@@ -1,0 +1,42 @@
+{
+  "compilerOptions": {
+    "outDir": "dist",
+    "target": "ES2015",
+    "module": "ES2015",
+    "lib": [
+      "DOM",
+      "ES2015",
+      "ES2016",
+      "ES2017"
+    ],
+    "declaration": false,
+    "removeComments": true,
+    "preserveConstEnums": true,
+    "sourceMap": true,
+    "strict": true,
+    "strictFunctionTypes": true,
+    "strictNullChecks": true,
+    "alwaysStrict": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+
+  },
+  "typeRoots": [
+    "./node_modules/@types/**",
+    "./src/@types/**/*.d.ts"
+  ],
+  "include": [
+    "src/**/*",
+    "./cypress.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.spec.ts"
+  ]
+}
