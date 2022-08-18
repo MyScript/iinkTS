@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Changing configuration dynamically</title>
+
+    <link rel="stylesheet" href="../examples.css" />
+
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+      integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X"
+      crossorigin="anonymous"
+    />
+
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"
+      integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4"
+      crossorigin="anonymous"
+    ></script>
+
+    <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
+    <script type="text/javascript" src="../../dist/iink.min.js"></script>
+
+    <style>
+      .flex {
+        display: flex;
+        height: 100%;
+        min-height: 100%;
+      }
+      .result {
+        border-bottom: solid gray 1px;
+      }
+      #editor.editor {
+        width: calc(100vw - 400px);
+        height: calc(100% - 105px);
+      }
+      .config {
+        border-left: solid black 1px;
+        width: 25%;
+        min-width: 400px;
+        height: 100vh;
+      }
+      .config .params {
+        height: calc(100% - 66px);
+        overflow: auto;
+      }
+      .config .card {
+        padding: 10px;
+      }
+      .config .card .title {
+        padding: 5px;
+        border-bottom: solid rgba(150, 150, 200, 1) 1px;
+        cursor: pointer;
+      }
+      .config .card .title:hover {
+        background-color: rgba(150, 150, 200, 0.15);
+      }
+      .config .card .content {
+        padding: 0px 0px 10px 20px;
+        display: none;
+      }
+      .config .card label {
+        display: block;
+        margin-top: 15px;
+      }
+      .config .card .content select,
+      .config .card .content input {
+        width: 100%;
+        font: 400 14px 'Source Sans Pro', sans-serif;
+      }
+      .config .card .content input[type='checkbox'] {
+        width: 15px;
+        padding: 0px;
+      }
+      .input-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .buttons-wrapper {
+        padding: 15px;
+        display: flex;
+        justify-content: space-around;
+      }
+
+      input:not([type='checkbox']) {
+        width: auto;
+        padding: 0 15px;
+        color: #131f26;
+        -webkit-appearance: none;
+        appearance: none;
+        height: 2.625rem;
+        font: 600 16px 'Source Sans Pro', sans-serif;
+        border: 1px solid #ced5d9;
+        border-radius: 3px;
+        -webkit-tap-highlight-color: transparent;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="flex">
+      <div class="content">
+        <div id="result" class="result"></div>
+        <div class="editor" id="editor" touch-action="none"></div>
+      </div>
+      <div class="config">
+        <div class="params">
+          <div class="card">
+            <div class="title">Server</div>
+            <div class="content">
+              <label for="server-protocol">Protocol:</label>
+              <select id="server-protocol" name="server-protocol">
+                <option value="WEBSOCKET">WEBSOCKET</option>
+                <option value="REST">REST</option>
+              </select>
+              <label for="server-scheme">Scheme:</label>
+              <select id="server-scheme" name="server-scheme">
+                <option value="http">http</option>
+                <option value="https">https</option>
+              </select>
+              <label for="server-host">Host:</label>
+              <input id="server-host" name="server-host" />
+              <label for="server-applicationKey">Application key:</label>
+              <input id="server-applicationKey" name="server-applicationKey" />
+              <label for="server-hmacKey">HMAC key:</label>
+              <input id="server-hmacKey" name="server-hmacKey" />
+            </div>
+          </div>
+          <div class="card">
+            <div class="title">Recognition</div>
+            <div class="content">
+              <label for="recognition-type">Type:</label>
+              <select id="recognition-type" name="recognition-type">
+                <option value="TEXT">TEXT</option>
+                <option value="MATH">MATH</option>
+                <option value="DIAGRAM">DIAGRAM</option>
+                <option value="Raw Content">Raw Content</option>
+              </select>
+              <label for="recognition-language">Language:</label>
+              <select
+                id="recognition-language"
+                name="recognition-language"
+              ></select>
+              <div class="input-row">
+                <label for="recognition-guides">Guides:</label>
+                <input
+                  type="checkbox"
+                  id="recognition-guides"
+                  name="recognition-guides"
+                />
+              </div>
+              <div class="input-row">
+                <label for="recognition-gesture">Gesture:</label>
+                <input
+                  type="checkbox"
+                  id="recognition-gesture"
+                  name="recognition-gesture"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="title">Rendering</div>
+            <div class="content">
+              <div class="input-row">
+                <label for="rendering-smartGuide">Smart guide:</label>
+                <input
+                  type="checkbox"
+                  id="rendering-smartGuide"
+                  name="rendering-smartGuide"
+                />
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="title">Triggers</div>
+            <div class="content">
+              <label for="triggers-exportContent">ExportContent:</label>
+              <select id="triggers-exportContent" name="triggers-exportContent">
+                <option value="POINTER_UP">POINTER_UP</option>
+                <option value="DEMAND">DEMAND</option>
+                <option value="QUIET_PERIOD">QUIET_PERIOD</option>
+              </select>
+              <label for="triggers-exportContent-delay">
+                ExportContent Delay:
+              </label>
+              <input
+                type="number"
+                id="triggers-exportContent-delay"
+                name="triggers-exportContent-delay"
+              />
+              <label for="triggers-resize-delay">Resize Delay:</label>
+              <input
+                type="number"
+                id="triggers-resize-delay"
+                name="triggers-resize-delay"
+              />
+            </div>
+          </div>
+        </div>
+        <div class="buttons-wrapper">
+          <button class="classic-btn" id="exportContent">Export</button>
+          <button class="classic-btn reset" id="reset-btn">Reset</button>
+          <button class="classic-btn success" id="valid-btn">Valid</button>
+        </div>
+      </div>
+    </div>
+    <script>
+      const editorElement = document.getElementById('editor');
+      const resultElement = document.getElementById('result');
+
+      const serverProtocolElement = document.getElementById('server-protocol');
+      const serverSchemelElement = document.getElementById('server-scheme');
+      const serverHostlElement = document.getElementById('server-host');
+      const serverApplicationKeyElement = document.getElementById(
+        'server-applicationKey'
+      );
+      const serverHMACKeyElement = document.getElementById('server-hmacKey');
+
+      const recognitionTypeElement =
+        document.getElementById('recognition-type');
+      const recognitionLanguageElement = document.getElementById('recognition-language');
+      const recognitionGuidesElement = document.getElementById('recognition-guides');
+      const recognitionGestureElement = document.getElementById('recognition-gesture');
+      const renderingSmartGuideElement = document.getElementById('rendering-smartGuide');
+      const triggersExportContentElement = document.getElementById('triggers-exportContent');
+      const triggersExportContentDelayElement = document.getElementById('triggers-exportContent-delay');
+      const triggersResizeDelayElement = document.getElementById('triggers-resize-delay');
+
+      const exportBtn = document.getElementById('exportContent');
+      const validBtn = document.getElementById('valid-btn');
+      const resetBtn = document.getElementById('reset-btn');
+
+      const defaultConfiguration = {
+        server: {
+          protocol: 'WEBSOCKET',
+          scheme: 'https',
+          host: 'webdemoapi.myscript.com',
+          applicationKey: '515131ab-35fa-411c-bb4d-3917e00faf60',
+          hmacKey: '54b2ca8a-6752-469d-87dd-553bb450e9ad',
+        },
+        recognition: {
+          type: 'TEXT',
+          lang: 'en_US',
+          replaceMimeTypes: false,
+          gesture: {
+            enable: true,
+          },
+          math: {
+            mimeTypes: ['application/x-latex'],
+          },
+          text: {
+            guides: {
+              enable: true,
+            },
+            mimeTypes: ['text/plain'],
+            margin: {
+              top: 20,
+              left: 10,
+              right: 10,
+            },
+          },
+          diagram: {
+            mimeTypes: [
+              'image/svg+xml',
+              'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            ],
+          },
+          export: {
+            jiix: {
+              strokes: true,
+            },
+          },
+        },
+        rendering: {
+          smartGuide: true,
+          smartGuideFadeOut: {
+            enable: false,
+            duration: 10000,
+          },
+        },
+        triggers: {
+          exportContent: 'POINTER_UP',
+          exportContentDelay: 2000,
+          resizeTriggerDelay: 50,
+        },
+      };
+
+      const cardELements = document.getElementsByClassName('card');
+      for (let i = 0; i < cardELements.length; i++) {
+        const btn = cardELements[i].getElementsByClassName('title')[0];
+        btn.addEventListener('click', function () {
+          const content = this.nextElementSibling;
+          if (content.style.display === 'block') {
+            content.style.display = 'none';
+          } else {
+            content.style.display = 'block';
+          }
+        });
+      }
+
+      /**
+       * Retrieve the list of available recognition languages using local json file
+       * @param {Object} The editor recognition parameters
+       */
+      iink
+        .getAvailableLanguageList(defaultConfiguration)
+        .then((res) => {
+          if (recognitionLanguageElement.options.length === 0) {
+            Object.keys(res.result).forEach((key) => {
+              const selected = defaultConfiguration.recognition?.lang === key;
+              recognitionLanguageElement.options[
+                recognitionLanguageElement.options.length
+              ] = new Option(res.result[key], key, selected, selected);
+            });
+          }
+        })
+        .catch((error) => console.error(error));
+
+      function initInputsValues() {
+        serverProtocolElement.value = defaultConfiguration.server.protocol;
+        serverSchemelElement.value = defaultConfiguration.server.scheme;
+        serverHostlElement.value = defaultConfiguration.server.host;
+        serverApplicationKeyElement.value =
+          defaultConfiguration.server.applicationKey;
+        serverHMACKeyElement.value = defaultConfiguration.server.hmacKey;
+
+        recognitionTypeElement.value = defaultConfiguration.recognition.type;
+        recognitionLanguageElement.value =
+          defaultConfiguration.recognition.lang;
+        recognitionGuidesElement.checked =
+          defaultConfiguration.recognition.text.guides.enable;
+        recognitionGestureElement.checked =
+          defaultConfiguration.recognition.gesture.enable;
+
+        renderingSmartGuideElement.checked =
+          defaultConfiguration.rendering.smartGuide;
+
+        triggersExportContentElement.value =
+          defaultConfiguration.triggers.exportContent;
+        triggersExportContentDelayElement.value =
+          defaultConfiguration.triggers.exportContentDelay;
+        triggersResizeDelayElement.value =
+          defaultConfiguration.triggers.resizeTriggerDelay;
+
+        exportBtn.disabled =
+          defaultConfiguration.triggers.exportContent !== 'DEMAND';
+      }
+      initInputsValues();
+
+      editorElement.addEventListener('changed', (event) => {
+        exportBtn.disabled =
+          !event.detail.canExport ||
+          triggersExportContentElement.value !== 'DEMAND';
+      });
+
+      serverProtocolElement.addEventListener('change', (e) => {
+        if (e.target.value === 'REST') {
+          if (triggersExportContentElement.value === 'POINTER_UP') {
+            triggersExportContentElement.value = 'QUIET_PERIOD';
+          }
+          triggersExportContentElement.querySelector(
+            'option[value="POINTER_UP"]'
+          ).disabled = true;
+          renderingSmartGuideElement.disabled = true;
+          renderingSmartGuideElement.checked = false;
+          recognitionGuidesElement.disabled = true;
+          recognitionGuidesElement.checked = false;
+        } else {
+          triggersExportContentElement.querySelector(
+            'option[value="POINTER_UP"]'
+          ).disabled = false;
+          renderingSmartGuideElement.disabled = false;
+          renderingSmartGuideElement.checked = true;
+          recognitionGuidesElement.disabled = false;
+          recognitionGuidesElement.checked = true;
+        }
+      });
+
+      resetBtn.addEventListener('click', initInputsValues);
+
+      validBtn.addEventListener('click', () => {
+        exportBtn.disabled = triggersExportContentElement.value !== 'DEMAND';
+        resultElement.innerHTML = '';
+        editor.configuration = {
+          server: {
+            protocol: serverProtocolElement.value,
+            scheme: serverSchemelElement.value,
+            host: serverHostlElement.value,
+            applicationKey: serverApplicationKeyElement.value,
+            hmacKey: serverHMACKeyElement.value,
+          },
+          recognition: {
+            replaceMimeTypes: true,
+            type: recognitionTypeElement.value,
+            lang: recognitionLanguageElement.value,
+            gesture: {
+              enable: recognitionGestureElement.checked,
+            },
+            text: {
+              mimeTypes: ['application/vnd.myscript.jiix'],
+              guides: {
+                enable: recognitionGuidesElement.checked,
+              },
+            },
+          },
+          rendering: {
+            smartGuide: renderingSmartGuideElement.checked,
+          },
+          triggers: {
+            triggerDelay: triggersExportContentDelayElement.value,
+            exportContent: triggersExportContentElement.value,
+          },
+        };
+      });
+
+      const editor = new iink.Editor(editorElement, defaultConfiguration);
+    </script>
+  </body>
+</html>

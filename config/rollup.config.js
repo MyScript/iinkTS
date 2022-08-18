@@ -1,0 +1,42 @@
+import typescript from 'rollup-plugin-typescript2';
+import { terser } from 'rollup-plugin-terser';
+import resolve from '@rollup/plugin-node-resolve';
+import del from 'rollup-plugin-delete';
+import dts from 'rollup-plugin-dts';
+
+export default [
+  {
+    input: 'src/iink.ts',
+    output: [
+      {
+        name: 'iink',
+        file: 'dist/iink.min.js',
+        format: 'umd',
+        exports: 'named',
+      },
+      {
+        file: './dist/iink.esm.js',
+        format: 'esm',
+      },
+    ],
+    plugins: [
+      del({ targets: 'dist/*', hook: 'buildStart' }),
+      resolve(),
+      typescript(),
+      terser({
+        keep_fnames: true,
+        compress: true,
+      })
+    ],
+  },
+  {
+    input: 'src/iink.ts',
+    plugins: [
+      dts(),
+    ],
+    output: {
+      file: `dist/iink.d.ts`,
+      format: 'es',
+    },
+  },
+];
