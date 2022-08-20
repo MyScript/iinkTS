@@ -314,15 +314,12 @@
        * Retrieve the list of available recognition languages using local json file
        * @param {Object} The editor recognition parameters
        */
-      iink
-        .getAvailableLanguageList(defaultConfiguration)
+      iink.getAvailableLanguageList(defaultConfiguration)
         .then((res) => {
           if (recognitionLanguageElement.options.length === 0) {
             Object.keys(res.result).forEach((key) => {
               const selected = defaultConfiguration.recognition?.lang === key;
-              recognitionLanguageElement.options[
-                recognitionLanguageElement.options.length
-              ] = new Option(res.result[key], key, selected, selected);
+              recognitionLanguageElement.options[recognitionLanguageElement.options.length] = new Option(res.result[key], key, selected, selected);
             });
           }
         })
@@ -332,30 +329,21 @@
         serverProtocolElement.value = defaultConfiguration.server.protocol;
         serverSchemelElement.value = defaultConfiguration.server.scheme;
         serverHostlElement.value = defaultConfiguration.server.host;
-        serverApplicationKeyElement.value =
-          defaultConfiguration.server.applicationKey;
+        serverApplicationKeyElement.value = defaultConfiguration.server.applicationKey;
         serverHMACKeyElement.value = defaultConfiguration.server.hmacKey;
 
         recognitionTypeElement.value = defaultConfiguration.recognition.type;
-        recognitionLanguageElement.value =
-          defaultConfiguration.recognition.lang;
-        recognitionGuidesElement.checked =
-          defaultConfiguration.recognition.text.guides.enable;
-        recognitionGestureElement.checked =
-          defaultConfiguration.recognition.gesture.enable;
+        recognitionLanguageElement.value = defaultConfiguration.recognition.lang;
+        recognitionGuidesElement.checked = defaultConfiguration.recognition.text.guides.enable;
+        recognitionGestureElement.checked = defaultConfiguration.recognition.gesture.enable;
 
-        renderingSmartGuideElement.checked =
-          defaultConfiguration.rendering.smartGuide;
+        renderingSmartGuideElement.checked = defaultConfiguration.rendering.smartGuide;
 
-        triggersExportContentElement.value =
-          defaultConfiguration.triggers.exportContent;
-        triggersExportContentDelayElement.value =
-          defaultConfiguration.triggers.exportContentDelay;
-        triggersResizeDelayElement.value =
-          defaultConfiguration.triggers.resizeTriggerDelay;
+        triggersExportContentElement.value = defaultConfiguration.triggers.exportContent;
+        triggersExportContentDelayElement.value = defaultConfiguration.triggers.exportContentDelay;
+        triggersResizeDelayElement.value = defaultConfiguration.triggers.resizeTriggerDelay;
 
-        exportBtn.disabled =
-          defaultConfiguration.triggers.exportContent !== 'DEMAND';
+        exportBtn.disabled =defaultConfiguration.triggers.exportContent !== 'DEMAND';
       }
       initInputsValues();
 
@@ -416,7 +404,9 @@
             },
           },
           rendering: {
-            smartGuide: renderingSmartGuideElement.checked,
+            smartGuide: {
+              enable: renderingSmartGuideElement.checked
+            }
           },
           triggers: {
             triggerDelay: triggersExportContentDelayElement.value,
@@ -425,7 +415,14 @@
         };
       });
 
-      const editor = new iink.Editor(editorElement, defaultConfiguration);
+      const options = {
+        configuration: defaultConfiguration
+      }
+      const editor = new iink.Editor(editorElement, options);
+
+      window.addEventListener('resize', () => {
+        editor.resize();
+      });
     </script>
   </body>
 </html>

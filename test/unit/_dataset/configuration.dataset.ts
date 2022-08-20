@@ -189,7 +189,6 @@ export const AllOverrideConfiguration: TConfigurationClient = {
   }
 }
 
-
 export const ConfigurationReplaceMimeType: TConfigurationClient = {
   recognition: {
     replaceMimeTypes: true,
@@ -207,6 +206,7 @@ export const ConfigurationReplaceMimeType: TConfigurationClient = {
     },
   }
 }
+
 export const ConfigurationReplaceMimeTypeEmpty: TConfigurationClient = {
   recognition: {
     replaceMimeTypes: true,
