@@ -73,38 +73,43 @@ describe('Configuration.ts', () =>
     })
   })
 
-  describe('should override all values', () => {
+  describe('should override all values', () =>
+  {
     const overrideConfig: TConfiguration = new Configuration(AllOverrideConfiguration)
 
     test('should override events', () =>
     {
       expect(overrideConfig.events).toStrictEqual(AllOverrideConfiguration.events)
     })
+
     test('should override grabber', () =>
     {
       expect(overrideConfig.grabber).toStrictEqual(AllOverrideConfiguration.grabber)
     })
+
     test('should override recognition', () =>
     {
       expect(overrideConfig.recognition).toStrictEqual(AllOverrideConfiguration.recognition)
     })
+
     test('should override rendering', () =>
     {
       expect(overrideConfig.rendering).toStrictEqual(AllOverrideConfiguration.rendering)
     })
+
     test('should override server', () =>
     {
       expect(overrideConfig.server).toStrictEqual(AllOverrideConfiguration.server)
     })
+
     test('should override triggers', () =>
     {
       expect(overrideConfig.triggers).toStrictEqual(AllOverrideConfiguration.triggers)
     })
   })
 
-
-  describe('should set mimeType JIIX if replaceMimeTypes but empty', () => {
-
+  describe('should replaceMimeTypes', () =>
+  {
     test('should replace mimeType', () =>
     {
       const crm: TConfiguration = new Configuration(ConfigurationReplaceMimeType)
@@ -113,6 +118,7 @@ describe('Configuration.ts', () =>
       expect(crm.recognition.rawContent.mimeTypes).toStrictEqual(ConfigurationReplaceMimeType.recognition?.rawContent?.mimeTypes)
       expect(crm.recognition.text.mimeTypes).toStrictEqual(ConfigurationReplaceMimeType.recognition?.text?.mimeTypes)
     })
+
     test('should set mimeType JIIX if replaceMimeTypes but mimeTypes empty', () =>
     {
       const crme: TConfiguration = new Configuration(ConfigurationReplaceMimeTypeEmpty)
@@ -121,6 +127,55 @@ describe('Configuration.ts', () =>
       expect(crme.recognition.rawContent.mimeTypes).toStrictEqual(['application/vnd.myscript.jiix'])
       expect(crme.recognition.text.mimeTypes).toStrictEqual(['application/vnd.myscript.jiix'])
     })
+
+  })
+
+  describe('specifics rules', () =>
+  {
+
+    test('should add mimeType JIIX if rendering.smartGuide = true', () =>
+    {
+      const conf = { ...DefaultConfiguration }
+      conf.server.protocol = "WEBSOCKET"
+      conf.recognition.type = "TEXT"
+      conf.rendering.smartGuide.enable = true
+      expect(conf.recognition.text.mimeTypes).not.toContain('application/vnd.myscript.jiix')
+      const c: TConfiguration = new Configuration(conf)
+      expect(c.recognition.text.mimeTypes).toContain('application/vnd.myscript.jiix')
+    })
+
+    test('should set rendering.smartGuide = false if not REST', () =>
+    {
+      const conf = { ...DefaultConfiguration }
+      conf.server.protocol = "REST"
+      conf.rendering.smartGuide.enable = true
+      const c: TConfiguration = new Configuration(conf)
+      expect(c.rendering.smartGuide.enable).toStrictEqual(false)
+    })
+
+    test('should set rendering.smartGuide = false if not TEXT', () =>
+    {
+      const conf = { ...DefaultConfiguration }
+      conf.recognition.type = "MATH"
+      conf.rendering.smartGuide.enable = true
+      const c: TConfiguration = new Configuration(conf)
+      expect(c.rendering.smartGuide.enable).toStrictEqual(false)
+    })
+
+    test('should set server.schme & server.host if server.useWindowLocation = true', () =>
+    {
+      const conf = { ...DefaultConfiguration }
+      conf.server.useWindowLocation = true
+
+      Object.defineProperty(window, "location", {
+        value: new URL('https://localhost:3000')
+      } );
+
+      const c: TConfiguration = new Configuration(conf)
+      expect(c.server.scheme).toStrictEqual(window.location.protocol.replace(':', ''))
+      expect(c.server.host).toStrictEqual(window.location.host)
+    })
+
   })
 
 })

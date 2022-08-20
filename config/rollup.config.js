@@ -1,6 +1,7 @@
 import typescript from 'rollup-plugin-typescript2';
 import { terser } from 'rollup-plugin-terser';
 import resolve from '@rollup/plugin-node-resolve';
+import postcss from 'rollup-plugin-postcss';
 import del from 'rollup-plugin-delete';
 import dts from 'rollup-plugin-dts';
 
@@ -26,13 +27,15 @@ export default [
       terser({
         keep_fnames: true,
         compress: true,
-      })
+      }),
+      postcss(),
     ],
   },
   {
     input: 'src/iink.ts',
     plugins: [
       dts(),
+      postcss(),
     ],
     output: {
       file: `dist/iink.d.ts`,

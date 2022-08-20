@@ -72,8 +72,7 @@ export class Configuration implements TConfiguration
       }
 
       if (this.recognition.replaceMimeTypes) {
-        this.recognition.text.mimeTypes = ['application/vnd.myscript.jiix']
-        // this.recognition.text.mimeTypes = configuration?.recognition?.text?.mimeTypes || ['application/vnd.myscript.jiix']
+        this.recognition.text.mimeTypes = configuration?.recognition?.text?.mimeTypes || ['application/vnd.myscript.jiix']
         this.recognition.math.mimeTypes = configuration?.recognition?.math?.mimeTypes || ['application/vnd.myscript.jiix']
         this.recognition.diagram.mimeTypes = configuration?.recognition?.diagram?.mimeTypes || ['application/vnd.myscript.jiix']
         this.recognition.rawContent.mimeTypes = configuration?.recognition?.rawContent?.mimeTypes || ['application/vnd.myscript.jiix']
