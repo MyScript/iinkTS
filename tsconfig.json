@@ -23,20 +23,19 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "skipLibCheck": true,
-    "esModuleInterop": true,
-
+    "esModuleInterop": true
   },
   "typeRoots": [
     "./node_modules/@types/**",
     "./src/@types/**/*.d.ts"
   ],
   "include": [
-    "src/**/*",
-    "./cypress.d.ts"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",
     "dist",
+    "examples/**",
     "**/*.spec.ts"
   ]
 }

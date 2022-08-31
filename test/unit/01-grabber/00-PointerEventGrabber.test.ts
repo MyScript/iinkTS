@@ -86,14 +86,14 @@ describe('PointerEventGrabber.ts', () =>
       expect(grabber.onPointerDown).not.toBeCalled()
     })
 
-    test('should not listen pointermove event  after detach', () =>
+    test('should not listen pointermove event after detach', () =>
     {
       grabber.detach(wrapperHTML)
       wrapperHTML.dispatchEvent(pointerMoveEvt)
       expect(grabber.onPointerMove).not.toBeCalled()
     })
 
-    test('should not listen pointerup event  after detach', () =>
+    test('should not listen pointerup event after detach', () =>
     {
       grabber.detach(wrapperHTML)
       wrapperHTML.dispatchEvent(pointerUpEvt)

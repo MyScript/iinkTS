@@ -68,23 +68,20 @@ describe('Model.ts', () =>
     })
   })
 
-  describe('addStroke', () =>
+  describe('rawStrokes', () =>
   {
-    const model: IModel = new Model()
-    test('should initialise strokeGroupe', () =>
+    test('should addStroke', () =>
     {
+      const model: IModel = new Model()
       const stroke = new Stroke(DefaultPenStyle, 1)
       model.addStroke(stroke)
       expect(model.rawStrokes).toHaveLength(1)
       expect(model.rawStrokes[0]).toStrictEqual(stroke)
     })
-  })
 
-  describe('extractPendingStrokes', () =>
-  {
-    const model: IModel = new Model()
-    test('should extract stroke', () =>
+    test('should extractPendingStrokes', () =>
     {
+      const model: IModel = new Model()
       const stroke = new Stroke(DefaultPenStyle, 1)
       model.addStroke(stroke)
       expect(model.rawStrokes).toHaveLength(1)
@@ -93,10 +90,9 @@ describe('Model.ts', () =>
       expect(extractStroke[0]).toStrictEqual(stroke)
       expect(model.rawStrokes).toHaveLength(1)
     })
-
   })
 
-  describe('addStrokeGroup', () =>
+  describe('strokeGroups', () =>
   {
     const model: IModel = new Model()
     test('should initialise strokeGroupe', () =>
@@ -135,7 +131,7 @@ describe('Model.ts', () =>
 
   })
 
-  describe('CurrentStroke', () =>
+  describe('currentStroke', () =>
   {
     const model: IModel = new Model()
     test('should initCurrentStroke', () =>
@@ -213,6 +209,56 @@ describe('Model.ts', () =>
         currentStroke,
         DefaultPenStyle
       )
+    })
+  })
+
+  describe('position', () => {
+    const model: IModel = new Model()
+    test('should initialize position', () => {
+      expect(model.positions.lastReceivedPosition).toBe(-1)
+      expect(model.positions.lastRenderedPosition).toBe(-1)
+      expect(model.positions.lastSentPosition).toBe(-1)
+    })
+    test('should updatePositionSent', () => {
+      model.updatePositionSent(5)
+      expect(model.positions.lastSentPosition).toBe(5)
+    })
+    test('should updatePositionReceived', () => {
+      model.updatePositionReceived()
+      expect(model.positions.lastReceivedPosition).toBe(model.positions.lastSentPosition)
+    })
+    test('should updatePositionRendered', () => {
+      model.updatePositionRendered(27)
+      expect(model.positions.lastRenderedPosition).toBe(27)
+    })
+    test('should resetPositionRenderer', () => {
+      model.resetPositionRenderer()
+      expect(model.positions.lastRenderedPosition).toBe(-1)
+    })
+    test('should resetPositions', () => {
+      model.resetPositions()
+      expect(model.positions.lastReceivedPosition).toBe(-1)
+      expect(model.positions.lastSentPosition).toBe(-1)
+    })
+  })
+
+  describe('clone', () => {
+    const model: IModel = new Model()
+    const stroke = new Stroke(DefaultPenStyle, 1)
+    model.addStroke(stroke)
+    test('should getClone', () => {
+      const clone = model.getClone()
+      expect(clone != model).toBeTruthy()
+      expect(clone.currentStroke).toStrictEqual(model.currentStroke)
+      expect(clone.defaultSymbols).toStrictEqual(model.defaultSymbols)
+      expect(clone.exports).toStrictEqual(model.exports)
+      expect(clone.height).toStrictEqual(model.height)
+      expect(clone.idle).toStrictEqual(model.idle)
+      expect(clone.positions).toStrictEqual(model.positions)
+      expect(clone.rawResults).toStrictEqual(model.rawResults)
+      expect(clone.rawStrokes).toStrictEqual(model.rawStrokes)
+      expect(clone.strokeGroups).toStrictEqual(model.strokeGroups)
+      expect(clone.width).toStrictEqual(model.width)
     })
   })
 

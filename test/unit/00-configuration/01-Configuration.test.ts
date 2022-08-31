@@ -144,13 +144,22 @@ describe('Configuration.ts', () =>
       expect(c.recognition.text.mimeTypes).toContain('application/vnd.myscript.jiix')
     })
 
-    test('should set rendering.smartGuide = false if not REST', () =>
+    test('should set rendering.smartGuide = false if REST', () =>
     {
       const conf = { ...DefaultConfiguration }
       conf.server.protocol = "REST"
       conf.rendering.smartGuide.enable = true
       const c: TConfiguration = new Configuration(conf)
       expect(c.rendering.smartGuide.enable).toStrictEqual(false)
+    })
+
+    test('should set triggers.exportContent = QUIET_PERIOD if REST', () =>
+    {
+      const conf = { ...DefaultConfiguration }
+      conf.server.protocol = "REST"
+      conf.triggers.exportContent = "POINTER_UP"
+      const c: TConfiguration = new Configuration(conf)
+      expect(c.triggers.exportContent).toStrictEqual('QUIET_PERIOD')
     })
 
     test('should set rendering.smartGuide = false if not TEXT', () =>
@@ -162,7 +171,7 @@ describe('Configuration.ts', () =>
       expect(c.rendering.smartGuide.enable).toStrictEqual(false)
     })
 
-    test('should set server.schme & server.host if server.useWindowLocation = true', () =>
+    test('should set server.scheme & server.host if server.useWindowLocation = true', () =>
     {
       const conf = { ...DefaultConfiguration }
       conf.server.useWindowLocation = true

@@ -117,23 +117,23 @@ describe('DefaultConfiguration.ts', () =>
 
   describe('should have DefaultTriggerConfiguration', () =>
   {
-    test('should have minHeight', () =>
+    test('should have exportContent', () =>
     {
-      expect(DefaultConfiguration.triggers.exportContent).toStrictEqual('QUIET_PERIOD')
+      expect(DefaultConfiguration.triggers.exportContent).toStrictEqual('POINTER_UP')
     })
-    test('should have minWidth', () =>
+    test('should have exportContentDelay', () =>
     {
       expect(DefaultConfiguration.triggers.exportContentDelay).toStrictEqual(1000)
     })
-    test('should have smartGuide', () =>
+    test('should have resizeTriggerDelay', () =>
     {
-      expect(DefaultConfiguration.triggers.resizeTriggerDelay).toStrictEqual(10)
+      expect(DefaultConfiguration.triggers.resizeTriggerDelay).toStrictEqual(100)
     })
   })
 
   describe('should have DefaultEventsConfiguration', () =>
   {
-    test('should have minHeight', () =>
+    test('should have processDelay', () =>
     {
       expect(DefaultConfiguration.events.processDelay).toStrictEqual(10)
     })
