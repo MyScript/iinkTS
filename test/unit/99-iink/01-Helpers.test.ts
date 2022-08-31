@@ -51,7 +51,7 @@ describe('Helpers.ts', () =>
       })
   })
 
-  test('should reject getAvailableLanguageList if sh empty', async () =>
+  test('should reject getAvailableLanguageList if host empty', async () =>
   {
     const conf = { ...ConfigurationTextWebsocket }
     delete conf?.server?.host

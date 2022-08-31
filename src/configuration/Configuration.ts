@@ -80,6 +80,14 @@ export class Configuration implements TConfiguration
     }
 
     if (
+      this.server.protocol === 'REST' &&
+      this.triggers.exportContent === 'POINTER_UP'
+    ) {
+      this.triggers.exportContent = 'QUIET_PERIOD'
+      this.triggers.exportContentDelay = Math.max(this.triggers.exportContentDelay, 50)
+    }
+
+    if (
       this.server.protocol === 'WEBSOCKET' &&
       this.recognition.type === 'TEXT'
     ) {

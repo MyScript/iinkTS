@@ -83,6 +83,7 @@ export class CanvasRenderer implements IRenderer
     }
     symbols.forEach(symbol => this.drawSymbol(this.context.renderingCanvasContext, symbol, stroker))
     this.context.capturingCanvasContext.clearRect(0, 0, this.context.capturingCanvas.width, this.context.capturingCanvas.height)
+    model.updatePositionRendered(symbols.length)
   }
 
   drawCurrentStroke(model: IModel, stroker: IStroker): void

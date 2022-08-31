@@ -6,7 +6,7 @@ import { TRecognitionConfiguration } from '../@types/configuration/RecognitionCo
 import { TTriggerConfiguration } from '../@types/configuration/TriggerConfiguration'
 import { TEventConfiguration } from '../@types/configuration/EventConfiguration'
 
-const DefaultServerConfiguration: TServerConfiguration = {
+export const DefaultServerConfiguration: TServerConfiguration = {
   protocol: 'WEBSOCKET',
   scheme: 'https',
   host: 'cloud.myscript.com',
@@ -23,7 +23,7 @@ const DefaultServerConfiguration: TServerConfiguration = {
   }
 }
 
-const DefaultRecognitionConfiguration: TRecognitionConfiguration = {
+export const DefaultRecognitionConfiguration: TRecognitionConfiguration = {
   type: 'TEXT',
   alwaysConnected: true,
   replaceMimeTypes: false,
@@ -103,7 +103,7 @@ const DefaultRecognitionConfiguration: TRecognitionConfiguration = {
   }
 }
 
-const DefaultGrabberConfiguration: TGrabberConfiguration = {
+export const DefaultGrabberConfiguration: TGrabberConfiguration = {
   listenerOptions: {
     capture: false,
     passive: true
@@ -112,7 +112,7 @@ const DefaultGrabberConfiguration: TGrabberConfiguration = {
   timestampFloatPrecision: 0
 }
 
-const DefaultRenderingConfiguration: TRenderingConfiguration = {
+export const DefaultRenderingConfiguration: TRenderingConfiguration = {
   minHeight: 100,
   minWidth: 100,
   smartGuide: {
@@ -124,13 +124,13 @@ const DefaultRenderingConfiguration: TRenderingConfiguration = {
   }
 }
 
-const DefaultTriggerConfiguration: TTriggerConfiguration = {
-  exportContent: 'QUIET_PERIOD',
+export const DefaultTriggerConfiguration: TTriggerConfiguration = {
+  exportContent: 'POINTER_UP',
   exportContentDelay: 1000,
-  resizeTriggerDelay: 10
+  resizeTriggerDelay: 100
 }
 
-const DefaultEventsConfiguration: TEventConfiguration = {
+export const DefaultEventsConfiguration: TEventConfiguration = {
   processDelay: 10
 }
 

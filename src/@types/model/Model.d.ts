@@ -43,7 +43,7 @@ export interface IModel
   modificationTime?: number
   currentStroke?: TStroke
   strokeGroups: TStrokeGroup[]
-  lastPositions: TRecognitionPositions
+  positions: TRecognitionPositions
   defaultSymbols: TStroke[]
   rawStrokes: TStroke[]
   recognizedSymbols?: TStroke[]
@@ -51,6 +51,7 @@ export interface IModel
   exports?: TExport
   width?: number
   height?: number
+  idle: boolean
 
   addPoint(stroke: TStroke, point: TPoint): void
   addStroke(stroke: TStroke): void
@@ -59,5 +60,14 @@ export interface IModel
   initCurrentStroke(point: TPoint, pointerId: number, pointerType: string, style: TPenStyle, dpi: number = 96): void
   appendToCurrentStroke(point: TPoint): void
   endCurrentStroke(point: TPoint, penStyle: TPenStyle): void
+
+  updatePositionSent(position: number = this.model.rawStrokes.length - 1): void
+  updatePositionReceived(): void
+  updatePositionRendered(position: number = this.model.recognizedSymbols ? this.model.recognizedSymbols.length - 1 : -1): void
+  resetPositionRenderer(): void
+  resetPositions(): void
+
+  getClone(): IModel
+
   clear(): void
 }

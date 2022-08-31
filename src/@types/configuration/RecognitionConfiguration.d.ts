@@ -16,9 +16,11 @@ export type TRecognitionRendererConfiguration = {
 
 export type TGesture = { enable: boolean }
 
+export type TRecognitionType = 'TEXT' | 'MATH' | 'DIAGRAM' | 'Raw Content'
+
 export type TRecognitionConfiguration = {
   convert?: TConvertConfiguration
-  type: 'TEXT' | 'MATH' | 'DIAGRAM' | 'Raw Content'
+  type: TRecognitionType
   alwaysConnected: boolean
   lang: string
   replaceMimeTypes: boolean
@@ -33,7 +35,7 @@ export type TRecognitionConfiguration = {
 
 export type TRecognitionConfigurationClient = {
   convert?: TConvertConfiguration
-  type?: 'TEXT' | 'MATH' | 'DIAGRAM' | 'Raw Content'
+  type?: TRecognitionType
   alwaysConnected?: boolean
   lang?: string
   replaceMimeTypes?: boolean

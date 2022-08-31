@@ -13,7 +13,7 @@ export class Model implements IModel
   modificationTime?: number
   currentStroke?: TStroke
   strokeGroups: TStrokeGroup[]
-  lastPositions: TRecognitionPositions
+  positions: TRecognitionPositions
   defaultSymbols: TStroke[]
   rawStrokes: TStroke[]
   recognizedSymbols?: TStroke[]
@@ -21,12 +21,14 @@ export class Model implements IModel
   exports?: TExport
   width?: number
   height?: number
+  idle: boolean
+
 
   constructor(width?: number, height?: number)
   {
     this.rawStrokes = []
     this.strokeGroups = []
-    this.lastPositions = {
+    this.positions = {
       lastSentPosition: -1,
       lastReceivedPosition: -1,
       lastRenderedPosition: -1
@@ -39,6 +41,7 @@ export class Model implements IModel
     this.creationTime = new Date().getTime()
     this.width = width
     this.height = height
+    this.idle = true
   }
 
   private filterPointByAcquisitionDelta(stroke: TStroke, point: TPoint): boolean
@@ -66,7 +69,7 @@ export class Model implements IModel
 
   extractPendingStrokes(position?: number): TStroke[]
   {
-    position = position || this.lastPositions.lastReceivedPosition + 1
+    position = position || this.positions.lastReceivedPosition + 1
     return this.rawStrokes.slice(position)
   }
 
@@ -122,14 +125,56 @@ export class Model implements IModel
     }
   }
 
+  updatePositionSent(position: number = this.rawStrokes.length - 1): void
+  {
+    this.positions.lastSentPosition = position
+  }
+
+  updatePositionReceived(): void
+  {
+    this.positions.lastReceivedPosition = this.positions.lastSentPosition
+  }
+
+  updatePositionRendered(position: number = this.recognizedSymbols ? this.recognizedSymbols.length - 1 : -1): void
+  {
+    this.positions.lastRenderedPosition = position
+  }
+
+  resetPositionRenderer(): void
+  {
+    this.positions.lastRenderedPosition = -1
+  }
+
+  resetPositions(): void
+  {
+    this.positions.lastSentPosition = -1
+    this.positions.lastReceivedPosition = -1
+  }
+
+  getClone(): IModel
+  {
+    const clonedModel = new Model(this.width, this.height)
+    clonedModel.defaultSymbols = [...this.defaultSymbols]
+    clonedModel.currentStroke = this.currentStroke ? Object.assign({}, this.currentStroke) : undefined
+    clonedModel.rawStrokes = [...this.rawStrokes]
+    clonedModel.strokeGroups = [...this.strokeGroups]
+    clonedModel.positions = Object.assign({}, this.positions)
+    clonedModel.exports = this.exports ? Object.assign({}, this.exports) : undefined
+    clonedModel.rawResults = Object.assign({}, this.rawResults)
+    clonedModel.recognizedSymbols = this.recognizedSymbols ? [...this.recognizedSymbols] : undefined
+    clonedModel.height = this.height
+    clonedModel.width = this.width
+    return clonedModel
+  }
+
   clear(): void
   {
     this.currentStroke = undefined
     this.rawStrokes = []
     this.strokeGroups = []
-    this.lastPositions.lastSentPosition = -1
-    this.lastPositions.lastReceivedPosition = -1
-    this.lastPositions.lastRenderedPosition = -1
+    this.positions.lastSentPosition = -1
+    this.positions.lastReceivedPosition = -1
+    this.positions.lastRenderedPosition = -1
     this.recognizedSymbols = undefined
     this.exports = undefined
     this.rawResults.convert = undefined
