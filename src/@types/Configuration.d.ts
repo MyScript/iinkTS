@@ -4,6 +4,7 @@ import { TRecognitionConfiguration, TRecognitionConfigurationClient } from "./co
 import { TRenderingConfiguration } from "./configuration/RenderingConfiguration"
 import { TServerConfiguration, TServerConfigurationClient } from "./configuration/ServerConfiguration"
 import { TTriggerConfiguration } from "./configuration/TriggerConfiguration"
+import { TUndoRedoConfiguration } from "./configuration/UndoRedoConfiguration"
 
 export type TConfiguration = {
   server: TServerConfiguration
@@ -12,6 +13,7 @@ export type TConfiguration = {
   rendering: TRenderingConfiguration
   triggers: TTriggerConfiguration
   events: TEventConfiguration
+  'undo-redo': TUndoRedoConfiguration
 }
 
 export type TConfigurationClient = {
@@ -21,4 +23,5 @@ export type TConfigurationClient = {
   rendering?: TRenderingConfiguration
   triggers?: TTriggerConfiguration
   events?: TEventConfiguration
+  'undo-redo'?: TUndoRedoConfiguration
 }

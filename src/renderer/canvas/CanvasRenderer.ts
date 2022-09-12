@@ -28,17 +28,18 @@ export class CanvasRenderer implements IRenderer
 
   private resizeContent(): void
   {
+    const pixelRatio: number = window.devicePixelRatio
     const elements: HTMLCanvasElement[] = [this.context.renderingCanvas, this.context.capturingCanvas]
     elements.forEach((canvas) =>
     {
       const domElement = canvas.parentNode as HTMLElement
       const width = Math.max(this.context?.minWidth, domElement.clientWidth)
       const height = Math.max(this.context?.minHeight, domElement.clientHeight)
-      canvas.width = width * window.devicePixelRatio
-      canvas.height = height * window.devicePixelRatio
+      canvas.width = width * pixelRatio
+      canvas.height = height * pixelRatio
+      canvas.getContext('2d')?.scale(pixelRatio, pixelRatio)
       canvas.style.width = `${ width }px`
       canvas.style.height = `${ height }px`
-      canvas.getContext('2d')?.scale(1, 1)
     })
   }
 

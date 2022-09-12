@@ -1,7 +1,7 @@
 import { TConfiguration, TConfigurationClient } from "./@types/Configuration"
 import { TEditorOptions } from "./@types/Editor"
 import { IGrabber } from "./@types/grabber/Grabber"
-import { IModel } from "./@types/model/Model"
+import { IModel, TExport } from "./@types/model/Model"
 import { IRecognizer } from "./@types/recognizer/Recognizer"
 import { TPoint } from "./@types/renderer/Point"
 import { IRenderer } from "./@types/renderer/Renderer"
@@ -11,10 +11,11 @@ import { TTheme } from "./@types/style/Theme"
 
 import Constants from "./Constants"
 import { BehaviorsManager } from "./behaviors/BehaviorsManager"
-import { StyleManager } from "./style/StyleManager"
 import { Configuration } from "./configuration/Configuration"
 import { EventHelper } from "./event/EventHelper"
 import { Model } from "./model/Model"
+import { StyleManager } from "./style/StyleManager"
+import { UndoRedoManager } from "./undo-redo/UndoRedoManager"
 
 import './iink.css'
 
@@ -34,6 +35,7 @@ export class Editor
   private _configuration: Configuration
   private _behaviorsManager: BehaviorsManager
   private _styleManager: StyleManager
+  private _undoRedoManager: UndoRedoManager
   private _mode: EditorMode
   private _resizeTimer?: ReturnType<typeof setTimeout>
   private _exportTimer?: ReturnType<typeof setTimeout>
@@ -63,6 +65,8 @@ export class Editor
     this._styleManager = new StyleManager(options?.penStyle, options?.theme)
 
     this._configuration = new Configuration(options?.configuration)
+
+    this._undoRedoManager = new UndoRedoManager(this.configuration["undo-redo"], this.model.getClone())
 
     this._behaviorsManager = new BehaviorsManager(this.configuration, options?.behaviors)
     this._behaviorsManager.init(this._wrapperHTML)
@@ -95,12 +99,9 @@ export class Editor
   set configuration(config: TConfigurationClient)
   {
     this.clear()
-    if (this._configuration) {
-      // TODO maybe need some removeListener are close connection
-      this._configuration.overrideDefaultConfiguration(config)
-    } else {
-      this._configuration = new Configuration(config)
-    }
+    this._undoRedoManager.reset(this.model)
+    // TODO maybe need some removeListener are close connection
+    this._configuration.overrideDefaultConfiguration(config)
   }
   get grabber(): IGrabber
   {
@@ -154,8 +155,6 @@ export class Editor
 
   private handleError(evt: Event)
   {
-    console.log('handleError evt: ', evt);
-    console.log('handleError this: ', this);
     const customEvent = evt as CustomEvent
     const err = customEvent?.detail as Error
     this.showError(err)
@@ -185,14 +184,18 @@ export class Editor
   pointerUp(_evt: PointerEvent, point: TPoint): void
   {
     this.model.endCurrentStroke(point, this.penStyle)
+    this._undoRedoManager.addModelToStack(this.model)
     this.renderer.drawModel(this.model, this.stroker)
     if (this.configuration.triggers.exportContent !== "DEMAND") {
       const timeout = this.configuration.triggers.exportContentDelay
       clearTimeout(this._exportTimer)
+      const currentModel = this.model.getClone()
       this._exportTimer = setTimeout(async () =>
       {
         try {
-          await this.recognizer.export(this.model)
+          await this.recognizer.export(currentModel)
+          this._undoRedoManager.updateModelInStack(currentModel)
+          this.events.emitExported(currentModel.exports as TExport)
         } catch (error) {
           this.showError(error as Error)
         }
@@ -214,8 +217,30 @@ export class Editor
   clear(): void
   {
     this.model.clear()
+    this._undoRedoManager.addModelToStack(this.model)
     this.renderer.drawModel(this.model, this.stroker)
+    this.events.emitExported(this.model.exports as TExport)
     this.events.emitCleared(this.model)
+  }
+
+  async undo(): Promise<IModel>
+  {
+    this.model = this._undoRedoManager.undo()
+    this.renderer.drawModel(this.model, this.stroker)
+    await this.recognizer.export(this.model)
+    this._undoRedoManager.updateModelInStack(this.model)
+    this.events.emitExported(this.model.exports as TExport)
+    return this.model
+  }
+
+  async redo(): Promise<IModel | false>
+  {
+    this.model = this._undoRedoManager.redo()
+    this.renderer.drawModel(this.model, this.stroker)
+    await this.recognizer.export(this.model)
+    this._undoRedoManager.updateModelInStack(this.model)
+    this.events.emitExported(this.model.exports as TExport)
+    return this.model
   }
 
   resize(): void

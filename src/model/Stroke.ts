@@ -11,7 +11,7 @@ export class Stroke implements TStroke
   y: number[]
   t: number[]
   p: number[]
-  // l: number[]
+  l: number[]
   color: string
   width: number
   '-myscript-pen-width': number
@@ -27,7 +27,7 @@ export class Stroke implements TStroke
     this.y = []
     this.t = []
     this.p = []
-    // this.l = []
+    this.l = []
     this.color = style.color
     this.width = style.width
     this['-myscript-pen-width'] = style['-myscript-pen-width']

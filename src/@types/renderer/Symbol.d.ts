@@ -2,8 +2,6 @@ import { TPenStyle } from "../style/PenStyle"
 import { TPoint } from "./Point"
 
 export type TSymbol = TPenStyle & {
-  width: number
-  color: string
   elementType?: string
   type: string
 }

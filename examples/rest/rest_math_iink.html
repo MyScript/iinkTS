@@ -30,25 +30,40 @@
       <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
         <img src="../assets/clear.svg">
       </button>
+      <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+        <img src="../assets/undo.svg">
+      </button>
+      <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+        <img src="../assets/redo.svg">
+      </button>
     </div>
-    <select id="language"></select>
   </nav>
   <div id="editor" touch-action="none"></div>
 </div>
 <script>
   const editorElement = document.getElementById('editor');
   const resultElement = document.getElementById('result');
-  const languageElement = document.getElementById('language');
   const clearElement = document.getElementById('clear');
+  const undoElement = document.getElementById('undo');
+  const redoElement = document.getElementById('redo');
 
   clearElement.addEventListener('click', async () => {
     editor.clear();
     resultElement.innerHTML = '';
   });
+
+  undoElement.addEventListener('click', () => {
+    editor.undo();
+  });
+
+  redoElement.addEventListener('click', () => {
+    editor.redo();
+  });
+
   /**
    * Instanciate Editor
    * @param {Element} The DOM element to attach the ink paper
-   * @param {Object} The recognition parameters
+   * @param {Object} The editor options
    */
   const options = {
     configuration: {
@@ -60,28 +75,17 @@
         hmacKey: '54b2ca8a-6752-469d-87dd-553bb450e9ad'
       },
       recognition: {
-        replaceMimeTypes: true,
-        type: 'MATH',
-        math: {
-          mimeTypes: ['application/x-latex'], // 'application/mathml+xml', 'application/vnd.myscript.jiix',
-          solver: {
-            enable: true,
-          }
-        }
+        type: 'MATH'
       }
     }
   }
+
   const editor = new iink.Editor(editorElement, options);
 
-  editor.events.addEventListener('loaded', async (evt) => {
-    if (languageElement.options.length === 0) {
-      const currentLanguage = editor.configuration.recognition.lang;
-      const res = await iink.getAvailableLanguageList(editor.configuration);
-      Object.keys(res.result).forEach(function (key) {
-        const selected = currentLanguage === key;
-        languageElement.options[languageElement.options.length] = new Option(res.result[key], key, selected, selected);
-      });
-    }
+  editor.events.addEventListener('changed', (event) => {
+    undoElement.disabled = !event.detail.canUndo;
+    redoElement.disabled = !event.detail.canRedo;
+    clearElement.disabled = !event.detail.canClear;
   })
 
   function cleanLatex(latexExport) {
@@ -97,11 +101,13 @@
     return latexExport.replace(new RegExp("(align.{1})", "g"), "aligned");
   }
 
-  editor.events.addEventListener('exported_application/x-latex', evt => {
-    clearElement.disabled = false;
-    katex.render(cleanLatex(evt.detail),  resultElement);
-    clearElement.disabled = false
-    undoElement.disabled = false
+  editor.events.addEventListener('exported', evt => {
+    const exports = evt.detail
+    if (exports && exports['application/x-latex']) {
+      katex.render(cleanLatex(exports['application/x-latex']),  resultElement);
+    } else {
+      resultElement.innerHTML = '';
+    }
   });
 
   window.addEventListener('resize', () => {

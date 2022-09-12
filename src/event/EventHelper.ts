@@ -1,4 +1,5 @@
 import { IModel, TExport } from "../@types/model/Model"
+import { TUndoRedoContext } from "../@types/undo-redo/UndoRedoContext"
 import Constants from "../Constants"
 
 
@@ -25,41 +26,48 @@ export class EventHelper extends EventTarget
     this.dispatchEvent(new CustomEvent(type, Object.assign({ bubbles: true, composed: true }, data ? { detail: data } : undefined)))
   }
 
-  emitLoaded() {
+  emitLoaded(): void {
     this.emit(Constants.EventType.LOADED)
   }
 
-  emitExported(exports: TExport) {
+  emitExported(exports: TExport): void {
     this.emit(Constants.EventType.EXPORTED, exports)
   }
-  emitExportedMimeType(mimeType: string, exports: TExport) {
-    this.emit(Constants.EventType.EXPORTED + '_' + mimeType, exports[mimeType])
-  }
-  addExportedListener(callback: EventListenerOrEventListenerObject): void
-  {
-    this.addEventListener(Constants.EventType.EXPORTED, callback)
-  }
+  // addExportedListener(callback: EventListenerOrEventListenerObject): void
+  // {
+  //   this.addEventListener(Constants.EventType.EXPORTED, callback)
+  // }
   // removeExportedListener(callback: EventListenerOrEventListenerObject): void
   // {
   //   this.removeEventListener(Constants.EventType.EXPORTED, callback)
   // }
 
-  emitIdle(model: IModel) {
+  emitChange(undoRedoContext: TUndoRedoContext): void {
+    this.emit(Constants.EventType.CHANGED, {
+      canUndo: undoRedoContext.canUndo,
+      canRedo: undoRedoContext.canRedo,
+      canClear: !undoRedoContext.stack[undoRedoContext.stackIndex].isEmpty,
+      stackIndex: undoRedoContext.stackIndex,
+      stackLength: undoRedoContext.stack.length,
+      isEmpty: undoRedoContext.stack[undoRedoContext.stackIndex].isEmpty,
+    })
+  }
+  emitIdle(model: IModel): void {
     this.emit(Constants.EventType.IDLE, model)
   }
-  emitError(err: Error) {
+  emitError(err: Error): void {
     this.emit(Constants.EventType.ERROR, err)
   }
-  emitClear(model?: IModel) {
+  emitClear(model?: IModel): void {
     this.emit(Constants.EventType.CLEAR, model)
   }
-  emitCleared(model?: IModel) {
+  emitCleared(model?: IModel): void {
     this.emit(Constants.EventType.CLEARED, model)
   }
-  emitConvert() {
+  emitConvert(): void {
     this.emit(Constants.EventType.CONVERT)
   }
-  emitImport(jiix: string, mimeType: string) {
+  emitImport(jiix: string, mimeType: string): void {
     this.emit(Constants.EventType.IMPORT, { jiix, mimeType } )
   }
 }

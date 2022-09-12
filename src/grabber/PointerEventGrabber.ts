@@ -43,7 +43,7 @@ export class PointerEventGrabber implements IGrabber
       x: this.roundFloat(clientX - rect.left - this.domElement.clientLeft, this.configuration.xyFloatPrecision),
       y: this.roundFloat(clientY - rect.top - this.domElement.clientTop, this.configuration.xyFloatPrecision),
       t: this.roundFloat(Date.now(), this.configuration.timestampFloatPrecision),
-      p: (event as PointerEvent).pressure,
+      p: (event as PointerEvent).pressure || 1,
 
     }
   }

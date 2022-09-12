@@ -2,8 +2,8 @@ import { TConfiguration } from './Configuration'
 
 export type TEditorOptions = {
   configuration: TConfiguration
-  behaviors?: any
-  penStyle?: any
-  theme?: any
+  behaviors?: IBehaviors
+  penStyle?: TPenStyle
+  theme?: TTheme
   globalClassCss?: string
 }

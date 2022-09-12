@@ -6,6 +6,7 @@ import { TRecognitionConfiguration } from '../@types/configuration/RecognitionCo
 import { TRenderingConfiguration } from '../@types/configuration/RenderingConfiguration'
 import { TServerConfiguration } from '../@types/configuration/ServerConfiguration'
 import { TTriggerConfiguration } from '../@types/configuration/TriggerConfiguration'
+import { TUndoRedoConfiguration } from '../@types/configuration/UndoRedoConfiguration'
 import { DefaultConfiguration } from './DefaultConfiguration'
 
 export class Configuration implements TConfiguration
@@ -16,6 +17,7 @@ export class Configuration implements TConfiguration
   rendering: TRenderingConfiguration
   server: TServerConfiguration
   triggers: TTriggerConfiguration
+  'undo-redo': TUndoRedoConfiguration
 
   constructor(configuration?: TConfigurationClient)
   {
@@ -58,25 +60,24 @@ export class Configuration implements TConfiguration
 
   overrideDefaultConfiguration(configuration?: TConfigurationClient): void
   {
-    if (configuration) {
-      this.events = this.mergeDeep({}, DefaultConfiguration.events, configuration?.events)
-      this.grabber = this.mergeDeep({}, DefaultConfiguration.grabber, configuration?.grabber)
-      this.recognition = this.mergeDeep({}, DefaultConfiguration.recognition, configuration?.recognition)
-      this.rendering = this.mergeDeep({}, DefaultConfiguration.rendering, configuration?.rendering)
-      this.server = this.mergeDeep({}, DefaultConfiguration.server, configuration?.server)
-      this.triggers = this.mergeDeep({}, DefaultConfiguration.triggers, configuration?.triggers)
+    this.events = this.mergeDeep({}, DefaultConfiguration.events, configuration?.events)
+    this.grabber = this.mergeDeep({}, DefaultConfiguration.grabber, configuration?.grabber)
+    this.recognition = this.mergeDeep({}, DefaultConfiguration.recognition, configuration?.recognition)
+    this.rendering = this.mergeDeep({}, DefaultConfiguration.rendering, configuration?.rendering)
+    this.server = this.mergeDeep({}, DefaultConfiguration.server, configuration?.server)
+    this.triggers = this.mergeDeep({}, DefaultConfiguration.triggers, configuration?.triggers)
+    this['undo-redo'] = this.mergeDeep({}, DefaultConfiguration['undo-redo'], configuration?.['undo-redo'])
 
-      if (this.server?.useWindowLocation) {
-        this.server.scheme = window.location.protocol.indexOf('s') > -1 ? 'https' : 'http'
-        this.server.host = window.location.host
-      }
+    if (this.server?.useWindowLocation) {
+      this.server.scheme = window.location.protocol.indexOf('s') > -1 ? 'https' : 'http'
+      this.server.host = window.location.host
+    }
 
-      if (this.recognition.replaceMimeTypes) {
-        this.recognition.text.mimeTypes = configuration?.recognition?.text?.mimeTypes || ['application/vnd.myscript.jiix']
-        this.recognition.math.mimeTypes = configuration?.recognition?.math?.mimeTypes || ['application/vnd.myscript.jiix']
-        this.recognition.diagram.mimeTypes = configuration?.recognition?.diagram?.mimeTypes || ['application/vnd.myscript.jiix']
-        this.recognition.rawContent.mimeTypes = configuration?.recognition?.rawContent?.mimeTypes || ['application/vnd.myscript.jiix']
-      }
+    if (this.recognition.replaceMimeTypes) {
+      this.recognition.text.mimeTypes = configuration?.recognition?.text?.mimeTypes || ['application/vnd.myscript.jiix']
+      this.recognition.math.mimeTypes = configuration?.recognition?.math?.mimeTypes || ['application/vnd.myscript.jiix']
+      this.recognition.diagram.mimeTypes = configuration?.recognition?.diagram?.mimeTypes || ['application/vnd.myscript.jiix']
+      this.recognition.rawContent.mimeTypes = configuration?.recognition?.rawContent?.mimeTypes || ['application/vnd.myscript.jiix']
     }
 
     if (

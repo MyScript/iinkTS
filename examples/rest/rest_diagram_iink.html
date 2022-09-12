@@ -23,6 +23,12 @@
       <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
         <img src="../assets/clear.svg">
       </button>
+      <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+        <img src="../assets/undo.svg">
+      </button>
+      <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+        <img src="../assets/redo.svg">
+      </button>
     </div>
     <div class="button-div" style="margin-left: auto">
     <div id="preview-container">
@@ -49,8 +55,10 @@
   const editButton = document.getElementById('edit-btn');
   const previewButton = document.getElementById('preview-btn');
   const progressElement = document.getElementById('progress');
+  const undoElement = document.getElementById('undo');
+  const redoElement = document.getElementById('redo');
 
-  let exportSvgXml = '';
+  let exports = '';
   let firstChanged = true;
   let undoRedoClearChanged = false;
   let isPreview = false;
@@ -100,6 +108,14 @@
     manageEmptySvg();
   });
 
+  undoElement.addEventListener('click', () => {
+    editor.undo();
+  });
+
+  redoElement.addEventListener('click', () => {
+    editor.redo();
+  });
+
   previewButton.addEventListener('click', () => {
     isPreview = true;
     previewButton.style.display = 'none';
@@ -113,6 +129,7 @@
     previewButton.style.display = 'flex';
     manageEditMode(false);
   });
+
   /**
    * Instanciate editor
    * @param {Element} The DOM element to attach the ink paper
@@ -136,11 +153,18 @@
       }
     }
   }
+
   const editor = new iink.Editor(editorElement, options);
 
-  editor.events.addEventListener('exported_image/svg+xml', evt => {
-    const exportSvgXml = evt.detail;
-    if (exportSvgXml) {
+  editor.events.addEventListener('changed', (event) => {
+    undoElement.disabled = !event.detail.canUndo;
+    redoElement.disabled = !event.detail.canRedo;
+    clearElement.disabled = !event.detail.canClear;
+  })
+
+  editor.events.addEventListener('exported', evt => {
+    const exports = evt.detail;
+    if (exports && exports['image/svg+xml']) {
       progressElement.style.transition = ' width 0.3s';
       progressElement.style.width = `${editorElement.clientWidth}px`;
       setTimeout(() => {
@@ -149,7 +173,7 @@
       }, 300);
       clearElement.disabled = false;
       const divSvgElement = document.createElement('div');
-      divSvgElement.innerHTML = exportSvgXml.trim();
+      divSvgElement.innerHTML = exports['image/svg+xml'].trim();
       const svgElement = divSvgElement.firstChild;
       svgElement.id = 'converted-svg';
       svgElement.setAttribute('width', editorElement.clientWidth);
@@ -161,8 +185,6 @@
       }
       editorElement.appendChild(svgElement);
       manageEditMode(false);
-    } else {
-      clearElement.disabled = true;
     }
   })
 

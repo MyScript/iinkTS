@@ -3,12 +3,6 @@ import { TStroke, TStrokeGroup } from '../stroker/Stroker'
 import { TPenStyle } from '../style/PenStyle'
 import { TRecognitionPositions } from './RecognitionPositions'
 
-
-export type TRawResults = {
-  convert: any
-  exports: any
-}
-
 export type TWordExport = {
   id: string
   label: string,
@@ -20,6 +14,11 @@ export type TJIIXExport = {
   label: string,
   version: string,
   words: TWordExport[]
+}
+
+export type TRawResults = {
+  convert?: any
+  exports?: TJIIXExport | string | Blob
 }
 
 export type TExport = {
@@ -40,7 +39,7 @@ export type TExport = {
 export interface IModel
 {
   readonly creationTime: number
-  modificationTime?: number
+  modificationDate: number
   currentStroke?: TStroke
   strokeGroups: TStrokeGroup[]
   positions: TRecognitionPositions
@@ -52,6 +51,7 @@ export interface IModel
   width?: number
   height?: number
   idle: boolean
+  isEmpty: boolean
 
   addPoint(stroke: TStroke, point: TPoint): void
   addStroke(stroke: TStroke): void

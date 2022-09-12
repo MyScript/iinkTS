@@ -5,6 +5,7 @@ import { TServerConfiguration } from '../@types/configuration/ServerConfiguratio
 import { TRecognitionConfiguration } from '../@types/configuration/RecognitionConfiguration'
 import { TTriggerConfiguration } from '../@types/configuration/TriggerConfiguration'
 import { TEventConfiguration } from '../@types/configuration/EventConfiguration'
+import { TUndoRedoConfiguration } from '../@types/configuration/UndoRedoConfiguration'
 
 export const DefaultServerConfiguration: TServerConfiguration = {
   protocol: 'WEBSOCKET',
@@ -134,6 +135,10 @@ export const DefaultEventsConfiguration: TEventConfiguration = {
   processDelay: 10
 }
 
+export const DefaultUndoRedoConfiguration: TUndoRedoConfiguration = {
+  maxStackSize: 10
+}
+
 export const DefaultConfiguration: TConfiguration = {
   server: DefaultServerConfiguration,
   recognition: DefaultRecognitionConfiguration,
@@ -141,4 +146,5 @@ export const DefaultConfiguration: TConfiguration = {
   rendering: DefaultRenderingConfiguration,
   triggers: DefaultTriggerConfiguration,
   events: DefaultEventsConfiguration,
+  'undo-redo': DefaultUndoRedoConfiguration
 } as const

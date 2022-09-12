@@ -72,6 +72,7 @@ export class RestRecognizer extends AbstractRecognizer
             x: s.x,
             y: s.y,
             t: s.t,
+            p: s.p,
             pointerType: s.pointerType
           }
         })
@@ -159,7 +160,7 @@ export class RestRecognizer extends AbstractRecognizer
   private handleSuccess(model: IModel, res: any, mimeType: string): void
   {
     model.updatePositionReceived()
-    model.rawResults.exports = res
+    model.rawResults.exports = res as TJIIXExport | string | Blob
 
     const exports: TExport = {}
     exports[mimeType] = res as TJIIXExport | string | Blob
@@ -169,7 +170,6 @@ export class RestRecognizer extends AbstractRecognizer
     } else {
       model.exports = exports
     }
-    this.eventHelper.emitExportedMimeType(mimeType, model.exports)
   }
 
   private handleError(err: ApiError): void
@@ -186,6 +186,9 @@ export class RestRecognizer extends AbstractRecognizer
 
   async export(model: IModel, requestedMimeTypes?: string[]): Promise<IModel | never>
   {
+    if (model.isEmpty) {
+      return Promise.resolve(model)
+    }
     model.idle = false
     let mimeTypes: string[] = requestedMimeTypes || []
     if (!mimeTypes.length) {
@@ -212,9 +215,10 @@ export class RestRecognizer extends AbstractRecognizer
       return Promise.reject(new Error('Export failed, no mimeTypes define in recognition configuration'))
     }
 
-    await Promise.all(mimeTypes.map(mimeType => this.callPostMessage(model, mimeType)))
+    const mimeTypesRequiringExport: string[] = mimeTypes.filter(m => !model.exports || !model.exports[m])
 
-    this.eventHelper.emitExported(model.exports as TExport)
+    await Promise.all(mimeTypesRequiringExport.map(mimeType => this.callPostMessage(model, mimeType)))
+
     model.idle = true
     this.eventHelper.emitIdle(model)
     return model

@@ -30,6 +30,12 @@
       <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
         <img src="../assets/clear.svg">
       </button>
+      <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+        <img src="../assets/undo.svg">
+      </button>
+      <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+        <img src="../assets/redo.svg">
+      </button>
     </div>
     <select id="language"></select>
   </nav>
@@ -40,6 +46,8 @@
   const resultElement = document.getElementById('result');
   const languageElement = document.getElementById('language');
   const clearElement = document.getElementById('clear');
+  const undoElement = document.getElementById('undo');
+  const redoElement = document.getElementById('redo');
 
   languageElement.addEventListener('change', (e) => {
     const configuration = JSON.parse(JSON.stringify(editor.configuration))
@@ -47,11 +55,18 @@
     editor.configuration = configuration
   });
 
+  undoElement.addEventListener('click', () => {
+    editor.undo()
+  })
+
+  redoElement.addEventListener('click', () => {
+    editor.redo()
+  })
+
   clearElement.addEventListener('click', () => {
     editor.clear();
     resultElement.innerHTML = '';
   });
-
 
   /**
    * Instanciate Editor
@@ -84,15 +99,14 @@
   editor.events.addEventListener('changed', (event) => {
     undoElement.disabled = !event.detail.canUndo;
     redoElement.disabled = !event.detail.canRedo;
-  });
+    clearElement.disabled = !event.detail.canClear;
+  })
 
-  editor.events.addEventListener('exported_application/vnd.myscript.jiix', (evt) => {
-    const exportJIIX = evt.detail;
-    if (exportJIIX) {
-      clearElement.disabled = false;
-      resultElement.innerHTML = `<span>${JSON.stringify(exportJIIX.elements)}</span>`
+  editor.events.addEventListener('exported', (evt) => {
+    const exports = evt.detail;
+    if (exports && exports['application/vnd.myscript.jiix']) {
+      resultElement.innerHTML = `<span>${JSON.stringify(exports['application/vnd.myscript.jiix'].elements)}</span>`
     } else {
-      clearElement.disabled = true;
       resultElement.innerHTML = '';
     }
   });

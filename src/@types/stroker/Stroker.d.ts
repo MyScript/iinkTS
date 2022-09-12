@@ -6,6 +6,7 @@ export type TStrokeJSON = {
   x: number[]
   y: number[]
   t: number[]
+  p: number[]
 }
 
 export type TStrokeGroupJSON = {
@@ -15,7 +16,7 @@ export type TStrokeGroupJSON = {
 
 export type TStroke = TSymbol & TStrokeJSON & {
   pointerId: number
-  p: number[]
+  l: number[]
 }
 
 

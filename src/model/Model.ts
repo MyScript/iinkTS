@@ -1,5 +1,3 @@
-
-
 import { TPenStyle } from '../@types/style/PenStyle'
 import { TPoint } from '../@types/renderer/Point'
 import { TStroke, TStrokeGroup } from '../@types/stroker/Stroker'
@@ -10,7 +8,7 @@ import { Stroke } from './Stroke'
 export class Model implements IModel
 {
   readonly creationTime: number
-  modificationTime?: number
+  modificationDate: number
   currentStroke?: TStroke
   strokeGroups: TStrokeGroup[]
   positions: TRecognitionPositions
@@ -22,9 +20,9 @@ export class Model implements IModel
   width?: number
   height?: number
   idle: boolean
+  isEmpty: boolean
 
-
-  constructor(width?: number, height?: number)
+  constructor(width?: number, height?: number, creationDate: number = new Date().getTime())
   {
     this.rawStrokes = []
     this.strokeGroups = []
@@ -38,10 +36,40 @@ export class Model implements IModel
       convert: undefined,
       exports: undefined
     }
-    this.creationTime = new Date().getTime()
+    this.creationTime = creationDate
+    this.modificationDate = creationDate
     this.width = width
     this.height = height
     this.idle = true
+    this.isEmpty = true
+  }
+
+  private computeDistance (point1: TPoint, point2: TPoint): number {
+    const distance = Math.sqrt(Math.pow((point1.y - point2.y), 2) + Math.pow((point1.x - point2.x), 2))
+    return isNaN(distance) ? 0 : distance
+  }
+
+  private computeLength (point1: TPoint, point2: TPoint, lastDistance: number): number {
+    const length = lastDistance + this.computeDistance(point1, point2)
+    return isNaN(length) ? 0 : length
+  }
+
+  private computePressure (point1: TPoint, point2: TPoint, lastDistance: number): number {
+    let ratio = 1.0
+    const distance = this.computeDistance(point1, point2)
+    const length = this.computeLength(point1, point2, lastDistance)
+
+    if (length === 0) {
+      ratio = 0.5
+    } else if (distance === length) {
+      ratio = 1.0
+    } else if (distance < 10) {
+      ratio = 0.2 + Math.pow(0.1 * distance, 0.4)
+    } else if (distance > length - 10) {
+      ratio = 0.2 + Math.pow(0.1 * (length - distance), 0.4)
+    }
+    const pressure = ratio * Math.max(0.1, 1.0 - (0.1 * Math.sqrt(distance)))
+    return isNaN(pressure) ? 0.5 : Math.round(pressure * 100) / 100
   }
 
   private filterPointByAcquisitionDelta(stroke: TStroke, point: TPoint): boolean
@@ -55,10 +83,18 @@ export class Model implements IModel
   addPoint(stroke: TStroke, point: TPoint): void
   {
     if (this.filterPointByAcquisitionDelta(stroke, point)) {
+      const lastPoint: TPoint = {
+        x: stroke.x[stroke.x.length -1],
+        y: stroke.y[stroke.y.length -1],
+        p: stroke.p[stroke.p.length -1],
+        t: stroke.t[stroke.t.length -1],
+      }
+      const lastDistance: number = stroke.l[stroke.l.length - 1]
       stroke.x.push(point.x)
       stroke.y.push(point.y)
       stroke.t.push(point.t)
-      stroke.p.push(point.p)
+      stroke.p.push(this.computePressure(point, lastPoint, lastDistance))
+      stroke.l.push(this.computeLength(point, lastPoint, lastDistance))
     }
   }
 
@@ -94,6 +130,7 @@ export class Model implements IModel
       }
       this.strokeGroups.push(newStrokeGroup)
     }
+    this.isEmpty = false
   }
 
   initCurrentStroke(point: TPoint, pointerId: number, pointerType: string, style: TPenStyle, dpi = 96): void
@@ -102,6 +139,8 @@ export class Model implements IModel
       const pxWidth = (style['-myscript-pen-width'] * dpi) / 25.4
       style.width = pxWidth / 2
     }
+    this.modificationDate = new Date().getTime()
+    this.exports = undefined
     this.currentStroke = new Stroke(style, pointerId, pointerType)
     this.addPoint(this.currentStroke, point)
   }
@@ -153,22 +192,25 @@ export class Model implements IModel
 
   getClone(): IModel
   {
-    const clonedModel = new Model(this.width, this.height)
-    clonedModel.defaultSymbols = [...this.defaultSymbols]
-    clonedModel.currentStroke = this.currentStroke ? Object.assign({}, this.currentStroke) : undefined
-    clonedModel.rawStrokes = [...this.rawStrokes]
-    clonedModel.strokeGroups = [...this.strokeGroups]
-    clonedModel.positions = Object.assign({}, this.positions)
-    clonedModel.exports = this.exports ? Object.assign({}, this.exports) : undefined
-    clonedModel.rawResults = Object.assign({}, this.rawResults)
-    clonedModel.recognizedSymbols = this.recognizedSymbols ? [...this.recognizedSymbols] : undefined
-    clonedModel.height = this.height
-    clonedModel.width = this.width
+    const clonedModel = new Model(this.width, this.height, this.creationTime)
+    clonedModel.modificationDate = JSON.parse(JSON.stringify(this.modificationDate))
+    clonedModel.defaultSymbols = JSON.parse(JSON.stringify(this.defaultSymbols))
+    clonedModel.currentStroke = this.currentStroke ? JSON.parse(JSON.stringify(this.currentStroke)) : undefined
+    clonedModel.rawStrokes = JSON.parse(JSON.stringify(this.rawStrokes))
+    clonedModel.strokeGroups = JSON.parse(JSON.stringify(this.strokeGroups))
+    clonedModel.positions = JSON.parse(JSON.stringify(this.positions))
+    clonedModel.exports = this.exports ? JSON.parse(JSON.stringify(this.exports)) : undefined
+    clonedModel.rawResults.convert = this.rawResults.convert ? JSON.parse(JSON.stringify(this.rawResults.convert)) : undefined
+    clonedModel.rawResults.exports = this.rawResults.exports ? JSON.parse(JSON.stringify(this.rawResults.exports)) : undefined
+    clonedModel.recognizedSymbols = this.recognizedSymbols ? JSON.parse(JSON.stringify(this.recognizedSymbols)) : undefined
+    clonedModel.idle = this.idle
+    clonedModel.isEmpty = this.isEmpty
     return clonedModel
   }
 
   clear(): void
   {
+    this.modificationDate = new Date().getTime()
     this.currentStroke = undefined
     this.rawStrokes = []
     this.strokeGroups = []
@@ -179,5 +221,7 @@ export class Model implements IModel
     this.exports = undefined
     this.rawResults.convert = undefined
     this.rawResults.exports = undefined
+    this.idle = true
+    this.isEmpty = true
   }
 }
