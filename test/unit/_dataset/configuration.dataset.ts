@@ -186,6 +186,9 @@ export const AllOverrideConfiguration: TConfigurationClient = {
   },
   events: {
     processDelay: 0
+  },
+  'undo-redo': {
+    maxStackSize: 10
   }
 }
 

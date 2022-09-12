@@ -24,6 +24,8 @@ describe('Configuration.ts', () =>
     expect(configurationDefault.rendering).toStrictEqual(DefaultConfiguration.rendering)
     expect(configurationDefault.server).toStrictEqual(DefaultConfiguration.server)
     expect(configurationDefault.triggers).toStrictEqual(DefaultConfiguration.triggers)
+    expect(configurationDefault['undo-redo']).toStrictEqual(DefaultConfiguration["undo-redo"])
+
   })
 
   const configurationsClient: { name: string, config: TConfigurationClient }[] = [
@@ -105,6 +107,11 @@ describe('Configuration.ts', () =>
     test('should override triggers', () =>
     {
       expect(overrideConfig.triggers).toStrictEqual(AllOverrideConfiguration.triggers)
+    })
+
+    test('should override undo-redo', () =>
+    {
+      expect(overrideConfig['undo-redo']).toStrictEqual(AllOverrideConfiguration['undo-redo'])
     })
   })
 

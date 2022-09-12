@@ -1,98 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="HandheldFriendly" content="true"/>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="HandheldFriendly" content="true"/>
+    <title>REST Text iink</title>
+    <link rel="stylesheet" href="../examples.css">
+    <script type="text/javascript" src="../../dist/iink.min.js"></script>
+  </head>
 
-  <title>REST Text iink</title>
+  <body>
+    <div id="result"></div>
 
-  <link rel="stylesheet" href="../examples.css">
+    <nav>
+      <div class="button-div">
+        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/clear.svg">
+        </button>
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/undo.svg">
+        </button>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/redo.svg">
+        </button>
+      </div>
+      <select id="language"></select>
+    </nav>
 
-  <script type="text/javascript" src="../../dist/iink.min.js"></script>
-</head>
+    <div id="editor" touch-action="none"></div>
 
-<body>
-<div id="result"></div>
-<div>
-  <nav>
-    <div class="button-div">
-      <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-        <img src="../assets/clear.svg">
-      </button>
-    </div>
-    <select id="language"></select>
-  </nav>
-  <div id="editor" touch-action="none"></div>
-</div>
-<script>
-  const editorElement = document.getElementById('editor');
-  const resultElement = document.getElementById('result');
-  const languageElement = document.getElementById('language');
-  const clearElement = document.getElementById('clear');
+    <script>
+      const editorElement = document.getElementById('editor');
+      const resultElement = document.getElementById('result');
+      const languageElement = document.getElementById('language');
+      const clearElement = document.getElementById('clear');
+      const undoElement = document.getElementById('undo');
+      const redoElement = document.getElementById('redo');
 
-  clearElement.addEventListener('click', async () => {
-    editor.clear()
-    resultElement.innerHTML = ''
-  });
-
-  languageElement.addEventListener('change', (e) => {
-    const configuration = JSON.parse(JSON.stringify(editor.configuration))
-    configuration.recognition.lang = e.target.value;
-    editor.configuration = configuration
-  });
-  /**
-   * Instanciate Editor
-   * @param {Element} The DOM element to attach the ink paper
-   * @param {Object} The editor options
-   */
-  const options = {
-    configuration: {
-      server: {
-        protocol: 'REST',
-        scheme: 'https',
-        host: 'webdemoapi.myscript.com',
-        applicationKey: '515131ab-35fa-411c-bb4d-3917e00faf60',
-        hmacKey: '54b2ca8a-6752-469d-87dd-553bb450e9ad'
-      },
-      recognition: {
-        type: 'TEXT',
-        text: {
-          mimeTypes: ['text/plain']
+      /**
+       * Instanciate Editor
+       * @param {Element} The DOM element to attach the ink paper
+       * @param {Object} The editor options
+       */
+      const options = {
+        configuration: {
+          server: {
+            protocol: 'REST',
+            scheme: 'https',
+            host: 'webdemoapi.myscript.com',
+            applicationKey: '515131ab-35fa-411c-bb4d-3917e00faf60',
+            hmacKey: '54b2ca8a-6752-469d-87dd-553bb450e9ad'
+          },
+          recognition: {
+            type: 'TEXT',
+            text: {
+              mimeTypes: ['text/plain']
+            }
+          }
         }
       }
-    }
-  }
-  const editor = new iink.Editor(editorElement, options);
 
-  editor.events.addEventListener('loaded', async (evt) => {
-    if (languageElement.options.length === 0) {
-      const currentLanguage = editor.configuration.recognition.lang;
-      const res = await iink.getAvailableLanguageList(editor.configuration);
-      Object.keys(res.result).forEach(function (key) {
-        const selected = currentLanguage === key;
-        languageElement.options[languageElement.options.length] = new Option(res.result[key], key, selected, selected);
+      const editor = new iink.Editor(editorElement, options);
+
+      editor.events.addEventListener('loaded', async (event) => {
+        if (languageElement.options.length === 0) {
+          const currentLanguage = editor.configuration.recognition.lang;
+          const res = await iink.getAvailableLanguageList(editor.configuration);
+          Object.keys(res.result).forEach(function (key) {
+            const selected = currentLanguage === key;
+            languageElement.options[languageElement.options.length] = new Option(res.result[key], key, selected, selected);
+          });
+        }
       });
-    }
-  });
-  editor.events.addEventListener('changed', (event) => {
-    undoElement.disabled = !event.detail.canUndo;
-    redoElement.disabled = !event.detail.canRedo;
-  })
 
-  editor.events.addEventListener('exported_text/plain', evt => {
-    resultElement.innerHTML = evt.detail
-    clearElement.disabled = false
-    undoElement.disabled = false
-  });
+      editor.events.addEventListener('changed', (event) => {
+        undoElement.disabled = !event.detail.canUndo;
+        redoElement.disabled = !event.detail.canRedo;
+        clearElement.disabled = !event.detail.canClear;
+      })
 
-  window.addEventListener('resize', () => {
-    editor.resize();
-  });
-</script>
-</body>
+      editor.events.addEventListener('exported', (event) => {
+        resultElement.innerHTML = event.detail ? event.detail['text/plain'] : ''
+      });
+
+      clearElement.addEventListener('click', async () => {
+        editor.clear()
+      });
+
+      undoElement.addEventListener('click', () => {
+        editor.undo();
+      });
+
+      redoElement.addEventListener('click', () => {
+        editor.redo();
+      });
+
+      languageElement.addEventListener('change', (e) => {
+        const configuration = JSON.parse(JSON.stringify(editor.configuration))
+        configuration.recognition.lang = e.target.value;
+        editor.configuration = configuration
+      });
+
+      window.addEventListener('resize', () => {
+        editor.resize();
+      });
+    </script>
+  </body>
 
 </html>

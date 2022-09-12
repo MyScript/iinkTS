@@ -18,7 +18,7 @@ export type TSolverConfiguration = {
 
 export type TUndoRedoMode = 'stroke' | 'session'
 
-export type TUndoRedoConfiguration = {
+export type TMathUndoRedoConfiguration = {
   mode: TUndoRedoMode
 }
 
@@ -26,7 +26,7 @@ export type TMathConfiguration = {
   mimeTypes: ('application/x-latex' | 'application/mathml+xml' | 'application/vnd.myscript.jiix')[]
   solver?: TSolverConfiguration
   margin?: TMarginConfiguration
-  'undo-redo'?: TUndoRedoConfiguration
+  'undo-redo'?: TMathUndoRedoConfiguration
   customGrammar?: string
   customGrammarId?: string
   customGrammarContent?: string

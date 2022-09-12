@@ -22,7 +22,7 @@ describe('Model.ts', () =>
       const stroke = new Stroke(DefaultPenStyle, 1)
       const point: TPoint = {
         t: 1,
-        p: 1,
+        p: 0.5,
         x: 1,
         y: 1
       }
@@ -139,11 +139,13 @@ describe('Model.ts', () =>
       expect(model.currentStroke).toBeUndefined()
       const point: TPoint = {
         t: 1,
-        p: 1,
+        p: 0.5,
         x: 1,
         y: 1
       }
+      expect(model.creationTime).toStrictEqual(model.modificationDate)
       model.initCurrentStroke(point, 42, 'mouse', DefaultPenStyle)
+      expect(model.creationTime).toBeLessThan(model.modificationDate)
       expect(model.currentStroke).toBeDefined()
       expect(model.currentStroke?.['-myscript-pen-fill-color']).toBe(DefaultPenStyle['-myscript-pen-fill-color'])
       expect(model.currentStroke?.['-myscript-pen-fill-style']).toBe(DefaultPenStyle['-myscript-pen-fill-style'])
@@ -182,7 +184,7 @@ describe('Model.ts', () =>
       expect(model.currentStroke?.t).toHaveLength(2)
       expect(model.currentStroke?.t[1]).toBe(point.t)
       expect(model.currentStroke?.p).toHaveLength(2)
-      expect(model.currentStroke?.p[1]).toBe(point.p)
+      expect(model.currentStroke?.p[1]).toBe(0.56)
     })
 
     test('should endCurrentStroke', () =>
@@ -242,23 +244,49 @@ describe('Model.ts', () =>
     })
   })
 
-  describe('clone', () => {
-    const model: IModel = new Model()
+  describe('clone', () =>
+  {
+    const model: IModel = new Model(27, 5)
     const stroke = new Stroke(DefaultPenStyle, 1)
     model.addStroke(stroke)
-    test('should getClone', () => {
+    const point: TPoint = {
+      t: 1,
+      p: 0.5,
+      x: 1,
+      y: 1
+    }
+    model.initCurrentStroke(point, 666, 'pen', DefaultPenStyle)
+    model.exports = { "text/plain": "M" }
+    test('should getClone', () =>
+    {
       const clone = model.getClone()
       expect(clone != model).toBeTruthy()
-      expect(clone.currentStroke).toStrictEqual(model.currentStroke)
-      expect(clone.defaultSymbols).toStrictEqual(model.defaultSymbols)
-      expect(clone.exports).toStrictEqual(model.exports)
-      expect(clone.height).toStrictEqual(model.height)
-      expect(clone.idle).toStrictEqual(model.idle)
-      expect(clone.positions).toStrictEqual(model.positions)
-      expect(clone.rawResults).toStrictEqual(model.rawResults)
-      expect(clone.rawStrokes).toStrictEqual(model.rawStrokes)
-      expect(clone.strokeGroups).toStrictEqual(model.strokeGroups)
-      expect(clone.width).toStrictEqual(model.width)
+      expect(clone.currentStroke).toEqual(model.currentStroke)
+      expect(clone.currentStroke).not.toBe(model.currentStroke)
+
+      expect(clone.defaultSymbols).toEqual(model.defaultSymbols)
+      expect(clone.defaultSymbols).not.toBe(model.defaultSymbols)
+
+      expect(clone.exports).toEqual(model.exports)
+      expect(clone.exports).not.toBe(model.exports)
+
+      expect(clone.height).toEqual(model.height)
+
+      expect(clone.idle).toEqual(model.idle)
+
+      expect(clone.positions).toEqual(model.positions)
+      expect(clone.positions).not.toBe(model.positions)
+
+      expect(clone.rawResults).toEqual(model.rawResults)
+      expect(clone.rawResults).not.toBe(model.rawResults)
+
+      expect(clone.rawStrokes).toEqual(model.rawStrokes)
+      expect(clone.rawStrokes).not.toBe(model.rawStrokes)
+
+      expect(clone.strokeGroups).toEqual(model.strokeGroups)
+      expect(clone.strokeGroups).not.toBe(model.strokeGroups)
+
+      expect(clone.width).toEqual(model.width)
     })
   })
 

@@ -9,7 +9,7 @@ config[0].plugins.push(
     verbose: true,
     contentBase: '',
     host: 'localhost',
-    port: 10001,
+    port: 8000,
     headers: {
       'Access-Control-Allow-Origin': '*'
     }

@@ -117,7 +117,7 @@ type TSolverConfiguration = {
 
 type TUndoRedoMode = 'stroke' | 'session'
 
-type TUndoRedoConfiguration = {
+type TMathUndoRedoConfiguration = {
   mode: TUndoRedoMode
 }
 
@@ -125,7 +125,7 @@ type TMathConfiguration = {
   mimeTypes: ('application/x-latex' | 'application/mathml+xml' | 'application/vnd.myscript.jiix')[]
   solver?: TSolverConfiguration
   margin?: TMarginConfiguration
-  'undo-redo'?: TUndoRedoConfiguration
+  'undo-redo'?: TMathUndoRedoConfiguration
   customGrammar?: string
   customGrammarId?: string
   customGrammarContent?: string
@@ -247,7 +247,7 @@ type TServerConfigurationClient = {
  * POINTER_UP :   Action is triggered on every PenUP.
  *                This is the recommended mode for CDK V3 WebSocket recognitions.
  * QUIET_PERIOD : Action is triggered after a quiet period in milli-seconds on every pointer up.
- *                The value is set to 2000 for example recognition will be triggered when the user stops writing for 2 seconds.
+ *                The value is set to 1000 for example recognition will be triggered when the user stops writing for 1 seconds.
  *                This is the recommended mode for all REST discoveries.
  * DEMAND :       Action is triggered on external demande
  */
@@ -257,6 +257,10 @@ type TServerConfigurationClient = {
   resizeTriggerDelay: number
 }
 
+type TUndoRedoConfiguration = {
+  maxStackSize: number
+}
+
 type TConfiguration = {
   server: TServerConfiguration
   recognition: TRecognitionConfiguration
@@ -264,6 +268,7 @@ type TConfiguration = {
   rendering: TRenderingConfiguration
   triggers: TTriggerConfiguration
   events: TEventConfiguration
+  'undo-redo': TUndoRedoConfiguration
 }
 
 type TConfigurationClient = {
@@ -273,13 +278,14 @@ type TConfigurationClient = {
   rendering?: TRenderingConfiguration
   triggers?: TTriggerConfiguration
   events?: TEventConfiguration
+  'undo-redo'?: TUndoRedoConfiguration
 }
 
 type TEditorOptions = {
   configuration: TConfiguration
-  behaviors?: any
-  penStyle?: any
-  theme?: any
+  behaviors?: IBehaviors
+  penStyle?: TPenStyle
+  theme?: TTheme
   globalClassCss?: string
 }
 
@@ -314,7 +320,7 @@ type TPoint$1 = TPartialXYPoint & {
  * @property {String} -myscript-pen-fill-style=none
  * @property {String} -myscript-pen-fill-color=#FFFFFF00 Color filled inside the area delimited by strokes and primitives
  */
-type TPenStyle = {
+type TPenStyle$1 = {
   color: string
   width: number
   '-myscript-pen-width': number
@@ -322,9 +328,7 @@ type TPenStyle = {
   '-myscript-pen-fill-color': string
 }
 
-type TSymbol = TPenStyle & {
-  width: number
-  color: string
+type TSymbol = TPenStyle$1 & {
   elementType?: string
   type: string
 }
@@ -334,15 +338,16 @@ type TStrokeJSON = {
   x: number[]
   y: number[]
   t: number[]
+  p: number[]
 }
 
 type TStroke = TSymbol & TStrokeJSON & {
   pointerId: number
-  p: number[]
+  l: number[]
 }
 
 type TStrokeGroup = {
-  penStyle: TPenStyle
+  penStyle: TPenStyle$1
   strokes: TStroke[]
 }
 
@@ -356,11 +361,6 @@ type TRecognitionPositions = {
   lastRenderedPosition: number
 }
 
-type TRawResults = {
-  convert: any
-  exports: any
-}
-
 type TWordExport = {
   id: string
   label: string,
@@ -372,6 +372,11 @@ type TJIIXExport = {
   label: string,
   version: string,
   words: TWordExport[]
+}
+
+type TRawResults = {
+  convert?: any
+  exports?: TJIIXExport | string | Blob
 }
 
 type TExport = {
@@ -392,7 +397,7 @@ type TExport = {
 interface IModel
 {
   readonly creationTime: number
-  modificationTime?: number
+  modificationDate: number
   currentStroke?: TStroke
   strokeGroups: TStrokeGroup[]
   positions: TRecognitionPositions
@@ -404,14 +409,15 @@ interface IModel
   width?: number
   height?: number
   idle: boolean
+  isEmpty: boolean
 
   addPoint(stroke: TStroke, point: TPoint$1): void
   addStroke(stroke: TStroke): void
-  addStrokeToGroup(stroke: TStroke, strokePenStyle: TPenStyle): void
+  addStrokeToGroup(stroke: TStroke, strokePenStyle: TPenStyle$1): void
   extractPendingStrokes(position?: number): TStroke[]
-  initCurrentStroke(point: TPoint$1, pointerId: number, pointerType: string, style: TPenStyle, dpi: number = 96): void
+  initCurrentStroke(point: TPoint$1, pointerId: number, pointerType: string, style: TPenStyle$1, dpi: number = 96): void
   appendToCurrentStroke(point: TPoint$1): void
-  endCurrentStroke(point: TPoint$1, penStyle: TPenStyle): void
+  endCurrentStroke(point: TPoint$1, penStyle: TPenStyle$1): void
 
   updatePositionSent(position: number = this.model.rawStrokes.length - 1): void
   updatePositionReceived(): void
@@ -463,11 +469,18 @@ type TTextTheme = {
   'font-size': number
 }
 
-type TTheme = {
-  ink: TPenStyle
+type TTheme$1 = {
+  ink: TPenStyle$1
   '.math': TMathTheme
   '.math-solved': TMathSolvedTheme
   '.text': TTextTheme
+}
+
+type TUndoRedoContext = {
+  canUndo: boolean
+  canRedo: boolean
+  stackIndex: number
+  stack: IModel[]
 }
 
 declare class EventHelper extends EventTarget {
@@ -477,8 +490,7 @@ declare class EventHelper extends EventTarget {
     private emit;
     emitLoaded(): void;
     emitExported(exports: TExport): void;
-    emitExportedMimeType(mimeType: string, exports: TExport): void;
-    addExportedListener(callback: EventListenerOrEventListenerObject): void;
+    emitChange(undoRedoContext: TUndoRedoContext): void;
     emitIdle(model: IModel): void;
     emitError(err: Error): void;
     emitClear(model?: IModel): void;
@@ -503,6 +515,7 @@ declare class Editor {
     private _configuration;
     private _behaviorsManager;
     private _styleManager;
+    private _undoRedoManager;
     private _mode;
     private _resizeTimer?;
     private _exportTimer?;
@@ -514,8 +527,8 @@ declare class Editor {
     get grabber(): IGrabber;
     get stroker(): IStroker;
     get renderer(): IRenderer;
-    get theme(): TTheme;
-    get penStyle(): TPenStyle;
+    get theme(): TTheme$1;
+    get penStyle(): TPenStyle$1;
     get mode(): EditorMode;
     get events(): EventHelper;
     get recognizer(): IRecognizer;
@@ -526,6 +539,8 @@ declare class Editor {
     pointerUp(_evt: PointerEvent, point: TPoint$1): void;
     setMode(mode: EditorMode): void;
     clear(): void;
+    undo(): Promise<IModel>;
+    redo(): Promise<IModel | false>;
     resize(): void;
     export(mimeTypes: string[]): Promise<IModel | never>;
     import(evt: Event): void;

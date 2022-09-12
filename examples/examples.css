@@ -180,7 +180,7 @@ select:focus {
 
 .ms-editor {
     width: 100vw;
-    height: calc(100vh - 152px);
+    height: calc(100vh - 176px);
     touch-action: none;
 }
 

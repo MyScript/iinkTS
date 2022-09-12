@@ -138,4 +138,12 @@ describe('DefaultConfiguration.ts', () =>
       expect(DefaultConfiguration.events.processDelay).toStrictEqual(10)
     })
   })
+
+  describe('should have DefaultUndoRedoConfiguration', () =>
+  {
+    test('should have maxStackSize', () =>
+    {
+      expect(DefaultConfiguration['undo-redo'].maxStackSize).toStrictEqual(10)
+    })
+  })
 })
