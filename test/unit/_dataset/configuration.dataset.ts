@@ -84,7 +84,6 @@ export const AllOverrideConfiguration: TConfigurationClient = {
   recognition: {
     type: 'DIAGRAM',
     alwaysConnected: false,
-    replaceMimeTypes: true,
     lang: 'fr_FR',
     gesture: {
       enable: false
@@ -189,29 +188,5 @@ export const AllOverrideConfiguration: TConfigurationClient = {
   },
   'undo-redo': {
     maxStackSize: 10
-  }
-}
-
-export const ConfigurationReplaceMimeType: TConfigurationClient = {
-  recognition: {
-    replaceMimeTypes: true,
-    math: {
-      mimeTypes: ['application/mathml+xml'],
-    },
-    diagram: {
-      mimeTypes: ['application/vnd.openxmlformats-officedocument.presentationml.presentation'],
-    },
-    text: {
-      mimeTypes: ['application/vnd.myscript.jiix'],
-    },
-    rawContent: {
-      mimeTypes: ['application/vnd.myscript.jiix'],
-    },
-  }
-}
-
-export const ConfigurationReplaceMimeTypeEmpty: TConfigurationClient = {
-  recognition: {
-    replaceMimeTypes: true,
   }
 }

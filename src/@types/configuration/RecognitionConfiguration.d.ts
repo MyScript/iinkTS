@@ -23,7 +23,6 @@ export type TRecognitionConfiguration = {
   type: TRecognitionType
   alwaysConnected: boolean
   lang: string
-  replaceMimeTypes: boolean
   math: TMathConfiguration
   text: TTextConfiguration
   diagram: TDiagramConfiguration
@@ -38,7 +37,6 @@ export type TRecognitionConfigurationClient = {
   type?: TRecognitionType
   alwaysConnected?: boolean
   lang?: string
-  replaceMimeTypes?: boolean
   math?: TMathConfiguration
   text?: TTextConfiguration
   diagram?: TDiagramConfiguration

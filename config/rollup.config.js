@@ -1,10 +1,10 @@
-import typescript from 'rollup-plugin-typescript2';
-import { terser } from 'rollup-plugin-terser';
-import resolve from '@rollup/plugin-node-resolve';
-import postcss from 'rollup-plugin-postcss';
-import del from 'rollup-plugin-delete';
-import dts from 'rollup-plugin-dts';
-import commonjs from 'rollup-plugin-commonjs';
+import typescript from 'rollup-plugin-typescript2'
+import { terser } from 'rollup-plugin-terser'
+import resolve from '@rollup/plugin-node-resolve'
+import postcss from 'rollup-plugin-postcss'
+import del from 'rollup-plugin-delete'
+import dts from 'rollup-plugin-dts'
+import commonjs from 'rollup-plugin-commonjs'
 
 export default [
   {
@@ -43,4 +43,4 @@ export default [
       format: 'es',
     },
   },
-];
+]

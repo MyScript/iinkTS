@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
-
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="HandheldFriendly" content="true"/>
-    <title>REST Text iink</title>
-    <link rel="stylesheet" href="../examples.css">
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+    <title>Rest Text iink</title>
+    <link rel="stylesheet" href="../examples.css" />
+    <script type="text/javascript" src="../../../dist/iink.min.js"></script>
   </head>
 
   <body>
@@ -18,13 +20,13 @@
     <nav>
       <div class="button-div">
         <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/clear.svg">
+          <img src="../assets/clear.svg" />
         </button>
         <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/undo.svg">
+          <img src="../assets/undo.svg" />
         </button>
         <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/redo.svg">
+          <img src="../assets/redo.svg" />
         </button>
       </div>
       <select id="language"></select>
@@ -52,16 +54,16 @@
             scheme: 'https',
             host: 'webdemoapi.myscript.com',
             applicationKey: '515131ab-35fa-411c-bb4d-3917e00faf60',
-            hmacKey: '54b2ca8a-6752-469d-87dd-553bb450e9ad'
+            hmacKey: '54b2ca8a-6752-469d-87dd-553bb450e9ad',
           },
           recognition: {
             type: 'TEXT',
             text: {
-              mimeTypes: ['text/plain']
-            }
-          }
-        }
-      }
+              mimeTypes: ['text/plain'],
+            },
+          },
+        },
+      };
 
       const editor = new iink.Editor(editorElement, options);
 
@@ -71,7 +73,8 @@
           const res = await iink.getAvailableLanguageList(editor.configuration);
           Object.keys(res.result).forEach(function (key) {
             const selected = currentLanguage === key;
-            languageElement.options[languageElement.options.length] = new Option(res.result[key], key, selected, selected);
+            languageElement.options[languageElement.options.length] =
+              new Option(res.result[key], key, selected, selected);
           });
         }
       });
@@ -80,14 +83,16 @@
         undoElement.disabled = !event.detail.canUndo;
         redoElement.disabled = !event.detail.canRedo;
         clearElement.disabled = !event.detail.canClear;
-      })
+      });
 
       editor.events.addEventListener('exported', (event) => {
-        resultElement.innerHTML = event.detail ? event.detail['text/plain'] : ''
+        resultElement.innerHTML = event.detail
+          ? event.detail['text/plain']
+          : '';
       });
 
       clearElement.addEventListener('click', async () => {
-        editor.clear()
+        editor.clear();
       });
 
       undoElement.addEventListener('click', () => {
@@ -99,9 +104,9 @@
       });
 
       languageElement.addEventListener('change', (e) => {
-        const configuration = JSON.parse(JSON.stringify(editor.configuration))
+        const configuration = JSON.parse(JSON.stringify(editor.configuration));
         configuration.recognition.lang = e.target.value;
-        editor.configuration = configuration
+        editor.configuration = configuration;
       });
 
       window.addEventListener('resize', () => {
@@ -109,5 +114,4 @@
       });
     </script>
   </body>
-
 </html>

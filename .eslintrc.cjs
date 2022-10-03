@@ -1,19 +1,23 @@
 /* eslint-disable no-undef */
 module.exports = {
-  root: true,
-  parser: '@typescript-eslint/parser',
+  parserOptions: {
+    parser: '@typescript-eslint/parser',
+  },
   plugins: [
-    '@typescript-eslint',
+    '@typescript-eslint'
   ],
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
+    'plugin:playwright/jest-playwright',
   ],
   env: {
-    "browser": true,
-    "es6": true
+    browser: true,
+    node: true,
+    es6: true,
   },
   rules: {
-    "@typescript-eslint/no-explicit-any": 1
-  }
-};
+    '@typescript-eslint/no-explicit-any': 1,
+    '@typescript-eslint/no-var-requires': 1,
+  },
+}

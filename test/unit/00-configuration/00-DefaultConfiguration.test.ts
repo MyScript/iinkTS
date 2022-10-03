@@ -36,10 +36,6 @@ describe('DefaultConfiguration.ts', () =>
     {
       expect(DefaultConfiguration.recognition.type).toStrictEqual('TEXT')
     })
-    test('should have replaceMimeTypes', () =>
-    {
-      expect(DefaultConfiguration.recognition.replaceMimeTypes).toStrictEqual(false)
-    })
     test('should have lang', () =>
     {
       expect(DefaultConfiguration.recognition.lang).toStrictEqual('en_US')
