@@ -168,6 +168,17 @@
                   name="recognition-gesture"
                 />
               </div>
+              <div class="input-row">
+                <label for="replace-mime-types">Replace MIME types:</label>
+                <input
+                  type="checkbox"
+                  id="replace-mime-types"
+                  name="replace-mime-types"
+                />
+              </div>
+              <label for="mime-types">MIME types:</label>
+              <select id="mime-types" name="mime-types" multiple style="height: auto;">
+              </select>
             </div>
           </div>
           <div class="card">
@@ -223,16 +234,15 @@
       const serverProtocolElement = document.getElementById('server-protocol');
       const serverSchemelElement = document.getElementById('server-scheme');
       const serverHostlElement = document.getElementById('server-host');
-      const serverApplicationKeyElement = document.getElementById(
-        'server-applicationKey'
-      );
+      const serverApplicationKeyElement = document.getElementById('server-applicationKey');
       const serverHMACKeyElement = document.getElementById('server-hmacKey');
 
-      const recognitionTypeElement =
-        document.getElementById('recognition-type');
+      const recognitionTypeElement = document.getElementById('recognition-type');
       const recognitionLanguageElement = document.getElementById('recognition-language');
       const recognitionGuidesElement = document.getElementById('recognition-guides');
       const recognitionGestureElement = document.getElementById('recognition-gesture');
+      const mimeTypesElement = document.getElementById('mime-types');
+
       const renderingSmartGuideElement = document.getElementById('rendering-smartGuide');
       const triggersExportContentElement = document.getElementById('triggers-exportContent');
       const triggersExportContentDelayElement = document.getElementById('triggers-exportContent-delay');
@@ -253,7 +263,6 @@
         recognition: {
           type: 'TEXT',
           lang: 'en_US',
-          replaceMimeTypes: false,
           gesture: {
             enable: true,
           },
@@ -310,6 +319,12 @@
         });
       }
 
+      const mimeTypesList = {
+        TEXT: ['text/plain', 'application/vnd.myscript.jiix'],
+        MATH: ['application/x-latex', 'application/mathml+xml', 'application/vnd.myscript.jiix'],
+        DIAGRAM: ['application/vnd.myscript.jiix', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'],
+        'Raw Content': ['application/vnd.myscript.jiix']
+      }
       /**
        * Retrieve the list of available recognition languages using local json file
        * @param {Object} The editor recognition parameters
@@ -337,6 +352,14 @@
         recognitionGuidesElement.checked = defaultConfiguration.recognition.text.guides.enable;
         recognitionGestureElement.checked = defaultConfiguration.recognition.gesture.enable;
 
+
+        const defaultMimeTypes = defaultConfiguration.recognition[defaultConfiguration.recognition.type.toLocaleLowerCase()].mimeTypes
+        mimeTypesElement.options = []
+        mimeTypesList[recognitionTypeElement.value].forEach((mt, i) => {
+          const selected = defaultMimeTypes.indexOf(mt) > -1
+          mimeTypesElement.options[i] = new Option(mt, mt, selected, selected)
+        })
+
         renderingSmartGuideElement.checked = defaultConfiguration.rendering.smartGuide;
 
         triggersExportContentElement.value = defaultConfiguration.triggers.exportContent;
@@ -346,7 +369,6 @@
         exportBtn.disabled =defaultConfiguration.triggers.exportContent !== 'DEMAND';
       }
       initInputsValues();
-
       editorElement.addEventListener('changed', (event) => {
         exportBtn.disabled =
           !event.detail.canExport ||
@@ -358,17 +380,13 @@
           if (triggersExportContentElement.value === 'POINTER_UP') {
             triggersExportContentElement.value = 'QUIET_PERIOD';
           }
-          triggersExportContentElement.querySelector(
-            'option[value="POINTER_UP"]'
-          ).disabled = true;
+          triggersExportContentElement.querySelector('option[value="POINTER_UP"]').disabled = true;
           renderingSmartGuideElement.disabled = true;
           renderingSmartGuideElement.checked = false;
           recognitionGuidesElement.disabled = true;
           recognitionGuidesElement.checked = false;
         } else {
-          triggersExportContentElement.querySelector(
-            'option[value="POINTER_UP"]'
-          ).disabled = false;
+          triggersExportContentElement.querySelector('option[value="POINTER_UP"]').disabled = false;
           renderingSmartGuideElement.disabled = false;
           renderingSmartGuideElement.checked = true;
           recognitionGuidesElement.disabled = false;
@@ -376,9 +394,22 @@
         }
       });
 
+      recognitionTypeElement.addEventListener('change', (e) => {
+        const defaultMimeTypes = defaultConfiguration.recognition[recognitionTypeElement.value.toLocaleLowerCase()].mimeTypes
+        mimeTypesElement.options = []
+        mimeTypesList[recognitionTypeElement.value].forEach((mt, i) => {
+          const selected = defaultMimeTypes.indexOf(mt) > -1
+          mimeTypesElement.options[i] = new Option(mt, mt, selected, selected)
+        })
+      })
+
       resetBtn.addEventListener('click', initInputsValues);
 
       validBtn.addEventListener('click', () => {
+        const selectedMimeTypes = []
+        for (let o of mimeTypesElement.selectedOptions) {
+          selectedMimeTypes.push(o.value)
+        }
         exportBtn.disabled = triggersExportContentElement.value !== 'DEMAND';
         resultElement.innerHTML = '';
         editor.configuration = {
@@ -390,18 +421,26 @@
             hmacKey: serverHMACKeyElement.value,
           },
           recognition: {
-            replaceMimeTypes: true,
             type: recognitionTypeElement.value,
             lang: recognitionLanguageElement.value,
             gesture: {
               enable: recognitionGestureElement.checked,
             },
+            math: {
+              mimeTypes: recognitionTypeElement.value === 'MATH' ? selectedMimeTypes : [],
+            },
             text: {
-              mimeTypes: ['application/vnd.myscript.jiix'],
+              mimeTypes: recognitionTypeElement.value === 'TEXT' ? selectedMimeTypes : [],
               guides: {
                 enable: recognitionGuidesElement.checked,
               },
             },
+            diagram: {
+              mimeTypes: recognitionTypeElement.value === 'DIAGRAM' ? selectedMimeTypes : [],
+            },
+            rawContent: {
+              mimeTypes: recognitionTypeElement.value === 'Raw Content' ? selectedMimeTypes : [],
+            }
           },
           rendering: {
             smartGuide: {

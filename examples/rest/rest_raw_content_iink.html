@@ -1,131 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="HandheldFriendly" content="true"/>
+    <title>Rest Raw Content iink</title>
 
-  <title>REST Raw Content iink</title>
+    <link rel="stylesheet" href="../examples.css" />
 
-  <link rel="stylesheet" href="../examples.css">
+    <script type="text/javascript" src="../../dist/iink.min.js"></script>
 
-  <script type="text/javascript" src="../../dist/iink.min.js"></script>
-
-  <style>
+    <style>
       #result span {
         font-size: small;
         padding: 12px;
       }
-  </style>
-</head>
+    </style>
+  </head>
 
-<body>
-<div id="result"></div>
-<div>
-  <nav>
-    <div class="button-div">
-      <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-        <img src="../assets/clear.svg">
-      </button>
-      <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-        <img src="../assets/undo.svg">
-      </button>
-      <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-        <img src="../assets/redo.svg">
-      </button>
+  <body>
+    <div id="result"></div>
+    <div>
+      <nav>
+        <div class="button-div">
+          <button
+            id="clear"
+            class="nav-btn btn-fab-mini btn-lightBlue"
+            disabled
+          >
+            <img src="../assets/clear.svg" />
+          </button>
+          <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+            <img src="../assets/undo.svg" />
+          </button>
+          <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+            <img src="../assets/redo.svg" />
+          </button>
+        </div>
+        <select id="language"></select>
+      </nav>
+      <div id="editor" touch-action="none"></div>
     </div>
-    <select id="language"></select>
-  </nav>
-  <div id="editor" touch-action="none"></div>
-</div>
-<script>
-  const editorElement = document.getElementById('editor');
-  const resultElement = document.getElementById('result');
-  const languageElement = document.getElementById('language');
-  const clearElement = document.getElementById('clear');
-  const undoElement = document.getElementById('undo');
-  const redoElement = document.getElementById('redo');
+    <script>
+      const editorElement = document.getElementById('editor');
+      const resultElement = document.getElementById('result');
+      const languageElement = document.getElementById('language');
+      const clearElement = document.getElementById('clear');
+      const undoElement = document.getElementById('undo');
+      const redoElement = document.getElementById('redo');
 
-  languageElement.addEventListener('change', (e) => {
-    const configuration = JSON.parse(JSON.stringify(editor.configuration))
-    configuration.recognition.lang = e.target.value;
-    editor.configuration = configuration
-  });
-
-  undoElement.addEventListener('click', () => {
-    editor.undo()
-  })
-
-  redoElement.addEventListener('click', () => {
-    editor.redo()
-  })
-
-  clearElement.addEventListener('click', () => {
-    editor.clear();
-    resultElement.innerHTML = '';
-  });
-
-  /**
-   * Instanciate Editor
-   * @param {Element} The DOM element to attach the ink paper
-   * @param {Object} The recognition parameters
-   */
-  const options = {
-    configuration: {
-      server: {
-        protocol: 'REST',
-        scheme: 'https',
-        host: 'webdemoapi.myscript.com',
-        applicationKey: '515131ab-35fa-411c-bb4d-3917e00faf60',
-        hmacKey: '54b2ca8a-6752-469d-87dd-553bb450e9ad'
-      },
-      recognition: {
-        type: 'Raw Content',
-        'raw-content': {
-          mimeTypes: ['application/vnd.myscript.jiix'],
-          recognition: {
-            text: true,
-            shape: false
-          }
-        }
-      }
-    }
-  }
-  const editor = new iink.Editor(editorElement, options);
-
-  editor.events.addEventListener('changed', (event) => {
-    undoElement.disabled = !event.detail.canUndo;
-    redoElement.disabled = !event.detail.canRedo;
-    clearElement.disabled = !event.detail.canClear;
-  })
-
-  editor.events.addEventListener('exported', (evt) => {
-    const exports = evt.detail;
-    if (exports && exports['application/vnd.myscript.jiix']) {
-      resultElement.innerHTML = `<span>${JSON.stringify(exports['application/vnd.myscript.jiix'].elements)}</span>`
-    } else {
-      resultElement.innerHTML = '';
-    }
-  });
-
-  editor.events.addEventListener('loaded', async (evt) => {
-    if (languageElement.options.length === 0) {
-      const currentLanguage = editor.configuration.recognition.lang;
-      const res = await iink.getAvailableLanguageList(editor.configuration);
-      Object.keys(res.result).forEach(function (key) {
-        const selected = currentLanguage === key;
-        languageElement.options[languageElement.options.length] = new Option(res.result[key], key, selected, selected);
+      languageElement.addEventListener('change', (e) => {
+        const configuration = JSON.parse(JSON.stringify(editor.configuration));
+        configuration.recognition.lang = e.target.value;
+        editor.configuration = configuration;
       });
-    }
-  });
 
-  window.addEventListener('resize', () => {
-    editor.resize();
-  });
-</script>
-</body>
+      undoElement.addEventListener('click', () => {
+        editor.undo();
+      });
 
+      redoElement.addEventListener('click', () => {
+        editor.redo();
+      });
+
+      clearElement.addEventListener('click', () => {
+        editor.clear();
+        resultElement.innerHTML = '';
+      });
+
+      /**
+       * Instanciate Editor
+       * @param {Element} The DOM element to attach the ink paper
+       * @param {Object} The recognition parameters
+       */
+      const options = {
+        configuration: {
+          server: {
+            protocol: 'REST',
+            scheme: 'https',
+            host: 'webdemoapi.myscript.com',
+            applicationKey: '515131ab-35fa-411c-bb4d-3917e00faf60',
+            hmacKey: '54b2ca8a-6752-469d-87dd-553bb450e9ad',
+          },
+          recognition: {
+            type: 'Raw Content',
+            'raw-content': {
+              mimeTypes: ['application/vnd.myscript.jiix'],
+              recognition: {
+                text: true,
+                shape: false,
+              },
+            },
+          },
+        },
+      };
+      const editor = new iink.Editor(editorElement, options);
+
+      editor.events.addEventListener('changed', (event) => {
+        undoElement.disabled = !event.detail.canUndo;
+        redoElement.disabled = !event.detail.canRedo;
+        clearElement.disabled = !event.detail.canClear;
+      });
+
+      editor.events.addEventListener('exported', (evt) => {
+        const exports = evt.detail;
+        if (exports && exports['application/vnd.myscript.jiix']) {
+          resultElement.innerHTML = `<span>${JSON.stringify(
+            exports['application/vnd.myscript.jiix'].elements
+          )}</span>`;
+        } else {
+          resultElement.innerHTML = '';
+        }
+      });
+
+      editor.events.addEventListener('loaded', async (evt) => {
+        if (languageElement.options.length === 0) {
+          const currentLanguage = editor.configuration.recognition.lang;
+          const res = await iink.getAvailableLanguageList(editor.configuration);
+          Object.keys(res.result).forEach(function (key) {
+            const selected = currentLanguage === key;
+            languageElement.options[languageElement.options.length] =
+              new Option(res.result[key], key, selected, selected);
+          });
+        }
+      });
+
+      window.addEventListener('resize', () => {
+        editor.resize();
+      });
+    </script>
+  </body>
 </html>

@@ -1,119 +1,134 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
 
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="HandheldFriendly" content="true"/>
+    <title>Rest Math iink</title>
 
-  <title>REST Math iink</title>
+    <link rel="stylesheet" href="../examples.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+      integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X"
+      crossorigin="anonymous"
+    />
 
-  <link rel="stylesheet" href="../examples.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
-        integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X"
-        crossorigin="anonymous">
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"
+      integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4"
+      crossorigin="anonymous"
+    ></script>
 
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"
-          integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4"
-          crossorigin="anonymous"></script>
+    <script type="text/javascript" src="../../dist/iink.min.js"></script>
+  </head>
 
-  <script type="text/javascript" src="../../dist/iink.min.js"></script>
-</head>
-
-<body>
-<div id="result"></div>
-<div>
-  <nav>
-    <div class="button-div">
-      <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-        <img src="../assets/clear.svg">
-      </button>
-      <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-        <img src="../assets/undo.svg">
-      </button>
-      <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-        <img src="../assets/redo.svg">
-      </button>
+  <body>
+    <div id="result"></div>
+    <div>
+      <nav>
+        <div class="button-div">
+          <button
+            id="clear"
+            class="nav-btn btn-fab-mini btn-lightBlue"
+            disabled
+          >
+            <img src="../assets/clear.svg" />
+          </button>
+          <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+            <img src="../assets/undo.svg" />
+          </button>
+          <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+            <img src="../assets/redo.svg" />
+          </button>
+        </div>
+      </nav>
+      <div id="editor" touch-action="none"></div>
     </div>
-  </nav>
-  <div id="editor" touch-action="none"></div>
-</div>
-<script>
-  const editorElement = document.getElementById('editor');
-  const resultElement = document.getElementById('result');
-  const clearElement = document.getElementById('clear');
-  const undoElement = document.getElementById('undo');
-  const redoElement = document.getElementById('redo');
+    <script>
+      const editorElement = document.getElementById('editor');
+      const resultElement = document.getElementById('result');
+      const clearElement = document.getElementById('clear');
+      const undoElement = document.getElementById('undo');
+      const redoElement = document.getElementById('redo');
 
-  clearElement.addEventListener('click', async () => {
-    editor.clear();
-    resultElement.innerHTML = '';
-  });
+      clearElement.addEventListener('click', async () => {
+        editor.clear();
+        resultElement.innerHTML = '';
+      });
 
-  undoElement.addEventListener('click', () => {
-    editor.undo();
-  });
+      undoElement.addEventListener('click', () => {
+        editor.undo();
+      });
 
-  redoElement.addEventListener('click', () => {
-    editor.redo();
-  });
+      redoElement.addEventListener('click', () => {
+        editor.redo();
+      });
 
-  /**
-   * Instanciate Editor
-   * @param {Element} The DOM element to attach the ink paper
-   * @param {Object} The editor options
-   */
-  const options = {
-    configuration: {
-      server: {
-        protocol: 'REST',
-        scheme: 'https',
-        host: 'webdemoapi.myscript.com',
-        applicationKey: '515131ab-35fa-411c-bb4d-3917e00faf60',
-        hmacKey: '54b2ca8a-6752-469d-87dd-553bb450e9ad'
-      },
-      recognition: {
-        type: 'MATH'
+      /**
+       * Instanciate Editor
+       * @param {Element} The DOM element to attach the ink paper
+       * @param {Object} The editor options
+       */
+      const options = {
+        configuration: {
+          server: {
+            protocol: 'REST',
+            scheme: 'https',
+            host: 'webdemoapi.myscript.com',
+            applicationKey: '515131ab-35fa-411c-bb4d-3917e00faf60',
+            hmacKey: '54b2ca8a-6752-469d-87dd-553bb450e9ad',
+          },
+          recognition: {
+            type: 'MATH',
+          },
+        },
+      };
+
+      const editor = new iink.Editor(editorElement, options);
+
+      editor.events.addEventListener('changed', (event) => {
+        undoElement.disabled = !event.detail.canUndo;
+        redoElement.disabled = !event.detail.canRedo;
+        clearElement.disabled = !event.detail.canClear;
+      });
+
+      function cleanLatex(latexExport) {
+        if (typeof latexExport === 'number') {
+          latexExport = latexExport.toString();
+        }
+        if (latexExport.includes('\\\\')) {
+          const steps = '\\begin{align*}' + latexExport + '\\end{align*}';
+          return steps
+            .replace('\\begin{aligned}', '')
+            .replace('\\end{aligned}', '')
+            .replace(new RegExp('(align.{1})', 'g'), 'aligned');
+        }
+        return latexExport.replace(new RegExp('(align.{1})', 'g'), 'aligned');
       }
-    }
-  }
 
-  const editor = new iink.Editor(editorElement, options);
+      editor.events.addEventListener('exported', (evt) => {
+        const exports = evt.detail;
+        if (exports && exports['application/x-latex']) {
+          katex.render(
+            cleanLatex(exports['application/x-latex']),
+            resultElement
+          );
+        } else {
+          resultElement.innerHTML = '';
+        }
+      });
 
-  editor.events.addEventListener('changed', (event) => {
-    undoElement.disabled = !event.detail.canUndo;
-    redoElement.disabled = !event.detail.canRedo;
-    clearElement.disabled = !event.detail.canClear;
-  })
-
-  function cleanLatex(latexExport) {
-    if(typeof latexExport === 'number') {
-      latexExport = latexExport.toString();
-    }
-    if (latexExport.includes('\\\\')) {
-      const steps = '\\begin{align*}' + latexExport + '\\end{align*}';
-      return steps.replace("\\begin{aligned}", "")
-        .replace("\\end{aligned}", "")
-        .replace(new RegExp("(align.{1})", "g"), "aligned");
-    }
-    return latexExport.replace(new RegExp("(align.{1})", "g"), "aligned");
-  }
-
-  editor.events.addEventListener('exported', evt => {
-    const exports = evt.detail
-    if (exports && exports['application/x-latex']) {
-      katex.render(cleanLatex(exports['application/x-latex']),  resultElement);
-    } else {
-      resultElement.innerHTML = '';
-    }
-  });
-
-  window.addEventListener('resize', () => {
-    editor.resize();
-  });
-</script>
-</body>
-
+      window.addEventListener('resize', () => {
+        editor.resize();
+      });
+    </script>
+  </body>
 </html>

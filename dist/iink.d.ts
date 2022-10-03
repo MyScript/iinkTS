@@ -165,7 +165,6 @@ type TRecognitionConfiguration = {
   type: TRecognitionType
   alwaysConnected: boolean
   lang: string
-  replaceMimeTypes: boolean
   math: TMathConfiguration
   text: TTextConfiguration
   diagram: TDiagramConfiguration
@@ -180,7 +179,6 @@ type TRecognitionConfigurationClient = {
   type?: TRecognitionType
   alwaysConnected?: boolean
   lang?: string
-  replaceMimeTypes?: boolean
   math?: TMathConfiguration
   text?: TTextConfiguration
   diagram?: TDiagramConfiguration
@@ -517,11 +515,13 @@ declare class Editor {
     private _styleManager;
     private _undoRedoManager;
     private _mode;
+    private _initialized;
     private _resizeTimer?;
     private _exportTimer?;
     model: IModel;
     debug: boolean;
     constructor(wrapperHTML: HTMLElement, options?: TEditorOptions);
+    get initialized(): boolean;
     get configuration(): TConfiguration;
     set configuration(config: TConfigurationClient);
     get grabber(): IGrabber;

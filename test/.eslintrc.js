@@ -1,0 +1,14 @@
+module.exports = {
+  globals: {
+    browser: true,
+    page: true,
+    expect: true
+  },
+  extends: [
+    'standard'
+  ],
+  parserOptions: {
+    ecmaVersion: 2018,
+    sourceType: 'module'
+  }
+}

@@ -7,8 +7,6 @@ import
   ConfigurationDiagramRest,
   ConfigurationRawContentRest,
   AllOverrideConfiguration,
-  ConfigurationReplaceMimeType,
-  ConfigurationReplaceMimeTypeEmpty
 } from "../_dataset/configuration.dataset"
 import { TConfiguration, TConfigurationClient } from "../../../src/@types/Configuration"
 
@@ -115,28 +113,6 @@ describe('Configuration.ts', () =>
     })
   })
 
-  describe('should replaceMimeTypes', () =>
-  {
-    test('should replace mimeType', () =>
-    {
-      const crm: TConfiguration = new Configuration(ConfigurationReplaceMimeType)
-      expect(crm.recognition.diagram.mimeTypes).toStrictEqual(ConfigurationReplaceMimeType.recognition?.diagram?.mimeTypes)
-      expect(crm.recognition.math.mimeTypes).toStrictEqual(ConfigurationReplaceMimeType.recognition?.math?.mimeTypes)
-      expect(crm.recognition.rawContent.mimeTypes).toStrictEqual(ConfigurationReplaceMimeType.recognition?.rawContent?.mimeTypes)
-      expect(crm.recognition.text.mimeTypes).toStrictEqual(ConfigurationReplaceMimeType.recognition?.text?.mimeTypes)
-    })
-
-    test('should set mimeType JIIX if replaceMimeTypes but mimeTypes empty', () =>
-    {
-      const crme: TConfiguration = new Configuration(ConfigurationReplaceMimeTypeEmpty)
-      expect(crme.recognition.diagram.mimeTypes).toStrictEqual(['application/vnd.myscript.jiix'])
-      expect(crme.recognition.math.mimeTypes).toStrictEqual(['application/vnd.myscript.jiix'])
-      expect(crme.recognition.rawContent.mimeTypes).toStrictEqual(['application/vnd.myscript.jiix'])
-      expect(crme.recognition.text.mimeTypes).toStrictEqual(['application/vnd.myscript.jiix'])
-    })
-
-  })
-
   describe('specifics rules', () =>
   {
 
@@ -185,7 +161,7 @@ describe('Configuration.ts', () =>
 
       Object.defineProperty(window, "location", {
         value: new URL('https://localhost:3000')
-      } );
+      })
 
       const c: TConfiguration = new Configuration(conf)
       expect(c.server.scheme).toStrictEqual(window.location.protocol.replace(':', ''))

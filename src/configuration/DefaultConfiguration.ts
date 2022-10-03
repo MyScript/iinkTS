@@ -27,7 +27,6 @@ export const DefaultServerConfiguration: TServerConfiguration = {
 export const DefaultRecognitionConfiguration: TRecognitionConfiguration = {
   type: 'TEXT',
   alwaysConnected: true,
-  replaceMimeTypes: false,
   lang: 'en_US',
   gesture: {
     enable: true

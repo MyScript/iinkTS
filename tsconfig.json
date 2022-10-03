@@ -25,6 +25,11 @@
     "skipLibCheck": true,
     "esModuleInterop": true
   },
+  "types": [
+    "@types/jest",
+    "jest-playwright-preset",
+    "expect-playwright",
+  ],
   "typeRoots": [
     "./node_modules/@types/**",
     "./src/@types/**/*.d.ts"
@@ -35,7 +40,6 @@
   "exclude": [
     "node_modules",
     "dist",
-    "examples/**",
-    "**/*.spec.ts"
+    "examples/**"
   ]
 }

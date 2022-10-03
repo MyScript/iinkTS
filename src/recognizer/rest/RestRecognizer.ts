@@ -67,7 +67,8 @@ export class RestRecognizer extends AbstractRecognizer
       const newPenStyle = JSON.stringify(group.penStyle) === '{}' ? undefined : StyleHelper.penStyleToCSS(group.penStyle as TPenStyle)
       const newGroup = {
         penStyle: newPenStyle,
-        strokes: group.strokes.map((s: TStroke) => {
+        strokes: group.strokes.map((s: TStroke) =>
+        {
           return {
             x: s.x,
             y: s.y,
@@ -224,7 +225,8 @@ export class RestRecognizer extends AbstractRecognizer
     return model
   }
 
-  async resize(model: IModel): Promise<IModel | never> {
+  async resize(model: IModel): Promise<IModel | never>
+  {
     return this.export(model)
   }
 

@@ -214,30 +214,37 @@ describe('Model.ts', () =>
     })
   })
 
-  describe('position', () => {
+  describe('position', () =>
+  {
     const model: IModel = new Model()
-    test('should initialize position', () => {
+    test('should initialize position', () =>
+    {
       expect(model.positions.lastReceivedPosition).toBe(-1)
       expect(model.positions.lastRenderedPosition).toBe(-1)
       expect(model.positions.lastSentPosition).toBe(-1)
     })
-    test('should updatePositionSent', () => {
+    test('should updatePositionSent', () =>
+    {
       model.updatePositionSent(5)
       expect(model.positions.lastSentPosition).toBe(5)
     })
-    test('should updatePositionReceived', () => {
+    test('should updatePositionReceived', () =>
+    {
       model.updatePositionReceived()
       expect(model.positions.lastReceivedPosition).toBe(model.positions.lastSentPosition)
     })
-    test('should updatePositionRendered', () => {
+    test('should updatePositionRendered', () =>
+    {
       model.updatePositionRendered(27)
       expect(model.positions.lastRenderedPosition).toBe(27)
     })
-    test('should resetPositionRenderer', () => {
+    test('should resetPositionRenderer', () =>
+    {
       model.resetPositionRenderer()
       expect(model.positions.lastRenderedPosition).toBe(-1)
     })
-    test('should resetPositions', () => {
+    test('should resetPositions', () =>
+    {
       model.resetPositions()
       expect(model.positions.lastReceivedPosition).toBe(-1)
       expect(model.positions.lastSentPosition).toBe(-1)
@@ -290,7 +297,8 @@ describe('Model.ts', () =>
     })
   })
 
-  describe('clear', () => {
+  describe('clear', () =>
+  {
     test('should clear model', () =>
     {
       const model: IModel = new Model()

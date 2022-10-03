@@ -5,6 +5,7 @@ import { DefaultPenStyle } from '../../../src/style/DefaultPenStyle'
 import { RestRecognizer } from '../../../src/recognizer/rest/RestRecognizer'
 import { Model } from '../../../src/model/Model'
 import { TRecognitionConfiguration, TRecognitionType } from '../../../src/@types/configuration/RecognitionConfiguration'
+
 describe('RestRecognizer.ts', () =>
 {
   global.fetch = require('jest-fetch-mock')
@@ -17,8 +18,9 @@ describe('RestRecognizer.ts', () =>
   })
 
   const recognitionTypeList: TRecognitionType[] = ['TEXT', 'DIAGRAM', 'MATH', 'Raw Content']
-  recognitionTypeList.forEach((recognitionType: TRecognitionType) => {
-    test(`should export ${recognitionType}`, async () =>
+  recognitionTypeList.forEach((recognitionType: TRecognitionType) =>
+  {
+    test(`should export ${ recognitionType }`, async () =>
     {
       const model: IModel = new Model(width, height)
       const p1: TPoint = { t: 1, p: 1, x: 1, y: 1 }

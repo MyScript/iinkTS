@@ -68,16 +68,14 @@ export class Configuration implements TConfiguration
     this.triggers = this.mergeDeep({}, DefaultConfiguration.triggers, configuration?.triggers)
     this['undo-redo'] = this.mergeDeep({}, DefaultConfiguration['undo-redo'], configuration?.['undo-redo'])
 
+    this.recognition.text.mimeTypes = configuration?.recognition?.text?.mimeTypes || DefaultConfiguration.recognition.text.mimeTypes
+    this.recognition.math.mimeTypes = configuration?.recognition?.math?.mimeTypes || DefaultConfiguration.recognition.math.mimeTypes
+    this.recognition.diagram.mimeTypes = configuration?.recognition?.diagram?.mimeTypes || DefaultConfiguration.recognition.diagram.mimeTypes
+    this.recognition.rawContent.mimeTypes = configuration?.recognition?.rawContent?.mimeTypes || DefaultConfiguration.recognition.rawContent.mimeTypes
+
     if (this.server?.useWindowLocation) {
       this.server.scheme = window.location.protocol.indexOf('s') > -1 ? 'https' : 'http'
       this.server.host = window.location.host
-    }
-
-    if (this.recognition.replaceMimeTypes) {
-      this.recognition.text.mimeTypes = configuration?.recognition?.text?.mimeTypes || ['application/vnd.myscript.jiix']
-      this.recognition.math.mimeTypes = configuration?.recognition?.math?.mimeTypes || ['application/vnd.myscript.jiix']
-      this.recognition.diagram.mimeTypes = configuration?.recognition?.diagram?.mimeTypes || ['application/vnd.myscript.jiix']
-      this.recognition.rawContent.mimeTypes = configuration?.recognition?.rawContent?.mimeTypes || ['application/vnd.myscript.jiix']
     }
 
     if (

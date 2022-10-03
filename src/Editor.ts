@@ -27,9 +27,14 @@ export enum EditorMode
   Eraser = 'eraser'
 }
 
+export type HTMLEditorElement = HTMLElement &
+{
+  editor: Editor
+}
+
 export class Editor
 {
-  private _wrapperHTML: HTMLElement
+  private _wrapperHTML: HTMLEditorElement
   private _loaderHTML: HTMLDivElement
   private _errorHTML: HTMLDivElement
   private _configuration: Configuration
@@ -37,6 +42,7 @@ export class Editor
   private _styleManager: StyleManager
   private _undoRedoManager: UndoRedoManager
   private _mode: EditorMode
+  private _initialized = false
   private _resizeTimer?: ReturnType<typeof setTimeout>
   private _exportTimer?: ReturnType<typeof setTimeout>
 
@@ -45,7 +51,7 @@ export class Editor
 
   constructor(wrapperHTML: HTMLElement, options?: TEditorOptions)
   {
-    this._wrapperHTML = wrapperHTML as HTMLElement
+    this._wrapperHTML = wrapperHTML as HTMLEditorElement
     this._wrapperHTML.classList.add(options?.globalClassCss || 'ms-editor')
 
     this._loaderHTML = document.createElement('div')
@@ -79,6 +85,9 @@ export class Editor
         this.events.addEventListener(Constants.EventType.ERROR, (evt: Event) => this.handleError(evt))
         this.events.addEventListener(Constants.EventType.CLEAR, this.clear)
         this.events.addEventListener(Constants.EventType.IMPORT, this.import)
+
+        this._initialized = true
+        this._wrapperHTML.editor = this
       })
       .catch((e: Error) =>
       {
@@ -92,6 +101,11 @@ export class Editor
       })
   }
 
+  get initialized(): boolean
+  {
+    return this._initialized
+  }
+
   get configuration(): TConfiguration
   {
     return this._configuration
@@ -99,9 +113,34 @@ export class Editor
   set configuration(config: TConfigurationClient)
   {
     this.clear()
-    this._undoRedoManager.reset(this.model)
     // TODO maybe need some removeListener are close connection
     this._configuration.overrideDefaultConfiguration(config)
+    this._undoRedoManager = new UndoRedoManager(this.configuration["undo-redo"], this.model.getClone())
+    this._behaviorsManager.overrideDefaultBehaviors(this._configuration)
+    this._behaviorsManager.init(this._wrapperHTML)
+      .then(async () =>
+      {
+        this.grabber.onPointerDown = (evt: PointerEvent, point: TPoint) => this.pointerDown(evt, point)
+        this.grabber.onPointerMove = (evt: PointerEvent, point: TPoint) => this.pointerMove(evt, point)
+        this.grabber.onPointerUp = (evt: PointerEvent, point: TPoint) => this.pointerUp(evt, point)
+
+        this.events.addEventListener(Constants.EventType.ERROR, (evt: Event) => this.handleError(evt))
+        this.events.addEventListener(Constants.EventType.CLEAR, this.clear)
+        this.events.addEventListener(Constants.EventType.IMPORT, this.import)
+
+        this._initialized = true
+        this._wrapperHTML.editor = this
+      })
+      .catch((e: Error) =>
+      {
+        this.showError(e)
+        this.events.emitError(e)
+      })
+      .finally(() =>
+      {
+        this._loaderHTML.style.display = 'none'
+        this.events.emitLoaded()
+      })
   }
   get grabber(): IGrabber
   {
@@ -195,6 +234,9 @@ export class Editor
         try {
           await this.recognizer.export(currentModel)
           this._undoRedoManager.updateModelInStack(currentModel)
+          if (this.model.modificationDate === currentModel.modificationDate) {
+            this.model.exports = currentModel.exports
+          }
           this.events.emitExported(currentModel.exports as TExport)
         } catch (error) {
           this.showError(error as Error)
