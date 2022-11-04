@@ -10,18 +10,24 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
 
-    <title>Rest Raw Content iink</title>
+    <title>Rest Math iink</title>
 
     <link rel="stylesheet" href="../examples.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+      integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X"
+      crossorigin="anonymous"
+    />
+
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"
+      integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4"
+      crossorigin="anonymous"
+    ></script>
 
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
-
-    <style>
-      #result span {
-        font-size: small;
-        padding: 12px;
-      }
-    </style>
   </head>
 
   <body>
@@ -43,22 +49,19 @@
             <img src="../assets/redo.svg" />
           </button>
         </div>
-        <select id="language"></select>
       </nav>
       <div id="editor" touch-action="none"></div>
     </div>
     <script>
       const editorElement = document.getElementById('editor');
       const resultElement = document.getElementById('result');
-      const languageElement = document.getElementById('language');
       const clearElement = document.getElementById('clear');
       const undoElement = document.getElementById('undo');
       const redoElement = document.getElementById('redo');
 
-      languageElement.addEventListener('change', (e) => {
-        const configuration = JSON.parse(JSON.stringify(editor.configuration));
-        configuration.recognition.lang = e.target.value;
-        editor.configuration = configuration;
+      clearElement.addEventListener('click', async () => {
+        editor.clear();
+        resultElement.innerHTML = '';
       });
 
       undoElement.addEventListener('click', () => {
@@ -69,30 +72,26 @@
         editor.redo();
       });
 
-      clearElement.addEventListener('click', () => {
-        editor.clear();
-        resultElement.innerHTML = '';
-      });
-
       /**
        * Instanciate Editor
        * @param {Element} The DOM element to attach the ink paper
-       * @param {Object} The recognition parameters
+       * @param {Object} The editor options
        */
       const options = {
         configuration: {
           server: {
-            protocol: 'REST',
+            protocol: 'WEBSOCKET',
             scheme: 'https',
             host: 'webdemoapi.myscript.com',
             applicationKey: '515131ab-35fa-411c-bb4d-3917e00faf60',
             hmacKey: '54b2ca8a-6752-469d-87dd-553bb450e9ad',
           },
           recognition: {
-            type: 'Raw Content',
+            type: 'MATH',
           },
         },
       };
+
       const editor = new iink.Editor(editorElement, options);
 
       editor.events.addEventListener('changed', (event) => {
@@ -101,26 +100,29 @@
         clearElement.disabled = !event.detail.canClear;
       });
 
+      function cleanLatex(latexExport) {
+        if (typeof latexExport === 'number') {
+          latexExport = latexExport.toString();
+        }
+        if (latexExport.includes('\\\\')) {
+          const steps = '\\begin{align*}' + latexExport + '\\end{align*}';
+          return steps
+            .replace('\\begin{aligned}', '')
+            .replace('\\end{aligned}', '')
+            .replace(new RegExp('(align.{1})', 'g'), 'aligned');
+        }
+        return latexExport.replace(new RegExp('(align.{1})', 'g'), 'aligned');
+      }
+
       editor.events.addEventListener('exported', (evt) => {
         const exports = evt.detail;
-        if (exports && exports['application/vnd.myscript.jiix']) {
-          resultElement.innerHTML = `<span>${JSON.stringify(
-            exports['application/vnd.myscript.jiix'].elements
-          )}</span>`;
+        if (exports && exports['application/x-latex']) {
+          katex.render(
+            cleanLatex(exports['application/x-latex']),
+            resultElement
+          );
         } else {
           resultElement.innerHTML = '';
-        }
-      });
-
-      editor.events.addEventListener('loaded', async (evt) => {
-        if (languageElement.options.length === 0) {
-          const currentLanguage = editor.configuration.recognition.lang;
-          const res = await iink.getAvailableLanguageList(editor.configuration);
-          Object.keys(res.result).forEach(function (key) {
-            const selected = currentLanguage === key;
-            languageElement.options[languageElement.options.length] =
-              new Option(res.result[key], key, selected, selected);
-          });
         }
       });
 

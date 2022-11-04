@@ -48,8 +48,8 @@ export interface IModel
   recognizedSymbols?: TStroke[]
   rawResults: TRawResults
   exports?: TExport
-  width?: number
-  height?: number
+  width: number
+  height: number
   idle: boolean
   isEmpty: boolean
 

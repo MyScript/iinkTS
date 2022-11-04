@@ -1,6 +1,6 @@
 
-import { TPartialXYPoint } from "../../../@types/renderer/Point"
-import { TSymbol, TShapeEllipseSymbol, TShapeLineSymbol, TShapeSymbol, TShapeTableSymbol, TLineSymbol, TShapeRecognizedSymbol } from "../../../@types/renderer/Symbol"
+import { TPartialXYPoint } from "../../@types/renderer/Point"
+import { TSymbol, TShapeEllipseSymbol, TShapeLineSymbol, TShapeSymbol, TShapeTableSymbol, TLineSymbol, TShapeRecognizedSymbol } from "../../@types/renderer/Symbol"
 
 export const ShapeSymbols = {
   table: 'table',

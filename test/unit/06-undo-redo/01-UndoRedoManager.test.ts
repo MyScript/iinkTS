@@ -10,15 +10,16 @@ import { DefaultPenStyle } from '../../../src/style/DefaultPenStyle'
 
 describe('UndoRedoManager.ts', () =>
 {
+  const width = 100, height = 100
   test('should instanciate UndoRedoManager', () =>
   {
-    const manager = new UndoRedoManager(DefaultConfiguration['undo-redo'], new Model())
+    const manager = new UndoRedoManager(DefaultConfiguration['undo-redo'], new Model(width, height))
     expect(manager).toBeDefined()
   })
 
   test('should initialize UndoRedoContext', () =>
   {
-    const model = new Model()
+    const model = new Model(width, height)
     const manager = new UndoRedoManager(DefaultConfiguration['undo-redo'], model)
     const context = new UndoRedoContext(model)
     expect(manager.context).toStrictEqual(context)
@@ -219,7 +220,7 @@ describe('UndoRedoManager.ts', () =>
     model.endCurrentStroke(p2, DefaultPenStyle)
 
     manager.addModelToStack(model)
-    const newModel = new Model()
+    const newModel = new Model(width, height)
     manager.reset(newModel)
 
     expect(manager.context.stackIndex).toStrictEqual(0)

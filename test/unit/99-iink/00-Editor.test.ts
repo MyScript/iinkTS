@@ -80,9 +80,9 @@ describe('Editor.ts', () =>
   {
     const wrapperHTML: HTMLElement = document.createElement('div')
     const editor = new Editor(wrapperHTML)
-    editor.renderer.resize = jest.fn()
+    editor.behaviors.resize = jest.fn()
     editor.resize()
-    expect(editor.renderer.resize).toBeCalledTimes(1)
+    expect(editor.behaviors.resize).toBeCalledTimes(1)
   })
 
   describe('Style', () => {
@@ -126,8 +126,8 @@ describe('Editor.ts', () =>
     editor.model.initCurrentStroke = jest.fn()
     editor.model.appendToCurrentStroke = jest.fn()
     editor.model.endCurrentStroke = jest.fn()
-    editor.renderer.drawCurrentStroke = jest.fn()
-    editor.renderer.drawModel = jest.fn()
+    editor.behaviors.drawCurrentStroke = jest.fn()
+    editor.behaviors.drawModel = jest.fn()
 
     const eventTarget = document.createElement('div')
     eventTarget.classList.add('ms-canvas')
@@ -144,19 +144,19 @@ describe('Editor.ts', () =>
       // TODO find solution to define target on pointerDownEvt
       editor.pointerDown(pointerDownEvt as PointerEvent, point)
       expect(editor.model.initCurrentStroke).toHaveBeenCalledTimes(1)
-      expect(editor.renderer.drawCurrentStroke).toHaveBeenCalledTimes(1)
+      expect(editor.behaviors.drawCurrentStroke).toHaveBeenCalledTimes(1)
     })
     test('should pointerMove', () =>
     {
       editor.pointerMove(pointerDownEvt as PointerEvent, point)
       expect(editor.model.appendToCurrentStroke).toHaveBeenCalledTimes(1)
-      expect(editor.renderer.drawCurrentStroke).toHaveBeenCalledTimes(1)
+      expect(editor.behaviors.drawCurrentStroke).toHaveBeenCalledTimes(1)
     })
     test('should pointerUp', () =>
     {
       editor.pointerUp(pointerDownEvt as PointerEvent, point)
       expect(editor.model.endCurrentStroke).toHaveBeenCalledTimes(1)
-      expect(editor.renderer.drawModel).toHaveBeenCalledTimes(1)
+      expect(editor.behaviors.drawModel).toHaveBeenCalledTimes(1)
     })
   })
 

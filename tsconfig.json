@@ -3,6 +3,7 @@
     "outDir": "dist",
     "target": "ES2015",
     "module": "ES2015",
+    "moduleResolution": "node",
     "lib": [
       "DOM",
       "ES2015",
@@ -27,6 +28,7 @@
   },
   "types": [
     "@types/jest",
+    "jest-websocket-mock",
     "jest-playwright-preset",
     "expect-playwright",
   ],
@@ -35,7 +37,8 @@
     "./src/@types/**/*.d.ts"
   ],
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "test/unit/**/*"
   ],
   "exclude": [
     "node_modules",

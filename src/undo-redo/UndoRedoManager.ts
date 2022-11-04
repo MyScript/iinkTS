@@ -1,7 +1,7 @@
 import { TUndoRedoConfiguration } from "../@types/configuration/UndoRedoConfiguration"
 import { IModel } from "../@types/model/Model"
 import { TUndoRedoContext } from "../@types/undo-redo/UndoRedoContext"
-import { EventHelper } from "../event/EventHelper"
+import { GlobalEvent } from "../event/GlobalEvent"
 import { UndoRedoContext } from "./UndoRedoContext"
 
 export class UndoRedoManager
@@ -15,9 +15,9 @@ export class UndoRedoManager
     this.context = new UndoRedoContext(model)
   }
 
-  get events(): EventHelper
+  get events(): GlobalEvent
   {
-    return EventHelper.getInstance()
+    return GlobalEvent.getInstance()
   }
 
   private updateCanUndoRedo(): void {
@@ -46,6 +46,7 @@ export class UndoRedoManager
     const index = this.context.stack.findIndex(m => m.modificationDate === model.modificationDate)
     if (index > -1) {
       this.context.stack.splice(index, 1, model.getClone())
+      this.events.emitChange(this.context)
     }
   }
 

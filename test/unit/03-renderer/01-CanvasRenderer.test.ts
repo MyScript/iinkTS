@@ -1,6 +1,6 @@
 import { TRenderingConfiguration } from '../../../src/@types/configuration/RenderingConfiguration'
 import { CanvasRenderer } from '../../../src/renderer/canvas/CanvasRenderer'
-import { QuadraticCanvasStroker } from '../../../src/renderer/canvas/stroker/QuadraticCanvasStroker'
+import { QuadraticCanvasStroker } from '../../../src/renderer/canvas/CanvasQuadraticStroker'
 
 describe('QuadraticUtils.ts', () =>
 {

@@ -6,6 +6,14 @@ export default {
     './src/**',
     '!./src/@types/**'
   ],
+  coverageThreshold: {
+    global: {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      // statements: -10,
+    },
+  },
   coverageDirectory: "coverage",
   coverageProvider: "v8",
   moduleFileExtensions: [
@@ -14,7 +22,10 @@ export default {
   ],
   preset: 'ts-jest',
   setupFiles: [
-    "jest-canvas-mock"
+    "jest-canvas-mock",
+  ],
+  setupFilesAfterEnv: [
+    "jest-websocket-mock"
   ],
   testEnvironment: 'jsdom',
   testMatch: [
@@ -26,5 +37,5 @@ export default {
   transform: {
     "^.+\\.css$": "jest-transform-css"
   },
-  verbose: false
+  verbose: true
 }

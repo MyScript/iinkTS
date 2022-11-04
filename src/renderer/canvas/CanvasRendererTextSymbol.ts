@@ -1,6 +1,6 @@
-import { TPartialXYPoint } from '../../../@types/renderer/Point'
-import { drawLine } from './ShapeSymbolCanvasRenderer'
-import { TSymbol, TTextUnderlineDataSymbol, TTextUnderlineSymbol, TUnderLineSymbol } from '../../../@types/renderer/Symbol'
+import { TPartialXYPoint } from '../../@types/renderer/Point'
+import { drawLine } from './CanvasRendererShapeSymbol'
+import { TSymbol, TTextUnderlineDataSymbol, TTextUnderlineSymbol, TUnderLineSymbol } from '../../@types/renderer/Symbol'
 
 export const TextSymbols = {
   inputCharacter: 'inputCharacter',
