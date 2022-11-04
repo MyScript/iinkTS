@@ -1,6 +1,6 @@
-import { TPoint } from "../../../@types/renderer/Point"
-import { TStroke, IStroker } from "../../../@types/stroker/Stroker"
-import { computeAxeAngle, computeLinksPoints, computeMiddlePoint } from "../../QuadraticUtils"
+import { TPoint } from "../../@types/renderer/Point"
+import { TStroke, IStroker } from "../../@types/stroker/Stroker"
+import { computeAxeAngle, computeLinksPoints, computeMiddlePoint } from "../QuadraticUtils"
 
 export class QuadraticCanvasStroker implements IStroker
 {

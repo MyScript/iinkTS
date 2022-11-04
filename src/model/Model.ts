@@ -17,12 +17,12 @@ export class Model implements IModel
   recognizedSymbols?: TStroke[]
   rawResults: TRawResults
   exports?: TExport
-  width?: number
-  height?: number
+  width: number
+  height: number
   idle: boolean
   isEmpty: boolean
 
-  constructor(width?: number, height?: number, creationDate: number = new Date().getTime())
+  constructor(width: number, height: number, creationDate: number = new Date().getTime())
   {
     this.rawStrokes = []
     this.strokeGroups = []

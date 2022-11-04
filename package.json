@@ -26,7 +26,7 @@
   "scripts": {
     "lint": "eslint ./src --ext .ts",
     "lint:fix": "eslint ./src --ext .ts --fix",
-    "test:unit": "jest --config=jest.unit.config.js",
+    "test:unit": "jest --config=jest.unit.config.js --detectOpenHandles --forceExit",
     "test:e2e": "jest --config=jest.e2e.config.js --runInBand --detectOpenHandles --forceExit",
     "build:lib": "rollup -c config/rollup.config.build.js --sourcemap",
     "build": "npm-run-all lint:fix test:unit build:lib",
@@ -52,6 +52,7 @@
     "jest-fetch-mock": "^3.0.3",
     "jest-playwright-preset": "^2.0.0",
     "jest-transform-css": "^4.0.1",
+    "jest-websocket-mock": "^2.4.0",
     "npm-run-all": "^4.1.5",
     "playwright": "^1.27.1",
     "postcss": "^8.4.16",

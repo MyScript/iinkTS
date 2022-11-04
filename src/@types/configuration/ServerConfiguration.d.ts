@@ -9,7 +9,7 @@ export type TServerConfiguration = {
   applicationKey: string
   hmacKey: string
   useWindowLocation?: boolean
-  websocket?: {
+  websocket: {
     pingEnabled: boolean
     pingDelay: number
     maxPingLostCount: number

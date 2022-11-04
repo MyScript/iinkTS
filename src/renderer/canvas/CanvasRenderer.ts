@@ -4,9 +4,9 @@ import { IModel } from "../../@types/model/Model"
 import { IRenderer, TRendererContext } from "../../@types/renderer/Renderer"
 import { TSymbol } from "../../@types/renderer/Symbol"
 
-import { drawShapeSymbol, ShapeSymbols } from "./symbols/ShapeSymbolCanvasRenderer"
-import { drawStroke } from "./symbols/StrokeSymbolCanvasRenderer"
-import { drawTextSymbol, TextSymbols } from "./symbols/TextSymbolCanvasRenderer"
+import { drawShapeSymbol, ShapeSymbols } from "./CanvasRendererShapeSymbol"
+import { drawStroke } from "./CanvasRendererStrokeSymbol"
+import { drawTextSymbol, TextSymbols } from "./CanvasRendererTextSymbol"
 
 export class CanvasRenderer implements IRenderer
 {
@@ -20,6 +20,7 @@ export class CanvasRenderer implements IRenderer
   private createCanvas(element: HTMLElement, type: string): HTMLCanvasElement
   {
     const canvas: HTMLCanvasElement = document.createElement('canvas')
+    canvas.id = type
     canvas.classList.add(type)
     canvas.classList.add('ms-canvas')
     element.appendChild(canvas)

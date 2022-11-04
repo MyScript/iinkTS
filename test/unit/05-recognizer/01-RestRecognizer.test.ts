@@ -2,7 +2,7 @@ import { IModel } from '../../../src/@types/model/Model'
 import { TPoint } from '../../../src/@types/renderer/Point'
 import { DefaultRecognitionConfiguration, DefaultServerConfiguration } from '../../../src/configuration/DefaultConfiguration'
 import { DefaultPenStyle } from '../../../src/style/DefaultPenStyle'
-import { RestRecognizer } from '../../../src/recognizer/rest/RestRecognizer'
+import { RestRecognizer } from '../../../src/recognizer/RestRecognizer'
 import { Model } from '../../../src/model/Model'
 import { TRecognitionConfiguration, TRecognitionType } from '../../../src/@types/configuration/RecognitionConfiguration'
 
@@ -32,7 +32,32 @@ describe('RestRecognizer.ts', () =>
         type: recognitionType
       }
       const rr = new RestRecognizer(DefaultServerConfiguration, recognitionConfig)
-      expect(await rr.export(model)).toStrictEqual(model)
+      const newModel = await rr.export(model)
+      model.positions.lastReceivedPosition++
+      model.positions.lastSentPosition++
+      model.exports = {}
+
+      let mimeType = ''
+      switch (recognitionType) {
+        case 'TEXT':
+          mimeType = 'text/plain'
+          break;
+        case 'DIAGRAM':
+          mimeType = 'application/vnd.myscript.jiix'
+          break;
+        case 'MATH':
+          mimeType = 'application/x-latex'
+          break;
+        case 'Raw Content':
+          mimeType = 'application/vnd.myscript.jiix'
+          break;
+
+        default:
+          throw new Error("invalid recognition type");
+      }
+
+      model.exports[mimeType] = ''
+      expect(newModel).toEqual(model)
     })
   })
 })

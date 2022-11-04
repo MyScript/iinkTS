@@ -7,16 +7,16 @@ import { DefaultPenStyle } from '../../../src/style/DefaultPenStyle'
 
 describe('Model.ts', () =>
 {
-
+  const width = 100, height = 100
   test('should create', () =>
   {
-    const model: IModel = new Model()
+    const model: IModel = new Model(width, height)
     expect(model).toBeDefined()
   })
 
   describe('addPoint', () =>
   {
-    const model: IModel = new Model()
+    const model: IModel = new Model(width, height)
     test('should add point to x, y, t & t array', () =>
     {
       const stroke = new Stroke(DefaultPenStyle, 1)
@@ -70,9 +70,9 @@ describe('Model.ts', () =>
 
   describe('rawStrokes', () =>
   {
-    test('should addStroke', () =>
+    test('should addStrokes', () =>
     {
-      const model: IModel = new Model()
+      const model: IModel = new Model(width, height)
       const stroke = new Stroke(DefaultPenStyle, 1)
       model.addStroke(stroke)
       expect(model.rawStrokes).toHaveLength(1)
@@ -81,7 +81,7 @@ describe('Model.ts', () =>
 
     test('should extractPendingStrokes', () =>
     {
-      const model: IModel = new Model()
+      const model: IModel = new Model(width, height)
       const stroke = new Stroke(DefaultPenStyle, 1)
       model.addStroke(stroke)
       expect(model.rawStrokes).toHaveLength(1)
@@ -94,7 +94,7 @@ describe('Model.ts', () =>
 
   describe('strokeGroups', () =>
   {
-    const model: IModel = new Model()
+    const model: IModel = new Model(width, height)
     test('should initialise strokeGroupe', () =>
     {
       const stroke = new Stroke(DefaultPenStyle, 1)
@@ -133,7 +133,7 @@ describe('Model.ts', () =>
 
   describe('currentStroke', () =>
   {
-    const model: IModel = new Model()
+    const model: IModel = new Model(width, height)
     test('should initCurrentStroke', () =>
     {
       expect(model.currentStroke).toBeUndefined()
@@ -216,7 +216,7 @@ describe('Model.ts', () =>
 
   describe('position', () =>
   {
-    const model: IModel = new Model()
+    const model: IModel = new Model(width, height)
     test('should initialize position', () =>
     {
       expect(model.positions.lastReceivedPosition).toBe(-1)
@@ -301,7 +301,7 @@ describe('Model.ts', () =>
   {
     test('should clear model', () =>
     {
-      const model: IModel = new Model()
+      const model: IModel = new Model(width, height)
       const p1: TPoint = { t: 1, p: 1, x: 1, y: 1 }
       const p2: TPoint = { t: 10, p: 10, x: 10, y: 10 }
       const p3: TPoint = { t: 10, p: 10, x: 10, y: 10 }

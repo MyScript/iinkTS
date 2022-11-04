@@ -1,23 +1,20 @@
 import { TConfiguration, TConfigurationClient } from "./@types/Configuration"
 import { TEditorOptions } from "./@types/Editor"
 import { IGrabber } from "./@types/grabber/Grabber"
-import { IModel, TExport } from "./@types/model/Model"
-import { IRecognizer } from "./@types/recognizer/Recognizer"
+import { IModel } from "./@types/model/Model"
 import { TPoint } from "./@types/renderer/Point"
-import { IRenderer } from "./@types/renderer/Renderer"
-import { IStroker } from "./@types/stroker/Stroker"
 import { TPenStyle } from "./@types/style/PenStyle"
 import { TTheme } from "./@types/style/Theme"
 
-import Constants from "./Constants"
+import { EventType } from "./Constants"
 import { BehaviorsManager } from "./behaviors/BehaviorsManager"
 import { Configuration } from "./configuration/Configuration"
-import { EventHelper } from "./event/EventHelper"
+import { GlobalEvent } from "./event/GlobalEvent"
 import { Model } from "./model/Model"
 import { StyleManager } from "./style/StyleManager"
-import { UndoRedoManager } from "./undo-redo/UndoRedoManager"
 
 import './iink.css'
+import { IBehaviors } from "./@types/Behaviors"
 
 export enum EditorMode
 {
@@ -40,11 +37,9 @@ export class Editor
   private _configuration: Configuration
   private _behaviorsManager: BehaviorsManager
   private _styleManager: StyleManager
-  private _undoRedoManager: UndoRedoManager
   private _mode: EditorMode
   private _initialized = false
-  private _resizeTimer?: ReturnType<typeof setTimeout>
-  private _exportTimer?: ReturnType<typeof setTimeout>
+  // private _exportTimer?: ReturnType<typeof setTimeout>
 
   model: IModel
   debug = false
@@ -66,39 +61,16 @@ export class Editor
 
     this._mode = EditorMode.Pen
 
-    this.model = new Model(this._wrapperHTML.clientWidth, this._wrapperHTML.clientHeight)
-
     this._styleManager = new StyleManager(options?.penStyle, options?.theme)
 
     this._configuration = new Configuration(options?.configuration)
 
-    this._undoRedoManager = new UndoRedoManager(this.configuration["undo-redo"], this.model.getClone())
+    const width = Math.max(this._wrapperHTML.clientWidth, this.configuration.rendering.minWidth)
+    const height = Math.max(this._wrapperHTML.clientHeight, this.configuration.rendering.minHeight)
+    this.model = new Model(width, height)
 
-    this._behaviorsManager = new BehaviorsManager(this.configuration, options?.behaviors)
-    this._behaviorsManager.init(this._wrapperHTML)
-      .then(async () =>
-      {
-        this.grabber.onPointerDown = (evt: PointerEvent, point: TPoint) => this.pointerDown(evt, point)
-        this.grabber.onPointerMove = (evt: PointerEvent, point: TPoint) => this.pointerMove(evt, point)
-        this.grabber.onPointerUp = (evt: PointerEvent, point: TPoint) => this.pointerUp(evt, point)
-
-        this.events.addEventListener(Constants.EventType.ERROR, (evt: Event) => this.handleError(evt))
-        this.events.addEventListener(Constants.EventType.CLEAR, this.clear)
-        this.events.addEventListener(Constants.EventType.IMPORT, this.import)
-
-        this._initialized = true
-        this._wrapperHTML.editor = this
-      })
-      .catch((e: Error) =>
-      {
-        this.showError(e)
-        this.events.emitError(e)
-      })
-      .finally(() =>
-      {
-        this._loaderHTML.style.display = 'none'
-        this.events.emitLoaded()
-      })
+    this._behaviorsManager = new BehaviorsManager(this.configuration, this.model, options?.behaviors)
+    this.initalizeBehaviors()
   }
 
   get initialized(): boolean
@@ -115,44 +87,20 @@ export class Editor
     this.clear()
     // TODO maybe need some removeListener are close connection
     this._configuration.overrideDefaultConfiguration(config)
-    this._undoRedoManager = new UndoRedoManager(this.configuration["undo-redo"], this.model.getClone())
-    this._behaviorsManager.overrideDefaultBehaviors(this._configuration)
-    this._behaviorsManager.init(this._wrapperHTML)
-      .then(async () =>
-      {
-        this.grabber.onPointerDown = (evt: PointerEvent, point: TPoint) => this.pointerDown(evt, point)
-        this.grabber.onPointerMove = (evt: PointerEvent, point: TPoint) => this.pointerMove(evt, point)
-        this.grabber.onPointerUp = (evt: PointerEvent, point: TPoint) => this.pointerUp(evt, point)
 
-        this.events.addEventListener(Constants.EventType.ERROR, (evt: Event) => this.handleError(evt))
-        this.events.addEventListener(Constants.EventType.CLEAR, this.clear)
-        this.events.addEventListener(Constants.EventType.IMPORT, this.import)
+    this.model.height = Math.max(this._wrapperHTML.clientHeight, this._configuration.rendering.minHeight)
+    this.model.width = Math.max(this._wrapperHTML.clientWidth, this._configuration.rendering.minWidth)
 
-        this._initialized = true
-        this._wrapperHTML.editor = this
-      })
-      .catch((e: Error) =>
-      {
-        this.showError(e)
-        this.events.emitError(e)
-      })
-      .finally(() =>
-      {
-        this._loaderHTML.style.display = 'none'
-        this.events.emitLoaded()
-      })
+    this._behaviorsManager.overrideDefaultBehaviors(this._configuration, this.model)
+    this.initalizeBehaviors()
+  }
+  get behaviors(): IBehaviors
+  {
+    return this._behaviorsManager.behaviors
   }
   get grabber(): IGrabber
   {
     return this._behaviorsManager.behaviors.grabber
-  }
-  get stroker(): IStroker
-  {
-    return this._behaviorsManager.behaviors.stroker
-  }
-  get renderer(): IRenderer
-  {
-    return this._behaviorsManager.behaviors.renderer
   }
   get theme(): TTheme
   {
@@ -166,13 +114,38 @@ export class Editor
   {
     return this._mode
   }
-  get events(): EventHelper
+  get events(): GlobalEvent
   {
-    return EventHelper.getInstance()
+    return GlobalEvent.getInstance()
   }
-  get recognizer(): IRecognizer
+
+  private initalizeBehaviors(): void
   {
-    return this._behaviorsManager.behaviors.recognizer
+    this._behaviorsManager.init(this._wrapperHTML, this.model)
+      .then(async () =>
+      {
+        this.grabber.onPointerDown = (evt: PointerEvent, point: TPoint) => this.pointerDown(evt, point)
+        this.grabber.onPointerMove = (evt: PointerEvent, point: TPoint) => this.pointerMove(evt, point)
+        this.grabber.onPointerUp = (evt: PointerEvent, point: TPoint) => this.pointerUp(evt, point)
+
+        this.events.addEventListener(EventType.ERROR, (evt: Event) => this.handleError(evt))
+        this.events.addEventListener(EventType.CLEAR, this.clear)
+        // this.events.addEventListener(EventType.IMPORT, this.import)
+
+        this._initialized = true
+        this._wrapperHTML.editor = this
+        this.events.emitLoaded()
+      })
+      .catch((e: Error) =>
+      {
+        this._initialized = false
+        this.showError(e)
+        this.events.emitError(e)
+      })
+      .finally(() =>
+      {
+        this._loaderHTML.style.display = 'none'
+      })
   }
 
   private showError(err: Error)
@@ -194,9 +167,14 @@ export class Editor
 
   private handleError(evt: Event)
   {
-    const customEvent = evt as CustomEvent
-    const err = customEvent?.detail as Error
-    this.showError(err)
+    // const error = (evt as unknown) as
+    // if (this._errorHTML.innerText === Constants.Error.TOO_OLD || evt.reason === 'CLOSE_RECOGNIZER') {
+    //   this._errorHTML.style.display = 'none'
+    // } else {
+      const customEvent = evt as CustomEvent
+      const err = customEvent?.detail as Error
+      this.showError(err)
+    // }
   }
 
   pointerDown(evt: PointerEvent, point: TPoint): void
@@ -210,38 +188,28 @@ export class Editor
       }
       const style: TPenStyle = Object.assign({}, this.theme?.ink, this.penStyle)
       this.model.initCurrentStroke(point, evt.pointerId, pointerType, style)
-      this.renderer.drawCurrentStroke(this.model, this.stroker)
+      this.behaviors.drawCurrentStroke(this.model)
     }
   }
 
   pointerMove(_evt: PointerEvent, point: TPoint): void
   {
     this.model.appendToCurrentStroke(point)
-    this.renderer.drawCurrentStroke(this.model, this.stroker)
+    this.behaviors.drawCurrentStroke(this.model)
   }
 
-  pointerUp(_evt: PointerEvent, point: TPoint): void
+  async pointerUp(_evt: PointerEvent, point: TPoint): Promise<void>
   {
     this.model.endCurrentStroke(point, this.penStyle)
-    this._undoRedoManager.addModelToStack(this.model)
-    this.renderer.drawModel(this.model, this.stroker)
-    if (this.configuration.triggers.exportContent !== "DEMAND") {
-      const timeout = this.configuration.triggers.exportContentDelay
-      clearTimeout(this._exportTimer)
-      const currentModel = this.model.getClone()
-      this._exportTimer = setTimeout(async () =>
-      {
-        try {
-          await this.recognizer.export(currentModel)
-          this._undoRedoManager.updateModelInStack(currentModel)
-          if (this.model.modificationDate === currentModel.modificationDate) {
-            this.model.exports = currentModel.exports
-          }
-          this.events.emitExported(currentModel.exports as TExport)
-        } catch (error) {
-          this.showError(error as Error)
-        }
-      }, timeout)
+    this.behaviors.drawModel(this.model)
+    try {
+      if (this.behaviors.addStrokes) {
+        this.model = await this.behaviors.addStrokes(this.model)
+      } else {
+        this.model = await this.behaviors.export(this.model)
+      }
+    } catch (error) {
+      this.showError(error as Error)
     }
   }
 
@@ -256,64 +224,46 @@ export class Editor
     }
   }
 
-  clear(): void
-  {
-    this.model.clear()
-    this._undoRedoManager.addModelToStack(this.model)
-    this.renderer.drawModel(this.model, this.stroker)
-    this.events.emitExported(this.model.exports as TExport)
-    this.events.emitCleared(this.model)
-  }
-
   async undo(): Promise<IModel>
   {
-    this.model = this._undoRedoManager.undo()
-    this.renderer.drawModel(this.model, this.stroker)
-    await this.recognizer.export(this.model)
-    this._undoRedoManager.updateModelInStack(this.model)
-    this.events.emitExported(this.model.exports as TExport)
+    this.model = await this.behaviors.undo()
     return this.model
   }
 
-  async redo(): Promise<IModel | false>
+  async redo(): Promise<IModel>
   {
-    this.model = this._undoRedoManager.redo()
-    this.renderer.drawModel(this.model, this.stroker)
-    await this.recognizer.export(this.model)
-    this._undoRedoManager.updateModelInStack(this.model)
-    this.events.emitExported(this.model.exports as TExport)
+    this.model = await this.behaviors.redo()
     return this.model
   }
 
-  resize(): void
+  async clear(): Promise<IModel>
   {
-    this.model.width = this._wrapperHTML.clientWidth
-    this.model.height = this._wrapperHTML.clientHeight
-    this.renderer.resize(this.model, this.stroker)
-    if (this.model.strokeGroups.length) {
-      window.clearTimeout(this._resizeTimer)
-      this._resizeTimer = setTimeout(() =>
-      {
-        this.recognizer.resize(this.model)
-      }, this.configuration.triggers.resizeTriggerDelay)
-    }
+    this.model = await this.behaviors.clear(this.model)
+    return this.model
   }
 
-  async export(mimeTypes: string[]): Promise<IModel | never>
+  async resize(): Promise<IModel>
   {
-    return this.recognizer.export(this.model, mimeTypes)
+    this.model.height = Math.max(this._wrapperHTML.clientHeight, this.configuration.rendering.minHeight)
+    this.model.width = Math.max(this._wrapperHTML.clientWidth, this.configuration.rendering.minWidth)
+    this.model = await this.behaviors.resize(this.model)
+    return this.model
   }
 
-  import(evt: Event)
+  async export(mimeTypes: string[]): Promise<IModel>
   {
-    if (this.recognizer.import) {
-      const customEvent = evt as CustomEvent
-      if (customEvent?.detail) {
-        const jiix: string = customEvent.detail.jiix
-        const mimeType: string = customEvent.detail.mimeType
-        this.recognizer.import(jiix, mimeType)
-      }
-    }
+    return this.behaviors.export(this.model, mimeTypes)
   }
 
+  // import(evt: Event)
+  // {
+  //   if (this.behaviors.import) {
+  //     const customEvent = evt as CustomEvent
+  //     if (customEvent?.detail) {
+  //       const jiix: string = customEvent.detail.jiix
+  //       const mimeType: string = customEvent.detail.mimeType
+  //       this.behaviors.import(jiix, mimeType)
+  //     }
+  //   }
+  // }
 }

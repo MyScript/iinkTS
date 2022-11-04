@@ -1,15 +1,15 @@
-import { TStroke, TStrokeGroup, TStrokeGroupJSON } from "../../@types/stroker/Stroker"
-import { TRecognitionConfiguration } from "../../@types/configuration/RecognitionConfiguration"
-import { TServerConfiguration } from "../../@types/configuration/ServerConfiguration"
-import { IModel, TExport, TJIIXExport } from "../../@types/model/Model"
-import { TPenStyle } from "../../@types/style/PenStyle"
+import { TStroke, TStrokeGroup, TStrokeGroupJSON } from "../@types/stroker/Stroker"
+import { TRecognitionConfiguration } from "../@types/configuration/RecognitionConfiguration"
+import { TServerConfiguration } from "../@types/configuration/ServerConfiguration"
+import { IModel, TExport, TJIIXExport } from "../@types/model/Model"
+import { TPenStyle } from "../@types/style/PenStyle"
 
-import Constants from '../../Constants'
-import StyleHelper from "../../style/StyleHelper"
-import { computeHmac } from "../CryptoHelper"
-import { AbstractRecognizer } from "../AbstractRecognizer"
+import Constants from '../Constants'
+import StyleHelper from "../style/StyleHelper"
+import { computeHmac } from "./CryptoHelper"
+import { AbstractRecognizer } from "./AbstractRecognizer"
 
-export type ApiError = {
+type ApiError = {
   code?: string
   message: string
 }
@@ -140,57 +140,37 @@ export class RestRecognizer extends AbstractRecognizer
     }
   }
 
-  private async callPostMessage(model: IModel, mimeType: string): Promise<IModel | never>
+  private async callPostMessage(model: IModel, mimeType: string): Promise<TExport | never>
   {
     const data = this.buildData(model)
-    model.updatePositionSent()
     return this.post(data, mimeType)
       .then((res) =>
       {
-        this.handleSuccess(model, res, mimeType)
-        return model
+        const exports: TExport = {}
+        exports[mimeType] = res as TJIIXExport | string | Blob
+        return exports
       })
       .catch((err) =>
       {
-        this.handleError(err)
-        return err
+        let message = err.message
+        if (!err.code) {
+          message = Constants.Error.CANT_ESTABLISH
+        }
+        const error = new Error(message)
+        error.name = err.code || ''
+        this.globalEvent.emitError(error)
+        throw error
       })
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private handleSuccess(model: IModel, res: any, mimeType: string): void
-  {
-    model.updatePositionReceived()
-    model.rawResults.exports = res as TJIIXExport | string | Blob
-
-    const exports: TExport = {}
-    exports[mimeType] = res as TJIIXExport | string | Blob
-
-    if (model.exports) {
-      Object.assign(model.exports, exports)
-    } else {
-      model.exports = exports
-    }
-  }
-
-  private handleError(err: ApiError): void
-  {
-    let message = err.message
-    if (!err.code) {
-      message = Constants.Error.CANT_ESTABLISH
-    }
-    const error = new Error(message)
-    error.name = err.code || ''
-    this.eventHelper.emitError(error)
-    throw error
   }
 
   async export(model: IModel, requestedMimeTypes?: string[]): Promise<IModel | never>
   {
-    if (model.isEmpty) {
-      return Promise.resolve(model)
+    const myModel = model.getClone()
+    myModel.updatePositionSent()
+
+    if (myModel.isEmpty) {
+      return Promise.resolve(myModel)
     }
-    model.idle = false
     let mimeTypes: string[] = requestedMimeTypes || []
     if (!mimeTypes.length) {
       switch (this.recognitionConfiguration.type) {
@@ -216,13 +196,17 @@ export class RestRecognizer extends AbstractRecognizer
       return Promise.reject(new Error('Export failed, no mimeTypes define in recognition configuration'))
     }
 
-    const mimeTypesRequiringExport: string[] = mimeTypes.filter(m => !model.exports || !model.exports[m])
+    const mimeTypesRequiringExport: string[] = mimeTypes.filter(m => !myModel.exports || !myModel.exports[m])
 
-    await Promise.all(mimeTypesRequiringExport.map(mimeType => this.callPostMessage(model, mimeType)))
+    const exports: TExport[] = await Promise.all(mimeTypesRequiringExport.map(mimeType => this.callPostMessage(myModel, mimeType)))
 
-    model.idle = true
-    this.eventHelper.emitIdle(model)
-    return model
+    myModel.updatePositionReceived()
+
+    exports.forEach(e => {
+      myModel.exports = Object.assign(myModel.exports || {}, e)
+    })
+
+    return myModel
   }
 
   async resize(model: IModel): Promise<IModel | never>

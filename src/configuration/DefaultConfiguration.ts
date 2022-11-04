@@ -10,7 +10,7 @@ import { TUndoRedoConfiguration } from '../@types/configuration/UndoRedoConfigur
 export const DefaultServerConfiguration: TServerConfiguration = {
   protocol: 'WEBSOCKET',
   scheme: 'https',
-  host: 'cloud.myscript.com',
+  host: 'webdemoapi.myscript.com',
   applicationKey: '',
   hmacKey: '',
   useWindowLocation: false,
