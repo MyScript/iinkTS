@@ -91,8 +91,7 @@ export const DefaultRecognitionConfiguration: TRecognitionConfiguration = {
       'erase-precisely': false
     }
   },
-  rawContent: {
-    mimeTypes: ['application/vnd.myscript.jiix'],
+  'raw-content': {
     recognition: {
       text: true,
       shape: false

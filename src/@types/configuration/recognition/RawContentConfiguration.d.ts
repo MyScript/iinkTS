@@ -8,7 +8,6 @@ export type TRecognitionConfiguration = {
 }
 
 export type TRawContentConfiguration = {
-  mimeTypes: ('application/vnd.myscript.jiix')[]
   text?: TTextConfConfiguration
   'session-time'?: number
   recognition?: TRecognitionConfiguration

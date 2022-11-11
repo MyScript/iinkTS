@@ -1,7 +1,7 @@
 import { TConfiguration, TConfigurationClient } from "./@types/Configuration"
 import { TEditorOptions } from "./@types/Editor"
 import { IGrabber } from "./@types/grabber/Grabber"
-import { IModel } from "./@types/model/Model"
+import { IModel, TExport } from "./@types/model/Model"
 import { TPoint } from "./@types/renderer/Point"
 import { TPenStyle } from "./@types/style/PenStyle"
 import { TTheme } from "./@types/style/Theme"
@@ -15,6 +15,7 @@ import { StyleManager } from "./style/StyleManager"
 
 import './iink.css'
 import { IBehaviors } from "./@types/Behaviors"
+import { TConverstionState } from "./@types/configuration/RecognitionConfiguration"
 
 export enum EditorMode
 {
@@ -31,7 +32,7 @@ export type HTMLEditorElement = HTMLElement &
 
 export class Editor
 {
-  private _wrapperHTML: HTMLEditorElement
+  wrapperHTML: HTMLEditorElement
   private _loaderHTML: HTMLDivElement
   private _errorHTML: HTMLDivElement
   private _configuration: Configuration
@@ -46,17 +47,17 @@ export class Editor
 
   constructor(wrapperHTML: HTMLElement, options?: TEditorOptions)
   {
-    this._wrapperHTML = wrapperHTML as HTMLEditorElement
-    this._wrapperHTML.classList.add(options?.globalClassCss || 'ms-editor')
+    this.wrapperHTML = wrapperHTML as HTMLEditorElement
+    this.wrapperHTML.classList.add(options?.globalClassCss || 'ms-editor')
 
     this._loaderHTML = document.createElement('div')
     this._loaderHTML.classList.add('loader')
-    this._loaderHTML = this._wrapperHTML.appendChild(this._loaderHTML)
+    this._loaderHTML = this.wrapperHTML.appendChild(this._loaderHTML)
     this._loaderHTML.style.display = 'initial'
 
     this._errorHTML = document.createElement('div')
     this._errorHTML.classList.add('error-msg')
-    this._errorHTML = this._wrapperHTML.appendChild(this._errorHTML)
+    this._errorHTML = this.wrapperHTML.appendChild(this._errorHTML)
     this._errorHTML.style.display = 'none'
 
     this._mode = EditorMode.Pen
@@ -65,8 +66,8 @@ export class Editor
 
     this._configuration = new Configuration(options?.configuration)
 
-    const width = Math.max(this._wrapperHTML.clientWidth, this.configuration.rendering.minWidth)
-    const height = Math.max(this._wrapperHTML.clientHeight, this.configuration.rendering.minHeight)
+    const width = Math.max(this.wrapperHTML.clientWidth, this.configuration.rendering.minWidth)
+    const height = Math.max(this.wrapperHTML.clientHeight, this.configuration.rendering.minHeight)
     this.model = new Model(width, height)
 
     this._behaviorsManager = new BehaviorsManager(this.configuration, this.model, options?.behaviors)
@@ -84,12 +85,14 @@ export class Editor
   }
   set configuration(config: TConfigurationClient)
   {
-    this.clear()
+    if (!this.model.isEmpty) {
+      this.model.clear()
+    }
     // TODO maybe need some removeListener are close connection
     this._configuration.overrideDefaultConfiguration(config)
 
-    this.model.height = Math.max(this._wrapperHTML.clientHeight, this._configuration.rendering.minHeight)
-    this.model.width = Math.max(this._wrapperHTML.clientWidth, this._configuration.rendering.minWidth)
+    this.model.height = Math.max(this.wrapperHTML.clientHeight, this._configuration.rendering.minHeight)
+    this.model.width = Math.max(this.wrapperHTML.clientWidth, this._configuration.rendering.minWidth)
 
     this._behaviorsManager.overrideDefaultBehaviors(this._configuration, this.model)
     this.initalizeBehaviors()
@@ -121,7 +124,7 @@ export class Editor
 
   private initalizeBehaviors(): void
   {
-    this._behaviorsManager.init(this._wrapperHTML, this.model)
+    this._behaviorsManager.init(this.wrapperHTML)
       .then(async () =>
       {
         this.grabber.onPointerDown = (evt: PointerEvent, point: TPoint) => this.pointerDown(evt, point)
@@ -133,7 +136,7 @@ export class Editor
         // this.events.addEventListener(EventType.IMPORT, this.import)
 
         this._initialized = true
-        this._wrapperHTML.editor = this
+        this.wrapperHTML.editor = this
         this.events.emitLoaded()
       })
       .catch((e: Error) =>
@@ -180,7 +183,7 @@ export class Editor
   pointerDown(evt: PointerEvent, point: TPoint): void
   {
     const target: Element = (evt.target as Element)
-    const pointerDownOnEditor = target?.id === this._wrapperHTML.id || target?.classList?.contains('ms-canvas')
+    const pointerDownOnEditor = target?.id === this.wrapperHTML.id || target?.classList?.contains('ms-canvas')
     if (pointerDownOnEditor) {
       let { pointerType } = evt
       if (this._mode === EditorMode.Eraser) {
@@ -201,13 +204,8 @@ export class Editor
   async pointerUp(_evt: PointerEvent, point: TPoint): Promise<void>
   {
     this.model.endCurrentStroke(point, this.penStyle)
-    this.behaviors.drawModel(this.model)
     try {
-      if (this.behaviors.addStrokes) {
-        this.model = await this.behaviors.addStrokes(this.model)
-      } else {
-        this.model = await this.behaviors.export(this.model)
-      }
+      this.model = await this.behaviors.updateModelRendering(this.model)
     } catch (error) {
       this.showError(error as Error)
     }
@@ -217,10 +215,10 @@ export class Editor
   {
     this._mode = mode
     if (this._mode === EditorMode.Eraser) {
-      this._wrapperHTML.classList.add('erasing')
+      this.wrapperHTML.classList.add('erasing')
     } else {
       document.body.style.cursor = 'initial'
-      this._wrapperHTML.classList.remove('erasing')
+      this.wrapperHTML.classList.remove('erasing')
     }
   }
 
@@ -244,15 +242,24 @@ export class Editor
 
   async resize(): Promise<IModel>
   {
-    this.model.height = Math.max(this._wrapperHTML.clientHeight, this.configuration.rendering.minHeight)
-    this.model.width = Math.max(this._wrapperHTML.clientWidth, this.configuration.rendering.minWidth)
+    this.model.height = Math.max(this.wrapperHTML.clientHeight, this.configuration.rendering.minHeight)
+    this.model.width = Math.max(this.wrapperHTML.clientWidth, this.configuration.rendering.minWidth)
     this.model = await this.behaviors.resize(this.model)
     return this.model
   }
 
   async export(mimeTypes: string[]): Promise<IModel>
   {
-    return this.behaviors.export(this.model, mimeTypes)
+    this.model = await this.behaviors.export(this.model, mimeTypes)
+    this.events.emitExported(this.model.exports as TExport)
+    return this.model
+  }
+
+  async convert(params: {conversionState?: TConverstionState, mimeTypes?: string[]}): Promise<IModel | never>
+  {
+    this.model = await this.behaviors.convert(this.model, params.conversionState, params.mimeTypes)
+    this.events.emitConvert(this.model.converts as TExport)
+    return this.model
   }
 
   // import(evt: Event)

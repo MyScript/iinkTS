@@ -1,4 +1,4 @@
-import { TStroke } from '../../../src/@types/stroker/Stroker'
+import { TStroke } from '../../../src/@types/model/Stroke'
 import { Stroke } from '../../../src/model/Stroke'
 import { DefaultPenStyle } from '../../../src/style/DefaultPenStyle'
 

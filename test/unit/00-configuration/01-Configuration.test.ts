@@ -66,10 +66,29 @@ describe('Configuration.ts', () =>
       {
         expect(configuration.recognition.type).toStrictEqual(cc.config?.recognition?.type)
       })
-      test('should have recognition.text.mimeTypes', () =>
-      {
-        expect(configuration.recognition.text.mimeTypes).toStrictEqual(cc.config?.recognition?.text?.mimeTypes)
-      })
+      if (cc.config.recognition?.type === 'Raw Content') {
+        test('should not have recognition[raw-content].mimeTypes', () =>
+        {
+            expect(configuration.recognition["raw-content"]).not.toHaveProperty('raw-content')
+        })
+      } else {
+        test('should have recognition.text.mimeTypes', () =>
+        {
+          switch (configuration.recognition.type) {
+            case 'MATH':
+              expect(configuration.recognition.math.mimeTypes).toStrictEqual(cc.config?.recognition?.math?.mimeTypes)
+              break;
+            case 'DIAGRAM':
+              expect(configuration.recognition.diagram.mimeTypes).toStrictEqual(cc.config?.recognition?.diagram?.mimeTypes)
+              break;
+            case 'TEXT':
+              expect(configuration.recognition.text.mimeTypes).toStrictEqual(cc.config?.recognition?.text?.mimeTypes)
+              break;
+            default:
+              break;
+          }
+        })
+      }
     })
   })
 

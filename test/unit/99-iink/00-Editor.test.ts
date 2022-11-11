@@ -127,7 +127,7 @@ describe('Editor.ts', () =>
     editor.model.appendToCurrentStroke = jest.fn()
     editor.model.endCurrentStroke = jest.fn()
     editor.behaviors.drawCurrentStroke = jest.fn()
-    editor.behaviors.drawModel = jest.fn()
+    editor.behaviors.updateModelRendering = jest.fn()
 
     const eventTarget = document.createElement('div')
     eventTarget.classList.add('ms-canvas')
@@ -156,7 +156,7 @@ describe('Editor.ts', () =>
     {
       editor.pointerUp(pointerDownEvt as PointerEvent, point)
       expect(editor.model.endCurrentStroke).toHaveBeenCalledTimes(1)
-      expect(editor.behaviors.drawModel).toHaveBeenCalledTimes(1)
+      expect(editor.behaviors.updateModelRendering).toHaveBeenCalledTimes(1)
     })
   })
 

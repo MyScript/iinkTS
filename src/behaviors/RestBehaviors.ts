@@ -4,17 +4,16 @@ import { IModel, TExport } from "../@types/model/Model"
 
 import { PointerEventGrabber } from '../grabber/PointerEventGrabber'
 import { CanvasRenderer } from "../renderer/canvas/CanvasRenderer"
-import { QuadraticCanvasStroker } from "../renderer/canvas/CanvasQuadraticStroker"
 import { RestRecognizer } from "../recognizer/RestRecognizer"
 import { DeferredPromise } from "../utils/DeferredPromise"
 import { TTriggerConfiguration } from "../@types/configuration/TriggerConfiguration"
 import { GlobalEvent } from "../event/GlobalEvent"
 import { UndoRedoManager } from "../undo-redo/UndoRedoManager"
+import { TConverstionState } from "../@types/configuration/RecognitionConfiguration"
 
 export class RestBehaviors implements IBehaviors
 {
   grabber: PointerEventGrabber
-  stroker: QuadraticCanvasStroker
   renderer: CanvasRenderer
   recognizer: RestRecognizer
   undoRedoManager: UndoRedoManager
@@ -26,7 +25,6 @@ export class RestBehaviors implements IBehaviors
   constructor(configuration: TConfiguration, model: IModel)
   {
     this.grabber = new PointerEventGrabber(configuration.grabber)
-    this.stroker = new QuadraticCanvasStroker()
     this.renderer = new CanvasRenderer(configuration.rendering)
     this.recognizer = new RestRecognizer(configuration.server, configuration.recognition)
     this.undoRedoManager = new UndoRedoManager(configuration["undo-redo"], model.getClone())
@@ -35,7 +33,7 @@ export class RestBehaviors implements IBehaviors
     this.initalise = new DeferredPromise<void | Error>()
   }
 
-  get globalEvents(): GlobalEvent
+  get globalEvent(): GlobalEvent
   {
     return GlobalEvent.getInstance()
   }
@@ -43,7 +41,7 @@ export class RestBehaviors implements IBehaviors
   private async _export(model: IModel, mimeTypes?: string[]): Promise<IModel | never>
   {
     const newModel = await this.recognizer.export(model, mimeTypes)
-    this.globalEvents.emitExported(newModel?.exports as TExport)
+    this.globalEvent.emitExported(newModel?.exports as TExport)
     return newModel
   }
 
@@ -57,12 +55,13 @@ export class RestBehaviors implements IBehaviors
 
   drawCurrentStroke(model: IModel): void
   {
-    this.renderer.drawCurrentStroke(model, this.stroker)
+    this.renderer.drawPendingStroke(model.currentStroke)
   }
 
-  drawModel(model: IModel): void
+  updateModelRendering(model: IModel): Promise<IModel | never>
   {
-    this.renderer.drawModel(model, this.stroker)
+    this.renderer.drawModel(model)
+    return this.export(model)
   }
 
   async export(model: IModel, mimeTypes?: string[]): Promise<IModel | never>
@@ -74,12 +73,16 @@ export class RestBehaviors implements IBehaviors
       let currentModel = model.getClone()
       this._exportTimer = setTimeout(async () =>
       {
-        currentModel = await this._export(currentModel, mimeTypes)
-        this.undoRedoManager.updateModelInStack(currentModel)
-        if (model.modificationDate === currentModel.modificationDate) {
-          model.exports = currentModel.exports
+        try {
+          currentModel = await this._export(currentModel, mimeTypes)
+          this.undoRedoManager.updateModelInStack(currentModel)
+          if (model.modificationDate === currentModel.modificationDate) {
+            model.exports = currentModel.exports
+          }
+          deferred.resolve(model)
+        } catch (error) {
+          deferred.reject(error as Error)
         }
-        deferred.resolve(model)
       }, this._triggerConfiguration.exportContentDelay)
     } else {
       deferred.resolve(model)
@@ -87,9 +90,14 @@ export class RestBehaviors implements IBehaviors
     return deferred.promise
   }
 
+  async convert(model: IModel, conversionState?: TConverstionState, requestedMimeTypes?: string[]): Promise<IModel | never>
+  {
+    return this.recognizer.convert(model, conversionState, requestedMimeTypes)
+  }
+
   async resize(model: IModel): Promise<IModel>
   {
-    this.renderer.resize(model, this.stroker)
+    this.renderer.resize(model)
     if (model.strokeGroups.length) {
       const deferredResize = new DeferredPromise<IModel>()
       clearTimeout(this._resizeTimer)
@@ -107,7 +115,7 @@ export class RestBehaviors implements IBehaviors
   async undo(): Promise<IModel>
   {
     const oldModel = this.undoRedoManager.undo()
-    this.drawModel(oldModel)
+    this.renderer.drawModel(oldModel)
     const modelUpdated = await this._export(oldModel)
     this.undoRedoManager.updateModelInStack(modelUpdated)
     return modelUpdated
@@ -116,7 +124,7 @@ export class RestBehaviors implements IBehaviors
   async redo(): Promise<IModel>
   {
     const newModel = this.undoRedoManager.redo()
-    this.drawModel(newModel)
+    this.renderer.drawModel(newModel)
     const modelUpdated = await this._export(newModel)
     this.undoRedoManager.updateModelInStack(modelUpdated)
     return modelUpdated
@@ -127,11 +135,17 @@ export class RestBehaviors implements IBehaviors
     const myModel = model.getClone()
     myModel.clear()
     this.undoRedoManager.addModelToStack(myModel)
-    this.drawModel(myModel)
+    this.renderer.drawModel(myModel)
     myModel.modificationDate = new Date().getTime()
-    console.log('myModel.exports: ', myModel.exports);
-    this.globalEvents.emitExported(myModel.exports as TExport)
-    this.globalEvents.emitCleared(myModel)
+    this.globalEvent.emitExported(myModel.exports as TExport)
+    this.globalEvent.emitCleared(myModel)
     return myModel
+  }
+
+  async destroy(): Promise<void>
+  {
+    this.grabber.detach()
+    this.renderer.destroy()
+    return Promise.resolve()
   }
 }

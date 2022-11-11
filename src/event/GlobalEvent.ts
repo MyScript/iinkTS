@@ -60,9 +60,9 @@ export class GlobalEvent extends EventTarget
   {
     this.emit(EventType.CLEARED, model)
   }
-  emitConvert(): void
+  emitConvert(exports: TExport): void
   {
-    this.emit(EventType.CONVERT)
+    this.emit(EventType.CONVERT, exports)
   }
   emitImport(jiix: string, mimeType: string): void
   {

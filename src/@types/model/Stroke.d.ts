@@ -15,6 +15,7 @@ export type TStrokeGroupJSON = {
 }
 
 export type TStroke = TSymbol & TStrokeJSON & {
+  id?: string
   pointerId: number
   l: number[]
 }
@@ -28,8 +29,4 @@ export type TStrokesPenStyle = {
 export type TStrokeGroup = {
   penStyle: TPenStyle
   strokes: TStroke[]
-}
-
-export interface IStroker {
-  drawStroke(context: CanvasRenderingContext2D, stroke: TStroke): void
 }

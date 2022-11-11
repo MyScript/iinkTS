@@ -284,9 +284,6 @@ describe('Model.ts', () =>
       expect(clone.positions).toEqual(model.positions)
       expect(clone.positions).not.toBe(model.positions)
 
-      expect(clone.rawResults).toEqual(model.rawResults)
-      expect(clone.rawResults).not.toBe(model.rawResults)
-
       expect(clone.rawStrokes).toEqual(model.rawStrokes)
       expect(clone.rawStrokes).not.toBe(model.rawStrokes)
 

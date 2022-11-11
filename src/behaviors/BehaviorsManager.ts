@@ -15,19 +15,22 @@ export class BehaviorsManager
 
   overrideDefaultBehaviors(configuration: TConfiguration, model: IModel, behaviors?: IBehaviors)
   {
+    if (this.behaviors) {
+      this.behaviors.destroy()
+    }
     let defaultBehaviors: IBehaviors
     if (configuration.server.protocol === 'REST') {
       defaultBehaviors = new RestBehaviors(configuration, model)
     } else {
-      defaultBehaviors = new WSBehaviors(configuration)
+      defaultBehaviors = new WSBehaviors(configuration, model)
     }
 
     this.behaviors = Object.assign(defaultBehaviors, behaviors)
   }
 
-  init(domElement: HTMLElement, model: IModel): Promise<void | Error>
+  init(domElement: HTMLElement): Promise<void | Error>
   {
-    return this.behaviors.init(domElement, model)
+    return this.behaviors.init(domElement)
   }
 
 }

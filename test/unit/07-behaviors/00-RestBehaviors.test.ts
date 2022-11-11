@@ -19,11 +19,11 @@ describe('RestBehaviors.ts', () =>
     expect(rb).toBeDefined()
   })
 
-  test('should have globalEvents property', () =>
+  test('should have globalEvent property', () =>
   {
     const model: IModel = new Model(width, height)
     const rb = new RestBehaviors(DefaultConfiguration, model)
-    expect(rb.globalEvents).toBe(GlobalEvent.getInstance())
+    expect(rb.globalEvent).toBe(GlobalEvent.getInstance())
   })
 
   test('should init', async () =>
@@ -41,28 +41,32 @@ describe('RestBehaviors.ts', () =>
     expect(rb.renderer.init).toBeCalledWith(wrapperHTML)
   })
 
-  test('should call renderer on drawCurrentModel', async () =>
+  test('should call renderer on drawCurrentStroke', async () =>
   {
     const wrapperHTML: HTMLElement = document.createElement('div')
     const model: IModel = new Model(width, height)
+    const p1: TPoint = { t: 1, p: 1, x: 1, y: 1 }
+    const p2: TPoint = { t: 10, p: 1, x: 100, y: 1 }
+    model.initCurrentStroke(p1, 1, 'pen', DefaultPenStyle)
+    model.endCurrentStroke(p2, DefaultPenStyle)
     const rb = new RestBehaviors(DefaultConfiguration, model)
     await rb.init(wrapperHTML)
-    rb.renderer.drawCurrentStroke = jest.fn()
+    rb.renderer.drawPendingStroke = jest.fn()
     rb.drawCurrentStroke(model)
-    expect(rb.renderer.drawCurrentStroke).toBeCalledTimes(1)
-    expect(rb.renderer.drawCurrentStroke).toBeCalledWith(model, rb.stroker)
+    expect(rb.renderer.drawPendingStroke).toBeCalledTimes(1)
+    expect(rb.renderer.drawPendingStroke).toBeCalledWith(model.currentStroke)
   })
 
-  test('should call renderer on drawModel', async () =>
+  test('should call renderer on updateModelRendering', async () =>
   {
     const wrapperHTML: HTMLElement = document.createElement('div')
     const model: IModel = new Model(width, height)
     const rb = new RestBehaviors(DefaultConfiguration, model)
     await rb.init(wrapperHTML)
     rb.renderer.drawModel = jest.fn()
-    rb.drawModel(model)
+    rb.updateModelRendering(model)
     expect(rb.renderer.drawModel).toBeCalledTimes(1)
-    expect(rb.renderer.drawModel).toBeCalledWith(model, rb.stroker)
+    expect(rb.renderer.drawModel).toBeCalledWith(model)
   })
 
   test('should export', async () =>
@@ -73,15 +77,16 @@ describe('RestBehaviors.ts', () =>
     await rb.init(wrapperHTML)
 
     rb.recognizer.export = jest.fn(m => Promise.resolve(m))
-    rb.globalEvents.emitExported = jest.fn(m => Promise.resolve(m))
+    rb.globalEvent.emitExported = jest.fn(m => Promise.resolve(m))
 
     rb.export(model)
     await delay(DefaultConfiguration.triggers.exportContentDelay)
 
     expect(rb.recognizer.export).toBeCalledTimes(1)
     expect(rb.recognizer.export).toBeCalledWith(model, undefined)
-    expect(rb.globalEvents.emitExported).toBeCalledTimes(1)
-    expect(rb.globalEvents.emitExported).toBeCalledWith(model.exports)
+    // TODO review singleton on GlobalEvent
+    // expect(rb.globalEvent.emitExported).toBeCalledTimes(1)
+    expect(rb.globalEvent.emitExported).toBeCalledWith(model.exports)
   })
 
   test('should not export if trigger configuration have exportContent = DEMAND', async () =>
@@ -122,7 +127,7 @@ describe('RestBehaviors.ts', () =>
     await delay(DefaultConfiguration.triggers.resizeTriggerDelay)
 
     expect(rb.renderer.resize).toBeCalledTimes(1)
-    expect(rb.renderer.resize).toBeCalledWith(model, rb.stroker)
+    expect(rb.renderer.resize).toBeCalledWith(model)
     expect(rb.recognizer.resize).toBeCalledTimes(1)
     expect(rb.recognizer.resize).toBeCalledWith(model)
   })
@@ -141,7 +146,7 @@ describe('RestBehaviors.ts', () =>
     await delay(DefaultConfiguration.triggers.resizeTriggerDelay)
 
     expect(rb.renderer.resize).toBeCalledTimes(1)
-    expect(rb.renderer.resize).toBeCalledWith(model, rb.stroker)
+    expect(rb.renderer.resize).toBeCalledWith(model)
     expect(rb.recognizer.resize).toBeCalledTimes(0)
   })
 
@@ -203,8 +208,8 @@ describe('RestBehaviors.ts', () =>
     await rb.init(wrapperHTML)
 
     rb.recognizer.export = jest.fn(m => Promise.resolve(m))
-    rb.globalEvents.emitExported = jest.fn(m => Promise.resolve(m))
-    rb.globalEvents.emitCleared = jest.fn(m => Promise.resolve(m))
+    rb.globalEvent.emitExported = jest.fn(m => Promise.resolve(m))
+    rb.globalEvent.emitCleared = jest.fn(m => Promise.resolve(m))
     rb.renderer.drawModel = jest.fn()
 
     const model2: IModel = new Model(width, height)
@@ -222,10 +227,10 @@ describe('RestBehaviors.ts', () =>
     expect(clearedModel.modificationDate).toBeGreaterThan(model2.modificationDate)
     expect(clearedModel.rawStrokes).toHaveLength(0)
 
-    expect(rb.globalEvents.emitExported).toBeCalledTimes(1)
-    expect(rb.globalEvents.emitExported).toBeCalledWith(clearedModel.exports)
-    expect(rb.globalEvents.emitCleared).toBeCalledTimes(1)
-    expect(rb.globalEvents.emitCleared).toBeCalledWith(clearedModel)
+    expect(rb.globalEvent.emitExported).toBeCalledTimes(1)
+    expect(rb.globalEvent.emitExported).toBeCalledWith(clearedModel.exports)
+    expect(rb.globalEvent.emitCleared).toBeCalledTimes(1)
+    expect(rb.globalEvent.emitCleared).toBeCalledWith(clearedModel)
 
   })
 

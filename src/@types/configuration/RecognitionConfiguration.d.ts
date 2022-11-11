@@ -18,6 +18,8 @@ export type TGesture = { enable: boolean }
 
 export type TRecognitionType = 'TEXT' | 'MATH' | 'DIAGRAM' | 'Raw Content'
 
+export type TConverstionState = 'DIGITAL_EDIT' | 'HANDWRITING'
+
 export type TRecognitionConfiguration = {
   convert?: TConvertConfiguration
   type: TRecognitionType
@@ -28,7 +30,7 @@ export type TRecognitionConfiguration = {
   diagram: TDiagramConfiguration
   renderer: TRecognitionRendererConfiguration
   export: TExportConfiguration
-  rawContent: TRawContentConfiguration
+  'raw-content': TRawContentConfiguration
   gesture: TGesture
 }
 
@@ -42,6 +44,6 @@ export type TRecognitionConfigurationClient = {
   diagram?: TDiagramConfiguration
   renderer?: TRecognitionRendererConfiguration
   export?: TExportConfiguration
-  rawContent?: TRawContentConfiguration
+  'raw-content'?: TRawContentConfiguration
   gesture?: TGesture
 }

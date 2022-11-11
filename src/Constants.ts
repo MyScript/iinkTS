@@ -1,9 +1,7 @@
 export const Error = {
-  ABNORMAL_CLOSURE: 'MyScript recognition server is not reachable. Please reload once you are connected.',
   WRONG_CREDENTIALS: 'Application credentials are invalid. Please check or regenerate your application key and hmackey.',
-  TOO_OLD: 'Session is too old. Max Session Duration Reached.',
-  NO_ACTIVITY: 'Session closed due to no activity.',
   UNKNOW: 'An unknown error has occurred.',
+  ABNORMAL_CLOSURE: 'MyScript recognition server is not reachable. Please reload once you are connected.',
   CANT_ESTABLISH: 'Unable to establish a connection to MyScript recognition server. Check the host and your connectivity.',
   GOING_AWAY: 'MyScript recognition server is going away, either because of a server failure or because the browser is navigating away from the page that opened the connection.',
   PROTOCOL_ERROR: 'MyScript recognition server terminated the connection due to a protocol error.',
@@ -38,15 +36,20 @@ export const EventType = {
 } as const
 
 export const WSEventType = {
-  PART_CHANGE: 'part_change',
-  CONTENT_CHANGE: 'content_change',
-  PATCH: 'patch',
+  PART_CHANGE: 'ws_part_change',
+  CONTENT_CHANGE: 'ws_content_change',
+  SVG_PATCH: 'ws_svg_patch',
   EXPORTED: 'ws_exported',
-  INITIALIZED: 'initialized',
-  CONNECTED: 'connected',
+  ERROR: 'ws_error',
+  INITIALIZED: 'ws_initialized',
+  CONNECTED: 'ws_connected',
   CONNECTION_ACTIVE: 'connection_active',
-  DISCONNECTED: 'disconnected',
+  DISCONNECTED: 'ws_disconnected',
 } as const
+
+export const WSMessage = {
+  CLOSE_RECOGNIZER: 'CLOSE_RECOGNIZER'
+}
 
 export const Exports = {
   JIIX: 'application/vnd.myscript.jiix'

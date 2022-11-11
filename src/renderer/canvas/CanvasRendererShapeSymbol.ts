@@ -174,8 +174,8 @@ export function drawShapeSymbol(context2D: CanvasRenderingContext2D, symbol: TSy
           break
         case ShapeSymbols.recognizedShape:
           // eslint-disable-next-line no-case-declarations
-          const recognizedSymbols = symbol as TShapeRecognizedSymbol
-          recognizedSymbols.primitives.forEach(primitive => drawShapeSymbol(context2D, primitive))
+          const recognizedShape = symbol as TShapeRecognizedSymbol
+          recognizedShape.primitives.forEach(primitive => drawShapeSymbol(context2D, primitive))
           break
         default:
           // logger.error(`${ symbol.type } not implemented`)

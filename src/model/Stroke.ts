@@ -1,5 +1,5 @@
 import { TPenStyle } from '../@types/style/PenStyle'
-import { TStroke } from '../@types/stroker/Stroker'
+import { TStroke } from '../@types/model/Stroke'
 
 export class Stroke implements TStroke
 {
