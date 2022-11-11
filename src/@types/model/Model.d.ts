@@ -1,5 +1,5 @@
 import { TPoint } from '../renderer/Point'
-import { TStroke, TStrokeGroup } from '../stroker/Stroker'
+import { TStroke, TStrokeGroup } from './Stroke'
 import { TPenStyle } from '../style/PenStyle'
 import { TRecognitionPositions } from './RecognitionPositions'
 
@@ -16,11 +16,6 @@ export type TJIIXExport = {
   words: TWordExport[]
 }
 
-export type TRawResults = {
-  convert?: any
-  exports?: TJIIXExport | string | Blob
-}
-
 export type TExport = {
   // // TEXT | Raw Content
   // 'application/vnd.myscript.jiix'?: TJIIXExport
@@ -32,7 +27,6 @@ export type TExport = {
   // // DIAGRAM
   // 'image/svg+xml'?: string
   // 'application/vnd.openxmlformats-officedocument.presentationml.presentation'?: Blob
-
   [key: string]: TJIIXExport | string | Blob
 }
 
@@ -45,8 +39,8 @@ export interface IModel
   positions: TRecognitionPositions
   defaultSymbols: TStroke[]
   rawStrokes: TStroke[]
-  recognizedSymbols?: TStroke[]
-  rawResults: TRawResults
+  recognizedSymbols?: TUpdatePatch[]
+  converts?: TExport
   exports?: TExport
   width: number
   height: number
@@ -60,6 +54,7 @@ export interface IModel
   initCurrentStroke(point: TPoint, pointerId: number, pointerType: string, style: TPenStyle, dpi: number = 96): void
   appendToCurrentStroke(point: TPoint): void
   endCurrentStroke(point: TPoint, penStyle: TPenStyle): void
+  extractPendingRecognizedSymbols (position: number = this.positions.lastRenderedPosition + 1): TUpdatePatch[]
 
   updatePositionSent(position: number = this.model.rawStrokes.length - 1): void
   updatePositionReceived(): void

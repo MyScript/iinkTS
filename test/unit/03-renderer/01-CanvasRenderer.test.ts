@@ -1,6 +1,6 @@
 import { TRenderingConfiguration } from '../../../src/@types/configuration/RenderingConfiguration'
 import { CanvasRenderer } from '../../../src/renderer/canvas/CanvasRenderer'
-import { QuadraticCanvasStroker } from '../../../src/renderer/canvas/CanvasQuadraticStroker'
+import { CanvasQuadraticStroker } from '../../../src/renderer/canvas/CanvasQuadraticStroker'
 
 describe('QuadraticUtils.ts', () =>
 {
@@ -9,7 +9,7 @@ describe('QuadraticUtils.ts', () =>
   wrapperHTML.style.height = `${ height }px`
   wrapperHTML.style.width = `${ width }px`
 
-  const stroker = new QuadraticCanvasStroker()
+  const stroker = new CanvasQuadraticStroker()
   stroker.drawStroke = jest.fn()
 
   const conf: TRenderingConfiguration = {
@@ -41,7 +41,7 @@ describe('QuadraticUtils.ts', () =>
 
   test('should destroy', () =>
   {
-    renderer.destroy(wrapperHTML)
+    renderer.destroy()
     expect(wrapperHTML.querySelector('.ms-rendering-canvas')).toBeNull()
     expect(wrapperHTML.querySelector('.ms-capture-canvas')).toBeNull()
   })

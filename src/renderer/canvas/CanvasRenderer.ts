@@ -1,20 +1,23 @@
-import { TStroke, IStroker } from "../../@types/stroker/Stroker"
+import { TStroke } from "../../@types/model/Stroke"
 import { TRenderingConfiguration } from "../../@types/configuration/RenderingConfiguration"
 import { IModel } from "../../@types/model/Model"
-import { IRenderer, TRendererContext } from "../../@types/renderer/Renderer"
+import { IRenderer, TCanvasRendererContext } from "../../@types/renderer/Renderer"
 import { TSymbol } from "../../@types/renderer/Symbol"
 
 import { drawShapeSymbol, ShapeSymbols } from "./CanvasRendererShapeSymbol"
 import { drawStroke } from "./CanvasRendererStrokeSymbol"
 import { drawTextSymbol, TextSymbols } from "./CanvasRendererTextSymbol"
+import { CanvasQuadraticStroker } from "./CanvasQuadraticStroker"
 
 export class CanvasRenderer implements IRenderer
 {
   config: TRenderingConfiguration
-  context!: TRendererContext
+  stroker: CanvasQuadraticStroker
+  context!: TCanvasRendererContext
 
   constructor(config: TRenderingConfiguration) {
     this.config = config
+    this.stroker = new CanvasQuadraticStroker()
   }
 
   private createCanvas(element: HTMLElement, type: string): HTMLCanvasElement
@@ -34,8 +37,8 @@ export class CanvasRenderer implements IRenderer
     elements.forEach((canvas) =>
     {
       const domElement = canvas.parentNode as HTMLElement
-      const width = Math.max(this.context?.minWidth, domElement.clientWidth)
-      const height = Math.max(this.context?.minHeight, domElement.clientHeight)
+      const width = Math.max(this.config.minWidth, domElement.clientWidth)
+      const height = Math.max(this.config.minHeight, domElement.clientHeight)
       canvas.width = width * pixelRatio
       canvas.height = height * pixelRatio
       canvas.getContext('2d')?.scale(pixelRatio, pixelRatio)
@@ -44,11 +47,11 @@ export class CanvasRenderer implements IRenderer
     })
   }
 
-  private drawSymbol(context2D: CanvasRenderingContext2D, symbol: TSymbol, stroker: IStroker)
+  private drawSymbol(context2D: CanvasRenderingContext2D, symbol: TSymbol)
   {
     const type = symbol.elementType || symbol.type
     if (type === 'stroke') {
-      drawStroke(context2D, symbol as TStroke, stroker)
+      drawStroke(context2D, symbol as TStroke, this.stroker)
     } else if (Object.keys(TextSymbols).includes(type)) {
       drawTextSymbol(context2D, symbol)
     } else if (Object.keys(ShapeSymbols).includes(type)) {
@@ -62,8 +65,7 @@ export class CanvasRenderer implements IRenderer
     const capturingCanvas: HTMLCanvasElement = this.createCanvas(element, 'ms-capture-canvas')
 
     this.context = {
-      minHeight: this.config.minHeight || 0,
-      minWidth: this.config.minWidth || 0,
+      parent: element,
       renderingCanvas,
       renderingCanvasContext: renderingCanvas.getContext('2d') as CanvasRenderingContext2D,
       capturingCanvas,
@@ -73,41 +75,33 @@ export class CanvasRenderer implements IRenderer
     this.resizeContent()
   }
 
-  drawModel(model: IModel, stroker: IStroker): void
+  drawModel(model: IModel): void
   {
     this.context.renderingCanvasContext?.clearRect(0, 0, this.context.renderingCanvas.width, this.context.renderingCanvas.height)
-    const symbols = [...model.defaultSymbols]
-    if (model.recognizedSymbols) {
-      symbols.push(...model.recognizedSymbols)
-      symbols.push(...model.extractPendingStrokes())
-    } else {
-      symbols.push(...model.rawStrokes)
-    }
-    symbols.forEach(symbol => this.drawSymbol(this.context.renderingCanvasContext, symbol, stroker))
+    const symbols = [...model.defaultSymbols, ...model.rawStrokes]
+    symbols.forEach(symbol => this.drawSymbol(this.context.renderingCanvasContext, symbol))
     this.context.capturingCanvasContext.clearRect(0, 0, this.context.capturingCanvas.width, this.context.capturingCanvas.height)
     model.updatePositionRendered(symbols.length)
   }
 
-  drawCurrentStroke(model: IModel, stroker: IStroker): void
+  drawPendingStroke(stroke: TStroke | undefined): void
   {
-    // Render the current stroke
-    const stroke: TStroke | undefined = model.currentStroke
     this.context.capturingCanvasContext.clearRect(0, 0, this.context.capturingCanvas.width, this.context.capturingCanvas.height)
-    if (stroker && stroke && stroke?.pointerType !== 'eraser') {
-      stroker.drawStroke(this.context.capturingCanvasContext, stroke)
+    if (stroke && stroke?.pointerType !== 'eraser') {
+      this.stroker.drawStroke(this.context.capturingCanvasContext, stroke)
     }
   }
 
-  resize(model: IModel, stroker: IStroker): void
+  resize(model: IModel): void
   {
     this.resizeContent()
-    this.drawModel(model, stroker)
+    this.drawModel(model)
   }
 
-  destroy(element: HTMLElement)
+  destroy(): void
   {
-    element.removeChild(this.context.renderingCanvas)
-    element.removeChild(this.context.capturingCanvas)
-    // this.context = undefined
+    while (this.context.parent.lastChild) {
+      this.context.parent.removeChild(this.context.parent.lastChild);
+    }
   }
 }

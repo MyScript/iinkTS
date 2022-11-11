@@ -71,7 +71,6 @@ export class Configuration implements TConfiguration
     this.recognition.text.mimeTypes = configuration?.recognition?.text?.mimeTypes || DefaultConfiguration.recognition.text.mimeTypes
     this.recognition.math.mimeTypes = configuration?.recognition?.math?.mimeTypes || DefaultConfiguration.recognition.math.mimeTypes
     this.recognition.diagram.mimeTypes = configuration?.recognition?.diagram?.mimeTypes || DefaultConfiguration.recognition.diagram.mimeTypes
-    this.recognition.rawContent.mimeTypes = configuration?.recognition?.rawContent?.mimeTypes || DefaultConfiguration.recognition.rawContent.mimeTypes
 
     if (this.server?.useWindowLocation) {
       this.server.scheme = window.location.protocol.indexOf('s') > -1 ? 'https' : 'http'

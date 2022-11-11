@@ -48,7 +48,6 @@ export type TUpdatePatchType = 'REPLACE_ALL' | 'REMOVE_ELEMENT' | 'REPLACE_ELEME
 
 export type TUpdatePatch = {
   type: TUpdatePatchType
-  [key: string]: unknown
 }
 
 export type TUpdatePatchReplaceAll = TUpdatePatch & {
@@ -70,8 +69,8 @@ export type TUpdatePatchRemoveElement = TUpdatePatch & {
 }
 
 export type TUpdatePatchAppendChild = TUpdatePatch & {
-  parentId: string
-  id: string
+  parentId?: string
+  svg: string
 }
 
 export type TUpdatePatchRemoveChild = TUpdatePatch & {
@@ -80,17 +79,17 @@ export type TUpdatePatchRemoveChild = TUpdatePatch & {
 }
 
 export type TUpdatePatchRemoveAttribut = TUpdatePatch & {
-  id: string
+  id?: string
   name: string
 }
 
 export type TUpdatePatchSetAttribut = TUpdatePatch & {
-  id: string
+  id?: string
   name: string
   value: string
 }
 
-export type TWebSocketPatchEvent = TWebSocketEvent & {
+export type TWebSocketSVGPatchEvent = TWebSocketEvent & {
   updates: TUpdatePatch[]
   layer: ('MODEL' | 'CAPTURE')
 }

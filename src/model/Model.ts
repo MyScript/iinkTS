@@ -1,9 +1,10 @@
 import { TPenStyle } from '../@types/style/PenStyle'
 import { TPoint } from '../@types/renderer/Point'
-import { TStroke, TStrokeGroup } from '../@types/stroker/Stroker'
-import { IModel, TExport, TRawResults } from '../@types/model/Model'
+import { TStroke, TStrokeGroup } from '../@types/model/Stroke'
+import { IModel, TExport } from '../@types/model/Model'
 import { TRecognitionPositions } from '../@types/model/RecognitionPositions'
 import { Stroke } from './Stroke'
+import { TUpdatePatch } from '../@types/recognizer/WSRecognizer'
 
 export class Model implements IModel
 {
@@ -14,9 +15,9 @@ export class Model implements IModel
   positions: TRecognitionPositions
   defaultSymbols: TStroke[]
   rawStrokes: TStroke[]
-  recognizedSymbols?: TStroke[]
-  rawResults: TRawResults
+  recognizedSymbols?: TUpdatePatch[]
   exports?: TExport
+  converts?: TExport
   width: number
   height: number
   idle: boolean
@@ -32,10 +33,6 @@ export class Model implements IModel
       lastRenderedPosition: -1
     }
     this.defaultSymbols = []
-    this.rawResults = {
-      convert: undefined,
-      exports: undefined
-    }
     this.creationTime = creationDate
     this.modificationDate = creationDate
     this.width = width
@@ -103,9 +100,8 @@ export class Model implements IModel
     this.rawStrokes.push(stroke)
   }
 
-  extractPendingStrokes(position?: number): TStroke[]
+  extractPendingStrokes(position: number = this.positions.lastReceivedPosition + 1): TStroke[]
   {
-    position = position || this.positions.lastReceivedPosition + 1
     return this.rawStrokes.slice(position)
   }
 
@@ -141,6 +137,7 @@ export class Model implements IModel
     }
     this.modificationDate = new Date().getTime()
     this.exports = undefined
+    this.converts = undefined
     this.currentStroke = new Stroke(style, pointerId, pointerType)
     this.addPoint(this.currentStroke, point)
   }
@@ -162,6 +159,11 @@ export class Model implements IModel
       // Resetting the current stroke to an undefined one
       this.currentStroke = undefined
     }
+  }
+
+  extractPendingRecognizedSymbols (position: number = this.positions.lastRenderedPosition + 1): TUpdatePatch[]
+  {
+    return this.recognizedSymbols ? this.recognizedSymbols.slice(position) : []
   }
 
   updatePositionSent(position: number = this.rawStrokes.length - 1): void
@@ -200,8 +202,7 @@ export class Model implements IModel
     clonedModel.strokeGroups = JSON.parse(JSON.stringify(this.strokeGroups))
     clonedModel.positions = JSON.parse(JSON.stringify(this.positions))
     clonedModel.exports = this.exports ? JSON.parse(JSON.stringify(this.exports)) : undefined
-    clonedModel.rawResults.convert = this.rawResults.convert ? JSON.parse(JSON.stringify(this.rawResults.convert)) : undefined
-    clonedModel.rawResults.exports = this.rawResults.exports ? JSON.parse(JSON.stringify(this.rawResults.exports)) : undefined
+    clonedModel.converts = this.converts ? JSON.parse(JSON.stringify(this.converts)) : undefined
     clonedModel.recognizedSymbols = this.recognizedSymbols ? JSON.parse(JSON.stringify(this.recognizedSymbols)) : undefined
     clonedModel.idle = this.idle
     clonedModel.isEmpty = this.isEmpty
@@ -219,8 +220,7 @@ export class Model implements IModel
     this.positions.lastRenderedPosition = -1
     this.recognizedSymbols = undefined
     this.exports = undefined
-    this.rawResults.convert = undefined
-    this.rawResults.exports = undefined
+    this.converts = undefined
     this.idle = true
     this.isEmpty = true
   }

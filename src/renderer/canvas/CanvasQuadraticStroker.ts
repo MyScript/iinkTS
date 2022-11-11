@@ -1,8 +1,8 @@
 import { TPoint } from "../../@types/renderer/Point"
-import { TStroke, IStroker } from "../../@types/stroker/Stroker"
+import { TStroke } from "../../@types/model/Stroke"
 import { computeAxeAngle, computeLinksPoints, computeMiddlePoint } from "../QuadraticUtils"
 
-export class QuadraticCanvasStroker implements IStroker
+export class CanvasQuadraticStroker
 {
 
   private renderArc(context2d: CanvasRenderingContext2D, center: TPoint, radius: number)

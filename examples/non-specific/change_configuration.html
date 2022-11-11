@@ -169,16 +169,10 @@
                 />
               </div>
               <div class="input-row">
-                <label for="replace-mime-types">Replace MIME types:</label>
-                <input
-                  type="checkbox"
-                  id="replace-mime-types"
-                  name="replace-mime-types"
-                />
+                <label for="mime-types">MIME types:</label>
+                <select id="mime-types" name="mime-types" multiple style="height: auto;">
+                </select>
               </div>
-              <label for="mime-types">MIME types:</label>
-              <select id="mime-types" name="mime-types" multiple style="height: auto;">
-              </select>
             </div>
           </div>
           <div class="card">
@@ -221,7 +215,7 @@
           </div>
         </div>
         <div class="buttons-wrapper">
-          <button class="classic-btn" id="exportContent">Export</button>
+          <button class="classic-btn" id="export-btn">Export</button>
           <button class="classic-btn reset" id="reset-btn">Reset</button>
           <button class="classic-btn success" id="valid-btn">Valid</button>
         </div>
@@ -241,14 +235,14 @@
       const recognitionLanguageElement = document.getElementById('recognition-language');
       const recognitionGuidesElement = document.getElementById('recognition-guides');
       const recognitionGestureElement = document.getElementById('recognition-gesture');
-      const mimeTypesElement = document.getElementById('mime-types');
+      const recognitionMimeTypesElement = document.getElementById('mime-types');
 
       const renderingSmartGuideElement = document.getElementById('rendering-smartGuide');
       const triggersExportContentElement = document.getElementById('triggers-exportContent');
       const triggersExportContentDelayElement = document.getElementById('triggers-exportContent-delay');
       const triggersResizeDelayElement = document.getElementById('triggers-resize-delay');
 
-      const exportBtn = document.getElementById('exportContent');
+      const exportBtn = document.getElementById('export-btn');
       const validBtn = document.getElementById('valid-btn');
       const resetBtn = document.getElementById('reset-btn');
 
@@ -282,9 +276,17 @@
           },
           diagram: {
             mimeTypes: [
-              'image/svg+xml',
-              'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+              'image/svg+xml'
             ],
+          },
+          'raw-content': {
+            recognition: {
+              text: true,
+              shape: false
+            },
+            eraser: {
+              'erase-precisely': false
+            }
           },
           export: {
             jiix: {
@@ -323,7 +325,6 @@
         TEXT: ['text/plain', 'application/vnd.myscript.jiix'],
         MATH: ['application/x-latex', 'application/mathml+xml', 'application/vnd.myscript.jiix'],
         DIAGRAM: ['application/vnd.myscript.jiix', 'application/vnd.openxmlformats-officedocument.presentationml.presentation'],
-        'Raw Content': ['application/vnd.myscript.jiix']
       }
       /**
        * Retrieve the list of available recognition languages using local json file
@@ -354,10 +355,10 @@
 
 
         const defaultMimeTypes = defaultConfiguration.recognition[defaultConfiguration.recognition.type.toLocaleLowerCase()].mimeTypes
-        mimeTypesElement.options = []
+        recognitionMimeTypesElement.options = []
         mimeTypesList[recognitionTypeElement.value].forEach((mt, i) => {
-          const selected = defaultMimeTypes.indexOf(mt) > -1
-          mimeTypesElement.options[i] = new Option(mt, mt, selected, selected)
+          const selected = defaultMimeTypes.indexOf(mt) > -1 || (mt =='application/vnd.myscript.jiix' && defaultConfiguration.rendering.smartGuide)
+          recognitionMimeTypesElement.options[i] = new Option(mt, mt, selected, selected)
         })
 
         renderingSmartGuideElement.checked = defaultConfiguration.rendering.smartGuide;
@@ -366,9 +367,10 @@
         triggersExportContentDelayElement.value = defaultConfiguration.triggers.exportContentDelay;
         triggersResizeDelayElement.value = defaultConfiguration.triggers.resizeTriggerDelay;
 
-        exportBtn.disabled =defaultConfiguration.triggers.exportContent !== 'DEMAND';
+        exportBtn.disabled = defaultConfiguration.triggers.exportContent !== 'DEMAND';
       }
       initInputsValues();
+
       editorElement.addEventListener('changed', (event) => {
         exportBtn.disabled =
           !event.detail.canExport ||
@@ -377,6 +379,12 @@
 
       serverProtocolElement.addEventListener('change', (e) => {
         if (e.target.value === 'REST') {
+          /**
+           * When server protocol is REST
+           *  - Trigger export content 'POINTER_UP' is not allowed
+           *  - Smart guide is not allowed
+           *  - Recognition guides is not allowed
+           */
           if (triggersExportContentElement.value === 'POINTER_UP') {
             triggersExportContentElement.value = 'QUIET_PERIOD';
           }
@@ -386,6 +394,8 @@
           recognitionGuidesElement.disabled = true;
           recognitionGuidesElement.checked = false;
         } else {
+          recognitionTypeElement.querySelector('option[value="Raw Content"]').disabled = false;
+          recognitionTypeElement.value = 'TEXT';
           triggersExportContentElement.querySelector('option[value="POINTER_UP"]').disabled = false;
           renderingSmartGuideElement.disabled = false;
           renderingSmartGuideElement.checked = true;
@@ -395,20 +405,39 @@
       });
 
       recognitionTypeElement.addEventListener('change', (e) => {
-        const defaultMimeTypes = defaultConfiguration.recognition[recognitionTypeElement.value.toLocaleLowerCase()].mimeTypes
-        mimeTypesElement.options = []
-        mimeTypesList[recognitionTypeElement.value].forEach((mt, i) => {
-          const selected = defaultMimeTypes.indexOf(mt) > -1
-          mimeTypesElement.options[i] = new Option(mt, mt, selected, selected)
-        })
+        recognitionMimeTypesElement.options = [];
+        if (recognitionTypeElement.value === 'Raw Content') {
+          // There is no MIME Type to set when recognition type is Raw Content
+          recognitionMimeTypesElement.innerHTML = '';
+          serverProtocolElement.value = 'REST';
+        } else {
+          const defaultMimeTypes = defaultConfiguration.recognition[recognitionTypeElement.value.toLocaleLowerCase()].mimeTypes;
+          mimeTypesList[recognitionTypeElement.value].forEach((mt, i) => {
+            const selected = defaultMimeTypes.indexOf(mt) > -1 || (mt =='application/vnd.myscript.jiix' && defaultConfiguration.rendering.smartGuide);
+            recognitionMimeTypesElement.options[i] = new Option(mt, mt, selected, selected);
+          })
+        }
+      })
+
+      renderingSmartGuideElement.addEventListener('change', (e) => {
+        if (e.srcElement.checked) {
+          // Smart guide needs application/vnd.myscript.jiix export
+          recognitionMimeTypesElement.querySelector('option[value="application/vnd.myscript.jiix"]').selected = true;
+        }
       })
 
       resetBtn.addEventListener('click', initInputsValues);
 
+      exportBtn.addEventListener('click', () => {
+        editor.export();
+      })
       validBtn.addEventListener('click', () => {
         const selectedMimeTypes = []
-        for (let o of mimeTypesElement.selectedOptions) {
+        for (let o of recognitionMimeTypesElement.selectedOptions) {
           selectedMimeTypes.push(o.value)
+        }
+        if (selectedMimeTypes.length === 0) {
+          selectedMimeTypes = undefined
         }
         exportBtn.disabled = triggersExportContentElement.value !== 'DEMAND';
         resultElement.innerHTML = '';
@@ -438,9 +467,6 @@
             diagram: {
               mimeTypes: recognitionTypeElement.value === 'DIAGRAM' ? selectedMimeTypes : [],
             },
-            rawContent: {
-              mimeTypes: recognitionTypeElement.value === 'Raw Content' ? selectedMimeTypes : [],
-            }
           },
           rendering: {
             smartGuide: {
@@ -459,6 +485,9 @@
       }
       const editor = new iink.Editor(editorElement, options);
 
+      editor.events.addEventListener('exported', (event) => {
+        resultElement.innerHTML = JSON.stringify(event.detail);
+      });
       window.addEventListener('resize', () => {
         editor.resize();
       });

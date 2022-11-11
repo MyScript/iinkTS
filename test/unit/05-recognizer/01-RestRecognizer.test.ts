@@ -60,4 +60,48 @@ describe('RestRecognizer.ts', () =>
       expect(newModel).toEqual(model)
     })
   })
+
+  recognitionTypeList.forEach((recognitionType: TRecognitionType) =>
+  {
+    test(`should convert ${ recognitionType }`, async () =>
+    {
+      const model: IModel = new Model(width, height)
+      const p1: TPoint = { t: 1, p: 1, x: 1, y: 1 }
+      const p2: TPoint = { t: 10, p: 1, x: 100, y: 1 }
+      model.initCurrentStroke(p1, 1, 'pen', DefaultPenStyle)
+      model.endCurrentStroke(p2, DefaultPenStyle)
+      const recognitionConfig: TRecognitionConfiguration = {
+        ...DefaultRecognitionConfiguration,
+        type: recognitionType
+      }
+      const rr = new RestRecognizer(DefaultServerConfiguration, recognitionConfig)
+      const newModel = await rr.convert(model, 'DIGITAL_EDIT')
+      model.positions.lastReceivedPosition++
+      model.positions.lastSentPosition++
+      model.converts = {}
+
+      let mimeType = ''
+      switch (recognitionType) {
+        case 'TEXT':
+          mimeType = 'text/plain'
+          break;
+        case 'DIAGRAM':
+          mimeType = 'application/vnd.myscript.jiix'
+          break;
+        case 'MATH':
+          mimeType = 'application/x-latex'
+          break;
+        case 'Raw Content':
+          mimeType = 'application/vnd.myscript.jiix'
+          break;
+
+        default:
+          throw new Error("invalid recognition type");
+      }
+
+      model.converts[mimeType] = ''
+      expect(newModel).toEqual(model)
+    })
+  })
+
 })

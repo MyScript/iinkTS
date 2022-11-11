@@ -37,5 +37,5 @@ export default {
   transform: {
     "^.+\\.css$": "jest-transform-css"
   },
-  verbose: true
+  verbose: false
 }

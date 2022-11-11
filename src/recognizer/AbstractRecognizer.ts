@@ -2,10 +2,8 @@
 import { TRecognitionConfiguration } from '../@types/configuration/RecognitionConfiguration'
 import { TServerConfiguration } from '../@types/configuration/ServerConfiguration'
 import { IModel } from '../@types/model/Model'
-import { IRecognizer } from '../@types/recognizer/Recognizer'
-import { GlobalEvent } from '../event/GlobalEvent'
 
-export abstract class AbstractRecognizer implements IRecognizer
+export abstract class AbstractRecognizer
 {
   protected serverConfiguration: TServerConfiguration
   protected recognitionConfiguration: TRecognitionConfiguration
@@ -14,11 +12,6 @@ export abstract class AbstractRecognizer implements IRecognizer
   {
     this.serverConfiguration = serverConfig
     this.recognitionConfiguration = recognitionConfig
-  }
-
-  get globalEvent(): GlobalEvent
-  {
-    return GlobalEvent.getInstance()
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function

@@ -1,13 +1,14 @@
-import { TStroke, TStrokeGroup, TStrokeGroupJSON } from "../@types/stroker/Stroker"
-import { TRecognitionConfiguration } from "../@types/configuration/RecognitionConfiguration"
+import { TStroke, TStrokeGroup, TStrokeGroupJSON } from "../@types/model/Stroke"
+import { TConverstionState, TRecognitionConfiguration } from "../@types/configuration/RecognitionConfiguration"
 import { TServerConfiguration } from "../@types/configuration/ServerConfiguration"
 import { IModel, TExport, TJIIXExport } from "../@types/model/Model"
 import { TPenStyle } from "../@types/style/PenStyle"
 
-import Constants from '../Constants'
+import { Error as ErrorConst } from '../Constants'
 import StyleHelper from "../style/StyleHelper"
 import { computeHmac } from "./CryptoHelper"
 import { AbstractRecognizer } from "./AbstractRecognizer"
+import { TRestPostConfiguration, TRestPostData } from "../@types/recognizer/RestRecognizer"
 
 type ApiError = {
   code?: string
@@ -26,7 +27,7 @@ export class RestRecognizer extends AbstractRecognizer
     return `${ this.serverConfiguration.scheme }://${ this.serverConfiguration.host }/api/v4.0/iink/batch`
   }
 
-  get postConfig()
+  get postConfig(): TRestPostConfiguration
   {
     switch (this.recognitionConfiguration.type) {
       case 'DIAGRAM':
@@ -44,7 +45,7 @@ export class RestRecognizer extends AbstractRecognizer
       case 'Raw Content':
         return {
           lang: this.recognitionConfiguration.lang,
-          'raw-content': this.recognitionConfiguration.rawContent,
+          'raw-content': this.recognitionConfiguration['raw-content'],
           export: this.recognitionConfiguration.export
         }
       case 'TEXT':
@@ -59,7 +60,7 @@ export class RestRecognizer extends AbstractRecognizer
     }
   }
 
-  private buildData(model: IModel)
+  private buildData(model: IModel): TRestPostData
   {
     const newStrokes: TStrokeGroupJSON[] = []
     model.strokeGroups.forEach((group: TStrokeGroup) =>
@@ -90,7 +91,6 @@ export class RestRecognizer extends AbstractRecognizer
       xDPI: 96,
       yDPI: 96,
       contentType,
-      // conversionState: 'DIGITAL_EDIT', 'HANDWRITING'
       // theme: StyleHelper.themeToCSS(),
       height: model.height,
       width: model.width,
@@ -140,9 +140,8 @@ export class RestRecognizer extends AbstractRecognizer
     }
   }
 
-  private async callPostMessage(model: IModel, mimeType: string): Promise<TExport | never>
+  private async tryFetch(data: unknown, mimeType: string): Promise<TExport | never>
   {
-    const data = this.buildData(model)
     return this.post(data, mimeType)
       .then((res) =>
       {
@@ -152,25 +151,19 @@ export class RestRecognizer extends AbstractRecognizer
       })
       .catch((err) =>
       {
-        let message = err.message
+        let message = err.message || ErrorConst.UNKNOW
         if (!err.code) {
-          message = Constants.Error.CANT_ESTABLISH
+          message = ErrorConst.CANT_ESTABLISH
+        } else if (err.code === 'access.not.granted') {
+          message = ErrorConst.WRONG_CREDENTIALS
         }
         const error = new Error(message)
-        error.name = err.code || ''
-        this.globalEvent.emitError(error)
         throw error
       })
   }
 
-  async export(model: IModel, requestedMimeTypes?: string[]): Promise<IModel | never>
+  private getMimeTypes(requestedMimeTypes?: string[]): string[]
   {
-    const myModel = model.getClone()
-    myModel.updatePositionSent()
-
-    if (myModel.isEmpty) {
-      return Promise.resolve(myModel)
-    }
     let mimeTypes: string[] = requestedMimeTypes || []
     if (!mimeTypes.length) {
       switch (this.recognitionConfiguration.type) {
@@ -181,7 +174,7 @@ export class RestRecognizer extends AbstractRecognizer
           mimeTypes = this.recognitionConfiguration.math.mimeTypes
           break
         case 'Raw Content':
-          mimeTypes = this.recognitionConfiguration.rawContent.mimeTypes
+          mimeTypes = ['application/vnd.myscript.jiix']
           break
         case 'TEXT':
           mimeTypes = this.recognitionConfiguration.text.mimeTypes
@@ -191,20 +184,58 @@ export class RestRecognizer extends AbstractRecognizer
           break
       }
     }
+    return mimeTypes
+  }
+
+  async convert(model: IModel, conversionState?: TConverstionState, requestedMimeTypes?: string[]): Promise<IModel | never>
+  {
+    const myModel = model.getClone()
+    myModel.updatePositionSent()
+
+    const mimeTypes = this.getMimeTypes(requestedMimeTypes)
+
+    const dataToConcert = this.buildData(myModel)
+    dataToConcert.conversionState = conversionState
+
+    const promises = mimeTypes.map(mt => this.tryFetch(dataToConcert, mt))
+    const converts: TExport[] = await Promise.all(promises)
+    converts.forEach(c => {
+      myModel.converts = Object.assign(myModel.converts || {}, c)
+    })
+
+    myModel.updatePositionReceived()
+
+    return myModel
+  }
+
+  private async exportModel(model: IModel, mimeType: string): Promise<TExport | never>
+  {
+    const data = this.buildData(model)
+    return this.tryFetch(data, mimeType)
+  }
+
+  async export(model: IModel, requestedMimeTypes?: string[]): Promise<IModel | never>
+  {
+    const myModel = model.getClone()
+    myModel.updatePositionSent()
+
+    if (myModel.isEmpty) {
+      return Promise.resolve(myModel)
+    }
+
+    const mimeTypes = this.getMimeTypes(requestedMimeTypes)
 
     if (!mimeTypes.length) {
       return Promise.reject(new Error('Export failed, no mimeTypes define in recognition configuration'))
     }
 
     const mimeTypesRequiringExport: string[] = mimeTypes.filter(m => !myModel.exports || !myModel.exports[m])
-
-    const exports: TExport[] = await Promise.all(mimeTypesRequiringExport.map(mimeType => this.callPostMessage(myModel, mimeType)))
-
-    myModel.updatePositionReceived()
-
+    const exports: TExport[] = await Promise.all(mimeTypesRequiringExport.map(mimeType => this.exportModel(myModel, mimeType)))
     exports.forEach(e => {
       myModel.exports = Object.assign(myModel.exports || {}, e)
     })
+
+    myModel.updatePositionReceived()
 
     return myModel
   }

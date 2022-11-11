@@ -67,12 +67,12 @@ describe('DefaultConfiguration.ts', () =>
       expect(DefaultConfiguration.recognition.diagram.mimeTypes).toStrictEqual(['application/vnd.myscript.jiix'])
       expect(DefaultConfiguration.recognition.diagram.eraser?.["erase-precisely"]).toStrictEqual(false)
     })
-    test('should have rawContent', () =>
+    test('should have raw-content', () =>
     {
-      expect(DefaultConfiguration.recognition.rawContent.mimeTypes).toStrictEqual(['application/vnd.myscript.jiix'])
-      expect(DefaultConfiguration.recognition.rawContent.recognition?.text).toStrictEqual(true)
-      expect(DefaultConfiguration.recognition.rawContent.recognition?.shape).toStrictEqual(false)
-      expect(DefaultConfiguration.recognition.rawContent.eraser?.["erase-precisely"]).toStrictEqual(false)
+      expect(DefaultConfiguration.recognition['raw-content']).not.toHaveProperty('mimeTypes')
+      expect(DefaultConfiguration.recognition['raw-content'].recognition?.text).toStrictEqual(true)
+      expect(DefaultConfiguration.recognition['raw-content'].recognition?.shape).toStrictEqual(false)
+      expect(DefaultConfiguration.recognition['raw-content'].eraser?.["erase-precisely"]).toStrictEqual(false)
     })
   })
 

@@ -15,7 +15,7 @@ export class UndoRedoManager
     this.context = new UndoRedoContext(model)
   }
 
-  get events(): GlobalEvent
+  get globalEvent(): GlobalEvent
   {
     return GlobalEvent.getInstance()
   }
@@ -23,6 +23,14 @@ export class UndoRedoManager
   private updateCanUndoRedo(): void {
     this.context.canRedo = this.context.stack.length - 1 > this.context.stackIndex
     this.context.canUndo = this.context.stackIndex > 0
+  }
+
+  getLastModel(): IModel {
+    return this.context.stack[this.context.stack.length - 1]
+  }
+
+  getModelFromModificationDate(modificationDate: number): IModel {
+    return this.context.stack.find(m => m.modificationDate === modificationDate) as IModel
   }
 
   addModelToStack(model: IModel): void {
@@ -39,14 +47,14 @@ export class UndoRedoManager
     }
 
     this.updateCanUndoRedo()
-    this.events.emitChange(this.context)
+    this.globalEvent.emitChange(this.context)
   }
 
   updateModelInStack(model: IModel): void {
     const index = this.context.stack.findIndex(m => m.modificationDate === model.modificationDate)
     if (index > -1) {
       this.context.stack.splice(index, 1, model.getClone())
-      this.events.emitChange(this.context)
+      this.globalEvent.emitChange(this.context)
     }
   }
 
@@ -54,7 +62,7 @@ export class UndoRedoManager
     if (this.context.canUndo) {
       this.context.stackIndex--
       this.updateCanUndoRedo()
-      this.events.emitChange(this.context)
+      this.globalEvent.emitChange(this.context)
     }
     return this.context.stack[this.context.stackIndex].getClone()
   }
@@ -63,14 +71,14 @@ export class UndoRedoManager
     if (this.context.canRedo) {
       this.context.stackIndex++
       this.updateCanUndoRedo()
-      this.events.emitChange(this.context)
+      this.globalEvent.emitChange(this.context)
     }
     return this.context.stack[this.context.stackIndex].getClone()
   }
 
   reset(model: IModel): void {
     this.context = new UndoRedoContext(model)
-    this.events.emitChange(this.context)
+    this.globalEvent.emitChange(this.context)
   }
 
 }

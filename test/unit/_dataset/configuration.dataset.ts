@@ -42,7 +42,7 @@ export const ConfigurationDiagramRest: TConfigurationClient = {
   },
   recognition: {
     type: 'DIAGRAM',
-    text: {
+    diagram: {
       mimeTypes: ['application/vnd.myscript.jiix']
     }
   }
@@ -58,9 +58,6 @@ export const ConfigurationRawContentRest: TConfigurationClient = {
   },
   recognition: {
     type: 'Raw Content',
-    text: {
-      mimeTypes: ['application/vnd.myscript.jiix']
-    }
   }
 }
 
@@ -148,8 +145,7 @@ export const AllOverrideConfiguration: TConfigurationClient = {
         'erase-precisely': true
       }
     },
-    rawContent: {
-      mimeTypes: ['application/vnd.myscript.jiix'],
+    'raw-content': {
       recognition: {
         text: false,
         shape: true
