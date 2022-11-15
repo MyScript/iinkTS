@@ -1,4 +1,4 @@
-import { IModel, TExport } from "../@types/model/Model"
+import { IModel, TExport, TJIIXExport } from "../@types/model/Model"
 import { TUndoRedoContext } from "../@types/undo-redo/UndoRedoContext"
 import { EventType } from "../Constants"
 
@@ -60,12 +60,20 @@ export class GlobalEvent extends EventTarget
   {
     this.emit(EventType.CLEARED, model)
   }
-  emitConvert(exports: TExport): void
+  emitConvert(): void
   {
     this.emit(EventType.CONVERT, exports)
   }
-  emitImport(jiix: string, mimeType: string): void
+  emitConverted(exports: TExport): void
+  {
+    this.emit(EventType.CONVERTED, exports)
+  }
+  emitImport(jiix: string | TJIIXExport, mimeType: string): void
   {
     this.emit(EventType.IMPORT, { jiix, mimeType })
+  }
+  emitImported(jiix: TJIIXExport): void
+  {
+    this.emit(EventType.IMPORTED, jiix)
   }
 }

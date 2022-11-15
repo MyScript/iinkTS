@@ -59,7 +59,7 @@ describe('DefaultConfiguration.ts', () =>
     test('should have text', () =>
     {
       expect(DefaultConfiguration.recognition.text.guides?.enable).toStrictEqual(true)
-      expect(DefaultConfiguration.recognition.text.mimeTypes).toStrictEqual(['text/plain'])
+      expect(DefaultConfiguration.recognition.text.mimeTypes).toStrictEqual(['application/vnd.myscript.jiix'])
       expect(DefaultConfiguration.recognition.text.eraser?.["erase-precisely"]).toStrictEqual(false)
     })
     test('should have diagram', () =>
@@ -105,7 +105,7 @@ describe('DefaultConfiguration.ts', () =>
     })
     test('should have smartGuide', () =>
     {
-      expect(DefaultConfiguration.rendering.smartGuide.enable).toStrictEqual(false)
+      expect(DefaultConfiguration.rendering.smartGuide.enable).toStrictEqual(true)
       expect(DefaultConfiguration.rendering.smartGuide.fadeOut.enable).toStrictEqual(false)
       expect(DefaultConfiguration.rendering.smartGuide.fadeOut.duration).toStrictEqual(10000)
     })

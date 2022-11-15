@@ -74,7 +74,7 @@ export const DefaultRecognitionConfiguration: TRecognitionConfiguration = {
     guides: {
       enable: true
     },
-    mimeTypes: ['text/plain'], // 'application/vnd.myscript.jiix'
+    mimeTypes: ['application/vnd.myscript.jiix'], // 'text/plain'
     margin: {
       top: 20,
       left: 10,
@@ -115,7 +115,7 @@ export const DefaultRenderingConfiguration: TRenderingConfiguration = {
   minHeight: 100,
   minWidth: 100,
   smartGuide: {
-    enable: false,
+    enable: true,
     fadeOut: {
       enable: false,
       duration: 10000

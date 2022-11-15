@@ -4,9 +4,9 @@ import { TPenStyle } from '../style/PenStyle'
 import { TRecognitionPositions } from './RecognitionPositions'
 
 export type TWordExport = {
-  id: string
+  id?: string
   label: string,
-  candidates: string[]
+  candidates?: string[]
 }
 
 export type TJIIXExport = {
@@ -18,15 +18,15 @@ export type TJIIXExport = {
 
 export type TExport = {
   // // TEXT | Raw Content
-  // 'application/vnd.myscript.jiix'?: TJIIXExport
+  'application/vnd.myscript.jiix'?: TJIIXExport
   // // TEXT
-  // 'text/plain'? : string
+  'text/plain'? : string
   // // MATH
-  // 'application/x-latex'?: string
-  // 'application/mathml+xml'?: string
+  'application/x-latex'?: string
+  'application/mathml+xml'?: string
   // // DIAGRAM
-  // 'image/svg+xml'?: string
-  // 'application/vnd.openxmlformats-officedocument.presentationml.presentation'?: Blob
+  'image/svg+xml'?: string
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation'?: Blob
   [key: string]: TJIIXExport | string | Blob
 }
 

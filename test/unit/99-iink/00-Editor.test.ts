@@ -5,6 +5,7 @@ import { TPoint } from "../../../src/@types/renderer/Point"
 import { LeftClickEventFake } from "../utils/PointerEventFake"
 import { DefaultPenStyle } from "../../../src/style/DefaultPenStyle"
 import { DefaultTheme } from "../../../src/style/DefaultTheme"
+import { Model } from "../../../src/model/Model"
 
 
 describe('Editor.ts', () =>
@@ -49,6 +50,16 @@ describe('Editor.ts', () =>
     expect(editor.configuration.triggers).toStrictEqual(AllOverrideConfiguration.triggers)
   })
 
+  test('should create Editor and not be initialized', () =>
+  {
+    const wrapperHTML: HTMLElement = document.createElement('div')
+    wrapperHTML.style.height = '100px'
+    wrapperHTML.style.width = '100px'
+    const editor = new Editor(wrapperHTML)
+
+    expect(editor.initialized).toBe(false)
+  })
+
   test('should append loader element', () =>
   {
     const wrapperHTML: HTMLElement = document.createElement('div')
@@ -76,13 +87,85 @@ describe('Editor.ts', () =>
     expect(editor.model).toBeDefined()
   })
 
+  test('should undo', () =>
+  {
+    const wrapperHTML: HTMLElement = document.createElement('div')
+    const editor = new Editor(wrapperHTML)
+    editor.behaviors.undo = jest.fn()
+    editor.undo()
+    expect(editor.behaviors.undo).toBeCalledTimes(1)
+  })
+
+  test('should redo', () =>
+  {
+    const wrapperHTML: HTMLElement = document.createElement('div')
+    const editor = new Editor(wrapperHTML)
+    editor.behaviors.redo = jest.fn()
+    editor.redo()
+    expect(editor.behaviors.redo).toBeCalledTimes(1)
+  })
+
+  test('should clear', () =>
+  {
+    const wrapperHTML: HTMLElement = document.createElement('div')
+    const editor = new Editor(wrapperHTML)
+    editor.behaviors.clear = jest.fn()
+    editor.clear()
+    expect(editor.behaviors.clear).toBeCalledTimes(1)
+  })
+
   test('should resize', () =>
   {
     const wrapperHTML: HTMLElement = document.createElement('div')
     const editor = new Editor(wrapperHTML)
     editor.behaviors.resize = jest.fn()
+    editor.smartGuide.resize = jest.fn()
     editor.resize()
     expect(editor.behaviors.resize).toBeCalledTimes(1)
+    expect(editor.smartGuide.resize).toBeCalledTimes(1)
+  })
+
+  test('should export', () =>
+  {
+    const wrapperHTML: HTMLElement = document.createElement('div')
+    const editor = new Editor(wrapperHTML)
+    const model = new Model(100, 50)
+    model.exports = {
+      "text/plain": 'tatapouet'
+    }
+    editor.behaviors.export = jest.fn(() => Promise.resolve(model))
+    editor.events.emitExported = jest.fn()
+    editor.export(['text/plain'])
+    expect(editor.behaviors.export).toBeCalledTimes(1)
+  })
+
+  test('should convert', () =>
+  {
+    const wrapperHTML: HTMLElement = document.createElement('div')
+    const editor = new Editor(wrapperHTML)
+    const model = new Model(100, 50)
+    model.converts = {
+      "text/plain": 'tatapouet'
+    }
+    editor.behaviors.convert = jest.fn(() => Promise.resolve(model))
+
+    editor.convert()
+    expect(editor.behaviors.convert).toBeCalledTimes(1)
+  })
+
+  test('should import', () =>
+  {
+    const wrapperHTML: HTMLElement = document.createElement('div')
+    const editor = new Editor(wrapperHTML)
+    const model = new Model(100, 50)
+    model.exports = {
+      "text/plain": 'tatapouet'
+    }
+    editor.behaviors.import = jest.fn(() => Promise.resolve(model))
+    editor.events.emitImported = jest.fn()
+
+    editor.import(new Blob(), 'text/plain')
+    expect(editor.behaviors.import).toBeCalledTimes(1)
   })
 
   describe('Style', () => {

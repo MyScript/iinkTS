@@ -313,28 +313,27 @@ describe('WSRecognizer.ts', () =>
 
       const exportMessageSent = mockServer.messages[mockServer.messages.length - 1]
 
-      let mimeType = ''
+      let mimeTypes = []
       switch (recognitionType) {
         case 'TEXT':
-          mimeType = 'text/plain'
+          mimeTypes = DefaultRecognitionConfiguration.text.mimeTypes
           break;
         case 'DIAGRAM':
-          mimeType = 'application/vnd.myscript.jiix'
+          mimeTypes = DefaultRecognitionConfiguration.diagram.mimeTypes
           break;
         case 'MATH':
-          mimeType = 'application/x-latex'
+          mimeTypes = DefaultRecognitionConfiguration.math.mimeTypes
           break;
         case 'Raw Content':
-          mimeType = 'application/vnd.myscript.jiix'
+          mimeTypes = ['application/vnd.myscript.jiix']
           break;
-
         default:
           throw new Error("invalid recognition type");
       }
       const exportMessageSentToTest = JSON.stringify({
         type: 'export',
         partId: partChangeMessage.partId,
-        mimeTypes: [mimeType]
+        mimeTypes
       })
       expect(exportMessageSent).toContain(exportMessageSentToTest)
     })

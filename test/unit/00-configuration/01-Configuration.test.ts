@@ -137,10 +137,11 @@ describe('Configuration.ts', () =>
 
     test('should add mimeType JIIX if rendering.smartGuide = true', () =>
     {
-      const conf = { ...DefaultConfiguration }
+      const conf = JSON.parse(JSON.stringify(DefaultConfiguration)) as TConfiguration
       conf.server.protocol = "WEBSOCKET"
       conf.recognition.type = "TEXT"
       conf.rendering.smartGuide.enable = true
+      conf.recognition.text.mimeTypes = ['text/plain']
       expect(conf.recognition.text.mimeTypes).not.toContain('application/vnd.myscript.jiix')
       const c: TConfiguration = new Configuration(conf)
       expect(c.recognition.text.mimeTypes).toContain('application/vnd.myscript.jiix')
