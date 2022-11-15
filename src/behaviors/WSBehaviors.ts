@@ -25,6 +25,7 @@ export class WSBehaviors implements IBehaviors
   private _exportDeffered?: DeferredPromise<TExport>
   private _convertDeffered?: DeferredPromise<TExport>
   private _addStrokeDeffered?: DeferredPromise<TExport>
+  private _importDeffered?: DeferredPromise<TExport>
   private _resizeDeffered?: DeferredPromise<void>
   private _undoDeffered?: DeferredPromise<void>
   private _redoDeffered?: DeferredPromise<void>
@@ -84,7 +85,6 @@ export class WSBehaviors implements IBehaviors
 
   private onSVGPatch = (evt: TWebSocketSVGPatchEvent) =>
   {
-    // console.log('onSVGPatch layer:', evt.layer, 'updates:', evt.updates)
     // TODO analyse if required ...
     // if (evt.updates.length) {
     //   if (model.recognizedSymbols) {
@@ -206,6 +206,25 @@ export class WSBehaviors implements IBehaviors
     }
     this.undoRedoManager.updateModelInStack(model)
     this._convertDeffered = undefined
+    return model
+  }
+
+  async import(model: IModel, data: Blob, mimeType?: string): Promise<IModel | never>
+  {
+    await this.initalise.promise
+    this.undoRedoManager.addModelToStack(model)
+    this._importDeffered = new DeferredPromise<TExport>()
+    this.recognizer.import(data, mimeType)
+
+    const myImportExport: TExport = await this._importDeffered.promise
+    model.updatePositionReceived()
+    if (model.exports) {
+      Object.assign(model.exports, myImportExport)
+    } else {
+      model.exports = myImportExport
+    }
+    this.undoRedoManager.updateModelInStack(model)
+    this._importDeffered = undefined
     return model
   }
 

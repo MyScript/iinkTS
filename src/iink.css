@@ -125,7 +125,7 @@
     background-color: #e0e0e0;
 }
 
-.ms-editor .smartguide .prompter-text-container {
+.ms-editor .smartguide .prompter-container {
     background-color: rgba(255, 255, 255, 0.9);
     height: 48px;
     line-height: 48px;
@@ -144,21 +144,21 @@
     -webkit-tap-highlight-color: transparent;
 }
 
-.ms-editor .smartguide .prompter-text-container > div > span {
+.ms-editor .smartguide .prompter-container > div > span {
     cursor: pointer;
     display: inline-block;
 }
 
-.ms-editor .smartguide .prompter-text-container .prompter-text {
+.ms-editor .smartguide .prompter-container .prompter-text {
     margin-left: 12px;
 }
 
-.ms-editor .smartguide .prompter-text-container .prompter-text .added-word {
+.ms-editor .smartguide .prompter-container .prompter-text .added-word {
     animation: 0.1s linear word-added,
     3s ease-in-out color-input;
 }
 
-.ms-editor .smartguide .prompter-text-container .prompter-text .modified-word {
+.ms-editor .smartguide .prompter-container .prompter-text .modified-word {
     animation: 0.1s linear word-modified,
     3s ease-in-out color-input;
 }
@@ -195,6 +195,7 @@
 }
 
 .ms-editor .smartguide .more-menu {
+    display: flex;
     flex-direction: column;
     margin-right: 12px;
     line-height: 30px;
@@ -203,6 +204,18 @@
     z-index: 100;
     box-shadow: 2px 2px 12px #BDBDBD;
     background-color: #F5F5F5;
+    overflow: hidden;
+    transition: max-height 2s ease-out, opacity 1s, visibility 0.5s linear;
+}
+.ms-editor .smartguide .more-menu.open {
+    max-height: 500px;
+    visibility: visible;
+    opacity: 1;
+}
+.ms-editor .smartguide .more-menu.close {
+    max-height: 0;
+    visibility: hidden;
+    opacity: 0;
 }
 
 .ms-editor .smartguide .more-menu .options-label-button {

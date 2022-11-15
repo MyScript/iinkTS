@@ -1,12 +1,14 @@
+import { randomUUID } from "crypto"
 import { TConverstionState, TRecognitionConfiguration } from "../@types/configuration/RecognitionConfiguration"
 import { TServerConfiguration } from "../@types/configuration/ServerConfiguration"
-import { IModel } from "../@types/model/Model"
+import { IModel, TExport } from "../@types/model/Model"
 import { TWebSocketContentChangeEvent, TWebSocketErrorEvent, TWebSocketEvent, TWebSocketExportEvent, TWebSocketHMACChallengeEvent, TWebSocketPartChangeEvent, TWebSocketSVGPatchEvent } from "../@types/recognizer/WSRecognizer"
 import { TStroke } from "../@types/model/Stroke"
 import { Error as ErrorConst, WSEventType } from "../Constants"
 import { WSEvent } from "../event/WSEvent"
 import { AbstractRecognizer } from "./AbstractRecognizer"
 import { computeHmac } from "./CryptoHelper"
+import { DeferredPromise } from "../utils/DeferredPromise"
 
 export class WSRecognizer extends AbstractRecognizer
 {
@@ -19,6 +21,7 @@ export class WSRecognizer extends AbstractRecognizer
   private viewSizeHeight!: number
   private viewSizeWidth!: number
   private currentErrorCode?: string | number
+  private _fileImportDeffered?: DeferredPromise<TExport>
   wsEvent: WSEvent
 
   constructor(serverConfig: TServerConfiguration, recognitionConfig: TRecognitionConfiguration)
@@ -138,7 +141,6 @@ export class WSRecognizer extends AbstractRecognizer
 
   // private errorCallback(e: Event): void
   // {
-  //   console.log('e: ', e);
   //   this.wsEvent.emitError(new Error(e.type))
   // }
 
@@ -241,9 +243,9 @@ export class WSRecognizer extends AbstractRecognizer
         //   recognizerContext.supportedImportMimeTypes = message.data.mimeTypes
         //   recognitionContext.response(undefined, message.data)
         //   break
-        //   case 'fileChunkAck':
-        //     recognitionContext.response(undefined, message.data)
-        //     break
+        case 'fileChunkAck':
+          this._fileImportDeffered?.resolve((websocketMessage as unknown) as TExport)
+          break
         //   case 'idle':
         //     recognizerContext.idle = true
         //     recognitionContext.patch(undefined, message.data)
@@ -364,6 +366,42 @@ export class WSRecognizer extends AbstractRecognizer
     }
     this.send(message)
     return model
+  }
+
+  async import(data: Blob, mimeType?: string): Promise<TExport | never>
+  {
+    const chunkSize = this.serverConfiguration.websocket.fileChunkSize
+    const importFileId = randomUUID()
+    // const messages = []
+    this._fileImportDeffered = new DeferredPromise<TExport>()
+    const readBlob = (blob: Blob): Promise<string | never> => {
+      const fileReader = new FileReader()
+      return new Promise((resolve, reject) => {
+        fileReader.onloadend = (ev) => resolve(ev.target?.result as string)
+        fileReader.onerror = () => reject()
+        fileReader.readAsText(blob)
+      })
+    }
+
+    const importFileMessage: TWebSocketEvent = {
+      type: 'importFile',
+      importFileId,
+      mimeType
+    }
+    this.send(importFileMessage)
+
+    for (let i = 0; i < data.size; i += chunkSize) {
+      const blobPart = data.slice(i, chunkSize, data.type)
+      const partFileString = await readBlob(blobPart)
+      const fileChuckMessage: TWebSocketEvent = {
+        type: 'fileChunk',
+        importFileId,
+        data: partFileString,
+        lastChunk: i + chunkSize > data.size
+      }
+      this.send(fileChuckMessage)
+    }
+    return this._fileImportDeffered.promise
   }
 
   async resize(model: IModel): Promise<IModel>

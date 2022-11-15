@@ -40,13 +40,13 @@ describe('RestRecognizer.ts', () =>
       let mimeType = ''
       switch (recognitionType) {
         case 'TEXT':
-          mimeType = 'text/plain'
+          mimeType = DefaultRecognitionConfiguration.text.mimeTypes[0]
           break;
         case 'DIAGRAM':
-          mimeType = 'application/vnd.myscript.jiix'
+          mimeType = DefaultRecognitionConfiguration.diagram.mimeTypes[0]
           break;
         case 'MATH':
-          mimeType = 'application/x-latex'
+          mimeType = DefaultRecognitionConfiguration.math.mimeTypes[0]
           break;
         case 'Raw Content':
           mimeType = 'application/vnd.myscript.jiix'
@@ -83,13 +83,13 @@ describe('RestRecognizer.ts', () =>
       let mimeType = ''
       switch (recognitionType) {
         case 'TEXT':
-          mimeType = 'text/plain'
+          mimeType = DefaultRecognitionConfiguration.text.mimeTypes[0]
           break;
         case 'DIAGRAM':
-          mimeType = 'application/vnd.myscript.jiix'
+          mimeType = DefaultRecognitionConfiguration.diagram.mimeTypes[0]
           break;
         case 'MATH':
-          mimeType = 'application/x-latex'
+          mimeType = DefaultRecognitionConfiguration.math.mimeTypes[0]
           break;
         case 'Raw Content':
           mimeType = 'application/vnd.myscript.jiix'

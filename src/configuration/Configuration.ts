@@ -60,17 +60,18 @@ export class Configuration implements TConfiguration
 
   overrideDefaultConfiguration(configuration?: TConfigurationClient): void
   {
-    this.events = this.mergeDeep({}, DefaultConfiguration.events, configuration?.events)
-    this.grabber = this.mergeDeep({}, DefaultConfiguration.grabber, configuration?.grabber)
-    this.recognition = this.mergeDeep({}, DefaultConfiguration.recognition, configuration?.recognition)
-    this.rendering = this.mergeDeep({}, DefaultConfiguration.rendering, configuration?.rendering)
-    this.server = this.mergeDeep({}, DefaultConfiguration.server, configuration?.server)
-    this.triggers = this.mergeDeep({}, DefaultConfiguration.triggers, configuration?.triggers)
-    this['undo-redo'] = this.mergeDeep({}, DefaultConfiguration['undo-redo'], configuration?.['undo-redo'])
+    const defaultConf = JSON.parse(JSON.stringify(DefaultConfiguration))
+    this.events = this.mergeDeep({}, defaultConf.events, configuration?.events)
+    this.grabber = this.mergeDeep({}, defaultConf.grabber, configuration?.grabber)
+    this.recognition = this.mergeDeep({}, defaultConf.recognition, configuration?.recognition)
+    this.rendering = this.mergeDeep({}, defaultConf.rendering, configuration?.rendering)
+    this.server = this.mergeDeep({}, defaultConf.server, configuration?.server)
+    this.triggers = this.mergeDeep({}, defaultConf.triggers, configuration?.triggers)
+    this['undo-redo'] = this.mergeDeep({}, defaultConf['undo-redo'], configuration?.['undo-redo'])
 
-    this.recognition.text.mimeTypes = configuration?.recognition?.text?.mimeTypes || DefaultConfiguration.recognition.text.mimeTypes
-    this.recognition.math.mimeTypes = configuration?.recognition?.math?.mimeTypes || DefaultConfiguration.recognition.math.mimeTypes
-    this.recognition.diagram.mimeTypes = configuration?.recognition?.diagram?.mimeTypes || DefaultConfiguration.recognition.diagram.mimeTypes
+    this.recognition.text.mimeTypes = configuration?.recognition?.text?.mimeTypes || defaultConf.recognition.text.mimeTypes
+    this.recognition.math.mimeTypes = configuration?.recognition?.math?.mimeTypes || defaultConf.recognition.math.mimeTypes
+    this.recognition.diagram.mimeTypes = configuration?.recognition?.diagram?.mimeTypes || defaultConf.recognition.diagram.mimeTypes
 
     if (this.server?.useWindowLocation) {
       this.server.scheme = window.location.protocol.indexOf('s') > -1 ? 'https' : 'http'

@@ -1,7 +1,7 @@
 import { TConfiguration, TConfigurationClient } from "./@types/Configuration"
 import { TEditorOptions } from "./@types/Editor"
 import { IGrabber } from "./@types/grabber/Grabber"
-import { IModel, TExport } from "./@types/model/Model"
+import { IModel, TExport, TJIIXExport } from "./@types/model/Model"
 import { TPoint } from "./@types/renderer/Point"
 import { TPenStyle } from "./@types/style/PenStyle"
 import { TTheme } from "./@types/style/Theme"
@@ -12,10 +12,12 @@ import { Configuration } from "./configuration/Configuration"
 import { GlobalEvent } from "./event/GlobalEvent"
 import { Model } from "./model/Model"
 import { StyleManager } from "./style/StyleManager"
+import { SmartGuide } from "./smartguide/SmartGuide"
 
 import './iink.css'
 import { IBehaviors } from "./@types/Behaviors"
 import { TConverstionState } from "./@types/configuration/RecognitionConfiguration"
+import { TMarginConfiguration } from "./@types/configuration/recognition/MarginConfiguration"
 
 export enum EditorMode
 {
@@ -38,6 +40,7 @@ export class Editor
   private _configuration: Configuration
   private _behaviorsManager: BehaviorsManager
   private _styleManager: StyleManager
+  private _smartGuide: SmartGuide
   private _mode: EditorMode
   private _initialized = false
   // private _exportTimer?: ReturnType<typeof setTimeout>
@@ -66,6 +69,8 @@ export class Editor
 
     this._configuration = new Configuration(options?.configuration)
 
+    this._smartGuide = new SmartGuide()
+
     const width = Math.max(this.wrapperHTML.clientWidth, this.configuration.rendering.minWidth)
     const height = Math.max(this.wrapperHTML.clientHeight, this.configuration.rendering.minHeight)
     this.model = new Model(width, height)
@@ -85,9 +90,7 @@ export class Editor
   }
   set configuration(config: TConfigurationClient)
   {
-    if (!this.model.isEmpty) {
-      this.model.clear()
-    }
+    this.model.clear()
     // TODO maybe need some removeListener are close connection
     this._configuration.overrideDefaultConfiguration(config)
 
@@ -121,20 +124,38 @@ export class Editor
   {
     return GlobalEvent.getInstance()
   }
+  get smartGuide(): SmartGuide
+  {
+    return this._smartGuide
+  }
 
   private initalizeBehaviors(): void
   {
     this._behaviorsManager.init(this.wrapperHTML)
       .then(async () =>
       {
-        this.grabber.onPointerDown = (evt: PointerEvent, point: TPoint) => this.pointerDown(evt, point)
-        this.grabber.onPointerMove = (evt: PointerEvent, point: TPoint) => this.pointerMove(evt, point)
-        this.grabber.onPointerUp = (evt: PointerEvent, point: TPoint) => this.pointerUp(evt, point)
+        if (this.configuration.rendering.smartGuide.enable) {
+          let margin
+          switch (this.configuration.recognition.type) {
+            case "TEXT":
+              margin = this.configuration.recognition.text.margin
+              break
+            case "MATH":
+              margin = this.configuration.recognition.math.margin
+              break
+            default:
+              margin = {
+                top: 20,
+                left: 10,
+                right: 10,
+                bottom: 10
+              }
+              break
+          }
+          this._smartGuide.init(this.wrapperHTML, margin as TMarginConfiguration)
+        }
 
-        this.events.addEventListener(EventType.ERROR, (evt: Event) => this.handleError(evt))
-        this.events.addEventListener(EventType.CLEAR, this.clear)
-        // this.events.addEventListener(EventType.IMPORT, this.import)
-
+        this.addListeners()
         this._initialized = true
         this.wrapperHTML.editor = this
         this.events.emitLoaded()
@@ -149,6 +170,38 @@ export class Editor
       {
         this._loaderHTML.style.display = 'none'
       })
+  }
+
+  private addListeners(): void
+  {
+    this.grabber.onPointerDown = (evt: PointerEvent, point: TPoint) => this.pointerDown(evt, point)
+    this.grabber.onPointerMove = (evt: PointerEvent, point: TPoint) => this.pointerMove(evt, point)
+    this.grabber.onPointerUp = (evt: PointerEvent, point: TPoint) => this.pointerUp(evt, point)
+
+    this.events.addEventListener(EventType.CONVERT, () => this.convert({ conversionState: "DIGITAL_EDIT" }))
+    this.events.addEventListener(EventType.CLEAR, () => this.clear())
+    this.events.addEventListener(EventType.ERROR, (evt: Event) => this.handleError(evt))
+    this.events.addEventListener(EventType.IMPORT, (evt: Event) => this.onImport(evt))
+    this.events.addEventListener(EventType.EXPORTED, (evt: Event) => this.onExport(evt))
+  }
+
+  private onExport(evt: Event): void
+  {
+    if (this.configuration.rendering.smartGuide.enable) {
+      const exports = (evt as CustomEvent).detail as TExport
+      if (exports['application/vnd.myscript.jiix']) {
+        const jjix = (exports['application/vnd.myscript.jiix'] as unknown) as string
+        this._smartGuide.update(JSON.parse(jjix))
+      }
+    }
+  }
+
+  private onImport(evt: Event): void
+  {
+    const customEvent = evt as CustomEvent
+    const jiix: string = customEvent.detail.jiix
+    const mimeType: string = customEvent.detail.mimeType
+    this.import(new Blob([JSON.stringify(jiix)], { type: mimeType }), mimeType)
   }
 
   private showError(err: Error)
@@ -174,9 +227,9 @@ export class Editor
     // if (this._errorHTML.innerText === Constants.Error.TOO_OLD || evt.reason === 'CLOSE_RECOGNIZER') {
     //   this._errorHTML.style.display = 'none'
     // } else {
-      const customEvent = evt as CustomEvent
-      const err = customEvent?.detail as Error
-      this.showError(err)
+    const customEvent = evt as CustomEvent
+    const err = customEvent?.detail as Error
+    this.showError(err)
     // }
   }
 
@@ -242,6 +295,7 @@ export class Editor
 
   async resize(): Promise<IModel>
   {
+    this._smartGuide.resize()
     this.model.height = Math.max(this.wrapperHTML.clientHeight, this.configuration.rendering.minHeight)
     this.model.width = Math.max(this.wrapperHTML.clientWidth, this.configuration.rendering.minWidth)
     this.model = await this.behaviors.resize(this.model)
@@ -255,22 +309,20 @@ export class Editor
     return this.model
   }
 
-  async convert(params: {conversionState?: TConverstionState, mimeTypes?: string[]}): Promise<IModel | never>
+  async convert(params?: { conversionState?: TConverstionState, mimeTypes?: string[] }): Promise<IModel | never>
   {
-    this.model = await this.behaviors.convert(this.model, params.conversionState, params.mimeTypes)
-    this.events.emitConvert(this.model.converts as TExport)
+    this.model = await this.behaviors.convert(this.model, params?.conversionState, params?.mimeTypes)
+    this.events.emitConverted(this.model.converts as TExport)
     return this.model
   }
 
-  // import(evt: Event)
-  // {
-  //   if (this.behaviors.import) {
-  //     const customEvent = evt as CustomEvent
-  //     if (customEvent?.detail) {
-  //       const jiix: string = customEvent.detail.jiix
-  //       const mimeType: string = customEvent.detail.mimeType
-  //       this.behaviors.import(jiix, mimeType)
-  //     }
-  //   }
-  // }
+  async import(data: Blob, mimeType?: string): Promise<IModel | never>
+  {
+    if (this.behaviors.import) {
+      this.model = await this.behaviors.import(this.model, data, mimeType)
+      this.events.emitImported(this.model.exports?.["application/vnd.myscript.jiix"] as TJIIXExport)
+      return this.model
+    }
+    return Promise.reject('Import impossible, behaviors has no import function')
+  }
 }

@@ -295,11 +295,13 @@
           },
         },
         rendering: {
-          smartGuide: true,
-          smartGuideFadeOut: {
-            enable: false,
-            duration: 10000,
-          },
+          smartGuide: {
+            enable: true,
+            smartGuideFadeOut: {
+              enable: false,
+              duration: 10000
+            }
+          }
         },
         triggers: {
           exportContent: 'POINTER_UP',

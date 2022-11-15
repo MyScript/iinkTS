@@ -20,6 +20,8 @@ export interface IBehaviors
   async export: (model: IModel, mimeTypes?: string[]) => Promise<IModel | never>
   async convert(model: IModel, conversionState?: TConverstionState, requestedMimeTypes?: string[]): Promise<TExport | never>
 
+  async import?(model: IModel, data: Blob, mimeType?: string): Promise<IModel | never>
+
   async resize(model: IModel): Promise<IModel>
 
   async undo(): Promise<IModel>

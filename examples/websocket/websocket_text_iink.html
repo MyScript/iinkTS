@@ -70,8 +70,7 @@
           const res = await iink.getAvailableLanguageList(editor.configuration);
           Object.keys(res.result).forEach(function (key) {
             const selected = currentLanguage === key;
-            languageElement.options[languageElement.options.length] =
-              new Option(res.result[key], key, selected, selected);
+            languageElement.options[languageElement.options.length] = new Option(res.result[key], key, selected, selected);
           });
         }
       });
@@ -83,8 +82,8 @@
       });
 
       editor.events.addEventListener('exported', (event) => {
-        resultElement.innerHTML = event.detail
-          ? event.detail['text/plain']
+        resultElement.innerHTML = event.detail && event.detail['application/vnd.myscript.jiix']
+          ? JSON.parse(event.detail['application/vnd.myscript.jiix']).label
           : '';
       });
 
