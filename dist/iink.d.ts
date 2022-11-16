@@ -159,7 +159,7 @@ type TGesture = { enable: boolean }
 
 type TRecognitionType = 'TEXT' | 'MATH' | 'DIAGRAM' | 'Raw Content'
 
-type TConverstionState$1 = 'DIGITAL_EDIT' | 'HANDWRITING'
+type TConverstionState = 'DIGITAL_EDIT' | 'HANDWRITING'
 
 type TRecognitionConfiguration = {
   convert?: TConvertConfiguration
@@ -288,26 +288,12 @@ type TEditorOptions = {
   globalClassCss?: string
 }
 
-interface IGrabber {
-  setConfiguration(configuration: TGrabberConfiguration): void
-
-  attach(domElement?: HTMLElement): void
-
-  detach(domElement?: HTMLElement): void
-
-  onPointerDown(evt: PointerEvent, point: TPoint): void
-
-  onPointerMove(evt: PointerEvent, point: TPoint): void
-
-  onPointerUp(evt: PointerEvent, point: TPoint): void
-}
-
 type TPartialXYPoint = {
   x: number
   y: number
 }
 
-type TPoint$1 = TPartialXYPoint & {
+type TPoint = TPartialXYPoint & {
   t: number
   p: number
 }
@@ -370,7 +356,7 @@ type TJIIXExport = {
   words: TWordExport[]
 }
 
-type TExport$1 = {
+type TExport = {
   // // TEXT | Raw Content
   'application/vnd.myscript.jiix'?: TJIIXExport
   // // TEXT
@@ -394,20 +380,20 @@ interface IModel
   defaultSymbols: TStroke[]
   rawStrokes: TStroke[]
   recognizedSymbols?: TUpdatePatch[]
-  converts?: TExport$1
-  exports?: TExport$1
+  converts?: TExport
+  exports?: TExport
   width: number
   height: number
   idle: boolean
   isEmpty: boolean
 
-  addPoint(stroke: TStroke, point: TPoint$1): void
+  addPoint(stroke: TStroke, point: TPoint): void
   addStroke(stroke: TStroke): void
   addStrokeToGroup(stroke: TStroke, strokePenStyle: TPenStyle$1): void
   extractPendingStrokes(position?: number): TStroke[]
-  initCurrentStroke(point: TPoint$1, pointerId: number, pointerType: string, style: TPenStyle$1, dpi: number = 96): void
-  appendToCurrentStroke(point: TPoint$1): void
-  endCurrentStroke(point: TPoint$1, penStyle: TPenStyle$1): void
+  initCurrentStroke(point: TPoint, pointerId: number, pointerType: string, style: TPenStyle$1, dpi: number = 96): void
+  appendToCurrentStroke(point: TPoint): void
+  endCurrentStroke(point: TPoint, penStyle: TPenStyle$1): void
   extractPendingRecognizedSymbols (position: number = this.positions.lastRenderedPosition + 1): TUpdatePatch[]
 
   updatePositionSent(position: number = this.model.rawStrokes.length - 1): void
@@ -421,27 +407,6 @@ interface IModel
   clear(): void
 }
 
-type TMathTheme = {
-  'font-family': string
-}
-
-type TMathSolvedTheme = {
-  'font-family': string
-  color: string
-}
-
-type TTextTheme = {
-  'font-family': string,
-  'font-size': number
-}
-
-type TTheme$1 = {
-  ink: TPenStyle$1
-  '.math': TMathTheme
-  '.math-solved': TMathSolvedTheme
-  '.text': TTextTheme
-}
-
 type TUndoRedoContext = {
   canUndo: boolean
   canRedo: boolean
@@ -450,118 +415,25 @@ type TUndoRedoContext = {
 }
 
 declare class GlobalEvent extends EventTarget {
-    private static instance;
+    #private;
     private constructor();
     static getInstance(): GlobalEvent;
-    private emit;
     emitLoaded(): void;
-    emitExported(exports: TExport$1): void;
+    emitExported(exports: TExport): void;
     emitChange(undoRedoContext: TUndoRedoContext): void;
     emitIdle(model: IModel): void;
     emitError(err: Error): void;
-    emitClear(model?: IModel): void;
+    emitNotif(message: string, timeout?: number): void;
+    emitClear(): void;
     emitCleared(model?: IModel): void;
     emitConvert(): void;
-    emitConverted(exports: TExport$1): void;
+    emitConverted(exports: TExport): void;
     emitImport(jiix: string | TJIIXExport, mimeType: string): void;
     emitImported(jiix: TJIIXExport): void;
 }
 
-declare class SmartGuide {
-    uuid: string;
-    private smartGuideElement;
-    private prompterContainerElement;
-    private prompterTextElement;
-    private ellipsisElement;
-    private tagElement;
-    private candidatesElement;
-    private menuElement;
-    private convertElement;
-    private copyElement;
-    private deleteElement;
-    margin: TMarginConfiguration;
-    isMenuOpen: boolean;
-    jiix?: TJIIXExport;
-    lastWord?: TWordExport;
-    wordToChange?: TWordExport;
-    constructor();
-    get globalEvent(): GlobalEvent;
-    private createWrapperElement;
-    private createPrompterContainerElement;
-    private createPrompterTextElement;
-    private createEllipsisElement;
-    private createTagElement;
-    private createCandidatesElement;
-    private createMoreMenuElement;
-    private createConvertElement;
-    private createCopyElement;
-    private createDeleteElement;
-    init(domElement: HTMLElement, margin: TMarginConfiguration): void;
-    toggleMenuVisibility(): void;
-    private onToggleMenu;
-    private onConvert;
-    private onCopy;
-    private onDelete;
-    private showCandidates;
-    private clickCandidate;
-    private addListeners;
-    resize(): void;
-    update(exports: TJIIXExport): void;
-}
-
-var css_248z = "/* @import url(../node_modules/perfect-scrollbar/css/perfect-scrollbar.css); */\n\n.ms-editor {\n    position: relative;\n    z-index: 20;\n    color: #1A9FFF;\n    font-family: sans-serif;\n}\n\n.ms-editor.erasing {\n    cursor: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAEsSURBVDiNrdO7SgNBFMbx/3fmCbQ1tunDIayFBvFSKxbxBfSdBPEBtLIWb3Ebl4R9AQWLkE70CWbHZl1Eg2iSr5vL+c1hhhFTMhwOdyX1gQ2gVU+PgTyldNHtdq+/1+jroCiKtpmdSupNO6ApkgZmdtzpdJ5+QGVZ9qqqugSWfkO+5F3SnrvnDVQURTuE8PgP5DNvkjJ3fzaAEMLJDAjAclVVZwCqL/ZqBqSJme2YpMN5EIAYY9+A9XkhST0DVuaFgJYtAAGoDJgsAJoYkM+rSHqwlNL5Ajq6EMBoNLoBtmbsZuDumwYQYzwCXmdw3oAjAAPIsuxF0kG98GdE0r67PzcQgLvnIYQ14P4PyF39WZuH0rRdZVluxxj7kjaA1Xp6nFLKzezc3W+/13wAItdV6XjME1AAAAAASUVORK5CYII=') 10 10, auto;\n}\n\n.ms-editor canvas,\n.ms-editor svg {\n    z-index: 15;\n    position: absolute;\n    left: 0;\n    top: 0;\n    height: 100%;\n    width: 100%;\n}\n\n.ms-editor canvas.ms-rendering-canvas {\n    z-index: 10;\n    pointer-events: none;\n    background-image: linear-gradient(to right, #F5F6F7 1px, transparent 1px),\n    linear-gradient(to bottom, #F5F6F7 1px, transparent 1px);\n    background-size: 18px 18px;\n}\n\n.ms-editor svg {\n    z-index: 10;\n    pointer-events: none;\n}\n.ms-editor svg[data-layer=\"BACKGROUND\"] {\n    z-index: 9;\n}\n\n.ms-editor .loader {\n    z-index: 30;\n    position: absolute;\n    width: 120px;\n    height: 120px;\n    top: calc(50% - 60px);\n    left: calc(50% - 60px);\n    border: 16px solid #F5F6F7;\n    border-radius: 50%;\n    border-top-color: #1A9FFF;\n    -webkit-animation: spin 2s linear infinite;\n    animation: spin 2s linear infinite;\n}\n\n.ms-editor .error-msg {\n    z-index: 25;\n    position: absolute;\n    width: 200px;\n    height: 200px;\n    top: calc(50% - 100px);\n    left: calc(50% - 100px);\n    font-size: 16px;\n    text-align: center;\n    word-wrap: break-word;\n}\n\n.ms-editor .error-msg::before {\n    content: url(data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCA3Ni41IDYxMiA0NTkiIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaW5ZTWluIG1lZXQiPgogICAgPHBhdGggZmlsbD0iIzFBOUZGRiIgZD0iTTQ5NC43LDIyOS41Yy0xNy44NTEtODYuNy05NC4zNTEtMTUzLTE4OC43LTE1M2MtMzguMjUsMC03My45NSwxMC4yLTEwMiwzMC42bDM4LjI1LDM4LjI1IGMxNy44NS0xMi43NSw0MC44LTE3Ljg1LDYzLjc1LTE3Ljg1Yzc2LjUsMCwxNDAuMjUsNjMuNzUsMTQwLjI1LDE0MC4yNXYxMi43NWgzOC4yNWM0My4zNSwwLDc2LjUsMzMuMTUsNzYuNSw3Ni41IGMwLDI4LjA1LTE1LjMsNTMuNTUtNDAuOCw2Ni4zbDM4LjI1LDM4LjI1QzU5MS42LDQzOC42LDYxMiw0MDAuMzUsNjEyLDM1N0M2MTIsMjkwLjcsNTU4LjQ1LDIzNC42LDQ5NC43LDIyOS41eiBNNzYuNSwxMDkuNjUgbDcxLjQsNjguODVDNjYuMywxODMuNiwwLDI0OS45LDAsMzMxLjVjMCw4NC4xNSw2OC44NSwxNTMsMTUzLDE1M2gyOTguMzVsNTEsNTFsMzMuMTUtMzMuMTVMMTA5LjY1LDc2LjVMNzYuNSwxMDkuNjV6IE0xOTYuMzUsMjI5LjVsMjA0LDIwNEgxNTNjLTU2LjEsMC0xMDItNDUuOS0xMDItMTAyYzAtNTYuMSw0NS45LTEwMiwxMDItMTAySDE5Ni4zNXoiIC8+Cjwvc3ZnPgo=);\n}\n\n.ms-editor .smartguide {\n    position: absolute;\n    z-index: 40;\n    font-size: 16px;\n}\n\n.ms-editor .smartguide.smartguide-in {\n    visibility: visible !important;\n    transition: opacity 0.5s;\n    opacity: 1;\n}\n\n.ms-editor .smartguide.smartguide-out {\n    transition: opacity 1s, visibility 1s;\n    visibility: hidden !important;\n    opacity: 0;\n}\n\n.ms-editor .smartguide .tag-icon {\n    padding: 0 18px;\n    border: 1px solid #959DA6;\n    font-weight: bold;\n    font-size: large;\n    -moz-user-select: none;\n    -webkit-user-select: none;\n    -ms-user-select: none;\n    user-select: none;\n    position: absolute;\n    z-index: 31;\n    height: 48px;\n    line-height: 48px;\n    background-color: rgba(255, 255, 255, 0.9);\n    color: #959DA6;\n}\n\n.ms-editor .smartguide .ellipsis {\n    cursor: pointer;\n    border-bottom: 1px solid #959DA6;\n    position: absolute;\n    z-index: 31;\n    height: 48px;\n    line-height: 38px;\n    padding: 0 8px;\n    font-weight: bold;\n    font-size: x-large;\n    background-color: rgba(255, 255, 255, 0.9);\n    color: #959DA6;\n    -moz-user-select: none;\n    -webkit-user-select: none;\n    -ms-user-select: none;\n    user-select: none;\n    -webkit-tap-highlight-color: transparent;\n}\n\n.ms-editor .smartguide .ellipsis:active {\n    background-color: #e0e0e0;\n}\n\n.ms-editor .smartguide .prompter-container {\n    background-color: rgba(255, 255, 255, 0.9);\n    height: 48px;\n    line-height: 48px;\n    overflow: hidden;\n    white-space: nowrap;\n    display: block;\n    text-align: left;\n    border-bottom: 1px solid #959DA6;\n    position: absolute;\n    z-index: 30;\n    color: #bfbfbf;\n    -moz-user-select: none;\n    -webkit-user-select: none;\n    -ms-user-select: none;\n    user-select: none;\n    -webkit-tap-highlight-color: transparent;\n}\n\n.ms-editor .smartguide .prompter-container > div > span {\n    cursor: pointer;\n    display: inline-block;\n}\n\n.ms-editor .smartguide .prompter-container .prompter-text {\n    margin-left: 12px;\n}\n\n.ms-editor .smartguide .prompter-container .prompter-text .added-word {\n    animation: 0.1s linear word-added,\n    3s ease-in-out color-input;\n}\n\n.ms-editor .smartguide .prompter-container .prompter-text .modified-word {\n    animation: 0.1s linear word-modified,\n    3s ease-in-out color-input;\n}\n\n.ms-editor .smartguide .candidates {\n    color: black;\n    flex-direction: column;\n    text-align: center;\n    line-height: 30px;\n    border-radius: 3px;\n    position: absolute;\n    box-shadow: 2px 2px 12px #BDBDBD, -2px 2px 12px #BDBDBD;\n    background-color: #F5F5F5;\n    z-index: 100;\n    -webkit-tap-highlight-color: transparent;\n}\n\n.ms-editor .smartguide .candidates > span {\n    cursor: pointer;\n    padding: 2px 20px;\n}\n\n.ms-editor .smartguide .candidates > span:hover {\n    background-color: #EEEEEE;\n}\n\n.ms-editor .smartguide .candidates > span:active {\n    background-color: #E0E0E0;\n}\n\n.ms-editor .smartguide .candidates .selected-word {\n    font-weight: bold;\n    background-color: #E0E0E0;\n}\n\n.ms-editor .smartguide .more-menu {\n    display: flex;\n    flex-direction: column;\n    margin-right: 12px;\n    line-height: 30px;\n    border-radius: 3px;\n    position: absolute;\n    z-index: 100;\n    box-shadow: 2px 2px 12px #BDBDBD;\n    background-color: #F5F5F5;\n    overflow: hidden;\n    transition: max-height 2s ease-out, opacity 1s, visibility 0.5s linear;\n}\n.ms-editor .smartguide .more-menu.open {\n    max-height: 500px;\n    visibility: visible;\n    opacity: 1;\n}\n.ms-editor .smartguide .more-menu.close {\n    max-height: 0;\n    visibility: hidden;\n    opacity: 0;\n}\n\n.ms-editor .smartguide .more-menu .options-label-button {\n    color: black;\n    font-size: 16px;\n    cursor: pointer;\n    box-sizing: border-box;\n    background: transparent;\n    border: none;\n    padding: 0 24px;\n    margin: 0;\n    height: 40px;\n    outline: none;\n    -webkit-tap-highlight-color: transparent;\n}\n\n.ms-editor .smartguide .more-menu .options-label-button:hover {\n    background-color: #EEEEEE;\n}\n\n.ms-editor .smartguide .more-menu .options-label-button:active {\n    background-color: #E0E0E0;\n}\n\n.ms-editor .ps__rail-x {\n    top: 32px !important;\n}\n\n/** Stroke **/\n\n.ms-editor .removed-stroke {\n    opacity: 0;\n    transition: opacity 0.1s ease-in-out;\n}\n\n.ms-editor .added-stroke {\n    animation: 0.2s opacity-appear;\n}\n\n@keyframes color-input {\n    0% {\n        color: black;\n    }\n    100% {\n        color: #bfbfbf;\n    }\n}\n\n@keyframes word-added {\n    0% {\n        transform: translate(5px, 0);\n    }\n    100% {\n        transform: none;\n    }\n}\n\n@keyframes word-modified {\n    0% {\n        transform: translate(0, 5px);\n    }\n    100% {\n        transform: none;\n    }\n}\n\n@keyframes opacity-appear {\n    0% {\n        opacity: 0;\n    }\n    100% {\n        opacity : 1;\n    }\n}\n\n@keyframes spin {\n    0% {\n        transform: rotate(0deg);\n    }\n    100% {\n        transform: rotate(360deg);\n    }\n}\n\n@-webkit-keyframes spin {\n    0% {\n        -webkit-transform: rotate(0deg);\n    }\n    100% {\n        -webkit-transform: rotate(360deg);\n    }\n}\n";
+var css_248z = "/* @import url(../node_modules/perfect-scrollbar/css/perfect-scrollbar.css); */\n\n.ms-editor {\n    position: relative;\n    z-index: 20;\n    color: #1A9FFF;\n    font-family: sans-serif;\n}\n\n.ms-editor.erasing {\n    cursor: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAEsSURBVDiNrdO7SgNBFMbx/3fmCbQ1tunDIayFBvFSKxbxBfSdBPEBtLIWb3Ebl4R9AQWLkE70CWbHZl1Eg2iSr5vL+c1hhhFTMhwOdyX1gQ2gVU+PgTyldNHtdq+/1+jroCiKtpmdSupNO6ApkgZmdtzpdJ5+QGVZ9qqqugSWfkO+5F3SnrvnDVQURTuE8PgP5DNvkjJ3fzaAEMLJDAjAclVVZwCqL/ZqBqSJme2YpMN5EIAYY9+A9XkhST0DVuaFgJYtAAGoDJgsAJoYkM+rSHqwlNL5Ajq6EMBoNLoBtmbsZuDumwYQYzwCXmdw3oAjAAPIsuxF0kG98GdE0r67PzcQgLvnIYQ14P4PyF39WZuH0rRdZVluxxj7kjaA1Xp6nFLKzezc3W+/13wAItdV6XjME1AAAAAASUVORK5CYII=') 10 10, auto;\n}\n\n.ms-editor canvas,\n.ms-editor svg {\n    z-index: 15;\n    position: absolute;\n    left: 0;\n    top: 0;\n    height: 100%;\n    width: 100%;\n}\n\n.ms-editor canvas.ms-rendering-canvas {\n    z-index: 10;\n    pointer-events: none;\n    background-image: linear-gradient(to right, #F5F6F7 1px, transparent 1px),\n    linear-gradient(to bottom, #F5F6F7 1px, transparent 1px);\n    background-size: 18px 18px;\n}\n\n.ms-editor svg {\n    z-index: 10;\n    pointer-events: none;\n}\n.ms-editor svg[data-layer=\"BACKGROUND\"] {\n    z-index: 9;\n}\n\n.ms-editor .loader {\n    z-index: 30;\n    position: absolute;\n    width: 120px;\n    height: 120px;\n    top: calc(50% - 60px);\n    left: calc(50% - 60px);\n    border: 16px solid #F5F6F7;\n    border-radius: 50%;\n    border-top-color: #1A9FFF;\n    -webkit-animation: spin 2s linear infinite;\n    animation: spin 2s linear infinite;\n}\n\n.ms-editor .message {\n    z-index: 25;\n    position: absolute;\n    width: 200px;\n    height: 200px;\n    top: calc(50% - 100px);\n    left: calc(50% - 100px);\n    font-size: 16px;\n    text-align: center;\n    word-wrap: break-word;\n}\n\n.ms-editor .error-msg::before {\n    content: url(\"data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCA3Ni41IDYxMiA0NTkiIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaW5ZTWluIG1lZXQiPgogICAgPHBhdGggZmlsbD0iIzFBOUZGRiIgZD0iTTQ5NC43LDIyOS41Yy0xNy44NTEtODYuNy05NC4zNTEtMTUzLTE4OC43LTE1M2MtMzguMjUsMC03My45NSwxMC4yLTEwMiwzMC42bDM4LjI1LDM4LjI1IGMxNy44NS0xMi43NSw0MC44LTE3Ljg1LDYzLjc1LTE3Ljg1Yzc2LjUsMCwxNDAuMjUsNjMuNzUsMTQwLjI1LDE0MC4yNXYxMi43NWgzOC4yNWM0My4zNSwwLDc2LjUsMzMuMTUsNzYuNSw3Ni41IGMwLDI4LjA1LTE1LjMsNTMuNTUtNDAuOCw2Ni4zbDM4LjI1LDM4LjI1QzU5MS42LDQzOC42LDYxMiw0MDAuMzUsNjEyLDM1N0M2MTIsMjkwLjcsNTU4LjQ1LDIzNC42LDQ5NC43LDIyOS41eiBNNzYuNSwxMDkuNjUgbDcxLjQsNjguODVDNjYuMywxODMuNiwwLDI0OS45LDAsMzMxLjVjMCw4NC4xNSw2OC44NSwxNTMsMTUzLDE1M2gyOTguMzVsNTEsNTFsMzMuMTUtMzMuMTVMMTA5LjY1LDc2LjVMNzYuNSwxMDkuNjV6IE0xOTYuMzUsMjI5LjVsMjA0LDIwNEgxNTNjLTU2LjEsMC0xMDItNDUuOS0xMDItMTAyYzAtNTYuMSw0NS45LTEwMiwxMDItMTAySDE5Ni4zNXoiIC8+Cjwvc3ZnPgo=\");\n}\n\n.ms-editor .info-msg::before {\n    content: \"\";\n    background-image: url(\"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgdmlld0JveD0iMCAwIDI0IDI0IgogIGZpbGw9Im5vbmUiCiAgc3Ryb2tlPSIjMUE5RkZGIgogIHN0cm9rZS13aWR0aD0iMiIKICBzdHJva2UtbGluZWNhcD0icm91bmQiCiAgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIKPgogIDxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjEwIiAvPgogIDxsaW5lIHgxPSIxMiIgeTE9IjE2IiB4Mj0iMTIiIHkyPSIxMiIgLz4KICA8bGluZSB4MT0iMTIiIHkxPSI4IiB4Mj0iMTIuMDEiIHkyPSI4IiAvPgo8L3N2Zz4=\");;\n    background-size: 100% 100%;\n    display: block;\n    margin: auto;\n    padding-bottom: 10px;\n    height: 25px;\n    width:25px;\n}\n\n.ms-editor .smartguide {\n    position: absolute;\n    z-index: 40;\n    font-size: 16px;\n}\n\n.ms-editor .smartguide.smartguide-in {\n    visibility: visible !important;\n    transition: opacity 0.5s;\n    opacity: 1;\n}\n\n.ms-editor .smartguide.smartguide-out {\n    transition: opacity 1s, visibility 1s;\n    visibility: hidden !important;\n    opacity: 0;\n}\n\n.ms-editor .smartguide .tag-icon {\n    padding: 0 18px;\n    border: 1px solid #959DA6;\n    font-weight: bold;\n    font-size: large;\n    -moz-user-select: none;\n    -webkit-user-select: none;\n    -ms-user-select: none;\n    user-select: none;\n    position: absolute;\n    z-index: 31;\n    height: 48px;\n    line-height: 48px;\n    background-color: rgba(255, 255, 255, 0.9);\n    color: #959DA6;\n}\n\n.ms-editor .smartguide .ellipsis {\n    cursor: pointer;\n    border-bottom: 1px solid #959DA6;\n    position: absolute;\n    z-index: 31;\n    height: 48px;\n    line-height: 38px;\n    padding: 0 8px;\n    font-weight: bold;\n    font-size: x-large;\n    background-color: rgba(255, 255, 255, 0.9);\n    color: #959DA6;\n    -moz-user-select: none;\n    -webkit-user-select: none;\n    -ms-user-select: none;\n    user-select: none;\n    -webkit-tap-highlight-color: transparent;\n}\n\n.ms-editor .smartguide .ellipsis:active {\n    background-color: #e0e0e0;\n}\n\n.ms-editor .smartguide .prompter-container {\n    background-color: rgba(255, 255, 255, 0.9);\n    height: 48px;\n    line-height: 48px;\n    overflow: hidden;\n    white-space: nowrap;\n    display: block;\n    text-align: left;\n    border-bottom: 1px solid #959DA6;\n    position: absolute;\n    z-index: 30;\n    color: #bfbfbf;\n    -moz-user-select: none;\n    -webkit-user-select: none;\n    -ms-user-select: none;\n    user-select: none;\n    -webkit-tap-highlight-color: transparent;\n}\n\n.ms-editor .smartguide .prompter-container > div > span {\n    cursor: pointer;\n    display: inline-block;\n}\n\n.ms-editor .smartguide .prompter-container .prompter-text {\n    margin-left: 12px;\n}\n\n.ms-editor .smartguide .prompter-container .prompter-text .added-word {\n    animation: 0.1s linear word-added,\n    3s ease-in-out color-input;\n}\n\n.ms-editor .smartguide .prompter-container .prompter-text .modified-word {\n    animation: 0.1s linear word-modified,\n    3s ease-in-out color-input;\n}\n\n.ms-editor .smartguide .candidates {\n    color: black;\n    flex-direction: column;\n    text-align: center;\n    line-height: 30px;\n    border-radius: 3px;\n    position: absolute;\n    box-shadow: 2px 2px 12px #BDBDBD, -2px 2px 12px #BDBDBD;\n    background-color: #F5F5F5;\n    z-index: 100;\n    -webkit-tap-highlight-color: transparent;\n}\n\n.ms-editor .smartguide .candidates > span {\n    cursor: pointer;\n    padding: 2px 20px;\n}\n\n.ms-editor .smartguide .candidates > span:hover {\n    background-color: #EEEEEE;\n}\n\n.ms-editor .smartguide .candidates > span:active {\n    background-color: #E0E0E0;\n}\n\n.ms-editor .smartguide .candidates .selected-word {\n    font-weight: bold;\n    background-color: #E0E0E0;\n}\n\n.ms-editor .smartguide .more-menu {\n    display: flex;\n    flex-direction: column;\n    margin-right: 12px;\n    line-height: 30px;\n    border-radius: 3px;\n    position: absolute;\n    z-index: 100;\n    box-shadow: 2px 2px 12px #BDBDBD;\n    background-color: #F5F5F5;\n    overflow: hidden;\n    transition: max-height 2s ease-out, opacity 1s, visibility 0.5s linear;\n}\n.ms-editor .smartguide .more-menu.open {\n    max-height: 500px;\n    visibility: visible;\n    opacity: 1;\n}\n.ms-editor .smartguide .more-menu.close {\n    max-height: 0;\n    visibility: hidden;\n    opacity: 0;\n}\n\n.ms-editor .smartguide .more-menu .options-label-button {\n    color: black;\n    font-size: 16px;\n    cursor: pointer;\n    box-sizing: border-box;\n    background: transparent;\n    border: none;\n    padding: 0 24px;\n    margin: 0;\n    height: 40px;\n    outline: none;\n    -webkit-tap-highlight-color: transparent;\n}\n\n.ms-editor .smartguide .more-menu .options-label-button:hover {\n    background-color: #EEEEEE;\n}\n\n.ms-editor .smartguide .more-menu .options-label-button:active {\n    background-color: #E0E0E0;\n}\n\n.ms-editor .ps__rail-x {\n    top: 32px !important;\n}\n\n/** Stroke **/\n\n.ms-editor .removed-stroke {\n    opacity: 0;\n    transition: opacity 0.1s ease-in-out;\n}\n\n.ms-editor .added-stroke {\n    animation: 0.2s opacity-appear;\n}\n\n@keyframes color-input {\n    0% {\n        color: black;\n    }\n    100% {\n        color: #bfbfbf;\n    }\n}\n\n@keyframes word-added {\n    0% {\n        transform: translate(5px, 0);\n    }\n    100% {\n        transform: none;\n    }\n}\n\n@keyframes word-modified {\n    0% {\n        transform: translate(0, 5px);\n    }\n    100% {\n        transform: none;\n    }\n}\n\n@keyframes opacity-appear {\n    0% {\n        opacity: 0;\n    }\n    100% {\n        opacity : 1;\n    }\n}\n\n@keyframes spin {\n    0% {\n        transform: rotate(0deg);\n    }\n    100% {\n        transform: rotate(360deg);\n    }\n}\n\n@-webkit-keyframes spin {\n    0% {\n        -webkit-transform: rotate(0deg);\n    }\n    100% {\n        -webkit-transform: rotate(360deg);\n    }\n}\n";
 styleInject(css_248z);
-
-interface IRenderer {
-  config: TRenderingConfiguration
-  init: (element: HTMLElement) => void
-  resize: (model: IModel) => void
-  destroy: () => void
-}
-
-interface IRecognizer {
-  init(height: number, width: number): void
-  export(model: IModel, mimeTypes?: string[]): Promise<IModel | never>
-  resize(model: IModel): Promise<IModel | never>
-  import?(data: Blob, mimeType?: string): Promise<TExport$1 | never>
-}
-
-declare class DeferredPromise<T> {
-    promise: Promise<T>;
-    resolve: (value: T) => void;
-    reject: (value: Error) => void;
-    isFullFilled: boolean;
-    isPending: boolean;
-    constructor();
-}
-
-interface IBehaviors$1
-{
-  grabber: IGrabber
-  renderer: IRenderer
-  recognizer: IRecognizer
-  initalise: DeferredPromise
-
-  async init: (element: HTMLElement) => Promise<void | Error>
-
-  drawCurrentStroke(model: IModel): void
-
-  async updateModelRendering: (model: IModel) => Promise<IModel | never>
-
-  async export: (model: IModel, mimeTypes?: string[]) => Promise<IModel | never>
-  async convert(model: IModel, conversionState?: TConverstionState, requestedMimeTypes?: string[]): Promise<TExport | never>
-
-  async import?(model: IModel, data: Blob, mimeType?: string): Promise<IModel | never>
-
-  async resize(model: IModel): Promise<IModel>
-
-  async undo(): Promise<IModel>
-  async redo(): Promise<IModel>
-
-  async clear(model: IModel): Promise<IModel>
-
-  async destroy(): Promise<void>
-}
 
 declare enum EditorMode {
     Mouse = "mouse",
@@ -573,37 +445,16 @@ declare type HTMLEditorElement = HTMLElement & {
     editor: Editor;
 };
 declare class Editor {
+    #private;
     wrapperHTML: HTMLEditorElement;
-    private _loaderHTML;
-    private _errorHTML;
-    private _configuration;
-    private _behaviorsManager;
-    private _styleManager;
-    private _smartGuide;
-    private _mode;
-    private _initialized;
     model: IModel;
     debug: boolean;
     constructor(wrapperHTML: HTMLElement, options?: TEditorOptions);
     get initialized(): boolean;
     get configuration(): TConfiguration;
     set configuration(config: TConfigurationClient);
-    get behaviors(): IBehaviors$1;
-    get grabber(): IGrabber;
-    get theme(): TTheme$1;
-    get penStyle(): TPenStyle$1;
     get mode(): EditorMode;
     get events(): GlobalEvent;
-    get smartGuide(): SmartGuide;
-    private initalizeBehaviors;
-    private addListeners;
-    private onExport;
-    private onImport;
-    private showError;
-    private handleError;
-    pointerDown(evt: PointerEvent, point: TPoint$1): void;
-    pointerMove(_evt: PointerEvent, point: TPoint$1): void;
-    pointerUp(_evt: PointerEvent, point: TPoint$1): Promise<void>;
     setMode(mode: EditorMode): void;
     undo(): Promise<IModel>;
     redo(): Promise<IModel>;
@@ -611,7 +462,7 @@ declare class Editor {
     resize(): Promise<IModel>;
     export(mimeTypes: string[]): Promise<IModel>;
     convert(params?: {
-        conversionState?: TConverstionState$1;
+        conversionState?: TConverstionState;
         mimeTypes?: string[];
     }): Promise<IModel | never>;
     import(data: Blob, mimeType?: string): Promise<IModel | never>;

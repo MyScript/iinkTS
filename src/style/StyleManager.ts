@@ -6,14 +6,14 @@ import { DefaultTheme } from "./DefaultTheme"
 
 export class StyleManager
 {
-  private _penStyle!: TPenStyle
-  private _theme!: TTheme
+  #penStyle!: TPenStyle
+  #theme!: TTheme
 
   get penStyle(): TPenStyle {
-    return this._penStyle
+    return this.#penStyle
   }
   get theme(): TTheme {
-    return this._theme
+    return this.#theme
   }
 
   constructor(penStyle?: TPenStyle, theme?: TTheme)
@@ -28,7 +28,7 @@ export class StyleManager
       ...DefaultPenStyle,
       ...(penStyle || {})
     }
-    this._penStyle = currentPenStyle
+    this.#penStyle = currentPenStyle
   }
 
   overrideDefaultTheme(theme?: TTheme): void
@@ -37,6 +37,6 @@ export class StyleManager
       ...DefaultTheme,
       ...(theme || {})
     }
-    this._theme = currentTheme
+    this.#theme = currentTheme
   }
 }

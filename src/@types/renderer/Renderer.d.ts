@@ -17,5 +17,4 @@ export interface IRenderer {
   config: TRenderingConfiguration
   init: (element: HTMLElement) => void
   resize: (model: IModel) => void
-  destroy: () => void
 }

@@ -97,11 +97,4 @@ export class CanvasRenderer implements IRenderer
     this.resizeContent()
     this.drawModel(model)
   }
-
-  destroy(): void
-  {
-    while (this.context.parent.lastChild) {
-      this.context.parent.removeChild(this.context.parent.lastChild);
-    }
-  }
 }

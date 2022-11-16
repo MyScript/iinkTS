@@ -1,6 +1,7 @@
 // import { UndoRedoContext } from '../../../src/undo-redo/UndoRedoContext'
 // import { Model } from '../../../src/model/Model'
 import { TMarginConfiguration } from '../../../src/@types/configuration/recognition/MarginConfiguration'
+import { DefaultRenderingConfiguration } from '../../../src/configuration/DefaultConfiguration'
 import { GlobalEvent } from '../../../src/event/GlobalEvent'
 import { SmartGuide } from '../../../src/smartguide/SmartGuide'
 import { LeftClickEventFake } from '../utils/PointerEventFake'
@@ -28,7 +29,7 @@ describe('SmartGuide.ts', () =>
   describe('Initilize', () => {
     const domElement = document.createElement('div')
     const sm = new SmartGuide()
-    sm.init(domElement, margin)
+    sm.init(domElement, margin, DefaultRenderingConfiguration)
 
     test('should init wrapper', () =>
     {
@@ -83,53 +84,7 @@ describe('SmartGuide.ts', () =>
   describe('Menu visibility', () => {
     const domElement = document.createElement('div')
     const sm = new SmartGuide()
-    sm.init(domElement, margin)
-    test('should hidden by default', () =>
-    {
-      const menu = domElement.querySelector('.more-menu') as HTMLDivElement
-      expect(menu.classList).toContain('close')
-      expect(menu.classList).not.toContain('open')
-      expect(sm.isMenuOpen).toEqual(false)
-    })
-    test('should open menu', () =>
-    {
-      sm.toggleMenuVisibility()
-      const menu = domElement.querySelector('.more-menu') as HTMLDivElement
-      expect(menu.classList).not.toContain('close')
-      expect(menu.classList).toContain('open')
-      expect(sm.isMenuOpen).toEqual(true)
-    })
-    test('should close menu', () =>
-    {
-      sm.toggleMenuVisibility()
-      const menu = domElement.querySelector('.more-menu') as HTMLDivElement
-      expect(menu.classList).toContain('close')
-      expect(menu.classList).not.toContain('open')
-      expect(sm.isMenuOpen).toEqual(false)
-    })
-    test('shoud call toggleMenuVisibility on click ellipsis', () =>
-    {
-      sm.toggleMenuVisibility = jest.fn()
-      const ellispis = domElement.querySelector('.ellipsis') as HTMLDivElement
-      const pointerDownEvt = new LeftClickEventFake('pointerdown', {
-        pointerType: "pen",
-        clientX: 10,
-        clientY: 10,
-        pressure: 1
-      })
-      ellispis.dispatchEvent(pointerDownEvt)
-      expect(sm.toggleMenuVisibility).toBeCalledTimes(1)
-    })
-
-  })
-
-  describe('Menu actions', () => {
-    const domElement = document.createElement('div')
-    const sm = new SmartGuide()
-    sm.globalEvent.emitConvert = jest.fn()
-    sm.globalEvent.emitClear = jest.fn()
-    sm.init(domElement, margin)
-    sm.toggleMenuVisibility()
+    sm.init(domElement, margin, DefaultRenderingConfiguration)
 
     const pointerDownEvt = new LeftClickEventFake('pointerdown', {
       pointerType: "pen",
@@ -137,6 +92,45 @@ describe('SmartGuide.ts', () =>
       clientY: 10,
       pressure: 1
     })
+    test('should hidden by default', () =>
+    {
+      const menu = domElement.querySelector('.more-menu') as HTMLDivElement
+      expect(menu.classList).toContain('close')
+      expect(menu.classList).not.toContain('open')
+    })
+    test('should open menu', () =>
+    {
+      const ellispis = domElement.querySelector('.ellipsis') as HTMLDivElement
+      ellispis.dispatchEvent(pointerDownEvt)
+      const menu = domElement.querySelector('.more-menu') as HTMLDivElement
+      expect(menu.classList).not.toContain('close')
+      expect(menu.classList).toContain('open')
+    })
+    test('should close menu', () =>
+    {
+      const ellispis = domElement.querySelector('.ellipsis') as HTMLDivElement
+      ellispis.dispatchEvent(pointerDownEvt)
+      const menu = domElement.querySelector('.more-menu') as HTMLDivElement
+      expect(menu.classList).toContain('close')
+      expect(menu.classList).not.toContain('open')
+    })
+  })
+
+  describe('Menu actions', () => {
+    const domElement = document.createElement('div')
+    const sm = new SmartGuide()
+    sm.globalEvent.emitConvert = jest.fn()
+    sm.globalEvent.emitClear = jest.fn()
+    sm.init(domElement, margin, DefaultRenderingConfiguration)
+
+    const pointerDownEvt = new LeftClickEventFake('pointerdown', {
+      pointerType: "pen",
+      clientX: 10,
+      clientY: 10,
+      pressure: 1
+    })
+    const ellispis = domElement.querySelector('.ellipsis') as HTMLDivElement
+    ellispis.dispatchEvent(pointerDownEvt)
     test('should emit CONVERT', () =>
     {
       const btn = domElement.querySelector(`#convert-${ sm.uuid }`) as HTMLDivElement
@@ -158,8 +152,7 @@ describe('SmartGuide.ts', () =>
   describe('Display', () => {
     const domElement = document.createElement('div')
     const sm = new SmartGuide()
-    sm.init(domElement, margin)
-    // "application/vnd.myscript.jiix":
+    sm.init(domElement, margin, DefaultRenderingConfiguration)
     const jiix = {
       "type": "Text",
       "label": "hello how",

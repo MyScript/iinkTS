@@ -42,10 +42,18 @@ module.exports.getEditor = async (page) => {
 
 /**
  * @param {Page} page - Playwright Page
+ * @returns Promise<Configuration>
+ */
+module.exports.getEditorConfiguration = async (page) => {
+  return page.evaluate('editor.configuration')
+}
+
+/**
+ * @param {Page} page - Playwright Page
  * @param {Configuration} configuration - Editor configuration
  * @returns Promise<void>
  */
- module.exports.changeConfiguration = async (page, configuration) => {
+module.exports.setEditorConfiguration = async (page, configuration) => {
   return page.evaluate(`editor.configuration = ${JSON.stringify(configuration)};`)
 }
 
@@ -63,4 +71,19 @@ const exported = `(async () => {
  */
 module.exports.getExportedDatas = async (page) => {
   return page.evaluate(exported)
+}
+
+const loaded = `(async () => {
+  return new Promise((resolve, reject) => {
+    editor.events.addEventListener('loaded', (e) => {
+      resolve();
+    });
+  });
+})()`
+/**
+ * @param {Page} page - Playwright Page
+ * @returns Promise<void>
+ */
+module.exports.waitEditorLoaded = async (page) => {
+  return page.evaluate(loaded)
 }
