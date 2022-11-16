@@ -1,5 +1,5 @@
-const { write, getExportedDatas, getEditor, changeConfiguration, } = require('./helper')
-const { h, hello } = require('./strokesDatas')
+const { write, getExportedDatas, getEditor, setEditorConfiguration, getEditorConfiguration, } = require('../helper')
+const { h, hello } = require('../strokesDatas')
 
 describe('Rest Text', () => {
   beforeAll(async () => {
@@ -10,12 +10,12 @@ describe('Rest Text', () => {
     await page.reload()
   })
 
-  it('should have title', async () => {
+  test('should have title', async () => {
     const title = await page.title()
     expect(title).toMatch('Rest Text iink')
   })
 
-  it('should only request text/plain by default', async () => {
+  test('should only request text/plain by default', async () => {
     const mimeTypeRequest = []
     page.on('request', async (request) => {
       if (request.url().includes('api/v4.0/iink/batch') && request.method() === 'POST') {
@@ -31,10 +31,10 @@ describe('Rest Text', () => {
     expect(mimeTypeRequest[0]).toContain('text/plain')
   })
 
-  it('should only request application/vnd.myscript.jiix', async () => {
-    let editor = await getEditor(page)
-    editor._configuration.recognition.text.mimeTypes = ['application/vnd.myscript.jiix']
-    await changeConfiguration(page, editor._configuration)
+  test('should only request application/vnd.myscript.jiix', async () => {
+    const configuration = await getEditorConfiguration(page)
+    configuration.recognition.text.mimeTypes = ['application/vnd.myscript.jiix']
+    await setEditorConfiguration(page, configuration)
 
     const mimeTypeRequest = []
     page.on('request', async (request) => {
@@ -52,17 +52,40 @@ describe('Rest Text', () => {
     expect(mimeTypeRequest[0]).toContain('application/vnd.myscript.jiix')
   })
 
-  it('should export "hello"', async () => {
+  test('should request application/vnd.myscript.jiix & text/plain', async () => {
+    const configuration = await getEditorConfiguration(page)
+    configuration.recognition.text.mimeTypes = ['application/vnd.myscript.jiix', 'text/plain']
+    await setEditorConfiguration(page, configuration)
+
+    const mimeTypeRequest = []
+    page.on('request', async (request) => {
+      if (request.url().includes('api/v4.0/iink/batch') && request.method() === 'POST') {
+        const headers = await request.allHeaders()
+        mimeTypeRequest.push(headers.accept)
+      }
+    })
+
+    await Promise.all([
+      getExportedDatas(page),
+      write(page, h.strokes, 100, 100),
+    ])
+    expect(mimeTypeRequest).toHaveLength(2)
+    const allMimeTypesRequested = mimeTypeRequest.join(' ')
+    expect(allMimeTypesRequested).toContain('application/vnd.myscript.jiix')
+    expect(allMimeTypesRequested).toContain('text/plain')
+  })
+
+  test('should export "hello"', async () => {
     const [exportedDatas] = await Promise.all([
       getExportedDatas(page),
       write(page, hello.strokes)
     ])
     const editor = await getEditor(page)
     expect(exportedDatas).toStrictEqual(editor.model.exports)
-    expect(exportedDatas['text/plain']).toStrictEqual(hello.exports.TEXT.at(-1))
+    expect(exportedDatas['text/plain']).toStrictEqual(hello.exports['text/plain'].at(-1))
   })
 
-  it('should display result', async () => {
+  test('should display result', async () => {
     const [exportedDatas] = await Promise.all([
       getExportedDatas(page),
       write(page, hello.strokes)
@@ -70,15 +93,15 @@ describe('Rest Text', () => {
     const resultElement = page.locator('#result')
     const resultText = await resultElement.textContent()
     expect(resultText).toStrictEqual(exportedDatas['text/plain'])
-    expect(resultText).toStrictEqual(hello.exports.TEXT.at(-1))
+    expect(resultText).toStrictEqual(hello.exports['text/plain'].at(-1))
   })
 
-  it('should clear', async () => {
+  test('should clear', async () => {
     const [exportedDatas] = await Promise.all([
       getExportedDatas(page),
       write(page, h.strokes)
     ])
-    expect(exportedDatas['text/plain']).toStrictEqual(h.exports.TEXT.at(-1))
+    expect(exportedDatas['text/plain']).toStrictEqual(h.exports['text/plain'].at(-1))
 
     const promisesResult = await Promise.all([
       getExportedDatas(page),
@@ -94,7 +117,7 @@ describe('Rest Text', () => {
     expect(resultText).toBe('')
   })
 
-  it('should undo/redo', async () => {
+  test('should undo/redo', async () => {
     const editorEl = await page.waitForSelector('#editor')
     await Promise.all([
       getExportedDatas(page),
@@ -122,4 +145,5 @@ describe('Rest Text', () => {
     raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
     expect(raw.length).toStrictEqual(hello.strokes.length - 1)
   })
+
 })

@@ -4,7 +4,7 @@ import { EventType } from "../Constants"
 
 export class GlobalEvent extends EventTarget
 {
-  private static instance: GlobalEvent
+  static #instance: GlobalEvent
 
   private constructor()
   {
@@ -13,29 +13,31 @@ export class GlobalEvent extends EventTarget
 
   public static getInstance(): GlobalEvent
   {
-    if (!GlobalEvent.instance) {
-      GlobalEvent.instance = new GlobalEvent()
+    if (!GlobalEvent.#instance) {
+      GlobalEvent.#instance = new GlobalEvent()
     }
 
-    return GlobalEvent.instance
+    return GlobalEvent.#instance
   }
 
-  private emit(type: string, data?: unknown): void
+  #emit(type: string, data?: unknown): void
   {
     this.dispatchEvent(new CustomEvent(type, Object.assign({ bubbles: true, composed: true }, data ? { detail: data } : undefined)))
   }
 
   emitLoaded(): void
   {
-    this.emit(EventType.LOADED)
+    this.#emit(EventType.LOADED)
   }
+
   emitExported(exports: TExport): void
   {
-    this.emit(EventType.EXPORTED, exports)
+    this.#emit(EventType.EXPORTED, exports)
   }
+
   emitChange(undoRedoContext: TUndoRedoContext): void
   {
-    this.emit(EventType.CHANGED, {
+    this.#emit(EventType.CHANGED, {
       canUndo: undoRedoContext.canUndo,
       canRedo: undoRedoContext.canRedo,
       canClear: !undoRedoContext.stack[undoRedoContext.stackIndex].isEmpty,
@@ -44,36 +46,45 @@ export class GlobalEvent extends EventTarget
       isEmpty: undoRedoContext.stack[undoRedoContext.stackIndex].isEmpty,
     })
   }
+
   emitIdle(model: IModel): void
   {
-    this.emit(EventType.IDLE, model)
+    this.#emit(EventType.IDLE, model)
   }
+
   emitError(err: Error): void
   {
-    this.emit(EventType.ERROR, err)
+    this.#emit(EventType.ERROR, err)
   }
-  emitClear(model?: IModel): void
+  emitNotif(message: string, timeout?: number): void
   {
-    this.emit(EventType.CLEAR, model)
+    this.#emit(EventType.NOTIF, { message, timeout })
+  }
+
+  emitClear(): void
+  {
+    this.#emit(EventType.CLEAR)
   }
   emitCleared(model?: IModel): void
   {
-    this.emit(EventType.CLEARED, model)
+    this.#emit(EventType.CLEARED, model)
   }
+
   emitConvert(): void
   {
-    this.emit(EventType.CONVERT, exports)
+    this.#emit(EventType.CONVERT, exports)
   }
   emitConverted(exports: TExport): void
   {
-    this.emit(EventType.CONVERTED, exports)
+    this.#emit(EventType.CONVERTED, exports)
   }
+
   emitImport(jiix: string | TJIIXExport, mimeType: string): void
   {
-    this.emit(EventType.IMPORT, { jiix, mimeType })
+    this.#emit(EventType.IMPORT, { jiix, mimeType })
   }
   emitImported(jiix: TJIIXExport): void
   {
-    this.emit(EventType.IMPORTED, jiix)
+    this.#emit(EventType.IMPORTED, jiix)
   }
 }

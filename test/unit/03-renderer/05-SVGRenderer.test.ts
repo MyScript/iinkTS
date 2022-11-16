@@ -498,22 +498,4 @@ describe('SVGRenderer.ts', () =>
     expect(svgCaptureElement.getAttribute('width')).toBe(`${ model.width }px`)
     expect(svgCaptureElement.getAttribute('height')).toBe(`${ model.height }px`)
   })
-
-  test('should destroy', () =>
-  {
-    const domElement = document.createElement('div') as HTMLElement
-    const renderer = new SVGRenderer(DefaultRenderingConfiguration)
-    renderer.init(domElement)
-
-    const svgModelElement: SVGElement = document.createElementNS("http://www.w3.org/2000/svg", 'svg') as SVGElement
-    domElement.appendChild(svgModelElement)
-
-    const svgCaptureElement: SVGElement = document.createElementNS("http://www.w3.org/2000/svg", 'svg') as SVGElement
-    domElement.appendChild(svgCaptureElement)
-
-    renderer.destroy()
-
-    expect(domElement.children).toHaveLength(0)
-  })
-
 })

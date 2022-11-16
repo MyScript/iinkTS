@@ -114,16 +114,13 @@ export class PointerEventGrabber implements IGrabber
 
   detach()
   {
-    this.domElement.removeEventListener('pointerdown', this.pointerDownHandler, this.configuration.listenerOptions)
-
-    this.domElement.removeEventListener('pointermove', this.pointerMoveHandler, this.configuration.listenerOptions)
-
-    this.domElement.removeEventListener('pointerup', this.pointerUpHandler, this.configuration.listenerOptions)
-    this.domElement.removeEventListener('pointerout', this.pointerUpHandler, this.configuration.listenerOptions)
-    this.domElement.removeEventListener('pointerleave', this.pointerUpHandler, this.configuration.listenerOptions)
-    this.domElement.removeEventListener('pointercancel', this.pointerUpHandler, this.configuration.listenerOptions)
-
-    this.domElement.removeEventListener('touchmove', this.prevent)
+    this.domElement?.removeEventListener('pointerdown', this.pointerDownHandler, this.configuration.listenerOptions)
+    this.domElement?.removeEventListener('pointermove', this.pointerMoveHandler, this.configuration.listenerOptions)
+    this.domElement?.removeEventListener('pointerup', this.pointerUpHandler, this.configuration.listenerOptions)
+    this.domElement?.removeEventListener('pointerout', this.pointerUpHandler, this.configuration.listenerOptions)
+    this.domElement?.removeEventListener('pointerleave', this.pointerUpHandler, this.configuration.listenerOptions)
+    this.domElement?.removeEventListener('pointercancel', this.pointerUpHandler, this.configuration.listenerOptions)
+    this.domElement?.removeEventListener('touchmove', this.prevent)
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     document.documentElement.removeEventListener('pointerdown', () => { })
   }

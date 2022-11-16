@@ -1,5 +1,5 @@
-jest.retryTimes(2)
-jest.setTimeout(50 * 1000)
+jest.retryTimes(1)
+jest.setTimeout(30 * 1000)
 
 // global.beforeAll(() => {
 // })

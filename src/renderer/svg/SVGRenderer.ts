@@ -25,7 +25,7 @@ export class SVGRenderer implements IRenderer
     }
   }
 
-  private _drawStroke(svgElement: SVGElement, stroke: TStroke)
+  #drawStroke(svgElement: SVGElement, stroke: TStroke)
   {
     if (stroke.pointerType === 'ERASER') {
       this.stroker.drawErasingStroke(svgElement, stroke)
@@ -34,7 +34,7 @@ export class SVGRenderer implements IRenderer
     }
   }
 
-  private replaceAll(layerName: string, update: TUpdatePatchReplaceAll): void
+  #replaceAll(layerName: string, update: TUpdatePatchReplaceAll): void
   {
     const oldLayer = this.context.parent.querySelector(`svg[data-layer="${ layerName }"]`) as SVGElement | null
     oldLayer?.remove()
@@ -47,7 +47,7 @@ export class SVGRenderer implements IRenderer
     }
   }
 
-  private replaceElement(update: TUpdatePatchReplaceELement): void
+  #replaceElement(update: TUpdatePatchReplaceELement): void
   {
     const elementToRemove = this.context.parent.querySelector(`#${ update.id }`) as HTMLElement | null
     if (elementToRemove) {
@@ -57,19 +57,19 @@ export class SVGRenderer implements IRenderer
     }
   }
 
-  private appendChild(layerName: string, update: TUpdatePatchAppendChild): void
+  #appendChild(layerName: string, update: TUpdatePatchAppendChild): void
   {
     const parentSelector = update.parentId ? `#${ update.parentId }` : `svg[data-layer="${ layerName }"]`
     const parent = this.context.parent.querySelector(parentSelector) as HTMLElement
     parent?.insertAdjacentHTML('beforeend', update.svg)
   }
 
-  private removeChild(update: TUpdatePatchRemoveChild): void
+  #removeChild(update: TUpdatePatchRemoveChild): void
   {
     this.context.parent.querySelector(`#${ update.parentId } > *:nth-child(${ update.index + 1 })`)?.remove()
   }
 
-  private removeElement(update: TUpdatePatchRemoveElement): void
+  #removeElement(update: TUpdatePatchRemoveElement): void
   {
     const elementToRemove = this.context.parent.querySelector(`#${ update.id }`)
     if (elementToRemove) {
@@ -85,52 +85,52 @@ export class SVGRenderer implements IRenderer
     }
   }
 
-  private insertBefore(update: TUpdatePatchInsertBefore): void
+  #insertBefore(update: TUpdatePatchInsertBefore): void
   {
     const parent = this.context.parent.querySelector(`#${ update.refId }`) as HTMLElement | null
     parent?.insertAdjacentHTML('beforebegin', update.svg)
   }
 
-  private setAttribut(update: TUpdatePatchSetAttribut): void
+  #setAttribute(update: TUpdatePatchSetAttribut): void
   {
     const selector = update.id ? `#${ update.id }` : 'svg'
     const element = this.context.parent.querySelector(selector) as HTMLElement | null
     element?.setAttribute(update.name, update.value)
   }
 
-  private removeAttribut(update: TUpdatePatchRemoveAttribut): void
+  #removeAttribute(update: TUpdatePatchRemoveAttribut): void
   {
     const selector = update.id ? `#${ update.id }` : 'svg'
     const element = this.context.parent.querySelector(selector) as HTMLElement | null
     element?.removeAttribute(update.name)
   }
 
-  private updateLayer(layerName: string, update: TUpdatePatch): void
+  updateLayer(layerName: string, update: TUpdatePatch): void
   {
     switch (update.type) {
       case 'REPLACE_ALL':
-        this.replaceAll(layerName, update as TUpdatePatchReplaceAll)
+        this.#replaceAll(layerName, update as TUpdatePatchReplaceAll)
         break
       case 'REPLACE_ELEMENT':
-        this.replaceElement(update as TUpdatePatchReplaceELement)
+        this.#replaceElement(update as TUpdatePatchReplaceELement)
         break
       case 'APPEND_CHILD':
-        this.appendChild(layerName, update as TUpdatePatchAppendChild)
+        this.#appendChild(layerName, update as TUpdatePatchAppendChild)
         break
       case 'REMOVE_ELEMENT':
-        this.removeElement(update as TUpdatePatchRemoveElement)
+        this.#removeElement(update as TUpdatePatchRemoveElement)
         break
       case 'REMOVE_CHILD':
-        this.removeChild(update as TUpdatePatchRemoveChild)
+        this.#removeChild(update as TUpdatePatchRemoveChild)
         break
       case 'INSERT_BEFORE':
-        this.insertBefore(update as TUpdatePatchInsertBefore)
+        this.#insertBefore(update as TUpdatePatchInsertBefore)
         break
       case 'SET_ATTRIBUTE':
-        this.setAttribut(update as TUpdatePatchSetAttribut)
+        this.#setAttribute(update as TUpdatePatchSetAttribut)
         break
       case 'REMOVE_ATTRIBUTE':
-        this.removeAttribut(update as TUpdatePatchRemoveAttribut)
+        this.#removeAttribute(update as TUpdatePatchRemoveAttribut)
         break
       default:
         break
@@ -159,7 +159,7 @@ export class SVGRenderer implements IRenderer
         if (oldStroke) {
           oldStroke.remove()
         }
-        this._drawStroke(pendingStrokeGroup, stroke)
+        this.#drawStroke(pendingStrokeGroup, stroke)
       }
     }
   }
@@ -176,12 +176,5 @@ export class SVGRenderer implements IRenderer
       svg.setAttribute('width', `${ width }px`)
       svg.setAttribute('height', `${ height }px`)
     })
-  }
-
-  destroy(): void
-  {
-    while (this.context.parent.lastChild) {
-      this.context.parent.removeChild(this.context.parent.lastChild);
-    }
   }
 }

@@ -39,11 +39,4 @@ describe('QuadraticUtils.ts', () =>
     expect(renderer.context).toBeDefined()
   })
 
-  test('should destroy', () =>
-  {
-    renderer.destroy()
-    expect(wrapperHTML.querySelector('.ms-rendering-canvas')).toBeNull()
-    expect(wrapperHTML.querySelector('.ms-capture-canvas')).toBeNull()
-  })
-
 })

@@ -39,7 +39,6 @@ describe('Helpers.ts', () =>
       })
   })
 
-
   test('should reject getAvailableLanguageList if scheme is empty', async () =>
   {
     const conf = { ...ConfigurationTextWebsocket }

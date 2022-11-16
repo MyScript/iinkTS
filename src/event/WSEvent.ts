@@ -3,12 +3,12 @@ import { WSEventType } from "../Constants"
 
 export class WSEvent extends EventTarget
 {
-  private abortController: AbortController
+  #abortController: AbortController
 
   constructor()
   {
     super()
-    this.abortController = new AbortController()
+    this.#abortController = new AbortController()
   }
 
   private emit(type: string, data?: unknown): void
@@ -31,7 +31,7 @@ export class WSEvent extends EventTarget
   }
   addConnectionActiveListener(callback: () => void): void
   {
-    this.addEventListener(WSEventType.CONNECTION_ACTIVE, () => callback(), { signal: this.abortController.signal })
+    this.addEventListener(WSEventType.CONNECTION_ACTIVE, () => callback(), { signal: this.#abortController.signal })
   }
 
   emitDisconnected(event: CloseEvent): void
@@ -40,7 +40,7 @@ export class WSEvent extends EventTarget
   }
   addDisconnectedListener(callback: (event: CloseEvent) => void): void
   {
-    this.addEventListener(WSEventType.DISCONNECTED, (evt: unknown) => callback(((evt as CustomEvent).detail as CloseEvent)), { signal: this.abortController.signal })
+    this.addEventListener(WSEventType.DISCONNECTED, (evt: unknown) => callback(((evt as CustomEvent).detail as CloseEvent)), { signal: this.#abortController.signal })
   }
 
   emitPartChange(partChange: TWebSocketPartChangeEvent): void
@@ -49,7 +49,7 @@ export class WSEvent extends EventTarget
   }
   addPartChangeListener(callback: (partChange: TWebSocketPartChangeEvent) => void): void
   {
-    this.addEventListener(WSEventType.PART_CHANGE, (evt: unknown) => callback(((evt as CustomEvent).detail as TWebSocketPartChangeEvent)), { signal: this.abortController.signal })
+    this.addEventListener(WSEventType.PART_CHANGE, (evt: unknown) => callback(((evt as CustomEvent).detail as TWebSocketPartChangeEvent)), { signal: this.#abortController.signal })
   }
 
   emitContentChange(contentChange: TWebSocketContentChangeEvent): void
@@ -58,7 +58,7 @@ export class WSEvent extends EventTarget
   }
   addContentChangeListener(callback: (contentChange: TWebSocketContentChangeEvent) => void): void
   {
-    this.addEventListener(WSEventType.CONTENT_CHANGE, (evt: unknown) => callback(((evt as CustomEvent).detail as TWebSocketContentChangeEvent)), { signal: this.abortController.signal })
+    this.addEventListener(WSEventType.CONTENT_CHANGE, (evt: unknown) => callback(((evt as CustomEvent).detail as TWebSocketContentChangeEvent)), { signal: this.#abortController.signal })
   }
 
   emitSVGPatch(patchChange: TWebSocketSVGPatchEvent): void
@@ -67,7 +67,7 @@ export class WSEvent extends EventTarget
   }
   addSVGPatchListener(callback: (contentChange: TWebSocketSVGPatchEvent) => void): void
   {
-    this.addEventListener(WSEventType.SVG_PATCH, (evt: unknown) => callback(((evt as CustomEvent).detail as TWebSocketSVGPatchEvent)), { signal: this.abortController.signal })
+    this.addEventListener(WSEventType.SVG_PATCH, (evt: unknown) => callback(((evt as CustomEvent).detail as TWebSocketSVGPatchEvent)), { signal: this.#abortController.signal })
   }
 
   emitExported(exports: TWebSocketExportEvent): void
@@ -76,7 +76,7 @@ export class WSEvent extends EventTarget
   }
   addExportListener(callback: (exports: TWebSocketExportEvent) => void): void
   {
-    this.addEventListener(WSEventType.EXPORTED, (evt: unknown) => callback(((evt as CustomEvent).detail as TWebSocketExportEvent)), { signal: this.abortController.signal })
+    this.addEventListener(WSEventType.EXPORTED, (evt: unknown) => callback(((evt as CustomEvent).detail as TWebSocketExportEvent)), { signal: this.#abortController.signal })
   }
 
   emitError(err: Error): void
@@ -85,11 +85,11 @@ export class WSEvent extends EventTarget
   }
   addErrorListener(callback: (err: Error) => void): void
   {
-    this.addEventListener(WSEventType.ERROR, (evt: unknown) => callback(((evt as CustomEvent).detail as Error)), { signal: this.abortController.signal })
+    this.addEventListener(WSEventType.ERROR, (evt: unknown) => callback(((evt as CustomEvent).detail as Error)), { signal: this.#abortController.signal })
   }
 
   clearListeners()
   {
-    this.abortController.abort()
+    this.#abortController.abort()
   }
 }

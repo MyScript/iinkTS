@@ -1,5 +1,5 @@
-const { write, getExportedDatas, getEditor, changeConfiguration } = require('./helper')
-const { equation1, one } = require('./strokesDatas')
+const { write, getExportedDatas, getEditor, setEditorConfiguration, getEditorConfiguration } = require('../helper')
+const { equation1, one } = require('../strokesDatas')
 
 describe('Rest Math', () => {
   beforeAll(async () => {
@@ -10,12 +10,12 @@ describe('Rest Math', () => {
     await page.reload()
   })
 
-  it('should have title', async () => {
+  test('should have title', async () => {
     const title = await page.title()
     expect(title).toMatch('Rest Math iink')
   })
 
-  it('should only request application/x-latex by default', async () => {
+  test('should only request application/x-latex by default', async () => {
     const mimeTypeRequest = []
     page.on('request', async (request) => {
       if (request.url().includes('api/v4.0/iink/batch') && request.method() === 'POST') {
@@ -31,12 +31,10 @@ describe('Rest Math', () => {
     expect(mimeTypeRequest[0]).toContain('application/x-latex')
   })
 
-  it('should only request application/mathml+xml', async () => {
-    let editor = await getEditor(page)
-    editor._configuration.recognition.math.mimeTypes = [
-      'application/mathml+xml',
-    ]
-    await changeConfiguration(page, editor._configuration)
+  test('should only request application/mathml+xml', async () => {
+    const configuration = await getEditorConfiguration(page)
+    configuration.recognition.math.mimeTypes = ['application/mathml+xml']
+    await setEditorConfiguration(page, configuration)
 
     const mimeTypeRequest = []
     page.on('request', async (request) => {
@@ -54,7 +52,30 @@ describe('Rest Math', () => {
     expect(mimeTypeRequest[0]).toContain('application/mathml+xml')
   })
 
-  it('should export "y=3x+2"', async () => {
+  test('should request application/mathml+xml & application/x-latex', async () => {
+    const configuration = await getEditorConfiguration(page)
+    configuration.recognition.math.mimeTypes = ['application/mathml+xml', 'application/x-latex']
+    await setEditorConfiguration(page, configuration)
+
+    const mimeTypeRequest = []
+    page.on('request', async (request) => {
+      if (request.url().includes('api/v4.0/iink/batch') && request.method() === 'POST') {
+        const headers = await request.allHeaders()
+        mimeTypeRequest.push(headers.accept)
+      }
+    })
+
+    await Promise.all([
+      getExportedDatas(page),
+      write(page, one.strokes, 100, 100),
+    ])
+    expect(mimeTypeRequest).toHaveLength(2)
+    const allMimeTypesRequested = mimeTypeRequest.join(' ')
+    expect(allMimeTypesRequested).toContain('application/mathml+xml')
+    expect(allMimeTypesRequested).toContain('application/x-latex')
+  })
+
+  test('should export "y=3x+2"', async () => {
     const [exportedDatas] = await Promise.all([
       getExportedDatas(page),
       write(page, equation1.strokes, 100, 100),
@@ -66,7 +87,7 @@ describe('Rest Math', () => {
     )
   })
 
-  it('should display katex-html into result', async () => {
+  test('should display katex-html into result', async () => {
     const [exportedDatas] = await Promise.all([
       getExportedDatas(page),
       write(page, equation1.strokes, 100, 100),
@@ -77,7 +98,7 @@ describe('Rest Math', () => {
     expect(htmlKatexResult).toStrictEqual(equation1.exports.LATEX.at(-1))
   })
 
-  it('should clear', async () => {
+  test('should clear', async () => {
     const [exportedDatas] = await Promise.all([
       getExportedDatas(page),
       write(page, one.strokes, 100, 100),
@@ -98,7 +119,7 @@ describe('Rest Math', () => {
     expect(resultText).toBe('')
   })
 
-  it('should undo/redo', async () => {
+  test('should undo/redo', async () => {
     const editorEl = await page.waitForSelector('#editor')
 
     await Promise.all([
@@ -127,4 +148,5 @@ describe('Rest Math', () => {
     raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
     expect(raw.length).toStrictEqual(equation1.strokes.length - 1)
   })
+
 })

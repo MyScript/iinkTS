@@ -32,6 +32,7 @@ export const EventType = {
   SUPPORTED_IMPORT_MIMETYPES: 'supportedImportMimeTypes',
   EXPORT: 'export',
   CONVERT: 'convert',
+  NOTIF: 'notif',
   ERROR: 'error'
 } as const
 

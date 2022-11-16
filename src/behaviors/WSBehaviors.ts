@@ -20,17 +20,18 @@ export class WSBehaviors implements IBehaviors
   renderer: SVGRenderer
   recognizer: WSRecognizer
   undoRedoManager: UndoRedoManager
-  private _triggerConfiguration: TTriggerConfiguration
-  private _resizeTimer?: ReturnType<typeof setTimeout>
-  private _exportDeffered?: DeferredPromise<TExport>
-  private _convertDeffered?: DeferredPromise<TExport>
-  private _addStrokeDeffered?: DeferredPromise<TExport>
-  private _importDeffered?: DeferredPromise<TExport>
-  private _resizeDeffered?: DeferredPromise<void>
-  private _undoDeffered?: DeferredPromise<void>
-  private _redoDeffered?: DeferredPromise<void>
-  private _clearDeffered?: DeferredPromise<void>
   initalise: DeferredPromise<void>
+
+  #triggerConfiguration: TTriggerConfiguration
+  #resizeTimer?: ReturnType<typeof setTimeout>
+  #exportDeffered?: DeferredPromise<TExport>
+  #convertDeffered?: DeferredPromise<TExport>
+  #addStrokeDeffered?: DeferredPromise<TExport>
+  #importDeffered?: DeferredPromise<TExport>
+  #resizeDeffered?: DeferredPromise<void>
+  #undoDeffered?: DeferredPromise<void>
+  #redoDeffered?: DeferredPromise<void>
+  #clearDeffered?: DeferredPromise<void>
 
   constructor(configuration: TConfiguration, model: IModel)
   {
@@ -38,7 +39,7 @@ export class WSBehaviors implements IBehaviors
     this.renderer = new SVGRenderer(configuration.rendering)
     this.recognizer = new WSRecognizer(configuration.server, configuration.recognition)
     this.undoRedoManager = new UndoRedoManager(configuration["undo-redo"], model.getClone())
-    this._triggerConfiguration = configuration.triggers
+    this.#triggerConfiguration = configuration.triggers
     this.initalise = new DeferredPromise<void>()
   }
 
@@ -77,10 +78,10 @@ export class WSBehaviors implements IBehaviors
   // private onContentChange = (evt: TWebSocketContentChangeEvent) =>
   private onContentChange = () =>
   {
-    this._resizeDeffered?.resolve()
-    this._undoDeffered?.resolve()
-    this._redoDeffered?.resolve()
-    this._clearDeffered?.resolve()
+    this.#resizeDeffered?.resolve()
+    this.#undoDeffered?.resolve()
+    this.#redoDeffered?.resolve()
+    this.#clearDeffered?.resolve()
   }
 
   private onSVGPatch = (evt: TWebSocketSVGPatchEvent) =>
@@ -106,8 +107,8 @@ export class WSBehaviors implements IBehaviors
 
   private onExport = (exportMessage: TWebSocketExportEvent) =>
   {
-    this._addStrokeDeffered?.resolve(exportMessage.exports)
-    this._exportDeffered?.resolve(exportMessage.exports)
+    this.#addStrokeDeffered?.resolve(exportMessage.exports)
+    this.#exportDeffered?.resolve(exportMessage.exports)
     this.globalEvent.emitExported(exportMessage.exports)
   }
 
@@ -122,20 +123,20 @@ export class WSBehaviors implements IBehaviors
         this.initalise.reject(err)
       }
     }
-    if (this._addStrokeDeffered?.isPending) {
-      this._addStrokeDeffered?.reject(err)
+    if (this.#addStrokeDeffered?.isPending) {
+      this.#addStrokeDeffered?.reject(err)
     }
-    if (this._resizeDeffered?.isPending) {
-      this._resizeDeffered?.reject(err)
+    if (this.#resizeDeffered?.isPending) {
+      this.#resizeDeffered?.reject(err)
     }
-    if (this._undoDeffered?.isPending) {
-      this._undoDeffered?.reject(err)
+    if (this.#undoDeffered?.isPending) {
+      this.#undoDeffered?.reject(err)
     }
-    if (this._redoDeffered?.isPending) {
-      this._redoDeffered?.reject(err)
+    if (this.#redoDeffered?.isPending) {
+      this.#redoDeffered?.reject(err)
     }
-    if (this._clearDeffered?.isPending) {
-      this._clearDeffered?.reject(err)
+    if (this.#clearDeffered?.isPending) {
+      this.#clearDeffered?.reject(err)
     }
   }
 
@@ -153,10 +154,10 @@ export class WSBehaviors implements IBehaviors
     await this.initalise.promise
     model.updatePositionSent()
     this.undoRedoManager.addModelToStack(model)
-    this._addStrokeDeffered = new DeferredPromise<TExport>()
+    this.#addStrokeDeffered = new DeferredPromise<TExport>()
     this.recognizer.addStrokes(model)
 
-    const exports: TExport = await this._addStrokeDeffered.promise
+    const exports: TExport = await this.#addStrokeDeffered.promise
     model.updatePositionReceived()
     if (model.exports) {
       Object.assign(model.exports, exports)
@@ -165,7 +166,7 @@ export class WSBehaviors implements IBehaviors
     }
     this.undoRedoManager.updateModelInStack(model)
     this.renderer.clearPendingStroke()
-    this._addStrokeDeffered = undefined
+    this.#addStrokeDeffered = undefined
     return model
   }
 
@@ -173,10 +174,10 @@ export class WSBehaviors implements IBehaviors
   {
     await this.initalise.promise
     this.undoRedoManager.addModelToStack(model)
-    this._exportDeffered = new DeferredPromise<TExport>()
+    this.#exportDeffered = new DeferredPromise<TExport>()
     await this.recognizer.export(model, mimeTypes)
 
-    const exports: TExport = await this._exportDeffered.promise
+    const exports: TExport = await this.#exportDeffered.promise
 
     model.updatePositionReceived()
     if (model.exports) {
@@ -186,7 +187,7 @@ export class WSBehaviors implements IBehaviors
     }
 
     this.undoRedoManager.updateModelInStack(model)
-    this._exportDeffered = undefined
+    this.#exportDeffered = undefined
     return model
   }
 
@@ -194,10 +195,10 @@ export class WSBehaviors implements IBehaviors
   {
     await this.initalise.promise
     this.undoRedoManager.addModelToStack(model)
-    this._convertDeffered = new DeferredPromise<TExport>()
+    this.#convertDeffered = new DeferredPromise<TExport>()
     this.recognizer.convert(conversionState)
 
-    const myExportConverted: TExport = await this._convertDeffered.promise
+    const myExportConverted: TExport = await this.#convertDeffered.promise
     model.updatePositionReceived()
     if (model.converts) {
       Object.assign(model.converts, myExportConverted)
@@ -205,7 +206,7 @@ export class WSBehaviors implements IBehaviors
       model.converts = myExportConverted
     }
     this.undoRedoManager.updateModelInStack(model)
-    this._convertDeffered = undefined
+    this.#convertDeffered = undefined
     return model
   }
 
@@ -213,10 +214,10 @@ export class WSBehaviors implements IBehaviors
   {
     await this.initalise.promise
     this.undoRedoManager.addModelToStack(model)
-    this._importDeffered = new DeferredPromise<TExport>()
+    this.#importDeffered = new DeferredPromise<TExport>()
     this.recognizer.import(data, mimeType)
 
-    const myImportExport: TExport = await this._importDeffered.promise
+    const myImportExport: TExport = await this.#importDeffered.promise
     model.updatePositionReceived()
     if (model.exports) {
       Object.assign(model.exports, myImportExport)
@@ -224,7 +225,7 @@ export class WSBehaviors implements IBehaviors
       model.exports = myImportExport
     }
     this.undoRedoManager.updateModelInStack(model)
-    this._importDeffered = undefined
+    this.#importDeffered = undefined
     return model
   }
 
@@ -232,52 +233,51 @@ export class WSBehaviors implements IBehaviors
   {
     await this.initalise.promise
     this.renderer.resize(model)
-    this._resizeDeffered = new DeferredPromise<void>()
-    clearTimeout(this._resizeTimer)
-    this._resizeTimer = setTimeout(async () =>
+    this.#resizeDeffered = new DeferredPromise<void>()
+    clearTimeout(this.#resizeTimer)
+    this.#resizeTimer = setTimeout(async () =>
     {
       this.recognizer.resize(model)
-    }, this._triggerConfiguration.resizeTriggerDelay)
-    await this._resizeDeffered.promise
-    this._resizeDeffered = undefined
+    }, this.#triggerConfiguration.resizeTriggerDelay)
+    await this.#resizeDeffered.promise
+    this.#resizeDeffered = undefined
     return model
   }
 
   async undo(): Promise<IModel>
   {
     await this.initalise.promise
-    this._undoDeffered = new DeferredPromise<void>()
+    this.#undoDeffered = new DeferredPromise<void>()
     this.recognizer.undo()
-    await this._undoDeffered.promise
+    await this.#undoDeffered.promise
     return this.undoRedoManager.undo()
   }
 
   async redo(): Promise<IModel>
   {
     await this.initalise.promise
-    this._redoDeffered = new DeferredPromise<void>()
+    this.#redoDeffered = new DeferredPromise<void>()
     this.recognizer.redo()
-    await this._redoDeffered.promise
+    await this.#redoDeffered.promise
     return this.undoRedoManager.redo()
   }
 
   async clear(model: IModel): Promise<IModel>
   {
     await this.initalise.promise
-    this._clearDeffered = new DeferredPromise<void>()
+    this.#clearDeffered = new DeferredPromise<void>()
     this.recognizer.clear()
     const myModel = model.getClone()
     myModel.clear()
     this.undoRedoManager.addModelToStack(myModel)
-    await this._clearDeffered?.promise
-    this._clearDeffered = undefined
+    await this.#clearDeffered?.promise
+    this.#clearDeffered = undefined
     return myModel
   }
 
   async destroy(): Promise<void>
   {
     this.grabber.detach()
-    this.renderer.destroy()
     this.recognizer.close(1000, WSMessage.CLOSE_RECOGNIZER)
     return Promise.resolve()
   }

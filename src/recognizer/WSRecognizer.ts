@@ -21,8 +21,9 @@ export class WSRecognizer extends AbstractRecognizer
   private viewSizeHeight!: number
   private viewSizeWidth!: number
   private currentErrorCode?: string | number
-  private _fileImportDeffered?: DeferredPromise<TExport>
   wsEvent: WSEvent
+
+  #fileImportDeffered?: DeferredPromise<TExport>
 
   constructor(serverConfig: TServerConfiguration, recognitionConfig: TRecognitionConfiguration)
   {
@@ -244,7 +245,7 @@ export class WSRecognizer extends AbstractRecognizer
         //   recognitionContext.response(undefined, message.data)
         //   break
         case 'fileChunkAck':
-          this._fileImportDeffered?.resolve((websocketMessage as unknown) as TExport)
+          this.#fileImportDeffered?.resolve((websocketMessage as unknown) as TExport)
           break
         //   case 'idle':
         //     recognizerContext.idle = true
@@ -373,7 +374,7 @@ export class WSRecognizer extends AbstractRecognizer
     const chunkSize = this.serverConfiguration.websocket.fileChunkSize
     const importFileId = randomUUID()
     // const messages = []
-    this._fileImportDeffered = new DeferredPromise<TExport>()
+    this.#fileImportDeffered = new DeferredPromise<TExport>()
     const readBlob = (blob: Blob): Promise<string | never> => {
       const fileReader = new FileReader()
       return new Promise((resolve, reject) => {
@@ -401,7 +402,7 @@ export class WSRecognizer extends AbstractRecognizer
       }
       this.send(fileChuckMessage)
     }
-    return this._fileImportDeffered.promise
+    return this.#fileImportDeffered.promise
   }
 
   async resize(model: IModel): Promise<IModel>

@@ -4,6 +4,7 @@ export default {
   collectCoverage: true,
   collectCoverageFrom: [
     './src/**',
+    '!./src/Editor.ts',
     '!./src/@types/**'
   ],
   coverageThreshold: {
