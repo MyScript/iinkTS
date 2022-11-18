@@ -29,5 +29,5 @@ export interface IBehaviors
 
   async clear(model: IModel): Promise<IModel>
 
-  async destroy(): Promise<void>
+  async destroy(model: IModel): Promise<void>
 }

@@ -107,8 +107,10 @@ export class WSBehaviors implements IBehaviors
 
   private onExport = (exportMessage: TWebSocketExportEvent) =>
   {
+    this.#importDeffered?.resolve(exportMessage.exports)
     this.#addStrokeDeffered?.resolve(exportMessage.exports)
     this.#exportDeffered?.resolve(exportMessage.exports)
+    this.#convertDeffered?.resolve(exportMessage.exports)
     this.globalEvent.emitExported(exportMessage.exports)
   }
 
@@ -125,6 +127,15 @@ export class WSBehaviors implements IBehaviors
     }
     if (this.#addStrokeDeffered?.isPending) {
       this.#addStrokeDeffered?.reject(err)
+    }
+    if (this.#exportDeffered?.isPending) {
+      this.#exportDeffered?.reject(err)
+    }
+    if (this.#convertDeffered?.isPending) {
+      this.#convertDeffered?.reject(err)
+    }
+    if (this.#importDeffered?.isPending) {
+      this.#importDeffered?.reject(err)
     }
     if (this.#resizeDeffered?.isPending) {
       this.#resizeDeffered?.reject(err)
@@ -250,6 +261,7 @@ export class WSBehaviors implements IBehaviors
     this.#undoDeffered = new DeferredPromise<void>()
     this.recognizer.undo()
     await this.#undoDeffered.promise
+    this.#undoDeffered = undefined
     return this.undoRedoManager.undo()
   }
 
@@ -259,6 +271,7 @@ export class WSBehaviors implements IBehaviors
     this.#redoDeffered = new DeferredPromise<void>()
     this.recognizer.redo()
     await this.#redoDeffered.promise
+    this.#redoDeffered = undefined
     return this.undoRedoManager.redo()
   }
 
@@ -278,7 +291,9 @@ export class WSBehaviors implements IBehaviors
   async destroy(): Promise<void>
   {
     this.grabber.detach()
+    this.renderer.destroy()
     this.recognizer.close(1000, WSMessage.CLOSE_RECOGNIZER)
+    // this.undoRedoManager.reset(model)
     return Promise.resolve()
   }
 }

@@ -105,7 +105,7 @@ describe('SVGRenderer.ts', () =>
     const parendNode = domElement.querySelector('svg[data-layer="CAPTURE"]')
     expect(parendNode?.children).toHaveLength(1)
 
-    const elementReplaced = domElement.querySelector(`#${updateReplaceElement.id}`)
+    const elementReplaced = domElement.querySelector(`#${ updateReplaceElement.id }`)
     expect(parendNode?.children.item(0)).toBe(elementReplaced)
   })
 
@@ -252,7 +252,7 @@ describe('SVGRenderer.ts', () =>
     }
     renderer.updatesLayer('MODEL', [updateRmoveChild])
 
-    const parendNode = domElement.querySelector(`#${updateRmoveChild.parentId}`)
+    const parendNode = domElement.querySelector(`#${ updateRmoveChild.parentId }`)
     expect(parendNode?.children).toHaveLength(2)
   })
 
@@ -312,7 +312,7 @@ describe('SVGRenderer.ts', () =>
     }
     renderer.updatesLayer('CAPTURE', [updateSetAttribut])
 
-    const element = domElement.querySelector(`#${updateSetAttribut.id}`)
+    const element = domElement.querySelector(`#${ updateSetAttribut.id }`)
     expect(element?.getAttribute(updateSetAttribut.name)).toBe(updateSetAttribut.value)
   })
 
@@ -497,5 +497,22 @@ describe('SVGRenderer.ts', () =>
 
     expect(svgCaptureElement.getAttribute('width')).toBe(`${ model.width }px`)
     expect(svgCaptureElement.getAttribute('height')).toBe(`${ model.height }px`)
+  })
+
+  test('should destroy', () =>
+  {
+    const domElement = document.createElement('div') as HTMLElement
+    const renderer = new SVGRenderer(DefaultRenderingConfiguration)
+    renderer.init(domElement)
+
+    const svgModelElement: SVGElement = document.createElementNS("http://www.w3.org/2000/svg", 'svg') as SVGElement
+    domElement.appendChild(svgModelElement)
+
+    const svgCaptureElement: SVGElement = document.createElementNS("http://www.w3.org/2000/svg", 'svg') as SVGElement
+    domElement.appendChild(svgCaptureElement)
+
+    renderer.destroy()
+
+    expect(domElement.children).toHaveLength(0)
   })
 })

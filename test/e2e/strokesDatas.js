@@ -24,7 +24,7 @@ module.exports.hello = {
   type: 'TEXT',
   strokes: helloStrokes,
   exports: {
-    'text/plain': ['h', 'he', 'hee', 'heel', 'hello'],
+    'text/plain': ['h', 'he', 'hel', 'hell', 'hello'],
     'application/vnd.myscript.jiix': {
       type: 'Text',
       label: 'hello',
@@ -38,6 +38,17 @@ module.exports.hello = {
       id: 'MainBlock',
     },
   },
+}
+
+const helloStrike = require('./strokes/helloStrike.json')
+module.exports.helloStrikeStroke = {
+  name: 'helloStrike',
+  type: 'TEXT',
+  strokes: helloStrike,
+  apiVersion: 'V4',
+  exports: {
+    'text/plain': ['hello', '']
+  }
 }
 
 const helloOne = require('./strokes/helloOneStroke.json')

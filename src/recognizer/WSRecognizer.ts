@@ -86,56 +86,54 @@ export class WSRecognizer extends AbstractRecognizer
   private closeCallback(evt: CloseEvent): void
   {
     let message = ''
-    if (this.currentErrorCode) return
-    switch (evt.code) {
-      case 1000:
-        // Normal Closure
-        break
-      case 1001:
-        message = ErrorConst.GOING_AWAY
-        break
-      case 1002:
-        message = ErrorConst.PROTOCOL_ERROR
-        break
-      case 1003:
-        message = ErrorConst.UNSUPPORTED_DATA
-        break
-      case 1005:
-        message = ErrorConst.UNSUPPORTED_DATA
-        break
-      case 1006:
-        message = ErrorConst.ABNORMAL_CLOSURE
-        break
-      case 1007:
-        message = ErrorConst.INVALID_FRAME_PAULOAD
-        break
-      case 1008:
-        message = ErrorConst.POLICY_VIOLATION
-        break
-      case 1009:
-        message = ErrorConst.MESSAGE_TOO_BIG
-        break
-      case 1011:
-        message = ErrorConst.INTERNAL_ERROR
-        break
-      case 1012:
-        message = ErrorConst.SERVICE_RESTART
-        break
-      case 1013:
-        message = ErrorConst.TRY_AGAIN
-        break
-      case 1014:
-        message = ErrorConst.BAD_GATEWAY
-        break
-      case 1015:
-        message = ErrorConst.TLS_HANDSHAKE
-        break
-      default:
-        message = ErrorConst.CANT_ESTABLISH
-        break
-    }
-    if (message) {
-      this.wsEvent.emitError(new Error(message))
+    if (!this.currentErrorCode) {
+      switch (evt.code) {
+        case 1000:
+          // Normal Closure
+          break
+        case 1001:
+          message = ErrorConst.GOING_AWAY
+          break
+        case 1002:
+          message = ErrorConst.PROTOCOL_ERROR
+          break
+        case 1003:
+          message = ErrorConst.UNSUPPORTED_DATA
+          break
+        case 1006:
+          message = ErrorConst.ABNORMAL_CLOSURE
+          break
+        case 1007:
+          message = ErrorConst.INVALID_FRAME_PAULOAD
+          break
+        case 1008:
+          message = ErrorConst.POLICY_VIOLATION
+          break
+        case 1009:
+          message = ErrorConst.MESSAGE_TOO_BIG
+          break
+        case 1011:
+          message = ErrorConst.INTERNAL_ERROR
+          break
+        case 1012:
+          message = ErrorConst.SERVICE_RESTART
+          break
+        case 1013:
+          message = ErrorConst.TRY_AGAIN
+          break
+        case 1014:
+          message = ErrorConst.BAD_GATEWAY
+          break
+        case 1015:
+          message = ErrorConst.TLS_HANDSHAKE
+          break
+        default:
+          message = ErrorConst.CANT_ESTABLISH
+          break
+      }
+      if (message) {
+        this.wsEvent.emitError(new Error(message))
+      }
     }
     this.wsEvent.emitDisconnected(evt)
   }
@@ -451,7 +449,6 @@ export class WSRecognizer extends AbstractRecognizer
     this.send(message)
   }
 }
-
 
 // export function buildSetPenStyle (penStyle) {
 //   return {

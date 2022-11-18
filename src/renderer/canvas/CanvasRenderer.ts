@@ -97,4 +97,11 @@ export class CanvasRenderer implements IRenderer
     this.resizeContent()
     this.drawModel(model)
   }
+
+  destroy(): void
+  {
+    if (this.context.parent) {
+      this.context.parent.innerHTML = ''
+    }
+  }
 }
