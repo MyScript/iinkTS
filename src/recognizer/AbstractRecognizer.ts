@@ -1,9 +1,10 @@
 
 import { TRecognitionConfiguration } from '../@types/configuration/RecognitionConfiguration'
 import { TServerConfiguration } from '../@types/configuration/ServerConfiguration'
+import { IRecognizer } from '../@types/recognizer/Recognizer'
 import { IModel } from '../@types/model/Model'
 
-export abstract class AbstractRecognizer
+export abstract class AbstractRecognizer implements IRecognizer
 {
   protected serverConfiguration: TServerConfiguration
   protected recognitionConfiguration: TRecognitionConfiguration
@@ -13,10 +14,6 @@ export abstract class AbstractRecognizer
     this.serverConfiguration = serverConfig
     this.recognitionConfiguration = recognitionConfig
   }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-empty-function
-  init(_height: number, _width: number): void { }
-
   abstract export(model: IModel, mimeTypes?: string[]): Promise<IModel | never>
 
   abstract resize(model: IModel): Promise<IModel | never>

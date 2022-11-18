@@ -76,8 +76,9 @@ export class Editor
 
     this.#behaviorsManager = new BehaviorsManager(this.configuration, this.model, options?.behaviors)
 
-    this.#initializeSmartGuide()
     this.#initalizeBehaviors()
+    this.#initializeSmartGuide()
+    this.#addListeners()
   }
 
   get initialized(): boolean
@@ -92,16 +93,16 @@ export class Editor
 
   set configuration(config: TConfigurationClient)
   {
-    this.model.clear()
     this.#configuration.overrideDefaultConfiguration(config)
 
+    this.model.clear()
     this.model.height = Math.max(this.wrapperHTML.clientHeight, this.#configuration.rendering.minHeight)
     this.model.width = Math.max(this.wrapperHTML.clientWidth, this.#configuration.rendering.minWidth)
 
-    this.#initializeSmartGuide()
-
     this.#behaviorsManager.overrideDefaultBehaviors(this.#configuration, this.model)
     this.#initalizeBehaviors()
+
+    this.#initializeSmartGuide()
   }
 
   get mode(): EditorMode
@@ -165,7 +166,9 @@ export class Editor
     this.#behaviorsManager.init(this.wrapperHTML)
       .then(async () =>
       {
-        this.#addListeners()
+        this.#grabber.onPointerDown = (evt: PointerEvent, point: TPoint) => this.#onPointerDown(evt, point)
+        this.#grabber.onPointerMove = (evt: PointerEvent, point: TPoint) => this.#onPointerMove(evt, point)
+        this.#grabber.onPointerUp = (evt: PointerEvent, point: TPoint) => this.#onPointerUp(evt, point)
         this.#initialized = true
         this.wrapperHTML.editor = this
         this.events.emitLoaded()
@@ -203,7 +206,6 @@ export class Editor
 
   #showNotif(message: string, timeout = 1000)
   {
-    console.log('timeout: ', timeout);
     this.#messageHTML.style.display = 'initial'
     this.#messageHTML.classList.add('info-msg')
     this.#messageHTML.classList.remove('error-msg')
@@ -215,10 +217,6 @@ export class Editor
 
   #addListeners(): void
   {
-    this.#grabber.onPointerDown = (evt: PointerEvent, point: TPoint) => this.#onPointerDown(evt, point)
-    this.#grabber.onPointerMove = (evt: PointerEvent, point: TPoint) => this.#onPointerMove(evt, point)
-    this.#grabber.onPointerUp = (evt: PointerEvent, point: TPoint) => this.#onPointerUp(evt, point)
-
     this.events.addEventListener(EventType.CONVERT, () => this.convert({ conversionState: "DIGITAL_EDIT" }))
     this.events.addEventListener(EventType.CLEAR, () => this.clear())
     this.events.addEventListener(EventType.ERROR, (evt: Event) => this.#onError(evt))
@@ -232,7 +230,6 @@ export class Editor
     const payload = (evt as CustomEvent).detail as { message: string, timeout: number }
     this.#showNotif(payload.message, payload.timeout)
   }
-
 
   #onExport(evt: Event): void
   {
@@ -320,7 +317,9 @@ export class Editor
 
   async resize(): Promise<IModel>
   {
-    this.#smartGuide.resize()
+    if (this.configuration.rendering.smartGuide.enable) {
+      this.#smartGuide.resize()
+    }
     this.model.height = Math.max(this.wrapperHTML.clientHeight, this.configuration.rendering.minHeight)
     this.model.width = Math.max(this.wrapperHTML.clientWidth, this.configuration.rendering.minWidth)
     this.model = await this.#behaviors.resize(this.model)
@@ -330,7 +329,6 @@ export class Editor
   async export(mimeTypes: string[]): Promise<IModel>
   {
     this.model = await this.#behaviors.export(this.model, mimeTypes)
-    this.events.emitExported(this.model.exports as TExport)
     return this.model
   }
 

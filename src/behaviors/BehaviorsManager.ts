@@ -16,7 +16,7 @@ export class BehaviorsManager
   overrideDefaultBehaviors(configuration: TConfiguration, model: IModel, behaviors?: IBehaviors)
   {
     if (this.behaviors) {
-      this.behaviors.destroy()
+      this.behaviors.destroy(model)
     }
     let defaultBehaviors: IBehaviors
     if (configuration.server.protocol === 'REST') {

@@ -177,4 +177,11 @@ export class SVGRenderer implements IRenderer
       svg.setAttribute('height', `${ height }px`)
     })
   }
+
+  destroy(): void
+  {
+    if (this.context.parent) {
+      this.context.parent.innerHTML = ''
+    }
+  }
 }

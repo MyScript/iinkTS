@@ -138,14 +138,18 @@ export class RestBehaviors implements IBehaviors
     this.undoRedoManager.addModelToStack(myModel)
     this.renderer.drawModel(myModel)
     myModel.modificationDate = new Date().getTime()
-    this.globalEvent.emitExported(myModel.exports as TExport)
     this.globalEvent.emitCleared(myModel)
+    this.globalEvent.emitExported(myModel.exports as TExport)
     return myModel
   }
 
-  async destroy(): Promise<void>
+  async destroy(model: IModel): Promise<void>
   {
     this.grabber.detach()
+    this.renderer.destroy()
+    this.undoRedoManager.reset(model)
+    this.globalEvent.emitCleared(model)
+    this.globalEvent.emitExported(model.exports as TExport)
     return Promise.resolve()
   }
 }

@@ -20,7 +20,7 @@ export class SmartGuide
   #deleteElement!: HTMLButtonElement
   #fadeOutTimout?: ReturnType<typeof setTimeout>
   #isMenuOpen!: boolean
-  margin!: TMarginConfiguration
+  margin: TMarginConfiguration
   renderingConfiguration!: TRenderingConfiguration
   jiix?: TJIIXExport
   lastWord?: TWordExport
@@ -29,6 +29,12 @@ export class SmartGuide
   constructor()
   {
     this.uuid = randomUUID()
+    this.margin = {
+      bottom: 0,
+      left: 0,
+      right: 0,
+      top: 0
+    }
     this.#createWrapperElement()
     this.#createPrompterContainerElement()
     this.#createPrompterTextElement()
@@ -212,7 +218,6 @@ export class SmartGuide
       }
     }
   }
-
   #hideCandidates(): void
   {
     this.#candidatesElement.style.display = 'none'
@@ -223,7 +228,6 @@ export class SmartGuide
     this.#menuElement.classList.remove('close')
     this.#isMenuOpen = true
   }
-
   #closeMenu(): void {
     this.#menuElement.classList.add('close')
     this.#menuElement.classList.remove('open')
@@ -255,6 +259,7 @@ export class SmartGuide
       let message = 'Nothing to copy'
       if (this.#prompterTextElement.innerText) {
         message = `"${this.#prompterTextElement.innerText}" copied to clipboard`
+        await navigator.clipboard.writeText(this.#prompterTextElement.innerText)
       }
       this.globalEvent.emitNotif(message)
     } catch (err) {
