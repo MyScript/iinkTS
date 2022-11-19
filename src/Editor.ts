@@ -40,6 +40,7 @@ export class Editor
   #configuration: Configuration
   #behaviorsManager: BehaviorsManager
   #styleManager: StyleManager
+  #localPenStyle: TPenStyle
   #smartGuide: SmartGuide
   #mode: EditorMode
   #initialized = false
@@ -65,6 +66,7 @@ export class Editor
     this.#mode = EditorMode.Pen
 
     this.#styleManager = new StyleManager(options?.penStyle, options?.theme)
+    this.#localPenStyle = this.#styleManager.penStyle
 
     this.#configuration = new Configuration(options?.configuration)
 
@@ -125,14 +127,45 @@ export class Editor
     return this.#behaviorsManager.behaviors.grabber
   }
 
-  get #theme(): TTheme
+  get theme(): TTheme
   {
     return this.#styleManager.theme
   }
 
-  get #penStyle(): TPenStyle
+  set theme(t: TTheme)
+  {
+    this.#styleManager.overrideDefaultTheme(t)
+    if (this.#behaviors.setTheme) {
+      this.#behaviors.setTheme(this.theme)
+    }
+  }
+
+  get penStyleClasses(): string
+  {
+    return this.#styleManager.penStyleClasses
+  }
+
+  set penStyleClasses(psc: string)
+  {
+    this.#styleManager.penStyleClasses = psc
+    this.#localPenStyle = (this.theme[`.${this.penStyleClasses}`]) as TPenStyle
+    if (this.#behaviors.setPenStyleClasses) {
+      this.#behaviors.setPenStyleClasses(psc)
+    }
+  }
+
+  get penStyle(): TPenStyle
   {
     return this.#styleManager.penStyle
+  }
+
+  set penStyle(p: TPenStyle)
+  {
+    this.#styleManager.overrideDefaultPenStyle(p)
+    this.#localPenStyle = this.penStyle
+    if (this.#behaviors.setPenStyle) {
+      this.#behaviors.setPenStyle(this.penStyle)
+    }
   }
 
   #initializeSmartGuide(): void
@@ -169,6 +202,16 @@ export class Editor
         this.#grabber.onPointerDown = (evt: PointerEvent, point: TPoint) => this.#onPointerDown(evt, point)
         this.#grabber.onPointerMove = (evt: PointerEvent, point: TPoint) => this.#onPointerMove(evt, point)
         this.#grabber.onPointerUp = (evt: PointerEvent, point: TPoint) => this.#onPointerUp(evt, point)
+
+        if (this.#behaviors.setPenStyle) {
+          this.#behaviors.setPenStyle(this.penStyle)
+        }
+        if (this.#behaviors.setTheme) {
+          this.#behaviors.setTheme(this.theme)
+        }
+        if (this.#behaviors.setPenStyleClasses) {
+          this.#behaviors.setPenStyleClasses(this.penStyleClasses)
+        }
         this.#initialized = true
         this.wrapperHTML.editor = this
         this.events.emitLoaded()
@@ -266,7 +309,7 @@ export class Editor
       if (this.#mode === EditorMode.Eraser) {
         pointerType = EditorMode.Eraser
       }
-      const style: TPenStyle = Object.assign({}, this.#theme?.ink, this.#penStyle)
+      const style: TPenStyle = Object.assign({}, this.theme?.ink, this.#localPenStyle)
       this.model.initCurrentStroke(point, evt.pointerId, pointerType, style)
       this.#behaviors.drawCurrentStroke(this.model)
     }
@@ -280,7 +323,7 @@ export class Editor
 
   #onPointerUp(_evt: PointerEvent, point: TPoint): void
   {
-    this.model.endCurrentStroke(point, this.#penStyle)
+    this.model.endCurrentStroke(point, this.penStyle)
     this.#behaviors.updateModelRendering(this.model)
       .then(model => this.model = model)
       .catch(error => this.#showError(error as Error))

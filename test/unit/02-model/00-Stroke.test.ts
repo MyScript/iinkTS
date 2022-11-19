@@ -1,4 +1,5 @@
 import { TStroke } from '../../../src/@types/model/Stroke'
+import { TPenStyle } from '../../../src/@types/style/PenStyle'
 import { Stroke } from '../../../src/model/Stroke'
 import { DefaultPenStyle } from '../../../src/style/DefaultPenStyle'
 
@@ -29,4 +30,22 @@ describe('Stroke.ts', () =>
     expect(stroke.pointerType).toBe('mouse')
   })
 
+  test('should create with custom PenStyle', () =>
+  {
+    const penStyle: TPenStyle = {
+      "-myscript-pen-fill-color": 'red',
+      "-myscript-pen-fill-style": "purple",
+      "-myscript-pen-width": 12,
+      color: 'green',
+      width: 42
+    }
+
+    const stroke: TStroke = new Stroke(penStyle, 12)
+    expect(stroke).toBeDefined()
+    expect(stroke['-myscript-pen-fill-color']).toBe(penStyle['-myscript-pen-fill-color'])
+    expect(stroke['-myscript-pen-fill-style']).toBe(penStyle['-myscript-pen-fill-style'])
+    expect(stroke['-myscript-pen-width']).toBe(penStyle['-myscript-pen-width'])
+    expect(stroke.color).toBe(penStyle.color)
+    expect(stroke.width).toBe(penStyle.width)
+  })
 })

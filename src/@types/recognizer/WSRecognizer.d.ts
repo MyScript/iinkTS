@@ -1,3 +1,4 @@
+import { TExport } from "../model/Model"
 
 
 export type TWebSocketEvent = {

@@ -17,10 +17,14 @@ export interface IBehaviors
 
   async updateModelRendering: (model: IModel) => Promise<IModel | never>
 
-  async export: (model: IModel, mimeTypes?: string[]) => Promise<IModel | never>
+  async export(model: IModel, mimeTypes?: string[]): Promise<IModel | never>
   async convert(model: IModel, conversionState?: TConverstionState, requestedMimeTypes?: string[]): Promise<TExport | never>
 
   async import?(model: IModel, data: Blob, mimeType?: string): Promise<IModel | never>
+
+  setPenStyle?(penStyle: TPenStyle): void
+  setPenStyleClasses?(penStyleClasses: string): void
+  setTheme?(theme: TTheme): void
 
   async resize(model: IModel): Promise<IModel>
 

@@ -28,9 +28,9 @@ describe('Helpers.ts', () =>
       })
   })
 
-  test('should reject getAvailableLanguageList if server configuration is empty', async () =>
+  test('should reject getAvailableLanguageList if configuration.server is empty', async () =>
   {
-    const conf = { ...ConfigurationTextWebsocket }
+    const conf = JSON.parse(JSON.stringify(ConfigurationTextWebsocket))
     delete conf?.server
     getAvailableLanguageList(conf)
       .catch(e =>
@@ -39,9 +39,9 @@ describe('Helpers.ts', () =>
       })
   })
 
-  test('should reject getAvailableLanguageList if scheme is empty', async () =>
+  test('should reject getAvailableLanguageList if configuration.server.scheme is empty', async () =>
   {
-    const conf = { ...ConfigurationTextWebsocket }
+    const conf = JSON.parse(JSON.stringify(ConfigurationTextWebsocket))
     delete conf?.server?.scheme
     getAvailableLanguageList(conf)
       .catch(e =>
@@ -50,16 +50,15 @@ describe('Helpers.ts', () =>
       })
   })
 
-  test('should reject getAvailableLanguageList if host empty', async () =>
+  test('should reject getAvailableLanguageList if configuration.server.host empty', async () =>
   {
-    const conf = { ...ConfigurationTextWebsocket }
+    const conf = JSON.parse(JSON.stringify(ConfigurationTextWebsocket))
     delete conf?.server?.host
     getAvailableLanguageList(conf)
       .catch(e =>
       {
         expect(e).toBe('Cannot get languages ! Please check your server configuration!')
       })
-
   })
 
 })

@@ -306,11 +306,11 @@ type TPoint = TPartialXYPoint & {
  * @property {String} -myscript-pen-fill-color=#FFFFFF00 Color filled inside the area delimited by strokes and primitives
  */
 type TPenStyle$1 = {
-  color: string
-  width: number
-  '-myscript-pen-width': number
-  '-myscript-pen-fill-style': string
-  '-myscript-pen-fill-color': string
+  color?: string
+  width?: number
+  '-myscript-pen-width'?: number
+  '-myscript-pen-fill-style'?: string
+  '-myscript-pen-fill-color'?: string
 }
 
 type TSymbol = TPenStyle$1 & {
@@ -407,6 +407,28 @@ interface IModel
   clear(): void
 }
 
+type TMathTheme = {
+  'font-family': string
+}
+
+type TMathSolvedTheme = {
+  'font-family': string
+  color: string
+}
+
+type TTextTheme = {
+  'font-family': string,
+  'font-size': number
+}
+
+type TTheme$1 = {
+  ink: TPenStyle$1
+  '.math': TMathTheme
+  '.math-solved': TMathSolvedTheme
+  '.text': TTextTheme
+  [key: string]: unknown
+}
+
 type TUndoRedoContext = {
   canUndo: boolean
   canRedo: boolean
@@ -455,6 +477,12 @@ declare class Editor {
     set configuration(config: TConfigurationClient);
     get mode(): EditorMode;
     get events(): GlobalEvent;
+    get theme(): TTheme$1;
+    set theme(t: TTheme$1);
+    get penStyleClasses(): string;
+    set penStyleClasses(psc: string);
+    get penStyle(): TPenStyle$1;
+    set penStyle(p: TPenStyle$1);
     setMode(mode: EditorMode): void;
     undo(): Promise<IModel>;
     redo(): Promise<IModel>;

@@ -28,10 +28,10 @@ export class Stroke implements TStroke
     this.t = []
     this.p = []
     this.l = []
-    this.color = style.color
-    this.width = style.width
-    this['-myscript-pen-width'] = style['-myscript-pen-width']
-    this['-myscript-pen-fill-style'] = style['-myscript-pen-fill-style']
-    this['-myscript-pen-fill-color'] = style['-myscript-pen-fill-color']
+    this.color = style.color as string
+    this.width = style.width as number
+    this['-myscript-pen-width'] = style['-myscript-pen-width'] as number
+    this['-myscript-pen-fill-style'] = style['-myscript-pen-fill-style'] as string
+    this['-myscript-pen-fill-color'] = style['-myscript-pen-fill-color'] as string
   }
 }

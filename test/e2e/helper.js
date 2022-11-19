@@ -11,7 +11,12 @@
  * @param {Number} [offsetX=0]
  * @param {Number} [offsetY=0]
  */
-module.exports.write = async (page, strokes, offsetX = 0, offsetY = 0) => {
+module.exports.write = async (page, strokes) => {
+
+  const editorEl = await page.waitForSelector('#editor')
+  const offsetX = await editorEl.evaluate((node) => node.offsetLeft)
+  const offsetY = await editorEl.evaluate((node) => node.offsetTop)
+
   for (const { x, y, t } of strokes) {
     const hasTimeStamp = t && t.length === x.length
     await page.mouse.move(offsetX + x[0], offsetY + y[0])

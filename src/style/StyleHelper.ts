@@ -8,9 +8,9 @@ const parser: any = new JsonCSS()
 export default {
   themeToCSS(json: TTheme): string
   {
-    let css = parser.toCSS(json) as string
-    css = css.replace( /[\r\n]+/gm, "" )
-    return css
+    return parser.toCSS(json) as string
+    // css = css.replace( /[\r\n]+/gm, "" )
+    // return css
   },
   themeToJSON(style: string): TTheme
   {
@@ -23,13 +23,20 @@ export default {
   penStyleToCSS (penStyle: TPenStyle): string {
     let css = parser.toCSS({ css: penStyle }) as string
     css = css.substring(6, css.length - 3)
-    css = css.replace( /[\r\n]+/gm, "" )
     return css
   },
   penStyleToJSON (penStyleString: string): TPenStyle {
     const penStyle = parser.toJSON(`css {${penStyleString}}`).css as TPenStyle
-    penStyle.width = Number(penStyle.width)
-    penStyle['-myscript-pen-width'] = Number(penStyle['-myscript-pen-width'])
+    if (penStyle.width) {
+      penStyle.width = Number(penStyle.width)
+    } else {
+      delete penStyle.width
+    }
+    if (penStyle['-myscript-pen-width']) {
+      penStyle['-myscript-pen-width'] = Number(penStyle['-myscript-pen-width'])
+    } else {
+      delete penStyle['-myscript-pen-width']
+    }
     return penStyle
   }
 }

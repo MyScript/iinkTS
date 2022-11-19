@@ -71,7 +71,7 @@ export class Model implements IModel
 
   private filterPointByAcquisitionDelta(stroke: TStroke, point: TPoint): boolean
   {
-    const delta: number = (2 + (stroke['-myscript-pen-width'] / 4))
+    const delta: number = (2 + ((stroke['-myscript-pen-width'] || 0) / 4))
     return stroke.x.length === 0 || stroke.y.length === 0 ||
       Math.abs(stroke.x[stroke.x.length - 1] - point.x) >= delta ||
       Math.abs(stroke.y[stroke.y.length - 1] - point.y) >= delta

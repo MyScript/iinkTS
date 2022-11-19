@@ -36,7 +36,7 @@ describe('Rest Text', () => {
       })
       await Promise.all([
         getExportedDatas(page),
-        write(page, h.strokes, 100, 100),
+        write(page, h.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(1)
       expect(mimeTypeRequest[0]).toContain('text/plain')
@@ -62,7 +62,7 @@ describe('Rest Text', () => {
 
       await Promise.all([
         getExportedDatas(page),
-        write(page, h.strokes, 100, 100),
+        write(page, h.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(1)
       expect(mimeTypeRequest[0]).toContain('application/vnd.myscript.jiix')
@@ -89,7 +89,7 @@ describe('Rest Text', () => {
 
       await Promise.all([
         getExportedDatas(page),
-        write(page, h.strokes, 100, 100),
+        write(page, h.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(2)
       const allMimeTypesRequested = mimeTypeRequest.join(' ')
