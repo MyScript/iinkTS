@@ -13,6 +13,8 @@ import { TStroke } from "../@types/model/Stroke"
 import { TTriggerConfiguration } from "../@types/configuration/TriggerConfiguration"
 import { WSMessage } from "../Constants"
 import { TConverstionState } from "../@types/configuration/RecognitionConfiguration"
+import { TTheme } from "../@types/style/Theme"
+import { TPenStyle } from "../@types/style/PenStyle"
 
 export class WSBehaviors implements IBehaviors
 {
@@ -66,7 +68,8 @@ export class WSBehaviors implements IBehaviors
     return this.initalise.promise
   }
 
-  private onConnectionActive = () => {
+  private onConnectionActive = () =>
+  {
     this.initalise.resolve()
   }
 
@@ -151,11 +154,26 @@ export class WSBehaviors implements IBehaviors
     }
   }
 
+  setPenStyle(penStyle: TPenStyle): void
+  {
+    this.recognizer.setPenStyle(penStyle)
+  }
+
+  setPenStyleClasses(penStyleClasses: string): void
+  {
+    this.recognizer.setPenStyleClasses(penStyleClasses)
+  }
+
+  setTheme(theme: TTheme): void
+  {
+    this.recognizer.setTheme(theme)
+  }
+
   drawCurrentStroke(model: IModel): void
   {
     const currentStroke = model.currentStroke as TStroke
     if (currentStroke) {
-      currentStroke.id = `pendingStroke-${model.rawStrokes.length}`
+      currentStroke.id = `pendingStroke-${ model.rawStrokes.length }`
       this.renderer.drawPendingStroke(currentStroke)
     }
   }

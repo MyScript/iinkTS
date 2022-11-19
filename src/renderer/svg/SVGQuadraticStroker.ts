@@ -69,7 +69,7 @@ export class SVGQuadraticStroker
 
   private buildSVGPath (stroke: TStroke): string  {
     const STROKE_LENGTH = stroke.x.length
-    const STROKE_WIDTH = stroke.width
+    const STROKE_WIDTH = (stroke.width as number)
     const NB_QUADRATICS = STROKE_LENGTH - 2
     const firstPoint = this.getPointByIndex(stroke, 0)
 
@@ -101,7 +101,7 @@ export class SVGQuadraticStroker
     const svgStroke = document.createElementNS("http://www.w3.org/2000/svg", 'path')
     svgStroke.classList.add('pending-stroke')
     svgStroke.setAttribute('id', stroke.id as string)
-    svgStroke.setAttribute('color', stroke.color)
+    svgStroke.setAttribute('color', stroke.color as string)
     const style = `fill:${stroke.color};stroke:transparent;`
     svgStroke.setAttribute('style', style)
     svgStroke.setAttribute('d', `${svgPath}Z`)

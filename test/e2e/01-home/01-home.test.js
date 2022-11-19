@@ -19,7 +19,7 @@ describe('Home Page', () =>
 
   test('each table of contents link must be associated with a section part', async () =>
   {
-    const links = await page.locator('#table-of-content > li')
+    const links = await page.locator('#table-of-content li')
     const sectionParts = await page.locator('.title')
     const linksCount = await links.count()
     const secctionPartsCount = await sectionParts.count()
@@ -43,23 +43,20 @@ describe('Home Page', () =>
       const links = await exampleItems.nth(i).locator('a')
       expect(await links.count()).toBe(2)
 
-      const expectedLink = exampleItemsTitle.toLocaleLowerCase().replace(' ', '_')
-
       const exampleLink = links.nth(0)
       const codeLink = links.nth(1)
 
       const exampleLinkText = await exampleLink.allInnerTexts()
       expect(exampleLinkText.length).toBe(1)
       expect(exampleLinkText[0].trim()).toBe('View example')
-      expect(await exampleLink.getAttribute('href')).toContain(expectedLink)
 
       const codeLinkText = await codeLink.allInnerTexts()
       expect(codeLinkText.length).toBe(1)
       expect(codeLinkText[0].trim()).toBe('Get source code')
       expect(await codeLink.getAttribute('href')).toContain('https://github.com/MyScript')
-      expect(await codeLink.getAttribute('href')).toContain(expectedLink)
     }
   })
+
   test('each "View example" link should ok', async () =>
   {
     const exampleLink = await page.locator('text=View example')
@@ -99,7 +96,5 @@ describe('Home Page', () =>
     }
     expect(linksInErrors).toStrictEqual([])
   })
-
-
 
 })

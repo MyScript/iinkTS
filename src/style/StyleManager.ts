@@ -8,6 +8,7 @@ export class StyleManager
 {
   #penStyle!: TPenStyle
   #theme!: TTheme
+  penStyleClasses: string
 
   get penStyle(): TPenStyle {
     return this.#penStyle
@@ -18,25 +19,18 @@ export class StyleManager
 
   constructor(penStyle?: TPenStyle, theme?: TTheme)
   {
+    this.penStyleClasses = ''
     this.overrideDefaultPenStyle(penStyle)
     this.overrideDefaultTheme(theme)
   }
 
   overrideDefaultPenStyle(penStyle?: TPenStyle): void
   {
-    const currentPenStyle: TPenStyle = {
-      ...DefaultPenStyle,
-      ...(penStyle || {})
-    }
-    this.#penStyle = currentPenStyle
+    this.#penStyle = Object.assign({}, DefaultPenStyle, penStyle || {}) as TPenStyle
   }
 
   overrideDefaultTheme(theme?: TTheme): void
   {
-    const currentTheme: TTheme = {
-      ...DefaultTheme,
-      ...(theme || {})
-    }
-    this.#theme = currentTheme
+    this.#theme = Object.assign({}, DefaultTheme, theme || {}) as TTheme
   }
 }

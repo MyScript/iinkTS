@@ -55,8 +55,8 @@ export function drawTextSymbol(context2D: CanvasRenderingContext2D, symbol: TSym
 {
   context2D.save()
   try {
-    context2D.lineWidth = symbol.width
-    context2D.strokeStyle = symbol.color
+    context2D.lineWidth = (symbol.width as number)
+    context2D.strokeStyle = (symbol.color as string)
     const type: string = symbol.elementType || symbol.type
 
     switch (type) {

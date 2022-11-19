@@ -8,7 +8,10 @@ import { Error as ErrorConst, WSEventType } from "../Constants"
 import { WSEvent } from "../event/WSEvent"
 import { AbstractRecognizer } from "./AbstractRecognizer"
 import { computeHmac } from "./CryptoHelper"
+import StyleHelper from "../style/StyleHelper"
 import { DeferredPromise } from "../utils/DeferredPromise"
+import { TPenStyle } from "../@types/style/PenStyle"
+import { TTheme } from "../@types/style/Theme"
 
 export class WSRecognizer extends AbstractRecognizer
 {
@@ -331,6 +334,33 @@ export class WSRecognizer extends AbstractRecognizer
     }
   }
 
+  setPenStyle(penStyle: TPenStyle): void
+  {
+    const message: TWebSocketEvent = {
+      type: 'setPenStyle',
+      style: StyleHelper.penStyleToCSS(penStyle)
+    }
+    this.send(message)
+  }
+
+  setPenStyleClasses(penStyleClasses: string): void
+  {
+    const message: TWebSocketEvent = {
+      type: 'setPenStyleClasses',
+      styleClasses: penStyleClasses
+    }
+    this.send(message)
+  }
+
+  setTheme(theme: TTheme)
+  {
+    const message: TWebSocketEvent = {
+      type: 'setTheme',
+      theme: StyleHelper.themeToCSS(theme)
+    }
+    this.send(message)
+  }
+
   async export(model: IModel, requestedMimeTypes?: string[]): Promise<IModel | never>
   {
     let mimeTypes: string[] = requestedMimeTypes || []
@@ -373,9 +403,11 @@ export class WSRecognizer extends AbstractRecognizer
     const importFileId = randomUUID()
     // const messages = []
     this.#fileImportDeffered = new DeferredPromise<TExport>()
-    const readBlob = (blob: Blob): Promise<string | never> => {
+    const readBlob = (blob: Blob): Promise<string | never> =>
+    {
       const fileReader = new FileReader()
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve, reject) =>
+      {
         fileReader.onloadend = (ev) => resolve(ev.target?.result as string)
         fileReader.onerror = () => reject()
         fileReader.readAsText(blob)
@@ -449,24 +481,3 @@ export class WSRecognizer extends AbstractRecognizer
     this.send(message)
   }
 }
-
-// export function buildSetPenStyle (penStyle) {
-//   return {
-//     type: 'setPenStyle',
-//     style: penStyle ? DefaultPenStyle.toCSS(penStyle) : ''
-//   }
-// }
-
-// export function buildSetPenStyleClasses (penStyleClasses) {
-//   return {
-//     type: 'setPenStyleClasses',
-//     styleClasses: penStyleClasses
-//   }
-// }
-
-// export function buildSetTheme (theme) {
-//   return {
-//     type: 'setTheme',
-//     theme: DefaultTheme.toCSS(theme)
-//   }
-// }

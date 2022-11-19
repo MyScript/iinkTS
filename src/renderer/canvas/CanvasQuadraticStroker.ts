@@ -58,8 +58,8 @@ export class CanvasQuadraticStroker
   drawStroke(context2d: CanvasRenderingContext2D, stroke: TStroke)
   {
     const length = stroke.x.length
-    const width = stroke.width > 0 ? stroke.width : context2d.lineWidth
-    const color = stroke.color ? stroke.color : context2d.strokeStyle
+    const width = (stroke.width as number) > 0 ? (stroke.width as number) : context2d.lineWidth
+    const color = (stroke.color as string) ? (stroke.color as string) : context2d.strokeStyle
     const firstPoint = this.getPointByIndex(stroke, 0) as TPoint
     const nbquadratics = length - 2
 

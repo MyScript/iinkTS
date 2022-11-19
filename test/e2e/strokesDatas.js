@@ -10,7 +10,7 @@ module.exports.h = {
       words: [
         {
           label: 'h',
-          candidates: ['h', 'k', 'hi', 'ʰ', 'hr'],
+          candidates: ['h', 'k', 'hi', 'he', 'hr'],
         },
       ],
       version: '3',
@@ -31,7 +31,7 @@ module.exports.hello = {
       words: [
         {
           label: 'hello',
-          candidates: ['hello', 'kello', 'helloo', 'hellor', 'Hello'],
+          candidates: ['hello', 'kello', 'helloo', 'hellor', 'hello'],
         },
       ],
       version: '3',

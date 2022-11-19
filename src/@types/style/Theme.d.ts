@@ -19,4 +19,5 @@ export type TTheme = {
   '.math': TMathTheme
   '.math-solved': TMathSolvedTheme
   '.text': TTextTheme
+  [key: string]: unknown
 }

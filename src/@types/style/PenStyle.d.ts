@@ -6,9 +6,9 @@
  * @property {String} -myscript-pen-fill-color=#FFFFFF00 Color filled inside the area delimited by strokes and primitives
  */
 export type TPenStyle = {
-  color: string
-  width: number
-  '-myscript-pen-width': number
-  '-myscript-pen-fill-style': string
-  '-myscript-pen-fill-color': string
+  color?: string
+  width?: number
+  '-myscript-pen-width'?: number
+  '-myscript-pen-fill-style'?: string
+  '-myscript-pen-fill-color'?: string
 }
