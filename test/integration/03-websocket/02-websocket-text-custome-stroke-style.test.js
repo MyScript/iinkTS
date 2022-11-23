@@ -1,7 +1,7 @@
 const {
   write,
   getExportedDatas,
-  waitEditorLoaded,
+  waitForEditorInitialization,
 } = require('../helper')
 const { h } = require('../strokesDatas')
 
@@ -26,8 +26,8 @@ describe('Websocket Text Customize Stroke Style', () => {
   })
 
   beforeEach(async () => {
-    await page.reload()
-    await waitEditorLoaded(page)
+    await page.reload({ waitUntil: 'networkidle'})
+    await waitForEditorInitialization(page)
   })
 
   test('should have title', async () => {

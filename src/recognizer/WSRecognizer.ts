@@ -1,4 +1,3 @@
-import { randomUUID } from "crypto"
 import { TConverstionState, TRecognitionConfiguration } from "../@types/configuration/RecognitionConfiguration"
 import { TServerConfiguration } from "../@types/configuration/ServerConfiguration"
 import { IModel, TExport } from "../@types/model/Model"
@@ -400,7 +399,7 @@ export class WSRecognizer extends AbstractRecognizer
   async import(data: Blob, mimeType?: string): Promise<TExport | never>
   {
     const chunkSize = this.serverConfiguration.websocket.fileChunkSize
-    const importFileId = randomUUID()
+    const importFileId = Math.random().toString(10).substring(2, 6)
     // const messages = []
     this.#fileImportDeffered = new DeferredPromise<TExport>()
     const readBlob = (blob: Blob): Promise<string | never> =>

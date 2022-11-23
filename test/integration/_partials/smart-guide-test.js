@@ -1,4 +1,4 @@
-const { getEditorConfiguration, setEditorConfiguration, waitEditorLoaded, write, getExportedDatas } = require("../helper")
+const { getEditorConfiguration, setEditorConfiguration, waitEditorLoaded, write, getExportedDatas, waitForEditorInitialization } = require("../helper")
 const { h, hello, helloOneStroke } = require("../strokesDatas")
 
 describe('SmartGuide', () => {
@@ -6,7 +6,7 @@ describe('SmartGuide', () => {
     const configuration = await getEditorConfiguration(page)
     configuration.rendering.smartGuide.enable = false
     setEditorConfiguration(page, configuration)
-    await waitEditorLoaded(page)
+    await waitForEditorInitialization(page)
     await Promise.all([
       getExportedDatas(page),
       write(page, h.strokes)
@@ -24,28 +24,35 @@ describe('SmartGuide', () => {
       getExportedDatas(page),
       write(page, h.strokes)
     ])
+    // wait css animation
+    await page.waitForTimeout(1000)
     expect(await page.locator('.prompter-text').isVisible()).toBe(true)
     expect(await page.locator('.candidates').isVisible()).toBe(false)
   })
 
   test('should display text into', async () => {
-    await write(page, hello.strokes)
-    await getExportedDatas(page)
+    await Promise.all([
+      getExportedDatas(page),
+      write(page, h.strokes)
+    ])
 
-    const textExpected = hello.exports['text/plain'].at(-1)
+    const textExpected = h.exports['text/plain'].at(-1)
     const textExpectedWithNbsp = textExpected.replace(/\s/g, '\u00A0')
 
     const prompterText = await page.waitForSelector('.prompter-text')
-    const textContent = await prompterText.evaluate(
-      (node) => node.textContent
-    )
+    const textContent = await prompterText.evaluate((node) => node.textContent)
 
     expect(textExpectedWithNbsp).toEqual(textContent)
   })
 
   test('should select candidate', async () => {
-    await write(page, hello.strokes)
-    const exports = await getExportedDatas(page)
+    // await first empty export
+    await getExportedDatas(page)
+
+    const [exports] = await Promise.all([
+      getExportedDatas(page),
+      write(page, hello.strokes)
+    ])
     const jiixExport = JSON.parse(exports['application/vnd.myscript.jiix'])
 
     expect(await page.innerText('.prompter-text')).toBe(jiixExport.label)
@@ -62,8 +69,13 @@ describe('SmartGuide', () => {
   })
 
   test('should convert', async () => {
-    await write(page, helloOneStroke.strokes)
+    // await first empty export
     await getExportedDatas(page)
+
+    await Promise.all([
+      getExportedDatas(page),
+      write(page, helloOneStroke.strokes)
+    ])
     expect(await page.locator('.more-menu.close').isVisible()).toBe(false)
 
     let pathElements = page.locator('path')
@@ -103,14 +115,18 @@ describe('SmartGuide', () => {
   })
 
   test('should Delete', async () => {
-    await write(page, h.strokes)
-    await getExportedDatas(page)
+    await Promise.all([
+      getExportedDatas(page),
+      write(page, h.strokes)
+    ])
+
     expect(await page.locator('.more-menu.close').isVisible()).toBe(false)
 
     let pathElements = page.locator('path')
     expect(await pathElements.count()).toEqual(1)
 
     await page.click(`.ellipsis`)
+    // wait for css animation
     await page.waitForTimeout(1000)
 
     expect(await page.locator('.more-menu.open').isVisible()).toBe(true)

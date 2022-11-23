@@ -216,7 +216,7 @@
     box-shadow: 2px 2px 12px #BDBDBD;
     background-color: #F5F5F5;
     overflow: hidden;
-    transition: max-height 2s ease-out, opacity 1s, visibility 0.5s linear;
+    transition: max-height 1s ease-out, opacity 1s, visibility 0.5s linear;
 }
 .ms-editor .smartguide .more-menu.open {
     max-height: 500px;

@@ -62,6 +62,14 @@ module.exports.setEditorConfiguration = async (page, configuration) => {
   return page.evaluate(`editor.configuration = ${JSON.stringify(configuration)};`)
 }
 
+/**
+ * @param {Page} page - Playwright Page
+ * @returns Promise<TExport>
+ */
+ module.exports.getEditorModelExports = async (page) => {
+  return page.evaluate('editor.model.exports')
+}
+
 const exported = `(async () => {
   return new Promise((resolve, reject) => {
     editor.events.addEventListener('exported', (e) => {
@@ -91,4 +99,8 @@ const loaded = `(async () => {
  */
 module.exports.waitEditorLoaded = async (page) => {
   return page.evaluate(loaded)
+}
+
+module.exports.waitForEditorInitialization = async (page) => {
+  return page.evaluate('editor.initializationPromise')
 }
