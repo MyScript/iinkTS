@@ -27,7 +27,7 @@
     "lint": "eslint ./src --ext .ts",
     "lint:fix": "eslint ./src --ext .ts --fix",
     "test:unit": "jest --config=jest.unit.config.js --detectOpenHandles --forceExit",
-    "test:e2e": "jest --config=jest.e2e.config.js --runInBand --detectOpenHandles --forceExit",
+    "test:integration": "jest --config=jest.integration.config.js --runInBand --detectOpenHandles --forceExit",
     "build:lib": "rollup -c config/rollup.config.build.js --sourcemap",
     "build": "npm-run-all lint:fix test:unit build:lib",
     "dev": "rollup -c config/rollup.config.dev.js -w --sourcemap"

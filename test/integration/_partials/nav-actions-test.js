@@ -3,6 +3,9 @@ const { h, hello } = require("../strokesDatas")
 
 describe('Nav actions', () => {
   test('should clear', async () => {
+    // await first empty export
+    await getExportedDatas(page)
+
     const [exportedDatas] = await Promise.all([
       getExportedDatas(page),
       write(page, h.strokes),
@@ -30,6 +33,9 @@ describe('Nav actions', () => {
   })
 
   test('should undo/redo', async () => {
+    // await first empty export
+    await getExportedDatas(page)
+
     const editorEl = await page.waitForSelector('#editor')
     await Promise.all([
       getExportedDatas(page),
@@ -37,8 +43,7 @@ describe('Nav actions', () => {
     ])
 
     let resultElement = page.locator('#result')
-    // TODO change wsbehaviors to raise exported event after rendering
-    await getExportedDatas(page)
+
     resultText = await resultElement.textContent()
     expect(resultText).toStrictEqual(hello.exports['text/plain'].at(-1))
 
@@ -71,6 +76,9 @@ describe('Nav actions', () => {
   })
 
   test('should change language', async () => {
+    // await first empty export
+    await getExportedDatas(page)
+
     await Promise.all([
       getExportedDatas(page),
       write(page, h.strokes),
@@ -80,7 +88,7 @@ describe('Nav actions', () => {
     expect(resultText).toStrictEqual(h.exports['text/plain'].at(-1))
 
     await Promise.all([
-      waitEditorLoaded(page),
+      getExportedDatas(page),
       page.selectOption('#language', 'fr_FR'),
     ])
 

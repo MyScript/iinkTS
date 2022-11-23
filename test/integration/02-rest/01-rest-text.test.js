@@ -14,12 +14,23 @@ describe('Rest Text', () => {
   })
 
   beforeEach(async () => {
-    await page.reload()
+    await page.reload({ waitUntil: 'networkidle'})
   })
 
   test('should have title', async () => {
     const title = await page.title()
     expect(title).toMatch('Rest Text iink')
+  })
+
+  test('should display text/plain into result', async () => {
+    const [exportedDatas] = await Promise.all([
+      getExportedDatas(page),
+      write(page, h.strokes),
+    ])
+    const resultElement = page.locator('#result')
+    resultText = await resultElement.textContent()
+    expect(resultText).toStrictEqual(exportedDatas['text/plain'])
+    expect(resultText).toStrictEqual(h.exports['text/plain'].at(-1))
   })
 
   describe('Request sent', () => {

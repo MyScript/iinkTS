@@ -18,6 +18,7 @@ import './iink.css'
 import { IBehaviors } from "./@types/Behaviors"
 import { TConverstionState } from "./@types/configuration/RecognitionConfiguration"
 import { TMarginConfiguration } from "./@types/configuration/recognition/MarginConfiguration"
+import { DeferredPromise } from "./utils/DeferredPromise"
 
 export enum EditorMode
 {
@@ -43,25 +44,27 @@ export class Editor
   #localPenStyle: TPenStyle
   #smartGuide: SmartGuide
   #mode: EditorMode
-  #initialized = false
+  #initializationDeferred: DeferredPromise<boolean>
 
   model: IModel
   debug = false
 
   constructor(wrapperHTML: HTMLElement, options?: TEditorOptions)
   {
+    this.#initializationDeferred = new DeferredPromise<boolean>()
+
     this.wrapperHTML = wrapperHTML as HTMLEditorElement
     this.wrapperHTML.classList.add(options?.globalClassCss || 'ms-editor')
 
     this.#loaderHTML = document.createElement('div')
     this.#loaderHTML.classList.add('loader')
-    this.#loaderHTML = this.wrapperHTML.appendChild(this.#loaderHTML)
     this.#loaderHTML.style.display = 'initial'
+    this.wrapperHTML.appendChild(this.#loaderHTML)
 
     this.#messageHTML = document.createElement('div')
     this.#messageHTML.classList.add('message')
-    this.#messageHTML = this.wrapperHTML.appendChild(this.#messageHTML)
     this.#messageHTML.style.display = 'none'
+    this.wrapperHTML.appendChild(this.#messageHTML)
 
     this.#mode = EditorMode.Pen
 
@@ -83,9 +86,9 @@ export class Editor
     this.#addListeners()
   }
 
-  get initialized(): boolean
+  get initializationPromise(): Promise<boolean>
   {
-    return this.#initialized
+    return this.#initializationDeferred.promise
   }
 
   get configuration(): TConfiguration
@@ -95,6 +98,7 @@ export class Editor
 
   set configuration(config: TConfigurationClient)
   {
+    this.#initializationDeferred = new DeferredPromise<boolean>()
     this.#configuration.overrideDefaultConfiguration(config)
 
     this.model.clear()
@@ -212,13 +216,14 @@ export class Editor
         if (this.#behaviors.setPenStyleClasses) {
           this.#behaviors.setPenStyleClasses(this.penStyleClasses)
         }
-        this.#initialized = true
+
         this.wrapperHTML.editor = this
+        this.#initializationDeferred.resolve(true)
         this.events.emitLoaded()
       })
       .catch((e: Error) =>
       {
-        this.#initialized = false
+        this.#initializationDeferred.resolve(false)
         this.#showError(e)
         this.events.emitError(e)
       })

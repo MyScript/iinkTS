@@ -50,14 +50,14 @@ describe('Editor.ts', () =>
     expect(editor.configuration.triggers).toStrictEqual(AllOverrideConfiguration.triggers)
   })
 
-  test('should create Editor and not be initialized', () =>
+  test('should create Editor and not be initialized', async () =>
   {
     const wrapperHTML: HTMLElement = document.createElement('div')
     wrapperHTML.style.height = '100px'
     wrapperHTML.style.width = '100px'
     const editor = new Editor(wrapperHTML)
 
-    expect(editor.initialized).toBe(false)
+    expect(await editor.initializationPromise).toBe(false)
   })
 
   test('should append loader element', () =>

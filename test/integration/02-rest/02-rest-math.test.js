@@ -13,12 +13,25 @@ describe('Rest Math', () => {
   })
 
   beforeEach(async () => {
-    await page.reload()
+    await page.reload({ waitUntil: 'networkidle'})
   })
 
   test('should have title', async () => {
     const title = await page.title()
     expect(title).toMatch('Rest Math iink')
+  })
+
+  test('should display katex-html into result', async () => {
+    const [exportedDatas] = await Promise.all([
+      getExportedDatas(page),
+      write(page, equation1.strokes),
+    ])
+    const resultElement = page.locator('#result')
+    const htmlKatexResult = await resultElement
+      .locator('.katex-html')
+      .textContent()
+    expect(htmlKatexResult).toStrictEqual(exportedDatas['application/x-latex'])
+    expect(htmlKatexResult).toStrictEqual(equation1.exports.LATEX.at(-1))
   })
 
   describe('Request sent', () => {
@@ -93,19 +106,6 @@ describe('Rest Math', () => {
       expect(allMimeTypesRequested).toContain('application/mathml+xml')
       expect(allMimeTypesRequested).toContain('application/x-latex')
     })
-  })
-
-  test('should display katex-html into result', async () => {
-    const [exportedDatas] = await Promise.all([
-      getExportedDatas(page),
-      write(page, equation1.strokes),
-    ])
-    const resultElement = page.locator('#result')
-    const htmlKatexResult = await resultElement
-      .locator('.katex-html')
-      .textContent()
-    expect(htmlKatexResult).toStrictEqual(exportedDatas['application/x-latex'])
-    expect(htmlKatexResult).toStrictEqual(equation1.exports.LATEX.at(-1))
   })
 
   describe('Nav actions', () => {

@@ -1,4 +1,3 @@
-import { randomUUID } from "crypto"
 import { TMarginConfiguration } from "../@types/configuration/recognition/MarginConfiguration"
 import { TRenderingConfiguration } from "../@types/configuration/RenderingConfiguration"
 import { TJIIXExport, TWordExport } from "../@types/model/Model"
@@ -28,7 +27,7 @@ export class SmartGuide
 
   constructor()
   {
-    this.uuid = randomUUID()
+    this.uuid = Math.random().toString(10).substring(2, 12)
     this.margin = {
       bottom: 0,
       left: 0,

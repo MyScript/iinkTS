@@ -22,9 +22,9 @@ export default {
     },
   },
 
-  setupFilesAfterEnv: ['expect-playwright', './test/e2e/jest.setup.js'],
+  setupFilesAfterEnv: ['expect-playwright', './test/integration/jest.setup.js'],
 
-  testMatch: ['**/e2e/**/*.test.js'],
+  testMatch: ['**/integration/**/*.test.js'],
 
   transform: {
     '^.+\\.(ts|tsx)?$': 'ts-jest'

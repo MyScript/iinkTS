@@ -1,14 +1,5 @@
-const {
-  write,
-  getExportedDatas,
-  waitEditorLoaded
-} = require('../helper')
-const {
-  h,
-  hello,
-  helloOneStroke,
-  helloStrikeStroke,
-} = require('../strokesDatas')
+const { write, getExportedDatas, waitForEditorInitialization } = require('../helper')
+const { h } = require('../strokesDatas')
 
 describe('Websocket Text', () => {
   beforeAll(async () => {
@@ -16,8 +7,8 @@ describe('Websocket Text', () => {
   })
 
   beforeEach(async () => {
-    await page.reload()
-    await waitEditorLoaded(page)
+    await page.reload({ waitUntil: 'networkidle'})
+    await waitForEditorInitialization(page)
   })
 
   test('should have title', async () => {
@@ -26,6 +17,8 @@ describe('Websocket Text', () => {
   })
 
   test('should export application/vnd.myscript.jiix', async () => {
+    // await first empty export
+    await getExportedDatas(page)
     const [exports] = await Promise.all([
       getExportedDatas(page),
       write(page, h.strokes),
@@ -35,11 +28,9 @@ describe('Websocket Text', () => {
     expect(jiixReceived).toStrictEqual(jiixExpected)
   })
 
-
   require('../_partials/nav-actions-test')
 
   require('../_partials/smart-guide-test')
 
   require('../_partials/gesture-test')
-
 })

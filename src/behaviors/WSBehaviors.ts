@@ -25,6 +25,7 @@ export class WSBehaviors implements IBehaviors
   initalise: DeferredPromise<void>
 
   #triggerConfiguration: TTriggerConfiguration
+  #exportTimer?: ReturnType<typeof setTimeout>
   #resizeTimer?: ReturnType<typeof setTimeout>
   #exportDeffered?: DeferredPromise<TExport>
   #convertDeffered?: DeferredPromise<TExport>
@@ -114,7 +115,12 @@ export class WSBehaviors implements IBehaviors
     this.#addStrokeDeffered?.resolve(exportMessage.exports)
     this.#exportDeffered?.resolve(exportMessage.exports)
     this.#convertDeffered?.resolve(exportMessage.exports)
-    this.globalEvent.emitExported(exportMessage.exports)
+
+    clearTimeout(this.#exportTimer)
+    this.#exportTimer = setTimeout(async () =>
+    {
+      this.globalEvent.emitExported(exportMessage.exports)
+    }, this.#triggerConfiguration.exportContentDelay)
   }
 
   private onDisconnected = (event: CloseEvent) =>
