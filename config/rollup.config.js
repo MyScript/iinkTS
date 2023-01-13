@@ -35,7 +35,12 @@ export default [
   },
   {
     input: 'src/iink.ts',
-    plugins: [dts(), postcss()],
+    plugins: [
+      dts(),
+      postcss({
+        inject: false
+      }),
+    ],
     output: {
       file: `dist/iink.d.ts`,
       format: 'es',
