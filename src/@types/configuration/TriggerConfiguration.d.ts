@@ -8,7 +8,7 @@
  * DEMAND :       Action is triggered on external demande
  */
  export type TTriggerConfiguration = {
-  exportContent: 'QUIET_PERIOD' | 'POINTER_UP' | 'DEMAND'
+  exportContent: "QUIET_PERIOD" | "POINTER_UP" | "DEMAND"
   exportContentDelay: number
   resizeTriggerDelay: number
 }

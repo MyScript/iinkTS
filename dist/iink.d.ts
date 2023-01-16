@@ -18,7 +18,7 @@ type TConvertConfiguration = {
 }
 
 type TEraserConfiguration = {
-  'erase-precisely': boolean
+  "erase-precisely": boolean
 }
 
 type TMarginConfiguration = {
@@ -39,7 +39,7 @@ type TTextConfConfiguration = {
 }
 
 type TTextConfiguration = {
-  mimeTypes: ('text/plain' | 'application/vnd.myscript.jiix')[]
+  mimeTypes: ("text/plain" | "application/vnd.myscript.jiix")[]
   margin?: TMarginConfiguration
   guides?: TGuidesConfiguration
   configuration?: TTextConfConfiguration
@@ -53,11 +53,11 @@ type TDiagramConvertConfiguration = {
 }
 
 type TDiagramConfiguration = {
-  mimeTypes: ('application/vnd.myscript.jiix' | 'application/vnd.openxmlformats-officedocument.presentationml.presentation' | 'image/svg+xml')[]
-  'enable-sub-blocks'?: boolean
+  mimeTypes: ("application/vnd.myscript.jiix" | "application/vnd.openxmlformats-officedocument.presentationml.presentation" | "image/svg+xml")[]
+  "enable-sub-blocks"?: boolean
   text?: TTextConfConfiguration
   convert?: TDiagramConvertConfiguration
-  'session-time'?: number
+  "session-time"?: number
   eraser?: TEraserConfiguration
 }
 
@@ -74,7 +74,7 @@ type TImageConfiguration = {
 }
 
 type TJiixConfiguration = {
-  'bounding-box'?: boolean
+  "bounding-box"?: boolean
   strokes: boolean
   text?: {
     chars: boolean
@@ -92,44 +92,44 @@ type TMathMLExport = {
 }
 
 type TExportConfiguration = {
-  'image-resolution'?: number
+  "image-resolution"?: number
   image?: TImageConfiguration
   jiix?: TJiixConfiguration
   mathml?: TMathMLExport
 }
 
-type TRoundingMode = 'half up' | 'truncate'
+type TRoundingMode = "half up" | "truncate"
 
-type TAngleUnit = 'deg' | 'rad'
+type TAngleUnit = "deg" | "rad"
 
-type TSolverOptions = 'algebraic' | 'numeric'
+type TSolverOptions = "algebraic" | "numeric"
 
 type TSolverConfiguration = {
   enable?: boolean
-  'fractional-part-digits'?: number
-  'decimal-separator'?: string
-  'rounding-mode'?: TRoundingMode
-  'angle-unit'?: TAngleUnit
+  "fractional-part-digits"?: number
+  "decimal-separator"?: string
+  "rounding-mode"?: TRoundingMode
+  "angle-unit"?: TAngleUnit
   options?: TSolverOptions
 }
 
-type TUndoRedoMode = 'stroke' | 'session'
+type TUndoRedoMode = "stroke" | "session"
 
 type TMathUndoRedoConfiguration = {
   mode: TUndoRedoMode
 }
 
 type TMathConfiguration = {
-  mimeTypes: ('application/x-latex' | 'application/mathml+xml' | 'application/vnd.myscript.jiix')[]
+  mimeTypes: ("application/x-latex" | "application/mathml+xml" | "application/vnd.myscript.jiix")[]
   solver?: TSolverConfiguration
   margin?: TMarginConfiguration
-  'undo-redo'?: TMathUndoRedoConfiguration
+  "undo-redo"?: TMathUndoRedoConfiguration
   customGrammar?: string
   customGrammarId?: string
   customGrammarContent?: string
   eraser?: TEraserConfiguration
-  'session-time'?: number
-  'recognition-timeout'?: number
+  "session-time"?: number
+  "recognition-timeout"?: number
 }
 
 type TRecognitionConfiguration$1 = {
@@ -139,14 +139,14 @@ type TRecognitionConfiguration$1 = {
 
 type TRawContentConfiguration = {
   text?: TTextConfConfiguration
-  'session-time'?: number
+  "session-time"?: number
   recognition?: TRecognitionConfiguration$1
   eraser?: TEraserConfiguration
 }
 
 type TDebugConfiguration = {
-  'draw-text-boxes': boolean
-  'draw-image-boxes': boolean
+  "draw-text-boxes": boolean
+  "draw-image-boxes": boolean
 }
 
 type TRecognitionRendererConfiguration = {
@@ -155,9 +155,9 @@ type TRecognitionRendererConfiguration = {
 
 type TGesture = { enable: boolean }
 
-type TRecognitionType = 'TEXT' | 'MATH' | 'DIAGRAM' | 'Raw Content'
+type TRecognitionType = "TEXT" | "MATH" | "DIAGRAM" | "Raw Content"
 
-type TConverstionState = 'DIGITAL_EDIT' | 'HANDWRITING'
+type TConverstionState = "DIGITAL_EDIT" | "HANDWRITING"
 
 type TRecognitionConfiguration = {
   convert?: TConvertConfiguration
@@ -169,7 +169,7 @@ type TRecognitionConfiguration = {
   diagram: TDiagramConfiguration
   renderer: TRecognitionRendererConfiguration
   export: TExportConfiguration
-  'raw-content': TRawContentConfiguration
+  "raw-content": TRawContentConfiguration
   gesture: TGesture
 }
 
@@ -183,7 +183,7 @@ type TRecognitionConfigurationClient = {
   diagram?: TDiagramConfiguration
   renderer?: TRecognitionRendererConfiguration
   export?: TExportConfiguration
-  'raw-content'?: TRawContentConfiguration
+  "raw-content"?: TRawContentConfiguration
   gesture?: TGesture
 }
 
@@ -201,9 +201,9 @@ type TRenderingConfiguration = {
   smartGuide: TSmartGuidesConfiguration
 }
 
-type TProtocol = 'WEBSOCKET' | 'REST'
+type TProtocol = "WEBSOCKET" | "REST"
 
-type TSchene = 'https' | 'http'
+type TSchene = "https" | "http"
 
 type TServerConfiguration = {
   protocol: TProtocol,
@@ -249,7 +249,7 @@ type TServerConfigurationClient = {
  * DEMAND :       Action is triggered on external demande
  */
  type TTriggerConfiguration = {
-  exportContent: 'QUIET_PERIOD' | 'POINTER_UP' | 'DEMAND'
+  exportContent: "QUIET_PERIOD" | "POINTER_UP" | "DEMAND"
   exportContentDelay: number
   resizeTriggerDelay: number
 }
@@ -265,7 +265,7 @@ type TConfiguration = {
   rendering: TRenderingConfiguration
   triggers: TTriggerConfiguration
   events: TEventConfiguration
-  'undo-redo': TUndoRedoConfiguration
+  "undo-redo": TUndoRedoConfiguration
 }
 
 type TConfigurationClient = {
@@ -275,7 +275,7 @@ type TConfigurationClient = {
   rendering?: TRenderingConfiguration
   triggers?: TTriggerConfiguration
   events?: TEventConfiguration
-  'undo-redo'?: TUndoRedoConfiguration
+  "undo-redo"?: TUndoRedoConfiguration
 }
 
 type TEditorOptions = {
@@ -306,9 +306,9 @@ type TPoint = TPartialXYPoint & {
 type TPenStyle$1 = {
   color?: string
   width?: number
-  '-myscript-pen-width'?: number
-  '-myscript-pen-fill-style'?: string
-  '-myscript-pen-fill-color'?: string
+  "-myscript-pen-width"?: number
+  "-myscript-pen-fill-style"?: string
+  "-myscript-pen-fill-color"?: string
 }
 
 type TSymbol = TPenStyle$1 & {
@@ -356,15 +356,15 @@ type TJIIXExport = {
 
 type TExport = {
   // // TEXT | Raw Content
-  'application/vnd.myscript.jiix'?: TJIIXExport
+  "application/vnd.myscript.jiix"?: TJIIXExport
   // // TEXT
-  'text/plain'? : string
+  "text/plain"? : string
   // // MATH
-  'application/x-latex'?: string
-  'application/mathml+xml'?: string
+  "application/x-latex"?: string
+  "application/mathml+xml"?: string
   // // DIAGRAM
-  'image/svg+xml'?: string
-  'application/vnd.openxmlformats-officedocument.presentationml.presentation'?: Blob
+  "image/svg+xml"?: string
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation"?: Blob
   [key: string]: TJIIXExport | string | Blob
 }
 
@@ -406,24 +406,24 @@ interface IModel
 }
 
 type TMathTheme = {
-  'font-family': string
+  "font-family": string
 }
 
 type TMathSolvedTheme = {
-  'font-family': string
+  "font-family": string
   color: string
 }
 
 type TTextTheme = {
-  'font-family': string,
-  'font-size': number
+  "font-family": string,
+  "font-size": number
 }
 
 type TTheme$1 = {
   ink: TPenStyle$1
-  '.math': TMathTheme
-  '.math-solved': TMathSolvedTheme
-  '.text': TTextTheme
+  ".math": TMathTheme
+  ".math-solved": TMathSolvedTheme
+  ".text": TTextTheme
   [key: string]: unknown
 }
 
@@ -491,6 +491,11 @@ declare class Editor {
     import(data: Blob, mimeType?: string): Promise<IModel | never>;
 }
 
+/**
+ * Return the list of available recognition languages
+ * @param {Configuration} [configuration] Configuration to get the languages
+ * @return {JSON} A list of available languages
+ */
 declare function getAvailableLanguageList(configuration?: TConfigurationClient): Promise<Array<Record<string, string>> | never>;
 
 export { Editor, getAvailableLanguageList };

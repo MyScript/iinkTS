@@ -53,79 +53,79 @@ export class SmartGuide
 
   #createWrapperElement(): void
   {
-    this.#smartGuideElement = document.createElement('div')
+    this.#smartGuideElement = document.createElement("div")
     this.#smartGuideElement.id = `smartguide-${ this.uuid }`
-    this.#smartGuideElement.classList.add('smartguide')
+    this.#smartGuideElement.classList.add("smartguide")
   }
 
   #createPrompterContainerElement(): void
   {
-    this.#prompterContainerElement = document.createElement('div')
+    this.#prompterContainerElement = document.createElement("div")
     this.#prompterContainerElement.id = `prompter-container-${ this.uuid }`
-    this.#prompterContainerElement.classList.add('prompter-container')
+    this.#prompterContainerElement.classList.add("prompter-container")
     // this.#prompterContainerElement.appendChild(textElement)
   }
 
   #createPrompterTextElement(): void
   {
-    this.#prompterTextElement = document.createElement('div')
+    this.#prompterTextElement = document.createElement("div")
     this.#prompterTextElement.id = `prompter-text-${ this.uuid }`
-    this.#prompterTextElement.classList.add('prompter-text')
-    this.#prompterTextElement.setAttribute('touch-action', 'none')
+    this.#prompterTextElement.classList.add("prompter-text")
+    this.#prompterTextElement.setAttribute("touch-action", "none")
   }
 
   #createEllipsisElement(): void
   {
-    this.#ellipsisElement = document.createElement('div')
+    this.#ellipsisElement = document.createElement("div")
     this.#ellipsisElement.id = `ellipsis-${ this.uuid }`
-    this.#ellipsisElement.classList.add('ellipsis')
-    this.#ellipsisElement.innerHTML = '...'
+    this.#ellipsisElement.classList.add("ellipsis")
+    this.#ellipsisElement.innerHTML = "..."
   }
 
   #createTagElement(): void
   {
-    this.#tagElement = document.createElement('div')
+    this.#tagElement = document.createElement("div")
     this.#tagElement.id = `tag-icon-${ this.uuid }`
-    this.#tagElement.classList.add('tag-icon')
-    this.#tagElement.innerHTML = '&#182;'
+    this.#tagElement.classList.add("tag-icon")
+    this.#tagElement.innerHTML = "&#182;"
   }
 
   #createCandidatesElement(): void
   {
-    this.#candidatesElement = document.createElement('div')
+    this.#candidatesElement = document.createElement("div")
     this.#candidatesElement.id = `candidates-${ this.uuid }`
-    this.#candidatesElement.classList.add('candidates')
+    this.#candidatesElement.classList.add("candidates")
   }
 
   #createMoreMenuElement(): void
   {
-    this.#menuElement = document.createElement('div')
+    this.#menuElement = document.createElement("div")
     this.#menuElement.id = `more-menu-${ this.uuid }`
-    this.#menuElement.classList.add('more-menu')
+    this.#menuElement.classList.add("more-menu")
   }
 
   #createConvertElement(): void
   {
-    this.#convertElement = document.createElement('button')
+    this.#convertElement = document.createElement("button")
     this.#convertElement.id = `convert-${ this.uuid }`
-    this.#convertElement.classList.add('options-label-button')
-    this.#convertElement.innerHTML = 'Convert'
+    this.#convertElement.classList.add("options-label-button")
+    this.#convertElement.innerHTML = "Convert"
   }
 
   #createCopyElement(): void
   {
-    this.#copyElement = document.createElement('button')
+    this.#copyElement = document.createElement("button")
     this.#copyElement.id = `copy-${ this.uuid }`
-    this.#copyElement.classList.add('options-label-button')
-    this.#copyElement.innerHTML = 'Copy'
+    this.#copyElement.classList.add("options-label-button")
+    this.#copyElement.innerHTML = "Copy"
   }
 
   #createDeleteElement(): void
   {
-    this.#deleteElement = document.createElement('button')
+    this.#deleteElement = document.createElement("button")
     this.#deleteElement.id = `delete-${ this.uuid }`
-    this.#deleteElement.classList.add('options-label-button')
-    this.#deleteElement.innerHTML = 'Delete'
+    this.#deleteElement.classList.add("options-label-button")
+    this.#deleteElement.innerHTML = "Delete"
   }
 
   init(domElement: HTMLElement, margin: TMarginConfiguration, renderingConfiguration: TRenderingConfiguration): void
@@ -142,11 +142,11 @@ export class SmartGuide
     this.#menuElement.appendChild(this.#copyElement)
     this.#menuElement.appendChild(this.#deleteElement)
     this.#smartGuideElement.appendChild(this.#menuElement)
-    this.#menuElement.classList.add('close')
+    this.#menuElement.classList.add("close")
     this.#isMenuOpen = false
 
     this.#smartGuideElement.appendChild(this.#candidatesElement)
-    this.#candidatesElement.style.display = 'none'
+    this.#candidatesElement.style.display = "none"
     this.margin = margin
     this.renderingConfiguration = renderingConfiguration
     this.#addListeners()
@@ -164,7 +164,7 @@ export class SmartGuide
     const observer = new MutationObserver((mutations) => {
       mutations.forEach(() => {
         clearTimeout(this.#fadeOutTimout)
-        if (this.#candidatesElement.style.display === 'none' && !this.#isMenuOpen) {
+        if (this.#candidatesElement.style.display === "none" && !this.#isMenuOpen) {
           this.#fadeOutTimout = setTimeout(() => {
             this.#hide()
           }, duration)
@@ -180,24 +180,24 @@ export class SmartGuide
 
   #show(): void
   {
-    this.#smartGuideElement.classList.remove('smartguide-out')
-    this.#smartGuideElement.classList.add('smartguide-in')
+    this.#smartGuideElement.classList.remove("smartguide-out")
+    this.#smartGuideElement.classList.add("smartguide-in")
   }
   #hide(): void
   {
-    this.#smartGuideElement.classList.add('smartguide-out')
-    this.#smartGuideElement.classList.remove('smartguide-in')
+    this.#smartGuideElement.classList.add("smartguide-out")
+    this.#smartGuideElement.classList.remove("smartguide-in")
   }
 
   #showCandidates = (target: HTMLElement) => {
-    const wordId = parseInt(target.id.replace('word-', '').replace(this.uuid, ''))
+    const wordId = parseInt(target.id.replace("word-", "").replace(this.uuid, ""))
     const words = this.jiix?.words as TWordExport[]
     this.wordToChange = words[wordId]
     if (this.wordToChange) {
       this.wordToChange.id = wordId.toString()
-      this.#candidatesElement.innerHTML = ''
+      this.#candidatesElement.innerHTML = ""
       if (this.wordToChange?.candidates) {
-        this.#candidatesElement.style.display = 'flex'
+        this.#candidatesElement.style.display = "flex"
         this.wordToChange.candidates.forEach((word, index) => {
           if (this.wordToChange?.label === word) {
             this.#candidatesElement.innerHTML += `<span id="cdt-${index}${this.uuid}" class="selected-word">${word}</span>`
@@ -219,17 +219,17 @@ export class SmartGuide
   }
   #hideCandidates(): void
   {
-    this.#candidatesElement.style.display = 'none'
+    this.#candidatesElement.style.display = "none"
   }
 
   #openMenu(): void {
-    this.#menuElement.classList.add('open')
-    this.#menuElement.classList.remove('close')
+    this.#menuElement.classList.add("open")
+    this.#menuElement.classList.remove("close")
     this.#isMenuOpen = true
   }
   #closeMenu(): void {
-    this.#menuElement.classList.add('close')
-    this.#menuElement.classList.remove('open')
+    this.#menuElement.classList.add("close")
+    this.#menuElement.classList.remove("open")
     this.#isMenuOpen = false
   }
 
@@ -255,7 +255,7 @@ export class SmartGuide
     evt.stopPropagation()
     try {
       this.#closeMenu()
-      let message = 'Nothing to copy'
+      let message = "Nothing to copy"
       if (this.#prompterTextElement.innerText) {
         message = `"${this.#prompterTextElement.innerText}" copied to clipboard`
         await navigator.clipboard.writeText(this.#prompterTextElement.innerText)
@@ -284,7 +284,7 @@ export class SmartGuide
       this.jiix.words[parseInt(this.wordToChange?.id as string)].label = candidate
       this.globalEvent.emitImport(this.jiix, Exports.JIIX)
     }
-    this.#candidatesElement.style.display = 'none'
+    this.#candidatesElement.style.display = "none"
   }
 
   #onClickPrompter = (evt: Event): void =>
@@ -308,13 +308,13 @@ export class SmartGuide
 
   #addListeners(): void
   {
-    this.#ellipsisElement.addEventListener('pointerdown', evt => this.#onClickEllipsis(evt))
-    this.#convertElement.addEventListener('pointerdown', evt => this.#onClickConvert(evt))
-    this.#copyElement.addEventListener('pointerdown', evt => this.#onClickCopy(evt))
-    this.#deleteElement.addEventListener('pointerdown', evt => this.#onClickDelete(evt))
-    this.#prompterTextElement.addEventListener('pointerdown', evt => this.#onClickPrompter(evt))
-    this.#candidatesElement.addEventListener('pointerdown', evt => this.#onClickCandidate(evt))
-    document.addEventListener('pointerdown', () => this.#onClickOutSide())
+    this.#ellipsisElement.addEventListener("pointerdown", evt => this.#onClickEllipsis(evt))
+    this.#convertElement.addEventListener("pointerdown", evt => this.#onClickConvert(evt))
+    this.#copyElement.addEventListener("pointerdown", evt => this.#onClickCopy(evt))
+    this.#deleteElement.addEventListener("pointerdown", evt => this.#onClickDelete(evt))
+    this.#prompterTextElement.addEventListener("pointerdown", evt => this.#onClickPrompter(evt))
+    this.#candidatesElement.addEventListener("pointerdown", evt => this.#onClickCandidate(evt))
+    document.addEventListener("pointerdown", () => this.#onClickOutSide())
   }
 
   resize(): void
@@ -344,23 +344,23 @@ export class SmartGuide
   {
     this.jiix = exports
     const createWordSpan = (index: number, word?: TWordExport) => {
-      const span = document.createElement('span')
+      const span = document.createElement("span")
       span.id = `word-${index}${this.uuid}`
       if (word) {
         span.textContent = word.label
       } else {
-        span.innerHTML = '&nbsp;'
+        span.innerHTML = "&nbsp;"
       }
       return span
     }
 
     const populatePrompter = () => {
-      this.#prompterTextElement.innerHTML = ''
+      this.#prompterTextElement.innerHTML = ""
       if (this.jiix?.words) {
         const words = this.jiix.words as TWordExport[]
         const myFragment = document.createDocumentFragment()
         words.forEach((word, index) => {
-          if (word.label === ' ' || word.label.includes('\n')) {
+          if (word.label === " " || word.label.includes("\n")) {
             myFragment.appendChild(createWordSpan(index))
           } else if (index !== words.length - 1) {
             myFragment.appendChild(createWordSpan(index, word))
@@ -373,7 +373,7 @@ export class SmartGuide
             const span = createWordSpan(index, word)
             // This is used to scroll to last word if last word is modified
             if ((this.lastWord?.candidates !== word.candidates) && (this.lastWord?.label !== word.label)) {
-              span.classList.add('added-word')
+              span.classList.add("added-word")
               this.#prompterTextElement.appendChild(span)
               this.#prompterContainerElement.scrollLeft = span.offsetLeft
               this.lastWord = word
@@ -393,8 +393,8 @@ export class SmartGuide
 
   clear(): void
   {
-    this.#prompterTextElement.innerHTML = ''
-    this.#candidatesElement.innerHTML = ''
+    this.#prompterTextElement.innerHTML = ""
+    this.#candidatesElement.innerHTML = ""
     this.#hide()
   }
 }

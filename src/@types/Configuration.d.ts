@@ -13,7 +13,7 @@ export type TConfiguration = {
   rendering: TRenderingConfiguration
   triggers: TTriggerConfiguration
   events: TEventConfiguration
-  'undo-redo': TUndoRedoConfiguration
+  "undo-redo": TUndoRedoConfiguration
 }
 
 export type TConfigurationClient = {
@@ -23,5 +23,5 @@ export type TConfigurationClient = {
   rendering?: TRenderingConfiguration
   triggers?: TTriggerConfiguration
   events?: TEventConfiguration
-  'undo-redo'?: TUndoRedoConfiguration
+  "undo-redo"?: TUndoRedoConfiguration
 }

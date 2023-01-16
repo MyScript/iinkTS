@@ -11,12 +11,14 @@
       "ES2017"
     ],
     "declaration": false,
-    "removeComments": true,
+    "declarationMap": false,
+    "removeComments": false,
     "preserveConstEnums": true,
     "sourceMap": true,
     "strict": true,
     "strictFunctionTypes": true,
     "strictNullChecks": true,
+    "allowSyntheticDefaultImports": true,
     "alwaysStrict": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
@@ -27,14 +29,12 @@
     "esModuleInterop": true
   },
   "types": [
+    "./node_modules/@types/**",
     "@types/jest",
     "jest-websocket-mock",
     "jest-playwright-preset",
     "expect-playwright",
-  ],
-  "typeRoots": [
-    "./node_modules/@types/**",
-    "./src/@types/**/*.d.ts"
+    "src/@types"
   ],
   "include": [
     "src/**/*",

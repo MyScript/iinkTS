@@ -2,7 +2,7 @@ import { IBehaviors } from "../@types/Behaviors"
 import { TConfiguration } from "../@types/Configuration"
 import { IModel, TExport } from "../@types/model/Model"
 
-import { PointerEventGrabber } from '../grabber/PointerEventGrabber'
+import { PointerEventGrabber } from "../grabber/PointerEventGrabber"
 import { WSRecognizer } from "../recognizer/WSRecognizer"
 import { TWebSocketExportEvent, TWebSocketSVGPatchEvent } from "../@types/recognizer/WSRecognizer"
 import { DeferredPromise } from "../utils/DeferredPromise"

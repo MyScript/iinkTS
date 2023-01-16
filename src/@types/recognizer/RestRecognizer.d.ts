@@ -9,7 +9,7 @@ export type TRestPostConfiguration = {
   lang: string,
   diagram?: TDiagramConfiguration,
   math?: TMathConfiguration,
-  'raw-content'?: TRawContentConfiguration,
+  "raw-content"?: TRawContentConfiguration,
   text?: TTextConfiguration,
   export: TExportConfiguration
 }

@@ -12,6 +12,6 @@ import { TConfigurationClient } from "./@types/Configuration"
      const response = await fetch(`${ serverConfig.scheme }://${ serverConfig.host }/api/v4.0/iink/availableLanguageList`)
      return response.json()
    } else {
-     return Promise.reject('Cannot get languages ! Please check your server configuration!')
+     return Promise.reject("Cannot get languages ! Please check your server configuration!")
    }
  }

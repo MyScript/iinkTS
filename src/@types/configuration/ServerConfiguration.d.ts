@@ -1,6 +1,6 @@
-export type TProtocol = 'WEBSOCKET' | 'REST'
+export type TProtocol = "WEBSOCKET" | "REST"
 
-export type TSchene = 'https' | 'http'
+export type TSchene = "https" | "http"
 
 export type TServerConfiguration = {
   protocol: TProtocol,

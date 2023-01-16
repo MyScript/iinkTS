@@ -1,6 +1,6 @@
-import JsonCSS from 'json-css'
-import { TPenStyle } from '../@types/style/PenStyle'
-import { TTheme } from '../@types/style/Theme'
+import JsonCSS from "json-css"
+import { TPenStyle } from "../@types/style/PenStyle"
+import { TTheme } from "../@types/style/Theme"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const parser: any = new JsonCSS()
@@ -15,8 +15,8 @@ export default {
   themeToJSON(style: string): TTheme
   {
     const theme = parser.toJSON(style) as TTheme
-    theme['.text']['font-size'] = Number(theme['.text']['font-size'])
-    theme.ink['-myscript-pen-width'] = Number(theme.ink['-myscript-pen-width'])
+    theme[".text"]["font-size"] = Number(theme[".text"]["font-size"])
+    theme.ink["-myscript-pen-width"] = Number(theme.ink["-myscript-pen-width"])
     theme.ink.width = Number(theme.ink.width)
     return theme
   },
@@ -32,10 +32,10 @@ export default {
     } else {
       delete penStyle.width
     }
-    if (penStyle['-myscript-pen-width']) {
-      penStyle['-myscript-pen-width'] = Number(penStyle['-myscript-pen-width'])
+    if (penStyle["-myscript-pen-width"]) {
+      penStyle["-myscript-pen-width"] = Number(penStyle["-myscript-pen-width"])
     } else {
-      delete penStyle['-myscript-pen-width']
+      delete penStyle["-myscript-pen-width"]
     }
     return penStyle
   }

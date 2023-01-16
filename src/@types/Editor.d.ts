@@ -1,4 +1,4 @@
-import { TConfiguration } from './Configuration'
+import { TConfiguration } from "./Configuration"
 
 export type TEditorOptions = {
   configuration: TConfiguration

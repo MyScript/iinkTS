@@ -4,7 +4,7 @@ import { TServerConfiguration } from "../@types/configuration/ServerConfiguratio
 import { IModel, TExport, TJIIXExport } from "../@types/model/Model"
 import { TPenStyle } from "../@types/style/PenStyle"
 
-import { Error as ErrorConst } from '../Constants'
+import { Error as ErrorConst } from "../Constants"
 import StyleHelper from "../style/StyleHelper"
 import { computeHmac } from "./CryptoHelper"
 import { AbstractRecognizer } from "./AbstractRecognizer"
@@ -30,25 +30,25 @@ export class RestRecognizer extends AbstractRecognizer
   get postConfig(): TRestPostConfiguration
   {
     switch (this.recognitionConfiguration.type) {
-      case 'DIAGRAM':
+      case "DIAGRAM":
         return {
           lang: this.recognitionConfiguration.lang,
           diagram: this.recognitionConfiguration.diagram,
           export: this.recognitionConfiguration.export
         }
-      case 'MATH':
+      case "MATH":
         return {
           lang: this.recognitionConfiguration.lang,
           math: this.recognitionConfiguration.math,
           export: this.recognitionConfiguration.export
         }
-      case 'Raw Content':
+      case "Raw Content":
         return {
           lang: this.recognitionConfiguration.lang,
-          'raw-content': this.recognitionConfiguration['raw-content'],
+          "raw-content": this.recognitionConfiguration["raw-content"],
           export: this.recognitionConfiguration.export
         }
-      case 'TEXT':
+      case "TEXT":
         return {
           lang: this.recognitionConfiguration.lang,
           text: this.recognitionConfiguration.text,
@@ -65,7 +65,7 @@ export class RestRecognizer extends AbstractRecognizer
     const newStrokes: TStrokeGroupJSON[] = []
     model.strokeGroups.forEach((group: TStrokeGroup) =>
     {
-      const newPenStyle = JSON.stringify(group.penStyle) === '{}' ? undefined : StyleHelper.penStyleToCSS(group.penStyle as TPenStyle)
+      const newPenStyle = JSON.stringify(group.penStyle) === "{}" ? undefined : StyleHelper.penStyleToCSS(group.penStyle as TPenStyle)
       const newGroup = {
         penStyle: newPenStyle,
         strokes: group.strokes.map((s: TStroke) =>
@@ -82,8 +82,8 @@ export class RestRecognizer extends AbstractRecognizer
       newStrokes.push(newGroup)
     })
 
-    const contentType: string = this.recognitionConfiguration.type === 'Raw Content' ?
-      'Raw Content' :
+    const contentType: string = this.recognitionConfiguration.type === "Raw Content" ?
+      "Raw Content" :
       this.recognitionConfiguration.type.charAt(0).toUpperCase() + this.recognitionConfiguration.type.slice(1).toLowerCase()
 
     return {
@@ -102,31 +102,31 @@ export class RestRecognizer extends AbstractRecognizer
   private async post(data: any, mimeType: string): Promise<any>
   {
     const headers = new Headers()
-    headers.append('Accept', 'application/json,' + mimeType)
-    headers.append('applicationKey', this.serverConfiguration.applicationKey)
-    headers.append('hmac', computeHmac(JSON.stringify(data), this.serverConfiguration.applicationKey, this.serverConfiguration.hmacKey))
-    headers.append('Content-Type', 'application/json')
+    headers.append("Accept", "application/json," + mimeType)
+    headers.append("applicationKey", this.serverConfiguration.applicationKey)
+    headers.append("hmac", computeHmac(JSON.stringify(data), this.serverConfiguration.applicationKey, this.serverConfiguration.hmacKey))
+    headers.append("Content-Type", "application/json")
     const reqInit: RequestInit = {
-      method: 'POST',
+      method: "POST",
       headers,
       body: JSON.stringify(data)
     }
     const request = new Request(this.url, reqInit)
     const response: Response = await fetch(request)
     if (response.ok) {
-      const contentType = response.headers.get('content-type')
+      const contentType = response.headers.get("content-type")
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let result: any
       switch (contentType) {
-        case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
-        case 'image/png':
-        case 'image/jpeg':
+        case "application/vnd.openxmlformats-officedocument.presentationml.presentation":
+        case "image/png":
+        case "image/jpeg":
           result = await response.blob()
           break
-        case 'application/json':
+        case "application/json":
           result = await response.json()
           break
-        case 'application/vnd.myscript.jiix':
+        case "application/vnd.myscript.jiix":
           result = await response.clone().json().catch(async () => await response.text())
           break
         default:
@@ -154,7 +154,7 @@ export class RestRecognizer extends AbstractRecognizer
         let message = err.message || ErrorConst.UNKNOW
         if (!err.code) {
           message = ErrorConst.CANT_ESTABLISH
-        } else if (err.code === 'access.not.granted') {
+        } else if (err.code === "access.not.granted") {
           message = ErrorConst.WRONG_CREDENTIALS
         }
         const error = new Error(message)
@@ -167,16 +167,16 @@ export class RestRecognizer extends AbstractRecognizer
     let mimeTypes: string[] = requestedMimeTypes || []
     if (!mimeTypes.length) {
       switch (this.recognitionConfiguration.type) {
-        case 'DIAGRAM':
+        case "DIAGRAM":
           mimeTypes = this.recognitionConfiguration.diagram.mimeTypes
           break
-        case 'MATH':
+        case "MATH":
           mimeTypes = this.recognitionConfiguration.math.mimeTypes
           break
-        case 'Raw Content':
-          mimeTypes = ['application/vnd.myscript.jiix']
+        case "Raw Content":
+          mimeTypes = ["application/vnd.myscript.jiix"]
           break
-        case 'TEXT':
+        case "TEXT":
           mimeTypes = this.recognitionConfiguration.text.mimeTypes
           break
         default:
@@ -226,7 +226,7 @@ export class RestRecognizer extends AbstractRecognizer
     const mimeTypes = this.getMimeTypes(requestedMimeTypes)
 
     if (!mimeTypes.length) {
-      return Promise.reject(new Error('Export failed, no mimeTypes define in recognition configuration'))
+      return Promise.reject(new Error("Export failed, no mimeTypes define in recognition configuration"))
     }
 
     const mimeTypesRequiringExport: string[] = mimeTypes.filter(m => !myModel.exports || !myModel.exports[m])

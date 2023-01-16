@@ -19,7 +19,7 @@ export class StyleManager
 
   constructor(penStyle?: TPenStyle, theme?: TTheme)
   {
-    this.penStyleClasses = ''
+    this.penStyleClasses = ""
     this.overrideDefaultPenStyle(penStyle)
     this.overrideDefaultTheme(theme)
   }

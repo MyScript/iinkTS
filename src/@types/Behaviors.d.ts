@@ -1,8 +1,8 @@
-import { IGrabber } from './grabber/Grabber'
-import { IRenderer } from './renderer/Renderer'
-import { IModel } from './model/Model'
-import { IRecognizer } from './recognizer/Recognizer'
-import { DeferredPromise } from '../utils/DeferredPromise'
+import { IGrabber } from "./grabber/Grabber"
+import { IRenderer } from "./renderer/Renderer"
+import { IModel } from "./model/Model"
+import { IRecognizer } from "./recognizer/Recognizer"
+import { DeferredPromise } from "../utils/DeferredPromise"
 
 export interface IBehaviors
 {

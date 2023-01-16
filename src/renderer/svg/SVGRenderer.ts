@@ -19,7 +19,7 @@ export class SVGRenderer implements IRenderer
 
   init(element: HTMLElement): void
   {
-    element.style.fontSize = '10px'
+    element.style.fontSize = "10px"
     this.context = {
       parent: element
     }
@@ -27,7 +27,7 @@ export class SVGRenderer implements IRenderer
 
   #drawStroke(svgElement: SVGElement, stroke: TStroke)
   {
-    if (stroke.pointerType === 'ERASER') {
+    if (stroke.pointerType === "ERASER") {
       this.stroker.drawErasingStroke(svgElement, stroke)
     } else {
       this.stroker.drawStroke(svgElement, stroke)
@@ -38,11 +38,11 @@ export class SVGRenderer implements IRenderer
   {
     const oldLayer = this.context.parent.querySelector(`svg[data-layer="${ layerName }"]`) as SVGElement | null
     oldLayer?.remove()
-    this.context.parent.insertAdjacentHTML('beforeend', update.svg)
+    this.context.parent.insertAdjacentHTML("beforeend", update.svg)
     const layer = this.context.parent.querySelector(`svg[data-layer="${ layerName }"]`) as SVGElement
-    if (layerName === 'MODEL') {
-      const pendingStrokesGroup = document.createElementNS("http://www.w3.org/2000/svg", 'g')
-      pendingStrokesGroup.id = 'pendingStrokes'
+    if (layerName === "MODEL") {
+      const pendingStrokesGroup = document.createElementNS("http://www.w3.org/2000/svg", "g")
+      pendingStrokesGroup.id = "pendingStrokes"
       layer.appendChild(pendingStrokesGroup)
     }
   }
@@ -53,7 +53,7 @@ export class SVGRenderer implements IRenderer
     if (elementToRemove) {
       const parent = elementToRemove.parentNode as HTMLElement | null | undefined
       elementToRemove?.remove()
-      parent?.insertAdjacentHTML('beforeend', update.svg)
+      parent?.insertAdjacentHTML("beforeend", update.svg)
     }
   }
 
@@ -61,7 +61,7 @@ export class SVGRenderer implements IRenderer
   {
     const parentSelector = update.parentId ? `#${ update.parentId }` : `svg[data-layer="${ layerName }"]`
     const parent = this.context.parent.querySelector(parentSelector) as HTMLElement
-    parent?.insertAdjacentHTML('beforeend', update.svg)
+    parent?.insertAdjacentHTML("beforeend", update.svg)
   }
 
   #removeChild(update: TUpdatePatchRemoveChild): void
@@ -73,10 +73,10 @@ export class SVGRenderer implements IRenderer
   {
     const elementToRemove = this.context.parent.querySelector(`#${ update.id }`)
     if (elementToRemove) {
-      if (update.id.includes('s') || update.id.includes('MODEL')) {
+      if (update.id.includes("s") || update.id.includes("MODEL")) {
         elementToRemove.remove()
       } else {
-        elementToRemove.setAttribute('class', 'removed-stroke')
+        elementToRemove.setAttribute("class", "removed-stroke")
         setTimeout(() =>
         {
           elementToRemove?.remove()
@@ -88,19 +88,19 @@ export class SVGRenderer implements IRenderer
   #insertBefore(update: TUpdatePatchInsertBefore): void
   {
     const parent = this.context.parent.querySelector(`#${ update.refId }`) as HTMLElement | null
-    parent?.insertAdjacentHTML('beforebegin', update.svg)
+    parent?.insertAdjacentHTML("beforebegin", update.svg)
   }
 
   #setAttribute(update: TUpdatePatchSetAttribut): void
   {
-    const selector = update.id ? `#${ update.id }` : 'svg'
+    const selector = update.id ? `#${ update.id }` : "svg"
     const element = this.context.parent.querySelector(selector) as HTMLElement | null
     element?.setAttribute(update.name, update.value)
   }
 
   #removeAttribute(update: TUpdatePatchRemoveAttribut): void
   {
-    const selector = update.id ? `#${ update.id }` : 'svg'
+    const selector = update.id ? `#${ update.id }` : "svg"
     const element = this.context.parent.querySelector(selector) as HTMLElement | null
     element?.removeAttribute(update.name)
   }
@@ -108,28 +108,28 @@ export class SVGRenderer implements IRenderer
   updateLayer(layerName: string, update: TUpdatePatch): void
   {
     switch (update.type) {
-      case 'REPLACE_ALL':
+      case "REPLACE_ALL":
         this.#replaceAll(layerName, update as TUpdatePatchReplaceAll)
         break
-      case 'REPLACE_ELEMENT':
+      case "REPLACE_ELEMENT":
         this.#replaceElement(update as TUpdatePatchReplaceELement)
         break
-      case 'APPEND_CHILD':
+      case "APPEND_CHILD":
         this.#appendChild(layerName, update as TUpdatePatchAppendChild)
         break
-      case 'REMOVE_ELEMENT':
+      case "REMOVE_ELEMENT":
         this.#removeElement(update as TUpdatePatchRemoveElement)
         break
-      case 'REMOVE_CHILD':
+      case "REMOVE_CHILD":
         this.#removeChild(update as TUpdatePatchRemoveChild)
         break
-      case 'INSERT_BEFORE':
+      case "INSERT_BEFORE":
         this.#insertBefore(update as TUpdatePatchInsertBefore)
         break
-      case 'SET_ATTRIBUTE':
+      case "SET_ATTRIBUTE":
         this.#setAttribute(update as TUpdatePatchSetAttribut)
         break
-      case 'REMOVE_ATTRIBUTE':
+      case "REMOVE_ATTRIBUTE":
         this.#removeAttribute(update as TUpdatePatchRemoveAttribut)
         break
       default:
@@ -144,16 +144,16 @@ export class SVGRenderer implements IRenderer
 
   clearPendingStroke(): void
   {
-    const pendingStrokeGroup = this.context.parent.querySelector('#pendingStrokes') as SVGElement
+    const pendingStrokeGroup = this.context.parent.querySelector("#pendingStrokes") as SVGElement
     if (pendingStrokeGroup) {
-      pendingStrokeGroup.innerHTML = ''
+      pendingStrokeGroup.innerHTML = ""
     }
   }
 
   drawPendingStroke(stroke: TStroke): void
   {
     if (stroke) {
-      const pendingStrokeGroup = this.context.parent.querySelector('#pendingStrokes') as SVGElement
+      const pendingStrokeGroup = this.context.parent.querySelector("#pendingStrokes") as SVGElement
       if (pendingStrokeGroup) {
         const oldStroke = pendingStrokeGroup.querySelector(`#${ stroke?.id }`)
         if (oldStroke) {
@@ -167,21 +167,21 @@ export class SVGRenderer implements IRenderer
   resize(model: IModel): void
   {
     const rect = this.context.parent.getBoundingClientRect()
-    const svgList = this.context.parent.querySelectorAll('svg')
+    const svgList = this.context.parent.querySelectorAll("svg")
     const width = Math.max(rect.width, model.width)
     const height = Math.max(rect.height, model.height)
     svgList.forEach(svg =>
     {
-      svg.setAttribute('viewBox', `0 0 ${ width }, ${ height }`)
-      svg.setAttribute('width', `${ width }px`)
-      svg.setAttribute('height', `${ height }px`)
+      svg.setAttribute("viewBox", `0 0 ${ width }, ${ height }`)
+      svg.setAttribute("width", `${ width }px`)
+      svg.setAttribute("height", `${ height }px`)
     })
   }
 
   destroy(): void
   {
     if (this.context.parent) {
-      this.context.parent.innerHTML = ''
+      this.context.parent.innerHTML = ""
     }
   }
 }

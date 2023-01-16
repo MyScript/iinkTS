@@ -1,10 +1,22 @@
 
+/**
+ * @hidden
+ */
 type JsonCSS = {
   toCSS(json): string
   toJSON(style): TTheme
 }
 
-declare module 'json-css'
+/**
+ * @hidden
+ */
+declare module "json-css"
 
-declare module 'crypto-js/enc-hex'
-declare module 'crypto-js/hmac-sha512'
+/**
+ * @hidden
+ */
+declare module "crypto-js/enc-hex"
+/**
+ * @hidden
+ */
+declare module "crypto-js/hmac-sha512"

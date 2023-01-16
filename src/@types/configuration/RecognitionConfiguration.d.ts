@@ -1,13 +1,13 @@
-import { TConvertConfiguration } from './recognition/ConvertConfiguration'
-import { TDiagramConfiguration } from './recognition/DiagramConfiguration'
-import { TExportConfiguration } from './recognition/ExportConfiguration'
-import { TMathConfiguration } from './recognition/MathConfiguration'
-import { TRawContentConfiguration } from './recognition/RawContentConfiguration'
-import { TTextConfiguration } from './recognition/TextConfiguration'
+import { TConvertConfiguration } from "./recognition/ConvertConfiguration"
+import { TDiagramConfiguration } from "./recognition/DiagramConfiguration"
+import { TExportConfiguration } from "./recognition/ExportConfiguration"
+import { TMathConfiguration } from "./recognition/MathConfiguration"
+import { TRawContentConfiguration } from "./recognition/RawContentConfiguration"
+import { TTextConfiguration } from "./recognition/TextConfiguration"
 
 export type TDebugConfiguration = {
-  'draw-text-boxes': boolean
-  'draw-image-boxes': boolean
+  "draw-text-boxes": boolean
+  "draw-image-boxes": boolean
 }
 
 export type TRecognitionRendererConfiguration = {
@@ -16,9 +16,9 @@ export type TRecognitionRendererConfiguration = {
 
 export type TGesture = { enable: boolean }
 
-export type TRecognitionType = 'TEXT' | 'MATH' | 'DIAGRAM' | 'Raw Content'
+export type TRecognitionType = "TEXT" | "MATH" | "DIAGRAM" | "Raw Content"
 
-export type TConverstionState = 'DIGITAL_EDIT' | 'HANDWRITING'
+export type TConverstionState = "DIGITAL_EDIT" | "HANDWRITING"
 
 export type TRecognitionConfiguration = {
   convert?: TConvertConfiguration
@@ -30,7 +30,7 @@ export type TRecognitionConfiguration = {
   diagram: TDiagramConfiguration
   renderer: TRecognitionRendererConfiguration
   export: TExportConfiguration
-  'raw-content': TRawContentConfiguration
+  "raw-content": TRawContentConfiguration
   gesture: TGesture
 }
 
@@ -44,6 +44,6 @@ export type TRecognitionConfigurationClient = {
   diagram?: TDiagramConfiguration
   renderer?: TRecognitionRendererConfiguration
   export?: TExportConfiguration
-  'raw-content'?: TRawContentConfiguration
+  "raw-content"?: TRawContentConfiguration
   gesture?: TGesture
 }

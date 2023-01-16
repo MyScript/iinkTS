@@ -1,10 +1,10 @@
-import { TPenStyle } from '../@types/style/PenStyle'
-import { TPoint } from '../@types/renderer/Point'
-import { TStroke, TStrokeGroup } from '../@types/model/Stroke'
-import { IModel, TExport } from '../@types/model/Model'
-import { TRecognitionPositions } from '../@types/model/RecognitionPositions'
-import { Stroke } from './Stroke'
-import { TUpdatePatch } from '../@types/recognizer/WSRecognizer'
+import { TPenStyle } from "../@types/style/PenStyle"
+import { TPoint } from "../@types/renderer/Point"
+import { TStroke, TStrokeGroup } from "../@types/model/Stroke"
+import { IModel, TExport } from "../@types/model/Model"
+import { TRecognitionPositions } from "../@types/model/RecognitionPositions"
+import { Stroke } from "./Stroke"
+import { TUpdatePatch } from "../@types/recognizer/WSRecognizer"
 
 export class Model implements IModel
 {
@@ -71,7 +71,7 @@ export class Model implements IModel
 
   private filterPointByAcquisitionDelta(stroke: TStroke, point: TPoint): boolean
   {
-    const delta: number = (2 + ((stroke['-myscript-pen-width'] || 0) / 4))
+    const delta: number = (2 + ((stroke["-myscript-pen-width"] || 0) / 4))
     return stroke.x.length === 0 || stroke.y.length === 0 ||
       Math.abs(stroke.x[stroke.x.length - 1] - point.x) >= delta ||
       Math.abs(stroke.y[stroke.y.length - 1] - point.y) >= delta
@@ -110,9 +110,9 @@ export class Model implements IModel
     const lastGroup = this.strokeGroups.length - 1
 
     const isPenStyleEqual = (ps1: TPenStyle, ps2: TPenStyle) => {
-      return ps1['-myscript-pen-fill-color'] === ps2['-myscript-pen-fill-color'] &&
-        ps1['-myscript-pen-fill-style'] === ps2['-myscript-pen-fill-style'] &&
-        ps1['-myscript-pen-width'] === ps2['-myscript-pen-width'] &&
+      return ps1["-myscript-pen-fill-color"] === ps2["-myscript-pen-fill-color"] &&
+        ps1["-myscript-pen-fill-style"] === ps2["-myscript-pen-fill-style"] &&
+        ps1["-myscript-pen-width"] === ps2["-myscript-pen-width"] &&
         ps1.color === ps2.color &&
         ps1.width === ps2.width
     }
@@ -131,8 +131,8 @@ export class Model implements IModel
 
   initCurrentStroke(point: TPoint, pointerId: number, pointerType: string, style: TPenStyle, dpi = 96): void
   {
-    if (style['-myscript-pen-width']) {
-      const pxWidth = (style['-myscript-pen-width'] * dpi) / 25.4
+    if (style["-myscript-pen-width"]) {
+      const pxWidth = (style["-myscript-pen-width"] * dpi) / 25.4
       style.width = pxWidth / 2
     }
     this.modificationDate = new Date().getTime()
