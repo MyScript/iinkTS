@@ -19,7 +19,7 @@ export class BehaviorsManager
       this.behaviors.destroy(model)
     }
     let defaultBehaviors: IBehaviors
-    if (configuration.server.protocol === 'REST') {
+    if (configuration.server.protocol === "REST") {
       defaultBehaviors = new RestBehaviors(configuration, model)
     } else {
       defaultBehaviors = new WSBehaviors(configuration, model)

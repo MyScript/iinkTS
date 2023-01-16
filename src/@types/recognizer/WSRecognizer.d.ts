@@ -45,7 +45,7 @@ export type TWebSocketExportEvent = TWebSocketEvent & {
   exports: TExport
 }
 
-export type TUpdatePatchType = 'REPLACE_ALL' | 'REMOVE_ELEMENT' | 'REPLACE_ELEMENT' | 'REMOVE_CHILD' | 'APPEND_CHILD' | 'INSERT_BEFORE' | 'REMOVE_ATTRIBUTE' | 'SET_ATTRIBUTE'
+export type TUpdatePatchType = "REPLACE_ALL" | "REMOVE_ELEMENT" | "REPLACE_ELEMENT" | "REMOVE_CHILD" | "APPEND_CHILD" | "INSERT_BEFORE" | "REMOVE_ATTRIBUTE" | "SET_ATTRIBUTE"
 
 export type TUpdatePatch = {
   type: TUpdatePatchType
@@ -92,5 +92,5 @@ export type TUpdatePatchSetAttribut = TUpdatePatch & {
 
 export type TWebSocketSVGPatchEvent = TWebSocketEvent & {
   updates: TUpdatePatch[]
-  layer: ('MODEL' | 'CAPTURE')
+  layer: ("MODEL" | "CAPTURE")
 }

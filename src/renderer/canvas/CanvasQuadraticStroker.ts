@@ -5,12 +5,12 @@ import { computeAxeAngle, computeLinksPoints, computeMiddlePoint } from "../Quad
 export class CanvasQuadraticStroker
 {
 
-  private renderArc(context2d: CanvasRenderingContext2D, center: TPoint, radius: number)
+  private renderArc(context2d: CanvasRenderingContext2D, center: TPoint, radius: number): void
   {
     context2d.arc(center.x, center.y, radius, 0, Math.PI * 2, true)
   }
 
-  private renderLine(context2d: CanvasRenderingContext2D, begin: TPoint, end: TPoint, width: number)
+  private renderLine(context2d: CanvasRenderingContext2D, begin: TPoint, end: TPoint, width: number): void
   {
     const linkPoints1 = computeLinksPoints(begin, computeAxeAngle(begin, end), width)
     const linkPoints2 = computeLinksPoints(end, computeAxeAngle(begin, end), width)
@@ -21,7 +21,7 @@ export class CanvasQuadraticStroker
     context2d.lineTo(linkPoints1[1].x, linkPoints1[1].y)
   }
 
-  private renderFinal(context2d: CanvasRenderingContext2D, begin: TPoint, end: TPoint, width: number)
+  private renderFinal(context2d: CanvasRenderingContext2D, begin: TPoint, end: TPoint, width: number): void
   {
     const ARCSPLIT = 6
     const angle = computeAxeAngle(begin, end)
@@ -33,7 +33,7 @@ export class CanvasQuadraticStroker
     }
   }
 
-  private renderQuadratic(context2d: CanvasRenderingContext2D, begin: TPoint, end: TPoint, ctrl: TPoint, width: number)
+  private renderQuadratic(context2d: CanvasRenderingContext2D, begin: TPoint, end: TPoint, ctrl: TPoint, width: number): void
   {
     const linkPoints1 = computeLinksPoints(begin, computeAxeAngle(begin, ctrl), width)
     const linkPoints2 = computeLinksPoints(end, computeAxeAngle(ctrl, end), width)
@@ -55,7 +55,7 @@ export class CanvasQuadraticStroker
     return point
   }
 
-  drawStroke(context2d: CanvasRenderingContext2D, stroke: TStroke)
+  drawStroke(context2d: CanvasRenderingContext2D, stroke: TStroke): void
   {
     const length = stroke.x.length
     const width = (stroke.width as number) > 0 ? (stroke.width as number) : context2d.lineWidth

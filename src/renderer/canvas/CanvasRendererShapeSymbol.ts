@@ -3,11 +3,11 @@ import { TPartialXYPoint } from "../../@types/renderer/Point"
 import { TSymbol, TShapeEllipseSymbol, TShapeLineSymbol, TShapeSymbol, TShapeTableSymbol, TLineSymbol, TShapeRecognizedSymbol } from "../../@types/renderer/Symbol"
 
 export const ShapeSymbols = {
-  table: 'table',
-  shape: 'shape',
-  recognizedShape: 'recognizedShape',
-  ellipse: 'ellipse',
-  line: 'line'
+  table: "table",
+  shape: "shape",
+  recognizedShape: "recognizedShape",
+  ellipse: "ellipse",
+  line: "line"
 }
 
 function phi(angle: number): number
@@ -93,10 +93,10 @@ function drawShapeEllipse(context2D: CanvasRenderingContext2D, shapeEllipse: TSh
 {
   const points = drawEllipseArc(context2D, shapeEllipse)
 
-  if (shapeEllipse?.beginDecoration === 'ARROW_HEAD') {
+  if (shapeEllipse?.beginDecoration === "ARROW_HEAD") {
     drawArrowHead(context2D, points[0], shapeEllipse.beginTangentAngle, 12.0)
   }
-  if (shapeEllipse?.endDecoration === 'ARROW_HEAD') {
+  if (shapeEllipse?.endDecoration === "ARROW_HEAD") {
     drawArrowHead(context2D, points[1], shapeEllipse.endTangentAngle, 12.0)
   }
 }
@@ -123,10 +123,10 @@ export function drawLine(context2D: CanvasRenderingContext2D, p1: TPartialXYPoin
 function drawShapeLine(context2D: CanvasRenderingContext2D, shapeLine: TShapeLineSymbol)
 {
   drawLine(context2D, shapeLine.firstPoint, shapeLine.lastPoint)
-  if (shapeLine.beginDecoration === 'ARROW_HEAD') {
+  if (shapeLine.beginDecoration === "ARROW_HEAD") {
     drawArrowHead(context2D, shapeLine.firstPoint, shapeLine.beginTangentAngle, 12.0)
   }
-  if (shapeLine.endDecoration === 'ARROW_HEAD') {
+  if (shapeLine.endDecoration === "ARROW_HEAD") {
     drawArrowHead(context2D, shapeLine.lastPoint, shapeLine.endTangentAngle, 12.0)
   }
 }

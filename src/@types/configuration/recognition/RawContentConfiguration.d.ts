@@ -9,7 +9,7 @@ export type TRecognitionConfiguration = {
 
 export type TRawContentConfiguration = {
   text?: TTextConfConfiguration
-  'session-time'?: number
+  "session-time"?: number
   recognition?: TRecognitionConfiguration
   eraser?: TEraserConfiguration
 }

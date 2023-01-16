@@ -1,6 +1,6 @@
-import { IGrabber } from '../@types/grabber/Grabber'
-import { TGrabberConfiguration } from '../@types/configuration/GrabberConfiguration'
-import { TPoint } from '../@types/renderer/Point'
+import { IGrabber } from "../@types/grabber/Grabber"
+import { TGrabberConfiguration } from "../@types/configuration/GrabberConfiguration"
+import { TPoint } from "../@types/renderer/Point"
 
 export class PointerEventGrabber implements IGrabber
 {
@@ -33,7 +33,7 @@ export class PointerEventGrabber implements IGrabber
   private extractPoint(event: MouseEvent | TouchEvent): TPoint
   {
     let clientX: number, clientY: number
-    if ('changedTouches' in event) {
+    if ("changedTouches" in event) {
       ({ clientX, clientY } = event.changedTouches[0])
     } else {
       ({ clientX, clientY } = event)
@@ -96,32 +96,32 @@ export class PointerEventGrabber implements IGrabber
       this.detach()
     }
     this.domElement = domElement
-    this.domElement.addEventListener('pointerdown', this.pointerDownHandler, this.configuration.listenerOptions)
+    this.domElement.addEventListener("pointerdown", this.pointerDownHandler, this.configuration.listenerOptions)
 
-    this.domElement.addEventListener('pointermove', this.pointerMoveHandler, this.configuration.listenerOptions)
+    this.domElement.addEventListener("pointermove", this.pointerMoveHandler, this.configuration.listenerOptions)
 
-    this.domElement.addEventListener('pointerup', this.pointerUpHandler, this.configuration.listenerOptions)
-    this.domElement.addEventListener('pointerout', this.pointerUpHandler, this.configuration.listenerOptions)
-    this.domElement.addEventListener('pointerleave', this.pointerUpHandler, this.configuration.listenerOptions)
-    this.domElement.addEventListener('pointercancel', this.pointerUpHandler, this.configuration.listenerOptions)
+    this.domElement.addEventListener("pointerup", this.pointerUpHandler, this.configuration.listenerOptions)
+    this.domElement.addEventListener("pointerout", this.pointerUpHandler, this.configuration.listenerOptions)
+    this.domElement.addEventListener("pointerleave", this.pointerUpHandler, this.configuration.listenerOptions)
+    this.domElement.addEventListener("pointercancel", this.pointerUpHandler, this.configuration.listenerOptions)
 
-    this.domElement.addEventListener('touchmove', this.prevent)
+    this.domElement.addEventListener("touchmove", this.prevent)
 
     // FIXME investigate why this is needed for iOS devices
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    document.documentElement.addEventListener('pointerdown', () => { })
+    document.documentElement.addEventListener("pointerdown", () => { })
   }
 
   detach()
   {
-    this.domElement?.removeEventListener('pointerdown', this.pointerDownHandler, this.configuration.listenerOptions)
-    this.domElement?.removeEventListener('pointermove', this.pointerMoveHandler, this.configuration.listenerOptions)
-    this.domElement?.removeEventListener('pointerup', this.pointerUpHandler, this.configuration.listenerOptions)
-    this.domElement?.removeEventListener('pointerout', this.pointerUpHandler, this.configuration.listenerOptions)
-    this.domElement?.removeEventListener('pointerleave', this.pointerUpHandler, this.configuration.listenerOptions)
-    this.domElement?.removeEventListener('pointercancel', this.pointerUpHandler, this.configuration.listenerOptions)
-    this.domElement?.removeEventListener('touchmove', this.prevent)
+    this.domElement?.removeEventListener("pointerdown", this.pointerDownHandler, this.configuration.listenerOptions)
+    this.domElement?.removeEventListener("pointermove", this.pointerMoveHandler, this.configuration.listenerOptions)
+    this.domElement?.removeEventListener("pointerup", this.pointerUpHandler, this.configuration.listenerOptions)
+    this.domElement?.removeEventListener("pointerout", this.pointerUpHandler, this.configuration.listenerOptions)
+    this.domElement?.removeEventListener("pointerleave", this.pointerUpHandler, this.configuration.listenerOptions)
+    this.domElement?.removeEventListener("pointercancel", this.pointerUpHandler, this.configuration.listenerOptions)
+    this.domElement?.removeEventListener("touchmove", this.prevent)
     // eslint-disable-next-line @typescript-eslint/no-empty-function
-    document.documentElement.removeEventListener('pointerdown', () => { })
+    document.documentElement.removeEventListener("pointerdown", () => { })
   }
 }

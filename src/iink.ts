@@ -1,2 +1,2 @@
-export { Editor } from './Editor'
-export { getAvailableLanguageList } from './helpers'
+export { Editor } from "./Editor"
+export { getAvailableLanguageList } from "./helpers"

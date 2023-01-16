@@ -1,8 +1,8 @@
 
-import { TRecognitionConfiguration } from '../@types/configuration/RecognitionConfiguration'
-import { TServerConfiguration } from '../@types/configuration/ServerConfiguration'
-import { IRecognizer } from '../@types/recognizer/Recognizer'
-import { IModel } from '../@types/model/Model'
+import { TRecognitionConfiguration } from "../@types/configuration/RecognitionConfiguration"
+import { TServerConfiguration } from "../@types/configuration/ServerConfiguration"
+import { IRecognizer } from "../@types/recognizer/Recognizer"
+import { IModel } from "../@types/model/Model"
 
 export abstract class AbstractRecognizer implements IRecognizer
 {

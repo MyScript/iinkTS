@@ -14,7 +14,7 @@ import { Model } from "./model/Model"
 import { StyleManager } from "./style/StyleManager"
 import { SmartGuide } from "./smartguide/SmartGuide"
 
-import './iink.css'
+import "./iink.css"
 import { IBehaviors } from "./@types/Behaviors"
 import { TConverstionState } from "./@types/configuration/RecognitionConfiguration"
 import { TMarginConfiguration } from "./@types/configuration/recognition/MarginConfiguration"
@@ -22,10 +22,10 @@ import { DeferredPromise } from "./utils/DeferredPromise"
 
 export enum EditorMode
 {
-  Mouse = 'mouse',
-  Pen = 'pen',
-  Touche = 'touch',
-  Eraser = 'eraser'
+  Mouse = "mouse",
+  Pen = "pen",
+  Touche = "touch",
+  Eraser = "eraser"
 }
 
 export type HTMLEditorElement = HTMLElement &
@@ -54,16 +54,16 @@ export class Editor
     this.#initializationDeferred = new DeferredPromise<boolean>()
 
     this.wrapperHTML = wrapperHTML as HTMLEditorElement
-    this.wrapperHTML.classList.add(options?.globalClassCss || 'ms-editor')
+    this.wrapperHTML.classList.add(options?.globalClassCss || "ms-editor")
 
-    this.#loaderHTML = document.createElement('div')
-    this.#loaderHTML.classList.add('loader')
-    this.#loaderHTML.style.display = 'initial'
+    this.#loaderHTML = document.createElement("div")
+    this.#loaderHTML.classList.add("loader")
+    this.#loaderHTML.style.display = "initial"
     this.wrapperHTML.appendChild(this.#loaderHTML)
 
-    this.#messageHTML = document.createElement('div')
-    this.#messageHTML.classList.add('message')
-    this.#messageHTML.style.display = 'none'
+    this.#messageHTML = document.createElement("div")
+    this.#messageHTML.classList.add("message")
+    this.#messageHTML.style.display = "none"
     this.wrapperHTML.appendChild(this.#messageHTML)
 
     this.#mode = EditorMode.Pen
@@ -229,37 +229,37 @@ export class Editor
       })
       .finally(() =>
       {
-        this.#loaderHTML.style.display = 'none'
+        this.#loaderHTML.style.display = "none"
       })
   }
 
   #showError(err: Error)
   {
-    this.#messageHTML.style.display = 'initial'
-    this.#messageHTML.classList.add('error-msg')
-    this.#messageHTML.classList.remove('info-msg')
+    this.#messageHTML.style.display = "initial"
+    this.#messageHTML.classList.add("error-msg")
+    this.#messageHTML.classList.remove("info-msg")
     this.#messageHTML.innerText = err.message
     if (this.debug) {
-      const pName = document.createElement('p')
+      const pName = document.createElement("p")
       pName.innerHTML = err.name
       this.#messageHTML.prepend(pName)
 
-      const pStack = document.createElement('p')
-      pStack.style.width = '50vw'
-      pStack.style.marginLeft = 'calc(-25vw + 100px)'
-      pStack.innerHTML = err.stack || ''
+      const pStack = document.createElement("p")
+      pStack.style.width = "50vw"
+      pStack.style.marginLeft = "calc(-25vw + 100px)"
+      pStack.innerHTML = err.stack || ""
       this.#messageHTML.appendChild(pStack)
     }
   }
 
   #showNotif(message: string, timeout = 1000)
   {
-    this.#messageHTML.style.display = 'initial'
-    this.#messageHTML.classList.add('info-msg')
-    this.#messageHTML.classList.remove('error-msg')
+    this.#messageHTML.style.display = "initial"
+    this.#messageHTML.classList.add("info-msg")
+    this.#messageHTML.classList.remove("error-msg")
     this.#messageHTML.innerText = message
     setTimeout(() => {
-      this.#messageHTML.style.display = 'none'
+      this.#messageHTML.style.display = "none"
     }, timeout)
   }
 
@@ -283,8 +283,8 @@ export class Editor
   {
     if (this.configuration.rendering.smartGuide.enable) {
       const exports = (evt as CustomEvent).detail as TExport
-      if (exports['application/vnd.myscript.jiix']) {
-        const jjix = (exports['application/vnd.myscript.jiix'] as unknown) as string
+      if (exports["application/vnd.myscript.jiix"]) {
+        const jjix = (exports["application/vnd.myscript.jiix"] as unknown) as string
         this.#smartGuide.update(JSON.parse(jjix))
       }
     }
@@ -308,7 +308,7 @@ export class Editor
   #onPointerDown(evt: PointerEvent, point: TPoint): void
   {
     const target: Element = (evt.target as Element)
-    const pointerDownOnEditor = target?.id === this.wrapperHTML.id || target?.classList?.contains('ms-canvas')
+    const pointerDownOnEditor = target?.id === this.wrapperHTML.id || target?.classList?.contains("ms-canvas")
     if (pointerDownOnEditor) {
       let { pointerType } = evt
       if (this.#mode === EditorMode.Eraser) {
@@ -338,10 +338,10 @@ export class Editor
   {
     this.#mode = mode
     if (this.#mode === EditorMode.Eraser) {
-      this.wrapperHTML.classList.add('erasing')
+      this.wrapperHTML.classList.add("erasing")
     } else {
-      document.body.style.cursor = 'initial'
-      this.wrapperHTML.classList.remove('erasing')
+      document.body.style.cursor = "initial"
+      this.wrapperHTML.classList.remove("erasing")
     }
   }
 
@@ -394,6 +394,6 @@ export class Editor
       this.events.emitImported(this.model.exports?.["application/vnd.myscript.jiix"] as TJIIXExport)
       return this.model
     }
-    return Promise.reject('Import impossible, behaviors has no import function')
+    return Promise.reject("Import impossible, behaviors has no import function")
   }
 }

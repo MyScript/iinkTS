@@ -2,7 +2,7 @@ import { IBehaviors } from "../@types/Behaviors"
 import { TConfiguration } from "../@types/Configuration"
 import { IModel, TExport } from "../@types/model/Model"
 
-import { PointerEventGrabber } from '../grabber/PointerEventGrabber'
+import { PointerEventGrabber } from "../grabber/PointerEventGrabber"
 import { CanvasRenderer } from "../renderer/canvas/CanvasRenderer"
 import { RestRecognizer } from "../recognizer/RestRecognizer"
 import { DeferredPromise } from "../utils/DeferredPromise"

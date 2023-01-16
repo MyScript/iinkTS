@@ -12,7 +12,7 @@ export type TTextConfConfiguration = {
 }
 
 export type TTextConfiguration = {
-  mimeTypes: ('text/plain' | 'application/vnd.myscript.jiix')[]
+  mimeTypes: ("text/plain" | "application/vnd.myscript.jiix")[]
   margin?: TMarginConfiguration
   guides?: TGuidesConfiguration
   configuration?: TTextConfConfiguration

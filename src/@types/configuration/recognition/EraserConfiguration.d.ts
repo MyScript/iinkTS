@@ -1,4 +1,4 @@
 
 export type TEraserConfiguration = {
-  'erase-precisely': boolean
+  "erase-precisely": boolean
 }

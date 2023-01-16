@@ -1,5 +1,5 @@
-import { TRenderingConfiguration } from '../configuration/RenderingConfiguration'
-import { IModel } from '../model/Model'
+import { TRenderingConfiguration } from "../configuration/RenderingConfiguration"
+import { IModel } from "../model/Model"
 
 export type TCanvasRendererContext = {
   parent: HTMLElement

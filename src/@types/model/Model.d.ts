@@ -1,7 +1,7 @@
-import { TPoint } from '../renderer/Point'
-import { TStroke, TStrokeGroup } from './Stroke'
-import { TPenStyle } from '../style/PenStyle'
-import { TRecognitionPositions } from './RecognitionPositions'
+import { TPoint } from "../renderer/Point"
+import { TStroke, TStrokeGroup } from "./Stroke"
+import { TPenStyle } from "../style/PenStyle"
+import { TRecognitionPositions } from "./RecognitionPositions"
 
 export type TWordExport = {
   id?: string
@@ -18,15 +18,15 @@ export type TJIIXExport = {
 
 export type TExport = {
   // // TEXT | Raw Content
-  'application/vnd.myscript.jiix'?: TJIIXExport
+  "application/vnd.myscript.jiix"?: TJIIXExport
   // // TEXT
-  'text/plain'? : string
+  "text/plain"? : string
   // // MATH
-  'application/x-latex'?: string
-  'application/mathml+xml'?: string
+  "application/x-latex"?: string
+  "application/mathml+xml"?: string
   // // DIAGRAM
-  'image/svg+xml'?: string
-  'application/vnd.openxmlformats-officedocument.presentationml.presentation'?: Blob
+  "image/svg+xml"?: string
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation"?: Blob
   [key: string]: TJIIXExport | string | Blob
 }
 

@@ -1,4 +1,4 @@
-import { TGrabberConfiguration } from '../configuration/GrabberConfiguration'
+import { TGrabberConfiguration } from "../configuration/GrabberConfiguration"
 
 export interface IGrabber {
   setConfiguration(configuration: TGrabberConfiguration): void

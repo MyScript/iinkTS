@@ -1,12 +1,12 @@
-import { TPartialXYPoint } from '../../@types/renderer/Point'
-import { drawLine } from './CanvasRendererShapeSymbol'
-import { TSymbol, TTextUnderlineDataSymbol, TTextUnderlineSymbol, TUnderLineSymbol } from '../../@types/renderer/Symbol'
+import { TPartialXYPoint } from "../../@types/renderer/Point"
+import { drawLine } from "./CanvasRendererShapeSymbol"
+import { TSymbol, TTextUnderlineDataSymbol, TTextUnderlineSymbol, TUnderLineSymbol } from "../../@types/renderer/Symbol"
 
 export const TextSymbols = {
-  inputCharacter: 'inputCharacter',
-  char: 'char',
-  string: 'string',
-  textLine: 'textLine'
+  inputCharacter: "inputCharacter",
+  char: "char",
+  string: "string",
+  textLine: "textLine"
 }
 
 function drawUnderline(context2D: CanvasRenderingContext2D, underline: TUnderLineSymbol, label: string, data: TTextUnderlineDataSymbol)
@@ -28,8 +28,8 @@ function drawText(context2D: CanvasRenderingContext2D, label: string, data: TTex
   context2D.save()
   try {
     context2D.font = `${ data.textHeight }px serif`
-    context2D.textAlign = (data.justificationType === 'CENTER') ? 'center' : 'left'
-    context2D.textBaseline = 'bottom'
+    context2D.textAlign = (data.justificationType === "CENTER") ? "center" : "left"
+    context2D.textBaseline = "bottom"
     context2D.fillStyle = context2D.strokeStyle
     context2D.fillText(label, data.topLeftPoint.x, (data.topLeftPoint.y + data.height))
   } finally {

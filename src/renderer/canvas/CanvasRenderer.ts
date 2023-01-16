@@ -15,17 +15,18 @@ export class CanvasRenderer implements IRenderer
   stroker: CanvasQuadraticStroker
   context!: TCanvasRendererContext
 
-  constructor(config: TRenderingConfiguration) {
+  constructor(config: TRenderingConfiguration)
+  {
     this.config = config
     this.stroker = new CanvasQuadraticStroker()
   }
 
   private createCanvas(element: HTMLElement, type: string): HTMLCanvasElement
   {
-    const canvas: HTMLCanvasElement = document.createElement('canvas')
+    const canvas: HTMLCanvasElement = document.createElement("canvas")
     canvas.id = type
     canvas.classList.add(type)
-    canvas.classList.add('ms-canvas')
+    canvas.classList.add("ms-canvas")
     element.appendChild(canvas)
     return canvas
   }
@@ -41,7 +42,7 @@ export class CanvasRenderer implements IRenderer
       const height = Math.max(this.config.minHeight, domElement.clientHeight)
       canvas.width = width * pixelRatio
       canvas.height = height * pixelRatio
-      canvas.getContext('2d')?.scale(pixelRatio, pixelRatio)
+      canvas.getContext("2d")?.scale(pixelRatio, pixelRatio)
       canvas.style.width = `${ width }px`
       canvas.style.height = `${ height }px`
     })
@@ -50,7 +51,7 @@ export class CanvasRenderer implements IRenderer
   private drawSymbol(context2D: CanvasRenderingContext2D, symbol: TSymbol)
   {
     const type = symbol.elementType || symbol.type
-    if (type === 'stroke') {
+    if (type === "stroke") {
       drawStroke(context2D, symbol as TStroke, this.stroker)
     } else if (Object.keys(TextSymbols).includes(type)) {
       drawTextSymbol(context2D, symbol)
@@ -61,15 +62,15 @@ export class CanvasRenderer implements IRenderer
 
   init(element: HTMLElement): void
   {
-    const renderingCanvas: HTMLCanvasElement = this.createCanvas(element, 'ms-rendering-canvas')
-    const capturingCanvas: HTMLCanvasElement = this.createCanvas(element, 'ms-capture-canvas')
+    const renderingCanvas: HTMLCanvasElement = this.createCanvas(element, "ms-rendering-canvas")
+    const capturingCanvas: HTMLCanvasElement = this.createCanvas(element, "ms-capture-canvas")
 
     this.context = {
       parent: element,
       renderingCanvas,
-      renderingCanvasContext: renderingCanvas.getContext('2d') as CanvasRenderingContext2D,
+      renderingCanvasContext: renderingCanvas.getContext("2d") as CanvasRenderingContext2D,
       capturingCanvas,
-      capturingCanvasContext: capturingCanvas.getContext('2d') as CanvasRenderingContext2D
+      capturingCanvasContext: capturingCanvas.getContext("2d") as CanvasRenderingContext2D
     }
 
     this.resizeContent()
@@ -87,7 +88,7 @@ export class CanvasRenderer implements IRenderer
   drawPendingStroke(stroke: TStroke | undefined): void
   {
     this.context.capturingCanvasContext.clearRect(0, 0, this.context.capturingCanvas.width, this.context.capturingCanvas.height)
-    if (stroke && stroke?.pointerType !== 'eraser') {
+    if (stroke && stroke?.pointerType !== "eraser") {
       this.stroker.drawStroke(this.context.capturingCanvasContext, stroke)
     }
   }
@@ -101,7 +102,7 @@ export class CanvasRenderer implements IRenderer
   destroy(): void
   {
     if (this.context.parent) {
-      this.context.parent.innerHTML = ''
+      this.context.parent.innerHTML = ""
     }
   }
 }

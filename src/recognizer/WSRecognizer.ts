@@ -35,18 +35,18 @@ export class WSRecognizer extends AbstractRecognizer
 
   get url()
   {
-    const scheme = (this.serverConfiguration.scheme === 'https') ? 'wss' : 'ws'
+    const scheme = (this.serverConfiguration.scheme === "https") ? "wss" : "ws"
     return `${ scheme }://${ this.serverConfiguration.host }/api/v4.0/iink/document`
   }
 
   get mimeTypes(): string[]
   {
     switch (this.recognitionConfiguration.type.toLocaleLowerCase()) {
-      case 'text':
+      case "text":
         return this.recognitionConfiguration.text.mimeTypes
-      case 'math':
+      case "math":
         return this.recognitionConfiguration.math.mimeTypes
-      case 'diagram':
+      case "diagram":
         return this.recognitionConfiguration.diagram.mimeTypes
       default:
         //'raw-content'
@@ -58,12 +58,12 @@ export class WSRecognizer extends AbstractRecognizer
   {
     this.pingCount++
     if (this.serverConfiguration.websocket.maxPingLostCount < this.pingCount) {
-      this.close(1000, 'PING_LOST')
+      this.close(1000, "PING_LOST")
     } else if (this.socket.readyState <= 1) {
       setTimeout(() =>
       {
         if (this.socket.readyState <= 1) {
-          this.socket.send(JSON.stringify({ type: 'ping' }))
+          this.socket.send(JSON.stringify({ type: "ping" }))
           this.infinitePing()
         }
       }, this.serverConfiguration.websocket.pingDelay)
@@ -74,7 +74,7 @@ export class WSRecognizer extends AbstractRecognizer
   {
     this.wsEvent.emitConnected()
     const params = {
-      type: this.sessionId ? 'restoreIInkSession' : 'newContentPackage',
+      type: this.sessionId ? "restoreIInkSession" : "newContentPackage",
       iinkSessionId: this.sessionId,
       applicationKey: this.serverConfiguration.applicationKey,
       xDpi: 96,
@@ -87,7 +87,7 @@ export class WSRecognizer extends AbstractRecognizer
 
   private closeCallback(evt: CloseEvent): void
   {
-    let message = ''
+    let message = ""
     if (!this.currentErrorCode) {
       switch (evt.code) {
         case 1000:
@@ -150,7 +150,7 @@ export class WSRecognizer extends AbstractRecognizer
     const hmacChallengeMessage = websocketMessage as TWebSocketHMACChallengeEvent
     if (hmacChallengeMessage.hmacChallenge) {
       this.send({
-        type: 'hmac',
+        type: "hmac",
         hmac: computeHmac(hmacChallengeMessage.hmacChallenge, this.serverConfiguration.applicationKey, this.serverConfiguration.hmacKey)
       })
     }
@@ -163,13 +163,13 @@ export class WSRecognizer extends AbstractRecognizer
   {
     this.reconnectionCount = 0
 
-    this.send({ ...this.recognitionConfiguration, type: 'configuration' })
+    this.send({ ...this.recognitionConfiguration, type: "configuration" })
 
     if (this.currentPartId) {
-      this.send({ type: 'openContentPart', id: this.currentPartId, mimeTypes: this.mimeTypes })
+      this.send({ type: "openContentPart", id: this.currentPartId, mimeTypes: this.mimeTypes })
     }
     else {
-      this.send({ type: 'newContentPart', contentType: this.recognitionConfiguration.type, mimeTypes: this.mimeTypes })
+      this.send({ type: "newContentPart", contentType: this.recognitionConfiguration.type, mimeTypes: this.mimeTypes })
     }
   }
 
@@ -203,7 +203,7 @@ export class WSRecognizer extends AbstractRecognizer
     const err = websocketMessage as TWebSocketErrorEvent
     this.currentErrorCode = err.data?.code || err.code
     let message = err.data?.message || err.message || ErrorConst.UNKNOW
-    if (this.currentErrorCode === 'access.not.granted') {
+    if (this.currentErrorCode === "access.not.granted") {
       message = ErrorConst.WRONG_CREDENTIALS
     }
     this.wsEvent.emitError(new Error(message))
@@ -213,38 +213,38 @@ export class WSRecognizer extends AbstractRecognizer
   {
     this.currentErrorCode = undefined
     const websocketMessage: TWebSocketEvent = JSON.parse(message.data)
-    if (websocketMessage.type !== 'pong') {
+    if (websocketMessage.type !== "pong") {
       this.pingCount = 0
       switch (websocketMessage.type) {
-        case 'ack':
+        case "ack":
           this.manageHMACChallengeMessage(websocketMessage)
           break
-        case 'contentPackageDescription':
+        case "contentPackageDescription":
           this.manageContentPackageDescriptionMessage()
           break
-        case 'partChanged':
+        case "partChanged":
           this.managePartChangeMessage(websocketMessage)
           break
-        case 'newPart':
+        case "newPart":
           this.wsEvent.emitConnectionActive()
           break
-        case 'contentChanged':
+        case "contentChanged":
           this.manageContentChangeMessage(websocketMessage)
           break
-        case 'exported':
+        case "exported":
           this.manageExportMessage(websocketMessage)
           break
-        case 'svgPatch':
+        case "svgPatch":
           this.manageSVGPatchMessage(websocketMessage)
           break
-        case 'error':
+        case "error":
           this.manageErrorMessage(websocketMessage)
           break
         // case 'supportedImportMimeTypes':
         //   recognizerContext.supportedImportMimeTypes = message.data.mimeTypes
         //   recognitionContext.response(undefined, message.data)
         //   break
-        case 'fileChunkAck':
+        case "fileChunkAck":
           this.#fileImportDeffered?.resolve((websocketMessage as unknown) as TExport)
           break
         //   case 'idle':
@@ -279,7 +279,7 @@ export class WSRecognizer extends AbstractRecognizer
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       const error = new Error(ErrorConst.CANT_ESTABLISH)
-      error.name = err.code || 'CANT_ESTABLISH'
+      error.name = err.code || "CANT_ESTABLISH"
       this.wsEvent.emitError(err)
     }
   }
@@ -288,7 +288,7 @@ export class WSRecognizer extends AbstractRecognizer
   {
     return this.serverConfiguration.websocket.autoReconnect &&
       this.reconnectionCount <= this.serverConfiguration.websocket.maxRetryCount &&
-      (!this.currentErrorCode || !['api.invalid.format', 'access.not.granted'].includes(this.currentErrorCode.toString()))
+      (!this.currentErrorCode || !["api.invalid.format", "access.not.granted"].includes(this.currentErrorCode.toString()))
   }
 
   addStrokes(model: IModel): void
@@ -298,7 +298,7 @@ export class WSRecognizer extends AbstractRecognizer
       return
     }
     this.send({
-      type: 'addStrokes',
+      type: "addStrokes",
       strokes: strokes.map((s: TStroke) =>
       {
         return {
@@ -318,10 +318,10 @@ export class WSRecognizer extends AbstractRecognizer
     if (this.socket.readyState === this.socket.OPEN) {
       this.socket.send(JSON.stringify(message))
     } else {
-      this.socket.removeEventListener('close', this.closeCallback)
+      this.socket.removeEventListener("close", this.closeCallback)
       // this.socket.removeEventListener('error', this.errorCallback)
-      this.socket.removeEventListener('message', this.messageCallback)
-      this.socket.removeEventListener('open', this.openCallback)
+      this.socket.removeEventListener("message", this.messageCallback)
+      this.socket.removeEventListener("open", this.openCallback)
       throw new Error(WSEventType.DISCONNECTED)
     }
   }
@@ -336,7 +336,7 @@ export class WSRecognizer extends AbstractRecognizer
   setPenStyle(penStyle: TPenStyle): void
   {
     const message: TWebSocketEvent = {
-      type: 'setPenStyle',
+      type: "setPenStyle",
       style: StyleHelper.penStyleToCSS(penStyle)
     }
     this.send(message)
@@ -345,7 +345,7 @@ export class WSRecognizer extends AbstractRecognizer
   setPenStyleClasses(penStyleClasses: string): void
   {
     const message: TWebSocketEvent = {
-      type: 'setPenStyleClasses',
+      type: "setPenStyleClasses",
       styleClasses: penStyleClasses
     }
     this.send(message)
@@ -354,7 +354,7 @@ export class WSRecognizer extends AbstractRecognizer
   setTheme(theme: TTheme)
   {
     const message: TWebSocketEvent = {
-      type: 'setTheme',
+      type: "setTheme",
       theme: StyleHelper.themeToCSS(theme)
     }
     this.send(message)
@@ -365,16 +365,16 @@ export class WSRecognizer extends AbstractRecognizer
     let mimeTypes: string[] = requestedMimeTypes || []
     if (!mimeTypes.length) {
       switch (this.recognitionConfiguration.type) {
-        case 'DIAGRAM':
+        case "DIAGRAM":
           mimeTypes = this.recognitionConfiguration.diagram.mimeTypes
           break
-        case 'MATH':
+        case "MATH":
           mimeTypes = this.recognitionConfiguration.math.mimeTypes
           break
-        case 'Raw Content':
-          mimeTypes = ['application/vnd.myscript.jiix']
+        case "Raw Content":
+          mimeTypes = ["application/vnd.myscript.jiix"]
           break
-        case 'TEXT':
+        case "TEXT":
           mimeTypes = this.recognitionConfiguration.text.mimeTypes
           break
         default:
@@ -384,11 +384,11 @@ export class WSRecognizer extends AbstractRecognizer
     }
 
     if (!mimeTypes.length) {
-      return Promise.reject(new Error('Export failed, no mimeTypes define in recognition configuration'))
+      return Promise.reject(new Error("Export failed, no mimeTypes define in recognition configuration"))
     }
 
     const message: TWebSocketEvent = {
-      type: 'export',
+      type: "export",
       partId: this.currentPartId,
       mimeTypes
     }
@@ -414,7 +414,7 @@ export class WSRecognizer extends AbstractRecognizer
     }
 
     const importFileMessage: TWebSocketEvent = {
-      type: 'importFile',
+      type: "importFile",
       importFileId,
       mimeType
     }
@@ -424,7 +424,7 @@ export class WSRecognizer extends AbstractRecognizer
       const blobPart = data.slice(i, chunkSize, data.type)
       const partFileString = await readBlob(blobPart)
       const fileChuckMessage: TWebSocketEvent = {
-        type: 'fileChunk',
+        type: "fileChunk",
         importFileId,
         data: partFileString,
         lastChunk: i + chunkSize > data.size
@@ -439,7 +439,7 @@ export class WSRecognizer extends AbstractRecognizer
     this.viewSizeHeight = model.height
     this.viewSizeWidth = model.width
     const message: TWebSocketEvent = {
-      type: 'changeViewSize',
+      type: "changeViewSize",
       height: this.viewSizeHeight,
       width: this.viewSizeWidth,
     }
@@ -450,7 +450,7 @@ export class WSRecognizer extends AbstractRecognizer
   convert(conversionState?: TConverstionState): void
   {
     const message: TWebSocketEvent = {
-      type: 'convert',
+      type: "convert",
       conversionState
     }
     this.send(message)
@@ -459,7 +459,7 @@ export class WSRecognizer extends AbstractRecognizer
   undo(): void
   {
     const message: TWebSocketEvent = {
-      type: 'undo',
+      type: "undo",
     }
     this.send(message)
   }
@@ -467,7 +467,7 @@ export class WSRecognizer extends AbstractRecognizer
   redo(): void
   {
     const message: TWebSocketEvent = {
-      type: 'redo',
+      type: "redo",
     }
     this.send(message)
   }
@@ -475,7 +475,7 @@ export class WSRecognizer extends AbstractRecognizer
   clear(): void
   {
     const message: TWebSocketEvent = {
-      type: 'clear',
+      type: "clear",
     }
     this.send(message)
   }

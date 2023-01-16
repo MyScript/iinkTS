@@ -9,10 +9,10 @@ export type TDiagramConvertConfiguration = {
 }
 
 export type TDiagramConfiguration = {
-  mimeTypes: ('application/vnd.myscript.jiix' | 'application/vnd.openxmlformats-officedocument.presentationml.presentation' | 'image/svg+xml')[]
-  'enable-sub-blocks'?: boolean
+  mimeTypes: ("application/vnd.myscript.jiix" | "application/vnd.openxmlformats-officedocument.presentationml.presentation" | "image/svg+xml")[]
+  "enable-sub-blocks"?: boolean
   text?: TTextConfConfiguration
   convert?: TDiagramConvertConfiguration
-  'session-time'?: number
+  "session-time"?: number
   eraser?: TEraserConfiguration
 }

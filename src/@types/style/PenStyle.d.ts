@@ -8,7 +8,7 @@
 export type TPenStyle = {
   color?: string
   width?: number
-  '-myscript-pen-width'?: number
-  '-myscript-pen-fill-style'?: string
-  '-myscript-pen-fill-color'?: string
+  "-myscript-pen-width"?: number
+  "-myscript-pen-fill-style"?: string
+  "-myscript-pen-fill-color"?: string
 }

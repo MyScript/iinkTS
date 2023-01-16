@@ -1,13 +1,13 @@
 
-import { TConfiguration, TConfigurationClient } from '../@types/Configuration'
-import { TEventConfiguration } from '../@types/configuration/EventConfiguration'
-import { TGrabberConfiguration } from '../@types/configuration/GrabberConfiguration'
-import { TRecognitionConfiguration } from '../@types/configuration/RecognitionConfiguration'
-import { TRenderingConfiguration } from '../@types/configuration/RenderingConfiguration'
-import { TServerConfiguration } from '../@types/configuration/ServerConfiguration'
-import { TTriggerConfiguration } from '../@types/configuration/TriggerConfiguration'
-import { TUndoRedoConfiguration } from '../@types/configuration/UndoRedoConfiguration'
-import { DefaultConfiguration } from './DefaultConfiguration'
+import { TConfiguration, TConfigurationClient } from "../@types/Configuration"
+import { TEventConfiguration } from "../@types/configuration/EventConfiguration"
+import { TGrabberConfiguration } from "../@types/configuration/GrabberConfiguration"
+import { TRecognitionConfiguration } from "../@types/configuration/RecognitionConfiguration"
+import { TRenderingConfiguration } from "../@types/configuration/RenderingConfiguration"
+import { TServerConfiguration } from "../@types/configuration/ServerConfiguration"
+import { TTriggerConfiguration } from "../@types/configuration/TriggerConfiguration"
+import { TUndoRedoConfiguration } from "../@types/configuration/UndoRedoConfiguration"
+import { DefaultConfiguration } from "./DefaultConfiguration"
 
 export class Configuration implements TConfiguration
 {
@@ -17,7 +17,7 @@ export class Configuration implements TConfiguration
   rendering: TRenderingConfiguration
   server: TServerConfiguration
   triggers: TTriggerConfiguration
-  'undo-redo': TUndoRedoConfiguration
+  "undo-redo": TUndoRedoConfiguration
 
   constructor(configuration?: TConfigurationClient)
   {
@@ -37,7 +37,7 @@ export class Configuration implements TConfiguration
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const isObject = (item: any) =>
     {
-      return (item && typeof item === 'object' && !Array.isArray(item))
+      return (item && typeof item === "object" && !Array.isArray(item))
     }
     if (!sources.length) return target
     const source = sources.shift()
@@ -67,35 +67,35 @@ export class Configuration implements TConfiguration
     this.rendering = this.mergeDeep({}, defaultConf.rendering, configuration?.rendering)
     this.server = this.mergeDeep({}, defaultConf.server, configuration?.server)
     this.triggers = this.mergeDeep({}, defaultConf.triggers, configuration?.triggers)
-    this['undo-redo'] = this.mergeDeep({}, defaultConf['undo-redo'], configuration?.['undo-redo'])
+    this["undo-redo"] = this.mergeDeep({}, defaultConf["undo-redo"], configuration?.["undo-redo"])
 
     this.recognition.text.mimeTypes = configuration?.recognition?.text?.mimeTypes || defaultConf.recognition.text.mimeTypes
     this.recognition.math.mimeTypes = configuration?.recognition?.math?.mimeTypes || defaultConf.recognition.math.mimeTypes
     this.recognition.diagram.mimeTypes = configuration?.recognition?.diagram?.mimeTypes || defaultConf.recognition.diagram.mimeTypes
 
     if (this.server?.useWindowLocation) {
-      this.server.scheme = window.location.protocol.indexOf('s') > -1 ? 'https' : 'http'
+      this.server.scheme = window.location.protocol.indexOf("s") > -1 ? "https" : "http"
       this.server.host = window.location.host
     }
 
     if (
-      this.server.protocol === 'REST' &&
-      this.triggers.exportContent === 'POINTER_UP'
+      this.server.protocol === "REST" &&
+      this.triggers.exportContent === "POINTER_UP"
     ) {
-      this.triggers.exportContent = 'QUIET_PERIOD'
+      this.triggers.exportContent = "QUIET_PERIOD"
       this.triggers.exportContentDelay = Math.max(this.triggers.exportContentDelay, 50)
     }
 
     if (
-      this.server.protocol === 'WEBSOCKET' &&
-      this.recognition.type === 'TEXT'
+      this.server.protocol === "WEBSOCKET" &&
+      this.recognition.type === "TEXT"
     ) {
       if (
         this.rendering.smartGuide.enable &&
-        !this.recognition.text.mimeTypes.includes('application/vnd.myscript.jiix')
+        !this.recognition.text.mimeTypes.includes("application/vnd.myscript.jiix")
       ) {
         // mimeType required for smartGuide
-        this.recognition.text.mimeTypes.push('application/vnd.myscript.jiix')
+        this.recognition.text.mimeTypes.push("application/vnd.myscript.jiix")
       }
     } else {
       // smartGuide enable only on websocket text

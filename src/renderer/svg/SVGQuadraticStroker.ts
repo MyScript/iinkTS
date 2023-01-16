@@ -12,7 +12,7 @@ export class SVGQuadraticStroker
       `m ${-radius},0`,
       `a ${radius},${radius} 0 1 0 ${radius * 2},0`,
       `a ${radius},${radius} 0 1 0 ${-(radius * 2)},0`
-    ].join(' ')
+    ].join(" ")
     return svgPath
   }
 
@@ -25,7 +25,7 @@ export class SVGQuadraticStroker
       `L ${linkPoints2[0].x},${linkPoints2[0].y}`,
       `L ${linkPoints2[1].x},${linkPoints2[1].y}`,
       `L ${linkPoints1[1].x},${linkPoints1[1].y}`
-    ].join(' ')
+    ].join(" ")
     return svgPath
   }
 
@@ -39,7 +39,7 @@ export class SVGQuadraticStroker
       const newAngle = angle - (i * (Math.PI / ARCSPLIT))
       parts.push(`L ${end.x - (end.p * width * Math.sin(newAngle))},${end.y + (end.p * width * Math.cos(newAngle))}`)
     }
-    const svgPath = parts.join(' ')
+    const svgPath = parts.join(" ")
     return svgPath
   }
 
@@ -53,7 +53,7 @@ export class SVGQuadraticStroker
       `Q ${linkPoints3[0].x},${linkPoints3[0].y} ${linkPoints2[0].x},${linkPoints2[0].y}`,
       `L ${linkPoints2[1].x},${linkPoints2[1].y}`,
       `Q ${linkPoints3[1].x},${linkPoints3[1].y} ${linkPoints1[1].x},${linkPoints1[1].y}`
-    ].join(' ')
+    ].join(" ")
     return svgPath
   }
 
@@ -92,31 +92,31 @@ export class SVGQuadraticStroker
       parts.push(this.getLinePath(computeMiddlePoint(beforeLastPoint, lastPoint), lastPoint, STROKE_WIDTH))
       parts.push(this.getFinalPath(beforeLastPoint, lastPoint, STROKE_WIDTH))
     }
-    return parts.join(' ')
+    return parts.join(" ")
   }
 
   drawStroke(svgElement: SVGElement, stroke: TStroke): void
   {
     const svgPath = this.buildSVGPath(stroke)
-    const svgStroke = document.createElementNS("http://www.w3.org/2000/svg", 'path')
-    svgStroke.classList.add('pending-stroke')
-    svgStroke.setAttribute('id', stroke.id as string)
-    svgStroke.setAttribute('color', stroke.color as string)
+    const svgStroke = document.createElementNS("http://www.w3.org/2000/svg", "path")
+    svgStroke.classList.add("pending-stroke")
+    svgStroke.setAttribute("id", stroke.id as string)
+    svgStroke.setAttribute("color", stroke.color as string)
     const style = `fill:${stroke.color};stroke:transparent;`
-    svgStroke.setAttribute('style', style)
-    svgStroke.setAttribute('d', `${svgPath}Z`)
+    svgStroke.setAttribute("style", style)
+    svgStroke.setAttribute("d", `${svgPath}Z`)
     svgElement.appendChild(svgStroke)
   }
 
   drawErasingStroke (svgElement: SVGElement, stroke: TStroke) {
     stroke.width = 20
     const svgPath = this.buildSVGPath(stroke)
-    const svgStroke = document.createElementNS("http://www.w3.org/2000/svg", 'path')
-    svgStroke.classList.add('erasing-stroke')
-    svgStroke.setAttribute('id', stroke.id as string)
-    const style = 'fill:grey;stroke:transparent;shadowBlur:5;opacity:0.2;'
-    svgStroke.setAttribute('style', style)
-    svgStroke.setAttribute('d', `${svgPath}Z`)
+    const svgStroke = document.createElementNS("http://www.w3.org/2000/svg", "path")
+    svgStroke.classList.add("erasing-stroke")
+    svgStroke.setAttribute("id", stroke.id as string)
+    const style = "fill:grey;stroke:transparent;shadowBlur:5;opacity:0.2;"
+    svgStroke.setAttribute("style", style)
+    svgStroke.setAttribute("d", `${svgPath}Z`)
     svgElement.appendChild(svgStroke)
   }
 }
