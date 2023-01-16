@@ -16,18 +16,40 @@ export type TJIIXExport = {
   words: TWordExport[]
 }
 
+/**
+ * List all supported MIME types for export.
+ * Attention, the MIME types supported depend on the {@link TRecognitionType | type of recognition}
+ */
 export type TExport = {
-  // // TEXT | Raw Content
-  "application/vnd.myscript.jiix"?: TJIIXExport
-  // // TEXT
-  "text/plain"? : string
-  // // MATH
-  "application/x-latex"?: string
-  "application/mathml+xml"?: string
-  // // DIAGRAM
-  "image/svg+xml"?: string
-  "application/vnd.openxmlformats-officedocument.presentationml.presentation"?: Blob
+  /** @hidden */
   [key: string]: TJIIXExport | string | Blob
+  /**
+   * vnd.myscript.jiix is used for text and raw-content exports
+   */
+  "application/vnd.myscript.jiix"?: TJIIXExport
+  /**
+   * text/plain is only use for text export
+   */
+  "text/plain"? : string
+  /**
+   * x-latex is only use for math export
+   * @see {@link https://katex.org/docs/browser.html | katex} to render
+   */
+  "application/x-latex"?: string
+  /**
+   * mathml+xml is only use for math export
+   * @see {@link https://www.w3.org/Math/whatIsMathML.html | Mathematical Markup Language}
+   */
+  "application/mathml+xml"?: string
+  /**
+   * svg+xml is only use for diagram export
+   */
+  "image/svg+xml"?: string
+  /**
+   * vnd.openxmlformats-officedocument.presentationml.presentation is only use for diagram export
+   * @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Blob | Blob}
+   */
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation"?: Blob
 }
 
 export interface IModel

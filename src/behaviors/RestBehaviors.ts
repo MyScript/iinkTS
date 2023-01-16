@@ -17,7 +17,7 @@ export class RestBehaviors implements IBehaviors
   renderer: CanvasRenderer
   recognizer: RestRecognizer
   undoRedoManager: UndoRedoManager
-  initalise: DeferredPromise<void | Error>
+  initialized: DeferredPromise<void | Error>
 
   #triggerConfiguration: TTriggerConfiguration
   #resizeTimer?: ReturnType<typeof setTimeout>
@@ -31,7 +31,7 @@ export class RestBehaviors implements IBehaviors
     this.undoRedoManager = new UndoRedoManager(configuration["undo-redo"], model.getClone())
 
     this.#triggerConfiguration = configuration.triggers
-    this.initalise = new DeferredPromise<void | Error>()
+    this.initialized = new DeferredPromise<void | Error>()
   }
 
   get globalEvent(): GlobalEvent
@@ -50,8 +50,8 @@ export class RestBehaviors implements IBehaviors
   {
     this.grabber.attach(domElement)
     this.renderer.init(domElement)
-    this.initalise.resolve()
-    return this.initalise.promise
+    this.initialized.resolve()
+    return this.initialized.promise
   }
 
   drawCurrentStroke(model: IModel): void

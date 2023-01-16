@@ -34,11 +34,9 @@
     "jest-websocket-mock",
     "jest-playwright-preset",
     "expect-playwright",
-    "src/@types"
   ],
   "include": [
-    "src/**/*",
-    "test/unit/**/*"
+    "src/**/*"
   ],
   "exclude": [
     "node_modules",

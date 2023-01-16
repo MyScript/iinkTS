@@ -1,11 +1,6 @@
 import { TConfigurationClient } from "./@types/Configuration"
 
-/**
- * Return the list of available recognition languages
- * @param {Configuration} [configuration] Configuration to get the languages
- * @return {JSON} A list of available languages
- */
- export async function getAvailableLanguageList(configuration?: TConfigurationClient): Promise<Array<Record<string, string>> | never>
+export async function getAvailableLanguageList(configuration: TConfigurationClient): Promise<Array<Record<string, string>> | never>
  {
    if (configuration?.server?.scheme && configuration?.server?.host) {
      const serverConfig = configuration.server

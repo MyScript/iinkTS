@@ -1,0 +1,45 @@
+{
+  "entryPoints": [
+    "src/iink.ts"
+  ],
+  "includes": "src",
+  "exclude": [
+    "config",
+    "coverage",
+    "dist",
+    "docker",
+    "docs",
+    "examples",
+    "test",
+    "node_modules"
+  ],
+  "excludeTags": [
+    "@override",
+    "@virtual",
+    "@privateRemarks",
+    "@hidden",
+    "@internal"
+  ],
+  "plugin": [
+    "typedoc-plugin-missing-exports",
+    "./plugins/typdoc-default-object.ts"
+  ],
+  "sort": [
+    "alphabetical",
+  ],
+  "excludeExternals": true,
+  "readme": "README.md",
+  "includeVersion": true,
+  "disableSources": false,
+  "githubPages": true,
+  "cleanOutputDir": true,
+  "categorizeByGroup": true,
+  "visibilityFilters": {
+    "protected": false,
+    "private": false,
+    "inherited": true,
+    "external": false,
+    "@alpha": false,
+    "@beta": false
+  }
+}
