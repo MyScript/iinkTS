@@ -22,7 +22,7 @@ export class WSBehaviors implements IBehaviors
   renderer: SVGRenderer
   recognizer: WSRecognizer
   undoRedoManager: UndoRedoManager
-  initalise: DeferredPromise<void>
+  initialized: DeferredPromise<void>
 
   #triggerConfiguration: TTriggerConfiguration
   #exportTimer?: ReturnType<typeof setTimeout>
@@ -43,7 +43,7 @@ export class WSBehaviors implements IBehaviors
     this.recognizer = new WSRecognizer(configuration.server, configuration.recognition)
     this.undoRedoManager = new UndoRedoManager(configuration["undo-redo"], model.getClone())
     this.#triggerConfiguration = configuration.triggers
-    this.initalise = new DeferredPromise<void>()
+    this.initialized = new DeferredPromise<void>()
   }
 
   get globalEvent(): GlobalEvent
@@ -66,12 +66,12 @@ export class WSBehaviors implements IBehaviors
     this.recognizer.wsEvent.addDisconnectedListener(this.onDisconnected)
     this.recognizer.wsEvent.addErrorListener(this.onError)
 
-    return this.initalise.promise
+    return this.initialized.promise
   }
 
   private onConnectionActive = () =>
   {
-    this.initalise.resolve()
+    this.initialized.resolve()
   }
 
   // private onPartChange = (evt: TWebSocketPartChangeEvent) =>
@@ -103,8 +103,8 @@ export class WSBehaviors implements IBehaviors
 
   private onError = (err: Error) =>
   {
-    if (this.initalise.isPending) {
-      this.initalise.reject(err)
+    if (this.initialized.isPending) {
+      this.initialized.reject(err)
     }
     this.globalEvent.emitError(err)
   }
@@ -127,11 +127,11 @@ export class WSBehaviors implements IBehaviors
   {
     const err = new Error(event.reason)
     err.name = event.code.toString()
-    if (this.initalise.isPending) {
+    if (this.initialized.isPending) {
       if (event.code === 1000) {
-        this.initalise.resolve()
+        this.initialized.resolve()
       } else {
-        this.initalise.reject(err)
+        this.initialized.reject(err)
       }
     }
     if (this.#addStrokeDeffered?.isPending) {
@@ -186,7 +186,7 @@ export class WSBehaviors implements IBehaviors
 
   async updateModelRendering(model: IModel): Promise<IModel | never>
   {
-    await this.initalise.promise
+    await this.initialized.promise
     model.updatePositionSent()
     this.undoRedoManager.addModelToStack(model)
     this.#addStrokeDeffered = new DeferredPromise<TExport>()
@@ -207,7 +207,7 @@ export class WSBehaviors implements IBehaviors
 
   async export(model: IModel, mimeTypes?: string[]): Promise<IModel | never>
   {
-    await this.initalise.promise
+    await this.initialized.promise
     this.undoRedoManager.addModelToStack(model)
     this.#exportDeffered = new DeferredPromise<TExport>()
     await this.recognizer.export(model, mimeTypes)
@@ -228,7 +228,7 @@ export class WSBehaviors implements IBehaviors
 
   async convert(model: IModel, conversionState?: TConverstionState): Promise<IModel | never>
   {
-    await this.initalise.promise
+    await this.initialized.promise
     this.undoRedoManager.addModelToStack(model)
     this.#convertDeffered = new DeferredPromise<TExport>()
     this.recognizer.convert(conversionState)
@@ -247,7 +247,7 @@ export class WSBehaviors implements IBehaviors
 
   async import(model: IModel, data: Blob, mimeType?: string): Promise<IModel | never>
   {
-    await this.initalise.promise
+    await this.initialized.promise
     this.undoRedoManager.addModelToStack(model)
     this.#importDeffered = new DeferredPromise<TExport>()
     this.recognizer.import(data, mimeType)
@@ -266,7 +266,7 @@ export class WSBehaviors implements IBehaviors
 
   async resize(model: IModel): Promise<IModel>
   {
-    await this.initalise.promise
+    await this.initialized.promise
     this.renderer.resize(model)
     this.#resizeDeffered = new DeferredPromise<void>()
     clearTimeout(this.#resizeTimer)
@@ -281,7 +281,7 @@ export class WSBehaviors implements IBehaviors
 
   async undo(): Promise<IModel>
   {
-    await this.initalise.promise
+    await this.initialized.promise
     this.#undoDeffered = new DeferredPromise<void>()
     this.recognizer.undo()
     await this.#undoDeffered.promise
@@ -291,7 +291,7 @@ export class WSBehaviors implements IBehaviors
 
   async redo(): Promise<IModel>
   {
-    await this.initalise.promise
+    await this.initialized.promise
     this.#redoDeffered = new DeferredPromise<void>()
     this.recognizer.redo()
     await this.#redoDeffered.promise
@@ -301,7 +301,7 @@ export class WSBehaviors implements IBehaviors
 
   async clear(model: IModel): Promise<IModel>
   {
-    await this.initalise.promise
+    await this.initialized.promise
     this.#clearDeffered = new DeferredPromise<void>()
     this.recognizer.clear()
     const myModel = model.getClone()

@@ -1,10 +1,13 @@
-import { TConfiguration, TConfigurationClient } from "./@types/Configuration"
 import { TEditorOptions } from "./@types/Editor"
+import { TConfiguration, TConfigurationClient } from "./@types/Configuration"
 import { IGrabber } from "./@types/grabber/Grabber"
 import { IModel, TExport, TJIIXExport } from "./@types/model/Model"
 import { TPoint } from "./@types/renderer/Point"
 import { TPenStyle } from "./@types/style/PenStyle"
 import { TTheme } from "./@types/style/Theme"
+import { IBehaviors } from "./@types/Behaviors"
+import { TConverstionState } from "./@types/configuration/RecognitionConfiguration"
+import { TMarginConfiguration } from "./@types/configuration/recognition/MarginConfiguration"
 
 import { EventType } from "./Constants"
 import { BehaviorsManager } from "./behaviors/BehaviorsManager"
@@ -13,19 +16,17 @@ import { GlobalEvent } from "./event/GlobalEvent"
 import { Model } from "./model/Model"
 import { StyleManager } from "./style/StyleManager"
 import { SmartGuide } from "./smartguide/SmartGuide"
+import { DeferredPromise } from "./utils/DeferredPromise"
 
 import "./iink.css"
-import { IBehaviors } from "./@types/Behaviors"
-import { TConverstionState } from "./@types/configuration/RecognitionConfiguration"
-import { TMarginConfiguration } from "./@types/configuration/recognition/MarginConfiguration"
-import { DeferredPromise } from "./utils/DeferredPromise"
 
 export enum EditorMode
 {
-  Mouse = "mouse",
-  Pen = "pen",
-  Touche = "touch",
-  Eraser = "eraser"
+  Writing = "writing",
+  /**
+   * @remarks Only available on WEBSOCKET
+   */
+  Erasing = "erasing"
 }
 
 export type HTMLEditorElement = HTMLElement &
@@ -66,7 +67,7 @@ export class Editor
     this.#messageHTML.style.display = "none"
     this.wrapperHTML.appendChild(this.#messageHTML)
 
-    this.#mode = EditorMode.Pen
+    this.#mode = EditorMode.Writing
 
     this.#styleManager = new StyleManager(options?.penStyle, options?.theme)
     this.#localPenStyle = this.#styleManager.penStyle
@@ -114,6 +115,24 @@ export class Editor
   get mode(): EditorMode
   {
     return this.#mode
+  }
+
+  /**
+   * @remarks Only available in WEBSOCKET
+   */
+  set mode(m: EditorMode)
+  {
+    if (this.#configuration.server.protocol === "WEBSOCKET") {
+      this.#mode = m
+      if (this.#mode === EditorMode.Erasing) {
+        this.wrapperHTML.classList.add("erasing")
+      } else {
+        document.body.style.cursor = "initial"
+        this.wrapperHTML.classList.remove("erasing")
+      }
+    } else {
+      throw new Error("set Editor.mode only available in WEBSOCKET")
+    }
   }
 
   get events(): GlobalEvent
@@ -311,8 +330,8 @@ export class Editor
     const pointerDownOnEditor = target?.id === this.wrapperHTML.id || target?.classList?.contains("ms-canvas")
     if (pointerDownOnEditor) {
       let { pointerType } = evt
-      if (this.#mode === EditorMode.Eraser) {
-        pointerType = EditorMode.Eraser
+      if (this.#mode === EditorMode.Erasing) {
+        pointerType = "eraser"
       }
       const style: TPenStyle = Object.assign({}, this.theme?.ink, this.#localPenStyle)
       this.model.initCurrentStroke(point, evt.pointerId, pointerType, style)
@@ -332,17 +351,6 @@ export class Editor
     this.#behaviors.updateModelRendering(this.model)
       .then(model => this.model = model)
       .catch(error => this.#showError(error as Error))
-  }
-
-  setMode(mode: EditorMode): void
-  {
-    this.#mode = mode
-    if (this.#mode === EditorMode.Eraser) {
-      this.wrapperHTML.classList.add("erasing")
-    } else {
-      document.body.style.cursor = "initial"
-      this.wrapperHTML.classList.remove("erasing")
-    }
   }
 
   async undo(): Promise<IModel>
@@ -374,7 +382,7 @@ export class Editor
     return this.model
   }
 
-  async export(mimeTypes: string[]): Promise<IModel>
+  async export(mimeTypes?: string[]): Promise<IModel>
   {
     this.model = await this.#behaviors.export(this.model, mimeTypes)
     return this.model

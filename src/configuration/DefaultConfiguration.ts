@@ -49,7 +49,7 @@ export const DefaultRecognitionConfiguration: TRecognitionConfiguration = {
     }
   },
   math: {
-    mimeTypes: ["application/x-latex"], // 'application/mathml+xml', 'application/vnd.myscript.jiix',
+    mimeTypes: ["application/x-latex"], // "application/mathml+xml", "application/vnd.myscript.jiix",
     solver: {
       enable: true,
       "fractional-part-digits": 3,
@@ -74,7 +74,7 @@ export const DefaultRecognitionConfiguration: TRecognitionConfiguration = {
     guides: {
       enable: true
     },
-    mimeTypes: ["application/vnd.myscript.jiix"], // 'text/plain'
+    mimeTypes: ["application/vnd.myscript.jiix"], // "text/plain"
     margin: {
       top: 20,
       left: 10,
@@ -86,7 +86,7 @@ export const DefaultRecognitionConfiguration: TRecognitionConfiguration = {
     }
   },
   diagram: {
-    mimeTypes: ["application/vnd.myscript.jiix"], // 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+    mimeTypes: ["application/vnd.myscript.jiix"], // "application/vnd.openxmlformats-officedocument.presentationml.presentation"
     eraser: {
       "erase-precisely": false
     }
@@ -145,4 +145,4 @@ export const DefaultConfiguration: TConfiguration = {
   triggers: DefaultTriggerConfiguration,
   events: DefaultEventsConfiguration,
   "undo-redo": DefaultUndoRedoConfiguration
-} as const
+}

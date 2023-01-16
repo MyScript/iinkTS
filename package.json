@@ -28,8 +28,9 @@
     "lint:fix": "eslint ./src --ext .ts --fix",
     "test:unit": "jest --config=jest.unit.config.js --detectOpenHandles --forceExit",
     "test:integration": "jest --config=jest.integration.config.js --runInBand --detectOpenHandles --forceExit",
+    "build:docs": "typedoc",
     "build:lib": "rollup -c config/rollup.config.build.js --sourcemap",
-    "build": "npm-run-all lint:fix test:unit build:lib",
+    "build": "npm-run-all lint:fix test:unit build:lib build:docs",
     "dev": "rollup -c config/rollup.config.dev.js -w --sourcemap"
   },
   "dependencies": {
@@ -68,6 +69,12 @@
     "ts-jest": "^29.0.3",
     "ts-node": "^10.9.1",
     "tslib": "^2.4.0",
+    "typedoc": "^0.23.24",
+    "typedoc-plugin-missing-exports": "^1.0.0",
     "typescript": "^4.7.4"
+  },
+  "resolutions": {
+    "**/loader-utils": "3.2.1",
+    "**/json5": "2.2.2"
   }
 }
