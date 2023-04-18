@@ -561,7 +561,7 @@ declare enum EditorMode {
      */
     Erasing = "erasing"
 }
-declare type HTMLEditorElement = HTMLElement & {
+type HTMLEditorElement = HTMLElement & {
     editor: Editor;
 };
 declare class Editor {
