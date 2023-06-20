@@ -135,6 +135,8 @@
               <input id="server-applicationKey" name="server-applicationKey" />
               <label for="server-hmacKey">HMAC key:</label>
               <input id="server-hmacKey" name="server-hmacKey" />
+              <label for="server-version">Version:</label>
+              <input id="server-version" name="server-version">
             </div>
           </div>
           <div class="card">
@@ -236,6 +238,7 @@
       const recognitionGuidesElement = document.getElementById('recognition-guides');
       const recognitionGestureElement = document.getElementById('recognition-gesture');
       const recognitionMimeTypesElement = document.getElementById('mime-types');
+      const serverVersionElement = document.getElementById('server-version');
 
       const renderingSmartGuideElement = document.getElementById('rendering-smartGuide');
       const triggersExportContentElement = document.getElementById('triggers-exportContent');
@@ -250,9 +253,10 @@
         server: {
           protocol: 'WEBSOCKET',
           scheme: 'https',
-          host: 'webdemoapi.myscript.com',
-          applicationKey: '515131ab-35fa-411c-bb4d-3917e00faf60',
-          hmacKey: '54b2ca8a-6752-469d-87dd-553bb450e9ad',
+          host: 'cloud.myscript.com',
+          applicationKey: '80a7f78d-939c-48e0-84a8-7794d6fbf624',
+          hmacKey: 'df2ba19a-7703-4ab4-9164-00dd33357745',
+          version: '2.1.0'
         },
         recognition: {
           type: 'TEXT',
@@ -349,6 +353,7 @@
         serverHostlElement.value = defaultConfiguration.server.host;
         serverApplicationKeyElement.value = defaultConfiguration.server.applicationKey;
         serverHMACKeyElement.value = defaultConfiguration.server.hmacKey;
+        serverVersionElement.value = defaultConfiguration.server.version
 
         recognitionTypeElement.value = defaultConfiguration.recognition.type;
         recognitionLanguageElement.value = defaultConfiguration.recognition.lang;
@@ -450,6 +455,7 @@
             host: serverHostlElement.value,
             applicationKey: serverApplicationKeyElement.value,
             hmacKey: serverHMACKeyElement.value,
+            version: serverVersionElement.value,
           },
           recognition: {
             type: recognitionTypeElement.value,

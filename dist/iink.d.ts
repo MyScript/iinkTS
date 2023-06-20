@@ -454,6 +454,7 @@ type TServerConfiguration = {
   host: string
   applicationKey: string
   hmacKey: string
+  version: string
   useWindowLocation?: boolean
   websocket: {
     pingEnabled: boolean
@@ -471,6 +472,7 @@ type TServerConfigurationClient = {
   host?: string
   applicationKey?: string
   hmacKey?: string
+  version?: string
   useWindowLocation?: boolean
   websocket?: {
     pingEnabled?: boolean

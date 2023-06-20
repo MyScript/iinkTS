@@ -22,15 +22,20 @@ describe('Rest Math', () => {
   })
 
   test('should display katex-html into result', async () => {
-    const [exportedDatas] = await Promise.all([
+    await Promise.all([
       getExportedDatas(page),
       write(page, equation1.strokes),
     ])
+    //TODO remove this
+    await page.waitForTimeout(1500)
+
+    const editor = await getEditor(page)
+
     const resultElement = page.locator('#result')
     const htmlKatexResult = await resultElement
       .locator('.katex-html')
       .textContent()
-    expect(htmlKatexResult).toStrictEqual(exportedDatas['application/x-latex'])
+    expect(htmlKatexResult).toStrictEqual(editor.model.exports['application/x-latex'])
     expect(htmlKatexResult).toStrictEqual(equation1.exports.LATEX.at(-1))
   })
 
@@ -114,9 +119,7 @@ describe('Rest Math', () => {
         getExportedDatas(page),
         write(page, one.strokes),
       ])
-      expect(exportedDatas['application/x-latex']).toStrictEqual(
-        one.exports.LATEX.at(-1)
-      )
+      expect(exportedDatas['application/x-latex']).toStrictEqual(one.exports.LATEX.at(-1))
 
       const promisesResult = await Promise.all([
         getExportedDatas(page),

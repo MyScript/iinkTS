@@ -11,6 +11,7 @@ import StyleHelper from "../style/StyleHelper"
 import { DeferredPromise } from "../utils/DeferredPromise"
 import { TPenStyle } from "../@types/style/PenStyle"
 import { TTheme } from "../@types/style/Theme"
+import { isVersionSuperiorOrEqual } from "../utils/versionHelper"
 
 export class WSRecognizer extends AbstractRecognizer
 {
@@ -36,7 +37,7 @@ export class WSRecognizer extends AbstractRecognizer
   get url()
   {
     const scheme = (this.serverConfiguration.scheme === "https") ? "wss" : "ws"
-    return `${ scheme }://${ this.serverConfiguration.host }/api/v4.0/iink/document`
+    return `${ scheme }://${ this.serverConfiguration.host }/api/v4.0/iink/document?applicationKey=${this.serverConfiguration.applicationKey}`
   }
 
   get mimeTypes(): string[]
@@ -49,7 +50,7 @@ export class WSRecognizer extends AbstractRecognizer
       case "diagram":
         return this.recognitionConfiguration.diagram.mimeTypes
       default:
-        //'raw-content'
+        //"raw-content"
         return []
     }
   }
@@ -73,7 +74,7 @@ export class WSRecognizer extends AbstractRecognizer
   private openCallback(): void
   {
     this.wsEvent.emitConnected()
-    const params = {
+    const params: TWebSocketEvent = {
       type: this.sessionId ? "restoreIInkSession" : "newContentPackage",
       iinkSessionId: this.sessionId,
       applicationKey: this.serverConfiguration.applicationKey,
@@ -81,6 +82,10 @@ export class WSRecognizer extends AbstractRecognizer
       yDpi: 96,
       viewSizeHeight: this.viewSizeHeight,
       viewSizeWidth: this.viewSizeWidth
+    }
+    if (isVersionSuperiorOrEqual(this.serverConfiguration.version, "2.0.4")) {
+      params["myscript-client-name"] = "__packageName__"
+      params["myscript-client-version"] = "__buildVersion__"
     }
     this.send(params)
   }
@@ -240,19 +245,19 @@ export class WSRecognizer extends AbstractRecognizer
         case "error":
           this.manageErrorMessage(websocketMessage)
           break
-        // case 'supportedImportMimeTypes':
+        // case "supportedImportMimeTypes":
         //   recognizerContext.supportedImportMimeTypes = message.data.mimeTypes
         //   recognitionContext.response(undefined, message.data)
         //   break
         case "fileChunkAck":
           this.#fileImportDeffered?.resolve((websocketMessage as unknown) as TExport)
           break
-        //   case 'idle':
+        //   case "idle":
         //     recognizerContext.idle = true
         //     recognitionContext.patch(undefined, message.data)
         //     break
         //   default :
-        //     logger.warn('This is something unexpected in current recognizer. Not the type of message we should have here.', message)
+        //     logger.warn("This is something unexpected in current recognizer. Not the type of message we should have here.", message)
       }
     }
   }
@@ -319,7 +324,7 @@ export class WSRecognizer extends AbstractRecognizer
       this.socket.send(JSON.stringify(message))
     } else {
       this.socket.removeEventListener("close", this.closeCallback)
-      // this.socket.removeEventListener('error', this.errorCallback)
+      // this.socket.removeEventListener("error", this.errorCallback)
       this.socket.removeEventListener("message", this.messageCallback)
       this.socket.removeEventListener("open", this.openCallback)
       throw new Error(WSEventType.DISCONNECTED)

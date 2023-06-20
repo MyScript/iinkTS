@@ -4,9 +4,9 @@ export const ConfigurationTextWebsocket: TConfigurationClient = {
   server: {
     protocol: 'WEBSOCKET',
     scheme: 'http',
-    host: 'webdemoapi.myscript.com',
-    applicationKey: '515131ab-35fa-411c-bb4d-3917e00faf60',
-    hmacKey: '54b2ca8a-6752-469d-87dd-553bb450e9ad'
+    host: 'cloud.myscript.com',
+    applicationKey: '80a7f78d-939c-48e0-84a8-7794d6fbf624',
+    hmacKey: 'df2ba19a-7703-4ab4-9164-00dd33357745'
   },
   recognition: {
     type: 'TEXT',
@@ -20,9 +20,9 @@ export const ConfigurationTextRest: TConfigurationClient = {
   server: {
     protocol: 'REST',
     scheme: 'http',
-    host: 'webdemoapi.myscript.com',
-    applicationKey: '515131ab-35fa-411c-bb4d-3917e00faf60',
-    hmacKey: '54b2ca8a-6752-469d-87dd-553bb450e9ad'
+    host: 'cloud.myscript.com',
+    applicationKey: '80a7f78d-939c-48e0-84a8-7794d6fbf624',
+    hmacKey: 'df2ba19a-7703-4ab4-9164-00dd33357745'
   },
   recognition: {
     type: 'TEXT',
@@ -36,9 +36,9 @@ export const ConfigurationDiagramRest: TConfigurationClient = {
   server: {
     protocol: 'REST',
     scheme: 'http',
-    host: 'webdemoapi.myscript.com',
-    applicationKey: '515131ab-35fa-411c-bb4d-3917e00faf60',
-    hmacKey: '54b2ca8a-6752-469d-87dd-553bb450e9ad'
+    host: 'cloud.myscript.com',
+    applicationKey: '80a7f78d-939c-48e0-84a8-7794d6fbf624',
+    hmacKey: 'df2ba19a-7703-4ab4-9164-00dd33357745'
   },
   recognition: {
     type: 'DIAGRAM',
@@ -52,9 +52,9 @@ export const ConfigurationRawContentRest: TConfigurationClient = {
   server: {
     protocol: 'REST',
     scheme: 'http',
-    host: 'webdemoapi.myscript.com',
-    applicationKey: '515131ab-35fa-411c-bb4d-3917e00faf60',
-    hmacKey: '54b2ca8a-6752-469d-87dd-553bb450e9ad'
+    host: 'cloud.myscript.com',
+    applicationKey: '80a7f78d-939c-48e0-84a8-7794d6fbf624',
+    hmacKey: 'df2ba19a-7703-4ab4-9164-00dd33357745'
   },
   recognition: {
     type: 'Raw Content',
@@ -68,6 +68,7 @@ export const AllOverrideConfiguration: TConfigurationClient = {
     host: 'host',
     applicationKey: 'applicationKey',
     hmacKey: 'hmacKey',
+    version: '2.0.4',
     useWindowLocation: false,
     websocket: {
       pingEnabled: false,

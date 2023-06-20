@@ -42,8 +42,10 @@ describe('Nav actions', () => {
       write(page, hello.strokes),
     ])
 
-    let resultElement = page.locator('#result')
+    //TODO remove this
+    await page.waitForTimeout(1500)
 
+    let resultElement = page.locator('#result')
     resultText = await resultElement.textContent()
     expect(resultText).toStrictEqual(hello.exports['text/plain'].at(-1))
 

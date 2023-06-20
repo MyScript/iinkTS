@@ -5,6 +5,7 @@ const {
   setEditorConfiguration,
   getEditorConfiguration,
   waitEditorLoaded,
+  getEditorModelExports,
 } = require('../helper')
 const { h, hello } = require('../strokesDatas')
 
@@ -120,14 +121,14 @@ describe('Rest Text', () => {
       expect(resultText).toStrictEqual(exportedDatas['text/plain'])
       expect(resultText).toStrictEqual(h.exports['text/plain'].at(-1))
 
+      expect(await getEditorModelExports(page)).toBeDefined()
+
       const promisesResult = await Promise.all([
         getExportedDatas(page),
         page.click('#clear'),
       ])
       expect(promisesResult[0]).toBeNull()
-
-      const editor = await getEditor(page)
-      expect(editor.model.exports).toBeUndefined()
+      expect(await getEditorModelExports(page)).toBeUndefined()
 
       resultElement = page.locator('#result')
       resultText = await resultElement.textContent()
@@ -137,9 +138,13 @@ describe('Rest Text', () => {
     test('should undo/redo', async () => {
       const editorEl = await page.waitForSelector('#editor')
       await Promise.all([getExportedDatas(page), write(page, hello.strokes)])
+
+      //TODO remove this
+      await page.waitForTimeout(1500)
+
       let resultElement = page.locator('#result')
       resultText = await resultElement.textContent()
-      expect(resultText).toStrictEqual(hello.exports['text/plain'].at(-1))
+      expect(hello.exports['text/plain'].at(-1)).toStrictEqual(resultText)
 
       let raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
       expect(raw.length).toStrictEqual(hello.strokes.length)

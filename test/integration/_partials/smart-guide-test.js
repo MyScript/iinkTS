@@ -55,6 +55,9 @@ describe('SmartGuide', () => {
     ])
     const jiixExport = JSON.parse(exports['application/vnd.myscript.jiix'])
 
+    // wait css animation
+    await page.waitForTimeout(1500)
+
     expect(await page.innerText('.prompter-text')).toBe(jiixExport.label)
     expect(await page.locator('.candidates').isVisible()).toBe(false)
 
