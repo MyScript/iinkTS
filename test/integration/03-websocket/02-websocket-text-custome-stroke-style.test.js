@@ -106,6 +106,9 @@ describe('Websocket Text Customize Stroke Style', () => {
       write(page, h.strokes),
     ])
 
+    //TODO remove this after fixed exported event
+    await page.waitForTimeout(500)
+
     const path = page.locator(`path[fill="${hexToRgbA(penColorExpected)}"]`)
     expect(await path.count()).toEqual(1)
   })

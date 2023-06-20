@@ -1,11 +1,11 @@
 
 export default {
   clearMocks: true,
-  collectCoverage: true,
+  // collectCoverage: true,
   collectCoverageFrom: [
-    './src/**',
-    '!./src/Editor.ts',
-    '!./src/@types/**'
+    "./src/**",
+    "!./src/Editor.ts",
+    "!./src/@types/**"
   ],
   coverageThreshold: {
     global: {
@@ -18,19 +18,19 @@ export default {
   coverageDirectory: "coverage",
   coverageProvider: "v8",
   moduleFileExtensions: [
-    'ts',
-    'js'
+    "ts",
+    "js"
   ],
-  preset: 'ts-jest',
+  preset: "ts-jest",
   setupFiles: [
     "jest-canvas-mock",
   ],
   setupFilesAfterEnv: [
     "jest-websocket-mock"
   ],
-  testEnvironment: 'jsdom',
+  testEnvironment: "jsdom",
   testMatch: [
-    '**/unit/**/*.test.ts'
+    "**/unit/**/*.test.ts"
   ],
   testPathIgnorePatterns: [
     "/node_modules/"

@@ -5,11 +5,20 @@ import { DefaultPenStyle } from '../../../src/style/DefaultPenStyle'
 import { RestRecognizer } from '../../../src/recognizer/RestRecognizer'
 import { Model } from '../../../src/model/Model'
 import { TRecognitionConfiguration, TRecognitionType } from '../../../src/@types/configuration/RecognitionConfiguration'
+import fetchMock from "jest-fetch-mock"
 
 describe('RestRecognizer.ts', () =>
 {
-  global.fetch = require('jest-fetch-mock')
   const height = 100, width = 100
+
+  beforeAll(() =>
+  {
+    fetchMock.enableMocks()
+  })
+  afterEach(() =>
+  {
+    fetchMock.resetMocks()
+  })
 
   test('should instanciate RestRecognizer', () =>
   {
@@ -41,21 +50,21 @@ describe('RestRecognizer.ts', () =>
       switch (recognitionType) {
         case 'TEXT':
           mimeType = DefaultRecognitionConfiguration.text.mimeTypes[0]
-          break;
+          break
         case 'DIAGRAM':
           mimeType = DefaultRecognitionConfiguration.diagram.mimeTypes[0]
-          break;
+          break
         case 'MATH':
           mimeType = DefaultRecognitionConfiguration.math.mimeTypes[0]
-          break;
+          break
         case 'Raw Content':
           mimeType = 'application/vnd.myscript.jiix'
-          break;
+          break
 
         default:
-          throw new Error("invalid recognition type");
+          throw new Error("invalid recognition type")
       }
-
+      expect(fetchMock).toHaveBeenCalledTimes(1)
       model.exports[mimeType] = ''
       expect(newModel).toEqual(model)
     })
@@ -84,21 +93,22 @@ describe('RestRecognizer.ts', () =>
       switch (recognitionType) {
         case 'TEXT':
           mimeType = DefaultRecognitionConfiguration.text.mimeTypes[0]
-          break;
+          break
         case 'DIAGRAM':
           mimeType = DefaultRecognitionConfiguration.diagram.mimeTypes[0]
-          break;
+          break
         case 'MATH':
           mimeType = DefaultRecognitionConfiguration.math.mimeTypes[0]
-          break;
+          break
         case 'Raw Content':
           mimeType = 'application/vnd.myscript.jiix'
-          break;
+          break
 
         default:
-          throw new Error("invalid recognition type");
+          throw new Error("invalid recognition type")
       }
 
+      expect(fetchMock).toHaveBeenCalledTimes(1)
       model.converts[mimeType] = ''
       expect(newModel).toEqual(model)
     })

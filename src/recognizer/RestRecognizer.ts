@@ -9,6 +9,7 @@ import StyleHelper from "../style/StyleHelper"
 import { computeHmac } from "./CryptoHelper"
 import { AbstractRecognizer } from "./AbstractRecognizer"
 import { TRestPostConfiguration, TRestPostData } from "../@types/recognizer/RestRecognizer"
+import { isVersionSuperiorOrEqual } from "../utils/versionHelper"
 
 type ApiError = {
   code?: string
@@ -106,6 +107,12 @@ export class RestRecognizer extends AbstractRecognizer
     headers.append("applicationKey", this.serverConfiguration.applicationKey)
     headers.append("hmac", computeHmac(JSON.stringify(data), this.serverConfiguration.applicationKey, this.serverConfiguration.hmacKey))
     headers.append("Content-Type", "application/json")
+
+    if (isVersionSuperiorOrEqual(this.serverConfiguration.version, "2.0.4")) {
+      headers.append("myscript-client-name", "__packageName__")
+      headers.append("myscript-client-version", "__buildVersion__")
+    }
+
     const reqInit: RequestInit = {
       method: "POST",
       headers,

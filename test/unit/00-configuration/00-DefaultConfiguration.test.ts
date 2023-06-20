@@ -14,7 +14,7 @@ describe('DefaultConfiguration.ts', () =>
     })
     test('should have host', () =>
     {
-      expect(DefaultConfiguration.server.host).toStrictEqual('webdemoapi.myscript.com')
+      expect(DefaultConfiguration.server.host).toStrictEqual('cloud.myscript.com')
     })
     test('should not have applicationKey', () =>
     {

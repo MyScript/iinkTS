@@ -1,29 +1,29 @@
-import serve from 'rollup-plugin-serve'
-import livereload from 'rollup-plugin-livereload'
-import config from './rollup.config'
+import serve from "rollup-plugin-serve"
+import livereload from "rollup-plugin-livereload"
+import config from "./rollup.config"
 
 config[0].plugins.push(
   serve({
     open: true,
-    openPage: '/examples/index.html',
+    openPage: "/examples/index.html",
     verbose: true,
-    contentBase: '',
-    host: 'localhost',
+    contentBase: "",
+    host: "localhost",
     port: 8000,
     headers: {
-      'Access-Control-Allow-Origin': '*'
+      "Access-Control-Allow-Origin": "*"
     }
   }),
   livereload({
     watch: [
-      'dist',
-      'examples'
+      "dist",
+      "examples"
     ]
   })
 )
 
 config.watch = {
-  include: 'src/**'
+  include: "src/**"
 }
 
 export default config
