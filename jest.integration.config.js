@@ -26,9 +26,5 @@ export default {
 
   testMatch: ["**/integration/**/*.test.js"],
 
-  transform: {
-    "^.+\\.(ts|tsx)?$": "ts-jest"
-  },
-
   verbose: true,
 }

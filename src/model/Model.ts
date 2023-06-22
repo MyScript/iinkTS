@@ -42,6 +42,13 @@ export class Model implements IModel
     this.idle = true
     this.isEmpty = true
   }
+  mergeExport(exports: TExport) {
+    if (this.exports) {
+      Object.assign(this.exports, exports)
+    } else {
+      this.exports = exports
+    }
+  }
 
   private computeDistance (point1: TPoint, point2: TPoint): number {
     const distance = Math.sqrt(Math.pow((point1.y - point2.y), 2) + Math.pow((point1.x - point2.x), 2))

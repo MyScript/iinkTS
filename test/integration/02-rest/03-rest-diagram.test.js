@@ -133,11 +133,12 @@ describe('Rest Diagram', () => {
       const editorEl = await page.waitForSelector('#editor')
       await Promise.all([
         getExportedDatas(page),
-        write(page, rectangle.strokes)
+        write(page, [rectangle.strokes[0]])
       ])
-
-      await page.waitForTimeout(1500)
-
+      await Promise.all([
+        getExportedDatas(page),
+        write(page, [rectangle.strokes[1]])
+      ])
       let resultText = await page.locator('#result').textContent()
       let rectResultJson = JSON.parse(resultText)
       expect(rectResultJson['application/vnd.myscript.jiix']).toMatchObject(rectangle.exports.at(-1)['application/vnd.myscript.jiix'])

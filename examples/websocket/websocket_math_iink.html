@@ -59,34 +59,6 @@
       const undoElement = document.getElementById('undo');
       const redoElement = document.getElementById('redo');
 
-      /**
-       * Instanciate Editor
-       * @param {Element} The DOM element to attach the ink paper
-       * @param {Object} The editor options
-       */
-    async function loadEditor() {
-      const res = await fetch('../server-configuration.json')
-      const conf = await res.json()
-      const options = {
-        configuration: {
-          server: {
-            ...conf,
-            protocol: 'WEBSOCKET',
-          },
-          recognition: {
-            type: 'MATH',
-          },
-        },
-      };
-
-      const editor = new iink.Editor(editorElement, options);
-
-      editor.events.addEventListener('changed', (event) => {
-        undoElement.disabled = !event.detail.canUndo;
-        redoElement.disabled = !event.detail.canRedo;
-        clearElement.disabled = !event.detail.canClear;
-      });
-
       function cleanLatex(latexExport) {
         if (typeof latexExport === 'number') {
           latexExport = latexExport.toString();
@@ -101,37 +73,68 @@
         return latexExport.replace(new RegExp('(align.{1})', 'g'), 'aligned');
       }
 
-      editor.events.addEventListener('exported', (evt) => {
-        const exports = evt.detail;
-        if (exports && exports['application/x-latex']) {
-          katex.render(
-            cleanLatex(exports['application/x-latex']),
-            resultElement
-          );
-        } else {
+      /**
+       * We use a function to wait the server configuration to load
+       */
+      async function loadEditor() {
+        const res = await fetch('../server-configuration.json');
+        const conf = await res.json();
+        const options = {
+          configuration: {
+            server: {
+              ...conf,
+              protocol: 'WEBSOCKET',
+            },
+            recognition: {
+              type: 'MATH',
+            },
+          },
+        };
+
+        /**
+         * Instanciate editor
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Editor parameters
+         */
+        const editor = new iink.Editor(editorElement, options);
+
+        editor.events.addEventListener('changed', (event) => {
+          undoElement.disabled = !event.detail.canUndo;
+          redoElement.disabled = !event.detail.canRedo;
+          clearElement.disabled = !event.detail.canClear;
+        });
+
+        editor.events.addEventListener('exported', (evt) => {
+          const exports = evt.detail;
+          if (exports && exports['application/x-latex']) {
+            katex.render(
+              cleanLatex(exports['application/x-latex']),
+              resultElement
+            );
+          } else {
+            resultElement.innerHTML = '';
+          }
+        });
+
+        clearElement.addEventListener('click', async () => {
+          editor.clear();
           resultElement.innerHTML = '';
-        }
-      });
+        });
 
-      clearElement.addEventListener('click', async () => {
-        editor.clear();
-        resultElement.innerHTML = '';
-      });
+        undoElement.addEventListener('click', () => {
+          editor.undo();
+        });
 
-      undoElement.addEventListener('click', () => {
-        editor.undo();
-      });
+        redoElement.addEventListener('click', () => {
+          editor.redo();
+        });
 
-      redoElement.addEventListener('click', () => {
-        editor.redo();
-      });
+        window.addEventListener('resize', () => {
+          editor.resize();
+        });
+      };
 
-      window.addEventListener('resize', () => {
-        editor.resize();
-      });
-    }
-
-    loadEditor()
+      loadEditor();
     </script>
   </body>
 </html>

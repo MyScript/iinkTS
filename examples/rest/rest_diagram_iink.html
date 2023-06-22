@@ -118,7 +118,6 @@
       undoElement.disabled = isPreview
       redoElement.disabled = isPreview
       clearElement.disabled = isPreview
-      console.log('editor.mode: ', editor.mode);
       eraserElement.disabled = isPreview || editor.mode === 'erasing'
       penElement.disabled = isPreview || editor.mode === 'writing'
       if (!isPreview) {
@@ -135,13 +134,11 @@
     }
 
     /**
-     * Instanciate editor
-     * @param {Element} The DOM element to attach the ink paper
-     * @param {Object} The recognition parameters
+     * We use a function to wait the server configuration to load
      */
     async function loadEditor() {
-      const res = await fetch('../server-configuration.json')
-      const conf = await res.json()
+      const res = await fetch('../server-configuration.json');
+      const conf = await res.json();
       const options = {
         configuration: {
           server: {
@@ -154,6 +151,11 @@
         },
       };
 
+      /**
+       * Instanciate editor
+       * @param {Element} The DOM element to attach the ink paper
+       * @param {Object} The Editor parameters
+       */
       editor = new iink.Editor(editorElement, options);
 
       editor.events.addEventListener('changed', (event) => {
@@ -247,9 +249,9 @@
       window.addEventListener('resize', () => {
         editor.resize();
       });
-    }
+    };
 
-    loadEditor()
+    loadEditor();
   </script>
 </body>
 

@@ -47,14 +47,26 @@
     const redoElement = document.getElementById('redo');
     let editor;
 
+    function cleanLatex(latexExport) {
+      if (typeof latexExport === 'number') {
+        latexExport = latexExport.toString();
+      }
+      if (latexExport.includes('\\\\')) {
+        const steps = '\\begin{align*}' + latexExport + '\\end{align*}';
+        return steps
+          .replace('\\begin{aligned}', '')
+          .replace('\\end{aligned}', '')
+          .replace(new RegExp('(align.{1})', 'g'), 'aligned');
+      }
+      return latexExport.replace(new RegExp('(align.{1})', 'g'), 'aligned');
+    }
+
     /**
-     * Instanciate Editor
-     * @param {Element} The DOM element to attach the ink paper
-     * @param {Object} The editor options
+     * We use a function to wait the server configuration to load
      */
     async function loadEditor() {
-      const res = await fetch('../server-configuration.json')
-      const conf = await res.json()
+      const res = await fetch('../server-configuration.json');
+      const conf = await res.json();
       const options = {
         configuration: {
           server: {
@@ -67,6 +79,11 @@
         },
       };
 
+      /**
+       * Instanciate editor
+       * @param {Element} The DOM element to attach the ink paper
+       * @param {Object} The Editor parameters
+       */
       editor = new iink.Editor(editorElement, options);
 
       editor.events.addEventListener('changed', (event) => {
@@ -74,20 +91,6 @@
         redoElement.disabled = !event.detail.canRedo;
         clearElement.disabled = !event.detail.canClear;
       });
-
-      function cleanLatex(latexExport) {
-        if (typeof latexExport === 'number') {
-          latexExport = latexExport.toString();
-        }
-        if (latexExport.includes('\\\\')) {
-          const steps = '\\begin{align*}' + latexExport + '\\end{align*}';
-          return steps
-            .replace('\\begin{aligned}', '')
-            .replace('\\end{aligned}', '')
-            .replace(new RegExp('(align.{1})', 'g'), 'aligned');
-        }
-        return latexExport.replace(new RegExp('(align.{1})', 'g'), 'aligned');
-      }
 
       editor.events.addEventListener('exported', (evt) => {
         const exports = evt.detail;
@@ -117,9 +120,9 @@
       window.addEventListener('resize', () => {
         editor.resize();
       });
-    }
+    };
 
-    loadEditor()
+    loadEditor();
   </script>
 </body>
 

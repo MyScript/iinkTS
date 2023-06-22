@@ -68,6 +68,11 @@ export class GlobalEvent extends EventTarget
     this.#emit(EventType.NOTIF, { message, timeout })
   }
 
+  emitClearMessage(): void
+  {
+    this.#emit(EventType.CLEAR_MESSAGE)
+  }
+
   emitClear(): void
   {
     this.#emit(EventType.CLEAR)

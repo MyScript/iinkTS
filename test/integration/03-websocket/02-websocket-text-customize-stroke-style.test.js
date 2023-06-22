@@ -2,7 +2,7 @@ const { waitForEditorWebSocket, write, getExportedDatas } = require('../helper')
 const { h } = require('../strokesDatas')
 
 function hexToRgbA(hex) {
-  var c
+  let c
   if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
     c = hex.substring(1).split('')
     if (c.length == 3) {
@@ -102,9 +102,6 @@ describe('Websocket Text Customize Stroke Style', () => {
       getExportedDatas(page),
       write(page, h.strokes),
     ])
-
-    //TODO remove this after fixed exported event
-    await page.waitForTimeout(500)
 
     const path = page.locator(`path[fill="${hexToRgbA(penColorExpected)}"]`)
     expect(await path.count()).toEqual(1)

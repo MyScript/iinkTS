@@ -1,4 +1,4 @@
-const { getEditorConfiguration, setEditorConfiguration, write, getExportedDatas, waitForEditorWebSocket } = require("../helper")
+const { getEditorConfiguration, setEditorConfiguration, write, getExportedDatas, waitForEditorWebSocket, getEditor } = require("../helper")
 const { h, hello, helloOneStroke } = require("../strokesDatas")
 
 describe('SmartGuide', () => {
@@ -12,6 +12,9 @@ describe('SmartGuide', () => {
       getExportedDatas(page),
       write(page, h.strokes)
     ])
+
+    // wait css animation
+    await page.waitForTimeout(1000)
     expect(await page.locator('.prompter-text').isVisible()).toBe(false)
     expect(await page.locator('.candidates').isVisible()).toBe(false)
   })
@@ -26,8 +29,10 @@ describe('SmartGuide', () => {
       getExportedDatas(page),
       write(page, h.strokes)
     ])
+
     // wait css animation
     await page.waitForTimeout(1000)
+
     expect(await page.locator('.prompter-text').isVisible()).toBe(true)
     expect(await page.locator('.candidates').isVisible()).toBe(false)
   })
@@ -48,15 +53,19 @@ describe('SmartGuide', () => {
   })
 
   test('should select candidate', async () => {
-    const [exports] = await Promise.all([
+    await Promise.all([
       getExportedDatas(page),
       write(page, hello.strokes)
     ])
 
-    const jiixExport = JSON.parse(exports['application/vnd.myscript.jiix'])
+    await page.waitForTimeout(1500)
+    const editor = await getEditor(page)
+    const jiixExport = JSON.parse(editor.model.exports['application/vnd.myscript.jiix'])
     expect(await page.innerText('.prompter-text')).toBe(jiixExport.label)
     expect(await page.locator('.candidates').isVisible()).toBe(false)
 
+    // wait css animation
+    await page.waitForTimeout(1000)
     await page.click(`.prompter-text > span`)
     expect(await page.locator('.candidates').isVisible()).toBe(true)
     const candidate = jiixExport.words[0].candidates[2]
@@ -83,7 +92,6 @@ describe('SmartGuide', () => {
     await page.click(`.ellipsis`)
     // wait for css animation
     await page.waitForTimeout(1000)
-
     expect(await page.locator('.more-menu.open').isVisible()).toBe(true)
 
     await Promise.all([
@@ -137,6 +145,9 @@ describe('SmartGuide', () => {
       getExportedDatas(page),
       page.click(`.more-menu > button >> text=Delete`),
     ])
+
+    // wait for css animation
+    await page.waitForTimeout(1000)
 
     pathElements = page.locator('path')
     expect(await pathElements.count()).toEqual(0)

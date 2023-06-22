@@ -9,7 +9,6 @@ describe('Nav actions', () => {
     ])
     let resultElement = page.locator('#result')
     resultText = await resultElement.textContent()
-
     const jiixReceived = JSON.parse(exportedDatas['application/vnd.myscript.jiix'])
     expect(resultText).toStrictEqual(jiixReceived.label)
 
@@ -22,8 +21,7 @@ describe('Nav actions', () => {
 
     expect(jjixReceived).toEqual(emptyJiix)
     const editor = await getEditor(page)
-    expect(editor.model.exports).toBeUndefined()
-
+    expect(JSON.parse(editor.model.exports['application/vnd.myscript.jiix'])).toEqual(jjixReceived)
     resultElement = page.locator('#result')
     resultText = await resultElement.textContent()
     expect(resultText).toBe('')

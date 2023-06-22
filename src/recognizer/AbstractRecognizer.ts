@@ -14,6 +14,7 @@ export abstract class AbstractRecognizer implements IRecognizer
     this.serverConfiguration = serverConfig
     this.recognitionConfiguration = recognitionConfig
   }
+
   abstract export(model: IModel, mimeTypes?: string[]): Promise<IModel | never>
 
   abstract resize(model: IModel): Promise<IModel | never>

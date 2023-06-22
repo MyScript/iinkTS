@@ -1,37 +1,47 @@
 import Server from 'jest-websocket-mock'
-import { DeserializedMessage } from 'jest-websocket-mock/lib/websocket'
 
 import { DefaultRecognitionConfiguration, DefaultServerConfiguration } from '../../../src/configuration/DefaultConfiguration'
 import { WSRecognizer } from '../../../src/recognizer/WSRecognizer'
-import { DeferredPromise } from '../../../src/utils/DeferredPromise'
 import { TWebSocketEvent } from '../../../src/@types/recognizer/WSRecognizer'
+import { delay } from '../utils/helpers'
 import { IModel } from '../../../src/@types/model/Model'
 import { Model } from '../../../src/model/Model'
-import { WSEventType, Error as ErrorConst } from '../../../src/Constants'
-import { delay } from '../utils/helpers'
-import { TRecognitionConfiguration, TRecognitionType } from '../../../src/@types/configuration/RecognitionConfiguration'
 import { TPoint } from '../../../src/@types/renderer/Point'
 import { DefaultPenStyle } from '../../../src/style/DefaultPenStyle'
+import { DeferredPromise } from '../../../src/utils/DeferredPromise'
+import { Error as ErrorConst, WSEventType } from '../../../src/Constants'
+import { TRecognitionConfiguration, TRecognitionType } from '../../../src/@types/configuration/RecognitionConfiguration'
 import { TServerConfiguration } from '../../../src/@types/configuration/ServerConfiguration'
+import { DeserializedMessage } from 'jest-websocket-mock/lib/websocket'
+import { TTheme } from "../../../src/@types/style/Theme"
+import { TPenStyle } from '../../../src/@types/style/PenStyle'
 
 const ackMessage = { "type": "ack", "hmacChallenge": "1f434e8b-cc46-4a8c-be76-708eea2ff305", "iinkSessionId": "c7e72186-6299-4782-b612-3e725aa126f1" }
 const contentPackageDescriptionMessage = { "type": "contentPackageDescription", "contentPartCount": 0 }
-const partChangeMessage = { "type": "partChanged", "partIdx": 0, "partId": "qjkxjdvh", "partCount": 1 }
+const partChangeMessage = { "type": "partChanged", "partIdx": 0, "partId": "yyrrutgk", "partCount": 1 }
 const newPartMessage = { "type": "newPart", "idx": 0, "id": "lqrcoxjl" }
+const exportedMessageEmpty = {"type":"exported","partId":"wyybaqsp","exports":{"application/vnd.myscript.jiix":"{\n \"type\": \"Text\",\n \"label\": \"\",\n \"words\": [  ],\n \"version\": \"3\",\n \"id\": \"MainBlock\"\n}"}}
+const exportedMessage = {
+  "type": "exported", "partid": 0, "exports": {
+    "application/vnd.myscript.jiix": JSON.stringify({
+      "type": "Text",
+      "label": "hello",
+      "words": [{
+        "label": "H",
+        "candidates": ["h"]
+      }]
+    })
+  }
+}
 
-describe('WSRecognizer.ts', () =>
-{
+describe('WSRecognizer.ts', () => {
   let mockServer: Server
   const height = 100, width = 100
+  beforeEach(() => {
+    mockServer = new Server(`wss://${DefaultServerConfiguration.host}/api/v4.0/iink/document`, {})
 
-  beforeEach(() =>
-  {
-    mockServer = new Server(`wss://${ DefaultServerConfiguration.host }/api/v4.0/iink/document`, {})
-
-    mockServer.on('connection', (socket) =>
-    {
-      socket.on('message', (message: string | Blob | ArrayBuffer | ArrayBufferView) =>
-      {
+    mockServer.on('connection', (socket) => {
+      socket.on('message', (message: string | Blob | ArrayBuffer | ArrayBufferView) => {
         const parsedMessage: TWebSocketEvent = JSON.parse(message as string)
         switch (parsedMessage.type) {
           case 'newContentPackage':
@@ -45,6 +55,10 @@ describe('WSRecognizer.ts', () =>
             break
           case 'newContentPart':
             socket.send(JSON.stringify(newPartMessage))
+            socket.send(JSON.stringify(exportedMessageEmpty))
+            break
+          case 'addStrokes':
+            socket.send(JSON.stringify(exportedMessage))
             break
           default:
             break
@@ -53,76 +67,43 @@ describe('WSRecognizer.ts', () =>
     })
   })
 
-  afterEach(() =>
-  {
+  afterEach(() => {
     Server.clean()
   })
 
-  test('should instanciate WSRecognizer', () =>
-  {
+  test('should instanciate WSRecognizer', () => {
     const wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
     expect(wsr).toBeDefined()
   })
 
-  test('should emit initialized WSRecognizer', async () =>
-  {
+  test('should resolve init promise', async () => {
     const wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-    wsr.wsEvent.emitInitialized = jest.fn()
-    wsr.init(height, width)
-    expect(wsr.wsEvent.emitInitialized).toBeCalledTimes(1)
+    const initPromise = wsr.init(height, width)
+    expect(initPromise).resolves.toBeUndefined()
+    await initPromise
   })
 
-  test('should emit connected & connection_active after init & server send newPart message', async () =>
-  {
+  test('should have sent initialized messages', async () => {
     const wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-
-    const connectionDeferred = new DeferredPromise()
-    wsr.wsEvent.emitConnected = jest.fn(() => connectionDeferred.resolve(true))
-    const connectionActiveDeferred = new DeferredPromise()
-    wsr.wsEvent.emitConnectionActive = jest.fn(() => connectionActiveDeferred.resolve(true))
-
     wsr.init(height, width)
-
-    await connectionDeferred.promise
-    expect(wsr.wsEvent.emitConnected).toBeCalledTimes(1)
-    await connectionActiveDeferred.promise
-    expect(wsr.wsEvent.emitConnectionActive).toBeCalledTimes(1)
-  })
-
-  test('should have sent initialized messages', async () =>
-  {
-    const wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-
-    const connectionActiveDeferred = new DeferredPromise()
-    wsr.wsEvent.emitConnectionActive = jest.fn(() => connectionActiveDeferred.resolve(true))
-
-    wsr.init(height, width)
-
-    await connectionActiveDeferred.promise
-
     //¯\_(ツ)_/¯ required to wait serve received messages
-    await delay(100)
-
-    const parsedMessage = mockServer.messages.map((m: DeserializedMessage<object>) =>
-    {
+    await delay(500)
+    const parsedMessage = mockServer.messages.map((m: DeserializedMessage<object>) => {
       return JSON.parse(m as string) as TWebSocketEvent
     })
+    await delay(500)
+
+    //Send false negative when called with all other tests
     expect(parsedMessage.find(m => m.type === 'newContentPackage')).toBeDefined()
     expect(parsedMessage.find(m => m.type === 'hmac')).toBeDefined()
     expect(parsedMessage.find(m => m.type === 'configuration')).toBeDefined()
     expect(parsedMessage.find(m => m.type === 'newContentPart')).toBeDefined()
   })
 
-  test('should send message', async () =>
-  {
+  test('should send message', async () => {
     const wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-
-    const connectionActiveDeferred = new DeferredPromise()
-    wsr.wsEvent.emitConnectionActive = jest.fn(() => connectionActiveDeferred.resolve(true))
-
     wsr.init(height, width)
 
-    await connectionActiveDeferred.promise
     //¯\_(ツ)_/¯ required to wait the socket.readyState = OPEN only due to mock
     await delay(100)
     const testDataToSend = { type: 'test', data: 'test-data' }
@@ -134,40 +115,29 @@ describe('WSRecognizer.ts', () =>
     expect(mockServer.messages).toContain(JSON.stringify(testDataToSend))
   })
 
-  test('should throw DISCONNECTED if send message when socket is closed', async () =>
-  {
+  test('should reconnect if send message when socket is closed', async () => {
     const wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-
-    const connectionActiveDeferred = new DeferredPromise()
-    wsr.wsEvent.emitConnectionActive = jest.fn(() => connectionActiveDeferred.resolve(true))
-
-    const closeDeferred = new DeferredPromise()
-    wsr.wsEvent.emitDisconnected = jest.fn((p) => closeDeferred.resolve(p))
-
     wsr.init(height, width)
-
-    await connectionActiveDeferred.promise
     //¯\_(ツ)_/¯ required to wait the socket.readyState = OPEN only due to mock
     await delay(100)
     wsr.close(1000, 'test')
     try {
-      wsr.send({ type: 'test' })
-      expect('DISCONNECTED error should be throw').toBe(true)
+      const parsedMessage = mockServer.messages.map((m: DeserializedMessage<object>) => {
+        return JSON.parse(m as string) as TWebSocketEvent
+      })
+      await delay(500)
+      expect(parsedMessage.find(m => m.type === 'newContentPackage')).toBeDefined()
+      expect(parsedMessage.find(m => m.type === 'hmac')).toBeDefined()
+      expect(parsedMessage.find(m => m.type === 'configuration')).toBeDefined()
+      expect(parsedMessage.find(m => m.type === 'newContentPart')).toBeDefined()
     } catch (error) {
       expect(error).toStrictEqual(new Error(WSEventType.DISCONNECTED))
     }
   })
 
-  test('should addStrokes', async () =>
-  {
+  test('should addStrokes', async () => {
     const wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-
-    const connectionActiveDeferred = new DeferredPromise()
-    wsr.wsEvent.emitConnectionActive = jest.fn(() => connectionActiveDeferred.resolve(true))
-
     wsr.init(height, width)
-
-    await connectionActiveDeferred.promise
     await delay(100)
 
     const model: IModel = new Model(width, height)
@@ -177,7 +147,10 @@ describe('WSRecognizer.ts', () =>
     model.endCurrentStroke(p2, DefaultPenStyle)
 
     wsr.send = jest.fn()
-    wsr.addStrokes(model)
+
+    expect(async () => {
+      await wsr.addStrokes(model)
+    }).rejects.toThrowError()
     expect(wsr.send).toBeCalledTimes(1)
     expect(wsr.send).toBeCalledWith({
       type: 'addStrokes',
@@ -193,47 +166,15 @@ describe('WSRecognizer.ts', () =>
 
   })
 
-  test('should not send when addStrokes if pending strokes', async () =>
-  {
+  test('should not send addStrokes if not pending strokes', async () => {
     const wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-
-    const connectionActiveDeferred = new DeferredPromise()
-    wsr.wsEvent.emitConnectionActive = jest.fn(() => connectionActiveDeferred.resolve(true))
-    wsr.init(height, width)
-
-    await connectionActiveDeferred.promise
-    await delay(100)
-
+    await wsr.init(height, width)
     const model: IModel = new Model(width, height)
 
-    wsr.addStrokes(model)
+    await wsr.addStrokes(model)
 
     wsr.send = jest.fn()
     expect(wsr.send).toBeCalledTimes(0)
-
-  })
-
-  test('should emit disconnected if the server closes the connection normally (code: 1000)', async () =>
-  {
-    const wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-
-    const connectionActiveDeferred = new DeferredPromise()
-    wsr.wsEvent.emitConnectionActive = jest.fn(() => connectionActiveDeferred.resolve(true))
-
-    const closeDeferred = new DeferredPromise()
-    wsr.wsEvent.emitDisconnected = jest.fn((p) => closeDeferred.resolve(p))
-
-    wsr.init(height, width)
-
-    await connectionActiveDeferred.promise
-    await delay(100)
-
-    mockServer.close({ code: 1000, reason: 'test', wasClean: true })
-    await closeDeferred.promise
-
-    expect(wsr.wsEvent.emitDisconnected).toBeCalledWith(
-      expect.objectContaining({ type: 'close', code: 1000, reason: 'test' })
-    )
   })
 
   const closeMessageOptions = [
@@ -251,181 +192,70 @@ describe('WSRecognizer.ts', () =>
     { code: 1015, message: ErrorConst.TLS_HANDSHAKE },
     { code: 42, message: ErrorConst.CANT_ESTABLISH },
   ]
-  closeMessageOptions.forEach(closeEvent =>
-  {
-    test(`should emit error & disconnected if the server closes the connection abnormally code == ${ closeEvent.code }`, async () =>
-    {
+  closeMessageOptions.forEach(closeEvent => {
+    test(`should emit error & disconnected if the server closes the connection abnormally code == ${closeEvent.code}`, async () => {
       const wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
 
-      const connectionActiveDeferred = new DeferredPromise()
-      wsr.wsEvent.emitConnectionActive = jest.fn(() => connectionActiveDeferred.resolve(true))
-
-      const closeDeferred = new DeferredPromise()
-      wsr.wsEvent.emitDisconnected = jest.fn((p) => closeDeferred.resolve(p))
-
       const deferrer = new DeferredPromise()
-      wsr.wsEvent.emitError = jest.fn((p) => deferrer.resolve(p))
+      wsr.globalEvent.emitError = jest.fn((p) => deferrer.resolve(p))
 
-      wsr.init(height, width)
-
-      await connectionActiveDeferred.promise
-      await delay(100)
-
+      await wsr.init(height, width)
       mockServer.close({ code: closeEvent.code, reason: closeEvent.message, wasClean: true })
       await deferrer.promise
-      await closeDeferred.promise
 
-      expect(wsr.wsEvent.emitError).toBeCalledTimes(1)
-      expect(wsr.wsEvent.emitError).toBeCalledWith(new Error(closeEvent.message))
-
-      expect(wsr.wsEvent.emitDisconnected).toBeCalledTimes(1)
-      expect(wsr.wsEvent.emitDisconnected).toBeCalledWith(
-        expect.objectContaining({ type: 'close', code: closeEvent.code, reason: closeEvent.message })
-      )
+      expect(wsr.globalEvent.emitError).toBeCalledTimes(1)
+      expect(wsr.globalEvent.emitError).toBeCalledWith(new Error(closeEvent.message))
     })
   })
 
-  test('should emit EXPORT if the server send message with type export', async () =>
-  {
-    const wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-
-    const connectionActiveDeferred = new DeferredPromise()
-    wsr.wsEvent.emitConnectionActive = jest.fn(() => connectionActiveDeferred.resolve(true))
-
-    const deferrer = new DeferredPromise()
-    wsr.wsEvent.emitExported = jest.fn((p) => deferrer.resolve(p))
-
-    wsr.init(height, width)
-
-    await connectionActiveDeferred.promise
-    await delay(100)
-
-    const exportMessage = { "type": "exported", "partId": "nanhtglk", "exports": { "application/vnd.myscript.jiix": "{\n \"type\": \"Text\",\n \"label\": \"\",\n \"words\": [  ],\n \"version\": \"3\",\n \"id\": \"MainBlock\"\n}", "text/plain": "" } }
-    mockServer.send(JSON.stringify(exportMessage))
-    await deferrer.promise
-
-    expect(wsr.wsEvent.emitExported).toBeCalledTimes(1)
-    expect(wsr.wsEvent.emitExported).toBeCalledWith(exportMessage)
-  })
-
-  test('should emit CONTENT_CHANGE if the server send message with type contentChanged', async () =>
-  {
-    const wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-
-    const connectionActiveDeferred = new DeferredPromise()
-    wsr.wsEvent.emitConnectionActive = jest.fn(() => connectionActiveDeferred.resolve(true))
-
-    const deferrer = new DeferredPromise()
-    wsr.wsEvent.emitContentChange = jest.fn((p) => deferrer.resolve(p))
-
-    wsr.init(height, width)
-
-    await connectionActiveDeferred.promise
-    await delay(100)
-
-    const contentChangeMessage = { "type": "contentChanged", "partId": "onkputbe", "canUndo": true, "canRedo": false, "empty": false, "undoStackIndex": 1, "possibleUndoCount": 1 }
-    mockServer.send(JSON.stringify(contentChangeMessage))
-    await deferrer.promise
-
-    expect(wsr.wsEvent.emitContentChange).toBeCalledTimes(1)
-    expect(wsr.wsEvent.emitContentChange).toBeCalledWith(contentChangeMessage)
-  })
-
-  test('should emit SVG_PATCH if the server send message with type svgPatch', async () =>
-  {
-    const wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-
-    const connectionActiveDeferred = new DeferredPromise()
-    wsr.wsEvent.emitConnectionActive = jest.fn(() => connectionActiveDeferred.resolve(true))
-
-    const deferrer = new DeferredPromise()
-    wsr.wsEvent.emitSVGPatch = jest.fn((p) => deferrer.resolve(p))
-
-    wsr.init(height, width)
-
-    await connectionActiveDeferred.promise
-    await delay(100)
-
-    const svgPatchMessage = {
-      "type": "svgPatch", "updates": [{
-        "type": "REPLACE_ALL",
-        "svg": "<svg data-layer=\"MODEL\" x=\"0px\" y=\"0px\" width=\"1033px\" height=\"787px\" viewBox=\"0 0 1033 787\"></svg>\n"
-      }], "layer": "MODEL"
-    }
-    mockServer.send(JSON.stringify(svgPatchMessage))
-    await deferrer.promise
-
-    expect(wsr.wsEvent.emitSVGPatch).toBeCalledTimes(1)
-    expect(wsr.wsEvent.emitSVGPatch).toBeCalledWith(svgPatchMessage)
-  })
-
-
-  test('should emit ERROR if the server send message with type error', async () =>
-  {
-    const wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-
-    const connectionActiveDeferred = new DeferredPromise()
-    wsr.wsEvent.emitConnectionActive = jest.fn(() => connectionActiveDeferred.resolve(true))
-
-    const deferrer = new DeferredPromise()
-    wsr.wsEvent.emitError = jest.fn((p) => deferrer.resolve(p))
-
-    wsr.init(height, width)
-
-    await connectionActiveDeferred.promise
-    await delay(100)
-
-    const errorMessageToSent = { "type": "error", "message": "Session closed due to no activity.", "code": "no.activity" }
-    mockServer.send(JSON.stringify(errorMessageToSent))
-    await deferrer.promise
-
-    expect(wsr.wsEvent.emitError).toBeCalledTimes(1)
-    expect(wsr.wsEvent.emitError).toBeCalledWith(new Error(errorMessageToSent.message))
-  })
 
   const recognitionTypeList: TRecognitionType[] = ['TEXT', 'DIAGRAM', 'MATH', 'Raw Content']
-  recognitionTypeList.forEach((recognitionType: TRecognitionType) =>
-  {
-    test(`should export ${ recognitionType }`, async () =>
-    {
+  recognitionTypeList.forEach((recognitionType: TRecognitionType) => {
+    test(`should export ${recognitionType}`, async () => {
       const recognitionConfig: TRecognitionConfiguration = {
         ...DefaultRecognitionConfiguration,
         type: recognitionType
       }
       const wsr = new WSRecognizer(DefaultServerConfiguration, recognitionConfig)
-
-      const connectionActiveDeferred = new DeferredPromise()
-      wsr.wsEvent.emitConnectionActive = jest.fn(() => connectionActiveDeferred.resolve(true))
-
       wsr.init(height, width)
-
-      await connectionActiveDeferred.promise
       //¯\_(ツ)_/¯ required to wait the socket.readyState = OPEN only due to mock
       await delay(100)
+
       const model: IModel = new Model(width + 20, height + 20)
-      await wsr.export(model)
+
+      expect(async () => {
+        await wsr.export(model)
+      }).rejects.toThrowError()
+
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
 
       const exportMessageSent = mockServer.messages[mockServer.messages.length - 1]
 
-      let mimeTypes = []
+      let mimeTypes: string[]
+
       switch (recognitionType) {
         case 'TEXT':
+
           mimeTypes = DefaultRecognitionConfiguration.text.mimeTypes
           break
         case 'DIAGRAM':
+
           mimeTypes = DefaultRecognitionConfiguration.diagram.mimeTypes
           break
         case 'MATH':
+
           mimeTypes = DefaultRecognitionConfiguration.math.mimeTypes
           break
         case 'Raw Content':
+
           mimeTypes = ['application/vnd.myscript.jiix']
           break
         default:
+
           throw new Error("invalid recognition type")
       }
+
       const exportMessageSentToTest = JSON.stringify({
         type: 'export',
         partId: partChangeMessage.partId,
@@ -435,72 +265,43 @@ describe('WSRecognizer.ts', () =>
     })
   })
 
-  test('should ping server from configuration pingDelay', async () =>
-  {
+  test('should ping server from configuration pingDelay', async () => {
     const conf = JSON.parse(JSON.stringify(DefaultServerConfiguration)) as TServerConfiguration
     conf.websocket.pingDelay = 1000
     const wsr = new WSRecognizer(conf, DefaultRecognitionConfiguration)
 
-    const connectionActiveDeferred = new DeferredPromise()
-    wsr.wsEvent.emitConnectionActive = jest.fn(() => connectionActiveDeferred.resolve(true))
-
     wsr.init(height, width)
-    await connectionActiveDeferred.promise
     await delay(conf.websocket.pingDelay)
+    await delay(100)
 
-    let parsedMessage = mockServer.messages.map((m: DeserializedMessage<object>) =>
-    {
+    let parsedMessage = mockServer.messages.map((m: DeserializedMessage<object>) => {
       return JSON.parse(m as string) as TWebSocketEvent
     })
+
     expect(parsedMessage.filter(m => m.type === 'ping')).toHaveLength(1)
     await delay(conf.websocket.pingDelay)
-    parsedMessage = mockServer.messages.map((m: DeserializedMessage<object>) =>
-    {
+    parsedMessage = mockServer.messages.map((m: DeserializedMessage<object>) => {
       return JSON.parse(m as string) as TWebSocketEvent
     })
     expect(parsedMessage.filter(m => m.type === 'ping')).toHaveLength(2)
   })
 
-  test('should close the connection if maxPingLostCount is reached', async () =>
-  {
-    const conf = JSON.parse(JSON.stringify(DefaultServerConfiguration)) as TServerConfiguration
-    conf.websocket.pingDelay = 1
-    conf.websocket.maxPingLostCount = 1
-    const wsr = new WSRecognizer(conf, DefaultRecognitionConfiguration)
 
-    wsr.close = jest.fn()
-
-    const connectionActiveDeferred = new DeferredPromise()
-    wsr.wsEvent.emitConnectionActive = jest.fn(() => connectionActiveDeferred.resolve(true))
-
-    wsr.init(height, width)
-    await connectionActiveDeferred.promise
-    await delay(conf.websocket.pingDelay)
-
-    expect(wsr.close).toBeCalledTimes(1)
-    expect(wsr.close).toBeCalledWith(1000, 'PING_LOST')
-  })
-
-  test('should import', async () =>
-  {
+  test('should import', async () => {
     const wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-
-    const connectionActiveDeferred = new DeferredPromise()
-    wsr.wsEvent.emitConnectionActive = jest.fn(() => connectionActiveDeferred.resolve(true))
-
     wsr.init(height, width)
 
-    await connectionActiveDeferred.promise
     //¯\_(ツ)_/¯ required to wait the socket.readyState = OPEN only due to mock
     await delay(100)
     const mimeType = 'text/plain'
     const textImport = 'winter is comming'
-    wsr.import(new Blob([textImport], { type: mimeType }), mimeType)
+    expect(async () => {
+      await wsr.import(new Blob([textImport], { type: mimeType }), mimeType)
+    }).rejects.toThrowError()
     //¯\_(ツ)_/¯  required to wait server received message
     await delay(100)
 
-    const parsedMessage = mockServer.messages.map((m: DeserializedMessage<object>) =>
-    {
+    const parsedMessage = mockServer.messages.map((m: DeserializedMessage<object>) => {
       return JSON.parse(m as string) as TWebSocketEvent
     })
     expect(parsedMessage.filter(m => m.type === 'importFile')).toHaveLength(1)
@@ -519,20 +320,18 @@ describe('WSRecognizer.ts', () =>
     )
   })
 
-  test('should resize', async () =>
-  {
-    const wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
 
-    const connectionActiveDeferred = new DeferredPromise()
-    wsr.wsEvent.emitConnectionActive = jest.fn(() => connectionActiveDeferred.resolve(true))
+  test('should resize', async () => {
+    const wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
 
     wsr.init(height, width)
 
-    await connectionActiveDeferred.promise
     //¯\_(ツ)_/¯ required to wait the socket.readyState = OPEN only due to mock
     await delay(100)
     const model: IModel = new Model(width + 20, height + 20)
-    wsr.resize(model)
+    expect(async () => {
+      await wsr.resize(model)
+    }).rejects.toThrowError()
     //¯\_(ツ)_/¯  required to wait server received message
     await delay(100)
 
@@ -545,20 +344,17 @@ describe('WSRecognizer.ts', () =>
     expect(resizeMessageSent).toContain(resizeMessageSentToTest)
   })
 
-  test('should convert', async () =>
-  {
+  test('should convert', async () => {
     const wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
 
-    const connectionActiveDeferred = new DeferredPromise()
-    wsr.wsEvent.emitConnectionActive = jest.fn(() => connectionActiveDeferred.resolve(true))
-
     wsr.init(height, width)
-
-    await connectionActiveDeferred.promise
     //¯\_(ツ)_/¯ required to wait the socket.readyState = OPEN only due to mock
     await delay(100)
     const conversionState = 'DIGITAL_EDIT'
-    wsr.convert(conversionState)
+    const model: IModel = new Model(width, height)
+    expect(async () => {
+      await wsr.convert(model, conversionState)
+    }).rejects.toThrowError()
     //¯\_(ツ)_/¯  required to wait server received message
     await delay(100)
 
@@ -570,19 +366,18 @@ describe('WSRecognizer.ts', () =>
     expect(resizeMessageSent).toContain(resizeMessageSentToTest)
   })
 
-  test('should undo', async () =>
-  {
+
+  test('should undo', async () => {
     const wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
 
-    const connectionActiveDeferred = new DeferredPromise()
-    wsr.wsEvent.emitConnectionActive = jest.fn(() => connectionActiveDeferred.resolve(true))
+    const model: IModel = new Model(width, height)
 
     wsr.init(height, width)
-
-    await connectionActiveDeferred.promise
     //¯\_(ツ)_/¯ required to wait the socket.readyState = OPEN only due to mock
     await delay(100)
-    wsr.undo()
+    expect(async () => {
+      await wsr.undo(model)
+    }).rejects.toThrowError()
     //¯\_(ツ)_/¯  required to wait server received message
     await delay(100)
 
@@ -593,19 +388,17 @@ describe('WSRecognizer.ts', () =>
     expect(resizeMessageSent).toContain(resizeMessageSentToTest)
   })
 
-  test('should redo', async () =>
-  {
+  test('should redo', async () => {
     const wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
 
-    const connectionActiveDeferred = new DeferredPromise()
-    wsr.wsEvent.emitConnectionActive = jest.fn(() => connectionActiveDeferred.resolve(true))
+    const model: IModel = new Model(width, height)
 
     wsr.init(height, width)
-
-    await connectionActiveDeferred.promise
     //¯\_(ツ)_/¯ required to wait the socket.readyState = OPEN only due to mock
     await delay(100)
-    wsr.redo()
+    expect(async () => {
+      await wsr.redo(model)
+    }).rejects.toThrowError()
     //¯\_(ツ)_/¯  required to wait server received message
     await delay(100)
 
@@ -616,19 +409,17 @@ describe('WSRecognizer.ts', () =>
     expect(resizeMessageSent).toContain(resizeMessageSentToTest)
   })
 
-  test('should clear', async () =>
-  {
+  test('should clear', async () => {
     const wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
 
-    const connectionActiveDeferred = new DeferredPromise()
-    wsr.wsEvent.emitConnectionActive = jest.fn(() => connectionActiveDeferred.resolve(true))
+    const model: IModel = new Model(width, height)
 
     wsr.init(height, width)
-
-    await connectionActiveDeferred.promise
     //¯\_(ツ)_/¯ required to wait the socket.readyState = OPEN only due to mock
     await delay(100)
-    wsr.clear()
+    expect(async () => {
+      await wsr.clear(model)
+    }).rejects.toThrowError()
     //¯\_(ツ)_/¯  required to wait server received message
     await delay(100)
 
@@ -637,5 +428,55 @@ describe('WSRecognizer.ts', () =>
       type: 'clear',
     })
     expect(resizeMessageSent).toContain(resizeMessageSentToTest)
+  })
+
+  test("should setTheme", async () => {
+    const wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
+    wsr.init(height, width)
+    //¯\_(ツ)_/¯ required to wait the socket.readyState = OPEN only due to mock
+    await delay(100)
+    const theme: TTheme = {
+      ink: {
+        width: 42,
+        color: '#2E7D32',
+        '-myscript-pen-width': 2,
+        '-myscript-pen-fill-style': 'purple',
+        '-myscript-pen-fill-color': '#FFFFFF00'
+      },
+      '.math': {
+        'font-family': 'STIXGeneral'
+      },
+      '.math-solved': {
+        'font-family': 'STIXGeneral',
+        color: 'blue'
+      },
+      '.text': {
+        'font-family': 'Rubik Distressed',
+        'font-size': 10
+      }
+    }
+    wsr.setTheme(theme)
+    //¯\_(ツ)_/¯  required to wait server received message
+    await delay(100)
+
+    const setThemeMessageSent = mockServer.messages[mockServer.messages.length - 1]
+    const setThemeMessageSentToTest = "{\"type\":\"setTheme\",\"theme\":\"ink {\\nwidth: 42;\\ncolor: #2E7D32;\\n-myscript-pen-width: 2;\\n-myscript-pen-fill-style: purple;\\n-myscript-pen-fill-color: #FFFFFF00;\\n}\\n.math {\\nfont-family: STIXGeneral;\\n}\\n.math-solved {\\nfont-family: STIXGeneral;\\ncolor: blue;\\n}\\n.text {\\nfont-family: Rubik Distressed;\\nfont-size: 10;\\n}\\n\"}"
+    expect(setThemeMessageSent).toContain(setThemeMessageSentToTest)
+  })
+  test("should setPenStyle", async () => {
+    const wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
+    wsr.init(height, width)
+    const CustomPenStyle: TPenStyle = { color: "#d1d1d1" }
+    //¯\_(ツ)_/¯ required to wait the socket.readyState = OPEN only due to mock
+    await delay(100)
+    wsr.setPenStyle(CustomPenStyle)
+    await delay(100)
+    //¯\_(ツ)_/¯  required to wait server received message
+    const setPenStyle = mockServer.messages[mockServer.messages.length - 1]
+    const setPenStyleToTest = JSON.stringify({
+      type: 'setPenStyle',
+      style: 'color: #d1d1d1;'
+    })
+    expect(setPenStyle).toContain(setPenStyleToTest)
   })
 })

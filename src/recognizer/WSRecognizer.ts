@@ -1,7 +1,9 @@
 import { TConverstionState, TRecognitionConfiguration } from "../@types/configuration/RecognitionConfiguration"
 import { TServerConfiguration } from "../@types/configuration/ServerConfiguration"
 import { IModel, TExport } from "../@types/model/Model"
-import { TWebSocketContentChangeEvent, TWebSocketErrorEvent, TWebSocketEvent, TWebSocketExportEvent, TWebSocketHMACChallengeEvent, TWebSocketPartChangeEvent, TWebSocketSVGPatchEvent } from "../@types/recognizer/WSRecognizer"
+import { TWebSocketErrorEvent, TWebSocketEvent, TWebSocketExportEvent, TWebSocketHMACChallengeEvent, TWebSocketPartChangeEvent, TWebSocketSVGPatchEvent } from "../@types/recognizer/WSRecognizer"
+import { TPenStyle } from "../@types/style/PenStyle"
+import { TTheme } from "../@types/style/Theme"
 import { TStroke } from "../@types/model/Stroke"
 import { Error as ErrorConst, WSEventType } from "../Constants"
 import { WSEvent } from "../event/WSEvent"
@@ -9,39 +11,59 @@ import { AbstractRecognizer } from "./AbstractRecognizer"
 import { computeHmac } from "./CryptoHelper"
 import StyleHelper from "../style/StyleHelper"
 import { DeferredPromise } from "../utils/DeferredPromise"
-import { TPenStyle } from "../@types/style/PenStyle"
-import { TTheme } from "../@types/style/Theme"
 import { isVersionSuperiorOrEqual } from "../utils/versionHelper"
+import { GlobalEvent } from "../event/GlobalEvent"
+/**
+ * A websocket dialog have this sequence :
+ * ---------- Client ------------------------------------- Server ----------------------------------
+ * init (send the new content package) ==================>
+ *                                     <================== hmacChallenge
+ * answerToHmacChallenge (send the hmac) =========>
+ * newPart (send the parameters ) ===============>
+ *                                       <=========== update
+ * addStrokes (send the strokes ) ============>
+ *                                       <=========== update
+ */
+export class WSRecognizer extends AbstractRecognizer {
+  #socket!: WebSocket
+  #pingCount = 0
+  #reconnectionCount = 0
+  #viewSizeHeight!: number
+  #viewSizeWidth!: number
+  // #contentPartCount = 0
+  #sessionId?: string
+  #currentPartId?: string
+  #currentErrorCode?: string | number
 
-export class WSRecognizer extends AbstractRecognizer
-{
-  private socket!: WebSocket
-  private pingCount = 0
-  private reconnectionCount = 0
-  // private contentPartCount = 0
-  private sessionId?: string
-  private currentPartId?: string
-  private viewSizeHeight!: number
-  private viewSizeWidth!: number
-  private currentErrorCode?: string | number
+  #penStyle?: TPenStyle
+  #penStyleClasses?: string
+  #theme?: TTheme
+
   wsEvent: WSEvent
 
-  #fileImportDeffered?: DeferredPromise<TExport>
+  #connected?: DeferredPromise<void>
+  #initialized?: DeferredPromise<void>
+  #addStrokeDeferred?: DeferredPromise<TExport>
+  #exportDeferred?: DeferredPromise<TExport>
+  #convertDeferred?: DeferredPromise<TExport>
+  #importDeferred?: DeferredPromise<TExport>
+  #resizeDeferred?: DeferredPromise<TExport>
+  #undoDeferred?: DeferredPromise<TExport>
+  #redoDeferred?: DeferredPromise<TExport>
+  #clearDeferred?: DeferredPromise<TExport>
 
-  constructor(serverConfig: TServerConfiguration, recognitionConfig: TRecognitionConfiguration)
-  {
+
+  constructor(serverConfig: TServerConfiguration, recognitionConfig: TRecognitionConfiguration) {
     super(serverConfig, recognitionConfig)
     this.wsEvent = new WSEvent()
   }
 
-  get url()
-  {
+  get url() {
     const scheme = (this.serverConfiguration.scheme === "https") ? "wss" : "ws"
-    return `${ scheme }://${ this.serverConfiguration.host }/api/v4.0/iink/document?applicationKey=${this.serverConfiguration.applicationKey}`
+    return `${ scheme }://${ this.serverConfiguration.host }/api/v4.0/iink/document?applicationKey=${ this.serverConfiguration.applicationKey }`
   }
 
-  get mimeTypes(): string[]
-  {
+  get mimeTypes(): string[] {
     switch (this.recognitionConfiguration.type.toLocaleLowerCase()) {
       case "text":
         return this.recognitionConfiguration.text.mimeTypes
@@ -55,33 +77,35 @@ export class WSRecognizer extends AbstractRecognizer
     }
   }
 
-  private infinitePing(): void
+  get globalEvent(): GlobalEvent
   {
-    this.pingCount++
-    if (this.serverConfiguration.websocket.maxPingLostCount < this.pingCount) {
-      this.close(1000, "PING_LOST")
-    } else if (this.socket.readyState <= 1) {
-      setTimeout(() =>
-      {
-        if (this.socket.readyState <= 1) {
-          this.socket.send(JSON.stringify({ type: "ping" }))
+    return GlobalEvent.getInstance()
+  }
+
+  private infinitePing(): void {
+    this.#pingCount++
+    if (this.serverConfiguration.websocket.maxPingLostCount < this.#pingCount) {
+      this.#socket.close(1000, "PING_LOST")
+    } else if (this.#socket.readyState <= 1) {
+      setTimeout(() => {
+        if (this.#socket.readyState <= 1) {
+          this.#socket.send(JSON.stringify({ type: "ping" }))
           this.infinitePing()
         }
       }, this.serverConfiguration.websocket.pingDelay)
     }
   }
 
-  private openCallback(): void
-  {
-    this.wsEvent.emitConnected()
+  private openCallback(): void {
+    this.#connected?.resolve()
     const params: TWebSocketEvent = {
-      type: this.sessionId ? "restoreIInkSession" : "newContentPackage",
-      iinkSessionId: this.sessionId,
+      type: this.#sessionId ? "restoreIInkSession" : "newContentPackage",
+      iinkSessionId: this.#sessionId,
       applicationKey: this.serverConfiguration.applicationKey,
       xDpi: 96,
       yDpi: 96,
-      viewSizeHeight: this.viewSizeHeight,
-      viewSizeWidth: this.viewSizeWidth
+      viewSizeHeight: this.#viewSizeHeight,
+      viewSizeWidth: this.#viewSizeWidth
     }
     if (isVersionSuperiorOrEqual(this.serverConfiguration.version, "2.0.4")) {
       params["myscript-client-name"] = "iink-ts"
@@ -90,10 +114,43 @@ export class WSRecognizer extends AbstractRecognizer
     this.send(params)
   }
 
-  private closeCallback(evt: CloseEvent): void
+  private rejectDeferredPending(error: Error): void
   {
+    if (this.#connected?.isPending) {
+      this.#connected?.reject(error)
+    }
+    if (this.#initialized?.isPending) {
+      this.#initialized?.reject(error)
+    }
+    if (this.#addStrokeDeferred?.isPending) {
+      this.#addStrokeDeferred?.reject(error)
+    }
+    if (this.#exportDeferred?.isPending) {
+      this.#exportDeferred?.reject(error)
+    }
+    if (this.#convertDeferred?.isPending) {
+      this.#convertDeferred?.reject(error)
+    }
+    if (this.#importDeferred?.isPending) {
+      this.#importDeferred?.reject(error)
+    }
+    if (this.#resizeDeferred?.isPending) {
+      this.#resizeDeferred?.reject(error)
+    }
+    if (this.#undoDeferred?.isPending) {
+      this.#undoDeferred?.reject(error)
+    }
+    if (this.#redoDeferred?.isPending) {
+      this.#redoDeferred?.reject(error)
+    }
+    if (this.#clearDeferred?.isPending) {
+      this.#clearDeferred.reject(error)
+    }
+  }
+
+  private closeCallback(evt: CloseEvent): void {
     let message = ""
-    if (!this.currentErrorCode) {
+    if (!this.#currentErrorCode) {
       switch (evt.code) {
         case 1000:
           // Normal Closure
@@ -138,20 +195,17 @@ export class WSRecognizer extends AbstractRecognizer
           message = ErrorConst.CANT_ESTABLISH
           break
       }
-      if (message) {
-        this.wsEvent.emitError(new Error(message))
-      }
     }
-    this.wsEvent.emitDisconnected(evt)
+    const error = new Error(message || evt.reason)
+
+    this.rejectDeferredPending(error)
+
+    if (!this.#currentErrorCode && evt.code !== 1000) {
+      this.globalEvent.emitError(error)
+    }
   }
 
-  // private errorCallback(e: Event): void
-  // {
-  //   this.wsEvent.emitError(new Error(e.type))
-  // }
-
-  private manageHMACChallengeMessage(websocketMessage: TWebSocketEvent): void
-  {
+  private manageHMACChallengeMessage(websocketMessage: TWebSocketEvent): void {
     const hmacChallengeMessage = websocketMessage as TWebSocketHMACChallengeEvent
     if (hmacChallengeMessage.hmacChallenge) {
       this.send({
@@ -160,66 +214,73 @@ export class WSRecognizer extends AbstractRecognizer
       })
     }
     if (hmacChallengeMessage.iinkSessionId) {
-      this.sessionId = hmacChallengeMessage.iinkSessionId
+      this.#sessionId = hmacChallengeMessage.iinkSessionId
     }
   }
 
-  private manageContentPackageDescriptionMessage(): void
-  {
-    this.reconnectionCount = 0
+  private manageContentPackageDescriptionMessage(): void {
+    this.#reconnectionCount = 0
 
     this.send({ ...this.recognitionConfiguration, type: "configuration" })
 
-    if (this.currentPartId) {
-      this.send({ type: "openContentPart", id: this.currentPartId, mimeTypes: this.mimeTypes })
+    if (this.#currentPartId) {
+      this.send({ type: "openContentPart", id: this.#currentPartId, mimeTypes: this.mimeTypes })
     }
     else {
       this.send({ type: "newContentPart", contentType: this.recognitionConfiguration.type, mimeTypes: this.mimeTypes })
     }
   }
 
-  private managePartChangeMessage(websocketMessage: TWebSocketEvent): void
-  {
+  private managePartChangeMessage(websocketMessage: TWebSocketEvent): void {
     const partChangeMessage = websocketMessage as TWebSocketPartChangeEvent
-    this.currentPartId = partChangeMessage.partId
-    this.wsEvent.emitPartChange(partChangeMessage)
+    this.#currentPartId = partChangeMessage.partId
   }
 
-  private manageContentChangeMessage(websocketMessage: TWebSocketEvent): void
-  {
-    const contentChangeMessage = websocketMessage as TWebSocketContentChangeEvent
-    this.wsEvent.emitContentChange(contentChangeMessage)
-  }
-
-  private manageExportMessage(websocketMessage: TWebSocketEvent): void
-  {
+  private manageExportMessage(websocketMessage: TWebSocketEvent): void {
     const exportMessage = websocketMessage as TWebSocketExportEvent
-    this.wsEvent.emitExported(exportMessage)
+    this.#initialized?.resolve()
+    this.#addStrokeDeferred?.resolve(exportMessage.exports)
+    this.#exportDeferred?.resolve(exportMessage.exports)
+    this.#convertDeferred?.resolve(exportMessage.exports)
+    this.#importDeferred?.resolve(exportMessage.exports)
+    this.#resizeDeferred?.resolve(exportMessage.exports)
+    this.#undoDeferred?.resolve(exportMessage.exports)
+    this.#redoDeferred?.resolve(exportMessage.exports)
+    this.#clearDeferred?.resolve(exportMessage.exports)
+    this.globalEvent.emitExported(exportMessage.exports)
   }
 
-  private manageSVGPatchMessage(websocketMessage: TWebSocketEvent): void
-  {
+  private manageErrorMessage(websocketMessage: TWebSocketEvent): void {
+    const err = websocketMessage as TWebSocketErrorEvent
+    this.#currentErrorCode = err.data?.code || err.code
+    let message = err.data?.message || err.message || ErrorConst.UNKNOW
+
+    switch (this.#currentErrorCode) {
+      case "no.activity":
+        message = ErrorConst.NO_ACTIVITY
+        break
+      case "access.not.granted":
+        message = ErrorConst.WRONG_CREDENTIALS
+        break
+      case "session.too.old":
+        message = ErrorConst.TOO_OLD
+        break
+    }
+    const error = new Error(message)
+    this.rejectDeferredPending(error)
+    this.globalEvent.emitError(error)
+  }
+
+  private manageSVGPatchMessage(websocketMessage: TWebSocketEvent): void {
     const svgPatchMessage = websocketMessage as TWebSocketSVGPatchEvent
     this.wsEvent.emitSVGPatch(svgPatchMessage)
   }
 
-  private manageErrorMessage(websocketMessage: TWebSocketEvent): void
-  {
-    const err = websocketMessage as TWebSocketErrorEvent
-    this.currentErrorCode = err.data?.code || err.code
-    let message = err.data?.message || err.message || ErrorConst.UNKNOW
-    if (this.currentErrorCode === "access.not.granted") {
-      message = ErrorConst.WRONG_CREDENTIALS
-    }
-    this.wsEvent.emitError(new Error(message))
-  }
-
-  private messageCallback(message: MessageEvent<string>): void
-  {
-    this.currentErrorCode = undefined
+  private messageCallback(message: MessageEvent<string>): void {
+    this.#currentErrorCode = undefined
     const websocketMessage: TWebSocketEvent = JSON.parse(message.data)
     if (websocketMessage.type !== "pong") {
-      this.pingCount = 0
+      this.#pingCount = 0
       switch (websocketMessage.type) {
         case "ack":
           this.manageHMACChallengeMessage(websocketMessage)
@@ -230,12 +291,9 @@ export class WSRecognizer extends AbstractRecognizer
         case "partChanged":
           this.managePartChangeMessage(websocketMessage)
           break
-        case "newPart":
-          this.wsEvent.emitConnectionActive()
-          break
-        case "contentChanged":
-          this.manageContentChangeMessage(websocketMessage)
-          break
+        // case "newPart":
+        //   this.#initialized?.resolve()
+        //   break
         case "exported":
           this.manageExportMessage(websocketMessage)
           break
@@ -250,7 +308,7 @@ export class WSRecognizer extends AbstractRecognizer
         //   recognitionContext.response(undefined, message.data)
         //   break
         case "fileChunkAck":
-          this.#fileImportDeffered?.resolve((websocketMessage as unknown) as TExport)
+          this.#importDeferred?.resolve((websocketMessage as unknown) as TExport)
           break
         //   case "idle":
         //     recognizerContext.idle = true
@@ -262,50 +320,53 @@ export class WSRecognizer extends AbstractRecognizer
     }
   }
 
-  init(height: number, width: number): void
-  {
+  async init(height: number, width: number): Promise<void> {
     try {
-      this.viewSizeHeight = height
-      this.viewSizeWidth = width
+      this.#connected = new DeferredPromise<void>()
+      this.#initialized = new DeferredPromise<void>()
 
-      this.socket = new WebSocket(this.url)
+      this.#viewSizeHeight = height
+      this.#viewSizeWidth = width
+      this.#pingCount = 0
+      if (this.#socket) {
+        this.#socket.close()
+        this.#socket.removeEventListener("close", this.closeCallback)
+        /* this.#socket.removeEventListener("error", this.errorCallback) */
+        this.#socket.removeEventListener("message", this.messageCallback)
+        this.#socket.removeEventListener("open", this.openCallback)
+      }
+      this.#socket = new WebSocket(this.url)
 
       if (this.serverConfiguration.websocket.pingEnabled) {
         this.infinitePing()
       }
 
-      this.socket.onopen = () => this.openCallback()
-      this.socket.onclose = (ev: CloseEvent) => this.closeCallback(ev)
-      // this.socket.onerror = (ev: Event) => this.errorCallback(ev)
+      this.#socket.onopen = () => this.openCallback()
+      this.#socket.onclose = (ev: CloseEvent) => this.closeCallback(ev)
+      /* this.#socket.onerror = (ev: Event) => this.errorCallback(ev) */
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      this.socket.onmessage = (ev: MessageEvent<any>) => this.messageCallback(ev)
+      this.#socket.onmessage = (ev: MessageEvent<any>) => this.messageCallback(ev)
 
-      this.wsEvent.emitInitialized()
+      return this.#initialized.promise
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       const error = new Error(ErrorConst.CANT_ESTABLISH)
-      error.name = err.code || "CANT_ESTABLISH"
-      this.wsEvent.emitError(err)
+      this.globalEvent.emitError(error)
+      this.#initialized?.reject(error)
+      return this.#initialized?.promise
     }
   }
 
-  canReconnect(): boolean
-  {
-    return this.serverConfiguration.websocket.autoReconnect &&
-      this.reconnectionCount <= this.serverConfiguration.websocket.maxRetryCount &&
-      (!this.currentErrorCode || !["api.invalid.format", "access.not.granted"].includes(this.currentErrorCode.toString()))
-  }
-
-  addStrokes(model: IModel): void
-  {
-    const strokes: TStroke[] = model.extractPendingStrokes()
+  async addStrokes(model: IModel): Promise<IModel> {
+    const localModel = model.getClone()
+    const strokes: TStroke[] = localModel.extractPendingStrokes()
     if (strokes.length === 0) {
-      return
+      return localModel
     }
+    this.#addStrokeDeferred = new DeferredPromise<TExport>()
     this.send({
       type: "addStrokes",
-      strokes: strokes.map((s: TStroke) =>
-      {
+      strokes: strokes.map((s: TStroke) => {
         return {
           pointerType: s.pointerType,
           pointerId: s.pointerId,
@@ -316,30 +377,42 @@ export class WSRecognizer extends AbstractRecognizer
         }
       })
     })
+    const exports = await this.#addStrokeDeferred.promise
+    localModel.updatePositionReceived()
+    localModel.mergeExport(exports)
+    return localModel
   }
 
-  send(message: TWebSocketEvent): void
-  {
-    if (this.socket.readyState === this.socket.OPEN) {
-      this.socket.send(JSON.stringify(message))
+  async send(message: TWebSocketEvent): Promise<void> {
+    await this.#connected?.promise
+    if (this.#socket.readyState === this.#socket.OPEN) {
+      this.#socket.send(JSON.stringify(message))
     } else {
-      this.socket.removeEventListener("close", this.closeCallback)
-      // this.socket.removeEventListener("error", this.errorCallback)
-      this.socket.removeEventListener("message", this.messageCallback)
-      this.socket.removeEventListener("open", this.openCallback)
-      throw new Error(WSEventType.DISCONNECTED)
+      if (this.#socket.readyState != this.#socket.CONNECTING) {
+        this.#reconnectionCount++
+        if (this.serverConfiguration.websocket.maxRetryCount >= this.#reconnectionCount) {
+          this.globalEvent.emitClearMessage()
+          await this.init(this.#viewSizeHeight, this.#viewSizeWidth)
+          this.setPenStyle(this.#penStyle as TPenStyle)
+          this.setPenStyleClasses(this.#penStyleClasses as string)
+          this.setTheme(this.#theme as TTheme)
+          this.send(message)
+        }
+        else {
+          throw new Error(WSEventType.DISCONNECTED)
+        }
+      }
     }
   }
 
-  close(code: number, reason: string): void
-  {
-    if (this.socket.readyState === this.socket.OPEN || this.socket.readyState === this.socket.CONNECTING) {
-      this.socket.close(code, reason)
+  close(code: number, reason: string): void {
+    if (this.#socket.readyState === this.#socket.OPEN || this.#socket.readyState === this.#socket.CONNECTING) {
+      this.#socket.close(code, reason)
     }
   }
 
-  setPenStyle(penStyle: TPenStyle): void
-  {
+  setPenStyle(penStyle: TPenStyle): void {
+    this.#penStyle = penStyle
     const message: TWebSocketEvent = {
       type: "setPenStyle",
       style: StyleHelper.penStyleToCSS(penStyle)
@@ -347,8 +420,8 @@ export class WSRecognizer extends AbstractRecognizer
     this.send(message)
   }
 
-  setPenStyleClasses(penStyleClasses: string): void
-  {
+  setPenStyleClasses(penStyleClasses: string): void {
+    this.#penStyleClasses = penStyleClasses
     const message: TWebSocketEvent = {
       type: "setPenStyleClasses",
       styleClasses: penStyleClasses
@@ -356,8 +429,8 @@ export class WSRecognizer extends AbstractRecognizer
     this.send(message)
   }
 
-  setTheme(theme: TTheme)
-  {
+  setTheme(theme: TTheme) {
+    this.#theme = theme
     const message: TWebSocketEvent = {
       type: "setTheme",
       theme: StyleHelper.themeToCSS(theme)
@@ -365,8 +438,9 @@ export class WSRecognizer extends AbstractRecognizer
     this.send(message)
   }
 
-  async export(model: IModel, requestedMimeTypes?: string[]): Promise<IModel | never>
-  {
+  async export(model: IModel, requestedMimeTypes?: string[]): Promise<IModel | never> {
+    this.#exportDeferred = new DeferredPromise<TExport>()
+    const localModel = model.getClone()
     let mimeTypes: string[] = requestedMimeTypes || []
     if (!mimeTypes.length) {
       switch (this.recognitionConfiguration.type) {
@@ -383,8 +457,7 @@ export class WSRecognizer extends AbstractRecognizer
           mimeTypes = this.recognitionConfiguration.text.mimeTypes
           break
         default:
-          throw new Error(`Recognition type "${ this.recognitionConfiguration.type }" is unknown.\n Possible types are:\n -DIAGRAM\n -MATH\n -Raw Content\n -TEXT`)
-          break
+          throw new Error(`Recognition type "${this.recognitionConfiguration.type}" is unknown.\n Possible types are:\n -DIAGRAM\n -MATH\n -Raw Content\n -TEXT`)
       }
     }
 
@@ -394,24 +467,24 @@ export class WSRecognizer extends AbstractRecognizer
 
     const message: TWebSocketEvent = {
       type: "export",
-      partId: this.currentPartId,
+      partId: this.#currentPartId,
       mimeTypes
     }
     this.send(message)
-    return model
+    const exports: TExport = await this.#exportDeferred.promise
+    localModel.updatePositionReceived()
+    localModel.mergeExport(exports)
+    return localModel
   }
 
-  async import(data: Blob, mimeType?: string): Promise<TExport | never>
-  {
+  async import(data: Blob, mimeType?: string): Promise<TExport | never> {
     const chunkSize = this.serverConfiguration.websocket.fileChunkSize
     const importFileId = Math.random().toString(10).substring(2, 6)
     // const messages = []
-    this.#fileImportDeffered = new DeferredPromise<TExport>()
-    const readBlob = (blob: Blob): Promise<string | never> =>
-    {
+    this.#importDeferred = new DeferredPromise<TExport>()
+    const readBlob = (blob: Blob): Promise<string | never> => {
       const fileReader = new FileReader()
-      return new Promise((resolve, reject) =>
-      {
+      return new Promise((resolve, reject) => {
         fileReader.onloadend = (ev) => resolve(ev.target?.result as string)
         fileReader.onerror = () => reject()
         fileReader.readAsText(blob)
@@ -436,52 +509,86 @@ export class WSRecognizer extends AbstractRecognizer
       }
       this.send(fileChuckMessage)
     }
-    return this.#fileImportDeffered.promise
+    return this.#importDeferred.promise
   }
 
-  async resize(model: IModel): Promise<IModel>
-  {
-    this.viewSizeHeight = model.height
-    this.viewSizeWidth = model.width
+  async resize(model: IModel): Promise<IModel> {
+    this.#resizeDeferred = new DeferredPromise<TExport>()
+    const localModel = model.getClone()
+    this.#viewSizeHeight = localModel.height
+    this.#viewSizeWidth = localModel.width
     const message: TWebSocketEvent = {
       type: "changeViewSize",
-      height: this.viewSizeHeight,
-      width: this.viewSizeWidth,
+      height: this.#viewSizeHeight,
+      width: this.#viewSizeWidth,
     }
     this.send(message)
-    return Promise.resolve(model)
+    const exports: TExport = await this.#resizeDeferred.promise
+    if (localModel.exports) {
+      Object.assign(localModel.exports, exports)
+    } else {
+      localModel.exports = exports
+    }
+    return localModel
   }
 
-  convert(conversionState?: TConverstionState): void
-  {
+  async convert(model: IModel, conversionState?: TConverstionState): Promise<IModel> {
+    this.#convertDeferred = new DeferredPromise<TExport>()
+    const localModel = model.getClone()
     const message: TWebSocketEvent = {
       type: "convert",
       conversionState
     }
     this.send(message)
+    const myExportConverted: TExport = await this.#convertDeferred.promise
+    localModel.updatePositionReceived()
+    if (localModel.converts) {
+      Object.assign(localModel.converts, myExportConverted)
+    } else {
+      localModel.converts = myExportConverted
+    }
+    return localModel
   }
 
-  undo(): void
-  {
+  async undo(model: IModel): Promise<IModel> {
+    const localModel = model.getClone()
+    this.#undoDeferred = new DeferredPromise<TExport>()
     const message: TWebSocketEvent = {
       type: "undo",
     }
     this.send(message)
+    const undoExports = await this.#undoDeferred.promise
+    localModel.updatePositionReceived()
+    localModel.mergeExport(undoExports)
+    this.#undoDeferred = undefined
+    return localModel
   }
 
-  redo(): void
-  {
+  async redo(model: IModel): Promise<IModel> {
+    const localModel = model.getClone()
+    this.#redoDeferred = new DeferredPromise<TExport>()
     const message: TWebSocketEvent = {
       type: "redo",
     }
     this.send(message)
+    const redoExports = await this.#redoDeferred.promise
+    localModel.updatePositionReceived()
+    localModel.mergeExport(redoExports)
+    this.#redoDeferred = undefined
+    return localModel
   }
 
-  clear(): void
-  {
+  async clear(model: IModel): Promise<IModel> {
+    const localModel = model.getClone()
+    this.#clearDeferred = new DeferredPromise<TExport>()
     const message: TWebSocketEvent = {
       type: "clear",
     }
     this.send(message)
+    const clearExports = await this.#clearDeferred?.promise
+    localModel.updatePositionReceived()
+    localModel.mergeExport(clearExports)
+    this.#clearDeferred = undefined
+    return localModel
   }
 }

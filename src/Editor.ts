@@ -196,6 +196,7 @@ export class Editor
 
   #initializeSmartGuide(): void
   {
+    this.#smartGuide.clear()
     if (this.configuration.rendering.smartGuide.enable) {
       let margin
       switch (this.configuration.recognition.type) {
@@ -215,13 +216,12 @@ export class Editor
           break
       }
       this.#smartGuide.init(this.wrapperHTML, margin as TMarginConfiguration, this.configuration.rendering)
-    } else {
-      this.#smartGuide.clear()
     }
   }
 
   #initalizeBehaviors(): void
   {
+    this.#cleanMessage()
     this.#behaviorsManager.init(this.wrapperHTML)
       .then(async () =>
       {
@@ -255,6 +255,12 @@ export class Editor
       })
   }
 
+  #cleanMessage()
+  {
+    this.#messageHTML.style.display = "none"
+    this.#messageHTML.innerHTML = ""
+  }
+
   #showError(err: Error)
   {
     this.#messageHTML.style.display = "initial"
@@ -281,7 +287,7 @@ export class Editor
     this.#messageHTML.classList.remove("error-msg")
     this.#messageHTML.innerText = message
     setTimeout(() => {
-      this.#messageHTML.style.display = "none"
+      this.#cleanMessage()
     }, timeout)
   }
 
@@ -293,6 +299,7 @@ export class Editor
     this.events.addEventListener(EventType.IMPORT, (evt: Event) => this.#onImport(evt))
     this.events.addEventListener(EventType.EXPORTED, (evt: Event) => this.#onExport(evt))
     this.events.addEventListener(EventType.NOTIF, (evt: Event) => this.#onNotif(evt))
+    this.events.addEventListener(EventType.CLEAR_MESSAGE, () => this.#cleanMessage())
   }
 
   #onNotif(evt: Event): void
@@ -305,7 +312,7 @@ export class Editor
   {
     if (this.configuration.rendering.smartGuide.enable) {
       const exports = (evt as CustomEvent).detail as TExport
-      if (exports["application/vnd.myscript.jiix"]) {
+      if (exports && exports["application/vnd.myscript.jiix"]) {
         const jjix = (exports["application/vnd.myscript.jiix"] as unknown) as string
         this.#smartGuide.update(JSON.parse(jjix))
       }
@@ -416,13 +423,13 @@ export class Editor
 
   async undo(): Promise<IModel>
   {
-    this.model = await this.behaviors.undo()
+    this.model = await this.behaviors.undo(this.model)
     return this.model
   }
 
   async redo(): Promise<IModel>
   {
-    this.model = await this.behaviors.redo()
+    this.model = await this.behaviors.redo(this.model)
     return this.model
   }
 
