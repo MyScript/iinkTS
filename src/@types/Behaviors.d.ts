@@ -2,7 +2,6 @@ import { IGrabber } from "./grabber/Grabber"
 import { IRenderer } from "./renderer/Renderer"
 import { IModel } from "./model/Model"
 import { IRecognizer } from "./recognizer/Recognizer"
-import { DeferredPromise } from "../utils/DeferredPromise"
 import { TTheme } from "./style/Theme"
 import { TConverstionState } from "./configuration/RecognitionConfiguration"
 import { TPenStyle } from "./style/PenStyle"
@@ -12,7 +11,6 @@ export interface IBehaviors
   grabber: IGrabber
   renderer: IRenderer
   recognizer: IRecognizer
-  initialized: DeferredPromise
 
   async init: (element: HTMLElement) => Promise<void | Error>
 
@@ -31,8 +29,8 @@ export interface IBehaviors
 
   async resize(model: IModel): Promise<IModel>
 
-  async undo(): Promise<IModel>
-  async redo(): Promise<IModel>
+  async undo(model: IModel): Promise<IModel>
+  async redo(model: IModel): Promise<IModel>
 
   async clear(model: IModel): Promise<IModel>
 

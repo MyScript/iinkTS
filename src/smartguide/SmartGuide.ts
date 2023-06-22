@@ -279,7 +279,6 @@ export class SmartGuide
     evt.stopPropagation()
     const target = evt.target as HTMLElement
     const candidate = target.innerText
-
     if (this.jiix && candidate !== this.wordToChange?.label && this.wordToChange?.candidates?.includes(candidate)) {
       this.jiix.words[parseInt(this.wordToChange?.id as string)].label = candidate
       this.globalEvent.emitImport(this.jiix, Exports.JIIX)

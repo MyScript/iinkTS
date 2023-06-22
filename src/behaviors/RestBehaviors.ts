@@ -17,7 +17,6 @@ export class RestBehaviors implements IBehaviors
   renderer: CanvasRenderer
   recognizer: RestRecognizer
   undoRedoManager: UndoRedoManager
-  initialized: DeferredPromise<void | Error>
 
   #triggerConfiguration: TTriggerConfiguration
   #resizeTimer?: ReturnType<typeof setTimeout>
@@ -31,7 +30,6 @@ export class RestBehaviors implements IBehaviors
     this.undoRedoManager = new UndoRedoManager(configuration["undo-redo"], model.getClone())
 
     this.#triggerConfiguration = configuration.triggers
-    this.initialized = new DeferredPromise<void | Error>()
   }
 
   get globalEvent(): GlobalEvent
@@ -50,8 +48,7 @@ export class RestBehaviors implements IBehaviors
   {
     this.grabber.attach(domElement)
     this.renderer.init(domElement)
-    this.initialized.resolve()
-    return this.initialized.promise
+    return Promise.resolve()
   }
 
   drawCurrentStroke(model: IModel): void
@@ -79,7 +76,7 @@ export class RestBehaviors implements IBehaviors
         } catch (error) {
           deferred.reject(error as Error)
         }
-      }, this.#triggerConfiguration.exportContentDelay)
+      }, this.#triggerConfiguration.exportContent === "QUIET_PERIOD" ? this.#triggerConfiguration.exportContentDelay : 0)
     } else {
       deferred.resolve(model)
     }
@@ -118,7 +115,8 @@ export class RestBehaviors implements IBehaviors
     }
   }
 
-  async undo(): Promise<IModel>
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async undo(_model: IModel): Promise<IModel>
   {
     const oldModel = this.undoRedoManager.undo()
     this.renderer.drawModel(oldModel)
@@ -127,7 +125,8 @@ export class RestBehaviors implements IBehaviors
     return modelUpdated
   }
 
-  async redo(): Promise<IModel>
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async redo(_model: IModel): Promise<IModel>
   {
     const newModel = this.undoRedoManager.redo()
     this.renderer.drawModel(newModel)

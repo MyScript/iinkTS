@@ -3,7 +3,6 @@ coverage
 .vscode
 
 docker/examples/delivery
-
 test/integration/screenshots
 docs
 dist

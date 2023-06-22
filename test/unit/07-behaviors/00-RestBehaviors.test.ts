@@ -178,7 +178,7 @@ describe('RestBehaviors.ts', () =>
     await rb.updateModelRendering(model2)
     await delay(DefaultConfiguration.triggers.exportContentDelay)
 
-    const undoModel = await rb.undo()
+    const undoModel = await rb.undo(model2)
     expect(undoModel).toEqual(model1)
   })
 
@@ -201,10 +201,10 @@ describe('RestBehaviors.ts', () =>
     const exportModel = await rb.updateModelRendering(model2)
     await delay(DefaultConfiguration.triggers.exportContentDelay)
 
-    const undoModel = await rb.undo()
+    const undoModel = await rb.undo(model2)
     expect(undoModel).toEqual(model1)
 
-    const redoModel = await rb.redo()
+    const redoModel = await rb.redo(undoModel)
     expect(redoModel.creationTime).toEqual(model2.creationTime)
     expect(redoModel.modificationDate).toEqual(exportModel.modificationDate)
   })

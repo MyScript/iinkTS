@@ -8,14 +8,19 @@ describe('Gesture', () => {
     setEditorConfiguration(page, configuration)
     await waitForEditorWebSocket(page)
 
-    await Promise.all([
+    const [firstModelExports] = await Promise.all([
       getExportedDatas(page),
-      write(page, helloStrikeStroke.strokes),
+      write(page, [helloStrikeStroke.strokes[0]]),
     ])
+    const firstJiixExport = JSON.parse(firstModelExports['application/vnd.myscript.jiix'])
+    expect(firstJiixExport.label).toEqual(helloStrikeStroke.exports['text/plain'][0])
 
-    const modelExports = await getEditorModelExports(page)
-    jiixExport = JSON.parse(modelExports['application/vnd.myscript.jiix'])
-    expect(jiixExport.label).toEqual('')
+    const [secondModelExports] = await Promise.all([
+      getExportedDatas(page),
+      write(page, [helloStrikeStroke.strokes[1]]),
+    ])
+    const secondJiixExport = JSON.parse(secondModelExports['application/vnd.myscript.jiix'])
+    expect(secondJiixExport.label).toEqual('')
   })
 
   test('should not apply gesture', async () => {
@@ -24,13 +29,18 @@ describe('Gesture', () => {
     setEditorConfiguration(page, configuration)
     await waitForEditorWebSocket(page)
 
-    await Promise.all([
+    const [firstModelExports] = await Promise.all([
       getExportedDatas(page),
-      write(page, helloStrikeStroke.strokes),
+      write(page, [helloStrikeStroke.strokes[0]]),
     ])
+    const firstJiixExport = JSON.parse(firstModelExports['application/vnd.myscript.jiix'])
+    expect(firstJiixExport.label).toEqual(helloStrikeStroke.exports['text/plain'][0])
 
-    const modelExports = await getEditorModelExports(page)
-    jiixExport = JSON.parse(modelExports['application/vnd.myscript.jiix'])
-    expect(jiixExport.label).not.toEqual('')
+    const [secondModelExports] = await Promise.all([
+      getExportedDatas(page),
+      write(page, [helloStrikeStroke.strokes[1]]),
+    ])
+    const secondJiixExport = JSON.parse(secondModelExports['application/vnd.myscript.jiix'])
+    expect(secondJiixExport.label).not.toEqual('')
   })
 })

@@ -162,10 +162,11 @@
               <label for="recognition-gesture">Gesture:</label>
               <input type="checkbox" id="recognition-gesture" name="recognition-gesture" />
             </div>
-            <div class="input-row">
-              <label for="mime-types">MIME types:</label>
-              <select id="mime-types" name="mime-types" multiple style="height: auto;">
-              </select>
+            <label for="mime-types">MIME types:</label>
+            <select id="mime-types" name="mime-types" multiple style="height: auto;">
+            </select>
+            <div style="font-style: italic;font-size: small;color:gray">
+              application/vnd.myscript.jiix is mandatory when smartGuide active
             </div>
           </div>
         </div>
@@ -340,12 +341,12 @@
       recognitionGuidesElement.checked = defaultConfiguration.recognition.text.guides.enable;
       recognitionGestureElement.checked = defaultConfiguration.recognition.gesture.enable;
 
-
       const defaultMimeTypes = defaultConfiguration.recognition[defaultConfiguration.recognition.type.toLocaleLowerCase()].mimeTypes
       recognitionMimeTypesElement.options = []
       mimeTypesList[recognitionTypeElement.value].forEach((mt, i) => {
         const selected = defaultMimeTypes.indexOf(mt) > -1 || (mt == 'application/vnd.myscript.jiix' && defaultConfiguration.rendering.smartGuide)
         recognitionMimeTypesElement.options[i] = new Option(mt, mt, selected, selected)
+        recognitionMimeTypesElement.options[i].disabled = mt == 'application/vnd.myscript.jiix' && defaultConfiguration.rendering.smartGuide
       })
 
       renderingSmartGuideElement.checked = defaultConfiguration.rendering.smartGuide;
@@ -404,6 +405,7 @@
         // Smart guide needs application/vnd.myscript.jiix export
         recognitionMimeTypesElement.querySelector('option[value="application/vnd.myscript.jiix"]').selected = true;
       }
+      recognitionMimeTypesElement.querySelector('option[value="application/vnd.myscript.jiix"]').disabled = e.srcElement.checked;
     })
 
     async function loadEditor() {
@@ -436,7 +438,7 @@
       });
 
       validBtn.addEventListener('click', () => {
-        const selectedMimeTypes = []
+        let selectedMimeTypes = []
         for (let o of recognitionMimeTypesElement.selectedOptions) {
           selectedMimeTypes.push(o.value)
         }
@@ -490,7 +492,7 @@
       });
     };
 
-    loadEditor()
+    loadEditor();
   </script>
 </body>
 

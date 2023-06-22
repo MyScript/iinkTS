@@ -70,6 +70,8 @@ export interface IModel
   idle: boolean
   isEmpty: boolean
 
+
+  mergeExport(exports: TExport)
   addPoint(stroke: TStroke, point: TPoint): void
   addStroke(stroke: TStroke): void
   addStrokeToGroup(stroke: TStroke, strokePenStyle: TPenStyle): void

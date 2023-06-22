@@ -181,7 +181,7 @@ export class SVGRenderer implements IRenderer
   destroy(): void
   {
     if (this.context.parent) {
-      this.context.parent.innerHTML = ""
+      this.context.parent.querySelectorAll("svg").forEach(n => n.remove())
     }
   }
 }
