@@ -1,118 +1,174 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="HandheldFriendly" content="true" />
 
-    <title>Rest Diagram iink</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="HandheldFriendly" content="true" />
 
-    <link rel="stylesheet" href="../examples.css" />
+  <title>Rest Diagram iink</title>
 
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
-  </head>
+  <link rel="stylesheet" href="../examples.css" />
 
-  <body>
-    <div>
-      <div id="progress"></div>
-      <div id="result"></div>
-      <nav>
-        <div class="button-div">
-          <button
-            id="clear"
-            class="nav-btn btn-fab-mini btn-lightBlue"
-            disabled
-          >
-            <img src="../assets/clear.svg" />
-          </button>
-          <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/undo.svg" />
-          </button>
-          <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/redo.svg" />
-          </button>
-        </div>
-        <div class="button-div" style="margin-left: auto">
-          <div id="preview-container">
-            <div id="preview-btn" class="classic-btn">
-              <img src="../assets/document.svg" />
-              <span>Preview</span>
-            </div>
-            <div id="edit-btn" class="classic-btn" style="display: none">
-              <img src="../assets/edit.svg" />
-              <span>Edit</span>
-            </div>
+  <script type="text/javascript" src="../../dist/iink.min.js"></script>
+</head>
+
+<body>
+  <div>
+    <div id="progress"></div>
+    <div id="result"></div>
+    <nav>
+      <div class="button-div">
+        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/clear.svg" />
+        </button>
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/undo.svg" />
+        </button>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/redo.svg" />
+        </button>
+      </div>
+      <div class="button-div" style="margin-left: auto">
+        <div id="preview-container">
+          <div id="preview-btn" class="classic-btn">
+            <img src="../assets/document.svg" />
+            <span>Preview</span>
+          </div>
+          <div id="edit-btn" class="classic-btn" style="display: none">
+            <img src="../assets/edit.svg" />
+            <span>Edit</span>
           </div>
         </div>
-      </nav>
-      <div id="editor" touch-action="none">
-        <svg id="converted-svg"></svg>
       </div>
+    </nav>
+    <div id="editor" touch-action="none">
+      <svg id="converted-svg"></svg>
     </div>
-    <script>
-      const editorElement = document.getElementById('editor');
-      const resultElement = document.getElementById('result');
-      const languageElement = document.getElementById('language');
-      const clearElement = document.getElementById('clear');
-      const editButton = document.getElementById('edit-btn');
-      const previewButton = document.getElementById('preview-btn');
-      const progressElement = document.getElementById('progress');
-      const undoElement = document.getElementById('undo');
-      const redoElement = document.getElementById('redo');
+  </div>
+  <script>
+    const editorElement = document.getElementById('editor');
+    const resultElement = document.getElementById('result');
+    const languageElement = document.getElementById('language');
+    const clearElement = document.getElementById('clear');
+    const editButton = document.getElementById('edit-btn');
+    const previewButton = document.getElementById('preview-btn');
+    const progressElement = document.getElementById('progress');
+    const undoElement = document.getElementById('undo');
+    const redoElement = document.getElementById('redo');
+    let editor;
 
-      let exports = '';
-      let firstChanged = true;
-      let undoRedoClearChanged = false;
-      let isPreview = false;
+    let exports = '';
+    let firstChanged = true;
+    let undoRedoClearChanged = false;
+    let isPreview = false;
 
-      function launchLoader() {
-        progressElement.style.transition = ' width 10s';
-        progressElement.style.opacity = '1';
-        progressElement.style.width = `${editorElement.clientWidth / 2}px`;
+    function launchLoader() {
+      progressElement.style.transition = ' width 10s';
+      progressElement.style.opacity = '1';
+      progressElement.style.width = `${ editorElement.clientWidth / 2 }px`;
+    }
+
+    function manageEmptySvg() {
+      if (document.getElementById('converted-svg')) {
+        document.getElementById('converted-svg').remove();
       }
+      const emptySvgElement = document.createElement('svg');
+      emptySvgElement.id = 'converted-svg';
+      editorElement.appendChild(emptySvgElement);
+    }
 
-      function manageEmptySvg() {
-        if (document.getElementById('converted-svg')) {
-          document.getElementById('converted-svg').remove();
+    function manageEditMode(withExport) {
+      if (withExport && isPreview && editor.model.rawStrokes.length > 0) {
+        const convertParams = {
+          conversionState: 'DIGITAL_EDIT',
+          mimeTypes: [
+            'image/svg+xml'
+          ]
         }
-        const emptySvgElement = document.createElement('svg');
-        emptySvgElement.id = 'converted-svg';
-        editorElement.appendChild(emptySvgElement);
+        editor.convert(convertParams);
+        launchLoader();
+      } else if (editor.model.rawStrokes.length === 0) {
+        manageEmptySvg();
       }
+      const convertedSvg = document.getElementById('converted-svg');
+      const canvasRendering = document.querySelector('.ms-rendering-canvas.ms-canvas');
+      const canvasCapture = document.querySelector('.ms-capture-canvas.ms-canvas');
+      if (!isPreview) {
+        convertedSvg.style.visibility = 'hidden';
+        canvasRendering.style.display = 'initial';
+        canvasCapture.style.display = 'initial';
+        editorElement.style.pointerEvents = 'initial';
+      } else {
+        convertedSvg.style.visibility = 'visible';
+        canvasRendering.style.display = 'none';
+        canvasCapture.style.display = 'none';
+        editorElement.style.pointerEvents = 'none';
+      }
+    }
 
-      function manageEditMode(withExport) {
-        if (withExport && isPreview && editor.model.rawStrokes.length > 0) {
-          const convertParams = {
-            conversionState: 'DIGITAL_EDIT',
-            mimeTypes: [
-              'image/svg+xml'
-            ]
+    /**
+     * Instanciate editor
+     * @param {Element} The DOM element to attach the ink paper
+     * @param {Object} The recognition parameters
+     */
+    async function loadEditor() {
+      const res = await fetch('../server-configuration.json')
+      const conf = await res.json()
+      const options = {
+        configuration: {
+          server: {
+            ...conf,
+            protocol: 'REST',
+          },
+          recognition: {
+            type: 'DIAGRAM'
+          },
+        },
+      };
+
+      editor = new iink.Editor(editorElement, options);
+
+      editor.events.addEventListener('changed', (event) => {
+        undoElement.disabled = !event.detail.canUndo;
+        redoElement.disabled = !event.detail.canRedo;
+        clearElement.disabled = !event.detail.canClear;
+      });
+
+      editor.events.addEventListener('exported', (event) => {
+        resultElement.innerHTML = JSON.stringify(event.detail || {});
+      });
+
+      editor.events.addEventListener('convert', (evt) => {
+        const exports = evt.detail;
+        if (exports && exports['image/svg+xml']) {
+          progressElement.style.transition = ' width 0.3s';
+          progressElement.style.width = `${ editorElement.clientWidth }px`;
+          setTimeout(() => {
+            progressElement.style.opacity = '0';
+            progressElement.style.width = '0';
+          }, 300);
+          clearElement.disabled = false;
+          const divSvgElement = document.createElement('div');
+          divSvgElement.innerHTML = exports['image/svg+xml'].trim();
+          const svgElement = divSvgElement.firstChild;
+          svgElement.id = 'converted-svg';
+          svgElement.setAttribute('width', editorElement.clientWidth);
+          svgElement.setAttribute('height', editorElement.clientHeight);
+          svgElement.setAttribute(
+            'viewBox',
+            `0 0 ${ editorElement.clientWidth / 3.77953 } ${ editorElement.clientHeight / 3.77953
+            }`
+          );
+          if (document.getElementById('converted-svg')) {
+            document.getElementById('converted-svg').remove();
           }
-          editor.convert(convertParams);
-          launchLoader();
-        } else if (editor.model.rawStrokes.length === 0) {
-          manageEmptySvg();
+          editorElement.appendChild(svgElement);
+          manageEditMode(false);
         }
-        const convertedSvg = document.getElementById('converted-svg');
-        const canvasRendering = document.querySelector('.ms-rendering-canvas.ms-canvas');
-        const canvasCapture = document.querySelector('.ms-capture-canvas.ms-canvas');
-        if (!isPreview) {
-          convertedSvg.style.visibility = 'hidden';
-          canvasRendering.style.display = 'initial';
-          canvasCapture.style.display = 'initial';
-          editorElement.style.pointerEvents = 'initial';
-        } else {
-          convertedSvg.style.visibility = 'visible';
-          canvasRendering.style.display = 'none';
-          canvasCapture.style.display = 'none';
-          editorElement.style.pointerEvents = 'none';
-        }
-      }
+      });
 
       clearElement.addEventListener('click', () => {
         undoRedoClearChanged = true;
@@ -142,72 +198,13 @@
         manageEditMode(false);
       });
 
-      /**
-       * Instanciate editor
-       * @param {Element} The DOM element to attach the ink paper
-       * @param {Object} The recognition parameters
-       */
-      const options = {
-        configuration: {
-          server: {
-            protocol: 'REST',
-            scheme: 'https',
-            host: 'cloud.myscript.com',
-            applicationKey: '80a7f78d-939c-48e0-84a8-7794d6fbf624',
-            hmacKey: 'df2ba19a-7703-4ab4-9164-00dd33357745',
-          },
-          recognition: {
-            type: 'DIAGRAM'
-          },
-        },
-      };
-
-      const editor = new iink.Editor(editorElement, options);
-
-      editor.events.addEventListener('changed', (event) => {
-        undoElement.disabled = !event.detail.canUndo;
-        redoElement.disabled = !event.detail.canRedo;
-        clearElement.disabled = !event.detail.canClear;
-      });
-
-
-      editor.events.addEventListener('exported', (event) => {
-        resultElement.innerHTML = JSON.stringify(event.detail || {});
-      });
-
-      editor.events.addEventListener('convert', (evt) => {
-        const exports = evt.detail;
-        if (exports && exports['image/svg+xml']) {
-          progressElement.style.transition = ' width 0.3s';
-          progressElement.style.width = `${editorElement.clientWidth}px`;
-          setTimeout(() => {
-            progressElement.style.opacity = '0';
-            progressElement.style.width = '0';
-          }, 300);
-          clearElement.disabled = false;
-          const divSvgElement = document.createElement('div');
-          divSvgElement.innerHTML = exports['image/svg+xml'].trim();
-          const svgElement = divSvgElement.firstChild;
-          svgElement.id = 'converted-svg';
-          svgElement.setAttribute('width', editorElement.clientWidth);
-          svgElement.setAttribute('height', editorElement.clientHeight);
-          svgElement.setAttribute(
-            'viewBox',
-            `0 0 ${editorElement.clientWidth / 3.77953} ${
-              editorElement.clientHeight / 3.77953
-            }`
-          );
-          if (document.getElementById('converted-svg')) {
-            document.getElementById('converted-svg').remove();
-          }
-          editorElement.appendChild(svgElement);
-          manageEditMode(false);
-        }
-      });
-
       window.addEventListener('resize', () => {
         editor.resize();
       });
-    </script>
-  </body>
+    }
+
+    loadEditor()
+  </script>
+</body>
+
 </html>

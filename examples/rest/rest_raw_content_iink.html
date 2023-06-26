@@ -1,59 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="HandheldFriendly" content="true" />
 
-    <title>Rest Raw Content iink</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="HandheldFriendly" content="true" />
 
-    <link rel="stylesheet" href="../examples.css" />
+  <title>Rest Raw Content iink</title>
 
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
+  <link rel="stylesheet" href="../examples.css" />
 
-    <style>
-      #result span {
-        font-size: small;
-        padding: 12px;
-      }
-    </style>
-  </head>
+  <script type="text/javascript" src="../../dist/iink.min.js"></script>
 
-  <body>
-    <div id="result"></div>
-    <div>
-      <nav>
-        <div class="button-div">
-          <button
-            id="clear"
-            class="nav-btn btn-fab-mini btn-lightBlue"
-            disabled
-          >
-            <img src="../assets/clear.svg" />
-          </button>
-          <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/undo.svg" />
-          </button>
-          <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/redo.svg" />
-          </button>
-        </div>
-        <select id="language"></select>
-      </nav>
-      <div id="editor" touch-action="none"></div>
-    </div>
-    <script>
-      const editorElement = document.getElementById('editor');
-      const resultElement = document.getElementById('result');
-      const languageElement = document.getElementById('language');
-      const clearElement = document.getElementById('clear');
-      const undoElement = document.getElementById('undo');
-      const redoElement = document.getElementById('redo');
+  <style>
+    #result span {
+      font-size: small;
+      padding: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="result"></div>
+  <div>
+    <nav>
+      <div class="button-div">
+        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/clear.svg" />
+        </button>
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/undo.svg" />
+        </button>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/redo.svg" />
+        </button>
+      </div>
+      <select id="language"></select>
+    </nav>
+    <div id="editor" touch-action="none"></div>
+  </div>
+  <script>
+    const editorElement = document.getElementById('editor');
+    const resultElement = document.getElementById('result');
+    const languageElement = document.getElementById('language');
+    const clearElement = document.getElementById('clear');
+    const undoElement = document.getElementById('undo');
+    const redoElement = document.getElementById('redo');
+    let editor;
+
+    /**
+     * Instanciate Editor
+     * @param {Element} The DOM element to attach the ink paper
+     * @param {Object} The recognition parameters
+     */
+    async function loadEditor() {
+      const res = await fetch('../server-configuration.json')
+      const conf = await res.json()
+      const options = {
+        configuration: {
+          server: {
+            ...conf,
+            protocol: 'REST',
+          },
+          recognition: {
+            type: 'Raw Content',
+          },
+        },
+      };
+      editor = new iink.Editor(editorElement, options);
+
+      editor.events.addEventListener('changed', (event) => {
+        undoElement.disabled = !event.detail.canUndo;
+        redoElement.disabled = !event.detail.canRedo;
+        clearElement.disabled = !event.detail.canClear;
+      });
+
+      editor.events.addEventListener('exported', (evt) => {
+        const exports = evt.detail;
+        if (exports && exports['application/vnd.myscript.jiix']) {
+          resultElement.innerHTML = `<span>${ JSON.stringify(
+            exports['application/vnd.myscript.jiix'].elements
+          ) }</span>`;
+        } else {
+          resultElement.innerHTML = '';
+        }
+      });
+
+      editor.events.addEventListener('loaded', async (evt) => {
+        if (languageElement.options.length === 0) {
+          const currentLanguage = editor.configuration.recognition.lang;
+          const res = await iink.getAvailableLanguageList(editor.configuration);
+          Object.keys(res.result).forEach(function (key) {
+            const selected = currentLanguage === key;
+            languageElement.options[languageElement.options.length] =
+              new Option(res.result[key], key, selected, selected);
+          });
+        }
+      });
 
       languageElement.addEventListener('change', (e) => {
         const configuration = JSON.parse(JSON.stringify(editor.configuration));
@@ -74,59 +119,13 @@
         resultElement.innerHTML = '';
       });
 
-      /**
-       * Instanciate Editor
-       * @param {Element} The DOM element to attach the ink paper
-       * @param {Object} The recognition parameters
-       */
-      const options = {
-        configuration: {
-          server: {
-            protocol: 'REST',
-            scheme: 'https',
-            host: 'cloud.myscript.com',
-            applicationKey: '80a7f78d-939c-48e0-84a8-7794d6fbf624',
-            hmacKey: 'df2ba19a-7703-4ab4-9164-00dd33357745',
-          },
-          recognition: {
-            type: 'Raw Content',
-          },
-        },
-      };
-      const editor = new iink.Editor(editorElement, options);
-
-      editor.events.addEventListener('changed', (event) => {
-        undoElement.disabled = !event.detail.canUndo;
-        redoElement.disabled = !event.detail.canRedo;
-        clearElement.disabled = !event.detail.canClear;
-      });
-
-      editor.events.addEventListener('exported', (evt) => {
-        const exports = evt.detail;
-        if (exports && exports['application/vnd.myscript.jiix']) {
-          resultElement.innerHTML = `<span>${JSON.stringify(
-            exports['application/vnd.myscript.jiix'].elements
-          )}</span>`;
-        } else {
-          resultElement.innerHTML = '';
-        }
-      });
-
-      editor.events.addEventListener('loaded', async (evt) => {
-        if (languageElement.options.length === 0) {
-          const currentLanguage = editor.configuration.recognition.lang;
-          const res = await iink.getAvailableLanguageList(editor.configuration);
-          Object.keys(res.result).forEach(function (key) {
-            const selected = currentLanguage === key;
-            languageElement.options[languageElement.options.length] =
-              new Option(res.result[key], key, selected, selected);
-          });
-        }
-      });
-
       window.addEventListener('resize', () => {
         editor.resize();
       });
-    </script>
-  </body>
+    }
+
+    loadEditor()
+  </script>
+</body>
+
 </html>
