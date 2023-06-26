@@ -101,6 +101,18 @@ module.exports.waitEditorLoaded = async (page) => {
   return page.evaluate(loaded)
 }
 
-module.exports.waitForEditorInitialization = async (page) => {
+module.exports.waitForEditorRest = async (page) => {
+  await Promise.all([
+    page.waitForSelector('#ms-rendering-canvas'),
+    page.waitForSelector('#ms-capture-canvas'),
+  ])
+  return page.evaluate('editor.initializationPromise')
+}
+
+module.exports.waitForEditorWebSocket = async (page) => {
+  await Promise.all([
+    page.waitForSelector('svg[data-layer="CAPTURE"]'),
+    page.waitForSelector('svg[data-layer="MODEL"]'),
+  ])
   return page.evaluate('editor.initializationPromise')
 }

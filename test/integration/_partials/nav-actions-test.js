@@ -1,11 +1,8 @@
-const { getExportedDatas, write, waitEditorLoaded, getEditor } = require("../helper")
+const { getExportedDatas, write, getEditor } = require("../helper")
 const { h, hello } = require("../strokesDatas")
 
 describe('Nav actions', () => {
   test('should clear', async () => {
-    // await first empty export
-    await getExportedDatas(page)
-
     const [exportedDatas] = await Promise.all([
       getExportedDatas(page),
       write(page, h.strokes),
@@ -33,9 +30,6 @@ describe('Nav actions', () => {
   })
 
   test('should undo/redo', async () => {
-    // await first empty export
-    await getExportedDatas(page)
-
     const editorEl = await page.waitForSelector('#editor')
     await Promise.all([
       getExportedDatas(page),
@@ -78,13 +72,14 @@ describe('Nav actions', () => {
   })
 
   test('should change language', async () => {
-    // await first empty export
-    await getExportedDatas(page)
-
     await Promise.all([
       getExportedDatas(page),
       write(page, h.strokes),
     ])
+
+    //await css animation
+    await page.waitForTimeout(1500)
+
     let resultElement = page.locator('#result')
     resultText = await resultElement.textContent()
     expect(resultText).toStrictEqual(h.exports['text/plain'].at(-1))
@@ -93,6 +88,9 @@ describe('Nav actions', () => {
       getExportedDatas(page),
       page.selectOption('#language', 'fr_FR'),
     ])
+
+    //await css animation
+    await page.waitForTimeout(1500)
 
     resultElement = page.locator('#result')
     resultText = await resultElement.textContent()

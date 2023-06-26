@@ -1,60 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="HandheldFriendly" content="true" />
-    <title>Websocket Text iink</title>
-    <link rel="stylesheet" href="../examples.css" />
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
-  </head>
 
-  <body>
-    <div id="result"></div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="HandheldFriendly" content="true" />
+  <title>Websocket Text iink</title>
+  <link rel="stylesheet" href="../examples.css" />
+  <script type="text/javascript" src="../../dist/iink.min.js"></script>
+</head>
 
-    <nav>
-      <div class="button-div">
-        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/clear.svg" />
-        </button>
-        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/undo.svg" />
-        </button>
-        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/redo.svg" />
-        </button>
-      </div>
-      <select id="language"></select>
-    </nav>
+<body>
+  <div id="result"></div>
 
-    <div id="editor" touch-action="none"></div>
+  <nav>
+    <div class="button-div">
+      <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+        <img src="../assets/clear.svg" />
+      </button>
+      <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+        <img src="../assets/undo.svg" />
+      </button>
+      <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+        <img src="../assets/redo.svg" />
+      </button>
+    </div>
+    <select id="language"></select>
+  </nav>
 
-    <script>
-      const editorElement = document.getElementById('editor');
-      const resultElement = document.getElementById('result');
-      const languageElement = document.getElementById('language');
-      const clearElement = document.getElementById('clear');
-      const undoElement = document.getElementById('undo');
-      const redoElement = document.getElementById('redo');
+  <div id="editor" touch-action="none"></div>
 
-      /**
-       * Instanciate Editor
-       * @param {Element} The DOM element to attach the ink paper
-       * @param {Object} The editor options
-       */
+  <script>
+    const editorElement = document.getElementById('editor');
+    const resultElement = document.getElementById('result');
+    const languageElement = document.getElementById('language');
+    const clearElement = document.getElementById('clear');
+    const undoElement = document.getElementById('undo');
+    const redoElement = document.getElementById('redo');
+    let editor;
+
+    /**
+     * Instanciate Editor
+     * @param {Element} The DOM element to attach the ink paper
+     * @param {Object} The editor options
+     */
+    async function loadEditor() {
+      const res = await fetch('../server-configuration.json')
+      const conf = await res.json()
       const options = {
         configuration: {
           server: {
+            ...conf,
             protocol: 'WEBSOCKET',
-            scheme: 'https',
-            host: 'cloud.myscript.com',
-            applicationKey: '80a7f78d-939c-48e0-84a8-7794d6fbf624',
-            hmacKey: 'df2ba19a-7703-4ab4-9164-00dd33357745'
           },
           recognition: {
             type: 'TEXT',
@@ -62,7 +61,7 @@
         },
       };
 
-      const editor = new iink.Editor(editorElement, options);
+      editor = new iink.Editor(editorElement, options);
 
       editor.events.addEventListener('loaded', async (event) => {
         if (languageElement.options.length === 0) {
@@ -108,6 +107,10 @@
       window.addEventListener('resize', () => {
         editor.resize();
       });
-    </script>
-  </body>
+    }
+
+    loadEditor()
+  </script>
+</body>
+
 </html>

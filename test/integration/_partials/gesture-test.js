@@ -1,4 +1,4 @@
-const { getEditorConfiguration, setEditorConfiguration, waitEditorLoaded, getExportedDatas, write, getEditorModelExports } = require("../helper")
+const { waitForEditorWebSocket, getEditorConfiguration, setEditorConfiguration, getExportedDatas, write, getEditorModelExports } = require("../helper")
 const { helloStrikeStroke } = require("../strokesDatas")
 
 describe('Gesture', () => {
@@ -6,9 +6,7 @@ describe('Gesture', () => {
     const configuration = await getEditorConfiguration(page)
     configuration.recognition.gesture.enable = true
     setEditorConfiguration(page, configuration)
-    await waitEditorLoaded(page)
-    // await first empty export
-    await getExportedDatas(page)
+    await waitForEditorWebSocket(page)
 
     await Promise.all([
       getExportedDatas(page),
@@ -24,10 +22,7 @@ describe('Gesture', () => {
     const configuration = await getEditorConfiguration(page)
     configuration.recognition.gesture.enable = false
     setEditorConfiguration(page, configuration)
-    await waitEditorLoaded(page)
-    // await first empty export
-    await getExportedDatas(page)
-
+    await waitForEditorWebSocket(page)
 
     await Promise.all([
       getExportedDatas(page),

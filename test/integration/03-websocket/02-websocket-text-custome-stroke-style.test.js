@@ -1,8 +1,4 @@
-const {
-  write,
-  getExportedDatas,
-  waitForEditorInitialization,
-} = require('../helper')
+const { waitForEditorWebSocket, write, getExportedDatas } = require('../helper')
 const { h } = require('../strokesDatas')
 
 function hexToRgbA(hex) {
@@ -27,7 +23,8 @@ describe('Websocket Text Customize Stroke Style', () => {
 
   beforeEach(async () => {
     await page.reload({ waitUntil: 'networkidle'})
-    await waitForEditorInitialization(page)
+    await waitForEditorWebSocket(page)
+    await page.waitForTimeout(1000)
   })
 
   test('should have title', async () => {
@@ -40,7 +37,7 @@ describe('Websocket Text Customize Stroke Style', () => {
       getExportedDatas(page),
       write(page, h.strokes),
     ])
-    const defaultThemeColor = await page.evaluate('options.theme.ink.color')
+    const defaultThemeColor = await page.evaluate('editor.theme.ink.color')
     const path = page.locator(`path[fill="${hexToRgbA(defaultThemeColor)}"]`)
     expect(await path.count()).toEqual(1)
   })

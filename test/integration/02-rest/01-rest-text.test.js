@@ -1,7 +1,7 @@
 const {
+  waitForEditorRest,
   write,
   getExportedDatas,
-  getEditor,
   setEditorConfiguration,
   getEditorConfiguration,
   waitEditorLoaded,
@@ -16,6 +16,7 @@ describe('Rest Text', () => {
 
   beforeEach(async () => {
     await page.reload({ waitUntil: 'networkidle'})
+    await waitForEditorRest(page)
   })
 
   test('should have title', async () => {

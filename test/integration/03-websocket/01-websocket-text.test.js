@@ -1,4 +1,4 @@
-const { write, getExportedDatas, waitForEditorInitialization } = require('../helper')
+const { waitForEditorWebSocket, write, getExportedDatas } = require('../helper')
 const { h } = require('../strokesDatas')
 
 describe('Websocket Text', () => {
@@ -8,7 +8,8 @@ describe('Websocket Text', () => {
 
   beforeEach(async () => {
     await page.reload({ waitUntil: 'networkidle'})
-    await waitForEditorInitialization(page)
+    await waitForEditorWebSocket(page)
+    await page.waitForTimeout(1000)
   })
 
   test('should have title', async () => {
@@ -17,8 +18,6 @@ describe('Websocket Text', () => {
   })
 
   test('should export application/vnd.myscript.jiix', async () => {
-    // await first empty export
-    await getExportedDatas(page)
     const [exports] = await Promise.all([
       getExportedDatas(page),
       write(page, h.strokes),

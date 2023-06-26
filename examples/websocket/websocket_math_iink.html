@@ -59,32 +59,19 @@
       const undoElement = document.getElementById('undo');
       const redoElement = document.getElementById('redo');
 
-      clearElement.addEventListener('click', async () => {
-        editor.clear();
-        resultElement.innerHTML = '';
-      });
-
-      undoElement.addEventListener('click', () => {
-        editor.undo();
-      });
-
-      redoElement.addEventListener('click', () => {
-        editor.redo();
-      });
-
       /**
        * Instanciate Editor
        * @param {Element} The DOM element to attach the ink paper
        * @param {Object} The editor options
        */
+    async function loadEditor() {
+      const res = await fetch('../server-configuration.json')
+      const conf = await res.json()
       const options = {
         configuration: {
           server: {
+            ...conf,
             protocol: 'WEBSOCKET',
-            scheme: 'https',
-            host: 'cloud.myscript.com',
-            applicationKey: '80a7f78d-939c-48e0-84a8-7794d6fbf624',
-            hmacKey: 'df2ba19a-7703-4ab4-9164-00dd33357745',
           },
           recognition: {
             type: 'MATH',
@@ -126,9 +113,25 @@
         }
       });
 
+      clearElement.addEventListener('click', async () => {
+        editor.clear();
+        resultElement.innerHTML = '';
+      });
+
+      undoElement.addEventListener('click', () => {
+        editor.undo();
+      });
+
+      redoElement.addEventListener('click', () => {
+        editor.redo();
+      });
+
       window.addEventListener('resize', () => {
         editor.resize();
       });
+    }
+
+    loadEditor()
     </script>
   </body>
 </html>

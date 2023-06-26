@@ -1,4 +1,4 @@
-const { getEditorConfiguration, setEditorConfiguration, waitEditorLoaded, write, getExportedDatas, waitForEditorInitialization } = require("../helper")
+const { getEditorConfiguration, setEditorConfiguration, write, getExportedDatas, waitForEditorWebSocket } = require("../helper")
 const { h, hello, helloOneStroke } = require("../strokesDatas")
 
 describe('SmartGuide', () => {
@@ -6,7 +6,8 @@ describe('SmartGuide', () => {
     const configuration = await getEditorConfiguration(page)
     configuration.rendering.smartGuide.enable = false
     setEditorConfiguration(page, configuration)
-    await waitForEditorInitialization(page)
+    await waitForEditorWebSocket(page)
+
     await Promise.all([
       getExportedDatas(page),
       write(page, h.strokes)
@@ -19,7 +20,8 @@ describe('SmartGuide', () => {
     const configuration = await getEditorConfiguration(page)
     configuration.rendering.smartGuide.enable = true
     setEditorConfiguration(page, configuration)
-    await waitEditorLoaded(page)
+    await waitForEditorWebSocket(page)
+
     await Promise.all([
       getExportedDatas(page),
       write(page, h.strokes)
@@ -46,9 +48,6 @@ describe('SmartGuide', () => {
   })
 
   test('should select candidate', async () => {
-    // await first empty export
-    await getExportedDatas(page)
-
     const [exports] = await Promise.all([
       getExportedDatas(page),
       write(page, hello.strokes)
@@ -72,9 +71,6 @@ describe('SmartGuide', () => {
   })
 
   test('should convert', async () => {
-    // await first empty export
-    await getExportedDatas(page)
-
     await Promise.all([
       getExportedDatas(page),
       write(page, helloOneStroke.strokes)
