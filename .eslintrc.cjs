@@ -5,8 +5,9 @@ module.exports = {
     node: true,
     es6: true,
   },
+  parser: "@typescript-eslint/parser",
   parserOptions: {
-    parser: "@typescript-eslint/parser",
+    project: "./tsconfig.json"
   },
   plugins: [
     "@typescript-eslint"
@@ -14,10 +15,9 @@ module.exports = {
   extends: [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
-    "plugin:playwright/jest-playwright",
   ],
   rules: {
-    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/no-explicit-any": "error",
     "@typescript-eslint/no-var-requires": "error",
     "quotes": "off",
     "@typescript-eslint/quotes": [

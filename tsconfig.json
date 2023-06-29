@@ -36,11 +36,12 @@
     "expect-playwright",
   ],
   "include": [
-    "src/**/*"
+    "."
   ],
   "exclude": [
     "node_modules",
     "dist",
-    "examples/**"
+    "examples/**",
+    "plugins"
   ]
 }
