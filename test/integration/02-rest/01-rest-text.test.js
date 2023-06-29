@@ -10,6 +10,7 @@ const {
 const { h, hello } = require('../strokesDatas')
 
 describe('Rest Text', () => {
+
   beforeAll(async () => {
     await page.goto('/examples/rest/rest_text_iink.html')
   })
@@ -29,24 +30,33 @@ describe('Rest Text', () => {
       getExportedDatas(page),
       write(page, h.strokes),
     ])
-    const resultElement = page.locator('#result')
-    resultText = await resultElement.textContent()
+    const resultText = await page.locator('#result').textContent()
     expect(resultText).toStrictEqual(exportedDatas['text/plain'])
     expect(resultText).toStrictEqual(h.exports['text/plain'].at(-1))
   })
 
   describe('Request sent', () => {
+    let mimeTypeRequest = []
+    const countMimeType = async (request) => {
+      if (
+        request.url().includes('api/v4.0/iink/batch') &&
+        request.method() === 'POST'
+      ) {
+        const headers = await request.allHeaders()
+        mimeTypeRequest.push(headers.accept)
+      }
+    }
+
+    beforeEach(async () => {
+      page.on('request', countMimeType)
+      mimeTypeRequest = []
+    })
+
+    afterEach(async () => {
+      await page.removeListener('request', countMimeType)
+    })
+
     test('should only request text/plain by default', async () => {
-      const mimeTypeRequest = []
-      page.on('request', async (request) => {
-        if (
-          request.url().includes('api/v4.0/iink/batch') &&
-          request.method() === 'POST'
-        ) {
-          const headers = await request.allHeaders()
-          mimeTypeRequest.push(headers.accept)
-        }
-      })
       await Promise.all([
         getExportedDatas(page),
         write(page, h.strokes),
@@ -61,18 +71,6 @@ describe('Rest Text', () => {
         'application/vnd.myscript.jiix',
       ]
       await setEditorConfiguration(page, configuration)
-
-      const mimeTypeRequest = []
-      page.on('request', async (request) => {
-        if (
-          request.url().includes('api/v4.0/iink/batch') &&
-          request.method() === 'POST'
-        ) {
-          const headers = await request.allHeaders()
-          mimeTypeRequest.push(headers.accept)
-        }
-      })
-
       await Promise.all([
         getExportedDatas(page),
         write(page, h.strokes),
@@ -88,18 +86,6 @@ describe('Rest Text', () => {
         'text/plain',
       ]
       await setEditorConfiguration(page, configuration)
-
-      const mimeTypeRequest = []
-      page.on('request', async (request) => {
-        if (
-          request.url().includes('api/v4.0/iink/batch') &&
-          request.method() === 'POST'
-        ) {
-          const headers = await request.allHeaders()
-          mimeTypeRequest.push(headers.accept)
-        }
-      })
-
       await Promise.all([
         getExportedDatas(page),
         write(page, h.strokes),
@@ -117,8 +103,7 @@ describe('Rest Text', () => {
         getExportedDatas(page),
         write(page, h.strokes),
       ])
-      let resultElement = page.locator('#result')
-      resultText = await resultElement.textContent()
+      const resultText = await page.locator('#result').textContent()
       expect(resultText).toStrictEqual(exportedDatas['text/plain'])
       expect(resultText).toStrictEqual(h.exports['text/plain'].at(-1))
 
@@ -131,45 +116,37 @@ describe('Rest Text', () => {
       expect(promisesResult[0]).toBeNull()
       expect(await getEditorModelExports(page)).toBeUndefined()
 
-      resultElement = page.locator('#result')
-      resultText = await resultElement.textContent()
-      expect(resultText).toBe('')
+      expect(await page.locator('#result').textContent()).toBe('')
     })
 
     test('should undo/redo', async () => {
       const editorEl = await page.waitForSelector('#editor')
-      await Promise.all([getExportedDatas(page), write(page, hello.strokes)])
+      await Promise.all([
+        getExportedDatas(page),
+        write(page, hello.strokes)
+      ])
 
-      //TODO remove this
       await page.waitForTimeout(1500)
 
-      let resultElement = page.locator('#result')
-      resultText = await resultElement.textContent()
-      expect(hello.exports['text/plain'].at(-1)).toStrictEqual(resultText)
+      expect(await page.locator('#result').textContent()).toStrictEqual(hello.exports['text/plain'].at(-1))
 
       let raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
       expect(raw.length).toStrictEqual(hello.strokes.length)
 
       await Promise.all([getExportedDatas(page), page.click('#undo')])
-      resultElement = page.locator('#result')
-      resultText = await resultElement.textContent()
-      expect(resultText).toStrictEqual(hello.exports['text/plain'].at(-2))
+      expect(await page.locator('#result').textContent()).toStrictEqual(hello.exports['text/plain'].at(-2))
 
       raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
       expect(raw.length).toStrictEqual(hello.strokes.length - 1)
 
       await Promise.all([getExportedDatas(page), page.click('#undo')])
-      resultElement = page.locator('#result')
-      resultText = await resultElement.textContent()
-      expect(resultText).toStrictEqual(hello.exports['text/plain'].at(-3))
+      expect(await page.locator('#result').textContent()).toStrictEqual(hello.exports['text/plain'].at(-3))
 
       raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
       expect(raw.length).toStrictEqual(hello.strokes.length - 2)
 
       await Promise.all([getExportedDatas(page), page.click('#redo')])
-      resultElement = page.locator('#result')
-      resultText = await resultElement.textContent()
-      expect(resultText).toStrictEqual(hello.exports['text/plain'].at(-2))
+      expect(await page.locator('#result').textContent()).toStrictEqual(hello.exports['text/plain'].at(-2))
 
       raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
       expect(raw.length).toStrictEqual(hello.strokes.length - 1)
@@ -180,8 +157,8 @@ describe('Rest Text', () => {
         getExportedDatas(page),
         write(page, h.strokes),
       ])
-      let resultElement = page.locator('#result')
-      resultText = await resultElement.textContent()
+
+      const resultText = await page.locator('#result').textContent()
       expect(resultText).toStrictEqual(exportedDatas['text/plain'])
       expect(resultText).toStrictEqual(h.exports['text/plain'].at(-1))
 
@@ -190,9 +167,7 @@ describe('Rest Text', () => {
         page.selectOption('#language', 'fr_FR'),
       ])
 
-      resultElement = page.locator('#result')
-      resultText = await resultElement.textContent()
-      expect(resultText).toBe('')
+      expect(await page.locator('#result').textContent()).toBe('')
     })
   })
 })
