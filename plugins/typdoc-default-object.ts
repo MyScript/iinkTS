@@ -35,7 +35,7 @@ exports.load = function ({ application })
     application.converter.on(Converter.EVENT_RESOLVE_BEGIN, () =>
     {
         for (const [refl, init] of defaultValues) {
-            refl.defaultValue = init.replace('/n', '<br>')
+            refl.defaultValue = init.replace("/n", "<br>")
         }
         defaultValues.clear()
     })
