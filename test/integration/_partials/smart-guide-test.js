@@ -52,11 +52,8 @@ describe('SmartGuide', () => {
       getExportedDatas(page),
       write(page, hello.strokes)
     ])
+
     const jiixExport = JSON.parse(exports['application/vnd.myscript.jiix'])
-
-    // wait css animation
-    await page.waitForTimeout(1500)
-
     expect(await page.innerText('.prompter-text')).toBe(jiixExport.label)
     expect(await page.locator('.candidates').isVisible()).toBe(false)
 
@@ -64,8 +61,11 @@ describe('SmartGuide', () => {
     expect(await page.locator('.candidates').isVisible()).toBe(true)
     const candidate = jiixExport.words[0].candidates[2]
 
-    await page.click(`.candidates > span >> text=${candidate}`)
-    await page.waitForTimeout(1000)
+    await Promise.all([
+      getExportedDatas(page),
+      page.click(`.candidates > span >> text=${candidate}`)
+    ])
+
     expect(await page.innerText('.prompter-text')).toBe(candidate)
     expect(await page.locator('.candidates').isVisible()).toBe(false)
   })
@@ -81,13 +81,15 @@ describe('SmartGuide', () => {
     expect(await pathElements.count()).toEqual(1)
 
     await page.click(`.ellipsis`)
+    // wait for css animation
     await page.waitForTimeout(1000)
 
     expect(await page.locator('.more-menu.open').isVisible()).toBe(true)
-    const convertPormise = getExportedDatas(page)
-    await page.click(`.more-menu > button >> text=Convert`)
 
-    await convertPormise
+    await Promise.all([
+      getExportedDatas(page),
+      page.click(`.more-menu > button >> text=Convert`)
+    ])
 
     pathElements = page.locator('path')
     expect(await pathElements.count()).toEqual(5)
@@ -102,6 +104,7 @@ describe('SmartGuide', () => {
     expect(await pathElements.count()).toEqual(1)
 
     await page.click(`.ellipsis`)
+    // wait for css animation
     await page.waitForTimeout(1000)
 
     expect(await page.locator('.more-menu.open').isVisible()).toBe(true)

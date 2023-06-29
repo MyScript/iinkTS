@@ -26,9 +26,9 @@
   "scripts": {
     "lint": "eslint ./src --ext .ts",
     "lint:fix": "eslint ./src --ext .ts --fix",
-    "test:unit": "jest --config=jest.unit.config.js --detectOpenHandles --forceExit",
-    "test:unit:coverage": "jest --config=jest.unit.config.js --coverage --detectOpenHandles --forceExit",
-    "test:integration": "jest --config=jest.integration.config.js --runInBand --detectOpenHandles --forceExit",
+    "test:unit": "jest --config=jest.unit.config.js",
+    "test:unit:coverage": "jest --config=jest.unit.config.js",
+    "test:integration": "jest --config=jest.integration.config.js",
     "build:docs": "typedoc",
     "build:lib": "rollup -c config/rollup.config.build.js --sourcemap",
     "build": "npm-run-all lint:fix test:unit build:lib build:docs",

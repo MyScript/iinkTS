@@ -9,6 +9,7 @@ const {
 const { equation1, one } = require('../strokesDatas')
 
 describe('Rest Math', () => {
+
   beforeAll(async () => {
     await page.goto('/examples/rest/rest_math_iink.html')
   })
@@ -28,31 +29,38 @@ describe('Rest Math', () => {
       getExportedDatas(page),
       write(page, equation1.strokes),
     ])
-    //TODO remove this
     await page.waitForTimeout(1500)
-
     const editor = await getEditor(page)
 
     const resultElement = page.locator('#result')
-    const htmlKatexResult = await resultElement
-      .locator('.katex-html')
-      .textContent()
+    const htmlKatexResult = await resultElement.locator('.katex-html').textContent()
+
     expect(htmlKatexResult).toStrictEqual(editor.model.exports['application/x-latex'])
     expect(htmlKatexResult).toStrictEqual(equation1.exports.LATEX.at(-1))
   })
 
   describe('Request sent', () => {
+    let mimeTypeRequest = []
+    const countMimeType = async (request) => {
+      if (
+        request.url().includes('api/v4.0/iink/batch') &&
+        request.method() === 'POST'
+      ) {
+        const headers = await request.allHeaders()
+        mimeTypeRequest.push(headers.accept)
+      }
+    }
+
+    beforeEach(async () => {
+      page.on('request', countMimeType)
+      mimeTypeRequest = []
+    })
+
+    afterEach(async () => {
+      await page.removeListener('request', countMimeType)
+    })
+
     test('should only request application/x-latex by default', async () => {
-      const mimeTypeRequest = []
-      page.on('request', async (request) => {
-        if (
-          request.url().includes('api/v4.0/iink/batch') &&
-          request.method() === 'POST'
-        ) {
-          const headers = await request.allHeaders()
-          mimeTypeRequest.push(headers.accept)
-        }
-      })
       await Promise.all([
         getExportedDatas(page),
         write(page, one.strokes),
@@ -65,17 +73,6 @@ describe('Rest Math', () => {
       const configuration = await getEditorConfiguration(page)
       configuration.recognition.math.mimeTypes = ['application/mathml+xml']
       await setEditorConfiguration(page, configuration)
-
-      const mimeTypeRequest = []
-      page.on('request', async (request) => {
-        if (
-          request.url().includes('api/v4.0/iink/batch') &&
-          request.method() === 'POST'
-        ) {
-          const headers = await request.allHeaders()
-          mimeTypeRequest.push(headers.accept)
-        }
-      })
 
       await Promise.all([
         getExportedDatas(page),
@@ -92,17 +89,6 @@ describe('Rest Math', () => {
         'application/x-latex',
       ]
       await setEditorConfiguration(page, configuration)
-
-      const mimeTypeRequest = []
-      page.on('request', async (request) => {
-        if (
-          request.url().includes('api/v4.0/iink/batch') &&
-          request.method() === 'POST'
-        ) {
-          const headers = await request.allHeaders()
-          mimeTypeRequest.push(headers.accept)
-        }
-      })
 
       await Promise.all([
         getExportedDatas(page),
