@@ -109,8 +109,8 @@ export class RestRecognizer extends AbstractRecognizer
     headers.append("Content-Type", "application/json")
 
     if (isVersionSuperiorOrEqual(this.serverConfiguration.version, "2.0.4")) {
-      headers.append("myscript-client-name", "__packageName__")
-      headers.append("myscript-client-version", "__buildVersion__")
+      headers.append("myscript-client-name", "iink-ts")
+      headers.append("myscript-client-version", "1.0.0-buildVersion")
     }
 
     const reqInit: RequestInit = {

@@ -4,7 +4,6 @@ import resolve from "@rollup/plugin-node-resolve"
 import postcss from "rollup-plugin-postcss"
 import dts from "rollup-plugin-dts"
 import commonjs from "rollup-plugin-commonjs"
-import replace from "@rollup/plugin-replace"
 
 export default [
   {
@@ -32,13 +31,6 @@ export default [
         compress: true,
       }),
       postcss(),
-      replace({
-        preventAssignment: true,
-        values: {
-          __packageName__: process.env.npm_package_name,
-          __buildVersion__: process.env.npm_package_version
-        }
-      })
     ],
   },
   {
@@ -48,13 +40,6 @@ export default [
       postcss({
         inject: false
       }),
-      replace({
-        preventAssignment: true,
-        values: {
-          __packageName__: process.env.npm_package_name,
-          __buildVersion__: process.env.npm_package_version
-        }
-      })
     ],
     output: {
       file: `dist/iink.d.ts`,
