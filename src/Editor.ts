@@ -56,6 +56,7 @@ export class Editor
 
     this.wrapperHTML = wrapperHTML as HTMLEditorElement
     this.wrapperHTML.classList.add(options?.globalClassCss || "ms-editor")
+    this.events.setElement(this.wrapperHTML)
 
     this.#loaderHTML = document.createElement("div")
     this.#loaderHTML.classList.add("loader")
@@ -182,9 +183,9 @@ export class Editor
     return this.#styleManager.penStyle
   }
 
-  set penStyle(p: TPenStyle)
+  set penStyle(ps: TPenStyle)
   {
-    this.#styleManager.overrideDefaultPenStyle(p)
+    this.#styleManager.overrideDefaultPenStyle(ps)
     this.#localPenStyle = this.penStyle
     if (this.#behaviors.setPenStyle) {
       this.#behaviors.setPenStyle(this.penStyle)
@@ -307,6 +308,7 @@ export class Editor
         this.#smartGuide.update(JSON.parse(jjix))
       }
     }
+    // this.wrapperHTML.dispatchEvent(new CustomEvent(evt.type, Object.assign({ bubbles: true, composed: true }, { detail: (evt as CustomEvent).detail })))
   }
 
   #onImport(evt: Event): void

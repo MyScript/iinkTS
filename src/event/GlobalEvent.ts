@@ -5,6 +5,7 @@ import { EventType } from "../Constants"
 export class GlobalEvent extends EventTarget
 {
   static #instance: GlobalEvent
+  #element?: HTMLElement
 
   private constructor()
   {
@@ -20,9 +21,15 @@ export class GlobalEvent extends EventTarget
     return GlobalEvent.#instance
   }
 
+  setElement(el: HTMLElement) {
+    this.#element = el
+  }
+
   #emit(type: string, data?: unknown): void
   {
-    this.dispatchEvent(new CustomEvent(type, Object.assign({ bubbles: true, composed: true }, data ? { detail: data } : undefined)))
+    const evt = new CustomEvent(type, Object.assign({ bubbles: true, composed: true }, data ? { detail: data } : undefined))
+    this.dispatchEvent(evt)
+    this.#element?.dispatchEvent(evt)
   }
 
   emitLoaded(): void
