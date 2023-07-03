@@ -27,7 +27,7 @@
     "lint": "eslint ./src --ext .ts",
     "lint:fix": "eslint ./src --ext .ts --fix",
     "test:unit": "jest --config=jest.unit.config.js",
-    "test:unit:coverage": "jest --config=jest.unit.config.js",
+    "test:unit:coverage": "jest --config=jest.unit.config.js --coverage",
     "test:integration": "jest --config=jest.integration.config.js",
     "build:docs": "typedoc",
     "build:lib": "rollup -c config/rollup.config.build.js --sourcemap",

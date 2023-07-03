@@ -1,4 +1,5 @@
 
+import { TConfiguration } from '../../../src/@types/Configuration'
 import { IModel } from '../../../src/@types/model/Model'
 import { TPoint } from '../../../src/@types/renderer/Point'
 import { RestBehaviors } from '../../../src/behaviors/RestBehaviors'
@@ -69,6 +70,35 @@ describe('RestBehaviors.ts', () =>
     expect(rb.renderer.drawModel).toBeCalledWith(model)
   })
 
+  test('should call recognizer on updateModelRendering', async () =>
+  {
+    const wrapperHTML: HTMLElement = document.createElement('div')
+    const model: IModel = new Model(width, height)
+    const rb = new RestBehaviors(DefaultConfiguration, model)
+    await rb.init(wrapperHTML)
+    rb.renderer.drawModel = jest.fn()
+    rb.recognizer.export = jest.fn(m => Promise.resolve(m))
+    await rb.updateModelRendering(model)
+    await delay(DefaultConfiguration.triggers.exportContentDelay)
+    expect(rb.recognizer.export).toBeCalledTimes(1)
+    expect(rb.recognizer.export).toBeCalledWith(model, undefined)
+  })
+
+  test('should not call recognizer on updateModelRendering when exportContent = "DEMAND"', async () =>
+  {
+    const wrapperHTML: HTMLElement = document.createElement('div')
+    const model: IModel = new Model(width, height)
+    const conf: TConfiguration = JSON.parse(JSON.stringify(DefaultConfiguration))
+    conf.triggers.exportContent = 'DEMAND'
+    const rb = new RestBehaviors(conf, model)
+    await rb.init(wrapperHTML)
+    rb.renderer.drawModel = jest.fn()
+    rb.recognizer.export = jest.fn(m => Promise.resolve(m))
+    await rb.updateModelRendering(model)
+    await delay(DefaultConfiguration.triggers.exportContentDelay)
+    expect(rb.recognizer.export).toBeCalledTimes(0)
+  })
+
   test('should export', async () =>
   {
     const wrapperHTML: HTMLElement = document.createElement('div')
@@ -84,28 +114,7 @@ describe('RestBehaviors.ts', () =>
 
     expect(rb.recognizer.export).toBeCalledTimes(1)
     expect(rb.recognizer.export).toBeCalledWith(model, undefined)
-    // TODO review singleton on GlobalEvent
-    // expect(rb.globalEvent.emitExported).toBeCalledTimes(1)
     expect(rb.globalEvent.emitExported).toBeCalledWith(model.exports)
-  })
-
-  test('should not export if trigger configuration have exportContent = DEMAND', async () =>
-  {
-    const wrapperHTML: HTMLElement = document.createElement('div')
-    const model: IModel = new Model(width, height)
-    const conf = {
-      ...DefaultConfiguration
-    }
-    conf.triggers.exportContent = 'DEMAND'
-    const rb = new RestBehaviors(conf, model)
-    await rb.init(wrapperHTML)
-
-    rb.recognizer.export = jest.fn(m => Promise.resolve(m))
-
-    rb.export(model)
-    await delay(DefaultConfiguration.triggers.exportContentDelay)
-
-    expect(rb.recognizer.export).toBeCalledTimes(0)
   })
 
   test('should resize', async () =>
@@ -166,15 +175,14 @@ describe('RestBehaviors.ts', () =>
     model2.initCurrentStroke(p1, 1, 'pen', DefaultPenStyle)
     model2.endCurrentStroke(p2, DefaultPenStyle)
 
-    await rb.export(model2)
+    await rb.updateModelRendering(model2)
     await delay(DefaultConfiguration.triggers.exportContentDelay)
 
-    const firstMod = await rb.undo()
-
-    expect(firstMod).toEqual(model1)
+    const undoModel = await rb.undo()
+    expect(undoModel).toEqual(model1)
   })
 
-  test('should undo', async () =>
+  test('should redo', async () =>
   {
     const wrapperHTML: HTMLElement = document.createElement('div')
     const model1: IModel = new Model(width, height)
@@ -190,14 +198,15 @@ describe('RestBehaviors.ts', () =>
     model2.initCurrentStroke(p1, 1, 'pen', DefaultPenStyle)
     model2.endCurrentStroke(p2, DefaultPenStyle)
 
-    await rb.export(model2)
+    const exportModel = await rb.updateModelRendering(model2)
     await delay(DefaultConfiguration.triggers.exportContentDelay)
 
-    await rb.undo()
+    const undoModel = await rb.undo()
+    expect(undoModel).toEqual(model1)
 
-    const secondMod = await rb.redo()
-
-    expect(secondMod).toEqual(model2)
+    const redoModel = await rb.redo()
+    expect(redoModel.creationTime).toEqual(model2.creationTime)
+    expect(redoModel.modificationDate).toEqual(exportModel.modificationDate)
   })
 
   test('should clear', async () =>
@@ -227,7 +236,7 @@ describe('RestBehaviors.ts', () =>
     expect(clearedModel.modificationDate).toBeGreaterThan(model2.modificationDate)
     expect(clearedModel.rawStrokes).toHaveLength(0)
 
-    expect(rb.globalEvent.emitExported).toBeCalledTimes(1)
+    expect(rb.globalEvent.emitExported).toBeCalledTimes(2)
     expect(rb.globalEvent.emitExported).toBeCalledWith(clearedModel.exports)
     expect(rb.globalEvent.emitCleared).toBeCalledTimes(1)
     expect(rb.globalEvent.emitCleared).toBeCalledWith(clearedModel)
