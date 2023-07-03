@@ -96,6 +96,9 @@
       const convertedSvg = document.getElementById('converted-svg');
       const canvasRendering = document.querySelector('.ms-rendering-canvas.ms-canvas');
       const canvasCapture = document.querySelector('.ms-capture-canvas.ms-canvas');
+      undoElement.disabled = isPreview
+      redoElement.disabled = isPreview
+      clearElement.disabled = isPreview
       if (!isPreview) {
         convertedSvg.style.visibility = 'hidden';
         canvasRendering.style.display = 'initial';
