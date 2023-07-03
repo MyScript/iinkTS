@@ -356,13 +356,6 @@
 
       exportBtn.disabled = defaultConfiguration.triggers.exportContent !== 'DEMAND';
     }
-    initInputsValues();
-
-    editorElement.addEventListener('changed', (event) => {
-      exportBtn.disabled =
-        !event.detail.canExport ||
-        triggersExportContentElement.value !== 'DEMAND';
-    });
 
     serverProtocolElement.addEventListener('change', (e) => {
       if (e.target.value === 'REST') {
@@ -413,80 +406,90 @@
       }
     })
 
-    resetBtn.addEventListener('click', initInputsValues);
-
-    exportBtn.addEventListener('click', () => {
-      editor.export();
-    })
-    validBtn.addEventListener('click', () => {
-      const selectedMimeTypes = []
-      for (let o of recognitionMimeTypesElement.selectedOptions) {
-        selectedMimeTypes.push(o.value)
-      }
-      if (selectedMimeTypes.length === 0) {
-        selectedMimeTypes = undefined
-      }
-      exportBtn.disabled = triggersExportContentElement.value !== 'DEMAND';
-      resultElement.innerHTML = '';
-      editor.configuration = {
-        server: {
-          protocol: serverProtocolElement.value,
-          scheme: serverSchemelElement.value,
-          host: serverHostlElement.value,
-          applicationKey: serverApplicationKeyElement.value,
-          hmacKey: serverHMACKeyElement.value,
-          version: serverVersionElement.value,
-        },
-        recognition: {
-          type: recognitionTypeElement.value,
-          lang: recognitionLanguageElement.value,
-          gesture: {
-            enable: recognitionGestureElement.checked,
-          },
-          math: {
-            mimeTypes: recognitionTypeElement.value === 'MATH' ? selectedMimeTypes : [],
-          },
-          text: {
-            mimeTypes: recognitionTypeElement.value === 'TEXT' ? selectedMimeTypes : [],
-            guides: {
-              enable: recognitionGuidesElement.checked,
-            },
-          },
-          diagram: {
-            mimeTypes: recognitionTypeElement.value === 'DIAGRAM' ? selectedMimeTypes : [],
-          },
-        },
-        rendering: {
-          smartGuide: {
-            enable: renderingSmartGuideElement.checked
-          }
-        },
-        triggers: {
-          triggerDelay: triggersExportContentDelayElement.value,
-          exportContent: triggersExportContentElement.value,
-        },
-      };
-    });
-
     async function loadEditor() {
-      const res = await fetch('../server-configuration.json')
-      const conf = await res.json()
+      const res = await fetch('../server-configuration.json');
+      const conf = await res.json();
       defaultConfiguration.server = {
         ...defaultConfiguration.server,
         ...conf
-      }
+      };
+
+      initInputsValues();
+
       const options = {
         configuration: defaultConfiguration
-      }
+      };
       const editor = new iink.Editor(editorElement, options);
 
       editor.events.addEventListener('exported', (event) => {
         resultElement.innerHTML = JSON.stringify(event.detail);
       });
+
+      editor.events.addEventListener('changed', (event) => {
+        exportBtn.disabled = !event.detail.canExport && triggersExportContentElement.value !== 'DEMAND';
+      });
+
+      resetBtn.addEventListener('click', initInputsValues);
+
+      exportBtn.addEventListener('click', () => {
+        editor.export();
+      });
+
+      validBtn.addEventListener('click', () => {
+        const selectedMimeTypes = []
+        for (let o of recognitionMimeTypesElement.selectedOptions) {
+          selectedMimeTypes.push(o.value)
+        }
+        if (selectedMimeTypes.length === 0) {
+          selectedMimeTypes = undefined
+        }
+        exportBtn.disabled = triggersExportContentElement.value !== 'DEMAND';
+        resultElement.innerHTML = '';
+        editor.configuration = {
+          server: {
+            protocol: serverProtocolElement.value,
+            scheme: serverSchemelElement.value,
+            host: serverHostlElement.value,
+            applicationKey: serverApplicationKeyElement.value,
+            hmacKey: serverHMACKeyElement.value,
+            version: serverVersionElement.value,
+          },
+          recognition: {
+            type: recognitionTypeElement.value,
+            lang: recognitionLanguageElement.value,
+            gesture: {
+              enable: recognitionGestureElement.checked,
+            },
+            math: {
+              mimeTypes: recognitionTypeElement.value === 'MATH' ? selectedMimeTypes : [],
+            },
+            text: {
+              mimeTypes: recognitionTypeElement.value === 'TEXT' ? selectedMimeTypes : [],
+              guides: {
+                enable: recognitionGuidesElement.checked,
+              },
+            },
+            diagram: {
+              mimeTypes: recognitionTypeElement.value === 'DIAGRAM' ? selectedMimeTypes : [],
+            },
+          },
+          rendering: {
+            smartGuide: {
+              enable: renderingSmartGuideElement.checked
+            }
+          },
+          triggers: {
+            triggerDelay: triggersExportContentDelayElement.value,
+            exportContent: triggersExportContentElement.value,
+          },
+        };
+      });
+
       window.addEventListener('resize', () => {
         editor.resize();
       });
-    }
+    };
+
     loadEditor()
   </script>
 </body>

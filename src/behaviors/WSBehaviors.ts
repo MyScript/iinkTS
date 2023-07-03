@@ -186,34 +186,43 @@ export class WSBehaviors implements IBehaviors
 
   async updateModelRendering(model: IModel): Promise<IModel | never>
   {
-    await this.initialized.promise
-    model.updatePositionSent()
-    this.undoRedoManager.addModelToStack(model)
-    this.#addStrokeDeffered = new DeferredPromise<TExport>()
-    this.recognizer.addStrokes(model)
+    if (this.#triggerConfiguration.exportContent !== "DEMAND") {
+      await this.initialized.promise
+      model.updatePositionSent()
+      this.undoRedoManager.addModelToStack(model)
+      this.#addStrokeDeffered = new DeferredPromise<TExport>()
+      this.recognizer.addStrokes(model)
 
-    const exports: TExport = await this.#addStrokeDeffered.promise
-    model.updatePositionReceived()
-    if (model.exports) {
-      Object.assign(model.exports, exports)
-    } else {
-      model.exports = exports
+      const exports: TExport = await this.#addStrokeDeffered.promise
+      model.updatePositionReceived()
+      if (model.exports) {
+        Object.assign(model.exports, exports)
+      } else {
+        model.exports = exports
+      }
+      this.undoRedoManager.updateModelInStack(model)
+      this.renderer.clearPendingStroke()
+      this.#addStrokeDeffered = undefined
     }
-    this.undoRedoManager.updateModelInStack(model)
-    this.renderer.clearPendingStroke()
-    this.#addStrokeDeffered = undefined
     return model
   }
 
   async export(model: IModel, mimeTypes?: string[]): Promise<IModel | never>
   {
+    let exports: TExport
     await this.initialized.promise
-    this.undoRedoManager.addModelToStack(model)
-    this.#exportDeffered = new DeferredPromise<TExport>()
-    await this.recognizer.export(model, mimeTypes)
-
-    const exports: TExport = await this.#exportDeffered.promise
-
+    if (this.#triggerConfiguration.exportContent === "DEMAND") {
+      this.#addStrokeDeffered = new DeferredPromise<TExport>()
+      this.recognizer.addStrokes(model)
+      exports = await this.#addStrokeDeffered.promise
+      this.#addStrokeDeffered = undefined
+    } else {
+      this.undoRedoManager.addModelToStack(model)
+      this.#exportDeffered = new DeferredPromise<TExport>()
+      await this.recognizer.export(model, mimeTypes)
+      exports = await this.#exportDeffered.promise
+      this.#exportDeffered = undefined
+    }
     model.updatePositionReceived()
     if (model.exports) {
       Object.assign(model.exports, exports)
@@ -222,7 +231,6 @@ export class WSBehaviors implements IBehaviors
     }
 
     this.undoRedoManager.updateModelInStack(model)
-    this.#exportDeffered = undefined
     return model
   }
 

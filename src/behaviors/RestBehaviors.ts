@@ -62,11 +62,6 @@ export class RestBehaviors implements IBehaviors
   async updateModelRendering(model: IModel): Promise<IModel | never>
   {
     this.renderer.drawModel(model)
-    return this.export(model)
-  }
-
-  async export(model: IModel, mimeTypes?: string[]): Promise<IModel | never>
-  {
     const deferred = new DeferredPromise<IModel | never>()
     this.undoRedoManager.addModelToStack(model)
     if (this.#triggerConfiguration.exportContent !== "DEMAND") {
@@ -75,7 +70,7 @@ export class RestBehaviors implements IBehaviors
       this.#exportTimer = setTimeout(async () =>
       {
         try {
-          currentModel = await this.#_export(currentModel, mimeTypes)
+          currentModel = await this.#_export(currentModel)
           this.undoRedoManager.updateModelInStack(currentModel)
           if (model.modificationDate === currentModel.modificationDate) {
             model.exports = currentModel.exports
@@ -89,6 +84,16 @@ export class RestBehaviors implements IBehaviors
       deferred.resolve(model)
     }
     return deferred.promise
+  }
+
+  async export(model: IModel, mimeTypes?: string[]): Promise<IModel | never>
+  {
+    const newModel = await this.#_export(model.getClone(), mimeTypes)
+    if (model.modificationDate === newModel.modificationDate) {
+      model.exports = newModel.exports
+    }
+    this.undoRedoManager.updateModelInStack(newModel)
+    return newModel
   }
 
   async convert(model: IModel, conversionState?: TConverstionState, requestedMimeTypes?: string[]): Promise<IModel | never>

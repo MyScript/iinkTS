@@ -1,4 +1,5 @@
 
+import { TConfiguration } from '../../../src/@types/Configuration'
 import { TConverstionState } from '../../../src/@types/configuration/RecognitionConfiguration'
 import { IModel } from '../../../src/@types/model/Model'
 import { TWebSocketSVGPatchEvent } from '../../../src/@types/recognizer/WSRecognizer'
@@ -171,6 +172,23 @@ describe('WSBehaviors.ts', () =>
       await expect(addStrokePromise).resolves.toBe(model)
       expect(model.exports).toEqual(exportMessage.exports)
     })
+    test('should not call recognizer.addStrokes when exportContent = "DEMAND"', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const model: IModel = new Model(width, height)
+      const conf: TConfiguration = JSON.parse(JSON.stringify(DefaultConfiguration))
+      conf.triggers.exportContent = 'DEMAND'
+      const wsb = new WSBehaviors(conf, model)
+      wsb.grabber.attach = jest.fn()
+      wsb.renderer.init = jest.fn()
+      wsb.recognizer.init = jest.fn()
+      wsb.recognizer.addStrokes = jest.fn()
+      const initPromise = wsb.init(wrapperHTML)
+      wsb.recognizer.wsEvent.emitConnectionActive()
+      wsb.updateModelRendering(model)
+      await initPromise
+      expect(wsb.recognizer.addStrokes).toBeCalledTimes(0)
+    })
     test('should emit EXPORTED when resolve', async () =>
     {
       const wrapperHTML: HTMLElement = document.createElement('div')
@@ -234,16 +252,38 @@ describe('WSBehaviors.ts', () =>
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.init = jest.fn()
+      wsb.recognizer.addStrokes = jest.fn()
       wsb.recognizer.export = jest.fn(m => Promise.resolve(m))
       const initPromise = wsb.init(wrapperHTML)
       wsb.recognizer.wsEvent.emitConnectionActive()
 
+      wsb.export(model)
+      await initPromise
+
+      expect(wsb.recognizer.addStrokes).toBeCalledTimes(0)
+      expect(wsb.recognizer.export).toBeCalledTimes(1)
+      expect(wsb.recognizer.export).toBeCalledWith(model, undefined)
+    })
+    test('should call recognizer.addStrokes when exportContent = "DEMAND"', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const model: IModel = new Model(width, height)
+      const conf: TConfiguration = JSON.parse(JSON.stringify(DefaultConfiguration))
+      conf.triggers.exportContent = 'DEMAND'
+      const wsb = new WSBehaviors(conf, model)
+      wsb.grabber.attach = jest.fn()
+      wsb.renderer.init = jest.fn()
+      wsb.recognizer.init = jest.fn()
+      wsb.recognizer.addStrokes = jest.fn()
+      wsb.recognizer.export = jest.fn(m => Promise.resolve(m))
+      const initPromise = wsb.init(wrapperHTML)
+      wsb.recognizer.wsEvent.emitConnectionActive()
 
       wsb.export(model)
       await initPromise
 
-      expect(wsb.recognizer.export).toBeCalledTimes(1)
-      expect(wsb.recognizer.export).toBeCalledWith(model, undefined)
+      expect(wsb.recognizer.addStrokes).toBeCalledTimes(1)
+      expect(wsb.recognizer.export).toBeCalledTimes(0)
     })
     test('should resolve when recognizer emit EXPORTED', async () =>
     {
