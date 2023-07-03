@@ -141,7 +141,7 @@
         resultElement.innerHTML = JSON.stringify(event.detail || {});
       });
 
-      editor.events.addEventListener('convert', (evt) => {
+      editor.events.addEventListener('converted', (evt) => {
         const exports = evt.detail;
         if (exports && exports['image/svg+xml']) {
           progressElement.style.transition = ' width 0.3s';
