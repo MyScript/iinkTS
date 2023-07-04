@@ -15,6 +15,7 @@ export class Model implements IModel
   positions: TRecognitionPositions
   defaultSymbols: TStroke[]
   rawStrokes: TStroke[]
+  selectedStrokes: TStroke[]
   recognizedSymbols?: TUpdatePatch[]
   exports?: TExport
   converts?: TExport
@@ -27,6 +28,7 @@ export class Model implements IModel
   {
     this.rawStrokes = []
     this.strokeGroups = []
+    this.selectedStrokes = []
     this.positions = {
       lastSentPosition: -1,
       lastReceivedPosition: -1,
@@ -97,6 +99,7 @@ export class Model implements IModel
 
   addStroke(stroke: TStroke): void
   {
+    stroke.id = stroke.id || `${new Date().getTime().toString()}-${this.rawStrokes.length}`
     this.rawStrokes.push(stroke)
   }
 
@@ -118,8 +121,10 @@ export class Model implements IModel
     }
 
     if (this.strokeGroups[lastGroup] && isPenStyleEqual(this.strokeGroups[lastGroup].penStyle, strokePenStyle)) {
+      stroke.id = stroke.id || `${new Date().getTime().toString()}-${this.strokeGroups[lastGroup].strokes.length}`
       this.strokeGroups[lastGroup].strokes.push(stroke)
     } else {
+      stroke.id = stroke.id || `${new Date().getTime().toString()}-0`
       const newStrokeGroup: TStrokeGroup = {
         penStyle: strokePenStyle,
         strokes: [stroke]
@@ -159,6 +164,75 @@ export class Model implements IModel
       // Resetting the current stroke to an undefined one
       this.currentStroke = undefined
     }
+  }
+
+  #getStrokeFromPoint(point: TPoint): TStroke[]
+  {
+    const isBetween = (val: number, min: number, max: number): boolean => (val >= min && val <= max)
+
+    const _strokeList: TStroke[] = []
+    const x0 = point.x
+    const y0 = point.y
+    this.rawStrokes.forEach((stroke) => {
+      if (_strokeList.some(s => s.id === stroke.id)) {
+        return
+      }
+      for (let i = 0; i < stroke.x.length; i++) {
+        if (
+          isBetween(stroke.x[i], x0 - 5, x0 + 5) &&
+          isBetween(stroke.y[i], y0 - 5, y0 + 5)
+        ) {
+          _strokeList.push(stroke)
+          break
+        }
+        else {
+          const x1 = stroke.x[i - 1]
+          const y1 = stroke.y[i - 1]
+          const x2 = stroke.x[i]
+          const y2 = stroke.y[i]
+          const xAlpha = (x0 - x1) / (x2 - x1)
+          const yAlpha = (y0 - y1) / (y2 - y1)
+          if (isBetween(xAlpha, 0, 1) && isBetween(yAlpha, 0, 1)) {
+            _strokeList.push(stroke)
+            break
+          }
+        }
+      }
+    })
+    return _strokeList
+  }
+
+  resetSelectedStrokes(): void
+  {
+    this.selectedStrokes = []
+  }
+
+  appendSelectedStrokesFromPoint(point: TPoint): void
+  {
+    this.#getStrokeFromPoint(point)
+      .forEach(s => {
+        if (!this.selectedStrokes.includes(s)) {
+          this.selectedStrokes.push(s)
+        }
+      })
+  }
+
+  removeStrokesFromPoint(point: TPoint): number
+  {
+    const strokes = this.#getStrokeFromPoint(point)
+    strokes.forEach(strokeToRemove => {
+      this.strokeGroups.forEach((group) => {
+        const strokeIndex = group.strokes.findIndex((s: TStroke): boolean => s.id === strokeToRemove.id)
+        if (strokeIndex !== -1) {
+          group.strokes.splice(strokeIndex, 1)
+        }
+      })
+      const strokeIndex = this.rawStrokes.findIndex((s: TStroke): boolean => s.id === strokeToRemove.id)
+      if (strokeIndex !== -1) {
+        this.rawStrokes.splice(strokeIndex, 1)
+      }
+    })
+    return strokes.length
   }
 
   extractPendingRecognizedSymbols (position: number = this.positions.lastRenderedPosition + 1): TUpdatePatch[]

@@ -3,6 +3,7 @@ import { TStroke } from "../@types/model/Stroke"
 
 export class Stroke implements TStroke
 {
+  id: string
   type: string
   pointerId: number
   pointerType: string
@@ -20,6 +21,7 @@ export class Stroke implements TStroke
 
   constructor(style: TPenStyle, pointerId: number, pointerType = "pen")
   {
+    this.id = new Date().getTime().toString()
     this.type = "stroke"
     this.pointerId = pointerId
     this.pointerType = pointerType

@@ -11,13 +11,21 @@
   <title>Rest Diagram iink</title>
 
   <link rel="stylesheet" href="../examples.css" />
+  <style>
+    #progress {
+      transition: width 10s;
+      width: 0;
+      height: 2px;
+      background-color: #1A9FFF;
+      opacity: 0;
+    }
+  </style>
 
   <script type="text/javascript" src="../../dist/iink.min.js"></script>
 </head>
 
 <body>
   <div>
-    <div id="progress"></div>
     <div id="result"></div>
     <nav>
       <div class="button-div">
@@ -29,6 +37,14 @@
         </button>
         <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
           <img src="../assets/redo.svg" />
+        </button>
+      </div>
+      <div class="button-div">
+        <button id="pen" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/pen.svg">
+        </button>
+        <button id="eraser" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/eraser.svg">
         </button>
       </div>
       <div class="button-div" style="margin-left: auto">
@@ -44,6 +60,7 @@
         </div>
       </div>
     </nav>
+    <div id="progress"></div>
     <div id="editor" touch-action="none">
       <svg id="converted-svg"></svg>
     </div>
@@ -58,6 +75,8 @@
     const progressElement = document.getElementById('progress');
     const undoElement = document.getElementById('undo');
     const redoElement = document.getElementById('redo');
+    const eraserElement = document.getElementById('eraser');
+    const penElement = document.getElementById('pen');
     let editor;
 
     let exports = '';
@@ -99,6 +118,9 @@
       undoElement.disabled = isPreview
       redoElement.disabled = isPreview
       clearElement.disabled = isPreview
+      console.log('editor.mode: ', editor.mode);
+      eraserElement.disabled = isPreview || editor.mode === 'erasing'
+      penElement.disabled = isPreview || editor.mode === 'writing'
       if (!isPreview) {
         convertedSvg.style.visibility = 'hidden';
         canvasRendering.style.display = 'initial';
@@ -135,9 +157,10 @@
       editor = new iink.Editor(editorElement, options);
 
       editor.events.addEventListener('changed', (event) => {
-        undoElement.disabled = !event.detail.canUndo;
-        redoElement.disabled = !event.detail.canRedo;
-        clearElement.disabled = !event.detail.canClear;
+        undoElement.disabled = !event.detail.canUndo || isPreview;
+        redoElement.disabled = !event.detail.canRedo || isPreview;
+        clearElement.disabled = !event.detail.canClear || isPreview;
+        eraserElement.disabled = !event.detail.canClear || editor.mode === 'erasing' || isPreview;;
       });
 
       editor.events.addEventListener('exported', (event) => {
@@ -185,6 +208,26 @@
 
       redoElement.addEventListener('click', () => {
         editor.redo();
+      });
+
+      eraserElement.addEventListener('click', () => {
+        eraserElement.disabled = true
+        penElement.disabled = false
+        editorElement.editor.mode = "erasing";
+        eraserElement.disabled = true;
+        eraserElement.classList.add('active')
+        penElement.disabled = false;
+        penElement.classList.remove('active')
+      });
+
+      penElement.addEventListener('click', () => {
+        eraserElement.disabled = false
+        penElement.disabled = true
+        editorElement.editor.mode = "pen";
+        eraserElement.disabled = false;
+        eraserElement.classList.remove('active')
+        penElement.disabled = true;
+        penElement.classList.add('active')
       });
 
       previewButton.addEventListener('click', () => {
