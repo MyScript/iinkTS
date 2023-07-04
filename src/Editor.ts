@@ -1,6 +1,7 @@
 import { TEditorOptions } from "./@types/Editor"
 import { TConfiguration, TConfigurationClient } from "./@types/Configuration"
 import { IGrabber } from "./@types/grabber/Grabber"
+import { TStroke, TStrokeGroup } from "./@types/model/Stroke"
 import { IModel, TExport, TJIIXExport } from "./@types/model/Model"
 import { TPoint } from "./@types/renderer/Point"
 import { TPenStyle } from "./@types/style/PenStyle"
@@ -23,10 +24,8 @@ import "./iink.css"
 export enum EditorMode
 {
   Writing = "writing",
-  /**
-   * @remarks Only available on WEBSOCKET
-   */
-  Erasing = "erasing"
+  Erasing = "erasing",
+  // Selecting = "selecting"
 }
 
 export type HTMLEditorElement = HTMLElement &
@@ -118,21 +117,24 @@ export class Editor
     return this.#mode
   }
 
-  /**
-   * @remarks Only available in WEBSOCKET
-   */
   set mode(m: EditorMode)
   {
-    if (this.#configuration.server.protocol === "WEBSOCKET") {
-      this.#mode = m
-      if (this.#mode === EditorMode.Erasing) {
+    this.#mode = m
+    switch (this.#mode) {
+      case EditorMode.Erasing:
         this.wrapperHTML.classList.add("erasing")
-      } else {
+        this.wrapperHTML.classList.remove("selecting")
+        break;
+      // case EditorMode.Selecting:
+      //   this.model.resetSelectedStrokes()
+      //   this.wrapperHTML.classList.remove("erasing")
+      //   this.wrapperHTML.classList.add("selecting")
+      //   break;
+      default:
         document.body.style.cursor = "initial"
         this.wrapperHTML.classList.remove("erasing")
-      }
-    } else {
-      throw new Error("set Editor.mode only available in WEBSOCKET")
+        this.wrapperHTML.classList.remove("selecting")
+        break;
     }
   }
 
@@ -141,7 +143,7 @@ export class Editor
     return GlobalEvent.getInstance()
   }
 
-  get #behaviors(): IBehaviors
+  get behaviors(): IBehaviors
   {
     return this.#behaviorsManager.behaviors
   }
@@ -159,8 +161,8 @@ export class Editor
   set theme(t: TTheme)
   {
     this.#styleManager.overrideDefaultTheme(t)
-    if (this.#behaviors.setTheme) {
-      this.#behaviors.setTheme(this.theme)
+    if (this.behaviors.setTheme) {
+      this.behaviors.setTheme(this.theme)
     }
   }
 
@@ -173,8 +175,8 @@ export class Editor
   {
     this.#styleManager.penStyleClasses = psc
     this.#localPenStyle = (this.theme[`.${this.penStyleClasses}`]) as TPenStyle
-    if (this.#behaviors.setPenStyleClasses) {
-      this.#behaviors.setPenStyleClasses(psc)
+    if (this.behaviors.setPenStyleClasses) {
+      this.behaviors.setPenStyleClasses(psc)
     }
   }
 
@@ -187,8 +189,8 @@ export class Editor
   {
     this.#styleManager.overrideDefaultPenStyle(ps)
     this.#localPenStyle = this.penStyle
-    if (this.#behaviors.setPenStyle) {
-      this.#behaviors.setPenStyle(this.penStyle)
+    if (this.behaviors.setPenStyle) {
+      this.behaviors.setPenStyle(this.penStyle)
     }
   }
 
@@ -223,18 +225,18 @@ export class Editor
     this.#behaviorsManager.init(this.wrapperHTML)
       .then(async () =>
       {
-        this.#grabber.onPointerDown = (evt: PointerEvent, point: TPoint) => this.#onPointerDown(evt, point)
-        this.#grabber.onPointerMove = (evt: PointerEvent, point: TPoint) => this.#onPointerMove(evt, point)
-        this.#grabber.onPointerUp = (evt: PointerEvent, point: TPoint) => this.#onPointerUp(evt, point)
+        this.#grabber.onPointerDown = (evt: PointerEvent, point: TPoint) => this.onPointerDown(evt, point)
+        this.#grabber.onPointerMove = (evt: PointerEvent, point: TPoint) => this.onPointerMove(evt, point)
+        this.#grabber.onPointerUp = (evt: PointerEvent, point: TPoint) => this.onPointerUp(evt, point)
 
-        if (this.#behaviors.setPenStyle) {
-          this.#behaviors.setPenStyle(this.penStyle)
+        if (this.behaviors.setPenStyle) {
+          this.behaviors.setPenStyle(this.penStyle)
         }
-        if (this.#behaviors.setTheme) {
-          this.#behaviors.setTheme(this.theme)
+        if (this.behaviors.setTheme) {
+          this.behaviors.setTheme(this.theme)
         }
-        if (this.#behaviors.setPenStyleClasses) {
-          this.#behaviors.setPenStyleClasses(this.penStyleClasses)
+        if (this.behaviors.setPenStyleClasses) {
+          this.behaviors.setPenStyleClasses(this.penStyleClasses)
         }
 
         this.wrapperHTML.editor = this
@@ -326,50 +328,107 @@ export class Editor
     this.#showError(err)
   }
 
-  #onPointerDown(evt: PointerEvent, point: TPoint): void
+  onPointerDown(evt: PointerEvent, point: TPoint): void
   {
     const target: Element = (evt.target as Element)
     const pointerDownOnEditor = target?.id === this.wrapperHTML.id || target?.classList?.contains("ms-canvas")
     if (pointerDownOnEditor) {
       let { pointerType } = evt
-      if (this.#mode === EditorMode.Erasing) {
-        pointerType = "eraser"
-      }
       const style: TPenStyle = Object.assign({}, this.theme?.ink, this.#localPenStyle)
-      this.model.initCurrentStroke(point, evt.pointerId, pointerType, style)
-      this.#behaviors.drawCurrentStroke(this.model)
+      switch (this.#mode) {
+        // case EditorMode.Selecting:
+        //   this.model.appendSelectedStrokesFromPoint(point)
+        //   break;
+        case EditorMode.Erasing:
+          if (this.configuration.server.protocol === "WEBSOCKET") {
+            pointerType = "eraser"
+          } else {
+            if (this.model.removeStrokesFromPoint(point) > 0) {
+              this.model.endCurrentStroke(point, this.penStyle)
+              this.behaviors.updateModelRendering(this.model)
+                .then(model => this.model = model)
+                .catch(error => this.#showError(error as Error))
+            }
+          }
+          break;
+        default:
+          this.model.initCurrentStroke(point, evt.pointerId, pointerType, style)
+          this.behaviors.drawCurrentStroke(this.model)
+          break;
+      }
     }
   }
 
-  #onPointerMove(_evt: PointerEvent, point: TPoint): void
+  onPointerMove(_evt: PointerEvent, point: TPoint): void
   {
-    this.model.appendToCurrentStroke(point)
-    this.#behaviors.drawCurrentStroke(this.model)
+    switch (this.#mode) {
+      // case EditorMode.Selecting:
+      //   this.model.appendSelectedStrokesFromPoint(point)
+      //   break;
+      case EditorMode.Erasing:
+        if (this.configuration.server.protocol === "WEBSOCKET") {
+          this.model.appendToCurrentStroke(point)
+        } else {
+          if (this.model.removeStrokesFromPoint(point) > 0) {
+            this.model.endCurrentStroke(point, this.penStyle)
+            this.behaviors.updateModelRendering(this.model)
+              .then(model => this.model = model)
+              .catch(error => this.#showError(error as Error))
+          }
+        }
+        break;
+      default:
+        this.model.appendToCurrentStroke(point)
+        break;
+    }
+    this.behaviors.drawCurrentStroke(this.model)
   }
 
-  #onPointerUp(_evt: PointerEvent, point: TPoint): void
+  onPointerUp(_evt: PointerEvent, point: TPoint): void
   {
-    this.model.endCurrentStroke(point, this.penStyle)
-    this.#behaviors.updateModelRendering(this.model)
-      .then(model => this.model = model)
-      .catch(error => this.#showError(error as Error))
+    switch (this.#mode) {
+      // case EditorMode.Selecting:
+      //   this.model.appendSelectedStrokesFromPoint(point)
+      //   break;
+      case EditorMode.Erasing:
+        if (this.configuration.server.protocol === "WEBSOCKET") {
+          this.model.endCurrentStroke(point, this.penStyle)
+          this.behaviors.updateModelRendering(this.model)
+            .then(model => this.model = model)
+            .catch(error => this.#showError(error as Error))
+        } else {
+          if (this.model.removeStrokesFromPoint(point) > 0) {
+            this.model.endCurrentStroke(point, this.penStyle)
+            this.behaviors.updateModelRendering(this.model)
+              .then(model => this.model = model)
+              .catch(error => this.#showError(error as Error))
+          }
+        }
+        break;
+      default:
+        this.model.endCurrentStroke(point, this.penStyle)
+        this.behaviors.updateModelRendering(this.model)
+          .then(model => this.model = model)
+          .catch(error => this.#showError(error as Error))
+        break;
+    }
   }
 
   async undo(): Promise<IModel>
   {
-    this.model = await this.#behaviors.undo()
+    this.model = await this.behaviors.undo()
     return this.model
   }
 
   async redo(): Promise<IModel>
   {
-    this.model = await this.#behaviors.redo()
+    this.model = await this.behaviors.redo()
     return this.model
   }
 
   async clear(): Promise<IModel>
   {
-    this.model = await this.#behaviors.clear(this.model)
+    this.model = await this.behaviors.clear(this.model)
     return this.model
   }
 
@@ -380,30 +439,42 @@ export class Editor
     }
     this.model.height = Math.max(this.wrapperHTML.clientHeight, this.configuration.rendering.minHeight)
     this.model.width = Math.max(this.wrapperHTML.clientWidth, this.configuration.rendering.minWidth)
-    this.model = await this.#behaviors.resize(this.model)
+    this.model = await this.behaviors.resize(this.model)
     return this.model
   }
 
   async export(mimeTypes?: string[]): Promise<IModel>
   {
-    this.model = await this.#behaviors.export(this.model, mimeTypes)
+    this.model = await this.behaviors.export(this.model, mimeTypes)
     return this.model
   }
 
   async convert(params?: { conversionState?: TConverstionState, mimeTypes?: string[] }): Promise<IModel | never>
   {
-    this.model = await this.#behaviors.convert(this.model, params?.conversionState, params?.mimeTypes)
+    this.model = await this.behaviors.convert(this.model, params?.conversionState, params?.mimeTypes)
     this.events.emitConverted(this.model.converts as TExport)
     return this.model
   }
 
   async import(data: Blob, mimeType?: string): Promise<IModel | never>
   {
-    if (this.#behaviors.import) {
-      this.model = await this.#behaviors.import(this.model, data, mimeType)
+    if (this.behaviors.import) {
+      this.model = await this.behaviors.import(this.model, data, mimeType)
       this.events.emitImported(this.model.exports?.["application/vnd.myscript.jiix"] as TJIIXExport)
       return this.model
     }
     return Promise.reject("Import impossible, behaviors has no import function")
+  }
+
+  async reDraw (rawStrokes: TStroke[], strokeGroups: TStrokeGroup[]) {
+    rawStrokes.forEach((stroke) => {
+      this.model.addStroke(stroke)
+    })
+    strokeGroups.forEach((group) => {
+      group.strokes.forEach((strokeFromGroup) => {
+        this.model.addStrokeToGroup(strokeFromGroup, group.penStyle)
+      })
+    })
+    return this.behaviors.updateModelRendering(this.model)
   }
 }

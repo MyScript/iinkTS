@@ -61,6 +61,7 @@ export interface IModel
   positions: TRecognitionPositions
   defaultSymbols: TStroke[]
   rawStrokes: TStroke[]
+  selectedStrokes: TStroke[]
   recognizedSymbols?: TUpdatePatch[]
   converts?: TExport
   exports?: TExport
@@ -77,6 +78,11 @@ export interface IModel
   appendToCurrentStroke(point: TPoint): void
   endCurrentStroke(point: TPoint, penStyle: TPenStyle): void
   extractPendingRecognizedSymbols (position: number = this.positions.lastRenderedPosition + 1): TUpdatePatch[]
+
+  resetSelectedStrokes(): void
+  appendSelectedStrokesFromPoint(point: TPoint): void
+
+  removeStrokesFromPoint(point: TPoint): number
 
   updatePositionSent(position: number = this.model.rawStrokes.length - 1): void
   updatePositionReceived(): void

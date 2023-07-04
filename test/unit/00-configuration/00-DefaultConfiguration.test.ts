@@ -139,7 +139,7 @@ describe('DefaultConfiguration.ts', () =>
   {
     test('should have maxStackSize', () =>
     {
-      expect(DefaultConfiguration['undo-redo'].maxStackSize).toStrictEqual(10)
+      expect(DefaultConfiguration['undo-redo'].maxStackSize).toStrictEqual(100)
     })
   })
 })

@@ -47,8 +47,8 @@ module.exports.helloStrikeStroke = {
   strokes: helloStrike,
   apiVersion: 'V4',
   exports: {
-    'text/plain': ['hello', '']
-  }
+    'text/plain': ['hello', ''],
+  },
 }
 
 const helloOne = require('./strokes/helloOneStroke.json')
@@ -160,4 +160,76 @@ module.exports.fence = {
       ],
     },
   },
+}
+
+const lineStroke = require('./strokes/line.json')
+module.exports.line = {
+  type: 'DIAGRAM',
+  strokes: lineStroke,
+  exports: [
+    {
+      'application/vnd.myscript.jiix': {
+        type: 'Diagram',
+        elements: [
+          {
+            type: "Edge",
+            kind: "line",
+            connected: [],
+            ports: [],
+            x1:	60.0628433,
+            y1:	47.2759705,
+            x2:	98.6923065,
+            y2:	47.0647392
+          }
+        ],
+        version: '3',
+        id: 'MainBlock',
+      },
+    }
+  ]
+
+}
+
+const rectangleStroke = require('./strokes/rectangle.json')
+module.exports.rectangle = {
+  type: 'DIAGRAM',
+  strokes: rectangleStroke,
+  exports: [
+    {
+      'application/vnd.myscript.jiix': {
+        type:	"Diagram",
+        elements:	[
+          {
+            type:	"Edge",
+            kind:	"line",
+            connected: [],
+            ports: [],
+            x1:	57.5701027,
+            y1:	52.1299248,
+            x2:	56.6754189,
+            y2:	71.9691315
+          }
+        ],
+        version:	"3",
+        id:	"MainBlock"
+      }
+    },
+    {
+      'application/vnd.myscript.jiix': {
+        type: 'Diagram',
+        elements: [
+          {
+            type: 'Node',
+            kind: 'rectangle',
+            x: 56.8398209,
+            y: 51.9560471,
+            width: 33.1532364,
+            height: 19.9649887,
+          },
+        ],
+        version: '3',
+        id: 'MainBlock',
+      },
+    },
+  ],
 }

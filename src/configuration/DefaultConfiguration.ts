@@ -135,7 +135,7 @@ export const DefaultEventsConfiguration: TEventConfiguration = {
 }
 
 export const DefaultUndoRedoConfiguration: TUndoRedoConfiguration = {
-  maxStackSize: 10
+  maxStackSize: 100
 }
 
 export const DefaultConfiguration: TConfiguration = {

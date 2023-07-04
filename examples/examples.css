@@ -210,6 +210,8 @@ select:focus {
     justify-content: center;
     align-items: center;
     overflow: auto;
+    width: 100%;
+    text-align: center;
 }
 
 /*** Index page ***/
@@ -533,13 +535,6 @@ select:focus {
     background-color: #ececec;
     -webkit-box-shadow: none;
     box-shadow: none;
-}
-
-.nav-btn.btn-primary {
-    background-color: #1A9FFF;
-}
-.nav-btn.btn-primary.active {
-    box-shadow: inset 0px 0px 10px 0px rgba(0, 0, 0, .4);
 }
 
 .button-div {
