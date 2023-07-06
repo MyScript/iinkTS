@@ -19,14 +19,15 @@ describe('Helpers.ts', () =>
     expect(languages).toStrictEqual({ fr: 'fr_FR' })
   })
 
-  // test('should reject getAvailableLanguageList if configuration is empty', async () =>
-  // {
-  //   getAvailableLanguageList()
-  //     .catch(e =>
-  //     {
-  //       expect(e).toBe('Cannot get languages ! Please check your server configuration!')
-  //     })
-  // })
+  test('should reject getAvailableLanguageList if no configuration', async () =>
+  {
+    // @ts-ignore
+    getAvailableLanguageList()
+      .catch(e =>
+      {
+        expect(e).toBe('Cannot get languages ! Please check your server configuration!')
+      })
+  })
 
   test('should reject getAvailableLanguageList if configuration.server is empty', async () =>
   {

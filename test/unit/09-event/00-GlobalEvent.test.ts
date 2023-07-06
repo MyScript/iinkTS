@@ -205,4 +205,11 @@ describe('GlobalEvent.ts', () =>
     )
   })
 
+  test('should emit & listen CLEAR_MESSAGE', () =>
+  {
+    const testFunction = jest.fn()
+    gEvent.addEventListener(EventType.CLEAR_MESSAGE, testFunction)
+    gEvent.emitClearMessage()
+    expect(testFunction).toBeCalledTimes(1)
+  })
 })

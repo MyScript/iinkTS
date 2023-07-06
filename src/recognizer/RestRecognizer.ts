@@ -239,7 +239,7 @@ export class RestRecognizer extends AbstractRecognizer
     const mimeTypesRequiringExport: string[] = mimeTypes.filter(m => !myModel.exports || !myModel.exports[m])
     const exports: TExport[] = await Promise.all(mimeTypesRequiringExport.map(mimeType => this.exportModel(myModel, mimeType)))
     exports.forEach(e => {
-      myModel.exports = Object.assign(myModel.exports || {}, e)
+      myModel.mergeExport(e)
     })
 
     myModel.updatePositionReceived()

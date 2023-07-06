@@ -11,6 +11,7 @@ export type TWordExport = {
 }
 
 export type TJIIXExport = {
+  type: string,
   id: string,
   label: string,
   version: string,

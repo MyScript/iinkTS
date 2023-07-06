@@ -3,8 +3,9 @@ import { TPoint } from "../@types/renderer/Point"
 import { TStroke, TStrokeGroup } from "../@types/model/Stroke"
 import { IModel, TExport } from "../@types/model/Model"
 import { TRecognitionPositions } from "../@types/model/RecognitionPositions"
-import { Stroke } from "./Stroke"
 import { TUpdatePatch } from "../@types/recognizer/WSRecognizer"
+
+import { Stroke } from "./Stroke"
 
 export class Model implements IModel
 {

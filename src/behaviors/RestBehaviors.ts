@@ -95,7 +95,9 @@ export class RestBehaviors implements IBehaviors
 
   async convert(model: IModel, conversionState?: TConverstionState, requestedMimeTypes?: string[]): Promise<IModel | never>
   {
-    return this.recognizer.convert(model, conversionState, requestedMimeTypes)
+    const newModel = await this.recognizer.convert(model, conversionState, requestedMimeTypes)
+    this.globalEvent.emitConverted(newModel.converts as TExport)
+    return newModel
   }
 
   async resize(model: IModel): Promise<IModel>
@@ -142,7 +144,6 @@ export class RestBehaviors implements IBehaviors
     this.undoRedoManager.addModelToStack(myModel)
     this.renderer.drawModel(myModel)
     myModel.modificationDate = new Date().getTime()
-    this.globalEvent.emitCleared(myModel)
     this.globalEvent.emitExported(myModel.exports as TExport)
     return myModel
   }
