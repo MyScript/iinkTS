@@ -29,13 +29,12 @@ describe('Nav actions', () => {
 
   test('should undo/redo', async () => {
     const editorEl = await page.waitForSelector('#editor')
-    await Promise.all([
-      getExportedDatas(page),
-      write(page, hello.strokes),
-    ])
-
-    //TODO remove this
-    await page.waitForTimeout(1500)
+    for(const s of hello.strokes) {
+      await Promise.all([
+        getExportedDatas(page),
+        write(page, [s]),
+      ])
+    }
 
     let resultElement = page.locator('#result')
     resultText = await resultElement.textContent()

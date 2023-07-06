@@ -9,13 +9,12 @@ describe('CanvasRendererShapeSymbol.ts', () =>
 
   canvasContext.moveTo = jest.fn()
   canvasContext.lineTo = jest.fn()
-  const p1 = { x: 1, y: 2}
-  const p2 = { x: 3, y: 4}
+  const p1 = { x: 1, y: 2 }
+  const p2 = { x: 3, y: 4 }
 
 
   test('should drawLine', () =>
   {
-
     drawLine(canvasContext, p1, p2)
     expect(canvasContext.moveTo).toBeCalledTimes(1)
     expect(canvasContext.moveTo).toBeCalledWith(p1.x, p1.y)
@@ -74,5 +73,4 @@ describe('CanvasRendererShapeSymbol.ts', () =>
     expect(canvasContext.lineTo).toBeCalledTimes(1)
     expect(canvasContext.lineTo).toBeCalledWith(p2.x, p2.y)
   })
-
 })

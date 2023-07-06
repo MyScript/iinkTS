@@ -255,6 +255,20 @@
     top: 32px !important;
 }
 
+.ms-editor #stroke-panel {
+    position: fixed;
+    bottom: 10px;
+    left: 10px;
+    right: 10px;
+    background-color: white;
+    border: solid black 2px;
+    padding: 5px;
+    word-wrap: break-word;
+    overflow: auto;
+    cursor: copy;
+    max-height: 100px;
+}
+
 /** Stroke **/
 
 .ms-editor .removed-stroke {

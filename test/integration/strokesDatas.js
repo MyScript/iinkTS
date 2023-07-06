@@ -172,22 +172,21 @@ module.exports.line = {
         type: 'Diagram',
         elements: [
           {
-            type: "Edge",
-            kind: "line",
+            type: 'Edge',
+            kind: 'line',
             connected: [],
             ports: [],
-            x1:	60.0628433,
-            y1:	47.2759705,
-            x2:	98.6923065,
-            y2:	47.0647392
-          }
+            x1: 60.0628433,
+            y1: 47.2759705,
+            x2: 98.6923065,
+            y2: 47.0647392,
+          },
         ],
         version: '3',
         id: 'MainBlock',
       },
-    }
-  ]
-
+    },
+  ],
 }
 
 const rectangleStroke = require('./strokes/rectangle.json')
@@ -197,22 +196,22 @@ module.exports.rectangle = {
   exports: [
     {
       'application/vnd.myscript.jiix': {
-        type:	"Diagram",
-        elements:	[
+        type: 'Diagram',
+        elements: [
           {
-            type:	"Edge",
-            kind:	"line",
+            type: 'Edge',
+            kind: 'line',
             connected: [],
             ports: [],
-            x1:	57.5701027,
-            y1:	52.1299248,
-            x2:	56.6754189,
-            y2:	71.9691315
-          }
+            x1: 57.5701027,
+            y1: 52.1299248,
+            x2: 56.6754189,
+            y2: 71.9691315,
+          },
         ],
-        version:	"3",
-        id:	"MainBlock"
-      }
+        version: '3',
+        id: 'MainBlock',
+      },
     },
     {
       'application/vnd.myscript.jiix': {
@@ -225,6 +224,76 @@ module.exports.rectangle = {
             y: 51.9560471,
             width: 33.1532364,
             height: 19.9649887,
+          },
+        ],
+        version: '3',
+        id: 'MainBlock',
+      },
+    },
+  ],
+}
+
+const ponyEraseStroke = require('./strokes/ponyErase.json')
+module.exports.ponyErase = {
+  type: 'TEXT',
+  strokes: ponyEraseStroke,
+  exports: [
+    {
+      'application/vnd.myscript.jiix': {
+        type: 'Text',
+        label: 'pony',
+        words: [
+          {
+            label: 'pony',
+            candidates: ['pony', 'Pony', 'pong', 'pory', 'fony'],
+          },
+        ],
+        version: '3',
+        id: 'MainBlock',
+      },
+    },
+    {
+      'application/vnd.myscript.jiix': {
+        type: 'Text',
+        label: 'ony',
+        words: [
+          {
+            label: 'ony',
+          },
+        ],
+        version: '3',
+        id: 'MainBlock',
+      },
+    },
+  ],
+}
+
+module.exports.ponyErasePrecisely = {
+  type: 'TEXT',
+  strokes: ponyEraseStroke,
+  exports: [
+    {
+      'application/vnd.myscript.jiix': {
+        type: 'Text',
+        label: 'pony',
+        words: [
+          {
+            label: 'pony',
+            candidates: ['pony', 'Pony', 'pong', 'pory', 'fony'],
+          },
+        ],
+        version: '3',
+        id: 'MainBlock',
+      },
+    },
+    {
+      'application/vnd.myscript.jiix': {
+        type: 'Text',
+        label: 'tony',
+        words: [
+          {
+            label: 'pony',
+            candidates: ['tony', 'oony', 'rony', 'wony', 'pony'],
           },
         ],
         version: '3',

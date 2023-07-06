@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="HandheldFriendly" content="true" />
+  <title>Websocket Text iink Eraser</title>
+  <link rel="stylesheet" href="../examples.css" />
+  <script type="text/javascript" src="../../dist/iink.min.js"></script>
+</head>
+
+<body>
+  <div>
+    <nav>
+      <div class="button-div">
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/undo.svg">
+        </button>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/redo.svg">
+        </button>
+      </div>
+      <div class="button-div">
+        <button id="pen" class="nav-btn btn-fab-mini btn-lightBlue active" disabled>
+          <img src="../assets/pen.svg">
+        </button>
+        <button id="eraser" class="nav-btn btn-fab-mini btn-lightBlue">
+          <img src="../assets/eraser.svg">
+        </button>
+      </div>
+      <label for="erase-precisely">Erase precisely:
+        <input type="checkbox" id="erase-precisely" name="erase-precisely">
+      </label>
+    </nav>
+    <div id="editor" touch-action="none"></div>
+  </div>
+  <script>
+    const editorElement = document.getElementById('editor');
+
+    const undoElement = document.getElementById('undo');
+    const redoElement = document.getElementById('redo');
+    const eraserElement = document.getElementById('eraser');
+    const penElement = document.getElementById('pen');
+    const erasePreciselyElement = document.getElementById('erase-precisely');
+    let editor;
+
+    /**
+     * We use a function to wait the server configuration to load
+     */
+    async function loadEditor() {
+      const res = await fetch('../server-configuration.json');
+      const conf = await res.json();
+      const options = {
+        configuration: {
+          server: {
+            ...conf,
+            protocol: 'WEBSOCKET',
+          },
+          recognition: {
+            type: 'TEXT',
+            text: {
+              eraser: {
+                'erase-precisely': false
+              }
+            }
+          },
+        },
+      };
+
+      /**
+       * Instanciate editor
+       * @param {Element} The DOM element to attach the ink paper
+       * @param {Object} The Editor parameters
+       */
+      editor = new iink.Editor(editorElement, options);
+
+      editorElement.addEventListener('changed', (event) => {
+        undoElement.disabled = !event.detail.canUndo;
+        redoElement.disabled = !event.detail.canRedo;
+      });
+
+      undoElement.addEventListener('click', () => {
+        editor.undo();
+      });
+      redoElement.addEventListener('click', () => {
+        editor.redo();
+      });
+
+      eraserElement.addEventListener('click', () => {
+        editor.mode = "erasing";
+        eraserElement.disabled = true;
+        eraserElement.classList.add('active')
+        penElement.disabled = false;
+        penElement.classList.remove('active')
+      });
+      penElement.addEventListener('click', () => {
+        editor.mode = "writing";
+        eraserElement.disabled = false;
+        eraserElement.classList.remove('active')
+        penElement.disabled = true;
+        penElement.classList.add('active')
+      });
+
+      erasePreciselyElement.addEventListener('change', (e) => {
+        const configuration = { ...editor.configuration };
+        configuration.recognition.text.eraser['erase-precisely'] = e.target.checked;
+        editor.configuration = configuration
+      })
+
+      window.addEventListener('resize', () => {
+        editor.resize();
+      });
+    }
+
+    loadEditor();
+  </script>
+</body>
+
+</html>
