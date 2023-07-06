@@ -42,7 +42,7 @@ export class Editor
   #behaviorsManager: BehaviorsManager
   #styleManager: StyleManager
   #localPenStyle: TPenStyle
-  #smartGuide: SmartGuide
+  #smartGuide?: SmartGuide
   #mode: EditorMode
   #initializationDeferred: DeferredPromise<boolean>
 
@@ -74,7 +74,6 @@ export class Editor
 
     this.#configuration = new Configuration(options?.configuration)
 
-    this.#smartGuide = new SmartGuide()
 
     const width = Math.max(this.wrapperHTML.clientWidth, this.configuration.rendering.minWidth)
     const height = Math.max(this.wrapperHTML.clientHeight, this.configuration.rendering.minHeight)
@@ -196,8 +195,9 @@ export class Editor
 
   #initializeSmartGuide(): void
   {
-    this.#smartGuide.clear()
+    this.#smartGuide?.destroy()
     if (this.configuration.rendering.smartGuide.enable) {
+      this.#smartGuide = new SmartGuide()
       let margin
       switch (this.configuration.recognition.type) {
         case "TEXT":
@@ -314,10 +314,9 @@ export class Editor
       const exports = (evt as CustomEvent).detail as TExport
       if (exports && exports["application/vnd.myscript.jiix"]) {
         const jjix = (exports["application/vnd.myscript.jiix"] as unknown) as string
-        this.#smartGuide.update(JSON.parse(jjix))
+        this.#smartGuide?.update(JSON.parse(jjix))
       }
     }
-    // this.wrapperHTML.dispatchEvent(new CustomEvent(evt.type, Object.assign({ bubbles: true, composed: true }, { detail: (evt as CustomEvent).detail })))
   }
 
   #onImport(evt: Event): void
@@ -443,7 +442,7 @@ export class Editor
   async resize(): Promise<IModel>
   {
     if (this.configuration.rendering.smartGuide.enable) {
-      this.#smartGuide.resize()
+      this.#smartGuide?.resize()
     }
     this.model.height = Math.max(this.wrapperHTML.clientHeight, this.configuration.rendering.minHeight)
     this.model.width = Math.max(this.wrapperHTML.clientWidth, this.configuration.rendering.minWidth)

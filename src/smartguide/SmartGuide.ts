@@ -396,4 +396,9 @@ export class SmartGuide
     this.#candidatesElement.innerHTML = ""
     this.#hide()
   }
+
+  destroy(): void
+  {
+    this.#smartGuideElement.innerHTML = ""
+  }
 }
