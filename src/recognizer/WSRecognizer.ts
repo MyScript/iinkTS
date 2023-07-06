@@ -524,11 +524,7 @@ export class WSRecognizer extends AbstractRecognizer {
     }
     this.send(message)
     const exports: TExport = await this.#resizeDeferred.promise
-    if (localModel.exports) {
-      Object.assign(localModel.exports, exports)
-    } else {
-      localModel.exports = exports
-    }
+    localModel.mergeExport(exports)
     return localModel
   }
 

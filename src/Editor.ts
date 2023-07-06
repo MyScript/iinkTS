@@ -436,6 +436,7 @@ export class Editor
   async clear(): Promise<IModel>
   {
     this.model = await this.behaviors.clear(this.model)
+    this.events.emitCleared(this.model)
     return this.model
   }
 

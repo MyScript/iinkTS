@@ -58,45 +58,75 @@ describe('RestBehaviors.ts', () =>
     expect(rb.renderer.drawPendingStroke).toBeCalledWith(model.currentStroke)
   })
 
-  test('should call renderer on updateModelRendering', async () =>
-  {
-    const wrapperHTML: HTMLElement = document.createElement('div')
-    const model: IModel = new Model(width, height)
-    const rb = new RestBehaviors(DefaultConfiguration, model)
-    await rb.init(wrapperHTML)
-    rb.renderer.drawModel = jest.fn()
-    rb.updateModelRendering(model)
-    expect(rb.renderer.drawModel).toBeCalledTimes(1)
-    expect(rb.renderer.drawModel).toBeCalledWith(model)
-  })
+  describe('updateModelRendering', () => {
+    test('should call renderer.drawModel', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const model: IModel = new Model(width, height)
+      const rb = new RestBehaviors(DefaultConfiguration, model)
+      await rb.init(wrapperHTML)
+      rb.renderer.drawModel = jest.fn()
+      rb.recognizer.export = jest.fn(m => Promise.resolve(m))
+      rb.updateModelRendering(model)
+      expect(rb.renderer.drawModel).toBeCalledTimes(1)
+      expect(rb.renderer.drawModel).toBeCalledWith(model)
+    })
 
-  test('should call recognizer on updateModelRendering', async () =>
-  {
-    const wrapperHTML: HTMLElement = document.createElement('div')
-    const model: IModel = new Model(width, height)
-    const rb = new RestBehaviors(DefaultConfiguration, model)
-    await rb.init(wrapperHTML)
-    rb.renderer.drawModel = jest.fn()
-    rb.recognizer.export = jest.fn(m => Promise.resolve(m))
-    await rb.updateModelRendering(model)
-    await delay(DefaultConfiguration.triggers.exportContentDelay)
-    expect(rb.recognizer.export).toBeCalledTimes(1)
-    expect(rb.recognizer.export).toBeCalledWith(model, undefined)
-  })
+    test('should call recognizer.export', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const model: IModel = new Model(width, height)
+      const rb = new RestBehaviors(DefaultConfiguration, model)
+      await rb.init(wrapperHTML)
+      rb.renderer.drawModel = jest.fn()
+      rb.recognizer.export = jest.fn(m => Promise.resolve(m))
+      await rb.updateModelRendering(model)
+      await delay(DefaultConfiguration.triggers.exportContentDelay)
+      expect(rb.recognizer.export).toBeCalledTimes(1)
+      expect(rb.recognizer.export).toBeCalledWith(model, undefined)
+    })
 
-  test('should not call recognizer on updateModelRendering when exportContent = "DEMAND"', async () =>
-  {
-    const wrapperHTML: HTMLElement = document.createElement('div')
-    const model: IModel = new Model(width, height)
-    const conf: TConfiguration = JSON.parse(JSON.stringify(DefaultConfiguration))
-    conf.triggers.exportContent = 'DEMAND'
-    const rb = new RestBehaviors(conf, model)
-    await rb.init(wrapperHTML)
-    rb.renderer.drawModel = jest.fn()
-    rb.recognizer.export = jest.fn(m => Promise.resolve(m))
-    await rb.updateModelRendering(model)
-    await delay(DefaultConfiguration.triggers.exportContentDelay)
-    expect(rb.recognizer.export).toBeCalledTimes(0)
+    test('should emit EXPORTED', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const model: IModel = new Model(width, height)
+      const rb = new RestBehaviors(DefaultConfiguration, model)
+      await rb.init(wrapperHTML)
+      rb.renderer.drawModel = jest.fn()
+      rb.recognizer.export = jest.fn(m => Promise.resolve(m))
+      rb.globalEvent.emitExported = jest.fn(e => e)
+      await rb.updateModelRendering(model)
+      await delay(DefaultConfiguration.triggers.exportContentDelay)
+      expect(rb.globalEvent.emitExported).toBeCalledWith(model.exports)
+    })
+
+    test('should reject if recognizer.export in error', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const model: IModel = new Model(width, height)
+      const conf: TConfiguration = JSON.parse(JSON.stringify(DefaultConfiguration))
+      const rb = new RestBehaviors(conf, model)
+      await rb.init(wrapperHTML)
+      rb.renderer.drawModel = jest.fn()
+      rb.recognizer.export = jest.fn(() => Promise.reject('pouet'))
+      const updatePromise = rb.updateModelRendering(model)
+      expect(updatePromise).rejects.toEqual('pouet')
+    })
+
+    test('should not call recognizer.export when exportContent = "DEMAND"', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const model: IModel = new Model(width, height)
+      const conf: TConfiguration = JSON.parse(JSON.stringify(DefaultConfiguration))
+      conf.triggers.exportContent = 'DEMAND'
+      const rb = new RestBehaviors(conf, model)
+      await rb.init(wrapperHTML)
+      rb.renderer.drawModel = jest.fn()
+      rb.recognizer.export = jest.fn(m => Promise.resolve(m))
+      await rb.updateModelRendering(model)
+      await delay(DefaultConfiguration.triggers.exportContentDelay)
+      expect(rb.recognizer.export).toBeCalledTimes(0)
+    })
   })
 
   test('should export', async () =>
@@ -115,6 +145,25 @@ describe('RestBehaviors.ts', () =>
     expect(rb.recognizer.export).toBeCalledTimes(1)
     expect(rb.recognizer.export).toBeCalledWith(model, undefined)
     expect(rb.globalEvent.emitExported).toBeCalledWith(model.exports)
+  })
+
+  test('should convert', async () =>
+  {
+    const wrapperHTML: HTMLElement = document.createElement('div')
+    const model: IModel = new Model(width, height)
+    model.converts = { "text/plain": 'pouet' }
+    const rb = new RestBehaviors(DefaultConfiguration, model)
+    await rb.init(wrapperHTML)
+
+    rb.recognizer.convert = jest.fn(m => Promise.resolve(m))
+    rb.globalEvent.emitConverted = jest.fn(m => Promise.resolve(m))
+
+    rb.convert(model, "DIGITAL_EDIT", ["mime-type"])
+    await delay(DefaultConfiguration.triggers.exportContentDelay)
+
+    expect(rb.recognizer.convert).toBeCalledTimes(1)
+    expect(rb.recognizer.convert).toBeCalledWith(model, "DIGITAL_EDIT", ["mime-type"])
+    expect(rb.globalEvent.emitConverted).toBeCalledWith(model.converts)
   })
 
   test('should resize', async () =>
@@ -168,6 +217,7 @@ describe('RestBehaviors.ts', () =>
 
     rb.recognizer.export = jest.fn(m => Promise.resolve(m))
     rb.renderer.drawModel = jest.fn()
+    rb.undoRedoManager.undo = jest.fn(() => model1)
 
     const model2: IModel = new Model(width, height)
     const p1: TPoint = { t: 1, p: 1, x: 1, y: 1 }
@@ -191,6 +241,8 @@ describe('RestBehaviors.ts', () =>
 
     rb.recognizer.export = jest.fn(m => Promise.resolve(m))
     rb.renderer.drawModel = jest.fn()
+    rb.undoRedoManager.undo = jest.fn(() => model1)
+    rb.undoRedoManager.redo = jest.fn(() => model2)
 
     const model2: IModel = new Model(width, height)
     const p1: TPoint = { t: 1, p: 1, x: 1, y: 1 }
@@ -238,9 +290,29 @@ describe('RestBehaviors.ts', () =>
 
     expect(rb.globalEvent.emitExported).toBeCalledTimes(2)
     expect(rb.globalEvent.emitExported).toBeCalledWith(clearedModel.exports)
-    expect(rb.globalEvent.emitCleared).toBeCalledTimes(1)
-    expect(rb.globalEvent.emitCleared).toBeCalledWith(clearedModel)
 
+  })
+
+  test('should destroy', async () =>
+  {
+    const wrapperHTML: HTMLElement = document.createElement('div')
+    const model: IModel = new Model(width, height)
+    model.converts = { "text/plain": 'pouet' }
+    const rb = new RestBehaviors(DefaultConfiguration, model)
+    await rb.init(wrapperHTML)
+
+    rb.grabber.detach = jest.fn()
+    rb.renderer.destroy = jest.fn()
+    rb.undoRedoManager.reset = jest.fn(m => m)
+
+    rb.destroy(model)
+    await delay(DefaultConfiguration.triggers.exportContentDelay)
+
+    expect(rb.grabber.detach).toBeCalledTimes(1)
+    expect(rb.renderer.destroy).toBeCalledTimes(1)
+    expect(rb.undoRedoManager.reset).toBeCalledTimes(1)
+    expect(rb.globalEvent.emitCleared).toBeCalledWith(model)
+    expect(rb.globalEvent.emitExported).toBeCalledWith(model.exports)
   })
 
 })

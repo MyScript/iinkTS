@@ -1,9 +1,11 @@
-import { IModel } from '../../../src/@types/model/Model'
+import { IModel, TExport } from '../../../src/@types/model/Model'
 import { TPoint } from '../../../src/@types/renderer/Point'
 import { TPenStyle } from '../../../src/@types/style/PenStyle'
+
 import { Model } from '../../../src/model/Model'
 import { Stroke } from '../../../src/model/Stroke'
 import { DefaultPenStyle } from '../../../src/style/DefaultPenStyle'
+import { delay } from '../utils/helpers'
 
 describe('Model.ts', () =>
 {
@@ -12,6 +14,42 @@ describe('Model.ts', () =>
   {
     const model: IModel = new Model(width, height)
     expect(model).toBeDefined()
+  })
+
+  describe('mergeExport', () =>
+  {
+    test('should initialize export if toBeUndefined', () =>
+    {
+      const model: IModel = new Model(width, height)
+      const e: TExport = { "text/plain": 'poney' }
+      expect(model.exports).toBeUndefined()
+      model.mergeExport(e)
+      expect(model.exports).toEqual(e)
+    })
+    test('should merge export', () =>
+    {
+      const model: IModel = new Model(width, height)
+      const originExport: TExport = {
+        'application/vnd.myscript.jiix': {
+          "type": "Text",
+          "label": "poney",
+          "words": [
+            {
+              "label": "poney",
+              "candidates": ["poney", "Poney", "ponay", "ponex", "pony"]
+            }
+          ],
+          "version": "3",
+          "id": "MainBlock"
+        }
+      }
+      model.exports = originExport
+      const e: TExport = { "text/plain": 'poney' }
+
+      model.mergeExport(e)
+      expect(model.exports).toMatchObject(originExport)
+      expect(model.exports).toMatchObject(e)
+    })
   })
 
   describe('addPoint', () =>
@@ -134,7 +172,7 @@ describe('Model.ts', () =>
   describe('currentStroke', () =>
   {
     const model: IModel = new Model(width, height)
-    test('should initCurrentStroke', () =>
+    test('should initCurrentStroke', async () =>
     {
       expect(model.currentStroke).toBeUndefined()
       const point: TPoint = {
@@ -144,8 +182,9 @@ describe('Model.ts', () =>
         y: 1
       }
       expect(model.creationTime).toStrictEqual(model.modificationDate)
+      await delay(100)
       model.initCurrentStroke(point, 42, 'mouse', DefaultPenStyle)
-      expect(model.creationTime).toBeLessThan(model.modificationDate)
+      expect(model.modificationDate - model.creationTime).toBeGreaterThanOrEqual(100)
       expect(model.currentStroke).toBeDefined()
       expect(model.currentStroke?.['-myscript-pen-fill-color']).toBe(DefaultPenStyle['-myscript-pen-fill-color'])
       expect(model.currentStroke?.['-myscript-pen-fill-style']).toBe(DefaultPenStyle['-myscript-pen-fill-style'])
@@ -160,6 +199,36 @@ describe('Model.ts', () =>
       expect(model.currentStroke?.t[0]).toBe(point.t)
       expect(model.currentStroke?.p).toHaveLength(1)
       expect(model.currentStroke?.p[0]).toBe(point.p)
+    })
+    test('should initCurrentStroke with -myscript-pen-width', async () =>
+    {
+      const _model: IModel = new Model(width, height)
+      const point: TPoint = {
+        t: 1,
+        p: 0.5,
+        x: 1,
+        y: 1
+      }
+      const style = { ...DefaultPenStyle }
+      style['-myscript-pen-width'] = 2
+      expect(_model.creationTime).toStrictEqual(_model.modificationDate)
+      await delay(100)
+      _model.initCurrentStroke(point, 42, 'mouse', style)
+      expect(_model.modificationDate - _model.creationTime).toBeGreaterThanOrEqual(100)
+      expect(_model.currentStroke).toBeDefined()
+      expect(_model.currentStroke?.['-myscript-pen-fill-color']).toBe(style['-myscript-pen-fill-color'])
+      expect(_model.currentStroke?.['-myscript-pen-fill-style']).toBe(style['-myscript-pen-fill-style'])
+      expect(_model.currentStroke?.['-myscript-pen-width']).toBe(style['-myscript-pen-width'])
+      expect(_model.currentStroke?.color).toBe(style.color)
+      expect(_model.currentStroke?.width).toBe(style.width)
+      expect(_model.currentStroke?.x).toHaveLength(1)
+      expect(_model.currentStroke?.x[0]).toBe(point.x)
+      expect(_model.currentStroke?.y).toHaveLength(1)
+      expect(_model.currentStroke?.y[0]).toBe(point.y)
+      expect(_model.currentStroke?.t).toHaveLength(1)
+      expect(_model.currentStroke?.t[0]).toBe(point.t)
+      expect(_model.currentStroke?.p).toHaveLength(1)
+      expect(_model.currentStroke?.p[0]).toBe(point.p)
     })
 
     test('should appendToCurrentStroke', () =>

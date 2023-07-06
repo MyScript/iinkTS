@@ -38,14 +38,12 @@ export class WSBehaviors implements IBehaviors
     return GlobalEvent.getInstance()
   }
 
-  init(domElement: HTMLElement): Promise<void>
+  async init(domElement: HTMLElement): Promise<void>
   {
     const model = this.undoRedoManager.getLastModel()
     this.grabber.attach(domElement)
     this.renderer.init(domElement)
-
     this.recognizer.wsEvent.addSVGPatchListener(this.onSVGPatch)
-
     return this.recognizer.init(model.height, model.width)
   }
 
@@ -123,7 +121,6 @@ export class WSBehaviors implements IBehaviors
     this.undoRedoManager.addModelToStack(newModel)
     const modelUpdated = await this.recognizer.convert(newModel, conversionState)
     this.undoRedoManager.updateModelInStack(modelUpdated)
-    this.globalEvent.emitExported(modelUpdated.exports as TExport)
     return modelUpdated
   }
 
@@ -135,7 +132,6 @@ export class WSBehaviors implements IBehaviors
     newModel.updatePositionReceived()
     newModel.mergeExport(myImportExport)
     this.undoRedoManager.updateModelInStack(newModel)
-    this.globalEvent.emitExported(newModel.exports as TExport)
     return newModel
   }
 
@@ -152,7 +148,6 @@ export class WSBehaviors implements IBehaviors
   {
     const newModel = await this.recognizer.undo(model)
     this.undoRedoManager.updateModelInStack(newModel)
-    this.globalEvent.emitExported(newModel.exports as TExport)
     return this.undoRedoManager.undo()
   }
 
@@ -160,7 +155,6 @@ export class WSBehaviors implements IBehaviors
   {
     const newModel = await this.recognizer.redo(model)
     this.undoRedoManager.updateModelInStack(newModel)
-    this.globalEvent.emitExported(newModel.exports as TExport)
     return this.undoRedoManager.redo()
   }
 
@@ -168,7 +162,6 @@ export class WSBehaviors implements IBehaviors
   {
     const newModel = await this.recognizer.clear(model)
     this.undoRedoManager.addModelToStack(newModel)
-    this.globalEvent.emitExported(newModel.exports as TExport)
     return newModel
   }
 
