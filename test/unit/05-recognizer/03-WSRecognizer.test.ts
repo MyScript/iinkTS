@@ -1,20 +1,21 @@
 import Server from 'jest-websocket-mock'
+import { DeserializedMessage } from 'jest-websocket-mock/lib/websocket'
 
+import { TWebSocketEvent } from '../../../src/@types/recognizer/WSRecognizer'
+import { IModel } from '../../../src/@types/model/Model'
+import { TTheme } from "../../../src/@types/style/Theme"
+import { TPenStyle } from '../../../src/@types/style/PenStyle'
+import { TServerConfiguration } from '../../../src/@types/configuration/ServerConfiguration'
+import { TRecognitionConfiguration, TRecognitionType } from '../../../src/@types/configuration/RecognitionConfiguration'
+import { TPoint } from '../../../src/@types/renderer/Point'
+
+import { delay } from '../utils/helpers'
 import { DefaultRecognitionConfiguration, DefaultServerConfiguration } from '../../../src/configuration/DefaultConfiguration'
 import { WSRecognizer } from '../../../src/recognizer/WSRecognizer'
-import { TWebSocketEvent } from '../../../src/@types/recognizer/WSRecognizer'
-import { delay } from '../utils/helpers'
-import { IModel } from '../../../src/@types/model/Model'
 import { Model } from '../../../src/model/Model'
-import { TPoint } from '../../../src/@types/renderer/Point'
 import { DefaultPenStyle } from '../../../src/style/DefaultPenStyle'
 import { DeferredPromise } from '../../../src/utils/DeferredPromise'
 import { Error as ErrorConst, WSEventType } from '../../../src/Constants'
-import { TRecognitionConfiguration, TRecognitionType } from '../../../src/@types/configuration/RecognitionConfiguration'
-import { TServerConfiguration } from '../../../src/@types/configuration/ServerConfiguration'
-import { DeserializedMessage } from 'jest-websocket-mock/lib/websocket'
-import { TTheme } from "../../../src/@types/style/Theme"
-import { TPenStyle } from '../../../src/@types/style/PenStyle'
 
 const ackMessage = { "type": "ack", "hmacChallenge": "1f434e8b-cc46-4a8c-be76-708eea2ff305", "iinkSessionId": "c7e72186-6299-4782-b612-3e725aa126f1" }
 const contentPackageDescriptionMessage = { "type": "contentPackageDescription", "contentPartCount": 0 }

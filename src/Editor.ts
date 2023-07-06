@@ -348,6 +348,8 @@ export class Editor
         case EditorMode.Erasing:
           if (this.configuration.server.protocol === "WEBSOCKET") {
             pointerType = "eraser"
+            this.model.initCurrentStroke(point, evt.pointerId, pointerType, style)
+            this.behaviors.drawCurrentStroke(this.model)
           } else {
             if (this.model.removeStrokesFromPoint(point) > 0) {
               this.model.endCurrentStroke(point, this.penStyle)
@@ -418,6 +420,25 @@ export class Editor
           .catch(error => this.#showError(error as Error))
         break;
     }
+    if (this.debug) {
+      this.showStrokes()
+    }
+  }
+
+  showStrokes(): void
+  {
+    let panel = document.getElementById("stroke-panel")
+    const text = JSON.stringify(this.model.rawStrokes.map((s: TStroke) => ({ pointerType: s.pointerType, pointerId: s.pointerId, x: s.x, y: s.y, t: s.t, p: s.p, })))
+    if (!panel) {
+      panel = document.createElement("div")
+      panel.id = "stroke-panel"
+      panel.addEventListener("click", () => {
+        navigator.clipboard.writeText(panel?.innerText as string)
+        this.#showNotif("strokes copied to clipboard!")
+      })
+      this.wrapperHTML.appendChild(panel)
+    }
+    panel.innerText = text
   }
 
   async undo(): Promise<IModel>

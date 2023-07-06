@@ -27,7 +27,7 @@ export class SVGRenderer implements IRenderer
 
   #drawStroke(svgElement: SVGElement, stroke: TStroke)
   {
-    if (stroke.pointerType === "ERASER") {
+    if (stroke.pointerType === "eraser") {
       this.stroker.drawErasingStroke(svgElement, stroke)
     } else {
       this.stroker.drawStroke(svgElement, stroke)
