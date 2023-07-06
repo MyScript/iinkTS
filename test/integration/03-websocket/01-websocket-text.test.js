@@ -1,3 +1,4 @@
+const { testGesture } = require('../_partials/gesture-test')
 const { waitForEditorWebSocket, write, getExportedDatas } = require('../helper')
 const { h } = require('../strokesDatas')
 
@@ -31,5 +32,5 @@ describe('Websocket Text', () => {
 
   require('../_partials/smart-guide-test')
 
-  require('../_partials/gesture-test')
+  testGesture(-100)
 })

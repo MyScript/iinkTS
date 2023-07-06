@@ -8,14 +8,14 @@
  * @param {Number} strokes[0].y[0]
  * @param {Array} [strokes[0].t]
  * @param {Number} strokes[0].t[0]
- * @param {Number} [offsetX=0]
- * @param {Number} [offsetY=0]
+ * @param {Number} [offsetTop=0]
+ * @param {Number} [offsetLeft=0]
  */
-module.exports.write = async (page, strokes) => {
+module.exports.write = async (page, strokes, offsetTop = 0, offsetLeft = 0) => {
 
   const editorEl = await page.waitForSelector('#editor')
-  const offsetX = await editorEl.evaluate((node) => node.offsetLeft)
-  const offsetY = await editorEl.evaluate((node) => node.offsetTop)
+  const offsetX = offsetLeft + await editorEl.evaluate((node) => node.offsetLeft)
+  const offsetY = offsetTop + await editorEl.evaluate((node) => node.offsetTop)
 
   for (const { x, y, t } of strokes) {
     const hasTimeStamp = t && t.length === x.length

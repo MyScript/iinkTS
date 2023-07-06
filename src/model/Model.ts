@@ -42,6 +42,7 @@ export class Model implements IModel
     this.idle = true
     this.isEmpty = true
   }
+
   mergeExport(exports: TExport) {
     if (this.exports) {
       Object.assign(this.exports, exports)

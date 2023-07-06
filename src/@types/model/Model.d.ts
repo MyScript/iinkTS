@@ -2,6 +2,7 @@ import { TPoint } from "../renderer/Point"
 import { TStroke, TStrokeGroup } from "./Stroke"
 import { TPenStyle } from "../style/PenStyle"
 import { TRecognitionPositions } from "./RecognitionPositions"
+import { TUpdatePatch } from "../recognizer/WSRecognizer"
 
 export type TWordExport = {
   id?: string
