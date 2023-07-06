@@ -88,6 +88,7 @@ describe('SmartGuide', () => {
 
     let pathElements = page.locator('path')
     expect(await pathElements.count()).toEqual(1)
+    const pathToBeDrawn = await pathElements.first().getAttribute('d')
 
     await page.click(`.ellipsis`)
     // wait for css animation
@@ -100,7 +101,9 @@ describe('SmartGuide', () => {
     ])
 
     pathElements = page.locator('path')
-    expect(await pathElements.count()).toEqual(5)
+    expect(await pathElements.count()).toEqual(1)
+    const pathToBeDrawnConverted = await pathElements.first().getAttribute('d')
+    expect(pathToBeDrawn).not.toEqual(pathToBeDrawnConverted)
   })
 
   test.skip('should Copy', async () => {
