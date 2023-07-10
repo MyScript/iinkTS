@@ -226,7 +226,7 @@ export class RestRecognizer extends AbstractRecognizer
     const myModel = model.getClone()
     myModel.updatePositionSent()
 
-    if (myModel.isEmpty) {
+    if (myModel.strokeGroups.length === 0) {
       return Promise.resolve(myModel)
     }
 
@@ -238,6 +238,7 @@ export class RestRecognizer extends AbstractRecognizer
 
     const mimeTypesRequiringExport: string[] = mimeTypes.filter(m => !myModel.exports || !myModel.exports[m])
     const exports: TExport[] = await Promise.all(mimeTypesRequiringExport.map(mimeType => this.exportModel(myModel, mimeType)))
+
     exports.forEach(e => {
       myModel.mergeExport(e)
     })

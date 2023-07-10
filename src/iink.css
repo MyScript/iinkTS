@@ -267,6 +267,7 @@
     overflow: auto;
     cursor: copy;
     max-height: 100px;
+    z-index: 999;
 }
 
 /** Stroke **/

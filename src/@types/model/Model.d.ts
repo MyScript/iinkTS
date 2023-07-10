@@ -70,8 +70,6 @@ export interface IModel
   width: number
   height: number
   idle: boolean
-  isEmpty: boolean
-
 
   mergeExport(exports: TExport)
   addPoint(stroke: TStroke, point: TPoint): void
