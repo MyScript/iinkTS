@@ -47,10 +47,10 @@ export class GlobalEvent extends EventTarget
     this.#emit(EventType.CHANGED, {
       canUndo: undoRedoContext.canUndo,
       canRedo: undoRedoContext.canRedo,
-      canClear: !undoRedoContext.stack[undoRedoContext.stackIndex].isEmpty,
+      canClear: undoRedoContext.stack[undoRedoContext.stackIndex].strokeGroups.length > 0,
       stackIndex: undoRedoContext.stackIndex,
       stackLength: undoRedoContext.stack.length,
-      isEmpty: undoRedoContext.stack[undoRedoContext.stackIndex].isEmpty,
+      isEmpty: undoRedoContext.stack[undoRedoContext.stackIndex].strokeGroups.length === 0,
     })
   }
 

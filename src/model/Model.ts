@@ -23,7 +23,6 @@ export class Model implements IModel
   width: number
   height: number
   idle: boolean
-  isEmpty: boolean
 
   constructor(width: number, height: number, creationDate: number = new Date().getTime())
   {
@@ -41,7 +40,6 @@ export class Model implements IModel
     this.width = width
     this.height = height
     this.idle = true
-    this.isEmpty = true
   }
 
   mergeExport(exports: TExport) {
@@ -140,7 +138,6 @@ export class Model implements IModel
       }
       this.strokeGroups.push(newStrokeGroup)
     }
-    this.isEmpty = false
   }
 
   initCurrentStroke(point: TPoint, pointerId: number, pointerType: string, style: TPenStyle, dpi = 96): void
@@ -288,7 +285,6 @@ export class Model implements IModel
     clonedModel.converts = this.converts ? JSON.parse(JSON.stringify(this.converts)) : undefined
     clonedModel.recognizedSymbols = this.recognizedSymbols ? JSON.parse(JSON.stringify(this.recognizedSymbols)) : undefined
     clonedModel.idle = this.idle
-    clonedModel.isEmpty = this.isEmpty
     return clonedModel
   }
 
@@ -305,6 +301,5 @@ export class Model implements IModel
     this.exports = undefined
     this.converts = undefined
     this.idle = true
-    this.isEmpty = true
   }
 }

@@ -16,10 +16,18 @@ export {
   DefaultUndoRedoConfiguration
  } from "./configuration/DefaultConfiguration"
 
+export { Configuration } from "./configuration/Configuration"
+
 export { RestBehaviors } from "./behaviors/RestBehaviors"
 
+export { RestRecognizer } from "./recognizer/RestRecognizer"
+
 export { WSBehaviors } from "./behaviors/WSBehaviors"
+
+export { WSRecognizer } from "./recognizer/WSRecognizer"
 
 export { DefaultPenStyle } from "./style/DefaultPenStyle"
 
 export { DefaultTheme } from "./style/DefaultTheme"
+
+export { Model } from "./model/Model"
