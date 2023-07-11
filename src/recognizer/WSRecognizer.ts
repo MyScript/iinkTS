@@ -52,6 +52,7 @@ export class WSRecognizer extends AbstractRecognizer
   #undoDeferred?: DeferredPromise<TExport>
   #redoDeferred?: DeferredPromise<TExport>
   #clearDeferred?: DeferredPromise<TExport>
+  #importPointEvents?: DeferredPromise<TExport>
 
 
   constructor(serverConfig: TServerConfiguration, recognitionConfig: TRecognitionConfiguration)
@@ -259,6 +260,7 @@ export class WSRecognizer extends AbstractRecognizer
     this.#undoDeferred?.resolve(exportMessage.exports)
     this.#redoDeferred?.resolve(exportMessage.exports)
     this.#clearDeferred?.resolve(exportMessage.exports)
+    this.#importPointEvents?.resolve(exportMessage.exports)
     this.globalEvent.emitExported(exportMessage.exports)
   }
 
@@ -547,6 +549,20 @@ export class WSRecognizer extends AbstractRecognizer
     const exports: TExport = await this.#resizeDeferred.promise
     localModel.mergeExport(exports)
     return localModel
+  }
+
+  async importPointEvents(strokes: TStroke[]): Promise<TExport>
+  {
+    this.#importPointEvents = new DeferredPromise<TExport>()
+    const message: TWebSocketEvent = {
+      type: "pointerEvents",
+      events: strokes
+    }
+    this.send(message)
+
+    const exportPoints = await this.#importDeferred?.promise
+    this.#importDeferred = undefined
+    return exportPoints as TExport
   }
 
   async convert(model: IModel, conversionState?: TConverstionState): Promise<IModel>
