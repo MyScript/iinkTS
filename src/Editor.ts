@@ -324,7 +324,7 @@ export class Editor
     const customEvent = evt as CustomEvent
     const jiix: string = customEvent.detail.jiix
     const mimeType: string = customEvent.detail.mimeType
-    this.import(new Blob([JSON.stringify(jiix)], { type: mimeType }), mimeType)
+    this.importBlob(new Blob([JSON.stringify(jiix)], { type: mimeType }), mimeType)
   }
 
   #onError(evt: Event)
@@ -484,10 +484,21 @@ export class Editor
     return this.model
   }
 
-  async import(data: Blob, mimeType?: string): Promise<IModel | never>
+  async importBlob(data: Blob, mimeType?: string): Promise<IModel | never>
   {
     if (this.behaviors.import) {
       this.model = await this.behaviors.import(this.model, data, mimeType)
+      this.events.emitImported(this.model.exports?.["application/vnd.myscript.jiix"] as TJIIXExport)
+      return this.model
+    }
+    return Promise.reject("Import impossible, behaviors has no import function")
+  }
+
+  async importText(data: string, mimeType?: string): Promise<IModel | never>
+  {
+    if (this.behaviors.import) {
+      const dataToImport = new Blob([data])
+      this.model = await this.behaviors.import(this.model, dataToImport, mimeType)
       this.events.emitImported(this.model.exports?.["application/vnd.myscript.jiix"] as TJIIXExport)
       return this.model
     }

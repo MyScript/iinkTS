@@ -6,6 +6,7 @@ import { AllOverrideConfiguration } from "../_dataset/configuration.dataset"
 import { DefaultPenStyle } from "../../../src/style/DefaultPenStyle"
 import { DefaultTheme } from "../../../src/style/DefaultTheme"
 import { Model } from "../../../src/model/Model"
+import { TExport } from "../../../src/@types/model/Model"
 
 
 describe('Editor.ts', () =>
@@ -150,7 +151,7 @@ describe('Editor.ts', () =>
     expect(editor.convert).toBeCalledTimes(1)
   })
 
-  test('should import', () =>
+  test('should import Blob', () =>
   {
     const wrapperHTML: HTMLElement = document.createElement('div')
     const editor = new Editor(wrapperHTML)
@@ -158,11 +159,26 @@ describe('Editor.ts', () =>
     model.exports = {
       "text/plain": 'tatapouet'
     }
-    editor.import = jest.fn(() => Promise.resolve(model))
+    editor.behaviors.recognizer.import = jest.fn(() => Promise.resolve(model.exports as TExport))
     editor.events.emitImported = jest.fn()
 
-    editor.import(new Blob(), 'text/plain')
-    expect(editor.import).toBeCalledTimes(1)
+    editor.importBlob(new Blob(), 'text/plain')
+    expect(editor.behaviors.recognizer.import).toBeCalledTimes(1)
+  })
+
+  test('should import Text', () =>
+  {
+    const wrapperHTML: HTMLElement = document.createElement('div')
+    const editor = new Editor(wrapperHTML)
+    const model = new Model(100, 50)
+    model.exports = {
+      "text/plain": 'tatapouet'
+    }
+    editor.behaviors.recognizer.import = jest.fn(() => Promise.resolve(model.exports as TExport))
+    editor.events.emitImported = jest.fn()
+
+    editor.importText("hello", 'text/plain')
+    expect(editor.behaviors.recognizer.import).toBeCalledTimes(1)
   })
 
   describe('Style', () => {
