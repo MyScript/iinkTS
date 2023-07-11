@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Import content</title>
+
+    <link rel="stylesheet" href="../examples.css" />
+
+    <script src="https://code.jquery.com/pep/0.4.3/pep.js"></script>
+    <script type="text/javascript" src="../../dist/iink.min.js"></script>
+  </head>
+
+  <body>
+    <div>
+      <nav>
+        <div class="button-div">
+          <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+            <img src="../assets/undo.svg" />
+          </button>
+          <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+            <img src="../assets/redo.svg" />
+          </button>
+        </div>
+        <div class="spacer"></div>
+        <input
+          type="text"
+          class="input-field"
+          id="importContentField"
+          data-type="text/plain"
+          placeholder="e.g. hello world"
+        />
+        <button class="classic-btn" id="importContent">Import</button>
+      </nav>
+      <div id="editor" touch-action="none"></div>
+    </div>
+    <script>
+      const editorElement = document.getElementById("editor")
+      const undoElement = document.getElementById("undo")
+      const redoElement = document.getElementById("redo")
+      const importContentField = document.getElementById("importContentField")
+      const importContentElement = document.getElementById("importContent")
+      let editor
+
+      async function loadEditor() {
+        const res = await fetch("../server-configuration.json")
+        const conf = await res.json()
+        const options = {
+          configuration: {
+            server: {
+              ...conf,
+              protocol: "WEBSOCKET",
+            },
+            recognition: {
+              type: "TEXT",
+            },
+          },
+        }
+        editor = new iink.Editor(editorElement, options)
+
+        editorElement.addEventListener("changed", (event) => {
+          undoElement.disabled = !event.detail.canUndo
+          redoElement.disabled = !event.detail.canRedo
+        })
+
+        undoElement.addEventListener("click", () => {
+          editor.undo()
+        })
+        redoElement.addEventListener("click", () => {
+          editor.redo()
+        })
+        importContentElement.addEventListener("click", () => {
+          const value = importContentField.value.replace("\\n", "\n")
+          editor.importText(value, importContentField.dataset.type)
+        })
+
+        window.addEventListener("resize", () => {
+          editor.resize()
+        })
+      }
+      loadEditor()
+    </script>
+  </body>
+</html>
