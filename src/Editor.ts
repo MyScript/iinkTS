@@ -460,6 +460,20 @@ export class Editor
     return this.model
   }
 
+  async importPointEvents(strokes: TStroke[]): Promise<IModel>
+  {
+    if(this.behaviors.importPointEvents)
+    {
+      this.model = await this.behaviors.importPointEvents(this.model, strokes)
+    }
+    else
+    {
+      throw new Error("Import points not implemented");
+
+    }
+    return this.model
+  }
+
   async resize(): Promise<IModel>
   {
     if (this.configuration.rendering.smartGuide.enable) {

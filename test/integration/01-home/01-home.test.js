@@ -1,4 +1,3 @@
-
 describe('Home Page', () =>
 {
   beforeAll(async () => {
@@ -76,25 +75,14 @@ describe('Home Page', () =>
     }
     expect(linksInErrors).toStrictEqual([])
   })
-
-  test.skip('each "Get source code" link should ok', async () =>
+  test('each "Get source code" link should ok', async () =>
   {
     const codeLinks = await page.locator('text=Get source code')
-    const linksInErrors = []
-    for (let i = 0; i < await codeLinks.count(); i++) {
-      const link = codeLinks.nth(i)
-      const href = await link.getAttribute('href')
-
-      const [response] = await Promise.all([
-        page.waitForResponse((response) => response.url() === href),
-        link.click()
-      ])
-      if (response.status() !== 200) {
-        linksInErrors.push(href)
-      }
-      await page.goBack()
+    const exampleLinks = await page.locator('text=View example')
+    for(let i = 0; i < await exampleLinks.count(); i++) {
+      const exampleHref = await exampleLinks.nth(i).getAttribute('href')
+      const linkHref = await codeLinks.nth(i).getAttribute("href")
+      expect(linkHref).toEqual(`https://github.com/MyScript/iinkTS/blob/master/examples/${exampleHref}`)
     }
-    expect(linksInErrors).toStrictEqual([])
   })
-
 })

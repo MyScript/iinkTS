@@ -95,6 +95,13 @@ export class WSBehaviors implements IBehaviors
     }
   }
 
+  async importPointEvents(model:IModel, strokes: TStroke[]): Promise<IModel | never>
+  {
+    const exportPoints = await this.recognizer.importPointEvents(strokes)
+    model.mergeExport(exportPoints)
+    return model
+  }
+
   async export(model: IModel, mimeTypes?: string[]): Promise<IModel | never>
   {
     try {
