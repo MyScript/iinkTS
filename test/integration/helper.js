@@ -69,6 +69,20 @@ module.exports.setEditorConfiguration = async (page, configuration) => {
  module.exports.getEditorModelExports = async (page) => {
   return page.evaluate('editor.model.exports')
 }
+/**
+ * @param {Page} page - Playwright Page
+ * @returns Promise<TExport>
+ */
+ module.exports.getEditorModelConverts = async (page) => {
+  return page.evaluate('editor.model.converts')
+}
+/**
+ * @param {Page} page - Playwright Page
+ * @returns Promise<TExport>
+ */
+ module.exports.getEditorModelExportsType = async (page, type) => {
+  return page.evaluate(`editor.model.exports['${type}']`)
+}
 
 const exported = `(async () => {
   return new Promise((resolve, reject) => {
@@ -115,4 +129,61 @@ module.exports.waitForEditorWebSocket = async (page) => {
     page.waitForSelector('svg[data-layer="MODEL"]'),
   ])
   return page.evaluate('editor.initializationPromise')
+}
+
+/**
+ *
+ * @param obj
+ * @param key
+ * @param list
+ * @returns {*}
+ */
+function findValuesHelper (obj, key, list) {
+  let listRef = list
+  if (!obj) return listRef
+  if (obj instanceof Array) {
+    Object.keys(obj).forEach((k) => {
+      listRef = listRef.concat(findValuesHelper(obj[k], key, []))
+    })
+    return listRef
+  }
+  if (obj[key]) {
+    if (obj[key] instanceof Array) {
+      Object.keys(obj[key]).forEach((l) => {
+        listRef.push(obj[key][l])
+      })
+    } else {
+      listRef.push(obj[key])
+    }
+  }
+
+  if (typeof obj === 'object') {
+    const children = Object.keys(obj)
+    if (children.length > 0) {
+      children.forEach((child) => {
+        listRef = listRef.concat(findValuesHelper(obj[child], key, []))
+      })
+    }
+  }
+  return listRef
+}
+
+/**
+ *
+ * @param obj
+ * @param key
+ * @returns {*}
+ */
+function findValuesByKey (obj, key) {
+  return findValuesHelper(JSON.parse(obj), key, [])
+}
+
+/**
+ *
+ * @param jiix
+ * @returns {*}
+ */
+module.exports.getStrokesFromJIIX = (jiix) => {
+  const itemsList = findValuesByKey(jiix, 'items')
+  return itemsList.filter(item => item.type === 'stroke')
 }

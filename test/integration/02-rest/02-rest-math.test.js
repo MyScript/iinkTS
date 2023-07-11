@@ -21,7 +21,7 @@ describe('Rest Math', () => {
 
   test('should have title', async () => {
     const title = await page.title()
-    expect(title).toMatch('Rest Math iink')
+    expect(title).toMatch('Rest Math')
   })
 
   test('should display katex-html into result', async () => {

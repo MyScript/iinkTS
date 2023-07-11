@@ -22,7 +22,7 @@ describe('Rest Text', () => {
 
   test('should have title', async () => {
     const title = await page.title()
-    expect(title).toMatch('Rest Text iink')
+    expect(title).toMatch('Rest Text')
   })
 
   test('should display text/plain into result', async () => {

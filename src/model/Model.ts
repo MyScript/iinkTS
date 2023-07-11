@@ -110,9 +110,9 @@ export class Model implements IModel
     this.rawStrokes.push(stroke)
   }
 
-  extractPendingStrokes(position: number = this.positions.lastReceivedPosition + 1): TStroke[]
+  extractUnsentStrokes(): TStroke[]
   {
-    return this.rawStrokes.slice(position)
+    return this.rawStrokes.slice(this.positions.lastSentPosition)
   }
 
   addStrokeToGroup(stroke: TStroke, strokePenStyle: TPenStyle): void

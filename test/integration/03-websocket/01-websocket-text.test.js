@@ -15,7 +15,7 @@ describe('Websocket Text', () => {
 
   test('should have title', async () => {
     const title = await page.title()
-    expect(title).toMatch('Websocket Text iink')
+    expect(title).toMatch('Websocket Text')
   })
 
   test('should export application/vnd.myscript.jiix', async () => {

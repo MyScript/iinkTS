@@ -42,7 +42,7 @@ export class GlobalEvent extends EventTarget
     this.#emit(EventType.EXPORTED, exports)
   }
 
-  emitChange(undoRedoContext: TUndoRedoContext): void
+  emitChanged(undoRedoContext: TUndoRedoContext): void
   {
     this.#emit(EventType.CHANGED, {
       canUndo: undoRedoContext.canUndo,

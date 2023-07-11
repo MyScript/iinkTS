@@ -21,7 +21,7 @@ describe('Rest Diagram', () => {
 
   test('should have title', async () => {
     const title = await page.title()
-    expect(title).toMatch('Rest Diagram iink')
+    expect(title).toMatch('Rest Diagram')
   })
 
   test('should display application/vnd.myscript.jiix into result', async () => {
