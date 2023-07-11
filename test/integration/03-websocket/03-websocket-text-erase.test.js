@@ -14,7 +14,7 @@ describe('Websocket Text', () => {
 
   test('should have title', async () => {
     const title = await page.title()
-    expect(title).toMatch('Websocket Text iink Eraser')
+    expect(title).toMatch('Websocket Text Eraser')
   })
 
   test('should toggle mode writing <-> erasing', async () => {

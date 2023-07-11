@@ -47,7 +47,7 @@ describe('GlobalEvent.ts', () =>
       stack: [new Model(100, 50)],
       stackIndex: 0,
     }
-    gEvent.emitChange(undoRedoContext)
+    gEvent.emitChanged(undoRedoContext)
     expect(testFunction).toBeCalledTimes(1)
     expect(testFunction).toBeCalledWith(
       expect.objectContaining({

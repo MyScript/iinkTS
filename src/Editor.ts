@@ -310,8 +310,9 @@ export class Editor
 
   #onExport(evt: Event): void
   {
+    const exports = (evt as CustomEvent).detail as TExport
+    this.model.mergeExport(exports)
     if (this.configuration.rendering.smartGuide.enable) {
-      const exports = (evt as CustomEvent).detail as TExport
       if (exports && exports["application/vnd.myscript.jiix"]) {
         const jjix = (exports["application/vnd.myscript.jiix"] as unknown) as string
         this.#smartGuide?.update(JSON.parse(jjix))
@@ -502,7 +503,7 @@ export class Editor
   {
     if (this.behaviors.import) {
       this.model = await this.behaviors.import(this.model, data, mimeType)
-      this.events.emitImported(this.model.exports?.["application/vnd.myscript.jiix"] as TJIIXExport)
+      this.events.emitImported(this.model.exports?.[mimeType || "application/vnd.myscript.jiix"] as TJIIXExport)
       return this.model
     }
     return Promise.reject("Import impossible, behaviors has no import function")
@@ -529,5 +530,7 @@ export class Editor
       })
     })
     return this.behaviors.updateModelRendering(this.model)
+      .then(model => this.model = model)
+      .catch(error => this.#showError(error as Error))
   }
 }

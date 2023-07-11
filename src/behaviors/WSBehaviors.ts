@@ -85,8 +85,8 @@ export class WSBehaviors implements IBehaviors
         const updatedModel = await this.recognizer.addStrokes(model)
         this.undoRedoManager.updateModelInStack(updatedModel)
         this.renderer.clearPendingStroke()
-        model.updatePositionReceived()
         model.mergeExport(updatedModel.exports as TExport)
+        model.updatePositionReceived()
       }
       return model
     } catch (error) {

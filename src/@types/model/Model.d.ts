@@ -75,7 +75,7 @@ export interface IModel
   addPoint(stroke: TStroke, point: TPoint): void
   addStroke(stroke: TStroke): void
   addStrokeToGroup(stroke: TStroke, strokePenStyle: TPenStyle): void
-  extractPendingStrokes(position?: number): TStroke[]
+  extractUnsentStrokes(): TStroke[]
   initCurrentStroke(point: TPoint, pointerId: number, pointerType: string, style: TPenStyle, dpi: number = 96): void
   appendToCurrentStroke(point: TPoint): void
   endCurrentStroke(point: TPoint, penStyle: TPenStyle): void

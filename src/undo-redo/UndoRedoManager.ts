@@ -47,14 +47,14 @@ export class UndoRedoManager
     }
 
     this.updateCanUndoRedo()
-    this.globalEvent.emitChange(this.context)
+    this.globalEvent.emitChanged(this.context)
   }
 
   updateModelInStack(model: IModel): void {
     const index = this.context.stack.findIndex(m => m.modificationDate === model.modificationDate)
     if (index > -1) {
       this.context.stack.splice(index, 1, model.getClone())
-      this.globalEvent.emitChange(this.context)
+      this.globalEvent.emitChanged(this.context)
     }
   }
 
@@ -62,7 +62,7 @@ export class UndoRedoManager
     if (this.context.canUndo) {
       this.context.stackIndex--
       this.updateCanUndoRedo()
-      this.globalEvent.emitChange(this.context)
+      this.globalEvent.emitChanged(this.context)
     }
     return this.context.stack[this.context.stackIndex].getClone()
   }
@@ -71,14 +71,14 @@ export class UndoRedoManager
     if (this.context.canRedo) {
       this.context.stackIndex++
       this.updateCanUndoRedo()
-      this.globalEvent.emitChange(this.context)
+      this.globalEvent.emitChanged(this.context)
     }
     return this.context.stack[this.context.stackIndex].getClone()
   }
 
   reset(model: IModel): void {
     this.context = new UndoRedoContext(model)
-    this.globalEvent.emitChange(this.context)
+    this.globalEvent.emitChanged(this.context)
   }
 
 }

@@ -215,7 +215,6 @@ select:focus {
 }
 
 /*** Index page ***/
-
 .index-background {
     background: #f5f5f5;
 }
@@ -457,8 +456,8 @@ select:focus {
     margin-right: 12px;
     height: 24px;
 }
-/** Undo redo Buttons **/
 
+/** Undo redo Buttons **/
 .nav-btn {
     display: inline-block;
     position: relative;

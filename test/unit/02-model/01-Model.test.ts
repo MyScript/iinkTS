@@ -117,13 +117,13 @@ describe('Model.ts', () =>
       expect(model.rawStrokes[0]).toStrictEqual(stroke)
     })
 
-    test('should extractPendingStrokes', () =>
+    test('should extractUnsentStrokes', () =>
     {
       const model: IModel = new Model(width, height)
       const stroke = new Stroke(DefaultPenStyle, 1)
       model.addStroke(stroke)
       expect(model.rawStrokes).toHaveLength(1)
-      const extractStroke = model.extractPendingStrokes()
+      const extractStroke = model.extractUnsentStrokes()
       expect(extractStroke).toHaveLength(1)
       expect(extractStroke[0]).toStrictEqual(stroke)
       expect(model.rawStrokes).toHaveLength(1)

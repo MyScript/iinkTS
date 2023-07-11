@@ -48,7 +48,7 @@ export class WSRecognizer extends AbstractRecognizer
   #exportDeferred?: DeferredPromise<TExport>
   #convertDeferred?: DeferredPromise<TExport>
   #importDeferred?: DeferredPromise<TExport>
-  #resizeDeferred?: DeferredPromise<TExport>
+  #resizeDeferred?: DeferredPromise<void>
   #undoDeferred?: DeferredPromise<TExport>
   #redoDeferred?: DeferredPromise<TExport>
   #clearDeferred?: DeferredPromise<TExport>
@@ -246,6 +246,7 @@ export class WSRecognizer extends AbstractRecognizer
   {
     const partChangeMessage = websocketMessage as TWebSocketPartChangeEvent
     this.#currentPartId = partChangeMessage.partId
+    this.#initialized?.resolve()
   }
 
   private manageExportMessage(websocketMessage: TWebSocketEvent): void
@@ -256,7 +257,6 @@ export class WSRecognizer extends AbstractRecognizer
     this.#exportDeferred?.resolve(exportMessage.exports)
     this.#convertDeferred?.resolve(exportMessage.exports)
     this.#importDeferred?.resolve(exportMessage.exports)
-    this.#resizeDeferred?.resolve(exportMessage.exports)
     this.#undoDeferred?.resolve(exportMessage.exports)
     this.#redoDeferred?.resolve(exportMessage.exports)
     this.#clearDeferred?.resolve(exportMessage.exports)
@@ -288,6 +288,7 @@ export class WSRecognizer extends AbstractRecognizer
 
   private manageSVGPatchMessage(websocketMessage: TWebSocketEvent): void
   {
+    this.#resizeDeferred?.resolve()
     const svgPatchMessage = websocketMessage as TWebSocketSVGPatchEvent
     this.wsEvent.emitSVGPatch(svgPatchMessage)
   }
@@ -308,9 +309,9 @@ export class WSRecognizer extends AbstractRecognizer
         case "partChanged":
           this.managePartChangeMessage(websocketMessage)
           break
-        // case "newPart":
-        //   this.#initialized?.resolve()
-        //   break
+        case "newPart":
+          this.#initialized?.resolve()
+          break
         case "exported":
           this.manageExportMessage(websocketMessage)
           break
@@ -371,7 +372,8 @@ export class WSRecognizer extends AbstractRecognizer
   async addStrokes(model: IModel): Promise<IModel>
   {
     const localModel = model.getClone()
-    const strokes: TStroke[] = localModel.extractPendingStrokes()
+    localModel.updatePositionSent()
+    const strokes: TStroke[] = localModel.extractUnsentStrokes()
     if (strokes.length === 0) {
       return localModel
     }
@@ -500,7 +502,6 @@ export class WSRecognizer extends AbstractRecognizer
   {
     const chunkSize = this.serverConfiguration.websocket.fileChunkSize
     const importFileId = Math.random().toString(10).substring(2, 6)
-    // const messages = []
     this.#importDeferred = new DeferredPromise<TExport>()
     const readBlob = (blob: Blob): Promise<string | never> =>
     {
@@ -536,7 +537,7 @@ export class WSRecognizer extends AbstractRecognizer
 
   async resize(model: IModel): Promise<IModel>
   {
-    this.#resizeDeferred = new DeferredPromise<TExport>()
+    this.#resizeDeferred = new DeferredPromise<void>()
     const localModel = model.getClone()
     this.#viewSizeHeight = localModel.height
     this.#viewSizeWidth = localModel.width
@@ -546,8 +547,7 @@ export class WSRecognizer extends AbstractRecognizer
       width: this.#viewSizeWidth,
     }
     this.send(message)
-    const exports: TExport = await this.#resizeDeferred.promise
-    localModel.mergeExport(exports)
+    await this.#resizeDeferred.promise
     return localModel
   }
 
@@ -617,6 +617,7 @@ export class WSRecognizer extends AbstractRecognizer
   async clear(model: IModel): Promise<IModel>
   {
     const localModel = model.getClone()
+    localModel.modificationDate = new Date().getTime()
     this.#clearDeferred = new DeferredPromise<TExport>()
     const message: TWebSocketEvent = {
       type: "clear",

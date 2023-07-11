@@ -30,7 +30,7 @@ describe('Websocket Text Customize Stroke Style', () => {
 
   test('should have title', async () => {
     const title = await page.title()
-    expect(title).toMatch('Styling pen and strokes')
+    expect(title).toMatch('Websocket Text Styling')
   })
 
   test('should draw stroke with DefaultTheme', async () => {

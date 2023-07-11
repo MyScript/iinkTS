@@ -10,7 +10,7 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
 
-    <title>Rest Math iink</title>
+    <title>Websocket Math</title>
 
     <link rel="stylesheet" href="../examples.css" />
     <link
@@ -19,14 +19,12 @@
       integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X"
       crossorigin="anonymous"
     />
-
     <script
       defer
       src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"
       integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4"
       crossorigin="anonymous"
     ></script>
-
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
   </head>
 
@@ -49,6 +47,8 @@
             <img src="../assets/redo.svg" />
           </button>
         </div>
+        <div class="spacer"></div>
+        <button class="classic-btn" id="convert" disabled>Convert</button>
       </nav>
       <div id="editor" touch-action="none"></div>
     </div>
@@ -58,6 +58,8 @@
       const clearElement = document.getElementById('clear');
       const undoElement = document.getElementById('undo');
       const redoElement = document.getElementById('redo');
+      const convertElement = document.getElementById('convert');
+      let editor;
 
       function cleanLatex(latexExport) {
         if (typeof latexExport === 'number') {
@@ -86,8 +88,8 @@
               protocol: 'WEBSOCKET',
             },
             recognition: {
-              type: 'MATH',
-            },
+              type: 'MATH'
+            }
           },
         };
 
@@ -96,7 +98,7 @@
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        const editor = new iink.Editor(editorElement, options);
+        editor = new iink.Editor(editorElement, options);
 
         editor.events.addEventListener('changed', (event) => {
           undoElement.disabled = !event.detail.canUndo;
@@ -107,18 +109,16 @@
         editor.events.addEventListener('exported', (evt) => {
           const exports = evt.detail;
           if (exports && exports['application/x-latex']) {
-            katex.render(
-              cleanLatex(exports['application/x-latex']),
-              resultElement
-            );
+            katex.render(cleanLatex(exports['application/x-latex']), resultElement);
+            convertElement.disabled = false;
           } else {
             resultElement.innerHTML = '';
+            convertElement.disabled = true;
           }
         });
 
         clearElement.addEventListener('click', async () => {
           editor.clear();
-          resultElement.innerHTML = '';
         });
 
         undoElement.addEventListener('click', () => {
@@ -127,6 +127,10 @@
 
         redoElement.addEventListener('click', () => {
           editor.redo();
+        });
+
+        convertElement.addEventListener('click', () => {
+          editor.convert();
         });
 
         window.addEventListener('resize', () => {
