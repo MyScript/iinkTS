@@ -6,6 +6,7 @@ export type TDiagramConvertConfiguration = {
   edge?: boolean
   node?: boolean
   text?: boolean
+  "match-text-size"?: boolean
 }
 
 export type TDiagramConfiguration = {
