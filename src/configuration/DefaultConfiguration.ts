@@ -90,6 +90,9 @@ export const DefaultRecognitionConfiguration: TRecognitionConfiguration = {
     mimeTypes: ["application/vnd.myscript.jiix"], // "application/vnd.openxmlformats-officedocument.presentationml.presentation"
     eraser: {
       "erase-precisely": false
+    },
+    convert: {
+      "match-text-size": true
     }
   },
   "raw-content": {

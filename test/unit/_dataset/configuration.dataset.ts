@@ -144,7 +144,10 @@ export const AllOverrideConfiguration: TConfigurationClient = {
       mimeTypes: ['application/vnd.openxmlformats-officedocument.presentationml.presentation'],
       eraser: {
         'erase-precisely': true
-      }
+      },
+      convert: {
+        "match-text-size": true,
+      },
     },
     'raw-content': {
       recognition: {
