@@ -5,6 +5,7 @@ import { IRecognizer } from "./recognizer/Recognizer"
 import { TTheme } from "./style/Theme"
 import { TConverstionState } from "./configuration/RecognitionConfiguration"
 import { TPenStyle } from "./style/PenStyle"
+import { TStroke } from "./model/Stroke"
 
 export interface IBehaviors
 {
@@ -21,6 +22,7 @@ export interface IBehaviors
   async export(model: IModel, mimeTypes?: string[]): Promise<IModel | never>
   async convert(model: IModel, conversionState?: TConverstionState, requestedMimeTypes?: string[]): Promise<IModel | never>
 
+  async importPointEvents?(model: IModel, strokes: TStroke[]): Promise<IModel | never>
   async import?(model: IModel, data: Blob, mimeType?: string): Promise<IModel | never>
 
   setPenStyle?(penStyle: TPenStyle): void

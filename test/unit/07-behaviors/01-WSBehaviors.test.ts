@@ -1,6 +1,7 @@
 
 import { TConfiguration } from '../../../src/@types/Configuration'
 import { IModel, TExport } from '../../../src/@types/model/Model'
+import { TStroke } from '../../../src/@types/model/Stroke'
 import { TWebSocketSVGPatchEvent } from '../../../src/@types/recognizer/WSRecognizer'
 import { TPoint } from '../../../src/@types/renderer/Point'
 import { TPenStyle } from '../../../src/@types/style/PenStyle'
@@ -406,6 +407,41 @@ describe('WSBehaviors.ts', () =>
       const _blob = new Blob([textImport], { type: mimeType })
       const modelReceive = await wsb.import(model, _blob, mimeType)
       await expect(modelReceive.exports).toBe(exportExpected)
+    })
+  })
+
+  describe('importPointsEvent', () =>
+  {
+    test('should call recognizer.importPointsEvents', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const model: IModel = new Model(width, height)
+      const wsb = new WSBehaviors(DefaultConfiguration, model)
+      wsb.grabber.attach = jest.fn()
+      wsb.renderer.init = jest.fn()
+      wsb.recognizer.send = jest.fn()
+      wsb.recognizer.init = jest.fn()
+      wsb.recognizer.importPointEvents = jest.fn()
+      const initPromise = wsb.init(wrapperHTML)
+      const tstrokeToImport: TStroke[] = JSON.parse(`[{
+        "pointerType": "PEN",
+        "pointerId": 1,
+        "x": [128, 125, 122, 119, 118, 117, 116, 117, 119, 123, 127, 135, 139, 141, 144, 144, 143, 142, 141, 142],
+        "y": [83, 91, 99, 107, 114, 121, 125, 120, 112, 101, 90, 76, 70, 66, 76, 88, 101, 111, 118, 123],
+        "t": [1516190046205, 1516190046247, 1516190046264, 1516190046280, 1516190046297, 1516190046314, 1516190046330, 1516190046380, 1516190046397, 1516190046413, 1516190046430, 1516190046447, 1516190046463, 1516190046480, 1516190046547, 1516190046563, 1516190046581, 1516190046597, 1516190046614, 1516190046630],
+        "p": [0.5, 0.7076987214308235, 0.8060672826037246, 0.8060672826037246, 0.785875329883628, 0.785875329883628, 0.7185264889882718, 0.7461846839143089, 0.8024894359144054, 0.6578786777951477, 0.6578786777951477, 0.5984465727129564, 0.7880849230110567, 0.7292125754002905, 0.6768853685004259, 0.6535898384862245, 0.6389126863152722, 0.6829846120277299, 0.785875329883628, 0.7461846839143089]
+      },{
+        "pointerType": "PEN",
+        "pointerId": 1,
+        "x": [117, 122, 128, 139, 146],
+        "y": [105, 105, 106, 107, 106],
+        "t": [1516190046870, 1516190046930, 1516190046947, 1516190046963, 1516190046980],
+        "p": [0.5, 0.7763932022500211, 0.7681880209236327, 0.6676543814462531, 0.785875329883628]
+      }]`)
+      wsb.importPointEvents(model, tstrokeToImport)
+      await initPromise
+      expect(wsb.recognizer.importPointEvents).toBeCalledTimes(1)
+      expect(wsb.recognizer.importPointEvents).toBeCalledWith(tstrokeToImport)
     })
   })
 

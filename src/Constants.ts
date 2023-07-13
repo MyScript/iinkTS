@@ -64,6 +64,11 @@ export const EventType = {
   ERROR: "error",
   /**
    * @event
+   * event emitted on click on pointer events
+   */
+  POINTEREVENTS: "pointer_events",
+  /**
+   * @event
    * event emitted after the end of the export
    */
   EXPORTED: "exported",
@@ -106,6 +111,7 @@ export const WSEventType = {
   PART_CHANGE: "ws_part_change",
   CONTENT_CHANGE: "ws_content_change",
   SVG_PATCH: "ws_svg_patch",
+  POINTER_EVENTS: "ws_pointer_events",
   EXPORTED: "ws_exported",
   ERROR: "ws_error",
   CONNECTED: "ws_connected",
