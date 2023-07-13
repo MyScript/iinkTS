@@ -1,6 +1,6 @@
-const { write, getExportedDatas, waitForEditorWebSocket } = require("../helper")
+const { write, getExportedDatas, waitForEditorWebSocket, getEditorModelExports } = require("../helper")
 const { testGesture } = require("../_partials/gesture-test")
-const { h, klopmo } = require("../strokesDatas")
+const { h, claclacla } = require("../strokesDatas")
 
 describe("Websocket Text Custom Lexicon", () => {
   beforeAll(async () => {
@@ -8,7 +8,7 @@ describe("Websocket Text Custom Lexicon", () => {
   })
 
   beforeEach(async () => {
-    await page.reload({ waitUntil: 'networkidle'})
+    await page.reload({ waitUntil: "networkidle" })
     await waitForEditorWebSocket(page)
   })
 
@@ -27,18 +27,38 @@ describe("Websocket Text Custom Lexicon", () => {
     expect(jiixReceived).toEqual(jiixExpected)
   })
 
-  test("should send lexicon data with klopmo", async () => {
-    await page.locator("#lexicon").fill("klopmo")
-    await page.click(`#reinit`)
-    await waitForEditorWebSocket(page)
+  test("should not recognize 'claclacla'", async () => {
+    for (const s of claclacla.strokes) {
+      await Promise.all([
+        getExportedDatas(page),
+        write(page, [s])
+      ])
+    }
 
-    const [exports] = await Promise.all([
-      getExportedDatas(page),
-      write(page, klopmo.strokes),
-    ])
-    const jiixExpected = klopmo.exports["application/vnd.myscript.jiix"]
+    const exports = await getEditorModelExports(page)
+    const jiixExpected = claclacla.exports["application/vnd.myscript.jiix"]
     const jiixReceived = exports["application/vnd.myscript.jiix"]
-    expect(jiixReceived.label).toStrictEqual(jiixExpected.label)
+    expect(jiixReceived).not.toEqual(jiixExpected)
+  })
+
+  test("should send lexicon data with jiix", async () => {
+    await Promise.all([
+      waitForEditorWebSocket(page),
+      page.locator("#lexicon").fill("claclacla"),
+      page.locator("#reinit").click(),
+    ])
+    await page.waitForTimeout(1000)
+    for (const s of claclacla.strokes) {
+      await Promise.all([
+        getExportedDatas(page),
+        write(page, [s])
+      ])
+    }
+
+    const exports = await getEditorModelExports(page)
+    const jiixExpected = claclacla.exports["application/vnd.myscript.jiix"]
+    const jiixReceived = exports["application/vnd.myscript.jiix"]
+    expect(jiixReceived.label).toEqual(jiixExpected.label)
   })
 
   require("../_partials/smart-guide-test")

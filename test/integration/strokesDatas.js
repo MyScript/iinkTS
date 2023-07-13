@@ -495,3 +495,31 @@ module.exports.rome = {
     },
   },
 }
+
+const claclaclaStrokes = require("./strokes/CustomLexicon/claclacla.json")
+module.exports.claclacla = {
+  type: "TEXT",
+  strokes: claclaclaStrokes,
+  exports: {
+    "text/plain": ["claclacla"],
+    "application/vnd.myscript.jiix": {
+      type: "Text",
+      label: "claclacla",
+      words: [
+        {
+          label: "claclacla",
+          candidates: [
+            "claclacla",
+            "Claclacla",
+            "claclacha",
+            "claclache",
+            "claclacle",
+            "elaclacha",
+          ],
+        },
+      ],
+      version: "3",
+      id: "MainBlock",
+    },
+  },
+}

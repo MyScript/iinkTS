@@ -10,15 +10,20 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
 
-    <title>Custom lexicon</title>
+    <title>WEBSOCKET Text iink</title>
 
     <link rel="stylesheet" href="../examples.css" />
 
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
-
     <style>
-      .button-div > p {
-        margin-right: 12px;
+      nav {
+        flex-wrap: wrap-reverse;
+      }
+
+      @media only screen and (max-device-width: 560px) {
+        #clearStorage {
+          margin: 0 0 12px auto;
+        }
       }
     </style>
   </head>
@@ -34,26 +39,17 @@
             <img src="../assets/redo.svg" />
           </button>
         </div>
-        <div class="spacer"></div>
-        <input
-          type="text"
-          class="input-field"
-          id="lexicon"
-          data-type="text/plain"
-          placeholder='Add your own lexicon (space-separated) and press "Send"'
-        />
-        <button class="classic-btn" id="reinit">Send</button>
+        <button class="classic-btn" id="clearStorage">
+          Clear local storage
+        </button>
       </nav>
       <div id="editor" touch-action="none"></div>
     </div>
     <script>
       const editorElement = document.getElementById("editor")
-
       const undoElement = document.getElementById("undo")
       const redoElement = document.getElementById("redo")
-
-      const reinitButton = document.getElementById("reinit")
-      const lexicon = document.getElementById("lexicon")
+      const clearStorage = document.getElementById("clearStorage")
       let editor
 
       async function loadEditor() {
@@ -66,26 +62,26 @@
               protocol: "WEBSOCKET",
             },
             recognition: {
+              type: "TEXT",
               text: {
-                configuration: {
-                  customLexicon: [""],
-                  addLKText: true,
-                },
+                mimeTypes: ["text/plain"],
               },
             },
           },
         }
-
-        /**
-         * Instanciate Editor
-         * @param {Element} The DOM element to attach the ink paper
-         * @param {Object} The editor options
-         */
         editor = new iink.Editor(editorElement, options)
 
-        editor.events.addEventListener("changed", (event) => {
+        editorElement.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo
           redoElement.disabled = !event.detail.canRedo
+        })
+
+        editorElement.addEventListener("exported", (event) => {
+          localStorage.setItem("editorTextContent", event.detail["text/plain"])
+        })
+
+        clearStorage.addEventListener("click", () => {
+          localStorage.removeItem("editorTextContent")
         })
 
         undoElement.addEventListener("click", () => {
@@ -95,19 +91,15 @@
           editorElement.editor.redo()
         })
 
-        reinitButton.addEventListener("click", () => {
-          const values = lexicon.value
-          const configuration = editor.configuration
-          configuration.recognition.text.configuration = {
-            customLexicon: values.split(" "),
-            addLKText: true,
-          }
-          editor.configuration = configuration
-        })
-
         window.addEventListener("resize", () => {
           editorElement.editor.resize()
         })
+
+        let editorTextContent
+        if (localStorage.editorTextContent) {
+          editorTextContent = localStorage.getItem("editorTextContent")
+          editor.importText(editorTextContent, 'text/plain')
+        }
       }
       loadEditor()
     </script>

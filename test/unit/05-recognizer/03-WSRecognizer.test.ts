@@ -544,7 +544,7 @@ describe('WSRecognizer.ts', () =>
         my_wsr.destroy()
       })
     })
-    test('should resolve when receive exported message', async () =>
+    test('should resolve when receive fileChunckAck message', async () =>
     {
       expect.assertions(1)
       await wsr.init(height, width)
@@ -621,6 +621,7 @@ describe('WSRecognizer.ts', () =>
       expect.assertions(1)
       await wsr.init(height, width)
       const promise = wsr.import(model, blobToImport, mimeType)
+      await delay(10)
       mockServer.send(JSON.stringify(emptyExportedMessage))
       await expect(promise).resolves.toEqual(
         expect.objectContaining({
@@ -631,11 +632,12 @@ describe('WSRecognizer.ts', () =>
       )
     })
     // TODO invastigate why the rejection is not caught
-    test.skip('should reject if receive error message', async () =>
+    test('should reject if receive error message', async () =>
     {
       expect.assertions(3)
       await wsr.init(height, width)
       const promise = wsr.import(model, blobToImport, mimeType)
+      await delay(10)
       mockServer.send(JSON.stringify(errorMessage))
       await expect(promise).rejects.toEqual(new Error(ErrorConst.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
