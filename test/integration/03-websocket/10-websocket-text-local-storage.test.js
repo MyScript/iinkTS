@@ -1,0 +1,53 @@
+/* const { testGesture } = require('../_partials/gesture-test') */
+const { waitForEditorWebSocket, write, getExportedDatas, waitForTimeout, getEditorModelExports, getEditorModelExportsType } = require('../helper')
+const { helloOneStroke } = require('../strokesDatas')
+
+describe('Websocket Text', () => {
+  beforeAll(async () => {
+    await page.goto('/examples/websocket/websocket_text_local_storage_text.html')
+  })
+
+  beforeEach(async () => {
+    await page.reload({ waitUntil: "networkidle" })
+    await waitForEditorWebSocket(page)
+  })
+
+  test('should have title', async () => {
+    const title = await page.title()
+    expect(title).toMatch('WEBSOCKET Text iink')
+  })
+
+  test('should export text/plain', async () => {
+    const [exports] = await Promise.all([
+      getExportedDatas(page),
+      write(page, helloOneStroke.strokes),
+    ])
+    //add delay to save text in localstorage
+    await page.waitForTimeout(400)
+    const jiixExpected = helloOneStroke.exports['text/plain'][0]
+    const jiixReceived = exports['text/plain']
+    await Promise.all([
+      waitForEditorWebSocket(page),
+      page.locator("#clearStorage").click(),
+    ])
+    expect(jiixReceived).toStrictEqual(jiixExpected)
+  })
+
+  test('should get hello in localstorage', async () => {
+      await Promise.all([
+        waitForEditorWebSocket(page),
+        page.locator("#clearStorage").click(),
+      ])
+      await page.waitForTimeout(1000)
+      await Promise.all([
+        getExportedDatas(page),
+        write(page, helloOneStroke.strokes)
+      ])
+
+      await page.reload({ waitUntil: "networkidle" })
+      await page.waitForTimeout(1000)
+
+      const exports = await getEditorModelExportsType(page, "application/vnd.myscript.jiix")
+      expect(exports.label).toEqual("hello")
+  })
+})

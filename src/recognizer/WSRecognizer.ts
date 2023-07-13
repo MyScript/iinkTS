@@ -354,9 +354,9 @@ export class WSRecognizer extends AbstractRecognizer
         //   recognizerContext.supportedImportMimeTypes = message.data.mimeTypes
         //   recognitionContext.response(undefined, message.data)
         //   break
-        case "fileChunkAck":
-          this.#importDeferred?.resolve((websocketMessage as unknown) as TExport)
-          break
+        // case "fileChunkAck":
+        //  this.#importDeferred?.resolve((websocketMessage as unknown) as TExport)
+        //  break
         //   case "idle":
         //     recognizerContext.idle = true
         //     recognitionContext.patch(undefined, message.data)
@@ -524,6 +524,7 @@ export class WSRecognizer extends AbstractRecognizer
 
   async import(model: IModel, data: Blob, mimeType?: string): Promise<IModel>
   {
+    await this.#initialized?.promise
     const localModel = model.getClone()
     const chunkSize = this.serverConfiguration.websocket.fileChunkSize
     const importFileId = Math.random().toString(10).substring(2, 6)
@@ -545,7 +546,6 @@ export class WSRecognizer extends AbstractRecognizer
       mimeType
     }
     await this.send(importFileMessage)
-
     for (let i = 0; i < data.size; i += chunkSize) {
       const blobPart = data.slice(i, i + chunkSize, data.type)
       const partFileString = await readBlob(blobPart)

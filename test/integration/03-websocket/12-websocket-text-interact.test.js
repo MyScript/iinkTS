@@ -58,7 +58,7 @@ describe("Websocket Text", () => {
 
       if (question.includes("Argentina")) {
         expect(jiixReceived.label).toStrictEqual(
-          `${jiixReceived.label} ${aires.exports["application/vnd.myscript.jiix"].label}`
+          `${buenos.exports["application/vnd.myscript.jiix"].label} ${aires.exports["application/vnd.myscript.jiix"].label}`
         )
       } else {
         expect(jiixReceived.label).toStrictEqual(jiixExpected.label)
