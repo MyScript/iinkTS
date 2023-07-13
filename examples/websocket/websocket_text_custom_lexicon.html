@@ -10,11 +10,17 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
 
-    <title>Import content</title>
+    <title>Custom lexicon</title>
 
     <link rel="stylesheet" href="../examples.css" />
 
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
+
+    <style>
+      .button-div > p {
+        margin-right: 12px;
+      }
+    </style>
   </head>
 
   <body>
@@ -32,20 +38,22 @@
         <input
           type="text"
           class="input-field"
-          id="importContentField"
+          id="lexicon"
           data-type="text/plain"
-          placeholder="e.g. hello world"
+          placeholder='Add your own lexicon (space-separated) and press "Send"'
         />
-        <button class="classic-btn" id="importContent">Import</button>
+        <button class="classic-btn" id="reinit">Send</button>
       </nav>
       <div id="editor" touch-action="none"></div>
     </div>
     <script>
       const editorElement = document.getElementById("editor")
+
       const undoElement = document.getElementById("undo")
       const redoElement = document.getElementById("redo")
-      const importContentField = document.getElementById("importContentField")
-      const importContentElement = document.getElementById("importContent")
+
+      const reinitButton = document.getElementById("reinit")
+      const lexicon = document.getElementById("lexicon")
       let editor
 
       async function loadEditor() {
@@ -59,29 +67,47 @@
             },
             recognition: {
               type: "TEXT",
+              addLKText: true,
+              configuration: {
+                customLexicon: "",
+              },
             },
           },
         }
+
+        /**
+         * Instanciate Editor
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The editor options
+         */
         editor = new iink.Editor(editorElement, options)
 
-        editorElement.addEventListener("changed", (event) => {
+        editor.events.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo
           redoElement.disabled = !event.detail.canRedo
         })
 
         undoElement.addEventListener("click", () => {
-          editor.undo()
+          editorElement.editor.undo()
         })
         redoElement.addEventListener("click", () => {
-          editor.redo()
+          editorElement.editor.redo()
         })
-        importContentElement.addEventListener("click", () => {
-          const value = importContentField.value.replace("\\n", "\n")
-          editor.importText(value, importContentField.dataset.type)
+
+        reinitButton.addEventListener("click", () => {
+          const values = lexicon.value
+          const configuration = editor.configuration
+          configuration.recognition = {
+            configuration: {
+              customLexicon: values.split(" "),
+              addLKText: true,
+            },
+          }
+          editor.configuration = configuration
         })
 
         window.addEventListener("resize", () => {
-          editor.resize()
+          editorElement.editor.resize()
         })
       }
       loadEditor()
