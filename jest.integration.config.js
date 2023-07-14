@@ -26,5 +26,5 @@ export default {
 
   testMatch: ["**/integration/**/*.test.js"],
 
-  verbose: true,
+  verbose: false,
 }

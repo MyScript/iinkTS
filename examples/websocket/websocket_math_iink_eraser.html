@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-
   <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
     <title>Websocket Math Eraser</title>
     <link rel="stylesheet" href="../examples.css" />
@@ -30,24 +29,25 @@
       <nav>
         <div class="button-div">
           <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/clear.svg">
+            <img src="../assets/clear.svg" />
           </button>
           <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/undo.svg">
+            <img src="../assets/undo.svg" />
           </button>
           <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/redo.svg">
+            <img src="../assets/redo.svg" />
           </button>
         </div>
         <div class="button-div">
           <button id="pen" class="nav-btn btn-fab-mini btn-lightBlue active" disabled>
-            <img src="../assets/pen.svg">
+            <img src="../assets/pen.svg" />
           </button>
           <button id="eraser" class="nav-btn btn-fab-mini btn-lightBlue">
-            <img src="../assets/eraser.svg">
+            <img src="../assets/eraser.svg" />
           </button>
-          <label for="erase-precisely">Erase precisely:
-            <input type="checkbox" id="erase-precisely" name="erase-precisely">
+          <label for="erase-precisely">
+            Erase precisely:
+            <input type="checkbox" id="erase-precisely" name="erase-precisely" />
           </label>
         </div>
         <button class="classic-btn" id="convert" disabled>Convert</button>
@@ -55,49 +55,46 @@
       <div id="editor" touch-action="none"></div>
     </div>
     <script>
-      const editorElement = document.getElementById('editor');
-      const resultElement = document.getElementById('result');
-      const undoElement = document.getElementById('undo');
-      const redoElement = document.getElementById('redo');
-      const clearElement = document.getElementById('clear');
-      const convertElement = document.getElementById('convert');
-      const eraserElement = document.getElementById('eraser');
-      const penElement = document.getElementById('pen');
-      const erasePreciselyElement = document.getElementById('erase-precisely');
-
+      const editorElement = document.getElementById("editor");
+      const resultElement = document.getElementById("result");
+      const undoElement = document.getElementById("undo");
+      const redoElement = document.getElementById("redo");
+      const clearElement = document.getElementById("clear");
+      const convertElement = document.getElementById("convert");
+      const eraserElement = document.getElementById("eraser");
+      const penElement = document.getElementById("pen");
+      const erasePreciselyElement = document.getElementById("erase-precisely");
 
       function cleanLatex(latexExport) {
-        if (latexExport.includes('\\\\')) {
-          const steps = '\\begin{align*}' + latexExport + '\\end{align*}';
-          return steps.replace("\\begin{aligned}", "")
-            .replace("\\end{aligned}", "")
-            .replace(new RegExp("(align.{1})", "g"), "aligned");
+        if (latexExport.includes("\\\\")) {
+          const steps = "\\begin{align*}" + latexExport + "\\end{align*}";
+          return steps.replace("\\begin{aligned}", "").replace("\\end{aligned}", "").replace(new RegExp("(align.{1})", "g"), "aligned");
         }
-        return latexExport
-          .replace(new RegExp("(align.{1})", "g"), "aligned");
+        return latexExport.replace(new RegExp("(align.{1})", "g"), "aligned");
       }
 
       /**
        * We use a function to wait the server configuration to load
        */
-       async function loadEditor() {
-        const res = await fetch('../server-configuration.json');
+      async function loadEditor() {
+        const res = await fetch("../server-configuration.json");
         const conf = await res.json();
         const options = {
           configuration: {
             server: {
               ...conf,
-              protocol: 'WEBSOCKET',
+              protocol: "WEBSOCKET"
             },
             recognition: {
-              type: 'MATH',
+              type: "MATH",
               math: {
+                mimeTypes: ["application/x-latex"],
                 eraser: {
-                  'erase-precisely': false
+                  "erase-precisely": false
                 }
-              },
-            },
-          },
+              }
+            }
+          }
         };
         /**
          * Instanciate editor
@@ -107,67 +104,66 @@
         const editor = new iink.Editor(editorElement, options);
         editor.debug = true;
 
-        editorElement.addEventListener('changed', (event) => {
+        editorElement.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo;
           redoElement.disabled = !event.detail.canRedo;
           clearElement.disabled = event.detail.isEmpty;
         });
-        editorElement.addEventListener('exported', (evt) => {
+        editorElement.addEventListener("exported", (evt) => {
           const exports = evt.detail;
-          if (exports && exports['application/x-latex']) {
+          if (exports && exports["application/x-latex"]) {
             convertElement.disabled = false;
-            katex.render(cleanLatex(exports['application/x-latex']),  resultElement);
+            katex.render(cleanLatex(exports["application/x-latex"]), resultElement);
             // resultElement.innerHTML = '<span>' + exports['application/x-latex'] + '</span>';
-          } else if (exports && exports['application/mathml+xml']) {
+          } else if (exports && exports["application/mathml+xml"]) {
             convertElement.disabled = false;
-            resultElement.innerText = exports['application/mathml+xml'];
-          } else if (exports && exports['application/mathofficeXML']) {
+            resultElement.innerText = exports["application/mathml+xml"];
+          } else if (exports && exports["application/mathofficeXML"]) {
             convertElement.disabled = false;
-            resultElement.innerText = exports['application/mathofficeXML'];
+            resultElement.innerText = exports["application/mathofficeXML"];
           } else {
             convertElement.disabled = true;
-            resultElement.innerHTML = '';
+            resultElement.innerHTML = "";
           }
         });
 
-        undoElement.addEventListener('click', () => {
+        undoElement.addEventListener("click", () => {
           editorElement.editor.undo();
         });
-        redoElement.addEventListener('click', () => {
+        redoElement.addEventListener("click", () => {
           editorElement.editor.redo();
         });
-        clearElement.addEventListener('click', () => {
+        clearElement.addEventListener("click", () => {
           editorElement.editor.clear();
         });
-        convertElement.addEventListener('click', () => {
+        convertElement.addEventListener("click", () => {
           editorElement.editor.convert();
         });
-        eraserElement.addEventListener('click', () => {
+        eraserElement.addEventListener("click", () => {
           editor.mode = "erasing";
           eraserElement.disabled = true;
-          eraserElement.classList.add('active')
+          eraserElement.classList.add("active");
           penElement.disabled = false;
-          penElement.classList.remove('active')
+          penElement.classList.remove("active");
         });
-        penElement.addEventListener('click', () => {
+        penElement.addEventListener("click", () => {
           editor.mode = "writing";
           eraserElement.disabled = false;
-          eraserElement.classList.remove('active')
+          eraserElement.classList.remove("active");
           penElement.disabled = true;
-          penElement.classList.add('active')
+          penElement.classList.add("active");
         });
-        erasePreciselyElement.addEventListener('change', (e) => {
-          const configuration = { ... editorElement.editor.configuration };
-          configuration.recognition.math.eraser['erase-precisely'] = e.target.checked;
-          editorElement.editor.configuration = configuration
-        })
+        erasePreciselyElement.addEventListener("change", (e) => {
+          const configuration = { ...editorElement.editor.configuration };
+          configuration.recognition.math.eraser["erase-precisely"] = e.target.checked;
+          editorElement.editor.configuration = configuration;
+        });
 
-        window.addEventListener('resize', () => {
+        window.addEventListener("resize", () => {
           editorElement.editor.resize();
         });
       }
       loadEditor();
     </script>
   </body>
-
 </html>

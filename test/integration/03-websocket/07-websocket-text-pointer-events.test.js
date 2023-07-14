@@ -25,8 +25,8 @@ describe('Websocket Text Pointer Events', () => {
       write(page, h.strokes),
     ])
     const jiixExpected = h.exports['application/vnd.myscript.jiix']
-    const jiixReceived = JSON.parse(exports['application/vnd.myscript.jiix'])
-    expect(jiixReceived).toStrictEqual(jiixExpected)
+    const jiixReceived = exports['application/vnd.myscript.jiix']
+    expect(jiixReceived).toEqual(jiixExpected)
   })
 
   test('should import points with button', async () => {
@@ -34,7 +34,7 @@ describe('Websocket Text Pointer Events', () => {
         getExportedDatas(page),
         page.locator('#pointerEvents').click(),
     ])
-    const jiixReceived = JSON.parse(exports['application/vnd.myscript.jiix'])
+    const jiixReceived = exports['application/vnd.myscript.jiix']
     expect(jiixReceived.label).toStrictEqual("A")
   })
 

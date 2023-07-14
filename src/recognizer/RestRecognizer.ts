@@ -206,7 +206,8 @@ export class RestRecognizer extends AbstractRecognizer
 
     const promises = mimeTypes.map(mt => this.tryFetch(dataToConcert, mt))
     const converts: TExport[] = await Promise.all(promises)
-    converts.forEach(c => {
+    converts.forEach(c =>
+    {
       myModel.converts = Object.assign(myModel.converts || {}, c)
     })
 
@@ -239,7 +240,8 @@ export class RestRecognizer extends AbstractRecognizer
     const mimeTypesRequiringExport: string[] = mimeTypes.filter(m => !myModel.exports || !myModel.exports[m])
     const exports: TExport[] = await Promise.all(mimeTypesRequiringExport.map(mimeType => this.exportModel(myModel, mimeType)))
 
-    exports.forEach(e => {
+    exports.forEach(e =>
+    {
       myModel.mergeExport(e)
     })
 

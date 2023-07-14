@@ -9,11 +9,13 @@ import { TTheme } from "./@types/style/Theme"
 import { IBehaviors } from "./@types/Behaviors"
 import { TConverstionState } from "./@types/configuration/RecognitionConfiguration"
 import { TMarginConfiguration } from "./@types/configuration/recognition/MarginConfiguration"
+import { TUndoRedoContext } from "./@types/undo-redo/UndoRedoContext"
 
-import { EventType } from "./Constants"
+import { Exports } from "./Constants"
 import { BehaviorsManager } from "./behaviors/BehaviorsManager"
 import { Configuration } from "./configuration/Configuration"
-import { GlobalEvent } from "./event/GlobalEvent"
+import { PublicEvent } from "./event/PublicEvent"
+import { InternalEvent } from "./event/InternalEvent"
 import { Model } from "./model/Model"
 import { StyleManager } from "./style/StyleManager"
 import { SmartGuide } from "./smartguide/SmartGuide"
@@ -74,7 +76,6 @@ export class Editor
 
     this.#configuration = new Configuration(options?.configuration)
 
-
     const width = Math.max(this.wrapperHTML.clientWidth, this.configuration.rendering.minWidth)
     const height = Math.max(this.wrapperHTML.clientHeight, this.configuration.rendering.minHeight)
     this.model = new Model(width, height)
@@ -123,7 +124,7 @@ export class Editor
       case EditorMode.Erasing:
         this.wrapperHTML.classList.add("erasing")
         this.wrapperHTML.classList.remove("selecting")
-        break;
+        break
       // case EditorMode.Selecting:
       //   this.model.resetSelectedStrokes()
       //   this.wrapperHTML.classList.remove("erasing")
@@ -133,13 +134,13 @@ export class Editor
         document.body.style.cursor = "initial"
         this.wrapperHTML.classList.remove("erasing")
         this.wrapperHTML.classList.remove("selecting")
-        break;
+        break
     }
   }
 
-  get events(): GlobalEvent
+  get events(): PublicEvent
   {
-    return GlobalEvent.getInstance()
+    return PublicEvent.getInstance()
   }
 
   get behaviors(): IBehaviors
@@ -147,7 +148,12 @@ export class Editor
     return this.#behaviorsManager.behaviors
   }
 
-  get #grabber(): IGrabber
+  get context(): TUndoRedoContext
+  {
+    return this.behaviors.context
+  }
+
+  get grabber(): IGrabber
   {
     return this.#behaviorsManager.behaviors.grabber
   }
@@ -173,7 +179,7 @@ export class Editor
   set penStyleClasses(psc: string)
   {
     this.#styleManager.penStyleClasses = psc
-    this.#localPenStyle = (this.theme[`.${this.penStyleClasses}`]) as TPenStyle
+    this.#localPenStyle = (this.theme[`.${ this.penStyleClasses }`]) as TPenStyle
     if (this.behaviors.setPenStyleClasses) {
       this.behaviors.setPenStyleClasses(psc)
     }
@@ -225,9 +231,9 @@ export class Editor
     this.#behaviorsManager.init(this.wrapperHTML)
       .then(async () =>
       {
-        this.#grabber.onPointerDown = (evt: PointerEvent, point: TPoint) => this.onPointerDown(evt, point)
-        this.#grabber.onPointerMove = (evt: PointerEvent, point: TPoint) => this.onPointerMove(evt, point)
-        this.#grabber.onPointerUp = (evt: PointerEvent, point: TPoint) => this.onPointerUp(evt, point)
+        this.grabber.onPointerDown = this.onPointerDown.bind(this)
+        this.grabber.onPointerMove = this.onPointerMove.bind(this)
+        this.grabber.onPointerUp = this.onPointerUp.bind(this)
 
         if (this.behaviors.setPenStyle) {
           this.behaviors.setPenStyle(this.penStyle)
@@ -247,7 +253,6 @@ export class Editor
       {
         this.#initializationDeferred.resolve(false)
         this.#showError(e)
-        this.events.emitError(e)
       })
       .finally(() =>
       {
@@ -280,59 +285,50 @@ export class Editor
     }
   }
 
-  #showNotif(message: string, timeout = 1000)
+  #showNotif(notif: { message: string, timeout?: number })
   {
     this.#messageHTML.style.display = "initial"
     this.#messageHTML.classList.add("info-msg")
     this.#messageHTML.classList.remove("error-msg")
-    this.#messageHTML.innerText = message
-    setTimeout(() => {
+    this.#messageHTML.innerText = notif.message
+    setTimeout(() =>
+    {
       this.#cleanMessage()
-    }, timeout)
+    }, notif.timeout || 2500)
   }
 
   #addListeners(): void
   {
-    this.events.addEventListener(EventType.CONVERT, () => this.convert({ conversionState: "DIGITAL_EDIT" }))
-    this.events.addEventListener(EventType.CLEAR, () => this.clear())
-    this.events.addEventListener(EventType.ERROR, (evt: Event) => this.#onError(evt))
-    this.events.addEventListener(EventType.IMPORT, (evt: Event) => this.#onImport(evt))
-    this.events.addEventListener(EventType.EXPORTED, (evt: Event) => this.#onExport(evt))
-    this.events.addEventListener(EventType.NOTIF, (evt: Event) => this.#onNotif(evt))
-    this.events.addEventListener(EventType.CLEAR_MESSAGE, () => this.#cleanMessage())
+    InternalEvent.getInstance().addConvertListener(this.convert.bind(this))
+    InternalEvent.getInstance().addClearListener(this.clear.bind(this))
+    InternalEvent.getInstance().addErrorListener(this.#showError.bind(this))
+    InternalEvent.getInstance().addImportJIIXListener(this.#onImportJIIX.bind(this))
+    InternalEvent.getInstance().addExportedListener(this.#onExport.bind(this))
+    InternalEvent.getInstance().addNotifListener(this.#showNotif.bind(this))
+    InternalEvent.getInstance().addClearMessageListener(this.#cleanMessage.bind(this))
+    InternalEvent.getInstance().addContextChangeListener(this.#onContextChange.bind(this))
   }
 
-  #onNotif(evt: Event): void
+  #onContextChange = (context: TUndoRedoContext) =>
   {
-    const payload = (evt as CustomEvent).detail as { message: string, timeout: number }
-    this.#showNotif(payload.message, payload.timeout)
+    this.events.emitChanged(context)
   }
 
-  #onExport(evt: Event): void
+  #onExport(exports: TExport): void
   {
-    const exports = (evt as CustomEvent).detail as TExport
     this.model.mergeExport(exports)
     if (this.configuration.rendering.smartGuide.enable) {
       if (exports && exports["application/vnd.myscript.jiix"]) {
-        const jjix = (exports["application/vnd.myscript.jiix"] as unknown) as string
-        this.#smartGuide?.update(JSON.parse(jjix))
+        const jjix = exports["application/vnd.myscript.jiix"] as TJIIXExport
+        this.#smartGuide?.update(jjix)
       }
     }
+    this.events.emitExported(exports)
   }
 
-  #onImport(evt: Event): void
+  #onImportJIIX(jiix: TJIIXExport): void
   {
-    const customEvent = evt as CustomEvent
-    const jiix: string = customEvent.detail.jiix
-    const mimeType: string = customEvent.detail.mimeType
-    this.importBlob(new Blob([JSON.stringify(jiix)], { type: mimeType }), mimeType)
-  }
-
-  #onError(evt: Event)
-  {
-    const customEvent = evt as CustomEvent
-    const err = customEvent?.detail as Error
-    this.#showError(err)
+    this.importBlob(new Blob([JSON.stringify(jiix)], { type: Exports.JIIX }), Exports.JIIX)
   }
 
   onPointerDown(evt: PointerEvent, point: TPoint): void
@@ -355,15 +351,15 @@ export class Editor
             if (this.model.removeStrokesFromPoint(point) > 0) {
               this.model.endCurrentStroke(point, this.penStyle)
               this.behaviors.updateModelRendering(this.model)
-                .then(model => this.model = model)
+                .then(model => Object.assign(this.model, model))
                 .catch(error => this.#showError(error as Error))
             }
           }
-          break;
+          break
         default:
           this.model.initCurrentStroke(point, evt.pointerId, pointerType, style)
           this.behaviors.drawCurrentStroke(this.model)
-          break;
+          break
       }
     }
   }
@@ -381,14 +377,14 @@ export class Editor
           if (this.model.removeStrokesFromPoint(point) > 0) {
             this.model.endCurrentStroke(point, this.penStyle)
             this.behaviors.updateModelRendering(this.model)
-              .then(model => this.model = model)
+              .then(model => Object.assign(this.model, model))
               .catch(error => this.#showError(error as Error))
           }
         }
-        break;
+        break
       default:
         this.model.appendToCurrentStroke(point)
-        break;
+        break
     }
     this.behaviors.drawCurrentStroke(this.model)
   }
@@ -403,74 +399,78 @@ export class Editor
         if (this.configuration.server.protocol === "WEBSOCKET") {
           this.model.endCurrentStroke(point, this.penStyle)
           this.behaviors.updateModelRendering(this.model)
-            .then(model => this.model = model)
+            .then(model => Object.assign(this.model, model))
             .catch(error => this.#showError(error as Error))
         } else {
           if (this.model.removeStrokesFromPoint(point) > 0) {
             this.model.endCurrentStroke(point, this.penStyle)
             this.behaviors.updateModelRendering(this.model)
-              .then(model => this.model = model)
+              .then(model => Object.assign(this.model, model))
               .catch(error => this.#showError(error as Error))
           }
         }
-        break;
+        break
       default:
         this.model.endCurrentStroke(point, this.penStyle)
         this.behaviors.updateModelRendering(this.model)
-          .then(model => this.model = model)
+          .then(model => Object.assign(this.model, model))
           .catch(error => this.#showError(error as Error))
-        break;
+        break
     }
-    if (this.debug) {
-      this.showStrokes()
-    }
+    this.#showStrokesIfDebug()
   }
 
-  showStrokes(): void
+  #showStrokesIfDebug(): void
   {
-    let panel = document.getElementById("stroke-panel")
-    const text = JSON.stringify(this.model.rawStrokes.map((s: TStroke) => ({ pointerType: s.pointerType, pointerId: s.pointerId, x: s.x, y: s.y, t: s.t, p: s.p, })))
-    if (!panel) {
-      panel = document.createElement("div")
-      panel.id = "stroke-panel"
-      panel.addEventListener("click", () => {
-        navigator.clipboard.writeText(panel?.innerText as string)
-        this.#showNotif("strokes copied to clipboard!")
-      })
-      this.wrapperHTML.appendChild(panel)
+    if (this.debug) {
+      let panel = document.getElementById("stroke-panel")
+      const text = JSON.stringify(this.model.rawStrokes.map((s: TStroke) => ({ pointerType: s.pointerType, pointerId: s.pointerId, x: s.x, y: s.y, t: s.t, p: s.p, })))
+      if (!panel) {
+        panel = document.createElement("div")
+        panel.id = "stroke-panel"
+        panel.addEventListener("click", () =>
+        {
+          navigator.clipboard.writeText(panel?.innerText as string)
+          this.#showNotif({ message: "strokes copied to clipboard!", timeout: 1500 })
+        })
+        this.wrapperHTML.appendChild(panel)
+      }
+      panel.innerText = text
     }
-    panel.innerText = text
   }
 
   async undo(): Promise<IModel>
   {
-    this.model = await this.behaviors.undo(this.model)
+    const model = await this.behaviors.undo(this.model)
+    Object.assign(this.model, model)
+    this.#showStrokesIfDebug()
     return this.model
   }
 
   async redo(): Promise<IModel>
   {
-    this.model = await this.behaviors.redo(this.model)
+    const model = await this.behaviors.redo(this.model)
+    Object.assign(this.model, model)
+    this.#showStrokesIfDebug()
     return this.model
   }
 
   async clear(): Promise<IModel>
   {
-    this.model = await this.behaviors.clear(this.model)
+    const model = await this.behaviors.clear(this.model)
+    Object.assign(this.model, model)
     this.events.emitCleared(this.model)
+    this.#showStrokesIfDebug()
     return this.model
   }
 
   async importPointEvents(strokes: TStroke[]): Promise<IModel>
   {
-    if(this.behaviors.importPointEvents)
-    {
+    if (this.behaviors.importPointEvents) {
       this.model = await this.behaviors.importPointEvents(this.model, strokes)
     }
-    else
-    {
-      throw new Error("Import points not implemented");
-
+    else {
+      throw new Error("Import points not implemented")
     }
     return this.model
   }
@@ -482,19 +482,22 @@ export class Editor
     }
     this.model.height = Math.max(this.wrapperHTML.clientHeight, this.configuration.rendering.minHeight)
     this.model.width = Math.max(this.wrapperHTML.clientWidth, this.configuration.rendering.minWidth)
-    this.model = await this.behaviors.resize(this.model)
+    const model = await this.behaviors.resize(this.model)
+    Object.assign(this.model, model)
     return this.model
   }
 
   async export(mimeTypes?: string[]): Promise<IModel>
   {
-    this.model = await this.behaviors.export(this.model, mimeTypes)
+    const model = await this.behaviors.export(this.model, mimeTypes)
+    Object.assign(this.model, model)
     return this.model
   }
 
   async convert(params?: { conversionState?: TConverstionState, mimeTypes?: string[] }): Promise<IModel | never>
   {
-    this.model = await this.behaviors.convert(this.model, params?.conversionState, params?.mimeTypes)
+    const model = await this.behaviors.convert(this.model, params?.conversionState, params?.mimeTypes)
+    Object.assign(this.model, model)
     this.events.emitConverted(this.model.converts as TExport)
     return this.model
   }
@@ -502,7 +505,8 @@ export class Editor
   async importBlob(data: Blob, mimeType?: string): Promise<IModel | never>
   {
     if (this.behaviors.import) {
-      this.model = await this.behaviors.import(this.model, data, mimeType)
+      const model = await this.behaviors.import(this.model, data, mimeType)
+      Object.assign(this.model, model)
       this.events.emitImported(this.model.exports?.[mimeType || "application/vnd.myscript.jiix"] as TJIIXExport)
       return this.model
     }
@@ -513,24 +517,29 @@ export class Editor
   {
     if (this.behaviors.import) {
       const dataToImport = new Blob([data])
-      this.model = await this.behaviors.import(this.model, dataToImport, mimeType)
+      const model = await this.behaviors.import(this.model, dataToImport, mimeType)
+      Object.assign(this.model, model)
       this.events.emitImported(this.model.exports?.["application/vnd.myscript.jiix"] as TJIIXExport)
       return this.model
     }
     return Promise.reject("Import impossible, behaviors has no import function")
   }
 
-  async reDraw (rawStrokes: TStroke[], strokeGroups: TStrokeGroup[]) {
-    rawStrokes.forEach((stroke) => {
+  async reDraw(rawStrokes: TStroke[], strokeGroups: TStrokeGroup[])
+  {
+    rawStrokes.forEach((stroke) =>
+    {
       this.model.addStroke(stroke)
     })
-    strokeGroups.forEach((group) => {
-      group.strokes.forEach((strokeFromGroup) => {
+    strokeGroups.forEach((group) =>
+    {
+      group.strokes.forEach((strokeFromGroup) =>
+      {
         this.model.addStrokeToGroup(strokeFromGroup, group.penStyle)
       })
     })
     return this.behaviors.updateModelRendering(this.model)
-      .then(model => this.model = model)
+      .then(model => Object.assign(this.model, model))
       .catch(error => this.#showError(error as Error))
   }
 }

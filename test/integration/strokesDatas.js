@@ -357,3 +357,15 @@ module.exports.jilop = {
     },
   },
 }
+
+const sumStroke = require('./strokes/sum.json')
+module.exports.sum = {
+  type: 'MATH',
+  strokes: sumStroke,
+  exports: {
+    LATEX: ['3', '3-', '3+', '3+1', '3+1-', '3+1=']
+  },
+  converts: {
+    LATEX: ['3+1=4']
+  }
+}

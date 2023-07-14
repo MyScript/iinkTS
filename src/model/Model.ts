@@ -42,7 +42,8 @@ export class Model implements IModel
     this.idle = true
   }
 
-  mergeExport(exports: TExport) {
+  mergeExport(exports: TExport)
+  {
     if (this.exports) {
       Object.assign(this.exports, exports)
     } else {
@@ -50,17 +51,20 @@ export class Model implements IModel
     }
   }
 
-  private computeDistance (point1: TPoint, point2: TPoint): number {
+  private computeDistance(point1: TPoint, point2: TPoint): number
+  {
     const distance = Math.sqrt(Math.pow((point1.y - point2.y), 2) + Math.pow((point1.x - point2.x), 2))
     return isNaN(distance) ? 0 : distance
   }
 
-  private computeLength (point1: TPoint, point2: TPoint, lastDistance: number): number {
+  private computeLength(point1: TPoint, point2: TPoint, lastDistance: number): number
+  {
     const length = lastDistance + this.computeDistance(point1, point2)
     return isNaN(length) ? 0 : length
   }
 
-  private computePressure (point1: TPoint, point2: TPoint, lastDistance: number): number {
+  private computePressure(point1: TPoint, point2: TPoint, lastDistance: number): number
+  {
     let ratio = 1.0
     const distance = this.computeDistance(point1, point2)
     const length = this.computeLength(point1, point2, lastDistance)
@@ -90,10 +94,10 @@ export class Model implements IModel
   {
     if (this.filterPointByAcquisitionDelta(stroke, point)) {
       const lastPoint: TPoint = {
-        x: stroke.x[stroke.x.length -1],
-        y: stroke.y[stroke.y.length -1],
-        p: stroke.p[stroke.p.length -1],
-        t: stroke.t[stroke.t.length -1],
+        x: stroke.x[stroke.x.length - 1],
+        y: stroke.y[stroke.y.length - 1],
+        p: stroke.p[stroke.p.length - 1],
+        t: stroke.t[stroke.t.length - 1],
       }
       const lastDistance: number = stroke.l[stroke.l.length - 1]
       stroke.x.push(point.x)
@@ -106,7 +110,7 @@ export class Model implements IModel
 
   addStroke(stroke: TStroke): void
   {
-    stroke.id = stroke.id || `${new Date().getTime().toString()}-${this.rawStrokes.length}`
+    stroke.id = stroke.id || `${ new Date().getTime().toString() }-${ this.rawStrokes.length }`
     this.rawStrokes.push(stroke)
   }
 
@@ -119,7 +123,8 @@ export class Model implements IModel
   {
     const lastGroup = this.strokeGroups.length - 1
 
-    const isPenStyleEqual = (ps1: TPenStyle, ps2: TPenStyle) => {
+    const isPenStyleEqual = (ps1: TPenStyle, ps2: TPenStyle) =>
+    {
       return ps1["-myscript-pen-fill-color"] === ps2["-myscript-pen-fill-color"] &&
         ps1["-myscript-pen-fill-style"] === ps2["-myscript-pen-fill-style"] &&
         ps1["-myscript-pen-width"] === ps2["-myscript-pen-width"] &&
@@ -128,10 +133,10 @@ export class Model implements IModel
     }
 
     if (this.strokeGroups[lastGroup] && isPenStyleEqual(this.strokeGroups[lastGroup].penStyle, strokePenStyle)) {
-      stroke.id = stroke.id || `${new Date().getTime().toString()}-${this.strokeGroups[lastGroup].strokes.length}`
+      stroke.id = stroke.id || `${ new Date().getTime().toString() }-${ this.strokeGroups[lastGroup].strokes.length }`
       this.strokeGroups[lastGroup].strokes.push(stroke)
     } else {
-      stroke.id = stroke.id || `${new Date().getTime().toString()}-0`
+      stroke.id = stroke.id || `${ new Date().getTime().toString() }-0`
       const newStrokeGroup: TStrokeGroup = {
         penStyle: strokePenStyle,
         strokes: [stroke]
@@ -179,7 +184,8 @@ export class Model implements IModel
     const _strokeList: TStroke[] = []
     const x0 = point.x
     const y0 = point.y
-    this.rawStrokes.forEach((stroke) => {
+    this.rawStrokes.forEach((stroke) =>
+    {
       if (_strokeList.some(s => s.id === stroke.id)) {
         return
       }
@@ -216,7 +222,8 @@ export class Model implements IModel
   appendSelectedStrokesFromPoint(point: TPoint): void
   {
     this.#getStrokeFromPoint(point)
-      .forEach(s => {
+      .forEach(s =>
+      {
         if (!this.selectedStrokes.includes(s)) {
           this.selectedStrokes.push(s)
         }
@@ -226,8 +233,10 @@ export class Model implements IModel
   removeStrokesFromPoint(point: TPoint): number
   {
     const strokes = this.#getStrokeFromPoint(point)
-    strokes.forEach(strokeToRemove => {
-      this.strokeGroups.forEach((group) => {
+    strokes.forEach(strokeToRemove =>
+    {
+      this.strokeGroups.forEach((group) =>
+      {
         const strokeIndex = group.strokes.findIndex((s: TStroke): boolean => s.id === strokeToRemove.id)
         if (strokeIndex !== -1) {
           group.strokes.splice(strokeIndex, 1)
@@ -241,7 +250,7 @@ export class Model implements IModel
     return strokes.length
   }
 
-  extractPendingRecognizedSymbols (position: number = this.positions.lastRenderedPosition + 1): TUpdatePatch[]
+  extractPendingRecognizedSymbols(position: number = this.positions.lastRenderedPosition + 1): TUpdatePatch[]
   {
     return this.recognizedSymbols ? this.recognizedSymbols.slice(position) : []
   }

@@ -34,24 +34,9 @@ export const EventType = {
   CHANGED: "changed",
   /**
    * @event
-   * event emitted on click on clear button from the Smartguide
-   */
-  CLEAR: "clear",
-  /**
-   * @event
-   * event emitted to clean message information or error
-   */
-  CLEAR_MESSAGE: "clear-message",
-  /**
-   * @event
    * event emitted when clearing is complete
    */
   CLEARED: "cleared",
-  /**
-   * @event
-   * event emitted on click on convert button from the Smartguide
-   */
-  CONVERT: "convert",
   /**
    * @event
    * event emitted after the conversion is complete
@@ -74,11 +59,6 @@ export const EventType = {
   EXPORTED: "exported",
   /**
    * @event
-   * event emitted on click on candidate element from the Smartguide
-   */
-  IMPORT: "import",
-  /**
-   * @event
    * event emitted after the end of the import
    */
   IMPORTED: "imported",
@@ -92,30 +72,21 @@ export const EventType = {
    * event emitted after full editor initialization
    */
   LOADED: "loaded",
-  /**
-   * @event
-   * event emitted to notify the user, for example after clicking the Smartguide copy button
-   */
-  NOTIF: "notif",
-  /**
-   * @event
-   * event emitted after rendering is complete
-   */
-  RENDERED: "rendered",
 } as const
 
 /**
  * @internal
  */
-export const WSEventType = {
-  PART_CHANGE: "ws_part_change",
-  CONTENT_CHANGE: "ws_content_change",
-  SVG_PATCH: "ws_svg_patch",
-  POINTER_EVENTS: "ws_pointer_events",
-  EXPORTED: "ws_exported",
-  ERROR: "ws_error",
-  CONNECTED: "ws_connected",
-  DISCONNECTED: "ws_disconnected",
+export const InternalEventType = {
+  SVG_PATCH: "internal_svg_patch",
+  EXPORTED: "internal_exported",
+  CLEAR_MESSAGE: "internal_clear_message",
+  ERROR: "internal_error",
+  NOTIF: "internal_notif",
+  IMPORT_JIIX: "internal_import_jiix",
+  CONVERT: "internal_convert",
+  CLEAR: "internal_clear",
+  CONTEXT_CHANGE: "internal_context_change",
 } as const
 
 /**

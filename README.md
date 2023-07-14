@@ -98,7 +98,7 @@ yarn add iink-ts
 ```javascript
   const editorElement = document.getElementById('editor');
 
-  const editor = iink.Editor(editorElement, {
+  const editor = new iink.Editor(editorElement, {
     server: {
         applicationKey: '#YOUR MYSCRIPT DEVELOPER APPLICATION KEY#',
         hmacKey: '#YOUR MYSCRIPT DEVELOPER HMAC KEY#'
@@ -123,7 +123,7 @@ yarn add iink-ts
         <script>
             const editorElement = document.getElementById('editor');
 
-            const editor = iink.Editor(editorElement, {
+            const editor = new iink.Editor(editorElement, {
                 server: {
                     applicationKey: '#YOUR MYSCRIPT DEVELOPER APPLICATION KEY#',
                     hmacKey: '#YOUR MYSCRIPT DEVELOPER HMAC KEY#'

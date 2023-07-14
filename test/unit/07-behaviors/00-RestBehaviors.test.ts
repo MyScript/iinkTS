@@ -2,9 +2,9 @@
 import { TConfiguration } from '../../../src/@types/Configuration'
 import { IModel } from '../../../src/@types/model/Model'
 import { TPoint } from '../../../src/@types/renderer/Point'
+
 import { RestBehaviors } from '../../../src/behaviors/RestBehaviors'
 import { DefaultConfiguration } from '../../../src/configuration/DefaultConfiguration'
-import { GlobalEvent } from '../../../src/event/GlobalEvent'
 import { Model } from '../../../src/model/Model'
 import { DefaultPenStyle } from '../../../src/style/DefaultPenStyle'
 import { delay } from '../utils/helpers'
@@ -18,13 +18,6 @@ describe('RestBehaviors.ts', () =>
     const model: IModel = new Model(width, height)
     const rb = new RestBehaviors(DefaultConfiguration, model)
     expect(rb).toBeDefined()
-  })
-
-  test('should have globalEvent property', () =>
-  {
-    const model: IModel = new Model(width, height)
-    const rb = new RestBehaviors(DefaultConfiguration, model)
-    expect(rb.globalEvent).toBe(GlobalEvent.getInstance())
   })
 
   test('should init', async () =>
@@ -83,21 +76,7 @@ describe('RestBehaviors.ts', () =>
       await rb.updateModelRendering(model)
       await delay(DefaultConfiguration.triggers.exportContentDelay)
       expect(rb.recognizer.export).toBeCalledTimes(1)
-      expect(rb.recognizer.export).toBeCalledWith(model, undefined)
-    })
-
-    test('should emit EXPORTED', async () =>
-    {
-      const wrapperHTML: HTMLElement = document.createElement('div')
-      const model: IModel = new Model(width, height)
-      const rb = new RestBehaviors(DefaultConfiguration, model)
-      await rb.init(wrapperHTML)
-      rb.renderer.drawModel = jest.fn()
-      rb.recognizer.export = jest.fn(m => Promise.resolve(m))
-      rb.globalEvent.emitExported = jest.fn(e => e)
-      await rb.updateModelRendering(model)
-      await delay(DefaultConfiguration.triggers.exportContentDelay)
-      expect(rb.globalEvent.emitExported).toBeCalledWith(model.exports)
+      expect(rb.recognizer.export).toBeCalledWith(model)
     })
 
     test('should reject if recognizer.export in error', async () =>
@@ -137,14 +116,12 @@ describe('RestBehaviors.ts', () =>
     await rb.init(wrapperHTML)
 
     rb.recognizer.export = jest.fn(m => Promise.resolve(m))
-    rb.globalEvent.emitExported = jest.fn(m => Promise.resolve(m))
 
     rb.export(model)
     await delay(DefaultConfiguration.triggers.exportContentDelay)
 
     expect(rb.recognizer.export).toBeCalledTimes(1)
     expect(rb.recognizer.export).toBeCalledWith(model, undefined)
-    expect(rb.globalEvent.emitExported).toBeCalledWith(model.exports)
   })
 
   test('should convert', async () =>
@@ -156,14 +133,12 @@ describe('RestBehaviors.ts', () =>
     await rb.init(wrapperHTML)
 
     rb.recognizer.convert = jest.fn(m => Promise.resolve(m))
-    rb.globalEvent.emitConverted = jest.fn(m => Promise.resolve(m))
 
     rb.convert(model, "DIGITAL_EDIT", ["mime-type"])
     await delay(DefaultConfiguration.triggers.exportContentDelay)
 
     expect(rb.recognizer.convert).toBeCalledTimes(1)
     expect(rb.recognizer.convert).toBeCalledWith(model, "DIGITAL_EDIT", ["mime-type"])
-    expect(rb.globalEvent.emitConverted).toBeCalledWith(model.converts)
   })
 
   test('should resize', async () =>
@@ -269,8 +244,6 @@ describe('RestBehaviors.ts', () =>
     await rb.init(wrapperHTML)
 
     rb.recognizer.export = jest.fn(m => Promise.resolve(m))
-    rb.globalEvent.emitExported = jest.fn(m => Promise.resolve(m))
-    rb.globalEvent.emitCleared = jest.fn(m => Promise.resolve(m))
     rb.renderer.drawModel = jest.fn()
 
     const model2: IModel = new Model(width, height)
@@ -287,10 +260,6 @@ describe('RestBehaviors.ts', () =>
 
     expect(clearedModel.modificationDate).toBeGreaterThan(model2.modificationDate)
     expect(clearedModel.rawStrokes).toHaveLength(0)
-
-    expect(rb.globalEvent.emitExported).toBeCalledTimes(2)
-    expect(rb.globalEvent.emitExported).toBeCalledWith(clearedModel.exports)
-
   })
 
   test('should destroy', async () =>
@@ -311,8 +280,6 @@ describe('RestBehaviors.ts', () =>
     expect(rb.grabber.detach).toBeCalledTimes(1)
     expect(rb.renderer.destroy).toBeCalledTimes(1)
     expect(rb.undoRedoManager.reset).toBeCalledTimes(1)
-    expect(rb.globalEvent.emitCleared).toBeCalledWith(model)
-    expect(rb.globalEvent.emitExported).toBeCalledWith(model.exports)
   })
 
 })

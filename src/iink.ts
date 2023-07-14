@@ -14,7 +14,7 @@ export {
   DefaultServerConfiguration,
   DefaultTriggerConfiguration,
   DefaultUndoRedoConfiguration
- } from "./configuration/DefaultConfiguration"
+} from "./configuration/DefaultConfiguration"
 
 export { Configuration } from "./configuration/Configuration"
 

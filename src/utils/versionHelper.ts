@@ -1,5 +1,6 @@
 
-export const isVersionSuperiorOrEqual = (source: string, target: string): boolean => {
+export const isVersionSuperiorOrEqual = (source: string, target: string): boolean =>
+{
   const sourceParts = source.split(".")
   const targetParts = target.split(".")
 

@@ -1,9 +1,5 @@
-const {
-    write,
-    getExportedDatas,
-    waitForEditorWebSocket,
-  } = require("../helper")
-  const { helloOneStroke } = require("../strokesDatas")
+const { write, getExportedDatas, waitForEditorWebSocket } = require("../helper")
+const { helloOneStroke } = require("../strokesDatas")
 
   describe("Websocket Text Search Without Smartguide", () => {
     beforeAll(async () => {
@@ -27,7 +23,7 @@ const {
       ])
 
       const jiixExpected = helloOneStroke.exports["application/vnd.myscript.jiix"].label
-      const jiixReceived = JSON.parse(exports["application/vnd.myscript.jiix"]).label
+      const jiixReceived = exports["application/vnd.myscript.jiix"].label
       expect(jiixReceived).toStrictEqual(jiixExpected)
     })
 

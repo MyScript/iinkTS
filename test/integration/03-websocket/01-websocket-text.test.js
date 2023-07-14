@@ -1,5 +1,5 @@
 const { testGesture } = require('../_partials/gesture-test')
-const { waitForEditorWebSocket, write, getExportedDatas } = require('../helper')
+const { waitForEditorWebSocket, write, getExportedDatas, getEditorModelExportsType } = require('../helper')
 const { h } = require('../strokesDatas')
 
 describe('Websocket Text', () => {
@@ -24,8 +24,10 @@ describe('Websocket Text', () => {
       write(page, h.strokes),
     ])
     const jiixExpected = h.exports['application/vnd.myscript.jiix']
-    const jiixReceived = JSON.parse(exports['application/vnd.myscript.jiix'])
-    expect(jiixReceived).toStrictEqual(jiixExpected)
+    const jiixReceived = exports['application/vnd.myscript.jiix']
+    const modelExportJiixReceived = await getEditorModelExportsType(page, 'application/vnd.myscript.jiix')
+    expect(jiixReceived).toEqual(modelExportJiixReceived)
+    expect(jiixReceived).toEqual(jiixExpected)
   })
 
   require('../_partials/nav-actions-test')

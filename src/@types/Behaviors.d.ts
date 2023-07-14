@@ -6,12 +6,14 @@ import { TTheme } from "./style/Theme"
 import { TConverstionState } from "./configuration/RecognitionConfiguration"
 import { TPenStyle } from "./style/PenStyle"
 import { TStroke } from "./model/Stroke"
+import { TUndoRedoContext } from "./undo-redo/UndoRedoContext"
 
 export interface IBehaviors
 {
   grabber: IGrabber
   renderer: IRenderer
   recognizer: IRecognizer
+  context: TUndoRedoContext
 
   async init: (element: HTMLElement) => Promise<void | Error>
 

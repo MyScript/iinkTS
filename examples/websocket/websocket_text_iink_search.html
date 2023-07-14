@@ -2,18 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
-
     <title>Text search</title>
-
     <link rel="stylesheet" href="../examples.css" />
-
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
   </head>
 
@@ -31,122 +25,118 @@
       <div id="editor" touch-action="none"></div>
     </div>
     <script>
-      const editorElement = document.getElementById("editor")
-      const convertElement = document.getElementById("convert")
-      const searchInput = document.getElementById("searchInput")
-      const searchBtn = document.getElementById("searchBtn")
-      let lastJiix = undefined
-      let editor
+      const editorElement = document.getElementById("editor");
+      const convertElement = document.getElementById("convert");
+      const searchInput = document.getElementById("searchInput");
+      const searchBtn = document.getElementById("searchBtn");
+      let lastJiix = undefined;
+      let editor;
 
       async function loadEditor() {
-        const res = await fetch("../server-configuration.json")
-        const conf = await res.json()
+        const res = await fetch("../server-configuration.json");
+        const conf = await res.json();
 
         const options = {
           configuration: {
             server: {
               ...conf,
-              protocol: "WEBSOCKET",
+              protocol: "WEBSOCKET"
             },
             recognition: {
               type: "TEXT",
               export: {
                 jiix: {
-                  "bounding-box": true,
-                },
-              },
+                  "bounding-box": true
+                }
+              }
             },
             rendering: {
               smartGuide: {
-                enable: false,
-              },
-            },
-          },
-        }
+                enable: false
+              }
+            }
+          }
+        };
 
-        editor = new iink.Editor(editorElement, options)
+        editor = new iink.Editor(editorElement, options);
 
         // Utility function transforming millimeters to pixel as iinkSDK is millimeters only
         function mmToPixel(mm) {
-          return (96 * mm) / 25.4
+          return (96 * mm) / 25.4;
         }
 
         // Highlight a series of words (jiix structure) by creating a div with a lower z-index
         function highlightWords(words) {
           words.forEach((word) => {
-            const boundingBox = word["bounding-box"]
-            const newElement = document.createElement("div")
-            newElement.style.position = "absolute"
-            newElement.style.left = mmToPixel(boundingBox.x) + "px"
-            newElement.style.top = mmToPixel(boundingBox.y) + "px"
-            newElement.style.height = mmToPixel(boundingBox.height) + "px"
-            newElement.style.width = mmToPixel(boundingBox.width) + "px"
+            const boundingBox = word["bounding-box"];
+            const newElement = document.createElement("div");
+            newElement.style.position = "absolute";
+            newElement.style.left = mmToPixel(boundingBox.x) + "px";
+            newElement.style.top = mmToPixel(boundingBox.y) + "px";
+            newElement.style.height = mmToPixel(boundingBox.height) + "px";
+            newElement.style.width = mmToPixel(boundingBox.width) + "px";
 
-            newElement.classList.add("highlight")
-            newElement.style.backgroundColor = "yellow"
+            newElement.classList.add("highlight");
+            newElement.style.backgroundColor = "yellow";
 
-            editorElement.appendChild(newElement)
-          })
+            editorElement.appendChild(newElement);
+          });
         }
 
         // Perform the search by iterating the last jiix received and ignoring the carriage returns and blank in it.
         function performSearch() {
-          document
-            .querySelectorAll(".highlight")
-            .forEach((elem) => elem.parentNode.removeChild(elem))
+          document.querySelectorAll(".highlight").forEach((elem) => elem.parentNode.removeChild(elem));
           if (searchInput.value && lastJiix) {
-            searchWords = searchInput.value.split(" ")
-            let posUnderEvaluation = 0
-            let wordsToHighlight = []
+            searchWords = searchInput.value.split(" ");
+            let posUnderEvaluation = 0;
+            let wordsToHighlight = [];
             lastJiix.words.forEach((word) => {
-              const searchWord = searchWords[posUnderEvaluation]
+              const searchWord = searchWords[posUnderEvaluation];
               if (word.label.trim() !== "") {
                 if (word.label.toUpperCase() === searchWord.toUpperCase()) {
-                  wordsToHighlight.push(word)
+                  wordsToHighlight.push(word);
                   if (posUnderEvaluation === searchWords.length - 1) {
-                    highlightWords(wordsToHighlight)
-                    posUnderEvaluation = 0
-                    wordsToHighlight = []
+                    highlightWords(wordsToHighlight);
+                    posUnderEvaluation = 0;
+                    wordsToHighlight = [];
                   } else {
-                    posUnderEvaluation++
+                    posUnderEvaluation++;
                   }
                 } else {
-                  posUnderEvaluation = 0
-                  wordsToHighlight = []
+                  posUnderEvaluation = 0;
+                  wordsToHighlight = [];
                 }
               }
-            })
+            });
           }
         }
-        searchBtn.addEventListener("click", performSearch)
+        searchBtn.addEventListener("click", performSearch);
 
         editor.events.addEventListener("exported", (evt) => {
-          const exports = evt.detail
+          const exports = evt.detail;
 
           if (exports) {
-            convertElement.disabled = false
+            convertElement.disabled = false;
             if (exports["application/vnd.myscript.jiix"]) {
-              lastJiix = JSON.parse(exports["application/vnd.myscript.jiix"])
-              performSearch()
+              lastJiix = exports["application/vnd.myscript.jiix"];
+              performSearch();
             }
           }
-        })
+        });
 
         editor.events.addEventListener("changed", () => {
-          document
-            .querySelectorAll(".highlight")
-            .forEach((elem) => elem.parentNode.removeChild(elem))
-        })
+          document.querySelectorAll(".highlight").forEach((elem) => elem.parentNode.removeChild(elem));
+        });
 
         convertElement.addEventListener("click", () => {
-          editor.convert()
-        })
+          editor.convert();
+        });
 
         window.addEventListener("resize", () => {
-          editor.resize()
-        })
+          editor.resize();
+        });
       }
-      loadEditor()
+      loadEditor();
     </script>
   </body>
 </html>

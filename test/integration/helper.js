@@ -100,6 +100,22 @@ module.exports.getExportedDatas = async (page) => {
   return page.evaluate(exported)
 }
 
+const converted = `(async () => {
+  return new Promise((resolve, reject) => {
+    editor.events.addEventListener('converted', (e) => {
+      resolve(e.detail);
+    });
+  });
+})()`
+
+/**
+ * @param {Page} page - Playwright Page
+ * @returns Promise<Exports>
+ */
+module.exports.getConvertedDatas = async (page) => {
+  return page.evaluate(converted)
+}
+
 const loaded = `(async () => {
   return new Promise((resolve, reject) => {
     editor.events.addEventListener('loaded', (e) => {
@@ -129,61 +145,4 @@ module.exports.waitForEditorWebSocket = async (page) => {
     page.waitForSelector('svg[data-layer="MODEL"]'),
   ])
   return page.evaluate('editor.initializationPromise')
-}
-
-/**
- *
- * @param obj
- * @param key
- * @param list
- * @returns {*}
- */
-function findValuesHelper (obj, key, list) {
-  let listRef = list
-  if (!obj) return listRef
-  if (obj instanceof Array) {
-    Object.keys(obj).forEach((k) => {
-      listRef = listRef.concat(findValuesHelper(obj[k], key, []))
-    })
-    return listRef
-  }
-  if (obj[key]) {
-    if (obj[key] instanceof Array) {
-      Object.keys(obj[key]).forEach((l) => {
-        listRef.push(obj[key][l])
-      })
-    } else {
-      listRef.push(obj[key])
-    }
-  }
-
-  if (typeof obj === 'object') {
-    const children = Object.keys(obj)
-    if (children.length > 0) {
-      children.forEach((child) => {
-        listRef = listRef.concat(findValuesHelper(obj[child], key, []))
-      })
-    }
-  }
-  return listRef
-}
-
-/**
- *
- * @param obj
- * @param key
- * @returns {*}
- */
-function findValuesByKey (obj, key) {
-  return findValuesHelper(JSON.parse(obj), key, [])
-}
-
-/**
- *
- * @param jiix
- * @returns {*}
- */
-module.exports.getStrokesFromJIIX = (jiix) => {
-  const itemsList = findValuesByKey(jiix, 'items')
-  return itemsList.filter(item => item.type === 'stroke')
 }

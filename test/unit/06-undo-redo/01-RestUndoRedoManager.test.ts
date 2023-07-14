@@ -1,26 +1,27 @@
-import { Model } from '../../../src/model/Model'
-import { UndoRedoManager } from '../../../src/undo-redo/UndoRedoManager'
-import { UndoRedoContext } from '../../../src/undo-redo/UndoRedoContext'
-import { DefaultConfiguration } from "../../../src/configuration/DefaultConfiguration"
 import { IModel } from '../../../src/@types/model/Model'
 import { TPoint } from '../../../src/@types/renderer/Point'
 import { TUndoRedoConfiguration } from '../../../src/@types/configuration/UndoRedoConfiguration'
+
+import { Model } from '../../../src/model/Model'
+import { RestUndoRedoManager } from '../../../src/undo-redo/RestUndoRedoManager'
+import { UndoRedoContext } from '../../../src/undo-redo/UndoRedoContext'
+import { DefaultConfiguration } from "../../../src/configuration/DefaultConfiguration"
 import { DefaultPenStyle } from '../../../src/style/DefaultPenStyle'
 
 
-describe('UndoRedoManager.ts', () =>
+describe('RestUndoRedoManager.ts', () =>
 {
   const width = 100, height = 100
-  test('should instanciate UndoRedoManager', () =>
+  test('should instanciate RestUndoRedoManager', () =>
   {
-    const manager = new UndoRedoManager(DefaultConfiguration['undo-redo'], new Model(width, height))
+    const manager = new RestUndoRedoManager(DefaultConfiguration['undo-redo'], new Model(width, height))
     expect(manager).toBeDefined()
   })
 
   test('should initialize UndoRedoContext', () =>
   {
     const model = new Model(width, height)
-    const manager = new UndoRedoManager(DefaultConfiguration['undo-redo'], model)
+    const manager = new RestUndoRedoManager(DefaultConfiguration['undo-redo'], model)
     const context = new UndoRedoContext(model)
     expect(manager.context).toStrictEqual(context)
   })
@@ -29,7 +30,7 @@ describe('UndoRedoManager.ts', () =>
   {
     const configuration: TUndoRedoConfiguration = { maxStackSize: 5 }
     const model: IModel = new Model(27, 5)
-    const manager = new UndoRedoManager(configuration, model)
+    const manager = new RestUndoRedoManager(configuration, model)
 
     test('should add model to stack', () =>
     {
@@ -110,7 +111,7 @@ describe('UndoRedoManager.ts', () =>
   describe('undo', () =>
   {
     const model: IModel = new Model(27, 5)
-    const manager = new UndoRedoManager(DefaultConfiguration['undo-redo'], model)
+    const manager = new RestUndoRedoManager(DefaultConfiguration['undo-redo'], model)
     test('should get the previous model', () =>
     {
       const p1: TPoint = { t: 1, p: 0.5, x: 1, y: 1 }
@@ -135,7 +136,7 @@ describe('UndoRedoManager.ts', () =>
   describe('redo', () =>
   {
     const model: IModel = new Model(27, 5)
-    const manager = new UndoRedoManager(DefaultConfiguration['undo-redo'], model)
+    const manager = new RestUndoRedoManager(DefaultConfiguration['undo-redo'], model)
     test('should get the next model', () =>
     {
       const p1: TPoint = { t: 1, p: 0.5, x: 1, y: 1 }
@@ -161,7 +162,7 @@ describe('UndoRedoManager.ts', () =>
   describe('updateModelInStack', () =>
   {
     const model: IModel = new Model(27, 5)
-    const manager = new UndoRedoManager(DefaultConfiguration['undo-redo'], model)
+    const manager = new RestUndoRedoManager(DefaultConfiguration['undo-redo'], model)
     test('should last model in stack', () =>
     {
       const p1: TPoint = { t: 1, p: 0.5, x: 1, y: 1 }
@@ -211,7 +212,7 @@ describe('UndoRedoManager.ts', () =>
   test('should reset context', () =>
   {
     const model: IModel = new Model(27, 5)
-    const manager = new UndoRedoManager(DefaultConfiguration['undo-redo'], model)
+    const manager = new RestUndoRedoManager(DefaultConfiguration['undo-redo'], model)
 
     const p1: TPoint = { t: 1, p: 0.5, x: 1, y: 1 }
     model.initCurrentStroke(p1, 666, 'pen', DefaultPenStyle)

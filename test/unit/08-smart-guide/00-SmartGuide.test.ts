@@ -1,10 +1,11 @@
-// import { UndoRedoContext } from '../../../src/undo-redo/UndoRedoContext'
-// import { Model } from '../../../src/model/Model'
+import { TRenderingConfiguration } from '../../../src/@types/configuration/RenderingConfiguration'
 import { TMarginConfiguration } from '../../../src/@types/configuration/recognition/MarginConfiguration'
+
 import { DefaultRenderingConfiguration } from '../../../src/configuration/DefaultConfiguration'
-import { GlobalEvent } from '../../../src/event/GlobalEvent'
+import { InternalEvent } from '../../../src/event/InternalEvent'
 import { SmartGuide } from '../../../src/smartguide/SmartGuide'
 import { LeftClickEventFake } from '../utils/PointerEventFake'
+import { delay } from '../utils/helpers'
 
 describe('SmartGuide.ts', () =>
 {
@@ -20,10 +21,10 @@ describe('SmartGuide.ts', () =>
     expect(sm).toBeDefined()
   })
 
-  test('should have globalEvent property', () =>
+  test('should have internalEvent property', () =>
   {
     const sm = new SmartGuide()
-    expect(sm.globalEvent).toBe(GlobalEvent.getInstance())
+    expect(sm.internalEvent).toBe(InternalEvent.getInstance())
   })
 
   describe('Initilize', () => {
@@ -81,6 +82,35 @@ describe('SmartGuide.ts', () =>
     })
   })
 
+  describe('Smartguide visibility', () => {
+    test('should be displayed on initialization', () =>
+    {
+      const domElement = document.createElement('div')
+      const sm = new SmartGuide()
+      sm.init(domElement, margin, DefaultRenderingConfiguration)
+      const smartguide = domElement.querySelector('.smartguide') as HTMLDivElement
+      expect(smartguide.classList).not.toContain('smartguide-out')
+      expect(smartguide.classList).toContain('smartguide-in')
+    })
+    test('should be hide after fadeOut delay', async () =>
+    {
+      const domElement = document.createElement('div')
+      const sm = new SmartGuide()
+      const renderingConfiguration: TRenderingConfiguration = {
+        ...DefaultRenderingConfiguration
+      }
+      renderingConfiguration.smartGuide.fadeOut.duration = 100
+      sm.init(domElement, margin, renderingConfiguration)
+      const smartguide = domElement.querySelector('.smartguide') as HTMLDivElement
+      expect(smartguide.classList).not.toContain('smartguide-out')
+      expect(smartguide.classList).toContain('smartguide-in')
+
+      await delay(renderingConfiguration.smartGuide.fadeOut.duration + 10)
+      expect(smartguide.classList).toContain('smartguide-out')
+      expect(smartguide.classList).not.toContain('smartguide-in')
+    })
+  })
+
   describe('Menu visibility', () => {
     const domElement = document.createElement('div')
     const sm = new SmartGuide()
@@ -119,8 +149,8 @@ describe('SmartGuide.ts', () =>
   describe('Menu actions', () => {
     const domElement = document.createElement('div')
     const sm = new SmartGuide()
-    sm.globalEvent.emitConvert = jest.fn()
-    sm.globalEvent.emitClear = jest.fn()
+    sm.internalEvent.emitConvert = jest.fn()
+    sm.internalEvent.emitClear = jest.fn()
     sm.init(domElement, margin, DefaultRenderingConfiguration)
 
     const pointerDownEvt = new LeftClickEventFake('pointerdown', {
@@ -135,7 +165,7 @@ describe('SmartGuide.ts', () =>
     {
       const btn = domElement.querySelector(`#convert-${ sm.uuid }`) as HTMLDivElement
       btn.dispatchEvent(pointerDownEvt)
-      expect(sm.globalEvent.emitConvert).toBeCalledTimes(1)
+      expect(sm.internalEvent.emitConvert).toBeCalledTimes(1)
     })
     test.skip('should COPY', () =>
     {
@@ -145,7 +175,7 @@ describe('SmartGuide.ts', () =>
     {
       const btn = domElement.querySelector(`#delete-${ sm.uuid }`) as HTMLDivElement
       btn.dispatchEvent(pointerDownEvt)
-      expect(sm.globalEvent.emitClear).toBeCalledTimes(1)
+      expect(sm.internalEvent.emitClear).toBeCalledTimes(1)
     })
   })
 
@@ -200,7 +230,6 @@ describe('SmartGuide.ts', () =>
       const candidates = domElement.querySelector('.candidates') as HTMLDivElement
       expect(candidates.children).toHaveLength(jiix.words.length)
     })
-
   })
 
 })

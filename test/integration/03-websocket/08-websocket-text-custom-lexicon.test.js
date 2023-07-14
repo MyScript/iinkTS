@@ -1,4 +1,4 @@
-const { write, getExportedDatas, waitEditorLoaded, waitForEditorWebSocket } = require("../helper")
+const { write, getExportedDatas, waitForEditorWebSocket } = require("../helper")
 const { testGesture } = require("../_partials/gesture-test")
 const { h, klopmo } = require("../strokesDatas")
 
@@ -8,8 +8,8 @@ describe("Websocket Text Custom Lexicon", () => {
   })
 
   beforeEach(async () => {
-    await page.reload()
-    await waitEditorLoaded(page)
+    await page.reload({ waitUntil: 'networkidle'})
+    await waitForEditorWebSocket(page)
   })
 
   test("should have title", async () => {
@@ -23,8 +23,8 @@ describe("Websocket Text Custom Lexicon", () => {
       write(page, h.strokes),
     ])
     const jiixExpected = h.exports["application/vnd.myscript.jiix"]
-    const jiixReceived = JSON.parse(exports["application/vnd.myscript.jiix"])
-    expect(jiixReceived).toStrictEqual(jiixExpected)
+    const jiixReceived = exports["application/vnd.myscript.jiix"]
+    expect(jiixReceived).toEqual(jiixExpected)
   })
 
   test("should send lexicon data with klopmo", async () => {
@@ -37,7 +37,7 @@ describe("Websocket Text Custom Lexicon", () => {
       write(page, klopmo.strokes),
     ])
     const jiixExpected = klopmo.exports["application/vnd.myscript.jiix"]
-    const jiixReceived = JSON.parse(exports["application/vnd.myscript.jiix"])
+    const jiixReceived = exports["application/vnd.myscript.jiix"]
     expect(jiixReceived.label).toStrictEqual(jiixExpected.label)
   })
 

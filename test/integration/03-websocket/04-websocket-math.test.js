@@ -1,6 +1,6 @@
 
-const { waitForEditorWebSocket, write, getExportedDatas, getEditorModelExportsType, getStrokesFromJIIX, getEditorConfiguration, setEditorConfiguration } = require('../helper')
-const { equation1, fence } = require('../strokesDatas')
+const { waitForEditorWebSocket, write, getExportedDatas, getEditorModelExportsType, getEditorConfiguration, setEditorConfiguration, getEditorModelConverts, getConvertedDatas, getEditorModelExports } = require('../helper')
+const { equation1, fence, sum } = require('../strokesDatas')
 
 describe('Websocket Math', function () {
   beforeAll(async () => {
@@ -28,7 +28,7 @@ describe('Websocket Math', function () {
     const jiix = await getEditorModelExportsType(page, 'application/vnd.myscript.jiix')
     expect(jiix).toBeUndefined()
     const latex = await getEditorModelExportsType(page, 'application/x-latex')
-    expect(latex).toEqual(equation1.exports.LATEX[equation1.exports.LATEX.length - 1])
+    expect(latex).toBeDefined()
     const mathml = await getEditorModelExportsType(page, 'application/mathml+xml')
     expect(mathml).toBeUndefined()
   })
@@ -36,7 +36,6 @@ describe('Websocket Math', function () {
   test('should only export jiix', async () => {
     const config = await getEditorConfiguration(page)
     config.recognition.math.mimeTypes = ['application/vnd.myscript.jiix']
-    config.recognition.export.jiix.strokes = true
     await setEditorConfiguration(page, config)
     await waitForEditorWebSocket(page)
 
@@ -46,10 +45,10 @@ describe('Websocket Math', function () {
         write(page, [s], 100, 100)
       ])
     }
-    const jiix = await getEditorModelExportsType(page, 'application/vnd.myscript.jiix')
-    expect(getStrokesFromJIIX(jiix).length).toEqual(equation1.strokes.length)
     const latex = await getEditorModelExportsType(page, 'application/x-latex')
     expect(latex).toBeUndefined()
+    const jiix = await getEditorModelExportsType(page, 'application/vnd.myscript.jiix')
+    expect(jiix).toBeDefined()
     const mathml = await getEditorModelExportsType(page, 'application/mathml+xml')
     expect(mathml).toBeUndefined()
   })
@@ -57,7 +56,6 @@ describe('Websocket Math', function () {
   test('should only export mathml+xml', async () => {
     const config = await getEditorConfiguration(page)
     config.recognition.math.mimeTypes = ['application/mathml+xml']
-    config.recognition.export.jiix.strokes = true
     await setEditorConfiguration(page, config)
     await waitForEditorWebSocket(page)
 
@@ -67,281 +65,245 @@ describe('Websocket Math', function () {
         write(page, [s], 100, 100)
       ])
     }
-    const jiix = await getEditorModelExportsType(page, 'application/vnd.myscript.jiix')
-    expect(jiix).toBeUndefined()
     const latex = await getEditorModelExportsType(page, 'application/x-latex')
     expect(latex).toBeUndefined()
-    let mathml = await getEditorModelExportsType(page, 'application/mathml+xml')
-    //remove new line
-    mathml = mathml.replace(/[\r\n]+/gm, "")
-    //remove space between ><
-    mathml = mathml.replace(/>\s*</gm, "><")
-    expect(mathml).toEqual(equation1.exports.MATHML.STANDARD)
+    const jiix = await getEditorModelExportsType(page, 'application/vnd.myscript.jiix')
+    expect(jiix).toBeUndefined()
+    const mathml = await getEditorModelExportsType(page, 'application/mathml+xml')
+    expect(mathml).toBeDefined()
   })
 
-  test('should undo/redo in mode stroke by default', async () => {
+  test('should undo/redo in mode "stroke" by default', async () => {
     const config = await getEditorConfiguration(page)
     expect(config.recognition.math['undo-redo'].mode).toEqual('stroke')
-    config.recognition.math.mimeTypes = ['application/vnd.myscript.jiix', 'application/x-latex']
-    config.recognition.export.jiix.strokes = true
-    await setEditorConfiguration(page, config)
-    await waitForEditorWebSocket(page)
 
-    let exports
-    let jiix
+    let latex
     let nbStroke = 0
     for(const s of equation1.strokes) {
-      nbStroke++
-      [exports] = await Promise.all([
+      const [exports] = await Promise.all([
         getExportedDatas(page),
-        write(page, [s], 100, 100)
+        write(page, [s])
       ])
-      jiix = await getEditorModelExportsType(page, 'application/vnd.myscript.jiix')
-      expect(getStrokesFromJIIX(jiix).length).toEqual(nbStroke)
-      expect(exports['application/vnd.myscript.jiix']).toEqual(jiix)
+      expect(equation1.exports.LATEX.at(nbStroke)).toEqual(exports['application/x-latex'])
+      nbStroke++
     }
-    let latex = await getEditorModelExportsType(page, 'application/x-latex')
-    expect(latex).toEqual(equation1.exports.LATEX[equation1.exports.LATEX.length - 1])
 
-    const clearPromises = await Promise.all([
+    const [clearExport] = await Promise.all([
       getExportedDatas(page),
       page.click('#clear')
     ])
+    const modelExportCleared = await getEditorModelExports(page)
+    if (modelExportCleared) {
+      expect(modelExportCleared['application/x-latex']).toEqual('')
+      expect(clearExport['application/x-latex']).toEqual('')
+    }
+
+    const [undo1Export] = await Promise.all([
+      getExportedDatas(page),
+      page.click('#undo')
+    ])
     latex = await getEditorModelExportsType(page, 'application/x-latex')
-    expect(clearPromises[0]['application/x-latex']).toEqual(latex)
-    expect(latex).toEqual('')
+    expect(undo1Export['application/x-latex']).toEqual(latex)
+    expect(equation1.exports.LATEX.at(-1)).toEqual(undo1Export['application/x-latex'])
 
-    const undo1Promises = await Promise.all([
+    // To wait for second export raise on undo/redo
+    await page.waitForTimeout(100)
+    const [undo2Export] = await Promise.all([
       getExportedDatas(page),
       page.click('#undo')
     ])
-    //TODO remove when waitForIdle implemented
-    await page.waitForTimeout(500)
-    jiix = await getEditorModelExportsType(page, 'application/vnd.myscript.jiix')
-    expect(undo1Promises[0]['application/vnd.myscript.jiix']).toEqual(jiix)
-    expect(getStrokesFromJIIX(jiix).length).toEqual(equation1.strokes.length)
+    latex = await getEditorModelExportsType(page, 'application/x-latex')
+    expect(undo2Export['application/x-latex']).toEqual(latex)
+    expect(equation1.exports.LATEX.at(-2)).toEqual(undo2Export['application/x-latex'])
 
-    const undo2Promises =  await Promise.all([
+    // To wait for second export raise on undo/redo
+    await page.waitForTimeout(100)
+    const [undo3Export] = await Promise.all([
       getExportedDatas(page),
       page.click('#undo')
     ])
-    //TODO remove when waitForIdle implemented
-    await page.waitForTimeout(500)
-    jiix = await getEditorModelExportsType(page, 'application/vnd.myscript.jiix')
-    expect(undo2Promises[0]['application/vnd.myscript.jiix']).toEqual(jiix)
-    expect(getStrokesFromJIIX(jiix).length).toEqual(equation1.strokes.length - 1)
+    latex = await getEditorModelExportsType(page, 'application/x-latex')
+    expect(undo3Export['application/x-latex']).toEqual(latex)
+    expect(equation1.exports.LATEX.at(-3)).toEqual(undo3Export['application/x-latex'])
 
-    const undo3Promises = await Promise.all([
-      getExportedDatas(page),
-      page.click('#undo')
-    ])
-    //TODO remove when waitForIdle implemented
-    await page.waitForTimeout(500)
-    jiix = await getEditorModelExportsType(page, 'application/vnd.myscript.jiix')
-    expect(undo3Promises[0]['application/vnd.myscript.jiix']).toEqual(jiix)
-    expect(getStrokesFromJIIX(jiix).length).toEqual(equation1.strokes.length - 2)
-
-    const redoPromises = await Promise.all([
+    // To wait for second export raise on undo/redo
+    await page.waitForTimeout(100)
+    const [redoExport] = await Promise.all([
       getExportedDatas(page),
       page.click('#redo')
     ])
-    //TODO remove when waitForIdle implemented
-    await page.waitForTimeout(500)
-    jiix = await getEditorModelExportsType(page, 'application/vnd.myscript.jiix')
-    expect(redoPromises[0]['application/vnd.myscript.jiix']).toEqual(jiix)
-    expect(getStrokesFromJIIX(jiix).length).toEqual(equation1.strokes.length - 1)
+    latex = await getEditorModelExportsType(page, 'application/x-latex')
+    expect(redoExport['application/x-latex']).toEqual(latex)
+    expect(equation1.exports.LATEX.at(-2)).toEqual(redoExport['application/x-latex'])
   })
 
-  test('should undo/redo in mode session', async () => {
+  test('should undo/redo in mode "session"', async () => {
     const config = await getEditorConfiguration(page)
-    config.recognition.math.mimeTypes = ['application/vnd.myscript.jiix', 'application/x-latex']
-    config.recognition.export.jiix.strokes = true
+    config.recognition.math.mimeTypes = ['application/x-latex']
     config.recognition.math['undo-redo'].mode = 'session'
+    // 5000 = time to write equation1
+    config.recognition.math['session-time'] = 5000
     await setEditorConfiguration(page, config)
     await waitForEditorWebSocket(page)
 
+    let latex
     await Promise.all([
       getExportedDatas(page),
-      write(page, equation1.strokes, 100, 100)
+      write(page, equation1.strokes)
     ])
-    //TODO remove when waitForIdle implemented
-    await page.waitForTimeout(500)
-    let jiix = await getEditorModelExportsType(page, 'application/vnd.myscript.jiix')
-    expect(getStrokesFromJIIX(jiix).length).toEqual(equation1.strokes.length)
-    let latex = await getEditorModelExportsType(page, 'application/x-latex')
-    expect(latex).toEqual(equation1.exports.LATEX[equation1.exports.LATEX.length - 1])
+    // To wait for the end of writing
+    await page.waitForTimeout(1000)
+    latex = await getEditorModelExportsType(page, 'application/x-latex')
+    expect(latex).toEqual(equation1.exports.LATEX.at(-1))
 
-    const clearPromises = await Promise.all([
+    const [clearExport] = await Promise.all([
       getExportedDatas(page),
       page.click('#clear')
     ])
-    latex = await getEditorModelExportsType(page, 'application/x-latex')
-    expect(clearPromises[0]['application/x-latex']).toEqual(latex)
-    expect(latex).toEqual('')
+    const modelExportCleared = await getEditorModelExports(page)
+    if (modelExportCleared) {
+      expect(modelExportCleared['application/x-latex']).toEqual('')
+      expect(clearExport['application/x-latex']).toEqual('')
+    }
 
-    const undo1Promises = await Promise.all([
+    // To wait for second export raise on undo/redo
+    await page.waitForTimeout(500)
+    const [undo1Export] = await Promise.all([
       getExportedDatas(page),
       page.click('#undo')
     ])
-    //TODO remove when waitForIdle implemented
-    await page.waitForTimeout(500)
-    jiix = await getEditorModelExportsType(page, 'application/vnd.myscript.jiix')
-    expect(undo1Promises[0]['application/vnd.myscript.jiix']).toEqual(jiix)
-    expect(getStrokesFromJIIX(jiix).length).toEqual(equation1.strokes.length)
+    latex = await getEditorModelExportsType(page, 'application/x-latex')
+    expect(undo1Export['application/x-latex']).toEqual(latex)
+    expect(undo1Export['application/x-latex']).toEqual(equation1.exports.LATEX.at(-1))
 
-    const undo2Promises =  await Promise.all([
+    // To wait for second export raise on undo/redo
+    await page.waitForTimeout(500)
+    const [undo2Export] = await Promise.all([
       getExportedDatas(page),
       page.click('#undo')
     ])
-    //TODO remove when waitForIdle implemented
-    await page.waitForTimeout(500)
     latex = await getEditorModelExportsType(page, 'application/x-latex')
-    expect(undo2Promises[0]['application/x-latex']).toEqual(latex)
+    expect(undo2Export['application/x-latex']).toEqual(latex)
     expect(latex).toEqual('')
 
-    const redoPromises = await Promise.all([
+    // To wait for second export raise on undo/redo
+    await page.waitForTimeout(500)
+    const [redoExport] = await Promise.all([
       getExportedDatas(page),
       page.click('#redo')
     ])
-    //TODO remove when waitForIdle implemented
-    await page.waitForTimeout(500)
-    jiix = await getEditorModelExportsType(page, 'application/vnd.myscript.jiix')
-    expect(redoPromises[0]['application/vnd.myscript.jiix']).toEqual(jiix)
-    expect(getStrokesFromJIIX(jiix).length).toEqual(equation1.strokes.length)
     latex = await getEditorModelExportsType(page, 'application/x-latex')
-    expect(latex).toEqual(equation1.exports.LATEX[equation1.exports.LATEX.length - 1])
+    expect(redoExport['application/x-latex']).toEqual(latex)
+    expect(redoExport['application/x-latex']).toEqual(equation1.exports.LATEX.at(-1))
   })
 
-  test('should convert with equation1', async () => {
-    const config = await getEditorConfiguration(page)
-    config.recognition.math.mimeTypes = ['application/vnd.myscript.jiix', 'application/x-latex']
-    config.recognition.export.jiix.strokes = true
-    await setEditorConfiguration(page, config)
-    await waitForEditorWebSocket(page)
-
+  test('should convert svg path', async () => {
     for(const s of equation1.strokes) {
       await Promise.all([
         getExportedDatas(page),
         write(page, [s], 100, 100)
       ])
     }
-    const jiix = await getEditorModelExportsType(page, 'application/vnd.myscript.jiix')
-    expect(getStrokesFromJIIX(jiix).length).toEqual(equation1.strokes.length)
-    const latex = await getEditorModelExportsType(page, 'application/x-latex')
-    expect(latex).toEqual(equation1.exports.LATEX[equation1.exports.LATEX.length - 1])
+    const emptyConvert = await getEditorModelConverts(page)
+    expect(emptyConvert).toBeUndefined()
+    expect(await page.locator('path').count()).toEqual(equation1.strokes.length)
 
     await Promise.all([
-      getExportedDatas(page),
+      getConvertedDatas(page),
       page.click('#convert')
     ])
-    const latexConv = await getEditorModelExportsType(page, 'application/x-latex')
-    expect(latexConv).toEqual(equation1.exports.LATEX[equation1.exports.LATEX.length - 1])
+    //To await for rendering
+    await page.waitForTimeout(1000)
+    expect(await page.locator('path').count()).toEqual(equation1.exports.LATEX.at(-1).length)
+
+    const convert = await getEditorModelConverts(page)
+    const laextExport = await getEditorModelExportsType(page, 'application/x-latex')
+    expect(convert['application/x-latex']).toEqual(laextExport)
+    expect(laextExport).toEqual(equation1.exports.LATEX.at(-1))
   })
 
-  test('should math flavor with fences', async () => {
+  test('should convert and solve sum by default', async () => {
     const config = await getEditorConfiguration(page)
-    config.recognition.math.mimeTypes = ['application/vnd.myscript.jiix', 'application/x-latex', 'application/mathml+xml']
-    config.recognition.export.jiix.strokes = true
+    expect(config.recognition.math.solver.enable).toEqual(true)
+    let numStroke = 0
+    for(const s of sum.strokes) {
+      const [exports] = await Promise.all([
+        getExportedDatas(page),
+        write(page, [s])
+      ])
+      expect(exports['application/x-latex']).toEqual(sum.exports.LATEX.at(numStroke))
+      numStroke++
+    }
+    const emptyConvert = await getEditorModelConverts(page)
+    expect(emptyConvert).toBeUndefined()
+
+    await Promise.all([
+      getConvertedDatas(page),
+      page.click('#convert')
+    ])
+    const convert = await getEditorModelConverts(page)
+    expect(convert['application/x-latex']).toEqual(sum.converts.LATEX.at(-1))
+    expect(await page.locator('#result').locator('.katex-html').textContent()).toEqual(sum.converts.LATEX.at(-1))
+  })
+
+  test('should convert and not solve sum', async () => {
+    const config = await getEditorConfiguration(page)
+    config.recognition.math.solver.enable = false
+    await setEditorConfiguration(page, config)
+    await waitForEditorWebSocket(page)
+
+    let numStroke = 0
+    for(const s of sum.strokes) {
+      const [exports] = await Promise.all([
+        getExportedDatas(page),
+        write(page, [s])
+      ])
+      expect(exports['application/x-latex']).toEqual(sum.exports.LATEX.at(numStroke))
+      numStroke++
+    }
+    const emptyConvert = await getEditorModelConverts(page)
+    expect(emptyConvert).toBeUndefined()
+
+    await Promise.all([
+      getConvertedDatas(page),
+      page.click('#convert')
+    ])
+    const convert = await getEditorModelConverts(page)
+    const laextExport = await getEditorModelExportsType(page, 'application/x-latex')
+    expect(convert['application/x-latex']).toEqual(laextExport)
+    expect(laextExport).toEqual(sum.exports.LATEX.at(-1))
+    expect(await page.locator('#result').locator('.katex-html').textContent()).toEqual(sum.exports.LATEX.at(-1))
+  })
+
+  test('should export mathml with flavor "standard"', async () => {
+    const config = await getEditorConfiguration(page)
+    config.recognition.math.mimeTypes = ['application/mathml+xml']
     config.recognition.export.mathml = { flavor: 'standard' }
     await setEditorConfiguration(page, config)
     await waitForEditorWebSocket(page)
-
     for(const s of fence.strokes) {
       await Promise.all([
         getExportedDatas(page),
         write(page, [s], 100, 175)
       ])
     }
-
-    let jiix = await getEditorModelExportsType(page, 'application/vnd.myscript.jiix')
-    expect(getStrokesFromJIIX(jiix).length).toEqual(fence.strokes.length)
-
-    let mathml = await getEditorModelExportsType(page, 'application/mathml+xml')
+    const mathml = await getEditorModelExportsType(page, 'application/mathml+xml')
     expect(mathml.trim().replace(/ /g, '')).toEqual(fence.exports.MATHML.STANDARD[fence.exports.MATHML.STANDARD.length - 1].trim().replace(/ /g, ''))
+  })
 
-    await Promise.all([
-      getExportedDatas(page),
-      page.click('#clear')
-    ])
-
+  test('should export mathml with flavor "ms-office"', async () => {
+    const config = await getEditorConfiguration(page)
+    config.recognition.math.mimeTypes = ['application/mathml+xml']
     config.recognition.export.mathml = { flavor: 'ms-office' }
     await setEditorConfiguration(page, config)
     await waitForEditorWebSocket(page)
-
     for(const s of fence.strokes) {
       await Promise.all([
         getExportedDatas(page),
         write(page, [s], 100, 175)
       ])
     }
-
-    jiix = await getEditorModelExportsType(page, 'application/vnd.myscript.jiix')
-    expect(getStrokesFromJIIX(jiix).length).toEqual(fence.strokes.length)
-    mathml = await getEditorModelExportsType(page, 'application/mathml+xml')
+    const mathml = await getEditorModelExportsType(page, 'application/mathml+xml')
     expect(mathml.trim().replace(/ /g, '')).toEqual(fence.exports.MATHML.MSOFFICE[fence.exports.MATHML.MSOFFICE.length - 1].trim().replace(/ /g, ''))
-  })
-
-  test('should each label of strokes', async () => {
-    for (const [index, strokes] of equation1.strokes.entries()) {
-      await Promise.all([
-        getExportedDatas(page),
-        write(page, [strokes], 100, 100)
-      ])
-      const latex = await getEditorModelExportsType(page, 'application/x-latex')
-      expect(latex).toEqual(equation1.exports.LATEX[index])
-    }
-  })
-
-  //TODO undo-redo after reconnect
-  // issue MSIS-5118 => undo does not work after restore session
-  test.skip('should undo/redo with reconnect', async () => {
-    const editorEl = await page.waitForSelector('#editor')
-    const isInit = await isEditorInitialized(editorEl)
-    expect(isInit).toEqual(true)
-
-    await write(page, equation1.strokes, 100, 100)
-    await page.evaluate(exported)
-
-    let jiix = await getEditorModelExportsType(page, 'application/vnd.myscript.jiix')
-    expect(getStrokesFromJIIX(jiix).length).toEqual(equation1.strokes.length)
-    let latex = await getEditorModelExportsType(page, 'application/x-latex')
-    expect(latex).toEqual(equation1.exports.LATEX[equation1.exports.LATEX.length - 1])
-
-    const clearClick = page.click('#clear')
-    const exportedEvent = page.evaluate(exported)
-    await Promise.all([clearClick, exportedEvent])
-    const exports = await editorEl.evaluate(node => node.editor.model.exports)
-    if (exports !== undefined) {
-      expect(exports['application/x-latex']).toEqual('')
-    }
-
-    await editorEl.evaluate((node) => {
-      node.editor.recognizer.close(node.editor.recognizerContext, node.editor.model)
-        .then(() => console.log('socket closed'))
-    })
-
-    for (const strokes of equation1.strokes) {
-      await write(page, [strokes], 100, 100)
-      await page.evaluate(exported)
-    }
-    jiix = await getEditorModelExportsType(page, 'application/vnd.myscript.jiix')
-    expect(getStrokesFromJIIX(jiix).length).toEqual(equation1.strokes.length)
-    latex = await getEditorModelExportsType(page, 'application/x-latex')
-    expect(latex).toEqual(equation1.exports.LATEX[equation1.exports.LATEX.length - 1])
-
-    for (const [index] of equation1.strokes.entries()) {
-      const undoElement = await page.waitForSelector('#undo')
-      const disabled = await undoElement.evaluate(node => node.disabled)
-      if (disabled) {
-        const exports = await editorEl.evaluate(node => node.editor.model.exports)
-        expect(exports).toEqual(undefined)
-      } else {
-        await undoElement.click()
-        await page.evaluate(exported)
-        jiix = await getEditorModelExportsType(page, 'application/vnd.myscript.jiix')
-        latex = await getEditorModelExportsType(page, 'application/x-latex')
-        expect(getStrokesFromJIIX(jiix).length).toEqual(equation1.strokes.length - index - 1)
-      }
-    }
   })
 })

@@ -1,8 +1,7 @@
 import { TMarginConfiguration } from "../@types/configuration/recognition/MarginConfiguration"
 import { TRenderingConfiguration } from "../@types/configuration/RenderingConfiguration"
 import { TJIIXExport, TWordExport } from "../@types/model/Model"
-import { Exports } from "../Constants"
-import { GlobalEvent } from "../event/GlobalEvent"
+import { InternalEvent } from "../event/InternalEvent"
 
 export class SmartGuide
 {
@@ -46,9 +45,9 @@ export class SmartGuide
     this.#createDeleteElement()
   }
 
-  get globalEvent(): GlobalEvent
+  get internalEvent(): InternalEvent
   {
-    return GlobalEvent.getInstance()
+    return InternalEvent.getInstance()
   }
 
   #createWrapperElement(): void
@@ -161,19 +160,19 @@ export class SmartGuide
 
   #initFadeOutObserver(duration = 3000): void
   {
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach(() => {
-        clearTimeout(this.#fadeOutTimout)
-        if (this.#candidatesElement.style.display === "none" && !this.#isMenuOpen) {
-          this.#fadeOutTimout = setTimeout(() => {
-            this.#hide()
-          }, duration)
-        } else if (!document.contains(this.#candidatesElement) && !document.contains(this.#menuElement)) {
-          this.#fadeOutTimout = setTimeout(() => {
-            this.#hide()
-          }, duration)
-        }
-      })
+    const observer = new MutationObserver(() =>
+    {
+      clearTimeout(this.#fadeOutTimout)
+      if (
+        !this.#smartGuideElement.classList.contains("smartguide-out") &&
+        this.#candidatesElement.style.display === "none" &&
+        !this.#isMenuOpen
+      ) {
+        this.#fadeOutTimout = setTimeout(() =>
+        {
+          this.#hide()
+        }, duration)
+      }
     })
     observer.observe(this.#smartGuideElement, { childList: true, subtree: true, attributes: true })
   }
@@ -189,7 +188,8 @@ export class SmartGuide
     this.#smartGuideElement.classList.remove("smartguide-in")
   }
 
-  #showCandidates = (target: HTMLElement) => {
+  #showCandidates = (target: HTMLElement) =>
+  {
     const wordId = parseInt(target.id.replace("word-", "").replace(this.uuid, ""))
     const words = this.jiix?.words as TWordExport[]
     this.wordToChange = words[wordId]
@@ -198,17 +198,18 @@ export class SmartGuide
       this.#candidatesElement.innerHTML = ""
       if (this.wordToChange?.candidates) {
         this.#candidatesElement.style.display = "flex"
-        this.wordToChange.candidates.forEach((word, index) => {
+        this.wordToChange.candidates.forEach((word, index) =>
+        {
           if (this.wordToChange?.label === word) {
-            this.#candidatesElement.innerHTML += `<span id="cdt-${index}${this.uuid}" class="selected-word">${word}</span>`
+            this.#candidatesElement.innerHTML += `<span id="cdt-${ index }${ this.uuid }" class="selected-word">${ word }</span>`
           } else {
-            this.#candidatesElement.innerHTML += `<span id="cdt-${index}${this.uuid}">${word}</span>`
+            this.#candidatesElement.innerHTML += `<span id="cdt-${ index }${ this.uuid }">${ word }</span>`
           }
         })
         const top = 48
         const left = target.getBoundingClientRect().left - 60
-        this.#candidatesElement.style.top = `${top}px`
-        this.#candidatesElement.style.left = `${left}px`
+        this.#candidatesElement.style.top = `${ top }px`
+        this.#candidatesElement.style.left = `${ left }px`
 
         const parent = target.parentNode?.parentNode?.parentNode
         if (parent) {
@@ -222,12 +223,14 @@ export class SmartGuide
     this.#candidatesElement.style.display = "none"
   }
 
-  #openMenu(): void {
+  #openMenu(): void
+  {
     this.#menuElement.classList.add("open")
     this.#menuElement.classList.remove("close")
     this.#isMenuOpen = true
   }
-  #closeMenu(): void {
+  #closeMenu(): void
+  {
     this.#menuElement.classList.add("close")
     this.#menuElement.classList.remove("open")
     this.#isMenuOpen = false
@@ -245,7 +248,7 @@ export class SmartGuide
   {
     evt.preventDefault()
     evt.stopPropagation()
-    this.globalEvent.emitConvert()
+    this.internalEvent.emitConvert()
     this.#closeMenu()
   }
 
@@ -257,12 +260,12 @@ export class SmartGuide
       this.#closeMenu()
       let message = "Nothing to copy"
       if (this.#prompterTextElement.innerText) {
-        message = `"${this.#prompterTextElement.innerText}" copied to clipboard`
+        message = `"${ this.#prompterTextElement.innerText }" copied to clipboard`
         await navigator.clipboard.writeText(this.#prompterTextElement.innerText)
       }
-      this.globalEvent.emitNotif(message)
+      this.internalEvent.emitNotif({ message, timeout: 1500 })
     } catch (err) {
-      this.globalEvent.emitError(err as Error)
+      this.internalEvent.emitError(err as Error)
     }
   }
 
@@ -270,18 +273,19 @@ export class SmartGuide
   {
     evt.preventDefault()
     evt.stopPropagation()
-    this.globalEvent.emitClear()
+    this.internalEvent.emitClear()
     this.#closeMenu()
   }
 
-  #onClickCandidate = (evt: Event) => {
+  #onClickCandidate = (evt: Event) =>
+  {
     evt.preventDefault()
     evt.stopPropagation()
     const target = evt.target as HTMLElement
     const candidate = target.innerText
     if (this.jiix && candidate !== this.wordToChange?.label && this.wordToChange?.candidates?.includes(candidate)) {
       this.jiix.words[parseInt(this.wordToChange?.id as string)].label = candidate
-      this.globalEvent.emitImport(this.jiix, Exports.JIIX)
+      this.internalEvent.emitImportJIIX(this.jiix)
     }
     this.#candidatesElement.style.display = "none"
   }
@@ -300,7 +304,8 @@ export class SmartGuide
 
   }
 
-  #onClickOutSide = () => {
+  #onClickOutSide = () =>
+  {
     this.#hideCandidates()
     this.#closeMenu()
   }
@@ -342,9 +347,10 @@ export class SmartGuide
   update(exports: TJIIXExport): void
   {
     this.jiix = exports
-    const createWordSpan = (index: number, word?: TWordExport) => {
+    const createWordSpan = (index: number, word?: TWordExport) =>
+    {
       const span = document.createElement("span")
-      span.id = `word-${index}${this.uuid}`
+      span.id = `word-${ index }${ this.uuid }`
       if (word) {
         span.textContent = word.label
       } else {
@@ -353,19 +359,20 @@ export class SmartGuide
       return span
     }
 
-    const populatePrompter = () => {
+    const populatePrompter = () =>
+    {
       this.#prompterTextElement.innerHTML = ""
       if (this.jiix?.words) {
         const words = this.jiix.words as TWordExport[]
         const myFragment = document.createDocumentFragment()
-        words.forEach((word, index) => {
+        words.forEach((word, index) =>
+        {
           if (word.label === " " || word.label.includes("\n")) {
             myFragment.appendChild(createWordSpan(index))
           } else if (index !== words.length - 1) {
             myFragment.appendChild(createWordSpan(index, word))
           } else {
             this.#prompterTextElement.appendChild(myFragment)
-            // this.perfectScrollbar.update()
             if (this.lastWord) {
               this.lastWord = word
             }

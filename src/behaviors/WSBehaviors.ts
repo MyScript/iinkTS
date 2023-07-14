@@ -7,49 +7,68 @@ import { TTriggerConfiguration } from "../@types/configuration/TriggerConfigurat
 import { TConverstionState } from "../@types/configuration/RecognitionConfiguration"
 import { TTheme } from "../@types/style/Theme"
 import { TPenStyle } from "../@types/style/PenStyle"
+import { TUndoRedoContext } from "../@types/undo-redo/UndoRedoContext"
 
 import { PointerEventGrabber } from "../grabber/PointerEventGrabber"
 import { WSRecognizer } from "../recognizer/WSRecognizer"
-import { GlobalEvent } from "../event/GlobalEvent"
 import { SVGRenderer } from "../renderer/svg/SVGRenderer"
-import { UndoRedoManager } from "../undo-redo/UndoRedoManager"
 import { WSMessage } from "../Constants"
+import { InternalEvent } from "../event/InternalEvent"
+import { DeferredPromise } from "../utils/DeferredPromise"
 
 export class WSBehaviors implements IBehaviors
 {
   grabber: PointerEventGrabber
   renderer: SVGRenderer
   recognizer: WSRecognizer
-  undoRedoManager: UndoRedoManager
+  context: TUndoRedoContext
 
   #triggerConfiguration: TTriggerConfiguration
+  #resizeTimer?: ReturnType<typeof setTimeout>
 
   constructor(configuration: TConfiguration, model: IModel)
   {
     this.grabber = new PointerEventGrabber(configuration.grabber)
     this.renderer = new SVGRenderer(configuration.rendering)
     this.recognizer = new WSRecognizer(configuration.server, configuration.recognition)
-    this.undoRedoManager = new UndoRedoManager(configuration["undo-redo"], model.getClone())
+    this.context = {
+      canRedo: false,
+      canUndo: false,
+      empty: true,
+      stackIndex: 0,
+      possibleUndoCount: 0,
+      stack: [model.getClone()]
+    }
     this.#triggerConfiguration = configuration.triggers
   }
 
-  get globalEvent(): GlobalEvent
+  get internalEvent(): InternalEvent
   {
-    return GlobalEvent.getInstance()
+    return InternalEvent.getInstance()
   }
 
   async init(domElement: HTMLElement): Promise<void>
   {
-    const model = this.undoRedoManager.getLastModel()
     this.grabber.attach(domElement)
     this.renderer.init(domElement)
-    this.recognizer.wsEvent.addSVGPatchListener(this.onSVGPatch)
+    this.internalEvent.addSVGPatchListener(this.onSVGPatch)
+    this.internalEvent.addContextChangeListener(this.onContextChange)
+    const model = this.context.stack[0]
     return this.recognizer.init(model.height, model.width)
   }
 
   private onSVGPatch = (evt: TWebSocketSVGPatchEvent) =>
   {
     this.renderer.updatesLayer(evt.layer, evt.updates)
+  }
+
+  private onContextChange = (context: TUndoRedoContext) =>
+  {
+    this.context.canRedo = context.canRedo
+    this.context.canUndo = context.canUndo
+    this.context.empty = context.empty
+    this.context.possibleUndoCount = context.possibleUndoCount
+    this.context.stackIndex = context.stackIndex
   }
 
   setPenStyle(penStyle: TPenStyle): void
@@ -76,23 +95,17 @@ export class WSBehaviors implements IBehaviors
     }
   }
 
-  async updateModelRendering(model: IModel): Promise<IModel | never>
+  async updateModelRendering(model: IModel): Promise<IModel>
   {
-    try {
-      if (this.#triggerConfiguration.exportContent !== "DEMAND") {
-        model.updatePositionSent()
-        this.undoRedoManager.addModelToStack(model)
-        const updatedModel = await this.recognizer.addStrokes(model)
-        this.undoRedoManager.updateModelInStack(updatedModel)
-        this.renderer.clearPendingStroke()
-        model.mergeExport(updatedModel.exports as TExport)
-        model.updatePositionReceived()
-      }
-      return model
-    } catch (error) {
-      this.globalEvent.emitError(error as Error)
-      return Promise.reject(error)
+    this.context.stack.push(model.getClone())
+    if (this.#triggerConfiguration.exportContent !== "DEMAND") {
+      model.updatePositionSent()
+      const updatedModel = await this.recognizer.addStrokes(model)
+      this.renderer.clearPendingStroke()
+      model.mergeExport(updatedModel.exports as TExport)
+      model.updatePositionReceived()
     }
+    return model
   }
 
   async importPointEvents(model:IModel, strokes: TStroke[]): Promise<IModel | never>
@@ -106,70 +119,77 @@ export class WSBehaviors implements IBehaviors
   {
     try {
       if (this.#triggerConfiguration.exportContent === "DEMAND") {
-        this.undoRedoManager.addModelToStack(model)
-        const modelUpdated = await this.recognizer.addStrokes(model)
-        this.undoRedoManager.updateModelInStack(modelUpdated)
-        return modelUpdated
+        return this.recognizer.addStrokes(model)
       } else {
-        this.undoRedoManager.addModelToStack(model)
-        const modelUpdated = await this.recognizer.export(model, mimeTypes)
-        this.undoRedoManager.updateModelInStack(modelUpdated)
-        return modelUpdated
+        return this.recognizer.export(model, mimeTypes)
       }
     } catch (error) {
-      this.globalEvent.emitError(error as Error)
+      this.internalEvent.emitError(error as Error)
       return Promise.reject(error)
     }
   }
 
   async convert(model: IModel, conversionState?: TConverstionState): Promise<IModel | never>
   {
-    const newModel = model.getClone()
-    this.undoRedoManager.addModelToStack(newModel)
-    const modelUpdated = await this.recognizer.convert(newModel, conversionState)
-    this.undoRedoManager.updateModelInStack(modelUpdated)
-    return modelUpdated
+    return this.recognizer.convert(model, conversionState)
   }
 
   async import(model: IModel, data: Blob, mimeType?: string): Promise<IModel | never>
   {
-    const newModel = model.getClone()
-    this.undoRedoManager.addModelToStack(newModel)
-    const myImportExport = await this.recognizer.import(data, mimeType)
-    newModel.updatePositionReceived()
-    newModel.mergeExport(myImportExport)
-    this.undoRedoManager.updateModelInStack(newModel)
-    return newModel
+    return this.recognizer.import(model, data, mimeType)
   }
 
   async resize(model: IModel): Promise<IModel>
   {
-    const newModel = model.getClone()
-    this.renderer.resize(newModel)
-    await new Promise(resolve => setTimeout(resolve, this.#triggerConfiguration.resizeTriggerDelay))
-    this.globalEvent.emitExported(newModel.exports as TExport)
-    return this.recognizer.resize(newModel)
+    const deferredResize = new DeferredPromise<IModel>()
+    const clonedModel = model.getClone()
+    this.renderer.resize(clonedModel)
+    clearTimeout(this.#resizeTimer)
+    this.#resizeTimer = setTimeout(async () =>
+    {
+      try {
+        const resizeModel = await this.recognizer.resize(clonedModel)
+        deferredResize.resolve(resizeModel)
+      } catch (error) {
+        deferredResize.reject(error as Error)
+      }
+    }, this.#triggerConfiguration.resizeTriggerDelay)
+
+    const newModel = await deferredResize.promise
+    this.internalEvent.emitExported(newModel.exports as TExport)
+    return newModel
   }
 
-  async undo(model: IModel): Promise<IModel>
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async undo(_model: IModel): Promise<IModel>
   {
-    const newModel = await this.recognizer.undo(model)
-    this.undoRedoManager.updateModelInStack(newModel)
-    return this.undoRedoManager.undo()
+    if (this.context.canUndo) {
+      const previousModel = this.context.stack[this.context.stackIndex - 1]
+      return this.recognizer.undo(previousModel)
+    }
+    else {
+      throw new Error("Undo not allowed")
+    }
   }
 
-  async redo(model: IModel): Promise<IModel>
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async redo(_model: IModel): Promise<IModel>
   {
-    const newModel = await this.recognizer.redo(model)
-    this.undoRedoManager.updateModelInStack(newModel)
-    return this.undoRedoManager.redo()
+    if (this.context.canRedo) {
+      const nextModel = this.context.stack[this.context.stackIndex + 1]
+      return this.recognizer.redo(nextModel)
+    }
+    else {
+      throw new Error("Redo not allowed")
+    }
   }
 
   async clear(model: IModel): Promise<IModel>
   {
-    const newModel = await this.recognizer.clear(model)
-    this.undoRedoManager.addModelToStack(newModel)
-    return newModel
+    const clearedModel = model.getClone()
+    clearedModel.clear()
+    this.context.stack.push(clearedModel)
+    return this.recognizer.clear(clearedModel)
   }
 
   async destroy(): Promise<void>
@@ -177,7 +197,6 @@ export class WSBehaviors implements IBehaviors
     this.grabber.detach()
     this.renderer.destroy()
     this.recognizer.close(1000, WSMessage.CLOSE_RECOGNIZER)
-    // this.undoRedoManager.reset(model)
     return Promise.resolve()
   }
 }

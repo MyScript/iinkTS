@@ -2,7 +2,7 @@ const { testGesture } = require('../_partials/gesture-test')
 const { waitForEditorWebSocket, write, getExportedDatas } = require('../helper')
 const { h } = require('../strokesDatas')
 
-describe('Websocket Text', () => {
+describe('Websocket Text Import Content', () => {
   beforeAll(async () => {
     await page.goto('/examples/websocket/websocket_text_import_content.html')
   })
@@ -24,8 +24,8 @@ describe('Websocket Text', () => {
       write(page, h.strokes),
     ])
     const jiixExpected = h.exports['application/vnd.myscript.jiix']
-    const jiixReceived = JSON.parse(exports['application/vnd.myscript.jiix'])
-    expect(jiixReceived).toStrictEqual(jiixExpected)
+    const jiixReceived = exports['application/vnd.myscript.jiix']
+    expect(jiixReceived).toEqual(jiixExpected)
   })
 
   test('should import text hello', async () => {
