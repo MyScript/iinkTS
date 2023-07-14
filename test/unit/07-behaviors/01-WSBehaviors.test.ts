@@ -1,4 +1,3 @@
-
 import { TConfiguration } from '../../../src/@types/Configuration'
 import { IModel, TExport } from '../../../src/@types/model/Model'
 import { TStroke } from '../../../src/@types/model/Stroke'
@@ -6,11 +5,12 @@ import { TWebSocketSVGPatchEvent } from '../../../src/@types/recognizer/WSRecogn
 import { TPoint } from '../../../src/@types/renderer/Point'
 import { TPenStyle } from '../../../src/@types/style/PenStyle'
 import { TTheme } from '../../../src/@types/style/Theme'
+import { TUndoRedoContext } from '../../../src/@types/undo-redo/UndoRedoContext'
 
 import { WSBehaviors } from '../../../src/behaviors/WSBehaviors'
 import { DefaultConfiguration } from '../../../src/configuration/DefaultConfiguration'
 import { WSMessage } from '../../../src/Constants'
-import { GlobalEvent } from '../../../src/event/GlobalEvent'
+import { InternalEvent } from '../../../src/event/InternalEvent'
 import { DefaultTheme } from '../../../src/iink'
 import { Model } from '../../../src/model/Model'
 import { DefaultPenStyle } from '../../../src/style/DefaultPenStyle'
@@ -18,7 +18,6 @@ import { delay } from '../utils/helpers'
 
 describe('WSBehaviors.ts', () =>
 {
-  const globalEvent = GlobalEvent.getInstance()
   const height = 100, width = 100
 
   test('should instanciate WSBehaviors', () =>
@@ -28,16 +27,17 @@ describe('WSBehaviors.ts', () =>
     expect(wsb).toBeDefined()
   })
 
-  test('should have globalEvent property', () =>
+  test('should have internalEvent property', () =>
   {
     const model: IModel = new Model(width, height)
     const wsb = new WSBehaviors(DefaultConfiguration, model)
-    expect(wsb.globalEvent).toBe(globalEvent)
+    expect(wsb.internalEvent).toBe(InternalEvent.getInstance())
+    expect(wsb.internalEvent).toEqual(InternalEvent.getInstance())
   })
 
   describe('init', () =>
   {
-    test('should init grabber, renderer & recognizer', async () =>
+    test('should init grabber, renderer & recognizer & context', async () =>
     {
       const wrapperHTML: HTMLElement = document.createElement('div')
       const model: IModel = new Model(width, height)
@@ -45,14 +45,22 @@ describe('WSBehaviors.ts', () =>
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn()
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
       wsb.init(wrapperHTML)
-      expect(wsb.grabber.attach).toBeCalledTimes(1)
-      expect(wsb.grabber.attach).toBeCalledWith(wrapperHTML)
-      expect(wsb.renderer.init).toBeCalledTimes(1)
-      expect(wsb.renderer.init).toBeCalledWith(wrapperHTML)
-      expect(wsb.recognizer.init).toBeCalledTimes(1)
-      expect(wsb.recognizer.init).toBeCalledWith(model.height, model.width)
+      await expect(wsb.context).toEqual({
+        canRedo: false,
+        canUndo: false,
+        empty: true,
+        stackIndex: 0,
+        possibleUndoCount: 0,
+        stack: [model]
+      })
+      await expect(wsb.grabber.attach).toBeCalledTimes(1)
+      await expect(wsb.grabber.attach).toBeCalledWith(wrapperHTML)
+      await expect(wsb.renderer.init).toBeCalledTimes(1)
+      await expect(wsb.renderer.init).toBeCalledWith(wrapperHTML)
+      await expect(wsb.recognizer.init).toBeCalledTimes(1)
+      await expect(wsb.recognizer.init).toBeCalledWith(model.height, model.width)
     })
 
     test('should resolve init when recognizer.init is resolve', async () =>
@@ -65,7 +73,7 @@ describe('WSBehaviors.ts', () =>
       wsb.recognizer.send = jest.fn()
       wsb.recognizer.init = jest.fn(() => Promise.resolve())
       const initPromise = await wsb.init(wrapperHTML)
-      expect(initPromise).toBeUndefined()
+      await expect(initPromise).toBeUndefined()
     })
 
     test('should reject init when recognizer.init is reject', async () =>
@@ -77,7 +85,7 @@ describe('WSBehaviors.ts', () =>
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
       wsb.recognizer.init = jest.fn(() => Promise.reject('pouet'))
-      expect(wsb.init(wrapperHTML)).rejects.toEqual('pouet')
+      await expect(wsb.init(wrapperHTML)).rejects.toEqual('pouet')
     })
   })
 
@@ -91,12 +99,12 @@ describe('WSBehaviors.ts', () =>
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn()
-      wsb.recognizer.setPenStyle = jest.fn(s => s)
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
+      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
       await wsb.init(wrapperHTML)
       wsb.setPenStyle(DefaultPenStyle)
-      expect(wsb.recognizer.setPenStyle).toBeCalledTimes(1)
-      expect(wsb.recognizer.setPenStyle).toBeCalledWith(DefaultPenStyle)
+      await expect(wsb.recognizer.setPenStyle).toBeCalledTimes(1)
+      await expect(wsb.recognizer.setPenStyle).toBeCalledWith(DefaultPenStyle)
     })
     test('should call recognizer.setPenStyleClasses', async () =>
     {
@@ -106,12 +114,12 @@ describe('WSBehaviors.ts', () =>
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn()
-      wsb.recognizer.setPenStyleClasses = jest.fn(s => s)
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
+      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
       await wsb.init(wrapperHTML)
       wsb.setPenStyleClasses('pouet')
-      expect(wsb.recognizer.setPenStyleClasses).toBeCalledTimes(1)
-      expect(wsb.recognizer.setPenStyleClasses).toBeCalledWith('pouet')
+      await expect(wsb.recognizer.setPenStyleClasses).toBeCalledTimes(1)
+      await expect(wsb.recognizer.setPenStyleClasses).toBeCalledWith('pouet')
     })
     test('should call recognizer.setTheme', async () =>
     {
@@ -121,12 +129,12 @@ describe('WSBehaviors.ts', () =>
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn()
-      wsb.recognizer.setTheme = jest.fn(t => t)
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
+      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
       await wsb.init(wrapperHTML)
       wsb.setTheme(DefaultTheme)
-      expect(wsb.recognizer.setTheme).toBeCalledTimes(1)
-      expect(wsb.recognizer.setTheme).toBeCalledWith(DefaultTheme)
+      await expect(wsb.recognizer.setTheme).toBeCalledTimes(1)
+      await expect(wsb.recognizer.setTheme).toBeCalledWith(DefaultTheme)
     })
   })
 
@@ -142,15 +150,14 @@ describe('WSBehaviors.ts', () =>
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn()
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
       const initPromise = wsb.init(wrapperHTML)
       await initPromise
       wsb.renderer.drawPendingStroke = jest.fn()
       wsb.drawCurrentStroke(model)
-      expect(wsb.renderer.drawPendingStroke).toBeCalledTimes(1)
-      expect(wsb.renderer.drawPendingStroke).toBeCalledWith(model.currentStroke)
+      await expect(wsb.renderer.drawPendingStroke).toBeCalledTimes(1)
+      await expect(wsb.renderer.drawPendingStroke).toBeCalledWith(model.currentStroke)
     })
-
     test('should not call renderer.drawPendingStroke if currentStroke is null', async () =>
     {
       const wrapperHTML: HTMLElement = document.createElement('div')
@@ -159,18 +166,18 @@ describe('WSBehaviors.ts', () =>
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn()
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
       const initPromise = wsb.init(wrapperHTML)
       await initPromise
       wsb.renderer.drawPendingStroke = jest.fn()
       wsb.drawCurrentStroke(model)
-      expect(wsb.renderer.drawPendingStroke).toBeCalledTimes(0)
+      await expect(wsb.renderer.drawPendingStroke).toBeCalledTimes(0)
     })
   })
 
   describe('updateModelRendering', () =>
   {
-    test('should call recognizer.addStrokes', async () =>
+    test('should call recognizer.addStrokes & renderer.clearPendingStroke', async () =>
     {
       const wrapperHTML: HTMLElement = document.createElement('div')
       const model: IModel = new Model(width, height)
@@ -183,8 +190,9 @@ describe('WSBehaviors.ts', () =>
       wsb.recognizer.addStrokes = jest.fn(m => Promise.resolve(m))
       await wsb.init(wrapperHTML)
       await wsb.updateModelRendering(model)
-      expect(wsb.recognizer.addStrokes).toBeCalledTimes(1)
-      expect(wsb.recognizer.addStrokes).toBeCalledWith(model)
+      await expect(wsb.recognizer.addStrokes).toBeCalledTimes(1)
+      await expect(wsb.recognizer.addStrokes).toBeCalledWith(model)
+      await expect(wsb.renderer.clearPendingStroke).toBeCalledTimes(1)
     })
     test('should not call recognizer.addStrokes when exportContent = "DEMAND"', async () =>
     {
@@ -201,7 +209,7 @@ describe('WSBehaviors.ts', () =>
       wsb.recognizer.addStrokes = jest.fn(m => Promise.resolve(m))
       await wsb.init(wrapperHTML)
       await wsb.updateModelRendering(model)
-      expect(wsb.recognizer.addStrokes).toBeCalledTimes(0)
+      await expect(wsb.recognizer.addStrokes).toBeCalledTimes(0)
     })
     test('should reject if recognizer.addStrokes rejected', async () =>
     {
@@ -210,32 +218,12 @@ describe('WSBehaviors.ts', () =>
       const wsb = new WSBehaviors(DefaultConfiguration, model)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
-      wsb.globalEvent.emitError = jest.fn()
       wsb.renderer.clearPendingStroke = jest.fn()
       wsb.recognizer.send = jest.fn()
       wsb.recognizer.init = jest.fn(() => Promise.resolve())
       wsb.recognizer.addStrokes = jest.fn(() => Promise.reject('poney'))
       await wsb.init(wrapperHTML)
-      expect(wsb.updateModelRendering(model)).rejects.toEqual('poney')
-    })
-    test('should emit ERROR if recognizer.addStrokes rejected', async () =>
-    {
-      const wrapperHTML: HTMLElement = document.createElement('div')
-      const model: IModel = new Model(width, height)
-      const wsb = new WSBehaviors(DefaultConfiguration, model)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.globalEvent.emitError = jest.fn()
-      wsb.renderer.clearPendingStroke = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.addStrokes = jest.fn(() => Promise.reject('poney'))
-      await wsb.init(wrapperHTML)
-      wsb.updateModelRendering(model)
-        .catch(() => {
-          expect(wsb.globalEvent.emitError).toBeCalledTimes(1)
-          expect(wsb.globalEvent.emitError).toBeCalledWith('poney')
-        })
+      await expect(wsb.updateModelRendering(model)).rejects.toEqual('poney')
     })
   })
 
@@ -249,13 +237,13 @@ describe('WSBehaviors.ts', () =>
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn()
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
       wsb.recognizer.export = jest.fn(m => Promise.resolve(m))
       const initPromise = wsb.init(wrapperHTML)
       wsb.export(model)
       await initPromise
-      expect(wsb.recognizer.export).toBeCalledTimes(1)
-      expect(wsb.recognizer.export).toBeCalledWith(model, undefined)
+      await expect(wsb.recognizer.export).toBeCalledTimes(1)
+      await expect(wsb.recognizer.export).toBeCalledWith(model, undefined)
     })
     test('should reject if recognizer.export rejected', async () =>
     {
@@ -264,32 +252,12 @@ describe('WSBehaviors.ts', () =>
       const wsb = new WSBehaviors(DefaultConfiguration, model)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
-      wsb.globalEvent.emitError = jest.fn()
       wsb.renderer.clearPendingStroke = jest.fn()
       wsb.recognizer.send = jest.fn()
       wsb.recognizer.init = jest.fn(() => Promise.resolve())
       wsb.recognizer.export = jest.fn(() => Promise.reject('poney'))
       await wsb.init(wrapperHTML)
-      expect(wsb.export(model)).rejects.toEqual('poney')
-    })
-    test('should emit ERROR if recognizer.addStrokes rejected', async () =>
-    {
-      const wrapperHTML: HTMLElement = document.createElement('div')
-      const model: IModel = new Model(width, height)
-      const wsb = new WSBehaviors(DefaultConfiguration, model)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.globalEvent.emitError = jest.fn()
-      wsb.renderer.clearPendingStroke = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.export = jest.fn(() => Promise.reject('poney'))
-      await wsb.init(wrapperHTML)
-      wsb.export(model)
-        .catch(() => {
-          expect(wsb.globalEvent.emitError).toBeCalledTimes(1)
-          expect(wsb.globalEvent.emitError).toBeCalledWith('poney')
-        })
+      await expect(wsb.export(model)).rejects.toEqual('poney')
     })
     test('should call recognizer.addStrokes when exportContent = "DEMAND"', async () =>
     {
@@ -301,48 +269,30 @@ describe('WSBehaviors.ts', () =>
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn()
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
       wsb.recognizer.addStrokes = jest.fn(m => Promise.resolve(m))
       wsb.recognizer.export = jest.fn(m => Promise.resolve(m))
       const initPromise = wsb.init(wrapperHTML)
       wsb.export(model)
       await initPromise
-      expect(wsb.recognizer.addStrokes).toBeCalledTimes(1)
-      expect(wsb.recognizer.export).toBeCalledTimes(0)
+      await expect(wsb.recognizer.addStrokes).toBeCalledTimes(1)
+      await expect(wsb.recognizer.export).toBeCalledTimes(0)
     })
     test('should reject if recognizer.addStrokes rejected when exportContent = "DEMAND"', async () =>
     {
       const wrapperHTML: HTMLElement = document.createElement('div')
       const model: IModel = new Model(width, height)
-      const wsb = new WSBehaviors(DefaultConfiguration, model)
+      const conf: TConfiguration = JSON.parse(JSON.stringify(DefaultConfiguration))
+      conf.triggers.exportContent = 'DEMAND'
+      const wsb = new WSBehaviors(conf, model)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
-      wsb.globalEvent.emitError = jest.fn()
       wsb.renderer.clearPendingStroke = jest.fn()
       wsb.recognizer.send = jest.fn()
       wsb.recognizer.init = jest.fn(() => Promise.resolve())
       wsb.recognizer.addStrokes = jest.fn(() => Promise.reject('poney'))
       await wsb.init(wrapperHTML)
-      expect(wsb.export(model)).rejects.toEqual('poney')
-    })
-    test('should emit ERROR if recognizer.addStrokes rejected when exportContent = "DEMAND"', async () =>
-    {
-      const wrapperHTML: HTMLElement = document.createElement('div')
-      const model: IModel = new Model(width, height)
-      const wsb = new WSBehaviors(DefaultConfiguration, model)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.globalEvent.emitError = jest.fn()
-      wsb.renderer.clearPendingStroke = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.addStrokes = jest.fn(() => Promise.reject('poney'))
-      await wsb.init(wrapperHTML)
-      wsb.export(model)
-        .catch(() => {
-          expect(wsb.globalEvent.emitError).toBeCalledTimes(1)
-          expect(wsb.globalEvent.emitError).toBeCalledWith('poney')
-        })
+      await expect(wsb.export(model)).rejects.toEqual('poney')
     })
   })
 
@@ -356,13 +306,13 @@ describe('WSBehaviors.ts', () =>
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn()
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
       wsb.recognizer.convert = jest.fn(m => Promise.resolve(m))
       const initPromise = wsb.init(wrapperHTML)
       wsb.convert(model)
       await initPromise
-      expect(wsb.recognizer.convert).toBeCalledTimes(1)
-      expect(wsb.recognizer.convert).toBeCalledWith(model, undefined)
+      await expect(wsb.recognizer.convert).toBeCalledTimes(1)
+      await expect(wsb.recognizer.convert).toBeCalledWith(model, undefined)
     })
   })
 
@@ -376,7 +326,7 @@ describe('WSBehaviors.ts', () =>
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn()
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
       wsb.recognizer.import = jest.fn()
       const initPromise = wsb.init(wrapperHTML)
       const mimeType = 'text/plain'
@@ -384,10 +334,9 @@ describe('WSBehaviors.ts', () =>
       const blob = new Blob([textImport], { type: mimeType })
       wsb.import(model, blob, mimeType)
       await initPromise
-      expect(wsb.recognizer.import).toBeCalledTimes(1)
-      expect(wsb.recognizer.import).toBeCalledWith(blob, mimeType)
+      await expect(wsb.recognizer.import).toBeCalledTimes(1)
+      await expect(wsb.recognizer.import).toBeCalledWith(model, blob, mimeType)
     })
-
     test('should return model form recognizer when recognizer emit EXPORTED', async () =>
     {
       const exportExpected: TExport = { 'test/plain': 'cofveve' }
@@ -397,16 +346,17 @@ describe('WSBehaviors.ts', () =>
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn()
-      wsb.recognizer.import = jest.fn((_blob) => {
-        return Promise.resolve(exportExpected)
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
+      wsb.recognizer.import = jest.fn(() => {
+        model.exports = exportExpected
+        return Promise.resolve(model)
       })
       await wsb.init(wrapperHTML)
       const mimeType = 'text/plain'
       const textImport = 'winter is comming'
       const _blob = new Blob([textImport], { type: mimeType })
       const modelReceive = await wsb.import(model, _blob, mimeType)
-      await expect(modelReceive.exports).toBe(exportExpected)
+      await await expect(modelReceive.exports).toBe(exportExpected)
     })
   })
 
@@ -455,15 +405,28 @@ describe('WSBehaviors.ts', () =>
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn()
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
       wsb.renderer.resize = jest.fn()
       wsb.recognizer.resize = jest.fn(m => Promise.resolve(m))
       await wsb.init(wrapperHTML)
       await wsb.resize(model)
-      expect(wsb.renderer.resize).toBeCalledTimes(1)
-      expect(wsb.renderer.resize).toBeCalledWith(model)
+      await expect(wsb.renderer.resize).toBeCalledTimes(1)
+      await expect(wsb.renderer.resize).toBeCalledWith(model)
     })
-
+    test('should reject if renderer.resize rejected', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const model: IModel = new Model(width, height)
+      const wsb = new WSBehaviors(DefaultConfiguration, model)
+      wsb.grabber.attach = jest.fn()
+      wsb.renderer.init = jest.fn()
+      wsb.recognizer.send = jest.fn()
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
+      wsb.renderer.resize = jest.fn()
+      wsb.recognizer.resize = jest.fn(()=> Promise.reject("pony"))
+      await wsb.init(wrapperHTML)
+      await expect(wsb.resize(model)).rejects.toEqual("pony")
+    })
     test('should call recognizer.resize after resizeTriggerDelay', async () =>
     {
       const wrapperHTML: HTMLElement = document.createElement('div')
@@ -472,14 +435,14 @@ describe('WSBehaviors.ts', () =>
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn()
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
       wsb.renderer.resize = jest.fn()
       wsb.recognizer.resize = jest.fn(m => Promise.resolve(m))
       await wsb.init(wrapperHTML)
       await wsb.resize(model)
       await delay(DefaultConfiguration.triggers.resizeTriggerDelay)
-      expect(wsb.recognizer.resize).toBeCalledTimes(1)
-      expect(wsb.recognizer.resize).toBeCalledWith(model)
+      await expect(wsb.recognizer.resize).toBeCalledTimes(1)
+      await expect(wsb.recognizer.resize).toBeCalledWith(model)
     })
   })
 
@@ -490,14 +453,48 @@ describe('WSBehaviors.ts', () =>
       const wrapperHTML: HTMLElement = document.createElement('div')
       const model: IModel = new Model(width, height)
       const wsb = new WSBehaviors(DefaultConfiguration, model)
+      wsb.context.canUndo = true
+      wsb.context.stackIndex = 1
+      wsb.context.stack.push(new Model(100, 200))
+      wsb.context.stack.push(new Model(42, 12))
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn()
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
       wsb.recognizer.undo = jest.fn(m => Promise.resolve(m))
       await wsb.init(wrapperHTML)
       await wsb.undo(model)
-      expect(wsb.recognizer.undo).toBeCalledTimes(1)
+      await expect(wsb.recognizer.undo).toBeCalledTimes(1)
+    })
+    test('should return previous model', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const model: IModel = new Model(width, height)
+      const wsb = new WSBehaviors(DefaultConfiguration, model)
+      wsb.context.canUndo = true
+      wsb.context.stackIndex = 1
+      wsb.context.stack.push(new Model(100, 200))
+      wsb.context.stack.push(new Model(42, 12))
+      wsb.grabber.attach = jest.fn()
+      wsb.renderer.init = jest.fn()
+      wsb.recognizer.send = jest.fn()
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
+      wsb.recognizer.undo = jest.fn(m => Promise.resolve(m))
+      await wsb.init(wrapperHTML)
+      await expect(wsb.undo(model)).resolves.toEqual(wsb.context.stack[0])
+    })
+    test('should throw error if context.canUndo = false', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const model: IModel = new Model(width, height)
+      const wsb = new WSBehaviors(DefaultConfiguration, model)
+      wsb.grabber.attach = jest.fn()
+      wsb.renderer.init = jest.fn()
+      wsb.recognizer.send = jest.fn()
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
+      wsb.recognizer.undo = jest.fn(m => Promise.resolve(m))
+      await wsb.init(wrapperHTML)
+      await expect(wsb.undo(model)).rejects.toEqual(new Error("Undo not allowed"))
     })
   })
 
@@ -508,14 +505,65 @@ describe('WSBehaviors.ts', () =>
       const wrapperHTML: HTMLElement = document.createElement('div')
       const model: IModel = new Model(width, height)
       const wsb = new WSBehaviors(DefaultConfiguration, model)
+      wsb.context.canRedo = true
+      wsb.context.stackIndex = 0
+      wsb.context.stack.push(new Model(100, 200))
+      wsb.context.stack.push(new Model(42, 12))
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn()
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
       wsb.recognizer.redo = jest.fn(m => Promise.resolve(m))
       await wsb.init(wrapperHTML)
       await wsb.redo(model)
-      expect(wsb.recognizer.redo).toBeCalledTimes(1)
+      await expect(wsb.recognizer.redo).toBeCalledTimes(1)
+    })
+    test('should return next model', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const model: IModel = new Model(width, height)
+      const wsb = new WSBehaviors(DefaultConfiguration, model)
+      wsb.context.canRedo = true
+      wsb.context.stackIndex = 0
+      wsb.context.stack.push(new Model(100, 200))
+      wsb.context.stack.push(new Model(42, 12))
+      wsb.grabber.attach = jest.fn()
+      wsb.renderer.init = jest.fn()
+      wsb.recognizer.send = jest.fn()
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
+      wsb.recognizer.redo = jest.fn(m => Promise.resolve(m))
+      await wsb.init(wrapperHTML)
+      await expect(wsb.redo(model)).resolves.toEqual(wsb.context.stack[1])
+    })
+    test('should reject if recognizer.redo rejected', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const model: IModel = new Model(width, height)
+      const wsb = new WSBehaviors(DefaultConfiguration, model)
+      wsb.context.canRedo = true
+      wsb.context.stackIndex = 0
+      wsb.context.stack.push(new Model(100, 200))
+      wsb.context.stack.push(new Model(42, 12))
+      wsb.grabber.attach = jest.fn()
+      wsb.renderer.init = jest.fn()
+      wsb.recognizer.send = jest.fn()
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
+      wsb.recognizer.redo = jest.fn(()=> Promise.reject("pony"))
+      await wsb.init(wrapperHTML)
+      await expect(wsb.redo(model)).rejects.toEqual("pony")
+    })
+    test('should throw error if context.canRedo = false', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const model: IModel = new Model(width, height)
+      const wsb = new WSBehaviors(DefaultConfiguration, model)
+      wsb.grabber.attach = jest.fn()
+      wsb.renderer.init = jest.fn()
+      wsb.recognizer.send = jest.fn()
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
+      wsb.recognizer.redo = jest.fn(m => Promise.resolve(m))
+      await wsb.init(wrapperHTML)
+      await expect(wsb.redo(model)).rejects.toEqual(new Error("Redo not allowed"))
     })
   })
 
@@ -529,14 +577,11 @@ describe('WSBehaviors.ts', () =>
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn()
-      const initPromise = wsb.init(wrapperHTML)
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
       wsb.recognizer.clear = jest.fn()
-      expect(async () => {
-        await wsb.clear(model)
-      }).rejects.toThrowError()
-      await initPromise
-      expect(wsb.recognizer.clear).toBeCalledTimes(1)
+      await wsb.init(wrapperHTML)
+      await wsb.clear(model)
+      await expect(wsb.recognizer.clear).toBeCalledTimes(1)
     })
   })
 
@@ -550,7 +595,7 @@ describe('WSBehaviors.ts', () =>
       wsb.renderer.destroy = jest.fn()
       wsb.recognizer.close = jest.fn()
       wsb.destroy()
-      expect(wsb.grabber.detach).toBeCalledTimes(1)
+      await expect(wsb.grabber.detach).toBeCalledTimes(1)
     })
 
     test('should call renderer.destroy', async () =>
@@ -561,7 +606,7 @@ describe('WSBehaviors.ts', () =>
       wsb.renderer.destroy = jest.fn()
       wsb.recognizer.close = jest.fn()
       wsb.destroy()
-      expect(wsb.renderer.destroy).toBeCalledTimes(1)
+      await expect(wsb.renderer.destroy).toBeCalledTimes(1)
     })
 
     test('should call recognizer.destroy', async () =>
@@ -572,8 +617,8 @@ describe('WSBehaviors.ts', () =>
       wsb.renderer.destroy = jest.fn()
       wsb.recognizer.close = jest.fn()
       wsb.destroy()
-      expect(wsb.recognizer.close).toBeCalledTimes(1)
-      expect(wsb.recognizer.close).toBeCalledWith(1000, WSMessage.CLOSE_RECOGNIZER)
+      await expect(wsb.recognizer.close).toBeCalledTimes(1)
+      await expect(wsb.recognizer.close).toBeCalledWith(1000, WSMessage.CLOSE_RECOGNIZER)
     })
 
   })
@@ -587,7 +632,7 @@ describe('WSBehaviors.ts', () =>
       const wsb = new WSBehaviors(DefaultConfiguration, model)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
-      wsb.recognizer.init = jest.fn()
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
       const initPromise = wsb.init(wrapperHTML)
       wsb.renderer.updatesLayer = jest.fn()
       await initPromise
@@ -596,41 +641,75 @@ describe('WSBehaviors.ts', () =>
         layer: 'MODEL',
         updates: []
       }
-      wsb.recognizer.wsEvent.emitSVGPatch(svgPatch)
-      expect(wsb.renderer.updatesLayer).toBeCalledTimes(1)
-      expect(wsb.renderer.updatesLayer).toBeCalledWith(svgPatch.layer, svgPatch.updates)
+      wsb.recognizer.internalEvent.emitSVGPatch(svgPatch)
+      await expect(wsb.renderer.updatesLayer).toBeCalledTimes(1)
+      await expect(wsb.renderer.updatesLayer).toBeCalledWith(svgPatch.layer, svgPatch.updates)
+    })
+    test('should update context when recognizer emit CONTEXT_CHANGE', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const model: IModel = new Model(width, height)
+      const wsb = new WSBehaviors(DefaultConfiguration, model)
+      wsb.grabber.attach = jest.fn()
+      wsb.renderer.init = jest.fn()
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
+      const initPromise = wsb.init(wrapperHTML)
+      wsb.renderer.updatesLayer = jest.fn()
+      await initPromise
+      const context: TUndoRedoContext = {
+        canRedo: true,
+        canUndo: true,
+        empty: false,
+        possibleUndoCount: 10,
+        stack: [],
+        stackIndex: 42
+      }
+      await expect(wsb.context).toEqual({
+        canRedo: false,
+        canUndo: false,
+        empty: true,
+        stackIndex: 0,
+        possibleUndoCount: 0,
+        stack: [model]
+      })
+      wsb.recognizer.internalEvent.emitContextChange(context)
+      await expect(wsb.context.canRedo).toEqual(context.canRedo)
+      await expect(wsb.context.canUndo).toEqual(context.canUndo)
+      await expect(wsb.context.empty).toEqual(context.empty)
+      await expect(wsb.context.possibleUndoCount).toEqual(context.possibleUndoCount)
+      await expect(wsb.context.stackIndex).toEqual(context.stackIndex)
     })
   })
 
   describe('Style', () =>
   {
-    test('should change PenStyle', () =>
+    test('should change PenStyle', async () =>
     {
       const model: IModel = new Model(width, height)
       const wsb = new WSBehaviors(DefaultConfiguration, model)
       const CustomPenStyle: TPenStyle = {color: "#d1d1d1"}
       wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn()
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
       wsb.recognizer.setPenStyle = jest.fn()
       wsb.setPenStyle(CustomPenStyle)
-      expect(wsb.recognizer.setPenStyle).toBeCalledTimes(1)
+      await expect(wsb.recognizer.setPenStyle).toBeCalledTimes(1)
     })
 
-    test('should change PenStyleClasses', () => {
+    test('should change PenStyleClasses', async () => {
       const model: IModel = new Model(width, height)
       const wsb = new WSBehaviors(DefaultConfiguration, model)
       wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn()
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
       wsb.recognizer.setPenStyleClasses = jest.fn()
       wsb.setPenStyleClasses("test")
-      expect(wsb.recognizer.setPenStyleClasses).toBeCalledTimes(1)
+      await expect(wsb.recognizer.setPenStyleClasses).toBeCalledTimes(1)
     })
 
-    test('should change theme', () => {
+    test('should change theme', async () => {
       const model: IModel = new Model(width, height)
       const wsb = new WSBehaviors(DefaultConfiguration, model)
       wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn()
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
       wsb.recognizer.setTheme = jest.fn()
       const theme: TTheme = {
         ink: {
@@ -653,8 +732,8 @@ describe('WSBehaviors.ts', () =>
         }
       }
       wsb.setTheme(theme)
-      expect(wsb.recognizer.setTheme).toBeCalledTimes(1)
-      expect(wsb.recognizer.setTheme).toBeCalledWith(theme)
+      await expect(wsb.recognizer.setTheme).toBeCalledTimes(1)
+      await expect(wsb.recognizer.setTheme).toBeCalledWith(theme)
     })
   })
 

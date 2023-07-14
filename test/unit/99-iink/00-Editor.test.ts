@@ -1,4 +1,4 @@
-import { Editor } from "../../../src/Editor"
+import { Editor, EditorMode } from "../../../src/Editor"
 import { DefaultConfiguration } from "../../../src/configuration/DefaultConfiguration"
 import { AllOverrideConfiguration } from "../_dataset/configuration.dataset"
 // import { TPoint } from "../../../src/@types/renderer/Point"
@@ -6,7 +6,6 @@ import { AllOverrideConfiguration } from "../_dataset/configuration.dataset"
 import { DefaultPenStyle } from "../../../src/style/DefaultPenStyle"
 import { DefaultTheme } from "../../../src/style/DefaultTheme"
 import { Model } from "../../../src/model/Model"
-import { TExport } from "../../../src/@types/model/Model"
 import { TStroke } from "../../../src/@types/model/Stroke"
 
 
@@ -160,7 +159,7 @@ describe('Editor.ts', () =>
     model.exports = {
       "text/plain": 'tatapouet'
     }
-    editor.behaviors.recognizer.import = jest.fn(() => Promise.resolve(model.exports as TExport))
+    editor.behaviors.recognizer.import = jest.fn(() => Promise.resolve(model))
     editor.events.emitImported = jest.fn()
 
     editor.importBlob(new Blob(), 'text/plain')
@@ -175,7 +174,7 @@ describe('Editor.ts', () =>
     model.exports = {
       "text/plain": 'tatapouet'
     }
-    editor.behaviors.recognizer.import = jest.fn(() => Promise.resolve(model.exports as TExport))
+    editor.behaviors.recognizer.import = jest.fn(() => Promise.resolve(model))
     editor.events.emitImported = jest.fn()
 
     editor.importText("hello", 'text/plain')
@@ -219,26 +218,26 @@ describe('Editor.ts', () =>
     })
   })
 
-  // describe('setMode', () => {
-  //   const wrapperHTML: HTMLElement = document.createElement('div')
-  //   const editor = new Editor(wrapperHTML)
-  //   test('should init mode = pen', () =>
-  //   {
-  //     expect(editor.mode).toBe(EditorMode.Pen)
-  //   })
-  //   test('should setMode = erase', () =>
-  //   {
-  //     editor.setMode(EditorMode.Eraser)
-  //     expect(editor.mode).toBe(EditorMode.Eraser)
-  //     expect(wrapperHTML.classList).toContain('erasing')
-  //   })
-  //   test('should setMode = erase', () =>
-  //   {
-  //     editor.setMode(EditorMode.Touche)
-  //     expect(editor.mode).toBe(EditorMode.Touche)
-  //     expect(wrapperHTML.classList).not.toContain('erasing')
-  //   })
-  // })
+  describe('setMode', () => {
+    const wrapperHTML: HTMLElement = document.createElement('div')
+    const editor = new Editor(wrapperHTML)
+    test('should init mode = Writing', () =>
+    {
+      expect(editor.mode).toBe(EditorMode.Writing)
+    })
+    test('should set mode = erase', () =>
+    {
+      editor.mode = EditorMode.Erasing
+      expect(wrapperHTML.classList).toContain('erasing')
+    })
+    test('should toggle mode', () =>
+    {
+      editor.mode = EditorMode.Erasing
+      expect(wrapperHTML.classList).toContain('erasing')
+      editor.mode = EditorMode.Writing
+      expect(wrapperHTML.classList).not.toContain('erasing')
+    })
+  })
 
   // describe('pointer', () =>
   // {

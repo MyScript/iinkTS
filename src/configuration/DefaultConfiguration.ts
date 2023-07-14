@@ -50,7 +50,7 @@ export const DefaultRecognitionConfiguration: TRecognitionConfiguration = {
     }
   },
   math: {
-    mimeTypes: ["application/x-latex"], // "application/mathml+xml", "application/vnd.myscript.jiix",
+    mimeTypes: ["application/vnd.myscript.jiix"], // "application/mathml+xml", "application/x-latex" ,
     solver: {
       enable: true,
       "fractional-part-digits": 3,

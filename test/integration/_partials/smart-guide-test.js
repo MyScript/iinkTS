@@ -1,4 +1,4 @@
-const { getEditorConfiguration, setEditorConfiguration, write, getExportedDatas, waitForEditorWebSocket, getEditor } = require("../helper")
+const { getEditorConfiguration, setEditorConfiguration, write, getExportedDatas, waitForEditorWebSocket, getEditor, getEditorModelConverts } = require("../helper")
 const { h, hello, helloOneStroke } = require("../strokesDatas")
 
 describe('SmartGuide', () => {
@@ -60,7 +60,7 @@ describe('SmartGuide', () => {
 
     await page.waitForTimeout(1500)
     const editor = await getEditor(page)
-    const jiixExport = JSON.parse(editor.model.exports['application/vnd.myscript.jiix'])
+    const jiixExport = editor.model.exports['application/vnd.myscript.jiix']
     expect(await page.innerText('.prompter-text')).toBe(jiixExport.label)
     expect(await page.locator('.candidates').isVisible()).toBe(false)
 
@@ -84,11 +84,10 @@ describe('SmartGuide', () => {
       getExportedDatas(page),
       write(page, helloOneStroke.strokes)
     ])
+    const emptyConvert = await getEditorModelConverts(page)
+    expect(emptyConvert).toBeUndefined()
     expect(await page.locator('.more-menu.close').isVisible()).toBe(false)
-
-    let pathElements = page.locator('path')
-    expect(await pathElements.count()).toEqual(1)
-    const pathToBeDrawn = await pathElements.first().getAttribute('d')
+    const wrotePath = await page.locator('path').first().getAttribute('d')
 
     await page.click(`.ellipsis`)
     // wait for css animation
@@ -100,10 +99,11 @@ describe('SmartGuide', () => {
       page.click(`.more-menu > button >> text=Convert`)
     ])
 
-    pathElements = page.locator('path')
-    expect(await pathElements.count()).toEqual(1)
-    const pathToBeDrawnConverted = await pathElements.first().getAttribute('d')
-    expect(pathToBeDrawn).not.toEqual(pathToBeDrawnConverted)
+    const convert = await getEditorModelConverts(page)
+    expect(convert).toBeDefined()
+
+    const convertedPath = await page.locator('path').first().getAttribute('d')
+    expect(wrotePath).not.toEqual(convertedPath)
   })
 
   test.skip('should Copy', async () => {

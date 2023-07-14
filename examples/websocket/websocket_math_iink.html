@@ -2,16 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
-
     <title>Websocket Math</title>
-
     <link rel="stylesheet" href="../examples.css" />
     <link
       rel="stylesheet"
@@ -33,11 +28,7 @@
     <div>
       <nav>
         <div class="button-div">
-          <button
-            id="clear"
-            class="nav-btn btn-fab-mini btn-lightBlue"
-            disabled
-          >
+          <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
             <img src="../assets/clear.svg" />
           </button>
           <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
@@ -53,44 +44,44 @@
       <div id="editor" touch-action="none"></div>
     </div>
     <script>
-      const editorElement = document.getElementById('editor');
-      const resultElement = document.getElementById('result');
-      const clearElement = document.getElementById('clear');
-      const undoElement = document.getElementById('undo');
-      const redoElement = document.getElementById('redo');
-      const convertElement = document.getElementById('convert');
+      const editorElement = document.getElementById("editor");
+      const resultElement = document.getElementById("result");
+      const clearElement = document.getElementById("clear");
+      const undoElement = document.getElementById("undo");
+      const redoElement = document.getElementById("redo");
+      const convertElement = document.getElementById("convert");
       let editor;
 
       function cleanLatex(latexExport) {
-        if (typeof latexExport === 'number') {
+        if (typeof latexExport === "number") {
           latexExport = latexExport.toString();
         }
-        if (latexExport.includes('\\\\')) {
-          const steps = '\\begin{align*}' + latexExport + '\\end{align*}';
-          return steps
-            .replace('\\begin{aligned}', '')
-            .replace('\\end{aligned}', '')
-            .replace(new RegExp('(align.{1})', 'g'), 'aligned');
+        if (latexExport.includes("\\\\")) {
+          const steps = "\\begin{align*}" + latexExport + "\\end{align*}";
+          return steps.replace("\\begin{aligned}", "").replace("\\end{aligned}", "").replace(new RegExp("(align.{1})", "g"), "aligned");
         }
-        return latexExport.replace(new RegExp('(align.{1})', 'g'), 'aligned');
+        return latexExport.replace(new RegExp("(align.{1})", "g"), "aligned");
       }
 
       /**
        * We use a function to wait the server configuration to load
        */
       async function loadEditor() {
-        const res = await fetch('../server-configuration.json');
+        const res = await fetch("../server-configuration.json");
         const conf = await res.json();
         const options = {
           configuration: {
             server: {
               ...conf,
-              protocol: 'WEBSOCKET',
+              protocol: "WEBSOCKET"
             },
             recognition: {
-              type: 'MATH'
+              type: "MATH",
+              math: {
+                mimeTypes: ["application/x-latex"]
+              }
             }
-          },
+          }
         };
 
         /**
@@ -100,43 +91,43 @@
          */
         editor = new iink.Editor(editorElement, options);
 
-        editor.events.addEventListener('changed', (event) => {
+        editor.events.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo;
           redoElement.disabled = !event.detail.canRedo;
           clearElement.disabled = !event.detail.canClear;
         });
 
-        editor.events.addEventListener('exported', (evt) => {
+        editor.events.addEventListener("exported", (evt) => {
           const exports = evt.detail;
-          if (exports && exports['application/x-latex']) {
-            katex.render(cleanLatex(exports['application/x-latex']), resultElement);
+          if (exports && exports["application/x-latex"]) {
+            katex.render(cleanLatex(exports["application/x-latex"]), resultElement);
             convertElement.disabled = false;
           } else {
-            resultElement.innerHTML = '';
+            resultElement.innerHTML = "";
             convertElement.disabled = true;
           }
         });
 
-        clearElement.addEventListener('click', async () => {
+        clearElement.addEventListener("click", async () => {
           editor.clear();
         });
 
-        undoElement.addEventListener('click', () => {
+        undoElement.addEventListener("click", () => {
           editor.undo();
         });
 
-        redoElement.addEventListener('click', () => {
+        redoElement.addEventListener("click", () => {
           editor.redo();
         });
 
-        convertElement.addEventListener('click', () => {
+        convertElement.addEventListener("click", () => {
           editor.convert();
         });
 
-        window.addEventListener('resize', () => {
+        window.addEventListener("resize", () => {
           editor.resize();
         });
-      };
+      }
 
       loadEditor();
     </script>

@@ -1,4 +1,4 @@
-const { getExportedDatas, write, getEditor } = require("../helper")
+const { getExportedDatas, write, getEditorModelExportsType } = require("../helper")
 const { h, hello } = require("../strokesDatas")
 
 describe('Nav actions', () => {
@@ -9,19 +9,19 @@ describe('Nav actions', () => {
     ])
     let resultElement = page.locator('#result')
     resultText = await resultElement.textContent()
-    const jiixReceived = JSON.parse(exportedDatas['application/vnd.myscript.jiix'])
+    const jiixReceived = exportedDatas['application/vnd.myscript.jiix']
     expect(resultText).toStrictEqual(jiixReceived.label)
 
-    const promisesResult = await Promise.all([
+    const [clearExport] = await Promise.all([
       getExportedDatas(page),
       page.click('#clear'),
     ])
     const emptyJiix = { "type": "Text", "label": "", "words": [  ], "version": "3", "id": "MainBlock"}
-    const jjixReceived = JSON.parse(promisesResult[0]['application/vnd.myscript.jiix'])
-
+    const jjixReceived = clearExport['application/vnd.myscript.jiix']
     expect(jjixReceived).toEqual(emptyJiix)
-    const editor = await getEditor(page)
-    expect(JSON.parse(editor.model.exports['application/vnd.myscript.jiix'])).toEqual(jjixReceived)
+
+    const modelExportJIIX = await getEditorModelExportsType(page, 'application/vnd.myscript.jiix')
+    expect(modelExportJIIX).toEqual(jjixReceived)
     resultElement = page.locator('#result')
     resultText = await resultElement.textContent()
     expect(resultText).toBe('')

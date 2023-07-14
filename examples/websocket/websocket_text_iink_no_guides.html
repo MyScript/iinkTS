@@ -2,10 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
@@ -29,50 +26,50 @@
       <div id="editor" touch-action="none"></div>
     </div>
     <script>
-      const editorElement = document.getElementById("editor")
-      const undoElement = document.getElementById("undo")
-      const redoElement = document.getElementById("redo")
-      let editor
+      const editorElement = document.getElementById("editor");
+      const undoElement = document.getElementById("undo");
+      const redoElement = document.getElementById("redo");
+      let editor;
 
       async function loadEditor() {
-        const res = await fetch("../server-configuration.json")
-        const conf = await res.json()
+        const res = await fetch("../server-configuration.json");
+        const conf = await res.json();
         const options = {
           configuration: {
             server: {
               ...conf,
-              protocol: "WEBSOCKET",
+              protocol: "WEBSOCKET"
             },
             recognition: {
               type: "TEXT",
               text: {
                 guides: {
-                  enable: false,
-                },
-              },
-            },
-          },
-        }
+                  enable: false
+                }
+              }
+            }
+          }
+        };
 
-        editor = new iink.Editor(editorElement, options)
+        editor = new iink.Editor(editorElement, options);
 
         editor.events.addEventListener("changed", (event) => {
-          undoElement.disabled = !event.detail.canUndo
-          redoElement.disabled = !event.detail.canRedo
-        })
+          undoElement.disabled = !event.detail.canUndo;
+          redoElement.disabled = !event.detail.canRedo;
+        });
 
         undoElement.addEventListener("click", () => {
-          editor.undo()
-        })
+          editor.undo();
+        });
         redoElement.addEventListener("click", () => {
-          editor.redo()
-        })
+          editor.redo();
+        });
 
         window.addEventListener("resize", () => {
-          editor.resize()
-        })
+          editor.resize();
+        });
       }
-      loadEditor()
+      loadEditor();
     </script>
   </body>
 </html>

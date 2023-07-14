@@ -14,14 +14,14 @@ module.exports.testGesture = (offsetTop = 0, offsetLeft = 0) => {
         getExportedDatas(page),
         write(page, [helloStrikeStroke.strokes[0]], offsetTop, offsetLeft),
       ])
-      const firstJiixExport = JSON.parse(firstModelExports['application/vnd.myscript.jiix'])
+      const firstJiixExport = firstModelExports['application/vnd.myscript.jiix']
       expect(firstJiixExport.label).toEqual(helloStrikeStroke.exports['text/plain'][0])
 
       const [secondModelExports] = await Promise.all([
         getExportedDatas(page),
         write(page, [helloStrikeStroke.strokes[1]], offsetTop, offsetLeft),
       ])
-      const secondJiixExport = JSON.parse(secondModelExports['application/vnd.myscript.jiix'])
+      const secondJiixExport = secondModelExports['application/vnd.myscript.jiix']
       expect(secondJiixExport.label).toEqual('')
     })
 
@@ -35,14 +35,14 @@ module.exports.testGesture = (offsetTop = 0, offsetLeft = 0) => {
         getExportedDatas(page),
         write(page, [helloStrikeStroke.strokes[0]], offsetTop, offsetLeft),
       ])
-      const firstJiixExport = JSON.parse(firstModelExports['application/vnd.myscript.jiix'])
+      const firstJiixExport = firstModelExports['application/vnd.myscript.jiix']
       expect(firstJiixExport.label).toEqual(helloStrikeStroke.exports['text/plain'][0])
 
       const [secondModelExports] = await Promise.all([
         getExportedDatas(page),
         write(page, [helloStrikeStroke.strokes[1]], offsetTop, offsetLeft),
       ])
-      const secondJiixExport = JSON.parse(secondModelExports['application/vnd.myscript.jiix'])
+      const secondJiixExport = secondModelExports['application/vnd.myscript.jiix']
       expect(secondJiixExport.label).not.toEqual('')
     })
   })

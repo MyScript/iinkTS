@@ -212,7 +212,7 @@ describe('Model.ts', () =>
       const style = { ...DefaultPenStyle }
       style['-myscript-pen-width'] = 2
       expect(_model.creationTime).toStrictEqual(_model.modificationDate)
-      await delay(100)
+      await delay(101)
       _model.initCurrentStroke(point, 42, 'mouse', style)
       expect(_model.modificationDate - _model.creationTime).toBeGreaterThanOrEqual(100)
       expect(_model.currentStroke).toBeDefined()

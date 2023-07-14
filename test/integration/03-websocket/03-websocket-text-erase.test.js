@@ -33,7 +33,7 @@ describe('Websocket Text', () => {
       write(page, [ponyErase.strokes[0]]),
     ])
     const ponyJiixExpected = ponyErase.exports[0]['application/vnd.myscript.jiix']
-    const ponyJiixReceived = JSON.parse(ponyExports['application/vnd.myscript.jiix'])
+    const ponyJiixReceived = ponyExports['application/vnd.myscript.jiix']
     expect(ponyJiixReceived.label).toEqual(ponyJiixExpected.label)
 
     await page.click("#eraser")
@@ -43,7 +43,7 @@ describe('Websocket Text', () => {
       write(page, [ponyErase.strokes[1]]),
     ])
     const ponyEraseJiixExpected = ponyErase.exports[1]['application/vnd.myscript.jiix']
-    const ponyEraseJiixReceived = JSON.parse(ponyEraseExports['application/vnd.myscript.jiix'])
+    const ponyEraseJiixReceived = ponyEraseExports['application/vnd.myscript.jiix']
     expect(ponyEraseJiixReceived.label).toEqual(ponyEraseJiixExpected.label)
   })
 
@@ -60,7 +60,7 @@ describe('Websocket Text', () => {
       write(page, [ponyErasePrecisely.strokes[0]]),
     ])
     const ponyJiixExpected = ponyErasePrecisely.exports[0]['application/vnd.myscript.jiix']
-    const ponyJiixReceived = JSON.parse(ponyExports['application/vnd.myscript.jiix'])
+    const ponyJiixReceived = ponyExports['application/vnd.myscript.jiix']
     expect(ponyJiixReceived.label).toEqual(ponyJiixExpected.label)
 
     await page.click("#eraser")
@@ -70,7 +70,7 @@ describe('Websocket Text', () => {
       write(page, [ponyErasePrecisely.strokes[1]]),
     ])
     const ponyEraseJiixExpected = ponyErasePrecisely.exports[1]['application/vnd.myscript.jiix']
-    const ponyEraseJiixReceived = JSON.parse(ponyEraseExports['application/vnd.myscript.jiix'])
+    const ponyEraseJiixReceived = ponyEraseExports['application/vnd.myscript.jiix']
     expect(ponyEraseJiixReceived.label).toEqual(ponyEraseJiixExpected.label)
   })
 
