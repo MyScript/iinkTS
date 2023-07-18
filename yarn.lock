@@ -2010,10 +2010,10 @@ eslint-plugin-jest@^27.1.3:
   dependencies:
     "@typescript-eslint/utils" "^5.10.0"
 
-eslint-plugin-playwright@^0.11.2:
-  version "0.11.2"
-  resolved "https://registry.yarnpkg.com/eslint-plugin-playwright/-/eslint-plugin-playwright-0.11.2.tgz#876057d4ab19d00b44bf004e27d5ace2c8bffada"
-  integrity sha512-uRLRLk7uTzc8NE6t4wBU8dijQwHvC66R/h7xwdM779jsJjMUtSmeaB8ayRkkpfwi+UU5BEfwvDANwmE+ccMVDw==
+eslint-plugin-playwright@^0.15.3:
+  version "0.15.3"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-playwright/-/eslint-plugin-playwright-0.15.3.tgz#9fd8753688351bcaf41797eb6a7df8807fd5eb1b"
+  integrity sha512-LQMW5y0DLK5Fnpya7JR1oAYL2/7Y9wDiYw6VZqlKqcRGSgjbVKNqxraphk7ra1U3Bb5EK444xMgUlQPbMg2M1g==
 
 eslint-scope@^5.1.1:
   version "5.1.1"
@@ -3251,10 +3251,10 @@ jest-mock@^29.5.0:
     "@types/node" "*"
     jest-util "^29.5.0"
 
-jest-playwright-preset@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/jest-playwright-preset/-/jest-playwright-preset-2.0.0.tgz#624edcbdd31d5242a3420f9eda01781c4d657f70"
-  integrity sha512-pV5ruTJJMen3lwshUL4dlSqLlP8z4q9MXqWJkmy+sB6HYfzXoqBHzhl+5hslznhnSVTe4Dwu+reiiwcUJpYUbw==
+jest-playwright-preset@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/jest-playwright-preset/-/jest-playwright-preset-3.0.1.tgz#91c5c2bf4c87ba879d8d9a7ef914ff4904b05c3d"
+  integrity sha512-tHqv+JUmheNMZpmH7XyT5CAMHr3ExTUIY9baMPzcJiLYPvCaPTwig9YvuGGnXV2n+Epmch0Ld4429g6py0nq0w==
   dependencies:
     expect-playwright "^0.8.0"
     jest-process-manager "^0.3.1"
@@ -4243,17 +4243,22 @@ pkg-dir@^4.1.0, pkg-dir@^4.2.0:
   dependencies:
     find-up "^4.0.0"
 
-playwright-core@1.35.1, playwright-core@>=1.2.0:
+playwright-core@1.36.1:
+  version "1.36.1"
+  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.36.1.tgz#f5f275d70548768ca892583519c89b237a381c77"
+  integrity sha512-7+tmPuMcEW4xeCL9cp9KxmYpQYHKkyjwoXRnoeTowaeNat8PoBMk/HwCYhqkH2fRkshfKEOiVus/IhID2Pg8kg==
+
+playwright-core@>=1.2.0:
   version "1.35.1"
   resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.35.1.tgz#52c1e6ffaa6a8c29de1a5bdf8cce0ce290ffb81d"
   integrity sha512-pNXb6CQ7OqmGDRspEjlxE49w+4YtR6a3X6mT1hZXeJHWmsEz7SunmvZeiG/+y1yyMZdHnnn73WKYdtV1er0Xyg==
 
-playwright@^1.35.1:
-  version "1.35.1"
-  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.35.1.tgz#f991d0c76ae517d4a0023d9428b09d19d5e87128"
-  integrity sha512-NbwBeGJLu5m7VGM0+xtlmLAH9VUfWwYOhUi/lSEDyGg46r1CA9RWlvoc5yywxR9AzQb0mOCm7bWtOXV7/w43ZA==
+playwright@^1.36.1:
+  version "1.36.1"
+  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.36.1.tgz#bd01541048b4ea54bcf1989e61e0129f34d2df71"
+  integrity sha512-2ZqHpD0U0COKR8bqR3W5IkyIAAM0mT9FgGJB9xWCI1qAUkqLxJskA1ueeQOTH2Qfz3+oxdwwf2EzdOX+RkZmmQ==
   dependencies:
-    playwright-core "1.35.1"
+    playwright-core "1.36.1"
 
 postcss-calc@^8.2.3:
   version "8.2.4"
