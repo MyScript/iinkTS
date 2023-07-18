@@ -2,7 +2,7 @@ const { waitForEditorWebSocket, write, getExportedDatas } = require('../helper')
 const { testGesture } = require('../_partials/gesture-test')
 const { h } = require('../strokesDatas')
 
-describe('Websocket Text', () => {
+describe('Websocket Text Pointer Events', () => {
   beforeAll(async () => {
     await page.goto('/examples/websocket/websocket_text_pointer_events.html')
   })
@@ -39,5 +39,6 @@ describe('Websocket Text', () => {
   })
 
   require('../_partials/smart-guide-test')
+
   testGesture(-100)
 })
