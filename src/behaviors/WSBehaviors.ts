@@ -131,11 +131,13 @@ export class WSBehaviors implements IBehaviors
 
   async convert(model: IModel, conversionState?: TConverstionState): Promise<IModel | never>
   {
+    this.context.stack.push(model.getClone())
     return this.recognizer.convert(model, conversionState)
   }
 
   async import(model: IModel, data: Blob, mimeType?: string): Promise<IModel | never>
   {
+    this.context.stack.push(model.getClone())
     return this.recognizer.import(model, data, mimeType)
   }
 

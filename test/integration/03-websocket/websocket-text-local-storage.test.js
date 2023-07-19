@@ -26,19 +26,12 @@ describe('Websocket Text', () => {
     await page.waitForTimeout(400)
     const jiixExpected = helloOneStroke.exports['text/plain'][0]
     const jiixReceived = exports['text/plain']
-    await Promise.all([
-      waitForEditorWebSocket(page),
-      page.locator("#clearStorage").click(),
-    ])
+    await page.locator("#clearStorage").click()
     expect(jiixReceived).toStrictEqual(jiixExpected)
   })
 
   test('should get hello in localstorage', async () => {
-      await Promise.all([
-        waitForEditorWebSocket(page),
-        page.locator("#clearStorage").click(),
-      ])
-      await page.waitForTimeout(1000)
+    await page.locator("#clearStorage").click()
       await Promise.all([
         getExportedDatas(page),
         write(page, helloOneStroke.strokes)
