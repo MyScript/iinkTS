@@ -368,4 +368,130 @@ module.exports.sum = {
   converts: {
     LATEX: ['3+1=4']
   }
+
+}
+const buenosStrokes = require("./strokes/Interact/buenos.json")
+module.exports.buenos = {
+  type: "TEXT",
+  strokes: buenosStrokes,
+  exports: {
+    "text/plain": ["b", "bu", "bue", "buen", "bueno", "buenos"],
+    "application/vnd.myscript.jiix": {
+      type: "Text",
+      label: "buenos",
+      words: [
+        {
+          label: "buenos",
+          candidates: ["buenos"],
+        },
+      ],
+      version: "3",
+      id: "MainBlock",
+    },
+  },
+}
+
+const airesStrokes = require("./strokes/Interact/aires.json")
+module.exports.aires = {
+  type: "TEXT",
+  strokes: airesStrokes,
+  exports: {
+    "text/plain": ["a", "ai", "air", "aire", "aires"],
+    "application/vnd.myscript.jiix": {
+      type: "Text",
+      label: "aires",
+      words: [
+        {
+          label: "aires",
+          candidates: ["aires"],
+        },
+      ],
+      version: "3",
+      id: "MainBlock",
+    },
+  },
+}
+
+const parisStrokes = require("./strokes/Interact/paris.json")
+module.exports.paris = {
+  type: "TEXT",
+  strokes: parisStrokes,
+  exports: {
+    "text/plain": ["p", "pa", "par", "pari", "paris"],
+    "application/vnd.myscript.jiix": {
+      type: "Text",
+      label: "paris",
+      words: [
+        {
+          label: "paris",
+          candidates: ["paris"],
+        },
+      ],
+      version: "3",
+      id: "MainBlock",
+    },
+  },
+}
+
+const tokyoStrokes = require("./strokes/Interact/tokyo.json")
+module.exports.tokyo = {
+  type: "TEXT",
+  strokes: tokyoStrokes,
+  exports: {
+    "text/plain": ["t", "to", "tok", "toky", "tokyo"],
+    "application/vnd.myscript.jiix": {
+      type: "Text",
+      label: "tokyo",
+      words: [
+        {
+          label: "tokyo",
+          candidates: ["tokyo"],
+        },
+      ],
+      version: "3",
+      id: "MainBlock",
+    },
+  },
+}
+
+const madridStrokes = require("./strokes/Interact/madrid.json")
+module.exports.madrid = {
+  type: "TEXT",
+  strokes: madridStrokes,
+  exports: {
+    "text/plain": ["m", "ma", "mad", "madr", "madri", "madrid"],
+    "application/vnd.myscript.jiix": {
+      type: "Text",
+      label: "madrid",
+      words: [
+        {
+          label: "madrid",
+          candidates: ["madrid"],
+        },
+      ],
+      version: "3",
+      id: "MainBlock",
+    },
+  },
+}
+
+const romeStrokes = require("./strokes/Interact/rome.json")
+module.exports.rome = {
+  type: "TEXT",
+  strokes: romeStrokes,
+  exports: {
+    "text/plain": ["r", "ro", "rom", "rome"],
+    "application/vnd.myscript.jiix": {
+      type: "Text",
+      label: "rome",
+      words: [
+        {
+          label: "rome",
+          candidates: ["rome"],
+        },
+      ],
+      version: "3",
+      id: "MainBlock",
+    },
+  },
 }
