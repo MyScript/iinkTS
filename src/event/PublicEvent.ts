@@ -1,4 +1,4 @@
-import { IModel, TExport, TJIIXExport } from "../@types/model/Model"
+import { IModel, TExport } from "../@types/model/Model"
 import { TUndoRedoContext } from "../@types/undo-redo/UndoRedoContext"
 import { EventType } from "../Constants"
 
@@ -66,8 +66,8 @@ export class PublicEvent extends EventTarget
     this.#emit(EventType.CONVERTED, exports)
   }
 
-  emitImported(jiix: TJIIXExport): void
+  emitImported(exports: TExport): void
   {
-    this.#emit(EventType.IMPORTED, jiix)
+    this.#emit(EventType.IMPORTED, exports)
   }
 }

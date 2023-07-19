@@ -297,6 +297,25 @@ export class Editor
     }, notif.timeout || 2500)
   }
 
+  #showStrokesIfDebug(): void
+  {
+    if (this.debug) {
+      let panel = document.getElementById("stroke-panel")
+      const text = JSON.stringify(this.model.rawStrokes.map((s: TStroke) => ({ pointerType: s.pointerType, pointerId: s.pointerId, x: s.x, y: s.y, t: s.t, p: s.p, })))
+      if (!panel) {
+        panel = document.createElement("div")
+        panel.id = "stroke-panel"
+        panel.addEventListener("click", () =>
+        {
+          navigator.clipboard.writeText(panel?.innerText as string)
+          this.#showNotif({ message: "strokes copied to clipboard!", timeout: 1500 })
+        })
+        this.wrapperHTML.appendChild(panel)
+      }
+      panel.innerText = text
+    }
+  }
+
   #addListeners(): void
   {
     InternalEvent.getInstance().addConvertListener(this.convert.bind(this))
@@ -328,7 +347,7 @@ export class Editor
 
   #onImportJIIX(jiix: TJIIXExport): void
   {
-    this.importBlob(new Blob([JSON.stringify(jiix)], { type: Exports.JIIX }), Exports.JIIX)
+    this.import(new Blob([JSON.stringify(jiix)], { type: Exports.JIIX }), Exports.JIIX)
   }
 
   onPointerDown(evt: PointerEvent, point: TPoint): void
@@ -420,25 +439,6 @@ export class Editor
     this.#showStrokesIfDebug()
   }
 
-  #showStrokesIfDebug(): void
-  {
-    if (this.debug) {
-      let panel = document.getElementById("stroke-panel")
-      const text = JSON.stringify(this.model.rawStrokes.map((s: TStroke) => ({ pointerType: s.pointerType, pointerId: s.pointerId, x: s.x, y: s.y, t: s.t, p: s.p, })))
-      if (!panel) {
-        panel = document.createElement("div")
-        panel.id = "stroke-panel"
-        panel.addEventListener("click", () =>
-        {
-          navigator.clipboard.writeText(panel?.innerText as string)
-          this.#showNotif({ message: "strokes copied to clipboard!", timeout: 1500 })
-        })
-        this.wrapperHTML.appendChild(panel)
-      }
-      panel.innerText = text
-    }
-  }
-
   async undo(): Promise<IModel>
   {
     const model = await this.behaviors.undo(this.model)
@@ -461,17 +461,6 @@ export class Editor
     Object.assign(this.model, model)
     this.events.emitCleared(this.model)
     this.#showStrokesIfDebug()
-    return this.model
-  }
-
-  async importPointEvents(strokes: TStroke[]): Promise<IModel>
-  {
-    if (this.behaviors.importPointEvents) {
-      this.model = await this.behaviors.importPointEvents(this.model, strokes)
-    }
-    else {
-      throw new Error("Import points not implemented")
-    }
     return this.model
   }
 
@@ -502,27 +491,37 @@ export class Editor
     return this.model
   }
 
-  async importBlob(data: Blob, mimeType?: string): Promise<IModel | never>
+  async import(data: Blob | string | TJIIXExport, mimeType?: string): Promise<IModel | never>
   {
     if (this.behaviors.import) {
-      const model = await this.behaviors.import(this.model, data, mimeType)
+      let blobToImport: Blob
+      if (data instanceof Blob) {
+        blobToImport = data
+      }
+      else if (typeof data === "string") {
+        blobToImport = new Blob([data])
+      }
+      else {
+        blobToImport = new Blob([JSON.stringify(data)])
+      }
+      const model = await this.behaviors.import(this.model, blobToImport, mimeType)
       Object.assign(this.model, model)
-      this.events.emitImported(this.model.exports?.[mimeType || "application/vnd.myscript.jiix"] as TJIIXExport)
+      this.events.emitImported(this.model.exports as TExport)
       return this.model
     }
     return Promise.reject("Import impossible, behaviors has no import function")
   }
 
-  async importText(data: string, mimeType?: string): Promise<IModel | never>
+  async importPointEvents(strokes: TStroke[]): Promise<IModel>
   {
-    if (this.behaviors.import) {
-      const dataToImport = new Blob([data])
-      const model = await this.behaviors.import(this.model, dataToImport, mimeType)
-      Object.assign(this.model, model)
-      this.events.emitImported(this.model.exports?.["application/vnd.myscript.jiix"] as TJIIXExport)
+    if (this.behaviors.importPointEvents) {
+      this.model = await this.behaviors.importPointEvents(this.model, strokes)
+      this.events.emitImported(this.model.exports as TExport)
       return this.model
     }
-    return Promise.reject("Import impossible, behaviors has no import function")
+    else {
+      throw new Error("Import points not implemented")
+    }
   }
 
   async reDraw(rawStrokes: TStroke[], strokeGroups: TStrokeGroup[])

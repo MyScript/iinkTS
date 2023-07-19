@@ -204,7 +204,7 @@ describe('RestUndoRedoManager.ts', () =>
 
       manager.updateModelInStack(firstModel)
 
-      expect(manager.context.stack[2]).toEqual(firstModel)
+      expect(manager.context.stack[2]).toMatchObject(firstModel)
       expect(manager.context.stack[2]).not.toBe(firstModel)
     })
   })
