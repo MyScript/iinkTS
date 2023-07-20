@@ -1,6 +1,7 @@
 node_modules
 coverage
-.vscode
+.vscode/*
+!.vscode/launch.json
 
 docker/examples/delivery
 test/integration/screenshots
