@@ -100,6 +100,22 @@ module.exports.getExportedDatas = async (page) => {
   return page.evaluate(exported)
 }
 
+const imported = `(async () => {
+  return new Promise((resolve, reject) => {
+    editor.events.addEventListener('imported', (e) => {
+      resolve(e.detail);
+    });
+  });
+})()`
+
+/**
+ * @param {Page} page - Playwright Page
+ * @returns Promise<Exports>
+ */
+module.exports.getImportedDatas = async (page) => {
+  return page.evaluate(imported)
+}
+
 const converted = `(async () => {
   return new Promise((resolve, reject) => {
     editor.events.addEventListener('converted', (e) => {
@@ -145,4 +161,39 @@ module.exports.waitForEditorWebSocket = async (page) => {
     page.waitForSelector('svg[data-layer="MODEL"]'),
   ])
   return page.evaluate('editor.initializationPromise')
+}
+
+function findValuesByKey (obj, key, list = []) {
+  if (!obj) return list
+  if (obj instanceof Array) {
+    Object.keys(obj).forEach((k) => {
+      list = list.concat(findValuesByKey(obj[k], key, []))
+    })
+    return list
+  }
+  if (obj[key]) {
+    if (obj[key] instanceof Array) {
+      Object.keys(obj[key]).forEach((l) => {
+        list.push(obj[key][l])
+      })
+    } else {
+      list.push(obj[key])
+    }
+  }
+
+  if (typeof obj === 'object') {
+    const children = Object.keys(obj)
+    if (children.length > 0) {
+      children.forEach((child) => {
+        list = list.concat(findValuesByKey(obj[child], key, []))
+      })
+    }
+  }
+  return list
+}
+
+module.exports.haveSameLabels = (jiix1, jiix2) => {
+  const labels1 = findValuesByKey(jiix1, 'label')
+  const labels2 = findValuesByKey(jiix2, 'label')
+  return JSON.stringify(labels1) === JSON.stringify(labels2)
 }

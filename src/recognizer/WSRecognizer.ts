@@ -437,6 +437,7 @@ export class WSRecognizer extends AbstractRecognizer
       strokes: strokes.map((s: TStroke) =>
       {
         return {
+          id: s.id,
           pointerType: s.pointerType,
           pointerId: s.pointerId,
           x: s.x,
@@ -605,6 +606,7 @@ export class WSRecognizer extends AbstractRecognizer
     const myExportConverted: TExport = await this.#convertDeferred.promise
     localModel.updatePositionReceived()
     localModel.converts = myExportConverted
+    localModel.exports = myExportConverted
     return localModel
   }
 

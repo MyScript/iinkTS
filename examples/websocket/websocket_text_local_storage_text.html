@@ -98,7 +98,7 @@
         let editorTextContent
         if (localStorage.editorTextContent) {
           editorTextContent = localStorage.getItem("editorTextContent")
-          editor.importText(editorTextContent, 'text/plain')
+          editor.import(editorTextContent, 'text/plain')
         }
       }
       loadEditor()

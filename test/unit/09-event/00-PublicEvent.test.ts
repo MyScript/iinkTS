@@ -119,11 +119,14 @@ describe('PublicEvent.ts', () =>
       "version": "3",
       "id": "MainBlock"
     }
-    gEvent.emitImported(jiix)
+    const exports: TExport = {
+      "application/vnd.myscript.jiix": jiix
+    }
+    gEvent.emitImported(exports)
     expect(testFunction).toBeCalledTimes(1)
     expect(testFunction).toBeCalledWith(
       expect.objectContaining({
-        detail: jiix
+        detail: exports
       }),
     )
   })
