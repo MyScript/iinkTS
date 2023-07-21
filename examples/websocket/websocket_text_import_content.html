@@ -60,12 +60,14 @@
         undoElement.addEventListener("click", () => {
           editor.undo();
         });
+
         redoElement.addEventListener("click", () => {
           editor.redo();
         });
+
         importContentElement.addEventListener("click", () => {
           const value = importContentField.value.replace("\\n", "\n");
-          editor.importText(value, importContentField.dataset.type);
+          editor.import(value, importContentField.dataset.type);
         });
 
         window.addEventListener("resize", () => {

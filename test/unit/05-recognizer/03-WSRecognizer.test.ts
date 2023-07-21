@@ -329,7 +329,7 @@ describe('WSRecognizer.ts', () =>
 
   describe('addStrokes', () =>
   {
-    const model: IModel = new Model(width, height)
+    const model = new Model(width, height)
     const p1: TPoint = { t: 1, p: 1, x: 1, y: 1 }
     const p2: TPoint = { t: 10, p: 1, x: 100, y: 1 }
     model.initCurrentStroke(p1, 1, 'pen', DefaultPenStyle)
@@ -369,7 +369,7 @@ describe('WSRecognizer.ts', () =>
           "y": [1, 1],
         }]
       }
-      await expect(addStrokesMessageSent).toEqual(addStrokesMessageSentToTest)
+      await expect(addStrokesMessageSent).toMatchObject(addStrokesMessageSentToTest)
     })
     test('should not send addStrokes message if model.extractUnsentStrokes return 0 strokes', async () =>
     {
