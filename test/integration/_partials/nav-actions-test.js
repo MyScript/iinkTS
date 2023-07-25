@@ -39,7 +39,6 @@ describe('Nav actions', () => {
     let resultElement = page.locator('#result')
     resultText = await resultElement.textContent()
     expect(resultText).toStrictEqual(hello.exports['text/plain'].at(-1))
-
     let raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
     expect(raw.length).toStrictEqual(hello.strokes.length)
 
@@ -47,7 +46,6 @@ describe('Nav actions', () => {
     resultElement = page.locator('#result')
     resultText = await resultElement.textContent()
     expect(resultText).toStrictEqual(hello.exports['text/plain'].at(-2))
-
     raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
     expect(raw.length).toStrictEqual(hello.strokes.length - 1)
 
@@ -55,7 +53,6 @@ describe('Nav actions', () => {
     resultElement = page.locator('#result')
     resultText = await resultElement.textContent()
     expect(resultText).toStrictEqual(hello.exports['text/plain'].at(-3))
-
     raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
     expect(raw.length).toStrictEqual(hello.strokes.length - 2)
 
@@ -63,7 +60,6 @@ describe('Nav actions', () => {
     resultElement = page.locator('#result')
     resultText = await resultElement.textContent()
     expect(resultText).toStrictEqual(hello.exports['text/plain'].at(-2))
-
     raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
     expect(raw.length).toStrictEqual(hello.strokes.length - 1)
   })

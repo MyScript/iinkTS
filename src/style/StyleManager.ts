@@ -1,36 +1,55 @@
 import { TPenStyle } from "../@types/style/PenStyle"
 import { TTheme } from "../@types/style/Theme"
-import { DefaultPenStyle } from "./DefaultPenStyle"
 
+import { DefaultPenStyle } from "./DefaultPenStyle"
 import { DefaultTheme } from "./DefaultTheme"
 
 export class StyleManager
 {
   #penStyle!: TPenStyle
   #theme!: TTheme
-  penStyleClasses: string
-
-  get penStyle(): TPenStyle {
-    return this.#penStyle
-  }
-  get theme(): TTheme {
-    return this.#theme
-  }
+  #penStyleClasses!: string
+  #currentPenStyle!: TPenStyle
 
   constructor(penStyle?: TPenStyle, theme?: TTheme)
   {
-    this.penStyleClasses = ""
-    this.overrideDefaultPenStyle(penStyle)
-    this.overrideDefaultTheme(theme)
+    this.setTheme(theme)
+    this.setPenStyleClasses()
+    this.setPenStyle(penStyle)
   }
 
-  overrideDefaultPenStyle(penStyle?: TPenStyle): void
+  get currentPenStyle(): TPenStyle
   {
-    this.#penStyle = Object.assign({}, DefaultPenStyle, penStyle || {}) as TPenStyle
+    return this.#currentPenStyle || this.#penStyle
   }
 
-  overrideDefaultTheme(theme?: TTheme): void
+  get penStyle(): TPenStyle
   {
-    this.#theme = Object.assign({}, DefaultTheme, theme || {}) as TTheme
+    return this.#penStyle
   }
+  setPenStyle(p?: TPenStyle)
+  {
+    this.#penStyle = Object.assign({}, DefaultPenStyle, p || {}) as TPenStyle
+    this.#currentPenStyle = p || (this.theme[`.${ this.#penStyleClasses }`]) as TPenStyle
+  }
+
+  get theme(): TTheme
+  {
+    return this.#theme
+  }
+  setTheme(t?: TTheme)
+  {
+    this.#theme = Object.assign({}, DefaultTheme, t || {}) as TTheme
+  }
+
+  get penStyleClasses(): string
+  {
+    return this.#penStyleClasses
+  }
+  setPenStyleClasses(psc = "")
+  {
+    this.#penStyleClasses = psc
+    this.#currentPenStyle = (this.theme[`.${ this.#penStyleClasses }`]) as TPenStyle
+  }
+
 }

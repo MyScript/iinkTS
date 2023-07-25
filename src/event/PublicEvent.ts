@@ -51,9 +51,9 @@ export class PublicEvent extends EventTarget
     })
   }
 
-  emitIdle(model: IModel): void
+  emitIdle(idle: boolean): void
   {
-    this.#emit(EventType.IDLE, model)
+    this.#emit(EventType.IDLE, idle)
   }
 
   emitCleared(model?: IModel): void

@@ -2,7 +2,7 @@ import { TRenderingConfiguration } from '../../../src/@types/configuration/Rende
 import { CanvasRenderer } from '../../../src/renderer/canvas/CanvasRenderer'
 import { CanvasQuadraticStroker } from '../../../src/renderer/canvas/CanvasQuadraticStroker'
 
-describe('QuadraticUtils.ts', () =>
+describe('CanvasRenderer.ts', () =>
 {
   const height = 10, width = 10
   const wrapperHTML: HTMLElement = document.createElement('div')
@@ -21,6 +21,10 @@ describe('QuadraticUtils.ts', () =>
         enable: false,
         duration: 100
       }
+    },
+    guides: {
+      enable: true,
+      gap: 50
     }
   }
   const renderer = new CanvasRenderer(conf)

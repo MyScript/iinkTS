@@ -45,6 +45,10 @@
       const eraserElement = document.getElementById("eraser");
       const penElement = document.getElementById("pen");
       const erasePreciselyElement = document.getElementById("erase-precisely");
+
+      /**
+       * we expose the editor for use in the integration test
+       */
       let editor;
 
       /**
@@ -69,13 +73,16 @@
             }
           }
         };
-
         /**
          * Instanciate editor
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
         editor = new iink.Editor(editorElement, options);
+        /**
+         *  async initialize editor behaviors
+         */
+        await editor.initialize();
 
         editorElement.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo;
@@ -108,6 +115,11 @@
           const configuration = { ...editor.configuration };
           configuration.recognition.text.eraser["erase-precisely"] = e.target.checked;
           editor.configuration = configuration;
+          editor.mode = "writing";
+          eraserElement.disabled = false;
+          eraserElement.classList.remove("active");
+          penElement.disabled = true;
+          penElement.classList.add("active");
         });
 
         window.addEventListener("resize", () => {

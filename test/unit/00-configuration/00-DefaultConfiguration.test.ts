@@ -71,7 +71,7 @@ describe("DefaultConfiguration.ts", () =>
     {
       expect(DefaultConfiguration.recognition["raw-content"]).not.toHaveProperty("mimeTypes")
       expect(DefaultConfiguration.recognition["raw-content"].recognition?.text).toStrictEqual(true)
-      expect(DefaultConfiguration.recognition["raw-content"].recognition?.shape).toStrictEqual(false)
+      expect(DefaultConfiguration.recognition["raw-content"].recognition?.shape).toStrictEqual(true)
       expect(DefaultConfiguration.recognition["raw-content"].eraser?.["erase-precisely"]).toStrictEqual(false)
     })
   })

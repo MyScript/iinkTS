@@ -9,9 +9,16 @@ export const ConfigurationTextWebsocket: TConfigurationClient = {
     hmacKey: 'df2ba19a-7703-4ab4-9164-00dd33357745'
   },
   recognition: {
+    lang: "en_US",
     type: 'TEXT',
     text: {
-      mimeTypes: ['text/plain', 'application/vnd.myscript.jiix']
+      mimeTypes: ['text/plain', 'application/vnd.myscript.jiix'],
+      margin: {
+        bottom: 12,
+        left: 12,
+        right: 12,
+        top: 12
+      },
     }
   }
 }
@@ -27,7 +34,13 @@ export const ConfigurationTextRest: TConfigurationClient = {
   recognition: {
     type: 'TEXT',
     text: {
-      mimeTypes: ['text/plain', 'application/vnd.myscript.jiix']
+      mimeTypes: ['text/plain', 'application/vnd.myscript.jiix'],
+      margin: {
+        bottom: 12,
+        left: 12,
+        right: 12,
+        top: 12
+      },
     }
   }
 }
@@ -176,6 +189,10 @@ export const AllOverrideConfiguration: TConfigurationClient = {
         enable: true,
         duration: 42
       }
+    },
+    guides: {
+      enable: false,
+      gap: 100
     }
   },
   triggers: {

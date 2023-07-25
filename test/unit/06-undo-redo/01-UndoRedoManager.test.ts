@@ -1,27 +1,27 @@
 import { IModel } from '../../../src/@types/model/Model'
-import { TPoint } from '../../../src/@types/renderer/Point'
+import { TPointer } from '../../../src/@types/geometry'
 import { TUndoRedoConfiguration } from '../../../src/@types/configuration/UndoRedoConfiguration'
 
 import { Model } from '../../../src/model/Model'
-import { RestUndoRedoManager } from '../../../src/undo-redo/RestUndoRedoManager'
+import { UndoRedoManager } from '../../../src/undo-redo/UndoRedoManager'
 import { UndoRedoContext } from '../../../src/undo-redo/UndoRedoContext'
 import { DefaultConfiguration } from "../../../src/configuration/DefaultConfiguration"
 import { DefaultPenStyle } from '../../../src/style/DefaultPenStyle'
 
 
-describe('RestUndoRedoManager.ts', () =>
+describe('UndoRedoManager.ts', () =>
 {
   const width = 100, height = 100
-  test('should instanciate RestUndoRedoManager', () =>
+  test('should instanciate UndoRedoManager', () =>
   {
-    const manager = new RestUndoRedoManager(DefaultConfiguration['undo-redo'], new Model(width, height))
+    const manager = new UndoRedoManager(DefaultConfiguration['undo-redo'], new Model(width, height))
     expect(manager).toBeDefined()
   })
 
   test('should initialize UndoRedoContext', () =>
   {
     const model = new Model(width, height)
-    const manager = new RestUndoRedoManager(DefaultConfiguration['undo-redo'], model)
+    const manager = new UndoRedoManager(DefaultConfiguration['undo-redo'], model)
     const context = new UndoRedoContext(model)
     expect(manager.context).toStrictEqual(context)
   })
@@ -30,15 +30,15 @@ describe('RestUndoRedoManager.ts', () =>
   {
     const configuration: TUndoRedoConfiguration = { maxStackSize: 5 }
     const model: IModel = new Model(27, 5)
-    const manager = new RestUndoRedoManager(configuration, model)
+    const manager = new UndoRedoManager(configuration, model)
 
     test('should add model to stack', () =>
     {
-      const p1: TPoint = { t: 1, p: 0.5, x: 1, y: 1 }
+      const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       model.initCurrentStroke(p1, 666, 'pen', DefaultPenStyle)
 
-      const p2: TPoint = { t: 15, p: 0.5, x: 10, y: 1 }
-      model.endCurrentStroke(p2, DefaultPenStyle)
+      const p2: TPointer = { t: 15, p: 0.5, x: 10, y: 1 }
+      model.endCurrentStroke(p2)
 
       manager.addModelToStack(model)
       expect(manager.context.stackIndex).toStrictEqual(1)
@@ -55,11 +55,11 @@ describe('RestUndoRedoManager.ts', () =>
     {
       const NB_STROKE = 4
       for (let i = 0; i < NB_STROKE; i++) {
-        const p1: TPoint = { t: i * 5, p: 1, x: i * 10, y: 10 }
+        const p1: TPointer = { t: i * 5, p: 1, x: i * 10, y: 10 }
         model.initCurrentStroke(p1, 666, 'pen', DefaultPenStyle)
 
-        const p2: TPoint = { t: i * 10, p: 1, x: i * 10, y: 10 }
-        model.endCurrentStroke(p2, DefaultPenStyle)
+        const p2: TPointer = { t: i * 10, p: 1, x: i * 10, y: 10 }
+        model.endCurrentStroke(p2)
 
         manager.addModelToStack(model)
       }
@@ -68,11 +68,11 @@ describe('RestUndoRedoManager.ts', () =>
 
       manager.context.stackIndex = 0
 
-      const p1: TPoint = { t: 27, p: 0.5, x: 1989, y: 2022 }
+      const p1: TPointer = { t: 27, p: 0.5, x: 1989, y: 2022 }
       model.initCurrentStroke(p1, 666, 'pen', DefaultPenStyle)
 
-      const p2: TPoint = { t: 75, p: 1, x: 200, y: 10 }
-      model.endCurrentStroke(p2, DefaultPenStyle)
+      const p2: TPointer = { t: 75, p: 1, x: 200, y: 10 }
+      model.endCurrentStroke(p2)
 
       manager.addModelToStack(model)
 
@@ -87,11 +87,11 @@ describe('RestUndoRedoManager.ts', () =>
     {
       const NB_STROKE = 10
       for (let i = 0; i < NB_STROKE; i++) {
-        const p1: TPoint = { t: i * 42, p: 0.5, x: i / 2, y: i * 20 }
+        const p1: TPointer = { t: i * 42, p: 0.5, x: i / 2, y: i * 20 }
         model.initCurrentStroke(p1, 666, 'pen', DefaultPenStyle)
 
-        const p2: TPoint = { t: i * 10, p: 1, x: i * 10, y: 10 }
-        model.endCurrentStroke(p2, DefaultPenStyle)
+        const p2: TPointer = { t: i * 10, p: 1, x: i * 10, y: 10 }
+        model.endCurrentStroke(p2)
 
         manager.addModelToStack(model)
       }
@@ -111,14 +111,14 @@ describe('RestUndoRedoManager.ts', () =>
   describe('undo', () =>
   {
     const model: IModel = new Model(27, 5)
-    const manager = new RestUndoRedoManager(DefaultConfiguration['undo-redo'], model)
+    const manager = new UndoRedoManager(DefaultConfiguration['undo-redo'], model)
     test('should get the previous model', () =>
     {
-      const p1: TPoint = { t: 1, p: 0.5, x: 1, y: 1 }
+      const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       model.initCurrentStroke(p1, 666, 'pen', DefaultPenStyle)
 
-      const p2: TPoint = { t: 15, p: 0.5, x: 10, y: 1 }
-      model.endCurrentStroke(p2, DefaultPenStyle)
+      const p2: TPointer = { t: 15, p: 0.5, x: 10, y: 1 }
+      model.endCurrentStroke(p2)
 
       manager.addModelToStack(model)
       const previousModel = manager.undo()
@@ -136,14 +136,14 @@ describe('RestUndoRedoManager.ts', () =>
   describe('redo', () =>
   {
     const model: IModel = new Model(27, 5)
-    const manager = new RestUndoRedoManager(DefaultConfiguration['undo-redo'], model)
+    const manager = new UndoRedoManager(DefaultConfiguration['undo-redo'], model)
     test('should get the next model', () =>
     {
-      const p1: TPoint = { t: 1, p: 0.5, x: 1, y: 1 }
+      const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       model.initCurrentStroke(p1, 666, 'pen', DefaultPenStyle)
 
-      const p2: TPoint = { t: 15, p: 0.5, x: 10, y: 1 }
-      model.endCurrentStroke(p2, DefaultPenStyle)
+      const p2: TPointer = { t: 15, p: 0.5, x: 10, y: 1 }
+      model.endCurrentStroke(p2)
 
       manager.addModelToStack(model)
       manager.undo()
@@ -162,14 +162,14 @@ describe('RestUndoRedoManager.ts', () =>
   describe('updateModelInStack', () =>
   {
     const model: IModel = new Model(27, 5)
-    const manager = new RestUndoRedoManager(DefaultConfiguration['undo-redo'], model)
-    test('should last model in stack', () =>
+    const manager = new UndoRedoManager(DefaultConfiguration['undo-redo'], model)
+    test('should update last model in stack', () =>
     {
-      const p1: TPoint = { t: 1, p: 0.5, x: 1, y: 1 }
+      const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       model.initCurrentStroke(p1, 666, 'pen', DefaultPenStyle)
 
-      const p2: TPoint = { t: 15, p: 0.5, x: 10, y: 1 }
-      model.endCurrentStroke(p2, DefaultPenStyle)
+      const p2: TPointer = { t: 15, p: 0.5, x: 10, y: 1 }
+      model.endCurrentStroke(p2)
 
       manager.addModelToStack(model)
 
@@ -183,23 +183,23 @@ describe('RestUndoRedoManager.ts', () =>
       expect(manager.context.stack[manager.context.stackIndex]).not.toBe(model)
     })
 
-    test('should previous model in stack', () =>
+    test('should update previous model in stack', () =>
     {
-      const p1: TPoint = { t: 1, p: 0.5, x: 1, y: 1 }
+      const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       model.initCurrentStroke(p1, 666, 'pen', DefaultPenStyle)
 
-      const p2: TPoint = { t: 15, p: 0.5, x: 10, y: 1 }
-      model.endCurrentStroke(p2, DefaultPenStyle)
+      const p2: TPointer = { t: 15, p: 0.5, x: 10, y: 1 }
+      model.endCurrentStroke(p2)
 
       manager.addModelToStack(model)
       const firstModel = model.getClone()
       firstModel.exports = { 'text/plain': '-' }
 
-      const p3: TPoint = { t: 100, p: 0.5, x: 1, y: 10 }
+      const p3: TPointer = { t: 100, p: 0.5, x: 1, y: 10 }
       model.initCurrentStroke(p3, 666, 'pen', DefaultPenStyle)
 
-      const p4: TPoint = { t: 150, p: 0.5, x: 1, y: 10 }
-      model.endCurrentStroke(p4, DefaultPenStyle)
+      const p4: TPointer = { t: 150, p: 0.5, x: 1, y: 10 }
+      model.endCurrentStroke(p4)
       manager.addModelToStack(model)
 
       manager.updateModelInStack(firstModel)
@@ -212,13 +212,13 @@ describe('RestUndoRedoManager.ts', () =>
   test('should reset context', () =>
   {
     const model: IModel = new Model(27, 5)
-    const manager = new RestUndoRedoManager(DefaultConfiguration['undo-redo'], model)
+    const manager = new UndoRedoManager(DefaultConfiguration['undo-redo'], model)
 
-    const p1: TPoint = { t: 1, p: 0.5, x: 1, y: 1 }
+    const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
     model.initCurrentStroke(p1, 666, 'pen', DefaultPenStyle)
 
-    const p2: TPoint = { t: 15, p: 0.5, x: 10, y: 1 }
-    model.endCurrentStroke(p2, DefaultPenStyle)
+    const p2: TPointer = { t: 15, p: 0.5, x: 10, y: 1 }
+    model.endCurrentStroke(p2)
 
     manager.addModelToStack(model)
     const newModel = new Model(width, height)

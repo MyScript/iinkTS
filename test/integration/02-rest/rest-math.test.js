@@ -5,6 +5,7 @@ const {
   getEditor,
   setEditorConfiguration,
   getEditorConfiguration,
+  getEditorModelExports,
 } = require('../helper')
 const { equation1, one } = require('../strokesDatas')
 
@@ -25,17 +26,20 @@ describe('Rest Math', () => {
   })
 
   test('should display katex-html into result', async () => {
-    await Promise.all([
-      getExportedDatas(page),
-      write(page, equation1.strokes),
-    ])
-    await page.waitForTimeout(1500)
-    const editor = await getEditor(page)
+    let exportedDatas
+    for (let s of equation1.strokes) {
+      [exportedDatas] = await Promise.all([
+        getExportedDatas(page),
+        write(page, [s]),
+      ])
+    }
 
     const resultElement = page.locator('#result')
     const htmlKatexResult = await resultElement.locator('.katex-html').textContent()
 
-    expect(htmlKatexResult).toStrictEqual(editor.model.exports['application/x-latex'])
+    const exports = await getEditorModelExports(page)
+    expect(exportedDatas['application/x-latex']).toStrictEqual(equation1.exports.LATEX.at(-1))
+    expect(exports['application/x-latex']).toStrictEqual(equation1.exports.LATEX.at(-1))
     expect(htmlKatexResult).toStrictEqual(equation1.exports.LATEX.at(-1))
   })
 
@@ -114,9 +118,7 @@ describe('Rest Math', () => {
         page.click('#clear'),
       ])
       expect(promisesResult[0]).toBeNull()
-
-      const editor = await getEditor(page)
-      expect(editor.model.exports).toBeUndefined()
+      expect(await getEditorModelExports(page)).toBeNull()
 
       const resultElement = page.locator('#result')
       const resultText = await resultElement.textContent()

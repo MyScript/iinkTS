@@ -1,5 +1,4 @@
 const { write, getExportedDatas, waitForEditorWebSocket, getEditorModelExports } = require("../helper")
-const { testGesture } = require("../_partials/gesture-test")
 const { h, claclacla } = require("../strokesDatas")
 
 describe("Websocket Text Custom Lexicon", () => {
@@ -60,8 +59,4 @@ describe("Websocket Text Custom Lexicon", () => {
     const jiixReceived = exports["application/vnd.myscript.jiix"]
     expect(jiixReceived.label).toEqual(jiixExpected.label)
   })
-
-  require("../_partials/smart-guide-test")
-
-  testGesture(-100)
 })

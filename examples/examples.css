@@ -40,7 +40,6 @@ nav {
     border-radius: 3px;
     -webkit-appearance: none;
     color: #060607;
-    background: #fff none;
     border: 1px solid #d2d6d7;
     box-shadow: 0 1px 1px 0 rgba(0,0,0,.08);
     transition: border-color 125ms;
@@ -513,6 +512,18 @@ select:focus {
     width: 40px;
     height: 40px;
     font-size: 24px;
+}
+
+.close-btn {
+    margin-left: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    border: none;
+    aspect-ratio: 1 / 1;
+    height: 100%;
+    padding: 7px;
 }
 
 /* Buttons Color */

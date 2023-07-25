@@ -1,5 +1,4 @@
 import { IGrabber } from "./grabber/Grabber"
-import { IRenderer } from "./renderer/Renderer"
 import { IModel } from "./model/Model"
 import { IRecognizer } from "./recognizer/Recognizer"
 import { TTheme } from "./style/Theme"
@@ -7,36 +6,57 @@ import { TConverstionState } from "./configuration/RecognitionConfiguration"
 import { TPenStyle } from "./style/PenStyle"
 import { TStroke } from "./model/Stroke"
 import { TUndoRedoContext } from "./undo-redo/UndoRedoContext"
+import { TConfiguration } from "./Configuration"
+import { StyleManager } from "../style/StyleManager"
+
+export type TBehaviorOptions = {
+  configuration: TConfiguration
+  behaviors?: {
+    grabber?: IGrabber
+    recognizer?: IRecognizer
+  }
+  penStyle?: TPenStyle
+  theme?: TTheme
+}
 
 export interface IBehaviors
 {
+  name: string
   grabber: IGrabber
-  renderer: IRenderer
   recognizer: IRecognizer
   context: TUndoRedoContext
+  options: TBehaviorOptions
+  styleManager: StyleManager
+  mode: ModeInteraction
+  #configuration: TConfiguration
 
-  async init: (element: HTMLElement) => Promise<void | Error>
+  get currentPenStyle(): TPenStyle
 
-  drawCurrentStroke(model: IModel): void
+  get model(): IModel
 
-  async updateModelRendering: (model: IModel) => Promise<IModel | never>
+  get penStyle(): TPenStyle
+  setPenStyle(penStyle?: TPenStyle)
 
-  async export(model: IModel, mimeTypes?: string[]): Promise<IModel | never>
-  async convert(model: IModel, conversionState?: TConverstionState, requestedMimeTypes?: string[]): Promise<IModel | never>
+  get penStyleClasses(): string
+  setPenStyleClasses(penStyleClasses?: string)
 
-  async importPointEvents?(model: IModel, strokes: TStroke[]): Promise<IModel | never>
-  async import?(model: IModel, data: Blob, mimeType?: string): Promise<IModel | never>
+  get theme(): TTheme
+  setTheme(theme?: TTheme)
 
-  setPenStyle?(penStyle: TPenStyle): void
-  setPenStyleClasses?(penStyleClasses: string): void
-  setTheme?(theme: TTheme): void
+  get configuration(): TConfiguration
+  set configuration(conf: TConfiguration)
 
-  async resize(model: IModel): Promise<IModel>
+  async init: (element: HTMLElement) => Promise<void>
+  async export(mimeTypes?: string[]): Promise<IModel | never>
+  async convert(conversionState?: TConverstionState, requestedMimeTypes?: string[]): Promise<IModel | never>
+  async resize(height: number, width: number): Promise<IModel>
+  async undo(): Promise<IModel>
+  async redo(): Promise<IModel>
 
-  async undo(model: IModel): Promise<IModel>
-  async redo(model: IModel): Promise<IModel>
+  async importPointEvents?(strokes: TStroke[]): Promise<IModel | never>
+  async import?(data: Blob, mimeType?: string): Promise<IModel | never>
 
-  async clear(model: IModel): Promise<IModel>
+  async clear(): Promise<IModel>
 
-  async destroy(model: IModel): Promise<void>
+  async destroy(): Promise<void>
 }

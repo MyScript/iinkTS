@@ -1,36 +1,52 @@
-import { IBehaviors } from "../@types/Behaviors"
-import { TConfiguration } from "../@types/Configuration"
+import { IBehaviors, TBehaviorOptions } from "../@types/Behaviors"
 import { IModel, TExport } from "../@types/model/Model"
-import { TTriggerConfiguration } from "../@types/configuration/TriggerConfiguration"
+import { TConfiguration } from "../@types/Configuration"
 import { TConverstionState } from "../@types/configuration/RecognitionConfiguration"
 import { TUndoRedoContext } from "../@types/undo-redo/UndoRedoContext"
+import { TPenStyle } from "../@types/style/PenStyle"
+import { TTheme } from "../@types/style/Theme"
+import { TPointer } from "../@types/geometry"
 
 import { PointerEventGrabber } from "../grabber/PointerEventGrabber"
 import { CanvasRenderer } from "../renderer/canvas/CanvasRenderer"
 import { RestRecognizer } from "../recognizer/RestRecognizer"
 import { DeferredPromise } from "../utils/DeferredPromise"
-import { RestUndoRedoManager } from "../undo-redo/RestUndoRedoManager"
+import { UndoRedoManager } from "../undo-redo/UndoRedoManager"
 import { InternalEvent } from "../event/InternalEvent"
+import { StyleManager } from "../style/StyleManager"
+import { Configuration } from "../configuration/Configuration"
+import { Model } from "../model/Model"
+import { ModeInteraction } from "../Constants"
 
 export class RestBehaviors implements IBehaviors
 {
+  name = "RestBehaviors"
+  options: TBehaviorOptions
   grabber: PointerEventGrabber
   renderer: CanvasRenderer
   recognizer: RestRecognizer
-  undoRedoManager: RestUndoRedoManager
+  undoRedoManager: UndoRedoManager
+  styleManager: StyleManager
+  #configuration: TConfiguration
+  #model: IModel
+  mode: ModeInteraction
 
-  #triggerConfiguration: TTriggerConfiguration
   #resizeTimer?: ReturnType<typeof setTimeout>
   #exportTimer?: ReturnType<typeof setTimeout>
 
-  constructor(configuration: TConfiguration, model: IModel)
+  constructor(options: TBehaviorOptions)
   {
-    this.grabber = new PointerEventGrabber(configuration.grabber)
-    this.renderer = new CanvasRenderer(configuration.rendering)
-    this.recognizer = new RestRecognizer(configuration.server, configuration.recognition)
-    this.undoRedoManager = new RestUndoRedoManager(configuration["undo-redo"], model)
+    this.options = options
+    this.#configuration = new Configuration(options?.configuration)
+    this.styleManager = new StyleManager(options.penStyle, options.theme)
 
-    this.#triggerConfiguration = configuration.triggers
+    this.grabber = new PointerEventGrabber(this.#configuration.grabber)
+    this.renderer = new CanvasRenderer(this.#configuration.rendering)
+    this.recognizer = new RestRecognizer(this.#configuration.server, this.#configuration.recognition)
+
+    this.mode = ModeInteraction.Writing
+    this.#model = new Model()
+    this.undoRedoManager = new UndoRedoManager(this.#configuration["undo-redo"], this.model)
   }
 
   get internalEvent(): InternalEvent
@@ -38,126 +54,230 @@ export class RestBehaviors implements IBehaviors
     return InternalEvent.getInstance()
   }
 
+  get model(): IModel
+  {
+    return this.#model
+  }
+
   get context(): TUndoRedoContext
   {
     return this.undoRedoManager.context
   }
 
-  async init(domElement: HTMLElement): Promise<void | Error>
+  get currentPenStyle(): TPenStyle
   {
-    this.grabber.attach(domElement)
+    return this.styleManager.currentPenStyle
+  }
+
+  get penStyle(): TPenStyle
+  {
+    return this.styleManager.penStyle
+  }
+  setPenStyle(ps?: TPenStyle)
+  {
+    this.styleManager.setPenStyle(ps)
+  }
+
+  get penStyleClasses(): string
+  {
+    return this.styleManager.penStyleClasses
+  }
+  setPenStyleClasses(psc?: string)
+  {
+    this.styleManager.setPenStyleClasses(psc)
+  }
+
+  get theme(): TTheme
+  {
+    return this.styleManager.theme
+  }
+  setTheme(t?: TTheme)
+  {
+    this.styleManager.setTheme(t)
+  }
+
+  get configuration(): TConfiguration
+  {
+    return this.#configuration
+  }
+
+  async init(domElement: HTMLElement): Promise<void>
+  {
+    this.model.width = Math.max(domElement.clientWidth, this.#configuration.rendering.minWidth)
+    this.model.height = Math.max(domElement.clientHeight, this.#configuration.rendering.minHeight)
+    this.undoRedoManager.updateModelInStack(this.model)
+
     this.renderer.init(domElement)
-    this.internalEvent.emitExported(this.context.stack[0].exports as TExport)
-    return Promise.resolve()
+
+    this.grabber.attach(domElement)
+    this.grabber.onPointerDown = this.onPointerDown.bind(this)
+    this.grabber.onPointerMove = this.onPointerMove.bind(this)
+    this.grabber.onPointerUp = this.onPointerUp.bind(this)
   }
 
-  drawCurrentStroke(model: IModel): void
+  private onPointerDown(evt: PointerEvent, point: TPointer): void
   {
-    this.renderer.drawPendingStroke(model.currentStroke)
+    const { pointerType } = evt
+    const style: TPenStyle = Object.assign({}, this.theme?.ink, this.currentPenStyle)
+    switch (this.mode) {
+      case ModeInteraction.Erasing:
+        if (this.model.removeStrokesFromPoint(point).length > 0) {
+          this.model.endCurrentStroke(point)
+          this.updateModelRendering()
+            .then(model => Object.assign(this.model, model))
+            .catch(error => this.internalEvent.emitError(error as Error))
+        }
+        break
+      default:
+        this.model.initCurrentStroke(point, evt.pointerId, pointerType, style)
+        this.drawCurrentStroke()
+        break
+    }
   }
 
-  async updateModelRendering(model: IModel): Promise<IModel | never>
+  private onPointerMove(_evt: PointerEvent, point: TPointer): void
   {
-    this.renderer.drawModel(model)
+    switch (this.mode) {
+      case ModeInteraction.Erasing:
+        if (this.model.removeStrokesFromPoint(point).length > 0) {
+          this.model.endCurrentStroke(point)
+          this.updateModelRendering()
+            .then(newModel => Object.assign(this.#model, newModel))
+            .catch(error => this.internalEvent.emitError(error as Error))
+        }
+        break
+      default:
+        this.model.appendToCurrentStroke(point)
+        this.drawCurrentStroke()
+        break
+    }
+  }
+
+  private onPointerUp(_evt: PointerEvent, point: TPointer): void
+  {
+    switch (this.mode) {
+      case ModeInteraction.Erasing:
+        if (this.model.removeStrokesFromPoint(point).length > 0) {
+          this.model.endCurrentStroke(point)
+          this.updateModelRendering()
+            .then(newModel => Object.assign(this.#model, newModel))
+            .catch(error => this.internalEvent.emitError(error as Error))
+        }
+        break
+      default:
+        this.model.endCurrentStroke(point)
+        this.updateModelRendering()
+          .then(newModel => Object.assign(this.#model, newModel))
+          .catch(error => this.internalEvent.emitError(error as Error))
+        break
+    }
+  }
+
+  drawCurrentStroke(): void
+  {
+    this.renderer.drawPendingStroke(this.model.currentStroke)
+  }
+
+  async updateModelRendering(): Promise<IModel | never>
+  {
+    this.renderer.drawModel(this.model)
     const deferred = new DeferredPromise<IModel | never>()
-    this.undoRedoManager.addModelToStack(model)
-    if (this.#triggerConfiguration.exportContent !== "DEMAND") {
+    this.undoRedoManager.addModelToStack(this.model)
+    if (this.#configuration.triggers.exportContent !== "DEMAND") {
       clearTimeout(this.#exportTimer)
-      let currentModel = model.getClone()
+      let currentModel = this.model.getClone()
       this.#exportTimer = setTimeout(async () =>
       {
         try {
           currentModel = await this.recognizer.export(currentModel)
           this.undoRedoManager.updateModelInStack(currentModel)
-          if (model.modificationDate === currentModel.modificationDate) {
-            model.exports = currentModel.exports
+          if (this.model.modificationDate === currentModel.modificationDate) {
+            this.model.exports = currentModel.exports
           }
-          deferred.resolve(model)
+          deferred.resolve(this.model)
         } catch (error) {
           deferred.reject(error as Error)
         }
-      }, this.#triggerConfiguration.exportContent === "QUIET_PERIOD" ? this.#triggerConfiguration.exportContentDelay : 0)
+      }, this.#configuration.triggers.exportContent === "QUIET_PERIOD" ? this.#configuration.triggers.exportContentDelay : 0)
     } else {
-      deferred.resolve(model)
+      deferred.resolve(this.model)
     }
     await deferred.promise
-    this.internalEvent.emitExported(model.exports as TExport)
+    this.internalEvent.emitExported(this.model.exports as TExport)
     return deferred.promise
   }
 
-  async export(model: IModel, mimeTypes?: string[]): Promise<IModel | never>
+  async export(mimeTypes?: string[]): Promise<IModel | never>
   {
-    const newModel = await this.recognizer.export(model.getClone(), mimeTypes)
-    if (model.modificationDate === newModel.modificationDate) {
-      model.mergeExport(newModel.exports as TExport)
+    const newModel = await this.recognizer.export(this.model.getClone(), mimeTypes)
+    if (this.model.modificationDate === newModel.modificationDate) {
+      this.model.mergeExport(newModel.exports as TExport)
     }
     this.undoRedoManager.updateModelInStack(newModel)
-    return model
+    return this.model
   }
 
-  async convert(model: IModel, conversionState?: TConverstionState, requestedMimeTypes?: string[]): Promise<IModel | never>
+  async convert(conversionState?: TConverstionState, requestedMimeTypes?: string[]): Promise<IModel | never>
   {
-    return this.recognizer.convert(model, conversionState, requestedMimeTypes)
+    const newModel = await this.recognizer.convert(this.model, conversionState, requestedMimeTypes)
+    Object.assign(this.#model, newModel)
+    return this.model
   }
 
-  async resize(model: IModel): Promise<IModel>
+  async resize(height: number, width: number): Promise<IModel>
   {
     const deferredResize = new DeferredPromise<IModel>()
-    this.renderer.resize(model)
-    if (model.strokeGroups.length) {
+    this.model.height = height
+    this.model.width = width
+    this.renderer.resize(this.model)
+    if (this.model.rawStrokes.length) {
       clearTimeout(this.#resizeTimer)
       this.#resizeTimer = setTimeout(async () =>
       {
-        const resizeModel = await this.recognizer.resize(model)
+        const resizeModel = await this.recognizer.resize(this.model)
         deferredResize.resolve(resizeModel)
-      }, this.#triggerConfiguration.resizeTriggerDelay)
+      }, this.#configuration.triggers.resizeTriggerDelay)
     } else {
-      deferredResize.resolve(model)
+      deferredResize.resolve(this.model)
     }
     const newModel = await deferredResize.promise
     this.internalEvent.emitExported(newModel.exports as TExport)
     return newModel
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async undo(_model: IModel): Promise<IModel>
+  async undo(): Promise<IModel>
   {
-    const oldModel = this.undoRedoManager.undo()
-    this.renderer.drawModel(oldModel)
-    const modelUpdated = await this.recognizer.export(oldModel)
-    this.undoRedoManager.updateModelInStack(modelUpdated)
-    this.internalEvent.emitExported(modelUpdated.exports as TExport)
-    return modelUpdated
+    this.#model = this.undoRedoManager.undo()
+    this.renderer.drawModel(this.#model)
+    this.#model = await this.recognizer.export(this.#model)
+    this.undoRedoManager.updateModelInStack(this.#model)
+    this.internalEvent.emitExported(this.#model.exports as TExport)
+    return this.#model
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async redo(_model: IModel): Promise<IModel>
+  async redo(): Promise<IModel>
   {
-    const newModel = this.undoRedoManager.redo()
-    this.renderer.drawModel(newModel)
-    const modelUpdated = await this.recognizer.export(newModel)
-    this.undoRedoManager.updateModelInStack(modelUpdated)
-    this.internalEvent.emitExported(modelUpdated.exports as TExport)
-    return modelUpdated
+    this.#model = this.undoRedoManager.redo()
+    this.renderer.drawModel(this.#model)
+    this.#model = await this.recognizer.export(this.#model)
+    this.undoRedoManager.updateModelInStack(this.#model)
+    this.internalEvent.emitExported(this.#model.exports as TExport)
+    return this.#model
   }
 
-  async clear(model: IModel): Promise<IModel>
+  async clear(): Promise<IModel>
   {
-    const myModel = model.getClone()
-    myModel.clear()
-    this.undoRedoManager.addModelToStack(myModel)
-    this.renderer.drawModel(myModel)
-    myModel.modificationDate = new Date().getTime()
-    this.internalEvent.emitExported(myModel.exports as TExport)
-    return myModel
+    this.model.clear()
+    this.undoRedoManager.addModelToStack(this.model)
+    this.renderer.drawModel(this.model)
+    this.internalEvent.emitExported(this.model.exports as TExport)
+    return this.model
   }
 
-  async destroy(model: IModel): Promise<void>
+  async destroy(): Promise<void>
   {
     this.grabber.detach()
     this.renderer.destroy()
-    this.undoRedoManager.reset(model)
-    this.internalEvent.emitExported(model.exports as TExport)
     return Promise.resolve()
   }
 }

@@ -1,7 +1,6 @@
 import { TStroke } from "../../@types/model/Stroke"
 import { TRenderingConfiguration } from "../../@types/configuration/RenderingConfiguration"
 import { IModel } from "../../@types/model/Model"
-import { IRenderer, TCanvasRendererContext } from "../../@types/renderer/Renderer"
 import { TSymbol } from "../../@types/renderer/Symbol"
 
 import { drawShapeSymbol, ShapeSymbols } from "./CanvasRendererShapeSymbol"
@@ -9,11 +8,17 @@ import { drawStroke } from "./CanvasRendererStrokeSymbol"
 import { drawTextSymbol, TextSymbols } from "./CanvasRendererTextSymbol"
 import { CanvasQuadraticStroker } from "./CanvasQuadraticStroker"
 
-export class CanvasRenderer implements IRenderer
+export class CanvasRenderer
 {
   config: TRenderingConfiguration
   stroker: CanvasQuadraticStroker
-  context!: TCanvasRendererContext
+  context!: {
+    parent: HTMLElement
+    renderingCanvas: HTMLCanvasElement
+    renderingCanvasContext: CanvasRenderingContext2D
+    capturingCanvas: HTMLCanvasElement
+    capturingCanvasContext: CanvasRenderingContext2D
+  }
 
   constructor(config: TRenderingConfiguration)
   {
@@ -21,13 +26,12 @@ export class CanvasRenderer implements IRenderer
     this.stroker = new CanvasQuadraticStroker()
   }
 
-  private createCanvas(element: HTMLElement, type: string): HTMLCanvasElement
+  private createCanvas(type: string): HTMLCanvasElement
   {
     const canvas: HTMLCanvasElement = document.createElement("canvas")
     canvas.id = type
     canvas.classList.add(type)
     canvas.classList.add("ms-canvas")
-    element.appendChild(canvas)
     return canvas
   }
 
@@ -62,8 +66,11 @@ export class CanvasRenderer implements IRenderer
 
   init(element: HTMLElement): void
   {
-    const renderingCanvas: HTMLCanvasElement = this.createCanvas(element, "ms-rendering-canvas")
-    const capturingCanvas: HTMLCanvasElement = this.createCanvas(element, "ms-capture-canvas")
+    const renderingCanvas: HTMLCanvasElement = this.createCanvas("ms-rendering-canvas")
+    element.appendChild(renderingCanvas)
+
+    const capturingCanvas: HTMLCanvasElement = this.createCanvas("ms-capture-canvas")
+    element.appendChild(capturingCanvas)
 
     this.context = {
       parent: element,
@@ -79,10 +86,8 @@ export class CanvasRenderer implements IRenderer
   drawModel(model: IModel): void
   {
     this.context.renderingCanvasContext?.clearRect(0, 0, this.context.renderingCanvas.width, this.context.renderingCanvas.height)
-    const symbols = [...model.defaultSymbols, ...model.rawStrokes]
-    symbols.forEach(symbol => this.drawSymbol(this.context.renderingCanvasContext, symbol))
+    model.rawStrokes.forEach(symbol => this.drawSymbol(this.context.renderingCanvasContext, symbol))
     this.context.capturingCanvasContext.clearRect(0, 0, this.context.capturingCanvas.width, this.context.capturingCanvas.height)
-    model.updatePositionRendered(symbols.length)
   }
 
   drawPendingStroke(stroke: TStroke | undefined): void

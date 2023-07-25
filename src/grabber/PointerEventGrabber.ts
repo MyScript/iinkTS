@@ -1,10 +1,10 @@
 import { IGrabber } from "../@types/grabber/Grabber"
 import { TGrabberConfiguration } from "../@types/configuration/GrabberConfiguration"
-import { TPoint } from "../@types/renderer/Point"
+import { TPointer } from "../@types/geometry"
 
 export class PointerEventGrabber implements IGrabber
 {
-  private configuration!: TGrabberConfiguration
+  private configuration: TGrabberConfiguration
 
   private domElement!: HTMLElement
 
@@ -12,13 +12,13 @@ export class PointerEventGrabber implements IGrabber
 
   private prevent = (e: Event) => e.preventDefault()
 
-  onPointerDown!: (evt: PointerEvent, point: TPoint) => void
-  onPointerMove!: (evt: PointerEvent, point: TPoint) => void
-  onPointerUp!: (evt: PointerEvent, point: TPoint) => void
+  onPointerDown!: (evt: PointerEvent, point: TPointer) => void
+  onPointerMove!: (evt: PointerEvent, point: TPointer) => void
+  onPointerUp!: (evt: PointerEvent, point: TPointer) => void
 
   constructor(configuration: TGrabberConfiguration)
   {
-    this.setConfiguration(configuration)
+    this.configuration = configuration
   }
 
   private roundFloat(oneFloat: number, requestedFloatPrecision: number): number
@@ -30,7 +30,7 @@ export class PointerEventGrabber implements IGrabber
     return oneFloat
   }
 
-  private extractPoint(event: MouseEvent | TouchEvent): TPoint
+  private extractPoint(event: MouseEvent | TouchEvent): TPointer
   {
     let clientX: number, clientY: number
     if ("changedTouches" in event) {
@@ -85,11 +85,6 @@ export class PointerEventGrabber implements IGrabber
     }
   }
 
-  setConfiguration(configuration: TGrabberConfiguration)
-  {
-    this.configuration = configuration
-  }
-
   attach(domElement: HTMLElement)
   {
     if (this.domElement) {
@@ -97,11 +92,9 @@ export class PointerEventGrabber implements IGrabber
     }
     this.domElement = domElement
     this.domElement.addEventListener("pointerdown", this.pointerDownHandler, this.configuration.listenerOptions)
-
     this.domElement.addEventListener("pointermove", this.pointerMoveHandler, this.configuration.listenerOptions)
-
     this.domElement.addEventListener("pointerup", this.pointerUpHandler, this.configuration.listenerOptions)
-    this.domElement.addEventListener("pointerout", this.pointerUpHandler, this.configuration.listenerOptions)
+    // this.domElement.addEventListener("pointerout", this.pointerUpHandler, this.configuration.listenerOptions)
     this.domElement.addEventListener("pointerleave", this.pointerUpHandler, this.configuration.listenerOptions)
     this.domElement.addEventListener("pointercancel", this.pointerUpHandler, this.configuration.listenerOptions)
 
@@ -117,7 +110,7 @@ export class PointerEventGrabber implements IGrabber
     this.domElement?.removeEventListener("pointerdown", this.pointerDownHandler, this.configuration.listenerOptions)
     this.domElement?.removeEventListener("pointermove", this.pointerMoveHandler, this.configuration.listenerOptions)
     this.domElement?.removeEventListener("pointerup", this.pointerUpHandler, this.configuration.listenerOptions)
-    this.domElement?.removeEventListener("pointerout", this.pointerUpHandler, this.configuration.listenerOptions)
+    // this.domElement?.removeEventListener("pointerout", this.pointerUpHandler, this.configuration.listenerOptions)
     this.domElement?.removeEventListener("pointerleave", this.pointerUpHandler, this.configuration.listenerOptions)
     this.domElement?.removeEventListener("pointercancel", this.pointerUpHandler, this.configuration.listenerOptions)
     this.domElement?.removeEventListener("touchmove", this.prevent)

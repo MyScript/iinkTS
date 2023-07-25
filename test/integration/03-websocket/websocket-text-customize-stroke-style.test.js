@@ -1,4 +1,3 @@
-const { testGesture } = require('../_partials/gesture-test')
 const { waitForEditorWebSocket, write, getExportedDatas } = require('../helper')
 const { h } = require('../strokesDatas')
 
@@ -73,9 +72,11 @@ describe('Websocket Text Customize Stroke Style', () => {
   })
 
   test('should draw stroke with default penStyle', async () => {
-    expect(await page.$eval('.pensettings', (elements) => elements.classList.contains('disabled'))).toEqual(true)
+    expect(await page.locator('#pencolor').isDisabled()).toEqual(true)
+    expect(await page.locator('#penwidth').isDisabled()).toEqual(true)
     await page.setChecked('#penenabled', true)
-    expect(await page.$eval('.pensettings', (elements) => elements.classList.contains('disabled'))).toEqual(false)
+    expect(await page.locator('#pencolor').isDisabled()).toEqual(false)
+    expect(await page.locator('#penwidth').isDisabled()).toEqual(false)
 
     await Promise.all([
       getExportedDatas(page),
@@ -87,15 +88,18 @@ describe('Websocket Text Customize Stroke Style', () => {
     expect(await path.count()).toEqual(1)
 
     await page.setChecked('#penenabled', false)
-    expect(await page.$eval('.pensettings', (elements) => elements.classList.contains('disabled'))).toEqual(true)
+    expect(await page.locator('#pencolor').isDisabled()).toEqual(true)
+    expect(await page.locator('#penwidth').isDisabled()).toEqual(true)
   })
 
   test('should draw stroke with selected penStyle', async () => {
     const penColorExpected = '#1a5fb4'
+    expect(await page.locator('#pencolor').isDisabled()).toEqual(true)
+    expect(await page.locator('#penwidth').isDisabled()).toEqual(true)
 
-    expect(await page.$eval('.pensettings', (elements) => elements.classList.contains('disabled'))).toEqual(true)
     await page.setChecked('#penenabled', true)
-    expect(await page.$eval('.pensettings', (elements) => elements.classList.contains('disabled'))).toEqual(false)
+    expect(await page.locator('#pencolor').isDisabled()).toEqual(false)
+    expect(await page.locator('#penwidth').isDisabled()).toEqual(false)
 
     await page.fill('#pencolor', penColorExpected)
 
@@ -107,8 +111,4 @@ describe('Websocket Text Customize Stroke Style', () => {
     const path = page.locator(`path[fill="${hexToRgbA(penColorExpected)}"]`)
     expect(await path.count()).toEqual(1)
   })
-
-  require('../_partials/smart-guide-test')
-
-  testGesture()
 })

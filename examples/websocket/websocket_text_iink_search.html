@@ -30,6 +30,10 @@
       const searchInput = document.getElementById("searchInput");
       const searchBtn = document.getElementById("searchBtn");
       let lastJiix = undefined;
+
+      /**
+       * we expose the editor for use in the integration test
+       */
       let editor;
 
       async function loadEditor() {
@@ -57,8 +61,16 @@
             }
           }
         };
-
+        /**
+         * Instanciate editor
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Editor parameters
+         */
         editor = new iink.Editor(editorElement, options);
+        /**
+         *  async initialize editor behaviors
+         */
+        await editor.initialize();
 
         // Utility function transforming millimeters to pixel as iinkSDK is millimeters only
         function mmToPixel(mm) {

@@ -1,287 +1,692 @@
-import { Editor, EditorMode } from "../../../src/Editor"
+import { TBehaviorOptions } from "../../../src/@types/Behaviors"
+import { TStroke } from "../../../src/@types/model/Stroke"
+import { TTheme } from "../../../src/@types/style/Theme"
+import { TPenStyle } from "../../../src/@types/style/PenStyle"
+import { TJIIXExport } from "../../../src/@types/model/Model"
+import { TConfiguration } from "../../../src/@types/Configuration"
+
+import { delay } from "../utils/helpers"
+import { Editor } from "../../../src/Editor"
 import { DefaultConfiguration } from "../../../src/configuration/DefaultConfiguration"
-import { AllOverrideConfiguration } from "../_dataset/configuration.dataset"
-// import { TPoint } from "../../../src/@types/renderer/Point"
 // import { LeftClickEventFake } from "../utils/PointerEventFake"
 import { DefaultPenStyle } from "../../../src/style/DefaultPenStyle"
 import { DefaultTheme } from "../../../src/style/DefaultTheme"
 import { Model } from "../../../src/model/Model"
-import { TStroke } from "../../../src/@types/model/Stroke"
-
+import { PointerEventGrabber } from "../../../src/grabber/PointerEventGrabber"
+import { WSRecognizer } from "../../../src/recognizer/WSRecognizer"
+import { PublicEvent } from "../../../src/event/PublicEvent"
+import { EventType, ModeInteraction } from "../../../src/Constants"
+import { InternalEvent } from "../../../src/event/InternalEvent"
+import { AllOverrideConfiguration } from "../_dataset/configuration.dataset"
 
 describe('Editor.ts', () =>
 {
+  const publicEvent = PublicEvent.getInstance()
+  const DefaultBehaviorsOptions: TBehaviorOptions = { configuration: DefaultConfiguration }
 
-  test('should create Editor with default configuration', () =>
+  describe('constructor', () =>
   {
-    const wrapperHTML: HTMLElement = document.createElement('div')
-    wrapperHTML.style.height = '100px'
-    wrapperHTML.style.width = '100px'
-    const editor = new Editor(wrapperHTML)
-
-    expect(editor.configuration.events).toStrictEqual(DefaultConfiguration.events)
-    expect(editor.configuration.grabber).toStrictEqual(DefaultConfiguration.grabber)
-    expect(editor.configuration.recognition).toStrictEqual(DefaultConfiguration.recognition)
-    expect(editor.configuration.rendering).toStrictEqual(DefaultConfiguration.rendering)
-    expect(editor.configuration.server).toStrictEqual(DefaultConfiguration.server)
-    expect(editor.configuration.triggers).toStrictEqual(DefaultConfiguration.triggers)
-  })
-
-  test('should override default configuration', () =>
-  {
-    const wrapperHTML: HTMLElement = document.createElement('div')
-    wrapperHTML.style.height = '100px'
-    wrapperHTML.style.width = '100px'
-    const editor = new Editor(wrapperHTML)
-
-    expect(editor.configuration.events).toStrictEqual(DefaultConfiguration.events)
-    expect(editor.configuration.grabber).toStrictEqual(DefaultConfiguration.grabber)
-    expect(editor.configuration.recognition).toStrictEqual(DefaultConfiguration.recognition)
-    expect(editor.configuration.rendering).toStrictEqual(DefaultConfiguration.rendering)
-    expect(editor.configuration.server).toStrictEqual(DefaultConfiguration.server)
-    expect(editor.configuration.triggers).toStrictEqual(DefaultConfiguration.triggers)
-
-    editor.configuration = AllOverrideConfiguration
-
-    expect(editor.configuration.events).toStrictEqual(AllOverrideConfiguration.events)
-    expect(editor.configuration.grabber).toStrictEqual(AllOverrideConfiguration.grabber)
-    expect(editor.configuration.recognition).toStrictEqual(AllOverrideConfiguration.recognition)
-    expect(editor.configuration.rendering).toStrictEqual(AllOverrideConfiguration.rendering)
-    expect(editor.configuration.server).toStrictEqual(AllOverrideConfiguration.server)
-    expect(editor.configuration.triggers).toStrictEqual(AllOverrideConfiguration.triggers)
-  })
-
-  /* test('should create Editor and not be initialized', async () =>
-  {
-    const wrapperHTML: HTMLElement = document.createElement('div')
-    wrapperHTML.style.height = '100px'
-    wrapperHTML.style.width = '100px'
-    const editor = new Editor(wrapperHTML)
-    expect(editor.initializationPromise).toBe(false)
-  }) */
-
-  test('should append loader element', () =>
-  {
-    const wrapperHTML: HTMLElement = document.createElement('div')
-    wrapperHTML.style.height = '100px'
-    wrapperHTML.style.width = '100px'
-    new Editor(wrapperHTML)
-    expect(wrapperHTML.querySelector('.loader')).toBeDefined()
-
-  })
-
-  test('should append error element', () =>
-  {
-    const wrapperHTML: HTMLElement = document.createElement('div')
-    wrapperHTML.style.height = '100px'
-    wrapperHTML.style.width = '100px'
-    new Editor(wrapperHTML)
-    expect(wrapperHTML.querySelector('.error-msg')).toBeDefined()
-
-  })
-
-  describe('constructor', () => {
-    test('should init model', () =>
+    test('should instantiate Editor', () =>
     {
       const wrapperHTML: HTMLElement = document.createElement('div')
-      const editor = new Editor(wrapperHTML)
+      wrapperHTML.style.height = '100px'
+      wrapperHTML.style.width = '100px'
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      expect(editor).toBeDefined()
+      expect(editor.configuration).toBeDefined()
       expect(editor.model).toBeDefined()
     })
-  })
-
-  test('should undo', async () =>
-  {
-    const wrapperHTML: HTMLElement = document.createElement('div')
-    const editor = new Editor(wrapperHTML)
-    editor.undo = jest.fn()
-    editor.undo()
-    expect(editor.undo).toBeCalledTimes(1)
-  })
-
-  test('should redo', () =>
-  {
-    const wrapperHTML: HTMLElement = document.createElement('div')
-    const editor = new Editor(wrapperHTML)
-    editor.redo = jest.fn()
-    editor.redo()
-    expect(editor.redo).toBeCalledTimes(1)
-  })
-
-  test('should clear', () =>
-  {
-    const wrapperHTML: HTMLElement = document.createElement('div')
-    const editor = new Editor(wrapperHTML)
-    editor.clear = jest.fn()
-    editor.clear()
-    expect(editor.clear).toBeCalledTimes(1)
-  })
-
-  test('should resize', () =>
-  {
-    const wrapperHTML: HTMLElement = document.createElement('div')
-    const editor = new Editor(wrapperHTML)
-    editor.resize = jest.fn()
-    editor.resize()
-    expect(editor.resize).toBeCalledTimes(1)
-  })
-
-  test('should export', () =>
-  {
-    const wrapperHTML: HTMLElement = document.createElement('div')
-    const editor = new Editor(wrapperHTML)
-    const model = new Model(100, 50)
-    model.exports = {
-      "text/plain": 'tatapouet'
-    }
-    editor.export = jest.fn(() => Promise.resolve(model))
-    editor.events.emitExported = jest.fn()
-    editor.export(['text/plain'])
-    expect(editor.export).toBeCalledTimes(1)
-  })
-
-  test('should convert', () =>
-  {
-    const wrapperHTML: HTMLElement = document.createElement('div')
-    const editor = new Editor(wrapperHTML)
-    const model = new Model(100, 50)
-    model.converts = {
-      "text/plain": 'tatapouet'
-    }
-    editor.convert = jest.fn(() => Promise.resolve(model))
-
-    editor.convert()
-    expect(editor.convert).toBeCalledTimes(1)
-  })
-
-  describe('import', () => {
-    test('should import Blob', () =>
+    test('should instantiate Editor with custom configuration', () =>
     {
       const wrapperHTML: HTMLElement = document.createElement('div')
-      const editor = new Editor(wrapperHTML)
-      const model = new Model(100, 50)
-      model.exports = {
-        "text/plain": 'tatapouet'
-      }
-      editor.behaviors.recognizer.import = jest.fn(() => Promise.resolve(model))
-      editor.events.emitImported = jest.fn()
-
-      editor.import(new Blob(), 'text/plain')
-      expect(editor.behaviors.recognizer.import).toBeCalledTimes(1)
+      wrapperHTML.style.height = '100px'
+      wrapperHTML.style.width = '100px'
+      const editor = new Editor(wrapperHTML, { configuration: (AllOverrideConfiguration as TConfiguration) })
+      editor.initialize()
+      expect(editor).toBeDefined()
+      expect(editor.configuration).toBeDefined()
+      expect(editor.model).toBeDefined()
     })
-
-    test('should import Text', () =>
+    test('should define default grabber', () =>
     {
       const wrapperHTML: HTMLElement = document.createElement('div')
-      const editor = new Editor(wrapperHTML)
-      const model = new Model(100, 50)
-      model.exports = {
-        "text/plain": 'tatapouet'
-      }
-      editor.behaviors.recognizer.import = jest.fn(() => Promise.resolve(model))
-      editor.events.emitImported = jest.fn()
-
-      editor.import("hello", 'text/plain')
-      expect(editor.behaviors.recognizer.import).toBeCalledTimes(1)
+      wrapperHTML.style.height = '100px'
+      wrapperHTML.style.width = '100px'
+      const customGrabber = new PointerEventGrabber(DefaultConfiguration.grabber)
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      expect(editor.grabber).not.toBe(customGrabber)
     })
-
-    test('should import points Events', () => {
+    test('should override grabber', () =>
+    {
       const wrapperHTML: HTMLElement = document.createElement('div')
-      const editor = new Editor(wrapperHTML)
-      const model = new Model(100, 50)
-      const tstrokeToImport: TStroke[] = JSON.parse(`[{
-        "pointerType": "PEN",
-        "pointerId": 1,
-        "x": [128, 125, 122, 119, 118, 117, 116, 117, 119, 123, 127, 135, 139, 141, 144, 144, 143, 142, 141, 142],
-        "y": [83, 91, 99, 107, 114, 121, 125, 120, 112, 101, 90, 76, 70, 66, 76, 88, 101, 111, 118, 123],
-        "t": [1516190046205, 1516190046247, 1516190046264, 1516190046280, 1516190046297, 1516190046314, 1516190046330, 1516190046380, 1516190046397, 1516190046413, 1516190046430, 1516190046447, 1516190046463, 1516190046480, 1516190046547, 1516190046563, 1516190046581, 1516190046597, 1516190046614, 1516190046630],
-        "p": [0.5, 0.7076987214308235, 0.8060672826037246, 0.8060672826037246, 0.785875329883628, 0.785875329883628, 0.7185264889882718, 0.7461846839143089, 0.8024894359144054, 0.6578786777951477, 0.6578786777951477, 0.5984465727129564, 0.7880849230110567, 0.7292125754002905, 0.6768853685004259, 0.6535898384862245, 0.6389126863152722, 0.6829846120277299, 0.785875329883628, 0.7461846839143089]
-      },{
-        "pointerType": "PEN",
-        "pointerId": 1,
-        "x": [117, 122, 128, 139, 146],
-        "y": [105, 105, 106, 107, 106],
-        "t": [1516190046870, 1516190046930, 1516190046947, 1516190046963, 1516190046980],
-        "p": [0.5, 0.7763932022500211, 0.7681880209236327, 0.6676543814462531, 0.785875329883628]
-      }]`)
-      editor.importPointEvents = jest.fn(() => Promise.resolve(model))
-      editor.importPointEvents(tstrokeToImport)
-      expect(editor.importPointEvents).toBeCalledTimes(1)
+      wrapperHTML.style.height = '100px'
+      wrapperHTML.style.width = '100px'
+      const customGrabber = new PointerEventGrabber(DefaultConfiguration.grabber)
+      const customBehaviorsOptions: TBehaviorOptions = {
+        configuration: DefaultConfiguration,
+        behaviors: {
+          grabber: customGrabber
+        }
+      }
+      const editor = new Editor(wrapperHTML, customBehaviorsOptions)
+      expect(editor.grabber).toBe(customGrabber)
+    })
+    test('should define default recognizer', () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      wrapperHTML.style.height = '100px'
+      wrapperHTML.style.width = '100px'
+      const customRecognizer = new WSRecognizer(DefaultConfiguration.server, DefaultConfiguration.recognition)
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      expect(editor.behaviors.recognizer).not.toBe(customRecognizer)
+    })
+    test('should override recognizer', () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      wrapperHTML.style.height = '100px'
+      wrapperHTML.style.width = '100px'
+      const customRecognizer = new WSRecognizer(DefaultConfiguration.server, DefaultConfiguration.recognition)
+      const customBehaviorsOptions: TBehaviorOptions = {
+        configuration: DefaultConfiguration,
+        behaviors: {
+          recognizer: customRecognizer
+        }
+      }
+      const editor = new Editor(wrapperHTML, customBehaviorsOptions)
+      expect(editor.behaviors.recognizer).toBe(customRecognizer)
+    })
+    test('should throw error if instantiate Editor without configuration', () =>
+    {
+      expect.assertions(1)
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      wrapperHTML.style.height = '100px'
+      wrapperHTML.style.width = '100px'
+      try {
+        //@ts-ignore
+        new Editor(wrapperHTML, {})
+      }
+      catch (error) {
+        expect((error as Error).message).toEqual("Configuration required")
+      }
+    })
+    test('should append loader element', () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      wrapperHTML.style.height = '100px'
+      wrapperHTML.style.width = '100px'
+      new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      expect(wrapperHTML.querySelector('.loader')).toBeDefined()
+    })
+    test('should append error element', () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      wrapperHTML.style.height = '100px'
+      wrapperHTML.style.width = '100px'
+      new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      expect(wrapperHTML.querySelector('.error-msg')).toBeDefined()
     })
   })
 
-  describe('Style', () => {
+  describe('initialize', () =>
+  {
+    test('should display and hide loader', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      wrapperHTML.style.height = '100px'
+      wrapperHTML.style.width = '100px'
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      const LOAD_TIMEOUT = 200
+      editor.behaviors.init = jest.fn(async () => { await delay(LOAD_TIMEOUT); return Promise.resolve() })
+      const loaderElement = wrapperHTML.getElementsByClassName("loader")
+      //@ts-ignore
+      expect(loaderElement.item(0)?.style.display).toEqual("none")
+      editor.initialize()
+      //@ts-ignore
+      expect(loaderElement.item(0)?.style.display).toEqual("initial")
+      await delay(LOAD_TIMEOUT)
+      //@ts-ignore
+      expect(loaderElement.item(0)?.style.display).toEqual("none")
+    })
+    test('should resolve when behaviors.init is resolved', async () =>
+    {
+      expect.assertions(1)
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      wrapperHTML.style.height = '100px'
+      wrapperHTML.style.width = '100px'
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      editor.behaviors.init = jest.fn(() => Promise.resolve())
+      await editor.initialize()
+      expect(editor.initializationPromise).toBeDefined()
+    })
+    test('should reject when behaviors.init is rejected', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      wrapperHTML.style.height = '100px'
+      wrapperHTML.style.width = '100px'
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      editor.behaviors.init = jest.fn(() => Promise.reject("pouet"))
+      expect(editor.initialize()).rejects.toEqual("pouet")
+    })
+    test('should show error when behaviors.init is rejected', async () =>
+    {
+      expect.assertions(3)
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      wrapperHTML.style.height = '100px'
+      wrapperHTML.style.width = '100px'
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      editor.behaviors.init = jest.fn(() => Promise.reject(new Error("pouet")))
+      const messageElement = wrapperHTML.getElementsByClassName("message")
+      try {
+        //@ts-ignore
+        expect(messageElement.item(0)?.style.display).toEqual("none")
+        await editor.initialize()
+      } catch (error) {
+        //@ts-ignore
+        expect(messageElement.item(0)?.style.display).toEqual("initial")
+        //@ts-ignore
+        expect(messageElement.item(0)?.innerText).toEqual("pouet")
+      }
+    })
+  })
+
+  describe('configuration', () =>
+  {
+    test('should change behaviors', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      wrapperHTML.style.height = '100px'
+      wrapperHTML.style.width = '100px'
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      expect(editor.behaviors.name).toEqual("WSBehaviors")
+      editor.behaviors.destroy = jest.fn(() => Promise.resolve())
+      //@ts-ignore
+      editor.configuration = { ...DefaultBehaviorsOptions, server: { protocol: "REST" } }
+      expect(editor.behaviors.name).toEqual("RestBehaviors")
+    })
+  })
+
+  describe('mode', () =>
+  {
     const wrapperHTML: HTMLElement = document.createElement('div')
-    const editor = new Editor(wrapperHTML)
+    const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+    test('should init mode = Writing', () =>
+    {
+      expect(editor.mode).toBe(ModeInteraction.Writing)
+    })
+    test('should set mode = erase', () =>
+    {
+      editor.mode = ModeInteraction.Erasing
+      expect(wrapperHTML.classList).toContain('erasing')
+    })
+    test('should toggle mode', () =>
+    {
+      editor.mode = ModeInteraction.Erasing
+      expect(wrapperHTML.classList).toContain('erasing')
+      editor.mode = ModeInteraction.Writing
+      expect(wrapperHTML.classList).not.toContain('erasing')
+    })
+  })
+
+  describe('context', () =>
+  {
+    test('should get context', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      wrapperHTML.style.height = '100px'
+      wrapperHTML.style.width = '100px'
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      expect(editor.context).toBe(editor.behaviors.context)
+    })
+  })
+
+  describe('undo', () =>
+  {
+    test('should resolve when behaviors.undo is resolved', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      editor.behaviors.init = jest.fn(() => Promise.resolve())
+      const modelExpected = new Model(100, 100)
+      editor.behaviors.undo = jest.fn(() => Promise.resolve(modelExpected))
+      await editor.initialize()
+      await editor.undo()
+      expect(editor.behaviors.undo).toBeCalledTimes(1)
+    })
+    test('should reject when behaviors.undo is rejected', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      editor.behaviors.init = jest.fn(() => Promise.resolve())
+      editor.behaviors.undo = jest.fn(() => Promise.reject("pouet"))
+      expect(editor.undo()).rejects.toEqual("pouet")
+    })
+  })
+
+  describe('redo', () =>
+  {
+    test('should resolve when behaviors.redo is resolved', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      editor.behaviors.init = jest.fn(() => Promise.resolve())
+      const modelExpected = new Model(100, 100)
+      editor.behaviors.redo = jest.fn(() => Promise.resolve(modelExpected))
+      await editor.initialize()
+      await editor.redo()
+      expect(editor.behaviors.redo).toBeCalledTimes(1)
+    })
+    test('should reject when behaviors.redo is rejected', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      editor.behaviors.init = jest.fn(() => Promise.resolve())
+      editor.behaviors.redo = jest.fn(() => Promise.reject("pouet"))
+      expect(editor.redo()).rejects.toEqual("pouet")
+    })
+  })
+
+  describe('clear', () =>
+  {
+    test('should resolve when behaviors.clear is resolved', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      editor.behaviors.init = jest.fn(() => Promise.resolve())
+      const modelExpected = new Model(100, 100)
+      editor.behaviors.clear = jest.fn(() => Promise.resolve(modelExpected))
+      await editor.initialize()
+      await editor.clear()
+      expect(editor.behaviors.clear).toBeCalledTimes(1)
+    })
+    test('should reject when behaviors.clear is rejected', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      editor.behaviors.init = jest.fn(() => Promise.resolve())
+      editor.behaviors.clear = jest.fn(() => Promise.reject("pouet"))
+      expect(editor.clear()).rejects.toEqual("pouet")
+    })
+    test('should emit cleared event', async () =>
+    {
+      const testFunction = jest.fn()
+      publicEvent.addEventListener(EventType.CLEARED, testFunction)
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      const modelExpected = new Model(100, 100)
+      editor.behaviors.init = jest.fn(() => Promise.resolve())
+      editor.behaviors.clear = jest.fn(() => Promise.resolve(modelExpected))
+      await editor.initialize()
+      await editor.clear()
+      expect(testFunction).toBeCalledTimes(1)
+    })
+  })
+
+  describe('resize', () =>
+  {
+    test('should resolve when behaviors.resize is resolved', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      editor.behaviors.init = jest.fn(() => Promise.resolve())
+      const modelExpected = new Model(100, 100)
+      editor.behaviors.resize = jest.fn(() => Promise.resolve(modelExpected))
+      await editor.initialize()
+      await editor.resize()
+      expect(editor.behaviors.resize).toBeCalledTimes(1)
+    })
+    test('should reject when behaviors.resize is rejected', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      editor.behaviors.init = jest.fn(() => Promise.resolve())
+      editor.behaviors.resize = jest.fn(() => Promise.reject("pouet"))
+      expect(editor.resize()).rejects.toEqual("pouet")
+    })
+  })
+
+  describe('export', () =>
+  {
+    test('should resolve when behaviors.export is resolved', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      editor.behaviors.init = jest.fn(() => Promise.resolve())
+      const modelExpected = new Model(100, 100)
+      editor.behaviors.export = jest.fn(() => Promise.resolve(modelExpected))
+      await editor.initialize()
+      await editor.export()
+      expect(editor.behaviors.export).toBeCalledTimes(1)
+    })
+    test('should reject when behaviors.export is rejected', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      editor.behaviors.init = jest.fn(() => Promise.resolve())
+      editor.behaviors.export = jest.fn(() => Promise.reject("pouet"))
+      expect(editor.export()).rejects.toEqual("pouet")
+    })
+  })
+
+  describe('convert', () =>
+  {
+    test('should resolve when behaviors.convert is resolved', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      editor.behaviors.init = jest.fn(() => Promise.resolve())
+      const modelExpected = new Model(100, 100)
+      editor.behaviors.convert = jest.fn(() => Promise.resolve(modelExpected))
+      await editor.initialize()
+      await editor.convert()
+      expect(editor.behaviors.convert).toBeCalledTimes(1)
+    })
+    test('should reject when behaviors.convert is rejected', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      editor.behaviors.init = jest.fn(() => Promise.resolve())
+      editor.behaviors.convert = jest.fn(() => Promise.reject("pouet"))
+      expect(editor.convert()).rejects.toEqual("pouet")
+    })
+  })
+
+  describe('import', () =>
+  {
+    test('should resolve import Blob when behaviors.import is resolved', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      editor.behaviors.init = jest.fn(() => Promise.resolve())
+      await editor.initialize()
+      const model = new Model(100, 50)
+      editor.behaviors.import = jest.fn(() => Promise.resolve(model))
+      editor.events.emitImported = jest.fn()
+      await editor.import(new Blob(), 'text/plain')
+      expect(editor.events.emitImported).toBeCalledTimes(1)
+      expect(editor.behaviors.import).toBeCalledTimes(1)
+    })
+    test('should reject import Blob if behaviors.import is rejected', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      editor.behaviors.init = jest.fn(() => Promise.resolve())
+      await editor.initialize()
+      editor.behaviors.import = jest.fn(() => Promise.reject("pouet"))
+      editor.events.emitImported = jest.fn()
+      expect(editor.import(new Blob(), 'text/plain')).rejects.toEqual("pouet")
+    })
+    test('should reject import Blob if behaviors.import is not define', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      editor.behaviors.init = jest.fn(() => Promise.resolve())
+      await editor.initialize()
+      editor.behaviors.import = undefined
+      editor.events.emitImported = jest.fn()
+      expect(editor.import(new Blob(), 'text/plain')).rejects.toEqual("Import impossible, behaviors has no import function")
+    })
+
+    test('should resolve import Text  when behaviors.import is resolved', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      editor.behaviors.init = jest.fn(() => Promise.resolve())
+      await editor.initialize()
+      const model = new Model(100, 50)
+      editor.behaviors.import = jest.fn(() => Promise.resolve(model))
+      editor.events.emitImported = jest.fn()
+      await editor.import("hello", 'text/plain')
+      expect(editor.events.emitImported).toBeCalledTimes(1)
+      expect(editor.behaviors.import).toBeCalledTimes(1)
+    })
+    test('should reject import Text if behaviors.import is rejected', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      editor.behaviors.init = jest.fn(() => Promise.resolve())
+      await editor.initialize()
+      editor.behaviors.import = jest.fn(() => Promise.reject("pouet"))
+      editor.events.emitImported = jest.fn()
+      expect(editor.import("hello", 'text/plain')).rejects.toEqual("pouet")
+    })
+    test('should reject import Text if behaviors.import is not define', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      editor.behaviors.init = jest.fn(() => Promise.resolve())
+      await editor.initialize()
+      editor.behaviors.import = undefined
+      editor.events.emitImported = jest.fn()
+      expect(editor.import("hello", 'text/plain')).rejects.toEqual("Import impossible, behaviors has no import function")
+    })
+
+    test('should resolve import JIIX  when behaviors.import is resolved', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      editor.behaviors.init = jest.fn(() => Promise.resolve())
+      await editor.initialize()
+      const model = new Model(100, 50)
+      editor.behaviors.import = jest.fn(() => Promise.resolve(model))
+      editor.events.emitImported = jest.fn()
+      const jiix: TJIIXExport = {
+        type: "Text",
+        label: "h",
+        words: [
+          {
+            label: "h",
+            candidates: ["h", "k", "hi", "hr", "hn"],
+          },
+        ],
+        version: "3",
+        id: "MainBlock",
+      }
+      await editor.import(jiix)
+      expect(editor.events.emitImported).toBeCalledTimes(1)
+      expect(editor.behaviors.import).toBeCalledTimes(1)
+    })
+    test('should reject import JIIX if behaviors.import is rejected', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      editor.behaviors.init = jest.fn(() => Promise.resolve())
+      await editor.initialize()
+      editor.behaviors.import = jest.fn(() => Promise.reject("pouet"))
+      editor.events.emitImported = jest.fn()
+      const jiix: TJIIXExport = {
+        type: "Text",
+        label: "h",
+        words: [
+          {
+            label: "h",
+            candidates: ["h", "k", "hi", "hr", "hn"],
+          },
+        ],
+        version: "3",
+        id: "MainBlock",
+      }
+      expect(editor.import(jiix)).rejects.toEqual("pouet")
+    })
+    test('should reject import JIIX if behaviors.import is not define', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      editor.behaviors.init = jest.fn(() => Promise.resolve())
+      await editor.initialize()
+      editor.behaviors.import = undefined
+      editor.events.emitImported = jest.fn()
+      const jiix: TJIIXExport = {
+        type: "Text",
+        label: "h",
+        words: [
+          {
+            label: "h",
+            candidates: ["h", "k", "hi", "hr", "hn"],
+          },
+        ],
+        version: "3",
+        id: "MainBlock",
+      }
+      expect(editor.import(jiix)).rejects.toEqual("Import impossible, behaviors has no import function")
+    })
+
+    test('should resolve import points Events  when behaviors.importPointEvents is resolved', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      editor.behaviors.init = jest.fn(() => Promise.resolve())
+      await editor.initialize()
+      const model = new Model(100, 50)
+      const tstrokeToImport: TStroke[] = [
+        //@ts-ignore
+        {
+          "pointerType": "mouse",
+          "pointerId": 0,
+          "pointers": [
+            { "x": 604, "y": 226, "t": 1693494025427, "p": 0.1 },
+            { "x": 611, "y": 222, "t": 1693494025467, "p": 0.8 },
+            { "x": 621, "y": 222, "t": 1693494025484, "p": 0.68 },
+          ]
+        }
+      ]
+      editor.behaviors.importPointEvents = jest.fn(() => Promise.resolve(model))
+      await editor.importPointEvents(tstrokeToImport)
+      expect(editor.events.emitImported).toBeCalledTimes(1)
+      expect(editor.behaviors.importPointEvents).toBeCalledTimes(1)
+    })
+    test('should resolve import points Events  when behaviors.importPointEvents is resolved', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      editor.behaviors.init = jest.fn(() => Promise.resolve())
+      await editor.initialize()
+      const tstrokeToImport: TStroke[] = [
+        //@ts-ignore
+        {
+          "pointerType": "mouse",
+          "pointerId": 0,
+          "pointers": [
+            { "x": 604, "y": 226, "t": 1693494025427, "p": 0.1 },
+            { "x": 611, "y": 222, "t": 1693494025467, "p": 0.8 },
+            { "x": 621, "y": 222, "t": 1693494025484, "p": 0.68 },
+          ]
+        }
+      ]
+      editor.behaviors.importPointEvents = jest.fn(() => Promise.reject("pouet"))
+      expect(editor.importPointEvents(tstrokeToImport)).rejects.toEqual("pouet")
+    })
+    test('should reject import Points if behaviors.import is not define', async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement('div')
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      editor.behaviors.init = jest.fn(() => Promise.resolve())
+      await editor.initialize()
+      const tstrokeToImport: TStroke[] = [
+        //@ts-ignore
+        {
+          "pointerType": "mouse",
+          "pointerId": 0,
+          "pointers": [
+            { "x": 604, "y": 226, "t": 1693494025427, "p": 0.1 },
+            { "x": 611, "y": 222, "t": 1693494025467, "p": 0.8 },
+            { "x": 621, "y": 222, "t": 1693494025484, "p": 0.68 },
+          ]
+        }
+      ]
+      editor.behaviors.importPointEvents = undefined
+      expect(editor.importPointEvents(tstrokeToImport)).rejects.toEqual("Import impossible, behaviors has no importPointEvents function")
+    })
+  })
+
+  describe('Style', () =>
+  {
+    const wrapperHTML: HTMLElement = document.createElement('div')
+    let editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
     test('should init theme', () =>
     {
       expect(editor.theme).toStrictEqual(DefaultTheme)
+    })
+    test('should set theme', () =>
+    {
+      editor.behaviors.setTheme = jest.fn()
+      //@ts-ignore
+      const customTheme: TTheme = {
+        ink: {
+          width: 42,
+          color: "red",
+          "-myscript-pen-fill-color": "blue",
+          "-myscript-pen-fill-style": "style",
+          "-myscript-pen-width": 5
+        }
+      }
+      editor.theme = customTheme
+      expect(editor.behaviors.setTheme).toBeCalledTimes(1)
+      expect(editor.behaviors.setTheme).toBeCalledWith(customTheme)
+    })
+    test('should set penStyleClasses', () =>
+    {
+      editor.behaviors.setPenStyleClasses = jest.fn()
+      const customPenStyleClasses = "customPenStyleClasses"
+      editor.penStyleClasses = customPenStyleClasses
+      expect(editor.behaviors.setPenStyleClasses).toBeCalledTimes(1)
+      expect(editor.behaviors.setPenStyleClasses).toBeCalledWith(customPenStyleClasses)
     })
     test('should init penStyle', () =>
     {
       expect(editor.penStyle).toStrictEqual(DefaultPenStyle)
     })
+    test('should init penStyle', () =>
+    {
+      editor.behaviors.setPenStyle = jest.fn()
+      const customPenStyle: TPenStyle = {
+        width: 42,
+        color: "red",
+        "-myscript-pen-fill-color": "blue",
+        "-myscript-pen-fill-style": "style",
+        "-myscript-pen-width": 5
+      }
+      editor.penStyle = customPenStyle
+      expect(editor.behaviors.setPenStyle).toBeCalledTimes(1)
+      expect(editor.behaviors.setPenStyle).toBeCalledWith(customPenStyle)
+    })
   })
 
-  describe('mode', () => {
+  describe('Events', () =>
+  {
     const wrapperHTML: HTMLElement = document.createElement('div')
-    const editor = new Editor(wrapperHTML)
-    test('should init mode = Writing', () =>
+    const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+    // TODO problem with internal event singleton
+    test.skip('should call clear when internalEvent emit clear', () =>
     {
-      expect(editor.mode).toBe(EditorMode.Writing)
+      editor.clear = jest.fn()
+      expect(editor.clear).toBeCalledTimes(0)
+      InternalEvent.getInstance().emitClear()
+      expect(editor.clear).toBeCalledTimes(1)
     })
-    test('should set mode = erase', () =>
+    // TODO problem with internal event singleton
+    test.skip('should call convert when internalEvent emit convert', () =>
     {
-      editor.mode = EditorMode.Erasing
-      expect(wrapperHTML.classList).toContain('erasing')
+      editor.convert = jest.fn()
+      expect(editor.convert).toBeCalledTimes(0)
+      InternalEvent.getInstance().emitConvert()
+      expect(editor.convert).toBeCalledTimes(1)
     })
-    test('should toggle mode', () =>
+    // TODO problem with internal event singleton
+    test.skip('should emit changed when internalEvent emit changed', () =>
     {
-      editor.mode = EditorMode.Erasing
-      expect(wrapperHTML.classList).toContain('erasing')
-      editor.mode = EditorMode.Writing
-      expect(wrapperHTML.classList).not.toContain('erasing')
+      editor.events.emitChanged = jest.fn()
+      expect(editor.events.emitChanged).toBeCalledTimes(0)
+      InternalEvent.getInstance().emitContextChange({ canRedo: true, canUndo: true, empty: false, possibleUndoCount: 10, stack: [], stackIndex: 11 })
+      expect(editor.events.emitChanged).toBeCalledTimes(1)
+    })
+    // TODO problem with internal event singleton
+    test.skip('should emit idle when internalEvent emit idle', () =>
+    {
+      editor.events.emitIdle = jest.fn()
+      expect(editor.events.emitIdle).toBeCalledTimes(0)
+      InternalEvent.getInstance().emitIdle(true)
+      expect(editor.events.emitIdle).toBeCalledTimes(1)
     })
   })
-
-  // describe('pointer', () =>
-  // {
-  //   const wrapperHTML: HTMLElement = document.createElement('div')
-  //   const editor = new Editor(wrapperHTML)
-  //   editor.model.initCurrentStroke = jest.fn()
-  //   editor.model.appendToCurrentStroke = jest.fn()
-  //   editor.model.endCurrentStroke = jest.fn()
-  //   editor.behaviors.drawCurrentStroke = jest.fn()
-  //   editor.behaviors.updateModelRendering = jest.fn()
-
-  //   const eventTarget = document.createElement('div')
-  //   eventTarget.classList.add('ms-canvas')
-  //   const pointerDownEvt = new LeftClickEventFake('pointerdown', {
-  //     pointerType: "pen",
-  //     clientX: 1,
-  //     clientY: 1,
-  //     pressure: 1
-  //   })
-  //   const point: TPoint = { p: 1, t: 1, x: 1, y: 1}
-
-  //   test.skip('should pointerDown', () =>
-  //   {
-  //     // TODO find solution to define target on pointerDownEvt
-  //     editor.pointerDown(pointerDownEvt as PointerEvent, point)
-  //     expect(editor.model.initCurrentStroke).toHaveBeenCalledTimes(1)
-  //     expect(editor.behaviors.drawCurrentStroke).toHaveBeenCalledTimes(1)
-  //   })
-  //   test('should pointerMove', () =>
-  //   {
-  //     editor.pointerMove(pointerDownEvt as PointerEvent, point)
-  //     expect(editor.model.appendToCurrentStroke).toHaveBeenCalledTimes(1)
-  //     expect(editor.behaviors.drawCurrentStroke).toHaveBeenCalledTimes(1)
-  //   })
-  //   test('should pointerUp', () =>
-  //   {
-  //     editor.pointerUp(pointerDownEvt as PointerEvent, point)
-  //     expect(editor.model.endCurrentStroke).toHaveBeenCalledTimes(1)
-  //     expect(editor.behaviors.updateModelRendering).toHaveBeenCalledTimes(1)
-  //   })
-  // })
 
 })

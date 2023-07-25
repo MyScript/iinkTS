@@ -1,4 +1,3 @@
-const { testGesture } = require('../_partials/gesture-test')
 const { waitForEditorWebSocket, write, getExportedDatas } = require('../helper')
 const { ponyErase, ponyErasePrecisely } = require('../strokesDatas')
 
@@ -52,8 +51,7 @@ describe('Websocket Text', () => {
       waitForEditorWebSocket(page),
       page.click("#erase-precisely")
     ])
-
-    await page.waitForTimeout(5000)
+    await page.waitForTimeout(1000)
 
     const [ponyExports] = await Promise.all([
       getExportedDatas(page),
@@ -73,8 +71,4 @@ describe('Websocket Text', () => {
     const ponyEraseJiixReceived = ponyEraseExports['application/vnd.myscript.jiix']
     expect(ponyEraseJiixReceived.label).toEqual(ponyEraseJiixExpected.label)
   })
-
-  require('../_partials/smart-guide-test')
-
-  testGesture(-100)
 })

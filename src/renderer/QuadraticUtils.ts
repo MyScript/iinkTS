@@ -1,6 +1,6 @@
-import { TPartialXYPoint, TPoint } from "../@types/renderer/Point"
+import { TPoint, TPointer } from "../@types/geometry"
 
-export function computeLinksPoints(point: TPoint, angle: number, width: number): TPartialXYPoint[]
+export function computeLinksPoints(point: TPointer, angle: number, width: number): TPoint[]
 {
   const radius = point.p * width
   return [
@@ -15,7 +15,7 @@ export function computeLinksPoints(point: TPoint, angle: number, width: number):
   ]
 }
 
-export function computeMiddlePoint(point1: TPoint, point2: TPoint): TPoint
+export function computeMiddlePoint(point1: TPointer, point2: TPointer): TPointer
 {
   return {
     x: ((point2.x + point1.x) / 2),
@@ -25,7 +25,7 @@ export function computeMiddlePoint(point1: TPoint, point2: TPoint): TPoint
   }
 }
 
-export function computeAxeAngle(begin: TPoint, end: TPoint): number
+export function computeAxeAngle(begin: TPointer, end: TPointer): number
 {
   return Math.atan2(end.y - begin.y, end.x - begin.x)
 }

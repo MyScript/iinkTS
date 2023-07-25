@@ -1,6 +1,7 @@
 import {
   Editor,
   getAvailableLanguageList,
+  getAvailableFontList,
   DefaultConfiguration,
   DefaultEventsConfiguration,
   DefaultGrabberConfiguration,
@@ -20,6 +21,10 @@ describe('Iink.ts', () =>
   test('should export getAvailableLanguageList', async () =>
   {
     expect(getAvailableLanguageList).toBeDefined()
+  })
+  test('should export getAvailableFontList', async () =>
+  {
+    expect(getAvailableFontList).toBeDefined()
   })
   test('should export Editor', async () =>
   {

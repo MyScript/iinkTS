@@ -301,11 +301,11 @@ module.exports.ponyErasePrecisely = {
     {
       "application/vnd.myscript.jiix": {
         type: "Text",
-        label: "tony",
+        label: "pony",
         words: [
           {
             label: "pony",
-            candidates: ["tony", "oony", "rony", "wony", "pony"],
+            candidates: ["pony", "oony", "rony", "wony", "pony"],
           },
         ],
         version: "3",

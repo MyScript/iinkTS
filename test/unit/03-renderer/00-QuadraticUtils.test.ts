@@ -1,15 +1,15 @@
-import { TPoint } from '../../../src/@types/renderer/Point'
+import { TPointer } from '../../../src/@types/geometry'
 import { computeLinksPoints, computeMiddlePoint, computeAxeAngle } from '../../../src/renderer/QuadraticUtils'
 
 describe('QuadraticUtils.ts', () =>
 {
-  const p1: TPoint = {
+  const p1: TPointer = {
     p: 1,
     t: 1,
     x: 1,
     y: 1
   }
-  const p2: TPoint = {
+  const p2: TPointer = {
     p: 1,
     t: 1,
     x: 2,

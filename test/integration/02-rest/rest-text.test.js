@@ -114,7 +114,7 @@ describe('Rest Text', () => {
         page.click('#clear'),
       ])
       expect(promisesResult[0]).toBeNull()
-      expect(await getEditorModelExports(page)).toBeUndefined()
+      expect(await getEditorModelExports(page)).toBeNull()
 
       expect(await page.locator('#result').textContent()).toBe('')
     })

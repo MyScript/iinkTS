@@ -1,15 +1,13 @@
-import { TGrabberConfiguration } from "../configuration/GrabberConfiguration"
+import { TPointer } from "../geometry"
 
 export interface IGrabber {
-  setConfiguration(configuration: TGrabberConfiguration): void
-
   attach(domElement?: HTMLElement): void
 
   detach(domElement?: HTMLElement): void
 
-  onPointerDown(evt: PointerEvent, point: TPoint): void
+  onPointerDown(evt: PointerEvent, point: TPointer): void
 
-  onPointerMove(evt: PointerEvent, point: TPoint): void
+  onPointerMove(evt: PointerEvent, point: TPointer): void
 
-  onPointerUp(evt: PointerEvent, point: TPoint): void
+  onPointerUp(evt: PointerEvent, point: TPointer): void
 }
