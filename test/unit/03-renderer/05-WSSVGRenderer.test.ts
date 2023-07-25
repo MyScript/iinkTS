@@ -1,4 +1,4 @@
-import { SVGRenderer } from '../../../src/renderer/svg/SVGRenderer'
+import { WSSVGRenderer } from '../../../src/renderer/svg/WSSVGRenderer'
 import { DefaultPenStyle } from '../../../src/style/DefaultPenStyle'
 import { DefaultRenderingConfiguration } from '../../../src/configuration/DefaultConfiguration'
 import { TStroke } from '../../../src/@types/model/Stroke'
@@ -6,7 +6,7 @@ import { TUpdatePatchAppendChild, TUpdatePatchInsertBefore, TUpdatePatchRemoveAt
 import { Model } from '../../../src/model/Model'
 import { delay } from '../utils/helpers'
 
-describe('SVGRenderer.ts', () =>
+describe('WSSVGRenderer.ts', () =>
 {
   const stroke: TStroke = {
     type: 'pen',
@@ -18,16 +18,17 @@ describe('SVGRenderer.ts', () =>
     "-myscript-pen-width": DefaultPenStyle['-myscript-pen-width'],
     color: DefaultPenStyle.color,
     width: DefaultPenStyle.width,
-    x: [1, 2, 3],
-    y: [1, 2, 3],
-    t: [3, 3, 3],
-    p: [4, 4, 4],
-    l: [4, 4, 4],
+    pointers: [
+      { "x": 604, "y": 226, "t": 1693494025427, "p": 0.1 },
+      { "x": 611, "y": 222, "t": 1693494025467, "p": 0.8 },
+      { "x": 621, "y": 222, "t": 1693494025484, "p": 0.68 },
+    ],
+    length: 4
   }
 
   test('should instanciate', () =>
   {
-    const renderer = new SVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new WSSVGRenderer(DefaultRenderingConfiguration)
     expect(renderer).toBeDefined()
     expect(renderer.config).toStrictEqual(DefaultRenderingConfiguration)
     expect(renderer.stroker).toBeDefined()
@@ -36,7 +37,7 @@ describe('SVGRenderer.ts', () =>
   test('should initialise context', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new SVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new WSSVGRenderer(DefaultRenderingConfiguration)
     renderer.init(domElement)
 
     expect(renderer.context.parent).toBe(domElement)
@@ -45,7 +46,7 @@ describe('SVGRenderer.ts', () =>
   test('should updatesLayer when type = REPLACE_ALL on layer CAPTURE', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new SVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new WSSVGRenderer(DefaultRenderingConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -63,7 +64,7 @@ describe('SVGRenderer.ts', () =>
   test('should updatesLayer when type = REPLACE_ALL on layer MODEL', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new SVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new WSSVGRenderer(DefaultRenderingConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -83,7 +84,7 @@ describe('SVGRenderer.ts', () =>
   test('should updatesLayer when type = REPLACE_ELEMENT', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new SVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new WSSVGRenderer(DefaultRenderingConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -112,7 +113,7 @@ describe('SVGRenderer.ts', () =>
   test('should updatesLayer when type = REMOVE_ELEMENT on layer CAPTURE', async () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new SVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new WSSVGRenderer(DefaultRenderingConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -144,7 +145,7 @@ describe('SVGRenderer.ts', () =>
   test('should updatesLayer when type = REMOVE_ELEMENT on layer MODEL', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new SVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new WSSVGRenderer(DefaultRenderingConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -172,7 +173,7 @@ describe('SVGRenderer.ts', () =>
   test('should updatesLayer when type = APPEND_CHILD with parentId', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new SVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new WSSVGRenderer(DefaultRenderingConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -201,7 +202,7 @@ describe('SVGRenderer.ts', () =>
   test('should updatesLayer when type = APPEND_CHILD without parentId', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new SVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new WSSVGRenderer(DefaultRenderingConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -229,7 +230,7 @@ describe('SVGRenderer.ts', () =>
   test('should updatesLayer when type = REMOVE_CHILD', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new SVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new WSSVGRenderer(DefaultRenderingConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -259,7 +260,7 @@ describe('SVGRenderer.ts', () =>
   test('should updatesLayer when type = INSERT_BEFORE', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new SVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new WSSVGRenderer(DefaultRenderingConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -290,7 +291,7 @@ describe('SVGRenderer.ts', () =>
   test('should updatesLayer when type = SET_ATTRIBUTE with id', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new SVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new WSSVGRenderer(DefaultRenderingConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -319,7 +320,7 @@ describe('SVGRenderer.ts', () =>
   test('should updatesLayer when type = SET_ATTRIBUTE without id', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new SVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new WSSVGRenderer(DefaultRenderingConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -347,7 +348,7 @@ describe('SVGRenderer.ts', () =>
   test('should updatesLayer when type = REMOVE_ATTRIBUTE with id', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new SVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new WSSVGRenderer(DefaultRenderingConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -375,7 +376,7 @@ describe('SVGRenderer.ts', () =>
   test('should updatesLayer when type = REMOVE_ATTRIBUTE without id', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new SVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new WSSVGRenderer(DefaultRenderingConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -399,10 +400,10 @@ describe('SVGRenderer.ts', () =>
     expect(element?.getAttribute(updateRemoveAttribut.name)).toBeNull()
   })
 
-  test('should drawPendingStroke first time', () =>
+  test('should drawPendingStroke', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new SVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new WSSVGRenderer(DefaultRenderingConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -416,13 +417,14 @@ describe('SVGRenderer.ts', () =>
     renderer.drawPendingStroke(stroke)
 
     expect(renderer.stroker.drawStroke).toBeCalledTimes(1)
-    expect(renderer.stroker.drawStroke).toBeCalledWith(pendingStrokesGroup, stroke)
+    expect(renderer.stroker.drawStroke).toBeCalledWith(pendingStrokesGroup, stroke, [{ name: "style", value: "fill:undefined;stroke:transparent;" }])
   })
 
-  test('should drawPendingStroke first time', () =>
+  test('should drawPendingStroke when pointerType = eraser', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new SVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new WSSVGRenderer(DefaultRenderingConfiguration)
+    renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
     const svgModelElement: SVGElement = document.createElementNS("http://www.w3.org/2000/svg", 'svg') as SVGElement
@@ -432,22 +434,33 @@ describe('SVGRenderer.ts', () =>
     svgModelElement.appendChild(pendingStrokesGroup)
     domElement.appendChild(svgModelElement)
 
-    renderer.drawPendingStroke(stroke)
+    const eraseStroke: TStroke = {
+      type: 'pen',
+      pointerType: 'eraser',
+      pointerId: 0,
+      id: 'test',
+      "-myscript-pen-fill-color": DefaultPenStyle['-myscript-pen-fill-color'],
+      "-myscript-pen-fill-style": DefaultPenStyle['-myscript-pen-fill-color'],
+      "-myscript-pen-width": DefaultPenStyle['-myscript-pen-width'],
+      color: DefaultPenStyle.color,
+      width: DefaultPenStyle.width,
+      pointers: [
+        { "x": 604, "y": 226, "t": 1693494025427, "p": 0.1 },
+        { "x": 611, "y": 222, "t": 1693494025467, "p": 0.8 },
+        { "x": 621, "y": 222, "t": 1693494025484, "p": 0.68 },
+      ],
+      length: 4
+    }
+    renderer.drawPendingStroke(eraseStroke)
 
-    stroke.x.push(1, 2, 3, 4, 5, 6)
-    stroke.y.push(1, 2, 3, 4, 5, 6)
-    stroke.t.push(1, 2, 3, 4, 5, 6)
-    stroke.p.push(1, 2, 3, 4, 5, 6)
-    stroke.l.push(1, 2, 3, 4, 5, 6)
-    renderer.drawPendingStroke(stroke)
-
-    expect(pendingStrokesGroup.children).toHaveLength(1)
+    expect(renderer.stroker.drawStroke).toBeCalledTimes(1)
+    expect(renderer.stroker.drawStroke).toBeCalledWith(pendingStrokesGroup, eraseStroke, [{ name: "style", value: "fill:grey;stroke:transparent;shadowBlur:5;opacity:0.2;" }])
   })
 
   test('should clearPendingStroke', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new SVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new WSSVGRenderer(DefaultRenderingConfiguration)
     renderer.init(domElement)
 
     const svgModelElement: SVGElement = document.createElementNS("http://www.w3.org/2000/svg", 'svg') as SVGElement
@@ -473,7 +486,7 @@ describe('SVGRenderer.ts', () =>
   {
     const width = 100, height = 50
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new SVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new WSSVGRenderer(DefaultRenderingConfiguration)
     const model = new Model(width, height)
     renderer.init(domElement)
 
@@ -502,7 +515,7 @@ describe('SVGRenderer.ts', () =>
   test('should destroy', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new SVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new WSSVGRenderer(DefaultRenderingConfiguration)
     renderer.init(domElement)
 
     const svgModelElement: SVGElement = document.createElementNS("http://www.w3.org/2000/svg", 'svg') as SVGElement

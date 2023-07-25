@@ -25,7 +25,7 @@ export type TMathUndoRedoConfiguration = {
 export type TMathConfiguration = {
   mimeTypes: ("application/x-latex" | "application/mathml+xml" | "application/vnd.myscript.jiix")[]
   solver?: TSolverConfiguration
-  margin?: TMarginConfiguration
+  margin: TMarginConfiguration
   "undo-redo"?: TMathUndoRedoConfiguration
   customGrammar?: string
   customGrammarId?: string

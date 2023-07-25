@@ -1,15 +1,16 @@
 import { TRenderingConfiguration } from "../../@types/configuration/RenderingConfiguration"
 import { IModel } from "../../@types/model/Model"
 import { TUpdatePatch, TUpdatePatchAppendChild, TUpdatePatchInsertBefore, TUpdatePatchRemoveAttribut, TUpdatePatchRemoveChild, TUpdatePatchRemoveElement, TUpdatePatchReplaceAll, TUpdatePatchReplaceELement, TUpdatePatchSetAttribut } from "../../@types/recognizer/WSRecognizer"
-import { IRenderer, TSVGRendererContext } from "../../@types/renderer/Renderer"
 import { TStroke } from "../../@types/model/Stroke"
 import { SVGQuadraticStroker } from "./SVGQuadraticStroker"
 
-export class SVGRenderer implements IRenderer
+export class WSSVGRenderer
 {
   config: TRenderingConfiguration
   stroker: SVGQuadraticStroker
-  context!: TSVGRendererContext
+  context!: {
+    parent: HTMLElement
+  }
 
   constructor(config: TRenderingConfiguration)
   {
@@ -27,11 +28,14 @@ export class SVGRenderer implements IRenderer
 
   #drawStroke(svgElement: SVGElement, stroke: TStroke)
   {
+    let style: string
     if (stroke.pointerType === "eraser") {
-      this.stroker.drawErasingStroke(svgElement, stroke)
+      stroke.width = 20
+      style = "fill:grey;stroke:transparent;shadowBlur:5;opacity:0.2;"
     } else {
-      this.stroker.drawStroke(svgElement, stroke)
+      style = `fill:${ stroke.color };stroke:transparent;`
     }
+    this.stroker.drawStroke(svgElement, stroke, [{ name: "style", value: style }])
   }
 
   #replaceAll(layerName: string, update: TUpdatePatchReplaceAll): void
@@ -140,6 +144,7 @@ export class SVGRenderer implements IRenderer
   updatesLayer(layerName: string, updates: TUpdatePatch[]): void
   {
     updates.forEach(u => this.updateLayer(layerName, u))
+    this.clearPendingStroke()
   }
 
   clearPendingStroke(): void

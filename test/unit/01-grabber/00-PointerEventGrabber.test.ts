@@ -101,7 +101,7 @@ describe('PointerEventGrabber.ts', () =>
     })
   })
 
-  describe('Should extract TPoint from event', () =>
+  describe('Should extract TPointer from event', () =>
   {
     const wrapperHTML: HTMLElement = document.createElement('div')
     wrapperHTML.style.width = '100px'
@@ -112,7 +112,7 @@ describe('PointerEventGrabber.ts', () =>
     grabber.onPointerDown = jest.fn()
     grabber.attach(wrapperHTML)
 
-    test('should extract TPoint from mouseEvent', () =>
+    test('should extract TPointer from mouseEvent', () =>
     {
       const mouseDownEvt = new LeftClickEventFake('pointerdown', {
         pointerType: "pen",
@@ -134,7 +134,7 @@ describe('PointerEventGrabber.ts', () =>
         )
     })
 
-    test('should extract TPoint from touchEvent', () =>
+    test('should extract TPointer from touchEvent', () =>
     {
       const touchDownEvt = new TouchEventFake('pointerdown', {
         pointerType: "pen",

@@ -1,7 +1,9 @@
+import { TPointer } from "../geometry"
 import { TSymbol } from "../renderer/Symbol"
 import { TPenStyle } from "../style/PenStyle"
 
 export type TStrokeJSON = {
+  id: string
   pointerType: string
   x: number[]
   y: number[]
@@ -14,16 +16,12 @@ export type TStrokeGroupJSON = {
   strokes: TStrokeJSON[]
 }
 
-export type TStroke = TSymbol & TStrokeJSON & {
-  id?: string
+export type TStroke = TSymbol & {
+  id: string
   pointerId: number
-  l: number[]
-}
-
-
-export type TStrokesPenStyle = {
-  penStyle: TPenStyle
-  strokes: TStroke[]
+  pointerType: string
+  pointers: TPointer[]
+  length: number
 }
 
 export type TStrokeGroup = {

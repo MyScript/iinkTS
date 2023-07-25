@@ -87,6 +87,8 @@ export const InternalEventType = {
   CONVERT: "internal_convert",
   CLEAR: "internal_clear",
   CONTEXT_CHANGE: "internal_context_change",
+  IDLE: "internal_idle",
+  WS_CLOSED: "internal_websocket_closed",
 } as const
 
 /**
@@ -111,10 +113,21 @@ export const Exports = {
 } as const
 
 /**
+ * @group Editor
+ * @remarks List the possibilities of interactions
+ */
+export const enum ModeInteraction
+{
+  Writing = "writing",
+  Erasing = "erasing",
+  // Selecting = "selecting"
+}
+
+/**
  * @group Constants
  */
 export default {
   Error,
   EventType,
-  Exports
+  Exports,
 } as const

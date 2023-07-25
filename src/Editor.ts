@@ -1,34 +1,23 @@
-import { TEditorOptions } from "./@types/Editor"
-import { TConfiguration, TConfigurationClient } from "./@types/Configuration"
+import { TConfiguration } from "./@types/Configuration"
 import { IGrabber } from "./@types/grabber/Grabber"
-import { TStroke, TStrokeGroup } from "./@types/model/Stroke"
+import { TStroke } from "./@types/model/Stroke"
 import { IModel, TExport, TJIIXExport } from "./@types/model/Model"
-import { TPoint } from "./@types/renderer/Point"
 import { TPenStyle } from "./@types/style/PenStyle"
 import { TTheme } from "./@types/style/Theme"
-import { IBehaviors } from "./@types/Behaviors"
+import { IBehaviors, TBehaviorOptions } from "./@types/Behaviors"
 import { TConverstionState } from "./@types/configuration/RecognitionConfiguration"
 import { TMarginConfiguration } from "./@types/configuration/recognition/MarginConfiguration"
 import { TUndoRedoContext } from "./@types/undo-redo/UndoRedoContext"
 
-import { Exports } from "./Constants"
-import { BehaviorsManager } from "./behaviors/BehaviorsManager"
-import { Configuration } from "./configuration/Configuration"
+import { Exports, ModeInteraction } from "./Constants"
 import { PublicEvent } from "./event/PublicEvent"
 import { InternalEvent } from "./event/InternalEvent"
-import { Model } from "./model/Model"
-import { StyleManager } from "./style/StyleManager"
 import { SmartGuide } from "./smartguide/SmartGuide"
 import { DeferredPromise } from "./utils/DeferredPromise"
+import { RestBehaviors } from "./behaviors/RestBehaviors"
+import { WSBehaviors } from "./behaviors/WSBehaviors"
 
 import "./iink.css"
-
-export enum EditorMode
-{
-  Writing = "writing",
-  Erasing = "erasing",
-  // Selecting = "selecting"
-}
 
 export type HTMLEditorElement = HTMLElement &
 {
@@ -40,28 +29,23 @@ export class Editor
   wrapperHTML: HTMLEditorElement
   #loaderHTML: HTMLDivElement
   #messageHTML: HTMLDivElement
-  #configuration: Configuration
-  #behaviorsManager: BehaviorsManager
-  #styleManager: StyleManager
-  #localPenStyle: TPenStyle
+  #behaviors!: IBehaviors
   #smartGuide?: SmartGuide
-  #mode: EditorMode
-  #initializationDeferred: DeferredPromise<boolean>
+  #initializationDeferred: DeferredPromise<void>
 
-  model: IModel
   debug = false
 
-  constructor(wrapperHTML: HTMLElement, options?: TEditorOptions)
+  constructor(wrapperHTML: HTMLElement, options: TBehaviorOptions, globalClassCss = "ms-editor")
   {
-    this.#initializationDeferred = new DeferredPromise<boolean>()
+    this.#initializationDeferred = new DeferredPromise<void>()
 
     this.wrapperHTML = wrapperHTML as HTMLEditorElement
-    this.wrapperHTML.classList.add(options?.globalClassCss || "ms-editor")
+    this.wrapperHTML.classList.add(globalClassCss)
     this.events.setElement(this.wrapperHTML)
 
     this.#loaderHTML = document.createElement("div")
     this.#loaderHTML.classList.add("loader")
-    this.#loaderHTML.style.display = "initial"
+    this.#loaderHTML.style.display = "none"
     this.wrapperHTML.appendChild(this.#loaderHTML)
 
     this.#messageHTML = document.createElement("div")
@@ -69,63 +53,48 @@ export class Editor
     this.#messageHTML.style.display = "none"
     this.wrapperHTML.appendChild(this.#messageHTML)
 
-    this.#mode = EditorMode.Writing
-
-    this.#styleManager = new StyleManager(options?.penStyle, options?.theme)
-    this.#localPenStyle = this.#styleManager.penStyle
-
-    this.#configuration = new Configuration(options?.configuration)
-
-    const width = Math.max(this.wrapperHTML.clientWidth, this.configuration.rendering.minWidth)
-    const height = Math.max(this.wrapperHTML.clientHeight, this.configuration.rendering.minHeight)
-    this.model = new Model(width, height)
-
-    this.#behaviorsManager = new BehaviorsManager(this.configuration, this.model, options?.behaviors)
-
-    this.#initalizeBehaviors()
-    this.#initializeSmartGuide()
+    this.#instantiateBehaviors(options)
     this.#addListeners()
   }
 
-  get initializationPromise(): Promise<boolean>
+  get initializationPromise(): Promise<void>
   {
     return this.#initializationDeferred.promise
   }
 
+  get model(): IModel
+  {
+    return this.behaviors.model
+  }
+
+  get behaviors(): IBehaviors
+  {
+    return this.#behaviors
+  }
+
   get configuration(): TConfiguration
   {
-    return this.#configuration
+    return this.behaviors.configuration
+  }
+  set configuration(configuration: TConfiguration)
+  {
+    this.#instantiateBehaviors({ configuration })
+    this.initialize()
   }
 
-  set configuration(config: TConfigurationClient)
+  get mode(): ModeInteraction
   {
-    this.#initializationDeferred = new DeferredPromise<boolean>()
-    this.#configuration.overrideDefaultConfiguration(config)
-
-    this.model.clear()
-    this.model.height = Math.max(this.wrapperHTML.clientHeight, this.#configuration.rendering.minHeight)
-    this.model.width = Math.max(this.wrapperHTML.clientWidth, this.#configuration.rendering.minWidth)
-
-    this.#behaviorsManager.overrideDefaultBehaviors(this.#configuration, this.model)
-    this.#initalizeBehaviors()
-
-    this.#initializeSmartGuide()
+    return this.behaviors.mode
   }
-
-  get mode(): EditorMode
+  set mode(m: ModeInteraction)
   {
-    return this.#mode
-  }
-
-  set mode(m: EditorMode)
-  {
-    this.#mode = m
-    switch (this.#mode) {
-      case EditorMode.Erasing:
+    this.behaviors.mode = m
+    switch (this.behaviors.mode) {
+      case ModeInteraction.Erasing:
         this.wrapperHTML.classList.add("erasing")
         this.wrapperHTML.classList.remove("selecting")
         break
-      // case EditorMode.Selecting:
+      // case ModeInteraction.Selecting:
       //   this.model.resetSelectedStrokes()
       //   this.wrapperHTML.classList.remove("erasing")
       //   this.wrapperHTML.classList.add("selecting")
@@ -143,11 +112,6 @@ export class Editor
     return PublicEvent.getInstance()
   }
 
-  get behaviors(): IBehaviors
-  {
-    return this.#behaviorsManager.behaviors
-  }
-
   get context(): TUndoRedoContext
   {
     return this.behaviors.context
@@ -155,48 +119,80 @@ export class Editor
 
   get grabber(): IGrabber
   {
-    return this.#behaviorsManager.behaviors.grabber
+    return this.behaviors.grabber
   }
 
-  get theme(): TTheme
+  get currentPenStyle(): TPenStyle
   {
-    return this.#styleManager.theme
-  }
-
-  set theme(t: TTheme)
-  {
-    this.#styleManager.overrideDefaultTheme(t)
-    if (this.behaviors.setTheme) {
-      this.behaviors.setTheme(this.theme)
-    }
-  }
-
-  get penStyleClasses(): string
-  {
-    return this.#styleManager.penStyleClasses
-  }
-
-  set penStyleClasses(psc: string)
-  {
-    this.#styleManager.penStyleClasses = psc
-    this.#localPenStyle = (this.theme[`.${ this.penStyleClasses }`]) as TPenStyle
-    if (this.behaviors.setPenStyleClasses) {
-      this.behaviors.setPenStyleClasses(psc)
-    }
+    return this.behaviors.currentPenStyle
   }
 
   get penStyle(): TPenStyle
   {
-    return this.#styleManager.penStyle
+    return this.behaviors.penStyle
   }
-
   set penStyle(ps: TPenStyle)
   {
-    this.#styleManager.overrideDefaultPenStyle(ps)
-    this.#localPenStyle = this.penStyle
-    if (this.behaviors.setPenStyle) {
-      this.behaviors.setPenStyle(this.penStyle)
+    this.behaviors.setPenStyle(ps)
+  }
+
+  get theme(): TTheme
+  {
+    return this.behaviors.theme
+  }
+  set theme(t: TTheme)
+  {
+    this.behaviors.setTheme(t)
+  }
+
+  get penStyleClasses(): string
+  {
+    return this.behaviors.penStyleClasses
+  }
+  set penStyleClasses(psc: string)
+  {
+    this.behaviors.setPenStyleClasses(psc)
+  }
+
+  #instantiateBehaviors(options: TBehaviorOptions)
+  {
+    if (!options?.configuration) {
+      throw new Error("Configuration required")
     }
+    if (this.#behaviors) {
+      this.#behaviors.destroy()
+    }
+    let defaultBehaviors: IBehaviors
+    if (options.configuration.server?.protocol === "REST") {
+      defaultBehaviors = new RestBehaviors(options)
+    } else {
+      defaultBehaviors = new WSBehaviors(options)
+    }
+    this.#behaviors = Object.assign(defaultBehaviors, options.behaviors)
+  }
+
+  #initializeBehaviors(): Promise<void>
+  {
+    this.#initializationDeferred = new DeferredPromise<void>()
+    this.#loaderHTML.style.display = "initial"
+    this.#cleanMessage()
+    return this.behaviors.init(this.wrapperHTML)
+      .then(async () =>
+      {
+        this.wrapperHTML.editor = this
+        this.#initializationDeferred.resolve()
+        this.events.emitLoaded()
+      })
+      .catch((e: Error) =>
+      {
+        this.#initializationDeferred.reject(e)
+        this.#showError(e)
+      })
+      .finally(() =>
+      {
+        this.#loaderHTML.style.display = "none"
+        return this.#initializationDeferred.promise
+      })
   }
 
   #initializeSmartGuide(): void
@@ -204,7 +200,7 @@ export class Editor
     this.#smartGuide?.destroy()
     if (this.configuration.rendering.smartGuide.enable) {
       this.#smartGuide = new SmartGuide()
-      let margin
+      let margin: TMarginConfiguration
       switch (this.configuration.recognition.type) {
         case "TEXT":
           margin = this.configuration.recognition.text.margin
@@ -221,43 +217,8 @@ export class Editor
           }
           break
       }
-      this.#smartGuide.init(this.wrapperHTML, margin as TMarginConfiguration, this.configuration.rendering)
+      this.#smartGuide.init(this.wrapperHTML, margin, this.configuration.rendering)
     }
-  }
-
-  #initalizeBehaviors(): void
-  {
-    this.#cleanMessage()
-    this.#behaviorsManager.init(this.wrapperHTML)
-      .then(async () =>
-      {
-        this.grabber.onPointerDown = this.onPointerDown.bind(this)
-        this.grabber.onPointerMove = this.onPointerMove.bind(this)
-        this.grabber.onPointerUp = this.onPointerUp.bind(this)
-
-        if (this.behaviors.setPenStyle) {
-          this.behaviors.setPenStyle(this.penStyle)
-        }
-        if (this.behaviors.setTheme) {
-          this.behaviors.setTheme(this.theme)
-        }
-        if (this.behaviors.setPenStyleClasses) {
-          this.behaviors.setPenStyleClasses(this.penStyleClasses)
-        }
-
-        this.wrapperHTML.editor = this
-        this.#initializationDeferred.resolve(true)
-        this.events.emitLoaded()
-      })
-      .catch((e: Error) =>
-      {
-        this.#initializationDeferred.resolve(false)
-        this.#showError(e)
-      })
-      .finally(() =>
-      {
-        this.#loaderHTML.style.display = "none"
-      })
   }
 
   #cleanMessage()
@@ -301,7 +262,7 @@ export class Editor
   {
     if (this.debug) {
       let panel = document.getElementById("stroke-panel")
-      const text = JSON.stringify(this.model.rawStrokes.map((s: TStroke) => ({ pointerType: s.pointerType, pointerId: s.pointerId, x: s.x, y: s.y, t: s.t, p: s.p, })))
+      const text = JSON.stringify(this.model.rawStrokes.map((s: TStroke) => ({ pointerType: s.pointerType, pointerId: s.pointerId, pointers: s.pointers })))
       if (!panel) {
         panel = document.createElement("div")
         panel.id = "stroke-panel"
@@ -326,11 +287,17 @@ export class Editor
     InternalEvent.getInstance().addNotifListener(this.#showNotif.bind(this))
     InternalEvent.getInstance().addClearMessageListener(this.#cleanMessage.bind(this))
     InternalEvent.getInstance().addContextChangeListener(this.#onContextChange.bind(this))
+    InternalEvent.getInstance().addIdleListener(this.#onIdleChange.bind(this))
   }
 
   #onContextChange = (context: TUndoRedoContext) =>
   {
     this.events.emitChanged(context)
+  }
+
+  #onIdleChange = (idle: boolean) =>
+  {
+    this.events.emitIdle(idle)
   }
 
   #onExport(exports: TExport): void
@@ -342,6 +309,7 @@ export class Editor
         this.#smartGuide?.update(jjix)
       }
     }
+    this.#showStrokesIfDebug()
     this.events.emitExported(exports)
   }
 
@@ -350,115 +318,32 @@ export class Editor
     this.import(new Blob([JSON.stringify(jiix)], { type: Exports.JIIX }), Exports.JIIX)
   }
 
-  onPointerDown(evt: PointerEvent, point: TPoint): void
+  async initialize(): Promise<void>
   {
-    const target: Element = (evt.target as Element)
-    const pointerDownOnEditor = target?.id === this.wrapperHTML.id || target?.classList?.contains("ms-canvas")
-    if (pointerDownOnEditor) {
-      let { pointerType } = evt
-      const style: TPenStyle = Object.assign({}, this.theme?.ink, this.#localPenStyle)
-      switch (this.#mode) {
-        // case EditorMode.Selecting:
-        //   this.model.appendSelectedStrokesFromPoint(point)
-        //   break;
-        case EditorMode.Erasing:
-          if (this.configuration.server.protocol === "WEBSOCKET") {
-            pointerType = "eraser"
-            this.model.initCurrentStroke(point, evt.pointerId, pointerType, style)
-            this.behaviors.drawCurrentStroke(this.model)
-          } else {
-            if (this.model.removeStrokesFromPoint(point) > 0) {
-              this.model.endCurrentStroke(point, this.penStyle)
-              this.behaviors.updateModelRendering(this.model)
-                .then(model => Object.assign(this.model, model))
-                .catch(error => this.#showError(error as Error))
-            }
-          }
-          break
-        default:
-          this.model.initCurrentStroke(point, evt.pointerId, pointerType, style)
-          this.behaviors.drawCurrentStroke(this.model)
-          break
-      }
-    }
-  }
-
-  onPointerMove(_evt: PointerEvent, point: TPoint): void
-  {
-    switch (this.#mode) {
-      // case EditorMode.Selecting:
-      //   this.model.appendSelectedStrokesFromPoint(point)
-      //   break;
-      case EditorMode.Erasing:
-        if (this.configuration.server.protocol === "WEBSOCKET") {
-          this.model.appendToCurrentStroke(point)
-        } else {
-          if (this.model.removeStrokesFromPoint(point) > 0) {
-            this.model.endCurrentStroke(point, this.penStyle)
-            this.behaviors.updateModelRendering(this.model)
-              .then(model => Object.assign(this.model, model))
-              .catch(error => this.#showError(error as Error))
-          }
-        }
-        break
-      default:
-        this.model.appendToCurrentStroke(point)
-        break
-    }
-    this.behaviors.drawCurrentStroke(this.model)
-  }
-
-  onPointerUp(_evt: PointerEvent, point: TPoint): void
-  {
-    switch (this.#mode) {
-      // case EditorMode.Selecting:
-      //   this.model.appendSelectedStrokesFromPoint(point)
-      //   break;
-      case EditorMode.Erasing:
-        if (this.configuration.server.protocol === "WEBSOCKET") {
-          this.model.endCurrentStroke(point, this.penStyle)
-          this.behaviors.updateModelRendering(this.model)
-            .then(model => Object.assign(this.model, model))
-            .catch(error => this.#showError(error as Error))
-        } else {
-          if (this.model.removeStrokesFromPoint(point) > 0) {
-            this.model.endCurrentStroke(point, this.penStyle)
-            this.behaviors.updateModelRendering(this.model)
-              .then(model => Object.assign(this.model, model))
-              .catch(error => this.#showError(error as Error))
-          }
-        }
-        break
-      default:
-        this.model.endCurrentStroke(point, this.penStyle)
-        this.behaviors.updateModelRendering(this.model)
-          .then(model => Object.assign(this.model, model))
-          .catch(error => this.#showError(error as Error))
-        break
-    }
-    this.#showStrokesIfDebug()
+    await this.#initializeBehaviors()
+    this.#initializeSmartGuide()
   }
 
   async undo(): Promise<IModel>
   {
-    const model = await this.behaviors.undo(this.model)
-    Object.assign(this.model, model)
+    await this.#initializationDeferred.promise
+    await this.behaviors.undo()
     this.#showStrokesIfDebug()
     return this.model
   }
 
   async redo(): Promise<IModel>
   {
-    const model = await this.behaviors.redo(this.model)
-    Object.assign(this.model, model)
+    await this.#initializationDeferred.promise
+    await this.behaviors.redo()
     this.#showStrokesIfDebug()
     return this.model
   }
 
   async clear(): Promise<IModel>
   {
-    const model = await this.behaviors.clear(this.model)
-    Object.assign(this.model, model)
+    await this.#initializationDeferred.promise
+    await this.behaviors.clear()
     this.events.emitCleared(this.model)
     this.#showStrokesIfDebug()
     return this.model
@@ -466,33 +351,34 @@ export class Editor
 
   async resize(): Promise<IModel>
   {
+    await this.#initializationDeferred.promise
     if (this.configuration.rendering.smartGuide.enable) {
       this.#smartGuide?.resize()
     }
-    this.model.height = Math.max(this.wrapperHTML.clientHeight, this.configuration.rendering.minHeight)
-    this.model.width = Math.max(this.wrapperHTML.clientWidth, this.configuration.rendering.minWidth)
-    const model = await this.behaviors.resize(this.model)
-    Object.assign(this.model, model)
+    const height = Math.max(this.wrapperHTML.clientHeight, this.configuration.rendering.minHeight)
+    const width = Math.max(this.wrapperHTML.clientWidth, this.configuration.rendering.minWidth)
+    await this.behaviors.resize(height, width)
     return this.model
   }
 
   async export(mimeTypes?: string[]): Promise<IModel>
   {
-    const model = await this.behaviors.export(this.model, mimeTypes)
-    Object.assign(this.model, model)
+    await this.#initializationDeferred.promise
+    await this.behaviors.export(mimeTypes)
     return this.model
   }
 
   async convert(params?: { conversionState?: TConverstionState, mimeTypes?: string[] }): Promise<IModel | never>
   {
-    const model = await this.behaviors.convert(this.model, params?.conversionState, params?.mimeTypes)
-    Object.assign(this.model, model)
+    await this.#initializationDeferred.promise
+    await this.behaviors.convert(params?.conversionState, params?.mimeTypes)
     this.events.emitConverted(this.model.converts as TExport)
     return this.model
   }
 
   async import(data: Blob | string | TJIIXExport, mimeType?: string): Promise<IModel | never>
   {
+    await this.#initializationDeferred.promise
     if (this.behaviors.import) {
       let blobToImport: Blob
       if (data instanceof Blob) {
@@ -504,8 +390,7 @@ export class Editor
       else {
         blobToImport = new Blob([JSON.stringify(data)])
       }
-      const model = await this.behaviors.import(this.model, blobToImport, mimeType)
-      Object.assign(this.model, model)
+      await this.behaviors.import(blobToImport, mimeType)
       this.events.emitImported(this.model.exports as TExport)
       return this.model
     }
@@ -514,31 +399,13 @@ export class Editor
 
   async importPointEvents(strokes: TStroke[]): Promise<IModel>
   {
+    await this.#initializationDeferred.promise
     if (this.behaviors.importPointEvents) {
-      this.model = await this.behaviors.importPointEvents(this.model, strokes)
+      await this.behaviors.importPointEvents(strokes)
       this.events.emitImported(this.model.exports as TExport)
       return this.model
     }
-    else {
-      throw new Error("Import points not implemented")
-    }
+    return Promise.reject("Import impossible, behaviors has no importPointEvents function")
   }
 
-  async reDraw(rawStrokes: TStroke[], strokeGroups: TStrokeGroup[])
-  {
-    rawStrokes.forEach((stroke) =>
-    {
-      this.model.addStroke(stroke)
-    })
-    strokeGroups.forEach((group) =>
-    {
-      group.strokes.forEach((strokeFromGroup) =>
-      {
-        this.model.addStrokeToGroup(strokeFromGroup, group.penStyle)
-      })
-    })
-    return this.behaviors.updateModelRendering(this.model)
-      .then(model => Object.assign(this.model, model))
-      .catch(error => this.#showError(error as Error))
-  }
 }

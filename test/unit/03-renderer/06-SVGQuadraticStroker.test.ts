@@ -3,7 +3,7 @@ import { TStroke } from '../../../src/@types/model/Stroke'
 
 describe('SVGQuadraticStroker.ts', () =>
 {
-
+  //@ts-ignore
   const stroke: TStroke = {
     type: 'pen',
     pointerType: 'pen',
@@ -14,11 +14,11 @@ describe('SVGQuadraticStroker.ts', () =>
     "-myscript-pen-width": 1,
     color: 'red',
     width: 1,
-    x:[1, 2, 3],
-    y:[1, 2, 3],
-    t:[3, 3, 3],
-    p:[4, 4, 4],
-    l:[4, 4, 4],
+    "pointers": [
+      { "x": 604, "y": 226, "t": 1693494025427, "p": 0.1 },
+      { "x": 611, "y": 222, "t": 1693494025467, "p": 0.8 },
+      { "x": 621, "y": 222, "t": 1693494025484, "p": 0.68 },
+    ]
   }
 
   test('should instanciate', () =>
@@ -34,21 +34,17 @@ describe('SVGQuadraticStroker.ts', () =>
     stroker.drawStroke(svgElement, stroke)
     const pathElement = svgElement.querySelector('path')
     expect(pathElement?.getAttribute('id')).toEqual(stroke.id)
-    expect(pathElement?.getAttribute('color')).toEqual(stroke.color)
-    expect(pathElement?.getAttribute('style')).toEqual(`fill:${stroke.color};stroke:transparent;`)
-    expect(pathElement?.classList).toContain('pending-stroke')
+    expect(pathElement?.getAttribute('type')).toEqual("stroke")
   })
 
-  test('should drawErasingStroke', () =>
+  test('should drawStroke with attrs', () =>
   {
     const svgElement: SVGElement = document.createElementNS("http://www.w3.org/2000/svg", 'svg') as SVGElement
     const stroker = new SVGQuadraticStroker()
-    stroker.drawErasingStroke(svgElement, stroke)
+    stroker.drawStroke(svgElement, stroke, [{ name: "style", value: `fill:${stroke.color};stroke:transparent;`}])
     const pathElement = svgElement.querySelector('path')
     expect(pathElement?.getAttribute('id')).toEqual(stroke.id)
-    expect(pathElement?.getAttribute('style')).toEqual('fill:grey;stroke:transparent;shadowBlur:5;opacity:0.2;')
-    expect(pathElement?.classList).toContain('erasing-stroke')
+    expect(pathElement?.getAttribute('type')).toEqual("stroke")
+    expect(pathElement?.getAttribute('style')).toEqual(`fill:${stroke.color};stroke:transparent;`)
   })
-
-
 })

@@ -1,5 +1,5 @@
 import { TPenStyle } from "../style/PenStyle"
-import { TPartialXYPoint } from "./Point"
+import { TPoint, TPointer } from "../geometry"
 
 export type TSymbol = TPenStyle & {
   elementType?: string
@@ -12,7 +12,7 @@ export type TShapeSymbol = TSymbol & {
 }
 
 export type TShapeEllipseSymbol = TSymbol & {
-  centerPoint: TPartialXYPoint
+  centerPoint: TPoint
   maxRadius: number
   minRadius: number
   orientation: number
@@ -25,14 +25,14 @@ export type TShapeEllipseSymbol = TSymbol & {
 }
 
 export type TShapeLineSymbol = TShapeEllipseSymbol & {
-  firstPoint: TPartialXYPoint
-  lastPoint: TPartialXYPoint
+  firstPoint: TPoint
+  lastPoint: TPoint
 }
 
 export type TLineSymbol = TSymbol & {
   data: {
-    p1: TPartialXYPoint
-    p2: TPartialXYPoint
+    p1: TPoint
+    p2: TPoint
   }
 }
 
@@ -52,7 +52,7 @@ export type TUnderLineSymbol = TSymbol & {
 }
 
 export type TTextUnderlineDataSymbol = {
-  topLeftPoint: TPoint
+  topLeftPoint: TPointer
   height: number
   width: number
   textHeight: number

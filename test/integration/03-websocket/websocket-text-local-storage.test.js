@@ -1,4 +1,3 @@
-/* const { testGesture } = require('../_partials/gesture-test') */
 const { waitForEditorWebSocket, write, getExportedDatas, waitForTimeout, getEditorModelExports, getEditorModelExportsType } = require('../helper')
 const { helloOneStroke } = require('../strokesDatas')
 

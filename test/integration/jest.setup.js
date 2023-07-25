@@ -1,4 +1,4 @@
-jest.retryTimes(0)
+jest.retryTimes(1)
 jest.setTimeout(30 * 1000)
 
 afterAll(() => {

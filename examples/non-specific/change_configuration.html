@@ -37,6 +37,10 @@
       height: calc(100% - 105px);
     }
 
+    .content {
+      width: 75%;
+    }
+
     .config {
       border-left: solid black 1px;
       width: 25%;
@@ -408,6 +412,14 @@
       recognitionMimeTypesElement.querySelector('option[value="application/vnd.myscript.jiix"]').disabled = e.srcElement.checked;
     })
 
+    initInputsValues();
+
+    /**
+     * Instanciate editor
+     * @param {Element} The DOM element to attach the ink paper
+     */
+    editor = new iink.Editor(editorElement)
+
     async function loadEditor() {
       const res = await fetch('../server-configuration.json');
       const conf = await res.json();
@@ -416,12 +428,13 @@
         ...conf
       };
 
-      initInputsValues();
-
       const options = {
         configuration: defaultConfiguration
       };
-      const editor = new iink.Editor(editorElement, options);
+      /**
+       *  async initialize editor behaviors
+       */
+      await editor.initialize(options)
 
       editor.events.addEventListener('exported', (event) => {
         resultElement.innerHTML = JSON.stringify(event.detail);

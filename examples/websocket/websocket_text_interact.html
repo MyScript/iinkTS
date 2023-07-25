@@ -55,8 +55,7 @@
       const nextButton = document.createElement("button")
       nextButton.id = "nextButton"
       nextButton.classList.add("classic-btn")
-      nextButton.innerHTML =
-        'Next question<svg class="icn"><use xmlns:xlink="http://www.w3.org/1999/xlink" href="#icn-play"></use></svg>'
+      nextButton.innerHTML = 'Next question<svg class="icn"><use xmlns:xlink="http://www.w3.org/1999/xlink" href="#icn-play"></use></svg>'
 
       const editorElement = document.getElementById("editor")
       const questionElement = document.getElementById("question")
@@ -70,9 +69,37 @@
 
       let countQuestion = 0
 
-      questionElement.innerText =
-        "What is the capital of " + countries[countQuestion] + "?"
-      let editor
+      questionElement.innerText = "What is the capital of " + countries[countQuestion] + "?"
+
+      function exportedIsAnswer(exports) {
+        if (exports["text/plain"]?.toLowerCase() === capitals[countQuestion]) {
+          resultElement.innerHTML = "<span> Yes, it is " + exports["text/plain"] + ".</span>"
+          resultElement.style.cssText = "color: green;"
+          nextDivElement.appendChild(nextButton)
+        } else {
+          resultElement.innerHTML = "<span> No, it is not " + exports["text/plain"] + ".</span>"
+          resultElement.style.cssText = "color: red;"
+          nextDivElement.innerHTML = ""
+        }
+      }
+
+      function changeQuestion() {
+        countQuestion++
+        if(countQuestion > 4) {
+          countQuestion = 0
+        }
+        questionElement.innerHTML = countries[countQuestion]
+          ? "What is the capital of " + countries[countQuestion] + " ?"
+          : "You won !"
+        nextDivElement.innerHTML = ""
+        editor.clear()
+        resultElement.innerHTML = ""
+      }
+
+      /**
+       * we expose the editor for use in the integration test
+       */
+      let editor;
 
       /**
        * Instanciate Editor
@@ -96,8 +123,16 @@
             },
           },
         }
-
-        editor = new iink.Editor(editorElement, options)
+        /**
+         * Instanciate editor
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Editor parameters
+         */
+        editor = new iink.Editor(editorElement, options);
+        /**
+         *  async initialize editor behaviors
+         */
+        await editor.initialize();
 
         editor.events.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo
@@ -122,33 +157,6 @@
         redoElement.addEventListener("click", () => {
           editor.redo()
         })
-
-        function exportedIsAnswer(exports) {
-          if (exports["text/plain"] === capitals[countQuestion]) {
-            resultElement.innerHTML =
-              "<span> Yes, it is " + exports["text/plain"] + ".</span>"
-            resultElement.style.cssText = "color: green;"
-            nextDivElement.appendChild(nextButton)
-          } else {
-            resultElement.innerHTML =
-              "<span> No, it is not " + exports["text/plain"] + ".</span>"
-            resultElement.style.cssText = "color: red;"
-            nextDivElement.innerHTML = ""
-          }
-        }
-
-        function changeQuestion() {
-          countQuestion++
-          if(countQuestion > 4) {
-            countQuestion = 0
-          }
-          questionElement.innerHTML = countries[countQuestion]
-            ? "What is the capital of " + countries[countQuestion] + " ?"
-            : "You won !"
-          nextDivElement.innerHTML = ""
-          editor.clear()
-          resultElement.innerHTML = ""
-        }
 
         window.addEventListener("resize", () => {
           editor.resize()

@@ -1,8 +1,6 @@
-/* @import url(../node_modules/perfect-scrollbar/css/perfect-scrollbar.css); */
-
 .ms-editor {
     position: relative;
-    z-index: 20;
+     z-index: 10;
     color: #1A9FFF;
     font-family: sans-serif;
 }
@@ -13,7 +11,7 @@
 
 .ms-editor canvas,
 .ms-editor svg {
-    z-index: 15;
+    z-index: 20;
     position: absolute;
     left: 0;
     top: 0;
@@ -22,18 +20,10 @@
 }
 
 .ms-editor canvas.ms-rendering-canvas {
-    z-index: 10;
+    z-index: 9;
     pointer-events: none;
     background-image: linear-gradient(to right, #F5F6F7 1px, transparent 1px), linear-gradient(to bottom, #F5F6F7 1px, transparent 1px);
     background-size: 18px 18px;
-}
-
-.ms-editor svg {
-    z-index: 10;
-    pointer-events: none;
-}
-.ms-editor svg[data-layer="BACKGROUND"] {
-    z-index: 9;
 }
 
 .ms-editor .loader {
@@ -53,20 +43,21 @@
 .ms-editor .message {
     z-index: 25;
     position: absolute;
-    width: 200px;
-    height: 200px;
+    width: 300px;
+    max-height: calc(25%);
+    min-height: 200px;
     top: calc(50% - 100px);
-    left: calc(50% - 100px);
+    left: calc(50% - 150px);
     font-size: 16px;
     text-align: center;
     word-wrap: break-word;
 }
 
-.ms-editor .error-msg::before {
+.ms-editor .message.error-msg::before {
     content: url("data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCA3Ni41IDYxMiA0NTkiIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaW5ZTWluIG1lZXQiPgogICAgPHBhdGggZmlsbD0iIzFBOUZGRiIgZD0iTTQ5NC43LDIyOS41Yy0xNy44NTEtODYuNy05NC4zNTEtMTUzLTE4OC43LTE1M2MtMzguMjUsMC03My45NSwxMC4yLTEwMiwzMC42bDM4LjI1LDM4LjI1IGMxNy44NS0xMi43NSw0MC44LTE3Ljg1LDYzLjc1LTE3Ljg1Yzc2LjUsMCwxNDAuMjUsNjMuNzUsMTQwLjI1LDE0MC4yNXYxMi43NWgzOC4yNWM0My4zNSwwLDc2LjUsMzMuMTUsNzYuNSw3Ni41IGMwLDI4LjA1LTE1LjMsNTMuNTUtNDAuOCw2Ni4zbDM4LjI1LDM4LjI1QzU5MS42LDQzOC42LDYxMiw0MDAuMzUsNjEyLDM1N0M2MTIsMjkwLjcsNTU4LjQ1LDIzNC42LDQ5NC43LDIyOS41eiBNNzYuNSwxMDkuNjUgbDcxLjQsNjguODVDNjYuMywxODMuNiwwLDI0OS45LDAsMzMxLjVjMCw4NC4xNSw2OC44NSwxNTMsMTUzLDE1M2gyOTguMzVsNTEsNTFsMzMuMTUtMzMuMTVMMTA5LjY1LDc2LjVMNzYuNSwxMDkuNjV6IE0xOTYuMzUsMjI5LjVsMjA0LDIwNEgxNTNjLTU2LjEsMC0xMDItNDUuOS0xMDItMTAyYzAtNTYuMSw0NS45LTEwMiwxMDItMTAySDE5Ni4zNXoiIC8+Cjwvc3ZnPgo=");
 }
 
-.ms-editor .info-msg::before {
+.ms-editor .message.info-msg::before {
     content: "";
     background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgdmlld0JveD0iMCAwIDI0IDI0IgogIGZpbGw9Im5vbmUiCiAgc3Ryb2tlPSIjMUE5RkZGIgogIHN0cm9rZS13aWR0aD0iMiIKICBzdHJva2UtbGluZWNhcD0icm91bmQiCiAgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIKPgogIDxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjEwIiAvPgogIDxsaW5lIHgxPSIxMiIgeTE9IjE2IiB4Mj0iMTIiIHkyPSIxMiIgLz4KICA8bGluZSB4MT0iMTIiIHkxPSI4IiB4Mj0iMTIuMDEiIHkyPSI4IiAvPgo8L3N2Zz4=");;
     background-size: 100% 100%;

@@ -1,8 +1,7 @@
-import { TPoint } from "../renderer/Point"
-import { TStroke, TStrokeGroup } from "./Stroke"
+import { TPoint, TPointer } from "../geometry"
+import { TStroke } from "./Stroke"
 import { TPenStyle } from "../style/PenStyle"
 import { TRecognitionPositions } from "./RecognitionPositions"
-import { TUpdatePatch } from "../recognizer/WSRecognizer"
 
 export type TWordExport = {
   id?: string
@@ -59,12 +58,9 @@ export interface IModel
   readonly creationTime: number
   modificationDate: number
   currentStroke?: TStroke
-  strokeGroups: TStrokeGroup[]
   positions: TRecognitionPositions
-  defaultSymbols: TStroke[]
   rawStrokes: TStroke[]
   selectedStrokes: TStroke[]
-  recognizedSymbols?: TUpdatePatch[]
   converts?: TExport
   exports?: TExport
   width: number
@@ -72,24 +68,25 @@ export interface IModel
   idle: boolean
 
   mergeExport(exports: TExport)
-  addPoint(stroke: TStroke, point: TPoint): void
+  mergeConvert(converts: TExport)
+
+  addPoint(stroke: TStroke, point: TPointer): void
   addStroke(stroke: TStroke): void
-  addStrokeToGroup(stroke: TStroke, strokePenStyle: TPenStyle): void
   extractUnsentStrokes(): TStroke[]
-  initCurrentStroke(point: TPoint, pointerId: number, pointerType: string, style: TPenStyle, dpi: number = 96): void
-  appendToCurrentStroke(point: TPoint): void
-  endCurrentStroke(point: TPoint, penStyle: TPenStyle): void
-  extractPendingRecognizedSymbols (position: number = this.positions.lastRenderedPosition + 1): TUpdatePatch[]
+
+  initCurrentStroke(point: TPointer, pointerId: number, pointerType: string, style: TPenStyle, dpi: number = 96): void
+  appendToCurrentStroke(point: TPointer): void
+  endCurrentStroke(point: TPointer): void
 
   resetSelectedStrokes(): void
   appendSelectedStrokesFromPoint(point: TPoint): void
 
-  removeStrokesFromPoint(point: TPoint): number
+  removeStroke(id: string): void
+  updateStroke(updatedStroke: TStroke): void
+  removeStrokesFromPoint(point: TPoint): string[]
 
   updatePositionSent(position: number = this.model.rawStrokes.length - 1): void
   updatePositionReceived(): void
-  updatePositionRendered(position: number = this.model.recognizedSymbols ? this.model.recognizedSymbols.length - 1 : -1): void
-  resetPositionRenderer(): void
   resetPositions(): void
 
   getClone(): IModel

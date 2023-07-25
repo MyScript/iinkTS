@@ -74,6 +74,11 @@
       }
 
       /**
+       * we expose the editor for use in the integration test
+       */
+      let editor;
+
+      /**
        * We use a function to wait the server configuration to load
        */
       async function loadEditor() {
@@ -101,14 +106,18 @@
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        const editor = new iink.Editor(editorElement, options);
-        editor.debug = true;
+        editor = new iink.Editor(editorElement, options);
+        /**
+         *  async initialize editor behaviors
+         */
+        await editor.initialize();
 
         editorElement.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo;
           redoElement.disabled = !event.detail.canRedo;
           clearElement.disabled = event.detail.isEmpty;
         });
+
         editorElement.addEventListener("exported", (evt) => {
           const exports = evt.detail;
           if (exports && exports["application/x-latex"]) {
@@ -130,15 +139,19 @@
         undoElement.addEventListener("click", () => {
           editorElement.editor.undo();
         });
+
         redoElement.addEventListener("click", () => {
           editorElement.editor.redo();
         });
+
         clearElement.addEventListener("click", () => {
           editorElement.editor.clear();
         });
+
         convertElement.addEventListener("click", () => {
           editorElement.editor.convert();
         });
+
         eraserElement.addEventListener("click", () => {
           editor.mode = "erasing";
           eraserElement.disabled = true;
@@ -146,6 +159,7 @@
           penElement.disabled = false;
           penElement.classList.remove("active");
         });
+
         penElement.addEventListener("click", () => {
           editor.mode = "writing";
           eraserElement.disabled = false;
@@ -153,6 +167,7 @@
           penElement.disabled = true;
           penElement.classList.add("active");
         });
+
         erasePreciselyElement.addEventListener("change", (e) => {
           const configuration = { ...editorElement.editor.configuration };
           configuration.recognition.math.eraser["erase-precisely"] = e.target.checked;

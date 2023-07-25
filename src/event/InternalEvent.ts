@@ -24,6 +24,11 @@ export class InternalEvent extends EventTarget
     return InternalEvent.#instance
   }
 
+  removeAllListeners(): void
+  {
+    this.#abortController.abort()
+  }
+
   #emit(type: string, data?: unknown): void
   {
     this.dispatchEvent(new CustomEvent(type, Object.assign({ bubbles: true, composed: true }, data ? { detail: data } : undefined)))
@@ -63,6 +68,15 @@ export class InternalEvent extends EventTarget
   addErrorListener(callback: (err: Error) => void): void
   {
     this.addEventListener(InternalEventType.ERROR, (evt: unknown) => callback(((evt as CustomEvent).detail as Error)), { signal: this.#abortController.signal })
+  }
+
+  emitWSClosed(): void
+  {
+    this.#emit(InternalEventType.WS_CLOSED)
+  }
+  addWSClosedListener(callback: () => void): void
+  {
+    this.addEventListener(InternalEventType.WS_CLOSED, () => callback(), { signal: this.#abortController.signal })
   }
 
   emitNotif(notif: { message: string, timeout?: number }): void
@@ -108,5 +122,14 @@ export class InternalEvent extends EventTarget
   addContextChangeListener(callback: (context: TUndoRedoContext) => void): void
   {
     this.addEventListener(InternalEventType.CONTEXT_CHANGE, (evt: unknown) => callback(((evt as CustomEvent).detail as TUndoRedoContext)), { signal: this.#abortController.signal })
+  }
+
+  emitIdle(idle: boolean): void
+  {
+    this.#emit(InternalEventType.IDLE, idle)
+  }
+  addIdleListener(callback: (idle: boolean) => void): void
+  {
+    this.addEventListener(InternalEventType.IDLE, (evt: unknown) => callback(((evt as CustomEvent).detail as boolean)), { signal: this.#abortController.signal })
   }
 }

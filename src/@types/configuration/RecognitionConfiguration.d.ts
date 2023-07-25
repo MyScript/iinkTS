@@ -14,8 +14,6 @@ export type TRecognitionRendererConfiguration = {
   debug: TDebugConfiguration
 }
 
-export type TGesture = { enable: boolean }
-
 export type TRecognitionType = "TEXT" | "MATH" | "DIAGRAM" | "Raw Content"
 
 export type TConverstionState = "DIGITAL_EDIT" | "HANDWRITING"
@@ -45,5 +43,5 @@ export type TRecognitionConfigurationClient = {
   renderer?: TRecognitionRendererConfiguration
   export?: TExportConfiguration
   "raw-content"?: TRawContentConfiguration
-  gesture?: TGesture
+  gesture?: { enable: boolean }
 }

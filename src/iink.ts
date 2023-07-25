@@ -1,9 +1,9 @@
 
-export { Editor, EditorMode } from "./Editor"
+export { Editor } from "./Editor"
 
-export { getAvailableLanguageList } from "./helpers"
+export { getAvailableLanguageList, getAvailableFontList } from "./helpers"
 
-export { default as Constants } from "./Constants"
+export { default as Constants, ModeInteraction } from "./Constants"
 
 export {
   DefaultConfiguration,
@@ -19,12 +19,12 @@ export {
 export { Configuration } from "./configuration/Configuration"
 
 export { RestBehaviors } from "./behaviors/RestBehaviors"
-
-export { RestRecognizer } from "./recognizer/RestRecognizer"
-
 export { WSBehaviors } from "./behaviors/WSBehaviors"
 
+export { RestRecognizer } from "./recognizer/RestRecognizer"
 export { WSRecognizer } from "./recognizer/WSRecognizer"
+
+export { PointerEventGrabber } from "./grabber/PointerEventGrabber"
 
 export { DefaultPenStyle } from "./style/DefaultPenStyle"
 

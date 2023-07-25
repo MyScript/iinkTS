@@ -22,8 +22,12 @@ describe('CanvasQuadraticStroker.ts', () =>
     const stroker = new CanvasQuadraticStroker()
     const stroke = new Stroke(DefaultPenStyle, 1)
     for (let i = 0; i < 5; i++) {
-      stroke.x.push(i)
-      stroke.y.push(i)
+      stroke.pointers.push({
+        p: 0.5,
+        t: 1,
+        x: i,
+        y: i
+      })
     }
     stroker.drawStroke(context.canvasContext, stroke)
   })

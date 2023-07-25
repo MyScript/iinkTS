@@ -3,7 +3,7 @@ import { IModel } from "../@types/model/Model"
 import { InternalEvent } from "../event/InternalEvent"
 import { UndoRedoContext } from "./UndoRedoContext"
 
-export class RestUndoRedoManager
+export class UndoRedoManager
 {
   context: UndoRedoContext
   configuration: TUndoRedoConfiguration
@@ -24,7 +24,7 @@ export class RestUndoRedoManager
     this.context.canRedo = this.context.stack.length - 1 > this.context.stackIndex
     this.context.canUndo = this.context.stackIndex > 0
     const currentModel = this.context.stack[this.context.stackIndex]
-    this.context.empty = currentModel.strokeGroups.length === 0 || currentModel.strokeGroups.some(sg => sg.strokes.length === 0)
+    this.context.empty = currentModel.rawStrokes.length === 0
   }
 
   addModelToStack(model: IModel): void
@@ -43,6 +43,15 @@ export class RestUndoRedoManager
 
     this.updateCanUndoRedo()
     this.internalEvent.emitContextChange(this.context)
+  }
+
+  removeLastModelInStack(): void
+  {
+    if (this.context.stackIndex === this.context.stack.length - 1) {
+      this.context.stackIndex--
+    }
+    this.context.stack.pop()
+    this.updateCanUndoRedo()
   }
 
   updateModelInStack(model: IModel): void

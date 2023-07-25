@@ -210,10 +210,8 @@
       const convertElement = document.getElementById("convert");
       const closeElement = document.getElementById("close");
       let currentMathElement = undefined;
-      let editor;
 
       function toggleView() {
-        //Hide elements
         document.querySelector("#editorContainer").classList.toggle("visible");
         document.querySelector("nav").classList.toggle("visible");
         document.querySelector("#editor").classList.toggle("visible");
@@ -228,6 +226,12 @@
         const results = regex.exec(location.search);
         return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
       }
+
+      /**
+       * we expose the editor for use in the integration test
+       */
+      let editor;
+
       /**
        * We use a function to wait the server configuration to load
        */
@@ -256,13 +260,16 @@
             }
           }
         };
-
         /**
          * Instanciate editor
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = new iink.Editor(editorElement, options);
+         editor = new iink.Editor(editorElement, options);
+        /**
+         *  async initialize editor behaviors
+         */
+        await editor.initialize();
 
         editor.events.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo;
@@ -282,7 +289,10 @@
         });
 
         mathContentElements.forEach((mathContentElement) => {
-          mathContentElement.addEventListener("click", () => {
+          mathContentElement.addEventListener("click", (e) => {
+            console.log('e: ', e);
+            e.preventDefault()
+            e.stopPropagation()
             const srcMathContentElement = mathContentElement;
             const editorBox = document.querySelector("#editorBox");
             currentMathElement = srcMathContentElement;

@@ -15,13 +15,10 @@ describe('Stroke.ts', () =>
     expect(stroke.color).toBe(DefaultPenStyle.color)
     expect(stroke.width).toBe(DefaultPenStyle.width)
     expect(stroke.elementType).toBeUndefined()
-    expect(stroke.p).toHaveLength(0)
+    expect(stroke.pointers).toHaveLength(0)
     expect(stroke.pointerId).toBe(12)
     expect(stroke.pointerType).toBe('pen')
-    expect(stroke.t).toHaveLength(0)
     expect(stroke.type).toBe('stroke')
-    expect(stroke.x).toHaveLength(0)
-    expect(stroke.y).toHaveLength(0)
   })
 
   test('should create with pointerType mouse', () =>

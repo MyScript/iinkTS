@@ -44,6 +44,6 @@ export default [
     output: {
       file: `dist/iink.d.ts`,
       format: "es",
-    },
-  },
+    }
+  }
 ]

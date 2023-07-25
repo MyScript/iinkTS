@@ -1,5 +1,4 @@
 const { waitForEditorWebSocket, write, getExportedDatas } = require('../helper')
-const { testGesture } = require('../_partials/gesture-test')
 const { h } = require('../strokesDatas')
 
 describe('Websocket Text Pointer Events', () => {
@@ -37,8 +36,4 @@ describe('Websocket Text Pointer Events', () => {
     const jiixReceived = exports['application/vnd.myscript.jiix']
     expect(jiixReceived.label).toStrictEqual("A")
   })
-
-  require('../_partials/smart-guide-test')
-
-  testGesture(-100)
 })

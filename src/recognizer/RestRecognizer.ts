@@ -1,4 +1,7 @@
-import { TStroke, TStrokeGroup, TStrokeGroupJSON } from "../@types/model/Stroke"
+
+import { IRecognizer } from "../@types/recognizer/Recognizer"
+import { TRestPostConfiguration, TRestPostData } from "../@types/recognizer/RestRecognizer"
+import { TStrokeGroup, TStrokeGroupJSON } from "../@types/model/Stroke"
 import { TConverstionState, TRecognitionConfiguration } from "../@types/configuration/RecognitionConfiguration"
 import { TServerConfiguration } from "../@types/configuration/ServerConfiguration"
 import { IModel, TExport, TJIIXExport } from "../@types/model/Model"
@@ -7,20 +10,23 @@ import { TPenStyle } from "../@types/style/PenStyle"
 import { Error as ErrorConst } from "../Constants"
 import StyleHelper from "../style/StyleHelper"
 import { computeHmac } from "./CryptoHelper"
-import { AbstractRecognizer } from "./AbstractRecognizer"
-import { TRestPostConfiguration, TRestPostData } from "../@types/recognizer/RestRecognizer"
 import { isVersionSuperiorOrEqual } from "../utils/versionHelper"
+import { convertStrokeToJSON } from "../model/Stroke"
 
 type ApiError = {
   code?: string
   message: string
 }
 
-export class RestRecognizer extends AbstractRecognizer
+export class RestRecognizer implements IRecognizer
 {
+  protected serverConfiguration: TServerConfiguration
+  protected recognitionConfiguration: TRecognitionConfiguration
+
   constructor(serverConfig: TServerConfiguration, recognitionConfig: TRecognitionConfiguration)
   {
-    super(serverConfig, recognitionConfig)
+    this.serverConfiguration = serverConfig
+    this.recognitionConfiguration = recognitionConfig
   }
 
   get url()
@@ -63,24 +69,43 @@ export class RestRecognizer extends AbstractRecognizer
 
   private buildData(model: IModel): TRestPostData
   {
-    const newStrokes: TStrokeGroupJSON[] = []
-    model.strokeGroups.forEach((group: TStrokeGroup) =>
+    const isPenStyleEqual = (ps1: TPenStyle, ps2: TPenStyle) =>
+    {
+      return ps1["-myscript-pen-fill-color"] === ps2["-myscript-pen-fill-color"] &&
+        ps1["-myscript-pen-fill-style"] === ps2["-myscript-pen-fill-style"] &&
+        ps1["-myscript-pen-width"] === ps2["-myscript-pen-width"] &&
+        ps1.color === ps2.color &&
+        ps1.width === ps2.width
+    }
+
+    const strokeGroupByPenStyle: TStrokeGroup[] = []
+    model.rawStrokes.forEach((s) => {
+      const groupIndex = strokeGroupByPenStyle.findIndex(sg => isPenStyleEqual(sg.penStyle, s))
+      if (groupIndex > -1) {
+        strokeGroupByPenStyle[groupIndex].strokes.push(s)
+      } else {
+        strokeGroupByPenStyle.push({
+          penStyle: {
+            "-myscript-pen-fill-color": s["-myscript-pen-fill-color"],
+            "-myscript-pen-fill-style": s["-myscript-pen-fill-style"],
+            "-myscript-pen-width": s["-myscript-pen-width"],
+            color: s.color,
+            width: s.width
+          },
+          strokes: [s]
+        })
+      }
+    })
+
+    const strokeGroupsToSend: TStrokeGroupJSON[] = []
+    strokeGroupByPenStyle.forEach((group: TStrokeGroup) =>
     {
       const newPenStyle = JSON.stringify(group.penStyle) === "{}" ? undefined : StyleHelper.penStyleToCSS(group.penStyle as TPenStyle)
       const newGroup = {
         penStyle: newPenStyle,
-        strokes: group.strokes.map((s: TStroke) =>
-        {
-          return {
-            x: s.x,
-            y: s.y,
-            t: s.t,
-            p: s.p,
-            pointerType: s.pointerType
-          }
-        })
+        strokes: group.strokes.map(convertStrokeToJSON)
       }
-      newStrokes.push(newGroup)
+      strokeGroupsToSend.push(newGroup)
     })
 
     const contentType: string = this.recognitionConfiguration.type === "Raw Content" ?
@@ -95,7 +120,7 @@ export class RestRecognizer extends AbstractRecognizer
       // theme: StyleHelper.themeToCSS(),
       height: model.height,
       width: model.width,
-      strokeGroups: newStrokes
+      strokeGroups: strokeGroupsToSend
     }
   }
 
@@ -208,7 +233,7 @@ export class RestRecognizer extends AbstractRecognizer
     const converts: TExport[] = await Promise.all(promises)
     converts.forEach(c =>
     {
-      myModel.converts = Object.assign(myModel.converts || {}, c)
+      myModel.mergeConvert(c)
     })
 
     myModel.updatePositionReceived()
@@ -216,18 +241,12 @@ export class RestRecognizer extends AbstractRecognizer
     return myModel
   }
 
-  private async exportModel(model: IModel, mimeType: string): Promise<TExport | never>
-  {
-    const data = this.buildData(model)
-    return this.tryFetch(data, mimeType)
-  }
-
   async export(model: IModel, requestedMimeTypes?: string[]): Promise<IModel | never>
   {
     const myModel = model.getClone()
     myModel.updatePositionSent()
 
-    if (myModel.strokeGroups.length === 0) {
+    if (myModel.rawStrokes.length === 0) {
       return Promise.resolve(myModel)
     }
 
@@ -238,7 +257,10 @@ export class RestRecognizer extends AbstractRecognizer
     }
 
     const mimeTypesRequiringExport: string[] = mimeTypes.filter(m => !myModel.exports || !myModel.exports[m])
-    const exports: TExport[] = await Promise.all(mimeTypesRequiringExport.map(mimeType => this.exportModel(myModel, mimeType)))
+
+    const data = this.buildData(model)
+
+    const exports: TExport[] = await Promise.all(mimeTypesRequiringExport.map(mimeType => this.tryFetch(data, mimeType)))
 
     exports.forEach(e =>
     {

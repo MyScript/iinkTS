@@ -7,7 +7,7 @@ import { TTheme } from "../../../src/@types/style/Theme"
 import { TPenStyle } from '../../../src/@types/style/PenStyle'
 import { TServerConfiguration } from '../../../src/@types/configuration/ServerConfiguration'
 import { TConverstionState, TRecognitionConfiguration, TRecognitionType } from '../../../src/@types/configuration/RecognitionConfiguration'
-import { TPoint } from '../../../src/@types/renderer/Point'
+import { TPointer } from '../../../src/@types/geometry'
 
 import { delay } from '../utils/helpers'
 import { DefaultRecognitionConfiguration, DefaultServerConfiguration } from '../../../src/configuration/DefaultConfiguration'
@@ -330,10 +330,10 @@ describe('WSRecognizer.ts', () =>
   describe('addStrokes', () =>
   {
     const model = new Model(width, height)
-    const p1: TPoint = { t: 1, p: 1, x: 1, y: 1 }
-    const p2: TPoint = { t: 10, p: 1, x: 100, y: 1 }
+    const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
+    const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
     model.initCurrentStroke(p1, 1, 'pen', DefaultPenStyle)
-    model.endCurrentStroke(p2, DefaultPenStyle)
+    model.endCurrentStroke(p2)
     let wsr: WSRecognizer
     let spyEmitError: jest.SpyInstance
     beforeEach(async () =>
@@ -361,8 +361,7 @@ describe('WSRecognizer.ts', () =>
       const addStrokesMessageSentToTest = {
         type: 'addStrokes',
         strokes: [{
-          "p": [0.5, 0.1],
-          "pointerId": 1,
+          "p": [0.88, 0.07],
           "pointerType": "pen",
           "t": [1, 10],
           "x": [1, 100],
@@ -387,7 +386,10 @@ describe('WSRecognizer.ts', () =>
       expect.assertions(1)
       await wsr.init(height, width)
       const promise = wsr.addStrokes(model)
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
       mockServer.send(JSON.stringify(emptyExportedMessage))
+      await promise
       await expect(promise).resolves.toEqual(
         expect.objectContaining({
           exports: {
@@ -401,6 +403,8 @@ describe('WSRecognizer.ts', () =>
       expect.assertions(3)
       await wsr.init(height, width)
       const promise = wsr.addStrokes(model)
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
       mockServer.send(JSON.stringify(errorMessage))
       await expect(promise).rejects.toEqual(new Error(ErrorConst.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
@@ -425,8 +429,8 @@ describe('WSRecognizer.ts', () =>
       await wsr.init(height, width)
       const CustomPenStyle: TPenStyle = { color: "#d1d1d1" }
       await wsr.setPenStyle(CustomPenStyle)
-      await delay(100)
       //¯\_(ツ)_/¯  required to wait server received message
+      await delay(100)
       const setPenStyle = mockServer.messages[mockServer.messages.length - 1]
       const setPenStyleToTest = JSON.stringify({
         type: 'setPenStyle',
@@ -549,6 +553,8 @@ describe('WSRecognizer.ts', () =>
       expect.assertions(1)
       await wsr.init(height, width)
       const promise = wsr.export(model)
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
       mockServer.send(JSON.stringify(hExportedMessage))
       await expect(promise).resolves.toEqual(
         expect.objectContaining({
@@ -563,6 +569,8 @@ describe('WSRecognizer.ts', () =>
       expect.assertions(3)
       await wsr.init(height, width)
       const promise = wsr.export(model)
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
       mockServer.send(JSON.stringify(errorMessage))
       await expect(promise).rejects.toEqual(new Error(ErrorConst.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
@@ -621,7 +629,8 @@ describe('WSRecognizer.ts', () =>
       expect.assertions(1)
       await wsr.init(height, width)
       const promise = wsr.import(model, blobToImport, mimeType)
-      await delay(10)
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
       mockServer.send(JSON.stringify(emptyExportedMessage))
       await expect(promise).resolves.toEqual(
         expect.objectContaining({
@@ -631,13 +640,12 @@ describe('WSRecognizer.ts', () =>
         })
       )
     })
-    // TODO invastigate why the rejection is not caught
     test('should reject if receive error message', async () =>
     {
       expect.assertions(3)
       await wsr.init(height, width)
       const promise = wsr.import(model, blobToImport, mimeType)
-      await delay(10)
+      await delay(100)
       mockServer.send(JSON.stringify(errorMessage))
       await expect(promise).rejects.toEqual(new Error(ErrorConst.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
@@ -682,6 +690,8 @@ describe('WSRecognizer.ts', () =>
       expect.assertions(1)
       await wsr.init(height, width)
       const promise = wsr.resize(model)
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
       mockServer.send(JSON.stringify(svgPatchMessage))
       await expect(promise).resolves.toEqual(model)
     })
@@ -690,6 +700,8 @@ describe('WSRecognizer.ts', () =>
       expect.assertions(3)
       await wsr.init(height, width)
       const promise = wsr.resize(model)
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
       mockServer.send(JSON.stringify(errorMessage))
       await expect(promise).rejects.toEqual(new Error(ErrorConst.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
@@ -733,6 +745,8 @@ describe('WSRecognizer.ts', () =>
       expect.assertions(1)
       await wsr.init(height, width)
       const promise = wsr.convert(model)
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
       mockServer.send(JSON.stringify(emptyExportedMessage))
       await expect(promise).resolves.toEqual(
         expect.objectContaining({
@@ -747,6 +761,8 @@ describe('WSRecognizer.ts', () =>
       expect.assertions(3)
       await wsr.init(height, width)
       const promise = wsr.convert(model)
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
       mockServer.send(JSON.stringify(errorMessage))
       await expect(promise).rejects.toEqual(new Error(ErrorConst.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
@@ -789,6 +805,8 @@ describe('WSRecognizer.ts', () =>
       expect.assertions(1)
       await wsr.init(height, width)
       const promise = wsr.undo(model)
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
       mockServer.send(JSON.stringify(emptyExportedMessage))
       await expect(promise).resolves.toEqual(
         expect.objectContaining({
@@ -803,6 +821,8 @@ describe('WSRecognizer.ts', () =>
       expect.assertions(3)
       await wsr.init(height, width)
       const promise = wsr.undo(model)
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
       mockServer.send(JSON.stringify(errorMessage))
       await expect(promise).rejects.toEqual(new Error(ErrorConst.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
@@ -845,6 +865,8 @@ describe('WSRecognizer.ts', () =>
       expect.assertions(1)
       await wsr.init(height, width)
       const promise = wsr.redo(model)
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
       mockServer.send(JSON.stringify(emptyExportedMessage))
       await expect(promise).resolves.toEqual(
         expect.objectContaining({
@@ -859,6 +881,8 @@ describe('WSRecognizer.ts', () =>
       expect.assertions(3)
       await wsr.init(height, width)
       const promise = wsr.redo(model)
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
       mockServer.send(JSON.stringify(errorMessage))
       await expect(promise).rejects.toEqual(new Error(ErrorConst.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
@@ -901,6 +925,8 @@ describe('WSRecognizer.ts', () =>
       expect.assertions(1)
       await wsr.init(height, width)
       const promise = wsr.clear(model)
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
       mockServer.send(JSON.stringify(emptyExportedMessage))
       await expect(promise).resolves.toEqual(
         expect.objectContaining({
@@ -915,6 +941,8 @@ describe('WSRecognizer.ts', () =>
       expect.assertions(3)
       await wsr.init(height, width)
       const promise = wsr.clear(model)
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
       mockServer.send(JSON.stringify(errorMessage))
       await expect(promise).rejects.toEqual(new Error(ErrorConst.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)

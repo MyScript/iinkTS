@@ -38,5 +38,14 @@ export default {
       delete penStyle["-myscript-pen-width"]
     }
     return penStyle
+  },
+
+  stringToJSON(style: string): {[key: string]: string}
+  {
+    return parser.toJSON(`css {${style}}`).css
+  },
+  JSONToString(style: {[key: string]: string}): string
+  {
+    return Object.entries(style).map(([k, v]) => `${k}:${v}`).join(";")
   }
 }

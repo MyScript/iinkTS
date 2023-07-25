@@ -29,6 +29,10 @@
       const editorElement = document.getElementById("editor");
       const undoElement = document.getElementById("undo");
       const redoElement = document.getElementById("redo");
+
+      /**
+       * we expose the editor for use in the integration test
+       */
       let editor;
 
       async function loadEditor() {
@@ -50,8 +54,16 @@
             }
           }
         };
-
+        /**
+         * Instanciate editor
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Editor parameters
+         */
         editor = new iink.Editor(editorElement, options);
+        /**
+         *  async initialize editor behaviors
+         */
+        await editor.initialize();
 
         editor.events.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo;

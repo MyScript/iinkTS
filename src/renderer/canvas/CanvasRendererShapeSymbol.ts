@@ -1,5 +1,5 @@
 
-import { TPartialXYPoint } from "../../@types/renderer/Point"
+import { TPoint } from "../../@types/geometry"
 import { TSymbol, TShapeEllipseSymbol, TShapeLineSymbol, TShapeSymbol, TShapeTableSymbol, TLineSymbol, TShapeRecognizedSymbol } from "../../@types/renderer/Symbol"
 
 export const ShapeSymbols = {
@@ -19,7 +19,7 @@ function phi(angle: number): number
   return returnedAngle
 }
 
-function drawEllipseArc(context2D: CanvasRenderingContext2D, shapeEllipse: TShapeEllipseSymbol): TPartialXYPoint[]
+function drawEllipseArc(context2D: CanvasRenderingContext2D, shapeEllipse: TShapeEllipseSymbol): TPoint[]
 {
   const { centerPoint, maxRadius, minRadius, orientation, startAngle, sweepAngle } = shapeEllipse
   const angleStep = 0.02 // angle delta between interpolated
@@ -70,7 +70,7 @@ function drawEllipseArc(context2D: CanvasRenderingContext2D, shapeEllipse: TShap
   return boundariesPoints
 }
 
-function drawArrowHead(context2D: CanvasRenderingContext2D, headPoint: TPartialXYPoint, angle: number, length: number)
+function drawArrowHead(context2D: CanvasRenderingContext2D, headPoint: TPoint, angle: number, length: number)
 {
   const alpha = phi(angle + (Math.PI * (7 / 8)))
   const beta = phi(angle - (Math.PI * (7 / 8)))
@@ -107,7 +107,7 @@ function drawShapeEllipse(context2D: CanvasRenderingContext2D, shapeEllipse: TSh
  * @param {{x: Number, y: Number}} p1 Origin point
  * @param {{x: Number, y: Number}} p2 Destination point
  */
-export function drawLine(context2D: CanvasRenderingContext2D, p1: TPartialXYPoint, p2: TPartialXYPoint)
+export function drawLine(context2D: CanvasRenderingContext2D, p1: TPoint, p2: TPoint)
 {
   context2D.save()
   try {
@@ -145,38 +145,40 @@ export function drawShapeSymbol(context2D: CanvasRenderingContext2D, symbol: TSy
 
     if (symbol.elementType) {
       switch (symbol.elementType) {
-        case ShapeSymbols.shape:
-          // eslint-disable-next-line no-case-declarations
+        case ShapeSymbols.shape: {
           const shapeSymbol = symbol as TShapeSymbol
           drawShapeSymbol(context2D, shapeSymbol.candidates[shapeSymbol.selectedCandidateIndex])
           break
-        case ShapeSymbols.table:
-          // eslint-disable-next-line no-case-declarations
+        }
+        case ShapeSymbols.table:{
           const tableSymbols = symbol as TShapeTableSymbol
           tableSymbols.lines.forEach(line => drawShapeSymbol(context2D, line))
           break
-        case ShapeSymbols.line:
-          // eslint-disable-next-line no-case-declarations
+        }
+        case ShapeSymbols.line: {
           const lineSymbol = symbol as TLineSymbol
           drawLine(context2D, lineSymbol.data.p1, lineSymbol.data.p2)
           break
+        }
         default:
           // logger.error(`${ symbol.elementType } not implemented`)
           break
       }
     } else {
       switch (symbol.type) {
-        case ShapeSymbols.ellipse:
+        case ShapeSymbols.ellipse: {
           drawShapeEllipse(context2D, symbol as TShapeEllipseSymbol)
           break
-        case ShapeSymbols.line:
+        }
+        case ShapeSymbols.line: {
           drawShapeLine(context2D, symbol as TShapeLineSymbol)
           break
-        case ShapeSymbols.recognizedShape:
-          // eslint-disable-next-line no-case-declarations
+        }
+        case ShapeSymbols.recognizedShape: {
           const recognizedShape = symbol as TShapeRecognizedSymbol
           recognizedShape.primitives.forEach(primitive => drawShapeSymbol(context2D, primitive))
           break
+        }
         default:
           // logger.error(`${ symbol.type } not implemented`)
           break

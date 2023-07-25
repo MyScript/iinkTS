@@ -12,8 +12,9 @@ export type TTextConfConfiguration = {
 }
 
 export type TTextConfiguration = {
+  text?: boolean
   mimeTypes: ("text/plain" | "application/vnd.myscript.jiix")[]
-  margin?: TMarginConfiguration
+  margin: TMarginConfiguration
   guides?: TGuidesConfiguration
   configuration?: TTextConfConfiguration
   eraser?: TEraserConfiguration

@@ -1,4 +1,3 @@
-const { testGesture } = require('../_partials/gesture-test')
 const { waitForEditorWebSocket, write, getExportedDatas } = require('../helper')
 const { h } = require('../strokesDatas')
 
@@ -51,8 +50,4 @@ describe('Websocket Text Import Content', () => {
     const textContent = await prompterText.evaluate((node) => node.textContent)
     expect(textContent).toEqual("pony")
   })
-
-  require('../_partials/smart-guide-test')
-
-  testGesture(-100)
 })

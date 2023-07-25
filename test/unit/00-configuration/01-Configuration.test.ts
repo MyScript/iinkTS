@@ -1,3 +1,6 @@
+
+import { TConfiguration, TConfigurationClient } from "../../../src/@types/Configuration"
+
 import { DefaultConfiguration } from "../../../src/configuration/DefaultConfiguration"
 import { Configuration } from "../../../src/configuration/Configuration"
 import
@@ -8,7 +11,6 @@ import
   ConfigurationRawContentRest,
   AllOverrideConfiguration,
 } from "../_dataset/configuration.dataset"
-import { TConfiguration, TConfigurationClient } from "../../../src/@types/Configuration"
 
 const configurationDefault = new Configuration()
 
@@ -134,7 +136,6 @@ describe('Configuration.ts', () =>
 
   describe('specifics rules', () =>
   {
-
     test('should add mimeType JIIX if rendering.smartGuide = true', () =>
     {
       const conf = JSON.parse(JSON.stringify(DefaultConfiguration)) as TConfiguration
@@ -187,7 +188,6 @@ describe('Configuration.ts', () =>
       expect(c.server.scheme).toStrictEqual(window.location.protocol.replace(':', ''))
       expect(c.server.host).toStrictEqual(window.location.host)
     })
-
   })
 
 })

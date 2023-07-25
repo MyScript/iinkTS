@@ -5,31 +5,31 @@ import { Model } from '../../../src/model/Model'
 
 describe('PublicEvent.ts', () =>
 {
-  const gEvent = PublicEvent.getInstance()
+  const publicEvent = PublicEvent.getInstance()
 
   test('should have singleton', () =>
   {
-    const gEvent1 = PublicEvent.getInstance()
-    const gEvent2 = PublicEvent.getInstance()
-    expect(gEvent1).toBe(gEvent2)
-    expect(gEvent1).toEqual(gEvent2)
-    expect(gEvent1).toStrictEqual(gEvent2)
+    const publicEvent1 = PublicEvent.getInstance()
+    const publicEvent2 = PublicEvent.getInstance()
+    expect(publicEvent1).toBe(publicEvent2)
+    expect(publicEvent1).toEqual(publicEvent2)
+    expect(publicEvent1).toStrictEqual(publicEvent2)
   })
 
   test('should emit & listen LOADED', () =>
   {
     const testFunction = jest.fn()
-    gEvent.addEventListener(EventType.LOADED, testFunction)
-    gEvent.emitLoaded()
+    publicEvent.addEventListener(EventType.LOADED, testFunction)
+    publicEvent.emitLoaded()
     expect(testFunction).toBeCalledTimes(1)
   })
 
   test('should emit & listen EXPORTED', () =>
   {
     const testFunction = jest.fn()
-    gEvent.addEventListener(EventType.EXPORTED, testFunction)
+    publicEvent.addEventListener(EventType.EXPORTED, testFunction)
     const exports:TExport = { 'text/plain': 'tatapouet' }
-    gEvent.emitExported(exports)
+    publicEvent.emitExported(exports)
     expect(testFunction).toBeCalledTimes(1)
     expect(testFunction).toBeCalledWith(
       expect.objectContaining({
@@ -41,7 +41,7 @@ describe('PublicEvent.ts', () =>
   test('should emit & listen CHANGED', () =>
   {
     const testFunction = jest.fn()
-    gEvent.addEventListener(EventType.CHANGED, testFunction)
+    publicEvent.addEventListener(EventType.CHANGED, testFunction)
     const undoRedoContext = {
       canUndo: true,
       canRedo: false,
@@ -51,7 +51,7 @@ describe('PublicEvent.ts', () =>
       possibleUndoCount: 10,
       stack: []
     }
-    gEvent.emitChanged(undoRedoContext)
+    publicEvent.emitChanged(undoRedoContext)
     expect(testFunction).toBeCalledTimes(1)
     expect(testFunction).toBeCalledWith(
       expect.objectContaining({
@@ -63,13 +63,12 @@ describe('PublicEvent.ts', () =>
   test('should emit & listen IDLE', () =>
   {
     const testFunction = jest.fn()
-    gEvent.addEventListener(EventType.IDLE, testFunction)
-    const model = new Model(100, 50)
-    gEvent.emitIdle(model)
+    publicEvent.addEventListener(EventType.IDLE, testFunction)
+    publicEvent.emitIdle(true)
     expect(testFunction).toBeCalledTimes(1)
     expect(testFunction).toBeCalledWith(
       expect.objectContaining({
-        detail: model
+        detail: true
       }),
     )
   })
@@ -77,9 +76,9 @@ describe('PublicEvent.ts', () =>
   test('should emit & listen CLEARED', () =>
   {
     const testFunction = jest.fn()
-    gEvent.addEventListener(EventType.CLEARED, testFunction)
+    publicEvent.addEventListener(EventType.CLEARED, testFunction)
     const model = new Model(100, 50)
-    gEvent.emitCleared(model)
+    publicEvent.emitCleared(model)
     expect(testFunction).toBeCalledTimes(1)
     expect(testFunction).toBeCalledWith(
       expect.objectContaining({
@@ -91,9 +90,9 @@ describe('PublicEvent.ts', () =>
   test('should emit & listen CONVERTED', () =>
   {
     const testFunction = jest.fn()
-    gEvent.addEventListener(EventType.CONVERTED, testFunction)
+    publicEvent.addEventListener(EventType.CONVERTED, testFunction)
     const exports: TExport = { 'text/plain': 'tatapouet' }
-    gEvent.emitConverted(exports)
+    publicEvent.emitConverted(exports)
     expect(testFunction).toBeCalledTimes(1)
     expect(testFunction).toBeCalledWith(
       expect.objectContaining({
@@ -105,7 +104,7 @@ describe('PublicEvent.ts', () =>
   test('should emit & listen IMPORTED', () =>
   {
     const testFunction = jest.fn()
-    gEvent.addEventListener(EventType.IMPORTED, testFunction)
+    publicEvent.addEventListener(EventType.IMPORTED, testFunction)
     const jiix: TJIIXExport = {
       "type": "Text",
       "label": "hello",
@@ -122,7 +121,7 @@ describe('PublicEvent.ts', () =>
     const exports: TExport = {
       "application/vnd.myscript.jiix": jiix
     }
-    gEvent.emitImported(exports)
+    publicEvent.emitImported(exports)
     expect(testFunction).toBeCalledTimes(1)
     expect(testFunction).toBeCalledWith(
       expect.objectContaining({

@@ -284,7 +284,7 @@ describe('Websocket Math', function () {
     for(const s of fence.strokes) {
       await Promise.all([
         getExportedDatas(page),
-        write(page, [s], 100, 175)
+        write(page, [s])
       ])
     }
     const mathml = await getEditorModelExportsType(page, 'application/mathml+xml')
@@ -300,7 +300,7 @@ describe('Websocket Math', function () {
     for(const s of fence.strokes) {
       await Promise.all([
         getExportedDatas(page),
-        write(page, [s], 100, 175)
+        write(page, [s])
       ])
     }
     const mathml = await getEditorModelExportsType(page, 'application/mathml+xml')

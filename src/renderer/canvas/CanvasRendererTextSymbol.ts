@@ -1,4 +1,4 @@
-import { TPartialXYPoint } from "../../@types/renderer/Point"
+import { TPoint } from "../../@types/geometry"
 import { drawLine } from "./CanvasRendererShapeSymbol"
 import { TSymbol, TTextUnderlineDataSymbol, TTextUnderlineSymbol, TUnderLineSymbol } from "../../@types/renderer/Symbol"
 
@@ -12,11 +12,11 @@ export const TextSymbols = {
 function drawUnderline(context2D: CanvasRenderingContext2D, underline: TUnderLineSymbol, label: string, data: TTextUnderlineDataSymbol)
 {
   const delta = data.width / label.length
-  const p1: TPartialXYPoint = {
+  const p1: TPoint = {
     x: data.topLeftPoint.x + (underline.data.firstCharacter * delta),
     y: data.topLeftPoint.y + data.height
   }
-  const p2: TPartialXYPoint = {
+  const p2: TPoint = {
     x: data.topLeftPoint.x + (underline.data.lastCharacter * delta),
     y: data.topLeftPoint.y + data.height
   }

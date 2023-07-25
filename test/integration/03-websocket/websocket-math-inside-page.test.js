@@ -36,7 +36,6 @@ describe("Websocket Math Inside Page", function () {
     await page.goto("/examples/websocket/websocket_math_inside_page.html")
   })
 
-
   test("should have title", async () => {
     const title = await page.title()
     expect(title).toMatch("Dynamic math part inside a page")
@@ -59,6 +58,7 @@ describe("Websocket Math Inside Page", function () {
           getImportedDatas(page),
           page.locator(`#${ mc.id }`).click()
         ])
+        await page.waitForTimeout(1000)
         expect(await page.locator("#editorContainer").isVisible()).toEqual(true)
       })
 

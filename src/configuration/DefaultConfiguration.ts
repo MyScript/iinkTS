@@ -98,7 +98,7 @@ export const DefaultRecognitionConfiguration: TRecognitionConfiguration = {
   "raw-content": {
     recognition: {
       text: true,
-      shape: false
+      shape: true
     },
     eraser: {
       "erase-precisely": false
@@ -124,6 +124,10 @@ export const DefaultRenderingConfiguration: TRenderingConfiguration = {
       enable: true,
       duration: 5000
     }
+  },
+  guides: {
+    enable: true,
+    gap: 50
   }
 }
 
