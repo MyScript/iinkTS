@@ -523,3 +523,24 @@ module.exports.claclacla = {
     },
   },
 }
+
+const buenosAiresStrokes = require("./strokes/Interact/buenosAires.json")
+module.exports.buenosAires = {
+  type: "TEXT",
+  strokes: buenosAiresStrokes,
+  exports: {
+    "text/plain": ["buenos aires"],
+    "application/vnd.myscript.jiix": {
+      type: "Text",
+      label: "buenos aires",
+      words: [
+        {
+          label: "buenos aires",
+          candidates: ["buenos aires"],
+        },
+      ],
+      version: "3",
+      id: "MainBlock",
+    },
+  },
+}

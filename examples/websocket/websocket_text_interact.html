@@ -68,10 +68,10 @@
       const countries = ["France", "Italy", "Spain", "Argentina", "Japan"]
       const capitals = ["paris", "rome", "madrid", "buenos aires", "tokyo"]
 
-      let randomNumber = Math.floor(Math.random() * countries.length)
+      let countQuestion = 0
 
       questionElement.innerText =
-        "What is the capital of " + countries[randomNumber] + "?"
+        "What is the capital of " + countries[countQuestion] + "?"
       let editor
 
       /**
@@ -124,7 +124,7 @@
         })
 
         function exportedIsAnswer(exports) {
-          if (exports["text/plain"] === capitals[randomNumber]) {
+          if (exports["text/plain"] === capitals[countQuestion]) {
             resultElement.innerHTML =
               "<span> Yes, it is " + exports["text/plain"] + ".</span>"
             resultElement.style.cssText = "color: green;"
@@ -138,11 +138,12 @@
         }
 
         function changeQuestion() {
-          countries.splice(randomNumber, 1)
-          capitals.splice(randomNumber, 1)
-          randomNumber = Math.floor(Math.random() * countries.length)
-          questionElement.innerHTML = countries[randomNumber]
-            ? "What is the capital of " + countries[randomNumber] + " ?"
+          countQuestion++
+          if(countQuestion > 4) {
+            countQuestion = 0
+          }
+          questionElement.innerHTML = countries[countQuestion]
+            ? "What is the capital of " + countries[countQuestion] + " ?"
             : "You won !"
           nextDivElement.innerHTML = ""
           editor.clear()
