@@ -8,6 +8,7 @@ const {
   tokyo,
   madrid,
   rome,
+  buenosAires
 } = require("../strokesDatas")
 
 describe("Websocket Text", () => {
@@ -26,43 +27,77 @@ describe("Websocket Text", () => {
     expect(title).toMatch("Interact with your app")
   })
 
-  for (let i = 0; i < 5; i++) {
-    i++
-    test(`should answer the question ${i}`, async () => {
-      const questionElement = page.locator("#question")
-      const question = await questionElement.textContent()
-      let stroke
-      if (question.includes("France")) {
-        stroke = paris
-      } else if (question.includes("Japan")) {
-        stroke = tokyo
-      } else if (question.includes("Spain")) {
-        stroke = madrid
-      } else if (question.includes("Italy")) {
-        stroke = rome
-      } else if (question.includes("Argentina")) {
-        stroke = buenos
-      }
 
-      if (question.includes("Argentina")) {
-        await Promise.all([write(page, buenos.strokes)])
-        await Promise.all([write(page, aires.strokes)])
-      } else {
-        await Promise.all([write(page, stroke.strokes)])
-      }
+  test(`should answer questions`, async () => {
+    await waitForEditorWebSocket(page)
+    let [exportParis] = await Promise.all([
+      getExportedDatas(page),
+      write(page, paris.strokes)
+    ])
 
-      let [exports] = await Promise.all([getExportedDatas(page)])
+    const jiixParisExpected = paris.exports["application/vnd.myscript.jiix"]
+    const jiixParisReceived = exportParis["application/vnd.myscript.jiix"]
 
-      const jiixExpected = stroke.exports["application/vnd.myscript.jiix"]
-      const jiixReceived = exports["application/vnd.myscript.jiix"]
+    expect(jiixParisReceived.label).toStrictEqual(jiixParisExpected.label)
 
-      if (question.includes("Argentina")) {
-        expect(jiixReceived.label).toStrictEqual(
-          `${buenos.exports["application/vnd.myscript.jiix"].label} ${aires.exports["application/vnd.myscript.jiix"].label}`
-        )
-      } else {
-        expect(jiixReceived.label).toStrictEqual(jiixExpected.label)
-      }
-    })
-  }
+    await page.locator("#nextButton").click()
+    //wait for the question to change
+    await page.waitForTimeout(400)
+
+    let [exportRome] = await Promise.all([
+      getExportedDatas(page),
+      write(page, rome.strokes)
+    ])
+
+    const jiixRomeExpected = rome.exports["application/vnd.myscript.jiix"]
+    const jiixRomeReceived = exportRome["application/vnd.myscript.jiix"]
+
+    expect(jiixRomeReceived.label).toStrictEqual(jiixRomeExpected.label)
+
+    await page.locator("#nextButton").click()
+    //wait for the question to change
+    await page.waitForTimeout(400)
+
+    let [exportMadrid] = await Promise.all([
+      getExportedDatas(page),
+      write(page, madrid.strokes)
+    ])
+
+    const jiixMadridExpected = madrid.exports["application/vnd.myscript.jiix"]
+    const jiixMadridReceived = exportMadrid["application/vnd.myscript.jiix"]
+
+    expect(jiixMadridReceived.label).toStrictEqual(jiixMadridExpected.label)
+
+    await page.locator("#nextButton").click()
+    //wait for the question to change
+    await page.waitForTimeout(400)
+    await write(page, buenos.strokes)
+
+    await page.waitForTimeout(400)
+
+    let [exportBuenosAires] = await Promise.all([
+      getExportedDatas(page),
+      write(page, aires.strokes)
+    ])
+    //wait for the export to be loaded
+    await page.waitForTimeout(400)
+    const jiixBuenosAiresExpected = buenosAires.exports["application/vnd.myscript.jiix"].label
+    const jiixBuenosAiresReceived = exportBuenosAires["application/vnd.myscript.jiix"].label
+
+    expect(jiixBuenosAiresReceived).toStrictEqual(jiixBuenosAiresExpected)
+
+    await page.locator("#nextButton").click()
+    //wait for the question to change
+    await page.waitForTimeout(400)
+
+    let [exportTokyo] = await Promise.all([
+      getExportedDatas(page),
+      write(page, tokyo.strokes)
+    ])
+
+    const jiixTokyoExpected = tokyo.exports["application/vnd.myscript.jiix"]
+    const jiixTokyoReceived = exportTokyo["application/vnd.myscript.jiix"]
+
+    expect(jiixTokyoReceived.label).toStrictEqual(jiixTokyoExpected.label)
+  })
 })
