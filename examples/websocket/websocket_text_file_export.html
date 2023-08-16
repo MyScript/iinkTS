@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Word Export with iink</title>
+
+    <link rel="stylesheet" href="../examples.css" />
+
+    <style>
+      #export-result {
+        height: 100px;
+        padding: 12px;
+        overflow: auto;
+      }
+    </style>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js"
+      integrity="sha256-FPJJt8nA+xL4RU6/gsriA8p8xAeLGatoyTjldvQKGdE="
+      crossorigin="anonymous"
+    ></script>
+    <script type="text/javascript" src="../../dist/iink.min.js"></script>
+  </head>
+
+  <body>
+    <div>
+      <nav>
+        <div class="button-div">
+          <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+            <img src="../assets/clear.svg" />
+          </button>
+          <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+            <img src="../assets/undo.svg" />
+          </button>
+          <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+            <img src="../assets/redo.svg" />
+          </button>
+        </div>
+
+        <div class="style-flex-item">
+          <select id="exportType"></select>
+        </div>
+        <button class="classic-btn" id="exportContent" disabled>Export to file</button>
+      </nav>
+      <div id="editor" touch-action="none"></div>
+    </div>
+    <script>
+      const editorElement = document.getElementById("editor");
+      const undoElement = document.getElementById("undo");
+      const redoElement = document.getElementById("redo");
+      const clearElement = document.getElementById("clear");
+      const exportElement = document.getElementById("exportContent");
+      let editor;
+
+      editorElement.addEventListener("changed", (event) => {
+        undoElement.disabled = !event.detail.canUndo;
+        redoElement.disabled = !event.detail.canRedo;
+        exportElement.disabled = event.detail.isEmpty;
+        clearElement.disabled = event.detail.isEmpty;
+      });
+
+      async function loadEditor() {
+        const res = await fetch("../server-configuration.json");
+        const conf = await res.json();
+
+        const options = {
+          configuration: {
+            server: {
+              ...conf,
+              protocol: "WEBSOCKET"
+            }
+          }
+        };
+
+        /**
+         * Instanciate editor
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Editor parameters
+         */
+        editor = new iink.Editor(editorElement, options);
+        /**
+         *  async initialize editor behaviors
+         */
+        await editor.initialize();
+
+        const toBlob = (data, mimeType) => new Blob([data], { type: mimeType });
+
+        const base64toBlob = (data, mimeType) => {
+          const byteCharacters = window.atob(data);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          return toBlob(byteArray, mimeType);
+        };
+
+        const exportFileType = {
+          word: {
+            mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            transform: base64toBlob,
+            name: "Word (docx)",
+            extension: "docx"
+          },
+          html: {
+            mimeType: "text/html",
+            name: "HTML",
+            transform: toBlob,
+            extension: "html"
+          },
+          png: {
+            mimeType: "image/png",
+            transform: base64toBlob,
+            name: "PNG",
+            extension: "png"
+          },
+          jpeg: {
+            mimeType: "image/jpeg",
+            transform: base64toBlob,
+            name: "JPEG",
+            extension: "jpg"
+          }
+        };
+
+        const selectElement = document.getElementById("exportType");
+        for (const exportType in exportFileType) {
+          const optionElement = document.createElement("option");
+          optionElement.value = exportType;
+          optionElement.innerText = exportFileType[exportType].name;
+          selectElement.appendChild(optionElement);
+        }
+
+        editorElement.addEventListener("exported", (evt) => {
+          const fileType = exportFileType[selectElement.options[selectElement.selectedIndex].value];
+          if (evt && evt.detail && evt.detail[fileType.mimeType]) {
+            window.saveAs(fileType.transform(evt.detail[fileType.mimeType], fileType.mimeType), `myDocument.${fileType.extension}`);
+          }
+        });
+
+        undoElement.addEventListener("click", () => {
+          editorElement.editor.undo();
+        });
+
+        redoElement.addEventListener("click", () => {
+          editorElement.editor.redo();
+        });
+
+        clearElement.addEventListener("click", () => {
+          editorElement.editor.clear();
+        });
+
+        exportElement.addEventListener("click", () => {
+          const mimeType = exportFileType[selectElement.options[selectElement.selectedIndex].value].mimeType;
+          editorElement.editor.export([mimeType, "application/vnd.myscript.jiix"]);
+        });
+
+        window.addEventListener("resize", () => {
+          editorElement.editor.resize();
+        });
+      }
+      loadEditor();
+    </script>
+  </body>
+</html>
