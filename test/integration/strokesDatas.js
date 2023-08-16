@@ -592,3 +592,24 @@ module.exports.oneThousandNineHundredAndNintyThree = {
     "text/plain": "1993",
   },
 }
+
+const helloOneSurrounded = require("./strokes/helloOneStrokeSurrounded.json")
+module.exports.helloOneSurrounded = {
+  type: "TEXT",
+  strokes: helloOneSurrounded,
+  exports: {
+    "text/plain": ["hello"],
+    "application/vnd.myscript.jiix": {
+      type: "Text",
+      label: "hello",
+      words: [
+        {
+          label: "hello",
+          candidates: ["hello", "helto", "helts", "kelto", "felto"],
+        },
+      ],
+      version: "3",
+      id: "MainBlock",
+    },
+  },
+}

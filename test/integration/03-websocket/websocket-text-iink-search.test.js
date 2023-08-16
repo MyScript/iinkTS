@@ -1,7 +1,7 @@
 const { write, getExportedDatas, waitForEditorWebSocket } = require("../helper")
 const { hello } = require("../strokesDatas")
 
-describe("Websocket Text", () => {
+describe("Websocket Text search", () => {
   beforeAll(async () => {
     await page.goto("/examples/websocket/websocket_text_iink_search.html")
   })

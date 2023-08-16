@@ -1,7 +1,7 @@
 const { waitForEditorWebSocket, write, getExportedDatas, waitForTimeout, getEditorModelExports, getEditorModelExportsType } = require('../helper')
 const { helloOneStroke } = require('../strokesDatas')
 
-describe('Websocket Text', () => {
+describe('Websocket Text local storage', () => {
   beforeAll(async () => {
     await page.goto('/examples/websocket/websocket_text_local_storage_text.html')
   })
