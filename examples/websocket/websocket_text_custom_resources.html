@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Custom pre-loaded resources</title>
+
+    <link rel="stylesheet" href="../examples.css" />
+
+    <script type="text/javascript" src="../../dist/iink.min.js"></script>
+
+    <style>
+      .button-div > p {
+        margin-right: 12px;
+      }
+
+      nav {
+        flex-wrap: wrap-reverse;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div>
+      <nav>
+        <div class="button-div">
+          <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+            <img src="../assets/undo.svg" />
+          </button>
+          <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+            <img src="../assets/redo.svg" />
+          </button>
+        </div>
+        <p>Custom pre-loaded resources: <b>Dinosaurs</b>. Try to write some dinosaurs name!</p>
+      </nav>
+      <div id="editor" touch-action="none"></div>
+    </div>
+    <script>
+      const editorElement = document.getElementById("editor");
+
+      const undoElement = document.getElementById("undo");
+      const redoElement = document.getElementById("redo");
+      let editor;
+      async function loadEditor() {
+        const res = await fetch("../server-configuration.json");
+        const conf = await res.json();
+        const options = {
+          configuration: {
+            server: {
+              ...conf,
+              protocol: "WEBSOCKET"
+            },
+            recognition: {
+              text: {
+                addLKText: true,
+                customResources: ["dinosaur"]
+              }
+            }
+          }
+        };
+
+        /**
+         * Instanciate editor
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Editor parameters
+         */
+        editor = new iink.Editor(editorElement, options);
+        /**
+         *  async initialize editor behaviors
+         */
+        await editor.initialize();
+
+        editorElement.addEventListener("changed", (event) => {
+          undoElement.disabled = !event.detail.canUndo;
+          redoElement.disabled = !event.detail.canRedo;
+        });
+
+        undoElement.addEventListener("click", () => {
+          editorElement.editor.undo();
+        });
+
+        redoElement.addEventListener("click", () => {
+          editorElement.editor.redo();
+        });
+
+        window.addEventListener("resize", () => {
+          editorElement.editor.resize();
+        });
+      }
+      loadEditor();
+    </script>
+  </body>
+</html>

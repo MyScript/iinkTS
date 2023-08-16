@@ -544,3 +544,24 @@ module.exports.buenosAires = {
     },
   },
 }
+
+const abrausorusStrokes = require("./strokes/abrausorus.json")
+module.exports.abrausorus = {
+  type: "TEXT",
+  strokes: abrausorusStrokes,
+  exports: {
+    "text/plain": ["abrausorus"],
+    "application/vnd.myscript.jiix": {
+      type: "Text",
+      label: "abrausorus",
+      words: [
+        {
+          label: "abrausorus",
+          candidates: ["abrausorus"],
+        },
+      ],
+      version: "3",
+      id: "MainBlock",
+    },
+  },
+}
