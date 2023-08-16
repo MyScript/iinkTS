@@ -8,6 +8,7 @@ import { TServerConfiguration } from "../@types/configuration/ServerConfiguratio
 import { TTriggerConfiguration } from "../@types/configuration/TriggerConfiguration"
 import { TUndoRedoConfiguration } from "../@types/configuration/UndoRedoConfiguration"
 import { DefaultConfiguration } from "./DefaultConfiguration"
+import { mergeDeep } from "../utils/MergeHelper"
 
 export class Configuration implements TConfiguration
 {
@@ -31,43 +32,18 @@ export class Configuration implements TConfiguration
     this.overrideDefaultConfiguration(configuration)
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  mergeDeep(target: any, ...sources: any[]): any
-  {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const isObject = (item: any) =>
-    {
-      return (item && typeof item === "object" && !Array.isArray(item))
-    }
-    if (!sources.length) return target
-    const source = sources.shift()
 
-    if (isObject(target) && isObject(source)) {
-      for (const key in source) {
-        if (isObject(source[key])) {
-          if (!target[key]) {
-            Object.assign(target, { [key]: {} })
-          }
-          this.mergeDeep(target[key], source[key])
-        } else {
-          Object.assign(target, { [key]: source[key] })
-        }
-      }
-    }
-
-    return this.mergeDeep(target, ...sources)
-  }
 
   overrideDefaultConfiguration(configuration?: TConfigurationClient): void
   {
     const defaultConf = JSON.parse(JSON.stringify(DefaultConfiguration))
-    this.events = this.mergeDeep({}, defaultConf.events, configuration?.events)
-    this.grabber = this.mergeDeep({}, defaultConf.grabber, configuration?.grabber)
-    this.recognition = this.mergeDeep({}, defaultConf.recognition, configuration?.recognition)
-    this.rendering = this.mergeDeep({}, defaultConf.rendering, configuration?.rendering)
-    this.server = this.mergeDeep({}, defaultConf.server, configuration?.server)
-    this.triggers = this.mergeDeep({}, defaultConf.triggers, configuration?.triggers)
-    this["undo-redo"] = this.mergeDeep({}, defaultConf["undo-redo"], configuration?.["undo-redo"])
+    this.events = mergeDeep({}, defaultConf.events, configuration?.events)
+    this.grabber = mergeDeep({}, defaultConf.grabber, configuration?.grabber)
+    this.recognition = mergeDeep({}, defaultConf.recognition, configuration?.recognition)
+    this.rendering = mergeDeep({}, defaultConf.rendering, configuration?.rendering)
+    this.server = mergeDeep({}, defaultConf.server, configuration?.server)
+    this.triggers = mergeDeep({}, defaultConf.triggers, configuration?.triggers)
+    this["undo-redo"] = mergeDeep({}, defaultConf["undo-redo"], configuration?.["undo-redo"])
 
     this.recognition.text.mimeTypes = configuration?.recognition?.text?.mimeTypes || defaultConf.recognition.text.mimeTypes
     this.recognition.math.mimeTypes = configuration?.recognition?.math?.mimeTypes || defaultConf.recognition.math.mimeTypes

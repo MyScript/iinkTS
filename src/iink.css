@@ -72,6 +72,8 @@
     position: absolute;
     z-index: 40;
     font-size: 16px;
+    height: 48px;
+    line-height: 48px;
 }
 
 .ms-editor .smartguide.smartguide-in {
@@ -97,7 +99,7 @@
     user-select: none;
     position: absolute;
     z-index: 31;
-    height: 48px;
+    height: 100%;
     line-height: 48px;
     background-color: rgba(255, 255, 255, 0.9);
     color: #959DA6;
