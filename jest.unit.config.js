@@ -23,6 +23,7 @@ export default {
   preset: "ts-jest",
   setupFiles: [
     "jest-canvas-mock",
+    "./test/unit/jest.setup.js"
   ],
   setupFilesAfterEnv: [
     "jest-websocket-mock"

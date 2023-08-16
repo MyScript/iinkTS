@@ -1,5 +1,7 @@
-import { TPenStyle } from "../@types/style/PenStyle"
 import { TTheme } from "../@types/style/Theme"
+import { TPenStyle } from "../@types/style/PenStyle"
+
+import { mergeDeep } from "../utils/MergeHelper"
 
 import { DefaultPenStyle } from "./DefaultPenStyle"
 import { DefaultTheme } from "./DefaultTheme"
@@ -29,7 +31,8 @@ export class StyleManager
   }
   setPenStyle(p?: TPenStyle)
   {
-    this.#penStyle = Object.assign({}, DefaultPenStyle, p || {}) as TPenStyle
+
+    this.#penStyle = mergeDeep(structuredClone(DefaultPenStyle), p || {}) as TPenStyle
     this.#currentPenStyle = p || (this.theme[`.${ this.#penStyleClasses }`]) as TPenStyle
   }
 
@@ -39,7 +42,7 @@ export class StyleManager
   }
   setTheme(t?: TTheme)
   {
-    this.#theme = Object.assign({}, DefaultTheme, t || {}) as TTheme
+    this.#theme = mergeDeep(structuredClone(DefaultTheme), t || {}) as TTheme
   }
 
   get penStyleClasses(): string
