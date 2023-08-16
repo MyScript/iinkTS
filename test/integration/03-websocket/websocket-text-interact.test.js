@@ -9,7 +9,7 @@ const {
   buenosAires
 } = require("../strokesDatas")
 
-describe("Websocket Text", () => {
+describe("Websocket Text interact", () => {
   beforeAll(async () => {
     await page.goto("/examples/websocket/websocket_text_interact.html")
   })

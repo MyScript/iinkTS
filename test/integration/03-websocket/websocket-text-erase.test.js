@@ -1,7 +1,7 @@
 const { waitForEditorWebSocket, write, getExportedDatas } = require('../helper')
 const { ponyErase, ponyErasePrecisely } = require('../strokesDatas')
 
-describe('Websocket Text', () => {
+describe('Websocket Text erase', () => {
   beforeAll(async () => {
     await page.goto('/examples/websocket/websocket_text_iink_eraser.html')
   })
