@@ -324,6 +324,15 @@ export class Editor
     this.#initializeSmartGuide()
   }
 
+  async waitForIdle(): Promise<void>
+  {
+    if (this.behaviors.waitForIdle)
+    {
+      return this.behaviors.waitForIdle()
+    }
+    return
+  }
+
   async undo(): Promise<IModel>
   {
     await this.#initializationDeferred.promise

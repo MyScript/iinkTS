@@ -39,6 +39,41 @@ module.exports.write = async (page, strokes, offsetTop = 0, offsetLeft = 0) => {
 
 /**
  * @param {Page} page - Playwright Page
+ * @param {Array} strokes
+ * @param {Object} strokes[0]
+ * @param {Array} strokes[0].pointers
+ * @param {Object} strokes[0].pointers[0]
+ * @param {Number} strokes[0].pointers[0].x
+ * @param {Number} strokes[0].pointers[0].y
+ * @param {Number} strokes[0].pointers[0].t
+ * @param {Number} strokes[0].pointers[0].p
+ * @param {Number} [offsetTop=0]
+ * @param {Number} [offsetLeft=0]
+ */
+module.exports.writePointers = async (page, strokes, offsetTop = 0, offsetLeft = 0) => {
+  const editorEl = await page.waitForSelector('#editor')
+  const boundingBox = await editorEl.evaluate((node) => node.getBoundingClientRect())
+  const offsetX = offsetLeft + boundingBox.x
+  const offsetY = offsetTop + boundingBox.y
+  for(s of strokes) {
+    const firstPointer = s.pointers[0]
+    let oldTimestamp = firstPointer.t
+    await page.mouse.move(offsetX + firstPointer.x, offsetY + firstPointer.y)
+    await page.mouse.down()
+    for(p of s.pointers) {
+      let waitTime = 0
+      waitTime = p.t - oldTimestamp
+      oldTimestamp = p.t
+      await page.waitForTimeout(waitTime)
+      await page.mouse.move(offsetX + p.x, offsetY + p.y)
+    }
+    await page.mouse.up()
+    await page.waitForTimeout(100)
+  }
+}
+
+/**
+ * @param {Page} page - Playwright Page
  * @returns Promise<Editor>
  */
 module.exports.getEditor = async (page) => {
@@ -130,6 +165,15 @@ const converted = `(async () => {
  */
 module.exports.getConvertedDatas = async (page) => {
   return page.evaluate(converted)
+}
+
+
+/**
+ * @param {Page} page - Playwright Page
+ * @returns Promise<void>
+ */
+module.exports.waitEditorIdle = async (page) => {
+  return page.evaluate("editor.waitForIdle()")
 }
 
 const loaded = `(async () => {

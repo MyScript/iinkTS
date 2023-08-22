@@ -53,6 +53,7 @@ export interface IBehaviors
   async undo(): Promise<IModel>
   async redo(): Promise<IModel>
 
+  async waitForIdle?(): Promise<void>
   async importPointEvents?(strokes: TStroke[]): Promise<IModel | never>
   async import?(data: Blob, mimeType?: string): Promise<IModel | never>
 

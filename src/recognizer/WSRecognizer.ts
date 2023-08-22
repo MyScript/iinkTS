@@ -69,6 +69,7 @@ export class WSRecognizer implements IRecognizer
   protected redoDeferred?: DeferredPromise<TExport>
   protected clearDeferred?: DeferredPromise<TExport>
   protected importPointEventsDeferred?: DeferredPromise<TExport>
+  protected waitForIdleDeferred?: DeferredPromise<void>
 
   url: string
 
@@ -166,6 +167,9 @@ export class WSRecognizer implements IRecognizer
     }
     if (this.clearDeferred?.isPending) {
       this.clearDeferred.reject(error)
+    }
+    if (this.waitForIdleDeferred?.isPending) {
+      this.waitForIdleDeferred.reject(error)
     }
   }
 
@@ -282,6 +286,7 @@ export class WSRecognizer implements IRecognizer
 
   protected async manageWaitForIdle(): Promise<void> {
     this.internalEvent.emitIdle(true)
+    this.waitForIdleDeferred?.resolve()
   }
 
   protected manageErrorMessage(websocketMessage: TWebSocketEvent): void
@@ -617,6 +622,17 @@ export class WSRecognizer implements IRecognizer
     localModel.mergeConvert(myExportConverted)
     localModel.mergeExport(myExportConverted)
     return localModel
+  }
+
+  async waitForIdle(): Promise<void>
+  {
+    await this.initialized?.promise
+    this.waitForIdleDeferred = new DeferredPromise<void>()
+    const message: TWebSocketEvent = {
+      type: "waitForIdle",
+    }
+    await this.send(message)
+    return this.waitForIdleDeferred?.promise
   }
 
   async undo(model: IModel): Promise<IModel>
