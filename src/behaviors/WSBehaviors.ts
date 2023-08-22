@@ -188,6 +188,11 @@ export class WSBehaviors implements IBehaviors
     return this.model
   }
 
+  async waitForIdle?(): Promise<void>
+  {
+    return this.recognizer.waitForIdle()
+  }
+
   async importPointEvents(strokes: TStroke[]): Promise<IModel | never>
   {
     const exportPoints = await this.recognizer.importPointEvents(strokes)

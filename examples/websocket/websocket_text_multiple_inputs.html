@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Multiple inputs</title>
+
+    <link rel="stylesheet" href="../examples.css" />
+
+    <style>
+      .instructions {
+        width: 100%;
+        padding: 24px 24px 0 24px;
+      }
+      .instructions ul {
+        margin: 0;
+        color: darkslategrey;
+        font-size: 20px;
+      }
+      .instructions li {
+        margin-left: 24px;
+      }
+      .instructions-blue {
+        background-color: rgba(150, 150, 255, 0.2);
+        padding: 2px;
+      }
+      main {
+        display: flex;
+        flex-direction: row;
+        gap: 12px;
+        padding: 24px;
+        height: calc(100% - 120px);
+        width: 100%;
+      }
+      #inputs-colum {
+        display: flex;
+        flex-direction: column;
+        width: calc(75% - 24px);
+        min-width: 400px;
+      }
+      #answers-colum {
+        display: flex;
+        flex-direction: column;
+        width: calc(25% - 24px);
+        min-width: 100px;
+      }
+      label {
+        margin-left: 24px;
+      }
+      .input {
+        z-index: 20;
+        font-size: 36px;
+        margin-left: 24px;
+        margin-bottom: 24px;
+        width: 100%;
+        height: 150px;
+        border: 1px #bfbfbf solid;
+        border-radius: 6px;
+        background-color: rgba(174, 174, 174, 0.1);
+      }
+      .answer {
+        font-size: 18px;
+        margin-left: 24px;
+        margin-bottom: 24px;
+        padding: 12px;
+        width: 100%;
+        height: 150px;
+        border: 1px #bfbfbf solid;
+        border-radius: 6px;
+      }
+      .answer.success {
+        background-color: rgba(172, 255, 167, 0.2);
+      }
+      .answer.error {
+        background-color: rgba(255, 92, 92, 0.2);
+      }
+      #editor {
+        width: 100%;
+        height: 100%;
+        border-radius: 6px;
+        background-color: rgba(150, 150, 255, 0.2);
+      }
+      #validate-answers {
+        margin: 12px 24px 24px 24px;
+        width: 100%;
+      }
+    </style>
+
+    <script type="text/javascript" src="../../dist/iink.min.js"></script>
+  </head>
+
+  <body>
+    <div id="instructions" class="instructions">
+      <ul>
+        To anwser question:
+        <li>
+          select the input area by clicking
+        </li>
+        <li>
+          wait until the background turns <span class="instructions-blue">blue</span>
+        </li>
+        <li>
+          you can write
+        </li>
+      </ul>
+    </div>
+    <main>
+      <div id="inputs-colum">
+
+      </div>
+      <div id="answers-colum">
+        <button id="validate-answers" class="classic-btn">Validate</button>
+      </div>
+    </main>
+    <div id="editor"></div>
+    <script src="./websocket_text_multiple_inputs.js"></script>
+  </body>
+</html>

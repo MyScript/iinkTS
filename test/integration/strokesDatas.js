@@ -565,3 +565,30 @@ module.exports.abrausorus = {
     },
   },
 }
+
+const centralProcessingUnitStrokes = require("./strokes/multiple-inputs/centralProcessingUnit.json")
+module.exports.centralProcessingUnit = {
+  type: "TEXT",
+  strokes: centralProcessingUnitStrokes,
+  exports: {
+    "text/plain": "central processing unit",
+  },
+}
+
+const Strokes1943 = require("./strokes/multiple-inputs/1943.json")
+module.exports.oneThousandNineHundredAndFortyThree = {
+  type: "TEXT",
+  strokes: Strokes1943,
+  exports: {
+    "text/plain": "1943",
+  },
+}
+
+const Strokes1993 = require("./strokes/multiple-inputs/1993.json")
+module.exports.oneThousandNineHundredAndNintyThree = {
+  type: "TEXT",
+  strokes: Strokes1993,
+  exports: {
+    "text/plain": "1993",
+  },
+}
