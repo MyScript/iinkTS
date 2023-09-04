@@ -49,8 +49,8 @@ export class CanvasQuadraticStroker
   {
     const NUMBER_POINTS = stroke.pointers.length
     const NUMBER_QUADRATICS = NUMBER_POINTS - 2
-    const width = (stroke.width as number) > 0 ? (stroke.width as number) : context2d.lineWidth
-    const color = (stroke.color as string) ? (stroke.color as string) : context2d.strokeStyle
+    const width = (stroke.style.width as number) > 0 ? (stroke.style.width as number) : context2d.lineWidth
+    const color = (stroke.style.color as string) ? (stroke.style.color as string) : context2d.strokeStyle
     const firstPoint = stroke.pointers[0] as TPointer
 
     context2d.save()

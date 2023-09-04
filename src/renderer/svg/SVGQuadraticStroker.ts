@@ -60,7 +60,7 @@ export class SVGQuadraticStroker
   private buildSVGPath(stroke: TStroke): string
   {
     const STROKE_LENGTH = stroke.pointers.length
-    const STROKE_WIDTH = (stroke.width as number)
+    const STROKE_WIDTH = (stroke.style.width as number)
     const NB_QUADRATICS = STROKE_LENGTH - 2
     const firstPoint = stroke.pointers[0]
 

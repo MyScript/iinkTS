@@ -1,9 +1,10 @@
 import { TPenStyle } from "../style/PenStyle"
 import { TPoint, TPointer } from "../geometry"
 
-export type TSymbol = TPenStyle & {
+export type TSymbol = {
   elementType?: string
   type: string
+  style: TPenStyle
 }
 
 export type TShapeSymbol = TSymbol & {

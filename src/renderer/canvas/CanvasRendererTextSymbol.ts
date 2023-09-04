@@ -55,8 +55,8 @@ export function drawTextSymbol(context2D: CanvasRenderingContext2D, symbol: TSym
 {
   context2D.save()
   try {
-    context2D.lineWidth = (symbol.width as number)
-    context2D.strokeStyle = (symbol.color as string)
+    context2D.lineWidth = (symbol.style.width as number)
+    context2D.strokeStyle = (symbol.style.color as string)
     const type: string = symbol.elementType || symbol.type
 
     switch (type) {
@@ -64,7 +64,7 @@ export function drawTextSymbol(context2D: CanvasRenderingContext2D, symbol: TSym
         drawTextLine(context2D, symbol as TTextUnderlineSymbol)
         break
       default:
-        // logger.error(`${symbol.elementType} not implemented`)
+        console.info(`drawTextSymbol => ${symbol.elementType} not implemented`)
         break
     }
 

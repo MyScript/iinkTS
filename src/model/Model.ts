@@ -72,7 +72,7 @@ export class Model implements IModel
 
   private filterPointByAcquisitionDelta(stroke: TStroke, point: TPointer, lastPointer: TPointer): boolean
   {
-    const delta: number = (2 + ((stroke["-myscript-pen-width"] || 0) / 4))
+    const delta: number = (2 + ((stroke.style["-myscript-pen-width"] || 0) / 4))
     return !lastPointer ||
       stroke.pointers.length === 0 ||
       Math.abs(lastPointer.x - point.x) >= delta ||

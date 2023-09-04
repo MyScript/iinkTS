@@ -140,8 +140,8 @@ export function drawShapeSymbol(context2D: CanvasRenderingContext2D, symbol: TSy
 {
   context2D.save()
   try {
-    context2D.lineWidth = symbol.width as number
-    context2D.strokeStyle = symbol.color as string
+    context2D.lineWidth = symbol.style.width as number
+    context2D.strokeStyle = symbol.style.color as string
 
     if (symbol.elementType) {
       switch (symbol.elementType) {
