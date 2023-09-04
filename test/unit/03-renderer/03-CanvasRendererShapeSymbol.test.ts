@@ -28,11 +28,7 @@ describe('CanvasRendererShapeSymbol.ts', () =>
     const lineSymbol: TLineSymbol = {
       elementType: 'line',
       type: 'pen',
-      "-myscript-pen-fill-color": DefaultPenStyle['-myscript-pen-fill-color'],
-      "-myscript-pen-fill-style": DefaultPenStyle['-myscript-pen-fill-color'],
-      "-myscript-pen-width": DefaultPenStyle['-myscript-pen-width'],
-      color: DefaultPenStyle.color,
-      width: DefaultPenStyle.width,
+      style: DefaultPenStyle,
       data: { p1, p2 }
     }
     drawShapeSymbol(canvasContext, lineSymbol)
@@ -48,21 +44,13 @@ describe('CanvasRendererShapeSymbol.ts', () =>
     const lineSymbol: TLineSymbol = {
       elementType: 'line',
       type: 'pen',
-      "-myscript-pen-fill-color": DefaultPenStyle['-myscript-pen-fill-color'],
-      "-myscript-pen-fill-style": DefaultPenStyle['-myscript-pen-fill-color'],
-      "-myscript-pen-width": DefaultPenStyle['-myscript-pen-width'],
-      color: DefaultPenStyle.color,
-      width: DefaultPenStyle.width,
+      style: DefaultPenStyle,
       data: { p1, p2 }
     }
     const shapeSymbol: TShapeSymbol = {
       elementType: 'shape',
       type: 'pen',
-      "-myscript-pen-fill-color": DefaultPenStyle['-myscript-pen-fill-color'],
-      "-myscript-pen-fill-style": DefaultPenStyle['-myscript-pen-fill-color'],
-      "-myscript-pen-width": DefaultPenStyle['-myscript-pen-width'],
-      color: DefaultPenStyle.color,
-      width: DefaultPenStyle.width,
+      style: DefaultPenStyle,
       selectedCandidateIndex: 0,
       candidates: [lineSymbol]
     }

@@ -11,11 +11,7 @@ export class Stroke implements TStroke
   elementType?: string
   pointers: TPointer[]
   length: number
-  color: string
-  width: number
-  "-myscript-pen-width": number
-  "-myscript-pen-fill-style": string
-  "-myscript-pen-fill-color": string
+  style: TPenStyle
 
   constructor(style: TPenStyle, pointerId: number, pointerType = "pen")
   {
@@ -25,11 +21,7 @@ export class Stroke implements TStroke
     this.pointerType = pointerType
     this.pointers = []
     this.length = 0
-    this.color = style.color as string
-    this.width = style.width as number
-    this["-myscript-pen-width"] = style["-myscript-pen-width"] as number
-    this["-myscript-pen-fill-style"] = style["-myscript-pen-fill-style"] as string
-    this["-myscript-pen-fill-color"] = style["-myscript-pen-fill-color"] as string
+    this.style = style
   }
 }
 

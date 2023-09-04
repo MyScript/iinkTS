@@ -80,18 +80,12 @@ export class RestRecognizer implements IRecognizer
 
     const strokeGroupByPenStyle: TStrokeGroup[] = []
     model.rawStrokes.forEach((s) => {
-      const groupIndex = strokeGroupByPenStyle.findIndex(sg => isPenStyleEqual(sg.penStyle, s))
+      const groupIndex = strokeGroupByPenStyle.findIndex(sg => isPenStyleEqual(sg.penStyle, s.style))
       if (groupIndex > -1) {
         strokeGroupByPenStyle[groupIndex].strokes.push(s)
       } else {
         strokeGroupByPenStyle.push({
-          penStyle: {
-            "-myscript-pen-fill-color": s["-myscript-pen-fill-color"],
-            "-myscript-pen-fill-style": s["-myscript-pen-fill-style"],
-            "-myscript-pen-width": s["-myscript-pen-width"],
-            color: s.color,
-            width: s.width
-          },
+          penStyle: s.style,
           strokes: [s]
         })
       }

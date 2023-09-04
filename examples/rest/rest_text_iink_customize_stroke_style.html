@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+    <title>Rest Text Styling</title>
+    <link rel="stylesheet" href="../examples.css" />
+    <script type="text/javascript" src="../../dist/iink.min.js"></script>
+    <style>
+      .nav-block {
+        display: block;
+      }
+      .flex-container {
+        display: flex;
+        flex-wrap: wrap;
+      }
+      .flex-container.between {
+        justify-content: space-between;
+      }
+
+      .flex-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 12px 0;
+      }
+
+      .pen-color-field,
+      .pen-color-field:focus {
+        padding: 0;
+        height: 36px;
+      }
+      #editor {
+        height: calc(100vh - 224px);
+      }
+
+      @media only screen and (max-width: 720px) {
+        #editor {
+          height: calc(100vh - 275px);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="result"></div>
+
+    <nav class="nav-block">
+      <div class="flex-container between ">
+        <div class="button-div">
+          <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+            <img src="../assets/clear.svg" />
+          </button>
+          <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+            <img src="../assets/undo.svg" />
+          </button>
+          <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+            <img src="../assets/redo.svg" />
+          </button>
+        </div>
+        <select id="language"></select>
+      </div>
+      <div class="flex-container">
+        <div class="flex-item">
+          <input id="penenabled" type="checkbox" />
+          <label for="penenabled">Enable pen color/thickness</label>
+        </div>
+        <div class="flex-item">
+          <label for="pencolor">Color:</label>
+          <input id="pencolor" class="input-field pen-color-field" type="color" value="#ff7314" disabled/>
+        </div>
+        <div class="flex-item">
+          <label for="penwidth">Thickness:</label>
+          <input id="penwidth" class="input-field" type="number" min="1" max="5" value="2" disabled/>
+        </div>
+      </div>
+    </nav>
+
+    <div id="editor" touch-action="none"></div>
+
+    <script>
+      const editorElement = document.getElementById("editor");
+      const resultElement = document.getElementById("result");
+      const languageElement = document.getElementById("language");
+      const clearElement = document.getElementById("clear");
+      const undoElement = document.getElementById("undo");
+      const redoElement = document.getElementById("redo");
+
+      const penEnabled = document.getElementById("penenabled");
+      const penColor = document.getElementById("pencolor");
+      const penWidth = document.getElementById("penwidth");
+      function getStyle() {
+        return {
+          color: penColor.value,
+          "-myscript-pen-width": penWidth.value
+        };
+      }
+      /**
+       * we expose the editor for use in the integration test
+       */
+      let editor;
+
+      /**
+       * We use a function to wait the server configuration to load
+       */
+      async function loadEditor() {
+        const res = await fetch("../server-configuration.json");
+        const conf = await res.json();
+        const options = {
+          configuration: {
+            server: {
+              ...conf,
+              protocol: "REST"
+            },
+            recognition: {
+              type: "TEXT",
+              text: {
+                mimeTypes: ["text/plain"]
+              }
+            }
+          }
+        };
+        /**
+         * Instanciate editor
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Editor parameters
+         */
+        editor = new iink.Editor(editorElement, options);
+        /**
+         *  async initialize editor behaviors
+         */
+        await editor.initialize();
+
+        const currentLanguage = editor.configuration.recognition.lang;
+        const availableLanguageListResponse = await iink.getAvailableLanguageList(editor.configuration);
+        Object.keys(availableLanguageListResponse.result).forEach(function (key) {
+          const selected = currentLanguage === key;
+          languageElement.options[languageElement.options.length] = new Option(availableLanguageListResponse.result[key], key, selected, selected);
+        });
+
+        editor.events.addEventListener("changed", (event) => {
+          undoElement.disabled = !event.detail.canUndo;
+          redoElement.disabled = !event.detail.canRedo;
+          clearElement.disabled = !event.detail.canClear;
+        });
+
+        editor.events.addEventListener("exported", (event) => {
+          resultElement.innerHTML = event.detail ? event.detail["text/plain"] : "";
+        });
+
+        clearElement.addEventListener("click", async () => {
+          editor.clear();
+        });
+
+        undoElement.addEventListener("click", () => {
+          editor.undo();
+        });
+
+        redoElement.addEventListener("click", () => {
+          editor.redo();
+        });
+
+        languageElement.addEventListener("change", (e) => {
+          const configuration = JSON.parse(JSON.stringify(editor.configuration));
+          configuration.recognition.lang = e.target.value;
+          editor.configuration = configuration;
+          resultElement.innerHTML = "";
+        });
+
+        penEnabled.addEventListener("change", (event) => {
+          penWidth.disabled = !event.target.checked;
+          penColor.disabled = !event.target.checked;
+          if (event.target.checked) {
+            editor.penStyle = getStyle();
+          } else {
+            editor.penStyle = undefined;
+          }
+        });
+
+        penColor.addEventListener("change", () => {
+          editor.penStyle = getStyle();
+        });
+
+        penWidth.addEventListener("change", () => {
+          editor.penStyle = getStyle();
+        });
+
+        window.addEventListener("resize", () => {
+          editor.resize();
+        });
+      }
+
+      loadEditor();
+    </script>
+  </body>
+</html>

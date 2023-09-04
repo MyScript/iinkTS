@@ -30,10 +30,10 @@ export class WSSVGRenderer
   {
     let style: string
     if (stroke.pointerType === "eraser") {
-      stroke.width = 20
+      stroke.style.width = 20
       style = "fill:grey;stroke:transparent;shadowBlur:5;opacity:0.2;"
     } else {
-      style = `fill:${ stroke.color };stroke:transparent;`
+      style = `fill:${ stroke.style.color };stroke:transparent;`
     }
     this.stroker.drawStroke(svgElement, stroke, [{ name: "style", value: style }])
   }
