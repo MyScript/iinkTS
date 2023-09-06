@@ -1,41 +1,45 @@
-import { IModel } from '../../../src/@types/model/Model'
-import { TPointer } from '../../../src/@types/geometry'
-import { TUndoRedoConfiguration } from '../../../src/@types/configuration/UndoRedoConfiguration'
+import
+{
+  IModel,
+  TPointer,
+  TUndoRedoConfiguration
+} from "../../../src/@types"
+import
+{
+  Model,
+  UndoRedoManager,
+  UndoRedoContext,
+  DefaultConfiguration,
+  DefaultPenStyle
+} from "../../../src/iink"
 
-import { Model } from '../../../src/model/Model'
-import { UndoRedoManager } from '../../../src/undo-redo/UndoRedoManager'
-import { UndoRedoContext } from '../../../src/undo-redo/UndoRedoContext'
-import { DefaultConfiguration } from "../../../src/configuration/DefaultConfiguration"
-import { DefaultPenStyle } from '../../../src/style/DefaultPenStyle'
-
-
-describe('UndoRedoManager.ts', () =>
+describe("UndoRedoManager.ts", () =>
 {
   const width = 100, height = 100
-  test('should instanciate UndoRedoManager', () =>
+  test("should instanciate UndoRedoManager", () =>
   {
-    const manager = new UndoRedoManager(DefaultConfiguration['undo-redo'], new Model(width, height))
+    const manager = new UndoRedoManager(DefaultConfiguration["undo-redo"], new Model(width, height))
     expect(manager).toBeDefined()
   })
 
-  test('should initialize UndoRedoContext', () =>
+  test("should initialize UndoRedoContext", () =>
   {
     const model = new Model(width, height)
-    const manager = new UndoRedoManager(DefaultConfiguration['undo-redo'], model)
+    const manager = new UndoRedoManager(DefaultConfiguration["undo-redo"], model)
     const context = new UndoRedoContext(model)
     expect(manager.context).toStrictEqual(context)
   })
 
-  describe('addModelToStack', () =>
+  describe("addModelToStack", () =>
   {
     const configuration: TUndoRedoConfiguration = { maxStackSize: 5 }
     const model: IModel = new Model(27, 5)
     const manager = new UndoRedoManager(configuration, model)
 
-    test('should add model to stack', () =>
+    test("should add model to stack", () =>
     {
       const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      model.initCurrentStroke(p1, 666, 'pen', DefaultPenStyle)
+      model.initCurrentStroke(p1, 666, "pen", DefaultPenStyle)
 
       const p2: TPointer = { t: 15, p: 0.5, x: 10, y: 1 }
       model.endCurrentStroke(p2)
@@ -51,12 +55,12 @@ describe('UndoRedoManager.ts', () =>
       expect(manager.context.canRedo).toStrictEqual(false)
     })
 
-    test('should splice end of stack if stackIndex no last', () =>
+    test("should splice end of stack if stackIndex no last", () =>
     {
       const NB_STROKE = 4
       for (let i = 0; i < NB_STROKE; i++) {
         const p1: TPointer = { t: i * 5, p: 1, x: i * 10, y: 10 }
-        model.initCurrentStroke(p1, 666, 'pen', DefaultPenStyle)
+        model.initCurrentStroke(p1, 666, "pen", DefaultPenStyle)
 
         const p2: TPointer = { t: i * 10, p: 1, x: i * 10, y: 10 }
         model.endCurrentStroke(p2)
@@ -69,7 +73,7 @@ describe('UndoRedoManager.ts', () =>
       manager.context.stackIndex = 0
 
       const p1: TPointer = { t: 27, p: 0.5, x: 1989, y: 2022 }
-      model.initCurrentStroke(p1, 666, 'pen', DefaultPenStyle)
+      model.initCurrentStroke(p1, 666, "pen", DefaultPenStyle)
 
       const p2: TPointer = { t: 75, p: 1, x: 200, y: 10 }
       model.endCurrentStroke(p2)
@@ -83,12 +87,12 @@ describe('UndoRedoManager.ts', () =>
       expect(manager.context.stack[manager.context.stackIndex]).not.toBe(model)
     })
 
-    test('should shift the first element of the stack when maxStackSize is exceeded', () =>
+    test("should shift the first element of the stack when maxStackSize is exceeded", () =>
     {
       const NB_STROKE = 10
       for (let i = 0; i < NB_STROKE; i++) {
         const p1: TPointer = { t: i * 42, p: 0.5, x: i / 2, y: i * 20 }
-        model.initCurrentStroke(p1, 666, 'pen', DefaultPenStyle)
+        model.initCurrentStroke(p1, 666, "pen", DefaultPenStyle)
 
         const p2: TPointer = { t: i * 10, p: 1, x: i * 10, y: 10 }
         model.endCurrentStroke(p2)
@@ -108,14 +112,14 @@ describe('UndoRedoManager.ts', () =>
     })
   })
 
-  describe('undo', () =>
+  describe("undo", () =>
   {
     const model: IModel = new Model(27, 5)
-    const manager = new UndoRedoManager(DefaultConfiguration['undo-redo'], model)
-    test('should get the previous model', () =>
+    const manager = new UndoRedoManager(DefaultConfiguration["undo-redo"], model)
+    test("should get the previous model", () =>
     {
       const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      model.initCurrentStroke(p1, 666, 'pen', DefaultPenStyle)
+      model.initCurrentStroke(p1, 666, "pen", DefaultPenStyle)
 
       const p2: TPointer = { t: 15, p: 0.5, x: 10, y: 1 }
       model.endCurrentStroke(p2)
@@ -133,14 +137,14 @@ describe('UndoRedoManager.ts', () =>
     })
   })
 
-  describe('redo', () =>
+  describe("redo", () =>
   {
     const model: IModel = new Model(27, 5)
-    const manager = new UndoRedoManager(DefaultConfiguration['undo-redo'], model)
-    test('should get the next model', () =>
+    const manager = new UndoRedoManager(DefaultConfiguration["undo-redo"], model)
+    test("should get the next model", () =>
     {
       const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      model.initCurrentStroke(p1, 666, 'pen', DefaultPenStyle)
+      model.initCurrentStroke(p1, 666, "pen", DefaultPenStyle)
 
       const p2: TPointer = { t: 15, p: 0.5, x: 10, y: 1 }
       model.endCurrentStroke(p2)
@@ -159,21 +163,21 @@ describe('UndoRedoManager.ts', () =>
     })
   })
 
-  describe('updateModelInStack', () =>
+  describe("updateModelInStack", () =>
   {
     const model: IModel = new Model(27, 5)
-    const manager = new UndoRedoManager(DefaultConfiguration['undo-redo'], model)
-    test('should update last model in stack', () =>
+    const manager = new UndoRedoManager(DefaultConfiguration["undo-redo"], model)
+    test("should update last model in stack", () =>
     {
       const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      model.initCurrentStroke(p1, 666, 'pen', DefaultPenStyle)
+      model.initCurrentStroke(p1, 666, "pen", DefaultPenStyle)
 
       const p2: TPointer = { t: 15, p: 0.5, x: 10, y: 1 }
       model.endCurrentStroke(p2)
 
       manager.addModelToStack(model)
 
-      model.exports = { 'text/plain': '-' }
+      model.exports = { "text/plain": "-" }
       manager.updateModelInStack(model)
 
       expect(manager.context.stackIndex).toStrictEqual(1)
@@ -183,20 +187,20 @@ describe('UndoRedoManager.ts', () =>
       expect(manager.context.stack[manager.context.stackIndex]).not.toBe(model)
     })
 
-    test('should update previous model in stack', () =>
+    test("should update previous model in stack", () =>
     {
       const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      model.initCurrentStroke(p1, 666, 'pen', DefaultPenStyle)
+      model.initCurrentStroke(p1, 666, "pen", DefaultPenStyle)
 
       const p2: TPointer = { t: 15, p: 0.5, x: 10, y: 1 }
       model.endCurrentStroke(p2)
 
       manager.addModelToStack(model)
       const firstModel = model.getClone()
-      firstModel.exports = { 'text/plain': '-' }
+      firstModel.exports = { "text/plain": "-" }
 
       const p3: TPointer = { t: 100, p: 0.5, x: 1, y: 10 }
-      model.initCurrentStroke(p3, 666, 'pen', DefaultPenStyle)
+      model.initCurrentStroke(p3, 666, "pen", DefaultPenStyle)
 
       const p4: TPointer = { t: 150, p: 0.5, x: 1, y: 10 }
       model.endCurrentStroke(p4)
@@ -209,13 +213,13 @@ describe('UndoRedoManager.ts', () =>
     })
   })
 
-  test('should reset context', () =>
+  test("should reset context", () =>
   {
     const model: IModel = new Model(27, 5)
-    const manager = new UndoRedoManager(DefaultConfiguration['undo-redo'], model)
+    const manager = new UndoRedoManager(DefaultConfiguration["undo-redo"], model)
 
     const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-    model.initCurrentStroke(p1, 666, 'pen', DefaultPenStyle)
+    model.initCurrentStroke(p1, 666, "pen", DefaultPenStyle)
 
     const p2: TPointer = { t: 15, p: 0.5, x: 10, y: 1 }
     model.endCurrentStroke(p2)

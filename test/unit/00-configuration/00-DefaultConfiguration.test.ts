@@ -1,4 +1,4 @@
-import { DefaultConfiguration } from "../../../src/configuration/DefaultConfiguration"
+import { DefaultConfiguration } from "../../../src/iink"
 
 describe("DefaultConfiguration.ts", () =>
 {

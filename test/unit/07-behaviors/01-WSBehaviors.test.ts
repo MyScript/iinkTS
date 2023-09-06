@@ -1,47 +1,51 @@
-import { TBehaviorOptions } from '../../../src/@types/Behaviors'
-import { TConfiguration } from '../../../src/@types/Configuration'
-import { IModel, TExport } from '../../../src/@types/model/Model'
-import { TStroke } from '../../../src/@types/model/Stroke'
-import { TWebSocketSVGPatchEvent } from '../../../src/@types/recognizer/WSRecognizer'
-import { TPointer } from '../../../src/@types/geometry'
-import { TPenStyle } from '../../../src/@types/style/PenStyle'
-import { TTheme } from '../../../src/@types/style/Theme'
-import { TUndoRedoContext } from '../../../src/@types/undo-redo/UndoRedoContext'
+import { delay } from "../utils/helpers"
+import
+{
+  TBehaviorOptions,
+  TConfiguration,
+  TExport,
+  TStroke,
+  TWebSocketSVGPatchEvent,
+  TPointer,
+  TPenStyle,
+  TTheme,
+  TUndoRedoContext
+} from "../../../src/@types"
+import
+{
+  WSBehaviors,
+  DefaultConfiguration,
+  Constants,
+  InternalEvent,
+  Model,
+  DefaultPenStyle
+} from "../../../src/iink"
 
-import { WSBehaviors } from '../../../src/behaviors/WSBehaviors'
-import { DefaultConfiguration } from '../../../src/configuration/DefaultConfiguration'
-import { WSMessage } from '../../../src/Constants'
-import { InternalEvent } from '../../../src/event/InternalEvent'
-// import { DefaultTheme } from '../../../src/iink'
-import { Model } from '../../../src/model/Model'
-import { DefaultPenStyle } from '../../../src/style/DefaultPenStyle'
-import { delay } from '../utils/helpers'
-
-describe('WSBehaviors.ts', () =>
+describe("WSBehaviors.ts", () =>
 {
   const height = 100, width = 100
   const DefaultBehaviorsOptions: TBehaviorOptions = {
     configuration: DefaultConfiguration
   }
 
-  test('should instanciate WSBehaviors', () =>
+  test("should instanciate WSBehaviors", () =>
   {
     const wsb = new WSBehaviors(DefaultBehaviorsOptions)
     expect(wsb).toBeDefined()
   })
 
-  test('should have internalEvent property', () =>
+  test("should have internalEvent property", () =>
   {
     const wsb = new WSBehaviors(DefaultBehaviorsOptions)
     expect(wsb.internalEvent).toBe(InternalEvent.getInstance())
     expect(wsb.internalEvent).toEqual(InternalEvent.getInstance())
   })
 
-  describe('init', () =>
+  describe("init", () =>
   {
-    test('should init grabber, renderer & recognizer & context', async () =>
+    test("should init grabber, renderer & recognizer & context", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -65,9 +69,9 @@ describe('WSBehaviors.ts', () =>
       await expect(wsb.recognizer.init).toBeCalledTimes(1)
     })
 
-    test('should resolve init when recognizer.init is resolve', async () =>
+    test("should resolve init when recognizer.init is resolve", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -80,23 +84,23 @@ describe('WSBehaviors.ts', () =>
       await expect(wsb.recognizer.init).toBeCalledTimes(1)
     })
 
-    test('should reject init when recognizer.init is reject', async () =>
+    test("should reject init when recognizer.init is reject", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.reject('pouet'))
-      await expect(wsb.init(wrapperHTML)).rejects.toEqual('pouet')
+      wsb.recognizer.init = jest.fn(() => Promise.reject("pouet"))
+      await expect(wsb.init(wrapperHTML)).rejects.toEqual("pouet")
     })
   })
 
-  describe('drawCurrentStroke', () =>
+  describe("drawCurrentStroke", () =>
   {
-    test('should call renderer.drawPendingStroke', async () =>
+    test("should call renderer.drawPendingStroke", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -108,14 +112,14 @@ describe('WSBehaviors.ts', () =>
       wsb.renderer.drawPendingStroke = jest.fn()
       await wsb.init(wrapperHTML)
       const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
-      wsb.model.initCurrentStroke(p1, 1, 'pen', DefaultPenStyle)
+      wsb.model.initCurrentStroke(p1, 1, "pen", DefaultPenStyle)
       wsb.drawCurrentStroke()
       await expect(wsb.renderer.drawPendingStroke).toBeCalledTimes(1)
       await expect(wsb.renderer.drawPendingStroke).toBeCalledWith(wsb.model.currentStroke)
     })
-    test('should not call renderer.drawPendingStroke if currentStroke is null', async () =>
+    test("should not call renderer.drawPendingStroke if currentStroke is null", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
 
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
@@ -132,11 +136,11 @@ describe('WSBehaviors.ts', () =>
     })
   })
 
-  describe('updateModelRendering', () =>
+  describe("updateModelRendering", () =>
   {
-    test('should call recognizer.addStrokes', async () =>
+    test("should call recognizer.addStrokes", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -150,11 +154,11 @@ describe('WSBehaviors.ts', () =>
       await wsb.updateModelRendering()
       await expect(wsb.recognizer.addStrokes).toBeCalledTimes(1)
     })
-    test('should not call recognizer.addStrokes when exportContent = "DEMAND"', async () =>
+    test("should not call recognizer.addStrokes when exportContent = DEMAND", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const configuration: TConfiguration = JSON.parse(JSON.stringify(DefaultConfiguration))
-      configuration.triggers.exportContent = 'DEMAND'
+      configuration.triggers.exportContent = "DEMAND"
       const wsb = new WSBehaviors({ configuration })
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -169,9 +173,9 @@ describe('WSBehaviors.ts', () =>
       await wsb.updateModelRendering()
       await expect(wsb.recognizer.addStrokes).toBeCalledTimes(0)
     })
-    test('should reject if recognizer.addStrokes rejected', async () =>
+    test("should reject if recognizer.addStrokes rejected", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -181,17 +185,17 @@ describe('WSBehaviors.ts', () =>
       wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
       wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
       wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.addStrokes = jest.fn(() => Promise.reject('poney'))
+      wsb.recognizer.addStrokes = jest.fn(() => Promise.reject("poney"))
       await wsb.init(wrapperHTML)
-      await expect(wsb.updateModelRendering()).rejects.toEqual('poney')
+      await expect(wsb.updateModelRendering()).rejects.toEqual("poney")
     })
   })
 
-  describe('export', () =>
+  describe("export", () =>
   {
-    test('should call recognizer.export', async () =>
+    test("should call recognizer.export", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -205,9 +209,9 @@ describe('WSBehaviors.ts', () =>
       await wsb.export()
       await expect(wsb.recognizer.export).toBeCalledTimes(1)
     })
-    test('should reject if recognizer.export rejected', async () =>
+    test("should reject if recognizer.export rejected", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -217,15 +221,15 @@ describe('WSBehaviors.ts', () =>
       wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
       wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
       wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.export = jest.fn(() => Promise.reject('poney'))
+      wsb.recognizer.export = jest.fn(() => Promise.reject("poney"))
       await wsb.init(wrapperHTML)
-      await expect(wsb.export()).rejects.toEqual('poney')
+      await expect(wsb.export()).rejects.toEqual("poney")
     })
-    test('should call recognizer.addStrokes when exportContent = "DEMAND"', async () =>
+    test("should call recognizer.addStrokes when exportContent = DEMAND", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const configuration: TConfiguration = JSON.parse(JSON.stringify(DefaultConfiguration))
-      configuration.triggers.exportContent = 'DEMAND'
+      configuration.triggers.exportContent = "DEMAND"
       const wsb = new WSBehaviors({ configuration })
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -241,11 +245,11 @@ describe('WSBehaviors.ts', () =>
       await expect(wsb.recognizer.addStrokes).toBeCalledTimes(1)
       await expect(wsb.recognizer.export).toBeCalledTimes(0)
     })
-    test('should reject if recognizer.addStrokes rejected when exportContent = "DEMAND"', async () =>
+    test("should reject if recognizer.addStrokes rejected when exportContent = DEMAND", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const configuration: TConfiguration = JSON.parse(JSON.stringify(DefaultConfiguration))
-      configuration.triggers.exportContent = 'DEMAND'
+      configuration.triggers.exportContent = "DEMAND"
       const wsb = new WSBehaviors({ configuration })
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -255,17 +259,17 @@ describe('WSBehaviors.ts', () =>
       wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
       wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
       wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.addStrokes = jest.fn(() => Promise.reject('poney'))
+      wsb.recognizer.addStrokes = jest.fn(() => Promise.reject("poney"))
       await wsb.init(wrapperHTML)
-      await expect(wsb.export()).rejects.toEqual('poney')
+      await expect(wsb.export()).rejects.toEqual("poney")
     })
   })
 
-  describe('convert', () =>
+  describe("convert", () =>
   {
-    test('should call recognizer.convert', async () =>
+    test("should call recognizer.convert", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -281,11 +285,11 @@ describe('WSBehaviors.ts', () =>
     })
   })
 
-  describe('import', () =>
+  describe("import", () =>
   {
-    test('should call recognizer.import', async () =>
+    test("should call recognizer.import", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -296,17 +300,17 @@ describe('WSBehaviors.ts', () =>
       wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
       wsb.recognizer.import = jest.fn()
       await wsb.init(wrapperHTML)
-      const mimeType = 'text/plain'
-      const textImport = 'winter is comming'
+      const mimeType = "text/plain"
+      const textImport = "winter is comming"
       const blob = new Blob([textImport], { type: mimeType })
       await wsb.import(blob, mimeType)
       await expect(wsb.recognizer.import).toBeCalledTimes(1)
     })
-    test('should return model form recognizer when recognizer emit EXPORTED', async () =>
+    test("should return model form recognizer when recognizer emit EXPORTED", async () =>
     {
-      const exportExpected: TExport = { 'test/plain': 'cofveve' }
-      const wrapperHTML: HTMLElement = document.createElement('div')
-      const model: IModel = new Model(width, height)
+      const exportExpected: TExport = { "test/plain": "cofveve" }
+      const wrapperHTML: HTMLElement = document.createElement("div")
+      const model = new Model(width, height)
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -321,19 +325,19 @@ describe('WSBehaviors.ts', () =>
         return Promise.resolve(model)
       })
       await wsb.init(wrapperHTML)
-      const mimeType = 'text/plain'
-      const textImport = 'winter is comming'
+      const mimeType = "text/plain"
+      const textImport = "winter is comming"
       const blob = new Blob([textImport], { type: mimeType })
       const modelReceive = await wsb.import(blob, mimeType)
       await await expect(modelReceive.exports).toBe(exportExpected)
     })
   })
 
-  describe('importPointsEvent', () =>
+  describe("importPointsEvent", () =>
   {
-    test('should call recognizer.importPointsEvents', async () =>
+    test("should call recognizer.importPointsEvents", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -362,11 +366,11 @@ describe('WSBehaviors.ts', () =>
     })
   })
 
-  describe('resize', () =>
+  describe("resize", () =>
   {
-    test('should call renderer.resize', async () =>
+    test("should call renderer.resize", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -381,9 +385,9 @@ describe('WSBehaviors.ts', () =>
       await wsb.resize(1, 2)
       await expect(wsb.renderer.resize).toBeCalledTimes(1)
     })
-    test('should reject if renderer.resize rejected', async () =>
+    test("should reject if renderer.resize rejected", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -397,9 +401,9 @@ describe('WSBehaviors.ts', () =>
       await wsb.init(wrapperHTML)
       await expect(wsb.resize(1, 2)).rejects.toEqual("pony")
     })
-    test('should call recognizer.resize after resizeTriggerDelay', async () =>
+    test("should call recognizer.resize after resizeTriggerDelay", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -417,11 +421,11 @@ describe('WSBehaviors.ts', () =>
     })
   })
 
-  describe('undo', () =>
+  describe("undo", () =>
   {
-    test('should call recognizer.undo', async () =>
+    test("should call recognizer.undo", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -438,9 +442,9 @@ describe('WSBehaviors.ts', () =>
       await wsb.undo()
       await expect(wsb.recognizer.undo).toBeCalledTimes(1)
     })
-    test('should return previous model', async () =>
+    test("should return previous model", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -457,9 +461,9 @@ describe('WSBehaviors.ts', () =>
       wsb.context.stack.push(new Model(100, 200))
       await expect(wsb.undo()).resolves.toEqual(wsb.context.stack[0])
     })
-    test('should throw error if context.canUndo = false', async () =>
+    test("should throw error if context.canUndo = false", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -474,11 +478,11 @@ describe('WSBehaviors.ts', () =>
     })
   })
 
-  describe('redo', () =>
+  describe("redo", () =>
   {
-    test('should call recognizer.redo', async () =>
+    test("should call recognizer.redo", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -495,9 +499,9 @@ describe('WSBehaviors.ts', () =>
       await wsb.redo()
       await expect(wsb.recognizer.redo).toBeCalledTimes(1)
     })
-    test('should return next model', async () =>
+    test("should return next model", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -514,9 +518,9 @@ describe('WSBehaviors.ts', () =>
       wsb.context.stack.push(nextModel)
       await expect(wsb.redo()).resolves.toEqual(wsb.context.stack[1])
     })
-    test('should reject if recognizer.redo rejected', async () =>
+    test("should reject if recognizer.redo rejected", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -533,9 +537,9 @@ describe('WSBehaviors.ts', () =>
       wsb.context.stack.push(new Model(42, 12))
       await expect(wsb.redo()).rejects.toEqual("pony")
     })
-    test('should throw error if context.canRedo = false', async () =>
+    test("should throw error if context.canRedo = false", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -550,11 +554,11 @@ describe('WSBehaviors.ts', () =>
     })
   })
 
-  describe('clear', () =>
+  describe("clear", () =>
   {
-    test('should call recognizer.clear', async () =>
+    test("should call recognizer.clear", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -570,9 +574,9 @@ describe('WSBehaviors.ts', () =>
     })
   })
 
-  describe('destroy', () =>
+  describe("destroy", () =>
   {
-    test('should call grabber.detach', async () =>
+    test("should call grabber.detach", async () =>
     {
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.detach = jest.fn()
@@ -582,7 +586,7 @@ describe('WSBehaviors.ts', () =>
       await expect(wsb.grabber.detach).toBeCalledTimes(1)
     })
 
-    test('should call renderer.destroy', async () =>
+    test("should call renderer.destroy", async () =>
     {
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.detach = jest.fn()
@@ -592,7 +596,7 @@ describe('WSBehaviors.ts', () =>
       await expect(wsb.renderer.destroy).toBeCalledTimes(1)
     })
 
-    test('should call recognizer.destroy', async () =>
+    test("should call recognizer.destroy", async () =>
     {
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.detach = jest.fn()
@@ -600,16 +604,16 @@ describe('WSBehaviors.ts', () =>
       wsb.recognizer.close = jest.fn()
       wsb.destroy()
       await expect(wsb.recognizer.close).toBeCalledTimes(1)
-      await expect(wsb.recognizer.close).toBeCalledWith(1000, WSMessage.CLOSE_RECOGNIZER)
+      await expect(wsb.recognizer.close).toBeCalledWith(1000, Constants.WSMessage.CLOSE_RECOGNIZER)
     })
 
   })
 
-  describe('Event', () =>
+  describe("Event", () =>
   {
-    test('should updatesLayer when recognizer emit SVG_PATCH', async () =>
+    test("should updatesLayer when recognizer emit SVG_PATCH", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -621,17 +625,17 @@ describe('WSBehaviors.ts', () =>
       wsb.renderer.updatesLayer = jest.fn()
       await wsb.init(wrapperHTML)
       const svgPatch: TWebSocketSVGPatchEvent = {
-        type: 'REPLACE_ALL',
-        layer: 'MODEL',
+        type: "REPLACE_ALL",
+        layer: "MODEL",
         updates: []
       }
       wsb.recognizer.internalEvent.emitSVGPatch(svgPatch)
       await expect(wsb.renderer.updatesLayer).toBeCalledTimes(1)
       await expect(wsb.renderer.updatesLayer).toBeCalledWith(svgPatch.layer, svgPatch.updates)
     })
-    test('should update context when recognizer emit CONTEXT_CHANGE', async () =>
+    test("should update context when recognizer emit CONTEXT_CHANGE", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -659,11 +663,11 @@ describe('WSBehaviors.ts', () =>
     })
   })
 
-  describe('Style', () =>
+  describe("Style", () =>
   {
-    test('should call styleManager.setPenStyle & recognizer.setPenStyle on init', async () =>
+    test("should call styleManager.setPenStyle & recognizer.setPenStyle on init", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const customPenStyle: TPenStyle = { color: "#d1d1d1" }
       const customBehaviorsOptions: TBehaviorOptions = JSON.parse(JSON.stringify(DefaultBehaviorsOptions))
       customBehaviorsOptions.penStyle = customPenStyle
@@ -683,9 +687,9 @@ describe('WSBehaviors.ts', () =>
       await expect(wsb.recognizer.setPenStyle).toBeCalledTimes(1)
       await expect(wsb.recognizer.setPenStyle).toBeCalledWith(customPenStyle)
     })
-    test('should change PenStyle', async () =>
+    test("should change PenStyle", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -704,28 +708,28 @@ describe('WSBehaviors.ts', () =>
       await expect(wsb.recognizer.setPenStyle).toBeCalledTimes(2)
       await expect(wsb.recognizer.setPenStyle).toHaveBeenNthCalledWith(2, wsb.styleManager.penStyle)
     })
-    test('should call styleManager.setTheme & recognizer.setTheme on init', async () =>
+    test("should call styleManager.setTheme & recognizer.setTheme on init", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const customBehaviorsOptions: TBehaviorOptions = JSON.parse(JSON.stringify(DefaultBehaviorsOptions))
       const customTheme: TTheme = {
         ink: {
           width: 42,
-          color: '#2E7D32',
-          '-myscript-pen-width': 2,
-          '-myscript-pen-fill-style': 'purple',
-          '-myscript-pen-fill-color': '#FFFFFF00'
+          color: "#2E7D32",
+          "-myscript-pen-width": 2,
+          "-myscript-pen-fill-style": "purple",
+          "-myscript-pen-fill-color": "#FFFFFF00"
         },
-        '.math': {
-          'font-family': 'STIXGeneral'
+        ".math": {
+          "font-family": "STIXGeneral"
         },
-        '.math-solved': {
-          'font-family': 'STIXGeneral',
-          color: 'blue'
+        ".math-solved": {
+          "font-family": "STIXGeneral",
+          color: "blue"
         },
-        '.text': {
-          'font-family': 'Rubik Distressed',
-          'font-size': 10
+        ".text": {
+          "font-family": "Rubik Distressed",
+          "font-size": 10
         }
       }
       customBehaviorsOptions.theme = customTheme
@@ -745,9 +749,9 @@ describe('WSBehaviors.ts', () =>
       await expect(wsb.recognizer.setTheme).toBeCalledTimes(1)
       await expect(wsb.recognizer.setTheme).toBeCalledWith(wsb.styleManager.theme)
     })
-    test('should change Theme', async () =>
+    test("should change Theme", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -764,21 +768,21 @@ describe('WSBehaviors.ts', () =>
       const customTheme: TTheme = {
         ink: {
           width: 42,
-          color: '#2E7D32',
-          '-myscript-pen-width': 2,
-          '-myscript-pen-fill-style': 'purple',
-          '-myscript-pen-fill-color': '#FFFFFF00'
+          color: "#2E7D32",
+          "-myscript-pen-width": 2,
+          "-myscript-pen-fill-style": "purple",
+          "-myscript-pen-fill-color": "#FFFFFF00"
         },
-        '.math': {
-          'font-family': 'STIXGeneral'
+        ".math": {
+          "font-family": "STIXGeneral"
         },
-        '.math-solved': {
-          'font-family': 'STIXGeneral',
-          color: 'blue'
+        ".math-solved": {
+          "font-family": "STIXGeneral",
+          color: "blue"
         },
-        '.text': {
-          'font-family': 'Rubik Distressed',
-          'font-size': 10
+        ".text": {
+          "font-family": "Rubik Distressed",
+          "font-size": 10
         }
       }
       await wsb.setTheme(customTheme)
@@ -787,9 +791,9 @@ describe('WSBehaviors.ts', () =>
       await expect(wsb.recognizer.setTheme).toBeCalledTimes(2)
       await expect(wsb.recognizer.setTheme).toHaveBeenNthCalledWith(2, wsb.styleManager.theme)
     })
-    test('should change PenStyleClasses', async () =>
+    test("should change PenStyleClasses", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
@@ -803,7 +807,7 @@ describe('WSBehaviors.ts', () =>
       await wsb.init(wrapperHTML)
       await expect(wsb.recognizer.setPenStyleClasses).toBeCalledTimes(1)
       await expect(wsb.styleManager.setPenStyleClasses).toBeCalledTimes(1)
-      await wsb.setPenStyleClasses('pouet')
+      await wsb.setPenStyleClasses("pouet")
       await expect(wsb.styleManager.setPenStyleClasses).toBeCalledTimes(2)
       await expect(wsb.styleManager.setPenStyleClasses).toHaveBeenNthCalledWith(2, "pouet")
       await expect(wsb.recognizer.setPenStyleClasses).toBeCalledTimes(2)

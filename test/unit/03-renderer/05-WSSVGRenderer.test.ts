@@ -1,12 +1,19 @@
-import { WSSVGRenderer } from '../../../src/renderer/svg/WSSVGRenderer'
-import { DefaultPenStyle } from '../../../src/style/DefaultPenStyle'
-import { DefaultRenderingConfiguration } from '../../../src/configuration/DefaultConfiguration'
-import { TStroke } from '../../../src/@types/model/Stroke'
-import { TUpdatePatchAppendChild, TUpdatePatchInsertBefore, TUpdatePatchRemoveAttribut, TUpdatePatchRemoveChild, TUpdatePatchRemoveElement, TUpdatePatchReplaceAll, TUpdatePatchReplaceELement, TUpdatePatchSetAttribut } from '../../../src/@types/recognizer/WSRecognizer'
-import { Model } from '../../../src/model/Model'
-import { delay } from '../utils/helpers'
+import { delay } from "../utils/helpers"
+import
+{
+  TUpdatePatchAppendChild,
+  TUpdatePatchInsertBefore,
+  TUpdatePatchRemoveAttribut,
+  TUpdatePatchRemoveChild,
+  TUpdatePatchRemoveElement,
+  TUpdatePatchReplaceAll,
+  TUpdatePatchReplaceELement,
+  TUpdatePatchSetAttribut,
+  TStroke
+} from "../../../src/@types"
+import { DefaultRenderingConfiguration, DefaultPenStyle, Model, WSSVGRenderer } from "../../../src/iink"
 
-describe('WSSVGRenderer.ts', () =>
+describe("WSSVGRenderer.ts", () =>
 {
   const stroke: TStroke = {
     type: 'pen',
@@ -22,7 +29,7 @@ describe('WSSVGRenderer.ts', () =>
     length: 4
   }
 
-  test('should instanciate', () =>
+  test("should instanciate", () =>
   {
     const renderer = new WSSVGRenderer(DefaultRenderingConfiguration)
     expect(renderer).toBeDefined()
@@ -30,27 +37,27 @@ describe('WSSVGRenderer.ts', () =>
     expect(renderer.stroker).toBeDefined()
   })
 
-  test('should initialise context', () =>
+  test("should initialise context", () =>
   {
-    const domElement = document.createElement('div') as HTMLElement
+    const domElement = document.createElement("div") as HTMLElement
     const renderer = new WSSVGRenderer(DefaultRenderingConfiguration)
     renderer.init(domElement)
 
     expect(renderer.context.parent).toBe(domElement)
   })
 
-  test('should updatesLayer when type = REPLACE_ALL on layer CAPTURE', () =>
+  test("should updatesLayer when type = REPLACE_ALL on layer CAPTURE", () =>
   {
-    const domElement = document.createElement('div') as HTMLElement
+    const domElement = document.createElement("div") as HTMLElement
     const renderer = new WSSVGRenderer(DefaultRenderingConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
     const update: TUpdatePatchReplaceAll = {
-      type: 'REPLACE_ALL',
+      type: "REPLACE_ALL",
       svg: '<svg data-layer="CAPTURE" x="0px" y="0px" width="833px" height="790px" viewBox="0 0 833 790"></svg>'
     }
-    renderer.updatesLayer('CAPTURE', [update])
+    renderer.updatesLayer("CAPTURE", [update])
 
     expect(domElement.children).toHaveLength(1)
     const layerCapture = domElement.querySelector('svg[data-layer="CAPTURE"')

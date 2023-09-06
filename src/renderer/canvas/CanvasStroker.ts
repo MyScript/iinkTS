@@ -2,7 +2,7 @@ import { TPointer } from "../../@types/geometry"
 import { TStroke } from "../../@types/model/Stroke"
 import { computeAxeAngle, computeLinksPoints, computeMiddlePoint } from "../QuadraticUtils"
 
-export class CanvasQuadraticStroker
+export class CanvasStroker
 {
 
   private renderArc(context2d: CanvasRenderingContext2D, center: TPointer, radius: number): void

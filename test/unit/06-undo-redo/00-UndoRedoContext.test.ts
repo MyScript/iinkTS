@@ -1,16 +1,15 @@
-import { UndoRedoContext } from '../../../src/undo-redo/UndoRedoContext'
-import { Model } from '../../../src/model/Model'
+import { UndoRedoContext, Model } from "../../../src/iink"
 
-describe('UndoRedoContext.ts', () =>
+describe("UndoRedoContext.ts", () =>
 {
   const width = 100, height = 100
-  test('should instanciate UndoRedoContext', () =>
+  test("should instanciate UndoRedoContext", () =>
   {
     const context = new UndoRedoContext(new Model(width, height))
     expect(context).toBeDefined()
   })
 
-  test('should be initialize', () =>
+  test("should be initialize", () =>
   {
     const model = new Model(width, height)
     const context = new UndoRedoContext(model)

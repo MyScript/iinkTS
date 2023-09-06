@@ -2,7 +2,7 @@ import { TPointer } from "../../@types/geometry"
 import { TStroke } from "../../@types/model/Stroke"
 import { computeAxeAngle, computeLinksPoints, computeMiddlePoint } from "../QuadraticUtils"
 
-export class SVGQuadraticStroker
+export class SVGStroker
 {
 
   private getArcPath(center: TPointer, radius: number): string

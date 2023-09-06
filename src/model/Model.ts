@@ -4,7 +4,7 @@ import { TStroke } from "../@types/model/Stroke"
 import { IModel, TExport } from "../@types/model/Model"
 import { TRecognitionPositions } from "../@types/model/RecognitionPositions"
 
-import { computeDistance } from "../utils/geometricHelper"
+import { computeDistance } from "../utils/geometric"
 import { Stroke } from "./Stroke"
 
 export class Model implements IModel

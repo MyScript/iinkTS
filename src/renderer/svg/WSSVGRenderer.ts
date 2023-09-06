@@ -2,12 +2,12 @@ import { TRenderingConfiguration } from "../../@types/configuration/RenderingCon
 import { IModel } from "../../@types/model/Model"
 import { TUpdatePatch, TUpdatePatchAppendChild, TUpdatePatchInsertBefore, TUpdatePatchRemoveAttribut, TUpdatePatchRemoveChild, TUpdatePatchRemoveElement, TUpdatePatchReplaceAll, TUpdatePatchReplaceELement, TUpdatePatchSetAttribut } from "../../@types/recognizer/WSRecognizer"
 import { TStroke } from "../../@types/model/Stroke"
-import { SVGQuadraticStroker } from "./SVGQuadraticStroker"
+import { SVGStroker } from "./SVGStroker"
 
 export class WSSVGRenderer
 {
   config: TRenderingConfiguration
-  stroker: SVGQuadraticStroker
+  stroker: SVGStroker
   context!: {
     parent: HTMLElement
   }
@@ -15,7 +15,7 @@ export class WSSVGRenderer
   constructor(config: TRenderingConfiguration)
   {
     this.config = config
-    this.stroker = new SVGQuadraticStroker()
+    this.stroker = new SVGStroker()
   }
 
   init(element: HTMLElement): void

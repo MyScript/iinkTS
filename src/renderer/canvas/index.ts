@@ -1,0 +1,5 @@
+export { CanvasRenderer } from "./CanvasRenderer"
+export * as canvasRendererShape from "./CanvasRendererShapeSymbol"
+export * as canvasRendererStroke from "./CanvasRendererStrokeSymbol"
+export * as canvasRendererText from "./CanvasRendererTextSymbol"
+export { CanvasStroker } from "./CanvasStroker"

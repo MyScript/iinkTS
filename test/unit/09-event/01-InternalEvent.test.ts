@@ -1,11 +1,11 @@
-import { TWebSocketSVGPatchEvent } from '../../../src/@types/recognizer/WSRecognizer'
-import { InternalEvent } from '../../../src/event/InternalEvent'
+import { TWebSocketSVGPatchEvent } from "../../../src/@types"
+import { InternalEvent } from "../../../src/iink"
 
-describe('InternalEvent.ts', () =>
+describe("InternalEvent.ts", () =>
 {
   const internalEvent = InternalEvent.getInstance()
 
-  test('should have singleton', () =>
+  test("should have singleton", () =>
   {
     const iEvent1 = InternalEvent.getInstance()
     const iEvent2 = InternalEvent.getInstance()
@@ -14,13 +14,13 @@ describe('InternalEvent.ts', () =>
     expect(iEvent1).toStrictEqual(iEvent2)
   })
 
-  test('should execute callback on emitSVGPatch', () =>
+  test("should execute callback on emitSVGPatch", () =>
   {
     const testFunction = jest.fn()
     internalEvent.addSVGPatchListener(testFunction)
     const svgPatch: TWebSocketSVGPatchEvent = {
-      type: 'svgPatch',
-      layer: 'MODEL',
+      type: "svgPatch",
+      layer: "MODEL",
       updates: []
     }
     internalEvent.emitSVGPatch(svgPatch)
@@ -28,27 +28,27 @@ describe('InternalEvent.ts', () =>
     expect(testFunction).toBeCalledWith(svgPatch)
   })
 
-  test('should execute callback on emitNotif', () =>
+  test("should execute callback on emitNotif", () =>
   {
     const testFunction = jest.fn()
     internalEvent.addNotifListener(testFunction)
-    const notif = { message: 'this is the end', timeout: 666 }
+    const notif = { message: "this is the end", timeout: 666 }
     internalEvent.emitNotif(notif)
     expect(testFunction).toBeCalledTimes(1)
     expect(testFunction).toBeCalledWith(notif)
   })
 
-  test('should execute callback on emitError', () =>
+  test("should execute callback on emitError", () =>
   {
     const testFunction = jest.fn()
     internalEvent.addErrorListener(testFunction)
-    const error = new Error('this is un error message')
+    const error = new Error("this is un error message")
     internalEvent.emitError(error)
     expect(testFunction).toBeCalledTimes(1)
     expect(testFunction).toBeCalledWith(error)
   })
 
-  test('should execute callback on emitClear', () =>
+  test("should execute callback on emitClear", () =>
   {
     const testFunction = jest.fn()
     internalEvent.addClearListener(testFunction)
@@ -56,7 +56,7 @@ describe('InternalEvent.ts', () =>
     expect(testFunction).toBeCalledTimes(1)
   })
 
-  test('should execute callback on emitConvert', () =>
+  test("should execute callback on emitConvert", () =>
   {
     const testFunction = jest.fn()
     internalEvent.addConvertListener(testFunction)
@@ -65,7 +65,7 @@ describe('InternalEvent.ts', () =>
     expect(testFunction).toBeCalledWith("DIGITAL_EDIT")
   })
 
-  test('should execute callback on emitImportJIIX', () =>
+  test("should execute callback on emitImportJIIX", () =>
   {
     const testFunction = jest.fn()
     internalEvent.addImportJIIXListener(testFunction)
@@ -87,7 +87,7 @@ describe('InternalEvent.ts', () =>
     expect(testFunction).toBeCalledWith(jiix)
   })
 
-  test('should execute callback on emitClearMessage', () =>
+  test("should execute callback on emitClearMessage", () =>
   {
     const testFunction = jest.fn()
     internalEvent.addClearMessageListener(testFunction)

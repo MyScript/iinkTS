@@ -10,7 +10,7 @@ import { TPenStyle } from "../@types/style/PenStyle"
 import { Error as ErrorConst } from "../Constants"
 import StyleHelper from "../style/StyleHelper"
 import { computeHmac } from "./CryptoHelper"
-import { isVersionSuperiorOrEqual } from "../utils/versionHelper"
+import { isVersionSuperiorOrEqual } from "../utils/version"
 import { convertStrokeToJSON } from "../model/Stroke"
 
 type ApiError = {

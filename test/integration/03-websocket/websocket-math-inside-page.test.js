@@ -1,4 +1,4 @@
-const { haveSameLabels, write, getEditorModelExports, getImportedDatas, getExportedDatas } = require("../helper")
+const { haveSameLabels, write, getEditorModelExports, getImportedDatas, getExportedDatas, waitEditorLoaded } = require("../helper")
 
 const mathContentList = [
   {
@@ -47,10 +47,12 @@ describe("Websocket Math Inside Page", function () {
       let currentTextContent
 
       afterAll(async () => {
-        await page.reload({ waitUntil: "networkidle" })
+        await page.reload()
       })
 
       test(`should open modal editor`, async () => {
+        await waitEditorLoaded(page)
+        await page.waitForTimeout(100)
         expect(await page.locator("#editorContainer").isVisible()).toEqual(false)
         currentTextContent = await page.locator(`#${mc.id} .katex-html`).textContent()
         expect(currentTextContent).toEqual(mc.textContent)
