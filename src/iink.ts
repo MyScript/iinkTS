@@ -1,11 +1,12 @@
 
 export { Editor } from "./Editor"
 
-export { getAvailableLanguageList, getAvailableFontList } from "./helpers"
+export { DeferredPromise, geometric, getAvailableFontList, getAvailableLanguageList, version } from "./utils"
 
 export { default as Constants, ModeInteraction } from "./Constants"
 
-export {
+export
+{
   DefaultConfiguration,
   DefaultEventsConfiguration,
   DefaultGrabberConfiguration,
@@ -13,21 +14,34 @@ export {
   DefaultRenderingConfiguration,
   DefaultServerConfiguration,
   DefaultTriggerConfiguration,
-  DefaultUndoRedoConfiguration
-} from "./configuration/DefaultConfiguration"
+  DefaultUndoRedoConfiguration,
+  Configuration
+} from "./configuration"
 
-export { Configuration } from "./configuration/Configuration"
+export { RestBehaviors, WSBehaviors } from "./behaviors"
 
-export { RestBehaviors } from "./behaviors/RestBehaviors"
-export { WSBehaviors } from "./behaviors/WSBehaviors"
+export { RestRecognizer, WSRecognizer, computeHmac } from "./recognizer"
 
-export { RestRecognizer } from "./recognizer/RestRecognizer"
-export { WSRecognizer } from "./recognizer/WSRecognizer"
+export
+{
+  CanvasRenderer,
+  CanvasStroker,
+  SVGStroker,
+  WSSVGRenderer,
+  canvasRendererShape,
+  canvasRendererStroke,
+  canvasRendererText,
+  quadradicsUtils
+} from "./renderer"
 
 export { PointerEventGrabber } from "./grabber/PointerEventGrabber"
 
-export { DefaultPenStyle } from "./style/DefaultPenStyle"
+export { DefaultPenStyle, DefaultTheme, StyleHelper, StyleManager } from "./style"
 
-export { DefaultTheme } from "./style/DefaultTheme"
+export { Model, Stroke, convertStrokeToJSON } from "./model"
 
-export { Model } from "./model/Model"
+export { UndoRedoContext, UndoRedoManager } from "./undo-redo"
+
+export { InternalEvent, PublicEvent } from "./event"
+
+export { SmartGuide } from "./smartguide/SmartGuide"

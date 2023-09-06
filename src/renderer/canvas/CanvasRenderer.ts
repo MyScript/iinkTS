@@ -6,12 +6,12 @@ import { TSymbol } from "../../@types/renderer/Symbol"
 import { drawShapeSymbol, ShapeSymbols } from "./CanvasRendererShapeSymbol"
 import { drawStroke } from "./CanvasRendererStrokeSymbol"
 import { drawTextSymbol, TextSymbols } from "./CanvasRendererTextSymbol"
-import { CanvasQuadraticStroker } from "./CanvasQuadraticStroker"
+import { CanvasStroker } from "./CanvasStroker"
 
 export class CanvasRenderer
 {
   config: TRenderingConfiguration
-  stroker: CanvasQuadraticStroker
+  stroker: CanvasStroker
   context!: {
     parent: HTMLElement
     renderingCanvas: HTMLCanvasElement
@@ -23,7 +23,7 @@ export class CanvasRenderer
   constructor(config: TRenderingConfiguration)
   {
     this.config = config
-    this.stroker = new CanvasQuadraticStroker()
+    this.stroker = new CanvasStroker()
   }
 
   private createCanvas(type: string): HTMLCanvasElement

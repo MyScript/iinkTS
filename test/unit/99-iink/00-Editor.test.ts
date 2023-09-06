@@ -1,66 +1,72 @@
-import { TBehaviorOptions } from "../../../src/@types/Behaviors"
-import { TStroke } from "../../../src/@types/model/Stroke"
-import { TTheme } from "../../../src/@types/style/Theme"
-import { TPenStyle } from "../../../src/@types/style/PenStyle"
-import { TJIIXExport } from "../../../src/@types/model/Model"
-import { TConfiguration } from "../../../src/@types/Configuration"
-
-import { delay } from "../utils/helpers"
-import { Editor } from "../../../src/Editor"
-import { DefaultConfiguration } from "../../../src/configuration/DefaultConfiguration"
-// import { LeftClickEventFake } from "../utils/PointerEventFake"
-import { DefaultPenStyle } from "../../../src/style/DefaultPenStyle"
-import { DefaultTheme } from "../../../src/style/DefaultTheme"
-import { Model } from "../../../src/model/Model"
-import { PointerEventGrabber } from "../../../src/grabber/PointerEventGrabber"
-import { WSRecognizer } from "../../../src/recognizer/WSRecognizer"
-import { PublicEvent } from "../../../src/event/PublicEvent"
-import { EventType, ModeInteraction } from "../../../src/Constants"
-import { InternalEvent } from "../../../src/event/InternalEvent"
 import { AllOverrideConfiguration } from "../_dataset/configuration.dataset"
+import { delay } from "../utils/helpers"
+// import { LeftClickEventFake } from "../utils/PointerEventFake"
+import
+{
+  TBehaviorOptions,
+  TStroke,
+  TTheme,
+  TPenStyle,
+  TJIIXExport,
+  TConfiguration
+} from "../../../src/@types"
+import
+{
+  Editor,
+  DefaultConfiguration,
+  DefaultPenStyle,
+  DefaultTheme,
+  Model,
+  PointerEventGrabber,
+  WSRecognizer,
+  PublicEvent,
+  Constants,
+  ModeInteraction,
+  InternalEvent
+} from "../../../src/iink"
 
-describe('Editor.ts', () =>
+describe("Editor.ts", () =>
 {
   const publicEvent = PublicEvent.getInstance()
   const DefaultBehaviorsOptions: TBehaviorOptions = { configuration: DefaultConfiguration }
 
-  describe('constructor', () =>
+  describe("constructor", () =>
   {
-    test('should instantiate Editor', () =>
+    test("should instantiate Editor", () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
-      wrapperHTML.style.height = '100px'
-      wrapperHTML.style.width = '100px'
+      const wrapperHTML: HTMLElement = document.createElement("div")
+      wrapperHTML.style.height = "100px"
+      wrapperHTML.style.width = "100px"
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       expect(editor).toBeDefined()
       expect(editor.configuration).toBeDefined()
       expect(editor.model).toBeDefined()
     })
-    test('should instantiate Editor with custom configuration', () =>
+    test("should instantiate Editor with custom configuration", () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
-      wrapperHTML.style.height = '100px'
-      wrapperHTML.style.width = '100px'
+      const wrapperHTML: HTMLElement = document.createElement("div")
+      wrapperHTML.style.height = "100px"
+      wrapperHTML.style.width = "100px"
       const editor = new Editor(wrapperHTML, { configuration: (AllOverrideConfiguration as TConfiguration) })
       editor.initialize()
       expect(editor).toBeDefined()
       expect(editor.configuration).toBeDefined()
       expect(editor.model).toBeDefined()
     })
-    test('should define default grabber', () =>
+    test("should define default grabber", () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
-      wrapperHTML.style.height = '100px'
-      wrapperHTML.style.width = '100px'
+      const wrapperHTML: HTMLElement = document.createElement("div")
+      wrapperHTML.style.height = "100px"
+      wrapperHTML.style.width = "100px"
       const customGrabber = new PointerEventGrabber(DefaultConfiguration.grabber)
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       expect(editor.grabber).not.toBe(customGrabber)
     })
-    test('should override grabber', () =>
+    test("should override grabber", () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
-      wrapperHTML.style.height = '100px'
-      wrapperHTML.style.width = '100px'
+      const wrapperHTML: HTMLElement = document.createElement("div")
+      wrapperHTML.style.height = "100px"
+      wrapperHTML.style.width = "100px"
       const customGrabber = new PointerEventGrabber(DefaultConfiguration.grabber)
       const customBehaviorsOptions: TBehaviorOptions = {
         configuration: DefaultConfiguration,
@@ -71,20 +77,20 @@ describe('Editor.ts', () =>
       const editor = new Editor(wrapperHTML, customBehaviorsOptions)
       expect(editor.grabber).toBe(customGrabber)
     })
-    test('should define default recognizer', () =>
+    test("should define default recognizer", () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
-      wrapperHTML.style.height = '100px'
-      wrapperHTML.style.width = '100px'
+      const wrapperHTML: HTMLElement = document.createElement("div")
+      wrapperHTML.style.height = "100px"
+      wrapperHTML.style.width = "100px"
       const customRecognizer = new WSRecognizer(DefaultConfiguration.server, DefaultConfiguration.recognition)
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       expect(editor.behaviors.recognizer).not.toBe(customRecognizer)
     })
-    test('should override recognizer', () =>
+    test("should override recognizer", () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
-      wrapperHTML.style.height = '100px'
-      wrapperHTML.style.width = '100px'
+      const wrapperHTML: HTMLElement = document.createElement("div")
+      wrapperHTML.style.height = "100px"
+      wrapperHTML.style.width = "100px"
       const customRecognizer = new WSRecognizer(DefaultConfiguration.server, DefaultConfiguration.recognition)
       const customBehaviorsOptions: TBehaviorOptions = {
         configuration: DefaultConfiguration,
@@ -95,12 +101,12 @@ describe('Editor.ts', () =>
       const editor = new Editor(wrapperHTML, customBehaviorsOptions)
       expect(editor.behaviors.recognizer).toBe(customRecognizer)
     })
-    test('should throw error if instantiate Editor without configuration', () =>
+    test("should throw error if instantiate Editor without configuration", () =>
     {
       expect.assertions(1)
-      const wrapperHTML: HTMLElement = document.createElement('div')
-      wrapperHTML.style.height = '100px'
-      wrapperHTML.style.width = '100px'
+      const wrapperHTML: HTMLElement = document.createElement("div")
+      wrapperHTML.style.height = "100px"
+      wrapperHTML.style.width = "100px"
       try {
         //@ts-ignore
         new Editor(wrapperHTML, {})
@@ -109,31 +115,31 @@ describe('Editor.ts', () =>
         expect((error as Error).message).toEqual("Configuration required")
       }
     })
-    test('should append loader element', () =>
+    test("should append loader element", () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
-      wrapperHTML.style.height = '100px'
-      wrapperHTML.style.width = '100px'
+      const wrapperHTML: HTMLElement = document.createElement("div")
+      wrapperHTML.style.height = "100px"
+      wrapperHTML.style.width = "100px"
       new Editor(wrapperHTML, DefaultBehaviorsOptions)
-      expect(wrapperHTML.querySelector('.loader')).toBeDefined()
+      expect(wrapperHTML.querySelector(".loader")).toBeDefined()
     })
-    test('should append error element', () =>
+    test("should append error element", () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
-      wrapperHTML.style.height = '100px'
-      wrapperHTML.style.width = '100px'
+      const wrapperHTML: HTMLElement = document.createElement("div")
+      wrapperHTML.style.height = "100px"
+      wrapperHTML.style.width = "100px"
       new Editor(wrapperHTML, DefaultBehaviorsOptions)
-      expect(wrapperHTML.querySelector('.error-msg')).toBeDefined()
+      expect(wrapperHTML.querySelector(".error-msg")).toBeDefined()
     })
   })
 
-  describe('initialize', () =>
+  describe("initialize", () =>
   {
-    test('should display and hide loader', async () =>
+    test("should display and hide loader", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
-      wrapperHTML.style.height = '100px'
-      wrapperHTML.style.width = '100px'
+      const wrapperHTML: HTMLElement = document.createElement("div")
+      wrapperHTML.style.height = "100px"
+      wrapperHTML.style.width = "100px"
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       const LOAD_TIMEOUT = 200
       editor.behaviors.init = jest.fn(async () => { await delay(LOAD_TIMEOUT); return Promise.resolve() })
@@ -147,32 +153,32 @@ describe('Editor.ts', () =>
       //@ts-ignore
       expect(loaderElement.item(0)?.style.display).toEqual("none")
     })
-    test('should resolve when behaviors.init is resolved', async () =>
+    test("should resolve when behaviors.init is resolved", async () =>
     {
       expect.assertions(1)
-      const wrapperHTML: HTMLElement = document.createElement('div')
-      wrapperHTML.style.height = '100px'
-      wrapperHTML.style.width = '100px'
+      const wrapperHTML: HTMLElement = document.createElement("div")
+      wrapperHTML.style.height = "100px"
+      wrapperHTML.style.width = "100px"
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       await editor.initialize()
       expect(editor.initializationPromise).toBeDefined()
     })
-    test('should reject when behaviors.init is rejected', async () =>
+    test("should reject when behaviors.init is rejected", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
-      wrapperHTML.style.height = '100px'
-      wrapperHTML.style.width = '100px'
+      const wrapperHTML: HTMLElement = document.createElement("div")
+      wrapperHTML.style.height = "100px"
+      wrapperHTML.style.width = "100px"
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.reject("pouet"))
       expect(editor.initialize()).rejects.toEqual("pouet")
     })
-    test('should show error when behaviors.init is rejected', async () =>
+    test("should show error when behaviors.init is rejected", async () =>
     {
       expect.assertions(3)
-      const wrapperHTML: HTMLElement = document.createElement('div')
-      wrapperHTML.style.height = '100px'
-      wrapperHTML.style.width = '100px'
+      const wrapperHTML: HTMLElement = document.createElement("div")
+      wrapperHTML.style.height = "100px"
+      wrapperHTML.style.width = "100px"
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.reject(new Error("pouet")))
       const messageElement = wrapperHTML.getElementsByClassName("message")
@@ -189,13 +195,13 @@ describe('Editor.ts', () =>
     })
   })
 
-  describe('configuration', () =>
+  describe("configuration", () =>
   {
-    test('should change behaviors', async () =>
+    test("should change behaviors", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
-      wrapperHTML.style.height = '100px'
-      wrapperHTML.style.width = '100px'
+      const wrapperHTML: HTMLElement = document.createElement("div")
+      wrapperHTML.style.height = "100px"
+      wrapperHTML.style.width = "100px"
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       expect(editor.behaviors.name).toEqual("WSBehaviors")
       editor.behaviors.destroy = jest.fn(() => Promise.resolve())
@@ -205,35 +211,35 @@ describe('Editor.ts', () =>
     })
   })
 
-  describe('mode', () =>
+  describe("mode", () =>
   {
-    const wrapperHTML: HTMLElement = document.createElement('div')
+    const wrapperHTML: HTMLElement = document.createElement("div")
     const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
-    test('should init mode = Writing', () =>
+    test("should init mode = Writing", () =>
     {
       expect(editor.mode).toBe(ModeInteraction.Writing)
     })
-    test('should set mode = erase', () =>
+    test("should set mode = erase", () =>
     {
       editor.mode = ModeInteraction.Erasing
-      expect(wrapperHTML.classList).toContain('erasing')
+      expect(wrapperHTML.classList).toContain("erasing")
     })
-    test('should toggle mode', () =>
+    test("should toggle mode", () =>
     {
       editor.mode = ModeInteraction.Erasing
-      expect(wrapperHTML.classList).toContain('erasing')
+      expect(wrapperHTML.classList).toContain("erasing")
       editor.mode = ModeInteraction.Writing
-      expect(wrapperHTML.classList).not.toContain('erasing')
+      expect(wrapperHTML.classList).not.toContain("erasing")
     })
   })
 
-  describe('context', () =>
+  describe("context", () =>
   {
-    test('should get context', async () =>
+    test("should get context", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
-      wrapperHTML.style.height = '100px'
-      wrapperHTML.style.width = '100px'
+      const wrapperHTML: HTMLElement = document.createElement("div")
+      wrapperHTML.style.height = "100px"
+      wrapperHTML.style.width = "100px"
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       expect(editor.context).toBe(editor.behaviors.context)
     })
@@ -241,9 +247,9 @@ describe('Editor.ts', () =>
 
   describe('undo', () =>
   {
-    test('should resolve when behaviors.undo is resolved', async () =>
+    test("should resolve when behaviors.undo is resolved", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       const modelExpected = new Model(100, 100)
@@ -252,9 +258,9 @@ describe('Editor.ts', () =>
       await editor.undo()
       expect(editor.behaviors.undo).toBeCalledTimes(1)
     })
-    test('should reject when behaviors.undo is rejected', async () =>
+    test("should reject when behaviors.undo is rejected", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       editor.behaviors.undo = jest.fn(() => Promise.reject("pouet"))
@@ -262,11 +268,11 @@ describe('Editor.ts', () =>
     })
   })
 
-  describe('redo', () =>
+  describe("redo", () =>
   {
-    test('should resolve when behaviors.redo is resolved', async () =>
+    test("should resolve when behaviors.redo is resolved", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       const modelExpected = new Model(100, 100)
@@ -275,9 +281,9 @@ describe('Editor.ts', () =>
       await editor.redo()
       expect(editor.behaviors.redo).toBeCalledTimes(1)
     })
-    test('should reject when behaviors.redo is rejected', async () =>
+    test("should reject when behaviors.redo is rejected", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       editor.behaviors.redo = jest.fn(() => Promise.reject("pouet"))
@@ -285,11 +291,11 @@ describe('Editor.ts', () =>
     })
   })
 
-  describe('clear', () =>
+  describe("clear", () =>
   {
-    test('should resolve when behaviors.clear is resolved', async () =>
+    test("should resolve when behaviors.clear is resolved", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       const modelExpected = new Model(100, 100)
@@ -298,19 +304,19 @@ describe('Editor.ts', () =>
       await editor.clear()
       expect(editor.behaviors.clear).toBeCalledTimes(1)
     })
-    test('should reject when behaviors.clear is rejected', async () =>
+    test("should reject when behaviors.clear is rejected", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       editor.behaviors.clear = jest.fn(() => Promise.reject("pouet"))
       expect(editor.clear()).rejects.toEqual("pouet")
     })
-    test('should emit cleared event', async () =>
+    test("should emit cleared event", async () =>
     {
       const testFunction = jest.fn()
-      publicEvent.addEventListener(EventType.CLEARED, testFunction)
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      publicEvent.addEventListener(Constants.EventType.CLEARED, testFunction)
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       const modelExpected = new Model(100, 100)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
@@ -321,11 +327,11 @@ describe('Editor.ts', () =>
     })
   })
 
-  describe('resize', () =>
+  describe("resize", () =>
   {
-    test('should resolve when behaviors.resize is resolved', async () =>
+    test("should resolve when behaviors.resize is resolved", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       const modelExpected = new Model(100, 100)
@@ -334,9 +340,9 @@ describe('Editor.ts', () =>
       await editor.resize()
       expect(editor.behaviors.resize).toBeCalledTimes(1)
     })
-    test('should reject when behaviors.resize is rejected', async () =>
+    test("should reject when behaviors.resize is rejected", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       editor.behaviors.resize = jest.fn(() => Promise.reject("pouet"))
@@ -344,11 +350,11 @@ describe('Editor.ts', () =>
     })
   })
 
-  describe('export', () =>
+  describe("export", () =>
   {
-    test('should resolve when behaviors.export is resolved', async () =>
+    test("should resolve when behaviors.export is resolved", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       const modelExpected = new Model(100, 100)
@@ -357,9 +363,9 @@ describe('Editor.ts', () =>
       await editor.export()
       expect(editor.behaviors.export).toBeCalledTimes(1)
     })
-    test('should reject when behaviors.export is rejected', async () =>
+    test("should reject when behaviors.export is rejected", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       editor.behaviors.export = jest.fn(() => Promise.reject("pouet"))
@@ -367,11 +373,11 @@ describe('Editor.ts', () =>
     })
   })
 
-  describe('convert', () =>
+  describe("convert", () =>
   {
-    test('should resolve when behaviors.convert is resolved', async () =>
+    test("should resolve when behaviors.convert is resolved", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       const modelExpected = new Model(100, 100)
@@ -380,9 +386,9 @@ describe('Editor.ts', () =>
       await editor.convert()
       expect(editor.behaviors.convert).toBeCalledTimes(1)
     })
-    test('should reject when behaviors.convert is rejected', async () =>
+    test("should reject when behaviors.convert is rejected", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       editor.behaviors.convert = jest.fn(() => Promise.reject("pouet"))
@@ -390,79 +396,79 @@ describe('Editor.ts', () =>
     })
   })
 
-  describe('import', () =>
+  describe("import", () =>
   {
-    test('should resolve import Blob when behaviors.import is resolved', async () =>
+    test("should resolve import Blob when behaviors.import is resolved", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       await editor.initialize()
       const model = new Model(100, 50)
       editor.behaviors.import = jest.fn(() => Promise.resolve(model))
       editor.events.emitImported = jest.fn()
-      await editor.import(new Blob(), 'text/plain')
+      await editor.import(new Blob(), "text/plain")
       expect(editor.events.emitImported).toBeCalledTimes(1)
       expect(editor.behaviors.import).toBeCalledTimes(1)
     })
-    test('should reject import Blob if behaviors.import is rejected', async () =>
+    test("should reject import Blob if behaviors.import is rejected", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       await editor.initialize()
       editor.behaviors.import = jest.fn(() => Promise.reject("pouet"))
       editor.events.emitImported = jest.fn()
-      expect(editor.import(new Blob(), 'text/plain')).rejects.toEqual("pouet")
+      expect(editor.import(new Blob(), "text/plain")).rejects.toEqual("pouet")
     })
-    test('should reject import Blob if behaviors.import is not define', async () =>
+    test("should reject import Blob if behaviors.import is not define", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       await editor.initialize()
       editor.behaviors.import = undefined
       editor.events.emitImported = jest.fn()
-      expect(editor.import(new Blob(), 'text/plain')).rejects.toEqual("Import impossible, behaviors has no import function")
+      expect(editor.import(new Blob(), "text/plain")).rejects.toEqual("Import impossible, behaviors has no import function")
     })
 
-    test('should resolve import Text  when behaviors.import is resolved', async () =>
+    test("should resolve import Text  when behaviors.import is resolved", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       await editor.initialize()
       const model = new Model(100, 50)
       editor.behaviors.import = jest.fn(() => Promise.resolve(model))
       editor.events.emitImported = jest.fn()
-      await editor.import("hello", 'text/plain')
+      await editor.import("hello", "text/plain")
       expect(editor.events.emitImported).toBeCalledTimes(1)
       expect(editor.behaviors.import).toBeCalledTimes(1)
     })
-    test('should reject import Text if behaviors.import is rejected', async () =>
+    test("should reject import Text if behaviors.import is rejected", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       await editor.initialize()
       editor.behaviors.import = jest.fn(() => Promise.reject("pouet"))
       editor.events.emitImported = jest.fn()
-      expect(editor.import("hello", 'text/plain')).rejects.toEqual("pouet")
+      expect(editor.import("hello", "text/plain")).rejects.toEqual("pouet")
     })
-    test('should reject import Text if behaviors.import is not define', async () =>
+    test("should reject import Text if behaviors.import is not define", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       await editor.initialize()
       editor.behaviors.import = undefined
       editor.events.emitImported = jest.fn()
-      expect(editor.import("hello", 'text/plain')).rejects.toEqual("Import impossible, behaviors has no import function")
+      expect(editor.import("hello", "text/plain")).rejects.toEqual("Import impossible, behaviors has no import function")
     })
 
-    test('should resolve import JIIX  when behaviors.import is resolved', async () =>
+    test("should resolve import JIIX  when behaviors.import is resolved", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       await editor.initialize()
@@ -485,9 +491,9 @@ describe('Editor.ts', () =>
       expect(editor.events.emitImported).toBeCalledTimes(1)
       expect(editor.behaviors.import).toBeCalledTimes(1)
     })
-    test('should reject import JIIX if behaviors.import is rejected', async () =>
+    test("should reject import JIIX if behaviors.import is rejected", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       await editor.initialize()
@@ -507,9 +513,9 @@ describe('Editor.ts', () =>
       }
       expect(editor.import(jiix)).rejects.toEqual("pouet")
     })
-    test('should reject import JIIX if behaviors.import is not define', async () =>
+    test("should reject import JIIX if behaviors.import is not define", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       await editor.initialize()
@@ -530,9 +536,9 @@ describe('Editor.ts', () =>
       expect(editor.import(jiix)).rejects.toEqual("Import impossible, behaviors has no import function")
     })
 
-    test('should resolve import points Events  when behaviors.importPointEvents is resolved', async () =>
+    test("should resolve import points Events  when behaviors.importPointEvents is resolved", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       await editor.initialize()
@@ -554,9 +560,9 @@ describe('Editor.ts', () =>
       expect(editor.events.emitImported).toBeCalledTimes(1)
       expect(editor.behaviors.importPointEvents).toBeCalledTimes(1)
     })
-    test('should resolve import points Events  when behaviors.importPointEvents is resolved', async () =>
+    test("should resolve import points Events  when behaviors.importPointEvents is resolved", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       await editor.initialize()
@@ -575,9 +581,9 @@ describe('Editor.ts', () =>
       editor.behaviors.importPointEvents = jest.fn(() => Promise.reject("pouet"))
       expect(editor.importPointEvents(tstrokeToImport)).rejects.toEqual("pouet")
     })
-    test('should reject import Points if behaviors.import is not define', async () =>
+    test("should reject import Points if behaviors.import is not define", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement('div')
+      const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       await editor.initialize()
@@ -598,15 +604,15 @@ describe('Editor.ts', () =>
     })
   })
 
-  describe('Style', () =>
+  describe("Style", () =>
   {
-    const wrapperHTML: HTMLElement = document.createElement('div')
+    const wrapperHTML: HTMLElement = document.createElement("div")
     let editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
-    test('should init theme', () =>
+    test("should init theme", () =>
     {
       expect(editor.theme).toStrictEqual(DefaultTheme)
     })
-    test('should set theme', () =>
+    test("should set theme", () =>
     {
       editor.behaviors.setTheme = jest.fn()
       //@ts-ignore
@@ -623,7 +629,7 @@ describe('Editor.ts', () =>
       expect(editor.behaviors.setTheme).toBeCalledTimes(1)
       expect(editor.behaviors.setTheme).toBeCalledWith(customTheme)
     })
-    test('should set penStyleClasses', () =>
+    test("should set penStyleClasses", () =>
     {
       editor.behaviors.setPenStyleClasses = jest.fn()
       const customPenStyleClasses = "customPenStyleClasses"
@@ -631,11 +637,11 @@ describe('Editor.ts', () =>
       expect(editor.behaviors.setPenStyleClasses).toBeCalledTimes(1)
       expect(editor.behaviors.setPenStyleClasses).toBeCalledWith(customPenStyleClasses)
     })
-    test('should init penStyle', () =>
+    test("should init penStyle", () =>
     {
       expect(editor.penStyle).toStrictEqual(DefaultPenStyle)
     })
-    test('should init penStyle', () =>
+    test("should init penStyle", () =>
     {
       editor.behaviors.setPenStyle = jest.fn()
       const customPenStyle: TPenStyle = {
@@ -651,12 +657,12 @@ describe('Editor.ts', () =>
     })
   })
 
-  describe('Events', () =>
+  describe("Events", () =>
   {
-    const wrapperHTML: HTMLElement = document.createElement('div')
+    const wrapperHTML: HTMLElement = document.createElement("div")
     const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
     // TODO problem with internal event singleton
-    test.skip('should call clear when internalEvent emit clear', () =>
+    test.skip("should call clear when internalEvent emit clear", () =>
     {
       editor.clear = jest.fn()
       expect(editor.clear).toBeCalledTimes(0)
@@ -664,7 +670,7 @@ describe('Editor.ts', () =>
       expect(editor.clear).toBeCalledTimes(1)
     })
     // TODO problem with internal event singleton
-    test.skip('should call convert when internalEvent emit convert', () =>
+    test.skip("should call convert when internalEvent emit convert", () =>
     {
       editor.convert = jest.fn()
       expect(editor.convert).toBeCalledTimes(0)
@@ -672,7 +678,7 @@ describe('Editor.ts', () =>
       expect(editor.convert).toBeCalledTimes(1)
     })
     // TODO problem with internal event singleton
-    test.skip('should emit changed when internalEvent emit changed', () =>
+    test.skip("should emit changed when internalEvent emit changed", () =>
     {
       editor.events.emitChanged = jest.fn()
       expect(editor.events.emitChanged).toBeCalledTimes(0)
@@ -680,7 +686,7 @@ describe('Editor.ts', () =>
       expect(editor.events.emitChanged).toBeCalledTimes(1)
     })
     // TODO problem with internal event singleton
-    test.skip('should emit idle when internalEvent emit idle', () =>
+    test.skip("should emit idle when internalEvent emit idle", () =>
     {
       editor.events.emitIdle = jest.fn()
       expect(editor.events.emitIdle).toBeCalledTimes(0)

@@ -1,7 +1,7 @@
-import { TPointer } from '../../../src/@types/geometry'
-import { computeLinksPoints, computeMiddlePoint, computeAxeAngle } from '../../../src/renderer/QuadraticUtils'
+import { TPointer } from "../../../src/@types"
+import { quadradicsUtils } from "../../../src/iink"
 
-describe('QuadraticUtils.ts', () =>
+describe("QuadraticUtils.ts", () =>
 {
   const p1: TPointer = {
     p: 1,
@@ -15,10 +15,10 @@ describe('QuadraticUtils.ts', () =>
     x: 2,
     y: 5
   }
-  test('should computeLinksPoints', () =>
+  test("should computeLinksPoints", () =>
   {
-    const partialPoint = computeLinksPoints(p1, 90, 1)
-    expect(partialPoint).toStrictEqual([
+    const points = quadradicsUtils.computeLinksPoints(p1, 90, 1)
+    expect(points).toStrictEqual([
       {
         x: 0.10600333639944215,
         y: 0.5519263838708298
@@ -30,15 +30,15 @@ describe('QuadraticUtils.ts', () =>
     ])
   })
 
-  test('should computeMiddlePoint', () =>
+  test("should computeMiddlePoint", () =>
   {
-    const point = computeMiddlePoint(p1, p2)
+    const point = quadradicsUtils.computeMiddlePoint(p1, p2)
     expect(point).toStrictEqual({ x: 1.5, y: 3, p: 1, t: 1 })
   })
 
   test('should computeAxeAngle', () =>
   {
-    const angle = computeAxeAngle(p1, p2)
+    const angle = quadradicsUtils.computeAxeAngle(p1, p2)
     expect(angle).toBe(1.3258176636680326)
   })
 

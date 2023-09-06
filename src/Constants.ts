@@ -129,5 +129,7 @@ export const enum ModeInteraction
 export default {
   Error,
   EventType,
+  InternalEventType,
   Exports,
+  WSMessage,
 } as const

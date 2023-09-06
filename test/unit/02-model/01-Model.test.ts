@@ -1,35 +1,31 @@
-import { IModel, TExport } from '../../../src/@types/model/Model'
-import { TPointer } from '../../../src/@types/geometry'
+import { delay } from "../utils/helpers"
+import { IModel, TExport, TPointer } from "../../../src/@types"
+import { Model, Stroke, DefaultPenStyle } from "../../../src/iink"
 
-import { Model } from '../../../src/model/Model'
-import { Stroke } from '../../../src/model/Stroke'
-import { DefaultPenStyle } from '../../../src/style/DefaultPenStyle'
-import { delay } from '../utils/helpers'
-
-describe('Model.ts', () =>
+describe("Model.ts", () =>
 {
   const width = 100, height = 100
-  test('should create', () =>
+  test("should create", () =>
   {
     const model: IModel = new Model(width, height)
     expect(model).toBeDefined()
   })
 
-  describe('mergeExport', () =>
+  describe("mergeExport", () =>
   {
-    test('should initialize export if toBeUndefined', () =>
+    test("should initialize export if toBeUndefined", () =>
     {
       const model: IModel = new Model(width, height)
-      const e: TExport = { "text/plain": 'poney' }
+      const e: TExport = { "text/plain": "poney" }
       expect(model.exports).toBeUndefined()
       model.mergeExport(e)
       expect(model.exports).toEqual(e)
     })
-    test('should merge export', () =>
+    test("should merge export", () =>
     {
       const model: IModel = new Model(width, height)
       const originExport: TExport = {
-        'application/vnd.myscript.jiix': {
+        "application/vnd.myscript.jiix": {
           "type": "Text",
           "label": "poney",
           "words": [
@@ -43,7 +39,7 @@ describe('Model.ts', () =>
         }
       }
       model.exports = originExport
-      const e: TExport = { "text/plain": 'poney' }
+      const e: TExport = { "text/plain": "poney" }
 
       model.mergeExport(e)
       expect(model.exports).toMatchObject(originExport)
@@ -51,21 +47,21 @@ describe('Model.ts', () =>
     })
   })
 
-  describe('mergeConvert', () =>
+  describe("mergeConvert", () =>
   {
-    test('should initialize export if toBeUndefined', () =>
+    test("should initialize export if toBeUndefined", () =>
     {
       const model: IModel = new Model(width, height)
-      const e: TExport = { "text/plain": 'poney' }
+      const e: TExport = { "text/plain": "poney" }
       expect(model.converts).toBeUndefined()
       model.mergeConvert(e)
       expect(model.converts).toEqual(e)
     })
-    test('should merge export', () =>
+    test("should merge export", () =>
     {
       const model: IModel = new Model(width, height)
       const originExport: TExport = {
-        'application/vnd.myscript.jiix': {
+        "application/vnd.myscript.jiix": {
           "type": "Text",
           "label": "poney",
           "words": [
@@ -79,7 +75,7 @@ describe('Model.ts', () =>
         }
       }
       model.converts = originExport
-      const e: TExport = { "text/plain": 'poney' }
+      const e: TExport = { "text/plain": "poney" }
 
       model.mergeConvert(e)
       expect(model.converts).toMatchObject(originExport)
@@ -87,10 +83,10 @@ describe('Model.ts', () =>
     })
   })
 
-  describe('addPoint', () =>
+  describe("addPoint", () =>
   {
     const model: IModel = new Model(width, height)
-    test('should add point to x, y, t & t array', () =>
+    test("should add point to x, y, t & t array", () =>
     {
       const stroke = new Stroke(DefaultPenStyle, 1)
       const point: TPointer = {
@@ -108,7 +104,7 @@ describe('Model.ts', () =>
       expect(stroke.pointers[0].t).toBe(point.t)
     })
 
-    test('should not add point if x is too close', () =>
+    test("should not add point if x is too close", () =>
     {
       const stroke = new Stroke(DefaultPenStyle, 1)
       const point: TPointer = {
@@ -123,7 +119,7 @@ describe('Model.ts', () =>
       expect(stroke.pointers).toHaveLength(1)
     })
 
-    test('should not add point if y is too close', () =>
+    test("should not add point if y is too close", () =>
     {
       const stroke = new Stroke(DefaultPenStyle, 1)
       const point: TPointer = {
@@ -139,9 +135,9 @@ describe('Model.ts', () =>
     })
   })
 
-  describe('updateStroke', () =>
+  describe("updateStroke", () =>
   {
-    test('should updateStroke', () =>
+    test("should updateStroke", () =>
     {
       const model: IModel = new Model(width, height)
       const stroke = new Stroke(DefaultPenStyle, 1)
@@ -163,7 +159,7 @@ describe('Model.ts', () =>
       expect(model.rawStrokes).toHaveLength(1)
       expect(model.rawStrokes[0]).toStrictEqual(strokeUpdated)
     })
-    test('should not updateStroke if id not exist', () =>
+    test("should not updateStroke if id not exist", () =>
     {
       const model: IModel = new Model(width, height)
       const stroke = new Stroke(DefaultPenStyle, 1)
@@ -188,9 +184,9 @@ describe('Model.ts', () =>
     })
   })
 
-  describe('removeStroke', () =>
+  describe("removeStroke", () =>
   {
-    test('should removeStroke', () =>
+    test("should removeStroke", () =>
     {
       const model: IModel = new Model(width, height)
       const stroke = new Stroke(DefaultPenStyle, 1)
@@ -208,7 +204,7 @@ describe('Model.ts', () =>
       model.removeStroke(stroke.id)
       expect(model.rawStrokes).toHaveLength(0)
     })
-    test('should not removeStroke if id not exist', () =>
+    test("should not removeStroke if id not exist", () =>
     {
       const model: IModel = new Model(width, height)
       const stroke = new Stroke(DefaultPenStyle, 1)
@@ -228,9 +224,9 @@ describe('Model.ts', () =>
     })
   })
 
-  describe('rawStrokes', () =>
+  describe("rawStrokes", () =>
   {
-    test('should addStrokes', () =>
+    test("should addStrokes", () =>
     {
       const model: IModel = new Model(width, height)
       const stroke = new Stroke(DefaultPenStyle, 1)
@@ -239,7 +235,7 @@ describe('Model.ts', () =>
       expect(model.rawStrokes[0]).toStrictEqual(stroke)
     })
 
-    test('should extractUnsentStrokes', () =>
+    test("should extractUnsentStrokes", () =>
     {
       const model: IModel = new Model(width, height)
       const stroke = new Stroke(DefaultPenStyle, 1)
@@ -252,10 +248,10 @@ describe('Model.ts', () =>
     })
   })
 
-  describe('currentStroke', () =>
+  describe("currentStroke", () =>
   {
     const model: IModel = new Model(width, height)
-    test('should initCurrentStroke', async () =>
+    test("should initCurrentStroke", async () =>
     {
       expect(model.currentStroke).toBeUndefined()
       const point: TPointer = {
@@ -266,12 +262,12 @@ describe('Model.ts', () =>
       }
       expect(model.creationTime).toStrictEqual(model.modificationDate)
       await delay(100)
-      model.initCurrentStroke(point, 42, 'mouse', DefaultPenStyle)
+      model.initCurrentStroke(point, 42, "mouse", DefaultPenStyle)
       expect(model.modificationDate - model.creationTime).toBeGreaterThanOrEqual(100)
       expect(model.currentStroke).toBeDefined()
-      expect(model.currentStroke?.style['-myscript-pen-fill-color']).toBe(DefaultPenStyle['-myscript-pen-fill-color'])
-      expect(model.currentStroke?.style['-myscript-pen-fill-style']).toBe(DefaultPenStyle['-myscript-pen-fill-style'])
-      expect(model.currentStroke?.style['-myscript-pen-width']).toBe(DefaultPenStyle['-myscript-pen-width'])
+      expect(model.currentStroke?.style["-myscript-pen-fill-color"]).toBe(DefaultPenStyle["-myscript-pen-fill-color"])
+      expect(model.currentStroke?.style["-myscript-pen-fill-style"]).toBe(DefaultPenStyle["-myscript-pen-fill-style"])
+      expect(model.currentStroke?.style["-myscript-pen-width"]).toBe(DefaultPenStyle["-myscript-pen-width"])
       expect(model.currentStroke?.style.color).toBe(DefaultPenStyle.color)
       expect(model.currentStroke?.style.width).toBe(DefaultPenStyle.width)
       expect(model.currentStroke?.pointers).toHaveLength(1)
@@ -280,7 +276,7 @@ describe('Model.ts', () =>
       expect(model.currentStroke?.pointers[0].t).toBe(point.t)
       expect(model.currentStroke?.pointers[0].p).toBe(point.p)
     })
-    test('should initCurrentStroke with -myscript-pen-width', async () =>
+    test("should initCurrentStroke with -myscript-pen-width", async () =>
     {
       const _model: IModel = new Model(width, height)
       const point: TPointer = {
@@ -290,15 +286,15 @@ describe('Model.ts', () =>
         y: 1
       }
       const style = { ...DefaultPenStyle }
-      style['-myscript-pen-width'] = 2
+      style["-myscript-pen-width"] = 2
       expect(_model.creationTime).toStrictEqual(_model.modificationDate)
       await delay(101)
-      _model.initCurrentStroke(point, 42, 'mouse', style)
+      _model.initCurrentStroke(point, 42, "mouse", style)
       expect(_model.modificationDate - _model.creationTime).toBeGreaterThanOrEqual(100)
       expect(_model.currentStroke).toBeDefined()
-      expect(_model.currentStroke?.style['-myscript-pen-fill-color']).toBe(style['-myscript-pen-fill-color'])
-      expect(_model.currentStroke?.style['-myscript-pen-fill-style']).toBe(style['-myscript-pen-fill-style'])
-      expect(_model.currentStroke?.style['-myscript-pen-width']).toBe(style['-myscript-pen-width'])
+      expect(_model.currentStroke?.style["-myscript-pen-fill-color"]).toBe(style["-myscript-pen-fill-color"])
+      expect(_model.currentStroke?.style["-myscript-pen-fill-style"]).toBe(style["-myscript-pen-fill-style"])
+      expect(_model.currentStroke?.style["-myscript-pen-width"]).toBe(style["-myscript-pen-width"])
       expect(_model.currentStroke?.style.color).toBe(style.color)
       expect(_model.currentStroke?.style.width).toBe(style.width)
       expect(model.currentStroke?.pointers).toHaveLength(1)
@@ -308,7 +304,7 @@ describe('Model.ts', () =>
       expect(model.currentStroke?.pointers[0].p).toBe(point.p)
     })
 
-    test('should appendToCurrentStroke', () =>
+    test("should appendToCurrentStroke", () =>
     {
       expect(model.currentStroke).toBeDefined()
       const point: TPointer = {
@@ -318,9 +314,9 @@ describe('Model.ts', () =>
         y: 15
       }
       model.appendToCurrentStroke(point)
-      expect(model.currentStroke?.style['-myscript-pen-fill-color']).toBe(DefaultPenStyle['-myscript-pen-fill-color'])
-      expect(model.currentStroke?.style['-myscript-pen-fill-style']).toBe(DefaultPenStyle['-myscript-pen-fill-style'])
-      expect(model.currentStroke?.style['-myscript-pen-width']).toBe(DefaultPenStyle['-myscript-pen-width'])
+      expect(model.currentStroke?.style["-myscript-pen-fill-color"]).toBe(DefaultPenStyle["-myscript-pen-fill-color"])
+      expect(model.currentStroke?.style["-myscript-pen-fill-style"]).toBe(DefaultPenStyle["-myscript-pen-fill-style"])
+      expect(model.currentStroke?.style["-myscript-pen-width"]).toBe(DefaultPenStyle["-myscript-pen-width"])
       expect(model.currentStroke?.style.color).toBe(DefaultPenStyle.color)
       expect(model.currentStroke?.style.width).toBe(DefaultPenStyle.width)
       expect(model.currentStroke?.pointers).toHaveLength(2)
@@ -330,7 +326,7 @@ describe('Model.ts', () =>
       expect(model.currentStroke?.pointers[1].p).toBe(point.p)
     })
 
-    test('should endCurrentStroke', () =>
+    test("should endCurrentStroke", () =>
     {
       model.addPoint = jest.fn()
       model.addStroke = jest.fn()
@@ -351,7 +347,8 @@ describe('Model.ts', () =>
     })
   })
 
-  describe('appendSelectedStrokesFromPoint', () => {
+  describe("appendSelectedStrokesFromPoint", () =>
+  {
     const model: IModel = new Model(27, 5)
     const stroke1 = new Stroke(DefaultPenStyle, 1)
     stroke1.id = "stroke-1"
@@ -375,29 +372,34 @@ describe('Model.ts', () =>
       })
     }
     model.addStroke(stroke2)
-    test('shoud select stroke when point on stroke', () => {
+    test("shoud select stroke when point on stroke", () =>
+    {
       model.appendSelectedStrokesFromPoint({ x: 1, y: 1 })
       expect(model.selectedStrokes).toHaveLength(1)
       expect(model.selectedStrokes[0].id).toEqual("stroke-1")
     })
-    test('shoud reset selectedStrokes', () => {
+    test("shoud reset selectedStrokes", () =>
+    {
       expect(model.selectedStrokes).toHaveLength(1)
       model.resetSelectedStrokes()
       expect(model.selectedStrokes).toHaveLength(0)
     })
-    test('should select the stroke when the point is at a distance less than 10', () => {
+    test("should select the stroke when the point is at a distance less than 10", () =>
+    {
       expect(model.selectedStrokes).toHaveLength(0)
       model.appendSelectedStrokesFromPoint({ x: 36, y: 41 })
       expect(model.selectedStrokes).toHaveLength(1)
       expect(model.selectedStrokes[0].id).toEqual("stroke-2")
     })
-    test('should not select the stroke when the point is at a distance less than 10', () => {
+    test("should not select the stroke when the point is at a distance less than 10", () =>
+    {
       model.resetSelectedStrokes()
       expect(model.selectedStrokes).toHaveLength(0)
       model.appendSelectedStrokesFromPoint({ x: 56, y: 51 })
       expect(model.selectedStrokes).toHaveLength(0)
     })
-    test('should not select the same stroke twice', () => {
+    test("should not select the same stroke twice", () =>
+    {
       model.resetSelectedStrokes()
       expect(model.selectedStrokes).toHaveLength(0)
       model.appendSelectedStrokesFromPoint({ x: 36, y: 41 })
@@ -409,8 +411,10 @@ describe('Model.ts', () =>
     })
   })
 
-  describe('removeStrokesFromPoint', () => {
-    test('shoud remove stroke when point on stroke', () => {
+  describe("removeStrokesFromPoint", () =>
+  {
+    test("shoud remove stroke when point on stroke", () =>
+    {
       const model: IModel = new Model(27, 5)
       const stroke1 = new Stroke(DefaultPenStyle, 1)
       stroke1.id = "stroke-1"
@@ -441,7 +445,8 @@ describe('Model.ts', () =>
       expect(model.rawStrokes).toHaveLength(1)
       expect(model.rawStrokes[0].id).toEqual("stroke-2")
     })
-    test('should remove the stroke when the point is at a distance less than 10', () => {
+    test("should remove the stroke when the point is at a distance less than 10", () =>
+    {
       const model: IModel = new Model(27, 5)
       const stroke1 = new Stroke(DefaultPenStyle, 1)
       stroke1.id = "stroke-1"
@@ -472,7 +477,8 @@ describe('Model.ts', () =>
       expect(model.rawStrokes).toHaveLength(1)
       expect(model.rawStrokes[0].id).toEqual("stroke-1")
     })
-    test('should not remove the stroke when the point is at a distance less than 10', () => {
+    test("should not remove the stroke when the point is at a distance less than 10", () =>
+    {
       const model: IModel = new Model(27, 5)
       const stroke1 = new Stroke(DefaultPenStyle, 1)
       stroke1.id = "stroke-1"
@@ -503,25 +509,25 @@ describe('Model.ts', () =>
     })
   })
 
-  describe('position', () =>
+  describe("position", () =>
   {
     const model: IModel = new Model(width, height)
-    test('should initialize position', () =>
+    test("should initialize position", () =>
     {
       expect(model.positions.lastReceivedPosition).toBe(-1)
       expect(model.positions.lastSentPosition).toBe(-1)
     })
-    test('should updatePositionSent', () =>
+    test("should updatePositionSent", () =>
     {
       model.updatePositionSent(5)
       expect(model.positions.lastSentPosition).toBe(5)
     })
-    test('should updatePositionReceived', () =>
+    test("should updatePositionReceived", () =>
     {
       model.updatePositionReceived()
       expect(model.positions.lastReceivedPosition).toBe(model.positions.lastSentPosition)
     })
-    test('should resetPositions', () =>
+    test("should resetPositions", () =>
     {
       model.resetPositions()
       expect(model.positions.lastReceivedPosition).toBe(-1)
@@ -529,7 +535,7 @@ describe('Model.ts', () =>
     })
   })
 
-  describe('clone', () =>
+  describe("clone", () =>
   {
     const model: IModel = new Model(27, 5)
     const stroke = new Stroke(DefaultPenStyle, 1)
@@ -540,9 +546,9 @@ describe('Model.ts', () =>
       x: 1,
       y: 1
     }
-    model.initCurrentStroke(point, 666, 'pen', DefaultPenStyle)
+    model.initCurrentStroke(point, 666, "pen", DefaultPenStyle)
     model.exports = { "text/plain": "M" }
-    test('should getClone', () =>
+    test("should getClone", () =>
     {
       const clone = model.getClone()
       expect(clone != model).toBeTruthy()
@@ -566,18 +572,18 @@ describe('Model.ts', () =>
     })
   })
 
-  describe('clear', () =>
+  describe("clear", () =>
   {
-    test('should clear model', () =>
+    test("should clear model", () =>
     {
       const model: IModel = new Model(width, height)
       const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
       const p2: TPointer = { t: 10, p: 10, x: 10, y: 10 }
       const p3: TPointer = { t: 10, p: 10, x: 10, y: 10 }
 
-      model.initCurrentStroke(p1, 42, 'mouse', DefaultPenStyle)
+      model.initCurrentStroke(p1, 42, "mouse", DefaultPenStyle)
       model.endCurrentStroke(p2)
-      model.initCurrentStroke(p3, 51, 'mouse', DefaultPenStyle)
+      model.initCurrentStroke(p3, 51, "mouse", DefaultPenStyle)
       expect(model.currentStroke).toBeDefined()
       expect(model.rawStrokes).toHaveLength(1)
 

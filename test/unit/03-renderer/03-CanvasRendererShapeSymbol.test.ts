@@ -1,11 +1,10 @@
-import { TLineSymbol, TShapeSymbol } from '../../../src/@types/renderer/Symbol'
-import { drawLine, drawShapeSymbol } from '../../../src/renderer/canvas/CanvasRendererShapeSymbol'
-import { DefaultPenStyle } from '../../../src/style/DefaultPenStyle'
+import { TLineSymbol, TShapeSymbol } from "../../../src/@types"
+import { DefaultPenStyle, canvasRendererShape } from "../../../src/iink"
 
-describe('CanvasRendererShapeSymbol.ts', () =>
+describe("CanvasRendererShapeSymbol.ts", () =>
 {
-  const canvas: HTMLCanvasElement = document.createElement('canvas')
-  const canvasContext = canvas.getContext('2d') as CanvasRenderingContext2D
+  const canvas: HTMLCanvasElement = document.createElement("canvas")
+  const canvasContext = canvas.getContext("2d") as CanvasRenderingContext2D
 
   canvasContext.moveTo = jest.fn()
   canvasContext.lineTo = jest.fn()
@@ -13,9 +12,9 @@ describe('CanvasRendererShapeSymbol.ts', () =>
   const p2 = { x: 3, y: 4 }
 
 
-  test('should drawLine', () =>
+  test("should drawLine", () =>
   {
-    drawLine(canvasContext, p1, p2)
+    canvasRendererShape.drawLine(canvasContext, p1, p2)
     expect(canvasContext.moveTo).toBeCalledTimes(1)
     expect(canvasContext.moveTo).toBeCalledWith(p1.x, p1.y)
 
@@ -23,15 +22,15 @@ describe('CanvasRendererShapeSymbol.ts', () =>
     expect(canvasContext.lineTo).toBeCalledWith(p2.x, p2.y)
   })
 
-  test('should drawShapeSymbol with type line', () =>
+  test("should drawShapeSymbol with type line", () =>
   {
     const lineSymbol: TLineSymbol = {
-      elementType: 'line',
-      type: 'pen',
+      elementType: "line",
+      type: "pen",
       style: DefaultPenStyle,
       data: { p1, p2 }
     }
-    drawShapeSymbol(canvasContext, lineSymbol)
+    canvasRendererShape.drawShapeSymbol(canvasContext, lineSymbol)
     expect(canvasContext.moveTo).toBeCalledTimes(1)
     expect(canvasContext.moveTo).toBeCalledWith(p1.x, p1.y)
 
@@ -39,22 +38,22 @@ describe('CanvasRendererShapeSymbol.ts', () =>
     expect(canvasContext.lineTo).toBeCalledWith(p2.x, p2.y)
   })
 
-  test('should drawShapeSymbol with type shape', () =>
+  test("should drawShapeSymbol with type shape", () =>
   {
     const lineSymbol: TLineSymbol = {
-      elementType: 'line',
-      type: 'pen',
+      elementType: "line",
+      type: "pen",
       style: DefaultPenStyle,
       data: { p1, p2 }
     }
     const shapeSymbol: TShapeSymbol = {
-      elementType: 'shape',
-      type: 'pen',
+      elementType: "shape",
+      type: "pen",
       style: DefaultPenStyle,
       selectedCandidateIndex: 0,
       candidates: [lineSymbol]
     }
-    drawShapeSymbol(canvasContext, shapeSymbol)
+    canvasRendererShape.drawShapeSymbol(canvasContext, shapeSymbol)
     expect(canvasContext.moveTo).toBeCalledTimes(1)
     expect(canvasContext.moveTo).toBeCalledWith(p1.x, p1.y)
 

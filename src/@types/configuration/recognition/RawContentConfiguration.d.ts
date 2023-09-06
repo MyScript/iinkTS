@@ -2,7 +2,7 @@
 import { TEraserConfiguration } from "./EraserConfiguration"
 import { TTextConfConfiguration } from "./TextConfiguration"
 
-export type TRecognitionConfiguration = {
+export type TRawContentRecognitionConfiguration = {
   text: boolean
   shape: boolean
 }

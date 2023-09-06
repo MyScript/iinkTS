@@ -14,7 +14,7 @@ import { InternalEvent } from "../event/InternalEvent"
 import { computeHmac } from "./CryptoHelper"
 import StyleHelper from "../style/StyleHelper"
 import { DeferredPromise } from "../utils/DeferredPromise"
-import { isVersionSuperiorOrEqual } from "../utils/versionHelper"
+import { isVersionSuperiorOrEqual } from "../utils/version"
 import { convertStrokeToJSON } from "../model/Stroke"
 
 /**
