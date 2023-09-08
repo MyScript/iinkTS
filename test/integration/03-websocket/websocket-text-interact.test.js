@@ -1,23 +1,12 @@
-const { write, getExportedDatas, waitForEditorWebSocket } = require("../helper")
-const {
-  buenos,
-  aires,
-  paris,
-  tokyo,
-  madrid,
-  rome,
-  buenosAires
-} = require("../strokesDatas")
+const { write, getExportedDatas, waitForEditorWebSocket, waitEditorIdle } = require("../helper")
+const { paris, tokyo, madrid, rome, buenosAires } = require("../strokesDatas")
+
 
 describe("Websocket Text interact", () => {
   beforeAll(async () => {
     await page.goto("/examples/websocket/websocket_text_interact.html")
-  })
-
-  beforeEach(async () => {
-    await page.reload({ waitUntil: "networkidle" })
     await waitForEditorWebSocket(page)
-    await page.waitForTimeout(1000)
+    await waitEditorIdle(page)
   })
 
   test("should have title", async () => {
@@ -25,50 +14,66 @@ describe("Websocket Text interact", () => {
     expect(title).toMatch("Interact with your app")
   })
 
+  test(`should ask teh capital of France`, async () => {
+    const question = await page.locator("#question").textContent()
+    expect(question).toEqual("What is the capital of France?")
+  })
 
-  test(`should answer questions`, async () => {
+  test(`should answer question capital of France`, async () => {
     const [exportParis] = await Promise.all([
       getExportedDatas(page),
       write(page, paris.strokes, -100)
     ])
+    await waitEditorIdle(page)
+    let textExpected = paris.exports["application/vnd.myscript.jiix"].label
+    let textReceived = exportParis["text/plain"]
+    expect(textReceived).toStrictEqual(textExpected)
+  })
 
-    const jiixParisExpected = paris.exports["application/vnd.myscript.jiix"]
-    const jiixParisReceived = exportParis["application/vnd.myscript.jiix"]
-
-    expect(jiixParisReceived.label).toStrictEqual(jiixParisExpected.label)
-
+  test(`should go next question`, async () => {
     await page.locator("#nextButton").click()
-    //wait for the question to change
-    await page.waitForTimeout(400)
+    await waitEditorIdle(page)
+    const question = await page.locator("#question").textContent()
+    expect(question).toContain("Italy")
+  })
 
-    const [exportRome] = await Promise.all([
+  test(`should answer question capital of Italy`, async () => {
+    const [exportRomes] = await Promise.all([
       getExportedDatas(page),
       write(page, rome.strokes, -100)
     ])
+    await waitEditorIdle(page)
+    textExpected = rome.exports["application/vnd.myscript.jiix"].label
+    textReceived = exportRomes["text/plain"]
+    expect(textReceived).toStrictEqual(textExpected)
+  })
 
-    const jiixRomeExpected = rome.exports["application/vnd.myscript.jiix"]
-    const jiixRomeReceived = exportRome["application/vnd.myscript.jiix"]
-
-    expect(jiixRomeReceived.label).toStrictEqual(jiixRomeExpected.label)
-
+  test(`should go next question`, async () => {
     await page.locator("#nextButton").click()
-    //wait for the question to change
-    await page.waitForTimeout(400)
+    await waitEditorIdle(page)
+    const question = await page.locator("#question").textContent()
+    expect(question).toContain("Spain")
+  })
 
+  test(`should answer question capital of Spain`, async () => {
     const [exportMadrid] = await Promise.all([
       getExportedDatas(page),
       write(page, madrid.strokes, -100)
     ])
+    await waitEditorIdle(page)
+    textExpected = madrid.exports["application/vnd.myscript.jiix"].label
+    textReceived = exportMadrid["text/plain"]
+    expect(textReceived).toStrictEqual(textExpected)
+  })
 
-    const jiixMadridExpected = madrid.exports["application/vnd.myscript.jiix"]
-    const jiixMadridReceived = exportMadrid["application/vnd.myscript.jiix"]
-
-    expect(jiixMadridReceived.label).toStrictEqual(jiixMadridExpected.label)
-
+  test(`should go next question`, async () => {
     await page.locator("#nextButton").click()
-    //wait for the question to change
-    await page.waitForTimeout(400)
+    await waitEditorIdle(page)
+    const question = await page.locator("#question").textContent()
+    expect(question).toContain("Argentina")
+  })
 
+  test(`should answer question capital of Argentina`, async () => {
     let exportBuenosAires
     for (let s of buenosAires.strokes) {
       [exportBuenosAires] = await Promise.all([
@@ -76,23 +81,27 @@ describe("Websocket Text interact", () => {
         write(page, [s], -100, -200)
       ])
     }
+    await waitEditorIdle(page)
+    textExpected = buenosAires.exports["application/vnd.myscript.jiix"].label
+    textReceived = exportBuenosAires["text/plain"]
+    expect(textReceived).toStrictEqual(textExpected)
+  })
 
-    const jiixBuenosAiresExpected = buenosAires.exports["application/vnd.myscript.jiix"].label
-    const jiixBuenosAiresReceived = exportBuenosAires["application/vnd.myscript.jiix"].label
-    expect(jiixBuenosAiresReceived).toStrictEqual(jiixBuenosAiresExpected)
-
+  test(`should go next question`, async () => {
     await page.locator("#nextButton").click()
-    //wait for the question to change
-    await page.waitForTimeout(400)
+    await waitEditorIdle(page)
+    const question = await page.locator("#question").textContent()
+    expect(question).toContain("Japan")
+  })
 
+  test(`should answer question capital of Japan`, async () => {
     const [exportTokyo] = await Promise.all([
       getExportedDatas(page),
       write(page, tokyo.strokes)
     ])
-
-    const jiixTokyoExpected = tokyo.exports["application/vnd.myscript.jiix"]
-    const jiixTokyoReceived = exportTokyo["application/vnd.myscript.jiix"]
-
-    expect(jiixTokyoReceived.label).toStrictEqual(jiixTokyoExpected.label)
+    await waitEditorIdle(page)
+    textExpected = tokyo.exports["application/vnd.myscript.jiix"].label
+    textReceived = exportTokyo["text/plain"]
+    expect(textReceived).toStrictEqual(textExpected)
   })
 })

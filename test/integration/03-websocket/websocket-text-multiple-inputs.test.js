@@ -1,5 +1,5 @@
 const { waitForEditorWebSocket, writePointers, waitEditorIdle } = require('../helper')
-const { centralProcessingUnit, oneThousandNineHundredAndFortyThree, oneThousandNineHundredAndNintyThree, h } = require('../strokesDatas')
+const { centralProcessingUnit, oneThousandNineHundredAndFortyThree, oneThousandNineHundredAndNintyThree } = require('../strokesDatas')
 
 const switchToOtherQuestion = async (page, inputId) => {
   return Promise.all([
@@ -15,7 +15,6 @@ const getAnswerText = async (page, answerId) => {
 describe('Websocket Text Multiple Inputs', () => {
   beforeAll(async () => {
     await page.goto('/examples/websocket/websocket_text_multiple_inputs.html')
-    await page.reload({ waitUntil: 'networkidle'})
     await waitForEditorWebSocket(page)
   })
 
@@ -24,17 +23,23 @@ describe('Websocket Text Multiple Inputs', () => {
     expect(title).toMatch('Multiple inputs')
   })
 
+  const data0 = {
+    inputId: "input-0",
+    answerId: "answer-0",
+    text: centralProcessingUnit,
+  }
+
   test('should answer the first question', async () => {
-    await writePointers(page, centralProcessingUnit.strokes)
+    await writePointers(page, data0.text.strokes)
     await waitEditorIdle(page)
-    const answerText = await getAnswerText(page, "answer-0")
-    expect(answerText).toEqual(centralProcessingUnit.exports["text/plain"])
+    const answerText = await getAnswerText(page, data0.answerId)
+    expect(answerText).toEqual(data0.text.exports["text/plain"])
   })
 
   test('should validate the first answer', async () => {
-    expect(await page.locator(`#answer-0`).getAttribute('class')).not.toContain('success')
-    await page.locator("#validate-answers").click()
-    expect(await page.locator(`#answer-0`).getAttribute('class')).toContain('success')
+    expect(await page.locator(`#${data0.answerId}`).getAttribute('class')).not.toContain('success')
+    await page.click("#validate-answers")
+    expect(await page.locator(`#${data0.answerId}`).getAttribute('class')).toContain('success')
   })
 
   const data1 = {
@@ -52,8 +57,8 @@ describe('Websocket Text Multiple Inputs', () => {
   })
 
   test("should validate the second answer", async () => {
-    expect(await page.locator(`#${data3.answerId}`).getAttribute('class')).not.toContain('success')
-    expect(await page.locator(`#${data3.answerId}`).getAttribute('class')).toContain('error')
+    expect(await page.locator(`#${data1.answerId}`).getAttribute('class')).not.toContain('success')
+    expect(await page.locator(`#${data1.answerId}`).getAttribute('class')).toContain('error')
     await page.locator("#validate-answers").click()
     expect(await page.locator(`#${data1.answerId}`).getAttribute('class')).toContain('success')
     expect(await page.locator(`#${data1.answerId}`).getAttribute('class')).not.toContain('error')
@@ -74,8 +79,8 @@ describe('Websocket Text Multiple Inputs', () => {
   })
 
   test("should validate the second answer", async () => {
-    expect(await page.locator(`#${data3.answerId}`).getAttribute('class')).not.toContain('success')
-    expect(await page.locator(`#${data3.answerId}`).getAttribute('class')).toContain('error')
+    expect(await page.locator(`#${data2.answerId}`).getAttribute('class')).not.toContain('success')
+    expect(await page.locator(`#${data2.answerId}`).getAttribute('class')).toContain('error')
     await page.locator("#validate-answers").click()
     expect(await page.locator(`#${data2.answerId}`).getAttribute('class')).not.toContain('success')
     expect(await page.locator(`#${data2.answerId}`).getAttribute('class')).toContain('error')
@@ -102,4 +107,5 @@ describe('Websocket Text Multiple Inputs', () => {
     expect(await page.locator(`#${data3.answerId}`).getAttribute('class')).toContain('success')
     expect(await page.locator(`#${data3.answerId}`).getAttribute('class')).not.toContain('error')
   })
+
 })

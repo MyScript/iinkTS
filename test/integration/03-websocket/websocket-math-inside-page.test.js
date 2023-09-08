@@ -1,4 +1,4 @@
-const { haveSameLabels, write, getEditorModelExports, getImportedDatas, getExportedDatas, waitEditorLoaded } = require("../helper")
+const { haveSameLabels, write, getEditorModelExports, getImportedDatas, getExportedDatas, waitEditorLoaded, waitEditorIdle } = require("../helper")
 
 const mathContentList = [
   {
@@ -47,12 +47,11 @@ describe("Websocket Math Inside Page", function () {
       let currentTextContent
 
       afterAll(async () => {
-        await page.reload()
+        await page.reload({ waitUntil: "networkidle" })
       })
 
       test(`should open modal editor`, async () => {
-        await waitEditorLoaded(page)
-        await page.waitForTimeout(100)
+        await waitEditorIdle(page)
         expect(await page.locator("#editorContainer").isVisible()).toEqual(false)
         currentTextContent = await page.locator(`#${mc.id} .katex-html`).textContent()
         expect(currentTextContent).toEqual(mc.textContent)
@@ -60,7 +59,7 @@ describe("Websocket Math Inside Page", function () {
           getImportedDatas(page),
           page.locator(`#${ mc.id }`).click()
         ])
-        await page.waitForTimeout(1000)
+        await waitEditorIdle(page)
         expect(await page.locator("#editorContainer").isVisible()).toEqual(true)
       })
 
@@ -76,7 +75,7 @@ describe("Websocket Math Inside Page", function () {
           getExportedDatas(page),
           write(page, mc.strokesToWrite)
         ])
-        await page.waitForTimeout(1000)
+        await waitEditorIdle(page)
         currentExport = await getEditorModelExports(page)
         expect(currentExport['application/x-latex']).toEqual(mc.latexAfterWriting)
       })
@@ -95,8 +94,8 @@ describe("Websocket Math Inside Page", function () {
           getImportedDatas(page),
           page.locator(`#${ mc.id }`).click()
         ])
+        await waitEditorIdle(page)
         expect(await page.locator("#editorContainer").isVisible()).toEqual(true)
-        await page.waitForTimeout(1000)
         currentExport = await getEditorModelExports(page)
         expect(currentExport['application/x-latex']).toEqual(mc.latexAfterWriting)
       })

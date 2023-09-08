@@ -1,4 +1,4 @@
-const { getExportedDatas, write, getEditorModelExportsType } = require("../helper")
+const { getExportedDatas, write, getEditorModelExportsType, waitEditorIdle } = require("../helper")
 const { h, hello } = require("../strokesDatas")
 
 describe('Nav actions', () => {
@@ -70,8 +70,7 @@ describe('Nav actions', () => {
       write(page, h.strokes),
     ])
 
-    //await css animation
-    await page.waitForTimeout(1500)
+    await waitEditorIdle(page)
 
     let resultElement = page.locator('#result')
     resultText = await resultElement.textContent()
@@ -82,8 +81,7 @@ describe('Nav actions', () => {
       page.selectOption('#language', 'fr_FR'),
     ])
 
-    //await css animation
-    await page.waitForTimeout(1500)
+    await waitEditorIdle(page)
 
     resultElement = page.locator('#result')
     resultText = await resultElement.textContent()

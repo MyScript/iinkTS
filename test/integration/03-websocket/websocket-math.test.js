@@ -1,5 +1,16 @@
 
-const { waitForEditorWebSocket, write, getExportedDatas, getEditorModelExportsType, getEditorConfiguration, setEditorConfiguration, getEditorModelConverts, getConvertedDatas, getEditorModelExports } = require('../helper')
+const {
+  waitForEditorWebSocket,
+  write,
+  getExportedDatas,
+  getEditorModelExportsType,
+  getEditorConfiguration,
+  setEditorConfiguration,
+  getEditorModelConverts,
+  getConvertedDatas,
+  getEditorModelExports,
+  waitEditorIdle
+} = require('../helper')
 const { equation1, fence, sum } = require('../strokesDatas')
 
 describe('Websocket Math', function () {
@@ -10,7 +21,7 @@ describe('Websocket Math', function () {
   beforeEach(async () => {
     await page.reload({ waitUntil: 'networkidle'})
     await waitForEditorWebSocket(page)
-    await page.waitForTimeout(1000)
+    await waitEditorIdle(page)
   })
 
   test('should have title', async () => {
@@ -106,8 +117,7 @@ describe('Websocket Math', function () {
     expect(undo1Export['application/x-latex']).toEqual(latex)
     expect(equation1.exports.LATEX.at(-1)).toEqual(undo1Export['application/x-latex'])
 
-    // To wait for second export raise on undo/redo
-    await page.waitForTimeout(100)
+    await waitEditorIdle(page)
     const [undo2Export] = await Promise.all([
       getExportedDatas(page),
       page.click('#undo')
@@ -116,8 +126,7 @@ describe('Websocket Math', function () {
     expect(undo2Export['application/x-latex']).toEqual(latex)
     expect(equation1.exports.LATEX.at(-2)).toEqual(undo2Export['application/x-latex'])
 
-    // To wait for second export raise on undo/redo
-    await page.waitForTimeout(100)
+    await waitEditorIdle(page)
     const [undo3Export] = await Promise.all([
       getExportedDatas(page),
       page.click('#undo')
@@ -126,8 +135,7 @@ describe('Websocket Math', function () {
     expect(undo3Export['application/x-latex']).toEqual(latex)
     expect(equation1.exports.LATEX.at(-3)).toEqual(undo3Export['application/x-latex'])
 
-    // To wait for second export raise on undo/redo
-    await page.waitForTimeout(100)
+    await waitEditorIdle(page)
     const [redoExport] = await Promise.all([
       getExportedDatas(page),
       page.click('#redo')
@@ -151,8 +159,7 @@ describe('Websocket Math', function () {
       getExportedDatas(page),
       write(page, equation1.strokes)
     ])
-    // To wait for the end of writing
-    await page.waitForTimeout(1000)
+    await waitEditorIdle(page)
     latex = await getEditorModelExportsType(page, 'application/x-latex')
     expect(latex).toEqual(equation1.exports.LATEX.at(-1))
 
@@ -166,8 +173,7 @@ describe('Websocket Math', function () {
       expect(clearExport['application/x-latex']).toEqual('')
     }
 
-    // To wait for second export raise on undo/redo
-    await page.waitForTimeout(500)
+    await waitEditorIdle(page)
     const [undo1Export] = await Promise.all([
       getExportedDatas(page),
       page.click('#undo')
@@ -176,8 +182,7 @@ describe('Websocket Math', function () {
     expect(undo1Export['application/x-latex']).toEqual(latex)
     expect(undo1Export['application/x-latex']).toEqual(equation1.exports.LATEX.at(-1))
 
-    // To wait for second export raise on undo/redo
-    await page.waitForTimeout(500)
+    await waitEditorIdle(page)
     const [undo2Export] = await Promise.all([
       getExportedDatas(page),
       page.click('#undo')
@@ -186,8 +191,7 @@ describe('Websocket Math', function () {
     expect(undo2Export['application/x-latex']).toEqual(latex)
     expect(latex).toEqual('')
 
-    // To wait for second export raise on undo/redo
-    await page.waitForTimeout(500)
+    await waitEditorIdle(page)
     const [redoExport] = await Promise.all([
       getExportedDatas(page),
       page.click('#redo')
@@ -212,8 +216,8 @@ describe('Websocket Math', function () {
       getConvertedDatas(page),
       page.click('#convert')
     ])
-    //To await for rendering
-    await page.waitForTimeout(1000)
+
+    await waitEditorIdle(page)
     expect(await page.locator('path').count()).toEqual(equation1.exports.LATEX.at(-1).length)
 
     const convert = await getEditorModelConverts(page)

@@ -24,7 +24,6 @@ describe('Websocket Text Customize Stroke Style', () => {
   beforeEach(async () => {
     await page.reload({ waitUntil: 'networkidle'})
     await waitForEditorWebSocket(page)
-    await page.waitForTimeout(1000)
   })
 
   test('should have title', async () => {

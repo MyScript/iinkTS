@@ -39,15 +39,13 @@
         height: 16px;
         width: 8px;
       }
-      #highlighted {
-        display: flex;
-        flex-direction: column;
+      .highlight-column {
         background-color: white;
-        padding: 10px;
-        min-width: 20vh;
+        padding: 12px;
+        min-width: 20%;
         border-left: 1px solid #d7dde3;
       }
-      #highlighted .colored .header {
+      .highlight-column .colored .header {
         width: auto;
         height: 10px;
       }
@@ -55,7 +53,7 @@
   </head>
   <body>
     <div style="display: flex">
-      <div style="width: 90vw">
+      <div style="width: 80%">
         <nav>
           <div class="button-div">
             <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
@@ -68,233 +66,96 @@
           <div>Surround your words to highlight them</div>
           <div class="colors">
             <div class="pensettings" data-color="#000000">
-              <button class="color color1" style="background-color: rgb(0, 0, 0)">
-                <span class="check" style="border-color: white"></span>
+              <button id="black-btn" class="color" style="background-color: rgb(0, 0, 0)">
+                <span id="check" class="check" style="border-color: white"></span>
               </button>
             </div>
             <div class="pensettings" data-color="#808080">
-              <button class="color color2" style="background-color: rgb(128, 128, 128)"></button>
+              <button id="dark-grey-btn" class="color" style="background-color: rgb(128, 128, 128)"></button>
             </div>
             <div class="pensettings" data-color="#d9d9d9">
-              <button class="color color3" style="background-color: rgb(217, 217, 217)"></button>
+              <button id="light-grey-btn" class="color" style="background-color: rgb(217, 217, 217)"></button>
             </div>
             <div class="pensettings" data-color="#1a8cff">
-              <button class="color color4" style="background-color: rgb(26, 140, 255)"></button>
+              <button id="blue-btn" class="color" style="background-color: rgb(26, 140, 255)"></button>
             </div>
             <div class="pensettings" data-color="#ff1a40">
-              <button class="color color5" style="background-color: rgb(255, 26, 64)"></button>
+              <button id="red-btn" class="color" style="background-color: rgb(255, 26, 64)"></button>
             </div>
             <div class="pensettings" data-color="#2bd965">
-              <button class="color color6" style="background-color: rgb(43, 217, 101)"></button>
+              <button id="green-btn" class="color" style="background-color: rgb(43, 217, 101)"></button>
             </div>
             <div class="pensettings" data-color="#ffdd33">
-              <button class="color color7" style="background-color: rgb(255, 221, 51)"></button>
+              <button id="yellow-btn" class="color" style="background-color: rgb(255, 221, 51)"></button>
             </div>
           </div>
         </nav>
         <div id="editor" touch-action="none"></div>
       </div>
-      <div id="highlighted"></div>
+      <div class="highlight-column">
+        <ul id="highlight-list">
+
+        </ul>
+      </div>
     </div>
     <script>
       const editorElement = document.getElementById("editor");
       const undoElement = document.getElementById("undo");
       const redoElement = document.getElementById("redo");
       const colors = document.querySelectorAll(".pensettings");
-      const highlightElement = document.getElementById("highlighted");
-      const hightlightedWords = new Map();
+      const highlightListElement = document.getElementById("highlight-list");
 
       let editor;
 
-      /**
-       * Create a DocumentFragement with the list of words for a color
-       * @param {Array} wordsToHighlight the list of word
-       * @param {String} color
-       * @param {String} id the id of the new container
-       * @return {DocumentFragment} fragment to add to the DOM
-       */
-      function addWordsToFragment(wordsToHighlight, bgColor, textcolor, id) {
-        if (bgColor === textcolor) {
-          bgColor += "50";
+      function clearHighlightList() {
+        while (highlightListElement.firstChild) {
+          highlightListElement.removeChild(highlightListElement.firstChild)
         }
-        const fragment = document.createDocumentFragment();
-        const div = document.createElement("div");
-        div.id = `id-${id}`;
-        div.classList.add("colored");
+      }
 
-        const ul = document.createElement("ul");
-        ul.id = "listOfWords";
-        wordsToHighlight.forEach((word) => {
+      function extractColor(style) {
+          const regexColor = /; color:\s#([0-9a-f]{3}){1,2}/i;
+          if (regexColor.test(style)) {
+            const rule = style.match(regexColor);
+            const regexCss = rule[0].match(/#([0-9a-f]{3}){1,2}/i);
+            return regexCss[0];
+          }
+      }
+
+      function extractBackgroundColor(style) {
+        const regexBackground = /-myscript-text-decoration-background-color:\s#([0-9a-f]{3}){1,2}/i;
+          if (regexBackground.test(style)) {
+            const rule = style.match(regexBackground);
+            const regexCss = rule[0].match(/#([0-9a-f]{3}){1,2}/i);
+            return regexCss[0];
+          }
+      }
+
+      function displayHightlightWords(jiix) {
+        if(!jiix || !jiix.spans?.length) {
+          return
+        }
+        const highlightSpans = jiix.spans.filter((span) => {
+          return span.class.indexOf("text-highlight") !== -1;
+        })
+        const label = jiix.label;
+        const highlightWords = highlightSpans.map((span) => {
+          const lastCharIndex = span["last-char"] + 1;
+          const cleanLabel = label.substring(span["first-char"], lastCharIndex).replace(/\r?\n/g, "");
+          return {
+            label: cleanLabel,
+            style: span.style,
+            id: `idLabel-${cleanLabel.replace(/\W/g, "-")}`
+          };
+        })
+        highlightWords.forEach((word) => {
           const li = document.createElement("li");
           li.id = `${word.id}`;
           li.textContent = word.label;
-          li.style.backgroundColor = bgColor;
-          li.style.color = textcolor;
-          ul.appendChild(li);
-        });
-        div.appendChild(ul);
-        fragment.appendChild(div);
-
-        return fragment;
-      }
-
-      /**
-       * Show the higlighted words in a separate div order by color !
-       * @param {Array} words list of word to add
-       * @return {void}
-       */
-      function showHighlights(words) {
-        words.forEach((word) => {
-          // regex to find text decoration css value
-          const regexBackground = /-myscript-text-decoration-background-color:\s#([0-9a-f]{3}){1,2}/i;
-          const regexColor = /; color:\s#([0-9a-f]{3}){1,2}/i;
-          let backgroundColor = "";
-          let textColor = "";
-          let wordsToHighlight = [];
-          if (regexBackground.test(word.style)) {
-            const rule = word.style.match(regexBackground);
-            // regex just for css value
-            const regexCss = rule[0].match(/#([0-9a-f]{3}){1,2}/i);
-            backgroundColor = regexCss[0];
-          }
-
-          if (regexColor.test(word.style)) {
-            const rule = word.style.match(regexColor);
-            const regexCss = rule[0].match(/#([0-9a-f]{3}){1,2}/i);
-            textColor = regexCss[0];
-          }
-
-          const id = backgroundColor.replace("#", "");
-          // highlight backgroundColor shown once
-          if (hightlightedWords.has(backgroundColor)) {
-            const wordsForColor = hightlightedWords.get(backgroundColor);
-            const found = wordsForColor.find((w) => {
-              return w.label === word.label;
-            });
-
-            if (!found) {
-              wordsToHighlight = wordsForColor.concat([word]);
-              hightlightedWords.set(backgroundColor, wordsToHighlight);
-
-              const divElement = document.querySelector(`#id-${id}`);
-              if (divElement) {
-                let li = divElement.querySelector(`#${word.id}`);
-                if (!li) {
-                  li = document.createElement("li");
-                  li.id = `${word.id}`;
-                  li.textContent = word.label;
-                  li.style.backgroundColor = backgroundColor;
-                  li.style.color = textColor;
-                  divElement.querySelector("ul").appendChild(li);
-                }
-              }
-            }
-          } else {
-            // new highlight backgroundColor !
-            wordsToHighlight.push(word);
-            hightlightedWords.set(backgroundColor, wordsToHighlight);
-            highlightElement.appendChild(addWordsToFragment(wordsToHighlight, backgroundColor, textColor, id));
-          }
-        });
-
-        if (hightlightedWords.size) {
-          let allWords = [];
-          hightlightedWords.forEach((word) => {
-            allWords = allWords.concat(word);
-          });
-
-          const deleted = allWords.filter((w) => {
-            return !words.find((s) => {
-              return s.id === w.id && s.label === w.label;
-            });
-          });
-
-          if (deleted.length) {
-            handleDeletedWords(deleted);
-          }
-        }
-      }
-
-      /**
-       * Remove words from the highlight div, and the inner Map
-       * @param {Array} deleted list of words deleted
-       * @return {void}
-       */
-      function handleDeletedWords(deleted) {
-        deleted.forEach((word) => {
-          const li = document.querySelector(`#${word.id}`);
-          if (li) {
-            // removing from DOM
-            const ulNode = li.parentNode;
-            if (ulNode.childNodes.length === 1) {
-              const divNode = ulNode.parentNode;
-              divNode.parentNode.removeChild(divNode);
-            } else {
-              li.parentNode.removeChild(li);
-            }
-
-            // removing from Map
-            hightlightedWords.forEach((value, key) => {
-              const foundIndex = value.findIndex((w) => {
-                return w.id === word.id;
-              });
-              if (foundIndex !== -1) {
-                value.splice(foundIndex, 1);
-              }
-              if (!value.length) {
-                hightlightedWords.delete(key);
-              }
-            });
-          }
-        });
-      }
-
-      /**
-       * Reset the highlighted words list
-       * @return {void}
-       */
-      function reset() {
-        if (hightlightedWords.size) {
-          const wordsElement = highlightElement.querySelectorAll(".colored");
-          wordsElement.forEach((word) => {
-            word.parentNode.removeChild(word);
-          });
-          hightlightedWords.clear();
-        }
-      }
-
-      /**
-       * Find highlighted words inside jiix object
-       * @param {Object} jiix parsed object
-       * @return {void}
-       */
-      function findHighlightedWords(jiix) {
-        if (jiix && jiix.spans) {
-          const spans = jiix.spans.filter((span) => {
-            return span.class.indexOf("text-highlight") !== -1;
-          });
-
-          if (spans.length === 0) {
-            reset();
-          } else {
-            const label = jiix.label;
-            const words = spans.map((span) => {
-              const lastCharIndex = span["last-char"] + 1;
-              const cleanLabel = label.substring(span["first-char"], lastCharIndex).replace(/\r?\n/g, "");
-              return {
-                label: cleanLabel,
-                style: span.style,
-                id: `idLabel-${cleanLabel.replace(/\W/g, "-")}`
-              };
-            });
-
-            if (words.length) {
-              showHighlights(words);
-            }
-          }
-        } else {
-          reset();
-        }
+          li.style.backgroundColor = extractBackgroundColor(word.style);
+          li.style.color = extractColor(word.style);
+          highlightListElement.append(li)
+        })
       }
 
       async function loadEditor() {
@@ -335,7 +196,7 @@
               color: event.currentTarget.getAttribute("data-color"),
               "-myscript-pen-width": 1
             };
-            const check = document.querySelector(".check");
+            const check = document.getElementById("check");
             event.currentTarget.querySelector(".color").appendChild(check);
           }
         }
@@ -350,19 +211,16 @@
 
         editorElement.addEventListener("exported", (event) => {
           const exports = event.detail;
-          if (exports && exports["application/vnd.myscript.jiix"]) {
-            const jiix = exports["application/vnd.myscript.jiix"];
-            setTimeout(() => {
-              findHighlightedWords(jiix);
-            });
-          } else {
-            reset();
+          clearHighlightList();
+          if (exports) {
+            displayHightlightWords(exports["application/vnd.myscript.jiix"])
           }
         });
 
         undoElement.addEventListener("click", () => {
           editor.undo();
         });
+
         redoElement.addEventListener("click", () => {
           editor.redo();
         });

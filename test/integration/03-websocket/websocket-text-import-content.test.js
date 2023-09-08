@@ -1,4 +1,4 @@
-const { waitForEditorWebSocket, write, getExportedDatas } = require('../helper')
+const { waitForEditorWebSocket, write, getExportedDatas, waitEditorIdle } = require('../helper')
 const { h } = require('../strokesDatas')
 
 describe('Websocket Text Import Content', () => {
@@ -9,7 +9,7 @@ describe('Websocket Text Import Content', () => {
   beforeEach(async () => {
     await page.reload({ waitUntil: 'networkidle'})
     await waitForEditorWebSocket(page)
-    await page.waitForTimeout(1000)
+    await waitEditorIdle(page)
   })
 
   test('should have title', async () => {

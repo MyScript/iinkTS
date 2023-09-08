@@ -14,12 +14,12 @@
     <style>
       .instructions {
         width: 100%;
-        padding: 24px 24px 0 24px;
+        padding-top: 12px;
       }
       .instructions ul {
         margin: 0;
         color: darkslategrey;
-        font-size: 20px;
+        font-size: 18px;
       }
       .instructions li {
         margin-left: 24px;
@@ -31,9 +31,10 @@
       main {
         display: flex;
         flex-direction: row;
-        gap: 12px;
+        gap: 24px;
         padding: 24px;
-        height: calc(100% - 120px);
+        margin-bottom: 12px;
+        height: calc(100% - 100px);
         width: 100%;
       }
       #inputs-colum {
@@ -48,13 +49,9 @@
         width: calc(25% - 24px);
         min-width: 100px;
       }
-      label {
-        margin-left: 24px;
-      }
       .input {
         z-index: 20;
         font-size: 36px;
-        margin-left: 24px;
         margin-bottom: 24px;
         width: 100%;
         height: 150px;
@@ -64,7 +61,6 @@
       }
       .answer {
         font-size: 18px;
-        margin-left: 24px;
         margin-bottom: 24px;
         padding: 12px;
         width: 100%;
@@ -85,7 +81,6 @@
         background-color: rgba(150, 150, 255, 0.2);
       }
       #validate-answers {
-        margin: 12px 24px 24px 24px;
         width: 100%;
       }
     </style>

@@ -1,4 +1,4 @@
-const { write, getExportedDatas, waitForEditorWebSocket } = require("../helper")
+const { write, getExportedDatas, waitForEditorWebSocket, waitEditorIdle } = require("../helper")
 const { abrausorus } = require("../strokesDatas")
 
 describe("Websocket Text Custom Resource", () => {
@@ -21,7 +21,7 @@ describe("Websocket Text Custom Resource", () => {
       getExportedDatas(page),
       write(page, abrausorus.strokes),
     ])
-    await page.waitForTimeout(500)
+    await waitEditorIdle(page)
     const jiixExpected = abrausorus.exports["application/vnd.myscript.jiix"]
     const jiixReceived = exports["application/vnd.myscript.jiix"]
     expect(jiixReceived.label).toEqual(jiixExpected.label)

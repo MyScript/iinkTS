@@ -1,4 +1,4 @@
-const { waitForEditorWebSocket, write, getExportedDatas, waitForTimeout, getEditorModelExports, getEditorModelExportsType } = require('../helper')
+const { waitForEditorWebSocket, write, getExportedDatas, getEditorModelExportsType, waitEditorIdle } = require('../helper')
 const { helloOneStroke } = require('../strokesDatas')
 
 describe('Websocket Text local storage', () => {
@@ -37,7 +37,8 @@ describe('Websocket Text local storage', () => {
       ])
 
       await page.reload({ waitUntil: "networkidle" })
-      await page.waitForTimeout(1000)
+      await waitForEditorWebSocket(page)
+      await waitEditorIdle(page)
 
       const exports = await getEditorModelExportsType(page, "application/vnd.myscript.jiix")
       expect(exports.label).toEqual("hello")
