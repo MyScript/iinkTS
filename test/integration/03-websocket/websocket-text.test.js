@@ -5,7 +5,8 @@ const {
   getEditorModelExportsType,
   getEditorConfiguration,
   setEditorConfiguration,
-  getEditorModelConverts
+  getEditorModelConverts,
+  waitEditorIdle
 } = require("../helper")
 const { h, hello, helloOneStroke, helloStrikeStroke } = require("../strokesDatas")
 
@@ -17,7 +18,7 @@ describe("Websocket Text", () => {
   beforeEach(async () => {
     await page.reload({ waitUntil: "networkidle" })
     await waitForEditorWebSocket(page)
-    await page.waitForTimeout(1000)
+    await waitEditorIdle(page)
   })
 
   test("should have title", async () => {
@@ -91,7 +92,6 @@ describe("Websocket Text", () => {
 
       // wait css animation
       await page.waitForTimeout(1000)
-
       expect(await page.locator(".prompter-text").isVisible()).toBe(true)
       expect(await page.locator(".candidates").isVisible()).toBe(false)
     })
@@ -109,8 +109,11 @@ describe("Websocket Text", () => {
     })
 
     test("should select candidate", async () => {
-      await Promise.all([getExportedDatas(page), write(page, hello.strokes)])
-      await page.waitForTimeout(1500)
+      await Promise.all([
+        getExportedDatas(page),
+        write(page, hello.strokes)
+      ])
+      await waitEditorIdle(page)
       const jiixExport = await getEditorModelExportsType(page, "application/vnd.myscript.jiix")
       expect(await page.innerText(".prompter-text")).toBe(jiixExport.label)
       expect(await page.locator(".candidates").isVisible()).toBe(false)

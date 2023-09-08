@@ -1,4 +1,4 @@
-const { waitForEditorWebSocket, write, getExportedDatas } = require('../helper')
+const { waitForEditorWebSocket, write, getExportedDatas, waitEditorIdle } = require('../helper')
 const { ponyErase, ponyErasePrecisely } = require('../strokesDatas')
 
 describe('Websocket Text erase', () => {
@@ -51,7 +51,7 @@ describe('Websocket Text erase', () => {
       waitForEditorWebSocket(page),
       page.click("#erase-precisely")
     ])
-    await page.waitForTimeout(1000)
+    await waitEditorIdle(page)
 
     const [ponyExports] = await Promise.all([
       getExportedDatas(page),

@@ -1,4 +1,4 @@
-const { write, getExportedDatas, waitForEditorWebSocket } = require("../helper")
+const { write, getExportedDatas, waitForEditorWebSocket, waitEditorIdle } = require("../helper")
 const { hello } = require("../strokesDatas")
 
 describe("Websocket Text file export", () => {
@@ -9,7 +9,7 @@ describe("Websocket Text file export", () => {
   beforeEach(async () => {
     await page.reload({ waitUntil: "networkidle" })
     await waitForEditorWebSocket(page)
-    await page.waitForTimeout(1000)
+    await waitEditorIdle(page)
   })
 
   test("should have title", async () => {

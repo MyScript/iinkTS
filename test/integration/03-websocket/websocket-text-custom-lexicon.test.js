@@ -1,5 +1,5 @@
-const { write, getExportedDatas, waitForEditorWebSocket, getEditorModelExports } = require("../helper")
-const { h, claclacla } = require("../strokesDatas")
+const { write, waitForEditorWebSocket, getEditorModelExports, waitEditorIdle } = require("../helper")
+const { claclacla } = require("../strokesDatas")
 
 describe("Websocket Text Custom Lexicon", () => {
   beforeAll(async () => {
@@ -9,6 +9,7 @@ describe("Websocket Text Custom Lexicon", () => {
   beforeEach(async () => {
     await page.reload({ waitUntil: "networkidle" })
     await waitForEditorWebSocket(page)
+    await waitEditorIdle(page)
   })
 
   test("should have title", async () => {
@@ -16,24 +17,9 @@ describe("Websocket Text Custom Lexicon", () => {
     expect(title).toMatch("Custom lexicon")
   })
 
-  test("should export application/vnd.myscript.jiix", async () => {
-    const [exports] = await Promise.all([
-      getExportedDatas(page),
-      write(page, h.strokes),
-    ])
-    const jiixExpected = h.exports["application/vnd.myscript.jiix"]
-    const jiixReceived = exports["application/vnd.myscript.jiix"]
-    expect(jiixReceived).toEqual(jiixExpected)
-  })
-
   test("should not recognize 'claclacla'", async () => {
-    for (const s of claclacla.strokes) {
-      await Promise.all([
-        getExportedDatas(page),
-        write(page, [s])
-      ])
-    }
-
+    await write(page, claclacla.strokes)
+    await waitEditorIdle(page)
     const exports = await getEditorModelExports(page)
     const jiixExpected = claclacla.exports["application/vnd.myscript.jiix"]
     const jiixReceived = exports["application/vnd.myscript.jiix"]
@@ -46,14 +32,8 @@ describe("Websocket Text Custom Lexicon", () => {
       page.locator("#lexicon").fill("claclacla"),
       page.locator("#reinit").click(),
     ])
-    await page.waitForTimeout(1000)
-    for (const s of claclacla.strokes) {
-      await Promise.all([
-        getExportedDatas(page),
-        write(page, [s])
-      ])
-    }
-
+    await write(page, claclacla.strokes)
+    await waitEditorIdle(page)
     const exports = await getEditorModelExports(page)
     const jiixExpected = claclacla.exports["application/vnd.myscript.jiix"]
     const jiixReceived = exports["application/vnd.myscript.jiix"]

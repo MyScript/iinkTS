@@ -17,6 +17,10 @@ function getResultElementFromInput(input) {
   }
 }
 
+async function delay(delayInms) {
+  return new Promise(resolve => setTimeout(resolve, delayInms));
+}
+
 validateResponsesBtn.addEventListener("pointerup", () => {
   for (let i = 0; i < answers.length; i++) {
     const el = document.getElementById(`answer-${i}`)
@@ -43,6 +47,8 @@ async function switchEditorInput(input) {
     await editor.import(textAnswered, "text/plain")
   } else {
     editor.clear()
+    await delay(100)
+    await editor.waitForIdle()
   }
   input.textContent = ""
   input.appendChild(editorElement)
@@ -77,7 +83,7 @@ for (let i = 0; i < questions.length; i++) {
   answerEl.classList.add("answer");
   const answerLabelEL = document.createElement("label");
   answerLabelEL.setAttribute("for", answerEl.id);
-  answerLabelEL.innerText = "Answer";
+  answerLabelEL.innerText = `Answer ${i + 1} :`;
   answersColumns.insertBefore(answerLabelEL, validateResponsesBtn);
   answersColumns.insertBefore(answerEl, validateResponsesBtn);
 
