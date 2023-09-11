@@ -235,6 +235,7 @@ function findValuesByKey (obj, key, list = []) {
   }
   return list
 }
+module.exports.findValuesByKey = findValuesByKey
 
 module.exports.haveSameLabels = (jiix1, jiix2) => {
   const labels1 = findValuesByKey(jiix1, 'label')
