@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Custom resources math (pre-compiled)</title>
+
+    <link rel="stylesheet" href="../examples.css" />
+
+    <script type="text/javascript" src="../../dist/iink.min.js"></script>
+
+    <style>
+      .description {
+        margin: 12px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <p class="description">
+      This example use a math custom resource. The grammar restrict the recognition to only basic elementary school math (addition and substraction).
+      The id of a pre-compiled grammar is sent.
+    </p>
+    <div id="result"></div>
+    <div>
+      <nav>
+        <div class="button-div">
+          <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+            <img src="../assets/clear.svg" />
+          </button>
+          <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+            <img src="../assets/undo.svg" />
+          </button>
+          <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+            <img src="../assets/redo.svg" />
+          </button>
+        </div>
+        <div class="spacer"></div>
+        <button class="classic-btn" id="convert" disabled>Convert</button>
+      </nav>
+      <div id="editor" touch-action="none"></div>
+    </div>
+    <script>
+      const editorElement = document.getElementById("editor");
+      const resultElement = document.getElementById("result");
+      const undoElement = document.getElementById("undo");
+      const redoElement = document.getElementById("redo");
+      const clearElement = document.getElementById("clear");
+      const convertElement = document.getElementById("convert");
+
+      editorElement.addEventListener("changed", (event) => {
+        undoElement.disabled = !event.detail.canUndo;
+        redoElement.disabled = !event.detail.canRedo;
+        clearElement.disabled = event.detail.isEmpty;
+      });
+
+      editorElement.addEventListener("exported", (evt) => {
+        const exports = evt.detail;
+        if (exports && exports["application/x-latex"]) {
+          convertElement.disabled = false;
+          resultElement.innerHTML = "<span>" + exports["application/x-latex"] + "</span>";
+        } else {
+          convertElement.disabled = true;
+          resultElement.innerHTML = "";
+        }
+      });
+
+      /**
+       * we expose the editor for use in the integration test
+       */
+      let editor;
+
+      /**
+       * We use a function to wait the server configuration to load
+       */
+      async function loadEditor() {
+        const res = await fetch("../server-configuration.json");
+        const conf = await res.json();
+        const options = {
+          configuration: {
+            server: {
+              ...conf,
+              protocol: "WEBSOCKET"
+            },
+            recognition: {
+              type: "MATH",
+              math: {
+                customGrammarId: "math-elementary",
+                mimeTypes: ["application/x-latex"]
+              }
+            }
+          }
+        };
+
+        /**
+         * Instanciate editor
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Editor parameters
+         */
+        editor = new iink.Editor(editorElement, options);
+        /**
+         *  async initialize editor behaviors
+         */
+        await editor.initialize();
+
+        undoElement.addEventListener("click", () => {
+          editor.undo();
+        });
+
+        redoElement.addEventListener("click", () => {
+          editor.redo();
+        });
+
+        clearElement.addEventListener("click", () => {
+          editor.clear();
+        });
+
+        convertElement.addEventListener("click", () => {
+          editor.convert();
+        });
+      }
+
+      loadEditor();
+    </script>
+  </body>
+</html>
