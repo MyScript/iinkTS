@@ -87,7 +87,6 @@ export interface IModel
 
   updatePositionSent(position: number = this.model.rawStrokes.length - 1): void
   updatePositionReceived(): void
-  resetPositions(): void
 
   getClone(): IModel
 

@@ -443,13 +443,13 @@ export class WSRecognizer implements IRecognizer
   {
     await this.initialized?.promise
     this.addStrokeDeferred = new DeferredPromise<TExport>()
+    const strokes: TStroke[] = model.extractUnsentStrokes()
+    model.updatePositionSent()
     const localModel = model.getClone()
-    const strokes: TStroke[] = localModel.extractUnsentStrokes()
     if (strokes.length === 0) {
       this.addStrokeDeferred.resolve({} as TExport)
       return localModel
     }
-    localModel.updatePositionSent()
     await this.send({
       type: "addStrokes",
       strokes: strokes.map(convertStrokeToJSON)

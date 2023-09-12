@@ -30,8 +30,8 @@ export class Model implements IModel
     this.rawStrokes = []
     this.selectedStrokes = []
     this.positions = {
-      lastSentPosition: -1,
-      lastReceivedPosition: -1
+      lastSentPosition: 0,
+      lastReceivedPosition: 0
     }
     this.idle = true
   }
@@ -198,7 +198,7 @@ export class Model implements IModel
     return strokes.map(s => s.id)
   }
 
-  updatePositionSent(position: number = this.rawStrokes.length - 1): void
+  updatePositionSent(position: number = this.rawStrokes.length): void
   {
     this.positions.lastSentPosition = position
   }
@@ -206,12 +206,6 @@ export class Model implements IModel
   updatePositionReceived(): void
   {
     this.positions.lastReceivedPosition = this.positions.lastSentPosition
-  }
-
-  resetPositions(): void
-  {
-    this.positions.lastSentPosition = -1
-    this.positions.lastReceivedPosition = -1
   }
 
   getClone(): IModel
@@ -232,8 +226,8 @@ export class Model implements IModel
     this.modificationDate = Date.now()
     this.currentStroke = undefined
     this.rawStrokes = []
-    this.positions.lastSentPosition = -1
-    this.positions.lastReceivedPosition = -1
+    this.positions.lastSentPosition = 0
+    this.positions.lastReceivedPosition = 0
     this.exports = undefined
     this.converts = undefined
     this.idle = true

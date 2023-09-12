@@ -1,6 +1,6 @@
 {
-  "scheme": "https",
-  "host": "cloud.myscript.com",
-  "applicationKey": "58cce6d2-d2a7-4ad3-b3bf-166f7b43619e",
-  "hmacKey": "92731ec6-605b-4a07-8b82-076675cd25ed"
+  "scheme": "http",
+  "host": "localhost:8897",
+  "applicationKey": "30a605cb-95ea-45ac-aea5-c093322c5100",
+  "hmacKey": "dc2afdde-40e9-4e96-9d11-430100771123"
 }
