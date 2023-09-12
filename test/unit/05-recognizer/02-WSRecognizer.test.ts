@@ -336,11 +336,6 @@ describe("WSRecognizer.ts", () =>
 
   describe("addStrokes", () =>
   {
-    const model = new Model(width, height)
-    const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
-    const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
-    model.initCurrentStroke(p1, 1, "pen", DefaultPenStyle)
-    model.endCurrentStroke(p2)
     let wsr: WSRecognizer
     let spyEmitError: jest.SpyInstance
     beforeEach(async () =>
@@ -355,11 +350,21 @@ describe("WSRecognizer.ts", () =>
     test("should throw error if recognizer has not been initialize", async () =>
     {
       expect.assertions(1)
+      const model = new Model(width, height)
+      const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
+      const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
+      model.initCurrentStroke(p1, 1, "pen", DefaultPenStyle)
+      model.endCurrentStroke(p2)
       await expect(wsr.addStrokes(model)).rejects.toEqual(new Error("Recognizer must be initilized"))
     })
     test("should send addStrokes message", async () =>
     {
       expect.assertions(1)
+      const model = new Model(width, height)
+      const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
+      const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
+      model.initCurrentStroke(p1, 1, "pen", DefaultPenStyle)
+      model.endCurrentStroke(p2)
       await wsr.init(height, width)
       wsr.addStrokes(model)
       //¯\_(ツ)_/¯  required to wait server received message
@@ -379,8 +384,8 @@ describe("WSRecognizer.ts", () =>
     })
     test("should not send addStrokes message if model.extractUnsentStrokes return 0 strokes", async () =>
     {
-      const emptyModel: IModel = new Model(width, height)
       expect.assertions(1)
+      const emptyModel: IModel = new Model(width, height)
       await wsr.init(height, width)
       await wsr.addStrokes(emptyModel)
       //¯\_(ツ)_/¯  required to wait server received message
@@ -391,6 +396,11 @@ describe("WSRecognizer.ts", () =>
     test("should resolve when receive exported message", async () =>
     {
       expect.assertions(1)
+      const model = new Model(width, height)
+      const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
+      const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
+      model.initCurrentStroke(p1, 1, "pen", DefaultPenStyle)
+      model.endCurrentStroke(p2)
       await wsr.init(height, width)
       const promise = wsr.addStrokes(model)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
@@ -408,6 +418,11 @@ describe("WSRecognizer.ts", () =>
     test("should reject if receive error message", async () =>
     {
       expect.assertions(3)
+      const model = new Model(width, height)
+      const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
+      const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
+      model.initCurrentStroke(p1, 1, "pen", DefaultPenStyle)
+      model.endCurrentStroke(p2)
       await wsr.init(height, width)
       const promise = wsr.addStrokes(model)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer

@@ -216,53 +216,35 @@ export class RestRecognizer implements IRecognizer
   async convert(model: IModel, conversionState?: TConverstionState, requestedMimeTypes?: string[]): Promise<IModel | never>
   {
     const myModel = model.getClone()
-    myModel.updatePositionSent()
-
     const mimeTypes = this.getMimeTypes(requestedMimeTypes)
-
     const dataToConcert = this.buildData(myModel)
     dataToConcert.conversionState = conversionState
-
     const promises = mimeTypes.map(mt => this.tryFetch(dataToConcert, mt))
     const converts: TExport[] = await Promise.all(promises)
     converts.forEach(c =>
     {
       myModel.mergeConvert(c)
     })
-
-    myModel.updatePositionReceived()
-
     return myModel
   }
 
   async export(model: IModel, requestedMimeTypes?: string[]): Promise<IModel | never>
   {
     const myModel = model.getClone()
-    myModel.updatePositionSent()
-
     if (myModel.rawStrokes.length === 0) {
       return Promise.resolve(myModel)
     }
-
     const mimeTypes = this.getMimeTypes(requestedMimeTypes)
-
     if (!mimeTypes.length) {
       return Promise.reject(new Error("Export failed, no mimeTypes define in recognition configuration"))
     }
-
     const mimeTypesRequiringExport: string[] = mimeTypes.filter(m => !myModel.exports || !myModel.exports[m])
-
     const data = this.buildData(model)
-
     const exports: TExport[] = await Promise.all(mimeTypesRequiringExport.map(mimeType => this.tryFetch(data, mimeType)))
-
     exports.forEach(e =>
     {
       myModel.mergeExport(e)
     })
-
-    myModel.updatePositionReceived()
-
     return myModel
   }
 

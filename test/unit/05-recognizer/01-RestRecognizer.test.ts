@@ -50,8 +50,6 @@ describe("RestRecognizer.ts", () =>
       }
       const rr = new RestRecognizer(DefaultServerConfiguration, recognitionConfig)
       const newModel = await rr.export(model)
-      model.positions.lastReceivedPosition++
-      model.positions.lastSentPosition++
       model.exports = {}
 
       let mimeType = ""
@@ -93,8 +91,6 @@ describe("RestRecognizer.ts", () =>
       }
       const rr = new RestRecognizer(DefaultServerConfiguration, recognitionConfig)
       const newModel = await rr.convert(model, "DIGITAL_EDIT")
-      model.positions.lastReceivedPosition++
-      model.positions.lastSentPosition++
       model.converts = {}
 
       let mimeType = ""
@@ -118,7 +114,7 @@ describe("RestRecognizer.ts", () =>
 
       expect(fetchMock).toHaveBeenCalledTimes(1)
       model.converts[mimeType] = ""
-      expect(newModel).toEqual(model)
+      expect(model).toEqual(newModel)
     })
   })
 

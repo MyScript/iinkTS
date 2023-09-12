@@ -180,10 +180,8 @@ export class WSBehaviors implements IBehaviors
   {
     this.context.stack.push(this.model.getClone())
     if (this.#configuration.triggers.exportContent !== "DEMAND") {
-      this.model.updatePositionSent()
       const updatedModel = await this.recognizer.addStrokes(this.model)
       this.model.mergeExport(updatedModel.exports as TExport)
-      this.model.updatePositionReceived()
     }
     return this.model
   }
@@ -274,10 +272,9 @@ export class WSBehaviors implements IBehaviors
 
   async clear(): Promise<IModel>
   {
-    const clearedModel = this.model.getClone()
-    clearedModel.clear()
-    this.context.stack.push(clearedModel)
-    return this.recognizer.clear(clearedModel)
+    this.model.clear()
+    this.context.stack.push(this.model.getClone())
+    return this.recognizer.clear(this.model)
   }
 
   async destroy(): Promise<void>

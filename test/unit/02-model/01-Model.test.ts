@@ -514,8 +514,8 @@ describe("Model.ts", () =>
     const model: IModel = new Model(width, height)
     test("should initialize position", () =>
     {
-      expect(model.positions.lastReceivedPosition).toBe(-1)
-      expect(model.positions.lastSentPosition).toBe(-1)
+      expect(model.positions.lastReceivedPosition).toBe(0)
+      expect(model.positions.lastSentPosition).toBe(0)
     })
     test("should updatePositionSent", () =>
     {
@@ -526,12 +526,6 @@ describe("Model.ts", () =>
     {
       model.updatePositionReceived()
       expect(model.positions.lastReceivedPosition).toBe(model.positions.lastSentPosition)
-    })
-    test("should resetPositions", () =>
-    {
-      model.resetPositions()
-      expect(model.positions.lastReceivedPosition).toBe(-1)
-      expect(model.positions.lastSentPosition).toBe(-1)
     })
   })
 
