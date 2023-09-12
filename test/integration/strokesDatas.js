@@ -368,8 +368,20 @@ module.exports.sum = {
   converts: {
     LATEX: ['3+1=4']
   }
-
 }
+
+const sumSimpleStroke = require('./strokes/sumSimple.json')
+module.exports.sumSimple = {
+  type: 'MATH',
+  strokes: sumSimpleStroke,
+  exports: {
+    LATEX: ['1', '1-', '1+', '1+3']
+  },
+  converts: {
+    LATEX: ['1+3=4']
+  }
+}
+
 const buenosStrokes = require("./strokes/Interact/buenos.json")
 module.exports.buenos = {
   type: "TEXT",
