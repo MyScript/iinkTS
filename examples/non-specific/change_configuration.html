@@ -414,11 +414,7 @@
 
     initInputsValues();
 
-    /**
-     * Instanciate editor
-     * @param {Element} The DOM element to attach the ink paper
-     */
-    editor = new iink.Editor(editorElement)
+    let editor;
 
     async function loadEditor() {
       const res = await fetch('../server-configuration.json');
@@ -431,10 +427,17 @@
       const options = {
         configuration: defaultConfiguration
       };
+
+      /**
+       * Instanciate editor
+       * @param {Element} The DOM element to attach the ink paper
+       */
+      editor = new iink.Editor(editorElement, options)
+
       /**
        *  async initialize editor behaviors
        */
-      await editor.initialize(options)
+      await editor.initialize()
 
       editor.events.addEventListener('exported', (event) => {
         resultElement.innerHTML = JSON.stringify(event.detail);
