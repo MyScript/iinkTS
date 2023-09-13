@@ -334,13 +334,13 @@ export class SmartGuide
     this.#smartGuideElement.style.left = `${ marginLeft }px`
     this.#smartGuideElement.style.right = `${ marginRight }px`
 
-    const left = this.#tagElement.offsetWidth
+    let left = this.#tagElement.offsetWidth
     this.#prompterContainerElement.style.marginLeft = `${ left }px`
     this.#prompterContainerElement.style.width = `${ this.#smartGuideElement.clientWidth - this.#tagElement.offsetWidth - this.#ellipsisElement.offsetHeight }px`
-
+    left += this.#prompterContainerElement.offsetWidth
     this.#menuElement.style.left = `${ left - this.#menuElement.offsetWidth + this.#ellipsisElement.offsetWidth }px`
     this.#menuElement.style.top = `${ this.#ellipsisElement.offsetHeight }px`
-    this.#ellipsisElement.style.right = `0px`
+    this.#ellipsisElement.style.left = `${ left }px`
   }
 
   update(exports: TJIIXExport): void
