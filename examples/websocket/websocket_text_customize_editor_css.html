@@ -39,7 +39,6 @@
         const res = await fetch("../server-configuration.json");
         const conf = await res.json();
         const options = {
-          globalClassCss: "my-custom-class",
           penStyle: {
             color: "#ffffff"
           },
@@ -68,12 +67,13 @@
           }
         };
 
+        const editorCustomClasses = "my-custom-class"
         /**
          * Instanciate editor
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-         editor = new iink.Editor(editorElement, options);
+         editor = new iink.Editor(editorElement, options, editorCustomClasses);
         /**
          *  async initialize editor behaviors
          */
