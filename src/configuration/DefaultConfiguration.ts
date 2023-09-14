@@ -121,7 +121,7 @@ export const DefaultRenderingConfiguration: TRenderingConfiguration = {
   smartGuide: {
     enable: true,
     fadeOut: {
-      enable: true,
+      enable: false,
       duration: 5000
     }
   },
