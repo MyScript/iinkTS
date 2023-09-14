@@ -106,7 +106,7 @@ describe("DefaultConfiguration.ts", () =>
     test("should have smartGuide", () =>
     {
       expect(DefaultConfiguration.rendering.smartGuide.enable).toStrictEqual(true)
-      expect(DefaultConfiguration.rendering.smartGuide.fadeOut.enable).toStrictEqual(true)
+      expect(DefaultConfiguration.rendering.smartGuide.fadeOut.enable).toStrictEqual(false)
       expect(DefaultConfiguration.rendering.smartGuide.fadeOut.duration).toStrictEqual(5000)
     })
   })

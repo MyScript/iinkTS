@@ -106,6 +106,7 @@ describe("SmartGuide.ts", () =>
       const renderingConfiguration: TRenderingConfiguration = {
         ...DefaultRenderingConfiguration
       }
+      renderingConfiguration.smartGuide.fadeOut.enable = true
       renderingConfiguration.smartGuide.fadeOut.duration = 100
       sm.init(domElement, margin, renderingConfiguration)
       const smartguide = domElement.querySelector(".smartguide") as HTMLDivElement
