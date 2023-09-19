@@ -234,7 +234,15 @@ export class SmartGuide {
       let message = "Nothing to copy"
       if (this.#prompterTextElement.innerText) {
         message = `"${this.#prompterTextElement.innerText}" copied to clipboard`
-        await navigator.clipboard.writeText(this.#prompterTextElement.innerText)
+        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
+          const permissionName = "clipboard-write" as PermissionName;
+          const permissionStatus = await navigator.permissions.query({ name: permissionName });
+          if (permissionStatus.state === "granted") {
+            await navigator.clipboard.writeText(this.#prompterTextElement.innerText)
+          }
+        } else {
+          await navigator.clipboard.writeText(this.#prompterTextElement.innerText)
+        }
       }
       this.internalEvent.emitNotif({ message, timeout: 1500 })
     } catch (err) {
