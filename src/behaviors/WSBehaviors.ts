@@ -180,6 +180,7 @@ export class WSBehaviors implements IBehaviors
   {
     this.context.stack.push(this.model.getClone())
     if (this.#configuration.triggers.exportContent !== "DEMAND") {
+      this.renderer.clearErasingStrokes()
       const updatedModel = await this.recognizer.addStrokes(this.model)
       this.model.mergeExport(updatedModel.exports as TExport)
     }

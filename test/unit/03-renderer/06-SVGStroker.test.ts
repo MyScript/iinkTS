@@ -36,7 +36,7 @@ describe("SVGStroker.ts", () =>
     stroker.drawStroke(svgElement, stroke)
     const pathElement = svgElement.querySelector("path")
     expect(pathElement?.getAttribute("id")).toEqual(stroke.id)
-    expect(pathElement?.getAttribute("type")).toEqual("stroke")
+    expect(pathElement?.getAttribute("type")).toEqual("pen")
   })
 
   test("should drawStroke with attrs", () =>
@@ -46,7 +46,7 @@ describe("SVGStroker.ts", () =>
     stroker.drawStroke(svgElement, stroke, [{ name: "style", value: `fill:${ stroke.style.color };stroke:transparent;` }])
     const pathElement = svgElement.querySelector("path")
     expect(pathElement?.getAttribute("id")).toEqual(stroke.id)
-    expect(pathElement?.getAttribute("type")).toEqual("stroke")
+    expect(pathElement?.getAttribute("type")).toEqual("pen")
     expect(pathElement?.getAttribute("style")).toEqual(`fill:${ stroke.style.color };stroke:transparent;`)
   })
 })

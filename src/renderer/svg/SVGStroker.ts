@@ -91,7 +91,7 @@ export class SVGStroker
     const svgPathElement = document.createElementNS("http://www.w3.org/2000/svg", "path")
     svgPathElement.classList.add("pending-stroke")
     svgPathElement.setAttribute("id", stroke.id)
-    svgPathElement.setAttribute("type", "stroke")
+    svgPathElement.setAttribute("type", stroke.pointerType)
     attrs?.forEach(a =>
     {
       svgPathElement.setAttribute(a.name, a.value)

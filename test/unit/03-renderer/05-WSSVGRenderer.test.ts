@@ -456,6 +456,38 @@ describe("WSSVGRenderer.ts", () =>
     expect(renderer.stroker.drawStroke).toBeCalledWith(pendingStrokesGroup, eraseStroke, [{ name: "style", value: "fill:grey;stroke:transparent;shadowBlur:5;opacity:0.2;" }])
   })
 
+  test('should delete erasing strokes', () =>
+  {
+    const domElement = document.createElement('div') as HTMLElement
+    const renderer = new WSSVGRenderer(DefaultRenderingConfiguration)
+    renderer.init(domElement)
+
+    const svgModelElement: SVGElement = document.createElementNS("http://www.w3.org/2000/svg", 'svg') as SVGElement
+    svgModelElement.setAttribute('data-layer', 'MODEL')
+    const pendingStrokesGroup = document.createElementNS("http://www.w3.org/2000/svg", 'g')
+    pendingStrokesGroup.id = 'pendingStrokes'
+    svgModelElement.appendChild(pendingStrokesGroup)
+    domElement.appendChild(svgModelElement)
+
+    const eraseStroke: TStroke = {
+      type: 'pen',
+      pointerType: 'eraser',
+      pointerId: 0,
+      id: 'test',
+      style: DefaultPenStyle,
+      pointers: [
+        { "x": 604, "y": 226, "t": 1693494025427, "p": 0.1 },
+        { "x": 611, "y": 222, "t": 1693494025467, "p": 0.8 },
+        { "x": 621, "y": 222, "t": 1693494025484, "p": 0.68 },
+      ],
+      length: 4
+    }
+    renderer.drawPendingStroke(eraseStroke)
+    expect(domElement.querySelectorAll("[type=eraser]").length).toStrictEqual(1)
+    renderer.clearPendingStroke()
+    expect(domElement.querySelectorAll("[type=eraser]").length).toStrictEqual(0)
+  })
+
   test('should clearPendingStroke', () =>
   {
     const domElement = document.createElement('div') as HTMLElement

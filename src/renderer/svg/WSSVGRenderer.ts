@@ -169,6 +169,14 @@ export class WSSVGRenderer
     }
   }
 
+  clearErasingStrokes(): void
+  {
+    const erasingStrokeList = this.context.parent.querySelectorAll("[type=eraser]") as NodeListOf<SVGElement>
+    erasingStrokeList.forEach(erasingStroke => {
+      erasingStroke.remove()
+    })
+  }
+
   resize(model: IModel): void
   {
     const rect = this.context.parent.getBoundingClientRect()
