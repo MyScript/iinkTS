@@ -1,20 +1,27 @@
 
-import { IRecognizer } from "../@types/recognizer/Recognizer"
-import { TRestPostConfiguration, TRestPostData } from "../@types/recognizer/RestRecognizer"
-import { TStrokeGroup, TStrokeGroupJSON } from "../@types/model/Stroke"
-import { TConverstionState, TRecognitionConfiguration } from "../@types/configuration/RecognitionConfiguration"
-import { TServerConfiguration } from "../@types/configuration/ServerConfiguration"
-import { IModel, TExport, TJIIXExport } from "../@types/model/Model"
-import { TPenStyle } from "../@types/style/PenStyle"
+import
+  {
+    IRecognizer,
+    TRestPostConfiguration,
+    TRestPostData,
+    TStrokeGroup,
+    TStrokeGroupJSON,
+    TConverstionState,
+    TRecognitionConfiguration,
+    TServerConfiguration,
+    TExport,
+    TJIIXExport,
+    TPenStyle
+  } from "../@types"
 
 import { Error as ErrorConst } from "../Constants"
 import { StyleHelper } from "../style/StyleHelper"
-import { computeHmac } from "../utils/CryptoHelper"
+import { computeHmac } from "../utils/crypto"
 import { isVersionSuperiorOrEqual } from "../utils/version"
 import { convertStrokeToJSON } from "../model/Stroke"
-
 import { LoggerManager } from "../logger"
 import { LoggerClass } from "../Constants"
+import { Model } from "../model"
 
 type ApiError = {
   code?: string
@@ -23,9 +30,10 @@ type ApiError = {
 
 export class RestRecognizer implements IRecognizer
 {
+  #logger = LoggerManager.getLogger(LoggerClass.RECOGNIZER)
+
   protected serverConfiguration: TServerConfiguration
   protected recognitionConfiguration: TRecognitionConfiguration
-  #logger = LoggerManager.getLogger(LoggerClass.RECOGNIZER)
 
   constructor(serverConfig: TServerConfiguration, recognitionConfig: TRecognitionConfiguration)
   {
@@ -72,7 +80,7 @@ export class RestRecognizer implements IRecognizer
     }
   }
 
-  protected buildData(model: IModel): TRestPostData
+  protected buildData(model: Model): TRestPostData
   {
     this.#logger.info("buildData", { model })
     const isPenStyleEqual = (ps1: TPenStyle, ps2: TPenStyle) =>
@@ -85,7 +93,8 @@ export class RestRecognizer implements IRecognizer
     }
 
     const strokeGroupByPenStyle: TStrokeGroup[] = []
-    model.rawStrokes.forEach((s) => {
+    model.strokes.forEach((s) =>
+    {
       const groupIndex = strokeGroupByPenStyle.findIndex(sg => isPenStyleEqual(sg.penStyle, s.style))
       if (groupIndex > -1) {
         strokeGroupByPenStyle[groupIndex].strokes.push(s)
@@ -165,7 +174,6 @@ export class RestRecognizer implements IRecognizer
           result = await response.clone().json().catch(async () => await response.text())
           break
         default:
-          this.#logger.warn("post default", { contentType })
           result = await response.text()
           break
       }
@@ -229,7 +237,7 @@ export class RestRecognizer implements IRecognizer
     return mimeTypes
   }
 
-  async convert(model: IModel, conversionState?: TConverstionState, requestedMimeTypes?: string[]): Promise<IModel | never>
+  async convert(model: Model, conversionState?: TConverstionState, requestedMimeTypes?: string[]): Promise<Model | never>
   {
     this.#logger.info("convert", { model, conversionState, requestedMimeTypes })
     const myModel = model.getClone()
@@ -237,20 +245,20 @@ export class RestRecognizer implements IRecognizer
     const dataToConcert = this.buildData(myModel)
     dataToConcert.conversionState = conversionState
     const promises = mimeTypes.map(mt => this.tryFetch(dataToConcert, mt))
-    const converts: TExport[] = await Promise.all(promises)
-    converts.forEach(c =>
+    const exports: TExport[] = await Promise.all(promises)
+    exports.forEach(e =>
     {
-      myModel.mergeConvert(c)
+      myModel.mergeConvert(e)
     })
     this.#logger.debug("convert", { model: myModel })
     return myModel
   }
 
-  async export(model: IModel, requestedMimeTypes?: string[]): Promise<IModel | never>
+  async export(model: Model, requestedMimeTypes?: string[]): Promise<Model | never>
   {
     this.#logger.info("export", { model, requestedMimeTypes })
     const myModel = model.getClone()
-    if (myModel.rawStrokes.length === 0) {
+    if (myModel.strokes.length === 0) {
       return Promise.resolve(myModel)
     }
     const mimeTypes = this.getMimeTypes(requestedMimeTypes)
@@ -269,7 +277,7 @@ export class RestRecognizer implements IRecognizer
     return myModel
   }
 
-  async resize(model: IModel): Promise<IModel | never>
+  async resize(model: Model): Promise<Model | never>
   {
     this.#logger.info("resize", { model })
     return this.export(model)

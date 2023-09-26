@@ -1,3 +1,5 @@
-import { TPenStyle } from "../@types/style/PenStyle"
+import { TPenStyle } from "../@types"
 
-export const DefaultPenStyle: TPenStyle = {}
+export const DefaultPenStyle: TPenStyle = {
+
+}

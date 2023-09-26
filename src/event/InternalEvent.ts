@@ -1,7 +1,11 @@
-import { TConverstionState } from "../@types/configuration/RecognitionConfiguration"
-import { TExport, TJIIXExport } from "../@types/model/Model"
-import { TWebSocketSVGPatchEvent } from "../@types/recognizer/WSRecognizer"
-import { TUndoRedoContext } from "../@types/undo-redo/UndoRedoContext"
+import {
+  TConverstionState,
+  TExport,
+  TJIIXExport,
+  TWSMessageEventSVGPatch,
+  TUndoRedoContext
+} from "../@types"
+
 import { InternalEventType } from "../Constants"
 import { LoggerManager } from "../logger"
 import { LoggerClass } from "../Constants"
@@ -10,7 +14,7 @@ export class InternalEvent extends EventTarget
 {
   static #instance: InternalEvent
   #abortController: AbortController
-  #logger = LoggerManager.getLogger(LoggerClass.INTERNALEVENT)
+  #logger = LoggerManager.getLogger(LoggerClass.INTERNAL_EVENT)
 
   private constructor()
   {
@@ -40,15 +44,15 @@ export class InternalEvent extends EventTarget
     this.dispatchEvent(new CustomEvent(type, Object.assign({ bubbles: true, composed: true }, data ? { detail: data } : undefined)))
   }
 
-  emitSVGPatch(patchChange: TWebSocketSVGPatchEvent): void
+  emitSVGPatch(patchChange: TWSMessageEventSVGPatch): void
   {
     this.#logger.info("emitSVGPatch", { patchChange })
     this.#emit(InternalEventType.SVG_PATCH, patchChange)
   }
-  addSVGPatchListener(callback: (contentChange: TWebSocketSVGPatchEvent) => void): void
+  addSVGPatchListener(callback: (contentChange: TWSMessageEventSVGPatch) => void): void
   {
     this.#logger.info("addSVGPatchListener", { callback })
-    this.addEventListener(InternalEventType.SVG_PATCH, (evt: unknown) => callback(((evt as CustomEvent).detail as TWebSocketSVGPatchEvent)), { signal: this.#abortController.signal })
+    this.addEventListener(InternalEventType.SVG_PATCH, (evt: unknown) => callback(((evt as CustomEvent).detail as TWSMessageEventSVGPatch)), { signal: this.#abortController.signal })
   }
 
   emitExported(exports: TExport): void
@@ -64,7 +68,7 @@ export class InternalEvent extends EventTarget
 
   emitClearMessage(): void
   {
-    this.#logger.info("emitClearMessage", { })
+    this.#logger.info("emitClearMessage")
     this.#emit(InternalEventType.CLEAR_MESSAGE)
   }
   addClearMessageListener(callback: () => void): void
@@ -87,7 +91,7 @@ export class InternalEvent extends EventTarget
 
   emitWSClosed(): void
   {
-    this.#logger.info("emitWSClosed", { })
+    this.#logger.info("emitWSClosed")
     this.#emit(InternalEventType.WS_CLOSED)
   }
   addWSClosedListener(callback: () => void): void
@@ -161,4 +165,5 @@ export class InternalEvent extends EventTarget
     this.#logger.info("addIdleListener", { callback })
     this.addEventListener(InternalEventType.IDLE, (evt: unknown) => callback(((evt as CustomEvent).detail as boolean)), { signal: this.#abortController.signal })
   }
+
 }

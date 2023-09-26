@@ -10,8 +10,7 @@ describe('Nav actions text language', () => {
 
     await waitEditorIdle(page)
 
-    let resultElement = page.locator('#result')
-    resultText = await resultElement.textContent()
+    let resultText = await page.locator('#result').textContent()
     expect(resultText).toStrictEqual(h.exports['text/plain'].at(-1))
 
     await Promise.all([
@@ -21,8 +20,7 @@ describe('Nav actions text language', () => {
 
     await waitEditorIdle(page)
 
-    resultElement = page.locator('#result')
-    resultText = await resultElement.textContent()
+    resultText = await  page.locator('#result').textContent()
     expect(resultText).toBe('')
   })
 })

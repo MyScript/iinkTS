@@ -7,7 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
     <title>Import content</title>
-    <link rel="stylesheet" href="../examples.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
     <style>
       #editor {
         height: calc(100vh - 72px);
@@ -28,15 +28,15 @@
 
   <body>
     <nav>
-      <div class="flex-container gap">
+      <div class="flex-container wrap gap">
         <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/undo.svg" />
+          <img src="../assets/img/undo.svg" />
         </button>
         <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/redo.svg" />
+          <img src="../assets/img/redo.svg" />
         </button>
       </div>
-      <div class="flex-container gap">
+      <div class="flex-container wrap gap">
         <input type="text" id="importContentField" data-type="text/plain" placeholder="e.g. hello world" />
         <button class="classic-btn" id="importContent">Import</button>
       </div>

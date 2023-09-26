@@ -1,12 +1,15 @@
-import { TConfiguration } from "../@types/configuration"
-import { TGrabberConfiguration } from "../@types/configuration/GrabberConfiguration"
-import { TRenderingConfiguration } from "../@types/configuration/RenderingConfiguration"
-import { TServerConfiguration } from "../@types/configuration/ServerConfiguration"
-import { TRecognitionConfiguration } from "../@types/configuration/RecognitionConfiguration"
-import { TTriggerConfiguration } from "../@types/configuration/TriggerConfiguration"
-import { TEventConfiguration } from "../@types/configuration/EventConfiguration"
-import { TUndoRedoConfiguration } from "../@types/configuration/UndoRedoConfiguration"
-import { TLoggerConfiguration, LoggerClass, LoggerLevel } from "../@types/configuration/LoggerConfiguration"
+import {
+  TConfiguration,
+  TGrabberConfiguration,
+  TRenderingConfiguration,
+  TServerConfiguration,
+  TRecognitionConfiguration,
+  TTriggerConfiguration,
+  TUndoRedoConfiguration,
+  TLoggerConfiguration,
+  LoggerClass,
+  LoggerLevel
+} from "../@types"
 
 export const DefaultServerConfiguration: TServerConfiguration = {
   protocol: "WEBSOCKET",
@@ -41,7 +44,7 @@ export const DefaultRecognitionConfiguration: TRecognitionConfiguration = {
       text: {
         chars: false,
         words: true
-      }
+      },
     },
   },
   renderer: {
@@ -103,7 +106,7 @@ export const DefaultRecognitionConfiguration: TRecognitionConfiguration = {
     },
     eraser: {
       "erase-precisely": false
-    }
+    },
   }
 }
 
@@ -138,10 +141,6 @@ export const DefaultTriggerConfiguration: TTriggerConfiguration = {
   resizeTriggerDelay: 100
 }
 
-export const DefaultEventsConfiguration: TEventConfiguration = {
-  processDelay: 10
-}
-
 export const DefaultUndoRedoConfiguration: TUndoRedoConfiguration = {
   maxStackSize: 100
 }
@@ -152,7 +151,6 @@ export const DefaultConfiguration: TConfiguration = {
   grabber: DefaultGrabberConfiguration,
   rendering: DefaultRenderingConfiguration,
   triggers: DefaultTriggerConfiguration,
-  events: DefaultEventsConfiguration,
   "undo-redo": DefaultUndoRedoConfiguration
 }
 
@@ -164,10 +162,10 @@ export const DefaultLoggerConfiguration: TLoggerConfiguration = {
   [LoggerClass.RENDERER]: LoggerLevel.ERROR,
   [LoggerClass.CONFIGURATION]: LoggerLevel.ERROR,
   [LoggerClass.PUBLIC_EVENT]: LoggerLevel.ERROR,
-  [LoggerClass.INTERNALEVENT]: LoggerLevel.ERROR,
+  [LoggerClass.INTERNAL_EVENT]: LoggerLevel.ERROR,
   [LoggerClass.MODEL]: LoggerLevel.ERROR,
   [LoggerClass.STROKE]: LoggerLevel.ERROR,
   [LoggerClass.SMARTGUIDE]: LoggerLevel.ERROR,
-  [LoggerClass.STYLEMANAGER]: LoggerLevel.ERROR,
-  [LoggerClass.UNDOREDO_MANAGER]: LoggerLevel.ERROR,
+  [LoggerClass.STYLE]: LoggerLevel.ERROR,
+  [LoggerClass.UNDO_REDO]: LoggerLevel.ERROR
 }

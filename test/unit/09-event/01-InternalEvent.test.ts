@@ -1,4 +1,4 @@
-import { TWebSocketSVGPatchEvent } from "../../../src/@types"
+import { TWSMessageEventSVGPatch } from "../../../src/@types"
 import { event } from "../../../src/iink"
 
 describe("InternalEvent.ts", () =>
@@ -19,7 +19,7 @@ describe("InternalEvent.ts", () =>
   {
     const testFunction = jest.fn()
     internalEvent.addSVGPatchListener(testFunction)
-    const svgPatch: TWebSocketSVGPatchEvent = {
+    const svgPatch: TWSMessageEventSVGPatch = {
       type: "svgPatch",
       layer: "MODEL",
       updates: []

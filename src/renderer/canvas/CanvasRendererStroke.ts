@@ -1,19 +1,29 @@
-import { TPointer } from "../../@types/geometry"
-import { TStroke } from "../../@types/model/Stroke"
-import { computeAxeAngle, computeLinksPoints, computeMiddlePoint } from "../QuadraticUtils"
-
-export class CanvasStroker
-{
-
-  private renderArc(context2d: CanvasRenderingContext2D, center: TPointer, radius: number): void
+import
   {
+    LoggerClass,
+    TPointer,
+    TStroke
+  } from "../../@types"
+import { LoggerManager } from "../../logger"
+
+import { computeAngleAxeRadian } from "../../utils/math"
+import { computeLinksPoints, computeMiddlePoint } from "../QuadraticUtils"
+
+export class CanvasRendererStroke
+{
+  #logger = LoggerManager.getLogger(LoggerClass.RENDERER)
+
+  protected renderArc(context2d: CanvasRenderingContext2D, center: TPointer, radius: number): void
+  {
+    this.#logger.debug("renderArc", { context2d, center, radius })
     context2d.arc(center.x, center.y, radius, 0, Math.PI * 2, true)
   }
 
-  private renderLine(context2d: CanvasRenderingContext2D, begin: TPointer, end: TPointer, width: number): void
+  protected renderLine(context2d: CanvasRenderingContext2D, begin: TPointer, end: TPointer, width: number): void
   {
-    const linkPoints1 = computeLinksPoints(begin, computeAxeAngle(begin, end), width)
-    const linkPoints2 = computeLinksPoints(end, computeAxeAngle(begin, end), width)
+    this.#logger.debug("renderLine", { context2d, begin, end, width })
+    const linkPoints1 = computeLinksPoints(begin, computeAngleAxeRadian(begin, end), width)
+    const linkPoints2 = computeLinksPoints(end, computeAngleAxeRadian(begin, end), width)
 
     context2d.moveTo(linkPoints1[0].x, linkPoints1[0].y)
     context2d.lineTo(linkPoints2[0].x, linkPoints2[0].y)
@@ -21,10 +31,11 @@ export class CanvasStroker
     context2d.lineTo(linkPoints1[1].x, linkPoints1[1].y)
   }
 
-  private renderFinal(context2d: CanvasRenderingContext2D, begin: TPointer, end: TPointer, width: number): void
+  protected renderFinal(context2d: CanvasRenderingContext2D, begin: TPointer, end: TPointer, width: number): void
   {
+    this.#logger.debug("renderFinal", { context2d, begin, end, width })
     const ARCSPLIT = 6
-    const angle = computeAxeAngle(begin, end)
+    const angle = computeAngleAxeRadian(begin, end)
     const linkPoints = computeLinksPoints(end, angle, width)
     context2d.moveTo(linkPoints[0].x, linkPoints[0].y)
     for (let i = 1; i <= ARCSPLIT; i++) {
@@ -33,11 +44,12 @@ export class CanvasStroker
     }
   }
 
-  private renderQuadratic(context2d: CanvasRenderingContext2D, begin: TPointer, end: TPointer, ctrl: TPointer, width: number): void
+  protected renderQuadratic(context2d: CanvasRenderingContext2D, begin: TPointer, end: TPointer, ctrl: TPointer, width: number): void
   {
-    const linkPoints1 = computeLinksPoints(begin, computeAxeAngle(begin, ctrl), width)
-    const linkPoints2 = computeLinksPoints(end, computeAxeAngle(ctrl, end), width)
-    const linkPoints3 = computeLinksPoints(ctrl, computeAxeAngle(begin, end), width)
+    this.#logger.debug("renderQuadratic", { context2d, begin, end, ctrl, width })
+    const linkPoints1 = computeLinksPoints(begin, computeAngleAxeRadian(begin, ctrl), width)
+    const linkPoints2 = computeLinksPoints(end, computeAngleAxeRadian(ctrl, end), width)
+    const linkPoints3 = computeLinksPoints(ctrl, computeAngleAxeRadian(begin, end), width)
 
     context2d.moveTo(linkPoints1[0].x, linkPoints1[0].y)
     context2d.quadraticCurveTo(linkPoints3[0].x, linkPoints3[0].y, linkPoints2[0].x, linkPoints2[0].y)
@@ -45,8 +57,9 @@ export class CanvasStroker
     context2d.quadraticCurveTo(linkPoints3[1].x, linkPoints3[1].y, linkPoints1[1].x, linkPoints1[1].y)
   }
 
-  drawStroke(context2d: CanvasRenderingContext2D, stroke: TStroke): void
+  draw(context2d: CanvasRenderingContext2D, stroke: TStroke): void
   {
+    this.#logger.info("draw", { context2d, stroke })
     const NUMBER_POINTS = stroke.pointers.length
     const NUMBER_QUADRATICS = NUMBER_POINTS - 2
     const width = (stroke.style.width as number) > 0 ? (stroke.style.width as number) : context2d.lineWidth
@@ -87,6 +100,9 @@ export class CanvasStroker
         context2d.fill()
       }
       context2d.save()
+    }
+    catch (error) {
+      this.#logger.error("draw", { error })
     }
     finally {
       context2d.restore()

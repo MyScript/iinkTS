@@ -1,11 +1,15 @@
-import { IBehaviors, TBehaviorOptions } from "../@types/Behaviors"
-import { IModel, TExport } from "../@types/model/Model"
-import { TConfiguration } from "../@types/configuration"
-import { TConverstionState } from "../@types/configuration/RecognitionConfiguration"
-import { TUndoRedoContext } from "../@types/undo-redo/UndoRedoContext"
-import { TPenStyle } from "../@types/style/PenStyle"
-import { TTheme } from "../@types/style/Theme"
-import { TPointer } from "../@types/geometry"
+import {
+  IBehaviors,
+  TBehaviorOptions,
+  IModel,
+  TExport,
+  TConfiguration,
+  TConverstionState,
+  TUndoRedoContext,
+  TPenStyle,
+  TTheme,
+  TPointer
+} from "../@types"
 
 import { PointerEventGrabber } from "../grabber/PointerEventGrabber"
 import { CanvasRenderer } from "../renderer/canvas/CanvasRenderer"
@@ -31,7 +35,7 @@ export class RestBehaviors implements IBehaviors
   undoRedoManager: UndoRedoManager
   styleManager: StyleManager
   #configuration: TConfiguration
-  #model: IModel
+  #model: Model
   intention: Intention
   #logger = LoggerManager.getLogger(LoggerClass.BEHAVIORS)
 
@@ -59,7 +63,7 @@ export class RestBehaviors implements IBehaviors
     return InternalEvent.getInstance()
   }
 
-  get model(): IModel
+  get model(): Model
   {
     return this.#model
   }
@@ -119,12 +123,13 @@ export class RestBehaviors implements IBehaviors
     this.renderer.init(domElement)
 
     this.grabber.attach(domElement)
-    this.grabber.onPointerDown = this.onPointerDown.bind(this)
-    this.grabber.onPointerMove = this.onPointerMove.bind(this)
-    this.grabber.onPointerUp = this.onPointerUp.bind(this)
+    this.grabber.onPointerDown = this.#onPointerDown.bind(this)
+    this.grabber.onPointerMove = this.#onPointerMove.bind(this)
+    this.grabber.onPointerUp = this.#onPointerUp.bind(this)
+    return Promise.resolve()
   }
 
-  private onPointerDown(evt: PointerEvent, point: TPointer): void
+  #onPointerDown(evt: PointerEvent, point: TPointer): void
   {
     this.#logger.info("onPointerDown", { intention: this.intention, evt, point })
     const { pointerType } = evt
@@ -143,12 +148,12 @@ export class RestBehaviors implements IBehaviors
         this.drawCurrentStroke()
         break
       default:
-        this.#logger.warn(`onPointerDown intention unknow: "${this.intention}"`)
+        this.#logger.warn("#onPointerDown", `onPointerDown intention unknow: "${this.intention}"`)
         break
     }
   }
 
-  private onPointerMove(_evt: PointerEvent, point: TPointer): void
+  #onPointerMove(_evt: PointerEvent, point: TPointer): void
   {
     this.#logger.info("onPointerMove", { intention: this.intention, point })
     switch (this.intention) {
@@ -165,12 +170,12 @@ export class RestBehaviors implements IBehaviors
         this.drawCurrentStroke()
         break
       default:
-        this.#logger.warn(`onPointerMove intention unknow: "${this.intention}"`)
+        this.#logger.warn("#onPointerMove", `onPointerMove intention unknow: "${this.intention}"`)
         break
     }
   }
 
-  private onPointerUp(_evt: PointerEvent, point: TPointer): void
+  #onPointerUp(_evt: PointerEvent, point: TPointer): void
   {
     this.#logger.info("onPointerUp", { intention: this.intention, point })
     switch (this.intention) {
@@ -189,7 +194,7 @@ export class RestBehaviors implements IBehaviors
           .catch(error => this.internalEvent.emitError(error as Error))
         break
       default:
-        this.#logger.warn(`onPointerUp intention unknow: "${this.intention}"`)
+        this.#logger.warn("#onPointerUp", `onPointerUp intention unknow: "${this.intention}"`)
         break
     }
   }
@@ -204,7 +209,7 @@ export class RestBehaviors implements IBehaviors
   {
     this.#logger.info("updateModelRendering")
     this.renderer.drawModel(this.model)
-    const deferred = new DeferredPromise<IModel | never>()
+    const deferred = new DeferredPromise<Model | never>()
     this.undoRedoManager.addModelToStack(this.model)
     if (this.#configuration.triggers.exportContent !== "DEMAND") {
       clearTimeout(this.#exportTimer)
@@ -256,11 +261,11 @@ export class RestBehaviors implements IBehaviors
   async resize(height: number, width: number): Promise<IModel>
   {
     this.#logger.info("resize", { height, width })
-    const deferredResize = new DeferredPromise<IModel>()
+    const deferredResize = new DeferredPromise<Model>()
     this.model.height = height
     this.model.width = width
     this.renderer.resize(this.model)
-    if (this.model.rawStrokes.length) {
+    if (this.model.strokes.length) {
       clearTimeout(this.#resizeTimer)
       this.#resizeTimer = setTimeout(async () =>
       {
@@ -270,16 +275,16 @@ export class RestBehaviors implements IBehaviors
     } else {
       deferredResize.resolve(this.model)
     }
-    const newModel = await deferredResize.promise
-    this.#logger.debug("resize", { newModel })
-    this.internalEvent.emitExported(newModel.exports as TExport)
-    return newModel
+    this.#model = await deferredResize.promise
+    this.#logger.debug("resize", { model: this.model })
+    this.internalEvent.emitExported(this.model.exports as TExport)
+    return this.model
   }
 
   async undo(): Promise<IModel>
   {
     this.#logger.info("undo")
-    this.#model = this.undoRedoManager.undo()
+    this.#model = this.undoRedoManager.undo() as Model
     this.renderer.drawModel(this.#model)
     this.#model = await this.recognizer.export(this.#model)
     this.undoRedoManager.updateModelInStack(this.#model)
@@ -291,7 +296,7 @@ export class RestBehaviors implements IBehaviors
   async redo(): Promise<IModel>
   {
     this.#logger.info("redo")
-    this.#model = this.undoRedoManager.redo()
+    this.#model = this.undoRedoManager.redo() as Model
     this.renderer.drawModel(this.#model)
     this.#model = await this.recognizer.export(this.#model)
     this.undoRedoManager.updateModelInStack(this.#model)

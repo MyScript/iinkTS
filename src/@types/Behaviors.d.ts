@@ -9,6 +9,7 @@ import { TUndoRedoContext } from "./undo-redo/UndoRedoContext"
 import { TConfiguration } from "./configuration"
 import { StyleManager } from "../style/StyleManager"
 import { TLoggerConfiguration } from "./configuration/LoggerConfiguration"
+import { Intention } from "../Constants"
 
 export type TBehaviorOptions = {
   configuration: TConfiguration
@@ -58,7 +59,7 @@ export interface IBehaviors
   waitForIdle?(): Promise<void>
   importPointEvents(strokes: TStroke[]): Promise<IModel>
   import?(data: Blob, mimeType?: string): Promise<IModel>
-
+  
   clear(): Promise<IModel>
 
   destroy(): Promise<void>

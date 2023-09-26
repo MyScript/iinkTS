@@ -1,23 +1,34 @@
 
-import { IRecognizer } from "../@types/recognizer/Recognizer"
-import { TConverstionState, TRecognitionConfiguration } from "../@types/configuration/RecognitionConfiguration"
-import { TServerConfiguration } from "../@types/configuration/ServerConfiguration"
-import { IModel, TExport, TJIIXExport } from "../@types/model/Model"
-import { TWebSocketContentChangeEvent, TWebSocketErrorEvent, TWebSocketEvent, TWebSocketExportEvent, TWebSocketHMACChallengeEvent, TWebSocketPartChangeEvent, TWebSocketSVGPatchEvent } from "../@types/recognizer/WSRecognizer"
-import { TStroke } from "../@types/model/Stroke"
-import { TUndoRedoContext } from "../@types/undo-redo/UndoRedoContext"
-import { TPenStyle } from "../@types/style/PenStyle"
-import { TTheme } from "../@types/style/Theme"
-import { LoggerClass } from "../@types/configuration/LoggerConfiguration"
+import
+  {
+    IRecognizer,
+    TConverstionState,
+    TRecognitionConfiguration,
+    TServerConfiguration,
+    TExport,
+    TJIIXExport,
+    TWSMessageEvent,
+    TWSMessageEventError,
+    TWSMessageEventSVGPatch,
+    TStroke,
+    TUndoRedoContext,
+    TPenStyle,
+    TTheme,
+    TWSMessageEventHMACChallenge,
+    TWSMessageEventPartChange,
+    TWSMessageEventExport,
+    TWSMessageEventContentChange
+  } from "../@types"
 
-import { Error as ErrorConst } from "../Constants"
+import { Error as ErrorConst, LoggerClass } from "../Constants"
 import { InternalEvent } from "../event/InternalEvent"
-import { computeHmac } from "../utils/CryptoHelper"
+import { computeHmac } from "../utils/crypto"
 import { StyleHelper } from "../style/StyleHelper"
 import { DeferredPromise } from "../utils/DeferredPromise"
 import { isVersionSuperiorOrEqual } from "../utils/version"
 import { convertStrokeToJSON } from "../model/Stroke"
 import { LoggerManager } from "../logger"
+import { Model } from "../model"
 
 /**
  * A websocket dialog have this sequence :
@@ -124,7 +135,7 @@ export class WSRecognizer implements IRecognizer
   protected openCallback(): void
   {
     this.connected?.resolve()
-    const params: TWebSocketEvent = {
+    const params: TWSMessageEvent = {
       type: this.sessionId ? "restoreIInkSession" : "newContentPackage",
       iinkSessionId: this.sessionId,
       applicationKey: this.serverConfiguration.applicationKey,
@@ -222,7 +233,7 @@ export class WSRecognizer implements IRecognizer
           message = ErrorConst.TLS_HANDSHAKE
           break
         default:
-          this.#logger.warn("closeCallback unknow CloseEvent.code", { evt })
+          this.#logger.warn("closeCallback", "unknow CloseEvent.code", { evt })
           message = ErrorConst.CANT_ESTABLISH
           break
       }
@@ -236,10 +247,10 @@ export class WSRecognizer implements IRecognizer
     }
   }
 
-  protected manageHMACChallengeMessage(websocketMessage: TWebSocketEvent): void
+  protected manageHMACChallengeMessage(websocketMessage: TWSMessageEvent): void
   {
     this.#logger.info("manageHMACChallengeMessage", { websocketMessage })
-    const hmacChallengeMessage = websocketMessage as TWebSocketHMACChallengeEvent
+    const hmacChallengeMessage = websocketMessage as TWSMessageEventHMACChallenge
     if (hmacChallengeMessage.hmacChallenge) {
       this.send({
         type: "hmac",
@@ -266,18 +277,18 @@ export class WSRecognizer implements IRecognizer
     }
   }
 
-  protected managePartChangeMessage(websocketMessage: TWebSocketEvent): void
+  protected managePartChangeMessage(websocketMessage: TWSMessageEvent): void
   {
     this.#logger.info("managePartChangeMessage", { websocketMessage })
-    const partChangeMessage = websocketMessage as TWebSocketPartChangeEvent
+    const partChangeMessage = websocketMessage as TWSMessageEventPartChange
     this.currentPartId = partChangeMessage.partId
     this.initialized?.resolve()
   }
 
-  protected manageExportMessage(websocketMessage: TWebSocketEvent): void
+  protected manageExportMessage(websocketMessage: TWSMessageEvent): void
   {
     this.#logger.info("manageExportMessage", { websocketMessage })
-    const exportMessage = websocketMessage as TWebSocketExportEvent
+    const exportMessage = websocketMessage as TWSMessageEventExport
     if (exportMessage.exports["application/vnd.myscript.jiix"]) {
       exportMessage.exports["application/vnd.myscript.jiix"] = JSON.parse(exportMessage.exports["application/vnd.myscript.jiix"].toString()) as TJIIXExport
     }
@@ -293,14 +304,15 @@ export class WSRecognizer implements IRecognizer
     this.internalEvent.emitExported(exportMessage.exports)
   }
 
-  protected async manageWaitForIdle(): Promise<void> {
+  protected async manageWaitForIdle(): Promise<void>
+  {
     this.internalEvent.emitIdle(true)
     this.waitForIdleDeferred?.resolve()
   }
 
-  protected manageErrorMessage(websocketMessage: TWebSocketEvent): void
+  protected manageErrorMessage(websocketMessage: TWSMessageEvent): void
   {
-    const err = websocketMessage as TWebSocketErrorEvent
+    const err = websocketMessage as TWSMessageEventError
     this.currentErrorCode = err.data?.code || err.code
     let message = err.data?.message || err.message || ErrorConst.UNKNOW
 
@@ -320,10 +332,10 @@ export class WSRecognizer implements IRecognizer
     this.internalEvent.emitError(error)
   }
 
-  protected manageContentChangeMessage(websocketMessage: TWebSocketEvent): void
+  protected manageContentChangeMessage(websocketMessage: TWSMessageEvent): void
   {
     this.#logger.info("manageContentChangeMessage", { websocketMessage })
-    const contentChangeMessage = websocketMessage as TWebSocketContentChangeEvent
+    const contentChangeMessage = websocketMessage as TWSMessageEventContentChange
     const context: TUndoRedoContext = {
       canRedo: contentChangeMessage.canRedo,
       canUndo: contentChangeMessage.canUndo,
@@ -335,11 +347,11 @@ export class WSRecognizer implements IRecognizer
     this.internalEvent.emitContextChange(context)
   }
 
-  protected manageSVGPatchMessage(websocketMessage: TWebSocketEvent): void
+  protected manageSVGPatchMessage(websocketMessage: TWSMessageEvent): void
   {
     this.#logger.info("manageSVGPatchMessage", { websocketMessage })
     this.resizeDeferred?.resolve()
-    const svgPatchMessage = websocketMessage as TWebSocketSVGPatchEvent
+    const svgPatchMessage = websocketMessage as TWSMessageEventSVGPatch
     this.internalEvent.emitSVGPatch(svgPatchMessage)
   }
 
@@ -347,7 +359,7 @@ export class WSRecognizer implements IRecognizer
   {
     this.#logger.debug("messageCallback", { message })
     this.currentErrorCode = undefined
-    const websocketMessage: TWebSocketEvent = JSON.parse(message.data)
+    const websocketMessage: TWSMessageEvent = JSON.parse(message.data)
     if (websocketMessage.type !== "pong") {
       this.pingCount = 0
       switch (websocketMessage.type) {
@@ -378,8 +390,8 @@ export class WSRecognizer implements IRecognizer
         case "idle":
           this.manageWaitForIdle()
           break
-        default :
-          this.#logger.warn("messageCallback", `Message type unknow: "${websocketMessage.type}".`)
+        default:
+          this.#logger.warn("messageCallback", `Message type unknow: "${ websocketMessage.type }".`)
       }
     }
   }
@@ -414,7 +426,7 @@ export class WSRecognizer implements IRecognizer
     }
   }
 
-  async send(message: TWebSocketEvent): Promise<void>
+  async send(message: TWSMessageEvent): Promise<void>
   {
     if (!this.connected) {
       return Promise.reject(new Error("Recognizer must be initilized"))
@@ -428,7 +440,7 @@ export class WSRecognizer implements IRecognizer
       if (this.socket.readyState != this.socket.CONNECTING && this.serverConfiguration.websocket.autoReconnect) {
         this.reconnectionCount++
         if (this.serverConfiguration.websocket.maxRetryCount >= this.reconnectionCount) {
-          this.#logger.debug("send", `try to reconnect number: ${this.reconnectionCount}.`)
+          this.#logger.debug("send", `try to reconnect number: ${ this.reconnectionCount }.`)
           this.internalEvent.emitClearMessage()
           await this.init(this.viewSizeHeight, this.viewSizeWidth)
           await this.setPenStyle(this.penStyle as TPenStyle)
@@ -465,7 +477,7 @@ export class WSRecognizer implements IRecognizer
     this.#logger.info("setPenStyle", { penStyle })
     await this.initialized?.promise
     this.penStyle = penStyle
-    const message: TWebSocketEvent = {
+    const message: TWSMessageEvent = {
       type: "setPenStyle",
       style: StyleHelper.penStyleToCSS(penStyle)
     }
@@ -477,7 +489,7 @@ export class WSRecognizer implements IRecognizer
     await this.initialized?.promise
     this.penStyleClasses = penStyleClasses
     this.#logger.info("setPenStyleClasses", { penStyleClasses })
-    const message: TWebSocketEvent = {
+    const message: TWSMessageEvent = {
       type: "setPenStyleClasses",
       styleClasses: penStyleClasses
     }
@@ -489,14 +501,14 @@ export class WSRecognizer implements IRecognizer
     this.#logger.info("setTheme", { theme })
     await this.initialized?.promise
     this.theme = theme
-    const message: TWebSocketEvent = {
+    const message: TWSMessageEvent = {
       type: "setTheme",
       theme: StyleHelper.themeToCSS(theme)
     }
     return this.send(message)
   }
 
-  async export(model: IModel, requestedMimeTypes?: string[]): Promise<IModel>
+  async export(model: Model, requestedMimeTypes?: string[]): Promise<Model>
   {
     this.#logger.info("export", { model, requestedMimeTypes })
     await this.initialized?.promise
@@ -526,7 +538,7 @@ export class WSRecognizer implements IRecognizer
       return Promise.reject(new Error(`Export failed, no mimeTypes define in recognition ${ this.recognitionConfiguration.type } configuration`))
     }
 
-    const message: TWebSocketEvent = {
+    const message: TWSMessageEvent = {
       type: "export",
       partId: this.currentPartId,
       mimeTypes
@@ -539,7 +551,7 @@ export class WSRecognizer implements IRecognizer
     return localModel
   }
 
-  async import(model: IModel, data: Blob, mimeType?: string): Promise<IModel>
+  async import(model: Model, data: Blob, mimeType?: string): Promise<Model>
   {
     this.#logger.info("import", { data, mimeType })
     await this.initialized?.promise
@@ -558,7 +570,7 @@ export class WSRecognizer implements IRecognizer
       })
     }
 
-    const importFileMessage: TWebSocketEvent = {
+    const importFileMessage: TWSMessageEvent = {
       type: "importFile",
       importFileId,
       mimeType
@@ -567,7 +579,7 @@ export class WSRecognizer implements IRecognizer
     for (let i = 0; i < data.size; i += chunkSize) {
       const blobPart = data.slice(i, i + chunkSize, data.type)
       const partFileString = await readBlob(blobPart)
-      const fileChuckMessage: TWebSocketEvent = {
+      const fileChuckMessage: TWSMessageEvent = {
         type: "fileChunk",
         importFileId,
         data: partFileString,
@@ -581,7 +593,7 @@ export class WSRecognizer implements IRecognizer
     return localModel
   }
 
-  async resize(model: IModel): Promise<IModel>
+  async resize(model: Model): Promise<Model>
   {
     this.#logger.info("resize", { model })
     await this.initialized?.promise
@@ -589,7 +601,7 @@ export class WSRecognizer implements IRecognizer
     const localModel = model.getClone()
     this.viewSizeHeight = localModel.height
     this.viewSizeWidth = localModel.width
-    const message: TWebSocketEvent = {
+    const message: TWSMessageEvent = {
       type: "changeViewSize",
       height: this.viewSizeHeight,
       width: this.viewSizeWidth,
@@ -604,7 +616,7 @@ export class WSRecognizer implements IRecognizer
     this.#logger.info("importPointsEvents", { strokes })
     await this.initialized?.promise
     this.importPointEventsDeferred = new DeferredPromise<TExport>()
-    const message: TWebSocketEvent = {
+    const message: TWSMessageEvent = {
       type: "pointerEvents",
       events: strokes.map(convertStrokeToJSON)
     }
@@ -615,13 +627,13 @@ export class WSRecognizer implements IRecognizer
     return exportPoints as TExport
   }
 
-  async convert(model: IModel, conversionState?: TConverstionState): Promise<IModel>
+  async convert(model: Model, conversionState?: TConverstionState): Promise<Model>
   {
     this.#logger.info("convert", { model, conversionState })
     await this.initialized?.promise
     this.convertDeferred = new DeferredPromise<TExport>()
     const localModel = model.getClone()
-    const message: TWebSocketEvent = {
+    const message: TWSMessageEvent = {
       type: "convert",
       conversionState
     }
@@ -629,7 +641,6 @@ export class WSRecognizer implements IRecognizer
     const myExportConverted: TExport = await this.convertDeferred?.promise
     localModel.updatePositionReceived()
     localModel.mergeConvert(myExportConverted)
-    localModel.mergeExport(myExportConverted)
     this.#logger.debug("convert", { model: localModel })
     return localModel
   }
@@ -638,20 +649,20 @@ export class WSRecognizer implements IRecognizer
   {
     await this.initialized?.promise
     this.waitForIdleDeferred = new DeferredPromise<void>()
-    const message: TWebSocketEvent = {
+    const message: TWSMessageEvent = {
       type: "waitForIdle",
     }
     await this.send(message)
     return this.waitForIdleDeferred?.promise
   }
 
-  async undo(model: IModel): Promise<IModel>
+  async undo(model: Model): Promise<Model>
   {
     this.#logger.info("undo", { model })
     await this.initialized?.promise
     const localModel = model.getClone()
     this.undoDeferred = new DeferredPromise<TExport>()
-    const message: TWebSocketEvent = {
+    const message: TWSMessageEvent = {
       type: "undo",
     }
     await this.send(message)
@@ -663,13 +674,13 @@ export class WSRecognizer implements IRecognizer
     return localModel
   }
 
-  async redo(model: IModel): Promise<IModel>
+  async redo(model: Model): Promise<Model>
   {
     this.#logger.info("redo", { model })
     await this.initialized?.promise
     const localModel = model.getClone()
     this.redoDeferred = new DeferredPromise<TExport>()
-    const message: TWebSocketEvent = {
+    const message: TWSMessageEvent = {
       type: "redo",
     }
     await this.send(message)
@@ -681,14 +692,14 @@ export class WSRecognizer implements IRecognizer
     return localModel
   }
 
-  async clear(model: IModel): Promise<IModel>
+  async clear(model: Model): Promise<Model>
   {
     this.#logger.info("clear", { model })
     await this.initialized?.promise
     const localModel = model.getClone()
     localModel.modificationDate = Date.now()
     this.clearDeferred = new DeferredPromise<TExport>()
-    const message: TWebSocketEvent = {
+    const message: TWSMessageEvent = {
       type: "clear",
     }
     await this.send(message)

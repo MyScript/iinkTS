@@ -132,7 +132,7 @@ async function initEditor() {
   };
 
   editor = new iink.Editor(editorElement, options);
-  editor.initialize();
+  await editor.initialize();
   editor.events.addEventListener("exported", (evt) => {
     const answerId = currentInput?.getAttribute("answer-id")
     if (answerId) {

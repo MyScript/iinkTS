@@ -1,17 +1,21 @@
-import { IBehaviors, TBehaviorOptions } from "../@types/Behaviors"
-import { TConfiguration } from "../@types/configuration"
-import { IModel, TExport } from "../@types/model/Model"
-import { TWebSocketSVGPatchEvent } from "../@types/recognizer/WSRecognizer"
-import { TStroke } from "../@types/model/Stroke"
-import { TConverstionState } from "../@types/configuration/RecognitionConfiguration"
-import { TUndoRedoContext } from "../@types/undo-redo/UndoRedoContext"
-import { TTheme } from "../@types/style/Theme"
-import { TPenStyle } from "../@types/style/PenStyle"
-import { TPointer } from "../@types/geometry"
+import {
+  IBehaviors,
+  TBehaviorOptions,
+  TConfiguration,
+  IModel,
+  TExport,
+  TWSMessageEventSVGPatch,
+  TStroke,
+  TConverstionState,
+  TUndoRedoContext,
+  TTheme,
+  TPenStyle,
+  TPointer
+} from "../@types"
 
 import { PointerEventGrabber } from "../grabber/PointerEventGrabber"
 import { WSRecognizer } from "../recognizer/WSRecognizer"
-import { Intention } from "../Constants"
+import { Intention, LoggerClass } from "../Constants"
 import { InternalEvent } from "../event/InternalEvent"
 import { DeferredPromise } from "../utils/DeferredPromise"
 import { WSSVGRenderer } from "../renderer/svg/WSSVGRenderer"
@@ -20,7 +24,6 @@ import { Configuration } from "../configuration/Configuration"
 import { Model } from "../model/Model"
 import { UndoRedoManager } from "../undo-redo"
 import { LoggerManager } from "../logger"
-import { LoggerClass } from "../Constants"
 
 export class WSBehaviors implements IBehaviors
 {
@@ -32,7 +35,7 @@ export class WSBehaviors implements IBehaviors
   undoRedoManager: UndoRedoManager
   styleManager: StyleManager
   #configuration: TConfiguration
-  #model: IModel
+  #model: Model
   intention: Intention
   #logger = LoggerManager.getLogger(LoggerClass.BEHAVIORS)
 
@@ -59,7 +62,7 @@ export class WSBehaviors implements IBehaviors
     return InternalEvent.getInstance()
   }
 
-  get model(): IModel
+  get model(): Model
   {
     return this.#model
   }
@@ -115,6 +118,12 @@ export class WSBehaviors implements IBehaviors
     return this.recognizer.setTheme(this.styleManager.theme)
   }
 
+  #onExport(exports: TExport): void
+  {
+    this.#logger.debug("onExport", { exports })
+    this.model.mergeExport(exports)
+  }
+
   async init(domElement: HTMLElement): Promise<void>
   {
     this.#logger.info("init", { domElement })
@@ -126,11 +135,12 @@ export class WSBehaviors implements IBehaviors
     this.renderer.init(domElement)
 
     this.grabber.attach(domElement)
-    this.grabber.onPointerDown = this.onPointerDown.bind(this)
-    this.grabber.onPointerMove = this.onPointerMove.bind(this)
-    this.grabber.onPointerUp = this.onPointerUp.bind(this)
+    this.grabber.onPointerDown = this.#onPointerDown.bind(this)
+    this.grabber.onPointerMove = this.#onPointerMove.bind(this)
+    this.grabber.onPointerUp = this.#onPointerUp.bind(this)
 
-    this.internalEvent.addSVGPatchListener(this.onSVGPatch)
+    this.internalEvent.addExportedListener(this.#onExport.bind(this))
+    this.internalEvent.addSVGPatchListener(this.onSVGPatch.bind(this))
 
     await this.recognizer.init(this.model.height, this.model.width)
     await this.setPenStyle(this.penStyle)
@@ -138,7 +148,7 @@ export class WSBehaviors implements IBehaviors
     await this.setPenStyleClasses(this.penStyleClasses)
   }
 
-  private onPointerDown(evt: PointerEvent, point: TPointer): void
+  #onPointerDown(evt: PointerEvent, point: TPointer): void
   {
     this.#logger.info("onPointerDown", { intention: this.intention, evt, point })
     let { pointerType } = evt
@@ -150,14 +160,14 @@ export class WSBehaviors implements IBehaviors
     this.drawCurrentStroke()
   }
 
-  private onPointerMove(_evt: PointerEvent, point: TPointer): void
+  #onPointerMove(_evt: PointerEvent, point: TPointer): void
   {
     this.#logger.info("onPointerMove", { intention: this.intention, point })
     this.model.appendToCurrentStroke(point)
     this.drawCurrentStroke()
   }
 
-  private async onPointerUp(_evt: PointerEvent, point: TPointer): Promise<void>
+  async #onPointerUp(_evt: PointerEvent, point: TPointer): Promise<void>
   {
     try {
       this.#logger.info("onPointerUp", { intention: this.intention, point })
@@ -168,7 +178,7 @@ export class WSBehaviors implements IBehaviors
     }
   }
 
-  private onSVGPatch = (evt: TWebSocketSVGPatchEvent) =>
+  private onSVGPatch(evt: TWSMessageEventSVGPatch): void
   {
     this.#logger.info("onSVGPatch", { evt })
     this.renderer.updatesLayer(evt.layer, evt.updates)
@@ -258,7 +268,7 @@ export class WSBehaviors implements IBehaviors
   async resize(height: number, width: number): Promise<IModel>
   {
     this.#logger.info("resize", { height, width })
-    const deferredResize = new DeferredPromise<IModel>()
+    const deferredResize = new DeferredPromise<Model>()
     this.model.height = height
     this.model.width = width
     const clonedModel = this.model.getClone()
@@ -285,7 +295,7 @@ export class WSBehaviors implements IBehaviors
   {
     this.#logger.info("undo")
     if (this.context.canUndo) {
-      this.#model = this.undoRedoManager.undo()
+      this.#model = this.undoRedoManager.undo() as Model
       return this.recognizer.undo(this.model)
     }
     else {
@@ -297,7 +307,7 @@ export class WSBehaviors implements IBehaviors
   {
     this.#logger.info("redo")
     if (this.context.canRedo) {
-      this.#model = this.undoRedoManager.redo()
+      this.#model = this.undoRedoManager.redo() as Model
       this.#logger.debug("undo", this.#model)
       return this.recognizer.redo(this.model)
     }

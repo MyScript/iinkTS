@@ -91,7 +91,7 @@ describe("Websocket Text highlight words", () => {
   })
 
   for (let index = 0; index < colorMap.length; index++) {
-    test(`should write text in color${colorMap[index].id} and highlight them`, async () => {
+    test(`should write text in color ${colorMap[index].id} and highlight them`, async () => {
       const currentColor = colorMap[index]
       await Promise.all([
         getDatasFromExportedEvent(page),

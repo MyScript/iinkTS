@@ -9,7 +9,7 @@
 
     <title>Websocket Text Styling</title>
 
-    <link rel="stylesheet" href="../examples.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
     <style>
       .nav-block {
         display: block;
@@ -72,32 +72,32 @@
 
   <body>
     <nav class="nav-block">
-      <div class="flex-container gap row-options">
-        <div class="flex-container gap nav-item">
-          <label>Apply pen style class (greenThickPen):</label>
+      <div class="flex-container wrap gap row-options">
+        <div class="flex-container wrap gap nav-item">
+          <label for="penStyleClasses">Apply pen style class (greenThickPen):</label>
           <input id="penStyleClasses" type="checkbox" />
         </div>
-        <div class="flex-container gap nav-item">
+        <div class="flex-container wrap gap nav-item">
           <label for="theme">Theme:</label>
-          <select id="theme" class="input-field"></select>
+          <select id="theme"></select>
         </div>
-        <div class="flex-container gap nav-item">
+        <div class="flex-container wrap gap nav-item">
           <label for="fonts">Font:</label>
-          <select id="fonts" class="input-field"></select>
+          <select id="fonts"></select>
         </div>
       </div>
-      <div class="flex-container gap row-options">
-        <div class="flex-container gap nav-item">
+      <div class="flex-container wrap gap row-options">
+        <div class="flex-container wrap gap nav-item">
           <label for="penenabled">Enable pen color/thickness</label>
           <input id="penenabled" type="checkbox" />
         </div>
-        <div class="flex-container gap nav-item">
+        <div class="flex-container wrap gap nav-item">
           <label for="pencolor">Color:</label>
-          <input id="pencolor" class="input-field pen-color-field" type="color" value="#ff7314" disabled/>
+          <input id="pencolor" type="color" value="#ff7314" disabled/>
         </div>
-        <div class="flex-container gap nav-item">
+        <div class="flex-container wrap gap nav-item">
           <label for="penwidth">Thickness:</label>
-          <input id="penwidth" class="input-field" type="number" min="1" max="5" value="2" disabled/>
+          <input id="penwidth" type="number" min="1" max="5" value="2" disabled/>
         </div>
       </div>
     </nav>

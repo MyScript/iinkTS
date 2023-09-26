@@ -1,6 +1,10 @@
-import { TMarginConfiguration } from "../@types/configuration/recognition/MarginConfiguration"
-import { TRenderingConfiguration } from "../@types/configuration/RenderingConfiguration"
-import { TJIIXExport, TWordExport } from "../@types/model/Model"
+import {
+  TMarginConfiguration,
+  TRenderingConfiguration,
+  TJIIXExport,
+  TJIIXWord
+} from "../@types"
+
 import { InternalEvent } from "../event/InternalEvent"
 import { LoggerManager } from "../logger"
 import { LoggerClass } from "../Constants"
@@ -22,12 +26,12 @@ export class SmartGuide {
   margin: TMarginConfiguration
   renderingConfiguration!: TRenderingConfiguration
   jiix?: TJIIXExport
-  lastWord?: TWordExport
-  wordToChange?: TWordExport
+  lastWord?: TJIIXWord
+  wordToChange?: TJIIXWord
   #logger = LoggerManager.getLogger(LoggerClass.SMARTGUIDE)
 
   constructor() {
-    this.#logger.info("constructor", { })
+    this.#logger.info("constructor")
     this.uuid = Math.random().toString(10).substring(2, 12)
     this.margin = {
       bottom: 0,
@@ -177,7 +181,7 @@ export class SmartGuide {
   #showCandidates = (target: HTMLElement) => {
     this.#logger.info("showCandidates", { target })
     const wordId = parseInt(target.id.replace("word-", "").replace(this.uuid, ""))
-    const words = this.jiix?.words as TWordExport[]
+    const words = this.jiix?.words as TJIIXWord[]
     this.wordToChange = words[wordId]
     if (this.wordToChange) {
       this.wordToChange.id = wordId.toString()
@@ -254,9 +258,9 @@ export class SmartGuide {
         }
       }
       this.internalEvent.emitNotif({ message, timeout: 1500 })
-    } catch (err) {
-      this.#logger.error("onClickCopy", { err })
-      this.internalEvent.emitError(err as Error)
+    } catch (error) {
+      this.#logger.error("onClickCopy", error)
+      this.internalEvent.emitError(error as Error)
     }
   }
 
@@ -274,7 +278,7 @@ export class SmartGuide {
     evt.stopPropagation()
     const target = evt.target as HTMLElement
     const candidate = target.innerText
-    if (this.jiix && candidate !== this.wordToChange?.label && this.wordToChange?.candidates?.includes(candidate)) {
+    if (this.jiix?.words && candidate !== this.wordToChange?.label && this.wordToChange?.candidates?.includes(candidate)) {
       this.jiix.words[parseInt(this.wordToChange?.id as string)].label = candidate
       this.internalEvent.emitImportJIIX(this.jiix)
     }
@@ -345,7 +349,8 @@ export class SmartGuide {
   update(exports: TJIIXExport): void {
     this.#logger.info("update", { exports })
     this.jiix = exports
-    const createWordSpan = (index: number, word?: TWordExport) => {
+    const createWordSpan = (index: number, word?: TJIIXWord) =>
+    {
       const span = document.createElement("span")
       span.id = `word-${index}${this.uuid}`
       if (word) {
@@ -358,10 +363,10 @@ export class SmartGuide {
     }
 
     const populatePrompter = () => {
-      this.#logger.info("populatePrompter", { })
+      this.#logger.info("populatePrompter")
       this.#prompterTextElement.innerHTML = ""
       if (this.jiix?.words) {
-        const words = this.jiix.words as TWordExport[]
+        const words = this.jiix.words as TJIIXWord[]
         const myFragment = document.createDocumentFragment()
         words.forEach((word, index) => {
           if (word.label === " " || word.label.includes("\n")) {
@@ -390,8 +395,7 @@ export class SmartGuide {
             }
             this.#prompterTextElement.appendChild(span)
             this.#prompterContainerElement.scrollLeft = span.offsetLeft
-            this.#logger.debug("update => populatePrompter", { span })
-            this.#logger.debug("update => populatePrompter", this.lastWord)
+            this.#logger.debug("update => populatePrompter", { span, lastWord: this.lastWord })
           }
         })
       }

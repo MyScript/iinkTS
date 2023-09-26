@@ -23,6 +23,6 @@ export * as undoredo from "./undo-redo"
 
 export * as event from "./event"
 
-export * as smartguide from "./smartguide/SmartGuide"
+export * as smartguide from "./smartguide"
 
 export * as logger from "./logger"

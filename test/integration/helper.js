@@ -108,7 +108,7 @@ module.exports.setEditorConfiguration = async (page, configuration) => {
  * @param {Page} page - Playwright Page
  * @returns Promise<TExport>
  */
- module.exports.getConversionsFromEditorModel = async (page) => {
+ module.exports.getConvertsFromEditorModel = async (page) => {
   return page.evaluate('editor.model.converts')
 }
 /**

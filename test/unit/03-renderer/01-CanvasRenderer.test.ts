@@ -1,37 +1,27 @@
-import { TRenderingConfiguration } from "../../../src/@types"
-import { renderer } from "../../../src/iink"
+import { renderer, configuration } from "../../../src/iink"
+import { buildStroke } from "../utils/helpers"
 
 describe("CanvasRenderer.ts", () =>
 {
-  const { CanvasRenderer, CanvasStroker } = renderer
+  const { CanvasRenderer } = renderer
   const height = 10, width = 10
   const wrapperHTML: HTMLElement = document.createElement("div")
   wrapperHTML.style.height = `${ height }px`
   wrapperHTML.style.width = `${ width }px`
 
-  const stroker = new CanvasStroker()
-  stroker.drawStroke = jest.fn()
-
-  const conf: TRenderingConfiguration = {
-    minHeight: 100,
-    minWidth: 100,
-    smartGuide: {
-      enable: true,
-      fadeOut: {
-        enable: false,
-        duration: 100
-      }
-    },
-    guides: {
-      enable: true,
-      gap: 50
-    }
-  }
-  const canvasRenderer = new CanvasRenderer(conf)
+  const canvasRenderer = new CanvasRenderer(configuration.DefaultRenderingConfiguration)
+  canvasRenderer.shapeRenderer.draw = jest.fn()
+  canvasRenderer.strokeRenderer.draw = jest.fn()
+  canvasRenderer.textRenderer.draw = jest.fn()
 
   test("should set configuration when instanciate", () =>
   {
-    expect(canvasRenderer.config).toStrictEqual(conf)
+    expect(canvasRenderer.configuration).toStrictEqual(configuration.DefaultRenderingConfiguration)
+  })
+
+  test("should set configuration when instanciate", () =>
+  {
+    expect(canvasRenderer.configuration).toStrictEqual(configuration.DefaultRenderingConfiguration)
   })
 
   test("should init", () =>
@@ -40,6 +30,29 @@ describe("CanvasRenderer.ts", () =>
     expect(wrapperHTML.querySelector(".ms-rendering-canvas")).toBeDefined()
     expect(wrapperHTML.querySelector(".ms-capture-canvas")).toBeDefined()
     expect(canvasRenderer.context).toBeDefined()
+  })
+
+  describe("drawPendingStroke", () => {
+    test("should drawPendingStroke", () =>
+    {
+      const stroke = buildStroke()
+      canvasRenderer.drawPendingStroke(stroke)
+      expect(canvasRenderer.strokeRenderer.draw).toHaveBeenCalledTimes(1)
+      expect(canvasRenderer.strokeRenderer.draw).toHaveBeenCalledWith(canvasRenderer.context.capturingCanvasContext, stroke)
+    })
+    test("should not drawPendingStroke if no stroke", () =>
+    {
+      //@ts-ignore
+      canvasRenderer.drawPendingStroke()
+      expect(canvasRenderer.strokeRenderer.draw).toHaveBeenCalledTimes(0)
+    })
+    test("should not drawPendingStroke if stroke.pointerType === eraser", () =>
+    {
+      const stroke = buildStroke()
+      stroke.pointerType = "eraser"
+      canvasRenderer.drawPendingStroke(stroke)
+      expect(canvasRenderer.strokeRenderer.draw).toHaveBeenCalledTimes(0)
+    })
   })
 
   test("should destroy", () =>

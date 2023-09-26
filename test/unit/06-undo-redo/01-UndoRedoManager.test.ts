@@ -1,6 +1,5 @@
 import
 {
-  IModel,
   TPointer,
   TUndoRedoConfiguration
 } from "../../../src/@types"
@@ -32,7 +31,7 @@ describe("UndoRedoManager.ts", () =>
   describe("addModelToStack", () =>
   {
     const configuration: TUndoRedoConfiguration = { maxStackSize: 5 }
-    const model: IModel = new Model(27, 5)
+    const model = new Model(27, 5)
     const manager = new UndoRedoManager(configuration, model)
 
     test("should add model to stack", () =>
@@ -113,7 +112,7 @@ describe("UndoRedoManager.ts", () =>
 
   describe("undo", () =>
   {
-    const model: IModel = new Model(27, 5)
+    const model = new Model(27, 5)
     const manager = new UndoRedoManager(DefaultConfiguration["undo-redo"], model)
     test("should get the previous model", () =>
     {
@@ -138,7 +137,7 @@ describe("UndoRedoManager.ts", () =>
 
   describe("redo", () =>
   {
-    const model: IModel = new Model(27, 5)
+    const model = new Model(27, 5)
     const manager = new UndoRedoManager(DefaultConfiguration["undo-redo"], model)
     test("should get the next model", () =>
     {
@@ -166,7 +165,7 @@ describe("UndoRedoManager.ts", () =>
   {
     test("should update last model in stack", async () =>
     {
-      const model: IModel = new Model(27, 5)
+      const model = new Model(27, 5)
       const manager = new UndoRedoManager(DefaultConfiguration["undo-redo"], model)
       const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       // wait a few seconds and have a different model.modificationDate
@@ -190,7 +189,7 @@ describe("UndoRedoManager.ts", () =>
 
     test("should update previous model in stack", async () =>
     {
-      const model: IModel = new Model(27, 5)
+      const model = new Model(27, 5)
       const manager = new UndoRedoManager(DefaultConfiguration["undo-redo"], model)
 
       const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
@@ -223,7 +222,7 @@ describe("UndoRedoManager.ts", () =>
 
   test("should reset context", () =>
   {
-    const model: IModel = new Model(27, 5)
+    const model = new Model(27, 5)
     const manager = new UndoRedoManager(DefaultConfiguration["undo-redo"], model)
 
     const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }

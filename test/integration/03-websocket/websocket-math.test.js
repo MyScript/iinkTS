@@ -6,7 +6,7 @@ const {
   getExportsTypeFromEditorModel,
   getEditorConfiguration,
   setEditorConfiguration,
-  getConversionsFromEditorModel,
+  getConvertsFromEditorModel,
   getDatasFromConvertedEvent,
   waitEditorIdle
 } = require('../helper')
@@ -119,7 +119,7 @@ describe('Websocket Math', function () {
         write(page, [s], 100, 100)
       ])
     }
-    const emptyConvert = await getConversionsFromEditorModel(page)
+    const emptyConvert = await getConvertsFromEditorModel(page)
     expect(emptyConvert).toBeUndefined()
     expect(await page.locator('path').count()).toEqual(equation1.strokes.length)
 
@@ -131,7 +131,7 @@ describe('Websocket Math', function () {
     await waitEditorIdle(page)
     expect(await page.locator('path').count()).toEqual(equation1.exports.LATEX.at(-1).length)
 
-    const convert = await getConversionsFromEditorModel(page)
+    const convert = await getConvertsFromEditorModel(page)
     const latexExport = await getExportsTypeFromEditorModel(page, 'application/x-latex')
     expect(convert['application/x-latex']).toEqual(latexExport)
     expect(latexExport).toEqual(equation1.exports.LATEX.at(-1))
@@ -149,16 +149,16 @@ describe('Websocket Math', function () {
       expect(exports['application/x-latex']).toEqual(sum.exports.LATEX.at(numStroke))
       numStroke++
     }
-    const emptyConvert = await getConversionsFromEditorModel(page)
+    const emptyConvert = await getConvertsFromEditorModel(page)
     expect(emptyConvert).toBeUndefined()
 
     await Promise.all([
       getDatasFromConvertedEvent(page),
       page.click('#convert')
     ])
-    const convert = await getConversionsFromEditorModel(page)
-    expect(convert['application/x-latex']).toEqual(sum.converts.LATEX.at(-1))
-    expect(await page.locator('#result').locator('.katex-html').textContent()).toEqual(sum.converts.LATEX.at(-1))
+    const convert = await getConvertsFromEditorModel(page)
+    expect(convert['application/x-latex']).toEqual(sum.exports.LATEX.at(-1))
+    expect(await page.locator('#result').locator('.katex-html').textContent()).toEqual(sum.exports.LATEX.at(-1))
   })
 
   test('should convert and not solve sum', async () => {
@@ -176,18 +176,18 @@ describe('Websocket Math', function () {
       expect(exports['application/x-latex']).toEqual(sum.exports.LATEX.at(numStroke))
       numStroke++
     }
-    const emptyConvert = await getConversionsFromEditorModel(page)
+    const emptyConvert = await getConvertsFromEditorModel(page)
     expect(emptyConvert).toBeUndefined()
 
     await Promise.all([
       getDatasFromConvertedEvent(page),
       page.click('#convert')
     ])
-    const convert = await getConversionsFromEditorModel(page)
+    const convert = await getConvertsFromEditorModel(page)
     const latexExport = await getExportsTypeFromEditorModel(page, 'application/x-latex')
     expect(convert['application/x-latex']).toEqual(latexExport)
-    expect(latexExport).toEqual(sum.exports.LATEX.at(-1))
-    expect(await page.locator('#result').locator('.katex-html').textContent()).toEqual(sum.exports.LATEX.at(-1))
+    expect(latexExport).toEqual(sum.exports.LATEX.at(-2))
+    expect(await page.locator('#result').locator('.katex-html').textContent()).toEqual(sum.exports.LATEX.at(-2))
   })
 
 

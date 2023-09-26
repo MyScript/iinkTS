@@ -37,10 +37,5 @@ describe("QuadraticUtils.ts", () =>
     expect(point).toStrictEqual({ x: 1.5, y: 3, p: 1, t: 1 })
   })
 
-  test('should computeAxeAngle', () =>
-  {
-    const angle = quadradicsUtils.computeAxeAngle(p1, p2)
-    expect(angle).toBe(1.3258176636680326)
-  })
 
 })

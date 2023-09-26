@@ -1,5 +1,7 @@
-import { IModel } from "../@types/model/Model"
-import { TUndoRedoContext } from "../@types/undo-redo/UndoRedoContext"
+import {
+  IModel,
+  TUndoRedoContext
+} from "../@types"
 
 export class UndoRedoContext implements TUndoRedoContext
 {

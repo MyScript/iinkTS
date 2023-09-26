@@ -128,14 +128,6 @@ describe("DefaultConfiguration.ts", () =>
     })
   })
 
-  describe("should have DefaultEventsConfiguration", () =>
-  {
-    test("should have processDelay", () =>
-    {
-      expect(DefaultConfiguration.events.processDelay).toStrictEqual(10)
-    })
-  })
-
   describe("should have DefaultUndoRedoConfiguration", () =>
   {
     test("should have maxStackSize", () =>

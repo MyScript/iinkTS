@@ -10,6 +10,6 @@ export type TRawContentRecognitionConfiguration = {
 export type TRawContentConfiguration = {
   text?: TTextConfConfiguration
   "session-time"?: number
-  recognition?: TRecognitionConfiguration
+  recognition?: TRawContentRecognitionConfiguration
   eraser?: TEraserConfiguration
 }

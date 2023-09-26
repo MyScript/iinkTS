@@ -1,4 +1,7 @@
-import { TPoint, TPointer } from "../@types/geometry"
+import {
+  TPoint,
+  TPointer
+} from "../@types"
 
 export function computeLinksPoints(point: TPointer, angle: number, width: number): TPoint[]
 {
@@ -23,9 +26,4 @@ export function computeMiddlePoint(point1: TPointer, point2: TPointer): TPointer
     p: ((point2.p + point1.p) / 2),
     t: ((point2.t + point1.t) / 2)
   }
-}
-
-export function computeAxeAngle(begin: TPointer, end: TPointer): number
-{
-  return Math.atan2(end.y - begin.y, end.x - begin.x)
 }

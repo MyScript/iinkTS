@@ -1,9 +1,11 @@
 import { ConfigurationTextWebsocket } from "../_dataset/configuration.dataset"
 import { utils } from "../../../src/iink"
 
+const round = (n: number, digit = 2) => Math.round(n * Math.pow(10, digit)) / Math.pow(10, digit)
+
 describe("utils", () =>
 {
-  const { getAvailableLanguageList, getAvailableFontList, version, geometric, crypto } = utils
+  const { getAvailableLanguageList, getAvailableFontList, version, mergeDeep, math, units, crypto } = utils
   describe("getAvailableLanguageList", () =>
   {
     global.fetch = jest.fn(() =>
@@ -146,7 +148,6 @@ describe("utils", () =>
       { source: "2.11.9", target: "2.12.88", expected: false },
       { source: "1.0.0", target: "1.0.0", expected: true },
     ]
-
     testDatas.forEach(d =>
     {
       test(`shoud get ${ d.source } is ${ d.expected ? "higher" : "lower" } than ${ d.target }`, () =>
@@ -156,7 +157,30 @@ describe("utils", () =>
     })
   })
 
-  describe("geometric", () =>
+  describe("merge", () =>
+  {
+    const testDatas = [
+      { source: { a: 1, b: 2 }, target: { a: 1, b: 3 }, expected: { a: 1, b: 3 } },
+      { source: { b: 2 }, target: { a: 1, b: 3 }, expected: { a: 1, b: 3 } },
+      { source: { a: 1, b: 2 }, target: { a: 1 }, expected: { a: 1, b: 2 } },
+      { source: { a: 1, b: { c: 1 } }, target: { a: 1 }, expected: { a: 1, b: { c: 1 } } },
+      { source: { a: 1 }, target: { a: 1, b: { c: 1 } }, expected: { a: 1, b: { c: 1 } } },
+      { source: { a: 1, b: { c: 1 } }, target: { a: 1, b: { d: 4 } }, expected: { a: 1, b: { c: 1, d: 4 } } },
+      { source: { a: 1, b: ["a", "b"] }, target: { a: 1 }, expected: { a: 1, b: ["a", "b"] } },
+      { source: { a: 1 }, target: { a: 1, b: ["a", "b"] }, expected: { a: 1, b: ["a", "b"] } },
+      { source: [1, 2], target: ["a", "b"], expected: [1, 2, "a", "b"] },
+      { source: "pouet", target: "yolo", expected: "yolo" },
+    ]
+    testDatas.forEach(d =>
+    {
+      test(`shoud mergeDeep ${ JSON.stringify(d.source) } with ${ JSON.stringify(d.target) } to ${ JSON.stringify(d.expected) }`, () =>
+      {
+        expect(mergeDeep(d.source, d.target)).toEqual(d.expected)
+      })
+    })
+  })
+
+  describe("math", () =>
   {
     describe("computeDistance", () =>
     {
@@ -181,9 +205,75 @@ describe("utils", () =>
       {
         test(`should computed distance of P1: [${ JSON.stringify(d.p1) }] & P2: [${ JSON.stringify(d.p2) }] to equal ${ d.expected }`, () =>
         {
-          expect(geometric.computeDistance(d.p1, d.p2)).toEqual(d.expected)
+          expect(math.computeDistance(d.p1, d.p2)).toEqual(d.expected)
         })
       })
+    })
+
+    describe("computeAngleAxeRadian", () =>
+    {
+      const testDatas = [
+        {
+          p1: { x: 0, y: 0 },
+          p2: { x: 10, y: 0 },
+          expect: 0
+        },
+        {
+          p1: { x: 10, y: 0 },
+          p2: { x: 0, y: 0 },
+          expect: 3.14
+        },
+        {
+          p1: { x: 0, y: 0 },
+          p2: { x: 0, y: 1 },
+          expect: 1.5708
+        },
+        {
+          p1: { x: 0, y: 1 },
+          p2: { x: 0, y: 0 },
+          expect: -1.5708
+        },
+        {
+          p1: { x: 0, y: 0 },
+          p2: { x: 1, y: 1 },
+          expect: 0.79
+        },
+        {
+          p1: { x: 1, y: 1 },
+          p2: { x: 0, y: 0 },
+          expect: -2.36
+        },
+        {
+          p1: { x: 0, y: 0 },
+          p2: { x: 3, y: 1 },
+          expect: 0.32
+        },
+        {
+          p1: { x: 3, y: 0 },
+          p2: { x: 0, y: 1 },
+          expect: 2.82
+        },
+      ]
+      testDatas.forEach(d =>
+      {
+        test(`should compute radian for P1[${ JSON.stringify(d.p1) }] P2[${ JSON.stringify(d.p2) }] to equal ${ d.expect }`, () =>
+        {
+          expect(round(math.computeAngleAxeRadian(d.p1, d.p2))).toEqual(round(d.expect))
+        })
+      })
+    })
+
+  })
+
+  describe("units", () =>
+  {
+    test("convertMillimeterToPixel", () =>
+    {
+      expect(round(units.convertMillimeterToPixel(10), 0)).toEqual(38)
+    })
+    test("convertPixelToMillimeter", () =>
+    {
+      expect(round(units.convertPixelToMillimeter(38), 0)).toEqual(10)
     })
   })
 

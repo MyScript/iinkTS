@@ -3,6 +3,7 @@ type EventFakeProps = {
   clientY: number
   pressure: number
   pointerType: string
+  pointerId?: number
 }
 
 type CompleteEventFakeProps = EventFakeProps & {
@@ -28,7 +29,7 @@ export class PointerEventFake extends Event {
     this.pressure = props.pressure
     this.button = props.button
     this.buttons = props.buttons
-    this.pointerId = Math.floor(Math.random() * 100)
+    this.pointerId = props.pointerId || Math.floor(Math.random() * 100)
   }
 }
 
@@ -51,7 +52,6 @@ export class RightClickEventFake extends PointerEventFake {
     })
   }
 }
-
 
 export class TouchEventFake extends PointerEventFake {
   changedTouches: TouchListFake

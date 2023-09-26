@@ -7,7 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
     <title>Rest Text Styling</title>
-    <link rel="stylesheet" href="../examples.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
     <style>
       .nav-block {
@@ -16,19 +16,23 @@
       input[type="number"].pen-width-field {
         width: 150px;
       }
-
-      .pen-color-field,
-      .pen-color-field:focus {
-        padding: 0;
-        height: 36px;
-      }
       #editor {
-        height: calc(100vh - 224px);
+        height: calc(100vh - 221px);
       }
 
-      @media only screen and (max-width: 720px) {
+      @media only screen and (max-width: 671px) {
         #editor {
-          height: calc(100vh - 275px);
+          height: calc(100vh - 268px);
+        }
+      }
+      @media only screen and (max-width: 474px) {
+        #editor {
+          height: calc(100vh - 308px);
+        }
+      }
+      @media only screen and (max-width: 375px) {
+        #editor {
+          height: calc(100vh - 340px);
         }
       }
     </style>
@@ -38,33 +42,33 @@
     <div id="result"></div>
 
     <nav class="nav-block">
-      <div class="flex-container between gap">
-        <div class="flex-container gap">
+      <div class="flex-container wrap between gap">
+        <div class="flex-container wrap gap">
           <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/clear.svg" />
+            <img src="../assets/img/clear.svg" />
           </button>
           <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/undo.svg" />
+            <img src="../assets/img/undo.svg" />
           </button>
           <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/redo.svg" />
+            <img src="../assets/img/redo.svg" />
           </button>
         </div>
-        <div class="flex-container gap">
+        <div class="flex-container wrap gap">
           <label for="language">Language: </label>
           <select id="language"></select>
         </div>
       </div>
-      <div class="flex-container between gap">
-        <div class="flex-container gap">
+      <div class="flex-container wrap between gap">
+        <div class="flex-container wrap gap">
           <label for="penenabled">Enable pen color/thickness: </label>
           <input id="penenabled" type="checkbox" />
         </div>
-        <div class="flex-container gap">
+        <div class="flex-container wrap gap">
           <label for="pencolor">Color:</label>
-          <input id="pencolor" class="input-field pen-color-field" type="color" value="#ff7314" disabled/>
+          <input id="pencolor" type="color" value="#ff7314" disabled/>
         </div>
-        <div class="flex-container gap">
+        <div class="flex-container wrap gap">
           <label for="penwidth">Thickness:</label>
           <input id="penwidth" class="pen-width-field" type="number" min="1" max="5" value="2" disabled/>
         </div>

@@ -1,6 +1,6 @@
-import { TConfigurationClient } from "../../../src/@types/configuration"
+import { DeepPartial, TConfiguration } from "../../../src/@types"
 
-export const ConfigurationTextWebsocket: TConfigurationClient = {
+export const ConfigurationTextWebsocket: DeepPartial<TConfiguration> = {
   server: {
     protocol: 'WEBSOCKET',
     scheme: 'http',
@@ -23,7 +23,7 @@ export const ConfigurationTextWebsocket: TConfigurationClient = {
   }
 }
 
-export const ConfigurationTextRest: TConfigurationClient = {
+export const ConfigurationTextRest: DeepPartial<TConfiguration> = {
   server: {
     protocol: 'REST',
     scheme: 'http',
@@ -45,7 +45,7 @@ export const ConfigurationTextRest: TConfigurationClient = {
   }
 }
 
-export const ConfigurationDiagramRest: TConfigurationClient = {
+export const ConfigurationDiagramRest: DeepPartial<TConfiguration> = {
   server: {
     protocol: 'REST',
     scheme: 'http',
@@ -61,7 +61,7 @@ export const ConfigurationDiagramRest: TConfigurationClient = {
   }
 }
 
-export const ConfigurationRawContentRest: TConfigurationClient = {
+export const ConfigurationRawContentRest: DeepPartial<TConfiguration> = {
   server: {
     protocol: 'REST',
     scheme: 'http',
@@ -74,7 +74,7 @@ export const ConfigurationRawContentRest: TConfigurationClient = {
   }
 }
 
-export const AllOverrideConfiguration: TConfigurationClient = {
+export const AllOverrideConfiguration: DeepPartial<TConfiguration> = {
   server: {
     protocol: 'REST',
     scheme: 'http',
@@ -107,7 +107,8 @@ export const AllOverrideConfiguration: TConfigurationClient = {
         text: {
           chars: true,
           words: false
-        }
+        },
+        ids: true,
       },
     },
     renderer: {
@@ -169,7 +170,12 @@ export const AllOverrideConfiguration: TConfigurationClient = {
       },
       eraser: {
         'erase-precisely': true
-      }
+      },
+      gestures: [
+        "underline",
+        "scratch-out",
+        "join"
+      ],
     }
   },
   grabber: {
@@ -192,16 +198,14 @@ export const AllOverrideConfiguration: TConfigurationClient = {
     },
     guides: {
       enable: false,
-      gap: 100
+      gap: 100,
+      type: "line-grid"
     }
   },
   triggers: {
     exportContent: 'DEMAND',
     exportContentDelay: 5,
     resizeTriggerDelay: 5
-  },
-  events: {
-    processDelay: 0
   },
   'undo-redo': {
     maxStackSize: 10

@@ -4,6 +4,7 @@ import resolve from "@rollup/plugin-node-resolve"
 import postcss from "rollup-plugin-postcss"
 import dts from "rollup-plugin-dts"
 import commonjs from "rollup-plugin-commonjs"
+import svg from "rollup-plugin-svg-import"
 
 export default [
   {
@@ -31,6 +32,7 @@ export default [
         compress: true,
       }),
       postcss(),
+      svg({ stringify: true })
     ],
   },
   {

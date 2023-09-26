@@ -1,15 +1,15 @@
-import { delay } from "../utils/helpers"
-import { IModel, TExport, TPointer } from "../../../src/@types"
+import { buildStroke, delay } from "../utils/helpers"
+import { TExport, TPointer } from "../../../src/@types"
 import { model, style } from "../../../src/iink"
 
 describe("Model.ts", () =>
 {
   const { Model, Stroke } = model
   const { DefaultPenStyle } = style
-  const width = 100, height = 100
+  const width = 100, height = 100, rowHeight = 10
   test("should create", () =>
   {
-    const model: IModel = new Model(width, height)
+    const model= new Model(width, height, rowHeight)
     expect(model).toBeDefined()
   })
 
@@ -17,7 +17,7 @@ describe("Model.ts", () =>
   {
     test("should initialize export if toBeUndefined", () =>
     {
-      const model: IModel = new Model(width, height)
+      const model= new Model(width, height, rowHeight)
       const e: TExport = { "text/plain": "poney" }
       expect(model.exports).toBeUndefined()
       model.mergeExport(e)
@@ -25,7 +25,7 @@ describe("Model.ts", () =>
     })
     test("should merge export", () =>
     {
-      const model: IModel = new Model(width, height)
+      const model= new Model(width, height, rowHeight)
       const originExport: TExport = {
         "application/vnd.myscript.jiix": {
           "type": "Text",
@@ -49,46 +49,10 @@ describe("Model.ts", () =>
     })
   })
 
-  describe("mergeConvert", () =>
-  {
-    test("should initialize export if toBeUndefined", () =>
-    {
-      const model: IModel = new Model(width, height)
-      const e: TExport = { "text/plain": "poney" }
-      expect(model.converts).toBeUndefined()
-      model.mergeConvert(e)
-      expect(model.converts).toEqual(e)
-    })
-    test("should merge export", () =>
-    {
-      const model: IModel = new Model(width, height)
-      const originExport: TExport = {
-        "application/vnd.myscript.jiix": {
-          "type": "Text",
-          "label": "poney",
-          "words": [
-            {
-              "label": "poney",
-              "candidates": ["poney", "Poney", "ponay", "ponex", "pony"]
-            }
-          ],
-          "version": "3",
-          "id": "MainBlock"
-        }
-      }
-      model.converts = originExport
-      const e: TExport = { "text/plain": "poney" }
-
-      model.mergeConvert(e)
-      expect(model.converts).toMatchObject(originExport)
-      expect(model.converts).toMatchObject(e)
-    })
-  })
-
   describe("addPoint", () =>
   {
-    const model: IModel = new Model(width, height)
-    test("should add point to x, y, t & t array", () =>
+    const model= new Model(width, height, rowHeight)
+    test("should add point to x, y, p & t array", () =>
     {
       const stroke = new Stroke(DefaultPenStyle, 1)
       const point: TPointer = {
@@ -141,7 +105,7 @@ describe("Model.ts", () =>
   {
     test("should updateStroke", () =>
     {
-      const model: IModel = new Model(width, height)
+      const model= new Model(width, height, rowHeight)
       const stroke = new Stroke(DefaultPenStyle, 1)
       for (let index = 0; index < 10; index++) {
         stroke.pointers.push({
@@ -152,18 +116,18 @@ describe("Model.ts", () =>
         })
       }
       model.addStroke(stroke)
-      expect(model.rawStrokes).toHaveLength(1)
-      expect(model.rawStrokes[0]).toStrictEqual(stroke)
+      expect(model.strokes).toHaveLength(1)
+      expect(model.strokes[0]).toStrictEqual(stroke)
       const strokeUpdated = new Stroke(DefaultPenStyle, 1)
       strokeUpdated.id = stroke.id
       strokeUpdated.pointers.push({ p: 0.5, t: 0.5, x: 100, y: 27 })
       model.updateStroke(strokeUpdated)
-      expect(model.rawStrokes).toHaveLength(1)
-      expect(model.rawStrokes[0]).toStrictEqual(strokeUpdated)
+      expect(model.strokes).toHaveLength(1)
+      expect(model.strokes[0]).toStrictEqual(strokeUpdated)
     })
     test("should not updateStroke if id not exist", () =>
     {
-      const model: IModel = new Model(width, height)
+      const model= new Model(width, height, rowHeight)
       const stroke = new Stroke(DefaultPenStyle, 1)
       for (let index = 0; index < 10; index++) {
         stroke.pointers.push({
@@ -174,15 +138,15 @@ describe("Model.ts", () =>
         })
       }
       model.addStroke(stroke)
-      expect(model.rawStrokes).toHaveLength(1)
-      expect(model.rawStrokes[0]).toStrictEqual(stroke)
+      expect(model.strokes).toHaveLength(1)
+      expect(model.strokes[0]).toStrictEqual(stroke)
       const strokeUpdated = new Stroke(DefaultPenStyle, 1)
       strokeUpdated.id = "pouette"
       strokeUpdated.pointers.push({ p: 0.5, t: 0.5, x: 100, y: 27 })
       model.updateStroke(strokeUpdated)
-      expect(model.rawStrokes).toHaveLength(1)
-      expect(model.rawStrokes[0]).not.toStrictEqual(strokeUpdated)
-      expect(model.rawStrokes[0]).toStrictEqual(stroke)
+      expect(model.strokes).toHaveLength(1)
+      expect(model.strokes[0]).not.toStrictEqual(strokeUpdated)
+      expect(model.strokes[0]).toStrictEqual(stroke)
     })
   })
 
@@ -190,7 +154,7 @@ describe("Model.ts", () =>
   {
     test("should removeStroke", () =>
     {
-      const model: IModel = new Model(width, height)
+      const model= new Model(width, height, rowHeight)
       const stroke = new Stroke(DefaultPenStyle, 1)
       for (let index = 0; index < 10; index++) {
         stroke.pointers.push({
@@ -201,14 +165,14 @@ describe("Model.ts", () =>
         })
       }
       model.addStroke(stroke)
-      expect(model.rawStrokes).toHaveLength(1)
-      expect(model.rawStrokes[0]).toStrictEqual(stroke)
+      expect(model.strokes).toHaveLength(1)
+      expect(model.strokes[0]).toStrictEqual(stroke)
       model.removeStroke(stroke.id)
-      expect(model.rawStrokes).toHaveLength(0)
+      expect(model.strokes).toHaveLength(0)
     })
     test("should not removeStroke if id not exist", () =>
     {
-      const model: IModel = new Model(width, height)
+      const model= new Model(width, height, rowHeight)
       const stroke = new Stroke(DefaultPenStyle, 1)
       for (let index = 0; index < 10; index++) {
         stroke.pointers.push({
@@ -219,40 +183,80 @@ describe("Model.ts", () =>
         })
       }
       model.addStroke(stroke)
-      expect(model.rawStrokes).toHaveLength(1)
-      expect(model.rawStrokes[0]).toStrictEqual(stroke)
+      expect(model.strokes).toHaveLength(1)
+      expect(model.strokes[0]).toStrictEqual(stroke)
       model.removeStroke("pouette")
-      expect(model.rawStrokes).toHaveLength(1)
+      expect(model.strokes).toHaveLength(1)
     })
   })
 
-  describe("rawStrokes", () =>
+  describe("strokes", () =>
   {
     test("should addStrokes", () =>
     {
-      const model: IModel = new Model(width, height)
+      const model= new Model(width, height, rowHeight)
       const stroke = new Stroke(DefaultPenStyle, 1)
       model.addStroke(stroke)
-      expect(model.rawStrokes).toHaveLength(1)
-      expect(model.rawStrokes[0]).toStrictEqual(stroke)
+      expect(model.strokes).toHaveLength(1)
+      expect(model.strokes[0]).toStrictEqual(stroke)
     })
 
     test("should extractUnsentStrokes", () =>
     {
-      const model: IModel = new Model(width, height)
+      const model= new Model(width, height, rowHeight)
       const stroke = new Stroke(DefaultPenStyle, 1)
       model.addStroke(stroke)
-      expect(model.rawStrokes).toHaveLength(1)
+      expect(model.strokes).toHaveLength(1)
       const extractStroke = model.extractUnsentStrokes()
       expect(extractStroke).toHaveLength(1)
       expect(extractStroke[0]).toStrictEqual(stroke)
-      expect(model.rawStrokes).toHaveLength(1)
+      expect(model.strokes).toHaveLength(1)
+    })
+
+    test("should extractDifferenceStrokes", async () =>
+    {
+      const model1= new Model(width, height, rowHeight)
+      const strokeNotModified = new Stroke(DefaultPenStyle, 1)
+      strokeNotModified.id = "stroke-not-modified"
+      model1.addPoint(strokeNotModified, { p: 5, t: 5, x: 5, y: 5 })
+      model1.addStroke(strokeNotModified)
+
+      const strokeModified = new Stroke(DefaultPenStyle, 1)
+      strokeModified.id = "stroke-modified"
+      model1.addPoint(strokeModified, { p: 5, t: 5, x: 5, y: 5 })
+      model1.addStroke(strokeModified)
+
+      const stroke1 = new Stroke(DefaultPenStyle, 1)
+      stroke1.id = "stroke-1"
+      model1.addPoint(stroke1, { p: 1, t: 1, x: 1, y: 1 })
+      model1.addStroke(stroke1)
+
+      const model2 = model1.getClone()
+      const stroke2 = new Stroke(DefaultPenStyle, 1)
+      stroke2.id = "stroke-2"
+      model2.addPoint(stroke2, { p: 2, t: 2, x: 2, y: 2 })
+      model2.addStroke(stroke2)
+      model2.removeStroke(stroke1.id)
+
+      await delay(50)
+      model1.addPoint(strokeModified, { p: 3, t: 3, x: 3, y: 3 })
+      model1.updateStroke(strokeModified)
+
+      expect(model1.strokes).toHaveLength(3)
+      expect(model2.strokes).toHaveLength(3)
+      const extractStroke = model1.extractDifferenceStrokes(model2)
+      expect(extractStroke.newStrokes).toHaveLength(2)
+      expect(extractStroke.newStrokes.find(s => s.id === stroke1.id)).toEqual(stroke1)
+      expect(extractStroke.newStrokes.find(s => s.id === strokeModified.id)).toEqual(strokeModified)
+      expect(extractStroke.deletedStrokes).toHaveLength(2)
+      expect(extractStroke.deletedStrokes.find(s => s.id === stroke2.id)).toEqual(stroke2)
+      expect(extractStroke.deletedStrokes.find(s => s.id === strokeModified.id)).toBeDefined()
     })
   })
 
   describe("currentStroke", () =>
   {
-    const model: IModel = new Model(width, height)
+    const model= new Model(width, height, rowHeight)
     test("should initCurrentStroke", async () =>
     {
       expect(model.currentStroke).toBeUndefined()
@@ -280,7 +284,7 @@ describe("Model.ts", () =>
     })
     test("should initCurrentStroke with -myscript-pen-width", async () =>
     {
-      const _model: IModel = new Model(width, height)
+      const _model= new Model(width, height, rowHeight)
       const point: TPointer = {
         t: 1,
         p: 0.5,
@@ -349,75 +353,11 @@ describe("Model.ts", () =>
     })
   })
 
-  describe("appendSelectedStrokesFromPoint", () =>
-  {
-    const model: IModel = new Model(27, 5)
-    const stroke1 = new Stroke(DefaultPenStyle, 1)
-    stroke1.id = "stroke-1"
-    for (let index = 0; index < 20; index++) {
-      stroke1.pointers.push({
-        p: 1,
-        t: index,
-        x: index,
-        y: index
-      })
-    }
-    model.addStroke(stroke1)
-    const stroke2 = new Stroke(DefaultPenStyle, 1)
-    stroke2.id = "stroke-2"
-    for (let index = 30; index < 40; index++) {
-      stroke2.pointers.push({
-        p: 1,
-        t: index,
-        x: index,
-        y: index
-      })
-    }
-    model.addStroke(stroke2)
-    test("shoud select stroke when point on stroke", () =>
-    {
-      model.appendSelectedStrokesFromPoint({ x: 1, y: 1 })
-      expect(model.selectedStrokes).toHaveLength(1)
-      expect(model.selectedStrokes[0].id).toEqual("stroke-1")
-    })
-    test("shoud reset selectedStrokes", () =>
-    {
-      expect(model.selectedStrokes).toHaveLength(1)
-      model.resetSelectedStrokes()
-      expect(model.selectedStrokes).toHaveLength(0)
-    })
-    test("should select the stroke when the point is at a distance less than 10", () =>
-    {
-      expect(model.selectedStrokes).toHaveLength(0)
-      model.appendSelectedStrokesFromPoint({ x: 36, y: 41 })
-      expect(model.selectedStrokes).toHaveLength(1)
-      expect(model.selectedStrokes[0].id).toEqual("stroke-2")
-    })
-    test("should not select the stroke when the point is at a distance less than 10", () =>
-    {
-      model.resetSelectedStrokes()
-      expect(model.selectedStrokes).toHaveLength(0)
-      model.appendSelectedStrokesFromPoint({ x: 56, y: 51 })
-      expect(model.selectedStrokes).toHaveLength(0)
-    })
-    test("should not select the same stroke twice", () =>
-    {
-      model.resetSelectedStrokes()
-      expect(model.selectedStrokes).toHaveLength(0)
-      model.appendSelectedStrokesFromPoint({ x: 36, y: 41 })
-      expect(model.selectedStrokes).toHaveLength(1)
-      expect(model.selectedStrokes[0].id).toEqual("stroke-2")
-      model.appendSelectedStrokesFromPoint({ x: 36, y: 40 })
-      expect(model.selectedStrokes).toHaveLength(1)
-      expect(model.selectedStrokes[0].id).toEqual("stroke-2")
-    })
-  })
-
   describe("removeStrokesFromPoint", () =>
   {
     test("shoud remove stroke when point on stroke", () =>
     {
-      const model: IModel = new Model(27, 5)
+      const model= new Model(27, 5)
       const stroke1 = new Stroke(DefaultPenStyle, 1)
       stroke1.id = "stroke-1"
       for (let index = 0; index < 20; index++) {
@@ -440,16 +380,16 @@ describe("Model.ts", () =>
         })
       }
       model.addStroke(stroke2)
-      expect(model.rawStrokes).toHaveLength(2)
+      expect(model.strokes).toHaveLength(2)
       const idsRemoves = model.removeStrokesFromPoint({ x: 1, y: 1 })
       expect(idsRemoves).toHaveLength(1)
       expect(idsRemoves[0]).toEqual("stroke-1")
-      expect(model.rawStrokes).toHaveLength(1)
-      expect(model.rawStrokes[0].id).toEqual("stroke-2")
+      expect(model.strokes).toHaveLength(1)
+      expect(model.strokes[0].id).toEqual("stroke-2")
     })
     test("should remove the stroke when the point is at a distance less than 10", () =>
     {
-      const model: IModel = new Model(27, 5)
+      const model= new Model(27, 5)
       const stroke1 = new Stroke(DefaultPenStyle, 1)
       stroke1.id = "stroke-1"
       for (let index = 0; index < 20; index++) {
@@ -472,16 +412,16 @@ describe("Model.ts", () =>
         })
       }
       model.addStroke(stroke2)
-      expect(model.rawStrokes).toHaveLength(2)
+      expect(model.strokes).toHaveLength(2)
       const idsRemoves = model.removeStrokesFromPoint({ x: 36, y: 41 })
       expect(idsRemoves).toHaveLength(1)
       expect(idsRemoves[0]).toEqual("stroke-2")
-      expect(model.rawStrokes).toHaveLength(1)
-      expect(model.rawStrokes[0].id).toEqual("stroke-1")
+      expect(model.strokes).toHaveLength(1)
+      expect(model.strokes[0].id).toEqual("stroke-1")
     })
     test("should not remove the stroke when the point is at a distance less than 10", () =>
     {
-      const model: IModel = new Model(27, 5)
+      const model= new Model(27, 5)
       const stroke1 = new Stroke(DefaultPenStyle, 1)
       stroke1.id = "stroke-1"
       for (let index = 0; index < 20; index++) {
@@ -504,16 +444,16 @@ describe("Model.ts", () =>
         })
       }
       model.addStroke(stroke2)
-      expect(model.rawStrokes).toHaveLength(2)
+      expect(model.strokes).toHaveLength(2)
       const idsRemoves = model.removeStrokesFromPoint({ x: 56, y: 51 })
       expect(idsRemoves).toHaveLength(0)
-      expect(model.rawStrokes).toHaveLength(2)
+      expect(model.strokes).toHaveLength(2)
     })
   })
 
   describe("position", () =>
   {
-    const model: IModel = new Model(width, height)
+    const model= new Model(width, height, rowHeight)
     test("should initialize position", () =>
     {
       expect(model.positions.lastReceivedPosition).toBe(0)
@@ -533,16 +473,10 @@ describe("Model.ts", () =>
 
   describe("clone", () =>
   {
-    const model: IModel = new Model(27, 5)
-    const stroke = new Stroke(DefaultPenStyle, 1)
+    const model= new Model(27, 5)
+    const stroke = buildStroke()
     model.addStroke(stroke)
-    const point: TPointer = {
-      t: 1,
-      p: 0.5,
-      x: 1,
-      y: 1
-    }
-    model.initCurrentStroke(point, 666, "pen", DefaultPenStyle)
+    model.initCurrentStroke({ p: 27, t: 5, x: 1989, y: 42 }, 666, "pen", DefaultPenStyle)
     model.exports = { "text/plain": "M" }
     test("should getClone", () =>
     {
@@ -561,8 +495,8 @@ describe("Model.ts", () =>
       expect(clone.positions).toEqual(model.positions)
       expect(clone.positions).not.toBe(model.positions)
 
-      expect(clone.rawStrokes).toEqual(model.rawStrokes)
-      expect(clone.rawStrokes).not.toBe(model.rawStrokes)
+      expect(clone.strokes).toEqual(model.strokes)
+      expect(clone.strokes).not.toBe(model.strokes)
 
       expect(clone.width).toEqual(model.width)
     })
@@ -572,7 +506,7 @@ describe("Model.ts", () =>
   {
     test("should clear model", () =>
     {
-      const model: IModel = new Model(width, height)
+      const model= new Model(width, height, rowHeight)
       const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
       const p2: TPointer = { t: 10, p: 10, x: 10, y: 10 }
       const p3: TPointer = { t: 10, p: 10, x: 10, y: 10 }
@@ -581,11 +515,11 @@ describe("Model.ts", () =>
       model.endCurrentStroke(p2)
       model.initCurrentStroke(p3, 51, "mouse", DefaultPenStyle)
       expect(model.currentStroke).toBeDefined()
-      expect(model.rawStrokes).toHaveLength(1)
+      expect(model.strokes).toHaveLength(1)
 
       model.clear()
       expect(model.currentStroke).toBeUndefined()
-      expect(model.rawStrokes).toHaveLength(0)
+      expect(model.strokes).toHaveLength(0)
     })
   })
 

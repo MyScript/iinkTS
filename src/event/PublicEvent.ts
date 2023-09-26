@@ -1,5 +1,9 @@
-import { IModel, TExport } from "../@types/model/Model"
-import { TUndoRedoContext } from "../@types/undo-redo/UndoRedoContext"
+import {
+  IModel,
+  TExport,
+  TUndoRedoContext
+} from "../@types"
+
 import { EventType } from "../Constants"
 import { LoggerManager } from "../logger"
 import { LoggerClass } from "../Constants"

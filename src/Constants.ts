@@ -24,52 +24,43 @@ export const Error = {
 
 /**
  * @event
- * @remarks Lists all events that can be listened to on the editor or DOM element
+ * @description Lists all events that can be listened to on the editor or DOM element
  */
 export const EventType = {
   /**
-   * @event
-   * event emitted when history has changed i.e. the context of undo-redo
+   * @description event emitted when history has changed i.e. the context of undo-redo
    */
   CHANGED: "changed",
   /**
-   * @event
-   * event emitted when clearing is complete
+   * @description event emitted when clearing is complete
    */
   CLEARED: "cleared",
   /**
-   * @event
-   * event emitted after the conversion is complete
+   * @description event emitted after the conversion is complete
    */
   CONVERTED: "converted",
   /**
-   * @event
-   * event emitted when the editor encounters an error
+   * @description event emitted when the editor encounters an error
    */
   ERROR: "error",
   /**
-   * @event
-   * event emitted on click on pointer events
+   * @description event emitted on click on pointer events
    */
   POINTEREVENTS: "pointer_events",
   /**
-   * @event
-   * event emitted after the end of the export
+   * @description event emitted after the end of the export
    */
   EXPORTED: "exported",
   /**
-   * @event
-   * event emitted after the end of the import
+   * @description event emitted after the end of the import
    */
   IMPORTED: "imported",
   /**
-   * @event
-   * event emitted when the server is idle after a job
+   * @description event emitted when the server is idle after a job
    */
   IDLE: "idle",
   /**
-   * @event
-   * event emitted after full editor initialization
+   * @description event emitted after full editor initialization
    */
   LOADED: "loaded",
 } as const
@@ -77,7 +68,7 @@ export const EventType = {
 /**
  * @event
  * @internal
- * @remarks Lists all internal library events
+ * @description Lists all internal library events
  */
 export const InternalEventType = {
   SVG_PATCH: "internal_svg_patch",
@@ -90,12 +81,12 @@ export const InternalEventType = {
   CLEAR: "internal_clear",
   CONTEXT_CHANGE: "internal_context_change",
   IDLE: "internal_idle",
-  WS_CLOSED: "internal_websocket_closed",
+  WS_CLOSED: "internal_websocket_closed"
 } as const
 
 /**
  * @group Export
- * @remarks List all supported MIME types for export. Attention, the MIME types supported depend on the {@link TRecognitionType | type of recognition}
+ * @description List all supported MIME types for export. Attention, the MIME types supported depend on the {@link TRecognitionType | type of recognition}
  */
 export const enum ExportType {
   JIIX = "application/vnd.myscript.jiix",
@@ -108,13 +99,12 @@ export const enum ExportType {
 
 /**
  * @group Editor
- * @remarks List the possibilities of interactions
+ * @description List the possibilities of interactions
  */
 export const enum Intention
 {
   Write = "write",
   Erase = "erase",
-  // Selecting = "selecting"
 }
 
 /**

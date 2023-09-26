@@ -9,14 +9,14 @@
 
     <title>Import math with JIIX</title>
 
-    <link rel="stylesheet" href="../examples.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
 
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
     <style>
       main {
         display: flex;
         flex-direction: row;
-        height: calc(100% - 76px);
+        height: calc(100% - 66px);
         width: 100%;
       }
       #editor {
@@ -48,16 +48,16 @@
     </style>
   </head>
   <body>
-    <nav class="flex-container between">
-      <div class="flex-container gap">
+    <nav class="flex-container wrap between">
+      <div class="flex-container wrap gap">
         <button class="classic-btn" id="import">Import</button>
       </div>
-      <div class="flex-container gap">
+      <div class="flex-container wrap gap">
         <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/undo.svg" />
+          <img src="../assets/img/undo.svg" />
         </button>
         <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/redo.svg" />
+          <img src="../assets/img/redo.svg" />
         </button>
         <button class="classic-btn" id="convert" disabled>Convert</button>
       </div>

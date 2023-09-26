@@ -77,6 +77,7 @@ describe('Home Page', () =>
     }
     expect(linksInErrors).toStrictEqual([])
   })
+
   test('each "Get source code" link should ok', async () =>
   {
     const codeLinks = await page.locator('text=Get source code')
