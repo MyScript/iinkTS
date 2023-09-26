@@ -134,7 +134,9 @@
       <div id="interpretatedTextContent"></div>
       <div id="interpretatedImageContent"></div>
     </div>
-    <button id="recognize" class="btn">Recognize</button>
+
+    <button id="recognize" class="classic-btn">Recognize</button>
+
     <script>
       const convertBlobToBase64 = (blob) =>
         new Promise((resolve, reject) => {
@@ -145,7 +147,7 @@
           };
           reader.readAsDataURL(blob);
         });
-      document.querySelector("#recognize").addEventListener("click", async () => {
+      document.getElementById("recognize").addEventListener("click", async () => {
         const res = await fetch("../server-configuration.json");
         const serverConfiguration = await res.json();
         // Creating a configuration

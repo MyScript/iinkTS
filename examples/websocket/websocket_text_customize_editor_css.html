@@ -13,22 +13,28 @@
     <link rel="stylesheet" href="../assets/my-custom-classes.css" />
 
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
+    <style>
+
+      #editor {
+        height: calc(100vh - 66px);
+      }
+    </style>
   </head>
 
   <body>
-    <div>
-      <nav>
-        <div class="button-div">
-          <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/undo.svg" />
-          </button>
-          <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/redo.svg" />
-          </button>
-        </div>
-      </nav>
-      <div id="editor" touch-action="none"></div>
-    </div>
+    <nav>
+      <div class="flex-container gap">
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/undo.svg" />
+        </button>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/redo.svg" />
+        </button>
+      </div>
+    </nav>
+
+    <div id="editor" touch-action="none"></div>
+
     <script>
       const editorElement = document.getElementById("editor");
       const undoElement = document.getElementById("undo");

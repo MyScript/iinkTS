@@ -8,26 +8,42 @@
     <meta name="HandheldFriendly" content="true" />
     <title>Import content</title>
     <link rel="stylesheet" href="../examples.css" />
+    <style>
+      #editor {
+        height: calc(100vh - 72px);
+      }
+      @media only screen and (max-width: 514px) {
+        #editor {
+          height: calc(100vh - 114px);
+        }
+      }
+      @media only screen and (max-width: 398px) {
+        #editor {
+          height: calc(100vh - 161px);
+        }
+      }
+    </style>
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
   </head>
 
   <body>
-    <div>
-      <nav>
-        <div class="button-div">
-          <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/undo.svg" />
-          </button>
-          <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/redo.svg" />
-          </button>
-        </div>
-        <div class="spacer"></div>
-        <input type="text" class="input-field" id="importContentField" data-type="text/plain" placeholder="e.g. hello world" />
+    <nav>
+      <div class="flex-container gap">
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/undo.svg" />
+        </button>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/redo.svg" />
+        </button>
+      </div>
+      <div class="flex-container gap">
+        <input type="text" id="importContentField" data-type="text/plain" placeholder="e.g. hello world" />
         <button class="classic-btn" id="importContent">Import</button>
-      </nav>
-      <div id="editor" touch-action="none"></div>
-    </div>
+      </div>
+    </nav>
+
+    <div id="editor" touch-action="none"></div>
+
     <script>
       const editorElement = document.getElementById("editor");
       const undoElement = document.getElementById("undo");

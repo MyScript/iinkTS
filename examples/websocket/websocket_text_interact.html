@@ -13,7 +13,34 @@
 
     <style>
       #editor {
-        width: 100%;
+        height: calc(100vh - 225px);
+      }
+      @media only screen and (max-width: 391px) {
+        #editor {
+          height: calc(100vh - 259px);
+        }
+      }
+      @media only screen and (max-width: 300px) {
+        #editor {
+          height: calc(100vh - 307px);
+        }
+      }
+
+      .question {
+          font-size: 2em;
+          background-color: #f5f5f5;
+          margin: 0;
+          padding: 12px;
+          border-bottom: 1px solid #D7DDE3;
+          text-align: center;
+      }
+      .result {
+          font-size: 1.25em;
+      }
+      .next-btn .icn {
+          margin: 0 -6px -4px 6px;
+          height: 20px;
+          width: 20px;
       }
     </style>
 
@@ -30,25 +57,27 @@
         ></path>
       </symbol>
     </svg>
-    <p id="question"></p>
-    <div id="result"></div>
-    <div>
-      <nav>
-        <div class="button-div">
-          <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/undo.svg" />
-          </button>
-          <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/redo.svg" />
-          </button>
-        </div>
-        <button id="nextButton" class="classic-btn">
-          Next question
-          <svg class="icn"><use xmlns:xlink="http://www.w3.org/1999/xlink" href="#icn-play"></use></svg>
+
+    <p id="question" class="question"></p>
+
+    <div id="result" class="result"></div>
+
+    <nav>
+      <div class="flex-container gap">
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/undo.svg" />
         </button>
-      </nav>
-      <div id="editor" touch-action="none"></div>
-    </div>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/redo.svg" />
+        </button>
+      </div>
+      <button id="next-btn" class="classic-btn next-btn">
+        Next question
+        <svg class="icn"><use xmlns:xlink="http://www.w3.org/1999/xlink" href="#icn-play"></use></svg>
+      </button>
+    </nav>
+
+    <div id="editor" touch-action="none"></div>
 
     <script>
       const editorElement = document.getElementById("editor");
@@ -56,7 +85,7 @@
       const resultElement = document.getElementById("result");
       const undoElement = document.getElementById("undo");
       const redoElement = document.getElementById("redo");
-      const nextButton = document.getElementById("nextButton");
+      const nextButton = document.getElementById("next-btn");
 
       const countries = ["France", "Italy", "Spain", "Argentina", "Japan"];
       const capitals = ["paris", "rome", "madrid", "buenos aires", "tokyo"];

@@ -9,34 +9,49 @@
     <title>Websocket Text Eraser</title>
     <link rel="stylesheet" href="../examples.css" />
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
+    <style>
+      #editor {
+        height: calc(100vh - 66px);
+      }
+      @media only screen and (max-width: 360px) {
+        #editor {
+          height: calc(100vh - 98px);
+        }
+      }
+      @media only screen and (max-width: 219px) {
+        #editor {
+          height: calc(100vh - 150px);
+        }
+      }
+    </style>
   </head>
 
   <body>
-    <div>
-      <nav>
-        <div class="button-div">
-          <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/undo.svg" />
-          </button>
-          <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/redo.svg" />
-          </button>
-        </div>
-        <div class="button-div">
-          <button id="pen" class="nav-btn btn-fab-mini btn-lightBlue active" disabled>
-            <img src="../assets/pen.svg" />
-          </button>
-          <button id="eraser" class="nav-btn btn-fab-mini btn-lightBlue">
-            <img src="../assets/eraser.svg" />
-          </button>
-        </div>
-        <label for="erase-precisely"
-          >Erase precisely:
-          <input type="checkbox" id="erase-precisely" name="erase-precisely" />
-        </label>
-      </nav>
-      <div id="editor" touch-action="none"></div>
-    </div>
+    <nav>
+      <div class="flex-container gap">
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/undo.svg" />
+        </button>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/redo.svg" />
+        </button>
+      </div>
+      <div class="flex-container gap">
+        <button id="pen" class="nav-btn btn-fab-mini btn-lightBlue active" disabled>
+          <img src="../assets/pen.svg" />
+        </button>
+        <button id="eraser" class="nav-btn btn-fab-mini btn-lightBlue">
+          <img src="../assets/eraser.svg" />
+        </button>
+      </div>
+      <label for="erase-precisely"
+        >Erase precisely:
+        <input type="checkbox" id="erase-precisely" name="erase-precisely" />
+      </label>
+    </nav>
+
+    <div id="editor" touch-action="none"></div>
+
     <script>
       const editorElement = document.getElementById("editor");
 

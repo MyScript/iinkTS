@@ -15,44 +15,11 @@
         display: block;
       }
 
-      label {
-        display: block;
-        min-width: 75px;
+      .row-options {
+        padding: 12px 12px 0px 12px;
       }
 
-      input:disabled,
-      select:disabled {
-        opacity: 0.5;
-        pointer-events: none;
-      }
-
-      .style-flex-container {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: baseline;
-      }
-
-      .style-flex-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        width: 33%;
-        min-width: 275px;
-        padding: 12px 12px 0;
-        margin: auto 0;
-      }
-
-      .style-flex-item select {
-        width: 200px;
-      }
-
-      .pen-color-field,
-      .pen-color-field:focus {
-        padding: 0;
-        height: 36px;
-      }
-
-      #prompter-css {
+      .prompter-css {
         height: 110px;
         width: 70%;
         margin-left: 36px;
@@ -64,37 +31,29 @@
         background: rgba(240, 240, 240, 0.9);
       }
 
-      @media only screen and (max-width: 850px) {
+      #editor {
+          height: calc(100vh - 122px);
+      }
+      @media only screen and (max-width: 1030px) {
         #editor {
-          height: calc(100vh - 260px);
+          height: calc(100vh - 169px);
+        }
+      }
+      @media only screen and (max-width: 771px) {
+        #editor {
+          height: calc(100vh - 216px);
+        }
+      }
+      @media only screen and (max-width: 648px) {
+        #editor {
+          height: calc(100vh - 263px);
         }
 
-        .style-flex-item {
-          width: 50%;
-        }
-
-        #prompter-css {
+        .prompter-css {
           position: fixed;
           bottom: 12px;
         }
       }
-
-      @media only screen and (max-width: 575px) {
-        #editor {
-          height: calc(100vh - 340px);
-        }
-
-        .style-flex-item {
-          width: 90%;
-          margin-left: 10%;
-        }
-
-        #prompter-css {
-          position: fixed;
-          bottom: 12px;
-        }
-      }
-
       @media only screen and (max-height: 400px) {
         #editor {
           height: calc(100vh - 50px);
@@ -105,10 +64,6 @@
           max-height: 50px;
           overflow: auto;
         }
-
-        .style-flex-item {
-          padding: 5px 5px 0;
-        }
       }
     </style>
 
@@ -117,30 +72,30 @@
 
   <body>
     <nav class="nav-block">
-      <div class="style-flex-container">
-        <div class="style-flex-item">
+      <div class="flex-container gap row-options">
+        <div class="flex-container gap nav-item">
+          <label>Apply pen style class (greenThickPen):</label>
           <input id="penStyleClasses" type="checkbox" />
-          <label for="penStyleClasses">Apply pen style class (greenThickPen)</label>
         </div>
-        <div class="style-flex-item theme">
+        <div class="flex-container gap nav-item">
           <label for="theme">Theme:</label>
           <select id="theme" class="input-field"></select>
         </div>
-        <div class="style-flex-item">
+        <div class="flex-container gap nav-item">
           <label for="fonts">Font:</label>
           <select id="fonts" class="input-field"></select>
         </div>
       </div>
-      <div class="style-flex-container">
-        <div class="style-flex-item">
-          <input id="penenabled" type="checkbox" />
+      <div class="flex-container gap row-options">
+        <div class="flex-container gap nav-item">
           <label for="penenabled">Enable pen color/thickness</label>
+          <input id="penenabled" type="checkbox" />
         </div>
-        <div class="style-flex-item">
+        <div class="flex-container gap nav-item">
           <label for="pencolor">Color:</label>
           <input id="pencolor" class="input-field pen-color-field" type="color" value="#ff7314" disabled/>
         </div>
-        <div class="style-flex-item">
+        <div class="flex-container gap nav-item">
           <label for="penwidth">Thickness:</label>
           <input id="penwidth" class="input-field" type="number" min="1" max="5" value="2" disabled/>
         </div>
@@ -148,9 +103,11 @@
     </nav>
 
     <div id="editor" touch-action="none"></div>
-    <div id="prompter-css">
+
+    <div id="prompter-css" class="prompter-css">
       <div id="prompter-css-text">Theme or pen style applied will be written here.</div>
     </div>
+
     <script>
       const editorElement = document.getElementById("editor");
       const penStyleClasses = document.getElementById("penStyleClasses");

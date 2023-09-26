@@ -9,21 +9,37 @@
     <title>Text search</title>
     <link rel="stylesheet" href="../examples.css" />
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
+    <style>
+      #editor {
+        height: calc(100vh - 62px);
+      }
+      @media only screen and (max-width: 509px) {
+        #editor {
+          height: calc(100vh - 110px);
+        }
+      }
+      @media only screen and (max-width: 397px) {
+        #editor {
+          height: calc(100vh - 157px);
+        }
+        .input-field {
+          width: 100%;
+        }
+      }
+    </style>
   </head>
 
   <body>
-    <div>
-      <nav>
-        <div class="spacer"></div>
-        <div class="search">
-          <input id="searchInput" type="search" class="input-field" />
-          <button id="searchBtn" class="classic-btn">Search</button>
-        </div>
-        <div class="spacer"></div>
-        <button class="classic-btn" id="convert" disabled>Convert</button>
-      </nav>
-      <div id="editor" touch-action="none"></div>
-    </div>
+    <nav>
+      <div class="flex-container between gap">
+        <input id="searchInput" type="search" class="input-field" />
+        <button id="searchBtn" class="classic-btn">Search</button>
+      </div>
+      <button class="classic-btn" id="convert" disabled>Convert</button>
+    </nav>
+
+    <div id="editor" touch-action="none"></div>
+
     <script>
       const editorElement = document.getElementById("editor");
       const convertElement = document.getElementById("convert");

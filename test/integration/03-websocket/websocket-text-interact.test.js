@@ -31,7 +31,7 @@ describe("Websocket Text interact", () => {
   })
 
   test(`should go next question`, async () => {
-    await page.locator("#nextButton").click()
+    await page.locator("#next-btn").click()
     await waitEditorIdle(page)
     const question = await page.locator("#question").textContent()
     expect(question).toContain("Italy")
@@ -49,7 +49,7 @@ describe("Websocket Text interact", () => {
   })
 
   test(`should go next question`, async () => {
-    await page.locator("#nextButton").click()
+    await page.locator("#next-btn").click()
     await waitEditorIdle(page)
     const question = await page.locator("#question").textContent()
     expect(question).toContain("Spain")
@@ -67,7 +67,7 @@ describe("Websocket Text interact", () => {
   })
 
   test(`should go next question`, async () => {
-    await page.locator("#nextButton").click()
+    await page.locator("#next-btn").click()
     await waitEditorIdle(page)
     const question = await page.locator("#question").textContent()
     expect(question).toContain("Argentina")
@@ -88,7 +88,7 @@ describe("Websocket Text interact", () => {
   })
 
   test(`should go next question`, async () => {
-    await page.locator("#nextButton").click()
+    await page.locator("#next-btn").click()
     await waitEditorIdle(page)
     const question = await page.locator("#question").textContent()
     expect(question).toContain("Japan")

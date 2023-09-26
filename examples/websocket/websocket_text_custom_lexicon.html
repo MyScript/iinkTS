@@ -17,35 +17,45 @@
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
 
     <style>
-      .button-div > p {
-        margin-right: 12px;
+      #editor {
+        height: calc(100vh - 66px);
+      }
+      @media only screen and (max-width: 486px) {
+        #editor {
+          height: calc(100vh - 114px);
+        }
+      }
+      @media only screen and (max-width: 382px) {
+        #editor {
+          height: calc(100vh - 161px);
+        }
       }
     </style>
   </head>
 
   <body>
-    <div>
-      <nav>
-        <div class="button-div">
-          <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/undo.svg" />
-          </button>
-          <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/redo.svg" />
-          </button>
-        </div>
-        <div class="spacer"></div>
+    <nav class="flex-container between" >
+      <div class="flex-container gap">
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/undo.svg" />
+        </button>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/redo.svg" />
+        </button>
+      </div>
+      <div class="flex-container gap">
         <input
           type="text"
-          class="input-field"
           id="lexicon"
           data-type="text/plain"
           placeholder='Add your own lexicon (space-separated) and press "Send"'
         />
         <button class="classic-btn" id="reinit">Send</button>
-      </nav>
-      <div id="editor" touch-action="none"></div>
-    </div>
+      </div>
+    </nav>
+
+    <div id="editor" touch-action="none"></div>
+
     <script>
       const editorElement = document.getElementById("editor")
       const undoElement = document.getElementById("undo")

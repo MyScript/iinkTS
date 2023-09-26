@@ -11,6 +11,14 @@
 
     <link rel="stylesheet" href="../examples.css" />
     <style>
+      #editor {
+        height: calc(100vh - 170px);
+      }
+      @media only screen and (max-width: 418px) {
+        #editor {
+          height: calc(100vh - 220px);
+        }
+      }
       #progress {
         transition: width 10s;
         width: 0;
@@ -24,46 +32,48 @@
   </head>
 
   <body>
-    <div>
-      <div id="result"></div>
-      <nav>
-        <div class="button-div">
-          <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/clear.svg" />
-          </button>
-          <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/undo.svg" />
-          </button>
-          <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/redo.svg" />
-          </button>
-        </div>
-        <div class="button-div">
-          <button id="pen" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/pen.svg" />
-          </button>
-          <button id="eraser" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/eraser.svg" />
-          </button>
-        </div>
-        <div class="button-div" style="margin-left: auto">
-          <div id="preview-container">
-            <div id="preview-btn" class="classic-btn">
-              <img src="../assets/document.svg" />
-              <span>Preview</span>
-            </div>
-            <div id="edit-btn" class="classic-btn" style="display: none">
-              <img src="../assets/edit.svg" />
-              <span>Edit</span>
-            </div>
+    <div id="result"></div>
+
+    <nav class="flex-container gap between">
+      <div class="flex-container gap">
+        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/clear.svg" />
+        </button>
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/undo.svg" />
+        </button>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/redo.svg" />
+        </button>
+      </div>
+      <div class="flex-container gap">
+        <button id="pen" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/pen.svg" />
+        </button>
+        <button id="eraser" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/eraser.svg" />
+        </button>
+      </div>
+      <div class="flex-container gap" style="margin-left: auto">
+        <div id="preview-container">
+          <div id="preview-btn" class="classic-btn">
+            <img src="../assets/document.svg" />
+            <span>Preview</span>
+          </div>
+          <div id="edit-btn" class="classic-btn" style="display: none">
+            <img src="../assets/edit.svg" />
+            <span>Edit</span>
           </div>
         </div>
-      </nav>
-      <div id="progress"></div>
-      <div id="editor" touch-action="none">
-        <svg id="converted-svg"></svg>
       </div>
+    </nav>
+
+    <div id="progress"></div>
+
+    <div id="editor" touch-action="none">
+      <svg id="converted-svg"></svg>
     </div>
+
     <script>
       const editorElement = document.getElementById("editor");
       const resultElement = document.getElementById("result");

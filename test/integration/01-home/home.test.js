@@ -68,7 +68,9 @@ describe('Home Page', () =>
         page.waitForResponse((response) => response.url().includes(href)),
         link.click()
       ])
-      if (response.status() !== 200) {
+      await page.waitForLoadState("networkidle")
+
+      if (response.status() >= 400) {
         linksInErrors.push(href)
       }
       await page.goBack()

@@ -25,26 +25,32 @@
     ></script>
 
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
+    <style>
+      #editor {
+        height: calc(100vh - 166px);
+      }
+    </style>
   </head>
 
   <body>
     <div id="result"></div>
-    <div>
-      <nav>
-        <div class="button-div">
-          <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/clear.svg" />
-          </button>
-          <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/undo.svg" />
-          </button>
-          <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/redo.svg" />
-          </button>
-        </div>
-      </nav>
-      <div id="editor" touch-action="none"></div>
-    </div>
+
+    <nav>
+      <div class="flex-container gap">
+        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/clear.svg" />
+        </button>
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/undo.svg" />
+        </button>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/redo.svg" />
+        </button>
+      </div>
+    </nav>
+
+    <div id="editor" touch-action="none"></div>
+
     <script>
       const editorElement = document.getElementById("editor");
       const resultElement = document.getElementById("result");

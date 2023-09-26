@@ -21,35 +21,43 @@
       crossorigin="anonymous"
     ></script>
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
+    <style>
+      #editor {
+        height: calc(100vh - 166px);
+      }
+      @media only screen and (max-width: 279px) {
+        #editor {
+          height: calc(100vh - 214px);
+        }
+      }
+    </style>
   </head>
 
   <body>
     <div id="result"></div>
-    <div>
-      <nav>
-        <div class="button-div">
-          <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/clear.svg" />
-          </button>
-          <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/undo.svg" />
-          </button>
-          <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/redo.svg" />
-          </button>
-        </div>
-        <div class="spacer"></div>
-        <button class="classic-btn" id="convert" disabled>Convert</button>
-      </nav>
-      <div id="editor" touch-action="none"></div>
-    </div>
+
+    <nav class="flex-container between">
+      <div class="flex-container gap">
+        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/clear.svg" />
+        </button>
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/undo.svg" />
+        </button>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/redo.svg" />
+        </button>
+      </div>
+    </nav>
+
+    <div id="editor" touch-action="none"></div>
+
     <script>
       const editorElement = document.getElementById("editor");
       const resultElement = document.getElementById("result");
       const clearElement = document.getElementById("clear");
       const undoElement = document.getElementById("undo");
       const redoElement = document.getElementById("redo");
-      const convertElement = document.getElementById("convert");
 
       function cleanLatex(latexExport) {
         if (typeof latexExport === "number") {
@@ -108,10 +116,8 @@
           const exports = evt.detail;
           if (exports && exports["application/x-latex"]) {
             katex.render(cleanLatex(exports["application/x-latex"]), resultElement);
-            convertElement.disabled = false;
           } else {
             resultElement.innerHTML = "";
-            convertElement.disabled = true;
           }
         });
 
@@ -125,10 +131,6 @@
 
         redoElement.addEventListener("click", () => {
           editor.redo();
-        });
-
-        convertElement.addEventListener("click", () => {
-          editor.convert();
         });
 
         window.addEventListener("resize", () => {

@@ -16,40 +16,39 @@
 
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
     <style>
-      nav {
-        flex-wrap: wrap-reverse;
+      #editor {
+        height: calc(100vh - 66px);
       }
-
-      @media only screen and (max-device-width: 560px) {
-        #clearStorage {
-          margin: 0 0 12px auto;
+      @media only screen and (max-width: 319px) {
+        #editor {
+          height: calc(100vh - 114px);
         }
       }
     </style>
   </head>
 
   <body>
-    <div>
-      <nav>
-        <div class="button-div">
-          <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/undo.svg" />
-          </button>
-          <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/redo.svg" />
-          </button>
-        </div>
-        <button class="classic-btn" id="clearStorage">
-          Clear local storage
+    <nav>
+      <div class="flex-container gap">
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/undo.svg" />
         </button>
-      </nav>
-      <div id="editor" touch-action="none"></div>
-    </div>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/redo.svg" />
+        </button>
+      </div>
+      <button class="classic-btn" id="clear-storage">
+        Clear local storage
+      </button>
+    </nav>
+
+    <div id="editor" touch-action="none"></div>
+
     <script>
       const editorElement = document.getElementById("editor")
       const undoElement = document.getElementById("undo")
       const redoElement = document.getElementById("redo")
-      const clearStorage = document.getElementById("clearStorage")
+      const clearStorage = document.getElementById("clear-storage")
 
       /**
        * we expose the editor for use in the integration test
