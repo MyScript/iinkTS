@@ -12,7 +12,6 @@
     <link rel="stylesheet" href="../examples.css" />
 
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
-
     <style>
       main {
         display: flex;
@@ -20,25 +19,40 @@
         height: calc(100% - 76px);
         width: 100%;
       }
+      #editor {
+        height: calc(100vh - 66px);
+        width: 60%;
+      }
       #jiix {
         border-right: 1px solid #D7DDE3;
-        min-height: calc(100vh - 80px);
-        max-height: calc(100vh - 80px);
-        min-width: calc(40%);
-        max-width: calc(40%);
+        min-height: calc(100vh - 70px);
+        max-height: calc(100vh - 70px);
+        width: 40%;
       }
-      #editor {
-        height: calc(100vh - 80px);
-        width: 60%;
+      @media only screen and (max-width: 600px) {
+        main {
+          display: flex;
+          flex-direction: column;
+        }
+        #editor {
+          height: calc(50vh - 66px);
+          width: 100%;
+        }
+        #jiix {
+          border-right: 1px solid #D7DDE3;
+          min-height: calc(50vh - 66px);
+          max-height: calc(50vh - 66px);
+          width: 100%;
+        }
       }
     </style>
   </head>
   <body>
-    <nav>
-      <div class="button-div">
+    <nav class="flex-container between">
+      <div class="flex-container gap">
         <button class="classic-btn" id="import">Import</button>
       </div>
-      <div class="button-div">
+      <div class="flex-container gap">
         <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
           <img src="../assets/undo.svg" />
         </button>
@@ -46,9 +60,9 @@
           <img src="../assets/redo.svg" />
         </button>
         <button class="classic-btn" id="convert" disabled>Convert</button>
-        <div class="spacer"></div>
       </div>
     </nav>
+
     <main>
       <textarea id="jiix">
 {

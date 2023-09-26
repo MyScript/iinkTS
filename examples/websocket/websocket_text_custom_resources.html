@@ -14,31 +14,38 @@
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
 
     <style>
-      .button-div > p {
-        margin-right: 12px;
-      }
 
-      nav {
-        flex-wrap: wrap-reverse;
+      #editor {
+        height: calc(100vh - 166px);
+      }
+      @media only screen and (max-width: 608px) {
+        #editor {
+          height: calc(100vh - 123px);
+        }
+      }
+      @media only screen and (max-width: 504px) {
+        #editor {
+          height: calc(100vh - 140px);
+        }
       }
     </style>
   </head>
 
   <body>
-    <div>
-      <nav>
-        <div class="button-div">
-          <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/undo.svg" />
-          </button>
-          <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/redo.svg" />
-          </button>
-        </div>
-        <p>Custom pre-loaded resources: <b>Dinosaurs</b>. Try to write some dinosaurs name!</p>
-      </nav>
-      <div id="editor" touch-action="none"></div>
-    </div>
+    <nav>
+      <div class="flex-container gap">
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/undo.svg" />
+        </button>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/redo.svg" />
+        </button>
+      </div>
+      <p>Custom pre-loaded resources: <b>Dinosaurs</b>. Try to write some dinosaurs name!</p>
+    </nav>
+
+    <div id="editor" touch-action="none"></div>
+
     <script>
       const editorElement = document.getElementById("editor");
 

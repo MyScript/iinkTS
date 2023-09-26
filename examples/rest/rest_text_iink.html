@@ -9,13 +9,23 @@
     <title>Rest Text</title>
     <link rel="stylesheet" href="../examples.css" />
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
+    <style>
+      #editor {
+        height: calc(100vh - 166px);
+      }
+      @media only screen and (max-width: 451px) {
+        #editor {
+          height: calc(100vh - 213px);
+        }
+      }
+    </style>
   </head>
 
   <body>
     <div id="result"></div>
 
-    <nav>
-      <div class="button-div">
+    <nav class="flex-container gap between">
+      <div class="flex-container gap">
         <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
           <img src="../assets/clear.svg" />
         </button>

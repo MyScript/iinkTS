@@ -15,6 +15,30 @@
     <style type="text/css">
       #editor {
         width: auto;
+        height: calc(100vh - 66px);
+      }
+      @media only screen and (max-width: 889px) {
+        #editor {
+          height: calc(100vh - 114px);
+        }
+      }
+      @media only screen and (max-width: 600px) {
+        .highlight-column {
+          position: absolute;
+          right: 0;
+        }
+      }
+      @media only screen and (max-width: 454px) {
+        #editor {
+          height: calc(100vh - 143px);
+        }
+      }
+      .flex-wrapper {
+        height: 100vh;
+        width: 100vw;
+      }
+      .editor-column {
+        width: 80%;
       }
       .colors {
         display: flex;
@@ -42,6 +66,7 @@
       .highlight-column {
         background-color: white;
         padding: 12px;
+        height: 100%;
         min-width: 20%;
         border-left: 1px solid #d7dde3;
       }
@@ -52,10 +77,10 @@
     </style>
   </head>
   <body>
-    <div style="display: flex">
-      <div style="width: 80%">
+    <div class="flex-container flex-wrapper">
+      <div class="editor-column">
         <nav>
-          <div class="button-div">
+          <div class="flex-container gap">
             <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
               <img src="../assets/undo.svg" />
             </button>
@@ -98,6 +123,7 @@
         </ul>
       </div>
     </div>
+
     <script>
       const editorElement = document.getElementById("editor");
       const undoElement = document.getElementById("undo");

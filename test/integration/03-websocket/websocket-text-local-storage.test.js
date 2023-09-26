@@ -25,12 +25,12 @@ describe('Websocket Text local storage', () => {
     await page.waitForTimeout(400)
     const jiixExpected = helloOneStroke.exports['text/plain'][0]
     const jiixReceived = exports['text/plain']
-    await page.locator("#clearStorage").click()
+    await page.locator("#clear-storage").click()
     expect(jiixReceived).toStrictEqual(jiixExpected)
   })
 
   test('should get hello in localstorage', async () => {
-    await page.locator("#clearStorage").click()
+    await page.locator("#clear-storage").click()
       await Promise.all([
         getExportedDatas(page),
         write(page, helloOneStroke.strokes)

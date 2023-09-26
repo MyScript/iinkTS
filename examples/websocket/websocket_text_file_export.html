@@ -12,10 +12,18 @@
     <link rel="stylesheet" href="../examples.css" />
 
     <style>
-      #export-result {
-        height: 100px;
-        padding: 12px;
-        overflow: auto;
+      #editor {
+        height: calc(100vh - 66px);
+      }
+      @media only screen and (max-width: 499px) {
+        #editor {
+          height: calc(100vh - 114px);
+        }
+      }
+      @media only screen and (max-width: 329px) {
+        #editor {
+          height: calc(100vh - 161px);
+        }
       }
     </style>
 
@@ -28,27 +36,26 @@
   </head>
 
   <body>
-    <div>
-      <nav>
-        <div class="button-div">
-          <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/clear.svg" />
-          </button>
-          <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/undo.svg" />
-          </button>
-          <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/redo.svg" />
-          </button>
-        </div>
-
-        <div class="style-flex-item">
-          <select id="exportType"></select>
-        </div>
+    <nav class="flex-container gap">
+      <div class="flex-container gap">
+        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/clear.svg" />
+        </button>
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/undo.svg" />
+        </button>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/redo.svg" />
+        </button>
+      </div>
+      <div class="flex-container gap">
+        <select id="exportType"></select>
         <button class="classic-btn" id="exportContent" disabled>Export to file</button>
-      </nav>
-      <div id="editor" touch-action="none"></div>
-    </div>
+      </div>
+    </nav>
+
+    <div id="editor" touch-action="none"></div>
+
     <script>
       const editorElement = document.getElementById("editor");
       const undoElement = document.getElementById("undo");

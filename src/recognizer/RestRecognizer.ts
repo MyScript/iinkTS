@@ -71,7 +71,7 @@ export class RestRecognizer implements IRecognizer
   {
     const isPenStyleEqual = (ps1: TPenStyle, ps2: TPenStyle) =>
     {
-      return ps1["-myscript-pen-fill-color"] === ps2["-myscript-pen-fill-color"] &&
+      return ps1 && ps2 && ps1["-myscript-pen-fill-color"] === ps2["-myscript-pen-fill-color"] &&
         ps1["-myscript-pen-fill-style"] === ps2["-myscript-pen-fill-style"] &&
         ps1["-myscript-pen-width"] === ps2["-myscript-pen-width"] &&
         ps1.color === ps2.color &&

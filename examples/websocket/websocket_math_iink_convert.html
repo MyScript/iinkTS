@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
-    <title>Websocket Math Eraser</title>
+    <title>Websocket Math Convert</title>
     <link rel="stylesheet" href="../examples.css" />
     <link
       rel="stylesheet"
@@ -25,24 +25,9 @@
       #editor {
         height: calc(100vh - 166px);
       }
-      @media only screen and (max-width: 524px) {
+      @media only screen and (max-width: 279px) {
         #editor {
           height: calc(100vh - 214px);
-        }
-      }
-      @media only screen and (max-width: 412px) {
-        #editor {
-          height: calc(100vh - 218px);
-        }
-      }
-      @media only screen and (max-width: 412px) {
-        #editor {
-          height: calc(100vh - 218px);
-        }
-      }
-      @media only screen and (max-width: 368px) {
-        #editor {
-          height: calc(100vh - 266px);
         }
       }
     </style>
@@ -51,7 +36,7 @@
   <body>
     <div id="result"></div>
 
-    <nav class="flex-container between">
+    <nav class="flex-container between gap">
       <div class="flex-container gap">
         <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
           <img src="../assets/clear.svg" />
@@ -64,18 +49,7 @@
         </button>
       </div>
       <div class="flex-container gap">
-        <button id="pen" class="nav-btn btn-fab-mini btn-lightBlue active" disabled>
-          <img src="../assets/pen.svg" />
-        </button>
-        <button id="eraser" class="nav-btn btn-fab-mini btn-lightBlue">
-          <img src="../assets/eraser.svg" />
-        </button>
-      </div>
-      <div class="flex-container gap">
-        <label for="erase-precisely">
-          Erase precisely:
-        </label>
-        <input id="erase-precisely" type="checkbox" />
+        <button class="classic-btn" id="convert" disabled>Convert</button>
       </div>
     </nav>
 
@@ -87,9 +61,7 @@
       const undoElement = document.getElementById("undo");
       const redoElement = document.getElementById("redo");
       const clearElement = document.getElementById("clear");
-      const eraserElement = document.getElementById("eraser");
-      const penElement = document.getElementById("pen");
-      const erasePreciselyElement = document.getElementById("erase-precisely");
+      const convertElement = document.getElementById("convert");
 
       function cleanLatex(latexExport) {
         if (latexExport.includes("\\\\")) {
@@ -147,8 +119,17 @@
         editorElement.addEventListener("exported", (evt) => {
           const exports = evt.detail;
           if (exports && exports["application/x-latex"]) {
+            convertElement.disabled = false;
             katex.render(cleanLatex(exports["application/x-latex"]), resultElement);
+            // resultElement.innerHTML = '<span>' + exports['application/x-latex'] + '</span>';
+          } else if (exports && exports["application/mathml+xml"]) {
+            convertElement.disabled = false;
+            resultElement.innerText = exports["application/mathml+xml"];
+          } else if (exports && exports["application/mathofficeXML"]) {
+            convertElement.disabled = false;
+            resultElement.innerText = exports["application/mathofficeXML"];
           } else {
+            convertElement.disabled = true;
             resultElement.innerHTML = "";
           }
         });
@@ -161,30 +142,9 @@
           editorElement.editor.redo();
         });
 
-        clearElement.addEventListener("click", () => {
-          editorElement.editor.clear();
-        });
 
-        eraserElement.addEventListener("click", () => {
-          editor.mode = "erasing";
-          eraserElement.disabled = true;
-          eraserElement.classList.add("active");
-          penElement.disabled = false;
-          penElement.classList.remove("active");
-        });
-
-        penElement.addEventListener("click", () => {
-          editor.mode = "writing";
-          eraserElement.disabled = false;
-          eraserElement.classList.remove("active");
-          penElement.disabled = true;
-          penElement.classList.add("active");
-        });
-
-        erasePreciselyElement.addEventListener("change", (e) => {
-          const configuration = { ...editorElement.editor.configuration };
-          configuration.recognition.math.eraser["erase-precisely"] = e.target.checked;
-          editorElement.editor.configuration = configuration;
+        convertElement.addEventListener("click", () => {
+          editorElement.editor.convert();
         });
 
         window.addEventListener("resize", () => {

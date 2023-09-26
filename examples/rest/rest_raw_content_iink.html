@@ -12,8 +12,15 @@
     <link rel="stylesheet" href="../examples.css" />
 
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
-
     <style>
+      #editor {
+        height: calc(100vh - 166px);
+      }
+      @media only screen and (max-width: 451px) {
+        #editor {
+          height: calc(100vh - 213px);
+        }
+      }
       #result span {
         font-size: small;
         padding: 12px;
@@ -23,23 +30,24 @@
 
   <body>
     <div id="result"></div>
-    <div>
-      <nav>
-        <div class="button-div">
-          <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/clear.svg" />
-          </button>
-          <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/undo.svg" />
-          </button>
-          <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/redo.svg" />
-          </button>
-        </div>
-        <select id="language"></select>
-      </nav>
-      <div id="editor" touch-action="none"></div>
-    </div>
+
+    <nav class="flex-container gap between">
+      <div class="flex-container gap">
+        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/clear.svg" />
+        </button>
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/undo.svg" />
+        </button>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/redo.svg" />
+        </button>
+      </div>
+      <select id="language"></select>
+    </nav>
+
+    <div id="editor" touch-action="none"></div>
+
     <script>
       const editorElement = document.getElementById("editor");
       const resultElement = document.getElementById("result");

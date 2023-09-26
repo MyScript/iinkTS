@@ -13,19 +13,8 @@
       .nav-block {
         display: block;
       }
-      .flex-container {
-        display: flex;
-        flex-wrap: wrap;
-      }
-      .flex-container.between {
-        justify-content: space-between;
-      }
-
-      .flex-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 12px 12px 0;
+      input[type="number"].pen-width-field {
+        width: 150px;
       }
 
       .pen-color-field,
@@ -49,8 +38,8 @@
     <div id="result"></div>
 
     <nav class="nav-block">
-      <div class="flex-container between ">
-        <div class="button-div">
+      <div class="flex-container between gap">
+        <div class="flex-container gap">
           <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
             <img src="../assets/clear.svg" />
           </button>
@@ -61,20 +50,23 @@
             <img src="../assets/redo.svg" />
           </button>
         </div>
-        <select id="language"></select>
-      </div>
-      <div class="flex-container">
-        <div class="flex-item">
-          <input id="penenabled" type="checkbox" />
-          <label for="penenabled">Enable pen color/thickness</label>
+        <div class="flex-container gap">
+          <label for="language">Language: </label>
+          <select id="language"></select>
         </div>
-        <div class="flex-item">
+      </div>
+      <div class="flex-container between gap">
+        <div class="flex-container gap">
+          <label for="penenabled">Enable pen color/thickness: </label>
+          <input id="penenabled" type="checkbox" />
+        </div>
+        <div class="flex-container gap">
           <label for="pencolor">Color:</label>
           <input id="pencolor" class="input-field pen-color-field" type="color" value="#ff7314" disabled/>
         </div>
-        <div class="flex-item">
+        <div class="flex-container gap">
           <label for="penwidth">Thickness:</label>
-          <input id="penwidth" class="input-field" type="number" min="1" max="5" value="2" disabled/>
+          <input id="penwidth" class="pen-width-field" type="number" min="1" max="5" value="2" disabled/>
         </div>
       </div>
     </nav>
