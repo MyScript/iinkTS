@@ -1,6 +1,6 @@
 
 import { delay } from "../utils/helpers"
-import { TBehaviorOptions, TConfiguration, IModel, TPointer } from "../../../src/@types"
+import { TBehaviorOptions, TConfiguration, TPointer } from "../../../src/@types"
 import { behaviors, model, configuration, style } from "../../../src/iink"
 
 describe("RestBehaviors.ts", () =>
@@ -168,7 +168,7 @@ describe("RestBehaviors.ts", () =>
     const wrapperHTML: HTMLElement = document.createElement("div")
     const rb = new RestBehaviors(DefaultBehaviorsOptions)
     await rb.init(wrapperHTML)
-    const model2: IModel = new Model(width, height)
+    const model2 = new Model(width, height)
     const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
     const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
     model2.initCurrentStroke(p1, 1, "pen", DefaultPenStyle)
@@ -190,9 +190,9 @@ describe("RestBehaviors.ts", () =>
     const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
     rb.model.initCurrentStroke(p1, 1, "pen", DefaultPenStyle)
     rb.model.endCurrentStroke(p2)
-    expect(rb.model.rawStrokes.length).toBeGreaterThan(0)
+    expect(rb.model.strokes.length).toBeGreaterThan(0)
     const clearedModel = await rb.clear()
-    expect(rb.model.rawStrokes).toHaveLength(0)
+    expect(rb.model.strokes).toHaveLength(0)
     expect(clearedModel).toBe(rb.model)
   })
 

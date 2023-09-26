@@ -1,12 +1,11 @@
-import { TExport } from "../model/Model"
+import { TExport } from "../model/Export"
 
-
-export type TWebSocketEvent = {
+export type TWSMessageEvent = {
   type: string
   [key: string]: unknown
 }
 
-export type TWebSocketErrorEvent = {
+export type TWSMessageEventError = {
   type: string
   code?: number | string
   message?: string
@@ -16,22 +15,22 @@ export type TWebSocketErrorEvent = {
   }
 }
 
-export type TWebSocketHMACChallengeEvent = TWebSocketEvent & {
+export type TWSMessageEventHMACChallenge = TWSMessageEvent & {
   hmacChallenge: string
   iinkSessionId: string
 }
 
-export type TContentPackageDescriptionMessage = TWebSocketEvent & {
+export type TWSMessageEventContentPackageDescriptionMessage = TWSMessageEvent & {
   contentPartCount: number
 }
 
-export type TWebSocketPartChangeEvent = TWebSocketEvent & {
+export type TWSMessageEventPartChange = TWSMessageEvent & {
   partIdx: number
   partId: string
   partCount: number
 }
 
-export type TWebSocketContentChangeEvent = TWebSocketEvent & {
+export type TWSMessageEventContentChange = TWSMessageEvent & {
   partId: string
   canUndo: boolean
   canRedo: boolean
@@ -40,7 +39,7 @@ export type TWebSocketContentChangeEvent = TWebSocketEvent & {
   possibleUndoCount: number
 }
 
-export type TWebSocketExportEvent = TWebSocketEvent & {
+export type TWSMessageEventExport = TWSMessageEvent & {
   partId: string
   exports: TExport
 }
@@ -90,7 +89,7 @@ export type TUpdatePatchSetAttribut = TUpdatePatch & {
   value: string
 }
 
-export type TWebSocketSVGPatchEvent = TWebSocketEvent & {
+export type TWSMessageEventSVGPatch = TWSMessageEvent & {
   updates: TUpdatePatch[]
   layer: ("MODEL" | "CAPTURE")
 }

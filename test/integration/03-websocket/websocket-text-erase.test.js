@@ -19,11 +19,11 @@ describe('Websocket Text erase', () => {
   test('should toggle intention writing <-> erasing', async () => {
     expect(await page.locator("#pen").isDisabled()).toBe(true)
     expect(await page.locator("#eraser").isDisabled()).toBe(false)
-    expect(await page.locator("#editor").getAttribute('class')).not.toContain('erasing')
+    expect(await page.locator("#editor").getAttribute('class')).not.toContain('erase')
     await page.click("#eraser")
     expect(await page.locator("#pen").isDisabled()).toBe(false)
     expect(await page.locator("#eraser").isDisabled()).toBe(true)
-    expect(await page.locator("#editor").getAttribute('class')).toContain('erasing')
+    expect(await page.locator("#editor").getAttribute('class')).toContain('erase')
   })
 
   test('should export erase stroke', async () => {

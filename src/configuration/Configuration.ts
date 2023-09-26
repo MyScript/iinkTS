@@ -1,32 +1,35 @@
 
-import { TConfiguration, TConfigurationClient } from "../@types/configuration"
-import { TEventConfiguration } from "../@types/configuration/EventConfiguration"
-import { TGrabberConfiguration } from "../@types/configuration/GrabberConfiguration"
-import { TRecognitionConfiguration } from "../@types/configuration/RecognitionConfiguration"
-import { TRenderingConfiguration } from "../@types/configuration/RenderingConfiguration"
-import { TServerConfiguration } from "../@types/configuration/ServerConfiguration"
-import { TTriggerConfiguration } from "../@types/configuration/TriggerConfiguration"
-import { TUndoRedoConfiguration } from "../@types/configuration/UndoRedoConfiguration"
+import
+  {
+    DeepPartial,
+    TConfiguration,
+    TGrabberConfiguration,
+    TRecognitionConfiguration,
+    TRenderingConfiguration,
+    TServerConfiguration,
+    TTriggerConfiguration,
+    TUndoRedoConfiguration
+  } from "../@types"
+
 import { DefaultConfiguration } from "./DefaultConfiguration"
-import { mergeDeep } from "../utils/MergeHelper"
 import { LoggerManager } from "../logger"
 import { LoggerClass } from "../Constants"
+import { mergeDeep } from "../utils/merge"
 
 export class Configuration implements TConfiguration
 {
-  events: TEventConfiguration
+  #logger = LoggerManager.getLogger(LoggerClass.CONFIGURATION)
+
   grabber: TGrabberConfiguration
   recognition: TRecognitionConfiguration
   rendering: TRenderingConfiguration
   server: TServerConfiguration
   triggers: TTriggerConfiguration
   "undo-redo": TUndoRedoConfiguration
-  #logger = LoggerManager.getLogger(LoggerClass.CONFIGURATION)
 
-  constructor(configuration?: TConfigurationClient)
+  constructor(configuration?: DeepPartial<TConfiguration>)
   {
     this.#logger.info("constructor", { configuration })
-    this.events = JSON.parse(JSON.stringify(DefaultConfiguration.events))
     this.grabber = JSON.parse(JSON.stringify(DefaultConfiguration.grabber))
     this.recognition = JSON.parse(JSON.stringify(DefaultConfiguration.recognition))
     this.rendering = JSON.parse(JSON.stringify(DefaultConfiguration.rendering))
@@ -36,11 +39,10 @@ export class Configuration implements TConfiguration
     this.overrideDefaultConfiguration(configuration)
   }
 
-  overrideDefaultConfiguration(configuration?: TConfigurationClient): void
+  overrideDefaultConfiguration(configuration?: DeepPartial<TConfiguration>): void
   {
     this.#logger.info("overrideDefaultConfiguration", { configuration })
     const defaultConf = JSON.parse(JSON.stringify(DefaultConfiguration))
-    this.events = mergeDeep({}, defaultConf.events, configuration?.events)
     this.grabber = mergeDeep({}, defaultConf.grabber, configuration?.grabber)
     this.recognition = mergeDeep({}, defaultConf.recognition, configuration?.recognition)
     this.rendering = mergeDeep({}, defaultConf.rendering, configuration?.rendering)

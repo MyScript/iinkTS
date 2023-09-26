@@ -1,19 +1,31 @@
-import { TRenderingConfiguration } from "../../@types/configuration/RenderingConfiguration"
-import { IModel } from "../../@types/model/Model"
-import { TUpdatePatch, TUpdatePatchAppendChild, TUpdatePatchInsertBefore, TUpdatePatchRemoveAttribut, TUpdatePatchRemoveChild, TUpdatePatchRemoveElement, TUpdatePatchReplaceAll, TUpdatePatchReplaceELement, TUpdatePatchSetAttribut } from "../../@types/recognizer/WSRecognizer"
-import { TStroke } from "../../@types/model/Stroke"
+import {
+  TRenderingConfiguration,
+  IModel,
+  TUpdatePatch,
+  TUpdatePatchAppendChild,
+  TUpdatePatchInsertBefore,
+  TUpdatePatchRemoveAttribut,
+  TUpdatePatchRemoveChild,
+  TUpdatePatchRemoveElement,
+  TUpdatePatchReplaceAll,
+  TUpdatePatchReplaceELement,
+  TUpdatePatchSetAttribut,
+  TStroke
+} from "../../@types"
+
 import { SVGStroker } from "./SVGStroker"
 import { LoggerManager } from "../../logger"
 import { LoggerClass } from "../../Constants"
 
 export class WSSVGRenderer
 {
+  #logger = LoggerManager.getLogger(LoggerClass.RENDERER)
+
   config: TRenderingConfiguration
   stroker: SVGStroker
   context!: {
     parent: HTMLElement
   }
-  #logger = LoggerManager.getLogger(LoggerClass.RENDERER)
 
   constructor(config: TRenderingConfiguration)
   {
@@ -31,7 +43,7 @@ export class WSSVGRenderer
     }
   }
 
-  #drawStroke(svgElement: SVGElement, stroke: TStroke)
+  protected drawStroke(svgElement: SVGElement, stroke: TStroke)
   {
     let style: string
     if (stroke.pointerType === "eraser") {
@@ -43,7 +55,7 @@ export class WSSVGRenderer
     this.stroker.drawStroke(svgElement, stroke, [{ name: "style", value: style }])
   }
 
-  #replaceAll(layerName: string, update: TUpdatePatchReplaceAll): void
+  protected replaceAll(layerName: string, update: TUpdatePatchReplaceAll): void
   {
     const oldLayer = this.context.parent.querySelector(`svg[data-layer="${ layerName }"]`) as SVGElement | null
     oldLayer?.remove()
@@ -56,7 +68,7 @@ export class WSSVGRenderer
     }
   }
 
-  #replaceElement(update: TUpdatePatchReplaceELement): void
+  protected replaceElement(update: TUpdatePatchReplaceELement): void
   {
     const elementToRemove = this.context.parent.querySelector(`#${ update.id }`) as HTMLElement | null
     if (elementToRemove) {
@@ -66,19 +78,19 @@ export class WSSVGRenderer
     }
   }
 
-  #appendChild(layerName: string, update: TUpdatePatchAppendChild): void
+  protected appendChild(layerName: string, update: TUpdatePatchAppendChild): void
   {
     const parentSelector = update.parentId ? `#${ update.parentId }` : `svg[data-layer="${ layerName }"]`
     const parent = this.context.parent.querySelector(parentSelector) as HTMLElement
     parent?.insertAdjacentHTML("beforeend", update.svg)
   }
 
-  #removeChild(update: TUpdatePatchRemoveChild): void
+  protected removeChild(update: TUpdatePatchRemoveChild): void
   {
     this.context.parent.querySelector(`#${ update.parentId } > *:nth-child(${ update.index + 1 })`)?.remove()
   }
 
-  #removeElement(update: TUpdatePatchRemoveElement): void
+  protected removeElement(update: TUpdatePatchRemoveElement): void
   {
     const elementToRemove = this.context.parent.querySelector(`#${ update.id }`)
     if (elementToRemove) {
@@ -94,20 +106,20 @@ export class WSSVGRenderer
     }
   }
 
-  #insertBefore(update: TUpdatePatchInsertBefore): void
+  protected insertBefore(update: TUpdatePatchInsertBefore): void
   {
     const parent = this.context.parent.querySelector(`#${ update.refId }`) as HTMLElement | null
     parent?.insertAdjacentHTML("beforebegin", update.svg)
   }
 
-  #setAttribute(update: TUpdatePatchSetAttribut): void
+  protected setAttribute(update: TUpdatePatchSetAttribut): void
   {
     const selector = update.id ? `#${ update.id }` : "svg"
     const element = this.context.parent.querySelector(selector) as HTMLElement | null
     element?.setAttribute(update.name, update.value)
   }
 
-  #removeAttribute(update: TUpdatePatchRemoveAttribut): void
+  protected removeAttribute(update: TUpdatePatchRemoveAttribut): void
   {
     const selector = update.id ? `#${ update.id }` : "svg"
     const element = this.context.parent.querySelector(selector) as HTMLElement | null
@@ -119,31 +131,31 @@ export class WSSVGRenderer
     this.#logger.info("updateLayer", { layerName, update })
     switch (update.type) {
       case "REPLACE_ALL":
-        this.#replaceAll(layerName, update as TUpdatePatchReplaceAll)
+        this.replaceAll(layerName, update as TUpdatePatchReplaceAll)
         break
       case "REPLACE_ELEMENT":
-        this.#replaceElement(update as TUpdatePatchReplaceELement)
+        this.replaceElement(update as TUpdatePatchReplaceELement)
         break
       case "APPEND_CHILD":
-        this.#appendChild(layerName, update as TUpdatePatchAppendChild)
+        this.appendChild(layerName, update as TUpdatePatchAppendChild)
         break
       case "REMOVE_ELEMENT":
-        this.#removeElement(update as TUpdatePatchRemoveElement)
+        this.removeElement(update as TUpdatePatchRemoveElement)
         break
       case "REMOVE_CHILD":
-        this.#removeChild(update as TUpdatePatchRemoveChild)
+        this.removeChild(update as TUpdatePatchRemoveChild)
         break
       case "INSERT_BEFORE":
-        this.#insertBefore(update as TUpdatePatchInsertBefore)
+        this.insertBefore(update as TUpdatePatchInsertBefore)
         break
       case "SET_ATTRIBUTE":
-        this.#setAttribute(update as TUpdatePatchSetAttribut)
+        this.setAttribute(update as TUpdatePatchSetAttribut)
         break
       case "REMOVE_ATTRIBUTE":
-        this.#removeAttribute(update as TUpdatePatchRemoveAttribut)
+        this.removeAttribute(update as TUpdatePatchRemoveAttribut)
         break
       default:
-        this.#logger.warn("updateLayer Default", {layerName, update})
+        this.#logger.warn("updateLayer", `update.type unknow ${update.type}`)
         break
     }
   }
@@ -157,7 +169,7 @@ export class WSSVGRenderer
 
   clearPendingStroke(): void
   {
-    this.#logger.info("clearPendingStroke", { })
+    this.#logger.info("clearPendingStroke")
     const pendingStrokeGroup = this.context.parent.querySelector("#pendingStrokes") as SVGElement
     if (pendingStrokeGroup) {
       pendingStrokeGroup.innerHTML = ""
@@ -174,7 +186,7 @@ export class WSSVGRenderer
         if (oldStroke) {
           oldStroke.remove()
         }
-        this.#drawStroke(pendingStrokeGroup, stroke)
+        this.drawStroke(pendingStrokeGroup, stroke)
       }
     }
   }

@@ -114,8 +114,7 @@ describe('Rest Text', () => {
         page.click('#clear'),
       ])
       expect(promisesResult[0]).toBeNull()
-      expect(await getExportsFromEditorModel(page)).toBeNull()
-
+      expect(await getExportsFromEditorModel(page)).toBeFalsy()
       expect(await page.locator('#result').textContent()).toBe('')
     })
 
@@ -130,44 +129,57 @@ describe('Rest Text', () => {
 
       expect(await page.locator('#result').textContent()).toStrictEqual(hello.exports['text/plain'].at(-1))
 
-      let raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
-      expect(raw.length).toStrictEqual(hello.strokes.length)
+      let strokes = await editorEl.evaluate((node) => node.editor.model.strokes)
+      expect(strokes.length).toStrictEqual(hello.strokes.length)
 
       await Promise.all([getDatasFromExportedEvent(page), page.click('#undo')])
       expect(await page.locator('#result').textContent()).toStrictEqual(hello.exports['text/plain'].at(-2))
 
-      raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
-      expect(raw.length).toStrictEqual(hello.strokes.length - 1)
+      strokes = await editorEl.evaluate((node) => node.editor.model.strokes)
+      expect(strokes.length).toStrictEqual(hello.strokes.length - 1)
 
       await Promise.all([getDatasFromExportedEvent(page), page.click('#undo')])
       expect(await page.locator('#result').textContent()).toStrictEqual(hello.exports['text/plain'].at(-3))
 
-      raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
-      expect(raw.length).toStrictEqual(hello.strokes.length - 2)
+      strokes = await editorEl.evaluate((node) => node.editor.model.strokes)
+      expect(strokes.length).toStrictEqual(hello.strokes.length - 2)
 
       await Promise.all([getDatasFromExportedEvent(page), page.click('#redo')])
       expect(await page.locator('#result').textContent()).toStrictEqual(hello.exports['text/plain'].at(-2))
 
-      raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
-      expect(raw.length).toStrictEqual(hello.strokes.length - 1)
+      strokes = await editorEl.evaluate((node) => node.editor.model.strokes)
+      expect(strokes.length).toStrictEqual(hello.strokes.length - 1)
     })
 
     test('should change language', async () => {
+      const requestEn = page.waitForRequest(req => req.url().includes('/api/v4.0/iink/batch') && req.method() === "POST")
       const [exportedDatas] = await Promise.all([
         getDatasFromExportedEvent(page),
         write(page, h.strokes),
       ])
+      const enPostData = (await requestEn).postDataJSON()
+      expect(enPostData.configuration.lang).toEqual("en_US")
 
-      const resultText = await page.locator('#result').textContent()
-      expect(resultText).toStrictEqual(exportedDatas['text/plain'])
-      expect(resultText).toStrictEqual(h.exports['text/plain'].at(-1))
+      const resultTextEn = await page.locator('#result').textContent()
+      expect(resultTextEn).toStrictEqual(exportedDatas['text/plain'])
+      expect(resultTextEn).toStrictEqual(h.exports['text/plain'].at(-1))
 
-      await Promise.all([
-        waitEditorLoaded(page),
-        page.selectOption('#language', 'fr_FR'),
-      ])
+
+      await page.selectOption('#language', 'fr_FR')
 
       expect(await page.locator('#result').textContent()).toBe('')
+
+      const requestFr = page.waitForRequest(req => req.url().includes('/api/v4.0/iink/batch') && req.method() === "POST")
+      await Promise.all([
+        getDatasFromExportedEvent(page),
+        write(page, h.strokes),
+      ])
+      const frPostData = (await requestFr).postDataJSON()
+      expect(frPostData.configuration.lang).toEqual("fr_FR")
+
+      const resultTextFr = await page.locator('#result').textContent()
+      expect(resultTextFr).toStrictEqual(exportedDatas['text/plain'])
+      expect(resultTextFr).toStrictEqual(h.exports['text/plain'].at(-1))
     })
   })
 })

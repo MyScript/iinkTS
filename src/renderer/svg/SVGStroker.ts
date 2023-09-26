@@ -1,11 +1,15 @@
-import { TPointer } from "../../@types/geometry"
-import { TStroke } from "../../@types/model/Stroke"
-import { computeAxeAngle, computeLinksPoints, computeMiddlePoint } from "../QuadraticUtils"
+import {
+  TPointer,
+  TStroke
+} from "../../@types"
+
+import { computeAngleAxeRadian } from "../../utils/math"
+import { computeLinksPoints, computeMiddlePoint } from "../QuadraticUtils"
 
 export class SVGStroker
 {
 
-  private getArcPath(center: TPointer, radius: number): string
+  protected getArcPath(center: TPointer, radius: number): string
   {
     const svgPath = [
       `M ${ center.x },${ center.y }`,
@@ -16,10 +20,10 @@ export class SVGStroker
     return svgPath
   }
 
-  private getLinePath(begin: TPointer, end: TPointer, width: number): string
+  protected getLinePath(begin: TPointer, end: TPointer, width: number): string
   {
-    const linkPoints1 = computeLinksPoints(begin, computeAxeAngle(begin, end), width)
-    const linkPoints2 = computeLinksPoints(end, computeAxeAngle(begin, end), width)
+    const linkPoints1 = computeLinksPoints(begin, computeAngleAxeRadian(begin, end), width)
+    const linkPoints2 = computeLinksPoints(end, computeAngleAxeRadian(begin, end), width)
     const svgPath = [
       `M ${ linkPoints1[0].x },${ linkPoints1[0].y }`,
       `L ${ linkPoints2[0].x },${ linkPoints2[0].y }`,
@@ -29,10 +33,10 @@ export class SVGStroker
     return svgPath
   }
 
-  private getFinalPath(begin: TPointer, end: TPointer, width: number): string
+  protected getFinalPath(begin: TPointer, end: TPointer, width: number): string
   {
     const ARCSPLIT = 6
-    const angle = computeAxeAngle(begin, end)
+    const angle = computeAngleAxeRadian(begin, end)
     const linkPoints = computeLinksPoints(end, angle, width)
     const parts = [`M ${ linkPoints[0].x },${ linkPoints[0].y }`]
     for (let i = 1; i <= ARCSPLIT; i++) {
@@ -43,11 +47,11 @@ export class SVGStroker
     return svgPath
   }
 
-  private getQuadraticPath(begin: TPointer, end: TPointer, central: TPointer, width: number): string
+  protected getQuadraticPath(begin: TPointer, end: TPointer, central: TPointer, width: number): string
   {
-    const linkPoints1 = computeLinksPoints(begin, computeAxeAngle(begin, central), width)
-    const linkPoints2 = computeLinksPoints(end, computeAxeAngle(central, end), width)
-    const linkPoints3 = computeLinksPoints(central, computeAxeAngle(begin, end), width)
+    const linkPoints1 = computeLinksPoints(begin, computeAngleAxeRadian(begin, central), width)
+    const linkPoints2 = computeLinksPoints(end, computeAngleAxeRadian(central, end), width)
+    const linkPoints3 = computeLinksPoints(central, computeAngleAxeRadian(begin, end), width)
     const svgPath = [
       `M ${ linkPoints1[0].x },${ linkPoints1[0].y }`,
       `Q ${ linkPoints3[0].x },${ linkPoints3[0].y } ${ linkPoints2[0].x },${ linkPoints2[0].y }`,
@@ -57,7 +61,7 @@ export class SVGStroker
     return svgPath
   }
 
-  private buildSVGPath(stroke: TStroke): string
+  protected buildSVGPath(stroke: TStroke): string
   {
     const STROKE_LENGTH = stroke.pointers.length
     const STROKE_WIDTH = (stroke.style.width as number)

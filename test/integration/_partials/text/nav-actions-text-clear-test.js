@@ -1,4 +1,4 @@
-const { writePointers, getDatasFromExportedEvent, getExportsFromEditorModel } = require("../../helper")
+const { writePointers, getDatasFromExportedEvent } = require("../../helper")
 const { one } = require("../../strokesDatas")
 
 describe('Nav actions text clear', () => {
@@ -13,7 +13,7 @@ describe('Nav actions text clear', () => {
       getDatasFromExportedEvent(page),
       page.click("#clear")
     ])
-    const emptyJiix = { "type": "Text", "label": "", "words": [  ], "version": "3", "id": "MainBlock"}
+    const emptyJiix = { "type": "Text", "label": "", "words": [], "version": "3", "id": "MainBlock" }
     expect(exportAfterClear["application/vnd.myscript.jiix"]).toEqual(emptyJiix)
     expect(exportAfterClear["application/vnd.myscript.jiix"].label).toStrictEqual('')
   })

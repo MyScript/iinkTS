@@ -5,7 +5,6 @@ const {
   setEditorConfiguration,
   getEditorConfiguration,
   getExportsFromEditorModel,
-  getExportsTypeFromEditorModel,
   waitEditorIdle,
   writePointers,
 } = require('../helper')
@@ -121,6 +120,7 @@ describe('Rest Math', () => {
         page.click('#clear'),
       ])
       expect(promisesResult[0]).toBeNull()
+      expect(await getExportsFromEditorModel(page)).toBeFalsy()
 
       const resultElement = page.locator('#result')
       const resultText = await resultElement.textContent()
@@ -134,15 +134,15 @@ describe('Rest Math', () => {
       await waitEditorIdle(page)
 
       await Promise.all([getDatasFromExportedEvent(page), page.click('#undo')])
-      let raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
+      let raw = await editorEl.evaluate((node) => node.editor.model.strokes)
       expect(raw.length).toStrictEqual(equation1.strokes.length - 1)
 
       await Promise.all([getDatasFromExportedEvent(page), page.click('#undo')])
-      raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
+      raw = await editorEl.evaluate((node) => node.editor.model.strokes)
       expect(raw.length).toStrictEqual(equation1.strokes.length - 2)
 
       await Promise.all([getDatasFromExportedEvent(page), page.click('#redo')])
-      raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
+      raw = await editorEl.evaluate((node) => node.editor.model.strokes)
       expect(raw.length).toStrictEqual(equation1.strokes.length - 1)
     })
   })

@@ -1,4 +1,4 @@
-import { TTheme } from "../@types/style/Theme"
+import { TTheme } from "../@types"
 
 export const DefaultTheme: TTheme = {
   ink: {

@@ -7,7 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
     <title>Websocket Text</title>
-    <link rel="stylesheet" href="../examples.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
     <style>
       #editor {
@@ -50,23 +50,23 @@
     <div id="result"></div>
 
     <nav>
-      <div class="flex-container gap">
+      <div class="flex-container wrap gap">
         <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/clear.svg" />
+          <img src="../assets/img/clear.svg" />
         </button>
         <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/undo.svg" />
+          <img src="../assets/img/undo.svg" />
         </button>
         <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/redo.svg" />
+          <img src="../assets/img/redo.svg" />
         </button>
       </div>
-      <div class="flex-container gap">
+      <div class="flex-container wrap gap">
         <label> Global log level: </label>
         <select id="global-logger-level"></select>
         <div class="dropdown-menu">
           <button id="line-menu" class="menu-button">
-            <img src="../assets/menu.svg" />
+            <img src="../assets/img/menu.svg" />
           </button>
           <ul id="specific-logger-level" class="">
             <li>
@@ -97,12 +97,12 @@
         [iink.constants.LoggerClass.RENDERER]: iink.constants.LoggerLevel.ERROR,
         [iink.constants.LoggerClass.CONFIGURATION]: iink.constants.LoggerLevel.ERROR,
         [iink.constants.LoggerClass.PUBLIC_EVENT]: iink.constants.LoggerLevel.ERROR,
-        [iink.constants.LoggerClass.INTERNALEVENT]: iink.constants.LoggerLevel.ERROR,
+        [iink.constants.LoggerClass.INTERNAL_EVENT]: iink.constants.LoggerLevel.ERROR,
         [iink.constants.LoggerClass.MODEL]: iink.constants.LoggerLevel.ERROR,
         [iink.constants.LoggerClass.STROKE]: iink.constants.LoggerLevel.ERROR,
         [iink.constants.LoggerClass.SMARTGUIDE]: iink.constants.LoggerLevel.ERROR,
-        [iink.constants.LoggerClass.STYLEMANAGER]: iink.constants.LoggerLevel.ERROR,
-        [iink.constants.LoggerClass.UNDOREDO_MANAGER]: iink.constants.LoggerLevel.ERROR
+        [iink.constants.LoggerClass.STYLE]: iink.constants.LoggerLevel.ERROR,
+        [iink.constants.LoggerClass.UNDO_REDO]: iink.constants.LoggerLevel.ERROR
       };
 
       Object.keys(iink.constants.LoggerLevel).forEach((level) => {
@@ -113,8 +113,11 @@
 
       Object.keys(iink.constants.LoggerClass).forEach((c) => {
         const li = document.createElement("li");
+        li.classList.add("flex-container", "between", "gap")
         const label = document.createElement("label");
-        label.textContent = c;
+        label.textContent = c.charAt(0).toUpperCase() + c.slice(1).toLocaleLowerCase() + ": ";
+        li.appendChild(label);
+
         const select = document.createElement("select");
         select.classList.add("specific-logger-level-input")
         Object.keys(iink.constants.LoggerLevel).forEach((level) => {
@@ -122,8 +125,6 @@
           const opt = new Option(level, iink.constants.LoggerLevel[level], selected, selected);
           select.appendChild(opt);
         });
-
-        li.appendChild(label);
         li.appendChild(select);
         select.addEventListener("change", (evt) => {
           loggerConfig[c] = evt.target.value;
@@ -169,12 +170,12 @@
           loggerConfig[iink.constants.LoggerClass.RENDERER] = evt.target.value;
           loggerConfig[iink.constants.LoggerClass.CONFIGURATION] = evt.target.value;
           loggerConfig[iink.constants.LoggerClass.PUBLIC_EVENT] = evt.target.value;
-          loggerConfig[iink.constants.LoggerClass.INTERNALEVENT] = evt.target.value;
+          loggerConfig[iink.constants.LoggerClass.INTERNAL_EVENT] = evt.target.value;
           loggerConfig[iink.constants.LoggerClass.MODEL] = evt.target.value;
           loggerConfig[iink.constants.LoggerClass.STROKE] = evt.target.value;
           loggerConfig[iink.constants.LoggerClass.SMARTGUIDE] = evt.target.value;
-          loggerConfig[iink.constants.LoggerClass.STYLEMANAGER] = evt.target.value;
-          loggerConfig[iink.constants.LoggerClass.UNDOREDO_MANAGER] = evt.target.value;
+          loggerConfig[iink.constants.LoggerClass.STYLE] = evt.target.value;
+          loggerConfig[iink.constants.LoggerClass.UNDO_REDO] = evt.target.value;
           Array.from(document.getElementsByClassName("specific-logger-level-input")).forEach(input => {
             input.value = evt.target.value
           })

@@ -5,8 +5,8 @@ const {
   getExportsTypeFromEditorModel,
   getEditorConfiguration,
   setEditorConfiguration,
-  getConversionsFromEditorModel,
-  waitEditorIdle
+  waitEditorIdle,
+  getExportsFromEditorModel
 } = require("../helper")
 const { h, hello, helloOneStroke, helloStrikeStroke } = require("../strokesDatas")
 
@@ -132,8 +132,6 @@ describe("Websocket Text", () => {
 
     test("should convert", async () => {
       await Promise.all([getDatasFromExportedEvent(page), write(page, helloOneStroke.strokes)])
-      const emptyConvert = await getConversionsFromEditorModel(page)
-      expect(emptyConvert).toBeUndefined()
       expect(await page.locator(".more-menu.close").isVisible()).toBe(false)
       const wrotePath = await page.locator("path").first().getAttribute("d")
 
@@ -144,7 +142,7 @@ describe("Websocket Text", () => {
 
       await Promise.all([getDatasFromExportedEvent(page), page.click(`.more-menu > button >> text=Convert`)])
 
-      const convert = await getConversionsFromEditorModel(page)
+      const convert = await getExportsFromEditorModel(page)
       expect(convert).toBeDefined()
 
       const convertedPath = await page.locator("path").first().getAttribute("d")

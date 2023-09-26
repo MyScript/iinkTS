@@ -1,7 +1,9 @@
-import { TTheme } from "../@types/style/Theme"
-import { TPenStyle } from "../@types/style/PenStyle"
+import {
+  TTheme,
+  TPenStyle
+} from "../@types"
 
-import { mergeDeep } from "../utils/MergeHelper"
+import { mergeDeep } from "../utils/merge"
 
 import { DefaultPenStyle } from "./DefaultPenStyle"
 import { DefaultTheme } from "./DefaultTheme"
@@ -14,7 +16,7 @@ export class StyleManager
   #theme!: TTheme
   #penStyleClasses!: string
   #currentPenStyle!: TPenStyle
-  #logger =  LoggerManager.getLogger(LoggerClass.STYLEMANAGER)
+  #logger =  LoggerManager.getLogger(LoggerClass.STYLE)
 
   constructor(penStyle?: TPenStyle, theme?: TTheme)
   {

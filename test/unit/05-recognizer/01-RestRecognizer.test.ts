@@ -1,7 +1,6 @@
 import fetchMock from "jest-fetch-mock"
 import
 {
-  IModel,
   TPointer,
   TRecognitionConfiguration,
   TRecognitionType
@@ -36,7 +35,7 @@ describe("RestRecognizer.ts", () =>
   {
     test(`should export ${ recognitionType }`, async () =>
     {
-      const model: IModel = new Model(width, height)
+      const model = new Model(width, height)
       const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
       const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
       model.initCurrentStroke(p1, 1, "pen", DefaultPenStyle)
@@ -77,7 +76,7 @@ describe("RestRecognizer.ts", () =>
   {
     test(`should convert ${ recognitionType }`, async () =>
     {
-      const model: IModel = new Model(width, height)
+      const model = new Model(width, height)
       const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
       const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
       model.initCurrentStroke(p1, 1, "pen", DefaultPenStyle)
@@ -104,7 +103,6 @@ describe("RestRecognizer.ts", () =>
         case "Raw Content":
           mimeType = "application/vnd.myscript.jiix"
           break
-
         default:
           throw new Error("invalid recognition type")
       }

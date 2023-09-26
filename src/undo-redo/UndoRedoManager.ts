@@ -1,5 +1,8 @@
-import { TUndoRedoConfiguration } from "../@types/configuration/UndoRedoConfiguration"
-import { IModel } from "../@types/model/Model"
+import {
+  TUndoRedoConfiguration,
+  IModel
+} from "../@types"
+
 import { InternalEvent } from "../event/InternalEvent"
 import { UndoRedoContext } from "./UndoRedoContext"
 import { LoggerManager } from "../logger"
@@ -7,9 +10,10 @@ import { LoggerClass } from "../Constants"
 
 export class UndoRedoManager
 {
+  #logger = LoggerManager.getLogger(LoggerClass.UNDO_REDO)
+
   context: UndoRedoContext
   configuration: TUndoRedoConfiguration
-  #logger = LoggerManager.getLogger(LoggerClass.UNDOREDO_MANAGER)
 
   constructor(configuration: TUndoRedoConfiguration, model: IModel)
   {
@@ -28,7 +32,7 @@ export class UndoRedoManager
     this.context.canRedo = this.context.stack.length - 1 > this.context.stackIndex
     this.context.canUndo = this.context.stackIndex > 0
     const currentModel = this.context.stack[this.context.stackIndex]
-    this.context.empty = currentModel.rawStrokes.length === 0
+    this.context.empty = currentModel.strokes.length === 0 && !currentModel.conversion
   }
 
   addModelToStack(model: IModel): void
@@ -67,6 +71,7 @@ export class UndoRedoManager
     if (index > -1) {
       this.context.stack.splice(index, 1, model.getClone())
     }
+    this.updateCanUndoRedo()
     this.internalEvent.emitContextChange(this.context)
   }
 

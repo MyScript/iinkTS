@@ -1,9 +1,14 @@
-
+/**
+ * @websocket
+ */
 export type TGuidesConfiguration = {
-  enable: boolean
-  gap: numnber
+  enable: boolean,
+  gap: number
 }
 
+/**
+ * @websocket
+ */
 export type TSmartGuidesConfiguration = {
   enable: boolean
   fadeOut: {
@@ -12,6 +17,10 @@ export type TSmartGuidesConfiguration = {
   }
 }
 
+/**
+ * @REST
+ * @websocket
+ */
 export type TRenderingConfiguration = {
   minHeight: number
   minWidth: number

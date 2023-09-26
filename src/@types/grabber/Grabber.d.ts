@@ -1,4 +1,4 @@
-import { TPointer } from "../geometry"
+import { TPointer } from "../math"
 
 export interface IGrabber {
   attach(domElement?: HTMLElement): void

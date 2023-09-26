@@ -4,7 +4,8 @@ export default {
   // collectCoverage: true,
   collectCoverageFrom: [
     "./src/**",
-    "!./src/@types/**"
+    "!./src/@types/**",
+    "!./src/Constants.ts",
   ],
   coverageThreshold: {
     global: {
@@ -36,7 +37,8 @@ export default {
     "/node_modules/"
   ],
   transform: {
-    "^.+\\.css$": "jest-transform-css"
+    "^.+\\.css$": "jest-transform-css",
+    "^.+\\.svg$": "<rootDir>/test/unit/svgTransform.js",
   },
   verbose: false
 }

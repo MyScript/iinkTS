@@ -4,8 +4,7 @@ import { DeserializedMessage } from "jest-websocket-mock/lib/websocket"
 import { delay } from "../utils/helpers"
 import
 {
-  TWebSocketEvent,
-  IModel,
+  TWSMessageEvent,
   TTheme,
   TPenStyle,
   TServerConfiguration,
@@ -89,7 +88,7 @@ const getMessages = (messages: DeserializedMessage<object>[], type: string): Des
 {
   return messages.filter((m: DeserializedMessage<object>) =>
   {
-    const parseMessage = JSON.parse(m as string) as TWebSocketEvent
+    const parseMessage = JSON.parse(m as string) as TWSMessageEvent
     return parseMessage.type === type
   })
 }
@@ -106,7 +105,7 @@ describe("WSRecognizer.ts", () =>
     {
       socket.on("message", (message: string | Blob | ArrayBuffer | ArrayBufferView) =>
       {
-        const parsedMessage: TWebSocketEvent = JSON.parse(message as string)
+        const parsedMessage: TWSMessageEvent = JSON.parse(message as string)
         switch (parsedMessage.type) {
           case "newContentPackage":
             socket.send(JSON.stringify(ackMessage))
@@ -497,7 +496,7 @@ describe("WSRecognizer.ts", () =>
 
   describe("export", () =>
   {
-    const model: IModel = new Model(width, height)
+    const model = new Model(width, height)
     let wsr: typeof WSRecognizer
     let spyEmitError: jest.SpyInstance
     beforeEach(async () =>
@@ -588,7 +587,7 @@ describe("WSRecognizer.ts", () =>
 
   describe("import", () =>
   {
-    const model: IModel = new Model(width, height)
+    const model = new Model(width, height)
     let wsr: typeof WSRecognizer
     let spyEmitError: jest.SpyInstance
     const mimeType = "text/plain"
@@ -615,7 +614,7 @@ describe("WSRecognizer.ts", () =>
       await delay(100)
       const parsedMessage = mockServer.messages.map((m: DeserializedMessage<object>) =>
       {
-        return JSON.parse(m as string) as TWebSocketEvent
+        return JSON.parse(m as string) as TWSMessageEvent
       })
       await expect(parsedMessage.filter(m => m.type === "importFile")).toHaveLength(1)
       await expect(parsedMessage.filter(m => m.type === "importFile")[0]).toEqual(
@@ -663,7 +662,7 @@ describe("WSRecognizer.ts", () =>
 
   describe("resize", () =>
   {
-    const model: IModel = new Model(width, height)
+    const model = new Model(width, height)
     let wsr: typeof WSRecognizer
     let spyEmitError: jest.SpyInstance
     beforeEach(async () =>
@@ -719,7 +718,7 @@ describe("WSRecognizer.ts", () =>
 
   describe("convert", () =>
   {
-    const model: IModel = new Model(width, height)
+    const model = new Model(width, height)
     let wsr: typeof WSRecognizer
     let spyEmitError: jest.SpyInstance
     beforeEach(async () =>
@@ -780,7 +779,7 @@ describe("WSRecognizer.ts", () =>
 
   describe("undo", () =>
   {
-    const model: IModel = new Model(width, height)
+    const model = new Model(width, height)
     let wsr: typeof WSRecognizer
     let spyEmitError: jest.SpyInstance
     beforeEach(async () =>
@@ -840,7 +839,7 @@ describe("WSRecognizer.ts", () =>
 
   describe("redo", () =>
   {
-    const model: IModel = new Model(width, height)
+    const model = new Model(width, height)
     let wsr: typeof WSRecognizer
     let spyEmitError: jest.SpyInstance
     beforeEach(async () =>
@@ -900,7 +899,7 @@ describe("WSRecognizer.ts", () =>
 
   describe("clear", () =>
   {
-    const model: IModel = new Model(width, height)
+    const model = new Model(width, height)
     let wsr: typeof WSRecognizer
     let spyEmitError: jest.SpyInstance
     beforeEach(async () =>
@@ -974,7 +973,7 @@ describe("WSRecognizer.ts", () =>
       {
         socket.on("message", (message: string | Blob | ArrayBuffer | ArrayBufferView) =>
         {
-          const parsedMessage: TWebSocketEvent = JSON.parse(message as string)
+          const parsedMessage: TWSMessageEvent = JSON.parse(message as string)
           switch (parsedMessage.type) {
             case "newContentPackage":
               socket.send(JSON.stringify(ackMessage))

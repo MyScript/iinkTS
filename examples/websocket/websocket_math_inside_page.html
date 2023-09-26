@@ -7,7 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
     <title>Dynamic math part inside a page</title>
-    <link rel="stylesheet" href="../examples.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
@@ -137,7 +137,6 @@
       <div class="textContent">
         In mathematics, the Pythagorean theorem, also known as Pythagoras' theorem, ... often called the "Pythagorean equation".
       </div>
-
       <h3>Other forms of the theorem</h3>
       <div class="textContent">
         If c denotes the length of the hypotenuse and a and b denote the lengths of the other two sides, the Pythagorean theorem can be expressed as
@@ -178,12 +177,12 @@
 
     <div id="editor-modal">
       <nav>
-        <div class="flex-container center">
+        <div class="flex-container wrap center">
           <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/undo.svg" />
+            <img src="../assets/img/undo.svg" />
           </button>
           <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-            <img src="../assets/redo.svg" />
+            <img src="../assets/img/redo.svg" />
           </button>
         </div>
         <button class="classic-btn" id="convert" disabled>Convert</button>
@@ -286,8 +285,8 @@
 
         mathContentElements.forEach((mathContentElement) => {
           mathContentElement.addEventListener("click", (e) => {
-            e.preventDefault()
-            e.stopPropagation()
+            e.preventDefault();
+            e.stopPropagation();
             const srcMathContentElement = mathContentElement;
             const editorBox = document.querySelector("#editorBox");
             currentMathElement = srcMathContentElement;
@@ -335,7 +334,7 @@
         });
       };
 
-      loadEditor().catch(error => console.error(error));
+      loadEditor().catch((error) => console.error(error));
     </script>
   </body>
 </html>

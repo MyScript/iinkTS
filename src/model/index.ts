@@ -1,2 +1,6 @@
 export { Model } from "./Model"
-export { Stroke, convertStrokeToJSON } from "./Stroke"
+
+export {
+  Stroke,
+  convertStrokeToJSON
+} from "./Stroke"

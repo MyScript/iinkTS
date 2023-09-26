@@ -1,6 +1,8 @@
 import JsonCSS from "json-css"
-import { TPenStyle } from "../@types/style/PenStyle"
-import { TTheme } from "../@types/style/Theme"
+import {
+  TPenStyle,
+  TTheme
+} from "../@types"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const parser: any = new JsonCSS()

@@ -30,13 +30,14 @@
   },
   "types": [
     "./node_modules/@types/**",
+    "./src/@types",
     "@types/jest",
     "jest-websocket-mock",
     "jest-playwright-preset",
     "expect-playwright",
   ],
   "include": [
-    "."
+    "./src"
   ],
   "exclude": [
     "node_modules",

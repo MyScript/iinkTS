@@ -1,10 +1,9 @@
 import { AllOverrideConfiguration } from "../_dataset/configuration.dataset"
-import { delay } from "../utils/helpers"
+import { buildStroke, delay } from "../utils/helpers"
 // import { LeftClickEventFake } from "../utils/PointerEventFake"
 import
 {
   TBehaviorOptions,
-  TStroke,
   TTheme,
   TPenStyle,
   TJIIXExport,
@@ -22,14 +21,15 @@ import
   event
 } from "../../../src/iink"
 
+const { DefaultConfiguration } = configuration
+const { DefaultPenStyle, DefaultTheme } = style
+const { Model } = model
+const { PointerEventGrabber } = grabber
+const { WSRecognizer } = recognizer
+const { PublicEvent, InternalEvent } = event
+
 describe("Editor.ts", () =>
 {
-  const { DefaultConfiguration } = configuration
-  const { DefaultPenStyle, DefaultTheme } = style
-  const { Model} = model
-  const { PointerEventGrabber } = grabber
-  const { WSRecognizer } = recognizer
-  const { PublicEvent, InternalEvent } = event
   const publicEvent = PublicEvent.getInstance()
   const DefaultBehaviorsOptions: TBehaviorOptions = { configuration: DefaultConfiguration }
 
@@ -225,14 +225,14 @@ describe("Editor.ts", () =>
     test("should set intention = erase", () =>
     {
       editor.intention = constants.Intention.Erase
-      expect(wrapperHTML.classList).toContain("erasing")
+      expect(wrapperHTML.classList).toContain("erase")
     })
     test("should toggle intention", () =>
     {
       editor.intention = constants.Intention.Erase
-      expect(wrapperHTML.classList).toContain("erasing")
+      expect(wrapperHTML.classList).toContain("erase")
       editor.intention = constants.Intention.Write
-      expect(wrapperHTML.classList).not.toContain("erasing")
+      expect(wrapperHTML.classList).not.toContain("erase")
     })
   })
 
@@ -248,7 +248,23 @@ describe("Editor.ts", () =>
     })
   })
 
-  describe('undo', () =>
+  describe("gesture", () =>
+  {
+    test("should set configuration.recognition.gesture.enable & initialize", async () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement("div")
+      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+      expect(editor.configuration.recognition.gesture.enable).toEqual(true)
+      editor.initialize = jest.fn()
+      editor.behaviors.init = jest.fn(() => Promise.resolve())
+      editor.behaviors.destroy = jest.fn(() => Promise.resolve())
+      editor.gestures = false
+      expect(editor.configuration.recognition.gesture.enable).toEqual(false)
+      expect(editor.initialize).toBeCalledTimes(1)
+    })
+  })
+
+  describe("undo", () =>
   {
     test("should resolve when behaviors.undo is resolved", async () =>
     {
@@ -539,27 +555,16 @@ describe("Editor.ts", () =>
       expect(editor.import(jiix)).rejects.toEqual("Import impossible, behaviors has no import function")
     })
 
-    test("should resolve import points Events  when behaviors.importPointEvents is resolved", async () =>
+    test("should resolve import points Events when behaviors.importPointEvents is resolved", async () =>
     {
       const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       await editor.initialize()
       const model = new Model(100, 50)
-      const tstrokeToImport: TStroke[] = [
-        //@ts-ignore
-        {
-          "pointerType": "mouse",
-          "pointerId": 0,
-          "pointers": [
-            { "x": 604, "y": 226, "t": 1693494025427, "p": 0.1 },
-            { "x": 611, "y": 222, "t": 1693494025467, "p": 0.8 },
-            { "x": 621, "y": 222, "t": 1693494025484, "p": 0.68 },
-          ]
-        }
-      ]
+      const strokeToImport = buildStroke()
       editor.behaviors.importPointEvents = jest.fn(() => Promise.resolve(model))
-      await editor.importPointEvents(tstrokeToImport)
+      await editor.importPointEvents([strokeToImport])
       expect(editor.events.emitImported).toBeCalledTimes(1)
       expect(editor.behaviors.importPointEvents).toBeCalledTimes(1)
     })
@@ -569,20 +574,9 @@ describe("Editor.ts", () =>
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       await editor.initialize()
-      const tstrokeToImport: TStroke[] = [
-        //@ts-ignore
-        {
-          "pointerType": "mouse",
-          "pointerId": 0,
-          "pointers": [
-            { "x": 604, "y": 226, "t": 1693494025427, "p": 0.1 },
-            { "x": 611, "y": 222, "t": 1693494025467, "p": 0.8 },
-            { "x": 621, "y": 222, "t": 1693494025484, "p": 0.68 },
-          ]
-        }
-      ]
+      const strokeToImport = buildStroke()
       editor.behaviors.importPointEvents = jest.fn(() => Promise.reject("pouet"))
-      expect(editor.importPointEvents(tstrokeToImport)).rejects.toEqual("pouet")
+      expect(editor.importPointEvents([strokeToImport])).rejects.toEqual("pouet")
     })
   })
 

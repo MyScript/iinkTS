@@ -9,8 +9,8 @@
 
     <title>Styling editor style</title>
 
-    <link rel="stylesheet" href="../examples.css" />
-    <link rel="stylesheet" href="../assets/my-custom-classes.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/my-custom-classes.css" />
 
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
     <style>
@@ -23,16 +23,15 @@
 
   <body>
     <nav>
-      <div class="flex-container gap">
+      <div class="flex-container wrap gap">
         <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/undo.svg" />
+          <img src="../assets/img/undo.svg" />
         </button>
         <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/redo.svg" />
+          <img src="../assets/img/redo.svg" />
         </button>
       </div>
     </nav>
-
     <div id="editor" touch-action="none"></div>
 
     <script>

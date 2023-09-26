@@ -7,7 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
     <title>REST no UI</title>
-    <link rel="stylesheet" href="../examples.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
 
     <style>
@@ -15,7 +15,7 @@
         display: flex;
         flex-direction: row;
       }
-      #rawStrokes,
+      #strokes,
       #result {
         min-height: 95vh;
         max-height: 95vh;
@@ -52,7 +52,7 @@
   </head>
 
   <body>
-    <textarea id="rawStrokes">
+    <textarea id="strokes">
 [
   {
     "pointerType": "mouse",
@@ -138,8 +138,8 @@
     <button id="recognize" class="classic-btn">Recognize</button>
 
     <script>
-      const convertBlobToBase64 = (blob) =>
-        new Promise((resolve, reject) => {
+      async function convertBlobToBase64(blob) {
+        return new Promise((resolve, reject) => {
           const reader = new FileReader();
           reader.onerror = reject;
           reader.onload = () => {
@@ -147,6 +147,7 @@
           };
           reader.readAsDataURL(blob);
         });
+      }
       document.getElementById("recognize").addEventListener("click", async () => {
         const res = await fetch("../server-configuration.json");
         const serverConfiguration = await res.json();
@@ -157,7 +158,7 @@
         // Creating a empty model
         const model = new iink.model.Model();
         // Filling the model with the stroke
-        model.rawStrokes = JSON.parse(document.querySelector("#rawStrokes").value);
+        model.strokes = JSON.parse(document.querySelector("#strokes").value);
         // Define exported mimeTypes
         const requestedMimeType = ["text/plain", "image/png"];
         // Triggering the recognition
@@ -171,7 +172,7 @@
                 document.querySelector("#interpretatedImageContent > img").src = b64;
               })
               .catch((error) => {
-                console.log("Unable to convert to base 64");
+                console.error("Unable to convert to base 64");
               });
           } else {
             document.querySelector("#interpretatedTextContent").innerHTML = JSON.stringify(newModel.exports[mimeType]);

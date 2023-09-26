@@ -124,8 +124,7 @@ describe('Rest Diagram', () => {
         page.click('#clear'),
       ])
       expect(promisesResult[0]).toBeNull()
-      expect(await getExportsFromEditorModel(page)).toBeNull()
-
+      expect(await getExportsFromEditorModel(page)).toBeFalsy()
       expect(await page.locator('#result').textContent()).toBe('{}')
     })
 
@@ -143,24 +142,24 @@ describe('Rest Diagram', () => {
       let rectResultJson = JSON.parse(resultText)
       expect(rectResultJson['application/vnd.myscript.jiix']).toMatchObject(rectangle.exports.at(-1)['application/vnd.myscript.jiix'])
 
-      let raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
-      expect(raw.length).toEqual(rectangle.strokes.length)
+      let strokes = await editorEl.evaluate((node) => node.editor.model.strokes)
+      expect(strokes.length).toEqual(rectangle.strokes.length)
 
       await Promise.all([getDatasFromExportedEvent(page), page.click('#undo')])
       resultText = await page.locator('#result').textContent()
       rectResultJson = JSON.parse(resultText)
       expect(rectResultJson['application/vnd.myscript.jiix']).toMatchObject(rectangle.exports.at(-2)['application/vnd.myscript.jiix'])
 
-      raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
-      expect(raw.length).toEqual(rectangle.strokes.length - 1)
+      strokes = await editorEl.evaluate((node) => node.editor.model.strokes)
+      expect(strokes.length).toEqual(rectangle.strokes.length - 1)
 
       await Promise.all([getDatasFromExportedEvent(page), page.click('#redo')])
       resultText = await page.locator('#result').textContent()
       rectResultJson = JSON.parse(resultText)
       expect(rectResultJson['application/vnd.myscript.jiix']).toMatchObject(rectangle.exports.at(-1)['application/vnd.myscript.jiix'])
 
-      raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
-      expect(raw.length).toEqual(rectangle.strokes.length)
+      strokes = await editorEl.evaluate((node) => node.editor.model.strokes)
+      expect(strokes.length).toEqual(rectangle.strokes.length)
     })
   })
 })

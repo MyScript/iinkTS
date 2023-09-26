@@ -1,19 +1,23 @@
-import { TStroke } from "../../@types/model/Stroke"
-import { TRenderingConfiguration } from "../../@types/configuration/RenderingConfiguration"
-import { IModel } from "../../@types/model/Model"
-import { TSymbol } from "../../@types/renderer/Symbol"
+import {
+  TStroke,
+  TRenderingConfiguration,
+  IModel,
+  TSymbol
+} from "../../@types"
 
-import { drawShapeSymbol, ShapeSymbols } from "./CanvasRendererShapeSymbol"
-import { drawStroke } from "./CanvasRendererStrokeSymbol"
-import { drawTextSymbol, TextSymbols } from "./CanvasRendererTextSymbol"
-import { CanvasStroker } from "./CanvasStroker"
+import { CanvasRendererStroke } from "./CanvasRendererStroke"
+import { CanvasRendererShape } from "./CanvasRendererShape"
+import { CanvasRendererText } from "./CanvasRendererText"
 import { LoggerManager } from "../../logger"
 import { LoggerClass } from "../../Constants"
 
 export class CanvasRenderer
 {
-  config: TRenderingConfiguration
-  stroker: CanvasStroker
+  #logger = LoggerManager.getLogger(LoggerClass.RENDERER)
+  configuration: TRenderingConfiguration
+  strokeRenderer: CanvasRendererStroke
+  shapeRenderer: CanvasRendererShape
+  textRenderer: CanvasRendererText
   context!: {
     parent: HTMLElement
     renderingCanvas: HTMLCanvasElement
@@ -21,16 +25,17 @@ export class CanvasRenderer
     capturingCanvas: HTMLCanvasElement
     capturingCanvasContext: CanvasRenderingContext2D
   }
-  #logger = LoggerManager.getLogger(LoggerClass.RENDERER)
 
   constructor(config: TRenderingConfiguration)
   {
     this.#logger.info("constructor", { config })
-    this.config = config
-    this.stroker = new CanvasStroker()
+    this.configuration = config
+    this.strokeRenderer = new CanvasRendererStroke()
+    this.shapeRenderer = new CanvasRendererShape()
+    this.textRenderer = new CanvasRendererText()
   }
 
-  private createCanvas(type: string): HTMLCanvasElement
+  protected createCanvas(type: string): HTMLCanvasElement
   {
     this.#logger.debug("createCanvas", { type })
     const canvas: HTMLCanvasElement = document.createElement("canvas")
@@ -40,15 +45,15 @@ export class CanvasRenderer
     return canvas
   }
 
-  private resizeContent(): void
+  protected resizeContent(): void
   {
     const pixelRatio: number = window.devicePixelRatio
     const elements: HTMLCanvasElement[] = [this.context.renderingCanvas, this.context.capturingCanvas]
     elements.forEach((canvas) =>
     {
       const domElement = canvas.parentNode as HTMLElement
-      const width = Math.max(this.config.minWidth, domElement.clientWidth)
-      const height = Math.max(this.config.minHeight, domElement.clientHeight)
+      const width = Math.max(this.configuration.minWidth, domElement.clientWidth)
+      const height = Math.max(this.configuration.minHeight, domElement.clientHeight)
       canvas.width = width * pixelRatio
       canvas.height = height * pixelRatio
       canvas.getContext("2d")?.scale(pixelRatio, pixelRatio)
@@ -57,15 +62,21 @@ export class CanvasRenderer
     })
   }
 
-  private drawSymbol(context2D: CanvasRenderingContext2D, symbol: TSymbol)
+  protected drawSymbol(context2D: CanvasRenderingContext2D, symbol: TSymbol)
   {
+    this.#logger.debug("drawSymbol", { symbol })
     const type = symbol.elementType || symbol.type
     if (type === "stroke") {
-      drawStroke(context2D, symbol as TStroke, this.stroker)
-    } else if (Object.keys(TextSymbols).includes(type)) {
-      drawTextSymbol(context2D, symbol)
-    } else if (Object.keys(ShapeSymbols).includes(type)) {
-      drawShapeSymbol(context2D, symbol)
+      const stroke = symbol as TStroke
+      if (stroke.pointerType !== "eraser") {
+        this.strokeRenderer.draw(context2D, stroke)
+      }
+    } else if (Object.keys(this.textRenderer.symbols).includes(type)) {
+      this.textRenderer.draw(context2D, symbol)
+    } else if (Object.keys(this.shapeRenderer.symbols).includes(type)) {
+      this.shapeRenderer.draw(context2D, symbol)
+    } else {
+      this.#logger.warn("drawSymbol", `symbol type unknow: ${type}`)
     }
   }
 
@@ -93,7 +104,7 @@ export class CanvasRenderer
   {
     this.#logger.info("drawModel", { model })
     this.context.renderingCanvasContext?.clearRect(0, 0, this.context.renderingCanvas.width, this.context.renderingCanvas.height)
-    model.rawStrokes.forEach(symbol => this.drawSymbol(this.context.renderingCanvasContext, symbol))
+    model.strokes.forEach(symbol => this.drawSymbol(this.context.renderingCanvasContext, symbol))
     this.context.capturingCanvasContext.clearRect(0, 0, this.context.capturingCanvas.width, this.context.capturingCanvas.height)
   }
 
@@ -102,7 +113,7 @@ export class CanvasRenderer
     this.#logger.info("drawPendingStroke", { stroke })
     this.context.capturingCanvasContext.clearRect(0, 0, this.context.capturingCanvas.width, this.context.capturingCanvas.height)
     if (stroke && stroke?.pointerType !== "eraser") {
-      this.stroker.drawStroke(this.context.capturingCanvasContext, stroke)
+      this.strokeRenderer.draw(this.context.capturingCanvasContext, stroke)
     }
   }
 

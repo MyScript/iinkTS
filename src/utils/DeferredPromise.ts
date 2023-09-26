@@ -2,7 +2,7 @@
 export class DeferredPromise<T> {
   promise: Promise<T>
   resolve!: (value: T) => void
-  reject!: (value: Error) => void
+  reject!: (value: Error | string) => void
 
   isFullFilled: boolean
   isPending: boolean

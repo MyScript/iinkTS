@@ -1,6 +1,10 @@
-import { IGrabber } from "../@types/grabber/Grabber"
-import { TGrabberConfiguration } from "../@types/configuration/GrabberConfiguration"
-import { TPointer } from "../@types/geometry"
+import
+{
+  IGrabber,
+  TGrabberConfiguration,
+  TPointer
+} from "../@types"
+
 import { LoggerManager } from "../logger"
 import { LoggerClass } from "../Constants"
 
@@ -45,8 +49,8 @@ export class PointerEventGrabber implements IGrabber
     }
     const rect: DOMRect = this.domElement.getBoundingClientRect()
     const pointer = {
-      x: this.roundFloat(clientX - rect.left - this.domElement.clientLeft, this.configuration.xyFloatPrecision),
-      y: this.roundFloat(clientY - rect.top - this.domElement.clientTop, this.configuration.xyFloatPrecision),
+      x: this.roundFloat(clientX - rect.left - this.domElement.clientLeft + this.domElement.scrollLeft, this.configuration.xyFloatPrecision),
+      y: this.roundFloat(clientY - rect.top - this.domElement.clientTop + this.domElement.scrollTop, this.configuration.xyFloatPrecision),
       t: this.roundFloat(Date.now(), this.configuration.timestampFloatPrecision),
       p: (event as PointerEvent).pressure || 1,
     }
@@ -57,6 +61,7 @@ export class PointerEventGrabber implements IGrabber
   protected pointerDownHandler = (evt: PointerEvent) =>
   {
     this.#logger.info("pointerDown", { evt })
+
     // exit if not a left click or multi-touch
     if (evt.button !== 0 || evt.buttons !== 1) {
       return
@@ -94,6 +99,21 @@ export class PointerEventGrabber implements IGrabber
     }
   }
 
+  private pointerOutHandler = (evt: PointerEvent) =>
+  {
+    if (
+      this.activePointerId != undefined && this.activePointerId === evt.pointerId &&
+      !this.domElement.contains(evt.target as HTMLElement)
+    ) {
+      evt.stopPropagation()
+      this.activePointerId = undefined
+      if (this.onPointerUp) {
+        const point = this.extractPoint(evt)
+        this.onPointerUp(evt, point)
+      }
+    }
+  }
+
   attach(domElement: HTMLElement)
   {
     this.#logger.info("attach", { domElement })
@@ -104,9 +124,9 @@ export class PointerEventGrabber implements IGrabber
     this.domElement.addEventListener("pointerdown", this.pointerDownHandler, this.configuration.listenerOptions)
     this.domElement.addEventListener("pointermove", this.pointerMoveHandler, this.configuration.listenerOptions)
     this.domElement.addEventListener("pointerup", this.pointerUpHandler, this.configuration.listenerOptions)
-    // this.domElement.addEventListener("pointerout", this.pointerUpHandler, this.configuration.listenerOptions)
     this.domElement.addEventListener("pointerleave", this.pointerUpHandler, this.configuration.listenerOptions)
     this.domElement.addEventListener("pointercancel", this.pointerUpHandler, this.configuration.listenerOptions)
+    this.domElement.addEventListener("pointerout", this.pointerOutHandler, this.configuration.listenerOptions)
 
     this.domElement.addEventListener("touchmove", this.prevent)
 
@@ -121,9 +141,9 @@ export class PointerEventGrabber implements IGrabber
     this.domElement?.removeEventListener("pointerdown", this.pointerDownHandler, this.configuration.listenerOptions)
     this.domElement?.removeEventListener("pointermove", this.pointerMoveHandler, this.configuration.listenerOptions)
     this.domElement?.removeEventListener("pointerup", this.pointerUpHandler, this.configuration.listenerOptions)
-    // this.domElement?.removeEventListener("pointerout", this.pointerUpHandler, this.configuration.listenerOptions)
     this.domElement?.removeEventListener("pointerleave", this.pointerUpHandler, this.configuration.listenerOptions)
     this.domElement?.removeEventListener("pointercancel", this.pointerUpHandler, this.configuration.listenerOptions)
+    this.domElement?.removeEventListener("pointerout", this.pointerOutHandler, this.configuration.listenerOptions)
     this.domElement?.removeEventListener("touchmove", this.prevent)
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     document.documentElement.removeEventListener("pointerdown", () => { })

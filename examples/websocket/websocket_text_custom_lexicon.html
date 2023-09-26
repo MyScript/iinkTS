@@ -12,10 +12,7 @@
 
     <title>Custom lexicon</title>
 
-    <link rel="stylesheet" href="../examples.css" />
-
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
-
+    <link rel="stylesheet" href="../assets/style/examples.css" />
     <style>
       #editor {
         height: calc(100vh - 66px);
@@ -31,19 +28,21 @@
         }
       }
     </style>
+
+    <script type="text/javascript" src="../../dist/iink.min.js"></script>
   </head>
 
   <body>
-    <nav class="flex-container between" >
-      <div class="flex-container gap">
+    <nav class="flex-container wrap between" >
+      <div class="flex-container wrap gap">
         <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/undo.svg" />
+          <img src="../assets/img/undo.svg" />
         </button>
         <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/redo.svg" />
+          <img src="../assets/img/redo.svg" />
         </button>
       </div>
-      <div class="flex-container gap">
+      <div class="flex-container wrap gap">
         <input
           type="text"
           id="lexicon"

@@ -6,7 +6,7 @@ import
   ConfigurationRawContentRest,
   AllOverrideConfiguration,
 } from "../_dataset/configuration.dataset"
-import { TConfiguration, TConfigurationClient } from "../../../src/@types"
+import { DeepPartial, TConfiguration, TRecognitionConfiguration } from "../../../src/@types"
 import { configuration } from "../../../src/iink"
 
 describe("Configuration.ts", () =>
@@ -16,16 +16,16 @@ describe("Configuration.ts", () =>
   test("should be default configuration", () =>
   {
     const configurationDefault = new Configuration()
-    expect(configurationDefault.events).toStrictEqual(DefaultConfiguration.events)
     expect(configurationDefault.grabber).toStrictEqual(DefaultConfiguration.grabber)
-    expect(configurationDefault.recognition).toStrictEqual(DefaultConfiguration.recognition)
+    const defaultRecognition = JSON.parse(JSON.stringify(DefaultConfiguration.recognition)) as TRecognitionConfiguration
+    expect(configurationDefault.recognition).toStrictEqual(defaultRecognition)
     expect(configurationDefault.rendering).toStrictEqual(DefaultConfiguration.rendering)
     expect(configurationDefault.server).toStrictEqual(DefaultConfiguration.server)
     expect(configurationDefault.triggers).toStrictEqual(DefaultConfiguration.triggers)
     expect(configurationDefault["undo-redo"]).toStrictEqual(DefaultConfiguration["undo-redo"])
   })
 
-  const configurationsClient: { name: string, config: TConfigurationClient }[] = [
+  const configurationsClient: { name: string, config: DeepPartial<TConfiguration> }[] = [
     { name: "ConfigurationTextWebsocket", config: ConfigurationTextWebsocket },
     { name: "ConfigurationTextRest", config: ConfigurationTextRest },
     { name: "ConfigurationDiagramRest", config: ConfigurationDiagramRest },
@@ -95,11 +95,6 @@ describe("Configuration.ts", () =>
   {
     const overrideConfig: TConfiguration = new Configuration(AllOverrideConfiguration)
 
-    test("should override events", () =>
-    {
-      expect(overrideConfig.events).toStrictEqual(AllOverrideConfiguration.events)
-    })
-
     test("should override grabber", () =>
     {
       expect(overrideConfig.grabber).toStrictEqual(AllOverrideConfiguration.grabber)
@@ -107,7 +102,8 @@ describe("Configuration.ts", () =>
 
     test("should override recognition", () =>
     {
-      expect(overrideConfig.recognition).toStrictEqual(AllOverrideConfiguration.recognition)
+      const expectedRecongnitionConf = JSON.parse(JSON.stringify(AllOverrideConfiguration.recognition)) as TRecognitionConfiguration
+      expect(overrideConfig.recognition).toStrictEqual(expectedRecongnitionConf)
     })
 
     test("should override rendering", () =>

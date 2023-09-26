@@ -1,4 +1,6 @@
 /**
+ * @REST
+ * @websocket
  * Configure when the action is triggered.
  * POINTER_UP :   Action is triggered on every PenUP.
  *                This is the recommended mode for CDK V3 WebSocket recognitions.
