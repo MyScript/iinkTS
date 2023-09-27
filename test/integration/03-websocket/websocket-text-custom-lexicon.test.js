@@ -1,5 +1,5 @@
-const { write, waitForEditorWebSocket, getEditorModelExports, waitEditorIdle } = require("../helper")
-const { claclacla } = require("../strokesDatas")
+const { writePointers, waitForEditorWebSocket, getEditorModelExports, waitEditorIdle } = require("../helper")
+const { covfefe } = require("../strokesDatas")
 
 describe("Websocket Text Custom Lexicon", () => {
   beforeAll(async () => {
@@ -17,26 +17,24 @@ describe("Websocket Text Custom Lexicon", () => {
     expect(title).toMatch("Custom lexicon")
   })
 
-  test("should not recognize 'claclacla'", async () => {
-    await write(page, claclacla.strokes)
+  test("should not recognize 'covfefe'", async () => {
+    await writePointers(page, covfefe.strokes)
     await waitEditorIdle(page)
     const exports = await getEditorModelExports(page)
-    const jiixExpected = claclacla.exports["application/vnd.myscript.jiix"]
     const jiixReceived = exports["application/vnd.myscript.jiix"]
-    expect(jiixReceived).not.toEqual(jiixExpected)
+    expect(jiixReceived.label).not.toEqual(covfefe.exports["text/plain"].at(-1))
   })
 
   test("should send lexicon data with jiix", async () => {
     await Promise.all([
       waitForEditorWebSocket(page),
-      page.locator("#lexicon").fill("claclacla"),
+      page.locator("#lexicon").fill("covfefe"),
       page.locator("#reinit").click(),
     ])
-    await write(page, claclacla.strokes)
+    await writePointers(page, covfefe.strokes)
     await waitEditorIdle(page)
     const exports = await getEditorModelExports(page)
-    const jiixExpected = claclacla.exports["application/vnd.myscript.jiix"]
     const jiixReceived = exports["application/vnd.myscript.jiix"]
-    expect(jiixReceived.label).toEqual(jiixExpected.label)
+    expect(jiixReceived.label).toEqual(covfefe.exports["text/plain"].at(-1))
   })
 })

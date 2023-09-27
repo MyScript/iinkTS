@@ -315,49 +315,6 @@ module.exports.ponyErasePrecisely = {
   ],
 }
 
-const klopmoStrokes = require("./strokes/CustomLexicon/klopmo.json")
-module.exports.klopmo = {
-  type: "TEXT",
-  strokes: klopmoStrokes,
-  exports: {
-    "text/plain": ["klopmo"],
-    "application/vnd.myscript.jiix": {
-      type: "Text",
-      label: "klopmo",
-      words: [
-        {
-          label: "klopmo",
-          candidates: ["klopmo", "Klopmo"],
-        },
-      ],
-      version: "3",
-      id: "MainBlock",
-    },
-  },
-}
-
-const jilopStrokes = require("./strokes/CustomLexicon/jilop.json")
-
-module.exports.jilop = {
-  type: "TEXT",
-  strokes: jilopStrokes,
-  exports: {
-    "text/plain": ["jilop"],
-    "application/vnd.myscript.jiix": {
-      type: "Text",
-      label: "jilop",
-      words: [
-        {
-          label: "jilop",
-          candidates: ["jilop", "Jilop"],
-        },
-      ],
-      version: "3",
-      id: "MainBlock",
-    },
-  },
-}
-
 const sumStroke = require('./strokes/sum.json')
 module.exports.sum = {
   type: 'MATH',
@@ -382,54 +339,12 @@ module.exports.sumSimple = {
   }
 }
 
-const buenosStrokes = require("./strokes/Interact/buenos.json")
-module.exports.buenos = {
-  type: "TEXT",
-  strokes: buenosStrokes,
-  exports: {
-    "text/plain": ["b", "bu", "bue", "buen", "bueno", "buenos"],
-    "application/vnd.myscript.jiix": {
-      type: "Text",
-      label: "buenos",
-      words: [
-        {
-          label: "buenos",
-          candidates: ["buenos"],
-        },
-      ],
-      version: "3",
-      id: "MainBlock",
-    },
-  },
-}
-
-const airesStrokes = require("./strokes/Interact/aires.json")
-module.exports.aires = {
-  type: "TEXT",
-  strokes: airesStrokes,
-  exports: {
-    "text/plain": ["a", "ai", "air", "aire", "aires"],
-    "application/vnd.myscript.jiix": {
-      type: "Text",
-      label: "aires",
-      words: [
-        {
-          label: "aires",
-          candidates: ["aires"],
-        },
-      ],
-      version: "3",
-      id: "MainBlock",
-    },
-  },
-}
-
-const parisStrokes = require("./strokes/Interact/paris.json")
+const parisStrokes = require("./strokes/interact/paris.json")
 module.exports.paris = {
   type: "TEXT",
   strokes: parisStrokes,
   exports: {
-    "text/plain": ["p", "pa", "par", "pari", "paris"],
+    "text/plain": ["paris"],
     "application/vnd.myscript.jiix": {
       type: "Text",
       label: "paris",
@@ -445,7 +360,7 @@ module.exports.paris = {
   },
 }
 
-const tokyoStrokes = require("./strokes/Interact/tokyo.json")
+const tokyoStrokes = require("./strokes/interact/tokyo.json")
 module.exports.tokyo = {
   type: "TEXT",
   strokes: tokyoStrokes,
@@ -466,12 +381,12 @@ module.exports.tokyo = {
   },
 }
 
-const madridStrokes = require("./strokes/Interact/madrid.json")
+const madridStrokes = require("./strokes/interact/madrid.json")
 module.exports.madrid = {
   type: "TEXT",
   strokes: madridStrokes,
   exports: {
-    "text/plain": ["m", "ma", "mad", "madr", "madri", "madrid"],
+    "text/plain": ["madrid"],
     "application/vnd.myscript.jiix": {
       type: "Text",
       label: "madrid",
@@ -487,12 +402,12 @@ module.exports.madrid = {
   },
 }
 
-const romeStrokes = require("./strokes/Interact/rome.json")
+const romeStrokes = require("./strokes/interact/rome.json")
 module.exports.rome = {
   type: "TEXT",
   strokes: romeStrokes,
   exports: {
-    "text/plain": ["r", "ro", "rom", "rome"],
+    "text/plain": ["rome"],
     "application/vnd.myscript.jiix": {
       type: "Text",
       label: "rome",
@@ -508,35 +423,7 @@ module.exports.rome = {
   },
 }
 
-const claclaclaStrokes = require("./strokes/CustomLexicon/claclacla.json")
-module.exports.claclacla = {
-  type: "TEXT",
-  strokes: claclaclaStrokes,
-  exports: {
-    "text/plain": ["claclacla"],
-    "application/vnd.myscript.jiix": {
-      type: "Text",
-      label: "claclacla",
-      words: [
-        {
-          label: "claclacla",
-          candidates: [
-            "claclacla",
-            "Claclacla",
-            "claclacha",
-            "claclache",
-            "claclacle",
-            "elaclacha",
-          ],
-        },
-      ],
-      version: "3",
-      id: "MainBlock",
-    },
-  },
-}
-
-const buenosAiresStrokes = require("./strokes/Interact/buenosAires.json")
+const buenosAiresStrokes = require("./strokes/interact/buenosAires.json")
 module.exports.buenosAires = {
   type: "TEXT",
   strokes: buenosAiresStrokes,
@@ -623,5 +510,14 @@ module.exports.helloOneSurrounded = {
       version: "3",
       id: "MainBlock",
     },
+  },
+}
+
+const covfefeStrokes = require("./strokes/covfefe.json")
+module.exports.covfefe = {
+  type: "TEXT",
+  strokes: covfefeStrokes,
+  exports: {
+    "text/plain": ["covfefe"],
   },
 }
