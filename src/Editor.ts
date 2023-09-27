@@ -266,8 +266,10 @@ export class Editor
       if (!panel) {
         panel = document.createElement("div")
         panel.id = "stroke-panel"
-        panel.addEventListener("click", () =>
+        panel.addEventListener("click", (e) =>
         {
+          e.preventDefault()
+          e.stopPropagation()
           navigator.clipboard.writeText(panel?.innerText as string)
           this.#showNotif({ message: "strokes copied to clipboard!", timeout: 1500 })
         })

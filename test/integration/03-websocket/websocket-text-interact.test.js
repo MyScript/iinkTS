@@ -1,4 +1,4 @@
-const { write, getExportedDatas, waitForEditorWebSocket, waitEditorIdle } = require("../helper")
+const { writePointers, getExportedDatas, waitForEditorWebSocket, waitEditorIdle, getEditorModelExportsType } = require("../helper")
 const { paris, tokyo, madrid, rome, buenosAires } = require("../strokesDatas")
 
 
@@ -20,13 +20,10 @@ describe("Websocket Text interact", () => {
   })
 
   test(`should answer question capital of France`, async () => {
-    const [exportParis] = await Promise.all([
-      getExportedDatas(page),
-      write(page, paris.strokes, -100)
-    ])
+    await writePointers(page, paris.strokes)
     await waitEditorIdle(page)
-    let textExpected = paris.exports["application/vnd.myscript.jiix"].label
-    let textReceived = exportParis["text/plain"]
+    const textExpected = paris.exports["text/plain"].at(-1)
+    const textReceived = await getEditorModelExportsType(page, "text/plain")
     expect(textReceived).toStrictEqual(textExpected)
   })
 
@@ -38,13 +35,10 @@ describe("Websocket Text interact", () => {
   })
 
   test(`should answer question capital of Italy`, async () => {
-    const [exportRomes] = await Promise.all([
-      getExportedDatas(page),
-      write(page, rome.strokes, -100)
-    ])
+    await writePointers(page, rome.strokes)
     await waitEditorIdle(page)
-    textExpected = rome.exports["application/vnd.myscript.jiix"].label
-    textReceived = exportRomes["text/plain"]
+    const textExpected = rome.exports["text/plain"].at(-1)
+    const textReceived = await getEditorModelExportsType(page, "text/plain")
     expect(textReceived).toStrictEqual(textExpected)
   })
 
@@ -56,13 +50,10 @@ describe("Websocket Text interact", () => {
   })
 
   test(`should answer question capital of Spain`, async () => {
-    const [exportMadrid] = await Promise.all([
-      getExportedDatas(page),
-      write(page, madrid.strokes, -100)
-    ])
+    await writePointers(page, madrid.strokes)
     await waitEditorIdle(page)
-    textExpected = madrid.exports["application/vnd.myscript.jiix"].label
-    textReceived = exportMadrid["text/plain"]
+    const textExpected = madrid.exports["text/plain"].at(-1)
+    const textReceived = await getEditorModelExportsType(page, "text/plain")
     expect(textReceived).toStrictEqual(textExpected)
   })
 
@@ -74,16 +65,10 @@ describe("Websocket Text interact", () => {
   })
 
   test(`should answer question capital of Argentina`, async () => {
-    let exportBuenosAires
-    for (let s of buenosAires.strokes) {
-      [exportBuenosAires] = await Promise.all([
-        getExportedDatas(page),
-        write(page, [s], -100, -200)
-      ])
-    }
+    await writePointers(page, buenosAires.strokes)
     await waitEditorIdle(page)
-    textExpected = buenosAires.exports["application/vnd.myscript.jiix"].label
-    textReceived = exportBuenosAires["text/plain"]
+    const textExpected = buenosAires.exports["text/plain"].at(-1)
+    const textReceived = await getEditorModelExportsType(page, "text/plain")
     expect(textReceived).toStrictEqual(textExpected)
   })
 
@@ -95,13 +80,10 @@ describe("Websocket Text interact", () => {
   })
 
   test(`should answer question capital of Japan`, async () => {
-    const [exportTokyo] = await Promise.all([
-      getExportedDatas(page),
-      write(page, tokyo.strokes)
-    ])
+    await writePointers(page, tokyo.strokes)
     await waitEditorIdle(page)
-    textExpected = tokyo.exports["application/vnd.myscript.jiix"].label
-    textReceived = exportTokyo["text/plain"]
+    const textExpected = tokyo.exports["text/plain"].at(-1)
+    const textReceived = await getEditorModelExportsType(page, "text/plain")
     expect(textReceived).toStrictEqual(textExpected)
   })
 })
