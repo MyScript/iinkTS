@@ -1,10 +1,10 @@
 const {
   waitForEditorRest,
   write,
-  getExportedDatas,
+  getDatasFromExportedEvent,
   setEditorConfiguration,
   getEditorConfiguration,
-  getEditorModelExports,
+  getExportsFromEditorModel,
 } = require('../helper')
 const { rectangle, line } = require('../strokesDatas')
 
@@ -15,7 +15,7 @@ describe('Rest Diagram', () => {
   })
 
   beforeEach(async () => {
-    await page.reload({ waitUntil: 'networkidle'})
+    await page.reload({ waitUntil: 'load' })
     await waitForEditorRest(page)
   })
 
@@ -26,7 +26,7 @@ describe('Rest Diagram', () => {
 
   test('should display application/vnd.myscript.jiix into result', async () => {
     const [lineExportedDatas] = await Promise.all([
-      getExportedDatas(page),
+      getDatasFromExportedEvent(page),
       write(page, [rectangle.strokes[0]]),
     ])
     const lineResultText = await page.locator('#result').textContent()
@@ -35,7 +35,7 @@ describe('Rest Diagram', () => {
     expect(lineExportedDatas['application/vnd.myscript.jiix']).toMatchObject(rectangle.exports[0]['application/vnd.myscript.jiix'])
 
     const [rectExportedDatas] = await Promise.all([
-      getExportedDatas(page),
+      getDatasFromExportedEvent(page),
       write(page, [rectangle.strokes[1]]),
     ])
     const rectResultText = await page.locator('#result').textContent()
@@ -67,7 +67,7 @@ describe('Rest Diagram', () => {
 
     test('should only request application/vnd.myscript.jiix by default', async () => {
       await Promise.all([
-        getExportedDatas(page),
+        getDatasFromExportedEvent(page),
         write(page, line.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(1)
@@ -81,7 +81,7 @@ describe('Rest Diagram', () => {
       ]
       await setEditorConfiguration(page, configuration)
       await Promise.all([
-        getExportedDatas(page),
+        getDatasFromExportedEvent(page),
         write(page, line.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(1)
@@ -96,7 +96,7 @@ describe('Rest Diagram', () => {
       ]
       await setEditorConfiguration(page, configuration)
       await Promise.all([
-        getExportedDatas(page),
+        getDatasFromExportedEvent(page),
         write(page, line.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(2)
@@ -109,7 +109,7 @@ describe('Rest Diagram', () => {
   describe('Nav actions', () => {
     test('should clear', async () => {
       const [exportedDatas] = await Promise.all([
-        getExportedDatas(page),
+        getDatasFromExportedEvent(page),
         write(page, line.strokes),
       ])
       const resultText = await page.locator('#result').textContent()
@@ -117,14 +117,14 @@ describe('Rest Diagram', () => {
       expect(exportedDatas['application/vnd.myscript.jiix']).toEqual(rectResultJson['application/vnd.myscript.jiix'])
       expect(rectResultJson['application/vnd.myscript.jiix']).toMatchObject(line.exports[0]['application/vnd.myscript.jiix'])
 
-      expect(await getEditorModelExports(page)).toBeDefined()
+      expect(await getExportsFromEditorModel(page)).toBeDefined()
 
       const promisesResult = await Promise.all([
-        getExportedDatas(page),
+        getDatasFromExportedEvent(page),
         page.click('#clear'),
       ])
       expect(promisesResult[0]).toBeNull()
-      expect(await getEditorModelExports(page)).toBeNull()
+      expect(await getExportsFromEditorModel(page)).toBeNull()
 
       expect(await page.locator('#result').textContent()).toBe('{}')
     })
@@ -132,11 +132,11 @@ describe('Rest Diagram', () => {
     test('should undo/redo', async () => {
       const editorEl = await page.waitForSelector('#editor')
       await Promise.all([
-        getExportedDatas(page),
+        getDatasFromExportedEvent(page),
         write(page, [rectangle.strokes[0]])
       ])
       await Promise.all([
-        getExportedDatas(page),
+        getDatasFromExportedEvent(page),
         write(page, [rectangle.strokes[1]])
       ])
       let resultText = await page.locator('#result').textContent()
@@ -146,7 +146,7 @@ describe('Rest Diagram', () => {
       let raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
       expect(raw.length).toEqual(rectangle.strokes.length)
 
-      await Promise.all([getExportedDatas(page), page.click('#undo')])
+      await Promise.all([getDatasFromExportedEvent(page), page.click('#undo')])
       resultText = await page.locator('#result').textContent()
       rectResultJson = JSON.parse(resultText)
       expect(rectResultJson['application/vnd.myscript.jiix']).toMatchObject(rectangle.exports.at(-2)['application/vnd.myscript.jiix'])
@@ -154,7 +154,7 @@ describe('Rest Diagram', () => {
       raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
       expect(raw.length).toEqual(rectangle.strokes.length - 1)
 
-      await Promise.all([getExportedDatas(page), page.click('#redo')])
+      await Promise.all([getDatasFromExportedEvent(page), page.click('#redo')])
       resultText = await page.locator('#result').textContent()
       rectResultJson = JSON.parse(resultText)
       expect(rectResultJson['application/vnd.myscript.jiix']).toMatchObject(rectangle.exports.at(-1)['application/vnd.myscript.jiix'])

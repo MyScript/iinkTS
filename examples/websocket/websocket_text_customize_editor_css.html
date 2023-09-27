@@ -109,9 +109,9 @@
         window.addEventListener("resize", () => {
           editorElement.editor.resize();
         });
-      }
-      loadEditor();
-      /* iink.register(editorElement, configuration, penStyle, theme, null, globalClassCSS); */
+      };
+
+      loadEditor().catch(error => console.error(error));
     </script>
   </body>
 </html>

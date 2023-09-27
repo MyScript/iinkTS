@@ -1,4 +1,4 @@
-const { write, getExportedDatas, waitForEditorWebSocket, waitEditorIdle } = require("../helper")
+const { write, getDatasFromExportedEvent, waitForEditorWebSocket, waitEditorIdle } = require("../helper")
 const { hello } = require("../strokesDatas")
 
 describe("Websocket Text file export", () => {
@@ -7,7 +7,7 @@ describe("Websocket Text file export", () => {
   })
 
   beforeEach(async () => {
-    await page.reload({ waitUntil: "networkidle" })
+    await page.reload({ waitUntil: 'load' })
     await waitForEditorWebSocket(page)
     await waitEditorIdle(page)
   })
@@ -20,7 +20,7 @@ describe("Websocket Text file export", () => {
   test("should write and save to word file", async () => {
     await waitForEditorWebSocket(page)
     await Promise.all([
-      getExportedDatas(page),
+      getDatasFromExportedEvent(page),
       write(page, hello.strokes)
     ])
     const downloadPromise = page.waitForEvent('download');
@@ -32,7 +32,7 @@ describe("Websocket Text file export", () => {
   test("should write and save to html file", async () => {
     await waitForEditorWebSocket(page)
     await Promise.all([
-      getExportedDatas(page),
+      getDatasFromExportedEvent(page),
       write(page, hello.strokes)
     ])
     const downloadPromise = page.waitForEvent('download');
@@ -45,7 +45,7 @@ describe("Websocket Text file export", () => {
   test("should write and save to png file", async () => {
     await waitForEditorWebSocket(page)
     await Promise.all([
-      getExportedDatas(page),
+      getDatasFromExportedEvent(page),
       write(page, hello.strokes)
     ])
     const downloadPromise = page.waitForEvent('download');
@@ -58,7 +58,7 @@ describe("Websocket Text file export", () => {
   test("should write and save to jpg file", async () => {
     await waitForEditorWebSocket(page)
     await Promise.all([
-      getExportedDatas(page),
+      getDatasFromExportedEvent(page),
       write(page, hello.strokes)
     ])
     const downloadPromise = page.waitForEvent('download');

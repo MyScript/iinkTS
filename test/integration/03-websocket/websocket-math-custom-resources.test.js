@@ -1,4 +1,4 @@
-const { waitForEditorWebSocket, writePointers, write, getExportedDatas, getEditorModelExportsType, waitEditorIdle, getEditorConfiguration, setEditorConfiguration } = require("../helper")
+const { waitForEditorWebSocket, writePointers, write, getDatasFromExportedEvent, getExportsTypeFromEditorModel, waitEditorIdle, getEditorConfiguration, setEditorConfiguration } = require("../helper")
 const { sumSimple, h } = require("../strokesDatas")
 
 describe("Websocket Math", function () {
@@ -7,7 +7,7 @@ describe("Websocket Math", function () {
   })
 
   beforeEach(async () => {
-    await page.reload({ waitUntil: "networkidle" })
+    await page.reload({ waitUntil: 'load' })
     await waitForEditorWebSocket(page)
     await waitEditorIdle(page)
   })
@@ -19,20 +19,20 @@ describe("Websocket Math", function () {
 
   test("should only export latex by default", async () => {
     for (const s of sumSimple.strokes) {
-      await Promise.all([getExportedDatas(page), writePointers(page, [s], 100, 100)])
+      await Promise.all([getDatasFromExportedEvent(page), writePointers(page, [s], 100, 100)])
     }
-    const jiix = await getEditorModelExportsType(page, "application/vnd.myscript.jiix")
+    const jiix = await getExportsTypeFromEditorModel(page, "application/vnd.myscript.jiix")
     expect(jiix).toBeUndefined()
-    const latex = await getEditorModelExportsType(page, "application/x-latex")
+    const latex = await getExportsTypeFromEditorModel(page, "application/x-latex")
     expect(latex).toBeDefined()
-    const mathml = await getEditorModelExportsType(page, "application/mathml+xml")
+    const mathml = await getExportsTypeFromEditorModel(page, "application/mathml+xml")
     expect(mathml).toBeUndefined()
   })
 
   test("should undo/redo", async () => {
     const editorEl = await page.waitForSelector("#editor")
     for (const s of sumSimple.strokes) {
-      await Promise.all([getExportedDatas(page), writePointers(page, [s])])
+      await Promise.all([getDatasFromExportedEvent(page), writePointers(page, [s])])
     }
 
     let resultElement = page.locator("#result")
@@ -41,7 +41,7 @@ describe("Websocket Math", function () {
     let raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
     expect(raw.length).toStrictEqual(sumSimple.strokes.length)
 
-    await Promise.all([getExportedDatas(page), page.click("#undo")])
+    await Promise.all([getDatasFromExportedEvent(page), page.click("#undo")])
     resultElement = page.locator("#result")
     resultText = await resultElement.textContent()
     expect(resultText).toStrictEqual(sumSimple.exports["LATEX"].at(-2))
@@ -50,17 +50,17 @@ describe("Websocket Math", function () {
   })
 
   test("should clear", async () => {
-    await Promise.all([getExportedDatas(page), writePointers(page, sumSimple.strokes)])
+    await Promise.all([getDatasFromExportedEvent(page), writePointers(page, sumSimple.strokes)])
     let resultElement = page.locator("#result")
     resultText = await resultElement.textContent()
     expect(resultText).toBeDefined()
 
-    const [clearExport] = await Promise.all([getExportedDatas(page), page.click("#clear")])
+    const [clearExport] = await Promise.all([getDatasFromExportedEvent(page), page.click("#clear")])
     const emptyLatex = ""
     const LatexReceived = clearExport["application/x-latex"]
     expect(LatexReceived).toEqual(emptyLatex)
 
-    const modelExportLatex = await getEditorModelExportsType(page, "application/x-latex")
+    const modelExportLatex = await getExportsTypeFromEditorModel(page, "application/x-latex")
     expect(modelExportLatex).toEqual(LatexReceived)
     resultElement = page.locator("#result")
     resultText = await resultElement.textContent()
@@ -68,7 +68,7 @@ describe("Websocket Math", function () {
   })
 
   test("should not recognize text", async () => {
-    await Promise.all([getExportedDatas(page), write(page, h.strokes)])
+    await Promise.all([getDatasFromExportedEvent(page), write(page, h.strokes)])
     let resultElement = page.locator("#result")
     resultText = await resultElement.textContent()
     expect(resultText).not.toEqual("h")
@@ -81,7 +81,7 @@ describe("Websocket Math", function () {
     await setEditorConfiguration(page, config)
     await waitForEditorWebSocket(page)
 
-    const [exportedDatas] = await Promise.all([getExportedDatas(page), write(page, h.strokes)])
+    const [exportedDatas] = await Promise.all([getDatasFromExportedEvent(page), write(page, h.strokes)])
     let resultElement = page.locator("#result")
     resultText = await resultElement.textContent()
     const latexReceived = exportedDatas["application/x-latex"]

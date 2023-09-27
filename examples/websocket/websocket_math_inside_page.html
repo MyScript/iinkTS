@@ -332,9 +332,9 @@
         convertElement.addEventListener("click", () => {
           editor.convert();
         });
-      }
+      };
 
-      loadEditor();
+      loadEditor().catch(error => console.error(error));
     </script>
   </body>
 </html>

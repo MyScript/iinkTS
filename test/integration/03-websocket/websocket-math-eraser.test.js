@@ -7,7 +7,7 @@ describe('Websocket Math Eraser', function () {
   })
 
   beforeEach(async () => {
-    await page.reload({ waitUntil: 'networkidle'})
+    await page.reload({ waitUntil: 'load' })
     await waitForEditorWebSocket(page)
   })
 

@@ -11,8 +11,8 @@ import
   TConverstionState,
   TRecognitionConfiguration,
   TRecognitionType,
-  TPointer,
 } from "../../../src/@types"
+
 import
 {
   DefaultRecognitionConfiguration,
@@ -21,6 +21,7 @@ import
   Model,
   DefaultPenStyle,
   Constants,
+  Stroke,
 } from "../../../src/iink"
 
 const ackMessage = { "type": "ack", "hmacChallenge": "1f434e8b-cc46-4a8c-be76-708eea2ff305", "iinkSessionId": "c7e72186-6299-4782-b612-3e725aa126f1" }
@@ -350,34 +351,29 @@ describe("WSRecognizer.ts", () =>
     test("should throw error if recognizer has not been initialize", async () =>
     {
       expect.assertions(1)
-      const model = new Model(width, height)
-      const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
-      const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
-      model.initCurrentStroke(p1, 1, "pen", DefaultPenStyle)
-      model.endCurrentStroke(p2)
-      await expect(wsr.addStrokes(model)).rejects.toEqual(new Error("Recognizer must be initilized"))
+      const stroke = new Stroke(DefaultPenStyle, 1)
+      stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1})
+      await expect(wsr.addStrokes([stroke])).rejects.toEqual(new Error("Recognizer must be initilized"))
     })
     test("should send addStrokes message", async () =>
     {
       expect.assertions(1)
-      const model = new Model(width, height)
-      const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
-      const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
-      model.initCurrentStroke(p1, 1, "pen", DefaultPenStyle)
-      model.endCurrentStroke(p2)
+      const stroke = new Stroke(DefaultPenStyle, 1)
+      stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1})
+      stroke.pointers.push({ p: 2, t: 4, x: 8, y: 16})
       await wsr.init(height, width)
-      wsr.addStrokes(model)
+      wsr.addStrokes([stroke])
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
       const addStrokesMessageSent = JSON.parse(mockServer.messages[mockServer.messages.length - 1] as string)
       const addStrokesMessageSentToTest = {
         type: "addStrokes",
         strokes: [{
-          "p": [0.88, 0.07],
+          "p": [1, 2],
           "pointerType": "pen",
-          "t": [1, 10],
-          "x": [1, 100],
-          "y": [1, 1],
+          "t": [1, 4],
+          "x": [1, 8],
+          "y": [1, 16],
         }]
       }
       await expect(addStrokesMessageSent).toMatchObject(addStrokesMessageSentToTest)
@@ -385,9 +381,8 @@ describe("WSRecognizer.ts", () =>
     test("should not send addStrokes message if model.extractUnsentStrokes return 0 strokes", async () =>
     {
       expect.assertions(1)
-      const emptyModel: IModel = new Model(width, height)
       await wsr.init(height, width)
-      await wsr.addStrokes(emptyModel)
+      await wsr.addStrokes([])
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
       const addStrokesMessageSent = JSON.parse(mockServer.messages[mockServer.messages.length - 1] as string)
@@ -396,35 +391,29 @@ describe("WSRecognizer.ts", () =>
     test("should resolve when receive exported message", async () =>
     {
       expect.assertions(1)
-      const model = new Model(width, height)
-      const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
-      const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
-      model.initCurrentStroke(p1, 1, "pen", DefaultPenStyle)
-      model.endCurrentStroke(p2)
+      const stroke = new Stroke(DefaultPenStyle, 1)
+      stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1})
+      stroke.pointers.push({ p: 2, t: 4, x: 8, y: 16})
       await wsr.init(height, width)
-      const promise = wsr.addStrokes(model)
+      const promise = wsr.addStrokes([stroke])
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       mockServer.send(JSON.stringify(emptyExportedMessage))
       await promise
       await expect(promise).resolves.toEqual(
         expect.objectContaining({
-          exports: {
-            "application/vnd.myscript.jiix": emptyJIIX
-          }
+          "application/vnd.myscript.jiix": emptyJIIX
         })
       )
     })
     test("should reject if receive error message", async () =>
     {
       expect.assertions(3)
-      const model = new Model(width, height)
-      const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
-      const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
-      model.initCurrentStroke(p1, 1, "pen", DefaultPenStyle)
-      model.endCurrentStroke(p2)
+      const stroke = new Stroke(DefaultPenStyle, 1)
+      stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1})
+      stroke.pointers.push({ p: 2, t: 4, x: 8, y: 16})
       await wsr.init(height, width)
-      const promise = wsr.addStrokes(model)
+      const promise = wsr.addStrokes([stroke])
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       mockServer.send(JSON.stringify(errorMessage))

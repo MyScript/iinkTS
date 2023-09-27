@@ -1,4 +1,4 @@
-const { write, getExportedDatas, waitForEditorWebSocket } = require("../helper")
+const { write, getDatasFromExportedEvent, waitForEditorWebSocket } = require("../helper")
 const { hello } = require("../strokesDatas")
 
 describe("Websocket Text search", () => {
@@ -7,7 +7,7 @@ describe("Websocket Text search", () => {
   })
 
   beforeEach(async () => {
-    await page.reload({ waitUntil: "networkidle" })
+    await page.reload({ waitUntil: 'load' })
     await waitForEditorWebSocket(page)
   })
 
@@ -18,7 +18,7 @@ describe("Websocket Text search", () => {
 
   test("should find text", async () => {
     await Promise.all([
-        getExportedDatas(page),
+        getDatasFromExportedEvent(page),
         write(page, hello.strokes)
     ])
 
@@ -36,7 +36,7 @@ describe("Websocket Text search", () => {
 
   test("should failed to find", async () => {
     await Promise.all([
-        getExportedDatas(page),
+        getDatasFromExportedEvent(page),
         write(page, hello.strokes)
     ])
 

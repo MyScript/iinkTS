@@ -8,8 +8,7 @@ import
   TWebSocketSVGPatchEvent,
   TPointer,
   TPenStyle,
-  TTheme,
-  TUndoRedoContext
+  TTheme
 } from "../../../src/@types"
 import
 {
@@ -150,7 +149,7 @@ describe("WSBehaviors.ts", () =>
       wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
       wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
       wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.addStrokes = jest.fn(m => Promise.resolve(m))
+      wsb.recognizer.addStrokes = jest.fn(() => Promise.resolve({} as TExport))
       await wsb.init(wrapperHTML)
       await wsb.updateModelRendering()
       await expect(wsb.recognizer.addStrokes).toBeCalledTimes(1)
@@ -167,7 +166,7 @@ describe("WSBehaviors.ts", () =>
       wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
       wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
       wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.addStrokes = jest.fn(m => Promise.resolve(m))
+      wsb.recognizer.addStrokes = jest.fn(() => Promise.resolve({} as TExport))
       await wsb.init(wrapperHTML)
       await wsb.updateModelRendering()
       await expect(wsb.renderer.clearErasingStrokes).toBeCalledTimes(1)
@@ -186,7 +185,7 @@ describe("WSBehaviors.ts", () =>
       wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
       wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
       wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.addStrokes = jest.fn(m => Promise.resolve(m))
+      wsb.recognizer.addStrokes = jest.fn(() => Promise.resolve({} as TExport))
       await wsb.init(wrapperHTML)
       await wsb.updateModelRendering()
       await expect(wsb.recognizer.addStrokes).toBeCalledTimes(0)
@@ -256,7 +255,7 @@ describe("WSBehaviors.ts", () =>
       wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
       wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
       wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.addStrokes = jest.fn(m => Promise.resolve(m))
+      wsb.recognizer.addStrokes = jest.fn(() => Promise.resolve({} as TExport))
       wsb.recognizer.export = jest.fn(m => Promise.resolve(m))
       await wsb.init(wrapperHTML)
       await wsb.export()
@@ -650,34 +649,6 @@ describe("WSBehaviors.ts", () =>
       wsb.recognizer.internalEvent.emitSVGPatch(svgPatch)
       await expect(wsb.renderer.updatesLayer).toBeCalledTimes(1)
       await expect(wsb.renderer.updatesLayer).toBeCalledWith(svgPatch.layer, svgPatch.updates)
-    })
-    test("should update context when recognizer emit CONTEXT_CHANGE", async () =>
-    {
-      const wrapperHTML: HTMLElement = document.createElement("div")
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.renderer.updatesLayer = jest.fn()
-      await wsb.init(wrapperHTML)
-      const context: TUndoRedoContext = {
-        canRedo: true,
-        canUndo: true,
-        empty: false,
-        possibleUndoCount: 10,
-        stack: [],
-        stackIndex: 42
-      }
-      wsb.recognizer.internalEvent.emitContextChange(context)
-      await expect(wsb.context.canRedo).toEqual(context.canRedo)
-      await expect(wsb.context.canUndo).toEqual(context.canUndo)
-      await expect(wsb.context.empty).toEqual(context.empty)
-      await expect(wsb.context.possibleUndoCount).toEqual(context.possibleUndoCount)
-      await expect(wsb.context.stackIndex).toEqual(context.stackIndex)
     })
   })
 

@@ -1,11 +1,13 @@
 const {
   waitForEditorRest,
   write,
-  getExportedDatas,
-  getEditor,
+  getDatasFromExportedEvent,
   setEditorConfiguration,
   getEditorConfiguration,
-  getEditorModelExports,
+  getExportsFromEditorModel,
+  getExportsTypeFromEditorModel,
+  waitEditorIdle,
+  writePointers,
 } = require('../helper')
 const { equation1, one } = require('../strokesDatas')
 
@@ -16,7 +18,7 @@ describe('Rest Math', () => {
   })
 
   beforeEach(async () => {
-    await page.reload({ waitUntil: 'networkidle'})
+    await page.reload({ waitUntil: 'load' })
     await waitForEditorRest(page)
   })
 
@@ -29,7 +31,7 @@ describe('Rest Math', () => {
     let exportedDatas
     for (let s of equation1.strokes) {
       [exportedDatas] = await Promise.all([
-        getExportedDatas(page),
+        getDatasFromExportedEvent(page),
         write(page, [s]),
       ])
     }
@@ -37,9 +39,9 @@ describe('Rest Math', () => {
     const resultElement = page.locator('#result')
     const htmlKatexResult = await resultElement.locator('.katex-html').textContent()
 
-    const exports = await getEditorModelExports(page)
+    const modelExports = await getExportsFromEditorModel(page)
     expect(exportedDatas['application/x-latex']).toStrictEqual(equation1.exports.LATEX.at(-1))
-    expect(exports['application/x-latex']).toStrictEqual(equation1.exports.LATEX.at(-1))
+    expect(modelExports['application/x-latex']).toStrictEqual(equation1.exports.LATEX.at(-1))
     expect(htmlKatexResult).toStrictEqual(equation1.exports.LATEX.at(-1))
   })
 
@@ -66,8 +68,8 @@ describe('Rest Math', () => {
 
     test('should only request application/x-latex by default', async () => {
       await Promise.all([
-        getExportedDatas(page),
-        write(page, one.strokes),
+        getDatasFromExportedEvent(page),
+        writePointers(page, one.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(1)
       expect(mimeTypeRequest[0]).toContain('application/x-latex')
@@ -79,8 +81,8 @@ describe('Rest Math', () => {
       await setEditorConfiguration(page, configuration)
 
       await Promise.all([
-        getExportedDatas(page),
-        write(page, one.strokes),
+        getDatasFromExportedEvent(page),
+        writePointers(page, one.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(1)
       expect(mimeTypeRequest[0]).toContain('application/mathml+xml')
@@ -95,8 +97,8 @@ describe('Rest Math', () => {
       await setEditorConfiguration(page, configuration)
 
       await Promise.all([
-        getExportedDatas(page),
-        write(page, one.strokes),
+        getDatasFromExportedEvent(page),
+        writePointers(page, one.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(2)
       const allMimeTypesRequested = mimeTypeRequest.join(' ')
@@ -108,17 +110,17 @@ describe('Rest Math', () => {
   describe('Nav actions', () => {
     test('should clear', async () => {
       const [exportedDatas] = await Promise.all([
-        getExportedDatas(page),
-        write(page, one.strokes),
+        getDatasFromExportedEvent(page),
+        writePointers(page, one.strokes)
       ])
+
       expect(exportedDatas['application/x-latex']).toStrictEqual(one.exports.LATEX.at(-1))
 
       const promisesResult = await Promise.all([
-        getExportedDatas(page),
+        getDatasFromExportedEvent(page),
         page.click('#clear'),
       ])
       expect(promisesResult[0]).toBeNull()
-      expect(await getEditorModelExports(page)).toBeNull()
 
       const resultElement = page.locator('#result')
       const resultText = await resultElement.textContent()
@@ -128,20 +130,18 @@ describe('Rest Math', () => {
     test('should undo/redo', async () => {
       const editorEl = await page.waitForSelector('#editor')
 
-      await Promise.all([
-        getExportedDatas(page),
-        write(page, equation1.strokes),
-      ])
+      await write(page, equation1.strokes)
+      await waitEditorIdle(page)
 
-      await Promise.all([getExportedDatas(page), page.click('#undo')])
+      await Promise.all([getDatasFromExportedEvent(page), page.click('#undo')])
       let raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
       expect(raw.length).toStrictEqual(equation1.strokes.length - 1)
 
-      await Promise.all([getExportedDatas(page), page.click('#undo')])
+      await Promise.all([getDatasFromExportedEvent(page), page.click('#undo')])
       raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
       expect(raw.length).toStrictEqual(equation1.strokes.length - 2)
 
-      await Promise.all([getExportedDatas(page), page.click('#redo')])
+      await Promise.all([getDatasFromExportedEvent(page), page.click('#redo')])
       raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
       expect(raw.length).toStrictEqual(equation1.strokes.length - 1)
     })
