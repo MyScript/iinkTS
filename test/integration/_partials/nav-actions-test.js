@@ -1,10 +1,10 @@
-const { getExportedDatas, write, getEditorModelExportsType, waitEditorIdle } = require("../helper")
+const { getDatasFromExportedEvent, write, getExportsTypeFromEditorModel, waitEditorIdle } = require("../helper")
 const { h, hello } = require("../strokesDatas")
 
 describe('Nav actions', () => {
   test('should clear', async () => {
     await Promise.all([
-      getExportedDatas(page),
+      getDatasFromExportedEvent(page),
       write(page, h.strokes),
     ])
     let resultElement = page.locator('#result')
@@ -12,14 +12,14 @@ describe('Nav actions', () => {
     expect(resultText).toBeDefined()
 
     const [clearExport] = await Promise.all([
-      getExportedDatas(page),
+      getDatasFromExportedEvent(page),
       page.click('#clear'),
     ])
     const emptyJiix = { "type": "Text", "label": "", "words": [  ], "version": "3", "id": "MainBlock"}
     const jjixReceived = clearExport['application/vnd.myscript.jiix']
     expect(jjixReceived).toEqual(emptyJiix)
 
-    const modelExportJIIX = await getEditorModelExportsType(page, 'application/vnd.myscript.jiix')
+    const modelExportJIIX = await getExportsTypeFromEditorModel(page, 'application/vnd.myscript.jiix')
     expect(modelExportJIIX).toEqual(jjixReceived)
     resultElement = page.locator('#result')
     resultText = await resultElement.textContent()
@@ -30,7 +30,7 @@ describe('Nav actions', () => {
     const editorEl = await page.waitForSelector('#editor')
     for(const s of hello.strokes) {
       await Promise.all([
-        getExportedDatas(page),
+        getDatasFromExportedEvent(page),
         write(page, [s]),
       ])
     }
@@ -41,21 +41,21 @@ describe('Nav actions', () => {
     let raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
     expect(raw.length).toStrictEqual(hello.strokes.length)
 
-    await Promise.all([getExportedDatas(page), page.click('#undo')])
+    await Promise.all([getDatasFromExportedEvent(page), page.click('#undo')])
     resultElement = page.locator('#result')
     resultText = await resultElement.textContent()
     expect(resultText).toStrictEqual(hello.exports['text/plain'].at(-2))
     raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
     expect(raw.length).toStrictEqual(hello.strokes.length - 1)
 
-    await Promise.all([getExportedDatas(page), page.click('#undo')])
+    await Promise.all([getDatasFromExportedEvent(page), page.click('#undo')])
     resultElement = page.locator('#result')
     resultText = await resultElement.textContent()
     expect(resultText).toStrictEqual(hello.exports['text/plain'].at(-3))
     raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
     expect(raw.length).toStrictEqual(hello.strokes.length - 2)
 
-    await Promise.all([getExportedDatas(page), page.click('#redo')])
+    await Promise.all([getDatasFromExportedEvent(page), page.click('#redo')])
     resultElement = page.locator('#result')
     resultText = await resultElement.textContent()
     expect(resultText).toStrictEqual(hello.exports['text/plain'].at(-2))
@@ -65,7 +65,7 @@ describe('Nav actions', () => {
 
   test('should change language', async () => {
     await Promise.all([
-      getExportedDatas(page),
+      getDatasFromExportedEvent(page),
       write(page, h.strokes),
     ])
 
@@ -76,7 +76,7 @@ describe('Nav actions', () => {
     expect(resultText).toStrictEqual(h.exports['text/plain'].at(-1))
 
     await Promise.all([
-      getExportedDatas(page),
+      getDatasFromExportedEvent(page),
       page.selectOption('#language', 'fr_FR'),
     ])
 

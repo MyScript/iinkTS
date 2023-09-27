@@ -2,15 +2,15 @@
 const {
   waitForEditorWebSocket,
   write,
-  getExportedDatas,
-  getEditorModelExportsType,
+  getDatasFromExportedEvent,
+  getExportsTypeFromEditorModel,
   getEditorConfiguration,
   setEditorConfiguration,
-  getEditorModelConverts,
-  getConvertedDatas,
+  getConversionsFromEditorModel,
+  getDatasFromConvertedEvent,
   waitEditorIdle
 } = require('../helper')
-const { equation1, fence, sum } = require('../strokesDatas')
+const { equation1, sum } = require('../strokesDatas')
 
 describe('Websocket Math', function () {
   beforeAll(async () => {
@@ -18,7 +18,7 @@ describe('Websocket Math', function () {
   })
 
   beforeEach(async () => {
-    await page.reload({ waitUntil: 'networkidle'})
+    await page.reload({ waitUntil: 'load' })
     await waitForEditorWebSocket(page)
     await waitEditorIdle(page)
   })
@@ -31,24 +31,24 @@ describe('Websocket Math', function () {
   test('should convert svg path', async () => {
     for(const s of equation1.strokes) {
       await Promise.all([
-        getExportedDatas(page),
+        getDatasFromExportedEvent(page),
         write(page, [s], 100, 100)
       ])
     }
-    const emptyConvert = await getEditorModelConverts(page)
+    const emptyConvert = await getConversionsFromEditorModel(page)
     expect(emptyConvert).toBeUndefined()
     expect(await page.locator('path').count()).toEqual(equation1.strokes.length)
 
     await Promise.all([
-      getConvertedDatas(page),
+      getDatasFromConvertedEvent(page),
       page.click('#convert')
     ])
 
     await waitEditorIdle(page)
     expect(await page.locator('path').count()).toEqual(equation1.exports.LATEX.at(-1).length)
 
-    const convert = await getEditorModelConverts(page)
-    const laextExport = await getEditorModelExportsType(page, 'application/x-latex')
+    const convert = await getConversionsFromEditorModel(page)
+    const laextExport = await getExportsTypeFromEditorModel(page, 'application/x-latex')
     expect(convert['application/x-latex']).toEqual(laextExport)
     expect(laextExport).toEqual(equation1.exports.LATEX.at(-1))
   })
@@ -59,20 +59,20 @@ describe('Websocket Math', function () {
     let numStroke = 0
     for(const s of sum.strokes) {
       const [exports] = await Promise.all([
-        getExportedDatas(page),
+        getDatasFromExportedEvent(page),
         write(page, [s])
       ])
       expect(exports['application/x-latex']).toEqual(sum.exports.LATEX.at(numStroke))
       numStroke++
     }
-    const emptyConvert = await getEditorModelConverts(page)
+    const emptyConvert = await getConversionsFromEditorModel(page)
     expect(emptyConvert).toBeUndefined()
 
     await Promise.all([
-      getConvertedDatas(page),
+      getDatasFromConvertedEvent(page),
       page.click('#convert')
     ])
-    const convert = await getEditorModelConverts(page)
+    const convert = await getConversionsFromEditorModel(page)
     expect(convert['application/x-latex']).toEqual(sum.converts.LATEX.at(-1))
     expect(await page.locator('#result').locator('.katex-html').textContent()).toEqual(sum.converts.LATEX.at(-1))
   })
@@ -86,21 +86,21 @@ describe('Websocket Math', function () {
     let numStroke = 0
     for(const s of sum.strokes) {
       const [exports] = await Promise.all([
-        getExportedDatas(page),
+        getDatasFromExportedEvent(page),
         write(page, [s])
       ])
       expect(exports['application/x-latex']).toEqual(sum.exports.LATEX.at(numStroke))
       numStroke++
     }
-    const emptyConvert = await getEditorModelConverts(page)
+    const emptyConvert = await getConversionsFromEditorModel(page)
     expect(emptyConvert).toBeUndefined()
 
     await Promise.all([
-      getConvertedDatas(page),
+      getDatasFromConvertedEvent(page),
       page.click('#convert')
     ])
-    const convert = await getEditorModelConverts(page)
-    const laextExport = await getEditorModelExportsType(page, 'application/x-latex')
+    const convert = await getConversionsFromEditorModel(page)
+    const laextExport = await getExportsTypeFromEditorModel(page, 'application/x-latex')
     expect(convert['application/x-latex']).toEqual(laextExport)
     expect(laextExport).toEqual(sum.exports.LATEX.at(-1))
     expect(await page.locator('#result').locator('.katex-html').textContent()).toEqual(sum.exports.LATEX.at(-1))

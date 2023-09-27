@@ -1,4 +1,4 @@
-const { writePointers, waitForEditorWebSocket, getEditorModelExports, waitEditorIdle } = require("../helper")
+const { writePointers, waitForEditorWebSocket, getExportsFromEditorModel, waitEditorIdle } = require("../helper")
 const { covfefe } = require("../strokesDatas")
 
 describe("Websocket Text Custom Lexicon", () => {
@@ -7,7 +7,7 @@ describe("Websocket Text Custom Lexicon", () => {
   })
 
   beforeEach(async () => {
-    await page.reload({ waitUntil: "networkidle" })
+    await page.reload({ waitUntil: 'load' })
     await waitForEditorWebSocket(page)
     await waitEditorIdle(page)
   })
@@ -20,7 +20,7 @@ describe("Websocket Text Custom Lexicon", () => {
   test("should not recognize 'covfefe'", async () => {
     await writePointers(page, covfefe.strokes)
     await waitEditorIdle(page)
-    const exports = await getEditorModelExports(page)
+    const exports = await getExportsFromEditorModel(page)
     const jiixReceived = exports["application/vnd.myscript.jiix"]
     expect(jiixReceived.label).not.toEqual(covfefe.exports["text/plain"].at(-1))
   })
@@ -33,7 +33,7 @@ describe("Websocket Text Custom Lexicon", () => {
     ])
     await writePointers(page, covfefe.strokes)
     await waitEditorIdle(page)
-    const exports = await getEditorModelExports(page)
+    const exports = await getExportsFromEditorModel(page)
     const jiixReceived = exports["application/vnd.myscript.jiix"]
     expect(jiixReceived.label).toEqual(covfefe.exports["text/plain"].at(-1))
   })

@@ -1,4 +1,4 @@
-const { write, getExportedDatas, waitForEditorWebSocket } = require("../helper")
+const { write, getDatasFromExportedEvent, waitForEditorWebSocket } = require("../helper")
 const { helloOneStroke } = require("../strokesDatas")
 
   describe("Websocket Text Search Without Smartguide", () => {
@@ -7,7 +7,7 @@ const { helloOneStroke } = require("../strokesDatas")
     })
 
     beforeEach(async () => {
-      await page.reload({ waitUntil: "networkidle" })
+      await page.reload({ waitUntil: 'load' })
       await waitForEditorWebSocket(page)
     })
 
@@ -18,7 +18,7 @@ const { helloOneStroke } = require("../strokesDatas")
 
     test("should draw stroke hello", async () => {
       const [exports] = await Promise.all([
-        getExportedDatas(page),
+        getDatasFromExportedEvent(page),
         write(page, helloOneStroke.strokes),
       ])
 
@@ -28,8 +28,8 @@ const { helloOneStroke } = require("../strokesDatas")
     })
 
     test("should not see guides", async () => {
-        const [exports] = await Promise.all([
-            getExportedDatas(page),
+        await Promise.all([
+            getDatasFromExportedEvent(page),
             write(page, helloOneStroke.strokes),
         ])
         const line = await page.locator("line").all()

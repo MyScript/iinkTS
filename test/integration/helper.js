@@ -33,7 +33,7 @@ module.exports.write = async (page, strokes, offsetTop = 0, offsetLeft = 0) => {
       await page.mouse.move(offsetX + x[p], offsetY + y[p])
     }
     await page.mouse.up()
-    await page.waitForTimeout(100)
+    await page.waitForTimeout(500)
   }
 }
 
@@ -68,7 +68,7 @@ module.exports.writePointers = async (page, strokes, offsetTop = 0, offsetLeft =
       await page.mouse.move(offsetX + p.x, offsetY + p.y)
     }
     await page.mouse.up()
-    await page.waitForTimeout(100)
+    await page.waitForTimeout(500)
   }
 }
 
@@ -101,21 +101,21 @@ module.exports.setEditorConfiguration = async (page, configuration) => {
  * @param {Page} page - Playwright Page
  * @returns Promise<TExport>
  */
- module.exports.getEditorModelExports = async (page) => {
+ module.exports.getExportsFromEditorModel = async (page) => {
   return page.evaluate('editor.model.exports')
 }
 /**
  * @param {Page} page - Playwright Page
  * @returns Promise<TExport>
  */
- module.exports.getEditorModelConverts = async (page) => {
+ module.exports.getConversionsFromEditorModel = async (page) => {
   return page.evaluate('editor.model.converts')
 }
 /**
  * @param {Page} page - Playwright Page
  * @returns Promise<TExport>
  */
- module.exports.getEditorModelExportsType = async (page, type) => {
+ module.exports.getExportsTypeFromEditorModel = async (page, type) => {
   return page.evaluate(`editor.model.exports['${type}']`)
 }
 
@@ -131,7 +131,7 @@ const exported = `(async () => {
  * @param {Page} page - Playwright Page
  * @returns Promise<Exports>
  */
-module.exports.getExportedDatas = async (page) => {
+module.exports.getDatasFromExportedEvent = async (page) => {
   return page.evaluate(exported)
 }
 
@@ -147,7 +147,7 @@ const imported = `(async () => {
  * @param {Page} page - Playwright Page
  * @returns Promise<Exports>
  */
-module.exports.getImportedDatas = async (page) => {
+module.exports.getDatasFromImportedEvent = async (page) => {
   return page.evaluate(imported)
 }
 
@@ -163,10 +163,9 @@ const converted = `(async () => {
  * @param {Page} page - Playwright Page
  * @returns Promise<Exports>
  */
-module.exports.getConvertedDatas = async (page) => {
+module.exports.getDatasFromConvertedEvent = async (page) => {
   return page.evaluate(converted)
 }
-
 
 /**
  * @param {Page} page - Playwright Page

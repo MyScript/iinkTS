@@ -439,25 +439,20 @@ export class WSRecognizer implements IRecognizer
     }
   }
 
-  async addStrokes(model: IModel): Promise<IModel>
+  async addStrokes(strokes: TStroke[]): Promise<TExport>
   {
     await this.initialized?.promise
     this.addStrokeDeferred = new DeferredPromise<TExport>()
-    const strokes: TStroke[] = model.extractUnsentStrokes()
-    model.updatePositionSent()
-    const localModel = model.getClone()
     if (strokes.length === 0) {
       this.addStrokeDeferred.resolve({} as TExport)
-      return localModel
     }
-    await this.send({
-      type: "addStrokes",
-      strokes: strokes.map(convertStrokeToJSON)
-    })
-    const exports = await this.addStrokeDeferred?.promise
-    localModel.updatePositionReceived()
-    localModel.mergeExport(exports)
-    return localModel
+    else {
+      await this.send({
+        type: "addStrokes",
+        strokes: strokes.map(convertStrokeToJSON)
+      })
+    }
+    return this.addStrokeDeferred?.promise
   }
 
   async setPenStyle(penStyle: TPenStyle): Promise<void>

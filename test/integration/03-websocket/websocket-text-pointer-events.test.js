@@ -1,4 +1,4 @@
-const { waitForEditorWebSocket, write, getExportedDatas, waitEditorIdle } = require('../helper')
+const { waitForEditorWebSocket, write, getDatasFromExportedEvent, waitEditorIdle } = require('../helper')
 const { h } = require('../strokesDatas')
 
 describe('Websocket Text Pointer Events', () => {
@@ -7,7 +7,7 @@ describe('Websocket Text Pointer Events', () => {
   })
 
   beforeEach(async () => {
-    await page.reload({ waitUntil: 'networkidle'})
+    await page.reload({ waitUntil: 'load' })
     await waitForEditorWebSocket(page)
     await waitEditorIdle(page)
   })
@@ -19,7 +19,7 @@ describe('Websocket Text Pointer Events', () => {
 
   test('should export application/vnd.myscript.jiix', async () => {
     const [exports] = await Promise.all([
-      getExportedDatas(page),
+      getDatasFromExportedEvent(page),
       write(page, h.strokes),
     ])
     const jiixExpected = h.exports['application/vnd.myscript.jiix']
@@ -29,7 +29,7 @@ describe('Websocket Text Pointer Events', () => {
 
   test('should import points with button', async () => {
     const [exports] = await Promise.all([
-        getExportedDatas(page),
+        getDatasFromExportedEvent(page),
         page.locator('#pointerEvents').click(),
     ])
     const jiixReceived = exports['application/vnd.myscript.jiix']

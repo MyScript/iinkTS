@@ -1,11 +1,11 @@
 const {
   waitForEditorRest,
   write,
-  getExportedDatas,
+  getDatasFromExportedEvent,
   setEditorConfiguration,
   getEditorConfiguration,
   waitEditorLoaded,
-  getEditorModelExports,
+  getExportsFromEditorModel,
 } = require('../helper')
 const { h, hello } = require('../strokesDatas')
 
@@ -16,7 +16,7 @@ describe('Rest Text', () => {
   })
 
   beforeEach(async () => {
-    await page.reload({ waitUntil: 'networkidle'})
+    await page.reload({ waitUntil: 'load' })
     await waitForEditorRest(page)
   })
 
@@ -27,7 +27,7 @@ describe('Rest Text', () => {
 
   test('should display text/plain into result', async () => {
     const [exportedDatas] = await Promise.all([
-      getExportedDatas(page),
+      getDatasFromExportedEvent(page),
       write(page, h.strokes),
     ])
     const resultText = await page.locator('#result').textContent()
@@ -58,7 +58,7 @@ describe('Rest Text', () => {
 
     test('should only request text/plain by default', async () => {
       await Promise.all([
-        getExportedDatas(page),
+        getDatasFromExportedEvent(page),
         write(page, h.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(1)
@@ -72,7 +72,7 @@ describe('Rest Text', () => {
       ]
       await setEditorConfiguration(page, configuration)
       await Promise.all([
-        getExportedDatas(page),
+        getDatasFromExportedEvent(page),
         write(page, h.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(1)
@@ -87,7 +87,7 @@ describe('Rest Text', () => {
       ]
       await setEditorConfiguration(page, configuration)
       await Promise.all([
-        getExportedDatas(page),
+        getDatasFromExportedEvent(page),
         write(page, h.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(2)
@@ -100,21 +100,21 @@ describe('Rest Text', () => {
   describe('Nav actions', () => {
     test('should clear', async () => {
       const [exportedDatas] = await Promise.all([
-        getExportedDatas(page),
+        getDatasFromExportedEvent(page),
         write(page, h.strokes),
       ])
       const resultText = await page.locator('#result').textContent()
       expect(resultText).toStrictEqual(exportedDatas['text/plain'])
       expect(resultText).toStrictEqual(h.exports['text/plain'].at(-1))
 
-      expect(await getEditorModelExports(page)).toBeDefined()
+      expect(await getExportsFromEditorModel(page)).toBeDefined()
 
       const promisesResult = await Promise.all([
-        getExportedDatas(page),
+        getDatasFromExportedEvent(page),
         page.click('#clear'),
       ])
       expect(promisesResult[0]).toBeNull()
-      expect(await getEditorModelExports(page)).toBeNull()
+      expect(await getExportsFromEditorModel(page)).toBeNull()
 
       expect(await page.locator('#result').textContent()).toBe('')
     })
@@ -122,7 +122,7 @@ describe('Rest Text', () => {
     test('should undo/redo', async () => {
       const editorEl = await page.waitForSelector('#editor')
       await Promise.all([
-        getExportedDatas(page),
+        getDatasFromExportedEvent(page),
         write(page, hello.strokes)
       ])
 
@@ -133,19 +133,19 @@ describe('Rest Text', () => {
       let raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
       expect(raw.length).toStrictEqual(hello.strokes.length)
 
-      await Promise.all([getExportedDatas(page), page.click('#undo')])
+      await Promise.all([getDatasFromExportedEvent(page), page.click('#undo')])
       expect(await page.locator('#result').textContent()).toStrictEqual(hello.exports['text/plain'].at(-2))
 
       raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
       expect(raw.length).toStrictEqual(hello.strokes.length - 1)
 
-      await Promise.all([getExportedDatas(page), page.click('#undo')])
+      await Promise.all([getDatasFromExportedEvent(page), page.click('#undo')])
       expect(await page.locator('#result').textContent()).toStrictEqual(hello.exports['text/plain'].at(-3))
 
       raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
       expect(raw.length).toStrictEqual(hello.strokes.length - 2)
 
-      await Promise.all([getExportedDatas(page), page.click('#redo')])
+      await Promise.all([getDatasFromExportedEvent(page), page.click('#redo')])
       expect(await page.locator('#result').textContent()).toStrictEqual(hello.exports['text/plain'].at(-2))
 
       raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
@@ -154,7 +154,7 @@ describe('Rest Text', () => {
 
     test('should change language', async () => {
       const [exportedDatas] = await Promise.all([
-        getExportedDatas(page),
+        getDatasFromExportedEvent(page),
         write(page, h.strokes),
       ])
 

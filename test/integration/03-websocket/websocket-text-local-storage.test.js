@@ -1,4 +1,4 @@
-const { waitForEditorWebSocket, write, getExportedDatas, getEditorModelExportsType, waitEditorIdle } = require('../helper')
+const { waitForEditorWebSocket, write, getDatasFromExportedEvent, getExportsTypeFromEditorModel, waitEditorIdle } = require('../helper')
 const { helloOneStroke } = require('../strokesDatas')
 
 describe('Websocket Text local storage', () => {
@@ -7,7 +7,7 @@ describe('Websocket Text local storage', () => {
   })
 
   beforeEach(async () => {
-    await page.reload({ waitUntil: "networkidle" })
+    await page.reload({ waitUntil: 'load' })
     await waitForEditorWebSocket(page)
   })
 
@@ -18,7 +18,7 @@ describe('Websocket Text local storage', () => {
 
   test('should export text/plain', async () => {
     const [exports] = await Promise.all([
-      getExportedDatas(page),
+      getDatasFromExportedEvent(page),
       write(page, helloOneStroke.strokes),
     ])
     //add delay to save text in localstorage
@@ -32,15 +32,15 @@ describe('Websocket Text local storage', () => {
   test('should get hello in localstorage', async () => {
     await page.locator("#clear-storage").click()
       await Promise.all([
-        getExportedDatas(page),
+        getDatasFromExportedEvent(page),
         write(page, helloOneStroke.strokes)
       ])
 
-      await page.reload({ waitUntil: "networkidle" })
+      await page.reload({ waitUntil: 'load' })
       await waitForEditorWebSocket(page)
       await waitEditorIdle(page)
 
-      const exports = await getEditorModelExportsType(page, "application/vnd.myscript.jiix")
+      const exports = await getExportsTypeFromEditorModel(page, "application/vnd.myscript.jiix")
       expect(exports.label).toEqual("hello")
   })
 })

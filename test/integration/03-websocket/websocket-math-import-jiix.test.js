@@ -1,5 +1,5 @@
 
-const { waitForEditorWebSocket, waitEditorIdle, getEditorModelExportsType, haveSameLabels } = require('../helper')
+const { waitForEditorWebSocket, waitEditorIdle, getExportsTypeFromEditorModel, haveSameLabels } = require('../helper')
 
 describe('Websocket Math Import JIIX', function () {
   beforeAll(async () => {
@@ -16,7 +16,7 @@ describe('Websocket Math Import JIIX', function () {
     await page.click('#import')
     await waitEditorIdle(page)
 
-    const jiix = await getEditorModelExportsType(page, "application/vnd.myscript.jiix")
+    const jiix = await getExportsTypeFromEditorModel(page, "application/vnd.myscript.jiix")
     const jiixTextToImport = await page.locator("#jiix").textContent()
     const jiixToImport = JSON.parse(jiixTextToImport)
     expect(haveSameLabels(jiix, jiixToImport)).toEqual(true)

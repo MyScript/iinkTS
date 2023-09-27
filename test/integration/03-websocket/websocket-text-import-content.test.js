@@ -1,4 +1,4 @@
-const { waitForEditorWebSocket, write, getExportedDatas, waitEditorIdle } = require('../helper')
+const { waitForEditorWebSocket, write, getDatasFromExportedEvent, waitEditorIdle } = require('../helper')
 const { h } = require('../strokesDatas')
 
 describe('Websocket Text Import Content', () => {
@@ -7,7 +7,7 @@ describe('Websocket Text Import Content', () => {
   })
 
   beforeEach(async () => {
-    await page.reload({ waitUntil: 'networkidle'})
+    await page.reload({ waitUntil: 'load' })
     await waitForEditorWebSocket(page)
     await waitEditorIdle(page)
   })
@@ -19,7 +19,7 @@ describe('Websocket Text Import Content', () => {
 
   test('should export application/vnd.myscript.jiix', async () => {
     const [exports] = await Promise.all([
-      getExportedDatas(page),
+      getDatasFromExportedEvent(page),
       write(page, h.strokes),
     ])
     const jiixExpected = h.exports['application/vnd.myscript.jiix']
@@ -31,7 +31,7 @@ describe('Websocket Text Import Content', () => {
     await Promise.all([
         page.locator("#importContentField").fill("hello"),
         page.locator("#importContent").click(),
-        getExportedDatas(page),
+        getDatasFromExportedEvent(page),
     ])
 
     const prompterText = await page.waitForSelector('.prompter-text')
@@ -43,7 +43,7 @@ describe('Websocket Text Import Content', () => {
     await Promise.all([
         page.locator("#importContentField").fill("pony"),
         page.locator("#importContent").click(),
-        getExportedDatas(page),
+        getDatasFromExportedEvent(page),
     ])
 
     const prompterText = await page.waitForSelector('.prompter-text')

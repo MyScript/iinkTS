@@ -18,6 +18,7 @@ import { WSSVGRenderer } from "../renderer/svg/WSSVGRenderer"
 import { StyleManager } from "../style/StyleManager"
 import { Configuration } from "../configuration/Configuration"
 import { Model } from "../model/Model"
+import { UndoRedoManager } from "../undo-redo"
 
 export class WSBehaviors implements IBehaviors
 {
@@ -26,7 +27,7 @@ export class WSBehaviors implements IBehaviors
   grabber: PointerEventGrabber
   renderer: WSSVGRenderer
   recognizer: WSRecognizer
-  context: TUndoRedoContext
+  undoRedoManager: UndoRedoManager
   styleManager: StyleManager
   #configuration: TConfiguration
   #model: IModel
@@ -46,14 +47,7 @@ export class WSBehaviors implements IBehaviors
 
     this.mode = ModeInteraction.Writing
     this.#model = new Model()
-    this.context = {
-      canRedo: false,
-      canUndo: false,
-      empty: true,
-      stackIndex: -1,
-      possibleUndoCount: 0,
-      stack: []
-    }
+    this.undoRedoManager = new UndoRedoManager(this.#configuration["undo-redo"], this.model)
   }
 
   get internalEvent(): InternalEvent
@@ -64,6 +58,11 @@ export class WSBehaviors implements IBehaviors
   get model(): IModel
   {
     return this.#model
+  }
+
+  get context(): TUndoRedoContext
+  {
+    return this.undoRedoManager.context
   }
 
   get configuration(): TConfiguration
@@ -108,10 +107,9 @@ export class WSBehaviors implements IBehaviors
 
   async init(domElement: HTMLElement): Promise<void>
   {
-    this.#model.width = Math.max(domElement.clientWidth, this.#configuration.rendering.minWidth)
-    this.#model.height = Math.max(domElement.clientHeight, this.#configuration.rendering.minHeight)
-    this.context.stack.push(this.model.getClone())
-    this.context.stackIndex = 0
+    this.model.width = Math.max(domElement.clientWidth, this.#configuration.rendering.minWidth)
+    this.model.height = Math.max(domElement.clientHeight, this.#configuration.rendering.minHeight)
+    this.undoRedoManager.updateModelInStack(this.model)
 
     this.renderer.init(domElement)
 
@@ -121,9 +119,8 @@ export class WSBehaviors implements IBehaviors
     this.grabber.onPointerUp = this.onPointerUp.bind(this)
 
     this.internalEvent.addSVGPatchListener(this.onSVGPatch)
-    this.internalEvent.addContextChangeListener(this.onContextChange)
 
-    await this.recognizer.init(this.#model.height, this.#model.width)
+    await this.recognizer.init(this.model.height, this.model.width)
     await this.setPenStyle(this.penStyle)
     await this.setTheme(this.theme)
     await this.setPenStyleClasses(this.penStyleClasses)
@@ -146,26 +143,19 @@ export class WSBehaviors implements IBehaviors
     this.drawCurrentStroke()
   }
 
-  private onPointerUp(_evt: PointerEvent, point: TPointer): void
+  private async onPointerUp(_evt: PointerEvent, point: TPointer): Promise<void>
   {
-    this.model.endCurrentStroke(point)
-    this.updateModelRendering()
-      .then(newModel => Object.assign(this.#model, newModel))
-      .catch(error => this.internalEvent.emitError(error as Error))
+    try {
+      this.model.endCurrentStroke(point)
+      await this.updateModelRendering()
+    } catch (error) {
+      this.internalEvent.emitError(error as Error)
+    }
   }
 
   private onSVGPatch = (evt: TWebSocketSVGPatchEvent) =>
   {
     this.renderer.updatesLayer(evt.layer, evt.updates)
-  }
-
-  private onContextChange = (context: TUndoRedoContext) =>
-  {
-    this.context.canRedo = context.canRedo
-    this.context.canUndo = context.canUndo
-    this.context.empty = context.empty
-    this.context.possibleUndoCount = context.possibleUndoCount
-    this.context.stackIndex = context.stackIndex
   }
 
   drawCurrentStroke(): void
@@ -178,16 +168,19 @@ export class WSBehaviors implements IBehaviors
 
   async updateModelRendering(): Promise<IModel>
   {
-    this.context.stack.push(this.model.getClone())
     if (this.#configuration.triggers.exportContent !== "DEMAND") {
+      const unsentStrokes = this.model.extractUnsentStrokes()
+      this.model.updatePositionSent()
+      this.undoRedoManager.addModelToStack(this.model)
       this.renderer.clearErasingStrokes()
-      const updatedModel = await this.recognizer.addStrokes(this.model)
-      this.model.mergeExport(updatedModel.exports as TExport)
+      const exports = await this.recognizer.addStrokes(unsentStrokes)
+      this.model.mergeExport(exports)
+      this.undoRedoManager.updateModelInStack(this.model)
     }
     return this.model
   }
 
-  async waitForIdle?(): Promise<void>
+  async waitForIdle(): Promise<void>
   {
     return this.recognizer.waitForIdle()
   }
@@ -203,7 +196,12 @@ export class WSBehaviors implements IBehaviors
   {
     try {
       if (this.#configuration.triggers.exportContent === "DEMAND") {
-        return this.recognizer.addStrokes(this.model)
+        const unsentStrokes = this.model.extractUnsentStrokes()
+        this.model.updatePositionSent()
+        const exports = await this.recognizer.addStrokes(unsentStrokes)
+        this.model.updatePositionReceived()
+        this.model.mergeExport(exports)
+        return this.model
       } else {
         return this.recognizer.export(this.model, mimeTypes)
       }
@@ -252,8 +250,8 @@ export class WSBehaviors implements IBehaviors
   async undo(): Promise<IModel>
   {
     if (this.context.canUndo) {
-      this.#model = this.context.stack[this.context.stackIndex - 1]
-      return this.recognizer.undo(this.#model)
+      this.#model = this.undoRedoManager.undo()
+      return this.recognizer.undo(this.model)
     }
     else {
       throw new Error("Undo not allowed")
@@ -263,8 +261,8 @@ export class WSBehaviors implements IBehaviors
   async redo(): Promise<IModel>
   {
     if (this.context.canRedo) {
-      this.#model = this.context.stack[this.context.stackIndex + 1]
-      return this.recognizer.redo(this.#model)
+      this.#model = this.undoRedoManager.redo()
+      return this.recognizer.redo(this.model)
     }
     else {
       throw new Error("Redo not allowed")
@@ -274,7 +272,7 @@ export class WSBehaviors implements IBehaviors
   async clear(): Promise<IModel>
   {
     this.model.clear()
-    this.context.stack.push(this.model.getClone())
+    this.undoRedoManager.addModelToStack(this.model)
     return this.recognizer.clear(this.model)
   }
 

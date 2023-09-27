@@ -112,8 +112,9 @@
           editorTextContent = localStorage.getItem("editorTextContent")
           editor.import(editorTextContent, 'text/plain')
         }
-      }
-      loadEditor()
+      };
+
+      loadEditor().catch(error => console.error(error));
     </script>
   </body>
 </html>

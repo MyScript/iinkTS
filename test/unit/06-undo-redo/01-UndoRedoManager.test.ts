@@ -12,6 +12,7 @@ import
   DefaultConfiguration,
   DefaultPenStyle
 } from "../../../src/iink"
+import { delay } from "../utils/helpers"
 
 describe("UndoRedoManager.ts", () =>
 {
@@ -165,11 +166,13 @@ describe("UndoRedoManager.ts", () =>
 
   describe("updateModelInStack", () =>
   {
-    const model: IModel = new Model(27, 5)
-    const manager = new UndoRedoManager(DefaultConfiguration["undo-redo"], model)
-    test("should update last model in stack", () =>
+    test("should update last model in stack", async () =>
     {
+      const model: IModel = new Model(27, 5)
+      const manager = new UndoRedoManager(DefaultConfiguration["undo-redo"], model)
       const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
+      // wait a few seconds and have a different model.modificationDate
+      await delay(100)
       model.initCurrentStroke(p1, 666, "pen", DefaultPenStyle)
 
       const p2: TPointer = { t: 15, p: 0.5, x: 10, y: 1 }
@@ -187,29 +190,36 @@ describe("UndoRedoManager.ts", () =>
       expect(manager.context.stack[manager.context.stackIndex]).not.toBe(model)
     })
 
-    test("should update previous model in stack", () =>
+    test("should update previous model in stack", async () =>
     {
+      const model: IModel = new Model(27, 5)
+      const manager = new UndoRedoManager(DefaultConfiguration["undo-redo"], model)
+
       const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
+      // wait a few seconds and have a different model.modificationDate
+      await delay(100)
       model.initCurrentStroke(p1, 666, "pen", DefaultPenStyle)
 
       const p2: TPointer = { t: 15, p: 0.5, x: 10, y: 1 }
       model.endCurrentStroke(p2)
 
-      manager.addModelToStack(model)
       const firstModel = model.getClone()
-      firstModel.exports = { "text/plain": "-" }
+      manager.addModelToStack(model)
 
       const p3: TPointer = { t: 100, p: 0.5, x: 1, y: 10 }
+      // wait a few seconds and have a different model.modificationDate
+      await delay(100)
       model.initCurrentStroke(p3, 666, "pen", DefaultPenStyle)
 
       const p4: TPointer = { t: 150, p: 0.5, x: 1, y: 10 }
       model.endCurrentStroke(p4)
       manager.addModelToStack(model)
 
+      firstModel.exports = { "text/plain": "-" }
       manager.updateModelInStack(firstModel)
 
-      expect(manager.context.stack[2]).toMatchObject(firstModel)
-      expect(manager.context.stack[2]).not.toBe(firstModel)
+      expect(manager.context.stack.at(-2)).toMatchObject(firstModel)
+      expect(manager.context.stack.at(-2)).not.toBe(firstModel)
     })
   })
 

@@ -1,4 +1,4 @@
-const { haveSameLabels, write, getEditorModelExports, getImportedDatas, getExportedDatas, waitEditorLoaded, waitEditorIdle } = require("../helper")
+const { haveSameLabels, write, getExportsFromEditorModel, getDatasFromImportedEvent, getDatasFromExportedEvent, waitEditorLoaded, waitEditorIdle } = require("../helper")
 
 const mathContentList = [
   {
@@ -46,17 +46,17 @@ describe("Websocket Math Inside Page", function () {
       let currentExport
       let currentTextContent
 
-      afterAll(async () => {
-        await page.reload({ waitUntil: "networkidle" })
+      beforeAll(async () => {
+        await page.reload({ waitUntil: 'load' })
+        await waitEditorIdle(page)
       })
 
       test(`should open modal editor`, async () => {
-        await waitEditorIdle(page)
         expect(await page.locator("#editor-modal").isVisible()).toEqual(false)
         currentTextContent = await page.locator(`#${mc.id} .katex-html`).textContent()
         expect(currentTextContent).toEqual(mc.textContent)
         await Promise.all([
-          getImportedDatas(page),
+          getDatasFromImportedEvent(page),
           page.locator(`#${ mc.id }`).click()
         ])
         await waitEditorIdle(page)
@@ -64,7 +64,7 @@ describe("Websocket Math Inside Page", function () {
       })
 
       test(`should import data-jiix`, async () => {
-        currentExport = await getEditorModelExports(page)
+        currentExport = await getExportsFromEditorModel(page)
         const jiixExpected = JSON.parse(await page.locator(`#${ mc.id }`).getAttribute("data-jiix"))
         expect(haveSameLabels(currentExport["application/vnd.myscript.jiix"], jiixExpected)).toEqual(true)
         expect(currentExport["application/x-latex"]).toEqual(mc.latex)
@@ -72,11 +72,11 @@ describe("Websocket Math Inside Page", function () {
 
       test(`should update equation`, async () => {
         await Promise.all([
-          getExportedDatas(page),
+          getDatasFromExportedEvent(page),
           write(page, mc.strokesToWrite)
         ])
         await waitEditorIdle(page)
-        currentExport = await getEditorModelExports(page)
+        currentExport = await getExportsFromEditorModel(page)
         expect(currentExport['application/x-latex']).toEqual(mc.latexAfterWriting)
       })
 
@@ -91,12 +91,12 @@ describe("Websocket Math Inside Page", function () {
 
       test(`should re-open modal editor with new equation`, async () => {
         await Promise.all([
-          getImportedDatas(page),
+          getDatasFromImportedEvent(page),
           page.locator(`#${ mc.id }`).click()
         ])
         await waitEditorIdle(page)
         expect(await page.locator("#editor-modal").isVisible()).toEqual(true)
-        currentExport = await getEditorModelExports(page)
+        currentExport = await getExportsFromEditorModel(page)
         expect(currentExport['application/x-latex']).toEqual(mc.latexAfterWriting)
       })
     })

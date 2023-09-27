@@ -1,4 +1,4 @@
-const { writePointers, getExportedDatas, waitForEditorWebSocket, waitEditorIdle, getEditorModelExportsType } = require("../helper")
+const { writePointers, getDatasFromExportedEvent, waitForEditorWebSocket, waitEditorIdle, getExportsTypeFromEditorModel } = require("../helper")
 const { paris, tokyo, madrid, rome, buenosAires } = require("../strokesDatas")
 
 
@@ -23,7 +23,7 @@ describe("Websocket Text interact", () => {
     await writePointers(page, paris.strokes)
     await waitEditorIdle(page)
     const textExpected = paris.exports["text/plain"].at(-1)
-    const textReceived = await getEditorModelExportsType(page, "text/plain")
+    const textReceived = await getExportsTypeFromEditorModel(page, "text/plain")
     expect(textReceived).toStrictEqual(textExpected)
   })
 
@@ -38,7 +38,7 @@ describe("Websocket Text interact", () => {
     await writePointers(page, rome.strokes)
     await waitEditorIdle(page)
     const textExpected = rome.exports["text/plain"].at(-1)
-    const textReceived = await getEditorModelExportsType(page, "text/plain")
+    const textReceived = await getExportsTypeFromEditorModel(page, "text/plain")
     expect(textReceived).toStrictEqual(textExpected)
   })
 
@@ -53,7 +53,7 @@ describe("Websocket Text interact", () => {
     await writePointers(page, madrid.strokes)
     await waitEditorIdle(page)
     const textExpected = madrid.exports["text/plain"].at(-1)
-    const textReceived = await getEditorModelExportsType(page, "text/plain")
+    const textReceived = await getExportsTypeFromEditorModel(page, "text/plain")
     expect(textReceived).toStrictEqual(textExpected)
   })
 
@@ -68,7 +68,7 @@ describe("Websocket Text interact", () => {
     await writePointers(page, buenosAires.strokes)
     await waitEditorIdle(page)
     const textExpected = buenosAires.exports["text/plain"].at(-1)
-    const textReceived = await getEditorModelExportsType(page, "text/plain")
+    const textReceived = await getExportsTypeFromEditorModel(page, "text/plain")
     expect(textReceived).toStrictEqual(textExpected)
   })
 
@@ -83,7 +83,7 @@ describe("Websocket Text interact", () => {
     await writePointers(page, tokyo.strokes)
     await waitEditorIdle(page)
     const textExpected = tokyo.exports["text/plain"].at(-1)
-    const textReceived = await getEditorModelExportsType(page, "text/plain")
+    const textReceived = await getExportsTypeFromEditorModel(page, "text/plain")
     expect(textReceived).toStrictEqual(textExpected)
   })
 })

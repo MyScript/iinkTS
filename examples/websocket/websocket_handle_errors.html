@@ -62,14 +62,10 @@
         /**
          *  async initialize editor behaviors
          */
-        try {
-          await editor.initialize();
-        } catch (error) {
-          console.error(error);
-        }
-      }
+        await editor.initialize();
+      };
 
-      loadEditor();
+      loadEditor().catch(error => console.error(error));
     </script>
   </body>
 </html>

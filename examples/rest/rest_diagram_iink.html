@@ -77,7 +77,6 @@
     <script>
       const editorElement = document.getElementById("editor");
       const resultElement = document.getElementById("result");
-      const languageElement = document.getElementById("language");
       const clearElement = document.getElementById("clear");
       const editButton = document.getElementById("edit-btn");
       const previewButton = document.getElementById("preview-btn");
@@ -259,9 +258,9 @@
         window.addEventListener("resize", () => {
           editor.resize();
         });
-      }
+      };
 
-      loadEditor();
+      loadEditor().catch(error => console.error(error));
     </script>
   </body>
 </html>

@@ -140,9 +140,9 @@
         window.addEventListener("resize", () => {
           editor.resize();
         });
-      }
+      };
 
-      loadEditor();
+      loadEditor().catch(error => console.error(error));
     </script>
   </body>
 </html>

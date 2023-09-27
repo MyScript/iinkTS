@@ -1,11 +1,11 @@
 const {
   waitForEditorWebSocket,
   write,
-  getExportedDatas,
-  getEditorModelExportsType,
+  getDatasFromExportedEvent,
+  getExportsTypeFromEditorModel,
   getEditorConfiguration,
   setEditorConfiguration,
-  getEditorModelConverts,
+  getConversionsFromEditorModel,
   waitEditorIdle
 } = require("../helper")
 const { h, hello, helloOneStroke, helloStrikeStroke } = require("../strokesDatas")
@@ -16,7 +16,7 @@ describe("Websocket Text", () => {
   })
 
   beforeEach(async () => {
-    await page.reload({ waitUntil: "networkidle" })
+    await page.reload({ waitUntil: 'load' })
     await waitForEditorWebSocket(page)
     await waitEditorIdle(page)
   })
@@ -27,10 +27,10 @@ describe("Websocket Text", () => {
   })
 
   test("should export application/vnd.myscript.jiix", async () => {
-    const [exports] = await Promise.all([getExportedDatas(page), write(page, h.strokes)])
+    const [exports] = await Promise.all([getDatasFromExportedEvent(page), write(page, h.strokes)])
     const jiixExpected = h.exports["application/vnd.myscript.jiix"]
     const jiixReceived = exports["application/vnd.myscript.jiix"]
-    const modelExportJiixReceived = await getEditorModelExportsType(page, "application/vnd.myscript.jiix")
+    const modelExportJiixReceived = await getExportsTypeFromEditorModel(page, "application/vnd.myscript.jiix")
     expect(jiixReceived).toEqual(modelExportJiixReceived)
     expect(jiixReceived).toEqual(jiixExpected)
   })
@@ -42,11 +42,11 @@ describe("Websocket Text", () => {
       setEditorConfiguration(page, configuration)
       await waitForEditorWebSocket(page)
 
-      const [firstModelExports] = await Promise.all([getExportedDatas(page), write(page, [helloStrikeStroke.strokes[0]])])
+      const [firstModelExports] = await Promise.all([getDatasFromExportedEvent(page), write(page, [helloStrikeStroke.strokes[0]])])
       const firstJiixExport = firstModelExports["application/vnd.myscript.jiix"]
       expect(firstJiixExport.label).toEqual(helloStrikeStroke.exports["text/plain"][0])
 
-      const [secondModelExports] = await Promise.all([getExportedDatas(page), write(page, [helloStrikeStroke.strokes[1]])])
+      const [secondModelExports] = await Promise.all([getDatasFromExportedEvent(page), write(page, [helloStrikeStroke.strokes[1]])])
       const secondJiixExport = secondModelExports["application/vnd.myscript.jiix"]
       expect(secondJiixExport.label).toEqual("")
     })
@@ -57,11 +57,11 @@ describe("Websocket Text", () => {
       setEditorConfiguration(page, configuration)
       await waitForEditorWebSocket(page)
 
-      const [firstModelExports] = await Promise.all([getExportedDatas(page), write(page, [helloStrikeStroke.strokes[0]])])
+      const [firstModelExports] = await Promise.all([getDatasFromExportedEvent(page), write(page, [helloStrikeStroke.strokes[0]])])
       const firstJiixExport = firstModelExports["application/vnd.myscript.jiix"]
       expect(firstJiixExport.label).toEqual(helloStrikeStroke.exports["text/plain"][0])
 
-      const [secondModelExports] = await Promise.all([getExportedDatas(page), write(page, [helloStrikeStroke.strokes[1]])])
+      const [secondModelExports] = await Promise.all([getDatasFromExportedEvent(page), write(page, [helloStrikeStroke.strokes[1]])])
       const secondJiixExport = secondModelExports["application/vnd.myscript.jiix"]
       expect(secondJiixExport.label).not.toEqual("")
     })
@@ -74,7 +74,7 @@ describe("Websocket Text", () => {
       setEditorConfiguration(page, configuration)
       await waitForEditorWebSocket(page)
 
-      await Promise.all([getExportedDatas(page), write(page, h.strokes)])
+      await Promise.all([getDatasFromExportedEvent(page), write(page, h.strokes)])
 
       // wait css animation
       await page.waitForTimeout(1000)
@@ -88,7 +88,7 @@ describe("Websocket Text", () => {
       setEditorConfiguration(page, configuration)
       await waitForEditorWebSocket(page)
 
-      await Promise.all([getExportedDatas(page), write(page, h.strokes)])
+      await Promise.all([getDatasFromExportedEvent(page), write(page, h.strokes)])
 
       // wait css animation
       await page.waitForTimeout(1000)
@@ -97,7 +97,7 @@ describe("Websocket Text", () => {
     })
 
     test("should display text into", async () => {
-      await Promise.all([getExportedDatas(page), write(page, h.strokes)])
+      await Promise.all([getDatasFromExportedEvent(page), write(page, h.strokes)])
 
       const textExpected = h.exports["text/plain"].at(-1)
       const textExpectedWithNbsp = textExpected.replace(/\s/g, "\u00A0")
@@ -110,11 +110,11 @@ describe("Websocket Text", () => {
 
     test("should select candidate", async () => {
       await Promise.all([
-        getExportedDatas(page),
+        getDatasFromExportedEvent(page),
         write(page, hello.strokes)
       ])
       await waitEditorIdle(page)
-      const jiixExport = await getEditorModelExportsType(page, "application/vnd.myscript.jiix")
+      const jiixExport = await getExportsTypeFromEditorModel(page, "application/vnd.myscript.jiix")
       expect(await page.innerText(".prompter-text")).toBe(jiixExport.label)
       expect(await page.locator(".candidates").isVisible()).toBe(false)
 
@@ -124,15 +124,15 @@ describe("Websocket Text", () => {
       expect(await page.locator(".candidates").isVisible()).toBe(true)
       const candidate = jiixExport.words[0].candidates[2]
 
-      await Promise.all([getExportedDatas(page), page.click(`.candidates > span >> text=${candidate}`)])
+      await Promise.all([getDatasFromExportedEvent(page), page.click(`.candidates > span >> text=${candidate}`)])
 
       expect(await page.innerText(".prompter-text")).toBe(candidate)
       expect(await page.locator(".candidates").isVisible()).toBe(false)
     })
 
     test("should convert", async () => {
-      await Promise.all([getExportedDatas(page), write(page, helloOneStroke.strokes)])
-      const emptyConvert = await getEditorModelConverts(page)
+      await Promise.all([getDatasFromExportedEvent(page), write(page, helloOneStroke.strokes)])
+      const emptyConvert = await getConversionsFromEditorModel(page)
       expect(emptyConvert).toBeUndefined()
       expect(await page.locator(".more-menu.close").isVisible()).toBe(false)
       const wrotePath = await page.locator("path").first().getAttribute("d")
@@ -142,9 +142,9 @@ describe("Websocket Text", () => {
       await page.waitForTimeout(1000)
       expect(await page.locator(".more-menu.open").isVisible()).toBe(true)
 
-      await Promise.all([getExportedDatas(page), page.click(`.more-menu > button >> text=Convert`)])
+      await Promise.all([getDatasFromExportedEvent(page), page.click(`.more-menu > button >> text=Convert`)])
 
-      const convert = await getEditorModelConverts(page)
+      const convert = await getConversionsFromEditorModel(page)
       expect(convert).toBeDefined()
 
       const convertedPath = await page.locator("path").first().getAttribute("d")
@@ -153,7 +153,7 @@ describe("Websocket Text", () => {
 
     test.skip("should Copy", async () => {
       await write(page, h.strokes)
-      await getExportedDatas(page)
+      await getDatasFromExportedEvent(page)
       expect(await page.locator(".more-menu.close").isVisible()).toBe(false)
 
       let pathElements = page.locator("path")
@@ -171,7 +171,7 @@ describe("Websocket Text", () => {
     })
 
     test("should Delete", async () => {
-      await Promise.all([getExportedDatas(page), write(page, h.strokes)])
+      await Promise.all([getDatasFromExportedEvent(page), write(page, h.strokes)])
 
       expect(await page.locator(".more-menu.close").isVisible()).toBe(false)
 
@@ -184,7 +184,7 @@ describe("Websocket Text", () => {
 
       expect(await page.locator(".more-menu.open").isVisible()).toBe(true)
 
-      await Promise.all([getExportedDatas(page), page.click(`.more-menu > button >> text=Delete`)])
+      await Promise.all([getDatasFromExportedEvent(page), page.click(`.more-menu > button >> text=Delete`)])
 
       // wait for css animation
       await page.waitForTimeout(1000)

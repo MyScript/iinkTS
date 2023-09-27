@@ -33,8 +33,8 @@ export class UndoRedoManager
       this.context.stack.splice(this.context.stackIndex + 1)
     }
 
-    this.context.stackIndex++
     this.context.stack.push(model.getClone())
+    this.context.stackIndex = this.context.stack.length - 1
 
     if (this.context.stack.length > this.configuration.maxStackSize) {
       this.context.stack.shift()

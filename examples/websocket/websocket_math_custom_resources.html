@@ -96,8 +96,17 @@
           }
         };
 
+        /**
+         * Instanciate editor
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Editor parameters
+         */
         editor = new iink.Editor(editorElement, options);
+        /**
+         *  async initialize editor behaviors
+         */
         await editor.initialize();
+
         editorElement.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo;
           redoElement.disabled = !event.detail.canRedo;
@@ -130,8 +139,9 @@
         window.addEventListener("resize", () => {
             editorElement.editor.resize();
         });
-      }
-      loadEditor();
+      };
+
+      loadEditor().catch(error => console.error(error));
     </script>
   </body>
 </html>
