@@ -3,6 +3,8 @@ import { IModel } from "../../@types/model/Model"
 import { TUpdatePatch, TUpdatePatchAppendChild, TUpdatePatchInsertBefore, TUpdatePatchRemoveAttribut, TUpdatePatchRemoveChild, TUpdatePatchRemoveElement, TUpdatePatchReplaceAll, TUpdatePatchReplaceELement, TUpdatePatchSetAttribut } from "../../@types/recognizer/WSRecognizer"
 import { TStroke } from "../../@types/model/Stroke"
 import { SVGStroker } from "./SVGStroker"
+import { Logger, LoggerManager } from "../../logger"
+import { LOGGER_CLASS } from "../../Constants"
 
 export class WSSVGRenderer
 {
@@ -11,15 +13,19 @@ export class WSSVGRenderer
   context!: {
     parent: HTMLElement
   }
+  #logger: Logger
 
   constructor(config: TRenderingConfiguration)
   {
+    this.#logger = LoggerManager.getLogger(LOGGER_CLASS.SVGRENDERER)
+    this.#logger.info("constructor", { config })
     this.config = config
     this.stroker = new SVGStroker()
   }
 
   init(element: HTMLElement): void
   {
+    this.#logger.info("init", { element })
     element.style.fontSize = "10px"
     this.context = {
       parent: element
@@ -111,6 +117,7 @@ export class WSSVGRenderer
 
   updateLayer(layerName: string, update: TUpdatePatch): void
   {
+    this.#logger.info("updateLayer", { layerName, update })
     switch (update.type) {
       case "REPLACE_ALL":
         this.#replaceAll(layerName, update as TUpdatePatchReplaceAll)
@@ -137,18 +144,21 @@ export class WSSVGRenderer
         this.#removeAttribute(update as TUpdatePatchRemoveAttribut)
         break
       default:
+        this.#logger.warn("updateLayer Default", {layerName, update})
         break
     }
   }
 
   updatesLayer(layerName: string, updates: TUpdatePatch[]): void
   {
+    this.#logger.info("updatesLayer", { layerName, updates })
     updates.forEach(u => this.updateLayer(layerName, u))
     this.clearPendingStroke()
   }
 
   clearPendingStroke(): void
   {
+    this.#logger.info("clearPendingStroke", { })
     const pendingStrokeGroup = this.context.parent.querySelector("#pendingStrokes") as SVGElement
     if (pendingStrokeGroup) {
       pendingStrokeGroup.innerHTML = ""
@@ -157,6 +167,7 @@ export class WSSVGRenderer
 
   drawPendingStroke(stroke: TStroke): void
   {
+    this.#logger.info("drawPendingStroke", { stroke })
     if (stroke) {
       const pendingStrokeGroup = this.context.parent.querySelector("#pendingStrokes") as SVGElement
       if (pendingStrokeGroup) {
@@ -179,6 +190,7 @@ export class WSSVGRenderer
 
   resize(model: IModel): void
   {
+    this.#logger.info("resize", { model })
     const rect = this.context.parent.getBoundingClientRect()
     const svgList = this.context.parent.querySelectorAll("svg")
     const width = Math.max(rect.width, model.width)
@@ -193,6 +205,7 @@ export class WSSVGRenderer
 
   destroy(): void
   {
+    this.#logger.info("destroy", { })
     if (this.context.parent) {
       this.context.parent.querySelectorAll("svg").forEach(n => n.remove())
     }

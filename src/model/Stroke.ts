@@ -1,6 +1,8 @@
 import { TPenStyle } from "../@types/style/PenStyle"
 import { TStroke, TStrokeJSON } from "../@types/model/Stroke"
 import { TPointer } from "../@types/geometry"
+import { Logger, LoggerManager } from "../logger"
+import { LOGGER_CLASS } from "../Constants"
 
 export class Stroke implements TStroke
 {
@@ -12,9 +14,12 @@ export class Stroke implements TStroke
   pointers: TPointer[]
   length: number
   style: TPenStyle
+  #logger: Logger
 
   constructor(style: TPenStyle, pointerId: number, pointerType = "pen")
   {
+    this.#logger = LoggerManager.getLogger(LOGGER_CLASS.STROKE)
+    this.#logger.info("constructor", { style, pointerId, pointerType })
     this.id = `${pointerType}-${Date.now().toString()}`
     this.type = "stroke"
     this.pointerId = pointerId

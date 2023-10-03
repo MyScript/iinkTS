@@ -2,6 +2,8 @@ import { TMarginConfiguration } from "../@types/configuration/recognition/Margin
 import { TRenderingConfiguration } from "../@types/configuration/RenderingConfiguration"
 import { TJIIXExport, TWordExport } from "../@types/model/Model"
 import { InternalEvent } from "../event/InternalEvent"
+import { Logger, LoggerManager } from "../logger"
+import { LOGGER_CLASS } from "../Constants"
 
 export class SmartGuide {
   uuid: string
@@ -22,8 +24,11 @@ export class SmartGuide {
   jiix?: TJIIXExport
   lastWord?: TWordExport
   wordToChange?: TWordExport
+  #logger: Logger
 
   constructor() {
+    this.#logger = LoggerManager.getLogger(LOGGER_CLASS.SMARTGUIDE)
+    this.#logger.info("constructor", { })
     this.uuid = Math.random().toString(10).substring(2, 12)
     this.margin = {
       bottom: 0,
@@ -115,6 +120,7 @@ export class SmartGuide {
   }
 
   init(domElement: HTMLElement, margin: TMarginConfiguration, renderingConfiguration: TRenderingConfiguration): void {
+    this.#logger.info("init", { domElement, margin, renderingConfiguration })
     domElement.appendChild(this.#smartGuideElement)
     this.#smartGuideElement.appendChild(this.#tagElement)
 
@@ -170,6 +176,7 @@ export class SmartGuide {
   }
 
   #showCandidates = (target: HTMLElement) => {
+    this.#logger.info("showCandidates", { target })
     const wordId = parseInt(target.id.replace("word-", "").replace(this.uuid, ""))
     const words = this.jiix?.words as TWordExport[]
     this.wordToChange = words[wordId]
@@ -213,6 +220,7 @@ export class SmartGuide {
   }
 
   #onClickEllipsis = (evt: Event) => {
+    this.#logger.info("onClickEllipsis", { evt })
     evt.preventDefault()
     evt.stopPropagation()
     this.#isMenuOpen ? this.#closeMenu() : this.#openMenu()
@@ -220,6 +228,7 @@ export class SmartGuide {
   }
 
   #onClickConvert = (evt: Event) => {
+    this.#logger.info("onClickConvert", { evt })
     evt.preventDefault()
     evt.stopPropagation()
     this.internalEvent.emitConvert()
@@ -227,6 +236,7 @@ export class SmartGuide {
   }
 
   #onClickCopy = async (evt: Event): Promise<void> => {
+    this.#logger.info("onClickCopy", { evt })
     evt.preventDefault()
     evt.stopPropagation()
     try {
@@ -246,11 +256,13 @@ export class SmartGuide {
       }
       this.internalEvent.emitNotif({ message, timeout: 1500 })
     } catch (err) {
+      this.#logger.error("onClickCopy", { err })
       this.internalEvent.emitError(err as Error)
     }
   }
 
   #onClickDelete = (evt: Event) => {
+    this.#logger.info("onClickDelete", { evt })
     evt.preventDefault()
     evt.stopPropagation()
     this.internalEvent.emitClear()
@@ -258,6 +270,7 @@ export class SmartGuide {
   }
 
   #onClickCandidate = (evt: Event) => {
+    this.#logger.info("onClickCandidate", { evt })
     evt.preventDefault()
     evt.stopPropagation()
     const target = evt.target as HTMLElement
@@ -270,6 +283,7 @@ export class SmartGuide {
   }
 
   #onClickPrompter = (evt: Event): void => {
+    this.#logger.info("onClickPrompter", { evt })
     evt.preventDefault()
     evt.stopPropagation()
     this.#closeMenu()
@@ -298,6 +312,7 @@ export class SmartGuide {
   }
 
   resize(): void {
+    this.#logger.info("resize", { })
     const mmToPixels = 3.779527559
     const marginTop = this.margin.top * mmToPixels
     const marginLeft = this.margin.left * mmToPixels
@@ -319,6 +334,7 @@ export class SmartGuide {
   }
 
   update(exports: TJIIXExport): void {
+    this.#logger.info("update", { exports })
     this.jiix = exports
     const createWordSpan = (index: number, word?: TWordExport) => {
       const span = document.createElement("span")
@@ -328,10 +344,12 @@ export class SmartGuide {
       } else {
         span.innerHTML = "&nbsp;"
       }
+      this.#logger.debug("update", { span })
       return span
     }
 
     const populatePrompter = () => {
+      this.#logger.info("populatePrompter", { })
       this.#prompterTextElement.innerHTML = ""
       if (this.jiix?.words) {
         const words = this.jiix.words as TWordExport[]
@@ -363,6 +381,8 @@ export class SmartGuide {
             }
             this.#prompterTextElement.appendChild(span)
             this.#prompterContainerElement.scrollLeft = span.offsetLeft
+            this.#logger.debug("update => populatePrompter", { span })
+            this.#logger.debug("update => populatePrompter", this.lastWord)
           }
         })
       }
@@ -374,12 +394,14 @@ export class SmartGuide {
   }
 
   clear(): void {
+    this.#logger.info("clear", { })
     this.#prompterTextElement.innerHTML = ""
     this.#candidatesElement.innerHTML = ""
     this.#hide()
   }
 
   destroy(): void {
+    this.#logger.info("destroy", { })
     this.#smartGuideElement.innerHTML = ""
   }
 }

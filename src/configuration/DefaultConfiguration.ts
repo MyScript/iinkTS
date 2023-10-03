@@ -6,6 +6,7 @@ import { TRecognitionConfiguration } from "../@types/configuration/RecognitionCo
 import { TTriggerConfiguration } from "../@types/configuration/TriggerConfiguration"
 import { TEventConfiguration } from "../@types/configuration/EventConfiguration"
 import { TUndoRedoConfiguration } from "../@types/configuration/UndoRedoConfiguration"
+import { TLoggerConfiguration, LOGGER_CLASS, LOGGER_LEVEL } from "../@types/configuration/LoggerConfiguration"
 
 export const DefaultServerConfiguration: TServerConfiguration = {
   protocol: "WEBSOCKET",
@@ -153,4 +154,21 @@ export const DefaultConfiguration: TConfiguration = {
   triggers: DefaultTriggerConfiguration,
   events: DefaultEventsConfiguration,
   "undo-redo": DefaultUndoRedoConfiguration
+}
+
+export const DefaultLoggerConfiguration: TLoggerConfiguration = {
+  [LOGGER_CLASS.EDITOR]: LOGGER_LEVEL.ERROR,
+  [LOGGER_CLASS.RECOGNIZER]: LOGGER_LEVEL.ERROR,
+  [LOGGER_CLASS.GRABBER]: LOGGER_LEVEL.ERROR,
+  [LOGGER_CLASS.BEHAVIORS]: LOGGER_LEVEL.ERROR,
+  [LOGGER_CLASS.CONFIGURATION]: LOGGER_LEVEL.ERROR,
+  [LOGGER_CLASS.PUBLIC_EVENT]: LOGGER_LEVEL.ERROR,
+  [LOGGER_CLASS.MODEL]: LOGGER_LEVEL.ERROR,
+  [LOGGER_CLASS.CANVAS_RENDERER]: LOGGER_LEVEL.ERROR,
+  [LOGGER_CLASS.SVGRENDERER]: LOGGER_LEVEL.ERROR,
+  [LOGGER_CLASS.SMARTGUIDE]: LOGGER_LEVEL.ERROR,
+  [LOGGER_CLASS.STYLEMANAGER]: LOGGER_LEVEL.ERROR,
+  [LOGGER_CLASS.UNDOREDO_MANAGER]: LOGGER_LEVEL.ERROR,
+  [LOGGER_CLASS.STROKE]: LOGGER_LEVEL.ERROR,
+  [LOGGER_CLASS.INTERNALEVENT]: LOGGER_LEVEL.ERROR
 }

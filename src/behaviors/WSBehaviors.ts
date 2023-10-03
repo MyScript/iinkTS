@@ -19,6 +19,8 @@ import { StyleManager } from "../style/StyleManager"
 import { Configuration } from "../configuration/Configuration"
 import { Model } from "../model/Model"
 import { UndoRedoManager } from "../undo-redo"
+import { Logger, LoggerManager } from "../logger"
+import { LOGGER_CLASS } from "../Constants"
 
 export class WSBehaviors implements IBehaviors
 {
@@ -32,11 +34,14 @@ export class WSBehaviors implements IBehaviors
   #configuration: TConfiguration
   #model: IModel
   mode: ModeInteraction
+  #logger: Logger
 
   #resizeTimer?: ReturnType<typeof setTimeout>
 
   constructor(options: TBehaviorOptions)
   {
+    this.#logger = LoggerManager.getLogger(LOGGER_CLASS.BEHAVIORS)
+    this.#logger.info("constructor", { options })
     this.options = options
     this.#configuration = new Configuration(options?.configuration)
     this.styleManager = new StyleManager(options.penStyle, options.theme)
@@ -81,7 +86,10 @@ export class WSBehaviors implements IBehaviors
   }
   setPenStyle(ps?: TPenStyle): Promise<void>
   {
+    this.#logger.debug("setPenStyle", { ps })
+    this.#logger.info("setPenStyle", { ps })
     this.styleManager.setPenStyle(ps)
+    this.#logger.debug("setPenStyle", this.styleManager.penStyle)
     return this.recognizer.setPenStyle(this.styleManager.penStyle)
   }
 
@@ -91,7 +99,10 @@ export class WSBehaviors implements IBehaviors
   }
   setPenStyleClasses(psc?: string): Promise<void>
   {
+    this.#logger.debug("setPenStyleClasses", { psc })
+    this.#logger.info("setPenStyleClasses", { psc })
     this.styleManager.setPenStyleClasses(psc)
+    this.#logger.debug("setPenStyleClasses", this.styleManager.penStyleClasses)
     return this.recognizer.setPenStyleClasses(this.styleManager.penStyleClasses)
   }
 
@@ -101,12 +112,16 @@ export class WSBehaviors implements IBehaviors
   }
   setTheme(t: TTheme): Promise<void>
   {
+    this.#logger.debug("setTheme", { t })
+    this.#logger.info("setTheme", { t })
     this.styleManager.setTheme(t)
+    this.#logger.debug("setTheme", this.styleManager.theme)
     return this.recognizer.setTheme(this.styleManager.theme)
   }
 
   async init(domElement: HTMLElement): Promise<void>
   {
+    this.#logger.info("init", { domElement })
     this.model.width = Math.max(domElement.clientWidth, this.#configuration.rendering.minWidth)
     this.model.height = Math.max(domElement.clientHeight, this.#configuration.rendering.minHeight)
     this.undoRedoManager.updateModelInStack(this.model)
@@ -128,6 +143,7 @@ export class WSBehaviors implements IBehaviors
 
   private onPointerDown(evt: PointerEvent, point: TPointer): void
   {
+    this.#logger.info("onPointerDown", { evt, point })
     let { pointerType } = evt
     const style: TPenStyle = Object.assign({}, this.theme?.ink, this.currentPenStyle)
     if (this.mode === ModeInteraction.Erasing) {
@@ -139,6 +155,7 @@ export class WSBehaviors implements IBehaviors
 
   private onPointerMove(_evt: PointerEvent, point: TPointer): void
   {
+    this.#logger.info("onPointerMove", { _evt, point })
     this.model.appendToCurrentStroke(point)
     this.drawCurrentStroke()
   }
@@ -146,6 +163,7 @@ export class WSBehaviors implements IBehaviors
   private async onPointerUp(_evt: PointerEvent, point: TPointer): Promise<void>
   {
     try {
+      this.#logger.info("onPointerUp", { _evt, point })
       this.model.endCurrentStroke(point)
       await this.updateModelRendering()
     } catch (error) {
@@ -155,6 +173,7 @@ export class WSBehaviors implements IBehaviors
 
   private onSVGPatch = (evt: TWebSocketSVGPatchEvent) =>
   {
+    this.#logger.info("onSVGPatch", { evt })
     this.renderer.updatesLayer(evt.layer, evt.updates)
   }
 
@@ -168,6 +187,7 @@ export class WSBehaviors implements IBehaviors
 
   async updateModelRendering(): Promise<IModel>
   {
+    this.#logger.debug("updateModelRendering", this.model)
     if (this.#configuration.triggers.exportContent !== "DEMAND") {
       const unsentStrokes = this.model.extractUnsentStrokes()
       this.model.updatePositionSent()
@@ -177,6 +197,7 @@ export class WSBehaviors implements IBehaviors
       this.model.mergeExport(exports)
       this.undoRedoManager.updateModelInStack(this.model)
     }
+    this.#logger.debug("updateModelRendering", this.model)
     return this.model
   }
 
@@ -187,13 +208,18 @@ export class WSBehaviors implements IBehaviors
 
   async importPointEvents(strokes: TStroke[]): Promise<IModel | never>
   {
+    this.#logger.debug("importPointEvents", this.model)
+    this.#logger.info("importPointEvents", { strokes })
     const exportPoints = await this.recognizer.importPointEvents(strokes)
     this.model.mergeExport(exportPoints)
+    this.#logger.debug("importPointEvents", this.model)
     return this.model
   }
 
   async export(mimeTypes?: string[]): Promise<IModel | never>
   {
+    this.#logger.debug("export", this.model)
+    this.#logger.info("export", { mimeTypes })
     try {
       if (this.#configuration.triggers.exportContent === "DEMAND") {
         const unsentStrokes = this.model.extractUnsentStrokes()
@@ -206,6 +232,7 @@ export class WSBehaviors implements IBehaviors
         return this.recognizer.export(this.model, mimeTypes)
       }
     } catch (error) {
+      this.#logger.error("export", { error } )
       this.internalEvent.emitError(error as Error)
       return Promise.reject(error)
     }
@@ -213,19 +240,25 @@ export class WSBehaviors implements IBehaviors
 
   async convert(conversionState?: TConverstionState): Promise<IModel | never>
   {
+    this.#logger.debug("convert", this.model)
+    this.#logger.info("convert", { conversionState })
     this.context.stack.push(this.model.getClone())
     this.#model = await this.recognizer.convert(this.model, conversionState)
+    this.#logger.debug("convert", this.model)
     return this.model
   }
 
   async import(data: Blob, mimeType?: string): Promise<IModel | never>
   {
+    this.#logger.info("import", { data, mimeType })
     this.context.stack.push(this.model.getClone())
     return this.recognizer.import(this.model, data, mimeType)
   }
 
   async resize(height: number, width: number): Promise<IModel>
   {
+    this.#logger.info("resize", { height, width })
+    this.#logger.debug("resize", this.model)
     const deferredResize = new DeferredPromise<IModel>()
     this.model.height = height
     this.model.width = width
@@ -238,39 +271,49 @@ export class WSBehaviors implements IBehaviors
         const resizeModel = await this.recognizer.resize(clonedModel)
         deferredResize.resolve(resizeModel)
       } catch (error) {
+        this.#logger.error("resize", { height, width, error } )
         deferredResize.reject(error as Error)
       }
     }, this.#configuration.triggers.resizeTriggerDelay)
 
     this.#model = await deferredResize.promise
     this.internalEvent.emitExported(this.model.exports as TExport)
+    this.#logger.debug("resize", this.model)
     return this.model
   }
 
   async undo(): Promise<IModel>
   {
+    this.#logger.debug("undo", this.#model)
+    this.#logger.info("undo", {})
     if (this.context.canUndo) {
       this.#model = this.undoRedoManager.undo()
       return this.recognizer.undo(this.model)
     }
     else {
+      this.#logger.error( "undo", { "Redo Not Allowed": String })
       throw new Error("Undo not allowed")
     }
   }
 
   async redo(): Promise<IModel>
   {
+    this.#logger.debug("redo", this.#model)
+    this.#logger.info("redo", {})
     if (this.context.canRedo) {
       this.#model = this.undoRedoManager.redo()
+      this.#logger.debug("undo", this.#model)
       return this.recognizer.redo(this.model)
     }
     else {
+      this.#logger.error("redo", { "Redo Not Allowed": String })
       throw new Error("Redo not allowed")
     }
   }
 
   async clear(): Promise<IModel>
   {
+    this.#logger.info("clear", this.model)
     this.model.clear()
     this.undoRedoManager.addModelToStack(this.model)
     return this.recognizer.clear(this.model)
@@ -278,6 +321,7 @@ export class WSBehaviors implements IBehaviors
 
   async destroy(): Promise<void>
   {
+    this.#logger.info("destroy", {})
     this.grabber.detach()
     this.renderer.destroy()
     this.recognizer.close(1000, WSMessage.CLOSE_RECOGNIZER)

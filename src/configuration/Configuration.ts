@@ -9,6 +9,8 @@ import { TTriggerConfiguration } from "../@types/configuration/TriggerConfigurat
 import { TUndoRedoConfiguration } from "../@types/configuration/UndoRedoConfiguration"
 import { DefaultConfiguration } from "./DefaultConfiguration"
 import { mergeDeep } from "../utils/MergeHelper"
+import { Logger, LoggerManager } from "../logger"
+import { LOGGER_CLASS } from "../Constants"
 
 export class Configuration implements TConfiguration
 {
@@ -19,9 +21,12 @@ export class Configuration implements TConfiguration
   server: TServerConfiguration
   triggers: TTriggerConfiguration
   "undo-redo": TUndoRedoConfiguration
+  #logger: Logger
 
   constructor(configuration?: TConfigurationClient)
   {
+    this.#logger = LoggerManager.getLogger(LOGGER_CLASS.CONFIGURATION)
+    this.#logger.info("constructor", { configuration })
     this.events = JSON.parse(JSON.stringify(DefaultConfiguration.events))
     this.grabber = JSON.parse(JSON.stringify(DefaultConfiguration.grabber))
     this.recognition = JSON.parse(JSON.stringify(DefaultConfiguration.recognition))
@@ -36,6 +41,7 @@ export class Configuration implements TConfiguration
 
   overrideDefaultConfiguration(configuration?: TConfigurationClient): void
   {
+    this.#logger.info("overrideDefaultConfiguration", { configuration })
     const defaultConf = JSON.parse(JSON.stringify(DefaultConfiguration))
     this.events = mergeDeep({}, defaultConf.events, configuration?.events)
     this.grabber = mergeDeep({}, defaultConf.grabber, configuration?.grabber)

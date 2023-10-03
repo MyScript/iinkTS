@@ -8,14 +8,17 @@ import { IBehaviors, TBehaviorOptions } from "./@types/Behaviors"
 import { TConverstionState } from "./@types/configuration/RecognitionConfiguration"
 import { TMarginConfiguration } from "./@types/configuration/recognition/MarginConfiguration"
 import { TUndoRedoContext } from "./@types/undo-redo/UndoRedoContext"
+import { LOGGER_CLASS, LOGGER_LEVEL, TLoggerConfiguration } from "./@types/configuration/LoggerConfiguration"
 
 import { Exports, ModeInteraction } from "./Constants"
+import { DefaultLoggerConfiguration } from "./configuration"
 import { PublicEvent } from "./event/PublicEvent"
 import { InternalEvent } from "./event/InternalEvent"
 import { SmartGuide } from "./smartguide/SmartGuide"
 import { DeferredPromise } from "./utils/DeferredPromise"
 import { RestBehaviors } from "./behaviors/RestBehaviors"
 import { WSBehaviors } from "./behaviors/WSBehaviors"
+import { LoggerManager, Logger } from "./logger"
 
 import "./iink.css"
 
@@ -33,10 +36,17 @@ export class Editor
   #smartGuide?: SmartGuide
   #initializationDeferred: DeferredPromise<void>
 
+  logger: Logger
+  #loggerConfiguration: TLoggerConfiguration
+
   debug = false
 
   constructor(wrapperHTML: HTMLElement, options: TBehaviorOptions, globalClassCss = "ms-editor")
   {
+    this.#loggerConfiguration = Object.assign({}, DefaultLoggerConfiguration, options.logger)
+
+    this.logger = LoggerManager.getLogger(LOGGER_CLASS.EDITOR)
+    this.logger.info("constructor", { wrapperHTML, options, globalClassCss })
     this.#initializationDeferred = new DeferredPromise<void>()
 
     this.wrapperHTML = wrapperHTML as HTMLEditorElement
@@ -55,6 +65,17 @@ export class Editor
 
     this.#instantiateBehaviors(options)
     this.#addListeners()
+  }
+
+  get loggerConfiguration(): TLoggerConfiguration
+  {
+    return this.#loggerConfiguration
+  }
+
+  set loggerConfiguration(loggerConfig: TLoggerConfiguration)
+  {
+    this.#loggerConfiguration = loggerConfig
+    LoggerManager.setLoggerLevel(loggerConfig)
   }
 
   get initializationPromise(): Promise<void>
@@ -78,6 +99,7 @@ export class Editor
   }
   set configuration(configuration: TConfiguration)
   {
+    this.logger.info("set configuration", { configuration })
     this.#instantiateBehaviors({ configuration })
     this.initialize()
   }
@@ -88,6 +110,7 @@ export class Editor
   }
   set mode(m: ModeInteraction)
   {
+    this.logger.info("set mode", { m })
     this.behaviors.mode = m
     switch (this.behaviors.mode) {
       case ModeInteraction.Erasing:
@@ -100,11 +123,13 @@ export class Editor
       //   this.wrapperHTML.classList.add("selecting")
       //   break;
       default:
+        this.logger.warn("set mode default", { m })
         document.body.style.cursor = "initial"
         this.wrapperHTML.classList.remove("erasing")
         this.wrapperHTML.classList.remove("selecting")
         break
     }
+    this.logger.debug("set mode", this.wrapperHTML)
   }
 
   get events(): PublicEvent
@@ -133,6 +158,7 @@ export class Editor
   }
   set penStyle(ps: TPenStyle)
   {
+    this.logger.info("set penStyle", { ps })
     this.behaviors.setPenStyle(ps)
   }
 
@@ -142,6 +168,7 @@ export class Editor
   }
   set theme(t: TTheme)
   {
+    this.logger.info("set theme", { t })
     this.behaviors.setTheme(t)
   }
 
@@ -151,11 +178,13 @@ export class Editor
   }
   set penStyleClasses(psc: string)
   {
+    this.logger.info("set penStyleClasses", { psc })
     this.behaviors.setPenStyleClasses(psc)
   }
 
   #instantiateBehaviors(options: TBehaviorOptions)
   {
+    this.logger.info("instantiateBehaviors", { options })
     if (!options?.configuration) {
       throw new Error("Configuration required")
     }
@@ -169,27 +198,34 @@ export class Editor
       defaultBehaviors = new WSBehaviors(options)
     }
     this.#behaviors = Object.assign(defaultBehaviors, options.behaviors)
+    this.logger.debug("instantiateBehaviors", this.#behaviors)
   }
 
   #initializeBehaviors(): Promise<void>
   {
+    this.logger.info("initializeBehaviors start", { })
     this.#initializationDeferred = new DeferredPromise<void>()
     this.#loaderHTML.style.display = "initial"
     this.#cleanMessage()
+    this.logger.debug("initializeBehaviors", this.wrapperHTML)
     return this.behaviors.init(this.wrapperHTML)
       .then(async () =>
       {
+        this.logger.info("initializeBehaviors then")
         this.wrapperHTML.editor = this
         this.#initializationDeferred.resolve()
         this.events.emitLoaded()
+        this.logger.debug("initializeBehaviors", this.wrapperHTML)
       })
       .catch((e: Error) =>
       {
+        this.logger.error("initializeBehaviors catch", { e })
         this.#initializationDeferred.reject(e)
         this.#showError(e)
       })
       .finally(() =>
       {
+        this.logger.info("initializeBehaviors finally", { })
         this.#loaderHTML.style.display = "none"
         return this.#initializationDeferred.promise
       })
@@ -198,6 +234,7 @@ export class Editor
   #initializeSmartGuide(): void
   {
     this.#smartGuide?.destroy()
+    this.logger.info("initializeSmartGuide", { smartGuide: this.configuration.rendering.smartGuide })
     if (this.configuration.rendering.smartGuide.enable) {
       this.#smartGuide = new SmartGuide()
       let margin: TMarginConfiguration
@@ -209,6 +246,7 @@ export class Editor
           margin = this.configuration.recognition.math.margin
           break
         default:
+          this.logger.warn("initializeSmartGuide default", this.configuration.recognition.type)
           margin = {
             top: 20,
             left: 10,
@@ -223,17 +261,20 @@ export class Editor
 
   #cleanMessage()
   {
+    this.logger.debug("cleanMessage", this.#messageHTML)
     this.#messageHTML.style.display = "none"
     this.#messageHTML.innerHTML = ""
+    this.logger.debug("cleanMessage", this.#messageHTML)
   }
 
   #showError(err: Error)
   {
+    this.logger.debug("showError", this.#messageHTML)
     this.#messageHTML.style.display = "initial"
     this.#messageHTML.classList.add("error-msg")
     this.#messageHTML.classList.remove("info-msg")
     this.#messageHTML.innerText = err.message
-    if (this.debug) {
+    if (this.logger.level >= LOGGER_LEVEL.DEBUG) {
       const pName = document.createElement("p")
       pName.innerHTML = err.name
       this.#messageHTML.prepend(pName)
@@ -244,10 +285,12 @@ export class Editor
       pStack.innerHTML = err.stack || ""
       this.#messageHTML.appendChild(pStack)
     }
+    this.logger.debug("showError", this.#messageHTML)
   }
 
   #showNotif(notif: { message: string, timeout?: number })
   {
+    this.logger.debug("showNotif", this.#messageHTML)
     this.#messageHTML.style.display = "initial"
     this.#messageHTML.classList.add("info-msg")
     this.#messageHTML.classList.remove("error-msg")
@@ -256,11 +299,12 @@ export class Editor
     {
       this.#cleanMessage()
     }, notif.timeout || 2500)
+    this.logger.debug("showNotif", this.#messageHTML)
   }
 
   #showStrokesIfDebug(): void
   {
-    if (this.debug) {
+    if (this.logger.level <= LOGGER_LEVEL.DEBUG) {
       let panel = document.getElementById("stroke-panel")
       const text = JSON.stringify(this.model.rawStrokes.map((s: TStroke) => ({ pointerType: s.pointerType, pointerId: s.pointerId, pointers: s.pointers })))
       if (!panel) {
@@ -304,6 +348,7 @@ export class Editor
 
   #onExport(exports: TExport): void
   {
+    this.logger.info("onExport", { exports })
     this.model.mergeExport(exports)
     if (this.configuration.rendering.smartGuide.enable) {
       if (exports && exports["application/vnd.myscript.jiix"]) {
@@ -317,11 +362,13 @@ export class Editor
 
   #onImportJIIX(jiix: TJIIXExport): void
   {
+    this.logger.info("onImportJIIX", { jiix })
     this.import(new Blob([JSON.stringify(jiix)], { type: Exports.JIIX }), Exports.JIIX)
   }
 
   async initialize(): Promise<void>
   {
+    this.logger.info("initialize", { })
     await this.#initializeBehaviors()
     this.#initializeSmartGuide()
   }
@@ -337,31 +384,42 @@ export class Editor
 
   async undo(): Promise<IModel>
   {
+    this.logger.debug("undo", this.model)
+    this.logger.info("undo", { })
     await this.#initializationDeferred.promise
     await this.behaviors.undo()
     this.#showStrokesIfDebug()
+    this.logger.debug("undo", this.model)
     return this.model
   }
 
   async redo(): Promise<IModel>
   {
+    this.logger.debug("redo", this.model)
+    this.logger.info("redo")
     await this.#initializationDeferred.promise
     await this.behaviors.redo()
     this.#showStrokesIfDebug()
+    this.logger.debug("redo", this.model)
     return this.model
   }
 
   async clear(): Promise<IModel>
   {
+    this.logger.debug("clear", this.model)
+    this.logger.info("clear")
     await this.#initializationDeferred.promise
     await this.behaviors.clear()
     this.events.emitCleared(this.model)
     this.#showStrokesIfDebug()
+    this.logger.debug("clear", this.model)
     return this.model
   }
 
   async resize(): Promise<IModel>
   {
+    this.logger.debug("resize", this.model)
+    this.logger.info("resize")
     await this.#initializationDeferred.promise
     if (this.configuration.rendering.smartGuide.enable) {
       this.#smartGuide?.resize()
@@ -369,26 +427,35 @@ export class Editor
     const height = Math.max(this.wrapperHTML.clientHeight, this.configuration.rendering.minHeight)
     const width = Math.max(this.wrapperHTML.clientWidth, this.configuration.rendering.minWidth)
     await this.behaviors.resize(height, width)
+    this.logger.debug("resize", this.model)
     return this.model
   }
 
   async export(mimeTypes?: string[]): Promise<IModel>
   {
+    this.logger.debug("export", this.model)
+    this.logger.info("export", { mimeTypes })
     await this.#initializationDeferred.promise
     await this.behaviors.export(mimeTypes)
+    this.logger.debug("export", this.model)
     return this.model
   }
 
   async convert(params?: { conversionState?: TConverstionState, mimeTypes?: string[] }): Promise<IModel | never>
   {
+    this.logger.debug("convert", this.model)
+    this.logger.info("export", { params })
     await this.#initializationDeferred.promise
     await this.behaviors.convert(params?.conversionState, params?.mimeTypes)
     this.events.emitConverted(this.model.converts as TExport)
+    this.logger.debug("convert", this.model)
     return this.model
   }
 
   async import(data: Blob | string | TJIIXExport, mimeType?: string): Promise<IModel | never>
   {
+    this.logger.debug("import", this.model)
+    this.logger.info("import", { data, mimeType })
     await this.#initializationDeferred.promise
     if (this.behaviors.import) {
       let blobToImport: Blob
@@ -403,6 +470,7 @@ export class Editor
       }
       await this.behaviors.import(blobToImport, mimeType)
       this.events.emitImported(this.model.exports as TExport)
+      this.logger.debug("import", this.model)
       return this.model
     }
     return Promise.reject("Import impossible, behaviors has no import function")
@@ -410,10 +478,13 @@ export class Editor
 
   async importPointEvents(strokes: TStroke[]): Promise<IModel>
   {
+    this.logger.debug("importPointEvents", this.model)
+    this.logger.info("importPointEvents", { strokes })
     await this.#initializationDeferred.promise
     if (this.behaviors.importPointEvents) {
       await this.behaviors.importPointEvents(strokes)
       this.events.emitImported(this.model.exports as TExport)
+      this.logger.debug("importPointEvents", this.model)
       return this.model
     }
     return Promise.reject("Import impossible, behaviors has no importPointEvents function")

@@ -1,15 +1,19 @@
 import { IModel, TExport } from "../@types/model/Model"
 import { TUndoRedoContext } from "../@types/undo-redo/UndoRedoContext"
 import { EventType } from "../Constants"
+import { Logger, LoggerManager } from "../logger"
+import { LOGGER_CLASS } from "../Constants"
 
 export class PublicEvent extends EventTarget
 {
   static #instance: PublicEvent
   #element?: HTMLElement
+  #logger: Logger
 
   private constructor()
   {
     super()
+    this.#logger = LoggerManager.getLogger(LOGGER_CLASS.PUBLIC_EVENT)
   }
 
   public static getInstance(): PublicEvent
@@ -23,6 +27,7 @@ export class PublicEvent extends EventTarget
 
   setElement(el: HTMLElement)
   {
+    this.#logger.info("setElement", { el })
     this.#element = el
   }
 
@@ -40,11 +45,13 @@ export class PublicEvent extends EventTarget
 
   emitExported(exports: TExport): void
   {
+    this.#logger.info("emitExported", { exports })
     this.#emit(EventType.EXPORTED, exports)
   }
 
   emitChanged(undoRedoContext: TUndoRedoContext): void
   {
+    this.#logger.info("emitChanged", { undoRedoContext })
     this.#emit(EventType.CHANGED, {
       ...undoRedoContext,
       canClear: !undoRedoContext.empty
@@ -53,21 +60,25 @@ export class PublicEvent extends EventTarget
 
   emitIdle(idle: boolean): void
   {
+    this.#logger.info("emitIdle", { idle })
     this.#emit(EventType.IDLE, idle)
   }
 
   emitCleared(model?: IModel): void
   {
+    this.#logger.info("emitCleared", { model })
     this.#emit(EventType.CLEARED, model)
   }
 
   emitConverted(exports: TExport): void
   {
+    this.#logger.info("emitConverted", { exports })
     this.#emit(EventType.CONVERTED, exports)
   }
 
   emitImported(exports: TExport): void
   {
+    this.#logger.info("emitImported", { exports })
     this.#emit(EventType.IMPORTED, exports)
   }
 }

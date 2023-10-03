@@ -3,7 +3,7 @@ export { Editor } from "./Editor"
 
 export { DeferredPromise, geometric, getAvailableFontList, getAvailableLanguageList, version } from "./utils"
 
-export { default as Constants, ModeInteraction } from "./Constants"
+export { default as Constants, ModeInteraction, LOGGER_CLASS, LOGGER_LEVEL } from "./Constants"
 
 export
 {
@@ -15,7 +15,8 @@ export
   DefaultServerConfiguration,
   DefaultTriggerConfiguration,
   DefaultUndoRedoConfiguration,
-  Configuration
+  Configuration,
+  DefaultLoggerConfiguration
 } from "./configuration"
 
 export { RestBehaviors, WSBehaviors } from "./behaviors"
@@ -45,3 +46,5 @@ export { UndoRedoContext, UndoRedoManager } from "./undo-redo"
 export { InternalEvent, PublicEvent } from "./event"
 
 export { SmartGuide } from "./smartguide/SmartGuide"
+
+export { Logger, LoggerManager } from "./logger"
