@@ -29,44 +29,6 @@ describe("Websocket Math", function () {
     expect(mathml).toBeUndefined()
   })
 
-  test("should undo/redo", async () => {
-    const editorEl = await page.waitForSelector("#editor")
-    for (const s of sumSimple.strokes) {
-      await Promise.all([getDatasFromExportedEvent(page), writePointers(page, [s])])
-    }
-
-    let resultElement = page.locator("#result")
-    resultText = await resultElement.textContent()
-    expect(resultText).toStrictEqual(sumSimple.exports["LATEX"].at(-1))
-    let raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
-    expect(raw.length).toStrictEqual(sumSimple.strokes.length)
-
-    await Promise.all([getDatasFromExportedEvent(page), page.click("#undo")])
-    resultElement = page.locator("#result")
-    resultText = await resultElement.textContent()
-    expect(resultText).toStrictEqual(sumSimple.exports["LATEX"].at(-2))
-    raw = await editorEl.evaluate((node) => node.editor.model.rawStrokes)
-    expect(raw.length).toStrictEqual(sumSimple.strokes.length - 1)
-  })
-
-  test("should clear", async () => {
-    await Promise.all([getDatasFromExportedEvent(page), writePointers(page, sumSimple.strokes)])
-    let resultElement = page.locator("#result")
-    resultText = await resultElement.textContent()
-    expect(resultText).toBeDefined()
-
-    const [clearExport] = await Promise.all([getDatasFromExportedEvent(page), page.click("#clear")])
-    const emptyLatex = ""
-    const LatexReceived = clearExport["application/x-latex"]
-    expect(LatexReceived).toEqual(emptyLatex)
-
-    const modelExportLatex = await getExportsTypeFromEditorModel(page, "application/x-latex")
-    expect(modelExportLatex).toEqual(LatexReceived)
-    resultElement = page.locator("#result")
-    resultText = await resultElement.textContent()
-    expect(resultText).toBe("")
-  })
-
   test("should not recognize text", async () => {
     await Promise.all([getDatasFromExportedEvent(page), write(page, h.strokes)])
     let resultElement = page.locator("#result")
@@ -87,4 +49,6 @@ describe("Websocket Math", function () {
     const latexReceived = exportedDatas["application/x-latex"]
     expect(resultText).toEqual("h")
   })
+  require("../_partials/math/nav-actions-math-undo-redo-test")
+  require("../_partials/math/nav-actions-math-clear-test")
 })

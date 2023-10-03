@@ -50,4 +50,5 @@ describe('Websocket Text Import Content', () => {
     const textContent = await prompterText.evaluate((node) => node.textContent)
     expect(textContent).toEqual("pony")
   })
+  require("../_partials/text/nav-actions-text-undo-redo-test")
 })

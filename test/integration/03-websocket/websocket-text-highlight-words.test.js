@@ -136,5 +136,5 @@ describe("Websocket Text highlight words", () => {
     expect(style.backgroundColor).toContain(highlightColor.color)
     expect(style.color).toContain(strokeColor.color)
   })
-
+  require("../_partials/text/nav-actions-text-undo-redo-test")
 })
