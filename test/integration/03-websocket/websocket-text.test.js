@@ -194,5 +194,7 @@ describe("Websocket Text", () => {
     })
   })
 
-  require("../_partials/nav-actions-test")
+  require("../_partials/text/nav-actions-text-clear-test")
+  require("../_partials/text/nav-actions-text-language-test")
+  require("../_partials/text/nav-actions-text-undo-redo-test")
 })

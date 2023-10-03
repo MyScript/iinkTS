@@ -26,4 +26,5 @@ describe("Websocket Text Custom Resource", () => {
     const jiixReceived = exports["application/vnd.myscript.jiix"]
     expect(jiixReceived.label).toEqual(jiixExpected.label)
   })
+  require("../_partials/text/nav-actions-text-undo-redo-test")
 })

@@ -15,4 +15,6 @@ describe('Websocket Math Eraser', function () {
     const title = await page.title()
     expect(title).toMatch('Websocket Math Eraser')
   })
+  require("../_partials/math/nav-actions-math-undo-redo-test")
+  require("../_partials/math/nav-actions-math-clear-test")
 })

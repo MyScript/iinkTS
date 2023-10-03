@@ -71,4 +71,5 @@ describe('Websocket Text erase', () => {
     const ponyEraseJiixReceived = ponyEraseExports['application/vnd.myscript.jiix']
     expect(ponyEraseJiixReceived.label).toEqual(ponyEraseJiixExpected.label)
   })
+  require("../_partials/text/nav-actions-text-undo-redo-test")
 })
