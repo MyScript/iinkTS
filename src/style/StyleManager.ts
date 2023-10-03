@@ -5,6 +5,8 @@ import { mergeDeep } from "../utils/MergeHelper"
 
 import { DefaultPenStyle } from "./DefaultPenStyle"
 import { DefaultTheme } from "./DefaultTheme"
+import { Logger, LoggerManager } from "../logger"
+import { LOGGER_CLASS } from "../Constants"
 
 export class StyleManager
 {
@@ -12,9 +14,12 @@ export class StyleManager
   #theme!: TTheme
   #penStyleClasses!: string
   #currentPenStyle!: TPenStyle
+  #logger: Logger
 
   constructor(penStyle?: TPenStyle, theme?: TTheme)
   {
+    this.#logger = LoggerManager.getLogger(LOGGER_CLASS.STYLEMANAGER)
+    this.#logger.info("constructor", { penStyle, theme })
     this.setTheme(theme)
     this.setPenStyleClasses()
     this.setPenStyle(penStyle)
@@ -31,9 +36,10 @@ export class StyleManager
   }
   setPenStyle(p?: TPenStyle)
   {
-
+    this.#logger.info("setPenStyle", { p })
     this.#penStyle = mergeDeep(structuredClone(DefaultPenStyle), p || {}) as TPenStyle
     this.#currentPenStyle = p || (this.theme[`.${ this.#penStyleClasses }`]) as TPenStyle
+    this.#logger.debug("setPenStyle", this.#currentPenStyle)
   }
 
   get theme(): TTheme
@@ -42,7 +48,9 @@ export class StyleManager
   }
   setTheme(t?: TTheme)
   {
+    this.#logger.info("setTheme", { t })
     this.#theme = mergeDeep(structuredClone(DefaultTheme), t || {}) as TTheme
+    this.#logger.debug("setTheme", this.#theme)
   }
 
   get penStyleClasses(): string
@@ -51,8 +59,10 @@ export class StyleManager
   }
   setPenStyleClasses(psc = "")
   {
+    this.#logger.info("setPenStyleClasses", { psc })
     this.#penStyleClasses = psc
     this.#currentPenStyle = (this.theme[`.${ this.#penStyleClasses }`]) as TPenStyle
+    this.#logger.debug("setPenStyleClasses", this.#currentPenStyle)
   }
 
 }

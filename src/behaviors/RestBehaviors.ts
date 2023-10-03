@@ -17,6 +17,8 @@ import { StyleManager } from "../style/StyleManager"
 import { Configuration } from "../configuration/Configuration"
 import { Model } from "../model/Model"
 import { ModeInteraction } from "../Constants"
+import { Logger, LoggerManager } from "../logger"
+import { LOGGER_CLASS } from "../Constants"
 
 export class RestBehaviors implements IBehaviors
 {
@@ -30,12 +32,15 @@ export class RestBehaviors implements IBehaviors
   #configuration: TConfiguration
   #model: IModel
   mode: ModeInteraction
+  #logger: Logger
 
   #resizeTimer?: ReturnType<typeof setTimeout>
   #exportTimer?: ReturnType<typeof setTimeout>
 
   constructor(options: TBehaviorOptions)
   {
+    this.#logger = LoggerManager.getLogger(LOGGER_CLASS.BEHAVIORS)
+    this.#logger.info("constructor", { options })
     this.options = options
     this.#configuration = new Configuration(options?.configuration)
     this.styleManager = new StyleManager(options.penStyle, options.theme)
@@ -75,6 +80,7 @@ export class RestBehaviors implements IBehaviors
   }
   setPenStyle(ps?: TPenStyle)
   {
+    this.#logger.info("setPenStyle", { ps })
     this.styleManager.setPenStyle(ps)
   }
 
@@ -84,6 +90,7 @@ export class RestBehaviors implements IBehaviors
   }
   setPenStyleClasses(psc?: string)
   {
+    this.#logger.info("setPenStyleClasses", { psc })
     this.styleManager.setPenStyleClasses(psc)
   }
 
@@ -93,6 +100,7 @@ export class RestBehaviors implements IBehaviors
   }
   setTheme(t?: TTheme)
   {
+    this.#logger.info("setTheme", { t })
     this.styleManager.setTheme(t)
   }
 
@@ -103,6 +111,7 @@ export class RestBehaviors implements IBehaviors
 
   async init(domElement: HTMLElement): Promise<void>
   {
+    this.#logger.info("init", { domElement })
     this.model.width = Math.max(domElement.clientWidth, this.#configuration.rendering.minWidth)
     this.model.height = Math.max(domElement.clientHeight, this.#configuration.rendering.minHeight)
     this.undoRedoManager.updateModelInStack(this.model)
@@ -117,6 +126,7 @@ export class RestBehaviors implements IBehaviors
 
   private onPointerDown(evt: PointerEvent, point: TPointer): void
   {
+    this.#logger.info("onPointerDown", { evt, point })
     const { pointerType } = evt
     const style: TPenStyle = Object.assign({}, this.theme?.ink, this.currentPenStyle)
     switch (this.mode) {
@@ -129,6 +139,7 @@ export class RestBehaviors implements IBehaviors
         }
         break
       default:
+        this.#logger.warn("onPointerDown default", { evt, point })
         this.model.initCurrentStroke(point, evt.pointerId, pointerType, style)
         this.drawCurrentStroke()
         break
@@ -137,6 +148,7 @@ export class RestBehaviors implements IBehaviors
 
   private onPointerMove(_evt: PointerEvent, point: TPointer): void
   {
+    this.#logger.info("onPointerMove", { _evt, point })
     switch (this.mode) {
       case ModeInteraction.Erasing:
         if (this.model.removeStrokesFromPoint(point).length > 0) {
@@ -147,6 +159,7 @@ export class RestBehaviors implements IBehaviors
         }
         break
       default:
+        this.#logger.warn("onPointerMove default", { _evt, point })
         this.model.appendToCurrentStroke(point)
         this.drawCurrentStroke()
         break
@@ -155,6 +168,7 @@ export class RestBehaviors implements IBehaviors
 
   private onPointerUp(_evt: PointerEvent, point: TPointer): void
   {
+    this.#logger.info("onPointerUp", { _evt, point })
     switch (this.mode) {
       case ModeInteraction.Erasing:
         if (this.model.removeStrokesFromPoint(point).length > 0) {
@@ -165,6 +179,7 @@ export class RestBehaviors implements IBehaviors
         }
         break
       default:
+        this.#logger.warn("onPointerUp default", { _evt, point })
         this.model.endCurrentStroke(point)
         this.updateModelRendering()
           .then(newModel => Object.assign(this.#model, newModel))
@@ -180,6 +195,7 @@ export class RestBehaviors implements IBehaviors
 
   async updateModelRendering(): Promise<IModel | never>
   {
+    this.#logger.debug("updateModelRendering", this.model)
     this.renderer.drawModel(this.model)
     const deferred = new DeferredPromise<IModel | never>()
     this.undoRedoManager.addModelToStack(this.model)
@@ -196,6 +212,7 @@ export class RestBehaviors implements IBehaviors
           }
           deferred.resolve(this.model)
         } catch (error) {
+          this.#logger.error("updateModelRendering", { error })
           deferred.reject(error as Error)
         }
       }, this.#configuration.triggers.exportContent === "QUIET_PERIOD" ? this.#configuration.triggers.exportContentDelay : 0)
@@ -204,28 +221,37 @@ export class RestBehaviors implements IBehaviors
     }
     await deferred.promise
     this.internalEvent.emitExported(this.model.exports as TExport)
+    this.#logger.debug("updateModelRendering", this.model.exports)
     return deferred.promise
   }
 
   async export(mimeTypes?: string[]): Promise<IModel | never>
   {
+    this.#logger.debug("export", this.model)
+    this.#logger.info("export", { mimeTypes })
     const newModel = await this.recognizer.export(this.model.getClone(), mimeTypes)
     if (this.model.modificationDate === newModel.modificationDate) {
       this.model.mergeExport(newModel.exports as TExport)
     }
     this.undoRedoManager.updateModelInStack(newModel)
+    this.#logger.debug("export", this.model)
     return this.model
   }
 
   async convert(conversionState?: TConverstionState, requestedMimeTypes?: string[]): Promise<IModel | never>
   {
+    this.#logger.debug("convert", this.model)
+    this.#logger.info("convert", { conversionState, requestedMimeTypes })
     const newModel = await this.recognizer.convert(this.model, conversionState, requestedMimeTypes)
     Object.assign(this.#model, newModel)
+    this.#logger.debug("convert", this.model)
     return this.model
   }
 
   async resize(height: number, width: number): Promise<IModel>
   {
+    this.#logger.debug("resize", this.model)
+    this.#logger.info("resize", { height, width })
     const deferredResize = new DeferredPromise<IModel>()
     this.model.height = height
     this.model.width = width
@@ -241,41 +267,52 @@ export class RestBehaviors implements IBehaviors
       deferredResize.resolve(this.model)
     }
     const newModel = await deferredResize.promise
+    this.#logger.debug("resize", { newModel })
     this.internalEvent.emitExported(newModel.exports as TExport)
     return newModel
   }
 
   async undo(): Promise<IModel>
   {
+    this.#logger.debug("undo", this.#model)
+    this.#logger.info("undo", {})
     this.#model = this.undoRedoManager.undo()
     this.renderer.drawModel(this.#model)
     this.#model = await this.recognizer.export(this.#model)
     this.undoRedoManager.updateModelInStack(this.#model)
     this.internalEvent.emitExported(this.#model.exports as TExport)
+    this.#logger.debug("undo", this.#model)
     return this.#model
   }
 
   async redo(): Promise<IModel>
   {
+    this.#logger.debug("redo", this.#model)
+    this.#logger.info("redo", {})
     this.#model = this.undoRedoManager.redo()
     this.renderer.drawModel(this.#model)
     this.#model = await this.recognizer.export(this.#model)
     this.undoRedoManager.updateModelInStack(this.#model)
     this.internalEvent.emitExported(this.#model.exports as TExport)
+    this.#logger.debug("redo", this.#model)
     return this.#model
   }
 
   async clear(): Promise<IModel>
   {
+    this.#logger.debug("clear", this.model)
+    this.#logger.info("clear", {})
     this.model.clear()
     this.undoRedoManager.addModelToStack(this.model)
     this.renderer.drawModel(this.model)
     this.internalEvent.emitExported(this.model.exports as TExport)
+    this.#logger.debug("clear", this.model)
     return this.model
   }
 
   async destroy(): Promise<void>
   {
+    this.#logger.info("destroy", {})
     this.grabber.detach()
     this.renderer.destroy()
     return Promise.resolve()

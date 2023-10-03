@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+    <title>Websocket Text</title>
+    <link rel="stylesheet" href="../examples.css" />
+    <script type="text/javascript" src="../../dist/iink.min.js"></script>
+    <style>
+      #editor {
+        height: calc(100vh - 166px);
+      }
+      @media only screen and (max-width: 452px) {
+        #editor {
+          height: calc(100vh - 213px);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="result"></div>
+
+    <nav>
+      <div class="button-div">
+        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/clear.svg" />
+        </button>
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/undo.svg" />
+        </button>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/redo.svg" />
+        </button>
+      </div>
+      <div id="parameters">
+        <select id="level">
+        </select>
+      </div>
+    </nav>
+
+    <div id="editor" touch-action="none"></div>
+
+    <script>
+      const editorElement = document.getElementById("editor");
+      const resultElement = document.getElementById("result");
+      const levelSelect = document.getElementById("level");
+      const clearElement = document.getElementById("clear");
+      const undoElement = document.getElementById("undo");
+      const redoElement = document.getElementById("redo");
+
+      let editor;
+      const loggerConfig = {
+        [iink.LOGGER_CLASS.EDITOR]: iink.LOGGER_LEVEL.TRACE,
+        [iink.LOGGER_CLASS.RECOGNIZER]: iink.LOGGER_LEVEL.TRACE,
+        [iink.LOGGER_CLASS.GRABBER]: iink.LOGGER_LEVEL.TRACE
+      };
+
+      Object.keys(iink.LOGGER_LEVEL).forEach((level) => {
+        const opt = new Option(level, iink.LOGGER_LEVEL[level], iink.LOGGER_LEVEL[level] === iink.LOGGER_LEVEL.ERROR, iink.LOGGER_LEVEL[level] === iink.LOGGER_LEVEL.ERROR)
+        levelSelect.appendChild(opt);
+      })
+      /**
+       * We use a function to wait the server configuration to load
+       */
+      async function loadEditor() {
+        const res = await fetch("../server-configuration.json");
+        const conf = await res.json();
+        const options = {
+          logger: loggerConfig,
+          configuration: {
+            server: {
+              ...conf,
+              protocol: "WEBSOCKET"
+            },
+            recognition: {
+              type: "TEXT"
+            }
+          }
+        };
+        /**
+         * Instanciate editor
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Editor parameters
+         */
+        editor = new iink.Editor(editorElement, options);
+        /**
+         *  async initialize editor behaviors
+         */
+        await editor.initialize();
+
+        levelSelect.addEventListener("change", (evt) => {
+          loggerConfig[iink.LOGGER_CLASS.EDITOR] = evt.target.value
+          loggerConfig[iink.LOGGER_CLASS.RECOGNIZER] = evt.target.value
+          loggerConfig[iink.LOGGER_CLASS.GRABBER] = evt.target.value
+
+          editor.loggerConfiguration = loggerConfig;
+        });
+
+        editor.events.addEventListener("changed", (event) => {
+          undoElement.disabled = !event.detail.canUndo;
+          redoElement.disabled = !event.detail.canRedo;
+          clearElement.disabled = !event.detail.canClear;
+        });
+
+        editor.events.addEventListener("exported", (event) => {
+          resultElement.innerHTML =
+            event.detail && event.detail["application/vnd.myscript.jiix"] ? event.detail["application/vnd.myscript.jiix"].label : "";
+        });
+
+        clearElement.addEventListener("click", async () => {
+          editor.clear();
+        });
+
+        undoElement.addEventListener("click", () => {
+          editor.undo();
+        });
+
+        redoElement.addEventListener("click", () => {
+          editor.redo();
+        });
+
+        window.addEventListener("resize", () => {
+          editor.resize();
+        });
+      }
+
+      loadEditor().catch(error => console.error(error));
+    </script>
+  </body>
+</html>

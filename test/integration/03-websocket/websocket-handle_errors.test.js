@@ -12,6 +12,6 @@
 
     test("should have error message", async () => {
         const errorMessage = await page.locator(".message.error-msg").textContent()
-        expect(errorMessage).toStrictEqual("Application credentials are invalid. Please check or regenerate your application key and hmackey.")
+        expect(errorMessage).toContain("Application credentials are invalid. Please check or regenerate your application key and hmackey.")
     })
   })

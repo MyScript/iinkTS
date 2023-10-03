@@ -13,6 +13,9 @@ import { computeHmac } from "./CryptoHelper"
 import { isVersionSuperiorOrEqual } from "../utils/version"
 import { convertStrokeToJSON } from "../model/Stroke"
 
+import { Logger, LoggerManager } from "../logger"
+import { LOGGER_CLASS } from "../Constants"
+
 type ApiError = {
   code?: string
   message: string
@@ -22,9 +25,12 @@ export class RestRecognizer implements IRecognizer
 {
   protected serverConfiguration: TServerConfiguration
   protected recognitionConfiguration: TRecognitionConfiguration
+  #logger: Logger
 
   constructor(serverConfig: TServerConfiguration, recognitionConfig: TRecognitionConfiguration)
   {
+    this.#logger = LoggerManager.getLogger(LOGGER_CLASS.RECOGNIZER)
+    this.#logger.info("constructor", { serverConfig, recognitionConfig })
     this.serverConfiguration = serverConfig
     this.recognitionConfiguration = recognitionConfig
   }
@@ -62,6 +68,7 @@ export class RestRecognizer implements IRecognizer
           export: this.recognitionConfiguration.export
         }
       default:
+        this.#logger.warn("postConfig default", this.recognitionConfiguration.type)
         throw new Error(`get postConfig error Recognition type unkow "${ this.recognitionConfiguration.type }"`)
         break
     }
@@ -69,6 +76,7 @@ export class RestRecognizer implements IRecognizer
 
   private buildData(model: IModel): TRestPostData
   {
+    this.#logger.info("buildData", { model })
     const isPenStyleEqual = (ps1: TPenStyle, ps2: TPenStyle) =>
     {
       return ps1 && ps2 && ps1["-myscript-pen-fill-color"] === ps2["-myscript-pen-fill-color"] &&
@@ -121,6 +129,8 @@ export class RestRecognizer implements IRecognizer
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async post(data: any, mimeType: string): Promise<any>
   {
+
+    this.#logger.info("post", { data, mimeType })
     const headers = new Headers()
     headers.append("Accept", "application/json," + mimeType)
     headers.append("applicationKey", this.serverConfiguration.applicationKey)
@@ -156,27 +166,33 @@ export class RestRecognizer implements IRecognizer
           result = await response.clone().json().catch(async () => await response.text())
           break
         default:
+          this.#logger.warn("post default", { contentType })
           result = await response.text()
           break
       }
+      this.#logger.debug("post", { result })
       return result
     } else {
       const err = await response.json() as ApiError
+      this.#logger.error("post", { err })
       throw err
     }
   }
 
   private async tryFetch(data: unknown, mimeType: string): Promise<TExport | never>
   {
+    this.#logger.debug("tryFetch", { data, mimeType })
     return this.post(data, mimeType)
       .then((res) =>
       {
         const exports: TExport = {}
         exports[mimeType] = res as TJIIXExport | string | Blob
+        this.#logger.debug("tryFetch", { exports })
         return exports
       })
       .catch((err) =>
       {
+        this.#logger.error("tryFetch", { data, mimeType, err })
         let message = err.message || ErrorConst.UNKNOW
         if (!err.code) {
           message = ErrorConst.CANT_ESTABLISH
@@ -190,6 +206,7 @@ export class RestRecognizer implements IRecognizer
 
   private getMimeTypes(requestedMimeTypes?: string[]): string[]
   {
+    this.#logger.info("getMimeTypes", { requestedMimeTypes })
     let mimeTypes: string[] = requestedMimeTypes || []
     if (!mimeTypes.length) {
       switch (this.recognitionConfiguration.type) {
@@ -206,6 +223,7 @@ export class RestRecognizer implements IRecognizer
           mimeTypes = this.recognitionConfiguration.text.mimeTypes
           break
         default:
+          this.#logger.warn("getMimeTypes default", this.recognitionConfiguration.type)
           throw new Error(`Recognition type "${ this.recognitionConfiguration.type }" is unknown.\n Possible types are:\n -DIAGRAM\n -MATH\n -Raw Content\n -TEXT`)
           break
       }
@@ -215,6 +233,8 @@ export class RestRecognizer implements IRecognizer
 
   async convert(model: IModel, conversionState?: TConverstionState, requestedMimeTypes?: string[]): Promise<IModel | never>
   {
+    this.#logger.info("convert", { model, conversionState, requestedMimeTypes })
+    this.#logger.debug("convert", { model })
     const myModel = model.getClone()
     const mimeTypes = this.getMimeTypes(requestedMimeTypes)
     const dataToConcert = this.buildData(myModel)
@@ -225,17 +245,21 @@ export class RestRecognizer implements IRecognizer
     {
       myModel.mergeConvert(c)
     })
+    this.#logger.debug("convert", { myModel })
     return myModel
   }
 
   async export(model: IModel, requestedMimeTypes?: string[]): Promise<IModel | never>
   {
+    this.#logger.debug("export", { model })
+    this.#logger.info("export", { model, requestedMimeTypes })
     const myModel = model.getClone()
     if (myModel.rawStrokes.length === 0) {
       return Promise.resolve(myModel)
     }
     const mimeTypes = this.getMimeTypes(requestedMimeTypes)
     if (!mimeTypes.length) {
+      this.#logger.error("export", { model, requestedMimeTypes, "Export failed, no mimeTypes define in recognition configuration": String })
       return Promise.reject(new Error("Export failed, no mimeTypes define in recognition configuration"))
     }
     const mimeTypesRequiringExport: string[] = mimeTypes.filter(m => !myModel.exports || !myModel.exports[m])
@@ -245,11 +269,13 @@ export class RestRecognizer implements IRecognizer
     {
       myModel.mergeExport(e)
     })
+    this.#logger.debug("export", { myModel })
     return myModel
   }
 
   async resize(model: IModel): Promise<IModel | never>
   {
+    this.#logger.info("resize", { model })
     return this.export(model)
   }
 

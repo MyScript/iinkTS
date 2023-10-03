@@ -123,6 +123,8 @@ export const enum ModeInteraction
   // Selecting = "selecting"
 }
 
+export { LOGGER_CLASS, LOGGER_LEVEL  } from "./@types/configuration/LoggerConfiguration"
+
 /**
  * @group Constants
  */

@@ -8,6 +8,7 @@ import { TStroke } from "./model/Stroke"
 import { TUndoRedoContext } from "./undo-redo/UndoRedoContext"
 import { TConfiguration } from "./Configuration"
 import { StyleManager } from "../style/StyleManager"
+import { TLoggerConfiguration } from "./configuration/LoggerConfiguration"
 
 export type TBehaviorOptions = {
   configuration: TConfiguration
@@ -17,6 +18,7 @@ export type TBehaviorOptions = {
   }
   penStyle?: TPenStyle
   theme?: TTheme
+  logger?: TLoggerConfiguration
 }
 
 export interface IBehaviors
