@@ -245,6 +245,7 @@ export class WSBehaviors implements IBehaviors
     this.context.stack.push(this.model.getClone())
     this.#model = await this.recognizer.convert(this.model, conversionState)
     this.#logger.debug("convert", this.model)
+    this.undoRedoManager.addModelToStack(this.model)
     return this.model
   }
 
@@ -252,7 +253,9 @@ export class WSBehaviors implements IBehaviors
   {
     this.#logger.info("import", { data, mimeType })
     this.context.stack.push(this.model.getClone())
-    return this.recognizer.import(this.model, data, mimeType)
+    const m = await this.recognizer.import(this.model, data, mimeType)
+    this.undoRedoManager.addModelToStack(m)
+    return m
   }
 
   async resize(height: number, width: number): Promise<IModel>
