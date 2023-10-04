@@ -352,9 +352,17 @@ export class SmartGuide {
             if ((this.lastWord?.candidates !== word.candidates) && (this.lastWord?.label !== word.label)) {
               this.lastWord = word
             }
+            if(this.wordToChange?.id === index.toString())
+            {
+              span.classList.add("modified-word")
+              this.wordToChange = undefined
+            }
+            else
+            {
+              span.classList.add("added-word")
+            }
             this.#prompterTextElement.appendChild(span)
             this.#prompterContainerElement.scrollLeft = span.offsetLeft
-            span.classList.add("added-word")
           }
         })
       }
