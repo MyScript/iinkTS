@@ -7,14 +7,15 @@ import
   AllOverrideConfiguration,
 } from "../_dataset/configuration.dataset"
 import { TConfiguration, TConfigurationClient } from "../../../src/@types"
-import { DefaultConfiguration, Configuration } from "../../../src/iink"
-
-const configurationDefault = new Configuration()
+import { configuration } from "../../../src/iink"
 
 describe("Configuration.ts", () =>
 {
+  const { Configuration, DefaultConfiguration } = configuration
+
   test("should be default configuration", () =>
   {
+    const configurationDefault = new Configuration()
     expect(configurationDefault.events).toStrictEqual(DefaultConfiguration.events)
     expect(configurationDefault.grabber).toStrictEqual(DefaultConfiguration.grabber)
     expect(configurationDefault.recognition).toStrictEqual(DefaultConfiguration.recognition)
@@ -22,7 +23,6 @@ describe("Configuration.ts", () =>
     expect(configurationDefault.server).toStrictEqual(DefaultConfiguration.server)
     expect(configurationDefault.triggers).toStrictEqual(DefaultConfiguration.triggers)
     expect(configurationDefault["undo-redo"]).toStrictEqual(DefaultConfiguration["undo-redo"])
-
   })
 
   const configurationsClient: { name: string, config: TConfigurationClient }[] = [
@@ -59,7 +59,7 @@ describe("Configuration.ts", () =>
       })
       test("should have default server.websocket", () =>
       {
-        expect(configuration.server.websocket).toStrictEqual(configurationDefault.server.websocket)
+        expect(configuration.server.websocket).toStrictEqual(DefaultConfiguration.server.websocket)
       })
       test("should have recognition.type", () =>
       {

@@ -4,15 +4,13 @@ import
   TPointer,
   TUndoRedoConfiguration
 } from "../../../src/@types"
-import
-{
-  Model,
-  UndoRedoManager,
-  UndoRedoContext,
-  DefaultConfiguration,
-  DefaultPenStyle
-} from "../../../src/iink"
 import { delay } from "../utils/helpers"
+import { undoredo, model, configuration, style } from "../../../src/iink"
+
+const { UndoRedoContext, UndoRedoManager } = undoredo
+const { Model } = model
+const { DefaultConfiguration } = configuration
+const { DefaultPenStyle } = style
 
 describe("UndoRedoManager.ts", () =>
 {

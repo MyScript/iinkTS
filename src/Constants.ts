@@ -75,7 +75,9 @@ export const EventType = {
 } as const
 
 /**
+ * @event
  * @internal
+ * @remarks Lists all internal library events
  */
 export const InternalEventType = {
   SVG_PATCH: "internal_svg_patch",
@@ -92,25 +94,17 @@ export const InternalEventType = {
 } as const
 
 /**
- * @internal
- */
-export const WSMessage = {
-  CLOSE_RECOGNIZER: "CLOSE_RECOGNIZER"
-}
-
-/**
  * @group Export
- * @remarks List all supported MIME types for export.
- * @remarks Attention, the MIME types supported depend on the {@link TRecognitionType | type of recognition}
+ * @remarks List all supported MIME types for export. Attention, the MIME types supported depend on the {@link TRecognitionType | type of recognition}
  */
-export const Exports = {
-  JIIX: "application/vnd.myscript.jiix",
-  TEXT: "text/plain",
-  LATEX: "application/x-latex",
-  MATHML: "application/mathml+xml",
-  SVG: "image/svg+xml",
-  OFFICE_DOCUMENT: "application/vnd.openxmlformats-officedocument.presentationml.presentation"
-} as const
+export const enum ExportType {
+  JIIX = "application/vnd.myscript.jiix",
+  TEXT = "text/plain",
+  LATEX = "application/x-latex",
+  MATHML = "application/mathml+xml",
+  SVG = "image/svg+xml",
+  OFFICE_DOCUMENT = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+}
 
 /**
  * @group Editor
@@ -123,15 +117,7 @@ export const enum ModeInteraction
   // Selecting = "selecting"
 }
 
-export { LOGGER_CLASS, LOGGER_LEVEL  } from "./@types/configuration/LoggerConfiguration"
-
 /**
- * @group Constants
+ * @group Logger
  */
-export default {
-  Error,
-  EventType,
-  InternalEventType,
-  Exports,
-  WSMessage,
-} as const
+export { LoggerClass, LoggerLevel  } from "./@types/configuration/LoggerConfiguration"

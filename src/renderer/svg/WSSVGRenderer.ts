@@ -3,8 +3,8 @@ import { IModel } from "../../@types/model/Model"
 import { TUpdatePatch, TUpdatePatchAppendChild, TUpdatePatchInsertBefore, TUpdatePatchRemoveAttribut, TUpdatePatchRemoveChild, TUpdatePatchRemoveElement, TUpdatePatchReplaceAll, TUpdatePatchReplaceELement, TUpdatePatchSetAttribut } from "../../@types/recognizer/WSRecognizer"
 import { TStroke } from "../../@types/model/Stroke"
 import { SVGStroker } from "./SVGStroker"
-import { Logger, LoggerManager } from "../../logger"
-import { LOGGER_CLASS } from "../../Constants"
+import { LoggerManager } from "../../logger"
+import { LoggerClass } from "../../Constants"
 
 export class WSSVGRenderer
 {
@@ -13,11 +13,10 @@ export class WSSVGRenderer
   context!: {
     parent: HTMLElement
   }
-  #logger: Logger
+  #logger = LoggerManager.getLogger(LoggerClass.SVGRENDERER)
 
   constructor(config: TRenderingConfiguration)
   {
-    this.#logger = LoggerManager.getLogger(LOGGER_CLASS.SVGRENDERER)
     this.#logger.info("constructor", { config })
     this.config = config
     this.stroker = new SVGStroker()

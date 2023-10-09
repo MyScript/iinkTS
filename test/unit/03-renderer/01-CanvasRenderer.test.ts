@@ -1,8 +1,9 @@
 import { TRenderingConfiguration } from "../../../src/@types"
-import { CanvasRenderer, CanvasStroker } from "../../../src/iink"
+import { renderer } from "../../../src/iink"
 
 describe("CanvasRenderer.ts", () =>
 {
+  const { CanvasRenderer, CanvasStroker } = renderer
   const height = 10, width = 10
   const wrapperHTML: HTMLElement = document.createElement("div")
   wrapperHTML.style.height = `${ height }px`
@@ -26,25 +27,24 @@ describe("CanvasRenderer.ts", () =>
       gap: 50
     }
   }
-  const renderer = new CanvasRenderer(conf)
+  const canvasRenderer = new CanvasRenderer(conf)
 
   test("should set configuration when instanciate", () =>
   {
-    const r = new CanvasRenderer(conf)
-    expect(r.config).toStrictEqual(conf)
+    expect(canvasRenderer.config).toStrictEqual(conf)
   })
 
   test("should init", () =>
   {
-    renderer.init(wrapperHTML)
+    canvasRenderer.init(wrapperHTML)
     expect(wrapperHTML.querySelector(".ms-rendering-canvas")).toBeDefined()
     expect(wrapperHTML.querySelector(".ms-capture-canvas")).toBeDefined()
-    expect(renderer.context).toBeDefined()
+    expect(canvasRenderer.context).toBeDefined()
   })
 
   test("should destroy", () =>
   {
-    renderer.destroy()
+    canvasRenderer.destroy()
     expect(wrapperHTML.querySelector(".ms-rendering-canvas")).toBeNull()
     expect(wrapperHTML.querySelector(".ms-capture-canvas")).toBeNull()
   })

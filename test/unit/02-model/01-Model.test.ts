@@ -1,9 +1,11 @@
 import { delay } from "../utils/helpers"
 import { IModel, TExport, TPointer } from "../../../src/@types"
-import { Model, Stroke, DefaultPenStyle } from "../../../src/iink"
+import { model, style } from "../../../src/iink"
 
 describe("Model.ts", () =>
 {
+  const { Model, Stroke } = model
+  const { DefaultPenStyle } = style
   const width = 100, height = 100
   test("should create", () =>
   {

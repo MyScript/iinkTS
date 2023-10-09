@@ -6,17 +6,14 @@ import
   TRecognitionConfiguration,
   TRecognitionType
 } from "../../../src/@types"
-import
-{
-  DefaultRecognitionConfiguration,
-  DefaultServerConfiguration,
-  DefaultPenStyle,
-  RestRecognizer,
-  Model
-} from "../../../src/iink"
+import { recognizer, configuration, style, model } from "../../../src/iink"
 
 describe("RestRecognizer.ts", () =>
 {
+  const { RestRecognizer } = recognizer
+  const { DefaultRecognitionConfiguration, DefaultServerConfiguration } = configuration
+  const { DefaultPenStyle } = style
+  const { Model } = model
   const height = 100, width = 100
 
   beforeAll(() =>

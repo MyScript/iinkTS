@@ -1,8 +1,8 @@
 import { IGrabber } from "../@types/grabber/Grabber"
 import { TGrabberConfiguration } from "../@types/configuration/GrabberConfiguration"
 import { TPointer } from "../@types/geometry"
-import { Logger, LoggerManager } from "../logger"
-import { LOGGER_CLASS } from "../Constants"
+import { LoggerManager } from "../logger"
+import { LoggerClass } from "../Constants"
 
 export class PointerEventGrabber implements IGrabber
 {
@@ -13,7 +13,7 @@ export class PointerEventGrabber implements IGrabber
   private activePointerId?: number
 
   private prevent = (e: Event) => e.preventDefault()
-  #logger: Logger
+  #logger = LoggerManager.getLogger(LoggerClass.GRABBER)
 
   onPointerDown!: (evt: PointerEvent, point: TPointer) => void
   onPointerMove!: (evt: PointerEvent, point: TPointer) => void
@@ -21,9 +21,8 @@ export class PointerEventGrabber implements IGrabber
 
   constructor(configuration: TGrabberConfiguration)
   {
-    this.#logger = LoggerManager.getLogger(LOGGER_CLASS.GRABBER)
-    this.configuration = configuration
     this.#logger.info("constructor", { configuration })
+    this.configuration = configuration
   }
 
   private roundFloat(oneFloat: number, requestedFloatPrecision: number): number
@@ -32,7 +31,7 @@ export class PointerEventGrabber implements IGrabber
       const floatPrecision: number = Math.pow(10, requestedFloatPrecision)
       return Math.round(oneFloat / floatPrecision) * floatPrecision
     }
-    this.#logger.info("roundFloat", { oneFloat, requestedFloatPrecision })
+    this.#logger.debug("roundFloat", { oneFloat, requestedFloatPrecision })
     return oneFloat
   }
 
@@ -45,19 +44,19 @@ export class PointerEventGrabber implements IGrabber
       ({ clientX, clientY } = event)
     }
     const rect: DOMRect = this.domElement.getBoundingClientRect()
-    this.#logger.info("extractPoint", { event })
-    return {
+    const pointer = {
       x: this.roundFloat(clientX - rect.left - this.domElement.clientLeft, this.configuration.xyFloatPrecision),
       y: this.roundFloat(clientY - rect.top - this.domElement.clientTop, this.configuration.xyFloatPrecision),
       t: this.roundFloat(Date.now(), this.configuration.timestampFloatPrecision),
       p: (event as PointerEvent).pressure || 1,
-
     }
+    this.#logger.debug("extractPoint", { event, pointer })
+    return pointer
   }
 
   private pointerDownHandler = (evt: PointerEvent) =>
   {
-    this.#logger.info("pointerDown", {evt})
+    this.#logger.info("pointerDown", { evt })
     // exit if not a left click or multi-touch
     if (evt.button !== 0 || evt.buttons !== 1) {
       return
@@ -73,7 +72,7 @@ export class PointerEventGrabber implements IGrabber
 
   private pointerMoveHandler = (evt: PointerEvent) =>
   {
-    this.#logger.info("pointerDown", {evt})
+    this.#logger.info("pointerMove", { evt })
     if (this.activePointerId != undefined && this.activePointerId === evt.pointerId) {
       if (this.onPointerMove) {
         const point = this.extractPoint(evt)
@@ -84,7 +83,7 @@ export class PointerEventGrabber implements IGrabber
 
   private pointerUpHandler = (evt: PointerEvent) =>
   {
-    this.#logger.info("pointerUp", {evt})
+    this.#logger.info("pointerUp", { evt })
     if (this.activePointerId != undefined && this.activePointerId === evt.pointerId) {
       this.activePointerId = undefined
       evt.stopPropagation()
@@ -118,7 +117,7 @@ export class PointerEventGrabber implements IGrabber
 
   detach()
   {
-    this.#logger.info("detach", {})
+    this.#logger.info("detach")
     this.domElement?.removeEventListener("pointerdown", this.pointerDownHandler, this.configuration.listenerOptions)
     this.domElement?.removeEventListener("pointermove", this.pointerMoveHandler, this.configuration.listenerOptions)
     this.domElement?.removeEventListener("pointerup", this.pointerUpHandler, this.configuration.listenerOptions)

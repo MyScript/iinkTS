@@ -48,6 +48,7 @@ describe("Websocket Math Inside Page", function () {
 
       beforeAll(async () => {
         await page.reload({ waitUntil: 'load' })
+        await waitEditorLoaded(page)
         await waitEditorIdle(page)
       })
 

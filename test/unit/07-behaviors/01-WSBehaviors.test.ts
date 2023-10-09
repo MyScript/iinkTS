@@ -10,18 +10,17 @@ import
   TPenStyle,
   TTheme
 } from "../../../src/@types"
-import
-{
-  WSBehaviors,
-  DefaultConfiguration,
-  Constants,
-  InternalEvent,
-  Model,
-  DefaultPenStyle
-} from "../../../src/iink"
+
+import { behaviors, event, model, configuration, constants, style } from "../../../src/iink"
 
 describe("WSBehaviors.ts", () =>
 {
+  const { WSBehaviors } = behaviors
+  const { InternalEvent } = event
+  const { Model } = model
+  const { DefaultConfiguration } = configuration
+  const { DefaultPenStyle } = style
+
   const height = 100, width = 100
   const DefaultBehaviorsOptions: TBehaviorOptions = {
     configuration: DefaultConfiguration
@@ -621,7 +620,7 @@ describe("WSBehaviors.ts", () =>
       wsb.recognizer.close = jest.fn()
       wsb.destroy()
       await expect(wsb.recognizer.close).toBeCalledTimes(1)
-      await expect(wsb.recognizer.close).toBeCalledWith(1000, Constants.WSMessage.CLOSE_RECOGNIZER)
+      await expect(wsb.recognizer.close).toBeCalledWith(1000, constants.InternalEventType.WS_CLOSED)
     })
 
   })

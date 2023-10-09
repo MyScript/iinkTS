@@ -1,11 +1,18 @@
-export const enum LOGGER_LEVEL {
+
+/**
+ * @group Logger
+ */
+export const enum LoggerLevel {
     DEBUG = "1",
     INFO = "2",
     WARN = "3",
     ERROR = "4"
   }
 
-  export const enum LOGGER_CLASS {
+/**
+ * @group Logger
+ */
+  export const enum LoggerClass {
     EDITOR = "EDITOR",
     RECOGNIZER = "RECOGNIZER",
     GRABBER = "GRABBER",
@@ -23,5 +30,5 @@ export const enum LOGGER_LEVEL {
   }
 
   export type TLoggerConfiguration = {
-    [key in keyof typeof LOGGER_CLASS]: LOGGER_LEVEL
+    [key in keyof typeof LoggerClass]: LoggerLevel
   }

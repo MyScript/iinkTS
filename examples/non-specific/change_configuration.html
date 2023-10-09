@@ -321,7 +321,7 @@
      * Retrieve the list of available recognition languages using local json file
      * @param {Object} The editor recognition parameters
      */
-    iink.getAvailableLanguageList(defaultConfiguration)
+    iink.utils.getAvailableLanguageList(defaultConfiguration)
       .then((res) => {
         if (recognitionLanguageElement.options.length === 0) {
           Object.keys(res.result).forEach((key) => {

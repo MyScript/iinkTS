@@ -5,7 +5,7 @@ import { TTheme } from "../@types/style/Theme"
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const parser: any = new JsonCSS()
 
-export default {
+export const StyleHelper = {
   themeToCSS(json: TTheme): string
   {
     return parser.toCSS(json) as string

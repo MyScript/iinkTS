@@ -8,13 +8,13 @@ import { IModel, TExport, TJIIXExport } from "../@types/model/Model"
 import { TPenStyle } from "../@types/style/PenStyle"
 
 import { Error as ErrorConst } from "../Constants"
-import StyleHelper from "../style/StyleHelper"
-import { computeHmac } from "./CryptoHelper"
+import { StyleHelper } from "../style/StyleHelper"
+import { computeHmac } from "../utils/CryptoHelper"
 import { isVersionSuperiorOrEqual } from "../utils/version"
 import { convertStrokeToJSON } from "../model/Stroke"
 
-import { Logger, LoggerManager } from "../logger"
-import { LOGGER_CLASS } from "../Constants"
+import { LoggerManager } from "../logger"
+import { LoggerClass } from "../Constants"
 
 type ApiError = {
   code?: string
@@ -25,11 +25,10 @@ export class RestRecognizer implements IRecognizer
 {
   protected serverConfiguration: TServerConfiguration
   protected recognitionConfiguration: TRecognitionConfiguration
-  #logger: Logger
+  #logger = LoggerManager.getLogger(LoggerClass.RECOGNIZER)
 
   constructor(serverConfig: TServerConfiguration, recognitionConfig: TRecognitionConfiguration)
   {
-    this.#logger = LoggerManager.getLogger(LOGGER_CLASS.RECOGNIZER)
     this.#logger.info("constructor", { serverConfig, recognitionConfig })
     this.serverConfiguration = serverConfig
     this.recognitionConfiguration = recognitionConfig
@@ -68,7 +67,6 @@ export class RestRecognizer implements IRecognizer
           export: this.recognitionConfiguration.export
         }
       default:
-        this.#logger.warn("postConfig default", this.recognitionConfiguration.type)
         throw new Error(`get postConfig error Recognition type unkow "${ this.recognitionConfiguration.type }"`)
         break
     }
@@ -114,7 +112,7 @@ export class RestRecognizer implements IRecognizer
       "Raw Content" :
       this.recognitionConfiguration.type.charAt(0).toUpperCase() + this.recognitionConfiguration.type.slice(1).toLowerCase()
 
-    return {
+    const data = {
       configuration: this.postConfig,
       xDPI: 96,
       yDPI: 96,
@@ -124,12 +122,13 @@ export class RestRecognizer implements IRecognizer
       width: model.width,
       strokeGroups: strokeGroupsToSend
     }
+    this.#logger.debug("buildData", { data })
+    return data
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private async post(data: any, mimeType: string): Promise<any>
   {
-
     this.#logger.info("post", { data, mimeType })
     const headers = new Headers()
     headers.append("Accept", "application/json," + mimeType)
@@ -223,7 +222,6 @@ export class RestRecognizer implements IRecognizer
           mimeTypes = this.recognitionConfiguration.text.mimeTypes
           break
         default:
-          this.#logger.warn("getMimeTypes default", this.recognitionConfiguration.type)
           throw new Error(`Recognition type "${ this.recognitionConfiguration.type }" is unknown.\n Possible types are:\n -DIAGRAM\n -MATH\n -Raw Content\n -TEXT`)
           break
       }
@@ -234,7 +232,6 @@ export class RestRecognizer implements IRecognizer
   async convert(model: IModel, conversionState?: TConverstionState, requestedMimeTypes?: string[]): Promise<IModel | never>
   {
     this.#logger.info("convert", { model, conversionState, requestedMimeTypes })
-    this.#logger.debug("convert", { model })
     const myModel = model.getClone()
     const mimeTypes = this.getMimeTypes(requestedMimeTypes)
     const dataToConcert = this.buildData(myModel)
@@ -245,13 +242,12 @@ export class RestRecognizer implements IRecognizer
     {
       myModel.mergeConvert(c)
     })
-    this.#logger.debug("convert", { myModel })
+    this.#logger.debug("convert", { model: myModel })
     return myModel
   }
 
   async export(model: IModel, requestedMimeTypes?: string[]): Promise<IModel | never>
   {
-    this.#logger.debug("export", { model })
     this.#logger.info("export", { model, requestedMimeTypes })
     const myModel = model.getClone()
     if (myModel.rawStrokes.length === 0) {
@@ -269,7 +265,7 @@ export class RestRecognizer implements IRecognizer
     {
       myModel.mergeExport(e)
     })
-    this.#logger.debug("export", { myModel })
+    this.#logger.debug("export", { model: myModel })
     return myModel
   }
 

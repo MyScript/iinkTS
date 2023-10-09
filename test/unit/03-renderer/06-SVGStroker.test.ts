@@ -1,8 +1,10 @@
 import { TStroke } from "../../../src/@types"
-import { SVGStroker } from "../../../src/iink"
+import { renderer } from "../../../src/iink"
 
 describe("SVGStroker.ts", () =>
 {
+  const { SVGStroker } = renderer
+
   //@ts-ignore
   const stroke: TStroke = {
     type: "pen",

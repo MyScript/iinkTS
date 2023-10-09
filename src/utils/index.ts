@@ -1,5 +1,6 @@
 export { DeferredPromise } from "./DeferredPromise"
 export * as geometric from "./geometric"
 export * as version from "./version"
+export * as crypto from "../utils/CryptoHelper"
 export { getAvailableFontList } from "./font"
 export { getAvailableLanguageList } from "./language"

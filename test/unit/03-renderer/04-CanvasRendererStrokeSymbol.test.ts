@@ -1,8 +1,11 @@
 import { TStroke } from "../../../src/@types"
-import { DefaultPenStyle, CanvasStroker, canvasRendererStroke } from "../../../src/iink"
+import { renderer, style } from "../../../src/iink"
 
 describe("CanvasRendererStrokeSymbol.ts", () =>
 {
+  const { CanvasStroker, canvasRendererStroke } = renderer
+  const { DefaultPenStyle } = style
+
   const canvas: HTMLCanvasElement = document.createElement("canvas")
   const canvasContext = canvas.getContext("2d") as CanvasRenderingContext2D
 

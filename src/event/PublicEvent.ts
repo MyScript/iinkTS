@@ -1,19 +1,18 @@
 import { IModel, TExport } from "../@types/model/Model"
 import { TUndoRedoContext } from "../@types/undo-redo/UndoRedoContext"
 import { EventType } from "../Constants"
-import { Logger, LoggerManager } from "../logger"
-import { LOGGER_CLASS } from "../Constants"
+import { LoggerManager } from "../logger"
+import { LoggerClass } from "../Constants"
 
 export class PublicEvent extends EventTarget
 {
   static #instance: PublicEvent
   #element?: HTMLElement
-  #logger: Logger
+  #logger = LoggerManager.getLogger(LoggerClass.PUBLIC_EVENT)
 
   private constructor()
   {
     super()
-    this.#logger = LoggerManager.getLogger(LOGGER_CLASS.PUBLIC_EVENT)
   }
 
   public static getInstance(): PublicEvent
@@ -40,6 +39,7 @@ export class PublicEvent extends EventTarget
 
   emitLoaded(): void
   {
+    this.#logger.info("emitLoaded")
     this.#emit(EventType.LOADED)
   }
 

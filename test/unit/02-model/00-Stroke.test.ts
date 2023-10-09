@@ -1,8 +1,10 @@
 import { TStroke, TPenStyle } from "../../../src/@types"
-import { Stroke, DefaultPenStyle } from "../../../src/iink"
+import { model, style } from "../../../src/iink"
 
 describe("Stroke.ts", () =>
 {
+  const { Stroke } = model
+  const { DefaultPenStyle } = style
   test("should create with default pointerType", () =>
   {
     const stroke: TStroke = new Stroke(DefaultPenStyle, 12)

@@ -11,10 +11,15 @@ import
   TUpdatePatchSetAttribut,
   TStroke
 } from "../../../src/@types"
-import { DefaultRenderingConfiguration, DefaultPenStyle, Model, WSSVGRenderer } from "../../../src/iink"
+import { renderer, configuration, model, style } from "../../../src/iink"
 
 describe("WSSVGRenderer.ts", () =>
 {
+  const { WSSVGRenderer } = renderer
+  const { Model } = model
+  const { DefaultRenderingConfiguration } = configuration
+  const { DefaultPenStyle } = style
+
   const stroke: TStroke = {
     type: 'pen',
     pointerType: 'pen',

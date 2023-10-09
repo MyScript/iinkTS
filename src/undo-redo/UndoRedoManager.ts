@@ -2,21 +2,20 @@ import { TUndoRedoConfiguration } from "../@types/configuration/UndoRedoConfigur
 import { IModel } from "../@types/model/Model"
 import { InternalEvent } from "../event/InternalEvent"
 import { UndoRedoContext } from "./UndoRedoContext"
-import { Logger, LoggerManager } from "../logger"
-import { LOGGER_CLASS } from "../Constants"
+import { LoggerManager } from "../logger"
+import { LoggerClass } from "../Constants"
 
 export class UndoRedoManager
 {
   context: UndoRedoContext
   configuration: TUndoRedoConfiguration
-  #logger: Logger
+  #logger = LoggerManager.getLogger(LoggerClass.UNDOREDO_MANAGER)
 
   constructor(configuration: TUndoRedoConfiguration, model: IModel)
   {
+    this.#logger.info("constructor", { configuration, model })
     this.configuration = configuration
     this.context = new UndoRedoContext(model)
-    this.#logger = LoggerManager.getLogger(LOGGER_CLASS.UNDOREDO_MANAGER)
-    this.#logger.info("constructor", { configuration, model })
   }
 
   get internalEvent(): InternalEvent
@@ -53,7 +52,7 @@ export class UndoRedoManager
 
   removeLastModelInStack(): void
   {
-    this.#logger.info("removeLastModelInStack", { })
+    this.#logger.info("removeLastModelInStack")
     if (this.context.stackIndex === this.context.stack.length - 1) {
       this.context.stackIndex--
     }
@@ -73,26 +72,28 @@ export class UndoRedoManager
 
   undo(): IModel
   {
-    this.#logger.info("undo", { })
+    this.#logger.info("undo")
     if (this.context.canUndo) {
       this.context.stackIndex--
       this.updateCanUndoRedo()
       this.internalEvent.emitContextChange(this.context)
     }
-    this.#logger.debug("undo", this.context.stack[this.context.stackIndex].getClone())
-    return this.context.stack[this.context.stackIndex].getClone()
+    const previousModel = this.context.stack[this.context.stackIndex].getClone()
+    this.#logger.debug("undo", previousModel)
+    return previousModel
   }
 
   redo(): IModel
   {
-    this.#logger.info("redo", { })
+    this.#logger.info("redo")
     if (this.context.canRedo) {
       this.context.stackIndex++
       this.updateCanUndoRedo()
       this.internalEvent.emitContextChange(this.context)
     }
-    this.#logger.debug("undo", this.context.stack[this.context.stackIndex].getClone())
-    return this.context.stack[this.context.stackIndex].getClone()
+    const nextModel = this.context.stack[this.context.stackIndex].getClone()
+    this.#logger.debug("redo", nextModel)
+    return nextModel
   }
 
   reset(model: IModel): void

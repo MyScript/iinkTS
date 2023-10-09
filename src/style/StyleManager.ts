@@ -5,8 +5,8 @@ import { mergeDeep } from "../utils/MergeHelper"
 
 import { DefaultPenStyle } from "./DefaultPenStyle"
 import { DefaultTheme } from "./DefaultTheme"
-import { Logger, LoggerManager } from "../logger"
-import { LOGGER_CLASS } from "../Constants"
+import { LoggerManager } from "../logger"
+import { LoggerClass } from "../Constants"
 
 export class StyleManager
 {
@@ -14,11 +14,10 @@ export class StyleManager
   #theme!: TTheme
   #penStyleClasses!: string
   #currentPenStyle!: TPenStyle
-  #logger: Logger
+  #logger =  LoggerManager.getLogger(LoggerClass.STYLEMANAGER)
 
   constructor(penStyle?: TPenStyle, theme?: TTheme)
   {
-    this.#logger = LoggerManager.getLogger(LOGGER_CLASS.STYLEMANAGER)
     this.#logger.info("constructor", { penStyle, theme })
     this.setTheme(theme)
     this.setPenStyleClasses()
@@ -34,11 +33,11 @@ export class StyleManager
   {
     return this.#penStyle
   }
-  setPenStyle(p?: TPenStyle)
+  setPenStyle(style?: TPenStyle)
   {
-    this.#logger.info("setPenStyle", { p })
-    this.#penStyle = mergeDeep(structuredClone(DefaultPenStyle), p || {}) as TPenStyle
-    this.#currentPenStyle = p || (this.theme[`.${ this.#penStyleClasses }`]) as TPenStyle
+    this.#logger.info("setPenStyle", { style })
+    this.#penStyle = mergeDeep(structuredClone(DefaultPenStyle), style || {}) as TPenStyle
+    this.#currentPenStyle = style || (this.theme[`.${ this.#penStyleClasses }`]) as TPenStyle
     this.#logger.debug("setPenStyle", this.#currentPenStyle)
   }
 
@@ -46,10 +45,10 @@ export class StyleManager
   {
     return this.#theme
   }
-  setTheme(t?: TTheme)
+  setTheme(theme?: TTheme)
   {
-    this.#logger.info("setTheme", { t })
-    this.#theme = mergeDeep(structuredClone(DefaultTheme), t || {}) as TTheme
+    this.#logger.info("setTheme", { theme })
+    this.#theme = mergeDeep(structuredClone(DefaultTheme), theme || {}) as TTheme
     this.#logger.debug("setTheme", this.#theme)
   }
 
@@ -57,10 +56,10 @@ export class StyleManager
   {
     return this.#penStyleClasses
   }
-  setPenStyleClasses(psc = "")
+  setPenStyleClasses(penStyleClass = "")
   {
-    this.#logger.info("setPenStyleClasses", { psc })
-    this.#penStyleClasses = psc
+    this.#logger.info("setPenStyleClasses", { penStyleClass })
+    this.#penStyleClasses = penStyleClass
     this.#currentPenStyle = (this.theme[`.${ this.#penStyleClasses }`]) as TPenStyle
     this.#logger.debug("setPenStyleClasses", this.#currentPenStyle)
   }

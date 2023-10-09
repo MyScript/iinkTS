@@ -13,20 +13,23 @@ import
 import
 {
   Editor,
-  DefaultConfiguration,
-  DefaultPenStyle,
-  DefaultTheme,
-  Model,
-  PointerEventGrabber,
-  WSRecognizer,
-  PublicEvent,
-  Constants,
-  ModeInteraction,
-  InternalEvent
+  configuration,
+  style,
+  model,
+  grabber,
+  recognizer,
+  constants,
+  event
 } from "../../../src/iink"
 
 describe("Editor.ts", () =>
 {
+  const { DefaultConfiguration } = configuration
+  const { DefaultPenStyle, DefaultTheme } = style
+  const { Model} = model
+  const { PointerEventGrabber } = grabber
+  const { WSRecognizer } = recognizer
+  const { PublicEvent, InternalEvent } = event
   const publicEvent = PublicEvent.getInstance()
   const DefaultBehaviorsOptions: TBehaviorOptions = { configuration: DefaultConfiguration }
 
@@ -217,18 +220,18 @@ describe("Editor.ts", () =>
     const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
     test("should init mode = Writing", () =>
     {
-      expect(editor.mode).toBe(ModeInteraction.Writing)
+      expect(editor.mode).toBe(constants.ModeInteraction.Writing)
     })
     test("should set mode = erase", () =>
     {
-      editor.mode = ModeInteraction.Erasing
+      editor.mode = constants.ModeInteraction.Erasing
       expect(wrapperHTML.classList).toContain("erasing")
     })
     test("should toggle mode", () =>
     {
-      editor.mode = ModeInteraction.Erasing
+      editor.mode = constants.ModeInteraction.Erasing
       expect(wrapperHTML.classList).toContain("erasing")
-      editor.mode = ModeInteraction.Writing
+      editor.mode = constants.ModeInteraction.Writing
       expect(wrapperHTML.classList).not.toContain("erasing")
     })
   })
@@ -315,7 +318,7 @@ describe("Editor.ts", () =>
     test("should emit cleared event", async () =>
     {
       const testFunction = jest.fn()
-      publicEvent.addEventListener(Constants.EventType.CLEARED, testFunction)
+      publicEvent.addEventListener(constants.EventType.CLEARED, testFunction)
       const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       const modelExpected = new Model(100, 100)
