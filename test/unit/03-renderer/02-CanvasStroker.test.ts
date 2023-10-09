@@ -1,7 +1,10 @@
-import { Stroke, CanvasStroker, DefaultPenStyle } from "../../../src/iink"
+import { renderer, model, style } from "../../../src/iink"
 
 describe("CanvasStroker.ts", () =>
 {
+  const { CanvasStroker } = renderer
+  const { Stroke } = model
+  const { DefaultPenStyle } = style
   const canvas: HTMLCanvasElement = document.createElement("canvas")
 
   const context = {

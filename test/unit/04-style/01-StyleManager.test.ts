@@ -1,8 +1,8 @@
-import { StyleManager, DefaultPenStyle, DefaultTheme } from "../../../src/iink"
+import { style } from "../../../src/iink"
 
 describe("StyleManager.ts", () =>
 {
-
+  const { StyleManager, DefaultPenStyle, DefaultTheme } = style
   describe("constructor", () =>
   {
     test("should instanciate with DefaultPenStyle & DefaultTheme", () =>

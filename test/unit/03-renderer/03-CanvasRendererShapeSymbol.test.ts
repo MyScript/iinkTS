@@ -1,8 +1,11 @@
 import { TLineSymbol, TShapeSymbol } from "../../../src/@types"
-import { DefaultPenStyle, canvasRendererShape } from "../../../src/iink"
+import { renderer, style } from "../../../src/iink"
 
 describe("CanvasRendererShapeSymbol.ts", () =>
 {
+  const { canvasRendererShape } = renderer
+  const { DefaultPenStyle } = style
+
   const canvas: HTMLCanvasElement = document.createElement("canvas")
   const canvasContext = canvas.getContext("2d") as CanvasRenderingContext2D
 

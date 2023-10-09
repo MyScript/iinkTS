@@ -2,14 +2,12 @@ import {
   TExport,
   TJIIXExport
 } from '../../../src/@types'
-import {
-  Constants,
-  PublicEvent,
-  Model
-} from '../../../src/iink'
+import { event, constants, model } from "../../../src/iink"
 
 describe('PublicEvent.ts', () =>
 {
+  const { PublicEvent } = event
+  const { Model } = model
   const publicEvent = PublicEvent.getInstance()
 
   test('should have singleton', () =>
@@ -24,7 +22,7 @@ describe('PublicEvent.ts', () =>
   test('should emit & listen LOADED', () =>
   {
     const testFunction = jest.fn()
-    publicEvent.addEventListener(Constants.EventType.LOADED, testFunction)
+    publicEvent.addEventListener(constants.EventType.LOADED, testFunction)
     publicEvent.emitLoaded()
     expect(testFunction).toBeCalledTimes(1)
   })
@@ -32,7 +30,7 @@ describe('PublicEvent.ts', () =>
   test('should emit & listen EXPORTED', () =>
   {
     const testFunction = jest.fn()
-    publicEvent.addEventListener(Constants.EventType.EXPORTED, testFunction)
+    publicEvent.addEventListener(constants.EventType.EXPORTED, testFunction)
     const exports:TExport = { 'text/plain': 'tatapouet' }
     publicEvent.emitExported(exports)
     expect(testFunction).toBeCalledTimes(1)
@@ -46,7 +44,7 @@ describe('PublicEvent.ts', () =>
   test('should emit & listen CHANGED', () =>
   {
     const testFunction = jest.fn()
-    publicEvent.addEventListener(Constants.EventType.CHANGED, testFunction)
+    publicEvent.addEventListener(constants.EventType.CHANGED, testFunction)
     const undoRedoContext = {
       canUndo: true,
       canRedo: false,
@@ -68,7 +66,7 @@ describe('PublicEvent.ts', () =>
   test('should emit & listen IDLE', () =>
   {
     const testFunction = jest.fn()
-    publicEvent.addEventListener(Constants.EventType.IDLE, testFunction)
+    publicEvent.addEventListener(constants.EventType.IDLE, testFunction)
     publicEvent.emitIdle(true)
     expect(testFunction).toBeCalledTimes(1)
     expect(testFunction).toBeCalledWith(
@@ -81,7 +79,7 @@ describe('PublicEvent.ts', () =>
   test('should emit & listen CLEARED', () =>
   {
     const testFunction = jest.fn()
-    publicEvent.addEventListener(Constants.EventType.CLEARED, testFunction)
+    publicEvent.addEventListener(constants.EventType.CLEARED, testFunction)
     const model = new Model(100, 50)
     publicEvent.emitCleared(model)
     expect(testFunction).toBeCalledTimes(1)
@@ -95,7 +93,7 @@ describe('PublicEvent.ts', () =>
   test('should emit & listen CONVERTED', () =>
   {
     const testFunction = jest.fn()
-    publicEvent.addEventListener(Constants.EventType.CONVERTED, testFunction)
+    publicEvent.addEventListener(constants.EventType.CONVERTED, testFunction)
     const exports: TExport = { 'text/plain': 'tatapouet' }
     publicEvent.emitConverted(exports)
     expect(testFunction).toBeCalledTimes(1)
@@ -109,7 +107,7 @@ describe('PublicEvent.ts', () =>
   test('should emit & listen IMPORTED', () =>
   {
     const testFunction = jest.fn()
-    publicEvent.addEventListener(Constants.EventType.IMPORTED, testFunction)
+    publicEvent.addEventListener(constants.EventType.IMPORTED, testFunction)
     const jiix: TJIIXExport = {
       "type": "Text",
       "label": "hello",

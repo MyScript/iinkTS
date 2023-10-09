@@ -54,13 +54,14 @@
 
       let editor;
       const loggerConfig = {
-        [iink.LOGGER_CLASS.EDITOR]: iink.LOGGER_LEVEL.TRACE,
-        [iink.LOGGER_CLASS.RECOGNIZER]: iink.LOGGER_LEVEL.TRACE,
-        [iink.LOGGER_CLASS.GRABBER]: iink.LOGGER_LEVEL.TRACE
+        [iink.constants.LoggerClass.EDITOR]: iink.constants.LoggerLevel.TRACE,
+        [iink.constants.LoggerClass.RECOGNIZER]: iink.constants.LoggerLevel.TRACE,
+        [iink.constants.LoggerClass.GRABBER]: iink.constants.LoggerLevel.TRACE
       };
 
-      Object.keys(iink.LOGGER_LEVEL).forEach((level) => {
-        const opt = new Option(level, iink.LOGGER_LEVEL[level], iink.LOGGER_LEVEL[level] === iink.LOGGER_LEVEL.ERROR, iink.LOGGER_LEVEL[level] === iink.LOGGER_LEVEL.ERROR)
+      Object.keys(iink.constants.LoggerLevel).forEach((level) => {
+        const selected = iink.constants.LoggerLevel[level] === iink.constants.LoggerLevel.ERROR
+        const opt = new Option(level, iink.constants.LoggerLevel[level], selected, selected)
         levelSelect.appendChild(opt);
       })
       /**
@@ -93,9 +94,9 @@
         await editor.initialize();
 
         levelSelect.addEventListener("change", (evt) => {
-          loggerConfig[iink.LOGGER_CLASS.EDITOR] = evt.target.value
-          loggerConfig[iink.LOGGER_CLASS.RECOGNIZER] = evt.target.value
-          loggerConfig[iink.LOGGER_CLASS.GRABBER] = evt.target.value
+          loggerConfig[iink.constants.LoggerClass.EDITOR] = evt.target.value
+          loggerConfig[iink.constants.LoggerClass.RECOGNIZER] = evt.target.value
+          loggerConfig[iink.constants.LoggerClass.GRABBER] = evt.target.value
 
           editor.loggerConfiguration = loggerConfig;
         });

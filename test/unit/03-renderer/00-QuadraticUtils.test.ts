@@ -1,8 +1,9 @@
 import { TPointer } from "../../../src/@types"
-import { quadradicsUtils } from "../../../src/iink"
+import { renderer } from "../../../src/iink"
 
 describe("QuadraticUtils.ts", () =>
 {
+  const { quadradicsUtils } = renderer
   const p1: TPointer = {
     p: 1,
     t: 1,

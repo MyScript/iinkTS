@@ -1,14 +1,14 @@
 import { TLoggerConfiguration } from "../@types"
-import { LOGGER_CLASS, LOGGER_LEVEL } from "../Constants"
+import { LoggerClass, LoggerLevel } from "../Constants"
 import { Logger } from "./logger"
 
 export class LoggerManager
 {
-  static #loggerMap: Map<LOGGER_CLASS, Logger> = new Map()
-  static getLogger(name: LOGGER_CLASS): Logger {
+  static #loggerMap: Map<LoggerClass, Logger> = new Map()
+  static getLogger(name: LoggerClass): Logger {
     if(!this.#loggerMap.has(name))
     {
-      this.#loggerMap.set(name, new Logger(name, LOGGER_LEVEL.ERROR))
+      this.#loggerMap.set(name, new Logger(name, LoggerLevel.ERROR))
     }
     return this.#loggerMap.get(name) as Logger
   }
@@ -17,7 +17,7 @@ export class LoggerManager
   {
 
     Object.keys(config).forEach((lc) => {
-      LoggerManager.getLogger(lc as LOGGER_CLASS).level = config[lc as LOGGER_CLASS]
+      LoggerManager.getLogger(lc as LoggerClass).level = config[lc as LoggerClass]
     })
   }
 }

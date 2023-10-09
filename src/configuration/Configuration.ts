@@ -9,8 +9,8 @@ import { TTriggerConfiguration } from "../@types/configuration/TriggerConfigurat
 import { TUndoRedoConfiguration } from "../@types/configuration/UndoRedoConfiguration"
 import { DefaultConfiguration } from "./DefaultConfiguration"
 import { mergeDeep } from "../utils/MergeHelper"
-import { Logger, LoggerManager } from "../logger"
-import { LOGGER_CLASS } from "../Constants"
+import { LoggerManager } from "../logger"
+import { LoggerClass } from "../Constants"
 
 export class Configuration implements TConfiguration
 {
@@ -21,11 +21,10 @@ export class Configuration implements TConfiguration
   server: TServerConfiguration
   triggers: TTriggerConfiguration
   "undo-redo": TUndoRedoConfiguration
-  #logger: Logger
+  #logger = LoggerManager.getLogger(LoggerClass.CONFIGURATION)
 
   constructor(configuration?: TConfigurationClient)
   {
-    this.#logger = LoggerManager.getLogger(LOGGER_CLASS.CONFIGURATION)
     this.#logger.info("constructor", { configuration })
     this.events = JSON.parse(JSON.stringify(DefaultConfiguration.events))
     this.grabber = JSON.parse(JSON.stringify(DefaultConfiguration.grabber))
@@ -36,8 +35,6 @@ export class Configuration implements TConfiguration
 
     this.overrideDefaultConfiguration(configuration)
   }
-
-
 
   overrideDefaultConfiguration(configuration?: TConfigurationClient): void
   {
@@ -83,5 +80,6 @@ export class Configuration implements TConfiguration
       // smartGuide enable only on websocket text
       this.rendering.smartGuide.enable = false
     }
+    this.#logger.debug("overrideDefaultConfiguration", { configuration: this })
   }
 }

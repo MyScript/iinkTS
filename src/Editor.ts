@@ -8,9 +8,9 @@ import { IBehaviors, TBehaviorOptions } from "./@types/Behaviors"
 import { TConverstionState } from "./@types/configuration/RecognitionConfiguration"
 import { TMarginConfiguration } from "./@types/configuration/recognition/MarginConfiguration"
 import { TUndoRedoContext } from "./@types/undo-redo/UndoRedoContext"
-import { LOGGER_CLASS, LOGGER_LEVEL, TLoggerConfiguration } from "./@types/configuration/LoggerConfiguration"
+import { LoggerClass, LoggerLevel, TLoggerConfiguration } from "./@types/configuration/LoggerConfiguration"
 
-import { Exports, ModeInteraction } from "./Constants"
+import { ExportType, ModeInteraction } from "./Constants"
 import { DefaultLoggerConfiguration } from "./configuration"
 import { PublicEvent } from "./event/PublicEvent"
 import { InternalEvent } from "./event/InternalEvent"
@@ -45,7 +45,7 @@ export class Editor
   {
     this.#loggerConfiguration = Object.assign({}, DefaultLoggerConfiguration, options.logger)
 
-    this.logger = LoggerManager.getLogger(LOGGER_CLASS.EDITOR)
+    this.logger = LoggerManager.getLogger(LoggerClass.EDITOR)
     this.logger.info("constructor", { wrapperHTML, options, globalClassCss })
     this.#initializationDeferred = new DeferredPromise<void>()
 
@@ -274,7 +274,7 @@ export class Editor
     this.#messageHTML.classList.add("error-msg")
     this.#messageHTML.classList.remove("info-msg")
     this.#messageHTML.innerText = err.message
-    if (this.logger.level >= LOGGER_LEVEL.DEBUG) {
+    if (this.logger.level >= LoggerLevel.DEBUG) {
       const pName = document.createElement("p")
       pName.innerHTML = err.name
       this.#messageHTML.prepend(pName)
@@ -304,7 +304,7 @@ export class Editor
 
   #showStrokesIfDebug(): void
   {
-    if (this.logger.level <= LOGGER_LEVEL.DEBUG) {
+    if (this.logger.level <= LoggerLevel.DEBUG) {
       let panel = document.getElementById("stroke-panel")
       const text = JSON.stringify(this.model.rawStrokes.map((s: TStroke) => ({ pointerType: s.pointerType, pointerId: s.pointerId, pointers: s.pointers })))
       if (!panel) {
@@ -363,7 +363,7 @@ export class Editor
   #onImportJIIX(jiix: TJIIXExport): void
   {
     this.logger.info("onImportJIIX", { jiix })
-    this.import(new Blob([JSON.stringify(jiix)], { type: Exports.JIIX }), Exports.JIIX)
+    this.import(new Blob([JSON.stringify(jiix)], { type: ExportType.JIIX }), ExportType.JIIX)
   }
 
   async initialize(): Promise<void>

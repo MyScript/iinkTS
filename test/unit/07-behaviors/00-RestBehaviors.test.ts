@@ -1,10 +1,15 @@
 
 import { delay } from "../utils/helpers"
 import { TBehaviorOptions, TConfiguration, IModel, TPointer } from "../../../src/@types"
-import { RestBehaviors, DefaultConfiguration, Model, DefaultPenStyle } from "../../../src/iink"
+import { behaviors, model, configuration, style } from "../../../src/iink"
 
 describe("RestBehaviors.ts", () =>
 {
+  const { RestBehaviors } = behaviors
+  const { Model } = model
+  const { DefaultConfiguration } = configuration
+  const { DefaultPenStyle } = style
+
   const height = 100, width = 100
   const DefaultBehaviorsOptions: TBehaviorOptions = {
     configuration: DefaultConfiguration

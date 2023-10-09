@@ -94,7 +94,7 @@ yarn add iink-ts
     <div id="editor"></div>
 ```
 
-5. In JavaScript and within a `<script>` tag placed before the closing tag `</body>`, create the editor using the Editor `constructor` function, your editor html element and a simple configuration:
+5. In JavaScript and within a `<script>` tag placed before the closing tag `</body>`, create the editor using the Editor `constructor` function, your editor html element and a simple configuration, then initialize it:
 ```javascript
   const editorElement = document.getElementById('editor');
 
@@ -102,7 +102,8 @@ yarn add iink-ts
     server: {
         applicationKey: '#YOUR MYSCRIPT DEVELOPER APPLICATION KEY#',
         hmacKey: '#YOUR MYSCRIPT DEVELOPER HMAC KEY#'
-    }
+    };
+    editor.initialize();
   });
 ```
 
@@ -129,6 +130,7 @@ yarn add iink-ts
                     hmacKey: '#YOUR MYSCRIPT DEVELOPER HMAC KEY#'
                 }
             });
+            editor.initialize();
         </script>
     </body>
 </html>

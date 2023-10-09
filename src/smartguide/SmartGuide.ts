@@ -2,8 +2,8 @@ import { TMarginConfiguration } from "../@types/configuration/recognition/Margin
 import { TRenderingConfiguration } from "../@types/configuration/RenderingConfiguration"
 import { TJIIXExport, TWordExport } from "../@types/model/Model"
 import { InternalEvent } from "../event/InternalEvent"
-import { Logger, LoggerManager } from "../logger"
-import { LOGGER_CLASS } from "../Constants"
+import { LoggerManager } from "../logger"
+import { LoggerClass } from "../Constants"
 
 export class SmartGuide {
   uuid: string
@@ -24,10 +24,9 @@ export class SmartGuide {
   jiix?: TJIIXExport
   lastWord?: TWordExport
   wordToChange?: TWordExport
-  #logger: Logger
+  #logger = LoggerManager.getLogger(LoggerClass.SMARTGUIDE)
 
   constructor() {
-    this.#logger = LoggerManager.getLogger(LOGGER_CLASS.SMARTGUIDE)
     this.#logger.info("constructor", { })
     this.uuid = Math.random().toString(10).substring(2, 12)
     this.margin = {

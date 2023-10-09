@@ -1,3 +1,4 @@
+//@ts-nocheck
 import Server from "jest-websocket-mock"
 import { DeserializedMessage } from "jest-websocket-mock/lib/websocket"
 import { delay } from "../utils/helpers"
@@ -13,16 +14,12 @@ import
   TRecognitionType,
 } from "../../../src/@types"
 
-import
-{
-  DefaultRecognitionConfiguration,
-  DefaultServerConfiguration,
-  WSRecognizer,
-  Model,
-  DefaultPenStyle,
-  Constants,
-  Stroke,
-} from "../../../src/iink"
+import { recognizer, configuration, style, model, constants } from "../../../src/iink"
+
+const { WSRecognizer } = recognizer
+const { DefaultRecognitionConfiguration, DefaultServerConfiguration } = configuration
+const { DefaultPenStyle } = style
+const { Model, Stroke } = model
 
 const ackMessage = { "type": "ack", "hmacChallenge": "1f434e8b-cc46-4a8c-be76-708eea2ff305", "iinkSessionId": "c7e72186-6299-4782-b612-3e725aa126f1" }
 const contentPackageDescriptionMessage = { "type": "contentPackageDescription", "contentPartCount": 0 }
@@ -192,7 +189,7 @@ describe("WSRecognizer.ts", () =>
       host: "init-test"
     }
     let addStroMockServerForInitTest: Server
-    let wsr: WSRecognizer
+    let wsr: typeof WSRecognizer
     let spyEmitError: jest.SpyInstance
 
     beforeEach(() =>
@@ -255,9 +252,9 @@ describe("WSRecognizer.ts", () =>
       expect.assertions(3)
       const promise = wsr.init(height, width)
       addStroMockServerForInitTest.send(JSON.stringify(errorMessage))
-      await expect(promise).rejects.toEqual(new Error(Constants.Error.WRONG_CREDENTIALS))
+      await expect(promise).rejects.toEqual(new Error(constants.Error.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
-      await expect(spyEmitError).toHaveBeenCalledWith(new Error(Constants.Error.WRONG_CREDENTIALS))
+      await expect(spyEmitError).toHaveBeenCalledWith(new Error(constants.Error.WRONG_CREDENTIALS))
     })
   })
 
@@ -294,7 +291,7 @@ describe("WSRecognizer.ts", () =>
 
   describe("send", () =>
   {
-    let wsr: WSRecognizer
+    let wsr: typeof WSRecognizer
     beforeEach(async () =>
     {
       wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
@@ -337,7 +334,7 @@ describe("WSRecognizer.ts", () =>
 
   describe("addStrokes", () =>
   {
-    let wsr: WSRecognizer
+    let wsr: typeof WSRecognizer
     let spyEmitError: jest.SpyInstance
     beforeEach(async () =>
     {
@@ -417,15 +414,15 @@ describe("WSRecognizer.ts", () =>
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       mockServer.send(JSON.stringify(errorMessage))
-      await expect(promise).rejects.toEqual(new Error(Constants.Error.WRONG_CREDENTIALS))
+      await expect(promise).rejects.toEqual(new Error(constants.Error.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
-      await expect(spyEmitError).toHaveBeenCalledWith(new Error(Constants.Error.WRONG_CREDENTIALS))
+      await expect(spyEmitError).toHaveBeenCalledWith(new Error(constants.Error.WRONG_CREDENTIALS))
     })
   })
 
   describe("Style", () =>
   {
-    let wsr: WSRecognizer
+    let wsr: typeof WSRecognizer
     beforeEach(async () =>
     {
       wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
@@ -501,7 +498,7 @@ describe("WSRecognizer.ts", () =>
   describe("export", () =>
   {
     const model: IModel = new Model(width, height)
-    let wsr: WSRecognizer
+    let wsr: typeof WSRecognizer
     let spyEmitError: jest.SpyInstance
     beforeEach(async () =>
     {
@@ -583,16 +580,16 @@ describe("WSRecognizer.ts", () =>
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       mockServer.send(JSON.stringify(errorMessage))
-      await expect(promise).rejects.toEqual(new Error(Constants.Error.WRONG_CREDENTIALS))
+      await expect(promise).rejects.toEqual(new Error(constants.Error.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
-      await expect(spyEmitError).toHaveBeenCalledWith(new Error(Constants.Error.WRONG_CREDENTIALS))
+      await expect(spyEmitError).toHaveBeenCalledWith(new Error(constants.Error.WRONG_CREDENTIALS))
     })
   })
 
   describe("import", () =>
   {
     const model: IModel = new Model(width, height)
-    let wsr: WSRecognizer
+    let wsr: typeof WSRecognizer
     let spyEmitError: jest.SpyInstance
     const mimeType = "text/plain"
     const textImport = "winter is comming"
@@ -658,16 +655,16 @@ describe("WSRecognizer.ts", () =>
       const promise = wsr.import(model, blobToImport, mimeType)
       await delay(100)
       mockServer.send(JSON.stringify(errorMessage))
-      await expect(promise).rejects.toEqual(new Error(Constants.Error.WRONG_CREDENTIALS))
+      await expect(promise).rejects.toEqual(new Error(constants.Error.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
-      await expect(spyEmitError).toHaveBeenCalledWith(new Error(Constants.Error.WRONG_CREDENTIALS))
+      await expect(spyEmitError).toHaveBeenCalledWith(new Error(constants.Error.WRONG_CREDENTIALS))
     })
   })
 
   describe("resize", () =>
   {
     const model: IModel = new Model(width, height)
-    let wsr: WSRecognizer
+    let wsr: typeof WSRecognizer
     let spyEmitError: jest.SpyInstance
     beforeEach(async () =>
     {
@@ -714,16 +711,16 @@ describe("WSRecognizer.ts", () =>
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       mockServer.send(JSON.stringify(errorMessage))
-      await expect(promise).rejects.toEqual(new Error(Constants.Error.WRONG_CREDENTIALS))
+      await expect(promise).rejects.toEqual(new Error(constants.Error.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
-      await expect(spyEmitError).toHaveBeenCalledWith(new Error(Constants.Error.WRONG_CREDENTIALS))
+      await expect(spyEmitError).toHaveBeenCalledWith(new Error(constants.Error.WRONG_CREDENTIALS))
     })
   })
 
   describe("convert", () =>
   {
     const model: IModel = new Model(width, height)
-    let wsr: WSRecognizer
+    let wsr: typeof WSRecognizer
     let spyEmitError: jest.SpyInstance
     beforeEach(async () =>
     {
@@ -775,16 +772,16 @@ describe("WSRecognizer.ts", () =>
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       mockServer.send(JSON.stringify(errorMessage))
-      await expect(promise).rejects.toEqual(new Error(Constants.Error.WRONG_CREDENTIALS))
+      await expect(promise).rejects.toEqual(new Error(constants.Error.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
-      await expect(spyEmitError).toHaveBeenCalledWith(new Error(Constants.Error.WRONG_CREDENTIALS))
+      await expect(spyEmitError).toHaveBeenCalledWith(new Error(constants.Error.WRONG_CREDENTIALS))
     })
   })
 
   describe("undo", () =>
   {
     const model: IModel = new Model(width, height)
-    let wsr: WSRecognizer
+    let wsr: typeof WSRecognizer
     let spyEmitError: jest.SpyInstance
     beforeEach(async () =>
     {
@@ -835,16 +832,16 @@ describe("WSRecognizer.ts", () =>
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       mockServer.send(JSON.stringify(errorMessage))
-      await expect(promise).rejects.toEqual(new Error(Constants.Error.WRONG_CREDENTIALS))
+      await expect(promise).rejects.toEqual(new Error(constants.Error.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
-      await expect(spyEmitError).toHaveBeenCalledWith(new Error(Constants.Error.WRONG_CREDENTIALS))
+      await expect(spyEmitError).toHaveBeenCalledWith(new Error(constants.Error.WRONG_CREDENTIALS))
     })
   })
 
   describe("redo", () =>
   {
     const model: IModel = new Model(width, height)
-    let wsr: WSRecognizer
+    let wsr: typeof WSRecognizer
     let spyEmitError: jest.SpyInstance
     beforeEach(async () =>
     {
@@ -895,16 +892,16 @@ describe("WSRecognizer.ts", () =>
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       mockServer.send(JSON.stringify(errorMessage))
-      await expect(promise).rejects.toEqual(new Error(Constants.Error.WRONG_CREDENTIALS))
+      await expect(promise).rejects.toEqual(new Error(constants.Error.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
-      await expect(spyEmitError).toHaveBeenCalledWith(new Error(Constants.Error.WRONG_CREDENTIALS))
+      await expect(spyEmitError).toHaveBeenCalledWith(new Error(constants.Error.WRONG_CREDENTIALS))
     })
   })
 
   describe("clear", () =>
   {
     const model: IModel = new Model(width, height)
-    let wsr: WSRecognizer
+    let wsr: typeof WSRecognizer
     let spyEmitError: jest.SpyInstance
     beforeEach(async () =>
     {
@@ -955,9 +952,9 @@ describe("WSRecognizer.ts", () =>
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       mockServer.send(JSON.stringify(errorMessage))
-      await expect(promise).rejects.toEqual(new Error(Constants.Error.WRONG_CREDENTIALS))
+      await expect(promise).rejects.toEqual(new Error(constants.Error.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
-      await expect(spyEmitError).toHaveBeenCalledWith(new Error(Constants.Error.WRONG_CREDENTIALS))
+      await expect(spyEmitError).toHaveBeenCalledWith(new Error(constants.Error.WRONG_CREDENTIALS))
     })
   })
 
@@ -968,7 +965,7 @@ describe("WSRecognizer.ts", () =>
       host: "close-test"
     }
     let mockServerForCloseTest: Server
-    let wsr: WSRecognizer
+    let wsr: typeof WSRecognizer
     let spyEmitError: jest.SpyInstance
     beforeEach(() =>
     {
@@ -1005,19 +1002,19 @@ describe("WSRecognizer.ts", () =>
       await wsr.destroy()
     })
     const closeMessageOptions = [
-      { code: 1001, message: Constants.Error.GOING_AWAY },
-      { code: 1002, message: Constants.Error.PROTOCOL_ERROR },
-      { code: 1003, message: Constants.Error.UNSUPPORTED_DATA },
-      { code: 1006, message: Constants.Error.ABNORMAL_CLOSURE },
-      { code: 1007, message: Constants.Error.INVALID_FRAME_PAULOAD },
-      { code: 1008, message: Constants.Error.POLICY_VIOLATION },
-      { code: 1009, message: Constants.Error.MESSAGE_TOO_BIG },
-      { code: 1011, message: Constants.Error.INTERNAL_ERROR },
-      { code: 1012, message: Constants.Error.SERVICE_RESTART },
-      { code: 1013, message: Constants.Error.TRY_AGAIN },
-      { code: 1014, message: Constants.Error.BAD_GATEWAY },
-      { code: 1015, message: Constants.Error.TLS_HANDSHAKE },
-      { code: 42, message: Constants.Error.CANT_ESTABLISH },
+      { code: 1001, message: constants.Error.GOING_AWAY },
+      { code: 1002, message: constants.Error.PROTOCOL_ERROR },
+      { code: 1003, message: constants.Error.UNSUPPORTED_DATA },
+      { code: 1006, message: constants.Error.ABNORMAL_CLOSURE },
+      { code: 1007, message: constants.Error.INVALID_FRAME_PAULOAD },
+      { code: 1008, message: constants.Error.POLICY_VIOLATION },
+      { code: 1009, message: constants.Error.MESSAGE_TOO_BIG },
+      { code: 1011, message: constants.Error.INTERNAL_ERROR },
+      { code: 1012, message: constants.Error.SERVICE_RESTART },
+      { code: 1013, message: constants.Error.TRY_AGAIN },
+      { code: 1014, message: constants.Error.BAD_GATEWAY },
+      { code: 1015, message: constants.Error.TLS_HANDSHAKE },
+      { code: 42, message: constants.Error.CANT_ESTABLISH },
     ]
     closeMessageOptions.forEach(async (closeEvent) =>
     {

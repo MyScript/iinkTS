@@ -234,7 +234,7 @@
          */
         await editor.initialize();
 
-        const fontsResponse = await iink.getAvailableFontList(editor.configuration)
+        const fontsResponse = await iink.utils.getAvailableFontList(editor.configuration)
         fontsResponse.forEach((f) => {
           fontsElement.options[fontsElement.options.length] = new Option(f);
         })

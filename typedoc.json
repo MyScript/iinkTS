@@ -13,13 +13,6 @@
     "test",
     "node_modules"
   ],
-  "excludeTags": [
-    "@override",
-    "@virtual",
-    "@privateRemarks",
-    "@hidden",
-    "@internal"
-  ],
   "plugin": [
     "typedoc-plugin-missing-exports",
     "./plugins/typdoc-default-object.ts"
@@ -34,12 +27,19 @@
   "githubPages": true,
   "cleanOutputDir": true,
   "categorizeByGroup": true,
+  "navigation": {
+    "includeCategories": false,
+    "includeGroups": true
+  },
   "visibilityFilters": {
     "protected": false,
     "private": false,
     "inherited": true,
     "external": false,
     "@alpha": false,
-    "@beta": false
-  }
+    "@beta": false,
+  },
+  "out": "./docs",
+  "pretty": true,
+  "customCss": "./typedoc.css"
 }

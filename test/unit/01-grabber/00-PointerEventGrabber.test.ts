@@ -1,9 +1,11 @@
 import { DoubleTouchEventFake, LeftClickEventFake, RightClickEventFake, TouchEventFake } from "../utils/PointerEventFake"
 import { TGrabberConfiguration, IGrabber } from "../../../src/@types"
-import { DefaultConfiguration, PointerEventGrabber } from "../../../src/iink"
+import { configuration, grabber } from "../../../src/iink"
 
 describe("PointerEventGrabber.ts", () =>
 {
+  const { DefaultConfiguration } = configuration
+  const { PointerEventGrabber} = grabber
 
   test("should create with default configuration", () =>
   {

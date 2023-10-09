@@ -6,8 +6,8 @@ import { TRecognitionPositions } from "../@types/model/RecognitionPositions"
 
 import { computeDistance } from "../utils/geometric"
 import { Stroke } from "./Stroke"
-import { Logger, LoggerManager } from "../logger"
-import { LOGGER_CLASS } from "../Constants"
+import { LoggerManager } from "../logger"
+import { LoggerClass } from "../Constants"
 
 export class Model implements IModel
 {
@@ -22,11 +22,10 @@ export class Model implements IModel
   width: number
   height: number
   idle: boolean
-  #logger: Logger
+  #logger = LoggerManager.getLogger(LoggerClass.MODEL)
 
   constructor(width = 100, height = 100, creationDate: number = Date.now())
   {
-    this.#logger = LoggerManager.getLogger(LOGGER_CLASS.MODEL)
     this.#logger.info("constructor", { width, height, creationDate })
     this.creationTime = creationDate
     this.modificationDate = creationDate
@@ -43,7 +42,6 @@ export class Model implements IModel
 
   mergeExport(exports: TExport)
   {
-    this.#logger.debug("mergeExport", this.exports)
     this.#logger.info("mergeExport", { exports })
     if (this.exports) {
       Object.assign(this.exports, exports)
@@ -55,7 +53,6 @@ export class Model implements IModel
 
   mergeConvert(converts: TExport)
   {
-    this.#logger.debug("mergeConvert", this.converts)
     this.#logger.info("mergeConvert", { converts })
     if (this.converts) {
       Object.assign(this.converts, converts)
@@ -67,7 +64,6 @@ export class Model implements IModel
 
   private computePressure(distance: number, globalDistance: number): number
   {
-    this.#logger.info("computePressure", { distance, globalDistance })
     let ratio = 1.0
     if (globalDistance === 0) {
       ratio = 0.5
@@ -84,7 +80,6 @@ export class Model implements IModel
 
   private filterPointByAcquisitionDelta(stroke: TStroke, point: TPointer, lastPointer: TPointer): boolean
   {
-    this.#logger.info("filterPointByAcquisitionDelta", { stroke, point, lastPointer })
     const delta: number = (2 + ((stroke.style["-myscript-pen-width"] || 0) / 4))
     return !lastPointer ||
       stroke.pointers.length === 0 ||
@@ -94,8 +89,7 @@ export class Model implements IModel
 
   addPoint(stroke: TStroke, pointer: TPointer): void
   {
-    this.#logger.info("addStroke", { stroke })
-    this.#logger.info("addPoint", { stroke, pointer })
+    this.#logger.debug("addPoint", { stroke, pointer })
     const lastPointer: TPointer = stroke.pointers.at(-1) || { p: 1, t: 0, x: 0, y: 0 }
     if (this.filterPointByAcquisitionDelta(stroke, pointer, lastPointer)) {
       const distance = computeDistance(pointer, lastPointer)
@@ -107,6 +101,7 @@ export class Model implements IModel
 
   addStroke(stroke: TStroke): void
   {
+    this.#logger.info("addStroke", { stroke })
     this.rawStrokes.push(stroke)
   }
 
@@ -117,7 +112,6 @@ export class Model implements IModel
 
   initCurrentStroke(point: TPointer, pointerId: number, pointerType: string, style: TPenStyle, dpi = 96): void
   {
-    this.#logger.debug("initCurrentStroke", this.currentStroke)
     this.#logger.info("initCurrentStroke", { point, pointerId, pointerType, style, dpi })
     if (style["-myscript-pen-width"]) {
       const pxWidth = (style["-myscript-pen-width"] * dpi) / 25.4
@@ -137,11 +131,11 @@ export class Model implements IModel
     if (this.currentStroke) {
       this.addPoint(this.currentStroke, point)
     }
+    this.#logger.debug("appendToCurrentStroke", this.currentStroke)
   }
 
   endCurrentStroke(point: TPointer): void
   {
-    this.#logger.debug("endCurrentStroke", this.currentStroke)
     this.#logger.info("endCurrentStroke", { point })
     if (this.currentStroke) {
       this.addPoint(this.currentStroke, point)
@@ -153,7 +147,6 @@ export class Model implements IModel
 
   #getStrokeFromPoint(point: TPoint): TStroke[]
   {
-    this.#logger.debug("getStrokeFromPoint", this.rawStrokes)
     this.#logger.info("getStrokeFromPoint", { point })
     const isBetween = (val: number, min: number, max: number): boolean => (val >= min && val <= max)
 
@@ -177,7 +170,7 @@ export class Model implements IModel
         }
       }
     })
-    this.#logger.debug("getStrokeFromPoint", { _strokeList })
+    this.#logger.debug("getStrokeFromPoint", { strokes: _strokeList })
     return _strokeList
   }
 
@@ -200,7 +193,6 @@ export class Model implements IModel
 
   updateStroke(updatedStroke: TStroke): void
   {
-    this.#logger.debug("updateStroke", this.rawStrokes)
     this.#logger.info("updateStroke", { updatedStroke })
     const strokeIndex = this.rawStrokes.findIndex((s: TStroke): boolean => s.id === updatedStroke.id)
     if (strokeIndex !== -1) {
@@ -211,7 +203,6 @@ export class Model implements IModel
 
   removeStroke(id: string): void
   {
-    this.#logger.debug("removeStroke", this.rawStrokes)
     this.#logger.info("removeStroke", { id })
     const strokeIndex = this.rawStrokes.findIndex((s: TStroke): boolean => s.id === id)
     if (strokeIndex !== -1) {
@@ -224,7 +215,6 @@ export class Model implements IModel
   {
     this.#logger.info("removeStrokesFromPoint", { point })
     const strokes = this.#getStrokeFromPoint(point)
-    this.#logger.debug("removeStrokesFromPoint", { strokes })
     strokes.forEach(strokeToRemove =>
     {
       this.removeStroke(strokeToRemove.id)
@@ -235,7 +225,6 @@ export class Model implements IModel
 
   updatePositionSent(position: number = this.rawStrokes.length): void
   {
-    this.#logger.debug("updatePositionSent", this.positions.lastSentPosition)
     this.#logger.info("updatePositionSent", { position })
     this.positions.lastSentPosition = position
     this.#logger.debug("updatePositionSent", this.positions.lastSentPosition)
@@ -243,17 +232,15 @@ export class Model implements IModel
 
   updatePositionReceived(): void
   {
-    this.#logger.debug("updatePositionReceived", this.positions.lastReceivedPosition)
-    this.#logger.info("updatePositionReceived", {})
+    this.#logger.info("updatePositionReceived")
     this.positions.lastReceivedPosition = this.positions.lastSentPosition
     this.#logger.debug("updatePositionReceived", this.positions.lastReceivedPosition)
   }
 
   getClone(): IModel
   {
-    this.#logger.info("getClone", {})
+    this.#logger.info("getClone")
     const clonedModel = new Model(this.width, this.height, this.creationTime)
-    this.#logger.debug("getClone", { clonedModel })
     clonedModel.modificationDate = JSON.parse(JSON.stringify(this.modificationDate))
     clonedModel.currentStroke = this.currentStroke ? JSON.parse(JSON.stringify(this.currentStroke)) : undefined
     clonedModel.rawStrokes = JSON.parse(JSON.stringify(this.rawStrokes))
@@ -267,7 +254,7 @@ export class Model implements IModel
 
   clear(): void
   {
-    this.#logger.info("clear", {})
+    this.#logger.info("clear")
     this.modificationDate = Date.now()
     this.currentStroke = undefined
     this.rawStrokes = []

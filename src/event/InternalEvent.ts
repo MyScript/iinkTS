@@ -3,20 +3,19 @@ import { TExport, TJIIXExport } from "../@types/model/Model"
 import { TWebSocketSVGPatchEvent } from "../@types/recognizer/WSRecognizer"
 import { TUndoRedoContext } from "../@types/undo-redo/UndoRedoContext"
 import { InternalEventType } from "../Constants"
-import { Logger, LoggerManager } from "../logger"
-import { LOGGER_CLASS } from "../Constants"
+import { LoggerManager } from "../logger"
+import { LoggerClass } from "../Constants"
 
 export class InternalEvent extends EventTarget
 {
   static #instance: InternalEvent
   #abortController: AbortController
-  #logger: Logger
+  #logger = LoggerManager.getLogger(LoggerClass.INTERNALEVENT)
 
   private constructor()
   {
     super()
-    this.#logger = LoggerManager.getLogger(LOGGER_CLASS.INTERNALEVENT)
-    this.#logger.info("constructor", { })
+    this.#logger.info("constructor")
     this.#abortController = new AbortController()
   }
 
@@ -31,7 +30,7 @@ export class InternalEvent extends EventTarget
 
   removeAllListeners(): void
   {
-    this.#logger.info("removeAllListeners", { })
+    this.#logger.info("removeAllListeners")
     this.#abortController.abort()
   }
 
@@ -81,6 +80,7 @@ export class InternalEvent extends EventTarget
 
   addErrorListener(callback: (err: Error) => void): void
   {
+    this.#logger.info("addErrorListener", { callback })
     this.addEventListener(InternalEventType.ERROR, (evt: unknown) => callback(((evt as CustomEvent).detail as Error)), { signal: this.#abortController.signal })
   }
 
@@ -91,6 +91,7 @@ export class InternalEvent extends EventTarget
   }
   addWSClosedListener(callback: () => void): void
   {
+    this.#logger.info("addWSClosedListener", { callback })
     this.addEventListener(InternalEventType.WS_CLOSED, () => callback(), { signal: this.#abortController.signal })
   }
 
@@ -101,6 +102,7 @@ export class InternalEvent extends EventTarget
   }
   addNotifListener(callback: (notif: { message: string, timeout?: number }) => void): void
   {
+    this.#logger.info("addNotifListener", { callback })
     this.addEventListener(InternalEventType.NOTIF, (evt: unknown) => callback(((evt as CustomEvent).detail as { message: string, timeout?: number })), { signal: this.#abortController.signal })
   }
 
@@ -111,6 +113,7 @@ export class InternalEvent extends EventTarget
   }
   addImportJIIXListener(callback: (jiix: TJIIXExport) => void): void
   {
+    this.#logger.info("addImportJIIXListener", { callback })
     this.addEventListener(InternalEventType.IMPORT_JIIX, (evt: unknown) => callback(((evt as CustomEvent).detail as TJIIXExport)), { signal: this.#abortController.signal })
   }
 
@@ -121,16 +124,18 @@ export class InternalEvent extends EventTarget
   }
   addConvertListener(callback: (params?: { conversionState?: TConverstionState, mimeTypes?: string[] }) => void): void
   {
+    this.#logger.info("addConvertListener", { callback })
     this.addEventListener(InternalEventType.CONVERT, (evt: unknown) => callback(((evt as CustomEvent).detail as { conversionState?: TConverstionState, mimeTypes?: string[] })), { signal: this.#abortController.signal })
   }
 
   emitClear(): void
   {
-    this.#logger.info("emitClear", { })
+    this.#logger.info("emitClear")
     this.#emit(InternalEventType.CLEAR)
   }
   addClearListener(callback: () => void): void
   {
+    this.#logger.info("addClearListener", { callback })
     this.addEventListener(InternalEventType.CLEAR, () => callback(), { signal: this.#abortController.signal })
   }
 
@@ -141,6 +146,7 @@ export class InternalEvent extends EventTarget
   }
   addContextChangeListener(callback: (context: TUndoRedoContext) => void): void
   {
+    this.#logger.info("addContextChangeListener", { callback })
     this.addEventListener(InternalEventType.CONTEXT_CHANGE, (evt: unknown) => callback(((evt as CustomEvent).detail as TUndoRedoContext)), { signal: this.#abortController.signal })
   }
 
@@ -151,6 +157,7 @@ export class InternalEvent extends EventTarget
   }
   addIdleListener(callback: (idle: boolean) => void): void
   {
+    this.#logger.info("addIdleListener", { callback })
     this.addEventListener(InternalEventType.IDLE, (evt: unknown) => callback(((evt as CustomEvent).detail as boolean)), { signal: this.#abortController.signal })
   }
 }

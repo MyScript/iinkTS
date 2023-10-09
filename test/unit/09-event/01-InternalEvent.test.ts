@@ -1,8 +1,9 @@
 import { TWebSocketSVGPatchEvent } from "../../../src/@types"
-import { InternalEvent } from "../../../src/iink"
+import { event } from "../../../src/iink"
 
 describe("InternalEvent.ts", () =>
 {
+  const { InternalEvent } = event
   const internalEvent = InternalEvent.getInstance()
 
   test("should have singleton", () =>

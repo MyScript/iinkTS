@@ -7,8 +7,8 @@ import { drawShapeSymbol, ShapeSymbols } from "./CanvasRendererShapeSymbol"
 import { drawStroke } from "./CanvasRendererStrokeSymbol"
 import { drawTextSymbol, TextSymbols } from "./CanvasRendererTextSymbol"
 import { CanvasStroker } from "./CanvasStroker"
-import { Logger, LoggerManager } from "../../logger"
-import { LOGGER_CLASS } from "../../Constants"
+import { LoggerManager } from "../../logger"
+import { LoggerClass } from "../../Constants"
 
 export class CanvasRenderer
 {
@@ -21,11 +21,10 @@ export class CanvasRenderer
     capturingCanvas: HTMLCanvasElement
     capturingCanvasContext: CanvasRenderingContext2D
   }
-  #logger: Logger
+  #logger = LoggerManager.getLogger(LoggerClass.CANVAS_RENDERER)
 
   constructor(config: TRenderingConfiguration)
   {
-    this.#logger = LoggerManager.getLogger(LOGGER_CLASS.CANVAS_RENDERER)
     this.#logger.info("constructor", { config })
     this.config = config
     this.stroker = new CanvasStroker()
@@ -38,7 +37,6 @@ export class CanvasRenderer
     canvas.id = type
     canvas.classList.add(type)
     canvas.classList.add("ms-canvas")
-    this.#logger.debug("createCanvas", { canvas })
     return canvas
   }
 
@@ -117,7 +115,7 @@ export class CanvasRenderer
 
   destroy(): void
   {
-    this.#logger.info("destroy", { })
+    this.#logger.info("destroy")
     if (this.context.parent) {
       this.context.parent.innerHTML = ""
     }
