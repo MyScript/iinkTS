@@ -314,7 +314,7 @@ describe("WSBehaviors.ts", () =>
       wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
       wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
       wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.import = jest.fn()
+      wsb.recognizer.import = jest.fn(m => Promise.resolve(m))
       await wsb.init(wrapperHTML)
       const mimeType = "text/plain"
       const textImport = "winter is comming"

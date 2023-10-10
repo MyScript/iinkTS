@@ -67,5 +67,6 @@ describe("Websocket Text file export", () => {
     const download = await downloadPromise;
     expect(download.suggestedFilename()).toBe("myDocument.jpg");
   })
-
+  require("../_partials/text/nav-actions-text-undo-redo-test")
+  require("../_partials/text/nav-actions-text-clear-test")
 })

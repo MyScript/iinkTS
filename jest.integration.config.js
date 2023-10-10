@@ -21,14 +21,6 @@ const projects = [
     name: "Tablet Safari",
     ...devices["iPad Mini landscape"],
   },
-  {
-    name: "Mobile Chrome",
-    ...devices["Pixel 5"]
-  },
-  {
-    name: "Mobile Safari",
-    ...devices["iPhone 13"],
-  }
 ]
 
 const testEnvironmentOptions = {
