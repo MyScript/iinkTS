@@ -158,17 +158,16 @@ export const DefaultConfiguration: TConfiguration = {
 
 export const DefaultLoggerConfiguration: TLoggerConfiguration = {
   [LoggerClass.EDITOR]: LoggerLevel.ERROR,
+  [LoggerClass.BEHAVIORS]: LoggerLevel.ERROR,
   [LoggerClass.RECOGNIZER]: LoggerLevel.ERROR,
   [LoggerClass.GRABBER]: LoggerLevel.ERROR,
-  [LoggerClass.BEHAVIORS]: LoggerLevel.ERROR,
+  [LoggerClass.RENDERER]: LoggerLevel.ERROR,
   [LoggerClass.CONFIGURATION]: LoggerLevel.ERROR,
   [LoggerClass.PUBLIC_EVENT]: LoggerLevel.ERROR,
+  [LoggerClass.INTERNALEVENT]: LoggerLevel.ERROR,
   [LoggerClass.MODEL]: LoggerLevel.ERROR,
-  [LoggerClass.CANVAS_RENDERER]: LoggerLevel.ERROR,
-  [LoggerClass.SVGRENDERER]: LoggerLevel.ERROR,
+  [LoggerClass.STROKE]: LoggerLevel.ERROR,
   [LoggerClass.SMARTGUIDE]: LoggerLevel.ERROR,
   [LoggerClass.STYLEMANAGER]: LoggerLevel.ERROR,
   [LoggerClass.UNDOREDO_MANAGER]: LoggerLevel.ERROR,
-  [LoggerClass.STROKE]: LoggerLevel.ERROR,
-  [LoggerClass.INTERNALEVENT]: LoggerLevel.ERROR
 }

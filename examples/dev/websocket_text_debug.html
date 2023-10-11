@@ -19,13 +19,38 @@
         }
       }
     </style>
+    <style>
+      .menu-button {
+        height: 36px;
+        width: 36px;
+        border-radius: 4px;
+        background: #f6f5f4;
+        border: none;
+        box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.225);
+        background-color: white;
+        display: block;
+      }
+      .menu-button.active {
+        box-shadow: inset 0 2px 5px 0 rgba(0, 0, 0, 0.225);
+      }
+      .menu-button img {
+        width: 24px;
+        height: 24px;
+      }
+    </style>
+    <style>
+      #specific-logger-level {
+        max-height: 500px;
+        overflow: auto;
+      }
+    </style>
   </head>
 
   <body>
     <div id="result"></div>
 
     <nav>
-      <div class="button-div">
+      <div class="flex-container gap">
         <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
           <img src="../assets/clear.svg" />
         </button>
@@ -36,9 +61,19 @@
           <img src="../assets/redo.svg" />
         </button>
       </div>
-      <div id="parameters">
-        <select id="level">
-        </select>
+      <div class="flex-container gap">
+        <label> Global log level: </label>
+        <select id="global-logger-level"></select>
+        <div class="dropdown-menu">
+          <button id="line-menu" class="menu-button">
+            <img src="../assets/menu.svg" />
+          </button>
+          <ul id="specific-logger-level" class="">
+            <li>
+              <h3>Specific log level</h3>
+            </li>
+          </ul>
+        </div>
       </div>
     </nav>
 
@@ -47,23 +82,56 @@
     <script>
       const editorElement = document.getElementById("editor");
       const resultElement = document.getElementById("result");
-      const levelSelect = document.getElementById("level");
+      const globalLoggerLevelSelect = document.getElementById("global-logger-level");
+      const specificLggerLevel = document.getElementById("specific-logger-level");
       const clearElement = document.getElementById("clear");
       const undoElement = document.getElementById("undo");
       const redoElement = document.getElementById("redo");
 
       let editor;
       const loggerConfig = {
-        [iink.constants.LoggerClass.EDITOR]: iink.constants.LoggerLevel.TRACE,
-        [iink.constants.LoggerClass.RECOGNIZER]: iink.constants.LoggerLevel.TRACE,
-        [iink.constants.LoggerClass.GRABBER]: iink.constants.LoggerLevel.TRACE
+        [iink.constants.LoggerClass.EDITOR]: iink.constants.LoggerLevel.ERROR,
+        [iink.constants.LoggerClass.BEHAVIORS]: iink.constants.LoggerLevel.ERROR,
+        [iink.constants.LoggerClass.RECOGNIZER]: iink.constants.LoggerLevel.ERROR,
+        [iink.constants.LoggerClass.GRABBER]: iink.constants.LoggerLevel.ERROR,
+        [iink.constants.LoggerClass.RENDERER]: iink.constants.LoggerLevel.ERROR,
+        [iink.constants.LoggerClass.CONFIGURATION]: iink.constants.LoggerLevel.ERROR,
+        [iink.constants.LoggerClass.PUBLIC_EVENT]: iink.constants.LoggerLevel.ERROR,
+        [iink.constants.LoggerClass.INTERNALEVENT]: iink.constants.LoggerLevel.ERROR,
+        [iink.constants.LoggerClass.MODEL]: iink.constants.LoggerLevel.ERROR,
+        [iink.constants.LoggerClass.STROKE]: iink.constants.LoggerLevel.ERROR,
+        [iink.constants.LoggerClass.SMARTGUIDE]: iink.constants.LoggerLevel.ERROR,
+        [iink.constants.LoggerClass.STYLEMANAGER]: iink.constants.LoggerLevel.ERROR,
+        [iink.constants.LoggerClass.UNDOREDO_MANAGER]: iink.constants.LoggerLevel.ERROR
       };
 
       Object.keys(iink.constants.LoggerLevel).forEach((level) => {
-        const selected = iink.constants.LoggerLevel[level] === iink.constants.LoggerLevel.ERROR
-        const opt = new Option(level, iink.constants.LoggerLevel[level], selected, selected)
-        levelSelect.appendChild(opt);
-      })
+        const selected = iink.constants.LoggerLevel[level] === iink.constants.LoggerLevel.ERROR;
+        const opt = new Option(level, iink.constants.LoggerLevel[level], selected, selected);
+        globalLoggerLevelSelect.appendChild(opt);
+      });
+
+      Object.keys(iink.constants.LoggerClass).forEach((c) => {
+        const li = document.createElement("li");
+        const label = document.createElement("label");
+        label.textContent = c;
+        const select = document.createElement("select");
+        select.classList.add("specific-logger-level-input")
+        Object.keys(iink.constants.LoggerLevel).forEach((level) => {
+          const selected = iink.constants.LoggerLevel[level] === iink.constants.LoggerLevel.ERROR;
+          const opt = new Option(level, iink.constants.LoggerLevel[level], selected, selected);
+          select.appendChild(opt);
+        });
+
+        li.appendChild(label);
+        li.appendChild(select);
+        select.addEventListener("change", (evt) => {
+          loggerConfig[c] = evt.target.value;
+          editor.loggerConfiguration = loggerConfig;
+        });
+        specificLggerLevel.appendChild(li);
+      });
+
       /**
        * We use a function to wait the server configuration to load
        */
@@ -93,11 +161,23 @@
          */
         await editor.initialize();
 
-        levelSelect.addEventListener("change", (evt) => {
-          loggerConfig[iink.constants.LoggerClass.EDITOR] = evt.target.value
-          loggerConfig[iink.constants.LoggerClass.RECOGNIZER] = evt.target.value
-          loggerConfig[iink.constants.LoggerClass.GRABBER] = evt.target.value
-
+        globalLoggerLevelSelect.addEventListener("change", (evt) => {
+          loggerConfig[iink.constants.LoggerClass.EDITOR] = evt.target.value;
+          loggerConfig[iink.constants.LoggerClass.BEHAVIORS] = evt.target.value;
+          loggerConfig[iink.constants.LoggerClass.RECOGNIZER] = evt.target.value;
+          loggerConfig[iink.constants.LoggerClass.GRABBER] = evt.target.value;
+          loggerConfig[iink.constants.LoggerClass.RENDERER] = evt.target.value;
+          loggerConfig[iink.constants.LoggerClass.CONFIGURATION] = evt.target.value;
+          loggerConfig[iink.constants.LoggerClass.PUBLIC_EVENT] = evt.target.value;
+          loggerConfig[iink.constants.LoggerClass.INTERNALEVENT] = evt.target.value;
+          loggerConfig[iink.constants.LoggerClass.MODEL] = evt.target.value;
+          loggerConfig[iink.constants.LoggerClass.STROKE] = evt.target.value;
+          loggerConfig[iink.constants.LoggerClass.SMARTGUIDE] = evt.target.value;
+          loggerConfig[iink.constants.LoggerClass.STYLEMANAGER] = evt.target.value;
+          loggerConfig[iink.constants.LoggerClass.UNDOREDO_MANAGER] = evt.target.value;
+          Array.from(document.getElementsByClassName("specific-logger-level-input")).forEach(input => {
+            input.value = evt.target.value
+          })
           editor.loggerConfiguration = loggerConfig;
         });
 
@@ -129,7 +209,7 @@
         });
       }
 
-      loadEditor().catch(error => console.error(error));
+      loadEditor().catch((error) => console.error(error));
     </script>
   </body>
 </html>
