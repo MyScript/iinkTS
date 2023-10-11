@@ -17,7 +17,7 @@ import { StyleHelper } from "../style/StyleHelper"
 import { DeferredPromise } from "../utils/DeferredPromise"
 import { isVersionSuperiorOrEqual } from "../utils/version"
 import { convertStrokeToJSON } from "../model/Stroke"
-import { LoggerManager, Logger } from "../logger"
+import { LoggerManager } from "../logger"
 
 /**
  * A websocket dialog have this sequence :
@@ -43,7 +43,7 @@ import { LoggerManager, Logger } from "../logger"
  */
 export class WSRecognizer implements IRecognizer
 {
-  logger: Logger
+  #logger = LoggerManager.getLogger(LoggerClass.RECOGNIZER)
   protected serverConfiguration: TServerConfiguration
   protected recognitionConfiguration: TRecognitionConfiguration
 
@@ -82,8 +82,7 @@ export class WSRecognizer implements IRecognizer
     this.recognitionConfiguration = recognitionConfig
     const scheme = (this.serverConfiguration.scheme === "https") ? "wss" : "ws"
     this.url = `${ scheme }://${ this.serverConfiguration.host }/api/v4.0/iink/document?applicationKey=${ this.serverConfiguration.applicationKey }`
-    this.logger = LoggerManager.getLogger(LoggerClass.RECOGNIZER)
-    this.logger.info("constructor", { serverConfig, recognitionConfig })
+    this.#logger.info("constructor", { serverConfig, recognitionConfig, url: this.url })
   }
 
   get mimeTypes(): string[]
@@ -96,7 +95,6 @@ export class WSRecognizer implements IRecognizer
       case "diagram":
         return this.recognitionConfiguration.diagram.mimeTypes
       default:
-        this.logger.warn("get mimeTypes default", this.recognitionConfiguration.type)
         //"raw-content"
         return []
     }
@@ -177,7 +175,6 @@ export class WSRecognizer implements IRecognizer
     if (this.waitForIdleDeferred?.isPending) {
       this.waitForIdleDeferred.reject(error)
     }
-    this.logger.error("rejectDefferedPending", { error })
   }
 
   protected closeCallback(evt: CloseEvent): void
@@ -225,7 +222,7 @@ export class WSRecognizer implements IRecognizer
           message = ErrorConst.TLS_HANDSHAKE
           break
         default:
-          this.logger.warn("closeCallback default", { evt })
+          this.#logger.warn("closeCallback unknow CloseEvent.code", { evt })
           message = ErrorConst.CANT_ESTABLISH
           break
       }
@@ -237,12 +234,11 @@ export class WSRecognizer implements IRecognizer
     if (!this.currentErrorCode && evt.code !== 1000) {
       this.internalEvent.emitError(error)
     }
-    this.logger.error("closeCallback", { evt, message, error })
   }
 
   protected manageHMACChallengeMessage(websocketMessage: TWebSocketEvent): void
   {
-    this.logger.info("manageHMACChallengeMessage", { websocketMessage })
+    this.#logger.info("manageHMACChallengeMessage", { websocketMessage })
     const hmacChallengeMessage = websocketMessage as TWebSocketHMACChallengeEvent
     if (hmacChallengeMessage.hmacChallenge) {
       this.send({
@@ -258,6 +254,7 @@ export class WSRecognizer implements IRecognizer
   protected manageContentPackageDescriptionMessage(): void
   {
     this.reconnectionCount = 0
+    this.#logger.info("manageContentPackageDescriptionMessage")
 
     this.send({ ...this.recognitionConfiguration, type: "configuration" })
 
@@ -271,7 +268,7 @@ export class WSRecognizer implements IRecognizer
 
   protected managePartChangeMessage(websocketMessage: TWebSocketEvent): void
   {
-    this.logger.info("managePartChangeMessage", { websocketMessage })
+    this.#logger.info("managePartChangeMessage", { websocketMessage })
     const partChangeMessage = websocketMessage as TWebSocketPartChangeEvent
     this.currentPartId = partChangeMessage.partId
     this.initialized?.resolve()
@@ -279,7 +276,7 @@ export class WSRecognizer implements IRecognizer
 
   protected manageExportMessage(websocketMessage: TWebSocketEvent): void
   {
-    this.logger.info("manageExportMessage", { websocketMessage })
+    this.#logger.info("manageExportMessage", { websocketMessage })
     const exportMessage = websocketMessage as TWebSocketExportEvent
     if (exportMessage.exports["application/vnd.myscript.jiix"]) {
       exportMessage.exports["application/vnd.myscript.jiix"] = JSON.parse(exportMessage.exports["application/vnd.myscript.jiix"].toString()) as TJIIXExport
@@ -317,8 +314,6 @@ export class WSRecognizer implements IRecognizer
       case "session.too.old":
         message = ErrorConst.TOO_OLD
         break
-      default:
-        this.logger.warn("manageErrorMessage Default", { websocketMessage })
     }
     const error = new Error(message)
     this.rejectDeferredPending(error)
@@ -327,7 +322,7 @@ export class WSRecognizer implements IRecognizer
 
   protected manageContentChangeMessage(websocketMessage: TWebSocketEvent): void
   {
-    this.logger.info("manageContentChangeMessage", { websocketMessage })
+    this.#logger.info("manageContentChangeMessage", { websocketMessage })
     const contentChangeMessage = websocketMessage as TWebSocketContentChangeEvent
     const context: TUndoRedoContext = {
       canRedo: contentChangeMessage.canRedo,
@@ -342,7 +337,7 @@ export class WSRecognizer implements IRecognizer
 
   protected manageSVGPatchMessage(websocketMessage: TWebSocketEvent): void
   {
-    this.logger.info("manageSVGPatchMessage", { websocketMessage })
+    this.#logger.info("manageSVGPatchMessage", { websocketMessage })
     this.resizeDeferred?.resolve()
     const svgPatchMessage = websocketMessage as TWebSocketSVGPatchEvent
     this.internalEvent.emitSVGPatch(svgPatchMessage)
@@ -350,7 +345,7 @@ export class WSRecognizer implements IRecognizer
 
   protected messageCallback(message: MessageEvent<string>): void
   {
-    this.logger.debug("messageCallback", { message })
+    this.#logger.debug("messageCallback", { message })
     this.currentErrorCode = undefined
     const websocketMessage: TWebSocketEvent = JSON.parse(message.data)
     if (websocketMessage.type !== "pong") {
@@ -384,7 +379,7 @@ export class WSRecognizer implements IRecognizer
           this.manageWaitForIdle()
           break
         default :
-          this.logger.warn("messageCallback", `Message type unknow: "${websocketMessage.type}".`)
+          this.#logger.warn("messageCallback", `Message type unknow: "${websocketMessage.type}".`)
       }
     }
   }
@@ -392,7 +387,7 @@ export class WSRecognizer implements IRecognizer
   async init(height: number, width: number): Promise<void>
   {
     try {
-      this.logger.info("init Recognizer", { height, width })
+      this.#logger.info("init", { height, width })
       this.destroy()
       this.connected = new DeferredPromise<void>()
       this.initialized = new DeferredPromise<void>()
@@ -426,14 +421,14 @@ export class WSRecognizer implements IRecognizer
     }
     await this.connected.promise
     if (this.socket.readyState === this.socket.OPEN) {
-      this.logger.debug("send", { message })
+      this.#logger.debug("send", { message })
       this.socket.send(JSON.stringify(message))
       return Promise.resolve()
     } else {
       if (this.socket.readyState != this.socket.CONNECTING && this.serverConfiguration.websocket.autoReconnect) {
         this.reconnectionCount++
         if (this.serverConfiguration.websocket.maxRetryCount >= this.reconnectionCount) {
-          this.logger.debug("send", `try to reconnect number: ${this.reconnectionCount}.`)
+          this.#logger.debug("send", `try to reconnect number: ${this.reconnectionCount}.`)
           this.internalEvent.emitClearMessage()
           await this.init(this.viewSizeHeight, this.viewSizeWidth)
           this.setPenStyle(this.penStyle as TPenStyle)
@@ -450,7 +445,7 @@ export class WSRecognizer implements IRecognizer
 
   async addStrokes(strokes: TStroke[]): Promise<TExport>
   {
-    this.logger.info("addStrokes", { strokes })
+    this.#logger.info("addStrokes", { strokes })
     await this.initialized?.promise
     this.addStrokeDeferred = new DeferredPromise<TExport>()
     if (strokes.length === 0) {
@@ -467,7 +462,7 @@ export class WSRecognizer implements IRecognizer
 
   async setPenStyle(penStyle: TPenStyle): Promise<void>
   {
-    this.logger.info("setPenStyle", { penStyle })
+    this.#logger.info("setPenStyle", { penStyle })
     await this.initialized?.promise
     this.penStyle = penStyle
     const message: TWebSocketEvent = {
@@ -481,7 +476,7 @@ export class WSRecognizer implements IRecognizer
   {
     await this.initialized?.promise
     this.penStyleClasses = penStyleClasses
-    this.logger.info("setPenStyleClasses", { penStyleClasses })
+    this.#logger.info("setPenStyleClasses", { penStyleClasses })
     const message: TWebSocketEvent = {
       type: "setPenStyleClasses",
       styleClasses: penStyleClasses
@@ -491,7 +486,7 @@ export class WSRecognizer implements IRecognizer
 
   async setTheme(theme: TTheme): Promise<void>
   {
-    this.logger.info("setTheme", { theme })
+    this.#logger.info("setTheme", { theme })
     await this.initialized?.promise
     this.theme = theme
     const message: TWebSocketEvent = {
@@ -503,7 +498,7 @@ export class WSRecognizer implements IRecognizer
 
   async export(model: IModel, requestedMimeTypes?: string[]): Promise<IModel>
   {
-    this.logger.info("export", { model, requestedMimeTypes })
+    this.#logger.info("export", { model, requestedMimeTypes })
     await this.initialized?.promise
     this.exportDeferred = new DeferredPromise<TExport>()
     const localModel = model.getClone()
@@ -540,13 +535,13 @@ export class WSRecognizer implements IRecognizer
     const exports: TExport = await this.exportDeferred?.promise
     localModel.updatePositionReceived()
     localModel.mergeExport(exports)
-    this.logger.debug("export", { model: localModel })
+    this.#logger.debug("export", { model: localModel })
     return localModel
   }
 
   async import(model: IModel, data: Blob, mimeType?: string): Promise<IModel>
   {
-    this.logger.info("import", { data, mimeType })
+    this.#logger.info("import", { data, mimeType })
     await this.initialized?.promise
     const localModel = model.getClone()
     const chunkSize = this.serverConfiguration.websocket.fileChunkSize
@@ -588,7 +583,7 @@ export class WSRecognizer implements IRecognizer
 
   async resize(model: IModel): Promise<IModel>
   {
-    this.logger.info("resize", { model })
+    this.#logger.info("resize", { model })
     await this.initialized?.promise
     this.resizeDeferred = new DeferredPromise<void>()
     const localModel = model.getClone()
@@ -606,7 +601,7 @@ export class WSRecognizer implements IRecognizer
 
   async importPointEvents(strokes: TStroke[]): Promise<TExport>
   {
-    this.logger.info("importPointsEvents", { strokes })
+    this.#logger.info("importPointsEvents", { strokes })
     await this.initialized?.promise
     this.importPointEventsDeferred = new DeferredPromise<TExport>()
     const message: TWebSocketEvent = {
@@ -616,13 +611,13 @@ export class WSRecognizer implements IRecognizer
     this.send(message)
     const exportPoints = await this.importPointEventsDeferred?.promise
     this.importPointEventsDeferred = undefined
-    this.logger.debug("importPointEvents", { exportPoints })
+    this.#logger.debug("importPointEvents", { exportPoints })
     return exportPoints as TExport
   }
 
   async convert(model: IModel, conversionState?: TConverstionState): Promise<IModel>
   {
-    this.logger.info("convert", { model, conversionState })
+    this.#logger.info("convert", { model, conversionState })
     await this.initialized?.promise
     this.convertDeferred = new DeferredPromise<TExport>()
     const localModel = model.getClone()
@@ -635,7 +630,7 @@ export class WSRecognizer implements IRecognizer
     localModel.updatePositionReceived()
     localModel.mergeConvert(myExportConverted)
     localModel.mergeExport(myExportConverted)
-    this.logger.debug("convert", { model: localModel })
+    this.#logger.debug("convert", { model: localModel })
     return localModel
   }
 
@@ -652,7 +647,7 @@ export class WSRecognizer implements IRecognizer
 
   async undo(model: IModel): Promise<IModel>
   {
-    this.logger.info("undo", { model })
+    this.#logger.info("undo", { model })
     await this.initialized?.promise
     const localModel = model.getClone()
     this.undoDeferred = new DeferredPromise<TExport>()
@@ -663,14 +658,14 @@ export class WSRecognizer implements IRecognizer
     const undoExports = await this.undoDeferred?.promise
     localModel.updatePositionReceived()
     localModel.mergeExport(undoExports)
-    this.logger.debug("undo", { model: localModel })
+    this.#logger.debug("undo", { model: localModel })
     this.undoDeferred = undefined
     return localModel
   }
 
   async redo(model: IModel): Promise<IModel>
   {
-    this.logger.info("redo", { model })
+    this.#logger.info("redo", { model })
     await this.initialized?.promise
     const localModel = model.getClone()
     this.redoDeferred = new DeferredPromise<TExport>()
@@ -681,14 +676,14 @@ export class WSRecognizer implements IRecognizer
     const redoExports = await this.redoDeferred?.promise
     localModel.updatePositionReceived()
     localModel.mergeExport(redoExports)
-    this.logger.debug("redo", { model: redoExports })
+    this.#logger.debug("redo", { model: redoExports })
     this.redoDeferred = undefined
     return localModel
   }
 
   async clear(model: IModel): Promise<IModel>
   {
-    this.logger.info("clear", { model })
+    this.#logger.info("clear", { model })
     await this.initialized?.promise
     const localModel = model.getClone()
     localModel.modificationDate = Date.now()
@@ -701,24 +696,24 @@ export class WSRecognizer implements IRecognizer
     localModel.updatePositionReceived()
     localModel.mergeExport(clearExports)
     this.clearDeferred = undefined
-    this.logger.info("clear", { model: localModel })
+    this.#logger.info("clear", { model: localModel })
     return localModel
   }
 
   close(code: number, reason: string): void
   {
     if (this.socket.readyState === this.socket.OPEN || this.socket.readyState === this.socket.CONNECTING) {
+      this.#logger.info("close", { code, reason })
       this.socket.removeEventListener("close", this.closeCallback)
       this.socket.removeEventListener("message", this.messageCallback)
       this.socket.removeEventListener("open", this.openCallback)
       this.socket.close(code, reason)
-      this.logger.info("close", { code, reason })
     }
   }
 
   destroy(): void
   {
-    this.logger.info("destroy")
+    this.#logger.info("destroy")
     this.connected = undefined
     this.initialized = undefined
     this.addStrokeDeferred = undefined
