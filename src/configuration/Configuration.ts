@@ -1,5 +1,5 @@
 
-import { TConfiguration, TConfigurationClient } from "../@types/Configuration"
+import { TConfiguration, TConfigurationClient } from "../@types/configuration"
 import { TEventConfiguration } from "../@types/configuration/EventConfiguration"
 import { TGrabberConfiguration } from "../@types/configuration/GrabberConfiguration"
 import { TRecognitionConfiguration } from "../@types/configuration/RecognitionConfiguration"
