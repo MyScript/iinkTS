@@ -8,7 +8,7 @@ import { IBehaviors, TBehaviorOptions } from "./@types/Behaviors"
 import { TConverstionState } from "./@types/configuration/RecognitionConfiguration"
 import { TMarginConfiguration } from "./@types/configuration/recognition/MarginConfiguration"
 import { TUndoRedoContext } from "./@types/undo-redo/UndoRedoContext"
-import { LoggerClass, LoggerLevel, TLoggerConfiguration } from "./@types/configuration/LoggerConfiguration"
+import { LoggerClass, TLoggerConfiguration } from "./@types/configuration/LoggerConfiguration"
 
 import { ExportType, Intention } from "./Constants"
 import { DefaultLoggerConfiguration } from "./configuration"
@@ -38,8 +38,7 @@ export class Editor
 
   logger: Logger
   #loggerConfiguration: TLoggerConfiguration
-
-  debug = false
+  showStrokesPan = false
 
   constructor(wrapperHTML: HTMLElement, options: TBehaviorOptions, globalClassCss = "ms-editor")
   {
@@ -274,17 +273,6 @@ export class Editor
     this.#messageHTML.classList.add("error-msg")
     this.#messageHTML.classList.remove("info-msg")
     this.#messageHTML.innerText = err.message
-    if (this.logger.level >= LoggerLevel.DEBUG) {
-      const pName = document.createElement("p")
-      pName.innerHTML = err.name
-      this.#messageHTML.prepend(pName)
-
-      const pStack = document.createElement("p")
-      pStack.style.width = "50vw"
-      pStack.style.marginLeft = "calc(-25vw + 100px)"
-      pStack.innerHTML = err.stack || ""
-      this.#messageHTML.appendChild(pStack)
-    }
     this.logger.debug("showError", this.#messageHTML)
   }
 
@@ -304,7 +292,7 @@ export class Editor
 
   #showStrokesIfDebug(): void
   {
-    if (this.logger.level <= LoggerLevel.DEBUG) {
+    if (this.showStrokesPan) {
       let panel = document.getElementById("stroke-panel")
       const text = JSON.stringify(this.model.rawStrokes.map((s: TStroke) => ({ pointerType: s.pointerType, pointerId: s.pointerId, pointers: s.pointers })))
       if (!panel) {
