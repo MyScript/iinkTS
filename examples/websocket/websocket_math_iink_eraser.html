@@ -166,7 +166,7 @@
         });
 
         eraserElement.addEventListener("click", () => {
-          editor.mode = "erasing";
+          editor.intention = iink.constants.Intention.Erase;
           eraserElement.disabled = true;
           eraserElement.classList.add("active");
           penElement.disabled = false;
@@ -174,7 +174,7 @@
         });
 
         penElement.addEventListener("click", () => {
-          editor.mode = "writing";
+          editor.intention = iink.constants.Intention.Write;
           eraserElement.disabled = false;
           eraserElement.classList.remove("active");
           penElement.disabled = true;

@@ -10,7 +10,7 @@ import { TMarginConfiguration } from "./@types/configuration/recognition/MarginC
 import { TUndoRedoContext } from "./@types/undo-redo/UndoRedoContext"
 import { LoggerClass, LoggerLevel, TLoggerConfiguration } from "./@types/configuration/LoggerConfiguration"
 
-import { ExportType, ModeInteraction } from "./Constants"
+import { ExportType, Intention } from "./Constants"
 import { DefaultLoggerConfiguration } from "./configuration"
 import { PublicEvent } from "./event/PublicEvent"
 import { InternalEvent } from "./event/InternalEvent"
@@ -104,32 +104,32 @@ export class Editor
     this.initialize()
   }
 
-  get mode(): ModeInteraction
+  get intention(): Intention
   {
-    return this.behaviors.mode
+    return this.behaviors.intention
   }
-  set mode(m: ModeInteraction)
+  set intention(m: Intention)
   {
-    this.logger.info("set mode", { m })
-    this.behaviors.mode = m
-    switch (this.behaviors.mode) {
-      case ModeInteraction.Erasing:
+    this.logger.info("set intention", { m })
+    this.behaviors.intention = m
+    switch (this.behaviors.intention) {
+      case Intention.Erase:
         this.wrapperHTML.classList.add("erasing")
         this.wrapperHTML.classList.remove("selecting")
         break
-      // case ModeInteraction.Selecting:
+      // case Intention.Selecting:
       //   this.model.resetSelectedStrokes()
       //   this.wrapperHTML.classList.remove("erasing")
       //   this.wrapperHTML.classList.add("selecting")
       //   break;
       default:
-        this.logger.warn("set mode default", { m })
+        this.logger.warn("set intention default", { m })
         document.body.style.cursor = "initial"
         this.wrapperHTML.classList.remove("erasing")
         this.wrapperHTML.classList.remove("selecting")
         break
     }
-    this.logger.debug("set mode", this.wrapperHTML)
+    this.logger.debug("set intention", this.wrapperHTML)
   }
 
   get events(): PublicEvent

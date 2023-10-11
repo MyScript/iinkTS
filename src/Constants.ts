@@ -110,10 +110,10 @@ export const enum ExportType {
  * @group Editor
  * @remarks List the possibilities of interactions
  */
-export const enum ModeInteraction
+export const enum Intention
 {
-  Writing = "writing",
-  Erasing = "erasing",
+  Write = "write",
+  Erase = "erase",
   // Selecting = "selecting"
 }
 

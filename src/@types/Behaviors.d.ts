@@ -29,7 +29,7 @@ export interface IBehaviors
   context: TUndoRedoContext
   options: TBehaviorOptions
   styleManager: StyleManager
-  mode: ModeInteraction
+  intention: Intention
   #configuration: TConfiguration
 
   get currentPenStyle(): TPenStyle

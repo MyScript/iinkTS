@@ -16,7 +16,7 @@ import { InternalEvent } from "../event/InternalEvent"
 import { StyleManager } from "../style/StyleManager"
 import { Configuration } from "../configuration/Configuration"
 import { Model } from "../model/Model"
-import { ModeInteraction, LoggerClass } from "../Constants"
+import { Intention, LoggerClass } from "../Constants"
 import { LoggerManager } from "../logger"
 
 export class RestBehaviors implements IBehaviors
@@ -30,7 +30,7 @@ export class RestBehaviors implements IBehaviors
   styleManager: StyleManager
   #configuration: TConfiguration
   #model: IModel
-  mode: ModeInteraction
+  intention: Intention
   #logger = LoggerManager.getLogger(LoggerClass.BEHAVIORS)
 
   #resizeTimer?: ReturnType<typeof setTimeout>
@@ -47,7 +47,7 @@ export class RestBehaviors implements IBehaviors
     this.renderer = new CanvasRenderer(this.#configuration.rendering)
     this.recognizer = new RestRecognizer(this.#configuration.server, this.#configuration.recognition)
 
-    this.mode = ModeInteraction.Writing
+    this.intention = Intention.Write
     this.#model = new Model()
     this.undoRedoManager = new UndoRedoManager(this.#configuration["undo-redo"], this.model)
   }
@@ -124,11 +124,11 @@ export class RestBehaviors implements IBehaviors
 
   private onPointerDown(evt: PointerEvent, point: TPointer): void
   {
-    this.#logger.info("onPointerDown", { mode: this.mode, evt, point })
+    this.#logger.info("onPointerDown", { intention: this.intention, evt, point })
     const { pointerType } = evt
     const style: TPenStyle = Object.assign({}, this.theme?.ink, this.currentPenStyle)
-    switch (this.mode) {
-      case ModeInteraction.Erasing:
+    switch (this.intention) {
+      case Intention.Erase:
         if (this.model.removeStrokesFromPoint(point).length > 0) {
           this.model.endCurrentStroke(point)
           this.updateModelRendering()
@@ -136,21 +136,21 @@ export class RestBehaviors implements IBehaviors
             .catch(error => this.internalEvent.emitError(error as Error))
         }
         break
-      case ModeInteraction.Writing:
+      case Intention.Write:
         this.model.initCurrentStroke(point, evt.pointerId, pointerType, style)
         this.drawCurrentStroke()
         break
       default:
-        this.#logger.warn(`onPointerDown mode unknow: "${this.mode}"`)
+        this.#logger.warn(`onPointerDown intention unknow: "${this.intention}"`)
         break
     }
   }
 
   private onPointerMove(_evt: PointerEvent, point: TPointer): void
   {
-    this.#logger.info("onPointerMove", { mode: this.mode, point })
-    switch (this.mode) {
-      case ModeInteraction.Erasing:
+    this.#logger.info("onPointerMove", { intention: this.intention, point })
+    switch (this.intention) {
+      case Intention.Erase:
         if (this.model.removeStrokesFromPoint(point).length > 0) {
           this.model.endCurrentStroke(point)
           this.updateModelRendering()
@@ -158,21 +158,21 @@ export class RestBehaviors implements IBehaviors
             .catch(error => this.internalEvent.emitError(error as Error))
         }
         break
-      case ModeInteraction.Writing:
+      case Intention.Write:
         this.model.appendToCurrentStroke(point)
         this.drawCurrentStroke()
         break
       default:
-        this.#logger.warn(`onPointerMove mode unknow: "${this.mode}"`)
+        this.#logger.warn(`onPointerMove intention unknow: "${this.intention}"`)
         break
     }
   }
 
   private onPointerUp(_evt: PointerEvent, point: TPointer): void
   {
-    this.#logger.info("onPointerUp", { mode: this.mode, point })
-    switch (this.mode) {
-      case ModeInteraction.Erasing:
+    this.#logger.info("onPointerUp", { intention: this.intention, point })
+    switch (this.intention) {
+      case Intention.Erase:
         if (this.model.removeStrokesFromPoint(point).length > 0) {
           this.model.endCurrentStroke(point)
           this.updateModelRendering()
@@ -180,14 +180,14 @@ export class RestBehaviors implements IBehaviors
             .catch(error => this.internalEvent.emitError(error as Error))
         }
         break
-      case ModeInteraction.Writing:
+      case Intention.Write:
         this.model.endCurrentStroke(point)
         this.updateModelRendering()
           .then(newModel => Object.assign(this.#model, newModel))
           .catch(error => this.internalEvent.emitError(error as Error))
         break
       default:
-        this.#logger.warn(`onPointerUp mode unknow: "${this.mode}"`)
+        this.#logger.warn(`onPointerUp intention unknow: "${this.intention}"`)
         break
     }
   }
