@@ -21,7 +21,7 @@ export class CanvasRenderer
     capturingCanvas: HTMLCanvasElement
     capturingCanvasContext: CanvasRenderingContext2D
   }
-  #logger = LoggerManager.getLogger(LoggerClass.CANVAS_RENDERER)
+  #logger = LoggerManager.getLogger(LoggerClass.RENDERER)
 
   constructor(config: TRenderingConfiguration)
   {
