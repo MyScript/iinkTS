@@ -164,6 +164,7 @@ const converted = `(async () => {
  * @returns Promise<Exports>
  */
 module.exports.getDatasFromConvertedEvent = async (page) => {
+  await page.waitForFunction(() => !!window.editor)
   return page.evaluate(converted)
 }
 
@@ -172,6 +173,7 @@ module.exports.getDatasFromConvertedEvent = async (page) => {
  * @returns Promise<void>
  */
 module.exports.waitEditorIdle = async (page) => {
+  await page.waitForFunction(() => !!window.editor)
   return page.evaluate("editor.waitForIdle()")
 }
 
@@ -187,6 +189,7 @@ const loaded = `(async () => {
  * @returns Promise<void>
  */
 module.exports.waitEditorLoaded = async (page) => {
+  await page.waitForFunction(() => !!window.editor)
   return page.evaluate(loaded)
 }
 
