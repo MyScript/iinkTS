@@ -13,7 +13,7 @@ export class WSSVGRenderer
   context!: {
     parent: HTMLElement
   }
-  #logger = LoggerManager.getLogger(LoggerClass.SVGRENDERER)
+  #logger = LoggerManager.getLogger(LoggerClass.RENDERER)
 
   constructor(config: TRenderingConfiguration)
   {
