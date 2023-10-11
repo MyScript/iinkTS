@@ -74,7 +74,7 @@ export class InternalEvent extends EventTarget
 
   emitError(err: Error): void
   {
-    this.#logger.error("emitError", { err })
+    this.#logger.info("emitError", { err })
     this.#emit(InternalEventType.ERROR, err)
   }
 
