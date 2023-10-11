@@ -214,24 +214,24 @@ describe("Editor.ts", () =>
     })
   })
 
-  describe("mode", () =>
+  describe("intention", () =>
   {
     const wrapperHTML: HTMLElement = document.createElement("div")
     const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
-    test("should init mode = Writing", () =>
+    test("should init intention = Write", () =>
     {
-      expect(editor.mode).toBe(constants.ModeInteraction.Writing)
+      expect(editor.intention).toBe(constants.Intention.Write)
     })
-    test("should set mode = erase", () =>
+    test("should set intention = erase", () =>
     {
-      editor.mode = constants.ModeInteraction.Erasing
+      editor.intention = constants.Intention.Erase
       expect(wrapperHTML.classList).toContain("erasing")
     })
-    test("should toggle mode", () =>
+    test("should toggle intention", () =>
     {
-      editor.mode = constants.ModeInteraction.Erasing
+      editor.intention = constants.Intention.Erase
       expect(wrapperHTML.classList).toContain("erasing")
-      editor.mode = constants.ModeInteraction.Writing
+      editor.intention = constants.Intention.Write
       expect(wrapperHTML.classList).not.toContain("erasing")
     })
   })

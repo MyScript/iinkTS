@@ -123,8 +123,8 @@
         undoElement.disabled = isPreview;
         redoElement.disabled = isPreview;
         clearElement.disabled = isPreview;
-        eraserElement.disabled = isPreview || editor.mode === "erasing";
-        penElement.disabled = isPreview || editor.mode === "writing";
+        eraserElement.disabled = isPreview || editor.intention === iink.constants.Intention.Erase;
+        penElement.disabled = isPreview || editor.intention === iink.constants.Intention.Write;
         if (!isPreview) {
           convertedSvg.style.visibility = "hidden";
           canvasRendering.style.display = "initial";
@@ -175,7 +175,7 @@
           undoElement.disabled = !event.detail.canUndo || isPreview;
           redoElement.disabled = !event.detail.canRedo || isPreview;
           clearElement.disabled = !event.detail.canClear || isPreview;
-          eraserElement.disabled = !event.detail.canClear || editor.mode === "erasing" || isPreview;
+          eraserElement.disabled = !event.detail.canClear || editor.intention === iink.constants.Intention.Erase || isPreview;
         });
 
         editor.events.addEventListener("exported", (event) => {
@@ -224,7 +224,7 @@
         eraserElement.addEventListener("click", () => {
           eraserElement.disabled = true;
           penElement.disabled = false;
-          editorElement.editor.mode = "erasing";
+          editorElement.editor.intention = iink.constants.Intention.Erase;
           eraserElement.disabled = true;
           eraserElement.classList.add("active");
           penElement.disabled = false;
@@ -234,7 +234,7 @@
         penElement.addEventListener("click", () => {
           eraserElement.disabled = false;
           penElement.disabled = true;
-          editorElement.editor.mode = "pen";
+          editorElement.editor.intention = iink.constants.Intention.Write;
           eraserElement.disabled = false;
           eraserElement.classList.remove("active");
           penElement.disabled = true;

@@ -11,7 +11,7 @@ import { TPointer } from "../@types/geometry"
 
 import { PointerEventGrabber } from "../grabber/PointerEventGrabber"
 import { WSRecognizer } from "../recognizer/WSRecognizer"
-import { ModeInteraction } from "../Constants"
+import { Intention } from "../Constants"
 import { InternalEvent } from "../event/InternalEvent"
 import { DeferredPromise } from "../utils/DeferredPromise"
 import { WSSVGRenderer } from "../renderer/svg/WSSVGRenderer"
@@ -33,7 +33,7 @@ export class WSBehaviors implements IBehaviors
   styleManager: StyleManager
   #configuration: TConfiguration
   #model: IModel
-  mode: ModeInteraction
+  intention: Intention
   #logger = LoggerManager.getLogger(LoggerClass.BEHAVIORS)
 
   #resizeTimer?: ReturnType<typeof setTimeout>
@@ -49,7 +49,7 @@ export class WSBehaviors implements IBehaviors
     this.renderer = new WSSVGRenderer(this.#configuration.rendering)
     this.recognizer = new WSRecognizer(this.#configuration.server, this.#configuration.recognition)
 
-    this.mode = ModeInteraction.Writing
+    this.intention = Intention.Write
     this.#model = new Model()
     this.undoRedoManager = new UndoRedoManager(this.#configuration["undo-redo"], this.model)
   }
@@ -139,10 +139,10 @@ export class WSBehaviors implements IBehaviors
 
   private onPointerDown(evt: PointerEvent, point: TPointer): void
   {
-    this.#logger.info("onPointerDown", { mode: this.mode, evt, point })
+    this.#logger.info("onPointerDown", { intention: this.intention, evt, point })
     let { pointerType } = evt
     const style: TPenStyle = Object.assign({}, this.theme?.ink, this.currentPenStyle)
-    if (this.mode === ModeInteraction.Erasing) {
+    if (this.intention === Intention.Erase) {
       pointerType = "eraser"
     }
     this.model.initCurrentStroke(point, evt.pointerId, pointerType, style)
@@ -151,7 +151,7 @@ export class WSBehaviors implements IBehaviors
 
   private onPointerMove(_evt: PointerEvent, point: TPointer): void
   {
-    this.#logger.info("onPointerMove", { mode: this.mode, point })
+    this.#logger.info("onPointerMove", { intention: this.intention, point })
     this.model.appendToCurrentStroke(point)
     this.drawCurrentStroke()
   }
@@ -159,7 +159,7 @@ export class WSBehaviors implements IBehaviors
   private async onPointerUp(_evt: PointerEvent, point: TPointer): Promise<void>
   {
     try {
-      this.#logger.info("onPointerUp", { mode: this.mode, point })
+      this.#logger.info("onPointerUp", { intention: this.intention, point })
       this.model.endCurrentStroke(point)
       await this.updateModelRendering()
     } catch (error) {
