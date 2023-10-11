@@ -1,4 +1,4 @@
-import { TConfiguration } from "../@types/Configuration"
+import { TConfiguration } from "../@types/configuration"
 import { TGrabberConfiguration } from "../@types/configuration/GrabberConfiguration"
 import { TRenderingConfiguration } from "../@types/configuration/RenderingConfiguration"
 import { TServerConfiguration } from "../@types/configuration/ServerConfiguration"

@@ -1,5 +1,5 @@
 import { IBehaviors, TBehaviorOptions } from "../@types/Behaviors"
-import { TConfiguration } from "../@types/Configuration"
+import { TConfiguration } from "../@types/configuration"
 import { IModel, TExport } from "../@types/model/Model"
 import { TWebSocketSVGPatchEvent } from "../@types/recognizer/WSRecognizer"
 import { TStroke } from "../@types/model/Stroke"

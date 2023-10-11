@@ -1,4 +1,4 @@
-import { TConfiguration } from "./@types/Configuration"
+import { TConfiguration } from "./@types/configuration"
 import { IGrabber } from "./@types/grabber/Grabber"
 import { TStroke } from "./@types/model/Stroke"
 import { IModel, TExport, TJIIXExport } from "./@types/model/Model"
