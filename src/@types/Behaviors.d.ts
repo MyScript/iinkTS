@@ -6,7 +6,7 @@ import { TConverstionState } from "./configuration/RecognitionConfiguration"
 import { TPenStyle } from "./style/PenStyle"
 import { TStroke } from "./model/Stroke"
 import { TUndoRedoContext } from "./undo-redo/UndoRedoContext"
-import { TConfiguration } from "./Configuration"
+import { TConfiguration } from "./configuration"
 import { StyleManager } from "../style/StyleManager"
 import { TLoggerConfiguration } from "./configuration/LoggerConfiguration"
 

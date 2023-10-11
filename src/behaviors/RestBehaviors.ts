@@ -1,6 +1,6 @@
 import { IBehaviors, TBehaviorOptions } from "../@types/Behaviors"
 import { IModel, TExport } from "../@types/model/Model"
-import { TConfiguration } from "../@types/Configuration"
+import { TConfiguration } from "../@types/configuration"
 import { TConverstionState } from "../@types/configuration/RecognitionConfiguration"
 import { TUndoRedoContext } from "../@types/undo-redo/UndoRedoContext"
 import { TPenStyle } from "../@types/style/PenStyle"
