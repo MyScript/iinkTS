@@ -1,4 +1,5 @@
 export * from "./recognition"
+export * from "./Configuration"
 export * from "./EventConfiguration"
 export * from "./GrabberConfiguration"
 export * from "./RecognitionConfiguration"

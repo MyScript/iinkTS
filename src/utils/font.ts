@@ -1,4 +1,4 @@
-import { TConfigurationClient } from "../@types/Configuration"
+import { TConfigurationClient } from "../@types/configuration"
 
 export async function getAvailableFontList(configuration: TConfigurationClient): Promise<Array<string>>
 {

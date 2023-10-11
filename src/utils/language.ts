@@ -1,4 +1,4 @@
-import { TConfigurationClient } from "../@types/Configuration"
+import { TConfigurationClient } from "../@types/configuration"
 
 export async function getAvailableLanguageList(configuration: TConfigurationClient): Promise<Array<Record<string, string>>>
 {

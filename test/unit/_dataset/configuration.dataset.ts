@@ -1,4 +1,4 @@
-import { TConfigurationClient } from "../../../src/@types/Configuration"
+import { TConfigurationClient } from "../../../src/@types/configuration"
 
 export const ConfigurationTextWebsocket: TConfigurationClient = {
   server: {
