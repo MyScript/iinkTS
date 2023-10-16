@@ -32,6 +32,7 @@ export class InternalEvent extends EventTarget
   {
     this.#logger.info("removeAllListeners")
     this.#abortController.abort()
+    this.#abortController = new AbortController()
   }
 
   #emit(type: string, data?: unknown): void
