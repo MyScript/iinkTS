@@ -48,6 +48,9 @@
           <img src="../assets/redo.svg" />
         </button>
       </div>
+      <div class="flex-container gap">
+        <button class="classic-btn" id="convert" disabled>Convert</button>
+      </div>
     </nav>
 
     <div id="editor" touch-action="none"></div>
@@ -58,6 +61,7 @@
       const clearElement = document.getElementById("clear");
       const undoElement = document.getElementById("undo");
       const redoElement = document.getElementById("redo");
+      const convertElement = document.getElementById("convert");
 
       function cleanLatex(latexExport) {
         if (typeof latexExport === "number") {
@@ -115,8 +119,17 @@
         editor.events.addEventListener("exported", (evt) => {
           const exports = evt.detail;
           if (exports && exports["application/x-latex"]) {
+            convertElement.disabled = false;
             katex.render(cleanLatex(exports["application/x-latex"]), resultElement);
+            // resultElement.innerHTML = '<span>' + exports['application/x-latex'] + '</span>';
+          } else if (exports && exports["application/mathml+xml"]) {
+            convertElement.disabled = false;
+            resultElement.innerText = exports["application/mathml+xml"];
+          } else if (exports && exports["application/mathofficeXML"]) {
+            convertElement.disabled = false;
+            resultElement.innerText = exports["application/mathofficeXML"];
           } else {
+            convertElement.disabled = true;
             resultElement.innerHTML = "";
           }
         });
@@ -131,6 +144,10 @@
 
         redoElement.addEventListener("click", () => {
           editor.redo();
+        });
+
+        convertElement.addEventListener("click", () => {
+          editorElement.editor.convert();
         });
 
         window.addEventListener("resize", () => {

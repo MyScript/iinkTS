@@ -6,10 +6,11 @@ const {
   getExportsTypeFromEditorModel,
   getEditorConfiguration,
   setEditorConfiguration,
-  getExportsFromEditorModel,
+  getConversionsFromEditorModel,
+  getDatasFromConvertedEvent,
   waitEditorIdle
 } = require('../helper')
-const { equation1, fence } = require('../strokesDatas')
+const { equation1, fence, sum } = require('../strokesDatas')
 
 describe('Websocket Math', function () {
   beforeAll(async () => {
@@ -110,5 +111,85 @@ describe('Websocket Math', function () {
     const mathml = await getExportsTypeFromEditorModel(page, 'application/mathml+xml')
     expect(mathml.trim().replace(/ /g, '')).toEqual(fence.exports.MATHML.MSOFFICE[fence.exports.MATHML.MSOFFICE.length - 1].trim().replace(/ /g, ''))
   })
+
+  test('should convert svg path', async () => {
+    for(const s of equation1.strokes) {
+      await Promise.all([
+        getDatasFromExportedEvent(page),
+        write(page, [s], 100, 100)
+      ])
+    }
+    const emptyConvert = await getConversionsFromEditorModel(page)
+    expect(emptyConvert).toBeUndefined()
+    expect(await page.locator('path').count()).toEqual(equation1.strokes.length)
+
+    await Promise.all([
+      getDatasFromConvertedEvent(page),
+      page.click('#convert')
+    ])
+
+    await waitEditorIdle(page)
+    expect(await page.locator('path').count()).toEqual(equation1.exports.LATEX.at(-1).length)
+
+    const convert = await getConversionsFromEditorModel(page)
+    const latexExport = await getExportsTypeFromEditorModel(page, 'application/x-latex')
+    expect(convert['application/x-latex']).toEqual(latexExport)
+    expect(latexExport).toEqual(equation1.exports.LATEX.at(-1))
+  })
+
+  test('should convert and solve sum by default', async () => {
+    const config = await getEditorConfiguration(page)
+    expect(config.recognition.math.solver.enable).toEqual(true)
+    let numStroke = 0
+    for(const s of sum.strokes) {
+      const [exports] = await Promise.all([
+        getDatasFromExportedEvent(page),
+        write(page, [s])
+      ])
+      expect(exports['application/x-latex']).toEqual(sum.exports.LATEX.at(numStroke))
+      numStroke++
+    }
+    const emptyConvert = await getConversionsFromEditorModel(page)
+    expect(emptyConvert).toBeUndefined()
+
+    await Promise.all([
+      getDatasFromConvertedEvent(page),
+      page.click('#convert')
+    ])
+    const convert = await getConversionsFromEditorModel(page)
+    expect(convert['application/x-latex']).toEqual(sum.converts.LATEX.at(-1))
+    expect(await page.locator('#result').locator('.katex-html').textContent()).toEqual(sum.converts.LATEX.at(-1))
+  })
+
+  test('should convert and not solve sum', async () => {
+    const config = await getEditorConfiguration(page)
+    config.recognition.math.solver.enable = false
+    await setEditorConfiguration(page, config)
+    await waitForEditorWebSocket(page)
+
+    let numStroke = 0
+    for(const s of sum.strokes) {
+      const [exports] = await Promise.all([
+        getDatasFromExportedEvent(page),
+        write(page, [s])
+      ])
+      expect(exports['application/x-latex']).toEqual(sum.exports.LATEX.at(numStroke))
+      numStroke++
+    }
+    const emptyConvert = await getConversionsFromEditorModel(page)
+    expect(emptyConvert).toBeUndefined()
+
+    await Promise.all([
+      getDatasFromConvertedEvent(page),
+      page.click('#convert')
+    ])
+    const convert = await getConversionsFromEditorModel(page)
+    const latexExport = await getExportsTypeFromEditorModel(page, 'application/x-latex')
+    expect(convert['application/x-latex']).toEqual(latexExport)
+    expect(latexExport).toEqual(sum.exports.LATEX.at(-1))
+    expect(await page.locator('#result').locator('.katex-html').textContent()).toEqual(sum.exports.LATEX.at(-1))
+  })
+
+
   require("../_partials/math/nav-actions-math-undo-redo-test")
 })
