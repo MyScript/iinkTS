@@ -301,17 +301,27 @@ export class SmartGuide {
   }
 
   #addListeners(): void {
-    this.#ellipsisElement.addEventListener("pointerdown", evt => this.#onClickEllipsis(evt))
-    this.#convertElement.addEventListener("pointerdown", evt => this.#onClickConvert(evt))
-    this.#copyElement.addEventListener("pointerdown", evt => this.#onClickCopy(evt))
-    this.#deleteElement.addEventListener("pointerdown", evt => this.#onClickDelete(evt))
-    this.#prompterTextElement.addEventListener("pointerdown", evt => this.#onClickPrompter(evt))
-    this.#candidatesElement.addEventListener("pointerdown", evt => this.#onClickCandidate(evt))
-    document.addEventListener("pointerdown", () => this.#onClickOutSide())
+    this.#ellipsisElement.addEventListener("pointerdown", this.#onClickEllipsis.bind(this))
+    this.#convertElement.addEventListener("pointerdown", this.#onClickConvert.bind(this))
+    this.#copyElement.addEventListener("pointerdown", this.#onClickCopy.bind(this))
+    this.#deleteElement.addEventListener("pointerdown", this.#onClickDelete.bind(this))
+    this.#prompterTextElement.addEventListener("pointerdown", this.#onClickPrompter.bind(this))
+    this.#candidatesElement.addEventListener("pointerdown", this.#onClickCandidate.bind(this))
+    document.addEventListener("pointerdown", this.#onClickOutSide.bind(this))
+  }
+
+  #removeListeners(): void {
+    this.#ellipsisElement.removeEventListener("pointerdown", this.#onClickEllipsis)
+    this.#convertElement.removeEventListener("pointerdown", this.#onClickConvert)
+    this.#copyElement.removeEventListener("pointerdown", this.#onClickCopy)
+    this.#deleteElement.removeEventListener("pointerdown", this.#onClickDelete)
+    this.#prompterTextElement.removeEventListener("pointerdown", this.#onClickPrompter)
+    this.#candidatesElement.removeEventListener("pointerdown", this.#onClickCandidate)
+    document.removeEventListener("pointerdown", this.#onClickOutSide)
   }
 
   resize(): void {
-    this.#logger.info("resize", { })
+    this.#logger.info("resize")
     const mmToPixels = 3.779527559
     const marginTop = this.margin.top * mmToPixels
     const marginLeft = this.margin.left * mmToPixels
@@ -393,14 +403,15 @@ export class SmartGuide {
   }
 
   clear(): void {
-    this.#logger.info("clear", { })
+    this.#logger.info("clear")
     this.#prompterTextElement.innerHTML = ""
     this.#candidatesElement.innerHTML = ""
     this.#hide()
   }
 
   destroy(): void {
-    this.#logger.info("destroy", { })
-    this.#smartGuideElement.innerHTML = ""
+    this.#logger.info("destroy")
+    this.#removeListeners()
+    this.#smartGuideElement.remove()
   }
 }
