@@ -63,7 +63,6 @@ export class Editor
     this.wrapperHTML.appendChild(this.#messageHTML)
 
     this.#instantiateBehaviors(options)
-    this.#addListeners()
   }
 
   get loggerConfiguration(): TLoggerConfiguration
@@ -187,6 +186,7 @@ export class Editor
     if (!options?.configuration) {
       throw new Error("Configuration required")
     }
+    InternalEvent.getInstance().removeAllListeners()
     if (this.#behaviors) {
       this.#behaviors.destroy()
     }
@@ -200,9 +200,9 @@ export class Editor
     this.logger.debug("instantiateBehaviors", this.#behaviors)
   }
 
-  #initializeBehaviors(): Promise<void>
+  async #initializeBehaviors(): Promise<void>
   {
-    this.logger.info("initializeBehaviors start", { })
+    this.logger.info("initializeBehaviors start")
     this.#initializationDeferred = new DeferredPromise<void>()
     this.#loaderHTML.style.display = "initial"
     this.#cleanMessage()
@@ -216,11 +216,11 @@ export class Editor
         this.events.emitLoaded()
         this.logger.debug("initializeBehaviors", this.wrapperHTML)
       })
-      .catch((e: Error) =>
+      .catch((error: Error) =>
       {
-        this.logger.error("initializeBehaviors catch", { e })
-        this.#initializationDeferred.reject(e)
-        this.#showError(e)
+        this.logger.error("initializeBehaviors catch", { error })
+        this.#initializationDeferred.reject(error)
+        this.#showError(error)
       })
       .finally(() =>
       {
@@ -356,9 +356,10 @@ export class Editor
 
   async initialize(): Promise<void>
   {
-    this.logger.info("initialize", { })
+    this.logger.info("initialize")
     await this.#initializeBehaviors()
     this.#initializeSmartGuide()
+    this.#addListeners()
   }
 
   async waitForIdle(): Promise<void>

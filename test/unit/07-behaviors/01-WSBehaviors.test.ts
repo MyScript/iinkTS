@@ -11,7 +11,7 @@ import
   TTheme
 } from "../../../src/@types"
 
-import { behaviors, event, model, configuration, constants, style } from "../../../src/iink"
+import { behaviors, event, model, configuration, style } from "../../../src/iink"
 
 describe("WSBehaviors.ts", () =>
 {
@@ -617,10 +617,9 @@ describe("WSBehaviors.ts", () =>
       const wsb = new WSBehaviors(DefaultBehaviorsOptions)
       wsb.grabber.detach = jest.fn()
       wsb.renderer.destroy = jest.fn()
-      wsb.recognizer.close = jest.fn()
+      wsb.recognizer.destroy = jest.fn()
       wsb.destroy()
-      await expect(wsb.recognizer.close).toBeCalledTimes(1)
-      await expect(wsb.recognizer.close).toBeCalledWith(1000, constants.InternalEventType.WS_CLOSED)
+      await expect(wsb.recognizer.destroy).toBeCalledTimes(1)
     })
 
   })

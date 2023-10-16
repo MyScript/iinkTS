@@ -20,7 +20,7 @@ import { Configuration } from "../configuration/Configuration"
 import { Model } from "../model/Model"
 import { UndoRedoManager } from "../undo-redo"
 import { LoggerManager } from "../logger"
-import { LoggerClass, InternalEventType } from "../Constants"
+import { LoggerClass } from "../Constants"
 
 export class WSBehaviors implements IBehaviors
 {
@@ -318,7 +318,7 @@ export class WSBehaviors implements IBehaviors
     this.#logger.info("destroy")
     this.grabber.detach()
     this.renderer.destroy()
-    this.recognizer.close(1000, InternalEventType.WS_CLOSED)
+    this.recognizer.destroy()
     return Promise.resolve()
   }
 }

@@ -204,8 +204,8 @@ export class WSSVGRenderer
 
   destroy(): void
   {
-    this.#logger.info("destroy", { })
-    if (this.context.parent) {
+    this.#logger.info("destroy", { context: this.context })
+    if (this.context?.parent) {
       this.context.parent.querySelectorAll("svg").forEach(n => n.remove())
     }
   }
