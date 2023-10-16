@@ -40,7 +40,7 @@ It integrates all you need:
 * Styling,
 * Typeset support,
 * More than 200 mathematical symbols supported,
-* 65 supported languages.
+* 72 supported languages.
 
 You can discover all the features on our Developer website for [Text](https://developer.myscript.com/features/text) and [Math](https://developer.myscript.com/features/math).
 
