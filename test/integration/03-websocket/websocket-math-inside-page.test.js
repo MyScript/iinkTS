@@ -1,4 +1,4 @@
-const { haveSameLabels, write, getExportsFromEditorModel, getDatasFromImportedEvent, getDatasFromExportedEvent, waitEditorLoaded, waitEditorIdle } = require("../helper")
+const { haveSameLabels, write, getExportsFromEditorModel, getDatasFromImportedEvent, getDatasFromExportedEvent, waitEditorIdle } = require("../helper")
 
 const mathContentList = [
   {
@@ -48,7 +48,6 @@ describe("Websocket Math Inside Page", function () {
 
       beforeAll(async () => {
         await page.reload({ waitUntil: 'load' })
-        await waitEditorLoaded(page)
         await waitEditorIdle(page)
       })
 
