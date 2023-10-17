@@ -431,9 +431,9 @@ export class WSRecognizer implements IRecognizer
           this.#logger.debug("send", `try to reconnect number: ${this.reconnectionCount}.`)
           this.internalEvent.emitClearMessage()
           await this.init(this.viewSizeHeight, this.viewSizeWidth)
-          this.setPenStyle(this.penStyle as TPenStyle)
-          this.setPenStyleClasses(this.penStyleClasses as string)
-          this.setTheme(this.theme as TTheme)
+          await this.setPenStyle(this.penStyle as TPenStyle)
+          await this.setPenStyleClasses(this.penStyleClasses as string)
+          await this.setTheme(this.theme as TTheme)
           return this.send(message)
         }
         else {
