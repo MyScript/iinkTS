@@ -118,8 +118,9 @@ export class WSBehaviors implements IBehaviors
   async init(domElement: HTMLElement): Promise<void>
   {
     this.#logger.info("init", { domElement })
-    this.model.width = Math.max(domElement.clientWidth, this.#configuration.rendering.minWidth)
-    this.model.height = Math.max(domElement.clientHeight, this.#configuration.rendering.minHeight)
+    const compStyles = window.getComputedStyle(domElement);
+    this.model.width = Math.max(parseInt(compStyles.width.replace("px","")), this.#configuration.rendering.minWidth)
+    this.model.height = Math.max(parseInt(compStyles.height.replace("px","")), this.#configuration.rendering.minHeight)
     this.undoRedoManager.updateModelInStack(this.model)
 
     this.renderer.init(domElement)
