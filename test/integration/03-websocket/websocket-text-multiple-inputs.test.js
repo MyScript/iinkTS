@@ -2,10 +2,17 @@ const { waitForEditorWebSocket, writePointers, waitEditorIdle } = require('../he
 const { centralProcessingUnit, oneThousandNineHundredAndFortyThree, oneThousandNineHundredAndNintyThree } = require('../strokesDatas')
 
 const switchToOtherQuestion = async (page, inputId) => {
-  return Promise.all([
-    page.locator(`#${inputId}`).click(),
+  await Promise.all([
+    page.click(`#${inputId}`),
     waitEditorIdle(page)
   ])
+  const backgroundColor = await page.locator(`#editor`).evaluate((el) => {
+    return window.getComputedStyle(el).getPropertyValue('background-color');
+  });
+  if(backgroundColor !== "rgba(150, 150, 255, 0.2)")
+  {
+    await switchToOtherQuestion(page, inputId)
+  }
 }
 
 const getAnswerText = async (page, answerId) => {
@@ -70,7 +77,7 @@ describe('Websocket Text Multiple Inputs', () => {
     text: oneThousandNineHundredAndFortyThree
   }
 
-  test("should answer the second question", async () => {
+  test("should answer the third question", async () => {
     await switchToOtherQuestion(page, data2.inputId)
     await writePointers(page, data2.text.strokes)
     await waitEditorIdle(page)
@@ -78,7 +85,7 @@ describe('Websocket Text Multiple Inputs', () => {
     expect(answerText).toEqual(data2.text.exports["text/plain"])
   })
 
-  test("should validate the second answer", async () => {
+  test("should validate the third answer", async () => {
     expect(await page.locator(`#${data2.answerId}`).getAttribute('class')).not.toContain('success')
     expect(await page.locator(`#${data2.answerId}`).getAttribute('class')).toContain('error')
     await page.locator("#validate-answers").click()
@@ -92,7 +99,7 @@ describe('Websocket Text Multiple Inputs', () => {
     text: oneThousandNineHundredAndNintyThree,
   }
 
-  test("should answer the second question", async () => {
+  test("should answer the fourth question", async () => {
     await switchToOtherQuestion(page, data3.inputId)
     await writePointers(page, data3.text.strokes)
     await waitEditorIdle(page)
@@ -100,7 +107,7 @@ describe('Websocket Text Multiple Inputs', () => {
     expect(answerText).toEqual(data3.text.exports["text/plain"])
   })
 
-  test("should validate the second answer", async () => {
+  test("should validate the fourth answer", async () => {
     expect(await page.locator(`#${data3.answerId}`).getAttribute('class')).not.toContain('success')
     expect(await page.locator(`#${data3.answerId}`).getAttribute('class')).toContain('error')
     await page.locator("#validate-answers").click()
