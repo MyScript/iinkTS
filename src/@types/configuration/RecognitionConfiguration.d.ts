@@ -29,7 +29,7 @@ export type TRecognitionConfiguration = {
   renderer: TRecognitionRendererConfiguration
   export: TExportConfiguration
   "raw-content": TRawContentConfiguration
-  gesture: TGesture
+  gesture: { enable: boolean }
 }
 
 export type TRecognitionConfigurationClient = {
