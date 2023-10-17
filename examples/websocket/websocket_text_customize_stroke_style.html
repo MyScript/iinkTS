@@ -248,6 +248,7 @@
         });
 
         penStyleClasses.addEventListener("change", (event) => {
+          themeSelector.disabled = event.target.checked
           if (event.target.checked) {
             editor.penStyle = undefined;
             editor.penStyleClasses = "greenThickPen";
@@ -295,7 +296,6 @@
           editor.resize();
         });
       };
-
       loadEditor().catch(error => console.error(error));
     </script>
   </body>
