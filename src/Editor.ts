@@ -413,8 +413,9 @@ export class Editor
     if (this.configuration.rendering.smartGuide.enable) {
       this.#smartGuide?.resize()
     }
-    const height = Math.max(this.wrapperHTML.clientHeight, this.configuration.rendering.minHeight)
-    const width = Math.max(this.wrapperHTML.clientWidth, this.configuration.rendering.minWidth)
+    const compStyles = window.getComputedStyle(this.wrapperHTML)
+    const height = Math.max(parseInt(compStyles.height.replace("px","")), this.configuration.rendering.minHeight)
+    const width = Math.max(parseInt(compStyles.width.replace("px","")), this.configuration.rendering.minWidth)
     await this.behaviors.resize(height, width)
     this.logger.debug("resize", this.model)
     return this.model
