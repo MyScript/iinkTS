@@ -225,7 +225,8 @@ select:disabled {
  *                                |_|               |_|            |___/
  */
 #result {
-    height: 100px;
+    min-height: 100px;
+    max-height: 100px;
     display: flex;
     justify-content: center;
     align-items: center;
