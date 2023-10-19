@@ -41,7 +41,7 @@
         padding: 12px;
       }
 
-      .content{
+      .content {
         width: calc(100vw - 400px);
         min-height: calc(100% - 105px);
       }
@@ -145,7 +145,7 @@
           position: fixed;
           right: 0;
         }
-        .flex{
+        .flex {
           display: block;
         }
         #menu-button img {
@@ -158,7 +158,7 @@
         }
       }
       .inactive {
-        display: none
+        display: none;
       }
     </style>
   </head>
@@ -282,17 +282,14 @@
 
       const menuButton = document.getElementById("menu-button");
       const mainMenu = document.getElementById("menu-content");
-      const contentEditor = document.getElementById("content")
+      const contentEditor = document.getElementById("content");
 
       menuButton.addEventListener("click", () => {
         mainMenu.classList.toggle("active");
-        if(contentEditor.classList.contains("inactive"))
-        {
-          contentEditor.classList.remove("inactive")
-        }
-        else
-        {
-          contentEditor.classList.add("inactive")
+        if (contentEditor.classList.contains("inactive")) {
+          contentEditor.classList.remove("inactive");
+        } else {
+          contentEditor.classList.add("inactive");
         }
       });
 
@@ -485,6 +482,19 @@
          *  async initialize editor behaviors
          */
         await editor.initialize();
+        function detectMob() {
+          const toMatch = [/Android/i, /webOS/i, /iPhone/i, /iPad/i, /iPod/i, /BlackBerry/i, /Windows Phone/i];
+
+          return toMatch.some((toMatchItem) => {
+            return navigator.userAgent.match(toMatchItem);
+          });
+        }
+
+        const isMobile = detectMob();
+        if (isMobile) {
+          const menuButtons = document.getElementsByClassName("buttons-wrapper");
+          menuButtons[0].style.marginTop = "-95px";
+        }
 
         editor.events.addEventListener("exported", (event) => {
           resultElement.innerHTML = JSON.stringify(event.detail);
