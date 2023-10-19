@@ -399,6 +399,11 @@ export class SmartGuide {
     populatePrompter()
     if (this.jiix?.words?.length) {
       this.#show()
+      this.#ellipsisElement.style.setProperty("pointer-events", "auto")
+    }
+    else
+    {
+      this.#ellipsisElement.style.setProperty("pointer-events", "none")
     }
   }
 
