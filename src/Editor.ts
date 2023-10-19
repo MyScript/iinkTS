@@ -480,4 +480,15 @@ export class Editor
     return Promise.reject("Import impossible, behaviors has no importPointEvents function")
   }
 
+  async reDraw(rawStrokes: TStroke[]): Promise<IModel | never>
+  {
+    if(this.behaviors.reDraw)
+    {
+      return this.behaviors.reDraw(rawStrokes)
+    }
+    else
+    {
+      return Promise.reject("reDraw impossible, behaviors has no reDraw function")
+    }
+  }
 }
