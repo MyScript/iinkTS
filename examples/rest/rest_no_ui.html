@@ -151,11 +151,11 @@
         const res = await fetch("../server-configuration.json");
         const serverConfiguration = await res.json();
         // Creating a configuration
-        const configuration = new iink.Configuration({ server: serverConfiguration });
+        const configuration = new iink.configuration.Configuration({ server: serverConfiguration });
         // Creating a recognizer
-        const iinkRecognizer = new iink.RestRecognizer(configuration.server, configuration.recognition);
+        const iinkRecognizer = new iink.recognizer.RestRecognizer(configuration.server, configuration.recognition);
         // Creating a empty model
-        const model = new iink.Model();
+        const model = new iink.model.Model();
         // Filling the model with the stroke
         model.rawStrokes = JSON.parse(document.querySelector("#rawStrokes").value);
         // Define exported mimeTypes
