@@ -58,6 +58,7 @@ export interface IBehaviors
   async waitForIdle?(): Promise<void>
   async importPointEvents?(strokes: TStroke[]): Promise<IModel | never>
   async import?(data: Blob, mimeType?: string): Promise<IModel | never>
+  async reDraw?(rawStrokes: TStroke[]): Promise<IModel | never>
 
   async clear(): Promise<IModel>
 

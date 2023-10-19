@@ -18,6 +18,7 @@ import { Configuration } from "../configuration/Configuration"
 import { Model } from "../model/Model"
 import { Intention, LoggerClass } from "../Constants"
 import { LoggerManager } from "../logger"
+import { TStroke } from "../@types"
 
 export class RestBehaviors implements IBehaviors
 {
@@ -315,5 +316,22 @@ export class RestBehaviors implements IBehaviors
     this.grabber.detach()
     this.renderer.destroy()
     return Promise.resolve()
+  }
+
+  async reDraw(rawStrokes: TStroke[]): Promise<IModel | never>
+  {
+    rawStrokes.forEach((stroke) =>
+    {
+      this.model.addStroke(stroke)
+    })
+
+    try {
+      const newModel = await this.updateModelRendering()
+      Object.assign(this.#model, newModel)
+      return this.model
+    } catch (error) {
+      this.internalEvent.emitError(error as Error)
+      throw error as Error
+    }
   }
 }
