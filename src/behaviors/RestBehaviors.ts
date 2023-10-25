@@ -19,6 +19,7 @@ import { Model } from "../model/Model"
 import { Intention, LoggerClass } from "../Constants"
 import { LoggerManager } from "../logger"
 import { TStroke } from "../@types"
+import { Stroke } from "../model"
 
 export class RestBehaviors implements IBehaviors
 {
@@ -318,10 +319,12 @@ export class RestBehaviors implements IBehaviors
     return Promise.resolve()
   }
 
-  async reDraw(rawStrokes: TStroke[]): Promise<IModel | never>
+  async importPointEvents(strokes: TStroke[]): Promise<IModel | never>
   {
-    rawStrokes.forEach((stroke) =>
+    strokes.forEach((s) =>
     {
+      const stroke = new Stroke(s.style, Math.random())
+      stroke.pointers = s.pointers
       this.model.addStroke(stroke)
     })
 

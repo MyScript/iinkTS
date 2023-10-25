@@ -56,9 +56,8 @@ export interface IBehaviors
   redo(): Promise<IModel>
 
   waitForIdle?(): Promise<void>
-  importPointEvents?(strokes: TStroke[]): Promise<IModel>
+  importPointEvents(strokes: TStroke[]): Promise<IModel>
   import?(data: Blob, mimeType?: string): Promise<IModel>
-  reDraw?(rawStrokes: TStroke[]): Promise<IModel>
 
   clear(): Promise<IModel>
 

@@ -1,3 +1,3 @@
-import config from "./rollup.config"
+import config from "./rollup.config.js"
 
 export default config

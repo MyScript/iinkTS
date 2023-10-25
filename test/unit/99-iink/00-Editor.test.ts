@@ -584,27 +584,6 @@ describe("Editor.ts", () =>
       editor.behaviors.importPointEvents = jest.fn(() => Promise.reject("pouet"))
       expect(editor.importPointEvents(tstrokeToImport)).rejects.toEqual("pouet")
     })
-    test("should reject import Points if behaviors.import is not define", async () =>
-    {
-      const wrapperHTML: HTMLElement = document.createElement("div")
-      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
-      editor.behaviors.init = jest.fn(() => Promise.resolve())
-      await editor.initialize()
-      const tstrokeToImport: TStroke[] = [
-        //@ts-ignore
-        {
-          "pointerType": "mouse",
-          "pointerId": 0,
-          "pointers": [
-            { "x": 604, "y": 226, "t": 1693494025427, "p": 0.1 },
-            { "x": 611, "y": 222, "t": 1693494025467, "p": 0.8 },
-            { "x": 621, "y": 222, "t": 1693494025484, "p": 0.68 },
-          ]
-        }
-      ]
-      editor.behaviors.importPointEvents = undefined
-      expect(editor.importPointEvents(tstrokeToImport)).rejects.toEqual("Import impossible, behaviors has no importPointEvents function")
-    })
   })
 
   describe("Style", () =>

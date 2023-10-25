@@ -471,24 +471,10 @@ export class Editor
     this.logger.debug("importPointEvents", this.model)
     this.logger.info("importPointEvents", { strokes })
     await this.#initializationDeferred.promise
-    if (this.behaviors.importPointEvents) {
-      await this.behaviors.importPointEvents(strokes)
-      this.events.emitImported(this.model.exports as TExport)
-      this.logger.debug("importPointEvents", this.model)
-      return this.model
-    }
+    await this.behaviors.importPointEvents(strokes)
+    this.events.emitImported(this.model.exports as TExport)
+    this.logger.debug("importPointEvents", this.model)
+    return this.model
     return Promise.reject("Import impossible, behaviors has no importPointEvents function")
-  }
-
-  async reDraw(rawStrokes: TStroke[]): Promise<IModel | never>
-  {
-    if(this.behaviors.reDraw)
-    {
-      return this.behaviors.reDraw(rawStrokes)
-    }
-    else
-    {
-      return Promise.reject("reDraw impossible, behaviors has no reDraw function")
-    }
   }
 }
