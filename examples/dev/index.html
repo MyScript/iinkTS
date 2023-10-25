@@ -6,8 +6,155 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
-    <title>Websocket Text</title>
-    <link rel="stylesheet" href="../examples.css" />
+    <title>iinkTS Example</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+      }
+
+      nav {
+        display: flex;
+        display: -webkit-flex;
+        align-items: center;
+        align-content: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        z-index: 25;
+        border-top: 1px solid #d7dde3; /*#A9B7C5*/
+        border-bottom: 1px solid #d7dde3; /*#A9B7C5*/
+        padding: 12px;
+      }
+
+      select {
+        width: auto;
+        padding: 0 35px 0 15px;
+        color: #131f26;
+        background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTQiIHZpZXdCb3g9IjAgMCAxOCAxNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik00LjQyMi4yNmMtLjIzMy0uMzM3LS42MS0uMzM3LS44NDQgMEwuMTc1IDUuMTdDLS4xNDIgNS42MjguMDQ4IDYgLjYxIDZoNi43OGMuNTU4IDAgLjc1NC0uMzcuNDM1LS44M0w0LjQyMi4yNnptLjAyIDEzLjQ3Yy0uMjM2LjM0Mi0uNjE4LjM0Ny0uODUuMDFMLjE2NyA4LjgxOEMtLjE0NiA4LjM2Ny4wNDggOCAuNjA4IDhoNi43ODNjLjU1OCAwIC43NTUuMzcuNDM3LjgzbC0zLjM4NSA0Ljl6IiBmaWxsPSIjMTMxRjI2Ii8+PC9nPjwvc3ZnPg==) right center no-repeat #fff;
+        -webkit-appearance: none;
+        appearance: none;
+        height: 40px;
+        font: 600 16px "Source Sans Pro", sans-serif;
+        border: 1px solid #ced5d9;
+        border-radius: 3px;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      button:focus,
+      select:focus {
+        outline: 2px solid #9b0000;
+        box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.16);
+      }
+
+      .button-div {
+        display: flex;
+        gap: 12px;
+      }
+
+      .nav-btn {
+        display: inline-block;
+        position: relative;
+        cursor: pointer;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        font-size: 24px;
+        color: #fff;
+        background-color: #1a9fff;
+        font-family: "Roboto", sans-serif;
+        letter-spacing: 1px;
+        text-align: center;
+        text-decoration: none;
+        text-transform: uppercase;
+        vertical-align: middle;
+        white-space: nowrap;
+        outline: none;
+        border: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+        -webkit-transition: all 0.1s ease-out;
+        transition: all 0.1s ease-out;
+        -webkit-box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.225);
+        box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.225);
+      }
+
+      .nav-btn:before {
+        content: "";
+        display: inline-block;
+        height: 18px;
+        width: 18px;
+      }
+
+      .nav-btn:active {
+        color: #fff;
+        text-decoration: none;
+        background: #0065b8;
+        box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.5);
+      }
+
+      .nav-btn:disabled,
+      .nav-btn[disabled] {
+        pointer-events: none;
+        cursor: default;
+        background-color: #ececec;
+        -webkit-box-shadow: none;
+        box-shadow: none;
+      }
+
+      .nav-btn > img {
+        display: block;
+        width: 50%;
+        margin: 9px auto;
+      }
+
+      #result {
+        min-height: 100px;
+        max-height: 100px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow: auto;
+        width: 100%;
+        text-align: center;
+      }
+    </style>
+
+    <style>
+      #clear:before {
+        background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+Cjxzdmcgd2lkdGg9IjIwcHgiIGhlaWdodD0iMjJweCIgdmlld0JveD0iMCAwIDIwIDIyIiB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiPgogICAgPGcgaWQ9IlBhZ2UtMSIgc3Ryb2tlPSJub25lIiBzdHJva2Utd2lkdGg9IjEiIGZpbGw9Im5vbmUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj4KICAgICAgICA8ZyBpZD0iQXBwcy1TbWFsbCIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTE0Ny4wMDAwMDAsIC02Mi4wMDAwMDApIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZT0iI0ZGRkZGRiI+CiAgICAgICAgICAgIDxnIGlkPSJHcm91cC0xMS1Db3B5LTMiIHRyYW5zZm9ybT0idHJhbnNsYXRlKDE0OC4wMDAwMDAsIDYzLjAwMDAwMCkiPgogICAgICAgICAgICAgICAgPGcgaWQ9Ikljb24tVHJhc2giPgogICAgICAgICAgICAgICAgICAgIDxwYXRoIGQ9Ik0wLDQgTDE4LDQiIGlkPSJQYXRoLTUyIj48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTMsNSBMNC4yODY2Nzk1NywxNy4wMDkwMDkzIEM0LjQwNDQ5MzE5LDE4LjEwODYwMzEgNS4zOTU4NTc4MSwxOSA2LjQ5NzM5MTcsMTkgTDExLjUwMjYwODMsMTkgQzEyLjYwNTczNzMsMTkgMTMuNTk2MTEzNiwxOC4xMDI5Mzk5IDEzLjcxMzMyMDQsMTcuMDA5MDA5MyBMMTUsNSIgaWQ9IlBhdGgtNTMiPjwvcGF0aD4KICAgICAgICAgICAgICAgICAgICA8cGF0aCBkPSJNNS41LDMuNSBMNi44MDM5MDEyLDAuNDU3NTYzODc3IEM2LjkxMjIwMzU3LDAuMjA0ODU4MzI2IDcuMjE1MDU3MzcsMCA3LjQ5MDQ3ODUyLDAgTDEwLjUwOTUyMTUsMCBDMTAuNzgwNDA1MywwIDExLjA4OTMzOTcsMC4yMDg0NTkzNzcgMTEuMTk2MDk4OCwwLjQ1NzU2Mzg3NyBMMTIuNSwzLjUiIGlkPSJQYXRoLTU0Ij48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTcsNy41IEw3LjUsMTUiIGlkPSJQYXRoLTY1Ij48L3BhdGg+CiAgICAgICAgICAgICAgICAgICAgPHBhdGggZD0iTTExLDcuNSBMMTAuNSwxNSIgaWQ9IlBhdGgtNjUiPjwvcGF0aD4KICAgICAgICAgICAgICAgIDwvZz4KICAgICAgICAgICAgPC9nPgogICAgICAgIDwvZz4KICAgIDwvZz4KPC9zdmc+)
+          center center no-repeat;
+      }
+
+      #undo:before {
+        background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+PHN2ZyB3aWR0aD0iMThweCIgaGVpZ2h0PSIxOHB4IiB2aWV3Qm94PSIwIDAgMTggMTgiIHZlcnNpb249IjEuMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayI+ICAgICAgICA8dGl0bGU+dW5kbzwvdGl0bGU+ICAgIDxkZXNjPkNyZWF0ZWQgd2l0aCBTa2V0Y2guPC9kZXNjPiAgICA8ZGVmcz48L2RlZnM+ICAgIDxnIGlkPSJTeW1ib2xzIiBzdHJva2U9Im5vbmUiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj4gICAgICAgIDxnIGlkPSJ1bmRvIiBmaWxsPSIjRkZGRkZGIj4gICAgICAgICAgICA8cGF0aCBkPSJNNC4zOTY5NzM4Myw5IEw2LjcwNDQ1MjA0LDExLjI5MDI0ODMgQzcuMDk2NDM3MDYsMTEuNjc5MzA2NCA3LjA5ODgwOTgxLDEyLjMxMjQ2NjkgNi43MDk3NTE3MywxMi43MDQ0NTIgQzYuMzIwNjkzNjYsMTMuMDk2NDM3IDUuNjg3NTMzMTIsMTMuMDk4ODA5NyA1LjI5NTU0ODEsMTIuNzA5NzUxNyBMMS40Njc0MjMwMyw4LjkxMDIxMTEgQzAuOTg3NzYyMDk4LDguNDM0MTMxNzggMC45NzczODMzNTcsNy42NDA2MTY5NyAxLjQ2MjE0Mjk4LDcuMTUyMjM3NjcgTDUuMjkwMjY4MDEsMy4yOTU1MjgyNCBDNS42NzkzMzcwMywyLjkwMzU1NDA3IDYuMzEyNDk3NjIsMi45MDExOTg5NyA2LjcwNDQ3MTc5LDMuMjkwMjY3OTggQzcuMDk2NDQ1OTYsMy42NzkzMzcgNy4wOTg4MDEwNiw0LjMxMjQ5NzU5IDYuNzA5NzMyMDUsNC43MDQ0NzE3NiBMNC40MzEyMTczNiw3IEwxMy4wMDEyMTQ0LDcgQzE1LjIwODc4NDIsNyAxNyw4Ljc5MzMzMjE1IDE3LDExIEMxNywxMy4yMDkwODQ2IDE1LjIxMjQzMjUsMTUgMTMuMDA0ODgxNSwxNSBMMTEsMTUgQzEwLjQ0NzcxNTMsMTUgMTAsMTQuNTUyMjg0NyAxMCwxNCBDMTAsMTMuNDQ3NzE1MyAxMC40NDc3MTUzLDEzIDExLDEzIEwxMy4wMDQ4ODE1LDEzIEMxNC4xMDcwMjQ0LDEzIDE1LDEyLjEwNTM1MTkgMTUsMTEgQzE1LDkuODk3MzczMzMgMTQuMTAzNjg1Nyw5IDEzLjAwMTIxNDQsOSBMNC4zOTY5NzM4Myw5IFoiIGlkPSJDb21iaW5lZC1TaGFwZSI+PC9wYXRoPiAgICAgICAgPC9nPiAgICA8L2c+PC9zdmc+)
+          center center no-repeat;
+      }
+
+      #redo:before {
+        background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+PHN2ZyB3aWR0aD0iMThweCIgaGVpZ2h0PSIxOHB4IiB2aWV3Qm94PSIwIDAgMTggMTgiIHZlcnNpb249IjEuMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayI+ICAgICAgICA8dGl0bGU+cmVkbzwvdGl0bGU+ICAgIDxkZXNjPkNyZWF0ZWQgd2l0aCBTa2V0Y2guPC9kZXNjPiAgICA8ZGVmcz48L2RlZnM+ICAgIDxnIGlkPSJTeW1ib2xzIiBzdHJva2U9Im5vbmUiIHN0cm9rZS13aWR0aD0iMSIgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj4gICAgICAgIDxnIGlkPSJyZWRvIiBmaWxsPSIjRkZGRkZGIj4gICAgICAgICAgICA8cGF0aCBkPSJNMTMuNTk0Mzc2Nyw5IEwxMS4yOTQyMTcyLDExLjI5MTU3MiBDMTAuOTAyOTYzMywxMS42ODEzNjUzIDEwLjkwMTc3OTEsMTIuMzE0NTI5MSAxMS4yOTE1NzI0LDEyLjcwNTc4MzEgQzExLjY4MTM2NTYsMTMuMDk3MDM3MSAxMi4zMTQ1Mjk1LDEzLjA5ODIyMTIgMTIuNzA1NzgzNCwxMi43MDg0MjggTDE2LjUzMzkwODEsOC44OTQ1OTUzNCBDMTcuMDEyMjU5NCw4LjQxODAyOTk2IDE3LjAyMjYzNzQsNy42MjQ1MzM0OCAxNi41MzY1NDgxLDcuMTM2NjI5MzcgTDEyLjcwODQyMzMsMy4yOTQyMTIgQzEyLjMxODYyNzQsMi45MDI5NjA3MiAxMS42ODU0NjM1LDIuOTAxNzgwOTQgMTEuMjk0MjEyMiwzLjI5MTU3Njg5IEMxMC45MDI5NjEsMy42ODEzNzI4NCAxMC45MDE3ODEyLDQuMzE0NTM2NzIgMTEuMjkxNTc3MSw0LjcwNTc4OCBMMTMuNTc3MjU1NCw3IEw0Ljk5ODc4NTY0LDcgQzIuNzkxMjE1ODEsNyAxLDguNzkzMzMyMTUgMSwxMSBDMSwxMy4yMDkwODQ2IDIuNzg3NTY3NTIsMTUgNC45OTUxMTg1LDE1IEw3LDE1IEM3LjU1MjI4NDc1LDE1IDgsMTQuNTUyMjg0NyA4LDE0IEM4LDEzLjQ0NzcxNTMgNy41NTIyODQ3NSwxMyA3LDEzIEw0Ljk5NTExODUsMTMgQzMuODkyOTc1NjIsMTMgMywxMi4xMDUzNTE5IDMsMTEgQzMsOS44OTczNzMzMyAzLjg5NjMxNDMyLDkgNC45OTg3ODU2NCw5IEwxMy41OTQzNzY3LDkgWiIgaWQ9IkNvbWJpbmVkLVNoYXBlIj48L3BhdGg+ICAgICAgICA8L2c+ICAgIDwvZz48L3N2Zz4=)
+          center center no-repeat;
+      }
+    </style>
+
+    <style>
+      #editor {
+        width: 100vw;
+        height: calc(100vh - 166px);
+      }
+
+      @media only screen and (max-width: 478px) {
+        #editor {
+          height: calc(100vh - 215px);
+        }
+      }
+    </style>
+    <script type="text/javascript" src="node_modules/iink-ts/dist/iink.min.js"></script>
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
   </head>
 
@@ -16,16 +163,11 @@
 
     <nav>
       <div class="button-div">
-        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/clear.svg" />
-        </button>
-        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/undo.svg" />
-        </button>
-        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/redo.svg" />
-        </button>
+        <button id="clear" class="nav-btn" disabled></button>
+        <button id="undo" class="nav-btn" disabled></button>
+        <button id="redo" class="nav-btn" disabled></button>
       </div>
+
       <select id="language"></select>
     </nav>
 
@@ -40,30 +182,34 @@
       const redoElement = document.getElementById("redo");
 
       /**
-       * we expose the editor for use in the integration test
+       * we use an asynchronous function to be able to wait for the end of the initialization of the editor
+       * before connecting the different event listeners
        */
-      let editor;
       async function loadEditor() {
         const options = {
           configuration: {
             server: {
               protocol: "WEBSOCKET",
-              scheme: "http",
-              host: "localhost:8897",
-              applicationKey: "30a605cb-95ea-45ac-aea5-c093322c5100",
-              hmacKey: "dc2afdde-40e9-4e96-9d11-430100771123"
+              scheme: "https",
+              host: "cloud.myscript.com",
+              applicationKey: "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+              hmacKey: "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
             },
             recognition: {
               type: "TEXT"
             }
           }
         };
+
         /**
          * Instanciate editor
          * @param {Element} The DOM element to attach the ink paper
-         * @param {Object} The Editor parameters
+         * @param {Object} The Editor parameters {@link https://myscript.github.io/iinkTS/docs/types/_internal_.TBehaviorOptions.html}
+         * @remarks You can see the editor methods at this address {@link https://myscript.github.io/iinkTS/docs/classes/Editor.html}
          */
-        editor = new iink.Editor(editorElement, options);
+
+        const editor = new iink.Editor(editorElement, options);
+
         /**
          *  async initialize editor behaviors
          */
@@ -76,6 +222,9 @@
           languageElement.options[languageElement.options.length] = new Option(availableLanguageResponse.result[key], key, selected, selected);
         });
 
+        /**
+         * You can use `editor.events` or directly `editorElement` to add event listener
+         */
         editor.events.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo;
           redoElement.disabled = !event.detail.canRedo;
@@ -88,15 +237,15 @@
         });
 
         clearElement.addEventListener("click", async () => {
-          editor.clear();
+          await editor.clear();
         });
 
-        undoElement.addEventListener("click", () => {
-          editor.undo();
+        undoElement.addEventListener("click", async () => {
+          await editor.undo();
         });
 
-        redoElement.addEventListener("click", () => {
-          editor.redo();
+        redoElement.addEventListener("click", async () => {
+          await editor.redo();
         });
 
         languageElement.addEventListener("change", (e) => {
@@ -110,7 +259,7 @@
         });
       }
 
-      loadEditor().catch(error => console.error(error));
+      loadEditor().catch((error) => console.error(error));
     </script>
   </body>
 </html>
