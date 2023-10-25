@@ -1,6 +1,6 @@
 import serve from "rollup-plugin-serve"
 import livereload from "rollup-plugin-livereload"
-import config from "./rollup.config"
+import config from "./rollup.config.js"
 
 config[0].plugins.push(
   serve({
