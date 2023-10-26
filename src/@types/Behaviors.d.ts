@@ -48,19 +48,19 @@ export interface IBehaviors
   get configuration(): TConfiguration
   set configuration(conf: TConfiguration)
 
-  async init: (element: HTMLElement) => Promise<void>
-  async export(mimeTypes?: string[]): Promise<IModel | never>
-  async convert(conversionState?: TConverstionState, requestedMimeTypes?: string[]): Promise<IModel | never>
-  async resize(height: number, width: number): Promise<IModel>
-  async undo(): Promise<IModel>
-  async redo(): Promise<IModel>
+  init(element: HTMLElement): Promise<void>
+  export(mimeTypes?: string[]): Promise<IModel>
+  convert(conversionState?: TConverstionState, requestedMimeTypes?: string[]): Promise<IModel>
+  resize(height: number, width: number): Promise<IModel>
+  undo(): Promise<IModel>
+  redo(): Promise<IModel>
 
-  async waitForIdle?(): Promise<void>
-  async importPointEvents?(strokes: TStroke[]): Promise<IModel | never>
-  async import?(data: Blob, mimeType?: string): Promise<IModel | never>
-  async reDraw?(rawStrokes: TStroke[]): Promise<IModel | never>
+  waitForIdle?(): Promise<void>
+  importPointEvents?(strokes: TStroke[]): Promise<IModel>
+  import?(data: Blob, mimeType?: string): Promise<IModel>
+  reDraw?(rawStrokes: TStroke[]): Promise<IModel>
 
-  async clear(): Promise<IModel>
+  clear(): Promise<IModel>
 
-  async destroy(): Promise<void>
+  destroy(): Promise<void>
 }
