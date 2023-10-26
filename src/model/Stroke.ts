@@ -19,7 +19,7 @@ export class Stroke implements TStroke
   constructor(style: TPenStyle, pointerId: number, pointerType = "pen")
   {
     this.#logger.info("constructor", { style, pointerId, pointerType })
-    this.id = `${pointerType}-${Date.now().toString()}`
+    this.id = `${pointerType}-${Math.random().toString(10).substring(2, 12)}`
     this.type = "stroke"
     this.pointerId = pointerId
     this.pointerType = pointerType
