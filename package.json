@@ -36,7 +36,7 @@
     "dev": "rollup -c config/rollup.config.dev.js -w --sourcemap"
   },
   "dependencies": {
-    "crypto-js": "^3.3.0",
+    "crypto-js": "^4.2.0",
     "json-css": "^1.5.6"
   },
   "devDependencies": {
