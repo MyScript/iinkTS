@@ -103,8 +103,8 @@ yarn add iink-ts
         applicationKey: '#YOUR MYSCRIPT DEVELOPER APPLICATION KEY#',
         hmacKey: '#YOUR MYSCRIPT DEVELOPER HMAC KEY#'
     };
-    editor.initialize();
   });
+  editor.initialize();
 ```
 
 6. Your `index.html` file should look like this:
