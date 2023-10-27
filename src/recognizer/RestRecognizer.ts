@@ -138,7 +138,7 @@ export class RestRecognizer implements IRecognizer
 
     if (isVersionSuperiorOrEqual(this.serverConfiguration.version, "2.0.4")) {
       headers.append("myscript-client-name", "iink-ts")
-      headers.append("myscript-client-version", "1.0.0-buildVersion")
+      headers.append("myscript-client-version", "1.0.2")
     }
 
     const reqInit: RequestInit = {
