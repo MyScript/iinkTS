@@ -72,7 +72,7 @@ export class RestRecognizer implements IRecognizer
     }
   }
 
-  private buildData(model: IModel): TRestPostData
+  protected buildData(model: IModel): TRestPostData
   {
     this.#logger.info("buildData", { model })
     const isPenStyleEqual = (ps1: TPenStyle, ps2: TPenStyle) =>
@@ -127,7 +127,7 @@ export class RestRecognizer implements IRecognizer
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async post(data: any, mimeType: string): Promise<any>
+  protected async post(data: any, mimeType: string): Promise<any>
   {
     this.#logger.info("post", { data, mimeType })
     const headers = new Headers()
@@ -178,7 +178,7 @@ export class RestRecognizer implements IRecognizer
     }
   }
 
-  private async tryFetch(data: unknown, mimeType: string): Promise<TExport | never>
+  protected async tryFetch(data: unknown, mimeType: string): Promise<TExport | never>
   {
     this.#logger.debug("tryFetch", { data, mimeType })
     return this.post(data, mimeType)
@@ -203,7 +203,7 @@ export class RestRecognizer implements IRecognizer
       })
   }
 
-  private getMimeTypes(requestedMimeTypes?: string[]): string[]
+  protected getMimeTypes(requestedMimeTypes?: string[]): string[]
   {
     this.#logger.info("getMimeTypes", { requestedMimeTypes })
     let mimeTypes: string[] = requestedMimeTypes || []

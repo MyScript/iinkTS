@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+    <title>Rest custom grabber</title>
+    <link rel="stylesheet" href="../examples.css" />
+    <script type="text/javascript" src="../../dist/iink.min.js"></script>
+    <script type="text/javascript" src="./custom_grabber.js"></script>
+    <style>
+      #editor {
+        height: calc(100vh - 187px);
+      }
+      @media only screen and (max-width: 579px) {
+        #editor {
+          height: calc(100vh - 257px);
+        }
+      }
+    </style>
+    <style>
+      .point-info {
+        width: calc(100% - 200px);
+        min-width: 200px;
+        overflow: auto;
+        white-space: nowrap;
+        padding: 0 12px;
+        margin: 5px 0;
+      }
+      @media only screen and (max-width: 600px) {
+        .point-info {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="result"></div>
+
+    <nav class="flex-container gap between">
+      <div class="flex-container gap">
+        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/clear.svg" />
+        </button>
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/undo.svg" />
+        </button>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/redo.svg" />
+        </button>
+      </div>
+      <ul class="point-info">
+        <li id="pointer-down">Down at:</li>
+        <li id="pointer-move">Move to:</li>
+        <li id="pointer-up">Up at:</li>
+      </ul>
+    </nav>
+
+    <div id="editor" touch-action="none"></div>
+
+    <script>
+      const editorElement = document.getElementById("editor");
+      const resultElement = document.getElementById("result");
+      const clearElement = document.getElementById("clear");
+      const undoElement = document.getElementById("undo");
+      const redoElement = document.getElementById("redo");
+
+      const infoElements = {
+        down: document.getElementById("pointer-down"),
+        move: document.getElementById("pointer-move"),
+        up: document.getElementById("pointer-up")
+      }
+      const customGrabber = new CustomGrabber(iink.configuration.DefaultGrabberConfiguration, infoElements)
+
+      let editor;
+      /**
+       * We use a function to wait the server configuration to load
+       */
+      async function loadEditor() {
+        const res = await fetch("../server-configuration.json");
+        const server = await res.json();
+        const options = {
+          configuration: {
+            server: {
+              ...server,
+              protocol: "REST"
+            }
+          },
+          behaviors: {
+            grabber: customGrabber
+          }
+        };
+        /**
+         * Instanciate editor
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Editor parameters
+         */
+        editor = new iink.Editor(editorElement, options);
+        /**
+         *  async initialize editor behaviors
+         */
+        await editor.initialize();
+
+
+        editor.events.addEventListener("changed", (event) => {
+          undoElement.disabled = !event.detail.canUndo;
+          redoElement.disabled = !event.detail.canRedo;
+          clearElement.disabled = !event.detail.canClear;
+        });
+
+        editor.events.addEventListener("exported", (event) => {
+          resultElement.innerHTML =
+            event.detail && event.detail["application/vnd.myscript.jiix"] ? event.detail["application/vnd.myscript.jiix"].label : "";
+        });
+
+        clearElement.addEventListener("click", async () => {
+          editor.clear();
+        });
+
+        undoElement.addEventListener("click", () => {
+          editor.undo();
+        });
+
+        redoElement.addEventListener("click", () => {
+          editor.redo();
+        });
+
+        window.addEventListener("resize", () => {
+          editor.resize();
+        });
+      }
+
+      loadEditor().catch((error) => console.error(error));
+    </script>
+  </body>
+</html>
