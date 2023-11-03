@@ -1,6 +1,5 @@
 const {
     waitForEditorRest,
-    waitEditorLoaded,
     getDatasFromExportedEvent,
     write
   } = require('../helper')
@@ -14,7 +13,10 @@ const {
 
     beforeEach(async () => {
       await page.reload({ waitUntil: 'load' })
-      await waitForEditorRest(page)
+      await Promise.all([
+        waitForEditorRest(page),
+        page.waitForRequest(req => req.url().includes('/api/v4.0/iink/availableLanguageList') && req.method() === "GET")
+      ])
     })
     
     test('should have title', async () => {

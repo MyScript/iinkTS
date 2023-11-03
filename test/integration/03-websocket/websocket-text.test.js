@@ -17,7 +17,10 @@ describe("Websocket Text", () => {
 
   beforeEach(async () => {
     await page.reload({ waitUntil: 'load' })
-    await waitForEditorWebSocket(page)
+    await Promise.all([
+      waitForEditorWebSocket(page),
+      page.waitForRequest(req => req.url().includes('/api/v4.0/iink/availableLanguageList') && req.method() === "GET")
+    ])
     await waitEditorIdle(page)
   })
 
