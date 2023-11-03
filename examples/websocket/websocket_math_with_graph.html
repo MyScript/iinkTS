@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+    <title>Websocket Math</title>
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+      integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X"
+      crossorigin="anonymous"
+    />
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"
+      integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4"
+      crossorigin="anonymous"
+    ></script>
+    <script type="text/javascript" src="../assets/desmos/calculator.js"></script>
+    <script type="text/javascript" src="../../dist/iink.min.js"></script>
+    <style>
+      #graph,
+      #editor {
+        height: calc(100vh - 166px);
+        width: 50%;
+      }
+      @media only screen and (max-width: 600px) {
+        #graph,
+        #editor {
+          width: 100%;
+          height: calc(50vh - 83px);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="result"></div>
+
+    <nav class="flex-container wrap between">
+      <div class="flex-container wrap gap">
+        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/clear.svg" />
+        </button>
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/undo.svg" />
+        </button>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/redo.svg" />
+        </button>
+      </div>
+    </nav>
+
+    <div class="flex-container wrap">
+      <div id="editor" touch-action="none"></div>
+      <div id="graph" class="graph"></div>
+    </div>
+
+    <script>
+      const editorElement = document.getElementById("editor");
+      const resultElement = document.getElementById("result");
+      const clearElement = document.getElementById("clear");
+      const undoElement = document.getElementById("undo");
+      const redoElement = document.getElementById("redo");
+      const graphEl = document.getElementById('graph')
+      const colors = ['#0060A0', '#09E05C', '#E06A09']
+      const calculator = Desmos.Calculator(graphEl, {
+        keypad: false,
+        graphpaper: true,
+        expressions: false,
+        settingsMenu: false,
+        zoomButtons: false,
+        expressionsTopbar: false,
+        solutions: false,
+        border: false,
+        lockViewport: false,
+        expressionsCollapsed: true
+      })
+
+      function extractExpressions (latex) {
+        if (!latex) return ['']
+        const expressions = latex.split('\\\\')
+        return expressions.map(e => {
+          return e.replace('\\dfrac', '\\frac')
+            .replace('\\begin{aligned}', '')
+            .replace('\\end{aligned}', '')
+            .replace('\\begin{cases}', '')
+            .replace('\\end{cases} ', '')
+          }
+        )
+      }
+
+      /**
+       * we expose the editor for use in the integration test
+       */
+      let editor;
+
+      /**
+       * We use a function to wait the server configuration to load
+       */
+      async function loadEditor() {
+        const res = await fetch("../server-configuration.json");
+        const conf = await res.json();
+        const options = {
+          configuration: {
+            server: {
+              ...conf,
+              protocol: "WEBSOCKET"
+            },
+            recognition: {
+              type: "MATH",
+              math: {
+                mimeTypes: ["application/x-latex"]
+              }
+            }
+          }
+        };
+        /**
+         * Instanciate editor
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Editor parameters
+         */
+        editor = new iink.Editor(editorElement, options);
+        /**
+         *  async initialize editor behaviors
+         */
+        await editor.initialize();
+
+        editor.events.addEventListener("changed", (event) => {
+          undoElement.disabled = !event.detail.canUndo;
+          redoElement.disabled = !event.detail.canRedo;
+          clearElement.disabled = !event.detail.canClear;
+        });
+
+        editor.events.addEventListener("exported", (evt) => {
+          const exports = evt.detail;
+          colors.forEach((color, index) => {
+            calculator.setExpression({ id: index, latex: '', color: colors[index] });
+          });
+          if (exports && exports["application/x-latex"]) {
+            katex.render(exports["application/x-latex"], resultElement);
+            extractExpressions(exports['application/x-latex']).forEach((val, index) => {
+              console.log('val: ', val);
+              calculator.setExpression({ id: index, latex: val, color: colors[index] });
+            })
+          }
+        });
+
+        clearElement.addEventListener("click", async () => {
+          editor.clear();
+        });
+
+        undoElement.addEventListener("click", () => {
+          editor.undo();
+        });
+
+        redoElement.addEventListener("click", () => {
+          editor.redo();
+        });
+
+        window.addEventListener("resize", () => {
+          editor.resize();
+        });
+      };
+
+      loadEditor().catch(error => console.error(error));
+    </script>
+  </body>
+</html>
