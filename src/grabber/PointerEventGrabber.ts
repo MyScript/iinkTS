@@ -6,13 +6,13 @@ import { LoggerClass } from "../Constants"
 
 export class PointerEventGrabber implements IGrabber
 {
-  private configuration: TGrabberConfiguration
+  protected configuration: TGrabberConfiguration
 
-  private domElement!: HTMLElement
+  protected domElement!: HTMLElement
 
-  private activePointerId?: number
+  protected activePointerId?: number
 
-  private prevent = (e: Event) => e.preventDefault()
+  protected prevent = (e: Event) => e.preventDefault()
   #logger = LoggerManager.getLogger(LoggerClass.GRABBER)
 
   onPointerDown!: (evt: PointerEvent, point: TPointer) => void
@@ -25,7 +25,7 @@ export class PointerEventGrabber implements IGrabber
     this.configuration = configuration
   }
 
-  private roundFloat(oneFloat: number, requestedFloatPrecision: number): number
+  protected roundFloat(oneFloat: number, requestedFloatPrecision: number): number
   {
     if (requestedFloatPrecision >= 0) {
       const floatPrecision: number = Math.pow(10, requestedFloatPrecision)
@@ -35,7 +35,7 @@ export class PointerEventGrabber implements IGrabber
     return oneFloat
   }
 
-  private extractPoint(event: MouseEvent | TouchEvent): TPointer
+  protected extractPoint(event: MouseEvent | TouchEvent): TPointer
   {
     let clientX: number, clientY: number
     if ("changedTouches" in event) {
@@ -54,7 +54,7 @@ export class PointerEventGrabber implements IGrabber
     return pointer
   }
 
-  private pointerDownHandler = (evt: PointerEvent) =>
+  protected pointerDownHandler = (evt: PointerEvent) =>
   {
     this.#logger.info("pointerDown", { evt })
     // exit if not a left click or multi-touch
@@ -70,7 +70,7 @@ export class PointerEventGrabber implements IGrabber
     }
   }
 
-  private pointerMoveHandler = (evt: PointerEvent) =>
+  protected pointerMoveHandler = (evt: PointerEvent) =>
   {
     this.#logger.info("pointerMove", { evt })
     if (this.activePointerId != undefined && this.activePointerId === evt.pointerId) {
@@ -81,7 +81,7 @@ export class PointerEventGrabber implements IGrabber
     }
   }
 
-  private pointerUpHandler = (evt: PointerEvent) =>
+  protected pointerUpHandler = (evt: PointerEvent) =>
   {
     this.#logger.info("pointerUp", { evt })
     if (this.activePointerId != undefined && this.activePointerId === evt.pointerId) {
