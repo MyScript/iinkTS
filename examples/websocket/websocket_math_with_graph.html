@@ -6,7 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
-    <title>Websocket Math</title>
+    <title>Websocket Math With Graph</title>
     <link rel="stylesheet" href="../assets/style/examples.css" />
     <link
       rel="stylesheet"
@@ -138,13 +138,14 @@
 
         editor.events.addEventListener("exported", (evt) => {
           const exports = evt.detail;
+          resultElement.innerHTML =
+            event.detail && event.detail["application/vnd.myscript.jiix"] ? event.detail["application/vnd.myscript.jiix"].label : "";
           colors.forEach((color, index) => {
             calculator.setExpression({ id: index, latex: '', color: colors[index] });
           });
           if (exports && exports["application/x-latex"]) {
             katex.render(exports["application/x-latex"], resultElement);
             extractExpressions(exports['application/x-latex']).forEach((val, index) => {
-              console.log('val: ', val);
               calculator.setExpression({ id: index, latex: val, color: colors[index] });
             })
           }
