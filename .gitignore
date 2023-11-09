@@ -7,3 +7,5 @@ docker/examples/delivery
 test/integration/screenshots
 docs
 dist
+
+__diff_output__
