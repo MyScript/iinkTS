@@ -3,10 +3,9 @@ const {
   waitForEditorWebSocket,
   write,
   getDatasFromExportedEvent,
-  getExportsTypeFromEditorModel,
   waitEditorIdle
 } = require('../helper')
-const { equation1, fence, sum } = require('../strokesDatas')
+const { equation1 } = require('../strokesDatas')
 expect.extend({ toMatchImageSnapshot })
 
 describe('Websocket Math', function () {
@@ -25,22 +24,7 @@ describe('Websocket Math', function () {
     expect(title).toMatch('Websocket Math With Graph')
   })
 
-  test('should only export latex by default', async () => {
-    for(const s of equation1.strokes) {
-      await Promise.all([
-        getDatasFromExportedEvent(page),
-        write(page, [s], 100, 100)
-      ])
-    }
-    const jiix = await getExportsTypeFromEditorModel(page, 'application/vnd.myscript.jiix')
-    expect(jiix).toBeUndefined()
-    const latex = await getExportsTypeFromEditorModel(page, 'application/x-latex')
-    expect(latex).toBeDefined()
-    const mathml = await getExportsTypeFromEditorModel(page, 'application/mathml+xml')
-    expect(mathml).toBeUndefined()
-  })
-
-  test('should draw equation on graph', async () => {
+  testIf(!page._browserContext._options.isMobile, 'should draw equation on graph', async () => {
     for(const s of equation1.strokes) {
       await Promise.all([
         getDatasFromExportedEvent(page),

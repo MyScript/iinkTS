@@ -79,6 +79,6 @@
   },
   "resolutions": {
     "**/loader-utils": "3.2.1",
-    "**/json5": "2.2.2"
+    "**/json5": "2.2.3"
   }
 }
