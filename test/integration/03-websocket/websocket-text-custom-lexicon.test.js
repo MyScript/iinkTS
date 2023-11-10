@@ -4,10 +4,6 @@ const { covfefe } = require("../strokesDatas")
 describe("Websocket Text Custom Lexicon", () => {
   beforeAll(async () => {
     await page.goto("/examples/websocket/websocket_text_custom_lexicon.html")
-  })
-
-  beforeEach(async () => {
-    await page.reload({ waitUntil: 'load' })
     await waitForEditorWebSocket(page)
     await waitEditorIdle(page)
   })
@@ -37,5 +33,6 @@ describe("Websocket Text Custom Lexicon", () => {
     const jiixReceived = exports["application/vnd.myscript.jiix"]
     expect(jiixReceived.label).toEqual(covfefe.exports["text/plain"].at(-1))
   })
+
   require("../_partials/text/nav-actions-text-undo-redo-test")
 })

@@ -1,7 +1,12 @@
-const { writePointers, getDatasFromExportedEvent } = require("../../helper")
+const { writePointers, getDatasFromExportedEvent, waitEditorIdle } = require("../../helper")
 const { one } = require("../../strokesDatas")
 
 describe('Nav actions text clear', () => {
+  beforeEach(async () => {
+    await page.reload({ waitUntil: 'load' })
+    await waitEditorIdle(page)
+  })
+
   test('should clear', async () => {
     const [exportBeforeClear] = await Promise.all([
       getDatasFromExportedEvent(page),

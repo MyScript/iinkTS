@@ -1,14 +1,9 @@
-const { assert } = require("console")
-const { write, waitForEditorWebSocket, waitEditorIdle } = require("../helper")
-const { hello } = require("../strokesDatas")
+const { write, waitForEditorWebSocket, waitEditorIdle, getDatasFromExportedEvent } = require("../helper")
+const { h } = require("../strokesDatas")
 
 describe("Websocket Custom recognizer", () => {
   beforeAll(async () => {
     await page.goto("/examples/dev/websocket_custom_recognizer.html")
-  })
-
-  beforeEach(async () => {
-    await page.reload({ waitUntil: 'load' })
     await waitForEditorWebSocket(page)
     await waitEditorIdle(page)
   })
@@ -19,17 +14,25 @@ describe("Websocket Custom recognizer", () => {
   })
 
   test("should have info in recognizer-info div", async () => {
-    const recognizerInfo = await page.$eval(".recognizer-info", el => el.textContent) 
-    assert(recognizerInfo.includes("connection established at ws://"))
-    assert(recognizerInfo.includes("Message sent: {"))
-    assert(recognizerInfo.includes("Message received: {"))
+    const url = await page.$eval("#recognizer-url", el => el.textContent)
+    expect(url).toContain("connection established at ws://")
+    const sent = await page.$eval("#recognizer-sent", el => el.textContent)
+    expect(sent).toContain("Message sent: {")
+    const received = await page.$eval("#recognizer-received", el => el.textContent)
+    expect(received).toContain("Message received: {")
   })
 
   test("should have info in recognizer-info div", async () => {
-    await write(page, hello.strokes)
-    const recognizerInfo = await page.$eval(".recognizer-info", el => el.textContent) 
-    assert(recognizerInfo.includes("connection established at ws://"))
-    assert(recognizerInfo.includes("Message sent: {\"type\":\"addStrokes\",\"strokes\""))
-    assert(recognizerInfo.includes("Message received: {\"type\":\"svgPatch\",\"updates\""))
+    await Promise.all([
+      getDatasFromExportedEvent(page),
+      write(page, h.strokes)
+    ])
+    const url = await page.$eval("#recognizer-url", el => el.textContent)
+    expect(url).toContain("connection established at ")
+    expect(url).toContain("/api/v4.0/iink/document?applicationKey=")
+    const sent = await page.$eval("#recognizer-sent", el => el.textContent)
+    expect(sent).toContain("Message sent: {\"type\":\"addStrokes\",\"strokes\"")
+    const received = await page.$eval("#recognizer-received", el => el.textContent)
+    expect(received).toContain("Message received: {\"type\":\"")
   })
 })

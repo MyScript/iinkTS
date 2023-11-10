@@ -4,10 +4,6 @@ const { hello } = require("../strokesDatas")
 describe("Websocket Text search", () => {
   beforeAll(async () => {
     await page.goto("/examples/websocket/websocket_text_iink_search.html")
-  })
-
-  beforeEach(async () => {
-    await page.reload({ waitUntil: 'load' })
     await waitForEditorWebSocket(page)
   })
 
@@ -16,16 +12,19 @@ describe("Websocket Text search", () => {
     expect(title).toMatch("Text search")
   })
 
-  test("should find text", async () => {
-    await Promise.all([
-        getDatasFromExportedEvent(page),
-        write(page, hello.strokes)
+  test("should write hello", async () => {
+    const [exported] = await Promise.all([
+      getDatasFromExportedEvent(page),
+      write(page, hello.strokes)
     ])
 
-    const inputSearch = page.locator("#searchInput")
+    expect(exported).toBeDefined()
+  })
+
+  test("should find text", async () => {
     await Promise.all([
-        inputSearch.type("hello"),
-        page.click("#searchBtn")
+      page.locator("#searchInput").type("hello"),
+      page.click("#searchBtn")
     ])
 
     //wait for css highlight
@@ -36,12 +35,11 @@ describe("Websocket Text search", () => {
 
   test("should failed to find", async () => {
     await Promise.all([
-        getDatasFromExportedEvent(page),
-        write(page, hello.strokes)
+      page.locator("#searchInput").type("test"),
+      page.click("#searchBtn")
     ])
-
-    page.locator("#searchInput").type("test")
-    await page.click("#searchBtn")
+    //wait for css highlight
+    await page.waitForTimeout(1000)
     expect(await page.locator(".highlight").count()).toEqual(0)
   })
 })

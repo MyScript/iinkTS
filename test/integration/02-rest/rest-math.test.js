@@ -14,12 +14,9 @@ describe('Rest Math', () => {
 
   beforeAll(async () => {
     await page.goto('/examples/rest/rest_math_iink.html')
-  })
-
-  beforeEach(async () => {
-    await page.reload({ waitUntil: 'load' })
     await waitForEditorRest(page)
   })
+
 
   test('should have title', async () => {
     const title = await page.title()
@@ -107,6 +104,11 @@ describe('Rest Math', () => {
   })
 
   describe('Nav actions', () => {
+    beforeEach(async () => {
+      await page.reload({ waitUntil: 'load' })
+      await waitForEditorRest(page)
+    })
+
     test('should clear', async () => {
       const [exportedDatas] = await Promise.all([
         getDatasFromExportedEvent(page),

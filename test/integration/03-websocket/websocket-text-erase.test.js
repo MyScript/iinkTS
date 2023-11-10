@@ -9,6 +9,7 @@ describe('Websocket Text erase', () => {
   beforeEach(async () => {
     await page.reload({ waitUntil: 'load' })
     await waitForEditorWebSocket(page)
+    await waitEditorIdle(page)
   })
 
   test('should have title', async () => {

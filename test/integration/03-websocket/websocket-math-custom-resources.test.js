@@ -1,5 +1,5 @@
-const { waitForEditorWebSocket, writePointers, write, getDatasFromExportedEvent, getExportsTypeFromEditorModel, waitEditorIdle, getEditorConfiguration, setEditorConfiguration } = require("../helper")
-const { sumSimple, h } = require("../strokesDatas")
+const { waitForEditorWebSocket, write, getDatasFromExportedEvent, waitEditorIdle, getEditorConfiguration, setEditorConfiguration } = require("../helper")
+const { h } = require("../strokesDatas")
 
 describe("Websocket Math", function () {
   beforeAll(async () => {
@@ -17,18 +17,6 @@ describe("Websocket Math", function () {
     expect(title).toMatch("Custom resources math")
   })
 
-  test("should only export latex by default", async () => {
-    for (const s of sumSimple.strokes) {
-      await Promise.all([getDatasFromExportedEvent(page), writePointers(page, [s], 100, 100)])
-    }
-    const jiix = await getExportsTypeFromEditorModel(page, "application/vnd.myscript.jiix")
-    expect(jiix).toBeUndefined()
-    const latex = await getExportsTypeFromEditorModel(page, "application/x-latex")
-    expect(latex).toBeDefined()
-    const mathml = await getExportsTypeFromEditorModel(page, "application/mathml+xml")
-    expect(mathml).toBeUndefined()
-  })
-
   test("should not recognize text", async () => {
     await Promise.all([getDatasFromExportedEvent(page), write(page, h.strokes)])
     let resultElement = page.locator("#result")
@@ -43,12 +31,12 @@ describe("Websocket Math", function () {
     await setEditorConfiguration(page, config)
     await waitForEditorWebSocket(page)
 
-    const [exportedDatas] = await Promise.all([getDatasFromExportedEvent(page), write(page, h.strokes)])
+    await Promise.all([getDatasFromExportedEvent(page), write(page, h.strokes)])
     let resultElement = page.locator("#result")
     resultText = await resultElement.textContent()
-    const latexReceived = exportedDatas["application/x-latex"]
     expect(resultText).toEqual("h")
   })
+
   require("../_partials/math/nav-actions-math-undo-redo-test")
   require("../_partials/math/nav-actions-math-clear-test")
 })

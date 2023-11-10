@@ -1,4 +1,4 @@
-const { waitForEditorWebSocket, write, getDatasFromExportedEvent } = require('../helper')
+const { waitForEditorWebSocket, write, getDatasFromExportedEvent, waitEditorIdle } = require('../helper')
 const { h } = require('../strokesDatas')
 
 function hexToRgbA(hex) {
@@ -24,6 +24,7 @@ describe('Websocket Text Customize Stroke Style', () => {
   beforeEach(async () => {
     await page.reload({ waitUntil: 'load' })
     await waitForEditorWebSocket(page)
+    await waitEditorIdle(page)
   })
 
   test('should have title', async () => {

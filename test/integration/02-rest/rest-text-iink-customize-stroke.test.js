@@ -12,11 +12,11 @@ const {
     })
 
     beforeEach(async () => {
-      await page.reload({ waitUntil: 'load' })
       await Promise.all([
-        waitForEditorRest(page),
+        page.reload({ waitUntil: 'load' }),
         page.waitForRequest(req => req.url().includes('/api/v4.0/iink/availableLanguageList') && req.method() === "GET")
       ])
+      await waitForEditorRest(page)
     })
     
     test('should have title', async () => {
