@@ -1,7 +1,12 @@
-const { getExportsFromEditorModel, write, getDatasFromExportedEvent } = require("../../helper")
+const { getExportsFromEditorModel, write, getDatasFromExportedEvent, waitEditorIdle } = require("../../helper")
 const { hello } = require("../../strokesDatas")
 
 describe('Nav actions text undo/redo', () => {
+  beforeEach(async () => {
+    await page.reload({ waitUntil: 'load' })
+    await waitEditorIdle(page)
+  })
+
   test('should undo/redo', async () => {
     const editorEl = await page.waitForSelector('#editor')
     for (const s of hello.strokes) {

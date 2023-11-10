@@ -46,11 +46,6 @@ describe("Websocket Math Inside Page", function () {
       let currentExport
       let currentTextContent
 
-      beforeAll(async () => {
-        await page.reload({ waitUntil: 'load' })
-        await waitEditorIdle(page)
-      })
-
       test(`should open modal editor`, async () => {
         await waitEditorIdle(page)
         expect(await page.locator("#editor-modal").isVisible()).toEqual(false)
@@ -104,6 +99,12 @@ describe("Websocket Math Inside Page", function () {
         expect(await page.locator("#editor-modal").isVisible()).toEqual(true)
         currentExport = await getExportsFromEditorModel(page)
         expect(currentExport['application/x-latex']).toEqual(mc.latexAfterWriting)
+      })
+
+      test(`should close modal editor`, async () => {
+        await waitEditorIdle(page)
+        await page.locator("#close").click()
+        expect(await page.locator("#editor-modal").isVisible()).toEqual(false)
       })
     })
   })

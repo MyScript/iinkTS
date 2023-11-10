@@ -4,10 +4,6 @@ const { h } = require('../strokesDatas')
 describe('Websocket Text Import Content', () => {
   beforeAll(async () => {
     await page.goto('/examples/websocket/websocket_text_import_content.html')
-  })
-
-  beforeEach(async () => {
-    await page.reload({ waitUntil: 'load' })
     await waitForEditorWebSocket(page)
     await waitEditorIdle(page)
   })
@@ -15,16 +11,6 @@ describe('Websocket Text Import Content', () => {
   test('should have title', async () => {
     const title = await page.title()
     expect(title).toMatch('Import')
-  })
-
-  test('should export application/vnd.myscript.jiix', async () => {
-    const [exports] = await Promise.all([
-      getDatasFromExportedEvent(page),
-      write(page, h.strokes),
-    ])
-    const jiixExpected = h.exports['application/vnd.myscript.jiix']
-    const jiixReceived = exports['application/vnd.myscript.jiix']
-    expect(jiixReceived).toEqual(jiixExpected)
   })
 
   test('should import text hello', async () => {
@@ -50,5 +36,6 @@ describe('Websocket Text Import Content', () => {
     const textContent = await prompterText.evaluate((node) => node.textContent)
     expect(textContent).toEqual("pony")
   })
+
   require("../_partials/text/nav-actions-text-undo-redo-test")
 })

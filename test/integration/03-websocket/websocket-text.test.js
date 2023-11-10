@@ -8,15 +8,11 @@ const {
   waitEditorIdle,
   getExportsFromEditorModel
 } = require("../helper")
-const { h, hello, helloOneStroke, helloStrikeStroke } = require("../strokesDatas")
+const { h, helloStrikeStroke } = require("../strokesDatas")
 
 describe("Websocket Text", () => {
   beforeAll(async () => {
     await page.goto("/examples/websocket/websocket_text_iink.html")
-  })
-
-  beforeEach(async () => {
-    await page.reload({ waitUntil: 'load' })
     await Promise.all([
       waitForEditorWebSocket(page),
       page.waitForRequest(req => req.url().includes('/api/v4.0/iink/availableLanguageList') && req.method() === "GET")
@@ -71,6 +67,14 @@ describe("Websocket Text", () => {
   })
 
   describe("SmartGuide", () => {
+    beforeAll(async () => {
+      await page.reload()
+      await Promise.all([
+        waitForEditorWebSocket(page),
+        page.waitForRequest(req => req.url().includes('/api/v4.0/iink/availableLanguageList') && req.method() === "GET")
+      ])
+      await waitEditorIdle(page)
+    })
     test("should not display", async () => {
       const configuration = await getEditorConfiguration(page)
       configuration.rendering.smartGuide.enable = false
@@ -91,20 +95,22 @@ describe("Websocket Text", () => {
       setEditorConfiguration(page, configuration)
       await waitForEditorWebSocket(page)
 
-      await Promise.all([getDatasFromExportedEvent(page), write(page, h.strokes)])
-
       // wait css animation
       await page.waitForTimeout(1000)
-      expect(await page.locator(".prompter-text").isVisible()).toBe(true)
-      expect(await page.locator(".candidates").isVisible()).toBe(false)
+      expect(await page.locator(".smartguide").isVisible()).toBe(true)
     })
 
     test("should display text into", async () => {
-      await Promise.all([getDatasFromExportedEvent(page), write(page, h.strokes)])
+      await Promise.all([
+        getDatasFromExportedEvent(page),
+        write(page, h.strokes)
+      ])
+      await waitEditorIdle(page)
 
       const textExpected = h.exports["text/plain"].at(-1)
       const textExpectedWithNbsp = textExpected.replace(/\s/g, "\u00A0")
 
+      expect(await page.locator(".prompter-text").isVisible()).toBe(true)
       const prompterText = await page.waitForSelector(".prompter-text")
       const textContent = await prompterText.evaluate((node) => node.textContent)
 
@@ -112,11 +118,6 @@ describe("Websocket Text", () => {
     })
 
     test("should select candidate", async () => {
-      await Promise.all([
-        getDatasFromExportedEvent(page),
-        write(page, hello.strokes)
-      ])
-      await waitEditorIdle(page)
       const jiixExport = await getExportsTypeFromEditorModel(page, "application/vnd.myscript.jiix")
       expect(await page.innerText(".prompter-text")).toBe(jiixExport.label)
       expect(await page.locator(".candidates").isVisible()).toBe(false)
@@ -127,22 +128,22 @@ describe("Websocket Text", () => {
       expect(await page.locator(".candidates").isVisible()).toBe(true)
       const candidate = jiixExport.words[0].candidates[2]
 
-      await Promise.all([getDatasFromExportedEvent(page), page.click(`.candidates > span >> text=${candidate}`)])
+      await Promise.all([getDatasFromExportedEvent(page), page.click(`.candidates > span >> text=${ candidate }`)])
 
       expect(await page.innerText(".prompter-text")).toBe(candidate)
       expect(await page.locator(".candidates").isVisible()).toBe(false)
     })
 
-    test("should convert", async () => {
-      await Promise.all([getDatasFromExportedEvent(page), write(page, helloOneStroke.strokes)])
+    test("should open menu more", async () => {
       expect(await page.locator(".more-menu.close").isVisible()).toBe(false)
-      const wrotePath = await page.locator("path").first().getAttribute("d")
-
       await page.click(`.ellipsis`)
       // wait for css animation
       await page.waitForTimeout(1000)
       expect(await page.locator(".more-menu.open").isVisible()).toBe(true)
+    })
 
+    test("should convert", async () => {
+      const wrotePath = await page.locator("path").first().getAttribute("d")
       await Promise.all([getDatasFromExportedEvent(page), page.click(`.more-menu > button >> text=Convert`)])
 
       const convert = await getExportsFromEditorModel(page)
@@ -150,6 +151,12 @@ describe("Websocket Text", () => {
 
       const convertedPath = await page.locator("path").first().getAttribute("d")
       expect(wrotePath).not.toEqual(convertedPath)
+    })
+
+    test("should close menu more after convert", async () => {
+      // wait for css animation
+      await page.waitForTimeout(1000)
+      expect(await page.locator(".more-menu.close").isVisible()).toBe(false)
     })
 
     test.skip("should Copy", async () => {
@@ -172,17 +179,9 @@ describe("Websocket Text", () => {
     })
 
     test("should Delete", async () => {
-      await Promise.all([getDatasFromExportedEvent(page), write(page, h.strokes)])
-
-      expect(await page.locator(".more-menu.close").isVisible()).toBe(false)
-
-      let pathElements = page.locator("path")
-      expect(await pathElements.count()).toEqual(1)
-
       await page.click(`.ellipsis`)
       // wait for css animation
       await page.waitForTimeout(1000)
-
       expect(await page.locator(".more-menu.open").isVisible()).toBe(true)
 
       await Promise.all([getDatasFromExportedEvent(page), page.click(`.more-menu > button >> text=Delete`)])
@@ -192,6 +191,12 @@ describe("Websocket Text", () => {
 
       pathElements = page.locator("path")
       expect(await pathElements.count()).toEqual(0)
+    })
+
+    test("should close menu more after delete", async () => {
+      // wait for css animation
+      await page.waitForTimeout(1000)
+      expect(await page.locator(".more-menu.close").isVisible()).toBe(false)
     })
   })
 

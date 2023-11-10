@@ -1,13 +1,10 @@
-const { waitForEditorWebSocket } = require("../helper")
+const { waitForEditorWebSocket, waitEditorIdle } = require("../helper")
 
 describe("Websocket Text Custom Resource", () => {
   beforeAll(async () => {
     await page.goto("/examples/websocket/websocket_text_customize_editor_css.html")
-  })
-
-  beforeEach(async () => {
-    await page.reload({ waitUntil: "networkidle" })
     await waitForEditorWebSocket(page)
+    await waitEditorIdle(page)
   })
 
   test("should have title", async () => {

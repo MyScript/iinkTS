@@ -190,6 +190,6 @@ describe('Websocket Math', function () {
     expect(await page.locator('#result').locator('.katex-html').textContent()).toEqual(sum.exports.LATEX.at(-2))
   })
 
-
+  require("../_partials/math/nav-actions-math-clear-test")
   require("../_partials/math/nav-actions-math-undo-redo-test")
 })

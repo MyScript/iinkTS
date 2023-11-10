@@ -4,11 +4,8 @@ const { abrausorus } = require("../strokesDatas")
 describe("Websocket Text Custom Resource", () => {
   beforeAll(async () => {
     await page.goto("/examples/websocket/websocket_text_custom_resources.html")
-  })
-
-  beforeEach(async () => {
-    await page.reload({ waitUntil: 'load' })
     await waitForEditorWebSocket(page)
+    await waitEditorIdle(page)
   })
 
   test("should have title", async () => {
@@ -26,5 +23,6 @@ describe("Websocket Text Custom Resource", () => {
     const jiixReceived = exports["application/vnd.myscript.jiix"]
     expect(jiixReceived.label).toEqual(jiixExpected.label)
   })
+
   require("../_partials/text/nav-actions-text-undo-redo-test")
 })

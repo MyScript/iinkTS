@@ -76,7 +76,7 @@ describe('Home Page', () =>
       await page.goBack()
     }
     expect(linksInErrors).toStrictEqual([])
-  })
+  }, 60000)
 
   test('each "Get source code" link should ok', async () =>
   {

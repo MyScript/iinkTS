@@ -1,16 +1,9 @@
-const { assert } = require("console")
 const { write, waitForEditorWebSocket, waitEditorIdle, getDatasFromExportedEvent } = require("../helper")
-const { hello } = require("../strokesDatas")
+const { h } = require("../strokesDatas")
 
 describe("Websocket Custom recognizer", () => {
-  let alertContent = ""
-
   beforeAll(async () => {
     await page.goto("/examples/dev/websocket_custom_grabber.html")
-  })
-
-  beforeEach(async () => {
-    await page.reload({ waitUntil: 'load' })
     await waitForEditorWebSocket(page)
     await waitEditorIdle(page)
   })
@@ -21,29 +14,34 @@ describe("Websocket Custom recognizer", () => {
   })
 
   test("should have info in point-info div", async () => {
-    const pointInfo = await page.$eval(".point-info", el => el.textContent) 
-    assert(pointInfo.includes("Down at:"))
-    assert(pointInfo.includes("Move to:"))
-    assert(pointInfo.includes("Up at:"))
+    const pointerDown = await page.$eval("#pointer-down", el => el.textContent)
+    expect(pointerDown).toContain("Down at:")
+    const pointerMove = await page.$eval("#pointer-move", el => el.textContent)
+    expect(pointerMove).toContain("Move to:")
+    const pointerUp = await page.$eval("#pointer-up", el => el.textContent)
+    expect(pointerUp).toContain("Up at:")
   })
 
   test("should have info in recognizer-info div", async () => {
-    await Promise.all([getDatasFromExportedEvent(page), write(page, hello.strokes)])
+    await Promise.all([
+      getDatasFromExportedEvent(page),
+      write(page, h.strokes)
+    ])
     const result = await page.$eval("#result", el => el.textContent)
-    assert(result.match("hello"))
+    expect(result).toMatch("h")
 
     const pointerDown = await page.$eval("#pointer-down", el => el.textContent) 
-    assert(pointerDown.includes("Down at: {\"x\":489,\"y\":238,\"t\":"))
+    expect(pointerDown).toContain("Down at: {\"x\":397,\"y\":254,\"t\":")
 
     const pointerMove = await page.$eval("#pointer-move", el => el.textContent) 
-    assert(pointerMove.includes("Move to: {\"x\":504,\"y\":236,\"t\":"))
+    expect(pointerMove).toContain("Move to: {\"x\":426,\"y\":250,\"t\":")
     
     const pointerUp = await page.$eval("#pointer-up", el => el.textContent) 
-    assert(pointerUp.includes("Up at: {\"x\":504,\"y\":236,\"t\":"))  
+    expect(pointerUp).toContain("Up at: {\"x\":426,\"y\":250,\"t\":")
   })
 
   test.skip("should display alert on right button click", async () => {
-    const dialogHandled = new Promise((resolve, reject) => {
+    const dialogHandled = new Promise((resolve) => {
       const handler = async dialog => {
         await dialog.accept()
         resolve(dialog.message())

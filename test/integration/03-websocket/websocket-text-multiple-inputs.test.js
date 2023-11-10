@@ -7,8 +7,8 @@ const switchToOtherQuestion = async (page, inputId) => {
     waitEditorIdle(page)
   ])
   const backgroundColor = await page.locator(`#editor`).evaluate((el) => {
-    return window.getComputedStyle(el).getPropertyValue('background-color');
-  });
+    return window.getComputedStyle(el).getPropertyValue('background-color')
+  })
   if(backgroundColor !== "rgba(150, 150, 255, 0.2)")
   {
     await switchToOtherQuestion(page, inputId)

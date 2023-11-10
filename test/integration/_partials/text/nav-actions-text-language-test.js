@@ -2,6 +2,11 @@ const { getDatasFromExportedEvent, write, waitEditorIdle } = require("../../help
 const { h } = require("../../strokesDatas")
 
 describe('Nav actions text language', () => {
+  beforeEach(async () => {
+    await page.reload({ waitUntil: 'load' })
+    await waitEditorIdle(page)
+  })
+
   test('should change language', async () => {
     await Promise.all([
       getDatasFromExportedEvent(page),

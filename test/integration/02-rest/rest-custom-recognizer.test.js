@@ -1,18 +1,14 @@
-const { assert } = require("console")
 const {
   waitForEditorRest,
-  write
+  write,
+  getDatasFromExportedEvent
 } = require('../helper')
-const { hello } = require('../strokesDatas')
+const { h } = require('../strokesDatas')
 
 describe('Rest Text', () => {
 
   beforeAll(async () => {
     await page.goto('/examples/dev/rest_custom_recognizer.html')
-  })
-
-  beforeEach(async () => {
-    await page.reload({ waitUntil: 'load' })
     await waitForEditorRest(page)
   })
 
@@ -22,17 +18,25 @@ describe('Rest Text', () => {
   })
 
   test("should have info in recognizer-info div", async () => {
-    const recognizerInfo = await page.$eval(".recognizer-info", el => el.textContent) 
-    assert(recognizerInfo.includes("Server url: http://"))
-    assert(recognizerInfo.includes("Message sent:"))
-    assert(recognizerInfo.includes("Message received:"))
+    const url = await page.$eval("#recognizer-url", el => el.textContent)
+    expect(url).toContain("Server url: http://")
+    const sent = await page.$eval("#recognizer-sent", el => el.textContent)
+    expect(sent).toContain("Message sent:")
+    const received = await page.$eval("#recognizer-received", el => el.textContent)
+    expect(received).toContain("Message received:")
   })
 
   test("should have info in recognizer-info div", async () => {
-    await write(page, hello.strokes)
-    const recognizerInfo = await page.$eval(".recognizer-info", el => el.textContent) 
-    assert(recognizerInfo.includes("connection established at ws://"))
-    assert(recognizerInfo.includes("POST: {\"configuration\":{\"lang\":\"en_US\""))
-    assert(recognizerInfo.includes("Response: {\"type\":\"Text\",\"label\":\"hello\""))
+    await Promise.all([
+      getDatasFromExportedEvent(page),
+      write(page, h.strokes)
+    ])
+    const url = await page.$eval("#recognizer-url", el => el.textContent)
+    expect(url).toContain("Server url: ")
+    expect(url).toContain("/api/v4.0/iink/batch")
+    const sent = await page.$eval("#recognizer-sent", el => el.textContent)
+    expect(sent).toContain("POST: {\"configuration\":{\"lang\":\"en_US\"")
+    const received = await page.$eval("#recognizer-received", el => el.textContent)
+    expect(received).toContain("Response: {\"type\":\"Text\",\"label\":\"h\"")
   })
 })
