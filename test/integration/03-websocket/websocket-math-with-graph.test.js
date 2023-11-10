@@ -11,6 +11,7 @@ expect.extend({ toMatchImageSnapshot })
 describe('Websocket Math', function () {
   beforeAll(async () => {
     await page.goto('/examples/websocket/websocket_math_with_graph.html')
+    
   })
 
   beforeEach(async () => {
@@ -24,7 +25,7 @@ describe('Websocket Math', function () {
     expect(title).toMatch('Websocket Math With Graph')
   })
 
-  testIf(!page._browserContext._options.isMobile, 'should draw equation on graph', async () => {
+  test('should draw equation on graph', async () => {
     for(const s of equation1.strokes) {
       await Promise.all([
         getDatasFromExportedEvent(page),
@@ -32,7 +33,12 @@ describe('Websocket Math', function () {
       ])
     }
     const img = await page.screenshot()
-    expect(img).toMatchImageSnapshot({ failureThreshold: 0.01, failureThresholdType: 'percent' })
+    expect(img).toMatchImageSnapshot({ allowSizeMismatch: true,
+                                       customSnapshotsDir: '../__image_snapshots__', 
+                                       customSnapshotIdentifier: 'websocket-math-with-graph-test-js-desktop-snap.png',
+                                       failureThreshold: 0.01, 
+                                       failureThresholdType: 'percent'
+                                     })
   })
 
   require("../_partials/math/nav-actions-math-undo-redo-test")
