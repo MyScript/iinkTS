@@ -1,2 +1,2 @@
-export { LoggerManager } from "./loggerManager"
-export { Logger } from "./logger"
+export * from "./loggerManager"
+export * from "./logger"

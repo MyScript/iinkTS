@@ -1,6 +1,11 @@
 import { buildStroke, delay } from "../utils/helpers"
-import
-{
+
+import {
+  WSBehaviors,
+  InternalEvent,
+  Model,
+  DefaultConfiguration,
+  DefaultPenStyle,
   TBehaviorOptions,
   TConfiguration,
   TExport,
@@ -8,18 +13,10 @@ import
   TPointer,
   TPenStyle,
   TTheme
-} from "../../../src/@types"
-
-import { behaviors, event, model, configuration, style } from "../../../src/iink"
+} from "../../../src/iink"
 
 describe("WSBehaviors.ts", () =>
 {
-  const { WSBehaviors } = behaviors
-  const { InternalEvent } = event
-  const { Model } = model
-  const { DefaultConfiguration } = configuration
-  const { DefaultPenStyle } = style
-
   const height = 100, width = 100
   const DefaultBehaviorsOptions: TBehaviorOptions = {
     configuration: DefaultConfiguration

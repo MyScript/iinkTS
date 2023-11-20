@@ -1,9 +1,10 @@
-import { TWSMessageEventSVGPatch } from "../../../src/@types"
-import { event } from "../../../src/iink"
+import {
+  InternalEvent,
+  TWSMessageEventSVGPatch
+} from "../../../src/iink"
 
 describe("InternalEvent.ts", () =>
 {
-  const { InternalEvent } = event
   const internalEvent = InternalEvent.getInstance()
 
   test("should have singleton", () =>

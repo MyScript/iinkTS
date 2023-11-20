@@ -1,14 +1,13 @@
-import {
-  TMarginConfiguration,
-  TRenderingConfiguration,
-  TJIIXExport,
-  TJIIXWord
-} from "../@types"
-
-import { InternalEvent } from "../event/InternalEvent"
-import { LoggerManager } from "../logger"
 import { LoggerClass } from "../Constants"
+import { TMarginConfiguration, TRenderingConfiguration } from "../configuration"
+import { InternalEvent } from "../event"
+import { LoggerManager } from "../logger"
+import { TJIIXExport, TJIIXWord } from "../model"
+import { createUUID } from "../utils"
 
+/**
+ * @group SmartGuide
+ */
 export class SmartGuide {
   uuid: string
   #smartGuideElement!: HTMLDivElement
@@ -32,7 +31,7 @@ export class SmartGuide {
 
   constructor() {
     this.#logger.info("constructor")
-    this.uuid = Math.random().toString(10).substring(2, 12)
+    this.uuid = createUUID()
     this.margin = {
       bottom: 0,
       left: 0,

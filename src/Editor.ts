@@ -1,40 +1,30 @@
-import
-{
-  TConfiguration,
-  IGrabber,
-  TStroke,
-  IModel,
-  TExport,
-  TJIIXExport,
-  TPenStyle,
-  TTheme,
-  IBehaviors,
-  TBehaviorOptions,
-  TConverstionState,
-  TMarginConfiguration,
-  TUndoRedoContext,
-  TLoggerConfiguration
-} from "./@types"
-
-import { ExportType, Intention, LoggerClass} from "./Constants"
-import { PublicEvent } from "./event/PublicEvent"
-import { InternalEvent } from "./event/InternalEvent"
-import { SmartGuide } from "./smartguide/SmartGuide"
-import { DeferredPromise } from "./utils/DeferredPromise"
-import { RestBehaviors } from "./behaviors/RestBehaviors"
-import { WSBehaviors } from "./behaviors/WSBehaviors"
-import { LoggerManager } from "./logger"
-import { DefaultLoggerConfiguration } from "./configuration"
-
 import "./iink.css"
+import { IBehaviors, RestBehaviors, TBehaviorOptions, WSBehaviors } from "./behaviors"
+import { SmartGuide } from "./smartguide"
+import { DeferredPromise } from "./utils"
+import { LoggerManager } from "./logger"
+import { ExportType, Intention, LoggerClass } from "./Constants"
+import { DefaultLoggerConfiguration, TConfiguration, TConverstionState, TLoggerConfiguration, TMarginConfiguration } from "./configuration"
+import { IModel, TExport, TJIIXExport, TStroke } from "./model"
+import { InternalEvent, PublicEvent } from "./event"
+import { TUndoRedoContext } from "./undo-redo"
+import { IGrabber } from "./grabber"
+import { TPenStyle, TTheme } from "./style"
 
+/**
+ * @group Editor
+ */
 export type HTMLEditorElement = HTMLElement &
 {
   editor: Editor
 }
 
+/**
+ * @group Editor
+ */
 export class Editor
 {
+  logger = LoggerManager.getLogger(LoggerClass.EDITOR)
   wrapperHTML: HTMLEditorElement
   #loaderHTML: HTMLDivElement
   #messageHTML: HTMLDivElement
@@ -42,7 +32,6 @@ export class Editor
   #smartGuide?: SmartGuide
   #initializationDeferred: DeferredPromise<void>
 
-  logger = LoggerManager.getLogger(LoggerClass.EDITOR)
   #loggerConfiguration!: TLoggerConfiguration
 
   showStrokesPan = false
@@ -135,6 +124,11 @@ export class Editor
     return PublicEvent.getInstance()
   }
 
+  get internalEvents(): InternalEvent
+  {
+    return InternalEvent.getInstance()
+  }
+
   get context(): TUndoRedoContext
   {
     return this.behaviors.context
@@ -164,20 +158,20 @@ export class Editor
   {
     return this.behaviors.theme
   }
-  set theme(t: TTheme)
+  set theme(theme: TTheme)
   {
-    this.logger.info("set theme", { t })
-    this.behaviors.setTheme(t)
+    this.logger.info("set theme", { t: theme })
+    this.behaviors.setTheme(theme)
   }
 
   get penStyleClasses(): string
   {
     return this.behaviors.penStyleClasses
   }
-  set penStyleClasses(psc: string)
+  set penStyleClasses(styleClasses: string)
   {
-    this.logger.info("set penStyleClasses", { psc })
-    this.behaviors.setPenStyleClasses(psc)
+    this.logger.info("set penStyleClasses", { psc: styleClasses })
+    this.behaviors.setPenStyleClasses(styleClasses)
   }
 
   get gestures(): boolean
@@ -197,7 +191,7 @@ export class Editor
     if (!options?.configuration) {
       throw new Error("Configuration required")
     }
-    InternalEvent.getInstance().removeAllListeners()
+    this.internalEvents.removeAllListeners()
     if (this.#behaviors) {
       this.#behaviors.destroy()
     }
@@ -315,15 +309,15 @@ export class Editor
 
   #addListeners(): void
   {
-    InternalEvent.getInstance().addConvertListener(this.convert.bind(this))
-    InternalEvent.getInstance().addClearListener(this.clear.bind(this))
-    InternalEvent.getInstance().addErrorListener(this.#showError.bind(this))
-    InternalEvent.getInstance().addImportJIIXListener(this.#onImportJIIX.bind(this))
-    InternalEvent.getInstance().addExportedListener(this.#onExport.bind(this))
-    InternalEvent.getInstance().addNotifListener(this.#showNotif.bind(this))
-    InternalEvent.getInstance().addClearMessageListener(this.#cleanMessage.bind(this))
-    InternalEvent.getInstance().addContextChangeListener(this.#onContextChange.bind(this))
-    InternalEvent.getInstance().addIdleListener(this.#onIdleChange.bind(this))
+    this.internalEvents.addConvertListener(this.convert.bind(this))
+    this.internalEvents.addClearListener(this.clear.bind(this))
+    this.internalEvents.addErrorListener(this.#showError.bind(this))
+    this.internalEvents.addImportJIIXListener(this.#onImportJIIX.bind(this))
+    this.internalEvents.addExportedListener(this.#onExport.bind(this))
+    this.internalEvents.addNotifListener(this.#showNotif.bind(this))
+    this.internalEvents.addClearMessageListener(this.#cleanMessage.bind(this))
+    this.internalEvents.addContextChangeListener(this.#onContextChange.bind(this))
+    this.internalEvents.addIdleListener(this.#onIdleChange.bind(this))
   }
 
   #onContextChange = (context: TUndoRedoContext) =>

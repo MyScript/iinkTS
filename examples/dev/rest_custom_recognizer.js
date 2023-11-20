@@ -1,4 +1,4 @@
-class CustomRestRecognizer extends iink.recognizer.RestRecognizer {
+class CustomRestRecognizer extends iink.RestRecognizer {
 
   constructor(serverConfig, recognitionConfig, elements) {
     super(serverConfig, recognitionConfig)

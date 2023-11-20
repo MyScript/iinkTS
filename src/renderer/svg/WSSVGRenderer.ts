@@ -1,22 +1,13 @@
-import {
-  TRenderingConfiguration,
-  IModel,
-  TUpdatePatch,
-  TUpdatePatchAppendChild,
-  TUpdatePatchInsertBefore,
-  TUpdatePatchRemoveAttribut,
-  TUpdatePatchRemoveChild,
-  TUpdatePatchRemoveElement,
-  TUpdatePatchReplaceAll,
-  TUpdatePatchReplaceELement,
-  TUpdatePatchSetAttribut,
-  TStroke
-} from "../../@types"
-
-import { SVGStroker } from "./SVGStroker"
-import { LoggerManager } from "../../logger"
 import { LoggerClass } from "../../Constants"
+import { TRenderingConfiguration } from "../../configuration"
+import { LoggerManager } from "../../logger"
+import { IModel, TStroke } from "../../model"
+import { TUpdatePatch, TUpdatePatchAppendChild, TUpdatePatchInsertBefore, TUpdatePatchRemoveAttribut, TUpdatePatchRemoveChild, TUpdatePatchRemoveElement, TUpdatePatchReplaceAll, TUpdatePatchReplaceELement, TUpdatePatchSetAttribut } from "../../recognizer"
+import { SVGStroker } from "./SVGStroker"
 
+/**
+ * @group Renderer
+ */
 export class WSSVGRenderer
 {
   #logger = LoggerManager.getLogger(LoggerClass.RENDERER)

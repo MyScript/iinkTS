@@ -1,6 +1,7 @@
-import { DeepPartial, TConfiguration } from "../../../src/@types"
+//@ts-nocheck
+import { PartialDeep, TConfiguration } from "../../../src/iink"
 
-export const ConfigurationTextWebsocket: DeepPartial<TConfiguration> = {
+export const ConfigurationTextWebsocket: PartialDeep<TConfiguration> = {
   server: {
     protocol: 'WEBSOCKET',
     scheme: 'http',
@@ -23,7 +24,7 @@ export const ConfigurationTextWebsocket: DeepPartial<TConfiguration> = {
   }
 }
 
-export const ConfigurationTextRest: DeepPartial<TConfiguration> = {
+export const ConfigurationTextRest: PartialDeep<TConfiguration> = {
   server: {
     protocol: 'REST',
     scheme: 'http',
@@ -45,7 +46,7 @@ export const ConfigurationTextRest: DeepPartial<TConfiguration> = {
   }
 }
 
-export const ConfigurationDiagramRest: DeepPartial<TConfiguration> = {
+export const ConfigurationDiagramRest: PartialDeep<TConfiguration> = {
   server: {
     protocol: 'REST',
     scheme: 'http',
@@ -61,7 +62,7 @@ export const ConfigurationDiagramRest: DeepPartial<TConfiguration> = {
   }
 }
 
-export const ConfigurationRawContentRest: DeepPartial<TConfiguration> = {
+export const ConfigurationRawContentRest: PartialDeep<TConfiguration> = {
   server: {
     protocol: 'REST',
     scheme: 'http',
@@ -74,7 +75,7 @@ export const ConfigurationRawContentRest: DeepPartial<TConfiguration> = {
   }
 }
 
-export const AllOverrideConfiguration: DeepPartial<TConfiguration> = {
+export const AllOverrideConfiguration: PartialDeep<TConfiguration> = {
   server: {
     protocol: 'REST',
     scheme: 'http',
@@ -108,7 +109,6 @@ export const AllOverrideConfiguration: DeepPartial<TConfiguration> = {
           chars: true,
           words: false
         },
-        ids: true,
       },
     },
     renderer: {
@@ -171,11 +171,6 @@ export const AllOverrideConfiguration: DeepPartial<TConfiguration> = {
       eraser: {
         'erase-precisely': true
       },
-      gestures: [
-        "underline",
-        "scratch-out",
-        "join"
-      ],
     }
   },
   grabber: {
@@ -198,8 +193,7 @@ export const AllOverrideConfiguration: DeepPartial<TConfiguration> = {
     },
     guides: {
       enable: false,
-      gap: 100,
-      type: "line-grid"
+      gap: 42
     }
   },
   triggers: {

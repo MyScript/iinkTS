@@ -1,11 +1,9 @@
-import {
-  TPointer,
-  TStroke
-} from "../../@types"
+import { TStroke } from "../../model"
+import { TPointer, computeAngleAxeRadian, computeLinksPointers, computeMiddlePointer } from "../../utils"
 
-import { computeAngleAxeRadian } from "../../utils/math"
-import { computeLinksPoints, computeMiddlePoint } from "../QuadraticUtils"
-
+/**
+ * @group Renderer
+ */
 export class SVGStroker
 {
 
@@ -22,8 +20,8 @@ export class SVGStroker
 
   protected getLinePath(begin: TPointer, end: TPointer, width: number): string
   {
-    const linkPoints1 = computeLinksPoints(begin, computeAngleAxeRadian(begin, end), width)
-    const linkPoints2 = computeLinksPoints(end, computeAngleAxeRadian(begin, end), width)
+    const linkPoints1 = computeLinksPointers(begin, computeAngleAxeRadian(begin, end), width)
+    const linkPoints2 = computeLinksPointers(end, computeAngleAxeRadian(begin, end), width)
     const svgPath = [
       `M ${ linkPoints1[0].x },${ linkPoints1[0].y }`,
       `L ${ linkPoints2[0].x },${ linkPoints2[0].y }`,
@@ -37,7 +35,7 @@ export class SVGStroker
   {
     const ARCSPLIT = 6
     const angle = computeAngleAxeRadian(begin, end)
-    const linkPoints = computeLinksPoints(end, angle, width)
+    const linkPoints = computeLinksPointers(end, angle, width)
     const parts = [`M ${ linkPoints[0].x },${ linkPoints[0].y }`]
     for (let i = 1; i <= ARCSPLIT; i++) {
       const newAngle = angle - (i * (Math.PI / ARCSPLIT))
@@ -49,9 +47,9 @@ export class SVGStroker
 
   protected getQuadraticPath(begin: TPointer, end: TPointer, central: TPointer, width: number): string
   {
-    const linkPoints1 = computeLinksPoints(begin, computeAngleAxeRadian(begin, central), width)
-    const linkPoints2 = computeLinksPoints(end, computeAngleAxeRadian(central, end), width)
-    const linkPoints3 = computeLinksPoints(central, computeAngleAxeRadian(begin, end), width)
+    const linkPoints1 = computeLinksPointers(begin, computeAngleAxeRadian(begin, central), width)
+    const linkPoints2 = computeLinksPointers(end, computeAngleAxeRadian(central, end), width)
+    const linkPoints3 = computeLinksPointers(central, computeAngleAxeRadian(begin, end), width)
     const svgPath = [
       `M ${ linkPoints1[0].x },${ linkPoints1[0].y }`,
       `Q ${ linkPoints3[0].x },${ linkPoints3[0].y } ${ linkPoints2[0].x },${ linkPoints2[0].y }`,
@@ -73,18 +71,18 @@ export class SVGStroker
       parts.push(this.getArcPath(firstPoint, STROKE_WIDTH * 0.6))
     } else {
       parts.push(this.getArcPath(firstPoint, STROKE_WIDTH * firstPoint.p))
-      parts.push(this.getLinePath(firstPoint, computeMiddlePoint(firstPoint, stroke.pointers[1]), STROKE_WIDTH))
+      parts.push(this.getLinePath(firstPoint, computeMiddlePointer(firstPoint, stroke.pointers[1]), STROKE_WIDTH))
 
       for (let i = 0; i < NB_QUADRATICS; i++) {
-        const begin = computeMiddlePoint(stroke.pointers[i], stroke.pointers[i + 1])
-        const end = computeMiddlePoint(stroke.pointers[i + 1], stroke.pointers[i + 2])
+        const begin = computeMiddlePointer(stroke.pointers[i], stroke.pointers[i + 1])
+        const end = computeMiddlePointer(stroke.pointers[i + 1], stroke.pointers[i + 2])
         const central = stroke.pointers[i + 1]
         parts.push(this.getQuadraticPath(begin, end, central, STROKE_WIDTH)
         )
       }
       const beforeLastPoint = stroke.pointers[STROKE_LENGTH - 2]
       const lastPoint = stroke.pointers[STROKE_LENGTH - 1]
-      parts.push(this.getLinePath(computeMiddlePoint(beforeLastPoint, lastPoint), lastPoint, STROKE_WIDTH))
+      parts.push(this.getLinePath(computeMiddlePointer(beforeLastPoint, lastPoint), lastPoint, STROKE_WIDTH))
       parts.push(this.getFinalPath(beforeLastPoint, lastPoint, STROKE_WIDTH))
     }
     return parts.join(" ")

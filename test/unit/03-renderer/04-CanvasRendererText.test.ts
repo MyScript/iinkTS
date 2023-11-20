@@ -1,11 +1,7 @@
-import { TTextSymbol } from "../../../src/@types"
-import { renderer, style } from "../../../src/iink"
+import { CanvasRendererText, DefaultPenStyle, TTextSymbol } from "../../../src/iink"
 
 describe("CanvasRendererText.ts", () =>
 {
-  const { CanvasRendererText } = renderer
-  const { DefaultPenStyle } = style
-
   const canvas: HTMLCanvasElement = document.createElement("canvas")
   const canvasContext = canvas.getContext("2d") as CanvasRenderingContext2D
   const canvasRendererText = new CanvasRendererText()

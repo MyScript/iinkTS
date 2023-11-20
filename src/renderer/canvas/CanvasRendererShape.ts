@@ -1,6 +1,11 @@
-import { LoggerClass, TLineSymbol, TPoint, TShapeEllipseSymbol, TShapeLineSymbol, TShapeRecognizedSymbol, TShapeSymbol, TShapeTableSymbol, TSymbol } from "../../@types"
+import { LoggerClass } from "../../Constants"
 import { LoggerManager } from "../../logger"
+import { TSymbol, TShapeEllipseSymbol, TShapeLineSymbol, TShapeRecognizedSymbol, TShapeSymbol, TShapeTableSymbol } from "../../model"
+import { TPoint } from "../../utils"
 
+/**
+ * @group Renderer
+ */
 export class CanvasRendererShape
 {
   #logger = LoggerManager.getLogger(LoggerClass.RENDERER)
@@ -132,48 +137,34 @@ export class CanvasRendererShape
     context2D.lineWidth = symbol.style.width as number
     context2D.strokeStyle = symbol.style.color as string
 
-    if (symbol.elementType) {
-      switch (symbol.elementType) {
-        case this.symbols.shape: {
-          const shapeSymbol = symbol as TShapeSymbol
-          this.draw(context2D, shapeSymbol.candidates[shapeSymbol.selectedCandidateIndex])
-          break
-        }
-        case this.symbols.table: {
-          const tableSymbols = symbol as TShapeTableSymbol
-          tableSymbols.lines.forEach(line => this.draw(context2D, line))
-          break
-        }
-        case this.symbols.line: {
-          const lineSymbol = symbol as TLineSymbol
-          this.drawLine(context2D, lineSymbol.data.p1, lineSymbol.data.p2)
-          break
-        }
-        default:
-          this.#logger.warn("draw", `${ symbol.elementType } not implemented`)
-          break
+    switch (symbol.type) {
+      case this.symbols.shape: {
+        const shapeSymbol = symbol as TShapeSymbol
+        this.draw(context2D, shapeSymbol.candidates[shapeSymbol.selectedCandidateIndex])
+        break
       }
-    } else {
-      switch (symbol.type) {
-        case this.symbols.ellipse: {
-          this.drawShapeEllipse(context2D, symbol as TShapeEllipseSymbol)
-          break
-        }
-        case this.symbols.line: {
-          this.drawShapeLine(context2D, symbol as TShapeLineSymbol)
-          break
-        }
-        case this.symbols.recognizedShape: {
-          const recognizedShape = symbol as TShapeRecognizedSymbol
-          recognizedShape.primitives.forEach(primitive => this.draw(context2D, primitive))
-          break
-        }
-        default:
-          this.#logger.warn("draw", `${ symbol.type } not implemented`)
-          break
+      case this.symbols.table: {
+        const tableSymbols = symbol as TShapeTableSymbol
+        tableSymbols.lines.forEach(line => this.drawLine(context2D, line.p1, line.p2))
+        break
       }
+      case this.symbols.ellipse: {
+        this.drawShapeEllipse(context2D, symbol as TShapeEllipseSymbol)
+        break
+      }
+      case this.symbols.line: {
+        this.drawShapeLine(context2D, symbol as TShapeLineSymbol)
+        break
+      }
+      case this.symbols.recognizedShape: {
+        const recognizedShape = symbol as TShapeRecognizedSymbol
+        recognizedShape.primitives.forEach(primitive => this.draw(context2D, primitive))
+        break
+      }
+      default:
+        this.#logger.warn("draw", `${ symbol.type } not implemented`)
+        break
     }
-
   }
 
 }

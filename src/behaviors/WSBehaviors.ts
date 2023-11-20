@@ -1,30 +1,19 @@
-import {
-  IBehaviors,
-  TBehaviorOptions,
-  TConfiguration,
-  IModel,
-  TExport,
-  TWSMessageEventSVGPatch,
-  TStroke,
-  TConverstionState,
-  TUndoRedoContext,
-  TTheme,
-  TPenStyle,
-  TPointer
-} from "../@types"
-
-import { PointerEventGrabber } from "../grabber/PointerEventGrabber"
-import { WSRecognizer } from "../recognizer/WSRecognizer"
 import { Intention, LoggerClass } from "../Constants"
-import { InternalEvent } from "../event/InternalEvent"
-import { DeferredPromise } from "../utils/DeferredPromise"
-import { WSSVGRenderer } from "../renderer/svg/WSSVGRenderer"
-import { StyleManager } from "../style/StyleManager"
-import { Configuration } from "../configuration/Configuration"
-import { Model } from "../model/Model"
-import { UndoRedoManager } from "../undo-redo"
+import { Configuration, TConfiguration, TConverstionState } from "../configuration"
+import { InternalEvent } from "../event"
+import { PointerEventGrabber } from "../grabber"
 import { LoggerManager } from "../logger"
+import { IModel, Model, TExport, TStroke } from "../model"
+import { TWSMessageEventSVGPatch, WSRecognizer } from "../recognizer"
+import { WSSVGRenderer } from "../renderer"
+import { StyleManager, TPenStyle, TTheme } from "../style"
+import { TUndoRedoContext, UndoRedoManager } from "../undo-redo"
+import { DeferredPromise, TPointer } from "../utils"
+import { IBehaviors, TBehaviorOptions } from "./IBehaviors"
 
+/**
+ * @group Behavior
+ */
 export class WSBehaviors implements IBehaviors
 {
   name = "WSBehaviors"
@@ -214,7 +203,7 @@ export class WSBehaviors implements IBehaviors
     return this.recognizer.waitForIdle()
   }
 
-  async importPointEvents(strokes: TStroke[]): Promise<IModel | never>
+  async importPointEvents(strokes: TStroke[]): Promise<IModel>
   {
     this.#logger.info("importPointEvents", { strokes })
     const exportPoints = await this.recognizer.importPointEvents(strokes)
@@ -223,7 +212,7 @@ export class WSBehaviors implements IBehaviors
     return this.model
   }
 
-  async export(mimeTypes?: string[]): Promise<IModel | never>
+  async export(mimeTypes?: string[]): Promise<IModel>
   {
     this.#logger.info("export", { mimeTypes })
     try {
@@ -245,7 +234,7 @@ export class WSBehaviors implements IBehaviors
     }
   }
 
-  async convert(conversionState?: TConverstionState): Promise<IModel | never>
+  async convert(conversionState?: TConverstionState): Promise<IModel>
   {
     this.#logger.info("convert", { conversionState })
     this.undoRedoManager.addModelToStack(this.model)
@@ -256,7 +245,7 @@ export class WSBehaviors implements IBehaviors
     return this.model
   }
 
-  async import(data: Blob, mimeType?: string): Promise<IModel | never>
+  async import(data: Blob, mimeType?: string): Promise<IModel>
   {
     this.#logger.info("import", { data, mimeType })
     this.context.stack.push(this.model.getClone())

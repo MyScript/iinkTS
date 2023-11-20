@@ -1,33 +1,45 @@
-
-import
-  {
-    IRecognizer,
-    TRestPostConfiguration,
-    TRestPostData,
-    TStrokeGroup,
-    TStrokeGroupJSON,
-    TConverstionState,
-    TRecognitionConfiguration,
-    TServerConfiguration,
-    TExport,
-    TJIIXExport,
-    TPenStyle
-  } from "../@types"
-
-import { Error as ErrorConst } from "../Constants"
-import { StyleHelper } from "../style/StyleHelper"
-import { computeHmac } from "../utils/crypto"
-import { isVersionSuperiorOrEqual } from "../utils/version"
-import { convertStrokeToJSON } from "../model/Stroke"
+import { LoggerClass, Error as ErrorConst } from "../Constants"
+import { TConverstionState, TDiagramConfiguration, TExportConfiguration, TMathConfiguration, TRawContentConfiguration, TRecognitionConfiguration, TServerConfiguration, TTextConfiguration } from "../configuration"
 import { LoggerManager } from "../logger"
-import { LoggerClass } from "../Constants"
-import { Model } from "../model"
+import { Model, TExport, TJIIXExport, TStrokeGroup, TStrokeGroupJSON, convertStrokeToJSON } from "../model"
+import { StyleHelper, TPenStyle } from "../style"
+import { computeHmac, isVersionSuperiorOrEqual } from "../utils"
+import { IRecognizer } from "./IRecognizer"
 
 type ApiError = {
   code?: string
   message: string
 }
 
+/**
+ * @group Recognizer
+ */
+export type TRestPostConfiguration = {
+  lang: string,
+  diagram?: TDiagramConfiguration,
+  math?: TMathConfiguration,
+  "raw-content"?: TRawContentConfiguration,
+  text?: TTextConfiguration,
+  export: TExportConfiguration
+}
+
+/**
+ * @group Recognizer
+ */
+export type TRestPostData = {
+  configuration: TRestPostConfiguration,
+  xDPI: number,
+  yDPI: number,
+  contentType: string,
+  conversionState?: TConverstionState
+  height: number,
+  width: number,
+  strokeGroups: TStrokeGroupJSON[]
+}
+
+/**
+ * @group Recognizer
+ */
 export class RestRecognizer implements IRecognizer
 {
   #logger = LoggerManager.getLogger(LoggerClass.RECOGNIZER)
@@ -135,8 +147,7 @@ export class RestRecognizer implements IRecognizer
     return data
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  protected async post(data: any, mimeType: string): Promise<any>
+  protected async post(data: unknown, mimeType: string): Promise<unknown>
   {
     this.#logger.info("post", { data, mimeType })
     const headers = new Headers()
@@ -159,8 +170,7 @@ export class RestRecognizer implements IRecognizer
     const response: Response = await fetch(request)
     if (response.ok) {
       const contentType = response.headers.get("content-type")
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let result: any
+      let result: unknown
       switch (contentType) {
         case "application/vnd.openxmlformats-officedocument.presentationml.presentation":
         case "image/png":
@@ -186,7 +196,7 @@ export class RestRecognizer implements IRecognizer
     }
   }
 
-  protected async tryFetch(data: unknown, mimeType: string): Promise<TExport | never>
+  protected async tryFetch(data: TRestPostData, mimeType: string): Promise<TExport | never>
   {
     this.#logger.debug("tryFetch", { data, mimeType })
     return this.post(data, mimeType)
@@ -237,7 +247,7 @@ export class RestRecognizer implements IRecognizer
     return mimeTypes
   }
 
-  async convert(model: Model, conversionState?: TConverstionState, requestedMimeTypes?: string[]): Promise<Model | never>
+  async convert(model: Model, conversionState?: TConverstionState, requestedMimeTypes?: string[]): Promise<Model>
   {
     this.#logger.info("convert", { model, conversionState, requestedMimeTypes })
     const myModel = model.getClone()
@@ -254,7 +264,7 @@ export class RestRecognizer implements IRecognizer
     return myModel
   }
 
-  async export(model: Model, requestedMimeTypes?: string[]): Promise<Model | never>
+  async export(model: Model, requestedMimeTypes?: string[]): Promise<Model>
   {
     this.#logger.info("export", { model, requestedMimeTypes })
     const myModel = model.getClone()
@@ -277,7 +287,7 @@ export class RestRecognizer implements IRecognizer
     return myModel
   }
 
-  async resize(model: Model): Promise<Model | never>
+  async resize(model: Model): Promise<Model>
   {
     this.#logger.info("resize", { model })
     return this.export(model)

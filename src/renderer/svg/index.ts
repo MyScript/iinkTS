@@ -1,2 +1,2 @@
-export { SVGStroker } from "./SVGStroker"
-export { WSSVGRenderer} from "./WSSVGRenderer"
+export * from "./SVGStroker"
+export * from "./WSSVGRenderer"

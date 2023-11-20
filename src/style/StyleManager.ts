@@ -1,15 +1,12 @@
-import {
-  TTheme,
-  TPenStyle
-} from "../@types"
-
-import { mergeDeep } from "../utils/merge"
-
-import { DefaultPenStyle } from "./DefaultPenStyle"
-import { DefaultTheme } from "./DefaultTheme"
-import { LoggerManager } from "../logger"
 import { LoggerClass } from "../Constants"
+import { LoggerManager } from "../logger"
+import { mergeDeep } from "../utils"
+import { DefaultPenStyle, TPenStyle } from "./PenStyle"
+import { DefaultTheme, TTheme } from "./Theme"
 
+/**
+ * @group Style
+ */
 export class StyleManager
 {
   #penStyle!: TPenStyle

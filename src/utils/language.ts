@@ -1,6 +1,10 @@
-import { DeepPartial, TConfiguration } from "../@types"
+import { TConfiguration } from "../configuration"
+import { PartialDeep } from "./types"
 
-export async function getAvailableLanguageList(configuration: DeepPartial<TConfiguration>): Promise<Array<Record<string, string>>>
+/**
+ * @group Utils
+ */
+export async function getAvailableLanguageList(configuration: PartialDeep<TConfiguration>): Promise<Array<Record<string, string>>>
 {
   if (configuration?.server?.scheme && configuration?.server?.host) {
     const serverConfig = configuration.server

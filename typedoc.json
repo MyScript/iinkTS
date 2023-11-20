@@ -26,7 +26,21 @@
   "disableSources": false,
   "githubPages": true,
   "cleanOutputDir": true,
-  "categorizeByGroup": true,
+  "categorizeByGroup": false,
+  "categoryOrder": [],
+  "groupOrder": [
+    "Editor",
+    "Configuration",
+    "Behavior",
+    "Renderer",
+    "Recognizer",
+    "Grabber",
+    "Model",
+    "Model/Export",
+    "Constants",
+    "Event",
+    "*"
+  ],
   "navigation": {
     "includeCategories": false,
     "includeGroups": true

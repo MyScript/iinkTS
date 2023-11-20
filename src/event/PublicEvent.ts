@@ -1,13 +1,11 @@
-import {
-  IModel,
-  TExport,
-  TUndoRedoContext
-} from "../@types"
-
-import { EventType } from "../Constants"
+import { EventType, LoggerClass } from "../Constants"
 import { LoggerManager } from "../logger"
-import { LoggerClass } from "../Constants"
+import { IModel, TExport } from "../model"
+import { TUndoRedoContext } from "../undo-redo"
 
+/**
+ * @group Event
+ */
 export class PublicEvent extends EventTarget
 {
   static #instance: PublicEvent

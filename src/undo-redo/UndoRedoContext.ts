@@ -1,8 +1,20 @@
-import {
-  IModel,
-  TUndoRedoContext
-} from "../@types"
+import { IModel } from "../model"
 
+/**
+ * @group UndoRedo
+ */
+export type TUndoRedoContext = {
+  canUndo: boolean
+  canRedo: boolean
+  empty: boolean
+  stackIndex: number
+  possibleUndoCount: number
+  stack: IModel[]
+}
+
+/**
+ * @group UndoRedo
+ */
 export class UndoRedoContext implements TUndoRedoContext
 {
   canUndo: boolean

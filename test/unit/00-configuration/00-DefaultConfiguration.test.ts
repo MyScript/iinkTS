@@ -1,8 +1,7 @@
-import { configuration } from "../../../src/iink"
+import { DefaultConfiguration } from "../../../src/iink"
 
 describe("DefaultConfiguration.ts", () =>
 {
-  const { DefaultConfiguration } = configuration
   describe("should have DefaultServerConfiguration", () =>
   {
     test("should have protocol", () =>

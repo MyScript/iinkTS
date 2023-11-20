@@ -1,2 +1,3 @@
 
-export { PointerEventGrabber } from "./PointerEventGrabber"
+export * from "./IGrabber"
+export * from "./PointerEventGrabber"

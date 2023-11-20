@@ -1,13 +1,12 @@
-import
-{
-  IGrabber,
-  TGrabberConfiguration,
-  TPointer
-} from "../@types"
-
-import { LoggerManager } from "../logger"
 import { LoggerClass } from "../Constants"
+import { TGrabberConfiguration } from "../configuration"
+import { LoggerManager } from "../logger"
+import { TPointer } from "../utils"
+import { IGrabber } from "./IGrabber"
 
+/**
+ * @group Grabber
+ */
 export class PointerEventGrabber implements IGrabber
 {
   protected configuration: TGrabberConfiguration

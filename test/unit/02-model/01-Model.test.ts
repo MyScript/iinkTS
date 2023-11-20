@@ -1,11 +1,8 @@
 import { buildStroke, delay } from "../utils/helpers"
-import { TExport, TPointer } from "../../../src/@types"
-import { model, style } from "../../../src/iink"
+import { Model, Stroke, DefaultPenStyle, TExport, TPointer } from "../../../src/iink"
 
 describe("Model.ts", () =>
 {
-  const { Model, Stroke } = model
-  const { DefaultPenStyle } = style
   const width = 100, height = 100, rowHeight = 10
   test("should create", () =>
   {

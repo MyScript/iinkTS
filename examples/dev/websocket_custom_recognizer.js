@@ -1,4 +1,4 @@
-class CustomWebsocketRecognizer extends iink.recognizer.WSRecognizer {
+class CustomWebsocketRecognizer extends iink.WSRecognizer {
 
   constructor(serverConfig, recognitionConfig, elements) {
     super(serverConfig, recognitionConfig)

@@ -113,7 +113,7 @@
         });
 
         eraserElement.addEventListener("click", () => {
-          editor.intention = iink.constants.Intention.Erase;
+          editor.intention = iink.Intention.Erase;
           eraserElement.disabled = true;
           eraserElement.classList.add("active");
           penElement.disabled = false;
@@ -121,7 +121,7 @@
         });
 
         penElement.addEventListener("click", () => {
-          editor.intention = iink.constants.Intention.Write;
+          editor.intention = iink.Intention.Write;
           eraserElement.disabled = false;
           eraserElement.classList.remove("active");
           penElement.disabled = true;
@@ -132,7 +132,7 @@
           const configuration = { ...editor.configuration };
           configuration.recognition.text.eraser["erase-precisely"] = e.target.checked;
           editor.configuration = configuration;
-          editor.intention = iink.constants.Intention.Write;
+          editor.intention = iink.Intention.Write;
           eraserElement.disabled = false;
           eraserElement.classList.remove("active");
           penElement.disabled = true;

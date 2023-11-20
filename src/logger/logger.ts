@@ -1,5 +1,8 @@
-import { LoggerClass, LoggerLevel } from "../@types"
+import { LoggerClass, LoggerLevel } from "../Constants"
 
+/**
+ * @group Logger
+ */
 export class Logger
 {
   instanceName: LoggerClass

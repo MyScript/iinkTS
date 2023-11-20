@@ -1,4 +1,4 @@
-class CustomGrabber extends iink.grabber.PointerEventGrabber {
+class CustomGrabber extends iink.PointerEventGrabber {
 
   constructor(configuration, elements) {
     super(configuration)

@@ -1,6 +1,10 @@
 import { delay } from "../utils/helpers"
-import
-{
+import {
+  WSSVGRenderer,
+  DefaultRenderingConfiguration,
+  Model,
+  Stroke,
+  DefaultPenStyle,
   TUpdatePatchAppendChild,
   TUpdatePatchInsertBefore,
   TUpdatePatchRemoveAttribut,
@@ -9,15 +13,10 @@ import
   TUpdatePatchReplaceAll,
   TUpdatePatchReplaceELement,
   TUpdatePatchSetAttribut
-} from "../../../src/@types"
-import { renderer, configuration, model, style } from "../../../src/iink"
+} from "../../../src/iink"
 
 describe("WSSVGRenderer.ts", () =>
 {
-  const { WSSVGRenderer } = renderer
-  const { Model, Stroke } = model
-  const { DefaultRenderingConfiguration } = configuration
-  const { DefaultPenStyle } = style
 
   const stroke = new Stroke(DefaultPenStyle, 1)
   stroke.pointers = [

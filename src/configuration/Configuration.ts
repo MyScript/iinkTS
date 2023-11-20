@@ -1,21 +1,41 @@
 
-import
-  {
-    DeepPartial,
-    TConfiguration,
-    TGrabberConfiguration,
-    TRecognitionConfiguration,
-    TRenderingConfiguration,
-    TServerConfiguration,
-    TTriggerConfiguration,
-    TUndoRedoConfiguration
-  } from "../@types"
-
-import { DefaultConfiguration } from "./DefaultConfiguration"
-import { LoggerManager } from "../logger"
 import { LoggerClass } from "../Constants"
-import { mergeDeep } from "../utils/merge"
+import { LoggerManager } from "../logger"
+import { PartialDeep, mergeDeep } from "../utils"
+import { DefaultGrabberConfiguration, TGrabberConfiguration } from "./GrabberConfiguration"
+import { DefaultRecognitionConfiguration, TRecognitionConfiguration } from "./RecognitionConfiguration"
+import { DefaultRenderingConfiguration, TRenderingConfiguration } from "./RenderingConfiguration"
+import { DefaultServerConfiguration, TServerConfiguration } from "./ServerConfiguration"
+import { DefaultTriggerConfiguration, TTriggerConfiguration } from "./TriggerConfiguration"
+import { DefaultUndoRedoConfiguration, TUndoRedoConfiguration } from "./UndoRedoConfiguration"
 
+/**
+ * @group Configuration
+ */
+export type TConfiguration = {
+  server: TServerConfiguration
+  recognition: TRecognitionConfiguration
+  grabber: TGrabberConfiguration
+  rendering: TRenderingConfiguration
+  triggers: TTriggerConfiguration
+  "undo-redo": TUndoRedoConfiguration
+}
+
+/**
+ * @group Configuration
+ */
+export const DefaultConfiguration: TConfiguration = {
+  server: DefaultServerConfiguration,
+  recognition: DefaultRecognitionConfiguration,
+  grabber: DefaultGrabberConfiguration,
+  rendering: DefaultRenderingConfiguration,
+  triggers: DefaultTriggerConfiguration,
+  "undo-redo": DefaultUndoRedoConfiguration
+}
+
+/**
+ * @group Configuration
+ */
 export class Configuration implements TConfiguration
 {
   #logger = LoggerManager.getLogger(LoggerClass.CONFIGURATION)
@@ -27,7 +47,7 @@ export class Configuration implements TConfiguration
   triggers: TTriggerConfiguration
   "undo-redo": TUndoRedoConfiguration
 
-  constructor(configuration?: DeepPartial<TConfiguration>)
+  constructor(configuration?: PartialDeep<TConfiguration>)
   {
     this.#logger.info("constructor", { configuration })
     this.grabber = JSON.parse(JSON.stringify(DefaultConfiguration.grabber))
@@ -39,7 +59,7 @@ export class Configuration implements TConfiguration
     this.overrideDefaultConfiguration(configuration)
   }
 
-  overrideDefaultConfiguration(configuration?: DeepPartial<TConfiguration>): void
+  overrideDefaultConfiguration(configuration?: PartialDeep<TConfiguration>): void
   {
     this.#logger.info("overrideDefaultConfiguration", { configuration })
     const defaultConf = JSON.parse(JSON.stringify(DefaultConfiguration))

@@ -1,7 +1,4 @@
-import { undoredo, model } from "../../../src/iink"
-
-const { UndoRedoContext } = undoredo
-const { Model } = model
+import { UndoRedoContext, Model } from "../../../src/iink"
 
 describe("UndoRedoContext.ts", () =>
 {

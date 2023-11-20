@@ -81,7 +81,7 @@
       async function loadEditor() {
         const res = await fetch("../server-configuration.json");
         const server = await res.json();
-        const configuration = new iink.configuration.Configuration({ server })
+        const configuration = new iink.Configuration({ server })
         configuration.server.protocol = "REST"
         const customRecognizer = new CustomRestRecognizer(configuration.server, configuration.recognition, infoElements)
         const options = {

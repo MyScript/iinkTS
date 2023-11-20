@@ -1,20 +1,16 @@
-import { TStroke, TPenStyle } from "../../../src/@types"
-import { model, style } from "../../../src/iink"
+import { Stroke, DefaultPenStyle, TPenStyle } from "../../../src/iink"
 
 describe("Stroke.ts", () =>
 {
-  const { Stroke } = model
-  const { DefaultPenStyle } = style
   test("should create with default pointerType", () =>
   {
-    const stroke: TStroke = new Stroke(DefaultPenStyle, 12)
+    const stroke = new Stroke(DefaultPenStyle, 12)
     expect(stroke).toBeDefined()
     expect(stroke.style["-myscript-pen-fill-color"]).toBe(DefaultPenStyle["-myscript-pen-fill-color"])
     expect(stroke.style["-myscript-pen-fill-style"]).toBe(DefaultPenStyle["-myscript-pen-fill-style"])
     expect(stroke.style["-myscript-pen-width"]).toBe(DefaultPenStyle["-myscript-pen-width"])
     expect(stroke.style.color).toBe(DefaultPenStyle.color)
     expect(stroke.style.width).toBe(DefaultPenStyle.width)
-    expect(stroke.elementType).toBeUndefined()
     expect(stroke.pointers).toHaveLength(0)
     expect(stroke.pointerId).toBe(12)
     expect(stroke.pointerType).toBe("pen")
@@ -23,7 +19,7 @@ describe("Stroke.ts", () =>
 
   test("should create with pointerType mouse", () =>
   {
-    const stroke: TStroke = new Stroke(DefaultPenStyle, 12, "mouse")
+    const stroke = new Stroke(DefaultPenStyle, 12, "mouse")
     expect(stroke.pointerType).toBe("mouse")
   })
 
@@ -37,7 +33,7 @@ describe("Stroke.ts", () =>
       width: 42
     }
 
-    const stroke: TStroke = new Stroke(penStyle, 12)
+    const stroke = new Stroke(penStyle, 12)
     expect(stroke).toBeDefined()
     expect(stroke.style["-myscript-pen-fill-color"]).toBe(penStyle["-myscript-pen-fill-color"])
     expect(stroke.style["-myscript-pen-fill-style"]).toBe(penStyle["-myscript-pen-fill-style"])

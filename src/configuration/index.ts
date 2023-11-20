@@ -1,3 +1,10 @@
 
-export { Configuration } from "./Configuration"
-export * from "./DefaultConfiguration"
+export * from "./Configuration"
+export * from "./GrabberConfiguration"
+export * from "./LoggerConfiguration"
+export * from "./RecognitionConfiguration"
+export * from "./RenderingConfiguration"
+export * from "./ServerConfiguration"
+export * from "./TriggerConfiguration"
+export * from "./UndoRedoConfiguration"
+export * from "./recognition"

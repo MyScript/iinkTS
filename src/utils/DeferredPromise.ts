@@ -1,4 +1,7 @@
 
+/**
+ * @group Utils
+ */
 export class DeferredPromise<T> {
   promise: Promise<T>
   resolve!: (value: T) => void

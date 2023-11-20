@@ -1,16 +1,14 @@
-import {
-  TStroke,
-  TRenderingConfiguration,
-  IModel,
-  TSymbol
-} from "../../@types"
-
-import { CanvasRendererStroke } from "./CanvasRendererStroke"
-import { CanvasRendererShape } from "./CanvasRendererShape"
-import { CanvasRendererText } from "./CanvasRendererText"
-import { LoggerManager } from "../../logger"
 import { LoggerClass } from "../../Constants"
+import { TRenderingConfiguration } from "../../configuration"
+import { LoggerManager } from "../../logger"
+import { IModel, TStroke, TSymbol } from "../../model"
+import { CanvasRendererShape } from "./CanvasRendererShape"
+import { CanvasRendererStroke } from "./CanvasRendererStroke"
+import { CanvasRendererText } from "./CanvasRendererText"
 
+/**
+ * @group Renderer
+ */
 export class CanvasRenderer
 {
   #logger = LoggerManager.getLogger(LoggerClass.RENDERER)
@@ -65,18 +63,17 @@ export class CanvasRenderer
   protected drawSymbol(context2D: CanvasRenderingContext2D, symbol: TSymbol)
   {
     this.#logger.debug("drawSymbol", { symbol })
-    const type = symbol.elementType || symbol.type
-    if (type === "stroke") {
+    if (symbol.type === "stroke") {
       const stroke = symbol as TStroke
       if (stroke.pointerType !== "eraser") {
         this.strokeRenderer.draw(context2D, stroke)
       }
-    } else if (Object.keys(this.textRenderer.symbols).includes(type)) {
+    } else if (Object.keys(this.textRenderer.symbols).includes(symbol.type)) {
       this.textRenderer.draw(context2D, symbol)
-    } else if (Object.keys(this.shapeRenderer.symbols).includes(type)) {
+    } else if (Object.keys(this.shapeRenderer.symbols).includes(symbol.type)) {
       this.shapeRenderer.draw(context2D, symbol)
     } else {
-      this.#logger.warn("drawSymbol", `symbol type unknow: ${type}`)
+      this.#logger.warn("drawSymbol", `symbol type unknow: ${symbol.type}`)
     }
   }
 
