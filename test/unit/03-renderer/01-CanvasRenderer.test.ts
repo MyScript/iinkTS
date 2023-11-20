@@ -1,27 +1,26 @@
-import { renderer, configuration } from "../../../src/iink"
+import { CanvasRenderer, DefaultRenderingConfiguration } from "../../../src/iink"
 import { buildStroke } from "../utils/helpers"
 
 describe("CanvasRenderer.ts", () =>
 {
-  const { CanvasRenderer } = renderer
   const height = 10, width = 10
   const wrapperHTML: HTMLElement = document.createElement("div")
   wrapperHTML.style.height = `${ height }px`
   wrapperHTML.style.width = `${ width }px`
 
-  const canvasRenderer = new CanvasRenderer(configuration.DefaultRenderingConfiguration)
+  const canvasRenderer = new CanvasRenderer(DefaultRenderingConfiguration)
   canvasRenderer.shapeRenderer.draw = jest.fn()
   canvasRenderer.strokeRenderer.draw = jest.fn()
   canvasRenderer.textRenderer.draw = jest.fn()
 
   test("should set configuration when instanciate", () =>
   {
-    expect(canvasRenderer.configuration).toStrictEqual(configuration.DefaultRenderingConfiguration)
+    expect(canvasRenderer.configuration).toStrictEqual(DefaultRenderingConfiguration)
   })
 
   test("should set configuration when instanciate", () =>
   {
-    expect(canvasRenderer.configuration).toStrictEqual(configuration.DefaultRenderingConfiguration)
+    expect(canvasRenderer.configuration).toStrictEqual(DefaultRenderingConfiguration)
   })
 
   test("should init", () =>

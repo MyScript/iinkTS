@@ -1,28 +1,28 @@
 
-export { Editor } from "./Editor"
+export * from "./Editor"
 
-export * as utils from "./utils"
+export * from "./utils"
 
-export * as constants from "./Constants"
+export * from "./Constants"
 
-export * as configuration from "./configuration"
+export * from "./configuration"
 
-export * as behaviors from "./behaviors"
+export * from "./behaviors"
 
-export * as recognizer from "./recognizer"
+export * from "./recognizer"
 
-export * as renderer from "./renderer"
+export * from "./renderer"
 
-export * as grabber from "./grabber"
+export * from "./grabber"
 
-export * as style from "./style"
+export * from "./style"
 
-export * as model from "./model"
+export * from "./model"
 
-export * as undoredo from "./undo-redo"
+export * from "./undo-redo"
 
-export * as event from "./event"
+export * from "./event"
 
-export * as smartguide from "./smartguide"
+export * from "./smartguide"
 
-export * as logger from "./logger"
+export * from "./logger"

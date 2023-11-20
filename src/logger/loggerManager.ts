@@ -1,7 +1,10 @@
-import { TLoggerConfiguration } from "../@types"
 import { LoggerClass, LoggerLevel } from "../Constants"
+import { TLoggerConfiguration } from "../configuration"
 import { Logger } from "./logger"
 
+/**
+ * @group Logger
+ */
 export class LoggerManager
 {
   static #loggerMap: Map<LoggerClass, Logger> = new Map()

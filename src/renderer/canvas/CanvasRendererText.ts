@@ -1,14 +1,11 @@
-import {
-  LoggerClass,
-  TPoint,
-  TSymbol,
-  TTextDataSymbol,
-  TTextSymbol,
-  TTextUnderlineSymbol,
-  TUnderLineSymbol
-} from "../../@types"
+import { LoggerClass } from "../../Constants"
 import { LoggerManager } from "../../logger"
+import { TSymbol, TTextDataSymbol, TTextSymbol, TTextUnderlineSymbol, TUnderLineSymbol } from "../../model"
+import { TPoint } from "../../utils"
 
+/**
+ * @group Renderer
+ */
 export class CanvasRendererText
 {
   #logger = LoggerManager.getLogger(LoggerClass.RENDERER)
@@ -76,9 +73,7 @@ export class CanvasRendererText
     this.#logger.info("draw", { context2D, symbol })
     context2D.lineWidth = (symbol.style.width as number)
     context2D.strokeStyle = (symbol.style.color as string)
-    const type: string = symbol.elementType || symbol.type
-
-    switch (type) {
+    switch (symbol.type) {
       case this.symbols.char:
       case this.symbols.string:
         this.drawText(context2D, symbol as TTextSymbol)
@@ -87,7 +82,7 @@ export class CanvasRendererText
         this.drawTextLine(context2D, symbol as TTextUnderlineSymbol)
         break
       default:
-        this.#logger.warn("draw", `${symbol.elementType} not implemented`)
+        this.#logger.warn("draw", `${symbol.type} not implemented`)
         break
     }
   }

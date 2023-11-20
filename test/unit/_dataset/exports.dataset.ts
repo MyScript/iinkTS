@@ -1,7 +1,7 @@
 //@ts-nocheck
-import { DeepPartial, TJIIXExport } from "../../../src/@types"
+import { PartialDeep, TJIIXExport } from "../../../src/@types"
 
-export const jiixText: DeepPartial<TJIIXExport> = {
+export const jiixText: PartialDeep<TJIIXExport> = {
   "type": "Raw Content",
   "bounding-box": {
     "x": 83.9312439,

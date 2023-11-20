@@ -1,6 +1,10 @@
-import { DeepPartial, TConfiguration } from "../@types"
+import { TConfiguration } from "../configuration"
+import { PartialDeep } from "./types"
 
-export async function getAvailableFontList(configuration: DeepPartial<TConfiguration>): Promise<Array<string>>
+/**
+ * @group Utils
+ */
+export async function getAvailableFontList(configuration: PartialDeep<TConfiguration>): Promise<Array<string>>
 {
   if (!configuration?.server?.scheme && !configuration?.server?.host) {
     return Promise.reject("Failed to get fonts: configuration.server.scheme & configuration.server.host are required!")

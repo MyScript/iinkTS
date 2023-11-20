@@ -1,13 +1,13 @@
-import {
-  TUndoRedoConfiguration,
-  IModel
-} from "../@types"
-
-import { InternalEvent } from "../event/InternalEvent"
-import { UndoRedoContext } from "./UndoRedoContext"
-import { LoggerManager } from "../logger"
 import { LoggerClass } from "../Constants"
+import { TUndoRedoConfiguration } from "../configuration"
+import { InternalEvent } from "../event"
+import { LoggerManager } from "../logger"
+import { IModel } from "../model"
+import { UndoRedoContext } from "./UndoRedoContext"
 
+/**
+ * @group UndoRedo
+ */
 export class UndoRedoManager
 {
   #logger = LoggerManager.getLogger(LoggerClass.UNDO_REDO)

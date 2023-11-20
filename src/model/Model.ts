@@ -1,18 +1,14 @@
-import {
-  TPenStyle,
-  TPoint,
-  TPointer,
-  TStroke,
-  IModel,
-  TExport,
-  TRecognitionPositions,
-} from "../@types"
-
-import { computeDistance } from "../utils/math"
-import { Stroke } from "./Stroke"
-import { LoggerManager } from "../logger"
 import { LoggerClass } from "../Constants"
+import { LoggerManager } from "../logger"
+import { TPenStyle } from "../style"
+import { TPoint, TPointer, computeDistance } from "../utils"
+import { TExport } from "./Export"
+import { IModel, TRecognitionPositions } from "./IModel"
+import { Stroke, TStroke } from "./Stroke"
 
+/**
+ * @group Model
+ */
 export class Model implements IModel
 {
   readonly creationTime: number

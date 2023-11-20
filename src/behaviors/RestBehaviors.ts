@@ -1,30 +1,19 @@
-import {
-  IBehaviors,
-  TBehaviorOptions,
-  IModel,
-  TExport,
-  TConfiguration,
-  TConverstionState,
-  TUndoRedoContext,
-  TPenStyle,
-  TTheme,
-  TPointer
-} from "../@types"
-
-import { PointerEventGrabber } from "../grabber/PointerEventGrabber"
-import { CanvasRenderer } from "../renderer/canvas/CanvasRenderer"
-import { RestRecognizer } from "../recognizer/RestRecognizer"
-import { DeferredPromise } from "../utils/DeferredPromise"
-import { UndoRedoManager } from "../undo-redo/UndoRedoManager"
-import { InternalEvent } from "../event/InternalEvent"
-import { StyleManager } from "../style/StyleManager"
-import { Configuration } from "../configuration/Configuration"
-import { Model } from "../model/Model"
 import { Intention, LoggerClass } from "../Constants"
+import { Configuration, TConfiguration, TConverstionState } from "../configuration"
+import { InternalEvent } from "../event"
+import { PointerEventGrabber } from "../grabber"
 import { LoggerManager } from "../logger"
-import { TStroke } from "../@types"
-import { Stroke } from "../model"
+import { IModel, Model, Stroke, TExport, TStroke } from "../model"
+import { RestRecognizer } from "../recognizer"
+import { CanvasRenderer } from "../renderer"
+import { StyleManager, TPenStyle, TTheme } from "../style"
+import { TUndoRedoContext, UndoRedoManager } from "../undo-redo"
+import { DeferredPromise, TPointer } from "../utils"
+import { IBehaviors, TBehaviorOptions } from "./IBehaviors"
 
+/**
+ * @group Behavior
+ */
 export class RestBehaviors implements IBehaviors
 {
   name = "RestBehaviors"
@@ -82,30 +71,34 @@ export class RestBehaviors implements IBehaviors
   {
     return this.styleManager.penStyle
   }
-  setPenStyle(style?: TPenStyle)
+  async setPenStyle(penStyle?: TPenStyle | undefined): Promise<void>
   {
-    this.#logger.info("setPenStyle", { style })
-    this.styleManager.setPenStyle(style)
+    this.#logger.info("setPenStyle", { penStyle })
+    this.styleManager.setPenStyle(penStyle)
+    return Promise.resolve()
   }
 
   get penStyleClasses(): string
   {
     return this.styleManager.penStyleClasses
   }
-  setPenStyleClasses(penClass?: string)
+  async setPenStyleClasses(penStyleClasses?: string | undefined): Promise<void>
   {
-    this.#logger.info("setPenStyleClasses", { penClass })
-    this.styleManager.setPenStyleClasses(penClass)
+    this.#logger.info("setPenStyleClasses", { penStyleClasses })
+    this.styleManager.setPenStyleClasses(penStyleClasses)
+    return Promise.resolve()
   }
+
 
   get theme(): TTheme
   {
     return this.styleManager.theme
   }
-  setTheme(theme?: TTheme)
+  async setTheme(theme?: TTheme): Promise<void>
   {
     this.#logger.info("setTheme", { theme })
     this.styleManager.setTheme(theme)
+    return Promise.resolve()
   }
 
   get configuration(): TConfiguration
@@ -148,7 +141,7 @@ export class RestBehaviors implements IBehaviors
         this.drawCurrentStroke()
         break
       default:
-        this.#logger.warn("#onPointerDown", `onPointerDown intention unknow: "${this.intention}"`)
+        this.#logger.warn("#onPointerDown", `onPointerDown intention unknow: "${ this.intention }"`)
         break
     }
   }
@@ -170,7 +163,7 @@ export class RestBehaviors implements IBehaviors
         this.drawCurrentStroke()
         break
       default:
-        this.#logger.warn("#onPointerMove", `onPointerMove intention unknow: "${this.intention}"`)
+        this.#logger.warn("#onPointerMove", `onPointerMove intention unknow: "${ this.intention }"`)
         break
     }
   }
@@ -194,7 +187,7 @@ export class RestBehaviors implements IBehaviors
           .catch(error => this.internalEvent.emitError(error as Error))
         break
       default:
-        this.#logger.warn("#onPointerUp", `onPointerUp intention unknow: "${this.intention}"`)
+        this.#logger.warn("#onPointerUp", `onPointerUp intention unknow: "${ this.intention }"`)
         break
     }
   }
@@ -205,7 +198,7 @@ export class RestBehaviors implements IBehaviors
     this.renderer.drawPendingStroke(this.model.currentStroke)
   }
 
-  async updateModelRendering(): Promise<IModel | never>
+  async updateModelRendering(): Promise<IModel>
   {
     this.#logger.info("updateModelRendering")
     this.renderer.drawModel(this.model)
@@ -237,7 +230,7 @@ export class RestBehaviors implements IBehaviors
     return deferred.promise
   }
 
-  async export(mimeTypes?: string[]): Promise<IModel | never>
+  async export(mimeTypes?: string[]): Promise<IModel>
   {
     this.#logger.info("export", { mimeTypes })
     const newModel = await this.recognizer.export(this.model.getClone(), mimeTypes)
@@ -249,7 +242,7 @@ export class RestBehaviors implements IBehaviors
     return this.model
   }
 
-  async convert(conversionState?: TConverstionState, requestedMimeTypes?: string[]): Promise<IModel | never>
+  async convert(conversionState?: TConverstionState, requestedMimeTypes?: string[]): Promise<IModel>
   {
     this.#logger.info("convert", { conversionState, requestedMimeTypes })
     const newModel = await this.recognizer.convert(this.model, conversionState, requestedMimeTypes)
@@ -324,7 +317,7 @@ export class RestBehaviors implements IBehaviors
     return Promise.resolve()
   }
 
-  async importPointEvents(strokes: TStroke[]): Promise<IModel | never>
+  async importPointEvents(strokes: TStroke[]): Promise<IModel>
   {
     strokes.forEach((s) =>
     {

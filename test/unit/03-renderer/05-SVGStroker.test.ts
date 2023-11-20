@@ -1,9 +1,8 @@
 import { buildStroke } from "../utils/helpers"
-import { renderer } from "../../../src/iink"
+import { SVGStroker } from "../../../src/iink"
 
 describe("SVGStroker.ts", () =>
 {
-  const { SVGStroker } = renderer
   const strokePen = buildStroke()
 
   test("should instanciate", () =>

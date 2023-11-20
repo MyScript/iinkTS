@@ -1,13 +1,15 @@
 import { delay } from "../utils/helpers"
 import { LeftClickEventFake } from "../utils/PointerEventFake"
-import { TRenderingConfiguration, TMarginConfiguration } from "../../../src/@types"
-import { smartguide, configuration, event } from "../../../src/iink"
+import {
+  SmartGuide,
+  DefaultRenderingConfiguration,
+  InternalEvent,
+  TRenderingConfiguration,
+  TMarginConfiguration
+} from "../../../src/iink"
 
 describe("SmartGuide.ts", () =>
 {
-  const { SmartGuide } = smartguide
-  const { DefaultRenderingConfiguration } = configuration
-  const { InternalEvent } = event
   const margin: TMarginConfiguration = {
     bottom: 100,
     top: 20,

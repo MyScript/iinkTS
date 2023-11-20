@@ -1,2 +1,2 @@
-export { InternalEvent } from "./InternalEvent"
-export { PublicEvent } from "./PublicEvent"
+export * from "./InternalEvent"
+export * from "./PublicEvent"

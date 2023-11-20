@@ -1,2 +1,3 @@
-export { RestBehaviors } from "./RestBehaviors"
-export { WSBehaviors } from "./WSBehaviors"
+export * from "./IBehaviors"
+export * from "./RestBehaviors"
+export * from "./WSBehaviors"

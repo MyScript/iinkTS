@@ -1,34 +1,13 @@
-
-import
-  {
-    IRecognizer,
-    TConverstionState,
-    TRecognitionConfiguration,
-    TServerConfiguration,
-    TExport,
-    TJIIXExport,
-    TWSMessageEvent,
-    TWSMessageEventError,
-    TWSMessageEventSVGPatch,
-    TStroke,
-    TUndoRedoContext,
-    TPenStyle,
-    TTheme,
-    TWSMessageEventHMACChallenge,
-    TWSMessageEventPartChange,
-    TWSMessageEventExport,
-    TWSMessageEventContentChange
-  } from "../@types"
-
-import { Error as ErrorConst, LoggerClass } from "../Constants"
-import { InternalEvent } from "../event/InternalEvent"
-import { computeHmac } from "../utils/crypto"
-import { StyleHelper } from "../style/StyleHelper"
-import { DeferredPromise } from "../utils/DeferredPromise"
-import { isVersionSuperiorOrEqual } from "../utils/version"
-import { convertStrokeToJSON } from "../model/Stroke"
+import { LoggerClass, Error as ErrorConst } from "../Constants"
+import { TConverstionState, TRecognitionConfiguration, TServerConfiguration } from "../configuration"
+import { InternalEvent } from "../event"
 import { LoggerManager } from "../logger"
-import { Model } from "../model"
+import { Model, TExport, TJIIXExport, TStroke, convertStrokeToJSON } from "../model"
+import { StyleHelper, TPenStyle, TTheme } from "../style"
+import { TUndoRedoContext } from "../undo-redo"
+import { DeferredPromise, computeHmac, isVersionSuperiorOrEqual } from "../utils"
+import { IRecognizer } from "./IRecognizer"
+import { TWSMessageEvent, TWSMessageEventContentChange, TWSMessageEventError, TWSMessageEventExport, TWSMessageEventHMACChallenge, TWSMessageEventPartChange, TWSMessageEventSVGPatch } from "./WSRecognizerMessage"
 
 /**
  * A websocket dialog have this sequence :
@@ -51,6 +30,10 @@ import { Model } from "../model"
  *                                                              <==================        svgPatch
  * addStrokes (send the strokes ) ============>
  *                                                              <==================        update
+ */
+
+/**
+ * @group Recognizer
  */
 export class WSRecognizer implements IRecognizer
 {

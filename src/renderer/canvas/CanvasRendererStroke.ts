@@ -1,14 +1,11 @@
-import
-  {
-    LoggerClass,
-    TPointer,
-    TStroke
-  } from "../../@types"
+import { LoggerClass } from "../../Constants"
 import { LoggerManager } from "../../logger"
+import { TStroke } from "../../model"
+import { TPointer, computeAngleAxeRadian, computeLinksPointers, computeMiddlePointer } from "../../utils"
 
-import { computeAngleAxeRadian } from "../../utils/math"
-import { computeLinksPoints, computeMiddlePoint } from "../QuadraticUtils"
-
+/**
+ * @group Renderer
+ */
 export class CanvasRendererStroke
 {
   #logger = LoggerManager.getLogger(LoggerClass.RENDERER)
@@ -22,8 +19,8 @@ export class CanvasRendererStroke
   protected renderLine(context2d: CanvasRenderingContext2D, begin: TPointer, end: TPointer, width: number): void
   {
     this.#logger.debug("renderLine", { context2d, begin, end, width })
-    const linkPoints1 = computeLinksPoints(begin, computeAngleAxeRadian(begin, end), width)
-    const linkPoints2 = computeLinksPoints(end, computeAngleAxeRadian(begin, end), width)
+    const linkPoints1 = computeLinksPointers(begin, computeAngleAxeRadian(begin, end), width)
+    const linkPoints2 = computeLinksPointers(end, computeAngleAxeRadian(begin, end), width)
 
     context2d.moveTo(linkPoints1[0].x, linkPoints1[0].y)
     context2d.lineTo(linkPoints2[0].x, linkPoints2[0].y)
@@ -36,7 +33,7 @@ export class CanvasRendererStroke
     this.#logger.debug("renderFinal", { context2d, begin, end, width })
     const ARCSPLIT = 6
     const angle = computeAngleAxeRadian(begin, end)
-    const linkPoints = computeLinksPoints(end, angle, width)
+    const linkPoints = computeLinksPointers(end, angle, width)
     context2d.moveTo(linkPoints[0].x, linkPoints[0].y)
     for (let i = 1; i <= ARCSPLIT; i++) {
       const newAngle = angle - ((i * Math.PI) / ARCSPLIT)
@@ -47,9 +44,9 @@ export class CanvasRendererStroke
   protected renderQuadratic(context2d: CanvasRenderingContext2D, begin: TPointer, end: TPointer, ctrl: TPointer, width: number): void
   {
     this.#logger.debug("renderQuadratic", { context2d, begin, end, ctrl, width })
-    const linkPoints1 = computeLinksPoints(begin, computeAngleAxeRadian(begin, ctrl), width)
-    const linkPoints2 = computeLinksPoints(end, computeAngleAxeRadian(ctrl, end), width)
-    const linkPoints3 = computeLinksPoints(ctrl, computeAngleAxeRadian(begin, end), width)
+    const linkPoints1 = computeLinksPointers(begin, computeAngleAxeRadian(begin, ctrl), width)
+    const linkPoints2 = computeLinksPointers(end, computeAngleAxeRadian(ctrl, end), width)
+    const linkPoints3 = computeLinksPointers(ctrl, computeAngleAxeRadian(begin, end), width)
 
     context2d.moveTo(linkPoints1[0].x, linkPoints1[0].y)
     context2d.quadraticCurveTo(linkPoints3[0].x, linkPoints3[0].y, linkPoints2[0].x, linkPoints2[0].y)
@@ -73,7 +70,7 @@ export class CanvasRendererStroke
         this.renderArc(context2d, firstPoint, width * 0.6)
       } else {
         this.renderArc(context2d, firstPoint, width * firstPoint.p)
-        const secondPoint: TPointer = computeMiddlePoint(firstPoint, stroke.pointers[1])
+        const secondPoint: TPointer = computeMiddlePointer(firstPoint, stroke.pointers[1])
         this.renderLine(context2d, firstPoint, secondPoint, width)
 
         // Possibility to try this (the start looks better when the ink is large)
@@ -81,12 +78,12 @@ export class CanvasRendererStroke
         // context2d.arc(first.x, first.y, width * first.p, 0, Math.PI * 2, true);
 
         for (let i = 0; i < NUMBER_QUADRATICS; i++) {
-          const begin: TPointer = computeMiddlePoint(stroke.pointers[i], stroke.pointers[i + 1])
-          const end: TPointer = computeMiddlePoint(stroke.pointers[i + 1], stroke.pointers[i + 2])
+          const begin: TPointer = computeMiddlePointer(stroke.pointers[i], stroke.pointers[i + 1])
+          const end: TPointer = computeMiddlePointer(stroke.pointers[i + 1], stroke.pointers[i + 2])
           const ctrl: TPointer = stroke.pointers[i + 1]
           this.renderQuadratic(context2d, begin, end, ctrl, width)
         }
-        const beginLine: TPointer = computeMiddlePoint(stroke.pointers[NUMBER_POINTS - 2], stroke.pointers[NUMBER_POINTS - 1])
+        const beginLine: TPointer = computeMiddlePointer(stroke.pointers[NUMBER_POINTS - 2], stroke.pointers[NUMBER_POINTS - 1])
         const endLine: TPointer = stroke.pointers[NUMBER_POINTS - 1]
         this.renderLine(context2d, beginLine, endLine, width)
 

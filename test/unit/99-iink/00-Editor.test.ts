@@ -1,32 +1,26 @@
 import { AllOverrideConfiguration } from "../_dataset/configuration.dataset"
 import { buildStroke, delay } from "../utils/helpers"
 // import { LeftClickEventFake } from "../utils/PointerEventFake"
+
 import
 {
   TBehaviorOptions,
   TTheme,
   TPenStyle,
   TJIIXExport,
-  TConfiguration
-} from "../../../src/@types"
-import
-{
+  TConfiguration,
   Editor,
-  configuration,
-  style,
-  model,
-  grabber,
-  recognizer,
-  constants,
-  event
+  DefaultConfiguration,
+  DefaultPenStyle,
+  DefaultTheme,
+  Model,
+  PointerEventGrabber,
+  WSRecognizer,
+  PublicEvent,
+  InternalEvent,
+  Intention,
+  EventType
 } from "../../../src/iink"
-
-const { DefaultConfiguration } = configuration
-const { DefaultPenStyle, DefaultTheme } = style
-const { Model } = model
-const { PointerEventGrabber } = grabber
-const { WSRecognizer } = recognizer
-const { PublicEvent, InternalEvent } = event
 
 describe("Editor.ts", () =>
 {
@@ -220,18 +214,18 @@ describe("Editor.ts", () =>
     const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
     test("should init intention = Write", () =>
     {
-      expect(editor.intention).toBe(constants.Intention.Write)
+      expect(editor.intention).toBe(Intention.Write)
     })
     test("should set intention = erase", () =>
     {
-      editor.intention = constants.Intention.Erase
+      editor.intention = Intention.Erase
       expect(wrapperHTML.classList).toContain("erase")
     })
     test("should toggle intention", () =>
     {
-      editor.intention = constants.Intention.Erase
+      editor.intention = Intention.Erase
       expect(wrapperHTML.classList).toContain("erase")
-      editor.intention = constants.Intention.Write
+      editor.intention = Intention.Write
       expect(wrapperHTML.classList).not.toContain("erase")
     })
   })
@@ -334,7 +328,7 @@ describe("Editor.ts", () =>
     test("should emit cleared event", async () =>
     {
       const testFunction = jest.fn()
-      publicEvent.addEventListener(constants.EventType.CLEARED, testFunction)
+      publicEvent.addEventListener(EventType.CLEARED, testFunction)
       const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       const modelExpected = new Model(100, 100)

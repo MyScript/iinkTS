@@ -1,11 +1,23 @@
 import { ConfigurationTextWebsocket } from "../_dataset/configuration.dataset"
-import { utils } from "../../../src/iink"
+import {
+  getAvailableLanguageList,
+  getAvailableFontList,
+  mergeDeep,
+  isVersionSuperiorOrEqual,
+  convertMillimeterToPixel,
+  convertPixelToMillimeter,
+  computeHmac,
+  computeAngleAxeRadian,
+  computeDistance,
+  computeLinksPointers,
+  computeMiddlePointer,
+  TPointer,
+ } from "../../../src/iink"
 
 const round = (n: number, digit = 2) => Math.round(n * Math.pow(10, digit)) / Math.pow(10, digit)
 
 describe("utils", () =>
 {
-  const { getAvailableLanguageList, getAvailableFontList, version, mergeDeep, math, units, crypto } = utils
   describe("getAvailableLanguageList", () =>
   {
     global.fetch = jest.fn(() =>
@@ -152,7 +164,7 @@ describe("utils", () =>
     {
       test(`shoud get ${ d.source } is ${ d.expected ? "higher" : "lower" } than ${ d.target }`, () =>
       {
-        expect(version.isVersionSuperiorOrEqual(d.source, d.target)).toEqual(d.expected)
+        expect(isVersionSuperiorOrEqual(d.source, d.target)).toEqual(d.expected)
       })
     })
   })
@@ -205,7 +217,7 @@ describe("utils", () =>
       {
         test(`should computed distance of P1: [${ JSON.stringify(d.p1) }] & P2: [${ JSON.stringify(d.p2) }] to equal ${ d.expected }`, () =>
         {
-          expect(math.computeDistance(d.p1, d.p2)).toEqual(d.expected)
+          expect(computeDistance(d.p1, d.p2)).toEqual(d.expected)
         })
       })
     })
@@ -258,22 +270,56 @@ describe("utils", () =>
       {
         test(`should compute radian for P1[${ JSON.stringify(d.p1) }] P2[${ JSON.stringify(d.p2) }] to equal ${ d.expect }`, () =>
         {
-          expect(round(math.computeAngleAxeRadian(d.p1, d.p2))).toEqual(round(d.expect))
+          expect(round(computeAngleAxeRadian(d.p1, d.p2))).toEqual(round(d.expect))
         })
       })
     })
 
+    describe("quadratics", () => {
+      const p1: TPointer = {
+        p: 1,
+        t: 1,
+        x: 1,
+        y: 1
+      }
+      const p2: TPointer = {
+        p: 1,
+        t: 1,
+        x: 2,
+        y: 5
+      }
+      test("should computeLinksPointers", () =>
+      {
+        const points = computeLinksPointers(p1, 90, 1)
+        expect(points).toStrictEqual([
+          {
+            x: 0.10600333639944215,
+            y: 0.5519263838708298
+          },
+          {
+            x: 1.8939966636005579,
+            y: 1.4480736161291703
+          }
+        ])
+      })
+
+      test("should computeMiddlePointer", () =>
+      {
+        const point = computeMiddlePointer(p1, p2)
+        expect(point).toStrictEqual({ x: 1.5, y: 3, p: 1, t: 1 })
+      })
+    })
   })
 
   describe("units", () =>
   {
     test("convertMillimeterToPixel", () =>
     {
-      expect(round(units.convertMillimeterToPixel(10), 0)).toEqual(38)
+      expect(round(convertMillimeterToPixel(10), 0)).toEqual(38)
     })
     test("convertPixelToMillimeter", () =>
     {
-      expect(round(units.convertPixelToMillimeter(38), 0)).toEqual(10)
+      expect(round(convertPixelToMillimeter(38), 0)).toEqual(10)
     })
   })
 
@@ -281,7 +327,7 @@ describe("utils", () =>
   {
     test("should computeHmac", () =>
     {
-      const computedHmac = crypto.computeHmac("Message", "AppKey", "HMACKey")
+      const computedHmac = computeHmac("Message", "AppKey", "HMACKey")
       expect(computedHmac)
         .toBe("b4d62a1900a4010a140e31fc4a07b6445499e6c7488f3214962427b2d539056182d0990f4d042ace794704f03dc6fdc2f73e25dd6ea35d3e0fd537d1dd4c1223")
     })

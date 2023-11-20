@@ -86,7 +86,7 @@
         await editor.initialize();
 
         const currentLanguage = editor.configuration.recognition.lang;
-        const availableLanguageListResponse = await iink.utils.getAvailableLanguageList(editor.configuration);
+        const availableLanguageListResponse = await iink.getAvailableLanguageList(editor.configuration);
         Object.keys(availableLanguageListResponse.result).forEach(function (key) {
           const selected = currentLanguage === key;
           languageElement.options[languageElement.options.length] = new Option(availableLanguageListResponse.result[key], key, selected, selected);

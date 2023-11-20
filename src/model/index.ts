@@ -1,6 +1,5 @@
-export { Model } from "./Model"
-
-export {
-  Stroke,
-  convertStrokeToJSON
-} from "./Stroke"
+export * from "./Export"
+export * from "./IModel"
+export * from "./Model"
+export * from "./Stroke"
+export * from "./Symbol"

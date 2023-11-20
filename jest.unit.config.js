@@ -1,10 +1,9 @@
-
 export default {
   clearMocks: true,
   // collectCoverage: true,
   collectCoverageFrom: [
     "./src/**",
-    "!./src/@types/**",
+    "!./src/modules.d.ts",
     "!./src/Constants.ts",
   ],
   coverageThreshold: {

@@ -1,18 +1,17 @@
 import fetchMock from "jest-fetch-mock"
-import
-{
+import {
+  RestRecognizer,
+  DefaultRecognitionConfiguration,
+  DefaultServerConfiguration,
+  DefaultPenStyle,
+  Model,
   TPointer,
   TRecognitionConfiguration,
   TRecognitionType
-} from "../../../src/@types"
-import { recognizer, configuration, style, model } from "../../../src/iink"
+ } from "../../../src/iink"
 
 describe("RestRecognizer.ts", () =>
 {
-  const { RestRecognizer } = recognizer
-  const { DefaultRecognitionConfiguration, DefaultServerConfiguration } = configuration
-  const { DefaultPenStyle } = style
-  const { Model } = model
   const height = 100, width = 100
 
   beforeAll(() =>

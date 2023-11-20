@@ -1,15 +1,13 @@
-import {
-  TConverstionState,
-  TExport,
-  TJIIXExport,
-  TWSMessageEventSVGPatch,
-  TUndoRedoContext
-} from "../@types"
-
-import { InternalEventType } from "../Constants"
+import { InternalEventType, LoggerClass } from "../Constants"
+import { TConverstionState } from "../configuration"
 import { LoggerManager } from "../logger"
-import { LoggerClass } from "../Constants"
+import { TExport, TJIIXExport } from "../model"
+import { TWSMessageEventSVGPatch } from "../recognizer"
+import { TUndoRedoContext } from "../undo-redo"
 
+/**
+ * @group Event
+ */
 export class InternalEvent extends EventTarget
 {
   static #instance: InternalEvent

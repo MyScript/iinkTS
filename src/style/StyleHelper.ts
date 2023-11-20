@@ -1,12 +1,13 @@
 import JsonCSS from "json-css"
-import {
-  TPenStyle,
-  TTheme
-} from "../@types"
+import { TTheme } from "./Theme"
+import { TPenStyle } from "./PenStyle"
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const parser: any = new JsonCSS()
 
+/**
+ * @group Style
+ */
 export const StyleHelper = {
   themeToCSS(json: TTheme): string
   {

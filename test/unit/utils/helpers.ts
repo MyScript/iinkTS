@@ -1,8 +1,4 @@
-import { TBoundingBox, TStroke } from "../../../src/@types"
-import { model, style } from "../../../src/iink"
-
-const { Stroke } = model
-const { DefaultPenStyle } = style
+import { Stroke, DefaultPenStyle, TBoundingBox, TStroke } from "../../../src/iink"
 
 export const delay = (delayInms: number) =>
 {

@@ -1,4 +1,4 @@
-export { CanvasRenderer } from "./CanvasRenderer"
-export { CanvasRendererShape } from "./CanvasRendererShape"
-export { CanvasRendererText } from "./CanvasRendererText"
-export { CanvasRendererStroke } from "./CanvasRendererStroke"
+export * from "./CanvasRenderer"
+export * from "./CanvasRendererShape"
+export * from "./CanvasRendererText"
+export * from "./CanvasRendererStroke"

@@ -1,4 +1,4 @@
-export { DefaultPenStyle } from "./DefaultPenStyle"
-export { DefaultTheme } from "./DefaultTheme"
-export { StyleHelper } from "./StyleHelper"
-export { StyleManager } from "./StyleManager"
+export * from "./PenStyle"
+export * from "./Theme"
+export * from "./StyleHelper"
+export * from "./StyleManager"

@@ -6,13 +6,17 @@ import
   ConfigurationRawContentRest,
   AllOverrideConfiguration,
 } from "../_dataset/configuration.dataset"
-import { DeepPartial, TConfiguration, TRecognitionConfiguration } from "../../../src/@types"
-import { configuration } from "../../../src/iink"
+
+import {
+  Configuration,
+  DefaultConfiguration,
+  PartialDeep,
+  TConfiguration,
+  TRecognitionConfiguration
+} from "../../../src/iink"
 
 describe("Configuration.ts", () =>
 {
-  const { Configuration, DefaultConfiguration } = configuration
-
   test("should be default configuration", () =>
   {
     const configurationDefault = new Configuration()
@@ -25,7 +29,7 @@ describe("Configuration.ts", () =>
     expect(configurationDefault["undo-redo"]).toStrictEqual(DefaultConfiguration["undo-redo"])
   })
 
-  const configurationsClient: { name: string, config: DeepPartial<TConfiguration> }[] = [
+  const configurationsClient: { name: string, config: PartialDeep<TConfiguration> }[] = [
     { name: "ConfigurationTextWebsocket", config: ConfigurationTextWebsocket },
     { name: "ConfigurationTextRest", config: ConfigurationTextRest },
     { name: "ConfigurationDiagramRest", config: ConfigurationDiagramRest },
