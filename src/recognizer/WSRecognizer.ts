@@ -146,7 +146,7 @@ export class WSRecognizer implements IRecognizer
     }
     if (isVersionSuperiorOrEqual(this.serverConfiguration.version, "2.0.4")) {
       params["myscript-client-name"] = "iink-ts"
-      params["myscript-client-version"] = "1.0.0-buildVersion"
+      params["myscript-client-version"] = "1.0.3"
     }
     this.send(params)
   }
