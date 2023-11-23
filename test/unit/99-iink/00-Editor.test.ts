@@ -19,7 +19,10 @@ import
   PublicEvent,
   InternalEvent,
   Intention,
-  EventType
+  EventType,
+  RestBehaviors,
+  WSBehaviors,
+  RestRecognizer
 } from "../../../src/iink"
 
 describe("Editor.ts", () =>
@@ -74,29 +77,59 @@ describe("Editor.ts", () =>
       const editor = new Editor(wrapperHTML, customBehaviorsOptions)
       expect(editor.grabber).toBe(customGrabber)
     })
-    test("should define default recognizer", () =>
+    test("should define default recognizer when REST", () =>
     {
       const wrapperHTML: HTMLElement = document.createElement("div")
       wrapperHTML.style.height = "100px"
       wrapperHTML.style.width = "100px"
-      const customRecognizer = new WSRecognizer(DefaultConfiguration.server, DefaultConfiguration.recognition)
+      const behaviorsOptions = structuredClone(DefaultBehaviorsOptions)
+      behaviorsOptions.configuration.server.protocol = "REST"
+      const customRecognizer = new WSRecognizer(behaviorsOptions.configuration.server, behaviorsOptions.configuration.recognition)
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
-      expect(editor.behaviors.recognizer).not.toBe(customRecognizer)
+      const RESTBehaviors = editor.behaviors as RestBehaviors
+      expect(RESTBehaviors.recognizer).not.toBe(customRecognizer)
     })
-    test("should override recognizer", () =>
+    test("should override recognizer when REST", () =>
     {
       const wrapperHTML: HTMLElement = document.createElement("div")
       wrapperHTML.style.height = "100px"
       wrapperHTML.style.width = "100px"
-      const customRecognizer = new WSRecognizer(DefaultConfiguration.server, DefaultConfiguration.recognition)
-      const customBehaviorsOptions: TBehaviorOptions = {
-        configuration: DefaultConfiguration,
-        behaviors: {
-          recognizer: customRecognizer
-        }
+      const behaviorsOptions = structuredClone(DefaultBehaviorsOptions)
+      behaviorsOptions.configuration.server.protocol = "REST"
+      const customRecognizer = new RestRecognizer(behaviorsOptions.configuration.server, behaviorsOptions.configuration.recognition)
+      behaviorsOptions.behaviors = {
+        recognizer: customRecognizer
       }
-      const editor = new Editor(wrapperHTML, customBehaviorsOptions)
-      expect(editor.behaviors.recognizer).toBe(customRecognizer)
+      const editor = new Editor(wrapperHTML, behaviorsOptions)
+      const RESTBehaviors = editor.behaviors as RestBehaviors
+      expect(RESTBehaviors.recognizer).toBe(customRecognizer)
+    })
+    test("should define default recognizer when Websocket", () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement("div")
+      wrapperHTML.style.height = "100px"
+      wrapperHTML.style.width = "100px"
+      const behaviorsOptions = structuredClone(DefaultBehaviorsOptions)
+      behaviorsOptions.configuration.server.protocol = "WEBSOCKET"
+      const customRecognizer = new WSRecognizer(behaviorsOptions.configuration.server, behaviorsOptions.configuration.recognition)
+      const editor = new Editor(wrapperHTML, behaviorsOptions)
+      const WSBehaviors = editor.behaviors as WSBehaviors
+      expect(WSBehaviors.recognizer).not.toBe(customRecognizer)
+    })
+    test("should override recognizer when REST", () =>
+    {
+      const wrapperHTML: HTMLElement = document.createElement("div")
+      wrapperHTML.style.height = "100px"
+      wrapperHTML.style.width = "100px"
+      const behaviorsOptions = structuredClone(DefaultBehaviorsOptions)
+      behaviorsOptions.configuration.server.protocol = "WEBSOCKET"
+      const customRecognizer = new WSRecognizer(behaviorsOptions.configuration.server, behaviorsOptions.configuration.recognition)
+      behaviorsOptions.behaviors = {
+        recognizer: customRecognizer
+      }
+      const editor = new Editor(wrapperHTML, behaviorsOptions)
+      const WSBehaviors = editor.behaviors as WSBehaviors
+      expect(WSBehaviors.recognizer).toBe(customRecognizer)
     })
     test("should throw error if instantiate Editor without configuration", () =>
     {

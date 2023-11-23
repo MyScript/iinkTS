@@ -2,9 +2,10 @@ import { Intention } from "../Constants"
 import { TConfiguration, TConverstionState, TLoggerConfiguration } from "../configuration"
 import { IGrabber } from "../grabber"
 import { IModel, TStroke } from "../model"
-import { IRecognizer } from "../recognizer"
-import { StyleManager, TPenStyle, TTheme } from "../style"
+import { RestRecognizer, WSRecognizer } from "../recognizer"
+import { TPenStyle, TTheme } from "../style"
 import { TUndoRedoContext } from "../undo-redo"
+import { PartialDeep } from "../utils"
 
 /**
  * @group Behavior
@@ -13,7 +14,7 @@ export type TBehaviorOptions = {
   configuration: TConfiguration
   behaviors?: {
     grabber?: IGrabber
-    recognizer?: IRecognizer
+    recognizer?: RestRecognizer | WSRecognizer
   }
   penStyle?: TPenStyle
   theme?: TTheme
@@ -27,10 +28,7 @@ export interface IBehaviors
 {
   name: string
   grabber: IGrabber
-  recognizer: IRecognizer
   context: TUndoRedoContext
-  options: TBehaviorOptions
-  styleManager: StyleManager
   intention: Intention
 
   get currentPenStyle(): TPenStyle
@@ -38,13 +36,13 @@ export interface IBehaviors
   get model(): IModel
 
   get penStyle(): TPenStyle
-  setPenStyle(penStyle?: TPenStyle): Promise<void>
+  setPenStyle(penStyle?: PartialDeep<TPenStyle>): Promise<void>
 
   get penStyleClasses(): string
   setPenStyleClasses(penStyleClasses?: string): Promise<void>
 
   get theme(): TTheme
-  setTheme(theme?: TTheme): Promise<void>
+  setTheme(theme?: PartialDeep<TTheme>): Promise<void>
 
   get configuration(): TConfiguration
   set configuration(conf: TConfiguration)

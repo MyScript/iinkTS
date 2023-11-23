@@ -130,7 +130,7 @@ describe("WSBehaviors.ts", () =>
     })
   })
 
-  describe("updateModelRendering", () =>
+  describe("synchronizeModelWithBackend", () =>
   {
     test("should call recognizer.addStrokes", async () =>
     {
@@ -146,7 +146,7 @@ describe("WSBehaviors.ts", () =>
       wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
       wsb.recognizer.addStrokes = jest.fn(() => Promise.resolve({} as TExport))
       await wsb.init(wrapperHTML)
-      await wsb.updateModelRendering()
+      await wsb.synchronizeModelWithBackend()
       await expect(wsb.recognizer.addStrokes).toBeCalledTimes(1)
     })
     test("should call renderer.clearErasingStrokes", async () =>
@@ -163,7 +163,7 @@ describe("WSBehaviors.ts", () =>
       wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
       wsb.recognizer.addStrokes = jest.fn(() => Promise.resolve({} as TExport))
       await wsb.init(wrapperHTML)
-      await wsb.updateModelRendering()
+      await wsb.synchronizeModelWithBackend()
       await expect(wsb.renderer.clearErasingStrokes).toBeCalledTimes(1)
     })
     test("should not call recognizer.addStrokes when exportContent = DEMAND", async () =>
@@ -182,7 +182,7 @@ describe("WSBehaviors.ts", () =>
       wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
       wsb.recognizer.addStrokes = jest.fn(() => Promise.resolve({} as TExport))
       await wsb.init(wrapperHTML)
-      await wsb.updateModelRendering()
+      await wsb.synchronizeModelWithBackend()
       await expect(wsb.recognizer.addStrokes).toBeCalledTimes(0)
     })
     test("should reject if recognizer.addStrokes rejected", async () =>
@@ -199,7 +199,7 @@ describe("WSBehaviors.ts", () =>
       wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
       wsb.recognizer.addStrokes = jest.fn(() => Promise.reject("poney"))
       await wsb.init(wrapperHTML)
-      await expect(wsb.updateModelRendering()).rejects.toEqual("poney")
+      await expect(wsb.synchronizeModelWithBackend()).rejects.toEqual("poney")
     })
   })
 

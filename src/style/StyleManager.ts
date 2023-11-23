@@ -1,6 +1,6 @@
 import { LoggerClass } from "../Constants"
 import { LoggerManager } from "../logger"
-import { mergeDeep } from "../utils"
+import { PartialDeep, mergeDeep } from "../utils"
 import { DefaultPenStyle, TPenStyle } from "./PenStyle"
 import { DefaultTheme, TTheme } from "./Theme"
 
@@ -15,7 +15,7 @@ export class StyleManager
   #currentPenStyle!: TPenStyle
   #logger =  LoggerManager.getLogger(LoggerClass.STYLE)
 
-  constructor(penStyle?: TPenStyle, theme?: TTheme)
+  constructor(penStyle?: PartialDeep<TPenStyle>, theme?: PartialDeep<TTheme>)
   {
     this.#logger.info("constructor", { penStyle, theme })
     this.setTheme(theme)
@@ -32,7 +32,7 @@ export class StyleManager
   {
     return this.#penStyle
   }
-  setPenStyle(style?: TPenStyle)
+  setPenStyle(style?: PartialDeep<TPenStyle>)
   {
     this.#logger.info("setPenStyle", { style })
     this.#penStyle = mergeDeep(structuredClone(DefaultPenStyle), style || {}) as TPenStyle
@@ -44,7 +44,7 @@ export class StyleManager
   {
     return this.#theme
   }
-  setTheme(theme?: TTheme)
+  setTheme(theme?: PartialDeep<TTheme>)
   {
     this.#logger.info("setTheme", { theme })
     this.#theme = mergeDeep(structuredClone(DefaultTheme), theme || {}) as TTheme
