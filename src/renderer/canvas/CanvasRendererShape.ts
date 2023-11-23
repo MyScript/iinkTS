@@ -1,6 +1,6 @@
 import { LoggerClass } from "../../Constants"
 import { LoggerManager } from "../../logger"
-import { TSymbol, TShapeEllipseSymbol, TShapeLineSymbol, TShapeRecognizedSymbol, TShapeSymbol, TShapeTableSymbol } from "../../model"
+import { TSymbol, TCanvasShapeEllipseSymbol, TCanvasShapeLineSymbol, TCanvasShapeTableSymbol } from "../../model"
 import { TPoint } from "../../utils"
 
 /**
@@ -12,8 +12,6 @@ export class CanvasRendererShape
 
   symbols = {
     table: "table",
-    shape: "shape",
-    recognizedShape: "recognizedShape",
     ellipse: "ellipse",
     line: "line"
   }
@@ -28,7 +26,7 @@ export class CanvasRendererShape
     return returnedAngle
   }
 
-  protected drawEllipseArc(context2D: CanvasRenderingContext2D, shapeEllipse: TShapeEllipseSymbol): TPoint[]
+  protected drawEllipseArc(context2D: CanvasRenderingContext2D, shapeEllipse: TCanvasShapeEllipseSymbol): TPoint[]
   {
     this.#logger.debug("drawEllipseArc", { context2D, shapeEllipse })
     const { centerPoint, maxRadius, minRadius, orientation, startAngle, sweepAngle } = shapeEllipse
@@ -105,7 +103,7 @@ export class CanvasRendererShape
     }
   }
 
-  protected drawShapeEllipse(context2D: CanvasRenderingContext2D, shapeEllipse: TShapeEllipseSymbol)
+  protected drawShapeEllipse(context2D: CanvasRenderingContext2D, shapeEllipse: TCanvasShapeEllipseSymbol)
   {
     this.#logger.debug("drawShapeEllipse", { context2D, shapeEllipse })
     const points = this.drawEllipseArc(context2D, shapeEllipse)
@@ -118,7 +116,7 @@ export class CanvasRendererShape
     }
   }
 
-  protected drawShapeLine(context2D: CanvasRenderingContext2D, shapeLine: TShapeLineSymbol)
+  protected drawShapeLine(context2D: CanvasRenderingContext2D, shapeLine: TCanvasShapeLineSymbol)
   {
     this.#logger.debug("drawShapeLine", { context2D, shapeLine })
     this.drawLine(context2D, shapeLine.firstPoint, shapeLine.lastPoint)
@@ -138,27 +136,17 @@ export class CanvasRendererShape
     context2D.strokeStyle = symbol.style.color as string
 
     switch (symbol.type) {
-      case this.symbols.shape: {
-        const shapeSymbol = symbol as TShapeSymbol
-        this.draw(context2D, shapeSymbol.candidates[shapeSymbol.selectedCandidateIndex])
-        break
-      }
       case this.symbols.table: {
-        const tableSymbols = symbol as TShapeTableSymbol
+        const tableSymbols = symbol as TCanvasShapeTableSymbol
         tableSymbols.lines.forEach(line => this.drawLine(context2D, line.p1, line.p2))
         break
       }
       case this.symbols.ellipse: {
-        this.drawShapeEllipse(context2D, symbol as TShapeEllipseSymbol)
+        this.drawShapeEllipse(context2D, symbol as TCanvasShapeEllipseSymbol)
         break
       }
       case this.symbols.line: {
-        this.drawShapeLine(context2D, symbol as TShapeLineSymbol)
-        break
-      }
-      case this.symbols.recognizedShape: {
-        const recognizedShape = symbol as TShapeRecognizedSymbol
-        recognizedShape.primitives.forEach(primitive => this.draw(context2D, primitive))
+        this.drawShapeLine(context2D, symbol as TCanvasShapeLineSymbol)
         break
       }
       default:

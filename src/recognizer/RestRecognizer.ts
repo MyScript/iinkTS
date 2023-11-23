@@ -4,7 +4,6 @@ import { LoggerManager } from "../logger"
 import { Model, TExport, TJIIXExport, TStrokeGroup, TStrokeGroupJSON, convertStrokeToJSON } from "../model"
 import { StyleHelper, TPenStyle } from "../style"
 import { computeHmac, isVersionSuperiorOrEqual } from "../utils"
-import { IRecognizer } from "./IRecognizer"
 
 type ApiError = {
   code?: string
@@ -40,7 +39,7 @@ export type TRestPostData = {
 /**
  * @group Recognizer
  */
-export class RestRecognizer implements IRecognizer
+export class RestRecognizer
 {
   #logger = LoggerManager.getLogger(LoggerClass.RECOGNIZER)
 

@@ -8,7 +8,7 @@ import { RestRecognizer } from "../recognizer"
 import { CanvasRenderer } from "../renderer"
 import { StyleManager, TPenStyle, TTheme } from "../style"
 import { TUndoRedoContext, UndoRedoManager } from "../undo-redo"
-import { DeferredPromise, TPointer } from "../utils"
+import { DeferredPromise, PartialDeep, TPointer } from "../utils"
 import { IBehaviors, TBehaviorOptions } from "./IBehaviors"
 
 /**
@@ -17,26 +17,24 @@ import { IBehaviors, TBehaviorOptions } from "./IBehaviors"
 export class RestBehaviors implements IBehaviors
 {
   name = "RestBehaviors"
-  options: TBehaviorOptions
+  #logger = LoggerManager.getLogger(LoggerClass.BEHAVIORS)
+  #configuration: TConfiguration
+  #model: Model
+  #resizeTimer?: ReturnType<typeof setTimeout>
+  #exportTimer?: ReturnType<typeof setTimeout>
+
   grabber: PointerEventGrabber
   renderer: CanvasRenderer
   recognizer: RestRecognizer
   undoRedoManager: UndoRedoManager
   styleManager: StyleManager
-  #configuration: TConfiguration
-  #model: Model
   intention: Intention
-  #logger = LoggerManager.getLogger(LoggerClass.BEHAVIORS)
 
-  #resizeTimer?: ReturnType<typeof setTimeout>
-  #exportTimer?: ReturnType<typeof setTimeout>
-
-  constructor(options: TBehaviorOptions)
+  constructor(options: PartialDeep<TBehaviorOptions>)
   {
     this.#logger.info("constructor", { options })
-    this.options = options
     this.#configuration = new Configuration(options?.configuration)
-    this.styleManager = new StyleManager(options.penStyle, options.theme)
+    this.styleManager = new StyleManager(options?.penStyle, options?.theme)
 
     this.grabber = new PointerEventGrabber(this.#configuration.grabber)
     this.renderer = new CanvasRenderer(this.#configuration.rendering)
@@ -45,6 +43,68 @@ export class RestBehaviors implements IBehaviors
     this.intention = Intention.Write
     this.#model = new Model()
     this.undoRedoManager = new UndoRedoManager(this.#configuration["undo-redo"], this.model)
+  }
+
+  protected onPointerDown(evt: PointerEvent, point: TPointer): void
+  {
+    this.#logger.info("onPointerDown", { intention: this.intention, evt, point })
+    const { pointerType } = evt
+    const style: TPenStyle = Object.assign({}, this.theme?.ink, this.currentPenStyle)
+    switch (this.intention) {
+      case Intention.Erase: {
+        if (this.model.removeStrokesFromPoint(point).length > 0) {
+          this.renderer.drawModel(this.model)
+        }
+        break
+      }
+      case Intention.Write:
+        this.model.initCurrentStroke(point, evt.pointerId, pointerType, style)
+        this.drawCurrentStroke()
+        break
+      default:
+        this.#logger.warn("#onPointerDown", `onPointerDown intention unknow: "${ this.intention }"`)
+        break
+    }
+  }
+
+  protected onPointerMove(_evt: PointerEvent, point: TPointer): void
+  {
+    this.#logger.info("onPointerMove", { intention: this.intention, point })
+    switch (this.intention) {
+      case Intention.Erase: {
+        if (this.model.removeStrokesFromPoint(point).length > 0) {
+          this.renderer.drawModel(this.model)
+        }
+        break
+      }
+      case Intention.Write:
+        this.model.appendToCurrentStroke(point)
+        this.drawCurrentStroke()
+        break
+      default:
+        this.#logger.warn("#onPointerMove", `onPointerMove intention unknow: "${ this.intention }"`)
+        break
+    }
+  }
+
+  protected async onPointerUp(_evt: PointerEvent, point: TPointer): Promise<void>
+  {
+    this.#logger.info("onPointerUp", { intention: this.intention, point })
+    switch (this.intention) {
+      case Intention.Erase:
+        this.model.removeStrokesFromPoint(point)
+        if (this.context.stack.at(-1)?.modificationDate !== this.model.modificationDate) {
+          await this.updateModelRendering()
+        }
+        break
+      case Intention.Write:
+        this.model.endCurrentStroke(point)
+        await this.updateModelRendering()
+        break
+      default:
+        this.#logger.warn("#onPointerUp", `onPointerUp intention unknow: "${ this.intention }"`)
+        break
+    }
   }
 
   get internalEvent(): InternalEvent
@@ -89,12 +149,11 @@ export class RestBehaviors implements IBehaviors
     return Promise.resolve()
   }
 
-
   get theme(): TTheme
   {
     return this.styleManager.theme
   }
-  async setTheme(theme?: TTheme): Promise<void>
+  async setTheme(theme?: PartialDeep<TTheme>): Promise<void>
   {
     this.#logger.info("setTheme", { theme })
     this.styleManager.setTheme(theme)
@@ -116,80 +175,10 @@ export class RestBehaviors implements IBehaviors
     this.renderer.init(domElement)
 
     this.grabber.attach(domElement)
-    this.grabber.onPointerDown = this.#onPointerDown.bind(this)
-    this.grabber.onPointerMove = this.#onPointerMove.bind(this)
-    this.grabber.onPointerUp = this.#onPointerUp.bind(this)
+    this.grabber.onPointerDown = this.onPointerDown.bind(this)
+    this.grabber.onPointerMove = this.onPointerMove.bind(this)
+    this.grabber.onPointerUp = this.onPointerUp.bind(this)
     return Promise.resolve()
-  }
-
-  #onPointerDown(evt: PointerEvent, point: TPointer): void
-  {
-    this.#logger.info("onPointerDown", { intention: this.intention, evt, point })
-    const { pointerType } = evt
-    const style: TPenStyle = Object.assign({}, this.theme?.ink, this.currentPenStyle)
-    switch (this.intention) {
-      case Intention.Erase:
-        if (this.model.removeStrokesFromPoint(point).length > 0) {
-          this.model.endCurrentStroke(point)
-          this.updateModelRendering()
-            .then(model => Object.assign(this.model, model))
-            .catch(error => this.internalEvent.emitError(error as Error))
-        }
-        break
-      case Intention.Write:
-        this.model.initCurrentStroke(point, evt.pointerId, pointerType, style)
-        this.drawCurrentStroke()
-        break
-      default:
-        this.#logger.warn("#onPointerDown", `onPointerDown intention unknow: "${ this.intention }"`)
-        break
-    }
-  }
-
-  #onPointerMove(_evt: PointerEvent, point: TPointer): void
-  {
-    this.#logger.info("onPointerMove", { intention: this.intention, point })
-    switch (this.intention) {
-      case Intention.Erase:
-        if (this.model.removeStrokesFromPoint(point).length > 0) {
-          this.model.endCurrentStroke(point)
-          this.updateModelRendering()
-            .then(newModel => Object.assign(this.#model, newModel))
-            .catch(error => this.internalEvent.emitError(error as Error))
-        }
-        break
-      case Intention.Write:
-        this.model.appendToCurrentStroke(point)
-        this.drawCurrentStroke()
-        break
-      default:
-        this.#logger.warn("#onPointerMove", `onPointerMove intention unknow: "${ this.intention }"`)
-        break
-    }
-  }
-
-  #onPointerUp(_evt: PointerEvent, point: TPointer): void
-  {
-    this.#logger.info("onPointerUp", { intention: this.intention, point })
-    switch (this.intention) {
-      case Intention.Erase:
-        if (this.model.removeStrokesFromPoint(point).length > 0) {
-          this.model.endCurrentStroke(point)
-          this.updateModelRendering()
-            .then(newModel => Object.assign(this.#model, newModel))
-            .catch(error => this.internalEvent.emitError(error as Error))
-        }
-        break
-      case Intention.Write:
-        this.model.endCurrentStroke(point)
-        this.updateModelRendering()
-          .then(newModel => Object.assign(this.#model, newModel))
-          .catch(error => this.internalEvent.emitError(error as Error))
-        break
-      default:
-        this.#logger.warn("#onPointerUp", `onPointerUp intention unknow: "${ this.intention }"`)
-        break
-    }
   }
 
   drawCurrentStroke(): void
@@ -202,7 +191,7 @@ export class RestBehaviors implements IBehaviors
   {
     this.#logger.info("updateModelRendering")
     this.renderer.drawModel(this.model)
-    const deferred = new DeferredPromise<Model | never>()
+    const deferred = new DeferredPromise<Model>()
     this.undoRedoManager.addModelToStack(this.model)
     if (this.#configuration.triggers.exportContent !== "DEMAND") {
       clearTimeout(this.#exportTimer)
@@ -218,6 +207,7 @@ export class RestBehaviors implements IBehaviors
           deferred.resolve(this.model)
         } catch (error) {
           this.#logger.error("updateModelRendering", { error })
+          this.internalEvent.emitError(error as Error)
           deferred.reject(error as Error)
         }
       }, this.#configuration.triggers.exportContent === "QUIET_PERIOD" ? this.#configuration.triggers.exportContentDelay : 0)
@@ -249,6 +239,25 @@ export class RestBehaviors implements IBehaviors
     Object.assign(this.#model, newModel)
     this.#logger.debug("convert", this.model)
     return this.model
+  }
+
+  async importPointEvents(strokes: TStroke[]): Promise<IModel>
+  {
+    strokes.forEach((s) =>
+    {
+      const stroke = new Stroke(s.style, Math.random())
+      stroke.pointers = s.pointers
+      this.model.addStroke(stroke)
+    })
+
+    try {
+      const newModel = await this.updateModelRendering()
+      Object.assign(this.#model, newModel)
+      return this.model
+    } catch (error) {
+      this.internalEvent.emitError(error as Error)
+      throw error as Error
+    }
   }
 
   async resize(height: number, width: number): Promise<IModel>
@@ -315,24 +324,5 @@ export class RestBehaviors implements IBehaviors
     this.grabber.detach()
     this.renderer.destroy()
     return Promise.resolve()
-  }
-
-  async importPointEvents(strokes: TStroke[]): Promise<IModel>
-  {
-    strokes.forEach((s) =>
-    {
-      const stroke = new Stroke(s.style, Math.random())
-      stroke.pointers = s.pointers
-      this.model.addStroke(stroke)
-    })
-
-    try {
-      const newModel = await this.updateModelRendering()
-      Object.assign(this.#model, newModel)
-      return this.model
-    } catch (error) {
-      this.internalEvent.emitError(error as Error)
-      throw error as Error
-    }
   }
 }

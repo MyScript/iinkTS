@@ -112,6 +112,8 @@ export class Model implements IModel
     this.#logger.info("addStroke", { stroke })
     this.strokes.push(stroke)
     this.modificationDate = Date.now()
+    this.converts = undefined
+    this.exports = undefined
   }
 
   updateStroke(updatedStroke: TStroke): void
@@ -122,6 +124,8 @@ export class Model implements IModel
       updatedStroke.modificationDate = Date.now()
       this.strokes.splice(strokeIndex, 1, updatedStroke)
       this.modificationDate = Date.now()
+      this.converts = undefined
+      this.exports = undefined
     }
     this.#logger.debug("updateStroke", this.strokes)
   }
@@ -135,6 +139,8 @@ export class Model implements IModel
       this.positions.lastReceivedPosition--
       this.strokes.splice(strokeIndex, 1)
       this.modificationDate = Date.now()
+      this.converts = undefined
+      this.exports = undefined
     }
     this.#logger.debug("removeStroke", this.strokes)
   }
@@ -147,7 +153,6 @@ export class Model implements IModel
     {
       this.removeStroke(strokeToRemove.id)
     })
-    this.modificationDate = Date.now()
     this.#logger.debug("removeStrokesFromPoint", strokes.map(s => s.id))
     return strokes.map(s => s.id)
   }

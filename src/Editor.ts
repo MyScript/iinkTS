@@ -1,7 +1,7 @@
 import "./iink.css"
 import { IBehaviors, RestBehaviors, TBehaviorOptions, WSBehaviors } from "./behaviors"
 import { SmartGuide } from "./smartguide"
-import { DeferredPromise } from "./utils"
+import { DeferredPromise, PartialDeep, mergeDeep } from "./utils"
 import { LoggerManager } from "./logger"
 import { ExportType, Intention, LoggerClass } from "./Constants"
 import { DefaultLoggerConfiguration, TConfiguration, TConverstionState, TLoggerConfiguration, TMarginConfiguration } from "./configuration"
@@ -36,10 +36,10 @@ export class Editor
 
   showStrokesPan = false
 
-  constructor(wrapperHTML: HTMLElement, options: TBehaviorOptions, globalClassCss = "ms-editor")
+  constructor(wrapperHTML: HTMLElement, options: PartialDeep<TBehaviorOptions>, globalClassCss = "ms-editor")
   {
     this.#initializationDeferred = new DeferredPromise<void>()
-    this.loggerConfiguration = options.logger || DefaultLoggerConfiguration
+    this.loggerConfiguration = mergeDeep({}, options.logger, DefaultLoggerConfiguration)
     this.logger.info("constructor", { wrapperHTML, options, globalClassCss })
 
     this.wrapperHTML = wrapperHTML as HTMLEditorElement
@@ -148,7 +148,7 @@ export class Editor
   {
     return this.behaviors.penStyle
   }
-  set penStyle(ps: TPenStyle)
+  set penStyle(ps: PartialDeep<TPenStyle>)
   {
     this.logger.info("set penStyle", { ps })
     this.behaviors.setPenStyle(ps)
@@ -158,7 +158,7 @@ export class Editor
   {
     return this.behaviors.theme
   }
-  set theme(theme: TTheme)
+  set theme(theme: PartialDeep<TTheme>)
   {
     this.logger.info("set theme", { t: theme })
     this.behaviors.setTheme(theme)
@@ -185,7 +185,7 @@ export class Editor
     this.initialize()
   }
 
-  #instantiateBehaviors(options: TBehaviorOptions)
+  #instantiateBehaviors(options: PartialDeep<TBehaviorOptions>)
   {
     this.logger.info("instantiateBehaviors", { options })
     if (!options?.configuration) {

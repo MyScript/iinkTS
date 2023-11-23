@@ -6,7 +6,6 @@ import { Model, TExport, TJIIXExport, TStroke, convertStrokeToJSON } from "../mo
 import { StyleHelper, TPenStyle, TTheme } from "../style"
 import { TUndoRedoContext } from "../undo-redo"
 import { DeferredPromise, computeHmac, isVersionSuperiorOrEqual } from "../utils"
-import { IRecognizer } from "./IRecognizer"
 import { TWSMessageEvent, TWSMessageEventContentChange, TWSMessageEventError, TWSMessageEventExport, TWSMessageEventHMACChallenge, TWSMessageEventPartChange, TWSMessageEventSVGPatch } from "./WSRecognizerMessage"
 
 /**
@@ -35,7 +34,7 @@ import { TWSMessageEvent, TWSMessageEventContentChange, TWSMessageEventError, TW
 /**
  * @group Recognizer
  */
-export class WSRecognizer implements IRecognizer
+export class WSRecognizer
 {
   #logger = LoggerManager.getLogger(LoggerClass.RECOGNIZER)
   protected serverConfiguration: TServerConfiguration
