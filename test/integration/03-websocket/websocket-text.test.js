@@ -8,7 +8,7 @@ const {
   waitEditorIdle,
   getExportsFromEditorModel
 } = require("../helper")
-const { h, helloStrikeStroke } = require("../strokesDatas")
+const { h, helloStrikeStroke, helloOneStroke } = require("../strokesDatas")
 
 describe("Websocket Text", () => {
   beforeAll(async () => {
@@ -63,6 +63,25 @@ describe("Websocket Text", () => {
       const [secondModelExports] = await Promise.all([getDatasFromExportedEvent(page), write(page, [helloStrikeStroke.strokes[1]])])
       const secondJiixExport = secondModelExports["application/vnd.myscript.jiix"]
       expect(secondJiixExport.label).not.toEqual("")
+    })
+
+    test("should work after gesture then undo-redo", async () => {
+      const configuration = await getEditorConfiguration(page)
+      configuration.recognition.gesture.enable = true
+      await setEditorConfiguration(page, configuration)
+      await waitForEditorWebSocket(page)
+      await write(page, [helloStrikeStroke.strokes[0]])
+      const [secondModelExports] = await Promise.all([getDatasFromExportedEvent(page), write(page, [helloStrikeStroke.strokes[1]])])
+      const secondJiixExport = secondModelExports["application/vnd.myscript.jiix"]
+      expect(secondJiixExport.label).toEqual("")
+      await page.click('#undo')
+      await waitEditorIdle(page)
+      const [undoRedoModelExport] = await Promise.all([getDatasFromExportedEvent(page), page.click('#redo')])
+      const undoRedoJiixExport = undoRedoModelExport["application/vnd.myscript.jiix"]
+      expect(undoRedoJiixExport.label).toEqual("")
+      const [helloModelExport] = await Promise.all([getDatasFromExportedEvent(page), write(page, helloOneStroke.strokes)])
+      const helloJiixExport = helloModelExport["application/vnd.myscript.jiix"]
+      expect(helloJiixExport.label).toEqual("hello")
     })
   })
 
