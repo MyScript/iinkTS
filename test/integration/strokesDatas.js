@@ -333,6 +333,18 @@ module.exports.sumSimple = {
   },
 }
 
+const threeScratchOutStrokes = require('./strokes/threeScratchOut.json')
+module.exports.threeScratchOut = {
+  type: 'MATH',
+  strokes: threeScratchOutStrokes,
+  exports: {
+    LATEX: ['3', '']
+  },
+  converts: {
+    LATEX: ['']
+  }
+}
+
 const parisStrokes = require("./strokes/interact/paris.json")
 module.exports.paris = {
   type: "TEXT",
