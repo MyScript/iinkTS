@@ -180,6 +180,22 @@ export type TJIIXEdgeLine = TJIIXEdgeElement & {
 /**
  * @group Model/Export
  */
+export type TJIIXEdgeArc = TJIIXEdgeElement & {
+  id: string
+  type: "Edge"
+  kind: "arc"
+  cx: number,
+  cy: number,
+  rx: number,
+  ry: number,
+  phi: number,
+  startAngle: number,
+  sweepAngle: number
+}
+
+/**
+ * @group Model/Export
+ */
 export type TJIIXExport = {
   type: string
   id: string

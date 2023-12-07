@@ -32,7 +32,7 @@ export type TCanvasShapeLineSymbol = TSymbol & {
 /**
  * @group Model/Canvas
  */
-export type TCanvasShapeTableLineSymbol = TSymbol & {
+export type TCanvasShapeTableLineSymbol = {
   p1: TPoint
   p2: TPoint
 }
@@ -47,7 +47,7 @@ export type TCanvasShapeTableSymbol = TSymbol & {
 /**
  * @group Model/Canvas
  */
-export type TUnderLineSymbol = TSymbol & {
+export type TCanvasUnderLineSymbol = TSymbol & {
   data: {
     firstCharacter: number
     lastCharacter: number
@@ -57,25 +57,20 @@ export type TUnderLineSymbol = TSymbol & {
 /**
  * @group Model/Canvas
  */
-export type TTextDataSymbol = {
-  topLeftPoint: TPoint
-  height: number
-  width: number
-  textHeight: number
-  justificationType: string
-}
-
-/**
- * @group Model/Canvas
- */
-export type TTextSymbol = TSymbol & {
+export type TCanvasTextSymbol = TSymbol & {
   label: string,
-  data: TTextDataSymbol
+  data: {
+    topLeftPoint: TPoint
+    height: number
+    width: number
+    textHeight: number
+    justificationType: string
+  }
 }
 
 /**
  * @group Model/Canvas
  */
-export type TTextUnderlineSymbol = TTextSymbol & {
-  underlineList: TUnderLineSymbol[]
+export type TCanvasTextUnderlineSymbol = TCanvasTextSymbol & {
+  underlineList: TCanvasUnderLineSymbol[]
 }

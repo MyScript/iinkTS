@@ -30,7 +30,7 @@ describe('Rest Diagram import', () => {
     expect(resultJson).toEqual(exportedDatas)
     expect(Object.keys(resultJson['application/vnd.myscript.jiix'].elements).length).toEqual(12)
     const editorEl = await page.waitForSelector('#editor')
-    const raw = await editorEl.evaluate((node) => node.editor.model.strokes)
+    const raw = await editorEl.evaluate((node) => node.editor.model.symbols)
     expect(raw.length).toEqual(40)
   })
 
@@ -55,9 +55,9 @@ describe('Rest Diagram import', () => {
 
       await Promise.all([getDatasFromExportedEvent(page), page.click('#redo')])
       expect(await page.locator('#result').textContent()).toBe('{}')
-      raw = await editorEl.evaluate((node) => node.editor.model.strokes)
+      raw = await editorEl.evaluate((node) => node.editor.model.symbols)
       expect(raw.length).toEqual(0)
-      raw = await editorEl.evaluate((node) => node.editor.model.strokes)
+      raw = await editorEl.evaluate((node) => node.editor.model.symbols)
       expect(raw.length).toEqual(0)
     })
   })

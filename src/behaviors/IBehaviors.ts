@@ -55,7 +55,7 @@ export interface IBehaviors
   redo(): Promise<IModel>
 
   waitForIdle?(): Promise<void>
-  importPointEvents(strokes: TStroke[]): Promise<IModel>
+  importPointEvents(strokes: PartialDeep<TStroke>[]): Promise<IModel>
   import?(data: Blob, mimeType?: string): Promise<IModel>
 
   clear(): Promise<IModel>

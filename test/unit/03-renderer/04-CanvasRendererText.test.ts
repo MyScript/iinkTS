@@ -1,4 +1,4 @@
-import { CanvasRendererText, DefaultPenStyle, TTextSymbol, TTextUnderlineSymbol } from "../../../src/iink"
+import { CanvasRendererText, DefaultPenStyle, TCanvasTextSymbol, TCanvasTextUnderlineSymbol } from "../../../src/iink"
 
 describe("CanvasRendererText.ts", () =>
 {
@@ -12,7 +12,10 @@ describe("CanvasRendererText.ts", () =>
 
   test("should draw text type char", () =>
   {
-    const text: TTextSymbol = {
+    const text: TCanvasTextSymbol = {
+      creationTime: Date.now(),
+      id: "id",
+      modificationDate: Date.now(),
       data: {
         height: 10,
         justificationType: "CENTER",
@@ -31,7 +34,10 @@ describe("CanvasRendererText.ts", () =>
 
   test("should draw text type string", () =>
   {
-    const text: TTextSymbol = {
+    const text: TCanvasTextSymbol = {
+      creationTime: Date.now(),
+      id: "id",
+      modificationDate: Date.now(),
       data: {
         height: 10,
         justificationType: "CENTER",
@@ -50,7 +56,10 @@ describe("CanvasRendererText.ts", () =>
 
   test("should draw text type string", () =>
   {
-    const text: TTextUnderlineSymbol = {
+    const text: TCanvasTextUnderlineSymbol = {
+      creationTime: Date.now(),
+      id: "id",
+      modificationDate: Date.now(),
       type: canvasRendererText.symbols.textLine,
       data: {
         height: 10,
@@ -63,6 +72,9 @@ describe("CanvasRendererText.ts", () =>
       style: DefaultPenStyle,
       underlineList: [
         {
+          creationTime: Date.now(),
+          id: "id",
+          modificationDate: Date.now(),
           data: {
             firstCharacter: 1,
             lastCharacter: 3

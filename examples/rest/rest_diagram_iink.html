@@ -107,14 +107,14 @@
       }
 
       function manageEditMode(withExport) {
-        if (withExport && isPreview && editor.model.strokes.length > 0) {
+        if (withExport && isPreview && editor.model.symbols.length > 0) {
           const convertParams = {
             conversionState: "DIGITAL_EDIT",
             mimeTypes: ["image/svg+xml"]
           };
           editor.convert(convertParams);
           launchLoader();
-        } else if (editor.model.strokes.length === 0) {
+        } else if (editor.model.symbols.length === 0) {
           manageEmptySvg();
         }
         const convertedSvg = document.getElementById("converted-svg");

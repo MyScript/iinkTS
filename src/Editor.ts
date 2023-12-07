@@ -34,8 +34,6 @@ export class Editor
 
   #loggerConfiguration!: TLoggerConfiguration
 
-  showStrokesPan = false
-
   constructor(wrapperHTML: HTMLElement, options: PartialDeep<TBehaviorOptions>, globalClassCss = "ms-editor")
   {
     this.#initializationDeferred = new DeferredPromise<void>()
@@ -286,27 +284,6 @@ export class Editor
     }, notif.timeout || 2500)
   }
 
-  #showStrokesIfDebug(): void
-  {
-    if (this.showStrokesPan) {
-      let panel = document.getElementById("stroke-panel")
-      const text = JSON.stringify(this.model.strokes.map((s: TStroke) => ({ pointerType: s.pointerType, pointerId: s.pointerId, pointers: s.pointers })))
-      if (!panel) {
-        panel = document.createElement("div")
-        panel.id = "stroke-panel"
-        panel.addEventListener("click", (e) =>
-        {
-          e.preventDefault()
-          e.stopPropagation()
-          navigator.clipboard.writeText(panel?.innerText as string)
-          this.#showNotif({ message: "strokes copied to clipboard!", timeout: 1500 })
-        })
-        this.wrapperHTML.appendChild(panel)
-      }
-      panel.innerText = text
-    }
-  }
-
   #addListeners(): void
   {
     this.internalEvents.addConvertListener(this.convert.bind(this))
@@ -339,7 +316,6 @@ export class Editor
         this.#smartGuide?.update(jjix)
       }
     }
-    this.#showStrokesIfDebug()
     this.events.emitExported(exports)
   }
 
@@ -370,7 +346,6 @@ export class Editor
     this.logger.info("undo")
     await this.#initializationDeferred.promise
     await this.behaviors.undo()
-    this.#showStrokesIfDebug()
     this.logger.debug("undo", this.model)
     return this.model
   }
@@ -380,7 +355,6 @@ export class Editor
     this.logger.info("redo")
     await this.#initializationDeferred.promise
     await this.behaviors.redo()
-    this.#showStrokesIfDebug()
     this.logger.debug("redo", this.model)
     return this.model
   }
@@ -391,7 +365,6 @@ export class Editor
     await this.#initializationDeferred.promise
     await this.behaviors.clear()
     this.events.emitCleared(this.model)
-    this.#showStrokesIfDebug()
     this.logger.debug("clear", this.model)
     return this.model
   }
@@ -453,7 +426,7 @@ export class Editor
     return Promise.reject("Import impossible, behaviors has no import function")
   }
 
-  async importPointEvents(strokes: TStroke[]): Promise<IModel>
+  async importPointEvents(strokes: PartialDeep<TStroke>[]): Promise<IModel>
   {
     this.logger.info("importPointEvents", { strokes })
     await this.#initializationDeferred.promise

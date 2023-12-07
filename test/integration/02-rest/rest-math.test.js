@@ -136,15 +136,15 @@ describe('Rest Math', () => {
       await waitEditorIdle(page)
 
       await Promise.all([getDatasFromExportedEvent(page), page.click('#undo')])
-      let raw = await editorEl.evaluate((node) => node.editor.model.strokes)
+      let raw = await editorEl.evaluate((node) => node.editor.model.symbols)
       expect(raw.length).toStrictEqual(equation1.strokes.length - 1)
 
       await Promise.all([getDatasFromExportedEvent(page), page.click('#undo')])
-      raw = await editorEl.evaluate((node) => node.editor.model.strokes)
+      raw = await editorEl.evaluate((node) => node.editor.model.symbols)
       expect(raw.length).toStrictEqual(equation1.strokes.length - 2)
 
       await Promise.all([getDatasFromExportedEvent(page), page.click('#redo')])
-      raw = await editorEl.evaluate((node) => node.editor.model.strokes)
+      raw = await editorEl.evaluate((node) => node.editor.model.symbols)
       expect(raw.length).toStrictEqual(equation1.strokes.length - 1)
     })
   })
