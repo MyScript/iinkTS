@@ -20,9 +20,12 @@ describe("CanvasRendererShape.ts", () =>
   test("should draw a table symbol", () =>
   {
     const table: TCanvasShapeTableSymbol = {
+      creationTime: Date.now(),
+      id: "id",
+      modificationDate: Date.now(),
       type: canvasRendererShape.symbols.table,
       style: DefaultPenStyle,
-      lines: [{ type: "line", style: DefaultPenStyle, p1, p2 }]
+      lines: [{ p1, p2 }]
     }
     canvasRendererShape.draw(canvasContext, table)
     expect(canvasContext.moveTo).toBeCalledTimes(1)
@@ -35,6 +38,9 @@ describe("CanvasRendererShape.ts", () =>
   test("should draw a ellipse symbol", () =>
   {
     const table: TCanvasShapeEllipseSymbol = {
+      creationTime: Date.now(),
+      id: "id",
+      modificationDate: Date.now(),
       type: canvasRendererShape.symbols.ellipse,
       beginTangentAngle: 0,
       centerPoint: p1,
@@ -54,6 +60,9 @@ describe("CanvasRendererShape.ts", () =>
   test("should draw a line symbol", () =>
   {
     const line: TCanvasShapeLineSymbol = {
+      creationTime: Date.now(),
+      id: "id",
+      modificationDate: Date.now(),
       firstPoint: p1,
       lastPoint: p2,
       style: DefaultPenStyle,

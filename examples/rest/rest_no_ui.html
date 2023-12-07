@@ -158,7 +158,7 @@
         // Creating a empty model
         const model = new iink.Model();
         // Filling the model with the stroke
-        model.strokes = JSON.parse(document.querySelector("#strokes").value);
+        model.symbols = iink.convertPartialStrokesToStrokes(JSON.parse(document.querySelector("#strokes").value));
         // Define exported mimeTypes
         const requestedMimeType = ["text/plain", "image/png"];
         // Triggering the recognition

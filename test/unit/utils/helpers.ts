@@ -1,4 +1,4 @@
-import { Stroke, DefaultPenStyle, TBoundingBox, TStroke } from "../../../src/iink"
+import { Stroke, DefaultPenStyle, TBoundingBox } from "../../../src/iink"
 
 export const delay = (delayInms: number) =>
 {
@@ -11,7 +11,7 @@ export function randomIntFromInterval(min: number, max: number): number
 }
 
 const defaultBox: TBoundingBox = { height: 10, width: 10, x: 1, y: 1 }
-export function buildStroke({ box = defaultBox, style = DefaultPenStyle, nbPoint = 5, pointerId = 1, pointerType = "pen" } = {}): TStroke
+export function buildStroke({ box = defaultBox, style = DefaultPenStyle, nbPoint = 5, pointerId = 1, pointerType = "pen" } = {}): Stroke
 {
   const stroke = new Stroke(style, pointerId, pointerType)
   for (let i = 0; i < nbPoint; i++) {

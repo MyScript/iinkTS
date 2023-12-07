@@ -131,25 +131,25 @@ describe('Rest Text', () => {
 
       expect(await page.locator('#result').textContent()).toStrictEqual(hello.exports['text/plain'].at(-1))
 
-      let strokes = await editorEl.evaluate((node) => node.editor.model.strokes)
+      let strokes = await editorEl.evaluate((node) => node.editor.model.symbols)
       expect(strokes.length).toStrictEqual(hello.strokes.length)
 
       await Promise.all([getDatasFromExportedEvent(page), page.click('#undo')])
       expect(await page.locator('#result').textContent()).toStrictEqual(hello.exports['text/plain'].at(-2))
 
-      strokes = await editorEl.evaluate((node) => node.editor.model.strokes)
+      strokes = await editorEl.evaluate((node) => node.editor.model.symbols)
       expect(strokes.length).toStrictEqual(hello.strokes.length - 1)
 
       await Promise.all([getDatasFromExportedEvent(page), page.click('#undo')])
       expect(await page.locator('#result').textContent()).toStrictEqual(hello.exports['text/plain'].at(-3))
 
-      strokes = await editorEl.evaluate((node) => node.editor.model.strokes)
+      strokes = await editorEl.evaluate((node) => node.editor.model.symbols)
       expect(strokes.length).toStrictEqual(hello.strokes.length - 2)
 
       await Promise.all([getDatasFromExportedEvent(page), page.click('#redo')])
       expect(await page.locator('#result').textContent()).toStrictEqual(hello.exports['text/plain'].at(-2))
 
-      strokes = await editorEl.evaluate((node) => node.editor.model.strokes)
+      strokes = await editorEl.evaluate((node) => node.editor.model.symbols)
       expect(strokes.length).toStrictEqual(hello.strokes.length - 1)
     })
 

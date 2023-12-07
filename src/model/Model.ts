@@ -4,7 +4,7 @@ import { TPenStyle } from "../style"
 import { TPoint, TPointer, computeDistance } from "../utils"
 import { TExport } from "./Export"
 import { IModel, TRecognitionPositions } from "./IModel"
-import { Stroke, TStroke } from "./Stroke"
+import { Stroke } from "./Stroke"
 
 /**
  * @group Model
@@ -13,10 +13,9 @@ export class Model implements IModel
 {
   readonly creationTime: number
   modificationDate: number
-  currentStroke?: TStroke
   positions: TRecognitionPositions
-  strokes: TStroke[]
-  selectedStrokes: TStroke[]
+  currentSymbol?: Stroke
+  symbols: Stroke[]
   exports?: TExport
   converts?: TExport
   width: number
@@ -33,8 +32,7 @@ export class Model implements IModel
     this.width = width
     this.height = height
     this.rowHeight = rowHeight
-    this.strokes = []
-    this.selectedStrokes = []
+    this.symbols = []
     this.positions = {
       lastSentPosition: 0,
       lastReceivedPosition: 0
@@ -56,7 +54,7 @@ export class Model implements IModel
     return isNaN(pressure) ? 0.5 : Math.round(pressure * 100) / 100
   }
 
-  protected filterPointByAcquisitionDelta(stroke: TStroke, point: TPointer, lastPointer: TPointer): boolean
+  protected filterPointByAcquisitionDelta(stroke: Stroke, point: TPointer, lastPointer?: TPointer): boolean
   {
     const delta: number = (2 + ((stroke.style["-myscript-pen-width"] || 0) / 4))
     return !lastPointer ||
@@ -65,13 +63,13 @@ export class Model implements IModel
       Math.abs(lastPointer.y - point.y) >= delta
   }
 
-  getStrokeFromPoint(point: TPoint): TStroke[]
+  getStrokeFromPoint(point: TPoint): Stroke[]
   {
     this.#logger.info("getStrokeFromPoint", { point })
     const isBetween = (val: number, min: number, max: number): boolean => (val >= min && val <= max)
 
-    const _strokeList: TStroke[] = []
-    this.strokes.forEach((stroke) =>
+    const _strokeList: Stroke[] = []
+    this.symbols.forEach((stroke) =>
     {
       for (let i = 0; i < stroke.pointers.length; i++) {
         const strokePointer = stroke.pointers[i]
@@ -94,12 +92,12 @@ export class Model implements IModel
     return _strokeList
   }
 
-  addPoint(stroke: TStroke, pointer: TPointer): void
+  addPoint(stroke: Stroke, pointer: TPointer): void
   {
     this.#logger.debug("addPoint", { stroke, pointer })
-    const lastPointer: TPointer = stroke.pointers.at(-1) || { p: 1, t: 0, x: 0, y: 0 }
+    const lastPointer = stroke.pointers.at(-1)
     if (this.filterPointByAcquisitionDelta(stroke, pointer, lastPointer)) {
-      const distance = computeDistance(pointer, lastPointer)
+      const distance = lastPointer ? computeDistance(pointer, lastPointer) : 0
       stroke.length += distance
       pointer.p = this.computePressure(distance, stroke.length)
       stroke.pointers.push(pointer)
@@ -107,42 +105,42 @@ export class Model implements IModel
     }
   }
 
-  addStroke(stroke: TStroke): void
+  addStroke(stroke: Stroke): void
   {
     this.#logger.info("addStroke", { stroke })
-    this.strokes.push(stroke)
+    this.symbols.push(stroke)
     this.modificationDate = Date.now()
     this.converts = undefined
     this.exports = undefined
   }
 
-  updateStroke(updatedStroke: TStroke): void
+  updateStroke(updatedStroke: Stroke): void
   {
     this.#logger.info("updateStroke", { updatedStroke })
-    const strokeIndex = this.strokes.findIndex((s: TStroke): boolean => s.id === updatedStroke.id)
+    const strokeIndex = this.symbols.findIndex((s: Stroke): boolean => s.id === updatedStroke.id)
     if (strokeIndex !== -1) {
       updatedStroke.modificationDate = Date.now()
-      this.strokes.splice(strokeIndex, 1, updatedStroke)
+      this.symbols.splice(strokeIndex, 1, updatedStroke)
       this.modificationDate = Date.now()
       this.converts = undefined
       this.exports = undefined
     }
-    this.#logger.debug("updateStroke", this.strokes)
+    this.#logger.debug("updateStroke", this.symbols)
   }
 
   removeStroke(id: string): void
   {
     this.#logger.info("removeStroke", { id })
-    const strokeIndex = this.strokes.findIndex(s => s.id === id)
+    const strokeIndex = this.symbols.findIndex(s => s.id === id)
     if (strokeIndex !== -1) {
       this.positions.lastSentPosition--
       this.positions.lastReceivedPosition--
-      this.strokes.splice(strokeIndex, 1)
+      this.symbols.splice(strokeIndex, 1)
       this.modificationDate = Date.now()
       this.converts = undefined
       this.exports = undefined
     }
-    this.#logger.debug("removeStroke", this.strokes)
+    this.#logger.debug("removeStroke", this.symbols)
   }
 
   removeStrokesFromPoint(point: TPoint): string[]
@@ -157,19 +155,9 @@ export class Model implements IModel
     return strokes.map(s => s.id)
   }
 
-  extractUnsentStrokes(): TStroke[]
+  extractUnsentStrokes(): Stroke[]
   {
-    return this.strokes.slice(this.positions.lastSentPosition)
-  }
-
-  extractDifferenceStrokes(model: IModel): { newStrokes: TStroke[], deletedStrokes: TStroke[]}
-  {
-    const newStrokes = this.strokes.filter(s1 => model.strokes.findIndex(s2 => s1.id === s2.id && s1.modificationDate === s2.modificationDate) === -1)
-    const deletedStrokes = model.strokes.filter(s1 => this.strokes.findIndex(s2 => s1.id === s2.id && s1.modificationDate === s2.modificationDate) === -1)
-    return {
-      newStrokes,
-      deletedStrokes
-    }
+    return this.symbols.slice(this.positions.lastSentPosition)
   }
 
   initCurrentStroke(point: TPointer, pointerId: number, pointerType: string, style: TPenStyle, dpi = 96): void
@@ -181,32 +169,32 @@ export class Model implements IModel
     }
     this.modificationDate = Date.now()
     this.exports = undefined
-    this.currentStroke = new Stroke(style, pointerId, pointerType)
-    this.#logger.debug("initCurrentStroke", this.currentStroke)
-    this.addPoint(this.currentStroke, point)
+    this.currentSymbol = new Stroke(style, pointerId, pointerType)
+    this.#logger.debug("initCurrentStroke", this.currentSymbol)
+    this.addPoint(this.currentSymbol, point)
   }
 
   appendToCurrentStroke(point: TPointer): void
   {
     this.#logger.info("appendToCurrentStroke", { point })
-    if (this.currentStroke) {
-      this.addPoint(this.currentStroke, point)
+    if (this.currentSymbol) {
+      this.addPoint(this.currentSymbol, point)
     }
-    this.#logger.debug("appendToCurrentStroke", this.currentStroke)
+    this.#logger.debug("appendToCurrentStroke", this.currentSymbol)
   }
 
   endCurrentStroke(point: TPointer): void
   {
     this.#logger.info("endCurrentStroke", { point })
-    if (this.currentStroke) {
-      this.addPoint(this.currentStroke, point)
-      this.addStroke(this.currentStroke)
-      this.currentStroke = undefined
+    if (this.currentSymbol) {
+      this.addPoint(this.currentSymbol, point)
+      this.addStroke(this.currentSymbol)
+      this.currentSymbol = undefined
     }
-    this.#logger.debug("endCurrentStroke", this.currentStroke)
+    this.#logger.debug("endCurrentStroke", this.currentSymbol)
   }
 
-  updatePositionSent(position: number = this.strokes.length): void
+  updatePositionSent(position: number = this.symbols.length): void
   {
     this.#logger.info("updatePositionSent", { position })
     this.positions.lastSentPosition = position
@@ -247,10 +235,11 @@ export class Model implements IModel
     this.#logger.info("getClone")
     const clonedModel = new Model(this.width, this.height, this.rowHeight, this.creationTime)
     clonedModel.modificationDate = JSON.parse(JSON.stringify(this.modificationDate))
-    clonedModel.currentStroke = this.currentStroke ? JSON.parse(JSON.stringify(this.currentStroke)) : undefined
-    clonedModel.strokes = JSON.parse(JSON.stringify(this.strokes))
+    clonedModel.currentSymbol = this.currentSymbol ? this.currentSymbol.getClone() : undefined
+    clonedModel.symbols = this.symbols.map(s => s.getClone())
     clonedModel.positions = JSON.parse(JSON.stringify(this.positions))
     clonedModel.exports = this.exports ? JSON.parse(JSON.stringify(this.exports)) : undefined
+    clonedModel.converts = this.converts ? JSON.parse(JSON.stringify(this.converts)) : undefined
     clonedModel.idle = this.idle
     this.#logger.debug("getClone", { clonedModel })
     return clonedModel
@@ -260,8 +249,8 @@ export class Model implements IModel
   {
     this.#logger.info("clear")
     this.modificationDate = Date.now()
-    this.currentStroke = undefined
-    this.strokes = []
+    this.currentSymbol = undefined
+    this.symbols = []
     this.positions.lastSentPosition = 0
     this.positions.lastReceivedPosition = 0
     this.exports = undefined

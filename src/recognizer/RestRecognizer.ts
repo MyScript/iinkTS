@@ -1,7 +1,7 @@
 import { LoggerClass, Error as ErrorConst } from "../Constants"
 import { TConverstionState, TDiagramConfiguration, TExportConfiguration, TMathConfiguration, TRawContentConfiguration, TRecognitionConfiguration, TServerConfiguration, TTextConfiguration } from "../configuration"
 import { LoggerManager } from "../logger"
-import { Model, TExport, TJIIXExport, TStrokeGroup, TStrokeGroupJSON, convertStrokeToJSON } from "../model"
+import { Model, TExport, TJIIXExport, TStrokeGroup, TStrokeGroupJSON } from "../model"
 import { StyleHelper, TPenStyle } from "../style"
 import { computeHmac, isVersionSuperiorOrEqual } from "../utils"
 
@@ -104,7 +104,7 @@ export class RestRecognizer
     }
 
     const strokeGroupByPenStyle: TStrokeGroup[] = []
-    model.strokes.forEach((s) =>
+    model.symbols.forEach((s) =>
     {
       const groupIndex = strokeGroupByPenStyle.findIndex(sg => isPenStyleEqual(sg.penStyle, s.style))
       if (groupIndex > -1) {
@@ -123,7 +123,7 @@ export class RestRecognizer
       const newPenStyle = JSON.stringify(group.penStyle) === "{}" ? undefined : StyleHelper.penStyleToCSS(group.penStyle as TPenStyle)
       const newGroup = {
         penStyle: newPenStyle,
-        strokes: group.strokes.map(convertStrokeToJSON)
+        strokes: group.strokes.map(s => s.toJSON())
       }
       strokeGroupsToSend.push(newGroup)
     })
@@ -137,7 +137,6 @@ export class RestRecognizer
       xDPI: 96,
       yDPI: 96,
       contentType,
-      // theme: StyleHelper.themeToCSS(),
       height: model.height,
       width: model.width,
       strokeGroups: strokeGroupsToSend
@@ -267,7 +266,7 @@ export class RestRecognizer
   {
     this.#logger.info("export", { model, requestedMimeTypes })
     const myModel = model.getClone()
-    if (myModel.strokes.length === 0) {
+    if (myModel.symbols.length === 0) {
       return Promise.resolve(myModel)
     }
     const mimeTypes = this.getMimeTypes(requestedMimeTypes)

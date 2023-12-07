@@ -1,8 +1,8 @@
 import { LoggerClass } from "../Constants"
 import { LoggerManager } from "../logger"
-import { TPenStyle } from "../style"
-import { TPointer, createUUID } from "../utils"
-import { TSymbol } from "./Symbol"
+import { DefaultPenStyle, TPenStyle } from "../style"
+import { PartialDeep, TPointer } from "../utils"
+import { AbstractSymbol, SymbolType, TSymbol } from "./Symbol"
 
 /**
  * @group Model
@@ -28,9 +28,6 @@ export type TStrokeGroupJSON = {
  * @group Model
  */
 export type TStroke = TSymbol & {
-  id: string
-  readonly creationTime: number
-  modificationDate: number
   pointerId: number
   pointerType: string
   pointers: TPointer[]
@@ -42,59 +39,118 @@ export type TStroke = TSymbol & {
  */
 export type TStrokeGroup = {
   penStyle: TPenStyle
-  strokes: TStroke[]
+  strokes: Stroke[]
 }
 
 /**
  * @group Model
  */
-export class Stroke implements TStroke
+export class Stroke extends AbstractSymbol implements TStroke
 {
   #logger = LoggerManager.getLogger(LoggerClass.STROKE)
 
-  id: string
-  readonly creationTime: number
-  modificationDate: number
-  type: string
   pointerId: number
   pointerType: string
   pointers: TPointer[]
   length: number
   style: TPenStyle
 
-  constructor(style: TPenStyle, pointerId: number, pointerType = "pen", type = "stroke")
+  constructor(style: TPenStyle, pointerId: number, pointerType = "pen")
   {
+    super(SymbolType.Stroke, style)
     this.#logger.info("constructor", { style, pointerId, pointerType })
-    this.creationTime = Date.now()
-    this.id = `${pointerType}-${createUUID()}`
-    this.modificationDate = this.creationTime
-    this.type = type
+
+    this.style = style
     this.pointerId = pointerId
     this.pointerType = pointerType
     this.pointers = []
-    this.style = style
     this.length = 0
+  }
+
+  getClone(): Stroke
+  {
+    const clone = new Stroke(this.style, this.pointerId, this.pointerType)
+    clone.id = this.id
+    clone.creationTime = this.creationTime
+    clone.modificationDate = this.modificationDate
+    clone.pointers = structuredClone(this.pointers)
+    clone.length = this.length
+    return clone
+  }
+
+  toJSON(): TStrokeJSON
+  {
+    const json: TStrokeJSON = {
+      id: this.id,
+      pointerType: this.pointerType,
+      p: [],
+      t: [],
+      x: [],
+      y: []
+    }
+    this.pointers.forEach(p => {
+      json.p.push(p.p)
+      json.t.push(p.t)
+      json.x.push(p.x)
+      json.y.push(p.y)
+    })
+    return json
   }
 }
 
-/**
- * @group Model
- */
-export function convertStrokeToJSON(stroke: TStroke): TStrokeJSON
+export function convertPartialStrokesToStrokes(json: PartialDeep<TStroke>[]): Stroke[]
 {
-  const json: TStrokeJSON = {
-    id: stroke.id,
-    pointerType: stroke.pointerType,
-    p: [],
-    t: [],
-    x: [],
-    y: []
-  }
-  stroke.pointers.forEach(p => {
-    json.p.push(p.p)
-    json.t.push(p.t)
-    json.x.push(p.x)
-    json.y.push(p.y)
+  const errors: string[] = []
+  const strokes: Stroke[] = []
+  json.forEach((j, ji) => {
+    let flag = true
+    const stroke = new Stroke(j.style || DefaultPenStyle, j.pointerId || 1)
+    if (j.id) stroke.id = j.id
+    if (!j.pointers?.length) {
+      errors.push(`stroke ${ji + 1} has not pointers`)
+      flag = false
+      return
+    }
+    j.pointers?.forEach((pp, pIndex) => {
+      if (!pp) {
+        errors.push(`stroke ${ji + 1} has no pointer at ${pIndex}`)
+        flag = false
+        return
+      }
+      const pointer: TPointer = {
+        p: pp.p || 1,
+        t: pp.t || pIndex,
+        x: 0,
+        y: 0
+      }
+      if (pp?.x == undefined || pp?.x == null) {
+        errors.push(`stroke ${ji + 1} has no x at pointer at ${pIndex}`)
+        flag = false
+        return
+      }
+      else {
+        pointer.x = pp.x
+      }
+      if (pp?.y == undefined || pp?.y == null) {
+        errors.push(`stroke ${ji + 1} has no y at pointer at ${pIndex}`)
+        flag = false
+        return
+      }
+      else {
+        pointer.y = pp.y
+      }
+      if (flag) {
+        stroke.pointers.push(pointer)
+      }
+    })
+    if (flag) {
+      strokes.push(stroke)
+    }
   })
-  return json
+
+  if (errors.length) {
+    throw new Error(errors.join("\n"))
+  }
+
+  return strokes
 }

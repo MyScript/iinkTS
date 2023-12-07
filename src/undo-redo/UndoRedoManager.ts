@@ -32,7 +32,7 @@ export class UndoRedoManager
     this.context.canRedo = this.context.stack.length - 1 > this.context.stackIndex
     this.context.canUndo = this.context.stackIndex > 0
     const currentModel = this.context.stack[this.context.stackIndex]
-    this.context.empty = currentModel.strokes.length === 0 && !currentModel.conversion
+    this.context.empty = currentModel.symbols.length === 0
   }
 
   addModelToStack(model: IModel): void

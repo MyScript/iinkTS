@@ -47,7 +47,7 @@ describe("RestBehaviors.ts", () =>
     rb.model.endCurrentStroke(p2)
     rb.drawCurrentStroke()
     expect(rb.renderer.drawPendingStroke).toBeCalledTimes(1)
-    expect(rb.renderer.drawPendingStroke).toBeCalledWith(rb.model.currentStroke)
+    expect(rb.renderer.drawPendingStroke).toBeCalledWith(rb.model.currentSymbol)
   })
 
   describe("updateModelRendering", () =>
@@ -191,9 +191,9 @@ describe("RestBehaviors.ts", () =>
     const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
     rb.model.initCurrentStroke(p1, 1, "pen", DefaultPenStyle)
     rb.model.endCurrentStroke(p2)
-    expect(rb.model.strokes.length).toBeGreaterThan(0)
+    expect(rb.model.symbols.length).toBeGreaterThan(0)
     const clearedModel = await rb.clear()
-    expect(rb.model.strokes).toHaveLength(0)
+    expect(rb.model.symbols).toHaveLength(0)
     expect(clearedModel).toBe(rb.model)
   })
 

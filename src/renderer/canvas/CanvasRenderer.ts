@@ -101,7 +101,7 @@ export class CanvasRenderer
   {
     this.#logger.info("drawModel", { model })
     this.context.renderingCanvasContext?.clearRect(0, 0, this.context.renderingCanvas.width, this.context.renderingCanvas.height)
-    model.strokes.forEach(symbol => this.drawSymbol(this.context.renderingCanvasContext, symbol))
+    model.symbols.forEach(symbol => this.drawSymbol(this.context.renderingCanvasContext, symbol))
     this.context.capturingCanvasContext.clearRect(0, 0, this.context.capturingCanvas.width, this.context.capturingCanvas.height)
   }
 
