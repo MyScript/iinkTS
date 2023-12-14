@@ -1,7 +1,6 @@
 import { LoggerClass } from "../../Constants"
 import { LoggerManager } from "../../logger"
-import { TSymbol, TCanvasShapeEllipseSymbol, TCanvasShapeLineSymbol, TCanvasShapeTableSymbol } from "../../model"
-import { TPoint } from "../../utils"
+import { TPoint, TCanvasShapeEllipseSymbol, TCanvasShapeLineSymbol, TCanvasShapeTableSymbol, TSymbol } from "../../primitive"
 
 /**
  * @group Renderer

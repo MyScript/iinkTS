@@ -1,7 +1,8 @@
 import { LoggerClass, Error as ErrorConst } from "../Constants"
 import { TConverstionState, TDiagramConfiguration, TExportConfiguration, TMathConfiguration, TRawContentConfiguration, TRecognitionConfiguration, TServerConfiguration, TTextConfiguration } from "../configuration"
 import { LoggerManager } from "../logger"
-import { Model, TExport, TJIIXExport, TStrokeGroup, TStrokeGroupJSON } from "../model"
+import { Model, TExport, TJIIXExport } from "../model"
+import { TStrokeGroup, TStrokeGroupJSON } from "../primitive"
 import { StyleHelper, TPenStyle } from "../style"
 import { computeHmac, isVersionSuperiorOrEqual } from "../utils"
 

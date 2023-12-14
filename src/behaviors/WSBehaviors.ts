@@ -3,12 +3,13 @@ import { Configuration, TConfiguration, TConverstionState } from "../configurati
 import { InternalEvent } from "../event"
 import { PointerEventGrabber } from "../grabber"
 import { LoggerManager } from "../logger"
-import { IModel, Model, TExport, Stroke, TStroke } from "../model"
+import { IModel, Model, TExport } from "../model"
 import { TWSMessageEventSVGPatch, WSRecognizer } from "../recognizer"
 import { WSSVGRenderer } from "../renderer"
 import { DefaultPenStyle, StyleManager, TPenStyle, TTheme } from "../style"
 import { TUndoRedoContext, UndoRedoManager } from "../undo-redo"
-import { DeferredPromise, PartialDeep, TPointer } from "../utils"
+import { DeferredPromise, PartialDeep } from "../utils"
+import { Stroke, TStroke, TPointer } from "../primitive"
 import { IBehaviors, TBehaviorOptions } from "./IBehaviors"
 
 /**

@@ -1,5 +1,5 @@
 import { TExport } from "./Export"
-import { TSymbol } from "./Symbol"
+import { TSymbol } from "../primitive"
 
 /**
  * @group Model

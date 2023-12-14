@@ -19,6 +19,8 @@ export * from "./style"
 
 export * from "./model"
 
+export * from "./primitive"
+
 export * from "./undo-redo"
 
 export * from "./event"
