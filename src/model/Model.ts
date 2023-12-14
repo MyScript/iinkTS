@@ -1,10 +1,10 @@
 import { LoggerClass } from "../Constants"
 import { LoggerManager } from "../logger"
 import { TPenStyle } from "../style"
-import { TPoint, TPointer, computeDistance } from "../utils"
+import { computeDistance } from "../utils"
 import { TExport } from "./Export"
 import { IModel, TRecognitionPositions } from "./IModel"
-import { Stroke } from "./Stroke"
+import { Stroke, TPoint, TPointer } from "../primitive"
 
 /**
  * @group Model

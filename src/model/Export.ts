@@ -1,4 +1,4 @@
-import { TBoundingBox, TPoint } from "../utils"
+import { TBoundingBox, TPoint } from "../primitive"
 
 /**
  * @group Model/Export
