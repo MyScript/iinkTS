@@ -64,7 +64,7 @@ export class OIModel implements IModel
     this.symbols.forEach(s => s.selected = false)
   }
 
-  createCurrentSymbol(tool: WriteTool, pointer: TPointer, style: TStyle, pointerId: number, pointerType: string): void
+  createCurrentSymbol(tool: WriteTool, pointer: TPointer, style: TStyle, pointerId: number, pointerType: string): TOISymbol
   {
     this.#logger.info("initCurrentStroke", { tool, pointer, style, pointerId, pointerType })
     switch (tool) {
@@ -72,7 +72,7 @@ export class OIModel implements IModel
         this.currentSymbol = new OIStroke(style, pointerId, pointerType)
         break
     }
-    this.updateCurrentSymbol(pointer)
+    return this.updateCurrentSymbol(pointer)
   }
 
   updateCurrentSymbol(pointer: TPointer): TOISymbol

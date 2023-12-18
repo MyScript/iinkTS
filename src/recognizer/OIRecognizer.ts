@@ -44,6 +44,7 @@ export class OIRecognizer
 
   protected connected?: DeferredPromise<void>
   protected initialized?: DeferredPromise<void>
+  protected ackDeferred?: DeferredPromise<void>
   protected addStrokeDeferred?: DeferredPromise<TOIMessageEventGesture | void>
   protected recognizeGestureDeferred?: DeferredPromise<TOIMessageEventGesture | void>
   protected transformStrokeDeferred?: DeferredPromise<void>
@@ -209,22 +210,24 @@ export class OIRecognizer
     this.send(params)
   }
 
-  protected manageHMACChallengeMessage(websocketMessage: TOIMessageEvent): void
+  protected async manageHMACChallengeMessage(websocketMessage: TOIMessageEvent): Promise<void>
   {
     const hmacChallengeMessage = websocketMessage as TOIMessageEventHMACChallenge
     if (hmacChallengeMessage.hmacChallenge) {
       this.send({
         type: "hmac",
-        hmac: computeHmac(hmacChallengeMessage.hmacChallenge, this.serverConfiguration.applicationKey, this.serverConfiguration.hmacKey)
+        hmac: await computeHmac(hmacChallengeMessage.hmacChallenge, this.serverConfiguration.applicationKey, this.serverConfiguration.hmacKey)
       })
     }
     if (hmacChallengeMessage.iinkSessionId) {
       this.sessionId = hmacChallengeMessage.iinkSessionId
     }
+    this.ackDeferred?.resolve()
   }
 
-  protected manageContentPackageDescriptionMessage(): void
+  protected async manageContentPackageDescriptionMessage(): Promise<void>
   {
+    await this.ackDeferred?.promise
     this.reconnectionCount = 0
 
     this.send({ ...this.recognitionConfiguration, type: "configuration" })
@@ -338,6 +341,7 @@ export class OIRecognizer
     try {
       this.connected = new DeferredPromise<void>()
       this.initialized = new DeferredPromise<void>()
+      this.ackDeferred = new DeferredPromise<void>()
       this.pingCount = 0
       this.socket = new WebSocket(this.url)
 
@@ -403,7 +407,7 @@ export class OIRecognizer
     await this.send({
       type: "addStrokes",
       processGestures,
-      strokes: strokes.map(s => s.convertToSend())
+      strokes: strokes.map(s => s.formatToSend())
     })
     return this.addStrokeDeferred?.promise
   }
@@ -419,7 +423,7 @@ export class OIRecognizer
     await this.send({
       type: "replaceStrokes",
       oldStrokeIds,
-      strokes: newStrokes.map(s => s.convertToSend())
+      strokes: newStrokes.map(s => s.formatToSend())
     })
     return this.replaceStrokeDeferred?.promise
   }
@@ -487,7 +491,7 @@ export class OIRecognizer
       type: "contextlessGesture",
       scaleX: pixelTomm,
       scaleY: pixelTomm,
-      strokes: strokes.map(s => s.convertToSend())
+      strokes: strokes.map(s => s.formatToSend())
     })
     return this.recognizeGestureDeferred?.promise
   }

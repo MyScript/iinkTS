@@ -1,5 +1,6 @@
+
 import style from "./iink.css"
-import { IBehaviors, RestBehaviors, TBehaviorOptions, WSBehaviors } from "./behaviors"
+import { IBehaviors, OIBehaviors, RestBehaviors, TBehaviorOptions, WSBehaviors } from "./behaviors"
 import { SmartGuide } from "./smartguide"
 import { DeferredPromise, PartialDeep, mergeDeep } from "./utils"
 import { LoggerManager } from "./logger"
@@ -113,6 +114,11 @@ export class Editor
         this.wrapperHTML.classList.add("erase")
         this.wrapperHTML.classList.remove("select")
         break
+      case Intention.Select:
+        this.wrapperHTML.classList.remove("draw")
+        this.wrapperHTML.classList.remove("erase")
+        this.wrapperHTML.classList.add("select")
+        break
       default:
         this.wrapperHTML.classList.add("draw")
         this.wrapperHTML.classList.remove("erase")
@@ -199,7 +205,10 @@ export class Editor
       this.#behaviors.destroy()
     }
     let defaultBehaviors: IBehaviors
-    if (options.configuration.server?.protocol === "REST") {
+    if (options.configuration.offscreen) {
+      defaultBehaviors = new OIBehaviors(options)
+    }
+    else if (options.configuration.server?.protocol === "REST") {
       defaultBehaviors = new RestBehaviors(options)
     } else {
       defaultBehaviors = new WSBehaviors(options)
