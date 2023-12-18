@@ -91,7 +91,8 @@ export const InternalEventType = {
  * @group Model/Export
  * @description List all supported MIME types for export. Please note, the MIME types supported depend on the recognition type configured
  */
-export enum ExportType {
+export enum ExportType
+{
   JIIX = "application/vnd.myscript.jiix",
   TEXT = "text/plain",
   LATEX = "application/x-latex",
@@ -163,4 +164,14 @@ export enum WriteTool
   Line = "line",
   Arrow = "arrow",
   DoubleArrow = "double-arrow",
+}
+
+/**
+ * @group Renderer
+ * @description List all svg elements roles
+ * @remarks only usable in the case of offscreen
+ */
+export enum SvgElementRole
+{
+  Guide = "guide",
 }
