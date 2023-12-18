@@ -7,7 +7,7 @@ export type TUndoRedoConfiguration = {
 }
 
 /**
- * @group Event
+ * @group Configuration
  */
 export const DefaultUndoRedoConfiguration: TUndoRedoConfiguration = {
   maxStackSize: 100

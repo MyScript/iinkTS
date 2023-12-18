@@ -26,6 +26,11 @@ export type TRawContentConfiguration = {
   "session-time"?: number
   recognition?: TRawContentRecognitionConfiguration
   eraser?: TEraserConfiguration
+  /**
+   * @description allows you to define the detected gestures
+   * @remarks only usable in the case of offscreen
+   */
+  gestures? : ("underline" | "scratch-out" | "join" | "insert" | "strike-through" | "surround")[]
 }
 
 /**
@@ -33,5 +38,9 @@ export type TRawContentConfiguration = {
  */
 export const DefaultRawContentConfiguration: TRawContentConfiguration = {
   recognition: DefaultRawContentRecognitionConfiguration,
-  eraser: DefaultEraserConfiguration
+  eraser: DefaultEraserConfiguration,
+  /**
+   * @remarks only usable in the case of offscreen
+   */
+  gestures : ["underline", "scratch-out", "join", "insert", "strike-through", "surround"]
 }
