@@ -1,0 +1,224 @@
+import { LoggerClass } from "../Constants"
+import { LoggerManager } from "../logger"
+import { DefaultStyle, TStyle } from "../style"
+import { PartialDeep, computeDistance, createUUID } from "../utils"
+import { TStroke, TStrokeJSON } from "./Stroke"
+import { TPoint, TPointer } from "./Point"
+import { Box } from "./Box"
+import { SymbolType, TOISymbol } from "./Symbol"
+import { MatrixTransform } from "../transform"
+
+/**
+ * @group Primitive
+ */
+export class OIStroke implements TStroke, TOISymbol
+{
+  #logger = LoggerManager.getLogger(LoggerClass.STROKE)
+  readonly type = SymbolType.Stroke
+
+  id: string
+  creationTime: number
+  modificationDate: number
+  transform: MatrixTransform
+  selected: boolean
+  style: TStyle
+  pointerId: number
+  pointerType: string
+  pointers: TPointer[]
+  length: number
+
+  constructor(style: TStyle, pointerId: number, pointerType = "pen")
+  {
+    this.#logger.info("constructor", { style, pointerId, pointerType })
+
+    this.id = `${ this.type }-${ createUUID() }`
+    this.creationTime = Date.now()
+    this.modificationDate = this.creationTime
+    this.style = style
+
+    this.pointerId = pointerId
+    this.pointerType = pointerType
+    this.pointers = []
+    this.length = 0
+    this.selected = false
+    this.transform = new MatrixTransform(1, 0, 0, 1, 0, 0)
+  }
+
+  get boundingBox(): Box
+  {
+    return Box.createFromPoints(this.pointers)
+  }
+
+  get SVGPath(): string
+  {
+    if (this.pointers.length < 2) return ""
+
+    const firstPoint = this.pointers[0]
+    const middlePoints = this.pointers.slice(1, -1)
+    const lastPoint = this.pointers.at(-1) as TPoint
+
+    const startPathMoveTo = `M ${ firstPoint.x } ${ firstPoint.y }`
+
+    const middlePathQuadratic = middlePoints.length ? middlePoints.reduce((acc, point) => `${ acc } ${ point.x } ${ point.y }`, "Q") : ""
+
+    const endPathLineTo = `L ${ lastPoint.x } ${ lastPoint.y }`
+
+    return `${ startPathMoveTo } ${ middlePathQuadratic } ${ endPathLineTo }`
+  }
+
+  get getSVGPathElement(): SVGPathElement
+  {
+    const el = document.createElementNS("http://www.w3.org/2000/svg", "path")
+    el.setAttribute("id", this.id)
+    el.setAttribute("type", "stroke")
+
+    el.setAttribute("vector-effect", "non-scaling-stroke")
+    el.setAttribute("stroke-linecap", "round")
+    el.setAttribute("stroke-linejoin", "round")
+
+    if (this.pointerType === "eraser") {
+      el.setAttribute("stroke-width", "20")
+      el.setAttribute("stroke", "grey")
+      el.setAttribute("opacity", "0.2")
+      el.setAttribute("shadowBlur", "5")
+      el.setAttribute("fill", "transparent")
+    }
+    else {
+      el.setAttribute("stroke", this.style.color || "black")
+      el.setAttribute("stroke-width", this.style.width?.toString() || "1")
+      el.setAttribute("fill", "transparent")
+    }
+    el.setAttribute("d", `${ this.SVGPath }`)
+    return el
+  }
+
+  protected computePressure(distance: number): number
+  {
+    let ratio = 1.0
+    if (distance === this.length) {
+      ratio = 1.0
+    } else if (distance < 10) {
+      ratio = 0.2 + Math.pow(0.1 * distance, 0.4)
+    } else if (distance > this.length - 10) {
+      ratio = 0.2 + Math.pow(0.1 * (this.length - distance), 0.4)
+    }
+    const pressure = ratio * Math.max(0.1, 1.0 - (0.1 * Math.sqrt(distance)))
+    return isNaN(pressure) ? 0.5 : Math.round(pressure * 100) / 100
+  }
+
+  protected filterPointByAcquisitionDelta(point: TPointer): boolean
+  {
+    const lastPointer = this.pointers.at(-1)
+    const delta: number = (2 + ((this.style.width || 1) / 4))
+    return !lastPointer ||
+      Math.abs(lastPointer.x - point.x) >= delta ||
+      Math.abs(lastPointer.y - point.y) >= delta
+  }
+
+  addPointer(pointer: TPointer): void
+  {
+    this.#logger.debug("addPoint", { pointer })
+    if (this.filterPointByAcquisitionDelta(pointer)) {
+      const lastPointer = this.pointers.at(-1)
+      const distance = lastPointer ? computeDistance(pointer, lastPointer) : 0
+      this.length += distance
+      pointer.p = this.computePressure(distance)
+      this.pointers.push(pointer)
+      this.modificationDate = Date.now()
+    }
+  }
+
+  getClone(): OIStroke
+  {
+    const clone = new OIStroke(this.style, this.pointerId, this.pointerType)
+    clone.id = this.id
+    clone.creationTime = this.creationTime
+    clone.modificationDate = this.modificationDate
+    clone.pointers = structuredClone(this.pointers)
+    clone.length = this.length
+    return clone
+  }
+
+  toJSON(): TStrokeJSON
+  {
+    const json: TStrokeJSON = {
+      id: this.id,
+      pointerType: this.pointerType,
+      p: [],
+      t: [],
+      x: [],
+      y: []
+    }
+    this.pointers.forEach(p =>
+    {
+      json.p.push(p.p)
+      json.t.push(p.t)
+      json.x.push(p.x)
+      json.y.push(p.y)
+    })
+    return json
+  }
+}
+
+/**
+ * @group Primitive
+ * @group Utils
+ */
+export function convertPartialStrokesToOIStrokes(json: PartialDeep<TStroke>[]): OIStroke[]
+{
+  const errors: string[] = []
+  const strokes: OIStroke[] = []
+  json.forEach((j, ji) =>
+  {
+    let flag = true
+    const stroke = new OIStroke(j.style || DefaultStyle, j.pointerId || 1)
+    if (j.id) stroke.id = j.id
+    if (!j.pointers?.length) {
+      errors.push(`stroke ${ ji + 1 } has not pointers`)
+      flag = false
+      return
+    }
+    j.pointers?.forEach((pp, pIndex) =>
+    {
+      if (!pp) {
+        errors.push(`stroke ${ ji + 1 } has no pointer at ${ pIndex }`)
+        flag = false
+        return
+      }
+      const pointer: TPointer = {
+        p: pp.p || 1,
+        t: pp.t || pIndex,
+        x: 0,
+        y: 0
+      }
+      if (pp?.x == undefined || pp?.x == null) {
+        errors.push(`stroke ${ ji + 1 } has no x at pointer at ${ pIndex }`)
+        flag = false
+        return
+      }
+      else {
+        pointer.x = pp.x
+      }
+      if (pp?.y == undefined || pp?.y == null) {
+        errors.push(`stroke ${ ji + 1 } has no y at pointer at ${ pIndex }`)
+        flag = false
+        return
+      }
+      else {
+        pointer.y = pp.y
+      }
+      if (flag) {
+        stroke.addPointer(pointer)
+      }
+    })
+    if (flag) {
+      strokes.push(stroke)
+    }
+  })
+
+  if (errors.length) {
+    throw new Error(errors.join("\n"))
+  }
+
+  return strokes
+}
