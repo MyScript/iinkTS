@@ -9,3 +9,11 @@ export type TStyle = {
   width?: number
   fill?: string
 }
+
+/**
+ * @group Style
+ */
+export const DefaultStyle: TStyle = {
+  color: "#000000",
+  width: 1
+} as const

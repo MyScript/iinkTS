@@ -1,4 +1,6 @@
+export * from "./Box"
 export * from "./CanvasSymbol"
+export * from "./OIStroke"
 export * from "./Point"
 export * from "./Stroke"
 export * from "./Symbol"

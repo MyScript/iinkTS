@@ -1,17 +1,18 @@
 import { TStyle } from "../style"
-import { createUUID } from "../utils"
+import { TBoundingBox } from "./Box"
 
-export const enum SymbolType
+export enum SymbolType
 {
   Stroke = "stroke",
   Shape = "shape",
+  Edge = "edge",
   Text = "text"
 }
 
 /**
  * @group Primitive
  */
-export type TSymbol = {
+export interface TSymbol {
   id: string
   creationTime: number
   modificationDate: number
@@ -19,25 +20,12 @@ export type TSymbol = {
   style: TStyle
 }
 
-/**
- * @group Primitive
- */
-export abstract class AbstractSymbol
+
+export interface TOISymbol extends TSymbol
 {
-  id: string
-  creationTime: number
-  modificationDate: number
+  selected: boolean
   type: SymbolType
-  style: TStyle
-
-  constructor(type: SymbolType, style: TStyle)
-  {
-    this.creationTime = Date.now()
-    this.id = `${type}-${createUUID()}`
-    this.modificationDate = this.creationTime
-    this.type = type
-    this.style = style
-  }
-
-  abstract getClone(): AbstractSymbol
+  get boundingBox(): TBoundingBox
+  get getSVGPathElement(): SVGPathElement
+  getClone(): TOISymbol
 }

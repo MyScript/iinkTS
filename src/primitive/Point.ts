@@ -22,13 +22,3 @@ export type TSegment = {
   p1: TPoint
   p2: TPoint
 }
-
-/**
- * @group Primitive
- */
-export type TBoundingBox = {
-  x: number,
-  y: number,
-  width: number,
-  height: number
-}
