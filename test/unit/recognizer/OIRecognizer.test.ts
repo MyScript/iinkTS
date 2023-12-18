@@ -287,7 +287,7 @@ describe("OIRecognizer.ts", () =>
       const messageSent = JSON.parse(mockServer.messages[mockServer.messages.length - 1] as string)
       const messageSentExpected = {
         type: "addStrokes",
-        strokes: strokes.map(s => s.convertToSend())
+        strokes: strokes.map(s => s.formatToSend())
       }
       await expect(messageSent).toMatchObject(messageSentExpected)
     })

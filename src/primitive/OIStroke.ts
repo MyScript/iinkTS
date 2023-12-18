@@ -2,7 +2,7 @@ import { LoggerClass } from "../Constants"
 import { LoggerManager } from "../logger"
 import { DefaultStyle, TStyle } from "../style"
 import { PartialDeep, computeDistance, createUUID } from "../utils"
-import { TStroke, TStrokeJSON } from "./Stroke"
+import { TStroke, TStrokeToSend } from "./Stroke"
 import { TPoint, TPointer } from "./Point"
 import { Box } from "./Box"
 import { SymbolType, TOISymbol } from "./Symbol"
@@ -139,9 +139,9 @@ export class OIStroke implements TStroke, TOISymbol
     return clone
   }
 
-  formatToSend(): TStrokeJSON
+  formatToSend(): TStrokeToSend
   {
-    const json: TStrokeJSON = {
+    const json: TStrokeToSend = {
       id: this.id,
       pointerType: this.pointerType,
       p: [],
