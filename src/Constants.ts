@@ -91,7 +91,7 @@ export const InternalEventType = {
  * @group Model/Export
  * @description List all supported MIME types for export. Please note, the MIME types supported depend on the recognition type configured
  */
-export const enum ExportType {
+export enum ExportType {
   JIIX = "application/vnd.myscript.jiix",
   TEXT = "text/plain",
   LATEX = "application/x-latex",
@@ -105,17 +105,21 @@ export const enum ExportType {
  * @group Editor
  * @description List the possibilities of interactions
  */
-export const enum Intention
+export enum Intention
 {
   Write = "write",
   Erase = "erase",
+  /**
+   * @remarks only usable in the case of offscreen
+   */
+  Select = "select"
 }
 
 /**
  * @group Constants
  * @group Logger
  */
-export const enum LoggerLevel
+export enum LoggerLevel
 {
   DEBUG = "1",
   INFO = "2",
@@ -127,7 +131,7 @@ export const enum LoggerLevel
  * @group Constants
  * @group Logger
  */
-export const enum LoggerClass
+export enum LoggerClass
 {
   EDITOR = "EDITOR",
   RECOGNIZER = "RECOGNIZER",
@@ -142,4 +146,21 @@ export const enum LoggerClass
   UNDO_REDO = "UNDO_REDO",
   STROKE = "STROKE",
   INTERNAL_EVENT = "INTERNAL_EVENT"
+}
+
+/**
+ * @group Constants
+ * @group Editor
+ * @description List all the shapes that can be drawn
+ * @remarks only usable in the case of offscreen
+ */
+export enum WriteTool
+{
+  Pencil = "pencil",
+  Rectangle = "rectangle",
+  Circle = "circle",
+  Triangle = "triangle",
+  Line = "line",
+  Arrow = "arrow",
+  DoubleArrow = "double-arrow",
 }
