@@ -139,7 +139,7 @@ export class OIStroke implements TStroke, TOISymbol
     return clone
   }
 
-  toJSON(): TStrokeJSON
+  formatToSend(): TStrokeJSON
   {
     const json: TStrokeJSON = {
       id: this.id,
