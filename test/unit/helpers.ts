@@ -1,4 +1,4 @@
-import { Stroke, DefaultPenStyle, TBoundingBox, OIStroke } from "../../src/iink"
+import { Stroke, DefaultPenStyle, TBoundingBox, OIStroke, DefaultStyle } from "../../src/iink"
 
 export const delay = (delayInms: number) =>
 {
@@ -26,7 +26,7 @@ export function buildStroke({ box = defaultBox, style = DefaultPenStyle, nbPoint
   return stroke
 }
 
-export function buildOIStroke({ box = defaultBox, style = DefaultPenStyle, nbPoint = 5, pointerId = 1, pointerType = "pen" } = {}): OIStroke
+export function buildOIStroke({ box = defaultBox, style = DefaultStyle, nbPoint = 5, pointerId = 1, pointerType = "pen" } = {}): OIStroke
 {
   const stroke = new OIStroke(style, pointerId, pointerType)
   for (let i = 0; i < nbPoint; i++) {

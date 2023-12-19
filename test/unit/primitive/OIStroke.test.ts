@@ -90,7 +90,7 @@ describe("OIStroke.ts", () =>
 
   describe("Properties", () =>
   {
-    test("should get boundingBox when no pointers", () =>
+    test("should get boundingBox without pointers", () =>
     {
       const stroke = new OIStroke(DefaultStyle, 1)
       expect(stroke.boundingBox.height).toEqual(0)
@@ -98,7 +98,7 @@ describe("OIStroke.ts", () =>
       expect(stroke.boundingBox.x).toEqual(0)
       expect(stroke.boundingBox.y).toEqual(0)
     })
-    test("should get boundingBox when no pointers", () =>
+    test("should get boundingBox with pointers", () =>
     {
       const stroke = new OIStroke(DefaultStyle, 1)
       stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
@@ -108,69 +108,25 @@ describe("OIStroke.ts", () =>
       expect(stroke.boundingBox.x).toEqual(1)
       expect(stroke.boundingBox.y).toEqual(1)
     })
-    test("should get SVGPath when no pointers", () =>
-    {
-      const stroke = new OIStroke(DefaultStyle, 1)
-      expect(stroke.SVGPath).toEqual("")
-    })
-    test("should get SVGPath when 2 pointers", () =>
-    {
-      const stroke = new OIStroke(DefaultStyle, 1)
-      stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
-      stroke.pointers.push({ p: 1, t: 1, x: 10, y: 1 })
-      expect(stroke.SVGPath).toEqual("M 1 1  L 10 1")
-    })
-    test("should get SVGPath when mote than 2 pointers", () =>
+  })
+
+  describe("convertToSend", () =>
+  {
+    test("should return clone", () =>
     {
       const stroke = new OIStroke(DefaultStyle, 1)
       stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
-      stroke.pointers.push({ p: 1, t: 1, x: 5, y: 5 })
-      stroke.pointers.push({ p: 1, t: 1, x: 7, y: 5 })
-      stroke.pointers.push({ p: 1, t: 1, x: 10, y: 1 })
-      expect(stroke.SVGPath).toEqual("M 1 1 Q 5 5 7 5 L 10 1")
-    })
-    test("should get getSVGPathElement with default style", () =>
-    {
-      const stroke = new OIStroke(DefaultStyle, 1)
-      stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
-      stroke.pointers.push({ p: 1, t: 1, x: 5, y: 5 })
-      stroke.pointers.push({ p: 1, t: 1, x: 7, y: 5 })
-      stroke.pointers.push({ p: 1, t: 1, x: 10, y: 1 })
-      const pathEl = stroke.getSVGPathElement
-      expect(pathEl.getAttribute("id")).toEqual(stroke.id)
-      expect(pathEl.getAttribute("type")).toEqual("stroke")
-      expect(pathEl.getAttribute("stroke")).toEqual(DefaultStyle.color)
-      expect(pathEl.getAttribute("stroke-width")).toEqual(DefaultStyle.width?.toString())
-    })
-    test("should get getSVGPathElement with custom style", () =>
-    {
-      const style: TStyle = {
-        color: "blue",
-        width: 20
-      }
-      const stroke = new OIStroke(style, 1)
-      stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
-      stroke.pointers.push({ p: 1, t: 1, x: 5, y: 5 })
-      stroke.pointers.push({ p: 1, t: 1, x: 7, y: 5 })
-      stroke.pointers.push({ p: 1, t: 1, x: 10, y: 1 })
-      const pathEl = stroke.getSVGPathElement
-      expect(pathEl.getAttribute("id")).toEqual(stroke.id)
-      expect(pathEl.getAttribute("type")).toEqual("stroke")
-      expect(pathEl.getAttribute("stroke")).toEqual(style.color)
-      expect(pathEl.getAttribute("stroke-width")).toEqual(style.width?.toString())
-    })
-    test("should get getSVGPathElement for eraser", () =>
-    {
-      const stroke = new OIStroke(DefaultStyle, 1, "eraser")
-      stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
-      stroke.pointers.push({ p: 1, t: 1, x: 5, y: 5 })
-      stroke.pointers.push({ p: 1, t: 1, x: 7, y: 5 })
-      stroke.pointers.push({ p: 1, t: 1, x: 10, y: 1 })
-      const pathEl = stroke.getSVGPathElement
-      expect(pathEl.getAttribute("id")).toEqual(stroke.id)
-      expect(pathEl.getAttribute("type")).toEqual("stroke")
-      expect(pathEl.getAttribute("stroke")).toEqual("grey")
-      expect(pathEl.getAttribute("stroke-width")).toEqual("20")
+      stroke.pointers.push({ p: 1, t: 1, x: 11, y: 11 })
+
+      const jsonToSend = stroke.convertToSend()
+      expect(jsonToSend).toEqual({
+        id: stroke.id,
+        pointerType: stroke.pointerType,
+        x: stroke.pointers.map(s => s.x),
+        y: stroke.pointers.map(s => s.y),
+        t: stroke.pointers.map(s => s.t),
+        p: stroke.pointers.map(s => s.p)
+      })
     })
   })
 

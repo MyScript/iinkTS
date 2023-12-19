@@ -1,7 +1,8 @@
 import { LoggerClass, SvgElementRole } from "../../Constants"
 import { TRenderingConfiguration } from "../../configuration"
 import { LoggerManager } from "../../logger"
-import { TOISymbol, TPoint } from "../../primitive"
+import { OIStroke, SymbolType, TOISymbol, TPoint } from "../../primitive"
+import { OISVGRendererStroke } from "./OISVGRendererStroke"
 import { createCircle, createGroup, createLayer, createLine } from "./SVGElementBuilder"
 
 const NO_SELECTION = "pointer-events: none; -webkit-touch-callout: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;"
@@ -17,6 +18,7 @@ export class OISVGRenderer
   configuration: TRenderingConfiguration
   parent!: HTMLElement
   layer!: SVGElement
+  strokeRenderer: OISVGRendererStroke
 
   verticalGuides: number[] = []
   horizontalGuides: number[] = []
@@ -26,19 +28,10 @@ export class OISVGRenderer
   {
     this.#logger.info("constructor", { configuration })
     this.configuration = configuration
+    this.strokeRenderer = new OISVGRendererStroke()
   }
 
-  init(element: HTMLElement): void
-  {
-    this.#logger.info("init", { element })
-    this.parent = element
-    this.#initLayer()
-    if (this.configuration.guides.enable) {
-      this.#drawGuides()
-    }
-  }
-
-  #initLayer(): void
+  protected initLayer(): void
   {
     const width = Math.max(this.configuration.minWidth, this.parent.clientWidth)
     const height = Math.max(this.configuration.minHeight, this.parent.clientHeight)
@@ -49,7 +42,7 @@ export class OISVGRenderer
     this.parent.appendChild(this.layer)
   }
 
-  #drawGuides(): void
+  protected drawGuides(): void
   {
     this.verticalGuides = []
     this.horizontalGuides = []
@@ -118,23 +111,49 @@ export class OISVGRenderer
     this.layer.appendChild(guidesGroup)
   }
 
-  #removeGuides(): void
+  protected removeGuides(): void
   {
     this.verticalGuides = []
     this.horizontalGuides = []
     this.layer.querySelector(`#${ this.#groupGuidesId }`)?.remove()
   }
 
+  init(element: HTMLElement): void
+  {
+    this.#logger.info("init", { element })
+    this.parent = element
+    this.initLayer()
+    if (this.configuration.guides.enable) {
+      this.drawGuides()
+    }
+  }
+
+  getSymbolElement(symbol: TOISymbol): SVGGeometryElement | undefined
+  {
+    switch(symbol.type) {
+      case SymbolType.Stroke:
+        return this.strokeRenderer.getSVGElement(symbol as OIStroke)
+      case SymbolType.Shape:
+      case SymbolType.Edge:
+      case SymbolType.Text:
+      default:
+        this.#logger.warn("getSymbolElement", `symbol type is unknow: "${symbol.type}"`)
+        return
+    }
+  }
+
   drawSymbol(symbol: TOISymbol): void
   {
     this.#logger.debug("drawSymbol", { symbol })
     const oldNode = this.layer.querySelector(`#${ symbol?.id }`)
-    if (oldNode) {
-      const el = symbol.getSVGPathElement
-      oldNode.replaceWith(el)
-    }
-    else {
-      this.layer.appendChild(symbol.getSVGPathElement)
+    const svgEl = this.getSymbolElement(symbol)
+    if (svgEl) {
+      if (oldNode) {
+        oldNode.replaceWith(svgEl)
+      }
+      else {
+        this.layer.appendChild(svgEl)
+      }
     }
   }
 
@@ -150,12 +169,12 @@ export class OISVGRenderer
   resize(height: number, width: number): void
   {
     this.#logger.info("resize", { height, width })
-    this.#removeGuides()
+    this.removeGuides()
     this.layer.setAttribute("width", `${ width }px`)
     this.layer.setAttribute("height", `${ height }px`)
     this.layer.setAttribute("viewBox", `0, 0, ${ width }, ${ height }`)
     if (this.configuration.guides.enable) {
-      this.#drawGuides()
+      this.drawGuides()
     }
   }
 
@@ -178,7 +197,7 @@ export class OISVGRenderer
       this.layer.firstChild.remove()
     }
     if (this.configuration.guides.enable) {
-      this.#drawGuides()
+      this.drawGuides()
     }
   }
 
