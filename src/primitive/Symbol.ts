@@ -26,6 +26,5 @@ export interface TOISymbol extends TSymbol
   selected: boolean
   type: SymbolType
   get boundingBox(): TBoundingBox
-  get getSVGPathElement(): SVGPathElement
   getClone(): TOISymbol
 }

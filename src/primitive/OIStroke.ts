@@ -3,7 +3,7 @@ import { LoggerManager } from "../logger"
 import { DefaultStyle, TStyle } from "../style"
 import { PartialDeep, computeDistance, createUUID } from "../utils"
 import { TStroke, TStrokeToSend } from "./Stroke"
-import { TPoint, TPointer } from "./Point"
+import { TPointer } from "./Point"
 import { Box } from "./Box"
 import { SymbolType, TOISymbol } from "./Symbol"
 import { MatrixTransform } from "../transform"
@@ -47,49 +47,6 @@ export class OIStroke implements TStroke, TOISymbol
   get boundingBox(): Box
   {
     return Box.createFromPoints(this.pointers)
-  }
-
-  get SVGPath(): string
-  {
-    if (this.pointers.length < 2) return ""
-
-    const firstPoint = this.pointers[0]
-    const middlePoints = this.pointers.slice(1, -1)
-    const lastPoint = this.pointers.at(-1) as TPoint
-
-    const startPathMoveTo = `M ${ firstPoint.x } ${ firstPoint.y }`
-
-    const middlePathQuadratic = middlePoints.length ? middlePoints.reduce((acc, point) => `${ acc } ${ point.x } ${ point.y }`, "Q") : ""
-
-    const endPathLineTo = `L ${ lastPoint.x } ${ lastPoint.y }`
-
-    return `${ startPathMoveTo } ${ middlePathQuadratic } ${ endPathLineTo }`
-  }
-
-  get getSVGPathElement(): SVGPathElement
-  {
-    const el = document.createElementNS("http://www.w3.org/2000/svg", "path")
-    el.setAttribute("id", this.id)
-    el.setAttribute("type", "stroke")
-
-    el.setAttribute("vector-effect", "non-scaling-stroke")
-    el.setAttribute("stroke-linecap", "round")
-    el.setAttribute("stroke-linejoin", "round")
-
-    if (this.pointerType === "eraser") {
-      el.setAttribute("stroke-width", "20")
-      el.setAttribute("stroke", "grey")
-      el.setAttribute("opacity", "0.2")
-      el.setAttribute("shadowBlur", "5")
-      el.setAttribute("fill", "transparent")
-    }
-    else {
-      el.setAttribute("stroke", this.style.color || "black")
-      el.setAttribute("stroke-width", this.style.width?.toString() || "1")
-      el.setAttribute("fill", "transparent")
-    }
-    el.setAttribute("d", `${ this.SVGPath }`)
-    return el
   }
 
   protected computePressure(distance: number): number

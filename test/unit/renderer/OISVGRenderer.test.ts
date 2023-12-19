@@ -105,29 +105,31 @@ describe("OISVGRenderer.ts", () =>
     renderer.init(divElement)
     const stroke = buildOIStroke()
 
-    test("should draw new symbol", () =>
+    test("should draw new stroke", () =>
     {
       renderer.drawSymbol(stroke)
-      const strokeEl = divElement.querySelector(`#${stroke.id}`)
-      expect(strokeEl).toBeDefined()
-      expect(strokeEl).toEqual(stroke.getSVGPathElement)
-    })
+      const el = divElement.querySelector(`#${stroke.id}`)!
+      expect(el).toBeDefined()
+      expect(el.getAttribute("id")).toEqual(stroke.id)
+      expect(el.getAttribute("type")).toEqual("stroke")
+      expect(el.getAttribute("stroke")).toEqual(stroke.style.color)
+      expect(el.getAttribute("stroke-width")).toEqual(stroke.style.width?.toString())
 
-    test("should replace symbol", () =>
+    })
+    test("should replace stroke", () =>
     {
-      const oldEl = stroke.getSVGPathElement
+      const oldEl = divElement.querySelector(`#${stroke.id}`)!
       stroke.addPointer({ x : 20, y: 50, p: 1, t: 1})
       renderer.drawSymbol(stroke)
-      const strokeEl = divElement.querySelector(`#${stroke.id}`)
-      expect(strokeEl).toBeDefined()
-      expect(strokeEl).toEqual(stroke.getSVGPathElement)
-      expect(oldEl).not.toEqual(stroke.getSVGPathElement)
+      const el = divElement.querySelector(`#${stroke.id}`)!
+      expect(el).toBeDefined()
+      expect(oldEl).not.toEqual(el)
     })
-    test("should replace symbol", () =>
+    test("should removeSymbol stroke", () =>
     {
       renderer.removeSymbol(stroke.id)
-      const strokeEl = divElement.querySelector(`#${stroke.id}`)
-      expect(strokeEl).toBeNull()
+      const el = divElement.querySelector(`#${stroke.id}`)!
+      expect(el).toBeNull()
     })
   })
 
