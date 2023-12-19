@@ -1,10 +1,10 @@
-import { LoggerClass } from "../Constants"
+import { LoggerClass, SELECTION_MARGIN } from "../Constants"
 import { LoggerManager } from "../logger"
 import { DefaultStyle, TStyle } from "../style"
 import { PartialDeep, computeDistance, createUUID } from "../utils"
 import { TStroke, TStrokeToSend } from "./Stroke"
-import { TPointer } from "./Point"
-import { Box } from "./Box"
+import { TPoint, TPointer } from "./Point"
+import { Box, TBoundingBox } from "./Box"
 import { SymbolType, TOISymbol } from "./Symbol"
 import { MatrixTransform } from "../transform"
 
@@ -83,6 +83,23 @@ export class OIStroke implements TStroke, TOISymbol
       this.pointers.push(pointer)
       this.modificationDate = Date.now()
     }
+  }
+
+  hasPointInsideBounds(box: TBoundingBox): boolean
+  {
+    return this.pointers.some(p =>
+    {
+      return p.x >= box.x && p.x <= box.x + box.width
+        && p.y >= box.y && p.y <= box.y + box.height
+    })
+  }
+
+  isCloseToPoint(point: TPoint): boolean
+  {
+    return this.pointers.some(pointer =>
+    {
+      return computeDistance(point, pointer) < SELECTION_MARGIN
+    })
   }
 
   getClone(): OIStroke

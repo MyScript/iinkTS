@@ -148,6 +148,8 @@ export class OIBehaviors implements IBehaviors
     switch (this.#intention) {
       case Intention.Erase:
         this.drawSymbol(this.model.createCurrentSymbol(this.writeTool, pointer, this.currentPenStyle, evt.pointerId, "eraser"))
+        this.model.selectedSymbolsFromPoint(pointer)
+        this.model.selection.map(s => this.drawSymbol(s))
         break
       case Intention.Select:
         break
@@ -163,6 +165,8 @@ export class OIBehaviors implements IBehaviors
     switch (this.#intention) {
       case Intention.Erase:
         this.drawSymbol(this.model.updateCurrentSymbol(pointer))
+        this.model.selectedSymbolsFromPoint(pointer)
+        this.model.selection.map(s => this.drawSymbol(s))
         break
       case Intention.Select:
         break

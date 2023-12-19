@@ -12,8 +12,6 @@ import
   TExport
 } from "../../../src/iink"
 
-
-
 describe("OIModel.ts", () =>
 {
   const width = 100, height = 100, rowHeight = 10
@@ -58,6 +56,15 @@ describe("OIModel.ts", () =>
       expect(_model.currentSymbol).toBeDefined()
       expect(_model.currentSymbol?.style.color).toBe(style.color)
       expect(_model.currentSymbol?.style.width).toBe(style.width)
+    })
+    test("should write error if symbol type unknow when createCurrentSymbol", () =>
+    {
+      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
+      const style: TStyle = { color: "red", width: 42 }
+      //@ts-ignore
+      model.createCurrentSymbol("unknow", point, style, 42, "mouse")
+      expect(console.error).toHaveBeenCalledTimes(1)
+      expect(console.error).toHaveBeenCalledWith({ "error": ["Can't create symbol, tool is unknow: \"unknow\""], "from": "MODEL.createCurrentSymbol" })
     })
     test("should updateCurrentSymbol", () =>
     {
@@ -106,7 +113,7 @@ describe("OIModel.ts", () =>
       const updatedSymb = structuredClone(symb)
       updatedSymb.style.color = "yellow"
       updatedSymb.style.width = 25
-      updatedSymb.pointers.push({ p: 1, t: 20, x: 42, y: 31})
+      updatedSymb.pointers.push({ p: 1, t: 20, x: 42, y: 31 })
       model.updateSymbol(updatedSymb)
       expect(model.symbols[0]).not.toEqual(symb)
       expect(model.symbols[0]).toEqual(updatedSymb)
@@ -119,7 +126,7 @@ describe("OIModel.ts", () =>
       updatedSymb2.id = "not-exist"
       updatedSymb2.style.color = "yellow"
       updatedSymb2.style.width = 25
-      updatedSymb2.pointers.push({ p: 1, t: 20, x: 42, y: 31})
+      updatedSymb2.pointers.push({ p: 1, t: 20, x: 42, y: 31 })
       model.updateSymbol(updatedSymb2)
       expect(model.symbols[1]).toEqual(symb2)
     })
@@ -140,9 +147,9 @@ describe("OIModel.ts", () =>
   describe("selection", () =>
   {
     const model = new OIModel(27, 5)
-    const stroke1 = buildOIStroke()
+    const stroke1 = buildOIStroke({ box: { height: 10, width: 10, x: 0, y: 0 } })
     model.addSymbol(stroke1)
-    const stroke2 = buildOIStroke()
+    const stroke2 = buildOIStroke({ box: { height: 10, width: 10, x: 20, y: 0 } })
     model.addSymbol(stroke2)
     test("should select stroke when point on stroke", () =>
     {
@@ -169,6 +176,27 @@ describe("OIModel.ts", () =>
       model.resetSelection()
       expect(model.selection).toHaveLength(0)
     })
+    test("should select stroke when point close", () =>
+    {
+      expect(model.selection).toHaveLength(0)
+      const point = JSON.parse(JSON.stringify(stroke1.pointers[0]))
+      point.x += 1
+      point.y += 1
+      model.selectedSymbolsFromPoint(point)
+      expect(model.selection).toHaveLength(1)
+      expect(model.selection[0].id).toEqual(stroke1.id)
+    })
+    test("should not select the stroke when the point is far away", () =>
+    {
+      model.resetSelection()
+      expect(model.selection).toHaveLength(0)
+      const point = JSON.parse(JSON.stringify(stroke1.pointers[0]))
+      point.x += 1000
+      point.y += 1000
+      model.selectedSymbolsFromPoint(point)
+      expect(model.selection).toHaveLength(0)
+    })
+
   })
 
   describe("positions", () =>

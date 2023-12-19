@@ -1,5 +1,6 @@
 import { TStyle } from "../style"
 import { TBoundingBox } from "./Box"
+import { TPoint } from "./Point"
 
 export enum SymbolType
 {
@@ -26,5 +27,7 @@ export interface TOISymbol extends TSymbol
   selected: boolean
   type: SymbolType
   get boundingBox(): TBoundingBox
+  hasPointInsideBounds(box: TBoundingBox): boolean
+  isCloseToPoint(point: TPoint): boolean
   getClone(): TOISymbol
 }

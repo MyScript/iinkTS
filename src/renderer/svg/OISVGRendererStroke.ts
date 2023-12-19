@@ -1,7 +1,16 @@
 import { OIStroke, TPointer } from "../../primitive"
+import { DefaultStyle } from "../../style"
+import { createPath } from "./SVGElementBuilder"
 
 export class OISVGRendererStroke
 {
+  selectionFilterId: string
+
+  constructor(selectionFilterId: string)
+  {
+    this.selectionFilterId = selectionFilterId
+  }
+
   getSVGPath(stroke: OIStroke): string
   {
     if (stroke.pointers.length < 2) return ""
@@ -20,26 +29,33 @@ export class OISVGRendererStroke
 
   getSVGElement(stroke: OIStroke): SVGPathElement
   {
-    const el = document.createElementNS("http://www.w3.org/2000/svg", "path")
-    el.setAttribute("id", stroke.id)
-    el.setAttribute("type", "stroke")
-    el.setAttribute("vector-effect", "non-scaling-stroke")
-    el.setAttribute("stroke-linecap", "round")
-    el.setAttribute("stroke-linejoin", "round")
-    el.setAttribute("fill", "transparent")
+
+    const attrs: { [key: string]: string } = {
+      "id": stroke.id,
+      "type": "stroke",
+      "vector-effect": "non-scaling-stroke",
+      "stroke-linecap": "round",
+      "stroke-linejoin": "round",
+      "fill": "transparent",
+      "d": this.getSVGPath(stroke),
+    }
 
     if (stroke.pointerType === "eraser") {
-      el.setAttribute("stroke-width", "20")
-      el.setAttribute("stroke", "grey")
-      el.setAttribute("opacity", "0.2")
-      el.setAttribute("shadowBlur", "5")
+      attrs["stroke-width"] =  "20"
+      attrs["stroke"] = "grey"
+      attrs["opacity"] = "0.2"
+      attrs["shadowBlur"] = "5"
     }
     else {
-      el.setAttribute("stroke", stroke.style.color || "black")
-      el.setAttribute("stroke-width", stroke.style.width?.toString() || "1")
+      attrs["stroke"] = stroke.style.color || DefaultStyle.color!
+      attrs["stroke-width"] = (stroke.style.width || DefaultStyle.width!).toString()
     }
-    el.setAttribute("d", `${ this.getSVGPath(stroke) }`)
-    return el
+
+    if (stroke.selected) {
+      attrs["filter"] = `url(#${ this.selectionFilterId })`
+    }
+
+    return createPath(attrs)
   }
 
 }
