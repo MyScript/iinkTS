@@ -99,10 +99,12 @@ yarn add iink-ts
   const editorElement = document.getElementById('editor');
 
   const editor = new iink.Editor(editorElement, {
-    server: {
-        applicationKey: '#YOUR MYSCRIPT DEVELOPER APPLICATION KEY#',
-        hmacKey: '#YOUR MYSCRIPT DEVELOPER HMAC KEY#'
-    };
+      configuration: {
+          server: {
+              applicationKey: '#YOUR MYSCRIPT DEVELOPER APPLICATION KEY#',
+              hmacKey: '#YOUR MYSCRIPT DEVELOPER HMAC KEY#'
+          }
+      }
   });
   editor.initialize();
 ```
@@ -125,9 +127,11 @@ yarn add iink-ts
             const editorElement = document.getElementById('editor');
 
             const editor = new iink.Editor(editorElement, {
-                server: {
-                    applicationKey: '#YOUR MYSCRIPT DEVELOPER APPLICATION KEY#',
-                    hmacKey: '#YOUR MYSCRIPT DEVELOPER HMAC KEY#'
+                configuration: {
+                    server: {
+                        applicationKey: '#YOUR MYSCRIPT DEVELOPER APPLICATION KEY#',
+                        hmacKey: '#YOUR MYSCRIPT DEVELOPER HMAC KEY#'
+                    }
                 }
             });
             editor.initialize();
