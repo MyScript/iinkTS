@@ -175,3 +175,5 @@ export enum SvgElementRole
 {
   Guide = "guide",
 }
+
+export const SELECTION_MARGIN = 10 as const

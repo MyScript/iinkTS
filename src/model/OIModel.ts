@@ -1,6 +1,6 @@
 import { LoggerClass, WriteTool } from "../Constants"
 import { LoggerManager } from "../logger"
-import { OIStroke, SymbolType, TOISymbol, TPointer } from "../primitive"
+import { OIStroke, SymbolType, TOISymbol, TPoint, TPointer } from "../primitive"
 import { TStyle } from "../style"
 import { TExport } from "./Export"
 import { IModel, TRecognitionPositions } from "./IModel"
@@ -51,6 +51,17 @@ export class OIModel implements IModel
     }
   }
 
+  selectedSymbolsFromPoint(point: TPoint): void
+  {
+    this.#logger.info("appendSelectedStrokesFromPoint", { point })
+    this.symbols.forEach(s =>
+    {
+      if (s.isCloseToPoint(point)) {
+        s.selected = true
+      }
+    })
+  }
+
   unselectSymbol(id: string): void
   {
     const symbol = this.symbols.find(s => s.id === id)
@@ -68,8 +79,11 @@ export class OIModel implements IModel
   {
     this.#logger.info("initCurrentStroke", { tool, pointer, style, pointerId, pointerType })
     switch (tool) {
-      default:
+      case WriteTool.Pencil:
         this.currentSymbol = new OIStroke(style, pointerId, pointerType)
+        break
+      default:
+        this.#logger.error("createCurrentSymbol", `Can't create symbol, tool is unknow: "${ tool }"`)
         break
     }
     return this.updateCurrentSymbol(pointer)
@@ -82,12 +96,9 @@ export class OIModel implements IModel
       throw new Error("Can't update current symbol because currentSymbol is undefined")
     }
 
-    switch (this.currentSymbol?.type) {
+    switch (this.currentSymbol.type) {
       case SymbolType.Stroke:
         (this.currentSymbol as OIStroke).addPointer(pointer)
-        break
-      default:
-        this.#logger.warn("updateCurrentSymbol", `currentSymbol type is unknow: "${ this.currentSymbol.type }"`)
         break
     }
     this.modificationDate = Date.now()

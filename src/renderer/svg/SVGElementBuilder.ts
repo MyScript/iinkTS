@@ -21,6 +21,36 @@ export function createLayer(width: number, height: number, attrs: { [key: string
 /**
  * @group Renderer
  */
+export function createFilter(id: string): SVGFilterElement
+{
+  const filter = document.createElementNS(XMLNS, "filter")
+  filter.id = id
+  return filter
+}
+
+
+/**
+ * @group Renderer
+ */
+export function createComponentTransfert(): SVGFEComponentTransferElement
+{
+  return document.createElementNS(XMLNS, "feComponentTransfer")
+}
+
+/**
+ * @group Renderer
+ */
+export function createTransfertFunctionTable(type: "feFuncA" | "feFuncB" | "feFuncG" | "feFuncR", values: string): SVGFEFuncAElement
+{
+  const feFunc = document.createElementNS(XMLNS, type)
+  feFunc.setAttribute("type", "table")
+  feFunc.setAttribute("tableValues", values)
+  return feFunc
+}
+
+/**
+ * @group Renderer
+ */
 export function createGroup(attrs: { [key: string]: string } = {}): SVGGElement
 {
   const groupEl = document.createElementNS(XMLNS, "g")
@@ -62,4 +92,17 @@ export function createCircle(p: TPoint, r: number, attrs: { [key: string]: strin
     circleEl.setAttribute(k, attrs[k])
   })
   return circleEl
+}
+
+/**
+ * @group Renderer
+ */
+export function createPath(attrs: { [key: string]: string } = {}): SVGPathElement
+{
+  const pathEl = document.createElementNS(XMLNS, "path")
+  Object.keys(attrs).forEach(k =>
+  {
+    pathEl.setAttribute(k, attrs[k])
+  })
+  return pathEl
 }

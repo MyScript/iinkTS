@@ -4,6 +4,7 @@ import
   OISVGRenderer,
   DefaultRenderingConfiguration,
   TRenderingConfiguration,
+  TOISymbol
 } from "../../../src/iink"
 
 describe("OISVGRenderer.ts", () =>
@@ -27,7 +28,6 @@ describe("OISVGRenderer.ts", () =>
       const layer = elements.item(0) as SVGElement
       expect(renderer.layer).toBe(layer)
     })
-
     test("should create guides with default gap", () =>
     {
       const divElement: HTMLDivElement = document.createElement("div")
@@ -105,10 +105,29 @@ describe("OISVGRenderer.ts", () =>
     renderer.init(divElement)
     const stroke = buildOIStroke()
 
+    test("should write error if symbol type unknow", () =>
+    {
+      const unknowSym: TOISymbol = {
+        //@ts-ignore
+        type: "unknow",
+        boundingBox: { height: 0, width: 0, x: 0, y: 0 },
+        creationTime: Date.now(),
+        modificationDate: Date.now(),
+        getClone: jest.fn(),
+        hasPointInsideBounds: jest.fn(),
+        isCloseToPoint: jest.fn()
+      }
+      renderer.drawSymbol(unknowSym)
+      const el = divElement.querySelector(`#${ stroke.id }`)!
+      expect(el).toBeNull()
+      expect(console.error).toHaveBeenCalledTimes(1)
+      expect(console.error).toHaveBeenCalledWith({ "error": ["symbol type is unknow: \"unknow\""], "from": "RENDERER.getSymbolElement" })
+
+    })
     test("should draw new stroke", () =>
     {
       renderer.drawSymbol(stroke)
-      const el = divElement.querySelector(`#${stroke.id}`)!
+      const el = divElement.querySelector(`#${ stroke.id }`)!
       expect(el).toBeDefined()
       expect(el.getAttribute("id")).toEqual(stroke.id)
       expect(el.getAttribute("type")).toEqual("stroke")
@@ -118,49 +137,75 @@ describe("OISVGRenderer.ts", () =>
     })
     test("should replace stroke", () =>
     {
-      const oldEl = divElement.querySelector(`#${stroke.id}`)!
-      stroke.addPointer({ x : 20, y: 50, p: 1, t: 1})
+      const oldEl = divElement.querySelector(`#${ stroke.id }`)!
+      stroke.addPointer({ x: 20, y: 50, p: 1, t: 1 })
       renderer.drawSymbol(stroke)
-      const el = divElement.querySelector(`#${stroke.id}`)!
+      const el = divElement.querySelector(`#${ stroke.id }`)!
       expect(el).toBeDefined()
       expect(oldEl).not.toEqual(el)
     })
     test("should removeSymbol stroke", () =>
     {
       renderer.removeSymbol(stroke.id)
-      const el = divElement.querySelector(`#${stroke.id}`)!
+      const el = divElement.querySelector(`#${ stroke.id }`)!
       expect(el).toBeNull()
     })
   })
 
-  test("should resize", () =>
+  describe("resize", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
     const renderer = new OISVGRenderer(DefaultRenderingConfiguration)
     renderer.init(divElement)
 
-    expect(renderer.layer.getAttribute("width")).toEqual("100px")
-    expect(renderer.layer.getAttribute("height")).toEqual("100px")
-    expect(renderer.layer.getAttribute("viewBox")).toEqual("0, 0, 100, 100")
-    renderer.resize(200, 400)
-    expect(renderer.layer.getAttribute("width")).toEqual("400px")
-    expect(renderer.layer.getAttribute("height")).toEqual("200px")
-    expect(renderer.layer.getAttribute("viewBox")).toEqual("0, 0, 400, 200")
+    test("should update height, width & viewbox", () =>
+    {
+      expect(renderer.layer.getAttribute("width")).toEqual("100px")
+      expect(renderer.layer.getAttribute("height")).toEqual("100px")
+      expect(renderer.layer.getAttribute("viewBox")).toEqual("0, 0, 100, 100")
+      renderer.resize(200, 400)
+      expect(renderer.layer.getAttribute("width")).toEqual("400px")
+      expect(renderer.layer.getAttribute("height")).toEqual("200px")
+      expect(renderer.layer.getAttribute("viewBox")).toEqual("0, 0, 400, 200")
+    })
+
+    test("should update guides", () =>
+    {
+      const nbGuide = renderer.layer.querySelector(`#${ renderer.groupGuidesId }`)?.children.length
+      renderer.resize(400, 400)
+      expect(nbGuide).not.toEqual(renderer.layer.querySelector(`#${ renderer.groupGuidesId }`)?.children.length)
+    })
   })
 
-  test("should clearElements", () =>
+  describe("clearElements", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const customConf = JSON.parse(JSON.stringify(DefaultRenderingConfiguration))
-    customConf.guides.enable = false
-    const renderer = new OISVGRenderer(customConf)
+    const renderer = new OISVGRenderer(DefaultRenderingConfiguration)
     renderer.init(divElement)
-    expect(renderer.layer.childElementCount).toEqual(0)
-    const stroke = buildOIStroke()
-    renderer.drawSymbol(stroke)
-    expect(renderer.layer.childElementCount).toEqual(1)
-    renderer.clearElements("path", { id: stroke.id })
-    expect(renderer.layer.childElementCount).toEqual(0)
+
+    test("should clearElements by type", () =>
+    {
+      expect(renderer.layer.querySelectorAll("path")).toHaveLength(0)
+      const stroke1 = buildOIStroke()
+      renderer.drawSymbol(stroke1)
+      const stroke2 = buildOIStroke()
+      renderer.drawSymbol(stroke2)
+      expect(renderer.layer.querySelectorAll("path")).toHaveLength(2)
+      renderer.clearElements("path")
+      expect(renderer.layer.querySelectorAll("path")).toHaveLength(0)
+    })
+
+    test("should clearElements by type and attrs", () =>
+    {
+      expect(renderer.layer.querySelectorAll("path")).toHaveLength(0)
+      const stroke1 = buildOIStroke()
+      renderer.drawSymbol(stroke1)
+      const stroke2 = buildOIStroke()
+      renderer.drawSymbol(stroke2)
+      expect(renderer.layer.querySelectorAll("path")).toHaveLength(2)
+      renderer.clearElements("path", { id: stroke2.id })
+      expect(renderer.layer.querySelectorAll("path")).toHaveLength(1)
+    })
   })
 
   test("should clear", () =>

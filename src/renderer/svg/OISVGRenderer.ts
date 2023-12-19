@@ -3,7 +3,7 @@ import { TRenderingConfiguration } from "../../configuration"
 import { LoggerManager } from "../../logger"
 import { OIStroke, SymbolType, TOISymbol, TPoint } from "../../primitive"
 import { OISVGRendererStroke } from "./OISVGRendererStroke"
-import { createCircle, createGroup, createLayer, createLine } from "./SVGElementBuilder"
+import { createCircle, createComponentTransfert, createFilter, createGroup, createLayer, createLine, createTransfertFunctionTable } from "./SVGElementBuilder"
 
 const NO_SELECTION = "pointer-events: none; -webkit-touch-callout: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;"
 
@@ -13,7 +13,8 @@ const NO_SELECTION = "pointer-events: none; -webkit-touch-callout: none; -webkit
 export class OISVGRenderer
 {
   #logger = LoggerManager.getLogger(LoggerClass.RENDERER)
-  #groupGuidesId = "guides-wrapper"
+  groupGuidesId = "guides-wrapper"
+  selectionFilterId = "selection-filter"
 
   configuration: TRenderingConfiguration
   parent!: HTMLElement
@@ -28,7 +29,7 @@ export class OISVGRenderer
   {
     this.#logger.info("constructor", { configuration })
     this.configuration = configuration
-    this.strokeRenderer = new OISVGRendererStroke()
+    this.strokeRenderer = new OISVGRendererStroke(this.selectionFilterId)
   }
 
   protected initLayer(): void
@@ -42,6 +43,16 @@ export class OISVGRenderer
     this.parent.appendChild(this.layer)
   }
 
+  protected createFilters(): void
+  {
+    const selectionFilter = createFilter(this.selectionFilterId)
+    const bfeComponentTransfer = createComponentTransfert()
+    const bfeFuncA = createTransfertFunctionTable("feFuncA", "0 0.25")
+    bfeComponentTransfer.appendChild(bfeFuncA)
+    selectionFilter.appendChild(bfeComponentTransfer)
+    this.layer.appendChild(selectionFilter)
+  }
+
   protected drawGuides(): void
   {
     this.verticalGuides = []
@@ -51,7 +62,7 @@ export class OISVGRenderer
     const offSet = this.configuration.guides.gap
     const subOffSet = this.configuration.guides.gap / 5
     const attrs = {
-      id: this.#groupGuidesId,
+      id: this.groupGuidesId,
       stroke: "grey",
       opacity: "0.5",
       style: NO_SELECTION,
@@ -115,7 +126,7 @@ export class OISVGRenderer
   {
     this.verticalGuides = []
     this.horizontalGuides = []
-    this.layer.querySelector(`#${ this.#groupGuidesId }`)?.remove()
+    this.layer.querySelector(`#${ this.groupGuidesId }`)?.remove()
   }
 
   init(element: HTMLElement): void
@@ -123,21 +134,19 @@ export class OISVGRenderer
     this.#logger.info("init", { element })
     this.parent = element
     this.initLayer()
+    this.createFilters()
     if (this.configuration.guides.enable) {
       this.drawGuides()
     }
   }
 
-  getSymbolElement(symbol: TOISymbol): SVGGeometryElement | undefined
+  getSymbolElements(symbol: TOISymbol): SVGGeometryElement | undefined
   {
     switch(symbol.type) {
       case SymbolType.Stroke:
         return this.strokeRenderer.getSVGElement(symbol as OIStroke)
-      case SymbolType.Shape:
-      case SymbolType.Edge:
-      case SymbolType.Text:
       default:
-        this.#logger.warn("getSymbolElement", `symbol type is unknow: "${symbol.type}"`)
+        this.#logger.error("getSymbolElement", `symbol type is unknow: "${symbol.type}"`)
         return
     }
   }
@@ -146,7 +155,7 @@ export class OISVGRenderer
   {
     this.#logger.debug("drawSymbol", { symbol })
     const oldNode = this.layer.querySelector(`#${ symbol?.id }`)
-    const svgEl = this.getSymbolElement(symbol)
+    const svgEl = this.getSymbolElements(symbol)
     if (svgEl) {
       if (oldNode) {
         oldNode.replaceWith(svgEl)
@@ -169,11 +178,11 @@ export class OISVGRenderer
   resize(height: number, width: number): void
   {
     this.#logger.info("resize", { height, width })
-    this.removeGuides()
     this.layer.setAttribute("width", `${ width }px`)
     this.layer.setAttribute("height", `${ height }px`)
     this.layer.setAttribute("viewBox", `0, 0, ${ width }, ${ height }`)
     if (this.configuration.guides.enable) {
+      this.removeGuides()
       this.drawGuides()
     }
   }
@@ -196,9 +205,7 @@ export class OISVGRenderer
     while (this.layer.firstChild) {
       this.layer.firstChild.remove()
     }
-    if (this.configuration.guides.enable) {
-      this.drawGuides()
-    }
+    this.init(this.parent)
   }
 
   destroy(): void

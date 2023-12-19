@@ -2,7 +2,8 @@ import { DefaultStyle, OISVGRendererStroke, OIStroke, TStyle } from "../../../sr
 
 describe("OISVGRendererStroke.ts", () =>
 {
-  const renderer = new OISVGRendererStroke()
+  const selectionFilterId = "selectionFilterId"
+  const renderer = new OISVGRendererStroke(selectionFilterId)
 
   test("should getSVGPath when no pointers", () =>
   {
@@ -30,7 +31,7 @@ describe("OISVGRendererStroke.ts", () =>
 
   test("should getSVGElement with default style", () =>
   {
-    const stroke = new OIStroke(DefaultStyle, 1)
+    const stroke = new OIStroke({}, 1)
     stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
     stroke.pointers.push({ p: 1, t: 1, x: 10, y: 1 })
     const el = renderer.getSVGElement(stroke)
@@ -54,6 +55,17 @@ describe("OISVGRendererStroke.ts", () =>
     expect(el.getAttribute("type")).toEqual("stroke")
     expect(el.getAttribute("stroke")).toEqual(style.color)
     expect(el.getAttribute("stroke-width")).toEqual(style.width?.toString())
+  })
+
+  test("should getSVGElement when selected", () =>
+  {
+    const stroke = new OIStroke(DefaultStyle, 1)
+    stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
+    stroke.pointers.push({ p: 1, t: 1, x: 10, y: 1 })
+    stroke.selected = true
+    const el = renderer.getSVGElement(stroke)
+    expect(el.getAttribute("id")).toEqual(stroke.id)
+    expect(el.getAttribute("filter")).toEqual(`url(#${ selectionFilterId })`)
   })
 
   test("should getSVGElement for eraser", () =>
