@@ -317,6 +317,7 @@ export class OIBehaviors implements IBehaviors
       })
       if (flag) {
         this.model.addSymbol(stroke)
+        this.drawSymbol(stroke)
       }
     })
     if (errors.length) {
