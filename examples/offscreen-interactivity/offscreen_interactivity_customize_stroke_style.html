@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Offscreen Custom stroke style</title>
+
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+
+    <style>
+      #editor {
+        width: 100vw;
+        height: calc(100vh - 180px);
+        touch-action: none;
+      }
+      .row-params {
+        padding: 12px 24px;
+        border-bottom: 1px solid #D7DDE3;
+      }
+      .row-label {
+        font-size: larger;
+        font-weight: 600;
+        width: 50px;
+      }
+      #pen-width {
+        width: 100px;
+      }
+      @media only screen and (max-width: 588px) {
+        #editor {
+          height: calc(100vh - 220px);
+        }
+      }
+      @media only screen and (max-width: 409px) {
+        #editor {
+          height: calc(100vh - 260px);
+        }
+      }
+      @media only screen and (max-width: 402px) {
+        #editor {
+          height: calc(100vh - 300px);
+        }
+      }
+    </style>
+
+    <script type="text/javascript" src="../../dist/iink.min.js"></script>
+  </head>
+
+  <body>
+    <nav class="flex-container start wrap gap">
+      <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+        <img src="../assets/img/clear.svg" />
+      </button>
+      <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+        <img src="../assets/img/undo.svg" />
+      </button>
+      <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+        <img src="../assets/img/redo.svg" />
+      </button>
+    </nav>
+    <div class="flex-container wrap gap row-params">
+      <label class="row-label">Pen:</label>
+      <div class="flex-container">
+        <label for="pen-color">color:</label>
+        <input id="pen-color" type="color" value="#ff7314" />
+      </div>
+      <div class="flex-container">
+        <label for="pen-opacity">opacity:</label>
+        <input id="pen-opacity" type="range" min="0" value="255" max="255"/>
+      </div>
+      <div class="flex-container wrap">
+        <label for="pen-width">thickness:</label>
+        <input id="pen-width" type="number" min="1" value="2" />
+      </div>
+    </div>
+
+    <div id="editor" touch-action="none"></div>
+
+    <script>
+      const editorElement = document.getElementById("editor");
+      const clearBtn = document.getElementById("clear");
+      const undoBtn = document.getElementById("undo");
+      const redoBtn = document.getElementById("redo");
+
+      const penColorInput = document.getElementById("pen-color");
+      const penOpacityInput = document.getElementById("pen-opacity");
+      const penWidthInput = document.getElementById("pen-width");
+
+      function getStyle() {
+        const color = `${penColorInput.value}${Number(penOpacityInput.value).toString(16).padStart(2, "0")}`
+        return {
+          color,
+          width: penWidthInput.value,
+        };
+      }
+
+      /**
+       * we expose the editor for use in the integration test
+       */
+      let editor;
+
+      async function loadEditor() {
+        const res = await fetch("../server-configuration.json");
+        const server = await res.json();
+        const options = {
+          configuration: {
+            offscreen: true,
+            server
+          },
+          penStyle: getStyle()
+        };
+
+        /**
+         * Instanciate editor
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Editor parameters
+         */
+        editor = new iink.Editor(editorElement, options);
+
+        /**
+         *  async initialize editor behaviors
+         */
+        await editor.initialize();
+
+        editor.events.addEventListener("changed", (event) => {
+          clearBtn.disabled = !event.detail.canClear;
+          undoBtn.disabled = !event.detail.canUndo;
+          redoBtn.disabled = !event.detail.canRedo;
+        });
+
+        clearBtn.addEventListener("click", async () => {
+          editor.clear();
+        });
+
+        undoBtn.addEventListener("click", () => {
+          editor.undo();
+        });
+
+        redoBtn.addEventListener("click", () => {
+          editor.redo();
+        });
+
+        penColorInput.addEventListener("change", () => {
+          editor.penStyle = getStyle();
+        });
+
+        penOpacityInput.addEventListener("change", () => {
+          editor.penStyle = getStyle();
+        });
+
+        penWidthInput.addEventListener("change", () => {
+          editor.penStyle = getStyle();
+        });
+
+        window.addEventListener("resize", () => {
+          editor.resize();
+        });
+      }
+
+      loadEditor().catch(error => console.error(error));
+    </script>
+  </body>
+</html>
