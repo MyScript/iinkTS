@@ -1,4 +1,6 @@
 export * from "./OISVGRenderer"
+export * from "./OISVGRendererEdge"
+export * from "./OISVGRendererShape"
 export * from "./OISVGRendererStroke"
 export * from "./SVGElementBuilder"
 export * from "./SVGStroker"

@@ -18,6 +18,18 @@ describe("Box.ts", () =>
     expect(box.yMax).toEqual(y + height)
   })
 
+  test("should throw error when create with negative width", () =>
+  {
+    const x = 0, y = 1, width = -2, height = 3
+    expect(() => new Box(x, y, width, height)).toThrow("width must be positive")
+  })
+
+  test("should throw error when create with negative height", () =>
+  {
+    const x = 0, y = 1, width = 2, height = -3
+    expect(() => new Box(x, y, width, height)).toThrow("height must be positive")
+  })
+
   test("should create from points if no points", () =>
   {
     const points: TPoint[] = []

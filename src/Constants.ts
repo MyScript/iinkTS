@@ -146,6 +146,8 @@ export enum LoggerClass
   STYLE = "STYLE",
   UNDO_REDO = "UNDO_REDO",
   STROKE = "STROKE",
+  SHAPE = "SHAPE",
+  EDGE = "EDGE",
   INTERNAL_EVENT = "INTERNAL_EVENT"
 }
 
@@ -161,6 +163,7 @@ export enum WriteTool
   Rectangle = "rectangle",
   Circle = "circle",
   Triangle = "triangle",
+  Parallelogram = "parallelogram",
   Line = "line",
   Arrow = "arrow",
   DoubleArrow = "double-arrow",

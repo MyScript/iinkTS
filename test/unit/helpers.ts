@@ -5,6 +5,10 @@ export const delay = (delayInms: number) =>
   return new Promise(resolve => setTimeout(resolve, delayInms))
 }
 
+export function round(n: number, digit = 2) {
+  return Math.round(n * Math.pow(10, digit)) / Math.pow(10, digit)
+}
+
 export function randomIntFromInterval(min: number, max: number): number
 {
   return Math.floor(Math.random() * (max - min) + min)

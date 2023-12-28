@@ -1,9 +1,11 @@
 import { LoggerClass, SvgElementRole } from "../../Constants"
 import { TRenderingConfiguration } from "../../configuration"
 import { LoggerManager } from "../../logger"
-import { OIStroke, SymbolType, TOISymbol, TPoint } from "../../primitive"
+import { OIStroke, SymbolType, TOIEdge, TOISymbol, TPoint, TOIShape } from "../../primitive"
+import { OISVGRendererEdge } from "./OISVGRendererEdge"
+import { OISVGRendererShape } from "./OISVGRendererShape"
 import { OISVGRendererStroke } from "./OISVGRendererStroke"
-import { createCircle, createComponentTransfert, createFilter, createGroup, createLayer, createLine, createTransfertFunctionTable } from "./SVGElementBuilder"
+import { createCircle, createComponentTransfert, createDefs, createFilter, createGroup, createLayer, createLine, createMarker, createPolygon, createTransfertFunctionTable } from "./SVGElementBuilder"
 
 const NO_SELECTION = "pointer-events: none; -webkit-touch-callout: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;"
 
@@ -15,11 +17,15 @@ export class OISVGRenderer
   #logger = LoggerManager.getLogger(LoggerClass.RENDERER)
   groupGuidesId = "guides-wrapper"
   selectionFilterId = "selection-filter"
+  arrowHeadStart = "arrow-head-start"
+  arrowHeadEnd = "arrow-head-end"
 
   configuration: TRenderingConfiguration
   parent!: HTMLElement
   layer!: SVGElement
   strokeRenderer: OISVGRendererStroke
+  shapeRenderer: OISVGRendererShape
+  edgeRenderer: OISVGRendererEdge
 
   verticalGuides: number[] = []
   horizontalGuides: number[] = []
@@ -30,6 +36,8 @@ export class OISVGRenderer
     this.#logger.info("constructor", { configuration })
     this.configuration = configuration
     this.strokeRenderer = new OISVGRendererStroke(this.selectionFilterId)
+    this.shapeRenderer = new OISVGRendererShape(this.selectionFilterId)
+    this.edgeRenderer = new OISVGRendererEdge(this.selectionFilterId, this.arrowHeadStart, this.arrowHeadEnd)
   }
 
   protected initLayer(): void
@@ -41,6 +49,27 @@ export class OISVGRenderer
     this.layer.style.setProperty("width", "auto")
     this.parent.style.setProperty("overflow", "auto")
     this.parent.appendChild(this.layer)
+  }
+
+  protected createDefs(): void
+  {
+    const defs = createDefs()
+
+    const SIZE = 5
+    const REFX = 0, REFY = SIZE / 2
+    const arrowHeadPolyAttrs = {
+      style: NO_SELECTION,
+      fill: "context-stroke",
+    }
+    const arrowHeadStart = createMarker(this.arrowHeadStart, SIZE, SIZE, REFX, REFY, "auto-start-reverse")
+    arrowHeadStart.appendChild(createPolygon([0, 0, SIZE, REFY, REFX, SIZE], arrowHeadPolyAttrs))
+    defs.appendChild(arrowHeadStart)
+
+    const arrowHeadEnd = createMarker(this.arrowHeadEnd, SIZE, SIZE, REFX, REFY, "auto")
+    arrowHeadEnd.appendChild(createPolygon([0, 0, SIZE, REFY, REFX, SIZE], arrowHeadPolyAttrs))
+    defs.appendChild(arrowHeadEnd)
+
+    this.layer.appendChild(defs)
   }
 
   protected createFilters(): void
@@ -135,16 +164,21 @@ export class OISVGRenderer
     this.parent = element
     this.initLayer()
     this.createFilters()
+    this.createDefs()
     if (this.configuration.guides.enable) {
       this.drawGuides()
     }
   }
 
-  getSymbolElements(symbol: TOISymbol): SVGGeometryElement | undefined
+  getSymbolElement(symbol: TOISymbol): SVGGeometryElement | undefined
   {
     switch(symbol.type) {
       case SymbolType.Stroke:
         return this.strokeRenderer.getSVGElement(symbol as OIStroke)
+      case SymbolType.Shape:
+        return this.shapeRenderer.getSVGElement(symbol as TOIShape)
+      case SymbolType.Edge:
+        return this.edgeRenderer.getSVGElement(symbol as TOIEdge)
       default:
         this.#logger.error("getSymbolElement", `symbol type is unknow: "${symbol.type}"`)
         return
@@ -155,7 +189,7 @@ export class OISVGRenderer
   {
     this.#logger.debug("drawSymbol", { symbol })
     const oldNode = this.layer.querySelector(`#${ symbol?.id }`)
-    const svgEl = this.getSymbolElements(symbol)
+    const svgEl = this.getSymbolElement(symbol)
     if (svgEl) {
       if (oldNode) {
         oldNode.replaceWith(svgEl)

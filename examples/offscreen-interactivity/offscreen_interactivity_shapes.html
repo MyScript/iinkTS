@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Offscreen shapes</title>
+
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+
+    <style>
+      #editor {
+        width: 100vw;
+        height: calc(100vh - 66px);
+        touch-action: none;
+      }
+      @media only screen and (max-width: 411px) {
+        #editor {
+          height: calc(100vh - 114px);
+        }
+      }
+      @media only screen and (max-width: 251px) {
+        #editor {
+          height: calc(100vh - 162px);
+        }
+      }
+    </style>
+
+    <style>
+      .menu-button {
+        height: 36px;
+        width: 36px;
+        border-radius: 4px;
+        background: #f6f5f4;
+        border: none;
+        box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.225);
+        background-color: white;
+        display: block;
+      }
+      .menu-button.active {
+        box-shadow: inset 0 2px 5px 0 rgba(0, 0, 0, 0.225);
+      }
+      .menu-button img {
+        width: 24px;
+        height: 24px;
+      }
+    </style>
+
+    <script type="text/javascript" src="../../dist/iink.min.js"></script>
+  </head>
+
+  <body>
+    <nav class="flex-container wrap gap">
+      <div class="flex-container wrap gap">
+        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/clear.svg" />
+        </button>
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/undo.svg" />
+        </button>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/redo.svg" />
+        </button>
+      </div>
+      <div class="flex-container wrap gap">
+        <button id="pen" class="menu-button active">
+          <img src="../assets/img/pen.svg" />
+        </button>
+        <div class="dropdown-menu">
+          <button id="shape-menu" class="menu-button">
+            <img id="shape-menu-img" src="../assets/img/rectangle.svg" />
+          </button>
+          <ul class="horizontal" style="margin-left: -50px;">
+            <li>
+              <button id="draw-rectangle" class="menu-button">
+                <img src="../assets/img/rectangle.svg" />
+              </button>
+            </li>
+            <li>
+              <button id="draw-circle" class="menu-button">
+                <img src="../assets/img/circle.svg" />
+              </button>
+            </li>
+            <li>
+              <button id="draw-triangle" class="menu-button">
+                <img src="../assets/img/triangle.svg" />
+              </button>
+            </li>
+            <li>
+              <button id="draw-parallelogram" class="menu-button">
+                <img src="../assets/img/parallelogram.svg" />
+              </button>
+            </li>
+          </ul>
+        </div>
+        <div class="dropdown-menu">
+          <button id="line-menu" class="menu-button">
+            <img id="line-menu-img" src="../assets/img/line.svg" />
+          </button>
+          <ul class="horizontal">
+            <li>
+              <button id="draw-line" class="menu-button">
+                <img src="../assets/img/line.svg" />
+              </button>
+            </li>
+            <li>
+              <button id="draw-arrow" class="menu-button">
+                <img src="../assets/img/arrow.svg" />
+              </button>
+            </li>
+            <li>
+              <button id="draw-double-arrow" class="menu-button">
+                <img src="../assets/img/double-arrow.svg" />
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div id="editor" touch-action="none"></div>
+
+    <script type="module">
+      const editorElement = document.getElementById("editor");
+
+      const clearBtn = document.getElementById("clear");
+      const undoBtn = document.getElementById("undo");
+      const redoBtn = document.getElementById("redo");
+
+      const penBtn = document.getElementById("pen");
+      const shapeMenuBtn = document.getElementById("shape-menu");
+      const drawRectangleBtn = document.getElementById("draw-rectangle");
+      const drawCircleBtn = document.getElementById("draw-circle");
+      const drawTriangleBtn = document.getElementById("draw-triangle");
+      const drawParallelogramBtn = document.getElementById("draw-parallelogram");
+      const lineMenuBtn = document.getElementById("line-menu");
+      const drawLineBtn = document.getElementById("draw-line");
+      const drawArrowBtn = document.getElementById("draw-arrow");
+      const drawDoubleArrowBtn = document.getElementById("draw-double-arrow");
+
+      /**
+       * we expose the editor for use in the integration test
+       */
+      let editor;
+
+      async function loadEditor() {
+        const res = await fetch("../server-configuration.json");
+        const server = await res.json();
+        const options = {
+          configuration: {
+            offscreen: true,
+            server
+          }
+        };
+        /**
+         * Instanciate editor
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Editor parameters
+         */
+        editor = new iink.Editor(editorElement, options);
+        /**
+         *  async initialize editor behaviors
+         */
+        await editor.initialize();
+
+        editor.events.addEventListener("changed", (event) => {
+          clearBtn.disabled = !event.detail.canClear;
+          undoBtn.disabled = !event.detail.canUndo;
+          redoBtn.disabled = !event.detail.canRedo;
+        });
+
+        clearBtn.addEventListener("click", async () => {
+          editor.clear();
+        });
+
+        undoBtn.addEventListener("click", () => {
+          editor.undo();
+        });
+
+        redoBtn.addEventListener("click", () => {
+          editor.redo();
+        });
+
+        penBtn.addEventListener("click", () => {
+          editor.writeTool = iink.WriteTool.Pencil;
+          penBtn.classList.add("active");
+          shapeMenuBtn.classList.remove("active");
+          lineMenuBtn.classList.remove("active");
+        });
+
+        drawRectangleBtn.addEventListener("click", () => {
+          editor.writeTool = iink.WriteTool.Rectangle;
+          document.querySelectorAll(".menu-button").forEach(el => el.classList.remove("active"))
+          shapeMenuBtn.classList.add("active");
+          drawRectangleBtn.classList.add("active");
+          document.getElementById("shape-menu-img").src = drawRectangleBtn.children.item(0).src;
+        });
+
+        drawCircleBtn.addEventListener("click", () => {
+          editor.writeTool = iink.WriteTool.Circle;
+          document.querySelectorAll(".menu-button").forEach(el => el.classList.remove("active"))
+          shapeMenuBtn.classList.add("active");
+          drawCircleBtn.classList.add("active");
+          document.getElementById("shape-menu-img").src = drawCircleBtn.children.item(0).src;
+        });
+
+        drawTriangleBtn.addEventListener("click", () => {
+          editor.writeTool = iink.WriteTool.Triangle;
+          document.querySelectorAll(".menu-button").forEach(el => el.classList.remove("active"))
+          shapeMenuBtn.classList.add("active");
+          drawTriangleBtn.classList.add("active");
+          document.getElementById("shape-menu-img").src = drawTriangleBtn.children.item(0).src;
+        });
+
+        drawParallelogramBtn.addEventListener("click", () => {
+          editor.writeTool = iink.WriteTool.Parallelogram;
+          document.querySelectorAll(".menu-button").forEach(el => el.classList.remove("active"))
+          shapeMenuBtn.classList.add("active");
+          drawParallelogramBtn.classList.add("active");
+          document.getElementById("shape-menu-img").src = drawParallelogramBtn.children.item(0).src;
+        });
+
+        drawLineBtn.addEventListener("click", () => {
+          editor.writeTool = iink.WriteTool.Line;
+          document.querySelectorAll(".menu-button").forEach(el => el.classList.remove("active"))
+          lineMenuBtn.classList.add("active");
+          drawLineBtn.classList.add("active");
+          document.getElementById("line-menu-img").src = drawLineBtn.children.item(0).src;
+        });
+
+        drawArrowBtn.addEventListener("click", () => {
+          editor.writeTool = iink.WriteTool.Arrow;
+          document.querySelectorAll(".menu-button").forEach(el => el.classList.remove("active"))
+          lineMenuBtn.classList.add("active");
+          drawArrowBtn.classList.add("active");
+          document.getElementById("line-menu-img").src = drawArrowBtn.children.item(0).src;
+        });
+
+        drawDoubleArrowBtn.addEventListener("click", () => {
+          editor.intention = iink.Intention.Write;
+          editor.writeTool = iink.WriteTool.DoubleArrow;
+          document.querySelectorAll(".menu-button").forEach(el => el.classList.remove("active"))
+          lineMenuBtn.classList.add("active");
+          drawDoubleArrowBtn.classList.add("active");
+          document.getElementById("line-menu-img").src = drawDoubleArrowBtn.children.item(0).src;
+        });
+
+        window.addEventListener("resize", () => {
+          editor.resize();
+        });
+      }
+
+      loadEditor().catch(error => console.error(error));
+    </script>
+  </body>
+</html>

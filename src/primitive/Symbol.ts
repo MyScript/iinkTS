@@ -27,7 +27,8 @@ export interface TOISymbol extends TSymbol
   selected: boolean
   type: SymbolType
   get boundingBox(): TBoundingBox
-  hasPointInsideBounds(box: TBoundingBox): boolean
+  get vertices(): TPoint[]
+  isPartiallyOrTotallyWrapped(box: TBoundingBox): boolean
   isCloseToPoint(point: TPoint): boolean
   getClone(): TOISymbol
 }

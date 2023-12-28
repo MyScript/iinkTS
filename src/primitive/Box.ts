@@ -1,3 +1,4 @@
+import { isBetween } from "../utils"
 import { TPoint } from "./Point"
 
 /**
@@ -29,6 +30,8 @@ export class Box implements TBoundingBox, TBoxLimit
 
   constructor(x: number, y: number, width: number, height: number)
   {
+    if (width < 0) throw new Error("width must be positive")
+    if (height < 0) throw new Error("height must be positive")
     this.height = height
     this.width = width
     this.x = x
@@ -65,5 +68,13 @@ export class Box implements TBoundingBox, TBoxLimit
   get yMax(): number
   {
     return this.y + this.height
+  }
+
+  isWrap(boundaries: TBoundingBox): boolean
+  {
+    return isBetween(this.xMin, boundaries.x, boundaries.x + boundaries.width) &&
+           isBetween(this.xMax, boundaries.x, boundaries.x + boundaries.width) &&
+           isBetween(this.yMin, boundaries.y, boundaries.y + boundaries.height) &&
+           isBetween(this.yMax, boundaries.y, boundaries.y + boundaries.height)
   }
 }
