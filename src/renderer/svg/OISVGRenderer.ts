@@ -215,8 +215,8 @@ export class OISVGRenderer
     this.layer.setAttribute("width", `${ width }px`)
     this.layer.setAttribute("height", `${ height }px`)
     this.layer.setAttribute("viewBox", `0, 0, ${ width }, ${ height }`)
+    this.removeGuides()
     if (this.configuration.guides.enable) {
-      this.removeGuides()
       this.drawGuides()
     }
   }
