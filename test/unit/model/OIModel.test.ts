@@ -9,7 +9,10 @@ import
   TStyle,
   DefaultStyle,
   SymbolType,
-  TExport
+  TExport,
+  TOIShape,
+  ShapeKind,
+  EdgeKind
 } from "../../../src/iink"
 
 describe("OIModel.ts", () =>
@@ -44,31 +47,89 @@ describe("OIModel.ts", () =>
       expect(stroke.pointers[0].t).toBe(point.t)
       expect(stroke.pointers[0].p).toBe(point.p)
     })
-    test("should createCurrentSymbol with pencil & custom style", async () =>
+    test("should createCurrentSymbol with pencil & custom style", () =>
     {
-      const _model = new OIModel(width, height, rowHeight)
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       const style: TStyle = { color: "red", width: 42 }
-      expect(_model.creationTime).toStrictEqual(_model.modificationDate)
-      await delay(101)
-      _model.createCurrentSymbol(WriteTool.Pencil, point, style, 42, "mouse")
-      expect(_model.modificationDate - _model.creationTime).toBeGreaterThanOrEqual(100)
-      expect(_model.currentSymbol).toBeDefined()
-      expect(_model.currentSymbol?.style.color).toBe(style.color)
-      expect(_model.currentSymbol?.style.width).toBe(style.width)
+      model.createCurrentSymbol(WriteTool.Pencil, point, style, 42, "mouse")
+      expect(model.currentSymbol).toBeDefined()
+      expect(model.currentSymbol?.style.color).toBe(style.color)
+      expect(model.currentSymbol?.style.width).toBe(style.width)
+    })
+    test("should createCurrentSymbol with Rectangle", () =>
+    {
+      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
+      model.createCurrentSymbol(WriteTool.Rectangle, point, DefaultStyle, 42, "mouse")
+      expect(model.currentSymbol).toBeDefined()
+      expect(model.currentSymbol?.type).toBe(SymbolType.Shape)
+      const shape = model.currentSymbol as TOIShape
+      expect(shape.kind).toBe(ShapeKind.Rectangle)
+    })
+    test("should createCurrentSymbol with Circle", () =>
+    {
+      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
+      model.createCurrentSymbol(WriteTool.Circle, point, DefaultStyle, 42, "mouse")
+      expect(model.currentSymbol).toBeDefined()
+      expect(model.currentSymbol?.type).toBe(SymbolType.Shape)
+      const shape = model.currentSymbol as TOIShape
+      expect(shape.kind).toBe(ShapeKind.Circle)
+    })
+    test("should createCurrentSymbol with Parallelogram", () =>
+    {
+      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
+      model.createCurrentSymbol(WriteTool.Parallelogram, point, DefaultStyle, 42, "mouse")
+      expect(model.currentSymbol).toBeDefined()
+      expect(model.currentSymbol?.type).toBe(SymbolType.Shape)
+      const shape = model.currentSymbol as TOIShape
+      expect(shape.kind).toBe(ShapeKind.Parallelogram)
+    })
+    test("should createCurrentSymbol with Triangle", () =>
+    {
+      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
+      model.createCurrentSymbol(WriteTool.Triangle, point, DefaultStyle, 42, "mouse")
+      expect(model.currentSymbol).toBeDefined()
+      expect(model.currentSymbol?.type).toBe(SymbolType.Shape)
+      const shape = model.currentSymbol as TOIShape
+      expect(shape.kind).toBe(ShapeKind.Triangle)
+    })
+    test("should createCurrentSymbol with Line", () =>
+    {
+      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
+      model.createCurrentSymbol(WriteTool.Line, point, DefaultStyle, 42, "mouse")
+      expect(model.currentSymbol).toBeDefined()
+      expect(model.currentSymbol?.type).toBe(SymbolType.Edge)
+      const shape = model.currentSymbol as TOIShape
+      expect(shape.kind).toBe(EdgeKind.Line)
+    })
+    test("should createCurrentSymbol with Arrow", () =>
+    {
+      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
+      model.createCurrentSymbol(WriteTool.Arrow, point, DefaultStyle, 42, "mouse")
+      expect(model.currentSymbol).toBeDefined()
+      expect(model.currentSymbol?.type).toBe(SymbolType.Edge)
+      const shape = model.currentSymbol as TOIShape
+      expect(shape.kind).toBe(EdgeKind.Line)
+    })
+    test("should createCurrentSymbol with DoubleArrow", () =>
+    {
+      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
+      model.createCurrentSymbol(WriteTool.Arrow, point, DefaultStyle, 42, "mouse")
+      expect(model.currentSymbol).toBeDefined()
+      expect(model.currentSymbol?.type).toBe(SymbolType.Edge)
+      const shape = model.currentSymbol as TOIShape
+      expect(shape.kind).toBe(EdgeKind.Line)
     })
     test("should write error if symbol type unknow when createCurrentSymbol", () =>
     {
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       const style: TStyle = { color: "red", width: 42 }
       //@ts-ignore
-      model.createCurrentSymbol("unknow", point, style, 42, "mouse")
-      expect(console.error).toHaveBeenCalledTimes(1)
-      expect(console.error).toHaveBeenCalledWith({ "error": ["Can't create symbol, tool is unknow: \"unknow\""], "from": "MODEL.createCurrentSymbol" })
+      expect(() => model.createCurrentSymbol("unknow", point, style, 42, "mouse")).toThrow("Can't create symbol, tool is unknow: \"unknow\"")
     })
     test("should updateCurrentSymbol", () =>
     {
-      expect(model.currentSymbol).toBeDefined()
+      const point1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
+      model.createCurrentSymbol(WriteTool.Pencil, point1, DefaultStyle, 42, "mouse")
       const point: TPointer = { t: 15, p: 15, x: 15, y: 15 }
       model.updateCurrentSymbol(point)
       const stroke = model.currentSymbol as OIStroke

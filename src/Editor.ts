@@ -4,7 +4,7 @@ import { IBehaviors, OIBehaviors, RestBehaviors, TBehaviorOptions, WSBehaviors }
 import { SmartGuide } from "./smartguide"
 import { DeferredPromise, PartialDeep, mergeDeep } from "./utils"
 import { LoggerManager } from "./logger"
-import { ExportType, Intention, LoggerClass } from "./Constants"
+import { ExportType, Intention, LoggerClass, WriteTool } from "./Constants"
 import { DefaultLoggerConfiguration, TConfiguration, TConverstionState, TLoggerConfiguration, TMarginConfiguration } from "./configuration"
 import { IModel, TExport, TJIIXExport } from "./model"
 import { TStroke } from "./primitive"
@@ -126,6 +126,34 @@ export class Editor
         break
     }
     this.logger.debug("set intention", this.wrapperHTML)
+  }
+
+  /**
+   * @remarks only usable in the case of offscreen
+   */
+  get writeTool(): WriteTool
+  {
+    if (this.configuration.offscreen) {
+      return (this.behaviors as unknown as OIBehaviors).writeTool
+    }
+    return WriteTool.Pencil
+  }
+  /**
+   * @remarks only usable in the case of offscreen
+   */
+  set writeTool(wt: WriteTool)
+  {
+    if (this.configuration.offscreen) {
+      (this.behaviors as unknown as OIBehaviors).writeTool = wt
+      if (wt !== WriteTool.Pencil) {
+        this.wrapperHTML.classList.add("shape")
+      }
+      else {
+        this.wrapperHTML.classList.remove("shape")
+      }
+    } else {
+      throw new Error("writeTool is only for offscreen configuration")
+    }
   }
 
   get events(): PublicEvent

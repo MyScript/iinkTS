@@ -114,7 +114,7 @@ describe("OISVGRenderer.ts", () =>
         creationTime: Date.now(),
         modificationDate: Date.now(),
         getClone: jest.fn(),
-        hasPointInsideBounds: jest.fn(),
+        isPartiallyOrTotallyWrapped: jest.fn(),
         isCloseToPoint: jest.fn()
       }
       renderer.drawSymbol(unknowSym)

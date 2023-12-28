@@ -1,6 +1,6 @@
 import { LoggerClass, WriteTool } from "../Constants"
 import { LoggerManager } from "../logger"
-import { OIStroke, SymbolType, TOISymbol, TPoint, TPointer } from "../primitive"
+import { OILine, OIShapeCircle, OIShapeParallelogram, OIShapeRectangle, OIShapeTriangle, OIStroke, ShapeKind, SymbolType, TOIEdge, TOISymbol, TPoint, TPointer, TOIShape, EdgeDecoration } from "../primitive"
 import { TStyle } from "../style"
 import { TExport } from "./Export"
 import { IModel, TRecognitionPositions } from "./IModel"
@@ -15,6 +15,7 @@ export class OIModel implements IModel
   modificationDate: number
   positions: TRecognitionPositions
   currentSymbol?: TOISymbol
+  currentSymbolOrigin?: TPoint
   symbols: TOISymbol[]
   exports?: TExport
   converts?: TExport
@@ -78,15 +79,66 @@ export class OIModel implements IModel
   createCurrentSymbol(tool: WriteTool, pointer: TPointer, style: TStyle, pointerId: number, pointerType: string): TOISymbol
   {
     this.#logger.info("initCurrentStroke", { tool, pointer, style, pointerId, pointerType })
+    this.currentSymbolOrigin = pointer
     switch (tool) {
       case WriteTool.Pencil:
         this.currentSymbol = new OIStroke(style, pointerId, pointerType)
         break
+      case WriteTool.Rectangle:
+        this.currentSymbol = OIShapeRectangle.createFromLine(style, pointer, pointer)
+        break
+      case WriteTool.Circle:
+        this.currentSymbol = OIShapeCircle.createFromLine(style, pointer, pointer)
+        break
+      case WriteTool.Triangle:
+        this.currentSymbol = OIShapeTriangle.createFromLine(style, pointer, pointer)
+        break
+      case WriteTool.Parallelogram:
+        this.currentSymbol = OIShapeParallelogram.createFromLine(style, pointer, pointer)
+        break
+      case WriteTool.Line:
+      case WriteTool.Arrow:
+      case WriteTool.DoubleArrow: {
+        let startDecoration, endDecoration
+        if (tool === WriteTool.Arrow) {
+          endDecoration = EdgeDecoration.Arrow
+        }
+        else if (tool === WriteTool.DoubleArrow) {
+          startDecoration = EdgeDecoration.Arrow
+          endDecoration = EdgeDecoration.Arrow
+        }
+        this.currentSymbol = new OILine(style, pointer, pointer, startDecoration, endDecoration)
+        break
+      }
       default:
-        this.#logger.error("createCurrentSymbol", `Can't create symbol, tool is unknow: "${ tool }"`)
+        throw new Error(`Can't create symbol, tool is unknow: "${ tool }"`)
         break
     }
     return this.updateCurrentSymbol(pointer)
+  }
+
+  updateCurrentSymbolShape(pointer: TPointer): void
+  {
+    if (!this.currentSymbol) {
+      throw new Error("Can't update current symbol because currentSymbol is undefined")
+    }
+    const shape = this.currentSymbol as TOIShape
+    switch (shape.kind) {
+      case ShapeKind.Rectangle:
+        OIShapeRectangle.updateFromLine(shape as OIShapeRectangle, this.currentSymbolOrigin!, pointer)
+        break;
+      case ShapeKind.Circle:
+        OIShapeCircle.updateFromLine(shape as OIShapeCircle, this.currentSymbolOrigin!, pointer)
+        break;
+      case ShapeKind.Triangle:
+        OIShapeTriangle.updateFromLine(shape as OIShapeTriangle, this.currentSymbolOrigin!, pointer)
+        break
+      case ShapeKind.Parallelogram:
+        OIShapeParallelogram.updateFromLine(shape as OIShapeParallelogram, this.currentSymbolOrigin!, pointer)
+        break
+      default:
+        break;
+    }
   }
 
   updateCurrentSymbol(pointer: TPointer): TOISymbol
@@ -99,6 +151,12 @@ export class OIModel implements IModel
     switch (this.currentSymbol.type) {
       case SymbolType.Stroke:
         (this.currentSymbol as OIStroke).addPointer(pointer)
+        break
+      case SymbolType.Shape:
+        this.updateCurrentSymbolShape(pointer)
+        break
+      case SymbolType.Edge:
+        (this.currentSymbol as TOIEdge).end = pointer
         break
     }
     this.modificationDate = Date.now()

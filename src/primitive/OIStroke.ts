@@ -35,18 +35,23 @@ export class OIStroke implements TStroke, TOISymbol
     this.creationTime = Date.now()
     this.modificationDate = this.creationTime
     this.style = style
+    this.selected = false
+    this.transform = new MatrixTransform(1, 0, 0, 1, 0, 0)
 
     this.pointerId = pointerId
     this.pointerType = pointerType
     this.pointers = []
     this.length = 0
-    this.selected = false
-    this.transform = new MatrixTransform(1, 0, 0, 1, 0, 0)
   }
 
   get boundingBox(): Box
   {
     return Box.createFromPoints(this.pointers)
+  }
+
+  get vertices(): TPoint[]
+  {
+    return this.pointers
   }
 
   protected computePressure(distance: number): number
@@ -85,7 +90,7 @@ export class OIStroke implements TStroke, TOISymbol
     }
   }
 
-  hasPointInsideBounds(box: TBoundingBox): boolean
+  isPartiallyOrTotallyWrapped(box: TBoundingBox): boolean
   {
     return this.pointers.some(p =>
     {

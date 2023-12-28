@@ -28,6 +28,28 @@ export function createFilter(id: string): SVGFilterElement
   return filter
 }
 
+/**
+ * @group Renderer
+ */
+export function createDefs(): SVGDefsElement
+{
+  return document.createElementNS(XMLNS, "defs")
+}
+
+/**
+ * @group Renderer
+ */
+export function createMarker(id: string, markerWidth: number, markerHeight: number, refX: number, refY: number, orient: "auto-start-reverse" | "auto"): SVGMarkerElement
+{
+  const marker = document.createElementNS(XMLNS, "marker")
+  marker.setAttribute("id", id)
+  marker.setAttribute("markerWidth", markerWidth.toString())
+  marker.setAttribute("markerHeight", markerHeight.toString())
+  marker.setAttribute("refX", refX.toString())
+  marker.setAttribute("refY", refY.toString())
+  marker.setAttribute("orient", orient)
+  return marker
+}
 
 /**
  * @group Renderer
@@ -105,4 +127,18 @@ export function createPath(attrs: { [key: string]: string } = {}): SVGPathElemen
     pathEl.setAttribute(k, attrs[k])
   })
   return pathEl
+}
+
+/**
+ * @group Renderer
+ */
+export function createPolygon(points: number[], attrs: { [key: string]: string } = {}): SVGPolylineElement
+{
+  const polygonEl = document.createElementNS(XMLNS, "polygon")
+  polygonEl.setAttribute("points", points.join(","))
+  Object.keys(attrs).forEach(k =>
+  {
+    polygonEl.setAttribute(k, attrs[k])
+  })
+  return polygonEl
 }

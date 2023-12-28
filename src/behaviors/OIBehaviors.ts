@@ -1,7 +1,7 @@
 import { Intention, InternalEventType, LoggerClass, WriteTool } from "../Constants"
 import { Configuration, TConfiguration, TConverstionState, TRenderingConfiguration } from "../configuration"
 import { InternalEvent } from "../event"
-import { PointerEventGrabber } from "../grabber"
+import { OIPointerEventGrabber } from "../grabber"
 import { LoggerManager } from "../logger"
 import { OIModel, TExport } from "../model"
 import { OIStroke, SymbolType, TOISymbol, TPointer, TStroke } from "../primitive"
@@ -25,7 +25,7 @@ export class OIBehaviors implements IBehaviors
   #intention: Intention
   #writeTool: WriteTool
 
-  grabber: PointerEventGrabber
+  grabber: OIPointerEventGrabber
   renderer: OISVGRenderer
   recognizer: OIRecognizer
   styleManager: StyleManager
@@ -37,7 +37,7 @@ export class OIBehaviors implements IBehaviors
     this.#configuration = new Configuration(options?.configuration)
     this.styleManager = new StyleManager(options?.penStyle, options?.theme)
 
-    this.grabber = new PointerEventGrabber(this.#configuration.grabber)
+    this.grabber = new OIPointerEventGrabber(this.#configuration.grabber)
     this.renderer = new OISVGRenderer(this.#configuration.rendering)
     this.recognizer = new OIRecognizer(this.#configuration.server, this.#configuration.recognition)
 
@@ -144,41 +144,51 @@ export class OIBehaviors implements IBehaviors
   protected onPointerDown(evt: PointerEvent, pointer: TPointer): void
   {
     this.#logger.debug("onPointerDown", { evt, pointer })
-
-    switch (this.#intention) {
-      case Intention.Erase:
-        this.drawSymbol(this.model.createCurrentSymbol(this.writeTool, pointer, this.currentPenStyle, evt.pointerId, "eraser"))
-        this.model.selectedSymbolsFromPoint(pointer)
-        this.model.selection.map(s => this.drawSymbol(s))
-        break
-      case Intention.Select:
-        break
-      default:
-        this.drawSymbol(this.model.createCurrentSymbol(this.writeTool, pointer, this.currentPenStyle, evt.pointerId, evt.pointerType))
-        break
+    try {
+      switch (this.#intention) {
+        case Intention.Erase:
+          this.drawSymbol(this.model.createCurrentSymbol(this.writeTool, pointer, this.currentPenStyle, evt.pointerId, "eraser"))
+          this.model.selectedSymbolsFromPoint(pointer)
+          this.model.selection.map(s => this.drawSymbol(s))
+          break
+        case Intention.Select:
+          break
+        default:
+          this.drawSymbol(this.model.createCurrentSymbol(this.writeTool, pointer, this.currentPenStyle, evt.pointerId, evt.pointerType))
+          break
+      }
+    } catch (error) {
+      this.#logger.error("onPointerDown", error)
+      this.grabber.stopPointerEvent()
+      this.internalEvent.emitError(error as Error)
     }
   }
 
   protected onPointerMove(_evt: PointerEvent, pointer: TPointer): void
   {
     this.#logger.debug("onPointerMove", { pointer })
-    switch (this.#intention) {
-      case Intention.Erase:
-        this.drawSymbol(this.model.updateCurrentSymbol(pointer))
-        this.model.selectedSymbolsFromPoint(pointer)
-        this.model.selection.map(s => this.drawSymbol(s))
-        break
-      case Intention.Select:
-        break
-      default:
-        // this.#drawStroke(pointer)
-        this.drawSymbol(this.model.updateCurrentSymbol(pointer))
-        break
+    try {
+      switch (this.#intention) {
+        case Intention.Erase:
+          this.drawSymbol(this.model.updateCurrentSymbol(pointer))
+          this.model.selectedSymbolsFromPoint(pointer)
+          this.model.selection.map(s => this.drawSymbol(s))
+          break
+        case Intention.Select:
+          break
+        default:
+          this.drawSymbol(this.model.updateCurrentSymbol(pointer))
+          break
+      }
+    } catch (error) {
+      this.#logger.error("onPointerDown", error)
+      this.internalEvent.emitError(error as Error)
     }
   }
 
   protected async applyEraseSymbol(pointer: TPointer): Promise<void>
   {
+    this.#logger.debug("applyEraseSymbol", { pointer })
     const symbol = this.model.endCurrentSymbol(pointer)
     this.renderer.removeSymbol(symbol.id)
     this.model.removeSymbol(symbol.id)
@@ -198,6 +208,7 @@ export class OIBehaviors implements IBehaviors
 
   protected async applyDrawnSymbol(pointer: TPointer): Promise<void>
   {
+    this.#logger.debug("applyDrawnSymbol", { pointer })
     const symbol = this.model.endCurrentSymbol(pointer)
     this.drawSymbol(symbol)
     this.model.updatePositionSent()
@@ -210,15 +221,20 @@ export class OIBehaviors implements IBehaviors
   protected onPointerUp(_evt: PointerEvent, pointer: TPointer): void
   {
     this.#logger.debug("onPointerUp", { pointer })
-    switch (this.#intention) {
-      case Intention.Erase:
-        this.applyEraseSymbol(pointer)
-        break
-      case Intention.Select:
-        break
-      default:
-        this.applyDrawnSymbol(pointer)
-        break
+    try {
+      switch (this.#intention) {
+        case Intention.Erase:
+          this.applyEraseSymbol(pointer)
+          break
+        case Intention.Select:
+          break
+        default:
+          this.applyDrawnSymbol(pointer)
+          break
+      }
+    } catch (error) {
+      this.#logger.error("onPointerUp", error)
+      this.internalEvent.emitError(error as Error)
     }
   }
 
