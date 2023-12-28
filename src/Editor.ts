@@ -5,7 +5,7 @@ import { SmartGuide } from "./smartguide"
 import { DeferredPromise, PartialDeep, mergeDeep } from "./utils"
 import { LoggerManager } from "./logger"
 import { ExportType, Intention, LoggerClass, WriteTool } from "./Constants"
-import { DefaultLoggerConfiguration, TConfiguration, TConverstionState, TLoggerConfiguration, TMarginConfiguration } from "./configuration"
+import { DefaultLoggerConfiguration, TConfiguration, TConverstionState, TLoggerConfiguration, TMarginConfiguration, TRenderingConfiguration } from "./configuration"
 import { IModel, TExport, TJIIXExport } from "./model"
 import { TStroke } from "./primitive"
 import { InternalEvent, PublicEvent } from "./event"
@@ -99,6 +99,18 @@ export class Editor
     this.logger.info("set configuration", { configuration })
     this.#instantiateBehaviors({ configuration })
     this.initialize()
+  }
+
+  /**
+   * @remarks only usable in the case of offscreen
+   */
+  set renderingConfiguration(renderingConfiguration: TRenderingConfiguration)
+  {
+    if (this.configuration.offscreen) {
+      (this.behaviors as unknown as OIBehaviors).renderingConfiguration = renderingConfiguration
+    } else {
+      throw new Error("set renderingConfiguration is only for offscreen")
+    }
   }
 
   get intention(): Intention
