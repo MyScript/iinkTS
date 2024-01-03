@@ -27,7 +27,7 @@ describe("OIShapeCircle.ts", () =>
       expect(circle).toBeDefined()
       expect(circle.creationTime).toBeLessThanOrEqual(Date.now())
       expect(circle.creationTime).toEqual(circle.modificationDate)
-      expect(circle.style).toEqual(style)
+      expect(circle.style).toEqual(expect.objectContaining(style))
       expect(circle.selected).toEqual(false)
       expect(circle.transform).toEqual(MatrixTransform.identity())
       expect(circle.center).toEqual(center)
@@ -72,7 +72,7 @@ describe("OIShapeCircle.ts", () =>
       expect(circle).toBeDefined()
       expect(circle.creationTime).toBeLessThanOrEqual(Date.now())
       expect(circle.creationTime).toEqual(circle.modificationDate)
-      expect(circle.style).toEqual(style)
+      expect(circle.style).toEqual(expect.objectContaining(style))
       expect(circle.selected).toEqual(false)
       expect(circle.transform).toEqual(MatrixTransform.identity())
     })
@@ -228,7 +228,7 @@ describe("OIShapeCircle.ts", () =>
     })
   })
 
-  describe("isPartiallyOrTotallyWrapped", () =>
+  describe("isOverlapping", () =>
   {
     const center: TPoint = { x: 10, y: 10 }
     const radius = 10
@@ -240,22 +240,22 @@ describe("OIShapeCircle.ts", () =>
     test(`should return true if partially wrap`, () =>
     {
       const boundaries: TBoundingBox = { height: 10, width: 10, x: -5, y: -5 }
-      expect(circle.isPartiallyOrTotallyWrapped(boundaries)).toEqual(true)
+      expect(circle.isOverlapping(boundaries)).toEqual(true)
     })
     test(`should return true if totally wrap`, () =>
     {
       const boundaries: TBoundingBox = { height: 50, width: 50, x: -25, y: -25 }
-      expect(circle.isPartiallyOrTotallyWrapped(boundaries)).toEqual(true)
+      expect(circle.isOverlapping(boundaries)).toEqual(true)
     })
     test(`should return false if box is outside`, () =>
     {
       const boundaries: TBoundingBox = { height: 2, width: 2, x: 50, y: 50 }
-      expect(circle.isPartiallyOrTotallyWrapped(boundaries)).toEqual(false)
+      expect(circle.isOverlapping(boundaries)).toEqual(false)
     })
     test(`should return false if box is inside`, () =>
     {
       const boundaries: TBoundingBox = { height: 2, width: 2, x: 9, y: 9 }
-      expect(circle.isPartiallyOrTotallyWrapped(boundaries)).toEqual(false)
+      expect(circle.isOverlapping(boundaries)).toEqual(false)
     })
   })
 

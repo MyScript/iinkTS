@@ -7,11 +7,12 @@ import { LoggerManager } from "./logger"
 import { ExportType, Intention, LoggerClass, WriteTool } from "./Constants"
 import { DefaultLoggerConfiguration, TConfiguration, TConverstionState, TLoggerConfiguration, TMarginConfiguration, TRenderingConfiguration } from "./configuration"
 import { IModel, TExport, TJIIXExport } from "./model"
-import { TStroke } from "./primitive"
+import { TOISymbol, TStroke } from "./primitive"
 import { InternalEvent, PublicEvent } from "./event"
 import { TUndoRedoContext } from "./undo-redo"
 import { IGrabber } from "./grabber"
 import { TPenStyle, TTheme } from "./style"
+import { StrikeThroughAction, SurroundAction } from "./gesture"
 
 /**
  * @group Editor
@@ -225,13 +226,69 @@ export class Editor
 
   get gestures(): boolean
   {
-    return this.configuration.recognition.gesture.enable
+    if (this.configuration.offscreen) {
+      return (this.behaviors as unknown as OIBehaviors).processGestures
+    }
+    else {
+      return this.configuration.recognition.gesture.enable
+    }
   }
   set gestures(apply: boolean)
   {
-    this.configuration.recognition.gesture.enable = apply
-    this.#instantiateBehaviors({ configuration: this.configuration })
-    this.initialize()
+    if (this.configuration.offscreen) {
+      (this.behaviors as unknown as OIBehaviors).processGestures = apply
+    }
+    else {
+      this.configuration.recognition.gesture.enable = apply
+      this.#instantiateBehaviors({ configuration: this.configuration })
+      this.initialize()
+    }
+  }
+
+  /**
+   * @remarks only usable in the case of offscreen
+   */
+  get surroundAction(): SurroundAction
+  {
+    if (this.configuration.offscreen) {
+      return (this.behaviors as unknown as OIBehaviors).surroundAction
+    }
+    throw new Error("surroundAction is only for offscreen configuration")
+    return SurroundAction.Surround
+  }
+  /**
+   * @remarks only usable in the case of offscreen
+   */
+  set surroundAction(action: SurroundAction)
+  {
+    if (this.configuration.offscreen) {
+      (this.behaviors as unknown as OIBehaviors).surroundAction = action
+    } else {
+      throw new Error("surroundAction is only for offscreen configuration")
+    }
+  }
+
+  /**
+   * @remarks only usable in the case of offscreen
+   */
+  get strikeThroughAction(): StrikeThroughAction
+  {
+    if (this.configuration.offscreen) {
+      return (this.behaviors as unknown as OIBehaviors).strikeThroughAction
+    }
+    throw new Error("strikeThroughAction is only for offscreen configuration")
+    return StrikeThroughAction.Draw
+  }
+  /**
+   * @remarks only usable in the case of offscreen
+   */
+  set strikeThroughAction(action: StrikeThroughAction)
+  {
+    if (this.configuration.offscreen) {
+      (this.behaviors as unknown as OIBehaviors).strikeThroughAction = action
+    } else {
+      throw new Error("strikeThroughAction is only for offscreen configuration")
+    }
   }
 
   #instantiateBehaviors(options: PartialDeep<TBehaviorOptions>)
@@ -338,6 +395,19 @@ export class Editor
     }, notif.timeout || 2500)
   }
 
+  /**
+   * @remarks only usable in the case of offscreen
+   */
+  updateSymbolsStyle(strokeIds: string[], style: { fill?: string, width?: number }): void
+  {
+    if (this.configuration.offscreen) {
+      (this.behaviors as unknown as OIBehaviors).updateSymbolsStyle(strokeIds, style)
+    }
+    else {
+      throw new Error("updateSymbolsStyle is only for offscreen configuration")
+    }
+  }
+
   #addListeners(): void
   {
     this.internalEvents.addConvertListener(this.convert.bind(this))
@@ -349,6 +419,12 @@ export class Editor
     this.internalEvents.addClearMessageListener(this.#cleanMessage.bind(this))
     this.internalEvents.addContextChangeListener(this.#onContextChange.bind(this))
     this.internalEvents.addIdleListener(this.#onIdleChange.bind(this))
+    this.internalEvents.addSelectedListener(this.#onSelectionChange.bind(this))
+  }
+
+  #onSelectionChange = (symbols: TOISymbol[]) =>
+  {
+    this.events.emitSelected(symbols)
   }
 
   #onContextChange = (context: TUndoRedoContext) =>

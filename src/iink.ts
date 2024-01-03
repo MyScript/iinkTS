@@ -30,3 +30,5 @@ export * from "./smartguide"
 export * from "./logger"
 
 export * from "./transform"
+
+export * from "./gesture"

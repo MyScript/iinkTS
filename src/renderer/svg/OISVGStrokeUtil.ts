@@ -1,8 +1,12 @@
 import { OIStroke, TPointer } from "../../primitive"
 import { DefaultStyle } from "../../style"
+import { MatrixTransform } from "../../transform"
 import { createPath } from "./SVGElementBuilder"
 
-export class OISVGRendererStroke
+/**
+ * @group Renderer
+ */
+export class OISVGStrokeUtil
 {
   selectionFilterId: string
 
@@ -29,7 +33,6 @@ export class OISVGRendererStroke
 
   getSVGElement(stroke: OIStroke): SVGPathElement
   {
-
     const attrs: { [key: string]: string } = {
       "id": stroke.id,
       "type": "stroke",
@@ -37,6 +40,7 @@ export class OISVGRendererStroke
       "stroke-linecap": "round",
       "stroke-linejoin": "round",
       "fill": "transparent",
+      "transform": MatrixTransform.toCssString(stroke.transform),
       "d": this.getSVGPath(stroke),
     }
 
@@ -49,6 +53,7 @@ export class OISVGRendererStroke
     else {
       attrs["stroke"] = stroke.style.color || DefaultStyle.color!
       attrs["stroke-width"] = (stroke.style.width || DefaultStyle.width!).toString()
+      attrs["opacity"] = (stroke.style.opacity || DefaultStyle.opacity!).toString()
     }
 
     if (stroke.selected) {

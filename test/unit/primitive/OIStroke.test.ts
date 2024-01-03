@@ -8,11 +8,15 @@ describe("OIStroke.ts", () =>
     test("should create with default style", () =>
     {
       const pointerId = 1
-      const stroke = new OIStroke(DefaultStyle, pointerId)
+      const style: TStyle = {
+        color: "blue",
+        width: 20
+      }
+      const stroke = new OIStroke(style, pointerId)
       expect(stroke).toBeDefined()
       expect(stroke.creationTime).toBeLessThanOrEqual(Date.now())
       expect(stroke.creationTime).toEqual(stroke.modificationDate)
-      expect(stroke.style).toEqual(DefaultStyle)
+      expect(stroke.style).toEqual(expect.objectContaining(style))
       expect(stroke.pointerId).toEqual(pointerId)
       expect(stroke.pointerType).toEqual("pen")
       expect(stroke.pointers).toHaveLength(0)
@@ -25,12 +29,8 @@ describe("OIStroke.ts", () =>
     })
     test("should create with custom style", () =>
     {
-      const style: TStyle = {
-        color: "blue",
-        width: 20
-      }
-      const stroke = new OIStroke(style, 1)
-      expect(stroke.style).toEqual(style)
+      const stroke = new OIStroke({}, 1)
+      expect(stroke.style).toEqual(DefaultStyle)
     })
   })
 
@@ -88,9 +88,9 @@ describe("OIStroke.ts", () =>
     })
   })
 
-  describe("Properties", () =>
+  describe("boundingBox", () =>
   {
-    test("should get boundingBox without pointers", () =>
+    test("should get without pointers", () =>
     {
       const stroke = new OIStroke(DefaultStyle, 1)
       expect(stroke.boundingBox.height).toEqual(0)
@@ -98,7 +98,7 @@ describe("OIStroke.ts", () =>
       expect(stroke.boundingBox.x).toEqual(0)
       expect(stroke.boundingBox.y).toEqual(0)
     })
-    test("should get boundingBox with pointers", () =>
+    test("should get with pointers", () =>
     {
       const stroke = new OIStroke(DefaultStyle, 1)
       stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
@@ -171,7 +171,7 @@ describe("OIStroke.ts", () =>
       expect(strokes[0].pointers[0]).toEqual(pStrokes[0]?.pointers?.[0])
       expect(strokes[0].style).toEqual(DefaultStyle)
       expect(strokes[1].pointers[1]).toEqual(pStrokes[1]?.pointers?.[1])
-      expect(strokes[1].style).toEqual(pStrokes[1]?.style)
+      expect(strokes[1].style).toEqual(expect.objectContaining(pStrokes[1]?.style))
     })
     test("should throw error if no pointers", () => {
       const pStrokes: PartialDeep<TStroke>[] = [

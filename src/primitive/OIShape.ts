@@ -59,7 +59,7 @@ export abstract class AbstracOIShape implements TOIShape
   abstract get vertices(): TPoint[]
   abstract get boundingBox(): Box
 
-  abstract isPartiallyOrTotallyWrapped(box: TBoundingBox): boolean
+  abstract isOverlapping(box: TBoundingBox): boolean
   abstract isCloseToPoint(point: TPoint): boolean
   abstract getClone(): TOISymbol
 }

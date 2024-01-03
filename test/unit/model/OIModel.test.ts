@@ -1,4 +1,4 @@
-import { buildOIStroke, delay } from "../helpers"
+import { buildOIHighlight, buildOIStroke, buildOIUnderline, delay } from "../helpers"
 
 import
 {
@@ -202,6 +202,20 @@ describe("OIModel.ts", () =>
       expect(model.symbols).toHaveLength(1)
       model.removeSymbol("not-exist")
       expect(model.symbols).toHaveLength(1)
+    })
+    test("should removeSymbol & decorators", () =>
+    {
+      const stroke = buildOIStroke()
+      const highlight = buildOIHighlight([stroke])
+      const underline = buildOIUnderline([stroke])
+      stroke.decorators.push(highlight)
+      stroke.decorators.push(underline)
+      model.addSymbol(stroke)
+      model.addSymbol(highlight)
+      model.addSymbol(underline)
+      const nbSymbols = model.symbols.length
+      model.removeSymbol(stroke.id)
+      expect(model.symbols).toHaveLength(nbSymbols - 3)
     })
   })
 

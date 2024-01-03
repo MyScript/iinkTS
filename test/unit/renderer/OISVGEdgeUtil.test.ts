@@ -1,11 +1,11 @@
-import { DefaultStyle, EdgeDecoration, OILine, OISVGRendererEdge, TPoint, TStyle } from "../../../src/iink"
+import { DefaultStyle, EdgeDecoration, OILine, OISVGEdgeUtil, TPoint, TStyle } from "../../../src/iink"
 
-describe("OISVGRendererEdge.ts", () =>
+describe("OISVGEdgeUtil.ts", () =>
 {
   const selectionFilterId = "selectionFilterId"
   const arrowStartDecoration = "arrowStartDecoration"
   const arrowEndDecoration = "arrowEndDecoration"
-  const renderer = new OISVGRendererEdge(selectionFilterId, arrowStartDecoration, arrowEndDecoration)
+  const renderer = new OISVGEdgeUtil(selectionFilterId, arrowStartDecoration, arrowEndDecoration)
 
   test("should getSVGElement with style", () =>
   {

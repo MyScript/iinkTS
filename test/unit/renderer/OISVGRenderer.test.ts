@@ -114,7 +114,7 @@ describe("OISVGRenderer.ts", () =>
         creationTime: Date.now(),
         modificationDate: Date.now(),
         getClone: jest.fn(),
-        isPartiallyOrTotallyWrapped: jest.fn(),
+        isOverlapping: jest.fn(),
         isCloseToPoint: jest.fn()
       }
       renderer.drawSymbol(unknowSym)
@@ -191,11 +191,10 @@ describe("OISVGRenderer.ts", () =>
       const stroke2 = buildOIStroke()
       renderer.drawSymbol(stroke2)
       expect(renderer.layer.querySelectorAll("path")).toHaveLength(2)
-      renderer.clearElements("path")
+      renderer.clearElements({ type: "path"})
       expect(renderer.layer.querySelectorAll("path")).toHaveLength(0)
     })
-
-    test("should clearElements by type and attrs", () =>
+    test("should clearElements by attrs", () =>
     {
       expect(renderer.layer.querySelectorAll("path")).toHaveLength(0)
       const stroke1 = buildOIStroke()
@@ -203,7 +202,19 @@ describe("OISVGRenderer.ts", () =>
       const stroke2 = buildOIStroke()
       renderer.drawSymbol(stroke2)
       expect(renderer.layer.querySelectorAll("path")).toHaveLength(2)
-      renderer.clearElements("path", { id: stroke2.id })
+      renderer.clearElements({ attrs: { id: stroke2.id } })
+      expect(renderer.layer.querySelectorAll("path")).toHaveLength(1)
+    })
+
+    test("should clearElements by type and attrs", () =>
+    {
+      renderer.clearElements({ type: "path"})
+      const stroke1 = buildOIStroke()
+      renderer.drawSymbol(stroke1)
+      const stroke2 = buildOIStroke()
+      renderer.drawSymbol(stroke2)
+      expect(renderer.layer.querySelectorAll("path")).toHaveLength(2)
+      renderer.clearElements({ type: "path", attrs: { id: stroke2.id } })
       expect(renderer.layer.querySelectorAll("path")).toHaveLength(1)
     })
   })

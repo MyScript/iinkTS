@@ -1,6 +1,7 @@
-import { Intention, InternalEventType, LoggerClass, WriteTool } from "../Constants"
+import { Intention, InternalEventType, LoggerClass, SvgElementRole, WriteTool } from "../Constants"
 import { Configuration, TConfiguration, TConverstionState, TRenderingConfiguration } from "../configuration"
 import { InternalEvent } from "../event"
+import { OIGestureManager, StrikeThroughAction, SurroundAction } from "../gesture"
 import { OIPointerEventGrabber } from "../grabber"
 import { LoggerManager } from "../logger"
 import { OIModel, TExport } from "../model"
@@ -8,10 +9,10 @@ import { OIStroke, SymbolType, TOISymbol, TPointer, TStroke } from "../primitive
 import { OIRecognizer } from "../recognizer/OIRecognizer"
 import { OISVGRenderer } from "../renderer"
 import { DefaultStyle, StyleManager, TStyle, TTheme } from "../style"
+import { OIResizeManager, OIRotateManager, OITranslateManager } from "../transform"
 import { TUndoRedoContext, UndoRedoManager } from "../undo-redo"
 import { PartialDeep, mergeDeep } from "../utils"
 import { IBehaviors, TBehaviorOptions } from "./IBehaviors"
-
 
 /**
  * @group Behavior
@@ -24,12 +25,20 @@ export class OIBehaviors implements IBehaviors
   #model: OIModel
   #intention: Intention
   #writeTool: WriteTool
+  #currentTransform?: SvgElementRole
+  #verticesVisibility = false
 
   grabber: OIPointerEventGrabber
   renderer: OISVGRenderer
   recognizer: OIRecognizer
   styleManager: StyleManager
   undoRedoManager: UndoRedoManager
+  gestureManager: OIGestureManager
+  resizeManager: OIResizeManager
+  rotateManager: OIRotateManager
+  translateManager: OITranslateManager
+
+  processGestures = true
 
   constructor(options: PartialDeep<TBehaviorOptions>)
   {
@@ -38,8 +47,13 @@ export class OIBehaviors implements IBehaviors
     this.styleManager = new StyleManager(options?.penStyle, options?.theme)
 
     this.grabber = new OIPointerEventGrabber(this.#configuration.grabber)
-    this.renderer = new OISVGRenderer(this.#configuration.rendering)
     this.recognizer = new OIRecognizer(this.#configuration.server, this.#configuration.recognition)
+    this.renderer = new OISVGRenderer(this.#configuration.rendering)
+
+    this.gestureManager = new OIGestureManager(this)
+    this.resizeManager = new OIResizeManager(this)
+    this.rotateManager = new OIRotateManager(this)
+    this.translateManager = new OITranslateManager(this)
 
     this.#intention = Intention.Write
     this.#writeTool = WriteTool.Pencil
@@ -90,10 +104,37 @@ export class OIBehaviors implements IBehaviors
   set renderingConfiguration(renderingConfiguration: TRenderingConfiguration)
   {
     this.configuration.rendering = mergeDeep(this.configuration.rendering, renderingConfiguration)
-    this.renderer.configuration = this.configuration.rendering
     const height = Math.max(this.renderer.parent.clientHeight, this.configuration.rendering.minHeight)
     const width = Math.max(this.renderer.parent.clientWidth, this.configuration.rendering.minWidth)
     this.renderer.resize(height, width)
+  }
+
+  get surroundAction(): SurroundAction
+  {
+    return this.gestureManager.surroundAction
+  }
+  set surroundAction(value: SurroundAction)
+  {
+    this.gestureManager.surroundAction = value
+  }
+
+  get strikeThroughAction(): StrikeThroughAction
+  {
+    return this.gestureManager.strikeThroughAction
+  }
+  set strikeThroughAction(value: StrikeThroughAction)
+  {
+    this.gestureManager.strikeThroughAction = value
+  }
+
+  get verticesVisibility(): boolean
+  {
+    return this.#verticesVisibility
+  }
+  set verticesVisibility(show: boolean)
+  {
+    this.#verticesVisibility = show
+    this.#verticesVisibility ? this.showVertices() : this.hideVertices()
   }
   //#endregion
 
@@ -141,48 +182,41 @@ export class OIBehaviors implements IBehaviors
   }
   //#endregion
 
-  protected onPointerDown(evt: PointerEvent, pointer: TPointer): void
+  //#region Draw
+
+  protected startDrawing(evt: PointerEvent, pointer: TPointer): void
   {
-    this.#logger.debug("onPointerDown", { evt, pointer })
-    try {
-      switch (this.#intention) {
-        case Intention.Erase:
-          this.drawSymbol(this.model.createCurrentSymbol(this.writeTool, pointer, this.currentPenStyle, evt.pointerId, "eraser"))
-          this.model.selectedSymbolsFromPoint(pointer)
-          this.model.selection.map(s => this.drawSymbol(s))
-          break
-        case Intention.Select:
-          break
-        default:
-          this.drawSymbol(this.model.createCurrentSymbol(this.writeTool, pointer, this.currentPenStyle, evt.pointerId, evt.pointerType))
-          break
-      }
-    } catch (error) {
-      this.#logger.error("onPointerDown", error)
-      this.grabber.stopPointerEvent()
-      this.internalEvent.emitError(error as Error)
+    switch (this.#intention) {
+      case Intention.Erase:
+        this.drawSymbol(this.model.createCurrentSymbol(WriteTool.Pencil, pointer, this.currentPenStyle, evt.pointerId, "eraser"))
+        this.model.selectedSymbolsFromPoint(pointer)
+        this.model.selection.map(s => this.drawSymbol(s))
+        break
+      case Intention.Select:
+        this.model.startSelectionByBox(pointer).forEach(s => this.drawSymbol(s))
+        this.renderer.drawSelectingRect(this.model.selectionBox)
+        break
+      default:
+        this.drawSymbol(this.model.createCurrentSymbol(this.writeTool, pointer, this.currentPenStyle, evt.pointerId, evt.pointerType))
+        break
     }
   }
 
-  protected onPointerMove(_evt: PointerEvent, pointer: TPointer): void
+  protected continueDrawing(pointer: TPointer): void
   {
-    this.#logger.debug("onPointerMove", { pointer })
-    try {
-      switch (this.#intention) {
-        case Intention.Erase:
-          this.drawSymbol(this.model.updateCurrentSymbol(pointer))
-          this.model.selectedSymbolsFromPoint(pointer)
-          this.model.selection.map(s => this.drawSymbol(s))
-          break
-        case Intention.Select:
-          break
-        default:
-          this.drawSymbol(this.model.updateCurrentSymbol(pointer))
-          break
-      }
-    } catch (error) {
-      this.#logger.error("onPointerDown", error)
-      this.internalEvent.emitError(error as Error)
+    switch (this.#intention) {
+      case Intention.Erase:
+        this.drawSymbol(this.model.updateCurrentSymbol(pointer))
+        this.model.selectedSymbolsFromPoint(pointer)
+        this.model.selection.map(s => this.drawSymbol(s))
+        break
+      case Intention.Select:
+        this.model.updateSelectionByBox(pointer).forEach(s => this.drawSymbol(s))
+        this.renderer.drawSelectingRect(this.model.selectionBox)
+        break
+      default:
+        this.drawSymbol(this.model.updateCurrentSymbol(pointer))
+        break
     }
   }
 
@@ -193,14 +227,14 @@ export class OIBehaviors implements IBehaviors
     this.renderer.removeSymbol(symbol.id)
     this.model.removeSymbol(symbol.id)
     if (this.model.selection.length) {
+      this.undoRedoManager.addModelToStack(this.model)
+      await this.recognizer.eraseStrokes(this.model.selection.filter(s => s.type === SymbolType.Stroke).map(s => s.id))
       this.model.selection.forEach(s =>
       {
         this.model.removeSymbol(s.id)
         this.renderer.removeSymbol(s.id)
       })
-      this.undoRedoManager.addModelToStack(this.model)
       this.model.updatePositionSent()
-      await this.recognizer.eraseStrokes(this.model.selection.filter(s => s.type === SymbolType.Stroke).map(s => s.id))
       this.model.updatePositionReceived()
       this.undoRedoManager.updateModelInStack(this.model)
     }
@@ -213,28 +247,171 @@ export class OIBehaviors implements IBehaviors
     this.drawSymbol(symbol)
     this.model.updatePositionSent()
     if (symbol.type === SymbolType.Stroke) {
-      await this.recognizer.addStrokes([symbol as OIStroke])
+      const stroke = symbol as OIStroke
+      this.undoRedoManager.addModelToStack(this.model)
+      if (this.processGestures) {
+        const shapesOverlap = this.model.symbols.filter(s => s.type !== SymbolType.Stroke && stroke.boundingBox.isOverlapping(s.boundingBox))
+        if (shapesOverlap.length) {
+          const gesture = await this.recognizer.recognizeGesture([stroke])
+          if (gesture) {
+            switch (gesture.gestures[0].type) {
+              case "scratch":
+                this.renderer.removeSymbol(stroke.id)
+                shapesOverlap.forEach(sov => {
+                  this.renderer.removeSymbol(sov.id)
+                  this.model.removeSymbol(sov.id)
+                })
+                break;
+              case "surround":
+                this.renderer.removeSymbol(stroke.id)
+                shapesOverlap.forEach(sov => {
+                  this.model.selectSymbol(sov.id)
+                })
+                this.renderer.drawSelectedGroup(shapesOverlap)
+                break
+              default:
+                this.#logger.info("applyDrawnSymbol", `Context less gesture not implemented: ${gesture.gestures[0].type}`)
+                break;
+            }
+          }
+        }
+      }
+      const gesture = await this.recognizer.addStrokes([symbol as OIStroke], this.processGestures)
+      this.model.updatePositionReceived()
+      this.undoRedoManager.updateModelInStack(this.model)
+      await this.gestureManager.apply(gesture)
     }
-    this.undoRedoManager.addModelToStack(this.model)
+    else {
+      this.undoRedoManager.addModelToStack(this.model)
+    }
   }
 
-  protected onPointerUp(_evt: PointerEvent, pointer: TPointer): void
+  protected async endDrawing(pointer: TPointer): Promise<void>
+  {
+    switch (this.#intention) {
+      case Intention.Erase:
+        await this.applyEraseSymbol(pointer)
+        break
+      case Intention.Select:
+        this.model.updateSelectionByBox(pointer).forEach(s => this.drawSymbol(s))
+        this.renderer.clearSelectingRect()
+        this.renderer.drawSelectedGroup(this.model.selection)
+        this.internalEvent.emitSelected(this.model.selection)
+        break
+      default:
+        await this.applyDrawnSymbol(pointer)
+        break
+    }
+  }
+
+  //#endregion
+
+  //#region debug
+  showVertices(): void
+  {
+    this.#logger.info("showAllPoints")
+    this.model.symbols.forEach(s => s.vertices.forEach(p => this.renderer.drawCircle(p, 2, { fill: "red", debug: "true" })))
+  }
+  hideVertices(): void
+  {
+    this.#logger.info("hideAllPoints")
+    this.renderer.clearElements({ type: "circle", attrs: { debug: "true" } })
+  }
+  //#region
+
+  protected onPointerDown(evt: PointerEvent, pointer: TPointer): void
+  {
+    this.#logger.debug("onPointerDown", { evt, pointer })
+    try {
+      const target: Element = (evt.target as Element)
+      switch (target.getAttribute("role")) {
+        case SvgElementRole.Translate: {
+          this.#currentTransform = SvgElementRole.Translate
+          this.translateManager.start(target, pointer)
+          break
+        }
+        case SvgElementRole.Resize: {
+          this.#currentTransform = SvgElementRole.Resize
+          this.resizeManager.start(target)
+          break
+        }
+        case SvgElementRole.Rotate: {
+          this.#currentTransform = SvgElementRole.Rotate
+          this.rotateManager.start(target)
+          break
+        }
+        default: {
+          this.renderer.removeSelectedGroup()
+          this.model.resetSelection()
+          this.internalEvent.emitSelected(this.model.selection)
+          this.startDrawing(evt, pointer)
+          break
+        }
+      }
+    } catch (error) {
+      this.#logger.error("onPointerDown", error)
+      this.grabber.stopPointerEvent()
+      this.internalEvent.emitError(error as Error)
+    }
+  }
+
+  protected onPointerMove(_evt: PointerEvent, pointer: TPointer): void
+  {
+    this.#logger.debug("onPointerMove", { pointer })
+    try {
+      switch (this.#currentTransform) {
+        case SvgElementRole.Translate:
+          this.translateManager.continue(pointer)
+          break
+        case SvgElementRole.Resize:
+          this.resizeManager.continue(pointer)
+          break
+        case SvgElementRole.Rotate:
+          this.rotateManager.continue(pointer)
+          break
+        default: {
+          this.continueDrawing(pointer)
+          break
+        }
+      }
+    } catch (error) {
+      this.#logger.error("onPointerDown", error)
+      this.internalEvent.emitError(error as Error)
+    }
+  }
+
+  protected async onPointerUp(_evt: PointerEvent, pointer: TPointer): Promise<void>
   {
     this.#logger.debug("onPointerUp", { pointer })
     try {
-      switch (this.#intention) {
-        case Intention.Erase:
-          this.applyEraseSymbol(pointer)
+      switch (this.#currentTransform) {
+        case SvgElementRole.Translate: {
+          await this.translateManager.end(pointer)
           break
-        case Intention.Select:
+        }
+        case SvgElementRole.Resize: {
+          await this.resizeManager.end(pointer)
           break
-        default:
-          this.applyDrawnSymbol(pointer)
+        }
+        case SvgElementRole.Rotate: {
+          this.rotateManager.end(pointer)
           break
+        }
+        default: {
+          await this.endDrawing(pointer)
+          break
+        }
       }
     } catch (error) {
       this.#logger.error("onPointerUp", error)
       this.internalEvent.emitError(error as Error)
+    }
+    finally {
+      this.#currentTransform = undefined
+      this.hideVertices()
+      if (this.verticesVisibility) {
+        this.showVertices()
+      }
     }
   }
 
@@ -244,6 +421,22 @@ export class OIBehaviors implements IBehaviors
     if (symbol) {
       this.renderer.drawSymbol(symbol)
     }
+  }
+
+  updateSymbolsStyle(strokeIds: string[], style: { color?: string, fill?: string, width?: number }): void
+  {
+    this.#logger.info("updateSymbolsStyle", { strokeIds, style })
+    this.model.symbols.forEach(s =>
+    {
+      if (strokeIds.includes(s.id)) {
+        s.style.width = style.width || s.style.width
+        s.style.color = style.color || s.style.color
+        s.style.fill = style.fill || s.style.fill
+        this.renderer.drawSymbol(s)
+        s.modificationDate = Date.now()
+      }
+    })
+    this.undoRedoManager.addModelToStack(this.model)
   }
 
   async init(domElement: HTMLElement): Promise<void>
@@ -332,6 +525,7 @@ export class OIBehaviors implements IBehaviors
   {
     this.#logger.info("undo")
     if (this.context.canUndo) {
+      this.renderer.removeSelectedGroup()
       const promises: Promise<void>[] = []
       const modelToApply = this.undoRedoManager.undo() as OIModel
       const modifications = modelToApply.extractDifferenceSymbols(this.model)
@@ -345,6 +539,10 @@ export class OIBehaviors implements IBehaviors
         promises.push(this.recognizer.addStrokes(modifications.added.filter(s => s.type === SymbolType.Stroke) as OIStroke[], false) as Promise<void>)
       }
       this.#model = modelToApply
+      this.hideVertices()
+      if (this.verticesVisibility) {
+        this.showVertices()
+      }
       await Promise.all(promises)
       return this.model
     }
@@ -357,6 +555,7 @@ export class OIBehaviors implements IBehaviors
   {
     this.#logger.info("redo")
     if (this.context.canRedo) {
+      this.renderer.removeSelectedGroup()
       const promises: Promise<void>[] = []
       const modelToApply = this.undoRedoManager.redo() as OIModel
       const modifications = modelToApply.extractDifferenceSymbols(this.model)
@@ -370,6 +569,10 @@ export class OIBehaviors implements IBehaviors
         promises.push(this.recognizer.addStrokes(modifications.added.filter(s => s.type === SymbolType.Stroke) as OIStroke[], false) as Promise<void>)
       }
       this.#model = modelToApply
+      this.hideVertices()
+      if (this.verticesVisibility) {
+        this.showVertices()
+      }
       await Promise.all(promises)
       return this.model
     }
@@ -395,6 +598,7 @@ export class OIBehaviors implements IBehaviors
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async convert(_conversionState?: TConverstionState, _requestedMimeTypes?: string[]): Promise<OIModel>
   {
+    this.renderer.removeSelectedGroup()
     throw new Error("Not implemented")
   }
 
@@ -414,6 +618,7 @@ export class OIBehaviors implements IBehaviors
       this.renderer.clear()
       await this.recognizer.eraseStrokes(this.model.symbols.filter(s => s.type === SymbolType.Stroke).map(s => s.id))
       this.model.clear()
+      this.internalEvent.emitSelected(this.model.selection)
       this.undoRedoManager.addModelToStack(this.model)
     }
     return this.model

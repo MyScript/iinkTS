@@ -6,7 +6,7 @@ import { TExport, TJIIXExport } from "../model"
 import { OIStroke } from "../primitive"
 import { TMatrixTransform } from "../transform"
 import { computeHmac, DeferredPromise, isVersionSuperiorOrEqual } from "../utils"
-import { TOIMessageEvent, TOIMessageEventError, TOIMessageEventExport, TOIMessageEventGesture, TOIMessageEventHMACChallenge, TOIMessageEventPartChange } from "./OIRecognizerMessage"
+import { TOIMessageEvent, TOIMessageEventContextlessGesture, TOIMessageEventError, TOIMessageEventExport, TOIMessageEventGesture, TOIMessageEventHMACChallenge, TOIMessageEventPartChange } from "./OIRecognizerMessage"
 
 /**
  * A websocket dialog have this sequence :
@@ -290,6 +290,12 @@ export class OIRecognizer
     this.addStrokeDeferred?.resolve(gestureMessage)
   }
 
+  protected manageContextlessGesture(websocketMessage: TOIMessageEvent): void
+  {
+    const gestureMessage = websocketMessage as TOIMessageEventContextlessGesture
+    this.recognizeGestureDeferred?.resolve(gestureMessage)
+  }
+
   protected messageCallback(message: MessageEvent<string>): void
   {
     this.currentErrorCode = undefined
@@ -312,7 +318,7 @@ export class OIRecognizer
             this.initialized?.resolve()
             break
           case "contentChanged":
-            this.addStrokeDeferred?.resolve()
+            this.addStrokeDeferred?.resolve(undefined)
             this.transformStrokeDeferred?.resolve()
             this.eraseStrokeDeferred?.resolve()
             this.replaceStrokeDeferred?.resolve()
@@ -322,6 +328,9 @@ export class OIRecognizer
             break
           case "gestureDetected":
             this.manageGestureDetected(websocketMessage)
+            break
+          case "Gesture":
+            this.manageContextlessGesture(websocketMessage)
             break
           case "idle":
             this.manageWaitForIdle()
@@ -396,12 +405,12 @@ export class OIRecognizer
     }
   }
 
-  async addStrokes(strokes: OIStroke[], processGestures = true): Promise<TOIMessageEventGesture | void>
+  async addStrokes(strokes: OIStroke[], processGestures = true): Promise<TOIMessageEventGesture | undefined>
   {
     await this.initialized?.promise
-    this.addStrokeDeferred = new DeferredPromise<TOIMessageEventGesture | void>()
+    this.addStrokeDeferred = new DeferredPromise<TOIMessageEventGesture | undefined>()
     if (strokes.length === 0) {
-      this.addStrokeDeferred.resolve()
+      this.addStrokeDeferred.resolve(undefined)
       return this.addStrokeDeferred?.promise
     }
     await this.send({
@@ -478,12 +487,12 @@ export class OIRecognizer
     return this.eraseStrokeDeferred?.promise
   }
 
-  async recognizeGesture(strokes: OIStroke[]): Promise<TOIMessageEventGesture | void>
+  async recognizeGesture(strokes: OIStroke[]): Promise<TOIMessageEventContextlessGesture | undefined>
   {
     await this.initialized?.promise
-    this.recognizeGestureDeferred = new DeferredPromise<TOIMessageEventGesture | void>()
+    this.recognizeGestureDeferred = new DeferredPromise<TOIMessageEventContextlessGesture | undefined>()
     if (strokes.length === 0) {
-      this.recognizeGestureDeferred.resolve()
+      this.recognizeGestureDeferred.resolve(undefined)
       return this.recognizeGestureDeferred?.promise
     }
     const pixelTomm = 25.4 / 96

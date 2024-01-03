@@ -1,6 +1,7 @@
+import { Box, TBoundingBox, TPoint } from "../primitive"
+
 /**
- * @group Utils
- * @group Math
+ * @group Transform
  * @remarks Represents a 2D affine transform, defined as a 3x3 matrix with an implicit third raw of <code>[ 0 0 1 ]</code>
  */
 export type TMatrixTransform = {
@@ -30,6 +31,10 @@ export type TMatrixTransform = {
   ty: number,
 }
 
+/**
+ * @group Transform
+ * @remarks Represents a 2D affine transform, defined as a 3x3 matrix with an implicit third raw of <code>[ 0 0 1 ]</code>
+ */
 export class MatrixTransform implements TMatrixTransform
 {
 	xx: number
@@ -49,16 +54,6 @@ export class MatrixTransform implements TMatrixTransform
     this.ty = ty
   }
 
-	multiply(m: TMatrixTransform): void
-  {
-		this.xx = this.xx * m.xx + this.xy * m.yx
-		this.yx = this.yx * m.xx + this.yy * m.yx
-		this.xy = this.xx * m.xy + this.xy * m.yy
-		this.yy = this.yx * m.xy + this.yy * m.yy
-		this.tx = this.xx * m.tx + this.xy * m.ty + this.tx
-		this.ty = this.yx * m.tx + this.yy * m.ty + this.ty
-	}
-
 	static identity(): TMatrixTransform {
     return {
       xx: 1,
@@ -68,6 +63,35 @@ export class MatrixTransform implements TMatrixTransform
       tx: 0,
       ty: 0
     }
+	}
+
+	static applyToPoint(mat: TMatrixTransform, point: TPoint): TPoint
+	{
+		return {
+			x: mat.xx * point.x + mat.yx * point.y + mat.tx,
+			y: mat.xy * point.x + mat.yy * point.y + mat.ty,
+    }
+	}
+
+	static applyToBox(mat: TMatrixTransform, box: TBoundingBox): Box
+	{
+		return new Box(mat.tx + box.x, mat.ty + box.y, box.width, box.height)
+	}
+
+  static toCssString(matrix: TMatrixTransform): string
+  {
+    return `matrix(${matrix.xx}, ${matrix.yx}, ${matrix.xy}, ${matrix.yy}, ${matrix.tx}, ${matrix.ty})`
+  }
+
+	multiply(m: TMatrixTransform): void
+  {
+    const { xx, yx, xy, yy, tx, ty } = this
+		this.xx = xx * m.xx + xy * m.yx
+		this.yx = yx * m.xx + yy * m.yx
+		this.xy = xx * m.xy + xy * m.yy
+		this.yy = yx * m.xy + yy * m.yy
+		this.tx = xx * m.tx + xy * m.ty + tx
+		this.ty = yx * m.tx + yy * m.ty + ty
 	}
 
   translate(tx: number, ty: number): void
@@ -82,10 +106,11 @@ export class MatrixTransform implements TMatrixTransform
     })
   }
 
-  rotate(radian: number): void
+  rotate(radian: number, center: TPoint): void
   {
-		const cosAngle = Math.cos(radian)
-		const sinAngle = Math.sin(radian)
+    this.translate(center.x, center.y)
+		const cosAngle = Math.round(Math.cos(radian) * 1000) / 1000
+		const sinAngle = Math.round(Math.sin(radian) * 1000) / 1000
     this.multiply({
       xx: cosAngle,
       yx: sinAngle,
@@ -94,6 +119,7 @@ export class MatrixTransform implements TMatrixTransform
       tx: 0,
       ty: 0
     })
+    this.translate(-center.x, -center.y)
   }
 
   scale(x: number, y: number): void
@@ -107,4 +133,10 @@ export class MatrixTransform implements TMatrixTransform
       ty: 0
     })
   }
+
+  getClone(): MatrixTransform
+  {
+    return new MatrixTransform(this.xx, this.yx, this.xy, this.yy, this.tx, this.ty)
+  }
+
 }

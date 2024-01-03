@@ -22,13 +22,13 @@ describe("OIEdge.ts", () =>
         const end: TPoint = { x: 5, y: 5 }
         const style: TStyle = {
           color: "blue",
-          width: 20
+          width: 20,
         }
         const line = new OILine(style, start, end)
         expect(line).toBeDefined()
         expect(line.creationTime).toBeLessThanOrEqual(Date.now())
         expect(line.creationTime).toEqual(line.modificationDate)
-        expect(line.style).toEqual(style)
+        expect(line.style).toEqual(expect.objectContaining(style))
         expect(line.selected).toEqual(false)
         expect(line.transform).toEqual(MatrixTransform.identity())
         expect(line.start).toEqual(start)
@@ -72,7 +72,7 @@ describe("OIEdge.ts", () =>
         expect(line.isCloseToPoint(closePoint)).toEqual(false)
       })
     })
-    describe("isPartiallyOrTotallyWrapped", () =>
+    describe("isOverlapping", () =>
     {
       const start: TPoint = { x: 0, y: 0 }
       const end: TPoint = { x: 0, y: 25 }
@@ -84,17 +84,17 @@ describe("OIEdge.ts", () =>
       test(`should return true if partially wrap`, () =>
       {
         const boundaries: TBoundingBox = { height: 10, width: 10, x: -5, y: -5 }
-        expect(line.isPartiallyOrTotallyWrapped(boundaries)).toEqual(true)
+        expect(line.isOverlapping(boundaries)).toEqual(true)
       })
       test(`should return true if totally wrap`, () =>
       {
         const boundaries: TBoundingBox = { height: 50, width: 50, x: -25, y: -25 }
-        expect(line.isPartiallyOrTotallyWrapped(boundaries)).toEqual(true)
+        expect(line.isOverlapping(boundaries)).toEqual(true)
       })
       test(`should return false if box is outside`, () =>
       {
         const boundaries: TBoundingBox = { height: 2, width: 2, x: 50, y: 50 }
-        expect(line.isPartiallyOrTotallyWrapped(boundaries)).toEqual(false)
+        expect(line.isOverlapping(boundaries)).toEqual(false)
       })
     })
     describe("getClone", () =>
