@@ -1,4 +1,4 @@
-import { TPoint } from "../../primitive"
+import { TBoundingBox, TPoint } from "../../primitive"
 
 const XMLNS = "http://www.w3.org/2000/svg"
 
@@ -141,4 +141,21 @@ export function createPolygon(points: number[], attrs: { [key: string]: string }
     polygonEl.setAttribute(k, attrs[k])
   })
   return polygonEl
+}
+
+/**
+ * @group Renderer
+ */
+export function createRect(box: TBoundingBox, attrs: { [key: string]: string } = {}): SVGRectElement
+{
+  const rectEl = document.createElementNS(XMLNS, "rect")
+  rectEl.setAttribute("x", box.x.toString())
+  rectEl.setAttribute("y", box.y.toString())
+  rectEl.setAttribute("width", box.width.toString())
+  rectEl.setAttribute("height", box.height.toString())
+  Object.keys(attrs).forEach(k =>
+  {
+    rectEl.setAttribute(k, attrs[k])
+  })
+  return rectEl
 }

@@ -1,8 +1,12 @@
 import { EdgeDecoration, TOIEdge } from "../../primitive"
 import { DefaultStyle } from "../../style"
+import { MatrixTransform } from "../../transform"
 import { createPath } from "./SVGElementBuilder"
 
-export class OISVGRendererEdge
+/**
+ * @group Renderer
+ */
+export class OISVGEdgeUtil
 {
   selectionFilterId: string
   arrowStartDecoration: string
@@ -27,6 +31,8 @@ export class OISVGRendererEdge
       "fill": "transparent",
       "stroke": edge.style.color || DefaultStyle.color!,
       "stroke-width": (edge.style.width || DefaultStyle.width!).toString(),
+      "opacity": (edge.style.opacity || DefaultStyle.opacity!).toString(),
+      "transform": MatrixTransform.toCssString(edge.transform),
       "d": `M ${edge.start.x} ${edge.start.y} L ${edge.end.x} ${edge.end.y}`,
     }
 

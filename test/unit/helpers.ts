@@ -1,11 +1,12 @@
-import { Stroke, DefaultPenStyle, TBoundingBox, OIStroke, DefaultStyle } from "../../src/iink"
+import { Stroke, DefaultPenStyle, TBoundingBox, OIStroke, DefaultStyle, OIDecoratorHighlight, TStyle, TOISymbol, OIDecoratorSurround, OIDecoratorUnderline, OIDecoratorStrikethrough } from "../../src/iink"
 
 export const delay = (delayInms: number) =>
 {
   return new Promise(resolve => setTimeout(resolve, delayInms))
 }
 
-export function round(n: number, digit = 2) {
+export function round(n: number, digit = 2)
+{
   return Math.round(n * Math.pow(10, digit)) / Math.pow(10, digit)
 }
 
@@ -42,4 +43,24 @@ export function buildOIStroke({ box = defaultBox, style = DefaultStyle, nbPoint 
     })
   }
   return stroke
+}
+
+export function buildOIHighlight(symbols: TOISymbol[], style: TStyle = DefaultStyle): OIDecoratorHighlight
+{
+  return new OIDecoratorHighlight(style, symbols)
+}
+
+export function buildOISurround(symbols: TOISymbol[], style: TStyle = DefaultStyle): OIDecoratorSurround
+{
+  return new OIDecoratorSurround(style, symbols)
+}
+
+export function buildOIUnderline(symbols: TOISymbol[], style: TStyle = DefaultStyle): OIDecoratorUnderline
+{
+  return new OIDecoratorUnderline(style, symbols)
+}
+
+export function buildOIStrikethrough(symbols: TOISymbol[], style: TStyle = DefaultStyle): OIDecoratorStrikethrough
+{
+  return new OIDecoratorStrikethrough(style, symbols)
 }

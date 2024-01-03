@@ -6,6 +6,7 @@ import { TPoint, TSegment } from "./Point"
 import { TOISymbol } from "./Symbol"
 import { AbstracOIShape, ShapeKind } from "./OIShape"
 import { Box, TBoundingBox } from "./Box"
+import { MatrixTransform } from "../transform"
 
 /**
  * @group Primitive
@@ -24,25 +25,25 @@ export class OIShapeCircle extends AbstracOIShape implements TOISymbol
     this.radius = radius
   }
 
-  get boundingBox(): Box
-  {
-    return new Box(this.center.x - this.radius, this.center.y - this.radius, this.radius * 2, this.radius * 2)
-  }
-
   get vertices(): TPoint[]
   {
     const firstPoint: TPoint = {
       x: this.center.x,
       y: this.radius + this.center.y
     }
-		const perimeter = 2 * Math.PI * this.radius
+    const perimeter = 2 * Math.PI * this.radius
     const nbPoint = Math.max(8, Math.round(perimeter / SELECTION_MARGIN))
     const points: TPoint[] = []
     for (let i = 0; i < nbPoint; i++) {
       const rad = 2 * Math.PI * (i / nbPoint)
       points.push(rotatePoint(this.center, firstPoint, rad))
     }
-    return points
+    return points.map(p => MatrixTransform.applyToPoint(this.transform, p))
+  }
+
+  get boundingBox(): Box
+  {
+    return new Box(this.center.x - this.radius, this.center.y - this.radius, this.radius * 2, this.radius * 2)
   }
 
   isCloseToPoint(point: TPoint): boolean
@@ -50,16 +51,16 @@ export class OIShapeCircle extends AbstracOIShape implements TOISymbol
     return Math.abs(computeDistance(point, this.center) - this.radius) < SELECTION_MARGIN
   }
 
-  isPartiallyOrTotallyWrapped(box: TBoundingBox): boolean
+  isOverlapping(box: TBoundingBox): boolean
   {
-    const segments: TSegment[] = [
+    const boxEdges: TSegment[] = [
       { p1: { x: box.x, y: box.y }, p2: { x: box.x + box.width, y: box.y } },
       { p1: { x: box.x + box.width, y: box.y }, p2: { x: box.x + box.width, y: box.y + box.height } },
       { p1: { x: box.x + box.width, y: box.y + box.height }, p2: { x: box.x, y: box.y + box.height } },
       { p1: { x: box.x, y: box.y + box.height }, p2: { x: box.x, y: box.y } },
     ]
     return this.boundingBox.isWrap(box) ||
-      segments.some(seg => findIntersectBetweenSegmentAndCircle(seg, this.center, this.radius).length)
+      boxEdges.some(seg => findIntersectBetweenSegmentAndCircle(seg, this.center, this.radius).length)
   }
 
   getClone(): OIShapeCircle
@@ -68,6 +69,7 @@ export class OIShapeCircle extends AbstracOIShape implements TOISymbol
     clone.id = this.id
     clone.creationTime = this.creationTime
     clone.modificationDate = this.modificationDate
+    clone.transform = this.transform.getClone()
     return clone
   }
 

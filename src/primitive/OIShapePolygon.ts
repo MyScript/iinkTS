@@ -1,16 +1,17 @@
 import { LoggerClass, SELECTION_MARGIN } from "../Constants"
 import { LoggerManager } from "../logger"
 import { TStyle } from "../style"
-import { computeDistanceBetweenPointAndSegment, isBetween } from "../utils"
+import { computeDistanceBetweenPointAndSegment, findIntersectionBetween2Segment } from "../utils"
 import { TPoint, TSegment } from "./Point"
 import { TOISymbol } from "./Symbol"
 import { AbstracOIShape, ShapeKind } from "./OIShape"
 import { Box, TBoundingBox } from "./Box"
+import { MatrixTransform } from "../transform"
 
 /**
  * @group Primitive
  */
-export abstract class OIShapePolygon extends AbstracOIShape implements TOISymbol
+export class OIShapePolygon extends AbstracOIShape implements TOISymbol
 {
   #logger = LoggerManager.getLogger(LoggerClass.SHAPE)
   points: TPoint[]
@@ -22,40 +23,51 @@ export abstract class OIShapePolygon extends AbstracOIShape implements TOISymbol
     this.points = points
   }
 
-  get boundingBox(): Box
-  {
-    return Box.createFromPoints(this.points)
-  }
-
   get vertices(): TPoint[]
   {
-    return this.points
+    return this.points.map(p => MatrixTransform.applyToPoint(this.transform, p))
+  }
+
+  get edges(): TSegment[]
+  {
+    return this.vertices.map((p, i) => {
+      if (i === this.vertices.length - 1) {
+        return { p1: this.vertices[0], p2: p }
+      }
+      else {
+        return { p1: p, p2: this.vertices[i + 1] }
+      }
+    })
+  }
+
+  get boundingBox(): Box
+  {
+    return Box.createFromPoints(this.vertices)
   }
 
   isCloseToPoint(point: TPoint): boolean
   {
-    const segments: TSegment[] = this.points.map((p, i) => {
-      if (i === this.points.length - 1) {
-        return { p1: this.points[0], p2: p }
-      }
-      else {
-        return { p1: p, p2: this.points[i + 1] }
-      }
-    })
-
-    return segments.some(seg =>
+    return this.edges.some(seg =>
     {
       return computeDistanceBetweenPointAndSegment(point, seg) < SELECTION_MARGIN
     })
   }
 
-  isPartiallyOrTotallyWrapped(box: TBoundingBox): boolean
+  isOverlapping(box: TBoundingBox): boolean
   {
     return this.boundingBox.isWrap(box) ||
-      this.vertices.some(v => isBetween(v.x, box.x, box.x + box.width) && isBetween(v.y, box.y, box.y + box.height))
+      this.edges.some(e1 => Box.getEdges(box).some(e2 => !!findIntersectionBetween2Segment(e1, e2)))
   }
 
-  abstract getClone(): OIShapePolygon
+  getClone(): OIShapePolygon
+  {
+    const clone = new OIShapePolygon(structuredClone(this.style), structuredClone(this.points), this.kind)
+    clone.id = this.id
+    clone.creationTime = this.creationTime
+    clone.modificationDate = this.modificationDate
+    clone.transform = this.transform.getClone()
+    return clone
+  }
 }
 
 /**
@@ -66,15 +78,6 @@ export class OIShapeTriangle extends OIShapePolygon implements TOISymbol
   constructor(style: TStyle, points: TPoint[])
   {
     super(style, points, ShapeKind.Triangle)
-  }
-
-  getClone(): OIShapeTriangle
-  {
-    const clone = new OIShapeTriangle(structuredClone(this.style), structuredClone(this.points))
-    clone.id = this.id
-    clone.creationTime = this.creationTime
-    clone.modificationDate = this.modificationDate
-    return clone
   }
 
   static createFromLine(style: TStyle, origin: TPoint, target: TPoint): OIShapeTriangle
@@ -108,15 +111,6 @@ export class OIShapeParallelogram extends OIShapePolygon implements TOISymbol
     super(style, points, ShapeKind.Parallelogram)
   }
 
-  getClone(): OIShapeParallelogram
-  {
-    const clone = new OIShapeParallelogram(structuredClone(this.style), structuredClone(this.points))
-    clone.id = this.id
-    clone.creationTime = this.creationTime
-    clone.modificationDate = this.modificationDate
-    return clone
-  }
-
   static createFromLine(style: TStyle, origin: TPoint, target: TPoint): OIShapeParallelogram
   {
     const points: TPoint[] = [
@@ -137,6 +131,47 @@ export class OIShapeParallelogram extends OIShapePolygon implements TOISymbol
       { x: origin.x + (target.x - origin.x) * 0.25, y: target.y },
     ]
     parallelogram.points = points
+    parallelogram.modificationDate = Date.now()
     return parallelogram
+  }
+}
+
+/**
+ * @group Primitive
+ */
+export class OIShapeRectangle extends OIShapePolygon implements TOISymbol
+{
+  #logger = LoggerManager.getLogger(LoggerClass.SHAPE)
+
+  constructor(style: TStyle, points: TPoint[])
+  {
+    super(style, points, ShapeKind.Rectangle)
+    this.#logger.debug("constructor", { style, points })
+  }
+
+  static createFromLine(style: TStyle, origin: TPoint, target: TPoint): OIShapeRectangle
+  {
+    const box = Box.createFromPoints([origin, target])
+    const points: TPoint[] = [
+      { x: box.xMin, y: box.yMin },
+      { x: box.xMax, y: box.yMin },
+      { x: box.xMax, y: box.yMax },
+      { x: box.xMin, y: box.yMax },
+    ]
+    return new OIShapeRectangle(style, points)
+  }
+
+  static updateFromLine(rect: OIShapeRectangle, origin: TPoint, target: TPoint): OIShapeRectangle
+  {
+    const box = Box.createFromPoints([origin, target])
+    const points: TPoint[] = [
+      { x: box.xMin, y: box.yMin },
+      { x: box.xMax, y: box.yMin },
+      { x: box.xMax, y: box.yMax },
+      { x: box.xMin, y: box.yMax },
+    ]
+    rect.points = points
+    rect.modificationDate = Date.now()
+    return rect
   }
 }

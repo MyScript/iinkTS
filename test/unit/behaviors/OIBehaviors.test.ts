@@ -1,4 +1,4 @@
-import { buildOIStroke } from "../helpers"
+import { buildOIStroke, delay } from "../helpers"
 import { LeftClickEventFake } from "../PointerEventFake"
 
 import
@@ -283,7 +283,7 @@ describe("OIBehaviors.ts", () =>
     {
       const oib = new OIBehaviors(DefaultBehaviorsOptions)
       oib.recognizer.init = jest.fn()
-      oib.recognizer.addStrokes = jest.fn()
+      oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
       oib.renderer.drawSymbol = jest.fn()
       const div = document.createElement("div")
       const pointerId = 666
@@ -378,7 +378,7 @@ describe("OIBehaviors.ts", () =>
           ]
         })
         expect(oib.renderer.drawSymbol).toBeCalledWith(oib.model.symbols[0])
-        expect(oib.recognizer.addStrokes).toBeCalledWith([oib.model.symbols[0]])
+        expect(oib.recognizer.addStrokes).toBeCalledWith([oib.model.symbols[0]], true)
       })
     })
     describe("Draw erase Stroke", () =>
@@ -386,7 +386,8 @@ describe("OIBehaviors.ts", () =>
       const oib = new OIBehaviors(DefaultBehaviorsOptions)
       oib.intention = Intention.Erase
       oib.recognizer.init = jest.fn()
-      oib.recognizer.addStrokes = jest.fn()
+      oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
+      oib.recognizer.eraseStrokes = jest.fn(() => Promise.resolve(undefined))
       oib.renderer.drawSymbol = jest.fn()
       oib.renderer.removeSymbol = jest.fn()
       const div = document.createElement("div")
@@ -462,9 +463,13 @@ describe("OIBehaviors.ts", () =>
         }) as PointerEvent
         const strokeID = oib.model.currentSymbol?.id
         target.dispatchEvent(pointerUp)
+        //¯\_(ツ)_/¯  required to wait oib.recognizer.eraseStrokes
+        await delay(100)
         expect(oib.model.currentSymbol).toBeUndefined()
         expect(oib.model.symbols).toHaveLength(1)
-        expect(oib.renderer.removeSymbol).toBeCalledWith(strokeID)
+        expect(oib.recognizer.eraseStrokes).toBeCalledWith([selectedSymbol.id])
+        expect(oib.renderer.removeSymbol).toHaveBeenNthCalledWith(1, strokeID)
+        expect(oib.renderer.removeSymbol).toHaveBeenNthCalledWith(2, selectedSymbol.id)
       })
     })
   })
@@ -539,10 +544,13 @@ describe("OIBehaviors.ts", () =>
       oib.context.canUndo = true
       oib.context.stackIndex = 1
       oib.context.stack.unshift(firstModel)
+      oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
       oib.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
       oib.renderer.removeSymbol = jest.fn()
-      oib.recognizer.addStrokes = jest.fn(() => Promise.resolve())
       oib.renderer.drawSymbol = jest.fn()
+      oib.renderer.drawCircle = jest.fn()
+      oib.renderer.clearElements = jest.fn()
+      oib.renderer.removeSelectedGroup = jest.fn()
       await oib.undo()
       expect(oib.recognizer.addStrokes).toBeCalledTimes(1)
       expect(oib.recognizer.addStrokes).toBeCalledWith([stroke1], false)
@@ -558,10 +566,13 @@ describe("OIBehaviors.ts", () =>
       oib.context.canUndo = true
       oib.context.stackIndex = 1
       oib.context.stack.unshift(firstModel)
+      oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
       oib.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
       oib.renderer.removeSymbol = jest.fn()
-      oib.recognizer.addStrokes = jest.fn(() => Promise.resolve())
       oib.renderer.drawSymbol = jest.fn()
+      oib.renderer.drawCircle = jest.fn()
+      oib.renderer.clearElements = jest.fn()
+      oib.renderer.removeSelectedGroup = jest.fn()
       await oib.undo()
       expect(oib.recognizer.eraseStrokes).toBeCalledTimes(1)
       expect(oib.recognizer.eraseStrokes).toBeCalledWith([stroke1.id])
@@ -577,10 +588,13 @@ describe("OIBehaviors.ts", () =>
       oib.context.canUndo = true
       oib.context.stackIndex = 1
       oib.context.stack.unshift(firstModel)
+      oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
       oib.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
-      oib.recognizer.addStrokes = jest.fn(() => Promise.resolve())
       oib.renderer.removeSymbol = jest.fn()
       oib.renderer.drawSymbol = jest.fn()
+      oib.renderer.drawCircle = jest.fn()
+      oib.renderer.clearElements = jest.fn()
+      oib.renderer.removeSelectedGroup = jest.fn()
       const modelReceive = await oib.undo()
       expect(modelReceive).toEqual(firstModel)
     })
@@ -605,10 +619,13 @@ describe("OIBehaviors.ts", () =>
       secondModel.addSymbol(stroke1)
       oib.context.canRedo = true
       oib.context.stack.push(secondModel)
+      oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
       oib.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
       oib.renderer.removeSymbol = jest.fn()
-      oib.recognizer.addStrokes = jest.fn(() => Promise.resolve())
       oib.renderer.drawSymbol = jest.fn()
+      oib.renderer.drawCircle = jest.fn()
+      oib.renderer.clearElements = jest.fn()
+      oib.renderer.removeSelectedGroup = jest.fn()
       await oib.redo()
       expect(oib.recognizer.addStrokes).toBeCalledTimes(1)
       expect(oib.recognizer.addStrokes).toBeCalledWith([stroke1], false)
@@ -623,10 +640,13 @@ describe("OIBehaviors.ts", () =>
       const secondModel = new OIModel(1, 1)
       oib.context.canRedo = true
       oib.context.stack.push(secondModel)
+      oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
       oib.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
       oib.renderer.removeSymbol = jest.fn()
-      oib.recognizer.addStrokes = jest.fn(() => Promise.resolve())
       oib.renderer.drawSymbol = jest.fn()
+      oib.renderer.drawCircle = jest.fn()
+      oib.renderer.clearElements = jest.fn()
+      oib.renderer.removeSelectedGroup = jest.fn()
       await oib.redo()
       expect(oib.recognizer.eraseStrokes).toBeCalledTimes(1)
       expect(oib.recognizer.eraseStrokes).toBeCalledWith([stroke1.id])
@@ -641,10 +661,13 @@ describe("OIBehaviors.ts", () =>
       secondModel.addSymbol(stroke1)
       oib.context.canRedo = true
       oib.context.stack.push(secondModel)
+      oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
       oib.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
-      oib.recognizer.addStrokes = jest.fn(() => Promise.resolve())
       oib.renderer.removeSymbol = jest.fn()
       oib.renderer.drawSymbol = jest.fn()
+      oib.renderer.drawCircle = jest.fn()
+      oib.renderer.clearElements = jest.fn()
+      oib.renderer.removeSelectedGroup = jest.fn()
       const modelReceive = await oib.redo()
       expect(modelReceive).toEqual(secondModel)
     })

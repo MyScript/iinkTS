@@ -1,9 +1,9 @@
-import { DefaultStyle, OISVGRendererShape, OIShapeCircle, OIShapeParallelogram, OIShapeRectangle, OIShapeTriangle, TPoint, TStyle } from "../../../src/iink"
+import { DefaultStyle, OISVGShapeUtil, OIShapeCircle, OIShapeParallelogram, OIShapeRectangle, OIShapeTriangle, TPoint, TStyle } from "../../../src/iink"
 
-describe("OISVGRendererShape.ts", () =>
+describe("OISVGShapeUtil.ts", () =>
 {
   const selectionFilterId = "selectionFilterId"
-  const renderer = new OISVGRendererShape(selectionFilterId)
+  const renderer = new OISVGShapeUtil(selectionFilterId)
 
   describe("rectangle", () =>
   {
@@ -12,14 +12,14 @@ describe("OISVGRendererShape.ts", () =>
       const origin: TPoint = { x: 1, y: 1 }
       const target: TPoint = { x: 1, y: 1 }
       const rect = OIShapeRectangle.createFromLine(DefaultStyle, origin, target)
-      expect(renderer.getSVGPath(rect)).toEqual("M 1 1 h 0 v 0 h -0 Z")
+      expect(renderer.getSVGPath(rect)).toEqual("M 1 1 L 1 1 L 1 1 L 1 1 Z")
     })
     test("should getSVGPath when origin is different to target", () =>
     {
       const origin: TPoint = { x: 1, y: 1 }
       const target: TPoint = { x: 11, y: 11 }
       const rect = OIShapeRectangle.createFromLine(DefaultStyle, origin, target)
-      expect(renderer.getSVGPath(rect)).toEqual("M 1 1 h 10 v 10 h -10 Z")
+      expect(renderer.getSVGPath(rect)).toEqual("M 1 1 L 11 1 L 11 11 L 1 11 Z")
     })
     test("should getSVGElement with default style", () =>
     {
@@ -68,14 +68,14 @@ describe("OISVGRendererShape.ts", () =>
       const origin: TPoint = { x: 1, y: 1 }
       const target: TPoint = { x: 1, y: 1 }
       const circle = OIShapeCircle.createFromLine(DefaultStyle, origin, target)
-      expect(renderer.getSVGPath(circle)).toEqual("M 1 1 m 0 0 a 0 0 0 1 0 -0 0 a 0 0 0 1 0 0 0 Z")
+      expect(renderer.getSVGPath(circle)).toEqual("M 1 1 a 0 0 0 1 1 0 0 a 0 0 0 1 1 -0 0 Z")
     })
     test("should getSVGPath when origin is different to target", () =>
     {
       const origin: TPoint = { x: 0, y: 0 }
       const target: TPoint = { x: 0, y: 10 }
       const circle = OIShapeCircle.createFromLine(DefaultStyle, origin, target)
-      expect(renderer.getSVGPath(circle)).toEqual("M 0 5 m 5 0 a 5 5 0 1 0 -10 0 a 5 5 0 1 0 10 0 Z")
+      expect(renderer.getSVGPath(circle)).toEqual("M -5 5 a 5 5 0 1 1 10 0 a 5 5 0 1 1 -10 0 Z")
     })
     test("should getSVGElement with default style", () =>
     {

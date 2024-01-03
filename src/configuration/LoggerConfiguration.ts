@@ -24,6 +24,8 @@ export const DefaultLoggerConfiguration: TLoggerConfiguration = {
   [LoggerClass.SHAPE]: LoggerLevel.ERROR,
   [LoggerClass.EDGE]: LoggerLevel.ERROR,
   [LoggerClass.SMARTGUIDE]: LoggerLevel.ERROR,
+  [LoggerClass.GESTURE]: LoggerLevel.ERROR,
   [LoggerClass.STYLE]: LoggerLevel.ERROR,
-  [LoggerClass.UNDO_REDO]: LoggerLevel.ERROR
+  [LoggerClass.UNDO_REDO]: LoggerLevel.ERROR,
+  [LoggerClass.TRANSFORMER]: LoggerLevel.ERROR,
 }

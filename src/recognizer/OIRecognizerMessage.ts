@@ -1,11 +1,17 @@
-import { TGestureType } from "../gesture"
+import { TGesture } from "../gesture"
 import { TExport } from "../model"
 
+/**
+ * @group Recognizer
+ */
 export type TOIMessageEvent = {
   type: string
   [key: string]: unknown
 }
 
+/**
+ * @group Recognizer
+ */
 export type TOIMessageEventError = {
   type: string
   code?: number | string
@@ -16,21 +22,33 @@ export type TOIMessageEventError = {
   }
 }
 
+/**
+ * @group Recognizer
+ */
 export type TOIMessageEventHMACChallenge = TOIMessageEvent & {
   hmacChallenge: string
   iinkSessionId: string
 }
 
+/**
+ * @group Recognizer
+ */
 export type TContentPackageDescriptionMessage = TOIMessageEvent & {
   contentPartCount: number
 }
 
+/**
+ * @group Recognizer
+ */
 export type TOIMessageEventPartChange = TOIMessageEvent & {
   partIdx: number
   partId: string
   partCount: number
 }
 
+/**
+ * @group Recognizer
+ */
 export type TOIMessageEventContentChange = TOIMessageEvent & {
   partId: string
   canUndo: boolean
@@ -40,16 +58,25 @@ export type TOIMessageEventContentChange = TOIMessageEvent & {
   possibleUndoCount: number
 }
 
+/**
+ * @group Recognizer
+ */
 export type TOIMessageEventExport = TOIMessageEvent & {
   partId: string
   exports: TExport
 }
 
-export type TOIMessageEventGesture = TOIMessageEvent & {
-  gestureType: TGestureType
-  gestureStrokeId: string
-  strokeIds: string[]
-  strokeBeforeIds: string[]
-  strokeAfterIds: string[]
-  subStrokes?: { x: number[], y: number[] }[]
+/**
+ * @group Recognizer
+ */
+export type TOIMessageEventGesture = TOIMessageEvent & TGesture
+
+type ContextlessGesture = {
+  type: "none" | "scratch" | "left-right" | "right-left" | "bottom-top" | "top-bottom" | "surround" | string,
+}
+/**
+ * @group Recognizer
+ */
+export type TOIMessageEventContextlessGesture = TOIMessageEvent & {
+  gestures: ContextlessGesture[]
 }

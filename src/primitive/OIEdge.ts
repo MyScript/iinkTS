@@ -2,9 +2,9 @@ import { LoggerClass, SELECTION_MARGIN } from "../Constants"
 import { LoggerManager } from "../logger"
 import { DefaultStyle, TStyle } from "../style"
 import { MatrixTransform } from "../transform"
-import { computeDistanceBetweenPointAndSegment, createUUID, isBetween } from "../utils"
+import { computeDistanceBetweenPointAndSegment, createUUID, findIntersectionBetween2Segment } from "../utils"
 import { Box, TBoundingBox } from "./Box"
-import { TPoint } from "./Point"
+import { TPoint, TSegment } from "./Point"
 import { SymbolType, TOISymbol } from "./Symbol"
 
 /**
@@ -16,6 +16,9 @@ export enum EdgeKind
   Arc = "arc",
 }
 
+/**
+ * @group Primitive
+ */
 export enum EdgeDecoration
 {
   Arrow = "arrow"
@@ -34,6 +37,9 @@ export type TOIEdge = TOISymbol & {
   boundingBox: Box
 }
 
+/**
+ * @group Primitive
+ */
 export class OILine implements TOIEdge
 {
   #logger = LoggerManager.getLogger(LoggerClass.EDGE)
@@ -87,10 +93,15 @@ export class OILine implements TOIEdge
     return computeDistanceBetweenPointAndSegment(point, { p1: this.start, p2: this.end}) < SELECTION_MARGIN
   }
 
-  isPartiallyOrTotallyWrapped(box: TBoundingBox): boolean
+  isOverlapping(box: TBoundingBox): boolean
   {
-    return this.boundingBox.isWrap(box) ||
-      this.vertices.some(v => isBetween(v.x, box.x, box.x + box.width) && isBetween(v.y, box.y, box.y + box.height))
+    const boxEdges: TSegment[] = [
+      { p1: { x: box.x, y: box.y }, p2: { x: box.x + box.width, y: box.y }},
+      { p1: { x: box.x + box.width, y: box.y }, p2: { x: box.x + box.width, y: box.y + box.height }},
+      { p1: { x: box.x + box.width, y: box.y + box.height }, p2: { x: box.x, y: box.y + box.height }},
+      { p1: { x: box.x, y: box.y + box.height }, p2: { x: box.x, y: box.y }},
+    ]
+    return this.boundingBox.isWrap(box) || boxEdges.some(be => findIntersectionBetween2Segment({ p1: this.start, p2: this.end }, be))
   }
 
   getClone(): OILine
@@ -99,6 +110,7 @@ export class OILine implements TOIEdge
     clone.id = this.id
     clone.creationTime = this.creationTime
     clone.modificationDate = this.modificationDate
+    clone.transform = this.transform.getClone()
     return clone
   }
 }

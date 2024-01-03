@@ -26,6 +26,7 @@ export class OIStroke implements TStroke, TOISymbol
   pointerType: string
   pointers: TPointer[]
   length: number
+  decorators: TOISymbol[]
 
   constructor(style: TStyle, pointerId: number, pointerType = "pen")
   {
@@ -34,13 +35,14 @@ export class OIStroke implements TStroke, TOISymbol
     this.id = `${ this.type }-${ createUUID() }`
     this.creationTime = Date.now()
     this.modificationDate = this.creationTime
-    this.style = style
+    this.style = Object.assign({}, DefaultStyle, style)
     this.selected = false
     this.transform = new MatrixTransform(1, 0, 0, 1, 0, 0)
 
     this.pointerId = pointerId
     this.pointerType = pointerType
     this.pointers = []
+    this.decorators = []
     this.length = 0
   }
 
@@ -90,7 +92,7 @@ export class OIStroke implements TStroke, TOISymbol
     }
   }
 
-  isPartiallyOrTotallyWrapped(box: TBoundingBox): boolean
+  isOverlapping(box: TBoundingBox): boolean
   {
     return this.pointers.some(p =>
     {
@@ -111,9 +113,11 @@ export class OIStroke implements TStroke, TOISymbol
   {
     const clone = new OIStroke(this.style, this.pointerId, this.pointerType)
     clone.id = this.id
+    clone.selected = this.selected
     clone.creationTime = this.creationTime
     clone.modificationDate = this.modificationDate
     clone.pointers = structuredClone(this.pointers)
+    clone.transform = this.transform.getClone()
     clone.length = this.length
     return clone
   }

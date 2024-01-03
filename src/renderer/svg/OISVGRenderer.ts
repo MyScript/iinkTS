@@ -1,11 +1,25 @@
 import { LoggerClass, SvgElementRole } from "../../Constants"
 import { TRenderingConfiguration } from "../../configuration"
 import { LoggerManager } from "../../logger"
-import { OIStroke, SymbolType, TOIEdge, TOISymbol, TPoint, TOIShape } from "../../primitive"
-import { OISVGRendererEdge } from "./OISVGRendererEdge"
-import { OISVGRendererShape } from "./OISVGRendererShape"
-import { OISVGRendererStroke } from "./OISVGRendererStroke"
-import { createCircle, createComponentTransfert, createDefs, createFilter, createGroup, createLayer, createLine, createMarker, createPolygon, createTransfertFunctionTable } from "./SVGElementBuilder"
+import { OIStroke, SymbolType, TOIEdge, TOISymbol, TPoint, TOIShape, TOIDecorator, TBoundingBox } from "../../primitive"
+import { OISVGDecoratorUtil } from "./OISVGDecoratorUtil"
+import { OISVGEdgeUtil } from "./OISVGEdgeUtil"
+import { OISVGSelectionUtils } from "./OISVGSelectionUtils"
+import { OISVGShapeUtil } from "./OISVGShapeUtil"
+import { OISVGStrokeUtil } from "./OISVGStrokeUtil"
+import
+{
+  createCircle,
+  createComponentTransfert,
+  createDefs,
+  createFilter,
+  createGroup,
+  createLayer,
+  createLine,
+  createMarker,
+  createPolygon,
+  createTransfertFunctionTable
+} from "./SVGElementBuilder"
 
 const NO_SELECTION = "pointer-events: none; -webkit-touch-callout: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;"
 
@@ -23,21 +37,25 @@ export class OISVGRenderer
   configuration: TRenderingConfiguration
   parent!: HTMLElement
   layer!: SVGElement
-  strokeRenderer: OISVGRendererStroke
-  shapeRenderer: OISVGRendererShape
-  edgeRenderer: OISVGRendererEdge
+
+  strokeRenderer: OISVGStrokeUtil
+  shapeRenderer: OISVGShapeUtil
+  edgeRenderer: OISVGEdgeUtil
+  decoratorRenderer: OISVGDecoratorUtil
+  selectionUtils: OISVGSelectionUtils
 
   verticalGuides: number[] = []
   horizontalGuides: number[] = []
-  boxMargin = 5
 
   constructor(configuration: TRenderingConfiguration)
   {
     this.#logger.info("constructor", { configuration })
     this.configuration = configuration
-    this.strokeRenderer = new OISVGRendererStroke(this.selectionFilterId)
-    this.shapeRenderer = new OISVGRendererShape(this.selectionFilterId)
-    this.edgeRenderer = new OISVGRendererEdge(this.selectionFilterId, this.arrowHeadStart, this.arrowHeadEnd)
+    this.strokeRenderer = new OISVGStrokeUtil(this.selectionFilterId)
+    this.shapeRenderer = new OISVGShapeUtil(this.selectionFilterId)
+    this.edgeRenderer = new OISVGEdgeUtil(this.selectionFilterId, this.arrowHeadStart, this.arrowHeadEnd)
+    this.decoratorRenderer = new OISVGDecoratorUtil(this.selectionFilterId)
+    this.selectionUtils = new OISVGSelectionUtils(this.selectionFilterId)
   }
 
   protected initLayer(): void
@@ -104,7 +122,7 @@ export class OISVGRenderer
           const begin: TPoint = { x: offSet, y }
           const end: TPoint = { x: width - offSet, y }
           this.horizontalGuides.push(y)
-          const svgLine = createLine(begin, end, { "stroke-width": "1" })
+          const svgLine = createLine(begin, end, { "stroke-width": "1", style: NO_SELECTION })
           guidesGroup.appendChild(svgLine)
         }
         break
@@ -112,24 +130,24 @@ export class OISVGRenderer
         for (let y = 0; y < height; y += offSet) {
           const begin: TPoint = { x: 0, y }
           const end: TPoint = { x: width, y }
-          const svgLine = createLine(begin, end, { "stroke-width": "1" })
+          const svgLine = createLine(begin, end, { "stroke-width": "1", style: NO_SELECTION })
           guidesGroup.appendChild(svgLine)
           this.horizontalGuides.push(y)
           for (let subY = y + subOffSet; subY < y + offSet; subY += subOffSet) {
             this.horizontalGuides.push(subY)
-            const svgLine = createLine({ x: 0, y: subY }, { x: width, y: subY }, { "stroke-width": "0.25" })
+            const svgLine = createLine({ x: 0, y: subY }, { x: width, y: subY }, { "stroke-width": "0.25", style: NO_SELECTION })
             guidesGroup.appendChild(svgLine)
           }
         }
         for (let x = 0; x < width; x += offSet) {
           const begin: TPoint = { x, y: 0 }
           const end: TPoint = { x, y: height }
-          const svgLine = createLine(begin, end, { "stroke-width": "1" })
+          const svgLine = createLine(begin, end, { "stroke-width": "1", style: NO_SELECTION })
           guidesGroup.appendChild(svgLine)
           this.verticalGuides.push(x)
           for (let subX = x + subOffSet; subX < x + offSet; subX += subOffSet) {
             this.verticalGuides.push(subX)
-            const svgLine = createLine({ x: subX, y: 0 }, { x: subX, y: height }, { "stroke-width": "0.25" })
+            const svgLine = createLine({ x: subX, y: 0 }, { x: subX, y: height }, { "stroke-width": "0.25", style: NO_SELECTION })
             guidesGroup.appendChild(svgLine)
           }
         }
@@ -170,26 +188,55 @@ export class OISVGRenderer
     }
   }
 
-  getSymbolElement(symbol: TOISymbol): SVGGeometryElement | undefined
+  getAttribute(id: string, name: string): string
   {
-    switch(symbol.type) {
-      case SymbolType.Stroke:
-        return this.strokeRenderer.getSVGElement(symbol as OIStroke)
-      case SymbolType.Shape:
-        return this.shapeRenderer.getSVGElement(symbol as TOIShape)
-      case SymbolType.Edge:
-        return this.edgeRenderer.getSVGElement(symbol as TOIEdge)
-      default:
-        this.#logger.error("getSymbolElement", `symbol type is unknow: "${symbol.type}"`)
-        return
-    }
+    const element = this.layer.querySelector(`#${ id }`) as HTMLElement | null
+    return element?.getAttribute(name) as string
+  }
+  setAttribute(id: string, name: string, value: string): void
+  {
+    const element = this.layer.querySelector(`#${ id }`) as HTMLElement | null
+    element?.setAttribute(name, value)
+  }
+
+  prependElement(el: Element): void
+  {
+    this.layer.prepend(el)
+  }
+
+  insertBefore(el: Element, child: Node | null): void
+  {
+    this.layer.insertBefore(el, child)
+  }
+
+  appendElement(el: Element): void
+  {
+    this.layer.appendChild(el)
   }
 
   drawSymbol(symbol: TOISymbol): void
   {
     this.#logger.debug("drawSymbol", { symbol })
     const oldNode = this.layer.querySelector(`#${ symbol?.id }`)
-    const svgEl = this.getSymbolElement(symbol)
+    let svgEl: SVGGeometryElement | undefined
+
+    switch (symbol.type) {
+      case SymbolType.Stroke:
+        svgEl = this.strokeRenderer.getSVGElement(symbol as OIStroke)
+        break
+      case SymbolType.Shape:
+        svgEl = this.shapeRenderer.getSVGElement(symbol as TOIShape)
+        break
+      case SymbolType.Edge:
+        svgEl = this.edgeRenderer.getSVGElement(symbol as TOIEdge)
+        break
+      case SymbolType.Decorator:
+        svgEl = this.decoratorRenderer.getSVGElement(symbol as TOIDecorator)
+        break
+      default:
+        this.#logger.error("getSymbolElement", `symbol type is unknow: "${ symbol.type }"`)
+    }
+
     if (svgEl) {
       if (oldNode) {
         oldNode.replaceWith(svgEl)
@@ -209,6 +256,65 @@ export class OISVGRenderer
     }
   }
 
+  drawCircle(point: TPoint, radius: number, attrs: { [key: string]: string } = {}): void
+  {
+    this.#logger.info("drawCircle", { point, radius, attrs })
+    this.layer.appendChild(createCircle(point, radius, attrs))
+  }
+
+  drawSelectingRect(box: TBoundingBox): void
+  {
+    this.clearSelectingRect()
+    this.appendElement(this.selectionUtils.getSelectingRect(box))
+  }
+  clearSelectingRect(): void
+  {
+    this.clearElements({ attrs: { role: SvgElementRole.Selecting.toString() } })
+  }
+  drawSelectedGroup(symbols: TOISymbol[]): void
+  {
+    if (!symbols.length) return
+    const symbolElments = symbols.map(s => this.getRenderedElementFromSymbol(s)) as SVGGeometryElement[]
+    this.selectionUtils.wrapElements(symbolElments)
+  }
+  resetSelectedGroup(symbols: TOISymbol[]): void
+  {
+    this.#logger.info("resetSelectedGroup", { strokes: symbols })
+    this.removeSelectedGroup()
+    this.drawSelectedGroup(symbols)
+  }
+  removeSelectedGroup(): void
+  {
+    this.#logger.info("removeSelectedGroup")
+    this.getRenderedElements({ attrs: { role: SvgElementRole.Selected.toString() } })
+      .forEach(g =>
+      {
+        this.selectionUtils.unWrap(g as SVGGElement)
+      })
+  }
+
+  //#region Transform
+  setTransformOrigin(id: string, originX: number, originY: number): void
+  {
+    this.setAttribute(id, "transform-origin", `${ originX }px ${ originY }px`)
+  }
+  translateElement(id: string, tx: number, ty: number): void
+  {
+    this.#logger.info("translateElement", { id, tx, ty })
+    this.setAttribute(id, "transform", `translate(${ tx },${ ty })`)
+  }
+  scaleElement(id: string, sx: number, sy: number): void
+  {
+    this.#logger.info("scaleElement", { id, sx, sy })
+    this.setAttribute(id, "transform", `scale(${ sx },${ sy })`)
+  }
+  rotateElement(id: string, degree: number): void
+  {
+    this.#logger.info("rotateElement", { id, degree })
+    this.setAttribute(id, "transform", `rotate(${ degree })`)
+  }
+  //#endregion
+
   resize(height: number, width: number): void
   {
     this.#logger.info("resize", { height, width })
@@ -221,15 +327,28 @@ export class OISVGRenderer
     }
   }
 
-  clearElements(type: string, attrs: { [key: string]: string } = {}): void
+  getRenderedElementFromSymbol(symbol: TOISymbol): SVGGeometryElement | null
+  {
+    return this.layer.querySelector(`#${ symbol.id }`) as SVGGeometryElement | null
+  }
+
+  getRenderedElements({ type, attrs }: { type?: string, attrs?: { [key: string]: string } }): NodeListOf<Element>
+  {
+    this.#logger.info("getRenderedElements", { type, attrs })
+    let query = type || "*"
+    if (attrs) {
+      Object.keys(attrs).forEach(k =>
+      {
+        query += `[${ k }=${ attrs[k] }]`
+      })
+    }
+    return this.layer.querySelectorAll(query)
+  }
+
+  clearElements({ type, attrs }: { type?: string, attrs?: { [key: string]: string } }): void
   {
     this.#logger.info("clearElements", { type, attrs })
-    let query = type
-    Object.keys(attrs).forEach(k =>
-    {
-      query += `[${ k }=${ attrs[k] }]`
-    })
-    this.layer.querySelectorAll(query)
+    this.getRenderedElements({ type, attrs })
       .forEach(e => e.remove())
   }
 

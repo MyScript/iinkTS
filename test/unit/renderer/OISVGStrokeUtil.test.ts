@@ -1,9 +1,9 @@
-import { DefaultStyle, OISVGRendererStroke, OIStroke, TStyle } from "../../../src/iink"
+import { DefaultStyle, OISVGStrokeUtil, OIStroke, TStyle } from "../../../src/iink"
 
-describe("OISVGRendererStroke.ts", () =>
+describe("OISVGStrokeUtil.ts", () =>
 {
   const selectionFilterId = "selectionFilterId"
-  const renderer = new OISVGRendererStroke(selectionFilterId)
+  const renderer = new OISVGStrokeUtil(selectionFilterId)
 
   test("should getSVGPath when no pointers", () =>
   {

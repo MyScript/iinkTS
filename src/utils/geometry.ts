@@ -177,3 +177,14 @@ export function findIntersectBetweenSegmentAndCircle(seg: TSegment, c: TPoint, r
 
   return result
 }
+
+/**
+ * @group Utils
+ */
+export function computeAngleRadian(p1: TPoint, p2: TPoint, c: TPoint): number
+{
+  const p1c = Math.sqrt(Math.pow(c.x - p1.x, 2) + Math.pow(c.y - p1.y, 2))
+  const p2c = Math.sqrt(Math.pow(c.x - p2.x, 2) + Math.pow(c.y - p2.y, 2))
+  const p1p2 = Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2))
+  return Math.acos((p2c * p2c + p1c * p1c - p1p2 * p1p2) / (2 * p2c * p1c))
+}
