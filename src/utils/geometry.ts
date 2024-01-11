@@ -72,7 +72,7 @@ export function isPointInsideBox(point: TPoint, box: TBoundingBox): boolean
  */
 export function convertRadianToDegree(radian: number): number
 {
-  return radian * 180 / Math.PI
+  return +((radian % (2 * Math.PI)) / Math.PI * 180).toFixed(4)
 }
 
 /**
@@ -80,16 +80,18 @@ export function convertRadianToDegree(radian: number): number
  */
 export function converDegreeToRadian(degree: number): number
 {
-  return degree * Math.PI / 180
+  return +((degree % 360) / 180 * Math.PI).toFixed(4)
 }
 
 /**
  * @group Utils
  */
-export function rotatePoint(center: TPoint, point: TPoint, radian: number): TPoint
+export function rotatePoint(point: TPoint, center: TPoint, radian: number): TPoint
 {
-  const x = (Math.cos(radian) * (point.x - center.x)) + (Math.sin(radian) * (point.y - center.y)) + center.x
-  const y = (Math.cos(radian) * (point.y - center.y)) - (Math.sin(radian) * (point.x - center.x)) + center.y
+  const xM = point.x - center.x
+  const yM = point.y - center.y
+  const x = Math.cos(radian) * xM + Math.sin(radian) * yM + center.x
+  const y = Math.cos(radian) * yM - Math.sin(radian) * xM + center.y
   return { x, y }
 }
 
@@ -181,10 +183,33 @@ export function findIntersectBetweenSegmentAndCircle(seg: TSegment, c: TPoint, r
 /**
  * @group Utils
  */
-export function computeAngleRadian(p1: TPoint, p2: TPoint, c: TPoint): number
+export function computeAngleRadian(p1: TPoint, center: TPoint, p2: TPoint): number
 {
-  const p1c = Math.sqrt(Math.pow(c.x - p1.x, 2) + Math.pow(c.y - p1.y, 2))
-  const p2c = Math.sqrt(Math.pow(c.x - p2.x, 2) + Math.pow(c.y - p2.y, 2))
+  const p1c = Math.sqrt(Math.pow(center.x - p1.x, 2) + Math.pow(center.y - p1.y, 2))
+  const p2c = Math.sqrt(Math.pow(center.x - p2.x, 2) + Math.pow(center.y - p2.y, 2))
   const p1p2 = Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2))
   return Math.acos((p2c * p2c + p1c * p1c - p1p2 * p1p2) / (2 * p2c * p1c))
+}
+
+/**
+ * @group Utils
+ */
+export function getPointsNearest(points1: TPoint[], points2: TPoint[]): { p1: TPoint, p2: TPoint }
+{
+  let p1 = points1[0]
+  let p2 = points2[0]
+  let minDistance = Number.MAX_SAFE_INTEGER
+  points1.forEach(_p1 =>
+  {
+    points2.forEach(_p2 =>
+    {
+      const d = computeDistance(_p1, _p2)
+      if (minDistance > d) {
+        minDistance = d
+        p1 = _p1
+        p2 = _p2
+      }
+    })
+  })
+  return { p1, p2 }
 }

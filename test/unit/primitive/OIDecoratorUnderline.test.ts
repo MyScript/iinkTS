@@ -1,5 +1,5 @@
-import { MatrixTransform, OIDecoratorUnderline, TStyle } from "../../../src/iink"
 import { buildOIStroke } from "../helpers"
+import { OIDecoratorUnderline, TStyle } from "../../../src/iink"
 
 describe("OIDecoratorUnderline.ts", () =>
 {
@@ -18,11 +18,10 @@ describe("OIDecoratorUnderline.ts", () =>
       expect(decorator.creationTime).toBeLessThanOrEqual(Date.now())
       expect(decorator.creationTime).toEqual(decorator.modificationDate)
       expect(decorator.style).toEqual(expect.objectContaining(style))
-      expect(decorator.transform).toEqual(MatrixTransform.identity())
     })
   })
 
-  describe("getClone", () =>
+  describe("clone", () =>
   {
     test("should return clone", () =>
     {
@@ -32,7 +31,7 @@ describe("OIDecoratorUnderline.ts", () =>
         width: 20
       }
       const decorator = new OIDecoratorUnderline(style, [sym])
-      const clone = decorator.getClone()
+      const clone = decorator.clone()
       expect(clone).toEqual(decorator)
       expect(clone).not.toBe(decorator)
     })

@@ -1,4 +1,12 @@
-import { OIStroke, DefaultStyle, MatrixTransform, TStyle, TPointer, TStroke, convertPartialStrokesToOIStrokes, PartialDeep } from "../../../src/iink"
+import {
+  OIStroke,
+  DefaultStyle,
+  TStyle,
+  TPointer,
+  TStroke,
+  convertPartialStrokesToOIStrokes,
+  PartialDeep
+} from "../../../src/iink"
 
 describe("OIStroke.ts", () =>
 {
@@ -21,7 +29,6 @@ describe("OIStroke.ts", () =>
       expect(stroke.pointerType).toEqual("pen")
       expect(stroke.pointers).toHaveLength(0)
       expect(stroke.selected).toEqual(false)
-      expect(stroke.transform).toEqual(MatrixTransform.identity())
       expect(stroke.boundingBox.x).toEqual(0)
       expect(stroke.boundingBox.y).toEqual(0)
       expect(stroke.boundingBox.height).toEqual(0)
@@ -112,7 +119,7 @@ describe("OIStroke.ts", () =>
 
   describe("convertToSend", () =>
   {
-    test("should return clone", () =>
+    test("should return array of x, y, t, and p", () =>
     {
       const stroke = new OIStroke(DefaultStyle, 1)
       stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
@@ -130,7 +137,7 @@ describe("OIStroke.ts", () =>
     })
   })
 
-  describe("getClone", () =>
+  describe("clone", () =>
   {
     test("should return clone", () =>
     {
@@ -142,7 +149,7 @@ describe("OIStroke.ts", () =>
       stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
       stroke.pointers.push({ p: 1, t: 1, x: 11, y: 11 })
 
-      const clone = stroke.getClone()
+      const clone = stroke.clone()
       expect(clone).toEqual(stroke)
       expect(clone).not.toBe(stroke)
     })

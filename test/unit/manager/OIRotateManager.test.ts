@@ -1,19 +1,19 @@
 import
-  {
-    DefaultConfiguration,
-    OIBehaviors,
-    OIDecoratorUnderline,
-    OILine,
-    OIRotateManager,
-    OIShapeCircle,
-    OIShapePolygon,
-    OIShapeRectangle,
-    OIStroke,
-    SvgElementRole,
-    TBehaviorOptions,
-    TPoint,
-    rotatePoint,
-  } from "../../../src/iink"
+{
+  DefaultConfiguration,
+  OIBehaviors,
+  OIDecoratorUnderline,
+  OIEdgeLine,
+  OIRotateManager,
+  OIShapeCircle,
+  OIShapePolygon,
+  OIShapeRectangle,
+  OIStroke,
+  SvgElementRole,
+  TBehaviorOptions,
+  TPoint,
+  rotatePoint,
+} from "../../../src/iink"
 
 describe("OIRotateManager.ts", () =>
 {
@@ -31,33 +31,12 @@ describe("OIRotateManager.ts", () =>
     expect(manager).toBeDefined()
   })
 
-  describe("Properties", () =>
+  describe("should applyToSymbol", () =>
   {
     const behaviors = new OIBehaviors(DefaultBehaviorsOptions)
     const manager = new OIRotateManager(behaviors)
-
-    test("shoud have model", () =>
-    {
-      expect(manager.model).toBe(behaviors.model)
-    })
-    test("shoud have undoRedoManager", () =>
-    {
-      expect(manager.undoRedoManager).toBe(behaviors.undoRedoManager)
-    })
-    test("shoud have renderer", () =>
-    {
-      expect(manager.renderer).toBe(behaviors.renderer)
-    })
-    test("shoud have recognizer", () =>
-    {
-      expect(manager.recognizer).toBe(behaviors.recognizer)
-    })
-  })
-
-  describe("should applyOnSymbol", () =>
-  {
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions)
-    const manager = new OIRotateManager(behaviors)
+    manager.textManager.updateTextBoundingBox = jest.fn()
+    manager.renderer.setAttribute = jest.fn()
 
     test("rotate stroke", () =>
     {
@@ -65,7 +44,7 @@ describe("OIRotateManager.ts", () =>
       const origin: TPoint = { x: 0, y: 0 }
       stroke.addPointer({ p: 1, t: 1, x: 1, y: 1 })
       stroke.addPointer({ p: 1, t: 10, x: 10, y: 0 })
-      manager.applyOnSymbol(stroke, origin, Math.PI / 2)
+      manager.applyToSymbol(stroke, origin, Math.PI / 2)
       expect(stroke.pointers[0].x.toFixed(0)).toEqual("1")
       expect(stroke.pointers[0].y.toFixed(0)).toEqual("-1")
       expect(stroke.pointers[1].x.toFixed(0)).toEqual("0")
@@ -78,7 +57,7 @@ describe("OIRotateManager.ts", () =>
       const radius = 4
       const circle = new OIShapeCircle({}, center, radius)
       const origin: TPoint = { x: 1, y: 2 }
-      manager.applyOnSymbol(circle, origin, Math.PI / 2)
+      manager.applyToSymbol(circle, origin, Math.PI / 2)
       expect(circle.radius).toEqual(radius)
       expect(circle.center).toEqual({ x: 4, y: -2 })
     })
@@ -92,7 +71,7 @@ describe("OIRotateManager.ts", () =>
       ]
       const rect = new OIShapeRectangle({}, points)
       const origin: TPoint = { x: 0, y: 0 }
-      manager.applyOnSymbol(rect, origin, Math.PI / 2)
+      manager.applyToSymbol(rect, origin, Math.PI / 2)
       expect(rect.points[0].x.toFixed(0)).toEqual("0")
       expect(rect.points[0].y.toFixed(0)).toEqual("0")
       expect(rect.points[1].x.toFixed(0)).toEqual("5")
@@ -114,15 +93,15 @@ describe("OIRotateManager.ts", () =>
       //@ts-ignore
       const rect = new OIShapePolygon({}, points, "pouet")
       const origin: TPoint = { x: 0, y: 0 }
-      expect(() => manager.applyOnSymbol(rect, origin, Math.PI / 2)).toThrowError("Can't apply rotate on shape, kind unknow: pouet")
+      expect(() => manager.applyToSymbol(rect, origin, Math.PI / 2)).toThrowError("Can't apply rotate on shape, kind unknow: pouet")
     })
     test("rotate edge Line", () =>
     {
       const start: TPoint = { x: 0, y: 0 }
       const end: TPoint = { x: 0, y: 5 }
-      const line = new OILine({}, start, end)
+      const line = new OIEdgeLine({}, start, end)
       const origin: TPoint = { x: 0, y: 0 }
-      manager.applyOnSymbol(line, origin, Math.PI / 2)
+      manager.applyToSymbol(line, origin, Math.PI / 2)
       expect(line.start.x.toFixed(0)).toEqual("0")
       expect(line.start.y.toFixed(0)).toEqual("0")
       expect(line.end.x.toFixed(0)).toEqual("5")
@@ -135,7 +114,7 @@ describe("OIRotateManager.ts", () =>
       stroke.addPointer({ p: 1, t: 10, x: 21, y: 42 })
       const underline = new OIDecoratorUnderline({}, [stroke])
       const origin: TPoint = { x: 0, y: 0 }
-      manager.applyOnSymbol(underline, origin, Math.PI / 2)
+      manager.applyToSymbol(underline, origin, Math.PI / 2)
       expect(underline.vertices[0]).toEqual({ x: 1, y: 47 })
       expect(underline.vertices[1]).toEqual({ x: 21, y: 47 })
     })
@@ -147,22 +126,21 @@ describe("OIRotateManager.ts", () =>
     const behaviors = new OIBehaviors(DefaultBehaviorsOptions)
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     behaviors.recognizer.replaceStrokes = jest.fn(() => Promise.resolve())
-    behaviors.renderer.setTransformOrigin = jest.fn()
-    behaviors.renderer.rotateElement = jest.fn()
-    behaviors.renderer.resetSelectedGroup = jest.fn()
+    behaviors.renderer.setAttribute = jest.fn()
     behaviors.renderer.drawSymbol = jest.fn()
+    behaviors.selectionManager.resetSelectedGroup = jest.fn()
     behaviors.setPenStyle = jest.fn(() => Promise.resolve())
     behaviors.setTheme = jest.fn(() => Promise.resolve())
     behaviors.setPenStyleClasses = jest.fn(() => Promise.resolve())
 
     const manager = new OIRotateManager(behaviors)
-    manager.applyOnSymbol = jest.fn()
+    manager.applyToSymbol = jest.fn()
 
     const stroke = new OIStroke({}, 1)
     stroke.addPointer({ p: 1, t: 1, x: 0, y: 0 })
     stroke.addPointer({ p: 1, t: 1, x: 10, y: 50 })
     stroke.selected = true
-    const strokeNotRotate = stroke.getClone()
+    const strokeNotRotate = stroke.clone()
     behaviors.model.addSymbol(stroke)
 
     const rotateCenter: TPoint = {
@@ -176,19 +154,19 @@ describe("OIRotateManager.ts", () =>
 
     const testDatas = [
       {
-        rotateToPoint: rotatePoint(rotateCenter, rotateOrigin, Math.PI / 5),
+        rotateToPoint: rotatePoint(rotateOrigin, rotateCenter, Math.PI / 5),
         angle: 36,
       },
       {
-        rotateToPoint: rotatePoint(rotateCenter, rotateOrigin, Math.PI / 2),
+        rotateToPoint: rotatePoint(rotateOrigin, rotateCenter, Math.PI / 2),
         angle: 90,
       },
       {
-        rotateToPoint: rotatePoint(rotateCenter, rotateOrigin, -Math.PI / 5),
+        rotateToPoint: rotatePoint(rotateOrigin, rotateCenter, -Math.PI / 5),
         angle: 324,
       },
       {
-        rotateToPoint: rotatePoint(rotateCenter, rotateOrigin, -Math.PI / 2),
+        rotateToPoint: rotatePoint(rotateOrigin, rotateCenter, -Math.PI / 2),
         angle: 270,
       },
     ]
@@ -215,23 +193,23 @@ describe("OIRotateManager.ts", () =>
         expect(manager.wrapper).toEqual(group)
         expect(manager.center).toEqual(rotateCenter)
         expect(manager.origin).toEqual(rotateOrigin)
-        expect(behaviors.renderer.setTransformOrigin).toHaveBeenCalledTimes(1)
-        expect(behaviors.renderer.setTransformOrigin).toHaveBeenCalledWith(group.id, rotateCenter.x, rotateCenter.y)
+        expect(behaviors.renderer.setAttribute).toHaveBeenCalledTimes(1)
+        expect(behaviors.renderer.setAttribute).toHaveBeenCalledWith(group.id, "transform-origin", `${ rotateCenter.x }px ${ rotateCenter.y }px`)
       })
       test(`shoud continu with angle: "${ data.angle }°`, () =>
       {
         expect(manager.continue(data.rotateToPoint)).toEqual(data.angle)
 
-        expect(behaviors.renderer.rotateElement).toHaveBeenCalledTimes(1)
-        expect(behaviors.renderer.rotateElement).toHaveBeenCalledWith(group.id, data.angle)
+        expect(behaviors.renderer.setAttribute).toHaveBeenCalledTimes(1)
+        expect(behaviors.renderer.setAttribute).toHaveBeenCalledWith(group.id, "transform", `rotate(${ data.angle })`)
       })
       test(`shoud end with angle: "${ data.angle }°`, async () =>
       {
         await manager.end(data.rotateToPoint)
 
-        expect(manager.applyOnSymbol).toHaveBeenCalledTimes(1)
-        expect(behaviors.renderer.resetSelectedGroup).toHaveBeenCalledTimes(1)
-        expect(behaviors.renderer.resetSelectedGroup).toHaveBeenCalledWith([stroke])
+        expect(manager.applyToSymbol).toHaveBeenCalledTimes(1)
+        expect(behaviors.selectionManager.resetSelectedGroup).toHaveBeenCalledTimes(1)
+        expect(behaviors.selectionManager.resetSelectedGroup).toHaveBeenCalledWith([stroke])
         expect(behaviors.renderer.drawSymbol).toHaveBeenCalledTimes(1)
         expect(behaviors.renderer.drawSymbol).toHaveBeenCalledWith(stroke)
         expect(behaviors.recognizer.replaceStrokes).toHaveBeenCalledTimes(1)

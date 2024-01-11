@@ -1,18 +1,19 @@
-import { OIShapeCircle, OIShapePolygon, ShapeKind, TOIShape } from "../../primitive"
+import { OIShapeCircle, OIShapeEllipse, OIShapePolygon, ShapeKind, TOIShape } from "../../primitive"
 import { DefaultStyle } from "../../style"
-import { MatrixTransform } from "../../transform"
-import { createPath } from "./SVGElementBuilder"
+import { SVGBuilder } from "./SVGBuilder"
 
 /**
  * @group Renderer
  */
 export class OISVGShapeUtil
 {
+  removalFilterId: string
   selectionFilterId: string
 
-  constructor(selectionFilterId: string)
+  constructor(selectionFilterId: string, removalFilterId: string)
   {
     this.selectionFilterId = selectionFilterId
+    this.removalFilterId = removalFilterId
   }
 
   getPolygonePath(polygon: OIShapePolygon): string
@@ -25,6 +26,11 @@ export class OISVGShapeUtil
     return `M ${circle.center.x - circle.radius} ${circle.center.y} a ${circle.radius} ${circle.radius} 0 1 1 ${circle.radius * 2} 0 a ${circle.radius} ${circle.radius} 0 1 1 -${circle.radius * 2} 0 Z`
   }
 
+  getEllipsePath(ellipse: OIShapeEllipse): string
+  {
+    return `M ${ellipse.center.x - ellipse.radiusX} ${ellipse.center.y} a ${ellipse.radiusX} ${ellipse.radiusY} 0 1 1 ${ellipse.radiusX * 2} 0 a ${ellipse.radiusX} ${ellipse.radiusY} 0 1 1 -${ellipse.radiusX * 2} 0 Z`
+  }
+
   getSVGPath(shape: TOIShape): string
   {
     switch(shape.kind) {
@@ -34,6 +40,8 @@ export class OISVGShapeUtil
         return this.getPolygonePath(shape as OIShapePolygon)
       case ShapeKind.Circle:
         return this.getCirclePath(shape as OIShapeCircle)
+      case ShapeKind.Ellipse:
+        return this.getEllipsePath(shape as OIShapeEllipse)
       default:
         throw new Error(`Can't getSVGPath for shape cause kind is unknow: "${shape.kind}"`)
     }
@@ -53,15 +61,17 @@ export class OISVGShapeUtil
       "stroke": shape.style.color || DefaultStyle.color!,
       "stroke-width": (shape.style.width || DefaultStyle.width!).toString(),
       "opacity": (shape.style.opacity || DefaultStyle.opacity!).toString(),
-      "transform": MatrixTransform.toCssString(shape.transform),
       "d": this.getSVGPath(shape),
     }
 
     if (shape.selected) {
       attrs["filter"] = `url(#${ this.selectionFilterId })`
     }
+    if (shape.toDelete) {
+      attrs["filter"] = `url(#${ this.removalFilterId })`
+    }
 
-    return createPath(attrs)
+    return SVGBuilder.createPath(attrs)
   }
 
 }

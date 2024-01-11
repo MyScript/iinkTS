@@ -1,5 +1,5 @@
-import { MatrixTransform, OIDecoratorHighlight, TStyle } from "../../../src/iink"
 import { buildOIStroke } from "../helpers"
+import { OIDecoratorHighlight, TStyle } from "../../../src/iink"
 
 describe("OIDecoratorHighlight.ts", () =>
 {
@@ -18,11 +18,10 @@ describe("OIDecoratorHighlight.ts", () =>
       expect(decorator.creationTime).toBeLessThanOrEqual(Date.now())
       expect(decorator.creationTime).toEqual(decorator.modificationDate)
       expect(decorator.style).toEqual(expect.objectContaining(style))
-      expect(decorator.transform).toEqual(MatrixTransform.identity())
     })
   })
 
-  describe("getClone", () =>
+  describe("clone", () =>
   {
     test("should return clone", () =>
     {
@@ -32,7 +31,7 @@ describe("OIDecoratorHighlight.ts", () =>
         width: 20
       }
       const decorator = new OIDecoratorHighlight(style, [sym])
-      const clone = decorator.getClone()
+      const clone = decorator.clone()
       expect(clone).toEqual(decorator)
       expect(clone).not.toBe(decorator)
     })

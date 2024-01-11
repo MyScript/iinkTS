@@ -196,7 +196,7 @@ export class RestBehaviors implements IBehaviors
     this.undoRedoManager.addModelToStack(this.model)
     if (this.#configuration.triggers.exportContent !== "DEMAND") {
       clearTimeout(this.#exportTimer)
-      let currentModel = this.model.getClone()
+      let currentModel = this.model.clone()
       this.#exportTimer = setTimeout(async () =>
       {
         try {
@@ -224,7 +224,7 @@ export class RestBehaviors implements IBehaviors
   async export(mimeTypes?: string[]): Promise<IModel>
   {
     this.#logger.info("export", { mimeTypes })
-    const newModel = await this.recognizer.export(this.model.getClone(), mimeTypes)
+    const newModel = await this.recognizer.export(this.model.clone(), mimeTypes)
     if (this.model.modificationDate === newModel.modificationDate) {
       this.model.mergeExport(newModel.exports as TExport)
     }

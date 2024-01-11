@@ -51,7 +51,6 @@ export class OIRecognizer
   protected eraseStrokeDeferred?: DeferredPromise<void>
   protected replaceStrokeDeferred?: DeferredPromise<void>
   protected exportDeferred?: DeferredPromise<TExport>
-  protected resizeDeferred?: DeferredPromise<void>
   protected closeDeferred?: DeferredPromise<void>
   protected waitForIdleDeferred?: DeferredPromise<void>
 
@@ -155,6 +154,18 @@ export class OIRecognizer
     }
   }
 
+  protected async waitPromises(): Promise<void>
+  {
+    await Promise.all([
+      this.initialized?.promise,
+      this.addStrokeDeferred?.promise,
+      this.transformStrokeDeferred?.promise,
+      this.replaceStrokeDeferred?.promise,
+      this.eraseStrokeDeferred?.promise
+    ])
+    return Promise.resolve()
+  }
+
   protected rejectDeferredPending(error: Error | string): void
   {
     if (this.connected?.isPending) {
@@ -183,9 +194,6 @@ export class OIRecognizer
     }
     if (this.waitForIdleDeferred?.isPending) {
       this.waitForIdleDeferred?.reject(error)
-    }
-    if (this.resizeDeferred?.isPending) {
-      this.resizeDeferred?.reject(error)
     }
     if (this.closeDeferred?.isPending) {
       this.closeDeferred?.resolve()
@@ -407,7 +415,7 @@ export class OIRecognizer
 
   async addStrokes(strokes: OIStroke[], processGestures = true): Promise<TOIMessageEventGesture | undefined>
   {
-    await this.initialized?.promise
+    await this.waitPromises()
     this.addStrokeDeferred = new DeferredPromise<TOIMessageEventGesture | undefined>()
     if (strokes.length === 0) {
       this.addStrokeDeferred.resolve(undefined)
@@ -423,7 +431,7 @@ export class OIRecognizer
 
   async replaceStrokes(oldStrokeIds: string[], newStrokes: OIStroke[]): Promise<void>
   {
-    await this.initialized?.promise
+    await this.waitPromises()
     this.replaceStrokeDeferred = new DeferredPromise<void>()
     if (oldStrokeIds.length === 0) {
       this.replaceStrokeDeferred.resolve()
@@ -439,7 +447,7 @@ export class OIRecognizer
 
   async translateStrokes(strokeIds: string[], tx: number, ty: number): Promise<void>
   {
-    await this.initialized?.promise
+    await this.waitPromises()
     this.transformStrokeDeferred = new DeferredPromise<void>()
     if (strokeIds.length === 0) {
       this.transformStrokeDeferred.resolve()
@@ -457,7 +465,7 @@ export class OIRecognizer
 
   async transformStrokes(strokeIds: string[], matrix: TMatrixTransform): Promise<void>
   {
-    await this.initialized?.promise
+    await this.waitPromises()
     this.transformStrokeDeferred = new DeferredPromise<void>()
     if (strokeIds.length === 0) {
       this.transformStrokeDeferred.resolve()
@@ -474,7 +482,7 @@ export class OIRecognizer
 
   async eraseStrokes(strokeIds: string[]): Promise<void>
   {
-    await this.initialized?.promise
+    await this.waitPromises()
     this.eraseStrokeDeferred = new DeferredPromise<void>()
     if (strokeIds.length === 0) {
       this.eraseStrokeDeferred.resolve()
@@ -489,7 +497,7 @@ export class OIRecognizer
 
   async recognizeGesture(strokes: OIStroke[]): Promise<TOIMessageEventContextlessGesture | undefined>
   {
-    await this.initialized?.promise
+    await this.waitPromises()
     this.recognizeGestureDeferred = new DeferredPromise<TOIMessageEventContextlessGesture | undefined>()
     if (strokes.length === 0) {
       this.recognizeGestureDeferred.resolve(undefined)
@@ -548,6 +556,16 @@ export class OIRecognizer
 
   async destroy(): Promise<void>
   {
+    this.connected = undefined
+    this.initialized = undefined
+    this.addStrokeDeferred= undefined
+    this.recognizeGestureDeferred= undefined
+    this.transformStrokeDeferred= undefined
+    this.eraseStrokeDeferred= undefined
+    this.replaceStrokeDeferred= undefined
+    this.exportDeferred= undefined
+    this.waitForIdleDeferred= undefined
+    this.closeDeferred = undefined
     if (this.socket) {
       this.socket.removeEventListener("open", this.openCallback.bind(this))
       this.socket.removeEventListener("close", this.closeCallback.bind(this))

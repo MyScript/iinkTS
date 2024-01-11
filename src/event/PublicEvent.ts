@@ -1,4 +1,4 @@
-import { EventType, LoggerClass } from "../Constants"
+import { EventType, Intention, LoggerClass } from "../Constants"
 import { LoggerManager } from "../logger"
 import { IModel, TExport } from "../model"
 import { TOISymbol } from "../primitive"
@@ -88,5 +88,10 @@ export class PublicEvent extends EventTarget
   emitSelected(symbols: TOISymbol[]): void
   {
     this.#emit(EventType.SELECTED, symbols)
+  }
+
+  emitIntention(intention: Intention): void
+  {
+    this.#emit(EventType.INTENTION, intention)
   }
 }

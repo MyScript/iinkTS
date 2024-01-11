@@ -1,9 +1,10 @@
-import { DefaultStyle, OISVGShapeUtil, OIShapeCircle, OIShapeParallelogram, OIShapeRectangle, OIShapeTriangle, TPoint, TStyle } from "../../../src/iink"
+import { DefaultStyle, OISVGShapeUtil, OIShapeCircle, OIShapeParallelogram, OIShapeRectangle, OIShapeTriangle, ShapeKind, SymbolType, TPoint, TStyle } from "../../../src/iink"
 
 describe("OISVGShapeUtil.ts", () =>
 {
   const selectionFilterId = "selectionFilterId"
-  const renderer = new OISVGShapeUtil(selectionFilterId)
+  const removalFilterId = "removalFilterId"
+  const renderer = new OISVGShapeUtil(selectionFilterId, removalFilterId)
 
   describe("rectangle", () =>
   {
@@ -28,8 +29,8 @@ describe("OISVGShapeUtil.ts", () =>
       const rect = OIShapeRectangle.createFromLine({}, origin, target)
       const el = renderer.getSVGElement(rect)
       expect(el.getAttribute("id")).toEqual(rect.id)
-      expect(el.getAttribute("type")).toEqual("shape")
-      expect(el.getAttribute("kind")).toEqual("rectangle")
+      expect(el.getAttribute("type")).toEqual(SymbolType.Shape)
+      expect(el.getAttribute("kind")).toEqual(ShapeKind.Rectangle)
       expect(el.getAttribute("stroke")).toEqual(DefaultStyle.color)
       expect(el.getAttribute("stroke-width")).toEqual(DefaultStyle.width?.toString())
     })
@@ -44,8 +45,8 @@ describe("OISVGShapeUtil.ts", () =>
       const rect = OIShapeRectangle.createFromLine(style, origin, target)
       const el = renderer.getSVGElement(rect)
       expect(el.getAttribute("id")).toEqual(rect.id)
-      expect(el.getAttribute("type")).toEqual("shape")
-      expect(el.getAttribute("kind")).toEqual("rectangle")
+      expect(el.getAttribute("type")).toEqual(SymbolType.Shape)
+      expect(el.getAttribute("kind")).toEqual(ShapeKind.Rectangle)
       expect(el.getAttribute("stroke")).toEqual(style.color)
       expect(el.getAttribute("stroke-width")).toEqual(style.width?.toString())
     })
@@ -54,10 +55,17 @@ describe("OISVGShapeUtil.ts", () =>
       const origin: TPoint = { x: 1, y: 1 }
       const target: TPoint = { x: 11, y: 11 }
       const rect = OIShapeRectangle.createFromLine(DefaultStyle, origin, target)
+      const elNotSelected = renderer.getSVGElement(rect)
+      expect(elNotSelected.getAttribute("id")).toEqual(rect.id)
+      expect(elNotSelected.getAttribute("type")).toEqual(SymbolType.Shape)
+      expect(elNotSelected.getAttribute("kind")).toEqual(ShapeKind.Rectangle)
+      expect(elNotSelected.getAttribute("filter")).toBeFalsy()
       rect.selected = true
-      const el = renderer.getSVGElement(rect)
-      expect(el.getAttribute("id")).toEqual(rect.id)
-      expect(el.getAttribute("filter")).toEqual(`url(#${ selectionFilterId })`)
+      const elSelected = renderer.getSVGElement(rect)
+      expect(elSelected.getAttribute("id")).toEqual(rect.id)
+      expect(elSelected.getAttribute("type")).toEqual(SymbolType.Shape)
+      expect(elSelected.getAttribute("kind")).toEqual(ShapeKind.Rectangle)
+      expect(elSelected.getAttribute("filter")).toEqual(`url(#${ selectionFilterId })`)
     })
   })
 
@@ -84,8 +92,8 @@ describe("OISVGShapeUtil.ts", () =>
       const circle = OIShapeCircle.createFromLine({}, origin, target)
       const el = renderer.getSVGElement(circle)
       expect(el.getAttribute("id")).toEqual(circle.id)
-      expect(el.getAttribute("type")).toEqual("shape")
-      expect(el.getAttribute("kind")).toEqual("circle")
+      expect(el.getAttribute("type")).toEqual(SymbolType.Shape)
+      expect(el.getAttribute("kind")).toEqual(ShapeKind.Circle)
       expect(el.getAttribute("stroke")).toEqual(DefaultStyle.color)
       expect(el.getAttribute("stroke-width")).toEqual(DefaultStyle.width?.toString())
     })
@@ -100,8 +108,8 @@ describe("OISVGShapeUtil.ts", () =>
       const circle = OIShapeCircle.createFromLine(style, origin, target)
       const el = renderer.getSVGElement(circle)
       expect(el.getAttribute("id")).toEqual(circle.id)
-      expect(el.getAttribute("type")).toEqual("shape")
-      expect(el.getAttribute("kind")).toEqual("circle")
+      expect(el.getAttribute("type")).toEqual(SymbolType.Shape)
+      expect(el.getAttribute("kind")).toEqual(ShapeKind.Circle)
       expect(el.getAttribute("stroke")).toEqual(style.color)
       expect(el.getAttribute("stroke-width")).toEqual(style.width?.toString())
     })
@@ -110,10 +118,17 @@ describe("OISVGShapeUtil.ts", () =>
       const origin: TPoint = { x: 1, y: 1 }
       const target: TPoint = { x: 11, y: 11 }
       const circle = OIShapeCircle.createFromLine(DefaultStyle, origin, target)
+      const elNotSelected = renderer.getSVGElement(circle)
+      expect(elNotSelected.getAttribute("id")).toEqual(circle.id)
+      expect(elNotSelected.getAttribute("type")).toEqual(SymbolType.Shape)
+      expect(elNotSelected.getAttribute("kind")).toEqual(ShapeKind.Circle)
+      expect(elNotSelected.getAttribute("filter")).toBeFalsy()
       circle.selected = true
-      const el = renderer.getSVGElement(circle)
-      expect(el.getAttribute("id")).toEqual(circle.id)
-      expect(el.getAttribute("filter")).toEqual(`url(#${ selectionFilterId })`)
+      const elSelected = renderer.getSVGElement(circle)
+      expect(elSelected.getAttribute("id")).toEqual(circle.id)
+      expect(elSelected.getAttribute("type")).toEqual(SymbolType.Shape)
+      expect(elSelected.getAttribute("kind")).toEqual(ShapeKind.Circle)
+      expect(elSelected.getAttribute("filter")).toEqual(`url(#${ selectionFilterId })`)
     })
   })
 
@@ -140,8 +155,8 @@ describe("OISVGShapeUtil.ts", () =>
       const parallelogram = OIShapeParallelogram.createFromLine({}, origin, target)
       const el = renderer.getSVGElement(parallelogram)
       expect(el.getAttribute("id")).toEqual(parallelogram.id)
-      expect(el.getAttribute("type")).toEqual("shape")
-      expect(el.getAttribute("kind")).toEqual("parallelogram")
+      expect(el.getAttribute("type")).toEqual(SymbolType.Shape)
+      expect(el.getAttribute("kind")).toEqual(ShapeKind.Parallelogram)
       expect(el.getAttribute("stroke")).toEqual(DefaultStyle.color)
       expect(el.getAttribute("stroke-width")).toEqual(DefaultStyle.width?.toString())
     })
@@ -156,8 +171,8 @@ describe("OISVGShapeUtil.ts", () =>
       const parallelogram = OIShapeParallelogram.createFromLine(style, origin, target)
       const el = renderer.getSVGElement(parallelogram)
       expect(el.getAttribute("id")).toEqual(parallelogram.id)
-      expect(el.getAttribute("type")).toEqual("shape")
-      expect(el.getAttribute("kind")).toEqual("parallelogram")
+      expect(el.getAttribute("type")).toEqual(SymbolType.Shape)
+      expect(el.getAttribute("kind")).toEqual(ShapeKind.Parallelogram)
       expect(el.getAttribute("stroke")).toEqual(style.color)
       expect(el.getAttribute("stroke-width")).toEqual(style.width?.toString())
     })
@@ -166,10 +181,17 @@ describe("OISVGShapeUtil.ts", () =>
       const origin: TPoint = { x: 1, y: 1 }
       const target: TPoint = { x: 11, y: 11 }
       const parallelogram = OIShapeParallelogram.createFromLine(DefaultStyle, origin, target)
+      const elNotSelected = renderer.getSVGElement(parallelogram)
+      expect(elNotSelected.getAttribute("id")).toEqual(parallelogram.id)
+      expect(elNotSelected.getAttribute("type")).toEqual(SymbolType.Shape)
+      expect(elNotSelected.getAttribute("kind")).toEqual(ShapeKind.Parallelogram)
+      expect(elNotSelected.getAttribute("filter")).toBeFalsy()
       parallelogram.selected = true
-      const el = renderer.getSVGElement(parallelogram)
-      expect(el.getAttribute("id")).toEqual(parallelogram.id)
-      expect(el.getAttribute("filter")).toEqual(`url(#${ selectionFilterId })`)
+      const elSelected = renderer.getSVGElement(parallelogram)
+      expect(elSelected.getAttribute("id")).toEqual(parallelogram.id)
+      expect(elSelected.getAttribute("type")).toEqual(SymbolType.Shape)
+      expect(elSelected.getAttribute("kind")).toEqual(ShapeKind.Parallelogram)
+      expect(elSelected.getAttribute("filter")).toEqual(`url(#${ selectionFilterId })`)
     })
   })
 
@@ -196,8 +218,8 @@ describe("OISVGShapeUtil.ts", () =>
       const triangle = OIShapeTriangle.createFromLine({}, origin, target)
       const el = renderer.getSVGElement(triangle)
       expect(el.getAttribute("id")).toEqual(triangle.id)
-      expect(el.getAttribute("type")).toEqual("shape")
-      expect(el.getAttribute("kind")).toEqual("triangle")
+      expect(el.getAttribute("type")).toEqual(SymbolType.Shape)
+      expect(el.getAttribute("kind")).toEqual(ShapeKind.Triangle)
       expect(el.getAttribute("stroke")).toEqual(DefaultStyle.color)
       expect(el.getAttribute("stroke-width")).toEqual(DefaultStyle.width?.toString())
     })
@@ -212,7 +234,7 @@ describe("OISVGShapeUtil.ts", () =>
       const triangle = OIShapeTriangle.createFromLine(style, origin, target)
       const el = renderer.getSVGElement(triangle)
       expect(el.getAttribute("id")).toEqual(triangle.id)
-      expect(el.getAttribute("type")).toEqual("shape")
+      expect(el.getAttribute("type")).toEqual(SymbolType.Shape)
       expect(el.getAttribute("kind")).toEqual("triangle")
       expect(el.getAttribute("stroke")).toEqual(style.color)
       expect(el.getAttribute("stroke-width")).toEqual(style.width?.toString())
@@ -222,10 +244,17 @@ describe("OISVGShapeUtil.ts", () =>
       const origin: TPoint = { x: 1, y: 1 }
       const target: TPoint = { x: 11, y: 11 }
       const triangle = OIShapeTriangle.createFromLine(DefaultStyle, origin, target)
+      const elNotSelected = renderer.getSVGElement(triangle)
+      expect(elNotSelected.getAttribute("id")).toEqual(triangle.id)
+      expect(elNotSelected.getAttribute("type")).toEqual(SymbolType.Shape)
+      expect(elNotSelected.getAttribute("kind")).toEqual(ShapeKind.Triangle)
+      expect(elNotSelected.getAttribute("filter")).toBeFalsy()
       triangle.selected = true
-      const el = renderer.getSVGElement(triangle)
-      expect(el.getAttribute("id")).toEqual(triangle.id)
-      expect(el.getAttribute("filter")).toEqual(`url(#${ selectionFilterId })`)
+      const elSelected = renderer.getSVGElement(triangle)
+      expect(elSelected.getAttribute("id")).toEqual(triangle.id)
+      expect(elSelected.getAttribute("type")).toEqual(SymbolType.Shape)
+      expect(elSelected.getAttribute("kind")).toEqual(ShapeKind.Triangle)
+      expect(elSelected.getAttribute("filter")).toEqual(`url(#${ selectionFilterId })`)
     })
   })
 })

@@ -2,16 +2,14 @@ import { LoggerClass, SELECTION_MARGIN } from "../Constants"
 import { LoggerManager } from "../logger"
 import { TStyle } from "../style"
 import { computeDistance, findIntersectBetweenSegmentAndCircle, rotatePoint } from "../utils"
-import { TPoint, TSegment } from "./Point"
-import { TOISymbol } from "./Symbol"
-import { AbstracOIShape, ShapeKind } from "./OIShape"
+import { TPoint } from "./Point"
+import { OIShape, ShapeKind } from "./OIShape"
 import { Box, TBoundingBox } from "./Box"
-import { MatrixTransform } from "../transform"
 
 /**
  * @group Primitive
  */
-export class OIShapeCircle extends AbstracOIShape implements TOISymbol
+export class OIShapeCircle extends OIShape
 {
   #logger = LoggerManager.getLogger(LoggerClass.SHAPE)
   center: TPoint
@@ -36,14 +34,20 @@ export class OIShapeCircle extends AbstracOIShape implements TOISymbol
     const points: TPoint[] = []
     for (let i = 0; i < nbPoint; i++) {
       const rad = 2 * Math.PI * (i / nbPoint)
-      points.push(rotatePoint(this.center, firstPoint, rad))
+      points.push(rotatePoint(firstPoint, this.center, rad))
     }
-    return points.map(p => MatrixTransform.applyToPoint(this.transform, p))
+    return points
   }
 
-  get boundingBox(): Box
+  override get boundingBox(): Box
   {
-    return new Box(this.center.x - this.radius, this.center.y - this.radius, this.radius * 2, this.radius * 2)
+    const boundingBox: TBoundingBox = {
+      x: this.center.x - this.radius,
+      y: this.center.y - this.radius,
+      height: this.radius * 2,
+      width: this.radius * 2
+    }
+    return new Box(boundingBox)
   }
 
   isCloseToPoint(point: TPoint): boolean
@@ -51,25 +55,20 @@ export class OIShapeCircle extends AbstracOIShape implements TOISymbol
     return Math.abs(computeDistance(point, this.center) - this.radius) < SELECTION_MARGIN
   }
 
-  isOverlapping(box: TBoundingBox): boolean
+  overlaps(box: TBoundingBox): boolean
   {
-    const boxEdges: TSegment[] = [
-      { p1: { x: box.x, y: box.y }, p2: { x: box.x + box.width, y: box.y } },
-      { p1: { x: box.x + box.width, y: box.y }, p2: { x: box.x + box.width, y: box.y + box.height } },
-      { p1: { x: box.x + box.width, y: box.y + box.height }, p2: { x: box.x, y: box.y + box.height } },
-      { p1: { x: box.x, y: box.y + box.height }, p2: { x: box.x, y: box.y } },
-    ]
-    return this.boundingBox.isWrap(box) ||
-      boxEdges.some(seg => findIntersectBetweenSegmentAndCircle(seg, this.center, this.radius).length)
+    return this.boundingBox.isContained(box) ||
+      Box.getSides(box).some(seg => findIntersectBetweenSegmentAndCircle(seg, this.center, this.radius).length)
   }
 
-  getClone(): OIShapeCircle
+  clone(): OIShapeCircle
   {
     const clone = new OIShapeCircle(structuredClone(this.style), structuredClone(this.center), this.radius)
     clone.id = this.id
+    clone.selected = this.selected
+    clone.toDelete = this.toDelete
     clone.creationTime = this.creationTime
     clone.modificationDate = this.modificationDate
-    clone.transform = this.transform.getClone()
     return clone
   }
 

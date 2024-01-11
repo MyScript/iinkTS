@@ -1,7 +1,7 @@
-import { EdgeDecoration, TOIEdge } from "../../primitive"
+import { EdgeDecoration, EdgeKind, OIEdgeArc, OIEdgeLine, TOIEdge } from "../../primitive"
 import { DefaultStyle } from "../../style"
-import { MatrixTransform } from "../../transform"
-import { createPath } from "./SVGElementBuilder"
+import { computeDistance } from "../../utils"
+import { SVGBuilder } from "./SVGBuilder"
 
 /**
  * @group Renderer
@@ -9,14 +9,49 @@ import { createPath } from "./SVGElementBuilder"
 export class OISVGEdgeUtil
 {
   selectionFilterId: string
+  removalFilterId: string
   arrowStartDecoration: string
   arrowEndDecoration: string
 
-  constructor(selectionFilterId: string, arrowStartDecoration: string, arrowEndDecoration: string)
+  constructor(selectionFilterId: string, removalFilterId: string, arrowStartDecoration: string, arrowEndDecoration: string)
   {
     this.selectionFilterId = selectionFilterId
+    this.removalFilterId = removalFilterId
     this.arrowStartDecoration = arrowStartDecoration
     this.arrowEndDecoration = arrowEndDecoration
+  }
+
+  getLinePath(line: OIEdgeLine): string
+  {
+    return `M ${ line.start.x } ${ line.start.y } L ${ line.end.x } ${ line.end.y }`
+  }
+
+  getArcPath(arc: OIEdgeArc): string
+  {
+    const dist12 = computeDistance(arc.middle, arc.start)
+    const dist23 = computeDistance(arc.end, arc.middle)
+    const dist13 = computeDistance(arc.start, arc.middle)
+
+    const angle = Math.acos((Math.pow(dist23, 2) + Math.pow(dist12, 2) - Math.pow(dist13, 2)) / (2 * dist23 * dist12))
+
+    const K = dist23 * dist12 * Math.sin(angle) / 2
+    const r = Math.round(dist23 * dist12 * dist13 / 4 / K * 1000) / 1000
+    const laf = +(Math.PI / 2 > angle)
+    const saf = +((arc.end.x - arc.start.x) * (arc.middle.y - arc.start.y) - (arc.end.y - arc.start.y) * (arc.middle.x - arc.start.x) < 0)
+
+    return `M ${ arc.start.x } ${ arc.start.y } A ${ r } ${ r } 0 ${ laf } ${ saf } ${ arc.end.x } ${ arc.end.y }`
+  }
+
+  getSVGPath(edge: TOIEdge): string
+  {
+    switch (edge.kind) {
+      case EdgeKind.Line:
+        return this.getLinePath(edge as OIEdgeLine)
+      case EdgeKind.Arc:
+        return this.getArcPath(edge as OIEdgeArc)
+      default:
+        throw new Error(`Can't getSVGPath for edge cause kind is unknow: "${ edge.kind }"`)
+    }
   }
 
   getSVGElement(edge: TOIEdge): SVGPathElement
@@ -32,8 +67,7 @@ export class OISVGEdgeUtil
       "stroke": edge.style.color || DefaultStyle.color!,
       "stroke-width": (edge.style.width || DefaultStyle.width!).toString(),
       "opacity": (edge.style.opacity || DefaultStyle.opacity!).toString(),
-      "transform": MatrixTransform.toCssString(edge.transform),
-      "d": `M ${edge.start.x} ${edge.start.y} L ${edge.end.x} ${edge.end.y}`,
+      "d": this.getSVGPath(edge),
     }
 
     if (edge.startDecoration === EdgeDecoration.Arrow) {
@@ -45,8 +79,11 @@ export class OISVGEdgeUtil
     if (edge.selected) {
       attrs["filter"] = `url(#${ this.selectionFilterId })`
     }
+    if (edge.toDelete) {
+      attrs["filter"] = `url(#${ this.removalFilterId })`
+    }
 
-    return createPath(attrs)
+    return SVGBuilder.createPath(attrs)
   }
 
 }

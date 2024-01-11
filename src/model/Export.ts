@@ -1,4 +1,4 @@
-import { TBoundingBox, TPoint } from "../primitive"
+import { EdgeDecoration, EdgeKind, ShapeKind, TBoundingBox, TPoint } from "../primitive"
 
 /**
  * @group Model/Export
@@ -12,6 +12,7 @@ export type TJIIXStrokeItem = TJIIXBase & {
   T?: number[]
   type: string
   id: string
+  "full-id"?: string
   "bounding-box"?: TBoundingBox
 }
 
@@ -72,7 +73,7 @@ export type TJIIXTextElement = TJIIXElement & {
 export type TJIIXNodeElement = TJIIXElement & {
   id: string
   type: "Node"
-  kind: "circle" | "ellipse" | "rectangle" | "triangle" | "parallelogram" | "polygon" | "rhombus"
+  kind: ShapeKind
 }
 
 /**
@@ -81,7 +82,7 @@ export type TJIIXNodeElement = TJIIXElement & {
 export type TJIIXNodeCircle = TJIIXNodeElement & {
   id: string
   type: "Node"
-  kind: "circle"
+  kind: ShapeKind.Circle
   cx: number
   cy: number
   r: number
@@ -93,7 +94,7 @@ export type TJIIXNodeCircle = TJIIXNodeElement & {
 export type TJIIXNodeEllipse = TJIIXNodeElement & {
   id: string
   type: "Node"
-  kind: "ellipse"
+  kind: ShapeKind.Ellipse
   cx: number
   cy: number
   rx: number
@@ -106,7 +107,7 @@ export type TJIIXNodeEllipse = TJIIXNodeElement & {
 export type TJIIXNodeRectangle = TJIIXNodeElement & {
   id: string
   type: "Node"
-  kind: "rectangle"
+  kind: ShapeKind.Rectangle
   height: number
   width: number
   x: number
@@ -119,7 +120,7 @@ export type TJIIXNodeRectangle = TJIIXNodeElement & {
 export type TJIIXNodeTriangle = TJIIXNodeElement & {
   id: string
   type: "Node"
-  kind: "triangle"
+  kind: ShapeKind.Triangle
   points: number[]
 }
 
@@ -129,7 +130,7 @@ export type TJIIXNodeTriangle = TJIIXNodeElement & {
 export type TJIIXNodeParrallelogram = TJIIXNodeElement & {
   id: string
   type: "Node"
-  kind: "parallelogram"
+  kind: ShapeKind.Parallelogram
   points: number[]
 }
 
@@ -139,7 +140,7 @@ export type TJIIXNodeParrallelogram = TJIIXNodeElement & {
 export type TJIIXNodePolygon = TJIIXNodeElement & {
   id: string
   type: "Node"
-  kind: "polygon"
+  kind: ShapeKind.Polygon
   points: number[]
 }
 
@@ -149,7 +150,7 @@ export type TJIIXNodePolygon = TJIIXNodeElement & {
 export type TJIIXNodeRhombus = TJIIXNodeElement & {
   id: string
   type: "Node"
-  kind: "rhombus"
+  kind: ShapeKind.Rhombus
   points: number[]
 }
 
@@ -157,33 +158,28 @@ export type TJIIXNodeRhombus = TJIIXNodeElement & {
  * @group Model/Export
  */
 export type TJIIXEdgeElement = TJIIXElement & {
-  id: string
   type: "Edge"
-  kind: string
+  kind: EdgeKind
 }
 
 /**
  * @group Model/Export
  */
 export type TJIIXEdgeLine = TJIIXEdgeElement & {
-  id: string
-  type: "Edge"
-  kind: "line"
+  kind: EdgeKind.Line
   x1: number
   x2: number
   y1: number
   y2: number
-  p1Decoration?: "arrow-head" | string
-  p2Decoration?: "arrow-head" | string
+  p1Decoration?: EdgeDecoration
+  p2Decoration?: EdgeDecoration
 }
 
 /**
  * @group Model/Export
  */
 export type TJIIXEdgeArc = TJIIXEdgeElement & {
-  id: string
-  type: "Edge"
-  kind: "arc"
+  kind: EdgeKind.Arc
   cx: number,
   cy: number,
   rx: number,
@@ -191,6 +187,8 @@ export type TJIIXEdgeArc = TJIIXEdgeElement & {
   phi: number,
   startAngle: number,
   sweepAngle: number
+  startDecoration?: EdgeDecoration
+  endDecoration?: EdgeDecoration
 }
 
 /**

@@ -74,6 +74,10 @@ export const EventType = {
   * @description event emitted after
   */
   SELECTED: "selected",
+  /**
+  * @description event emitted after
+  */
+  INTENTION: "intention",
 } as const
 
 /**
@@ -99,6 +103,7 @@ export const InternalEventType = {
   IDLE: "internal_idle",
   WS_CLOSED: "internal_websocket_closed",
   SELECTED: "internal_selected",
+  INTENTION: "internal_intention",
 } as const
 
 /**
@@ -164,8 +169,11 @@ export enum LoggerClass
   STROKE = "STROKE",
   SHAPE = "SHAPE",
   EDGE = "EDGE",
+  TEXT = "TEXT",
   INTERNAL_EVENT = "INTERNAL_EVENT",
   TRANSFORMER = "TRANSFORMER",
+  CONVERTER = "CONVERTER",
+  SELECTION = "SELECTION",
 }
 
 /**
@@ -179,6 +187,7 @@ export enum WriteTool
   Pencil = "pencil",
   Rectangle = "rectangle",
   Circle = "circle",
+  Ellipse = "ellipse",
   Triangle = "triangle",
   Parallelogram = "parallelogram",
   Line = "line",
@@ -200,6 +209,10 @@ export enum SvgElementRole
   Translate = "translate",
   Resize = "resize",
   Rotate = "rotate",
+  BoudingBox = "bounding-box",
+  RecognitionBox = "recognition-box",
+  RecognitionBoxItem = "recognition-box-item",
+  ConnectionLine = "connection-line"
 }
 
 /**

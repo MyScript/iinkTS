@@ -230,18 +230,18 @@ export class Model implements IModel
     this.#logger.debug("mergeConvert", this.converts)
   }
 
-  getClone(): Model
+  clone(): Model
   {
-    this.#logger.info("getClone")
+    this.#logger.info("clone")
     const clonedModel = new Model(this.width, this.height, this.rowHeight, this.creationTime)
     clonedModel.modificationDate = JSON.parse(JSON.stringify(this.modificationDate))
-    clonedModel.currentSymbol = this.currentSymbol ? this.currentSymbol.getClone() : undefined
-    clonedModel.symbols = this.symbols.map(s => s.getClone())
+    clonedModel.currentSymbol = this.currentSymbol ? this.currentSymbol.clone() : undefined
+    clonedModel.symbols = this.symbols.map(s => s.clone())
     clonedModel.positions = JSON.parse(JSON.stringify(this.positions))
     clonedModel.exports = this.exports ? JSON.parse(JSON.stringify(this.exports)) : undefined
     clonedModel.converts = this.converts ? JSON.parse(JSON.stringify(this.converts)) : undefined
     clonedModel.idle = this.idle
-    this.#logger.debug("getClone", { clonedModel })
+    this.#logger.debug("clone", { clonedModel })
     return clonedModel
   }
 

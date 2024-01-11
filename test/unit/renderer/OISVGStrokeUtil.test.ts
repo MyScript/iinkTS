@@ -3,7 +3,8 @@ import { DefaultStyle, OISVGStrokeUtil, OIStroke, TStyle } from "../../../src/ii
 describe("OISVGStrokeUtil.ts", () =>
 {
   const selectionFilterId = "selectionFilterId"
-  const renderer = new OISVGStrokeUtil(selectionFilterId)
+  const removalFilterId = "removalFilterId"
+  const renderer = new OISVGStrokeUtil(selectionFilterId, removalFilterId)
 
   test("should getSVGPath when no pointers", () =>
   {

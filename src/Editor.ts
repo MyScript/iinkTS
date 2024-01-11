@@ -30,6 +30,9 @@ export class Editor
   logger = LoggerManager.getLogger(LoggerClass.EDITOR)
   wrapperHTML: HTMLEditorElement
   #loaderHTML: HTMLDivElement
+  #stateHTML: HTMLDivElement
+  #busyHTML: HTMLDivElement
+  #idleHTML: HTMLDivElement
   #messageHTML: HTMLDivElement
   #behaviors!: IBehaviors
   #smartGuide?: SmartGuide
@@ -56,6 +59,19 @@ export class Editor
     this.#loaderHTML.classList.add("loader")
     this.#loaderHTML.style.display = "none"
     this.wrapperHTML.appendChild(this.#loaderHTML)
+
+    this.#stateHTML = document.createElement("div")
+    this.#stateHTML.classList.add("state")
+    this.#idleHTML = document.createElement("div")
+    this.#idleHTML.textContent = "idle"
+    this.#idleHTML.style.display = "none"
+    this.#stateHTML.appendChild(this.#idleHTML)
+    this.#busyHTML = document.createElement("div")
+    this.#busyHTML.classList.add("busy")
+    this.#busyHTML.style.display = "none"
+    this.#stateHTML.appendChild(this.#busyHTML)
+    this.#stateHTML.style.display = "none"
+    this.wrapperHTML.appendChild(this.#stateHTML)
 
     this.#messageHTML = document.createElement("div")
     this.#messageHTML.classList.add("message")
@@ -121,23 +137,7 @@ export class Editor
   set intention(i: Intention)
   {
     this.behaviors.intention = i
-    switch (this.behaviors.intention) {
-      case Intention.Erase:
-        this.wrapperHTML.classList.remove("draw")
-        this.wrapperHTML.classList.add("erase")
-        this.wrapperHTML.classList.remove("select")
-        break
-      case Intention.Select:
-        this.wrapperHTML.classList.remove("draw")
-        this.wrapperHTML.classList.remove("erase")
-        this.wrapperHTML.classList.add("select")
-        break
-      default:
-        this.wrapperHTML.classList.add("draw")
-        this.wrapperHTML.classList.remove("erase")
-        this.wrapperHTML.classList.remove("select")
-        break
-    }
+    this.#setCursorIntention()
     this.logger.debug("set intention", this.wrapperHTML)
   }
 
@@ -291,6 +291,45 @@ export class Editor
     }
   }
 
+  #setCursorIntention(): void
+  {
+    switch (this.behaviors.intention) {
+      case Intention.Erase:
+        this.wrapperHTML.classList.remove("draw")
+        this.wrapperHTML.classList.add("erase")
+        this.wrapperHTML.classList.remove("select")
+        break
+      case Intention.Select:
+        this.wrapperHTML.classList.remove("draw")
+        this.wrapperHTML.classList.remove("erase")
+        this.wrapperHTML.classList.add("select")
+        break
+      default:
+        this.wrapperHTML.classList.add("draw")
+        this.wrapperHTML.classList.remove("erase")
+        this.wrapperHTML.classList.remove("select")
+        break
+    }
+  }
+
+  updateEditorState(idle: boolean): void
+  {
+    if (this.configuration.offscreen) {
+      this.#stateHTML.style.display = "block"
+      if (idle) {
+        this.#idleHTML.style.display = "block"
+        this.#busyHTML.style.display = "none"
+      }
+      else {
+        this.#idleHTML.style.display = "none"
+        this.#busyHTML.style.display = "block"
+      }
+    }
+    else {
+      this.#stateHTML.style.display = "none"
+    }
+  }
+
   #instantiateBehaviors(options: PartialDeep<TBehaviorOptions>)
   {
     this.logger.info("instantiateBehaviors", { options })
@@ -338,6 +377,7 @@ export class Editor
       {
         this.logger.debug("initializeBehaviors", "finally")
         this.#loaderHTML.style.display = "none"
+        this.updateEditorState(true)
         return this.#initializationDeferred.promise
       })
   }
@@ -420,11 +460,18 @@ export class Editor
     this.internalEvents.addContextChangeListener(this.#onContextChange.bind(this))
     this.internalEvents.addIdleListener(this.#onIdleChange.bind(this))
     this.internalEvents.addSelectedListener(this.#onSelectionChange.bind(this))
+    this.internalEvents.addIntentionListener(this.#onIntentionChange.bind(this))
   }
 
   #onSelectionChange = (symbols: TOISymbol[]) =>
   {
     this.events.emitSelected(symbols)
+  }
+
+  #onIntentionChange = (intention: Intention) =>
+  {
+    this.intention = intention
+    this.events.emitIntention(intention)
   }
 
   #onContextChange = (context: TUndoRedoContext) =>
@@ -434,6 +481,7 @@ export class Editor
 
   #onIdleChange = (idle: boolean) =>
   {
+    this.updateEditorState(idle)
     this.events.emitIdle(idle)
   }
 
@@ -454,6 +502,59 @@ export class Editor
     this.logger.info("onImportJIIX", { jiix })
     this.import(new Blob([JSON.stringify(jiix)], { type: ExportType.JIIX }), ExportType.JIIX)
   }
+
+  /**
+   * @remarks only usable in the case of offscreen
+   */
+  drawRecognitionBox(): Promise<void>
+  {
+    if (this.configuration.offscreen) {
+      return (this.behaviors as unknown as OIBehaviors).drawRecognitionBox()
+    }
+    else {
+      throw new Error("drawRecognitionBox is only for offscreen configuration")
+    }
+  }
+
+  /**
+   * @remarks only usable in the case of offscreen
+   */
+  clearRecognitionBox(): void
+  {
+    if (this.configuration.offscreen) {
+      return (this.behaviors as unknown as OIBehaviors).clearRecognitionBox()
+    }
+    else {
+      throw new Error("clearRecognitionBox is only for offscreen configuration")
+    }
+  }
+
+  /**
+   * @remarks only usable in the case of offscreen
+   */
+  drawRecognitionBoxItem(): Promise<void>
+  {
+    if (this.configuration.offscreen) {
+      return (this.behaviors as unknown as OIBehaviors).drawRecognitionBoxItem()
+    }
+    else {
+      throw new Error("drawRecognitionBoxItem is only for offscreen configuration")
+    }
+  }
+
+  /**
+   * @remarks only usable in the case of offscreen
+   */
+  clearRecognitionBoxItem(): void
+  {
+    if (this.configuration.offscreen) {
+      return (this.behaviors as unknown as OIBehaviors).clearRecognitionBoxItem()
+    }
+    else {
+      throw new Error("clearRecognitionBoxItem is only for offscreen configuration")
+    }
+  }
+
 
   async initialize(): Promise<void>
   {
@@ -507,8 +608,8 @@ export class Editor
       this.#smartGuide?.resize()
     }
     const compStyles = window.getComputedStyle(this.wrapperHTML)
-    const height = Math.max(parseInt(compStyles.height.replace("px","")), this.configuration.rendering.minHeight)
-    const width = Math.max(parseInt(compStyles.width.replace("px","")), this.configuration.rendering.minWidth)
+    const height = Math.max(parseInt(compStyles.height.replace("px", "")), this.configuration.rendering.minHeight)
+    const width = Math.max(parseInt(compStyles.width.replace("px", "")), this.configuration.rendering.minWidth)
     await this.behaviors.resize(height, width)
     this.logger.debug("resize", this.model)
     return this.model

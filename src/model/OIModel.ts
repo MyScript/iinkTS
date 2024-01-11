@@ -1,6 +1,26 @@
 import { LoggerClass, WriteTool } from "../Constants"
 import { LoggerManager } from "../logger"
-import { OILine, OIShapeCircle, OIShapeParallelogram, OIShapeRectangle, OIShapeTriangle, OIStroke, ShapeKind, SymbolType, TOIEdge, TOISymbol, TPoint, TPointer, TOIShape, EdgeDecoration, Box } from "../primitive"
+import
+{
+  OIEdgeLine,
+  OIShapeCircle,
+  OIShapeParallelogram,
+  OIShapeRectangle,
+  OIShapeTriangle,
+  OIStroke,
+  ShapeKind,
+  SymbolType,
+  TOIEdge,
+  TOISymbol,
+  TPoint,
+  TPointer,
+  TOIShape,
+  EdgeDecoration,
+  EdgeKind,
+  OIShapeEllipse,
+  TOIDecorator,
+  TOISymbolDecorable,
+} from "../primitive"
 import { TStyle } from "../style"
 import { TExport } from "./Export"
 import { IModel, TRecognitionPositions } from "./IModel"
@@ -16,8 +36,6 @@ export class OIModel implements IModel
   positions: TRecognitionPositions
   currentSymbol?: TOISymbol
   currentSymbolOrigin?: TPoint
-  startSelectionPoint: TPoint
-  endSelectionPoint: TPoint
   symbols: TOISymbol[]
   exports?: TExport
   converts?: TExport
@@ -38,19 +56,17 @@ export class OIModel implements IModel
       lastSentPosition: 0,
       lastReceivedPosition: 0
     }
-    this.startSelectionPoint = { x: 0, y: 0 }
-    this.endSelectionPoint = { x: 0, y: 0 }
     this.idle = true
   }
 
-  get selection(): TOISymbol[]
+  get symbolsSelected(): TOISymbol[]
   {
     return this.symbols.filter(s => s.selected)
   }
 
-  get selectionBox(): Box
+  get symbolsToDelete(): TOISymbol[]
   {
-    return Box.createFromPoints([this.startSelectionPoint, this.endSelectionPoint])
+    return this.symbols.filter(s => s.toDelete)
   }
 
   selectSymbol(id: string): void
@@ -61,13 +77,13 @@ export class OIModel implements IModel
     }
   }
 
-  selectedSymbolsFromPoint(point: TPoint): void
+  setToDeleteSymbolsFromPoint(point: TPoint): void
   {
     this.#logger.info("appendSelectedStrokesFromPoint", { point })
     this.symbols.forEach(s =>
     {
       if (s.isCloseToPoint(point)) {
-        s.selected = true
+        s.toDelete = true
       }
     })
   }
@@ -85,34 +101,6 @@ export class OIModel implements IModel
     this.symbols.forEach(s => s.selected = false)
   }
 
-  startSelectionByBox(point: TPoint): TOISymbol[]
-  {
-    this.startSelectionPoint = point
-    this.endSelectionPoint = point
-    const updatedSymbols: TOISymbol[] = []
-
-    this.symbols.forEach(s => {
-      if (s.selected !== s.isOverlapping(this.selectionBox)) {
-        s.selected = s.isOverlapping(this.selectionBox)
-        updatedSymbols.push(s)
-      }
-    })
-    return updatedSymbols
-  }
-
-  updateSelectionByBox(point: TPoint): TOISymbol[]
-  {
-    this.endSelectionPoint = point
-    const updatedSymbols: TOISymbol[] = []
-    this.symbols.forEach(s => {
-      if (s.selected !== s.isOverlapping(this.selectionBox)) {
-        s.selected = s.isOverlapping(this.selectionBox)
-        updatedSymbols.push(s)
-      }
-    })
-    return updatedSymbols
-  }
-
   createCurrentSymbol(tool: WriteTool, pointer: TPointer, style: TStyle, pointerId: number, pointerType: string): TOISymbol
   {
     this.#logger.info("initCurrentStroke", { tool, pointer, style, pointerId, pointerType })
@@ -126,6 +114,9 @@ export class OIModel implements IModel
         break
       case WriteTool.Circle:
         this.currentSymbol = OIShapeCircle.createFromLine(style, pointer, pointer)
+        break
+      case WriteTool.Ellipse:
+        this.currentSymbol = OIShapeEllipse.createFromLine(style, pointer, pointer)
         break
       case WriteTool.Triangle:
         this.currentSymbol = OIShapeTriangle.createFromLine(style, pointer, pointer)
@@ -144,7 +135,7 @@ export class OIModel implements IModel
           startDecoration = EdgeDecoration.Arrow
           endDecoration = EdgeDecoration.Arrow
         }
-        this.currentSymbol = new OILine(style, pointer, pointer, startDecoration, endDecoration)
+        this.currentSymbol = new OIEdgeLine(style, pointer, pointer, startDecoration, endDecoration)
         break
       }
       default:
@@ -163,10 +154,13 @@ export class OIModel implements IModel
     switch (shape.kind) {
       case ShapeKind.Rectangle:
         OIShapeRectangle.updateFromLine(shape as OIShapeRectangle, this.currentSymbolOrigin!, pointer)
-        break;
+        break
       case ShapeKind.Circle:
         OIShapeCircle.updateFromLine(shape as OIShapeCircle, this.currentSymbolOrigin!, pointer)
-        break;
+        break
+      case ShapeKind.Ellipse:
+        OIShapeEllipse.updateFromLine(shape as OIShapeEllipse, this.currentSymbolOrigin!, pointer)
+        break
       case ShapeKind.Triangle:
         OIShapeTriangle.updateFromLine(shape as OIShapeTriangle, this.currentSymbolOrigin!, pointer)
         break
@@ -174,7 +168,22 @@ export class OIModel implements IModel
         OIShapeParallelogram.updateFromLine(shape as OIShapeParallelogram, this.currentSymbolOrigin!, pointer)
         break
       default:
-        break;
+        break
+    }
+  }
+
+  updateCurrentSymbolEdge(pointer: TPointer): void
+  {
+    if (!this.currentSymbol) {
+      throw new Error("Can't update current symbol because currentSymbol is undefined")
+    }
+    const edge = this.currentSymbol as TOIEdge
+    switch (edge.kind) {
+      case EdgeKind.Line:
+        (this.currentSymbol as OIEdgeLine).end = pointer
+        break
+      default:
+        break
     }
   }
 
@@ -193,7 +202,7 @@ export class OIModel implements IModel
         this.updateCurrentSymbolShape(pointer)
         break
       case SymbolType.Edge:
-        (this.currentSymbol as TOIEdge).end = pointer
+        this.updateCurrentSymbolEdge(pointer)
         break
     }
     this.modificationDate = Date.now()
@@ -201,12 +210,48 @@ export class OIModel implements IModel
     return this.currentSymbol
   }
 
+  getSymbolRowIndex(symbol: TOISymbol): number
+  {
+    return Math.round(symbol.boundingBox.yMiddle / this.rowHeight)
+  }
+
+  getSymbolInRowOrdered(rowIndex: number): TOISymbol[]
+  {
+    return this.symbols.filter(s => this.getSymbolRowIndex(s) === rowIndex)
+      .sort((s1, s2) => s1.boundingBox.xMiddle - s2.boundingBox.xMiddle)
+  }
+
+  getSymbolsByRowOrdered(): { index: number, symbols: TOISymbol[] }[]
+  {
+    const rows: { index: number, symbols: TOISymbol[] }[] = []
+    this.symbols.forEach(s =>
+    {
+      const rowIndex = this.getSymbolRowIndex(s)
+      const row = rows.find(r => r.index === rowIndex)
+      if (row) {
+        row.symbols.push(s)
+      }
+      else {
+        rows.push({ index: rowIndex, symbols: [s] })
+      }
+    })
+    rows.forEach(r =>
+    {
+      r.symbols.sort((s1, s2) => s1.boundingBox.xMiddle - s2.boundingBox.xMiddle)
+    })
+    return rows.sort((r1, r2) => r1.index - r2.index)
+  }
+
+  getLastSymbolInRow(rowIndex: number): TOISymbol | undefined
+  {
+    return this.getSymbolInRowOrdered(rowIndex).at(-1)
+  }
+
   endCurrentSymbol(pointer: TPointer): TOISymbol
   {
     this.#logger.info("endCurrentStroke", { pointer })
     const symbol = this.updateCurrentSymbol(pointer)
     this.currentSymbol = undefined
-    this.addSymbol(symbol)
     this.currentSymbolOrigin = undefined
     return symbol
   }
@@ -235,50 +280,57 @@ export class OIModel implements IModel
     this.#logger.debug("updateSymbol", this.symbols)
   }
 
-  splitStroke(strokeToSplit: OIStroke, i: number): { before: OIStroke, after: OIStroke }
+  replaceSymbol(id: string, symbols: TOISymbol[]): void
   {
-    const before = new OIStroke(strokeToSplit.style, strokeToSplit.pointerId, strokeToSplit.pointerType)
-    before.pointers = strokeToSplit.pointers.slice(0, i)
-
-    const after = new OIStroke(strokeToSplit.style, strokeToSplit.pointerId, strokeToSplit.pointerType)
-    after.pointers = strokeToSplit.pointers.slice(i)
-
-    const index = this.symbols.findIndex(s => s.id === strokeToSplit.id )
-    if (index > -1) {
-      this.symbols.splice(index, 1, before, after)
+    const sIndex = this.symbols.findIndex(s => s.id === id)
+    if (sIndex !== -1) {
+      this.symbols.splice(sIndex, 1, ...symbols)
+      this.modificationDate = Date.now()
+      this.converts = undefined
+      this.exports = undefined
     }
-    return { before, after }
   }
 
   removeSymbol(id: string): string[]
   {
     this.#logger.info("removeSymbol", { id })
     const idsDeleted: string[] = []
-    const strokeIndex = this.symbols.findIndex(s => s.id === id)
-    if (strokeIndex !== -1) {
+    const symbolIndex = this.symbols.findIndex(s => s.id === id)
+    if (symbolIndex !== -1) {
       idsDeleted.push(id)
-      const sym = this.symbols.at(strokeIndex) as TOISymbol
-      if (sym.type === SymbolType.Stroke) {
+      const sym = this.symbols.at(symbolIndex) as TOISymbol
+      if ([SymbolType.Stroke.toString(), SymbolType.Text.toString()].includes(sym.type)) {
         const stroke = sym as OIStroke
-        stroke.decorators.forEach(d => {
-          idsDeleted.push(d.id)
-          this.removeSymbol(d.id)
+        stroke.decorators.forEach(d =>
+        {
+          const decIndex = this.symbols.findIndex(s => s.id === d.id)
+          if (decIndex > -1) {
+            idsDeleted.push(d.id)
+            this.symbols.splice(decIndex, 1)
+          }
+        })
+      }
+      else if (sym.type === SymbolType.Decorator.toString()) {
+        const deco = sym as TOIDecorator
+        deco.parents.forEach(p =>
+        {
+          const decorable = p as TOISymbolDecorable
+          const decIndex = decorable.decorators.findIndex(s => s.id === deco.id)
+          if (decIndex > -1) {
+            decorable.decorators.splice(decIndex, 1)
+            this.updateSymbol(p)
+          }
         })
       }
       this.positions.lastSentPosition--
       this.positions.lastReceivedPosition--
-      this.symbols.splice(strokeIndex, 1)
+      this.symbols.splice(symbolIndex, 1)
       this.modificationDate = Date.now()
       this.converts = undefined
       this.exports = undefined
     }
     this.#logger.debug("removeSymbol", this.symbols)
     return idsDeleted
-  }
-
-  getSymbolsHigher(y: number): TOISymbol[]
-  {
-    return this.symbols.filter(s => s.boundingBox.y + s.boundingBox.height < y)
   }
 
   updatePositionSent(position: number = this.symbols.length): void
@@ -319,17 +371,17 @@ export class OIModel implements IModel
     this.#logger.debug("mergeExport", this.exports)
   }
 
-  getClone(): OIModel
+  clone(): OIModel
   {
-    this.#logger.info("getClone")
+    this.#logger.info("clone")
     const clonedModel = new OIModel(this.width, this.height, this.rowHeight, this.creationTime)
     clonedModel.modificationDate = this.modificationDate
-    clonedModel.currentSymbol = this.currentSymbol ? this.currentSymbol.getClone() : undefined
-    clonedModel.symbols = this.symbols.map(s => s.getClone())
+    clonedModel.currentSymbol = this.currentSymbol ? this.currentSymbol.clone() : undefined
+    clonedModel.symbols = this.symbols.map(s => s.clone())
     clonedModel.positions = structuredClone(this.positions)
     clonedModel.exports = structuredClone(this.exports)
     clonedModel.idle = this.idle
-    this.#logger.debug("getClone", { clonedModel })
+    this.#logger.debug("clone", { clonedModel })
     return clonedModel
   }
 

@@ -1,4 +1,4 @@
-import { buildOIStroke } from "../helpers"
+import { buildOICircle, buildOILine, buildOIStroke } from "../helpers"
 import
 {
   OISVGRenderer,
@@ -98,24 +98,98 @@ describe("OISVGRenderer.ts", () =>
     })
   })
 
+  describe("attribute", () =>
+  {
+    const divElement: HTMLDivElement = document.createElement("div")
+    const renderer = new OISVGRenderer(DefaultRenderingConfiguration)
+    renderer.init(divElement)
+    const element = document.createElement("path")
+    element.id = "attribut-test-id"
+    renderer.layer.appendChild(element)
+    const attr = { name: "attribut-test-name", value: "attribut-test-value" }
+
+    test("should set & get attribut", () =>
+    {
+      expect(renderer.getAttribute(element.id, attr.name)).toBeFalsy()
+
+      renderer.setAttribute(element.id, attr.name, attr.value)
+      expect(renderer.getAttribute(element.id, attr.name)).toEqual(attr.value)
+    })
+
+    test("should do nothing if element not exist in layer", () =>
+    {
+      renderer.setAttribute("unknow-id", attr.name, attr.value)
+      expect(renderer.getAttribute("unknow-id", attr.name)).toBeFalsy()
+    })
+  })
+
+  describe("element", () =>
+  {
+    const divElement: HTMLDivElement = document.createElement("div")
+    const renderer = new OISVGRenderer(DefaultRenderingConfiguration)
+    renderer.init(divElement)
+
+    const elementToPreprend = document.createElement("path")
+    elementToPreprend.id = "preprend-id"
+
+    const elementToAppend = document.createElement("path")
+    elementToAppend.id = "append-id"
+
+    const elementToInsertBefore = document.createElement("path")
+    elementToInsertBefore.id = "insert-before-id"
+
+    test("should prependElement", () =>
+    {
+      const nbChild = renderer.layer.childElementCount
+      expect(renderer.layer.firstElementChild?.getAttribute("id")).not.toEqual(elementToPreprend.id)
+      renderer.prependElement(elementToPreprend)
+      expect(renderer.layer.childElementCount).toEqual(nbChild + 1)
+      expect(renderer.layer.firstElementChild?.getAttribute("id")).toEqual(elementToPreprend.id)
+    })
+
+    test("should appendElement", () =>
+    {
+      const nbChild = renderer.layer.childElementCount
+      expect(renderer.layer.lastElementChild?.getAttribute("id")).not.toEqual(elementToAppend.id)
+      renderer.appendElement(elementToAppend)
+      expect(renderer.layer.childElementCount).toEqual(nbChild + 1)
+      expect(renderer.layer.lastElementChild?.getAttribute("id")).toEqual(elementToAppend.id)
+    })
+
+    test("should insertBeforeElement", () =>
+    {
+      renderer.appendElement(elementToInsertBefore)
+      const nbChild = renderer.layer.childElementCount
+      expect(renderer.layer.childElementCount).toEqual(nbChild)
+      expect(renderer.layer.lastElementChild?.getAttribute("id")).toEqual(elementToInsertBefore.id)
+      renderer.insertBeforeElement(elementToAppend, elementToInsertBefore)
+      expect(renderer.layer.childElementCount).toEqual(nbChild)
+      expect(renderer.layer.children.item(nbChild - 1)?.getAttribute("id")).toEqual(elementToInsertBefore.id)
+    })
+  })
+
   describe("symbol", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
     const renderer = new OISVGRenderer(DefaultRenderingConfiguration)
     renderer.init(divElement)
     const stroke = buildOIStroke()
+    const circle = buildOICircle()
+    const line = buildOILine()
 
     test("should write error if symbol type unknow", () =>
     {
+      //@ts-ignore
       const unknowSym: TOISymbol = {
         //@ts-ignore
         type: "unknow",
-        boundingBox: { height: 0, width: 0, x: 0, y: 0 },
+        boundingBox: { height: 0, width: 0, x: 0, y: 0, xMax: 0, xMiddle: 0, xMin: 0, yMax: 0, yMiddle: 0, yMin: 0 },
         creationTime: Date.now(),
         modificationDate: Date.now(),
-        getClone: jest.fn(),
-        isOverlapping: jest.fn(),
-        isCloseToPoint: jest.fn()
+        clone: jest.fn(),
+        overlaps: jest.fn(),
+        isCloseToPoint: jest.fn(),
+
       }
       renderer.drawSymbol(unknowSym)
       const el = divElement.querySelector(`#${ stroke.id }`)!
@@ -133,7 +207,6 @@ describe("OISVGRenderer.ts", () =>
       expect(el.getAttribute("type")).toEqual("stroke")
       expect(el.getAttribute("stroke")).toEqual(stroke.style.color)
       expect(el.getAttribute("stroke-width")).toEqual(stroke.style.width?.toString())
-
     })
     test("should replace stroke", () =>
     {
@@ -149,6 +222,26 @@ describe("OISVGRenderer.ts", () =>
       renderer.removeSymbol(stroke.id)
       const el = divElement.querySelector(`#${ stroke.id }`)!
       expect(el).toBeNull()
+    })
+    test("should draw new circle", () =>
+    {
+      renderer.drawSymbol(circle)
+      const el = divElement.querySelector(`#${ circle.id }`)!
+      expect(el).toBeDefined()
+      expect(el.getAttribute("id")).toEqual(circle.id)
+      expect(el.getAttribute("type")).toEqual("shape")
+      expect(el.getAttribute("stroke")).toEqual(circle.style.color)
+      expect(el.getAttribute("stroke-width")).toEqual(circle.style.width?.toString())
+    })
+    test("should draw new line", () =>
+    {
+      renderer.drawSymbol(line)
+      const el = divElement.querySelector(`#${ line.id }`)!
+      expect(el).toBeDefined()
+      expect(el.getAttribute("id")).toEqual(line.id)
+      expect(el.getAttribute("type")).toEqual("edge")
+      expect(el.getAttribute("stroke")).toEqual(line.style.color)
+      expect(el.getAttribute("stroke-width")).toEqual(line.style.width?.toString())
     })
   })
 
@@ -191,7 +284,7 @@ describe("OISVGRenderer.ts", () =>
       const stroke2 = buildOIStroke()
       renderer.drawSymbol(stroke2)
       expect(renderer.layer.querySelectorAll("path")).toHaveLength(2)
-      renderer.clearElements({ type: "path"})
+      renderer.clearElements({ type: "path" })
       expect(renderer.layer.querySelectorAll("path")).toHaveLength(0)
     })
     test("should clearElements by attrs", () =>
@@ -208,14 +301,14 @@ describe("OISVGRenderer.ts", () =>
 
     test("should clearElements by type and attrs", () =>
     {
-      renderer.clearElements({ type: "path"})
+      renderer.clearElements({ type: "path" })
       const stroke1 = buildOIStroke()
       renderer.drawSymbol(stroke1)
       const stroke2 = buildOIStroke()
       renderer.drawSymbol(stroke2)
-      expect(renderer.layer.querySelectorAll("path")).toHaveLength(2)
-      renderer.clearElements({ type: "path", attrs: { id: stroke2.id } })
-      expect(renderer.layer.querySelectorAll("path")).toHaveLength(1)
+      expect(renderer.layer.querySelectorAll("g")).toHaveLength(6)
+      renderer.clearElements({ type: "g", attrs: { id: stroke2.id } })
+      expect(renderer.layer.querySelectorAll("g")).toHaveLength(5)
     })
   })
 
@@ -237,7 +330,7 @@ describe("OISVGRenderer.ts", () =>
     const divElement: HTMLDivElement = document.createElement("div")
     const renderer = new OISVGRenderer(DefaultRenderingConfiguration)
     renderer.init(divElement)
-    expect(divElement.childElementCount).toEqual(1)
+    expect(divElement.childElementCount).toBeGreaterThan(1)
     renderer.destroy()
     expect(divElement.childElementCount).toEqual(0)
   })

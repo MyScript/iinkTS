@@ -1,11 +1,10 @@
-import { LoggerClass, SELECTION_MARGIN } from "../Constants"
-import { LoggerManager } from "../logger"
-import { DefaultStyle, TStyle } from "../style"
-import { MatrixTransform } from "../transform"
+import { SELECTION_MARGIN } from "../Constants"
+import { TStyle } from "../style"
 import { computeDistanceBetweenPointAndSegment, createUUID, findIntersectionBetween2Segment } from "../utils"
 import { Box, TBoundingBox } from "./Box"
+import { OISymbol, TOISymbol } from "./OISymbol"
 import { TPoint, TSegment } from "./Point"
-import { SymbolType, TOISymbol } from "./Symbol"
+import { SymbolType } from "./Symbol"
 
 /**
  * @group Primitive
@@ -21,7 +20,7 @@ export enum EdgeKind
  */
 export enum EdgeDecoration
 {
-  Arrow = "arrow"
+  Arrow = "arrow-head"
 }
 
 /**
@@ -34,39 +33,24 @@ export type TOIEdge = TOISymbol & {
   end: TPoint
   startDecoration?: EdgeDecoration
   endDecoration?: EdgeDecoration
-  boundingBox: Box
 }
 
 /**
  * @group Primitive
  */
-export class OILine implements TOIEdge
+export abstract class OIEdge extends OISymbol implements TOIEdge
 {
-  #logger = LoggerManager.getLogger(LoggerClass.EDGE)
-
-  readonly type = SymbolType.Edge
-  readonly kind = EdgeKind.Line
-
-  id: string
-  creationTime: number
-  modificationDate: number
-  transform: MatrixTransform
-  selected: boolean
-  style: TStyle
+  readonly kind: EdgeKind
   start: TPoint
   end: TPoint
   startDecoration?: EdgeDecoration
   endDecoration?: EdgeDecoration
 
-  constructor(style: TStyle, start: TPoint, end: TPoint, startDecoration?: EdgeDecoration, endDecoration?: EdgeDecoration)
+  constructor(kind: EdgeKind, style: TStyle, start: TPoint, end: TPoint, startDecoration?: EdgeDecoration, endDecoration?: EdgeDecoration)
   {
-    this.id = `${ this.type }-${ this.kind }-${ createUUID() }`
-    this.#logger.debug("constructor", { style, start, end, startDecoration, endDecoration })
-    this.creationTime = Date.now()
-    this.modificationDate = this.creationTime
-    this.style = Object.assign({}, DefaultStyle, style)
-    this.selected = false
-    this.transform = new MatrixTransform(1, 0, 0, 1, 0, 0)
+    super(SymbolType.Edge, style)
+    this.id = `${ this.type }-${ kind }-${ createUUID() }`
+    this.kind = kind
 
     this.start = start
     this.end = end
@@ -74,43 +58,39 @@ export class OILine implements TOIEdge
     this.endDecoration = endDecoration
   }
 
-  get vertices(): TPoint[]
+  abstract get vertices(): TPoint[]
+
+  override get boundingBox(): Box
   {
-    return [
-      this.start,
-      this.end
-    ]
+    const bb = Box.createFromPoints(this.vertices)
+    bb.x -= SELECTION_MARGIN / 2
+    bb.y -= SELECTION_MARGIN / 2
+    bb.height += SELECTION_MARGIN
+    bb.width += SELECTION_MARGIN
+    return bb
   }
 
-  get boundingBox(): Box
+  get edges(): TSegment[]
   {
-    const minBox = Box.createFromPoints([this.start, this.end])
-    return new Box(minBox.xMin - SELECTION_MARGIN / 2, minBox.yMin - SELECTION_MARGIN / 2, minBox.width + SELECTION_MARGIN, minBox.height + SELECTION_MARGIN)
+    return this.vertices.slice(0, -1).map((p, i) =>
+    {
+      return { p1: p, p2: this.vertices[i + 1] }
+    })
   }
 
   isCloseToPoint(point: TPoint): boolean
   {
-    return computeDistanceBetweenPointAndSegment(point, { p1: this.start, p2: this.end}) < SELECTION_MARGIN
+    return this.edges.some(seg =>
+    {
+      return computeDistanceBetweenPointAndSegment(point, seg) < SELECTION_MARGIN
+    })
   }
 
-  isOverlapping(box: TBoundingBox): boolean
+  overlaps(box: TBoundingBox): boolean
   {
-    const boxEdges: TSegment[] = [
-      { p1: { x: box.x, y: box.y }, p2: { x: box.x + box.width, y: box.y }},
-      { p1: { x: box.x + box.width, y: box.y }, p2: { x: box.x + box.width, y: box.y + box.height }},
-      { p1: { x: box.x + box.width, y: box.y + box.height }, p2: { x: box.x, y: box.y + box.height }},
-      { p1: { x: box.x, y: box.y + box.height }, p2: { x: box.x, y: box.y }},
-    ]
-    return this.boundingBox.isWrap(box) || boxEdges.some(be => findIntersectionBetween2Segment({ p1: this.start, p2: this.end }, be))
+    return this.boundingBox.isContained(box) ||
+      this.edges.some(e1 => Box.getSides(box).some(e2 => !!findIntersectionBetween2Segment(e1, e2)))
   }
 
-  getClone(): OILine
-  {
-    const clone = new OILine(structuredClone(this.style), structuredClone(this.start), structuredClone(this.end), this.startDecoration, this.endDecoration)
-    clone.id = this.id
-    clone.creationTime = this.creationTime
-    clone.modificationDate = this.modificationDate
-    clone.transform = this.transform.getClone()
-    return clone
-  }
+  abstract clone(): OIEdge
 }

@@ -1,6 +1,6 @@
 import { DecoratorKind, TOIDecorator } from "../../primitive"
 import { DefaultStyle } from "../../style"
-import { createLine, createRect } from "./SVGElementBuilder"
+import { SVGBuilder } from "./SVGBuilder"
 
 /**
  * @group Renderer
@@ -8,10 +8,12 @@ import { createLine, createRect } from "./SVGElementBuilder"
 export class OISVGDecoratorUtil
 {
   selectionFilterId: string
+  removalFilterId: string
 
-  constructor(selectionFilterId: string)
+  constructor(selectionFilterId: string, removalFilterId: string)
   {
     this.selectionFilterId = selectionFilterId
+    this.removalFilterId = removalFilterId
   }
 
   getSVGElement(decorator: TOIDecorator): SVGGeometryElement | undefined
@@ -27,36 +29,37 @@ export class OISVGDecoratorUtil
     if (decorator.selected) {
       attrs["filter"] = `url(#${ this.selectionFilterId })`
     }
+    attrs["opacity"] = (decorator.style.opacity || DefaultStyle.opacity!).toString()
+    if (decorator.toDelete) {
+      attrs["opacity"] = ((decorator.style.opacity || DefaultStyle.opacity!) * 0.5).toString()
+    }
 
     let element: SVGGeometryElement | undefined
 
     switch (decorator.kind) {
       case DecoratorKind.Highlight:
-        attrs["opacity"] = "0.4"
+        attrs["opacity"] = decorator.toDelete ? "0.25" : "0.5"
         attrs["stroke"] = "transparent"
         attrs["fill"] = decorator.style.color || DefaultStyle.color!
-        element = createRect(decorator.boundingBox, attrs)
+        element = SVGBuilder.createRect(decorator.boundingBox, attrs)
         break
       case DecoratorKind.Surround:
-        attrs["opacity"] = (decorator.style.opacity || DefaultStyle.opacity!).toString()
         attrs["fill"] = "transparent"
         attrs["stroke"] = decorator.style.color || DefaultStyle.color!
         attrs["stroke-width"] = (decorator.style.width || DefaultStyle.width!).toString()
-        element = createRect(decorator.boundingBox, attrs)
+        element = SVGBuilder.createRect(decorator.boundingBox, attrs)
         break
       case DecoratorKind.Strikethrough:
-        attrs["opacity"] = (decorator.style.opacity || DefaultStyle.opacity!).toString()
         attrs["fill"] = "transparent"
         attrs["stroke"] = decorator.style.color || DefaultStyle.color!
         attrs["stroke-width"] = (decorator.style.width || DefaultStyle.width!).toString()
-        element = createLine(decorator.vertices[0], decorator.vertices[1], attrs)
+        element = SVGBuilder.createLine(decorator.vertices[0], decorator.vertices[1], attrs)
         break
       case DecoratorKind.Underline:
-        attrs["opacity"] = (decorator.style.opacity || DefaultStyle.opacity!).toString()
         attrs["fill"] = "transparent"
         attrs["stroke"] = decorator.style.color || DefaultStyle.color!
         attrs["stroke-width"] = (decorator.style.width || DefaultStyle.width!).toString()
-        element = createLine(decorator.vertices[0], decorator.vertices[1], attrs)
+        element = SVGBuilder.createLine(decorator.vertices[0], decorator.vertices[1], attrs)
         break
     }
 

@@ -52,6 +52,36 @@
     animation: spin 2s linear infinite;
 }
 
+.ms-editor .state {
+    z-index: 999;
+    position: sticky;
+    width: 50px;
+    height: 50px;
+    top: calc(100% - 50px);
+    padding: 12px;
+    left: 0px;
+    background-color: #F5F6F7;
+    cursor: auto;
+    color: #717171;
+}
+.ms-editor .state .busy {
+    color: #717171;
+    border: 4px solid #F5F6F7;
+    border-radius: 100%;
+    border-top-color: #1A9FFF;
+    border-left-color: #1A9FFF;
+    border-bottom-color: #1A9FFF;
+    -webkit-animation: spin 2s linear infinite;
+    animation: spin 2s linear infinite;
+    height: 100%;
+    width: 100%;
+}
+.ms-editor .state .idle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 .ms-editor .message {
     z-index: 25;
     position: absolute;
@@ -294,6 +324,18 @@
     border-left: 1px solid lightgrey;
 }
 
+/** Symbols **/
+.ms-editor .symbol-tooltip {
+    position: absolute;
+    z-index: 999;
+    width: auto;
+    cursor: pointer;
+    background-color: white;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.25), -2px -2px 10px rgba(0, 0, 0, 0.25);
+    border-radius: 12px;
+    padding: 5px;
+    white-space: pre;
+}
 /** Stroke **/
 .ms-editor .stroke-menu {
     position: absolute;

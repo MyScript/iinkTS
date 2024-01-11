@@ -1,13 +1,11 @@
 import { LoggerClass, SELECTION_MARGIN } from "../Constants"
+import { computeDistanceBetweenPointAndSegment, createUUID, findIntersectionBetween2Segment } from "../utils"
 import { LoggerManager } from "../logger"
-import { DefaultStyle, TStyle } from "../style"
-
-import { SymbolType, TOISymbol } from "./Symbol"
-
+import { TStyle } from "../style"
+import { SymbolType } from "./Symbol"
 import { Box, TBoundingBox } from "./Box"
 import { TPoint, TSegment } from "./Point"
-import { computeDistanceBetweenPointAndSegment, createUUID, findIntersectionBetween2Segment } from "../utils"
-import { MatrixTransform } from "../transform"
+import { OISymbol, TOISymbol, TOISymbolDecorable } from "./OISymbol"
 
 /**
  * @group Primitive
@@ -24,38 +22,25 @@ export enum DecoratorKind
  * @group Primitive
  */
 export type TOIDecorator = TOISymbol & {
-  type: SymbolType
   kind: DecoratorKind
-  boundingBox: Box
-  parents: TOISymbol[]
+  parents: TOISymbolDecorable[]
 }
 
 /**
  * @group Primitive
  */
-export abstract class OIDecorator implements TOIDecorator
+export abstract class OIDecorator extends OISymbol implements TOIDecorator
 {
   #logger = LoggerManager.getLogger(LoggerClass.SHAPE)
-  type = SymbolType.Decorator
   kind: DecoratorKind
-  id: string
-  creationTime: number
-  modificationDate: number
-  transform: MatrixTransform
-  selected: boolean
-  style: TStyle
-  parents: TOISymbol[]
+  parents: TOISymbolDecorable[]
 
-  constructor(kind: DecoratorKind, style: TStyle, symbols: TOISymbol[])
+  constructor(kind: DecoratorKind, style: TStyle, symbols: TOISymbolDecorable[])
   {
+    super(SymbolType.Decorator, style)
     this.#logger.debug("constructor", { kind, style, symbols })
     this.id = `${ this.type }-${ kind }-${ createUUID() }`
-    this.creationTime = Date.now()
-    this.modificationDate = this.creationTime
     this.kind = kind
-    this.style = Object.assign({}, DefaultStyle, style)
-    this.selected = false
-    this.transform = new MatrixTransform(1, 0, 0, 1, 0, 0)
     this.parents = symbols
   }
 
@@ -96,7 +81,7 @@ export abstract class OIDecorator implements TOIDecorator
     })
   }
 
-  isOverlapping(box: TBoundingBox): boolean
+  overlaps(box: TBoundingBox): boolean
   {
     const boxEdges: TSegment[] = [
       { p1: { x: box.x, y: box.y }, p2: { x: box.x + box.width, y: box.y }},
@@ -104,9 +89,9 @@ export abstract class OIDecorator implements TOIDecorator
       { p1: { x: box.x + box.width, y: box.y + box.height }, p2: { x: box.x, y: box.y + box.height }},
       { p1: { x: box.x, y: box.y + box.height }, p2: { x: box.x, y: box.y }},
     ]
-    return this.boundingBox.isWrap(box) ||
+    return this.boundingBox.isContained(box) ||
       this.edges.some(e1 => boxEdges.some(e2 => !!findIntersectionBetween2Segment(e1, e2)))
   }
 
-  abstract getClone(): OIDecorator
+  abstract clone(): OIDecorator
 }

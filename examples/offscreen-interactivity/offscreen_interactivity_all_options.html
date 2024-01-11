@@ -16,12 +16,12 @@
         height: calc(100vh - 127px);
         touch-action: none;
       }
-      @media only screen and (max-width: 798px) {
+      @media only screen and (max-width: 894px) {
         #editor {
           height: calc(100vh - 177px);
         }
       }
-      @media only screen and (max-width: 407px) {
+      @media only screen and (max-width: 498px) {
         #editor {
           height: calc(100vh - 223px);
         }
@@ -29,6 +29,11 @@
       @media only screen and (max-width: 396px) {
         #editor {
           height: calc(100vh - 270px);
+        }
+      }
+      @media only screen and (max-width: 361px) {
+        #editor {
+          height: calc(100vh - 311px);
         }
       }
       .row-options {
@@ -96,7 +101,7 @@
       }
       #modal .modal-header {
         display: flex;
-        padding: 10px;
+        padding: 12px;
         border-bottom: 1px solid grey;
       }
       #modal .modal-header #modal-title {
@@ -106,14 +111,10 @@
       }
       #modal-body {
         height: calc(100% - 62px);
+        padding: 12px;
         max-width: 100%;
         overflow: auto;
         border: none;
-      }
-      .jiix-text {
-        margin: 12px;
-        padding: 12px;
-        box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.225);
       }
     </style>
 
@@ -196,7 +197,45 @@
         height: 24px;
       }
     </style>
+    <style>
+      .renderjson a {
+        text-decoration: none;
+      }
+      .renderjson span {
+        height: 16px;
+      }
+      .renderjson .disclosure {
+        color: gray;
+        font-size: 150%;
+        padding-right: 12px;
+        font-weight: 900;
+        vertical-align: sub;
+      }
+      .renderjson .syntax {
+        color: grey;
+      }
+      .renderjson .string {
+        color: red;
+      }
+      .renderjson .number {
+        color: green;
+      }
+      .renderjson .boolean {
+        color: blue;
+      }
+      .renderjson .key {
+        color: darkblue;
+      }
+      .renderjson .keyword {
+        color: lightgoldenrodyellow;
+      }
+      .renderjson .object.syntax ,
+      .renderjson .array.syntax {
+        color: darkblue;
+      }
+    </style>
 
+    <script type="text/javascript" src="../assets/renderjson/renderjson.js"></script>
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
   </head>
 
@@ -228,13 +267,18 @@
           <img src="../assets/img/pen.svg" />
         </button>
         <div class="dropdown-menu">
-          <button id="shape-menu" class="menu-button">
-            <img id="shape-menu-img" src="../assets/img/rectangle.svg" />
+          <button id="menu-shape-btn" class="menu-button">
+            <img id="menu-shape-btn-img" src="../assets/img/rectangle.svg" />
           </button>
           <ul class="horizontal">
             <li>
               <button id="draw-rectangle" class="menu-button">
                 <img src="../assets/img/rectangle.svg" />
+              </button>
+            </li>
+            <li>
+              <button id="draw-ellipse" class="menu-button">
+                <img src="../assets/img/ellipse.svg" />
               </button>
             </li>
             <li>
@@ -250,8 +294,8 @@
           </ul>
         </div>
         <div class="dropdown-menu">
-          <button id="line-menu" class="menu-button">
-            <img id="line-menu-img" src="../assets/img/line.svg" />
+          <button id="menu-edge-btn" class="menu-button">
+            <img id="menu-edge-btn-img" src="../assets/img/line.svg" />
           </button>
           <ul class="horizontal">
             <li>
@@ -279,6 +323,7 @@
         </button>
       </div>
       <div class="flex-container gap wrap">
+        <button class="classic-btn" id="import">Import</button>
         <button class="classic-btn" id="convert">Convert</button>
         <button class="classic-btn" id="show-jiix">Show JIIX</button>
         <button class="classic-btn" id="show-model">Show model</button>
@@ -292,7 +337,7 @@
       </div>
       <div class="flex-container">
         <label for="pen-width">Thickness:</label>
-        <input id="pen-width" type="number" min="1" value="1" />
+        <input id="pen-width" type="number" min="1" max="9" value="4" />
       </div>
 
       <div class="flex-container global-options">
@@ -354,7 +399,7 @@
                 </li>
                 <li class="flex-container">
                   <label class="label" for="guides-gap">Guides gap</label>
-                  <input type="number" min="5" id="guides-gap" value="100">
+                  <input type="number" min="5" id="guides-gap" value="100" />
                 </li>
               </ul>
             </li>
@@ -401,10 +446,17 @@
                   </div>
                 </li>
                 <li class="flex-container">
-                  <label class="label">Show points</label>
+                  <label class="label">Show vertices</label>
                   <div class="toggle-switch">
-                    <input class="toggle-input" id="toggle-points-visibility" type="checkbox" />
-                    <label class="toggle-label" for="toggle-points-visibility"></label>
+                    <input class="toggle-input" id="toggle-vertices-visibility" type="checkbox" />
+                    <label class="toggle-label" for="toggle-vertices-visibility"></label>
+                  </div>
+                </li>
+                <li class="flex-container">
+                  <label class="label">Show bounding box</label>
+                  <div class="toggle-switch">
+                    <input class="toggle-input" id="toggle-bounding-box-visibility" type="checkbox" />
+                    <label class="toggle-label" for="toggle-bounding-box-visibility"></label>
                   </div>
                 </li>
               </ul>
@@ -447,9 +499,7 @@
 
     <div id="export-html-pan">
       <div class="export-html-header">
-        <span class="export-html-title">
-          Backend rendering
-        </span>
+        <span class="export-html-title"> Backend rendering </span>
         <button id="html-pan-close-btn" class="close-btn">
           <img src="../assets/img/cross.svg" />
         </button>

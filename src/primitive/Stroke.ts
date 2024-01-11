@@ -73,7 +73,7 @@ export class Stroke implements TStroke
     this.length = 0
   }
 
-  getClone(): Stroke
+  clone(): Stroke
   {
     const clone = new Stroke(this.style, this.pointerId, this.pointerType)
     clone.id = this.id

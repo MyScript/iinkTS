@@ -71,12 +71,15 @@ export type TOIMessageEventExport = TOIMessageEvent & {
  */
 export type TOIMessageEventGesture = TOIMessageEvent & TGesture
 
-type ContextlessGesture = {
+/**
+ * @group Recognizer
+ */
+export type TContextlessGestureType = {
   type: "none" | "scratch" | "left-right" | "right-left" | "bottom-top" | "top-bottom" | "surround" | string,
 }
 /**
  * @group Recognizer
  */
 export type TOIMessageEventContextlessGesture = TOIMessageEvent & {
-  gestures: ContextlessGesture[]
+  gestures: TContextlessGestureType[]
 }
