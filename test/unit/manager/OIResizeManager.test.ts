@@ -1,19 +1,19 @@
 import
-  {
-    DefaultConfiguration,
-    OIBehaviors,
-    OIDecoratorUnderline,
-    OILine,
-    OIResizeManager,
-    OIShapeCircle,
-    OIShapePolygon,
-    OIShapeRectangle,
-    OIStroke,
-    ResizeDirection,
-    SvgElementRole,
-    TBehaviorOptions,
-    TPoint
-  } from "../../../src/iink"
+{
+  DefaultConfiguration,
+  OIBehaviors,
+  OIDecoratorUnderline,
+  OIEdgeLine,
+  OIResizeManager,
+  OIShapeCircle,
+  OIShapePolygon,
+  OIShapeRectangle,
+  OIStroke,
+  ResizeDirection,
+  SvgElementRole,
+  TBehaviorOptions,
+  TPoint
+} from "../../../src/iink"
 
 describe("OIResizeManager.ts", () =>
 {
@@ -31,30 +31,7 @@ describe("OIResizeManager.ts", () =>
     expect(manager).toBeDefined()
   })
 
-  describe("Properties", () =>
-  {
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions)
-    const manager = new OIResizeManager(behaviors)
-
-    test("shoud have model", () =>
-    {
-      expect(manager.model).toBe(behaviors.model)
-    })
-    test("shoud have undoRedoManager", () =>
-    {
-      expect(manager.undoRedoManager).toBe(behaviors.undoRedoManager)
-    })
-    test("shoud have renderer", () =>
-    {
-      expect(manager.renderer).toBe(behaviors.renderer)
-    })
-    test("shoud have recognizer", () =>
-    {
-      expect(manager.recognizer).toBe(behaviors.recognizer)
-    })
-  })
-
-  describe("should applyOnSymbol", () =>
+  describe("should applyToSymbol", () =>
   {
     const behaviors = new OIBehaviors(DefaultBehaviorsOptions)
     const manager = new OIResizeManager(behaviors)
@@ -65,7 +42,7 @@ describe("OIResizeManager.ts", () =>
       const origin: TPoint = { x: 1, y: 2 }
       stroke.addPointer({ p: 1, t: 1, x: 1, y: 2 })
       stroke.addPointer({ p: 1, t: 10, x: 21, y: 42 })
-      manager.applyOnSymbol(stroke, origin, 2, 3)
+      manager.applyToSymbol(stroke, origin, 2, 3)
       expect(stroke.pointers[0]).toEqual(expect.objectContaining({ x: 1, y: 2 }))
       expect(stroke.pointers[1]).toEqual(expect.objectContaining({ x: 41, y: 122 }))
     })
@@ -75,7 +52,7 @@ describe("OIResizeManager.ts", () =>
       const radius = 4
       const circle = new OIShapeCircle({}, center, radius)
       const origin: TPoint = { x: 1, y: 2 }
-      manager.applyOnSymbol(circle, origin, 2, 4)
+      manager.applyToSymbol(circle, origin, 2, 4)
       expect(circle.radius).toEqual(12)
       expect(circle.center).toEqual({ x: 9, y: 14 })
     })
@@ -89,7 +66,7 @@ describe("OIResizeManager.ts", () =>
       ]
       const rect = new OIShapeRectangle({}, points)
       const origin: TPoint = { x: 0, y: 0 }
-      manager.applyOnSymbol(rect, origin, 2, 3)
+      manager.applyToSymbol(rect, origin, 2, 3)
       expect(rect.points[0]).toEqual({ x: 0, y: 0 })
       expect(rect.points[1]).toEqual({ x: 0, y: 15 })
       expect(rect.points[2]).toEqual({ x: 10, y: 15 })
@@ -106,15 +83,15 @@ describe("OIResizeManager.ts", () =>
       //@ts-ignore
       const rect = new OIShapePolygon({}, points, "pouet")
       const origin: TPoint = { x: 0, y: 0 }
-      expect(() => manager.applyOnSymbol(rect, origin, 2, 3)).toThrowError("Can't apply resize on shape, kind unknow: pouet")
+      expect(() => manager.applyToSymbol(rect, origin, 2, 3)).toThrowError("Can't apply resize on shape, kind unknow: pouet")
     })
     test("resize edge Line", () =>
     {
       const start: TPoint = { x: 0, y: 0 }
       const end: TPoint = { x: 0, y: 5 }
-      const line = new OILine({}, start, end)
+      const line = new OIEdgeLine({}, start, end)
       const origin: TPoint = { x: 0, y: 0 }
-      manager.applyOnSymbol(line, origin, 2, 3)
+      manager.applyToSymbol(line, origin, 2, 3)
       expect(line.start).toEqual({ x: 0, y: 0 })
       expect(line.end).toEqual({ x: 0, y: 15 })
     })
@@ -125,7 +102,7 @@ describe("OIResizeManager.ts", () =>
       stroke.addPointer({ p: 1, t: 10, x: 21, y: 42 })
       const underline = new OIDecoratorUnderline({}, [stroke])
       const origin: TPoint = { x: 0, y: 0 }
-      manager.applyOnSymbol(underline, origin, 2, 3)
+      manager.applyToSymbol(underline, origin, 2, 3)
       expect(underline.vertices[0]).toEqual({ x: 1, y: 47 })
       expect(underline.vertices[1]).toEqual({ x: 21, y: 47 })
     })
@@ -137,21 +114,20 @@ describe("OIResizeManager.ts", () =>
     const behaviors = new OIBehaviors(DefaultBehaviorsOptions)
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     behaviors.recognizer.replaceStrokes = jest.fn(() => Promise.resolve())
-    behaviors.renderer.setTransformOrigin = jest.fn()
-    behaviors.renderer.scaleElement = jest.fn()
-    behaviors.renderer.resetSelectedGroup = jest.fn()
+    behaviors.renderer.setAttribute = jest.fn()
+    behaviors.selectionManager.resetSelectedGroup = jest.fn()
     behaviors.renderer.drawSymbol = jest.fn()
     behaviors.setPenStyle = jest.fn(() => Promise.resolve())
     behaviors.setTheme = jest.fn(() => Promise.resolve())
     behaviors.setPenStyleClasses = jest.fn(() => Promise.resolve())
 
     const manager = new OIResizeManager(behaviors)
-    manager.applyOnSymbol = jest.fn()
+    manager.applyToSymbol = jest.fn()
 
     const stroke = new OIStroke({}, 1)
     stroke.addPointer({ p: 1, t: 1, x: 0, y: 0 })
     stroke.addPointer({ p: 1, t: 1, x: 10, y: 50 })
-    const strokeNotResized = stroke.getClone()
+    const strokeNotResized = stroke.clone()
     stroke.selected = true
     behaviors.model.addSymbol(stroke)
 
@@ -163,8 +139,8 @@ describe("OIResizeManager.ts", () =>
     const testDatas = [
       {
         direction: ResizeDirection.North,
-        origin: {
-          x: 0,
+        transformOrigin: {
+          x: stroke.boundingBox.xMiddle,
           y: stroke.boundingBox.yMax
         },
         scale: {
@@ -174,9 +150,9 @@ describe("OIResizeManager.ts", () =>
       },
       {
         direction: ResizeDirection.East,
-        origin: {
+        transformOrigin: {
           x: stroke.boundingBox.xMin,
-          y: 0
+          y: stroke.boundingBox.yMiddle
         },
         scale: {
           x: 1 + (resizeToPoint.x - stroke.boundingBox.xMax) / stroke.boundingBox.width,
@@ -185,8 +161,8 @@ describe("OIResizeManager.ts", () =>
       },
       {
         direction: ResizeDirection.South,
-        origin: {
-          x: 0,
+        transformOrigin: {
+          x: stroke.boundingBox.xMiddle,
           y: stroke.boundingBox.yMin
         },
         scale: {
@@ -196,9 +172,9 @@ describe("OIResizeManager.ts", () =>
       },
       {
         direction: ResizeDirection.West,
-        origin: {
+        transformOrigin: {
           x: stroke.boundingBox.xMax,
-          y: 0
+          y: stroke.boundingBox.yMiddle
         },
         scale: {
           x: 1 + (stroke.boundingBox.xMin - resizeToPoint.x) / stroke.boundingBox.width,
@@ -207,7 +183,7 @@ describe("OIResizeManager.ts", () =>
       },
       {
         direction: ResizeDirection.NorthEast,
-        origin: {
+        transformOrigin: {
           x: stroke.boundingBox.xMin,
           y: stroke.boundingBox.yMax
         },
@@ -218,7 +194,7 @@ describe("OIResizeManager.ts", () =>
       },
       {
         direction: ResizeDirection.NorthWest,
-        origin: {
+        transformOrigin: {
           x: stroke.boundingBox.xMax,
           y: stroke.boundingBox.yMax
         },
@@ -229,7 +205,7 @@ describe("OIResizeManager.ts", () =>
       },
       {
         direction: ResizeDirection.SouthEast,
-        origin: {
+        transformOrigin: {
           x: stroke.boundingBox.xMin,
           y: stroke.boundingBox.yMin
         },
@@ -240,7 +216,7 @@ describe("OIResizeManager.ts", () =>
       },
       {
         direction: ResizeDirection.SouthWest,
-        origin: {
+        transformOrigin: {
           x: stroke.boundingBox.xMax,
           y: stroke.boundingBox.yMin
         },
@@ -263,33 +239,34 @@ describe("OIResizeManager.ts", () =>
       group.setAttribute("role", SvgElementRole.Selected)
       const resizeElement = document.createElementNS("http://www.w3.org/2000/svg", "line")
       resizeElement.setAttribute("resize-direction", data.direction)
+      resizeElement.setAttribute("transform-origin", JSON.stringify(data.transformOrigin))
       group.appendChild(resizeElement)
 
-      test(`should start with direction: "${ data.direction } `, () =>
+      test(`should start with direction: "${ data.direction }" `, () =>
       {
         manager.start(resizeElement)
 
         expect(manager.wrapper).toEqual(group)
         expect(manager.boundingBox).toEqual(stroke.boundingBox)
         expect(manager.direction).toEqual(data.direction)
-        expect(manager.origin).toEqual(data.origin)
-        expect(behaviors.renderer.setTransformOrigin).toHaveBeenCalledTimes(1)
-        expect(behaviors.renderer.setTransformOrigin).toHaveBeenCalledWith(group.id, data.origin.x, data.origin.y)
+        expect(manager.transformOrigin).toEqual(data.transformOrigin)
+        expect(behaviors.renderer.setAttribute).toHaveBeenCalledTimes(1)
+        expect(behaviors.renderer.setAttribute).toHaveBeenCalledWith(group.id, "transform-origin", `${ data.transformOrigin.x }px ${ data.transformOrigin.y }px`)
       })
       test(`shoud continu with direction: "${ data.direction }"`, () =>
       {
         expect(manager.continue(resizeToPoint)).toEqual({ scaleX: data.scale.x, scaleY: data.scale.y })
 
-        expect(behaviors.renderer.scaleElement).toHaveBeenCalledTimes(1)
-        expect(behaviors.renderer.scaleElement).toHaveBeenCalledWith(group.id, data.scale.x, data.scale.y)
+        expect(behaviors.renderer.setAttribute).toHaveBeenCalledTimes(1)
+        expect(behaviors.renderer.setAttribute).toHaveBeenCalledWith(group.id, "transform", `scale(${ data.scale.x },${ data.scale.y })`)
       })
       test(`shoud end with direction: "${ data.direction }"`, async () =>
       {
         await manager.end(resizeToPoint)
 
-        expect(manager.applyOnSymbol).toHaveBeenCalledTimes(1)
-        expect(behaviors.renderer.resetSelectedGroup).toHaveBeenCalledTimes(1)
-        expect(behaviors.renderer.resetSelectedGroup).toHaveBeenCalledWith([stroke])
+        expect(manager.applyToSymbol).toHaveBeenCalledTimes(1)
+        expect(behaviors.selectionManager.resetSelectedGroup).toHaveBeenCalledTimes(1)
+        expect(behaviors.selectionManager.resetSelectedGroup).toHaveBeenCalledWith([stroke])
         expect(behaviors.renderer.drawSymbol).toHaveBeenCalledTimes(1)
         expect(behaviors.renderer.drawSymbol).toHaveBeenCalledWith(stroke)
         expect(behaviors.recognizer.replaceStrokes).toHaveBeenCalledTimes(1)

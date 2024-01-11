@@ -1,4 +1,4 @@
-import { Box, TBoundingBox, TPoint } from "../primitive"
+import { TPoint } from "../primitive"
 
 /**
  * @group Transform
@@ -37,12 +37,12 @@ export type TMatrixTransform = {
  */
 export class MatrixTransform implements TMatrixTransform
 {
-	xx: number
-	yx: number
-	xy: number
-	yy: number
-	tx: number
-	ty: number
+  xx: number
+  yx: number
+  xy: number
+  yy: number
+  tx: number
+  ty: number
 
   constructor(xx: number, yx: number, xy: number, yy: number, tx: number, ty: number)
   {
@@ -54,63 +54,65 @@ export class MatrixTransform implements TMatrixTransform
     this.ty = ty
   }
 
-	static identity(): TMatrixTransform {
+  static identity(): MatrixTransform
+  {
+    return new MatrixTransform(1, 0, 0, 1, 0, 0)
+  }
+
+  static applyToPoint(mat: TMatrixTransform, point: TPoint): TPoint
+  {
     return {
-      xx: 1,
-      yx: 0,
-      xy: 0,
-      yy: 1,
-      tx: 0,
-      ty: 0
+      x: mat.xx * point.x + mat.xy * point.y + mat.tx,
+      y: mat.yx * point.x + mat.yy * point.y + mat.ty,
     }
-	}
+  }
 
-	static applyToPoint(mat: TMatrixTransform, point: TPoint): TPoint
-	{
-		return {
-			x: mat.xx * point.x + mat.yx * point.y + mat.tx,
-			y: mat.xy * point.x + mat.yy * point.y + mat.ty,
+  static rotation(mat: TMatrixTransform): number
+  {
+    let rotation
+
+    if (mat.xx !== 0 || mat.xy !== 0) {
+      const hypotAc = Math.hypot(mat.xx, mat.xy)
+      rotation = Math.acos(mat.xx / hypotAc) * (mat.xy > 0 ? -1 : 1)
+    } else if (mat.yx !== 0 || mat.yy !== 0) {
+      const hypotBd = Math.hypot(mat.yx, mat.yy)
+      rotation = Math.PI / 2 + Math.acos(mat.yx / hypotBd) * (mat.yy > 0 ? -1 : 1)
+    } else {
+      rotation = 0
     }
-	}
 
-	static applyToBox(mat: TMatrixTransform, box: TBoundingBox): Box
-	{
-		return new Box(mat.tx + box.x, mat.ty + box.y, box.width, box.height)
-	}
+    return rotation
+  }
 
   static toCssString(matrix: TMatrixTransform): string
   {
-    return `matrix(${matrix.xx}, ${matrix.yx}, ${matrix.xy}, ${matrix.yy}, ${matrix.tx}, ${matrix.ty})`
+    return `matrix(${ matrix.xx }, ${ matrix.yx }, ${ matrix.xy }, ${ matrix.yy }, ${ matrix.tx }, ${ matrix.ty })`
   }
 
-	multiply(m: TMatrixTransform): void
+  multiply(m: TMatrixTransform): MatrixTransform
   {
     const { xx, yx, xy, yy, tx, ty } = this
-		this.xx = xx * m.xx + xy * m.yx
-		this.yx = yx * m.xx + yy * m.yx
-		this.xy = xx * m.xy + xy * m.yy
-		this.yy = yx * m.xy + yy * m.yy
-		this.tx = xx * m.tx + xy * m.ty + tx
-		this.ty = yx * m.tx + yy * m.ty + ty
-	}
-
-  translate(tx: number, ty: number): void
-  {
-    this.multiply({
-      xx: 1,
-      yx: 0,
-      xy: 0,
-      yy: 1,
-      tx,
-      ty
-    })
+    this.xx = xx * m.xx + xy * m.yx
+    this.yx = yx * m.xx + yy * m.yx
+    this.xy = xx * m.xy + xy * m.yy
+    this.yy = yx * m.xy + yy * m.yy
+    this.tx = xx * m.tx + xy * m.ty + tx
+    this.ty = yx * m.tx + yy * m.ty + ty
+    return this
   }
 
-  rotate(radian: number, center: TPoint): void
+  translate(tx: number, ty: number): MatrixTransform
   {
-    this.translate(center.x, center.y)
-		const cosAngle = Math.round(Math.cos(radian) * 1000) / 1000
-		const sinAngle = Math.round(Math.sin(radian) * 1000) / 1000
+    return this.multiply({ xx: 1, yx: 0, xy: 0, yy: 1, tx, ty })
+  }
+
+  rotate(radian: number, center?: TPoint): MatrixTransform
+  {
+    if (center) {
+      this.translate(center.x, center.y)
+    }
+    const cosAngle = Math.round(Math.cos(radian) * 1000) / 1000
+    const sinAngle = Math.round(Math.sin(radian) * 1000) / 1000
     this.multiply({
       xx: cosAngle,
       yx: sinAngle,
@@ -119,11 +121,17 @@ export class MatrixTransform implements TMatrixTransform
       tx: 0,
       ty: 0
     })
-    this.translate(-center.x, -center.y)
+    if (center) {
+      this.translate(-center.x, -center.y)
+    }
+    return this
   }
 
-  scale(x: number, y: number): void
+  scale(x: number, y: number, center?: TPoint): MatrixTransform
   {
+    if (center) {
+      this.translate(center.x, center.y)
+    }
     this.multiply({
       xx: x,
       yx: 0,
@@ -132,11 +140,25 @@ export class MatrixTransform implements TMatrixTransform
       tx: 0,
       ty: 0
     })
+    if (center) {
+      this.translate(-center.x, -center.y)
+    }
+    return this
   }
 
-  getClone(): MatrixTransform
+  applyToPoint(point: TPoint): TPoint
+  {
+    return MatrixTransform.applyToPoint(this, point)
+  }
+
+  clone(): MatrixTransform
   {
     return new MatrixTransform(this.xx, this.yx, this.xy, this.yy, this.tx, this.ty)
+  }
+
+  toCssString(): string
+  {
+    return MatrixTransform.toCssString(this)
   }
 
 }

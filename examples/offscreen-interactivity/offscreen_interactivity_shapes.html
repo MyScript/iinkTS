@@ -70,8 +70,8 @@
           <img src="../assets/img/pen.svg" />
         </button>
         <div class="dropdown-menu">
-          <button id="shape-menu" class="menu-button">
-            <img id="shape-menu-img" src="../assets/img/rectangle.svg" />
+          <button id="menu-shape" class="menu-button">
+            <img id="menu-shape-img" src="../assets/img/rectangle.svg" />
           </button>
           <ul class="horizontal" style="margin-left: -50px;">
             <li>
@@ -97,8 +97,8 @@
           </ul>
         </div>
         <div class="dropdown-menu">
-          <button id="line-menu" class="menu-button">
-            <img id="line-menu-img" src="../assets/img/line.svg" />
+          <button id="menu-edge-btn" class="menu-button">
+            <img id="menu-edge-btn-img" src="../assets/img/line.svg" />
           </button>
           <ul class="horizontal">
             <li>
@@ -131,12 +131,12 @@
       const redoBtn = document.getElementById("redo");
 
       const penBtn = document.getElementById("pen");
-      const shapeMenuBtn = document.getElementById("shape-menu");
+      const shapeMenuBtn = document.getElementById("menu-shape");
       const drawRectangleBtn = document.getElementById("draw-rectangle");
       const drawCircleBtn = document.getElementById("draw-circle");
       const drawTriangleBtn = document.getElementById("draw-triangle");
       const drawParallelogramBtn = document.getElementById("draw-parallelogram");
-      const lineMenuBtn = document.getElementById("line-menu");
+      const lineMenuBtn = document.getElementById("menu-edge-btn");
       const drawLineBtn = document.getElementById("draw-line");
       const drawArrowBtn = document.getElementById("draw-arrow");
       const drawDoubleArrowBtn = document.getElementById("draw-double-arrow");
@@ -196,7 +196,7 @@
           document.querySelectorAll(".menu-button").forEach(el => el.classList.remove("active"))
           shapeMenuBtn.classList.add("active");
           drawRectangleBtn.classList.add("active");
-          document.getElementById("shape-menu-img").src = drawRectangleBtn.children.item(0).src;
+          document.getElementById("menu-shape-img").src = drawRectangleBtn.children.item(0).src;
         });
 
         drawCircleBtn.addEventListener("click", () => {
@@ -204,7 +204,7 @@
           document.querySelectorAll(".menu-button").forEach(el => el.classList.remove("active"))
           shapeMenuBtn.classList.add("active");
           drawCircleBtn.classList.add("active");
-          document.getElementById("shape-menu-img").src = drawCircleBtn.children.item(0).src;
+          document.getElementById("menu-shape-img").src = drawCircleBtn.children.item(0).src;
         });
 
         drawTriangleBtn.addEventListener("click", () => {
@@ -212,7 +212,7 @@
           document.querySelectorAll(".menu-button").forEach(el => el.classList.remove("active"))
           shapeMenuBtn.classList.add("active");
           drawTriangleBtn.classList.add("active");
-          document.getElementById("shape-menu-img").src = drawTriangleBtn.children.item(0).src;
+          document.getElementById("menu-shape-img").src = drawTriangleBtn.children.item(0).src;
         });
 
         drawParallelogramBtn.addEventListener("click", () => {
@@ -220,7 +220,7 @@
           document.querySelectorAll(".menu-button").forEach(el => el.classList.remove("active"))
           shapeMenuBtn.classList.add("active");
           drawParallelogramBtn.classList.add("active");
-          document.getElementById("shape-menu-img").src = drawParallelogramBtn.children.item(0).src;
+          document.getElementById("menu-shape-img").src = drawParallelogramBtn.children.item(0).src;
         });
 
         drawLineBtn.addEventListener("click", () => {
@@ -228,7 +228,7 @@
           document.querySelectorAll(".menu-button").forEach(el => el.classList.remove("active"))
           lineMenuBtn.classList.add("active");
           drawLineBtn.classList.add("active");
-          document.getElementById("line-menu-img").src = drawLineBtn.children.item(0).src;
+          document.getElementById("menu-edge-btn-img").src = drawLineBtn.children.item(0).src;
         });
 
         drawArrowBtn.addEventListener("click", () => {
@@ -236,7 +236,7 @@
           document.querySelectorAll(".menu-button").forEach(el => el.classList.remove("active"))
           lineMenuBtn.classList.add("active");
           drawArrowBtn.classList.add("active");
-          document.getElementById("line-menu-img").src = drawArrowBtn.children.item(0).src;
+          document.getElementById("menu-edge-btn-img").src = drawArrowBtn.children.item(0).src;
         });
 
         drawDoubleArrowBtn.addEventListener("click", () => {
@@ -245,7 +245,7 @@
           document.querySelectorAll(".menu-button").forEach(el => el.classList.remove("active"))
           lineMenuBtn.classList.add("active");
           drawDoubleArrowBtn.classList.add("active");
-          document.getElementById("line-menu-img").src = drawDoubleArrowBtn.children.item(0).src;
+          document.getElementById("menu-edge-btn-img").src = drawDoubleArrowBtn.children.item(0).src;
         });
 
         window.addEventListener("resize", () => {

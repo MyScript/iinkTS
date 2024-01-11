@@ -25,5 +25,5 @@ export interface IModel
   rowHeight: number
   idle: boolean
 
-  getClone(): IModel
+  clone(): IModel
 }

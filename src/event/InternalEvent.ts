@@ -1,4 +1,4 @@
-import { InternalEventType, LoggerClass } from "../Constants"
+import { Intention, InternalEventType, LoggerClass } from "../Constants"
 import { TConverstionState } from "../configuration"
 import { LoggerManager } from "../logger"
 import { TExport, TJIIXExport } from "../model"
@@ -173,5 +173,15 @@ export class InternalEvent extends EventTarget
   {
     this.#logger.info("addSelectedListener", { callback })
     this.addEventListener(InternalEventType.SELECTED, (evt: unknown) => callback(((evt as CustomEvent).detail as TOISymbol[])), { signal: this.#abortController.signal })
+  }
+
+  emitIntention(intention: Intention): void
+  {
+    this.#emit(InternalEventType.INTENTION, intention)
+  }
+  addIntentionListener(callback: (intention: Intention) => void): void
+  {
+    this.#logger.info("addSelectedListener", { callback })
+    this.addEventListener(InternalEventType.INTENTION, (evt: unknown) => callback(((evt as CustomEvent).detail as Intention)), { signal: this.#abortController.signal })
   }
 }

@@ -198,7 +198,7 @@ describe("UndoRedoManager.ts", () =>
       const p2: TPointer = { t: 15, p: 0.5, x: 10, y: 1 }
       model.endCurrentStroke(p2)
 
-      const firstModel = model.getClone()
+      const firstModel = model.clone()
       manager.addModelToStack(model)
 
       const p3: TPointer = { t: 100, p: 0.5, x: 1, y: 10 }

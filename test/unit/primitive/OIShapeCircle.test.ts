@@ -5,7 +5,6 @@ import
   TPoint,
   DefaultStyle,
   TStyle,
-  MatrixTransform,
   SELECTION_MARGIN,
   TBoundingBox
 } from "../../../src/iink"
@@ -29,7 +28,6 @@ describe("OIShapeCircle.ts", () =>
       expect(circle.creationTime).toEqual(circle.modificationDate)
       expect(circle.style).toEqual(expect.objectContaining(style))
       expect(circle.selected).toEqual(false)
-      expect(circle.transform).toEqual(MatrixTransform.identity())
       expect(circle.center).toEqual(center)
       expect(circle.radius).toEqual(radius)
       expect(circle.boundingBox.x).toEqual(0)
@@ -74,7 +72,6 @@ describe("OIShapeCircle.ts", () =>
       expect(circle.creationTime).toEqual(circle.modificationDate)
       expect(circle.style).toEqual(expect.objectContaining(style))
       expect(circle.selected).toEqual(false)
-      expect(circle.transform).toEqual(MatrixTransform.identity())
     })
     test("should create with default style", () =>
     {
@@ -228,7 +225,7 @@ describe("OIShapeCircle.ts", () =>
     })
   })
 
-  describe("isOverlapping", () =>
+  describe("overlaps", () =>
   {
     const center: TPoint = { x: 10, y: 10 }
     const radius = 10
@@ -240,26 +237,26 @@ describe("OIShapeCircle.ts", () =>
     test(`should return true if partially wrap`, () =>
     {
       const boundaries: TBoundingBox = { height: 10, width: 10, x: -5, y: -5 }
-      expect(circle.isOverlapping(boundaries)).toEqual(true)
+      expect(circle.overlaps(boundaries)).toEqual(true)
     })
     test(`should return true if totally wrap`, () =>
     {
       const boundaries: TBoundingBox = { height: 50, width: 50, x: -25, y: -25 }
-      expect(circle.isOverlapping(boundaries)).toEqual(true)
+      expect(circle.overlaps(boundaries)).toEqual(true)
     })
     test(`should return false if box is outside`, () =>
     {
       const boundaries: TBoundingBox = { height: 2, width: 2, x: 50, y: 50 }
-      expect(circle.isOverlapping(boundaries)).toEqual(false)
+      expect(circle.overlaps(boundaries)).toEqual(false)
     })
     test(`should return false if box is inside`, () =>
     {
       const boundaries: TBoundingBox = { height: 2, width: 2, x: 9, y: 9 }
-      expect(circle.isOverlapping(boundaries)).toEqual(false)
+      expect(circle.overlaps(boundaries)).toEqual(false)
     })
   })
 
-  describe("getClone", () =>
+  describe("clone", () =>
   {
     test("should return clone", () =>
     {
@@ -270,7 +267,7 @@ describe("OIShapeCircle.ts", () =>
         width: 20
       }
       const circle = new OIShapeCircle(style, center, radius)
-      const clone = circle.getClone()
+      const clone = circle.clone()
       expect(clone).toEqual(circle)
       expect(clone).not.toBe(circle)
     })

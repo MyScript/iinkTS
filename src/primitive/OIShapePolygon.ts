@@ -1,17 +1,14 @@
-import { LoggerClass, SELECTION_MARGIN } from "../Constants"
+import { LoggerClass } from "../Constants"
 import { LoggerManager } from "../logger"
 import { TStyle } from "../style"
-import { computeDistanceBetweenPointAndSegment, findIntersectionBetween2Segment } from "../utils"
-import { TPoint, TSegment } from "./Point"
-import { TOISymbol } from "./Symbol"
-import { AbstracOIShape, ShapeKind } from "./OIShape"
-import { Box, TBoundingBox } from "./Box"
-import { MatrixTransform } from "../transform"
+import { TPoint } from "./Point"
+import { OIShape, ShapeKind } from "./OIShape"
+import { Box } from "./Box"
 
 /**
  * @group Primitive
  */
-export class OIShapePolygon extends AbstracOIShape implements TOISymbol
+export class OIShapePolygon extends OIShape
 {
   #logger = LoggerManager.getLogger(LoggerClass.SHAPE)
   points: TPoint[]
@@ -25,47 +22,17 @@ export class OIShapePolygon extends AbstracOIShape implements TOISymbol
 
   get vertices(): TPoint[]
   {
-    return this.points.map(p => MatrixTransform.applyToPoint(this.transform, p))
+    return this.points
   }
 
-  get edges(): TSegment[]
-  {
-    return this.vertices.map((p, i) => {
-      if (i === this.vertices.length - 1) {
-        return { p1: this.vertices[0], p2: p }
-      }
-      else {
-        return { p1: p, p2: this.vertices[i + 1] }
-      }
-    })
-  }
-
-  get boundingBox(): Box
-  {
-    return Box.createFromPoints(this.vertices)
-  }
-
-  isCloseToPoint(point: TPoint): boolean
-  {
-    return this.edges.some(seg =>
-    {
-      return computeDistanceBetweenPointAndSegment(point, seg) < SELECTION_MARGIN
-    })
-  }
-
-  isOverlapping(box: TBoundingBox): boolean
-  {
-    return this.boundingBox.isWrap(box) ||
-      this.edges.some(e1 => Box.getEdges(box).some(e2 => !!findIntersectionBetween2Segment(e1, e2)))
-  }
-
-  getClone(): OIShapePolygon
+  clone(): OIShapePolygon
   {
     const clone = new OIShapePolygon(structuredClone(this.style), structuredClone(this.points), this.kind)
     clone.id = this.id
+    clone.selected = this.selected
+    clone.toDelete = this.toDelete
     clone.creationTime = this.creationTime
     clone.modificationDate = this.modificationDate
-    clone.transform = this.transform.getClone()
     return clone
   }
 }
@@ -73,7 +40,7 @@ export class OIShapePolygon extends AbstracOIShape implements TOISymbol
 /**
  * @group Primitive
  */
-export class OIShapeTriangle extends OIShapePolygon implements TOISymbol
+export class OIShapeTriangle extends OIShapePolygon
 {
   constructor(style: TStyle, points: TPoint[])
   {
@@ -104,7 +71,7 @@ export class OIShapeTriangle extends OIShapePolygon implements TOISymbol
 /**
  * @group Primitive
  */
-export class OIShapeParallelogram extends OIShapePolygon implements TOISymbol
+export class OIShapeParallelogram extends OIShapePolygon
 {
   constructor(style: TStyle, points: TPoint[])
   {
@@ -139,7 +106,7 @@ export class OIShapeParallelogram extends OIShapePolygon implements TOISymbol
 /**
  * @group Primitive
  */
-export class OIShapeRectangle extends OIShapePolygon implements TOISymbol
+export class OIShapeRectangle extends OIShapePolygon
 {
   #logger = LoggerManager.getLogger(LoggerClass.SHAPE)
 

@@ -1,4 +1,3 @@
-import { SELECTION_MARGIN } from "../Constants"
 import { isBetween } from "../utils"
 import { TPoint, TSegment } from "./Point"
 
@@ -15,55 +14,117 @@ export type TBoundingBox = {
 /**
  * @group Primitive
  */
-export class Box implements TBoundingBox
+export type TBox = {
+  x: number
+  y: number
+  width: number
+  height: number
+  xMin: number
+  xMiddle: number
+  xMax: number
+  yMin: number
+  yMiddle: number
+  yMax: number
+}
+
+/**
+ * @group Primitive
+ */
+export class Box implements TBox
 {
   x: number
   y: number
   width: number
   height: number
 
-  constructor(x: number, y: number, width: number, height: number)
+  constructor(boundindBox: TBoundingBox)
   {
-    if (width < 0) throw new Error("width must be positive")
-    if (height < 0) throw new Error("height must be positive")
-    this.height = height
-    this.width = width
-    this.x = x
-    this.y = y
+    if (boundindBox.width < 0) throw new Error("width must be positive")
+    if (boundindBox.height < 0) throw new Error("height must be positive")
+    this.height = boundindBox.height
+    this.width = boundindBox.width
+    this.x = boundindBox.x
+    this.y = boundindBox.y
   }
 
   static createFromBoxes(boxes: TBoundingBox[]): Box
   {
     if (!boxes?.length) {
-      return new Box(0, 0, 0, 0)
+      return new Box({ height: 0, width: 0, x: 0, y: 0 })
     }
-    const xMin = Math.min(...boxes.map(b => b.x))
-    const width = Math.max(...boxes.map(b => b.x + b.width)) - xMin
-    const yMin = Math.min(...boxes.map(b => b.y))
-    const height = Math.max(...boxes.map(b => b.y + b.height)) - yMin
-    return new Box(xMin, yMin, width, height)
+    const x = Math.min(...boxes.map(b => b.x))
+    const width = Math.max(...boxes.map(b => b.x + b.width)) - x
+    const y = Math.min(...boxes.map(b => b.y))
+    const height = Math.max(...boxes.map(b => b.y + b.height)) - y
+    return new Box({ x, y, width, height })
   }
 
   static createFromPoints(points: TPoint[]): Box
   {
     if (!points?.length) {
-      return new Box(0, 0, 0, 0)
+      return new Box({ height: 0, width: 0, x: 0, y: 0 })
     }
     const x = Math.min(...points.map(p => p.x))
     const width = Math.max(...points.map(p => p.x)) - x
     const y = Math.min(...points.map(p => p.y))
     const height = Math.max(...points.map(p => p.y)) - y
-    return new Box(x, y, width, height)
+    return new Box({ x, y, width, height })
   }
 
-  static getEdges(box: TBoundingBox): TSegment[]
+  static getCorners(box: TBoundingBox): TPoint[]
   {
     return [
-      { p1: { x: box.x, y: box.y }, p2: { x: box.x + box.width, y: box.y }},
-      { p1: { x: box.x + box.width, y: box.y }, p2: { x: box.x + box.width, y: box.y + box.height }},
-      { p1: { x: box.x + box.width, y: box.y + box.height }, p2: { x: box.x, y: box.y + box.height }},
-      { p1: { x: box.x, y: box.y + box.height }, p2: { x: box.x, y: box.y }},
+      { x: box.x, y: box.y },
+      { x: box.x + box.width, y: box.y },
+      { x: box.x + box.width, y: box.y + box.height },
+      { x: box.x, y: box.y + box.height }
     ]
+  }
+
+  static getSides(box: TBoundingBox): TSegment[]
+  {
+    const vertices = Box.getCorners(box)
+    return vertices.map((p, i) =>
+    {
+      if (i === 3) {
+        return { p1: vertices[0], p2: p }
+      }
+      else {
+        return { p1: p, p2: vertices[i + 1] }
+      }
+    })
+  }
+
+  static isContained(box: TBoundingBox, wrapper: TBoundingBox): boolean
+  {
+    return isBetween(box.x, wrapper.x, wrapper.x + wrapper.width) &&
+      isBetween(box.x + box.width, wrapper.x, wrapper.x + wrapper.width) &&
+      isBetween(box.y, wrapper.y, wrapper.y + wrapper.height) &&
+      isBetween(box.y + box.height, wrapper.y, wrapper.y + wrapper.height)
+  }
+
+  static containsPoint(box: TBoundingBox, point: TPoint): boolean
+  {
+    return isBetween(point.x, box.x, box.x + box.width) &&
+      isBetween(point.y, box.y, box.y + box.height)
+  }
+
+  static contains(box: TBoundingBox, child: TBoundingBox): boolean
+  {
+    return isBetween(child.x, box.x, box.x + box.width) &&
+      isBetween(child.x + child.width, box.x, box.x + box.width) &&
+      isBetween(child.y, box.y, box.y + box.height) &&
+      isBetween(child.y + child.height, box.y, box.y + box.height)
+  }
+
+  static overlaps(box1: TBoundingBox, box2: TBoundingBox): boolean
+  {
+    if (box1.x > box2.x + box2.width) return false
+    if (box1.x + box1.width < box2.x) return false
+    if (box1.y > box2.y + box2.height) return false
+    if (box1.y + box1.height < box2.y) return false
+
+    return true
   }
 
   get xMin(): number
@@ -71,9 +132,9 @@ export class Box implements TBoundingBox
     return this.x
   }
 
-  get yMin(): number
+  get xMiddle(): number
   {
-    return this.y
+    return this.x + this.width / 2
   }
 
   get xMax(): number
@@ -81,26 +142,38 @@ export class Box implements TBoundingBox
     return this.x + this.width
   }
 
+  get yMin(): number
+  {
+    return this.y
+  }
+
+  get yMiddle(): number
+  {
+    return this.y + this.height / 2
+  }
+
   get yMax(): number
   {
     return this.y + this.height
   }
 
-  isWrap(boundaries: TBoundingBox): boolean
+  isContained(wrapper: TBoundingBox): boolean
   {
-    return isBetween(this.xMin, boundaries.x, boundaries.x + boundaries.width) &&
-      isBetween(this.xMax, boundaries.x, boundaries.x + boundaries.width) &&
-      isBetween(this.yMin, boundaries.y, boundaries.y + boundaries.height) &&
-      isBetween(this.yMax, boundaries.y, boundaries.y + boundaries.height)
+    return Box.isContained(this, wrapper)
   }
 
-  isOverlapping(boundaries: TBoundingBox) : boolean
+  contains(child: TBoundingBox): boolean
   {
-    if (this.xMin > boundaries.x + boundaries.width + SELECTION_MARGIN) return false
-    if (this.xMax < boundaries.x - SELECTION_MARGIN) return false
-    if (this.yMin > boundaries.y + boundaries.height + SELECTION_MARGIN) return false
-    if (this.yMax < boundaries.y - SELECTION_MARGIN) return false
+    return Box.contains(this, child)
+  }
 
-    return true
+  overlaps(boundaries: TBoundingBox): boolean
+  {
+    return Box.overlaps(this, boundaries)
+  }
+
+  getCorners(): TPoint[]
+  {
+    return Box.getCorners(this)
   }
 }

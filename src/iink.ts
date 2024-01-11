@@ -1,34 +1,19 @@
 
-export * from "./Editor"
-
-export * from "./utils"
-
 export * from "./Constants"
-
-export * from "./configuration"
-
+export * from "./Editor"
 export * from "./behaviors"
-
-export * from "./recognizer"
-
-export * from "./renderer"
-
-export * from "./grabber"
-
-export * from "./style"
-
-export * from "./model"
-
-export * from "./primitive"
-
-export * from "./undo-redo"
-
+export * from "./configuration"
 export * from "./event"
-
-export * from "./smartguide"
-
-export * from "./logger"
-
-export * from "./transform"
-
 export * from "./gesture"
+export * from "./grabber"
+export * from "./logger"
+export * from "./manager"
+export * from "./model"
+export * from "./primitive"
+export * from "./recognizer"
+export * from "./renderer"
+export * from "./smartguide"
+export * from "./style"
+export * from "./transform"
+export * from "./undo-redo"
+export * from "./utils"

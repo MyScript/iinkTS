@@ -1,15 +1,17 @@
 const editorElement = document.getElementById("editor");
 
+const importBtn = document.getElementById("import");
 const clearBtn = document.getElementById("clear");
 const undoBtn = document.getElementById("undo");
 const redoBtn = document.getElementById("redo");
 
 const penBtn = document.getElementById("pen");
-const shapeMenuBtn = document.getElementById("shape-menu");
+const menuShapeBtn = document.getElementById("menu-shape-btn");
 const drawRectangleBtn = document.getElementById("draw-rectangle");
+const drawEllipseBtn = document.getElementById("draw-ellipse");
 const drawCircleBtn = document.getElementById("draw-circle");
 const drawTriangleBtn = document.getElementById("draw-triangle");
-const lineMenuBtn = document.getElementById("line-menu");
+const menuEdgeBtn = document.getElementById("menu-edge-btn");
 const drawLineBtn = document.getElementById("draw-line");
 const drawArrowBtn = document.getElementById("draw-arrow");
 const drawDoubleArrowBtn = document.getElementById("draw-double-arrow");
@@ -39,7 +41,8 @@ const guidesGapInput = document.getElementById("guides-gap");
 
 const recognitionBoxToggle = document.getElementById("toggle-recognition-box");
 const recognitionItemBoxToggle = document.getElementById("toggle-recognition-item-box");
-const pointsVisibilityToggle = document.getElementById("toggle-points-visibility");
+const verticesVisibilityToggle = document.getElementById("toggle-vertices-visibility");
+const boundingBoxVisibilityToggle = document.getElementById("toggle-bounding-box-visibility");
 
 const alignmentGuidesToggle = document.getElementById("alignment-guides-toggle");
 const alignmentElementsToggle = document.getElementById("alignment-elements-toggle");
@@ -54,81 +57,36 @@ const exportHtmlPan = document.getElementById("export-html-pan");
 const htmlPanCloseBtn = document.getElementById("html-pan-close-btn");
 const exportHtmlBody = document.getElementById("export-html-body");
 
+function resetMenuBtn() {
+  Array.from(document.getElementsByClassName("menu-button"))
+    .forEach(btn => {
+      btn.classList.remove("active");
+    });
+};
+
 function getStyle() {
   return {
     color: penColorInput.value,
     width: penWidthInput.value,
   };
-}
+};
 
 function showModal(title, body) {
   modal.style.display = "block";
   modalTitle.innerText = title;
-  modalBody.innerHTML = body.outerHTML;
-}
-
-function toggleHtmlPanVisibilty() {
-  const isVisible = exportHtmlPan.style.getPropertyValue("display") === "block"
-  exportHtmlPan.style.setProperty("display", isVisible ? "none" : "block")
-}
+  while (modalBody.firstChild) {
+    modalBody.firstChild.remove()
+  }
+  modalBody.appendChild(body);
+};
 
 function closeHtmlPanVisibilty() {
-  exportHtmlPan.style.setProperty("display", "none")
-}
+  exportHtmlPan.style.setProperty("display", "none");
+};
 
 function closeModal() {
   modal.style.display = "none";
-}
-
-function isNumeric(value) {
-  return /^-?\d+$/.test(value);
-}
-
-function createElementsFromObjet(data, wrapper) {
-  Object.keys(data).forEach((key) => {
-    const localData = data[key];
-    if (key === "exports") {
-      return;
-    } else if (["X", "Y", "F", "T"].includes(key)) {
-      const node = document.createElement("li");
-      node.style = "white-space: nowrap;"
-      wrapper.appendChild(node);
-      node.textContent = key + `: [${localData.join(", ")}]`;
-    } else if (["pointers", "transform", "style"].includes(key)) {
-      const node = document.createElement("li");
-      node.style = "white-space: nowrap;"
-      wrapper.appendChild(node);
-      node.textContent = key + `: [${JSON.stringify(localData)}]`;
-    } else if (["decorators", "parents"].includes(key)) {
-      const node = document.createElement("li");
-      node.style = "white-space: nowrap;"
-      wrapper.appendChild(node);
-      node.textContent = key + `: [${localData.map(d => d.id).join(",")}]`;
-    } else if (Array.isArray(localData)) {
-      const node = document.createElement("li");
-      wrapper.appendChild(node);
-      if (!isNumeric(key)) node.textContent = key;
-      else node.textContent = `${wrapper.previousSibling.textContent}-${key}`;
-      const subNode = document.createElement("ul");
-      node.appendChild(subNode);
-      createElementsFromObjet(localData, subNode);
-    } else if (typeof localData === "object") {
-      const node = document.createElement("li");
-      wrapper.appendChild(node);
-      if (!isNumeric(key)) node.textContent = key;
-      else node.textContent = `${wrapper.previousSibling.textContent}-${key}`;
-      const subNode = document.createElement("ul");
-      node.appendChild(subNode);
-      createElementsFromObjet(localData, subNode);
-    } else {
-      const node = document.createElement("li");
-      wrapper.appendChild(node);
-
-      if (!isNumeric(key)) node.textContent = `${key}: ${localData}`;
-      else node.textContent = localData;
-    }
-  });
-}
+};
 
 function createStrokeInputColor(stroke) {
   const inputColor = document.createElement("input");
@@ -136,63 +94,61 @@ function createStrokeInputColor(stroke) {
   inputColor.value = stroke.style.color;
   inputColor.classList.add("stroke-input")
   inputColor.addEventListener("change", (evt) => {
-    editor.updateSymbolsStyle([stroke.id], { color: evt.target.value })
+    editor.updateSymbolsStyle([stroke.id], { color: evt.target.value });
   })
   return inputColor
-}
+};
 
 function createStrokeInputsWidth(stroke) {
   const minus = document.createElement("button");
-  minus.classList.add("stroke-input")
-  minus.textContent = "-"
+  minus.classList.add("stroke-input");
+  minus.textContent = "-";
   minus.addEventListener("pointerup", () => {
-    stroke.style.width--
+    stroke.style.width--;
     if (stroke.style.width <= 1) {
-      minus.setAttribute('disabled', true)
+      minus.setAttribute('disabled', true);
     }
     else {
-      minus.removeAttribute('disabled')
+      minus.removeAttribute('disabled');
     }
-    editor.updateSymbolsStyle([stroke.id], { width: stroke.style.width})
+    editor.updateSymbolsStyle([stroke.id], { width: stroke.style.width });
   })
 
   const plus = document.createElement("button");
-  plus.textContent = "+"
-  plus.classList.add("stroke-input")
+  plus.textContent = "+";
+  plus.classList.add("stroke-input");
   if (stroke.style.width <= 1) {
-    minus.setAttribute('disabled', true)
+    minus.setAttribute('disabled', true);
   }
   plus.addEventListener("pointerup", () => {
-    stroke.style.width++
+    stroke.style.width++;
     if (stroke.style.width <= 1) {
-      minus.setAttribute('disabled', true)
+      minus.setAttribute('disabled', true);
     }
     else {
-      minus.removeAttribute('disabled')
+      minus.removeAttribute('disabled');
     }
-    editor.updateSymbolsStyle([stroke.id], { width: stroke.style.width})
+    editor.updateSymbolsStyle([stroke.id], { width: stroke.style.width });
   })
   return { minus, plus }
-}
+};
 
 function createStrokeInputWrapper(stroke) {
   const inputWrapper = document.createElement("div");
-  inputWrapper.classList.add("stroke-input-wrapper")
-
-  inputWrapper.appendChild(createStrokeInputColor(stroke))
-  const inputs = createStrokeInputsWidth(stroke)
-  inputWrapper.appendChild(inputs.minus)
-  inputWrapper.appendChild(inputs.plus)
-
+  inputWrapper.classList.add("stroke-input-wrapper");
+  inputWrapper.appendChild(createStrokeInputColor(stroke));
+  const inputs = createStrokeInputsWidth(stroke);
+  inputWrapper.appendChild(inputs.minus);
+  inputWrapper.appendChild(inputs.plus);
   return inputWrapper
-}
+};
 
 modalCloseBtn.addEventListener("pointerup", () => {
   closeModal();
 });
 
-htmlPanToggle.addEventListener("change", () => {
-  toggleHtmlPanVisibilty();
+htmlPanToggle.addEventListener("change", (event) => {
+  exportHtmlPan.style.setProperty("display", event.target.checked ? "block" : "none");
 });
 
 htmlPanCloseBtn.addEventListener("pointerup", () => {
@@ -200,8 +156,8 @@ htmlPanCloseBtn.addEventListener("pointerup", () => {
   closeHtmlPanVisibilty();
 });
 
-selectionToggle.addEventListener("change", () => {
-  selectionPan.classList.toggle("open");
+selectionToggle.addEventListener("change", (event) => {
+  event.target.checked ? selectionPan.classList.add("open") : selectionPan.classList.remove("open");
 });
 
 /**
@@ -228,7 +184,7 @@ async function loadEditor() {
             // required to convert text
             text: {
               chars: true,
-              words: false
+              words: true
             },
           }
         }
@@ -255,11 +211,14 @@ async function loadEditor() {
    */
   await editor.initialize();
 
+  let exportTimeout;
   editor.events.addEventListener("changed", (event) => {
     clearBtn.disabled = !event.detail.canClear;
     undoBtn.disabled = !event.detail.canUndo;
     redoBtn.disabled = !event.detail.canRedo;
-    editor.export(["text/html"]);
+    clearTimeout(exportTimeout)
+    exportTimeout = setTimeout(() => editor.export(["text/html"]), 1000);
+
   });
 
   editor.events.addEventListener("exported", (event) => {
@@ -284,6 +243,28 @@ async function loadEditor() {
     }
   });
 
+  editor.events.addEventListener("intention", (event) => {
+    resetMenuBtn();
+    switch (event.detail) {
+      case iink.Intention.Select:
+        selectBtn.classList.add("active");
+        break;
+      case iink.Intention.Erase:
+        eraserBtn.classList.add("active");
+        break;
+      case iink.Intention.Write:
+        penBtn.classList.add("active");
+        break;
+    }
+  });
+
+  importBtn.addEventListener("pointerup", async () => {
+    const strokeRes = await fetch("../assets/datas/hello-my-friend.json");
+    // const strokeRes = await fetch("../assets/datas/hello-my-friend.json");
+    const strokes = await strokeRes.json();
+    await editor.importPointEvents(strokes);
+  });
+
   clearBtn.addEventListener("pointerup", async () => {
     editor.clear();
   });
@@ -299,141 +280,96 @@ async function loadEditor() {
   penBtn.addEventListener("pointerup", () => {
     editor.intention = iink.Intention.Write;
     editor.writeTool = iink.WriteTool.Pencil;
+    resetMenuBtn();
     penBtn.classList.add("active");
-    shapeMenuBtn.classList.remove("active");
-    lineMenuBtn.classList.remove("active");
-    eraserBtn.classList.remove("active");
-    selectBtn.classList.remove("active");
   });
 
   drawRectangleBtn.addEventListener("pointerup", () => {
     editor.intention = iink.Intention.Write;
     editor.writeTool = iink.WriteTool.Rectangle;
-    penBtn.classList.remove("active");
-    shapeMenuBtn.classList.add("active");
+    resetMenuBtn();
+    menuShapeBtn.classList.add("active");
     drawRectangleBtn.classList.add("active");
-    drawCircleBtn.classList.remove("active");
-    drawTriangleBtn.classList.remove("active");
-    lineMenuBtn.classList.remove("active");
-    eraserBtn.classList.remove("active");
-    selectBtn.classList.remove("active");
-    document.getElementById("shape-menu-img").src = drawRectangleBtn.children.item(0).src;
+    document.getElementById("menu-shape-btn-img").src = drawRectangleBtn.children.item(0).src;
   });
 
   drawCircleBtn.addEventListener("pointerup", () => {
     editor.intention = iink.Intention.Write;
     editor.writeTool = iink.WriteTool.Circle;
-    penBtn.classList.remove("active");
-    shapeMenuBtn.classList.add("active");
-    lineMenuBtn.classList.remove("active");
-    drawRectangleBtn.classList.remove("active");
+    resetMenuBtn();
+    menuShapeBtn.classList.add("active");
     drawCircleBtn.classList.add("active");
-    drawTriangleBtn.classList.remove("active");
-    eraserBtn.classList.remove("active");
-    selectBtn.classList.remove("active");
-    document.getElementById("shape-menu-img").src = drawCircleBtn.children.item(0).src;
+    document.getElementById("menu-shape-btn-img").src = drawCircleBtn.children.item(0).src;
+  });
+
+  drawEllipseBtn.addEventListener("pointerup", () => {
+    editor.intention = iink.Intention.Write;
+    editor.writeTool = iink.WriteTool.Ellipse;
+    resetMenuBtn();
+    menuShapeBtn.classList.add("active");
+    drawEllipseBtn.classList.add("active");
+    document.getElementById("menu-shape-btn-img").src = drawEllipseBtn.children.item(0).src;
   });
 
   drawTriangleBtn.addEventListener("pointerup", () => {
     editor.intention = iink.Intention.Write;
     editor.writeTool = iink.WriteTool.Triangle;
-    penBtn.classList.remove("active");
-    shapeMenuBtn.classList.add("active");
-    drawRectangleBtn.classList.remove("active");
-    drawCircleBtn.classList.remove("active");
+    resetMenuBtn();
+    menuShapeBtn.classList.add("active");
     drawTriangleBtn.classList.add("active");
-    lineMenuBtn.classList.remove("active");
-    eraserBtn.classList.remove("active");
-    selectBtn.classList.remove("active");
-    document.getElementById("shape-menu-img").src = drawTriangleBtn.children.item(0).src;
+    document.getElementById("menu-shape-btn-img").src = drawTriangleBtn.children.item(0).src;
   });
 
   drawLineBtn.addEventListener("pointerup", () => {
     editor.intention = iink.Intention.Write;
     editor.writeTool = iink.WriteTool.Line;
-    penBtn.classList.remove("active");
-    shapeMenuBtn.classList.remove("active");
-    lineMenuBtn.classList.add("active");
+    resetMenuBtn();
+    menuEdgeBtn.classList.add("active");
     drawLineBtn.classList.add("active");
-    drawArrowBtn.classList.remove("active");
-    drawDoubleArrowBtn.classList.remove("active");
-    eraserBtn.classList.remove("active");
-    selectBtn.classList.remove("active");
-    document.getElementById("line-menu-img").src = drawLineBtn.children.item(0).src;
+    document.getElementById("menu-edge-btn-img").src = drawLineBtn.children.item(0).src;
   });
 
   drawArrowBtn.addEventListener("pointerup", () => {
     editor.intention = iink.Intention.Write;
     editor.writeTool = iink.WriteTool.Arrow;
-    penBtn.classList.remove("active");
-    shapeMenuBtn.classList.remove("active");
-    lineMenuBtn.classList.add("active");
-    drawLineBtn.classList.remove("active");
+    resetMenuBtn();
+    menuEdgeBtn.classList.add("active");
     drawArrowBtn.classList.add("active");
-    drawDoubleArrowBtn.classList.remove("active");
-    eraserBtn.classList.remove("active");
-    selectBtn.classList.remove("active");
-    document.getElementById("line-menu-img").src = drawArrowBtn.children.item(0).src;
+    document.getElementById("menu-edge-btn-img").src = drawArrowBtn.children.item(0).src;
   });
 
   drawDoubleArrowBtn.addEventListener("pointerup", () => {
     editor.intention = iink.Intention.Write;
     editor.writeTool = iink.WriteTool.DoubleArrow;
-    penBtn.classList.remove("active");
-    shapeMenuBtn.classList.remove("active");
-    lineMenuBtn.classList.add("active");
-    drawLineBtn.classList.remove("active");
-    drawArrowBtn.classList.remove("active");
+    resetMenuBtn();
+    menuEdgeBtn.classList.add("active");
     drawDoubleArrowBtn.classList.add("active");
-    eraserBtn.classList.remove("active");
-    selectBtn.classList.remove("active");
-    document.getElementById("line-menu-img").src = drawDoubleArrowBtn.children.item(0).src;
+    document.getElementById("menu-edge-btn-img").src = drawDoubleArrowBtn.children.item(0).src;
   });
 
   eraserBtn.addEventListener("pointerup", () => {
     editor.intention = iink.Intention.Erase;
-    penBtn.classList.remove("active");
-    shapeMenuBtn.classList.remove("active");
-    lineMenuBtn.classList.remove("active");
+    resetMenuBtn();
     eraserBtn.classList.add("active");
-    selectBtn.classList.remove("active");
   });
 
   selectBtn.addEventListener("pointerup", () => {
     editor.intention = iink.Intention.Select;
-    penBtn.classList.remove("active");
-    shapeMenuBtn.classList.remove("active");
-    lineMenuBtn.classList.remove("active");
-    eraserBtn.classList.remove("active");
+    resetMenuBtn();
     selectBtn.classList.add("active");
   });
 
   showJIIXBtn.addEventListener("pointerup", async () => {
     const { exports } = await editor.export(["application/vnd.myscript.jiix"]);
     const jiix = exports["application/vnd.myscript.jiix"];
-
     const title = `Export application/vnd.myscript.jiix`;
-    const body = document.createElement("div");
-
-    const textEl = document.createElement("div");
-    textEl.classList.add("jiix-text");
-    textEl.textContent = jiix.elements.map((e) => e.label).join(" ");
-    body.appendChild(textEl);
-
-    let list = document.createElement("ul");
-    createElementsFromObjet(jiix, list);
-    body.appendChild(list);
     navigator.clipboard.writeText(JSON.stringify(jiix));
-    showModal(title, body);
+    showModal(title, renderjson(jiix));
   });
 
   showModelBtn.addEventListener("pointerup", () => {
-    const title = "Models";
-    const body = document.createElement("div");
-    let list = document.createElement("ul");
-    createElementsFromObjet(editor.model, list);
-    body.appendChild(list);
-    showModal(title, body);
+    const title = "Model";
+    showModal(title, renderjson(editor.model));
   });
 
   convertBtn.addEventListener("pointerup", () => {
@@ -503,8 +439,12 @@ async function loadEditor() {
     }
   });
 
-  pointsVisibilityToggle.addEventListener("change", (evt) => {
+  verticesVisibilityToggle.addEventListener("change", (evt) => {
     editor.behaviors.verticesVisibility = evt.target.checked;
+  });
+
+  boundingBoxVisibilityToggle.addEventListener("change", (evt) => {
+    editor.behaviors.boundingBoxVisibility = evt.target.checked;
   });
 
   window.addEventListener("resize", () => {

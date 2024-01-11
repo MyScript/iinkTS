@@ -2,14 +2,14 @@ import { TStyle } from "../style"
 import { Box } from "./Box"
 import { DecoratorKind, OIDecorator } from "./OIDecorator"
 import { TPoint } from "./Point"
-import { TOISymbol } from "./Symbol"
+import { TOISymbol, TOISymbolDecorable } from "./OISymbol"
 
 /**
  * @group Primitive
  */
 export class OIDecoratorSurround extends OIDecorator implements TOISymbol
 {
-  constructor(style: TStyle, symbols: TOISymbol[])
+  constructor(style: TStyle, symbols: TOISymbolDecorable[])
   {
     super(DecoratorKind.Surround, style, symbols)
   }
@@ -29,13 +29,14 @@ export class OIDecoratorSurround extends OIDecorator implements TOISymbol
     ]
   }
 
-  getClone(): OIDecoratorSurround
+  clone(): OIDecoratorSurround
   {
     const clone = new OIDecoratorSurround(structuredClone(this.style), structuredClone(this.parents))
     clone.id = this.id
+    clone.selected = this.selected
+    clone.toDelete = this.toDelete
     clone.creationTime = this.creationTime
     clone.modificationDate = this.modificationDate
-    clone.transform = this.transform.getClone()
     return clone
   }
 }

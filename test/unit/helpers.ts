@@ -1,4 +1,21 @@
-import { Stroke, DefaultPenStyle, TBoundingBox, OIStroke, DefaultStyle, OIDecoratorHighlight, TStyle, TOISymbol, OIDecoratorSurround, OIDecoratorUnderline, OIDecoratorStrikethrough } from "../../src/iink"
+import
+{
+  DefaultPenStyle,
+  DefaultStyle,
+  TBoundingBox,
+  TStyle,
+  TOISymbolDecorable,
+  Stroke,
+  OIStroke,
+  OIDecoratorHighlight,
+  OIDecoratorSurround,
+  OIDecoratorUnderline,
+  OIDecoratorStrikethrough,
+  OIShapeCircle,
+  OIShapePolygon,
+  ShapeKind,
+  OIEdgeLine,
+} from "../../src/iink"
 
 export const delay = (delayInms: number) =>
 {
@@ -45,22 +62,37 @@ export function buildOIStroke({ box = defaultBox, style = DefaultStyle, nbPoint 
   return stroke
 }
 
-export function buildOIHighlight(symbols: TOISymbol[], style: TStyle = DefaultStyle): OIDecoratorHighlight
+export function buildOIHighlight(symbols: TOISymbolDecorable[], style: TStyle = DefaultStyle): OIDecoratorHighlight
 {
   return new OIDecoratorHighlight(style, symbols)
 }
 
-export function buildOISurround(symbols: TOISymbol[], style: TStyle = DefaultStyle): OIDecoratorSurround
+export function buildOISurround(symbols: TOISymbolDecorable[], style: TStyle = DefaultStyle): OIDecoratorSurround
 {
   return new OIDecoratorSurround(style, symbols)
 }
 
-export function buildOIUnderline(symbols: TOISymbol[], style: TStyle = DefaultStyle): OIDecoratorUnderline
+export function buildOIUnderline(symbols: TOISymbolDecorable[], style: TStyle = DefaultStyle): OIDecoratorUnderline
 {
   return new OIDecoratorUnderline(style, symbols)
 }
 
-export function buildOIStrikethrough(symbols: TOISymbol[], style: TStyle = DefaultStyle): OIDecoratorStrikethrough
+export function buildOIStrikethrough(symbols: TOISymbolDecorable[], style: TStyle = DefaultStyle): OIDecoratorStrikethrough
 {
   return new OIDecoratorStrikethrough(style, symbols)
+}
+
+export function buildOICircle({ center = { x: 0, y: 0 }, radius = 5, style = DefaultStyle } = {}): OIShapeCircle
+{
+  return new OIShapeCircle(style, center, radius)
+}
+
+export function buildOIPolygon({ points = [{x: 0, y: 0}, {x: 5, y: 5}, {x: 10, y: 0}], shapekind = ShapeKind.Triangle, style = DefaultStyle } = {}): OIShapePolygon
+{
+  return new OIShapePolygon(style, points, shapekind)
+}
+
+export function buildOILine({ start = { x: 0, y: 0}, end = {x: 5, y: 5}, style = DefaultStyle } = {}): OIEdgeLine
+{
+  return new OIEdgeLine(style, start, end)
 }

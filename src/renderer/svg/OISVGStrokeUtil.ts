@@ -1,28 +1,39 @@
-import { OIStroke, TPointer } from "../../primitive"
+import { OIStroke, TOIDecorator, TPointer } from "../../primitive"
 import { DefaultStyle } from "../../style"
-import { MatrixTransform } from "../../transform"
-import { createPath } from "./SVGElementBuilder"
+import { OISVGDecoratorUtil } from "./OISVGDecoratorUtil"
+import { SVGBuilder } from "./SVGBuilder"
 
 /**
  * @group Renderer
  */
 export class OISVGStrokeUtil
 {
+  removalFilterId: string
   selectionFilterId: string
+  decoratorUtil: OISVGDecoratorUtil
 
-  constructor(selectionFilterId: string)
+  constructor(selectionFilterId: string, removalFilterId: string)
   {
     this.selectionFilterId = selectionFilterId
+    this.removalFilterId = removalFilterId
+    this.decoratorUtil = new OISVGDecoratorUtil(this.selectionFilterId, this.removalFilterId)
   }
 
   getSVGPath(stroke: OIStroke): string
   {
-    if (stroke.pointers.length < 2) return ""
+    if (stroke.pointers.length < 1) return ""
 
     const firstPoint = stroke.pointers.at(0) as TPointer
+
+    if (stroke.pointers.length === 1) {
+      const strokeWith = stroke.style.width || 4
+      return `C ${ firstPoint.x - strokeWith / 2 } ${ firstPoint.y } Q ${ firstPoint.x  + strokeWith / 2 } ${ firstPoint.y }`
+    }
+
     const middlePoints = stroke.pointers.slice(1)
 
     const startPathMoveTo = `M ${ firstPoint.x } ${ firstPoint.y }`
+
 
     const middlePathQuadratic = middlePoints.reduce((acc, point) => {
       return `${ acc } ${ point.x } ${ point.y }`
@@ -31,7 +42,7 @@ export class OISVGStrokeUtil
     return `${ startPathMoveTo } ${ middlePathQuadratic }`
   }
 
-  getSVGElement(stroke: OIStroke): SVGPathElement
+  getSVGElement(stroke: OIStroke): SVGGraphicsElement
   {
     const attrs: { [key: string]: string } = {
       "id": stroke.id,
@@ -40,8 +51,6 @@ export class OISVGStrokeUtil
       "stroke-linecap": "round",
       "stroke-linejoin": "round",
       "fill": "transparent",
-      "transform": MatrixTransform.toCssString(stroke.transform),
-      "d": this.getSVGPath(stroke),
     }
 
     if (stroke.pointerType === "eraser") {
@@ -54,13 +63,27 @@ export class OISVGStrokeUtil
       attrs["stroke"] = stroke.style.color || DefaultStyle.color!
       attrs["stroke-width"] = (stroke.style.width || DefaultStyle.width!).toString()
       attrs["opacity"] = (stroke.style.opacity || DefaultStyle.opacity!).toString()
+      if (stroke.selected) {
+        attrs["filter"] = `url(#${ this.selectionFilterId })`
+      }
+      if (stroke.toDelete) {
+        attrs["filter"] = `url(#${ this.removalFilterId })`
+      }
     }
 
-    if (stroke.selected) {
-      attrs["filter"] = `url(#${ this.selectionFilterId })`
-    }
+    const strokeGroup = SVGBuilder.createGroup(attrs)
 
-    return createPath(attrs)
+    const strokeAttrs: { [key: string]: string } = { "d": this.getSVGPath(stroke) }
+    strokeGroup.append(SVGBuilder.createPath(strokeAttrs))
+
+    stroke.decorators.forEach(d => {
+      const deco = this.decoratorUtil.getSVGElement(d as TOIDecorator)
+      if (deco) {
+        strokeGroup.prepend(deco)
+      }
+    })
+
+    return strokeGroup
   }
 
 }

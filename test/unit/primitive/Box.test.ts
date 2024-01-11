@@ -5,7 +5,7 @@ describe("Box.ts", () =>
   test("should create", () =>
   {
     const x = 0, y = 1, width = 2, height = 3
-    const box = new Box(x, y, width, height)
+    const box = new Box({ x, y, width, height })
     expect(box).toBeDefined()
     expect(box.x).toEqual(x)
     expect(box.y).toEqual(y)
@@ -21,13 +21,13 @@ describe("Box.ts", () =>
   test("should throw error when create with negative width", () =>
   {
     const x = 0, y = 1, width = -2, height = 3
-    expect(() => new Box(x, y, width, height)).toThrow("width must be positive")
+    expect(() => new Box({ x, y, width, height })).toThrow("width must be positive")
   })
 
   test("should throw error when create with negative height", () =>
   {
     const x = 0, y = 1, width = 2, height = -3
-    expect(() => new Box(x, y, width, height)).toThrow("height must be positive")
+    expect(() => new Box({ x, y, width, height })).toThrow("height must be positive")
   })
 
   describe("createFromBoxes", () =>

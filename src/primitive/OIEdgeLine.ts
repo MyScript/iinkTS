@@ -1,0 +1,39 @@
+import { LoggerClass } from "../Constants"
+import { LoggerManager } from "../logger"
+import { TStyle } from "../style"
+import { EdgeDecoration, EdgeKind, OIEdge } from "./OIEdge"
+import { TPoint } from "./Point"
+
+/**
+ * @group Primitive
+ */
+export class OIEdgeLine extends OIEdge
+{
+  #logger = LoggerManager.getLogger(LoggerClass.EDGE)
+
+
+  constructor(style: TStyle, start: TPoint, end: TPoint, startDecoration?: EdgeDecoration, endDecoration?: EdgeDecoration)
+  {
+    super(EdgeKind.Line, style, start, end, startDecoration, endDecoration)
+  }
+
+  get vertices(): TPoint[]
+  {
+    return [
+      this.start,
+      this.end
+    ]
+  }
+
+  clone(): OIEdgeLine
+  {
+    this.#logger.info("clone", this)
+    const clone = new OIEdgeLine(structuredClone(this.style), structuredClone(this.start), structuredClone(this.end), this.startDecoration, this.endDecoration)
+    clone.id = this.id
+    clone.selected = this.selected
+    clone.toDelete = this.toDelete
+    clone.creationTime = this.creationTime
+    clone.modificationDate = this.modificationDate
+    return clone
+  }
+}

@@ -1,4 +1,4 @@
-import { buildOIHighlight, buildOIStroke, buildOIUnderline, delay } from "../helpers"
+import { buildOICircle, buildOIHighlight, buildOIStroke, buildOIUnderline, delay } from "../helpers"
 
 import
 {
@@ -12,7 +12,8 @@ import
   TExport,
   TOIShape,
   ShapeKind,
-  EdgeKind
+  EdgeKind,
+  OIEdgeLine
 } from "../../../src/iink"
 
 describe("OIModel.ts", () =>
@@ -74,6 +75,15 @@ describe("OIModel.ts", () =>
       const shape = model.currentSymbol as TOIShape
       expect(shape.kind).toBe(ShapeKind.Circle)
     })
+    test("should createCurrentSymbol with Ellipse", () =>
+    {
+      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
+      model.createCurrentSymbol(WriteTool.Ellipse, point, DefaultStyle, 42, "mouse")
+      expect(model.currentSymbol).toBeDefined()
+      expect(model.currentSymbol?.type).toBe(SymbolType.Shape)
+      const shape = model.currentSymbol as TOIShape
+      expect(shape.kind).toBe(ShapeKind.Ellipse)
+    })
     test("should createCurrentSymbol with Parallelogram", () =>
     {
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
@@ -98,8 +108,10 @@ describe("OIModel.ts", () =>
       model.createCurrentSymbol(WriteTool.Line, point, DefaultStyle, 42, "mouse")
       expect(model.currentSymbol).toBeDefined()
       expect(model.currentSymbol?.type).toBe(SymbolType.Edge)
-      const shape = model.currentSymbol as TOIShape
+      const shape = model.currentSymbol as OIEdgeLine
       expect(shape.kind).toBe(EdgeKind.Line)
+      expect(shape.startDecoration).toBeUndefined()
+      expect(shape.endDecoration).toBeUndefined()
     })
     test("should createCurrentSymbol with Arrow", () =>
     {
@@ -107,17 +119,21 @@ describe("OIModel.ts", () =>
       model.createCurrentSymbol(WriteTool.Arrow, point, DefaultStyle, 42, "mouse")
       expect(model.currentSymbol).toBeDefined()
       expect(model.currentSymbol?.type).toBe(SymbolType.Edge)
-      const shape = model.currentSymbol as TOIShape
+      const shape = model.currentSymbol as OIEdgeLine
       expect(shape.kind).toBe(EdgeKind.Line)
+      expect(shape.startDecoration).toBeUndefined()
+      expect(shape.endDecoration).toBeDefined()
     })
     test("should createCurrentSymbol with DoubleArrow", () =>
     {
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      model.createCurrentSymbol(WriteTool.Arrow, point, DefaultStyle, 42, "mouse")
+      model.createCurrentSymbol(WriteTool.DoubleArrow, point, DefaultStyle, 42, "mouse")
       expect(model.currentSymbol).toBeDefined()
       expect(model.currentSymbol?.type).toBe(SymbolType.Edge)
-      const shape = model.currentSymbol as TOIShape
+      const shape = model.currentSymbol as OIEdgeLine
       expect(shape.kind).toBe(EdgeKind.Line)
+      expect(shape.startDecoration).toBeDefined()
+      expect(shape.endDecoration).toBeDefined()
     })
     test("should write error if symbol type unknow when createCurrentSymbol", () =>
     {
@@ -142,13 +158,10 @@ describe("OIModel.ts", () =>
     test("should endCurrentSymbol", () =>
     {
       expect(model.currentSymbol).toBeDefined()
-      const currentSymbol = { ...model.currentSymbol }
       const point: TPointer = { t: 25, p: 25, x: 25, y: 25 }
       expect(model.symbols).toHaveLength(0)
       model.endCurrentSymbol(point)
       expect(model.currentSymbol).toBeUndefined()
-      expect(model.symbols).toHaveLength(1)
-      expect(model.symbols[0].id).toEqual(currentSymbol.id)
     })
     test("should throw error when updateCurrentSymbol if currentSymbol undefined", () =>
     {
@@ -160,23 +173,23 @@ describe("OIModel.ts", () =>
 
   describe("symbols", () =>
   {
-    const model = new OIModel(27, 5)
-    const symb = buildOIStroke()
+    const model = new OIModel(width, height, rowHeight)
+    const sym = buildOIStroke()
     test("should addSymbol", () =>
     {
       expect(model.symbols).toHaveLength(0)
-      model.addSymbol(symb)
+      model.addSymbol(sym)
       expect(model.symbols).toHaveLength(1)
-      expect(model.symbols[0]).toEqual(symb)
+      expect(model.symbols[0]).toEqual(sym)
     })
     test("should updateSymbol", () =>
     {
-      const updatedSymb = structuredClone(symb)
+      const updatedSymb = structuredClone(sym)
       updatedSymb.style.color = "yellow"
       updatedSymb.style.width = 25
       updatedSymb.pointers.push({ p: 1, t: 20, x: 42, y: 31 })
       model.updateSymbol(updatedSymb)
-      expect(model.symbols[0]).not.toEqual(symb)
+      expect(model.symbols[0]).not.toEqual(sym)
       expect(model.symbols[0]).toEqual(updatedSymb)
     })
     test("should not updateSymbol if id not exist", () =>
@@ -191,17 +204,44 @@ describe("OIModel.ts", () =>
       model.updateSymbol(updatedSymb2)
       expect(model.symbols[1]).toEqual(symb2)
     })
+    test("should replaceSymbol", () =>
+    {
+      const sym1 = buildOIStroke()
+      model.addSymbol(sym1)
+      const oldLength = model.symbols.length
+      const sym2 = buildOIStroke()
+      const sym3 = buildOIStroke()
+      model.replaceSymbol(sym1.id, [sym2, sym3])
+      expect(oldLength + 1).toEqual(model.symbols.length)
+      expect(model.symbols.find(s => s.id === sym1.id)).toBeUndefined()
+      expect(model.symbols.find(s => s.id === sym2.id)).toEqual(sym2)
+      expect(model.symbols.find(s => s.id === sym3.id)).toEqual(sym3)
+    })
+    test("should not replaceSymbol if id not exist", () =>
+    {
+      const sym1 = buildOIStroke()
+      model.addSymbol(sym1)
+      const oldLength = model.symbols.length
+      const sym2 = buildOIStroke()
+      const sym3 = buildOIStroke()
+      model.replaceSymbol("unknow", [sym2, sym3])
+      expect(oldLength).toEqual(model.symbols.length)
+      expect(model.symbols.find(s => s.id === sym1.id)).toEqual(sym1)
+      expect(model.symbols.find(s => s.id === sym2.id)).toBeUndefined()
+      expect(model.symbols.find(s => s.id === sym3.id)).toBeUndefined()
+    })
     test("should removeSymbol", () =>
     {
-      expect(model.symbols).toHaveLength(2)
-      model.removeSymbol(symb.id)
-      expect(model.symbols).toHaveLength(1)
+      const oldLength = model.symbols.length
+      model.removeSymbol(sym.id)
+      expect(model.symbols).toHaveLength(oldLength - 1)
+      expect(model.symbols.find(s => s.id === sym.id)).toBeUndefined()
     })
     test("should not removeSymbol if id not exist", () =>
     {
-      expect(model.symbols).toHaveLength(1)
+      const oldLength = model.symbols.length
       model.removeSymbol("not-exist")
-      expect(model.symbols).toHaveLength(1)
+      expect(model.symbols).toHaveLength(oldLength)
     })
     test("should removeSymbol & decorators", () =>
     {
@@ -214,14 +254,72 @@ describe("OIModel.ts", () =>
       model.addSymbol(highlight)
       model.addSymbol(underline)
       const nbSymbols = model.symbols.length
-      model.removeSymbol(stroke.id)
+      expect(model.removeSymbol(stroke.id)).toHaveLength(3)
       expect(model.symbols).toHaveLength(nbSymbols - 3)
+    })
+  })
+
+  describe("get symbols", () =>
+  {
+    const model = new OIModel(width, height, rowHeight)
+
+    const stroke51 = buildOIStroke({ box: { height: 9, width: 10, x: 0, y: 4.6 * rowHeight } })
+    model.addSymbol(stroke51)
+
+    const stroke12 = buildOIStroke({ box: { height: 9, width: 100, x: 50, y: rowHeight / 2 } })
+    model.addSymbol(stroke12)
+
+    const circle13 = buildOICircle({ center: { x: 200, y: rowHeight * 1.4 }, radius: 5 })
+    model.addSymbol(circle13)
+
+    const circle22 = buildOICircle({ center: { x: 200, y: rowHeight * 2.25 }, radius: 5 })
+    model.addSymbol(circle22)
+
+    const stroke21 = buildOIStroke({ box: { height: 9, width: 10, x: 0, y: 1.6 * rowHeight } })
+    model.addSymbol(stroke21)
+
+    const stroke11 = buildOIStroke({ box: { height: 9, width: 10, x: 0, y: rowHeight / 2 } })
+    model.addSymbol(stroke11)
+
+    const stroke31 = buildOIStroke({ box: { height: 9, width: 10, x: 0, y: 2.6 * rowHeight } })
+    model.addSymbol(stroke31)
+
+    test("shoud get rowIndex for each symbols", () =>
+    {
+      expect(model.getSymbolRowIndex(stroke11)).toEqual(1)
+      expect(model.getSymbolRowIndex(stroke12)).toEqual(1)
+      expect(model.getSymbolRowIndex(circle13)).toEqual(1)
+      expect(model.getSymbolRowIndex(circle22)).toEqual(2)
+      expect(model.getSymbolRowIndex(stroke21)).toEqual(2)
+      expect(model.getSymbolRowIndex(stroke31)).toEqual(3)
+      expect(model.getSymbolRowIndex(stroke51)).toEqual(5)
+    })
+    test("shoud get symbols orderered for each row", () =>
+    {
+      expect(model.getSymbolInRowOrdered(0)).toEqual([])
+      expect(model.getSymbolInRowOrdered(1)).toEqual([stroke11, stroke12, circle13])
+      expect(model.getSymbolInRowOrdered(2)).toEqual([stroke21, circle22])
+      expect(model.getSymbolInRowOrdered(3)).toEqual([stroke31])
+      expect(model.getSymbolInRowOrdered(4)).toEqual([])
+      expect(model.getSymbolInRowOrdered(5)).toEqual([stroke51])
+    })
+    test("shoud get symbols group by row and ordered", () =>
+    {
+      const rows = model.getSymbolsByRowOrdered()
+      expect(rows[0].index).toEqual(1)
+      expect(rows[0].symbols).toEqual([stroke11, stroke12, circle13])
+      expect(rows[1].index).toEqual(2)
+      expect(rows[1].symbols).toEqual([stroke21, circle22])
+      expect(rows[2].index).toEqual(3)
+      expect(rows[2].symbols).toEqual([stroke31])
+      expect(rows[3].index).toEqual(5)
+      expect(rows[3].symbols).toEqual([stroke51])
     })
   })
 
   describe("selection", () =>
   {
-    const model = new OIModel(27, 5)
+    const model = new OIModel(width, height, rowHeight)
     const stroke1 = buildOIStroke({ box: { height: 10, width: 10, x: 0, y: 0 } })
     model.addSymbol(stroke1)
     const stroke2 = buildOIStroke({ box: { height: 10, width: 10, x: 20, y: 0 } })
@@ -229,54 +327,62 @@ describe("OIModel.ts", () =>
     test("should select stroke when point on stroke", () =>
     {
       model.selectSymbol(stroke1.id)
-      expect(model.selection).toHaveLength(1)
-      expect(model.selection[0].id).toEqual(stroke1.id)
+      expect(model.symbolsSelected).toHaveLength(1)
+      expect(model.symbolsSelected[0].id).toEqual(stroke1.id)
     })
     test("should unselect stroke", () =>
     {
-      expect(model.selection).toHaveLength(1)
+      expect(model.symbolsSelected).toHaveLength(1)
       model.unselectSymbol(stroke1.id)
-      expect(model.selection).toHaveLength(0)
+      expect(model.symbolsSelected).toHaveLength(0)
     })
     test("should not select the same stroke twice", () =>
     {
       model.selectSymbol(stroke1.id)
-      expect(model.selection).toHaveLength(1)
+      expect(model.symbolsSelected).toHaveLength(1)
       model.selectSymbol(stroke1.id)
-      expect(model.selection).toHaveLength(1)
+      expect(model.symbolsSelected).toHaveLength(1)
     })
     test("should reset selection", () =>
     {
-      expect(model.selection).toHaveLength(1)
+      expect(model.symbolsSelected).toHaveLength(1)
       model.resetSelection()
-      expect(model.selection).toHaveLength(0)
+      expect(model.symbolsSelected).toHaveLength(0)
     })
-    test("should select stroke when point close", () =>
+  })
+
+  describe("toDelete", () =>
+  {
+    const model = new OIModel(width, height, rowHeight)
+    const stroke1 = buildOIStroke({ box: { height: 10, width: 10, x: 0, y: 0 } })
+    model.addSymbol(stroke1)
+    const stroke2 = buildOIStroke({ box: { height: 10, width: 10, x: 20, y: 0 } })
+    model.addSymbol(stroke2)
+    test("should set stroke.toDelete = true when point close", () =>
     {
-      expect(model.selection).toHaveLength(0)
+      expect(model.symbolsToDelete).toHaveLength(0)
       const point = JSON.parse(JSON.stringify(stroke1.pointers[0]))
       point.x += 1
       point.y += 1
-      model.selectedSymbolsFromPoint(point)
-      expect(model.selection).toHaveLength(1)
-      expect(model.selection[0].id).toEqual(stroke1.id)
+      model.setToDeleteSymbolsFromPoint(point)
+      expect(model.symbolsToDelete).toHaveLength(1)
+      expect(model.symbolsToDelete[0].id).toEqual(stroke1.id)
     })
-    test("should not select the stroke when the point is far away", () =>
+    test("should not set stroke.toDelete = true when the point is far away", () =>
     {
-      model.resetSelection()
-      expect(model.selection).toHaveLength(0)
+      model.symbols.forEach(s => s.toDelete = false)
+      expect(model.symbolsToDelete).toHaveLength(0)
       const point = JSON.parse(JSON.stringify(stroke1.pointers[0]))
       point.x += 1000
       point.y += 1000
-      model.selectedSymbolsFromPoint(point)
-      expect(model.selection).toHaveLength(0)
+      model.setToDeleteSymbolsFromPoint(point)
+      expect(model.symbolsToDelete).toHaveLength(0)
     })
-
   })
 
   describe("positions", () =>
   {
-    const model = new OIModel(27, 5)
+    const model = new OIModel(width, height, rowHeight)
     model.addSymbol(buildOIStroke())
     model.addSymbol(buildOIStroke())
     test("should positions init with 0", () =>
@@ -298,7 +404,7 @@ describe("OIModel.ts", () =>
 
   describe("extract", () =>
   {
-    const model = new OIModel(27, 5)
+    const model = new OIModel(width, height, rowHeight)
     model.addSymbol(buildOIStroke())
     model.addSymbol(buildOIStroke())
     test("should extract all traits if nothing is sent", () =>
@@ -318,7 +424,7 @@ describe("OIModel.ts", () =>
 
     test("should extract symbol added in second model", () =>
     {
-      const newModel = model.getClone()
+      const newModel = model.clone()
       const newSymb = buildOIStroke()
       model.addSymbol(newSymb)
       const { added, removed } = model.extractDifferenceSymbols(newModel)
@@ -327,7 +433,7 @@ describe("OIModel.ts", () =>
     })
     test("should extract symbol removed in second model", () =>
     {
-      const newModel = model.getClone()
+      const newModel = model.clone()
       const newSymb = buildOIStroke()
       model.addSymbol(newSymb)
       const { added, removed } = newModel.extractDifferenceSymbols(model)
@@ -344,7 +450,7 @@ describe("OIModel.ts", () =>
 
   describe("export", () =>
   {
-    const model = new OIModel(27, 5)
+    const model = new OIModel(width, height, rowHeight)
     const e: TExport = { "text/plain": "poney" }
     test("should define export to undefined", () =>
     {
@@ -380,14 +486,14 @@ describe("OIModel.ts", () =>
 
   describe("clone", () =>
   {
-    const model = new OIModel(27, 5)
+    const model = new OIModel(width, height, rowHeight)
     const stroke = buildOIStroke()
     model.addSymbol(stroke)
     model.createCurrentSymbol(WriteTool.Pencil, { p: 27, t: 5, x: 1989, y: 42 }, DefaultStyle, 42, "mouse")
     model.exports = { "text/plain": "M" }
-    test("should getClone", () =>
+    test("should clone", () =>
     {
-      const clone = model.getClone()
+      const clone = model.clone()
       expect(clone != model).toBeTruthy()
       expect(clone.currentSymbol).toEqual(model.currentSymbol)
       expect(clone.currentSymbol).not.toBe(model.currentSymbol)
@@ -419,7 +525,7 @@ describe("OIModel.ts", () =>
       const p3: TPointer = { t: 10, p: 10, x: 10, y: 10 }
 
       model.createCurrentSymbol(WriteTool.Pencil, p1, DefaultStyle, 42, "mouse")
-      model.endCurrentSymbol(p2)
+      model.addSymbol(model.endCurrentSymbol(p2))
       model.createCurrentSymbol(WriteTool.Pencil, p3, DefaultStyle, 51, "mouse")
       expect(model.currentSymbol).toBeDefined()
       expect(model.symbols).toHaveLength(1)

@@ -3,10 +3,13 @@
  * @group Gesture
  * @description List all authorized gestures
  */
-export type TGestureType = ("UNDERLINE"| "SCRATCH" | "JOIN" | "INSERT" | "STRIKETHROUGH" | "SURROUND")
+export type TGestureType = "UNDERLINE" | "SCRATCH" | "JOIN" | "INSERT" | "STRIKETHROUGH" | "SURROUND"
 
 /**
  * @group Gesture
+ * @remarks
+ *  when gestureType = "INSERT", subStrokes represent the two parts
+ *  when gestureType = "SCRATCH", subStrokes represent the part to substract at the stroke corresponding fullStrokeId
  */
 export type TGesture = {
   gestureType: TGestureType

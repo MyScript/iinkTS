@@ -5,7 +5,6 @@ import
   TPoint,
   DefaultStyle,
   TStyle,
-  MatrixTransform,
   SELECTION_MARGIN,
   TBoundingBox,
   OIShapeRectangle,
@@ -31,7 +30,6 @@ describe("OIShapePolygon.ts", () =>
         expect(rect.creationTime).toEqual(rect.modificationDate)
         expect(rect.style).toEqual(expect.objectContaining(style))
         expect(rect.selected).toEqual(false)
-        expect(rect.transform).toEqual(MatrixTransform.identity())
       })
       test("should create with default style", () =>
       {
@@ -182,7 +180,7 @@ describe("OIShapePolygon.ts", () =>
       })
     })
 
-    describe("isOverlapping", () =>
+    describe("overlaps", () =>
     {
       const points: TPoint[] = [
         { x: 0, y: 0 },
@@ -198,26 +196,26 @@ describe("OIShapePolygon.ts", () =>
       test(`should return true if partially wrap`, () =>
       {
         const boundaries: TBoundingBox = { height: 100, width: 100, x: -50, y: -50 }
-        expect(triangle.isOverlapping(boundaries)).toEqual(true)
+        expect(triangle.overlaps(boundaries)).toEqual(true)
       })
       test(`should return true if totally wrap`, () =>
       {
         const boundaries: TBoundingBox = { height: 500, width: 500, x: -25, y: -25 }
-        expect(triangle.isOverlapping(boundaries)).toEqual(true)
+        expect(triangle.overlaps(boundaries)).toEqual(true)
       })
       test(`should return false if box is outside`, () =>
       {
         const boundaries: TBoundingBox = { height: 20, width: 20, x: 500, y: 500 }
-        expect(triangle.isOverlapping(boundaries)).toEqual(false)
+        expect(triangle.overlaps(boundaries)).toEqual(false)
       })
       test(`should return false if box is inside`, () =>
       {
         const boundaries: TBoundingBox = { height: 2, width: 2, x: 5, y: 50 }
-        expect(triangle.isOverlapping(boundaries)).toEqual(false)
+        expect(triangle.overlaps(boundaries)).toEqual(false)
       })
     })
 
-    describe("getClone", () =>
+    describe("clone", () =>
     {
       test("should return clone", () =>
       {
@@ -232,7 +230,7 @@ describe("OIShapePolygon.ts", () =>
           width: 20
         }
         const triangle = new OIShapeRectangle(style, points)
-        const clone = triangle.getClone()
+        const clone = triangle.clone()
         expect(clone).toEqual(triangle)
         expect(clone).not.toBe(triangle)
       })
@@ -260,7 +258,6 @@ describe("OIShapePolygon.ts", () =>
         expect(triangle.creationTime).toEqual(triangle.modificationDate)
         expect(triangle.style).toEqual(expect.objectContaining(style))
         expect(triangle.selected).toEqual(false)
-        expect(triangle.transform).toEqual(MatrixTransform.identity())
         expect(triangle.points).toEqual(points)
         expect(triangle.boundingBox.x).toEqual(0)
         expect(triangle.boundingBox.y).toEqual(0)
@@ -296,7 +293,6 @@ describe("OIShapePolygon.ts", () =>
         expect(triangle.creationTime).toEqual(triangle.modificationDate)
         expect(triangle.style).toEqual(expect.objectContaining(style))
         expect(triangle.selected).toEqual(false)
-        expect(triangle.transform).toEqual(MatrixTransform.identity())
       })
       test("should create with default style", () =>
       {
@@ -446,7 +442,7 @@ describe("OIShapePolygon.ts", () =>
       })
     })
 
-    describe("isOverlapping", () =>
+    describe("overlaps", () =>
     {
       const points: TPoint[] = [
         { x: 0, y: 0 },
@@ -461,26 +457,26 @@ describe("OIShapePolygon.ts", () =>
       test(`should return true if partially wrap`, () =>
       {
         const boundaries: TBoundingBox = { height: 100, width: 100, x: -50, y: -50 }
-        expect(triangle.isOverlapping(boundaries)).toEqual(true)
+        expect(triangle.overlaps(boundaries)).toEqual(true)
       })
       test(`should return true if totally wrap`, () =>
       {
         const boundaries: TBoundingBox = { height: 500, width: 500, x: -25, y: -25 }
-        expect(triangle.isOverlapping(boundaries)).toEqual(true)
+        expect(triangle.overlaps(boundaries)).toEqual(true)
       })
       test(`should return false if box is outside`, () =>
       {
         const boundaries: TBoundingBox = { height: 20, width: 20, x: 500, y: 500 }
-        expect(triangle.isOverlapping(boundaries)).toEqual(false)
+        expect(triangle.overlaps(boundaries)).toEqual(false)
       })
       test(`should return false if box is inside`, () =>
       {
         const boundaries: TBoundingBox = { height: 2, width: 2, x: 5, y: 50 }
-        expect(triangle.isOverlapping(boundaries)).toEqual(false)
+        expect(triangle.overlaps(boundaries)).toEqual(false)
       })
     })
 
-    describe("getClone", () =>
+    describe("clone", () =>
     {
       test("should return clone", () =>
       {
@@ -494,7 +490,7 @@ describe("OIShapePolygon.ts", () =>
           width: 20
         }
         const triangle = new OIShapeTriangle(style, points)
-        const clone = triangle.getClone()
+        const clone = triangle.clone()
         expect(clone).toEqual(triangle)
         expect(clone).not.toBe(triangle)
       })
@@ -522,7 +518,6 @@ describe("OIShapePolygon.ts", () =>
         expect(parallelogram.creationTime).toEqual(parallelogram.modificationDate)
         expect(parallelogram.style).toEqual(expect.objectContaining(style))
         expect(parallelogram.selected).toEqual(false)
-        expect(parallelogram.transform).toEqual(MatrixTransform.identity())
         expect(parallelogram.points).toEqual(points)
         expect(parallelogram.boundingBox.x).toEqual(0)
         expect(parallelogram.boundingBox.y).toEqual(0)
@@ -559,7 +554,6 @@ describe("OIShapePolygon.ts", () =>
         expect(parallelogram.creationTime).toEqual(parallelogram.modificationDate)
         expect(parallelogram.style).toEqual(expect.objectContaining(style))
         expect(parallelogram.selected).toEqual(false)
-        expect(parallelogram.transform).toEqual(MatrixTransform.identity())
       })
       test("should create with default style", () =>
       {
@@ -711,7 +705,7 @@ describe("OIShapePolygon.ts", () =>
       })
     })
 
-    describe("isOverlapping", () =>
+    describe("overlaps", () =>
     {
       const points: TPoint[] = [
         { x: 0, y: 0 },
@@ -726,26 +720,26 @@ describe("OIShapePolygon.ts", () =>
       test(`should return true if partially wrap`, () =>
       {
         const boundaries: TBoundingBox = { height: 100, width: 100, x: -50, y: -50 }
-        expect(parallelogram.isOverlapping(boundaries)).toEqual(true)
+        expect(parallelogram.overlaps(boundaries)).toEqual(true)
       })
       test(`should return true if totally wrap`, () =>
       {
         const boundaries: TBoundingBox = { height: 500, width: 500, x: -25, y: -25 }
-        expect(parallelogram.isOverlapping(boundaries)).toEqual(true)
+        expect(parallelogram.overlaps(boundaries)).toEqual(true)
       })
       test(`should return false if box is outside`, () =>
       {
         const boundaries: TBoundingBox = { height: 20, width: 20, x: 500, y: 500 }
-        expect(parallelogram.isOverlapping(boundaries)).toEqual(false)
+        expect(parallelogram.overlaps(boundaries)).toEqual(false)
       })
       test(`should return false if box is inside`, () =>
       {
         const boundaries: TBoundingBox = { height: 2, width: 2, x: 5, y: 50 }
-        expect(parallelogram.isOverlapping(boundaries)).toEqual(false)
+        expect(parallelogram.overlaps(boundaries)).toEqual(false)
       })
     })
 
-    describe("getClone", () =>
+    describe("clone", () =>
     {
       test("should return clone", () =>
       {
@@ -759,7 +753,7 @@ describe("OIShapePolygon.ts", () =>
           width: 20
         }
         const parallelogram = new OIShapeParallelogram(style, points)
-        const clone = parallelogram.getClone()
+        const clone = parallelogram.clone()
         expect(clone).toEqual(parallelogram)
         expect(clone).not.toBe(parallelogram)
       })

@@ -1,43 +1,30 @@
 import { LoggerClass, SELECTION_MARGIN } from "../Constants"
 import { LoggerManager } from "../logger"
 import { DefaultStyle, TStyle } from "../style"
-import { PartialDeep, computeDistance, createUUID } from "../utils"
+import { PartialDeep, computeDistance } from "../utils"
 import { TStroke, TStrokeToSend } from "./Stroke"
 import { TPoint, TPointer } from "./Point"
-import { Box, TBoundingBox } from "./Box"
-import { SymbolType, TOISymbol } from "./Symbol"
-import { MatrixTransform } from "../transform"
+import { TBoundingBox } from "./Box"
+import { SymbolType } from "./Symbol"
+import { OIDecorator } from "./OIDecorator"
+import { OISymbol, TOISymbolDecorable } from "./OISymbol"
 
 /**
  * @group Primitive
  */
-export class OIStroke implements TStroke, TOISymbol
+export class OIStroke extends OISymbol implements TStroke, TOISymbolDecorable
 {
   #logger = LoggerManager.getLogger(LoggerClass.STROKE)
-  readonly type = SymbolType.Stroke
-
-  id: string
-  creationTime: number
-  modificationDate: number
-  transform: MatrixTransform
-  selected: boolean
-  style: TStyle
   pointerId: number
   pointerType: string
   pointers: TPointer[]
   length: number
-  decorators: TOISymbol[]
+  decorators: OIDecorator[]
 
   constructor(style: TStyle, pointerId: number, pointerType = "pen")
   {
+    super(SymbolType.Stroke, style)
     this.#logger.info("constructor", { style, pointerId, pointerType })
-
-    this.id = `${ this.type }-${ createUUID() }`
-    this.creationTime = Date.now()
-    this.modificationDate = this.creationTime
-    this.style = Object.assign({}, DefaultStyle, style)
-    this.selected = false
-    this.transform = new MatrixTransform(1, 0, 0, 1, 0, 0)
 
     this.pointerId = pointerId
     this.pointerType = pointerType
@@ -46,9 +33,15 @@ export class OIStroke implements TStroke, TOISymbol
     this.length = 0
   }
 
-  get boundingBox(): Box
+  static split(strokeToSplit: OIStroke, i: number): { before: OIStroke, after: OIStroke }
   {
-    return Box.createFromPoints(this.pointers)
+    const before = new OIStroke(strokeToSplit.style, strokeToSplit.pointerId, strokeToSplit.pointerType)
+    before.pointers = strokeToSplit.pointers.slice(0, i)
+
+    const after = new OIStroke(strokeToSplit.style, strokeToSplit.pointerId, strokeToSplit.pointerType)
+    after.pointers = strokeToSplit.pointers.slice(i)
+
+    return { before, after }
   }
 
   get vertices(): TPoint[]
@@ -92,7 +85,7 @@ export class OIStroke implements TStroke, TOISymbol
     }
   }
 
-  isOverlapping(box: TBoundingBox): boolean
+  overlaps(box: TBoundingBox): boolean
   {
     return this.pointers.some(p =>
     {
@@ -109,15 +102,15 @@ export class OIStroke implements TStroke, TOISymbol
     })
   }
 
-  getClone(): OIStroke
+  clone(): OIStroke
   {
     const clone = new OIStroke(this.style, this.pointerId, this.pointerType)
     clone.id = this.id
     clone.selected = this.selected
+    clone.toDelete = this.toDelete
     clone.creationTime = this.creationTime
     clone.modificationDate = this.modificationDate
     clone.pointers = structuredClone(this.pointers)
-    clone.transform = this.transform.getClone()
     clone.length = this.length
     return clone
   }
@@ -141,6 +134,7 @@ export class OIStroke implements TStroke, TOISymbol
     })
     return json
   }
+
 }
 
 /**

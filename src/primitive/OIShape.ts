@@ -1,9 +1,10 @@
-import { DefaultStyle, TStyle } from "../style"
-import { MatrixTransform } from "../transform"
-import { createUUID } from "../utils"
+import { SELECTION_MARGIN } from "../Constants"
+import { TStyle } from "../style"
+import { computeDistanceBetweenPointAndSegment, createUUID, findIntersectionBetween2Segment } from "../utils"
 import { Box, TBoundingBox } from "./Box"
-import { TPoint } from "./Point"
-import { SymbolType, TOISymbol } from "./Symbol"
+import { OISymbol, TOISymbol } from "./OISymbol"
+import { TPoint, TSegment } from "./Point"
+import { SymbolType } from "./Symbol"
 
 /**
  * @group Primitive
@@ -24,42 +25,50 @@ export enum ShapeKind
  * @group Primitive
  */
 export type TOIShape = TOISymbol & {
-  type: SymbolType
   kind: ShapeKind
-  vertices: TPoint[]
-  boundingBox: Box
 }
 
 /**
  * @group Primitive
  */
-export abstract class AbstracOIShape implements TOIShape
+export abstract class OIShape extends OISymbol implements TOIShape
 {
-  readonly type = SymbolType.Shape
   readonly kind: ShapeKind
-
-  id: string
-  creationTime: number
-  modificationDate: number
-  transform: MatrixTransform
-  selected: boolean
-  style: TStyle
-
   constructor(kind: ShapeKind, style: TStyle)
   {
+    super(SymbolType.Shape, style)
     this.id = `${ this.type }-${ kind }-${ createUUID() }`
-    this.creationTime = Date.now()
-    this.modificationDate = this.creationTime
     this.kind = kind
-    this.style = Object.assign({}, DefaultStyle, style)
-    this.selected = false
-    this.transform = new MatrixTransform(1, 0, 0, 1, 0, 0)
   }
 
   abstract get vertices(): TPoint[]
-  abstract get boundingBox(): Box
 
-  abstract isOverlapping(box: TBoundingBox): boolean
-  abstract isCloseToPoint(point: TPoint): boolean
-  abstract getClone(): TOISymbol
+  get edges(): TSegment[]
+  {
+    return this.vertices.map((p, i) =>
+    {
+      if (i === this.vertices.length - 1) {
+        return { p1: p, p2: this.vertices[0] }
+      }
+      else {
+        return { p1: p, p2: this.vertices[i + 1] }
+      }
+    })
+  }
+
+  overlaps(box: TBoundingBox): boolean
+  {
+    return this.boundingBox.isContained(box) ||
+      this.edges.some(e1 => Box.getSides(box).some(e2 => !!findIntersectionBetween2Segment(e1, e2)))
+  }
+
+  isCloseToPoint(point: TPoint): boolean
+  {
+    return this.edges.some(seg =>
+    {
+      return computeDistanceBetweenPointAndSegment(point, seg) < SELECTION_MARGIN
+    })
+  }
+
+  abstract clone(): OIShape
 }
