@@ -1,4 +1,4 @@
-import "./iink.css"
+import style from "./iink.css"
 import { IBehaviors, RestBehaviors, TBehaviorOptions, WSBehaviors } from "./behaviors"
 import { SmartGuide } from "./smartguide"
 import { DeferredPromise, PartialDeep, mergeDeep } from "./utils"
@@ -46,6 +46,10 @@ export class Editor
     this.wrapperHTML.classList.add(globalClassCss)
     this.wrapperHTML.classList.add("draw")
     this.events.setElement(this.wrapperHTML)
+
+    const styleElement = document.createElement("style")
+    styleElement.appendChild(document.createTextNode(style as string))
+    this.wrapperHTML.appendChild(styleElement)
 
     this.#loaderHTML = document.createElement("div")
     this.#loaderHTML.classList.add("loader")
