@@ -3,6 +3,8 @@ type JsonCSS = {
   toJSON(style): TTheme
 }
 
+declare module "*.css"
+
 declare module "json-css"
 
 declare module "crypto-js/enc-hex"

@@ -31,8 +31,13 @@ export default [
         keep_fnames: true,
         compress: true,
       }),
-      postcss(),
-      svg({ stringify: true })
+      postcss({
+        minimize: true,
+        inject: false
+      }),
+      svg({
+        stringify: true
+      })
     ],
   },
   {
