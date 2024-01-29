@@ -1,8 +1,8 @@
 import { arcJIIX, circleJIIX, ellipseJIIX, helloJIIX, lineJIIX, parallelogramJIIX, polygonJIIX, rectangleJIIX, rhombusJIIX, triangleJIIX } from "../__dataset__/jiix.dataset"
 import { buildOIStroke } from "../helpers"
-import { Box, DefaultConfiguration, OIBehaviors, OIConverterManager, TBehaviorOptions, TJIIXEdgeElement, TJIIXNodeElement, TJIIXTextElement } from "../../../src/iink"
+import { Box, DefaultConfiguration, OIBehaviors, OIConversionManager, TBehaviorOptions, TJIIXEdgeElement, TJIIXNodeElement, TJIIXTextElement } from "../../../src/iink"
 
-describe("OIConverterManager.ts", () =>
+describe("OIConversionManager.ts", () =>
 {
   const behaviorsOptions: TBehaviorOptions = {
     configuration: JSON.parse(JSON.stringify(DefaultConfiguration))
@@ -11,7 +11,7 @@ describe("OIConverterManager.ts", () =>
   test("should create", () =>
   {
     const behaviors = new OIBehaviors(behaviorsOptions)
-    const manager = new OIConverterManager(behaviors)
+    const manager = new OIConversionManager(behaviors)
     expect(manager).toBeDefined()
   })
 
@@ -20,15 +20,15 @@ describe("OIConverterManager.ts", () =>
     const behaviors = new OIBehaviors(behaviorsOptions)
     behaviors.textManager.adjustText = jest.fn()
     behaviors.export = jest.fn(() => Promise.resolve(behaviors.model))
-    behaviors.selectionManager.removeSelectedGroup = jest.fn()
-    const manager = new OIConverterManager(behaviors)
+    behaviors.selector.removeSelectedGroup = jest.fn()
+    const manager = new OIConversionManager(behaviors)
     manager.convertText = jest.fn((_t: TJIIXTextElement, _a: boolean) => Promise.resolve())
     manager.convertNode = jest.fn((_t: TJIIXNodeElement) => Promise.resolve())
     manager.convertEdge = jest.fn((_t: TJIIXEdgeElement) => Promise.resolve())
     test("should call behaviors.export if no model.exports?.[\"application/vnd.myscript.jiix\"]", async () =>
     {
       await manager.convert()
-      expect(behaviors.selectionManager.removeSelectedGroup).toHaveBeenCalledTimes(1)
+      expect(behaviors.selector.removeSelectedGroup).toHaveBeenCalledTimes(1)
       expect(behaviors.export).toHaveBeenCalledTimes(1)
       expect(behaviors.export).toHaveBeenCalledWith(["application/vnd.myscript.jiix"])
     })
@@ -37,7 +37,7 @@ describe("OIConverterManager.ts", () =>
       expect(manager.convertText).toHaveBeenCalledTimes(0)
       manager.model.exports = { "application/vnd.myscript.jiix": helloJIIX }
       await manager.convert()
-      expect(behaviors.selectionManager.removeSelectedGroup).toHaveBeenCalledTimes(1)
+      expect(behaviors.selector.removeSelectedGroup).toHaveBeenCalledTimes(1)
       expect(manager.convertText).toHaveBeenCalledTimes(1)
       expect(behaviors.textManager.adjustText).toHaveBeenCalledTimes(1)
     })
@@ -46,7 +46,7 @@ describe("OIConverterManager.ts", () =>
       expect(manager.convertNode).toHaveBeenCalledTimes(0)
       manager.model.exports = { "application/vnd.myscript.jiix": rectangleJIIX }
       await manager.convert()
-      expect(behaviors.selectionManager.removeSelectedGroup).toHaveBeenCalledTimes(1)
+      expect(behaviors.selector.removeSelectedGroup).toHaveBeenCalledTimes(1)
       expect(manager.convertNode).toHaveBeenCalledTimes(1)
     })
     test("should call convertEdge", async () =>
@@ -54,7 +54,7 @@ describe("OIConverterManager.ts", () =>
       expect(manager.convertEdge).toHaveBeenCalledTimes(0)
       manager.model.exports = { "application/vnd.myscript.jiix": lineJIIX }
       await manager.convert()
-      expect(behaviors.selectionManager.removeSelectedGroup).toHaveBeenCalledTimes(1)
+      expect(behaviors.selector.removeSelectedGroup).toHaveBeenCalledTimes(1)
       expect(manager.convertEdge).toHaveBeenCalledTimes(1)
     })
   })
@@ -67,11 +67,11 @@ describe("OIConverterManager.ts", () =>
     behaviors.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
     behaviors.renderer.drawSymbol = jest.fn(() => symEl)
     behaviors.renderer.removeSymbol = jest.fn(() => Promise.resolve())
-    behaviors.renderer.getSymbolElementBounds = jest.fn(() => new Box({ height: 4, width: 3, x: 2, y: 1 }))
+    behaviors.renderer.getElementBounds = jest.fn(() => new Box({ height: 4, width: 3, x: 2, y: 1 }))
     behaviors.renderer.getSymbolBounds = jest.fn(() => new Box({ height: 4, width: 3, x: 2, y: 1 }))
     behaviors.model.addSymbol = jest.fn()
     behaviors.model.removeSymbol = jest.fn()
-    const manager = new OIConverterManager(behaviors)
+    const manager = new OIConversionManager(behaviors)
 
     const helloTextJIIX = helloJIIX.elements?.[0] as TJIIXTextElement
 
@@ -117,7 +117,7 @@ describe("OIConverterManager.ts", () =>
     behaviors.renderer.removeSymbol = jest.fn(() => Promise.resolve())
     behaviors.model.addSymbol = jest.fn()
     behaviors.model.removeSymbol = jest.fn()
-    const manager = new OIConverterManager(behaviors)
+    const manager = new OIConversionManager(behaviors)
 
     const jiixNodeRect = rectangleJIIX.elements?.[0] as TJIIXNodeElement
     const jiixNodeCircle = circleJIIX.elements?.[0] as TJIIXNodeElement
@@ -235,7 +235,7 @@ describe("OIConverterManager.ts", () =>
     behaviors.renderer.removeSymbol = jest.fn(() => Promise.resolve())
     behaviors.model.addSymbol = jest.fn()
     behaviors.model.removeSymbol = jest.fn()
-    const manager = new OIConverterManager(behaviors)
+    const manager = new OIConversionManager(behaviors)
 
     const jiixEdgeLine = lineJIIX.elements?.[0] as TJIIXEdgeElement
     const jiixEdgeArc = arcJIIX.elements?.[0] as TJIIXEdgeElement

@@ -1,6 +1,7 @@
 export * from "./OISVGRenderer"
 export * from "./OISVGDecoratorUtil"
 export * from "./OISVGEdgeUtil"
+export * from "./OISVGEraserUtil"
 export * from "./OISVGShapeUtil"
 export * from "./OISVGStrokeUtil"
 export * from "./OISVGTextUtil"

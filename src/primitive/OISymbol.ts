@@ -14,6 +14,7 @@ export interface TOISymbol extends TSymbol
   toDelete: boolean
   get boundingBox(): TBox
   get vertices(): TPoint[]
+  get snapPoints(): TPoint[]
   overlaps(box: TBoundingBox): boolean
   isCloseToPoint(point: TPoint): boolean
   clone(): TOISymbol
@@ -59,6 +60,11 @@ export abstract class OISymbol implements TOISymbol
   get boundingBox(): Box
   {
     return Box.createFromPoints(this.vertices)
+  }
+
+  get snapPoints(): TPoint[]
+  {
+    return this.boundingBox.snapPoints
   }
 
   abstract overlaps(box: TBoundingBox): boolean

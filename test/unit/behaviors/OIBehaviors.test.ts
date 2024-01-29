@@ -1,12 +1,11 @@
-import { buildOIStroke, delay } from "../helpers"
+import { jiixText } from "../_dataset/exports.dataset"
+import { buildOIStroke } from "../helpers"
 import { LeftClickEventFake } from "../PointerEventFake"
-
 import
 {
   OIBehaviors,
   DefaultConfiguration,
   Intention,
-  WriteTool,
   InternalEventType,
   DefaultTheme,
   InternalEvent,
@@ -18,7 +17,6 @@ import
   TStroke,
   DefaultStyle,
 } from "../../../src/iink"
-import { jiixText } from "../_dataset/exports.dataset"
 
 describe("OIBehaviors.ts", () =>
 {
@@ -38,7 +36,7 @@ describe("OIBehaviors.ts", () =>
   describe("Properties", () =>
   {
     const oib = new OIBehaviors(DefaultBehaviorsOptions)
-    oib.selectionManager.removeSelectedGroup = jest.fn()
+    oib.selector.removeSelectedGroup = jest.fn()
     test("should have internalEvent property", () =>
     {
       expect(oib.internalEvent).toBe(InternalEvent.getInstance())
@@ -58,16 +56,6 @@ describe("OIBehaviors.ts", () =>
       oib.model.resetSelection = jest.fn()
       oib.intention = Intention.Erase
       expect(oib.model.resetSelection).toBeCalledTimes(1)
-    })
-    test("should have writeTool property initialize to Pencil", () =>
-    {
-      expect(oib.writeTool).toEqual(WriteTool.Pencil)
-    })
-    test("should set writeTool property to Circle", () =>
-    {
-      oib.writeTool = WriteTool.Circle
-      expect(oib.writeTool).toEqual(WriteTool.Circle)
-      expect(oib.selectionManager.removeSelectedGroup).toBeCalledTimes(1)
     })
     test("should have model property initialize", () =>
     {
@@ -243,249 +231,230 @@ describe("OIBehaviors.ts", () =>
     })
   })
 
-  describe("drawSymbol", () =>
+  describe("updateSymbolsStyle", () =>
   {
-    test("should call renderer.drawSymbol", async () =>
+    const oib = new OIBehaviors(DefaultBehaviorsOptions)
+    oib.recognizer.init = jest.fn()
+    oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
+    oib.renderer.drawSymbol = jest.fn()
+    const div = document.createElement("div")
+    const stroke1 = buildOIStroke()
+    oib.model.addSymbol(stroke1)
+    const stroke2 = buildOIStroke()
+    oib.model.addSymbol(stroke2)
+    test("should update symbol color and draw", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement("div")
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
-      oib.grabber.attach = jest.fn()
-      oib.renderer.init = jest.fn()
-      oib.recognizer.send = jest.fn()
-      oib.recognizer.init = jest.fn(() => Promise.resolve())
-      await oib.init(wrapperHTML)
-      oib.renderer.drawSymbol = jest.fn()
-      const symbol = buildOIStroke()
-      oib.drawSymbol(symbol)
-      await expect(oib.renderer.drawSymbol).toBeCalledTimes(1)
-      await expect(oib.renderer.drawSymbol).toBeCalledWith(symbol)
+      await oib.init(div)
+      expect(oib.model.symbols[0].style.color).toEqual("#000000")
+      oib.updateSymbolsStyle([stroke1.id], { color: "red" })
+      expect(oib.model.symbols[0].style.color).toEqual("red")
+      expect(oib.renderer.drawSymbol).toHaveBeenCalledTimes(1)
+      expect(oib.renderer.drawSymbol).toHaveBeenCalledWith(stroke1)
     })
-    test("should not call renderer.drawSymbol if not symbol", async () =>
+    test("should update symbol width and draw", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement("div")
-
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
-      oib.grabber.attach = jest.fn()
-      oib.renderer.init = jest.fn()
-      oib.recognizer.send = jest.fn()
-      oib.recognizer.init = jest.fn(() => Promise.resolve())
-      await oib.init(wrapperHTML)
-      oib.renderer.drawSymbol = jest.fn()
-      //@ts-ignore
-      oib.drawSymbol()
-      await expect(oib.renderer.drawSymbol).toBeCalledTimes(0)
+      await oib.init(div)
+      expect(oib.model.symbols[1].style.width).toEqual(4)
+      oib.updateSymbolsStyle([stroke2.id], { width: 42 })
+      expect(oib.model.symbols[1].style.width).toEqual(42)
+      expect(oib.renderer.drawSymbol).toHaveBeenCalledTimes(1)
+      expect(oib.renderer.drawSymbol).toHaveBeenCalledWith(stroke2)
     })
   })
 
-  describe("Draw", () =>
+  describe("Writer", () =>
   {
-    describe("Pen Stroke", () =>
+    const oib = new OIBehaviors(DefaultBehaviorsOptions)
+    oib.recognizer.init = jest.fn()
+    oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
+    oib.writer.start = jest.fn()
+    oib.writer.continue = jest.fn()
+    oib.writer.end = jest.fn()
+    const div = document.createElement("div")
+    const pointerId = 666
+    test("should call writer.start on pointerdown", async () =>
     {
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
-      oib.recognizer.init = jest.fn()
-      oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
-      oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
-      oib.renderer.drawSymbol = jest.fn()
-      const div = document.createElement("div")
-      const pointerId = 666
-      test("should draw on pointerdown", async () =>
-      {
-        await oib.init(div)
-        const target = div.querySelector("svg") as SVGSVGElement
-        const pointerDown = new LeftClickEventFake("pointerdown", {
-          pointerType: "pen",
-          clientX: 1,
-          clientY: 1,
-          pressure: 1,
-          pointerId
-        }) as PointerEvent
+      await oib.init(div)
+      const target = div.querySelector("svg") as SVGSVGElement
+      const pointerDown = new LeftClickEventFake("pointerdown", {
+        pointerType: "pen",
+        clientX: 1,
+        clientY: 1,
+        pressure: 1,
+        pointerId
+      }) as PointerEvent
 
-        target.dispatchEvent(pointerDown)
-        expect(oib.model.currentSymbol).toMatchObject({
-          pointers: [
-            {
-              x: 1,
-              y: 1,
-              p: expect.any(Number),
-              t: expect.any(Number),
-            }
-          ]
-        })
-        expect(oib.renderer.drawSymbol).toBeCalledWith(oib.model.currentSymbol)
-      })
-      test("should draw on pointermove", async () =>
-      {
-        const target = div.querySelector("svg") as SVGSVGElement
-        const pointerMove = new LeftClickEventFake("pointermove", {
-          pointerType: "pen",
-          clientX: 5,
-          clientY: 4,
-          pressure: 1,
-          pointerId
-        }) as PointerEvent
-
-        target.dispatchEvent(pointerMove)
-        expect(oib.model.currentSymbol).toMatchObject({
-          pointers: [
-            {
-              x: 1,
-              y: 1,
-              p: expect.any(Number),
-              t: expect.any(Number),
-            },
-            {
-              x: 5,
-              y: 4,
-              p: expect.any(Number),
-              t: expect.any(Number),
-            },
-          ]
-        })
-        expect(oib.renderer.drawSymbol).toBeCalledWith(oib.model.currentSymbol)
-      })
-      test("should draw and add pen stroke on pointerup", async () =>
-      {
-        const target = div.querySelector("svg") as SVGSVGElement
-        const pointerUp = new LeftClickEventFake("pointerup", {
-          pointerType: "pen",
-          clientX: 10,
-          clientY: 11,
-          pressure: 1,
-          pointerId
-        }) as PointerEvent
-
-        target.dispatchEvent(pointerUp)
-        //¯\_(ツ)_/¯  required to wait oib.recognizer.addStrokes
-        await delay(100)
-        expect(oib.model.currentSymbol).toBeUndefined()
-        expect(oib.model.symbols[0]).toMatchObject({
-          pointers: [
-            {
-              x: 1,
-              y: 1,
-              p: expect.any(Number),
-              t: expect.any(Number),
-            },
-            {
-              x: 5,
-              y: 4,
-              p: expect.any(Number),
-              t: expect.any(Number),
-            },
-            {
-              x: 10,
-              y: 11,
-              p: expect.any(Number),
-              t: expect.any(Number),
-            },
-          ]
-        })
-        expect(oib.renderer.drawSymbol).toBeCalledWith(oib.model.symbols[0])
-        expect(oib.recognizer.addStrokes).toBeCalledWith([oib.model.symbols[0]], true)
-      })
+      target.dispatchEvent(pointerDown)
+      expect(oib.writer.start).toBeCalledTimes(1)
+      expect(oib.writer.continue).toBeCalledTimes(0)
+      expect(oib.writer.end).toBeCalledTimes(0)
     })
-    describe("Erase Stroke", () =>
+    test("should call writer.continue on pointermove", async () =>
     {
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
-      oib.intention = Intention.Erase
-      oib.recognizer.init = jest.fn()
-      oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
-      oib.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
-      oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
-      oib.renderer.drawSymbol = jest.fn()
-      oib.renderer.removeSymbol = jest.fn()
-      const div = document.createElement("div")
-      const pointerId = 666
-      test("should start to draw stroke on pointerdown", async () =>
-      {
-        await oib.init(div)
-        const target = div.querySelector("svg") as SVGSVGElement
-        const pointerDown = new LeftClickEventFake("pointerdown", {
-          pointerType: "pen",
-          clientX: 1,
-          clientY: 1,
-          pressure: 1,
-          pointerId
-        }) as PointerEvent
+      const target = div.querySelector("svg") as SVGSVGElement
+      const pointerMove = new LeftClickEventFake("pointermove", {
+        pointerType: "pen",
+        clientX: 5,
+        clientY: 4,
+        pressure: 1,
+        pointerId
+      }) as PointerEvent
 
-        target.dispatchEvent(pointerDown)
-        expect(oib.model.currentSymbol).toMatchObject({
-          pointers: [
-            {
-              x: 1,
-              y: 1,
-              p: expect.any(Number),
-              t: expect.any(Number),
-            }
-          ]
-        })
-        expect(oib.renderer.drawSymbol).toBeCalledWith(oib.model.currentSymbol)
-      })
-      test("should draw stroke on pointermove", async () =>
-      {
-        const target = div.querySelector("svg") as SVGSVGElement
-        const pointerMove = new LeftClickEventFake("pointermove", {
-          pointerType: "eraser",
-          clientX: 5,
-          clientY: 4,
-          pressure: 1,
-          pointerId
-        }) as PointerEvent
+      target.dispatchEvent(pointerMove)
+      expect(oib.writer.start).toBeCalledTimes(0)
+      expect(oib.writer.continue).toBeCalledTimes(1)
+      expect(oib.writer.end).toBeCalledTimes(0)
+    })
+    test("should call writer.end on pointerup", async () =>
+    {
+      const target = div.querySelector("svg") as SVGSVGElement
+      const pointerUp = new LeftClickEventFake("pointerup", {
+        pointerType: "pen",
+        clientX: 10,
+        clientY: 11,
+        pressure: 1,
+        pointerId
+      }) as PointerEvent
 
-        target.dispatchEvent(pointerMove)
-        expect(oib.model.currentSymbol).toMatchObject({
-          pointers: [
-            {
-              x: 1,
-              y: 1,
-              p: expect.any(Number),
-              t: expect.any(Number),
-            },
-            {
-              x: 5,
-              y: 4,
-              p: expect.any(Number),
-              t: expect.any(Number),
-            },
-          ]
-        })
-        expect(oib.renderer.drawSymbol).toBeCalledWith(oib.model.currentSymbol)
-      })
-      test("should draw and erase stroke on pointerup", async () =>
-      {
-        const symbolToDelete = buildOIStroke()
-        symbolToDelete.toDelete = true
-        oib.model.addSymbol(symbolToDelete)
-        oib.model.addSymbol(buildOIStroke())
-        const target = div.querySelector("svg") as SVGSVGElement
-        const pointerUp = new LeftClickEventFake("pointerup", {
-          pointerType: "eraser",
-          clientX: 10,
-          clientY: 11,
-          pressure: 1,
-          pointerId
-        }) as PointerEvent
-        const strokeID = oib.model.currentSymbol?.id
-        target.dispatchEvent(pointerUp)
-        //¯\_(ツ)_/¯  required to wait oib.recognizer.eraseStrokes
-        await delay(100)
-        expect(oib.model.currentSymbol).toBeUndefined()
-        expect(oib.model.symbols).toHaveLength(1)
-        expect(oib.recognizer.eraseStrokes).toBeCalledWith([symbolToDelete.id])
-        expect(oib.renderer.removeSymbol).toHaveBeenNthCalledWith(1, strokeID)
-        expect(oib.renderer.removeSymbol).toHaveBeenNthCalledWith(2, symbolToDelete.id)
-      })
+      target.dispatchEvent(pointerUp)
+      expect(oib.writer.start).toBeCalledTimes(0)
+      expect(oib.writer.continue).toBeCalledTimes(0)
+      expect(oib.writer.end).toBeCalledTimes(1)
+    })
+  })
+
+  describe("Eraser", () =>
+  {
+    const oib = new OIBehaviors(DefaultBehaviorsOptions)
+    oib.intention = Intention.Erase
+    oib.recognizer.init = jest.fn()
+    oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
+    oib.eraser.start = jest.fn()
+    oib.eraser.continue = jest.fn()
+    oib.eraser.end = jest.fn()
+    const div = document.createElement("div")
+    const pointerId = 666
+    test("should call eraseManager.start on pointerdown", async () =>
+    {
+      await oib.init(div)
+      const target = div.querySelector("svg") as SVGSVGElement
+      const pointerDown = new LeftClickEventFake("pointerdown", {
+        pointerType: "pen",
+        clientX: 1,
+        clientY: 1,
+        pressure: 1,
+        pointerId
+      }) as PointerEvent
+
+      target.dispatchEvent(pointerDown)
+      expect(oib.eraser.start).toBeCalledTimes(1)
+      expect(oib.eraser.continue).toBeCalledTimes(0)
+      expect(oib.eraser.end).toBeCalledTimes(0)
+    })
+    test("should call eraseManager.continue on pointermove", async () =>
+    {
+      const target = div.querySelector("svg") as SVGSVGElement
+      const pointerMove = new LeftClickEventFake("pointermove", {
+        pointerType: "pen",
+        clientX: 5,
+        clientY: 4,
+        pressure: 1,
+        pointerId
+      }) as PointerEvent
+
+      target.dispatchEvent(pointerMove)
+      expect(oib.eraser.start).toBeCalledTimes(0)
+      expect(oib.eraser.continue).toBeCalledTimes(1)
+      expect(oib.eraser.end).toBeCalledTimes(0)
+    })
+    test("should call eraseManager.end on pointerup", async () =>
+    {
+      const target = div.querySelector("svg") as SVGSVGElement
+      const pointerUp = new LeftClickEventFake("pointerup", {
+        pointerType: "pen",
+        clientX: 10,
+        clientY: 11,
+        pressure: 1,
+        pointerId
+      }) as PointerEvent
+
+      target.dispatchEvent(pointerUp)
+      expect(oib.eraser.start).toBeCalledTimes(0)
+      expect(oib.eraser.continue).toBeCalledTimes(0)
+      expect(oib.eraser.end).toBeCalledTimes(1)
+    })
+  })
+
+  describe("Selector", () =>
+  {
+    const oib = new OIBehaviors(DefaultBehaviorsOptions)
+    oib.intention = Intention.Select
+    oib.recognizer.init = jest.fn()
+    oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
+    oib.selector.start = jest.fn()
+    oib.selector.continue = jest.fn()
+    oib.selector.end = jest.fn()
+    const div = document.createElement("div")
+    const pointerId = 666
+    test("should call eraseManager.start on pointerdown", async () =>
+    {
+      await oib.init(div)
+      const target = div.querySelector("svg") as SVGSVGElement
+      const pointerDown = new LeftClickEventFake("pointerdown", {
+        pointerType: "pen",
+        clientX: 1,
+        clientY: 1,
+        pressure: 1,
+        pointerId
+      }) as PointerEvent
+
+      target.dispatchEvent(pointerDown)
+      expect(oib.selector.start).toBeCalledTimes(1)
+      expect(oib.selector.continue).toBeCalledTimes(0)
+      expect(oib.selector.end).toBeCalledTimes(0)
+    })
+    test("should call eraseManager.continue on pointermove", async () =>
+    {
+      const target = div.querySelector("svg") as SVGSVGElement
+      const pointerMove = new LeftClickEventFake("pointermove", {
+        pointerType: "pen",
+        clientX: 5,
+        clientY: 4,
+        pressure: 1,
+        pointerId
+      }) as PointerEvent
+
+      target.dispatchEvent(pointerMove)
+      expect(oib.selector.start).toBeCalledTimes(0)
+      expect(oib.selector.continue).toBeCalledTimes(1)
+      expect(oib.selector.end).toBeCalledTimes(0)
+    })
+    test("should call eraseManager.end on pointerup", async () =>
+    {
+      const target = div.querySelector("svg") as SVGSVGElement
+      const pointerUp = new LeftClickEventFake("pointerup", {
+        pointerType: "pen",
+        clientX: 10,
+        clientY: 11,
+        pressure: 1,
+        pointerId
+      }) as PointerEvent
+
+      target.dispatchEvent(pointerUp)
+      expect(oib.selector.start).toBeCalledTimes(0)
+      expect(oib.selector.continue).toBeCalledTimes(0)
+      expect(oib.selector.end).toBeCalledTimes(1)
     })
   })
 
   describe("importPointsEvent", () =>
   {
-    test("should call recognizer.importPointsEvents", async () =>
+    test("should call recognizer.addStrokes", async () =>
     {
       const wrapperHTML: HTMLElement = document.createElement("div")
       const oib = new OIBehaviors(DefaultBehaviorsOptions)
       oib.grabber.attach = jest.fn()
-      oib.recognizer.send = jest.fn()
+      oib.renderer.drawSymbol = jest.fn()
       oib.recognizer.init = jest.fn(() => Promise.resolve())
       oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
@@ -508,14 +477,15 @@ describe("OIBehaviors.ts", () =>
       await oib.importPointEvents(pStrokes)
       expect(oib.recognizer.addStrokes).toBeCalledTimes(1)
     })
-    test("should add symbols to model", async () =>
+    test("should add symbols to model and draw", async () =>
     {
       const wrapperHTML: HTMLElement = document.createElement("div")
       const oib = new OIBehaviors(DefaultBehaviorsOptions)
       oib.grabber.attach = jest.fn()
-      oib.recognizer.send = jest.fn()
-      oib.recognizer.init = jest.fn()
+      oib.renderer.drawSymbol = jest.fn()
+      oib.recognizer.init = jest.fn(() => Promise.resolve())
       oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
+      oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
       expect(oib.model.symbols).toHaveLength(0)
       await oib.init(wrapperHTML)
       const pStrokes: PartialDeep<TStroke>[] = [
@@ -535,6 +505,7 @@ describe("OIBehaviors.ts", () =>
       ]
       await oib.importPointEvents(pStrokes)
       expect(oib.model.symbols).toHaveLength(pStrokes.length)
+      expect(oib.renderer.drawSymbol).toHaveBeenCalledTimes(2)
     })
   })
 
@@ -543,23 +514,20 @@ describe("OIBehaviors.ts", () =>
     test("should call recognizer.addStrokes & renderer.drawSymbol", async () =>
     {
       const oib = new OIBehaviors(DefaultBehaviorsOptions)
-      oib.selectionManager.removeSelectedGroup = jest.fn()
+      oib.selector.removeSelectedGroup = jest.fn()
+      oib.debugSVG.apply = jest.fn()
+      oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
+      oib.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
+      oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
+      oib.renderer.removeSymbol = jest.fn()
+      oib.renderer.drawSymbol = jest.fn()
+      oib.renderer.clearElements = jest.fn()
       const stroke1 = buildOIStroke()
       const firstModel = oib.model.clone()
       firstModel.addSymbol(stroke1)
       oib.context.canUndo = true
       oib.context.stackIndex = 1
       oib.context.stack.unshift(firstModel)
-      oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
-      oib.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
-      oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
-      oib.renderer.removeSymbol = jest.fn()
-      oib.renderer.drawSymbol = jest.fn()
-      oib.renderer.drawCircle = jest.fn()
-      oib.renderer.clearElements = jest.fn()
-      oib.renderer.clearBoudingBox = jest.fn()
-      oib.renderer.drawBoundingBox = jest.fn()
-      oib.selectionManager.removeSelectedGroup = jest.fn()
       await oib.undo()
       expect(oib.recognizer.addStrokes).toBeCalledTimes(1)
       expect(oib.recognizer.addStrokes).toBeCalledWith([stroke1], false)
@@ -569,23 +537,20 @@ describe("OIBehaviors.ts", () =>
     test("should call recognizer.eraseStrokes & renderer.removeSymbol", async () =>
     {
       const oib = new OIBehaviors(DefaultBehaviorsOptions)
-      oib.selectionManager.removeSelectedGroup = jest.fn()
+      oib.selector.removeSelectedGroup = jest.fn()
+      oib.debugSVG.apply = jest.fn()
+      oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
+      oib.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
+      oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
+      oib.renderer.removeSymbol = jest.fn()
+      oib.renderer.drawSymbol = jest.fn()
+      oib.renderer.clearElements = jest.fn()
       const stroke1 = buildOIStroke()
       oib.model.addSymbol(stroke1)
       const firstModel = new OIModel(1, 1)
       oib.context.canUndo = true
       oib.context.stackIndex = 1
       oib.context.stack.unshift(firstModel)
-      oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
-      oib.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
-      oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
-      oib.renderer.removeSymbol = jest.fn()
-      oib.renderer.drawSymbol = jest.fn()
-      oib.renderer.drawCircle = jest.fn()
-      oib.renderer.clearElements = jest.fn()
-      oib.renderer.clearBoudingBox = jest.fn()
-      oib.renderer.drawBoundingBox = jest.fn()
-      oib.selectionManager.removeSelectedGroup = jest.fn()
       await oib.undo()
       expect(oib.recognizer.eraseStrokes).toBeCalledTimes(1)
       expect(oib.recognizer.eraseStrokes).toBeCalledWith([stroke1.id])
@@ -595,34 +560,27 @@ describe("OIBehaviors.ts", () =>
     test("should return next model", async () =>
     {
       const oib = new OIBehaviors(DefaultBehaviorsOptions)
-      oib.selectionManager.removeSelectedGroup = jest.fn()
+      oib.selector.removeSelectedGroup = jest.fn()
+      oib.debugSVG.apply = jest.fn()
+      oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
+      oib.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
+      oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
+      oib.renderer.removeSymbol = jest.fn()
+      oib.renderer.drawSymbol = jest.fn()
+      oib.renderer.clearElements = jest.fn()
       const stroke1 = buildOIStroke()
       const firstModel = new OIModel(1, 1)
       firstModel.addSymbol(stroke1)
       oib.context.canUndo = true
       oib.context.stackIndex = 1
       oib.context.stack.unshift(firstModel)
-      oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
-      oib.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
-      oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
-      oib.renderer.removeSymbol = jest.fn()
-      oib.renderer.drawSymbol = jest.fn()
-      oib.renderer.drawCircle = jest.fn()
-      oib.renderer.clearElements = jest.fn()
-      oib.renderer.clearBoudingBox = jest.fn()
-      oib.renderer.drawBoundingBox = jest.fn()
-      oib.selectionManager.removeSelectedGroup = jest.fn()
       const modelReceive = await oib.undo()
       expect(modelReceive).toEqual(firstModel)
     })
     test("should throw error if canUndo = false", async () =>
     {
-      try {
-        const oib = new OIBehaviors(DefaultBehaviorsOptions)
-        await oib.undo()
-      } catch (error) {
-        expect(error).toEqual(new Error("undo not allowed"))
-      }
+      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      expect(oib.undo()).rejects.toThrowError("undo not allowed")
     })
   })
 
@@ -631,22 +589,19 @@ describe("OIBehaviors.ts", () =>
     test("should call recognizer.addStrokes & renderer.drawSymbol", async () =>
     {
       const oib = new OIBehaviors(DefaultBehaviorsOptions)
-      oib.selectionManager.removeSelectedGroup = jest.fn()
-      const stroke1 = buildOIStroke()
-      const secondModel = oib.model.clone()
-      secondModel.addSymbol(stroke1)
-      oib.context.canRedo = true
-      oib.context.stack.push(secondModel)
+      oib.selector.removeSelectedGroup = jest.fn()
+      oib.debugSVG.apply = jest.fn()
       oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
       oib.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
       oib.renderer.removeSymbol = jest.fn()
       oib.renderer.drawSymbol = jest.fn()
-      oib.renderer.drawCircle = jest.fn()
       oib.renderer.clearElements = jest.fn()
-      oib.renderer.clearBoudingBox = jest.fn()
-      oib.renderer.drawBoundingBox = jest.fn()
-      oib.selectionManager.removeSelectedGroup = jest.fn()
+      const stroke1 = buildOIStroke()
+      const secondModel = oib.model.clone()
+      secondModel.addSymbol(stroke1)
+      oib.context.canRedo = true
+      oib.context.stack.push(secondModel)
       await oib.redo()
       expect(oib.recognizer.addStrokes).toBeCalledTimes(1)
       expect(oib.recognizer.addStrokes).toBeCalledWith([stroke1], false)
@@ -656,22 +611,19 @@ describe("OIBehaviors.ts", () =>
     test("should call recognizer.eraseStrokes & renderer.removeSymbol", async () =>
     {
       const oib = new OIBehaviors(DefaultBehaviorsOptions)
-      oib.selectionManager.removeSelectedGroup = jest.fn()
-      const stroke1 = buildOIStroke()
-      oib.model.addSymbol(stroke1)
-      const secondModel = new OIModel(1, 1)
-      oib.context.canRedo = true
-      oib.context.stack.push(secondModel)
+      oib.selector.removeSelectedGroup = jest.fn()
+      oib.debugSVG.apply = jest.fn()
       oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
       oib.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
       oib.renderer.removeSymbol = jest.fn()
       oib.renderer.drawSymbol = jest.fn()
-      oib.renderer.drawCircle = jest.fn()
       oib.renderer.clearElements = jest.fn()
-      oib.renderer.clearBoudingBox = jest.fn()
-      oib.renderer.drawBoundingBox = jest.fn()
-      oib.selectionManager.removeSelectedGroup = jest.fn()
+      const stroke1 = buildOIStroke()
+      oib.model.addSymbol(stroke1)
+      const secondModel = new OIModel(1, 1)
+      oib.context.canRedo = true
+      oib.context.stack.push(secondModel)
       await oib.redo()
       expect(oib.recognizer.eraseStrokes).toBeCalledTimes(1)
       expect(oib.recognizer.eraseStrokes).toBeCalledWith([stroke1.id])
@@ -681,33 +633,25 @@ describe("OIBehaviors.ts", () =>
     test("should return next model", async () =>
     {
       const oib = new OIBehaviors(DefaultBehaviorsOptions)
-      oib.selectionManager.removeSelectedGroup = jest.fn()
-      const stroke1 = buildOIStroke()
-      const secondModel = new OIModel(1, 1)
-      secondModel.addSymbol(stroke1)
-      oib.context.canRedo = true
-      oib.context.stack.push(secondModel)
+      oib.selector.removeSelectedGroup = jest.fn()
+      oib.debugSVG.apply = jest.fn()
       oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
       oib.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
       oib.renderer.removeSymbol = jest.fn()
       oib.renderer.drawSymbol = jest.fn()
-      oib.renderer.drawCircle = jest.fn()
-      oib.renderer.clearElements = jest.fn()
-      oib.renderer.clearBoudingBox = jest.fn()
-      oib.renderer.drawBoundingBox = jest.fn()
-      oib.selectionManager.removeSelectedGroup = jest.fn()
+      const stroke1 = buildOIStroke()
+      const secondModel = new OIModel(1, 1)
+      secondModel.addSymbol(stroke1)
+      oib.context.canRedo = true
+      oib.context.stack.push(secondModel)
       const modelReceive = await oib.redo()
       expect(modelReceive).toEqual(secondModel)
     })
     test("should throw error if canRedo = false", async () =>
     {
-      try {
-        const oib = new OIBehaviors(DefaultBehaviorsOptions)
-        await oib.redo()
-      } catch (error) {
-        expect(error).toEqual(new Error("redo not allowed"))
-      }
+      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      expect(oib.redo()).rejects.toThrowError("redo not allowed")
     })
   })
 
@@ -733,11 +677,13 @@ describe("OIBehaviors.ts", () =>
       const oib = new OIBehaviors(DefaultBehaviorsOptions)
       oib.grabber.attach = jest.fn()
       oib.renderer.init = jest.fn()
+      oib.internalEvent.emitError = jest.fn()
       oib.recognizer.send = jest.fn()
       oib.recognizer.init = jest.fn(() => Promise.resolve())
       oib.recognizer.export = jest.fn(() => Promise.reject("poney"))
       await oib.init(wrapperHTML)
-      await expect(oib.export()).rejects.toEqual("poney")
+      await oib.export()
+      expect(oib.internalEvent.emitError).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -771,22 +717,24 @@ describe("OIBehaviors.ts", () =>
     test("should call renderer.clear", async () =>
     {
       const oib = new OIBehaviors(DefaultBehaviorsOptions)
-      const stroke = buildOIStroke()
-      oib.model.addSymbol(stroke)
+      oib.debugSVG.apply = jest.fn()
       oib.renderer.clear = jest.fn()
       oib.recognizer.eraseStrokes = jest.fn()
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
+      const stroke = buildOIStroke()
+      oib.model.addSymbol(stroke)
       oib.clear()
       await expect(oib.renderer.clear).toBeCalledTimes(1)
     })
     test("should call recognizer.eraseStrokes", async () =>
     {
       const oib = new OIBehaviors(DefaultBehaviorsOptions)
-      const stroke = buildOIStroke()
-      oib.model.addSymbol(stroke)
+      oib.debugSVG.apply = jest.fn()
       oib.renderer.clear = jest.fn()
       oib.recognizer.eraseStrokes = jest.fn()
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
+      const stroke = buildOIStroke()
+      oib.model.addSymbol(stroke)
       oib.clear()
       await expect(oib.recognizer.eraseStrokes).toBeCalledTimes(1)
       await expect(oib.recognizer.eraseStrokes).toBeCalledWith([stroke.id])
@@ -794,11 +742,13 @@ describe("OIBehaviors.ts", () =>
     test("should clear model", async () =>
     {
       const oib = new OIBehaviors(DefaultBehaviorsOptions)
-      const stroke = buildOIStroke()
-      oib.model.addSymbol(stroke)
+      oib.debugSVG.apply = jest.fn()
       oib.renderer.clear = jest.fn()
       oib.recognizer.eraseStrokes = jest.fn()
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
+      const stroke = buildOIStroke()
+      oib.model.addSymbol(stroke)
+      oib.clear()
       const newModel = await oib.clear()
       await expect(newModel.symbols).toHaveLength(0)
       await expect(oib.model.symbols).toHaveLength(0)
@@ -806,6 +756,7 @@ describe("OIBehaviors.ts", () =>
     test("should do nothing if strokes empty", async () =>
     {
       const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      oib.debugSVG.apply = jest.fn()
       oib.renderer.clear = jest.fn()
       oib.recognizer.eraseStrokes = jest.fn()
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())

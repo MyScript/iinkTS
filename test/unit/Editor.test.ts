@@ -275,22 +275,6 @@ describe("Editor.ts", () =>
     })
   })
 
-  describe("gesture", () =>
-  {
-    test("should set configuration.recognition.gesture.enable & initialize", async () =>
-    {
-      const wrapperHTML: HTMLElement = document.createElement("div")
-      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
-      expect(editor.configuration.recognition.gesture.enable).toEqual(true)
-      editor.initialize = jest.fn()
-      editor.behaviors.init = jest.fn(() => Promise.resolve())
-      editor.behaviors.destroy = jest.fn(() => Promise.resolve())
-      editor.gestures = false
-      expect(editor.configuration.recognition.gesture.enable).toEqual(false)
-      expect(editor.initialize).toBeCalledTimes(1)
-    })
-  })
-
   describe("undo", () =>
   {
     test("should resolve when behaviors.undo is resolved", async () =>

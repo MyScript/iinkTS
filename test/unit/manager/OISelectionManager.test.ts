@@ -1,10 +1,12 @@
+import { buildOIStroke } from "../helpers"
 import
 {
   OIBehaviors,
   TBehaviorOptions,
   DefaultConfiguration,
   OISelectionManager,
-  TBoundingBox
+  TBoundingBox,
+  SvgElementRole,
 } from "../../../src/iink"
 
 
@@ -47,34 +49,47 @@ describe("OISelectionManager.ts", () =>
     expect(manager.renderer.clearElements).toBeCalledTimes(1)
   })
 
-  // test("should get the selected group", () =>
-  // {
-  //   const removalFilterId = "removalFilterId"
-  //   const renderer = new OISVGStrokeUtil(selectionFilterId, removalFilterId)
+  describe("selected group", () =>
+  {
+    const wrapperHTML: HTMLElement = document.createElement("div")
+    const behaviors = new OIBehaviors(behaviorsOptions)
+    const manager = new OISelectionManager(behaviors)
+    const stroke = buildOIStroke()
 
-  //   const stroke = buildOIStroke()
-  //   const strokeEl = renderer.getSVGElement(stroke)
-  //   //@ts-ignore
-  //   window.SVGElement.prototype.getBBox = () => stroke.boundingBox
+    behaviors.recognizer.init = jest.fn(() => Promise.resolve())
+    behaviors.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
+    behaviors.renderer.getElementBounds = jest.fn(() => stroke.boundingBox)
 
-  //   const group = selectionUtils.wrapElements([strokeEl]) as SVGGElement
-  //   expect(group).not.toBeNull()
-  //   expect(group.getAttribute("role")).toEqual(SvgElementRole.Selected)
-  //   const translateRect = group?.querySelector(`[role=${ SvgElementRole.Translate }]`)
-  //   expect(translateRect?.getAttribute("x")).toEqual((stroke.boundingBox.x - SELECTION_MARGIN).toString())
-  //   expect(translateRect?.getAttribute("y")).toEqual((stroke.boundingBox.y - SELECTION_MARGIN).toString())
-  //   expect(translateRect?.getAttribute("width")).toEqual((stroke.boundingBox.width + 2 * SELECTION_MARGIN).toString())
-  //   expect(translateRect?.getAttribute("height")).toEqual((stroke.boundingBox.height + 2 * SELECTION_MARGIN).toString())
+    beforeAll(async () =>
+    {
+      await behaviors.init(wrapperHTML)
+      behaviors.model.addSymbol(stroke)
+      behaviors.renderer.drawSymbol(stroke)
+    })
 
-  //   const rotateCircles = group.querySelectorAll(`circle[role=${ SvgElementRole.Rotate }]`)
-  //   expect(rotateCircles).toHaveLength(2)
+    test("should draw selected group", () =>
+    {
+      manager.drawSelectedGroup([stroke])
+      const group = behaviors.renderer.layer.querySelector("[role=\"selected\"]") as SVGGElement
+      expect(group).not.toBeNull()
+      const translateRect = group?.querySelector(`[role=${ SvgElementRole.Translate }]`)
+      expect(translateRect?.getAttribute("x")).toEqual((stroke.boundingBox.x).toString())
+      expect(translateRect?.getAttribute("y")).toEqual((stroke.boundingBox.y).toString())
+      expect(translateRect?.getAttribute("width")).toEqual((stroke.boundingBox.width).toString())
+      expect(translateRect?.getAttribute("height")).toEqual((stroke.boundingBox.height).toString())
 
-  //   const cornerResizeElement = group.querySelectorAll(`circle[role=${ SvgElementRole.Resize }]`)
-  //   expect(cornerResizeElement).toHaveLength(4)
-  //   const edgeResizeElement = group.querySelectorAll(`line[role=${ SvgElementRole.Resize }]`)
-  //   expect(edgeResizeElement).toHaveLength(4)
+      const rotateCircles = group.querySelectorAll(`circle[role=${ SvgElementRole.Rotate }]`)
+      expect(rotateCircles).toHaveLength(2)
 
-  //   const strokePath = group.querySelectorAll(`[id=${ stroke.id }]`)
-  //   expect(strokePath).toHaveLength(1)
-  // })
+      const cornerResizeElement = group.querySelectorAll(`circle[role=${ SvgElementRole.Resize }]`)
+      expect(cornerResizeElement).toHaveLength(4)
+      const edgeResizeElement = group.querySelectorAll(`line[role=${ SvgElementRole.Resize }]`)
+      expect(edgeResizeElement).toHaveLength(4)
+
+      const strokePath = group.querySelectorAll(`[id=${ stroke.id }]`)
+      expect(strokePath).toHaveLength(1)
+    })
+
+  })
+
 })

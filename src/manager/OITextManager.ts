@@ -58,7 +58,7 @@ export class OITextManager
     textGroupEl.setAttribute("visibility", "hidden")
     this.renderer.appendElement(textGroupEl)
 
-    const box = new Box(this.renderer.getSymbolElementBounds(textGroupEl) as TBoundingBox)
+    const box = new Box(this.renderer.getElementBounds(textGroupEl) as TBoundingBox)
     textSymbol.boundingBox = box
     const textEl = textGroupEl.querySelector("text")
     if (textEl) {
@@ -76,6 +76,38 @@ export class OITextManager
     return textSymbol
   }
 
+  alignTextToRow(textSymbols: OIText[]): void
+  {
+    let lastX = textSymbols[0].point.x
+    textSymbols.forEach((s, i) =>
+    {
+      const textSymbol = s as OIText
+      const fontSize = computeAverage(textSymbol.chars.map(c => c.fontSize))
+      const whiteSpaceWidth = i === 0 ? 0 : this.getSpaceWidth(fontSize)
+      textSymbol.point.y = Math.round(textSymbol.point.y / this.rowHeight) * this.rowHeight
+      textSymbol.point.x = lastX + whiteSpaceWidth
+      textSymbol.boundingBox.x = lastX + whiteSpaceWidth
+
+      lastX = textSymbol.boundingBox.xMax
+
+      const textGroupEl = this.renderer.drawSymbol(textSymbol) as SVGGElement
+      const box = new Box(this.renderer.getElementBounds(textGroupEl))
+      const textEl = textGroupEl.querySelector("text")
+      textSymbol.boundingBox = box
+      if (textEl) {
+        for (let i = 0; i < textEl.getNumberOfChars(); i++) {
+          const char = textSymbol.chars.at(i)
+          if (char) {
+            const ext = textEl.getExtentOfChar(i)
+            char.boundingBox = new Box(ext)
+            char.fontSize = fontSize
+          }
+        }
+      }
+      this.model.updateSymbol(s)
+    })
+  }
+
   adjustText(): void
   {
     const rows = this.model.getSymbolsByRowOrdered()
@@ -87,35 +119,7 @@ export class OITextManager
         return s.type !== SymbolType.Text || (s.type === SymbolType.Text && (s as OIText).rotation)
       })
       if (isTextRow) {
-        let lastX = (r.symbols[0] as OIText).point.x
-        r.symbols.forEach((s, i) =>
-        {
-          const textSymbol = s as OIText
-          const fontSize = computeAverage(textSymbol.chars.map(c => c.fontSize))
-          const whiteSpaceWidth = i === 0 ? 0 : this.getSpaceWidth(fontSize)
-          textSymbol.point.y = Math.round(textSymbol.point.y / this.rowHeight) * this.rowHeight
-          textSymbol.point.x = lastX + whiteSpaceWidth
-          textSymbol.boundingBox.x = lastX + whiteSpaceWidth
-
-          lastX = textSymbol.boundingBox.xMax
-
-          const textGroupEl = this.renderer.drawSymbol(textSymbol) as SVGGElement
-          const box = new Box(this.renderer.getSymbolElementBounds(textGroupEl))
-          const textEl = textGroupEl.querySelector("text")
-          textSymbol.boundingBox = box
-          if (textEl) {
-            for (let i = 0; i < textEl.getNumberOfChars(); i++) {
-              const char = textSymbol.chars.at(i)
-              if (char) {
-                const ext = textEl.getExtentOfChar(i)
-                char.boundingBox = new Box(ext)
-                char.fontSize = fontSize
-              }
-            }
-          }
-
-          this.model.updateSymbol(s)
-        })
+        this.alignTextToRow(r.symbols as OIText[])
       }
       else {
         r.symbols

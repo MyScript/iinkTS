@@ -4,7 +4,7 @@ import
   OIBehaviors,
   OIDecoratorUnderline,
   OIEdgeLine,
-  OIRotateManager,
+  OIRotationManager,
   OIShapeCircle,
   OIShapePolygon,
   OIShapeRectangle,
@@ -15,7 +15,7 @@ import
   rotatePoint,
 } from "../../../src/iink"
 
-describe("OIRotateManager.ts", () =>
+describe("OIRotationManager.ts", () =>
 {
   const DefaultBehaviorsOptions: TBehaviorOptions = {
     configuration: JSON.parse(JSON.stringify(DefaultConfiguration))
@@ -27,14 +27,14 @@ describe("OIRotateManager.ts", () =>
   test("should create", () =>
   {
     const behaviors = new OIBehaviors(DefaultBehaviorsOptions)
-    const manager = new OIRotateManager(behaviors)
+    const manager = new OIRotationManager(behaviors)
     expect(manager).toBeDefined()
   })
 
   describe("should applyToSymbol", () =>
   {
     const behaviors = new OIBehaviors(DefaultBehaviorsOptions)
-    const manager = new OIRotateManager(behaviors)
+    const manager = new OIRotationManager(behaviors)
     manager.textManager.updateTextBoundingBox = jest.fn()
     manager.renderer.setAttribute = jest.fn()
 
@@ -128,12 +128,12 @@ describe("OIRotateManager.ts", () =>
     behaviors.recognizer.replaceStrokes = jest.fn(() => Promise.resolve())
     behaviors.renderer.setAttribute = jest.fn()
     behaviors.renderer.drawSymbol = jest.fn()
-    behaviors.selectionManager.resetSelectedGroup = jest.fn()
+    behaviors.selector.resetSelectedGroup = jest.fn()
     behaviors.setPenStyle = jest.fn(() => Promise.resolve())
     behaviors.setTheme = jest.fn(() => Promise.resolve())
     behaviors.setPenStyleClasses = jest.fn(() => Promise.resolve())
 
-    const manager = new OIRotateManager(behaviors)
+    const manager = new OIRotationManager(behaviors)
     manager.applyToSymbol = jest.fn()
 
     const stroke = new OIStroke({}, 1)
@@ -188,7 +188,7 @@ describe("OIRotateManager.ts", () =>
 
       test(`should start with angle: "${ data.angle }° `, () =>
       {
-        manager.start(rotateElement)
+        manager.start(rotateElement, rotateOrigin)
 
         expect(manager.wrapper).toEqual(group)
         expect(manager.center).toEqual(rotateCenter)
@@ -208,8 +208,8 @@ describe("OIRotateManager.ts", () =>
         await manager.end(data.rotateToPoint)
 
         expect(manager.applyToSymbol).toHaveBeenCalledTimes(1)
-        expect(behaviors.selectionManager.resetSelectedGroup).toHaveBeenCalledTimes(1)
-        expect(behaviors.selectionManager.resetSelectedGroup).toHaveBeenCalledWith([stroke])
+        expect(behaviors.selector.resetSelectedGroup).toHaveBeenCalledTimes(1)
+        expect(behaviors.selector.resetSelectedGroup).toHaveBeenCalledWith([stroke])
         expect(behaviors.renderer.drawSymbol).toHaveBeenCalledTimes(1)
         expect(behaviors.renderer.drawSymbol).toHaveBeenCalledWith(stroke)
         expect(behaviors.recognizer.replaceStrokes).toHaveBeenCalledTimes(1)

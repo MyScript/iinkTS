@@ -9,7 +9,8 @@ export enum SymbolType
   Shape = "shape",
   Decorator = "decorator",
   Edge = "edge",
-  Text = "text"
+  Text = "text",
+  Eraser = "eraser",
 }
 
 /**

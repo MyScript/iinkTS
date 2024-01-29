@@ -28,7 +28,7 @@ import { OITextManager } from "./OITextManager"
 /**
  * @group Manager
  */
-export class OIRotateManager
+export class OIRotationManager
 {
   #logger = LoggerManager.getLogger(LoggerClass.TRANSFORMER)
   behaviors: OIBehaviors
@@ -62,9 +62,9 @@ export class OIRotateManager
     return this.behaviors.textManager
   }
 
-  get selectionManager(): OISelectionManager
+  get selector(): OISelectionManager
   {
-    return this.behaviors.selectionManager
+    return this.behaviors.selector
   }
 
   get recognizer(): OIRecognizer
@@ -166,7 +166,7 @@ export class OIRotateManager
     this.renderer.setAttribute(id, "transform", `rotate(${ degree })`)
   }
 
-  start(target: Element): void
+  start(target: Element, origin: TPoint): void
   {
     this.#logger.info("start", { target })
     this.wrapper = (target.closest(`[role=${ SvgElementRole.Selected }]`) as unknown) as SVGGElement
@@ -176,10 +176,7 @@ export class OIRotateManager
       x: boundingBox.xMin + boundingBox.width / 2,
       y: boundingBox.yMiddle
     }
-    this.origin = {
-      x: Number(target.getAttribute("cx")),
-      y: Number(target.getAttribute("cy"))
-    }
+    this.origin = origin
     this.setTransformOrigin(this.wrapper.id, this.center.x, this.center.y)
   }
 
@@ -213,7 +210,7 @@ export class OIRotateManager
         strokesRotated.push(s as OIStroke)
       }
     })
-    this.selectionManager.resetSelectedGroup(this.model.symbolsSelected)
+    this.selector.resetSelectedGroup(this.model.symbolsSelected)
     this.undoRedoManager.addModelToStack(this.model)
     const promise = this.recognizer.replaceStrokes(strokesRotated.map(s => s.id), strokesRotated)
     this.wrapper = undefined

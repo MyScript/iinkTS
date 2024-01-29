@@ -15,29 +15,29 @@ export class OIDecoratorUnderline extends OIDecorator implements TOISymbol
     super(DecoratorKind.Underline, style, symbols)
   }
 
-  get vertices(): TPoint[]
-  {
-    const symBox = Box.createFromBoxes(this.parents.map(sym => sym.boundingBox))
-    return [
-      {
-        x: symBox.xMin,
-        y: symBox.yMax + SELECTION_MARGIN / 2
-      },
-      {
-        x: symBox.xMax,
-        y: symBox.yMax + SELECTION_MARGIN / 2
-      }
-    ]
-  }
-
   get boundingBox(): Box
   {
     const symBox = Box.createFromBoxes(this.parents.map(sym => sym.boundingBox))
     const x = symBox.xMin - SELECTION_MARGIN / 2
     const y = symBox.yMax
     const width = symBox.width + SELECTION_MARGIN
-    const height = 2 * SELECTION_MARGIN
+    const height = SELECTION_MARGIN
     return new Box({ x, y, width, height })
+  }
+
+  get vertices(): TPoint[]
+  {
+    const symBox = this.boundingBox
+    return [
+      {
+        x: symBox.xMin + SELECTION_MARGIN / 2,
+        y: symBox.yMin + SELECTION_MARGIN / 2
+      },
+      {
+        x: symBox.xMax - SELECTION_MARGIN / 2,
+        y: symBox.yMin + SELECTION_MARGIN / 2
+      }
+    ]
   }
 
   clone(): OIDecoratorUnderline

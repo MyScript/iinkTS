@@ -1,16 +1,20 @@
 import { LoggerClass, SvgElementRole } from "../../Constants"
 import { TRenderingConfiguration } from "../../configuration"
 import { LoggerManager } from "../../logger"
-import { OIStroke, SymbolType, TOIEdge, TOISymbol, TPoint, TOIShape, TBoundingBox, OIText, TOIDecorator, Box } from "../../primitive"
-import { createUUID, getPointsNearest } from "../../utils"
+import { OIStroke, SymbolType, TOIEdge, TOISymbol, TPoint, TOIShape, TBoundingBox, OIText, TOIDecorator, Box, OIEraser } from "../../primitive"
+import { getPointsNearest } from "../../utils"
 import { OISVGDecoratorUtil } from "./OISVGDecoratorUtil"
 import { OISVGEdgeUtil } from "./OISVGEdgeUtil"
+import { OISVGEraserUtil } from "./OISVGEraserUtil"
 import { OISVGShapeUtil } from "./OISVGShapeUtil"
 import { OISVGStrokeUtil } from "./OISVGStrokeUtil"
 import { OISVGTextUtil } from "./OISVGTextUtil"
 import { SVGBuilder } from "./SVGBuilder"
 
-const NO_SELECTION = "pointer-events: none; -webkit-touch-callout: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;"
+/**
+ * @group Renderer
+ */
+export const NO_SELECTION = "pointer-events: none; -webkit-touch-callout: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;"
 
 /**
  * @group Renderer
@@ -30,6 +34,7 @@ export class OISVGRenderer
   layer!: SVGElement
 
   strokeUtil: OISVGStrokeUtil
+  eraserUtil: OISVGEraserUtil
   shapeUtil: OISVGShapeUtil
   edgeUtil: OISVGEdgeUtil
   textUtil: OISVGTextUtil
@@ -43,6 +48,7 @@ export class OISVGRenderer
     this.#logger.info("constructor", { configuration })
     this.configuration = configuration
     this.strokeUtil = new OISVGStrokeUtil(this.selectionFilterId, this.removalFilterId)
+    this.eraserUtil = new OISVGEraserUtil()
     this.shapeUtil = new OISVGShapeUtil(this.selectionFilterId, this.removalFilterId)
     this.edgeUtil = new OISVGEdgeUtil(this.selectionFilterId, this.removalFilterId, this.arrowHeadStart, this.arrowHeadEnd)
     this.textUtil = new OISVGTextUtil(this.selectionFilterId, this.removalFilterId)
@@ -241,6 +247,8 @@ export class OISVGRenderer
     switch (symbol.type) {
       case SymbolType.Stroke:
         return this.strokeUtil.getSVGElement(symbol as OIStroke)
+      case SymbolType.Eraser:
+        return this.eraserUtil.getSVGElement(symbol as OIEraser)
       case SymbolType.Shape:
         return this.shapeUtil.getSVGElement(symbol as TOIShape)
       case SymbolType.Edge:
@@ -255,7 +263,7 @@ export class OISVGRenderer
     }
   }
 
-  getSymbolElementBounds(el: SVGElement): TBoundingBox
+  getElementBounds(el: SVGElement): TBoundingBox
   {
     if (el.tagName === "g") {
       const boxes: TBoundingBox[] = []
@@ -266,7 +274,7 @@ export class OISVGRenderer
       el.childNodes.forEach(child =>
       {
         const bbox = new Box((child as SVGGeometryElement).getBBox({ stroke: true, markers: true, clipped: true, fill: true }))
-        const svgPoints = bbox.getCorners().map(c =>
+        const svgPoints = bbox.corners.map(c =>
         {
           let point = new DOMPoint(c.x, c.y)
           if (m) {
@@ -295,36 +303,36 @@ export class OISVGRenderer
       el.id = id
       el.setAttribute("visibility", "hidden")
       this.layer.prepend(el)
-      const bbox = this.getSymbolElementBounds(el)
+      const bbox = this.getElementBounds(el)
       return bbox
     }
     return
   }
 
-  addTooltipOnSymbolElement(el: SVGElement, symbol: TOISymbol): SVGElement
-  {
-    el.onpointerdown = (e) =>
-    {
-      if (e.button === 2) {
-        e.preventDefault()
-        e.stopPropagation()
-        this.tooltip.style.left = `${ symbol.boundingBox.xMin }px`
-        this.tooltip.style.top = `${ symbol.boundingBox.yMax }px`
-        this.tooltip.textContent = `
-  id: ${ symbol.id }
-  type: ${ symbol.type }
-  boundingBox: {
-    xMin: ${ symbol.boundingBox.xMin },
-    yMin: ${ symbol.boundingBox.yMin },
-    xMax: ${ symbol.boundingBox.xMax },
-    yMax: ${ symbol.boundingBox.yMax }
-  }
-`
-        this.tooltip.style.display = "block"
-      }
-    }
-    return el
-  }
+//   addTooltipOnSymbolElement(el: SVGElement, symbol: TOISymbol): SVGElement
+//   {
+//     el.onpointerdown = (e) =>
+//     {
+//       if (e.button === 2) {
+//         e.preventDefault()
+//         e.stopPropagation()
+//         this.tooltip.style.left = `${ symbol.boundingBox.xMin }px`
+//         this.tooltip.style.top = `${ symbol.boundingBox.yMax }px`
+//         this.tooltip.textContent = `
+//   id: ${ symbol.id }
+//   type: ${ symbol.type }
+//   boundingBox: {
+//     xMin: ${ symbol.boundingBox.xMin },
+//     yMin: ${ symbol.boundingBox.yMin },
+//     xMax: ${ symbol.boundingBox.xMax },
+//     yMax: ${ symbol.boundingBox.yMax }
+//   }
+// `
+//         this.tooltip.style.display = "block"
+//       }
+//     }
+//     return el
+//   }
 
   drawSymbol(symbol: TOISymbol): SVGGraphicsElement | undefined
   {
@@ -333,8 +341,6 @@ export class OISVGRenderer
     const svgEl = this.getSymbolElement(symbol)
 
     if (svgEl) {
-      this.addTooltipOnSymbolElement(svgEl, symbol)
-
       if (oldNode) {
         oldNode.replaceWith(svgEl)
       }
@@ -370,246 +376,18 @@ export class OISVGRenderer
     this.layer.appendChild(line)
   }
 
-  drawConnectionBetweenBox(id: string, box1: TBoundingBox, box2: TBoundingBox, color: string, role = SvgElementRole.ConnectionLine): void
+  drawConnectionBetweenBox(id: string, box1: TBoundingBox, box2: TBoundingBox, attrs?: { [key: string]: string }): void
   {
-    const points1: TPoint[] = [
-      { x: box1.x, y: box1.y },
-      { x: box1.x + box1.width, y: box1.y },
-      { x: box1.x + box1.width, y: box1.y + box1.height },
-      { x: box1.x, y: box1.y + box1.height },
-    ]
-    const points2: TPoint[] = [
-      { x: box2.x, y: box2.y },
-      { x: box2.x + box2.width, y: box2.y },
-      { x: box2.x + box2.width, y: box2.y + box2.height },
-      { x: box2.x, y: box2.y + box2.height },
-    ]
+    const points1: TPoint[] = new Box(box1).corners
+    const points2: TPoint[] = new Box(box2).corners
     const { p1, p2 } = getPointsNearest(points1, points2)
-    const attrs = {
+    const attrsLine = {
       id,
-      role,
       fill: "transparent",
-      stroke: color,
-      style: NO_SELECTION
+      style: NO_SELECTION,
+      ...attrs
     }
-    this.drawLine(p1, p2, attrs)
-  }
-
-  clearConnectionLine(role: string): void
-  {
-    this.layer.querySelectorAll(`[role=${ role }]`)
-      .forEach(e => e.remove())
-  }
-
-  drawBoundingBox(symbols: TOISymbol[]): void
-  {
-    const symbolAttrs = {
-      role: SvgElementRole.BoudingBox,
-      style: "pointer-events: none",
-      fill: "transparent",
-      stroke: "#1A9FFF",
-      "stroke-width": "1",
-      "stroke-dasharray": "8",
-      "vector-effect": "non-scaling-stroke",
-    }
-    const charAttrs = {
-      role: SvgElementRole.BoudingBox,
-      style: "pointer-events: none",
-      fill: "transparent",
-      stroke: "#e01b24",
-      "stroke-width": "1",
-      "stroke-dasharray": "8",
-      "vector-effect": "non-scaling-stroke",
-    }
-    symbols.forEach(s =>
-    {
-      const symEl = this.getRenderedElementFromSymbol(s.id) as SVGGraphicsElement
-      if (s.type === SymbolType.Text) {
-        const text = s as OIText
-        let transform: string = ""
-        if (text.rotation) {
-          transform = `rotate(${ text.rotation.degree }, ${ text.rotation.center.x }, ${ text.rotation.center.y })`
-        }
-        text.chars.forEach(c =>
-        {
-          const ca = {
-            ...charAttrs,
-            char: c.label,
-            transform
-          }
-          symEl.insertAdjacentElement("beforebegin", SVGBuilder.createRect(c.boundingBox, ca))
-        })
-        const sa = {
-          ...symbolAttrs,
-          symbol: s.id,
-          transform
-        }
-        symEl.insertAdjacentElement("beforebegin", SVGBuilder.createRect(s.boundingBox, sa))
-      }
-      else {
-        const sa = {
-          ...symbolAttrs,
-          symbol: s.id,
-        }
-        symEl.insertAdjacentElement("beforebegin", SVGBuilder.createRect(s.boundingBox, sa))
-      }
-    })
-  }
-
-  clearBoudingBox(): void
-  {
-    this.layer.querySelectorAll(`[role=${ SvgElementRole.BoudingBox }]`)
-      .forEach(e => e.remove())
-    this.layer.querySelectorAll(`[role=${ SvgElementRole.BoudingBox }]`)
-      .forEach(e => e.remove())
-  }
-
-  drawRecognitionBox(box: TBoundingBox, words?: string[]): void
-  {
-    const COLOR = "green"
-    const TEXT_HEIGHT = 20
-    const recognitionGroup = SVGBuilder.createGroup({ role: SvgElementRole.RecognitionBox })
-
-    const rect = SVGBuilder.createRect(box, { fill: "transparent", stroke: COLOR })
-    recognitionGroup.appendChild(rect)
-
-    const wordsGroup = SVGBuilder.createGroup({ id: `words-group-${ createUUID() }` })
-    const wordX = box.x + box.width
-    let wordY = box.y + TEXT_HEIGHT / 2
-    words?.forEach(w =>
-    {
-      wordsGroup.appendChild(SVGBuilder.createText({ x: wordX, y: wordY }, w, { stroke: COLOR, style: NO_SELECTION }))
-      wordY += TEXT_HEIGHT
-    })
-    recognitionGroup.appendChild(wordsGroup)
-    this.layer.appendChild(recognitionGroup)
-
-    const wordsGroupBox = wordsGroup.getBBox()
-    const rectBox = {
-      width: wordsGroupBox.width + 10,
-      height: wordsGroupBox.height + 10,
-      x: wordsGroupBox.x - 5,
-      y: wordsGroupBox.y - 5,
-    }
-    const rectTranslate = SVGBuilder.createRect(rectBox, { fill: "white", style: "cursor:move", stroke: COLOR })
-    wordsGroup.prepend(rectTranslate)
-
-    const translateEl = (e: PointerEvent) =>
-    {
-      e.preventDefault()
-      e.stopPropagation()
-      const originX = Number(this.getAttribute(wordsGroup.id, "originX"))
-      const originY = Number(this.getAttribute(wordsGroup.id, "originY"))
-      const tx = e.clientX - originX
-      const ty = e.clientY - originY
-      this.setAttribute(wordsGroup.id, "transform", `translate(${ tx },${ ty })`)
-      const newRectBox = {
-        width: rectBox.width,
-        height: rectBox.height,
-        x: rectBox.x + tx,
-        y: rectBox.y + ty,
-      }
-      this.removeSymbol(`connection-${ wordsGroup.id }`)
-      this.drawConnectionBetweenBox(`connection-${ wordsGroup.id }`, box, newRectBox, COLOR, SvgElementRole.RecognitionBox)
-    }
-
-    rectTranslate.addEventListener("pointerdown", e =>
-    {
-      e.preventDefault()
-      e.stopPropagation()
-      if (!this.getAttribute(wordsGroup.id, "originX")) {
-        this.setAttribute(wordsGroup.id, "originX", e.clientX.toString())
-        this.setAttribute(wordsGroup.id, "originY", e.clientY.toString())
-      }
-      this.layer.addEventListener("pointermove", translateEl)
-    })
-    this.layer.addEventListener("pointerup", () => this.layer.removeEventListener("pointermove", translateEl))
-    this.layer.addEventListener("pointerleave", () => this.layer.removeEventListener("pointermove", translateEl))
-    this.layer.addEventListener("pointercancel", () => this.layer.removeEventListener("pointermove", translateEl))
-
-  }
-
-  clearRecognitionBox(): void
-  {
-    this.clearConnectionLine(SvgElementRole.RecognitionBox)
-    this.layer.querySelectorAll(`[role=${ SvgElementRole.RecognitionBox }]`)
-      .forEach(e => e.remove())
-  }
-
-  drawRecognitionBoxItem(box: TBoundingBox, label?: string, chars?: string[]): void
-  {
-    const COLOR = "blue"
-    const CHAR_SIZE = 14
-
-    const recognitionItemGroup = SVGBuilder.createGroup({ role: SvgElementRole.RecognitionBoxItem })
-    const rect = SVGBuilder.createRect(box, { fill: "transparent", stroke: COLOR })
-    recognitionItemGroup.appendChild(rect)
-
-    const charX = box.x
-    let charY = box.y - CHAR_SIZE
-
-    const charsGroup = SVGBuilder.createGroup({ id: `chars-group-${ createUUID() }` })
-    if (label) {
-      charsGroup.appendChild(SVGBuilder.createText({ x: charX, y: charY }, `label: ${ label }`, { fill: COLOR, "font-size": CHAR_SIZE.toString(), style: NO_SELECTION }))
-    }
-    if (chars?.length) {
-      charY += CHAR_SIZE
-      charsGroup.appendChild(SVGBuilder.createText({ x: charX, y: charY }, `[${ chars.join(", ") }]`, { fill: COLOR, "font-size": CHAR_SIZE.toString(), style: NO_SELECTION }))
-    }
-
-    recognitionItemGroup.appendChild(charsGroup)
-    this.layer.appendChild(recognitionItemGroup)
-
-    const charsGroupBox = charsGroup.getBBox()
-    const rectBox = {
-      width: charsGroupBox.width + 10,
-      height: charsGroupBox.height + 10,
-      x: charsGroupBox.x - 5,
-      y: charsGroupBox.y - 5,
-    }
-    const rectTranslate = SVGBuilder.createRect(rectBox, { fill: "white", style: "cursor:move", stroke: COLOR })
-    charsGroup.prepend(rectTranslate)
-
-    const translateEl = (e: PointerEvent) =>
-    {
-      e.preventDefault()
-      e.stopPropagation()
-      const originX = Number(this.getAttribute(charsGroup.id, "originX"))
-      const originY = Number(this.getAttribute(charsGroup.id, "originY"))
-      const tx = e.clientX - originX
-      const ty = e.clientY - originY
-      this.setAttribute(charsGroup.id, "transform", `translate(${ tx },${ ty })`)
-      const newRectBox = {
-        width: rectBox.width,
-        height: rectBox.height,
-        x: rectBox.x + tx,
-        y: rectBox.y + ty,
-      }
-      this.removeSymbol(`connection-${ charsGroup.id }`)
-      this.drawConnectionBetweenBox(`connection-${ charsGroup.id }`, box, newRectBox, COLOR, SvgElementRole.RecognitionBoxItem)
-    }
-
-    rectTranslate.addEventListener("pointerdown", e =>
-    {
-      e.preventDefault()
-      e.stopPropagation()
-      if (!this.getAttribute(charsGroup.id, "originX")) {
-        this.setAttribute(charsGroup.id, "originX", e.clientX.toString())
-        this.setAttribute(charsGroup.id, "originY", e.clientY.toString())
-      }
-      this.layer.addEventListener("pointermove", translateEl)
-    })
-    this.layer.addEventListener("pointerup", () => this.layer.removeEventListener("pointermove", translateEl))
-    this.layer.addEventListener("pointerleave", () => this.layer.removeEventListener("pointermove", translateEl))
-    this.layer.addEventListener("pointercancel", () => this.layer.removeEventListener("pointermove", translateEl))
-
-  }
-
-  clearRecognitionBoxItem(): void
-  {
-    this.clearConnectionLine(SvgElementRole.RecognitionBoxItem)
-    this.layer.querySelectorAll(`[role=${ SvgElementRole.RecognitionBoxItem }]`)
-      .forEach(e => e.remove())
+    this.drawLine(p1, p2, attrsLine)
   }
 
   resize(height: number, width: number): void
@@ -624,15 +402,15 @@ export class OISVGRenderer
     }
   }
 
-  getRenderedElementFromSymbol(id: string): SVGGraphicsElement | null
+  getElementById(id: string): SVGGraphicsElement | null
   {
     return this.layer.querySelector(`#${ id }`) as SVGGraphicsElement | null
   }
 
-  getRenderedElements({ type, attrs }: { type?: string, attrs?: { [key: string]: string } }): NodeListOf<Element>
+  getElements({ tagName, attrs }: { tagName?: string, attrs?: { [key: string]: string } }): NodeListOf<Element>
   {
-    this.#logger.info("getRenderedElements", { type, attrs })
-    let query = type || "*"
+    this.#logger.info("getElements", { tagName, attrs })
+    let query = tagName || "*"
     if (attrs) {
       Object.keys(attrs).forEach(k =>
       {
@@ -642,10 +420,10 @@ export class OISVGRenderer
     return this.layer.querySelectorAll(query)
   }
 
-  clearElements({ type, attrs }: { type?: string, attrs?: { [key: string]: string } }): void
+  clearElements({ tagName, attrs }: { tagName?: string, attrs?: { [key: string]: string } }): void
   {
-    this.#logger.info("clearElements", { type, attrs })
-    this.getRenderedElements({ type, attrs })
+    this.#logger.info("clearElements", { tagName, attrs })
+    this.getElements({ tagName, attrs })
       .forEach(e => e.remove())
   }
 

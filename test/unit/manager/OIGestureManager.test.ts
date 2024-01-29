@@ -197,7 +197,7 @@ describe("OIGestureManager.ts", () =>
 
     gestMan.behaviors.internalEvent.emitSelected = jest.fn()
     gestMan.renderer.drawSymbol = jest.fn()
-    gestMan.selectionManager.drawSelectedGroup = jest.fn()
+    gestMan.selector.drawSelectedGroup = jest.fn()
     gestMan.undoRedoManager.addModelToStack = jest.fn()
 
     test("should do nothing if gesture as no strokeIds", async () =>
@@ -212,7 +212,7 @@ describe("OIGestureManager.ts", () =>
       await gestMan.applySurroundGesture(gesture)
       expect(gestMan.behaviors.internalEvent.emitSelected).toHaveBeenCalledTimes(0)
       expect(gestMan.renderer.drawSymbol).toHaveBeenCalledTimes(0)
-      expect(gestMan.selectionManager.drawSelectedGroup).toHaveBeenCalledTimes(0)
+      expect(gestMan.selector.drawSelectedGroup).toHaveBeenCalledTimes(0)
       expect(gestMan.undoRedoManager.addModelToStack).toHaveBeenCalledTimes(0)
     })
 
@@ -231,8 +231,8 @@ describe("OIGestureManager.ts", () =>
         strokeAfterIds: []
       }
       await gestMan.applySurroundGesture(gesture)
-      expect(gestMan.selectionManager.drawSelectedGroup).toHaveBeenCalledTimes(1)
-      expect(gestMan.selectionManager.drawSelectedGroup).toHaveBeenCalledWith([stroke])
+      expect(gestMan.selector.drawSelectedGroup).toHaveBeenCalledTimes(1)
+      expect(gestMan.selector.drawSelectedGroup).toHaveBeenCalledWith([stroke])
       expect(gestMan.behaviors.internalEvent.emitSelected).toHaveBeenCalledTimes(1)
       expect(gestMan.behaviors.internalEvent.emitSelected).toHaveBeenCalledWith([stroke])
       expect(gestMan.undoRedoManager.addModelToStack).toHaveBeenCalledTimes(0)
@@ -504,11 +504,7 @@ describe("OIGestureManager.ts", () =>
       }
       await gestMan.applyUnderlineGesture(gesture)
       expect(gestMan.renderer.drawSymbol).toHaveBeenCalledTimes(1)
-      expect(gestMan.renderer.drawSymbol).toHaveBeenCalledWith(expect.objectContaining({
-        type: SymbolType.Decorator,
-        kind: DecoratorKind.Underline,
-        parents: [stroke]
-      }))
+      expect(gestMan.renderer.drawSymbol).toHaveBeenCalledWith(stroke)
     })
   })
 

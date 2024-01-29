@@ -44,8 +44,8 @@ const recognitionItemBoxToggle = document.getElementById("toggle-recognition-ite
 const verticesVisibilityToggle = document.getElementById("toggle-vertices-visibility");
 const boundingBoxVisibilityToggle = document.getElementById("toggle-bounding-box-visibility");
 
-const alignmentGuidesToggle = document.getElementById("alignment-guides-toggle");
-const alignmentElementsToggle = document.getElementById("alignment-elements-toggle");
+const snapToGridToggle = document.getElementById("snap-to-guides-toggle");
+const snapToElementToggle = document.getElementById("snap-to-elements-toggle");
 
 const selectionToggle = document.getElementById("toggle-selection-pan");
 const htmlPanToggle = document.getElementById("toggle-export-html-pan");
@@ -195,7 +195,7 @@ async function loadEditor() {
         guides: {
           enable: true,
           gap: 100,
-          type: "grid"
+          type: "point"
         }
       },
     }
@@ -279,14 +279,14 @@ async function loadEditor() {
 
   penBtn.addEventListener("pointerup", () => {
     editor.intention = iink.Intention.Write;
-    editor.writeTool = iink.WriteTool.Pencil;
+    editor.behaviors.writer.tool = iink.WriteTool.Pencil;
     resetMenuBtn();
     penBtn.classList.add("active");
   });
 
   drawRectangleBtn.addEventListener("pointerup", () => {
     editor.intention = iink.Intention.Write;
-    editor.writeTool = iink.WriteTool.Rectangle;
+    editor.behaviors.writer.tool = iink.WriteTool.Rectangle;
     resetMenuBtn();
     menuShapeBtn.classList.add("active");
     drawRectangleBtn.classList.add("active");
@@ -295,7 +295,7 @@ async function loadEditor() {
 
   drawCircleBtn.addEventListener("pointerup", () => {
     editor.intention = iink.Intention.Write;
-    editor.writeTool = iink.WriteTool.Circle;
+    editor.behaviors.writer.tool = iink.WriteTool.Circle;
     resetMenuBtn();
     menuShapeBtn.classList.add("active");
     drawCircleBtn.classList.add("active");
@@ -304,7 +304,7 @@ async function loadEditor() {
 
   drawEllipseBtn.addEventListener("pointerup", () => {
     editor.intention = iink.Intention.Write;
-    editor.writeTool = iink.WriteTool.Ellipse;
+    editor.behaviors.writer.tool = iink.WriteTool.Ellipse;
     resetMenuBtn();
     menuShapeBtn.classList.add("active");
     drawEllipseBtn.classList.add("active");
@@ -313,7 +313,7 @@ async function loadEditor() {
 
   drawTriangleBtn.addEventListener("pointerup", () => {
     editor.intention = iink.Intention.Write;
-    editor.writeTool = iink.WriteTool.Triangle;
+    editor.behaviors.writer.tool = iink.WriteTool.Triangle;
     resetMenuBtn();
     menuShapeBtn.classList.add("active");
     drawTriangleBtn.classList.add("active");
@@ -322,7 +322,7 @@ async function loadEditor() {
 
   drawLineBtn.addEventListener("pointerup", () => {
     editor.intention = iink.Intention.Write;
-    editor.writeTool = iink.WriteTool.Line;
+    editor.behaviors.writer.tool = iink.WriteTool.Line;
     resetMenuBtn();
     menuEdgeBtn.classList.add("active");
     drawLineBtn.classList.add("active");
@@ -331,7 +331,7 @@ async function loadEditor() {
 
   drawArrowBtn.addEventListener("pointerup", () => {
     editor.intention = iink.Intention.Write;
-    editor.writeTool = iink.WriteTool.Arrow;
+    editor.behaviors.writer.tool = iink.WriteTool.Arrow;
     resetMenuBtn();
     menuEdgeBtn.classList.add("active");
     drawArrowBtn.classList.add("active");
@@ -340,7 +340,7 @@ async function loadEditor() {
 
   drawDoubleArrowBtn.addEventListener("pointerup", () => {
     editor.intention = iink.Intention.Write;
-    editor.writeTool = iink.WriteTool.DoubleArrow;
+    editor.behaviors.writer.tool = iink.WriteTool.DoubleArrow;
     resetMenuBtn();
     menuEdgeBtn.classList.add("active");
     drawDoubleArrowBtn.classList.add("active");
@@ -387,64 +387,56 @@ async function loadEditor() {
   applyGestureCheckBox.addEventListener("change", (e) => {
     surrondActionSelect.disabled = !applyGestureCheckBox.checked;
     strikeThroughActionSelect.disabled = !applyGestureCheckBox.checked;
-    editor.gestures = !applyGestureCheckBox.checked;
+    editor.behaviors.writer.detectGesture = applyGestureCheckBox.checked;
   });
 
   surrondActionSelect.addEventListener("change", (evt) => {
-    editor.surroundAction = evt.target.value;
+    editor.behaviors.gesture.surroundAction = evt.target.value;
   });
 
   strikeThroughActionSelect.addEventListener("change", (evt) => {
-    editor.strikeThroughAction = evt.target.value;
+    editor.behaviors.gesture.strikeThroughAction = evt.target.value;
   });
 
   guidesToggle.addEventListener("change", (event) => {
     guidesTypeSelect.disabled = !event.target.checked;
     guidesGapInput.disabled = !event.target.checked;
     options.configuration.rendering.guides.enable = event.target.checked;
-    editor.renderingConfiguration = options.configuration.rendering;
+    editor.behaviors.renderingConfiguration = options.configuration.rendering;
   });
 
   guidesTypeSelect.addEventListener("change", (event) => {
     options.configuration.rendering.guides.type = event.target.value;
-    editor.renderingConfiguration = options.configuration.rendering;
+    editor.behaviors.renderingConfiguration = options.configuration.rendering;
   });
 
   guidesGapInput.addEventListener("change", (event) => {
     options.configuration.rendering.guides.gap = Number(event.target.value);
-    editor.renderingConfiguration = options.configuration.rendering;
+    editor.behaviors.renderingConfiguration = options.configuration.rendering;
   });
 
-  alignmentGuidesToggle.addEventListener("change", (event) => {
-    editor.alignGuides = event.target.checked;
+  snapToGridToggle.addEventListener("change", (event) => {
+    editor.behaviors.snap.snapToGrid = event.target.checked;
   });
 
-  alignmentElementsToggle.addEventListener("change", (event) => {
-    editor.alignElements = event.target.checked;
+  snapToElementToggle.addEventListener("change", (event) => {
+    editor.behaviors.snap.snapToElement = event.target.checked;
   });
 
   recognitionBoxToggle.addEventListener("change", (evt) => {
-    if (evt.target.checked) {
-      editor.drawRecognitionBox();
-    } else {
-      editor.clearRecognitionBox();
-    }
+    editor.behaviors.debugSVG.recognitionBoxVisibility = evt.target.checked;
   });
 
   recognitionItemBoxToggle.addEventListener("change", (evt) => {
-    if (evt.target.checked) {
-      editor.drawRecognitionBoxItem();
-    } else {
-      editor.clearRecognitionBoxItem();
-    }
+    editor.behaviors.debugSVG.recognitionItemBoxVisibility = evt.target.checked;
   });
 
   verticesVisibilityToggle.addEventListener("change", (evt) => {
-    editor.behaviors.verticesVisibility = evt.target.checked;
+    editor.behaviors.debugSVG.verticesVisibility = evt.target.checked;
   });
 
   boundingBoxVisibilityToggle.addEventListener("change", (evt) => {
-    editor.behaviors.boundingBoxVisibility = evt.target.checked;
+    editor.behaviors.debugSVG.boundingBoxVisibility = evt.target.checked;
   });
 
   window.addEventListener("resize", () => {

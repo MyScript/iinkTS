@@ -12,9 +12,10 @@ import
   OIDecoratorUnderline,
   OIDecoratorStrikethrough,
   OIShapeCircle,
-  OIShapePolygon,
-  ShapeKind,
   OIEdgeLine,
+  OIText,
+  TOISymbolChar,
+  TPoint,
 } from "../../src/iink"
 
 export const delay = (delayInms: number) =>
@@ -82,17 +83,17 @@ export function buildOIStrikethrough(symbols: TOISymbolDecorable[], style: TStyl
   return new OIDecoratorStrikethrough(style, symbols)
 }
 
-export function buildOICircle({ center = { x: 0, y: 0 }, radius = 5, style = DefaultStyle } = {}): OIShapeCircle
+export function buildOICircle({ center = { x: 0, y: 0 }, radius = 5, style = DefaultStyle }: { center?: TPoint, radius?: number, style?: TStyle } = {}): OIShapeCircle
 {
   return new OIShapeCircle(style, center, radius)
 }
 
-export function buildOIPolygon({ points = [{x: 0, y: 0}, {x: 5, y: 5}, {x: 10, y: 0}], shapekind = ShapeKind.Triangle, style = DefaultStyle } = {}): OIShapePolygon
-{
-  return new OIShapePolygon(style, points, shapekind)
-}
-
-export function buildOILine({ start = { x: 0, y: 0}, end = {x: 5, y: 5}, style = DefaultStyle } = {}): OIEdgeLine
+export function buildOILine({ start = { x: 0, y: 0 }, end = { x: 5, y: 5 }, style = DefaultStyle }: { start?: TPoint, end?: TPoint, style?: TStyle } = {}): OIEdgeLine
 {
   return new OIEdgeLine(style, start, end)
+}
+
+export function buildOIText({ chars = [], point = { x: 0, y: 0 }, boundingBox = { x: 0, y: 10, width: 20, height: 30 }, style = DefaultStyle }: { chars?: TOISymbolChar[], point?: TPoint, boundingBox?: TBoundingBox, style?: TStyle } = {}): OIText
+{
+  return new OIText(style, chars, point, boundingBox)
 }

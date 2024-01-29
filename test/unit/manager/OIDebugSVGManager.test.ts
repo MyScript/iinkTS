@@ -1,0 +1,227 @@
+import { helloJIIX, lineJIIX, rectangleJIIX } from "../_dataset/jiix.dataset"
+import { buildOIStroke, buildOIText, delay } from "../helpers"
+import
+{
+  DefaultConfiguration,
+  OIBehaviors,
+  OIDebugSVGManager,
+  TBehaviorOptions,
+  TOISymbolChar,
+} from "../../../src/iink"
+
+describe("OIDebugSVGManager.ts", () =>
+{
+  const behaviorsOptions: TBehaviorOptions = {
+    configuration: JSON.parse(JSON.stringify(DefaultConfiguration))
+  }
+  behaviorsOptions.configuration.offscreen = true
+  test("should create", () =>
+  {
+    const behaviors = new OIBehaviors(behaviorsOptions)
+    const manager = new OIDebugSVGManager(behaviors)
+    expect(manager).toBeDefined()
+    expect(manager.verticesVisibility).toEqual(false)
+    expect(manager.boundingBoxVisibility).toEqual(false)
+    expect(manager.recognitionBoxVisibility).toEqual(false)
+    expect(manager.recognitionItemBoxVisibility).toEqual(false)
+  })
+
+  describe("bounding box", () =>
+  {
+    const wrapperHTML: HTMLElement = document.createElement("div")
+    const behaviors = new OIBehaviors(behaviorsOptions)
+    behaviors.recognizer.init = jest.fn(() => Promise.resolve())
+
+    const manager = new OIDebugSVGManager(behaviors)
+
+    beforeAll(async () =>
+    {
+      await behaviors.init(wrapperHTML)
+    })
+
+    afterEach(() =>
+    {
+      behaviors.model.clear()
+      behaviors.renderer.clear()
+    })
+
+    test("should show/hide stroke bounding box", async () =>
+    {
+      const stroke = buildOIStroke()
+      manager.model.addSymbol(stroke)
+      manager.renderer.drawSymbol(stroke)
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"bounding-box\"]")).toHaveLength(0)
+      manager.boundingBoxVisibility = true
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"bounding-box\"]")).toHaveLength(1)
+      manager.boundingBoxVisibility = false
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"bounding-box\"]")).toHaveLength(0)
+    })
+
+    test("should show/hide text and char bounding box", async () =>
+    {
+      const chars: TOISymbolChar[] = [
+        {
+          boundingBox: { height: 10, width: 5, x: 0, y: 10 },
+          color: "black",
+          fontSize: 16,
+          fontWeight: 400,
+          id: "char-1",
+          label: "A"
+        },
+        {
+          boundingBox: { height: 10, width: 5, x: 5, y: 10 },
+          color: "black",
+          fontSize: 16,
+          fontWeight: 400,
+          id: "char-2",
+          label: "b"
+        }
+      ]
+      const stroke = buildOIText({ chars, boundingBox: { height: 10, width: 10, x: 0, y: 10 } })
+      manager.model.addSymbol(stroke)
+      manager.renderer.drawSymbol(stroke)
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"bounding-box\"]")).toHaveLength(0)
+      manager.boundingBoxVisibility = true
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"bounding-box\"]")).toHaveLength(3)
+      manager.boundingBoxVisibility = false
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"bounding-box\"]")).toHaveLength(0)
+    })
+  })
+
+  describe("vertices", () =>
+  {
+    const wrapperHTML: HTMLElement = document.createElement("div")
+    const behaviors = new OIBehaviors(behaviorsOptions)
+    behaviors.recognizer.init = jest.fn(() => Promise.resolve())
+
+    const manager = new OIDebugSVGManager(behaviors)
+
+    beforeAll(async () =>
+    {
+      await behaviors.init(wrapperHTML)
+    })
+
+    test("should show/hide stroke vertices", async () =>
+    {
+      const stroke = buildOIStroke()
+      manager.model.addSymbol(stroke)
+      manager.renderer.drawSymbol(stroke)
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"vertices\"]")).toHaveLength(0)
+      manager.verticesVisibility = true
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"vertices\"]")).toHaveLength(stroke.pointers.length)
+      manager.verticesVisibility = false
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"vertices\"]")).toHaveLength(0)
+    })
+
+  })
+
+  describe("recognition box", () =>
+  {
+    const wrapperHTML: HTMLElement = document.createElement("div")
+    const behaviors = new OIBehaviors(behaviorsOptions)
+    behaviors.recognizer.init = jest.fn(() => Promise.resolve())
+    Object.defineProperty(global.SVGElement.prototype, 'getBBox', {
+      writable: true,
+      value: jest.fn().mockReturnValue({
+        x: 0,
+        y: 0,
+        width: 10,
+        height: 10
+      }),
+    })
+    const manager = new OIDebugSVGManager(behaviors)
+
+    beforeAll(async () =>
+    {
+      await behaviors.init(wrapperHTML)
+    })
+
+    test("should show/hide stroke recognition box", async () =>
+    {
+      behaviors.model.exports = { "application/vnd.myscript.jiix": helloJIIX }
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-box\"]")).toHaveLength(0)
+      manager.recognitionBoxVisibility = true
+      await delay(100)
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-box\"]")).toHaveLength(helloJIIX.elements!.length)
+      manager.recognitionBoxVisibility = false
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-box\"]")).toHaveLength(0)
+    })
+
+    test("should show/hide node recognition box", async () =>
+    {
+      behaviors.model.exports = { "application/vnd.myscript.jiix": rectangleJIIX }
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-box\"]")).toHaveLength(0)
+      manager.recognitionBoxVisibility = true
+      await delay(100)
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-box\"]")).toHaveLength(rectangleJIIX.elements!.length)
+      manager.recognitionBoxVisibility = false
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-box\"]")).toHaveLength(0)
+    })
+
+    test("should show/hide edge recognition box", async () =>
+    {
+      behaviors.model.exports = { "application/vnd.myscript.jiix": lineJIIX }
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-box\"]")).toHaveLength(0)
+      manager.recognitionBoxVisibility = true
+      await delay(100)
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-box\"]")).toHaveLength(lineJIIX.elements!.length)
+      manager.recognitionBoxVisibility = false
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-box\"]")).toHaveLength(0)
+    })
+  })
+
+  describe("recognition item box", () =>
+  {
+    const wrapperHTML: HTMLElement = document.createElement("div")
+    const behaviors = new OIBehaviors(behaviorsOptions)
+    behaviors.recognizer.init = jest.fn(() => Promise.resolve())
+    Object.defineProperty(global.SVGElement.prototype, 'getBBox', {
+      writable: true,
+      value: jest.fn().mockReturnValue({
+        x: 0,
+        y: 0,
+        width: 10,
+        height: 10
+      }),
+    })
+    const manager = new OIDebugSVGManager(behaviors)
+
+    beforeAll(async () =>
+    {
+      await behaviors.init(wrapperHTML)
+    })
+
+    test("should show/hide stroke recognition box", async () =>
+    {
+      behaviors.model.exports = { "application/vnd.myscript.jiix": helloJIIX }
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-item-box\"]")).toHaveLength(0)
+      manager.recognitionItemBoxVisibility = true
+      await delay(100)
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-item-box\"]")).toHaveLength(helloJIIX.elements!.length)
+      manager.recognitionItemBoxVisibility = false
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-item-box\"]")).toHaveLength(0)
+    })
+
+    test("should show/hide node recognition box", async () =>
+    {
+      behaviors.model.exports = { "application/vnd.myscript.jiix": rectangleJIIX }
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-item-box\"]")).toHaveLength(0)
+      manager.recognitionItemBoxVisibility = true
+      await delay(100)
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-item-box\"]")).toHaveLength(rectangleJIIX.elements!.length)
+      manager.recognitionItemBoxVisibility = false
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-item-box\"]")).toHaveLength(0)
+    })
+
+    test("should show/hide edge recognition box", async () =>
+    {
+      behaviors.model.exports = { "application/vnd.myscript.jiix": lineJIIX }
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-item-box\"]")).toHaveLength(0)
+      manager.recognitionItemBoxVisibility = true
+      await delay(100)
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-item-box\"]")).toHaveLength(lineJIIX.elements!.length)
+      manager.recognitionItemBoxVisibility = false
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-item-box\"]")).toHaveLength(0)
+    })
+  })
+})

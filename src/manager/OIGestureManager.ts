@@ -1,4 +1,4 @@
-import { Intention, LoggerClass } from "../Constants"
+import { LoggerClass } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerManager } from "../logger"
 import { OIModel } from "../model"
@@ -66,9 +66,9 @@ export class OIGestureManager
     return this.behaviors.undoRedoManager
   }
 
-  get selectionManager(): OISelectionManager
+  get selector(): OISelectionManager
   {
-    return this.behaviors.selectionManager
+    return this.behaviors.selector
   }
 
   get currentStyle(): TStyle
@@ -90,12 +90,13 @@ export class OIGestureManager
     }
     switch (this.surroundAction) {
       case SurroundAction.Select: {
-        this.behaviors.internalEvent.emitIntention(Intention.Select)
+        // TODO wait editor intention menu
+        // this.behaviors.internalEvent.emitIntention(Intention.Select)
         gesture.strokeIds.forEach(id =>
         {
           this.model.selectSymbol(id)
         })
-        this.selectionManager.drawSelectedGroup(this.model.symbolsSelected)
+        this.selector.drawSelectedGroup(this.model.symbolsSelected)
         this.behaviors.internalEvent.emitSelected(this.model.symbolsSelected)
         break
       }
@@ -299,9 +300,9 @@ export class OIGestureManager
     {
       const underline = new OIDecoratorUnderline(this.currentStyle, [s])
       this.model.addSymbol(underline)
-      this.renderer.drawSymbol(underline)
       s.decorators.push(underline)
       this.model.updateSymbol(s)
+      this.renderer.drawSymbol(s)
     })
     this.undoRedoManager.addModelToStack(this.model)
   }
@@ -334,9 +335,7 @@ export class OIGestureManager
           this.model.removeSymbol(id)
             .forEach(idDelete => this.renderer.removeSymbol(idDelete))
         })
-        const strokeIdsToDelete = this.model.symbols.filter(s => s.type === SymbolType.Stroke && gesture.strokeIds.includes(s.id)).map(s => s.id)
-        this.undoRedoManager.addModelToStack(this.model)
-        await this.recognizer.eraseStrokes(strokeIdsToDelete)
+        await this.recognizer.eraseStrokes(gesture.strokeIds)
         this.model.updatePositionReceived()
         this.undoRedoManager.addModelToStack(this.model)
         break
@@ -435,7 +434,6 @@ export class OIGestureManager
         }
         return
       }
-      case "none":
       case "bottom-top": {
         // TODO IIC-989
         return
@@ -444,6 +442,7 @@ export class OIGestureManager
         // TODO IIC-989
         return
       }
+      case "none":
       default:
         return
     }

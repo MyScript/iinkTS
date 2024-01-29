@@ -205,7 +205,7 @@ describe("OISVGRenderer.ts", () =>
       expect(el).toBeDefined()
       expect(el.getAttribute("id")).toEqual(stroke.id)
       expect(el.getAttribute("type")).toEqual("stroke")
-      expect(el.getAttribute("stroke")).toEqual(stroke.style.color)
+      expect(el.getAttribute("fill")).toEqual(stroke.style.color)
       expect(el.getAttribute("stroke-width")).toEqual(stroke.style.width?.toString())
     })
     test("should replace stroke", () =>
@@ -276,7 +276,7 @@ describe("OISVGRenderer.ts", () =>
     const renderer = new OISVGRenderer(DefaultRenderingConfiguration)
     renderer.init(divElement)
 
-    test("should clearElements by type", () =>
+    test("should clearElements by tagName", () =>
     {
       expect(renderer.layer.querySelectorAll("path")).toHaveLength(0)
       const stroke1 = buildOIStroke()
@@ -284,7 +284,7 @@ describe("OISVGRenderer.ts", () =>
       const stroke2 = buildOIStroke()
       renderer.drawSymbol(stroke2)
       expect(renderer.layer.querySelectorAll("path")).toHaveLength(2)
-      renderer.clearElements({ type: "path" })
+      renderer.clearElements({ tagName: "path" })
       expect(renderer.layer.querySelectorAll("path")).toHaveLength(0)
     })
     test("should clearElements by attrs", () =>
@@ -299,15 +299,15 @@ describe("OISVGRenderer.ts", () =>
       expect(renderer.layer.querySelectorAll("path")).toHaveLength(1)
     })
 
-    test("should clearElements by type and attrs", () =>
+    test("should clearElements by tagName and attrs", () =>
     {
-      renderer.clearElements({ type: "path" })
+      renderer.clearElements({ tagName: "path" })
       const stroke1 = buildOIStroke()
       renderer.drawSymbol(stroke1)
       const stroke2 = buildOIStroke()
       renderer.drawSymbol(stroke2)
       expect(renderer.layer.querySelectorAll("g")).toHaveLength(6)
-      renderer.clearElements({ type: "g", attrs: { id: stroke2.id } })
+      renderer.clearElements({ tagName: "g", attrs: { id: stroke2.id } })
       expect(renderer.layer.querySelectorAll("g")).toHaveLength(5)
     })
   })
