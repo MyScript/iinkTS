@@ -6,6 +6,9 @@ import { OIModel } from "../model"
 import { Box, SymbolType, TBoundingBox, TOISymbol, TPoint } from "../primitive"
 import { OISVGRenderer, SVGBuilder } from "../renderer"
 import { StyleHelper } from "../style"
+import { OIResizeManager } from "./OIResizeManager"
+import { OIRotationManager } from "./OIRotationManager"
+import { OITranslateManager } from "./OITranslateManager"
 
 /**
  * @group Manager
@@ -40,6 +43,21 @@ export class OISelectionManager
     return this.behaviors.internalEvent
   }
 
+  get rotationManager(): OIRotationManager
+  {
+    return this.behaviors.rotationManager
+  }
+
+  get translateManager(): OITranslateManager
+  {
+    return this.behaviors.translateManager
+  }
+
+  get resizeManager(): OIResizeManager
+  {
+    return this.behaviors.resizeManager
+  }
+
   get selectionBox(): Box | undefined
   {
     if (this.startSelectionPoint && this.endSelectionPoint) {
@@ -65,6 +83,16 @@ export class OISelectionManager
     this.renderer.clearElements({ attrs: { id: this.#selectingId } })
   }
 
+  protected getPoint(ev: PointerEvent): TPoint
+  {
+    const { clientLeft, scrollLeft, clientTop, scrollTop } = this.renderer.parent
+    const rect: DOMRect = this.renderer.parent.getBoundingClientRect()
+    return {
+      x: ev.clientX - rect.left - clientLeft + scrollLeft,
+      y: ev.clientY - rect.top - clientTop + scrollTop,
+    }
+  }
+
   protected createTranslateRect(box: TBoundingBox): SVGRectElement
   {
     const attrs = {
@@ -79,7 +107,32 @@ export class OISelectionManager
       x: box.x,
       y: box.y
     }
-    return SVGBuilder.createRect(boxWithMarge, attrs)
+    const translateEl = SVGBuilder.createRect(boxWithMarge, attrs)
+    const handler = (ev: PointerEvent) => {
+      ev.preventDefault()
+      ev.stopPropagation()
+      this.translateManager.continue(this.getPoint(ev))
+    }
+    const endHandler = (ev: PointerEvent) => {
+      ev.preventDefault()
+      ev.stopPropagation()
+      this.translateManager.end(this.getPoint(ev))
+      this.renderer.layer.removeEventListener("pointermove", handler)
+      this.renderer.layer.removeEventListener("pointercancel", endHandler)
+      this.renderer.layer.removeEventListener("pointerleave", endHandler)
+      this.renderer.layer.removeEventListener("pointerup", endHandler)
+    }
+
+    translateEl.addEventListener("pointerdown", (ev) => {
+      ev.preventDefault()
+      ev.stopPropagation()
+      this.translateManager.start(ev.target as Element, this.getPoint(ev))
+      this.renderer.layer.addEventListener("pointermove", handler)
+      this.renderer.layer.addEventListener("pointercancel", endHandler)
+      this.renderer.layer.addEventListener("pointerleave", endHandler)
+      this.renderer.layer.addEventListener("pointerup", endHandler)
+    })
+    return translateEl
   }
 
   protected createRotateGroup(box: TBoundingBox): SVGGElement
@@ -108,6 +161,31 @@ export class OISelectionManager
       fill: "black",
     }
     group.appendChild(SVGBuilder.createCircle(center, radius / 2, attrs2))
+
+    const handler = (ev: PointerEvent) => {
+      ev.preventDefault()
+      ev.stopPropagation()
+      this.rotationManager.continue(this.getPoint(ev))
+    }
+    const endHandler = (ev: PointerEvent) => {
+      ev.preventDefault()
+      ev.stopPropagation()
+      this.rotationManager.end(this.getPoint(ev))
+      this.renderer.layer.removeEventListener("pointermove", handler)
+      this.renderer.layer.removeEventListener("pointercancel", endHandler)
+      this.renderer.layer.removeEventListener("pointerleave", endHandler)
+      this.renderer.layer.removeEventListener("pointerup", endHandler)
+    }
+
+    group.addEventListener("pointerdown", (ev) => {
+      ev.preventDefault()
+      ev.stopPropagation()
+      this.rotationManager.start(ev.target as Element, this.getPoint(ev))
+      this.renderer.layer.addEventListener("pointermove", handler)
+      this.renderer.layer.addEventListener("pointercancel", endHandler)
+      this.renderer.layer.addEventListener("pointerleave", endHandler)
+      this.renderer.layer.addEventListener("pointerup", endHandler)
+    })
     return group
   }
 
@@ -124,6 +202,33 @@ export class OISelectionManager
     const P_SE: TPoint = { x: box.x + box.width + SELECTION_MARGIN, y: box.y + box.height + SELECTION_MARGIN }
     const P_SW: TPoint = { x: box.x - SELECTION_MARGIN, y: box.y + box.height + SELECTION_MARGIN }
 
+    const bindEl = (el: SVGElement, transformOrigin: TPoint) => {
+      const handler = (ev: PointerEvent) => {
+        ev.preventDefault()
+        ev.stopPropagation()
+        this.resizeManager.continue(this.getPoint(ev))
+      }
+      const endHandler = (ev: PointerEvent) => {
+        ev.preventDefault()
+        ev.stopPropagation()
+        this.resizeManager.end(this.getPoint(ev))
+        this.renderer.layer.removeEventListener("pointermove", handler)
+        this.renderer.layer.removeEventListener("pointercancel", endHandler)
+        this.renderer.layer.removeEventListener("pointerleave", endHandler)
+        this.renderer.layer.removeEventListener("pointerup", endHandler)
+      }
+
+      el.addEventListener("pointerdown", (ev) => {
+        ev.preventDefault()
+        ev.stopPropagation()
+        this.resizeManager.start(ev.target as Element, transformOrigin)
+        this.renderer.layer.addEventListener("pointermove", handler)
+        this.renderer.layer.addEventListener("pointercancel", endHandler)
+        this.renderer.layer.addEventListener("pointerleave", endHandler)
+        this.renderer.layer.addEventListener("pointerup", endHandler)
+      })
+    }
+
     const sideResizeDefs = [
       { direction: ResizeDirection.North, p1: P_NW, p2: P_NE, transformOrigin: { x: box.x + box.width / 2, y: box.y + box.height } },
       { direction: ResizeDirection.East, p1: P_NE, p2: P_SE, transformOrigin: { x: box.x, y: box.y + box.height / 2 } },
@@ -138,7 +243,9 @@ export class OISelectionManager
         "transform-origin": JSON.stringify(def.transformOrigin),
         style: `cursor:${ def.direction };`
       }
-      group.appendChild(SVGBuilder.createLine(def.p1, def.p2, attrs))
+      const lineResize = SVGBuilder.createLine(def.p1, def.p2, attrs)
+      bindEl(lineResize, def.transformOrigin)
+      group.appendChild(lineResize)
     })
     const cornerResizeDefs = [
       { direction: ResizeDirection.NorthWest, p: P_NW, transformOrigin: { x: box.x + box.width, y: box.y + box.height } },
@@ -157,7 +264,9 @@ export class OISelectionManager
         fill: "white",
         style: `cursor:${ def.direction };`
       }
-      group.appendChild(SVGBuilder.createCircle(def.p, 5, attrs))
+      const cornerResize = SVGBuilder.createCircle(def.p, 5, attrs)
+      bindEl(cornerResize, def.transformOrigin)
+      group.appendChild(cornerResize)
     })
     return group
   }
@@ -187,7 +296,7 @@ export class OISelectionManager
 
     if (!elements.length) return
 
-    const elementsWithBounds = elements.map(element => ({ element, bounds: this.renderer.getSymbolElementBounds(element) }))
+    const elementsWithBounds = elements.map(element => ({ element, bounds: this.renderer.getElementBounds(element) }))
 
     const box = Box.createFromBoxes(elementsWithBounds.filter(e => e.bounds.width && e.bounds.height).map(e => e.bounds))
     const interact = {
@@ -212,8 +321,10 @@ export class OISelectionManager
     }
     elementsWithBounds.forEach(el =>
     {
-      surroundGroup.prepend(SVGBuilder.createRect(el.bounds, SURROUND_ATTRS))
-      surroundGroup.insertAdjacentElement("afterbegin", el.element)
+      if (el.element.getAttribute("type") !== SymbolType.Decorator) {
+        surroundGroup.prepend(SVGBuilder.createRect(el.bounds, SURROUND_ATTRS))
+        surroundGroup.insertAdjacentElement("afterbegin", el.element)
+      }
     })
     return surroundGroup
   }
@@ -238,7 +349,7 @@ export class OISelectionManager
   drawSelectedGroup(symbols: TOISymbol[]): void
   {
     if (!symbols.length) return
-    const symbolElments = symbols.map(s => this.renderer.getRenderedElementFromSymbol(s.id)) as SVGGeometryElement[]
+    const symbolElments = symbols.map(s => this.renderer.getElementById(s.id)) as SVGGeometryElement[]
     const group = this.wrapElements(symbolElments)
     if (group) {
       this.renderer.appendElement(group)
@@ -255,14 +366,14 @@ export class OISelectionManager
   removeSelectedGroup(): void
   {
     this.#logger.info("removeSelectedGroup")
-    this.renderer.getRenderedElements({ attrs: { role: SvgElementRole.Selected.toString() } })
+    this.renderer.getElements({ attrs: { role: SvgElementRole.Selected.toString() } })
       .forEach(g =>
       {
         this.unWrap(g as SVGGElement)
       })
   }
 
-  startSelectionByBox(point: TPoint): TOISymbol[]
+  start(point: TPoint): TOISymbol[]
   {
     this.startSelectionPoint = point
     this.endSelectionPoint = point
@@ -280,7 +391,7 @@ export class OISelectionManager
     return updatedSymbols
   }
 
-  updateSelectionByBox(point: TPoint): TOISymbol[]
+  continue(point: TPoint): TOISymbol[]
   {
     if (!this.startSelectionPoint) {
       throw new Error("You need to call startSelectionByBox before")
@@ -299,10 +410,10 @@ export class OISelectionManager
     return updatedSymbols
   }
 
-  endSelectionByBox(point: TPoint): TOISymbol[]
+  end(point: TPoint): TOISymbol[]
   {
     this.endSelectionPoint = point
-    const updatedSymbols = this.updateSelectionByBox(point)
+    const updatedSymbols = this.continue(point)
     this.startSelectionPoint = undefined
     this.endSelectionPoint = undefined
     this.clearSelectingRect()

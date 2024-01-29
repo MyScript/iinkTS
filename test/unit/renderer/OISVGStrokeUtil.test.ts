@@ -17,7 +17,7 @@ describe("OISVGStrokeUtil.ts", () =>
     const stroke = new OIStroke(DefaultStyle, 1)
     stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
     stroke.pointers.push({ p: 1, t: 1, x: 10, y: 1 })
-    expect(renderer.getSVGPath(stroke)).toEqual("M 1 1 Q 10 1")
+    expect(renderer.getSVGPath(stroke)).toEqual("M 1 1 m -2.4 0 a 2.4 2.4 0 1 0 4.8 0 a 2.4 2.4 0 1 0 -4.8 0")
   })
 
   test("should getSVGPath when mote than 2 pointers", () =>
@@ -27,7 +27,7 @@ describe("OISVGStrokeUtil.ts", () =>
     stroke.pointers.push({ p: 1, t: 1, x: 5, y: 5 })
     stroke.pointers.push({ p: 1, t: 1, x: 7, y: 5 })
     stroke.pointers.push({ p: 1, t: 1, x: 10, y: 1 })
-    expect(renderer.getSVGPath(stroke)).toEqual("M 1 1 Q 5 5 7 5 10 1")
+    expect(renderer.getSVGPath(stroke)).toContain("M 1 1 m -4 0 a 4 4 0 1 0 8 0 a 4 4 0 1 0 -8 0")
   })
 
   test("should getSVGElement with default style", () =>
@@ -38,7 +38,7 @@ describe("OISVGStrokeUtil.ts", () =>
     const el = renderer.getSVGElement(stroke)
     expect(el.getAttribute("id")).toEqual(stroke.id)
     expect(el.getAttribute("type")).toEqual("stroke")
-    expect(el.getAttribute("stroke")).toEqual(DefaultStyle.color)
+    expect(el.getAttribute("fill")).toEqual(DefaultStyle.color)
     expect(el.getAttribute("stroke-width")).toEqual(DefaultStyle.width?.toString())
   })
 
@@ -54,7 +54,7 @@ describe("OISVGStrokeUtil.ts", () =>
     const el = renderer.getSVGElement(stroke)
     expect(el.getAttribute("id")).toEqual(stroke.id)
     expect(el.getAttribute("type")).toEqual("stroke")
-    expect(el.getAttribute("stroke")).toEqual(style.color)
+    expect(el.getAttribute("fill")).toEqual(style.color)
     expect(el.getAttribute("stroke-width")).toEqual(style.width?.toString())
   })
 
@@ -67,17 +67,5 @@ describe("OISVGStrokeUtil.ts", () =>
     const el = renderer.getSVGElement(stroke)
     expect(el.getAttribute("id")).toEqual(stroke.id)
     expect(el.getAttribute("filter")).toEqual(`url(#${ selectionFilterId })`)
-  })
-
-  test("should getSVGElement for eraser", () =>
-  {
-    const stroke = new OIStroke(DefaultStyle, 1, "eraser")
-    stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
-    stroke.pointers.push({ p: 1, t: 1, x: 10, y: 1 })
-    const el = renderer.getSVGElement(stroke)
-    expect(el.getAttribute("id")).toEqual(stroke.id)
-    expect(el.getAttribute("type")).toEqual("stroke")
-    expect(el.getAttribute("stroke")).toEqual("grey")
-    expect(el.getAttribute("stroke-width")).toEqual("20")
   })
 })

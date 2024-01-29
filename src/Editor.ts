@@ -4,15 +4,14 @@ import { IBehaviors, OIBehaviors, RestBehaviors, TBehaviorOptions, WSBehaviors }
 import { SmartGuide } from "./smartguide"
 import { DeferredPromise, PartialDeep, mergeDeep } from "./utils"
 import { LoggerManager } from "./logger"
-import { ExportType, Intention, LoggerClass, WriteTool } from "./Constants"
-import { DefaultLoggerConfiguration, TConfiguration, TConverstionState, TLoggerConfiguration, TMarginConfiguration, TRenderingConfiguration } from "./configuration"
+import { ExportType, Intention, LoggerClass } from "./Constants"
+import { DefaultLoggerConfiguration, TConfiguration, TConverstionState, TLoggerConfiguration, TMarginConfiguration } from "./configuration"
 import { IModel, TExport, TJIIXExport } from "./model"
 import { TOISymbol, TStroke } from "./primitive"
 import { InternalEvent, PublicEvent } from "./event"
 import { TUndoRedoContext } from "./undo-redo"
 import { IGrabber } from "./grabber"
 import { TPenStyle, TTheme } from "./style"
-import { StrikeThroughAction, SurroundAction } from "./gesture"
 
 /**
  * @group Editor
@@ -118,55 +117,15 @@ export class Editor
     this.initialize()
   }
 
-  /**
-   * @remarks only usable in the case of offscreen
-   */
-  set renderingConfiguration(renderingConfiguration: TRenderingConfiguration)
-  {
-    if (this.configuration.offscreen) {
-      (this.behaviors as unknown as OIBehaviors).renderingConfiguration = renderingConfiguration
-    } else {
-      throw new Error("set renderingConfiguration is only for offscreen")
-    }
-  }
-
   get intention(): Intention
   {
     return this.behaviors.intention
   }
   set intention(i: Intention)
   {
+    this.logger.info("set intention", i)
     this.behaviors.intention = i
     this.#setCursorIntention()
-    this.logger.debug("set intention", this.wrapperHTML)
-  }
-
-  /**
-   * @remarks only usable in the case of offscreen
-   */
-  get writeTool(): WriteTool
-  {
-    if (this.configuration.offscreen) {
-      return (this.behaviors as unknown as OIBehaviors).writeTool
-    }
-    return WriteTool.Pencil
-  }
-  /**
-   * @remarks only usable in the case of offscreen
-   */
-  set writeTool(wt: WriteTool)
-  {
-    if (this.configuration.offscreen) {
-      (this.behaviors as unknown as OIBehaviors).writeTool = wt
-      if (wt !== WriteTool.Pencil) {
-        this.wrapperHTML.classList.add("shape")
-      }
-      else {
-        this.wrapperHTML.classList.remove("shape")
-      }
-    } else {
-      throw new Error("writeTool is only for offscreen configuration")
-    }
   }
 
   get events(): PublicEvent
@@ -224,73 +183,6 @@ export class Editor
     this.behaviors.setPenStyleClasses(styleClasses)
   }
 
-  get gestures(): boolean
-  {
-    if (this.configuration.offscreen) {
-      return (this.behaviors as unknown as OIBehaviors).processGestures
-    }
-    else {
-      return this.configuration.recognition.gesture.enable
-    }
-  }
-  set gestures(apply: boolean)
-  {
-    if (this.configuration.offscreen) {
-      (this.behaviors as unknown as OIBehaviors).processGestures = apply
-    }
-    else {
-      this.configuration.recognition.gesture.enable = apply
-      this.#instantiateBehaviors({ configuration: this.configuration })
-      this.initialize()
-    }
-  }
-
-  /**
-   * @remarks only usable in the case of offscreen
-   */
-  get surroundAction(): SurroundAction
-  {
-    if (this.configuration.offscreen) {
-      return (this.behaviors as unknown as OIBehaviors).surroundAction
-    }
-    throw new Error("surroundAction is only for offscreen configuration")
-    return SurroundAction.Surround
-  }
-  /**
-   * @remarks only usable in the case of offscreen
-   */
-  set surroundAction(action: SurroundAction)
-  {
-    if (this.configuration.offscreen) {
-      (this.behaviors as unknown as OIBehaviors).surroundAction = action
-    } else {
-      throw new Error("surroundAction is only for offscreen configuration")
-    }
-  }
-
-  /**
-   * @remarks only usable in the case of offscreen
-   */
-  get strikeThroughAction(): StrikeThroughAction
-  {
-    if (this.configuration.offscreen) {
-      return (this.behaviors as unknown as OIBehaviors).strikeThroughAction
-    }
-    throw new Error("strikeThroughAction is only for offscreen configuration")
-    return StrikeThroughAction.Draw
-  }
-  /**
-   * @remarks only usable in the case of offscreen
-   */
-  set strikeThroughAction(action: StrikeThroughAction)
-  {
-    if (this.configuration.offscreen) {
-      (this.behaviors as unknown as OIBehaviors).strikeThroughAction = action
-    } else {
-      throw new Error("strikeThroughAction is only for offscreen configuration")
-    }
-  }
-
   #setCursorIntention(): void
   {
     switch (this.behaviors.intention) {
@@ -312,7 +204,7 @@ export class Editor
     }
   }
 
-  updateEditorState(idle: boolean): void
+  #updateEditorState(idle: boolean): void
   {
     if (this.configuration.offscreen) {
       this.#stateHTML.style.display = "block"
@@ -377,7 +269,7 @@ export class Editor
       {
         this.logger.debug("initializeBehaviors", "finally")
         this.#loaderHTML.style.display = "none"
-        this.updateEditorState(true)
+        this.#updateEditorState(true)
         return this.#initializationDeferred.promise
       })
   }
@@ -481,7 +373,7 @@ export class Editor
 
   #onIdleChange = (idle: boolean) =>
   {
-    this.updateEditorState(idle)
+    this.#updateEditorState(idle)
     this.events.emitIdle(idle)
   }
 
@@ -502,59 +394,6 @@ export class Editor
     this.logger.info("onImportJIIX", { jiix })
     this.import(new Blob([JSON.stringify(jiix)], { type: ExportType.JIIX }), ExportType.JIIX)
   }
-
-  /**
-   * @remarks only usable in the case of offscreen
-   */
-  drawRecognitionBox(): Promise<void>
-  {
-    if (this.configuration.offscreen) {
-      return (this.behaviors as unknown as OIBehaviors).drawRecognitionBox()
-    }
-    else {
-      throw new Error("drawRecognitionBox is only for offscreen configuration")
-    }
-  }
-
-  /**
-   * @remarks only usable in the case of offscreen
-   */
-  clearRecognitionBox(): void
-  {
-    if (this.configuration.offscreen) {
-      return (this.behaviors as unknown as OIBehaviors).clearRecognitionBox()
-    }
-    else {
-      throw new Error("clearRecognitionBox is only for offscreen configuration")
-    }
-  }
-
-  /**
-   * @remarks only usable in the case of offscreen
-   */
-  drawRecognitionBoxItem(): Promise<void>
-  {
-    if (this.configuration.offscreen) {
-      return (this.behaviors as unknown as OIBehaviors).drawRecognitionBoxItem()
-    }
-    else {
-      throw new Error("drawRecognitionBoxItem is only for offscreen configuration")
-    }
-  }
-
-  /**
-   * @remarks only usable in the case of offscreen
-   */
-  clearRecognitionBoxItem(): void
-  {
-    if (this.configuration.offscreen) {
-      return (this.behaviors as unknown as OIBehaviors).clearRecognitionBoxItem()
-    }
-    else {
-      throw new Error("clearRecognitionBoxItem is only for offscreen configuration")
-    }
-  }
-
 
   async initialize(): Promise<void>
   {

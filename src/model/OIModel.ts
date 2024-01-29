@@ -1,27 +1,14 @@
-import { LoggerClass, WriteTool } from "../Constants"
+import { LoggerClass } from "../Constants"
 import { LoggerManager } from "../logger"
 import
 {
-  OIEdgeLine,
-  OIShapeCircle,
-  OIShapeParallelogram,
-  OIShapeRectangle,
-  OIShapeTriangle,
   OIStroke,
-  ShapeKind,
   SymbolType,
-  TOIEdge,
   TOISymbol,
   TPoint,
-  TPointer,
-  TOIShape,
-  EdgeDecoration,
-  EdgeKind,
-  OIShapeEllipse,
   TOIDecorator,
   TOISymbolDecorable,
 } from "../primitive"
-import { TStyle } from "../style"
 import { TExport } from "./Export"
 import { IModel, TRecognitionPositions } from "./IModel"
 
@@ -35,7 +22,6 @@ export class OIModel implements IModel
   modificationDate: number
   positions: TRecognitionPositions
   currentSymbol?: TOISymbol
-  currentSymbolOrigin?: TPoint
   symbols: TOISymbol[]
   exports?: TExport
   converts?: TExport
@@ -56,6 +42,8 @@ export class OIModel implements IModel
       lastSentPosition: 0,
       lastReceivedPosition: 0
     }
+    this.exports = undefined
+    this.converts = undefined
     this.idle = true
   }
 
@@ -101,115 +89,6 @@ export class OIModel implements IModel
     this.symbols.forEach(s => s.selected = false)
   }
 
-  createCurrentSymbol(tool: WriteTool, pointer: TPointer, style: TStyle, pointerId: number, pointerType: string): TOISymbol
-  {
-    this.#logger.info("initCurrentStroke", { tool, pointer, style, pointerId, pointerType })
-    this.currentSymbolOrigin = pointer
-    switch (tool) {
-      case WriteTool.Pencil:
-        this.currentSymbol = new OIStroke(style, pointerId, pointerType)
-        break
-      case WriteTool.Rectangle:
-        this.currentSymbol = OIShapeRectangle.createFromLine(style, pointer, pointer)
-        break
-      case WriteTool.Circle:
-        this.currentSymbol = OIShapeCircle.createFromLine(style, pointer, pointer)
-        break
-      case WriteTool.Ellipse:
-        this.currentSymbol = OIShapeEllipse.createFromLine(style, pointer, pointer)
-        break
-      case WriteTool.Triangle:
-        this.currentSymbol = OIShapeTriangle.createFromLine(style, pointer, pointer)
-        break
-      case WriteTool.Parallelogram:
-        this.currentSymbol = OIShapeParallelogram.createFromLine(style, pointer, pointer)
-        break
-      case WriteTool.Line:
-      case WriteTool.Arrow:
-      case WriteTool.DoubleArrow: {
-        let startDecoration, endDecoration
-        if (tool === WriteTool.Arrow) {
-          endDecoration = EdgeDecoration.Arrow
-        }
-        else if (tool === WriteTool.DoubleArrow) {
-          startDecoration = EdgeDecoration.Arrow
-          endDecoration = EdgeDecoration.Arrow
-        }
-        this.currentSymbol = new OIEdgeLine(style, pointer, pointer, startDecoration, endDecoration)
-        break
-      }
-      default:
-        throw new Error(`Can't create symbol, tool is unknow: "${ tool }"`)
-        break
-    }
-    return this.updateCurrentSymbol(pointer)
-  }
-
-  updateCurrentSymbolShape(pointer: TPointer): void
-  {
-    if (!this.currentSymbol) {
-      throw new Error("Can't update current symbol because currentSymbol is undefined")
-    }
-    const shape = this.currentSymbol as TOIShape
-    switch (shape.kind) {
-      case ShapeKind.Rectangle:
-        OIShapeRectangle.updateFromLine(shape as OIShapeRectangle, this.currentSymbolOrigin!, pointer)
-        break
-      case ShapeKind.Circle:
-        OIShapeCircle.updateFromLine(shape as OIShapeCircle, this.currentSymbolOrigin!, pointer)
-        break
-      case ShapeKind.Ellipse:
-        OIShapeEllipse.updateFromLine(shape as OIShapeEllipse, this.currentSymbolOrigin!, pointer)
-        break
-      case ShapeKind.Triangle:
-        OIShapeTriangle.updateFromLine(shape as OIShapeTriangle, this.currentSymbolOrigin!, pointer)
-        break
-      case ShapeKind.Parallelogram:
-        OIShapeParallelogram.updateFromLine(shape as OIShapeParallelogram, this.currentSymbolOrigin!, pointer)
-        break
-      default:
-        break
-    }
-  }
-
-  updateCurrentSymbolEdge(pointer: TPointer): void
-  {
-    if (!this.currentSymbol) {
-      throw new Error("Can't update current symbol because currentSymbol is undefined")
-    }
-    const edge = this.currentSymbol as TOIEdge
-    switch (edge.kind) {
-      case EdgeKind.Line:
-        (this.currentSymbol as OIEdgeLine).end = pointer
-        break
-      default:
-        break
-    }
-  }
-
-  updateCurrentSymbol(pointer: TPointer): TOISymbol
-  {
-    this.#logger.info("updateCurrentSymbol", { pointer })
-    if (!this.currentSymbol) {
-      throw new Error("Can't update current symbol because currentSymbol is undefined")
-    }
-
-    switch (this.currentSymbol.type) {
-      case SymbolType.Stroke:
-        (this.currentSymbol as OIStroke).addPointer(pointer)
-        break
-      case SymbolType.Shape:
-        this.updateCurrentSymbolShape(pointer)
-        break
-      case SymbolType.Edge:
-        this.updateCurrentSymbolEdge(pointer)
-        break
-    }
-    this.modificationDate = Date.now()
-    this.exports = undefined
-    return this.currentSymbol
-  }
-
   getSymbolRowIndex(symbol: TOISymbol): number
   {
     return Math.round(symbol.boundingBox.yMiddle / this.rowHeight)
@@ -245,15 +124,6 @@ export class OIModel implements IModel
   getLastSymbolInRow(rowIndex: number): TOISymbol | undefined
   {
     return this.getSymbolInRowOrdered(rowIndex).at(-1)
-  }
-
-  endCurrentSymbol(pointer: TPointer): TOISymbol
-  {
-    this.#logger.info("endCurrentStroke", { pointer })
-    const symbol = this.updateCurrentSymbol(pointer)
-    this.currentSymbol = undefined
-    this.currentSymbolOrigin = undefined
-    return symbol
   }
 
   addSymbol(symbol: TOISymbol): void
@@ -376,7 +246,6 @@ export class OIModel implements IModel
     this.#logger.info("clone")
     const clonedModel = new OIModel(this.width, this.height, this.rowHeight, this.creationTime)
     clonedModel.modificationDate = this.modificationDate
-    clonedModel.currentSymbol = this.currentSymbol ? this.currentSymbol.clone() : undefined
     clonedModel.symbols = this.symbols.map(s => s.clone())
     clonedModel.positions = structuredClone(this.positions)
     clonedModel.exports = structuredClone(this.exports)
@@ -389,10 +258,10 @@ export class OIModel implements IModel
   {
     this.#logger.info("clear")
     this.modificationDate = Date.now()
-    this.currentSymbol = undefined
     this.symbols = []
     this.positions.lastSentPosition = 0
     this.positions.lastReceivedPosition = 0
+    this.currentSymbol = undefined
     this.exports = undefined
     this.converts = undefined
     this.idle = true

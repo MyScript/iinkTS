@@ -55,9 +55,9 @@ export class OIResizeManager
     return this.behaviors.undoRedoManager
   }
 
-  get selectionManager(): OISelectionManager
+  get selector(): OISelectionManager
   {
-    return this.behaviors.selectionManager
+    return this.behaviors.selector
   }
 
   get textManager(): OITextManager
@@ -182,7 +182,7 @@ export class OIResizeManager
     this.renderer.setAttribute(id, "transform", `scale(${ sx },${ sy })`)
   }
 
-  start(target: Element): void
+  start(target: Element, origin: TPoint): void
   {
     this.#logger.info("start", { target })
     this.wrapper = (target.closest(`[role=${ SvgElementRole.Selected }]`) as unknown) as SVGGElement
@@ -190,8 +190,8 @@ export class OIResizeManager
 
     this.keepRatio = this.model.symbolsSelected.some(s => s.type === SymbolType.Text || (s.type === SymbolType.Shape && (s as TOIShape).kind === ShapeKind.Circle))
 
-    this.transformOrigin = JSON.parse(target.getAttribute("transform-origin") as string) as TPoint
-    this.boundingBox = Box.createFromBoxes(this.model.symbolsSelected.map(s => s.boundingBox))
+    this.transformOrigin = origin
+    this.boundingBox = Box.createFromPoints(this.model.symbolsSelected.flatMap(s => s.vertices))
 
     this.setTransformOrigin(this.wrapper!.id, this.transformOrigin.x, this.transformOrigin.y)
   }
@@ -255,7 +255,7 @@ export class OIResizeManager
       }
     })
     const promise = this.recognizer.replaceStrokes(strokesResized.map(s => s.id), strokesResized)
-    this.selectionManager.resetSelectedGroup(this.model.symbolsSelected)
+    this.selector.resetSelectedGroup(this.model.symbolsSelected)
     this.undoRedoManager.addModelToStack(this.model)
     this.wrapper = undefined
     await promise

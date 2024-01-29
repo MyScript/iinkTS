@@ -1,20 +1,6 @@
-import { buildOICircle, buildOIHighlight, buildOIStroke, buildOIUnderline, delay } from "../helpers"
+import { buildOICircle, buildOIHighlight, buildOIStroke, buildOIUnderline } from "../helpers"
 
-import
-{
-  OIModel,
-  WriteTool,
-  OIStroke,
-  TPointer,
-  TStyle,
-  DefaultStyle,
-  SymbolType,
-  TExport,
-  TOIShape,
-  ShapeKind,
-  EdgeKind,
-  OIEdgeLine
-} from "../../../src/iink"
+import { OIModel, TExport, } from "../../../src/iink"
 
 describe("OIModel.ts", () =>
 {
@@ -23,152 +9,6 @@ describe("OIModel.ts", () =>
   {
     const model = new OIModel(width, height, rowHeight)
     expect(model).toBeDefined()
-  })
-
-  describe("currentSymbol", () =>
-  {
-    const model = new OIModel(width, height, rowHeight)
-
-    test("should createCurrentSymbol with pencil", async () =>
-    {
-      expect(model.currentSymbol).toBeUndefined()
-      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      expect(model.creationTime).toStrictEqual(model.modificationDate)
-      await delay(100)
-      model.createCurrentSymbol(WriteTool.Pencil, point, DefaultStyle, 42, "mouse")
-      expect(model.modificationDate - model.creationTime).toBeGreaterThanOrEqual(100)
-      expect(model.currentSymbol).toBeDefined()
-      expect(model.currentSymbol?.style.color).toBe(DefaultStyle.color)
-      expect(model.currentSymbol?.style.width).toBe(DefaultStyle.width)
-      expect(model.currentSymbol?.type).toBe(SymbolType.Stroke)
-      const stroke = model.currentSymbol as OIStroke
-      expect(stroke.pointers).toHaveLength(1)
-      expect(stroke.pointers[0].x).toBe(point.x)
-      expect(stroke.pointers[0].y).toBe(point.y)
-      expect(stroke.pointers[0].t).toBe(point.t)
-      expect(stroke.pointers[0].p).toBe(point.p)
-    })
-    test("should createCurrentSymbol with pencil & custom style", () =>
-    {
-      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      const style: TStyle = { color: "red", width: 42 }
-      model.createCurrentSymbol(WriteTool.Pencil, point, style, 42, "mouse")
-      expect(model.currentSymbol).toBeDefined()
-      expect(model.currentSymbol?.style.color).toBe(style.color)
-      expect(model.currentSymbol?.style.width).toBe(style.width)
-    })
-    test("should createCurrentSymbol with Rectangle", () =>
-    {
-      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      model.createCurrentSymbol(WriteTool.Rectangle, point, DefaultStyle, 42, "mouse")
-      expect(model.currentSymbol).toBeDefined()
-      expect(model.currentSymbol?.type).toBe(SymbolType.Shape)
-      const shape = model.currentSymbol as TOIShape
-      expect(shape.kind).toBe(ShapeKind.Rectangle)
-    })
-    test("should createCurrentSymbol with Circle", () =>
-    {
-      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      model.createCurrentSymbol(WriteTool.Circle, point, DefaultStyle, 42, "mouse")
-      expect(model.currentSymbol).toBeDefined()
-      expect(model.currentSymbol?.type).toBe(SymbolType.Shape)
-      const shape = model.currentSymbol as TOIShape
-      expect(shape.kind).toBe(ShapeKind.Circle)
-    })
-    test("should createCurrentSymbol with Ellipse", () =>
-    {
-      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      model.createCurrentSymbol(WriteTool.Ellipse, point, DefaultStyle, 42, "mouse")
-      expect(model.currentSymbol).toBeDefined()
-      expect(model.currentSymbol?.type).toBe(SymbolType.Shape)
-      const shape = model.currentSymbol as TOIShape
-      expect(shape.kind).toBe(ShapeKind.Ellipse)
-    })
-    test("should createCurrentSymbol with Parallelogram", () =>
-    {
-      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      model.createCurrentSymbol(WriteTool.Parallelogram, point, DefaultStyle, 42, "mouse")
-      expect(model.currentSymbol).toBeDefined()
-      expect(model.currentSymbol?.type).toBe(SymbolType.Shape)
-      const shape = model.currentSymbol as TOIShape
-      expect(shape.kind).toBe(ShapeKind.Parallelogram)
-    })
-    test("should createCurrentSymbol with Triangle", () =>
-    {
-      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      model.createCurrentSymbol(WriteTool.Triangle, point, DefaultStyle, 42, "mouse")
-      expect(model.currentSymbol).toBeDefined()
-      expect(model.currentSymbol?.type).toBe(SymbolType.Shape)
-      const shape = model.currentSymbol as TOIShape
-      expect(shape.kind).toBe(ShapeKind.Triangle)
-    })
-    test("should createCurrentSymbol with Line", () =>
-    {
-      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      model.createCurrentSymbol(WriteTool.Line, point, DefaultStyle, 42, "mouse")
-      expect(model.currentSymbol).toBeDefined()
-      expect(model.currentSymbol?.type).toBe(SymbolType.Edge)
-      const shape = model.currentSymbol as OIEdgeLine
-      expect(shape.kind).toBe(EdgeKind.Line)
-      expect(shape.startDecoration).toBeUndefined()
-      expect(shape.endDecoration).toBeUndefined()
-    })
-    test("should createCurrentSymbol with Arrow", () =>
-    {
-      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      model.createCurrentSymbol(WriteTool.Arrow, point, DefaultStyle, 42, "mouse")
-      expect(model.currentSymbol).toBeDefined()
-      expect(model.currentSymbol?.type).toBe(SymbolType.Edge)
-      const shape = model.currentSymbol as OIEdgeLine
-      expect(shape.kind).toBe(EdgeKind.Line)
-      expect(shape.startDecoration).toBeUndefined()
-      expect(shape.endDecoration).toBeDefined()
-    })
-    test("should createCurrentSymbol with DoubleArrow", () =>
-    {
-      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      model.createCurrentSymbol(WriteTool.DoubleArrow, point, DefaultStyle, 42, "mouse")
-      expect(model.currentSymbol).toBeDefined()
-      expect(model.currentSymbol?.type).toBe(SymbolType.Edge)
-      const shape = model.currentSymbol as OIEdgeLine
-      expect(shape.kind).toBe(EdgeKind.Line)
-      expect(shape.startDecoration).toBeDefined()
-      expect(shape.endDecoration).toBeDefined()
-    })
-    test("should write error if symbol type unknow when createCurrentSymbol", () =>
-    {
-      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      const style: TStyle = { color: "red", width: 42 }
-      //@ts-ignore
-      expect(() => model.createCurrentSymbol("unknow", point, style, 42, "mouse")).toThrow("Can't create symbol, tool is unknow: \"unknow\"")
-    })
-    test("should updateCurrentSymbol", () =>
-    {
-      const point1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      model.createCurrentSymbol(WriteTool.Pencil, point1, DefaultStyle, 42, "mouse")
-      const point: TPointer = { t: 15, p: 15, x: 15, y: 15 }
-      model.updateCurrentSymbol(point)
-      const stroke = model.currentSymbol as OIStroke
-      expect(stroke.pointers).toHaveLength(2)
-      expect(stroke.pointers[1].x).toBe(point.x)
-      expect(stroke.pointers[1].y).toBe(point.y)
-      expect(stroke.pointers[1].t).toBe(point.t)
-      expect(stroke.pointers[1].p).toBe(point.p)
-    })
-    test("should endCurrentSymbol", () =>
-    {
-      expect(model.currentSymbol).toBeDefined()
-      const point: TPointer = { t: 25, p: 25, x: 25, y: 25 }
-      expect(model.symbols).toHaveLength(0)
-      model.endCurrentSymbol(point)
-      expect(model.currentSymbol).toBeUndefined()
-    })
-    test("should throw error when updateCurrentSymbol if currentSymbol undefined", () =>
-    {
-      expect(model.currentSymbol).toBeUndefined()
-      const point: TPointer = { t: 15, p: 15, x: 15, y: 15 }
-      expect(() => model.updateCurrentSymbol(point)).toThrow("Can't update current symbol because currentSymbol is undefined")
-    })
   })
 
   describe("symbols", () =>
@@ -256,6 +96,22 @@ describe("OIModel.ts", () =>
       const nbSymbols = model.symbols.length
       expect(model.removeSymbol(stroke.id)).toHaveLength(3)
       expect(model.symbols).toHaveLength(nbSymbols - 3)
+    })
+    test("should removeSymbol & decorators", () =>
+    {
+      const stroke = buildOIStroke()
+      const highlight = buildOIHighlight([stroke])
+      const underline = buildOIUnderline([stroke])
+      stroke.decorators.push(highlight)
+      stroke.decorators.push(underline)
+      model.addSymbol(stroke)
+      model.addSymbol(highlight)
+      model.addSymbol(underline)
+      const nbSymbols = model.symbols.length
+      expect(stroke.decorators).toHaveLength(2)
+      expect(model.removeSymbol(underline.id)).toHaveLength(1)
+      expect(model.symbols).toHaveLength(nbSymbols - 1)
+      expect(stroke.decorators).toHaveLength(1)
     })
   })
 
@@ -489,29 +345,12 @@ describe("OIModel.ts", () =>
     const model = new OIModel(width, height, rowHeight)
     const stroke = buildOIStroke()
     model.addSymbol(stroke)
-    model.createCurrentSymbol(WriteTool.Pencil, { p: 27, t: 5, x: 1989, y: 42 }, DefaultStyle, 42, "mouse")
     model.exports = { "text/plain": "M" }
     test("should clone", () =>
     {
       const clone = model.clone()
-      expect(clone != model).toBeTruthy()
-      expect(clone.currentSymbol).toEqual(model.currentSymbol)
-      expect(clone.currentSymbol).not.toBe(model.currentSymbol)
-
-      expect(clone.exports).toEqual(model.exports)
-      expect(clone.exports).not.toBe(model.exports)
-
-      expect(clone.height).toEqual(model.height)
-
-      expect(clone.idle).toEqual(model.idle)
-
-      expect(clone.positions).toEqual(model.positions)
-      expect(clone.positions).not.toBe(model.positions)
-
-      expect(clone.symbols).toEqual(model.symbols)
-      expect(clone.symbols).not.toBe(model.symbols)
-
-      expect(clone.width).toEqual(model.width)
+      expect(clone).toStrictEqual(model)
+      expect(clone).not.toBe(model)
     })
   })
 
@@ -520,13 +359,8 @@ describe("OIModel.ts", () =>
     test("should clear model", () =>
     {
       const model = new OIModel(width, height, rowHeight)
-      const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
-      const p2: TPointer = { t: 10, p: 10, x: 10, y: 10 }
-      const p3: TPointer = { t: 10, p: 10, x: 10, y: 10 }
-
-      model.createCurrentSymbol(WriteTool.Pencil, p1, DefaultStyle, 42, "mouse")
-      model.addSymbol(model.endCurrentSymbol(p2))
-      model.createCurrentSymbol(WriteTool.Pencil, p3, DefaultStyle, 51, "mouse")
+      model.currentSymbol = buildOIStroke()
+      model.addSymbol(buildOIStroke())
       expect(model.currentSymbol).toBeDefined()
       expect(model.symbols).toHaveLength(1)
 

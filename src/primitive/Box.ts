@@ -81,6 +81,11 @@ export class Box implements TBox
     ]
   }
 
+  static getCenter(box: TBoundingBox): TPoint
+  {
+    return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+  }
+
   static getSides(box: TBoundingBox): TSegment[]
   {
     const vertices = Box.getCorners(box)
@@ -157,6 +162,24 @@ export class Box implements TBox
     return this.y + this.height
   }
 
+  get corners(): TPoint[]
+  {
+    return Box.getCorners(this)
+  }
+
+  get center(): TPoint
+  {
+    return Box.getCenter(this)
+  }
+
+  get snapPoints(): TPoint[]
+  {
+    return [
+      ...this.corners,
+      this.center
+    ]
+  }
+
   isContained(wrapper: TBoundingBox): boolean
   {
     return Box.isContained(this, wrapper)
@@ -172,8 +195,4 @@ export class Box implements TBox
     return Box.overlaps(this, boundaries)
   }
 
-  getCorners(): TPoint[]
-  {
-    return Box.getCorners(this)
-  }
 }

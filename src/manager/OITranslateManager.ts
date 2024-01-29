@@ -49,9 +49,9 @@ export class OITranslateManager
     return this.behaviors.undoRedoManager
   }
 
-  get selectionManager(): OISelectionManager
+  get selector(): OISelectionManager
   {
-    return this.behaviors.selectionManager
+    return this.behaviors.selector
   }
 
   get textManager(): OITextManager
@@ -207,7 +207,7 @@ export class OITranslateManager
       }
     })
     const promise = this.recognizer.translateStrokes(strokesTranslated.map(s => s.id), tx, ty)
-    this.selectionManager.resetSelectedGroup(this.model.symbolsSelected)
+    this.selector.resetSelectedGroup(this.model.symbolsSelected)
     this.undoRedoManager.addModelToStack(this.model)
     this.wrapper = undefined
     await promise

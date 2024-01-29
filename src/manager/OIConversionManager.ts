@@ -12,7 +12,7 @@ import { OISelectionManager } from "./OISelectionManager"
 /**
  * @group Manager
  */
-export class OIConverterManager
+export class OIConversionManager
 {
   #logger = LoggerManager.getLogger(LoggerClass.CONVERTER)
   behaviors: OIBehaviors
@@ -34,9 +34,9 @@ export class OIConverterManager
     return this.behaviors.undoRedoManager
   }
 
-  get selectionManager(): OISelectionManager
+  get selector(): OISelectionManager
   {
-    return this.behaviors.selectionManager
+    return this.behaviors.selector
   }
 
   get renderer(): OISVGRenderer
@@ -141,7 +141,7 @@ export class OIConverterManager
         }
 
         const textGroupEl = this.renderer.drawSymbol(textSymbol) as SVGGElement
-        const box = Box.createFromBoxes([this.renderer.getSymbolElementBounds(textGroupEl)])
+        const box = Box.createFromBoxes([this.renderer.getElementBounds(textGroupEl)])
         const textEl = textGroupEl.querySelector("text")
         textSymbol.boundingBox = box
         if (textEl) {
@@ -245,7 +245,7 @@ export class OIConverterManager
     }
     if (shape) {
       this.model.addSymbol(shape)
-      this.behaviors.drawSymbol(shape)
+      this.renderer.drawSymbol(shape)
       const uniqIdsToRemove = [...new Set(associatedStroke.map(s => s.id))]
       uniqIdsToRemove.forEach(id =>
       {
@@ -305,7 +305,7 @@ export class OIConverterManager
 
     if (oiedge) {
       this.model.addSymbol(oiedge)
-      this.behaviors.drawSymbol(oiedge)
+      this.renderer.drawSymbol(oiedge)
       const uniqIdsToRemove = [...new Set(associatedStroke.map(s => s.id))]
       uniqIdsToRemove.forEach(id =>
       {
@@ -322,7 +322,7 @@ export class OIConverterManager
     if (!this.model.exports?.["application/vnd.myscript.jiix"]) {
       await this.behaviors.export(["application/vnd.myscript.jiix"])
     }
-    this.selectionManager.removeSelectedGroup()
+    this.selector.removeSelectedGroup()
     const jiix = this.model.exports?.["application/vnd.myscript.jiix"] as TJIIXExport
     if (jiix?.elements?.length) {
       const alignTextToGuide = !jiix.elements?.some(e => e.type !== "Text")

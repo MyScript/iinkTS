@@ -10,6 +10,7 @@ import
   OIShapeRectangle,
   OIStroke,
   ResizeDirection,
+  SELECTION_MARGIN,
   SvgElementRole,
   TBehaviorOptions,
   TPoint
@@ -95,7 +96,7 @@ describe("OIResizeManager.ts", () =>
       expect(line.start).toEqual({ x: 0, y: 0 })
       expect(line.end).toEqual({ x: 0, y: 15 })
     })
-    test("resize Decorator", () =>
+    test("resize decorator", () =>
     {
       const stroke = new OIStroke({}, 1)
       stroke.addPointer({ p: 1, t: 1, x: 1, y: 2 })
@@ -103,8 +104,8 @@ describe("OIResizeManager.ts", () =>
       const underline = new OIDecoratorUnderline({}, [stroke])
       const origin: TPoint = { x: 0, y: 0 }
       manager.applyToSymbol(underline, origin, 2, 3)
-      expect(underline.vertices[0]).toEqual({ x: 1, y: 47 })
-      expect(underline.vertices[1]).toEqual({ x: 21, y: 47 })
+      expect(underline.vertices[0]).toEqual({ x: stroke.boundingBox.xMin, y: stroke.boundingBox.yMax + SELECTION_MARGIN / 2 })
+      expect(underline.vertices[1]).toEqual({ x: stroke.boundingBox.xMax, y: stroke.boundingBox.yMax + SELECTION_MARGIN / 2 })
     })
   })
 
@@ -115,7 +116,7 @@ describe("OIResizeManager.ts", () =>
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     behaviors.recognizer.replaceStrokes = jest.fn(() => Promise.resolve())
     behaviors.renderer.setAttribute = jest.fn()
-    behaviors.selectionManager.resetSelectedGroup = jest.fn()
+    behaviors.selector.resetSelectedGroup = jest.fn()
     behaviors.renderer.drawSymbol = jest.fn()
     behaviors.setPenStyle = jest.fn(() => Promise.resolve())
     behaviors.setTheme = jest.fn(() => Promise.resolve())
@@ -239,12 +240,11 @@ describe("OIResizeManager.ts", () =>
       group.setAttribute("role", SvgElementRole.Selected)
       const resizeElement = document.createElementNS("http://www.w3.org/2000/svg", "line")
       resizeElement.setAttribute("resize-direction", data.direction)
-      resizeElement.setAttribute("transform-origin", JSON.stringify(data.transformOrigin))
       group.appendChild(resizeElement)
 
       test(`should start with direction: "${ data.direction }" `, () =>
       {
-        manager.start(resizeElement)
+        manager.start(resizeElement, data.transformOrigin)
 
         expect(manager.wrapper).toEqual(group)
         expect(manager.boundingBox).toEqual(stroke.boundingBox)
@@ -265,8 +265,8 @@ describe("OIResizeManager.ts", () =>
         await manager.end(resizeToPoint)
 
         expect(manager.applyToSymbol).toHaveBeenCalledTimes(1)
-        expect(behaviors.selectionManager.resetSelectedGroup).toHaveBeenCalledTimes(1)
-        expect(behaviors.selectionManager.resetSelectedGroup).toHaveBeenCalledWith([stroke])
+        expect(behaviors.selector.resetSelectedGroup).toHaveBeenCalledTimes(1)
+        expect(behaviors.selector.resetSelectedGroup).toHaveBeenCalledWith([stroke])
         expect(behaviors.renderer.drawSymbol).toHaveBeenCalledTimes(1)
         expect(behaviors.renderer.drawSymbol).toHaveBeenCalledWith(stroke)
         expect(behaviors.recognizer.replaceStrokes).toHaveBeenCalledTimes(1)

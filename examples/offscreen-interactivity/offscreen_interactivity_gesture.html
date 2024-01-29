@@ -136,15 +136,15 @@
         });
 
         applyGestureCheckBox.addEventListener("change", () => {
-          editor.gestures = applyGestureCheckBox.checked;
+          editor.behaviors.writer.detectGesture = applyGestureCheckBox.checked;
         });
 
         surrondActionSelect.addEventListener("change", (evt) => {
-          editor.surroundAction = evt.target.value;
+          editor.behaviors.gesture.surroundAction = evt.target.value;
         });
 
         strikeThroughActionSelect.addEventListener("change", (evt) => {
-          editor.strikeThroughAction = evt.target.value;
+          editor.behaviors.gesture.strikeThroughAction = evt.target.value;
         });
 
         window.addEventListener("resize", () => {

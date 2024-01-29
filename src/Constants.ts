@@ -171,28 +171,11 @@ export enum LoggerClass
   EDGE = "EDGE",
   TEXT = "TEXT",
   INTERNAL_EVENT = "INTERNAL_EVENT",
+  WRITE = "WRITE",
   TRANSFORMER = "TRANSFORMER",
   CONVERTER = "CONVERTER",
   SELECTION = "SELECTION",
-}
-
-/**
- * @group Constants
- * @group Editor
- * @description List all the shapes that can be drawn
- * @remarks only usable in the case of offscreen
- */
-export enum WriteTool
-{
-  Pencil = "pencil",
-  Rectangle = "rectangle",
-  Circle = "circle",
-  Ellipse = "ellipse",
-  Triangle = "triangle",
-  Parallelogram = "parallelogram",
-  Line = "line",
-  Arrow = "arrow",
-  DoubleArrow = "double-arrow",
+  SVGDEBUG = "SVGDEBUG",
 }
 
 /**
@@ -203,16 +186,10 @@ export enum WriteTool
 export enum SvgElementRole
 {
   Guide = "guide",
-  Selecting = "selecting",
   Selected = "selected",
-  Surround = "surround",
   Translate = "translate",
   Resize = "resize",
   Rotate = "rotate",
-  BoudingBox = "bounding-box",
-  RecognitionBox = "recognition-box",
-  RecognitionBoxItem = "recognition-box-item",
-  ConnectionLine = "connection-line"
 }
 
 /**

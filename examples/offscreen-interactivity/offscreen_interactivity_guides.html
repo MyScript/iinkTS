@@ -140,17 +140,17 @@
           guidesTypeSelect.disabled = !event.target.checked;
           guidesGapInput.disabled = !event.target.checked;
           options.configuration.rendering.guides.enable = event.target.checked;
-          editor.renderingConfiguration = options.configuration.rendering;
+          editor.behaviors.renderingConfiguration = options.configuration.rendering;
         });
 
         guidesTypeSelect.addEventListener("change", (event) => {
           options.configuration.rendering.guides.type = event.target.value;
-          editor.renderingConfiguration = options.configuration.rendering;
+          editor.behaviors.renderingConfiguration = options.configuration.rendering;
         });
 
         guidesGapInput.addEventListener("change", (event) => {
           options.configuration.rendering.guides.gap = Number(event.target.value);
-          editor.renderingConfiguration = options.configuration.rendering;
+          editor.behaviors.renderingConfiguration = options.configuration.rendering;
         });
 
 

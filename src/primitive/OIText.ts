@@ -67,14 +67,14 @@ export class OIText implements TOISymbolDecorable
     if (this.rotation) {
       const center = this.rotation.center
       const rad = converDegreeToRadian(-this.rotation.degree)
-      return this.boundingBox.getCorners()
+      return this.boundingBox.corners
         .map(p =>
         {
           return rotatePoint(p, center, rad)
         })
     }
     else {
-      return this.boundingBox.getCorners()
+      return this.boundingBox.corners
     }
   }
 
@@ -89,6 +89,11 @@ export class OIText implements TOISymbolDecorable
         return { p1: p, p2: this.vertices[i + 1] }
       }
     })
+  }
+
+  get snapPoints(): TPoint[]
+  {
+    return this.vertices
   }
 
   isCloseToPoint(point: TPoint): boolean
