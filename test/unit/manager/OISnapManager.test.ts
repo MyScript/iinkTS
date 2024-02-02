@@ -201,7 +201,7 @@ describe("OISnapManager.ts", () =>
       await behaviors.init(wrapperHTML)
     })
 
-    test.skip("should do nothing if snapToElement & snapToGrid are equal to false", () =>
+    test("should do nothing if snapToElement & snapToGrid are equal to false", () =>
     {
       manager.snapToGrid = false
       manager.snapToElement = false
@@ -209,7 +209,7 @@ describe("OISnapManager.ts", () =>
       expect(manager.renderer.clearElements).toBeCalledTimes(1)
     })
 
-    test.skip("should return a nudge to the nearest guide point when snapToGrid equals true", () =>
+    test("should return a nudge to the nearest guide point when snapToGrid equals true", () =>
     {
       manager.snapToGrid = true
       manager.snapToElement = false

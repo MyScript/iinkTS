@@ -154,6 +154,17 @@ export class OIModel implements IModel
   {
     const sIndex = this.symbols.findIndex(s => s.id === id)
     if (sIndex !== -1) {
+      const oldSym = this.symbols[sIndex]
+      if ([SymbolType.Stroke.toString(), SymbolType.Text.toString()].includes(oldSym.type)) {
+        const stroke = oldSym as OIStroke
+        stroke.decorators.forEach(d =>
+        {
+          const decIndex = this.symbols.findIndex(s => s.id === d.id)
+          if (decIndex > -1) {
+            this.symbols.splice(decIndex, 1)
+          }
+        })
+      }
       this.symbols.splice(sIndex, 1, ...symbols)
       this.modificationDate = Date.now()
       this.converts = undefined

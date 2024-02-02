@@ -77,9 +77,9 @@ describe("OIDebugSVGManager.ts", () =>
           label: "b"
         }
       ]
-      const stroke = buildOIText({ chars, boundingBox: { height: 10, width: 10, x: 0, y: 10 } })
-      manager.model.addSymbol(stroke)
-      manager.renderer.drawSymbol(stroke)
+      const text = buildOIText({ chars, boundingBox: { height: 10, width: 10, x: 0, y: 10 } })
+      manager.model.addSymbol(text)
+      manager.renderer.drawSymbol(text)
       expect(manager.renderer.layer.querySelectorAll("[debug=\"bounding-box\"]")).toHaveLength(0)
       manager.boundingBoxVisibility = true
       expect(manager.renderer.layer.querySelectorAll("[debug=\"bounding-box\"]")).toHaveLength(3)
