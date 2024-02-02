@@ -116,8 +116,8 @@ describe("OITranslateManager.ts", () =>
     behaviors.setPenStyleClasses = jest.fn(() => Promise.resolve())
 
     const manager = new OITranslateManager(behaviors)
-    manager.snap.snapToGrid = false
-    manager.snap.snapToElement = false
+    manager.snaps.snapToGrid = false
+    manager.snaps.snapToElement = false
     manager.applyToSymbol = jest.fn()
 
     const stroke = new OIStroke({}, 1)

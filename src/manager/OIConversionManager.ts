@@ -342,7 +342,7 @@ export class OIConversionManager
         }
       }))
     }
-    this.behaviors.textManager.adjustText()
+    this.behaviors.texter.adjustText()
     this.undoRedoManager.addModelToStack(this.model)
   }
 }

@@ -22,6 +22,7 @@ import
 import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
 import { UndoRedoManager } from "../undo-redo"
+import { OIDebugSVGManager } from "./OIDebugSVGManager"
 import { OISelectionManager } from "./OISelectionManager"
 import { OISnapManager } from "./OISnapManager"
 import { OITextManager } from "./OITextManager"
@@ -61,9 +62,9 @@ export class OIResizeManager
     return this.behaviors.selector
   }
 
-  get textManager(): OITextManager
+  get texter(): OITextManager
   {
-    return this.behaviors.textManager
+    return this.behaviors.texter
   }
 
   get renderer(): OISVGRenderer
@@ -76,9 +77,14 @@ export class OIResizeManager
     return this.behaviors.recognizer
   }
 
-  get snap(): OISnapManager
+  get snaps(): OISnapManager
   {
-    return this.behaviors.snap
+    return this.behaviors.snaps
+  }
+
+  get svgDebugger(): OIDebugSVGManager
+  {
+    return this.behaviors.svgDebugger
   }
 
   protected applyToStroke(stroke: OIStroke, origin: TPoint, scaleX: number, scaleY: number): OIStroke
@@ -154,7 +160,7 @@ export class OIResizeManager
     {
       c.fontSize *= (scaleX + scaleY) / 2
     })
-    return this.textManager.updateTextBoundingBox(text)
+    return this.texter.updateTextBoundingBox(text)
   }
 
   applyToSymbol(symbol: TOISymbol, origin: TPoint, scaleX: number, scaleY: number): TOISymbol
@@ -225,7 +231,7 @@ export class OIResizeManager
       ResizeDirection.SouthEast,
       ResizeDirection.SouthWest
     ].includes(this.direction)
-    const { x, y } = this.snap.snapResize(point, horizontalResize, verticalResize)
+    const { x, y } = this.snaps.snapResize(point, horizontalResize, verticalResize)
     localPoint.x = x
     localPoint.y = y
 
@@ -270,7 +276,7 @@ export class OIResizeManager
   {
     this.#logger.info("end", { point })
     const { scaleX, scaleY } = this.continue(point)
-    this.snap.clearSnapToElementLines()
+    this.snaps.clearSnapToElementLines()
     const strokesResized: OIStroke[] = []
     this.model.symbolsSelected.forEach(s =>
     {
@@ -286,5 +292,6 @@ export class OIResizeManager
     this.undoRedoManager.addModelToStack(this.model)
     this.wrapper = undefined
     await promise
+    await this.svgDebugger.apply()
   }
 }

@@ -52,14 +52,14 @@ export class OIGestureManager
     return this.behaviors.recognizer
   }
 
-  get translateManager(): OITranslateManager
+  get translator(): OITranslateManager
   {
-    return this.behaviors.translateManager
+    return this.behaviors.translator
   }
 
-  get textManager(): OITextManager
+  get texter(): OITextManager
   {
-    return this.behaviors.textManager
+    return this.behaviors.texter
   }
 
   get model(): OIModel
@@ -159,7 +159,7 @@ export class OIGestureManager
           this.model.removeSymbol(te.id)
         }
       })
-      this.textManager.adjustText()
+      this.texter.adjustText()
     }
     const strokesToErase = this.model.symbols.filter(s => s.type === SymbolType.Stroke && gesture.strokeIds.includes(s.id)) as OIStroke[]
     if (strokesToErase.length) {
@@ -219,7 +219,7 @@ export class OIGestureManager
       const lastXBefore = Math.max(...symbolsBeforeInCurrentRow.map(s => s.boundingBox.xMax))
       const firstXAfter = Math.min(...symbolsAfterInCurrentRow.map(s => s.boundingBox.xMin))
       const translateX = lastXBefore - firstXAfter
-      promises.push(this.translateManager.translate(symbolsAfterInCurrentRow, translateX, 0))
+      promises.push(this.translator.translate(symbolsAfterInCurrentRow, translateX, 0))
     }
     else if (symbolsBeforeInCurrentRow?.length) {
       if (currentRow?.symbols.length) {
@@ -229,15 +229,15 @@ export class OIGestureManager
           const lastXBefore = Math.max(...currentRow.symbols.map(s => s.boundingBox.xMax))
           const xMin = Math.min(...symbolInNextRow.map(s => s.boundingBox.xMin))
           const translateX = lastXBefore + SPACE_BETWEEN_STROKE - xMin
-          promises.push(this.translateManager.translate(symbolInNextRow, translateX, -this.rowHeight))
+          promises.push(this.translator.translate(symbolInNextRow, translateX, -this.rowHeight))
         }
 
         const symbolsAfterNextRow = nextRows.filter(r => r.index > currentRowIndex + 1).flatMap(r => r.symbols)
-        promises.push(this.translateManager.translate(symbolsAfterNextRow, 0, -this.rowHeight))
+        promises.push(this.translator.translate(symbolsAfterNextRow, 0, -this.rowHeight))
       }
       else {
         const nextSymbols = nextRows.filter(r => r.index > currentRowIndex + 1).flatMap(r => r.symbols)
-        promises.push(this.translateManager.translate(nextSymbols, 0, -this.rowHeight))
+        promises.push(this.translator.translate(nextSymbols, 0, -this.rowHeight))
       }
     }
     else if (symbolsAfterInCurrentRow?.length) {
@@ -245,16 +245,16 @@ export class OIGestureManager
         const lastXBefore = Math.max(...previousRow.symbols.map(s => s.boundingBox.xMax))
         const xMin = Math.min(...symbolsAfterInCurrentRow.map(s => s.boundingBox.xMin))
         const translateX = lastXBefore + SPACE_BETWEEN_STROKE - xMin
-        promises.push(this.translateManager.translate(symbolsAfterInCurrentRow, translateX, -this.rowHeight))
+        promises.push(this.translator.translate(symbolsAfterInCurrentRow, translateX, -this.rowHeight))
 
         const afterNextSymbols = nextRows.flatMap(r => r.symbols)
         if (afterNextSymbols.length) {
-          promises.push(this.translateManager.translate(afterNextSymbols, 0, -this.rowHeight))
+          promises.push(this.translator.translate(afterNextSymbols, 0, -this.rowHeight))
         }
       }
       else {
         const nextSymbols = [...symbolsAfterInCurrentRow, ...nextRows.flatMap(r => r.symbols)]
-        promises.push(this.translateManager.translate(nextSymbols, 0, -this.rowHeight))
+        promises.push(this.translator.translate(nextSymbols, 0, -this.rowHeight))
       }
     }
 
@@ -286,7 +286,7 @@ export class OIGestureManager
       const indexToSplit = strokeToSplit.pointers.findIndex(p => nearestPoint.p2.x === p.x && nearestPoint.p2.y === p.y)
       if (indexToSplit > -1) {
         const newStrokes = OIStroke.split(strokeToSplit, indexToSplit)
-        this.translateManager.applyToSymbol(newStrokes.after, SPACE_BETWEEN_STROKE, 0)
+        this.translator.applyToSymbol(newStrokes.after, SPACE_BETWEEN_STROKE, 0)
         this.model.replaceSymbol(strokeToSplit.id, [newStrokes.before, newStrokes.after])
         this.renderer.removeSymbol(strokeToSplit.id)
         this.renderer.drawSymbol(newStrokes.before)
@@ -295,7 +295,7 @@ export class OIGestureManager
       }
 
       if (symbolsAfterInCurrentRow?.length) {
-        promises.push(this.translateManager.translate(symbolsAfterInCurrentRow.filter(s => s.id !== strokeToSplit.id), SPACE_BETWEEN_STROKE, 0))
+        promises.push(this.translator.translate(symbolsAfterInCurrentRow.filter(s => s.id !== strokeToSplit.id), SPACE_BETWEEN_STROKE, 0))
       }
     }
     else if (symbolsAfterInCurrentRow?.length) {
@@ -303,17 +303,17 @@ export class OIGestureManager
       if (symbolsBeforeInCurrentRow?.length) {
         translateX = Math.min(...symbolsBeforeInCurrentRow.map(s => s.boundingBox.xMin)) - Math.min(...symbolsAfterInCurrentRow.map(s => s.boundingBox.xMin))
       }
-      promises.push(this.translateManager.translate(symbolsAfterInCurrentRow, translateX, this.rowHeight))
+      promises.push(this.translator.translate(symbolsAfterInCurrentRow, translateX, this.rowHeight))
 
       const nextSymbols = nextRows.filter(r => r.index > currentRowIndex).flatMap(r => r.symbols)
       if (nextSymbols.length) {
-        promises.push(this.translateManager.translate(nextSymbols, 0, this.rowHeight))
+        promises.push(this.translator.translate(nextSymbols, 0, this.rowHeight))
       }
     }
     else if (symbolsBeforeInCurrentRow?.length) {
       const nextSymbols = nextRows.filter(r => r.index > currentRowIndex).flatMap(r => r.symbols)
       if (nextSymbols.length) {
-        promises.push(this.translateManager.translate(nextSymbols, 0, this.rowHeight))
+        promises.push(this.translator.translate(nextSymbols, 0, this.rowHeight))
       }
     }
 

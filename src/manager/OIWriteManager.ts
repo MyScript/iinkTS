@@ -101,9 +101,9 @@ export class OIWriteManager
     return this.behaviors.gesture
   }
 
-  get snap(): OISnapManager
+  get snaps(): OISnapManager
   {
-    return this.behaviors.snap
+    return this.behaviors.snaps
   }
 
   get selector(): OISelectionManager
@@ -219,7 +219,7 @@ export class OIWriteManager
     this.currentSymbolOrigin = localPointer
     this.createCurrentSymbol(localPointer, style, pointerId, pointerType)
     if (this.tool !== WriteTool.Pencil) {
-      const { x, y } = this.snap.snapResize(pointer)
+      const { x, y } = this.snaps.snapResize(pointer)
       localPointer.x = x
       localPointer.y = y
     }
@@ -233,7 +233,7 @@ export class OIWriteManager
     this.#logger.info("continueWriting", { pointer })
     const localPointer = pointer
     if (this.tool !== WriteTool.Pencil) {
-      const { x, y } = this.snap.snapResize(pointer)
+      const { x, y } = this.snaps.snapResize(pointer)
       localPointer.x = x
       localPointer.y = y
     }
@@ -246,13 +246,13 @@ export class OIWriteManager
     this.#logger.info("finishWriting", { pointer })
     const localPointer = pointer
     if (this.tool !== WriteTool.Pencil) {
-      const { x, y } = this.snap.snapResize(pointer)
+      const { x, y } = this.snaps.snapResize(pointer)
       localPointer.x = x
       localPointer.y = y
     }
     this.updateCurrentSymbol(localPointer)
     this.renderer.drawSymbol(this.model.currentSymbol!)
-    this.snap.clearSnapToElementLines()
+    this.snaps.clearSnapToElementLines()
     const symbol = this.model.currentSymbol as TOISymbol
     this.model.currentSymbol = undefined
     this.currentSymbolOrigin = undefined

@@ -35,7 +35,7 @@ describe("OIRotationManager.ts", () =>
   {
     const behaviors = new OIBehaviors(DefaultBehaviorsOptions)
     const manager = new OIRotationManager(behaviors)
-    manager.textManager.updateTextBoundingBox = jest.fn()
+    manager.texter.updateTextBoundingBox = jest.fn()
     manager.renderer.setAttribute = jest.fn()
 
     test("rotate stroke", () =>

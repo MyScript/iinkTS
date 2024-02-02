@@ -515,7 +515,7 @@ describe("OIBehaviors.ts", () =>
     {
       const oib = new OIBehaviors(DefaultBehaviorsOptions)
       oib.selector.removeSelectedGroup = jest.fn()
-      oib.debugSVG.apply = jest.fn()
+      oib.svgDebugger.apply = jest.fn()
       oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
       oib.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
@@ -538,7 +538,7 @@ describe("OIBehaviors.ts", () =>
     {
       const oib = new OIBehaviors(DefaultBehaviorsOptions)
       oib.selector.removeSelectedGroup = jest.fn()
-      oib.debugSVG.apply = jest.fn()
+      oib.svgDebugger.apply = jest.fn()
       oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
       oib.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
@@ -561,7 +561,7 @@ describe("OIBehaviors.ts", () =>
     {
       const oib = new OIBehaviors(DefaultBehaviorsOptions)
       oib.selector.removeSelectedGroup = jest.fn()
-      oib.debugSVG.apply = jest.fn()
+      oib.svgDebugger.apply = jest.fn()
       oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
       oib.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
@@ -590,7 +590,7 @@ describe("OIBehaviors.ts", () =>
     {
       const oib = new OIBehaviors(DefaultBehaviorsOptions)
       oib.selector.removeSelectedGroup = jest.fn()
-      oib.debugSVG.apply = jest.fn()
+      oib.svgDebugger.apply = jest.fn()
       oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
       oib.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
@@ -612,7 +612,7 @@ describe("OIBehaviors.ts", () =>
     {
       const oib = new OIBehaviors(DefaultBehaviorsOptions)
       oib.selector.removeSelectedGroup = jest.fn()
-      oib.debugSVG.apply = jest.fn()
+      oib.svgDebugger.apply = jest.fn()
       oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
       oib.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
@@ -634,7 +634,7 @@ describe("OIBehaviors.ts", () =>
     {
       const oib = new OIBehaviors(DefaultBehaviorsOptions)
       oib.selector.removeSelectedGroup = jest.fn()
-      oib.debugSVG.apply = jest.fn()
+      oib.svgDebugger.apply = jest.fn()
       oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
       oib.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
@@ -717,7 +717,7 @@ describe("OIBehaviors.ts", () =>
     test("should call renderer.clear", async () =>
     {
       const oib = new OIBehaviors(DefaultBehaviorsOptions)
-      oib.debugSVG.apply = jest.fn()
+      oib.svgDebugger.apply = jest.fn()
       oib.renderer.clear = jest.fn()
       oib.recognizer.eraseStrokes = jest.fn()
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
@@ -729,7 +729,7 @@ describe("OIBehaviors.ts", () =>
     test("should call recognizer.eraseStrokes", async () =>
     {
       const oib = new OIBehaviors(DefaultBehaviorsOptions)
-      oib.debugSVG.apply = jest.fn()
+      oib.svgDebugger.apply = jest.fn()
       oib.renderer.clear = jest.fn()
       oib.recognizer.eraseStrokes = jest.fn()
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
@@ -742,7 +742,7 @@ describe("OIBehaviors.ts", () =>
     test("should clear model", async () =>
     {
       const oib = new OIBehaviors(DefaultBehaviorsOptions)
-      oib.debugSVG.apply = jest.fn()
+      oib.svgDebugger.apply = jest.fn()
       oib.renderer.clear = jest.fn()
       oib.recognizer.eraseStrokes = jest.fn()
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
@@ -756,7 +756,7 @@ describe("OIBehaviors.ts", () =>
     test("should do nothing if strokes empty", async () =>
     {
       const oib = new OIBehaviors(DefaultBehaviorsOptions)
-      oib.debugSVG.apply = jest.fn()
+      oib.svgDebugger.apply = jest.fn()
       oib.renderer.clear = jest.fn()
       oib.recognizer.eraseStrokes = jest.fn()
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
