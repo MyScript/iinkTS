@@ -17,7 +17,7 @@ import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
 import { TStyle } from "../style"
 import { UndoRedoManager } from "../undo-redo"
-import { getPointsNearest, isBetween } from "../utils"
+import { getClosestPoints, isBetween } from "../utils"
 import { TGesture, StrikeThroughAction, SurroundAction } from "../gesture"
 import { OITranslateManager } from "./OITranslateManager"
 import { OISelectionManager } from "./OISelectionManager"
@@ -246,7 +246,7 @@ export class OIGestureManager
         x: gesture.subStrokes[0].x.at(-1) as number,
         y: gesture.subStrokes[0].y.at(-1) as number
       }
-      const nearestPoint = getPointsNearest([intersectPoint], strokeToSplit.pointers)
+      const nearestPoint = getClosestPoints([intersectPoint], strokeToSplit.pointers)
       const indexToSplit = strokeToSplit.pointers.findIndex(p => nearestPoint.p2.x === p.x && nearestPoint.p2.y === p.y)
       if (indexToSplit > -1) {
         const newStrokes = OIStroke.split(strokeToSplit, indexToSplit)

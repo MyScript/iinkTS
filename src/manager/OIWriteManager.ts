@@ -27,6 +27,7 @@ import { TStyle } from "../style"
 import { UndoRedoManager } from "../undo-redo"
 import { OIGestureManager } from "./OIGestureManager"
 import { OISelectionManager } from "./OISelectionManager"
+import { OISnapManager } from "./OISnapManager"
 
 /**
  * @group Constants
@@ -100,6 +101,11 @@ export class OIWriteManager
     return this.behaviors.gesture
   }
 
+  get snap(): OISnapManager
+  {
+    return this.behaviors.snap
+  }
+
   get selector(): OISelectionManager
   {
     return this.behaviors.selector
@@ -113,6 +119,7 @@ export class OIWriteManager
   protected createCurrentSymbol(pointer: TPointer, style: TStyle, pointerId: number, pointerType: string): TOISymbol
   {
     this.#logger.debug("createCurrentSymbol", { pointer, style, pointerId, pointerType })
+
     switch (this.tool) {
       case WriteTool.Pencil:
         this.model.currentSymbol = new OIStroke(style, pointerId, pointerType)
@@ -208,24 +215,44 @@ export class OIWriteManager
   start(style: TStyle, pointer: TPointer, pointerId: number, pointerType: string): void
   {
     this.#logger.info("startWriting", { style, pointer, pointerId, pointerType })
-    this.currentSymbolOrigin = pointer
-    this.createCurrentSymbol(pointer, style, pointerId, pointerType)
+    const localPointer = pointer
+    this.currentSymbolOrigin = localPointer
+    this.createCurrentSymbol(localPointer, style, pointerId, pointerType)
+    if (this.tool !== WriteTool.Pencil) {
+      const { x, y } = this.snap.snapResize(pointer)
+      localPointer.x = x
+      localPointer.y = y
+    }
+    this.currentSymbolOrigin = localPointer
+    this.createCurrentSymbol(localPointer, style, pointerId, pointerType)
     this.renderer.drawSymbol(this.model.currentSymbol!)
   }
 
   continue(pointer: TPointer): void
   {
     this.#logger.info("continueWriting", { pointer })
-    this.updateCurrentSymbol(pointer)
+    const localPointer = pointer
+    if (this.tool !== WriteTool.Pencil) {
+      const { x, y } = this.snap.snapResize(pointer)
+      localPointer.x = x
+      localPointer.y = y
+    }
+    this.updateCurrentSymbol(localPointer)
     this.renderer.drawSymbol(this.model.currentSymbol!)
   }
 
   async end(pointer: TPointer): Promise<void>
   {
     this.#logger.info("finishWriting", { pointer })
-    this.updateCurrentSymbol(pointer)
+    const localPointer = pointer
+    if (this.tool !== WriteTool.Pencil) {
+      const { x, y } = this.snap.snapResize(pointer)
+      localPointer.x = x
+      localPointer.y = y
+    }
+    this.updateCurrentSymbol(localPointer)
     this.renderer.drawSymbol(this.model.currentSymbol!)
-
+    this.snap.clearSnapToElementLines()
     const symbol = this.model.currentSymbol as TOISymbol
     this.model.currentSymbol = undefined
     this.currentSymbolOrigin = undefined

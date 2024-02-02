@@ -19,7 +19,7 @@
       }
       .row-params {
         padding: 12px 24px;
-        border-bottom: 1px solid #D7DDE3;
+        border-bottom: 1px solid #d7dde3;
       }
       .row-label {
         font-size: larger;
@@ -69,11 +69,11 @@
       </div>
       <div class="flex-container">
         <label for="pen-opacity">opacity:</label>
-        <input id="pen-opacity" type="range" min="0" value="255" max="255"/>
+        <input id="pen-opacity" type="range" min="0" value="255" max="255" />
       </div>
       <div class="flex-container wrap">
         <label for="pen-width">thickness:</label>
-        <input id="pen-width" type="number" min="1" value="4" max="9"/>
+        <input id="pen-width" type="number" min="1" value="4" max="9" />
       </div>
     </div>
 
@@ -90,10 +90,10 @@
       const penWidthInput = document.getElementById("pen-width");
 
       function getStyle() {
-        const color = `${penColorInput.value}${Number(penOpacityInput.value).toString(16).padStart(2, "0")}`
+        const color = `${penColorInput.value}${Number(penOpacityInput.value).toString(16).padStart(2, "0")}`;
         return {
           color,
-          width: penWidthInput.value,
+          width: penWidthInput.value
         };
       }
 
@@ -160,7 +160,7 @@
         });
       }
 
-      loadEditor().catch(error => console.error(error));
+      loadEditor().catch((error) => console.error(error));
     </script>
   </body>
 </html>

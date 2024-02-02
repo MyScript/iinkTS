@@ -31,15 +31,14 @@ export class SVGBuilder
     return document.createElementNS(XMLNS, "defs")
   }
 
-  static createMarker(id: string, markerWidth: number, markerHeight: number, refX: number, refY: number, orient: "auto-start-reverse" | "auto"): SVGMarkerElement
+  static createMarker(id: string, attrs: { [key: string]: string } = {}): SVGMarkerElement
   {
     const marker = document.createElementNS(XMLNS, "marker")
     marker.setAttribute("id", id)
-    marker.setAttribute("markerWidth", markerWidth.toString())
-    marker.setAttribute("markerHeight", markerHeight.toString())
-    marker.setAttribute("refX", refX.toString())
-    marker.setAttribute("refY", refY.toString())
-    marker.setAttribute("orient", orient)
+    Object.keys(attrs).forEach(k =>
+    {
+      marker.setAttribute(k, attrs[k])
+    })
     return marker
   }
 

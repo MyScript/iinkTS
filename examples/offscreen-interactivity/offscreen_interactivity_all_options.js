@@ -8,8 +8,9 @@ const redoBtn = document.getElementById("redo");
 const penBtn = document.getElementById("pen");
 const menuShapeBtn = document.getElementById("menu-shape-btn");
 const drawRectangleBtn = document.getElementById("draw-rectangle");
-const drawEllipseBtn = document.getElementById("draw-ellipse");
+const drawParallelogramBtn = document.getElementById("draw-parallelogram");
 const drawCircleBtn = document.getElementById("draw-circle");
+const drawEllipseBtn = document.getElementById("draw-ellipse");
 const drawTriangleBtn = document.getElementById("draw-triangle");
 const menuEdgeBtn = document.getElementById("menu-edge-btn");
 const drawLineBtn = document.getElementById("draw-line");
@@ -41,11 +42,13 @@ const guidesGapInput = document.getElementById("guides-gap");
 
 const recognitionBoxToggle = document.getElementById("toggle-recognition-box");
 const recognitionItemBoxToggle = document.getElementById("toggle-recognition-item-box");
+const snapPointsVisibilityToggle = document.getElementById("toggle-snap-points-visibility");
 const verticesVisibilityToggle = document.getElementById("toggle-vertices-visibility");
 const boundingBoxVisibilityToggle = document.getElementById("toggle-bounding-box-visibility");
 
 const snapToGridToggle = document.getElementById("snap-to-guides-toggle");
 const snapToElementToggle = document.getElementById("snap-to-elements-toggle");
+const snapAngleElementToggle = document.getElementById("snap-angle");
 
 const selectionToggle = document.getElementById("toggle-selection-pan");
 const htmlPanToggle = document.getElementById("toggle-export-html-pan");
@@ -293,6 +296,15 @@ async function loadEditor() {
     document.getElementById("menu-shape-btn-img").src = drawRectangleBtn.children.item(0).src;
   });
 
+  drawParallelogramBtn.addEventListener("pointerup", () => {
+    editor.intention = iink.Intention.Write;
+    editor.behaviors.writer.tool = iink.WriteTool.Parallelogram;
+    resetMenuBtn();
+    menuShapeBtn.classList.add("active");
+    drawParallelogramBtn.classList.add("active");
+    document.getElementById("menu-shape-btn-img").src = drawRectangleBtn.children.item(0).src;
+  });
+
   drawCircleBtn.addEventListener("pointerup", () => {
     editor.intention = iink.Intention.Write;
     editor.behaviors.writer.tool = iink.WriteTool.Circle;
@@ -423,6 +435,10 @@ async function loadEditor() {
     editor.behaviors.snap.snapToElement = event.target.checked;
   });
 
+  snapAngleElementToggle.addEventListener("change", (event) => {
+    editor.behaviors.snap.snapAngle = +event.target.value;
+  });
+
   recognitionBoxToggle.addEventListener("change", (evt) => {
     editor.behaviors.debugSVG.recognitionBoxVisibility = evt.target.checked;
   });
@@ -433,6 +449,10 @@ async function loadEditor() {
 
   verticesVisibilityToggle.addEventListener("change", (evt) => {
     editor.behaviors.debugSVG.verticesVisibility = evt.target.checked;
+  });
+
+  snapPointsVisibilityToggle.addEventListener("change", (evt) => {
+    editor.behaviors.debugSVG.snapPointsVisibility = evt.target.checked;
   });
 
   boundingBoxVisibilityToggle.addEventListener("change", (evt) => {

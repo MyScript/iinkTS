@@ -229,7 +229,7 @@
       .renderjson .keyword {
         color: lightgoldenrodyellow;
       }
-      .renderjson .object.syntax ,
+      .renderjson .object.syntax,
       .renderjson .array.syntax {
         color: darkblue;
       }
@@ -277,13 +277,18 @@
               </button>
             </li>
             <li>
-              <button id="draw-ellipse" class="menu-button">
-                <img src="../assets/img/ellipse.svg" />
+              <button id="draw-parallelogram" class="menu-button">
+                <img src="../assets/img/parallelogram.svg" />
               </button>
             </li>
             <li>
               <button id="draw-circle" class="menu-button">
                 <img src="../assets/img/circle.svg" />
+              </button>
+            </li>
+            <li>
+              <button id="draw-ellipse" class="menu-button">
+                <img src="../assets/img/ellipse.svg" />
               </button>
             </li>
             <li>
@@ -406,7 +411,7 @@
             <li class="dropdown-menu full-width horizontal left">
               <label class="label flex-container between gap">
                 <img src="../assets/img/caret-left.svg" />
-                Alignment
+                Snap
               </label>
               <ul>
                 <li class="flex-container">
@@ -422,6 +427,17 @@
                     <input class="toggle-input" id="snap-to-elements-toggle" type="checkbox" checked />
                     <label class="toggle-label" for="snap-to-elements-toggle"></label>
                   </div>
+                </li>
+                <li class="flex-container">
+                  <label class="label" for="snap-angle">Angle</label>
+                  <select id="snap-angle">
+                    <option value="0" selected>None</option>
+                    <option value="10">10°</option>
+                    <option value="30">30°</option>
+                    <option value="45">45°</option>
+                    <option value="90">90°</option>
+                    <option value="180">180°</option>
+                  </select>
                 </li>
               </ul>
             </li>
@@ -443,6 +459,13 @@
                   <div class="toggle-switch">
                     <input class="toggle-input" id="toggle-recognition-item-box" type="checkbox" />
                     <label class="toggle-label" for="toggle-recognition-item-box"></label>
+                  </div>
+                </li>
+                <li class="flex-container">
+                  <label class="label">Show snap points</label>
+                  <div class="toggle-switch">
+                    <input class="toggle-input" id="toggle-snap-points-visibility" type="checkbox" />
+                    <label class="toggle-label" for="toggle-snap-points-visibility"></label>
                   </div>
                 </li>
                 <li class="flex-container">

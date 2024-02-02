@@ -83,7 +83,7 @@ describe("OISVGShapeUtil.ts", () =>
       const origin: TPoint = { x: 0, y: 0 }
       const target: TPoint = { x: 0, y: 10 }
       const circle = OIShapeCircle.createFromLine(DefaultStyle, origin, target)
-      expect(renderer.getSVGPath(circle)).toEqual("M -5 5 a 5 5 0 1 1 10 0 a 5 5 0 1 1 -10 0 Z")
+      expect(renderer.getSVGPath(circle)).toEqual("M 0 5 a 0 0 0 1 1 0 0 a 0 0 0 1 1 -0 0 Z")
     })
     test("should getSVGElement with default style", () =>
     {

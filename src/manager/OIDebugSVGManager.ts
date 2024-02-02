@@ -9,6 +9,7 @@ import { convertBoundingBoxMillimeterToPixel, createUUID } from "../utils"
 export class OIDebugSVGManager
 {
   #logger = LoggerManager.getLogger(LoggerClass.SVGDEBUG)
+  #snapPointsVisibility = false
   #verticesVisibility = false
   #boundingBoxVisibility = false
   #recognitionBoxVisibility = false
@@ -30,6 +31,16 @@ export class OIDebugSVGManager
   get renderer(): OISVGRenderer
   {
     return this.behaviors.renderer
+  }
+
+  get snapPointsVisibility(): boolean
+  {
+    return this.#snapPointsVisibility
+  }
+  set snapPointsVisibility(show: boolean)
+  {
+    this.#snapPointsVisibility = show
+    this.debugSnapPoints()
   }
 
   get verticesVisibility(): boolean
@@ -70,6 +81,48 @@ export class OIDebugSVGManager
   {
     this.#recognitionItemBoxVisibility = show
     this.debugRecognitionItemBox()
+  }
+
+  protected showSnapPoints(): void
+  {
+    this.#logger.info("showSnapPoints")
+    if (this.model.currentSymbol) {
+      this.model.currentSymbol.snapPoints.forEach(p => this.renderer.drawCircle(p, 2, { fill: "blue", "debug": "snap-points" }))
+    }
+    this.model.symbols.forEach(s => s.snapPoints.forEach(p => this.renderer.drawCircle(p, 2, { fill: "blue", "debug": "snap-points" })))
+  }
+  protected hideSnapPoints(): void
+  {
+    this.#logger.info("hideSnapPoints")
+    this.renderer.clearElements({ attrs: { "debug": "snap-points" } })
+  }
+  debugSnapPoints(): void
+  {
+    this.hideSnapPoints()
+    if (this.snapPointsVisibility) {
+      this.showSnapPoints()
+    }
+  }
+
+  protected showVertices(): void
+  {
+    this.#logger.info("showVertices")
+    if (this.model.currentSymbol) {
+      this.model.currentSymbol.vertices.forEach(p => this.renderer.drawCircle(p, 2, { fill: "red", "debug": "vertices" }))
+    }
+    this.model.symbols.forEach(s => s.vertices.forEach(p => this.renderer.drawCircle(p, 2, { fill: "red", "debug": "vertices" })))
+  }
+  protected hideVertices(): void
+  {
+    this.#logger.info("hideVertices")
+    this.renderer.clearElements({ attrs: { "debug": "vertices" } })
+  }
+  debugVertices(): void
+  {
+    this.hideVertices()
+    if (this.verticesVisibility) {
+      this.showVertices()
+    }
   }
 
   protected drawBoundingBox(symbols: TOISymbol[]): void
@@ -146,27 +199,6 @@ export class OIDebugSVGManager
     this.hideBoundingBox()
     if (this.boundingBoxVisibility) {
       this.showBoundingBox()
-    }
-  }
-
-  protected showVertices(): void
-  {
-    this.#logger.info("showVertices")
-    if (this.model.currentSymbol) {
-      this.model.currentSymbol.vertices.forEach(p => this.renderer.drawCircle(p, 2, { fill: "red", "debug": "vertices" }))
-    }
-    this.model.symbols.forEach(s => s.vertices.forEach(p => this.renderer.drawCircle(p, 2, { fill: "red", "debug": "vertices" })))
-  }
-  protected hideVertices(): void
-  {
-    this.#logger.info("hideVertices")
-    this.renderer.clearElements({ attrs: { "debug": "vertices" } })
-  }
-  debugVertices(): void
-  {
-    this.hideVertices()
-    if (this.verticesVisibility) {
-      this.showVertices()
     }
   }
 
@@ -430,6 +462,7 @@ export class OIDebugSVGManager
   {
     this.debugBoundingBox()
     this.debugVertices()
+    this.debugSnapPoints()
     await this.debugRecognitionBox()
     await this.debugRecognitionItemBox()
   }

@@ -70,6 +70,11 @@ export abstract class OIEdge extends OISymbol implements TOIEdge
     return bb
   }
 
+  get snapPoints(): TPoint[]
+  {
+    return this.vertices
+  }
+
   get edges(): TSegment[]
   {
     return this.vertices.slice(0, -1).map((p, i) =>

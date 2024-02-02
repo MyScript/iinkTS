@@ -2,7 +2,7 @@ import { LoggerClass, SvgElementRole } from "../../Constants"
 import { TRenderingConfiguration } from "../../configuration"
 import { LoggerManager } from "../../logger"
 import { OIStroke, SymbolType, TOIEdge, TOISymbol, TPoint, TOIShape, TBoundingBox, OIText, TOIDecorator, Box, OIEraser } from "../../primitive"
-import { getPointsNearest } from "../../utils"
+import { getClosestPoints } from "../../utils"
 import { OISVGDecoratorUtil } from "./OISVGDecoratorUtil"
 import { OISVGEdgeUtil } from "./OISVGEdgeUtil"
 import { OISVGEraserUtil } from "./OISVGEraserUtil"
@@ -25,12 +25,12 @@ export class OISVGRenderer
   groupGuidesId = "guides-wrapper"
   selectionFilterId = "selection-filter"
   removalFilterId = "removal-filter"
-  arrowHeadStart = "arrow-head-start"
-  arrowHeadEnd = "arrow-head-end"
+  arrowHeadStartMarker = "arrow-head-start"
+  arrowHeadEndMaker = "arrow-head-end"
+  crossMarker = "cross-head"
 
   configuration: TRenderingConfiguration
   parent!: HTMLElement
-  tooltip!: HTMLElement
   layer!: SVGElement
 
   strokeUtil: OISVGStrokeUtil
@@ -50,7 +50,7 @@ export class OISVGRenderer
     this.strokeUtil = new OISVGStrokeUtil(this.selectionFilterId, this.removalFilterId)
     this.eraserUtil = new OISVGEraserUtil()
     this.shapeUtil = new OISVGShapeUtil(this.selectionFilterId, this.removalFilterId)
-    this.edgeUtil = new OISVGEdgeUtil(this.selectionFilterId, this.removalFilterId, this.arrowHeadStart, this.arrowHeadEnd)
+    this.edgeUtil = new OISVGEdgeUtil(this.selectionFilterId, this.removalFilterId, this.arrowHeadStartMarker, this.arrowHeadEndMaker)
     this.textUtil = new OISVGTextUtil(this.selectionFilterId, this.removalFilterId)
     this.decoratorUtil = new OISVGDecoratorUtil(this.selectionFilterId, this.removalFilterId)
 
@@ -74,18 +74,36 @@ export class OISVGRenderer
     const defs = SVGBuilder.createDefs()
 
     const SIZE = 5
-    const REFX = 0, REFY = SIZE / 2
-    const arrowHeadPolyAttrs = {
+    const REFX = SIZE - 1, REFY = SIZE / 2
+    const arrowHeadMarkerAttrs = {
       style: NO_SELECTION,
       fill: "context-stroke",
+      markerWidth: SIZE.toString(),
+      markerHeight: SIZE.toString(),
+      refX: REFX.toString(),
+      refY: REFY.toString(),
     }
-    const arrowHeadStart = SVGBuilder.createMarker(this.arrowHeadStart, SIZE, SIZE, REFX, REFY, "auto-start-reverse")
-    arrowHeadStart.appendChild(SVGBuilder.createPolygon([0, 0, SIZE, REFY, REFX, SIZE], arrowHeadPolyAttrs))
+
+    const arrowHeadStart = SVGBuilder.createMarker(this.arrowHeadStartMarker, { ...arrowHeadMarkerAttrs, orient: "auto-start-reverse" })
+    arrowHeadStart.appendChild(SVGBuilder.createPolygon([0, 0, SIZE, REFY, 0, SIZE], arrowHeadMarkerAttrs))
     defs.appendChild(arrowHeadStart)
 
-    const arrowHeadEnd = SVGBuilder.createMarker(this.arrowHeadEnd, SIZE, SIZE, REFX, REFY, "auto")
-    arrowHeadEnd.appendChild(SVGBuilder.createPolygon([0, 0, SIZE, REFY, REFX, SIZE], arrowHeadPolyAttrs))
+    const arrowHeadEnd = SVGBuilder.createMarker(this.arrowHeadEndMaker, { ...arrowHeadMarkerAttrs, orient: "auto" })
+    arrowHeadEnd.appendChild(SVGBuilder.createPolygon([0, 0, SIZE, REFY, 0, SIZE], arrowHeadMarkerAttrs))
     defs.appendChild(arrowHeadEnd)
+
+    const crossMarkerAttrs = {
+      style: NO_SELECTION,
+      markerWidth: "5",
+      markerHeight: "5",
+      refX: "0",
+      refY: "0",
+      viewBox: "-5 -5 10 10"
+    }
+    const cross = SVGBuilder.createMarker(this.crossMarker, crossMarkerAttrs)
+    cross.appendChild(SVGBuilder.createPath({ d: "M -4,-4 L 4,4 M -4,4 L 4,-4", stroke: "white", "stroke-width": "3" }))
+    cross.appendChild(SVGBuilder.createPath({ d: "M -4,-4 L 4,4 M -4,4 L 4,-4", stroke: "context-stroke", "stroke-width": "2" }))
+    defs.appendChild(cross)
 
     this.layer.appendChild(defs)
   }
@@ -174,6 +192,8 @@ export class OISVGRenderer
         this.#logger.error("#drawGuides", `Guide type unknow: ${ this.configuration.guides.type }`)
         break
     }
+    this.horizontalGuides = [...new Set(this.horizontalGuides)]
+    this.verticalGuides = [...new Set(this.verticalGuides)]
     this.layer.appendChild(guidesGroup)
   }
 
@@ -184,15 +204,6 @@ export class OISVGRenderer
     this.layer.querySelector(`#${ this.groupGuidesId }`)?.remove()
   }
 
-  protected initTooltip(): void
-  {
-    this.tooltip = document.createElement("div")
-    this.tooltip.id = "svg-renderer-tooltip"
-    this.tooltip.classList.add("symbol-tooltip")
-    this.tooltip.style.display = "none"
-    this.tooltip.onpointerup = () => this.tooltip.style.display = "none"
-    this.parent.appendChild(this.tooltip)
-  }
 
   init(element: HTMLElement): void
   {
@@ -200,7 +211,6 @@ export class OISVGRenderer
     this.parent = element
     this.parent.oncontextmenu = () => false
     this.initLayer()
-    this.initTooltip()
     if (this.configuration.guides.enable) {
       this.drawGuides()
     }
@@ -309,31 +319,6 @@ export class OISVGRenderer
     return
   }
 
-//   addTooltipOnSymbolElement(el: SVGElement, symbol: TOISymbol): SVGElement
-//   {
-//     el.onpointerdown = (e) =>
-//     {
-//       if (e.button === 2) {
-//         e.preventDefault()
-//         e.stopPropagation()
-//         this.tooltip.style.left = `${ symbol.boundingBox.xMin }px`
-//         this.tooltip.style.top = `${ symbol.boundingBox.yMax }px`
-//         this.tooltip.textContent = `
-//   id: ${ symbol.id }
-//   type: ${ symbol.type }
-//   boundingBox: {
-//     xMin: ${ symbol.boundingBox.xMin },
-//     yMin: ${ symbol.boundingBox.yMin },
-//     xMax: ${ symbol.boundingBox.xMax },
-//     yMax: ${ symbol.boundingBox.yMax }
-//   }
-// `
-//         this.tooltip.style.display = "block"
-//       }
-//     }
-//     return el
-//   }
-
   drawSymbol(symbol: TOISymbol): SVGGraphicsElement | undefined
   {
     this.#logger.debug("drawSymbol", { symbol })
@@ -380,7 +365,7 @@ export class OISVGRenderer
   {
     const points1: TPoint[] = new Box(box1).corners
     const points2: TPoint[] = new Box(box2).corners
-    const { p1, p2 } = getPointsNearest(points1, points2)
+    const { p1, p2 } = getClosestPoints(points1, points2)
     const attrsLine = {
       id,
       fill: "transparent",

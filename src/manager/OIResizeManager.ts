@@ -23,6 +23,7 @@ import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
 import { UndoRedoManager } from "../undo-redo"
 import { OISelectionManager } from "./OISelectionManager"
+import { OISnapManager } from "./OISnapManager"
 import { OITextManager } from "./OITextManager"
 
 /**
@@ -73,6 +74,11 @@ export class OIResizeManager
   get recognizer(): OIRecognizer
   {
     return this.behaviors.recognizer
+  }
+
+  get snap(): OISnapManager
+  {
+    return this.behaviors.snap
   }
 
   protected applyToStroke(stroke: OIStroke, origin: TPoint, scaleX: number, scaleY: number): OIStroke
@@ -202,20 +208,40 @@ export class OIResizeManager
     if (!this.wrapper) {
       throw new Error("Can't resize, you must call start before")
     }
+    const localPoint = point
+    const horizontalResize = [
+      ResizeDirection.East,
+      ResizeDirection.NorthEast,
+      ResizeDirection.SouthEast,
+      ResizeDirection.West,
+      ResizeDirection.NorthWest,
+      ResizeDirection.SouthWest
+    ].includes(this.direction)
+    const verticalResize = [
+      ResizeDirection.North,
+      ResizeDirection.NorthEast,
+      ResizeDirection.NorthWest,
+      ResizeDirection.South,
+      ResizeDirection.SouthEast,
+      ResizeDirection.SouthWest
+    ].includes(this.direction)
+    const { x, y } = this.snap.snapResize(point, horizontalResize, verticalResize)
+    localPoint.x = x
+    localPoint.y = y
 
     let deltaX = 0, deltaY = 0
     if ([ResizeDirection.East, ResizeDirection.NorthEast, ResizeDirection.SouthEast].includes(this.direction)) {
-      deltaX = point.x - this.boundingBox.xMax
+      deltaX = localPoint.x - this.boundingBox.xMax
     }
     else if ([ResizeDirection.West, ResizeDirection.NorthWest, ResizeDirection.SouthWest].includes(this.direction)) {
-      deltaX = this.boundingBox.xMin - point.x
+      deltaX = this.boundingBox.xMin - localPoint.x
     }
 
     if ([ResizeDirection.North, ResizeDirection.NorthEast, ResizeDirection.NorthWest].includes(this.direction)) {
-      deltaY = this.boundingBox.yMin - point.y
+      deltaY = this.boundingBox.yMin - localPoint.y
     }
     else if ([ResizeDirection.South, ResizeDirection.SouthEast, ResizeDirection.SouthWest].includes(this.direction)) {
-      deltaY = point.y - this.boundingBox.yMax
+      deltaY = localPoint.y - this.boundingBox.yMax
     }
 
     let scaleX = 1 + (deltaX / this.boundingBox.width)
@@ -244,6 +270,7 @@ export class OIResizeManager
   {
     this.#logger.info("end", { point })
     const { scaleX, scaleY } = this.continue(point)
+    this.snap.clearSnapToElementLines()
     const strokesResized: OIStroke[] = []
     this.model.symbolsSelected.forEach(s =>
     {

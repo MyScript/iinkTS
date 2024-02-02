@@ -23,6 +23,7 @@ import { OISVGRenderer } from "../renderer"
 import { UndoRedoManager } from "../undo-redo"
 import { computeAngleRadian, converDegreeToRadian, convertRadianToDegree, rotatePoint } from "../utils"
 import { OISelectionManager } from "./OISelectionManager"
+import { OISnapManager } from "./OISnapManager"
 import { OITextManager } from "./OITextManager"
 
 /**
@@ -70,6 +71,11 @@ export class OIRotationManager
   get recognizer(): OIRecognizer
   {
     return this.behaviors.recognizer
+  }
+
+  get snap(): OISnapManager
+  {
+    return this.behaviors.snap
   }
 
   protected applyToStroke(stroke: OIStroke, center: TPoint, angleRad: number): OIStroke
@@ -187,6 +193,8 @@ export class OIRotationManager
       throw new Error("Can't rotate, you must call start before")
     }
     let angleDegree = +convertRadianToDegree(computeAngleRadian(this.origin, this.center, point))
+
+    angleDegree = this.snap.snapRotation(angleDegree)
 
     if (point.x - this.center.x < 0) {
       angleDegree = 360 - angleDegree

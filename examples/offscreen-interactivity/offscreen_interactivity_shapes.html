@@ -73,10 +73,15 @@
           <button id="menu-shape" class="menu-button">
             <img id="menu-shape-img" src="../assets/img/rectangle.svg" />
           </button>
-          <ul class="horizontal" style="margin-left: -50px;">
+          <ul class="horizontal">
             <li>
               <button id="draw-rectangle" class="menu-button">
                 <img src="../assets/img/rectangle.svg" />
+              </button>
+            </li>
+            <li>
+              <button id="draw-parallelogram" class="menu-button">
+                <img src="../assets/img/parallelogram.svg" />
               </button>
             </li>
             <li>
@@ -85,13 +90,13 @@
               </button>
             </li>
             <li>
-              <button id="draw-triangle" class="menu-button">
-                <img src="../assets/img/triangle.svg" />
+              <button id="draw-ellipse" class="menu-button">
+                <img src="../assets/img/ellipse.svg" />
               </button>
             </li>
             <li>
-              <button id="draw-parallelogram" class="menu-button">
-                <img src="../assets/img/parallelogram.svg" />
+              <button id="draw-triangle" class="menu-button">
+                <img src="../assets/img/triangle.svg" />
               </button>
             </li>
           </ul>
@@ -133,9 +138,10 @@
       const penBtn = document.getElementById("pen");
       const shapeMenuBtn = document.getElementById("menu-shape");
       const drawRectangleBtn = document.getElementById("draw-rectangle");
-      const drawCircleBtn = document.getElementById("draw-circle");
-      const drawTriangleBtn = document.getElementById("draw-triangle");
       const drawParallelogramBtn = document.getElementById("draw-parallelogram");
+      const drawCircleBtn = document.getElementById("draw-circle");
+      const drawEllipseBtn = document.getElementById("draw-ellipse");
+      const drawTriangleBtn = document.getElementById("draw-triangle");
       const lineMenuBtn = document.getElementById("menu-edge-btn");
       const drawLineBtn = document.getElementById("draw-line");
       const drawArrowBtn = document.getElementById("draw-arrow");
@@ -185,64 +191,71 @@
         });
 
         penBtn.addEventListener("click", () => {
-          editor.writeTool = iink.WriteTool.Pencil;
+          editor.behaviors.writer.tool = iink.WriteTool.Pencil;
           penBtn.classList.add("active");
           shapeMenuBtn.classList.remove("active");
           lineMenuBtn.classList.remove("active");
         });
 
         drawRectangleBtn.addEventListener("click", () => {
-          editor.writeTool = iink.WriteTool.Rectangle;
-          document.querySelectorAll(".menu-button").forEach(el => el.classList.remove("active"))
+          editor.behaviors.writer.tool = iink.WriteTool.Rectangle;
+          document.querySelectorAll(".menu-button").forEach((el) => el.classList.remove("active"));
           shapeMenuBtn.classList.add("active");
           drawRectangleBtn.classList.add("active");
           document.getElementById("menu-shape-img").src = drawRectangleBtn.children.item(0).src;
         });
 
-        drawCircleBtn.addEventListener("click", () => {
-          editor.writeTool = iink.WriteTool.Circle;
-          document.querySelectorAll(".menu-button").forEach(el => el.classList.remove("active"))
-          shapeMenuBtn.classList.add("active");
-          drawCircleBtn.classList.add("active");
-          document.getElementById("menu-shape-img").src = drawCircleBtn.children.item(0).src;
-        });
-
-        drawTriangleBtn.addEventListener("click", () => {
-          editor.writeTool = iink.WriteTool.Triangle;
-          document.querySelectorAll(".menu-button").forEach(el => el.classList.remove("active"))
-          shapeMenuBtn.classList.add("active");
-          drawTriangleBtn.classList.add("active");
-          document.getElementById("menu-shape-img").src = drawTriangleBtn.children.item(0).src;
-        });
-
         drawParallelogramBtn.addEventListener("click", () => {
-          editor.writeTool = iink.WriteTool.Parallelogram;
-          document.querySelectorAll(".menu-button").forEach(el => el.classList.remove("active"))
+          editor.behaviors.writer.tool = iink.WriteTool.Parallelogram;
+          document.querySelectorAll(".menu-button").forEach((el) => el.classList.remove("active"));
           shapeMenuBtn.classList.add("active");
           drawParallelogramBtn.classList.add("active");
           document.getElementById("menu-shape-img").src = drawParallelogramBtn.children.item(0).src;
         });
 
+        drawCircleBtn.addEventListener("click", () => {
+          editor.behaviors.writer.tool = iink.WriteTool.Circle;
+          document.querySelectorAll(".menu-button").forEach((el) => el.classList.remove("active"));
+          shapeMenuBtn.classList.add("active");
+          drawCircleBtn.classList.add("active");
+          document.getElementById("menu-shape-img").src = drawCircleBtn.children.item(0).src;
+        });
+
+        drawEllipseBtn.addEventListener("click", () => {
+          editor.behaviors.writer.tool = iink.WriteTool.Ellipse;
+          document.querySelectorAll(".menu-button").forEach((el) => el.classList.remove("active"));
+          shapeMenuBtn.classList.add("active");
+          drawEllipseBtn.classList.add("active");
+          document.getElementById("menu-shape-img").src = drawEllipseBtn.children.item(0).src;
+        });
+
+        drawTriangleBtn.addEventListener("click", () => {
+          editor.behaviors.writer.tool = iink.WriteTool.Triangle;
+          document.querySelectorAll(".menu-button").forEach((el) => el.classList.remove("active"));
+          shapeMenuBtn.classList.add("active");
+          drawTriangleBtn.classList.add("active");
+          document.getElementById("menu-shape-img").src = drawTriangleBtn.children.item(0).src;
+        });
+
         drawLineBtn.addEventListener("click", () => {
-          editor.writeTool = iink.WriteTool.Line;
-          document.querySelectorAll(".menu-button").forEach(el => el.classList.remove("active"))
+          editor.behaviors.writer.tool = iink.WriteTool.Line;
+          document.querySelectorAll(".menu-button").forEach((el) => el.classList.remove("active"));
           lineMenuBtn.classList.add("active");
           drawLineBtn.classList.add("active");
           document.getElementById("menu-edge-btn-img").src = drawLineBtn.children.item(0).src;
         });
 
         drawArrowBtn.addEventListener("click", () => {
-          editor.writeTool = iink.WriteTool.Arrow;
-          document.querySelectorAll(".menu-button").forEach(el => el.classList.remove("active"))
+          editor.behaviors.writer.tool = iink.WriteTool.Arrow;
+          document.querySelectorAll(".menu-button").forEach((el) => el.classList.remove("active"));
           lineMenuBtn.classList.add("active");
           drawArrowBtn.classList.add("active");
           document.getElementById("menu-edge-btn-img").src = drawArrowBtn.children.item(0).src;
         });
 
         drawDoubleArrowBtn.addEventListener("click", () => {
-          editor.intention = iink.Intention.Write;
-          editor.writeTool = iink.WriteTool.DoubleArrow;
-          document.querySelectorAll(".menu-button").forEach(el => el.classList.remove("active"))
+          editor.behaviors.writer.tool = iink.WriteTool.DoubleArrow;
+          document.querySelectorAll(".menu-button").forEach((el) => el.classList.remove("active"));
           lineMenuBtn.classList.add("active");
           drawDoubleArrowBtn.classList.add("active");
           document.getElementById("menu-edge-btn-img").src = drawDoubleArrowBtn.children.item(0).src;
@@ -253,7 +266,7 @@
         });
       }
 
-      loadEditor().catch(error => console.error(error));
+      loadEditor().catch((error) => console.error(error));
     </script>
   </body>
 </html>

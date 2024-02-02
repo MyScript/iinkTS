@@ -9,7 +9,6 @@ import
   TBoundingBox
 } from "../../../src/iink"
 
-
 describe("OIShapeCircle.ts", () =>
 {
   describe("constructor", () =>
@@ -107,11 +106,11 @@ describe("OIShapeCircle.ts", () =>
       }
       const circle = OIShapeCircle.createFromLine(style, origin, target)
       expect(circle.center).toEqual({ x: 6, y: 12 })
-      expect(round(circle.radius, 0)).toEqual(11)
-      expect(round(circle.boundingBox.width, 0)).toEqual(22)
-      expect(round(circle.boundingBox.height, 0)).toEqual(22)
-      expect(round(circle.boundingBox.x, 0)).toEqual(-5)
-      expect(round(circle.boundingBox.y, 0)).toEqual(1)
+      expect(round(circle.radius, 0)).toEqual(5)
+      expect(round(circle.boundingBox.width, 0)).toEqual(10)
+      expect(round(circle.boundingBox.height, 0)).toEqual(10)
+      expect(round(circle.boundingBox.x, 0)).toEqual(1)
+      expect(round(circle.boundingBox.y, 0)).toEqual(7)
     })
     test("should create when origin is at the top right", () =>
     {
@@ -123,11 +122,11 @@ describe("OIShapeCircle.ts", () =>
       }
       const circle = OIShapeCircle.createFromLine(style, origin, target)
       expect(circle.center).toEqual({ x: 6, y: 12 })
-      expect(round(circle.radius, 0)).toEqual(11)
-      expect(round(circle.boundingBox.width, 0)).toEqual(22)
-      expect(round(circle.boundingBox.height, 0)).toEqual(22)
-      expect(round(circle.boundingBox.x, 0)).toEqual(-5)
-      expect(round(circle.boundingBox.y, 0)).toEqual(1)
+      expect(round(circle.radius, 0)).toEqual(5)
+      expect(round(circle.boundingBox.width, 0)).toEqual(10)
+      expect(round(circle.boundingBox.height, 0)).toEqual(10)
+      expect(round(circle.boundingBox.x, 0)).toEqual(1)
+      expect(round(circle.boundingBox.y, 0)).toEqual(7)
     })
     test("should create when origin is at the bottom right", () =>
     {
@@ -139,11 +138,11 @@ describe("OIShapeCircle.ts", () =>
       }
       const circle = OIShapeCircle.createFromLine(style, origin, target)
       expect(circle.center).toEqual({ x: 6, y: 12 })
-      expect(round(circle.radius, 0)).toEqual(11)
-      expect(round(circle.boundingBox.width, 0)).toEqual(22)
-      expect(round(circle.boundingBox.height, 0)).toEqual(22)
-      expect(round(circle.boundingBox.x, 0)).toEqual(-5)
-      expect(round(circle.boundingBox.y, 0)).toEqual(1)
+      expect(round(circle.radius, 0)).toEqual(5)
+      expect(round(circle.boundingBox.width, 0)).toEqual(10)
+      expect(round(circle.boundingBox.height, 0)).toEqual(10)
+      expect(round(circle.boundingBox.x, 0)).toEqual(1)
+      expect(round(circle.boundingBox.y, 0)).toEqual(7)
     })
     test("should create when origin is at the bottom left", () =>
     {
@@ -155,11 +154,11 @@ describe("OIShapeCircle.ts", () =>
       }
       const circle = OIShapeCircle.createFromLine(style, origin, target)
       expect(circle.center).toEqual({ x: 6, y: 12 })
-      expect(round(circle.radius, 0)).toEqual(11)
-      expect(round(circle.boundingBox.width, 0)).toEqual(22)
-      expect(round(circle.boundingBox.height, 0)).toEqual(22)
-      expect(round(circle.boundingBox.x, 0)).toEqual(-5)
-      expect(round(circle.boundingBox.y, 0)).toEqual(1)
+      expect(round(circle.radius, 0)).toEqual(5)
+      expect(round(circle.boundingBox.width, 0)).toEqual(10)
+      expect(round(circle.boundingBox.height, 0)).toEqual(10)
+      expect(round(circle.boundingBox.x, 0)).toEqual(1)
+      expect(round(circle.boundingBox.y, 0)).toEqual(7)
     })
   })
 
@@ -175,28 +174,28 @@ describe("OIShapeCircle.ts", () =>
     test("should updateFromLine when target x increas", () =>
     {
       expect(circle.center).toEqual({ x: 2.5, y: 4 })
-      expect(round(circle.radius, 0)).toEqual(3)
-      expect(round(circle.boundingBox.width, 0)).toEqual(5)
-      expect(round(circle.boundingBox.height, 0)).toEqual(5)
-      expect(round(circle.boundingBox.x, 0)).toEqual(0)
-      expect(round(circle.boundingBox.y, 0)).toEqual(2)
+      expect(round(circle.radius, 0)).toEqual(2)
+      expect(round(circle.boundingBox.width, 0)).toEqual(3)
+      expect(round(circle.boundingBox.height, 0)).toEqual(3)
+      expect(round(circle.boundingBox.x, 0)).toEqual(1)
+      expect(round(circle.boundingBox.y, 0)).toEqual(3)
       OIShapeCircle.updateFromLine(circle, origin, { x: target.x + 6, y: target.y })
       expect(circle.center).toEqual({ x: 5.5, y: 4 })
-      expect(round(circle.radius, 0)).toEqual(5)
-      expect(round(circle.boundingBox.width, 0)).toEqual(10)
-      expect(round(circle.boundingBox.height, 0)).toEqual(10)
-      expect(round(circle.boundingBox.x, 0)).toEqual(1)
-      expect(round(circle.boundingBox.y, 0)).toEqual(-1)
+      expect(round(circle.radius, 0)).toEqual(2)
+      expect(round(circle.boundingBox.width, 0)).toEqual(4)
+      expect(round(circle.boundingBox.height, 0)).toEqual(4)
+      expect(round(circle.boundingBox.x, 0)).toEqual(4)
+      expect(round(circle.boundingBox.y, 0)).toEqual(2)
     })
     test("should updateFromLine when target y increase", () =>
     {
       OIShapeCircle.updateFromLine(circle, origin, { x: target.x, y: target.y + 4 })
       expect(circle.center).toEqual({ x: 2.5, y: 6 })
-      expect(round(circle.radius, 0)).toEqual(4)
-      expect(round(circle.boundingBox.width, 0)).toEqual(9)
-      expect(round(circle.boundingBox.height, 0)).toEqual(9)
-      expect(round(circle.boundingBox.x, 0)).toEqual(-2)
-      expect(round(circle.boundingBox.y, 0)).toEqual(2)
+      expect(round(circle.radius, 0)).toEqual(2)
+      expect(round(circle.boundingBox.width, 0)).toEqual(3)
+      expect(round(circle.boundingBox.height, 0)).toEqual(3)
+      expect(round(circle.boundingBox.x, 0)).toEqual(1)
+      expect(round(circle.boundingBox.y, 0)).toEqual(5)
     })
   })
 

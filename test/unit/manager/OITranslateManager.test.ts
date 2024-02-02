@@ -102,7 +102,7 @@ describe("OITranslateManager.ts", () =>
     })
   })
 
-  describe("translate process on stroke", () =>
+  describe("translate process on stroke without snap", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
     const behaviors = new OIBehaviors(DefaultBehaviorsOptions)
@@ -116,6 +116,8 @@ describe("OITranslateManager.ts", () =>
     behaviors.setPenStyleClasses = jest.fn(() => Promise.resolve())
 
     const manager = new OITranslateManager(behaviors)
+    manager.snap.snapToGrid = false
+    manager.snap.snapToElement = false
     manager.applyToSymbol = jest.fn()
 
     const stroke = new OIStroke({}, 1)
