@@ -336,6 +336,24 @@ export class OISVGRenderer
     return svgEl
   }
 
+  replaceSymbol(id:string, symbols: TOISymbol[]): SVGGraphicsElement[] | undefined
+  {
+    this.#logger.debug("drawSymbol", { symbols })
+    const oldNode = this.layer.querySelector(`#${ id }`)
+    const elements = symbols.map(s => this.getSymbolElement(s)).filter(x => !!x) as SVGGraphicsElement[]
+
+    if (elements.length) {
+      if (oldNode) {
+        elements.forEach(e => oldNode.insertAdjacentElement("beforebegin", e))
+        oldNode.remove()
+      }
+      else {
+        elements.forEach(e => this.layer.appendChild(e))
+      }
+    }
+    return elements
+  }
+
   removeSymbol(id: string): void
   {
     this.#logger.debug("removeSymbol", { id })

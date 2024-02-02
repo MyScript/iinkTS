@@ -1,7 +1,7 @@
 import { LoggerClass, SELECTION_MARGIN } from "../Constants"
 import { LoggerManager } from "../logger"
 import { DefaultStyle, TStyle } from "../style"
-import { PartialDeep, computeDistance } from "../utils"
+import { PartialDeep, computeDistance, getClosestPoint} from "../utils"
 import { TStroke, TStrokeToSend } from "./Stroke"
 import { TPoint, TPointer } from "./Point"
 import { TBoundingBox } from "./Box"
@@ -42,6 +42,35 @@ export class OIStroke extends OISymbol implements TStroke, TOISymbolDecorable
     after.pointers = strokeToSplit.pointers.slice(i)
 
     return { before, after }
+  }
+
+  static substract(stroke: OIStroke, partStroke: OIStroke): { before?: OIStroke, after?: OIStroke }
+  {
+    if (!partStroke.length) return { before: stroke }
+    const result: { before?: OIStroke, after?: OIStroke } = {}
+    const lastPointBeforeStroke = {
+      x: partStroke.pointers[0].x as number,
+      y: partStroke.pointers[0].y as number
+    }
+    const closestLastPointBeforeStroke = getClosestPoint(stroke.pointers, lastPointBeforeStroke)
+    if (closestLastPointBeforeStroke.index > -1) {
+      const newStrokes = OIStroke.split(stroke, closestLastPointBeforeStroke.index)
+      result.before = newStrokes.before
+      result.after = newStrokes.after
+    }
+    const strokeAfter = result.after || stroke
+    const firstPointAfterStroke = {
+      x: partStroke.pointers.at(-1)!.x as number,
+      y: partStroke.pointers.at(-1)!.y as number
+    }
+    const closestFirstPointStrokeAfter = getClosestPoint(strokeAfter.pointers, firstPointAfterStroke)
+    if (closestFirstPointStrokeAfter.index > -1) {
+      const newStrokes = OIStroke.split(strokeAfter, closestFirstPointStrokeAfter.index)
+      result.after = newStrokes.after
+    }
+    if (!result.before?.pointers.length) result.before = undefined
+    if (!result.after?.pointers.length) result.after = undefined
+    return result
   }
 
   get snapPoints(): TPoint[]

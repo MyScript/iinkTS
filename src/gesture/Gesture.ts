@@ -17,7 +17,7 @@ export type TGesture = {
   strokeIds: string[]
   strokeBeforeIds: string[]
   strokeAfterIds: string[]
-  subStrokes?: { x: number[], y: number[] }[]
+  subStrokes?: { fullStrokeId: string, x: number[], y: number[] }[]
 }
 
 /**

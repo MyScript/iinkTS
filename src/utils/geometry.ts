@@ -213,3 +213,26 @@ export function getClosestPoints(points1: TPoint[], points2: TPoint[]): { p1: TP
   })
   return { p1, p2 }
 }
+
+/**
+ * @group Utils
+ */
+export function getClosestPoint(points: TPoint[], point: TPoint): { point?: TPoint, index: number }
+{
+  let minDistance = Number.MAX_SAFE_INTEGER
+  let closest: TPoint | undefined
+  let index = -1
+  points.forEach((p, i) =>
+  {
+    const d = computeDistance(p, point)
+    if (minDistance > d) {
+      minDistance = d
+      closest = p
+      index = i
+    }
+  })
+  return {
+    point: closest,
+    index
+  }
+}

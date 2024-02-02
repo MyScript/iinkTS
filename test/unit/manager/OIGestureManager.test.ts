@@ -1,3 +1,4 @@
+import { buildOIStroke, buildOIText } from "../helpers"
 import
 {
   OIGestureManager,
@@ -7,9 +8,9 @@ import
   TGesture,
   DecoratorKind,
   SymbolType,
-  SurroundAction
+  SurroundAction,
+  TOISymbolChar
 } from "../../../src/iink"
-import { buildOIStroke } from "../helpers"
 
 describe("OIGestureManager.ts", () =>
 {
@@ -272,6 +273,23 @@ describe("OIGestureManager.ts", () =>
         id: stroke.id,
       }))
     })
+
+    test("should log error if surroundAction is unknow", async () =>
+    {
+      console.error = jest.fn()
+      const gesture: TGesture = {
+        gestureType: "SURROUND",
+        gestureStrokeId: "stroke-5b5c63a1-d546-4eb8-a63a-6db512ce2aaf",
+        strokeIds: [stroke.id],
+        strokeBeforeIds: [],
+        strokeAfterIds: []
+      }
+      //@ts-ignore
+      gestMan.surroundAction = "unknow"
+      await gestMan.applySurroundGesture(gesture)
+      expect(console.error).toHaveBeenCalledTimes(1)
+      expect(console.error).toHaveBeenCalledWith({ "error": ["Unknow surroundAction: unknow, values allowed are: highlight, select, surround"], "from": "GESTURE.applySurroundGesture" })
+    })
   })
 
   describe("applyScratchGesture", () =>
@@ -281,17 +299,26 @@ describe("OIGestureManager.ts", () =>
     }
     behaviorsOptions.configuration.offscreen = true
     const behaviors = new OIBehaviors(behaviorsOptions)
-    const stroke = buildOIStroke()
-    behaviors.model.addSymbol(stroke)
-    const gestureStroke = buildOIStroke()
-    const gestMan = new OIGestureManager(behaviors)
-    gestMan.renderer.removeSymbol = jest.fn()
-    gestMan.model.removeSymbol = jest.fn(id => [id])
-    gestMan.recognizer.eraseStrokes = jest.fn((() => Promise.resolve()))
-    gestMan.undoRedoManager.addModelToStack = jest.fn()
+    const manager = new OIGestureManager(behaviors)
+    manager.textManager.adjustText = jest.fn()
+    manager.renderer.drawSymbol = jest.fn()
+    manager.renderer.removeSymbol = jest.fn()
+    manager.renderer.replaceSymbol = jest.fn()
+    manager.model.removeSymbol = jest.fn(id => [id])
+    manager.model.updateSymbol = jest.fn(id => [id])
+    manager.model.replaceSymbol = jest.fn(id => [id])
+    manager.recognizer.eraseStrokes = jest.fn((() => Promise.resolve()))
+    manager.recognizer.replaceStrokes = jest.fn((() => Promise.resolve()))
+    manager.undoRedoManager.addModelToStack = jest.fn()
+
+    beforeEach(() =>
+    {
+      manager.model.clear()
+    })
 
     test("should do nothing if gesture as no strokeIds", async () =>
     {
+      const gestureStroke = buildOIStroke()
       const gesture: TGesture = {
         gestureType: "SCRATCH",
         gestureStrokeId: gestureStroke.id,
@@ -299,15 +326,98 @@ describe("OIGestureManager.ts", () =>
         strokeBeforeIds: [],
         strokeAfterIds: []
       }
-      await gestMan.applyScratchGesture(gestureStroke, gesture)
-      expect(gestMan.renderer.removeSymbol).toHaveBeenCalledTimes(0)
-      expect(gestMan.model.removeSymbol).toHaveBeenCalledTimes(0)
-      expect(gestMan.recognizer.eraseStrokes).toHaveBeenCalledTimes(0)
-      expect(gestMan.undoRedoManager.addModelToStack).toHaveBeenCalledTimes(0)
+      await manager.applyScratchGesture(gestureStroke, gesture)
+      expect(manager.renderer.removeSymbol).toHaveBeenCalledTimes(0)
+      expect(manager.model.removeSymbol).toHaveBeenCalledTimes(0)
+      expect(manager.recognizer.eraseStrokes).toHaveBeenCalledTimes(0)
+      expect(manager.undoRedoManager.addModelToStack).toHaveBeenCalledTimes(0)
     })
 
-    test("should draw symbol", async () =>
+    test("should erase text symbol", async () =>
     {
+      const chars: TOISymbolChar[] = [
+        {
+          boundingBox: { height: 10, width: 5, x: 0, y: 10 },
+          color: "black",
+          fontSize: 16,
+          fontWeight: 400,
+          id: "char-1",
+          label: "A"
+        },
+        {
+          boundingBox: { height: 10, width: 5, x: 5, y: 10 },
+          color: "black",
+          fontSize: 16,
+          fontWeight: 400,
+          id: "char-2",
+          label: "b"
+        }
+      ]
+      const text = buildOIText({ chars, boundingBox: { height: 10, width: 10, x: 0, y: 10 } })
+      behaviors.model.addSymbol(text)
+      const gestureStroke = buildOIStroke({ box: text.boundingBox })
+      const gesture: TGesture = {
+        gestureType: "SCRATCH",
+        gestureStrokeId: gestureStroke.id,
+        strokeIds: [text.id],
+        strokeBeforeIds: [],
+        strokeAfterIds: []
+      }
+      await manager.applyScratchGesture(gestureStroke, gesture)
+      expect(manager.renderer.drawSymbol).toHaveBeenCalledTimes(0)
+      expect(manager.model.updateSymbol).toHaveBeenCalledTimes(0)
+      expect(manager.renderer.removeSymbol).toHaveBeenCalledTimes(1)
+      expect(manager.model.removeSymbol).toHaveBeenCalledTimes(1)
+      expect(manager.recognizer.eraseStrokes).toHaveBeenCalledTimes(0)
+      expect(manager.textManager.adjustText).toHaveBeenCalledTimes(1)
+      expect(manager.undoRedoManager.addModelToStack).toHaveBeenCalledTimes(1)
+    })
+
+    test("should partially erase text symbol", async () =>
+    {
+      const chars: TOISymbolChar[] = [
+        {
+          boundingBox: { height: 10, width: 5, x: 0, y: 10 },
+          color: "black",
+          fontSize: 16,
+          fontWeight: 400,
+          id: "char-1",
+          label: "A"
+        },
+        {
+          boundingBox: { height: 10, width: 5, x: 5, y: 10 },
+          color: "black",
+          fontSize: 16,
+          fontWeight: 400,
+          id: "char-2",
+          label: "b"
+        }
+      ]
+      const text = buildOIText({ chars, boundingBox: { height: 10, width: 10, x: 0, y: 10 } })
+      behaviors.model.addSymbol(text)
+      const gestureStroke = buildOIStroke({ box: chars[0].boundingBox })
+      const gesture: TGesture = {
+        gestureType: "SCRATCH",
+        gestureStrokeId: gestureStroke.id,
+        strokeIds: [text.id],
+        strokeBeforeIds: [],
+        strokeAfterIds: []
+      }
+      await manager.applyScratchGesture(gestureStroke, gesture)
+      expect(manager.renderer.drawSymbol).toHaveBeenCalledTimes(1)
+      expect(manager.model.updateSymbol).toHaveBeenCalledTimes(1)
+      expect(manager.renderer.removeSymbol).toHaveBeenCalledTimes(0)
+      expect(manager.model.removeSymbol).toHaveBeenCalledTimes(0)
+      expect(manager.recognizer.eraseStrokes).toHaveBeenCalledTimes(0)
+      expect(manager.textManager.adjustText).toHaveBeenCalledTimes(1)
+      expect(manager.undoRedoManager.addModelToStack).toHaveBeenCalledTimes(1)
+    })
+
+    test("should erase stroke symbol", async () =>
+    {
+      const stroke = buildOIStroke()
+      behaviors.model.addSymbol(stroke)
+      const gestureStroke = buildOIStroke()
       const gesture: TGesture = {
         gestureType: "SCRATCH",
         gestureStrokeId: gestureStroke.id,
@@ -315,11 +425,39 @@ describe("OIGestureManager.ts", () =>
         strokeBeforeIds: [],
         strokeAfterIds: []
       }
-      await gestMan.applyScratchGesture(gestureStroke, gesture)
-      expect(gestMan.renderer.removeSymbol).toHaveBeenCalledTimes(1)
-      expect(gestMan.model.removeSymbol).toHaveBeenCalledTimes(1)
-      expect(gestMan.recognizer.eraseStrokes).toHaveBeenCalledTimes(1)
-      expect(gestMan.undoRedoManager.addModelToStack).toHaveBeenCalledTimes(1)
+      await manager.applyScratchGesture(gestureStroke, gesture)
+      expect(manager.renderer.drawSymbol).toHaveBeenCalledTimes(0)
+      expect(manager.model.updateSymbol).toHaveBeenCalledTimes(0)
+      expect(manager.renderer.removeSymbol).toHaveBeenCalledTimes(1)
+      expect(manager.model.removeSymbol).toHaveBeenCalledTimes(1)
+      expect(manager.recognizer.eraseStrokes).toHaveBeenCalledTimes(1)
+      expect(manager.undoRedoManager.addModelToStack).toHaveBeenCalledTimes(1)
+    })
+
+    test("should partially erase stroke symbol", async () =>
+    {
+      const stroke = buildOIStroke({ nbPoint: 50 })
+      behaviors.model.addSymbol(stroke)
+      const gestureStroke = buildOIStroke()
+      const gesture: TGesture = {
+        gestureType: "SCRATCH",
+        gestureStrokeId: gestureStroke.id,
+        strokeIds: [stroke.id],
+        strokeBeforeIds: [],
+        strokeAfterIds: [],
+        subStrokes: [{ fullStrokeId: stroke.id, x: stroke.pointers.slice(10, 25).map(p => p.x), y: stroke.pointers.slice(10, 25).map(p => p.y) }],
+      }
+      await manager.applyScratchGesture(gestureStroke, gesture)
+      expect(manager.model.updateSymbol).toHaveBeenCalledTimes(0)
+      expect(manager.model.replaceSymbol).toHaveBeenCalledTimes(1)
+      expect(manager.model.removeSymbol).toHaveBeenCalledTimes(0)
+      expect(manager.renderer.drawSymbol).toHaveBeenCalledTimes(0)
+      expect(manager.renderer.removeSymbol).toHaveBeenCalledTimes(0)
+      expect(manager.renderer.removeSymbol).toHaveBeenCalledTimes(0)
+      expect(manager.renderer.replaceSymbol).toHaveBeenCalledTimes(1)
+      expect(manager.recognizer.eraseStrokes).toHaveBeenCalledTimes(0)
+      expect(manager.recognizer.replaceStrokes).toHaveBeenCalledTimes(1)
+      expect(manager.undoRedoManager.addModelToStack).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -402,7 +540,7 @@ describe("OIGestureManager.ts", () =>
         strokeIds: [stroke.id],
         strokeBeforeIds: [],
         strokeAfterIds: [],
-        subStrokes: [{ x: stroke.pointers.slice(2).map(p => p.x), y: stroke.pointers.slice(2).map(p => p.y) }],
+        subStrokes: [{ fullStrokeId: stroke.id, x: stroke.pointers.slice(2).map(p => p.x), y: stroke.pointers.slice(2).map(p => p.y) }],
       }
       await gestMan.applyInsertGesture(strokeGesture, gesture)
       expect(gestMan.renderer.removeSymbol).toHaveBeenCalledTimes(1)
@@ -507,5 +645,4 @@ describe("OIGestureManager.ts", () =>
       expect(gestMan.renderer.drawSymbol).toHaveBeenCalledWith(stroke)
     })
   })
-
 })
