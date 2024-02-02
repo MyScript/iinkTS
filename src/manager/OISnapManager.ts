@@ -2,14 +2,15 @@ import { LoggerClass } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerManager } from "../logger"
 import { OIModel } from "../model"
-import { TPoint } from "../primitive"
-import { OISVGRenderer } from "../renderer"
-import { computeDistance } from "../utils"
+import { Box, TPoint, TSegment } from "../primitive"
+import { NO_SELECTION, OISVGRenderer } from "../renderer"
 
-export type OISnapInfo = {
-  origin: TPoint,
-  target: TPoint,
-  distance: number,
+export type TSnapNudge = TPoint
+
+export type TSnapLineInfos = {
+  nudge: TSnapNudge,
+  verticales: TSegment[]
+  horizontales: TSegment[]
 }
 
 /**
@@ -21,6 +22,7 @@ export class OISnapManager
   behaviors: OIBehaviors
   snapToGrid: boolean
   snapToElement: boolean
+  snapAngle: number
 
   constructor(behaviors: OIBehaviors)
   {
@@ -28,6 +30,7 @@ export class OISnapManager
     this.behaviors = behaviors
     this.snapToElement = true
     this.snapToGrid = true
+    this.snapAngle = 0
   }
 
   get model(): OIModel
@@ -40,12 +43,23 @@ export class OISnapManager
     return this.behaviors.renderer
   }
 
-  get snapPoints(): TPoint[]
+  get selectionSnapPoints(): TPoint[]
   {
-    return this.model.symbolsSelected.flatMap(s => s.snapPoints)
+    return Box.createFromBoxes(this.model.symbolsSelected.flatMap(s => s.boundingBox)).snapPoints
   }
 
-  protected getNearestVeticalGuide(x: number): number
+  get otherSnapPoints(): TPoint[]
+  {
+    const selectSymbolIds = this.model.symbolsSelected.map(s => s.id)
+    return this.model.symbols.filter(s => !selectSymbolIds.includes(s.id)).flatMap(s => s.snapPoints)
+  }
+
+  get snapThreshold(): number
+  {
+    return this.behaviors.configuration.rendering.guides.gap / 2
+  }
+
+  protected getNearestVerticalGuide(x: number): number
   {
     if (this.renderer.verticalGuides.length) {
       return this.renderer.verticalGuides.reduce((prev, curr) =>
@@ -67,31 +81,163 @@ export class OISnapManager
     return y
   }
 
-  getPointToSnap(point: TPoint): TPoint
+  protected getGuidePointToSnap(point: TPoint): TPoint
   {
-    const pointToSnap = point
-    console.log('pointToSnap: ', pointToSnap.x, pointToSnap.y)
-    if (this.snapToGrid) {
-      const gridSnapInfos: OISnapInfo[] = this.snapPoints.map(sp =>
+    return {
+      x: this.getNearestVerticalGuide(point.x),
+      y: this.getNearestHorizontalGuide(point.y)
+    }
+  }
+
+  drawSnapToElementLines(lines: TSegment[]): void
+  {
+    const attrs = {
+      role: "snap-to-element",
+      fill: "transparent",
+      stroke: "blue",
+      "stroke-width": "2",
+      style: NO_SELECTION,
+      "marker-start": `url(#${ this.renderer.crossMarker })`,
+      "marker-end": `url(#${ this.renderer.crossMarker })`
+    }
+    lines.forEach(seg =>
+    {
+      this.renderer.drawLine(seg.p1, seg.p2, attrs)
+    })
+  }
+
+  clearSnapToElementLines(): void
+  {
+    this.renderer.clearElements({ attrs: { role: "snap-to-element" } })
+  }
+
+  protected getSnapLinesInfos(sourcePoints: TPoint[], targetPoints: TPoint[]): TSnapLineInfos
+  {
+    const infos: TSnapLineInfos = {
+      nudge: {
+        x: Infinity,
+        y: Infinity
+      },
+      verticales: [],
+      horizontales: [],
+    }
+    if (!sourcePoints.length || !targetPoints.length) return infos
+
+    sourcePoints.forEach(p1 =>
+    {
+      targetPoints.forEach(p2 =>
       {
-        const target = {
-          x: this.getNearestVeticalGuide(sp.x),
-          y: this.getNearestHorizontalGuide(sp.y)
+        if (this.snapThreshold > Math.abs(p2.x - p1.x)) {
+          if (Math.abs(infos.nudge.x) > Math.abs(p2.x - p1.x)) {
+            infos.nudge.x = p2.x - p1.x
+            infos.verticales = [{ p1: {...p1}, p2 }]
+          }
+          else if (infos.nudge.x === p2.x - p1.x) {
+            infos.verticales.push({ p1: {...p1}, p2 })
+          }
         }
-        return {
-          origin: sp,
-          target,
-          distance: computeDistance(sp, target)
+        if (this.snapThreshold > Math.abs(p2.y - p1.y)) {
+          if (Math.abs(infos.nudge.y) > Math.abs(p2.y - p1.y)) {
+            infos.nudge.y = p2.y - p1.y
+            infos.horizontales = [{ p1: {...p1}, p2 }]
+          }
+          else if (infos.nudge.y === p2.y - p1.y) {
+            infos.horizontales.push({ p1: {...p1}, p2 })
+          }
         }
       })
-      const nearestGridPoint = gridSnapInfos.reduce((g1, g2) => g1.distance < g2.distance ? g1 : g2)
+    })
 
-      pointToSnap.x = point.x + nearestGridPoint.target.x - nearestGridPoint.origin.x
-      pointToSnap.y = point.y + nearestGridPoint.target.y - nearestGridPoint.origin.y
+    return infos
+  }
+
+  snapResize(point: TPoint, horizontal = true, vertical = true): TPoint
+  {
+    this.clearSnapToElementLines()
+    if (!this.snapToElement && !this.snapToGrid) return point
+
+    let localPoint: TPoint = {
+      x: Infinity,
+      y: Infinity
+    }
+    if (this.snapToGrid) {
+      localPoint = this.getGuidePointToSnap(point)
+    }
+    const snapLines: TSegment[] = []
+
+    if (this.snapToElement) {
+      const snapLinesInfos = this.getSnapLinesInfos([point], this.otherSnapPoints)
+      if (horizontal && Math.abs(snapLinesInfos.nudge.x) <= Math.abs(point.x - localPoint.x)) {
+        localPoint.x = point.x + snapLinesInfos.nudge.x
+        snapLines.push(...snapLinesInfos.verticales)
+      }
+      if (vertical && Math.abs(snapLinesInfos.nudge.y) <= Math.abs(point.y - localPoint.y)) {
+        localPoint.y = point.y + snapLinesInfos.nudge.y
+        snapLines.push(...snapLinesInfos.horizontales)
+      }
     }
 
-    console.log('pointToSnap: ', pointToSnap.x, pointToSnap.y)
-    return pointToSnap
+    if (localPoint.x === Infinity) localPoint.x = point.x
+    if (localPoint.y === Infinity) localPoint.y = point.y
 
+    snapLines.forEach(s => s.p1 = localPoint)
+    this.drawSnapToElementLines(snapLines)
+    return localPoint
+  }
+
+  snapTranslate(tx: number, ty: number): TSnapNudge
+  {
+    this.clearSnapToElementLines()
+    const nudge: TSnapNudge = { x: tx, y: ty }
+    if (!this.snapToElement && !this.snapToGrid) return nudge
+
+    const selectionSymbolPoints = this.selectionSnapPoints.map(p => ({ x: p.x + tx, y: p.y + ty }))
+
+    let lastDeltaX = Infinity
+    let lastDeltaY = Infinity
+
+    if (this.snapToGrid) {
+      selectionSymbolPoints.forEach(p =>
+      {
+        const gridPoint = this.getGuidePointToSnap(p)
+        if (lastDeltaX > Math.abs(gridPoint.x - p.x)) {
+          nudge.x = gridPoint.x - p.x + tx
+          lastDeltaX = Math.abs(gridPoint.x - p.x)
+        }
+        if (lastDeltaY > Math.abs(gridPoint.y - p.y)) {
+          nudge.y = gridPoint.y - p.y + ty
+          lastDeltaY = Math.abs(gridPoint.y - p.y)
+        }
+      })
+    }
+
+    const snapLines: TSegment[] = []
+    if (this.snapToElement) {
+      const snapLinesInfos = this.getSnapLinesInfos(selectionSymbolPoints, this.otherSnapPoints)
+      if (lastDeltaX >= Math.abs(snapLinesInfos.nudge.x) && snapLinesInfos.verticales.length) {
+        nudge.x = snapLinesInfos.nudge.x + tx
+        snapLines.push(...snapLinesInfos.verticales)
+      }
+      if (lastDeltaY >= Math.abs(snapLinesInfos.nudge.y) && snapLinesInfos.horizontales.length) {
+        nudge.y = snapLinesInfos.nudge.y + ty
+        snapLines.push(...snapLinesInfos.horizontales)
+      }
+    }
+    if (snapLines.length) {
+      snapLines.forEach(l => {
+        l.p1.x += nudge.x - tx
+        l.p1.y += nudge.y - ty
+      })
+      this.drawSnapToElementLines(snapLines)
+    }
+    return nudge
+  }
+
+  snapRotation(angleDegree: number): number
+  {
+    if (this.snapAngle > 0) {
+      return this.snapAngle * Math.round(angleDegree / this.snapAngle)
+    }
+    return angleDegree
   }
 }

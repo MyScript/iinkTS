@@ -68,7 +68,6 @@ describe("OIConversionManager.ts", () =>
     behaviors.renderer.drawSymbol = jest.fn(() => symEl)
     behaviors.renderer.removeSymbol = jest.fn(() => Promise.resolve())
     behaviors.renderer.getElementBounds = jest.fn(() => new Box({ height: 4, width: 3, x: 2, y: 1 }))
-    behaviors.renderer.getSymbolBounds = jest.fn(() => new Box({ height: 4, width: 3, x: 2, y: 1 }))
     behaviors.model.addSymbol = jest.fn()
     behaviors.model.removeSymbol = jest.fn()
     const manager = new OIConversionManager(behaviors)

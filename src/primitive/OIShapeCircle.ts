@@ -79,7 +79,9 @@ export class OIShapeCircle extends OIShape
       y: (origin.y + target.y) / 2
     }
 
-    const radius = computeDistance(origin, target) / 2
+    const width = Math.abs(origin.x - target.x)
+    const height = Math.abs(origin.y - target.y)
+    const radius = Math.min(width, height) / 2
     return new OIShapeCircle(style, center, radius)
   }
 
@@ -89,7 +91,9 @@ export class OIShapeCircle extends OIShape
       x: (origin.x + target.x) / 2,
       y: (origin.y + target.y) / 2
     }
-    circle.radius = computeDistance(origin, target) / 2
+    const width = Math.abs(origin.x - target.x)
+    const height = Math.abs(origin.y - target.y)
+    circle.radius = Math.min(width, height) / 2
     return circle
   }
 }

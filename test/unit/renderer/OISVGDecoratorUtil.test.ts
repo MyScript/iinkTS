@@ -1,7 +1,6 @@
 import { DecoratorKind, DefaultStyle, OISVGDecoratorUtil, SymbolType, TStyle } from "../../../src/iink"
 import { buildOIHighlight, buildOIStrikethrough, buildOIStroke, buildOISurround, buildOIUnderline } from "../helpers"
 
-
 describe("OISVGDecoratorUtil.ts", () =>
 {
   test("should instanciate", () =>
@@ -53,6 +52,16 @@ describe("OISVGDecoratorUtil.ts", () =>
       decorator.selected = true
       const elSelected = renderer.getSVGElement(decorator) as SVGGeometryElement
       expect(elSelected.getAttribute("filter")).toEqual(`url(#${ selectionFilterId })`)
+    })
+    test("should Highlight to delete", () =>
+    {
+      const sym = buildOIStroke()
+      const decorator = buildOIHighlight([sym])
+      const elNotToDelete = renderer.getSVGElement(decorator) as SVGGeometryElement
+      expect(elNotToDelete.getAttribute("opacity")).toEqual(`0.5`)
+      decorator.toDelete = true
+      const elToDelete = renderer.getSVGElement(decorator) as SVGGeometryElement
+      expect(elToDelete.getAttribute("opacity")).toEqual(`0.25`)
     })
     test("should get Surround", () =>
     {
@@ -176,6 +185,16 @@ describe("OISVGDecoratorUtil.ts", () =>
       decorator.selected = true
       const elSelected = renderer.getSVGElement(decorator) as SVGGeometryElement
       expect(elSelected.getAttribute("filter")).toEqual(`url(#${ selectionFilterId })`)
+    })
+    test("should Underline selected", () =>
+    {
+      const sym = buildOIStroke()
+      const decorator = buildOIUnderline([sym])
+      const elNotToDelete = renderer.getSVGElement(decorator) as SVGGeometryElement
+      expect(elNotToDelete.getAttribute("opacity")).toEqual(`1`)
+      decorator.toDelete = true
+      const elToDelete = renderer.getSVGElement(decorator) as SVGGeometryElement
+      expect(elToDelete.getAttribute("opacity")).toEqual(`0.5`)
     })
   })
 

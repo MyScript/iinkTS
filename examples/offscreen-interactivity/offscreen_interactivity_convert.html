@@ -40,7 +40,7 @@
           <label class="toggle-label" for="convert-auto-toggle"></label>
         </div>
         <label class="label" for="font-size">Font size</label>
-        <input type="number" min="0" id="font-size" value="0" disabled>
+        <input type="number" min="0" id="font-size" value="0" disabled />
       </div>
       <div class="flex-container wrap gap">
         <button class="classic-btn" id="convert">Convert</button>
@@ -78,10 +78,10 @@
                   text: {
                     chars: true,
                     words: true
-                  },
+                  }
                 }
               }
-            },
+            }
           }
         };
         /**
@@ -113,14 +113,14 @@
           editor.redo();
         });
 
-        convertAutoToggle.addEventListener("change", e => {
-          editor.convertAuto = event.target.checked
-          fontSizeInput.disabled = !event.target.checked
-        })
+        convertAutoToggle.addEventListener("change", (e) => {
+          editor.convertAuto = event.target.checked;
+          fontSizeInput.disabled = !event.target.checked;
+        });
 
-        fontSizeInput.addEventListener("change", e => {
-          editor.fontSize = Number(event.target.value)
-        })
+        fontSizeInput.addEventListener("change", (e) => {
+          editor.fontSize = Number(event.target.value);
+        });
 
         convertBtn.addEventListener("click", () => {
           editor.convert();
@@ -131,7 +131,7 @@
         });
       }
 
-      loadEditor().catch(error => console.error(error));
+      loadEditor().catch((error) => console.error(error));
     </script>
   </body>
 </html>

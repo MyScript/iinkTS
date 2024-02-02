@@ -278,12 +278,12 @@ describe("OISVGRenderer.ts", () =>
 
     test("should clearElements by tagName", () =>
     {
-      expect(renderer.layer.querySelectorAll("path")).toHaveLength(0)
+      const nbPath = renderer.layer.querySelectorAll("path").length
       const stroke1 = buildOIStroke()
       renderer.drawSymbol(stroke1)
       const stroke2 = buildOIStroke()
       renderer.drawSymbol(stroke2)
-      expect(renderer.layer.querySelectorAll("path")).toHaveLength(2)
+      expect(renderer.layer.querySelectorAll("path")).toHaveLength(nbPath + 2)
       renderer.clearElements({ tagName: "path" })
       expect(renderer.layer.querySelectorAll("path")).toHaveLength(0)
     })
@@ -298,7 +298,6 @@ describe("OISVGRenderer.ts", () =>
       renderer.clearElements({ attrs: { id: stroke2.id } })
       expect(renderer.layer.querySelectorAll("path")).toHaveLength(1)
     })
-
     test("should clearElements by tagName and attrs", () =>
     {
       renderer.clearElements({ tagName: "path" })
@@ -330,7 +329,7 @@ describe("OISVGRenderer.ts", () =>
     const divElement: HTMLDivElement = document.createElement("div")
     const renderer = new OISVGRenderer(DefaultRenderingConfiguration)
     renderer.init(divElement)
-    expect(divElement.childElementCount).toBeGreaterThan(1)
+    expect(divElement.childElementCount).toEqual(1)
     renderer.destroy()
     expect(divElement.childElementCount).toEqual(0)
   })

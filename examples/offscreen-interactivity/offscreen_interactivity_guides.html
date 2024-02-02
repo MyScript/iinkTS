@@ -153,13 +153,12 @@
           editor.behaviors.renderingConfiguration = options.configuration.rendering;
         });
 
-
         window.addEventListener("resize", () => {
           editor.resize();
         });
       }
 
-      loadEditor().catch(error => console.error(error));
+      loadEditor().catch((error) => console.error(error));
     </script>
   </body>
 </html>

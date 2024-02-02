@@ -21,6 +21,7 @@ import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer/svg/OISVGRenderer"
 import { UndoRedoManager } from "../undo-redo"
 import { OISelectionManager } from "./OISelectionManager"
+import { OISnapManager } from "./OISnapManager"
 import { OITextManager } from "./OITextManager"
 
 /**
@@ -67,6 +68,11 @@ export class OITranslateManager
   get recognizer(): OIRecognizer
   {
     return this.behaviors.recognizer
+  }
+
+  get snap(): OISnapManager
+  {
+    return this.behaviors.snap
   }
 
   protected applyToStroke(stroke: OIStroke, tx: number, ty: number): OIStroke
@@ -183,8 +189,14 @@ export class OITranslateManager
     if (!this.wrapper) {
       throw new Error("Can't translate, you must call start before")
     }
-    const tx = point.x - this.transformOrigin.x
-    const ty = point.y - this.transformOrigin.y
+
+    let tx = point.x - this.transformOrigin.x
+    let ty = point.y - this.transformOrigin.y
+
+    const nudge = this.snap.snapTranslate(tx, ty)
+    tx = nudge.x
+    ty = nudge.y
+
     this.translateElement(this.wrapper.id as string, tx, ty)
     return {
       tx,
@@ -196,6 +208,7 @@ export class OITranslateManager
   {
     this.#logger.info("end", { point })
     const { tx, ty } = this.continue(point)
+    this.snap.clearSnapToElementLines()
     const strokesTranslated: OIStroke[] = []
     this.model.symbolsSelected.forEach(s =>
     {

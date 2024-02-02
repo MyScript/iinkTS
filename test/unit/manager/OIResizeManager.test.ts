@@ -109,7 +109,7 @@ describe("OIResizeManager.ts", () =>
     })
   })
 
-  describe("resize process on stroke", () =>
+  describe("resize process on stroke without snap", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
     const behaviors = new OIBehaviors(DefaultBehaviorsOptions)
@@ -123,6 +123,8 @@ describe("OIResizeManager.ts", () =>
     behaviors.setPenStyleClasses = jest.fn(() => Promise.resolve())
 
     const manager = new OIResizeManager(behaviors)
+    manager.snap.snapToGrid = false
+    manager.snap.snapToElement = false
     manager.applyToSymbol = jest.fn()
 
     const stroke = new OIStroke({}, 1)

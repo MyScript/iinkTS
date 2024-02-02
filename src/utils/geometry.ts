@@ -194,7 +194,7 @@ export function computeAngleRadian(p1: TPoint, center: TPoint, p2: TPoint): numb
 /**
  * @group Utils
  */
-export function getPointsNearest(points1: TPoint[], points2: TPoint[]): { p1: TPoint, p2: TPoint }
+export function getClosestPoints(points1: TPoint[], points2: TPoint[]): { p1: TPoint, p2: TPoint }
 {
   let p1 = points1[0]
   let p2 = points2[0]

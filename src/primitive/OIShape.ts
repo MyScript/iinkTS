@@ -43,6 +43,11 @@ export abstract class OIShape extends OISymbol implements TOIShape
 
   abstract get vertices(): TPoint[]
 
+  get snapPoints(): TPoint[]
+  {
+    return this.boundingBox.snapPoints
+  }
+
   get edges(): TSegment[]
   {
     return this.vertices.map((p, i) =>

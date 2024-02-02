@@ -62,10 +62,7 @@ export abstract class OISymbol implements TOISymbol
     return Box.createFromPoints(this.vertices)
   }
 
-  get snapPoints(): TPoint[]
-  {
-    return this.boundingBox.snapPoints
-  }
+  abstract get snapPoints(): TPoint[]
 
   abstract overlaps(box: TBoundingBox): boolean
 

@@ -48,6 +48,11 @@ export abstract class OIDecorator extends OISymbol implements TOIDecorator
 
   abstract get vertices(): TPoint[]
 
+  get snapPoints(): TPoint[]
+  {
+    return []
+  }
+
   get edges(): TSegment[]
   {
     return this.vertices.map((p, i) => {

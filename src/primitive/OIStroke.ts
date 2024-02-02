@@ -44,6 +44,11 @@ export class OIStroke extends OISymbol implements TStroke, TOISymbolDecorable
     return { before, after }
   }
 
+  get snapPoints(): TPoint[]
+  {
+    return this.boundingBox.snapPoints
+  }
+
   get vertices(): TPoint[]
   {
     return this.pointers
