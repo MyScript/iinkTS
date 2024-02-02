@@ -428,35 +428,35 @@ async function loadEditor() {
   });
 
   snapToGridToggle.addEventListener("change", (event) => {
-    editor.behaviors.snap.snapToGrid = event.target.checked;
+    editor.behaviors.snaps.snapToGrid = event.target.checked;
   });
 
   snapToElementToggle.addEventListener("change", (event) => {
-    editor.behaviors.snap.snapToElement = event.target.checked;
+    editor.behaviors.snaps.snapToElement = event.target.checked;
   });
 
   snapAngleElementToggle.addEventListener("change", (event) => {
-    editor.behaviors.snap.snapAngle = +event.target.value;
+    editor.behaviors.snaps.snapAngle = +event.target.value;
   });
 
   recognitionBoxToggle.addEventListener("change", (evt) => {
-    editor.behaviors.debugSVG.recognitionBoxVisibility = evt.target.checked;
+    editor.behaviors.svgDebugger.recognitionBoxVisibility = evt.target.checked;
   });
 
   recognitionItemBoxToggle.addEventListener("change", (evt) => {
-    editor.behaviors.debugSVG.recognitionItemBoxVisibility = evt.target.checked;
+    editor.behaviors.svgDebugger.recognitionItemBoxVisibility = evt.target.checked;
   });
 
   verticesVisibilityToggle.addEventListener("change", (evt) => {
-    editor.behaviors.debugSVG.verticesVisibility = evt.target.checked;
+    editor.behaviors.svgDebugger.verticesVisibility = evt.target.checked;
   });
 
   snapPointsVisibilityToggle.addEventListener("change", (evt) => {
-    editor.behaviors.debugSVG.snapPointsVisibility = evt.target.checked;
+    editor.behaviors.svgDebugger.snapPointsVisibility = evt.target.checked;
   });
 
   boundingBoxVisibilityToggle.addEventListener("change", (evt) => {
-    editor.behaviors.debugSVG.boundingBoxVisibility = evt.target.checked;
+    editor.behaviors.svgDebugger.boundingBoxVisibility = evt.target.checked;
   });
 
   window.addEventListener("resize", () => {

@@ -43,19 +43,19 @@ export class OISelectionManager
     return this.behaviors.internalEvent
   }
 
-  get rotationManager(): OIRotationManager
+  get rotator(): OIRotationManager
   {
-    return this.behaviors.rotationManager
+    return this.behaviors.rotator
   }
 
-  get translateManager(): OITranslateManager
+  get translator(): OITranslateManager
   {
-    return this.behaviors.translateManager
+    return this.behaviors.translator
   }
 
-  get resizeManager(): OIResizeManager
+  get resizer(): OIResizeManager
   {
-    return this.behaviors.resizeManager
+    return this.behaviors.resizer
   }
 
   get selectionBox(): Box | undefined
@@ -111,12 +111,12 @@ export class OISelectionManager
     const handler = (ev: PointerEvent) => {
       ev.preventDefault()
       ev.stopPropagation()
-      this.translateManager.continue(this.getPoint(ev))
+      this.translator.continue(this.getPoint(ev))
     }
     const endHandler = (ev: PointerEvent) => {
       ev.preventDefault()
       ev.stopPropagation()
-      this.translateManager.end(this.getPoint(ev))
+      this.translator.end(this.getPoint(ev))
       this.renderer.layer.removeEventListener("pointermove", handler)
       this.renderer.layer.removeEventListener("pointercancel", endHandler)
       this.renderer.layer.removeEventListener("pointerleave", endHandler)
@@ -126,7 +126,7 @@ export class OISelectionManager
     translateEl.addEventListener("pointerdown", (ev) => {
       ev.preventDefault()
       ev.stopPropagation()
-      this.translateManager.start(ev.target as Element, this.getPoint(ev))
+      this.translator.start(ev.target as Element, this.getPoint(ev))
       this.renderer.layer.addEventListener("pointermove", handler)
       this.renderer.layer.addEventListener("pointercancel", endHandler)
       this.renderer.layer.addEventListener("pointerleave", endHandler)
@@ -165,12 +165,12 @@ export class OISelectionManager
     const handler = (ev: PointerEvent) => {
       ev.preventDefault()
       ev.stopPropagation()
-      this.rotationManager.continue(this.getPoint(ev))
+      this.rotator.continue(this.getPoint(ev))
     }
     const endHandler = (ev: PointerEvent) => {
       ev.preventDefault()
       ev.stopPropagation()
-      this.rotationManager.end(this.getPoint(ev))
+      this.rotator.end(this.getPoint(ev))
       this.renderer.layer.removeEventListener("pointermove", handler)
       this.renderer.layer.removeEventListener("pointercancel", endHandler)
       this.renderer.layer.removeEventListener("pointerleave", endHandler)
@@ -180,7 +180,7 @@ export class OISelectionManager
     group.addEventListener("pointerdown", (ev) => {
       ev.preventDefault()
       ev.stopPropagation()
-      this.rotationManager.start(ev.target as Element, this.getPoint(ev))
+      this.rotator.start(ev.target as Element, this.getPoint(ev))
       this.renderer.layer.addEventListener("pointermove", handler)
       this.renderer.layer.addEventListener("pointercancel", endHandler)
       this.renderer.layer.addEventListener("pointerleave", endHandler)
@@ -206,12 +206,12 @@ export class OISelectionManager
       const handler = (ev: PointerEvent) => {
         ev.preventDefault()
         ev.stopPropagation()
-        this.resizeManager.continue(this.getPoint(ev))
+        this.resizer.continue(this.getPoint(ev))
       }
       const endHandler = (ev: PointerEvent) => {
         ev.preventDefault()
         ev.stopPropagation()
-        this.resizeManager.end(this.getPoint(ev))
+        this.resizer.end(this.getPoint(ev))
         this.renderer.layer.removeEventListener("pointermove", handler)
         this.renderer.layer.removeEventListener("pointercancel", endHandler)
         this.renderer.layer.removeEventListener("pointerleave", endHandler)
@@ -221,7 +221,7 @@ export class OISelectionManager
       el.addEventListener("pointerdown", (ev) => {
         ev.preventDefault()
         ev.stopPropagation()
-        this.resizeManager.start(ev.target as Element, transformOrigin)
+        this.resizer.start(ev.target as Element, transformOrigin)
         this.renderer.layer.addEventListener("pointermove", handler)
         this.renderer.layer.addEventListener("pointercancel", endHandler)
         this.renderer.layer.addEventListener("pointerleave", endHandler)

@@ -20,6 +20,7 @@ import
 import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer/svg/OISVGRenderer"
 import { UndoRedoManager } from "../undo-redo"
+import { OIDebugSVGManager } from "./OIDebugSVGManager"
 import { OISelectionManager } from "./OISelectionManager"
 import { OISnapManager } from "./OISnapManager"
 import { OITextManager } from "./OITextManager"
@@ -55,9 +56,9 @@ export class OITranslateManager
     return this.behaviors.selector
   }
 
-  get textManager(): OITextManager
+  get texter(): OITextManager
   {
-    return this.behaviors.textManager
+    return this.behaviors.texter
   }
 
   get renderer(): OISVGRenderer
@@ -70,9 +71,14 @@ export class OITranslateManager
     return this.behaviors.recognizer
   }
 
-  get snap(): OISnapManager
+  get snaps(): OISnapManager
   {
-    return this.behaviors.snap
+    return this.behaviors.snaps
+  }
+
+  get svgDebugger(): OIDebugSVGManager
+  {
+    return this.behaviors.svgDebugger
   }
 
   protected applyToStroke(stroke: OIStroke, tx: number, ty: number): OIStroke
@@ -135,7 +141,7 @@ export class OITranslateManager
     }
     text.point.x += tx
     text.point.y += ty
-    return this.textManager.updateTextBoundingBox(text)
+    return this.texter.updateTextBoundingBox(text)
   }
 
   applyToSymbol(symbol: TOISymbol, tx: number, ty: number): TOISymbol
@@ -193,7 +199,7 @@ export class OITranslateManager
     let tx = point.x - this.transformOrigin.x
     let ty = point.y - this.transformOrigin.y
 
-    const nudge = this.snap.snapTranslate(tx, ty)
+    const nudge = this.snaps.snapTranslate(tx, ty)
     tx = nudge.x
     ty = nudge.y
 
@@ -208,7 +214,7 @@ export class OITranslateManager
   {
     this.#logger.info("end", { point })
     const { tx, ty } = this.continue(point)
-    this.snap.clearSnapToElementLines()
+    this.snaps.clearSnapToElementLines()
     const strokesTranslated: OIStroke[] = []
     this.model.symbolsSelected.forEach(s =>
     {
@@ -224,6 +230,7 @@ export class OITranslateManager
     this.undoRedoManager.addModelToStack(this.model)
     this.wrapper = undefined
     await promise
+    await this.svgDebugger.apply()
   }
 
 }

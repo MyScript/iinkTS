@@ -5,8 +5,14 @@ import { OIModel } from "../model"
 import { Box, TPoint, TSegment } from "../primitive"
 import { NO_SELECTION, OISVGRenderer } from "../renderer"
 
+/**
+ * @group Snap
+ */
 export type TSnapNudge = TPoint
 
+/**
+ * @group Snap
+ */
 export type TSnapLineInfos = {
   nudge: TSnapNudge,
   verticales: TSegment[]

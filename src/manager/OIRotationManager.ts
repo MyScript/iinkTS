@@ -22,6 +22,7 @@ import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
 import { UndoRedoManager } from "../undo-redo"
 import { computeAngleRadian, converDegreeToRadian, convertRadianToDegree, rotatePoint } from "../utils"
+import { OIDebugSVGManager } from "./OIDebugSVGManager"
 import { OISelectionManager } from "./OISelectionManager"
 import { OISnapManager } from "./OISnapManager"
 import { OITextManager } from "./OITextManager"
@@ -58,9 +59,9 @@ export class OIRotationManager
     return this.behaviors.undoRedoManager
   }
 
-  get textManager(): OITextManager
+  get texter(): OITextManager
   {
-    return this.behaviors.textManager
+    return this.behaviors.texter
   }
 
   get selector(): OISelectionManager
@@ -73,9 +74,14 @@ export class OIRotationManager
     return this.behaviors.recognizer
   }
 
-  get snap(): OISnapManager
+  get snaps(): OISnapManager
   {
-    return this.behaviors.snap
+    return this.behaviors.snaps
+  }
+
+  get svgDebugger(): OIDebugSVGManager
+  {
+    return this.behaviors.svgDebugger
   }
 
   protected applyToStroke(stroke: OIStroke, center: TPoint, angleRad: number): OIStroke
@@ -139,7 +145,7 @@ export class OIRotationManager
       degree: convertRadianToDegree(-angleRad) + (text.rotation?.degree || 0),
       center: center
     }
-    return this.textManager.updateTextBoundingBox(text)
+    return this.texter.updateTextBoundingBox(text)
   }
 
   applyToSymbol(symbol: TOISymbol, center: TPoint, angleRad: number): TOISymbol
@@ -194,7 +200,7 @@ export class OIRotationManager
     }
     let angleDegree = +convertRadianToDegree(computeAngleRadian(this.origin, this.center, point))
 
-    angleDegree = this.snap.snapRotation(angleDegree)
+    angleDegree = this.snaps.snapRotation(angleDegree)
 
     if (point.x - this.center.x < 0) {
       angleDegree = 360 - angleDegree
@@ -223,5 +229,6 @@ export class OIRotationManager
     const promise = this.recognizer.replaceStrokes(strokesRotated.map(s => s.id), strokesRotated)
     this.wrapper = undefined
     await promise
+    await this.svgDebugger.apply()
   }
 }

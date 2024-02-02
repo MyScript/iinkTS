@@ -300,7 +300,7 @@ describe("OIGestureManager.ts", () =>
     behaviorsOptions.configuration.offscreen = true
     const behaviors = new OIBehaviors(behaviorsOptions)
     const manager = new OIGestureManager(behaviors)
-    manager.textManager.adjustText = jest.fn()
+    manager.texter.adjustText = jest.fn()
     manager.renderer.drawSymbol = jest.fn()
     manager.renderer.removeSymbol = jest.fn()
     manager.renderer.replaceSymbol = jest.fn()
@@ -369,7 +369,7 @@ describe("OIGestureManager.ts", () =>
       expect(manager.renderer.removeSymbol).toHaveBeenCalledTimes(1)
       expect(manager.model.removeSymbol).toHaveBeenCalledTimes(1)
       expect(manager.recognizer.eraseStrokes).toHaveBeenCalledTimes(0)
-      expect(manager.textManager.adjustText).toHaveBeenCalledTimes(1)
+      expect(manager.texter.adjustText).toHaveBeenCalledTimes(1)
       expect(manager.undoRedoManager.addModelToStack).toHaveBeenCalledTimes(1)
     })
 
@@ -409,7 +409,7 @@ describe("OIGestureManager.ts", () =>
       expect(manager.renderer.removeSymbol).toHaveBeenCalledTimes(0)
       expect(manager.model.removeSymbol).toHaveBeenCalledTimes(0)
       expect(manager.recognizer.eraseStrokes).toHaveBeenCalledTimes(0)
-      expect(manager.textManager.adjustText).toHaveBeenCalledTimes(1)
+      expect(manager.texter.adjustText).toHaveBeenCalledTimes(1)
       expect(manager.undoRedoManager.addModelToStack).toHaveBeenCalledTimes(1)
     })
 
@@ -475,7 +475,7 @@ describe("OIGestureManager.ts", () =>
     const stroke21 = buildOIStroke({ box: { height: 9, width: 10, x: 100, y: 1.6 * rowHeight } })
     behaviors.model.addSymbol(stroke21)
     const gestMan = new OIGestureManager(behaviors)
-    gestMan.translateManager.translate = jest.fn((() => Promise.resolve()))
+    gestMan.translator.translate = jest.fn((() => Promise.resolve()))
     gestMan.undoRedoManager.addModelToStack = jest.fn()
     gestMan.undoRedoManager.updateModelInStack = jest.fn()
 
@@ -483,8 +483,8 @@ describe("OIGestureManager.ts", () =>
     {
       const strokeGesture = buildOIStroke({ box: { height: 9, width: 10, x: 20, y: 0.6 * rowHeight } })
       await gestMan.applyJoinGesture(strokeGesture)
-      expect(gestMan.translateManager.translate).toHaveBeenCalledTimes(1)
-      expect(gestMan.translateManager.translate).toHaveBeenCalledWith([stroke12], stroke11.boundingBox.xMax - stroke12.boundingBox.xMin, 0)
+      expect(gestMan.translator.translate).toHaveBeenCalledTimes(1)
+      expect(gestMan.translator.translate).toHaveBeenCalledWith([stroke12], stroke11.boundingBox.xMax - stroke12.boundingBox.xMin, 0)
       expect(gestMan.undoRedoManager.addModelToStack).toHaveBeenCalledTimes(1)
       expect(gestMan.undoRedoManager.updateModelInStack).toHaveBeenCalledTimes(1)
     })
@@ -493,8 +493,8 @@ describe("OIGestureManager.ts", () =>
     {
       const strokeGesture = buildOIStroke({ box: { height: 9, width: 10, x: 10, y: 1.6 * rowHeight } })
       await gestMan.applyJoinGesture(strokeGesture)
-      expect(gestMan.translateManager.translate).toHaveBeenCalledTimes(1)
-      expect(gestMan.translateManager.translate).toHaveBeenCalledWith([stroke21], stroke12.boundingBox.xMax - stroke21.boundingBox.xMin + 50, -rowHeight)
+      expect(gestMan.translator.translate).toHaveBeenCalledTimes(1)
+      expect(gestMan.translator.translate).toHaveBeenCalledWith([stroke21], stroke12.boundingBox.xMax - stroke21.boundingBox.xMin + 50, -rowHeight)
       expect(gestMan.undoRedoManager.addModelToStack).toHaveBeenCalledTimes(1)
       expect(gestMan.undoRedoManager.updateModelInStack).toHaveBeenCalledTimes(1)
     })
@@ -505,8 +505,8 @@ describe("OIGestureManager.ts", () =>
       behaviors.model.addSymbol(stroke51)
       const strokeGesture = buildOIStroke({ box: { height: 9, width: 10, x: 10, y: 4.6 * rowHeight } })
       await gestMan.applyJoinGesture(strokeGesture)
-      expect(gestMan.translateManager.translate).toHaveBeenCalledTimes(1)
-      expect(gestMan.translateManager.translate).toHaveBeenCalledWith([stroke51], 0, -rowHeight)
+      expect(gestMan.translator.translate).toHaveBeenCalledTimes(1)
+      expect(gestMan.translator.translate).toHaveBeenCalledWith([stroke51], 0, -rowHeight)
       expect(gestMan.undoRedoManager.addModelToStack).toHaveBeenCalledTimes(1)
       expect(gestMan.undoRedoManager.updateModelInStack).toHaveBeenCalledTimes(1)
     })

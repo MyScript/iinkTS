@@ -46,14 +46,14 @@ export class OIBehaviors implements IBehaviors
   writer: OIWriteManager
   eraser: OIEraseManager
   gesture: OIGestureManager
-  resizeManager: OIResizeManager
-  rotationManager: OIRotationManager
-  translateManager: OITranslateManager
-  convertManager: OIConversionManager
-  textManager: OITextManager
+  resizer: OIResizeManager
+  rotator: OIRotationManager
+  translator: OITranslateManager
+  converter: OIConversionManager
+  texter: OITextManager
   selector: OISelectionManager
-  debugSVG: OIDebugSVGManager
-  snap: OISnapManager
+  svgDebugger: OIDebugSVGManager
+  snaps: OISnapManager
 
   constructor(options: PartialDeep<TBehaviorOptions>)
   {
@@ -68,14 +68,14 @@ export class OIBehaviors implements IBehaviors
     this.writer = new OIWriteManager(this)
     this.eraser = new OIEraseManager(this)
     this.gesture = new OIGestureManager(this)
-    this.resizeManager = new OIResizeManager(this)
-    this.rotationManager = new OIRotationManager(this)
-    this.translateManager = new OITranslateManager(this)
-    this.convertManager = new OIConversionManager(this)
-    this.textManager = new OITextManager(this)
+    this.resizer = new OIResizeManager(this)
+    this.rotator = new OIRotationManager(this)
+    this.translator = new OITranslateManager(this)
+    this.converter = new OIConversionManager(this)
+    this.texter = new OITextManager(this)
     this.selector = new OISelectionManager(this)
-    this.debugSVG = new OIDebugSVGManager(this)
-    this.snap = new OISnapManager(this)
+    this.svgDebugger = new OIDebugSVGManager(this)
+    this.snaps = new OISnapManager(this)
 
     this.#intention = Intention.Write
     this.#model = new OIModel(this.#configuration.rendering.minWidth, this.#configuration.rendering.minHeight, this.configuration.rendering.guides.gap)
@@ -191,7 +191,7 @@ export class OIBehaviors implements IBehaviors
       this.internalEvent.emitError(error as Error)
     }
     finally {
-      this.debugSVG.apply()
+      this.svgDebugger.apply()
     }
   }
 
@@ -215,7 +215,7 @@ export class OIBehaviors implements IBehaviors
       this.internalEvent.emitError(error as Error)
     }
     finally {
-      this.debugSVG.apply()
+      this.svgDebugger.apply()
     }
   }
 
@@ -240,7 +240,7 @@ export class OIBehaviors implements IBehaviors
       this.internalEvent.emitError(error as Error)
     }
     finally {
-      await this.debugSVG.apply()
+      await this.svgDebugger.apply()
       await this.recognizer.waitForIdle()
     }
   }
@@ -336,7 +336,7 @@ export class OIBehaviors implements IBehaviors
         this.renderer.drawSymbol(stroke)
       }
     })
-    this.debugSVG.apply()
+    this.svgDebugger.apply()
     if (errors.length) {
       this.internalEvent.emitError(new Error(errors.join("\n")))
     }
@@ -370,7 +370,7 @@ export class OIBehaviors implements IBehaviors
       }
       this.#model = modelToApply
       await Promise.all(promises)
-      await this.debugSVG.apply()
+      await this.svgDebugger.apply()
       await this.recognizer.waitForIdle()
       return this.model
     }
@@ -399,7 +399,7 @@ export class OIBehaviors implements IBehaviors
       }
       this.#model = modelToApply
       await Promise.all(promises)
-      this.debugSVG.apply()
+      this.svgDebugger.apply()
       await this.recognizer.waitForIdle()
       return this.model
     }
@@ -429,14 +429,14 @@ export class OIBehaviors implements IBehaviors
   {
     try {
       this.internalEvent.emitIdle(false)
-      await this.convertManager.convert()
+      await this.converter.convert()
       await this.recognizer.waitForIdle()
     } catch (error) {
       this.#logger.error("convert", error)
       this.internalEvent.emitError(error as Error)
     }
     finally {
-      await this.debugSVG.apply()
+      await this.svgDebugger.apply()
       this.internalEvent.emitIdle(true)
     }
     return this.model
@@ -472,7 +472,7 @@ export class OIBehaviors implements IBehaviors
       this.internalEvent.emitError(error as Error)
     }
     finally {
-      await this.debugSVG.apply()
+      await this.svgDebugger.apply()
       this.internalEvent.emitIdle(true)
     }
     return this.model
