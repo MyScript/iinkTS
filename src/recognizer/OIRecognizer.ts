@@ -415,6 +415,7 @@ export class OIRecognizer
 
   async addStrokes(strokes: OIStroke[], processGestures = true): Promise<TOIMessageEventGesture | undefined>
   {
+    this.addStrokeDeferred?.resolve(undefined)
     await this.waitPromises()
     this.addStrokeDeferred = new DeferredPromise<TOIMessageEventGesture | undefined>()
     if (strokes.length === 0) {
