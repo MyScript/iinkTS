@@ -236,3 +236,20 @@ export function getClosestPoint(points: TPoint[], point: TPoint): { point?: TPoi
     index
   }
 }
+
+/**
+ * @group Utils
+ */
+export const isPointInsidePolygon = (point: TPoint, points: TPoint[]) =>
+{
+  let inside = false
+  for (let i = 0, j = points.length - 1; i < points.length; j = i++) {
+    const p1 = points[i]
+    const p2 = points[j]
+    const intersect = ((p1.y > point.y) != (p2.y > point.y))
+      && (point.x < (p2.x - p1.x) * (point.y - p1.y) / (p2.y - p1.y) + p1.x)
+    if (intersect) inside = !inside
+  }
+
+  return inside
+}

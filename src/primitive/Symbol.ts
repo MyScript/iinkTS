@@ -7,7 +7,6 @@ export enum SymbolType
 {
   Stroke = "stroke",
   Shape = "shape",
-  Decorator = "decorator",
   Edge = "edge",
   Text = "text",
   Eraser = "eraser",

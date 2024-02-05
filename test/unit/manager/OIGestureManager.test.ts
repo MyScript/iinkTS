@@ -6,8 +6,6 @@ import
   TBehaviorOptions,
   DefaultConfiguration,
   TGesture,
-  DecoratorKind,
-  SymbolType,
   SurroundAction,
   TOISymbolChar
 } from "../../../src/iink"
@@ -301,6 +299,7 @@ describe("OIGestureManager.ts", () =>
     const behaviors = new OIBehaviors(behaviorsOptions)
     const manager = new OIGestureManager(behaviors)
     manager.texter.adjustText = jest.fn()
+    manager.texter.updateTextBoundingBox = jest.fn()
     manager.renderer.drawSymbol = jest.fn()
     manager.renderer.removeSymbol = jest.fn()
     manager.renderer.replaceSymbol = jest.fn()
@@ -355,7 +354,7 @@ describe("OIGestureManager.ts", () =>
       ]
       const text = buildOIText({ chars, boundingBox: { height: 10, width: 10, x: 0, y: 10 } })
       behaviors.model.addSymbol(text)
-      const gestureStroke = buildOIStroke({ box: text.boundingBox })
+      const gestureStroke = buildOIStroke({ box: { height: 20, width: 20, x: -5, y: 5 }, nbPoint: 100 })
       const gesture: TGesture = {
         gestureType: "SCRATCH",
         gestureStrokeId: gestureStroke.id,
@@ -592,11 +591,7 @@ describe("OIGestureManager.ts", () =>
       }
       await gestMan.applyStrikeThroughGesture(gesture)
       expect(gestMan.renderer.drawSymbol).toHaveBeenCalledTimes(1)
-      expect(gestMan.renderer.drawSymbol).toHaveBeenCalledWith(expect.objectContaining({
-        type: SymbolType.Decorator,
-        kind: DecoratorKind.Strikethrough,
-        parents: [stroke]
-      }))
+      expect(gestMan.renderer.drawSymbol).toHaveBeenCalledWith(stroke)
     })
   })
 

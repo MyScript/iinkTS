@@ -1,14 +1,54 @@
+import { buildOIText } from "../helpers"
 import
 {
   OIBehaviors,
   TBehaviorOptions,
   DefaultConfiguration,
-  OITextManager
+  OITextManager,
+  TOISymbolChar,
+  Box,
+  SVGBuilder
 } from "../../../src/iink"
 
 
 describe("OITextManager.ts", () =>
 {
+  const chars: TOISymbolChar[] = [
+    {
+      boundingBox: { height: 0, width: 0, x: 0, y: 0 },
+      color: "black",
+      fontSize: 12,
+      fontWeight: 400,
+      id: "char-1",
+      label: "A"
+    },
+    {
+      boundingBox: { height: 0, width: 0, x: 0, y: 0 },
+      color: "black",
+      fontSize: 16,
+      fontWeight: 400,
+      id: "char-1",
+      label: "A"
+    },
+  ]
+  Object.defineProperty(global.SVGElement.prototype, 'getNumberOfChars', {
+    writable: true,
+    value: jest.fn().mockReturnValue(chars.length),
+  })
+  Object.defineProperty(global.SVGElement.prototype, 'getExtentOfChar', {
+    writable: true,
+    value: jest.fn((i) => ({ x: i, y: i * 2, height: i * 3, width: i * 4})),
+  })
+  Object.defineProperty(global.SVGElement.prototype, 'getBBox', {
+    writable: true,
+    value: jest.fn().mockReturnValue({
+      x: 0,
+      y: 0,
+      width: 10,
+      height: 10
+    }),
+  })
+
   const behaviorsOptions: TBehaviorOptions = {
     configuration: JSON.parse(JSON.stringify(DefaultConfiguration))
   }
@@ -18,6 +58,63 @@ describe("OITextManager.ts", () =>
     const behaviors = new OIBehaviors(behaviorsOptions)
     const manager = new OITextManager(behaviors)
     expect(manager).toBeDefined()
+  })
+
+  test("should set chars BoundingBox", () =>
+  {
+    const behaviors = new OIBehaviors(behaviorsOptions)
+    const manager = new OITextManager(behaviors)
+    const text = buildOIText({ chars })
+    const textEl = manager.renderer.getSymbolElement(text) as SVGGElement
+    manager.setCharsBoundingBox(text, textEl)
+
+    expect(chars[0].boundingBox).toEqual({ height: 0, width: 0, x: 0, y: 0 })
+    expect(chars[1].boundingBox).toEqual({ height: 3, width: 4, x: 1, y: 2 })
+  })
+
+  test("should get element BoundingBox", () =>
+  {
+    const behaviors = new OIBehaviors(behaviorsOptions)
+    const manager = new OITextManager(behaviors)
+    const text = buildOIText({ chars })
+    const textEl = manager.renderer.getSymbolElement(text) as SVGGElement
+    expect(manager.getElementBoundingBox(textEl)).toEqual({ x: 0, y: 0, width: 10, height: 10 })
+  })
+
+  test("should get BoundingBox", () =>
+  {
+    const behaviors = new OIBehaviors(behaviorsOptions)
+    const manager = new OITextManager(behaviors)
+    manager.renderer.layer = SVGBuilder.createLayer(100, 100)
+    manager.renderer.prependElement = jest.fn()
+    const text = buildOIText({ chars })
+    manager.getElementBoundingBox = jest.fn(() => new Box({ x: 1, y: 2, width: 3, height: 4 }))
+    expect(manager.getBoundingBox(text)).toEqual({ x: 1, y: 2, width: 3, height: 4 })
+    expect(manager.getElementBoundingBox).toBeCalledTimes(1)
+  })
+
+  test("shoud get Space Width", () =>
+  {
+    const behaviors = new OIBehaviors(behaviorsOptions)
+    const manager = new OITextManager(behaviors)
+    manager.getBoundingBox = jest.fn(() => new Box({ height: 12, width: 42, x: 0, y: 0 }))
+    expect(manager.getSpaceWidth(12)).toEqual(42)
+    expect(manager.getBoundingBox).toBeCalledTimes(1)
+  })
+
+  test("should update Text BoundingBox", () =>
+  {
+    const behaviors = new OIBehaviors(behaviorsOptions)
+    const manager = new OITextManager(behaviors)
+    manager.renderer.layer = SVGBuilder.createLayer(100, 100)
+    manager.renderer.prependElement = jest.fn()
+    manager.getElementBoundingBox = jest.fn(() => new Box({ x: 1989, y: 27, width: 5, height: 42 }))
+    manager.setCharsBoundingBox = jest.fn()
+    const text = buildOIText({ chars })
+    manager.updateTextBoundingBox(text)
+    expect(text.boundingBox).toEqual({ x: 1989, y: 27, width: 5, height: 42 })
+    expect(manager.getElementBoundingBox).toBeCalledTimes(1)
+    expect(manager.setCharsBoundingBox).toBeCalledTimes(1)
   })
 
 })

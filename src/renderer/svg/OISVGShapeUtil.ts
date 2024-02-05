@@ -67,7 +67,7 @@ export class OISVGShapeUtil
     if (shape.selected) {
       attrs["filter"] = `url(#${ this.selectionFilterId })`
     }
-    if (shape.toDelete) {
+    if (shape.deleting) {
       attrs["filter"] = `url(#${ this.removalFilterId })`
     }
 

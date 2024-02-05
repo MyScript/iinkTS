@@ -9,7 +9,6 @@ import
   SvgElementRole,
 } from "../../../src/iink"
 
-
 describe("OISelectionManager.ts", () =>
 {
   const behaviorsOptions: TBehaviorOptions = {
@@ -58,7 +57,6 @@ describe("OISelectionManager.ts", () =>
 
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     behaviors.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
-    behaviors.renderer.getElementBounds = jest.fn(() => stroke.boundingBox)
 
     beforeAll(async () =>
     {
@@ -73,10 +71,10 @@ describe("OISelectionManager.ts", () =>
       const group = behaviors.renderer.layer.querySelector("[role=\"selected\"]") as SVGGElement
       expect(group).not.toBeNull()
       const translateRect = group?.querySelector(`[role=${ SvgElementRole.Translate }]`)
-      expect(translateRect?.getAttribute("x")).toEqual((stroke.boundingBox.x).toString())
-      expect(translateRect?.getAttribute("y")).toEqual((stroke.boundingBox.y).toString())
-      expect(translateRect?.getAttribute("width")).toEqual((stroke.boundingBox.width).toString())
-      expect(translateRect?.getAttribute("height")).toEqual((stroke.boundingBox.height).toString())
+      expect(translateRect?.getAttribute("x")).toEqual((stroke.boundingBox.x - (stroke.style.width || 1)).toString())
+      expect(translateRect?.getAttribute("y")).toEqual((stroke.boundingBox.y - (stroke.style.width || 1)).toString())
+      expect(translateRect?.getAttribute("width")).toEqual((stroke.boundingBox.width + 2 * (stroke.style.width || 1)).toString())
+      expect(translateRect?.getAttribute("height")).toEqual((stroke.boundingBox.height + 2 * (stroke.style.width || 1)).toString())
 
       const rotateCircles = group.querySelectorAll(`circle[role=${ SvgElementRole.Rotate }]`)
       expect(rotateCircles).toHaveLength(2)
@@ -89,7 +87,48 @@ describe("OISelectionManager.ts", () =>
       const strokePath = group.querySelectorAll(`[id=${ stroke.id }]`)
       expect(strokePath).toHaveLength(1)
     })
+  })
 
+  describe("process", () =>
+  {
+    const behaviors = new OIBehaviors(behaviorsOptions)
+    const manager = new OISelectionManager(behaviors)
+    const strokeToSelect = buildOIStroke( { box: { height: 10, width: 10, x: 10, y: 10 }})
+    manager.model.addSymbol(strokeToSelect)
+    const otherStroke = buildOIStroke( { box: { height: 10, width: 10, x: 100, y: 100 }})
+    manager.model.addSymbol(otherStroke)
+    manager.drawSelectingRect = jest.fn()
+    manager.clearSelectingRect = jest.fn()
+    manager.drawSelectedGroup = jest.fn()
+    manager.renderer.drawSymbol = jest.fn()
+    manager.internalEvent.emitSelected = jest.fn()
+
+    test("start", () =>
+    {
+      manager.start({ x: 1, y: 2 })
+      expect(manager.drawSelectingRect).toBeCalledTimes(1)
+    })
+
+    test("continue", () =>
+    {
+      manager.continue({ x: 20, y: 20 })
+      expect(manager.drawSelectingRect).toBeCalledTimes(1)
+      expect(manager.renderer.drawSymbol).toBeCalledTimes(1)
+      expect(manager.renderer.drawSymbol).toBeCalledWith(strokeToSelect)
+      expect(manager.model.symbolsSelected).toEqual([strokeToSelect])
+    })
+
+    test("end", () =>
+    {
+      manager.end({ x: 20, y: 20 })
+      expect(manager.drawSelectingRect).toBeCalledTimes(1)
+      expect(manager.clearSelectingRect).toBeCalledTimes(1)
+      expect(manager.drawSelectedGroup).toBeCalledTimes(1)
+      expect(manager.drawSelectedGroup).toBeCalledWith([strokeToSelect])
+      expect(manager.model.symbolsSelected).toEqual([strokeToSelect])
+      expect(manager.internalEvent.emitSelected).toBeCalledTimes(1)
+      expect(manager.internalEvent.emitSelected).toBeCalledWith([strokeToSelect])
+    })
   })
 
 })

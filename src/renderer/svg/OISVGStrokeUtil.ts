@@ -1,4 +1,4 @@
-import { OIStroke, TOIDecorator, TPointer } from "../../primitive"
+import { DecoratorKind, OIStroke, OIDecorator, TPointer } from "../../primitive"
 import { DefaultStyle } from "../../style"
 import { computeAngleAxeRadian, computeLinksPointers, computeMiddlePointer } from "../../utils"
 import { OISVGDecoratorUtil } from "./OISVGDecoratorUtil"
@@ -120,7 +120,7 @@ export class OISVGStrokeUtil
     if (stroke.selected) {
       attrs["filter"] = `url(#${ this.selectionFilterId })`
     }
-    if (stroke.toDelete) {
+    if (stroke.deleting) {
       attrs["filter"] = `url(#${ this.removalFilterId })`
     }
 
@@ -130,9 +130,14 @@ export class OISVGStrokeUtil
     strokeGroup.append(SVGBuilder.createPath(strokeAttrs))
 
     stroke.decorators.forEach(d => {
-      const deco = this.decoratorUtil.getSVGElement(d as TOIDecorator)
+      const deco = this.decoratorUtil.getSVGElement(d as OIDecorator)
       if (deco) {
-        strokeGroup.prepend(deco)
+        if (d.kind === DecoratorKind.Highlight) {
+          strokeGroup.prepend(deco)
+        }
+        else {
+          strokeGroup.append(deco)
+        }
       }
     })
 

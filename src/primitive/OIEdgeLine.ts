@@ -31,7 +31,7 @@ export class OIEdgeLine extends OIEdge
     const clone = new OIEdgeLine(structuredClone(this.style), structuredClone(this.start), structuredClone(this.end), this.startDecoration, this.endDecoration)
     clone.id = this.id
     clone.selected = this.selected
-    clone.toDelete = this.toDelete
+    clone.deleting = this.deleting
     clone.creationTime = this.creationTime
     clone.modificationDate = this.modificationDate
     return clone

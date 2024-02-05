@@ -66,7 +66,7 @@ export class OIShapeCircle extends OIShape
     const clone = new OIShapeCircle(structuredClone(this.style), structuredClone(this.center), this.radius)
     clone.id = this.id
     clone.selected = this.selected
-    clone.toDelete = this.toDelete
+    clone.deleting = this.deleting
     clone.creationTime = this.creationTime
     clone.modificationDate = this.modificationDate
     return clone

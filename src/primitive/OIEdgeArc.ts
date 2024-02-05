@@ -34,7 +34,7 @@ export class OIEdgeArc extends OIEdge
     const clone = new OIEdgeArc(structuredClone(this.style), structuredClone(this.start), structuredClone(this.middle), structuredClone(this.end), this.startDecoration, this.endDecoration)
     clone.id = this.id
     clone.selected = this.selected
-    clone.toDelete = this.toDelete
+    clone.deleting = this.deleting
     clone.creationTime = this.creationTime
     clone.modificationDate = this.modificationDate
     return clone

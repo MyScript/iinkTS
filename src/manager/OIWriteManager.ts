@@ -3,7 +3,8 @@ import { OIBehaviors } from "../behaviors"
 import { TGesture } from "../gesture"
 import { LoggerManager } from "../logger"
 import { OIModel } from "../model"
-import {
+import
+{
   EdgeDecoration,
   EdgeKind,
   OIEdgeLine,
@@ -25,6 +26,7 @@ import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
 import { TStyle } from "../style"
 import { UndoRedoManager } from "../undo-redo"
+import { isPointInsidePolygon } from "../utils"
 import { OIGestureManager } from "./OIGestureManager"
 import { OISelectionManager } from "./OISelectionManager"
 import { OISnapManager } from "./OISnapManager"
@@ -263,7 +265,11 @@ export class OIWriteManager
       if (this.detectGesture) {
         const needContextLessGesture = this.model.symbols.some(s =>
         {
-          return s.type !== SymbolType.Stroke && currentStroke.boundingBox.overlaps(s.boundingBox)
+          return s.type !== SymbolType.Stroke &&
+            (
+              s.vertices.some(p => currentStroke.boundingBox.containsPoint(p)) ||
+              currentStroke.pointers.some(p => isPointInsidePolygon(p, s.vertices))
+            )
         })
         if (needContextLessGesture) {
           gestureFromContextLess = await this.gestureManager.getGestureFromContextLess(currentStroke)

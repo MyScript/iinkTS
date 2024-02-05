@@ -4,20 +4,17 @@ import { LoggerManager } from "../logger"
 import { OIModel } from "../model"
 import
 {
-  OIDecoratorHighlight,
-  OIDecoratorSurround,
+  OIDecorator,
   OIStroke,
-  OIDecoratorStrikethrough,
-  OIDecoratorUnderline,
   SymbolType,
-  TOISymbolDecorable,
   OIText,
+  DecoratorKind,
 } from "../primitive"
 import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
 import { TStyle } from "../style"
 import { UndoRedoManager } from "../undo-redo"
-import { getClosestPoints, isBetween } from "../utils"
+import { getClosestPoints, isBetween, isPointInsidePolygon } from "../utils"
 import { TGesture, StrikeThroughAction, SurroundAction } from "../gesture"
 import { OITranslateManager } from "./OITranslateManager"
 import { OISelectionManager } from "./OISelectionManager"
@@ -108,10 +105,9 @@ export class OIGestureManager
       }
       case SurroundAction.Highlight: {
         const symbolsToHightlight = this.model.symbols.filter(s => gesture.strokeIds.includes(s.id)) as OIStroke[]
-        const highlight = new OIDecoratorHighlight(this.currentStyle, symbolsToHightlight)
-        this.model.addSymbol(highlight)
         symbolsToHightlight.forEach(s =>
         {
+          const highlight = new OIDecorator(DecoratorKind.Highlight, this.currentStyle, s)
           s.decorators.push(highlight)
           this.model.updateSymbol(s)
           this.renderer.drawSymbol(s)
@@ -121,14 +117,14 @@ export class OIGestureManager
       }
       case SurroundAction.Surround: {
         const symbolsToSurround = this.model.symbols.filter(s => gesture.strokeIds.includes(s.id)) as OIStroke[]
-        const surround = new OIDecoratorSurround(this.currentStyle, symbolsToSurround)
-        this.model.addSymbol(surround)
         symbolsToSurround.forEach(s =>
         {
+          const surround = new OIDecorator(DecoratorKind.Surround, this.currentStyle, s)
           s.decorators.push(surround)
           this.model.updateSymbol(s)
           this.renderer.drawSymbol(s)
         })
+        this.undoRedoManager.addModelToStack(this.model)
         break
       }
       default:
@@ -149,14 +145,20 @@ export class OIGestureManager
     if (textToErase.length) {
       textToErase.forEach(te =>
       {
-        te.chars = te.chars.filter(c => !gestureStroke.boundingBox.overlaps(c.boundingBox))
-        if (te.chars.length) {
-          this.model.updateSymbol(te)
-          this.renderer.drawSymbol(te)
-        }
-        else {
+        const charsToRemove = te.getCharsOverlaps(gestureStroke.pointers)
+        if (te.chars.length == charsToRemove.length) {
           this.renderer.removeSymbol(te.id)
           this.model.removeSymbol(te.id)
+        }
+        else {
+          charsToRemove.forEach(c =>
+          {
+            const cIndex = te.chars.findIndex(c1 => c1.id === c.id)
+            te.chars.splice(cIndex, 1)
+          })
+          this.model.updateSymbol(te)
+          this.texter.updateTextBoundingBox(te)
+          this.renderer.drawSymbol(te)
         }
       })
       this.texter.adjustText()
@@ -192,7 +194,11 @@ export class OIGestureManager
           }
         }
       })
-      strokeIdsToErase.forEach(id => this.model.removeSymbol(id).forEach(idDelete => this.renderer.removeSymbol(idDelete)))
+      strokeIdsToErase.forEach(id =>
+      {
+        this.model.removeSymbol(id)
+        this.renderer.removeSymbol(id)
+      })
       if (strokeIdsToErase.length) {
         promises.push(this.recognizer.eraseStrokes(strokeIdsToErase))
       }
@@ -212,8 +218,8 @@ export class OIGestureManager
     const previousRow = rows.find(r => r.index === currentRowIndex - 1)
     const currentRow = rows.find(r => r.index === currentRowIndex)
     const nextRows = rows.filter(r => r.index > currentRowIndex)
-    const symbolsBeforeInCurrentRow = currentRow?.symbols.filter(s => s.boundingBox.xMiddle < gestureStroke.boundingBox.xMiddle)
-    const symbolsAfterInCurrentRow = currentRow?.symbols.filter(s => s.boundingBox.xMiddle > gestureStroke.boundingBox.xMiddle)
+    const symbolsBeforeInCurrentRow = currentRow?.symbols.filter(s => s.boundingBox.xMid < gestureStroke.boundingBox.xMid)
+    const symbolsAfterInCurrentRow = currentRow?.symbols.filter(s => s.boundingBox.xMid > gestureStroke.boundingBox.xMid)
 
     if (symbolsBeforeInCurrentRow?.length && symbolsAfterInCurrentRow?.length) {
       const lastXBefore = Math.max(...symbolsBeforeInCurrentRow.map(s => s.boundingBox.xMax))
@@ -272,8 +278,8 @@ export class OIGestureManager
     const rows = this.model.getSymbolsByRowOrdered()
     const currentRow = rows.find(r => r.index === currentRowIndex)
     const nextRows = rows.filter(r => r.index > currentRowIndex)
-    const symbolsBeforeInCurrentRow = currentRow?.symbols.filter(s => s.boundingBox.xMiddle < gestureStroke.boundingBox.xMiddle)
-    const symbolsAfterInCurrentRow = currentRow?.symbols.filter(s => s.boundingBox.xMiddle > gestureStroke.boundingBox.xMiddle)
+    const symbolsBeforeInCurrentRow = currentRow?.symbols.filter(s => s.boundingBox.xMid < gestureStroke.boundingBox.xMid)
+    const symbolsAfterInCurrentRow = currentRow?.symbols.filter(s => s.boundingBox.xMid > gestureStroke.boundingBox.xMid)
 
     if (gesture.strokeIds.length && gesture.subStrokes?.length) {
       // we can split only one stroke
@@ -331,11 +337,10 @@ export class OIGestureManager
       this.#logger.warn("applyUnderlineGesture", "Unable to apply underline because there are no strokes")
       return
     }
-    const symbolsToUnderline = this.model.symbols.filter(s => gesture.strokeIds.includes(s.id)) as TOISymbolDecorable[]
+    const symbolsToUnderline = this.model.symbols.filter(s => gesture.strokeIds.includes(s.id)) as (OIStroke | OIText)[]
     symbolsToUnderline.forEach(s =>
     {
-      const underline = new OIDecoratorUnderline(this.currentStyle, [s])
-      this.model.addSymbol(underline)
+      const underline = new OIDecorator(DecoratorKind.Underline, this.currentStyle, s)
       s.decorators.push(underline)
       this.model.updateSymbol(s)
       this.renderer.drawSymbol(s)
@@ -352,14 +357,13 @@ export class OIGestureManager
     }
     switch (this.strikeThroughAction) {
       case StrikeThroughAction.Draw: {
-        const symbolsToStrikethrough = this.model.symbols.filter(s => gesture.strokeIds.includes(s.id)) as TOISymbolDecorable[]
+        const symbolsToStrikethrough = this.model.symbols.filter(s => gesture.strokeIds.includes(s.id)) as (OIStroke | OIText)[]
         symbolsToStrikethrough.forEach(s =>
         {
-          const strikethrough = new OIDecoratorStrikethrough(this.currentStyle, [s])
-          this.renderer.drawSymbol(strikethrough)
-          this.model.addSymbol(strikethrough)
+          const strikethrough = new OIDecorator(DecoratorKind.Strikethrough, this.currentStyle, s)
           s.decorators.push(strikethrough)
           this.model.updateSymbol(s)
+          this.renderer.drawSymbol(s)
         })
         this.undoRedoManager.addModelToStack(this.model)
         break
@@ -369,7 +373,7 @@ export class OIGestureManager
         gesture.strokeIds.forEach(id =>
         {
           this.model.removeSymbol(id)
-            .forEach(idDelete => this.renderer.removeSymbol(idDelete))
+          this.renderer.removeSymbol(id)
         })
         await this.recognizer.eraseStrokes(gesture.strokeIds)
         this.model.updatePositionReceived()
@@ -415,7 +419,10 @@ export class OIGestureManager
     if (!gesture?.gestures.length) return
     switch (gesture.gestures[0].type) {
       case "surround": {
-        const symbolsToSelect = this.model.symbols.filter(s => stroke.boundingBox.contains(s.boundingBox))
+        const symbolsToSelect = this.model.symbols.filter(s =>
+        {
+          return stroke.boundingBox.containsPoint({ x: s.boundingBox.xMid, y: s.boundingBox.yMid })
+        })
         return {
           gestureType: "SURROUND",
           gestureStrokeId: stroke.id,
@@ -429,7 +436,8 @@ export class OIGestureManager
         const symbolsToUnderline = this.model.symbols.filter(s =>
         {
           return [SymbolType.Text.toString(), SymbolType.Stroke.toString()].includes(s.type) &&
-            isBetween(stroke.boundingBox.yMiddle, s.boundingBox.y + s.boundingBox.height * 3 / 4, s.boundingBox.y + s.boundingBox.height * 5 / 4)
+            stroke.pointers.some(p => isBetween(p.x, s.boundingBox.xMin, s.boundingBox.xMax)) &&
+            isBetween(stroke.boundingBox.yMid, s.boundingBox.y + s.boundingBox.height * 3 / 4, s.boundingBox.y + s.boundingBox.height * 5 / 4)
         })
         if (symbolsToUnderline.length) {
           return {
@@ -443,7 +451,8 @@ export class OIGestureManager
         const symbolsToStrikeThrough = this.model.symbols.filter(s =>
         {
           return [SymbolType.Text.toString(), SymbolType.Stroke.toString()].includes(s.type) &&
-            isBetween(stroke.boundingBox.yMiddle, s.boundingBox.y + s.boundingBox.height / 4, s.boundingBox.y + s.boundingBox.height * 3 / 4)
+            stroke.pointers.some(p => isBetween(p.x, s.boundingBox.xMin, s.boundingBox.xMax)) &&
+            isBetween(stroke.boundingBox.yMid, s.boundingBox.y + s.boundingBox.height / 4, s.boundingBox.y + s.boundingBox.height * 3 / 4)
         })
         if (symbolsToStrikeThrough.length) {
           return {
@@ -459,7 +468,8 @@ export class OIGestureManager
       case "scratch": {
         const symbolsToErase = this.model.symbols.filter(s =>
         {
-          return [SymbolType.Stroke.toString(), SymbolType.Text.toString()].includes(s.type) && stroke.boundingBox.overlaps(s.boundingBox)
+          return SymbolType.Stroke === s.type && stroke.boundingBox.overlaps(s.boundingBox) ||
+            SymbolType.Text === s.type && stroke.pointers.some(p => isPointInsidePolygon(p, s.vertices))
         })
         if (symbolsToErase.length) {
           return {

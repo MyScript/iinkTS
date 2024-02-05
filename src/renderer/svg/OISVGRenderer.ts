@@ -1,7 +1,7 @@
 import { LoggerClass, SvgElementRole } from "../../Constants"
 import { TRenderingConfiguration } from "../../configuration"
 import { LoggerManager } from "../../logger"
-import { OIStroke, SymbolType, TOIEdge, TOISymbol, TPoint, TOIShape, TBoundingBox, OIText, TOIDecorator, Box, OIEraser } from "../../primitive"
+import { OIStroke, SymbolType, TOIEdge, TOISymbol, TPoint, TOIShape, TBoundingBox, OIText, Box, OIEraser } from "../../primitive"
 import { getClosestPoints } from "../../utils"
 import { OISVGDecoratorUtil } from "./OISVGDecoratorUtil"
 import { OISVGEdgeUtil } from "./OISVGEdgeUtil"
@@ -110,19 +110,15 @@ export class OISVGRenderer
 
   protected createFilters(): void
   {
-    const removalFilter = SVGBuilder.createFilter(this.removalFilterId)
+    const removalFilter = SVGBuilder.createFilter(this.removalFilterId, { filterUnits: "userSpaceOnUse" })
     const bfeComponentTransfer = SVGBuilder.createComponentTransfert()
     const bfeFuncA = SVGBuilder.createTransfertFunctionTable("feFuncA", "0 0.25")
     bfeComponentTransfer.appendChild(bfeFuncA)
     removalFilter.appendChild(bfeComponentTransfer)
     this.layer.appendChild(removalFilter)
 
-    const selectionFilter = SVGBuilder.createFilter(this.selectionFilterId)
+    const selectionFilter = SVGBuilder.createFilter(this.selectionFilterId, { filterUnits: "userSpaceOnUse" })
     selectionFilter.appendChild(SVGBuilder.createDropShadow({ dx: -1, dy: -1, deviation: 1 }))
-    selectionFilter.appendChild(SVGBuilder.createDropShadow({ dx: 1, dy: -1, deviation: 1 }))
-    selectionFilter.appendChild(SVGBuilder.createDropShadow({ dx: -1, dy: 1, deviation: 1 }))
-    selectionFilter.appendChild(SVGBuilder.createDropShadow({ dx: 1, dy: 1, deviation: 1 }))
-
     this.layer.appendChild(selectionFilter)
   }
 
@@ -204,7 +200,6 @@ export class OISVGRenderer
     this.layer.querySelector(`#${ this.groupGuidesId }`)?.remove()
   }
 
-
   init(element: HTMLElement): void
   {
     this.#logger.info("init", { element })
@@ -263,60 +258,12 @@ export class OISVGRenderer
         return this.shapeUtil.getSVGElement(symbol as TOIShape)
       case SymbolType.Edge:
         return this.edgeUtil.getSVGElement(symbol as TOIEdge)
-      case SymbolType.Decorator:
-        return this.decoratorUtil.getSVGElement(symbol as TOIDecorator)
       case SymbolType.Text:
         return this.textUtil.getSVGElement(symbol as OIText)
       default:
         this.#logger.error("getSymbolElement", `symbol type is unknow: "${ symbol.type }"`)
         return
     }
-  }
-
-  getElementBounds(el: SVGElement): TBoundingBox
-  {
-    if (el.tagName === "g") {
-      const boxes: TBoundingBox[] = []
-      const svgGroup = (el as SVGGElement)
-      const deltaX = this.parent.scrollLeft - this.parent.offsetLeft
-      const deltaY = this.parent.scrollTop - this.parent.offsetTop
-      const m = svgGroup.getScreenCTM()
-      el.childNodes.forEach(child =>
-      {
-        const bbox = new Box((child as SVGGeometryElement).getBBox({ stroke: true, markers: true, clipped: true, fill: true }))
-        const svgPoints = bbox.corners.map(c =>
-        {
-          let point = new DOMPoint(c.x, c.y)
-          if (m) {
-            point = point.matrixTransform(m)
-          }
-          point.x += deltaX
-          point.y += deltaY
-          return point
-        })
-        const bboxTransform = Box.createFromPoints(svgPoints)
-        boxes.push(bboxTransform)
-      })
-      return Box.createFromBoxes(boxes)
-    }
-    else {
-      return (el as SVGGeometryElement).getBBox({ stroke: true, markers: true, clipped: true, fill: true })
-    }
-  }
-
-  getSymbolBounds(symbol: TOISymbol): TBoundingBox | undefined
-  {
-    const id = "render-to-bbox"
-    this.layer.querySelector(`#${ id }`)?.remove()
-    const el = this.getSymbolElement(symbol)
-    if (el) {
-      el.id = id
-      el.setAttribute("visibility", "hidden")
-      this.layer.prepend(el)
-      const bbox = this.getElementBounds(el)
-      return bbox
-    }
-    return
   }
 
   drawSymbol(symbol: TOISymbol): SVGGraphicsElement | undefined

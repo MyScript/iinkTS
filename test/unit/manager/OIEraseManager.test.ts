@@ -57,10 +57,10 @@ describe("OIEraseManager.ts", () =>
     {
       const eraserId = manager.currentEraser!.id
       const strokeToErase = buildOIStroke()
-      strokeToErase.toDelete = true
+      strokeToErase.deleting = true
       manager.model.symbols.push(strokeToErase)
       const circleToErase = buildOICircle()
-      circleToErase.toDelete = true
+      circleToErase.deleting = true
       manager.model.symbols.push(circleToErase)
       manager.model.symbols.push(buildOIStroke())
       const point: TPointer = { t: 1, p: 0.5, x: 20, y: 20 }

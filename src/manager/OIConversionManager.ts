@@ -2,12 +2,13 @@ import { LoggerClass } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerManager } from "../logger"
 import { OIModel, TJIIXChar, TJIIXEdgeArc, TJIIXEdgeElement, TJIIXEdgeLine, TJIIXExport, TJIIXNodeCircle, TJIIXNodeElement, TJIIXNodeEllipse, TJIIXNodePolygon, TJIIXNodeRectangle, TJIIXTextElement, TJIIXWord } from "../model"
-import { Box, EdgeKind, OIEdgeArc, OIEdgeLine, OIShapeCircle, OIShapeEllipse, OIShapePolygon, OIStroke, OIText, SymbolType, TOIEdge, TOIShape, TOISymbolChar, TPoint } from "../primitive"
+import { Box, DecoratorKind, EdgeKind, OIDecorator, OIEdgeArc, OIEdgeLine, OIShapeCircle, OIShapeEllipse, OIShapePolygon, OIStroke, OIText, SymbolType, TOIEdge, TOIShape, TOISymbolChar, TPoint } from "../primitive"
 import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
 import { UndoRedoManager } from "../undo-redo"
 import { computeAngleAxeRadian, computeAverage, convertBoundingBoxMillimeterToPixel, convertMillimeterToPixel, createUUID, rotatePoint } from "../utils"
 import { OISelectionManager } from "./OISelectionManager"
+import { OITextManager } from "./OITextManager"
 
 /**
  * @group Manager
@@ -37,6 +38,11 @@ export class OIConversionManager
   get selector(): OISelectionManager
   {
     return this.behaviors.selector
+  }
+
+  get texter(): OITextManager
+  {
+    return this.behaviors.texter
   }
 
   get renderer(): OISVGRenderer
@@ -93,21 +99,29 @@ export class OIConversionManager
         charSymbols.push(this.buildChar(char, charStrokes))
       }
     })
-    return new OIText({}, charSymbols, { x: boundingBox.xMin, y: boundingBox.yMax }, boundingBox)
-  }
-
-  getSpaceWidth(fontSize: number): number
-  {
-    const boundingBox = new Box({ height: 0, width: 0, x: 0, y: 0 })
-    const charSymbol: TOISymbolChar = {
-      id: `text-char-space`,
-      label: "_",
-      color: "",
-      fontSize,
-      fontWeight: 0,
-      boundingBox
+    const text = new OIText({}, charSymbols, { x: boundingBox.xMin, y: boundingBox.yMax }, boundingBox)
+    const decorators = strokes.flatMap(s => s.decorators)
+    if (decorators.length)
+    {
+      const hightlight = decorators.find(d => d.kind === DecoratorKind.Highlight)
+      if (hightlight) {
+        text.decorators.push(new OIDecorator(DecoratorKind.Highlight, hightlight.style, text))
+      }
+      const strikethrough = decorators.find(d => d.kind === DecoratorKind.Strikethrough)
+      if (strikethrough) {
+        text.decorators.push(new OIDecorator(DecoratorKind.Strikethrough, strikethrough.style, text))
+      }
+      const surround = decorators.find(d => d.kind === DecoratorKind.Surround)
+      if (surround) {
+        text.decorators.push(new OIDecorator(DecoratorKind.Surround, surround.style, text))
+      }
+      const underline = decorators.find(d => d.kind === DecoratorKind.Underline)
+      if (underline) {
+        text.decorators.push(new OIDecorator(DecoratorKind.Underline, underline.style, text))
+      }
     }
-    return this.renderer.getSymbolBounds(new OIText({}, [charSymbol], { x: 0, y: 0 }, boundingBox))?.width as number
+
+    return text
   }
 
   async convertText(text: TJIIXTextElement, alignTextToGuide: boolean): Promise<void>
@@ -141,18 +155,8 @@ export class OIConversionManager
         }
 
         const textGroupEl = this.renderer.drawSymbol(textSymbol) as SVGGElement
-        const box = Box.createFromBoxes([this.renderer.getElementBounds(textGroupEl)])
-        const textEl = textGroupEl.querySelector("text")
-        textSymbol.boundingBox = box
-        if (textEl) {
-          for (let i = 0; i < textEl.getNumberOfChars(); i++) {
-            const char = textSymbol.chars.at(i)
-            if (char) {
-              const ext = textEl.getExtentOfChar(i)
-              char.boundingBox = new Box(ext)
-            }
-          }
-        }
+        textSymbol.boundingBox = this.texter.getElementBoundingBox(textGroupEl)
+        this.texter.setCharsBoundingBox(textSymbol, textGroupEl)
         this.model.addSymbol(textSymbol)
       }
     })
@@ -210,8 +214,8 @@ export class OIConversionManager
     const points: TPoint[] = []
     for (let i = 0; i < polygon.points.length; i += 2) {
       points.push({
-        x: polygon.points[i],
-        y: polygon.points[i + 1]
+        x: convertMillimeterToPixel(polygon.points[i]),
+        y: convertMillimeterToPixel(polygon.points[i + 1])
       })
     }
     return new OIShapePolygon(strokes[0]?.style, points, polygon.kind)

@@ -7,12 +7,12 @@ import { TPoint, TPointer } from "./Point"
 import { TBoundingBox } from "./Box"
 import { SymbolType } from "./Symbol"
 import { OIDecorator } from "./OIDecorator"
-import { OISymbol, TOISymbolDecorable } from "./OISymbol"
+import { OISymbol } from "./OISymbol"
 
 /**
  * @group Primitive
  */
-export class OIStroke extends OISymbol implements TStroke, TOISymbolDecorable
+export class OIStroke extends OISymbol implements TStroke
 {
   #logger = LoggerManager.getLogger(LoggerClass.STROKE)
   pointerId: number
@@ -141,10 +141,11 @@ export class OIStroke extends OISymbol implements TStroke, TOISymbolDecorable
     const clone = new OIStroke(this.style, this.pointerId, this.pointerType)
     clone.id = this.id
     clone.selected = this.selected
-    clone.toDelete = this.toDelete
+    clone.deleting = this.deleting
     clone.creationTime = this.creationTime
     clone.modificationDate = this.modificationDate
     clone.pointers = structuredClone(this.pointers)
+    clone.decorators = this.decorators.map(d => d.clone(clone))
     clone.length = this.length
     return clone
   }

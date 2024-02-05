@@ -3,7 +3,7 @@ import { OIBehaviors } from "../behaviors"
 import { InternalEvent } from "../event"
 import { LoggerManager } from "../logger"
 import { OIModel } from "../model"
-import { Box, SymbolType, TBoundingBox, TOISymbol, TPoint } from "../primitive"
+import { Box, OIText, SymbolType, TBoundingBox, TOISymbol, TPoint } from "../primitive"
 import { OISVGRenderer, SVGBuilder } from "../renderer"
 import { StyleHelper } from "../style"
 import { OIResizeManager } from "./OIResizeManager"
@@ -19,6 +19,7 @@ export class OISelectionManager
   #selectingId = "selecting-rect"
   startSelectionPoint?: TPoint
   endSelectionPoint?: TPoint
+  selectedGroup?: SVGGElement
 
   behaviors: OIBehaviors
 
@@ -108,12 +109,14 @@ export class OISelectionManager
       y: box.y
     }
     const translateEl = SVGBuilder.createRect(boxWithMarge, attrs)
-    const handler = (ev: PointerEvent) => {
+    const handler = (ev: PointerEvent) =>
+    {
       ev.preventDefault()
       ev.stopPropagation()
       this.translator.continue(this.getPoint(ev))
     }
-    const endHandler = (ev: PointerEvent) => {
+    const endHandler = (ev: PointerEvent) =>
+    {
       ev.preventDefault()
       ev.stopPropagation()
       this.translator.end(this.getPoint(ev))
@@ -123,7 +126,8 @@ export class OISelectionManager
       this.renderer.layer.removeEventListener("pointerup", endHandler)
     }
 
-    translateEl.addEventListener("pointerdown", (ev) => {
+    translateEl.addEventListener("pointerdown", (ev) =>
+    {
       ev.preventDefault()
       ev.stopPropagation()
       this.translator.start(ev.target as Element, this.getPoint(ev))
@@ -162,12 +166,14 @@ export class OISelectionManager
     }
     group.appendChild(SVGBuilder.createCircle(center, radius / 2, attrs2))
 
-    const handler = (ev: PointerEvent) => {
+    const handler = (ev: PointerEvent) =>
+    {
       ev.preventDefault()
       ev.stopPropagation()
       this.rotator.continue(this.getPoint(ev))
     }
-    const endHandler = (ev: PointerEvent) => {
+    const endHandler = (ev: PointerEvent) =>
+    {
       ev.preventDefault()
       ev.stopPropagation()
       this.rotator.end(this.getPoint(ev))
@@ -177,7 +183,8 @@ export class OISelectionManager
       this.renderer.layer.removeEventListener("pointerup", endHandler)
     }
 
-    group.addEventListener("pointerdown", (ev) => {
+    group.addEventListener("pointerdown", (ev) =>
+    {
       ev.preventDefault()
       ev.stopPropagation()
       this.rotator.start(ev.target as Element, this.getPoint(ev))
@@ -195,20 +202,23 @@ export class OISelectionManager
       role: SvgElementRole.Resize,
       "vector-effect": "non-scaling-size",
       "stroke-width": "4",
-      "stroke": "#1A9FFF",
+      "stroke": "#3e68ff",
     })
     const P_NW: TPoint = { x: box.x - SELECTION_MARGIN, y: box.y - SELECTION_MARGIN }
     const P_NE: TPoint = { x: box.x + box.width + SELECTION_MARGIN, y: box.y - SELECTION_MARGIN }
     const P_SE: TPoint = { x: box.x + box.width + SELECTION_MARGIN, y: box.y + box.height + SELECTION_MARGIN }
     const P_SW: TPoint = { x: box.x - SELECTION_MARGIN, y: box.y + box.height + SELECTION_MARGIN }
 
-    const bindEl = (el: SVGElement, transformOrigin: TPoint) => {
-      const handler = (ev: PointerEvent) => {
+    const bindEl = (el: SVGElement, transformOrigin: TPoint) =>
+    {
+      const handler = (ev: PointerEvent) =>
+      {
         ev.preventDefault()
         ev.stopPropagation()
         this.resizer.continue(this.getPoint(ev))
       }
-      const endHandler = (ev: PointerEvent) => {
+      const endHandler = (ev: PointerEvent) =>
+      {
         ev.preventDefault()
         ev.stopPropagation()
         this.resizer.end(this.getPoint(ev))
@@ -218,7 +228,8 @@ export class OISelectionManager
         this.renderer.layer.removeEventListener("pointerup", endHandler)
       }
 
-      el.addEventListener("pointerdown", (ev) => {
+      el.addEventListener("pointerdown", (ev) =>
+      {
         ev.preventDefault()
         ev.stopPropagation()
         this.resizer.start(ev.target as Element, transformOrigin)
@@ -271,88 +282,91 @@ export class OISelectionManager
     return group
   }
 
-  protected createSelectedGroup(box: TBoundingBox, interact = { resize: false, translate: false, rotate: false, color: false }): SVGGElement
+  protected createSelectedGroup(box: TBoundingBox): SVGGElement
   {
     const attrs = {
       id: `selected-${ Date.now() }`,
       role: SvgElementRole.Selected,
     }
     const surroundGroup = SVGBuilder.createGroup(attrs)
-    if (interact.translate) {
-      surroundGroup.appendChild(this.createTranslateRect(box))
-    }
-    if (interact.resize) {
-      surroundGroup.appendChild(this.createResizeGroup(box))
-    }
-    if (interact.rotate) {
-      surroundGroup.appendChild(this.createRotateGroup(box))
-    }
+    surroundGroup.appendChild(this.createTranslateRect(box))
+    surroundGroup.appendChild(this.createResizeGroup(box))
+    surroundGroup.appendChild(this.createRotateGroup(box))
     return surroundGroup
   }
 
-  protected wrapElements(elements: SVGElement[]): SVGGElement | undefined
+  protected wrapSymbols(symbols: TOISymbol[]): SVGGElement | undefined
   {
-    this.#logger.info("drawSelectedGroup", { elements })
+    this.#logger.info("drawSelectedGroup", { symbols })
 
-    if (!elements.length) return
+    if (!symbols.length) return
 
-    const elementsWithBounds = elements.map(element => ({ element, bounds: this.renderer.getElementBounds(element) }))
+    const symbolElementMap = symbols.map(s =>
+    {
+      return {
+        symbol: s,
+        element: this.renderer.getElementById(s.id),
+      }
+    })
 
-    const box = Box.createFromBoxes(elementsWithBounds.filter(e => e.bounds.width && e.bounds.height).map(e => e.bounds))
-    const interact = {
-      resize: elements.some(e => e.getAttribute("type") !== SymbolType.Decorator),
-      translate: elements.some(e => e.getAttribute("type") !== SymbolType.Decorator),
-      rotate: elements.some(e => e.getAttribute("type") !== SymbolType.Decorator),
-      color: true
-    }
+    const box1 = Box.createFromBoxes(symbols.map(s =>
+    {
+      return {
+        x: s.boundingBox.x - (s.style.width || 1),
+        y: s.boundingBox.y - (s.style.width || 1),
+        height: s.boundingBox.height + (s.style.width || 1) * 2,
+        width: s.boundingBox.width + (s.style.width || 1) * 2,
+      }
+    }))
 
-    const surroundGroup = this.createSelectedGroup(box, interact)
-    elements.forEach(el => el.setAttribute("filter", `url(#${ this.renderer.selectionFilterId })`))
+    const box2 = Box.createFromPoints(symbols.flatMap(s => s.vertices))
+    const box = Box.createFromBoxes([box1, box2])
 
-    elements.forEach(s => s.setAttribute("style", "pointer-events:none;" + s.getAttribute("style")))
+    const surroundGroup = this.createSelectedGroup(box)
+    symbolElementMap.forEach(se =>
+    {
+      se.element?.setAttribute("filter", `url(#${ this.renderer.selectionFilterId })`)
+      se.element?.setAttribute("style", "pointer-events:none;" + se.element?.getAttribute("style"))
+    })
 
     const SURROUND_ATTRS = {
       style: "pointer-events: none",
       fill: "transparent",
-      stroke: "#1A9FFF",
+      stroke: "#3e68ff",
       "stroke-width": "1",
       "stroke-dasharray": "4",
       "vector-effect": "non-scaling-size",
+      transform: "rotate(0, 0, 0)"
     }
-    elementsWithBounds.forEach(el =>
+    symbolElementMap.forEach(s =>
     {
-      if (el.element.getAttribute("type") !== SymbolType.Decorator) {
-        surroundGroup.prepend(SVGBuilder.createRect(el.bounds, SURROUND_ATTRS))
-        surroundGroup.insertAdjacentElement("afterbegin", el.element)
+      if (s.element) {
+        const bounds: TBoundingBox = {
+          x: s.symbol.boundingBox.x - (s.symbol.style.width || 1),
+          y: s.symbol.boundingBox.y - (s.symbol.style.width || 1),
+          height: s.symbol.boundingBox.height + (s.symbol.style.width || 1) * 2,
+          width: s.symbol.boundingBox.width + (s.symbol.style.width || 1) * 2,
+        }
+        if (s.symbol.type === SymbolType.Text) {
+          const t = s.symbol as OIText
+          SURROUND_ATTRS.transform = `rotate(${t.rotation?.degree || 0}, ${t.rotation?.center.x || 0}, ${t.rotation?.center.y || 0})`
+        }
+        else {
+          SURROUND_ATTRS.transform = "rotate(0, 0, 0)"
+        }
+        surroundGroup.prepend(SVGBuilder.createRect(bounds, SURROUND_ATTRS))
+        surroundGroup.insertAdjacentElement("afterbegin", s.element)
       }
     })
     return surroundGroup
   }
 
-  protected unWrap(group: SVGGElement): void
-  {
-    const querySymbols = Object.values(SymbolType).filter(v => v !== SymbolType.Decorator).map(v => `[type=${ v }]`).join(",")
-    group.querySelectorAll(querySymbols)
-      .forEach(s =>
-      {
-        const style = s.getAttribute("style") as string
-        const styleJson = StyleHelper.stringToJSON(style)
-        styleJson["pointer-events"] = "stroke;"
-        // delete styleJson["pointer-events"]
-        s.setAttribute("style", StyleHelper.JSONToString(styleJson))
-        s.removeAttribute("filter")
-        group.insertAdjacentElement("beforebegin", s)
-      })
-    group.remove()
-  }
-
   drawSelectedGroup(symbols: TOISymbol[]): void
   {
     if (!symbols.length) return
-    const symbolElments = symbols.map(s => this.renderer.getElementById(s.id)) as SVGGeometryElement[]
-    const group = this.wrapElements(symbolElments)
-    if (group) {
-      this.renderer.appendElement(group)
+    this.selectedGroup = this.wrapSymbols(symbols)
+    if (this.selectedGroup) {
+      this.renderer.appendElement(this.selectedGroup)
     }
   }
 
@@ -366,29 +380,45 @@ export class OISelectionManager
   removeSelectedGroup(): void
   {
     this.#logger.info("removeSelectedGroup")
-    this.renderer.getElements({ attrs: { role: SvgElementRole.Selected.toString() } })
-      .forEach(g =>
+    const querySymbols = Object.values(SymbolType).map(v => `[type=${ v }]`).join(",")
+    this.selectedGroup?.querySelectorAll(querySymbols)
+      .forEach(s =>
       {
-        this.unWrap(g as SVGGElement)
+        const style = s.getAttribute("style") as string
+        const styleJson = StyleHelper.stringToJSON(style)
+        styleJson["pointer-events"] = "stroke;"
+        // delete styleJson["pointer-events"]
+        s.setAttribute("style", StyleHelper.JSONToString(styleJson))
+        s.querySelectorAll("*").forEach(e => e.removeAttribute("filter"))
+        s.removeAttribute("filter")
+        this.selectedGroup?.insertAdjacentElement("beforebegin", s)
+      })
+    this.selectedGroup?.remove()
+    this.selectedGroup = undefined
+  }
+
+  hideSelectedElements(): void
+  {
+    const query = `[role=${ SvgElementRole.Resize }],[role=${ SvgElementRole.Rotate }],[role=${ SvgElementRole.Translate }]`
+    this.selectedGroup?.querySelectorAll(query)
+      .forEach(el =>
+      {
+        el.setAttribute("visibility", "hidden")
       })
   }
 
-  start(point: TPoint): TOISymbol[]
+  showSelectedElements(): void
+  {
+    const query = `[role=${ SvgElementRole.Resize }],[role=${ SvgElementRole.Rotate }],[role=${ SvgElementRole.Translate }]`
+    this.selectedGroup?.querySelectorAll(query)
+      .forEach(el => el.setAttribute("visibility", "visible"))
+  }
+
+  start(point: TPoint): void
   {
     this.startSelectionPoint = point
     this.endSelectionPoint = point
-    const updatedSymbols: TOISymbol[] = []
-
-    this.model.symbols.forEach(s =>
-    {
-      if (s.selected !== s.overlaps(this.selectionBox!)) {
-        s.selected = s.overlaps(this.selectionBox!)
-        updatedSymbols.push(s)
-        this.renderer.drawSymbol(s)
-      }
-    })
     this.drawSelectingRect(this.selectionBox!)
-    return updatedSymbols
   }
 
   continue(point: TPoint): TOISymbol[]

@@ -2,7 +2,6 @@ import
 {
   DefaultConfiguration,
   OIBehaviors,
-  OIDecoratorUnderline,
   OIEdgeLine,
   OIResizeManager,
   OIShapeCircle,
@@ -10,7 +9,6 @@ import
   OIShapeRectangle,
   OIStroke,
   ResizeDirection,
-  SELECTION_MARGIN,
   SvgElementRole,
   TBehaviorOptions,
   TPoint
@@ -96,17 +94,6 @@ describe("OIResizeManager.ts", () =>
       expect(line.start).toEqual({ x: 0, y: 0 })
       expect(line.end).toEqual({ x: 0, y: 15 })
     })
-    test("resize decorator", () =>
-    {
-      const stroke = new OIStroke({}, 1)
-      stroke.addPointer({ p: 1, t: 1, x: 1, y: 2 })
-      stroke.addPointer({ p: 1, t: 10, x: 21, y: 42 })
-      const underline = new OIDecoratorUnderline({}, [stroke])
-      const origin: TPoint = { x: 0, y: 0 }
-      manager.applyToSymbol(underline, origin, 2, 3)
-      expect(underline.vertices[0]).toEqual({ x: stroke.boundingBox.xMin, y: stroke.boundingBox.yMax + SELECTION_MARGIN / 2 })
-      expect(underline.vertices[1]).toEqual({ x: stroke.boundingBox.xMax, y: stroke.boundingBox.yMax + SELECTION_MARGIN / 2 })
-    })
   })
 
   describe("resize process on stroke without snap", () =>
@@ -143,7 +130,7 @@ describe("OIResizeManager.ts", () =>
       {
         direction: ResizeDirection.North,
         transformOrigin: {
-          x: stroke.boundingBox.xMiddle,
+          x: stroke.boundingBox.xMid,
           y: stroke.boundingBox.yMax
         },
         scale: {
@@ -155,7 +142,7 @@ describe("OIResizeManager.ts", () =>
         direction: ResizeDirection.East,
         transformOrigin: {
           x: stroke.boundingBox.xMin,
-          y: stroke.boundingBox.yMiddle
+          y: stroke.boundingBox.yMid
         },
         scale: {
           x: 1 + (resizeToPoint.x - stroke.boundingBox.xMax) / stroke.boundingBox.width,
@@ -165,7 +152,7 @@ describe("OIResizeManager.ts", () =>
       {
         direction: ResizeDirection.South,
         transformOrigin: {
-          x: stroke.boundingBox.xMiddle,
+          x: stroke.boundingBox.xMid,
           y: stroke.boundingBox.yMin
         },
         scale: {
@@ -177,7 +164,7 @@ describe("OIResizeManager.ts", () =>
         direction: ResizeDirection.West,
         transformOrigin: {
           x: stroke.boundingBox.xMax,
-          y: stroke.boundingBox.yMiddle
+          y: stroke.boundingBox.yMid
         },
         scale: {
           x: 1 + (stroke.boundingBox.xMin - resizeToPoint.x) / stroke.boundingBox.width,

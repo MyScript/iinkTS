@@ -154,9 +154,6 @@ export class OITranslateManager
         return this.applyToShape(symbol as TOIShape, tx, ty)
       case SymbolType.Edge:
         return this.applyToEdge(symbol as TOIEdge, tx, ty)
-      case SymbolType.Decorator:
-        // Decorator is computed from its parent (eg. OIStroke)
-        return symbol
       case SymbolType.Text:
         return this.applyOnText(symbol as OIText, tx, ty)
       default:
@@ -187,6 +184,7 @@ export class OITranslateManager
     this.#logger.info("start", { origin })
     this.wrapper = (target.closest(`[role=${ SvgElementRole.Selected }]`) as unknown) as SVGGElement
     this.transformOrigin = origin
+    this.selector.hideSelectedElements()
   }
 
   continue(point: TPoint): { tx: number, ty: number }
@@ -219,6 +217,7 @@ export class OITranslateManager
     this.model.symbolsSelected.forEach(s =>
     {
       this.applyToSymbol(s, tx, ty)
+      // if (s.type ===)
       this.renderer.drawSymbol(s)
       this.model.updateSymbol(s)
       if (s.type === SymbolType.Stroke) {
@@ -229,6 +228,7 @@ export class OITranslateManager
     this.selector.resetSelectedGroup(this.model.symbolsSelected)
     this.undoRedoManager.addModelToStack(this.model)
     this.wrapper = undefined
+    this.selector.showSelectedElements()
     await promise
     await this.svgDebugger.apply()
   }
