@@ -1,8 +1,4 @@
-import { OIText, TOIDecorator } from "../../primitive"
-// import { MatrixTransform } from "../../transform"
-// import { convertRadianToDegree } from "../../utils"
-// import { MatrixTransform } from "../../transform"
-// import { convertRadianToDegree } from "../../utils"
+import { DecoratorKind, OIText, OIDecorator } from "../../primitive"
 import { OISVGDecoratorUtil } from "./OISVGDecoratorUtil"
 import { SVGBuilder } from "./SVGBuilder"
 
@@ -33,12 +29,12 @@ export class OISVGTextUtil
       "style": "-webkit-user-select: none; -ms-user-select: none; user-select: none;"
     }
     if (text.rotation) {
-      groupAttrs.transform = `rotate(${text.rotation.degree}, ${text.rotation.center.x}, ${text.rotation.center.y})`
+      groupAttrs.transform = `rotate(${ text.rotation.degree }, ${ text.rotation.center.x }, ${ text.rotation.center.y })`
     }
     if (text.selected) {
       groupAttrs["filter"] = `url(#${ this.selectionFilterId })`
     }
-    if (text.toDelete) {
+    if (text.deleting) {
       groupAttrs["filter"] = `url(#${ this.removalFilterId })`
     }
 
@@ -62,9 +58,14 @@ export class OISVGTextUtil
 
     text.decorators.forEach(d =>
     {
-      const deco = this.decoratorUtil.getSVGElement(d as TOIDecorator)
+      const deco = this.decoratorUtil.getSVGElement(d as OIDecorator)
       if (deco) {
-        textGroup.prepend(deco)
+        if (d.kind === DecoratorKind.Highlight) {
+          textGroup.prepend(deco)
+        }
+        else {
+          textGroup.append(deco)
+        }
       }
     })
 

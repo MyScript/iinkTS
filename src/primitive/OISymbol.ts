@@ -1,7 +1,6 @@
 import { DefaultStyle, TStyle } from "../style"
 import { createUUID } from "../utils"
 import { TBox, TBoundingBox, Box } from "./Box"
-import { TOIDecorator } from "./OIDecorator"
 import { TPoint } from "./Point"
 import { SymbolType, TSymbol } from "./Symbol"
 
@@ -11,21 +10,13 @@ import { SymbolType, TSymbol } from "./Symbol"
 export interface TOISymbol extends TSymbol
 {
   selected: boolean
-  toDelete: boolean
+  deleting: boolean
   get boundingBox(): TBox
   get vertices(): TPoint[]
   get snapPoints(): TPoint[]
   overlaps(box: TBoundingBox): boolean
   isCloseToPoint(point: TPoint): boolean
   clone(): TOISymbol
-}
-
-/**
- * @group Primitive
- */
-export interface TOISymbolDecorable extends TOISymbol
-{
-  decorators: TOIDecorator[]
 }
 
 /**
@@ -39,7 +30,7 @@ export abstract class OISymbol implements TOISymbol
   creationTime: number
   modificationDate: number
   selected: boolean
-  toDelete: boolean
+  deleting: boolean
   style: TStyle
 
   constructor(type: SymbolType, style: TStyle)
@@ -50,7 +41,7 @@ export abstract class OISymbol implements TOISymbol
     this.creationTime = Date.now()
     this.modificationDate = this.creationTime
     this.selected = false
-    this.toDelete = false
+    this.deleting = false
 
     this.style = Object.assign({}, DefaultStyle, style)
   }

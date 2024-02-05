@@ -157,9 +157,6 @@ export class OIRotationManager
         return this.applyToShape(symbol as TOIShape, center, angleRad)
       case SymbolType.Edge:
         return this.applyToEdge(symbol as TOIEdge, center, angleRad)
-      case SymbolType.Decorator:
-        // Decorator is computed from its parent (eg. OIStroke)
-        return symbol
       case SymbolType.Text:
         return this.applyOnText(symbol as OIText, center, angleRad)
       default:
@@ -186,10 +183,11 @@ export class OIRotationManager
 
     this.center = {
       x: boundingBox.xMin + boundingBox.width / 2,
-      y: boundingBox.yMiddle
+      y: boundingBox.yMid
     }
     this.origin = origin
     this.setTransformOrigin(this.wrapper.id, this.center.x, this.center.y)
+    this.selector.hideSelectedElements()
   }
 
   continue(point: TPoint): number
@@ -228,6 +226,7 @@ export class OIRotationManager
     this.undoRedoManager.addModelToStack(this.model)
     const promise = this.recognizer.replaceStrokes(strokesRotated.map(s => s.id), strokesRotated)
     this.wrapper = undefined
+    this.selector.showSelectedElements()
     await promise
     await this.svgDebugger.apply()
   }

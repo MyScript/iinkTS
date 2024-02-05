@@ -19,10 +19,14 @@ export class SVGBuilder
     return svgEl
   }
 
-  static createFilter(id: string): SVGFilterElement
+  static createFilter(id: string, attrs: { [key: string]: string } = {}): SVGFilterElement
   {
     const filter = document.createElementNS(XMLNS, "filter")
     filter.id = id
+    Object.keys(attrs).forEach(k =>
+    {
+      filter.setAttribute(k, attrs[k])
+    })
     return filter
   }
 

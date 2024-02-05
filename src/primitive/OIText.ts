@@ -1,12 +1,12 @@
 import { LoggerClass, SELECTION_MARGIN } from "../Constants"
 import { LoggerManager } from "../logger"
 import { DefaultStyle, TStyle } from "../style"
-import { computeDistanceBetweenPointAndSegment, converDegreeToRadian, createUUID, findIntersectionBetween2Segment, rotatePoint } from "../utils"
+import { computeDistanceBetweenPointAndSegment, converDegreeToRadian, createUUID, findIntersectionBetween2Segment, isPointInsidePolygon, rotatePoint } from "../utils"
 import { TPoint, TSegment } from "./Point"
 import { SymbolType } from "./Symbol"
 import { Box, TBoundingBox } from "./Box"
 import { OIDecorator } from "./OIDecorator"
-import { TOISymbolDecorable } from "./OISymbol"
+import { TOISymbol } from "./OISymbol"
 
 /**
  * @group Primitive
@@ -23,7 +23,7 @@ export type TOISymbolChar = {
 /**
  * @group Primitive
  */
-export class OIText implements TOISymbolDecorable
+export class OIText implements TOISymbol
 {
   #logger = LoggerManager.getLogger(LoggerClass.TEXT)
   readonly type = SymbolType.Text
@@ -31,7 +31,7 @@ export class OIText implements TOISymbolDecorable
   creationTime: number
   modificationDate: number
   selected: boolean
-  toDelete: boolean
+  deleting: boolean
   style: TStyle
   point: TPoint
   boundingBox: Box
@@ -50,7 +50,7 @@ export class OIText implements TOISymbolDecorable
     this.modificationDate = this.creationTime
     this.style = Object.assign({}, DefaultStyle, style)
     this.selected = false
-    this.toDelete = false
+    this.deleting = false
     this.point = point
     this.boundingBox = new Box(boundingBox)
     this.chars = chars
@@ -93,7 +93,23 @@ export class OIText implements TOISymbolDecorable
 
   get snapPoints(): TPoint[]
   {
-    return this.vertices
+    const offsetY = this.boundingBox.yMax - this.point.y
+    const points = [
+      { x: this.boundingBox.x, y: this.boundingBox.yMin + offsetY },
+      { x: this.boundingBox.xMax, y: this.boundingBox.yMin + offsetY },
+      { x: this.boundingBox.xMax, y: this.boundingBox.yMax - offsetY },
+      { x: this.boundingBox.x, y: this.boundingBox.yMax - offsetY },
+    ]
+    if (this.rotation) {
+      const center = this.rotation.center
+      const rad = converDegreeToRadian(-this.rotation.degree)
+      return points
+        .map(p =>
+        {
+          return rotatePoint(p, center, rad)
+        })
+    }
+    return points
   }
 
   isCloseToPoint(point: TPoint): boolean
@@ -101,6 +117,30 @@ export class OIText implements TOISymbolDecorable
     return this.edges.some(seg =>
     {
       return computeDistanceBetweenPointAndSegment(point, seg) < SELECTION_MARGIN
+    })
+  }
+
+  protected getCharCorners(char: TOISymbolChar): TPoint[]
+  {
+    const boxBox = new Box(char.boundingBox)
+    if (this.rotation) {
+      const center = this.rotation.center
+      const rad = converDegreeToRadian(-this.rotation.degree)
+      return boxBox.corners
+        .map(p =>
+        {
+          return rotatePoint(p, center, rad)
+        })
+    }
+    return boxBox.corners
+  }
+
+  getCharsOverlaps(points: TPoint[]): TOISymbolChar[]
+  {
+    return this.chars.filter(c =>
+    {
+      const charCorners = this.getCharCorners(c)
+      return points.some(p => isPointInsidePolygon(p, charCorners))
     })
   }
 
@@ -115,9 +155,11 @@ export class OIText implements TOISymbolDecorable
     const clone = new OIText(structuredClone(this.style), structuredClone(this.chars), structuredClone(this.point), this.boundingBox)
     clone.id = this.id
     clone.selected = this.selected
-    clone.toDelete = this.toDelete
+    clone.deleting = this.deleting
     clone.creationTime = this.creationTime
     clone.modificationDate = this.modificationDate
+    clone.decorators = this.decorators.map(d => d.clone(clone))
+    clone.rotation = this.rotation ? structuredClone(this.rotation) : undefined
     return clone
   }
 }

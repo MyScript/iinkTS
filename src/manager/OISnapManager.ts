@@ -51,7 +51,7 @@ export class OISnapManager
 
   get selectionSnapPoints(): TPoint[]
   {
-    return Box.createFromBoxes(this.model.symbolsSelected.flatMap(s => s.boundingBox)).snapPoints
+    return Box.createFromPoints(this.model.symbolsSelected.flatMap(s => s.snapPoints)).snapPoints
   }
 
   get otherSnapPoints(): TPoint[]

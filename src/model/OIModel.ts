@@ -6,8 +6,6 @@ import
   SymbolType,
   TOISymbol,
   TPoint,
-  TOIDecorator,
-  TOISymbolDecorable,
 } from "../primitive"
 import { TExport } from "./Export"
 import { IModel, TRecognitionPositions } from "./IModel"
@@ -54,7 +52,7 @@ export class OIModel implements IModel
 
   get symbolsToDelete(): TOISymbol[]
   {
-    return this.symbols.filter(s => s.toDelete)
+    return this.symbols.filter(s => s.deleting)
   }
 
   selectSymbol(id: string): void
@@ -71,7 +69,7 @@ export class OIModel implements IModel
     this.symbols.forEach(s =>
     {
       if (s.isCloseToPoint(point)) {
-        s.toDelete = true
+        s.deleting = true
       }
     })
   }
@@ -91,13 +89,13 @@ export class OIModel implements IModel
 
   getSymbolRowIndex(symbol: TOISymbol): number
   {
-    return Math.round(symbol.boundingBox.yMiddle / this.rowHeight)
+    return Math.round(symbol.boundingBox.yMid / this.rowHeight)
   }
 
   getSymbolInRowOrdered(rowIndex: number): TOISymbol[]
   {
     return this.symbols.filter(s => this.getSymbolRowIndex(s) === rowIndex)
-      .sort((s1, s2) => s1.boundingBox.xMiddle - s2.boundingBox.xMiddle)
+      .sort((s1, s2) => s1.boundingBox.xMid - s2.boundingBox.xMid)
   }
 
   getSymbolsByRowOrdered(): { index: number, symbols: TOISymbol[] }[]
@@ -116,7 +114,7 @@ export class OIModel implements IModel
     })
     rows.forEach(r =>
     {
-      r.symbols.sort((s1, s2) => s1.boundingBox.xMiddle - s2.boundingBox.xMiddle)
+      r.symbols.sort((s1, s2) => s1.boundingBox.xMid - s2.boundingBox.xMid)
     })
     return rows.sort((r1, r2) => r1.index - r2.index)
   }
@@ -154,17 +152,6 @@ export class OIModel implements IModel
   {
     const sIndex = this.symbols.findIndex(s => s.id === id)
     if (sIndex !== -1) {
-      const oldSym = this.symbols[sIndex]
-      if ([SymbolType.Stroke.toString(), SymbolType.Text.toString()].includes(oldSym.type)) {
-        const stroke = oldSym as OIStroke
-        stroke.decorators.forEach(d =>
-        {
-          const decIndex = this.symbols.findIndex(s => s.id === d.id)
-          if (decIndex > -1) {
-            this.symbols.splice(decIndex, 1)
-          }
-        })
-      }
       this.symbols.splice(sIndex, 1, ...symbols)
       this.modificationDate = Date.now()
       this.converts = undefined
@@ -172,37 +159,11 @@ export class OIModel implements IModel
     }
   }
 
-  removeSymbol(id: string): string[]
+  removeSymbol(id: string): void
   {
     this.#logger.info("removeSymbol", { id })
-    const idsDeleted: string[] = []
     const symbolIndex = this.symbols.findIndex(s => s.id === id)
     if (symbolIndex !== -1) {
-      idsDeleted.push(id)
-      const sym = this.symbols.at(symbolIndex) as TOISymbol
-      if ([SymbolType.Stroke.toString(), SymbolType.Text.toString()].includes(sym.type)) {
-        const stroke = sym as OIStroke
-        stroke.decorators.forEach(d =>
-        {
-          const decIndex = this.symbols.findIndex(s => s.id === d.id)
-          if (decIndex > -1) {
-            idsDeleted.push(d.id)
-            this.symbols.splice(decIndex, 1)
-          }
-        })
-      }
-      else if (sym.type === SymbolType.Decorator.toString()) {
-        const deco = sym as TOIDecorator
-        deco.parents.forEach(p =>
-        {
-          const decorable = p as TOISymbolDecorable
-          const decIndex = decorable.decorators.findIndex(s => s.id === deco.id)
-          if (decIndex > -1) {
-            decorable.decorators.splice(decIndex, 1)
-            this.updateSymbol(p)
-          }
-        })
-      }
       this.positions.lastSentPosition--
       this.positions.lastReceivedPosition--
       this.symbols.splice(symbolIndex, 1)
@@ -211,7 +172,6 @@ export class OIModel implements IModel
       this.exports = undefined
     }
     this.#logger.debug("removeSymbol", this.symbols)
-    return idsDeleted
   }
 
   updatePositionSent(position: number = this.symbols.length): void

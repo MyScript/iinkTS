@@ -1,4 +1,4 @@
-import { buildOICircle, buildOIHighlight, buildOIStroke, buildOIUnderline } from "../helpers"
+import { buildOICircle, buildOIStroke } from "../helpers"
 
 import { OIModel, TExport, } from "../../../src/iink"
 
@@ -82,36 +82,6 @@ describe("OIModel.ts", () =>
       const oldLength = model.symbols.length
       model.removeSymbol("not-exist")
       expect(model.symbols).toHaveLength(oldLength)
-    })
-    test("should removeSymbol & decorators", () =>
-    {
-      const stroke = buildOIStroke()
-      const highlight = buildOIHighlight([stroke])
-      const underline = buildOIUnderline([stroke])
-      stroke.decorators.push(highlight)
-      stroke.decorators.push(underline)
-      model.addSymbol(stroke)
-      model.addSymbol(highlight)
-      model.addSymbol(underline)
-      const nbSymbols = model.symbols.length
-      expect(model.removeSymbol(stroke.id)).toHaveLength(3)
-      expect(model.symbols).toHaveLength(nbSymbols - 3)
-    })
-    test("should removeSymbol & decorators", () =>
-    {
-      const stroke = buildOIStroke()
-      const highlight = buildOIHighlight([stroke])
-      const underline = buildOIUnderline([stroke])
-      stroke.decorators.push(highlight)
-      stroke.decorators.push(underline)
-      model.addSymbol(stroke)
-      model.addSymbol(highlight)
-      model.addSymbol(underline)
-      const nbSymbols = model.symbols.length
-      expect(stroke.decorators).toHaveLength(2)
-      expect(model.removeSymbol(underline.id)).toHaveLength(1)
-      expect(model.symbols).toHaveLength(nbSymbols - 1)
-      expect(stroke.decorators).toHaveLength(1)
     })
   })
 
@@ -207,14 +177,14 @@ describe("OIModel.ts", () =>
     })
   })
 
-  describe("toDelete", () =>
+  describe("deleting", () =>
   {
     const model = new OIModel(width, height, rowHeight)
     const stroke1 = buildOIStroke({ box: { height: 10, width: 10, x: 0, y: 0 } })
     model.addSymbol(stroke1)
     const stroke2 = buildOIStroke({ box: { height: 10, width: 10, x: 20, y: 0 } })
     model.addSymbol(stroke2)
-    test("should set stroke.toDelete = true when point close", () =>
+    test("should set stroke.deleting = true when point close", () =>
     {
       expect(model.symbolsToDelete).toHaveLength(0)
       const point = JSON.parse(JSON.stringify(stroke1.pointers[0]))
@@ -224,9 +194,9 @@ describe("OIModel.ts", () =>
       expect(model.symbolsToDelete).toHaveLength(1)
       expect(model.symbolsToDelete[0].id).toEqual(stroke1.id)
     })
-    test("should not set stroke.toDelete = true when the point is far away", () =>
+    test("should not set stroke.deleting = true when the point is far away", () =>
     {
-      model.symbols.forEach(s => s.toDelete = false)
+      model.symbols.forEach(s => s.deleting = false)
       expect(model.symbolsToDelete).toHaveLength(0)
       const point = JSON.parse(JSON.stringify(stroke1.pointers[0]))
       point.x += 1000

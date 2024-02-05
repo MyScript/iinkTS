@@ -2,7 +2,6 @@ import
 {
   DefaultConfiguration,
   OIBehaviors,
-  OIDecoratorUnderline,
   OIEdgeLine,
   OIRotationManager,
   OIShapeCircle,
@@ -106,17 +105,6 @@ describe("OIRotationManager.ts", () =>
       expect(line.start.y.toFixed(0)).toEqual("0")
       expect(line.end.x.toFixed(0)).toEqual("5")
       expect(line.end.y.toFixed(0)).toEqual("0")
-    })
-    test("rotate Decorator", () =>
-    {
-      const stroke = new OIStroke({}, 1)
-      stroke.addPointer({ p: 1, t: 1, x: 1, y: 2 })
-      stroke.addPointer({ p: 1, t: 10, x: 21, y: 42 })
-      const underline = new OIDecoratorUnderline({}, [stroke])
-      const origin: TPoint = { x: 0, y: 0 }
-      manager.applyToSymbol(underline, origin, Math.PI / 2)
-      expect(underline.vertices[0]).toEqual({ x: 1, y: 47 })
-      expect(underline.vertices[1]).toEqual({ x: 21, y: 47 })
     })
   })
 

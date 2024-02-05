@@ -1,5 +1,5 @@
-import { DecoratorKind, DefaultStyle, OISVGDecoratorUtil, SymbolType, TStyle } from "../../../src/iink"
-import { buildOIHighlight, buildOIStrikethrough, buildOIStroke, buildOISurround, buildOIUnderline } from "../helpers"
+import { buildOIDecorator, buildOIStroke } from "../helpers"
+import { DecoratorKind, DefaultStyle, OISVGDecoratorUtil, TStyle } from "../../../src/iink"
 
 describe("OISVGDecoratorUtil.ts", () =>
 {
@@ -22,10 +22,9 @@ describe("OISVGDecoratorUtil.ts", () =>
       const style: TStyle = {
         color: "red",
       }
-      const decorator = buildOIHighlight([sym], style)
+      const decorator = buildOIDecorator(DecoratorKind.Highlight, sym, style)
       const el = renderer.getSVGElement(decorator) as SVGGeometryElement
       expect(el).toBeDefined()
-      expect(el.getAttribute("type")).toEqual(SymbolType.Decorator)
       expect(el.getAttribute("kind")).toEqual(DecoratorKind.Highlight)
       expect(el.getAttribute("opacity")).toEqual("0.5")
       expect(el.getAttribute("stroke")).toEqual("transparent")
@@ -34,10 +33,9 @@ describe("OISVGDecoratorUtil.ts", () =>
     test("should get Highlight with DefaultStyle", () =>
     {
       const sym = buildOIStroke()
-      const decorator = buildOIHighlight([sym], {})
+      const decorator = buildOIDecorator(DecoratorKind.Highlight, sym, {})
       const el = renderer.getSVGElement(decorator) as SVGGeometryElement
       expect(el).toBeDefined()
-      expect(el.getAttribute("type")).toEqual(SymbolType.Decorator)
       expect(el.getAttribute("kind")).toEqual(DecoratorKind.Highlight)
       expect(el.getAttribute("opacity")).toEqual("0.5")
       expect(el.getAttribute("stroke")).toEqual("transparent")
@@ -46,20 +44,20 @@ describe("OISVGDecoratorUtil.ts", () =>
     test("should Highlight selected", () =>
     {
       const sym = buildOIStroke()
-      const decorator = buildOIHighlight([sym])
+      const decorator = buildOIDecorator(DecoratorKind.Highlight, sym)
       const elNotSelected = renderer.getSVGElement(decorator) as SVGGeometryElement
       expect(elNotSelected.getAttribute("filter")).toBeFalsy()
-      decorator.selected = true
+      sym.selected = true
       const elSelected = renderer.getSVGElement(decorator) as SVGGeometryElement
       expect(elSelected.getAttribute("filter")).toEqual(`url(#${ selectionFilterId })`)
     })
     test("should Highlight to delete", () =>
     {
       const sym = buildOIStroke()
-      const decorator = buildOIHighlight([sym])
+      const decorator = buildOIDecorator(DecoratorKind.Highlight, sym)
       const elNotToDelete = renderer.getSVGElement(decorator) as SVGGeometryElement
       expect(elNotToDelete.getAttribute("opacity")).toEqual(`0.5`)
-      decorator.toDelete = true
+      sym.deleting = true
       const elToDelete = renderer.getSVGElement(decorator) as SVGGeometryElement
       expect(elToDelete.getAttribute("opacity")).toEqual(`0.25`)
     })
@@ -71,10 +69,9 @@ describe("OISVGDecoratorUtil.ts", () =>
         opacity: 0.5,
         width: 4
       }
-      const decorator = buildOISurround([sym], style)
+      const decorator = buildOIDecorator(DecoratorKind.Surround, sym, style)
       const el = renderer.getSVGElement(decorator) as SVGGeometryElement
       expect(el).toBeDefined()
-      expect(el.getAttribute("type")).toEqual(SymbolType.Decorator)
       expect(el.getAttribute("kind")).toEqual(DecoratorKind.Surround)
       expect(el.getAttribute("fill")).toEqual("transparent")
       expect(el.getAttribute("stroke")).toEqual(style.color!)
@@ -84,10 +81,9 @@ describe("OISVGDecoratorUtil.ts", () =>
     test("should get Surround with DefaultStyle", () =>
     {
       const sym = buildOIStroke()
-      const decorator = buildOISurround([sym], {})
+      const decorator = buildOIDecorator(DecoratorKind.Surround, sym, {})
       const el = renderer.getSVGElement(decorator) as SVGGeometryElement
       expect(el).toBeDefined()
-      expect(el.getAttribute("type")).toEqual(SymbolType.Decorator)
       expect(el.getAttribute("kind")).toEqual(DecoratorKind.Surround)
       expect(el.getAttribute("fill")).toEqual("transparent")
       expect(el.getAttribute("stroke")).toEqual(DefaultStyle.color!)
@@ -97,10 +93,10 @@ describe("OISVGDecoratorUtil.ts", () =>
     test("should Surround selected", () =>
     {
       const sym = buildOIStroke()
-      const decorator = buildOISurround([sym])
+      const decorator = buildOIDecorator(DecoratorKind.Surround, sym)
       const elNotSelected = renderer.getSVGElement(decorator) as SVGGeometryElement
       expect(elNotSelected.getAttribute("filter")).toBeFalsy()
-      decorator.selected = true
+      sym.selected = true
       const elSelected = renderer.getSVGElement(decorator) as SVGGeometryElement
       expect(elSelected.getAttribute("filter")).toEqual(`url(#${ selectionFilterId })`)
     })
@@ -112,10 +108,9 @@ describe("OISVGDecoratorUtil.ts", () =>
         opacity: 0.5,
         width: 4
       }
-      const decorator = buildOIStrikethrough([sym], style)
+      const decorator = buildOIDecorator(DecoratorKind.Strikethrough, sym, style)
       const el = renderer.getSVGElement(decorator) as SVGGeometryElement
       expect(el).toBeDefined()
-      expect(el.getAttribute("type")).toEqual(SymbolType.Decorator)
       expect(el.getAttribute("kind")).toEqual(DecoratorKind.Strikethrough)
       expect(el.getAttribute("fill")).toEqual("transparent")
       expect(el.getAttribute("stroke")).toEqual(style.color!)
@@ -125,10 +120,9 @@ describe("OISVGDecoratorUtil.ts", () =>
     test("should get Strikethrough with DefaultStyle", () =>
     {
       const sym = buildOIStroke()
-      const decorator = buildOIStrikethrough([sym], {})
+      const decorator = buildOIDecorator(DecoratorKind.Strikethrough, sym, {})
       const el = renderer.getSVGElement(decorator) as SVGGeometryElement
       expect(el).toBeDefined()
-      expect(el.getAttribute("type")).toEqual(SymbolType.Decorator)
       expect(el.getAttribute("kind")).toEqual(DecoratorKind.Strikethrough)
       expect(el.getAttribute("fill")).toEqual("transparent")
       expect(el.getAttribute("stroke")).toEqual(DefaultStyle.color!)
@@ -138,10 +132,10 @@ describe("OISVGDecoratorUtil.ts", () =>
     test("should Strikethrough selected", () =>
     {
       const sym = buildOIStroke()
-      const decorator = buildOIStrikethrough([sym])
+      const decorator = buildOIDecorator(DecoratorKind.Strikethrough, sym)
       const elNotSelected = renderer.getSVGElement(decorator) as SVGGeometryElement
       expect(elNotSelected.getAttribute("filter")).toBeFalsy()
-      decorator.selected = true
+      sym.selected = true
       const elSelected = renderer.getSVGElement(decorator) as SVGGeometryElement
       expect(elSelected.getAttribute("filter")).toEqual(`url(#${ selectionFilterId })`)
     })
@@ -153,10 +147,9 @@ describe("OISVGDecoratorUtil.ts", () =>
         opacity: 0.5,
         width: 4
       }
-      const decorator = buildOIUnderline([sym], style)
+      const decorator = buildOIDecorator(DecoratorKind.Underline, sym, style)
       const el = renderer.getSVGElement(decorator) as SVGGeometryElement
       expect(el).toBeDefined()
-      expect(el.getAttribute("type")).toEqual(SymbolType.Decorator)
       expect(el.getAttribute("kind")).toEqual(DecoratorKind.Underline)
       expect(el.getAttribute("fill")).toEqual("transparent")
       expect(el.getAttribute("stroke")).toEqual(style.color!)
@@ -166,10 +159,9 @@ describe("OISVGDecoratorUtil.ts", () =>
     test("should get Underline with DefaultStyle", () =>
     {
       const sym = buildOIStroke()
-      const decorator = buildOIUnderline([sym], {})
+      const decorator = buildOIDecorator(DecoratorKind.Underline, sym, {})
       const el = renderer.getSVGElement(decorator) as SVGGeometryElement
       expect(el).toBeDefined()
-      expect(el.getAttribute("type")).toEqual(SymbolType.Decorator)
       expect(el.getAttribute("kind")).toEqual(DecoratorKind.Underline)
       expect(el.getAttribute("fill")).toEqual("transparent")
       expect(el.getAttribute("stroke")).toEqual(DefaultStyle.color!)
@@ -179,20 +171,20 @@ describe("OISVGDecoratorUtil.ts", () =>
     test("should Underline selected", () =>
     {
       const sym = buildOIStroke()
-      const decorator = buildOIUnderline([sym])
+      const decorator = buildOIDecorator(DecoratorKind.Underline, sym)
       const elNotSelected = renderer.getSVGElement(decorator) as SVGGeometryElement
       expect(elNotSelected.getAttribute("filter")).toBeFalsy()
-      decorator.selected = true
+      sym.selected = true
       const elSelected = renderer.getSVGElement(decorator) as SVGGeometryElement
       expect(elSelected.getAttribute("filter")).toEqual(`url(#${ selectionFilterId })`)
     })
     test("should Underline selected", () =>
     {
       const sym = buildOIStroke()
-      const decorator = buildOIUnderline([sym])
+      const decorator = buildOIDecorator(DecoratorKind.Underline, sym)
       const elNotToDelete = renderer.getSVGElement(decorator) as SVGGeometryElement
       expect(elNotToDelete.getAttribute("opacity")).toEqual(`1`)
-      decorator.toDelete = true
+      sym.deleting = true
       const elToDelete = renderer.getSVGElement(decorator) as SVGGeometryElement
       expect(elToDelete.getAttribute("opacity")).toEqual(`0.5`)
     })

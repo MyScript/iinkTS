@@ -1,11 +1,7 @@
-import { LoggerClass, SELECTION_MARGIN } from "../Constants"
-import { computeDistanceBetweenPointAndSegment, createUUID, findIntersectionBetween2Segment } from "../utils"
-import { LoggerManager } from "../logger"
+import { createUUID } from "../utils"
 import { TStyle } from "../style"
-import { SymbolType } from "./Symbol"
-import { Box, TBoundingBox } from "./Box"
-import { TPoint, TSegment } from "./Point"
-import { OISymbol, TOISymbol, TOISymbolDecorable } from "./OISymbol"
+import { OIStroke } from "./OIStroke"
+import { OIText } from "./OIText"
 
 /**
  * @group Primitive
@@ -21,82 +17,26 @@ export enum DecoratorKind
 /**
  * @group Primitive
  */
-export type TOIDecorator = TOISymbol & {
-  kind: DecoratorKind
-  parents: TOISymbolDecorable[]
-}
-
-/**
- * @group Primitive
- */
-export abstract class OIDecorator extends OISymbol implements TOIDecorator
+export class OIDecorator
 {
-  #logger = LoggerManager.getLogger(LoggerClass.SHAPE)
+  id: string
   kind: DecoratorKind
-  parents: TOISymbolDecorable[]
+  style: TStyle
+  parent: OIStroke | OIText
 
-  constructor(kind: DecoratorKind, style: TStyle, symbols: TOISymbolDecorable[])
+  constructor(kind: DecoratorKind, style: TStyle, symbol: OIStroke | OIText)
   {
-    super(SymbolType.Decorator, style)
-    this.#logger.debug("constructor", { kind, style, symbols })
-    this.id = `${ this.type }-${ kind }-${ createUUID() }`
+    this.id = `${ kind }-${ createUUID() }`
+    this.style = style
     this.kind = kind
-    this.parents = symbols
+    this.parent = symbol
   }
 
-  abstract get boundingBox(): Box
-
-  abstract get vertices(): TPoint[]
-
-  get snapPoints(): TPoint[]
+  clone(parent: OIStroke | OIText): OIDecorator
   {
-    return []
+    const clone = new OIDecorator(this.kind, structuredClone(this.style), parent)
+    clone.id = this.id
+    return clone
   }
 
-  get edges(): TSegment[]
-  {
-    return this.vertices.map((p, i) => {
-      if (i === this.vertices.length - 1) {
-        return { p1: this.vertices[0], p2: p }
-      }
-      else {
-        return { p1: p, p2: this.vertices[i + 1] }
-      }
-    })
-  }
-
-  isCloseToPoint(point: TPoint): boolean
-  {
-    const segments: TSegment[] = []
-
-    for (let i = 0; i < this.vertices.length - 1; i++) {
-      segments.push({
-        p1: this.vertices[i],
-        p2: this.vertices[ i + 1]
-      })
-    }
-    segments.push({
-      p1: this.vertices.at(-1)!,
-      p2: this.vertices.at(0)!
-    })
-
-    return segments.some(seg =>
-    {
-      return computeDistanceBetweenPointAndSegment(point, seg) < SELECTION_MARGIN
-    })
-  }
-
-  overlaps(box: TBoundingBox): boolean
-  {
-    const boxEdges: TSegment[] = [
-      { p1: { x: box.x, y: box.y }, p2: { x: box.x + box.width, y: box.y }},
-      { p1: { x: box.x + box.width, y: box.y }, p2: { x: box.x + box.width, y: box.y + box.height }},
-      { p1: { x: box.x + box.width, y: box.y + box.height }, p2: { x: box.x, y: box.y + box.height }},
-      { p1: { x: box.x, y: box.y + box.height }, p2: { x: box.x, y: box.y }},
-    ]
-    return this.boundingBox.isContained(box) ||
-      this.edges.some(e1 => boxEdges.some(e2 => !!findIntersectionBetween2Segment(e1, e2)))
-  }
-
-  abstract clone(): OIDecorator
 }

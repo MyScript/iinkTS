@@ -2,7 +2,7 @@ import { LoggerClass } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerManager } from "../logger"
 import { OIModel } from "../model"
-import { Box, OIText, SymbolType, TBoundingBox, TOISymbolChar } from "../primitive"
+import { Box, OIText, SymbolType, TOISymbolChar } from "../primitive"
 import { OISVGRenderer } from "../renderer"
 import { computeAverage } from "../utils"
 
@@ -35,6 +35,44 @@ export class OITextManager
     return this.behaviors.model
   }
 
+  protected drawSymbolHidden(text: OIText): SVGGElement
+  {
+    const clone = text.clone()
+    clone.id = "text-to-measure"
+    clone.chars.forEach(c => c.id += "to-measure")
+    this.renderer.layer.querySelector(`#${ clone.id }`)?.remove()
+    const el = this.renderer.getSymbolElement(clone) as SVGGElement
+    el.setAttribute("visibility", "hidden")
+    this.renderer.prependElement(el)
+    return el
+  }
+
+  setCharsBoundingBox(text: OIText, textGroupEl: SVGGElement): OIText
+  {
+    const textEl = textGroupEl.querySelector("text")
+    if (textEl) {
+      for (let i = 0; i < textEl.getNumberOfChars(); i++) {
+        const char = text.chars.at(i)
+        if (char) {
+          const ext = textEl.getExtentOfChar(i)
+          char.boundingBox = new Box(ext)
+        }
+      }
+    }
+    return text
+  }
+
+  getElementBoundingBox(textElement: SVGElement): Box
+  {
+    return new Box(textElement.querySelector("text")!.getBBox({ stroke: true, markers: true, clipped: true, fill: true }))
+  }
+
+  getBoundingBox(text: OIText): Box
+  {
+    const element = this.drawSymbolHidden(text)
+    return this.getElementBoundingBox(element)
+  }
+
   getSpaceWidth(fontSize: number): number
   {
     const boundingBox = new Box({ height: 0, width: 0, x: 0, y: 0 })
@@ -46,32 +84,14 @@ export class OITextManager
       fontWeight: 0,
       boundingBox
     }
-    return this.renderer.getSymbolBounds(new OIText({}, [charSymbol], { x: 0, y: 0 }, boundingBox))?.width as number
+    return this.getBoundingBox(new OIText({}, [charSymbol], { x: 0, y: 0 }, boundingBox))?.width as number
   }
 
   updateTextBoundingBox(textSymbol: OIText): OIText
   {
-    const clone = textSymbol.clone()
-    clone.id = "updateTextBoundingBox"
-    clone.chars.forEach(c => c.id = "updateTextBoundingBox-" + c.id)
-    const textGroupEl = this.renderer.getSymbolElement(clone) as SVGGElement
-    textGroupEl.setAttribute("visibility", "hidden")
-    this.renderer.appendElement(textGroupEl)
-
-    const box = new Box(this.renderer.getElementBounds(textGroupEl) as TBoundingBox)
-    textSymbol.boundingBox = box
-    const textEl = textGroupEl.querySelector("text")
-    if (textEl) {
-      for (let i = 0; i < textEl.getNumberOfChars(); i++) {
-        const char = textSymbol.chars.at(i)
-        if (char) {
-          const ext = textEl.getExtentOfChar(i)
-          char.boundingBox = new Box(ext)
-        }
-      }
-    }
-
-    this.renderer.removeElement(textGroupEl.id)
+    const textGroupEl = this.drawSymbolHidden(textSymbol)
+    textSymbol.boundingBox = this.getElementBoundingBox(textGroupEl)
+    this.setCharsBoundingBox(textSymbol, textGroupEl)
     this.model.updateSymbol(textSymbol)
     return textSymbol
   }
@@ -91,19 +111,8 @@ export class OITextManager
       lastX = textSymbol.boundingBox.xMax
 
       const textGroupEl = this.renderer.drawSymbol(textSymbol) as SVGGElement
-      const box = new Box(this.renderer.getElementBounds(textGroupEl))
-      const textEl = textGroupEl.querySelector("text")
-      textSymbol.boundingBox = box
-      if (textEl) {
-        for (let i = 0; i < textEl.getNumberOfChars(); i++) {
-          const char = textSymbol.chars.at(i)
-          if (char) {
-            const ext = textEl.getExtentOfChar(i)
-            char.boundingBox = new Box(ext)
-            char.fontSize = fontSize
-          }
-        }
-      }
+      textSymbol.boundingBox = this.getElementBoundingBox(textGroupEl)
+      this.setCharsBoundingBox(textSymbol, textGroupEl)
       this.model.updateSymbol(s)
     })
   }

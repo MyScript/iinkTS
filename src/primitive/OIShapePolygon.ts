@@ -30,7 +30,7 @@ export class OIShapePolygon extends OIShape
     const clone = new OIShapePolygon(structuredClone(this.style), structuredClone(this.points), this.kind)
     clone.id = this.id
     clone.selected = this.selected
-    clone.toDelete = this.toDelete
+    clone.deleting = this.deleting
     clone.creationTime = this.creationTime
     clone.modificationDate = this.modificationDate
     return clone

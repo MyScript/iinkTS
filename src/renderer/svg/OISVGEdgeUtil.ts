@@ -79,7 +79,7 @@ export class OISVGEdgeUtil
     if (edge.selected) {
       attrs["filter"] = `url(#${ this.selectionFilterId })`
     }
-    if (edge.toDelete) {
+    if (edge.deleting) {
       attrs["filter"] = `url(#${ this.removalFilterId })`
     }
 

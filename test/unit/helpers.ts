@@ -4,18 +4,15 @@ import
   DefaultStyle,
   TBoundingBox,
   TStyle,
-  TOISymbolDecorable,
   Stroke,
   OIStroke,
-  OIDecoratorHighlight,
-  OIDecoratorSurround,
-  OIDecoratorUnderline,
-  OIDecoratorStrikethrough,
+  OIDecorator,
   OIShapeCircle,
   OIEdgeLine,
   OIText,
   TOISymbolChar,
   TPoint,
+  DecoratorKind,
 } from "../../src/iink"
 
 export const delay = (delayInms: number) =>
@@ -63,24 +60,9 @@ export function buildOIStroke({ box = defaultBox, style = DefaultStyle, nbPoint 
   return stroke
 }
 
-export function buildOIHighlight(symbols: TOISymbolDecorable[], style: TStyle = DefaultStyle): OIDecoratorHighlight
+export function buildOIDecorator(kind: DecoratorKind, symbol: OIStroke | OIText, style: TStyle = DefaultStyle): OIDecorator
 {
-  return new OIDecoratorHighlight(style, symbols)
-}
-
-export function buildOISurround(symbols: TOISymbolDecorable[], style: TStyle = DefaultStyle): OIDecoratorSurround
-{
-  return new OIDecoratorSurround(style, symbols)
-}
-
-export function buildOIUnderline(symbols: TOISymbolDecorable[], style: TStyle = DefaultStyle): OIDecoratorUnderline
-{
-  return new OIDecoratorUnderline(style, symbols)
-}
-
-export function buildOIStrikethrough(symbols: TOISymbolDecorable[], style: TStyle = DefaultStyle): OIDecoratorStrikethrough
-{
-  return new OIDecoratorStrikethrough(style, symbols)
+  return new OIDecorator(kind, style, symbol)
 }
 
 export function buildOICircle({ center = { x: 0, y: 0 }, radius = 5, style = DefaultStyle }: { center?: TPoint, radius?: number, style?: TStyle } = {}): OIShapeCircle

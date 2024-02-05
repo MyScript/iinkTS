@@ -173,9 +173,6 @@ export class OIResizeManager
         return this.applyToShape(symbol as TOIShape, origin, scaleX, scaleY)
       case SymbolType.Edge:
         return this.applyToEdge(symbol as TOIEdge, origin, scaleX, scaleY)
-      case SymbolType.Decorator:
-        // Decorator is computed from its parent (eg. OIStroke)
-        return symbol
       case SymbolType.Text:
         return this.applyOnText(symbol as OIText, origin, scaleX, scaleY)
       default:
@@ -206,6 +203,7 @@ export class OIResizeManager
     this.boundingBox = Box.createFromPoints(this.model.symbolsSelected.flatMap(s => s.vertices))
 
     this.setTransformOrigin(this.wrapper!.id, this.transformOrigin.x, this.transformOrigin.y)
+    this.selector.hideSelectedElements()
   }
 
   continue(point: TPoint): { scaleX: number, scaleY: number }
@@ -291,6 +289,7 @@ export class OIResizeManager
     this.selector.resetSelectedGroup(this.model.symbolsSelected)
     this.undoRedoManager.addModelToStack(this.model)
     this.wrapper = undefined
+    this.selector.showSelectedElements()
     await promise
     await this.svgDebugger.apply()
   }

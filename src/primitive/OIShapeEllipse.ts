@@ -57,7 +57,7 @@ export class OIShapeEllipse extends OIShape
     const clone = new OIShapeEllipse(structuredClone(this.style), structuredClone(this.center), this.radiusX, this.radiusY)
     clone.id = this.id
     clone.selected = this.selected
-    clone.toDelete = this.toDelete
+    clone.deleting = this.deleting
     clone.creationTime = this.creationTime
     clone.modificationDate = this.modificationDate
     return clone

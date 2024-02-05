@@ -1,7 +1,7 @@
 [
   {
     "type": "stroke",
-    "id": "stroke-05ebf6e7-68fe-4a5f-888b-ed19a7d5c8df",
+    "id": "stroke-h",
     "creationTime": 1705570994881,
     "modificationDate": 1705570996102,
     "selected": false,
@@ -206,7 +206,7 @@
   },
   {
     "type": "stroke",
-    "id": "stroke-69528c85-16a9-43a1-9748-2638c71b2bb1",
+    "id": "stroke-ello",
     "creationTime": 1705571003682,
     "modificationDate": 1705571006151,
     "selected": false,
@@ -663,7 +663,7 @@
   },
   {
     "type": "stroke",
-    "id": "stroke-8512a73c-71c3-4b0b-a12d-d0918f29b617",
+    "id": "stroke-my",
     "creationTime": 1705571028541,
     "modificationDate": 1705571030406,
     "selected": false,
@@ -988,7 +988,7 @@
   },
   {
     "type": "stroke",
-    "id": "stroke-c6ffb21d-8e9b-49ea-a1b3-54a340f29e08",
+    "id": "stroke-friend",
     "creationTime": 1705571031273,
     "modificationDate": 1705571035140,
     "selected": false,
@@ -1613,7 +1613,7 @@
   },
   {
     "type": "stroke",
-    "id": "stroke-7215b4e1-47ae-41d6-a2c1-1786579bdbbf",
+    "id": "stroke-dot-of-i",
     "creationTime": 1705571035940,
     "modificationDate": 1705571036185,
     "selected": false,
@@ -1656,7 +1656,7 @@
   },
   {
     "type": "stroke",
-    "id": "stroke-873a8318-f57b-4801-ab75-669df852cc16",
+    "id": "stroke-how",
     "creationTime": 1705571040945,
     "modificationDate": 1705571043001,
     "selected": false,
@@ -2011,7 +2011,7 @@
   },
   {
     "type": "stroke",
-    "id": "stroke-134ab5a9-e6b5-4e39-8058-2c2efdd76ff4",
+    "id": "stroke-are",
     "creationTime": 1705571043709,
     "modificationDate": 1705571045093,
     "selected": false,
@@ -2252,7 +2252,7 @@
   },
   {
     "type": "stroke",
-    "id": "stroke-4ace5573-4d95-4186-a1c7-8d7225ae5179",
+    "id": "stroke-you",
     "creationTime": 1705571045671,
     "modificationDate": 1705571047522,
     "selected": false,
@@ -2577,7 +2577,7 @@
   },
   {
     "type": "stroke",
-    "id": "stroke-4e71da01-2a14-4bef-90da-de0cd7d04f5a",
+    "id": "stroke-question-mark",
     "creationTime": 1705571047887,
     "modificationDate": 1705571048372,
     "selected": false,
@@ -2686,63 +2686,7 @@
   },
   {
     "type": "stroke",
-    "id": "stroke-16be1c8f-2431-47a5-a752-980b9690e960",
-    "creationTime": 1705571048736,
-    "modificationDate": 1705571048736,
-    "selected": false,
-    "toDelete": false,
-    "style": {
-      "color": "#000000",
-      "width": "4",
-      "opacity": 1
-    },
-    "pointerId": 0,
-    "pointerType": "mouse",
-    "pointers": [
-      {
-        "x": 525,
-        "y": 310,
-        "t": 1705571048735,
-        "p": 1
-      }
-    ],
-    "decorators": [],
-    "length": 0
-  },
-  {
-    "type": "stroke",
-    "id": "stroke-6e7b43bd-ea89-4406-b89b-cd08e49bdd31",
-    "creationTime": 1705571050950,
-    "modificationDate": 1705571051071,
-    "selected": false,
-    "toDelete": false,
-    "style": {
-      "color": "#000000",
-      "width": "4",
-      "opacity": 1
-    },
-    "pointerId": 0,
-    "pointerType": "mouse",
-    "pointers": [
-      {
-        "x": 526,
-        "y": 311,
-        "t": 1705571050950,
-        "p": 1
-      },
-      {
-        "x": 523,
-        "y": 311,
-        "t": 1705571051071,
-        "p": 0.83
-      }
-    ],
-    "decorators": [],
-    "length": 3
-  },
-  {
-    "type": "stroke",
-    "id": "stroke-dba489fd-92ef-4687-857c-7a0cae35261f",
+    "id": "stroke-dot-of-question-mark",
     "creationTime": 1705571053101,
     "modificationDate": 1705571053603,
     "selected": false,

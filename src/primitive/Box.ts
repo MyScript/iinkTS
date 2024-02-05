@@ -20,10 +20,10 @@ export type TBox = {
   width: number
   height: number
   xMin: number
-  xMiddle: number
+  xMid: number
   xMax: number
   yMin: number
-  yMiddle: number
+  yMid: number
   yMax: number
 }
 
@@ -137,7 +137,7 @@ export class Box implements TBox
     return this.x
   }
 
-  get xMiddle(): number
+  get xMid(): number
   {
     return this.x + this.width / 2
   }
@@ -152,7 +152,7 @@ export class Box implements TBox
     return this.y
   }
 
-  get yMiddle(): number
+  get yMid(): number
   {
     return this.y + this.height / 2
   }
@@ -188,6 +188,11 @@ export class Box implements TBox
   contains(child: TBoundingBox): boolean
   {
     return Box.contains(this, child)
+  }
+
+  containsPoint(point: TPoint): boolean
+  {
+    return Box.containsPoint(this, point)
   }
 
   overlaps(boundaries: TBoundingBox): boolean

@@ -2,7 +2,6 @@ import
 {
   DefaultConfiguration,
   OIBehaviors,
-  OIDecoratorUnderline,
   OIEdgeLine,
   OITranslateManager,
   OIShapeCircle,
@@ -89,16 +88,6 @@ describe("OITranslateManager.ts", () =>
       manager.applyToSymbol(line, 10, 15)
       expect(line.start).toEqual(expect.objectContaining({ x: 10, y: 15 }))
       expect(line.end).toEqual(expect.objectContaining({ x: 10, y: 20 }))
-    })
-    test("translate Decorator", () =>
-    {
-      const stroke = new OIStroke({}, 1)
-      stroke.addPointer({ p: 1, t: 1, x: 1, y: 2 })
-      stroke.addPointer({ p: 1, t: 10, x: 21, y: 42 })
-      const underline = new OIDecoratorUnderline({}, [stroke])
-      manager.applyToSymbol(underline, 10, 15)
-      expect(underline.vertices[0]).toEqual({ x: 1, y: 47 })
-      expect(underline.vertices[1]).toEqual({ x: 21, y: 47 })
     })
   })
 

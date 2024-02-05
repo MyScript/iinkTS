@@ -20,7 +20,7 @@ export class OIEraser implements TOISymbol
   modificationDate: number
   pointers: TPointer[]
   selected = false
-  toDelete = false
+  deleting = false
 
   constructor()
   {
@@ -67,6 +67,8 @@ export class OIEraser implements TOISymbol
   {
     const clone = new OIEraser()
     clone.id = this.id
+    clone.creationTime = this.creationTime
+    clone.modificationDate = this.modificationDate
     clone.pointers = structuredClone(this.pointers)
     return clone
   }

@@ -183,7 +183,7 @@ describe("OISVGRenderer.ts", () =>
       const unknowSym: TOISymbol = {
         //@ts-ignore
         type: "unknow",
-        boundingBox: { height: 0, width: 0, x: 0, y: 0, xMax: 0, xMiddle: 0, xMin: 0, yMax: 0, yMiddle: 0, yMin: 0 },
+        boundingBox: { height: 0, width: 0, x: 0, y: 0, xMax: 0, xMid: 0, xMin: 0, yMax: 0, yMid: 0, yMin: 0 },
         creationTime: Date.now(),
         modificationDate: Date.now(),
         clone: jest.fn(),
