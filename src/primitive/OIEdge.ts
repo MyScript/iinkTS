@@ -67,6 +67,12 @@ export abstract class OIEdge extends OISymbol implements TOIEdge
     bb.y -= SELECTION_MARGIN / 2
     bb.height += SELECTION_MARGIN
     bb.width += SELECTION_MARGIN
+    if (this.startDecoration || this.endDecoration) {
+      bb.x -= ((this.style.width || 1) * 2.5)
+      bb.y -= ((this.style.width || 1) * 2.5)
+      bb.height += ((this.style.width || 1) * 5)
+      bb.width += ((this.style.width || 1) * 5)
+    }
     return bb
   }
 
