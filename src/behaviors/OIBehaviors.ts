@@ -336,12 +336,12 @@ export class OIBehaviors implements IBehaviors
         this.renderer.drawSymbol(stroke)
       }
     })
-    this.svgDebugger.apply()
     if (errors.length) {
       this.internalEvent.emitError(new Error(errors.join("\n")))
     }
     this.undoRedoManager.addModelToStack(this.model)
     await this.recognizer.addStrokes(this.model.extractUnsentStrokes(), false)
+    await this.svgDebugger.apply()
     this.model.updatePositionSent()
     this.model.updatePositionReceived()
     this.undoRedoManager.updateModelInStack(this.model)
@@ -399,7 +399,7 @@ export class OIBehaviors implements IBehaviors
       }
       this.#model = modelToApply
       await Promise.all(promises)
-      this.svgDebugger.apply()
+      await this.svgDebugger.apply()
       await this.recognizer.waitForIdle()
       return this.model
     }
@@ -412,7 +412,9 @@ export class OIBehaviors implements IBehaviors
   {
     try {
       this.#logger.info("export", { mimeTypes })
-      if (!this.model.exports?.["application/vnd.myscript.jiix"]) {
+      const needExport = !mimeTypes?.length && !this.model.exports?.["application/vnd.myscript.jiix"] ||
+      mimeTypes?.some(mt => !this.model.exports?.[mt])
+      if (needExport) {
         const exports = await this.recognizer.export(mimeTypes)
         this.model.mergeExport(exports as TExport)
         await this.recognizer.waitForIdle()
