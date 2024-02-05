@@ -130,18 +130,18 @@ export class OIDebugSVGManager
     const symbolAttrs = {
       style: "pointer-events: none",
       fill: "transparent",
-      stroke: "#1A9FFF",
+      stroke: "red",
       "stroke-width": "1",
-      "stroke-dasharray": "8",
+      "stroke-dasharray": "5 5",
       "vector-effect": "non-scaling-stroke",
       "debug": "bounding-box"
     }
     const charAttrs = {
       style: "pointer-events: none",
       fill: "transparent",
-      stroke: "#e01b24",
+      stroke: "orange",
       "stroke-width": "1",
-      "stroke-dasharray": "8",
+      "stroke-dasharray": "0 5 0",
       "vector-effect": "non-scaling-stroke",
       "debug": "bounding-box"
     }
