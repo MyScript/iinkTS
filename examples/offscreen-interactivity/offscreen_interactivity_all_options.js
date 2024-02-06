@@ -37,13 +37,6 @@ function resetMenuBtn() {
     });
 };
 
-function getStyle() {
-  return {
-    color: penColorInput.value,
-    width: penWidthInput.value,
-  };
-};
-
 function showModal(title, body) {
   modal.style.display = "block";
   modalTitle.innerText = title;
@@ -203,7 +196,7 @@ async function loadEditor() {
     const jiix = exports["application/vnd.myscript.jiix"];
     const title = `Export application/vnd.myscript.jiix`;
     showModal(title, renderjson(jiix));
-    const permission = await navigator.permissions.query({name:'clipboard-write'})
+    const permission = await navigator.permissions.query({ name: 'clipboard-write' })
     if (permission.state === 'granted') {
       navigator.clipboard.writeText(JSON.stringify(jiix));
     }

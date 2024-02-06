@@ -98,7 +98,6 @@ export class OIMenuStyle extends OIMenu
     return this.menuColorFill
   }
 
-
   protected createMenuThickness(): HTMLDivElement
   {
     const wrapper = document.createElement("div")
