@@ -25,14 +25,17 @@ describe("OIRotationManager.ts", () =>
 
   test("should create", () =>
   {
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions)
+    const layerInfo = document.createElement("div")
+    //@ts-ignore TODO IIC-1006
+    const behaviors = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
     const manager = new OIRotationManager(behaviors)
     expect(manager).toBeDefined()
   })
 
   describe("should applyToSymbol", () =>
   {
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions)
+    const layerInfo = document.createElement("div")
+    const behaviors = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
     const manager = new OIRotationManager(behaviors)
     manager.texter.updateTextBoundingBox = jest.fn()
     manager.renderer.setAttribute = jest.fn()
@@ -111,7 +114,8 @@ describe("OIRotationManager.ts", () =>
   describe("resize process on stroke", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions)
+    const layerInfo = document.createElement("div")
+    const behaviors = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     behaviors.recognizer.replaceStrokes = jest.fn(() => Promise.resolve())
     behaviors.renderer.setAttribute = jest.fn()

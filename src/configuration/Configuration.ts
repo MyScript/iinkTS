@@ -3,6 +3,7 @@ import { LoggerClass } from "../Constants"
 import { LoggerManager } from "../logger"
 import { PartialDeep, mergeDeep } from "../utils"
 import { DefaultGrabberConfiguration, TGrabberConfiguration } from "./GrabberConfiguration"
+import { DefaultMenuConfiguration, TMenuConfiguration } from "./MenuConfiguration"
 import { DefaultRecognitionConfiguration, TRecognitionConfiguration } from "./RecognitionConfiguration"
 import { DefaultRenderingConfiguration, TRenderingConfiguration } from "./RenderingConfiguration"
 import { DefaultServerConfiguration, TServerConfiguration } from "./ServerConfiguration"
@@ -19,7 +20,8 @@ export type TConfiguration = {
   grabber: TGrabberConfiguration
   rendering: TRenderingConfiguration
   triggers: TTriggerConfiguration
-  "undo-redo": TUndoRedoConfiguration
+  "undo-redo": TUndoRedoConfiguration,
+  menu: TMenuConfiguration
 }
 
 /**
@@ -32,7 +34,8 @@ export const DefaultConfiguration: TConfiguration = {
   grabber: DefaultGrabberConfiguration,
   rendering: DefaultRenderingConfiguration,
   triggers: DefaultTriggerConfiguration,
-  "undo-redo": DefaultUndoRedoConfiguration
+  "undo-redo": DefaultUndoRedoConfiguration,
+  menu: DefaultMenuConfiguration
 }
 
 /**
@@ -49,6 +52,7 @@ export class Configuration implements TConfiguration
   server: TServerConfiguration
   triggers: TTriggerConfiguration
   "undo-redo": TUndoRedoConfiguration
+  menu: TMenuConfiguration
 
   constructor(configuration?: PartialDeep<TConfiguration>)
   {
@@ -58,7 +62,9 @@ export class Configuration implements TConfiguration
     this.recognition = structuredClone(DefaultConfiguration.recognition)
     this.rendering = structuredClone(DefaultConfiguration.rendering)
     this.server = structuredClone(DefaultConfiguration.server)
+    this["undo-redo"] = structuredClone(DefaultConfiguration["undo-redo"])
     this.triggers = structuredClone(DefaultConfiguration.triggers)
+    this.menu = structuredClone(DefaultConfiguration.menu)
 
     this.overrideDefaultConfiguration(configuration)
   }
@@ -74,6 +80,7 @@ export class Configuration implements TConfiguration
     this.server = mergeDeep({}, defaultConf.server, configuration?.server)
     this.triggers = mergeDeep({}, defaultConf.triggers, configuration?.triggers)
     this["undo-redo"] = mergeDeep({}, defaultConf["undo-redo"], configuration?.["undo-redo"])
+    this.menu = mergeDeep({}, defaultConf.menu, configuration?.menu)
 
     this.recognition.text.mimeTypes = (configuration?.recognition?.text?.mimeTypes || defaultConf.recognition.text.mimeTypes) as ("text/plain" | "application/vnd.myscript.jiix")[]
     this.recognition.math.mimeTypes = (configuration?.recognition?.math?.mimeTypes || defaultConf.recognition.math.mimeTypes) as ("application/vnd.myscript.jiix" | "application/x-latex" | "application/mathml+xml")[]
@@ -116,6 +123,7 @@ export class Configuration implements TConfiguration
       }
       // raw-content.gestures Unrecognized when not offscreen
       delete this.recognition["raw-content"].gestures
+      this.menu.style.enable = false
     }
     this.#logger.debug("overrideDefaultConfiguration", { configuration: this })
   }

@@ -12,43 +12,14 @@
     <link rel="stylesheet" href="../assets/style/examples.css" />
     <style>
       #editor {
-        width: 100vw;
-        height: calc(100vh - 127px);
+        width: 100%;
+        height: calc(100dvh - 62px);
         touch-action: none;
       }
-      @media only screen and (max-width: 894px) {
+      @media only screen and (max-width: 386px) {
         #editor {
-          height: calc(100vh - 177px);
+          height: calc(100dvh - 110px);
         }
-      }
-      @media only screen and (max-width: 498px) {
-        #editor {
-          height: calc(100vh - 223px);
-        }
-      }
-      @media only screen and (max-width: 396px) {
-        #editor {
-          height: calc(100vh - 270px);
-        }
-      }
-      @media only screen and (max-width: 361px) {
-        #editor {
-          height: calc(100vh - 311px);
-        }
-      }
-      .row-options {
-        border-bottom: 1px solid #d7dde3; /*#A9B7C5*/
-        padding: 12px;
-      }
-      .row-options #pen-width {
-        width: 100px;
-      }
-      .row-options .global-options {
-        margin-left: auto;
-      }
-      .row-options .global-options input:not(.toggle-input),
-      .row-options .global-options select {
-        width: 150px;
       }
     </style>
 
@@ -93,15 +64,25 @@
         left: 10%;
         width: 80%;
         background-color: white;
-        z-index: 31;
+        z-index: 999;
         border-radius: 20px;
         display: none;
         border: 1px solid grey;
         box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.5);
       }
+      @media only screen and (max-width: 500px) {
+        #modal {
+          top: 0;
+          height: 100%;
+          left: 0;
+          width: 100%;
+          border-radius: 0px;
+        }
+      }
       #modal .modal-header {
         display: flex;
         padding: 12px;
+        overflow: hidden;
         border-bottom: 1px solid grey;
       }
       #modal .modal-header #modal-title {
@@ -124,7 +105,7 @@
         z-index: 11;
         background-color: white;
         box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.5);
-        height: calc(100vh - 137px);
+        height: calc(100dvh - 137px);
         width: 0px;
         -webkit-transition: width 0.3s ease-in-out;
         -moz-transition: width 0.3s ease-in-out;
@@ -197,6 +178,7 @@
         height: 24px;
       }
     </style>
+
     <style>
       .renderjson a {
         text-decoration: none;
@@ -250,101 +232,10 @@
       <div id="modal-body"></div>
     </div>
 
-    <nav class="flex-container gap wrap">
-      <div class="flex-container gap wrap">
-        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/clear.svg" />
-        </button>
-        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/undo.svg" />
-        </button>
-        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/redo.svg" />
-        </button>
-      </div>
-      <div class="flex-container gap wrap">
-        <button id="pen" class="menu-button active">
-          <img src="../assets/img/pen.svg" />
-        </button>
-        <div class="dropdown-menu">
-          <button id="menu-shape-btn" class="menu-button">
-            <img id="menu-shape-btn-img" src="../assets/img/rectangle.svg" />
-          </button>
-          <ul class="horizontal">
-            <li>
-              <button id="draw-rectangle" class="menu-button">
-                <img src="../assets/img/rectangle.svg" />
-              </button>
-            </li>
-            <li>
-              <button id="draw-parallelogram" class="menu-button">
-                <img src="../assets/img/parallelogram.svg" />
-              </button>
-            </li>
-            <li>
-              <button id="draw-circle" class="menu-button">
-                <img src="../assets/img/circle.svg" />
-              </button>
-            </li>
-            <li>
-              <button id="draw-ellipse" class="menu-button">
-                <img src="../assets/img/ellipse.svg" />
-              </button>
-            </li>
-            <li>
-              <button id="draw-triangle" class="menu-button">
-                <img src="../assets/img/triangle.svg" />
-              </button>
-            </li>
-          </ul>
-        </div>
-        <div class="dropdown-menu">
-          <button id="menu-edge-btn" class="menu-button">
-            <img id="menu-edge-btn-img" src="../assets/img/line.svg" />
-          </button>
-          <ul class="horizontal">
-            <li>
-              <button id="draw-line" class="menu-button">
-                <img src="../assets/img/line.svg" />
-              </button>
-            </li>
-            <li>
-              <button id="draw-arrow" class="menu-button">
-                <img src="../assets/img/arrow.svg" />
-              </button>
-            </li>
-            <li>
-              <button id="draw-double-arrow" class="menu-button">
-                <img src="../assets/img/double-arrow.svg" />
-              </button>
-            </li>
-          </ul>
-        </div>
-        <button id="eraser" class="menu-button">
-          <img src="../assets/img/eraser.svg" />
-        </button>
-        <button id="select" class="menu-button">
-          <img src="../assets/img/cursor.svg" />
-        </button>
-      </div>
-      <div class="flex-container gap wrap">
-        <button class="classic-btn" id="import">Import</button>
-        <button class="classic-btn" id="convert">Convert</button>
-        <button class="classic-btn" id="show-jiix">Show JIIX</button>
-        <button class="classic-btn" id="show-model">Show model</button>
-      </div>
-    </nav>
-
-    <div class="row-options flex-container gap wrap">
-      <div class="flex-container">
-        <label for="pen-color">Color:</label>
-        <input id="pen-color" type="color" value="black" />
-      </div>
-      <div class="flex-container">
-        <label for="pen-width">Thickness:</label>
-        <input id="pen-width" type="number" min="1" max="9" value="4" />
-      </div>
-
+    <nav class="flex-container gap wrap center">
+      <button class="classic-btn" id="import">Import</button>
+      <button class="classic-btn" id="show-jiix">Show JIIX</button>
+      <button class="classic-btn" id="show-model">Show model</button>
       <div class="flex-container global-options">
         <div class="dropdown-menu">
           <button class="menu-button">
@@ -354,132 +245,28 @@
             <li class="dropdown-menu full-width horizontal left">
               <label class="label flex-container between gap">
                 <img src="../assets/img/caret-left.svg" />
-                Gesture
+                Menu
               </label>
               <ul>
                 <li class="flex-container">
-                  <label class="label">Detect gesture</label>
+                  <label class="label">Action</label>
                   <div class="toggle-switch">
-                    <input class="toggle-input" id="apply-gesture" type="checkbox" checked />
-                    <label class="toggle-label" for="apply-gesture"></label>
+                    <input class="toggle-input" id="menu-action-toggle" type="checkbox" checked />
+                    <label class="toggle-label" for="menu-action-toggle"></label>
                   </div>
                 </li>
                 <li class="flex-container">
-                  <label class="label">On Surround</label>
-                  <select id="surround-action">
-                    <option value="select" selected>Select</option>
-                    <option value="surround">Surround</option>
-                    <option value="highlight">Highlight</option>
-                  </select>
-                </li>
-                <li class="flex-container">
-                  <label class="label">On Strike Through</label>
-                  <select id="strike-through-action">
-                    <option value="draw" selected>Draw</option>
-                    <option value="erase">Erase</option>
-                  </select>
-                </li>
-              </ul>
-            </li>
-            <li class="dropdown-menu full-width horizontal left">
-              <label class="label flex-container between gap">
-                <img src="../assets/img/caret-left.svg" />
-                Guides
-              </label>
-              <ul>
-                <li class="flex-container">
-                  <label class="label">Guides enable</label>
+                  <label class="label">Style</label>
                   <div class="toggle-switch">
-                    <input class="toggle-input" id="guides-enable" type="checkbox" checked />
-                    <label class="toggle-label" for="guides-enable"></label>
+                    <input class="toggle-input" id="menu-style-toggle" type="checkbox" checked />
+                    <label class="toggle-label" for="menu-style-toggle"></label>
                   </div>
                 </li>
                 <li class="flex-container">
-                  <label class="label" for="guides-type">Guides type</label>
-                  <select id="guides-type">
-                    <option value="line">line</option>
-                    <option value="grid">grid</option>
-                    <option value="point" selected>point</option>
-                  </select>
-                </li>
-                <li class="flex-container">
-                  <label class="label" for="guides-gap">Guides gap</label>
-                  <input type="number" min="5" id="guides-gap" value="100" />
-                </li>
-              </ul>
-            </li>
-            <li class="dropdown-menu full-width horizontal left">
-              <label class="label flex-container between gap">
-                <img src="../assets/img/caret-left.svg" />
-                Snap
-              </label>
-              <ul>
-                <li class="flex-container">
-                  <label class="label">Guides</label>
+                  <label class="label">Intention</label>
                   <div class="toggle-switch">
-                    <input class="toggle-input" id="snap-to-guides-toggle" type="checkbox" checked />
-                    <label class="toggle-label" for="snap-to-guides-toggle"></label>
-                  </div>
-                </li>
-                <li class="flex-container">
-                  <label class="label">Elements</label>
-                  <div class="toggle-switch">
-                    <input class="toggle-input" id="snap-to-elements-toggle" type="checkbox" checked />
-                    <label class="toggle-label" for="snap-to-elements-toggle"></label>
-                  </div>
-                </li>
-                <li class="flex-container">
-                  <label class="label" for="snap-angle">Angle</label>
-                  <select id="snap-angle">
-                    <option value="0" selected>None</option>
-                    <option value="10">10°</option>
-                    <option value="30">30°</option>
-                    <option value="45">45°</option>
-                    <option value="90">90°</option>
-                    <option value="180">180°</option>
-                  </select>
-                </li>
-              </ul>
-            </li>
-            <li class="dropdown-menu full-width horizontal left">
-              <label class="label flex-container between gap">
-                <img src="../assets/img/caret-left.svg" />
-                Debug
-              </label>
-              <ul>
-                <li class="flex-container">
-                  <label class="label">Show recognition box</label>
-                  <div class="toggle-switch">
-                    <input class="toggle-input" id="toggle-recognition-box" type="checkbox" />
-                    <label class="toggle-label" for="toggle-recognition-box"></label>
-                  </div>
-                </li>
-                <li class="flex-container">
-                  <label class="label">Show recognition item box</label>
-                  <div class="toggle-switch">
-                    <input class="toggle-input" id="toggle-recognition-item-box" type="checkbox" />
-                    <label class="toggle-label" for="toggle-recognition-item-box"></label>
-                  </div>
-                </li>
-                <li class="flex-container">
-                  <label class="label">Show snap points</label>
-                  <div class="toggle-switch">
-                    <input class="toggle-input" id="toggle-snap-points-visibility" type="checkbox" />
-                    <label class="toggle-label" for="toggle-snap-points-visibility"></label>
-                  </div>
-                </li>
-                <li class="flex-container">
-                  <label class="label">Show vertices</label>
-                  <div class="toggle-switch">
-                    <input class="toggle-input" id="toggle-vertices-visibility" type="checkbox" />
-                    <label class="toggle-label" for="toggle-vertices-visibility"></label>
-                  </div>
-                </li>
-                <li class="flex-container">
-                  <label class="label">Show bounding box</label>
-                  <div class="toggle-switch">
-                    <input class="toggle-input" id="toggle-bounding-box-visibility" type="checkbox" />
-                    <label class="toggle-label" for="toggle-bounding-box-visibility"></label>
+                    <input class="toggle-input" id="menu-intention-toggle" type="checkbox" checked />
+                    <label class="toggle-label" for="menu-intention-toggle"></label>
                   </div>
                 </li>
               </ul>
@@ -509,7 +296,7 @@
           </ul>
         </div>
       </div>
-    </div>
+    </nav>
 
     <div id="selection-panel">
       <div class="selection-header">

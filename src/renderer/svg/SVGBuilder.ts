@@ -153,6 +153,21 @@ export class SVGBuilder
     return tSpanEl
   }
 
+  static createForeignObject(box: TBoundingBox, node: HTMLElement, attrs: { [key: string]: string } = {}): SVGForeignObjectElement
+  {
+    const objEl = document.createElementNS(XMLNS, "foreignObject")
+    objEl.setAttribute("x", box.x.toString())
+    objEl.setAttribute("y", box.y.toString())
+    objEl.setAttribute("width", box.width.toString())
+    objEl.setAttribute("height", box.height.toString())
+    Object.keys(attrs).forEach(k =>
+    {
+      objEl.setAttribute(k, attrs[k])
+    })
+    objEl.appendChild(node)
+    return objEl
+  }
+
   static createText(p: TPoint, text: string, attrs: { [key: string]: string } = {}): SVGTextElement
   {
     const textEl = document.createElementNS(XMLNS, "text")

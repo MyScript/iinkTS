@@ -37,6 +37,6 @@ describe("OISVGEraserUtil.ts", () =>
     expect(el.getAttribute("id")).toEqual(eraserSym.id)
     expect(el.getAttribute("type")).toEqual("eraser")
     expect(el.getAttribute("stroke")).toEqual("grey")
-    expect(el.getAttribute("stroke-width")).toEqual("20")
+    expect(el.getAttribute("stroke-width")).toEqual("12")
   })
 })

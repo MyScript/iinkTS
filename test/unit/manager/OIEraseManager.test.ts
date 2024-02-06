@@ -1,16 +1,13 @@
 import { buildOICircle, buildOIStroke } from "../helpers"
-import { DefaultConfiguration, OIBehaviors, OIEraseManager, SymbolType, TBehaviorOptions, TPointer } from "../../../src/iink"
+import { OIBehaviorsTest } from "../OIBehaviorsTest"
+import { OIEraseManager, SymbolType, TPointer } from "../../../src/iink"
 
 
 describe("OIEraseManager.ts", () =>
 {
-  const behaviorsOptions: TBehaviorOptions = {
-    configuration: JSON.parse(JSON.stringify(DefaultConfiguration))
-  }
-  behaviorsOptions.configuration.offscreen = true
   test("should create", () =>
   {
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const behaviors = new OIBehaviorsTest()
     const manager = new OIEraseManager(behaviors)
     expect(manager).toBeDefined()
     expect(manager.currentEraser).toBeUndefined()
@@ -19,7 +16,7 @@ describe("OIEraseManager.ts", () =>
   describe("writing process", () =>
   {
     const wrapperHTML: HTMLElement = document.createElement("div")
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const behaviors = new OIBehaviorsTest()
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     behaviors.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
     behaviors.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())

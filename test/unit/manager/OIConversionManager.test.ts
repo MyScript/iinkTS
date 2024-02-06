@@ -1,23 +1,20 @@
 import { arcJIIX, circleJIIX, ellipseJIIX, helloJIIX, lineJIIX, parallelogramJIIX, polygonJIIX, rectangleJIIX, rhombusJIIX, triangleJIIX } from "../__dataset__/jiix.dataset"
 import { buildOIStroke } from "../helpers"
-import { Box, DefaultConfiguration, OIBehaviors, OIConversionManager, TBehaviorOptions, TJIIXEdgeElement, TJIIXNodeElement, TJIIXTextElement } from "../../../src/iink"
+import { OIBehaviorsTest } from "../OIBehaviorsTest"
+import { Box, OIConversionManager, TJIIXEdgeElement, TJIIXNodeElement, TJIIXTextElement } from "../../../src/iink"
 
 describe("OIConversionManager.ts", () =>
 {
-  const behaviorsOptions: TBehaviorOptions = {
-    configuration: JSON.parse(JSON.stringify(DefaultConfiguration))
-  }
-  behaviorsOptions.configuration.offscreen = true
   test("should create", () =>
   {
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const behaviors = new OIBehaviorsTest()
     const manager = new OIConversionManager(behaviors)
     expect(manager).toBeDefined()
   })
 
   describe("convert", () =>
   {
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const behaviors = new OIBehaviorsTest()
     behaviors.texter.adjustText = jest.fn()
     behaviors.export = jest.fn(() => Promise.resolve(behaviors.model))
     behaviors.selector.removeSelectedGroup = jest.fn()
@@ -62,7 +59,7 @@ describe("OIConversionManager.ts", () =>
   describe("convertText", () =>
   {
     const symEl = document.createElementNS("http://www.w3.org/2000/svg", "path")
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const behaviors = new OIBehaviorsTest()
     behaviors.export = jest.fn(() => Promise.resolve(behaviors.model))
     behaviors.texter.getElementBoundingBox = jest.fn(() => new Box({ height: 10, width: 5, x: 1, y: 2}))
     behaviors.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
@@ -109,7 +106,7 @@ describe("OIConversionManager.ts", () =>
   describe("convertNode", () =>
   {
     const symEl = document.createElementNS("http://www.w3.org/2000/svg", "path")
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const behaviors = new OIBehaviorsTest()
     behaviors.export = jest.fn(() => Promise.resolve(behaviors.model))
     behaviors.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
     behaviors.renderer.drawSymbol = jest.fn(() => symEl)
@@ -227,7 +224,7 @@ describe("OIConversionManager.ts", () =>
   describe("convertEdge", () =>
   {
     const symEl = document.createElementNS("http://www.w3.org/2000/svg", "path")
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const behaviors = new OIBehaviorsTest()
     behaviors.export = jest.fn(() => Promise.resolve(behaviors.model))
     behaviors.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
     behaviors.renderer.drawSymbol = jest.fn(() => symEl)

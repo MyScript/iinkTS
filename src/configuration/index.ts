@@ -2,6 +2,7 @@
 export * from "./Configuration"
 export * from "./GrabberConfiguration"
 export * from "./LoggerConfiguration"
+export * from "./MenuConfiguration"
 export * from "./RecognitionConfiguration"
 export * from "./RenderingConfiguration"
 export * from "./ServerConfiguration"

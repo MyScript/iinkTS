@@ -1,36 +1,28 @@
 import { buildOIStroke, buildOIText } from "../helpers"
+import { OIBehaviorsTest } from "../OIBehaviorsTest"
 import
 {
-  OIGestureManager,
-  OIBehaviors,
-  TBehaviorOptions,
   DefaultConfiguration,
   TGesture,
   SurroundAction,
-  TOISymbolChar
+  TOISymbolChar,
+  OIGestureManager
 } from "../../../src/iink"
 
 describe("OIGestureManager.ts", () =>
 {
-  const behaviorsOptions: TBehaviorOptions = {
-    configuration: JSON.parse(JSON.stringify(DefaultConfiguration))
-  }
   const rowHeight = DefaultConfiguration.rendering.guides.gap
-  behaviorsOptions.configuration.offscreen = true
+
   test("should create", () =>
   {
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const behaviors = new OIBehaviorsTest()
     const gestMan = new OIGestureManager(behaviors)
     expect(gestMan).toBeDefined()
   })
 
   describe("apply", () =>
   {
-    const behaviorsOptions: TBehaviorOptions = {
-      configuration: JSON.parse(JSON.stringify(DefaultConfiguration))
-    }
-    behaviorsOptions.configuration.offscreen = true
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const behaviors = new OIBehaviorsTest()
     const gestMan = new OIGestureManager(behaviors)
     gestMan.applyInsertGesture = jest.fn()
     gestMan.applyJoinGesture = jest.fn()
@@ -185,11 +177,7 @@ describe("OIGestureManager.ts", () =>
 
   describe("applySurroundGesture", () =>
   {
-    const behaviorsOptions: TBehaviorOptions = {
-      configuration: JSON.parse(JSON.stringify(DefaultConfiguration))
-    }
-    behaviorsOptions.configuration.offscreen = true
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const behaviors = new OIBehaviorsTest()
     const stroke = buildOIStroke()
     behaviors.model.addSymbol(stroke)
     const gestMan = new OIGestureManager(behaviors)
@@ -292,11 +280,7 @@ describe("OIGestureManager.ts", () =>
 
   describe("applyScratchGesture", () =>
   {
-    const behaviorsOptions: TBehaviorOptions = {
-      configuration: JSON.parse(JSON.stringify(DefaultConfiguration))
-    }
-    behaviorsOptions.configuration.offscreen = true
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const behaviors = new OIBehaviorsTest()
     const manager = new OIGestureManager(behaviors)
     manager.texter.adjustText = jest.fn()
     manager.texter.updateTextBoundingBox = jest.fn()
@@ -462,11 +446,7 @@ describe("OIGestureManager.ts", () =>
 
   describe("applyJoinGesture", () =>
   {
-    const behaviorsOptions: TBehaviorOptions = {
-      configuration: JSON.parse(JSON.stringify(DefaultConfiguration))
-    }
-    behaviorsOptions.configuration.offscreen = true
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const behaviors = new OIBehaviorsTest()
     const stroke11 = buildOIStroke({ box: { height: 9, width: 10, x: 0, y: 0.6 * rowHeight } })
     behaviors.model.addSymbol(stroke11)
     const stroke12 = buildOIStroke({ box: { height: 9, width: 10, x: 100, y: 0.6 * rowHeight } })
@@ -514,11 +494,7 @@ describe("OIGestureManager.ts", () =>
 
   describe("applyInsertGesture", () =>
   {
-    const behaviorsOptions: TBehaviorOptions = {
-      configuration: JSON.parse(JSON.stringify(DefaultConfiguration))
-    }
-    behaviorsOptions.configuration.offscreen = true
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const behaviors = new OIBehaviorsTest()
     const stroke = buildOIStroke()
     behaviors.model.addSymbol(stroke)
     const gestMan = new OIGestureManager(behaviors)
@@ -551,11 +527,7 @@ describe("OIGestureManager.ts", () =>
 
   describe("applyStrikeThroughGesture", () =>
   {
-    const behaviorsOptions: TBehaviorOptions = {
-      configuration: JSON.parse(JSON.stringify(DefaultConfiguration))
-    }
-    behaviorsOptions.configuration.offscreen = true
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const behaviors = new OIBehaviorsTest()
     const stroke = buildOIStroke()
     behaviors.model.addSymbol(stroke)
     const gestMan = new OIGestureManager(behaviors)
@@ -597,11 +569,7 @@ describe("OIGestureManager.ts", () =>
 
   describe("applyUnderlineGesture", () =>
   {
-    const behaviorsOptions: TBehaviorOptions = {
-      configuration: JSON.parse(JSON.stringify(DefaultConfiguration))
-    }
-    behaviorsOptions.configuration.offscreen = true
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const behaviors = new OIBehaviorsTest()
     const stroke = buildOIStroke()
     behaviors.model.addSymbol(stroke)
     const gestMan = new OIGestureManager(behaviors)

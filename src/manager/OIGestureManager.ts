@@ -1,4 +1,4 @@
-import { LoggerClass } from "../Constants"
+import { Intention, LoggerClass } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerManager } from "../logger"
 import { OIModel } from "../model"
@@ -93,8 +93,7 @@ export class OIGestureManager
     }
     switch (this.surroundAction) {
       case SurroundAction.Select: {
-        // TODO wait editor intention menu
-        // this.behaviors.internalEvent.emitIntention(Intention.Select)
+        this.behaviors.internalEvent.emitIntention(Intention.Select)
         gesture.strokeIds.forEach(id =>
         {
           this.model.selectSymbol(id)

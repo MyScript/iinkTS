@@ -25,14 +25,17 @@ describe("OIResizeManager.ts", () =>
 
   test("should create", () =>
   {
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions)
+    const layerInfo = document.createElement("div")
+    //@ts-ignore
+    const behaviors = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
     const manager = new OIResizeManager(behaviors)
     expect(manager).toBeDefined()
   })
 
   describe("should applyToSymbol", () =>
   {
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions)
+    const layerInfo = document.createElement("div")
+    const behaviors = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
     const manager = new OIResizeManager(behaviors)
 
     test("resize stroke", () =>
@@ -99,7 +102,8 @@ describe("OIResizeManager.ts", () =>
   describe("resize process on stroke without snap", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions)
+    const layerInfo = document.createElement("div")
+    const behaviors = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     behaviors.recognizer.replaceStrokes = jest.fn(() => Promise.resolve())
     behaviors.renderer.setAttribute = jest.fn()

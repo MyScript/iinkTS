@@ -28,7 +28,9 @@ describe("OIWriteManager.ts", () =>
 
   test("should create", () =>
   {
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions)
+    const layerInfo = document.createElement("div")
+    //@ts-ignore TODO IIC-1006
+    const behaviors = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
     const manager = new OIWriteManager(behaviors)
     expect(manager).toBeDefined()
   })
@@ -36,7 +38,8 @@ describe("OIWriteManager.ts", () =>
   describe("writing process", () =>
   {
     const wrapperHTML: HTMLElement = document.createElement("div")
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions)
+    const layerInfo = document.createElement("div")
+    const behaviors = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     behaviors.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
 

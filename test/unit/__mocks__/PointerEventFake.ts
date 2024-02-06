@@ -11,9 +11,10 @@ type CompleteEventFakeProps = EventFakeProps & {
   buttons: number
 }
 
-type TouchListFake = ({clientX: number, clientY: number})[]
+type TouchListFake = ({ clientX: number, clientY: number })[]
 
-export class PointerEventFake extends Event {
+export class PointerEventFake extends Event
+{
   clientX: number
   clientY: number
   pressure: number
@@ -21,8 +22,9 @@ export class PointerEventFake extends Event {
   button: number
   buttons: number
   pointerId: number
-  constructor(type: string, props: CompleteEventFakeProps) {
-    super(type, props as EventInit);
+  constructor(type: string, props: CompleteEventFakeProps)
+  {
+    super(type, props as EventInit)
     this.clientX = props.clientX
     this.clientY = props.clientY
     this.pointerType = props.pointerType
@@ -33,8 +35,10 @@ export class PointerEventFake extends Event {
   }
 }
 
-export class LeftClickEventFake extends PointerEventFake {
-  constructor(type: string, props: EventFakeProps) {
+export class LeftClickEventFake extends PointerEventFake
+{
+  constructor(type: string, props: EventFakeProps)
+  {
     super(type, {
       ...props,
       button: 0,
@@ -43,8 +47,10 @@ export class LeftClickEventFake extends PointerEventFake {
   }
 }
 
-export class RightClickEventFake extends PointerEventFake {
-  constructor(type: string, props: EventFakeProps) {
+export class RightClickEventFake extends PointerEventFake
+{
+  constructor(type: string, props: EventFakeProps)
+  {
     super(type, {
       ...props,
       button: 1,
@@ -53,9 +59,11 @@ export class RightClickEventFake extends PointerEventFake {
   }
 }
 
-export class TouchEventFake extends PointerEventFake {
+export class TouchEventFake extends PointerEventFake
+{
   changedTouches: TouchListFake
-  constructor(type: string, props: EventFakeProps) {
+  constructor(type: string, props: EventFakeProps)
+  {
     super(type, {
       ...props,
       button: 0,
@@ -68,9 +76,11 @@ export class TouchEventFake extends PointerEventFake {
   }
 }
 
-export class DoubleTouchEventFake extends PointerEventFake {
+export class DoubleTouchEventFake extends PointerEventFake
+{
   changedTouches: TouchListFake
-  constructor(type: string, props: EventFakeProps) {
+  constructor(type: string, props: EventFakeProps)
+  {
     super(type, {
       ...props,
       button: 0,
