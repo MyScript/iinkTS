@@ -24,14 +24,17 @@ describe("OITranslateManager.ts", () =>
 
   test("should create", () =>
   {
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions)
+    const layerInfo = document.createElement("div")
+    //@ts-ignore TODO IIC-1006
+    const behaviors = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
     const manager = new OITranslateManager(behaviors)
     expect(manager).toBeDefined()
   })
 
   describe("should applyToSymbol", () =>
   {
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions)
+    const layerInfo = document.createElement("div")
+    const behaviors = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
     const manager = new OITranslateManager(behaviors)
 
     test("translate stroke", () =>
@@ -94,7 +97,8 @@ describe("OITranslateManager.ts", () =>
   describe("translate process on stroke without snap", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions)
+    const layerInfo = document.createElement("div")
+    const behaviors = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     behaviors.recognizer.translateStrokes = jest.fn(() => Promise.resolve())
     behaviors.renderer.setAttribute = jest.fn()

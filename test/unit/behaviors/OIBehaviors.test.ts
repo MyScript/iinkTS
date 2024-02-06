@@ -29,14 +29,18 @@ describe("OIBehaviors.ts", () =>
 
   test("should instanciate OIBehaviors", () =>
   {
-    const oib = new OIBehaviors(DefaultBehaviorsOptions)
+    const layerInfo = document.createElement("div")
+    //@ts-ignore TODO IIC-1006
+    const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
     expect(oib).toBeDefined()
   })
 
   describe("Properties", () =>
   {
-    const oib = new OIBehaviors(DefaultBehaviorsOptions)
+    const layerInfo = document.createElement("div")
+    const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
     oib.selector.removeSelectedGroup = jest.fn()
+    oib.renderer.parent = layerInfo
     test("should have internalEvent property", () =>
     {
       expect(oib.internalEvent).toBe(InternalEvent.getInstance())
@@ -84,7 +88,8 @@ describe("OIBehaviors.ts", () =>
       const customStyle: TStyle = { color: "#d1d1d1" }
       const customBehaviorsOptions: TBehaviorOptions = JSON.parse(JSON.stringify(DefaultBehaviorsOptions))
       customBehaviorsOptions.penStyle = customStyle
-      const oib = new OIBehaviors(customBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(customBehaviorsOptions, layerInfo)
       oib.grabber.attach = jest.fn()
       oib.renderer.init = jest.fn()
       oib.recognizer.send = jest.fn()
@@ -93,7 +98,9 @@ describe("OIBehaviors.ts", () =>
     test("should change Style", async () =>
     {
       const wrapperHTML: HTMLElement = document.createElement("div")
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+      oib.menu.render = jest.fn()
       oib.grabber.attach = jest.fn()
       oib.renderer.init = jest.fn()
       oib.recognizer.send = jest.fn()
@@ -129,7 +136,8 @@ describe("OIBehaviors.ts", () =>
         }
       }
       customBehaviorsOptions.theme = customTheme
-      const oib = new OIBehaviors(customBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(customBehaviorsOptions, layerInfo)
       oib.grabber.attach = jest.fn()
       oib.renderer.init = jest.fn()
       oib.recognizer.send = jest.fn()
@@ -139,7 +147,9 @@ describe("OIBehaviors.ts", () =>
     test("should change Theme", async () =>
     {
       const wrapperHTML: HTMLElement = document.createElement("div")
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+      oib.menu.render = jest.fn()
       oib.grabber.attach = jest.fn()
       oib.renderer.init = jest.fn()
       oib.recognizer.send = jest.fn()
@@ -173,7 +183,9 @@ describe("OIBehaviors.ts", () =>
     test("should change PenStyleClasses", async () =>
     {
       const wrapperHTML: HTMLElement = document.createElement("div")
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+      oib.menu.render = jest.fn()
       oib.grabber.attach = jest.fn()
       oib.renderer.init = jest.fn()
       oib.recognizer.send = jest.fn()
@@ -191,7 +203,9 @@ describe("OIBehaviors.ts", () =>
     test("should init grabber, renderer & recognizer & context", async () =>
     {
       const wrapperHTML: HTMLElement = document.createElement("div")
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+      oib.menu.render = jest.fn()
       oib.grabber.attach = jest.fn()
       oib.renderer.init = jest.fn()
       oib.recognizer.send = jest.fn()
@@ -211,7 +225,9 @@ describe("OIBehaviors.ts", () =>
     test("should resolve init when recognizer.init is resolve", async () =>
     {
       const wrapperHTML: HTMLElement = document.createElement("div")
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+      oib.menu.render = jest.fn()
       oib.grabber.attach = jest.fn()
       oib.renderer.init = jest.fn()
       oib.recognizer.send = jest.fn()
@@ -222,7 +238,9 @@ describe("OIBehaviors.ts", () =>
     test("should reject init when recognizer.init is reject", async () =>
     {
       const wrapperHTML: HTMLElement = document.createElement("div")
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+      oib.menu.render = jest.fn()
       oib.grabber.attach = jest.fn()
       oib.renderer.init = jest.fn()
       oib.recognizer.send = jest.fn()
@@ -233,7 +251,8 @@ describe("OIBehaviors.ts", () =>
 
   describe("updateSymbolsStyle", () =>
   {
-    const oib = new OIBehaviors(DefaultBehaviorsOptions)
+    const layerInfo = document.createElement("div")
+    const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
     oib.recognizer.init = jest.fn()
     oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
     oib.renderer.drawSymbol = jest.fn()
@@ -264,7 +283,8 @@ describe("OIBehaviors.ts", () =>
 
   describe("Writer", () =>
   {
-    const oib = new OIBehaviors(DefaultBehaviorsOptions)
+    const layerInfo = document.createElement("div")
+    const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
     oib.recognizer.init = jest.fn()
     oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
     oib.writer.start = jest.fn()
@@ -325,7 +345,8 @@ describe("OIBehaviors.ts", () =>
 
   describe("Eraser", () =>
   {
-    const oib = new OIBehaviors(DefaultBehaviorsOptions)
+    const layerInfo = document.createElement("div")
+    const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
     oib.intention = Intention.Erase
     oib.recognizer.init = jest.fn()
     oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
@@ -387,7 +408,8 @@ describe("OIBehaviors.ts", () =>
 
   describe("Selector", () =>
   {
-    const oib = new OIBehaviors(DefaultBehaviorsOptions)
+    const layerInfo = document.createElement("div")
+    const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
     oib.intention = Intention.Select
     oib.recognizer.init = jest.fn()
     oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
@@ -452,7 +474,8 @@ describe("OIBehaviors.ts", () =>
     test("should call recognizer.addStrokes", async () =>
     {
       const wrapperHTML: HTMLElement = document.createElement("div")
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
       oib.grabber.attach = jest.fn()
       oib.renderer.drawSymbol = jest.fn()
       oib.recognizer.init = jest.fn(() => Promise.resolve())
@@ -480,7 +503,8 @@ describe("OIBehaviors.ts", () =>
     test("should add symbols to model and draw", async () =>
     {
       const wrapperHTML: HTMLElement = document.createElement("div")
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
       oib.grabber.attach = jest.fn()
       oib.renderer.drawSymbol = jest.fn()
       oib.recognizer.init = jest.fn(() => Promise.resolve())
@@ -513,7 +537,8 @@ describe("OIBehaviors.ts", () =>
   {
     test("should call recognizer.addStrokes & renderer.drawSymbol", async () =>
     {
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
       oib.selector.removeSelectedGroup = jest.fn()
       oib.svgDebugger.apply = jest.fn()
       oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
@@ -536,7 +561,8 @@ describe("OIBehaviors.ts", () =>
     })
     test("should call recognizer.eraseStrokes & renderer.removeSymbol", async () =>
     {
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
       oib.selector.removeSelectedGroup = jest.fn()
       oib.svgDebugger.apply = jest.fn()
       oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
@@ -559,7 +585,8 @@ describe("OIBehaviors.ts", () =>
     })
     test("should return next model", async () =>
     {
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
       oib.selector.removeSelectedGroup = jest.fn()
       oib.svgDebugger.apply = jest.fn()
       oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
@@ -579,7 +606,8 @@ describe("OIBehaviors.ts", () =>
     })
     test("should throw error if canUndo = false", async () =>
     {
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
       expect(oib.undo()).rejects.toThrowError("undo not allowed")
     })
   })
@@ -588,7 +616,8 @@ describe("OIBehaviors.ts", () =>
   {
     test("should call recognizer.addStrokes & renderer.drawSymbol", async () =>
     {
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
       oib.selector.removeSelectedGroup = jest.fn()
       oib.svgDebugger.apply = jest.fn()
       oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
@@ -610,7 +639,8 @@ describe("OIBehaviors.ts", () =>
     })
     test("should call recognizer.eraseStrokes & renderer.removeSymbol", async () =>
     {
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
       oib.selector.removeSelectedGroup = jest.fn()
       oib.svgDebugger.apply = jest.fn()
       oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
@@ -632,7 +662,8 @@ describe("OIBehaviors.ts", () =>
     })
     test("should return next model", async () =>
     {
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
       oib.selector.removeSelectedGroup = jest.fn()
       oib.svgDebugger.apply = jest.fn()
       oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
@@ -650,7 +681,8 @@ describe("OIBehaviors.ts", () =>
     })
     test("should throw error if canRedo = false", async () =>
     {
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
       expect(oib.redo()).rejects.toThrowError("redo not allowed")
     })
   })
@@ -660,7 +692,9 @@ describe("OIBehaviors.ts", () =>
     test("should call recognizer.export", async () =>
     {
       const wrapperHTML: HTMLElement = document.createElement("div")
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+      oib.menu.render = jest.fn()
       oib.grabber.attach = jest.fn()
       oib.renderer.init = jest.fn()
       oib.recognizer.send = jest.fn()
@@ -674,7 +708,9 @@ describe("OIBehaviors.ts", () =>
     test("should reject if recognizer.export rejected", async () =>
     {
       const wrapperHTML: HTMLElement = document.createElement("div")
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+      oib.menu.render = jest.fn()
       oib.grabber.attach = jest.fn()
       oib.renderer.init = jest.fn()
       oib.internalEvent.emitError = jest.fn()
@@ -692,7 +728,10 @@ describe("OIBehaviors.ts", () =>
     test("should call renderer.resize", async () =>
     {
       const wrapperHTML: HTMLElement = document.createElement("div")
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+      oib.menu.render = jest.fn()
+      oib.menu.style.update = jest.fn()
       oib.renderer.resize = jest.fn()
       oib.recognizer.init = jest.fn(() => Promise.resolve())
       await oib.init(wrapperHTML)
@@ -702,7 +741,10 @@ describe("OIBehaviors.ts", () =>
     test("should update model", async () =>
     {
       const wrapperHTML: HTMLElement = document.createElement("div")
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+      oib.menu.render = jest.fn()
+      oib.menu.style.update = jest.fn()
       oib.recognizer.init = jest.fn(() => Promise.resolve())
       oib.renderer.resize = jest.fn()
       await oib.init(wrapperHTML)
@@ -716,7 +758,8 @@ describe("OIBehaviors.ts", () =>
   {
     test("should call renderer.clear", async () =>
     {
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
       oib.svgDebugger.apply = jest.fn()
       oib.renderer.clear = jest.fn()
       oib.recognizer.eraseStrokes = jest.fn()
@@ -728,7 +771,8 @@ describe("OIBehaviors.ts", () =>
     })
     test("should call recognizer.eraseStrokes", async () =>
     {
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
       oib.svgDebugger.apply = jest.fn()
       oib.renderer.clear = jest.fn()
       oib.recognizer.eraseStrokes = jest.fn()
@@ -741,7 +785,8 @@ describe("OIBehaviors.ts", () =>
     })
     test("should clear model", async () =>
     {
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
       oib.svgDebugger.apply = jest.fn()
       oib.renderer.clear = jest.fn()
       oib.recognizer.eraseStrokes = jest.fn()
@@ -755,7 +800,8 @@ describe("OIBehaviors.ts", () =>
     })
     test("should do nothing if strokes empty", async () =>
     {
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
       oib.svgDebugger.apply = jest.fn()
       oib.renderer.clear = jest.fn()
       oib.recognizer.eraseStrokes = jest.fn()
@@ -770,7 +816,8 @@ describe("OIBehaviors.ts", () =>
   {
     test("should call grabber.detach", async () =>
     {
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
       oib.grabber.detach = jest.fn()
       oib.renderer.destroy = jest.fn()
       oib.recognizer.close = jest.fn()
@@ -780,7 +827,8 @@ describe("OIBehaviors.ts", () =>
 
     test("should call renderer.destroy", async () =>
     {
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
       oib.grabber.detach = jest.fn()
       oib.renderer.destroy = jest.fn()
       oib.recognizer.close = jest.fn()
@@ -790,7 +838,8 @@ describe("OIBehaviors.ts", () =>
 
     test("should call recognizer.destroy", async () =>
     {
-      const oib = new OIBehaviors(DefaultBehaviorsOptions)
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
       oib.grabber.detach = jest.fn()
       oib.renderer.destroy = jest.fn()
       oib.recognizer.close = jest.fn()

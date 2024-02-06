@@ -133,7 +133,11 @@ export enum Intention
   /**
    * @remarks only usable in the case of offscreen
    */
-  Select = "select"
+  Select = "select",
+  /**
+   * @remarks only usable in the case of offscreen
+   */
+  Move = "move"
 }
 
 /**
@@ -176,6 +180,7 @@ export enum LoggerClass
   CONVERTER = "CONVERTER",
   SELECTION = "SELECTION",
   SVGDEBUG = "SVGDEBUG",
+  MENU = "MENU"
 }
 
 /**

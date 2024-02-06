@@ -449,6 +449,7 @@ export class OISelectionManager
     this.clearSelectingRect()
     this.drawSelectedGroup(this.model.symbolsSelected)
     this.internalEvent.emitSelected(this.model.symbolsSelected)
+    this.behaviors.menu.style.update()
     return updatedSymbols
   }
 }

@@ -12,8 +12,8 @@
     <link rel="stylesheet" href="../assets/style/examples.css" />
     <style>
       #editor {
-        width: 100vw;
-        height: calc(100vh - 66px);
+        width: 100%;
+        height: 100dvh;
         touch-action: none;
       }
     </style>
@@ -21,28 +21,10 @@
   </head>
 
   <body>
-    <nav>
-      <div class="flex-container gap wrap">
-        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/clear.svg" />
-        </button>
-        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/undo.svg" />
-        </button>
-        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/redo.svg" />
-        </button>
-      </div>
-    </nav>
-
     <div id="editor" touch-action="none"></div>
 
     <script>
       const editorElement = document.getElementById("editor");
-      const clearBtn = document.getElementById("clear");
-      const undoBtn = document.getElementById("undo");
-      const redoBtn = document.getElementById("redo");
-      const importBtn = document.getElementById("import");
 
       /**
        * we expose the editor for use in the integration test
@@ -56,8 +38,29 @@
         const options = {
           configuration: {
             offscreen: true,
-            server
-          }
+            server,
+            recognition: {
+              export: {
+                jiix: {
+                  // required to draw elements box & convert
+                  "bounding-box": true,
+                  // required to convert
+                  ids: true,
+                  // required to convert
+                  "full-stroke-ids": true,
+                  // required to convert text
+                  text: {
+                    chars: true,
+                    words: true
+                  },
+                }
+              }
+            },
+            rendering: {
+              minHeight: 4000,
+              minWidth: 4000,
+             },
+          },
         };
 
         /**
@@ -71,24 +74,6 @@
          *  async initialize editor behaviors
          */
         await editor.initialize();
-
-        editor.events.addEventListener("changed", (event) => {
-          clearBtn.disabled = !event.detail.canClear;
-          undoBtn.disabled = !event.detail.canUndo;
-          redoBtn.disabled = !event.detail.canRedo;
-        });
-
-        clearBtn.addEventListener("click", async () => {
-          editor.clear();
-        });
-
-        undoBtn.addEventListener("click", () => {
-          editor.undo();
-        });
-
-        redoBtn.addEventListener("click", () => {
-          editor.redo();
-        });
 
         window.addEventListener("resize", () => {
           editor.resize();

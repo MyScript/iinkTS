@@ -63,6 +63,10 @@ export class SmartGuide
     this.#smartGuideElement = document.createElement("div")
     this.#smartGuideElement.id = `smartguide-${ this.uuid }`
     this.#smartGuideElement.classList.add("smartguide")
+    this.#smartGuideElement.addEventListener("pointerdown", e => {
+      e.preventDefault()
+      e.stopPropagation()
+    })
   }
 
   #createWrapperElement(): void

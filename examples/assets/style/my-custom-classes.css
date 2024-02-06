@@ -4,7 +4,7 @@ nav {
 
 .my-custom-class {
     position: relative;
-    height: calc(100vh - 66px);
+    height: calc(100dvh - 66px);
     width: 100%;
     z-index: 20;
     font-family: sans-serif;
@@ -22,8 +22,6 @@ nav {
     position: absolute;
     left: 0;
     top: 0;
-    height: 100%;
-    width: 100%;
 }
 
 .my-custom-class canvas.ms-rendering-canvas {
@@ -81,6 +79,7 @@ nav {
     z-index: 40;
     font-size: 16px;
     background-color: rgba(60, 60, 60, 0.5);
+    pointer-events: all;
 }
 
 .my-custom-class .smartguide .tag-icon {
@@ -200,6 +199,7 @@ nav {
     overflow: hidden;
     transition: max-height 1s ease-out, opacity 1s, visibility 0.5s linear;
     background-color: rgba(60, 60, 60, 1);
+    pointer-events: all;
 }
 .my-custom-class .smartguide .more-menu.open {
     max-height: 500px;

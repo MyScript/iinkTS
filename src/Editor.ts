@@ -28,11 +28,12 @@ export class Editor
 {
   logger = LoggerManager.getLogger(LoggerClass.EDITOR)
   wrapperHTML: HTMLEditorElement
-  #loaderHTML: HTMLDivElement
-  #stateHTML: HTMLDivElement
-  #busyHTML: HTMLDivElement
-  #idleHTML: HTMLDivElement
-  #messageHTML: HTMLDivElement
+  #layerInfos!: HTMLDivElement
+  #loaderHTML!: HTMLDivElement
+  #messageHTML!: HTMLDivElement
+  #stateHTML!: HTMLDivElement
+  #busyHTML!: HTMLDivElement
+  #idleHTML!: HTMLDivElement
   #behaviors!: IBehaviors
   #smartGuide?: SmartGuide
   #initializationDeferred: DeferredPromise<void>
@@ -54,28 +55,7 @@ export class Editor
     styleElement.appendChild(document.createTextNode(style as string))
     this.wrapperHTML.appendChild(styleElement)
 
-    this.#loaderHTML = document.createElement("div")
-    this.#loaderHTML.classList.add("loader")
-    this.#loaderHTML.style.display = "none"
-    this.wrapperHTML.appendChild(this.#loaderHTML)
-
-    this.#stateHTML = document.createElement("div")
-    this.#stateHTML.classList.add("state")
-    this.#idleHTML = document.createElement("div")
-    this.#idleHTML.textContent = "idle"
-    this.#idleHTML.style.display = "none"
-    this.#stateHTML.appendChild(this.#idleHTML)
-    this.#busyHTML = document.createElement("div")
-    this.#busyHTML.classList.add("busy")
-    this.#busyHTML.style.display = "none"
-    this.#stateHTML.appendChild(this.#busyHTML)
-    this.#stateHTML.style.display = "none"
-    this.wrapperHTML.appendChild(this.#stateHTML)
-
-    this.#messageHTML = document.createElement("div")
-    this.#messageHTML.classList.add("message")
-    this.#messageHTML.style.display = "none"
-    this.wrapperHTML.appendChild(this.#messageHTML)
+    this.wrapperHTML.appendChild(this.#createLayerInfos())
 
     this.#instantiateBehaviors(options)
   }
@@ -204,6 +184,48 @@ export class Editor
     }
   }
 
+  #createLayerInfos(): HTMLDivElement
+  {
+    this.#layerInfos = document.createElement("div")
+    this.#layerInfos.classList.add("ms-layer-infos")
+    this.#layerInfos.appendChild(this.#createLoader())
+    this.#layerInfos.appendChild(this.#createMessage())
+    this.#layerInfos.appendChild(this.#createEditorState())
+    return this.#layerInfos
+  }
+
+  #createLoader(): HTMLDivElement
+  {
+    this.#loaderHTML = document.createElement("div")
+    this.#loaderHTML.classList.add("loader")
+    this.#loaderHTML.style.display = "none"
+    return this.#loaderHTML
+  }
+
+  #createMessage(): HTMLDivElement
+  {
+    this.#messageHTML = document.createElement("div")
+    this.#messageHTML.classList.add("message")
+    this.#messageHTML.style.display = "none"
+    return this.#messageHTML
+  }
+
+  #createEditorState(): HTMLDivElement
+  {
+    this.#stateHTML = document.createElement("div")
+    this.#stateHTML.classList.add("state")
+    this.#idleHTML = document.createElement("div")
+    this.#idleHTML.textContent = "idle"
+    this.#idleHTML.style.display = "block"
+    this.#stateHTML.appendChild(this.#idleHTML)
+    this.#busyHTML = document.createElement("div")
+    this.#busyHTML.classList.add("busy")
+    this.#busyHTML.style.display = "none"
+    this.#stateHTML.appendChild(this.#busyHTML)
+    this.#stateHTML.style.display = "none"
+    return this.#stateHTML
+  }
+
   #updateEditorState(idle: boolean): void
   {
     if (this.configuration.offscreen) {
@@ -232,16 +254,14 @@ export class Editor
     if (this.#behaviors) {
       this.#behaviors.destroy()
     }
-    let defaultBehaviors: IBehaviors
     if (options.configuration.offscreen) {
-      defaultBehaviors = new OIBehaviors(options)
+      this.#behaviors = new OIBehaviors(options, this.#layerInfos)
     }
     else if (options.configuration.server?.protocol === "REST") {
-      defaultBehaviors = new RestBehaviors(options)
+      this.#behaviors = new RestBehaviors(options)
     } else {
-      defaultBehaviors = new WSBehaviors(options)
+      this.#behaviors = new WSBehaviors(options)
     }
-    this.#behaviors = Object.assign(defaultBehaviors, options.behaviors)
     this.logger.debug("instantiateBehaviors", this.#behaviors)
   }
 
@@ -297,7 +317,7 @@ export class Editor
           }
           break
       }
-      this.#smartGuide.init(this.wrapperHTML, margin, this.configuration.rendering)
+      this.#smartGuide.init(this.#layerInfos, margin, this.configuration.rendering)
     }
   }
 
@@ -327,20 +347,7 @@ export class Editor
     }, notif.timeout || 2500)
   }
 
-  /**
-   * @remarks only usable in the case of offscreen
-   */
-  updateSymbolsStyle(strokeIds: string[], style: { fill?: string, width?: number }): void
-  {
-    if (this.configuration.offscreen) {
-      (this.behaviors as unknown as OIBehaviors).updateSymbolsStyle(strokeIds, style)
-    }
-    else {
-      throw new Error("updateSymbolsStyle is only for offscreen configuration")
-    }
-  }
-
-  #addListeners(): void
+  #addInternalListeners(): void
   {
     this.internalEvents.addConvertListener(this.convert.bind(this))
     this.internalEvents.addClearListener(this.clear.bind(this))
@@ -400,7 +407,7 @@ export class Editor
     this.logger.info("initialize")
     await this.#initializeBehaviors()
     this.#initializeSmartGuide()
-    this.#addListeners()
+    this.#addInternalListeners()
   }
 
   async waitForIdle(): Promise<void>

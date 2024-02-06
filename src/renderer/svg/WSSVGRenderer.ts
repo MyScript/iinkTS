@@ -39,7 +39,7 @@ export class WSSVGRenderer
   {
     let style: string
     if (stroke.pointerType === "eraser") {
-      stroke.style.width = 20
+      stroke.style.width = 12
       style = "fill:grey;stroke:transparent;shadowBlur:5;opacity:0.2;"
     } else {
       style = `fill:${ stroke.style.color };stroke:transparent;`

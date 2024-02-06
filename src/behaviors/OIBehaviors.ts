@@ -4,7 +4,7 @@ import { InternalEvent } from "../event"
 import { OIPointerEventGrabber } from "../grabber"
 import { LoggerManager } from "../logger"
 import { OIModel, TExport } from "../model"
-import { OIStroke, SymbolType, TPointer, TStroke } from "../primitive"
+import { OIStroke, OIText, SymbolType, TPointer, TStroke } from "../primitive"
 import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
 import { DefaultStyle, StyleManager, TStyle, TTheme } from "../style"
@@ -20,7 +20,9 @@ import
   OITranslateManager,
   OITextManager,
   OIEraseManager,
-  OIDebugSVGManager
+  OIDebugSVGManager,
+  OIMoveManager,
+  OIMenuManager
 } from "../manager"
 import { TUndoRedoContext, UndoRedoManager } from "../undo-redo"
 import { PartialDeep, mergeDeep } from "../utils"
@@ -36,6 +38,7 @@ export class OIBehaviors implements IBehaviors
   #configuration: TConfiguration
   #model: OIModel
   #intention: Intention
+  layerInfos: HTMLDivElement
 
   grabber: OIPointerEventGrabber
   renderer: OISVGRenderer
@@ -54,11 +57,14 @@ export class OIBehaviors implements IBehaviors
   selector: OISelectionManager
   svgDebugger: OIDebugSVGManager
   snaps: OISnapManager
+  move: OIMoveManager
+  menu: OIMenuManager
 
-  constructor(options: PartialDeep<TBehaviorOptions>)
+  constructor(options: PartialDeep<TBehaviorOptions>, layerInfos: HTMLDivElement)
   {
     this.#logger.info("constructor", { options })
     this.#configuration = new Configuration(options?.configuration)
+    this.layerInfos = layerInfos
     this.styleManager = new StyleManager(Object.assign({}, DefaultStyle, options?.penStyle), options?.theme)
 
     this.grabber = new OIPointerEventGrabber(this.#configuration.grabber)
@@ -76,6 +82,8 @@ export class OIBehaviors implements IBehaviors
     this.selector = new OISelectionManager(this)
     this.svgDebugger = new OIDebugSVGManager(this)
     this.snaps = new OISnapManager(this)
+    this.move = new OIMoveManager(this)
+    this.menu = new OIMenuManager(this, options.behaviors?.menu)
 
     this.#intention = Intention.Write
     this.#model = new OIModel(this.#configuration.rendering.minWidth, this.#configuration.rendering.minHeight, this.configuration.rendering.guides.gap)
@@ -96,7 +104,35 @@ export class OIBehaviors implements IBehaviors
   set intention(i: Intention)
   {
     this.#intention = i
+    switch (this.#intention) {
+      case Intention.Erase:
+        this.renderer.parent?.classList.remove("draw")
+        this.renderer.parent?.classList.add("erase")
+        this.renderer.parent?.classList.remove("select")
+        this.renderer.parent?.classList.remove("move")
+        break
+      case Intention.Select:
+        this.renderer.parent?.classList.remove("draw")
+        this.renderer.parent?.classList.remove("erase")
+        this.renderer.parent?.classList.add("select")
+        this.renderer.parent?.classList.remove("move")
+        break
+      case Intention.Move:
+        this.renderer.parent?.classList.remove("draw")
+        this.renderer.parent?.classList.remove("erase")
+        this.renderer.parent?.classList.remove("select")
+        this.renderer.parent?.classList.add("move")
+        break
+      default:
+        this.renderer.parent?.classList.add("draw")
+        this.renderer.parent?.classList.remove("erase")
+        this.renderer.parent?.classList.remove("select")
+        this.renderer.parent?.classList.remove("move")
+        break
+    }
+    this.menu.update()
     this.model.resetSelection()
+    this.selector.removeSelectedGroup()
   }
 
   get model(): OIModel
@@ -125,11 +161,7 @@ export class OIBehaviors implements IBehaviors
   //#region Style
   get currentPenStyle(): TStyle
   {
-    return {
-      color: this.styleManager.currentPenStyle.color || this.theme?.ink.color,
-      fill: this.styleManager.currentPenStyle.fill || this.theme?.ink.fill,
-      width: this.styleManager.currentPenStyle.width || this.theme?.ink.width
-    }
+    return this.styleManager.currentPenStyle
   }
 
   get penStyle(): TStyle
@@ -139,7 +171,7 @@ export class OIBehaviors implements IBehaviors
   async setPenStyle(penStyle?: TStyle | undefined): Promise<void>
   {
     this.#logger.info("setPenStyle", { penStyle })
-    this.styleManager.setPenStyle(penStyle)
+    this.styleManager.setPenStyle(Object.assign({}, this.currentPenStyle, penStyle))
     return Promise.resolve()
   }
 
@@ -172,14 +204,19 @@ export class OIBehaviors implements IBehaviors
     this.internalEvent.emitIdle(false)
     try {
       this.selector.removeSelectedGroup()
-      this.model.resetSelection()
-      this.internalEvent.emitSelected(this.model.symbolsSelected)
+      if (this.model.symbolsSelected.length) {
+        this.model.resetSelection()
+        this.internalEvent.emitSelected(this.model.symbolsSelected)
+      }
       switch (this.#intention) {
         case Intention.Erase:
           this.eraser.start(pointer)
           break
         case Intention.Select:
           this.selector.start(pointer)
+          break
+        case Intention.Move:
+          this.move.start(evt)
           break
         default:
           this.writer.start(this.currentPenStyle, pointer, evt.pointerId, evt.pointerType)
@@ -195,7 +232,7 @@ export class OIBehaviors implements IBehaviors
     }
   }
 
-  protected onPointerMove(_evt: PointerEvent, pointer: TPointer): void
+  protected onPointerMove(evt: PointerEvent, pointer: TPointer): void
   {
     this.#logger.debug("onPointerMove", { pointer })
     try {
@@ -205,6 +242,9 @@ export class OIBehaviors implements IBehaviors
           break
         case Intention.Select:
           this.selector.continue(pointer)
+          break
+        case Intention.Move:
+          this.move.continue(evt)
           break
         default:
           this.writer.continue(pointer)
@@ -219,7 +259,7 @@ export class OIBehaviors implements IBehaviors
     }
   }
 
-  protected async onPointerUp(_evt: PointerEvent, pointer: TPointer): Promise<void>
+  protected async onPointerUp(evt: PointerEvent, pointer: TPointer): Promise<void>
   {
     this.#logger.debug("onPointerUp", { pointer })
     try {
@@ -229,6 +269,9 @@ export class OIBehaviors implements IBehaviors
           break
         case Intention.Select:
           await this.selector.end(pointer)
+          break
+        case Intention.Move:
+          this.move.end(evt)
           break
         default:
           await this.writer.end(pointer)
@@ -245,37 +288,23 @@ export class OIBehaviors implements IBehaviors
     }
   }
 
-  updateSymbolsStyle(strokeIds: string[], style: { color?: string, fill?: string, width?: number }): void
-  {
-    this.#logger.info("updateSymbolsStyle", { strokeIds, style })
-    this.model.symbols.forEach(s =>
-    {
-      if (strokeIds.includes(s.id)) {
-        s.style.width = style.width || s.style.width
-        s.style.color = style.color || s.style.color
-        s.style.fill = style.fill || s.style.fill
-        this.renderer.drawSymbol(s)
-        s.modificationDate = Date.now()
-      }
-    })
-    this.undoRedoManager.addModelToStack(this.model)
-  }
-
   async init(domElement: HTMLElement): Promise<void>
   {
     try {
       this.#logger.info("init", { domElement })
-      this.model.width = Math.max(domElement.clientWidth, this.#configuration.rendering.minWidth)
-      this.model.height = Math.max(domElement.clientHeight, this.#configuration.rendering.minHeight)
-      this.model.rowHeight = this.configuration.rendering.guides.gap
-      this.undoRedoManager.updateModelInStack(this.model)
 
       this.renderer.init(domElement)
+      this.menu.render(this.layerInfos)
 
       this.grabber.attach(this.renderer.layer as unknown as HTMLElement)
       this.grabber.onPointerDown = this.onPointerDown.bind(this)
       this.grabber.onPointerMove = this.onPointerMove.bind(this)
       this.grabber.onPointerUp = this.onPointerUp.bind(this)
+
+      this.model.width = Math.max(domElement.clientWidth, this.#configuration.rendering.minWidth)
+      this.model.height = Math.max(domElement.clientHeight, this.#configuration.rendering.minHeight)
+      this.model.rowHeight = this.configuration.rendering.guides.gap
+      this.undoRedoManager.updateModelInStack(this.model)
 
       await this.recognizer.init()
       await this.setPenStyle(this.penStyle)
@@ -284,6 +313,31 @@ export class OIBehaviors implements IBehaviors
     } catch (error) {
       throw new Error(error as string)
     }
+  }
+
+  updateSymbolsStyle(symbolIds: string[], style: TStyle): void
+  {
+    this.#logger.info("updateSymbolsStyle", { symbolIds, style })
+    this.model.symbols.forEach(s =>
+    {
+      if (symbolIds.includes(s.id)) {
+        Object.assign(s.style, style)
+        if (s.type === SymbolType.Text) {
+          (s as OIText).chars.forEach(c =>
+          {
+            if (style.color) {
+              c.color = style.color
+            }
+            if (style.width) {
+              c.fontWeight = style.width * 100
+            }
+          })
+        }
+        this.renderer.drawSymbol(s)
+        s.modificationDate = Date.now()
+      }
+    })
+    this.undoRedoManager.addModelToStack(this.model)
   }
 
   async importPointEvents(strokes: PartialDeep<TStroke>[]): Promise<OIModel>
@@ -413,7 +467,7 @@ export class OIBehaviors implements IBehaviors
     try {
       this.#logger.info("export", { mimeTypes })
       const needExport = !mimeTypes?.length && !this.model.exports?.["application/vnd.myscript.jiix"] ||
-      mimeTypes?.some(mt => !this.model.exports?.[mt])
+        mimeTypes?.some(mt => !this.model.exports?.[mt])
       if (needExport) {
         const exports = await this.recognizer.export(mimeTypes)
         this.model.mergeExport(exports as TExport)
@@ -451,6 +505,7 @@ export class OIBehaviors implements IBehaviors
     this.model.height = height
     this.model.width = width
     this.renderer.resize(height, width)
+    this.menu.update()
     this.internalEvent.emitIdle(true)
     return this.model
   }
@@ -485,6 +540,7 @@ export class OIBehaviors implements IBehaviors
     this.#logger.info("destroy")
     this.grabber.detach()
     this.renderer.destroy()
+    this.menu.destroy()
     this.recognizer.close(1000, InternalEventType.WS_CLOSED)
     return Promise.resolve()
   }

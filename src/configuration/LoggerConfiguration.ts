@@ -33,4 +33,5 @@ export const DefaultLoggerConfiguration: TLoggerConfiguration = {
   [LoggerClass.WRITE]: LoggerLevel.ERROR,
   [LoggerClass.SELECTION]: LoggerLevel.ERROR,
   [LoggerClass.SVGDEBUG]: LoggerLevel.ERROR,
+  [LoggerClass.MENU]: LoggerLevel.ERROR,
 }

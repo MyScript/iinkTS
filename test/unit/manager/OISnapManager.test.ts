@@ -19,14 +19,17 @@ describe("OISnapManager.ts", () =>
   behaviorsOptions.configuration.rendering.guides.gap = 10
   test("should create", () =>
   {
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const layerInfo = document.createElement("div")
+    //@ts-ignore TODO IIC-1006
+    const behaviors = new OIBehaviors(behaviorsOptions, layerInfo)
     const manager = new OISnapManager(behaviors)
     expect(manager).toBeDefined()
   })
 
   test("should call renderer.drawLine when drawSnapToElementLines", () =>
   {
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const layerInfo = document.createElement("div")
+    const behaviors = new OIBehaviors(behaviorsOptions, layerInfo)
     const manager = new OISnapManager(behaviors)
     manager.renderer.drawLine = jest.fn()
     const lines: TSegment[] = [
@@ -49,7 +52,8 @@ describe("OISnapManager.ts", () =>
 
   test("should call renderer.clearElements when clearSnapToElementLines", () =>
   {
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const layerInfo = document.createElement("div")
+    const behaviors = new OIBehaviors(behaviorsOptions, layerInfo)
     const manager = new OISnapManager(behaviors)
     manager.renderer.clearElements = jest.fn()
     manager.clearSnapToElementLines()
@@ -60,7 +64,8 @@ describe("OISnapManager.ts", () =>
   describe("snapResize", () =>
   {
     const wrapperHTML: HTMLElement = document.createElement("div")
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const layerInfo = document.createElement("div")
+    const behaviors = new OIBehaviors(behaviorsOptions, layerInfo)
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     const manager = new OISnapManager(behaviors)
     manager.renderer.drawLine = jest.fn()
@@ -185,7 +190,8 @@ describe("OISnapManager.ts", () =>
   describe("snapTranslate", () =>
   {
     const wrapperHTML: HTMLElement = document.createElement("div")
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const layerInfo = document.createElement("div")
+    const behaviors = new OIBehaviors(behaviorsOptions, layerInfo)
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     const manager = new OISnapManager(behaviors)
     const selectionSnapPointMock = { x: 25, y: 30 }
@@ -315,7 +321,8 @@ describe("OISnapManager.ts", () =>
 
   describe("snapRotation", () =>
   {
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const layerInfo = document.createElement("div")
+    const behaviors = new OIBehaviors(behaviorsOptions, layerInfo)
     const manager = new OISnapManager(behaviors)
 
     test("should do nothing if snapToElement & snapToGrid are equal to false", () =>

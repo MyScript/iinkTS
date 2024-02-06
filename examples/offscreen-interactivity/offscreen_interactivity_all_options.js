@@ -1,54 +1,24 @@
 const editorElement = document.getElementById("editor");
 
 const importBtn = document.getElementById("import");
-const clearBtn = document.getElementById("clear");
-const undoBtn = document.getElementById("undo");
-const redoBtn = document.getElementById("redo");
 
-const penBtn = document.getElementById("pen");
-const menuShapeBtn = document.getElementById("menu-shape-btn");
-const drawRectangleBtn = document.getElementById("draw-rectangle");
-const drawParallelogramBtn = document.getElementById("draw-parallelogram");
-const drawCircleBtn = document.getElementById("draw-circle");
-const drawEllipseBtn = document.getElementById("draw-ellipse");
-const drawTriangleBtn = document.getElementById("draw-triangle");
-const menuEdgeBtn = document.getElementById("menu-edge-btn");
-const drawLineBtn = document.getElementById("draw-line");
-const drawArrowBtn = document.getElementById("draw-arrow");
-const drawDoubleArrowBtn = document.getElementById("draw-double-arrow");
-const eraserBtn = document.getElementById("eraser");
-const selectBtn = document.getElementById("select");
-
-const convertBtn = document.getElementById("convert");
 const showJIIXBtn = document.getElementById("show-jiix");
 const showModelBtn = document.getElementById("show-model");
-
-const penColorInput = document.getElementById("pen-color");
-const fillColorInput = document.getElementById("fill-color");
-const penWidthInput = document.getElementById("pen-width");
 
 const modal = document.getElementById("modal");
 const modalTitle = document.getElementById("modal-title");
 const modalBody = document.getElementById("modal-body");
 const modalCloseBtn = document.getElementById("modal-close-btn");
 
-const applyGestureCheckBox = document.getElementById("apply-gesture");
-const surrondActionSelect = document.getElementById("surround-action");
-const strikeThroughActionSelect = document.getElementById("strike-through-action");
-
-const guidesToggle = document.getElementById("guides-enable");
-const guidesTypeSelect = document.getElementById("guides-type");
-const guidesGapInput = document.getElementById("guides-gap");
+const menuActionToggle = document.getElementById("menu-action-toggle");
+const menuStyleToggle = document.getElementById("menu-style-toggle");
+const menuIntentionToggle = document.getElementById("menu-intention-toggle");
 
 const recognitionBoxToggle = document.getElementById("toggle-recognition-box");
 const recognitionItemBoxToggle = document.getElementById("toggle-recognition-item-box");
 const snapPointsVisibilityToggle = document.getElementById("toggle-snap-points-visibility");
 const verticesVisibilityToggle = document.getElementById("toggle-vertices-visibility");
 const boundingBoxVisibilityToggle = document.getElementById("toggle-bounding-box-visibility");
-
-const snapToGridToggle = document.getElementById("snap-to-guides-toggle");
-const snapToElementToggle = document.getElementById("snap-to-elements-toggle");
-const snapAngleElementToggle = document.getElementById("snap-angle");
 
 const selectionToggle = document.getElementById("toggle-selection-pan");
 const htmlPanToggle = document.getElementById("toggle-export-html-pan");
@@ -97,7 +67,7 @@ function createStrokeInputColor(stroke) {
   inputColor.value = stroke.style.color;
   inputColor.classList.add("stroke-input")
   inputColor.addEventListener("change", (evt) => {
-    editor.updateSymbolsStyle([stroke.id], { color: evt.target.value });
+    editor.behaviors.updateSymbolsStyle([stroke.id], { color: evt.target.value });
   })
   return inputColor
 };
@@ -114,7 +84,7 @@ function createStrokeInputsWidth(stroke) {
     else {
       minus.removeAttribute('disabled');
     }
-    editor.updateSymbolsStyle([stroke.id], { width: stroke.style.width });
+    editor.behaviors.updateSymbolsStyle([stroke.id], { width: stroke.style.width });
   })
 
   const plus = document.createElement("button");
@@ -131,7 +101,7 @@ function createStrokeInputsWidth(stroke) {
     else {
       minus.removeAttribute('disabled');
     }
-    editor.updateSymbolsStyle([stroke.id], { width: stroke.style.width });
+    editor.behaviors.updateSymbolsStyle([stroke.id], { width: stroke.style.width });
   })
   return { minus, plus }
 };
@@ -216,9 +186,6 @@ async function loadEditor() {
 
   let exportTimeout;
   editor.events.addEventListener("changed", (event) => {
-    clearBtn.disabled = !event.detail.canClear;
-    undoBtn.disabled = !event.detail.canUndo;
-    redoBtn.disabled = !event.detail.canRedo;
     clearTimeout(exportTimeout)
     exportTimeout = setTimeout(() => editor.export(["text/html"]), 1000);
 
@@ -246,137 +213,21 @@ async function loadEditor() {
     }
   });
 
-  editor.events.addEventListener("intention", (event) => {
-    resetMenuBtn();
-    switch (event.detail) {
-      case iink.Intention.Select:
-        selectBtn.classList.add("active");
-        break;
-      case iink.Intention.Erase:
-        eraserBtn.classList.add("active");
-        break;
-      case iink.Intention.Write:
-        penBtn.classList.add("active");
-        break;
-    }
-  });
-
   importBtn.addEventListener("pointerup", async () => {
     const strokeRes = await fetch("../assets/datas/hello-my-friend.json");
-    // const strokeRes = await fetch("../assets/datas/hello-my-friend.json");
     const strokes = await strokeRes.json();
     await editor.importPointEvents(strokes);
-  });
-
-  clearBtn.addEventListener("pointerup", async () => {
-    editor.clear();
-  });
-
-  undoBtn.addEventListener("pointerup", () => {
-    editor.undo();
-  });
-
-  redoBtn.addEventListener("pointerup", () => {
-    editor.redo();
-  });
-
-  penBtn.addEventListener("pointerup", () => {
-    editor.intention = iink.Intention.Write;
-    editor.behaviors.writer.tool = iink.WriteTool.Pencil;
-    resetMenuBtn();
-    penBtn.classList.add("active");
-  });
-
-  drawRectangleBtn.addEventListener("pointerup", () => {
-    editor.intention = iink.Intention.Write;
-    editor.behaviors.writer.tool = iink.WriteTool.Rectangle;
-    resetMenuBtn();
-    menuShapeBtn.classList.add("active");
-    drawRectangleBtn.classList.add("active");
-    document.getElementById("menu-shape-btn-img").src = drawRectangleBtn.children.item(0).src;
-  });
-
-  drawParallelogramBtn.addEventListener("pointerup", () => {
-    editor.intention = iink.Intention.Write;
-    editor.behaviors.writer.tool = iink.WriteTool.Parallelogram;
-    resetMenuBtn();
-    menuShapeBtn.classList.add("active");
-    drawParallelogramBtn.classList.add("active");
-    document.getElementById("menu-shape-btn-img").src = drawRectangleBtn.children.item(0).src;
-  });
-
-  drawCircleBtn.addEventListener("pointerup", () => {
-    editor.intention = iink.Intention.Write;
-    editor.behaviors.writer.tool = iink.WriteTool.Circle;
-    resetMenuBtn();
-    menuShapeBtn.classList.add("active");
-    drawCircleBtn.classList.add("active");
-    document.getElementById("menu-shape-btn-img").src = drawCircleBtn.children.item(0).src;
-  });
-
-  drawEllipseBtn.addEventListener("pointerup", () => {
-    editor.intention = iink.Intention.Write;
-    editor.behaviors.writer.tool = iink.WriteTool.Ellipse;
-    resetMenuBtn();
-    menuShapeBtn.classList.add("active");
-    drawEllipseBtn.classList.add("active");
-    document.getElementById("menu-shape-btn-img").src = drawEllipseBtn.children.item(0).src;
-  });
-
-  drawTriangleBtn.addEventListener("pointerup", () => {
-    editor.intention = iink.Intention.Write;
-    editor.behaviors.writer.tool = iink.WriteTool.Triangle;
-    resetMenuBtn();
-    menuShapeBtn.classList.add("active");
-    drawTriangleBtn.classList.add("active");
-    document.getElementById("menu-shape-btn-img").src = drawTriangleBtn.children.item(0).src;
-  });
-
-  drawLineBtn.addEventListener("pointerup", () => {
-    editor.intention = iink.Intention.Write;
-    editor.behaviors.writer.tool = iink.WriteTool.Line;
-    resetMenuBtn();
-    menuEdgeBtn.classList.add("active");
-    drawLineBtn.classList.add("active");
-    document.getElementById("menu-edge-btn-img").src = drawLineBtn.children.item(0).src;
-  });
-
-  drawArrowBtn.addEventListener("pointerup", () => {
-    editor.intention = iink.Intention.Write;
-    editor.behaviors.writer.tool = iink.WriteTool.Arrow;
-    resetMenuBtn();
-    menuEdgeBtn.classList.add("active");
-    drawArrowBtn.classList.add("active");
-    document.getElementById("menu-edge-btn-img").src = drawArrowBtn.children.item(0).src;
-  });
-
-  drawDoubleArrowBtn.addEventListener("pointerup", () => {
-    editor.intention = iink.Intention.Write;
-    editor.behaviors.writer.tool = iink.WriteTool.DoubleArrow;
-    resetMenuBtn();
-    menuEdgeBtn.classList.add("active");
-    drawDoubleArrowBtn.classList.add("active");
-    document.getElementById("menu-edge-btn-img").src = drawDoubleArrowBtn.children.item(0).src;
-  });
-
-  eraserBtn.addEventListener("pointerup", () => {
-    editor.intention = iink.Intention.Erase;
-    resetMenuBtn();
-    eraserBtn.classList.add("active");
-  });
-
-  selectBtn.addEventListener("pointerup", () => {
-    editor.intention = iink.Intention.Select;
-    resetMenuBtn();
-    selectBtn.classList.add("active");
   });
 
   showJIIXBtn.addEventListener("pointerup", async () => {
     const { exports } = await editor.export(["application/vnd.myscript.jiix"]);
     const jiix = exports["application/vnd.myscript.jiix"];
     const title = `Export application/vnd.myscript.jiix`;
-    navigator.clipboard.writeText(JSON.stringify(jiix));
     showModal(title, renderjson(jiix));
+    const permission = await navigator.permissions.query({name:'clipboard-write'})
+    if (permission.state === 'granted') {
+      navigator.clipboard.writeText(JSON.stringify(jiix));
+    }
   });
 
   showModelBtn.addEventListener("pointerup", () => {
@@ -384,79 +235,16 @@ async function loadEditor() {
     showModal(title, renderjson(editor.model));
   });
 
-  convertBtn.addEventListener("pointerup", () => {
-    editor.convert();
+  menuActionToggle.addEventListener("change", (event) => {
+    event.target.checked ? editor.behaviors.menu.action.show() : editor.behaviors.menu.action.hide();
   });
 
-  penColorInput.addEventListener("change", () => {
-    editor.penStyle = getStyle();
+  menuStyleToggle.addEventListener("change", (event) => {
+    event.target.checked ? editor.behaviors.menu.style.show() : editor.behaviors.menu.style.hide();
   });
 
-  penWidthInput.addEventListener("change", () => {
-    editor.penStyle = getStyle();
-  });
-
-  applyGestureCheckBox.addEventListener("change", (e) => {
-    surrondActionSelect.disabled = !applyGestureCheckBox.checked;
-    strikeThroughActionSelect.disabled = !applyGestureCheckBox.checked;
-    editor.behaviors.writer.detectGesture = applyGestureCheckBox.checked;
-  });
-
-  surrondActionSelect.addEventListener("change", (evt) => {
-    editor.behaviors.gesture.surroundAction = evt.target.value;
-  });
-
-  strikeThroughActionSelect.addEventListener("change", (evt) => {
-    editor.behaviors.gesture.strikeThroughAction = evt.target.value;
-  });
-
-  guidesToggle.addEventListener("change", (event) => {
-    guidesTypeSelect.disabled = !event.target.checked;
-    guidesGapInput.disabled = !event.target.checked;
-    options.configuration.rendering.guides.enable = event.target.checked;
-    editor.behaviors.renderingConfiguration = options.configuration.rendering;
-  });
-
-  guidesTypeSelect.addEventListener("change", (event) => {
-    options.configuration.rendering.guides.type = event.target.value;
-    editor.behaviors.renderingConfiguration = options.configuration.rendering;
-  });
-
-  guidesGapInput.addEventListener("change", (event) => {
-    options.configuration.rendering.guides.gap = Number(event.target.value);
-    editor.behaviors.renderingConfiguration = options.configuration.rendering;
-  });
-
-  snapToGridToggle.addEventListener("change", (event) => {
-    editor.behaviors.snaps.snapToGrid = event.target.checked;
-  });
-
-  snapToElementToggle.addEventListener("change", (event) => {
-    editor.behaviors.snaps.snapToElement = event.target.checked;
-  });
-
-  snapAngleElementToggle.addEventListener("change", (event) => {
-    editor.behaviors.snaps.snapAngle = +event.target.value;
-  });
-
-  recognitionBoxToggle.addEventListener("change", (evt) => {
-    editor.behaviors.svgDebugger.recognitionBoxVisibility = evt.target.checked;
-  });
-
-  recognitionItemBoxToggle.addEventListener("change", (evt) => {
-    editor.behaviors.svgDebugger.recognitionItemBoxVisibility = evt.target.checked;
-  });
-
-  verticesVisibilityToggle.addEventListener("change", (evt) => {
-    editor.behaviors.svgDebugger.verticesVisibility = evt.target.checked;
-  });
-
-  snapPointsVisibilityToggle.addEventListener("change", (evt) => {
-    editor.behaviors.svgDebugger.snapPointsVisibility = evt.target.checked;
-  });
-
-  boundingBoxVisibilityToggle.addEventListener("change", (evt) => {
-    editor.behaviors.svgDebugger.boundingBoxVisibility = evt.target.checked;
+  menuIntentionToggle.addEventListener("change", (event) => {
+    event.target.checked ? editor.behaviors.menu.intention.show() : editor.behaviors.menu.intention.hide();
   });
 
   window.addEventListener("resize", () => {

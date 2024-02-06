@@ -1,9 +1,7 @@
 import { buildOIStroke } from "../helpers"
+import { OIBehaviorsTest } from "../OIBehaviorsTest"
 import
 {
-  OIBehaviors,
-  TBehaviorOptions,
-  DefaultConfiguration,
   OISelectionManager,
   TBoundingBox,
   SvgElementRole,
@@ -11,20 +9,16 @@ import
 
 describe("OISelectionManager.ts", () =>
 {
-  const behaviorsOptions: TBehaviorOptions = {
-    configuration: JSON.parse(JSON.stringify(DefaultConfiguration))
-  }
-  behaviorsOptions.configuration.offscreen = true
   test("should create", () =>
   {
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const behaviors = new OIBehaviorsTest()
     const manager = new OISelectionManager(behaviors)
     expect(manager).toBeDefined()
   })
 
   test("should draw selecting rect", () =>
   {
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const behaviors = new OIBehaviorsTest()
     const manager = new OISelectionManager(behaviors)
     manager.renderer.clearElements = jest.fn()
     manager.renderer.appendElement = jest.fn()
@@ -41,7 +35,7 @@ describe("OISelectionManager.ts", () =>
 
   test("should clear selecting rect", () =>
   {
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const behaviors = new OIBehaviorsTest()
     const manager = new OISelectionManager(behaviors)
     manager.renderer.clearElements = jest.fn()
     manager.clearSelectingRect()
@@ -51,7 +45,7 @@ describe("OISelectionManager.ts", () =>
   describe("selected group", () =>
   {
     const wrapperHTML: HTMLElement = document.createElement("div")
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const behaviors = new OIBehaviorsTest()
     const manager = new OISelectionManager(behaviors)
     const stroke = buildOIStroke()
 
@@ -91,7 +85,7 @@ describe("OISelectionManager.ts", () =>
 
   describe("process", () =>
   {
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const behaviors = new OIBehaviorsTest()
     const manager = new OISelectionManager(behaviors)
     const strokeToSelect = buildOIStroke( { box: { height: 10, width: 10, x: 10, y: 10 }})
     manager.model.addSymbol(strokeToSelect)

@@ -57,7 +57,7 @@ export class OISVGShapeUtil
       "vector-effect": "non-scaling-stroke",
       "stroke-linecap": "round",
       "stroke-linejoin": "round",
-      "fill": "transparent",
+      "fill": shape.style.fill || "transparent",
       "stroke": shape.style.color || DefaultStyle.color!,
       "stroke-width": (shape.style.width || DefaultStyle.width!).toString(),
       "opacity": (shape.style.opacity || DefaultStyle.opacity!).toString(),

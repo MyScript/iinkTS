@@ -34,7 +34,7 @@ export class OISVGEraserUtil
     const attrs: { [key: string]: string } = {
       "id": eraser.id,
       "type": "eraser",
-      "stroke-width":  "20",
+      "stroke-width":  "12",
       "stroke": "grey",
       "opacity": "0.2",
       "shadowBlur": "5",

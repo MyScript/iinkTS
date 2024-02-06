@@ -2,22 +2,16 @@ import { helloJIIX, lineJIIX, rectangleJIIX } from "../_dataset/jiix.dataset"
 import { buildOIStroke, buildOIText, delay } from "../helpers"
 import
 {
-  DefaultConfiguration,
-  OIBehaviors,
   OIDebugSVGManager,
-  TBehaviorOptions,
   TOISymbolChar,
 } from "../../../src/iink"
+import { OIBehaviorsTest } from "../OIBehaviorsTest"
 
 describe("OIDebugSVGManager.ts", () =>
 {
-  const behaviorsOptions: TBehaviorOptions = {
-    configuration: JSON.parse(JSON.stringify(DefaultConfiguration))
-  }
-  behaviorsOptions.configuration.offscreen = true
   test("should create", () =>
   {
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const behaviors = new OIBehaviorsTest()
     const manager = new OIDebugSVGManager(behaviors)
     expect(manager).toBeDefined()
     expect(manager.verticesVisibility).toEqual(false)
@@ -29,7 +23,7 @@ describe("OIDebugSVGManager.ts", () =>
   describe("bounding box", () =>
   {
     const wrapperHTML: HTMLElement = document.createElement("div")
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const behaviors = new OIBehaviorsTest()
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
 
     const manager = new OIDebugSVGManager(behaviors)
@@ -91,7 +85,7 @@ describe("OIDebugSVGManager.ts", () =>
   describe("vertices", () =>
   {
     const wrapperHTML: HTMLElement = document.createElement("div")
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const behaviors = new OIBehaviorsTest()
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
 
     const manager = new OIDebugSVGManager(behaviors)
@@ -118,7 +112,7 @@ describe("OIDebugSVGManager.ts", () =>
   describe("recognition box", () =>
   {
     const wrapperHTML: HTMLElement = document.createElement("div")
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const behaviors = new OIBehaviorsTest()
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     Object.defineProperty(global.SVGElement.prototype, 'getBBox', {
       writable: true,
@@ -173,7 +167,7 @@ describe("OIDebugSVGManager.ts", () =>
   describe("recognition item box", () =>
   {
     const wrapperHTML: HTMLElement = document.createElement("div")
-    const behaviors = new OIBehaviors(behaviorsOptions)
+    const behaviors = new OIBehaviorsTest()
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     Object.defineProperty(global.SVGElement.prototype, 'getBBox', {
       writable: true,
