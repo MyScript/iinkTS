@@ -27,7 +27,6 @@ import { OISVGRenderer } from "../renderer"
 import { TStyle } from "../style"
 import { UndoRedoManager } from "../undo-redo"
 import { OIGestureManager } from "./OIGestureManager"
-import { OISelectionManager } from "./OISelectionManager"
 import { OISnapManager } from "./OISnapManager"
 
 
@@ -89,11 +88,6 @@ export class OIWriteManager
   get snaps(): OISnapManager
   {
     return this.behaviors.snaps
-  }
-
-  get selector(): OISelectionManager
-  {
-    return this.behaviors.selector
   }
 
   get recognizer(): OIRecognizer

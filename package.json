@@ -27,12 +27,18 @@
   "scripts": {
     "lint": "eslint ./src --ext .ts",
     "lint:fix": "eslint ./src --ext .ts --fix",
+    "dev": "rollup -c config/rollup.config.dev.mjs -w --sourcemap",
+    "dev:tldraw": "cd ./examples/offscreen-interactivity/offscreen_interactivity_tldraw && yarn dev",
     "test:unit": "jest --config=jest.unit.config.js",
     "test:integration": "jest --config=jest.integration.config.js",
-    "build:docs": "typedoc",
+    "copy:to:tldraw": "cp -r dist/ examples/offscreen-interactivity/offscreen_interactivity_tldraw/node_modules/iink-ts/",
+    "install:tldraw": "cd ./examples/offscreen-interactivity/offscreen_interactivity_tldraw && yarn install",
+    "prepare:tldraw": "npm-run-all build:lib copy:to:tldraw",
+    "build:tldraw": "cd ./examples/offscreen-interactivity/offscreen_interactivity_tldraw && yarn build",
     "build:lib": "rollup -c config/rollup.config.build.mjs --sourcemap",
-    "build": "npm-run-all lint:fix test:unit build:lib build:docs",
-    "dev": "rollup -c config/rollup.config.dev.mjs -w --sourcemap"
+    "build:docs": "typedoc",
+    "build": "npm-run-all lint:fix test:unit build:lib build:docs copy:to:tldraw build:tldraw",
+    "postinstall": "yarn install:tldraw &&  yarn prepare:tldraw"
   },
   "dependencies": {
     "json-css": "^1.5.6"
