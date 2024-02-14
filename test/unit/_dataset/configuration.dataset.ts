@@ -100,6 +100,11 @@ export const AllOverrideConfiguration: PartialDeep<TConfiguration> = {
     gesture: {
       enable: false
     },
+    convert: {
+      force: {
+        'on-stylesheet-change': false
+      }
+    },
     export: {
       'image-resolution': 12,
       jiix: {
