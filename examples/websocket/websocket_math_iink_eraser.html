@@ -147,7 +147,11 @@
         editorElement.addEventListener("exported", (evt) => {
           const exports = evt.detail;
           if (exports && exports["application/x-latex"]) {
-            katex.render(cleanLatex(exports["application/x-latex"]), resultElement);
+            try {
+              katex.render(cleanLatex(exports["application/x-latex"]), resultElement);
+            } catch (error) {
+              resultElement.innerHTML = '<span>' + cleanLatex(exports['application/x-latex']) + '</span>';
+            }
           } else {
             resultElement.innerHTML = "";
           }

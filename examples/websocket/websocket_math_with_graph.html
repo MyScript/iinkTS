@@ -81,6 +81,14 @@
         expressionsCollapsed: true
       })
 
+      function cleanLatex(latexExport) {
+        if (latexExport.includes("\\\\")) {
+          const steps = "\\begin{align*}" + latexExport + "\\end{align*}";
+          return steps.replace("\\begin{aligned}", "").replace("\\end{aligned}", "").replace(new RegExp("(align.{1})", "g"), "aligned");
+        }
+        return latexExport.replace(new RegExp("(align.{1})", "g"), "aligned");
+      }
+
       function extractExpressions (latex) {
         if (!latex) return ['']
         const expressions = latex.split('\\\\')
@@ -144,7 +152,11 @@
             calculator.setExpression({ id: index, latex: '', color: colors[index] });
           });
           if (exports && exports["application/x-latex"]) {
-            katex.render(exports["application/x-latex"], resultElement);
+            try {
+              katex.render(cleanLatex(exports["application/x-latex"]), resultElement);
+            } catch (error) {
+              resultElement.innerHTML = '<span>' + cleanLatex(exports['application/x-latex']) + '</span>';
+            }
             extractExpressions(exports['application/x-latex']).forEach((val, index) => {
               calculator.setExpression({ id: index, latex: val, color: colors[index] });
             })
