@@ -64,6 +64,7 @@
       const convertElement = document.getElementById("convert");
 
       function cleanLatex(latexExport) {
+        console.log('latexExport: ', latexExport);
         if (typeof latexExport === "number") {
           latexExport = latexExport.toString();
         }
@@ -120,8 +121,11 @@
           const exports = evt.detail;
           if (exports && exports["application/x-latex"]) {
             convertElement.disabled = false;
-            katex.render(cleanLatex(exports["application/x-latex"]), resultElement);
-            // resultElement.innerHTML = '<span>' + exports['application/x-latex'] + '</span>';
+            try {
+              katex.render(cleanLatex(exports["application/x-latex"]), resultElement);
+            } catch (error) {
+              resultElement.innerHTML = '<span>' + cleanLatex(exports['application/x-latex']) + '</span>';
+            }
           } else if (exports && exports["application/mathml+xml"]) {
             convertElement.disabled = false;
             resultElement.innerText = exports["application/mathml+xml"];
