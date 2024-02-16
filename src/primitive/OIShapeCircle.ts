@@ -1,8 +1,8 @@
 import { LoggerClass, SELECTION_MARGIN } from "../Constants"
 import { LoggerManager } from "../logger"
-import { TStyle } from "../style"
-import { computeDistance, findIntersectBetweenSegmentAndCircle, rotatePoint } from "../utils"
-import { TPoint } from "./Point"
+import { DefaultStyle, TStyle } from "../style"
+import { PartialDeep, computeDistance, findIntersectBetweenSegmentAndCircle, isValidNumber, rotatePoint } from "../utils"
+import { TPoint, isValidPoint } from "./Point"
 import { OIShape, ShapeKind } from "./OIShape"
 import { Box, TBoundingBox } from "./Box"
 
@@ -95,5 +95,12 @@ export class OIShapeCircle extends OIShape
     const height = Math.abs(origin.y - target.y)
     circle.radius = Math.min(width, height) / 2
     return circle
+  }
+
+  static create(partial: PartialDeep<OIShapeCircle>): OIShapeCircle
+  {
+    if (!isValidPoint(partial.center)) throw new Error(`Unable to create circle, center is invalid`)
+    if (!isValidNumber(partial.radius)) throw new Error(`Unable to create circle, radius is undefined`)
+    return new OIShapeCircle(partial.style || DefaultStyle, partial.center as TPoint, partial.radius!)
   }
 }

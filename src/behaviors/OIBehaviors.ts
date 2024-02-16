@@ -4,7 +4,28 @@ import { InternalEvent } from "../event"
 import { OIPointerEventGrabber } from "../grabber"
 import { LoggerManager } from "../logger"
 import { OIModel, TExport } from "../model"
-import { OIStroke, OIText, SymbolType, TPointer, TStroke } from "../primitive"
+import
+{
+  EdgeKind,
+  OIEdge,
+  OIEdgeArc,
+  OIEdgeLine,
+  OIShape,
+  OIShapeCircle,
+  OIShapeEllipse,
+  OIShapeParallelogram,
+  OIShapePolygon,
+  OIShapeRectangle,
+  OIShapeTriangle,
+  OIStroke,
+  OIText,
+  ShapeKind,
+  SymbolType,
+  TOISymbol,
+  TPointer,
+  TStroke,
+  convertPartialStrokesToOIStrokes
+} from "../primitive"
 import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
 import { DefaultStyle, StyleManager, TStyle, TTheme } from "../style"
@@ -251,7 +272,7 @@ export class OIBehaviors implements IBehaviors
           break
       }
     } catch (error) {
-      this.#logger.error("onPointerDown", error)
+      this.#logger.error("onPointerMove", error)
       this.internalEvent.emitError(error as Error)
     }
     finally {
@@ -277,14 +298,15 @@ export class OIBehaviors implements IBehaviors
           await this.writer.end(pointer)
           break
       }
+      await this.recognizer.waitForIdle()
     } catch (error) {
       this.undo()
       this.#logger.error("onPointerUp", error)
       this.internalEvent.emitError(error as Error)
     }
     finally {
+      this.menu.update()
       await this.svgDebugger.apply()
-      await this.recognizer.waitForIdle()
     }
   }
 
@@ -315,6 +337,144 @@ export class OIBehaviors implements IBehaviors
     }
   }
 
+  protected createShape(partialShape: PartialDeep<OIShape>): OIShape
+  {
+    switch (partialShape.kind) {
+      case ShapeKind.Circle:
+        return OIShapeCircle.create(partialShape as PartialDeep<OIShapeCircle>)
+      case ShapeKind.Ellipse:
+        return OIShapeEllipse.create(partialShape as PartialDeep<OIShapeEllipse>)
+      case ShapeKind.Parallelogram:
+        return OIShapeParallelogram.create(partialShape as PartialDeep<OIShapeParallelogram>)
+      case ShapeKind.Polygon:
+        return OIShapePolygon.create(partialShape as PartialDeep<OIShapePolygon>)
+      case ShapeKind.Rectangle:
+        return OIShapeRectangle.create(partialShape as PartialDeep<OIShapeRectangle>)
+      case ShapeKind.Triangle:
+        return OIShapeTriangle.create(partialShape as PartialDeep<OIShapeTriangle>)
+      default:
+        throw new Error(`Unable to create shape, kind: "${ partialShape.kind }" is unknown`)
+    }
+  }
+
+  protected createEdge(partialEdge: PartialDeep<OIEdge>): OIEdge
+  {
+    switch (partialEdge.kind) {
+      case EdgeKind.Arc:
+        return OIEdgeArc.create(partialEdge)
+      case EdgeKind.Line:
+        return OIEdgeLine.create(partialEdge)
+      default:
+        throw new Error(`Unable to create edge, kind: "${ partialEdge.kind }" is unknown`)
+    }
+  }
+
+  async createSymbol(symbol: PartialDeep<TOISymbol>): Promise<TOISymbol>
+  {
+    try {
+      switch (symbol.type) {
+        case SymbolType.Stroke:
+          return await this.addSymbol(OIStroke.create(symbol as PartialDeep<OIStroke>))
+        case SymbolType.Shape:
+          return await this.addSymbol(this.createShape(symbol as PartialDeep<OIStroke>))
+        case SymbolType.Edge:
+          return await this.addSymbol(this.createEdge(symbol as PartialDeep<OIEdge>))
+        default:
+          throw new Error(`Unable to create symbol, type: "${ symbol.type }" is unknown`)
+      }
+    } catch (error) {
+      this.#logger.error("importPointEvents", error)
+      this.internalEvent.emitError(error as Error)
+      throw error
+    }
+  }
+
+  async addSymbol(symbolToAdd: TOISymbol): Promise<TOISymbol>
+  {
+    try {
+      this.#logger.info("addSymbol", { symbolToAdd })
+      this.internalEvent.emitIdle(false)
+      this.model.addSymbol(symbolToAdd)
+      this.renderer.drawSymbol(symbolToAdd)
+      if (symbolToAdd.type === SymbolType.Stroke) {
+        await this.recognizer.addStrokes([symbolToAdd as OIStroke], false)
+      }
+      this.undoRedoManager.addModelToStack(this.model)
+      return symbolToAdd
+    } catch (error) {
+      this.#logger.error("addSymbol", error)
+      this.internalEvent.emitError(error as Error)
+      throw error
+    }
+    finally {
+      this.menu.update()
+      await this.svgDebugger.apply()
+      await this.recognizer.waitForIdle()
+    }
+  }
+
+  async replaceSymbol(symbolToReplace: TOISymbol, newSymbols: TOISymbol[]): Promise<void>
+  {
+    try {
+      this.#logger.info("replaceSymbol", { symbolToReplace, newSymbols })
+      this.internalEvent.emitIdle(false)
+      this.model.replaceSymbol(symbolToReplace.id, newSymbols)
+      this.renderer.replaceSymbol(symbolToReplace.id, newSymbols)
+      const newStrokes = newSymbols.filter(s => s.type === SymbolType.Stroke) as OIStroke[]
+      if (symbolToReplace.type === SymbolType.Stroke && newStrokes.length) {
+        await this.recognizer.replaceStrokes([symbolToReplace.id], newStrokes)
+      }
+      else if (symbolToReplace.type === SymbolType.Stroke) {
+        await this.recognizer.eraseStrokes([symbolToReplace.id])
+      }
+      else if (newStrokes.length) {
+        await this.recognizer.addStrokes(newStrokes, false)
+      }
+      this.undoRedoManager.addModelToStack(this.model)
+    } catch (error) {
+      this.#logger.error("replaceSymbol", error)
+      this.internalEvent.emitError(error as Error)
+      throw error
+    }
+    finally {
+      this.menu.update()
+      await this.svgDebugger.apply()
+      await this.recognizer.waitForIdle()
+    }
+  }
+
+  changeOrderSymbol(symbol: TOISymbol, position: "first" | "last" | "forward" | "backward"): void
+  {
+    this.model.changeOrderSymbol(symbol.id, position)
+    this.renderer.changeOrderSymbol(symbol, position)
+  }
+
+  async removeSymbol(id: string): Promise<void>
+  {
+    try {
+      this.#logger.info("removeSymbol", { id })
+      this.internalEvent.emitIdle(false)
+      const symbol = this.model.symbols.find(s => s.id === id)
+      if (symbol) {
+        this.model.removeSymbol(symbol.id)
+        this.renderer.removeSymbol(symbol.id)
+        if (symbol.type === SymbolType.Stroke) {
+          await this.recognizer.eraseStrokes([symbol.id])
+        }
+        this.undoRedoManager.addModelToStack(this.model)
+      }
+    } catch (error) {
+      this.#logger.error("removeSymbol", error)
+      this.internalEvent.emitError(error as Error)
+      throw error
+    }
+    finally {
+      this.menu.update()
+      await this.svgDebugger.apply()
+      await this.recognizer.waitForIdle()
+    }
+  }
+
   updateSymbolsStyle(symbolIds: string[], style: TStyle): void
   {
     this.#logger.info("updateSymbolsStyle", { symbolIds, style })
@@ -340,67 +500,34 @@ export class OIBehaviors implements IBehaviors
     this.undoRedoManager.addModelToStack(this.model)
   }
 
-  async importPointEvents(strokes: PartialDeep<TStroke>[]): Promise<OIModel>
+  async importPointEvents(partialStrokes: PartialDeep<TStroke>[]): Promise<OIModel>
   {
-    this.#logger.info("importPointEvents", { strokes })
-    this.internalEvent.emitIdle(false)
-    const errors: string[] = []
-    strokes.forEach((s, strokeIndex) =>
-    {
-      const stroke = new OIStroke(s.style || DefaultStyle, s.pointerId || 1)
-      if (s.id) stroke.id = s.id
-      if (s.pointerType) stroke.pointerType = s.pointerType
-      if (!s.pointers?.length) {
-        errors.push(`stroke ${ strokeIndex + 1 } has not pointers`)
-      }
-      let flag = true
-      s.pointers?.forEach((pp, pIndex) =>
+    try {
+      this.#logger.info("importPointEvents", { partialStrokes })
+      this.internalEvent.emitIdle(false)
+      const strokes = convertPartialStrokesToOIStrokes(partialStrokes)
+      strokes.forEach(s =>
       {
-        flag = true
-        if (!pp) {
-          errors.push(`stroke ${ strokeIndex + 1 } has no pointer at ${ pIndex }`)
-          return
-        }
-        const pointer: TPointer = {
-          p: pp.p || 1,
-          t: pp.t || pIndex,
-          x: 0,
-          y: 0
-        }
-        if (pp?.x == undefined || pp?.x == null) {
-          errors.push(`stroke ${ strokeIndex + 1 } has no x at pointer at ${ pIndex }`)
-          flag = false
-        }
-        else {
-          pointer.x = pp.x
-        }
-        if (pp?.y == undefined || pp?.y == null) {
-          errors.push(`stroke ${ strokeIndex + 1 } has no y at pointer at ${ pIndex }`)
-          flag = false
-        }
-        else {
-          pointer.y = pp.y
-        }
-        if (flag) {
-          stroke.pointers.push(pointer)
-        }
+        this.model.addSymbol(s)
+        this.renderer.drawSymbol(s)
       })
-      if (flag) {
-        this.model.addSymbol(stroke)
-        this.renderer.drawSymbol(stroke)
-      }
-    })
-    if (errors.length) {
-      this.internalEvent.emitError(new Error(errors.join("\n")))
+      this.undoRedoManager.addModelToStack(this.model)
+      await this.recognizer.addStrokes(strokes, false)
+      this.model.updatePositionSent()
+      this.model.updatePositionReceived()
+      this.undoRedoManager.updateModelInStack(this.model)
+      this.#logger.debug("importPointEvents", this.model)
+      return this.model
+    } catch (error) {
+      this.#logger.error("importPointEvents", error)
+      this.internalEvent.emitError(error as Error)
+      throw error
     }
-    this.undoRedoManager.addModelToStack(this.model)
-    await this.recognizer.addStrokes(this.model.extractUnsentStrokes(), false)
-    await this.svgDebugger.apply()
-    this.model.updatePositionSent()
-    this.model.updatePositionReceived()
-    this.undoRedoManager.updateModelInStack(this.model)
-    this.#logger.debug("importPointEvents", this.model)
-    await this.recognizer.waitForIdle()
+    finally {
+      this.menu.update()
+      await this.svgDebugger.apply()
+      await this.recognizer.waitForIdle()
+    }
     return this.model
   }
 
@@ -424,6 +551,7 @@ export class OIBehaviors implements IBehaviors
       }
       this.#model = modelToApply
       await Promise.all(promises)
+      this.menu.update()
       await this.svgDebugger.apply()
       await this.recognizer.waitForIdle()
       return this.model
@@ -453,6 +581,7 @@ export class OIBehaviors implements IBehaviors
       }
       this.#model = modelToApply
       await Promise.all(promises)
+      this.menu.update()
       await this.svgDebugger.apply()
       await this.recognizer.waitForIdle()
       return this.model
@@ -492,6 +621,7 @@ export class OIBehaviors implements IBehaviors
       this.internalEvent.emitError(error as Error)
     }
     finally {
+      this.menu.update()
       await this.svgDebugger.apply()
       this.internalEvent.emitIdle(true)
     }
@@ -529,6 +659,7 @@ export class OIBehaviors implements IBehaviors
       this.internalEvent.emitError(error as Error)
     }
     finally {
+      this.menu.update()
       await this.svgDebugger.apply()
       this.internalEvent.emitIdle(true)
     }

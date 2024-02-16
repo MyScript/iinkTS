@@ -170,30 +170,19 @@ export class OIStroke extends OISymbol implements TStroke
     return json
   }
 
-}
-
-/**
- * @group Primitive
- * @group Utils
- */
-export function convertPartialStrokesToOIStrokes(json: PartialDeep<TStroke>[]): OIStroke[]
-{
-  const errors: string[] = []
-  const strokes: OIStroke[] = []
-  json.forEach((j, ji) =>
+  static create(partial: PartialDeep<OIStroke>): OIStroke
   {
-    let flag = true
-    const stroke = new OIStroke(j.style || DefaultStyle, j.pointerId || 1)
-    if (j.id) stroke.id = j.id
-    if (!j.pointers?.length) {
-      errors.push(`stroke ${ ji + 1 } has not pointers`)
-      flag = false
-      return
+    if (!partial.pointers?.length) {
+      throw new Error(`not pointers`)
     }
-    j.pointers?.forEach((pp, pIndex) =>
+    const stroke = new OIStroke(partial.style || DefaultStyle, partial.pointerId || 1)
+    if (partial.id) stroke.id = partial.id
+    const errors: string[] = []
+    let flag = true
+    partial.pointers?.forEach((pp, pIndex) =>
     {
       if (!pp) {
-        errors.push(`stroke ${ ji + 1 } has no pointer at ${ pIndex }`)
+        errors.push(`no pointer at ${ pIndex }`)
         flag = false
         return
       }
@@ -204,7 +193,7 @@ export function convertPartialStrokesToOIStrokes(json: PartialDeep<TStroke>[]): 
         y: 0
       }
       if (pp?.x == undefined || pp?.x == null) {
-        errors.push(`stroke ${ ji + 1 } has no x at pointer at ${ pIndex }`)
+        errors.push(`no x at pointer at ${ pIndex }`)
         flag = false
         return
       }
@@ -212,7 +201,7 @@ export function convertPartialStrokesToOIStrokes(json: PartialDeep<TStroke>[]): 
         pointer.x = pp.x
       }
       if (pp?.y == undefined || pp?.y == null) {
-        errors.push(`stroke ${ ji + 1 } has no y at pointer at ${ pIndex }`)
+        errors.push(`no y at pointer at ${ pIndex }`)
         flag = false
         return
       }
@@ -223,8 +212,28 @@ export function convertPartialStrokesToOIStrokes(json: PartialDeep<TStroke>[]): 
         stroke.addPointer(pointer)
       }
     })
-    if (flag) {
-      strokes.push(stroke)
+
+    if (errors.length) {
+      throw new Error(errors.join(" and "))
+    }
+    return stroke
+  }
+}
+
+/**
+ * @group Primitive
+ * @group Utils
+ */
+export function convertPartialStrokesToOIStrokes(json: PartialDeep<TStroke>[]): OIStroke[]
+{
+  const errors: string[] = []
+  const strokes: OIStroke[] = []
+  json.forEach((j, i) =>
+  {
+    try {
+      strokes.push(OIStroke.create(j as PartialDeep<OIStroke>))
+    } catch (e) {
+      errors.push(`stroke ${i + 1} has ${(e as Error).message}`)
     }
   })
 

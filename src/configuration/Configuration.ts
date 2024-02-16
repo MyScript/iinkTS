@@ -96,6 +96,11 @@ export class Configuration implements TConfiguration
       this.recognition.type = "Raw Content"
       this.rendering.smartGuide.enable = false
       this.server.protocol = "WEBSOCKET"
+      this.recognition.export.jiix["full-stroke-ids"] = true
+      this.recognition.export.jiix.ids = true
+      this.recognition.export.jiix.text.words = true
+      this.recognition.export.jiix.text.chars = true
+      this.recognition.export.jiix["bounding-box"]= true
     }
     else {
       if (

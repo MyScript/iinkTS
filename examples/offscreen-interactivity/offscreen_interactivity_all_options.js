@@ -145,31 +145,9 @@ async function loadEditor() {
     configuration: {
       offscreen: true,
       server,
-      recognition: {
-        export: {
-          jiix: {
-            // required to draw elements box & convert
-            "bounding-box": true,
-            // required to convert
-            ids: true,
-            // required to convert
-            "full-stroke-ids": true,
-            // required to convert text
-            text: {
-              chars: true,
-              words: true
-            },
-          }
-        }
-      },
       rendering: {
         minHeight: 4000,
         minWidth: 4000,
-        guides: {
-          enable: true,
-          gap: 100,
-          type: "point"
-        }
       },
     }
   };

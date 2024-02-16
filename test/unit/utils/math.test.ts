@@ -1,11 +1,38 @@
-import {
+import
+{
   computeAverage,
   isBetween,
+  isValidNumber,
 } from "../../../src/iink"
 
 
 describe("math.ts", () =>
 {
+  describe("isValidNumber", () =>
+  {
+    const testDatas = [
+      { value: "", expect: false },
+      { value: "x", expect: false },
+      { value: "1e10", expect: true },
+      { value: 1e10, expect: true },
+      { value: "-5", expect: true },
+      { value: -5, expect: true },
+      { value: 42, expect: true },
+      { value: { b: "x" }, expect: false },
+      { value: { b: "10" }, expect: false },
+      { value: [{ b: "10" }], expect: false },
+      { value: Infinity, expect: false },
+      { value: -Infinity, expect: false },
+    ]
+    testDatas.forEach(d =>
+    {
+      test(`should return ${ d.expect } from "${ d.value }"`, () =>
+      {
+        expect(isValidNumber(d.value)).toEqual(d.expect)
+      })
+    })
+  })
+
   describe("isBetween", () =>
   {
     test("should return true", () =>

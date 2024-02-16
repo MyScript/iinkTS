@@ -1,8 +1,9 @@
 import { LoggerClass } from "../Constants"
 import { LoggerManager } from "../logger"
-import { TStyle } from "../style"
+import { DefaultStyle, TStyle } from "../style"
+import { PartialDeep } from "../utils"
 import { EdgeDecoration, EdgeKind, OIEdge } from "./OIEdge"
-import { TPoint } from "./Point"
+import { TPoint, isValidPoint } from "./Point"
 
 /**
  * @group Primitive
@@ -38,5 +39,13 @@ export class OIEdgeArc extends OIEdge
     clone.creationTime = this.creationTime
     clone.modificationDate = this.modificationDate
     return clone
+  }
+
+  static create(partial: PartialDeep<OIEdgeArc>): OIEdgeArc
+  {
+    if (!isValidPoint(partial?.start)) throw new Error(`Unable to create a arc, start point is invalid`)
+    if (!isValidPoint(partial?.middle)) throw new Error(`Unable to create a arc, middle point is invalid`)
+    if (!isValidPoint(partial?.end)) throw new Error(`Unable to create a arc, end point is invalid`)
+    return new OIEdgeArc(partial.style || DefaultStyle, partial?.start as TPoint, partial?.middle as TPoint, partial?.end as TPoint, partial.startDecoration, partial.endDecoration)
   }
 }

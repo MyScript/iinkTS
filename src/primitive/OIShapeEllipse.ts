@@ -1,8 +1,8 @@
 import { LoggerClass, SELECTION_MARGIN } from "../Constants"
 import { LoggerManager } from "../logger"
-import { TStyle } from "../style"
-import { computeDistanceBetweenPointAndSegment, findIntersectionBetween2Segment, } from "../utils"
-import { TPoint } from "./Point"
+import { DefaultStyle, TStyle } from "../style"
+import { PartialDeep, computeDistanceBetweenPointAndSegment, findIntersectionBetween2Segment, isValidNumber, } from "../utils"
+import { TPoint, isValidPoint } from "./Point"
 import { OIShape, ShapeKind } from "./OIShape"
 import { Box, TBoundingBox } from "./Box"
 
@@ -83,5 +83,13 @@ export class OIShapeEllipse extends OIShape
     ellipse.radiusX = Math.abs(origin.x - target.x) / 2
     ellipse.radiusY = Math.abs(origin.y - target.y) / 2
     return ellipse
+  }
+
+  static create(partial: PartialDeep<OIShapeEllipse>): OIShapeEllipse
+  {
+    if (!isValidPoint(partial.center)) throw new Error(`Unable to create circle, center is undefined`)
+    if (!isValidNumber(partial.radiusX)) throw new Error(`Unable to create circle, radiusX is undefined`)
+    if (!isValidNumber(partial.radiusY)) throw new Error(`Unable to create circle, radiusY is undefined`)
+    return new OIShapeEllipse(partial.style || DefaultStyle, partial.center as TPoint, partial.radiusX!, partial.radiusY!)
   }
 }

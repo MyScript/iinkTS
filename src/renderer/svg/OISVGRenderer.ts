@@ -228,9 +228,24 @@ export class OISVGRenderer
     this.layer.prepend(el)
   }
 
-  insertBeforeElement(el: Element, child: Node | null): void
+  changeOrderSymbol(symbolToMove: TOISymbol, position: "first" | "last" | "forward" | "backward"): void
   {
-    this.layer.insertBefore(el, child)
+    const moveEl = this.layer.querySelector(`#${ symbolToMove.id }`)
+    if (!moveEl) return
+    switch (position) {
+      case "first":
+        this.layer.insertAdjacentElement("beforeend", moveEl)
+        break;
+      case "last":
+        this.layer.insertAdjacentElement("afterbegin", moveEl)
+        break;
+      case "forward":
+        moveEl?.nextElementSibling?.insertAdjacentElement("afterend", moveEl)
+        break;
+      case "backward":
+        moveEl?.previousElementSibling?.insertAdjacentElement("afterend", moveEl)
+        break;
+    }
   }
 
   appendElement(el: Element): void

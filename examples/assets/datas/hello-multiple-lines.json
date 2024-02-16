@@ -2,17 +2,11 @@
   {
     "type": "stroke",
     "id": "stroke-hello",
-    "creationTime": 1705604635566,
-    "modificationDate": 1705604637866,
-    "selected": false,
-    "toDelete": false,
     "style": {
       "color": "#000000",
       "width": 4,
       "opacity": 1
     },
-    "pointerId": 0,
-    "pointerType": "mouse",
     "pointers": [
       {
         "x": 404,
@@ -524,24 +518,16 @@
         "t": 1705604637866,
         "p": 0.67
       }
-    ],
-    "decorators": [],
-    "length": 486.5962846641447
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-how",
-    "creationTime": 1705604640207,
-    "modificationDate": 1705604642145,
-    "selected": false,
-    "toDelete": false,
     "style": {
       "color": "#000000",
       "width": 4,
       "opacity": 1
     },
-    "pointerId": 0,
-    "pointerType": "mouse",
     "pointers": [
       {
         "x": 406,
@@ -927,24 +913,16 @@
         "t": 1705604642144,
         "p": 0.68
       }
-    ],
-    "decorators": [],
-    "length": 296.698967233101
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-are",
-    "creationTime": 1705604642848,
-    "modificationDate": 1705604643992,
-    "selected": false,
-    "toDelete": false,
     "style": {
       "color": "#000000",
       "width": 4,
       "opacity": 1
     },
-    "pointerId": 0,
-    "pointerType": "mouse",
     "pointers": [
       {
         "x": 408,
@@ -1198,24 +1176,16 @@
         "t": 1705604643992,
         "p": 0.81
       }
-    ],
-    "decorators": [],
-    "length": 205.01222339256879
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-you",
-    "creationTime": 1705604644694,
-    "modificationDate": 1705604664279,
-    "selected": false,
-    "toDelete": false,
     "style": {
       "color": "#000000",
       "width": 4,
       "opacity": 1
     },
-    "pointerId": 0,
-    "pointerType": "mouse",
     "pointers": [
       {
         "x": 396,
@@ -1595,24 +1565,16 @@
         "t": 1705604646525,
         "p": 0.72
       }
-    ],
-    "decorators": [],
-    "length": 307.24288925002884
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-my",
-    "creationTime": 1705604647852,
-    "modificationDate": 1705604649231,
-    "selected": false,
-    "toDelete": false,
     "style": {
       "color": "#000000",
       "width": 4,
       "opacity": 1
     },
-    "pointerId": 0,
-    "pointerType": "mouse",
     "pointers": [
       {
         "x": 399,
@@ -1884,24 +1846,16 @@
         "t": 1705604649231,
         "p": 0.7
       }
-    ],
-    "decorators": [],
-    "length": 230.92328465311863
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-friend",
-    "creationTime": 1705604650150,
-    "modificationDate": 1705604652800,
-    "selected": false,
-    "toDelete": false,
     "style": {
       "color": "#000000",
       "width": 4,
       "opacity": 1
     },
-    "pointerId": 0,
-    "pointerType": "mouse",
     "pointers": [
       {
         "x": 399,
@@ -2401,8 +2355,6 @@
         "t": 1705604652800,
         "p": 0.74
       }
-    ],
-    "decorators": [],
-    "length": 437.49755380766584
+    ]
   }
 ]

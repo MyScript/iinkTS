@@ -32,7 +32,13 @@ export class OIBehaviorsTest extends OIBehaviors
   setPenStyle = jest.fn()
   setPenStyleClasses = jest.fn()
   setTheme = jest.fn()
+
+  addSymbol = jest.fn()
+  replaceSymbol = jest.fn()
+  changeOrderSymbol = jest.fn()
+  removeSymbol = jest.fn()
   updateSymbolsStyle = jest.fn()
+
   importPointEvents = jest.fn()
 
   undo = jest.fn()

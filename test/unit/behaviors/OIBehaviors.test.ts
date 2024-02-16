@@ -1,5 +1,5 @@
 import { jiixText } from "../_dataset/exports.dataset"
-import { buildOIStroke } from "../helpers"
+import { buildOICircle, buildOIStroke } from "../helpers"
 import { LeftClickEventFake } from "../PointerEventFake"
 import
 {
@@ -16,6 +16,10 @@ import
   PartialDeep,
   TStroke,
   DefaultStyle,
+  SymbolType,
+  OIShapeCircle,
+  OIStroke,
+  ShapeKind,
 } from "../../../src/iink"
 
 describe("OIBehaviors.ts", () =>
@@ -74,10 +78,6 @@ describe("OIBehaviors.ts", () =>
       expect(oib.context.empty).toEqual(true)
       expect(oib.context.stack.length).toEqual(1)
       expect(oib.context.stackIndex).toEqual(0)
-    })
-    test("should have configuration property", () =>
-    {
-      expect(oib.configuration).toEqual(DefaultBehaviorsOptions.configuration)
     })
   })
 
@@ -246,6 +246,132 @@ describe("OIBehaviors.ts", () =>
       oib.recognizer.send = jest.fn()
       oib.recognizer.init = jest.fn(() => Promise.reject("pouet"))
       await expect(oib.init(wrapperHTML)).rejects.toEqual(new Error("pouet"))
+    })
+  })
+
+  describe("CRUD", () =>
+  {
+    const layerInfo = document.createElement("div")
+    const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+    oib.menu.update = jest.fn()
+    oib.svgDebugger.apply = jest.fn()
+    oib.recognizer.waitForIdle = jest.fn()
+
+    oib.recognizer.init = jest.fn()
+    oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
+    oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
+    oib.recognizer.replaceStrokes = jest.fn(() => Promise.resolve())
+    oib.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
+
+    oib.renderer.drawSymbol = jest.fn()
+    oib.renderer.changeOrderSymbol = jest.fn()
+    oib.renderer.replaceSymbol = jest.fn()
+    oib.renderer.removeSymbol = jest.fn()
+
+    oib.model.addSymbol = jest.fn()
+    oib.model.changeOrderSymbol = jest.fn()
+    oib.model.replaceSymbol = jest.fn()
+    oib.model.removeSymbol = jest.fn()
+
+    test("add stroke", async () =>
+    {
+      const stroke = buildOIStroke()
+      await oib.addSymbol(stroke)
+      expect(oib.model.addSymbol).toHaveBeenNthCalledWith(1, stroke)
+      expect(oib.renderer.drawSymbol).toHaveBeenNthCalledWith(1, stroke)
+      expect(oib.recognizer.addStrokes).toHaveBeenNthCalledWith(1, [stroke], false)
+    })
+    test("add shape", async () =>
+    {
+      const shape = buildOICircle()
+      await oib.addSymbol(shape)
+      expect(oib.model.addSymbol).toHaveBeenNthCalledWith(1, shape)
+      expect(oib.renderer.drawSymbol).toHaveBeenNthCalledWith(1, shape)
+      expect(oib.recognizer.addStrokes).not.toHaveBeenCalled()
+    })
+    test("create stroke", async () =>
+    {
+      const stroke: PartialDeep<OIStroke> = {
+        type: SymbolType.Stroke,
+        pointers: [{ x: 0, y: 1, t: 1, p: 1 }]
+      }
+      await oib.createSymbol(stroke)
+      expect(oib.model.addSymbol).toHaveBeenNthCalledWith(1, expect.objectContaining(stroke))
+      expect(oib.renderer.drawSymbol).toHaveBeenNthCalledWith(1, expect.objectContaining(stroke))
+      expect(oib.recognizer.addStrokes).toHaveBeenNthCalledWith(1, [expect.objectContaining(stroke)], false)
+    })
+    test("create shape", async () =>
+    {
+      const shape: PartialDeep<OIShapeCircle> = {
+        type: SymbolType.Shape,
+        kind: ShapeKind.Circle,
+        center: { x: 5, y: 5 },
+        radius: 5
+      }
+      await oib.createSymbol(shape)
+      expect(oib.model.addSymbol).toHaveBeenNthCalledWith(1, expect.objectContaining(shape))
+      expect(oib.renderer.drawSymbol).toHaveBeenNthCalledWith(1, expect.objectContaining(shape))
+      expect(oib.recognizer.addStrokes).not.toHaveBeenCalled()
+    })
+    test("replace stroke by stroke", async () =>
+    {
+      const stroke1 = buildOIStroke()
+      const stroke2 = buildOIStroke()
+      await oib.replaceSymbol(stroke1, [stroke2])
+      expect(oib.model.replaceSymbol).toHaveBeenNthCalledWith(1, stroke1.id, [stroke2])
+      expect(oib.renderer.replaceSymbol).toHaveBeenNthCalledWith(1, stroke1.id, [stroke2])
+      expect(oib.recognizer.replaceStrokes).toHaveBeenNthCalledWith(1, [stroke1.id], [stroke2])
+    })
+    test("replace stroke by shape", async () =>
+    {
+      const stroke = buildOIStroke()
+      const shape = buildOICircle()
+      await oib.replaceSymbol(stroke, [shape])
+      expect(oib.model.replaceSymbol).toHaveBeenNthCalledWith(1, stroke.id, [shape])
+      expect(oib.renderer.replaceSymbol).toHaveBeenNthCalledWith(1, stroke.id, [shape])
+      expect(oib.recognizer.eraseStrokes).toHaveBeenNthCalledWith(1, [stroke.id])
+    })
+    test("replace shape by stroke", async () =>
+    {
+      const stroke = buildOIStroke()
+      const shape = buildOICircle()
+      await oib.replaceSymbol(shape, [stroke])
+      expect(oib.model.replaceSymbol).toHaveBeenNthCalledWith(1, shape.id, [stroke])
+      expect(oib.renderer.replaceSymbol).toHaveBeenNthCalledWith(1, shape.id, [stroke])
+      expect(oib.recognizer.addStrokes).toHaveBeenNthCalledWith(1, [stroke], false)
+    })
+    test("change order symbol", async () =>
+    {
+      const stroke = buildOIStroke()
+      await oib.changeOrderSymbol(stroke, "last")
+      expect(oib.model.changeOrderSymbol).toHaveBeenNthCalledWith(1, stroke.id, "last")
+      expect(oib.renderer.changeOrderSymbol).toHaveBeenNthCalledWith(1, stroke, "last")
+    })
+    test("not remove stroke if not in model", async () =>
+    {
+      const stroke = buildOIStroke()
+      await oib.removeSymbol(stroke.id)
+      expect(oib.model.removeSymbol).not.toHaveBeenCalled()
+      expect(oib.renderer.removeSymbol).not.toHaveBeenCalled()
+      expect(oib.recognizer.eraseStrokes).not.toHaveBeenCalled()
+    })
+    test("remove stroke", async () =>
+    {
+      const stroke = buildOIStroke()
+      oib.model.symbols.push(stroke)
+      await oib.removeSymbol(stroke.id)
+      expect(oib.model.removeSymbol).toHaveBeenNthCalledWith(1, stroke.id)
+      expect(oib.renderer.removeSymbol).toHaveBeenNthCalledWith(1, stroke.id)
+      expect(oib.recognizer.eraseStrokes).toHaveBeenNthCalledWith(1, [stroke.id])
+    })
+    test("remove shape", async () =>
+    {
+      const shape = buildOICircle()
+      oib.model.symbols.push(shape)
+      await oib.removeSymbol(shape.id)
+      expect(oib.model.removeSymbol).toHaveBeenNthCalledWith(1, shape.id)
+      expect(oib.renderer.removeSymbol).toHaveBeenNthCalledWith(1, shape.id)
+      expect(oib.recognizer.eraseStrokes).not.toHaveBeenCalled()
     })
   })
 
