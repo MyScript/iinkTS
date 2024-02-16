@@ -119,11 +119,6 @@ export class OIModel implements IModel
     return rows.sort((r1, r2) => r1.index - r2.index)
   }
 
-  getLastSymbolInRow(rowIndex: number): TOISymbol | undefined
-  {
-    return this.getSymbolInRowOrdered(rowIndex).at(-1)
-  }
-
   addSymbol(symbol: TOISymbol): void
   {
     this.#logger.info("addSymbol", { symbol })
@@ -156,6 +151,30 @@ export class OIModel implements IModel
       this.modificationDate = Date.now()
       this.converts = undefined
       this.exports = undefined
+    }
+  }
+
+  changeOrderSymbol(id: string, position: "first" | "last" | "forward" | "backward")
+  {
+    const fromIndex = this.symbols.findIndex(s => s.id === id)
+    if (fromIndex > -1) {
+      let toIndex = fromIndex
+      switch (position) {
+        case "first":
+          toIndex = 0
+          break
+        case "last":
+          toIndex = this.symbols.length - 1
+          break
+        case "forward":
+          toIndex = Math.min(toIndex + 1, this.symbols.length - 1)
+          break
+        case "backward":
+          toIndex = Math.max(toIndex - 1, 0)
+          break
+      }
+      const sym = this.symbols.splice(fromIndex, 1)[0]
+      this.symbols.splice(toIndex, 0, sym)
     }
   }
 

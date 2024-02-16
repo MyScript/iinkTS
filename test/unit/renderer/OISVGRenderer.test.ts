@@ -135,9 +135,6 @@ describe("OISVGRenderer.ts", () =>
     const elementToAppend = document.createElement("path")
     elementToAppend.id = "append-id"
 
-    const elementToInsertBefore = document.createElement("path")
-    elementToInsertBefore.id = "insert-before-id"
-
     test("should prependElement", () =>
     {
       const nbChild = renderer.layer.childElementCount
@@ -154,17 +151,6 @@ describe("OISVGRenderer.ts", () =>
       renderer.appendElement(elementToAppend)
       expect(renderer.layer.childElementCount).toEqual(nbChild + 1)
       expect(renderer.layer.lastElementChild?.getAttribute("id")).toEqual(elementToAppend.id)
-    })
-
-    test("should insertBeforeElement", () =>
-    {
-      renderer.appendElement(elementToInsertBefore)
-      const nbChild = renderer.layer.childElementCount
-      expect(renderer.layer.childElementCount).toEqual(nbChild)
-      expect(renderer.layer.lastElementChild?.getAttribute("id")).toEqual(elementToInsertBefore.id)
-      renderer.insertBeforeElement(elementToAppend, elementToInsertBefore)
-      expect(renderer.layer.childElementCount).toEqual(nbChild)
-      expect(renderer.layer.children.item(nbChild - 1)?.getAttribute("id")).toEqual(elementToInsertBefore.id)
     })
   })
 

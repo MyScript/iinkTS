@@ -2,7 +2,7 @@ export default {
   clearMocks: true,
   // collectCoverage: true,
   collectCoverageFrom: [
-    "./src/**",
+    "./src/**/*.ts",
     "!./src/modules.d.ts",
     "!./src/Constants.ts",
   ],

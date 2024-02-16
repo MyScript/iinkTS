@@ -267,8 +267,8 @@ export class OIRecognizer
 
   protected async manageWaitForIdle(): Promise<void>
   {
-    this.internalEvent.emitIdle(true)
     this.waitForIdleDeferred?.resolve()
+    this.internalEvent.emitIdle(true)
   }
 
   protected manageErrorMessage(websocketMessage: TOIMessageEvent): void
@@ -310,7 +310,6 @@ export class OIRecognizer
     try {
       const websocketMessage: TOIMessageEvent = JSON.parse(message.data)
       if (websocketMessage.type !== "pong") {
-        this.internalEvent.emitClearMessage()
         this.pingCount = 0
         switch (websocketMessage.type) {
           case "ack":

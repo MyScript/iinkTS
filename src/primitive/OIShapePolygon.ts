@@ -1,9 +1,10 @@
 import { LoggerClass } from "../Constants"
 import { LoggerManager } from "../logger"
-import { TStyle } from "../style"
-import { TPoint } from "./Point"
+import { DefaultStyle, TStyle } from "../style"
+import { TPoint, isValidPoint } from "./Point"
 import { OIShape, ShapeKind } from "./OIShape"
 import { Box } from "./Box"
+import { PartialDeep } from "../utils"
 
 /**
  * @group Primitive
@@ -35,6 +36,14 @@ export class OIShapePolygon extends OIShape
     clone.modificationDate = this.modificationDate
     return clone
   }
+
+  static create(partial: PartialDeep<OIShapePolygon>): OIShapePolygon
+  {
+    if (!partial?.points || partial?.points?.length < 3) throw new Error(`Unable to create polygon at least 3 points required`)
+    if (partial?.points?.some(p => !isValidPoint(p))) throw new Error(`Unable to create a polygon, one or more points are invalid`)
+    return new OIShapePolygon(partial.style || DefaultStyle, partial.points as TPoint[], ShapeKind.Polygon)
+  }
+
 }
 
 /**
@@ -65,6 +74,13 @@ export class OIShapeTriangle extends OIShapePolygon
       { x: (origin.x + target.x) / 2, y: target.y }
     ]
     return triangle
+  }
+
+  static create(partial: PartialDeep<OIShapeTriangle>): OIShapeTriangle
+  {
+    if (partial?.points?.length !== 3) throw new Error(`Unable to create triangle, invalid points number`)
+    if (partial?.points?.some(p => !isValidPoint(p))) throw new Error(`Unable to create a triangle, one or more points are invalid`)
+    return new OIShapeTriangle(partial.style || DefaultStyle, partial.points as TPoint[])
   }
 }
 
@@ -100,6 +116,13 @@ export class OIShapeParallelogram extends OIShapePolygon
     parallelogram.points = points
     parallelogram.modificationDate = Date.now()
     return parallelogram
+  }
+
+  static create(partial: PartialDeep<OIShapeParallelogram>): OIShapeParallelogram
+  {
+    if (partial?.points?.length !== 4) throw new Error(`Unable to create parallelogram, invalid points number`)
+    if (partial?.points?.some(p => !isValidPoint(p))) throw new Error(`Unable to create a parallelogram, one or more points are invalid`)
+    return new OIShapeParallelogram(partial.style || DefaultStyle, partial.points as TPoint[])
   }
 }
 
@@ -140,5 +163,12 @@ export class OIShapeRectangle extends OIShapePolygon
     rect.points = points
     rect.modificationDate = Date.now()
     return rect
+  }
+
+  static create(partial: PartialDeep<OIShapeRectangle>): OIShapeRectangle
+  {
+    if (partial?.points?.length !== 4) throw new Error(`Unable to create rectangle, invalid points number`)
+    if (partial?.points?.some(p => !isValidPoint(p))) throw new Error(`Unable to create a rectangle, one or more points are invalid`)
+    return new OIShapeRectangle(partial.style || DefaultStyle, partial.points as TPoint[])
   }
 }

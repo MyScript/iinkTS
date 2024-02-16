@@ -30,7 +30,8 @@ export class Editor
   wrapperHTML: HTMLEditorElement
   #layerInfos!: HTMLDivElement
   #loaderHTML!: HTMLDivElement
-  #messageHTML!: HTMLDivElement
+  #messageEl!: HTMLDivElement
+  #messageText!: HTMLParagraphElement
   #stateHTML!: HTMLDivElement
   #busyHTML!: HTMLDivElement
   #idleHTML!: HTMLDivElement
@@ -204,10 +205,17 @@ export class Editor
 
   #createMessage(): HTMLDivElement
   {
-    this.#messageHTML = document.createElement("div")
-    this.#messageHTML.classList.add("message")
-    this.#messageHTML.style.display = "none"
-    return this.#messageHTML
+    this.#messageEl = document.createElement("div")
+    this.#messageEl.classList.add("message")
+    const closeBtn = document.createElement("button")
+    closeBtn.classList.add("ms-button", "close")
+    closeBtn.addEventListener("pointerup", this.cleanMessage.bind(this))
+    this.#messageEl.appendChild(closeBtn)
+    this.#messageEl.style.display = "none"
+
+    this.#messageText = document.createElement("p")
+    this.#messageEl.appendChild(this.#messageText)
+    return this.#messageEl
   }
 
   #createEditorState(): HTMLDivElement
@@ -270,7 +278,7 @@ export class Editor
     this.logger.info("initializeBehaviors", "start")
     this.#initializationDeferred = new DeferredPromise<void>()
     this.#loaderHTML.style.display = "initial"
-    this.#cleanMessage()
+    this.cleanMessage()
     return this.behaviors.init(this.wrapperHTML)
       .then(async () =>
       {
@@ -283,7 +291,7 @@ export class Editor
       {
         this.logger.error("initializeBehaviors", error)
         this.#initializationDeferred.reject(error)
-        this.#showError(error)
+        this.showError(error)
       })
       .finally(() =>
       {
@@ -321,29 +329,29 @@ export class Editor
     }
   }
 
-  #cleanMessage()
+  cleanMessage()
   {
-    this.#messageHTML.style.display = "none"
-    this.#messageHTML.innerHTML = ""
+    this.#messageEl.style.display = "none"
+    this.#messageText.innerText = ""
   }
 
-  #showError(err: Error | string)
+  showError(err: Error | string)
   {
-    this.#messageHTML.style.display = "initial"
-    this.#messageHTML.classList.add("error-msg")
-    this.#messageHTML.classList.remove("info-msg")
-    this.#messageHTML.innerText = typeof err === "string" ? err : err.message
+    this.#messageEl.style.display = "initial"
+    this.#messageEl.classList.add("error-msg")
+    this.#messageEl.classList.remove("info-msg")
+    this.#messageText.innerText = typeof err === "string" ? err : err.message
   }
 
-  #showNotif(notif: { message: string, timeout?: number })
+  showNotif(notif: { message: string, timeout?: number })
   {
-    this.#messageHTML.style.display = "initial"
-    this.#messageHTML.classList.add("info-msg")
-    this.#messageHTML.classList.remove("error-msg")
-    this.#messageHTML.innerText = notif.message
+    this.#messageEl.style.display = "initial"
+    this.#messageEl.classList.add("info-msg")
+    this.#messageEl.classList.remove("error-msg")
+    this.#messageText.innerText = notif.message
     setTimeout(() =>
     {
-      this.#cleanMessage()
+      this.cleanMessage()
     }, notif.timeout || 2500)
   }
 
@@ -351,11 +359,11 @@ export class Editor
   {
     this.internalEvents.addConvertListener(this.convert.bind(this))
     this.internalEvents.addClearListener(this.clear.bind(this))
-    this.internalEvents.addErrorListener(this.#showError.bind(this))
+    this.internalEvents.addErrorListener(this.showError.bind(this))
+    this.internalEvents.addNotifListener(this.showNotif.bind(this))
+    this.internalEvents.addClearMessageListener(this.cleanMessage.bind(this))
     this.internalEvents.addImportJIIXListener(this.#onImportJIIX.bind(this))
     this.internalEvents.addExportedListener(this.#onExport.bind(this))
-    this.internalEvents.addNotifListener(this.#showNotif.bind(this))
-    this.internalEvents.addClearMessageListener(this.#cleanMessage.bind(this))
     this.internalEvents.addContextChangeListener(this.#onContextChange.bind(this))
     this.internalEvents.addIdleListener(this.#onIdleChange.bind(this))
     this.internalEvents.addSelectedListener(this.#onSelectionChange.bind(this))

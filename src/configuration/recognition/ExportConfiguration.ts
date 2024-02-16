@@ -21,11 +21,11 @@ export type TImageConfiguration = {
  * @group Configuration
  */
 export type TJiixConfiguration = {
-  "bounding-box"?: boolean
+  "bounding-box": boolean
   strokes: boolean
   ids: boolean,
   "full-stroke-ids": boolean,
-  text?: {
+  text: {
     chars: boolean
     words: boolean
   }
@@ -66,7 +66,7 @@ export type TMathMLExport = {
 export type TExportConfiguration = {
   "image-resolution"?: number
   image?: TImageConfiguration
-  jiix?: TJiixConfiguration
+  jiix: TJiixConfiguration
   mathml?: TMathMLExport
 }
 

@@ -1,6 +1,5 @@
 import { AllOverrideConfiguration } from "./__dataset__/configuration.dataset"
 import { buildStroke, delay } from "./helpers"
-// import { LeftClickEventFake } from "../__mocks__/PointerEventFake"
 
 import
 {
@@ -175,15 +174,12 @@ describe("Editor.ts", () =>
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       const LOAD_TIMEOUT = 200
       editor.behaviors.init = jest.fn(async () => { await delay(LOAD_TIMEOUT); return Promise.resolve() })
-      const loaderElement = wrapperHTML.getElementsByClassName("loader")
-      //@ts-ignore
-      expect(loaderElement.item(0)?.style.display).toEqual("none")
+      const loaderElement = wrapperHTML.querySelector(".loader") as HTMLElement
+      expect(loaderElement.style.display).toEqual("none")
       editor.initialize()
-      //@ts-ignore
-      expect(loaderElement.item(0)?.style.display).toEqual("initial")
+      expect(loaderElement.style.display).toEqual("initial")
       await delay(LOAD_TIMEOUT)
-      //@ts-ignore
-      expect(loaderElement.item(0)?.style.display).toEqual("none")
+      expect(loaderElement.style.display).toEqual("none")
     })
     test("should resolve when behaviors.init is resolved", async () =>
     {
@@ -213,16 +209,13 @@ describe("Editor.ts", () =>
       wrapperHTML.style.width = "100px"
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.reject(new Error("pouet")))
-      const messageElement = wrapperHTML.getElementsByClassName("message")
+      const messageElement = wrapperHTML.querySelector(".message") as HTMLElement
       try {
-        //@ts-ignore
-        expect(messageElement.item(0)?.style.display).toEqual("none")
+        expect(messageElement!.style.display).toEqual("none")
         await editor.initialize()
       } catch (error) {
-        //@ts-ignore
-        expect(messageElement.item(0)?.style.display).toEqual("initial")
-        //@ts-ignore
-        expect(messageElement.item(0)?.innerText).toEqual("pouet")
+        expect(messageElement!.style.display).toEqual("initial")
+        expect(messageElement!.querySelector("p")!.innerText).toEqual("pouet")
       }
     })
   })

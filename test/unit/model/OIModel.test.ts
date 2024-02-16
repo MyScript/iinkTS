@@ -11,7 +11,7 @@ describe("OIModel.ts", () =>
     expect(model).toBeDefined()
   })
 
-  describe("symbols", () =>
+  describe("crud symbols", () =>
   {
     const model = new OIModel(width, height, rowHeight)
     const sym = buildOIStroke()
@@ -82,6 +82,77 @@ describe("OIModel.ts", () =>
       const oldLength = model.symbols.length
       model.removeSymbol("not-exist")
       expect(model.symbols).toHaveLength(oldLength)
+    })
+  })
+
+  describe("change symbol order", () =>
+  {
+    const model = new OIModel(width, height, rowHeight)
+    const sym1 = buildOIStroke()
+    model.addSymbol(sym1)
+    const sym2 = buildOIStroke()
+    model.addSymbol(sym2)
+    const sym3 = buildOIStroke()
+    model.addSymbol(sym3)
+    const sym4 = buildOIStroke()
+    model.addSymbol(sym4)
+
+    test("should do nothing when change symbol order not in model", () =>
+    {
+      const symUnknow = buildOIStroke()
+      model.changeOrderSymbol(symUnknow.id, "first")
+      expect(model.symbols[0].id).toEqual(sym1.id)
+      expect(model.symbols[1].id).toEqual(sym2.id)
+      expect(model.symbols[2].id).toEqual(sym3.id)
+      expect(model.symbols[3].id).toEqual(sym4.id)
+    })
+    test("should do nothing when change order to first if sym at first position", () =>
+    {
+      expect(model.symbols[0].id).toEqual(sym1.id)
+      model.changeOrderSymbol(sym1.id, "first")
+      expect(model.symbols[0].id).toEqual(sym1.id)
+    })
+    test("should change order to first position", () =>
+    {
+      expect(model.symbols[0].id).toEqual(sym1.id)
+      model.changeOrderSymbol(sym3.id, "first")
+      expect(model.symbols[0].id).toEqual(sym3.id)
+    })
+    test("should do nothing when change order last if sym at last position", () =>
+    {
+      expect(model.symbols.at(-1)!.id).toEqual(sym4.id)
+      model.changeOrderSymbol(sym4.id, "last")
+      expect(model.symbols.at(-1)!.id).toEqual(sym4.id)
+    })
+    test("should change order to at last position", () =>
+    {
+      expect(model.symbols.at(-1)!.id).toEqual(sym4.id)
+      model.changeOrderSymbol(sym2.id, "last")
+      expect(model.symbols.at(-1)!.id).toEqual(sym2.id)
+    })
+    test("should change order to forward", () =>
+    {
+      expect(model.symbols.at(1)!.id).toEqual(sym1.id)
+      model.changeOrderSymbol(sym3.id, "forward")
+      expect(model.symbols.at(1)!.id).toEqual(sym3.id)
+    })
+    test("should do nothing when move last at forward", () =>
+    {
+      expect(model.symbols.at(-1)!.id).toEqual(sym2.id)
+      model.changeOrderSymbol(sym3.id, "forward")
+      expect(model.symbols.at(-1)!.id).toEqual(sym2.id)
+    })
+    test("should move backward", () =>
+    {
+      expect(model.symbols.at(0)!.id).toEqual(sym1.id)
+      model.changeOrderSymbol(sym4.id, "backward")
+      expect(model.symbols.at(0)!.id).toEqual(sym4.id)
+    })
+    test("should do nothing when move last at backward", () =>
+    {
+      expect(model.symbols.at(0)!.id).toEqual(sym4.id)
+      model.changeOrderSymbol(sym4.id, "backward")
+      expect(model.symbols.at(0)!.id).toEqual(sym4.id)
     })
   })
 
