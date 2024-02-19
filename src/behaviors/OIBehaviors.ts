@@ -337,6 +337,28 @@ export class OIBehaviors implements IBehaviors
     }
   }
 
+  async changeLanguage(code: string): Promise<void>
+  {
+    try {
+      this.#logger.info("changeLanguage", { code })
+      this.internalEvent.emitIdle(false)
+      this.configuration.recognition.lang = code
+      await this.recognizer.destroy()
+      this.recognizer = new OIRecognizer(this.#configuration.server, this.#configuration.recognition)
+      await this.recognizer.init()
+      this.recognizer.addStrokes(this.model.symbols.filter(s => s.type === SymbolType.Stroke) as OIStroke[])
+    } catch (error) {
+      this.#logger.error("changeLanguage", error)
+      this.internalEvent.emitError(error as Error)
+      throw error
+    }
+    finally {
+      this.menu.update()
+      await this.svgDebugger.apply()
+      await this.recognizer.waitForIdle()
+    }
+  }
+
   protected createShape(partialShape: PartialDeep<OIShape>): OIShape
   {
     switch (partialShape.kind) {

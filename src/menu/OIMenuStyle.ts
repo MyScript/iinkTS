@@ -64,7 +64,7 @@ export class OIMenuStyle extends OIMenu
 
   get isMobile(): boolean
   {
-    return this.behaviors.renderer.parent.clientWidth < 600
+    return this.behaviors.renderer.parent.clientWidth < 700
   }
 
   protected createMenuColor(property: "color" | "fill", currentColor: string): HTMLDivElement
