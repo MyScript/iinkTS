@@ -1,7 +1,6 @@
+import { OIBehaviorsTest } from "../OIBehaviorsTest"
 import
 {
-  DefaultConfiguration,
-  OIBehaviors,
   OIEdgeLine,
   OIRotationManager,
   OIShapeCircle,
@@ -9,33 +8,22 @@ import
   OIShapeRectangle,
   OIStroke,
   SvgElementRole,
-  TBehaviorOptions,
   TPoint,
   rotatePoint,
 } from "../../../src/iink"
 
 describe("OIRotationManager.ts", () =>
 {
-  const DefaultBehaviorsOptions: TBehaviorOptions = {
-    configuration: JSON.parse(JSON.stringify(DefaultConfiguration))
-  }
-  DefaultBehaviorsOptions.configuration.offscreen = true
-  DefaultBehaviorsOptions.configuration.recognition.type = "Raw Content"
-  DefaultBehaviorsOptions.configuration.rendering.smartGuide.enable = false
-
   test("should create", () =>
   {
-    const layerInfo = document.createElement("div")
-    //@ts-ignore TODO IIC-1006
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+    const behaviors = new OIBehaviorsTest()
     const manager = new OIRotationManager(behaviors)
     expect(manager).toBeDefined()
   })
 
   describe("should applyToSymbol", () =>
   {
-    const layerInfo = document.createElement("div")
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+    const behaviors = new OIBehaviorsTest()
     const manager = new OIRotationManager(behaviors)
     manager.texter.updateTextBoundingBox = jest.fn()
     manager.renderer.setAttribute = jest.fn()
@@ -114,8 +102,7 @@ describe("OIRotationManager.ts", () =>
   describe("resize process on stroke", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const layerInfo = document.createElement("div")
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+    const behaviors = new OIBehaviorsTest()
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     behaviors.recognizer.replaceStrokes = jest.fn(() => Promise.resolve())
     behaviors.renderer.setAttribute = jest.fn()

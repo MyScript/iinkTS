@@ -1,40 +1,28 @@
+import { OIBehaviorsTest } from "../OIBehaviorsTest"
 import
 {
-  DefaultConfiguration,
-  OIBehaviors,
   OIEdgeLine,
   OITranslateManager,
   OIShapeCircle,
   OIShapePolygon,
   OIShapeRectangle,
   OIStroke,
-  TBehaviorOptions,
   TPoint,
   SvgElementRole,
 } from "../../../src/iink"
 
 describe("OITranslateManager.ts", () =>
 {
-  const DefaultBehaviorsOptions: TBehaviorOptions = {
-    configuration: JSON.parse(JSON.stringify(DefaultConfiguration))
-  }
-  DefaultBehaviorsOptions.configuration.offscreen = true
-  DefaultBehaviorsOptions.configuration.recognition.type = "Raw Content"
-  DefaultBehaviorsOptions.configuration.rendering.smartGuide.enable = false
-
   test("should create", () =>
   {
-    const layerInfo = document.createElement("div")
-    //@ts-ignore TODO IIC-1006
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+    const behaviors = new OIBehaviorsTest()
     const manager = new OITranslateManager(behaviors)
     expect(manager).toBeDefined()
   })
 
   describe("should applyToSymbol", () =>
   {
-    const layerInfo = document.createElement("div")
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+    const behaviors = new OIBehaviorsTest()
     const manager = new OITranslateManager(behaviors)
 
     test("translate stroke", () =>
@@ -97,8 +85,7 @@ describe("OITranslateManager.ts", () =>
   describe("translate process on stroke without snap", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const layerInfo = document.createElement("div")
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+    const behaviors = new OIBehaviorsTest()
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     behaviors.recognizer.translateStrokes = jest.fn(() => Promise.resolve())
     behaviors.renderer.setAttribute = jest.fn()

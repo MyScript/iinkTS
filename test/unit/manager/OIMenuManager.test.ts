@@ -1,6 +1,11 @@
 import { OIBehaviorsTest } from "../OIBehaviorsTest"
-
-import { OIMenuManager, OIMenuStyle, OIMenuIntention, OIMenuAction } from "../../../src/iink"
+import
+{
+  OIMenuManager,
+  OIMenuStyle,
+  OIMenuIntention,
+  OIMenuAction
+} from "../../../src/iink"
 
 describe("OIMenuManager.ts", () =>
 {

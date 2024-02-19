@@ -1,15 +1,12 @@
 import { buildOIText } from "../helpers"
+import { OIBehaviorsTest } from "../OIBehaviorsTest"
 import
 {
-  OIBehaviors,
-  TBehaviorOptions,
-  DefaultConfiguration,
   OITextManager,
   TOISymbolChar,
   Box,
   SVGBuilder
 } from "../../../src/iink"
-
 
 describe("OITextManager.ts", () =>
 {
@@ -49,23 +46,16 @@ describe("OITextManager.ts", () =>
     }),
   })
 
-  const DefaultBehaviorsOptions: TBehaviorOptions = {
-    configuration: JSON.parse(JSON.stringify(DefaultConfiguration))
-  }
-  DefaultBehaviorsOptions.configuration.offscreen = true
   test("should create", () =>
   {
-    const layerInfo = document.createElement("div")
-    //@ts-ignore TODO IIC-1006
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+    const behaviors = new OIBehaviorsTest()
     const manager = new OITextManager(behaviors)
     expect(manager).toBeDefined()
   })
 
   test("should set chars BoundingBox", () =>
   {
-    const layerInfo = document.createElement("div")
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+    const behaviors = new OIBehaviorsTest()
     const manager = new OITextManager(behaviors)
     const text = buildOIText({ chars })
     const textEl = manager.renderer.getSymbolElement(text) as SVGGElement
@@ -77,8 +67,7 @@ describe("OITextManager.ts", () =>
 
   test("should get element BoundingBox", () =>
   {
-    const layerInfo = document.createElement("div")
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+    const behaviors = new OIBehaviorsTest()
     const manager = new OITextManager(behaviors)
     const text = buildOIText({ chars })
     const textEl = manager.renderer.getSymbolElement(text) as SVGGElement
@@ -87,8 +76,7 @@ describe("OITextManager.ts", () =>
 
   test("should get BoundingBox", () =>
   {
-    const layerInfo = document.createElement("div")
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+    const behaviors = new OIBehaviorsTest()
     const manager = new OITextManager(behaviors)
     manager.renderer.layer = SVGBuilder.createLayer(100, 100)
     manager.renderer.prependElement = jest.fn()
@@ -100,8 +88,7 @@ describe("OITextManager.ts", () =>
 
   test("shoud get Space Width", () =>
   {
-    const layerInfo = document.createElement("div")
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+    const behaviors = new OIBehaviorsTest()
     const manager = new OITextManager(behaviors)
     manager.getBoundingBox = jest.fn(() => new Box({ height: 12, width: 42, x: 0, y: 0 }))
     expect(manager.getSpaceWidth(12)).toEqual(42)
@@ -110,8 +97,7 @@ describe("OITextManager.ts", () =>
 
   test("should update Text BoundingBox", () =>
   {
-    const layerInfo = document.createElement("div")
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+    const behaviors = new OIBehaviorsTest()
     const manager = new OITextManager(behaviors)
     manager.renderer.layer = SVGBuilder.createLayer(100, 100)
     manager.renderer.prependElement = jest.fn()
