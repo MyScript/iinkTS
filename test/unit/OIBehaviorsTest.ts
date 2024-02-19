@@ -20,7 +20,7 @@ export class OIBehaviorsTest extends OIBehaviors
     this.undoRedoManager.updateModelInStack(this.model)
 
     this.renderer.init(domElement)
-    this.menu.render(this.layerInfos)
+    // this.menu.render(this.layerInfos)
 
     this.grabber.attach(this.renderer.layer as unknown as HTMLElement)
     this.grabber.onPointerDown = this.onPointerDown.bind(this)

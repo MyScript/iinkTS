@@ -1,7 +1,6 @@
+import { OIBehaviorsTest } from "../OIBehaviorsTest"
 import
 {
-  DefaultConfiguration,
-  OIBehaviors,
   OIEdgeLine,
   OIResizeManager,
   OIShapeCircle,
@@ -10,32 +9,21 @@ import
   OIStroke,
   ResizeDirection,
   SvgElementRole,
-  TBehaviorOptions,
   TPoint
 } from "../../../src/iink"
 
 describe("OIResizeManager.ts", () =>
 {
-  const DefaultBehaviorsOptions: TBehaviorOptions = {
-    configuration: JSON.parse(JSON.stringify(DefaultConfiguration))
-  }
-  DefaultBehaviorsOptions.configuration.offscreen = true
-  DefaultBehaviorsOptions.configuration.recognition.type = "Raw Content"
-  DefaultBehaviorsOptions.configuration.rendering.smartGuide.enable = false
-
   test("should create", () =>
   {
-    const layerInfo = document.createElement("div")
-    //@ts-ignore
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+    const behaviors = new OIBehaviorsTest()
     const manager = new OIResizeManager(behaviors)
     expect(manager).toBeDefined()
   })
 
   describe("should applyToSymbol", () =>
   {
-    const layerInfo = document.createElement("div")
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+    const behaviors = new OIBehaviorsTest()
     const manager = new OIResizeManager(behaviors)
 
     test("resize stroke", () =>
@@ -102,8 +90,7 @@ describe("OIResizeManager.ts", () =>
   describe("resize process on stroke without snap", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const layerInfo = document.createElement("div")
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+    const behaviors = new OIBehaviorsTest()
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     behaviors.recognizer.replaceStrokes = jest.fn(() => Promise.resolve())
     behaviors.renderer.setAttribute = jest.fn()

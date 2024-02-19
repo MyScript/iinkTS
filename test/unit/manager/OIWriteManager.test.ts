@@ -1,8 +1,6 @@
+import { OIBehaviorsTest } from "../OIBehaviorsTest"
 import
 {
-  OIBehaviors,
-  TBehaviorOptions,
-  DefaultConfiguration,
   OIWriteManager,
   DefaultStyle,
   SymbolType,
@@ -19,18 +17,9 @@ import
 
 describe("OIWriteManager.ts", () =>
 {
-  const DefaultBehaviorsOptions: TBehaviorOptions = {
-    configuration: JSON.parse(JSON.stringify(DefaultConfiguration))
-  }
-  DefaultBehaviorsOptions.configuration.offscreen = true
-  DefaultBehaviorsOptions.configuration.recognition.type = "Raw Content"
-  DefaultBehaviorsOptions.configuration.rendering.smartGuide.enable = false
-
   test("should create", () =>
   {
-    const layerInfo = document.createElement("div")
-    //@ts-ignore TODO IIC-1006
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+    const behaviors = new OIBehaviorsTest()
     const manager = new OIWriteManager(behaviors)
     expect(manager).toBeDefined()
   })
@@ -38,8 +27,7 @@ describe("OIWriteManager.ts", () =>
   describe("writing process", () =>
   {
     const wrapperHTML: HTMLElement = document.createElement("div")
-    const layerInfo = document.createElement("div")
-    const behaviors = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+    const behaviors = new OIBehaviorsTest()
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     behaviors.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
 
