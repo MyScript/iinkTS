@@ -170,6 +170,17 @@ export class OIStroke extends OISymbol implements TStroke
     return json
   }
 
+  toJSON(): PartialDeep<OIStroke>
+  {
+    return {
+      id: this.id,
+      type: this.type,
+      pointers: this.pointers,
+      style: this.style,
+      decorators: this.decorators.length ? this.decorators : undefined
+    }
+  }
+
   static create(partial: PartialDeep<OIStroke>): OIStroke
   {
     if (!partial.pointers?.length) {

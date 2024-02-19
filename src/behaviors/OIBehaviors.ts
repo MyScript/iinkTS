@@ -6,6 +6,7 @@ import { LoggerManager } from "../logger"
 import { OIModel, TExport } from "../model"
 import
 {
+  Box,
   EdgeKind,
   OIEdge,
   OIEdgeArc,
@@ -22,12 +23,13 @@ import
   ShapeKind,
   SymbolType,
   TOISymbol,
+  TPoint,
   TPointer,
   TStroke,
   convertPartialStrokesToOIStrokes
 } from "../primitive"
 import { OIRecognizer } from "../recognizer"
-import { OISVGRenderer } from "../renderer"
+import { OISVGRenderer, SVGBuilder } from "../renderer"
 import { DefaultStyle, StyleManager, TStyle, TTheme } from "../style"
 import
 {
@@ -151,9 +153,7 @@ export class OIBehaviors implements IBehaviors
         this.renderer.parent?.classList.remove("move")
         break
     }
-    this.menu.update()
-    this.model.resetSelection()
-    this.selector.removeSelectedGroup()
+    this.unselectAll()
   }
 
   get model(): OIModel
@@ -224,11 +224,7 @@ export class OIBehaviors implements IBehaviors
     this.#logger.debug("onPointerDown", { evt, pointer })
     this.internalEvent.emitIdle(false)
     try {
-      this.selector.removeSelectedGroup()
-      if (this.model.symbolsSelected.length) {
-        this.model.resetSelection()
-        this.internalEvent.emitSelected(this.model.symbolsSelected)
-      }
+      this.unselectAll()
       switch (this.#intention) {
         case Intention.Erase:
           this.eraser.start(pointer)
@@ -310,6 +306,34 @@ export class OIBehaviors implements IBehaviors
     }
   }
 
+  protected async onContextMenu(el: HTMLElement, point: TPoint): Promise<void>
+  {
+    if (this.intention === Intention.Select) {
+      let found = false
+      let currentEl: HTMLElement | null = el
+      const symbolTypesAllowed = [SymbolType.Edge.toString(), SymbolType.Shape.toString(), SymbolType.Stroke.toString(), SymbolType.Text.toString()]
+      while (currentEl && currentEl.tagName !== "svg" && !found) {
+        if (symbolTypesAllowed.includes(currentEl.getAttribute("type") as string)) {
+          found = true
+        }
+        else {
+          currentEl = currentEl.parentElement
+        }
+      }
+      if (currentEl?.id) {
+        this.model.selectSymbol(currentEl.id)
+        this.renderer.drawSymbol(this.model.symbolsSelected[0])
+        this.selector.drawSelectedGroup(this.model.symbolsSelected)
+      }
+      else {
+        this.unselectAll()
+        this.menu.context.position.x = point.x + this.renderer.parent.clientLeft
+        this.menu.context.position.y = point.y + this.renderer.parent.clientTop
+        this.menu.context.show()
+      }
+    }
+  }
+
   async init(domElement: HTMLElement): Promise<void>
   {
     try {
@@ -322,6 +346,7 @@ export class OIBehaviors implements IBehaviors
       this.grabber.onPointerDown = this.onPointerDown.bind(this)
       this.grabber.onPointerMove = this.onPointerMove.bind(this)
       this.grabber.onPointerUp = this.onPointerUp.bind(this)
+      this.grabber.onContextMenu = this.onContextMenu.bind(this)
 
       this.model.width = Math.max(domElement.clientWidth, this.#configuration.rendering.minWidth)
       this.model.height = Math.max(domElement.clientHeight, this.#configuration.rendering.minHeight)
@@ -391,18 +416,47 @@ export class OIBehaviors implements IBehaviors
     }
   }
 
-  async createSymbol(symbol: PartialDeep<TOISymbol>): Promise<TOISymbol>
+  async createSymbols(partialSymbols: PartialDeep<TOISymbol>[]): Promise<TOISymbol[]>
   {
     try {
-      switch (symbol.type) {
+      const errors: string[] = []
+      const symbols: (TOISymbol | undefined)[] = partialSymbols.map(s =>
+      {
+        switch (s.type) {
+          case SymbolType.Stroke:
+            return OIStroke.create(s as PartialDeep<OIStroke>)
+          case SymbolType.Shape:
+            return this.createShape(s as PartialDeep<OIStroke>)
+          case SymbolType.Edge:
+            return this.createEdge(s as PartialDeep<OIEdge>)
+          default:
+            errors.push(`Unable to create symbol, type: "${ s.type }" is unknown`)
+            return
+        }
+      })
+      if (errors.length) {
+        throw new Error(errors.join("\n"))
+      }
+      return await this.addSymbols(symbols as TOISymbol[])
+    } catch (error) {
+      this.#logger.error("importPointEvents", error)
+      this.internalEvent.emitError(error as Error)
+      throw error
+    }
+  }
+
+  async createSymbol(partialSymbol: PartialDeep<TOISymbol>): Promise<TOISymbol>
+  {
+    try {
+      switch (partialSymbol.type) {
         case SymbolType.Stroke:
-          return await this.addSymbol(OIStroke.create(symbol as PartialDeep<OIStroke>))
+          return await this.addSymbol(OIStroke.create(partialSymbol as PartialDeep<OIStroke>))
         case SymbolType.Shape:
-          return await this.addSymbol(this.createShape(symbol as PartialDeep<OIStroke>))
+          return await this.addSymbol(this.createShape(partialSymbol as PartialDeep<OIStroke>))
         case SymbolType.Edge:
-          return await this.addSymbol(this.createEdge(symbol as PartialDeep<OIEdge>))
+          return await this.addSymbol(this.createEdge(partialSymbol as PartialDeep<OIEdge>))
         default:
-          throw new Error(`Unable to create symbol, type: "${ symbol.type }" is unknown`)
+          throw new Error(`Unable to create symbol, type: "${ partialSymbol.type }" is unknown`)
       }
     } catch (error) {
       this.#logger.error("importPointEvents", error)
@@ -423,6 +477,56 @@ export class OIBehaviors implements IBehaviors
       }
       this.undoRedoManager.addModelToStack(this.model)
       return symbolToAdd
+    } catch (error) {
+      this.#logger.error("addSymbol", error)
+      this.internalEvent.emitError(error as Error)
+      throw error
+    }
+    finally {
+      this.menu.update()
+      await this.svgDebugger.apply()
+      await this.recognizer.waitForIdle()
+    }
+  }
+
+  async addSymbols(symbolsToAdd: TOISymbol[]): Promise<TOISymbol[]>
+  {
+    try {
+      this.#logger.info("addSymbol", { symbolsToAdd })
+      this.internalEvent.emitIdle(false)
+      const strokes = symbolsToAdd.filter(s => s.type === SymbolType.Stroke) as OIStroke[]
+      await this.recognizer.addStrokes(strokes, false)
+      symbolsToAdd.forEach(s =>
+      {
+        this.model.addSymbol(s)
+        this.renderer.drawSymbol(s)
+      })
+      this.undoRedoManager.addModelToStack(this.model)
+      return symbolsToAdd
+    } catch (error) {
+      this.#logger.error("addSymbol", error)
+      this.internalEvent.emitError(error as Error)
+      throw error
+    }
+    finally {
+      this.menu.update()
+      this.svgDebugger.apply()
+      this.recognizer.waitForIdle()
+    }
+  }
+
+  async updateSymbol(symbolToUpdate: TOISymbol): Promise<TOISymbol>
+  {
+    try {
+      this.#logger.info("updateSymbol", { symbolToUpdate })
+      this.internalEvent.emitIdle(false)
+      this.model.updateSymbol(symbolToUpdate)
+      this.renderer.drawSymbol(symbolToUpdate)
+      if (symbolToUpdate.type === SymbolType.Stroke) {
+        await this.recognizer.replaceStrokes([symbolToUpdate.id], [symbolToUpdate as OIStroke])
+      }
+      this.undoRedoManager.addModelToStack(this.model)
+      return symbolToUpdate
     } catch (error) {
       this.#logger.error("addSymbol", error)
       this.internalEvent.emitError(error as Error)
@@ -460,15 +564,47 @@ export class OIBehaviors implements IBehaviors
     }
     finally {
       this.menu.update()
-      await this.svgDebugger.apply()
-      await this.recognizer.waitForIdle()
+      this.svgDebugger.apply()
+      this.recognizer.waitForIdle()
     }
+  }
+
+  changeOrderSymbols(symbols: TOISymbol[], position: "first" | "last" | "forward" | "backward")
+  {
+    symbols.forEach(s => this.changeOrderSymbol(s, position))
   }
 
   changeOrderSymbol(symbol: TOISymbol, position: "first" | "last" | "forward" | "backward"): void
   {
     this.model.changeOrderSymbol(symbol.id, position)
     this.renderer.changeOrderSymbol(symbol, position)
+  }
+
+  async removeSymbols(ids: string[]): Promise<void>
+  {
+    try {
+      this.#logger.info("removeSymbol", { ids })
+      this.internalEvent.emitIdle(false)
+      const symbolsToRemove = this.model.symbols.filter(s => ids.includes(s.id))
+      const strokeIdsToRemove = symbolsToRemove.filter(s => s.type === SymbolType.Stroke).map(s => s.id)
+      symbolsToRemove.forEach(s =>
+      {
+        this.model.removeSymbol(s.id)
+        this.renderer.removeSymbol(s.id)
+      })
+      await this.recognizer.eraseStrokes(strokeIdsToRemove)
+
+      this.undoRedoManager.addModelToStack(this.model)
+    } catch (error) {
+      this.#logger.error("removeSymbol", error)
+      this.internalEvent.emitError(error as Error)
+      throw error
+    }
+    finally {
+      this.menu.update()
+      this.svgDebugger.apply()
+      this.recognizer.waitForIdle()
+    }
   }
 
   async removeSymbol(id: string): Promise<void>
@@ -492,8 +628,34 @@ export class OIBehaviors implements IBehaviors
     }
     finally {
       this.menu.update()
-      await this.svgDebugger.apply()
-      await this.recognizer.waitForIdle()
+      this.svgDebugger.apply()
+      this.recognizer.waitForIdle()
+    }
+  }
+
+  selectAll(): void
+  {
+    this.model.symbols.forEach(s =>
+    {
+      s.selected = true
+      this.renderer.drawSymbol(s)
+    })
+    this.selector.drawSelectedGroup(this.model.symbolsSelected)
+    this.internalEvent.emitSelected(this.model.symbolsSelected)
+  }
+
+  unselectAll(): void
+  {
+    this.menu.context.hide()
+    this.menu.update()
+    if (this.model.symbolsSelected.length) {
+      this.model.symbolsSelected.forEach(s =>
+      {
+        s.selected = false
+        this.renderer.drawSymbol(s)
+      })
+      this.selector.removeSelectedGroup()
+      this.internalEvent.emitSelected(this.model.symbolsSelected)
     }
   }
 
@@ -547,8 +709,8 @@ export class OIBehaviors implements IBehaviors
     }
     finally {
       this.menu.update()
-      await this.svgDebugger.apply()
-      await this.recognizer.waitForIdle()
+      this.svgDebugger.apply()
+      this.recognizer.waitForIdle()
     }
     return this.model
   }
@@ -558,7 +720,7 @@ export class OIBehaviors implements IBehaviors
     this.#logger.info("undo")
     if (this.context.canUndo) {
       this.internalEvent.emitIdle(false)
-      this.selector.removeSelectedGroup()
+      this.unselectAll()
       const promises: Promise<void>[] = []
       const modelToApply = this.undoRedoManager.undo() as OIModel
       const modifications = modelToApply.extractDifferenceSymbols(this.model)
@@ -574,13 +736,10 @@ export class OIBehaviors implements IBehaviors
       this.#model = modelToApply
       await Promise.all(promises)
       this.menu.update()
-      await this.svgDebugger.apply()
+      this.svgDebugger.apply()
       await this.recognizer.waitForIdle()
-      return this.model
     }
-    else {
-      throw new Error("undo not allowed")
-    }
+    return this.model
   }
 
   async redo(): Promise<OIModel>
@@ -588,7 +747,7 @@ export class OIBehaviors implements IBehaviors
     this.#logger.info("redo")
     if (this.context.canRedo) {
       this.internalEvent.emitIdle(false)
-      this.selector.removeSelectedGroup()
+      this.unselectAll()
       const promises: Promise<void>[] = []
       const modelToApply = this.undoRedoManager.redo() as OIModel
       const modifications = modelToApply.extractDifferenceSymbols(this.model)
@@ -604,13 +763,113 @@ export class OIBehaviors implements IBehaviors
       this.#model = modelToApply
       await Promise.all(promises)
       this.menu.update()
-      await this.svgDebugger.apply()
+      this.svgDebugger.apply()
       await this.recognizer.waitForIdle()
-      return this.model
     }
-    else {
-      throw new Error("redo not allowed")
+    return this.model
+  }
+
+  protected triggerDownload(fileName: string, urlData: string): void
+  {
+    const downloadAnchorNode = document.createElement("a")
+    downloadAnchorNode.setAttribute("href", urlData)
+    downloadAnchorNode.setAttribute("download", fileName)
+    document.body.appendChild(downloadAnchorNode)
+    downloadAnchorNode.click()
+    downloadAnchorNode.remove()
+  }
+
+  downloadAsSVG(selection = false)
+  {
+    const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" }
+    let exportName: string
+    try {
+      exportName = `iink-ts-${ new Date().toLocaleDateString(navigator.language, options) }`
+    } catch {
+      exportName = `iink-ts-${ new Date().toLocaleDateString("en-US", options) }`
     }
+
+    const symbols = selection ? this.model.symbolsSelected : this.model.symbols
+    const box = Box.createFromBoxes(symbols.map(s => s.boundingBox))
+    const svgNode = SVGBuilder.createLayer(box)
+    symbols.forEach(s =>
+    {
+      const el = this.renderer.getElementById(s.id)?.cloneNode(true)
+      if (el) {
+        svgNode.appendChild(el)
+      }
+    })
+
+    const svgString = (new XMLSerializer()).serializeToString(svgNode)
+    const svgBlob = new Blob([svgString], {
+      type: "image/svg+xml;charset=utf-8"
+    })
+    const url = URL.createObjectURL(svgBlob)
+    this.triggerDownload(exportName + ".svg", url)
+  }
+
+  downloadAsJPG(selection = false)
+  {
+    const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" }
+    let exportName: string
+    try {
+      exportName = `iink-ts-${ new Date().toLocaleDateString(navigator.language, options) }`
+    } catch {
+      exportName = `iink-ts-${ new Date().toLocaleDateString("en-US", options) }`
+    }
+
+    const symbols = selection ? this.model.symbolsSelected : this.model.symbols
+    const box = Box.createFromBoxes(symbols.map(s => s.boundingBox))
+    const svgNode = SVGBuilder.createLayer(box)
+    symbols.forEach(s =>
+    {
+      const el = this.renderer.getElementById(s.id)?.cloneNode(true)
+      if (el) {
+        svgNode.appendChild(el)
+      }
+    })
+
+    const svgString = (new XMLSerializer()).serializeToString(svgNode)
+
+    const svgBlob = new Blob([svgString], {
+      type: "image/svg+xml;charset=utf-8"
+    })
+
+    const url = URL.createObjectURL(svgBlob)
+    const image = new Image()
+    image.width = box.width
+    image.height = box.height
+    image.src = url
+    image.onload = () =>
+    {
+      const canvas = document.createElement("canvas")
+      canvas.width = image.width
+      canvas.height = image.height
+
+      const ctx = canvas.getContext("2d") as CanvasRenderingContext2D
+      ctx.drawImage(image, 0, 0)
+      URL.revokeObjectURL(url)
+
+      const imgURI = canvas
+        .toDataURL("image/png")
+        .replace("image/png", "image/octet-stream")
+
+      this.triggerDownload(exportName + ".jpg", imgURI)
+    }
+  }
+
+  downloadAsJson(selection = false)
+  {
+    const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" }
+    let exportName: string
+    try {
+      exportName = `iink-ts-${ new Date().toLocaleDateString(navigator.language, options) }`
+    } catch {
+      exportName = `iink-ts-${ new Date().toLocaleDateString("en-US", options) }`
+    }
+    const symbolsToExport = selection ? this.model.symbolsSelected : this.model.symbols
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(symbolsToExport, null, 2))
+    this.triggerDownload(exportName + ".json", dataStr)
   }
 
   async export(mimeTypes?: string[]): Promise<OIModel>
@@ -637,15 +896,14 @@ export class OIBehaviors implements IBehaviors
     try {
       this.internalEvent.emitIdle(false)
       await this.converter.convert()
-      await this.recognizer.waitForIdle()
     } catch (error) {
       this.#logger.error("convert", error)
       this.internalEvent.emitError(error as Error)
     }
     finally {
       this.menu.update()
-      await this.svgDebugger.apply()
-      this.internalEvent.emitIdle(true)
+      this.svgDebugger.apply()
+      this.recognizer.waitForIdle()
     }
     return this.model
   }
@@ -673,7 +931,6 @@ export class OIBehaviors implements IBehaviors
         this.model.clear()
         this.undoRedoManager.addModelToStack(this.model)
         this.internalEvent.emitSelected(this.model.symbolsSelected)
-        await this.recognizer.waitForIdle()
       }
     }
     catch (error) {
@@ -682,8 +939,8 @@ export class OIBehaviors implements IBehaviors
     }
     finally {
       this.menu.update()
-      await this.svgDebugger.apply()
-      this.internalEvent.emitIdle(true)
+      this.svgDebugger.apply()
+      this.recognizer.waitForIdle()
     }
     return this.model
   }

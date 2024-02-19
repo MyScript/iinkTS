@@ -55,7 +55,7 @@ export class OIMenuIntention extends OIMenu
   {
     this.writeBtn = document.createElement("button")
     this.writeBtn.id = `${this.id}-write-pencil`
-    this.writeBtn.classList.add("ms-menu-button", "icon")
+    this.writeBtn.classList.add("ms-menu-button", "square")
     this.writeBtn.innerHTML = pencilIcon
     this.writeBtn.addEventListener("pointerup", () =>
     {
@@ -71,7 +71,7 @@ export class OIMenuIntention extends OIMenu
   {
     this.menuMove = document.createElement("button")
     this.menuMove.id = `${this.id}-move`
-    this.menuMove.classList.add("ms-menu-button", "icon")
+    this.menuMove.classList.add("ms-menu-button", "square")
     this.menuMove.innerHTML = handIcon
     this.menuMove.addEventListener("pointerup", () =>
     {
@@ -86,7 +86,7 @@ export class OIMenuIntention extends OIMenu
   {
     this.menuSelect = document.createElement("button")
     this.menuSelect.id = `${this.id}-select`
-    this.menuSelect.classList.add("ms-menu-button", "icon")
+    this.menuSelect.classList.add("ms-menu-button", "square")
     this.menuSelect.innerHTML = cursorIcon
     this.menuSelect.addEventListener("pointerup", () =>
     {
@@ -101,7 +101,7 @@ export class OIMenuIntention extends OIMenu
   {
     this.menuErase = document.createElement("button")
     this.menuErase.id = `${this.id}-erase`
-    this.menuErase.classList.add("ms-menu-button", "icon")
+    this.menuErase.classList.add("ms-menu-button", "square")
     this.menuErase.innerHTML = eraseIcon
     this.menuErase.addEventListener("pointerup", () =>
     {
@@ -116,7 +116,7 @@ export class OIMenuIntention extends OIMenu
   {
     const subMenuShape = document.createElement("button")
     subMenuShape.id = `${this.id}-write-shape-${tool}`
-    subMenuShape.classList.add("ms-menu-button", "icon")
+    subMenuShape.classList.add("ms-menu-button", "square")
     subMenuShape.innerHTML = icon
     subMenuShape.addEventListener("pointerup", () =>
     {
@@ -138,7 +138,7 @@ export class OIMenuIntention extends OIMenu
   {
     this.menuShape = document.createElement("button")
     this.menuShape.id = `${this.id}-write-shape`
-    this.menuShape.classList.add("ms-menu-button", "icon")
+    this.menuShape.classList.add("ms-menu-button", "square")
     this.menuShape.innerHTML = rectangleIcon
     this.subMenuShape = {
       circle: this.createShapeSubMenu(circleIcon, WriteTool.Circle),
@@ -148,7 +148,7 @@ export class OIMenuIntention extends OIMenu
     }
     const subMenuContent = document.createElement("div")
     subMenuContent.id = `${this.id}-write-shape-list`
-    subMenuContent.classList.add("ms-menu-row", "sub-menu-shape")
+    subMenuContent.classList.add("ms-menu-row", "sub-menu-content-shape")
     subMenuContent.appendChild(this.subMenuShape.rectangle)
     subMenuContent.appendChild(this.subMenuShape.circle)
     subMenuContent.appendChild(this.subMenuShape.ellipse)
@@ -157,19 +157,19 @@ export class OIMenuIntention extends OIMenu
     return this.createSubMenu(this.menuShape, subMenuContent).element
   }
 
-  protected createEdgeSubMenu(icon: string, tool: WriteTool): HTMLButtonElement
+  protected createEdgeSubMenu(square: string, tool: WriteTool): HTMLButtonElement
   {
     const subMenuEdge = document.createElement("button")
     subMenuEdge.id = `${this.id}-write-edge-${tool}`
-    subMenuEdge.classList.add("ms-menu-button", "icon")
-    subMenuEdge.innerHTML = icon
+    subMenuEdge.classList.add("ms-menu-button", "square")
+    subMenuEdge.innerHTML = square
     subMenuEdge.addEventListener("pointerup", () =>
     {
       this.unselectAll()
       this.behaviors.intention = Intention.Write
       this.behaviors.writer.tool = tool
       subMenuEdge.classList.add("active")
-      this.menuEdge!.innerHTML = icon
+      this.menuEdge!.innerHTML = square
       this.menuEdge!.classList.add("active")
       const subMenuContent = this.menuEdge!.nextSibling
       if (subMenuContent) {
@@ -183,7 +183,7 @@ export class OIMenuIntention extends OIMenu
   {
     this.menuEdge = document.createElement("button")
     this.menuEdge.id = `${this.id}-write-edge`
-    this.menuEdge.classList.add("ms-menu-button", "icon")
+    this.menuEdge.classList.add("ms-menu-button", "square")
     this.menuEdge.innerHTML = lineIcon
     this.subMenuEdge = {
       line: this.createEdgeSubMenu(lineIcon, WriteTool.Line),
@@ -192,7 +192,7 @@ export class OIMenuIntention extends OIMenu
     }
     const subMenuContent = document.createElement("div")
     subMenuContent.id = `${this.id}-write-edge-list`
-    subMenuContent.classList.add("ms-menu-row", "sub-menu-edge")
+    subMenuContent.classList.add("ms-menu-row", "sub-menu-content-edge")
     subMenuContent.appendChild(this.subMenuEdge.line)
     subMenuContent.appendChild(this.subMenuEdge.arrow)
     subMenuContent.appendChild(this.subMenuEdge.doubleArrow)

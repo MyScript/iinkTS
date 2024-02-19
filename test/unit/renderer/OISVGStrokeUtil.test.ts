@@ -66,6 +66,6 @@ describe("OISVGStrokeUtil.ts", () =>
     stroke.selected = true
     const el = renderer.getSVGElement(stroke)
     expect(el.getAttribute("id")).toEqual(stroke.id)
-    expect(el.getAttribute("filter")).toEqual(`url(#${ selectionFilterId })`)
+    expect(el.querySelector("path")?.getAttribute("filter")).toEqual(`url(#${ selectionFilterId })`)
   })
 })

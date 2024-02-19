@@ -139,7 +139,7 @@ describe("OITranslateManager.ts", () =>
     {
       const group = document.createElementNS("http://www.w3.org/2000/svg", "g")
       group.setAttribute("id", "group-id")
-      group.setAttribute("role", SvgElementRole.Selected)
+      group.setAttribute("role", SvgElementRole.InteractElementsGroup)
       const translateElement = document.createElementNS("http://www.w3.org/2000/svg", "circle")
       group.appendChild(translateElement)
 
@@ -147,15 +147,15 @@ describe("OITranslateManager.ts", () =>
       {
         manager.start(translateElement, translationOrigin)
 
-        expect(manager.wrapper).toEqual(group)
+        expect(manager.interactElementsGroup).toEqual(group)
         expect(manager.transformOrigin).toEqual(translationOrigin)
       })
       test(`shoud continu with tx: "${ data.tx } & ty ${ data.ty }`, () =>
       {
         expect(manager.continue(data.translateToPoint)).toEqual({ tx: data.tx, ty: data.ty })
 
-        expect(behaviors.renderer.setAttribute).toHaveBeenCalledTimes(1)
-        expect(behaviors.renderer.setAttribute).toHaveBeenCalledWith(group.id, "transform", `translate(${ data.tx },${ data.ty })`)
+        expect(behaviors.renderer.setAttribute).toHaveBeenNthCalledWith(1, group.id, "transform", `translate(${ data.tx },${ data.ty })`)
+        expect(behaviors.renderer.setAttribute).toHaveBeenNthCalledWith(2, stroke.id, "transform", `translate(${ data.tx },${ data.ty })`)
       })
       test(`shoud end with tx: "${ data.tx } & ty ${ data.ty }`, async () =>
       {

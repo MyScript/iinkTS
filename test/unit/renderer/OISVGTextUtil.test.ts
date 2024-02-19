@@ -70,7 +70,7 @@ describe("OISVGTextUtil.ts", () =>
     const elSelected = renderer.getSVGElement(text)
     expect(elSelected.getAttribute("id")).toEqual(text.id)
     expect(elSelected.getAttribute("type")).toEqual(SymbolType.Text)
-    expect(elSelected.getAttribute("filter")).toEqual(`url(#${ selectionFilterId })`)
+    expect(elSelected.querySelector("text")?.getAttribute("filter")).toEqual(`url(#${ selectionFilterId })`)
   })
 
 })

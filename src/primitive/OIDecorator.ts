@@ -27,7 +27,7 @@ export class OIDecorator
   constructor(kind: DecoratorKind, style: TStyle, symbol: OIStroke | OIText)
   {
     this.id = `${ kind }-${ createUUID() }`
-    this.style = style
+    this.style = structuredClone(style)
     this.kind = kind
     this.parent = symbol
   }

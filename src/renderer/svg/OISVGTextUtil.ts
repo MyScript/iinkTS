@@ -31,16 +31,17 @@ export class OISVGTextUtil
     if (text.rotation) {
       groupAttrs.transform = `rotate(${ text.rotation.degree }, ${ text.rotation.center.x }, ${ text.rotation.center.y })`
     }
-    if (text.selected) {
-      groupAttrs["filter"] = `url(#${ this.selectionFilterId })`
-    }
     if (text.deleting) {
       groupAttrs["filter"] = `url(#${ this.removalFilterId })`
     }
 
     const textGroup = SVGBuilder.createGroup(groupAttrs)
 
-    const textElement = SVGBuilder.createText(text.point, "")
+    const textAttrs: { [key: string]: string } = { }
+    if (text.selected) {
+      textAttrs["filter"] = `url(#${ this.selectionFilterId })`
+    }
+    const textElement = SVGBuilder.createText(text.point, "", textAttrs)
 
     text.chars.forEach(c =>
     {

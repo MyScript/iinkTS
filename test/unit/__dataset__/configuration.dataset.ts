@@ -232,7 +232,8 @@ export const AllOverrideConfiguration: PartialDeep<TConfiguration> = {
       passive: false
     },
     xyFloatPrecision: 27,
-    timestampFloatPrecision: 27
+    timestampFloatPrecision: 27,
+    delayLongTouch: 1000
   },
   rendering: {
     minHeight: 42,

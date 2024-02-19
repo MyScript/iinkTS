@@ -217,7 +217,7 @@ describe("OIResizeManager.ts", () =>
     {
       const group = document.createElementNS("http://www.w3.org/2000/svg", "g")
       group.setAttribute("id", "group-id")
-      group.setAttribute("role", SvgElementRole.Selected)
+      group.setAttribute("role", SvgElementRole.InteractElementsGroup)
       const resizeElement = document.createElementNS("http://www.w3.org/2000/svg", "line")
       resizeElement.setAttribute("resize-direction", data.direction)
       group.appendChild(resizeElement)
@@ -225,25 +225,22 @@ describe("OIResizeManager.ts", () =>
       test(`should start with direction: "${ data.direction }" `, () =>
       {
         manager.start(resizeElement, data.transformOrigin)
-
-        expect(manager.wrapper).toEqual(group)
+        expect(manager.interactElementsGroup).toEqual(group)
         expect(manager.boundingBox).toEqual(stroke.boundingBox)
         expect(manager.direction).toEqual(data.direction)
         expect(manager.transformOrigin).toEqual(data.transformOrigin)
-        expect(behaviors.renderer.setAttribute).toHaveBeenCalledTimes(1)
-        expect(behaviors.renderer.setAttribute).toHaveBeenCalledWith(group.id, "transform-origin", `${ data.transformOrigin.x }px ${ data.transformOrigin.y }px`)
+        expect(behaviors.renderer.setAttribute).toHaveBeenNthCalledWith(1, group.id, "transform-origin", `${ data.transformOrigin.x }px ${ data.transformOrigin.y }px`)
+        expect(behaviors.renderer.setAttribute).toHaveBeenNthCalledWith(2, stroke.id, "transform-origin", `${ data.transformOrigin.x }px ${ data.transformOrigin.y }px`)
       })
       test(`shoud continu with direction: "${ data.direction }"`, () =>
       {
         expect(manager.continue(resizeToPoint)).toEqual({ scaleX: data.scale.x, scaleY: data.scale.y })
-
-        expect(behaviors.renderer.setAttribute).toHaveBeenCalledTimes(1)
-        expect(behaviors.renderer.setAttribute).toHaveBeenCalledWith(group.id, "transform", `scale(${ data.scale.x },${ data.scale.y })`)
+        expect(behaviors.renderer.setAttribute).toHaveBeenNthCalledWith(1, group.id, "transform", `scale(${ data.scale.x },${ data.scale.y })`)
+        expect(behaviors.renderer.setAttribute).toHaveBeenNthCalledWith(2, stroke.id, "transform", `scale(${ data.scale.x },${ data.scale.y })`)
       })
       test(`shoud end with direction: "${ data.direction }"`, async () =>
       {
         await manager.end(resizeToPoint)
-
         expect(manager.applyToSymbol).toHaveBeenCalledTimes(1)
         expect(behaviors.selector.resetSelectedGroup).toHaveBeenCalledTimes(1)
         expect(behaviors.selector.resetSelectedGroup).toHaveBeenCalledWith([stroke])

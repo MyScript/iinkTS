@@ -159,7 +159,7 @@ describe("OIRotationManager.ts", () =>
     {
       const group = document.createElementNS("http://www.w3.org/2000/svg", "g")
       group.setAttribute("id", "group-id")
-      group.setAttribute("role", SvgElementRole.Selected)
+      group.setAttribute("role", SvgElementRole.InteractElementsGroup)
       const rotateElement = document.createElementNS("http://www.w3.org/2000/svg", "circle")
       rotateElement.setAttribute("cx", rotateOrigin.x.toString())
       rotateElement.setAttribute("cy", rotateOrigin.y.toString())
@@ -169,18 +169,18 @@ describe("OIRotationManager.ts", () =>
       {
         manager.start(rotateElement, rotateOrigin)
 
-        expect(manager.wrapper).toEqual(group)
+        expect(manager.interactElementsGroup).toEqual(group)
         expect(manager.center).toEqual(rotateCenter)
         expect(manager.origin).toEqual(rotateOrigin)
-        expect(behaviors.renderer.setAttribute).toHaveBeenCalledTimes(1)
-        expect(behaviors.renderer.setAttribute).toHaveBeenCalledWith(group.id, "transform-origin", `${ rotateCenter.x }px ${ rotateCenter.y }px`)
+        expect(behaviors.renderer.setAttribute).toHaveBeenNthCalledWith(1, group.id, "transform-origin", `${ rotateCenter.x }px ${ rotateCenter.y }px`)
+        expect(behaviors.renderer.setAttribute).toHaveBeenNthCalledWith(2, stroke.id, "transform-origin", `${ rotateCenter.x }px ${ rotateCenter.y }px`)
       })
       test(`shoud continu with angle: "${ data.angle }°`, () =>
       {
         expect(manager.continue(data.rotateToPoint)).toEqual(data.angle)
 
-        expect(behaviors.renderer.setAttribute).toHaveBeenCalledTimes(1)
-        expect(behaviors.renderer.setAttribute).toHaveBeenCalledWith(group.id, "transform", `rotate(${ data.angle })`)
+        expect(behaviors.renderer.setAttribute).toHaveBeenNthCalledWith(1, group.id, "transform", `rotate(${ data.angle })`)
+        expect(behaviors.renderer.setAttribute).toHaveBeenNthCalledWith(2, stroke.id, "transform", `rotate(${ data.angle })`)
       })
       test(`shoud end with angle: "${ data.angle }°`, async () =>
       {

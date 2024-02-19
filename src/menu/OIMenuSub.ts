@@ -4,19 +4,17 @@
 export class OIMenuSub
 {
   element: HTMLDivElement
-  trigger: HTMLElement
   content: HTMLElement
 
   constructor(trigger: HTMLElement, subMenu: HTMLElement, position: "top" | "left" | "right" | "bottom" | "bottom-left" = "top")
   {
-    this.trigger = trigger
+    this.element = document.createElement("div")
+    this.element.classList.add("sub-menu")
+    this.element.appendChild(trigger)
 
     this.content = document.createElement("div")
-    this.content.classList.add("sub-menu", position)
+    this.content.classList.add("sub-menu-content", position)
     this.content.appendChild(subMenu)
-
-    this.element = document.createElement("div")
-    this.element.appendChild(this.trigger)
     this.element.appendChild(this.content)
 
     trigger.addEventListener("pointerdown", () => {
@@ -33,14 +31,14 @@ export class OIMenuSub
 
   unwrap(): void
   {
-    this.content.classList.remove("sub-menu")
+    this.content.classList.remove("sub-menu-content")
     this.element.insertAdjacentElement("beforebegin", this.content)
     this.element.style.display = "none"
   }
 
   wrap(): void
   {
-    this.content.classList.add("sub-menu")
+    this.content.classList.add("sub-menu-content")
     this.element.appendChild(this.content)
     this.element.style.display = "block"
   }

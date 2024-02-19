@@ -80,8 +80,7 @@ export class OIWriteManager
     else {
       this.renderer.parent.classList.remove("shape")
     }
-    this.behaviors.menu.update()
-    this.selector.removeSelectedGroup()
+    this.behaviors.unselectAll()
   }
 
   get model(): OIModel

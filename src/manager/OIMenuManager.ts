@@ -2,6 +2,7 @@ import { LoggerClass } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerManager } from "../logger"
 import { OIMenuAction, OIMenuIntention, OIMenuStyle } from "../menu"
+import { OIMenuContext } from "../menu/OIMenuContext"
 import { PartialDeep } from "../utils"
 
 /**
@@ -14,9 +15,10 @@ export class OIMenuManager
   layer?: HTMLElement
   action: OIMenuAction
   intention: OIMenuIntention
+  context: OIMenuContext
   style: OIMenuStyle
 
-  constructor(behaviors: OIBehaviors, custom?: PartialDeep<{ style?: OIMenuStyle, intention?: OIMenuIntention, action?: OIMenuAction }>)
+  constructor(behaviors: OIBehaviors, custom?: PartialDeep<{ style?: OIMenuStyle, intention?: OIMenuIntention, action?: OIMenuAction, context?: OIMenuContext}>)
   {
     this.#logger.info("constructor")
     this.behaviors = behaviors
@@ -42,6 +44,13 @@ export class OIMenuManager
     else {
       this.action = new OIMenuAction(this.behaviors)
     }
+    if (custom?.context) {
+      const CustomMenuAction = custom.context as unknown as typeof OIMenuContext
+      this.context = new CustomMenuAction(this.behaviors)
+    }
+    else {
+      this.context = new OIMenuContext(this.behaviors)
+    }
   }
 
   render(layer: HTMLElement): void
@@ -56,6 +65,9 @@ export class OIMenuManager
       }
       if (this.behaviors.configuration.menu.intention.enable) {
         this.intention.render(this.layer)
+      }
+      if (this.behaviors.configuration.menu.context.enable) {
+        this.context.render(this.layer)
       }
     }
   }

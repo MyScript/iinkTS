@@ -63,6 +63,18 @@ export class OIShapeEllipse extends OIShape
     return clone
   }
 
+  toJSON(): PartialDeep<OIShapeEllipse>
+  {
+    return {
+      id: this.id,
+      type: this.type,
+      kind: this.kind,
+      radiusX: this.radiusX,
+      radiusY: this.radiusY,
+      style: this.style,
+    }
+  }
+
   static createFromLine(style: TStyle, origin: TPoint, target: TPoint): OIShapeEllipse
   {
     const center = {

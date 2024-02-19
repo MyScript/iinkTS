@@ -122,6 +122,10 @@ export class OIModel implements IModel
   addSymbol(symbol: TOISymbol): void
   {
     this.#logger.info("addSymbol", { symbol })
+    const sIndex = this.symbols.findIndex(s => s.id === symbol.id)
+    if (sIndex > -1) {
+      throw new Error(`Symbol id already exist: ${symbol.id}`)
+    }
     this.symbols.push(symbol)
     this.modificationDate = Date.now()
     this.converts = undefined
@@ -236,7 +240,11 @@ export class OIModel implements IModel
     this.#logger.info("clone")
     const clonedModel = new OIModel(this.width, this.height, this.rowHeight, this.creationTime)
     clonedModel.modificationDate = this.modificationDate
-    clonedModel.symbols = this.symbols.map(s => s.clone())
+    clonedModel.symbols = this.symbols.map(s => {
+      const c = s.clone()
+      c.selected = false
+      return c
+    })
     clonedModel.positions = structuredClone(this.positions)
     clonedModel.exports = structuredClone(this.exports)
     clonedModel.idle = this.idle

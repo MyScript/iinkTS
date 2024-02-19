@@ -23,6 +23,7 @@ export type TGrabberConfiguration = {
   listenerOptions: TListenerConfiguration
   xyFloatPrecision: number
   timestampFloatPrecision: number
+  delayLongTouch: number
 }
 
 /**
@@ -31,5 +32,6 @@ export type TGrabberConfiguration = {
 export const DefaultGrabberConfiguration: TGrabberConfiguration = {
   listenerOptions: DefaultListenerConfiguration,
   xyFloatPrecision: 0,
-  timestampFloatPrecision: 0
+  timestampFloatPrecision: 0,
+  delayLongTouch: 500
 }

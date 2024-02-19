@@ -44,6 +44,15 @@ describe("OISelectionManager.ts", () =>
 
   describe("selected group", () =>
   {
+    Object.defineProperty(global.SVGElement.prototype, 'getBBox', {
+      writable: true,
+      value: jest.fn().mockReturnValue({
+        x: 0,
+        y: 0,
+        width: 10,
+        height: 10
+      }),
+    })
     const wrapperHTML: HTMLElement = document.createElement("div")
     const behaviors = new OIBehaviorsTest()
     const manager = new OISelectionManager(behaviors)
@@ -62,7 +71,7 @@ describe("OISelectionManager.ts", () =>
     test("should draw selected group", () =>
     {
       manager.drawSelectedGroup([stroke])
-      const group = behaviors.renderer.layer.querySelector("[role=\"selected\"]") as SVGGElement
+      const group = behaviors.renderer.layer.querySelector(`[role=${ SvgElementRole.InteractElementsGroup }]`) as SVGGElement
       expect(group).not.toBeNull()
       const translateRect = group?.querySelector(`[role=${ SvgElementRole.Translate }]`)
       expect(translateRect?.getAttribute("x")).toEqual((stroke.boundingBox.x - (stroke.style.width || 1)).toString())
@@ -77,9 +86,6 @@ describe("OISelectionManager.ts", () =>
       expect(cornerResizeElement).toHaveLength(4)
       const edgeResizeElement = group.querySelectorAll(`line[role=${ SvgElementRole.Resize }]`)
       expect(edgeResizeElement).toHaveLength(4)
-
-      const strokePath = group.querySelectorAll(`[id=${ stroke.id }]`)
-      expect(strokePath).toHaveLength(1)
     })
   })
 

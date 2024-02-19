@@ -21,6 +21,9 @@
         height: calc(100dvh - 62px);
         resize: none;
       }
+      #show-symbols-to-import-btn {
+        display: none;
+      }
       @media only screen and (max-width: 900px) {
         #show-symbols-to-import-btn {
           display: block;
@@ -111,6 +114,7 @@
         await editor.initialize();
 
         importBtn.addEventListener("click", async () => {
+          importBtn.disabled = true;
           await editor.importPointEvents(JSON.parse(pointerEventsObjectElement.value));
         });
 

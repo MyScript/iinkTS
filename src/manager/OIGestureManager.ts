@@ -98,6 +98,7 @@ export class OIGestureManager
         {
           this.model.selectSymbol(id)
         })
+        this.model.symbolsSelected.forEach(s => this.renderer.drawSymbol(s))
         this.selector.drawSelectedGroup(this.model.symbolsSelected)
         this.behaviors.internalEvent.emitSelected(this.model.symbolsSelected)
         break
@@ -107,7 +108,8 @@ export class OIGestureManager
         symbolsToHightlight.forEach(s =>
         {
           const highlight = new OIDecorator(DecoratorKind.Highlight, this.currentStyle, s)
-          s.decorators.push(highlight)
+          const index = s.decorators.findIndex(d => d.kind === DecoratorKind.Highlight)
+          index > -1 ? s.decorators.splice(index, 1, highlight) : s.decorators.push(highlight)
           this.model.updateSymbol(s)
           this.renderer.drawSymbol(s)
         })
@@ -340,7 +342,8 @@ export class OIGestureManager
     symbolsToUnderline.forEach(s =>
     {
       const underline = new OIDecorator(DecoratorKind.Underline, this.currentStyle, s)
-      s.decorators.push(underline)
+      const index = s.decorators.findIndex(d => d.kind === DecoratorKind.Underline)
+      index > -1 ? s.decorators.splice(index, 1, underline) : s.decorators.push(underline)
       this.model.updateSymbol(s)
       this.renderer.drawSymbol(s)
     })
@@ -360,7 +363,8 @@ export class OIGestureManager
         symbolsToStrikethrough.forEach(s =>
         {
           const strikethrough = new OIDecorator(DecoratorKind.Strikethrough, this.currentStyle, s)
-          s.decorators.push(strikethrough)
+          const index = s.decorators.findIndex(d => d.kind === DecoratorKind.Strikethrough)
+          index > -1 ? s.decorators.splice(index, 1, strikethrough) : s.decorators.push(strikethrough)
           this.model.updateSymbol(s)
           this.renderer.drawSymbol(s)
         })

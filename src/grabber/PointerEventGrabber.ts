@@ -102,7 +102,7 @@ export class PointerEventGrabber implements IGrabber
     }
   }
 
-  private pointerOutHandler = (evt: PointerEvent) =>
+  protected pointerOutHandler = (evt: PointerEvent) =>
   {
     if (
       this.activePointerId != undefined && this.activePointerId === evt.pointerId &&

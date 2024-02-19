@@ -38,6 +38,20 @@ export class OIEdgeLine extends OIEdge
     return clone
   }
 
+  toJSON(): PartialDeep<OIEdgeLine>
+  {
+    return {
+      id: this.id,
+      type: this.type,
+      kind: this.kind,
+      start: this.start,
+      end: this.end,
+      style: this.style,
+      startDecoration: this.startDecoration,
+      endDecoration: this.endDecoration,
+    }
+  }
+
   static create(partial: PartialDeep<OIEdgeLine>): OIEdgeLine
   {
     if (!isValidPoint(partial?.start)) throw new Error(`Unable to create a arc, start point is invalid`)
