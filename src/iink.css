@@ -187,6 +187,11 @@
     right: -12px;
     transform: translate(100%, -50%);
 }
+.ms-editor .ms-tooltip .ms-tooltip-content.bottom {
+    bottom: -12px;
+    left: 50%;
+    transform: translate(-50%, 100%);
+}
 
 /** smartguide **/
 .ms-editor .smartguide {
@@ -443,6 +448,11 @@
     min-width: 125px;
     max-width: 125px;
 }
+.ms-editor .ms-menu .select-language {
+    width: auto;
+    height: 32px;
+    padding: 0px 8px;
+}
 
 .ms-editor .ms-menu-item.list button {
     display: flex;
@@ -503,6 +513,8 @@
     position: relative;
     padding: 4px;
 }
+.ms-editor .ms-menu .ms-menu-button:focus,
+.ms-editor .ms-menu .ms-menu-button:active,
 .ms-editor .ms-menu .ms-menu-button.active {
     border: 1px solid #1A9FFF;
     color: #1A9FFF;

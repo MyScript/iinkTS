@@ -24,10 +24,10 @@ export class OIMenuSub
       const close = (e: PointerEvent) => {
         if (!this.element.contains(e.target as HTMLElement)) {
           this.content.classList.remove("open")
-          document.removeEventListener("pointerup", close)
+          document.removeEventListener("pointerdown", close)
         }
       }
-      document.addEventListener("pointerup", close)
+      document.addEventListener("pointerdown", close)
     })
   }
 

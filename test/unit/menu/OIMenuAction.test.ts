@@ -1,9 +1,15 @@
 import { OIBehaviorsTest } from "../OIBehaviorsTest"
 import { OIMenuAction } from "../../../src/iink"
 
-
 describe("OIMenuAction.ts", () =>
 {
+  global.fetch = jest.fn(() =>
+    Promise.resolve({
+      json: () => Promise.resolve({ result: { fr: "fr_FR" } }),
+    }),
+  ) as jest.Mock
+  Object.defineProperty(HTMLElement.prototype, 'clientWidth', { configurable: true, value: 500 })
+
   test("should create", () =>
   {
     const behaviors = new OIBehaviorsTest()
@@ -15,6 +21,7 @@ describe("OIMenuAction.ts", () =>
   {
     const layer = document.createElement("div")
     const behaviors = new OIBehaviorsTest()
+    behaviors.init(behaviors.layerInfos)
     const menu = new OIMenuAction(behaviors)
     menu.render(layer)
     test("should render menu action", () =>
@@ -40,6 +47,10 @@ describe("OIMenuAction.ts", () =>
     test("should render menu clear", () =>
     {
       expect(layer.querySelector("#ms-menu-action-clear")).not.toBeNull()
+    })
+    test("should render menu language", () =>
+    {
+      expect(layer.querySelector("#ms-menu-action-language")).not.toBeNull()
     })
     test("should render menu undo", () =>
     {
@@ -87,7 +98,7 @@ describe("OIMenuAction.ts", () =>
     test("should remove elements", () =>
     {
       expect(layer.childElementCount).toEqual(1)
-      expect(menu.wrapper?.childElementCount).toEqual(5)
+      expect(menu.wrapper?.childElementCount).toEqual(6)
       menu.destroy()
       expect(layer.childElementCount).toEqual(0)
       expect(menu.wrapper).toBeUndefined()

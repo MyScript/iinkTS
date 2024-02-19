@@ -4,7 +4,7 @@ import { PartialDeep } from "./types"
 /**
  * @group Utils
  */
-export async function getAvailableLanguageList(configuration: PartialDeep<TConfiguration>): Promise<Array<Record<string, string>>>
+export async function getAvailableLanguageList(configuration: PartialDeep<TConfiguration>): Promise<{ result: { [key: string]: string } }>
 {
   if (configuration?.server?.scheme && configuration?.server?.host) {
     const serverConfig = configuration.server

@@ -1,4 +1,5 @@
 import menuIcon from "../assets/svg/menu.svg"
+import languageIcon from "../assets/svg/language.svg"
 import trashIcon from "../assets/svg/trash.svg"
 import undoIcon from "../assets/svg/undo.svg"
 import redoIcon from "../assets/svg/redo.svg"
@@ -15,6 +16,7 @@ import { OIMenu, TMenuItemBoolean, TMenuItemButtonList, TMenuItemSelect } from "
 import { SymbolType } from "../primitive"
 import { StrikeThroughAction, SurroundAction } from "../gesture"
 import { OIMenuSub } from "./OIMenuSub"
+import { getAvailableLanguageList } from "../utils"
 
 /**
  * Menu
@@ -26,6 +28,7 @@ export class OIMenuAction extends OIMenu
   behaviors: OIBehaviors
   id: string
   wrapper?: HTMLElement
+  menuLanguage!: OIMenuSub
   menuClear?: HTMLButtonElement
   menuUndo?: HTMLButtonElement
   menuRedo?: HTMLButtonElement
@@ -60,6 +63,11 @@ export class OIMenuAction extends OIMenu
     return this.behaviors.model
   }
 
+  get isMobile(): boolean
+  {
+    return this.behaviors.renderer.parent.clientWidth < 700
+  }
+
   protected createMenuClear(): HTMLElement
   {
     this.menuClear = document.createElement("button")
@@ -67,7 +75,37 @@ export class OIMenuAction extends OIMenu
     this.menuClear.classList.add("ms-menu-button", "icon")
     this.menuClear.innerHTML = trashIcon
     this.menuClear.addEventListener("pointerup", () => this.behaviors.clear())
-    return this.createToolTip(this.menuClear, "Clear", "right")
+    return this.createToolTip(this.menuClear, "Clear", "bottom")
+  }
+
+  protected createMenuLanguage(): HTMLElement
+  {
+    const triggerBtn = document.createElement("button")
+    triggerBtn.id = this.id
+    triggerBtn.classList.add("ms-menu-button", "icon")
+    triggerBtn.innerHTML = languageIcon
+
+    const select = document.createElement("select")
+    select.classList.add("select-language")
+    select.id = `${ this.id }-language`
+    getAvailableLanguageList(this.behaviors.configuration)
+      .then(json =>
+      {
+        const languages = json.result as { [key: string]: string }
+        Object.keys(languages).forEach(key =>
+        {
+          const selected = key === this.behaviors.configuration.recognition.lang
+          const opt = new Option(languages[key], key, selected, selected)
+          select.appendChild(opt)
+        })
+      })
+    select.addEventListener("change", (e) =>
+    {
+      const value = (e.target as HTMLInputElement).value
+      this.behaviors.changeLanguage(value)
+    })
+    this.menuLanguage = this.createSubMenu(this.createToolTip(triggerBtn, "Language", "bottom"), select, "bottom")
+    return this.menuLanguage.element
   }
 
   protected createMenuUndo(): HTMLElement
@@ -77,7 +115,7 @@ export class OIMenuAction extends OIMenu
     this.menuUndo.classList.add("ms-menu-button", "icon")
     this.menuUndo.innerHTML = undoIcon
     this.menuUndo.addEventListener("pointerup", () => this.behaviors.undo())
-    return this.createToolTip(this.menuUndo, "Undo", "right")
+    return this.createToolTip(this.menuUndo, "Undo", "bottom")
   }
 
   protected createMenuRedo(): HTMLElement
@@ -87,7 +125,7 @@ export class OIMenuAction extends OIMenu
     this.menuRedo.classList.add("ms-menu-button", "icon")
     this.menuRedo.innerHTML = redoIcon
     this.menuRedo.addEventListener("pointerup", () => this.behaviors.redo())
-    return this.createToolTip(this.menuRedo, "Redo", "right")
+    return this.createToolTip(this.menuRedo, "Redo", "bottom")
   }
 
   protected createMenuConvert(): HTMLElement
@@ -100,7 +138,7 @@ export class OIMenuAction extends OIMenu
     {
       this.behaviors.convert()
     })
-    return this.createToolTip(this.menuConvert, "Convert", "right")
+    return this.createToolTip(this.menuConvert, "Convert", "bottom")
   }
 
   protected createMenuGesture(): void
@@ -217,8 +255,8 @@ export class OIMenuAction extends OIMenu
   protected createMenuSnap(): void
   {
     const trigger = document.createElement("button")
-    trigger.id = `${this.id}-snap`,
-    trigger.classList.add("ms-menu-button", "icon")
+    trigger.id = `${ this.id }-snap`,
+      trigger.classList.add("ms-menu-button", "icon")
     trigger.innerHTML = snapIcon
 
     const subMenuWrapper = document.createElement("div")
@@ -227,21 +265,21 @@ export class OIMenuAction extends OIMenu
     const menuItems: (TMenuItemBoolean | TMenuItemSelect)[] = [
       {
         type: "checkbox",
-        id: `${this.id}-snap-to-guide`,
+        id: `${ this.id }-snap-to-guide`,
         label: "Snap to guide",
         initValue: this.behaviors.snaps.snapToGrid,
         callback: (value) => this.behaviors.snaps.snapToGrid = value
       },
       {
         type: "checkbox",
-        id: `${this.id}-snap-to-element`,
+        id: `${ this.id }-snap-to-element`,
         label: "Snap to element",
         initValue: this.behaviors.snaps.snapToElement,
         callback: (value) => this.behaviors.snaps.snapToElement = value
       },
       {
         type: "select",
-        id: `${this.id}-snap-angle`,
+        id: `${ this.id }-snap-angle`,
         label: "Snap angle",
         values: [
           { label: "None", value: "0" },
@@ -265,42 +303,42 @@ export class OIMenuAction extends OIMenu
   protected createMenuDebug(): void
   {
     const menuDebug = document.createElement("button")
-    menuDebug.id = `${this.id}-debug`
+    menuDebug.id = `${ this.id }-debug`
     menuDebug.classList.add("ms-menu-button", "icon")
     menuDebug.innerHTML = debugIcon
 
     const menuItems: TMenuItemBoolean[] = [
       {
         type: "checkbox",
-        id: `${this.id}-debug-bounding-box`,
+        id: `${ this.id }-debug-bounding-box`,
         label: "Show bounding box",
         initValue: this.behaviors.svgDebugger.boundingBoxVisibility,
         callback: (debug) => this.behaviors.svgDebugger.boundingBoxVisibility = debug
       },
       {
         type: "checkbox",
-        id: `${this.id}-debug-recognition-box`,
+        id: `${ this.id }-debug-recognition-box`,
         label: "Show recognition box",
         initValue: this.behaviors.svgDebugger.recognitionBoxVisibility,
         callback: (debug) => this.behaviors.svgDebugger.recognitionBoxVisibility = debug
       },
       {
         type: "checkbox",
-        id: `${this.id}-debug-bounding-item-box`,
+        id: `${ this.id }-debug-bounding-item-box`,
         label: "Show recognition item box",
         initValue: this.behaviors.svgDebugger.recognitionItemBoxVisibility,
         callback: (debug) => this.behaviors.svgDebugger.recognitionItemBoxVisibility = debug
       },
       {
         type: "checkbox",
-        id: `${this.id}-debug-snap-points`,
+        id: `${ this.id }-debug-snap-points`,
         label: "Show snap points",
         initValue: this.behaviors.svgDebugger.snapPointsVisibility,
         callback: (debug) => this.behaviors.svgDebugger.snapPointsVisibility = debug
       },
       {
         type: "checkbox",
-        id: `${this.id}-debug-vertices`,
+        id: `${ this.id }-debug-vertices`,
         label: "Show vertices",
         initValue: this.behaviors.svgDebugger.verticesVisibility,
         callback: (debug) => this.behaviors.svgDebugger.verticesVisibility = debug
@@ -342,7 +380,8 @@ export class OIMenuAction extends OIMenu
 
       this.wrapper = document.createElement("div")
       this.wrapper.classList.add("ms-menu", "ms-menu-top-left", "ms-menu-row")
-      this.wrapper.appendChild(this.createSubMenu(this.createToolTip(menuTrigger, "Menu", "right"), subMenuWrapper, "bottom").element)
+      this.wrapper.appendChild(this.createSubMenu(this.createToolTip(menuTrigger, "Menu", "bottom"), subMenuWrapper, "bottom").element)
+      this.wrapper.appendChild(this.createMenuLanguage())
       this.wrapper.appendChild(this.createMenuClear())
       this.wrapper.appendChild(this.createMenuUndo())
       this.wrapper.appendChild(this.createMenuRedo())
@@ -356,6 +395,9 @@ export class OIMenuAction extends OIMenu
 
   update(): void
   {
+    if (this.menuLanguage) {
+      this.isMobile ? this.menuLanguage.wrap() : this.menuLanguage.unwrap()
+    }
     if (this.menuClear) {
       this.menuClear.disabled = this.behaviors.context.empty
     }

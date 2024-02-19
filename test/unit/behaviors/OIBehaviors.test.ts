@@ -24,6 +24,11 @@ import
 
 describe("OIBehaviors.ts", () =>
 {
+  global.fetch = jest.fn(() =>
+    Promise.resolve({
+      json: () => Promise.resolve({ result: { fr: "fr_FR" } }),
+    }),
+  ) as jest.Mock
   const DefaultBehaviorsOptions: TBehaviorOptions = {
     configuration: JSON.parse(JSON.stringify(DefaultConfiguration))
   }
