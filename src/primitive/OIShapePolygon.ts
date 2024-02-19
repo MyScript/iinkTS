@@ -37,6 +37,17 @@ export class OIShapePolygon extends OIShape
     return clone
   }
 
+  toJSON(): PartialDeep<OIShapePolygon>
+  {
+    return {
+      id: this.id,
+      type: this.type,
+      kind: this.kind,
+      points: this.points,
+      style: this.style,
+    }
+  }
+
   static create(partial: PartialDeep<OIShapePolygon>): OIShapePolygon
   {
     if (!partial?.points || partial?.points?.length < 3) throw new Error(`Unable to create polygon at least 3 points required`)

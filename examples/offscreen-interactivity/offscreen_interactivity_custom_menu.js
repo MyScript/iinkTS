@@ -51,7 +51,19 @@ class CustomMenuStyle extends iink.OIMenuStyle {
     const symbolsStyles = this.symbolsSelected.map(s => s.style)
     const hasUniqColor = symbolsStyles.length && symbolsStyles.every(st => st.color === symbolsStyles[0]?.color)
     const color = hasUniqColor && symbolsStyles[0]?.color ? symbolsStyles[0]?.color : (this.behaviors.currentPenStyle.color || "rgb(0, 0, 0)")
-    return this.createMenuColor("color", color)
+    const menuColorStrokeDef = {
+      type: "colors",
+      label: "Colors",
+      id: `${ this.id }-color`,
+      fill: false,
+      values: this.colors,
+      initValue: color,
+      callback: (color) => {
+        this.behaviors.setPenStyle({ color })
+        this.behaviors.updateSymbolsStyle(this.symbolsSelected.map(s => s.id), { color })
+      },
+    }
+    return this.createColorList(menuColorStrokeDef)
   }
 
   render(layer)
@@ -121,14 +133,13 @@ class CustomMenuIntention extends iink.OIMenuIntention {
     const symbolsStyles = this.symbolsSelected.map(s => s.style)
     const hasUniqColor = symbolsStyles.length && symbolsStyles.every(st => st.color === symbolsStyles[0]?.color)
     const color = hasUniqColor && symbolsStyles[0]?.color ? symbolsStyles[0]?.color : (this.behaviors.currentPenStyle.color || "rgb(0, 0, 0)")
-    this.menuColorStroke = this.createMenuColor("color", color)
+    this.menuColorStroke = this.createColorList("color", color)
     this.menuColorStroke.style.setProperty("margin-top", "12px")
     return this.menuColorStroke
   }
 
   render(layer)
   {
-    console.log('layer: ', layer);
     this.wrapper = document.createElement("div")
     this.wrapper.classList.add("ms-menu", "custom-menu-intention")
 
@@ -146,7 +157,6 @@ class CustomMenuAction extends iink.OIMenuAction {
 
   render(layer)
   {
-    console.log('layer: ', layer);
     this.wrapper = document.createElement("div")
     this.wrapper.classList.add("ms-menu", "custom-menu-action")
     this.wrapper.appendChild(this.createMenuClear())

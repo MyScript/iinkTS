@@ -35,7 +35,7 @@ export class OIResizeManager
   #logger = LoggerManager.getLogger(LoggerClass.TRANSFORMER)
   behaviors: OIBehaviors
 
-  wrapper?: SVGElement
+  interactElementsGroup?: SVGElement
   direction!: ResizeDirection
   boundingBox!: Box
   transformOrigin!: TPoint
@@ -194,22 +194,25 @@ export class OIResizeManager
   start(target: Element, origin: TPoint): void
   {
     this.#logger.info("start", { target })
-    this.wrapper = (target.closest(`[role=${ SvgElementRole.Selected }]`) as unknown) as SVGGElement
+    this.interactElementsGroup = (target.closest(`[role=${ SvgElementRole.InteractElementsGroup }]`) as unknown) as SVGGElement
     this.direction = target.getAttribute("resize-direction") as ResizeDirection
 
     this.keepRatio = this.model.symbolsSelected.some(s => s.type === SymbolType.Text || (s.type === SymbolType.Shape && (s as TOIShape).kind === ShapeKind.Circle))
 
     this.transformOrigin = origin
     this.boundingBox = Box.createFromPoints(this.model.symbolsSelected.flatMap(s => s.vertices))
+    this.setTransformOrigin(this.interactElementsGroup!.id, this.transformOrigin.x, this.transformOrigin.y)
+    this.model.symbolsSelected.forEach(s => {
+      this.setTransformOrigin(s.id, this.transformOrigin.x, this.transformOrigin.y)
+    })
 
-    this.setTransformOrigin(this.wrapper!.id, this.transformOrigin.x, this.transformOrigin.y)
-    this.selector.hideSelectedElements()
+    this.selector.hideInteractElements()
   }
 
   continue(point: TPoint): { scaleX: number, scaleY: number }
   {
     this.#logger.info("continue", { point })
-    if (!this.wrapper) {
+    if (!this.interactElementsGroup) {
       throw new Error("Can't resize, you must call start before")
     }
     const localPoint = point
@@ -263,7 +266,10 @@ export class OIResizeManager
         scaleY = scaleX
       }
     }
-    this.scaleElement(this.wrapper.id, scaleX, scaleY)
+    this.scaleElement(this.interactElementsGroup.id, scaleX, scaleY)
+    this.model.symbolsSelected.forEach(s => {
+      this.scaleElement(s.id, scaleX, scaleY)
+    })
     return {
       scaleX,
       scaleY
@@ -288,8 +294,8 @@ export class OIResizeManager
     const promise = this.recognizer.replaceStrokes(strokesResized.map(s => s.id), strokesResized)
     this.selector.resetSelectedGroup(this.model.symbolsSelected)
     this.undoRedoManager.addModelToStack(this.model)
-    this.wrapper = undefined
-    this.selector.showSelectedElements()
+    this.interactElementsGroup = undefined
+    this.selector.showInteractElements()
     await promise
     await this.svgDebugger.apply()
   }

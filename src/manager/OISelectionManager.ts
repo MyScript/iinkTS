@@ -5,7 +5,6 @@ import { LoggerManager } from "../logger"
 import { OIModel } from "../model"
 import { Box, OIText, SymbolType, TBoundingBox, TOISymbol, TPoint } from "../primitive"
 import { OISVGRenderer, SVGBuilder } from "../renderer"
-import { StyleHelper } from "../style"
 import { OIResizeManager } from "./OIResizeManager"
 import { OIRotationManager } from "./OIRotationManager"
 import { OITranslateManager } from "./OITranslateManager"
@@ -128,6 +127,9 @@ export class OISelectionManager
 
     translateEl.addEventListener("pointerdown", (ev) =>
     {
+      if (ev.button !== 0 || ev.buttons !== 1) {
+        return
+      }
       ev.preventDefault()
       ev.stopPropagation()
       this.translator.start(ev.target as Element, this.getPoint(ev))
@@ -185,6 +187,9 @@ export class OISelectionManager
 
     group.addEventListener("pointerdown", (ev) =>
     {
+      if (ev.button !== 0 || ev.buttons !== 1) {
+        return
+      }
       ev.preventDefault()
       ev.stopPropagation()
       this.rotator.start(ev.target as Element, this.getPoint(ev))
@@ -230,6 +235,9 @@ export class OISelectionManager
 
       el.addEventListener("pointerdown", (ev) =>
       {
+        if (ev.button !== 0 || ev.buttons !== 1) {
+          return
+        }
         ev.preventDefault()
         ev.stopPropagation()
         this.resizer.start(ev.target as Element, transformOrigin)
@@ -282,22 +290,9 @@ export class OISelectionManager
     return group
   }
 
-  protected createSelectedGroup(box: TBoundingBox): SVGGElement
+  protected createInteractElementsGroup(symbols: TOISymbol[]): SVGGElement | undefined
   {
-    const attrs = {
-      id: `selected-${ Date.now() }`,
-      role: SvgElementRole.Selected,
-    }
-    const surroundGroup = SVGBuilder.createGroup(attrs)
-    surroundGroup.appendChild(this.createTranslateRect(box))
-    surroundGroup.appendChild(this.createResizeGroup(box))
-    surroundGroup.appendChild(this.createRotateGroup(box))
-    return surroundGroup
-  }
-
-  protected wrapSymbols(symbols: TOISymbol[]): SVGGElement | undefined
-  {
-    this.#logger.info("drawSelectedGroup", { symbols })
+    this.#logger.info("createInteractElementsGroup", { symbols })
 
     if (!symbols.length) return
 
@@ -322,13 +317,14 @@ export class OISelectionManager
     const box2 = Box.createFromPoints(symbols.flatMap(s => s.vertices))
     const box = Box.createFromBoxes([box1, box2])
 
-    const surroundGroup = this.createSelectedGroup(box)
-    symbolElementMap.forEach(se =>
-    {
-      se.element?.setAttribute("filter", `url(#${ this.renderer.selectionFilterId })`)
-      se.element?.setAttribute("style", "pointer-events:none;" + se.element?.getAttribute("style"))
-    })
-
+    const attrs = {
+      id: `selected-${ Date.now() }`,
+      role: SvgElementRole.InteractElementsGroup,
+    }
+    const surroundGroup = SVGBuilder.createGroup(attrs)
+    surroundGroup.appendChild(this.createTranslateRect(box))
+    surroundGroup.appendChild(this.createResizeGroup(box))
+    surroundGroup.appendChild(this.createRotateGroup(box))
     const SURROUND_ATTRS = {
       style: "pointer-events: none",
       fill: "transparent",
@@ -349,13 +345,12 @@ export class OISelectionManager
         }
         if (s.symbol.type === SymbolType.Text) {
           const t = s.symbol as OIText
-          SURROUND_ATTRS.transform = `rotate(${t.rotation?.degree || 0}, ${t.rotation?.center.x || 0}, ${t.rotation?.center.y || 0})`
+          SURROUND_ATTRS.transform = `rotate(${ t.rotation?.degree || 0 }, ${ t.rotation?.center.x || 0 }, ${ t.rotation?.center.y || 0 })`
         }
         else {
           SURROUND_ATTRS.transform = "rotate(0, 0, 0)"
         }
         surroundGroup.prepend(SVGBuilder.createRect(bounds, SURROUND_ATTRS))
-        surroundGroup.insertAdjacentElement("afterbegin", s.element)
       }
     })
     return surroundGroup
@@ -364,15 +359,20 @@ export class OISelectionManager
   drawSelectedGroup(symbols: TOISymbol[]): void
   {
     if (!symbols.length) return
-    this.selectedGroup = this.wrapSymbols(symbols)
+    this.selectedGroup = this.createInteractElementsGroup(symbols)
     if (this.selectedGroup) {
-      this.renderer.appendElement(this.selectedGroup)
+      this.renderer.layer.appendChild(this.selectedGroup)
+      const groupBox = this.selectedGroup.getBBox()
+      this.behaviors.menu.context.position.x = groupBox.x + groupBox.width / 2 - this.renderer.parent.clientLeft
+      this.behaviors.menu.context.position.y = groupBox.y + groupBox.height - this.renderer.parent.clientTop
+      this.behaviors.menu.context.show()
     }
+    this.behaviors.menu.update()
   }
 
   resetSelectedGroup(symbols: TOISymbol[]): void
   {
-    this.#logger.info("resetSelectedGroup", { strokes: symbols })
+    this.#logger.info("resetSelectedGroup", { symbols })
     this.removeSelectedGroup()
     this.drawSelectedGroup(symbols)
   }
@@ -380,25 +380,14 @@ export class OISelectionManager
   removeSelectedGroup(): void
   {
     this.#logger.info("removeSelectedGroup")
-    const querySymbols = Object.values(SymbolType).map(v => `[type=${ v }]`).join(",")
-    this.selectedGroup?.querySelectorAll(querySymbols)
-      .forEach(s =>
-      {
-        const style = s.getAttribute("style") as string
-        const styleJson = StyleHelper.stringToJSON(style)
-        styleJson["pointer-events"] = "stroke;"
-        // delete styleJson["pointer-events"]
-        s.setAttribute("style", StyleHelper.JSONToString(styleJson))
-        s.querySelectorAll("*").forEach(e => e.removeAttribute("filter"))
-        s.removeAttribute("filter")
-        this.selectedGroup?.insertAdjacentElement("beforebegin", s)
-      })
+    this.behaviors.menu.context.hide()
     this.selectedGroup?.remove()
     this.selectedGroup = undefined
   }
 
-  hideSelectedElements(): void
+  hideInteractElements(): void
   {
+    this.behaviors.menu.context.hide()
     const query = `[role=${ SvgElementRole.Resize }],[role=${ SvgElementRole.Rotate }],[role=${ SvgElementRole.Translate }]`
     this.selectedGroup?.querySelectorAll(query)
       .forEach(el =>
@@ -407,8 +396,9 @@ export class OISelectionManager
       })
   }
 
-  showSelectedElements(): void
+  showInteractElements(): void
   {
+    this.behaviors.menu.context.show()
     const query = `[role=${ SvgElementRole.Resize }],[role=${ SvgElementRole.Rotate }],[role=${ SvgElementRole.Translate }]`
     this.selectedGroup?.querySelectorAll(query)
       .forEach(el => el.setAttribute("visibility", "visible"))
@@ -449,7 +439,6 @@ export class OISelectionManager
     this.clearSelectingRect()
     this.drawSelectedGroup(this.model.symbolsSelected)
     this.internalEvent.emitSelected(this.model.symbolsSelected)
-    this.behaviors.menu.style.update()
     return updatedSymbols
   }
 }

@@ -32,6 +32,8 @@ export class OISVGRenderer
   configuration: TRenderingConfiguration
   parent!: HTMLElement
   layer!: SVGElement
+  definitionGroup!: SVGGElement
+
 
   strokeUtil: OISVGStrokeUtil
   eraserUtil: OISVGEraserUtil
@@ -60,16 +62,15 @@ export class OISVGRenderer
   {
     const width = Math.max(this.configuration.minWidth, this.parent.clientWidth)
     const height = Math.max(this.configuration.minHeight, this.parent.clientHeight)
-    this.layer = SVGBuilder.createLayer(width, height)
+    this.layer = SVGBuilder.createLayer({ x: 0, y: 0, width, height })
     this.layer.style.setProperty("height", "auto")
     this.layer.style.setProperty("width", "auto")
-    this.createFilters()
-    this.createDefs()
+    this.layer.appendChild(this.createSVGTools())
     this.parent.style.setProperty("overflow", "auto")
     this.parent.appendChild(this.layer)
   }
 
-  protected createDefs(): void
+  protected createDefs(): SVGDefsElement
   {
     const defs = SVGBuilder.createDefs()
 
@@ -105,21 +106,24 @@ export class OISVGRenderer
     cross.appendChild(SVGBuilder.createPath({ d: "M -4,-4 L 4,4 M -4,4 L 4,-4", stroke: "context-stroke", "stroke-width": "2" }))
     defs.appendChild(cross)
 
-    this.layer.appendChild(defs)
+    return defs
   }
 
-  protected createFilters(): void
+  protected createFilters(): SVGGElement
   {
+    const filtersGroup = SVGBuilder.createGroup({ id: "definition-group" })
     const removalFilter = SVGBuilder.createFilter(this.removalFilterId, { filterUnits: "userSpaceOnUse" })
     const bfeComponentTransfer = SVGBuilder.createComponentTransfert()
     const bfeFuncA = SVGBuilder.createTransfertFunctionTable("feFuncA", "0 0.25")
     bfeComponentTransfer.appendChild(bfeFuncA)
     removalFilter.appendChild(bfeComponentTransfer)
-    this.layer.appendChild(removalFilter)
+    filtersGroup.appendChild(removalFilter)
 
     const selectionFilter = SVGBuilder.createFilter(this.selectionFilterId, { filterUnits: "userSpaceOnUse" })
     selectionFilter.appendChild(SVGBuilder.createDropShadow({ dx: -1, dy: -1, deviation: 1 }))
-    this.layer.appendChild(selectionFilter)
+    filtersGroup.appendChild(selectionFilter)
+
+    return filtersGroup
   }
 
   protected drawGuides(): void
@@ -185,12 +189,12 @@ export class OISVGRenderer
         }
         break
       default:
-        this.#logger.error("#drawGuides", `Guide type unknow: ${ this.configuration.guides.type }`)
+        this.#logger.error("drawGuides", `Guide type unknow: ${ this.configuration.guides.type }`)
         break
     }
     this.horizontalGuides = [...new Set(this.horizontalGuides)]
     this.verticalGuides = [...new Set(this.verticalGuides)]
-    this.layer.appendChild(guidesGroup)
+    this.definitionGroup.appendChild(guidesGroup)
   }
 
   protected removeGuides(): void
@@ -200,15 +204,23 @@ export class OISVGRenderer
     this.layer.querySelector(`#${ this.groupGuidesId }`)?.remove()
   }
 
+  protected createSVGTools(): SVGGElement
+  {
+    this.definitionGroup = SVGBuilder.createGroup({ id: "definition-group" })
+    this.definitionGroup.appendChild(this.createDefs())
+    this.definitionGroup.appendChild(this.createFilters())
+    if (this.configuration.guides.enable) {
+      this.drawGuides()
+    }
+    return this.definitionGroup
+  }
+
   init(element: HTMLElement): void
   {
     this.#logger.info("init", { element })
     this.parent = element
     this.parent.oncontextmenu = () => false
     this.initLayer()
-    if (this.configuration.guides.enable) {
-      this.drawGuides()
-    }
   }
 
   getAttribute(id: string, name: string): string
@@ -234,17 +246,19 @@ export class OISVGRenderer
     if (!moveEl) return
     switch (position) {
       case "first":
-        this.layer.insertAdjacentElement("beforeend", moveEl)
-        break;
+        this.definitionGroup.insertAdjacentElement("afterend", moveEl)
+        break
       case "last":
-        this.layer.insertAdjacentElement("afterbegin", moveEl)
-        break;
+        this.layer.insertAdjacentElement("beforeend", moveEl)
+        break
       case "forward":
-        moveEl?.nextElementSibling?.insertAdjacentElement("afterend", moveEl)
-        break;
+        moveEl.nextElementSibling?.insertAdjacentElement("afterend", moveEl)
+        break
       case "backward":
-        moveEl?.previousElementSibling?.insertAdjacentElement("afterend", moveEl)
-        break;
+        if (moveEl.previousElementSibling !== this.definitionGroup) {
+          moveEl.previousElementSibling?.insertAdjacentElement("beforebegin", moveEl)
+        }
+        break
     }
   }
 
@@ -298,7 +312,7 @@ export class OISVGRenderer
     return svgEl
   }
 
-  replaceSymbol(id:string, symbols: TOISymbol[]): SVGGraphicsElement[] | undefined
+  replaceSymbol(id: string, symbols: TOISymbol[]): SVGGraphicsElement[] | undefined
   {
     this.#logger.debug("drawSymbol", { symbols })
     const oldNode = this.layer.querySelector(`#${ id }`)
@@ -398,11 +412,7 @@ export class OISVGRenderer
     while (this.layer.firstChild) {
       this.layer.firstChild.remove()
     }
-    this.createFilters()
-    this.createDefs()
-    if (this.configuration.guides.enable) {
-      this.drawGuides()
-    }
+    this.layer.appendChild(this.createSVGTools())
   }
 
   destroy(): void

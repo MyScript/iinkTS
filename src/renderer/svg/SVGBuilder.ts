@@ -6,12 +6,12 @@ const XMLNS = "http://www.w3.org/2000/svg"
  */
 export class SVGBuilder
 {
-  static createLayer(width: number, height: number, attrs: { [key: string]: string } = {}): SVGElement
+  static createLayer(boundingBox: TBoundingBox, attrs: { [key: string]: string } = {}): SVGElement
   {
     const svgEl = document.createElementNS(XMLNS, "svg")
-    svgEl.setAttribute("width", `${ width }px`)
-    svgEl.setAttribute("height", `${ height }px`)
-    svgEl.setAttribute("viewBox", `0, 0, ${ width }, ${ height }`)
+    svgEl.setAttribute("width", `${ boundingBox.width }px`)
+    svgEl.setAttribute("height", `${ boundingBox.height }px`)
+    svgEl.setAttribute("viewBox", `${boundingBox.x}, ${boundingBox.y}, ${boundingBox. width }, ${ boundingBox.height }`)
     Object.keys(attrs).forEach(k =>
     {
       svgEl.setAttribute(k, attrs[k])

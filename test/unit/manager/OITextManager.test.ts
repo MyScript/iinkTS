@@ -78,7 +78,7 @@ describe("OITextManager.ts", () =>
   {
     const behaviors = new OIBehaviorsTest()
     const manager = new OITextManager(behaviors)
-    manager.renderer.layer = SVGBuilder.createLayer(100, 100)
+    manager.renderer.layer = SVGBuilder.createLayer({ x: 0, y: 0, width: 100, height: 100 })
     manager.renderer.prependElement = jest.fn()
     const text = buildOIText({ chars })
     manager.getElementBoundingBox = jest.fn(() => new Box({ x: 1, y: 2, width: 3, height: 4 }))
@@ -99,7 +99,7 @@ describe("OITextManager.ts", () =>
   {
     const behaviors = new OIBehaviorsTest()
     const manager = new OITextManager(behaviors)
-    manager.renderer.layer = SVGBuilder.createLayer(100, 100)
+    manager.renderer.layer = SVGBuilder.createLayer({ x: 0, y: 0, width: 100, height: 100 })
     manager.renderer.prependElement = jest.fn()
     manager.getElementBoundingBox = jest.fn(() => new Box({ x: 1989, y: 27, width: 5, height: 42 }))
     manager.setCharsBoundingBox = jest.fn()

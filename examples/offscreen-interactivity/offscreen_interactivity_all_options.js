@@ -192,6 +192,7 @@ async function loadEditor() {
   });
 
   importBtn.addEventListener("pointerup", async () => {
+    importBtn.disabled = true;
     const strokeRes = await fetch("../assets/datas/hello-my-friend.json");
     const strokes = await strokeRes.json();
     await editor.importPointEvents(strokes);

@@ -4,7 +4,7 @@ import { OIBehaviors } from "../behaviors"
 import { LoggerManager } from "../logger"
 import { OIModel } from "../model"
 import { SymbolType, TOISymbol } from "../primitive"
-import { OIMenu } from "./OIMenu"
+import { OIMenu, TMenuItemColorList } from "./OIMenu"
 import { WriteTool } from "../manager"
 import { OIMenuSub } from "./OIMenuSub"
 
@@ -24,20 +24,6 @@ export class OIMenuStyle extends OIMenu
   menuColorFill?: HTMLDivElement
   menuThickness?: HTMLDivElement
   menuStrokeOpacity?: HTMLDivElement
-
-  sizes = [
-    { label: "S", value: 2 },
-    { label: "M", value: 4 },
-    { label: "L", value: 6 },
-    { label: "XL", value: 8 },
-  ]
-
-  colors = [
-    "#000000", "#808080", "#ffffff", "transparent",
-    "#ff0000", "#ff6400", "#ffc800", "#ffff00",
-    "#0000ff", "#0064ff", "#00c8ff", "#00ffff",
-    "#008000", "#00af00", "#00e100", "#00ff00"
-  ]
 
   constructor(behaviors: OIBehaviors, id = "ms-menu-style")
   {
@@ -67,63 +53,25 @@ export class OIMenuStyle extends OIMenu
     return this.behaviors.renderer.parent.clientWidth < 700
   }
 
-  protected createMenuColor(property: "color" | "fill", currentColor: string): HTMLDivElement
-  {
-    const list = document.createElement("div")
-    list.id = `${ this.id }-${ property }-list`
-    list.classList.add("ms-menu-row", "color-list")
-    this.colors.forEach((color) =>
-    {
-      const btn = document.createElement("button")
-      btn.id = `${ this.id }-${ property }-${ color.replace("#", "") }-btn`
-      btn.classList.add("ms-menu-button")
-      const colorEl = document.createElement("div")
-      colorEl.style.setProperty("height", "50%")
-      colorEl.style.setProperty("width", "50%")
-      colorEl.style.setProperty("border-radius", "100%")
-      colorEl.style.setProperty("margin", "auto")
-      if (property === "fill") {
-        colorEl.style.setProperty("background-color", color)
-        colorEl.style.setProperty("border", "1px solid lightgrey")
-      } else {
-        colorEl.style.setProperty("background-color", "transparent")
-        colorEl.style.setProperty("border", `3px solid ${ color }`)
-      }
-      if (color === "#ffffff") {
-        colorEl.style.setProperty("border", "1px solid black")
-      }
-      if (color === "transparent") {
-        colorEl.style.setProperty("background-image", "linear-gradient(45deg, #AAA 10%, transparent 20%, #AAA 30%, transparent 40%, #AAA 50%, transparent 60%, #AAA 70%, transparent 80%, #AAA 90%, transparent 100%)")
-      }
-      if (property === "color" && currentColor === color) {
-        btn.classList.add("active")
-      }
-      if (property === "fill" && currentColor === color) {
-        btn.classList.add("active")
-      }
-      btn.appendChild(colorEl)
-      btn.addEventListener("pointerup", (e) =>
-      {
-        e.preventDefault()
-        e.stopPropagation()
-        this.behaviors.setPenStyle({ [property]: color })
-        list.querySelectorAll("*").forEach(e => e.classList.remove("active"))
-        btn.classList.add("active")
-        if (this.symbolsSelected.length) {
-          this.behaviors.updateSymbolsStyle(this.symbolsSelected.map(s => s.id), { [property]: color })
-        }
-      })
-      list!.appendChild(btn)
-    })
-    return list
-  }
-
   protected createMenuStroke(): HTMLDivElement
   {
     const symbolsStyles = this.symbolsSelected.map(s => s.style)
     const hasUniqColor = symbolsStyles.length && symbolsStyles.every(st => st.color === symbolsStyles[0]?.color)
     const color = hasUniqColor && symbolsStyles[0]?.color ? symbolsStyles[0]?.color : (this.behaviors.currentPenStyle.color || "rgb(0, 0, 0)") as string
-    this.menuColorStroke = this.createWrapCollapsible(this.createMenuColor("color", color), "Stroke")
+    const menuColorStrokeDef: TMenuItemColorList = {
+      type: "colors",
+      label: "Colors",
+      id: `${ this.id }-color`,
+      fill: false,
+      values: this.colors,
+      initValue: color,
+      callback: (color) => {
+        this.behaviors.setPenStyle({ color })
+        this.behaviors.updateSymbolsStyle(this.symbolsSelected.map(s => s.id), { color })
+      },
+    }
+    const menuColor = this.createColorList(menuColorStrokeDef)
+    this.menuColorStroke = this.createWrapCollapsible(menuColor, "Colors")
     this.menuColorStroke.id = `${ this.id }-color`
     return this.menuColorStroke
   }
@@ -131,12 +79,26 @@ export class OIMenuStyle extends OIMenu
   protected createMenuColorFill(): HTMLDivElement
   {
     const symbolsStyles = this.symbolsSelected.map(s => s.style)
-    const hasUniqFillColor = symbolsStyles.length && symbolsStyles.every(st => st.fill === symbolsStyles[0]?.fill)
-    const color = hasUniqFillColor && symbolsStyles[0]?.fill ? symbolsStyles[0]?.fill : (this.behaviors.currentPenStyle.fill || "transparent") as string
-    this.menuColorFill = this.createWrapCollapsible(this.createMenuColor("fill", color), "Fill")
+    const hasUniqColor = symbolsStyles.length && symbolsStyles.every(st => st.color === symbolsStyles[0]?.color)
+    const color = hasUniqColor && symbolsStyles[0]?.color ? symbolsStyles[0]?.color : (this.behaviors.currentPenStyle.color || "rgb(0, 0, 0)") as string
+    const menuColorStrokeDef: TMenuItemColorList = {
+      type: "colors",
+      label: "Fill",
+      id: `${ this.id }-fill`,
+      fill: true,
+      values: this.colors,
+      initValue: color,
+      callback: (fill) => {
+        this.behaviors.setPenStyle({ fill })
+        this.behaviors.updateSymbolsStyle(this.symbolsSelected.map(s => s.id), { fill })
+      },
+    }
+    const menuColor = this.createColorList(menuColorStrokeDef)
+    this.menuColorFill = this.createWrapCollapsible(menuColor, "Fill")
     this.menuColorFill.id = `${ this.id }-fill`
     return this.menuColorFill
   }
+
 
   protected createMenuThickness(): HTMLDivElement
   {
@@ -152,7 +114,7 @@ export class OIMenuStyle extends OIMenu
     {
       const btn = document.createElement("button")
       btn.id = `${ this.id }-thickness-${ size.label }-btn`
-      btn.classList.add("ms-menu-button")
+      btn.classList.add("ms-menu-button", "square")
       btn.textContent = size.label
       if (width === size.value) {
         btn.classList.add("active")
@@ -220,7 +182,7 @@ export class OIMenuStyle extends OIMenu
     if (this.behaviors.configuration.menu.style.enable) {
       this.triggerBtn = document.createElement("button")
       this.triggerBtn.id = this.id
-      this.triggerBtn.classList.add("ms-menu-button", "icon")
+      this.triggerBtn.classList.add("ms-menu-button", "square")
       this.triggerBtn.innerHTML = styleIcon
 
       const subMenuContent = document.createElement("div")

@@ -47,6 +47,17 @@ export class LeftClickEventFake extends PointerEventFake
   }
 }
 
+export class ContextMenuEventFake extends PointerEventFake
+{
+  constructor(props: EventFakeProps)
+  {
+    super("contextmenu", {
+      ...props,
+      button: 2,
+      buttons: 2
+    })
+  }
+}
 export class RightClickEventFake extends PointerEventFake
 {
   constructor(type: string, props: EventFakeProps)

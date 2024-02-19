@@ -1,7 +1,7 @@
 import { LoggerClass, SELECTION_MARGIN } from "../Constants"
 import { LoggerManager } from "../logger"
 import { DefaultStyle, TStyle } from "../style"
-import { computeDistanceBetweenPointAndSegment, converDegreeToRadian, createUUID, findIntersectionBetween2Segment, isPointInsidePolygon, rotatePoint } from "../utils"
+import { PartialDeep, computeDistanceBetweenPointAndSegment, converDegreeToRadian, createUUID, findIntersectionBetween2Segment, isPointInsidePolygon, rotatePoint } from "../utils"
 import { TPoint, TSegment } from "./Point"
 import { SymbolType } from "./Symbol"
 import { Box, TBoundingBox } from "./Box"
@@ -161,5 +161,18 @@ export class OIText implements TOISymbol
     clone.decorators = this.decorators.map(d => d.clone(clone))
     clone.rotation = this.rotation ? structuredClone(this.rotation) : undefined
     return clone
+  }
+
+  toJSON(): PartialDeep<OIText>
+  {
+    return {
+      id: this.id,
+      type: this.type,
+      point: this.point,
+      chars: this.chars,
+      style: this.style,
+      rotation: this.rotation,
+      decorators: this.decorators.length ? this.decorators : undefined
+    }
   }
 }

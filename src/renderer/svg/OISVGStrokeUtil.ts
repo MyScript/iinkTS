@@ -117,9 +117,6 @@ export class OISVGStrokeUtil
       "opacity": (stroke.style.opacity || DefaultStyle.opacity!).toString(),
     }
 
-    if (stroke.selected) {
-      attrs["filter"] = `url(#${ this.selectionFilterId })`
-    }
     if (stroke.deleting) {
       attrs["filter"] = `url(#${ this.removalFilterId })`
     }
@@ -127,6 +124,9 @@ export class OISVGStrokeUtil
     const strokeGroup = SVGBuilder.createGroup(attrs)
 
     const strokeAttrs: { [key: string]: string } = { "d": this.getSVGPath(stroke) }
+    if (stroke.selected) {
+      strokeAttrs["filter"] = `url(#${ this.selectionFilterId })`
+    }
     strokeGroup.append(SVGBuilder.createPath(strokeAttrs))
 
     stroke.decorators.forEach(d => {

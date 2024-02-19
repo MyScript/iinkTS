@@ -67,7 +67,7 @@
   <body>
     <nav>
       <button id="show-symbols-to-import-btn" class="classic-btn">Show symbols</button>
-      <button class="classic-btn" id="create-all-btn">Create all</button>
+      <button class="classic-btn create-btn" id="create-all-btn">Create all</button>
     </nav>
     <div class="flex-container">
       <div id="symbols-to-create"></div>
@@ -92,12 +92,14 @@
         textarea.value = JSON.stringify(s, null, 2);
         inputsWrapper.appendChild(textarea);
 
-        const btn = document.createElement("buttom");
+        const btn = document.createElement("button");
         btn.id = `add-symbol-${index}-btn`;
-        btn.classList.add("classic-btn");
+        btn.classList.add("classic-btn", "create-btn");
         btn.textContent = "Create";
         inputsWrapper.appendChild(btn);
         btn.addEventListener("pointerup", () => {
+          createAllBtn.disabled = true;
+          btn.disabled = true;
           document.getElementById("editor").editor.behaviors.createSymbol(JSON.parse(textarea.value));
         });
 
@@ -143,7 +145,9 @@
         });
 
         createAllBtn.addEventListener("pointerup", () => {
-          symbols.map(s => editor.behaviors.createSymbol(s))
+          console.log('document.querySelectorAll(".create-btn"): ', document.querySelectorAll(".create-btn"));
+          document.querySelectorAll(".create-btn").forEach(b => b.disabled = true);
+          editor.behaviors.createSymbols(symbols)
         })
 
         window.addEventListener("resize", () => {

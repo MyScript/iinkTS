@@ -72,6 +72,18 @@ export class OIShapeCircle extends OIShape
     return clone
   }
 
+  toJSON(): PartialDeep<OIShapeCircle>
+  {
+    return {
+      id: this.id,
+      type: this.type,
+      kind: this.kind,
+      center: this.center,
+      radius: this.radius,
+      style: this.style,
+    }
+  }
+
   static createFromLine(style: TStyle, origin: TPoint, target: TPoint): OIShapeCircle
   {
     const center = {

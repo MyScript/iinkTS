@@ -21,13 +21,11 @@ export class OISVGDecoratorUtil
   {
     const attrs: { [key: string]: string } = {
       "id": decorator.id,
+      "type": "decorator",
       "kind": decorator.kind,
       "vector-effect": "non-scaling-stroke",
       "stroke-linecap": "round",
       "stroke-linejoin": "round",
-    }
-    if (decorator.parent.selected) {
-      attrs["filter"] = `url(#${ this.selectionFilterId })`
     }
     attrs["opacity"] = (decorator.style.opacity || DefaultStyle.opacity!).toString()
     if (decorator.parent.deleting) {

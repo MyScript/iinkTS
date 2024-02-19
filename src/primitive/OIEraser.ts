@@ -1,6 +1,6 @@
 import { LoggerClass, SELECTION_MARGIN } from "../Constants"
 import { LoggerManager } from "../logger"
-import { computeDistance, createUUID } from "../utils"
+import { PartialDeep, computeDistance, createUUID } from "../utils"
 import { TPoint, TPointer } from "./Point"
 import { Box, TBoundingBox } from "./Box"
 import { SymbolType } from "./Symbol"
@@ -73,4 +73,12 @@ export class OIEraser implements TOISymbol
     return clone
   }
 
+  toJSON(): PartialDeep<OIEraser>
+  {
+    return {
+      id: this.id,
+      type: this.type,
+      pointers: this.pointers
+    }
+  }
 }

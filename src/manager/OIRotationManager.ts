@@ -34,7 +34,7 @@ export class OIRotationManager
 {
   #logger = LoggerManager.getLogger(LoggerClass.TRANSFORMER)
   behaviors: OIBehaviors
-  wrapper?: SVGElement
+  interactElementsGroup?: SVGElement
   center!: TPoint
   origin!: TPoint
 
@@ -178,7 +178,7 @@ export class OIRotationManager
   start(target: Element, origin: TPoint): void
   {
     this.#logger.info("start", { target })
-    this.wrapper = (target.closest(`[role=${ SvgElementRole.Selected }]`) as unknown) as SVGGElement
+    this.interactElementsGroup = (target.closest(`[role=${ SvgElementRole.InteractElementsGroup }]`) as unknown) as SVGGElement
     const boundingBox = Box.createFromPoints(this.model.symbolsSelected.flatMap(s => s.vertices))
 
     this.center = {
@@ -186,14 +186,17 @@ export class OIRotationManager
       y: boundingBox.yMid
     }
     this.origin = origin
-    this.setTransformOrigin(this.wrapper.id, this.center.x, this.center.y)
-    this.selector.hideSelectedElements()
+    this.setTransformOrigin(this.interactElementsGroup.id, this.center.x, this.center.y)
+    this.model.symbolsSelected.forEach(s => {
+      this.setTransformOrigin(s.id, this.center.x, this.center.y)
+    })
+    this.selector.hideInteractElements()
   }
 
   continue(point: TPoint): number
   {
     this.#logger.info("continue", { point })
-    if (!this.wrapper) {
+    if (!this.interactElementsGroup) {
       throw new Error("Can't rotate, you must call start before")
     }
     let angleDegree = +convertRadianToDegree(computeAngleRadian(this.origin, this.center, point))
@@ -203,7 +206,11 @@ export class OIRotationManager
     if (point.x - this.center.x < 0) {
       angleDegree = 360 - angleDegree
     }
-    this.rotateElement(this.wrapper.id, angleDegree)
+
+    this.rotateElement(this.interactElementsGroup.id, angleDegree)
+    this.model.symbolsSelected.forEach(s => {
+      this.rotateElement(s.id, angleDegree)
+    })
     return angleDegree
   }
 
@@ -225,8 +232,8 @@ export class OIRotationManager
     this.selector.resetSelectedGroup(this.model.symbolsSelected)
     this.undoRedoManager.addModelToStack(this.model)
     const promise = this.recognizer.replaceStrokes(strokesRotated.map(s => s.id), strokesRotated)
-    this.wrapper = undefined
-    this.selector.showSelectedElements()
+    this.interactElementsGroup = undefined
+    this.selector.showInteractElements()
     await promise
     await this.svgDebugger.apply()
   }

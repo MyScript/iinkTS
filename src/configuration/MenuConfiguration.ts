@@ -13,6 +13,9 @@ export type TMenuConfiguration = {
   action: {
     enable: boolean,
   }
+  context: {
+    enable: boolean,
+  }
 }
 
 export const DefaultMenuConfiguration: TMenuConfiguration = {
@@ -24,6 +27,9 @@ export const DefaultMenuConfiguration: TMenuConfiguration = {
     enable: true
   },
   action: {
+    enable: true
+  },
+  context: {
     enable: true
   },
 }

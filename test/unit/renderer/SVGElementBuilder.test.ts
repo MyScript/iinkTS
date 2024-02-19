@@ -7,12 +7,12 @@ describe("SVGBuilder.ts", () =>
 {
   test("should createLayer", () =>
   {
-    const width = 42, height = 57, attrs = { attr1: "pouet"}
-    const layer = SVGBuilder.createLayer(width, height, attrs)
+    const x = 1, y = 5, width = 42, height = 57, attrs = { attr1: "pouet"}
+    const layer = SVGBuilder.createLayer({ x, y, width, height }, attrs)
     expect(layer).toBeDefined()
     expect(layer.getAttribute("width")).toEqual(`${width}px`)
     expect(layer.getAttribute("height")).toEqual(`${height}px`)
-    expect(layer.getAttribute("viewBox")).toEqual(`0, 0, ${ width }, ${ height }`)
+    expect(layer.getAttribute("viewBox")).toEqual(`${x}, ${y}, ${ width }, ${ height }`)
     expect(layer.getAttribute("attr1")).toEqual(attrs.attr1)
   })
 

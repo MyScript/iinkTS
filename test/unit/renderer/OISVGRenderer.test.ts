@@ -84,7 +84,7 @@ describe("OISVGRenderer.ts", () =>
       const rendererCustom = new OISVGRenderer(customConf)
       rendererCustom.init(divElement)
       expect(console.error).toBeCalledTimes(1)
-      expect(console.error).toBeCalledWith({ "error": ["Guide type unknow: test"], "from": "RENDERER.#drawGuides" })
+      expect(console.error).toBeCalledWith({ "error": ["Guide type unknow: test"], "from": "RENDERER.drawGuides" })
     })
     test("should not create guides", () =>
     {
@@ -291,9 +291,9 @@ describe("OISVGRenderer.ts", () =>
       renderer.drawSymbol(stroke1)
       const stroke2 = buildOIStroke()
       renderer.drawSymbol(stroke2)
-      expect(renderer.layer.querySelectorAll("g")).toHaveLength(6)
+      const nbGroup = renderer.layer.querySelectorAll("g").length
       renderer.clearElements({ tagName: "g", attrs: { id: stroke2.id } })
-      expect(renderer.layer.querySelectorAll("g")).toHaveLength(5)
+      expect(renderer.layer.querySelectorAll("g")).toHaveLength(nbGroup - 1)
     })
   })
 

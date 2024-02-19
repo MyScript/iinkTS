@@ -8,11 +8,12 @@ import gestureIcon from "../assets/svg/spock-hand-gesture.svg"
 import guideIcon from "../assets/svg/orthogonal-view.svg"
 import snapIcon from "../assets/svg/arrow-to-dot.svg"
 import debugIcon from "../assets/svg/wolf.svg"
+import downloadIcon from "../assets/svg/download.svg"
 import { LoggerClass } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerManager } from "../logger"
 import { OIModel } from "../model"
-import { OIMenu, TMenuItemBoolean, TMenuItemButtonList, TMenuItemSelect } from "./OIMenu"
+import { OIMenu, TMenuItemBoolean, TMenuItemButton, TMenuItemButtonList, TMenuItemSelect } from "./OIMenu"
 import { SymbolType } from "../primitive"
 import { StrikeThroughAction, SurroundAction } from "../gesture"
 import { OIMenuSub } from "./OIMenuSub"
@@ -33,10 +34,6 @@ export class OIMenuAction extends OIMenu
   menuUndo?: HTMLButtonElement
   menuRedo?: HTMLButtonElement
   menuConvert?: HTMLButtonElement
-  menuGesture!: OIMenuSub
-  menuGuide!: OIMenuSub
-  menuSnap!: OIMenuSub
-  menuDebug!: OIMenuSub
 
   guideGaps = [
     { label: "S", value: "10" },
@@ -51,11 +48,6 @@ export class OIMenuAction extends OIMenu
     this.id = id
     this.#logger.info("constructor")
     this.behaviors = behaviors
-
-    this.createMenuGesture()
-    this.createMenuGuide()
-    this.createMenuSnap()
-    this.createMenuDebug()
   }
 
   get model(): OIModel
@@ -72,7 +64,7 @@ export class OIMenuAction extends OIMenu
   {
     this.menuClear = document.createElement("button")
     this.menuClear.id = `${ this.id }-clear`
-    this.menuClear.classList.add("ms-menu-button", "icon")
+    this.menuClear.classList.add("ms-menu-button", "square")
     this.menuClear.innerHTML = trashIcon
     this.menuClear.addEventListener("pointerup", () => this.behaviors.clear())
     return this.createToolTip(this.menuClear, "Clear", "bottom")
@@ -82,7 +74,7 @@ export class OIMenuAction extends OIMenu
   {
     const triggerBtn = document.createElement("button")
     triggerBtn.id = this.id
-    triggerBtn.classList.add("ms-menu-button", "icon")
+    triggerBtn.classList.add("ms-menu-button", "square")
     triggerBtn.innerHTML = languageIcon
 
     const select = document.createElement("select")
@@ -112,7 +104,7 @@ export class OIMenuAction extends OIMenu
   {
     this.menuUndo = document.createElement("button")
     this.menuUndo.id = `${ this.id }-undo`
-    this.menuUndo.classList.add("ms-menu-button", "icon")
+    this.menuUndo.classList.add("ms-menu-button", "square")
     this.menuUndo.innerHTML = undoIcon
     this.menuUndo.addEventListener("pointerup", () => this.behaviors.undo())
     return this.createToolTip(this.menuUndo, "Undo", "bottom")
@@ -122,7 +114,7 @@ export class OIMenuAction extends OIMenu
   {
     this.menuRedo = document.createElement("button")
     this.menuRedo.id = `${ this.id }-redo`
-    this.menuRedo.classList.add("ms-menu-button", "icon")
+    this.menuRedo.classList.add("ms-menu-button", "square")
     this.menuRedo.innerHTML = redoIcon
     this.menuRedo.addEventListener("pointerup", () => this.behaviors.redo())
     return this.createToolTip(this.menuRedo, "Redo", "bottom")
@@ -132,7 +124,7 @@ export class OIMenuAction extends OIMenu
   {
     this.menuConvert = document.createElement("button")
     this.menuConvert.id = `${ this.id }-convert`
-    this.menuConvert.classList.add("ms-menu-button", "icon")
+    this.menuConvert.classList.add("ms-menu-button", "square")
     this.menuConvert.innerHTML = translateIcon
     this.menuConvert.addEventListener("pointerup", () =>
     {
@@ -141,11 +133,11 @@ export class OIMenuAction extends OIMenu
     return this.createToolTip(this.menuConvert, "Convert", "bottom")
   }
 
-  protected createMenuGesture(): void
+  protected createMenuGesture(): HTMLDivElement
   {
     const trigger = document.createElement("button")
     trigger.id = `${ this.id }-gesture`
-    trigger.classList.add("ms-menu-button", "icon")
+    trigger.classList.add("ms-menu-button", "square")
     trigger.innerHTML = gestureIcon
     const subMenuWrapper = document.createElement("div")
     subMenuWrapper.classList.add("ms-menu-colmun")
@@ -190,14 +182,14 @@ export class OIMenuAction extends OIMenu
       subMenuWrapper.appendChild(this.createMenuItem(i))
     })
 
-    this.menuGesture = this.createSubMenu(this.createToolTip(trigger, "Gesture", "right"), subMenuWrapper, "right")
+    return this.createSubMenu(this.createToolTip(trigger, "Gesture", "right"), subMenuWrapper, "right").element
   }
 
-  protected createMenuGuide(): void
+  protected createMenuGuide(): HTMLDivElement
   {
     const trigger = document.createElement("button")
     trigger.id = `${ this.id }-guide`
-    trigger.classList.add("ms-menu-button", "icon")
+    trigger.classList.add("ms-menu-button", "square")
     trigger.innerHTML = guideIcon
 
     const subMenuWrapper = document.createElement("div")
@@ -249,14 +241,14 @@ export class OIMenuAction extends OIMenu
       subMenuWrapper.appendChild(this.createMenuItem(i))
     })
 
-    this.menuGuide = this.createSubMenu(this.createToolTip(trigger, "Guide", "right"), subMenuWrapper, "right")
+    return this.createSubMenu(this.createToolTip(trigger, "Guide", "right"), subMenuWrapper, "right").element
   }
 
-  protected createMenuSnap(): void
+  protected createMenuSnap(): HTMLDivElement
   {
     const trigger = document.createElement("button")
-    trigger.id = `${ this.id }-snap`,
-      trigger.classList.add("ms-menu-button", "icon")
+    trigger.id = `${ this.id }-snap`
+    trigger.classList.add("ms-menu-button", "square")
     trigger.innerHTML = snapIcon
 
     const subMenuWrapper = document.createElement("div")
@@ -297,15 +289,15 @@ export class OIMenuAction extends OIMenu
     {
       subMenuWrapper.appendChild(this.createMenuItem(i))
     })
-    this.menuSnap = this.createSubMenu(this.createToolTip(trigger, "Snap", "right"), subMenuWrapper, "right")
+    return this.createSubMenu(this.createToolTip(trigger, "Snap", "right"), subMenuWrapper, "right").element
   }
 
-  protected createMenuDebug(): void
+  protected createMenuDebug(): HTMLDivElement
   {
-    const menuDebug = document.createElement("button")
-    menuDebug.id = `${ this.id }-debug`
-    menuDebug.classList.add("ms-menu-button", "icon")
-    menuDebug.innerHTML = debugIcon
+    const trigger = document.createElement("button")
+    trigger.id = `${ this.id }-debug`
+    trigger.classList.add("ms-menu-button", "square")
+    trigger.innerHTML = debugIcon
 
     const menuItems: TMenuItemBoolean[] = [
       {
@@ -350,7 +342,52 @@ export class OIMenuAction extends OIMenu
     {
       subMenuWrapper.appendChild(this.createMenuItem(i))
     })
-    this.menuDebug = this.createSubMenu(this.createToolTip(menuDebug, "Debug", "right"), subMenuWrapper, "right")
+    return this.createSubMenu(this.createToolTip(trigger, "Debug", "right"), subMenuWrapper, "right").element
+  }
+
+  protected createMenuExport(): HTMLElement
+  {
+    const trigger = document.createElement("button")
+    trigger.id = `${ this.id }-export`
+    trigger.classList.add("ms-menu-button", "square")
+    trigger.innerHTML = downloadIcon
+
+    const menuItems: TMenuItemButton[] = [
+      {
+        type: "button",
+        id: `${ this.id }-export-json`,
+        label: "json",
+        callback: () =>
+        {
+          this.behaviors.downloadAsJson()
+        }
+      },
+      {
+        type: "button",
+        id: `${ this.id }-export-svg`,
+        label: "svg",
+        callback: () =>
+        {
+          this.behaviors.downloadAsSVG()
+        }
+      },
+      {
+        type: "button",
+        id: `${ this.id }-export-jpg`,
+        label: "jpg",
+        callback: () =>
+        {
+          this.behaviors.downloadAsJPG()
+        }
+      },
+    ]
+    const subMenuWrapper = document.createElement("div")
+    subMenuWrapper.classList.add("ms-menu-colmun")
+    menuItems.forEach(i =>
+    {
+      subMenuWrapper.appendChild(this.createMenuItem(i))
+    })
+    return this.createSubMenu(this.createToolTip(trigger, "Export", "right"), subMenuWrapper, "right").element
   }
 
   protected unselectAll(): void
@@ -367,16 +404,17 @@ export class OIMenuAction extends OIMenu
   {
     if (this.behaviors.configuration.menu.action.enable) {
       const menuTrigger = document.createElement("button")
-      menuTrigger.id = "ms-menu-action"
-      menuTrigger.classList.add("ms-menu-button", "icon")
+      menuTrigger.id = this.id
+      menuTrigger.classList.add("ms-menu-button", "square")
       menuTrigger.innerHTML = menuIcon
 
       const subMenuWrapper = document.createElement("div")
       subMenuWrapper.classList.add("ms-menu-colmun")
-      subMenuWrapper.appendChild(this.menuGesture.element)
-      subMenuWrapper.appendChild(this.menuGuide.element)
-      subMenuWrapper.appendChild(this.menuSnap.element)
-      subMenuWrapper.appendChild(this.menuDebug.element)
+      subMenuWrapper.appendChild(this.createMenuGesture())
+      subMenuWrapper.appendChild(this.createMenuGuide())
+      subMenuWrapper.appendChild(this.createMenuSnap())
+      subMenuWrapper.appendChild(this.createMenuDebug())
+      subMenuWrapper.appendChild(this.createMenuExport())
 
       this.wrapper = document.createElement("div")
       this.wrapper.classList.add("ms-menu", "ms-menu-top-left", "ms-menu-row")

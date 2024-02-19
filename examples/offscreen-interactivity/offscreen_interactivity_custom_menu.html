@@ -68,27 +68,25 @@
 
   <body>
     <nav class="flex-container wrap gap">
-      <div class="flex-container wrap gap">
-        <div class="flex-container wrap">
-          <label class="label">Show/hide Menu Style</label>
-          <div class="toggle-switch">
-            <input class="toggle-input" id="menu-style-toggle" type="checkbox" checked />
-            <label class="toggle-label" for="menu-style-toggle"></label>
-          </div>
+      <div class="flex-container wrap">
+        <label class="label">Show/hide Menu Style</label>
+        <div class="toggle-switch">
+          <input class="toggle-input" id="menu-style-toggle" type="checkbox" checked />
+          <label class="toggle-label" for="menu-style-toggle"></label>
         </div>
-        <div class="flex-container wrap">
-          <label class="label">Show/hide Menu Intention</label>
-          <div class="toggle-switch">
-            <input class="toggle-input" id="menu-intention-toggle" type="checkbox" checked />
-            <label class="toggle-label" for="menu-intention-toggle"></label>
-          </div>
+      </div>
+      <div class="flex-container wrap">
+        <label class="label">Show/hide Menu Action</label>
+        <div class="toggle-switch">
+          <input class="toggle-input" id="menu-action-toggle" type="checkbox" checked />
+          <label class="toggle-label" for="menu-action-toggle"></label>
         </div>
-        <div class="flex-container wrap">
-          <label class="label">Show/hide Menu Action</label>
-          <div class="toggle-switch">
-            <input class="toggle-input" id="menu-action-toggle" type="checkbox" checked />
-            <label class="toggle-label" for="menu-action-toggle"></label>
-          </div>
+      </div>
+      <div class="flex-container wrap">
+        <label class="label">Show/hide Menu Intention</label>
+        <div class="toggle-switch">
+          <input class="toggle-input" id="menu-intention-toggle" type="checkbox" checked />
+          <label class="toggle-label" for="menu-intention-toggle"></label>
         </div>
       </div>
     </nav>
@@ -128,7 +126,6 @@
             },
           },
           behaviors: {
-            enable: true,
             menu: {
               style: CustomMenuStyle,
               intention: CustomMenuIntention,
@@ -154,7 +151,6 @@
           menuIntentionToggle.checked ? editor.behaviors.menu.intention.show() : editor.behaviors.menu.intention.hide();
         });
         menuActionToggle.addEventListener("change", () => {
-          console.log('menuActionToggle.checked: ', menuActionToggle.checked);
           menuActionToggle.checked ? editor.behaviors.menu.action.show() : editor.behaviors.menu.action.hide();
         });
 

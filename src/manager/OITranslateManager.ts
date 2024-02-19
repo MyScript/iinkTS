@@ -32,7 +32,7 @@ export class OITranslateManager
 {
   #logger = LoggerManager.getLogger(LoggerClass.TRANSFORMER)
   behaviors: OIBehaviors
-  wrapper?: SVGElement
+  interactElementsGroup?: SVGElement
   transformOrigin!: TPoint
 
   constructor(behaviors: OIBehaviors)
@@ -182,15 +182,15 @@ export class OITranslateManager
   start(target: Element, origin: TPoint): void
   {
     this.#logger.info("start", { origin })
-    this.wrapper = (target.closest(`[role=${ SvgElementRole.Selected }]`) as unknown) as SVGGElement
+    this.interactElementsGroup = (target.closest(`[role=${ SvgElementRole.InteractElementsGroup }]`) as unknown) as SVGGElement
     this.transformOrigin = origin
-    this.selector.hideSelectedElements()
+    this.selector.hideInteractElements()
   }
 
   continue(point: TPoint): { tx: number, ty: number }
   {
     this.#logger.info("continue", { point })
-    if (!this.wrapper) {
+    if (!this.interactElementsGroup) {
       throw new Error("Can't translate, you must call start before")
     }
 
@@ -201,7 +201,10 @@ export class OITranslateManager
     tx = nudge.x
     ty = nudge.y
 
-    this.translateElement(this.wrapper.id as string, tx, ty)
+    this.translateElement(this.interactElementsGroup.id as string, tx, ty)
+    this.model.symbolsSelected.forEach(s => {
+      this.translateElement(s.id as string, tx, ty)
+    })
     return {
       tx,
       ty
@@ -217,7 +220,6 @@ export class OITranslateManager
     this.model.symbolsSelected.forEach(s =>
     {
       this.applyToSymbol(s, tx, ty)
-      // if (s.type ===)
       this.renderer.drawSymbol(s)
       this.model.updateSymbol(s)
       if (s.type === SymbolType.Stroke) {
@@ -227,8 +229,8 @@ export class OITranslateManager
     const promise = this.recognizer.translateStrokes(strokesTranslated.map(s => s.id), tx, ty)
     this.selector.resetSelectedGroup(this.model.symbolsSelected)
     this.undoRedoManager.addModelToStack(this.model)
-    this.wrapper = undefined
-    this.selector.showSelectedElements()
+    this.interactElementsGroup = undefined
+    this.selector.showInteractElements()
     await promise
     await this.svgDebugger.apply()
   }

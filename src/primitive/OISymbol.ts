@@ -1,5 +1,5 @@
 import { DefaultStyle, TStyle } from "../style"
-import { createUUID } from "../utils"
+import { PartialDeep, createUUID } from "../utils"
 import { TBox, TBoundingBox, Box } from "./Box"
 import { TPoint } from "./Point"
 import { SymbolType, TSymbol } from "./Symbol"
@@ -17,6 +17,7 @@ export interface TOISymbol extends TSymbol
   overlaps(box: TBoundingBox): boolean
   isCloseToPoint(point: TPoint): boolean
   clone(): TOISymbol
+  toJSON(): PartialDeep<TOISymbol>
 }
 
 /**
@@ -60,4 +61,6 @@ export abstract class OISymbol implements TOISymbol
   abstract isCloseToPoint(point: TPoint): boolean
 
   abstract clone(): OISymbol
+
+  abstract toJSON(): PartialDeep<OISymbol>
 }

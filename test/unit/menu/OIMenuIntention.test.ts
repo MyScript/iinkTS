@@ -84,10 +84,10 @@ describe("OIMenuIntention.ts", () =>
     test("should display sub menu shape", () =>
     {
       const menuEl = behaviors.layerInfos.querySelector("#ms-menu-intention-write-shape") as HTMLDivElement
-      const subMenuEl1 = behaviors.layerInfos.querySelector(".sub-menu-shape") as HTMLDivElement
+      const subMenuEl1 = behaviors.layerInfos.querySelector(".sub-menu-content-shape") as HTMLDivElement
       expect(subMenuEl1.classList.contains("open")).toBeFalsy()
       menuEl.dispatchEvent(pointerUpEvt)
-      const subMenuEl2 = behaviors.layerInfos.querySelector(".sub-menu-shape") as HTMLDivElement
+      const subMenuEl2 = behaviors.layerInfos.querySelector(".sub-menu-content-shape") as HTMLDivElement
       expect(subMenuEl2.classList.contains("open")).toBeFalsy()
     })
     test("should set write rectangle", () =>
@@ -141,10 +141,10 @@ describe("OIMenuIntention.ts", () =>
     test("should display sub menu edge", () =>
     {
       const menuEl = behaviors.layerInfos.querySelector("#ms-menu-intention-write-edge") as HTMLDivElement
-      const subMenuEl1 = behaviors.layerInfos.querySelector(".sub-menu-edge") as HTMLDivElement
+      const subMenuEl1 = behaviors.layerInfos.querySelector(".sub-menu-content-edge") as HTMLDivElement
       expect(subMenuEl1.classList.contains("open")).toBeFalsy()
       menuEl.dispatchEvent(pointerUpEvt)
-      const subMenuEl2 = behaviors.layerInfos.querySelector(".sub-menu-edge") as HTMLDivElement
+      const subMenuEl2 = behaviors.layerInfos.querySelector(".sub-menu-content-edge") as HTMLDivElement
       expect(subMenuEl2.classList.contains("open")).toBeFalsy()
     })
     test("should set write arrow", () =>

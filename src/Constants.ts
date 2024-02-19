@@ -191,7 +191,7 @@ export enum LoggerClass
 export enum SvgElementRole
 {
   Guide = "guide",
-  Selected = "selected",
+  InteractElementsGroup = "interact-elements-group",
   Translate = "translate",
   Resize = "resize",
   Rotate = "rotate",

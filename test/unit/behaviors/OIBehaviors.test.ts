@@ -64,11 +64,11 @@ describe("OIBehaviors.ts", () =>
       oib.intention = Intention.Erase
       expect(oib.intention).toEqual(Intention.Erase)
     })
-    test("should removeSelection on change intention", () =>
+    test("should unselectAll on change intention", () =>
     {
-      oib.model.resetSelection = jest.fn()
+      oib.unselectAll= jest.fn()
       oib.intention = Intention.Erase
-      expect(oib.model.resetSelection).toBeCalledTimes(1)
+      expect(oib.unselectAll).toBeCalledTimes(1)
     })
     test("should have model property initialize", () =>
     {
@@ -609,6 +609,9 @@ describe("OIBehaviors.ts", () =>
       const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
       oib.grabber.attach = jest.fn()
       oib.renderer.drawSymbol = jest.fn()
+      oib.menu.render = jest.fn()
+      oib.menu.update = jest.fn()
+      oib.svgDebugger.apply = jest.fn()
       oib.recognizer.init = jest.fn(() => Promise.resolve())
       oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
@@ -638,6 +641,9 @@ describe("OIBehaviors.ts", () =>
       const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
       oib.grabber.attach = jest.fn()
       oib.renderer.drawSymbol = jest.fn()
+      oib.menu.render = jest.fn()
+      oib.menu.update = jest.fn()
+      oib.svgDebugger.apply = jest.fn()
       oib.recognizer.init = jest.fn(() => Promise.resolve())
       oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
@@ -735,11 +741,11 @@ describe("OIBehaviors.ts", () =>
       const modelReceive = await oib.undo()
       expect(modelReceive).toEqual(firstModel)
     })
-    test("should throw error if canUndo = false", async () =>
+    test("should do nothing if canUndo = false", async () =>
     {
       const layerInfo = document.createElement("div")
       const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
-      expect(oib.undo()).rejects.toThrowError("undo not allowed")
+      expect(await oib.undo()).toEqual(oib.model)
     })
   })
 
@@ -810,11 +816,11 @@ describe("OIBehaviors.ts", () =>
       const modelReceive = await oib.redo()
       expect(modelReceive).toEqual(secondModel)
     })
-    test("should throw error if canRedo = false", async () =>
+    test("should do nothing if canRedo = false", async () =>
     {
       const layerInfo = document.createElement("div")
       const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
-      expect(oib.redo()).rejects.toThrowError("redo not allowed")
+      expect(await oib.redo()).toEqual(oib.model)
     })
   })
 
