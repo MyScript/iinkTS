@@ -5,12 +5,14 @@ import {
   TRawContentConfiguration,
   TRecognitionRendererConfiguration,
   TTextConfiguration,
+  TConvertionConfiguration,
   DefaultDiagramConfiguration,
   DefaultExportConfiguration,
   DefaultRecognitionRendererConfiguration,
   DefaultRawContentConfiguration,
   DefaultMathConfiguration,
   DefaultTextConfiguration,
+  DefaultConvertionConfiguration,
 } from "./recognition"
 
 /**
@@ -37,6 +39,7 @@ export type TRecognitionConfiguration = {
   export: TExportConfiguration
   "raw-content": TRawContentConfiguration
   gesture: { enable: boolean }
+  convert: TConvertionConfiguration
 }
 
 /**
@@ -55,4 +58,5 @@ export const DefaultRecognitionConfiguration: TRecognitionConfiguration = {
   gesture: {
     enable: true
   },
+  convert: DefaultConvertionConfiguration,
 }
