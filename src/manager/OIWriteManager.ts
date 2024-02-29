@@ -26,7 +26,6 @@ import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
 import { TStyle } from "../style"
 import { UndoRedoManager } from "../undo-redo"
-import { isPointInsidePolygon } from "../utils"
 import { OIGestureManager } from "./OIGestureManager"
 import { OISelectionManager } from "./OISelectionManager"
 import { OISnapManager } from "./OISnapManager"
@@ -262,18 +261,8 @@ export class OIWriteManager
     if (symbol.type === SymbolType.Stroke) {
       let gestureFromContextLess: TGesture | undefined
       const currentStroke = symbol as OIStroke
-      if (this.detectGesture) {
-        const needContextLessGesture = this.model.symbols.some(s =>
-        {
-          return s.type !== SymbolType.Stroke &&
-            (
-              s.vertices.some(p => currentStroke.boundingBox.containsPoint(p)) ||
-              currentStroke.pointers.some(p => isPointInsidePolygon(p, s.vertices))
-            )
-        })
-        if (needContextLessGesture) {
-          gestureFromContextLess = await this.gestureManager.getGestureFromContextLess(currentStroke)
-        }
+      if (this.detectGesture && this.model.symbols.some(s => s.type !== SymbolType.Stroke && currentStroke.boundingBox.overlaps(s.boundingBox)) ) {
+        gestureFromContextLess = await this.gestureManager.getGestureFromContextLess(currentStroke)
       }
       if (gestureFromContextLess) {
         await this.gestureManager.apply(currentStroke, gestureFromContextLess)

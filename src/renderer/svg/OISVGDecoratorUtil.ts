@@ -81,11 +81,11 @@ export class OISVGDecoratorUtil
         attrs["stroke"] = decorator.style.color || DefaultStyle.color!
         attrs["stroke-width"] = (decorator.style.width || DefaultStyle.width!).toString()
         const p1 = {
-          x: decorator.parent.boundingBox.xMin + SELECTION_MARGIN / 2,
+          x: decorator.parent.boundingBox.xMin,
           y: decorator.parent.boundingBox.yMax + (decorator.parent.type === SymbolType.Stroke ? SELECTION_MARGIN / 2 : 0)
         }
         const p2 = {
-          x: decorator.parent.boundingBox.xMax - SELECTION_MARGIN / 2,
+          x: decorator.parent.boundingBox.xMax,
           y: decorator.parent.boundingBox.yMax + (decorator.parent.type === SymbolType.Stroke ? SELECTION_MARGIN / 2 : 0)
         }
         element = SVGBuilder.createLine(p1, p2, attrs)
