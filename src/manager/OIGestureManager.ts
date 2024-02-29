@@ -142,6 +142,11 @@ export class OIGestureManager
       this.#logger.warn("applyScratchGesture", "Unable to apply underline because there are no strokes")
       return
     }
+    const symbolsToErase = this.model.symbols.filter(s => [SymbolType.Shape.toString(), SymbolType.Edge.toString()].includes(s.type) && gesture.strokeIds.includes(s.id)) as OIText[]
+    symbolsToErase.forEach(s => {
+      this.renderer.removeSymbol(s.id)
+      this.model.removeSymbol(s.id)
+    })
     const textToErase = this.model.symbols.filter(s => s.type === SymbolType.Text && gesture.strokeIds.includes(s.id)) as OIText[]
     if (textToErase.length) {
       textToErase.forEach(te =>
@@ -426,13 +431,16 @@ export class OIGestureManager
         {
           return stroke.boundingBox.containsPoint({ x: s.boundingBox.xMid, y: s.boundingBox.yMid })
         })
-        return {
-          gestureType: "SURROUND",
-          gestureStrokeId: stroke.id,
-          strokeAfterIds: [],
-          strokeBeforeIds: [],
-          strokeIds: symbolsToSelect.map(s => s.id),
+        if (symbolsToSelect.length) {
+          return {
+            gestureType: "SURROUND",
+            gestureStrokeId: stroke.id,
+            strokeAfterIds: [],
+            strokeBeforeIds: [],
+            strokeIds: symbolsToSelect.map(s => s.id),
+          }
         }
+        return
       }
       case "left-right":
       case "right-left": {
@@ -472,7 +480,8 @@ export class OIGestureManager
         const symbolsToErase = this.model.symbols.filter(s =>
         {
           return SymbolType.Stroke === s.type && stroke.boundingBox.overlaps(s.boundingBox) ||
-            SymbolType.Text === s.type && stroke.pointers.some(p => isPointInsidePolygon(p, s.vertices))
+            SymbolType.Text === s.type && stroke.pointers.some(p => isPointInsidePolygon(p, s.vertices)) ||
+            stroke.boundingBox.contains(s.boundingBox)
         })
         if (symbolsToErase.length) {
           return {
@@ -486,11 +495,29 @@ export class OIGestureManager
         return
       }
       case "bottom-top": {
-        // TODO IIC-989
+        const hasShapeInRow = this.model.symbols.some(s => isBetween(s.boundingBox.yMid, stroke.boundingBox.yMin, stroke.boundingBox.yMax))
+        if (hasShapeInRow) {
+          return {
+            gestureType: "JOIN",
+            gestureStrokeId: stroke.id,
+            strokeAfterIds: [],
+            strokeBeforeIds: [],
+            strokeIds: [],
+          }
+        }
         return
       }
       case "top-bottom": {
-        // TODO IIC-989
+        const hasShapeInRow = this.model.symbols.some(s => isBetween(s.boundingBox.yMid, stroke.boundingBox.yMin, stroke.boundingBox.yMax))
+        if (hasShapeInRow) {
+          return {
+            gestureType: "INSERT",
+            gestureStrokeId: stroke.id,
+            strokeAfterIds: [],
+            strokeBeforeIds: [],
+            strokeIds: [],
+          }
+        }
         return
       }
       case "none":

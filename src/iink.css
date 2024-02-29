@@ -529,7 +529,6 @@
     width: 75%;
     border-radius: 100%;
     margin: auto;
-
 }
 .ms-editor .ms-menu .ms-menu-button:hover {
     background-color: rgb(239, 239, 239, 1);
@@ -540,7 +539,10 @@
     color: rgba(0, 0, 0, 0.4);
 }
 .ms-editor .ms-menu .ms-menu-button:focus,
-.ms-editor .ms-menu .ms-menu-button:active,
+.ms-editor .ms-menu .ms-menu-button:active {
+    background-color: #1aa0ff55;
+    outline: none;
+}
 .ms-editor .ms-menu .ms-menu-button.active {
     border: 1px solid #1A9FFF;
     color: #1A9FFF;
