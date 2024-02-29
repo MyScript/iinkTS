@@ -5,7 +5,7 @@ import { LoggerManager } from "../logger"
 import { Model, TExport, TJIIXExport, TStroke, convertStrokeToJSON } from "../model"
 import { StyleHelper, TPenStyle, TTheme } from "../style"
 import { TUndoRedoContext } from "../undo-redo"
-import { DeferredPromise, computeHmac, isVersionSuperiorOrEqual } from "../utils"
+import { DeferredPromise, PartialDeep, computeHmac, isVersionSuperiorOrEqual } from "../utils"
 import { TWSMessageEvent, TWSMessageEventContentChange, TWSMessageEventError, TWSMessageEventExport, TWSMessageEventHMACChallenge, TWSMessageEventPartChange, TWSMessageEventSVGPatch } from "./WSRecognizerMessage"
 
 /**
@@ -249,7 +249,11 @@ export class WSRecognizer
     this.reconnectionCount = 0
     this.#logger.info("manageContentPackageDescriptionMessage")
 
-    this.send({ ...this.recognitionConfiguration, type: "configuration" })
+    const recognitionConfig = structuredClone(this.recognitionConfiguration) as PartialDeep<TRecognitionConfiguration>
+    if (!isVersionSuperiorOrEqual(this.serverConfiguration.version, "2.3.0")) {
+      delete recognitionConfig.convert
+    }
+    this.send({ ...recognitionConfig, type: "configuration" })
 
     if (this.currentPartId) {
       this.send({ type: "openContentPart", id: this.currentPartId, mimeTypes: this.mimeTypes })
