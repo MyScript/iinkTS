@@ -178,5 +178,11 @@ We welcome your contributions: if you would like to extend iinkTS for your needs
 
 Please take a look at our [contributing](https://github.com/MyScript/iinkTS/blob/master/CONTRIBUTING.md) guidelines before submitting your pull request.
 
+## Troubleshooting
+If you encounter the error: `Unrecognized property: convert.force`, this means your server version is lower than 2.3.0.
+To correct the problem, you have 2 options:
+- either update your server
+- either add in the iink-ts configuration `configuration.server.version = 2.2.0`
+
 ## License
 This library is licensed under the [Apache 2.0](http://opensource.org/licenses/Apache-2.0).

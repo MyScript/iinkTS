@@ -35,4 +35,14 @@
 
 ## Bugs fix
 - fix(Style) wrong import for custom grabber & custom recognizer
+
+# [v1.0.4](https://github.com/MyScript/iinkTS/tree/v1.0.4)
+
+## Bugs fix
+- fix(Types) not all types are exported for development
+- fix(Model) clear export when strokes changed
 - fix(README.md) installing iink-ts from github using readme fails
+- fix(install) npm install error after git clone
+- fix(style) Editor styles unavailable in shadow dom elements [#2](https://github.com/MyScript/iinkTS/issues/2)
+- fix(Convert) Server state randomly corrupts and collapses the iink editor content [#1](https://github.com/MyScript/iinkTS/issues/1)
+- fix(examples) math examples don't give result when katex fails
