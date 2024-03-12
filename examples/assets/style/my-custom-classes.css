@@ -38,8 +38,11 @@ nav {
     z-index: 10;
     pointer-events: none;
 }
-.my-custom-class svg[data-layer="BACKGROUND"] {
-    z-index: 9;
+
+.my-custom-class svg line {
+    stroke: white;
+    opacity: 1;
+    stroke-width: 0.25px;
 }
 
 .my-custom-class .loader {
