@@ -244,6 +244,76 @@ select:disabled {
  *                                | |               | |             __/ |
  *                                |_|               |_|            |___/
  */
+.link-info {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    height: 32px;
+    width: 32px;
+}
+.help-overlay {
+    display: none;
+    position: fixed;
+    z-index: 998;
+    top: 0;
+    left: 0;
+    height: 100dvh;
+    width: 100dvw;
+    background: #000;
+    opacity: 0.7;
+}
+.help-modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    top: 50%;
+    max-height: 90%;
+    left: 50%;
+    width: 80%;
+    max-width: 1000px;
+    transform: translate(-50%, -50%);
+    background-color: #f5f5f5;
+    box-shadow: 0 6px 24px -12px rgba(6,6,7,.4);
+    overflow: auto;
+    padding: 0px 24px
+}
+.help-modal .close {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    height: 32px;
+    width: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 30px;
+    font-weight: bold;
+    text-decoration: none;
+    color: #333;
+    border: none;
+    background-color: transparent;
+}
+.help-modal .close:focus,
+.help-modal .close:hover {
+    color: #1A9FFF;
+}
+.help-modal .help-modal-content {
+    margin: 24px auto 24px;
+}
+.help-modal .gestures {
+    margin-bottom: 24px;
+    padding: 24px;
+    box-shadow: 0 6px 24px -12px rgba(6,6,7,.4);
+    background-color: #fff;
+  }
+.help-modal .gestures > div > img {
+    height: auto;
+    max-width: 300px;
+}
+.help-modal .gestures-img-container {
+    text-align: center;
+}
+
 #result {
     min-height: 100px;
     max-height: 100px;
