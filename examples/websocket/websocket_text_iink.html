@@ -23,6 +23,40 @@
 
   <body>
     <div id="result"></div>
+    <a id="link-info" class="link-info" onclick="document.querySelectorAll('.help-overlay,.help-modal').forEach(e => e.style.display = 'block');">
+      <img src="../assets/img/info.svg"/>
+    </a>
+    <div id="help-overlay" class="help-overlay" onclick="document.querySelectorAll('.help-overlay,.help-modal').forEach(e => e.style.display = 'none');">
+    </div>
+    <div id="help-modal" class="help-modal">
+      <div id="help-modal-content" class="help-modal-content">
+        <button class="close" href="#" onclick="document.querySelectorAll('.help-overlay,.help-modal').forEach(e => e.style.display = 'none');">×</button>
+        <h1>Gestures</h1>
+        <div class="gestures">
+          <h3>Erase</h3>
+          <p>Scratch thoroughly and cover all the characters.</p>
+          <div class="gestures-img-container">
+            <img src="../assets/img/gestures/gest-erase.png"/>
+          </div>
+        </div>
+        <div class="gestures">
+          <h3>Break</h3>
+          <p>Draw a straight vertical line downwards. Start above characters and end well below the baseline.</p>
+          <div class="gestures-img-container">
+            <img src="../assets/img/gestures/gest-break-lines.png"/>
+            <img src="../assets/img/gestures/gest-break-words.png"/>
+          </div>
+        </div>
+        <div class="gestures">
+          <h3>Join</h3>
+          <p>Draw a straight vertical line upwards. Start well below the baseline and end above characters.</p>
+          <div class="gestures-img-container">
+            <img src="../assets/img/gestures/gest-join-lines.png"/>
+            <img src="../assets/img/gestures/gest-join-words.png"/>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <nav>
       <div class="flex-container wrap gap">
