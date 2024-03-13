@@ -16,10 +16,10 @@ describe('Home Page', () =>
     expect(await tableOfContent.isVisible()).toBe(true)
   })
 
-  test('each table of contents link must be associated with a section part', async () =>
+  test('each table of contents link must be associated with a detail', async () =>
   {
     const links = await page.locator('#table-of-content li')
-    const sectionParts = await page.locator('.title')
+    const sectionParts = await page.locator('details')
     const linksCount = await links.count()
     const secctionPartsCount = await sectionParts.count()
     expect(linksCount).toBe(secctionPartsCount)
