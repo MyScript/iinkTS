@@ -1,7 +1,8 @@
 import { LoggerClass } from "../../Constants"
 import { TRenderingConfiguration } from "../../configuration"
 import { LoggerManager } from "../../logger"
-import { IModel, TStroke, TSymbol } from "../../model"
+import { IModel } from "../../model"
+import { Stroke, TSymbol } from "../../primitive"
 import { CanvasRendererShape } from "./CanvasRendererShape"
 import { CanvasRendererStroke } from "./CanvasRendererStroke"
 import { CanvasRendererText } from "./CanvasRendererText"
@@ -64,7 +65,7 @@ export class CanvasRenderer
   {
     this.#logger.debug("drawSymbol", { symbol })
     if (symbol.type === "stroke") {
-      const stroke = symbol as TStroke
+      const stroke = symbol as Stroke
       if (stroke.pointerType !== "eraser") {
         this.strokeRenderer.draw(context2D, stroke)
       }
@@ -101,11 +102,11 @@ export class CanvasRenderer
   {
     this.#logger.info("drawModel", { model })
     this.context.renderingCanvasContext?.clearRect(0, 0, this.context.renderingCanvas.width, this.context.renderingCanvas.height)
-    model.strokes.forEach(symbol => this.drawSymbol(this.context.renderingCanvasContext, symbol))
+    model.symbols.forEach(symbol => this.drawSymbol(this.context.renderingCanvasContext, symbol))
     this.context.capturingCanvasContext.clearRect(0, 0, this.context.capturingCanvas.width, this.context.capturingCanvas.height)
   }
 
-  drawPendingStroke(stroke: TStroke | undefined): void
+  drawPendingStroke(stroke: Stroke | undefined): void
   {
     this.#logger.info("drawPendingStroke", { stroke })
     this.context.capturingCanvasContext.clearRect(0, 0, this.context.capturingCanvas.width, this.context.capturingCanvas.height)

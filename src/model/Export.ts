@@ -1,4 +1,4 @@
-import { TBoundingBox, TPoint } from "../utils"
+import { TBoundingBox, TPoint } from "../primitive"
 
 /**
  * @group Model/Export
@@ -175,6 +175,22 @@ export type TJIIXEdgeLine = TJIIXEdgeElement & {
   y2: number
   p1Decoration?: "arrow-head" | string
   p2Decoration?: "arrow-head" | string
+}
+
+/**
+ * @group Model/Export
+ */
+export type TJIIXEdgeArc = TJIIXEdgeElement & {
+  id: string
+  type: "Edge"
+  kind: "arc"
+  cx: number,
+  cy: number,
+  rx: number,
+  ry: number,
+  phi: number,
+  startAngle: number,
+  sweepAngle: number
 }
 
 /**

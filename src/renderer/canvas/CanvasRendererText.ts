@@ -1,7 +1,6 @@
 import { LoggerClass } from "../../Constants"
 import { LoggerManager } from "../../logger"
-import { TSymbol, TTextDataSymbol, TTextSymbol, TTextUnderlineSymbol, TUnderLineSymbol } from "../../model"
-import { TPoint } from "../../utils"
+import { TSymbol, TCanvasTextSymbol, TCanvasTextUnderlineSymbol, TCanvasUnderLineSymbol, TPoint } from "../../primitive"
 
 /**
  * @group Renderer
@@ -16,19 +15,19 @@ export class CanvasRendererText
     textLine: "textLine"
   }
 
-  protected drawUnderline(context2D: CanvasRenderingContext2D, underline: TUnderLineSymbol, label: string, data: TTextDataSymbol)
+  protected drawUnderline(context2D: CanvasRenderingContext2D, textUnderline: TCanvasTextUnderlineSymbol, underline: TCanvasUnderLineSymbol)
   {
-    this.#logger.debug("#drawUnderline", { context2D, underline, label, data })
+    this.#logger.debug("#drawUnderline", { context2D, textUnderline, underline })
     context2D.save()
     try {
-      const delta = data.width / label.length
+      const delta = textUnderline.data.width / textUnderline.label.length
       const p1: TPoint = {
-        x: data.topLeftPoint.x + (underline.data.firstCharacter * delta),
-        y: data.topLeftPoint.y + data.height
+        x: textUnderline.data.topLeftPoint.x + (underline.data.firstCharacter * delta),
+        y: textUnderline.data.topLeftPoint.y + textUnderline.data.height
       }
       const p2: TPoint = {
-        x: data.topLeftPoint.x + (underline.data.lastCharacter * delta),
-        y: data.topLeftPoint.y + data.height
+        x: textUnderline.data.topLeftPoint.x + (underline.data.lastCharacter * delta),
+        y: textUnderline.data.topLeftPoint.y + textUnderline.data.height
       }
       context2D.beginPath()
       context2D.moveTo(p1.x, p1.y)
@@ -41,7 +40,7 @@ export class CanvasRendererText
     }
   }
 
-  protected drawText(context2D: CanvasRenderingContext2D, text: TTextSymbol)
+  protected drawText(context2D: CanvasRenderingContext2D, text: TCanvasTextSymbol)
   {
     this.#logger.debug("#drawText", { context2D, text })
     context2D.save()
@@ -58,13 +57,13 @@ export class CanvasRendererText
     }
   }
 
-  protected drawTextLine(context2D: CanvasRenderingContext2D, textUnderline: TTextUnderlineSymbol)
+  protected drawTextLine(context2D: CanvasRenderingContext2D, textUnderline: TCanvasTextUnderlineSymbol)
   {
     this.#logger.debug("#drawTextLine", { context2D, textUnderline })
     this.drawText(context2D, textUnderline)
     textUnderline.underlineList.forEach((underline) =>
     {
-      this.drawUnderline(context2D, underline, textUnderline.label, textUnderline.data)
+      this.drawUnderline(context2D, textUnderline, underline)
     })
   }
 
@@ -76,10 +75,10 @@ export class CanvasRendererText
     switch (symbol.type) {
       case this.symbols.char:
       case this.symbols.string:
-        this.drawText(context2D, symbol as TTextSymbol)
+        this.drawText(context2D, symbol as TCanvasTextSymbol)
         break
       case this.symbols.textLine:
-        this.drawTextLine(context2D, symbol as TTextUnderlineSymbol)
+        this.drawTextLine(context2D, symbol as TCanvasTextUnderlineSymbol)
         break
       default:
         this.#logger.warn("draw", `${symbol.type} not implemented`)

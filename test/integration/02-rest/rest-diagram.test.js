@@ -142,7 +142,7 @@ describe('Rest Diagram', () => {
       let rectResultJson = JSON.parse(resultText)
       expect(rectResultJson['application/vnd.myscript.jiix']).toMatchObject(rectangle.exports.at(-1)['application/vnd.myscript.jiix'])
 
-      let strokes = await editorEl.evaluate((node) => node.editor.model.strokes)
+      let strokes = await editorEl.evaluate((node) => node.editor.model.symbols)
       expect(strokes.length).toEqual(rectangle.strokes.length)
 
       await Promise.all([getDatasFromExportedEvent(page), page.click('#undo')])
@@ -150,7 +150,7 @@ describe('Rest Diagram', () => {
       rectResultJson = JSON.parse(resultText)
       expect(rectResultJson['application/vnd.myscript.jiix']).toMatchObject(rectangle.exports.at(-2)['application/vnd.myscript.jiix'])
 
-      strokes = await editorEl.evaluate((node) => node.editor.model.strokes)
+      strokes = await editorEl.evaluate((node) => node.editor.model.symbols)
       expect(strokes.length).toEqual(rectangle.strokes.length - 1)
 
       await Promise.all([getDatasFromExportedEvent(page), page.click('#redo')])
@@ -158,7 +158,7 @@ describe('Rest Diagram', () => {
       rectResultJson = JSON.parse(resultText)
       expect(rectResultJson['application/vnd.myscript.jiix']).toMatchObject(rectangle.exports.at(-1)['application/vnd.myscript.jiix'])
 
-      strokes = await editorEl.evaluate((node) => node.editor.model.strokes)
+      strokes = await editorEl.evaluate((node) => node.editor.model.symbols)
       expect(strokes.length).toEqual(rectangle.strokes.length)
     })
   })

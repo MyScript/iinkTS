@@ -1,7 +1,7 @@
 import { LoggerClass } from "../../Constants"
 import { LoggerManager } from "../../logger"
-import { TStroke } from "../../model"
-import { TPointer, computeAngleAxeRadian, computeLinksPointers, computeMiddlePointer } from "../../utils"
+import { Stroke, TPointer } from "../../primitive"
+import { computeAngleAxeRadian, computeLinksPointers, computeMiddlePointer } from "../../utils"
 
 /**
  * @group Renderer
@@ -54,7 +54,7 @@ export class CanvasRendererStroke
     context2d.quadraticCurveTo(linkPoints3[1].x, linkPoints3[1].y, linkPoints1[1].x, linkPoints1[1].y)
   }
 
-  draw(context2d: CanvasRenderingContext2D, stroke: TStroke): void
+  draw(context2d: CanvasRenderingContext2D, stroke: Stroke): void
   {
     this.#logger.info("draw", { context2d, stroke })
     const NUMBER_POINTS = stroke.pointers.length
