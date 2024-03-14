@@ -1,4 +1,4 @@
-import { LoggerClass } from "../Constants"
+import { WriteTool, LoggerClass } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { TGesture } from "../gesture"
 import { LoggerManager } from "../logger"
@@ -30,22 +30,6 @@ import { OIGestureManager } from "./OIGestureManager"
 import { OISelectionManager } from "./OISelectionManager"
 import { OISnapManager } from "./OISnapManager"
 
-/**
- * @group Constants
- * @description List all the shapes that can be drawn
- */
-export enum WriteTool
-{
-  Pencil = "pencil",
-  Rectangle = "rectangle",
-  Circle = "circle",
-  Ellipse = "ellipse",
-  Triangle = "triangle",
-  Parallelogram = "parallelogram",
-  Line = "line",
-  Arrow = "arrow",
-  DoubleArrow = "double-arrow",
-}
 
 /**
  * @group Manager

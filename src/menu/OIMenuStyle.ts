@@ -1,11 +1,10 @@
 import styleIcon from "../assets/svg/palette.svg"
-import { Intention, LoggerClass } from "../Constants"
+import { Intention, WriteTool, LoggerClass } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerManager } from "../logger"
 import { OIModel } from "../model"
 import { SymbolType, TOISymbol } from "../primitive"
 import { OIMenu, TMenuItemColorList } from "./OIMenu"
-import { WriteTool } from "../manager"
 import { OIMenuSub } from "./OIMenuSub"
 
 /**

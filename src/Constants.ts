@@ -142,6 +142,24 @@ export enum Intention
 
 /**
  * @group Constants
+ * @description List all the shapes that can be drawn
+ * @remarks only usable in the case of offscreen
+ */
+export enum WriteTool
+{
+  Pencil = "pencil",
+  Rectangle = "rectangle",
+  Circle = "circle",
+  Ellipse = "ellipse",
+  Triangle = "triangle",
+  Parallelogram = "parallelogram",
+  Line = "line",
+  Arrow = "arrow",
+  DoubleArrow = "double-arrow",
+}
+
+/**
+ * @group Constants
  * @group Logger
  */
 export enum LoggerLevel
