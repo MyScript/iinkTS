@@ -1,8 +1,7 @@
 import { LoggerClass } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerManager } from "../logger"
-import { OIMenuAction, OIMenuIntention, OIMenuStyle } from "../menu"
-import { OIMenuContext } from "../menu/OIMenuContext"
+import { OIMenuAction, OIMenuIntention, OIMenuStyle, OIMenuContext } from "../menu"
 import { PartialDeep } from "../utils"
 
 /**
