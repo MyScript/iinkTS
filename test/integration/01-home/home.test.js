@@ -64,11 +64,6 @@ describe('Home Page', () =>
 
   test('each "View example" link should ok', async () =>
   {
-    const exampleDetails = await page.locator('.example-recognition')
-    for (let i = 0; i < await exampleDetails.count(); i++) {
-      const currentDetail = exampleDetails.nth(i);
-      await currentDetail.click()
-    }
     const exampleLink = await page.locator('text=View example')
 
     const currentUrl = page.url()
