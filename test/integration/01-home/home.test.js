@@ -31,33 +31,44 @@ describe('Home Page', () =>
     }
   })
 
-  test('each example-item should have 2 links', async () =>
+  test('for each example-recognition each example-item should have 2 links', async () =>
   {
-    const exampleItems = await page.locator('.example-item')
+    const exampleDetails = await page.locator('.example-recognition')
 
-    for (let i = 0; i < await exampleItems.count(); i++) {
-      const exampleItemsTitle = await exampleItems.nth(i).locator('p strong').textContent()
-      expect(exampleItemsTitle).toBeDefined()
+    for (let i = 0; i < await exampleDetails.count(); i++) {
+      const currentDetail = exampleDetails.nth(i);
+      await currentDetail.click()
+      const exampleItems = await currentDetail.locator('.example-item')
 
-      const links = await exampleItems.nth(i).locator('a')
-      expect(await links.count()).toBe(2)
+      for (let i = 0; i < await exampleItems.count(); i++) {
+        const exampleItemsTitle = await exampleItems.nth(i).locator('p strong').textContent()
+        expect(exampleItemsTitle).toBeDefined()
 
-      const exampleLink = links.nth(0)
-      const codeLink = links.nth(1)
+        const links = await exampleItems.nth(i).locator('a')
+        expect(await links.count()).toBe(2)
 
-      const exampleLinkText = await exampleLink.allInnerTexts()
-      expect(exampleLinkText.length).toBe(1)
-      expect(exampleLinkText[0].trim()).toBe('View example')
+        const exampleLink = links.nth(0)
+        const codeLink = links.nth(1)
 
-      const codeLinkText = await codeLink.allInnerTexts()
-      expect(codeLinkText.length).toBe(1)
-      expect(codeLinkText[0].trim()).toBe('Get source code')
-      expect(await codeLink.getAttribute('href')).toContain('https://github.com/MyScript')
+        const exampleLinkText = await exampleLink.allInnerTexts()
+        expect(exampleLinkText.length).toBe(1)
+        expect(exampleLinkText[0].trim()).toBe('View example')
+
+        const codeLinkText = await codeLink.allInnerTexts()
+        expect(codeLinkText.length).toBe(1)
+        expect(codeLinkText[0].trim()).toBe('Get source code')
+        expect(await codeLink.getAttribute('href')).toContain('https://github.com/MyScript')
+      }
     }
   })
 
   test('each "View example" link should ok', async () =>
   {
+    const exampleDetails = await page.locator('.example-recognition')
+    for (let i = 0; i < await exampleDetails.count(); i++) {
+      const currentDetail = exampleDetails.nth(i);
+      await currentDetail.click()
+    }
     const exampleLink = await page.locator('text=View example')
     const linksInErrors = []
     for (let i = 0; i < await exampleLink.count(); i++) {
@@ -74,12 +85,21 @@ describe('Home Page', () =>
         linksInErrors.push(href)
       }
       await page.goBack()
+      for (let i = 0; i < await exampleDetails.count(); i++) {
+        const currentDetail = exampleDetails.nth(i);
+        await currentDetail.click()
+      }
     }
     expect(linksInErrors).toStrictEqual([])
   }, 60000)
 
   test('each "Get source code" link should ok', async () =>
   {
+    const exampleDetails = await page.locator('.example-recognition')
+    for (let i = 0; i < await exampleDetails.count(); i++) {
+      const currentDetail = exampleDetails.nth(i);
+      await currentDetail.click()
+    }
     const codeLinks = await page.locator('text=Get source code')
     const exampleLinks = await page.locator('text=View example')
     for(let i = 0; i < await exampleLinks.count(); i++) {

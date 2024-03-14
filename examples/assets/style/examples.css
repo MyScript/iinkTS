@@ -235,19 +235,19 @@ select:disabled {
     padding: 24px 12px;
 }
 
-.home-main .example-details {
+.home-main .example-recognition {
     width: 100%;
     max-width: 1000px;
     background-color: white;
 }
 
-.home-main .example-details-summary {
+.home-main .example-recognition-summary {
     position: sticky;
     top: 50px;
     background-color: white;
 }
 
-.home-main .example-details-title {
+.home-main .example-recognition-title {
     position: relative;
     display: flex;
     align-items: center;
@@ -256,23 +256,23 @@ select:disabled {
     margin: 0;
 }
 
-.home-main .example-details-title h2 {
+.home-main .example-recognition-title h2 {
     color: #1A9FFF;
     margin: 0px;
 }
 
-.home-main .example-details-title .quote {
+.home-main .example-recognition-title .quote {
     color: #969696;
     font-style: italic;
 }
 
-.home-main .example-details-title img {
+.home-main .example-recognition-title img {
     height: 50px;
     width: auto;
     stroke: #1A9FFF;
 }
 
-.home-main .example-details-content {
+.home-main .example-recognition-content {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -280,7 +280,7 @@ select:disabled {
     padding: 24px;
 }
 
-.home-main .example-details .example-section {
+.home-main .example-recognition .example-section {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-column-gap: 24px;
@@ -288,7 +288,7 @@ select:disabled {
     padding-bottom: 24px;
 }
 
-.home-main .example-details .example-section-title {
+.home-main .example-recognition .example-section-title {
     grid-column: span 2;
     margin-bottom: 6px;
     padding: 0 6px;
@@ -298,13 +298,13 @@ select:disabled {
     height: 32px;
 }
 
-.home-main .example-details .example-item {
+.home-main .example-recognition .example-item {
     min-width: 175px;
     padding: 12px;
     box-shadow: 0 6px 24px -12px rgba(6, 6, 7, .4);
 }
 
-.home-main .example-details .example-item .example-btn-wrapper {
+.home-main .example-recognition .example-item .example-btn-wrapper {
     margin: 20px 0;
     display: flex;
     justify-content: center;
@@ -313,7 +313,7 @@ select:disabled {
     text-align: center;
 }
 
-.home-main .example-details .example-item .btn {
+.home-main .example-recognition .example-item .btn {
     height: 48px;
     line-height: 43px;
     width: 40%;
@@ -333,7 +333,7 @@ select:disabled {
     transition: all 125ms;
 }
 
-.home-main .example-details .example-item .btn .icn {
+.home-main .example-recognition .example-item .btn .icn {
     margin: 0 2px -4px -12px;
     width: 20px;
     height: 20px;
@@ -352,19 +352,19 @@ select:disabled {
         padding: 6px 3px;
     }
 
-    .home-main .example-details {
+    .home-main .example-recognition {
         width: calc(100% - 10px);
     }
 
-    .home-main .example-details-content {
+    .home-main .example-recognition-content {
         padding: 0px;
     }
 
-    .home-main .example-details .example-item {
+    .home-main .example-recognition .example-item {
         grid-column: span 2;
     }
 
-    .home-main .example-details .example-item .example-btn-wrapper {
+    .home-main .example-recognition .example-item .example-btn-wrapper {
         margin: 5px 0;
     }
 }
