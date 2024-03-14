@@ -238,6 +238,13 @@ select:disabled {
 .home-main .example-details {
     width: 100%;
     max-width: 1000px;
+    background-color: white;
+}
+
+.home-main .example-details-summary {
+    position: sticky;
+    top: 50px;
+    background-color: white;
 }
 
 .home-main .example-details-title {
