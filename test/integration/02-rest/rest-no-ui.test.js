@@ -25,6 +25,8 @@ describe('Rest no UI', () => {
       imagePngExport,
       page.click('#recognize')
     ])
+    // for wait rendering after convertBlobToBase64
+    await page.waitForTimeout(1000)
 
     expect(await page.locator('#interpretatedTextContent').textContent()).not.toBe('')
     expect(await page.locator('#interpretatedImageContent > *').count()).toEqual(1)    
