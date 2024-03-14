@@ -107,7 +107,7 @@ select:disabled {
 
 .accordion .accordion-summary::before {
     display: block;
-    content: url("../img//nav-arrow-down.svg");
+    content: url("../img/nav-arrow-down.svg");
     height: 32px;
     width: 32px;
     float: right;
