@@ -3,12 +3,13 @@ import { Configuration, TConfiguration, TConverstionState } from "../configurati
 import { InternalEvent } from "../event"
 import { PointerEventGrabber } from "../grabber"
 import { LoggerManager } from "../logger"
-import { IModel, Model, TExport, TStroke } from "../model"
+import { IModel, Model, TExport } from "../model"
 import { TWSMessageEventSVGPatch, WSRecognizer } from "../recognizer"
 import { WSSVGRenderer } from "../renderer"
-import { StyleManager, TPenStyle, TTheme } from "../style"
+import { DefaultPenStyle, StyleManager, TPenStyle, TTheme } from "../style"
 import { TUndoRedoContext, UndoRedoManager } from "../undo-redo"
-import { DeferredPromise, PartialDeep, TPointer } from "../utils"
+import { DeferredPromise, PartialDeep } from "../utils"
+import { Stroke, TStroke, TPointer } from "../primitive"
 import { IBehaviors, TBehaviorOptions } from "./IBehaviors"
 
 /**
@@ -174,10 +175,10 @@ export class WSBehaviors implements IBehaviors
 
   drawCurrentStroke(): void
   {
-    this.#logger.debug("drawCurrentStroke", { stroke: this.model.currentStroke })
-    const currentStroke = this.model.currentStroke as TStroke
-    if (currentStroke) {
-      this.renderer.drawPendingStroke(currentStroke)
+    this.#logger.debug("drawCurrentStroke", { stroke: this.model.currentSymbol })
+    const currentSymbol = this.model.currentSymbol as Stroke
+    if (currentSymbol) {
+      this.renderer.drawPendingStroke(currentSymbol)
     }
   }
 
@@ -244,10 +245,54 @@ export class WSBehaviors implements IBehaviors
     return m
   }
 
-  async importPointEvents(strokes: TStroke[]): Promise<IModel>
+  async importPointEvents(strokes: PartialDeep<TStroke>[]): Promise<IModel>
   {
     this.#logger.info("importPointEvents", { strokes })
-    const exportPoints = await this.recognizer.importPointEvents(strokes)
+    const errors: string[] = []
+    const strokesToImport = strokes.map((s, strokeIndex) => {
+      const str = new Stroke(s.style || DefaultPenStyle, s.pointerId || 1)
+      if (s.id) str.id = s.id
+      if (s.pointerType) str.pointerType = s.pointerType
+      if (!s.pointers?.length) {
+        errors.push(`stroke ${strokeIndex + 1} has not pointers`)
+      }
+      let flag = true
+      s.pointers?.forEach((pp, pIndex) => {
+        flag = true
+        if (!pp) {
+          errors.push(`stroke ${strokeIndex + 1} has no pointer at ${pIndex}`)
+          return
+        }
+        const pointer: TPointer = {
+          p: pp.p || 1,
+          t: pp.t || pIndex,
+          x: 0,
+          y: 0
+        }
+        if (pp?.x == undefined || pp?.x == null) {
+          errors.push(`stroke ${strokeIndex + 1} has no x at pointer at ${pIndex}`)
+          flag = false
+        }
+        else {
+          pointer.x = pp.x
+        }
+        if (pp?.y == undefined || pp?.y == null) {
+          errors.push(`stroke ${strokeIndex + 1} has no y at pointer at ${pIndex}`)
+          flag = false
+        }
+        else {
+          pointer.y = pp.y
+        }
+        if (flag) {
+          str.pointers.push(pointer)
+        }
+      })
+      return str
+    })
+    if (errors.length) {
+      this.internalEvent.emitError( new Error(errors.join("\n")))
+    }
+    const exportPoints = await this.recognizer.importPointEvents(strokesToImport)
     this.model.mergeExport(exportPoints)
     this.#logger.debug("importPointEvents", this.model)
     return this.model

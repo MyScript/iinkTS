@@ -2,7 +2,8 @@ import { LoggerClass, Error as ErrorConst } from "../Constants"
 import { TConverstionState, TRecognitionConfiguration, TServerConfiguration } from "../configuration"
 import { InternalEvent } from "../event"
 import { LoggerManager } from "../logger"
-import { Model, TExport, TJIIXExport, TStroke, convertStrokeToJSON } from "../model"
+import { Model, TExport, TJIIXExport } from "../model"
+import { Stroke } from "../primitive"
 import { StyleHelper, TPenStyle, TTheme } from "../style"
 import { TUndoRedoContext } from "../undo-redo"
 import { DeferredPromise, PartialDeep, computeHmac, isVersionSuperiorOrEqual } from "../utils"
@@ -441,7 +442,7 @@ export class WSRecognizer
     }
   }
 
-  async addStrokes(strokes: TStroke[]): Promise<TExport>
+  async addStrokes(strokes: Stroke[]): Promise<TExport>
   {
     this.#logger.info("addStrokes", { strokes })
     await this.initialized?.promise
@@ -452,7 +453,7 @@ export class WSRecognizer
     else {
       await this.send({
         type: "addStrokes",
-        strokes: strokes.map(convertStrokeToJSON)
+        strokes: strokes.map(s => s.toJSON())
       })
     }
     return this.addStrokeDeferred?.promise
@@ -597,14 +598,14 @@ export class WSRecognizer
     return localModel
   }
 
-  async importPointEvents(strokes: TStroke[]): Promise<TExport>
+  async importPointEvents(strokes: Stroke[]): Promise<TExport>
   {
     this.#logger.info("importPointsEvents", { strokes })
     await this.initialized?.promise
     this.importPointEventsDeferred = new DeferredPromise<TExport>()
     const message: TWSMessageEvent = {
       type: "pointerEvents",
-      events: strokes.map(convertStrokeToJSON)
+      events: strokes.map(s => s.toJSON())
     }
     this.send(message)
     const exportPoints = await this.importPointEventsDeferred?.promise

@@ -3,12 +3,13 @@ import { Configuration, TConfiguration, TConverstionState } from "../configurati
 import { InternalEvent } from "../event"
 import { PointerEventGrabber } from "../grabber"
 import { LoggerManager } from "../logger"
-import { IModel, Model, Stroke, TExport, TStroke } from "../model"
+import { IModel, Model, TExport } from "../model"
+import { Stroke, TStroke, TPointer } from "../primitive"
 import { RestRecognizer } from "../recognizer"
 import { CanvasRenderer } from "../renderer"
-import { StyleManager, TPenStyle, TTheme } from "../style"
+import { DefaultPenStyle, StyleManager, TPenStyle, TTheme } from "../style"
 import { TUndoRedoContext, UndoRedoManager } from "../undo-redo"
-import { DeferredPromise, PartialDeep, TPointer } from "../utils"
+import { DeferredPromise, PartialDeep } from "../utils"
 import { IBehaviors, TBehaviorOptions } from "./IBehaviors"
 
 /**
@@ -183,8 +184,8 @@ export class RestBehaviors implements IBehaviors
 
   drawCurrentStroke(): void
   {
-    this.#logger.debug("drawCurrentStroke", { stroke: this.model.currentStroke })
-    this.renderer.drawPendingStroke(this.model.currentStroke)
+    this.#logger.debug("drawCurrentStroke", { stroke: this.model.currentSymbol })
+    this.renderer.drawPendingStroke(this.model.currentSymbol)
   }
 
   async updateModelRendering(): Promise<IModel>
@@ -241,15 +242,59 @@ export class RestBehaviors implements IBehaviors
     return this.model
   }
 
-  async importPointEvents(strokes: TStroke[]): Promise<IModel>
+  async importPointEvents(strokes: PartialDeep<TStroke>[]): Promise<IModel>
   {
-    strokes.forEach((s) =>
+    const errors: string[] = []
+    strokes.forEach((s, strokeIndex) =>
     {
-      const stroke = new Stroke(s.style, Math.random())
-      stroke.pointers = s.pointers
-      this.model.addStroke(stroke)
+      let flag = true
+      const stroke = new Stroke(s.style || DefaultPenStyle, s.pointerId || 1)
+      if (s.id) stroke.id = s.id
+      if (!s.pointers?.length) {
+        errors.push(`stroke ${strokeIndex + 1} has not pointers`)
+        flag = false
+        return
+      }
+      s.pointers?.forEach((pp, pIndex) => {
+        if (!pp) {
+          errors.push(`stroke ${strokeIndex + 1} has no pointer at ${pIndex}`)
+          flag = false
+          return
+        }
+        const pointer: TPointer = {
+          p: pp.p || 1,
+          t: pp.t || pIndex,
+          x: 0,
+          y: 0
+        }
+        if (pp?.x == undefined || pp?.x == null) {
+          errors.push(`stroke ${strokeIndex + 1} has no x at pointer at ${pIndex}`)
+          flag = false
+          return
+        }
+        else {
+          pointer.x = pp.x
+        }
+        if (pp?.y == undefined || pp?.y == null) {
+          errors.push(`stroke ${strokeIndex + 1} has no y at pointer at ${pIndex}`)
+          flag = false
+          return
+        }
+        else {
+          pointer.y = pp.y
+        }
+        if (flag) {
+          stroke.pointers.push(pointer)
+        }
+      })
+      if (flag) {
+        this.model.addStroke(stroke)
+      }
     })
 
+    if (errors.length) {
+      this.internalEvent.emitError( new Error(errors.join("\n")))
+    }
     try {
       const newModel = await this.updateModelRendering()
       Object.assign(this.#model, newModel)
@@ -267,7 +312,7 @@ export class RestBehaviors implements IBehaviors
     this.model.height = height
     this.model.width = width
     this.renderer.resize(this.model)
-    if (this.model.strokes.length) {
+    if (this.model.symbols.length) {
       clearTimeout(this.#resizeTimer)
       this.#resizeTimer = setTimeout(async () =>
       {

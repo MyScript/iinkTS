@@ -1,7 +1,7 @@
 import { LoggerClass } from "../Constants"
 import { TGrabberConfiguration } from "../configuration"
 import { LoggerManager } from "../logger"
-import { TPointer } from "../utils"
+import { TPointer } from "../primitive"
 import { IGrabber } from "./IGrabber"
 
 /**

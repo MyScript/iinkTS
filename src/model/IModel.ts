@@ -1,6 +1,5 @@
-import { TConverstionState } from "../configuration"
 import { TExport } from "./Export"
-import { TStroke } from "./Stroke"
+import { TSymbol } from "../primitive"
 
 /**
  * @group Model
@@ -17,13 +16,10 @@ export interface IModel
 {
   readonly creationTime: number
   modificationDate: number
-  currentStroke?: TStroke
   positions: TRecognitionPositions
-  strokes: TStroke[]
-  selectedStrokes: TStroke[]
+  symbols: TSymbol[]
   exports?: TExport
   converts?: TExport
-  conversion?: TConverstionState
   width: number
   height: number
   rowHeight: number
