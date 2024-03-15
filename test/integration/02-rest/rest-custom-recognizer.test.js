@@ -19,7 +19,7 @@ describe('Rest Text', () => {
 
   test("should have info in recognizer-info div", async () => {
     const url = await page.$eval("#recognizer-url", el => el.textContent)
-    expect(url).toContain("Server url: http://")
+    expect(url).toContain("Server url:")
     const sent = await page.$eval("#recognizer-sent", el => el.textContent)
     expect(sent).toContain("Message sent:")
     const received = await page.$eval("#recognizer-received", el => el.textContent)

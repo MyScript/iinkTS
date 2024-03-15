@@ -15,7 +15,7 @@ describe("Websocket Text", () => {
     await page.goto("/examples/websocket/websocket_text_iink.html")
     await Promise.all([
       waitForEditorWebSocket(page),
-      page.waitForRequest(req => req.url().includes('/api/v4.0/iink/availableLanguageList') && req.method() === "GET")
+      page.waitForResponse(req => req.url().includes('/api/v4.0/iink/availableLanguageList'))
     ])
     await waitEditorIdle(page)
   })
@@ -90,7 +90,7 @@ describe("Websocket Text", () => {
       await page.reload()
       await Promise.all([
         waitForEditorWebSocket(page),
-        page.waitForRequest(req => req.url().includes('/api/v4.0/iink/availableLanguageList') && req.method() === "GET")
+        page.waitForResponse(req => req.url().includes('/api/v4.0/iink/availableLanguageList'))
       ])
       await waitEditorIdle(page)
     })
