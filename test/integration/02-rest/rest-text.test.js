@@ -17,7 +17,7 @@ describe('Rest Text', () => {
   beforeEach(async () => {
     await Promise.all([
       page.reload({ waitUntil: 'load' }),
-      page.waitForRequest(req => req.url().includes('/api/v4.0/iink/availableLanguageList') && req.method() === "GET")
+      page.waitForResponse(req => req.url().includes('/api/v4.0/iink/availableLanguageList'))
     ])
     await waitForEditorRest(page)
   })

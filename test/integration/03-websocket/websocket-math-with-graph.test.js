@@ -13,7 +13,6 @@ describe('Websocket Math', function () {
     await page.goto('/examples/websocket/websocket_math_with_graph.html')
     await waitForEditorWebSocket(page)
     await waitEditorIdle(page)
-
   })
 
   test('should have title', async () => {
@@ -29,10 +28,16 @@ describe('Websocket Math', function () {
       ])
     }
     const img = await page.screenshot()
+
+    // To update the snapshot, uncomment the following 2 lines
+    // const fs = require('fs')
+    // fs.writeFile(__dirname + '../__image_snapshots__/websocket-math-with-graph-test-js-snapshot.png', img);
+
     expect(img).toMatchImageSnapshot({
+
       allowSizeMismatch: true,
       customSnapshotsDir: '../__image_snapshots__',
-      customSnapshotIdentifier: 'websocket-math-with-graph-test-js-desktop-snap.png',
+      customSnapshotIdentifier: 'websocket-math-with-graph-test-js-snapshot.png',
       failureThreshold: 0.01,
       failureThresholdType: 'percent'
     })

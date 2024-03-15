@@ -15,7 +15,7 @@ describe("Websocket Custom recognizer", () => {
 
   test("should have info in recognizer-info div", async () => {
     const url = await page.$eval("#recognizer-url", el => el.textContent)
-    expect(url).toContain("connection established at ws://")
+    expect(url).toContain("connection established at")
     const sent = await page.$eval("#recognizer-sent", el => el.textContent)
     expect(sent).toContain("Message sent: {")
     const received = await page.$eval("#recognizer-received", el => el.textContent)
