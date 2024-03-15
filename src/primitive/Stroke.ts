@@ -8,7 +8,7 @@ import { AbstractSymbol, SymbolType, TSymbol } from "./Symbol"
 /**
  * @group Primitive
  */
-export type TStrokeJSON = {
+export type TStrokeToSend = {
   id: string
   pointerType: string
   x: number[]
@@ -20,9 +20,9 @@ export type TStrokeJSON = {
 /**
  * @group Primitive
  */
-export type TStrokeGroupJSON = {
+export type TStrokeGroupToSend = {
   penStyle?: string
-  strokes: TStrokeJSON[]
+  strokes: TStrokeToSend[]
 }
 
 /**
@@ -79,9 +79,9 @@ export class Stroke extends AbstractSymbol implements TStroke
     return clone
   }
 
-  toJSON(): TStrokeJSON
+  formatToSend(): TStrokeToSend
   {
-    const json: TStrokeJSON = {
+    const json: TStrokeToSend = {
       id: this.id,
       pointerType: this.pointerType,
       p: [],
