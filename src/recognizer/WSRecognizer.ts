@@ -453,7 +453,7 @@ export class WSRecognizer
     else {
       await this.send({
         type: "addStrokes",
-        strokes: strokes.map(s => s.toJSON())
+        strokes: strokes.map(s => s.formatToSend())
       })
     }
     return this.addStrokeDeferred?.promise
@@ -605,7 +605,7 @@ export class WSRecognizer
     this.importPointEventsDeferred = new DeferredPromise<TExport>()
     const message: TWSMessageEvent = {
       type: "pointerEvents",
-      events: strokes.map(s => s.toJSON())
+      events: strokes.map(s => s.formatToSend())
     }
     this.send(message)
     const exportPoints = await this.importPointEventsDeferred?.promise

@@ -2,7 +2,7 @@ import { LoggerClass, Error as ErrorConst } from "../Constants"
 import { TConverstionState, TDiagramConfiguration, TExportConfiguration, TMathConfiguration, TRawContentConfiguration, TRecognitionConfiguration, TServerConfiguration, TTextConfiguration } from "../configuration"
 import { LoggerManager } from "../logger"
 import { Model, TExport, TJIIXExport } from "../model"
-import { TStrokeGroup, TStrokeGroupJSON } from "../primitive"
+import { TStrokeGroup, TStrokeGroupToSend } from "../primitive"
 import { StyleHelper, TPenStyle } from "../style"
 import { computeHmac, isVersionSuperiorOrEqual } from "../utils"
 
@@ -34,7 +34,7 @@ export type TRestPostData = {
   conversionState?: TConverstionState
   height: number,
   width: number,
-  strokeGroups: TStrokeGroupJSON[]
+  strokeGroups: TStrokeGroupToSend[]
 }
 
 /**
@@ -118,13 +118,13 @@ export class RestRecognizer
       }
     })
 
-    const strokeGroupsToSend: TStrokeGroupJSON[] = []
+    const strokeGroupsToSend: TStrokeGroupToSend[] = []
     strokeGroupByPenStyle.forEach((group: TStrokeGroup) =>
     {
       const newPenStyle = JSON.stringify(group.penStyle) === "{}" ? undefined : StyleHelper.penStyleToCSS(group.penStyle as TPenStyle)
       const newGroup = {
         penStyle: newPenStyle,
-        strokes: group.strokes.map(s => s.toJSON())
+        strokes: group.strokes.map(s => s.formatToSend())
       }
       strokeGroupsToSend.push(newGroup)
     })
