@@ -117,7 +117,7 @@ describe("OIStroke.ts", () =>
     })
   })
 
-  describe("convertToSend", () =>
+  describe("formatToSend", () =>
   {
     test("should return array of x, y, t, and p", () =>
     {
@@ -125,7 +125,7 @@ describe("OIStroke.ts", () =>
       stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
       stroke.pointers.push({ p: 1, t: 1, x: 11, y: 11 })
 
-      const jsonToSend = stroke.convertToSend()
+      const jsonToSend = stroke.formatToSend()
       expect(jsonToSend).toEqual({
         id: stroke.id,
         pointerType: stroke.pointerType,

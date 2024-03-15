@@ -440,7 +440,7 @@ export class OIRecognizer
     await this.send({
       type: "replaceStrokes",
       oldStrokeIds,
-      strokes: newStrokes.map(s => s.formatToSend())
+      newStrokes: newStrokes.map(s => s.formatToSend())
     })
     return this.replaceStrokeDeferred?.promise
   }
