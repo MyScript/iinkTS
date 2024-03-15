@@ -7,12 +7,11 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
     <title>Rest Text Styling</title>
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
     <style>
-      .nav-block {
-        display: block;
-      }
       input[type="number"].pen-width-field {
         width: 150px;
       }
@@ -41,7 +40,7 @@
   <body>
     <div id="result"></div>
 
-    <nav class="nav-block">
+    <nav>
       <div class="flex-container wrap between gap">
         <div class="flex-container wrap gap">
           <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
@@ -59,6 +58,7 @@
           <select id="language"></select>
         </div>
       </div>
+      <div class="separator horizontal"></div>
       <div class="flex-container wrap between gap">
         <div class="flex-container wrap gap">
           <label for="penenabled">Enable pen color/thickness: </label>

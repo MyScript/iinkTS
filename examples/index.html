@@ -9,17 +9,17 @@
 
     <title>iinkTS: Examples</title>
 
-    <link rel="stylesheet" href="./assets/style/examples.css" />
+    <link rel="stylesheet" href="./assets/style/reset.css" />
+    <link rel="stylesheet" href="./assets/style/components.css" />
+    <link rel="stylesheet" href="./assets/style/home.css" />
   </head>
 
   <body class="home">
     <script defer>
       function openTarget() {
         const hash = location.hash.substring(1);
-        console.log("hash: ", hash);
         if (hash) {
           const target = document.getElementById(hash);
-          console.log("target: ", target);
           if (target) {
             if (target.tagName.toLowerCase() === "details") {
               target.open = true;
@@ -50,7 +50,7 @@
       }
     </script>
 
-    <svg>
+    <svg style="display: none;">
       <symbol id="icn-info" viewBox="0 0 16 16">
         <g stroke="currentColor" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
           <path

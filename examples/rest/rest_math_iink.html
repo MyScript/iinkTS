@@ -9,6 +9,8 @@
 
     <title>Rest Math</title>
 
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
     <link
       rel="stylesheet"
@@ -35,18 +37,16 @@
   <body>
     <div id="result"></div>
 
-    <nav>
-      <div class="flex-container wrap gap">
-        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/clear.svg" />
-        </button>
-        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/undo.svg" />
-        </button>
-        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/redo.svg" />
-        </button>
-      </div>
+    <nav class="flex-container wrap gap">
+      <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+        <img src="../assets/img/clear.svg" />
+      </button>
+      <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+        <img src="../assets/img/undo.svg" />
+      </button>
+      <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+        <img src="../assets/img/redo.svg" />
+      </button>
     </nav>
 
     <div id="editor" touch-action="none"></div>

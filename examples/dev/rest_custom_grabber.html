@@ -7,6 +7,8 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
     <title>Rest custom grabber</title>
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
     <script type="text/javascript" src="./custom_grabber.js"></script>
@@ -14,7 +16,7 @@
       #editor {
         height: calc(100vh - 187px);
       }
-      @media only screen and (max-width: 579px) {
+      @media only screen and (max-width: 600px) {
         #editor {
           height: calc(100vh - 257px);
         }
@@ -40,7 +42,7 @@
   <body>
     <div id="result"></div>
 
-    <nav class="flex-container gap between">
+    <nav class="flex-container gap between wrap">
       <div class="flex-container gap">
         <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
           <img src="../assets/img/clear.svg" />

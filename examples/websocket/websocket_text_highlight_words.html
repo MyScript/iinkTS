@@ -9,6 +9,8 @@
 
     <title>Highlight words</title>
 
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
 
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
@@ -33,7 +35,7 @@
           height: calc(100vh - 143px);
         }
       }
-      .flex-wrapper {
+      .wrapper {
         height: 100vh;
         width: 100vw;
       }
@@ -77,9 +79,9 @@
     </style>
   </head>
   <body>
-    <div class="flex-container wrap flex-wrapper">
+    <div class="flex-container wrap wrapper">
       <div class="editor-column">
-        <nav>
+        <nav class="flex-container wrap gap between">
           <div class="flex-container wrap gap">
             <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
               <img src="../assets/img/undo.svg" />
