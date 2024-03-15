@@ -9,6 +9,8 @@
 
     <title>Changing configuration dynamically</title>
 
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
 
     <link
@@ -28,12 +30,6 @@
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
 
     <style>
-      .flex {
-        display: flex;
-        height: 100%;
-        min-height: 100%;
-      }
-
       #result {
         border-bottom: solid gray 1px;
         overflow: auto;
@@ -47,61 +43,53 @@
       }
       .editor {
         width: 100%;
-        height: calc(100% - 100px);
+        height: calc(100dvh - 100px);
       }
 
-      .config {
+      .configuration-container {
         border-left: solid black 1px;
+        background-color: white;
+        height: 100dvh;
+        min-height: 100dvh;
         width: 400px;
-        height: 100vh;
+        max-width: 400px;
       }
 
-      .config .params {
+      .configuration-container .params {
         height: calc(100% - 66px);
         overflow: auto;
       }
 
-      .config .card {
+      .configuration-container .card {
         width: 100%;
         padding: 10px;
       }
 
-      .config .card .title {
+      .configuration-container .card .card-title {
         padding: 5px;
         border-bottom: solid rgba(150, 150, 200, 1) 1px;
         cursor: pointer;
       }
 
-      .config .card .title:hover {
+      .configuration-container .card .card-title:hover {
         background-color: rgba(150, 150, 200, 0.15);
       }
 
-      .config .card .content {
+      .configuration-container .card .card-content {
         width: 100%;
         padding: 0px 0px 10px 20px;
         display: none;
       }
 
-      .config .card label {
+      .configuration-container .card label {
         display: block;
         margin-top: 15px;
       }
 
-      .config .card .content select,
-      .config .card .content input {
+      .configuration-container .card .card-content select,
+      .configuration-container .card .card-content input:not([type="checkbox"]){
         width: 100%;
         font: 400 14px "Source Sans Pro", sans-serif;
-      }
-
-      .config .card .content input[type="checkbox"] {
-        width: 15px;
-        padding: 0px;
-      }
-
-      .input-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
       }
 
       .buttons-wrapper {
@@ -110,25 +98,20 @@
         justify-content: space-around;
       }
 
-      input:not([type="checkbox"]) {
-        width: auto;
-        padding: 0 15px;
-        color: #131f26;
-        -webkit-appearance: none;
-        appearance: none;
-        height: 2.625rem;
-        font: 600 16px "Source Sans Pro", sans-serif;
-        border: 1px solid #ced5d9;
-        border-radius: 3px;
-        -webkit-tap-highlight-color: transparent;
-      }
       #menu-button {
         display: none;
+        position: fixed;
+        z-index: 100;
+        right: 12px;
+        top: 12px;
       }
-      @media screen and (max-width: 750px) {
-        .config {
+      @media screen and (max-width: 1000px) {
+        .configuration-container {
+          position: fixed;
+          right: 0;
+          z-index: 99;
           display: none; /* Masquer le menu par défaut */
-          width: 90%;
+          width: 100%;
         }
         .content {
           width: 100vw;
@@ -136,49 +119,30 @@
         }
 
         #menu-button {
-          height: 36px;
-          width: 36px;
-          border-radius: 4px;
-          background: #f6f5f4;
-          border: none;
-          box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.225);
-          background-color: white;
-          display: block;
-          position: fixed;
-          right: 0;
-        }
-        .flex {
           display: block;
         }
-        #menu-button img {
-          width: 24px;
-          height: 24px;
+        .configuration-container.active {
+          display: block;
         }
+      }
 
-        #menu-content.active {
-          display: block;
-        }
-      }
-      .inactive {
-        display: none;
-      }
     </style>
   </head>
 
   <body>
-    <button id="menu-button">
+    <button id="menu-button" class="menu-button">
       <img src="../assets/img/menu.svg" />
     </button>
-    <div class="flex">
-      <div id="content" class="content">
-        <div id="result" class="result"></div>
-        <div class="editor" id="editor" touch-action="none"></div>
+    <div class="flex-container">
+      <div class="content">
+        <div id="result"></div>
+        <div id="editor" class="editor" touch-action="none"></div>
       </div>
-      <div id="menu-content" class="config">
+      <div id="menu-content" class="configuration-container">
         <div class="params">
           <div class="card">
-            <div class="title">Server</div>
-            <div class="content">
+            <div class="card-title">Server</div>
+            <div class="card-content">
               <label for="server-protocol">Protocol:</label>
               <select id="server-protocol" name="server-protocol">
                 <option value="WEBSOCKET">WEBSOCKET</option>
@@ -200,8 +164,8 @@
             </div>
           </div>
           <div class="card">
-            <div class="title">Recognition</div>
-            <div class="content">
+            <div class="card-title">Recognition</div>
+            <div class="card-content">
               <label for="recognition-type">Type:</label>
               <select id="recognition-type" name="recognition-type">
                 <option value="TEXT">TEXT</option>
@@ -211,11 +175,11 @@
               </select>
               <label for="recognition-language">Language:</label>
               <select id="recognition-language" name="recognition-language"></select>
-              <div class="input-row">
+              <div class="flex-container between">
                 <label for="recognition-guides">Guides:</label>
                 <input type="checkbox" id="recognition-guides" name="recognition-guides" />
               </div>
-              <div class="input-row">
+              <div class="flex-container between">
                 <label for="recognition-gesture">Gesture:</label>
                 <input type="checkbox" id="recognition-gesture" name="recognition-gesture" />
               </div>
@@ -225,17 +189,17 @@
             </div>
           </div>
           <div class="card">
-            <div class="title">Rendering</div>
-            <div class="content">
-              <div class="input-row">
+            <div class="card-title">Rendering</div>
+            <div class="card-content">
+              <div class="flex-container between">
                 <label for="rendering-smartGuide">Smart guide:</label>
                 <input type="checkbox" id="rendering-smartGuide" name="rendering-smartGuide" />
               </div>
             </div>
           </div>
           <div class="card">
-            <div class="title">Triggers</div>
-            <div class="content">
+            <div class="card-title">Triggers</div>
+            <div class="card-content">
               <label for="triggers-exportContent">ExportContent:</label>
               <select id="triggers-exportContent" name="triggers-exportContent">
                 <option value="POINTER_UP">POINTER_UP</option>
@@ -284,15 +248,9 @@
 
       const menuButton = document.getElementById("menu-button");
       const mainMenu = document.getElementById("menu-content");
-      const contentEditor = document.getElementById("content");
 
       menuButton.addEventListener("click", () => {
         mainMenu.classList.toggle("active");
-        if (contentEditor.classList.contains("inactive")) {
-          contentEditor.classList.remove("inactive");
-        } else {
-          contentEditor.classList.add("inactive");
-        }
       });
 
       const defaultConfiguration = {
@@ -360,7 +318,7 @@
 
       const cardELements = document.getElementsByClassName("card");
       for (let i = 0; i < cardELements.length; i++) {
-        const btn = cardELements[i].getElementsByClassName("title")[0];
+        const btn = cardELements[i].getElementsByClassName("card-title")[0];
         btn.addEventListener("click", function () {
           const content = this.nextElementSibling;
           if (content.style.display === "block") {

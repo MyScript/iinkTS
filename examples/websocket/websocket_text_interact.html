@@ -9,6 +9,8 @@
 
     <title>Interact with your app</title>
 
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
 
     <style>
@@ -48,7 +50,7 @@
   </head>
 
   <body>
-    <svg>
+    <svg style="display: none;">
       <symbol id="icn-play" viewBox="0 0 16 16">
         <path
           d="M13.153 8.589c.606-.325.603-.854 0-1.178L4.873 2.97C4.392 2.709 4 2.945 4 3.496v9.008c0 .55.39.787.874.527l8.28-4.442z"
@@ -62,7 +64,7 @@
 
     <div id="result" class="result"></div>
 
-    <nav>
+    <nav class="flex-container wrap gap between">
       <div class="flex-container wrap gap">
         <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
           <img src="../assets/img/undo.svg" />

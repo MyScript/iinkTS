@@ -17,10 +17,6 @@ function getResultElementFromInput(input) {
   }
 }
 
-async function delay(delayInms) {
-  return new Promise(resolve => setTimeout(resolve, delayInms));
-}
-
 validateResponsesBtn.addEventListener("pointerup", () => {
   for (let i = 0; i < answers.length; i++) {
     const el = document.getElementById(`answer-${i}`)
@@ -39,19 +35,24 @@ validateResponsesBtn.addEventListener("pointerup", () => {
 async function switchEditorInput(input) {
   await editor.waitForIdle()
   const strokesWritten = getWrittenStrokes()
-  currentInput.replaceChild(strokesWritten, editorElement)
+  if (currentInput.contains(editorElement)) {
+    currentInput.replaceChild(strokesWritten, editorElement)
+  }
+  currentInput.setAttribute("pointers", JSON.stringify(editor.model.symbols))
 
   currentInput = input
-  const textAnswered = getResultElementFromInput(input)?.textContent
+
+  const textAnswered = getResultElementFromInput(currentInput)?.textContent
+  editor.clear()
+  await editor.waitForIdle()
   if (textAnswered) {
-    await editor.import(textAnswered, "text/plain")
-  } else {
-    editor.clear()
-    await delay(100)
-    await editor.waitForIdle()
+    const pointers = currentInput.getAttribute("pointers")
+    if (pointers) {
+      await editor.importPointEvents(JSON.parse(pointers));
+    }
   }
-  input.textContent = ""
-  input.appendChild(editorElement)
+  currentInput.textContent = ""
+  currentInput.appendChild(editorElement)
 }
 
 const questions = [
