@@ -292,6 +292,7 @@ export class WSBehaviors implements IBehaviors
     if (errors.length) {
       this.internalEvent.emitError( new Error(errors.join("\n")))
     }
+    strokesToImport.map(s => this.model.addStroke(s))
     const exportPoints = await this.recognizer.importPointEvents(strokesToImport)
     this.model.mergeExport(exportPoints)
     this.#logger.debug("importPointEvents", this.model)
