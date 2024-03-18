@@ -79,8 +79,6 @@ export class OIEraseManager
       })
       this.undoRedoManager.addModelToStack(this.model)
       await this.recognizer.eraseStrokes(symbolsToDelete.filter(s => s.type === SymbolType.Stroke).map(s => s.id))
-      this.model.updatePositionSent()
-      this.model.updatePositionReceived()
       this.undoRedoManager.updateModelInStack(this.model)
     }
   }

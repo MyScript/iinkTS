@@ -3,8 +3,16 @@ import { LoggerManager } from "../logger"
 import { TPenStyle } from "../style"
 import { computeDistance } from "../utils"
 import { TExport } from "./Export"
-import { IModel, TRecognitionPositions } from "./IModel"
+import { IModel } from "./IModel"
 import { Stroke, TPoint, TPointer } from "../primitive"
+
+/**
+ * @group Model
+ */
+export type TRecognitionPositions = {
+  lastSentPosition: number
+  lastReceivedPosition: number
+}
 
 /**
  * @group Model

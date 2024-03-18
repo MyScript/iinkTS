@@ -252,7 +252,6 @@ export class OIWriteManager
         await this.gestureManager.apply(currentStroke, gestureFromContextLess)
       }
       else {
-        this.model.updatePositionSent()
         const gesture = await this.recognizer.addStrokes([currentStroke], this.detectGesture)
         if (gesture) {
           await this.gestureManager.apply(currentStroke, gesture)
@@ -261,7 +260,6 @@ export class OIWriteManager
           this.model.addSymbol(symbol)
           this.undoRedoManager.addModelToStack(this.model)
         }
-        this.model.updatePositionReceived()
       }
       this.undoRedoManager.updateModelInStack(this.model)
     }
