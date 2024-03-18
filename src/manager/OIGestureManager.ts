@@ -210,8 +210,6 @@ export class OIGestureManager
       }
       await Promise.all(promises)
     }
-    this.model.updatePositionSent()
-    this.model.updatePositionReceived()
     this.undoRedoManager.addModelToStack(this.model)
   }
 
@@ -329,8 +327,6 @@ export class OIGestureManager
       }
     }
 
-    this.model.updatePositionSent()
-    this.model.updatePositionReceived()
     this.undoRedoManager.addModelToStack(this.model)
     await Promise.all(promises)
     this.undoRedoManager.updateModelInStack(this.model)
@@ -377,14 +373,12 @@ export class OIGestureManager
         break
       }
       case StrikeThroughAction.Erase: {
-        this.model.updatePositionSent()
         gesture.strokeIds.forEach(id =>
         {
           this.model.removeSymbol(id)
           this.renderer.removeSymbol(id)
         })
         await this.recognizer.eraseStrokes(gesture.strokeIds)
-        this.model.updatePositionReceived()
         this.undoRedoManager.addModelToStack(this.model)
         break
       }

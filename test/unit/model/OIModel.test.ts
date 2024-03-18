@@ -277,47 +277,11 @@ describe("OIModel.ts", () =>
     })
   })
 
-  describe("positions", () =>
-  {
-    const model = new OIModel(width, height, rowHeight)
-    model.addSymbol(buildOIStroke())
-    model.addSymbol(buildOIStroke())
-    test("should positions init with 0", () =>
-    {
-      expect(model.positions).toEqual({ lastSentPosition: 0, lastReceivedPosition: 0 })
-    })
-
-    test("should update position sent", () =>
-    {
-      model.updatePositionSent()
-      expect(model.positions).toEqual({ lastSentPosition: 2, lastReceivedPosition: 0 })
-    })
-    test("should update received sent", () =>
-    {
-      model.updatePositionReceived()
-      expect(model.positions).toEqual({ lastSentPosition: 2, lastReceivedPosition: 2 })
-    })
-  })
-
   describe("extract", () =>
   {
     const model = new OIModel(width, height, rowHeight)
     model.addSymbol(buildOIStroke())
     model.addSymbol(buildOIStroke())
-    test("should extract all traits if nothing is sent", () =>
-    {
-      expect(model.extractUnsentStrokes()).toEqual(model.symbols)
-    })
-    test("should extract a stroke if one out of two sent", () =>
-    {
-      model.positions.lastSentPosition = 1
-      expect(model.extractUnsentStrokes()).toEqual([model.symbols[1]])
-    })
-    test("should not extract anything if all strokes have been sent", () =>
-    {
-      model.positions.lastSentPosition = 2
-      expect(model.extractUnsentStrokes()).toHaveLength(0)
-    })
 
     test("should extract symbol added in second model", () =>
     {

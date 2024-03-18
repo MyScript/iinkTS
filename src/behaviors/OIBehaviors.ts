@@ -697,8 +697,6 @@ export class OIBehaviors implements IBehaviors
       })
       this.undoRedoManager.addModelToStack(this.model)
       await this.recognizer.addStrokes(strokes, false)
-      this.model.updatePositionSent()
-      this.model.updatePositionReceived()
       this.undoRedoManager.updateModelInStack(this.model)
       this.#logger.debug("importPointEvents", this.model)
       return this.model

@@ -2,13 +2,11 @@ import { LoggerClass } from "../Constants"
 import { LoggerManager } from "../logger"
 import
 {
-  OIStroke,
-  SymbolType,
   TOISymbol,
   TPoint,
 } from "../primitive"
 import { TExport } from "./Export"
-import { IModel, TRecognitionPositions } from "./IModel"
+import { IModel } from "./IModel"
 
 /**
  * @group Model
@@ -18,7 +16,6 @@ export class OIModel implements IModel
   #logger = LoggerManager.getLogger(LoggerClass.MODEL)
   readonly creationTime: number
   modificationDate: number
-  positions: TRecognitionPositions
   currentSymbol?: TOISymbol
   symbols: TOISymbol[]
   exports?: TExport
@@ -36,10 +33,6 @@ export class OIModel implements IModel
     this.height = height
     this.rowHeight = rowHeight
     this.symbols = []
-    this.positions = {
-      lastSentPosition: 0,
-      lastReceivedPosition: 0
-    }
     this.exports = undefined
     this.converts = undefined
     this.idle = true
@@ -187,33 +180,12 @@ export class OIModel implements IModel
     this.#logger.info("removeSymbol", { id })
     const symbolIndex = this.symbols.findIndex(s => s.id === id)
     if (symbolIndex !== -1) {
-      this.positions.lastSentPosition--
-      this.positions.lastReceivedPosition--
       this.symbols.splice(symbolIndex, 1)
       this.modificationDate = Date.now()
       this.converts = undefined
       this.exports = undefined
     }
     this.#logger.debug("removeSymbol", this.symbols)
-  }
-
-  updatePositionSent(position: number = this.symbols.length): void
-  {
-    this.#logger.info("updatePositionSent", { position })
-    this.positions.lastSentPosition = position
-    this.#logger.debug("updatePositionSent", this.positions.lastSentPosition)
-  }
-
-  updatePositionReceived(): void
-  {
-    this.#logger.info("updatePositionReceived")
-    this.positions.lastReceivedPosition = this.positions.lastSentPosition
-    this.#logger.debug("updatePositionReceived", this.positions.lastReceivedPosition)
-  }
-
-  extractUnsentStrokes(): OIStroke[]
-  {
-    return this.symbols.slice(this.positions.lastSentPosition).filter(s => s.type === SymbolType.Stroke) as OIStroke[]
   }
 
   extractDifferenceSymbols(model: OIModel): { added: TOISymbol[], removed: TOISymbol[] }
@@ -245,7 +217,6 @@ export class OIModel implements IModel
       c.selected = false
       return c
     })
-    clonedModel.positions = structuredClone(this.positions)
     clonedModel.exports = structuredClone(this.exports)
     clonedModel.idle = this.idle
     this.#logger.debug("clone", { clonedModel })
@@ -257,8 +228,6 @@ export class OIModel implements IModel
     this.#logger.info("clear")
     this.modificationDate = Date.now()
     this.symbols = []
-    this.positions.lastSentPosition = 0
-    this.positions.lastReceivedPosition = 0
     this.currentSymbol = undefined
     this.exports = undefined
     this.converts = undefined
