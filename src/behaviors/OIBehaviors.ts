@@ -320,13 +320,13 @@ export class OIBehaviors implements IBehaviors
           currentEl = currentEl.parentElement
         }
       }
+      this.unselectAll()
       if (currentEl?.id) {
         this.model.selectSymbol(currentEl.id)
         this.renderer.drawSymbol(this.model.symbolsSelected[0])
         this.selector.drawSelectedGroup(this.model.symbolsSelected)
       }
       else {
-        this.unselectAll()
         this.menu.context.position.x = point.x + this.renderer.parent.clientLeft
         this.menu.context.position.y = point.y + this.renderer.parent.clientTop
         this.menu.context.show()
