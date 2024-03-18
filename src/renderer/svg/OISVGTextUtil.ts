@@ -1,4 +1,5 @@
 import { DecoratorKind, OIText, OIDecorator } from "../../primitive"
+import { DefaultStyle } from "../../style"
 import { OISVGDecoratorUtil } from "./OISVGDecoratorUtil"
 import { SVGBuilder } from "./SVGBuilder"
 
@@ -26,7 +27,8 @@ export class OISVGTextUtil
       "vector-effect": "non-scaling-stroke",
       "stroke-linecap": "round",
       "stroke-linejoin": "round",
-      "style": "-webkit-user-select: none; -ms-user-select: none; user-select: none;"
+      "style": "-webkit-user-select: none; -ms-user-select: none; user-select: none;",
+      "opacity": (text.style.opacity || DefaultStyle.opacity!).toString(),
     }
     if (text.rotation) {
       groupAttrs.transform = `rotate(${ text.rotation.degree }, ${ text.rotation.center.x }, ${ text.rotation.center.y })`
