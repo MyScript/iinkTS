@@ -3,7 +3,7 @@ import { TMarginConfiguration, TRenderingConfiguration } from "../configuration"
 import { InternalEvent } from "../event"
 import { LoggerManager } from "../logger"
 import { TJIIXExport, TJIIXWord } from "../model"
-import { createUUID } from "../utils"
+import { convertMillimeterToPixel, createUUID } from "../utils"
 
 /**
  * @group SmartGuide
@@ -11,6 +11,7 @@ import { createUUID } from "../utils"
 export class SmartGuide {
   uuid: string
   #smartGuideElement!: HTMLDivElement
+  #wrapperElement!: HTMLDivElement
   #prompterContainerElement!: HTMLDivElement
   #prompterTextElement!: HTMLDivElement
   #ellipsisElement!: HTMLDivElement
@@ -38,6 +39,7 @@ export class SmartGuide {
       right: 0,
       top: 0
     }
+    this.#createRootElement()
     this.#createWrapperElement()
     this.#createPrompterContainerElement()
     this.#createPrompterTextElement()
@@ -54,17 +56,22 @@ export class SmartGuide {
     return InternalEvent.getInstance()
   }
 
-  #createWrapperElement(): void {
+  #createRootElement(): void {
     this.#smartGuideElement = document.createElement("div")
     this.#smartGuideElement.id = `smartguide-${this.uuid}`
     this.#smartGuideElement.classList.add("smartguide")
+  }
+
+  #createWrapperElement(): void {
+    this.#wrapperElement = document.createElement("div")
+    this.#wrapperElement.id = `smartguide-wrapper-${this.uuid}`
+    this.#wrapperElement.classList.add("smartguide-wrapper")
   }
 
   #createPrompterContainerElement(): void {
     this.#prompterContainerElement = document.createElement("div")
     this.#prompterContainerElement.id = `prompter-container-${this.uuid}`
     this.#prompterContainerElement.classList.add("prompter-container")
-    // this.#prompterContainerElement.appendChild(textElement)
   }
 
   #createPrompterTextElement(): void {
@@ -124,22 +131,24 @@ export class SmartGuide {
   init(domElement: HTMLElement, margin: TMarginConfiguration, renderingConfiguration: TRenderingConfiguration): void {
     this.#logger.info("init", { domElement, margin, renderingConfiguration })
     domElement.appendChild(this.#smartGuideElement)
-    this.#smartGuideElement.appendChild(this.#tagElement)
+    this.#smartGuideElement.appendChild(this.#wrapperElement)
+
+    this.#wrapperElement.appendChild(this.#tagElement)
 
     this.#prompterContainerElement.appendChild(this.#prompterTextElement)
-    this.#smartGuideElement.appendChild(this.#prompterContainerElement)
+    this.#wrapperElement.appendChild(this.#prompterContainerElement)
 
-    this.#smartGuideElement.appendChild(this.#ellipsisElement)
+    this.#wrapperElement.appendChild(this.#ellipsisElement)
 
     this.#menuElement.appendChild(this.#convertElement)
     this.#menuElement.appendChild(this.#copyElement)
     this.#menuElement.appendChild(this.#deleteElement)
-    this.#smartGuideElement.appendChild(this.#menuElement)
     this.#menuElement.classList.add("close")
+    this.#wrapperElement.appendChild(this.#menuElement)
     this.#isMenuOpen = false
 
-    this.#smartGuideElement.appendChild(this.#candidatesElement)
     this.#candidatesElement.style.display = "none"
+    this.#wrapperElement.appendChild(this.#candidatesElement)
     this.margin = margin
     this.renderingConfiguration = renderingConfiguration
     this.#addListeners()
@@ -194,10 +203,6 @@ export class SmartGuide {
             this.#candidatesElement.innerHTML += `<span id="cdt-${index}${this.uuid}">${word}</span>`
           }
         })
-        const top = 48
-        const left = target.getBoundingClientRect().left - 60
-        this.#candidatesElement.style.top = `${top}px`
-        this.#candidatesElement.style.left = `${left}px`
 
         const parent = target.parentNode?.parentNode?.parentNode
         if (parent) {
@@ -295,7 +300,11 @@ export class SmartGuide {
     } else {
       this.#hideCandidates()
     }
+  }
 
+  #stopPropagation = (evt: Event) =>{
+    evt.preventDefault()
+    evt.stopPropagation()
   }
 
   #onClickOutSide = () => {
@@ -304,6 +313,7 @@ export class SmartGuide {
   }
 
   #addListeners(): void {
+    this.#smartGuideElement.addEventListener("pointerdown", this.#stopPropagation.bind(this))
     this.#ellipsisElement.addEventListener("pointerdown", this.#onClickEllipsis.bind(this))
     this.#convertElement.addEventListener("pointerdown", this.#onClickConvert.bind(this))
     this.#copyElement.addEventListener("pointerdown", this.#onClickCopy.bind(this))
@@ -314,6 +324,7 @@ export class SmartGuide {
   }
 
   #removeListeners(): void {
+    this.#smartGuideElement.addEventListener("pointerdown", this.#stopPropagation)
     this.#ellipsisElement.removeEventListener("pointerdown", this.#onClickEllipsis)
     this.#convertElement.removeEventListener("pointerdown", this.#onClickConvert)
     this.#copyElement.removeEventListener("pointerdown", this.#onClickCopy)
@@ -325,24 +336,10 @@ export class SmartGuide {
 
   resize(): void {
     this.#logger.info("resize")
-    const mmToPixels = 3.779527559
-    const marginTop = this.margin.top * mmToPixels
-    const marginLeft = this.margin.left * mmToPixels
-    const marginRight = this.margin.right * mmToPixels
-    // 12 is the space between line in mm
-    const top = marginTop - (12 * mmToPixels)
-
-    this.#smartGuideElement.style.top = `${top}px`
-    this.#smartGuideElement.style.left = `${marginLeft}px`
-    this.#smartGuideElement.style.right = `${marginRight}px`
-
-    let left = this.#tagElement.offsetWidth
-    this.#prompterContainerElement.style.marginLeft = `${left}px`
-    this.#prompterContainerElement.style.width = `${this.#smartGuideElement.clientWidth - this.#tagElement.offsetWidth - this.#ellipsisElement.offsetHeight}px`
-    left += this.#prompterContainerElement.offsetWidth
-    this.#menuElement.style.left = `${left - this.#menuElement.offsetWidth + this.#ellipsisElement.offsetWidth}px`
-    this.#menuElement.style.top = `${this.#ellipsisElement.offsetHeight}px`
-    this.#ellipsisElement.style.left = `${left}px`
+    const marginLeft = convertMillimeterToPixel(this.margin.left)
+    const marginRight = convertMillimeterToPixel(this.margin.right)
+    this.#wrapperElement.style.marginLeft = `${marginLeft}px`
+    this.#wrapperElement.style.marginRight = `${marginRight}px`
   }
 
   update(exports: TJIIXExport): void {
