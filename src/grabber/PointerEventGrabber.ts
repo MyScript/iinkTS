@@ -78,6 +78,10 @@ export class PointerEventGrabber implements IGrabber
   {
     this.#logger.info("pointerMove", { evt })
     if (this.activePointerId != undefined && this.activePointerId === evt.pointerId) {
+      if ((evt.target as HTMLElement).classList.contains("smartguide")) {
+        this.pointerUpHandler(evt)
+        return
+      }
       if (this.onPointerMove) {
         const point = this.extractPoint(evt)
         this.onPointerMove(evt, point)

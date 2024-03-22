@@ -25,10 +25,10 @@
 
   <body>
     <div id="result"></div>
-    <a id="link-info" class="link-info" onclick="document.querySelectorAll('.help-overlay,.help-modal').forEach(e => e.style.display = 'block');">
+    <a id="link-info" class="link-info">
       <img src="../assets/img/info.svg"/>
     </a>
-    <div id="help-overlay" class="help-overlay" onclick="document.querySelectorAll('.help-overlay,.help-modal').forEach(e => e.style.display = 'none');">
+    <div id="help-overlay" class="help-overlay">
     </div>
     <div id="help-modal" class="help-modal">
       <div id="help-modal-content" class="help-modal-content">
@@ -80,10 +80,20 @@
     <script>
       const editorElement = document.getElementById("editor");
       const resultElement = document.getElementById("result");
+      const linkInfoElement = document.getElementById("link-info");
+      const helpOverlayElement = document.getElementById("help-overlay");
       const languageElement = document.getElementById("language");
       const clearElement = document.getElementById("clear");
       const undoElement = document.getElementById("undo");
       const redoElement = document.getElementById("redo");
+
+      linkInfoElement.addEventListener("click", async () => {
+        document.querySelectorAll('.help-overlay,.help-modal').forEach(e => e.style.display = 'block');
+      });
+
+      helpOverlayElement.addEventListener("click", async () => {
+        document.querySelectorAll('.help-overlay,.help-modal').forEach(e => e.style.display = 'none');
+      });
 
       /**
        * we expose the editor for use in the integration test
@@ -103,7 +113,7 @@
               protocol: "WEBSOCKET"
             },
             recognition: {
-              type: "TEXT"
+              type: "TEXT",
             }
           }
         };
