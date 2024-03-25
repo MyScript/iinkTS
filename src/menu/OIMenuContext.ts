@@ -186,7 +186,7 @@ export class OIMenuContext extends OIMenu
             const stroke = s as OIStroke | OIText
             if (value) {
               if (!stroke.decorators.some(d => d.kind === kind)) {
-                stroke.decorators.push(new OIDecorator(kind, this.behaviors.currentPenStyle, stroke))
+                stroke.decorators.push(new OIDecorator(kind, this.behaviors.currentPenStyle))
               }
             }
             else {

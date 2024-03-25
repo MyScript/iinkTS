@@ -61,7 +61,7 @@ export class OISVGTextUtil
 
     text.decorators.forEach(d =>
     {
-      const deco = this.decoratorUtil.getSVGElement(d as OIDecorator)
+      const deco = this.decoratorUtil.getSVGElement(d as OIDecorator, text)
       if (deco) {
         if (d.kind === DecoratorKind.Highlight) {
           textGroup.prepend(deco)
