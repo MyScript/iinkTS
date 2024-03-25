@@ -1,4 +1,3 @@
-import { buildOIStroke } from "../helpers"
 import { DecoratorKind, OIDecorator, TStyle } from "../../../src/iink"
 
 describe("OIDecorator.ts", () =>
@@ -9,8 +8,7 @@ describe("OIDecorator.ts", () =>
       color: "blue",
       width: 20
     }
-    const sym = buildOIStroke()
-    const decorator = new OIDecorator(DecoratorKind.Highlight, style, sym)
+    const decorator = new OIDecorator(DecoratorKind.Highlight, style)
     test("should create ", () =>
     {
       expect(decorator).toBeDefined()
@@ -18,7 +16,7 @@ describe("OIDecorator.ts", () =>
     })
     test("should clone", () =>
     {
-      const clone = decorator.clone(sym)
+      const clone = decorator.clone()
       expect(clone).toEqual(decorator)
       expect(clone).not.toBe(decorator)
     })
@@ -30,8 +28,7 @@ describe("OIDecorator.ts", () =>
       color: "blue",
       width: 20
     }
-    const sym = buildOIStroke()
-    const decorator = new OIDecorator(DecoratorKind.Strikethrough, style, sym)
+    const decorator = new OIDecorator(DecoratorKind.Strikethrough, style)
     test("should create ", () =>
     {
       expect(decorator).toBeDefined()
@@ -39,7 +36,7 @@ describe("OIDecorator.ts", () =>
     })
     test("should clone", () =>
     {
-      const clone = decorator.clone(sym)
+      const clone = decorator.clone()
       expect(clone).toEqual(decorator)
       expect(clone).not.toBe(decorator)
     })
@@ -51,8 +48,7 @@ describe("OIDecorator.ts", () =>
       color: "blue",
       width: 20
     }
-    const sym = buildOIStroke()
-    const decorator = new OIDecorator(DecoratorKind.Surround, style, sym)
+    const decorator = new OIDecorator(DecoratorKind.Surround, style)
     test("should create ", () =>
     {
       expect(decorator).toBeDefined()
@@ -60,7 +56,7 @@ describe("OIDecorator.ts", () =>
     })
     test("should clone", () =>
     {
-      const clone = decorator.clone(sym)
+      const clone = decorator.clone()
       expect(clone).toEqual(decorator)
       expect(clone).not.toBe(decorator)
     })
@@ -72,8 +68,7 @@ describe("OIDecorator.ts", () =>
       color: "blue",
       width: 20
     }
-    const sym = buildOIStroke()
-    const decorator = new OIDecorator(DecoratorKind.Underline, style, sym)
+    const decorator = new OIDecorator(DecoratorKind.Underline, style)
     test("should create ", () =>
     {
       expect(decorator).toBeDefined()
@@ -81,7 +76,7 @@ describe("OIDecorator.ts", () =>
     })
     test("should clone", () =>
     {
-      const clone = decorator.clone(sym)
+      const clone = decorator.clone()
       expect(clone).toEqual(decorator)
       expect(clone).not.toBe(decorator)
     })

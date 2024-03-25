@@ -130,7 +130,7 @@ export class OISVGStrokeUtil
     strokeGroup.append(SVGBuilder.createPath(strokeAttrs))
 
     stroke.decorators.forEach(d => {
-      const deco = this.decoratorUtil.getSVGElement(d as OIDecorator)
+      const deco = this.decoratorUtil.getSVGElement(d as OIDecorator, stroke)
       if (deco) {
         if (d.kind === DecoratorKind.Highlight) {
           strokeGroup.prepend(deco)

@@ -158,7 +158,7 @@ export class OIText implements TOISymbol
     clone.deleting = this.deleting
     clone.creationTime = this.creationTime
     clone.modificationDate = this.modificationDate
-    clone.decorators = this.decorators.map(d => d.clone(clone))
+    clone.decorators = this.decorators.map(d => d.clone())
     clone.rotation = this.rotation ? structuredClone(this.rotation) : undefined
     return clone
   }

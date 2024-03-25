@@ -107,7 +107,7 @@ export class OIGestureManager
         const symbolsToHightlight = this.model.symbols.filter(s => gesture.strokeIds.includes(s.id)) as OIStroke[]
         symbolsToHightlight.forEach(s =>
         {
-          const highlight = new OIDecorator(DecoratorKind.Highlight, this.currentStyle, s)
+          const highlight = new OIDecorator(DecoratorKind.Highlight, this.currentStyle)
           const index = s.decorators.findIndex(d => d.kind === DecoratorKind.Highlight)
           index > -1 ? s.decorators.splice(index, 1, highlight) : s.decorators.push(highlight)
           this.model.updateSymbol(s)
@@ -120,7 +120,7 @@ export class OIGestureManager
         const symbolsToSurround = this.model.symbols.filter(s => gesture.strokeIds.includes(s.id)) as OIStroke[]
         symbolsToSurround.forEach(s =>
         {
-          const surround = new OIDecorator(DecoratorKind.Surround, this.currentStyle, s)
+          const surround = new OIDecorator(DecoratorKind.Surround, this.currentStyle)
           s.decorators.push(surround)
           this.model.updateSymbol(s)
           this.renderer.drawSymbol(s)
@@ -342,7 +342,7 @@ export class OIGestureManager
     const symbolsToUnderline = this.model.symbols.filter(s => gesture.strokeIds.includes(s.id)) as (OIStroke | OIText)[]
     symbolsToUnderline.forEach(s =>
     {
-      const underline = new OIDecorator(DecoratorKind.Underline, this.currentStyle, s)
+      const underline = new OIDecorator(DecoratorKind.Underline, this.currentStyle)
       const index = s.decorators.findIndex(d => d.kind === DecoratorKind.Underline)
       index > -1 ? s.decorators.splice(index, 1, underline) : s.decorators.push(underline)
       this.model.updateSymbol(s)
@@ -363,7 +363,7 @@ export class OIGestureManager
         const symbolsToStrikethrough = this.model.symbols.filter(s => gesture.strokeIds.includes(s.id)) as (OIStroke | OIText)[]
         symbolsToStrikethrough.forEach(s =>
         {
-          const strikethrough = new OIDecorator(DecoratorKind.Strikethrough, this.currentStyle, s)
+          const strikethrough = new OIDecorator(DecoratorKind.Strikethrough, this.currentStyle)
           const index = s.decorators.findIndex(d => d.kind === DecoratorKind.Strikethrough)
           index > -1 ? s.decorators.splice(index, 1, strikethrough) : s.decorators.push(strikethrough)
           this.model.updateSymbol(s)

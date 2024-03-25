@@ -105,19 +105,19 @@ export class OIConversionManager
     {
       const hightlight = decorators.find(d => d.kind === DecoratorKind.Highlight)
       if (hightlight) {
-        text.decorators.push(new OIDecorator(DecoratorKind.Highlight, hightlight.style, text))
+        text.decorators.push(new OIDecorator(DecoratorKind.Highlight, hightlight.style))
       }
       const strikethrough = decorators.find(d => d.kind === DecoratorKind.Strikethrough)
       if (strikethrough) {
-        text.decorators.push(new OIDecorator(DecoratorKind.Strikethrough, strikethrough.style, text))
+        text.decorators.push(new OIDecorator(DecoratorKind.Strikethrough, strikethrough.style))
       }
       const surround = decorators.find(d => d.kind === DecoratorKind.Surround)
       if (surround) {
-        text.decorators.push(new OIDecorator(DecoratorKind.Surround, surround.style, text))
+        text.decorators.push(new OIDecorator(DecoratorKind.Surround, surround.style))
       }
       const underline = decorators.find(d => d.kind === DecoratorKind.Underline)
       if (underline) {
-        text.decorators.push(new OIDecorator(DecoratorKind.Underline, underline.style, text))
+        text.decorators.push(new OIDecorator(DecoratorKind.Underline, underline.style))
       }
     }
 

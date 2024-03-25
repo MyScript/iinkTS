@@ -60,9 +60,9 @@ export function buildOIStroke({ box = defaultBox, style = DefaultStyle, nbPoint 
   return stroke
 }
 
-export function buildOIDecorator(kind: DecoratorKind, symbol: OIStroke | OIText, style: TStyle = DefaultStyle): OIDecorator
+export function buildOIDecorator(kind: DecoratorKind, style: TStyle = DefaultStyle): OIDecorator
 {
-  return new OIDecorator(kind, style, symbol)
+  return new OIDecorator(kind, style)
 }
 
 export function buildOICircle({ center = { x: 0, y: 0 }, radius = 5, style = DefaultStyle }: { center?: TPoint, radius?: number, style?: TStyle } = {}): OIShapeCircle

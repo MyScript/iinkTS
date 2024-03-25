@@ -1,5 +1,5 @@
 import { SELECTION_MARGIN } from "../../Constants"
-import { DecoratorKind, OIDecorator, SymbolType, TBoundingBox } from "../../primitive"
+import { DecoratorKind, OIDecorator, OIStroke, OIText, SymbolType, TBoundingBox } from "../../primitive"
 import { DefaultStyle } from "../../style"
 import { SVGBuilder } from "./SVGBuilder"
 
@@ -17,7 +17,7 @@ export class OISVGDecoratorUtil
     this.removalFilterId = removalFilterId
   }
 
-  getSVGElement(decorator: OIDecorator): SVGGeometryElement | undefined
+  getSVGElement(decorator: OIDecorator, parent: OIStroke | OIText): SVGGeometryElement | undefined
   {
     const attrs: { [key: string]: string } = {
       "id": decorator.id,
@@ -28,7 +28,7 @@ export class OISVGDecoratorUtil
       "stroke-linejoin": "round",
     }
     attrs["opacity"] = (decorator.style.opacity || DefaultStyle.opacity!).toString()
-    if (decorator.parent.deleting) {
+    if (parent.deleting) {
       attrs["opacity"] = ((decorator.style.opacity || DefaultStyle.opacity!) * 0.5).toString()
     }
 
@@ -36,14 +36,14 @@ export class OISVGDecoratorUtil
 
     switch (decorator.kind) {
       case DecoratorKind.Highlight: {
-        attrs["opacity"] = decorator.parent.deleting ? "0.25" : "0.5"
+        attrs["opacity"] = parent.deleting ? "0.25" : "0.5"
         attrs["stroke"] = "transparent"
         attrs["fill"] = decorator.style.color || DefaultStyle.color!
         const bounds: TBoundingBox = {
-          x: decorator.parent.boundingBox.x - (decorator.parent.style.width || 1),
-          y: decorator.parent.boundingBox.y - (decorator.parent.style.width || 1),
-          height: decorator.parent.boundingBox.height + (decorator.parent.style.width || 1) * 2,
-          width: decorator.parent.boundingBox.width + (decorator.parent.style.width || 1) * 2,
+          x: parent.boundingBox.x - (parent.style.width || 1),
+          y: parent.boundingBox.y - (parent.style.width || 1),
+          height: parent.boundingBox.height + (parent.style.width || 1) * 2,
+          width: parent.boundingBox.width + (parent.style.width || 1) * 2,
         }
         element = SVGBuilder.createRect(bounds, attrs)
         break
@@ -53,10 +53,10 @@ export class OISVGDecoratorUtil
         attrs["stroke"] = decorator.style.color || DefaultStyle.color!
         attrs["stroke-width"] = (decorator.style.width || DefaultStyle.width!).toString()
         const bounds: TBoundingBox = {
-          x: decorator.parent.boundingBox.x - (decorator.parent.style.width || 1),
-          y: decorator.parent.boundingBox.y - (decorator.parent.style.width || 1),
-          height: decorator.parent.boundingBox.height + (decorator.parent.style.width || 1) * 2,
-          width: decorator.parent.boundingBox.width + (decorator.parent.style.width || 1) * 2,
+          x: parent.boundingBox.x - (parent.style.width || 1),
+          y: parent.boundingBox.y - (parent.style.width || 1),
+          height: parent.boundingBox.height + (parent.style.width || 1) * 2,
+          width: parent.boundingBox.width + (parent.style.width || 1) * 2,
         }
         element = SVGBuilder.createRect(bounds, attrs)
         break
@@ -66,12 +66,12 @@ export class OISVGDecoratorUtil
         attrs["stroke"] = decorator.style.color || DefaultStyle.color!
         attrs["stroke-width"] = (decorator.style.width || DefaultStyle.width!).toString()
         const p1 = {
-          x: decorator.parent.boundingBox.xMin,
-          y: decorator.parent.boundingBox.yMid
+          x: parent.boundingBox.xMin,
+          y: parent.boundingBox.yMid
         }
         const p2 = {
-          x: decorator.parent.boundingBox.xMax,
-          y: decorator.parent.boundingBox.yMid
+          x: parent.boundingBox.xMax,
+          y: parent.boundingBox.yMid
         }
         element = SVGBuilder.createLine(p1, p2, attrs)
         break
@@ -81,12 +81,12 @@ export class OISVGDecoratorUtil
         attrs["stroke"] = decorator.style.color || DefaultStyle.color!
         attrs["stroke-width"] = (decorator.style.width || DefaultStyle.width!).toString()
         const p1 = {
-          x: decorator.parent.boundingBox.xMin,
-          y: decorator.parent.boundingBox.yMax + (decorator.parent.type === SymbolType.Stroke ? SELECTION_MARGIN / 2 : 0)
+          x: parent.boundingBox.xMin,
+          y: parent.boundingBox.yMax + (parent.type === SymbolType.Stroke ? SELECTION_MARGIN / 2 : 0)
         }
         const p2 = {
-          x: decorator.parent.boundingBox.xMax,
-          y: decorator.parent.boundingBox.yMax + (decorator.parent.type === SymbolType.Stroke ? SELECTION_MARGIN / 2 : 0)
+          x: parent.boundingBox.xMax,
+          y: parent.boundingBox.yMax + (parent.type === SymbolType.Stroke ? SELECTION_MARGIN / 2 : 0)
         }
         element = SVGBuilder.createLine(p1, p2, attrs)
         break

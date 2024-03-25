@@ -145,7 +145,7 @@ export class OIStroke extends OISymbol implements TStroke
     clone.creationTime = this.creationTime
     clone.modificationDate = this.modificationDate
     clone.pointers = structuredClone(this.pointers)
-    clone.decorators = this.decorators.map(d => d.clone(clone))
+    clone.decorators = this.decorators.map(d => d.clone())
     clone.length = this.length
     return clone
   }
