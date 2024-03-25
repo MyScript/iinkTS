@@ -1,4 +1,4 @@
-import { Intention, InternalEventType, LoggerClass } from "../Constants"
+import { Intention, InternalEventType, LoggerClass, SELECTION_MARGIN } from "../Constants"
 import { Configuration, TConfiguration, TConverstionState, TRenderingConfiguration } from "../configuration"
 import { InternalEvent } from "../event"
 import { OIPointerEventGrabber } from "../grabber"
@@ -777,18 +777,18 @@ export class OIBehaviors implements IBehaviors
     downloadAnchorNode.remove()
   }
 
-  downloadAsSVG(selection = false)
+  protected getSymbolsBounds(symbols: TOISymbol[]): Box
   {
-    const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" }
-    let exportName: string
-    try {
-      exportName = `iink-ts-${ new Date().toLocaleDateString(navigator.language, options) }`
-    } catch {
-      exportName = `iink-ts-${ new Date().toLocaleDateString("en-US", options) }`
-    }
-
-    const symbols = selection ? this.model.symbolsSelected : this.model.symbols
     const box = Box.createFromBoxes(symbols.map(s => s.boundingBox))
+    box.x -= SELECTION_MARGIN
+    box.y -= SELECTION_MARGIN
+    box.width += SELECTION_MARGIN * 2
+    box.height += SELECTION_MARGIN * 2
+    return box
+  }
+
+  protected buildBlobFromSymbols(symbols: TOISymbol[], box: Box): Blob
+  {
     const svgNode = SVGBuilder.createLayer(box)
     symbols.forEach(s =>
     {
@@ -799,39 +799,36 @@ export class OIBehaviors implements IBehaviors
     })
 
     const svgString = (new XMLSerializer()).serializeToString(svgNode)
-    const svgBlob = new Blob([svgString], {
+
+    return new Blob([svgString], {
       type: "image/svg+xml;charset=utf-8"
     })
+  }
+
+  protected getExportName(extension: string): string
+  {
+    const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" }
+    try {
+      return `iink-ts-${ new Date().toLocaleDateString(navigator.language, options) }.${extension}`
+    } catch {
+      return `iink-ts-${ new Date().toLocaleDateString("en-US", options) }.${extension}`
+    }
+  }
+
+  downloadAsSVG(selection = false)
+  {
+    const symbols = selection ? this.model.symbolsSelected : this.model.symbols
+    const box = this.getSymbolsBounds(symbols)
+    const svgBlob = this.buildBlobFromSymbols(symbols, box)
     const url = URL.createObjectURL(svgBlob)
-    this.triggerDownload(exportName + ".svg", url)
+    this.triggerDownload(this.getExportName("svg"), url)
   }
 
   downloadAsJPG(selection = false)
   {
-    const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" }
-    let exportName: string
-    try {
-      exportName = `iink-ts-${ new Date().toLocaleDateString(navigator.language, options) }`
-    } catch {
-      exportName = `iink-ts-${ new Date().toLocaleDateString("en-US", options) }`
-    }
-
     const symbols = selection ? this.model.symbolsSelected : this.model.symbols
-    const box = Box.createFromBoxes(symbols.map(s => s.boundingBox))
-    const svgNode = SVGBuilder.createLayer(box)
-    symbols.forEach(s =>
-    {
-      const el = this.renderer.getElementById(s.id)?.cloneNode(true)
-      if (el) {
-        svgNode.appendChild(el)
-      }
-    })
-
-    const svgString = (new XMLSerializer()).serializeToString(svgNode)
-
-    const svgBlob = new Blob([svgString], {
-      type: "image/svg+xml;charset=utf-8"
-    })
+    const box = this.getSymbolsBounds(symbols)
+    const svgBlob = this.buildBlobFromSymbols(symbols, box)
 
     const url = URL.createObjectURL(svgBlob)
     const image = new Image()
@@ -852,7 +849,7 @@ export class OIBehaviors implements IBehaviors
         .toDataURL("image/png")
         .replace("image/png", "image/octet-stream")
 
-      this.triggerDownload(exportName + ".jpg", imgURI)
+      this.triggerDownload(this.getExportName("jpg"), imgURI)
     }
   }
 
