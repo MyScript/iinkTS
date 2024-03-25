@@ -8,7 +8,8 @@ import { convertMillimeterToPixel, createUUID } from "../utils"
 /**
  * @group SmartGuide
  */
-export class SmartGuide {
+export class SmartGuide
+{
   uuid: string
   #smartGuideElement!: HTMLDivElement
   #wrapperElement!: HTMLDivElement
@@ -30,7 +31,8 @@ export class SmartGuide {
   wordToChange?: TJIIXWord
   #logger = LoggerManager.getLogger(LoggerClass.SMARTGUIDE)
 
-  constructor() {
+  constructor()
+  {
     this.#logger.info("constructor")
     this.uuid = createUUID()
     this.margin = {
@@ -52,83 +54,96 @@ export class SmartGuide {
     this.#createDeleteElement()
   }
 
-  get internalEvent(): InternalEvent {
+  get internalEvent(): InternalEvent
+  {
     return InternalEvent.getInstance()
   }
 
-  #createRootElement(): void {
+  #createRootElement(): void
+  {
     this.#smartGuideElement = document.createElement("div")
-    this.#smartGuideElement.id = `smartguide-${this.uuid}`
+    this.#smartGuideElement.id = `smartguide-${ this.uuid }`
     this.#smartGuideElement.classList.add("smartguide")
   }
 
-  #createWrapperElement(): void {
+  #createWrapperElement(): void
+  {
     this.#wrapperElement = document.createElement("div")
-    this.#wrapperElement.id = `smartguide-wrapper-${this.uuid}`
+    this.#wrapperElement.id = `smartguide-wrapper-${ this.uuid }`
     this.#wrapperElement.classList.add("smartguide-wrapper")
   }
 
-  #createPrompterContainerElement(): void {
+  #createPrompterContainerElement(): void
+  {
     this.#prompterContainerElement = document.createElement("div")
-    this.#prompterContainerElement.id = `prompter-container-${this.uuid}`
+    this.#prompterContainerElement.id = `prompter-container-${ this.uuid }`
     this.#prompterContainerElement.classList.add("prompter-container")
   }
 
-  #createPrompterTextElement(): void {
+  #createPrompterTextElement(): void
+  {
     this.#prompterTextElement = document.createElement("div")
-    this.#prompterTextElement.id = `prompter-text-${this.uuid}`
+    this.#prompterTextElement.id = `prompter-text-${ this.uuid }`
     this.#prompterTextElement.classList.add("prompter-text")
     this.#prompterTextElement.setAttribute("touch-action", "none")
   }
 
-  #createEllipsisElement(): void {
+  #createEllipsisElement(): void
+  {
     this.#ellipsisElement = document.createElement("div")
-    this.#ellipsisElement.id = `ellipsis-${this.uuid}`
+    this.#ellipsisElement.id = `ellipsis-${ this.uuid }`
     this.#ellipsisElement.classList.add("ellipsis")
     this.#ellipsisElement.innerHTML = "..."
   }
 
-  #createTagElement(): void {
+  #createTagElement(): void
+  {
     this.#tagElement = document.createElement("div")
-    this.#tagElement.id = `tag-icon-${this.uuid}`
+    this.#tagElement.id = `tag-icon-${ this.uuid }`
     this.#tagElement.classList.add("tag-icon")
     this.#tagElement.innerHTML = "&#182;"
   }
 
-  #createCandidatesElement(): void {
+  #createCandidatesElement(): void
+  {
     this.#candidatesElement = document.createElement("div")
-    this.#candidatesElement.id = `candidates-${this.uuid}`
+    this.#candidatesElement.id = `candidates-${ this.uuid }`
     this.#candidatesElement.classList.add("candidates")
   }
 
-  #createMoreMenuElement(): void {
+  #createMoreMenuElement(): void
+  {
     this.#menuElement = document.createElement("div")
-    this.#menuElement.id = `more-menu-${this.uuid}`
+    this.#menuElement.id = `more-menu-${ this.uuid }`
     this.#menuElement.classList.add("more-menu")
   }
 
-  #createConvertElement(): void {
+  #createConvertElement(): void
+  {
     this.#convertElement = document.createElement("button")
-    this.#convertElement.id = `convert-${this.uuid}`
+    this.#convertElement.id = `convert-${ this.uuid }`
     this.#convertElement.classList.add("options-label-button")
     this.#convertElement.innerHTML = "Convert"
   }
 
-  #createCopyElement(): void {
+  #createCopyElement(): void
+  {
     this.#copyElement = document.createElement("button")
-    this.#copyElement.id = `copy-${this.uuid}`
+    this.#copyElement.id = `copy-${ this.uuid }`
     this.#copyElement.classList.add("options-label-button")
     this.#copyElement.innerHTML = "Copy"
   }
 
-  #createDeleteElement(): void {
+  #createDeleteElement(): void
+  {
     this.#deleteElement = document.createElement("button")
-    this.#deleteElement.id = `delete-${this.uuid}`
+    this.#deleteElement.id = `delete-${ this.uuid }`
     this.#deleteElement.classList.add("options-label-button")
     this.#deleteElement.innerHTML = "Delete"
   }
 
-  init(domElement: HTMLElement, margin: TMarginConfiguration, renderingConfiguration: TRenderingConfiguration): void {
+  init(domElement: HTMLElement, margin: TMarginConfiguration, renderingConfiguration: TRenderingConfiguration): void
+  {
     this.#logger.info("init", { domElement, margin, renderingConfiguration })
     domElement.appendChild(this.#smartGuideElement)
     this.#smartGuideElement.appendChild(this.#wrapperElement)
@@ -161,15 +176,18 @@ export class SmartGuide {
     this.resize()
   }
 
-  #initFadeOutObserver(duration = 3000): void {
-    const observer = new MutationObserver(() => {
+  #initFadeOutObserver(duration = 3000): void
+  {
+    const observer = new MutationObserver(() =>
+    {
       clearTimeout(this.#fadeOutTimout)
       if (
         !this.#smartGuideElement.classList.contains("smartguide-out") &&
         this.#candidatesElement.style.display === "none" &&
         !this.#isMenuOpen
       ) {
-        this.#fadeOutTimout = setTimeout(() => {
+        this.#fadeOutTimout = setTimeout(() =>
+        {
           this.#hide()
         }, duration)
       }
@@ -177,16 +195,19 @@ export class SmartGuide {
     observer.observe(this.#smartGuideElement, { childList: true, subtree: true, attributes: true })
   }
 
-  #show(): void {
+  #show(): void
+  {
     this.#smartGuideElement.classList.remove("smartguide-out")
     this.#smartGuideElement.classList.add("smartguide-in")
   }
-  #hide(): void {
+  #hide(): void
+  {
     this.#smartGuideElement.classList.add("smartguide-out")
     this.#smartGuideElement.classList.remove("smartguide-in")
   }
 
-  #showCandidates = (target: HTMLElement) => {
+  #showCandidates = (target: HTMLElement) =>
+  {
     this.#logger.info("showCandidates", { target })
     const wordId = parseInt(target.id.replace("word-", "").replace(this.uuid, ""))
     const words = this.jiix?.words as TJIIXWord[]
@@ -196,11 +217,12 @@ export class SmartGuide {
       this.#candidatesElement.innerHTML = ""
       if (this.wordToChange?.candidates) {
         this.#candidatesElement.style.display = "flex"
-        this.wordToChange.candidates.forEach((word, index) => {
+        this.wordToChange.candidates.forEach((word, index) =>
+        {
           if (this.wordToChange?.label === word) {
-            this.#candidatesElement.innerHTML += `<span id="cdt-${index}${this.uuid}" class="selected-word">${word}</span>`
+            this.#candidatesElement.innerHTML += `<span id="cdt-${ index }${ this.uuid }" class="selected-word">${ word }</span>`
           } else {
-            this.#candidatesElement.innerHTML += `<span id="cdt-${index}${this.uuid}">${word}</span>`
+            this.#candidatesElement.innerHTML += `<span id="cdt-${ index }${ this.uuid }">${ word }</span>`
           }
         })
 
@@ -211,22 +233,26 @@ export class SmartGuide {
       }
     }
   }
-  #hideCandidates(): void {
+  #hideCandidates(): void
+  {
     this.#candidatesElement.style.display = "none"
   }
 
-  #openMenu(): void {
+  #openMenu(): void
+  {
     this.#menuElement.classList.add("open")
     this.#menuElement.classList.remove("close")
     this.#isMenuOpen = true
   }
-  #closeMenu(): void {
+  #closeMenu(): void
+  {
     this.#menuElement.classList.add("close")
     this.#menuElement.classList.remove("open")
     this.#isMenuOpen = false
   }
 
-  #onClickEllipsis = (evt: Event) => {
+  #onClickEllipsis = (evt: Event) =>
+  {
     this.#logger.info("onClickEllipsis", { evt })
     evt.preventDefault()
     evt.stopPropagation()
@@ -234,7 +260,8 @@ export class SmartGuide {
     this.#hideCandidates()
   }
 
-  #onClickConvert = (evt: Event) => {
+  #onClickConvert = (evt: Event) =>
+  {
     this.#logger.info("onClickConvert", { evt })
     evt.preventDefault()
     evt.stopPropagation()
@@ -242,7 +269,38 @@ export class SmartGuide {
     this.#closeMenu()
   }
 
-  #onClickCopy = async (evt: Event): Promise<void> => {
+  #createTextAreaElement(value: string): HTMLTextAreaElement
+  {
+    const isRTL = document.documentElement.getAttribute("dir") === "rtl"
+    const textArea = document.createElement("textarea")
+    textArea.style.fontSize = "12pt"
+    textArea.style.display = "absolute"
+    textArea.style[isRTL ? "right" : "left"] = "-9999px"
+    const yPosition = window.pageYOffset || document.documentElement.scrollTop
+    textArea.style.top = `${ yPosition }px`
+    textArea.setAttribute("readonly", "")
+    textArea.value = value
+    return textArea
+  }
+
+  #selectText(textArea: HTMLTextAreaElement)
+  {
+    if (navigator.userAgent.match(/ipad|iphone/i)) {
+      const range = document.createRange()
+      range.selectNodeContents(textArea)
+      const selection = window.getSelection()
+      if (selection) {
+        selection.removeAllRanges()
+        selection.addRange(range)
+        textArea.setSelectionRange(0, 999999)
+      }
+    } else {
+      textArea.select()
+    }
+  }
+
+  #onClickCopy = async (evt: Event): Promise<void> =>
+  {
     this.#logger.info("onClickCopy", { evt })
     evt.preventDefault()
     evt.stopPropagation()
@@ -250,16 +308,12 @@ export class SmartGuide {
       this.#closeMenu()
       let message = "Nothing to copy"
       if (this.#prompterTextElement.innerText) {
-        message = `"${this.#prompterTextElement.innerText}" copied to clipboard`
-        if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
-          const permissionName = "clipboard-write" as PermissionName;
-          const permissionStatus = await navigator.permissions.query({ name: permissionName });
-          if (permissionStatus.state === "granted") {
-            await navigator.clipboard.writeText(this.#prompterTextElement.innerText)
-          }
-        } else {
-          await navigator.clipboard.writeText(this.#prompterTextElement.innerText)
-        }
+        message = `"${ this.#prompterTextElement.innerText }" copied to clipboard`
+        const fakeEl = this.#createTextAreaElement(this.#prompterTextElement.innerText)
+        this.#prompterContainerElement.appendChild(fakeEl)
+        this.#selectText(fakeEl)
+        document.execCommand("copy")
+        fakeEl.remove()
       }
       this.internalEvent.emitNotif({ message, timeout: 1500 })
     } catch (error) {
@@ -268,7 +322,8 @@ export class SmartGuide {
     }
   }
 
-  #onClickDelete = (evt: Event) => {
+  #onClickDelete = (evt: Event) =>
+  {
     this.#logger.info("onClickDelete", { evt })
     evt.preventDefault()
     evt.stopPropagation()
@@ -276,7 +331,8 @@ export class SmartGuide {
     this.#closeMenu()
   }
 
-  #onClickCandidate = (evt: Event) => {
+  #onClickCandidate = (evt: Event) =>
+  {
     this.#logger.info("onClickCandidate", { evt })
     evt.preventDefault()
     evt.stopPropagation()
@@ -289,7 +345,8 @@ export class SmartGuide {
     this.#candidatesElement.style.display = "none"
   }
 
-  #onClickPrompter = (evt: Event): void => {
+  #onClickPrompter = (evt: Event): void =>
+  {
     this.#logger.info("onClickPrompter", { evt })
     evt.preventDefault()
     evt.stopPropagation()
@@ -302,17 +359,20 @@ export class SmartGuide {
     }
   }
 
-  #stopPropagation = (evt: Event) =>{
+  #stopPropagation = (evt: Event) =>
+  {
     evt.preventDefault()
     evt.stopPropagation()
   }
 
-  #onClickOutSide = () => {
+  #onClickOutSide = () =>
+  {
     this.#hideCandidates()
     this.#closeMenu()
   }
 
-  #addListeners(): void {
+  #addListeners(): void
+  {
     this.#smartGuideElement.addEventListener("pointerdown", this.#stopPropagation.bind(this))
     this.#ellipsisElement.addEventListener("pointerdown", this.#onClickEllipsis.bind(this))
     this.#convertElement.addEventListener("pointerdown", this.#onClickConvert.bind(this))
@@ -323,7 +383,8 @@ export class SmartGuide {
     document.addEventListener("pointerdown", this.#onClickOutSide.bind(this))
   }
 
-  #removeListeners(): void {
+  #removeListeners(): void
+  {
     this.#smartGuideElement.addEventListener("pointerdown", this.#stopPropagation)
     this.#ellipsisElement.removeEventListener("pointerdown", this.#onClickEllipsis)
     this.#convertElement.removeEventListener("pointerdown", this.#onClickConvert)
@@ -334,21 +395,23 @@ export class SmartGuide {
     document.removeEventListener("pointerdown", this.#onClickOutSide)
   }
 
-  resize(): void {
+  resize(): void
+  {
     this.#logger.info("resize")
     const marginLeft = convertMillimeterToPixel(this.margin.left)
     const marginRight = convertMillimeterToPixel(this.margin.right)
-    this.#wrapperElement.style.marginLeft = `${marginLeft}px`
-    this.#wrapperElement.style.marginRight = `${marginRight}px`
+    this.#wrapperElement.style.marginLeft = `${ marginLeft }px`
+    this.#wrapperElement.style.marginRight = `${ marginRight }px`
   }
 
-  update(exports: TJIIXExport): void {
+  update(exports: TJIIXExport): void
+  {
     this.#logger.info("update", { exports })
     this.jiix = exports
     const createWordSpan = (index: number, word?: TJIIXWord) =>
     {
       const span = document.createElement("span")
-      span.id = `word-${index}${this.uuid}`
+      span.id = `word-${ index }${ this.uuid }`
       if (word) {
         span.textContent = word.label
       } else {
@@ -358,13 +421,15 @@ export class SmartGuide {
       return span
     }
 
-    const populatePrompter = () => {
+    const populatePrompter = () =>
+    {
       this.#logger.info("populatePrompter")
       this.#prompterTextElement.innerHTML = ""
       if (this.jiix?.words) {
         const words = this.jiix.words as TJIIXWord[]
         const myFragment = document.createDocumentFragment()
-        words.forEach((word, index) => {
+        words.forEach((word, index) =>
+        {
           if (word.label === " " || word.label.includes("\n")) {
             myFragment.appendChild(createWordSpan(index))
           } else if (index !== words.length - 1) {
@@ -380,13 +445,11 @@ export class SmartGuide {
             if ((this.lastWord?.candidates !== word.candidates) && (this.lastWord?.label !== word.label)) {
               this.lastWord = word
             }
-            if(this.wordToChange?.id === index.toString())
-            {
+            if (this.wordToChange?.id === index.toString()) {
               span.classList.add("modified-word")
               this.wordToChange = undefined
             }
-            else
-            {
+            else {
               span.classList.add("added-word")
             }
             this.#prompterTextElement.appendChild(span)
@@ -401,20 +464,21 @@ export class SmartGuide {
       this.#show()
       this.#ellipsisElement.style.setProperty("pointer-events", "auto")
     }
-    else
-    {
+    else {
       this.#ellipsisElement.style.setProperty("pointer-events", "none")
     }
   }
 
-  clear(): void {
+  clear(): void
+  {
     this.#logger.info("clear")
     this.#prompterTextElement.innerHTML = ""
     this.#candidatesElement.innerHTML = ""
     this.#hide()
   }
 
-  destroy(): void {
+  destroy(): void
+  {
     this.#logger.info("destroy")
     this.#removeListeners()
     this.#smartGuideElement.remove()
