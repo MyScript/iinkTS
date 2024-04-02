@@ -144,7 +144,8 @@ export const AllOverrideConfiguration: PartialDeep<TConfiguration> = {
     alwaysConnected: false,
     lang: 'fr_FR',
     gesture: {
-      enable: false
+      enable: false,
+      ignoreGestureStrokes: false,
     },
     convert: {
       force: {
