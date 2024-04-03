@@ -83,18 +83,6 @@ nav {
     background-color: rgba(60, 60, 60, 0.5);
 }
 
-.my-custom-class .smartguide.smartguide-in {
-    visibility: visible !important;
-    transition: opacity 0.1s;
-    opacity: 1;
-}
-
-.my-custom-class .smartguide.smartguide-out {
-    visibility: hidden !important;
-    transition: opacity 0.1s, visibility 0.1s;
-    opacity: 0;
-}
-
 .my-custom-class .smartguide .tag-icon {
     padding: 0 18px;
     border: 1px solid #959DA6;

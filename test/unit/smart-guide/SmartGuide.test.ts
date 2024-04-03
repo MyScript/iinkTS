@@ -1,10 +1,8 @@
-import { delay } from "../helpers"
 import { LeftClickEventFake } from "../PointerEventFake"
 import {
   SmartGuide,
   DefaultRenderingConfiguration,
   InternalEvent,
-  TRenderingConfiguration,
   TMarginConfiguration
 } from "../../../src/iink"
 
@@ -81,37 +79,6 @@ describe("SmartGuide.ts", () =>
       const deleteBtn = domElement.querySelector(`#delete-${ sm.uuid }`) as HTMLDivElement
       expect(deleteBtn).toBeDefined()
       expect(deleteBtn.classList).toContain("options-label-button")
-    })
-  })
-
-  describe("Smartguide visibility", () =>
-  {
-    test("should be displayed on initialization", () =>
-    {
-      const domElement = document.createElement("div")
-      const sm = new SmartGuide()
-      sm.init(domElement, margin, DefaultRenderingConfiguration)
-      const smartguide = domElement.querySelector(".smartguide") as HTMLDivElement
-      expect(smartguide.classList).not.toContain("smartguide-out")
-      expect(smartguide.classList).toContain("smartguide-in")
-    })
-    test("should be hide after fadeOut delay", async () =>
-    {
-      const domElement = document.createElement("div")
-      const sm = new SmartGuide()
-      const renderingConfiguration: TRenderingConfiguration = {
-        ...DefaultRenderingConfiguration
-      }
-      renderingConfiguration.smartGuide.fadeOut.enable = true
-      renderingConfiguration.smartGuide.fadeOut.duration = 100
-      sm.init(domElement, margin, renderingConfiguration)
-      const smartguide = domElement.querySelector(".smartguide") as HTMLDivElement
-      expect(smartguide.classList).not.toContain("smartguide-out")
-      expect(smartguide.classList).toContain("smartguide-in")
-
-      await delay(renderingConfiguration.smartGuide.fadeOut.duration + 10)
-      expect(smartguide.classList).toContain("smartguide-out")
-      expect(smartguide.classList).not.toContain("smartguide-in")
     })
   })
 

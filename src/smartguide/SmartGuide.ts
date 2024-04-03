@@ -22,7 +22,6 @@ export class SmartGuide
   #convertElement!: HTMLButtonElement
   #copyElement!: HTMLButtonElement
   #deleteElement!: HTMLButtonElement
-  #fadeOutTimout?: ReturnType<typeof setTimeout>
   #isMenuOpen!: boolean
   margin: TMarginConfiguration
   renderingConfiguration!: TRenderingConfiguration
@@ -168,42 +167,7 @@ export class SmartGuide
     this.renderingConfiguration = renderingConfiguration
     this.#addListeners()
 
-    this.#show()
-    if (this.renderingConfiguration.smartGuide.fadeOut.enable) {
-      this.#initFadeOutObserver(this.renderingConfiguration.smartGuide.fadeOut.duration)
-    }
-
     this.resize()
-  }
-
-  #initFadeOutObserver(duration = 3000): void
-  {
-    const observer = new MutationObserver(() =>
-    {
-      clearTimeout(this.#fadeOutTimout)
-      if (
-        !this.#smartGuideElement.classList.contains("smartguide-out") &&
-        this.#candidatesElement.style.display === "none" &&
-        !this.#isMenuOpen
-      ) {
-        this.#fadeOutTimout = setTimeout(() =>
-        {
-          this.#hide()
-        }, duration)
-      }
-    })
-    observer.observe(this.#smartGuideElement, { childList: true, subtree: true, attributes: true })
-  }
-
-  #show(): void
-  {
-    this.#smartGuideElement.classList.remove("smartguide-out")
-    this.#smartGuideElement.classList.add("smartguide-in")
-  }
-  #hide(): void
-  {
-    this.#smartGuideElement.classList.add("smartguide-out")
-    this.#smartGuideElement.classList.remove("smartguide-in")
   }
 
   #showCandidates = (target: HTMLElement) =>
@@ -226,10 +190,7 @@ export class SmartGuide
           }
         })
 
-        const parent = target.parentNode?.parentNode?.parentNode
-        if (parent) {
-          parent.insertBefore(this.#candidatesElement, target.parentNode?.parentNode)
-        }
+        target.appendChild(this.#candidatesElement)
       }
     }
   }
@@ -461,7 +422,6 @@ export class SmartGuide
     }
     populatePrompter()
     if (this.jiix?.words?.length) {
-      this.#show()
       this.#ellipsisElement.style.setProperty("pointer-events", "auto")
     }
     else {
@@ -474,7 +434,6 @@ export class SmartGuide
     this.#logger.info("clear")
     this.#prompterTextElement.innerHTML = ""
     this.#candidatesElement.innerHTML = ""
-    this.#hide()
   }
 
   destroy(): void

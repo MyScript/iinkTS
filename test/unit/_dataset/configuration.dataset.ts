@@ -191,10 +191,6 @@ export const AllOverrideConfiguration: PartialDeep<TConfiguration> = {
     minWidth: 42,
     smartGuide: {
       enable: false,
-      fadeOut: {
-        enable: true,
-        duration: 42
-      }
     },
     guides: {
       enable: false,

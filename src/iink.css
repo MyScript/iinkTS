@@ -99,18 +99,6 @@
     border-bottom: 1px solid #959da6;
 }
 
-.ms-editor .smartguide.smartguide-in {
-    visibility: visible !important;
-    transition: opacity 0.5s;
-    opacity: 1;
-}
-
-.ms-editor .smartguide.smartguide-out {
-    transition: opacity 1s, visibility 1s;
-    visibility: hidden !important;
-    opacity: 0;
-}
-
 .ms-editor .smartguide .tag-icon {
     padding: 0 18px;
     border-left: 1px solid #959DA6;
@@ -189,15 +177,15 @@
 }
 
 .ms-editor .smartguide .candidates {
+    z-index: 100;
+    position: absolute;
     color: black;
     flex-direction: column;
     text-align: center;
     line-height: 30px;
     border-radius: 3px;
-    position: absolute;
     box-shadow: 2px 2px 12px #BDBDBD, -2px 2px 12px #BDBDBD;
     background-color: #F5F5F5;
-    z-index: 100;
     -webkit-tap-highlight-color: transparent;
 }
 

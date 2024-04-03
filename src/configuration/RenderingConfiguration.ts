@@ -20,10 +20,6 @@ export const DefaultGuidesConfiguration: TGuidesConfiguration = {
  */
 export type TSmartGuidesConfiguration = {
   enable: boolean
-  fadeOut: {
-    enable: boolean
-    duration: number
-  }
 }
 
 /**
@@ -31,10 +27,6 @@ export type TSmartGuidesConfiguration = {
  */
 export const DefaultSmartGuidesConfiguration: TSmartGuidesConfiguration = {
   enable: true,
-  fadeOut: {
-    enable: false,
-    duration: 5000
-  }
 }
 
 /**
