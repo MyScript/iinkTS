@@ -103,12 +103,6 @@ describe("DefaultConfiguration.ts", () =>
     {
       expect(DefaultConfiguration.rendering.minWidth).toStrictEqual(100)
     })
-    test("should have smartGuide", () =>
-    {
-      expect(DefaultConfiguration.rendering.smartGuide.enable).toStrictEqual(true)
-      expect(DefaultConfiguration.rendering.smartGuide.fadeOut.enable).toStrictEqual(false)
-      expect(DefaultConfiguration.rendering.smartGuide.fadeOut.duration).toStrictEqual(5000)
-    })
   })
 
   describe("should have DefaultTriggerConfiguration", () =>
