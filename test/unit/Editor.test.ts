@@ -1,6 +1,6 @@
-import { AllOverrideConfiguration } from "./_dataset/configuration.dataset"
+import { AllOverrideConfiguration } from "./__dataset__/configuration.dataset"
 import { buildStroke, delay } from "./helpers"
-// import { LeftClickEventFake } from "../PointerEventFake"
+// import { LeftClickEventFake } from "../__mocks__/PointerEventFake"
 
 import
 {

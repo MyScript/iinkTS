@@ -23,10 +23,12 @@ export default {
   preset: "ts-jest",
   setupFiles: [
     "jest-canvas-mock",
-    "./test/unit/jest.setup.js"
+    "./test/unit/jest.setup.js",
+    "./test/unit/text-encoder.mock.ts"
   ],
   setupFilesAfterEnv: [
-    "jest-websocket-mock"
+    "jest-websocket-mock",
+    "./test/unit/setupTests.ts"
   ],
   testEnvironment: "jsdom",
   testMatch: [

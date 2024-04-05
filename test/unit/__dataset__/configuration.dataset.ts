@@ -5,9 +5,14 @@ export const ConfigurationTextWebsocket: PartialDeep<TConfiguration> = {
   server: {
     protocol: 'WEBSOCKET',
     scheme: 'http',
-    host: 'cloud.myscript.com',
-    applicationKey: '80a7f78d-939c-48e0-84a8-7794d6fbf624',
-    hmacKey: 'df2ba19a-7703-4ab4-9164-00dd33357745'
+    host: 'test.com',
+    applicationKey: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+    hmacKey: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
+    version: "3.0.0",
+    websocket: {
+      pingEnabled: false,
+      pingDelay: 100
+    }
   },
   recognition: {
     lang: "en_US",
@@ -24,13 +29,35 @@ export const ConfigurationTextWebsocket: PartialDeep<TConfiguration> = {
   }
 }
 
+export const ConfigurationMathWebsocket: PartialDeep<TConfiguration> = {
+  server: {
+    protocol: 'WEBSOCKET',
+    scheme: 'http',
+    host: 'test.com',
+    applicationKey: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+    hmacKey: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
+    version: "3.0.0",
+    websocket: {
+      pingEnabled: false
+    }
+  },
+  recognition: {
+    lang: "en_US",
+    type: 'MATH',
+    math: {
+      mimeTypes: ["application/vnd.myscript.jiix"],
+    }
+  }
+}
+
 export const ConfigurationTextRest: PartialDeep<TConfiguration> = {
   server: {
     protocol: 'REST',
     scheme: 'http',
-    host: 'cloud.myscript.com',
-    applicationKey: '80a7f78d-939c-48e0-84a8-7794d6fbf624',
-    hmacKey: 'df2ba19a-7703-4ab4-9164-00dd33357745'
+    host: 'test.com',
+    applicationKey: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+    hmacKey: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
+    version: "3.0.0"
   },
   recognition: {
     type: 'TEXT',
@@ -50,9 +77,10 @@ export const ConfigurationDiagramRest: PartialDeep<TConfiguration> = {
   server: {
     protocol: 'REST',
     scheme: 'http',
-    host: 'cloud.myscript.com',
-    applicationKey: '80a7f78d-939c-48e0-84a8-7794d6fbf624',
-    hmacKey: 'df2ba19a-7703-4ab4-9164-00dd33357745'
+    host: 'test.com',
+    applicationKey: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+    hmacKey: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
+    version: "3.0.0"
   },
   recognition: {
     type: 'DIAGRAM',
@@ -62,13 +90,31 @@ export const ConfigurationDiagramRest: PartialDeep<TConfiguration> = {
   }
 }
 
+export const ConfigurationMathRest: PartialDeep<TConfiguration> = {
+  server: {
+    protocol: 'REST',
+    scheme: 'http',
+    host: 'test.com',
+    applicationKey: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+    hmacKey: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
+    version: "3.0.0"
+  },
+  recognition: {
+    type: 'MATH',
+    math: {
+      mimeTypes: ['application/vnd.myscript.jiix']
+    }
+  }
+}
+
 export const ConfigurationRawContentRest: PartialDeep<TConfiguration> = {
   server: {
     protocol: 'REST',
     scheme: 'http',
-    host: 'cloud.myscript.com',
-    applicationKey: '80a7f78d-939c-48e0-84a8-7794d6fbf624',
-    hmacKey: 'df2ba19a-7703-4ab4-9164-00dd33357745'
+    host: 'test.com',
+    applicationKey: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+    hmacKey: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
+    version: "3.0.0"
   },
   recognition: {
     type: 'Raw Content',
@@ -79,9 +125,9 @@ export const AllOverrideConfiguration: PartialDeep<TConfiguration> = {
   server: {
     protocol: 'REST',
     scheme: 'http',
-    host: 'host',
-    applicationKey: 'applicationKey',
-    hmacKey: 'hmacKey',
+    host: 'test.com',
+    applicationKey: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+    hmacKey: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
     version: '2.0.4',
     useWindowLocation: false,
     websocket: {

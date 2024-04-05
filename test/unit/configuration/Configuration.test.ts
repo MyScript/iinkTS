@@ -5,7 +5,7 @@ import
   ConfigurationDiagramRest,
   ConfigurationRawContentRest,
   AllOverrideConfiguration,
-} from "../_dataset/configuration.dataset"
+} from "../__dataset__/configuration.dataset"
 
 import {
   Configuration,
@@ -60,10 +60,6 @@ describe("Configuration.ts", () =>
       test("should have server.hmacKey", () =>
       {
         expect(configuration.server.hmacKey).toStrictEqual(cc.config?.server?.hmacKey)
-      })
-      test("should have default server.websocket", () =>
-      {
-        expect(configuration.server.websocket).toStrictEqual(DefaultConfiguration.server.websocket)
       })
       test("should have recognition.type", () =>
       {

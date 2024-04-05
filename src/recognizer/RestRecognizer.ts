@@ -152,7 +152,12 @@ export class RestRecognizer
     const headers = new Headers()
     headers.append("Accept", "application/json," + mimeType)
     headers.append("applicationKey", this.serverConfiguration.applicationKey)
-    headers.append("hmac", computeHmac(JSON.stringify(data), this.serverConfiguration.applicationKey, this.serverConfiguration.hmacKey))
+    try {
+      const hmac = await computeHmac(JSON.stringify(data), this.serverConfiguration.applicationKey, this.serverConfiguration.hmacKey)
+      headers.append("hmac", hmac)
+    } catch (error) {
+      this.#logger.error("post.computeHmac", error)
+    }
     headers.append("Content-Type", "application/json")
 
     if (isVersionSuperiorOrEqual(this.serverConfiguration.version, "2.0.4")) {

@@ -1,4 +1,4 @@
-import { DoubleTouchEventFake, LeftClickEventFake, RightClickEventFake, TouchEventFake } from "../PointerEventFake"
+import { DoubleTouchEventFake, LeftClickEventFake, RightClickEventFake, TouchEventFake } from "../__mocks__/PointerEventFake"
 import { DefaultConfiguration, PointerEventGrabber, TGrabberConfiguration, IGrabber } from "../../../src/iink"
 
 describe("PointerEventGrabber.ts", () =>

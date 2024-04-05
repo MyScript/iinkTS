@@ -1,4 +1,4 @@
-import { LeftClickEventFake } from "../PointerEventFake"
+import { LeftClickEventFake } from "../__mocks__/PointerEventFake"
 import {
   SmartGuide,
   DefaultRenderingConfiguration,
