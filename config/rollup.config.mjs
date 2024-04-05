@@ -23,7 +23,7 @@ export default [
     ],
     plugins: [
       commonjs({
-        include: ["node_modules/json-css/**", "node_modules/crypto-js/**"],
+        include: ["node_modules/json-css/**"],
       }),
       resolve(),
       typescript(),

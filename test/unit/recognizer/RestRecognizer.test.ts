@@ -1,14 +1,16 @@
 import fetchMock from "jest-fetch-mock"
-import {
+import
+{
   RestRecognizer,
-  DefaultRecognitionConfiguration,
-  DefaultServerConfiguration,
   DefaultPenStyle,
   Model,
   TPointer,
   TRecognitionConfiguration,
-  TRecognitionType
- } from "../../../src/iink"
+  TRecognitionType,
+  TConfiguration,
+  TServerConfiguration
+} from "../../../src/iink"
+import { ConfigurationDiagramRest, ConfigurationMathRest, ConfigurationRawContentRest, ConfigurationTextRest } from "../__dataset__/configuration.dataset"
 
 describe("RestRecognizer.ts", () =>
 {
@@ -25,14 +27,32 @@ describe("RestRecognizer.ts", () =>
 
   test("should instanciate RestRecognizer", () =>
   {
-    const rr = new RestRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
+    const rr = new RestRecognizer(ConfigurationTextRest.server as TServerConfiguration, ConfigurationTextRest.recognition as TRecognitionConfiguration)
     expect(rr).toBeDefined()
   })
 
-  const recognitionTypeList: TRecognitionType[] = ["TEXT", "DIAGRAM", "MATH", "Raw Content"]
-  recognitionTypeList.forEach((recognitionType: TRecognitionType) =>
+  const testDatas: { type: TRecognitionType, config: TConfiguration }[] = [
+    {
+      type: "TEXT",
+      config: ConfigurationTextRest as TConfiguration
+    },
+    {
+      type: "DIAGRAM",
+      config: ConfigurationDiagramRest as TConfiguration
+    },
+    {
+      type: "MATH",
+      config: ConfigurationMathRest as TConfiguration
+    },
+    {
+      type: "Raw Content",
+      config: ConfigurationRawContentRest as TConfiguration
+    },
+  ]
+
+  testDatas.forEach(({ type, config }) =>
   {
-    test(`should export ${ recognitionType }`, async () =>
+    test(`should export ${ type }`, async () =>
     {
       const model = new Model(width, height)
       const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
@@ -40,40 +60,41 @@ describe("RestRecognizer.ts", () =>
       model.initCurrentStroke(p1, 1, "pen", DefaultPenStyle)
       model.endCurrentStroke(p2)
       const recognitionConfig: TRecognitionConfiguration = {
-        ...DefaultRecognitionConfiguration,
-        type: recognitionType
+        ...config.recognition,
+        type
       }
-      const rr = new RestRecognizer(DefaultServerConfiguration, recognitionConfig)
+      const rr = new RestRecognizer(config.server, recognitionConfig)
       const newModel = await rr.export(model)
-      model.exports = {}
 
-      let mimeType = ""
-      switch (recognitionType) {
+      let mimeTypes = []
+      switch (type) {
         case "TEXT":
-          mimeType = DefaultRecognitionConfiguration.text.mimeTypes[0]
+          mimeTypes = config.recognition.text!.mimeTypes
           break
         case "DIAGRAM":
-          mimeType = DefaultRecognitionConfiguration.diagram.mimeTypes[0]
+          mimeTypes = config.recognition.diagram!.mimeTypes
           break
         case "MATH":
-          mimeType = DefaultRecognitionConfiguration.math.mimeTypes[0]
+          mimeTypes = config.recognition.math!.mimeTypes
           break
         case "Raw Content":
-          mimeType = "application/vnd.myscript.jiix"
+          mimeTypes = ["application/vnd.myscript.jiix"]
           break
 
         default:
           throw new Error("invalid recognition type")
       }
-      expect(fetchMock).toHaveBeenCalledTimes(1)
-      model.exports[mimeType] = ""
-      expect(newModel).toEqual(model)
+      expect(fetchMock).toHaveBeenCalledTimes(mimeTypes.length)
+      expect(model.exports).toBeUndefined()
+      mimeTypes.forEach(m => {
+        expect(newModel.exports![m]).toBeDefined()
+      })
     })
   })
 
-  recognitionTypeList.forEach((recognitionType: TRecognitionType) =>
+  testDatas.forEach(({ type, config }) =>
   {
-    test(`should convert ${ recognitionType }`, async () =>
+    test(`should convert ${ type }`, async () =>
     {
       const model = new Model(width, height)
       const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
@@ -81,34 +102,33 @@ describe("RestRecognizer.ts", () =>
       model.initCurrentStroke(p1, 1, "pen", DefaultPenStyle)
       model.endCurrentStroke(p2)
       const recognitionConfig: TRecognitionConfiguration = {
-        ...DefaultRecognitionConfiguration,
-        type: recognitionType
+        ...config.recognition,
+        type
       }
-      const rr = new RestRecognizer(DefaultServerConfiguration, recognitionConfig)
+      const rr = new RestRecognizer(config.server, recognitionConfig)
       const newModel = await rr.convert(model, "DIGITAL_EDIT")
-      model.converts = {}
 
-      let mimeType = ""
-      switch (recognitionType) {
+      let mimeTypes = []
+      switch (type) {
         case "TEXT":
-          mimeType = DefaultRecognitionConfiguration.text.mimeTypes[0]
+          mimeTypes = config.recognition.text!.mimeTypes
           break
         case "DIAGRAM":
-          mimeType = DefaultRecognitionConfiguration.diagram.mimeTypes[0]
+          mimeTypes = config.recognition.diagram!.mimeTypes
           break
         case "MATH":
-          mimeType = DefaultRecognitionConfiguration.math.mimeTypes[0]
+          mimeTypes = config.recognition.math!.mimeTypes
           break
         case "Raw Content":
-          mimeType = "application/vnd.myscript.jiix"
+          mimeTypes = ["application/vnd.myscript.jiix"]
           break
-        default:
-          throw new Error("invalid recognition type")
       }
 
-      expect(fetchMock).toHaveBeenCalledTimes(1)
-      model.converts[mimeType] = ""
-      expect(model).toEqual(newModel)
+      expect(fetchMock).toHaveBeenCalledTimes(mimeTypes.length)
+      expect(model.converts).toBeUndefined()
+      mimeTypes.forEach(m => {
+        expect(newModel.converts![m]).toBeDefined()
+      })
     })
   })
 

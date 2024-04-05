@@ -13,11 +13,12 @@ import { TWSMessageEvent, TWSMessageEventContentChange, TWSMessageEventError, TW
  * A websocket dialog have this sequence :
  * --------------------------- Client --------------------------------------------------- Server ----------------------------------
  * init: send newContentPackage or restoreIInkSession           ==================>
- *                                                              <==================       hmacChallenge
- * answer hmacChallenge: send the hmac                          ==================>
+ *                                                              <==================       ack
+ * answer ack:
+ *  send the hmac (if enable)                                   ==================>
+ *  send the configuration                                      ==================>
  *                                                              <==================       contentPackageDescription
  * answer contentPackageDescription:
- *  send the configuration                                      ==================>
  *  send newContentPart or openContentPart                      ==================>
  *                                                              <==================        partChanged
  *                                                              <==================        contentChanged
@@ -46,9 +47,9 @@ export class WSRecognizer
   protected reconnectionCount = 0
   protected viewSizeHeight!: number
   protected viewSizeWidth!: number
-  // contentPartCount = 0
   protected sessionId?: string
-  protected currentPartId?: string
+  // contentPartCount = 0
+  currentPartId?: string
   protected currentErrorCode?: string | number
 
   protected penStyle?: TPenStyle
@@ -57,6 +58,7 @@ export class WSRecognizer
 
   protected connected?: DeferredPromise<void>
   protected initialized?: DeferredPromise<void>
+  protected ackDeferred?: DeferredPromise<void>
   protected addStrokeDeferred?: DeferredPromise<TExport>
   protected exportDeferred?: DeferredPromise<TExport>
   protected convertDeferred?: DeferredPromise<TExport>
@@ -86,11 +88,8 @@ export class WSRecognizer
         return this.recognitionConfiguration.text.mimeTypes
       case "math":
         return this.recognitionConfiguration.math.mimeTypes
-      case "diagram":
-        return this.recognitionConfiguration.diagram.mimeTypes
       default:
-        //"raw-content"
-        return []
+        throw new Error(`Unauthorized recognition type: "${ this.recognitionConfiguration.type }"`)
     }
   }
 
@@ -230,32 +229,33 @@ export class WSRecognizer
     }
   }
 
-  protected manageHMACChallengeMessage(websocketMessage: TWSMessageEvent): void
+  protected async manageAckMessage(websocketMessage: TWSMessageEvent): Promise<void>
   {
-    this.#logger.info("manageHMACChallengeMessage", { websocketMessage })
+    this.#logger.info("manageAckMessage", { websocketMessage })
     const hmacChallengeMessage = websocketMessage as TWSMessageEventHMACChallenge
     if (hmacChallengeMessage.hmacChallenge) {
       this.send({
         type: "hmac",
-        hmac: computeHmac(hmacChallengeMessage.hmacChallenge, this.serverConfiguration.applicationKey, this.serverConfiguration.hmacKey)
+        hmac: await computeHmac(hmacChallengeMessage.hmacChallenge, this.serverConfiguration.applicationKey, this.serverConfiguration.hmacKey)
       })
     }
     if (hmacChallengeMessage.iinkSessionId) {
       this.sessionId = hmacChallengeMessage.iinkSessionId
     }
-  }
-
-  protected manageContentPackageDescriptionMessage(): void
-  {
-    this.reconnectionCount = 0
-    this.#logger.info("manageContentPackageDescriptionMessage")
 
     const recognitionConfig = structuredClone(this.recognitionConfiguration) as PartialDeep<TRecognitionConfiguration>
     if (!isVersionSuperiorOrEqual(this.serverConfiguration.version, "2.3.0")) {
       delete recognitionConfig.convert
     }
     this.send({ ...recognitionConfig, type: "configuration" })
+    this.ackDeferred?.resolve()
+  }
 
+  protected async manageContentPackageDescriptionMessage(): Promise<void>
+  {
+    this.reconnectionCount = 0
+    await this.ackDeferred?.promise
+    this.#logger.info("manageContentPackageDescriptionMessage")
     if (this.currentPartId) {
       this.send({ type: "openContentPart", id: this.currentPartId, mimeTypes: this.mimeTypes })
     }
@@ -351,7 +351,7 @@ export class WSRecognizer
       this.pingCount = 0
       switch (websocketMessage.type) {
         case "ack":
-          this.manageHMACChallengeMessage(websocketMessage)
+          this.manageAckMessage(websocketMessage)
           break
         case "contentPackageDescription":
           this.manageContentPackageDescriptionMessage()
@@ -390,6 +390,7 @@ export class WSRecognizer
       this.destroy()
       this.connected = new DeferredPromise<void>()
       this.initialized = new DeferredPromise<void>()
+      this.ackDeferred = new DeferredPromise<void>()
       this.viewSizeHeight = height
       this.viewSizeWidth = width
       this.pingCount = 0
@@ -714,6 +715,7 @@ export class WSRecognizer
     this.#logger.info("destroy")
     this.connected = undefined
     this.initialized = undefined
+    this.ackDeferred = undefined
     this.addStrokeDeferred = undefined
     this.exportDeferred = undefined
     this.convertDeferred = undefined

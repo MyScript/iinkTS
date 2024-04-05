@@ -1,140 +1,41 @@
-//@ts-nocheck
-import Server from "jest-websocket-mock"
-import { DeserializedMessage } from "jest-websocket-mock/lib/websocket"
-import { delay } from "../helpers"
+import { buildStroke, delay } from "../helpers"
 
-import {
-  TWSMessageEvent,
-  TTheme,
-  TPenStyle,
+import
+{
   TServerConfiguration,
-  TConverstionState,
   TRecognitionConfiguration,
-  TRecognitionType,
   WSRecognizer,
   DefaultRecognitionConfiguration,
-  DefaultServerConfiguration,
-  DefaultPenStyle,
+  Error as ErrorConst,
+  TRecognitionType,
+  TConfiguration,
+  TPenStyle,
+  TTheme,
   Model,
-  Stroke,
-  Error as ErrorConst
+  TConverstionState,
 } from "../../../src/iink"
 
-
-const ackMessage = { "type": "ack", "hmacChallenge": "1f434e8b-cc46-4a8c-be76-708eea2ff305", "iinkSessionId": "c7e72186-6299-4782-b612-3e725aa126f1" }
-const contentPackageDescriptionMessage = { "type": "contentPackageDescription", "contentPartCount": 0 }
-const partChangeMessage = { "type": "partChanged", "partIdx": 0, "partId": "yyrrutgk", "partCount": 1 }
-const newPartMessage = { "type": "newPart", "idx": 0, "id": "lqrcoxjl" }
-
-const emptyJIIX = {
-  "type": "Text",
-  "label": "",
-  "words": [],
-}
-const emptyExportedMessage = {
-  "type": "exported",
-  "partId": "wyybaqsp",
-  "exports": {
-    "application/vnd.myscript.jiix": JSON.stringify(emptyJIIX)
-  }
-}
-const hJIIX = {
-  "type": "Text",
-  "label": "hello",
-  "words": [{
-    "label": "H",
-    "candidates": ["h"]
-  }]
-}
-const hExportedMessage = {
-  "type": "exported",
-  "partid": 0,
-  "exports": {
-    "application/vnd.myscript.jiix": JSON.stringify(hJIIX)
-  }
-}
-const svgPatchMessage = {
-  "type": "svgPatch",
-  "updates": [
-    {
-      "type": "REMOVE_ELEMENT",
-      "id": "MODEL-dg7f8894033c80"
-    },
-    {
-      "type": "SET_ATTRIBUTE",
-      "name": "viewBox",
-      "value": "0 0 967 790"
-    },
-    {
-      "type": "SET_ATTRIBUTE",
-      "name": "width",
-      "value": "967px"
-    },
-    {
-      "type": "INSERT_BEFORE",
-      "refId": "G7f8814290820-",
-      "svg": "<g id=\"G7f881429b700-\">\n  <g id=\"MODEL-dg7f8894033d00\">\n    <line x1=\"10\" y1=\"35\" x2=\"245.85\" y2=\"35\" stroke=\"rgba(0, 0, 0, 0.160784319)\" stroke-width=\"0.1\"></line>\n    <line x1=\"10\" y1=\"50\" x2=\"245.85\" y2=\"50\" stroke=\"rgba(0, 0, 0, 0.160784319)\" stroke-width=\"0.1\"></line>\n    <line x1=\"10\" y1=\"65\" x2=\"245.85\" y2=\"65\" stroke=\"rgba(0, 0, 0, 0.160784319)\" stroke-width=\"0.1\"></line>\n    <line x1=\"10\" y1=\"80\" x2=\"245.85\" y2=\"80\" stroke=\"rgba(0, 0, 0, 0.160784319)\" stroke-width=\"0.1\"></line>\n    <line x1=\"10\" y1=\"95\" x2=\"245.85\" y2=\"95\" stroke=\"rgba(0, 0, 0, 0.160784319)\" stroke-width=\"0.1\"></line>\n    <line x1=\"10\" y1=\"110\" x2=\"245.85\" y2=\"110\" stroke=\"rgba(0, 0, 0, 0.160784319)\" stroke-width=\"0.1\"></line>\n    <line x1=\"10\" y1=\"125\" x2=\"245.85\" y2=\"125\" stroke=\"rgba(0, 0, 0, 0.160784319)\" stroke-width=\"0.1\"></line>\n    <line x1=\"10\" y1=\"140\" x2=\"245.85\" y2=\"140\" stroke=\"rgba(0, 0, 0, 0.160784319)\" stroke-width=\"0.1\"></line>\n    <line x1=\"10\" y1=\"155\" x2=\"245.85\" y2=\"155\" stroke=\"rgba(0, 0, 0, 0.160784319)\" stroke-width=\"0.1\"></line>\n    <line x1=\"10\" y1=\"170\" x2=\"245.85\" y2=\"170\" stroke=\"rgba(0, 0, 0, 0.160784319)\" stroke-width=\"0.1\"></line>\n    <line x1=\"10\" y1=\"185\" x2=\"245.85\" y2=\"185\" stroke=\"rgba(0, 0, 0, 0.160784319)\" stroke-width=\"0.1\"></line>\n    <line x1=\"10\" y1=\"200\" x2=\"245.85\" y2=\"200\" stroke=\"rgba(0, 0, 0, 0.160784319)\" stroke-width=\"0.1\"></line>\n  </g>\n</g>\n"
-    },
-    {
-      "type": "REMOVE_ELEMENT",
-      "id": "G7f8814290820-"
-    }
-  ],
-  "layer": "MODEL"
-}
-const errorMessage = { "type": "error", "message": "Access not granted", "code": "access.not.granted" }
-const recognitionTypeList: TRecognitionType[] = ["TEXT", "DIAGRAM", "MATH", "Raw Content"]
-
-const getMessages = (messages: DeserializedMessage<object>[], type: string): DeserializedMessage<object>[] =>
-{
-  return messages.filter((m: DeserializedMessage<object>) =>
-  {
-    const parseMessage = JSON.parse(m as string) as TWSMessageEvent
-    return parseMessage.type === type
-  })
-}
+import { ConfigurationMathWebsocket, ConfigurationTextWebsocket } from "../__dataset__/configuration.dataset"
+import { ServerWebsocketMock, emptyJIIX, errorNotGrantedMessage, hJIIX, partChangeMessage } from "../__mocks__/ServerWebsocketMock"
 
 describe("WSRecognizer.ts", () =>
 {
-  let mockServer: Server
   const height = 100, width = 100
-  beforeEach(() =>
-  {
-    mockServer = new Server(`wss://${ DefaultServerConfiguration.host }/api/v4.0/iink/document`, {})
 
-    mockServer.on("connection", (socket) =>
+  const testDatas: { type: TRecognitionType, config: TConfiguration }[] = [
     {
-      socket.on("message", (message: string | Blob | ArrayBuffer | ArrayBufferView) =>
-      {
-        const parsedMessage: TWSMessageEvent = JSON.parse(message as string)
-        switch (parsedMessage.type) {
-          case "newContentPackage":
-            socket.send(JSON.stringify(ackMessage))
-            break
-          case "hmac":
-            socket.send(JSON.stringify(contentPackageDescriptionMessage))
-            break
-          case "configuration":
-            socket.send(JSON.stringify(partChangeMessage))
-            break
-          case "newContentPart":
-            socket.send(JSON.stringify(newPartMessage))
-            break
-          default:
-            break
-        }
-      })
-    })
-  })
-
-  afterEach(() =>
-  {
-    Server.clean()
-  })
+      type: "TEXT",
+      config: ConfigurationTextWebsocket as TConfiguration
+    },
+    {
+      type: "MATH",
+      config: ConfigurationMathWebsocket as TConfiguration
+    },
+  ]
 
   test("should instanciate WSRecognizer", () =>
   {
-    const wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
+    const wsr = new WSRecognizer(ConfigurationTextWebsocket.server as TServerConfiguration, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
     expect(wsr).toBeDefined()
   })
 
@@ -143,115 +44,127 @@ describe("WSRecognizer.ts", () =>
     test("should get url", () =>
     {
       const serverConfig = {
-        ...DefaultServerConfiguration,
+        ...ConfigurationTextWebsocket.server,
         scheme: "http",
         host: "pony",
         applicationKey: "applicationKey"
       } as TServerConfiguration
+
       const wsr = new WSRecognizer(serverConfig, DefaultRecognitionConfiguration)
       expect(wsr.url).toEqual("ws://pony/api/v4.0/iink/document?applicationKey=applicationKey")
     })
-    recognitionTypeList.forEach(recognitionType =>
+
+    testDatas.forEach(({ type, config }) =>
     {
-      test(`should get mimeTypes for ${ recognitionType }`, () =>
+      test(`should get mimeTypes for ${ type }`, () =>
       {
-        const recognitionConfig: TRecognitionConfiguration = {
-          ...DefaultRecognitionConfiguration,
-          type: recognitionType
-        }
-        const wsr = new WSRecognizer(DefaultServerConfiguration, recognitionConfig)
-        let mimeTypes: string[]
-        switch (recognitionType) {
+        const wsr = new WSRecognizer(config.server, config.recognition)
+        switch (type) {
           case "TEXT":
-            mimeTypes = recognitionConfig.text.mimeTypes
-            break
-          case "DIAGRAM":
-            mimeTypes = recognitionConfig.diagram.mimeTypes
+            expect(wsr.mimeTypes).toEqual(config.recognition.text.mimeTypes)
             break
           case "MATH":
-            mimeTypes = recognitionConfig.math.mimeTypes
+            expect(wsr.mimeTypes).toEqual(config.recognition.math.mimeTypes)
             break
-          case "Raw Content":
-            mimeTypes = []
-            break
-          default:
-            throw new Error("invalid recognition type")
         }
-        expect(wsr.mimeTypes).toEqual(mimeTypes)
       })
     })
   })
 
   describe("init", () =>
   {
-    const serverConfigToCloseTest: TServerConfiguration = {
-      ...DefaultServerConfiguration,
+    const serverConfig = {
+      ...ConfigurationTextWebsocket.server,
       host: "init-test"
-    }
-    let addStroMockServerForInitTest: Server
-    let wsr: typeof WSRecognizer
-    let spyEmitError: jest.SpyInstance
+    } as TServerConfiguration
+    let mockServerForInitTest: ServerWebsocketMock
+    let wsr: WSRecognizer
+
 
     beforeEach(() =>
     {
-      addStroMockServerForInitTest = new Server(`wss://${ serverConfigToCloseTest.host }/api/v4.0/iink/document`, {})
-      wsr = new WSRecognizer(serverConfigToCloseTest, DefaultRecognitionConfiguration)
-      spyEmitError = jest.spyOn(wsr.internalEvent, "emitError")
-      spyEmitError.mockResolvedValue(() => Promise.resolve())
+      wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+      mockServerForInitTest = new ServerWebsocketMock(wsr.url)
     })
     afterEach(async () =>
     {
       await wsr.destroy()
-      addStroMockServerForInitTest.close()
+      mockServerForInitTest.close()
     })
+
     test("should sent newContentPackage message", async () =>
     {
       expect.assertions(2)
-      expect(getMessages(addStroMockServerForInitTest.messages, "newContentPackage")).toHaveLength(0)
+      expect(mockServerForInitTest.getMessages("newContentPackage")).toHaveLength(0)
       wsr.init(height, width)
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      expect(getMessages(addStroMockServerForInitTest.messages, "newContentPackage")).toHaveLength(1)
+      expect(mockServerForInitTest.getMessages("newContentPackage")).toHaveLength(1)
     })
-    test("should sent hmac message when receive hmacChallenge message", async () =>
+    test("should sent hmac and configuration messages when receive ack message with hmacChallenge", async () =>
+    {
+      expect.assertions(3)
+      expect(mockServerForInitTest.messages).toHaveLength(0)
+      wsr.init(height, width)
+      mockServerForInitTest.sendAckWithHMAC()
+      //¯\_(ツ)_/¯  required to wait server received message
+      await delay(100)
+      expect(mockServerForInitTest.getMessages("hmac")).toHaveLength(1)
+      expect(mockServerForInitTest.getMessages("configuration")).toHaveLength(1)
+    })
+    test("should sent only configuration message when receive ack message without hmacChallenge", async () =>
+    {
+      expect.assertions(3)
+      expect(mockServerForInitTest.messages).toHaveLength(0)
+      wsr.init(height, width)
+
+      mockServerForInitTest.sendAckWithoutHMAC()
+      //¯\_(ツ)_/¯  required to wait server received message
+      await delay(100)
+      expect(mockServerForInitTest.getMessages("hmac")).toHaveLength(0)
+      expect(mockServerForInitTest.getMessages("configuration")).toHaveLength(1)
+    })
+    test("should sent newContentPart message when receive contentPackageDescription", async () =>
     {
       expect.assertions(2)
       wsr.init(height, width)
+      expect(mockServerForInitTest.getMessages("newContentPart")).toHaveLength(0)
+      mockServerForInitTest.sendAckWithoutHMAC()
+      mockServerForInitTest.sendContentPackageDescription()
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      expect(getMessages(addStroMockServerForInitTest.messages, "hmac")).toHaveLength(0)
-      addStroMockServerForInitTest.send(JSON.stringify(ackMessage))
-      //¯\_(ツ)_/¯  required to wait server received message
-      await delay(100)
-      expect(getMessages(addStroMockServerForInitTest.messages, "hmac")).toHaveLength(1)
+      expect(mockServerForInitTest.getMessages("newContentPart")).toHaveLength(1)
     })
-    test("should sent hmac & newPart messages when receive hmacChallenge message", async () =>
+    test("should sent openContentPart message when receive contentPackageDescription if currentPartId is defined", async () =>
     {
-      expect.assertions(4)
+      expect.assertions(2)
       wsr.init(height, width)
+      expect(mockServerForInitTest.getMessages("openContentPart")).toHaveLength(0)
+      wsr.currentPartId = "currentPartId"
+      mockServerForInitTest.sendAckWithoutHMAC()
+      mockServerForInitTest.sendContentPackageDescription()
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      expect(getMessages(addStroMockServerForInitTest.messages, "configuration")).toHaveLength(0)
-      expect(getMessages(addStroMockServerForInitTest.messages, "newContentPart")).toHaveLength(0)
-      addStroMockServerForInitTest.send(JSON.stringify(contentPackageDescriptionMessage))
-      //¯\_(ツ)_/¯  required to wait server received message
-      await delay(100)
-      expect(getMessages(addStroMockServerForInitTest.messages, "configuration")).toHaveLength(1)
-      expect(getMessages(addStroMockServerForInitTest.messages, "newContentPart")).toHaveLength(1)
+      expect(mockServerForInitTest.getMessages("openContentPart")).toHaveLength(1)
     })
-    test.skip("should resolve when receive newPart message", async () =>
+    test("should resolve when receive newPart message", async () =>
     {
       expect.assertions(1)
       const promise = wsr.init(height, width)
-      addStroMockServerForInitTest.send(JSON.stringify(newPartMessage))
+      mockServerForInitTest.sendAckWithoutHMAC()
+      mockServerForInitTest.sendContentPackageDescription()
+      mockServerForInitTest.sendNewPartMessage()
       await promise
       expect(1).toEqual(1)
     })
+    //fix test
+    //maybe refactor of internal event to remove singleton
     test.skip("should reject if receive error message", async () =>
     {
+      const spyEmitError: jest.SpyInstance = jest.spyOn(wsr.internalEvent, "emitError")
       expect.assertions(3)
       const promise = wsr.init(height, width)
-      addStroMockServerForInitTest.send(JSON.stringify(errorMessage))
+      mockServerForInitTest.sendNotGrantedErrorMessage()
       await expect(promise).rejects.toEqual(new Error(ErrorConst.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
       await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
@@ -260,46 +173,85 @@ describe("WSRecognizer.ts", () =>
 
   describe("Ping", () =>
   {
+    const serverConfig = {
+      ...JSON.parse(JSON.stringify(ConfigurationTextWebsocket.server)),
+      host: "ping-test"
+    } as TServerConfiguration
+    let mockServer: ServerWebsocketMock
+    let wsr: WSRecognizer
+
+    beforeEach(() =>
+    {
+      wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+
+      mockServer = new ServerWebsocketMock(wsr.url)
+      mockServer.init()
+    })
+    afterEach(async () =>
+    {
+      await wsr.destroy()
+      mockServer.close()
+    })
+
     test("should send ping message", async () =>
     {
       expect.assertions(2)
-      const conf = JSON.parse(JSON.stringify(DefaultServerConfiguration)) as TServerConfiguration
-      conf.websocket.pingDelay = 200
-      const wsr = new WSRecognizer(conf, DefaultRecognitionConfiguration)
+      serverConfig.websocket.pingEnabled = true
+      const wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
       await wsr.init(height, width)
-      await delay(conf.websocket.pingDelay)
-      await delay(100)
-      expect(getMessages(mockServer.messages, "ping")).toHaveLength(1)
-      await delay(conf.websocket.pingDelay)
-      expect(getMessages(mockServer.messages, "ping")).toHaveLength(2)
+      await delay(serverConfig.websocket.pingDelay)
+      expect(mockServer.getMessages("ping")).toHaveLength(1)
+      await delay(serverConfig.websocket.pingDelay)
+      expect(mockServer.getMessages("ping")).toHaveLength(2)
     })
     test("should not send ping message", async () =>
     {
       expect.assertions(2)
-      const conf = JSON.parse(JSON.stringify(DefaultServerConfiguration)) as TServerConfiguration
-      conf.websocket.pingDelay = 200
-      conf.websocket.pingEnabled = false
-      const wsr = new WSRecognizer(conf, DefaultRecognitionConfiguration)
+      serverConfig.websocket.pingEnabled = false
+      const wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
       await wsr.init(height, width)
-      await delay(conf.websocket.pingDelay)
-      await delay(100)
-      expect(getMessages(mockServer.messages, "ping")).toHaveLength(0)
-      await delay(conf.websocket.pingDelay)
-      expect(getMessages(mockServer.messages, "ping")).toHaveLength(0)
+      await delay(serverConfig.websocket.pingDelay)
+      expect(mockServer.getMessages("ping")).toHaveLength(0)
+      await delay(serverConfig.websocket.pingDelay)
+      expect(mockServer.getMessages("ping")).toHaveLength(0)
+    })
+    test("should close the connection when maxPingLostCount is reached", async () =>
+    {
+      expect.assertions(3)
+      serverConfig.websocket.pingEnabled = true
+      serverConfig.websocket.maxPingLostCount = 2
+      const wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+      await wsr.init(height, width)
+      await delay(serverConfig.websocket.pingDelay)
+      expect(mockServer.server.clients()).toHaveLength(1)
+      await delay(serverConfig.websocket.pingDelay * serverConfig.websocket.maxPingLostCount)
+      expect(mockServer.getMessages("ping")).toHaveLength(serverConfig.websocket.maxPingLostCount + 1)
+      expect(mockServer.server.clients()).toHaveLength(0)
     })
   })
 
   describe("send", () =>
   {
-    let wsr: typeof WSRecognizer
-    beforeEach(async () =>
+    const serverConfig = {
+      ...ConfigurationTextWebsocket.server,
+      host: "send-test"
+    } as TServerConfiguration
+    let mockServer: ServerWebsocketMock
+    let wsr: WSRecognizer
+
+    beforeEach(() =>
     {
-      wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
+      wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+
+      mockServer = new ServerWebsocketMock(wsr.url)
+      mockServer.init()
     })
     afterEach(async () =>
     {
       await wsr.destroy()
+      mockServer.close()
     })
+
     test("should throw error if recognizer has not been initialize", async () =>
     {
       expect.assertions(1)
@@ -314,7 +266,7 @@ describe("WSRecognizer.ts", () =>
       await wsr.send(testDataToSend)
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      const messageSent = JSON.parse(mockServer.messages[mockServer.messages.length - 1] as string)
+      const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       expect(messageSent).toEqual(testDataToSend)
     })
     //TODO fix test
@@ -327,51 +279,51 @@ describe("WSRecognizer.ts", () =>
       await wsr.send(testDataToSend)
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      const messageSent = JSON.parse(mockServer.messages[mockServer.messages.length - 1] as string)
+      const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       expect(messageSent).toEqual(testDataToSend)
     })
   })
 
   describe("addStrokes", () =>
   {
-    let wsr: typeof WSRecognizer
-    let spyEmitError: jest.SpyInstance
-    beforeEach(async () =>
+    const serverConfig = {
+      ...ConfigurationTextWebsocket.server,
+      host: "add-strokes-test"
+    } as TServerConfiguration
+    let mockServer: ServerWebsocketMock
+    let wsr: WSRecognizer
+
+    beforeEach(() =>
     {
-      wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-      spyEmitError = jest.spyOn(wsr.internalEvent, "emitError")
+      wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+
+      mockServer = new ServerWebsocketMock(wsr.url)
+      mockServer.init()
     })
     afterEach(async () =>
     {
       await wsr.destroy()
+      mockServer.close()
     })
+
     test("should throw error if recognizer has not been initialize", async () =>
     {
       expect.assertions(1)
-      const stroke = new Stroke(DefaultPenStyle, 1)
-      stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1})
+      const stroke = buildStroke()
       await expect(wsr.addStrokes([stroke])).rejects.toEqual(new Error("Recognizer must be initilized"))
     })
     test("should send addStrokes message", async () =>
     {
       expect.assertions(1)
-      const stroke = new Stroke(DefaultPenStyle, 1)
-      stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1})
-      stroke.pointers.push({ p: 2, t: 4, x: 8, y: 16})
+      const stroke = buildStroke()
       await wsr.init(height, width)
       wsr.addStrokes([stroke])
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      const addStrokesMessageSent = JSON.parse(mockServer.messages[mockServer.messages.length - 1] as string)
+      const addStrokesMessageSent = JSON.parse(mockServer.getLastMessage() as string)
       const addStrokesMessageSentToTest = {
         type: "addStrokes",
-        strokes: [{
-          "p": [1, 2],
-          "pointerType": "pen",
-          "t": [1, 4],
-          "x": [1, 8],
-          "y": [1, 16],
-        }]
+        strokes: [stroke.formatToSend()]
       }
       await expect(addStrokesMessageSent).toMatchObject(addStrokesMessageSentToTest)
     })
@@ -382,20 +334,18 @@ describe("WSRecognizer.ts", () =>
       await wsr.addStrokes([])
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      const addStrokesMessageSent = JSON.parse(mockServer.messages[mockServer.messages.length - 1] as string)
+      const addStrokesMessageSent = JSON.parse(mockServer.getLastMessage() as string)
       await expect(addStrokesMessageSent.type).not.toEqual("addStrokes")
     })
     test("should resolve when receive exported message", async () =>
     {
       expect.assertions(1)
-      const stroke = new Stroke(DefaultPenStyle, 1)
-      stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1})
-      stroke.pointers.push({ p: 2, t: 4, x: 8, y: 16})
+      const stroke = buildStroke()
       await wsr.init(height, width)
       const promise = wsr.addStrokes([stroke])
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(emptyExportedMessage))
+      mockServer.sendEmptyExportMessage()
       await promise
       await expect(promise).resolves.toEqual(
         expect.objectContaining({
@@ -405,15 +355,14 @@ describe("WSRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
+      let spyEmitError = jest.spyOn(wsr.internalEvent, "emitError")
       expect.assertions(3)
-      const stroke = new Stroke(DefaultPenStyle, 1)
-      stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1})
-      stroke.pointers.push({ p: 2, t: 4, x: 8, y: 16})
+      const stroke = buildStroke()
       await wsr.init(height, width)
       const promise = wsr.addStrokes([stroke])
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(errorMessage))
+      mockServer.send(JSON.stringify(errorNotGrantedMessage))
       await expect(promise).rejects.toEqual(new Error(ErrorConst.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
       await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
@@ -422,15 +371,26 @@ describe("WSRecognizer.ts", () =>
 
   describe("Style", () =>
   {
-    let wsr: typeof WSRecognizer
-    beforeEach(async () =>
+    const serverConfig = {
+      ...ConfigurationTextWebsocket.server,
+      host: "style-test"
+    } as TServerConfiguration
+    let mockServer: ServerWebsocketMock
+    let wsr: WSRecognizer
+
+    beforeEach(() =>
     {
-      wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
+      wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+
+      mockServer = new ServerWebsocketMock(wsr.url)
+      mockServer.init()
     })
     afterEach(async () =>
     {
       await wsr.destroy()
+      mockServer.close()
     })
+
     test("should setPenStyle", async () =>
     {
       expect.assertions(1)
@@ -439,7 +399,7 @@ describe("WSRecognizer.ts", () =>
       await wsr.setPenStyle(CustomPenStyle)
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      const setPenStyle = mockServer.messages[mockServer.messages.length - 1]
+      const setPenStyle = mockServer.getLastMessage()
       const setPenStyleToTest = JSON.stringify({
         type: "setPenStyle",
         style: "color: #d1d1d1;"
@@ -454,7 +414,7 @@ describe("WSRecognizer.ts", () =>
       await wsr.setPenStyleClasses(styleClasses)
       await delay(100)
       //¯\_(ツ)_/¯  required to wait server received message
-      const setPenStyleClasses = mockServer.messages[mockServer.messages.length - 1]
+      const setPenStyleClasses = mockServer.getLastMessage()
       const setPenStyleClassesToTest = JSON.stringify({
         type: "setPenStyleClasses",
         styleClasses
@@ -489,7 +449,7 @@ describe("WSRecognizer.ts", () =>
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
 
-      const setThemeMessageSent = mockServer.messages[mockServer.messages.length - 1]
+      const setThemeMessageSent = mockServer.getLastMessage()
       const setThemeMessageSentToTest = "{\"type\":\"setTheme\",\"theme\":\"ink {\\nwidth: 42;\\ncolor: #2E7D32;\\n-myscript-pen-width: 2;\\n-myscript-pen-fill-style: purple;\\n-myscript-pen-fill-color: #FFFFFF00;\\n}\\n.math {\\nfont-family: STIXGeneral;\\n}\\n.math-solved {\\nfont-family: STIXGeneral;\\ncolor: blue;\\n}\\n.text {\\nfont-family: Rubik Distressed;\\nfont-size: 10;\\n}\\n\"}"
       expect(setThemeMessageSent).toContain(setThemeMessageSentToTest)
     })
@@ -498,50 +458,53 @@ describe("WSRecognizer.ts", () =>
   describe("export", () =>
   {
     const model = new Model(width, height)
-    let wsr: typeof WSRecognizer
-    let spyEmitError: jest.SpyInstance
-    beforeEach(async () =>
+    const serverConfig = {
+      ...ConfigurationTextWebsocket.server,
+      host: "export-test"
+    } as TServerConfiguration
+    let mockServer: ServerWebsocketMock
+    let wsr: WSRecognizer
+
+    beforeEach(() =>
     {
-      wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-      spyEmitError = jest.spyOn(wsr.internalEvent, "emitError")
+      wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+
+      mockServer = new ServerWebsocketMock(wsr.url)
+      mockServer.init()
     })
     afterEach(async () =>
     {
       await wsr.destroy()
+      mockServer.close()
     })
+
     test("should throw error if recognizer has not been initialize", async () =>
     {
       expect.assertions(1)
       await expect(wsr.export(model)).rejects.toEqual(new Error("Recognizer must be initilized"))
     })
-    recognitionTypeList.forEach((recognitionType: TRecognitionType) =>
+    testDatas.forEach(({ type, config }) =>
     {
-      test(`should send export message for ${ recognitionType }`, async () =>
+      test(`should send export message for ${ type }`, async () =>
       {
         expect.assertions(1)
         const recognitionConfig: TRecognitionConfiguration = {
-          ...DefaultRecognitionConfiguration,
-          type: recognitionType
+          ...config.recognition,
+          type
         }
-        const my_wsr = new WSRecognizer(DefaultServerConfiguration, recognitionConfig)
+        const my_wsr = new WSRecognizer(serverConfig, recognitionConfig)
         await my_wsr.init(height, width)
         my_wsr.export(model)
         //¯\_(ツ)_/¯  required to wait server received message
         await delay(100)
-        const exportMessageSent = mockServer.messages[mockServer.messages.length - 1]
+        const exportMessageSent = mockServer.getLastMessage()
         let mimeTypes: string[]
-        switch (recognitionType) {
+        switch (type) {
           case "TEXT":
-            mimeTypes = DefaultRecognitionConfiguration.text.mimeTypes
-            break
-          case "DIAGRAM":
-            mimeTypes = DefaultRecognitionConfiguration.diagram.mimeTypes
+            mimeTypes = config.recognition.text.mimeTypes
             break
           case "MATH":
-            mimeTypes = DefaultRecognitionConfiguration.math.mimeTypes
-            break
-          case "Raw Content":
-            mimeTypes = ["application/vnd.myscript.jiix"]
+            mimeTypes = config.recognition.math.mimeTypes
             break
           default:
             throw new Error("invalid recognition type")
@@ -556,14 +519,14 @@ describe("WSRecognizer.ts", () =>
         my_wsr.destroy()
       })
     })
-    test("should resolve when receive fileChunckAck message", async () =>
+    test("should resolve when receive export message", async () =>
     {
       expect.assertions(1)
       await wsr.init(height, width)
       const promise = wsr.export(model)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(hExportedMessage))
+      mockServer.sendHExportMessage()
       await expect(promise).resolves.toEqual(
         expect.objectContaining({
           exports: {
@@ -574,12 +537,13 @@ describe("WSRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
+      const spyEmitError: jest.SpyInstance = jest.spyOn(wsr.internalEvent, "emitError")
       expect.assertions(3)
       await wsr.init(height, width)
       const promise = wsr.export(model)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(errorMessage))
+      mockServer.send(JSON.stringify(errorNotGrantedMessage))
       await expect(promise).rejects.toEqual(new Error(ErrorConst.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
       await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
@@ -589,20 +553,29 @@ describe("WSRecognizer.ts", () =>
   describe("import", () =>
   {
     const model = new Model(width, height)
-    let wsr: typeof WSRecognizer
-    let spyEmitError: jest.SpyInstance
     const mimeType = "text/plain"
     const textImport = "winter is comming"
     const blobToImport = new Blob([textImport])
-    beforeEach(async () =>
+    const serverConfig = {
+      ...ConfigurationTextWebsocket.server,
+      host: "import-test"
+    } as TServerConfiguration
+    let mockServer: ServerWebsocketMock
+    let wsr: WSRecognizer
+
+    beforeEach(() =>
     {
-      wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-      spyEmitError = jest.spyOn(wsr.internalEvent, "emitError")
+      wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+
+      mockServer = new ServerWebsocketMock(wsr.url)
+      mockServer.init()
     })
     afterEach(async () =>
     {
       await wsr.destroy()
+      mockServer.close()
     })
+
     test("should throw error if recognizer has not been initialize", async () =>
     {
       await expect(wsr.import(model, blobToImport, mimeType)).rejects.toEqual(new Error("Recognizer must be initilized"))
@@ -613,24 +586,19 @@ describe("WSRecognizer.ts", () =>
       wsr.import(model, blobToImport, mimeType)
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      const parsedMessage = mockServer.messages.map((m: DeserializedMessage<object>) =>
-      {
-        return JSON.parse(m as string) as TWSMessageEvent
-      })
-      await expect(parsedMessage.filter(m => m.type === "importFile")).toHaveLength(1)
-      await expect(parsedMessage.filter(m => m.type === "importFile")[0]).toEqual(
-        expect.objectContaining({
-          type: "importFile",
-          mimeType
-        })
-      )
-      await expect(parsedMessage.filter(m => m.type === "fileChunk")).toHaveLength(1)
-      await expect(parsedMessage.filter(m => m.type === "fileChunk")[0]).toEqual(
-        expect.objectContaining({
-          type: "fileChunk",
-          data: textImport
-        })
-      )
+      const importFileMessages = mockServer.getMessages("importFile")
+      expect(importFileMessages).toHaveLength(1)
+      //@ts-ignore
+      const importFileMes = JSON.parse(importFileMessages[0])
+      //@ts-ignore
+      expect(importFileMes.mimeType).toEqual(mimeType)
+
+      const fileChunkMessages = mockServer.getMessages("fileChunk")
+      expect(fileChunkMessages).toHaveLength(1)
+      //@ts-ignore
+      const fileChunkMes = JSON.parse(fileChunkMessages[0])
+      //@ts-ignore
+      expect(fileChunkMes.importFileId).toEqual(importFileMes.importFileId)
     })
     test("should resolve when receive exported message", async () =>
     {
@@ -639,7 +607,7 @@ describe("WSRecognizer.ts", () =>
       const promise = wsr.import(model, blobToImport, mimeType)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(emptyExportedMessage))
+      mockServer.sendEmptyExportMessage()
       await expect(promise).resolves.toEqual(
         expect.objectContaining({
           exports: {
@@ -650,11 +618,12 @@ describe("WSRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
+      const spyEmitError: jest.SpyInstance = jest.spyOn(wsr.internalEvent, "emitError")
       expect.assertions(3)
       await wsr.init(height, width)
       const promise = wsr.import(model, blobToImport, mimeType)
       await delay(100)
-      mockServer.send(JSON.stringify(errorMessage))
+      mockServer.sendNotGrantedErrorMessage()
       await expect(promise).rejects.toEqual(new Error(ErrorConst.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
       await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
@@ -664,17 +633,27 @@ describe("WSRecognizer.ts", () =>
   describe("resize", () =>
   {
     const model = new Model(width, height)
-    let wsr: typeof WSRecognizer
-    let spyEmitError: jest.SpyInstance
-    beforeEach(async () =>
+    const serverConfig = {
+      ...ConfigurationTextWebsocket.server,
+      host: "resize-test"
+    } as TServerConfiguration
+    let mockServer: ServerWebsocketMock
+    let wsr: WSRecognizer
+
+    beforeEach(() =>
     {
-      wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-      spyEmitError = jest.spyOn(wsr.internalEvent, "emitError")
+      wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+
+      mockServer = new ServerWebsocketMock(wsr.url)
+      mockServer.init()
     })
     afterEach(async () =>
     {
       await wsr.destroy()
+      mockServer.close()
     })
+
+
     test("should throw error if recognizer has not been initialize", async () =>
     {
       expect.assertions(1)
@@ -689,7 +668,7 @@ describe("WSRecognizer.ts", () =>
       wsr.resize(model)
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      const resizeMessageSent = mockServer.messages[mockServer.messages.length - 1]
+      const resizeMessageSent = mockServer.getLastMessage()
       const resizeMessageSentToTest = JSON.stringify({ type: "changeViewSize", height: model.height, width: model.width })
       await expect(resizeMessageSent).toEqual(resizeMessageSentToTest)
     })
@@ -700,17 +679,18 @@ describe("WSRecognizer.ts", () =>
       const promise = wsr.resize(model)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(svgPatchMessage))
+      mockServer.sendSVGPatchMessage()
       await expect(promise).resolves.toEqual(model)
     })
     test("should reject if receive error message", async () =>
     {
+      const spyEmitError: jest.SpyInstance = jest.spyOn(wsr.internalEvent, "emitError")
       expect.assertions(3)
       await wsr.init(height, width)
       const promise = wsr.resize(model)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(errorMessage))
+      mockServer.sendNotGrantedErrorMessage()
       await expect(promise).rejects.toEqual(new Error(ErrorConst.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
       await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
@@ -720,17 +700,26 @@ describe("WSRecognizer.ts", () =>
   describe("convert", () =>
   {
     const model = new Model(width, height)
-    let wsr: typeof WSRecognizer
-    let spyEmitError: jest.SpyInstance
-    beforeEach(async () =>
+    const serverConfig = {
+      ...ConfigurationTextWebsocket.server,
+      host: "convert-test"
+    } as TServerConfiguration
+    let mockServer: ServerWebsocketMock
+    let wsr: WSRecognizer
+
+    beforeEach(() =>
     {
-      wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-      spyEmitError = jest.spyOn(wsr.internalEvent, "emitError")
+      wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+
+      mockServer = new ServerWebsocketMock(wsr.url)
+      mockServer.init()
     })
     afterEach(async () =>
     {
       await wsr.destroy()
+      mockServer.close()
     })
+
     test("should throw error if recognizer has not been initialize", async () =>
     {
       expect.assertions(1)
@@ -744,7 +733,7 @@ describe("WSRecognizer.ts", () =>
       wsr.convert(model, conversionState)
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      const resizeMessageSent = mockServer.messages[mockServer.messages.length - 1]
+      const resizeMessageSent = mockServer.getLastMessage()
       const resizeMessageSentToTest = JSON.stringify({ type: "convert", conversionState })
       await expect(resizeMessageSent).toEqual(resizeMessageSentToTest)
     })
@@ -755,7 +744,7 @@ describe("WSRecognizer.ts", () =>
       const promise = wsr.convert(model)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(emptyExportedMessage))
+      mockServer.sendEmptyExportMessage()
       await expect(promise).resolves.toEqual(
         expect.objectContaining({
           converts: {
@@ -766,12 +755,13 @@ describe("WSRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
+      const spyEmitError: jest.SpyInstance = jest.spyOn(wsr.internalEvent, "emitError")
       expect.assertions(3)
       await wsr.init(height, width)
       const promise = wsr.convert(model)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(errorMessage))
+      mockServer.sendNotGrantedErrorMessage()
       await expect(promise).rejects.toEqual(new Error(ErrorConst.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
       await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
@@ -781,17 +771,26 @@ describe("WSRecognizer.ts", () =>
   describe("undo", () =>
   {
     const model = new Model(width, height)
-    let wsr: typeof WSRecognizer
-    let spyEmitError: jest.SpyInstance
-    beforeEach(async () =>
+    const serverConfig = {
+      ...ConfigurationTextWebsocket.server,
+      host: "undo-test"
+    } as TServerConfiguration
+    let mockServer: ServerWebsocketMock
+    let wsr: WSRecognizer
+
+    beforeEach(() =>
     {
-      wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-      spyEmitError = jest.spyOn(wsr.internalEvent, "emitError")
+      wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+
+      mockServer = new ServerWebsocketMock(wsr.url)
+      mockServer.init()
     })
     afterEach(async () =>
     {
       await wsr.destroy()
+      mockServer.close()
     })
+
     test("should throw error if recognizer has not been initialize", async () =>
     {
       expect.assertions(1)
@@ -804,7 +803,7 @@ describe("WSRecognizer.ts", () =>
       wsr.undo(model)
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      const resizeMessageSent = mockServer.messages[mockServer.messages.length - 1]
+      const resizeMessageSent = mockServer.getLastMessage()
       const resizeMessageSentToTest = JSON.stringify({ type: "undo" })
       await expect(resizeMessageSent).toEqual(resizeMessageSentToTest)
     })
@@ -815,7 +814,7 @@ describe("WSRecognizer.ts", () =>
       const promise = wsr.undo(model)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(emptyExportedMessage))
+      mockServer.sendEmptyExportMessage()
       await expect(promise).resolves.toEqual(
         expect.objectContaining({
           exports: {
@@ -826,12 +825,13 @@ describe("WSRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
+      const spyEmitError: jest.SpyInstance = jest.spyOn(wsr.internalEvent, "emitError")
       expect.assertions(3)
       await wsr.init(height, width)
       const promise = wsr.undo(model)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(errorMessage))
+      mockServer.sendNotGrantedErrorMessage()
       await expect(promise).rejects.toEqual(new Error(ErrorConst.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
       await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
@@ -841,17 +841,26 @@ describe("WSRecognizer.ts", () =>
   describe("redo", () =>
   {
     const model = new Model(width, height)
-    let wsr: typeof WSRecognizer
-    let spyEmitError: jest.SpyInstance
-    beforeEach(async () =>
+    const serverConfig = {
+      ...ConfigurationTextWebsocket.server,
+      host: "undo-test"
+    } as TServerConfiguration
+    let mockServer: ServerWebsocketMock
+    let wsr: WSRecognizer
+
+    beforeEach(() =>
     {
-      wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-      spyEmitError = jest.spyOn(wsr.internalEvent, "emitError")
+      wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+
+      mockServer = new ServerWebsocketMock(wsr.url)
+      mockServer.init()
     })
     afterEach(async () =>
     {
       await wsr.destroy()
+      mockServer.close()
     })
+
     test("should throw error if recognizer has not been initialize", async () =>
     {
       expect.assertions(1)
@@ -864,7 +873,7 @@ describe("WSRecognizer.ts", () =>
       wsr.redo(model)
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      const resizeMessageSent = mockServer.messages[mockServer.messages.length - 1]
+      const resizeMessageSent = mockServer.getLastMessage()
       const resizeMessageSentToTest = JSON.stringify({ type: "redo" })
       await expect(resizeMessageSent).toEqual(resizeMessageSentToTest)
     })
@@ -875,7 +884,7 @@ describe("WSRecognizer.ts", () =>
       const promise = wsr.redo(model)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(emptyExportedMessage))
+      mockServer.sendEmptyExportMessage()
       await expect(promise).resolves.toEqual(
         expect.objectContaining({
           exports: {
@@ -886,12 +895,13 @@ describe("WSRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
+      const spyEmitError: jest.SpyInstance = jest.spyOn(wsr.internalEvent, "emitError")
       expect.assertions(3)
       await wsr.init(height, width)
       const promise = wsr.redo(model)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(errorMessage))
+      mockServer.sendNotGrantedErrorMessage()
       await expect(promise).rejects.toEqual(new Error(ErrorConst.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
       await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
@@ -901,17 +911,26 @@ describe("WSRecognizer.ts", () =>
   describe("clear", () =>
   {
     const model = new Model(width, height)
-    let wsr: typeof WSRecognizer
-    let spyEmitError: jest.SpyInstance
-    beforeEach(async () =>
+    const serverConfig = {
+      ...ConfigurationTextWebsocket.server,
+      host: "clear-test"
+    } as TServerConfiguration
+    let mockServer: ServerWebsocketMock
+    let wsr: WSRecognizer
+
+    beforeEach(() =>
     {
-      wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-      spyEmitError = jest.spyOn(wsr.internalEvent, "emitError")
+      wsr = new WSRecognizer(serverConfig, DefaultRecognitionConfiguration)
+
+      mockServer = new ServerWebsocketMock(wsr.url)
+      mockServer.init()
     })
     afterEach(async () =>
     {
       await wsr.destroy()
+      mockServer.close()
     })
+
     test("should throw error if recognizer has not been initialize", async () =>
     {
       expect.assertions(1)
@@ -924,7 +943,7 @@ describe("WSRecognizer.ts", () =>
       wsr.clear(model)
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      const resizeMessageSent = mockServer.messages[mockServer.messages.length - 1]
+      const resizeMessageSent = mockServer.getLastMessage()
       const resizeMessageSentToTest = JSON.stringify({ type: "clear" })
       await expect(resizeMessageSent).toEqual(resizeMessageSentToTest)
     })
@@ -935,7 +954,7 @@ describe("WSRecognizer.ts", () =>
       const promise = wsr.clear(model)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(emptyExportedMessage))
+      mockServer.sendEmptyExportMessage()
       await expect(promise).resolves.toEqual(
         expect.objectContaining({
           exports: {
@@ -946,12 +965,13 @@ describe("WSRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
+      const spyEmitError: jest.SpyInstance = jest.spyOn(wsr.internalEvent, "emitError")
       expect.assertions(3)
       await wsr.init(height, width)
       const promise = wsr.clear(model)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(errorMessage))
+      mockServer.sendNotGrantedErrorMessage()
       await expect(promise).rejects.toEqual(new Error(ErrorConst.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
       await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
@@ -960,47 +980,27 @@ describe("WSRecognizer.ts", () =>
 
   describe("Connection lost", () =>
   {
-    const serverConfigToCloseTest: TServerConfiguration = {
-      ...DefaultServerConfiguration,
+    const serverConfig = {
+      ...ConfigurationTextWebsocket.server,
       host: "close-test"
-    }
-    let mockServerForCloseTest: Server
-    let wsr: typeof WSRecognizer
-    let spyEmitError: jest.SpyInstance
+    } as TServerConfiguration
+    let mockServer: ServerWebsocketMock
+    let wsr: WSRecognizer
+
     beforeEach(() =>
     {
-      mockServerForCloseTest = new Server(`wss://${ serverConfigToCloseTest.host }/api/v4.0/iink/document`, {})
-      mockServerForCloseTest.on("connection", (socket) =>
-      {
-        socket.on("message", (message: string | Blob | ArrayBuffer | ArrayBufferView) =>
-        {
-          const parsedMessage: TWSMessageEvent = JSON.parse(message as string)
-          switch (parsedMessage.type) {
-            case "newContentPackage":
-              socket.send(JSON.stringify(ackMessage))
-              break
-            case "hmac":
-              socket.send(JSON.stringify(contentPackageDescriptionMessage))
-              break
-            case "configuration":
-              socket.send(JSON.stringify(partChangeMessage))
-              break
-            case "newContentPart":
-              socket.send(JSON.stringify(newPartMessage))
-              break
-            default:
-              break
-          }
-        })
-      })
-      wsr = new WSRecognizer(serverConfigToCloseTest, DefaultRecognitionConfiguration)
-      spyEmitError = jest.spyOn(wsr.internalEvent, "emitError")
+      wsr = new WSRecognizer(serverConfig, DefaultRecognitionConfiguration)
+
+      mockServer = new ServerWebsocketMock(wsr.url)
+      mockServer.init()
     })
     afterEach(async () =>
     {
-      spyEmitError.mockReset()
       await wsr.destroy()
+      mockServer.close()
     })
+
+
     const closeMessageOptions = [
       { code: 1001, message: ErrorConst.GOING_AWAY },
       { code: 1002, message: ErrorConst.PROTOCOL_ERROR },
@@ -1020,9 +1020,10 @@ describe("WSRecognizer.ts", () =>
     {
       test(`should emit error if the server closes the connection abnormally code == ${ closeEvent.code }`, async () =>
       {
+        const spyEmitError: jest.SpyInstance = jest.spyOn(wsr.internalEvent, "emitError")
         expect.assertions(2)
         await wsr.init(height, width)
-        mockServerForCloseTest.server.close({ code: closeEvent.code, reason: closeEvent.message, wasClean: false })
+        mockServer.server.close({ code: closeEvent.code, reason: closeEvent.message, wasClean: false })
         expect(spyEmitError).toHaveBeenCalledTimes(1)
         expect(spyEmitError).toHaveBeenCalledWith(new Error(closeEvent.message))
       })
@@ -1031,16 +1032,25 @@ describe("WSRecognizer.ts", () =>
 
   describe("destroy", () =>
   {
+    const serverConfig = {
+      ...ConfigurationTextWebsocket.server,
+      host: "destroy-test"
+    } as TServerConfiguration
+    let mockServer: ServerWebsocketMock
     test("should close socket", async () =>
     {
       expect.assertions(2)
-      const wsr = new WSRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
+      const wsr = new WSRecognizer(serverConfig, DefaultRecognitionConfiguration)
+      mockServer = new ServerWebsocketMock(wsr.url)
+      mockServer.init()
+
       await wsr.init(height, width)
       // 1 -> OPEN
       await expect(mockServer.server.clients()[0].readyState).toEqual(1)
       wsr.destroy()
       // 2 -> CLOSING
       await expect(mockServer.server.clients()[0].readyState).toEqual(2)
+      mockServer.close()
     })
   })
 })

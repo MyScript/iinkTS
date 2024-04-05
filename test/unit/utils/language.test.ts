@@ -1,4 +1,4 @@
-import { ConfigurationTextWebsocket } from "../_dataset/configuration.dataset"
+import { ConfigurationTextWebsocket } from "../__dataset__/configuration.dataset"
 import { getAvailableLanguageList } from "../../../src/iink"
 
 describe("language.ts", () =>
