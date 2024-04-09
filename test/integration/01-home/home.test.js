@@ -70,28 +70,19 @@ describe('Home Page', () =>
       await currentDetail.click()
     }
     const exampleLink = await page.locator('text=View example')
+
+    const currentUrl = page.url()
     const linksInErrors = []
     for (let i = 0; i < await exampleLink.count(); i++) {
       const link = exampleLink.nth(i)
       const href = await link.getAttribute('href')
-
-      const [response] = await Promise.all([
-        page.waitForResponse((response) => response.url().includes(href)),
-        link.click()
-      ])
-      await page.waitForLoadState("networkidle")
-
-      if (response.status() >= 400) {
+      const examplePage = await page.request.get(currentUrl.replace("index.html", href));
+      if (!examplePage.ok()) {
         linksInErrors.push(href)
-      }
-      await page.goBack()
-      for (let i = 0; i < await exampleDetails.count(); i++) {
-        const currentDetail = exampleDetails.nth(i);
-        await currentDetail.click()
       }
     }
     expect(linksInErrors).toStrictEqual([])
-  }, 60000)
+  })
 
   test('each "Get source code" link should ok', async () =>
   {
