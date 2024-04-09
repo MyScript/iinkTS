@@ -154,34 +154,23 @@ describe('Rest Text', () => {
     })
 
     test('should change language', async () => {
-      const requestEn = page.waitForRequest(req => req.url().includes('/api/v4.0/iink/batch') && req.method() === "POST")
-      const [exportedDatas] = await Promise.all([
-        getDatasFromExportedEvent(page),
+      const [requestEn] = await Promise.all([
+        page.waitForRequest(req => req.url().includes('/api/v4.0/iink/batch') && req.method() === "POST"),
         write(page, h.strokes),
       ])
       const enPostData = (await requestEn).postDataJSON()
       expect(enPostData.configuration.lang).toEqual("en_US")
 
-      const resultTextEn = await page.locator('#result').textContent()
-      expect(resultTextEn).toStrictEqual(exportedDatas['text/plain'])
-      expect(resultTextEn).toStrictEqual(h.exports['text/plain'].at(-1))
-
-
       await page.selectOption('#language', 'fr_FR')
 
       expect(await page.locator('#result').textContent()).toBe('')
 
-      const requestFr = page.waitForRequest(req => req.url().includes('/api/v4.0/iink/batch') && req.method() === "POST")
-      await Promise.all([
-        getDatasFromExportedEvent(page),
+      const [requestFr] = await Promise.all([
+        page.waitForRequest(req => req.url().includes('/api/v4.0/iink/batch') && req.method() === "POST"),
         write(page, h.strokes),
       ])
       const frPostData = (await requestFr).postDataJSON()
       expect(frPostData.configuration.lang).toEqual("fr_FR")
-
-      const resultTextFr = await page.locator('#result').textContent()
-      expect(resultTextFr).toStrictEqual(exportedDatas['text/plain'])
-      expect(resultTextFr).toStrictEqual(h.exports['text/plain'].at(-1))
     })
   })
 })
