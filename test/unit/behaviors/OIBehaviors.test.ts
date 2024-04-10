@@ -1,6 +1,6 @@
-import { jiixText } from "../_dataset/exports.dataset"
+import { jiixText } from "../__dataset__/exports.dataset"
+import { LeftClickEventFake } from "../__mocks__/PointerEventFake"
 import { buildOICircle, buildOIStroke } from "../helpers"
-import { LeftClickEventFake } from "../PointerEventFake"
 import
 {
   OIBehaviors,

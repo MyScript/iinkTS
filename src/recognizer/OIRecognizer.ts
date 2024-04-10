@@ -45,8 +45,8 @@ export class OIRecognizer
   protected connected?: DeferredPromise<void>
   protected initialized?: DeferredPromise<void>
   protected ackDeferred?: DeferredPromise<void>
-  protected addStrokeDeferred?: DeferredPromise<TOIMessageEventGesture | void>
-  protected recognizeGestureDeferred?: DeferredPromise<TOIMessageEventGesture | void>
+  protected addStrokeDeferred?: DeferredPromise<TOIMessageEventGesture | undefined>
+  protected recognizeGestureDeferred?: DeferredPromise<TOIMessageEventContextlessGesture | undefined>
   protected transformStrokeDeferred?: DeferredPromise<void>
   protected eraseStrokeDeferred?: DeferredPromise<void>
   protected replaceStrokeDeferred?: DeferredPromise<void>
@@ -218,7 +218,7 @@ export class OIRecognizer
     this.send(params)
   }
 
-  protected async manageHMACChallengeMessage(websocketMessage: TOIMessageEvent): Promise<void>
+  protected async manageAckMessage(websocketMessage: TOIMessageEvent): Promise<void>
   {
     const hmacChallengeMessage = websocketMessage as TOIMessageEventHMACChallenge
     if (hmacChallengeMessage.hmacChallenge) {
@@ -230,6 +230,7 @@ export class OIRecognizer
     if (hmacChallengeMessage.iinkSessionId) {
       this.sessionId = hmacChallengeMessage.iinkSessionId
     }
+    this.send({ ...this.recognitionConfiguration, type: "configuration" })
     this.ackDeferred?.resolve()
   }
 
@@ -237,9 +238,6 @@ export class OIRecognizer
   {
     await this.ackDeferred?.promise
     this.reconnectionCount = 0
-
-    this.send({ ...this.recognitionConfiguration, type: "configuration" })
-
     if (this.currentPartId) {
       this.send({ type: "openContentPart", id: this.currentPartId, mimeTypes: this.mimeTypes })
     }
@@ -313,7 +311,7 @@ export class OIRecognizer
         this.pingCount = 0
         switch (websocketMessage.type) {
           case "ack":
-            this.manageHMACChallengeMessage(websocketMessage)
+            this.manageAckMessage(websocketMessage)
             break
           case "contentPackageDescription":
             this.manageContentPackageDescriptionMessage()

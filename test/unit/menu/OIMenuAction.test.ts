@@ -1,4 +1,4 @@
-import { OIBehaviorsTest } from "../OIBehaviorsTest"
+import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
 import { OIMenuAction } from "../../../src/iink"
 
 describe("OIMenuAction.ts", () =>
@@ -12,7 +12,7 @@ describe("OIMenuAction.ts", () =>
 
   test("should create", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const menu = new OIMenuAction(behaviors)
     expect(menu).toBeDefined()
   })
@@ -20,7 +20,7 @@ describe("OIMenuAction.ts", () =>
   describe("render", () =>
   {
     const layer = document.createElement("div")
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     behaviors.init(behaviors.layerInfos)
     const menu = new OIMenuAction(behaviors)
     menu.render(layer)
@@ -70,7 +70,7 @@ describe("OIMenuAction.ts", () =>
   describe("show/hide", () =>
   {
     const layer = document.createElement("div")
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     behaviors.init(behaviors.layerInfos)
     const menu = new OIMenuAction(behaviors)
     menu.render(layer)
@@ -91,7 +91,7 @@ describe("OIMenuAction.ts", () =>
   describe("destroy", () =>
   {
     const layer = document.createElement("div")
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     behaviors.init(behaviors.layerInfos)
     const menu = new OIMenuAction(behaviors)
     menu.render(layer)

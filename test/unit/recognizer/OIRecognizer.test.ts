@@ -1,93 +1,26 @@
-import Server from "jest-websocket-mock"
-import { DeserializedMessage } from "jest-websocket-mock/lib/websocket"
+import { OffScreenOverrideConfiguration } from "../__dataset__/configuration.dataset"
+import { ServerOIWebsocketMock, hJIIX, partChangeMessage } from "../__mocks__/ServerOIWebsocketMock"
 import { buildOIStroke, delay } from "../helpers"
 
-import {
+import
+{
   OIRecognizer,
-  DefaultRecognitionConfiguration,
-  DefaultServerConfiguration,
   Error as ErrorConst,
-  TOIMessageEvent,
   TServerConfiguration,
   TRecognitionConfiguration,
   TMatrixTransform,
   MatrixTransform,
- } from "../../../src/iink"
-
-
-const ackMessage = { "type": "ack", "hmacChallenge": "1f434e8b-cc46-4a8c-be76-708eea2ff305", "iinkSessionId": "c7e72186-6299-4782-b612-3e725aa126f1" }
-const contentPackageDescriptionMessage = { "type": "contentPackageDescription", "contentPartCount": 0 }
-const partChangeMessage = { "type": "partChanged", "partIdx": 0, "partId": "yyrrutgk", "partCount": 1 }
-const newPartMessage = { "type": "newPart", "idx": 0, "id": "lqrcoxjl" }
-const contentChangeMessage = { "type": "contentChanged", "partId": "mknnilfn", "canUndo": null, "canRedo": null, "empty": null, "undoStackIndex": 0, "possibleUndoCount": 0 }
-
-const hJIIX = {
-  "type": "Text",
-  "label": "hello",
-  "words": [{
-    "label": "H",
-    "candidates": ["h"]
-  }]
-}
-const hExportedMessage = {
-  "type": "exported",
-  "partid": 0,
-  "exports": {
-    "application/vnd.myscript.jiix": JSON.stringify(hJIIX)
-  }
-}
-const errorMessage = { "type": "error", "message": "Access not granted", "code": "access.not.granted" }
-
-const getMessages = (messages: DeserializedMessage<object>[], type: string): DeserializedMessage<object>[] =>
-{
-  return messages.filter((m: DeserializedMessage<object>) =>
-  {
-    const parseMessage = JSON.parse(m as string) as TOIMessageEvent
-    return parseMessage.type === type
-  })
-}
+} from "../../../src/iink"
 
 describe("OIRecognizer.ts", () =>
 {
-  let mockServer: Server
-  beforeEach(() =>
-  {
-    mockServer = new Server(`wss://${ DefaultServerConfiguration.host }/api/v4.0/iink/offscreen`, {})
-
-    mockServer.on("connection", (socket) =>
-    {
-      socket.on("message", (message: string | Blob | ArrayBuffer | ArrayBufferView) =>
-      {
-        const parsedMessage: TOIMessageEvent = JSON.parse(message as string)
-        switch (parsedMessage.type) {
-          case "newContentPackage":
-            socket.send(JSON.stringify(ackMessage))
-            break
-          case "hmac":
-            socket.send(JSON.stringify(contentPackageDescriptionMessage))
-            break
-          case "configuration":
-            socket.send(JSON.stringify(partChangeMessage))
-            break
-          case "newContentPart":
-            socket.send(JSON.stringify(newPartMessage))
-            break
-          default:
-            break
-        }
-      })
-    })
-  })
-
-  afterEach(() =>
-  {
-    Server.clean()
-  })
+  const ServerConfig = OffScreenOverrideConfiguration.server as TServerConfiguration
+  const RecognitionConfig = OffScreenOverrideConfiguration.recognition as TRecognitionConfiguration
 
   test("should instanciate OIRecognizer", () =>
   {
-    const wsr = new OIRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-    expect(wsr).toBeDefined()
+    const oiRecognizer = new OIRecognizer(ServerConfig, RecognitionConfig)
+    expect(oiRecognizer).toBeDefined()
   })
 
   describe("Properties", () =>
@@ -95,77 +28,102 @@ describe("OIRecognizer.ts", () =>
     test("should get url", () =>
     {
       const serverConfig = {
-        ...DefaultServerConfiguration,
+        ...ServerConfig,
         scheme: "http",
         host: "pony",
         applicationKey: "applicationKey"
       } as TServerConfiguration
-      const wsr = new OIRecognizer(serverConfig, DefaultRecognitionConfiguration)
-      expect(wsr.url).toEqual("ws://pony/api/v4.0/iink/offscreen?applicationKey=applicationKey")
+      const oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      expect(oiRecognizer.url).toEqual("ws://pony/api/v4.0/iink/offscreen?applicationKey=applicationKey")
     })
 
     test(`should get mimeTypes`, () =>
     {
-      const wsr = new OIRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-      expect(wsr.mimeTypes).toEqual(["application/vnd.myscript.jiix"])
+      const oiRecognizer = new OIRecognizer(ServerConfig, RecognitionConfig)
+      expect(oiRecognizer.mimeTypes).toEqual(["application/vnd.myscript.jiix"])
     })
   })
 
   describe("init", () =>
   {
-    const serverConfigToInitTest: TServerConfiguration = {
-      ...DefaultServerConfiguration,
+    const serverConfig: TServerConfiguration = {
+      ...ServerConfig,
       host: "init-test"
     }
-    let addStroMockServerForInitTest: Server
-    let wsr: OIRecognizer
-    let spyEmitError: jest.SpyInstance
+    let mockServer: ServerOIWebsocketMock
+    let oiRecognizer: OIRecognizer
 
     beforeEach(() =>
     {
-      addStroMockServerForInitTest = new Server(`wss://${ serverConfigToInitTest.host }/api/v4.0/iink/offscreen`, {})
-      wsr = new OIRecognizer(serverConfigToInitTest, DefaultRecognitionConfiguration)
-      spyEmitError = jest.spyOn(wsr.internalEvent, "emitError")
-      spyEmitError.mockResolvedValue(() => Promise.resolve())
+      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
     })
     afterEach(async () =>
     {
-      await wsr.destroy()
-      addStroMockServerForInitTest.close()
+      await oiRecognizer.destroy()
+      mockServer.close()
     })
-    test("should have dialog sequence", async () =>
+
+    test("should have dialog sequence with hmacChallenge", async () =>
     {
-      expect(getMessages(addStroMockServerForInitTest.messages, "newContentPackage")).toHaveLength(0)
-      const promise = wsr.init()
+      expect(mockServer.getMessages("newContentPackage")).toHaveLength(0)
+      const promise = oiRecognizer.init()
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      expect(getMessages(addStroMockServerForInitTest.messages, "newContentPackage")).toHaveLength(1)
+      expect(mockServer.getMessages("newContentPackage")).toHaveLength(1)
 
-      expect(getMessages(addStroMockServerForInitTest.messages, "hmac")).toHaveLength(0)
-      addStroMockServerForInitTest.send(JSON.stringify(ackMessage))
+      expect(mockServer.getMessages("configuration")).toHaveLength(0)
+      expect(mockServer.getMessages("hmac")).toHaveLength(0)
+      mockServer.sendAckWithHMAC()
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      expect(getMessages(addStroMockServerForInitTest.messages, "hmac")).toHaveLength(1)
+      expect(mockServer.getMessages("hmac")).toHaveLength(1)
+      expect(mockServer.getMessages("configuration")).toHaveLength(1)
 
-      expect(getMessages(addStroMockServerForInitTest.messages, "configuration")).toHaveLength(0)
-      expect(getMessages(addStroMockServerForInitTest.messages, "newContentPart")).toHaveLength(0)
-      addStroMockServerForInitTest.send(JSON.stringify(contentPackageDescriptionMessage))
+      expect(mockServer.getMessages("newContentPart")).toHaveLength(0)
+      mockServer.sendContentPackageDescription()
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      expect(getMessages(addStroMockServerForInitTest.messages, "configuration")).toHaveLength(1)
-      expect(getMessages(addStroMockServerForInitTest.messages, "newContentPart")).toHaveLength(1)
+      expect(mockServer.getMessages("newContentPart")).toHaveLength(1)
 
-      addStroMockServerForInitTest.send(JSON.stringify(newPartMessage))
+      mockServer.sendNewPartMessage()
+      await promise
+      expect(1).toEqual(1)
+    })
+    test("should have dialog sequence without hmacChallenge", async () =>
+    {
+      expect(mockServer.getMessages("newContentPackage")).toHaveLength(0)
+      const promise = oiRecognizer.init()
+      //¯\_(ツ)_/¯  required to wait server received message
+      await delay(100)
+      expect(mockServer.getMessages("newContentPackage")).toHaveLength(1)
+
+      expect(mockServer.getMessages("configuration")).toHaveLength(0)
+      expect(mockServer.getMessages("hmac")).toHaveLength(0)
+      mockServer.sendAckWithoutHMAC()
+      //¯\_(ツ)_/¯  required to wait server received message
+      await delay(100)
+      expect(mockServer.getMessages("hmac")).toHaveLength(0)
+      expect(mockServer.getMessages("configuration")).toHaveLength(1)
+
+      expect(mockServer.getMessages("newContentPart")).toHaveLength(0)
+      mockServer.sendContentPackageDescription()
+      //¯\_(ツ)_/¯  required to wait server received message
+      await delay(100)
+      expect(mockServer.getMessages("newContentPart")).toHaveLength(1)
+
+      mockServer.sendNewPartMessage()
       await promise
       expect(1).toEqual(1)
     })
     test("should reject if receive error message", async () =>
     {
+      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
       expect.assertions(3)
-      const promise = wsr.init()
+      const promise = oiRecognizer.init()
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      addStroMockServerForInitTest.send(JSON.stringify(errorMessage))
+      mockServer.sendNotGrantedErrorMessage()
       await expect(promise).rejects.toEqual(ErrorConst.WRONG_CREDENTIALS)
       await expect(spyEmitError).toHaveBeenCalledTimes(2)
       await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
@@ -174,117 +132,165 @@ describe("OIRecognizer.ts", () =>
 
   describe("Ping", () =>
   {
+    const serverConfig: TServerConfiguration = {
+      ...JSON.parse(JSON.stringify(ServerConfig)),
+      host: "ping-test"
+    }
+    let mockServer: ServerOIWebsocketMock
+    let oiRecognizer: OIRecognizer
+
+    beforeEach(() =>
+    {
+      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+
+      mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
+      mockServer.init()
+    })
+    afterEach(async () =>
+    {
+      await oiRecognizer.destroy()
+      mockServer.close()
+    })
+
     test("should send ping message", async () =>
     {
       expect.assertions(2)
-      const conf = JSON.parse(JSON.stringify(DefaultServerConfiguration)) as TServerConfiguration
-      conf.websocket.pingDelay = 200
-      const wsr = new OIRecognizer(conf, DefaultRecognitionConfiguration)
-      await wsr.init()
-      await delay(conf.websocket.pingDelay)
-      await delay(100)
-      expect(getMessages(mockServer.messages, "ping")).toHaveLength(1)
-      await delay(conf.websocket.pingDelay)
-      expect(getMessages(mockServer.messages, "ping")).toHaveLength(2)
+      serverConfig.websocket.pingEnabled = true
+      const oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      await oiRecognizer.init()
+      await delay(serverConfig.websocket.pingDelay * 1.5)
+      expect(mockServer.getMessages("ping")).toHaveLength(1)
+      await delay(serverConfig.websocket.pingDelay)
+      expect(mockServer.getMessages("ping")).toHaveLength(2)
+      await oiRecognizer.destroy()
     })
     test("should not send ping message", async () =>
     {
       expect.assertions(2)
-      const conf = JSON.parse(JSON.stringify(DefaultServerConfiguration)) as TServerConfiguration
-      conf.websocket.pingDelay = 200
-      conf.websocket.pingEnabled = false
-      const wsr = new OIRecognizer(conf, DefaultRecognitionConfiguration)
-      await wsr.init()
-      await delay(conf.websocket.pingDelay)
-      await delay(100)
-      expect(getMessages(mockServer.messages, "ping")).toHaveLength(0)
-      await delay(conf.websocket.pingDelay)
-      expect(getMessages(mockServer.messages, "ping")).toHaveLength(0)
+      serverConfig.websocket.pingEnabled = false
+      const oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      await oiRecognizer.init()
+      await delay(serverConfig.websocket.pingDelay * 1.5)
+      expect(mockServer.getMessages("ping")).toHaveLength(0)
+      await delay(serverConfig.websocket.pingDelay)
+      expect(mockServer.getMessages("ping")).toHaveLength(0)
+      await oiRecognizer.destroy()
+    })
+    test("should close the connection when maxPingLostCount is reached", async () =>
+    {
+      expect.assertions(3)
+      serverConfig.websocket.pingEnabled = true
+      serverConfig.websocket.maxPingLostCount = 2
+      const oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      await oiRecognizer.init()
+      await delay(serverConfig.websocket.pingDelay * 1.5)
+      expect(mockServer.server.clients()).toHaveLength(1)
+      await delay(serverConfig.websocket.pingDelay * serverConfig.websocket.maxPingLostCount)
+      expect(mockServer.getMessages("ping")).toHaveLength(serverConfig.websocket.maxPingLostCount + 1)
+      expect(mockServer.server.clients()).toHaveLength(0)
     })
   })
 
   describe("send", () =>
   {
-    let wsr: OIRecognizer
-    beforeEach(async () =>
+    const serverConfig: TServerConfiguration = {
+      ...ServerConfig,
+      host: "send-test"
+    }
+    let mockServer: ServerOIWebsocketMock
+    let oiRecognizer: OIRecognizer
+
+    beforeEach(() =>
     {
-      wsr = new OIRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
+      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
+      mockServer.init()
     })
     afterEach(async () =>
     {
-      await wsr.destroy()
+      await oiRecognizer.destroy()
+      mockServer.close()
     })
+
     test("should throw error if recognizer has not been initialize", async () =>
     {
       expect.assertions(1)
       const testDataToSend = { type: "test", data: "test-data" }
-      await expect(wsr.send(testDataToSend)).rejects.toEqual(new Error("Recognizer must be initilized"))
+      await expect(oiRecognizer.send(testDataToSend)).rejects.toEqual(new Error("Recognizer must be initilized"))
     })
     test("should send message", async () =>
     {
       expect.assertions(1)
-      await wsr.init()
+      await oiRecognizer.init()
       const testDataToSend = { type: "test", data: "test-data" }
-      await wsr.send(testDataToSend)
+      await oiRecognizer.send(testDataToSend)
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      const messageSent = JSON.parse(mockServer.messages[mockServer.messages.length - 1] as string)
+      const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       expect(messageSent).toEqual(testDataToSend)
     })
     //TODO fix test
     test.skip("should reconnect before send message", async () =>
     {
       expect.assertions(1)
-      await wsr.init()
-      await wsr.close(1000, "CLOSE_RECOGNIZER")
+      await oiRecognizer.init()
+      await oiRecognizer.close(1000, "CLOSE_RECOGNIZER")
       const testDataToSend = { type: "test", data: "test-data" }
-      await wsr.send(testDataToSend)
+      await oiRecognizer.send(testDataToSend)
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      const messageSent = JSON.parse(mockServer.messages[mockServer.messages.length - 1] as string)
+      const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       expect(messageSent).toEqual(testDataToSend)
     })
   })
 
   describe("addStrokes", () =>
   {
+    const serverConfig: TServerConfiguration = {
+      ...ServerConfig,
+      host: "add-strokes-test"
+    }
+    let mockServer: ServerOIWebsocketMock
+    let oiRecognizer: OIRecognizer
     const strokes = [buildOIStroke()]
-    let wsr: OIRecognizer
-    let spyEmitError: jest.SpyInstance
-    beforeEach(async () =>
+
+    beforeEach(() =>
     {
-      wsr = new OIRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-      spyEmitError = jest.spyOn(wsr.internalEvent, "emitError")
+      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
+      mockServer.init()
     })
     afterEach(async () =>
     {
-      await wsr.destroy()
+      await oiRecognizer.destroy()
+      mockServer.close()
     })
+
     test("should throw error if recognizer has not been initialize", async () =>
     {
       expect.assertions(1)
-      await expect(wsr.addStrokes(strokes)).rejects.toEqual(new Error("Recognizer must be initilized"))
+      await expect(oiRecognizer.addStrokes(strokes)).rejects.toEqual(new Error("Recognizer must be initilized"))
     })
     test("should not send addStrokes message if 0 strokes", async () =>
     {
       expect.assertions(1)
-      await wsr.init()
-      await wsr.addStrokes([])
+      await oiRecognizer.init()
+      await oiRecognizer.addStrokes([])
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      const messageSent = JSON.parse(mockServer.messages[mockServer.messages.length - 1] as string)
+      const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       await expect(messageSent.type).not.toEqual("addStrokes")
     })
     test("should send addStrokes message & resolve when receive contentChanged message", async () =>
     {
       expect.assertions(1)
-      await wsr.init()
-      const promise = wsr.addStrokes(strokes)
+      await oiRecognizer.init()
+      const promise = oiRecognizer.addStrokes(strokes)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(contentChangeMessage))
+      mockServer.sendContentChangeMessage()
       await promise
-      const messageSent = JSON.parse(mockServer.messages[mockServer.messages.length - 1] as string)
+      const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       const messageSentExpected = {
         type: "addStrokes",
         strokes: strokes.map(s => s.formatToSend())
@@ -293,12 +299,13 @@ describe("OIRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
+      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
       expect.assertions(3)
-      await wsr.init()
-      const promise = wsr.addStrokes(strokes)
+      await oiRecognizer.init()
+      const promise = oiRecognizer.addStrokes(strokes)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(errorMessage))
+      mockServer.sendNotGrantedErrorMessage()
       await expect(promise).rejects.toEqual(ErrorConst.WRONG_CREDENTIALS)
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
       await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
@@ -307,44 +314,52 @@ describe("OIRecognizer.ts", () =>
 
   describe("replaceStrokes", () =>
   {
+    const serverConfig: TServerConfiguration = {
+      ...ServerConfig,
+      host: "replace-strokes-test"
+    }
+    let mockServer: ServerOIWebsocketMock
+    let oiRecognizer: OIRecognizer
     const strokes = [buildOIStroke()]
     const oldStrokeIds = ["id-1", "id-2"]
-    let wsr: OIRecognizer
-    let spyEmitError: jest.SpyInstance
-    beforeEach(async () =>
+
+    beforeEach(() =>
     {
-      wsr = new OIRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-      spyEmitError = jest.spyOn(wsr.internalEvent, "emitError")
+      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
+      mockServer.init()
     })
     afterEach(async () =>
     {
-      await wsr.destroy()
+      await oiRecognizer.destroy()
+      mockServer.close()
     })
+
     test("should throw error if recognizer has not been initialize", async () =>
     {
       expect.assertions(1)
-      await expect(wsr.replaceStrokes(oldStrokeIds, strokes)).rejects.toEqual(new Error("Recognizer must be initilized"))
+      await expect(oiRecognizer.replaceStrokes(oldStrokeIds, strokes)).rejects.toEqual(new Error("Recognizer must be initilized"))
     })
     test("should not send replaceStrokes message if 0 strokes", async () =>
     {
       expect.assertions(1)
-      await wsr.init()
-      await wsr.replaceStrokes([], [])
+      await oiRecognizer.init()
+      await oiRecognizer.replaceStrokes([], [])
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      const messageSent = JSON.parse(mockServer.messages[mockServer.messages.length - 1] as string)
+      const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       await expect(messageSent.type).not.toEqual("replaceStrokes")
     })
     test("should send replaceStrokes message & resolve when receive contentChanged message", async () =>
     {
       expect.assertions(1)
-      await wsr.init()
-      const promise = wsr.replaceStrokes(oldStrokeIds, strokes)
+      await oiRecognizer.init()
+      const promise = oiRecognizer.replaceStrokes(oldStrokeIds, strokes)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(contentChangeMessage))
+      mockServer.sendContentChangeMessage()
       await promise
-      const messageSent = JSON.parse(mockServer.messages[mockServer.messages.length - 1] as string)
+      const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       const messageSentExpected = {
         type: "replaceStrokes",
         oldStrokeIds,
@@ -353,12 +368,13 @@ describe("OIRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
+      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
       expect.assertions(3)
-      await wsr.init()
-      const promise = wsr.replaceStrokes(oldStrokeIds, strokes)
+      await oiRecognizer.init()
+      const promise = oiRecognizer.replaceStrokes(oldStrokeIds, strokes)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(errorMessage))
+      mockServer.sendNotGrantedErrorMessage()
       await expect(promise).rejects.toEqual(ErrorConst.WRONG_CREDENTIALS)
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
       await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
@@ -367,44 +383,52 @@ describe("OIRecognizer.ts", () =>
 
   describe("translateStrokes", () =>
   {
+    const serverConfig: TServerConfiguration = {
+      ...ServerConfig,
+      host: "replace-strokes-test"
+    }
+    let mockServer: ServerOIWebsocketMock
+    let oiRecognizer: OIRecognizer
     const strokeIds = ["id-1", "id-2"]
     const tx = 5, ty = 10
-    let wsr: OIRecognizer
-    let spyEmitError: jest.SpyInstance
-    beforeEach(async () =>
+
+    beforeEach(() =>
     {
-      wsr = new OIRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-      spyEmitError = jest.spyOn(wsr.internalEvent, "emitError")
+      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
+      mockServer.init()
     })
     afterEach(async () =>
     {
-      await wsr.destroy()
+      await oiRecognizer.destroy()
+      mockServer.close()
     })
+
     test("should throw error if recognizer has not been initialize", async () =>
     {
       expect.assertions(1)
-      await expect(wsr.translateStrokes(strokeIds, tx, ty)).rejects.toEqual(new Error("Recognizer must be initilized"))
+      await expect(oiRecognizer.translateStrokes(strokeIds, tx, ty)).rejects.toEqual(new Error("Recognizer must be initilized"))
     })
     test("should not send translateStrokes message if 0 strokes", async () =>
     {
       expect.assertions(1)
-      await wsr.init()
-      await wsr.translateStrokes([], tx, ty)
+      await oiRecognizer.init()
+      await oiRecognizer.translateStrokes([], tx, ty)
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      const messageSent = JSON.parse(mockServer.messages[mockServer.messages.length - 1] as string)
+      const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       await expect(messageSent.type).not.toEqual("translateStrokes")
     })
     test("should send translateStrokes message & resolve when receive contentChanged message", async () =>
     {
       expect.assertions(1)
-      await wsr.init()
-      const promise = wsr.translateStrokes(strokeIds, tx, ty)
+      await oiRecognizer.init()
+      const promise = oiRecognizer.translateStrokes(strokeIds, tx, ty)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(contentChangeMessage))
+      mockServer.sendContentChangeMessage()
       await promise
-      const messageSent = JSON.parse(mockServer.messages[mockServer.messages.length - 1] as string)
+      const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       const messageSentExpected = {
         type: "transform",
         transformationType: "TRANSLATE",
@@ -416,12 +440,13 @@ describe("OIRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
+      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
       expect.assertions(3)
-      await wsr.init()
-      const promise = wsr.translateStrokes(strokeIds, tx, ty)
+      await oiRecognizer.init()
+      const promise = oiRecognizer.translateStrokes(strokeIds, tx, ty)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(errorMessage))
+      mockServer.sendNotGrantedErrorMessage()
       await expect(promise).rejects.toEqual(ErrorConst.WRONG_CREDENTIALS)
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
       await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
@@ -430,44 +455,52 @@ describe("OIRecognizer.ts", () =>
 
   describe("transformStrokes", () =>
   {
+    const serverConfig: TServerConfiguration = {
+      ...ServerConfig,
+      host: "transform-strokes-test"
+    }
+    let mockServer: ServerOIWebsocketMock
+    let oiRecognizer: OIRecognizer
     const strokeIds = ["id-1", "id-2"]
     const matrix: TMatrixTransform = new MatrixTransform(6, 5, 4, 3, 2, 1)
-    let wsr: OIRecognizer
-    let spyEmitError: jest.SpyInstance
-    beforeEach(async () =>
+
+    beforeEach(() =>
     {
-      wsr = new OIRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-      spyEmitError = jest.spyOn(wsr.internalEvent, "emitError")
+      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
+      mockServer.init()
     })
     afterEach(async () =>
     {
-      await wsr.destroy()
+      await oiRecognizer.destroy()
+      mockServer.close()
     })
+
     test("should throw error if recognizer has not been initialize", async () =>
     {
       expect.assertions(1)
-      await expect(wsr.transformStrokes(strokeIds, matrix)).rejects.toEqual(new Error("Recognizer must be initilized"))
+      await expect(oiRecognizer.transformStrokes(strokeIds, matrix)).rejects.toEqual(new Error("Recognizer must be initilized"))
     })
     test("should not send transformStrokes message if 0 strokes", async () =>
     {
       expect.assertions(1)
-      await wsr.init()
-      await wsr.transformStrokes([], matrix)
+      await oiRecognizer.init()
+      await oiRecognizer.transformStrokes([], matrix)
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      const messageSent = JSON.parse(mockServer.messages[mockServer.messages.length - 1] as string)
+      const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       await expect(messageSent.type).not.toEqual("transformStrokes")
     })
     test("should send transformStrokes message & resolve when receive contentChanged message", async () =>
     {
       expect.assertions(1)
-      await wsr.init()
-      const promise = wsr.transformStrokes(strokeIds, matrix)
+      await oiRecognizer.init()
+      const promise = oiRecognizer.transformStrokes(strokeIds, matrix)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(contentChangeMessage))
+      mockServer.sendContentChangeMessage()
       await promise
-      const messageSent = JSON.parse(mockServer.messages[mockServer.messages.length - 1] as string)
+      const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       const messageSentExpected = {
         type: "transform",
         transformationType: "MATRIX",
@@ -478,12 +511,13 @@ describe("OIRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
+      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
       expect.assertions(3)
-      await wsr.init()
-      const promise = wsr.transformStrokes(strokeIds, matrix)
+      await oiRecognizer.init()
+      const promise = oiRecognizer.transformStrokes(strokeIds, matrix)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(errorMessage))
+      mockServer.sendNotGrantedErrorMessage()
       await expect(promise).rejects.toEqual(ErrorConst.WRONG_CREDENTIALS)
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
       await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
@@ -492,43 +526,51 @@ describe("OIRecognizer.ts", () =>
 
   describe("eraseStrokes", () =>
   {
+    const serverConfig: TServerConfiguration = {
+      ...ServerConfig,
+      host: "erase-strokes-test"
+    }
+    let mockServer: ServerOIWebsocketMock
+    let oiRecognizer: OIRecognizer
     const strokeIds = ["erase-1"]
-    let wsr: OIRecognizer
-    let spyEmitError: jest.SpyInstance
-    beforeEach(async () =>
+
+    beforeEach(() =>
     {
-      wsr = new OIRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-      spyEmitError = jest.spyOn(wsr.internalEvent, "emitError")
+      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
+      mockServer.init()
     })
     afterEach(async () =>
     {
-      await wsr.destroy()
+      await oiRecognizer.destroy()
+      mockServer.close()
     })
+
     test("should throw error if recognizer has not been initialize", async () =>
     {
       expect.assertions(1)
-      await expect(wsr.eraseStrokes(strokeIds)).rejects.toEqual(new Error("Recognizer must be initilized"))
+      await expect(oiRecognizer.eraseStrokes(strokeIds)).rejects.toEqual(new Error("Recognizer must be initilized"))
     })
     test("should not send eraseStrokes message if 0 strokes", async () =>
     {
       expect.assertions(1)
-      await wsr.init()
-      await wsr.eraseStrokes([])
+      await oiRecognizer.init()
+      await oiRecognizer.eraseStrokes([])
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      const messageSent = JSON.parse(mockServer.messages[mockServer.messages.length - 1] as string)
+      const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       await expect(messageSent.type).not.toEqual("eraseStrokes")
     })
     test("should send eraseStrokes message & resolve when receive contentChanged message", async () =>
     {
       expect.assertions(1)
-      await wsr.init()
-      const promise = wsr.eraseStrokes(strokeIds)
+      await oiRecognizer.init()
+      const promise = oiRecognizer.eraseStrokes(strokeIds)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(contentChangeMessage))
+      mockServer.sendContentChangeMessage()
       await promise
-      const messageSent = JSON.parse(mockServer.messages[mockServer.messages.length - 1] as string)
+      const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       const messageSentExpected = {
         type: "eraseStrokes",
         strokeIds
@@ -537,12 +579,13 @@ describe("OIRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
+      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
       expect.assertions(3)
-      await wsr.init()
-      const promise = wsr.eraseStrokes(strokeIds)
+      await oiRecognizer.init()
+      const promise = oiRecognizer.eraseStrokes(strokeIds)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(errorMessage))
+      mockServer.sendNotGrantedErrorMessage()
       await expect(promise).rejects.toEqual(ErrorConst.WRONG_CREDENTIALS)
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
       await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
@@ -551,30 +594,38 @@ describe("OIRecognizer.ts", () =>
 
   describe("waitForIdle", () =>
   {
-    let wsr: OIRecognizer
-    let spyEmitError: jest.SpyInstance
-    beforeEach(async () =>
+    const serverConfig: TServerConfiguration = {
+      ...ServerConfig,
+      host: "waitForIdle-test"
+    }
+    let mockServer: ServerOIWebsocketMock
+    let oiRecognizer: OIRecognizer
+
+    beforeEach(() =>
     {
-      wsr = new OIRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-      spyEmitError = jest.spyOn(wsr.internalEvent, "emitError")
+      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
+      mockServer.init()
     })
     afterEach(async () =>
     {
-      await wsr.destroy()
+      await oiRecognizer.destroy()
+      mockServer.close()
     })
+
     test("should throw error if recognizer has not been initialize", async () =>
     {
       expect.assertions(1)
-      await expect(wsr.export()).rejects.toEqual(new Error("Recognizer must be initilized"))
+      await expect(oiRecognizer.export()).rejects.toEqual(new Error("Recognizer must be initilized"))
     })
     test("should send waitForIdle & resolve when receive idle message", async () =>
     {
       expect.assertions(2)
-      await wsr.init()
-      const promise = wsr.waitForIdle()
+      await oiRecognizer.init()
+      const promise = oiRecognizer.waitForIdle()
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      const wfiMessageSent = mockServer.messages[mockServer.messages.length - 1]
+      const wfiMessageSent = mockServer.getLastMessage()
       expect(wfiMessageSent).toEqual(JSON.stringify({ type: "waitForIdle" }))
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
@@ -584,12 +635,13 @@ describe("OIRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
+      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
       expect.assertions(3)
-      await wsr.init()
-      const promise = wsr.waitForIdle()
+      await oiRecognizer.init()
+      const promise = oiRecognizer.waitForIdle()
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(errorMessage))
+      mockServer.sendNotGrantedErrorMessage()
       await expect(promise).rejects.toEqual(ErrorConst.WRONG_CREDENTIALS)
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
       await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
@@ -598,34 +650,37 @@ describe("OIRecognizer.ts", () =>
 
   describe("export", () =>
   {
-    let wsr: OIRecognizer
-    let spyEmitError: jest.SpyInstance
-    beforeEach(async () =>
+    const serverConfig: TServerConfiguration = {
+      ...ServerConfig,
+      host: "export-test"
+    }
+    let mockServer: ServerOIWebsocketMock
+    let oiRecognizer: OIRecognizer
+
+    beforeEach(() =>
     {
-      wsr = new OIRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-      spyEmitError = jest.spyOn(wsr.internalEvent, "emitError")
+      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
+      mockServer.init()
     })
     afterEach(async () =>
     {
-      await wsr.destroy()
+      await oiRecognizer.destroy()
+      mockServer.close()
     })
+
     test("should throw error if recognizer has not been initialize", async () =>
     {
       expect.assertions(1)
-      await expect(wsr.export()).rejects.toEqual(new Error("Recognizer must be initilized"))
+      await expect(oiRecognizer.export()).rejects.toEqual(new Error("Recognizer must be initilized"))
     })
     test("should send export", async () =>
     {
-      const recognitionConfig: TRecognitionConfiguration = {
-        ...DefaultRecognitionConfiguration,
-        type: "Raw Content"
-      }
-      const my_wsr = new OIRecognizer(DefaultServerConfiguration, recognitionConfig)
-      await my_wsr.init()
-      const promise = my_wsr.export()
+      await oiRecognizer.init()
+      const promise = oiRecognizer.export()
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      const exportMessageSent = mockServer.messages[mockServer.messages.length - 1]
+      const exportMessageSent = mockServer.getLastMessage()
 
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
@@ -636,36 +691,40 @@ describe("OIRecognizer.ts", () =>
       })
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(hExportedMessage))
+      mockServer.sendHExportMessage()
       expect(exportMessageSent).toContain(exportmessageSentExpected)
       await expect(promise).resolves.toEqual(
         expect.objectContaining({
           "application/vnd.myscript.jiix": hJIIX
         })
       )
+      oiRecognizer.destroy()
     })
     test("should resolve when receive fileChunckAck message", async () =>
     {
       expect.assertions(1)
-      await wsr.init()
-      const promise = wsr.export()
+
+      await oiRecognizer.init()
+      const promise = oiRecognizer.export()
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(hExportedMessage))
+      mockServer.sendHExportMessage()
       await expect(promise).resolves.toEqual(
         expect.objectContaining({
           "application/vnd.myscript.jiix": hJIIX
         })
       )
+      oiRecognizer.destroy()
     })
     test("should reject if receive error message", async () =>
     {
+      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
       expect.assertions(3)
-      await wsr.init()
-      const promise = wsr.export()
+      await oiRecognizer.init()
+      const promise = oiRecognizer.export()
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.send(JSON.stringify(errorMessage))
+      mockServer.sendNotGrantedErrorMessage()
       await expect(promise).rejects.toEqual(ErrorConst.WRONG_CREDENTIALS)
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
       await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
@@ -674,47 +733,25 @@ describe("OIRecognizer.ts", () =>
 
   describe("Connection lost", () =>
   {
-    const serverConfigToCloseTest: TServerConfiguration = {
-      ...DefaultServerConfiguration,
+    const serverConfig: TServerConfiguration = {
+      ...ServerConfig,
       host: "close-test"
     }
-    let mockServerForCloseTest: Server
-    let wsr: OIRecognizer
-    let spyEmitError: jest.SpyInstance
+    let mockServer: ServerOIWebsocketMock
+    let oiRecognizer: OIRecognizer
+
     beforeEach(() =>
     {
-      mockServerForCloseTest = new Server(`wss://${ serverConfigToCloseTest.host }/api/v4.0/iink/offscreen`, {})
-      mockServerForCloseTest.on("connection", (socket) =>
-      {
-        socket.on("message", (message: string | Blob | ArrayBuffer | ArrayBufferView) =>
-        {
-          const parsedMessage: TOIMessageEvent = JSON.parse(message as string)
-          switch (parsedMessage.type) {
-            case "newContentPackage":
-              socket.send(JSON.stringify(ackMessage))
-              break
-            case "hmac":
-              socket.send(JSON.stringify(contentPackageDescriptionMessage))
-              break
-            case "configuration":
-              socket.send(JSON.stringify(partChangeMessage))
-              break
-            case "newContentPart":
-              socket.send(JSON.stringify(newPartMessage))
-              break
-            default:
-              break
-          }
-        })
-      })
-      wsr = new OIRecognizer(serverConfigToCloseTest, DefaultRecognitionConfiguration)
-      spyEmitError = jest.spyOn(wsr.internalEvent, "emitError")
+      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
+      mockServer.init()
     })
     afterEach(async () =>
     {
-      spyEmitError.mockReset()
-      await wsr.destroy()
+      await oiRecognizer.destroy()
+      mockServer.close()
     })
+
     const closeMessageOptions = [
       { code: 1001, message: ErrorConst.GOING_AWAY },
       { code: 1002, message: ErrorConst.PROTOCOL_ERROR },
@@ -734,9 +771,10 @@ describe("OIRecognizer.ts", () =>
     {
       test(`should emit error if the server closes the connection abnormally code == ${ closeEvent.code }`, async () =>
       {
+        const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
         expect.assertions(2)
-        await wsr.init()
-        mockServerForCloseTest.server.close({ code: closeEvent.code, reason: closeEvent.message, wasClean: false })
+        await oiRecognizer.init()
+        mockServer.close({ code: closeEvent.code, reason: closeEvent.message, wasClean: false })
         expect(spyEmitError).toHaveBeenCalledTimes(1)
         expect(spyEmitError).toHaveBeenCalledWith(new Error(closeEvent.message))
       })
@@ -745,13 +783,26 @@ describe("OIRecognizer.ts", () =>
 
   describe("destroy", () =>
   {
+    const serverConfig = {
+      ...ServerConfig,
+      host: "destroy-test"
+    } as TServerConfiguration
+    let mockServer: ServerOIWebsocketMock
+
     test("should close socket", async () =>
     {
-      const wsr = new OIRecognizer(DefaultServerConfiguration, DefaultRecognitionConfiguration)
-      await wsr.init()
-      await expect(mockServer.server.clients()).toHaveLength(1)
-      await wsr.destroy()
-      await expect(mockServer.server.clients()).toHaveLength(0)
+      const oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
+      mockServer.init()
+      await oiRecognizer.init()
+
+      // 1 -> OPEN
+      await expect(mockServer.server.clients()[0].readyState).toEqual(1)
+      oiRecognizer.destroy()
+      // 2 -> CLOSING
+      await expect(mockServer.server.clients()[0].readyState).toEqual(2)
+      mockServer.close()
     })
   })
+
 })

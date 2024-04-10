@@ -263,14 +263,14 @@ export const OffScreenOverrideConfiguration: DeepPartial<TConfiguration> = {
   server: {
     protocol: 'REST',
     scheme: 'http',
-    host: 'host',
-    applicationKey: 'applicationKey',
-    hmacKey: 'hmacKey',
+    host: 'test.com',
+    applicationKey: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+    hmacKey: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
     version: '2.0.4',
     useWindowLocation: false,
     websocket: {
       pingEnabled: false,
-      pingDelay: 42,
+      pingDelay: 100,
       maxPingLostCount: 42,
       autoReconnect: false,
       maxRetryCount: 42,

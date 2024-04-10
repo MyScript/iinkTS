@@ -4,7 +4,7 @@ import {
   LeftClickEventFake,
   RightClickEventFake,
   TouchEventFake
-} from "../PointerEventFake"
+} from "../__mocks__/PointerEventFake"
 import {
   DefaultConfiguration,
   OIPointerEventGrabber,

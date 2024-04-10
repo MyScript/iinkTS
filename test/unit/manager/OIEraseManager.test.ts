@@ -1,5 +1,5 @@
 import { buildOICircle, buildOIStroke } from "../helpers"
-import { OIBehaviorsTest } from "../OIBehaviorsTest"
+import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
 import { OIEraseManager, SymbolType, TPointer } from "../../../src/iink"
 
 
@@ -7,7 +7,7 @@ describe("OIEraseManager.ts", () =>
 {
   test("should create", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const manager = new OIEraseManager(behaviors)
     expect(manager).toBeDefined()
     expect(manager.currentEraser).toBeUndefined()
@@ -16,7 +16,7 @@ describe("OIEraseManager.ts", () =>
   describe("writing process", () =>
   {
     const wrapperHTML: HTMLElement = document.createElement("div")
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     behaviors.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
     behaviors.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
