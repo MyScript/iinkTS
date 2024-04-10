@@ -1,5 +1,5 @@
 import { buildOIStroke, buildOIText } from "../helpers"
-import { OIBehaviorsTest } from "../OIBehaviorsTest"
+import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
 import
 {
   DefaultConfiguration,
@@ -15,14 +15,14 @@ describe("OIGestureManager.ts", () =>
 
   test("should create", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const gestMan = new OIGestureManager(behaviors)
     expect(gestMan).toBeDefined()
   })
 
   describe("apply", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const gestMan = new OIGestureManager(behaviors)
     gestMan.applyInsertGesture = jest.fn()
     gestMan.applyJoinGesture = jest.fn()
@@ -177,7 +177,7 @@ describe("OIGestureManager.ts", () =>
 
   describe("applySurroundGesture", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const stroke = buildOIStroke()
     behaviors.model.addSymbol(stroke)
     const gestMan = new OIGestureManager(behaviors)
@@ -280,7 +280,7 @@ describe("OIGestureManager.ts", () =>
 
   describe("applyScratchGesture", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const manager = new OIGestureManager(behaviors)
     manager.texter.adjustText = jest.fn()
     manager.texter.updateTextBoundingBox = jest.fn()
@@ -446,7 +446,7 @@ describe("OIGestureManager.ts", () =>
 
   describe("applyJoinGesture", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const stroke11 = buildOIStroke({ box: { height: 9, width: 10, x: 0, y: 0.6 * rowHeight } })
     behaviors.model.addSymbol(stroke11)
     const stroke12 = buildOIStroke({ box: { height: 9, width: 10, x: 100, y: 0.6 * rowHeight } })
@@ -494,7 +494,7 @@ describe("OIGestureManager.ts", () =>
 
   describe("applyInsertGesture", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const stroke = buildOIStroke()
     behaviors.model.addSymbol(stroke)
     const gestMan = new OIGestureManager(behaviors)
@@ -527,7 +527,7 @@ describe("OIGestureManager.ts", () =>
 
   describe("applyStrikeThroughGesture", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const stroke = buildOIStroke()
     behaviors.model.addSymbol(stroke)
     const gestMan = new OIGestureManager(behaviors)
@@ -569,7 +569,7 @@ describe("OIGestureManager.ts", () =>
 
   describe("applyUnderlineGesture", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const stroke = buildOIStroke()
     behaviors.model.addSymbol(stroke)
     const gestMan = new OIGestureManager(behaviors)

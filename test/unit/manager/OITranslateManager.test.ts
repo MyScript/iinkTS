@@ -1,4 +1,4 @@
-import { OIBehaviorsTest } from "../OIBehaviorsTest"
+import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
 import
 {
   OIEdgeLine,
@@ -15,14 +15,14 @@ describe("OITranslateManager.ts", () =>
 {
   test("should create", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const manager = new OITranslateManager(behaviors)
     expect(manager).toBeDefined()
   })
 
   describe("should applyToSymbol", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const manager = new OITranslateManager(behaviors)
 
     test("translate stroke", () =>
@@ -85,7 +85,7 @@ describe("OITranslateManager.ts", () =>
   describe("translate process on stroke without snap", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     behaviors.recognizer.translateStrokes = jest.fn(() => Promise.resolve())
     behaviors.renderer.setAttribute = jest.fn()

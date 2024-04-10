@@ -1,5 +1,5 @@
 import { buildOIStroke } from "../helpers"
-import { OIBehaviorsTest } from "../OIBehaviorsTest"
+import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
 import
 {
   OISelectionManager,
@@ -11,14 +11,14 @@ describe("OISelectionManager.ts", () =>
 {
   test("should create", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const manager = new OISelectionManager(behaviors)
     expect(manager).toBeDefined()
   })
 
   test("should draw selecting rect", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const manager = new OISelectionManager(behaviors)
     manager.renderer.clearElements = jest.fn()
     manager.renderer.appendElement = jest.fn()
@@ -35,7 +35,7 @@ describe("OISelectionManager.ts", () =>
 
   test("should clear selecting rect", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const manager = new OISelectionManager(behaviors)
     manager.renderer.clearElements = jest.fn()
     manager.clearSelectingRect()
@@ -54,7 +54,7 @@ describe("OISelectionManager.ts", () =>
       }),
     })
     const wrapperHTML: HTMLElement = document.createElement("div")
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const manager = new OISelectionManager(behaviors)
     const stroke = buildOIStroke()
 
@@ -91,7 +91,7 @@ describe("OISelectionManager.ts", () =>
 
   describe("process", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const manager = new OISelectionManager(behaviors)
     const strokeToSelect = buildOIStroke( { box: { height: 10, width: 10, x: 10, y: 10 }})
     manager.model.addSymbol(strokeToSelect)

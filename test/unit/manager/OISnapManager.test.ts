@@ -1,5 +1,5 @@
 import { buildOILine } from "../helpers"
-import { OIBehaviorsTest } from "../OIBehaviorsTest"
+import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
 import
 {
   OISnapManager,
@@ -12,14 +12,14 @@ describe("OISnapManager.ts", () =>
 {
   test("should create", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const manager = new OISnapManager(behaviors)
     expect(manager).toBeDefined()
   })
 
   test("should call renderer.drawLine when drawSnapToElementLines", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const manager = new OISnapManager(behaviors)
     manager.renderer.drawLine = jest.fn()
     const lines: TSegment[] = [
@@ -42,7 +42,7 @@ describe("OISnapManager.ts", () =>
 
   test("should call renderer.clearElements when clearSnapToElementLines", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const manager = new OISnapManager(behaviors)
     manager.renderer.clearElements = jest.fn()
     manager.clearSnapToElementLines()
@@ -53,7 +53,7 @@ describe("OISnapManager.ts", () =>
   describe("snapResize", () =>
   {
     const wrapperHTML: HTMLElement = document.createElement("div")
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     behaviors.configuration.rendering.guides.gap = 10
     const manager = new OISnapManager(behaviors)
@@ -179,7 +179,7 @@ describe("OISnapManager.ts", () =>
   describe("snapTranslate", () =>
   {
     const wrapperHTML: HTMLElement = document.createElement("div")
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     behaviors.configuration.rendering.guides.gap = 10
     const manager = new OISnapManager(behaviors)
@@ -310,7 +310,7 @@ describe("OISnapManager.ts", () =>
 
   describe("snapRotation", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const manager = new OISnapManager(behaviors)
 
     test("should do nothing if snapToElement & snapToGrid are equal to false", () =>

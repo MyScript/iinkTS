@@ -1,17 +1,17 @@
-import { helloJIIX, lineJIIX, rectangleJIIX } from "../_dataset/jiix.dataset"
+import { helloJIIX, lineJIIX, rectangleJIIX } from "../__dataset__/jiix.dataset"
 import { buildOIStroke, buildOIText, delay } from "../helpers"
 import
 {
   OIDebugSVGManager,
   TOISymbolChar,
 } from "../../../src/iink"
-import { OIBehaviorsTest } from "../OIBehaviorsTest"
+import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
 
 describe("OIDebugSVGManager.ts", () =>
 {
   test("should create", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const manager = new OIDebugSVGManager(behaviors)
     expect(manager).toBeDefined()
     expect(manager.verticesVisibility).toEqual(false)
@@ -23,7 +23,7 @@ describe("OIDebugSVGManager.ts", () =>
   describe("bounding box", () =>
   {
     const wrapperHTML: HTMLElement = document.createElement("div")
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
 
     const manager = new OIDebugSVGManager(behaviors)
@@ -85,7 +85,7 @@ describe("OIDebugSVGManager.ts", () =>
   describe("vertices", () =>
   {
     const wrapperHTML: HTMLElement = document.createElement("div")
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
 
     const manager = new OIDebugSVGManager(behaviors)
@@ -112,7 +112,7 @@ describe("OIDebugSVGManager.ts", () =>
   describe("recognition box", () =>
   {
     const wrapperHTML: HTMLElement = document.createElement("div")
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     Object.defineProperty(global.SVGElement.prototype, 'getBBox', {
       writable: true,
@@ -167,7 +167,7 @@ describe("OIDebugSVGManager.ts", () =>
   describe("recognition item box", () =>
   {
     const wrapperHTML: HTMLElement = document.createElement("div")
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     Object.defineProperty(global.SVGElement.prototype, 'getBBox', {
       writable: true,

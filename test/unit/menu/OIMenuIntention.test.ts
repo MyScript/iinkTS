@@ -1,12 +1,12 @@
-import { OIBehaviorsTest } from "../OIBehaviorsTest"
-import { LeftClickEventFake } from "../PointerEventFake"
+import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
+import { LeftClickEventFake } from "../__mocks__/PointerEventFake"
 import { Intention, OIMenuIntention, WriteTool } from "../../../src/iink"
 
 describe("OIMenuIntention.ts", () =>
 {
   test("should create", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const menu = new OIMenuIntention(behaviors)
     expect(menu).toBeDefined()
   })
@@ -14,7 +14,7 @@ describe("OIMenuIntention.ts", () =>
   describe("render", () =>
   {
     const layer = document.createElement("div")
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const menu = new OIMenuIntention(behaviors)
     menu.render(layer)
     test("should display menu write pencil", () =>
@@ -41,7 +41,7 @@ describe("OIMenuIntention.ts", () =>
 
   describe("change intention", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     behaviors.init(behaviors.layerInfos)
     const menu = new OIMenuIntention(behaviors)
     const pointerUpEvt = new LeftClickEventFake("pointerup", {
@@ -163,7 +163,7 @@ describe("OIMenuIntention.ts", () =>
 
   describe("update", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     behaviors.init(behaviors.layerInfos)
     const menu = new OIMenuIntention(behaviors)
     menu.render(behaviors.layerInfos)
@@ -260,7 +260,7 @@ describe("OIMenuIntention.ts", () =>
 
   describe("show/hide", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     behaviors.init(behaviors.layerInfos)
     const menu = new OIMenuIntention(behaviors)
     menu.render(behaviors.layerInfos)
@@ -280,7 +280,7 @@ describe("OIMenuIntention.ts", () =>
 
   describe("destroy", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     behaviors.init(behaviors.layerInfos)
     const menu = new OIMenuIntention(behaviors)
     menu.render(behaviors.layerInfos)

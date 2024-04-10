@@ -1,4 +1,4 @@
-import { OIBehaviorsTest } from "../OIBehaviorsTest"
+import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
 import
 {
   OIMenuManager,
@@ -11,7 +11,7 @@ describe("OIMenuManager.ts", () =>
 {
   test("should instanciate", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const manager = new OIMenuManager(behaviors)
     expect(manager).toBeDefined()
   })
@@ -24,7 +24,7 @@ describe("OIMenuManager.ts", () =>
       {
         name = "override-style"
       }
-      const behaviors = new OIBehaviorsTest()
+      const behaviors = new OIBehaviorsMock()
       //@ts-ignore
       const manager = new OIMenuManager(behaviors, { style: CustomMenuStyle })
       //@ts-ignore
@@ -36,7 +36,7 @@ describe("OIMenuManager.ts", () =>
       {
         name = "override-intention"
       }
-      const behaviors = new OIBehaviorsTest()
+      const behaviors = new OIBehaviorsMock()
       //@ts-ignore
       const manager = new OIMenuManager(behaviors, { intention: CustomMenuIntention })
       //@ts-ignore
@@ -48,7 +48,7 @@ describe("OIMenuManager.ts", () =>
       {
         name = "override-action"
       }
-      const behaviors = new OIBehaviorsTest()
+      const behaviors = new OIBehaviorsMock()
       //@ts-ignore
       const manager = new OIMenuManager(behaviors, { action: CustomMenuAction })
       //@ts-ignore
@@ -59,7 +59,7 @@ describe("OIMenuManager.ts", () =>
   describe("render", () =>
   {
     const layer = document.createElement("div")
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     //@ts-ignore
     const manager = new OIMenuManager(behaviors)
     manager.action.render = jest.fn()
@@ -110,7 +110,7 @@ describe("OIMenuManager.ts", () =>
 
   describe("update", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     //@ts-ignore
     const manager = new OIMenuManager(behaviors)
     manager.action.update = jest.fn()
@@ -128,7 +128,7 @@ describe("OIMenuManager.ts", () =>
 
   describe("show/hide", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     //@ts-ignore
     const manager = new OIMenuManager(behaviors)
     manager.action.show = jest.fn()
@@ -156,7 +156,7 @@ describe("OIMenuManager.ts", () =>
 
   describe("destroy", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     //@ts-ignore
     const manager = new OIMenuManager(behaviors)
     manager.action.destroy = jest.fn()

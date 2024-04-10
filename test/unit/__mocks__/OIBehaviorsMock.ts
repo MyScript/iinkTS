@@ -1,12 +1,12 @@
-import { OIBehaviors, TBehaviorOptions } from "../../src/behaviors"
-import { DefaultConfiguration } from "../../src/configuration"
+import { OIBehaviors, TBehaviorOptions } from "../../../src/behaviors"
+import { DefaultConfiguration } from "../../../src/configuration"
 
 const behaviorsOptions: TBehaviorOptions = {
   configuration: JSON.parse(JSON.stringify(DefaultConfiguration))
 }
 behaviorsOptions.configuration.offscreen = true
 
-export class OIBehaviorsTest extends OIBehaviors
+export class OIBehaviorsMock extends OIBehaviors
 {
   constructor() {
     //@ts-ignore

@@ -1,5 +1,5 @@
 import { buildOIText } from "../helpers"
-import { OIBehaviorsTest } from "../OIBehaviorsTest"
+import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
 import
 {
   OITextManager,
@@ -48,14 +48,14 @@ describe("OITextManager.ts", () =>
 
   test("should create", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const manager = new OITextManager(behaviors)
     expect(manager).toBeDefined()
   })
 
   test("should set chars BoundingBox", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const manager = new OITextManager(behaviors)
     const text = buildOIText({ chars })
     const textEl = manager.renderer.getSymbolElement(text) as SVGGElement
@@ -67,7 +67,7 @@ describe("OITextManager.ts", () =>
 
   test("should get element BoundingBox", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const manager = new OITextManager(behaviors)
     const text = buildOIText({ chars })
     const textEl = manager.renderer.getSymbolElement(text) as SVGGElement
@@ -76,7 +76,7 @@ describe("OITextManager.ts", () =>
 
   test("should get BoundingBox", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const manager = new OITextManager(behaviors)
     manager.renderer.layer = SVGBuilder.createLayer({ x: 0, y: 0, width: 100, height: 100 })
     manager.renderer.prependElement = jest.fn()
@@ -88,7 +88,7 @@ describe("OITextManager.ts", () =>
 
   test("shoud get Space Width", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const manager = new OITextManager(behaviors)
     manager.getBoundingBox = jest.fn(() => new Box({ height: 12, width: 42, x: 0, y: 0 }))
     expect(manager.getSpaceWidth(12)).toEqual(42)
@@ -97,7 +97,7 @@ describe("OITextManager.ts", () =>
 
   test("should update Text BoundingBox", () =>
   {
-    const behaviors = new OIBehaviorsTest()
+    const behaviors = new OIBehaviorsMock()
     const manager = new OITextManager(behaviors)
     manager.renderer.layer = SVGBuilder.createLayer({ x: 0, y: 0, width: 100, height: 100 })
     manager.renderer.prependElement = jest.fn()
