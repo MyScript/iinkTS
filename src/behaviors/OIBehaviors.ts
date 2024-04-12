@@ -635,6 +635,7 @@ export class OIBehaviors implements IBehaviors
 
   selectAll(): void
   {
+    this.selector.removeSelectedGroup()
     this.model.symbols.forEach(s =>
     {
       s.selected = true
