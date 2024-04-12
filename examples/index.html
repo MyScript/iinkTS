@@ -48,6 +48,21 @@
         document.body.scrollTop = 0;
         document.documentElement.scrollTop = 0;
       }
+
+      window.addEventListener("load", () => {
+        if (window.innerWidth < 1000) {
+          document.getElementById("home-nav").classList.add("hidden")
+        }
+      })
+      window.addEventListener("resize", () => {
+        if (window.innerWidth < 1000) {
+          document.getElementById("home-nav").classList.add("hidden")
+        }
+      })
+
+      function toggleMenu() {
+        document.getElementById("home-nav").classList.toggle("hidden")
+      }
     </script>
 
     <svg style="display: none;">
@@ -79,790 +94,796 @@
     </svg>
 
     <header class="home-header">
+      <button id="home-menu-toggle" class="menu-button home-menu-toggle" onpointerup="toggleMenu()">
+        <img src="./assets/img/menu.svg" />
+      </button>
       <a id="home-header-link" class="home-header-link" href="http://www.myscript.com/" target="_blank" title="MyScript"> </a>
     </header>
 
     <button id="back-to-top-btn" class="back-to-top-btn" title="Go to top" onpointerup="topFunction()">Top</button>
     <h1>iinkTS Examples</h1>
-    <nav class="home-nav">
-      <h2>Table of contents</h2>
-      <ul id="table-of-content">
-        <li><a href="#text">Text recognition</a></li>
-        <li><a href="#math">Math recognition</a></li>
-        <li><a href="#diagram">Diagram recognition</a></li>
-        <li><a href="#raw-content">Raw content recognition</a></li>
-        <li><a href="#not-specific">Not specific recognition</a></li>
-        <li><a href="#development">Development</a></li>
-      </ul>
-    </nav>
 
-    <main class="home-main">
-      <details id="text" name="text" class="accordion example-recognition">
-        <summary class="accordion-summary example-recognition-summary">
-          <div class="example-recognition-title">
-            <img src="./assets/img/home-text.svg" />
-            <span>
-              <h2>
-                Text recognition
-              </h2>
-              <div class="quote">
-                Simple block of multi-line text.
-              </div>
-            </span>
-          </div>
-        </summary>
-        <div role="definition" class="accordion-content example-recognition-content">
-          <section class="example-section">
-            <h3 class="example-section-title">Websocket</h3>
-            <div class="example-item">
-              <p><strong>Get Started</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="websocket/websocket_text_iink.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_iink.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-            <div class="example-item">
-              <p><strong>Disable guides</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="websocket/websocket_text_iink_no_guides.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_iink_no_guides.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-            <div class="example-item">
-              <p><strong>Eraser</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="websocket/websocket_text_iink_eraser.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_iink_eraser.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-            <div class="example-item">
-              <p><strong>Use local storage to save text</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="websocket/websocket_text_local_storage_text.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_local_storage_text.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-            <div class="example-item">
-              <p><strong>Custom lexicon</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="websocket/websocket_text_custom_lexicon.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_custom_lexicon.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-            <div class="example-item">
-              <p><strong>Custom pre-loaded resource</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="websocket/websocket_text_custom_resources.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_custom_resources.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-            <div class="example-item">
-              <p><strong>Customize editor style</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="websocket/websocket_text_customize_editor_css.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_customize_editor_css.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-            <div class="example-item">
-              <p><strong>Customize font and style of stroke</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="websocket/websocket_text_customize_stroke_style.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_customize_stroke_style.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-            <div class="example-item">
-              <p><strong>Import pointer events</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="websocket/websocket_text_pointer_events.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_pointer_events.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-            <div class="example-item">
-              <p><strong>Import text</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="websocket/websocket_text_import_content.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_import_content.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-            <div class="example-item">
-              <p><strong>Searching text (without Smart Guide)</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="websocket/websocket_text_iink_search.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_iink_search.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-            <div class="example-item">
-              <p><strong>Interact</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="websocket/websocket_text_interact.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_interact.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-            <div class="example-item">
-              <p><strong>Highlight words</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="websocket/websocket_text_highlight_words.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_highlight_words.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-            <div class="example-item">
-              <p><strong>Use multiple inputs fields</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="websocket/websocket_text_multiple_inputs.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_multiple_inputs.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-            <div class="example-item">
-              <p><strong>Produce file from writing (docx, html...)</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="websocket/websocket_text_file_export.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_file_export.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-          </section>
-          <section class="example-section">
-            <h3 class="example-section-title">REST</h3>
-            <div class="example-item">
-              <p><strong>Getting Started</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="rest/rest_text_iink.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_text_iink.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-            <div class="example-item">
-              <p><strong>Customize style of stroke</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="rest/rest_text_iink_customize_stroke_style.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example</a
-                >
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_text_iink_customize_stroke_style.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-          </section>
-        </div>
-      </details>
+    <div class="home-content">
+      <nav id="home-nav" class="home-nav">
+        <h2>Table of contents</h2>
+        <ul id="table-of-content">
+          <li><a href="#text">Text recognition</a></li>
+          <li><a href="#math">Math recognition</a></li>
+          <li><a href="#diagram">Diagram recognition</a></li>
+          <li><a href="#raw-content">Raw content recognition</a></li>
+          <li><a href="#not-specific">Not specific recognition</a></li>
+          <li><a href="#development">Development</a></li>
+        </ul>
+      </nav>
 
-      <details id="math" name="math" class="accordion example-recognition">
-        <summary class="accordion-summary example-recognition-summary">
-          <div class="example-recognition-title">
-            <img src="./assets/img/home-math.svg" />
-            <span>
-              <h2>
-                Math recognition
-              </h2>
-              <div class="quote">
-                Block supporting one or more equation.
+      <main class="home-main">
+        <details id="text" name="text" class="accordion example-recognition">
+          <summary class="accordion-summary example-recognition-summary">
+            <div class="example-recognition-title">
+              <img src="./assets/img/home-text.svg" />
+              <span>
+                <h2>
+                  Text recognition
+                </h2>
+                <div class="quote">
+                  Simple block of multi-line text.
+                </div>
+              </span>
+            </div>
+          </summary>
+          <div role="definition" class="accordion-content example-recognition-content">
+            <section class="example-section">
+              <h3 class="example-section-title">Websocket</h3>
+              <div class="example-item">
+                <p><strong>Get Started</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="websocket/websocket_text_iink.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_iink.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
               </div>
-            </span>
+              <div class="example-item">
+                <p><strong>Disable guides</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="websocket/websocket_text_iink_no_guides.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_iink_no_guides.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+              <div class="example-item">
+                <p><strong>Eraser</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="websocket/websocket_text_iink_eraser.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_iink_eraser.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+              <div class="example-item">
+                <p><strong>Use local storage to save text</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="websocket/websocket_text_local_storage_text.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_local_storage_text.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+              <div class="example-item">
+                <p><strong>Custom lexicon</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="websocket/websocket_text_custom_lexicon.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_custom_lexicon.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+              <div class="example-item">
+                <p><strong>Custom pre-loaded resource</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="websocket/websocket_text_custom_resources.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_custom_resources.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+              <div class="example-item">
+                <p><strong>Customize editor style</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="websocket/websocket_text_customize_editor_css.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_customize_editor_css.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+              <div class="example-item">
+                <p><strong>Customize font and style of stroke</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="websocket/websocket_text_customize_stroke_style.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_customize_stroke_style.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+              <div class="example-item">
+                <p><strong>Import pointer events</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="websocket/websocket_text_pointer_events.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_pointer_events.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+              <div class="example-item">
+                <p><strong>Import text</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="websocket/websocket_text_import_content.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_import_content.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+              <div class="example-item">
+                <p><strong>Searching text (without Smart Guide)</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="websocket/websocket_text_iink_search.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_iink_search.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+              <div class="example-item">
+                <p><strong>Interact</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="websocket/websocket_text_interact.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_interact.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+              <div class="example-item">
+                <p><strong>Highlight words</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="websocket/websocket_text_highlight_words.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_highlight_words.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+              <div class="example-item">
+                <p><strong>Use multiple inputs fields</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="websocket/websocket_text_multiple_inputs.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_multiple_inputs.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+              <div class="example-item">
+                <p><strong>Produce file from writing (docx, html...)</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="websocket/websocket_text_file_export.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_file_export.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+            </section>
+            <section class="example-section">
+              <h3 class="example-section-title">REST</h3>
+              <div class="example-item">
+                <p><strong>Getting Started</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="rest/rest_text_iink.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_text_iink.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+              <div class="example-item">
+                <p><strong>Customize style of stroke</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="rest/rest_text_iink_customize_stroke_style.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example</a
+                  >
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_text_iink_customize_stroke_style.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+            </section>
           </div>
-        </summary>
-        <div role="definition" class="accordion-content example-recognition-content">
-          <section class="example-section">
-            <h3 class="example-section-title">Websocket</h3>
-            <div class="example-item">
-              <p><strong>Get Started</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="websocket/websocket_math_iink.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_iink.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-            <div class="example-item">
-              <p><strong>Eraser</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="websocket/websocket_math_iink_eraser.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_iink_eraser.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-            <div class="example-item">
-              <p><strong>Custom resource math</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="websocket/websocket_math_custom_resources.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_custom_resources.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-            <div class="example-item">
-              <p><strong>Custom resource math (pre-compiled)</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="websocket/websocket_math_custom_resources_compiled.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_custom_resources_compiled.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-            <div class="example-item">
-              <p><strong>Import JIIX</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="websocket/websocket_math_import_jiix.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_import_jiix.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-            <div class="example-item">
-              <p><strong>Math inside page</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="websocket/websocket_math_inside_page.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_inside_page.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-            <div class="example-item">
-              <p><strong>Draw graph</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="websocket/websocket_math_with_graph.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_with_graph.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-          </section>
-          <section class="example-section">
-            <h3 class="example-section-title">REST</h3>
-            <div class="example-item">
-              <p><strong>Getting Started</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="rest/rest_math_iink.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example</a
-                >
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_math_iink.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-          </section>
-        </div>
-      </details>
+        </details>
 
-      <details id="diagram" name="diagram" class="accordion example-recognition">
-        <summary class="accordion-summary example-recognition-summary">
-          <div class="example-recognition-title">
-            <img src="./assets/img/home-diagram.svg" />
-            <span>
-              <h2>
-                Diagram recognition
-              </h2>
-              <div class="quote">
-                Block supporting a diagram, with automatic text/non-text distinction and dynamic reorganization possibilities.
+        <details id="math" name="math" class="accordion example-recognition">
+          <summary class="accordion-summary example-recognition-summary">
+            <div class="example-recognition-title">
+              <img src="./assets/img/home-math.svg" />
+              <span>
+                <h2>
+                  Math recognition
+                </h2>
+                <div class="quote">
+                  Block supporting one or more equation.
+                </div>
+              </span>
+            </div>
+          </summary>
+          <div role="definition" class="accordion-content example-recognition-content">
+            <section class="example-section">
+              <h3 class="example-section-title">Websocket</h3>
+              <div class="example-item">
+                <p><strong>Get Started</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="websocket/websocket_math_iink.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_iink.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
               </div>
-            </span>
+              <div class="example-item">
+                <p><strong>Eraser</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="websocket/websocket_math_iink_eraser.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_iink_eraser.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+              <div class="example-item">
+                <p><strong>Custom resource math</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="websocket/websocket_math_custom_resources.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_custom_resources.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+              <div class="example-item">
+                <p><strong>Custom resource math (pre-compiled)</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="websocket/websocket_math_custom_resources_compiled.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_custom_resources_compiled.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+              <div class="example-item">
+                <p><strong>Import JIIX</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="websocket/websocket_math_import_jiix.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_import_jiix.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+              <div class="example-item">
+                <p><strong>Math inside page</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="websocket/websocket_math_inside_page.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_inside_page.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+              <div class="example-item">
+                <p><strong>Draw graph</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="websocket/websocket_math_with_graph.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_with_graph.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+            </section>
+            <section class="example-section">
+              <h3 class="example-section-title">REST</h3>
+              <div class="example-item">
+                <p><strong>Getting Started</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="rest/rest_math_iink.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example</a
+                  >
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_math_iink.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+            </section>
           </div>
-        </summary>
-        <div role="definition" class="accordion-content example-recognition-content">
-          <section class="example-section">
-            <h3 class="example-section-title">REST</h3>
-            <div class="example-item">
-              <p><strong>Get Started</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="rest/rest_diagram_iink.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example</a
-                >
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_diagram_iink.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-            <div class="example-item">
-              <p><strong>Import pointer events</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="rest/rest_diagram_iink_import.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example</a
-                >
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_diagram_iink_import.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-          </section>
-        </div>
-      </details>
+        </details>
 
-      <details id="raw-content" name="raw-content" class="accordion example-recognition">
-        <summary class="accordion-summary example-recognition-summary">
-          <div class="example-recognition-title">
-            <img src="./assets/img/home-raw-content.svg" />
-            <span>
-              <h2>
-                Raw Content recognition
-              </h2>
-              <div class="quote">
-                Block hosting digital ink with no explicit segmentation into text, math, diagram or other items which semantics is known by iink SDK.
-              </div>
-            </span>
-          </div>
-        </summary>
-        <div role="definition" class="accordion-content example-recognition-content">
-          <section class="example-section">
-            <h3 class="example-section-title">REST</h3>
-            <div class="example-item">
-              <p><strong>Get Started</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="rest/rest_raw_content_iink.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example</a
-                >
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_raw_content_iink.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
+        <details id="diagram" name="diagram" class="accordion example-recognition">
+          <summary class="accordion-summary example-recognition-summary">
+            <div class="example-recognition-title">
+              <img src="./assets/img/home-diagram.svg" />
+              <span>
+                <h2>
+                  Diagram recognition
+                </h2>
+                <div class="quote">
+                  Block supporting a diagram, with automatic text/non-text distinction and dynamic reorganization possibilities.
+                </div>
+              </span>
             </div>
-          </section>
-        </div>
-      </details>
+          </summary>
+          <div role="definition" class="accordion-content example-recognition-content">
+            <section class="example-section">
+              <h3 class="example-section-title">REST</h3>
+              <div class="example-item">
+                <p><strong>Get Started</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="rest/rest_diagram_iink.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example</a
+                  >
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_diagram_iink.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+              <div class="example-item">
+                <p><strong>Import pointer events</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="rest/rest_diagram_iink_import.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example</a
+                  >
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_diagram_iink_import.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+            </section>
+          </div>
+        </details>
 
-      <details id="not-specific" name="not-specific" class="accordion example-recognition">
-        <summary class="accordion-summary example-recognition-summary">
-          <div class="example-recognition-title">
-            <img src="./assets/img/home-not-specific.svg" />
-            <span>
-              <h2>
-                Not Specific recognition
-              </h2>
-              <div class="quote">
-                For all recognition types
+        <details id="raw-content" name="raw-content" class="accordion example-recognition">
+          <summary class="accordion-summary example-recognition-summary">
+            <div class="example-recognition-title">
+              <img src="./assets/img/home-raw-content.svg" />
+              <span>
+                <h2>
+                  Raw Content recognition
+                </h2>
+                <div class="quote">
+                  Block hosting digital ink with no explicit segmentation into text, math, diagram or other items which semantics is known by iink SDK.
+                </div>
+              </span>
+            </div>
+          </summary>
+          <div role="definition" class="accordion-content example-recognition-content">
+            <section class="example-section">
+              <h3 class="example-section-title">REST</h3>
+              <div class="example-item">
+                <p><strong>Get Started</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="rest/rest_raw_content_iink.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example</a
+                  >
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_raw_content_iink.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
               </div>
-            </span>
+            </section>
           </div>
-        </summary>
-        <div role="definition" class="accordion-content example-recognition-content">
-          <section class="example-section">
-            <div class="example-item">
-              <p><strong>Change configuration</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="non-specific/change_configuration.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/non-specific/change_configuration.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-          </section>
-          <section class="example-section">
-            <h3 class="example-section-title">Websocket</h3>
-            <div class="example-item">
-              <p><strong>Configure on-demand export</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="websocket/websocket_export_on_demand.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_export_on_demand.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-            <div class="example-item">
-              <p><strong>Handle errors</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="websocket/websocket_handle_errors.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_handle_errors.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-          </section>
-          <section class="example-section">
-            <h3 class="example-section-title">REST</h3>
-            <div class="example-item">
-              <p><strong>Without UI</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="rest/rest_no_ui.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_no_ui.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
-            </div>
-          </section>
-        </div>
-      </details>
+        </details>
 
-      <details id="development" name="development" class="accordion example-recognition">
-        <summary class="accordion-summary example-recognition-summary">
-          <div class="example-recognition-title">
-            <img src="./assets/img/home-development.svg" />
-            <span>
-              <h2>
-                Development
-              </h2>
-              <div class="quote">
-                For developers who want to integrate link-ts
+        <details id="not-specific" name="not-specific" class="accordion example-recognition">
+          <summary class="accordion-summary example-recognition-summary">
+            <div class="example-recognition-title">
+              <img src="./assets/img/home-not-specific.svg" />
+              <span>
+                <h2>
+                  Not Specific recognition
+                </h2>
+                <div class="quote">
+                  For all recognition types
+                </div>
+              </span>
+            </div>
+          </summary>
+          <div role="definition" class="accordion-content example-recognition-content">
+            <section class="example-section">
+              <div class="example-item">
+                <p><strong>Change configuration</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="non-specific/change_configuration.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/non-specific/change_configuration.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
               </div>
-            </span>
+            </section>
+            <section class="example-section">
+              <h3 class="example-section-title">Websocket</h3>
+              <div class="example-item">
+                <p><strong>Configure on-demand export</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="websocket/websocket_export_on_demand.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_export_on_demand.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+              <div class="example-item">
+                <p><strong>Handle errors</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="websocket/websocket_handle_errors.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_handle_errors.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+            </section>
+            <section class="example-section">
+              <h3 class="example-section-title">REST</h3>
+              <div class="example-item">
+                <p><strong>Without UI</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="rest/rest_no_ui.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_no_ui.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+            </section>
           </div>
-        </summary>
-        <div role="definition" class="accordion-content example-recognition-content">
-          <section class="example-section">
-            <div class="example-item">
-              <p><strong>Configuring debug trace</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="dev/websocket_text_debug.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/dev/websocket_text_debug.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
-              </div>
+        </details>
+
+        <details id="development" name="development" class="accordion example-recognition">
+          <summary class="accordion-summary example-recognition-summary">
+            <div class="example-recognition-title">
+              <img src="./assets/img/home-development.svg" />
+              <span>
+                <h2>
+                  Development
+                </h2>
+                <div class="quote">
+                  For developers who want to integrate link-ts
+                </div>
+              </span>
             </div>
-            <h3 class="example-section-title">Websocket</h3>
-            <div class="example-item">
-              <p><strong>Custom recognizer</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="dev/websocket_custom_recognizer.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/dev/websocket_custom_recognizer.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
+          </summary>
+          <div role="definition" class="accordion-content example-recognition-content">
+            <section class="example-section">
+              <div class="example-item">
+                <p><strong>Configuring debug trace</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="dev/websocket_text_debug.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/dev/websocket_text_debug.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
               </div>
-            </div>
-            <div class="example-item">
-              <p><strong>Custom grabber</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="dev/websocket_custom_grabber.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/dev/websocket_custom_grabber.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
+              <h3 class="example-section-title">Websocket</h3>
+              <div class="example-item">
+                <p><strong>Custom recognizer</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="dev/websocket_custom_recognizer.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/dev/websocket_custom_recognizer.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
               </div>
-            </div>
-            <h3 class="example-section-title">REST</h3>
-            <div class="example-item">
-              <p><strong>Custom recognizer</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="dev/rest_custom_recognizer.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/dev/rest_custom_recognizer.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
+              <div class="example-item">
+                <p><strong>Custom grabber</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="dev/websocket_custom_grabber.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/dev/websocket_custom_grabber.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
               </div>
-            </div>
-            <div class="example-item">
-              <p><strong>Custom grabber</strong></p>
-              <div class="example-btn-wrapper">
-                <a href="dev/rest_custom_grabber.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                  </svg>
-                  View example
-                </a>
-                <a href="https://github.com/MyScript/iinkTS/blob/master/examples/dev/rest_custom_grabber.html" class="btn">
-                  <svg class="icn">
-                    <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                  </svg>
-                  Get source code
-                </a>
+              <h3 class="example-section-title">REST</h3>
+              <div class="example-item">
+                <p><strong>Custom recognizer</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="dev/rest_custom_recognizer.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/dev/rest_custom_recognizer.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
               </div>
-            </div>
-          </section>
-        </div>
-      </details>
-    </main>
+              <div class="example-item">
+                <p><strong>Custom grabber</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="dev/rest_custom_grabber.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/dev/rest_custom_grabber.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+            </section>
+          </div>
+        </details>
+      </main>
+    </div>
   </body>
 </html>
