@@ -534,9 +534,10 @@
     background-color: rgb(239, 239, 239, 1);
 }
 .ms-editor .ms-menu .ms-menu-button:disabled {
-    cursor: not-allowed;
     background-color: rgba(255, 255, 255, 0.4);
     color: rgba(0, 0, 0, 0.4);
+    pointer-events: none;
+    opacity: 0.5;
 }
 .ms-editor .ms-menu .ms-menu-button:focus,
 .ms-editor .ms-menu .ms-menu-button:active {

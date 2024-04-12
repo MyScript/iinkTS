@@ -4,7 +4,6 @@ import { OIBehaviors } from "../behaviors"
 import { LoggerManager } from "../logger"
 import { Box, DecoratorKind, OIDecorator, OIStroke, OIText, SymbolType, TOISymbol } from "../primitive"
 import { OIMenu, TMenuItemBoolean, TMenuItemButton, TMenuItemColorList } from "./OIMenu"
-import { TStyle } from "../style"
 
 /**
  * Menu
@@ -37,14 +36,18 @@ export class OIMenuContext extends OIMenu
     this.position = { x: 0, y: 0, scrollLeft: 0, scrollTop: 0 }
   }
 
-  get symbols(): TOISymbol[]
+  get symbolsSelected(): TOISymbol[]
   {
     return this.behaviors.model.symbolsSelected
+  }
+  get haveSymbolsSelected(): boolean
+  {
+    return this.symbolsSelected.length > 0
   }
 
   get symbolsDecorable(): (OIStroke | OIText)[]
   {
-    return this.symbols.filter(s => s.type === SymbolType.Stroke || s.type === SymbolType.Text) as (OIStroke | OIText)[]
+    return this.symbolsSelected.filter(s => s.type === SymbolType.Stroke || s.type === SymbolType.Text) as (OIStroke | OIText)[]
   }
   get showDecorator(): boolean
   {
@@ -59,7 +62,7 @@ export class OIMenuContext extends OIMenu
     this.duplicateBtn.classList.add("ms-menu-button")
     this.duplicateBtn.addEventListener("pointerup", async () =>
     {
-      const symbolsToDuplicate = this.behaviors.model.symbolsSelected
+      const symbolsToDuplicate = this.symbolsSelected
       const selectionBox = Box.createFromBoxes(symbolsToDuplicate.map(s => s.boundingBox))
       const duplicatedSymbols = symbolsToDuplicate.map(s =>
       {
@@ -90,7 +93,7 @@ export class OIMenuContext extends OIMenu
     this.removeBtn.addEventListener("pointerup", async () =>
     {
       this.behaviors.selector.removeSelectedGroup()
-      await this.behaviors.removeSymbols(this.behaviors.model.symbolsSelected.map(s => s.id))
+      await this.behaviors.removeSymbols(this.symbolsSelected.map(s => s.id))
       this.behaviors.menu.update()
     })
     return this.removeBtn
@@ -116,8 +119,8 @@ export class OIMenuContext extends OIMenu
         id: `${ this.id }-reorder-first`,
         label: "Bring to front",
         callback: () => {
-          this.behaviors.changeOrderSymbols(this.behaviors.model.symbolsSelected, "last")
-          this.behaviors.selector.resetSelectedGroup(this.behaviors.model.symbolsSelected)
+          this.behaviors.changeOrderSymbols(this.symbolsSelected, "last")
+          this.behaviors.selector.resetSelectedGroup(this.symbolsSelected)
         }
       },
       {
@@ -125,8 +128,8 @@ export class OIMenuContext extends OIMenu
         id: `${ this.id }-reorder-forward`,
         label: "Bring forward",
         callback: () => {
-          this.behaviors.changeOrderSymbols(this.behaviors.model.symbolsSelected, "forward")
-          this.behaviors.selector.resetSelectedGroup(this.behaviors.model.symbolsSelected)
+          this.behaviors.changeOrderSymbols(this.symbolsSelected, "forward")
+          this.behaviors.selector.resetSelectedGroup(this.symbolsSelected)
         }
       },
       {
@@ -134,8 +137,8 @@ export class OIMenuContext extends OIMenu
         id: `${ this.id }-reorder-backward`,
         label: "Send backward",
         callback: () => {
-          this.behaviors.changeOrderSymbols(this.behaviors.model.symbolsSelected, "backward")
-          this.behaviors.selector.resetSelectedGroup(this.behaviors.model.symbolsSelected)
+          this.behaviors.changeOrderSymbols(this.symbolsSelected, "backward")
+          this.behaviors.selector.resetSelectedGroup(this.symbolsSelected)
         }
       },
       {
@@ -143,8 +146,8 @@ export class OIMenuContext extends OIMenu
         id: `${ this.id }-reorder-last`,
         label: "Send to back",
         callback: () => {
-          this.behaviors.changeOrderSymbols(this.behaviors.model.symbolsSelected.slice().reverse(), "first")
-          this.behaviors.selector.resetSelectedGroup(this.behaviors.model.symbolsSelected)
+          this.behaviors.changeOrderSymbols(this.symbolsSelected.slice().reverse(), "first")
+          this.behaviors.selector.resetSelectedGroup(this.symbolsSelected)
         }
       },
     ]
@@ -172,28 +175,36 @@ export class OIMenuContext extends OIMenu
     icon.innerHTML = ArrowDown
     trigger.appendChild(icon)
 
-    const decoStyles = this.symbolsDecorable.map(s => s.decorators.find(d => d.kind === kind)?.style).filter(style => !!style) as TStyle[]
-    const hasUniqColor = decoStyles.length && decoStyles.every(st => st.color === decoStyles[0]?.color)
-    const color = hasUniqColor && decoStyles[0]?.color ? decoStyles[0]?.color : (this.behaviors.currentPenStyle.color || "rgb(0, 0, 0)") as string
     const menuItems: (TMenuItemBoolean | TMenuItemColorList )[] = [
       {
         type: "checkbox",
         id: `${ this.id }-decorator-${kind}-enable`,
         label: "Enable",
         initValue: false,
-        callback: (value) => {
+        callback: (enable) => {
           this.symbolsDecorable.forEach(s => {
-            const stroke = s as OIStroke | OIText
-            if (value) {
-              if (!stroke.decorators.some(d => d.kind === kind)) {
-                stroke.decorators.push(new OIDecorator(kind, this.behaviors.currentPenStyle))
+            if (enable) {
+              if (!s.decorators.some(d => d.kind === kind)) {
+                s.decorators.push(new OIDecorator(kind, this.behaviors.currentPenStyle))
               }
             }
             else {
-              stroke.decorators = []
+              const decoIndex = s.decorators.findIndex(d => d.kind === kind)
+              if (decoIndex > -1) {
+                s.decorators.splice(decoIndex, 1)
+              }
             }
-            this.behaviors.updateSymbol(stroke)
+            this.behaviors.model.updateSymbol(s)
+            this.behaviors.renderer.drawSymbol(s)
           })
+
+          document.querySelectorAll(`#${ this.id }-decorator-${kind}-color button`).forEach(b => {
+            (b as HTMLButtonElement).disabled = !enable
+            b.classList.remove("active")
+          })
+          if (enable) {
+            document.querySelector(`#${ this.id }-decorator-${kind}-color button`)?.classList.add("active")
+          }
         }
       },
       {
@@ -202,12 +213,13 @@ export class OIMenuContext extends OIMenu
         id: `${ this.id }-decorator-${kind}-color`,
         fill: false,
         values: this.colors.filter((_c, i) => !(i % 4)),
-        initValue: color,
+        initValue: this.colors[0],
+        disabled: true,
         callback: (color) => {
           this.symbolsDecorable.forEach(s => {
-            const decos = s.decorators.find(d => d.kind === kind)
-            if (decos) {
-              decos.style.color = color
+            const deco = s.decorators.find(d => d.kind === kind)
+            if (deco) {
+              deco.style.color = color
               this.behaviors.model.updateSymbol(s)
               this.behaviors.renderer.drawSymbol(s)
             }
@@ -268,19 +280,19 @@ export class OIMenuContext extends OIMenu
         type: "button",
         id: `${ this.id }-export-json`,
         label: "json",
-        callback: () => this.behaviors.downloadAsJson(this.behaviors.model.symbolsSelected.length > 0)
+        callback: () => this.behaviors.downloadAsJson(this.haveSymbolsSelected)
       },
       {
         type: "button",
         id: `${ this.id }-export-svg`,
         label: "svg",
-        callback: () => this.behaviors.downloadAsSVG(this.behaviors.model.symbolsSelected.length > 0)
+        callback: () => this.behaviors.downloadAsSVG(this.haveSymbolsSelected)
       },
       {
         type: "button",
         id: `${ this.id }-export-jpg`,
         label: "jpg",
-        callback: () => this.behaviors.downloadAsJPG(this.behaviors.model.symbolsSelected.length > 0)
+        callback: () => this.behaviors.downloadAsJPG(this.haveSymbolsSelected)
       },
     ]
     const subMenuWrapper = document.createElement("div")
@@ -313,29 +325,75 @@ export class OIMenuContext extends OIMenu
     return btn
   }
 
+  protected updateDecoratorSubMenu(): void
+  {
+    if (this.showDecorator) {
+      this.decoratorMenu?.style.removeProperty("display")
+
+      Object.values(DecoratorKind).forEach(kind => {
+        const checkbox = document.getElementById(`${ this.id }-decorator-${kind}-enable`) as HTMLInputElement
+        if (checkbox) {
+          document.querySelectorAll(`#${ this.id }-decorator-${kind}-color button`).forEach(e => e.classList.remove("active"))
+          const decos = this.symbolsDecorable.flatMap(s => s.decorators).filter(d => d.kind === kind)
+
+          if (decos.length && decos.every(d => d.style.color === decos[0].style.color)) {
+            const btnToActivate = document.getElementById(`${ this.id }-decorator-${kind}-color-${decos[0].style.color?.replace("#", "")}-btn`)
+            btnToActivate?.classList.add("active")
+          }
+
+          if (this.symbolsDecorable.filter(s => s.decorators.some(d => d.kind === kind)).length === this.symbolsDecorable.length) {
+            checkbox.checked = true
+
+            document.querySelectorAll(`#${ this.id }-decorator-${kind}-color button`).forEach(b => {
+              (b as HTMLButtonElement).disabled = false
+            })
+            checkbox.indeterminate = false
+          }
+          else if (this.symbolsDecorable.filter(s => !s.decorators.some(d => d.kind === kind)).length === this.symbolsDecorable.length) {
+            checkbox.checked = false
+            document.querySelectorAll(`#${ this.id }-decorator-${kind}-color button`).forEach(b => {
+              (b as HTMLButtonElement).disabled = true
+            })
+            checkbox.indeterminate = false
+          }
+          else {
+            checkbox.setAttribute("indeterminate", "true")
+            checkbox.indeterminate = true
+            document.querySelectorAll(`#${ this.id }-decorator-${kind}-color button`).forEach(b => {
+              (b as HTMLButtonElement).disabled = false
+            })
+          }
+        }
+
+      })
+    }
+    else {
+      this.decoratorMenu?.style.setProperty("display", "none")
+    }
+  }
+
   update(): void
   {
     this.wrapper?.style.setProperty("left", `${ this.position.x - this.position.scrollLeft }px`)
     this.wrapper?.style.setProperty("top", `${ this.position.y - this.position.scrollTop }px`)
-    if (this.behaviors.model.symbolsSelected.length > 0)
+    if (this.haveSymbolsSelected)
     {
       this.reorderMenu?.style.removeProperty("display")
       this.duplicateBtn?.style.removeProperty("display")
-      this.menuExport?.style.removeProperty("display")
       this.removeBtn?.style.removeProperty("display")
     }
     else {
       this.reorderMenu?.style.setProperty("display", "none")
       this.duplicateBtn?.style.setProperty("display", "none")
-      this.menuExport?.style.setProperty("display", "none")
       this.removeBtn?.style.setProperty("display", "none")
     }
-    if (this.showDecorator) {
-      this.decoratorMenu?.style.removeProperty("display")
+    if (this.behaviors.model.symbols.length) {
+      this.menuExport?.style.removeProperty("display")
     }
     else {
-      this.decoratorMenu?.style.setProperty("display", "none")
+      this.menuExport?.style.setProperty("display", "none")
     }
+    this.updateDecoratorSubMenu()
   }
 
   render(domElement: HTMLElement): void
