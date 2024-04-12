@@ -8,6 +8,7 @@ export type TMenuItem = {
   id: string,
   label: string,
   type: "button" | "checkbox" | "select" | "list" | "colors"
+  disabled?: boolean
 }
 
 /**
@@ -57,7 +58,7 @@ export type TMenuItemColorList = TMenuItem & {
  */
 export type TMenuItemBoolean = TMenuItem & {
   type: "checkbox",
-  initValue: boolean,
+  initValue: boolean | "indeterminate",
   callback: (value: boolean) => void
 }
 
@@ -152,7 +153,14 @@ export abstract class OIMenu
     const checkbox = document.createElement("input")
     checkbox.id = item.id
     checkbox.setAttribute("type", "checkbox")
-    checkbox.checked = item.initValue
+    if (item.disabled) {
+      checkbox.disabled = true
+    }
+    if (item.initValue === "indeterminate") {
+      checkbox.indeterminate = true
+    } else {
+      checkbox.checked = item.initValue
+    }
     checkbox.addEventListener("change", (e) => item.callback((e.target as HTMLInputElement).checked))
     wrapper.appendChild(checkbox)
     return wrapper
@@ -167,6 +175,9 @@ export abstract class OIMenu
     wrapper.appendChild(labelEl)
     const select = document.createElement("select")
     select.id = item.id
+    if (item.disabled) {
+      select.disabled = true
+    }
     item.values.forEach(v =>
     {
       const selected = v.value === item.initValue
@@ -203,6 +214,9 @@ export abstract class OIMenu
     item.values.forEach((v) =>
     {
       const btn = document.createElement("button")
+      if (item.disabled) {
+        btn.disabled = true
+      }
       btn.id = `${item.id}-${ v.value }-btn`
       if (item.initValue === v.value) {
         btn.classList.add("active")
@@ -239,6 +253,9 @@ export abstract class OIMenu
     item.values.forEach((color) =>
     {
       const btn = document.createElement("button")
+      if (item.disabled) {
+        btn.disabled = true
+      }
       btn.id = `${ item.id }-${ color.replace("#", "") }-btn`
       btn.classList.add("ms-menu-button", "square")
       const colorEl = document.createElement("div")

@@ -1,5 +1,4 @@
-import { SELECTION_MARGIN } from "../../Constants"
-import { DecoratorKind, OIDecorator, OIStroke, OIText, SymbolType, TBoundingBox } from "../../primitive"
+import { DecoratorKind, OIDecorator, OIStroke, OIText, TBoundingBox } from "../../primitive"
 import { DefaultStyle } from "../../style"
 import { SVGBuilder } from "./SVGBuilder"
 
@@ -82,11 +81,11 @@ export class OISVGDecoratorUtil
         attrs["stroke-width"] = (decorator.style.width || DefaultStyle.width!).toString()
         const p1 = {
           x: parent.boundingBox.xMin,
-          y: parent.boundingBox.yMax + (parent.type === SymbolType.Stroke ? SELECTION_MARGIN / 2 : 0)
+          y: parent.boundingBox.yMax + (parent.style.width || 1)
         }
         const p2 = {
           x: parent.boundingBox.xMax,
-          y: parent.boundingBox.yMax + (parent.type === SymbolType.Stroke ? SELECTION_MARGIN / 2 : 0)
+          y: parent.boundingBox.yMax + (parent.style.width || 1)
         }
         element = SVGBuilder.createLine(p1, p2, attrs)
         break
