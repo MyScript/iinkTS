@@ -1,4 +1,4 @@
-import { LeftClickEventFake } from "../__mocks__/PointerEventFake"
+import { LeftClickEventMock } from "../__mocks__/EventMock"
 import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
 import { buildOICircle, buildOIStroke } from "../helpers"
 import { Intention, OIMenuStyle, WriteTool } from "../../../src/iink"
@@ -122,7 +122,7 @@ describe("OIMenuStyle.ts", () =>
 
   describe("update style", () =>
   {
-    const pointerUpEvt = new LeftClickEventFake("pointerup", {
+    const pointerUpEvt = new LeftClickEventMock("pointerup", {
       pointerType: "pen",
       clientX: 10,
       clientY: 10,

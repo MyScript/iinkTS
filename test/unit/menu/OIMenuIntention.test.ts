@@ -1,5 +1,5 @@
 import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
-import { LeftClickEventFake } from "../__mocks__/PointerEventFake"
+import { LeftClickEventMock } from "../__mocks__/EventMock"
 import { Intention, OIMenuIntention, WriteTool } from "../../../src/iink"
 
 describe("OIMenuIntention.ts", () =>
@@ -44,7 +44,7 @@ describe("OIMenuIntention.ts", () =>
     const behaviors = new OIBehaviorsMock()
     behaviors.init(behaviors.layerInfos)
     const menu = new OIMenuIntention(behaviors)
-    const pointerUpEvt = new LeftClickEventFake("pointerup", {
+    const pointerUpEvt = new LeftClickEventMock("pointerup", {
       pointerType: "pen",
       clientX: 10,
       clientY: 10,

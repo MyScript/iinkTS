@@ -1,4 +1,4 @@
-type EventFakeProps = {
+type EventMockProps = {
   clientX: number
   clientY: number
   pressure: number
@@ -6,14 +6,18 @@ type EventFakeProps = {
   pointerId?: number
 }
 
-type CompleteEventFakeProps = EventFakeProps & {
+type CompleteEventMockProps = EventMockProps & {
   button: number
   buttons: number
 }
 
 type TouchListFake = ({ clientX: number, clientY: number })[]
 
-export class PointerEventFake extends Event
+type EventChangeFakeProps = {
+  target: EventTarget
+}
+
+export class EventMock extends Event
 {
   clientX: number
   clientY: number
@@ -22,7 +26,7 @@ export class PointerEventFake extends Event
   button: number
   buttons: number
   pointerId: number
-  constructor(type: string, props: CompleteEventFakeProps)
+  constructor(type: string, props: CompleteEventMockProps)
   {
     super(type, props as EventInit)
     this.clientX = props.clientX
@@ -35,9 +39,9 @@ export class PointerEventFake extends Event
   }
 }
 
-export class LeftClickEventFake extends PointerEventFake
+export class LeftClickEventMock extends EventMock
 {
-  constructor(type: string, props: EventFakeProps)
+  constructor(type: string, props: EventMockProps)
   {
     super(type, {
       ...props,
@@ -47,9 +51,9 @@ export class LeftClickEventFake extends PointerEventFake
   }
 }
 
-export class ContextMenuEventFake extends PointerEventFake
+export class ContextMenuEventMock extends EventMock
 {
-  constructor(props: EventFakeProps)
+  constructor(props: EventMockProps)
   {
     super("contextmenu", {
       ...props,
@@ -58,9 +62,10 @@ export class ContextMenuEventFake extends PointerEventFake
     })
   }
 }
-export class RightClickEventFake extends PointerEventFake
+
+export class RightClickEventMock extends EventMock
 {
-  constructor(type: string, props: EventFakeProps)
+  constructor(type: string, props: EventMockProps)
   {
     super(type, {
       ...props,
@@ -70,10 +75,10 @@ export class RightClickEventFake extends PointerEventFake
   }
 }
 
-export class TouchEventFake extends PointerEventFake
+export class TouchEventMock extends EventMock
 {
   changedTouches: TouchListFake
-  constructor(type: string, props: EventFakeProps)
+  constructor(type: string, props: EventMockProps)
   {
     super(type, {
       ...props,
@@ -87,10 +92,10 @@ export class TouchEventFake extends PointerEventFake
   }
 }
 
-export class DoubleTouchEventFake extends PointerEventFake
+export class DoubleTouchEventMock extends EventMock
 {
   changedTouches: TouchListFake
-  constructor(type: string, props: EventFakeProps)
+  constructor(type: string, props: EventMockProps)
   {
     super(type, {
       ...props,
@@ -101,5 +106,13 @@ export class DoubleTouchEventFake extends PointerEventFake
       clientX: props.clientX,
       clientY: props.clientY,
     }]
+  }
+}
+
+export class ChangeEventMock extends Event
+{
+  constructor(props: EventChangeFakeProps)
+  {
+    super("change", props as EventInit)
   }
 }

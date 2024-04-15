@@ -39,6 +39,7 @@ export class OIBehaviorsMock extends OIBehaviors
   removeSymbol = jest.fn()
   updateSymbolsStyle = jest.fn()
 
+  changeLanguage = jest.fn()
   importPointEvents = jest.fn()
 
   undo = jest.fn()
