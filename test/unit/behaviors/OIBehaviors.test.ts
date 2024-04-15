@@ -1,5 +1,5 @@
 import { jiixText } from "../__dataset__/exports.dataset"
-import { LeftClickEventFake } from "../__mocks__/PointerEventFake"
+import { LeftClickEventMock } from "../__mocks__/EventMock"
 import { buildOICircle, buildOIStroke } from "../helpers"
 import
 {
@@ -427,7 +427,7 @@ describe("OIBehaviors.ts", () =>
     {
       await oib.init(div)
       const target = div.querySelector("svg") as SVGSVGElement
-      const pointerDown = new LeftClickEventFake("pointerdown", {
+      const pointerDown = new LeftClickEventMock("pointerdown", {
         pointerType: "pen",
         clientX: 1,
         clientY: 1,
@@ -443,7 +443,7 @@ describe("OIBehaviors.ts", () =>
     test("should call writer.continue on pointermove", async () =>
     {
       const target = div.querySelector("svg") as SVGSVGElement
-      const pointerMove = new LeftClickEventFake("pointermove", {
+      const pointerMove = new LeftClickEventMock("pointermove", {
         pointerType: "pen",
         clientX: 5,
         clientY: 4,
@@ -459,7 +459,7 @@ describe("OIBehaviors.ts", () =>
     test("should call writer.end on pointerup", async () =>
     {
       const target = div.querySelector("svg") as SVGSVGElement
-      const pointerUp = new LeftClickEventFake("pointerup", {
+      const pointerUp = new LeftClickEventMock("pointerup", {
         pointerType: "pen",
         clientX: 10,
         clientY: 11,
@@ -490,7 +490,7 @@ describe("OIBehaviors.ts", () =>
     {
       await oib.init(div)
       const target = div.querySelector("svg") as SVGSVGElement
-      const pointerDown = new LeftClickEventFake("pointerdown", {
+      const pointerDown = new LeftClickEventMock("pointerdown", {
         pointerType: "pen",
         clientX: 1,
         clientY: 1,
@@ -506,7 +506,7 @@ describe("OIBehaviors.ts", () =>
     test("should call eraseManager.continue on pointermove", async () =>
     {
       const target = div.querySelector("svg") as SVGSVGElement
-      const pointerMove = new LeftClickEventFake("pointermove", {
+      const pointerMove = new LeftClickEventMock("pointermove", {
         pointerType: "pen",
         clientX: 5,
         clientY: 4,
@@ -522,7 +522,7 @@ describe("OIBehaviors.ts", () =>
     test("should call eraseManager.end on pointerup", async () =>
     {
       const target = div.querySelector("svg") as SVGSVGElement
-      const pointerUp = new LeftClickEventFake("pointerup", {
+      const pointerUp = new LeftClickEventMock("pointerup", {
         pointerType: "pen",
         clientX: 10,
         clientY: 11,
@@ -553,7 +553,7 @@ describe("OIBehaviors.ts", () =>
     {
       await oib.init(div)
       const target = div.querySelector("svg") as SVGSVGElement
-      const pointerDown = new LeftClickEventFake("pointerdown", {
+      const pointerDown = new LeftClickEventMock("pointerdown", {
         pointerType: "pen",
         clientX: 1,
         clientY: 1,
@@ -569,7 +569,7 @@ describe("OIBehaviors.ts", () =>
     test("should call eraseManager.continue on pointermove", async () =>
     {
       const target = div.querySelector("svg") as SVGSVGElement
-      const pointerMove = new LeftClickEventFake("pointermove", {
+      const pointerMove = new LeftClickEventMock("pointermove", {
         pointerType: "pen",
         clientX: 5,
         clientY: 4,
@@ -585,7 +585,7 @@ describe("OIBehaviors.ts", () =>
     test("should call eraseManager.end on pointerup", async () =>
     {
       const target = div.querySelector("svg") as SVGSVGElement
-      const pointerUp = new LeftClickEventFake("pointerup", {
+      const pointerUp = new LeftClickEventMock("pointerup", {
         pointerType: "pen",
         clientX: 10,
         clientY: 11,

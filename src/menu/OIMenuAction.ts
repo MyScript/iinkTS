@@ -9,7 +9,7 @@ import guideIcon from "../assets/svg/orthogonal-view.svg"
 import snapIcon from "../assets/svg/arrow-to-dot.svg"
 import debugIcon from "../assets/svg/wolf.svg"
 import downloadIcon from "../assets/svg/download.svg"
-import { LoggerClass } from "../Constants"
+import { Intention, LoggerClass, WriteTool } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerManager } from "../logger"
 import { OIModel } from "../model"
@@ -66,7 +66,11 @@ export class OIMenuAction extends OIMenu
     this.menuClear.id = `${ this.id }-clear`
     this.menuClear.classList.add("ms-menu-button", "square")
     this.menuClear.innerHTML = trashIcon
-    this.menuClear.addEventListener("pointerup", () => this.behaviors.clear())
+    this.menuClear.addEventListener("pointerup", () =>
+    {
+      this.#logger.info(`${ this.id }.clear`)
+      this.behaviors.clear()
+    })
     return this.createToolTip(this.menuClear, "Clear", "bottom")
   }
 
@@ -93,6 +97,7 @@ export class OIMenuAction extends OIMenu
       })
     select.addEventListener("change", (e) =>
     {
+      this.#logger.info(`${ this.id }.selectLanguage`)
       const value = (e.target as HTMLInputElement).value
       this.behaviors.changeLanguage(value)
     })
@@ -106,7 +111,11 @@ export class OIMenuAction extends OIMenu
     this.menuUndo.id = `${ this.id }-undo`
     this.menuUndo.classList.add("ms-menu-button", "square")
     this.menuUndo.innerHTML = undoIcon
-    this.menuUndo.addEventListener("pointerup", () => this.behaviors.undo())
+    this.menuUndo.addEventListener("pointerup", () =>
+    {
+      this.#logger.info(`${ this.id }.undo`)
+      this.behaviors.undo()
+    })
     return this.createToolTip(this.menuUndo, "Undo", "bottom")
   }
 
@@ -116,7 +125,11 @@ export class OIMenuAction extends OIMenu
     this.menuRedo.id = `${ this.id }-redo`
     this.menuRedo.classList.add("ms-menu-button", "square")
     this.menuRedo.innerHTML = redoIcon
-    this.menuRedo.addEventListener("pointerup", () => this.behaviors.redo())
+    this.menuRedo.addEventListener("pointerup", () =>
+    {
+      this.#logger.info(`${ this.id }.redo`)
+      this.behaviors.redo()
+    })
     return this.createToolTip(this.menuRedo, "Redo", "bottom")
   }
 
@@ -128,6 +141,7 @@ export class OIMenuAction extends OIMenu
     this.menuConvert.innerHTML = translateIcon
     this.menuConvert.addEventListener("pointerup", () =>
     {
+      this.#logger.info(`${ this.id }.convert`)
       this.behaviors.convert()
     })
     return this.createToolTip(this.menuConvert, "Convert", "bottom")
@@ -158,7 +172,13 @@ export class OIMenuAction extends OIMenu
         id: `${ this.id }-gesture-detect`,
         label: "Detect gesture",
         initValue: this.behaviors.writer.detectGesture,
-        callback: (value) => this.behaviors.writer.detectGesture = value
+        callback: (value) =>
+        {
+          this.#logger.info(`${ this.id }.gesture-detect`, { value })
+          this.behaviors.writer.detectGesture = value
+          this.behaviors.intention = Intention.Write
+          this.behaviors.writer.tool = WriteTool.Pencil
+        }
       },
       {
         type: "select",
@@ -166,7 +186,13 @@ export class OIMenuAction extends OIMenu
         label: "On surround",
         values: surroundActionValues,
         initValue: this.behaviors.gesture.surroundAction,
-        callback: (value) => this.behaviors.gesture.surroundAction = value as SurroundAction
+        callback: (value) =>
+        {
+          this.#logger.info(`${ this.id }.gesture-surround`, { value })
+          this.behaviors.gesture.surroundAction = value as SurroundAction
+          this.behaviors.intention = Intention.Write
+          this.behaviors.writer.tool = WriteTool.Pencil
+        }
       },
       {
         type: "select",
@@ -174,7 +200,13 @@ export class OIMenuAction extends OIMenu
         label: "On strikethrough",
         values: strikeThroughActionValues,
         initValue: this.behaviors.gesture.strikeThroughAction,
-        callback: (value) => this.behaviors.gesture.strikeThroughAction = value as StrikeThroughAction
+        callback: (value) =>
+        {
+          this.#logger.info(`${ this.id }.gesture-strikethrough`, { value })
+          this.behaviors.gesture.strikeThroughAction = value as StrikeThroughAction
+          this.behaviors.intention = Intention.Write
+          this.behaviors.writer.tool = WriteTool.Pencil
+        }
       },
     ]
     menuItems.forEach(i =>
@@ -203,6 +235,7 @@ export class OIMenuAction extends OIMenu
         initValue: this.behaviors.configuration.rendering.guides.enable,
         callback: (value) =>
         {
+          this.#logger.info(`${ this.id }.guide-enable`, { value })
           this.behaviors.configuration.rendering.guides.enable = value as boolean
           this.behaviors.renderingConfiguration = this.behaviors.configuration.rendering
         }
@@ -219,6 +252,7 @@ export class OIMenuAction extends OIMenu
         initValue: this.behaviors.configuration.rendering.guides.type,
         callback: (value) =>
         {
+          this.#logger.info(`${ this.id }.guide-type`, { value })
           this.behaviors.configuration.rendering.guides.type = value as ("line" | "grid" | "point")
           this.behaviors.renderingConfiguration = this.behaviors.configuration.rendering
         }
@@ -231,6 +265,7 @@ export class OIMenuAction extends OIMenu
         initValue: this.behaviors.configuration.rendering.guides.gap.toString(),
         callback: (value) =>
         {
+          this.#logger.info(`${ this.id }.guide-size`, { value })
           this.behaviors.configuration.rendering.guides.gap = +value
           this.behaviors.renderingConfiguration = this.behaviors.configuration.rendering
         }
