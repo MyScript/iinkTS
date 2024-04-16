@@ -20,15 +20,15 @@ It integrates all you need:
 
 ## Table of contents
 
-* [Features](https://github.com/MyScript/iinkTS#features)
-* [Requirements](https://github.com/MyScript/iinkTS#requirements)
-* [Installation](https://github.com/MyScript/iinkTS#installation)
-* [Usage](https://github.com/MyScript/iinkTS#usage)
-* [Documentation](https://github.com/MyScript/iinkTS#documentation)
-* [Development](https://github.com/MyScript/iinkTS#development)
-* [Support](https://github.com/MyScript/iinkTS#getting-support )
-* [Feedback](https://github.com/MyScript/iinkTS#sharing-your-feedback)
-* [Contributing](https://github.com/MyScript/iinkTS#contributing)
+* [Features](#features)
+* [Requirements](#requirements)
+* [Installation](#installation)
+* [Usage](#usage)
+* [Documentation](#documentation)
+* [Development](#development)
+* [Support](#getting-support )
+* [Feedback](#sharing-your-feedback)
+* [Contributing](#contributing)
 
 ## Features
 
@@ -62,7 +62,7 @@ OR
 yarn init
 ```
 
-You can then install iinkTS and use it as showed in the [Usage](https://github.com/MyScript/iinkTS#usage) section.
+You can then install iinkTS and use it as showed in the [Usage](#usage) section.
 
 ```shell
 npm install iink-ts
@@ -208,7 +208,7 @@ We also provide a complete [API Reference](https://myscript.github.io/iinkTS/doc
 
 ## Development
 
-Instructions to help you build the project and develop are available in the [SETUP.md](https://github.com/MyScript/iinkTS/blob/master/SETUP.md) file.
+Instructions to help you build the project and develop are available in the [SETUP.md](./SETUP.md) file.
 
 
 ## Getting support
@@ -224,7 +224,7 @@ We’re planning to showcase apps using it so let us know by sending a quick mai
 
 We welcome your contributions: if you would like to extend iinkTS for your needs, feel free to fork it!
 
-Please take a look at our [contributing](https://github.com/MyScript/iinkTS/blob/master/CONTRIBUTING.md) guidelines before submitting your pull request.
+Please take a look at our [contributing](./CONTRIBUTING.md) guidelines before submitting your pull request.
 
 ## Troubleshooting
 If you encounter the error: `Unrecognized property: convert.force`, this means your server version is lower than 2.3.0.
