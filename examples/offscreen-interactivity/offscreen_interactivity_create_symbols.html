@@ -18,8 +18,15 @@
         height: calc(100dvh - 62px);
         touch-action: none;
       }
-      #show-symbols-to-import-btn {
+      #show-import {
         display: none;
+        margin: 0;
+        margin-left: -4px;
+        padding: 0 4px;
+      }
+      #show-import img {
+        margin: 0;
+        padding: 0;
       }
       #symbols-to-create {
         width: 300px;
@@ -34,7 +41,7 @@
         resize: none;
       }
       @media only screen and (max-width: 900px) {
-        #show-symbols-to-import-btn {
+        #show-import {
           display: block;
         }
         #symbols-to-create {
@@ -67,9 +74,11 @@
   </head>
 
   <body>
-    <nav>
-      <button id="show-symbols-to-import-btn" class="classic-btn">Show symbols</button>
+    <nav class="flex-container">
       <button class="classic-btn create-btn" id="create-all-btn">Create all</button>
+      <button class="classic-btn" id="show-import">
+        <img src="../assets/img/nav-arrow-down.svg" />
+      </button>
     </nav>
     <div class="flex-container">
       <div id="symbols-to-create"></div>
@@ -78,15 +87,16 @@
 
     <script>
       const editorElement = document.getElementById("editor");
-      const showSymbolBtn = document.getElementById("show-symbols-to-import-btn");
+      const showSymbolBtn = document.getElementById("show-import");
       const createAllBtn = document.getElementById("create-all-btn");
       const symbolsToCreate = document.getElementById("symbols-to-create");
+      const symbolsCreated = [];
 
       showSymbolBtn.addEventListener("pointerup", () => {
         document.getElementById("symbols-to-create").classList.toggle("open");
       });
 
-      function createSymbolElToCreate(s, index) {
+      function createSymbolElToCreate(s) {
         const inputsWrapper = document.createElement("div");
         inputsWrapper.style.setProperty("height", "50%");
 
@@ -95,14 +105,14 @@
         inputsWrapper.appendChild(textarea);
 
         const btn = document.createElement("button");
-        btn.id = `add-symbol-${index}-btn`;
+        btn.id = `add-symbol-${s.type}-btn`;
         btn.classList.add("classic-btn", "create-btn");
         btn.textContent = "Create";
         inputsWrapper.appendChild(btn);
-        btn.addEventListener("pointerup", () => {
+        btn.addEventListener("pointerup", async () => {
+          symbolsCreated.push(await document.getElementById("editor").editor.behaviors.createSymbol(JSON.parse(textarea.value)));
           createAllBtn.disabled = true;
           btn.disabled = true;
-          document.getElementById("editor").editor.behaviors.createSymbol(JSON.parse(textarea.value));
         });
 
         return inputsWrapper;
@@ -146,11 +156,17 @@
           symbolsToCreate.appendChild(createSymbolElToCreate(s, i));
         });
 
-        createAllBtn.addEventListener("pointerup", () => {
-          console.log('document.querySelectorAll(".create-btn"): ', document.querySelectorAll(".create-btn"));
-          document.querySelectorAll(".create-btn").forEach(b => b.disabled = true);
-          editor.behaviors.createSymbols(symbols)
-        })
+        createAllBtn.addEventListener("pointerup", async () => {
+          symbolsCreated.push(await editor.behaviors.createSymbols(symbols));
+          document.querySelectorAll(".create-btn").forEach((b) => (b.disabled = true));
+        });
+
+        editor.events.addEventListener("changed", (event) => {
+          createAllBtn.disabled = symbolsCreated.some(sc => event.detail.stack[event.detail.stackIndex].symbols.some(s => s.id === sc.id));
+          symbols.forEach(sc => {
+            document.getElementById(`add-symbol-${sc.type}-btn`).disabled = symbolsCreated.some(sc => event.detail.stack[event.detail.stackIndex].symbols.some(s => s.id === sc.id && s.type === sc.type));
+          })
+        });
 
         window.addEventListener("resize", () => {
           editor.resize();

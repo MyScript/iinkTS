@@ -1,6 +1,7 @@
 const editorElement = document.getElementById("editor");
 
 const importBtn = document.getElementById("import");
+const showImportBtn = document.getElementById("show-import");
 
 const showJIIXBtn = document.getElementById("show-jiix");
 const showModelBtn = document.getElementById("show-model");
@@ -155,11 +156,19 @@ async function loadEditor() {
    */
   await editor.initialize();
 
+  const strokeRes = await fetch("../assets/datas/hello-my-friend.json");
+  const pointersToImport = await strokeRes.json();
+
   let exportTimeout;
   editor.events.addEventListener("changed", (event) => {
+    if (event.detail.empty) {
+      importBtn.disabled = false;
+    }
+    else {
+      importBtn.disabled = event.detail.stack[event.detail.stackIndex].symbols.some(s1 => pointersToImport.some(s2 => s2.id === s1.id))
+    }
     clearTimeout(exportTimeout)
     exportTimeout = setTimeout(() => editor.export(["text/html"]), 1000);
-
   });
 
   editor.events.addEventListener("exported", (event) => {
@@ -186,9 +195,12 @@ async function loadEditor() {
 
   importBtn.addEventListener("pointerup", async () => {
     importBtn.disabled = true;
-    const strokeRes = await fetch("../assets/datas/hello-my-friend.json");
-    const strokes = await strokeRes.json();
-    await editor.importPointEvents(strokes);
+    await editor.importPointEvents(pointersToImport);
+  });
+
+  showImportBtn.addEventListener("pointerup", async () => {
+    const title = `Pointers to import`;
+    showModal(title, renderjson(pointersToImport));
   });
 
   showJIIXBtn.addEventListener("pointerup", async () => {

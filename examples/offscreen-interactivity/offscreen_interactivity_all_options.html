@@ -163,6 +163,18 @@
     </style>
 
     <style>
+      #show-import {
+        margin: 0;
+        margin-left: -4px;
+        padding: 0 4px;
+      }
+      #show-import img {
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+
+    <style>
       .renderjson a {
         text-decoration: none;
       }
@@ -216,7 +228,12 @@
     </div>
 
     <nav class="flex-container gap wrap center">
-      <button class="classic-btn" id="import">Import</button>
+      <span class="flex-container">
+        <button class="classic-btn" id="import">Import</button>
+        <button class="classic-btn " id="show-import">
+          <img src="../assets/img/nav-arrow-down.svg" />
+        </button>
+      </span>
       <button class="classic-btn" id="show-jiix">Show JIIX</button>
       <button class="classic-btn" id="show-model">Show model</button>
       <div class="flex-container global-options">
