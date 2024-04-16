@@ -903,7 +903,7 @@ describe("OIBehaviors.ts", () =>
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
       const stroke = buildOIStroke()
       oib.model.addSymbol(stroke)
-      oib.clear()
+      await oib.clear()
       await expect(oib.renderer.clear).toBeCalledTimes(1)
     })
     test("should call recognizer.eraseStrokes", async () =>
