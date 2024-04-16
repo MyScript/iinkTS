@@ -152,7 +152,7 @@ export class OISelectionManager
     const radius = 8
     const center: TPoint = {
       x: (box.x + box.width / 2),
-      y: box.y - 20
+      y: box.y - 4 * SELECTION_MARGIN
     }
     const attrs1 = {
       role: SvgElementRole.Rotate,
@@ -166,7 +166,14 @@ export class OISelectionManager
       role: SvgElementRole.Rotate,
       fill: "black",
     }
+
     group.appendChild(SVGBuilder.createCircle(center, radius / 2, attrs2))
+    const attrs3 = {
+      role: SvgElementRole.Rotate,
+      stroke: "black",
+      "stroke-width": "2"
+    }
+    group.appendChild(SVGBuilder.createLine({ x: center.x, y: center.y + radius }, { x: center.x, y: box.y - SELECTION_MARGIN }, attrs3))
 
     const handler = (ev: PointerEvent) =>
     {
