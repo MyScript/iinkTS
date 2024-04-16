@@ -17,9 +17,7 @@ export function MainMenu()
 	const OnConvert = () =>
 	{
 		const shapesToConvert = editor.getCurrentPageShapes().filter(s => s.type === "draw") as TLDrawShape[]
-		console.log('shapesToConvert: ', shapesToConvert)
 		const { toConvert, toRemove } = converter.convert(shapesToConvert)
-		console.log('toRemove: ', toRemove)
 		editor.deleteShapes(toRemove)
 		editor.createShapes(toConvert)
 	}
