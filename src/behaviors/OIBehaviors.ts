@@ -922,12 +922,14 @@ export class OIBehaviors implements IBehaviors
       this.#logger.info("clear")
       this.internalEvent.emitIdle(false)
       if (this.model.symbols.length) {
-        this.renderer.clear()
         await this.recognizer.eraseStrokes(this.model.symbols.filter(s => s.type === SymbolType.Stroke).map(s => s.id))
+        this.renderer.clear()
         this.model.clear()
+        this.selector.removeSelectedGroup()
         this.undoRedoManager.addModelToStack(this.model)
         this.internalEvent.emitSelected(this.model.symbolsSelected)
       }
+      this.menu.update()
     }
     catch (error) {
       this.#logger.error("clear", error)
