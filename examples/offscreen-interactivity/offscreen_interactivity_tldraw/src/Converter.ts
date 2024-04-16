@@ -309,8 +309,6 @@ export class Converter
       })
     }
 
-    console.log('toConvert: ', toConvert);
-    console.log('toRemove: ', toRemove);
     return {
       toConvert: toConvert.filter(s => s),
       toRemove: toRemove.filter(s => s),
