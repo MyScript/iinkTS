@@ -40,16 +40,6 @@ export default function App()
 		setLoading(false)
 	}
 
-	const updateExports = async () =>
-	{
-		if (!Recognizer.instance) {
-			await loadRecognizer()
-		}
-		dispatch(setExports(await Recognizer.instance.export(['application/vnd.myscript.jiix', 'text/html'])))
-	}
-
-	let exportsDebounce: ReturnType<typeof setTimeout>
-
 	const setAppToState = useCallback((editor: Editor) =>
 	{
 		setEditor(editor)
@@ -57,23 +47,16 @@ export default function App()
 
 	useEffect(() =>
 	{
-		if (!editor) return
+		if (!editor || !recognizer) return
 
 		const handleChangeEvent: TLEventMapHandler<'change'> = async (change) =>
 		{
 			if (change.source === 'user') {
 				try {
-					if (await useSynchronizer(editor).sync(change.changes)) {
-						clearTimeout(exportsDebounce)
-						exportsDebounce = setTimeout(async () =>
-						{
-							await updateExports()
-						}, 500)
-					}
+					dispatch(setExports(await useSynchronizer(editor, recognizer).sync(change.changes)))
 				} catch (error) {
 					dispatch(addError(typeof error === "string" ? error as string : (error as Error).message))
 				}
-
 			}
 		}
 
@@ -82,8 +65,9 @@ export default function App()
 		return () =>
 		{
 			editor.off('change', handleChangeEvent)
+			recognizer.destroy()
 		}
-	}, [editor])
+	}, [editor, recognizer])
 
 	useEffect(() =>
 	{

@@ -14,8 +14,7 @@ import
 } from "iink-ts"
 import
 {
-  Recognizer,
-  useRecognizer
+  Recognizer
 } from "./Recognizer"
 import { Gesture } from "./Gesture"
 
@@ -23,7 +22,7 @@ export class Synchronizer
 {
   static instance: Synchronizer
   editor: Editor
-  recognizer!: Recognizer
+  recognizer: Recognizer
   gesture: Gesture
   updateDebounce?: ReturnType<typeof setTimeout>
 
@@ -31,9 +30,10 @@ export class Synchronizer
   protected drawShapeToUpdate: TLDrawShape[] = []
   protected drawShapeToRemove: TLDrawShape[] = []
 
-  constructor(editor: Editor)
+  constructor(editor: Editor, recognizer: Recognizer)
   {
     this.editor = editor
+    this.recognizer = recognizer
     this.gesture = new Gesture(editor)
   }
 
@@ -64,8 +64,50 @@ export class Synchronizer
     return stroke
   }
 
+  protected async determinesContextlessGesture(drawShapes: TLDrawShape[]): Promise<TGesture | undefined>
+  {
+    const gestureShape = drawShapes[0]
+    const othersPageShape = this.editor.getCurrentPageShapes().filter(s => s.id !== gestureShape.id)
+    if (!gestureShape || !othersPageShape.length) return
+
+    const gestureBounds = this.editor.getShapePageBounds(gestureShape)!
+
+    if (!othersPageShape.some(s => gestureBounds.contains(this.editor.getShapePageBounds(s)!))) {
+      return
+    }
+
+    const gestureResult = await this.recognizer.recognizeGesture(drawShapes.map(this.formatDrawShapeToSend))
+    if (gestureResult) {
+      if (
+        gestureResult.gestures[0].type.toLocaleLowerCase() == "surround" &&
+        othersPageShape.some(s => gestureBounds.contains(this.editor.getShapePageBounds(s)!))
+      ) {
+        return {
+          gestureStrokeId: gestureShape.id,
+          gestureType: "SURROUND",
+          strokeIds: [],
+          strokeBeforeIds: [],
+          strokeAfterIds: []
+        }
+      }
+      else if (
+        gestureResult.gestures[0].type.toLocaleLowerCase() == "scratch" &&
+        othersPageShape.some(s => gestureBounds.contains(this.editor.getShapePageBounds(s)!))
+      ) {
+        return {
+          gestureStrokeId: gestureShape.id,
+          gestureType: "SCRATCH",
+          strokeIds: [],
+          strokeBeforeIds: [],
+          strokeAfterIds: []
+        }
+      }
+    }
+    return
+  }
+
   //@ts-ignore
-  async sync(changes: RecordsDiff<TLShape>): Promise<boolean>
+  async sync(changes: RecordsDiff<TLShape>): Promise<TExport>
   {
     for (const record of Object.values((changes.added as Record<TLShapeId, TLShape>))) {
       if (record.typeName === 'shape') {
@@ -106,46 +148,12 @@ export class Synchronizer
       return false
     }
 
-    if (!this.recognizer) {
-      this.recognizer = await useRecognizer()
-    }
-
     if (this.drawShapeToAdd.length) {
       const newDrawShapeCompleted = this.drawShapeToAdd.filter(s => s.props.isComplete)
       this.drawShapeToAdd = this.drawShapeToAdd.filter(s => !s.props.isComplete)
       if (newDrawShapeCompleted.length) {
-        let gesture: TGesture | undefined
-
-        const gestureResult = await this.recognizer.recognizeGesture(newDrawShapeCompleted.map(this.formatDrawShapeToSend))
-        if (gestureResult) {
-          const gestureBounds = this.editor.getShapePageBounds(newDrawShapeCompleted[0])!
-          if (
-            gestureResult.gestures[0].type.toLocaleLowerCase() == "surround" &&
-            this.editor.getCurrentPageShapes().some(s => s.id !== newDrawShapeCompleted[0].id && gestureBounds.collides(this.editor.getShapePageBounds(s)!))
-          ) {
-            gesture = {
-              gestureStrokeId: newDrawShapeCompleted[0].id,
-              gestureType: "SURROUND",
-              strokeIds: [],
-              strokeBeforeIds: [],
-              strokeAfterIds: []
-            }
-          }
-          else if (
-            gestureResult.gestures[0].type.toLocaleLowerCase() == "scratch" &&
-            this.editor.getCurrentPageShapes().some(s => s.id !== newDrawShapeCompleted[0].id && gestureBounds.collides(this.editor.getShapePageBounds(s)!))
-          ) {
-            gesture = {
-              gestureStrokeId: newDrawShapeCompleted[0].id,
-              gestureType: "SCRATCH",
-              strokeIds: [],
-              strokeBeforeIds: [],
-              strokeAfterIds: []
-            }
-          }
-        }
-
-        const addStrokeResult = await this.recognizer.addStrokes(newDrawShapeCompleted.map(this.formatDrawShapeToSend), newDrawShapeCompleted.length < 2)
+        let gesture = await this.determinesContextlessGesture(newDrawShapeCompleted)
+        const addStrokeResult = await this.recognizer.addStrokes(newDrawShapeCompleted.map(this.formatDrawShapeToSend), !gesture)
         if (!gesture) {
           gesture = addStrokeResult
         }
@@ -192,15 +200,15 @@ export class Synchronizer
       this.drawShapeToRemove = []
       await promise
     }
-    await this.recognizer.waitForIdle()
-    return true
+
+    return Recognizer.instance.export(['application/vnd.myscript.jiix', 'text/html'])
   }
 }
 
-export const useSynchronizer = (editor: Editor): Synchronizer =>
+export const useSynchronizer = (editor: Editor, recognizer: Recognizer): Synchronizer =>
 {
   if (!Synchronizer.instance) {
-    Synchronizer.instance = new Synchronizer(editor)
+    Synchronizer.instance = new Synchronizer(editor, recognizer)
   }
   return Synchronizer.instance
 }
