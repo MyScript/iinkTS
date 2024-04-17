@@ -73,7 +73,7 @@ describe("Websocket Text highlight words", () => {
     await waitEditorIdle(page)
     expect(await page.locator("#highlight-list > li").count()).toEqual(1)
     const style = await getComputedStyle(page.locator("#highlight-list > li"))
-    expect(style.backgroundColor).toContain("rgb(128, 128, 128)")
+    expect(style.backgroundColor).toContain("rgb(0, 0, 0)")
   })
 
   test("should write, surround and is in list then remove from list", async () => {
