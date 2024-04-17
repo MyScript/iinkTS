@@ -10,6 +10,7 @@ import
 
 export class Recognizer extends OIRecognizer
 {
+  static initializing = false
   static instance: Recognizer
   messages: string[]
 
@@ -26,21 +27,23 @@ export class Recognizer extends OIRecognizer
     this.messages.push(`Received: ${ websocketMessage.type }`)
   }
 
-  protected closeCallback(evt: CloseEvent): void
-  {
-    super.closeCallback(evt)
-  }
-
   override send(message: TOIMessageEvent): Promise<void>
   {
     this.messages.push(`Sent: ${ JSON.stringify(message.type) }`)
     return super.send(message)
   }
+
+  override destroy(): Promise<void>
+  {
+    Recognizer.initializing = false
+    return super.destroy()
+  }
 }
 
 export const useRecognizer = async (): Promise<Recognizer> =>
 {
-  if (!Recognizer.instance) {
+  if (!Recognizer.initializing) {
+    Recognizer.initializing = true
     const res = await fetch("../../../server-configuration.json");
     const server = await res.json();
     const recognition: PartialDeep<TRecognitionConfiguration> = {
