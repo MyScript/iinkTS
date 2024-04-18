@@ -37,8 +37,7 @@
     "build:tldraw": "cd ./examples/offscreen-interactivity/offscreen_interactivity_tldraw && yarn build",
     "build:lib": "rollup -c config/rollup.config.build.mjs --sourcemap",
     "build:docs": "typedoc",
-    "build": "npm-run-all lint:fix test:unit build:lib build:docs copy:to:tldraw build:tldraw",
-    "postinstall": "yarn install:tldraw &&  yarn prepare:tldraw"
+    "build": "npm-run-all lint:fix test:unit build:lib build:docs copy:to:tldraw build:tldraw"
   },
   "dependencies": {
     "json-css": "^1.5.6"
