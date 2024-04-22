@@ -371,7 +371,7 @@ export class OIBehaviors implements IBehaviors
       await this.recognizer.destroy()
       this.recognizer = new OIRecognizer(this.#configuration.server, this.#configuration.recognition)
       await this.recognizer.init()
-      this.recognizer.addStrokes(this.model.symbols.filter(s => s.type === SymbolType.Stroke) as OIStroke[], false)
+      await this.recognizer.addStrokes(this.model.symbols.filter(s => s.type === SymbolType.Stroke) as OIStroke[], false)
     } catch (error) {
       this.#logger.error("changeLanguage", error)
       this.internalEvent.emitError(error as Error)

@@ -1136,11 +1136,6 @@ cross-spawn@^7.0.2:
     shebang-command "^2.0.0"
     which "^2.0.1"
 
-crypto-js@^4.2.0:
-  version "4.2.0"
-  resolved "https://registry.yarnpkg.com/crypto-js/-/crypto-js-4.2.0.tgz#4d931639ecdfd12ff80e8186dba6af2c2e856631"
-  integrity sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==
-
 csstype@^3.0.2:
   version "3.1.3"
   resolved "https://registry.yarnpkg.com/csstype/-/csstype-3.1.3.tgz#d80ff294d114fb0e6ac500fbf85b60137d7eff81"
@@ -1527,12 +1522,11 @@ ignore@^5.2.0:
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-5.3.1.tgz#5073e554cd42c5b33b394375f538b8593e34d4ef"
   integrity sha512-5Fytz/IraMjqpwfd34ke28PTVMjZjJG2MPn5t7OE4eUCUNf8BAa7b5WUS9/Qvr6mwOQS7Mk6vdsMno5he+T8Xw==
 
-iink-ts@^1.0.4:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/iink-ts/-/iink-ts-1.0.4.tgz#5020fb90a84603c52ff108486c118b00b67322fd"
-  integrity sha512-DDY1VYrczshzxw10Ewmf4Zgi8DyS73u/dvYMShPWfAIy4xuOGgJPh3f51KRcnJhdypIcPfjJOT2WIcS6Ui+VrQ==
+iink-ts@2.0.0-alpha.6:
+  version "2.0.0-alpha.6"
+  resolved "https://registry.yarnpkg.com/iink-ts/-/iink-ts-2.0.0-alpha.6.tgz#4dc6247c8903e1333e1987ff0c5c0a7f6a591b51"
+  integrity sha512-IiKYl3efYClHpvbLX1FRdZsGGM76X9c0sNV2coogrvu0xEUgk2kmjHMyBf/8zt9Ng0tkVPIZFt7FQikD227Rbw==
   dependencies:
-    crypto-js "^4.2.0"
     json-css "^1.5.6"
 
 immer@^9.0.21:
