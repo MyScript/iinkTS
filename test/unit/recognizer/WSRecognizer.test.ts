@@ -199,10 +199,11 @@ describe("WSRecognizer.ts", () =>
       serverConfig.websocket.pingEnabled = true
       const wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
       await wsr.init(height, width)
-      await delay(serverConfig.websocket.pingDelay)
+      await delay(serverConfig.websocket.pingDelay * 1.5)
       expect(mockServer.getMessages("ping")).toHaveLength(1)
       await delay(serverConfig.websocket.pingDelay)
       expect(mockServer.getMessages("ping")).toHaveLength(2)
+      await wsr.destroy()
     })
     test("should not send ping message", async () =>
     {
@@ -210,10 +211,11 @@ describe("WSRecognizer.ts", () =>
       serverConfig.websocket.pingEnabled = false
       const wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
       await wsr.init(height, width)
-      await delay(serverConfig.websocket.pingDelay)
+      await delay(serverConfig.websocket.pingDelay * 1.5)
       expect(mockServer.getMessages("ping")).toHaveLength(0)
       await delay(serverConfig.websocket.pingDelay)
       expect(mockServer.getMessages("ping")).toHaveLength(0)
+      await wsr.destroy()
     })
     test("should close the connection when maxPingLostCount is reached", async () =>
     {
@@ -222,11 +224,12 @@ describe("WSRecognizer.ts", () =>
       serverConfig.websocket.maxPingLostCount = 2
       const wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
       await wsr.init(height, width)
-      await delay(serverConfig.websocket.pingDelay)
+      await delay(serverConfig.websocket.pingDelay * 1.5)
       expect(mockServer.server.clients()).toHaveLength(1)
       await delay(serverConfig.websocket.pingDelay * serverConfig.websocket.maxPingLostCount)
       expect(mockServer.getMessages("ping")).toHaveLength(serverConfig.websocket.maxPingLostCount + 1)
       expect(mockServer.server.clients()).toHaveLength(0)
+      await wsr.destroy()
     })
   })
 
