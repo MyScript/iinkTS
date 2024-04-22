@@ -95,6 +95,7 @@ yarn add iink-ts
 ```
 
 5. In JavaScript and within a `<script>` tag placed before the closing tag `</body>`, create the editor using the Editor `constructor` function, your editor html element and a simple configuration, then initialize it:
+* Initialization in the standard case, i.e. websocket or rest mode
 ```javascript
   const editorElement = document.getElementById('editor');
 
@@ -108,8 +109,24 @@ yarn add iink-ts
   });
   editor.initialize();
 ```
+* Initialization in the offscreen case
+```javascript
+  const editorElement = document.getElementById('editor');
+
+  const editor = new iink.Editor(editorElement, {
+      configuration: {
+        offscreen: true,
+          server: {
+              applicationKey: '#YOUR MYSCRIPT DEVELOPER APPLICATION KEY#',
+              hmacKey: '#YOUR MYSCRIPT DEVELOPER HMAC KEY#'
+          }
+      }
+  });
+  editor.initialize();
+```
 
 6. Your `index.html` file should look like this:
+* In the standard case
 ```html
 <html>
     <head>
@@ -127,6 +144,37 @@ yarn add iink-ts
             const editorElement = document.getElementById('editor');
 
             const editor = new iink.Editor(editorElement, {
+                configuration: {
+                    server: {
+                        applicationKey: '#YOUR MYSCRIPT DEVELOPER APPLICATION KEY#',
+                        hmacKey: '#YOUR MYSCRIPT DEVELOPER HMAC KEY#'
+                    }
+                }
+            });
+            editor.initialize();
+        </script>
+    </body>
+</html>
+```
+* In the offscreen case
+```html
+<html>
+    <head>
+        <script src="node_modules/iink-ts/dist/iink.min.js"></script>
+        <style>
+            #editor {
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="editor" touch-action="none"></div>
+        <script>
+            const editorElement = document.getElementById('editor');
+
+            const editor = new iink.Editor(editorElement, {
+                offscreen: true,
                 configuration: {
                     server: {
                         applicationKey: '#YOUR MYSCRIPT DEVELOPER APPLICATION KEY#',
