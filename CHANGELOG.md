@@ -46,3 +46,14 @@
 - fix(style) Editor styles unavailable in shadow dom elements [#2](https://github.com/MyScript/iinkTS/issues/2)
 - fix(Convert) Server state randomly corrupts and collapses the iink editor content [#1](https://github.com/MyScript/iinkTS/issues/1)
 - fix(examples) math examples don't give result when katex fails
+
+# [v1.0.5](https://github.com/MyScript/iinkTS/tree/v1.0.5)
+
+## Refactor
+- use the native Crypto module instead of the crypto-js library as the library is no longer maintained [#3](https://github.com/MyScript/iinkTS/issues/3)
+- split examples css files
+- redesign of the examples homepage style
+
+## Bugs fix
+- fix(SmartGuide) it is possible to write just next to the ellipsis
+- fix(WSBehaviors) add stroke to model when importPointEvents
