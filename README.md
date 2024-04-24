@@ -1,7 +1,7 @@
 # iinkTS
 
 [![npm version](https://badge.fury.io/js/iink-ts.svg)](https://badge.fury.io/js/iink-ts)
-[![Examples](https://img.shields.io/badge/Link%20to-examples-blue.svg)](https://myscript.github.io/iinkTS/examples/)
+[![Examples](https://img.shields.io/badge/Link%20to-examples-blue.svg)](https://iinkts-beta.myscript.com/2.0.0-alpha.8/examples/index.html)
 [![Documentation](https://img.shields.io/badge/Link%20to-documentation-green.svg)](https://developer.myscript.com/docs/interactive-ink/latest/web/iinkts/)
 
 > The fastest way to integrate rich **handwriting** features in your webapp.
