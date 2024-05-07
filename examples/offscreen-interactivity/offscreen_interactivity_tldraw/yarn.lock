@@ -1522,10 +1522,10 @@ ignore@^5.2.0:
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-5.3.1.tgz#5073e554cd42c5b33b394375f538b8593e34d4ef"
   integrity sha512-5Fytz/IraMjqpwfd34ke28PTVMjZjJG2MPn5t7OE4eUCUNf8BAa7b5WUS9/Qvr6mwOQS7Mk6vdsMno5he+T8Xw==
 
-iink-ts@2.0.0-alpha.6:
-  version "2.0.0-alpha.6"
-  resolved "https://registry.yarnpkg.com/iink-ts/-/iink-ts-2.0.0-alpha.6.tgz#4dc6247c8903e1333e1987ff0c5c0a7f6a591b51"
-  integrity sha512-IiKYl3efYClHpvbLX1FRdZsGGM76X9c0sNV2coogrvu0xEUgk2kmjHMyBf/8zt9Ng0tkVPIZFt7FQikD227Rbw==
+iink-ts@2.0.0-alpha.8:
+  version "2.0.0-alpha.8"
+  resolved "https://registry.yarnpkg.com/iink-ts/-/iink-ts-2.0.0-alpha.8.tgz#173d4b4e2bc14e3e4df9e203735acd1e756b03b8"
+  integrity sha512-rGJgGaMMWLgT3qO5ElwGR8+vB0GR0DBEPgyRDjazR/+zoRDBGXvYlYz/28MrvdEdfcVEdksOrc2lcGa3+iHfZg==
   dependencies:
     json-css "^1.5.6"
 
