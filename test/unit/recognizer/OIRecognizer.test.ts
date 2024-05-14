@@ -66,53 +66,55 @@ describe("OIRecognizer.ts", () =>
 
     test("should have dialog sequence with hmacChallenge", async () =>
     {
-      expect(mockServer.getMessages("newContentPackage")).toHaveLength(0)
+      expect(mockServer.getMessages("authenticate")).toHaveLength(0)
       const promise = oiRecognizer.init()
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      expect(mockServer.getMessages("newContentPackage")).toHaveLength(1)
+      expect(mockServer.getMessages("authenticate")).toHaveLength(1)
 
-      expect(mockServer.getMessages("configuration")).toHaveLength(0)
       expect(mockServer.getMessages("hmac")).toHaveLength(0)
-      mockServer.sendAckWithHMAC()
+      mockServer.sendHMACChallenge()
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
       expect(mockServer.getMessages("hmac")).toHaveLength(1)
-      expect(mockServer.getMessages("configuration")).toHaveLength(1)
+
+      expect(mockServer.getMessages("initSession")).toHaveLength(0)
+      mockServer.sendAuthenticated()
+      //¯\_(ツ)_/¯  required to wait server received message
+      await delay(100)
+      expect(mockServer.getMessages("initSession")).toHaveLength(1)
 
       expect(mockServer.getMessages("newContentPart")).toHaveLength(0)
-      mockServer.sendContentPackageDescription()
+      mockServer.sendSessionDescription()
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
       expect(mockServer.getMessages("newContentPart")).toHaveLength(1)
 
-      mockServer.sendNewPartMessage()
+      mockServer.sendPartChangeMessage()
       await promise
       expect(1).toEqual(1)
     })
     test("should have dialog sequence without hmacChallenge", async () =>
     {
-      expect(mockServer.getMessages("newContentPackage")).toHaveLength(0)
+      expect(mockServer.getMessages("authenticate")).toHaveLength(0)
       const promise = oiRecognizer.init()
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      expect(mockServer.getMessages("newContentPackage")).toHaveLength(1)
+      expect(mockServer.getMessages("authenticate")).toHaveLength(1)
 
-      expect(mockServer.getMessages("configuration")).toHaveLength(0)
-      expect(mockServer.getMessages("hmac")).toHaveLength(0)
-      mockServer.sendAckWithoutHMAC()
+      expect(mockServer.getMessages("initSession")).toHaveLength(0)
+      mockServer.sendAuthenticated()
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      expect(mockServer.getMessages("hmac")).toHaveLength(0)
-      expect(mockServer.getMessages("configuration")).toHaveLength(1)
+      expect(mockServer.getMessages("initSession")).toHaveLength(1)
 
       expect(mockServer.getMessages("newContentPart")).toHaveLength(0)
-      mockServer.sendContentPackageDescription()
+      mockServer.sendSessionDescription()
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
       expect(mockServer.getMessages("newContentPart")).toHaveLength(1)
 
-      mockServer.sendNewPartMessage()
+      mockServer.sendPartChangeMessage()
       await promise
       expect(1).toEqual(1)
     })
