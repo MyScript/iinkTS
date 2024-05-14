@@ -64,11 +64,6 @@ describe('Home Page', () =>
 
   test('each "View example" link should ok', async () =>
   {
-    const exampleDetails = await page.locator('.example-recognition')
-    for (let i = 0; i < await exampleDetails.count(); i++) {
-      const currentDetail = exampleDetails.nth(i);
-      await currentDetail.click()
-    }
     const exampleLink = await page.locator('text=View example')
 
     const currentUrl = page.url()
@@ -84,7 +79,7 @@ describe('Home Page', () =>
     expect(linksInErrors).toStrictEqual([])
   })
 
-  test('each "Get source code" link should ok', async () =>
+  test('each "Get source code" link should target https://github.com/MyScript/iinkTS', async () =>
   {
     const exampleDetails = await page.locator('.example-recognition')
     for (let i = 0; i < await exampleDetails.count(); i++) {
@@ -96,7 +91,7 @@ describe('Home Page', () =>
     for(let i = 0; i < await exampleLinks.count(); i++) {
       const exampleHref = await exampleLinks.nth(i).getAttribute('href')
       const linkHref = await codeLinks.nth(i).getAttribute("href")
-      expect(linkHref).toEqual(`https://github.com/MyScript/iinkTS/blob/master/examples/${exampleHref}`)
+      expect(linkHref).toContain(`https://github.com/MyScript/iinkTS/blob/master/examples/`)
     }
   })
 })

@@ -14,11 +14,11 @@
     <script type="text/javascript" src="./websocket_custom_recognizer.js"></script>
     <style>
       #editor {
-        height: calc(100vh - 187px);
+        height: calc(100dvh - 187px);
       }
       @media only screen and (max-width: 600px) {
         #editor {
-          height: calc(100vh - 257px);
+          height: calc(100dvh - 257px);
         }
       }
     </style>
@@ -70,12 +70,6 @@
       const undoElement = document.getElementById("undo");
       const redoElement = document.getElementById("redo");
 
-      const infoElements = {
-        url: document.getElementById("recognizer-url"),
-        sent: document.getElementById("recognizer-sent"),
-        received: document.getElementById("recognizer-received")
-      }
-
       let editor;
       /**
        * We use a function to wait the server configuration to load
@@ -84,11 +78,10 @@
         const res = await fetch("../server-configuration.json");
         const server = await res.json();
         const configuration = new iink.Configuration({ server })
-        const customRecognizer = new CustomWebsocketRecognizer(configuration.server, configuration.recognition, infoElements)
         const options = {
           configuration,
           behaviors: {
-            recognizer: customRecognizer
+            recognizer: CustomWebsocketRecognizer
           }
         };
         /**

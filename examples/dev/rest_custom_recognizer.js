@@ -1,10 +1,11 @@
 class CustomRestRecognizer extends iink.RestRecognizer {
 
-  constructor(serverConfig, recognitionConfig, elements) {
+  constructor(serverConfig, recognitionConfig) {
     super(serverConfig, recognitionConfig)
-    this.urlElement = elements.url
-    this.sentElement = elements.sent
-    this.receivedElement = elements.received
+    this.urlElement = document.getElementById("recognizer-url")
+    this.sentElement = document.getElementById("recognizer-sent")
+    this.receivedElement = document.getElementById("recognizer-received")
+
     this.urlElement.textContent = `Server url: ${this.url}`
   }
 

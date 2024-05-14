@@ -1,4 +1,4 @@
-import { LeftClickEventFake } from "../__mocks__/PointerEventFake"
+import { LeftClickEventMock } from "../__mocks__/EventMock"
 import {
   SmartGuide,
   DefaultRenderingConfiguration,
@@ -88,7 +88,7 @@ describe("SmartGuide.ts", () =>
     const sm = new SmartGuide()
     sm.init(domElement, margin, DefaultRenderingConfiguration)
 
-    const pointerDownEvt = new LeftClickEventFake("pointerdown", {
+    const pointerDownEvt = new LeftClickEventMock("pointerdown", {
       pointerType: "pen",
       clientX: 10,
       clientY: 10,
@@ -126,7 +126,7 @@ describe("SmartGuide.ts", () =>
     sm.internalEvent.emitClear = jest.fn()
     sm.init(domElement, margin, DefaultRenderingConfiguration)
 
-    const pointerDownEvt = new LeftClickEventFake("pointerdown", {
+    const pointerDownEvt = new LeftClickEventMock("pointerdown", {
       pointerType: "pen",
       clientX: 10,
       clientY: 10,
@@ -195,7 +195,7 @@ describe("SmartGuide.ts", () =>
     {
       // cannot be tested here, you have to simulate an event with a target different from the prompter
       const prompterTextElement = domElement.querySelector(".prompter-text") as HTMLDivElement
-      const pointerDownEvt = new LeftClickEventFake("pointerdown", {
+      const pointerDownEvt = new LeftClickEventMock("pointerdown", {
         pointerType: "pen",
         clientX: 10,
         clientY: 10,

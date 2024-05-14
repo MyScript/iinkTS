@@ -19,6 +19,7 @@ describe("RestBehaviors.ts", () =>
 
   test("should instanciate RestBehaviors", () =>
   {
+    //@ts-ignore TODO IIC-1006
     const rb = new RestBehaviors(DefaultBehaviorsOptions)
     expect(rb).toBeDefined()
   })

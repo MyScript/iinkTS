@@ -1,4 +1,7 @@
+import { ConfigurationMathWebsocket, ConfigurationTextWebsocket } from "../__dataset__/configuration.dataset"
+import { ServerWebsocketMock, emptyJIIX, errorNotGrantedMessage, hJIIX, partChangeMessage } from "../__mocks__/ServerWebsocketMock"
 import { buildStroke, delay } from "../helpers"
+
 
 import
 {
@@ -14,9 +17,6 @@ import
   Model,
   TConverstionState,
 } from "../../../src/iink"
-
-import { ConfigurationMathWebsocket, ConfigurationTextWebsocket } from "../__dataset__/configuration.dataset"
-import { ServerWebsocketMock, emptyJIIX, errorNotGrantedMessage, hJIIX, partChangeMessage } from "../__mocks__/ServerWebsocketMock"
 
 describe("WSRecognizer.ts", () =>
 {
@@ -77,83 +77,83 @@ describe("WSRecognizer.ts", () =>
       ...ConfigurationTextWebsocket.server,
       host: "init-test"
     } as TServerConfiguration
-    let mockServerForInitTest: ServerWebsocketMock
+    let mockServer: ServerWebsocketMock
     let wsr: WSRecognizer
 
 
     beforeEach(() =>
     {
       wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
-      mockServerForInitTest = new ServerWebsocketMock(wsr.url)
+      mockServer = new ServerWebsocketMock(wsr.url)
     })
     afterEach(async () =>
     {
       await wsr.destroy()
-      mockServerForInitTest.close()
+      mockServer.close()
     })
 
     test("should sent newContentPackage message", async () =>
     {
       expect.assertions(2)
-      expect(mockServerForInitTest.getMessages("newContentPackage")).toHaveLength(0)
+      expect(mockServer.getMessages("newContentPackage")).toHaveLength(0)
       wsr.init(height, width)
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      expect(mockServerForInitTest.getMessages("newContentPackage")).toHaveLength(1)
+      expect(mockServer.getMessages("newContentPackage")).toHaveLength(1)
     })
     test("should sent hmac and configuration messages when receive ack message with hmacChallenge", async () =>
     {
       expect.assertions(3)
-      expect(mockServerForInitTest.messages).toHaveLength(0)
+      expect(mockServer.messages).toHaveLength(0)
       wsr.init(height, width)
-      mockServerForInitTest.sendAckWithHMAC()
+      mockServer.sendAckWithHMAC()
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      expect(mockServerForInitTest.getMessages("hmac")).toHaveLength(1)
-      expect(mockServerForInitTest.getMessages("configuration")).toHaveLength(1)
+      expect(mockServer.getMessages("hmac")).toHaveLength(1)
+      expect(mockServer.getMessages("configuration")).toHaveLength(1)
     })
     test("should sent only configuration message when receive ack message without hmacChallenge", async () =>
     {
       expect.assertions(3)
-      expect(mockServerForInitTest.messages).toHaveLength(0)
+      expect(mockServer.messages).toHaveLength(0)
       wsr.init(height, width)
 
-      mockServerForInitTest.sendAckWithoutHMAC()
+      mockServer.sendAckWithoutHMAC()
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      expect(mockServerForInitTest.getMessages("hmac")).toHaveLength(0)
-      expect(mockServerForInitTest.getMessages("configuration")).toHaveLength(1)
+      expect(mockServer.getMessages("hmac")).toHaveLength(0)
+      expect(mockServer.getMessages("configuration")).toHaveLength(1)
     })
     test("should sent newContentPart message when receive contentPackageDescription", async () =>
     {
       expect.assertions(2)
       wsr.init(height, width)
-      expect(mockServerForInitTest.getMessages("newContentPart")).toHaveLength(0)
-      mockServerForInitTest.sendAckWithoutHMAC()
-      mockServerForInitTest.sendContentPackageDescription()
+      expect(mockServer.getMessages("newContentPart")).toHaveLength(0)
+      mockServer.sendAckWithoutHMAC()
+      mockServer.sendContentPackageDescription()
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      expect(mockServerForInitTest.getMessages("newContentPart")).toHaveLength(1)
+      expect(mockServer.getMessages("newContentPart")).toHaveLength(1)
     })
     test("should sent openContentPart message when receive contentPackageDescription if currentPartId is defined", async () =>
     {
       expect.assertions(2)
       wsr.init(height, width)
-      expect(mockServerForInitTest.getMessages("openContentPart")).toHaveLength(0)
+      expect(mockServer.getMessages("openContentPart")).toHaveLength(0)
       wsr.currentPartId = "currentPartId"
-      mockServerForInitTest.sendAckWithoutHMAC()
-      mockServerForInitTest.sendContentPackageDescription()
+      mockServer.sendAckWithoutHMAC()
+      mockServer.sendContentPackageDescription()
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
-      expect(mockServerForInitTest.getMessages("openContentPart")).toHaveLength(1)
+      expect(mockServer.getMessages("openContentPart")).toHaveLength(1)
     })
     test("should resolve when receive newPart message", async () =>
     {
       expect.assertions(1)
       const promise = wsr.init(height, width)
-      mockServerForInitTest.sendAckWithoutHMAC()
-      mockServerForInitTest.sendContentPackageDescription()
-      mockServerForInitTest.sendNewPartMessage()
+      mockServer.sendAckWithoutHMAC()
+      mockServer.sendContentPackageDescription()
+      mockServer.sendNewPartMessage()
       await promise
       expect(1).toEqual(1)
     })
@@ -164,7 +164,7 @@ describe("WSRecognizer.ts", () =>
       const spyEmitError: jest.SpyInstance = jest.spyOn(wsr.internalEvent, "emitError")
       expect.assertions(3)
       const promise = wsr.init(height, width)
-      mockServerForInitTest.sendNotGrantedErrorMessage()
+      mockServer.sendNotGrantedErrorMessage()
       await expect(promise).rejects.toEqual(new Error(ErrorConst.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
       await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
@@ -199,10 +199,11 @@ describe("WSRecognizer.ts", () =>
       serverConfig.websocket.pingEnabled = true
       const wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
       await wsr.init(height, width)
-      await delay(serverConfig.websocket.pingDelay)
+      await delay(serverConfig.websocket.pingDelay * 1.5)
       expect(mockServer.getMessages("ping")).toHaveLength(1)
       await delay(serverConfig.websocket.pingDelay)
       expect(mockServer.getMessages("ping")).toHaveLength(2)
+      await wsr.destroy()
     })
     test("should not send ping message", async () =>
     {
@@ -210,10 +211,11 @@ describe("WSRecognizer.ts", () =>
       serverConfig.websocket.pingEnabled = false
       const wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
       await wsr.init(height, width)
-      await delay(serverConfig.websocket.pingDelay)
+      await delay(serverConfig.websocket.pingDelay * 1.5)
       expect(mockServer.getMessages("ping")).toHaveLength(0)
       await delay(serverConfig.websocket.pingDelay)
       expect(mockServer.getMessages("ping")).toHaveLength(0)
+      await wsr.destroy()
     })
     test("should close the connection when maxPingLostCount is reached", async () =>
     {
@@ -222,11 +224,12 @@ describe("WSRecognizer.ts", () =>
       serverConfig.websocket.maxPingLostCount = 2
       const wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
       await wsr.init(height, width)
-      await delay(serverConfig.websocket.pingDelay)
+      await delay(serverConfig.websocket.pingDelay * 1.5)
       expect(mockServer.server.clients()).toHaveLength(1)
       await delay(serverConfig.websocket.pingDelay * serverConfig.websocket.maxPingLostCount)
       expect(mockServer.getMessages("ping")).toHaveLength(serverConfig.websocket.maxPingLostCount + 1)
       expect(mockServer.server.clients()).toHaveLength(0)
+      await wsr.destroy()
     })
   })
 

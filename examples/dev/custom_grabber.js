@@ -1,10 +1,10 @@
 class CustomGrabber extends iink.PointerEventGrabber {
 
-  constructor(configuration, elements) {
+  constructor(configuration) {
     super(configuration)
-    this.downElement = elements.down
-    this.moveElement = elements.move
-    this.upElement = elements.up
+    this.downElement = document.getElementById("pointer-down")
+    this.moveElement = document.getElementById("pointer-move")
+    this.upElement = document.getElementById("pointer-up")
   }
 
   pointerDownHandler = (evt) =>

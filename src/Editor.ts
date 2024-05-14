@@ -1,12 +1,13 @@
+
 import style from "./iink.css"
-import { IBehaviors, RestBehaviors, TBehaviorOptions, WSBehaviors } from "./behaviors"
+import { IBehaviors, OIBehaviors, RestBehaviors, TBehaviorOptions, WSBehaviors } from "./behaviors"
 import { SmartGuide } from "./smartguide"
 import { DeferredPromise, PartialDeep, mergeDeep } from "./utils"
 import { LoggerManager } from "./logger"
 import { ExportType, Intention, LoggerClass } from "./Constants"
 import { DefaultLoggerConfiguration, TConfiguration, TConverstionState, TLoggerConfiguration, TMarginConfiguration } from "./configuration"
 import { IModel, TExport, TJIIXExport } from "./model"
-import { TStroke } from "./primitive"
+import { TOISymbol, TStroke } from "./primitive"
 import { InternalEvent, PublicEvent } from "./event"
 import { TUndoRedoContext } from "./undo-redo"
 import { IGrabber } from "./grabber"
@@ -27,8 +28,13 @@ export class Editor
 {
   logger = LoggerManager.getLogger(LoggerClass.EDITOR)
   wrapperHTML: HTMLEditorElement
-  #loaderHTML: HTMLDivElement
-  #messageHTML: HTMLDivElement
+  #layerInfos!: HTMLDivElement
+  #loaderHTML!: HTMLDivElement
+  #messageEl!: HTMLDivElement
+  #messageText!: HTMLParagraphElement
+  #stateHTML!: HTMLDivElement
+  #busyHTML!: HTMLDivElement
+  #idleHTML!: HTMLDivElement
   #behaviors!: IBehaviors
   #smartGuide?: SmartGuide
   #initializationDeferred: DeferredPromise<void>
@@ -50,15 +56,7 @@ export class Editor
     styleElement.appendChild(document.createTextNode(style as string))
     this.wrapperHTML.appendChild(styleElement)
 
-    this.#loaderHTML = document.createElement("div")
-    this.#loaderHTML.classList.add("loader")
-    this.#loaderHTML.style.display = "none"
-    this.wrapperHTML.appendChild(this.#loaderHTML)
-
-    this.#messageHTML = document.createElement("div")
-    this.#messageHTML.classList.add("message")
-    this.#messageHTML.style.display = "none"
-    this.wrapperHTML.appendChild(this.#messageHTML)
+    this.wrapperHTML.appendChild(this.#createLayerInfos())
 
     this.#instantiateBehaviors(options)
   }
@@ -106,20 +104,9 @@ export class Editor
   }
   set intention(i: Intention)
   {
+    this.logger.info("set intention", i)
     this.behaviors.intention = i
-    switch (this.behaviors.intention) {
-      case Intention.Erase:
-        this.wrapperHTML.classList.remove("draw")
-        this.wrapperHTML.classList.add("erase")
-        this.wrapperHTML.classList.remove("select")
-        break
-      default:
-        this.wrapperHTML.classList.add("draw")
-        this.wrapperHTML.classList.remove("erase")
-        this.wrapperHTML.classList.remove("select")
-        break
-    }
-    this.logger.debug("set intention", this.wrapperHTML)
+    this.#setCursorIntention()
   }
 
   get events(): PublicEvent
@@ -177,15 +164,92 @@ export class Editor
     this.behaviors.setPenStyleClasses(styleClasses)
   }
 
-  get gestures(): boolean
+  #setCursorIntention(): void
   {
-    return this.configuration.recognition.gesture.enable
+    switch (this.behaviors.intention) {
+      case Intention.Erase:
+        this.wrapperHTML.classList.remove("draw")
+        this.wrapperHTML.classList.add("erase")
+        this.wrapperHTML.classList.remove("select")
+        break
+      case Intention.Select:
+        this.wrapperHTML.classList.remove("draw")
+        this.wrapperHTML.classList.remove("erase")
+        this.wrapperHTML.classList.add("select")
+        break
+      default:
+        this.wrapperHTML.classList.add("draw")
+        this.wrapperHTML.classList.remove("erase")
+        this.wrapperHTML.classList.remove("select")
+        break
+    }
   }
-  set gestures(apply: boolean)
+
+  #createLayerInfos(): HTMLDivElement
   {
-    this.configuration.recognition.gesture.enable = apply
-    this.#instantiateBehaviors({ configuration: this.configuration })
-    this.initialize()
+    this.#layerInfos = document.createElement("div")
+    this.#layerInfos.classList.add("ms-layer-infos")
+    this.#layerInfos.appendChild(this.#createLoader())
+    this.#layerInfos.appendChild(this.#createMessage())
+    this.#layerInfos.appendChild(this.#createEditorState())
+    return this.#layerInfos
+  }
+
+  #createLoader(): HTMLDivElement
+  {
+    this.#loaderHTML = document.createElement("div")
+    this.#loaderHTML.classList.add("loader")
+    this.#loaderHTML.style.display = "none"
+    return this.#loaderHTML
+  }
+
+  #createMessage(): HTMLDivElement
+  {
+    this.#messageEl = document.createElement("div")
+    this.#messageEl.classList.add("message")
+    const closeBtn = document.createElement("button")
+    closeBtn.classList.add("ms-button", "close")
+    closeBtn.addEventListener("pointerup", this.cleanMessage.bind(this))
+    this.#messageEl.appendChild(closeBtn)
+    this.#messageEl.style.display = "none"
+
+    this.#messageText = document.createElement("p")
+    this.#messageEl.appendChild(this.#messageText)
+    return this.#messageEl
+  }
+
+  #createEditorState(): HTMLDivElement
+  {
+    this.#stateHTML = document.createElement("div")
+    this.#stateHTML.classList.add("state")
+    this.#idleHTML = document.createElement("div")
+    this.#idleHTML.textContent = "idle"
+    this.#idleHTML.style.display = "block"
+    this.#stateHTML.appendChild(this.#idleHTML)
+    this.#busyHTML = document.createElement("div")
+    this.#busyHTML.classList.add("busy")
+    this.#busyHTML.style.display = "none"
+    this.#stateHTML.appendChild(this.#busyHTML)
+    this.#stateHTML.style.display = "none"
+    return this.#stateHTML
+  }
+
+  #updateEditorState(idle: boolean): void
+  {
+    if (this.configuration.offscreen) {
+      this.#stateHTML.style.display = "block"
+      if (idle) {
+        this.#idleHTML.style.display = "block"
+        this.#busyHTML.style.display = "none"
+      }
+      else {
+        this.#idleHTML.style.display = "none"
+        this.#busyHTML.style.display = "block"
+      }
+    }
+    else {
+      this.#stateHTML.style.display = "none"
+    }
   }
 
   #instantiateBehaviors(options: PartialDeep<TBehaviorOptions>)
@@ -198,13 +262,14 @@ export class Editor
     if (this.#behaviors) {
       this.#behaviors.destroy()
     }
-    let defaultBehaviors: IBehaviors
-    if (options.configuration.server?.protocol === "REST") {
-      defaultBehaviors = new RestBehaviors(options)
-    } else {
-      defaultBehaviors = new WSBehaviors(options)
+    if (options.configuration.offscreen) {
+      this.#behaviors = new OIBehaviors(options, this.#layerInfos)
     }
-    this.#behaviors = Object.assign(defaultBehaviors, options.behaviors)
+    else if (options.configuration.server?.protocol === "REST") {
+      this.#behaviors = new RestBehaviors(options)
+    } else {
+      this.#behaviors = new WSBehaviors(options)
+    }
     this.logger.debug("instantiateBehaviors", this.#behaviors)
   }
 
@@ -213,7 +278,7 @@ export class Editor
     this.logger.info("initializeBehaviors", "start")
     this.#initializationDeferred = new DeferredPromise<void>()
     this.#loaderHTML.style.display = "initial"
-    this.#cleanMessage()
+    this.cleanMessage()
     return this.behaviors.init(this.wrapperHTML)
       .then(async () =>
       {
@@ -226,12 +291,13 @@ export class Editor
       {
         this.logger.error("initializeBehaviors", error)
         this.#initializationDeferred.reject(error)
-        this.#showError(error)
+        this.showError(error)
       })
       .finally(() =>
       {
         this.logger.debug("initializeBehaviors", "finally")
         this.#loaderHTML.style.display = "none"
+        this.#updateEditorState(true)
         return this.#initializationDeferred.promise
       })
   }
@@ -259,47 +325,60 @@ export class Editor
           }
           break
       }
-      this.#smartGuide.init(this.wrapperHTML, margin, this.configuration.rendering)
+      this.#smartGuide.init(this.#layerInfos, margin, this.configuration.rendering)
     }
   }
 
-  #cleanMessage()
+  cleanMessage()
   {
-    this.#messageHTML.style.display = "none"
-    this.#messageHTML.innerHTML = ""
+    this.#messageEl.style.display = "none"
+    this.#messageText.innerText = ""
   }
 
-  #showError(err: Error | string)
+  showError(err: Error | string)
   {
-    this.#messageHTML.style.display = "initial"
-    this.#messageHTML.classList.add("error-msg")
-    this.#messageHTML.classList.remove("info-msg")
-    this.#messageHTML.innerText = typeof err === "string" ? err : err.message
+    this.#messageEl.style.display = "initial"
+    this.#messageEl.classList.add("error-msg")
+    this.#messageEl.classList.remove("info-msg")
+    this.#messageText.innerText = typeof err === "string" ? err : err.message
   }
 
-  #showNotif(notif: { message: string, timeout?: number })
+  showNotif(notif: { message: string, timeout?: number })
   {
-    this.#messageHTML.style.display = "initial"
-    this.#messageHTML.classList.add("info-msg")
-    this.#messageHTML.classList.remove("error-msg")
-    this.#messageHTML.innerText = notif.message
+    this.#messageEl.style.display = "initial"
+    this.#messageEl.classList.add("info-msg")
+    this.#messageEl.classList.remove("error-msg")
+    this.#messageText.innerText = notif.message
     setTimeout(() =>
     {
-      this.#cleanMessage()
+      this.cleanMessage()
     }, notif.timeout || 2500)
   }
 
-  #addListeners(): void
+  #addInternalListeners(): void
   {
     this.internalEvents.addConvertListener(this.convert.bind(this))
     this.internalEvents.addClearListener(this.clear.bind(this))
-    this.internalEvents.addErrorListener(this.#showError.bind(this))
+    this.internalEvents.addErrorListener(this.showError.bind(this))
+    this.internalEvents.addNotifListener(this.showNotif.bind(this))
+    this.internalEvents.addClearMessageListener(this.cleanMessage.bind(this))
     this.internalEvents.addImportJIIXListener(this.#onImportJIIX.bind(this))
     this.internalEvents.addExportedListener(this.#onExport.bind(this))
-    this.internalEvents.addNotifListener(this.#showNotif.bind(this))
-    this.internalEvents.addClearMessageListener(this.#cleanMessage.bind(this))
     this.internalEvents.addContextChangeListener(this.#onContextChange.bind(this))
     this.internalEvents.addIdleListener(this.#onIdleChange.bind(this))
+    this.internalEvents.addSelectedListener(this.#onSelectionChange.bind(this))
+    this.internalEvents.addIntentionListener(this.#onIntentionChange.bind(this))
+  }
+
+  #onSelectionChange = (symbols: TOISymbol[]) =>
+  {
+    this.events.emitSelected(symbols)
+  }
+
+  #onIntentionChange = (intention: Intention) =>
+  {
+    this.intention = intention
+    this.events.emitIntention(intention)
   }
 
   #onContextChange = (context: TUndoRedoContext) =>
@@ -309,6 +388,7 @@ export class Editor
 
   #onIdleChange = (idle: boolean) =>
   {
+    this.#updateEditorState(idle)
     this.events.emitIdle(idle)
   }
 
@@ -335,7 +415,7 @@ export class Editor
     this.logger.info("initialize")
     await this.#initializeBehaviors()
     this.#initializeSmartGuide()
-    this.#addListeners()
+    this.#addInternalListeners()
   }
 
   async waitForIdle(): Promise<void>
@@ -382,8 +462,8 @@ export class Editor
       this.#smartGuide?.resize()
     }
     const compStyles = window.getComputedStyle(this.wrapperHTML)
-    const height = Math.max(parseInt(compStyles.height.replace("px","")), this.configuration.rendering.minHeight)
-    const width = Math.max(parseInt(compStyles.width.replace("px","")), this.configuration.rendering.minWidth)
+    const height = Math.max(parseInt(compStyles.height.replace("px", "")), this.configuration.rendering.minHeight)
+    const width = Math.max(parseInt(compStyles.width.replace("px", "")), this.configuration.rendering.minWidth)
     await this.behaviors.resize(height, width)
     this.logger.debug("resize", this.model)
     return this.model

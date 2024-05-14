@@ -1,4 +1,4 @@
-import { DoubleTouchEventFake, LeftClickEventFake, RightClickEventFake, TouchEventFake } from "../__mocks__/PointerEventFake"
+import { DoubleTouchEventMock, LeftClickEventMock, RightClickEventMock, TouchEventMock } from "../__mocks__/EventMock"
 import { DefaultConfiguration, PointerEventGrabber, TGrabberConfiguration, IGrabber } from "../../../src/iink"
 
 describe("PointerEventGrabber.ts", () =>
@@ -22,14 +22,14 @@ describe("PointerEventGrabber.ts", () =>
     grabber.onPointerMove = jest.fn()
     grabber.onPointerUp = jest.fn()
 
-    const pointerDownEvt = new LeftClickEventFake("pointerdown", {
+    const pointerDownEvt = new LeftClickEventMock("pointerdown", {
       pointerType: "pen",
       clientX: 10,
       clientY: 10,
       pressure: 1
     })
 
-    const pointerMoveEvt = new LeftClickEventFake("pointermove", {
+    const pointerMoveEvt = new LeftClickEventMock("pointermove", {
       pointerType: "pen",
       clientX: 15,
       clientY: 15,
@@ -37,7 +37,7 @@ describe("PointerEventGrabber.ts", () =>
     })
     pointerMoveEvt.pointerId = pointerDownEvt.pointerId
 
-    const pointerUpEvt = new LeftClickEventFake("pointerup", {
+    const pointerUpEvt = new LeftClickEventMock("pointerup", {
       pointerType: "pen",
       clientX: 15,
       clientY: 15,
@@ -110,7 +110,7 @@ describe("PointerEventGrabber.ts", () =>
 
     test("should extract TPointer from mouseEvent", () =>
     {
-      const mouseDownEvt = new LeftClickEventFake("pointerdown", {
+      const mouseDownEvt = new LeftClickEventMock("pointerdown", {
         pointerType: "pen",
         clientX: 2705,
         clientY: 1989,
@@ -132,7 +132,7 @@ describe("PointerEventGrabber.ts", () =>
 
     test("should extract TPointer from touchEvent", () =>
     {
-      const touchDownEvt = new TouchEventFake("pointerdown", {
+      const touchDownEvt = new TouchEventMock("pointerdown", {
         pointerType: "pen",
         clientX: 2705,
         clientY: 1989,
@@ -160,7 +160,7 @@ describe("PointerEventGrabber.ts", () =>
     wrapperHTML.style.height = "100px"
     document.body.appendChild(wrapperHTML)
 
-    const pointerDownEvt = new LeftClickEventFake("pointerdown", {
+    const pointerDownEvt = new LeftClickEventMock("pointerdown", {
       pointerType: "pen",
       clientX: 2705,
       clientY: 1989,
@@ -251,7 +251,7 @@ describe("PointerEventGrabber.ts", () =>
 
     test("should not listen right click event", () =>
     {
-      const pointerDownEvt = new RightClickEventFake("pointerdown", {
+      const pointerDownEvt = new RightClickEventMock("pointerdown", {
         pointerType: "pen",
         clientX: 300,
         clientY: 500,
@@ -264,7 +264,7 @@ describe("PointerEventGrabber.ts", () =>
 
     test("should not listen right click event", () =>
     {
-      const pointerDownEvt = new DoubleTouchEventFake("pointerdown", {
+      const pointerDownEvt = new DoubleTouchEventMock("pointerdown", {
         pointerType: "pen",
         clientX: 300,
         clientY: 500,

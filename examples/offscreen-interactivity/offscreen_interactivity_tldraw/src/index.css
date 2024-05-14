@@ -1,0 +1,109 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap');
+@import url('tldraw/tldraw.css');
+
+html,
+body,
+#root {
+	padding: 0;
+	margin: 0;
+	font-family: 'Inter', sans-serif;
+	overscroll-behavior: none;
+	touch-action: none;
+	overflow: hidden;
+	height: 100dvh;
+	width: 100dvw;
+}
+
+.tldraw__editor {
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	bottom: 0px;
+	right: 0px;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+.loader {
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  animation: spin 2s linear infinite;
+}
+
+.modal {
+	position: absolute;
+	z-index: 999;
+	top: 50%;
+	left: 50%;
+	max-width: 50%;
+	overflow: auto;
+	transform: translate(-50%, -50%);
+	background-color: white;
+	padding: 12px;
+	box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.225);
+	border-radius: 12px;
+}
+.modal .modal-header {
+	border-bottom: 1px solid rgba(0, 0, 0, 0.225);
+	margin-top: 0px;
+	padding-bottom: 8px;
+}
+.modal.error .modal-header  {
+	color: crimson;
+}
+.modal .modal-footer {
+	padding-top: 12px;
+}
+.modal .modal-footer .close-btn {
+  background-color: #e7e7e7;
+	color: black;
+  border: none;
+	float: right;
+  text-align: center;
+  text-decoration: none;
+  font-size: 16px;
+  padding: 12px 24px;
+	border-radius: 12px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.tabs {
+	display: flex;
+	position: relative;
+}
+.tabs::after {
+	content: "";
+	width: 100%;
+	border-bottom: 1px solid black;
+	position: absolute;
+	bottom: 0;
+}
+
+.tab-btn {
+	border: 1px solid transparent;
+	padding: 12px;
+}
+.tab-btn.active {
+	border: 1px solid black;
+	border-radius: 5px 5px 0 0;
+	border-bottom: 1px solid white;
+	z-index: 2;
+}
+
+.tab-content {
+	display: none;
+	height: 100%;
+	width: 100%;
+}
+
+.tab-content.active {
+	display: block;
+}

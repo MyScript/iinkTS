@@ -37,6 +37,7 @@
   ],
   "include": [
     "src",
+    "test/unit"
   ],
   "exclude": [
     "node_modules",

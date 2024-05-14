@@ -21,9 +21,11 @@ export type TImageConfiguration = {
  * @group Configuration
  */
 export type TJiixConfiguration = {
-  "bounding-box"?: boolean
+  "bounding-box": boolean
   strokes: boolean
-  text?: {
+  ids: boolean,
+  "full-stroke-ids": boolean,
+  text: {
     chars: boolean
     words: boolean
   }
@@ -36,6 +38,8 @@ export type TJiixConfiguration = {
 export const DefaultJiixConfiguration: TJiixConfiguration = {
   "bounding-box": false,
   strokes: false,
+  ids: false,
+  "full-stroke-ids": false,
   text: {
     chars: false,
     words: true
@@ -62,7 +66,7 @@ export type TMathMLExport = {
 export type TExportConfiguration = {
   "image-resolution"?: number
   image?: TImageConfiguration
-  jiix?: TJiixConfiguration
+  jiix: TJiixConfiguration
   mathml?: TMathMLExport
 }
 

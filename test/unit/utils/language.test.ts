@@ -5,7 +5,7 @@ describe("language.ts", () =>
 {
   global.fetch = jest.fn(() =>
     Promise.resolve({
-      json: () => Promise.resolve({ fr: "fr_FR" }),
+      json: () => Promise.resolve({ result: { fr: "fr_FR" } }),
     }),
   ) as jest.Mock
 

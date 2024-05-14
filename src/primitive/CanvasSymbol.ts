@@ -2,7 +2,7 @@ import { TPoint } from "./Point"
 import { TSymbol } from "./Symbol"
 
 /**
- * @group Primitive/Canvas
+ * @group Primitive
  */
 export type TCanvasShapeEllipseSymbol = TSymbol & {
   centerPoint: TPoint
@@ -18,7 +18,7 @@ export type TCanvasShapeEllipseSymbol = TSymbol & {
 }
 
 /**
- * @group Primitive/Canvas
+ * @group Primitive
  */
 export type TCanvasShapeLineSymbol = TSymbol & {
   firstPoint: TPoint
@@ -30,7 +30,7 @@ export type TCanvasShapeLineSymbol = TSymbol & {
 }
 
 /**
- * @group Primitive/Canvas
+ * @group Primitive
  */
 export type TCanvasShapeTableLineSymbol = {
   p1: TPoint
@@ -38,14 +38,14 @@ export type TCanvasShapeTableLineSymbol = {
 }
 
 /**
- * @group Primitive/Canvas
+ * @group Primitive
  */
 export type TCanvasShapeTableSymbol = TSymbol & {
   lines: TCanvasShapeTableLineSymbol[]
 }
 
 /**
- * @group Primitive/Canvas
+ * @group Primitive
  */
 export type TCanvasUnderLineSymbol = TSymbol & {
   data: {
@@ -55,7 +55,7 @@ export type TCanvasUnderLineSymbol = TSymbol & {
 }
 
 /**
- * @group Primitive/Canvas
+ * @group Primitive
  */
 export type TCanvasTextSymbol = TSymbol & {
   label: string,
@@ -69,7 +69,7 @@ export type TCanvasTextSymbol = TSymbol & {
 }
 
 /**
- * @group Primitive/Canvas
+ * @group Primitive
  */
 export type TCanvasTextUnderlineSymbol = TCanvasTextSymbol & {
   underlineList: TCanvasUnderLineSymbol[]

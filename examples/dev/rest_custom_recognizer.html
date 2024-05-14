@@ -14,11 +14,11 @@
     <script type="text/javascript" src="./rest_custom_recognizer.js"></script>
     <style>
       #editor {
-        height: calc(100vh - 187px);
+        height: calc(100dvh - 187px);
       }
       @media only screen and (max-width: 600px) {
         #editor {
-          height: calc(100vh - 257px);
+          height: calc(100dvh - 257px);
         }
       }
     </style>
@@ -85,11 +85,10 @@
         const server = await res.json();
         const configuration = new iink.Configuration({ server })
         configuration.server.protocol = "REST"
-        const customRecognizer = new CustomRestRecognizer(configuration.server, configuration.recognition, infoElements)
         const options = {
           configuration,
           behaviors: {
-            recognizer: customRecognizer
+            recognizer: CustomRestRecognizer
           }
         };
         /**

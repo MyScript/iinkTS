@@ -25,12 +25,12 @@ describe("quadratics", () =>
     const points = computeLinksPointers(p1, 90, 1)
     expect(points).toStrictEqual([
       {
-        x: 0.10600333639944215,
-        y: 0.5519263838708298
+        x: 0.106,
+        y: 0.552
       },
       {
-        x: 1.8939966636005579,
-        y: 1.4480736161291703
+        x: 1.894,
+        y: 1.448
       }
     ])
   })

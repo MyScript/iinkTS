@@ -24,6 +24,7 @@ describe("WSBehaviors.ts", () =>
 
   test("should instanciate WSBehaviors", () =>
   {
+    //@ts-ignore TODO IIC-1006
     const wsb = new WSBehaviors(DefaultBehaviorsOptions)
     expect(wsb).toBeDefined()
   })

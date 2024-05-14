@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Offscreen custom menu</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+
+    <style>
+      #editor {
+        width: 100vw;
+        height: calc(100dvh - 62px);
+        touch-action: none;
+      }
+      @media only screen and (max-width: 631px) {
+        #editor {
+          height: calc(100dvh - 114px);
+        }
+      }
+      @media only screen and (max-width: 427px) {
+        #editor {
+          height: calc(100dvh - 158px);
+        }
+      }
+    </style>
+
+    <style>
+      .ms-editor .state {
+        display: none;
+      }
+      .custom-menu-style {
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        width: 150px;
+        min-width: 150px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .custom-menu-intention {
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+      }
+      .custom-menu-action {
+        position: absolute;
+        top: 0px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+      }
+    </style>
+
+    <script type="text/javascript" src="../../dist/iink.min.js"></script>
+    <script type="text/javascript" src="./offscreen_interactivity_custom_menu.js"></script>
+  </head>
+
+  <body>
+    <nav class="flex-container wrap gap">
+      <div class="flex-container wrap">
+        <label class="label">Show/hide Menu Style</label>
+        <div class="toggle-switch">
+          <input class="toggle-input" id="menu-style-toggle" type="checkbox" checked />
+          <label class="toggle-label" for="menu-style-toggle"></label>
+        </div>
+      </div>
+      <div class="flex-container wrap">
+        <label class="label">Show/hide Menu Action</label>
+        <div class="toggle-switch">
+          <input class="toggle-input" id="menu-action-toggle" type="checkbox" checked />
+          <label class="toggle-label" for="menu-action-toggle"></label>
+        </div>
+      </div>
+      <div class="flex-container wrap">
+        <label class="label">Show/hide Menu Intention</label>
+        <div class="toggle-switch">
+          <input class="toggle-input" id="menu-intention-toggle" type="checkbox" checked />
+          <label class="toggle-label" for="menu-intention-toggle"></label>
+        </div>
+      </div>
+    </nav>
+
+    <div id="editor" touch-action="none"></div>
+
+    <script type="module">
+      const editorElement = document.getElementById("editor");
+
+      const menuStyleToggle = document.getElementById("menu-style-toggle");
+      const menuIntentionToggle = document.getElementById("menu-intention-toggle");
+      const menuActionToggle = document.getElementById("menu-action-toggle");
+
+
+      /**
+       * we expose the editor for use in the integration test
+       */
+      let editor;
+
+      async function loadEditor() {
+        const res = await fetch("../server-configuration.json");
+        const server = await res.json();
+        const options = {
+          configuration: {
+            offscreen: true,
+            server,
+            menu: {
+              style: {
+                enable: true
+              },
+              intention: {
+                enable: true
+              },
+              action: {
+                enable: true
+              }
+            },
+          },
+          behaviors: {
+            menu: {
+              style: CustomMenuStyle,
+              intention: CustomMenuIntention,
+              action: CustomMenuAction
+            }
+          }
+        };
+        /**
+         * Instanciate editor
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Editor parameters
+         */
+        editor = new iink.Editor(editorElement, options);
+        /**
+         *  async initialize editor behaviors
+         */
+        await editor.initialize();
+
+        menuStyleToggle.addEventListener("change", () => {
+          menuStyleToggle.checked ? editor.behaviors.menu.style.show() : editor.behaviors.menu.style.hide();
+        });
+        menuIntentionToggle.addEventListener("change", () => {
+          menuIntentionToggle.checked ? editor.behaviors.menu.intention.show() : editor.behaviors.menu.intention.hide();
+        });
+        menuActionToggle.addEventListener("change", () => {
+          menuActionToggle.checked ? editor.behaviors.menu.action.show() : editor.behaviors.menu.action.hide();
+        });
+
+        window.addEventListener("resize", () => {
+          editor.resize();
+        });
+      }
+
+      loadEditor().catch((error) => console.error(error));
+    </script>
+  </body>
+</html>
