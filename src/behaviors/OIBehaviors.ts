@@ -294,7 +294,6 @@ export class OIBehaviors implements IBehaviors
           await this.writer.end(pointer)
           break
       }
-      await this.recognizer.waitForIdle()
     } catch (error) {
       this.undo()
       this.#logger.error("onPointerUp", error)
@@ -303,6 +302,7 @@ export class OIBehaviors implements IBehaviors
     finally {
       this.menu.update()
       await this.svgDebugger.apply()
+      await this.recognizer.waitForIdle()
     }
   }
 
@@ -510,8 +510,8 @@ export class OIBehaviors implements IBehaviors
     }
     finally {
       this.menu.update()
-      this.svgDebugger.apply()
-      this.recognizer.waitForIdle()
+      await this.svgDebugger.apply()
+      await this.recognizer.waitForIdle()
     }
   }
 
@@ -535,7 +535,6 @@ export class OIBehaviors implements IBehaviors
     finally {
       this.menu.update()
       await this.svgDebugger.apply()
-      await this.recognizer.waitForIdle()
     }
   }
 
@@ -564,8 +563,8 @@ export class OIBehaviors implements IBehaviors
     }
     finally {
       this.menu.update()
-      this.svgDebugger.apply()
-      this.recognizer.waitForIdle()
+      await this.svgDebugger.apply()
+      await this.recognizer.waitForIdle()
     }
   }
 
@@ -602,8 +601,8 @@ export class OIBehaviors implements IBehaviors
     }
     finally {
       this.menu.update()
-      this.svgDebugger.apply()
-      this.recognizer.waitForIdle()
+      await this.svgDebugger.apply()
+      await this.recognizer.waitForIdle()
     }
   }
 
@@ -628,8 +627,8 @@ export class OIBehaviors implements IBehaviors
     }
     finally {
       this.menu.update()
-      this.svgDebugger.apply()
-      this.recognizer.waitForIdle()
+      await this.svgDebugger.apply()
+      await this.recognizer.waitForIdle()
     }
   }
 
@@ -708,8 +707,8 @@ export class OIBehaviors implements IBehaviors
     }
     finally {
       this.menu.update()
-      this.svgDebugger.apply()
-      this.recognizer.waitForIdle()
+      await this.svgDebugger.apply()
+      await this.recognizer.waitForIdle()
     }
     return this.model
   }
@@ -720,20 +719,15 @@ export class OIBehaviors implements IBehaviors
     if (this.context.canUndo) {
       this.internalEvent.emitIdle(false)
       this.unselectAll()
-      const promises: Promise<void>[] = []
       const modelToApply = this.undoRedoManager.undo() as OIModel
       const modifications = modelToApply.extractDifferenceSymbols(this.model)
       this.#logger.debug("undo", { modifications })
-      if (modifications.removed.length) {
-        modifications.removed.forEach(s => this.renderer.removeSymbol(s.id))
-        promises.push(this.recognizer.eraseStrokes(modifications.removed.filter(s => s.type === SymbolType.Stroke).map(s => s.id)))
+      if (modifications.removed.some(s => s.type === SymbolType.Stroke) || modifications.added.some(s => s.type === SymbolType.Stroke)) {
+        await this.recognizer.undo()
       }
-      if (modifications.added.length) {
-        modifications.added.forEach(s => this.renderer.drawSymbol(s))
-        promises.push(this.recognizer.addStrokes(modifications.added.filter(s => s.type === SymbolType.Stroke) as OIStroke[], false) as Promise<void>)
-      }
+      modifications.removed.forEach(s => this.renderer.removeSymbol(s.id))
+      modifications.added.forEach(s => this.renderer.drawSymbol(s))
       this.#model = modelToApply
-      await Promise.all(promises)
       this.menu.update()
       this.svgDebugger.apply()
       await this.recognizer.waitForIdle()
@@ -747,22 +741,18 @@ export class OIBehaviors implements IBehaviors
     if (this.context.canRedo) {
       this.internalEvent.emitIdle(false)
       this.unselectAll()
-      const promises: Promise<void>[] = []
       const modelToApply = this.undoRedoManager.redo() as OIModel
       const modifications = modelToApply.extractDifferenceSymbols(this.model)
       this.#logger.debug("redo", { modifications })
-      if (modifications.removed.length) {
-        modifications.removed.forEach(s => this.renderer.removeSymbol(s.id))
-        promises.push(this.recognizer.eraseStrokes(modifications.removed.filter(s => s.type === SymbolType.Stroke).map(s => s.id)))
+      if (modifications.removed.some(s => s.type === SymbolType.Stroke) || modifications.added.some(s => s.type === SymbolType.Stroke)) {
+        await this.recognizer.redo()
       }
-      if (modifications.added.length) {
-        modifications.added.forEach(s => this.renderer.drawSymbol(s))
-        promises.push(this.recognizer.addStrokes(modifications.added.filter(s => s.type === SymbolType.Stroke) as OIStroke[], false) as Promise<void>)
-      }
+      modifications.removed.forEach(s => this.renderer.removeSymbol(s.id))
+      modifications.added.forEach(s => this.renderer.drawSymbol(s))
+
       this.#model = modelToApply
-      await Promise.all(promises)
       this.menu.update()
-      this.svgDebugger.apply()
+      await this.svgDebugger.apply()
       await this.recognizer.waitForIdle()
     }
     return this.model
@@ -898,8 +888,8 @@ export class OIBehaviors implements IBehaviors
     }
     finally {
       this.menu.update()
-      this.svgDebugger.apply()
-      this.recognizer.waitForIdle()
+      await this.svgDebugger.apply()
+      await this.recognizer.waitForIdle()
     }
     return this.model
   }
@@ -937,8 +927,8 @@ export class OIBehaviors implements IBehaviors
     }
     finally {
       this.menu.update()
-      this.svgDebugger.apply()
-      this.recognizer.waitForIdle()
+      await this.svgDebugger.apply()
+      await this.recognizer.waitForIdle()
     }
     return this.model
   }

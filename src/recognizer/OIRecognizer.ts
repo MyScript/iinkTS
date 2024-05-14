@@ -53,6 +53,8 @@ export class OIRecognizer
   protected exportDeferred?: DeferredPromise<TExport>
   protected closeDeferred?: DeferredPromise<void>
   protected waitForIdleDeferred?: DeferredPromise<void>
+  protected undoDeferred?: DeferredPromise<void>
+  protected redoDeferred?: DeferredPromise<void>
 
   url: string
 
@@ -161,7 +163,9 @@ export class OIRecognizer
       this.addStrokeDeferred?.promise,
       this.transformStrokeDeferred?.promise,
       this.replaceStrokeDeferred?.promise,
-      this.eraseStrokeDeferred?.promise
+      this.eraseStrokeDeferred?.promise,
+      this.undoDeferred?.promise,
+      this.redoDeferred?.promise,
     ])
     return Promise.resolve()
   }
@@ -188,6 +192,12 @@ export class OIRecognizer
     }
     if (this.replaceStrokeDeferred?.isPending) {
       this.replaceStrokeDeferred?.reject(error)
+    }
+    if (this.undoDeferred?.isPending) {
+      this.undoDeferred?.reject(error)
+    }
+    if (this.redoDeferred?.isPending) {
+      this.redoDeferred?.reject(error)
     }
     if (this.exportDeferred?.isPending) {
       this.exportDeferred?.reject(error)
@@ -333,6 +343,8 @@ export class OIRecognizer
             this.transformStrokeDeferred?.resolve()
             this.eraseStrokeDeferred?.resolve()
             this.replaceStrokeDeferred?.resolve()
+            this.undoDeferred?.resolve()
+            this.redoDeferred?.resolve()
             break
           case "exported":
             this.manageExportMessage(websocketMessage)
@@ -525,6 +537,30 @@ export class OIRecognizer
     }
     await this.send(message)
     return this.waitForIdleDeferred?.promise
+  }
+
+  async undo(): Promise<void>
+  {
+    await this.initialized?.promise
+    await this.undoDeferred?.promise
+    this.undoDeferred = new DeferredPromise<void>()
+    const message: TOIMessageEvent = {
+      type: "undo",
+    }
+    await this.send(message)
+    return this.undoDeferred?.promise
+  }
+
+  async redo(): Promise<void>
+  {
+    await this.initialized?.promise
+    await this.redoDeferred?.promise
+    this.redoDeferred = new DeferredPromise<void>()
+    const message: TOIMessageEvent = {
+      type: "redo",
+    }
+    await this.send(message)
+    return this.redoDeferred?.promise
   }
 
   async export(requestedMimeTypes?: string[]): Promise<TExport>
