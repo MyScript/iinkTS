@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Offscreen import</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <style>
+      #editor {
+        width: calc(100vw - 300px);
+        height: calc(100dvh - 62px);
+        touch-action: none;
+      }
+      textarea {
+        width: 300px;
+        height: calc(100dvh - 62px);
+        resize: none;
+      }
+      #show-symbols-to-import-btn {
+        display: none;
+      }
+      @media only screen and (max-width: 900px) {
+        #show-symbols-to-import-btn {
+          display: block;
+        }
+        #pointerEventsObject {
+          position: absolute;
+          z-index: 89;
+          top: 60px;
+          left: 0px;
+          min-width: 300px;
+          width: 50%;
+          height: 0px;
+          background-color: white;
+          box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.225);
+          overflow: hidden;
+          opacity: 0;
+          -webkit-transition: all 0.3s ease-in-out;
+          -moz-transition: all 0.3s ease-in-out;
+          -o-transition: all 0.3s ease-in-out;
+          transition: all 0.3s ease-in-out;
+        }
+        #pointerEventsObject.open {
+          height: calc(100dvh - 62px);
+          opacity: 1;
+          overflow: auto;
+        }
+        #editor {
+          width: 100dvw;
+        }
+      }
+    </style>
+    <script type="text/javascript" src="../../dist/iink.min.js"></script>
+  </head>
+
+  <body>
+    <nav>
+      <button id="show-symbols-to-import-btn" class="classic-btn">Show symbols</button>
+      <button class="classic-btn" id="import">Import</button>
+    </nav>
+    <div class="flex-container">
+      <textarea id="pointerEventsObject"> </textarea>
+      <div id="editor" touch-action="none"></div>
+    </div>
+
+    <script>
+      const editorElement = document.getElementById("editor");
+      const showSymbolBtn = document.getElementById("show-symbols-to-import-btn");
+      const pointerEventsObjectElement = document.getElementById("pointerEventsObject");
+      const importBtn = document.getElementById("import");
+
+      showSymbolBtn.addEventListener("pointerup", () => {
+        pointerEventsObjectElement.classList.toggle("open");
+      });
+
+      /**
+       * we expose the editor for use in the integration test
+       */
+      let editor;
+
+      async function loadEditor() {
+        const res = await fetch("../server-configuration.json");
+        const server = await res.json();
+
+        const options = {
+          configuration: {
+            offscreen: true,
+            server,
+            rendering: {
+              minHeight: 1000,
+              minWidth: 1000
+            }
+          }
+        };
+
+        /**
+         * Instanciate editor
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Editor parameters
+         */
+        const editor = new iink.Editor(editorElement, options);
+
+        const strokeRes = await fetch("../assets/datas/hello-my-friend.json");
+        pointerEventsObjectElement.value = JSON.stringify(await strokeRes.json(), null, 2);
+
+        /**
+         *  async initialize editor behaviors
+         */
+        await editor.initialize();
+
+        importBtn.addEventListener("click", async () => {
+          importBtn.disabled = true;
+          await editor.importPointEvents(JSON.parse(pointerEventsObjectElement.value));
+        });
+
+        window.addEventListener("resize", () => {
+          editor.resize();
+        });
+      }
+
+      loadEditor().catch((error) => console.error(error));
+    </script>
+  </body>
+</html>

@@ -5,6 +5,7 @@ import
   ConfigurationDiagramRest,
   ConfigurationRawContentRest,
   AllOverrideConfiguration,
+  OffScreenOverrideConfiguration,
 } from "../__dataset__/configuration.dataset"
 
 import {
@@ -22,6 +23,8 @@ describe("Configuration.ts", () =>
     const configurationDefault = new Configuration()
     expect(configurationDefault.grabber).toStrictEqual(DefaultConfiguration.grabber)
     const defaultRecognition = JSON.parse(JSON.stringify(DefaultConfiguration.recognition)) as TRecognitionConfiguration
+    // need to remove raw-content.gestures because not recognized when not offscreen configuration
+    delete defaultRecognition["raw-content"].gestures
     expect(configurationDefault.recognition).toStrictEqual(defaultRecognition)
     expect(configurationDefault.rendering).toStrictEqual(DefaultConfiguration.rendering)
     expect(configurationDefault.server).toStrictEqual(DefaultConfiguration.server)
@@ -125,6 +128,12 @@ describe("Configuration.ts", () =>
     {
       expect(overrideConfig["undo-redo"]).toStrictEqual(AllOverrideConfiguration["undo-redo"])
     })
+
+    test("should override raw-content.gestures when offscreen=true", () =>
+    {
+      const c: TConfiguration = new Configuration(OffScreenOverrideConfiguration)
+      expect(c.recognition["raw-content"].gestures).toStrictEqual(OffScreenOverrideConfiguration.recognition["raw-content"].gestures)
+    })
   })
 
   describe("specifics rules", () =>
@@ -181,6 +190,14 @@ describe("Configuration.ts", () =>
       expect(c.server.scheme).toStrictEqual(window.location.protocol.replace(":", ""))
       expect(c.server.host).toStrictEqual(window.location.host)
     })
+
+    test("should set recognitionType=Raw Content when offscreen=true", () =>
+    {
+      const c: TConfiguration = new Configuration(OffScreenOverrideConfiguration)
+      expect(c.rendering).toStrictEqual(OffScreenOverrideConfiguration.rendering)
+      expect(c.recognition.type).toStrictEqual("Raw Content")
+    })
+
   })
 
 })

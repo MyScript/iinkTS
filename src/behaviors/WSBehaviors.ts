@@ -37,9 +37,21 @@ export class WSBehaviors implements IBehaviors
     this.#configuration = new Configuration(options?.configuration)
     this.styleManager = new StyleManager(options?.penStyle, options?.theme)
 
-    this.grabber = new PointerEventGrabber(this.#configuration.grabber)
+    if (options.behaviors?.grabber) {
+      const CustomGrabber = options.behaviors?.grabber as unknown as typeof PointerEventGrabber
+      this.grabber = new CustomGrabber(this.#configuration.grabber)
+    }
+    else {
+      this.grabber = new PointerEventGrabber(this.#configuration.grabber)
+    }
+    if (options.behaviors?.recognizer) {
+      const CustomRecognizer = options.behaviors?.recognizer as unknown as typeof WSRecognizer
+      this.recognizer = new CustomRecognizer(this.#configuration.server, this.#configuration.recognition)
+    }
+    else {
+      this.recognizer = new WSRecognizer(this.#configuration.server, this.#configuration.recognition)
+    }
     this.renderer = new WSSVGRenderer(this.#configuration.rendering)
-    this.recognizer = new WSRecognizer(this.#configuration.server, this.#configuration.recognition)
 
     this.intention = Intention.Write
     this.#model = new Model()
@@ -229,7 +241,7 @@ export class WSBehaviors implements IBehaviors
   {
     this.#logger.info("convert", { conversionState })
     this.undoRedoManager.addModelToStack(this.model)
-    this.context.stack.push(this.model.getClone())
+    this.context.stack.push(this.model.clone())
     this.#model = await this.recognizer.convert(this.model, conversionState)
     this.#logger.debug("convert", this.model)
     this.undoRedoManager.addModelToStack(this.model)
@@ -239,7 +251,7 @@ export class WSBehaviors implements IBehaviors
   async import(data: Blob, mimeType?: string): Promise<IModel>
   {
     this.#logger.info("import", { data, mimeType })
-    this.context.stack.push(this.model.getClone())
+    this.context.stack.push(this.model.clone())
     const m = await this.recognizer.import(this.model, data, mimeType)
     this.undoRedoManager.addModelToStack(m)
     return m
@@ -305,7 +317,7 @@ export class WSBehaviors implements IBehaviors
     const deferredResize = new DeferredPromise<Model>()
     this.model.height = height
     this.model.width = width
-    const clonedModel = this.model.getClone()
+    const clonedModel = this.model.clone()
     this.renderer.resize(clonedModel)
     clearTimeout(this.#resizeTimer)
     this.#resizeTimer = setTimeout(async () =>

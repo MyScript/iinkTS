@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+    <title>Get Started</title>
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <style>
+      #editor {
+        width: 100%;
+        height: 100dvh;
+        touch-action: none;
+      }
+    </style>
+    <script type="text/javascript" src="../../dist/iink.min.js"></script>
+  </head>
+
+  <body>
+    <div id="editor" touch-action="none"></div>
+
+    <script>
+      const editorElement = document.getElementById("editor");
+
+      /**
+       * we expose the editor for use in the integration test
+       */
+      let editor;
+
+      async function loadEditor() {
+        const res = await fetch("../server-configuration.json");
+        const server = await res.json();
+
+        const options = {
+          configuration: {
+            offscreen: true,
+            server,
+            rendering: {
+              minHeight: 4000,
+              minWidth: 4000,
+             },
+          },
+        };
+
+        /**
+         * Instanciate editor
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Editor parameters
+         */
+        const editor = new iink.Editor(editorElement, options);
+
+        /**
+         *  async initialize editor behaviors
+         */
+        await editor.initialize();
+
+        window.addEventListener("resize", () => {
+          editor.resize();
+        });
+      }
+
+      loadEditor().catch((error) => console.error(error));
+    </script>
+  </body>
+</html>

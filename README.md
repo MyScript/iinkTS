@@ -20,15 +20,15 @@ It integrates all you need:
 
 ## Table of contents
 
-* [Features](https://github.com/MyScript/iinkTS#features)
-* [Requirements](https://github.com/MyScript/iinkTS#requirements)
-* [Installation](https://github.com/MyScript/iinkTS#installation)
-* [Usage](https://github.com/MyScript/iinkTS#usage)
-* [Documentation](https://github.com/MyScript/iinkTS#documentation)
-* [Development](https://github.com/MyScript/iinkTS#development)
-* [Support](https://github.com/MyScript/iinkTS#getting-support )
-* [Feedback](https://github.com/MyScript/iinkTS#sharing-your-feedback)
-* [Contributing](https://github.com/MyScript/iinkTS#contributing)
+* [Features](#features)
+* [Requirements](#requirements)
+* [Installation](#installation)
+* [Usage](#usage)
+* [Documentation](#documentation)
+* [Development](#development)
+* [Support](#getting-support )
+* [Feedback](#sharing-your-feedback)
+* [Contributing](#contributing)
 
 ## Features
 
@@ -62,7 +62,7 @@ OR
 yarn init
 ```
 
-You can then install iinkTS and use it as showed in the [Usage](https://github.com/MyScript/iinkTS#usage) section.
+You can then install iinkTS and use it as showed in the [Usage](#usage) section.
 
 ```shell
 npm install iink-ts
@@ -95,6 +95,7 @@ yarn add iink-ts
 ```
 
 5. In JavaScript and within a `<script>` tag placed before the closing tag `</body>`, create the editor using the Editor `constructor` function, your editor html element and a simple configuration, then initialize it:
+* Initialization in the standard case, i.e. websocket or rest mode
 ```javascript
   const editorElement = document.getElementById('editor');
 
@@ -108,8 +109,24 @@ yarn add iink-ts
   });
   editor.initialize();
 ```
+* Initialization in the offscreen case
+```javascript
+  const editorElement = document.getElementById('editor');
+
+  const editor = new iink.Editor(editorElement, {
+      configuration: {
+        offscreen: true,
+          server: {
+              applicationKey: '#YOUR MYSCRIPT DEVELOPER APPLICATION KEY#',
+              hmacKey: '#YOUR MYSCRIPT DEVELOPER HMAC KEY#'
+          }
+      }
+  });
+  editor.initialize();
+```
 
 6. Your `index.html` file should look like this:
+* In the standard case
 ```html
 <html>
     <head>
@@ -127,6 +144,37 @@ yarn add iink-ts
             const editorElement = document.getElementById('editor');
 
             const editor = new iink.Editor(editorElement, {
+                configuration: {
+                    server: {
+                        applicationKey: '#YOUR MYSCRIPT DEVELOPER APPLICATION KEY#',
+                        hmacKey: '#YOUR MYSCRIPT DEVELOPER HMAC KEY#'
+                    }
+                }
+            });
+            editor.initialize();
+        </script>
+    </body>
+</html>
+```
+* In the offscreen case
+```html
+<html>
+    <head>
+        <script src="node_modules/iink-ts/dist/iink.min.js"></script>
+        <style>
+            #editor {
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="editor" touch-action="none"></div>
+        <script>
+            const editorElement = document.getElementById('editor');
+
+            const editor = new iink.Editor(editorElement, {
+                offscreen: true,
                 configuration: {
                     server: {
                         applicationKey: '#YOUR MYSCRIPT DEVELOPER APPLICATION KEY#',
@@ -160,7 +208,7 @@ We also provide a complete [API Reference](https://myscript.github.io/iinkTS/doc
 
 ## Development
 
-Instructions to help you build the project and develop are available in the [SETUP.md](https://github.com/MyScript/iinkTS/blob/master/SETUP.md) file.
+Instructions to help you build the project and develop are available in the [SETUP.md](./SETUP.md) file.
 
 
 ## Getting support
@@ -176,7 +224,7 @@ We’re planning to showcase apps using it so let us know by sending a quick mai
 
 We welcome your contributions: if you would like to extend iinkTS for your needs, feel free to fork it!
 
-Please take a look at our [contributing](https://github.com/MyScript/iinkTS/blob/master/CONTRIBUTING.md) guidelines before submitting your pull request.
+Please take a look at our [contributing](./CONTRIBUTING.md) guidelines before submitting your pull request.
 
 ## Troubleshooting
 If you encounter the error: `Unrecognized property: convert.force`, this means your server version is lower than 2.3.0.

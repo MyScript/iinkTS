@@ -435,9 +435,9 @@ describe("Model.ts", () =>
     model.addStroke(stroke)
     model.initCurrentStroke({ p: 27, t: 5, x: 1989, y: 42 }, 666, "pen", DefaultPenStyle)
     model.exports = { "text/plain": "M" }
-    test("should getClone", () =>
+    test("should clone", () =>
     {
-      const clone = model.getClone()
+      const clone = model.clone()
       expect(clone != model).toBeTruthy()
       expect(clone.currentSymbol).toEqual(model.currentSymbol)
       expect(clone.currentSymbol).not.toBe(model.currentSymbol)

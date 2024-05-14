@@ -254,7 +254,7 @@ export class RestRecognizer
   async convert(model: Model, conversionState?: TConverstionState, requestedMimeTypes?: string[]): Promise<Model>
   {
     this.#logger.info("convert", { model, conversionState, requestedMimeTypes })
-    const myModel = model.getClone()
+    const myModel = model.clone()
     const mimeTypes = this.getMimeTypes(requestedMimeTypes)
     const dataToConcert = this.buildData(myModel)
     dataToConcert.conversionState = conversionState
@@ -271,7 +271,7 @@ export class RestRecognizer
   async export(model: Model, requestedMimeTypes?: string[]): Promise<Model>
   {
     this.#logger.info("export", { model, requestedMimeTypes })
-    const myModel = model.getClone()
+    const myModel = model.clone()
     if (myModel.symbols.length === 0) {
       return Promise.resolve(myModel)
     }

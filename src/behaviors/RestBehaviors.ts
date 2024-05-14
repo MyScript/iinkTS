@@ -37,9 +37,21 @@ export class RestBehaviors implements IBehaviors
     this.#configuration = new Configuration(options?.configuration)
     this.styleManager = new StyleManager(options?.penStyle, options?.theme)
 
-    this.grabber = new PointerEventGrabber(this.#configuration.grabber)
+    if (options.behaviors?.grabber) {
+      const CustomGrabber = options.behaviors?.grabber as unknown as typeof PointerEventGrabber
+      this.grabber = new CustomGrabber(this.#configuration.grabber)
+    }
+    else {
+      this.grabber = new PointerEventGrabber(this.#configuration.grabber)
+    }
+    if (options.behaviors?.recognizer) {
+      const CustomRecognizer = options.behaviors?.recognizer as unknown as typeof RestRecognizer
+      this.recognizer = new CustomRecognizer(this.#configuration.server, this.#configuration.recognition)
+    }
+    else {
+      this.recognizer = new RestRecognizer(this.#configuration.server, this.#configuration.recognition)
+    }
     this.renderer = new CanvasRenderer(this.#configuration.rendering)
-    this.recognizer = new RestRecognizer(this.#configuration.server, this.#configuration.recognition)
 
     this.intention = Intention.Write
     this.#model = new Model()
@@ -196,7 +208,7 @@ export class RestBehaviors implements IBehaviors
     this.undoRedoManager.addModelToStack(this.model)
     if (this.#configuration.triggers.exportContent !== "DEMAND") {
       clearTimeout(this.#exportTimer)
-      let currentModel = this.model.getClone()
+      let currentModel = this.model.clone()
       this.#exportTimer = setTimeout(async () =>
       {
         try {
@@ -224,7 +236,7 @@ export class RestBehaviors implements IBehaviors
   async export(mimeTypes?: string[]): Promise<IModel>
   {
     this.#logger.info("export", { mimeTypes })
-    const newModel = await this.recognizer.export(this.model.getClone(), mimeTypes)
+    const newModel = await this.recognizer.export(this.model.clone(), mimeTypes)
     if (this.model.modificationDate === newModel.modificationDate) {
       this.model.mergeExport(newModel.exports as TExport)
     }

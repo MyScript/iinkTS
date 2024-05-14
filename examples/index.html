@@ -6,6 +6,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
+    <link rel="icon" type="image/" href="./favicon.ico" />
 
     <title>iinkTS: Examples</title>
 
@@ -51,21 +52,21 @@
 
       window.addEventListener("load", () => {
         if (window.innerWidth < 1000) {
-          document.getElementById("home-nav").classList.add("hidden")
+          document.getElementById("home-nav").classList.add("hidden");
         }
-      })
+      });
       window.addEventListener("resize", () => {
         if (window.innerWidth < 1000) {
-          document.getElementById("home-nav").classList.add("hidden")
+          document.getElementById("home-nav").classList.add("hidden");
         }
-      })
+      });
 
       function toggleMenu() {
-        document.getElementById("home-nav").classList.toggle("hidden")
+        document.getElementById("home-nav").classList.toggle("hidden");
       }
     </script>
 
-    <svg style="display: none;">
+    <svg style="display: none">
       <symbol id="icn-info" viewBox="0 0 16 16">
         <g stroke="currentColor" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
           <path
@@ -101,12 +102,14 @@
     </header>
 
     <button id="back-to-top-btn" class="back-to-top-btn" title="Go to top" onpointerup="topFunction()">Top</button>
+
     <h1>iinkTS Examples</h1>
 
     <div class="home-content">
       <nav id="home-nav" class="home-nav">
         <h2>Table of contents</h2>
         <ul id="table-of-content">
+          <li><a href="#offscreen-interactivity">Offscreen Interactivity</a></li>
           <li><a href="#text">Text recognition</a></li>
           <li><a href="#math">Math recognition</a></li>
           <li><a href="#diagram">Diagram recognition</a></li>
@@ -117,17 +120,148 @@
       </nav>
 
       <main class="home-main">
+        <details id="offscreen-interactivity" name="offscreen-interactivity" class="accordion example-recognition">
+          <summary class="accordion-summary example-recognition-summary">
+            <div class="example-recognition-title">
+              <img src="./assets/img/home-offscreen.svg" />
+              <span>
+                <h2>Offscreen Interactivity</h2>
+                <div class="quote">
+                  Client implementation plug into myscript recognition without explicit segmentation into text, mathematics, diagram
+                </div>
+              </span>
+            </div>
+          </summary>
+          <div role="definition" class="accordion-content example-recognition-content">
+            <section class="example-section">
+              <div class="example-item">
+                <p><strong>Get Started</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="offscreen-interactivity/index.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/index.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+              <div class="example-item">
+                <p><strong>All options</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="offscreen-interactivity/offscreen_interactivity_all_options.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a
+                    href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_all_options.html"
+                    class="btn"
+                  >
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+              <div class="example-item">
+                <p><strong>Create symbol</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="offscreen-interactivity/offscreen_interactivity_create_symbols.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a
+                    href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_create_symbols.html"
+                    class="btn"
+                  >
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+              <div class="example-item">
+                <p><strong>Import pointers</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="offscreen-interactivity/offscreen_interactivity_import_pointers.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a
+                    href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_import_pointers.html"
+                    class="btn"
+                  >
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+              <div class="example-item">
+                <p><strong>Custom menu</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="offscreen-interactivity/offscreen_interactivity_custom_menu.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a
+                    href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_custom_menu.html"
+                    class="btn"
+                  >
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+              <div class="example-item">
+                <p><strong>TLDraw</strong></p>
+                <div class="example-btn-wrapper">
+                  <a href="offscreen-interactivity/offscreen_interactivity_tldraw/dist/index.html" class="btn">
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
+                    </svg>
+                    View example
+                  </a>
+                  <a
+                    href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_tldraw/src/App.tsx"
+                    class="btn"
+                  >
+                    <svg class="icn">
+                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
+                    </svg>
+                    Get source code
+                  </a>
+                </div>
+              </div>
+            </section>
+          </div>
+        </details>
+
         <details id="text" name="text" class="accordion example-recognition">
           <summary class="accordion-summary example-recognition-summary">
             <div class="example-recognition-title">
               <img src="./assets/img/home-text.svg" />
               <span>
-                <h2>
-                  Text recognition
-                </h2>
-                <div class="quote">
-                  Simple block of multi-line text.
-                </div>
+                <h2>Text recognition</h2>
+                <div class="quote">Simple block of multi-line text.</div>
               </span>
             </div>
           </summary>
@@ -416,8 +550,8 @@
                     <svg class="icn">
                       <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
                     </svg>
-                    View example</a
-                  >
+                    View example
+                  </a>
                   <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_text_iink_customize_stroke_style.html" class="btn">
                     <svg class="icn">
                       <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
@@ -435,12 +569,8 @@
             <div class="example-recognition-title">
               <img src="./assets/img/home-math.svg" />
               <span>
-                <h2>
-                  Math recognition
-                </h2>
-                <div class="quote">
-                  Block supporting one or more equation.
-                </div>
+                <h2>Math recognition</h2>
+                <div class="quote">Block supporting one or more equation.</div>
               </span>
             </div>
           </summary>
@@ -507,7 +637,10 @@
                     </svg>
                     View example
                   </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_custom_resources_compiled.html" class="btn">
+                  <a
+                    href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_custom_resources_compiled.html"
+                    class="btn"
+                  >
                     <svg class="icn">
                       <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
                     </svg>
@@ -595,9 +728,7 @@
             <div class="example-recognition-title">
               <img src="./assets/img/home-diagram.svg" />
               <span>
-                <h2>
-                  Diagram recognition
-                </h2>
+                <h2>Diagram recognition</h2>
                 <div class="quote">
                   Block supporting a diagram, with automatic text/non-text distinction and dynamic reorganization possibilities.
                 </div>
@@ -614,8 +745,8 @@
                     <svg class="icn">
                       <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
                     </svg>
-                    View example</a
-                  >
+                    View example
+                  </a>
                   <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_diagram_iink.html" class="btn">
                     <svg class="icn">
                       <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
@@ -631,8 +762,8 @@
                     <svg class="icn">
                       <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
                     </svg>
-                    View example</a
-                  >
+                    View example
+                  </a>
                   <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_diagram_iink_import.html" class="btn">
                     <svg class="icn">
                       <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
@@ -650,11 +781,10 @@
             <div class="example-recognition-title">
               <img src="./assets/img/home-raw-content.svg" />
               <span>
-                <h2>
-                  Raw Content recognition
-                </h2>
+                <h2>Raw Content recognition</h2>
                 <div class="quote">
-                  Block hosting digital ink with no explicit segmentation into text, math, diagram or other items which semantics is known by iink SDK.
+                  Block hosting digital ink with no explicit segmentation into text, math, diagram or other items which semantics is known by iink
+                  SDK.
                 </div>
               </span>
             </div>
@@ -669,8 +799,8 @@
                     <svg class="icn">
                       <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
                     </svg>
-                    View example</a
-                  >
+                    View example
+                  </a>
                   <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_raw_content_iink.html" class="btn">
                     <svg class="icn">
                       <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
@@ -688,12 +818,8 @@
             <div class="example-recognition-title">
               <img src="./assets/img/home-not-specific.svg" />
               <span>
-                <h2>
-                  Not Specific recognition
-                </h2>
-                <div class="quote">
-                  For all recognition types
-                </div>
+                <h2>Not Specific recognition</h2>
+                <div class="quote">For all recognition types</div>
               </span>
             </div>
           </summary>
@@ -782,12 +908,8 @@
             <div class="example-recognition-title">
               <img src="./assets/img/home-development.svg" />
               <span>
-                <h2>
-                  Development
-                </h2>
-                <div class="quote">
-                  For developers who want to integrate link-ts
-                </div>
+                <h2>Development</h2>
+                <div class="quote">For developers who want to integrate link-ts</div>
               </span>
             </div>
           </summary>
@@ -883,6 +1005,7 @@
             </section>
           </div>
         </details>
+
       </main>
     </div>
   </body>

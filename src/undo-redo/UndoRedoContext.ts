@@ -31,6 +31,6 @@ export class UndoRedoContext implements TUndoRedoContext
     this.canRedo = false
     this.canUndo = false
     this.empty = true
-    this.stack = [model.getClone()]
+    this.stack = [model.clone()]
   }
 }

@@ -42,7 +42,7 @@ export class UndoRedoManager
       this.context.stack.splice(this.context.stackIndex + 1)
     }
 
-    this.context.stack.push(model.getClone())
+    this.context.stack.push(model.clone())
     this.context.stackIndex = this.context.stack.length - 1
 
     if (this.context.stack.length > this.configuration.maxStackSize) {
@@ -69,7 +69,7 @@ export class UndoRedoManager
     this.#logger.info("updateModelInStack", { model })
     const index = this.context.stack.findIndex(m => m.modificationDate === model.modificationDate)
     if (index > -1) {
-      this.context.stack.splice(index, 1, model.getClone())
+      this.context.stack.splice(index, 1, model.clone())
     }
     this.updateCanUndoRedo()
     this.internalEvent.emitContextChange(this.context)
@@ -83,7 +83,7 @@ export class UndoRedoManager
       this.updateCanUndoRedo()
       this.internalEvent.emitContextChange(this.context)
     }
-    const previousModel = this.context.stack[this.context.stackIndex].getClone()
+    const previousModel = this.context.stack[this.context.stackIndex].clone()
     this.#logger.debug("undo", previousModel)
     return previousModel
   }
@@ -96,7 +96,7 @@ export class UndoRedoManager
       this.updateCanUndoRedo()
       this.internalEvent.emitContextChange(this.context)
     }
-    const nextModel = this.context.stack[this.context.stackIndex].getClone()
+    const nextModel = this.context.stack[this.context.stackIndex].clone()
     this.#logger.debug("redo", nextModel)
     return nextModel
   }

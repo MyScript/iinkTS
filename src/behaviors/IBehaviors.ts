@@ -1,9 +1,10 @@
 import { Intention } from "../Constants"
 import { TConfiguration, TConverstionState, TLoggerConfiguration } from "../configuration"
 import { IGrabber } from "../grabber"
+import { OIMenuAction, OIMenuIntention, OIMenuStyle } from "../menu"
 import { IModel } from "../model"
 import { TStroke } from "../primitive"
-import { RestRecognizer, WSRecognizer } from "../recognizer"
+import { OIRecognizer, RestRecognizer, WSRecognizer } from "../recognizer"
 import { TStyle, TTheme } from "../style"
 import { TUndoRedoContext } from "../undo-redo"
 import { PartialDeep } from "../utils"
@@ -15,7 +16,12 @@ export type TBehaviorOptions = {
   configuration: TConfiguration
   behaviors?: {
     grabber?: IGrabber
-    recognizer?: RestRecognizer | WSRecognizer
+    recognizer?: RestRecognizer | WSRecognizer | OIRecognizer
+    menu?: {
+      style?: OIMenuStyle
+      intention?: OIMenuIntention
+      action?: OIMenuAction
+    }
   }
   penStyle?: TStyle
   theme?: TTheme

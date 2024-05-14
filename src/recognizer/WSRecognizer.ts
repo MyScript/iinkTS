@@ -501,7 +501,7 @@ export class WSRecognizer
     this.#logger.info("export", { model, requestedMimeTypes })
     await this.initialized?.promise
     this.exportDeferred = new DeferredPromise<TExport>()
-    const localModel = model.getClone()
+    const localModel = model.clone()
     let mimeTypes: string[] = requestedMimeTypes || []
     if (!mimeTypes.length) {
       switch (this.recognitionConfiguration.type) {
@@ -543,7 +543,7 @@ export class WSRecognizer
   {
     this.#logger.info("import", { data, mimeType })
     await this.initialized?.promise
-    const localModel = model.getClone()
+    const localModel = model.clone()
     const chunkSize = this.serverConfiguration.websocket.fileChunkSize
     const importFileId = Math.random().toString(10).substring(2, 6)
     this.importDeferred = new DeferredPromise<TExport>()
@@ -586,7 +586,7 @@ export class WSRecognizer
     this.#logger.info("resize", { model })
     await this.initialized?.promise
     this.resizeDeferred = new DeferredPromise<void>()
-    const localModel = model.getClone()
+    const localModel = model.clone()
     this.viewSizeHeight = localModel.height
     this.viewSizeWidth = localModel.width
     const message: TWSMessageEvent = {
@@ -620,7 +620,7 @@ export class WSRecognizer
     this.#logger.info("convert", { model, conversionState })
     await this.initialized?.promise
     this.convertDeferred = new DeferredPromise<TExport>()
-    const localModel = model.getClone()
+    const localModel = model.clone()
     const message: TWSMessageEvent = {
       type: "convert",
       conversionState
@@ -648,7 +648,7 @@ export class WSRecognizer
   {
     this.#logger.info("undo", { model })
     await this.initialized?.promise
-    const localModel = model.getClone()
+    const localModel = model.clone()
     this.undoDeferred = new DeferredPromise<TExport>()
     const message: TWSMessageEvent = {
       type: "undo",
@@ -666,7 +666,7 @@ export class WSRecognizer
   {
     this.#logger.info("redo", { model })
     await this.initialized?.promise
-    const localModel = model.getClone()
+    const localModel = model.clone()
     this.redoDeferred = new DeferredPromise<TExport>()
     const message: TWSMessageEvent = {
       type: "redo",
@@ -684,7 +684,7 @@ export class WSRecognizer
   {
     this.#logger.info("clear", { model })
     await this.initialized?.promise
-    const localModel = model.getClone()
+    const localModel = model.clone()
     localModel.modificationDate = Date.now()
     this.clearDeferred = new DeferredPromise<TExport>()
     const message: TWSMessageEvent = {

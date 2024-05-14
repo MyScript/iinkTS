@@ -38,7 +38,10 @@ export type TRecognitionConfiguration = {
   renderer: TRecognitionRendererConfiguration
   export: TExportConfiguration
   "raw-content": TRawContentConfiguration
-  gesture: { enable: boolean }
+  gesture: {
+    enable: boolean,
+    ignoreGestureStrokes: boolean
+  }
   convert: TConvertionConfiguration
 }
 
@@ -56,7 +59,8 @@ export const DefaultRecognitionConfiguration: TRecognitionConfiguration = {
   alwaysConnected: true,
   lang: "en_US",
   gesture: {
-    enable: true
+    enable: true,
+    ignoreGestureStrokes: true,
   },
   convert: DefaultConvertionConfiguration,
 }
