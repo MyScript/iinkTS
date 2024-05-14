@@ -33,8 +33,9 @@ export type TOIMessageEventHMACChallenge = TOIMessageEvent & {
 /**
  * @group Recognizer
  */
-export type TContentPackageDescriptionMessage = TOIMessageEvent & {
+export type TSessionDescriptionMessage = TOIMessageEvent & {
   contentPartCount: number
+  iinkSessionId: string
 }
 
 /**

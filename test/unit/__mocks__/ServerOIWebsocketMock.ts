@@ -2,20 +2,19 @@ import Server from "jest-websocket-mock"
 import { DeserializedMessage } from "jest-websocket-mock/lib/websocket"
 import { TWSMessageEvent } from "../../../src/recognizer"
 
-export const ackWithHMACMessage = {
-  "type": "ack",
+export const HMACChallengeMessage = {
+  "type": "hmacChallenge",
   "hmacChallenge": "1f434e8b-cc46-4a8c-be76-708eea2ff305",
-  "iinkSessionId": "c7e72186-6299-4782-b612-3e725aa126f1"
 }
 
-export const ackMessageWithoutHMAC = {
-  "type": "ack",
-  "iinkSessionId": "c7e72186-6299-4782-b612-3e725aa126f1"
+export const authenticatedMessage = {
+  "type": "authenticated",
 }
 
-export const contentPackageDescriptionMessage = {
-  "type": "contentPackageDescription",
-  "contentPartCount": 0
+export const sessionDescriptionMessage = {
+  "type": "sessionDescription",
+  "contentPartCount": 0,
+  "iinkSessionId":	"39311164-39fb-4ae1-be8f-fa955c89dbd7"
 }
 
 export const partChangeMessage = {
@@ -23,12 +22,6 @@ export const partChangeMessage = {
   "partIdx": 0,
   "partId": "yyrrutgk",
   "partCount": 1
-}
-
-export const newPartMessage = {
-  "type": "newPart",
-  "idx": 0,
-  "id": "lqrcoxjl"
 }
 
 export const contentChangeMessage = {
@@ -74,22 +67,24 @@ export class ServerOIWebsocketMock extends Server
       {
         const parsedMessage: TWSMessageEvent = JSON.parse(message as string)
         switch (parsedMessage.type) {
-          case "newContentPackage":
+          case "authenticate":
             if (withHMAC) {
-              socket.send(JSON.stringify(ackWithHMACMessage))
+              socket.send(JSON.stringify(HMACChallengeMessage))
             }
             else {
-              socket.send(JSON.stringify(ackMessageWithoutHMAC))
+              socket.send(JSON.stringify(authenticatedMessage))
             }
             break
           case "hmac":
-            socket.send(JSON.stringify(contentPackageDescriptionMessage))
+            socket.send(JSON.stringify(authenticatedMessage))
             break
-          case "configuration":
-            socket.send(JSON.stringify(partChangeMessage))
+          case "initSession":
+          case "restoreSession":
+            socket.send(JSON.stringify(sessionDescriptionMessage))
             break
           case "newContentPart":
-            socket.send(JSON.stringify(newPartMessage))
+          case "openContentPart":
+            socket.send(JSON.stringify(partChangeMessage))
             break
           default:
             break
@@ -98,29 +93,24 @@ export class ServerOIWebsocketMock extends Server
     })
   }
 
-  sendAckWithHMAC()
+  sendHMACChallenge()
   {
-    this.send(JSON.stringify(ackWithHMACMessage))
+    this.send(JSON.stringify(HMACChallengeMessage))
   }
 
-  sendAckWithoutHMAC()
+  sendAuthenticated()
   {
-    this.send(JSON.stringify(ackMessageWithoutHMAC))
+    this.send(JSON.stringify(authenticatedMessage))
   }
 
-  sendContentPackageDescription()
+  sendSessionDescription()
   {
-    this.send(JSON.stringify(contentPackageDescriptionMessage))
+    this.send(JSON.stringify(sessionDescriptionMessage))
   }
 
   sendPartChangeMessage()
   {
     this.send(JSON.stringify(partChangeMessage))
-  }
-
-  sendNewPartMessage()
-  {
-    this.send(JSON.stringify(newPartMessage))
   }
 
   sendContentChangeMessage()

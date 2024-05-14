@@ -5,25 +5,26 @@ import { LoggerManager } from "../logger"
 import { TExport, TJIIXExport } from "../model"
 import { OIStroke } from "../primitive"
 import { TMatrixTransform } from "../transform"
-import { computeHmac, DeferredPromise, isVersionSuperiorOrEqual } from "../utils"
-import { TOIMessageEvent, TOIMessageEventContextlessGesture, TOIMessageEventError, TOIMessageEventExport, TOIMessageEventGesture, TOIMessageEventHMACChallenge, TOIMessageEventPartChange } from "./OIRecognizerMessage"
+import { computeHmac, DeferredPromise } from "../utils"
+import { TOIMessageEvent, TOIMessageEventContextlessGesture, TOIMessageEventError, TOIMessageEventExport, TOIMessageEventGesture, TOIMessageEventHMACChallenge, TOIMessageEventPartChange, TSessionDescriptionMessage } from "./OIRecognizerMessage"
 
 /**
  * A websocket dialog have this sequence :
- * --------------------------- Client --------------------------------------------------- Server ----------------------------------
- * init: send newContentPackage or restoreIInkSession           ==================>
- *                                                              <==================       hmacChallenge
- * answer hmacChallenge: send the hmac                          ==================>
- *                                                              <==================       contentPackageDescription
- * answer contentPackageDescription:
- *  send the configuration                                      ==================>
- *  send newContentPart or openContentPart                      ==================>
- *                                                              <==================        partChanged
- *                                                              <==================        contentChanged
- *                                                              <==================        newPart
- *
- * addStrokes (send the strokes ) ============>
- *                                                              <==================        update
+ * --------------- Client --------------------------------------------------------------- Server ---------------
+ * { type: "authenticate" }                           ==================>
+ *                                                    <==================       { type: "hmacChallenge" }
+ * { type: "hmac" }                                   ==================>
+ *                                                    <==================       { type: "authenticated" }
+ * { type: "initSession" | "restoreSession" }         ==================>
+ *                                                    <==================       { type: "sessionDescription" }
+ * { type: "newContentPart" | "openContentPart" }     ==================>
+ *                                                    <==================       { type: "partChanged" }
+ * { type: "addStrokes" }                             ==================>
+ *                                                    <==================       { type: "contentChanged" }
+ * { type: "transform" }                              ==================>
+ *                                                    <==================       { type: "contentChanged" }
+ * { type: "eraseStrokes" }                           ==================>
+ *                                                    <==================       { type: "contentChanged" }
  */
 
 /**
@@ -44,7 +45,6 @@ export class OIRecognizer
 
   protected connected?: DeferredPromise<void>
   protected initialized?: DeferredPromise<void>
-  protected ackDeferred?: DeferredPromise<void>
   protected addStrokeDeferred?: DeferredPromise<TOIMessageEventGesture | undefined>
   protected recognizeGestureDeferred?: DeferredPromise<TOIMessageEventContextlessGesture | undefined>
   protected transformStrokeDeferred?: DeferredPromise<void>
@@ -203,43 +203,49 @@ export class OIRecognizer
   protected openCallback(): void
   {
     this.connected?.resolve()
-    const pixelTomm = 25.4 / 96
     const params: TOIMessageEvent = {
-      type: this.sessionId ? "restoreIInkSession" : "newContentPackage",
-      iinkSessionId: this.sessionId,
-      applicationKey: this.serverConfiguration.applicationKey,
-      scaleX: pixelTomm,
-      scaleY: pixelTomm
-    }
-    if (isVersionSuperiorOrEqual(this.serverConfiguration.version, "2.0.4")) {
-      params["myscript-client-name"] = "iink-ts"
-      params["myscript-client-version"] = "1.0.0-buildVersion"
+      type: "authenticate",
+      "myscript-client-name": "iink-ts",
+      "myscript-client-version": "1.0.0-buildVersion",
     }
     this.send(params)
   }
 
-  protected async manageAckMessage(websocketMessage: TOIMessageEvent): Promise<void>
+  protected async manageHMACChallenge(websocketMessage: TOIMessageEvent): Promise<void>
   {
-    const hmacChallengeMessage = websocketMessage as TOIMessageEventHMACChallenge
-    if (hmacChallengeMessage.hmacChallenge) {
+    try {
+      const hmacChallengeMessage = websocketMessage as TOIMessageEventHMACChallenge
       this.send({
         type: "hmac",
         hmac: await computeHmac(hmacChallengeMessage.hmacChallenge, this.serverConfiguration.applicationKey, this.serverConfiguration.hmacKey)
       })
+    } catch (error) {
+      this.internalEvent.emitError(new Error(error as string))
     }
-    if (hmacChallengeMessage.iinkSessionId) {
-      this.sessionId = hmacChallengeMessage.iinkSessionId
-    }
-    this.send({ ...this.recognitionConfiguration, type: "configuration" })
-    this.ackDeferred?.resolve()
   }
 
-  protected async manageContentPackageDescriptionMessage(): Promise<void>
+  protected manageAuthenticated(): void
   {
-    await this.ackDeferred?.promise
+    const pixelTomm = 25.4 / 96
+    const params: TOIMessageEvent = {
+      type: this.sessionId ? "restoreSession" : "initSession",
+      iinkSessionId: this.sessionId,
+      scaleX: pixelTomm,
+      scaleY: pixelTomm,
+      configuration: this.recognitionConfiguration
+    }
+    this.send(params)
+  }
+
+  protected manageSessionDescriptionMessage(websocketMessage: TOIMessageEvent): void
+  {
+    const sessionDescription = websocketMessage as TSessionDescriptionMessage
     this.reconnectionCount = 0
+    if (sessionDescription.iinkSessionId) {
+      this.sessionId = sessionDescription.iinkSessionId
+    }
     if (this.currentPartId) {
-      this.send({ type: "openContentPart", id: this.currentPartId, mimeTypes: this.mimeTypes })
+      this.send({ type: "openContentPart", id: this.currentPartId })
     }
     else {
       this.send({ type: "newContentPart", contentType: this.recognitionConfiguration.type, mimeTypes: this.mimeTypes })
@@ -248,9 +254,9 @@ export class OIRecognizer
 
   protected managePartChangeMessage(websocketMessage: TOIMessageEvent): void
   {
+    this.initialized?.resolve()
     const partChangeMessage = websocketMessage as TOIMessageEventPartChange
     this.currentPartId = partChangeMessage.partId
-    this.initialized?.resolve()
   }
 
   protected manageExportMessage(websocketMessage: TOIMessageEvent): void
@@ -263,7 +269,7 @@ export class OIRecognizer
     this.internalEvent.emitExported(exportMessage.exports)
   }
 
-  protected async manageWaitForIdle(): Promise<void>
+  protected manageWaitForIdle(): void
   {
     this.waitForIdleDeferred?.resolve()
     this.internalEvent.emitIdle(true)
@@ -310,17 +316,17 @@ export class OIRecognizer
       if (websocketMessage.type !== "pong") {
         this.pingCount = 0
         switch (websocketMessage.type) {
-          case "ack":
-            this.manageAckMessage(websocketMessage)
+          case "hmacChallenge":
+            this.manageHMACChallenge(websocketMessage)
             break
-          case "contentPackageDescription":
-            this.manageContentPackageDescriptionMessage()
+          case "authenticated":
+            this.manageAuthenticated()
+            break
+          case "sessionDescription":
+            this.manageSessionDescriptionMessage(websocketMessage)
             break
           case "partChanged":
             this.managePartChangeMessage(websocketMessage)
-            break
-          case "newPart":
-            this.initialized?.resolve()
             break
           case "contentChanged":
             this.addStrokeDeferred?.resolve(undefined)
@@ -355,7 +361,6 @@ export class OIRecognizer
     try {
       this.connected = new DeferredPromise<void>()
       this.initialized = new DeferredPromise<void>()
-      this.ackDeferred = new DeferredPromise<void>()
       this.pingCount = 0
       this.socket = new WebSocket(this.url)
 
@@ -556,13 +561,13 @@ export class OIRecognizer
   {
     this.connected = undefined
     this.initialized = undefined
-    this.addStrokeDeferred= undefined
-    this.recognizeGestureDeferred= undefined
-    this.transformStrokeDeferred= undefined
-    this.eraseStrokeDeferred= undefined
-    this.replaceStrokeDeferred= undefined
-    this.exportDeferred= undefined
-    this.waitForIdleDeferred= undefined
+    this.addStrokeDeferred = undefined
+    this.recognizeGestureDeferred = undefined
+    this.transformStrokeDeferred = undefined
+    this.eraseStrokeDeferred = undefined
+    this.replaceStrokeDeferred = undefined
+    this.exportDeferred = undefined
+    this.waitForIdleDeferred = undefined
     this.closeDeferred = undefined
     if (this.socket) {
       this.socket.removeEventListener("open", this.openCallback.bind(this))
