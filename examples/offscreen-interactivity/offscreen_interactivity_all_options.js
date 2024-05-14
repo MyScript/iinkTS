@@ -208,9 +208,11 @@ async function loadEditor() {
     const jiix = exports["application/vnd.myscript.jiix"];
     const title = `Export application/vnd.myscript.jiix`;
     showModal(title, renderjson(jiix));
-    const permission = await navigator.permissions.query({ name: 'clipboard-write' })
-    if (permission.state === 'granted') {
+    try {
       navigator.clipboard.writeText(JSON.stringify(jiix));
+    }
+    catch(err) {
+      console.error(err);
     }
   });
 

@@ -650,6 +650,116 @@ describe("OIRecognizer.ts", () =>
     })
   })
 
+  describe("undo", () =>
+  {
+    const serverConfig: TServerConfiguration = {
+      ...ServerConfig,
+      host: "undo-test"
+    }
+    let mockServer: ServerOIWebsocketMock
+    let oiRecognizer: OIRecognizer
+
+    beforeEach(() =>
+    {
+      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
+      mockServer.init()
+    })
+    afterEach(async () =>
+    {
+      await oiRecognizer.destroy()
+      mockServer.close()
+    })
+
+    test("should throw error if recognizer has not been initialize", async () =>
+    {
+      expect.assertions(1)
+      await expect(oiRecognizer.undo()).rejects.toEqual(new Error("Recognizer must be initilized"))
+    })
+
+    test("should send eraseStrokes message & resolve when receive contentChanged message", async () =>
+    {
+      expect.assertions(1)
+      await oiRecognizer.init()
+      const promise = oiRecognizer.undo()
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
+      mockServer.sendContentChangeMessage()
+      await promise
+      const messageSent = JSON.parse(mockServer.getLastMessage() as string)
+      const messageSentExpected = { type: "undo" }
+      await expect(messageSent).toMatchObject(messageSentExpected)
+    })
+    test("should reject if receive error message", async () =>
+    {
+      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
+      expect.assertions(3)
+      await oiRecognizer.init()
+      const promise = oiRecognizer.undo()
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
+      mockServer.sendNotGrantedErrorMessage()
+      await expect(promise).rejects.toEqual(ErrorConst.WRONG_CREDENTIALS)
+      await expect(spyEmitError).toHaveBeenCalledTimes(1)
+      await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
+    })
+  })
+
+  describe("redo", () =>
+  {
+    const serverConfig: TServerConfiguration = {
+      ...ServerConfig,
+      host: "redo-test"
+    }
+    let mockServer: ServerOIWebsocketMock
+    let oiRecognizer: OIRecognizer
+
+    beforeEach(() =>
+    {
+      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
+      mockServer.init()
+    })
+    afterEach(async () =>
+    {
+      await oiRecognizer.destroy()
+      mockServer.close()
+    })
+
+    test("should throw error if recognizer has not been initialize", async () =>
+    {
+      expect.assertions(1)
+      await expect(oiRecognizer.redo()).rejects.toEqual(new Error("Recognizer must be initilized"))
+    })
+
+    test("should send eraseStrokes message & resolve when receive contentChanged message", async () =>
+    {
+      expect.assertions(1)
+      await oiRecognizer.init()
+      const promise = oiRecognizer.redo()
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
+      mockServer.sendContentChangeMessage()
+      await promise
+      const messageSent = JSON.parse(mockServer.getLastMessage() as string)
+      const messageSentExpected = { type: "redo" }
+      await expect(messageSent).toMatchObject(messageSentExpected)
+    })
+    test("should reject if receive error message", async () =>
+    {
+      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
+      expect.assertions(3)
+      await oiRecognizer.init()
+      const promise = oiRecognizer.redo()
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
+      mockServer.sendNotGrantedErrorMessage()
+      await expect(promise).rejects.toEqual(ErrorConst.WRONG_CREDENTIALS)
+      await expect(spyEmitError).toHaveBeenCalledTimes(1)
+      await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
+    })
+  })
+
   describe("export", () =>
   {
     const serverConfig: TServerConfiguration = {
