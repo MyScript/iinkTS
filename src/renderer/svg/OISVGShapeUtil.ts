@@ -37,6 +37,7 @@ export class OISVGShapeUtil
       case ShapeKind.Parallelogram:
       case ShapeKind.Triangle:
       case ShapeKind.Rectangle:
+      case ShapeKind.Rhombus:
         return this.getPolygonePath(shape as OIShapePolygon)
       case ShapeKind.Circle:
         return this.getCirclePath(shape as OIShapeCircle)
