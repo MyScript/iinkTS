@@ -2,7 +2,7 @@ import { LoggerClass } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerManager } from "../logger"
 import { OIModel, TJIIXChar, TJIIXEdgeArc, TJIIXEdgeElement, TJIIXEdgeLine, TJIIXExport, TJIIXNodeCircle, TJIIXNodeElement, TJIIXNodeEllipse, TJIIXNodePolygon, TJIIXNodeRectangle, TJIIXTextElement, TJIIXWord } from "../model"
-import { Box, DecoratorKind, EdgeKind, OIDecorator, OIEdgeArc, OIEdgeLine, OIShapeCircle, OIShapeEllipse, OIShapePolygon, OIStroke, OIText, SymbolType, TOIEdge, TOIShape, TOISymbolChar, TPoint } from "../primitive"
+import { Box, DecoratorKind, EdgeKind, OIDecorator, OIEdgeArc, OIEdgeLine, OIShapeCircle, OIShapeEllipse, OIShapePolygon, OIStroke, OIText, SymbolType, TOIEdge, TOIShape, TOISymbol, TOISymbolChar, TPoint } from "../primitive"
 import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
 import { UndoRedoManager } from "../undo-redo"
@@ -67,14 +67,13 @@ export class OIConversionManager
       this.model.symbols.filter(s => s.type === SymbolType.Stroke) as OIStroke[]
   }
 
-  buildChar(char: TJIIXChar, strokes: OIStroke[]): TOISymbolChar
+  buildChar(char: TJIIXChar, strokes: OIStroke[], fontSize?: number): TOISymbolChar
   {
     const grid = char.grid.map(p => ({
       x: convertMillimeterToPixel(p.x),
       y: convertMillimeterToPixel(p.y),
     }))
     const boundingBox = Box.createFromPoints(grid)
-    const fontSize = this.fontSize || Math.ceil(Math.round((boundingBox.yMax - boundingBox.yMin) / 2) / 8) * 8
     const fontWeight = Math.min(1000, Math.max(100, Math.round(strokes[0].style.width || 1) * 100))
 
     const color = strokes[0].style.color || "black"
@@ -82,13 +81,13 @@ export class OIConversionManager
       id: `text-char-${ createUUID() }`,
       label: char.label,
       color,
-      fontSize,
+      fontSize: fontSize || Math.ceil(Math.round((boundingBox.yMax - boundingBox.yMin) / 2) / 8) * 8,
       fontWeight,
       boundingBox
     }
   }
 
-  buildWord(word: TJIIXWord, chars: TJIIXChar[], strokes: OIStroke[]): OIText
+  buildWord(word: TJIIXWord, chars: TJIIXChar[], strokes: OIStroke[], startPoint: TPoint, fontSize?: number): OIText
   {
     const boundingBox = Box.createFromBoxes([convertBoundingBoxMillimeterToPixel(word["bounding-box"])])
     const charSymbols: TOISymbolChar[] = []
@@ -96,13 +95,12 @@ export class OIConversionManager
     {
       const charStrokes = strokes.filter(s => char.items?.some(i => i["full-id"] === s.id)) as OIStroke[]
       if (charStrokes.length) {
-        charSymbols.push(this.buildChar(char, charStrokes))
+        charSymbols.push(this.buildChar(char, charStrokes, fontSize))
       }
     })
-    const text = new OIText({}, charSymbols, { x: boundingBox.xMin, y: boundingBox.yMax }, boundingBox)
+    const text = new OIText({}, charSymbols, startPoint, boundingBox)
     const decorators = strokes.flatMap(s => s.decorators)
-    if (decorators.length)
-    {
+    if (decorators.length) {
       const hightlight = decorators.find(d => d.kind === DecoratorKind.Highlight)
       if (hightlight) {
         text.decorators.push(new OIDecorator(DecoratorKind.Highlight, hightlight.style))
@@ -124,7 +122,7 @@ export class OIConversionManager
     return text
   }
 
-  async convertText(text: TJIIXTextElement, alignTextToGuide: boolean): Promise<void>
+  convertText(text: TJIIXTextElement, alignTextToGuide: boolean): { symbol: OIText, strokeIds: string[] }[] | undefined
   {
     if (!text.words) {
       throw new Error("You need to active configuration.recognition.export.jiix.text.words = true")
@@ -139,41 +137,49 @@ export class OIConversionManager
     const jiixWords = text.words as TJIIXWord[]
     const jiixChars = text.chars as TJIIXChar[]
 
-    const strokesIdsToRemove: string[] = []
-    const decoratorIdsToRemove: string[] = []
+    const result: { symbol: OIText, strokeIds: string[] }[] = []
 
+    const bb = convertBoundingBoxMillimeterToPixel(text["bounding-box"])
+    let startPoint: TPoint = {
+      x: bb.x,
+      y: bb.y + this.rowHeight
+    }
+    const fontSize = alignTextToGuide ? Math.ceil(computeAverage(jiixWords.map(w => w["bounding-box"]?.height || this.rowHeight)) * this.rowHeight / this.rowHeight) : undefined
     jiixWords.forEach(word =>
     {
       const wordStrokes = this.strokes.filter(s => word.items?.some(i => i["full-id"] === s.id)) as OIStroke[]
       if (wordStrokes.length) {
-        decoratorIdsToRemove.push(...wordStrokes.flatMap(s => s.decorators.map(d => d.id)) as string[])
-        strokesIdsToRemove.push(...wordStrokes.map(s => s.id))
+        const strokeIds: string[] = [...wordStrokes.map(s => s.id), ...wordStrokes.flatMap(s => s.decorators.map(d => d.id))]
         const chars = jiixChars.slice(word["first-char"] as number, (word["last-char"] || 0) + 1)
-        const textSymbol = this.buildWord(word, chars, wordStrokes)
+        const textSymbol = this.buildWord(word, chars, wordStrokes, startPoint, this.fontSize || fontSize)
+
         if (alignTextToGuide) {
           textSymbol.point.y = Math.trunc(textSymbol.point.y / this.rowHeight) * this.rowHeight
         }
-
-        const textGroupEl = this.renderer.drawSymbol(textSymbol) as SVGGElement
-        textSymbol.boundingBox = this.texter.getElementBoundingBox(textGroupEl)
-        this.texter.setCharsBoundingBox(textSymbol, textGroupEl)
-        this.model.addSymbol(textSymbol)
+        this.texter.setBoundingBox(textSymbol)
+        result.push({ symbol: textSymbol, strokeIds: [...new Set(strokeIds)] })
+        startPoint = {
+          x: startPoint.x + textSymbol.boundingBox.width,
+          y: startPoint.y
+        }
+      }
+      else {
+        if (word.label === "\n") {
+          startPoint = {
+            x: bb.x,
+            y: startPoint.y + this.rowHeight
+          }
+        }
+        else {
+          startPoint = {
+            x: startPoint.x + convertMillimeterToPixel(word["bounding-box"]?.width || 1),
+            y: startPoint.y
+          }
+        }
       }
     })
 
-    const uniqIdsToRemove = [...new Set(strokesIdsToRemove)]
-    decoratorIdsToRemove.forEach(id =>
-    {
-      this.renderer.removeSymbol(id)
-      this.model.removeSymbol(id)
-    })
-    uniqIdsToRemove.forEach(id =>
-    {
-      this.renderer.removeSymbol(id)
-      this.model.removeSymbol(id)
-    })
-
-    await this.recognizer.eraseStrokes(uniqIdsToRemove)
+    return result
   }
 
   buildCircle(circle: TJIIXNodeCircle, strokes: OIStroke[]): OIShapeCircle
@@ -221,7 +227,7 @@ export class OIConversionManager
     return new OIShapePolygon(strokes[0]?.style, points, polygon.kind)
   }
 
-  async convertNode(node: TJIIXNodeElement): Promise<void>
+  convertNode(node: TJIIXNodeElement): { symbol: TOIShape, strokeIds: string[] } | undefined
   {
     const associatedStroke = this.strokes.filter(s => node.items?.some(i => i["full-id"] === s.id))
     if (!associatedStroke.length) return
@@ -247,17 +253,7 @@ export class OIConversionManager
         this.#logger.warn("convertNode", `Conversion of Node with kind equal to ${ node.kind } is unknow`)
         return
     }
-    if (shape) {
-      this.model.addSymbol(shape)
-      this.renderer.drawSymbol(shape)
-      const uniqIdsToRemove = [...new Set(associatedStroke.map(s => s.id))]
-      uniqIdsToRemove.forEach(id =>
-      {
-        this.renderer.removeSymbol(id)
-        this.model.removeSymbol(id)
-      })
-      await this.recognizer.eraseStrokes(uniqIdsToRemove)
-    }
+    return { symbol: shape, strokeIds: [...new Set(associatedStroke.map(s => s.id))] }
   }
 
   buildLine(line: TJIIXEdgeLine, strokes: OIStroke[]): OIEdgeLine
@@ -289,38 +285,28 @@ export class OIConversionManager
     return new OIEdgeArc(strokes[0]?.style, start, middle, end, arc.startDecoration, arc.endDecoration)
   }
 
-  async convertEdge(edge: TJIIXEdgeElement): Promise<void>
+  convertEdge(edge: TJIIXEdgeElement): { symbol: TOIEdge, strokeIds: string[] } | undefined
   {
     const associatedStroke = this.strokes.filter(s => edge.items?.some(i => i["full-id"] === s.id))
     if (!associatedStroke.length) return
 
-    let oiedge: TOIEdge
+    let oiEdge: TOIEdge
     switch (edge.kind) {
       case EdgeKind.Line:
-        oiedge = this.buildLine(edge as TJIIXEdgeLine, associatedStroke)
+        oiEdge = this.buildLine(edge as TJIIXEdgeLine, associatedStroke)
         break
       case EdgeKind.Arc:
-        oiedge = this.buildArc(edge as TJIIXEdgeArc, associatedStroke)
+        oiEdge = this.buildArc(edge as TJIIXEdgeArc, associatedStroke)
         break
       default:
         this.#logger.warn("convertEdge", `Conversion of Edge with kind equal to ${ edge.kind } is unknow`)
         return
     }
 
-    if (oiedge) {
-      this.model.addSymbol(oiedge)
-      this.renderer.drawSymbol(oiedge)
-      const uniqIdsToRemove = [...new Set(associatedStroke.map(s => s.id))]
-      uniqIdsToRemove.forEach(id =>
-      {
-        this.renderer.removeSymbol(id)
-        this.model.removeSymbol(id)
-      })
-      await this.recognizer.eraseStrokes(uniqIdsToRemove)
-    }
+    return { symbol: oiEdge, strokeIds: [...new Set(associatedStroke.map(s => s.id))] }
   }
 
-  async convert(): Promise<void>
+  async apply(): Promise<void>
   {
     this.#logger.info("convert")
     if (!this.model.exports?.["application/vnd.myscript.jiix"]) {
@@ -330,23 +316,51 @@ export class OIConversionManager
     const jiix = this.model.exports?.["application/vnd.myscript.jiix"] as TJIIXExport
     if (jiix?.elements?.length) {
       const alignTextToGuide = !jiix.elements?.some(e => e.type !== "Text")
-      await Promise.all(jiix.elements.map(e =>
+      const convertedSymbols: { symbol: TOISymbol, strokeIds: string[] }[] = []
+      jiix.elements.forEach(e =>
       {
         switch (e.type) {
-          case "Text":
-            return this.convertText(e as TJIIXTextElement, alignTextToGuide)
-          case "Node":
-            return this.convertNode(e as TJIIXNodeElement)
-          case "Edge":
-            return this.convertEdge(e as TJIIXEdgeElement)
+          case "Text": {
+            const conversion = this.convertText(e as TJIIXTextElement, alignTextToGuide)
+            if (conversion) {
+              convertedSymbols.push(...conversion)
+            }
+            break
+          }
+          case "Node": {
+            const conversion = this.convertNode(e as TJIIXNodeElement)
+            if (conversion) {
+              convertedSymbols.push(conversion)
+            }
+            break
+          }
+          case "Edge": {
+            const conversion = this.convertEdge(e as TJIIXEdgeElement)
+            if (conversion) {
+              convertedSymbols.push(conversion)
+            }
+            break
+          }
           default: {
             this.#logger.warn("buildConversions", `Unknow jiix element type: ${ e.type }`)
-            return Promise.resolve()
           }
         }
-      }))
+      })
+      convertedSymbols.forEach(cs =>
+      {
+        this.model.addSymbol(cs.symbol)
+        this.renderer.drawSymbol(cs.symbol)
+        cs.strokeIds.forEach(id =>
+        {
+          this.renderer.removeSymbol(id)
+          this.model.removeSymbol(id)
+        })
+      })
+
+      this.behaviors.texter.adjustText()
+      await this.recognizer.eraseStrokes(convertedSymbols.flatMap(cs => cs.strokeIds))
+      this.undoRedoManager.addModelToStack(this.model)
     }
-    this.behaviors.texter.adjustText()
-    this.undoRedoManager.addModelToStack(this.model)
+
   }
 }

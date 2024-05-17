@@ -62,6 +62,13 @@ export class OITextManager
     return text
   }
 
+  setBoundingBox(text: OIText): void
+  {
+    const element = this.drawSymbolHidden(text)
+    text.boundingBox = this.getElementBoundingBox(element)
+    this.setCharsBoundingBox(text, element)
+  }
+
   getElementBoundingBox(textElement: SVGElement): Box
   {
     return new Box(textElement.querySelector("text")!.getBBox({ stroke: true, markers: true, clipped: true, fill: true }))
@@ -99,11 +106,12 @@ export class OITextManager
   alignTextToRow(textSymbols: OIText[]): void
   {
     let lastX = textSymbols[0].point.x
+    const symbolWhitoutSpaceBefore = [",", "."]
     textSymbols.forEach((s, i) =>
     {
       const textSymbol = s as OIText
       const fontSize = computeAverage(textSymbol.chars.map(c => c.fontSize))
-      const whiteSpaceWidth = i === 0 ? 0 : this.getSpaceWidth(fontSize)
+      const whiteSpaceWidth = (i === 0 || symbolWhitoutSpaceBefore.includes(textSymbol.label)) ? 0 : this.getSpaceWidth(fontSize)
       textSymbol.point.y = Math.round(textSymbol.point.y / this.rowHeight) * this.rowHeight
       textSymbol.point.x = lastX + whiteSpaceWidth
       textSymbol.boundingBox.x = lastX + whiteSpaceWidth
