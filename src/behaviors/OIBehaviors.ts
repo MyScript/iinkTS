@@ -721,13 +721,13 @@ export class OIBehaviors implements IBehaviors
       this.unselectAll()
       const modelToApply = this.undoRedoManager.undo() as OIModel
       const modifications = modelToApply.extractDifferenceSymbols(this.model)
+      this.#model = modelToApply
       this.#logger.debug("undo", { modifications })
       if (modifications.removed.some(s => s.type === SymbolType.Stroke) || modifications.added.some(s => s.type === SymbolType.Stroke)) {
         await this.recognizer.undo()
       }
       modifications.removed.forEach(s => this.renderer.removeSymbol(s.id))
       modifications.added.forEach(s => this.renderer.drawSymbol(s))
-      this.#model = modelToApply
       this.menu.update()
       this.svgDebugger.apply()
       await this.recognizer.waitForIdle()
@@ -743,6 +743,7 @@ export class OIBehaviors implements IBehaviors
       this.unselectAll()
       const modelToApply = this.undoRedoManager.redo() as OIModel
       const modifications = modelToApply.extractDifferenceSymbols(this.model)
+      this.#model = modelToApply
       this.#logger.debug("redo", { modifications })
       if (modifications.removed.some(s => s.type === SymbolType.Stroke) || modifications.added.some(s => s.type === SymbolType.Stroke)) {
         await this.recognizer.redo()
@@ -750,7 +751,6 @@ export class OIBehaviors implements IBehaviors
       modifications.removed.forEach(s => this.renderer.removeSymbol(s.id))
       modifications.added.forEach(s => this.renderer.drawSymbol(s))
 
-      this.#model = modelToApply
       this.menu.update()
       await this.svgDebugger.apply()
       await this.recognizer.waitForIdle()
@@ -881,7 +881,7 @@ export class OIBehaviors implements IBehaviors
   {
     try {
       this.internalEvent.emitIdle(false)
-      await this.converter.convert()
+      await this.converter.apply()
     } catch (error) {
       this.#logger.error("convert", error)
       this.internalEvent.emitError(error as Error)
