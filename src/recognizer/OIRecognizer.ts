@@ -414,6 +414,7 @@ export class OIRecognizer
           await this.destroy()
           if (!this.initialized) {
             await this.init()
+            await this.waitForIdle()
           }
           else {
             await this.initialized.promise
