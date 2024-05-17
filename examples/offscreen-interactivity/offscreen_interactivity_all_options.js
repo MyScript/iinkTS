@@ -156,7 +156,7 @@ async function loadEditor() {
    */
   await editor.initialize();
 
-  const strokeRes = await fetch("../assets/datas/hello-my-friend.json");
+  const strokeRes = await fetch("../assets/datas/shakespeare-quotes.json");
   const pointersToImport = await strokeRes.json();
 
   let exportTimeout;
