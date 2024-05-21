@@ -35,7 +35,7 @@ describe("UndoRedoManager.ts", () =>
     test("should add model to stack", () =>
     {
       const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      model.initCurrentStroke(p1, 666, "pen", DefaultPenStyle)
+      model.initCurrentStroke(p1, "pen", DefaultPenStyle)
 
       const p2: TPointer = { t: 15, p: 0.5, x: 10, y: 1 }
       model.endCurrentStroke(p2)
@@ -56,7 +56,7 @@ describe("UndoRedoManager.ts", () =>
       const NB_STROKE = 4
       for (let i = 0; i < NB_STROKE; i++) {
         const p1: TPointer = { t: i * 5, p: 1, x: i * 10, y: 10 }
-        model.initCurrentStroke(p1, 666, "pen", DefaultPenStyle)
+        model.initCurrentStroke(p1, "pen", DefaultPenStyle)
 
         const p2: TPointer = { t: i * 10, p: 1, x: i * 10, y: 10 }
         model.endCurrentStroke(p2)
@@ -69,7 +69,7 @@ describe("UndoRedoManager.ts", () =>
       manager.context.stackIndex = 0
 
       const p1: TPointer = { t: 27, p: 0.5, x: 1989, y: 2022 }
-      model.initCurrentStroke(p1, 666, "pen", DefaultPenStyle)
+      model.initCurrentStroke(p1, "pen", DefaultPenStyle)
 
       const p2: TPointer = { t: 75, p: 1, x: 200, y: 10 }
       model.endCurrentStroke(p2)
@@ -88,7 +88,7 @@ describe("UndoRedoManager.ts", () =>
       const NB_STROKE = 10
       for (let i = 0; i < NB_STROKE; i++) {
         const p1: TPointer = { t: i * 42, p: 0.5, x: i / 2, y: i * 20 }
-        model.initCurrentStroke(p1, 666, "pen", DefaultPenStyle)
+        model.initCurrentStroke(p1, "pen", DefaultPenStyle)
 
         const p2: TPointer = { t: i * 10, p: 1, x: i * 10, y: 10 }
         model.endCurrentStroke(p2)
@@ -115,7 +115,7 @@ describe("UndoRedoManager.ts", () =>
     test("should get the previous model", () =>
     {
       const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      model.initCurrentStroke(p1, 666, "pen", DefaultPenStyle)
+      model.initCurrentStroke(p1, "pen", DefaultPenStyle)
 
       const p2: TPointer = { t: 15, p: 0.5, x: 10, y: 1 }
       model.endCurrentStroke(p2)
@@ -140,7 +140,7 @@ describe("UndoRedoManager.ts", () =>
     test("should get the next model", () =>
     {
       const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      model.initCurrentStroke(p1, 666, "pen", DefaultPenStyle)
+      model.initCurrentStroke(p1, "pen", DefaultPenStyle)
 
       const p2: TPointer = { t: 15, p: 0.5, x: 10, y: 1 }
       model.endCurrentStroke(p2)
@@ -168,7 +168,7 @@ describe("UndoRedoManager.ts", () =>
       const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       // wait a few seconds and have a different model.modificationDate
       await delay(100)
-      model.initCurrentStroke(p1, 666, "pen", DefaultPenStyle)
+      model.initCurrentStroke(p1, "pen", DefaultPenStyle)
 
       const p2: TPointer = { t: 15, p: 0.5, x: 10, y: 1 }
       model.endCurrentStroke(p2)
@@ -193,7 +193,7 @@ describe("UndoRedoManager.ts", () =>
       const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       // wait a few seconds and have a different model.modificationDate
       await delay(100)
-      model.initCurrentStroke(p1, 666, "pen", DefaultPenStyle)
+      model.initCurrentStroke(p1, "pen", DefaultPenStyle)
 
       const p2: TPointer = { t: 15, p: 0.5, x: 10, y: 1 }
       model.endCurrentStroke(p2)
@@ -204,7 +204,7 @@ describe("UndoRedoManager.ts", () =>
       const p3: TPointer = { t: 100, p: 0.5, x: 1, y: 10 }
       // wait a few seconds and have a different model.modificationDate
       await delay(100)
-      model.initCurrentStroke(p3, 666, "pen", DefaultPenStyle)
+      model.initCurrentStroke(p3, "pen", DefaultPenStyle)
 
       const p4: TPointer = { t: 150, p: 0.5, x: 1, y: 10 }
       model.endCurrentStroke(p4)
@@ -224,7 +224,7 @@ describe("UndoRedoManager.ts", () =>
     const manager = new UndoRedoManager(DefaultConfiguration["undo-redo"], model)
 
     const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-    model.initCurrentStroke(p1, 666, "pen", DefaultPenStyle)
+    model.initCurrentStroke(p1, "pen", DefaultPenStyle)
 
     const p2: TPointer = { t: 15, p: 0.5, x: 10, y: 1 }
     model.endCurrentStroke(p2)

@@ -1,7 +1,6 @@
 [
    {
       "pointerType": "mouse",
-      "pointerId": 0,
       "x": [
          261,
          262,
@@ -365,7 +364,6 @@
    },
    {
       "pointerType": "mouse",
-      "pointerId": 0,
       "x": [
          252,
          255,

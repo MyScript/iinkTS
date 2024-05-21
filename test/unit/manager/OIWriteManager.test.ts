@@ -40,7 +40,7 @@ describe("OIWriteManager.ts", () =>
     {
       expect(manager.model.currentSymbol).toBeUndefined()
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      manager.start(DefaultStyle, point, 42, "mouse")
+      manager.start(DefaultStyle, point, "mouse")
       expect(manager.model.creationTime).toStrictEqual(manager.model.modificationDate)
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toEqual(SymbolType.Stroke)
@@ -53,7 +53,7 @@ describe("OIWriteManager.ts", () =>
     {
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       const style: TStyle = { color: "red", width: 42 }
-      manager.start(style, point, 42, "mouse")
+      manager.start(style, point, "mouse")
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.style.color).toBe(style.color)
       expect(manager.model.currentSymbol?.style.width).toBe(style.width)
@@ -64,7 +64,7 @@ describe("OIWriteManager.ts", () =>
       manager.tool = WriteTool.Rectangle
       expect(wrapperHTML.classList.contains("shape")).toBe(true)
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      manager.start(DefaultStyle, point, 42, "mouse")
+      manager.start(DefaultStyle, point, "mouse")
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Shape)
       const shape = manager.model.currentSymbol as TOIShape
@@ -77,7 +77,7 @@ describe("OIWriteManager.ts", () =>
       manager.tool = WriteTool.Circle
       expect(wrapperHTML.classList.contains("shape")).toBe(true)
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      manager.start(DefaultStyle, point, 42, "mouse")
+      manager.start(DefaultStyle, point, "mouse")
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Shape)
       const shape = manager.model.currentSymbol as TOIShape
@@ -90,7 +90,7 @@ describe("OIWriteManager.ts", () =>
       manager.tool = WriteTool.Ellipse
       expect(wrapperHTML.classList.contains("shape")).toBe(true)
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      manager.start(DefaultStyle, point, 42, "mouse")
+      manager.start(DefaultStyle, point, "mouse")
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Shape)
       const shape = manager.model.currentSymbol as TOIShape
@@ -103,7 +103,7 @@ describe("OIWriteManager.ts", () =>
       manager.tool = WriteTool.Triangle
       expect(wrapperHTML.classList.contains("shape")).toBe(true)
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      manager.start(DefaultStyle, point, 42, "mouse")
+      manager.start(DefaultStyle, point, "mouse")
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Shape)
       const shape = manager.model.currentSymbol as TOIShape
@@ -116,7 +116,7 @@ describe("OIWriteManager.ts", () =>
       manager.tool = WriteTool.Parallelogram
       expect(wrapperHTML.classList.contains("shape")).toBe(true)
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      manager.start(DefaultStyle, point, 42, "mouse")
+      manager.start(DefaultStyle, point, "mouse")
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Shape)
       const shape = manager.model.currentSymbol as TOIShape
@@ -129,7 +129,7 @@ describe("OIWriteManager.ts", () =>
       manager.tool = WriteTool.Line
       expect(wrapperHTML.classList.contains("shape")).toBe(true)
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      manager.start(DefaultStyle, point, 42, "mouse")
+      manager.start(DefaultStyle, point, "mouse")
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Edge)
       const shape = manager.model.currentSymbol as TOIEdge
@@ -144,7 +144,7 @@ describe("OIWriteManager.ts", () =>
       manager.tool = WriteTool.Arrow
       expect(wrapperHTML.classList.contains("shape")).toBe(true)
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      manager.start(DefaultStyle, point, 42, "mouse")
+      manager.start(DefaultStyle, point, "mouse")
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Edge)
       const shape = manager.model.currentSymbol as TOIEdge
@@ -159,7 +159,7 @@ describe("OIWriteManager.ts", () =>
       manager.tool = WriteTool.DoubleArrow
       expect(wrapperHTML.classList.contains("shape")).toBe(true)
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      manager.start(DefaultStyle, point, 42, "mouse")
+      manager.start(DefaultStyle, point, "mouse")
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Edge)
       const shape = manager.model.currentSymbol as TOIEdge
@@ -175,13 +175,13 @@ describe("OIWriteManager.ts", () =>
       const style: TStyle = { color: "red", width: 42 }
       //@ts-ignore
       manager.tool = "unknow"
-      expect(() => manager.start(style, point, 42, "mouse")).toThrow("Can't create symbol, tool is unknow: \"unknow\"")
+      expect(() => manager.start(style, point, "mouse")).toThrow("Can't create symbol, tool is unknow: \"unknow\"")
     })
     test("should update currentSymbol", () =>
     {
       manager.tool = WriteTool.Pencil
       const point1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      manager.start(DefaultStyle, point1, 42, "mouse")
+      manager.start(DefaultStyle, point1, "mouse")
       const point2: TPointer = { t: 15, p: 15, x: 15, y: 15 }
       manager.continue(point2)
       const stroke = manager.model.currentSymbol as OIStroke
@@ -201,7 +201,7 @@ describe("OIWriteManager.ts", () =>
     {
       manager.model.clear()
       const point: TPointer = { t: 25, p: 25, x: 25, y: 25 }
-      manager.start(DefaultStyle, point, 42, "mouse")
+      manager.start(DefaultStyle, point, "mouse")
       manager.continue(point)
       await manager.end(point)
       expect(manager.model.currentSymbol).toBeUndefined()

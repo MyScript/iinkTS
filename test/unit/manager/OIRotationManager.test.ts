@@ -30,7 +30,7 @@ describe("OIRotationManager.ts", () =>
 
     test("rotate stroke", () =>
     {
-      const stroke = new OIStroke({}, 1)
+      const stroke = new OIStroke({})
       const origin: TPoint = { x: 0, y: 0 }
       stroke.addPointer({ p: 1, t: 1, x: 1, y: 1 })
       stroke.addPointer({ p: 1, t: 10, x: 10, y: 0 })
@@ -115,7 +115,7 @@ describe("OIRotationManager.ts", () =>
     const manager = new OIRotationManager(behaviors)
     manager.applyToSymbol = jest.fn()
 
-    const stroke = new OIStroke({}, 1)
+    const stroke = new OIStroke({})
     stroke.addPointer({ p: 1, t: 1, x: 0, y: 0 })
     stroke.addPointer({ p: 1, t: 1, x: 10, y: 50 })
     stroke.selected = true

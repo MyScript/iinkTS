@@ -8,13 +8,13 @@ describe("OISVGStrokeUtil.ts", () =>
 
   test("should getSVGPath when no pointers", () =>
   {
-    const stroke = new OIStroke(DefaultStyle, 1)
+    const stroke = new OIStroke(DefaultStyle)
     expect(renderer.getSVGPath(stroke)).toEqual("")
   })
 
   test("should getSVGPath when 2 pointers", () =>
   {
-    const stroke = new OIStroke(DefaultStyle, 1)
+    const stroke = new OIStroke(DefaultStyle)
     stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
     stroke.pointers.push({ p: 1, t: 1, x: 10, y: 1 })
     expect(renderer.getSVGPath(stroke)).toEqual("M 1 1 m -2.4 0 a 2.4 2.4 0 1 0 4.8 0 a 2.4 2.4 0 1 0 -4.8 0")
@@ -22,7 +22,7 @@ describe("OISVGStrokeUtil.ts", () =>
 
   test("should getSVGPath when mote than 2 pointers", () =>
   {
-    const stroke = new OIStroke(DefaultStyle, 1)
+    const stroke = new OIStroke(DefaultStyle)
     stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
     stroke.pointers.push({ p: 1, t: 1, x: 5, y: 5 })
     stroke.pointers.push({ p: 1, t: 1, x: 7, y: 5 })
@@ -32,7 +32,7 @@ describe("OISVGStrokeUtil.ts", () =>
 
   test("should getSVGElement with default style", () =>
   {
-    const stroke = new OIStroke({}, 1)
+    const stroke = new OIStroke({})
     stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
     stroke.pointers.push({ p: 1, t: 1, x: 10, y: 1 })
     const el = renderer.getSVGElement(stroke)
@@ -48,7 +48,7 @@ describe("OISVGStrokeUtil.ts", () =>
       color: "blue",
       width: 20
     }
-    const stroke = new OIStroke(style, 1)
+    const stroke = new OIStroke(style)
     stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
     stroke.pointers.push({ p: 1, t: 1, x: 10, y: 1 })
     const el = renderer.getSVGElement(stroke)
@@ -60,7 +60,7 @@ describe("OISVGStrokeUtil.ts", () =>
 
   test("should getSVGElement when selected", () =>
   {
-    const stroke = new OIStroke(DefaultStyle, 1)
+    const stroke = new OIStroke(DefaultStyle)
     stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
     stroke.pointers.push({ p: 1, t: 1, x: 10, y: 1 })
     stroke.selected = true

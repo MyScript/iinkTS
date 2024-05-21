@@ -57,7 +57,7 @@ describe("RestRecognizer.ts", () =>
       const model = new Model(width, height)
       const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
       const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
-      model.initCurrentStroke(p1, 1, "pen", DefaultPenStyle)
+      model.initCurrentStroke(p1, "pen", DefaultPenStyle)
       model.endCurrentStroke(p2)
       const recognitionConfig: TRecognitionConfiguration = {
         ...config.recognition,
@@ -99,7 +99,7 @@ describe("RestRecognizer.ts", () =>
       const model = new Model(width, height)
       const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
       const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
-      model.initCurrentStroke(p1, 1, "pen", DefaultPenStyle)
+      model.initCurrentStroke(p1, "pen", DefaultPenStyle)
       model.endCurrentStroke(p2)
       const recognitionConfig: TRecognitionConfiguration = {
         ...config.recognition,

@@ -71,7 +71,7 @@ export class RestBehaviors implements IBehaviors
         break
       }
       case Intention.Write:
-        this.model.initCurrentStroke(point, evt.pointerId, pointerType, style)
+        this.model.initCurrentStroke(point, pointerType, style)
         this.drawCurrentStroke()
         break
       default:
@@ -260,7 +260,7 @@ export class RestBehaviors implements IBehaviors
     strokes.forEach((s, strokeIndex) =>
     {
       let flag = true
-      const stroke = new Stroke(s.style || DefaultPenStyle, s.pointerId || 1)
+      const stroke = new Stroke(s.style || DefaultPenStyle, s.pointerType)
       if (s.id) stroke.id = s.id
       if (!s.pointers?.length) {
         errors.push(`stroke ${strokeIndex + 1} has not pointers`)

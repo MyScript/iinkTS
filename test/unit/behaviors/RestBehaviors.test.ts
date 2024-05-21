@@ -45,7 +45,7 @@ describe("RestBehaviors.ts", () =>
     rb.renderer.drawPendingStroke = jest.fn()
     const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
     const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
-    rb.model.initCurrentStroke(p1, 1, "pen", DefaultPenStyle)
+    rb.model.initCurrentStroke(p1, "pen", DefaultPenStyle)
     rb.model.endCurrentStroke(p2)
     rb.drawCurrentStroke()
     expect(rb.renderer.drawPendingStroke).toBeCalledTimes(1)
@@ -133,7 +133,7 @@ describe("RestBehaviors.ts", () =>
     await rb.init(wrapperHTML)
     const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
     const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
-    rb.model.initCurrentStroke(p1, 1, "pen", DefaultPenStyle)
+    rb.model.initCurrentStroke(p1, "pen", DefaultPenStyle)
     rb.model.endCurrentStroke(p2)
     await rb.resize(1, 2)
     expect(rb.renderer.resize).toBeCalledTimes(1)
@@ -174,7 +174,7 @@ describe("RestBehaviors.ts", () =>
     const model2 = new Model(width, height)
     const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
     const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
-    model2.initCurrentStroke(p1, 1, "pen", DefaultPenStyle)
+    model2.initCurrentStroke(p1, "pen", DefaultPenStyle)
     model2.endCurrentStroke(p2)
     rb.recognizer.export = jest.fn(m => Promise.resolve(m))
     rb.renderer.drawModel = jest.fn()
@@ -191,7 +191,7 @@ describe("RestBehaviors.ts", () =>
     rb.renderer.drawModel = jest.fn()
     const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
     const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
-    rb.model.initCurrentStroke(p1, 1, "pen", DefaultPenStyle)
+    rb.model.initCurrentStroke(p1, "pen", DefaultPenStyle)
     rb.model.endCurrentStroke(p2)
     expect(rb.model.symbols.length).toBeGreaterThan(0)
     const clearedModel = await rb.clear()

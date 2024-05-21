@@ -51,7 +51,7 @@ describe("Model.ts", () =>
     const model= new Model(width, height, rowHeight)
     test("should add point to x, y, p & t array", () =>
     {
-      const stroke = new Stroke(DefaultPenStyle, 1)
+      const stroke = new Stroke(DefaultPenStyle)
       const point: TPointer = {
         t: 1,
         p: 0.5,
@@ -69,7 +69,7 @@ describe("Model.ts", () =>
 
     test("should not add point if x is too close", () =>
     {
-      const stroke = new Stroke(DefaultPenStyle, 1)
+      const stroke = new Stroke(DefaultPenStyle)
       const point: TPointer = {
         t: 10,
         p: 10,
@@ -84,7 +84,7 @@ describe("Model.ts", () =>
 
     test("should not add point if y is too close", () =>
     {
-      const stroke = new Stroke(DefaultPenStyle, 1)
+      const stroke = new Stroke(DefaultPenStyle)
       const point: TPointer = {
         t: 10,
         p: 10,
@@ -103,7 +103,7 @@ describe("Model.ts", () =>
     test("should updateStroke", () =>
     {
       const model= new Model(width, height, rowHeight)
-      const stroke = new Stroke(DefaultPenStyle, 1)
+      const stroke = new Stroke(DefaultPenStyle)
       for (let index = 0; index < 10; index++) {
         stroke.pointers.push({
           p: 1,
@@ -115,7 +115,7 @@ describe("Model.ts", () =>
       model.addStroke(stroke)
       expect(model.symbols).toHaveLength(1)
       expect(model.symbols[0]).toStrictEqual(stroke)
-      const strokeUpdated = new Stroke(DefaultPenStyle, 1)
+      const strokeUpdated = new Stroke(DefaultPenStyle)
       strokeUpdated.id = stroke.id
       strokeUpdated.pointers.push({ p: 0.5, t: 0.5, x: 100, y: 27 })
       model.updateStroke(strokeUpdated)
@@ -125,7 +125,7 @@ describe("Model.ts", () =>
     test("should not updateStroke if id not exist", () =>
     {
       const model= new Model(width, height, rowHeight)
-      const stroke = new Stroke(DefaultPenStyle, 1)
+      const stroke = new Stroke(DefaultPenStyle)
       for (let index = 0; index < 10; index++) {
         stroke.pointers.push({
           p: 1,
@@ -137,7 +137,7 @@ describe("Model.ts", () =>
       model.addStroke(stroke)
       expect(model.symbols).toHaveLength(1)
       expect(model.symbols[0]).toStrictEqual(stroke)
-      const strokeUpdated = new Stroke(DefaultPenStyle, 1)
+      const strokeUpdated = new Stroke(DefaultPenStyle)
       strokeUpdated.id = "pouette"
       strokeUpdated.pointers.push({ p: 0.5, t: 0.5, x: 100, y: 27 })
       model.updateStroke(strokeUpdated)
@@ -152,7 +152,7 @@ describe("Model.ts", () =>
     test("should removeStroke", () =>
     {
       const model= new Model(width, height, rowHeight)
-      const stroke = new Stroke(DefaultPenStyle, 1)
+      const stroke = new Stroke(DefaultPenStyle)
       for (let index = 0; index < 10; index++) {
         stroke.pointers.push({
           p: 1,
@@ -170,7 +170,7 @@ describe("Model.ts", () =>
     test("should not removeStroke if id not exist", () =>
     {
       const model= new Model(width, height, rowHeight)
-      const stroke = new Stroke(DefaultPenStyle, 1)
+      const stroke = new Stroke(DefaultPenStyle)
       for (let index = 0; index < 10; index++) {
         stroke.pointers.push({
           p: 1,
@@ -192,7 +192,7 @@ describe("Model.ts", () =>
     test("should addStrokes", () =>
     {
       const model= new Model(width, height, rowHeight)
-      const stroke = new Stroke(DefaultPenStyle, 1)
+      const stroke = new Stroke(DefaultPenStyle)
       model.addStroke(stroke)
       expect(model.symbols).toHaveLength(1)
       expect(model.symbols[0]).toStrictEqual(stroke)
@@ -201,7 +201,7 @@ describe("Model.ts", () =>
     test("should extractUnsentStrokes", () =>
     {
       const model= new Model(width, height, rowHeight)
-      const stroke = new Stroke(DefaultPenStyle, 1)
+      const stroke = new Stroke(DefaultPenStyle)
       model.addStroke(stroke)
       expect(model.symbols).toHaveLength(1)
       const extractStroke = model.extractUnsentStrokes()
@@ -225,7 +225,7 @@ describe("Model.ts", () =>
       }
       expect(model.creationTime).toStrictEqual(model.modificationDate)
       await delay(100)
-      model.initCurrentStroke(point, 42, "mouse", DefaultPenStyle)
+      model.initCurrentStroke(point, "mouse", DefaultPenStyle)
       expect(model.modificationDate - model.creationTime).toBeGreaterThanOrEqual(100)
       expect(model.currentSymbol).toBeDefined()
       expect(model.currentSymbol?.style["-myscript-pen-fill-color"]).toBe(DefaultPenStyle["-myscript-pen-fill-color"])
@@ -252,7 +252,7 @@ describe("Model.ts", () =>
       style["-myscript-pen-width"] = 2
       expect(_model.creationTime).toStrictEqual(_model.modificationDate)
       await delay(101)
-      _model.initCurrentStroke(point, 42, "mouse", style)
+      _model.initCurrentStroke(point, "mouse", style)
       expect(_model.modificationDate - _model.creationTime).toBeGreaterThanOrEqual(100)
       expect(_model.currentSymbol).toBeDefined()
       expect(_model.currentSymbol?.style["-myscript-pen-fill-color"]).toBe(style["-myscript-pen-fill-color"])
@@ -315,7 +315,7 @@ describe("Model.ts", () =>
     test("shoud remove stroke when point on stroke", () =>
     {
       const model= new Model(27, 5)
-      const stroke1 = new Stroke(DefaultPenStyle, 1)
+      const stroke1 = new Stroke(DefaultPenStyle)
       stroke1.id = "stroke-1"
       for (let index = 0; index < 20; index++) {
         stroke1.pointers.push({
@@ -326,7 +326,7 @@ describe("Model.ts", () =>
         })
       }
       model.addStroke(stroke1)
-      const stroke2 = new Stroke(DefaultPenStyle, 1)
+      const stroke2 = new Stroke(DefaultPenStyle)
       stroke2.id = "stroke-2"
       for (let index = 30; index < 40; index++) {
         stroke2.pointers.push({
@@ -347,7 +347,7 @@ describe("Model.ts", () =>
     test("should remove the stroke when the point is at a distance less than 10", () =>
     {
       const model= new Model(27, 5)
-      const stroke1 = new Stroke(DefaultPenStyle, 1)
+      const stroke1 = new Stroke(DefaultPenStyle)
       stroke1.id = "stroke-1"
       for (let index = 0; index < 20; index++) {
         stroke1.pointers.push({
@@ -358,7 +358,7 @@ describe("Model.ts", () =>
         })
       }
       model.addStroke(stroke1)
-      const stroke2 = new Stroke(DefaultPenStyle, 1)
+      const stroke2 = new Stroke(DefaultPenStyle)
       stroke2.id = "stroke-2"
       for (let index = 30; index < 40; index++) {
         stroke2.pointers.push({
@@ -379,7 +379,7 @@ describe("Model.ts", () =>
     test("should not remove the stroke when the point is at a distance less than 10", () =>
     {
       const model= new Model(27, 5)
-      const stroke1 = new Stroke(DefaultPenStyle, 1)
+      const stroke1 = new Stroke(DefaultPenStyle)
       stroke1.id = "stroke-1"
       for (let index = 0; index < 20; index++) {
         stroke1.pointers.push({
@@ -390,7 +390,7 @@ describe("Model.ts", () =>
         })
       }
       model.addStroke(stroke1)
-      const stroke2 = new Stroke(DefaultPenStyle, 1)
+      const stroke2 = new Stroke(DefaultPenStyle)
       stroke2.id = "stroke-2"
       for (let index = 30; index < 40; index++) {
         stroke2.pointers.push({
@@ -433,7 +433,7 @@ describe("Model.ts", () =>
     const model= new Model(27, 5)
     const stroke = buildStroke()
     model.addStroke(stroke)
-    model.initCurrentStroke({ p: 27, t: 5, x: 1989, y: 42 }, 666, "pen", DefaultPenStyle)
+    model.initCurrentStroke({ p: 27, t: 5, x: 1989, y: 42 }, "pen", DefaultPenStyle)
     model.exports = { "text/plain": "M" }
     test("should clone", () =>
     {
@@ -468,9 +468,9 @@ describe("Model.ts", () =>
       const p2: TPointer = { t: 10, p: 10, x: 10, y: 10 }
       const p3: TPointer = { t: 10, p: 10, x: 10, y: 10 }
 
-      model.initCurrentStroke(p1, 42, "mouse", DefaultPenStyle)
+      model.initCurrentStroke(p1, "mouse", DefaultPenStyle)
       model.endCurrentStroke(p2)
-      model.initCurrentStroke(p3, 51, "mouse", DefaultPenStyle)
+      model.initCurrentStroke(p3, "mouse", DefaultPenStyle)
       expect(model.currentSymbol).toBeDefined()
       expect(model.symbols).toHaveLength(1)
 

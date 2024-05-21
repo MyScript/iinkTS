@@ -15,18 +15,16 @@ import { OISymbol } from "./OISymbol"
 export class OIStroke extends OISymbol implements TStroke
 {
   #logger = LoggerManager.getLogger(LoggerClass.STROKE)
-  pointerId: number
   pointerType: string
   pointers: TPointer[]
   length: number
   decorators: OIDecorator[]
 
-  constructor(style: TStyle, pointerId: number, pointerType = "pen")
+  constructor(style: TStyle, pointerType = "pen")
   {
     super(SymbolType.Stroke, style)
-    this.#logger.info("constructor", { style, pointerId, pointerType })
+    this.#logger.info("constructor", { style, pointerType })
 
-    this.pointerId = pointerId
     this.pointerType = pointerType
     this.pointers = []
     this.decorators = []
@@ -35,10 +33,10 @@ export class OIStroke extends OISymbol implements TStroke
 
   static split(strokeToSplit: OIStroke, i: number): { before: OIStroke, after: OIStroke }
   {
-    const before = new OIStroke(strokeToSplit.style, strokeToSplit.pointerId, strokeToSplit.pointerType)
+    const before = new OIStroke(strokeToSplit.style, strokeToSplit.pointerType)
     before.pointers = strokeToSplit.pointers.slice(0, i)
 
-    const after = new OIStroke(strokeToSplit.style, strokeToSplit.pointerId, strokeToSplit.pointerType)
+    const after = new OIStroke(strokeToSplit.style, strokeToSplit.pointerType)
     after.pointers = strokeToSplit.pointers.slice(i)
 
     return { before, after }
@@ -138,7 +136,7 @@ export class OIStroke extends OISymbol implements TStroke
 
   clone(): OIStroke
   {
-    const clone = new OIStroke(this.style, this.pointerId, this.pointerType)
+    const clone = new OIStroke(this.style, this.pointerType)
     clone.id = this.id
     clone.selected = this.selected
     clone.deleting = this.deleting
@@ -186,7 +184,7 @@ export class OIStroke extends OISymbol implements TStroke
     if (!partial.pointers?.length) {
       throw new Error(`not pointers`)
     }
-    const stroke = new OIStroke(partial.style || DefaultStyle, partial.pointerId || 1)
+    const stroke = new OIStroke(partial.style || DefaultStyle, partial.pointerType)
     if (partial.id) stroke.id = partial.id
     const errors: string[] = []
     let flag = true

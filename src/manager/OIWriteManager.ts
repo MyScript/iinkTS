@@ -95,13 +95,13 @@ export class OIWriteManager
     return this.behaviors.recognizer
   }
 
-  protected createCurrentSymbol(pointer: TPointer, style: TStyle, pointerId: number, pointerType: string): TOISymbol
+  protected createCurrentSymbol(pointer: TPointer, style: TStyle, pointerType: string): TOISymbol
   {
-    this.#logger.debug("createCurrentSymbol", { pointer, style, pointerId, pointerType })
+    this.#logger.debug("createCurrentSymbol", { pointer, style, pointerType })
 
     switch (this.tool) {
       case WriteTool.Pencil:
-        this.model.currentSymbol = new OIStroke(style, pointerId, pointerType)
+        this.model.currentSymbol = new OIStroke(style, pointerType)
         break
       case WriteTool.Rectangle:
         this.model.currentSymbol = OIShapeRectangle.createFromLine(style, pointer, pointer)
@@ -191,19 +191,19 @@ export class OIWriteManager
     return this.model.currentSymbol
   }
 
-  start(style: TStyle, pointer: TPointer, pointerId: number, pointerType: string): void
+  start(style: TStyle, pointer: TPointer, pointerType: string): void
   {
-    this.#logger.info("startWriting", { style, pointer, pointerId, pointerType })
+    this.#logger.info("startWriting", { style, pointer, pointerType })
     const localPointer = pointer
     this.currentSymbolOrigin = localPointer
-    this.createCurrentSymbol(localPointer, style, pointerId, pointerType)
+    this.createCurrentSymbol(localPointer, style, pointerType)
     if (this.tool !== WriteTool.Pencil) {
       const { x, y } = this.snaps.snapResize(pointer)
       localPointer.x = x
       localPointer.y = y
     }
     this.currentSymbolOrigin = localPointer
-    this.createCurrentSymbol(localPointer, style, pointerId, pointerType)
+    this.createCurrentSymbol(localPointer, style, pointerType)
     this.renderer.drawSymbol(this.model.currentSymbol!)
   }
 

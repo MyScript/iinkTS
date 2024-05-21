@@ -4,7 +4,7 @@ describe("Stroke.ts", () =>
 {
   test("should create with default pointerType", () =>
   {
-    const stroke = new Stroke(DefaultPenStyle, 12)
+    const stroke = new Stroke(DefaultPenStyle)
     expect(stroke).toBeDefined()
     expect(stroke.style["-myscript-pen-fill-color"]).toBe(DefaultPenStyle["-myscript-pen-fill-color"])
     expect(stroke.style["-myscript-pen-fill-style"]).toBe(DefaultPenStyle["-myscript-pen-fill-style"])
@@ -12,14 +12,13 @@ describe("Stroke.ts", () =>
     expect(stroke.style.color).toBe(DefaultPenStyle.color)
     expect(stroke.style.width).toBe(DefaultPenStyle.width)
     expect(stroke.pointers).toHaveLength(0)
-    expect(stroke.pointerId).toBe(12)
     expect(stroke.pointerType).toBe("pen")
     expect(stroke.type).toBe("stroke")
   })
 
   test("should create with pointerType mouse", () =>
   {
-    const stroke = new Stroke(DefaultPenStyle, 12, "mouse")
+    const stroke = new Stroke(DefaultPenStyle, "mouse")
     expect(stroke.pointerType).toBe("mouse")
   })
 
@@ -33,7 +32,7 @@ describe("Stroke.ts", () =>
       width: 42
     }
 
-    const stroke = new Stroke(penStyle, 12)
+    const stroke = new Stroke(penStyle)
     expect(stroke).toBeDefined()
     expect(stroke.style["-myscript-pen-fill-color"]).toBe(penStyle["-myscript-pen-fill-color"])
     expect(stroke.style["-myscript-pen-fill-style"]).toBe(penStyle["-myscript-pen-fill-style"])

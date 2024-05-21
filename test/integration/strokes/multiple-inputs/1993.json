@@ -2,7 +2,6 @@
   {
     "id": "mouse-1694173367053",
     "type": "stroke",
-    "pointerId": 0,
     "pointerType": "mouse",
     "pointers": [
       {
@@ -90,7 +89,6 @@
         "p": 0.7
       }
     ],
-    "length": 379.9775148699389,
     "style": {
       "color": "#000000",
       "width": 1.8897637795275593,
@@ -102,7 +100,6 @@
   {
     "id": "mouse-1694173367903",
     "type": "stroke",
-    "pointerId": 0,
     "pointerType": "mouse",
     "pointers": [
       {
@@ -220,7 +217,6 @@
         "p": 0.68
       }
     ],
-    "length": 391.5936604914115,
     "style": {
       "color": "#000000",
       "width": 1.8897637795275593,
@@ -232,7 +228,6 @@
   {
     "id": "mouse-1694173368722",
     "type": "stroke",
-    "pointerId": 0,
     "pointerType": "mouse",
     "pointers": [
       {
@@ -320,7 +315,6 @@
         "p": 0.7
       }
     ],
-    "length": 402.26989499669963,
     "style": {
       "color": "#000000",
       "width": 1.8897637795275593,
@@ -332,7 +326,6 @@
   {
     "id": "mouse-1694173369439",
     "type": "stroke",
-    "pointerId": 0,
     "pointerType": "mouse",
     "pointers": [
       {
@@ -462,7 +455,6 @@
         "p": 0.8
       }
     ],
-    "length": 459.06621957468275,
     "style": {
       "color": "#000000",
       "width": 1.8897637795275593,
@@ -474,7 +466,6 @@
   {
     "id": "mouse-1694173370316",
     "type": "stroke",
-    "pointerId": 0,
     "pointerType": "mouse",
     "pointers": [
       {
@@ -550,7 +541,6 @@
         "p": 0.74
       }
     ],
-    "length": 441.04095436363826,
     "style": {
       "color": "#000000",
       "width": 1.8897637795275593,
@@ -562,7 +552,6 @@
   {
     "id": "mouse-1694173371113",
     "type": "stroke",
-    "pointerId": 0,
     "pointerType": "mouse",
     "pointers": [
       {
@@ -710,7 +699,6 @@
         "p": 0.72
       }
     ],
-    "length": 489.371132013743,
     "style": {
       "color": "#000000",
       "width": 1.8897637795275593,

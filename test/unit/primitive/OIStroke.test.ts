@@ -15,17 +15,15 @@ describe("OIStroke.ts", () =>
   {
     test("should create with default style", () =>
     {
-      const pointerId = 1
       const style: TStyle = {
         color: "blue",
         width: 20
       }
-      const stroke = new OIStroke(style, pointerId)
+      const stroke = new OIStroke(style)
       expect(stroke).toBeDefined()
       expect(stroke.creationTime).toBeLessThanOrEqual(Date.now())
       expect(stroke.creationTime).toEqual(stroke.modificationDate)
       expect(stroke.style).toEqual(expect.objectContaining(style))
-      expect(stroke.pointerId).toEqual(pointerId)
       expect(stroke.pointerType).toEqual("pen")
       expect(stroke.pointers).toHaveLength(0)
       expect(stroke.selected).toEqual(false)
@@ -36,14 +34,14 @@ describe("OIStroke.ts", () =>
     })
     test("should create with custom style", () =>
     {
-      const stroke = new OIStroke({}, 1)
+      const stroke = new OIStroke({})
       expect(stroke.style).toEqual(DefaultStyle)
     })
   })
 
   describe("addPointer", () =>
   {
-    const stroke = new OIStroke(DefaultStyle, 1)
+    const stroke = new OIStroke(DefaultStyle)
 
     test("should add first pointer and update modification date", () =>
     {
@@ -99,7 +97,7 @@ describe("OIStroke.ts", () =>
   {
     test("should get without pointers", () =>
     {
-      const stroke = new OIStroke(DefaultStyle, 1)
+      const stroke = new OIStroke(DefaultStyle)
       expect(stroke.boundingBox.height).toEqual(0)
       expect(stroke.boundingBox.width).toEqual(0)
       expect(stroke.boundingBox.x).toEqual(0)
@@ -107,7 +105,7 @@ describe("OIStroke.ts", () =>
     })
     test("should get with pointers", () =>
     {
-      const stroke = new OIStroke(DefaultStyle, 1)
+      const stroke = new OIStroke(DefaultStyle)
       stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
       stroke.pointers.push({ p: 1, t: 1, x: 11, y: 11 })
       expect(stroke.boundingBox.height).toEqual(10)
@@ -121,7 +119,7 @@ describe("OIStroke.ts", () =>
   {
     test("should return array of x, y, t, and p", () =>
     {
-      const stroke = new OIStroke(DefaultStyle, 1)
+      const stroke = new OIStroke(DefaultStyle)
       stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
       stroke.pointers.push({ p: 1, t: 1, x: 11, y: 11 })
 
@@ -145,7 +143,7 @@ describe("OIStroke.ts", () =>
         color: "blue",
         width: 20
       }
-      const stroke = new OIStroke(style, 1)
+      const stroke = new OIStroke(style)
       stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
       stroke.pointers.push({ p: 1, t: 1, x: 11, y: 11 })
 

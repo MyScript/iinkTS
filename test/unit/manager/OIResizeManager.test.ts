@@ -28,7 +28,7 @@ describe("OIResizeManager.ts", () =>
 
     test("resize stroke", () =>
     {
-      const stroke = new OIStroke({}, 1)
+      const stroke = new OIStroke({})
       const origin: TPoint = { x: 1, y: 2 }
       stroke.addPointer({ p: 1, t: 1, x: 1, y: 2 })
       stroke.addPointer({ p: 1, t: 10, x: 21, y: 42 })
@@ -105,7 +105,7 @@ describe("OIResizeManager.ts", () =>
     manager.snaps.snapToElement = false
     manager.applyToSymbol = jest.fn()
 
-    const stroke = new OIStroke({}, 1)
+    const stroke = new OIStroke({})
     stroke.addPointer({ p: 1, t: 1, x: 0, y: 0 })
     stroke.addPointer({ p: 1, t: 1, x: 10, y: 50 })
     const strokeNotResized = stroke.clone()

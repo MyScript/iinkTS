@@ -32,9 +32,9 @@ export function randomIntFromInterval(min: number, max: number): number
 
 const defaultBox: TBoundingBox = { height: 10, width: 10, x: 1, y: 1 }
 
-export function buildStroke({ box = defaultBox, style = DefaultPenStyle, nbPoint = 5, pointerId = 1, pointerType = "pen" } = {}): Stroke
+export function buildStroke({ box = defaultBox, style = DefaultPenStyle, nbPoint = 5,  pointerType = "pen" } = {}): Stroke
 {
-  const stroke = new Stroke(style, pointerId, pointerType)
+  const stroke = new Stroke(style, pointerType)
   for (let i = 0; i < nbPoint; i++) {
     stroke.pointers.push({
       p: Math.random(),
@@ -46,9 +46,9 @@ export function buildStroke({ box = defaultBox, style = DefaultPenStyle, nbPoint
   return stroke
 }
 
-export function buildOIStroke({ box = defaultBox, style = DefaultStyle, nbPoint = 5, pointerId = 1, pointerType = "pen" } = {}): OIStroke
+export function buildOIStroke({ box = defaultBox, style = DefaultStyle, nbPoint = 5, pointerType = "pen" } = {}): OIStroke
 {
-  const stroke = new OIStroke(style, pointerId, pointerType)
+  const stroke = new OIStroke(style, pointerType)
   for (let i = 0; i < nbPoint; i++) {
     stroke.pointers.push({
       p: Math.random(),

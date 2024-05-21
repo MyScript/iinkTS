@@ -107,7 +107,7 @@ describe("WSBehaviors.ts", () =>
       wsb.renderer.drawPendingStroke = jest.fn()
       await wsb.init(wrapperHTML)
       const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
-      wsb.model.initCurrentStroke(p1, 1, "pen", DefaultPenStyle)
+      wsb.model.initCurrentStroke(p1, "pen", DefaultPenStyle)
       wsb.drawCurrentStroke()
       await expect(wsb.renderer.drawPendingStroke).toBeCalledTimes(1)
       await expect(wsb.renderer.drawPendingStroke).toBeCalledWith(wsb.model.currentSymbol)
