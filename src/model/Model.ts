@@ -168,16 +168,16 @@ export class Model implements IModel
     return this.symbols.slice(this.positions.lastSentPosition)
   }
 
-  initCurrentStroke(point: TPointer, pointerId: number, pointerType: string, style: TPenStyle, dpi = 96): void
+  initCurrentStroke(point: TPointer, pointerType: string, style: TPenStyle, dpi = 96): void
   {
-    this.#logger.info("initCurrentStroke", { point, pointerId, pointerType, style, dpi })
+    this.#logger.info("initCurrentStroke", { point, pointerType, style, dpi })
     if (style["-myscript-pen-width"]) {
       const pxWidth = (style["-myscript-pen-width"] * dpi) / 25.4
       style.width = pxWidth / 2
     }
     this.modificationDate = Date.now()
     this.exports = undefined
-    this.currentSymbol = new Stroke(style, pointerId, pointerType)
+    this.currentSymbol = new Stroke(style, pointerType)
     this.#logger.debug("initCurrentStroke", this.currentSymbol)
     this.addPoint(this.currentSymbol, point)
   }

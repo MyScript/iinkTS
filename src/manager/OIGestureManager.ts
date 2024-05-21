@@ -177,7 +177,7 @@ export class OIGestureManager
       {
         const partPointersToRemove = gesture.subStrokes?.find(ss => ss.fullStrokeId === sd.id)
         if (partPointersToRemove) {
-          const strokePartToErase = new OIStroke({}, 1, "eraser")
+          const strokePartToErase = new OIStroke({}, "eraser")
           partPointersToRemove.x.forEach((x, i) =>
           {
             strokePartToErase.addPointer({ x, y: partPointersToRemove.y[i], p: 1, t: 1 })

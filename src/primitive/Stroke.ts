@@ -29,7 +29,6 @@ export type TStrokeGroupToSend = {
  * @group Primitive
  */
 export type TStroke = TSymbol & {
-  pointerId: number
   pointerType: string
   pointers: TPointer[]
   length: number
@@ -54,20 +53,18 @@ export class Stroke implements TStroke
   creationTime: number
   modificationDate: number
   style: TPenStyle
-  pointerId: number
   pointerType: string
   pointers: TPointer[]
   length: number
 
-  constructor(style: TPenStyle, pointerId: number, pointerType = "pen")
+  constructor(style: TPenStyle, pointerType = "pen")
   {
-    this.#logger.info("constructor", { style, pointerId, pointerType })
+    this.#logger.info("constructor", { style, pointerType })
 
     this.id = `${this.type}-${createUUID()}`
     this.creationTime = Date.now()
     this.modificationDate = this.creationTime
     this.style = style
-    this.pointerId = pointerId
     this.pointerType = pointerType
     this.pointers = []
     this.length = 0
@@ -75,7 +72,7 @@ export class Stroke implements TStroke
 
   clone(): Stroke
   {
-    const clone = new Stroke(this.style, this.pointerId, this.pointerType)
+    const clone = new Stroke(this.style, this.pointerType)
     clone.id = this.id
     clone.creationTime = this.creationTime
     clone.modificationDate = this.modificationDate
@@ -114,7 +111,7 @@ export function convertPartialStrokesToStrokes(json: PartialDeep<TStroke>[]): St
   const strokes: Stroke[] = []
   json.forEach((j, ji) => {
     let flag = true
-    const stroke = new Stroke(j.style || DefaultPenStyle, j.pointerId || 1)
+    const stroke = new Stroke(j.style || DefaultPenStyle, j.pointerType)
     if (j.id) stroke.id = j.id
     if (!j.pointers?.length) {
       errors.push(`stroke ${ji + 1} has not pointers`)

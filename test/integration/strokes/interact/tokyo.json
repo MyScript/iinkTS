@@ -1,7 +1,6 @@
 [
   {
     "pointerType": "mouse",
-    "pointerId": 0,
     "pointers": [
       {
         "x": 120,
@@ -61,7 +60,6 @@
   },
   {
     "pointerType": "mouse",
-    "pointerId": 0,
     "pointers": [
       {
         "x": 117,
@@ -91,7 +89,6 @@
   },
   {
     "pointerType": "mouse",
-    "pointerId": 0,
     "pointers": [
       {
         "x": 131,
@@ -187,7 +184,6 @@
   },
   {
     "pointerType": "mouse",
-    "pointerId": 0,
     "pointers": [
       {
         "x": 155,
@@ -349,7 +345,6 @@
   },
   {
     "pointerType": "mouse",
-    "pointerId": 0,
     "pointers": [
       {
         "x": 187,
@@ -469,7 +464,6 @@
   },
   {
     "pointerType": "mouse",
-    "pointerId": 0,
     "pointers": [
       {
         "x": 219,

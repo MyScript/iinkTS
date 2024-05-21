@@ -1,7 +1,6 @@
 [
   {
     "pointerType": "mouse",
-    "pointerId": 0,
     "x": [
       228,
       233,
@@ -417,7 +416,6 @@
   },
   {
     "pointerType": "eraser",
-    "pointerId": 0,
     "x": [
       231
     ],

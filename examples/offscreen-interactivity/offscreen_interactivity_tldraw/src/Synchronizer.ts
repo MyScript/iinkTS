@@ -45,7 +45,7 @@ export class Synchronizer
       fill: shape.props.fill,
       width: 1
     }
-    const stroke = new OIStroke(style, 1, shape.props.isPen ? "pen" : "mouse")
+    const stroke = new OIStroke(style, shape.props.isPen ? "pen" : "mouse")
     stroke.id = shape.id
 
     shape.props.segments.forEach(seg =>

@@ -133,7 +133,7 @@ export class WSBehaviors implements IBehaviors
     if (this.intention === Intention.Erase) {
       pointerType = "eraser"
     }
-    this.model.initCurrentStroke(point, evt.pointerId, pointerType, style)
+    this.model.initCurrentStroke(point, pointerType, style)
     this.drawCurrentStroke()
   }
 
@@ -262,7 +262,7 @@ export class WSBehaviors implements IBehaviors
     this.#logger.info("importPointEvents", { strokes })
     const errors: string[] = []
     const strokesToImport = strokes.map((s, strokeIndex) => {
-      const str = new Stroke(s.style || DefaultPenStyle, s.pointerId || 1)
+      const str = new Stroke(s.style || DefaultPenStyle, s.pointerType)
       if (s.id) str.id = s.id
       if (s.pointerType) str.pointerType = s.pointerType
       if (!s.pointers?.length) {

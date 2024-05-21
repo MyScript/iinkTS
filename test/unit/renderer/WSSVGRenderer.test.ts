@@ -18,7 +18,7 @@ import {
 describe("WSSVGRenderer.ts", () =>
 {
 
-  const stroke = new Stroke(DefaultPenStyle, 1)
+  const stroke = new Stroke(DefaultPenStyle)
   stroke.pointers = [
     { "x": 604, "y": 226, "t": 1693494025427, "p": 0.1 },
     { "x": 611, "y": 222, "t": 1693494025467, "p": 0.8 },
@@ -433,7 +433,7 @@ describe("WSSVGRenderer.ts", () =>
     svgModelElement.appendChild(pendingStrokesGroup)
     domElement.appendChild(svgModelElement)
 
-    const eraseStroke = new Stroke(DefaultPenStyle, 1, "eraser")
+    const eraseStroke = new Stroke(DefaultPenStyle, "eraser")
     eraseStroke.pointers = [
       { "x": 604, "y": 226, "t": 1693494025427, "p": 0.1 },
       { "x": 611, "y": 222, "t": 1693494025467, "p": 0.8 },
@@ -458,7 +458,7 @@ describe("WSSVGRenderer.ts", () =>
     svgModelElement.appendChild(pendingStrokesGroup)
     domElement.appendChild(svgModelElement)
 
-    const eraseStroke = new Stroke(DefaultPenStyle, 1, "eraser")
+    const eraseStroke = new Stroke(DefaultPenStyle, "eraser")
     eraseStroke.pointers = [
       { "x": 604, "y": 226, "t": 1693494025427, "p": 0.1 },
       { "x": 611, "y": 222, "t": 1693494025467, "p": 0.8 },

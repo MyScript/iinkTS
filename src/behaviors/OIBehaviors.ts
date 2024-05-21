@@ -236,7 +236,7 @@ export class OIBehaviors implements IBehaviors
           this.move.start(evt)
           break
         default:
-          this.writer.start(this.currentPenStyle, pointer, evt.pointerId, evt.pointerType)
+          this.writer.start(this.currentPenStyle, pointer, evt.pointerType)
           break
       }
     } catch (error) {
