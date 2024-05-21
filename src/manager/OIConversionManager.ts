@@ -122,7 +122,7 @@ export class OIConversionManager
     return text
   }
 
-  convertText(text: TJIIXTextElement, alignTextToGuide: boolean): { symbol: OIText, strokeIds: string[] }[] | undefined
+  convertText(text: TJIIXTextElement, alignTextToGuide: boolean): { symbol: OIText, strokeIds: string[], decoratorsIds: string[] }[] | undefined
   {
     if (!text.words) {
       throw new Error("You need to active configuration.recognition.export.jiix.text.words = true")
@@ -137,7 +137,7 @@ export class OIConversionManager
     const jiixWords = text.words as TJIIXWord[]
     const jiixChars = text.chars as TJIIXChar[]
 
-    const result: { symbol: OIText, strokeIds: string[] }[] = []
+    const result: { symbol: OIText, strokeIds: string[], decoratorsIds: string[] }[] = []
 
     const bb = convertBoundingBoxMillimeterToPixel(text["bounding-box"])
     let startPoint: TPoint = {
@@ -149,7 +149,8 @@ export class OIConversionManager
     {
       const wordStrokes = this.strokes.filter(s => word.items?.some(i => i["full-id"] === s.id)) as OIStroke[]
       if (wordStrokes.length) {
-        const strokeIds: string[] = [...wordStrokes.map(s => s.id), ...wordStrokes.flatMap(s => s.decorators.map(d => d.id))]
+        const strokeIds: string[] = wordStrokes.map(s => s.id)
+        const decoratorsIds: string[] = wordStrokes.flatMap(s => s.decorators.map(d => d.id))
         const chars = jiixChars.slice(word["first-char"] as number, (word["last-char"] || 0) + 1)
         const textSymbol = this.buildWord(word, chars, wordStrokes, startPoint, this.fontSize || fontSize)
 
@@ -157,7 +158,11 @@ export class OIConversionManager
           textSymbol.point.y = Math.trunc(textSymbol.point.y / this.rowHeight) * this.rowHeight
         }
         this.texter.setBoundingBox(textSymbol)
-        result.push({ symbol: textSymbol, strokeIds: [...new Set(strokeIds)] })
+        result.push({
+          symbol: textSymbol,
+          strokeIds: [...new Set(strokeIds)],
+          decoratorsIds: [...new Set(decoratorsIds)]
+        })
         startPoint = {
           x: startPoint.x + textSymbol.boundingBox.width,
           y: startPoint.y
@@ -316,7 +321,7 @@ export class OIConversionManager
     const jiix = this.model.exports?.["application/vnd.myscript.jiix"] as TJIIXExport
     if (jiix?.elements?.length) {
       const alignTextToGuide = !jiix.elements?.some(e => e.type !== "Text")
-      const convertedSymbols: { symbol: TOISymbol, strokeIds: string[] }[] = []
+      const convertedSymbols: { symbol: TOISymbol, strokeIds: string[], decoratorsIds?: string[] }[] = []
       jiix.elements.forEach(e =>
       {
         switch (e.type) {
@@ -351,6 +356,11 @@ export class OIConversionManager
         this.model.addSymbol(cs.symbol)
         this.renderer.drawSymbol(cs.symbol)
         cs.strokeIds.forEach(id =>
+        {
+          this.renderer.removeSymbol(id)
+          this.model.removeSymbol(id)
+        })
+        cs.decoratorsIds?.forEach(id =>
         {
           this.renderer.removeSymbol(id)
           this.model.removeSymbol(id)
