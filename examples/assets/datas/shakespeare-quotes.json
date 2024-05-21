@@ -2,10 +2,6 @@
   {
     "type": "stroke",
     "id": "stroke-62142ff7-dae0-4066-887d-dd3965edf2bc",
-    "creationTime": 1715955778194,
-    "modificationDate": 1715955821451,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -81,17 +77,11 @@
         "x": 121,
         "y": 337
       }
-    ],
-    "decorators": [],
-    "length": 49.81142712286841
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-b61b023f-9a87-456b-b339-bd66340d7e20",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821451,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -137,17 +127,11 @@
         "x": 141,
         "y": 324
       }
-    ],
-    "decorators": [],
-    "length": 35.44958914188733
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-306405e4-a98e-4641-9d6f-ae45da3b32e1",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821451,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -175,17 +159,11 @@
         "x": 128,
         "y": 326
       }
-    ],
-    "decorators": [],
-    "length": 6
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-c78b207b-697e-4b24-86cf-1410cc3862d9",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821451,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -207,17 +185,11 @@
         "x": 131,
         "y": 329
       }
-    ],
-    "decorators": [],
-    "length": 4.123105625617661
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-9a3dbfe0-f88b-492f-9745-27ca88791ace",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821452,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -293,17 +265,11 @@
         "x": 170,
         "y": 340
       }
-    ],
-    "decorators": [],
-    "length": 46.88166408670684
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-e07affc3-2999-4818-9bd0-9651673e8d99",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821452,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -385,17 +351,11 @@
         "x": 200,
         "y": 336
       }
-    ],
-    "decorators": [],
-    "length": 51.36858552233895
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-6e58e694-a47f-4e9f-bd42-a4eafdb97b6a",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821452,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -483,17 +443,11 @@
         "x": 223,
         "y": 338
       }
-    ],
-    "decorators": [],
-    "length": 62.478287564901045
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-6247d20f-ac28-4d16-b5a8-f1d390ed3313",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821452,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -569,17 +523,11 @@
         "x": 230,
         "y": 328
       }
-    ],
-    "decorators": [],
-    "length": 58.173723946045314
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-cd2cc461-e604-4c1a-924e-b714098c2d6d",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821452,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -601,17 +549,11 @@
         "x": 247,
         "y": 325
       }
-    ],
-    "decorators": [],
-    "length": 3.1622776601683795
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-68f6f904-4fc5-4039-9206-cabfb7336e54",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821452,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -669,17 +611,11 @@
         "x": 252,
         "y": 346
       }
-    ],
-    "decorators": [],
-    "length": 31.184768511938252
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-0fadfabc-24ea-426d-a727-a894a40962a5",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821452,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -725,17 +661,11 @@
         "x": 265,
         "y": 343
       }
-    ],
-    "decorators": [],
-    "length": 40.99965285075363
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-d853414f-a50d-469d-9801-65968e151582",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821452,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -859,17 +789,11 @@
         "x": 343,
         "y": 343
       }
-    ],
-    "decorators": [],
-    "length": 117.76062428417508
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-50c3638f-2e4a-42a4-b9c7-8dcaef1d32d4",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821452,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -951,17 +875,11 @@
         "x": 382,
         "y": 340
       }
-    ],
-    "decorators": [],
-    "length": 78.95426124328125
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-d54ce77e-608d-4472-aaf4-b711b2b17bfd",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821452,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -1091,17 +1009,11 @@
         "x": 449,
         "y": 325
       }
-    ],
-    "decorators": [],
-    "length": 94.30235995436179
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-526c1e36-dc30-45c1-ba59-b1a708e0f598",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821452,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -1177,17 +1089,11 @@
         "x": 479,
         "y": 341
       }
-    ],
-    "decorators": [],
-    "length": 71.07858638667727
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-4cbca110-998d-4b10-b29d-2dbd0f24e25b",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821453,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -1269,17 +1175,11 @@
         "x": 486,
         "y": 334
       }
-    ],
-    "decorators": [],
-    "length": 64.5853803239072
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-22673055-73c0-41ac-9ef6-ee882351c29d",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821453,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -1319,17 +1219,11 @@
         "x": 509,
         "y": 338
       }
-    ],
-    "decorators": [],
-    "length": 17.199815512769188
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-aa15a9c8-0aee-45a1-9490-aa9f2260abfd",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821453,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -1381,17 +1275,11 @@
         "x": 524,
         "y": 350
       }
-    ],
-    "decorators": [],
-    "length": 46.88119520002311
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-0b48f33f-04e8-48ce-855f-eb0d2a0038d6",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821453,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -1431,17 +1319,11 @@
         "x": 530,
         "y": 321
       }
-    ],
-    "decorators": [],
-    "length": 16.462852037598072
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-2058d39e-5175-4d8d-a522-c91a992fc936",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821453,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -1493,17 +1375,11 @@
         "x": 591,
         "y": 300
       }
-    ],
-    "decorators": [],
-    "length": 35.46234000232114
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-57593361-1afa-49ee-a580-4f7e712352c9",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821453,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -1549,17 +1425,11 @@
         "x": 585,
         "y": 339
       }
-    ],
-    "decorators": [],
-    "length": 30.06785251301511
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-0184ca6e-c74f-4c05-b81f-0a41ed6d9636",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821453,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -1617,17 +1487,11 @@
         "x": 595,
         "y": 337
       }
-    ],
-    "decorators": [],
-    "length": 31.590445521749615
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-26aad53c-f1cb-4e68-9488-a985b9d6cee4",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821453,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -1691,17 +1555,11 @@
         "x": 633,
         "y": 331
       }
-    ],
-    "decorators": [],
-    "length": 53.801397464537494
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-49027c97-a49f-4dc1-ad99-1b363e7bbed0",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821453,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -1717,17 +1575,11 @@
         "x": 650,
         "y": 329
       }
-    ],
-    "decorators": [],
-    "length": 0
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-b5971552-3771-495f-ba0e-0de6841ea5ee",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821453,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -1785,17 +1637,11 @@
         "x": 654,
         "y": 344
       }
-    ],
-    "decorators": [],
-    "length": 24.33859550720445
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-d44fccfd-ae9e-41b5-aebf-c24be00dd648",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821453,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -1901,17 +1747,11 @@
         "x": 690,
         "y": 340
       }
-    ],
-    "decorators": [],
-    "length": 81.93648779503785
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-6d97f814-6a81-4a00-b1e0-e771dab5a7a1",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821453,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -1957,17 +1797,11 @@
         "x": 693,
         "y": 353
       }
-    ],
-    "decorators": [],
-    "length": 19.16243758807328
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-58ed655b-1400-411f-98a4-217e0b7f4171",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821453,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -2043,17 +1877,11 @@
         "x": 737,
         "y": 334
       }
-    ],
-    "decorators": [],
-    "length": 66.72446247915606
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-d7aeb70a-8a3a-4a0a-babf-4057754d9c51",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821453,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -2099,17 +1927,11 @@
         "x": 753,
         "y": 347
       }
-    ],
-    "decorators": [],
-    "length": 17.4084889114037
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-97e43c9f-17c8-43e3-9e92-a43d3ef8cf17",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821453,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -2197,17 +2019,11 @@
         "x": 783,
         "y": 341
       }
-    ],
-    "decorators": [],
-    "length": 64.61508480647322
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-76725a47-2021-4dc0-9917-e6a0ec05c822",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821454,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -2259,17 +2075,11 @@
         "x": 786,
         "y": 333
       }
-    ],
-    "decorators": [],
-    "length": 41.614906037329995
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-f19110ce-55e2-4151-9e3f-4945b33fe686",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821454,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -2321,17 +2131,11 @@
         "x": 802,
         "y": 343
       }
-    ],
-    "decorators": [],
-    "length": 50.247723976759694
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-d559c134-cf92-4379-b24e-0608579de223",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821454,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -2437,17 +2241,11 @@
         "x": 843,
         "y": 351
       }
-    ],
-    "decorators": [],
-    "length": 98.77241775102783
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-d9329415-f86b-4d2d-b206-2ea1fbd989f1",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821454,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -2505,17 +2303,11 @@
         "x": 877,
         "y": 337
       }
-    ],
-    "decorators": [],
-    "length": 59.02260119403818
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-e3242eae-b7bf-4a11-b344-e2b3e9dd06ac",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821454,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -2633,17 +2425,11 @@
         "x": 941,
         "y": 337
       }
-    ],
-    "decorators": [],
-    "length": 99.37962269680655
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-bb3b1314-96eb-4d05-a6da-0d764f7d14b7",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821455,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -2707,17 +2493,11 @@
         "x": 957,
         "y": 369
       }
-    ],
-    "decorators": [],
-    "length": 86.21776694615738
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-41869af6-14e5-49bf-9ee4-a9b1e7d45ef2",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821455,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -2799,17 +2579,11 @@
         "x": 1008,
         "y": 329
       }
-    ],
-    "decorators": [],
-    "length": 62.664470062156106
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-d5c6a588-9963-4826-a06f-8479898b22a0",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821455,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -2855,17 +2629,11 @@
         "x": 1029,
         "y": 338
       }
-    ],
-    "decorators": [],
-    "length": 19.26882723033592
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-179867ff-9524-4565-aa32-f3b0dc50eb8f",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821455,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -2899,17 +2667,11 @@
         "x": 1039,
         "y": 339
       }
-    ],
-    "decorators": [],
-    "length": 16.28538328578604
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-6efeb001-cff7-4d2d-9345-d1156f1ba662",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821455,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -2925,17 +2687,11 @@
         "x": 1034,
         "y": 303
       }
-    ],
-    "decorators": [],
-    "length": 0
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-a17d27f1-30bf-4606-8938-c9cee38fd528",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821455,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -2999,17 +2755,11 @@
         "x": 1051,
         "y": 332
       }
-    ],
-    "decorators": [],
-    "length": 48.304195114726845
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-459aa1b6-5089-4079-9200-5559d4820cb3",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821455,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -3067,17 +2817,11 @@
         "x": 1063,
         "y": 344
       }
-    ],
-    "decorators": [],
-    "length": 40.79289171078253
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-bee787ab-84fe-4534-a94a-808dfc579370",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821455,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -3177,17 +2921,11 @@
         "x": 120,
         "y": 356
       }
-    ],
-    "decorators": [],
-    "length": 106.12105334454598
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-69c82b61-209e-471c-833b-dd01965a67c2",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821455,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -3221,17 +2959,11 @@
         "x": 117,
         "y": 371
       }
-    ],
-    "decorators": [],
-    "length": 15.785844453984339
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-45d49397-d6ab-496e-a075-7e8ebc76915f",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821455,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -3301,17 +3033,11 @@
         "x": 131,
         "y": 374
       }
-    ],
-    "decorators": [],
-    "length": 57.47397037880842
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-9a30ec16-4b69-4662-8b62-0d4c0790450f",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821455,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -3369,17 +3095,11 @@
         "x": 164,
         "y": 358
       }
-    ],
-    "decorators": [],
-    "length": 47.30606648547378
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-91d47131-cc5b-4c39-9175-49e643936d78",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821455,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -3443,17 +3163,11 @@
         "x": 218,
         "y": 388
       }
-    ],
-    "decorators": [],
-    "length": 49.53727543433393
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-941f907c-3b07-407f-8186-b5e50004db87",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821455,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -3529,17 +3243,11 @@
         "x": 251,
         "y": 379
       }
-    ],
-    "decorators": [],
-    "length": 62.93075212400043
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-5802d7ad-e7f7-44ab-a205-07dba9104593",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821455,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -3591,17 +3299,11 @@
         "x": 272,
         "y": 380
       }
-    ],
-    "decorators": [],
-    "length": 41.2132692932481
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-d02f9661-8954-4fd1-ae6e-a683f6133fc3",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821455,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -3695,17 +3397,11 @@
         "x": 295,
         "y": 381
       }
-    ],
-    "decorators": [],
-    "length": 102.30608568140983
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-dfd821f9-425a-4b30-97c7-246b6b6c38c1",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821456,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -3775,17 +3471,11 @@
         "x": 363,
         "y": 376
       }
-    ],
-    "decorators": [],
-    "length": 51.559260590166616
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-1d4e6eda-d683-4424-83db-dfcd02ee469b",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821456,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -3831,17 +3521,11 @@
         "x": 383,
         "y": 393
       }
-    ],
-    "decorators": [],
-    "length": 48.36680343963234
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-c285de89-d7ac-4f8b-a3cd-825245402971",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821456,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -3875,17 +3559,11 @@
         "x": 394,
         "y": 383
       }
-    ],
-    "decorators": [],
-    "length": 17.932607274437387
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-f270807f-e139-4bbb-8e2a-af8c1a6eb81c",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821456,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -3901,17 +3579,11 @@
         "x": 387,
         "y": 354
       }
-    ],
-    "decorators": [],
-    "length": 0
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-7f6e15af-a718-495d-a8d6-771510e6496b",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821456,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -3963,17 +3635,11 @@
         "x": 406,
         "y": 393
       }
-    ],
-    "decorators": [],
-    "length": 42.882516006260026
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-96bf6965-aa4e-4c81-9cbc-8bf2e19f39c0",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821456,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -4037,17 +3703,11 @@
         "x": 426,
         "y": 364
       }
-    ],
-    "decorators": [],
-    "length": 52.50575102724766
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-ea058624-3b7e-431f-8b45-75b4d453eda1",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821456,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -4147,17 +3807,11 @@
         "x": 437,
         "y": 407
       }
-    ],
-    "decorators": [],
-    "length": 68.58003931944563
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-fbd10f0f-3aa7-47e9-965b-b366a8b5b430",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821456,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -4233,17 +3887,11 @@
         "x": 478,
         "y": 382
       }
-    ],
-    "decorators": [],
-    "length": 68.75110374877192
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-d0e27a3b-9ee9-4a04-94be-6e4310cfbfd9",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821456,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -4277,17 +3925,11 @@
         "x": 493,
         "y": 375
       }
-    ],
-    "decorators": [],
-    "length": 25.89762031107385
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-155d9b06-93f7-426d-9bc6-e567c6284029",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821456,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -4303,17 +3945,11 @@
         "x": 481,
         "y": 347
       }
-    ],
-    "decorators": [],
-    "length": 0
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-fc43f40b-7b90-41b4-a166-5e7918ea071e",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821456,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -4365,17 +4001,11 @@
         "x": 503,
         "y": 391
       }
-    ],
-    "decorators": [],
-    "length": 41.55397932090314
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-9f491337-b6d4-4573-b78f-741d167a7692",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821456,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -4433,17 +4063,11 @@
         "x": 537,
         "y": 380
       }
-    ],
-    "decorators": [],
-    "length": 58.17093807376653
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-b02947c8-3644-4455-ab95-7195da85c962",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821456,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -4465,17 +4089,11 @@
         "x": 594,
         "y": 373
       }
-    ],
-    "decorators": [],
-    "length": 3
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-4b1f8feb-b8ef-4304-97de-edcb2077f63b",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821456,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -4557,17 +4175,11 @@
         "x": 586,
         "y": 376
       }
-    ],
-    "decorators": [],
-    "length": 59.157134902445236
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-dd8711a3-d78d-4c72-9d30-c97a8a7db01e",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821456,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -4607,17 +4219,11 @@
         "x": 607,
         "y": 384
       }
-    ],
-    "decorators": [],
-    "length": 19.860213191601495
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-fe25dec5-1626-4b43-aca5-0f5d41b1eef1",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821457,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -4675,17 +4281,11 @@
         "x": 612,
         "y": 389
       }
-    ],
-    "decorators": [],
-    "length": 37.10131178239328
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-138d2fb2-b514-4969-bbe9-8e6dc846ce22",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821457,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -4779,17 +4379,11 @@
         "x": 670,
         "y": 386
       }
-    ],
-    "decorators": [],
-    "length": 82.78261241448742
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-a46e788e-9ec6-4fe4-8f6a-c37d0c375d53",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821457,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -4841,17 +4435,11 @@
         "x": 675,
         "y": 378
       }
-    ],
-    "decorators": [],
-    "length": 37.85715052853614
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-5e93bfbf-c539-4837-bac7-250d2dba0f50",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821457,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -4873,17 +4461,11 @@
         "x": 687,
         "y": 383
       }
-    ],
-    "decorators": [],
-    "length": 10.198039027185569
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-39c4c619-5eb6-4e52-9e35-3aacc60cff84",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821457,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -4959,17 +4541,11 @@
         "x": 705,
         "y": 386
       }
-    ],
-    "decorators": [],
-    "length": 96.78448889541669
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-01bc9f8c-dfb8-46fb-b6fc-d8c84c383920",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821457,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -5015,17 +4591,11 @@
         "x": 726,
         "y": 381
       }
-    ],
-    "decorators": [],
-    "length": 44.82059080129909
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-63519362-bb9f-4652-9f0c-ef699c9d81ed",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821457,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -5065,17 +4635,11 @@
         "x": 743,
         "y": 375
       }
-    ],
-    "decorators": [],
-    "length": 14.76782893563237
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-0c8cb00c-3a02-4ea4-9217-1abb453ad60d",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821457,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -5121,17 +4685,11 @@
         "x": 745,
         "y": 400
       }
-    ],
-    "decorators": [],
-    "length": 49.541350248812655
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-68d477f1-0b83-4a1a-a7c8-461e380db993",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821457,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -5195,17 +4753,11 @@
         "x": 801,
         "y": 393
       }
-    ],
-    "decorators": [],
-    "length": 47.59404343538946
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-9c311dd5-d701-46f3-9671-a8227ecbc101",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821457,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -5293,17 +4845,11 @@
         "x": 837,
         "y": 383
       }
-    ],
-    "decorators": [],
-    "length": 80.16497717667832
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-0fcce72b-9c20-44b9-838d-75cf5973c422",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821457,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -5361,17 +4907,11 @@
         "x": 845,
         "y": 369
       }
-    ],
-    "decorators": [],
-    "length": 37.23306169139071
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-27cc5aee-7e2f-4477-b6ea-b2ffff76f659",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821457,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -5411,17 +4951,11 @@
         "x": 862,
         "y": 381
       }
-    ],
-    "decorators": [],
-    "length": 15.837882267736525
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-5efbb381-0300-4797-bfe3-7888846176ae",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821457,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -5467,17 +5001,11 @@
         "x": 876,
         "y": 380
       }
-    ],
-    "decorators": [],
-    "length": 44.0674208979359
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-6d755ce3-bbf3-422c-aaab-368c047e9555",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821457,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -5523,17 +5051,11 @@
         "x": 887,
         "y": 386
       }
-    ],
-    "decorators": [],
-    "length": 46.44602825436472
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-230cbce0-8687-467a-91dd-c1588020fc4a",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821457,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -5627,17 +5149,11 @@
         "x": 958,
         "y": 397
       }
-    ],
-    "decorators": [],
-    "length": 76.28299188107316
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-c1d965f4-e9f4-47cb-9e37-193d2c9ff379",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821457,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -5695,17 +5211,11 @@
         "x": 991,
         "y": 385
       }
-    ],
-    "decorators": [],
-    "length": 45.10881184173259
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-b87fd5b7-0681-4ac2-900b-cdc53dd805bc",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821457,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -5787,17 +5297,11 @@
         "x": 1013,
         "y": 374
       }
-    ],
-    "decorators": [],
-    "length": 88.08535786748274
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-0b26b34a-66ee-4088-a5d5-4f34eed14ffc",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821457,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -5897,17 +5401,11 @@
         "x": 1071,
         "y": 377
       }
-    ],
-    "decorators": [],
-    "length": 99.51291185683873
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-a144ab3d-7160-4133-ab6a-e47838e35624",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821457,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -5959,17 +5457,11 @@
         "x": 1099,
         "y": 378
       }
-    ],
-    "decorators": [],
-    "length": 71.85316157979415
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-0635fb19-6282-45ad-9961-3beab0b5fabd",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821457,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -6015,17 +5507,11 @@
         "x": 128,
         "y": 414
       }
-    ],
-    "decorators": [],
-    "length": 32.92083324372398
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-ec8b9e58-2553-4e78-9b6d-1e98fbcbbd71",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821457,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -6071,17 +5557,11 @@
         "x": 124,
         "y": 452
       }
-    ],
-    "decorators": [],
-    "length": 29.49532534127004
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-cb1607f6-8e51-4a9d-9cb8-cba2e10d435d",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821457,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -6175,17 +5655,11 @@
         "x": 161,
         "y": 447
       }
-    ],
-    "decorators": [],
-    "length": 76.15595548490647
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-54dfe859-9035-4b1d-8cbf-95abe51016da",
-    "creationTime": 1715955778195,
-    "modificationDate": 1715955821457,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -6267,17 +5741,11 @@
         "x": 189,
         "y": 440
       }
-    ],
-    "decorators": [],
-    "length": 61.956244479545006
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-aad13052-7c32-40d8-a300-3bb6b7801871",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821457,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -6335,17 +5803,11 @@
         "x": 259,
         "y": 406
       }
-    ],
-    "decorators": [],
-    "length": 72.21445667707604
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-1a3f0f04-ca3f-4ba2-93bb-baf88c32a89a",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821458,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -6385,17 +5847,11 @@
         "x": 249,
         "y": 425
       }
-    ],
-    "decorators": [],
-    "length": 19.357797119744085
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-a19ca66a-608f-4efd-85a5-2f7d3c4258a7",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821458,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -6465,17 +5921,11 @@
         "x": 260,
         "y": 445
       }
-    ],
-    "decorators": [],
-    "length": 63.932077423983074
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-ce5fdc21-75d2-4e98-b644-49da1c3e6365",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821458,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -6491,17 +5941,11 @@
         "x": 283,
         "y": 443
       }
-    ],
-    "decorators": [],
-    "length": 0
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-2f3b3ec6-817e-4580-b050-c6a5d30876ee",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821458,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -6547,17 +5991,11 @@
         "x": 301,
         "y": 426
       }
-    ],
-    "decorators": [],
-    "length": 46.829296657909666
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-9c5600eb-4e6f-49a0-9993-7d39c53169c6",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821459,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -6651,17 +6089,11 @@
         "x": 334,
         "y": 445
       }
-    ],
-    "decorators": [],
-    "length": 78.02017273809703
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-6eb83594-589e-42a9-bcd8-6b24ec42ce7c",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821459,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -6731,17 +6163,11 @@
         "x": 386,
         "y": 442
       }
-    ],
-    "decorators": [],
-    "length": 81.63530170110596
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-da47d161-2a52-464f-9858-3a81dc468331",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821459,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -6829,17 +6255,11 @@
         "x": 434,
         "y": 413
       }
-    ],
-    "decorators": [],
-    "length": 69.83837878836842
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-ea4990ba-623f-4ec5-8a1f-1ba4666c9ecc",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821459,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -6873,17 +6293,11 @@
         "x": 429,
         "y": 434
       }
-    ],
-    "decorators": [],
-    "length": 12.627805494253789
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-1c70ddc1-ac7a-4c54-924f-6b94ff9e2b0f",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821459,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -6977,17 +6391,11 @@
         "x": 504,
         "y": 445
       }
-    ],
-    "decorators": [],
-    "length": 84.21808112723731
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-f65d493e-5a3a-4e0e-ac33-810f0e27af2b",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821459,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -7027,17 +6435,11 @@
         "x": 521,
         "y": 442
       }
-    ],
-    "decorators": [],
-    "length": 22.134241087582144
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-0f092f67-9f73-4202-9bba-fbee1cbc712c",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821459,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -7089,17 +6491,11 @@
         "x": 524,
         "y": 479
       }
-    ],
-    "decorators": [],
-    "length": 50.73517959384438
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-9dfc7ad3-c70c-4e18-98d0-8a321b39b256",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821459,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -7127,17 +6523,11 @@
         "x": 614,
         "y": 447
       }
-    ],
-    "decorators": [],
-    "length": 16.280801557483787
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-4d05b444-1f7e-4a21-bec5-4ba66d885a6a",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821459,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -7153,17 +6543,11 @@
         "x": 610,
         "y": 417
       }
-    ],
-    "decorators": [],
-    "length": 0
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-0146c1f8-f929-4308-ab08-2984863135e8",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821459,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -7221,17 +6605,11 @@
         "x": 640,
         "y": 443
       }
-    ],
-    "decorators": [],
-    "length": 49.36828122748863
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-6b660c9e-eb90-4226-941e-a5a327f00b09",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821459,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -7277,17 +6655,11 @@
         "x": 650,
         "y": 444
       }
-    ],
-    "decorators": [],
-    "length": 40.01753000500633
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-1962c47c-3ed5-466c-b777-d2522dfafbc4",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821459,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -7321,17 +6693,11 @@
         "x": 656,
         "y": 420
       }
-    ],
-    "decorators": [],
-    "length": 17.444448022961833
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-09d41458-958e-410c-89ee-dcbb0d0ea974",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821459,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -7395,17 +6761,11 @@
         "x": 678,
         "y": 437
       }
-    ],
-    "decorators": [],
-    "length": 65.26739073131489
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-c51ebd52-c91a-4917-80a4-6a0756a26469",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821459,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -7469,17 +6829,11 @@
         "x": 699,
         "y": 437
       }
-    ],
-    "decorators": [],
-    "length": 53.34297973517493
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-c0aee727-66b3-4b5f-87f2-e859de507d1e",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821459,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -7519,17 +6873,11 @@
         "x": 712,
         "y": 441
       }
-    ],
-    "decorators": [],
-    "length": 52.70948565771054
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-07c95dc9-2fd0-47cb-8ab2-48b6965642bc",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821459,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -7575,17 +6923,11 @@
         "x": 726,
         "y": 417
       }
-    ],
-    "decorators": [],
-    "length": 24.789920830350017
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-d86d5e11-128f-42f8-a952-68118ec93c2e",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821459,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -7601,17 +6943,11 @@
         "x": 739,
         "y": 450
       }
-    ],
-    "decorators": [],
-    "length": 0
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-03fd561f-935d-4b65-b28d-5a1ca6b9678e",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955778196,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -7669,17 +7005,11 @@
         "x": 264.981791969535,
         "y": 91.72557172557168
       }
-    ],
-    "decorators": [],
-    "length": 123.99473358079264
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-afc0b6fd-c69e-48c0-b3c9-9d77c1a7513b",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955778196,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -7767,17 +7097,11 @@
         "x": 277.31798648585345,
         "y": 80.51143451143459
       }
-    ],
-    "decorators": [],
-    "length": 102.79331951559979
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-57413a28-2e58-4fb5-a941-a0f3fa06adfa",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955778196,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -7805,17 +7129,11 @@
         "x": 298.9063268894109,
         "y": 129.10602910602918
       }
-    ],
-    "decorators": [],
-    "length": 15.447928227538227
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-150b6772-cba8-48b0-a592-f4a81ef4b9c6",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955778196,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -7837,17 +7155,11 @@
         "x": 298.9063268894109,
         "y": 78.64241164241167
       }
-    ],
-    "decorators": [],
-    "length": 5.5571632311813035
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-aca772c4-1132-42d6-bf53-804470f15e1a",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955778196,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -7881,17 +7193,11 @@
         "x": 317.4106186638886,
         "y": 127.23700623700627
       }
-    ],
-    "decorators": [],
-    "length": 61.86706253747418
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-b2cc32b1-4782-49f8-9eb2-5b9170cf68bb",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955778196,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -7907,17 +7213,11 @@
         "x": 323.5787159220479,
         "y": 80.51143451143459
       }
-    ],
-    "decorators": [],
-    "length": 0
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-00941066-0930-4f7d-9176-2f7d66ad8810",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955778196,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -7987,17 +7287,11 @@
         "x": 328.7187969705139,
         "y": 142.1891891891892
       }
-    ],
-    "decorators": [],
-    "length": 62.075507225877814
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-8c3c6b72-0c42-43c4-8f46-c3586a5938f7",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955778196,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -8025,17 +7319,11 @@
         "x": 335.91491043836635,
         "y": 136.58212058212064
       }
-    ],
-    "decorators": [],
-    "length": 22.463572664167778
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-d4d7bfee-547d-439f-8fd9-486bd8658913",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955778196,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -8057,17 +7345,11 @@
         "x": 337.9709428577528,
         "y": 84.24948024948021
       }
-    ],
-    "decorators": [],
-    "length": 5.700529422059455
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-339efbcd-9f99-4ac7-bbf6-e6c5c348b79f",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955778196,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -8119,17 +7401,11 @@
         "x": 348.2511049546849,
         "y": 117.89189189189189
       }
-    ],
-    "decorators": [],
-    "length": 82.71051880564085
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-3bea6d99-74cb-4f57-88f6-98b4d4819b2e",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955778196,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -8175,17 +7451,11 @@
         "x": 359.55928326131016,
         "y": 136.58212058212064
       }
-    ],
-    "decorators": [],
-    "length": 30.161636350624676
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-15bbb1e0-2c5d-4c4f-add2-053624751858",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955778196,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -8279,17 +7549,11 @@
         "x": 392.45580197149286,
         "y": 132.8440748440748
       }
-    ],
-    "decorators": [],
-    "length": 143.6866284442735
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-f824cc90-a3ea-4025-999f-c306fe44399a",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955778196,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -8353,17 +7617,11 @@
         "x": 441.8846286658466,
         "y": 146.53430353430355
       }
-    ],
-    "decorators": [],
-    "length": 108.54501648755067
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-eff2ef7e-c4d1-4e46-8521-6bb41eefbfa0",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955778196,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -8439,17 +7697,11 @@
         "x": 491.22940673112066,
         "y": 137.1891891891892
       }
-    ],
-    "decorators": [],
-    "length": 127.3800417734505
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-6ee26c7c-fb19-4f05-b4c4-1dbe54180aa3",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955778196,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -8501,17 +7753,11 @@
         "x": 501.5095688280527,
         "y": 109.15384615384626
       }
-    ],
-    "decorators": [],
-    "length": 74.788953512231
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-5ed21c2a-6602-47be-91fb-da3a7e11de23",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955778196,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -8539,17 +7785,11 @@
         "x": 520.0138606025306,
         "y": 133.45114345114354
       }
-    ],
-    "decorators": [],
-    "length": 30.34855798060653
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-bb21efae-9d5c-4109-becd-4b6ad15fcdce",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955778196,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -8649,17 +7889,11 @@
         "x": 551.88236310302,
         "y": 137.1891891891892
       }
-    ],
-    "decorators": [],
-    "length": 178.64490033380486
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-5f902f0a-836a-499f-8126-d3217109ba54",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955778196,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -8711,17 +7945,11 @@
         "x": 571.414671087191,
         "y": 129.71309771309774
       }
-    ],
-    "decorators": [],
-    "length": 95.75595936157004
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-b3447719-cc2a-4551-b8c5-cb072bbc7161",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955778196,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -8773,17 +8001,11 @@
         "x": 567.3026062484182,
         "y": 142.79625779625775
       }
-    ],
-    "decorators": [],
-    "length": 74.1399131020592
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-0bb11160-ba62-4bfb-ac42-87247aa53d30",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955778196,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -8871,17 +8093,11 @@
         "x": 588.8909466519756,
         "y": 131.58212058212064
       }
-    ],
-    "decorators": [],
-    "length": 194.47396961132984
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-95518a1a-3916-439d-b567-04e8cbbde2f9",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955778196,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -8951,17 +8167,11 @@
         "x": 635.15167608817,
         "y": 116.62993762993771
       }
-    ],
-    "decorators": [],
-    "length": 107.09410766123962
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-18a4a42e-5d77-4280-8d59-2bed201150ee",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955778196,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -9025,17 +8235,11 @@
         "x": 633.0956436687836,
         "y": 109.15384615384626
       }
-    ],
-    "decorators": [],
-    "length": 92.1845347313099
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-42543cd9-feb6-46fa-899a-f1714f5b6a11",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955778196,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -9075,17 +8279,11 @@
         "x": 652.6279516529545,
         "y": 133.45114345114354
       }
-    ],
-    "decorators": [],
-    "length": 28.46274422431587
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-6edf288f-6988-4436-91a9-af552970b140",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955778196,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -9125,17 +8323,11 @@
         "x": 680.3843893146711,
         "y": 86.72557172557168
       }
-    ],
-    "decorators": [],
-    "length": 56.96298698123565
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-69948559-92bc-40c5-bc0d-3dba1ed6c72a",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955778196,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -9199,17 +8391,11 @@
         "x": 693.7486000406828,
         "y": 135.32016632016627
       }
-    ],
-    "decorators": [],
-    "length": 102.714445285244
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-ba6ade96-2f3e-42f4-a559-41bcc9ecd0fc",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821459,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -9333,17 +8519,11 @@
         "x": 131,
         "y": 627.5
       }
-    ],
-    "decorators": [],
-    "length": 133.3283445743351
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-f5f0228f-959b-4873-9823-e1302ead2405",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821459,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -9407,17 +8587,11 @@
         "x": 179,
         "y": 645.5
       }
-    ],
-    "decorators": [],
-    "length": 44.78425698101302
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-1ebae2d0-e54e-46f1-ac1a-b082c1ede2eb",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821459,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -9463,17 +8637,11 @@
         "x": 196,
         "y": 625.5
       }
-    ],
-    "decorators": [],
-    "length": 25.658028657158603
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-48f8db84-d269-4fe6-bf37-37af80e497eb",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821459,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -9567,17 +8735,11 @@
         "x": 235,
         "y": 641.5
       }
-    ],
-    "decorators": [],
-    "length": 61.423085521551066
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-f9779f75-3c26-4baf-a718-2ac3594ef06e",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821460,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -9641,17 +8803,11 @@
         "x": 255,
         "y": 651.5
       }
-    ],
-    "decorators": [],
-    "length": 50.11606651100329
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-ec0af7de-3023-44aa-80c0-7596d7428095",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821460,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -9727,17 +8883,11 @@
         "x": 265,
         "y": 636.5
       }
-    ],
-    "decorators": [],
-    "length": 51.992937182485356
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-133cef32-5e95-4a8a-aac4-0ad614d3802b",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821460,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -9789,17 +8939,11 @@
         "x": 306,
         "y": 651.5
       }
-    ],
-    "decorators": [],
-    "length": 47.711519688796855
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-e1a7845a-96fd-461b-8fcf-41769a0c8f7d",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821460,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -9911,17 +9055,11 @@
         "x": 312,
         "y": 655.5
       }
-    ],
-    "decorators": [],
-    "length": 89.78032535411108
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-771bb768-20e9-40c3-ae6f-d18e51160283",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821460,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -9979,17 +9117,11 @@
         "x": 333,
         "y": 649.5
       }
-    ],
-    "decorators": [],
-    "length": 38.68387160941366
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-2abdfbbe-2fce-4fad-803d-7de70a02af09",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821460,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -10035,17 +9167,11 @@
         "x": 337,
         "y": 619.5
       }
-    ],
-    "decorators": [],
-    "length": 20.643089128064798
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-79632719-f8a2-43a2-96ec-08026c72973a",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821460,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -10109,17 +9235,11 @@
         "x": 340,
         "y": 657.5
       }
-    ],
-    "decorators": [],
-    "length": 36.69576422297795
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-3f206aff-43ff-4345-b754-cfebb6b4ec45",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821460,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -10207,17 +9327,11 @@
         "x": 383,
         "y": 633.5
       }
-    ],
-    "decorators": [],
-    "length": 56.95681931712673
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-d48f0389-b2d4-4f22-a1ec-80bec180f182",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821460,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -10263,17 +9377,11 @@
         "x": 398,
         "y": 643.5
       }
-    ],
-    "decorators": [],
-    "length": 19.890934561250027
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-34eeb104-5c90-4e22-af1a-dd4b58d2e9ce",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821460,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -10319,17 +9427,11 @@
         "x": 424,
         "y": 621.5
       }
-    ],
-    "decorators": [],
-    "length": 27.72005855668874
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-1e218b36-beaa-4854-8dc7-4669bffe5a6e",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821460,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -10405,17 +9507,11 @@
         "x": 440,
         "y": 640.5
       }
-    ],
-    "decorators": [],
-    "length": 51.34013086410302
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-5b31bef4-46d6-4966-b927-04d7803c3897",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821460,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -10479,17 +9575,11 @@
         "x": 493,
         "y": 645.5
       }
-    ],
-    "decorators": [],
-    "length": 46.43052582432176
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-70791ae2-18e1-4d61-873c-26b9fb9846c4",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821460,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -10535,17 +9625,11 @@
         "x": 507,
         "y": 618.5
       }
-    ],
-    "decorators": [],
-    "length": 19.971297588200937
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-ee034797-018c-4123-aba0-67f5627d5c9f",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821460,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -10603,17 +9687,11 @@
         "x": 514,
         "y": 629.5
       }
-    ],
-    "decorators": [],
-    "length": 29.70368472321006
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-a3771be7-1724-4d9d-9ed8-c50c7ab7f505",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821461,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -10689,17 +9767,11 @@
         "x": 516,
         "y": 634.5
       }
-    ],
-    "decorators": [],
-    "length": 48.714529741714095
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-8e1a0dc2-86b3-4f61-942d-c463c43f300f",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821461,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -10727,17 +9799,11 @@
         "x": 540,
         "y": 641.5
       }
-    ],
-    "decorators": [],
-    "length": 12.36931687685298
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-f41fddbb-e7c7-40a1-a2fe-dd27c64c9c36",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821461,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -10771,17 +9837,11 @@
         "x": 552,
         "y": 640.5
       }
-    ],
-    "decorators": [],
-    "length": 10.63441361516796
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-ded1c838-6a1b-4a36-920c-383d69b6eb2f",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821461,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -10797,17 +9857,11 @@
         "x": 546,
         "y": 611.5
       }
-    ],
-    "decorators": [],
-    "length": 0
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-ab3f121e-a1b1-42da-a9f3-d2fa4031816c",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821461,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -10853,17 +9907,11 @@
         "x": 563,
         "y": 644.5
       }
-    ],
-    "decorators": [],
-    "length": 41.09147019991319
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-917d35fd-c6d7-408f-a367-a8deadd54442",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821461,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -10903,17 +9951,11 @@
         "x": 577,
         "y": 612.5
       }
-    ],
-    "decorators": [],
-    "length": 18.30308784984488
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-c46119c5-662a-446c-b3ec-54688e903946",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821461,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -10983,17 +10025,11 @@
         "x": 568,
         "y": 629.5
       }
-    ],
-    "decorators": [],
-    "length": 57.09491961828919
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-34d2393d-a0f9-4e5a-b66b-d0fb67c645d1",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821461,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -11063,17 +10099,11 @@
         "x": 608,
         "y": 623.5
       }
-    ],
-    "decorators": [],
-    "length": 44.41287958896001
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-a7efc7fc-08ab-49d7-9b13-620c4310b193",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821461,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -11149,17 +10179,11 @@
         "x": 605,
         "y": 646.5
       }
-    ],
-    "decorators": [],
-    "length": 45.6571269428469
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-33ed0e03-bd77-4a54-9969-0193dad08c58",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821461,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -11193,17 +10217,11 @@
         "x": 625,
         "y": 662.5
       }
-    ],
-    "decorators": [],
-    "length": 25.478917397072003
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-3c8ded9f-f2c7-494e-b03e-fd3eee9081d1",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821461,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -11297,17 +10315,11 @@
         "x": 693,
         "y": 647.5
       }
-    ],
-    "decorators": [],
-    "length": 84.54647561561573
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-77fabe24-9414-4a05-a7c7-36e48c808366",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821461,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -11335,17 +10347,11 @@
         "x": 681,
         "y": 632.5
       }
-    ],
-    "decorators": [],
-    "length": 9.565401897601228
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-0a046c0e-fd09-4a23-a902-1bfe8c4dc279",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821461,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -11427,17 +10433,11 @@
         "x": 714,
         "y": 641.5
       }
-    ],
-    "decorators": [],
-    "length": 49.614192998809045
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-eaf44780-c470-4547-8bee-aec9d8f19fc3",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821461,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -11501,17 +10501,11 @@
         "x": 719,
         "y": 633.5
       }
-    ],
-    "decorators": [],
-    "length": 38.19896960886765
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-74adf318-57b7-4874-90d9-dad7426b56df",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821461,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -11557,17 +10551,11 @@
         "x": 734,
         "y": 645.5
       }
-    ],
-    "decorators": [],
-    "length": 33.70094354403322
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-22c64003-50cc-4200-b0f4-477bbaddf0f9",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821461,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -11685,17 +10673,11 @@
         "x": 787,
         "y": 640.5
       }
-    ],
-    "decorators": [],
-    "length": 78.30486783832013
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-53c07d3b-60e7-4693-85c6-c21fdc735fe1",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821462,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -11765,17 +10747,11 @@
         "x": 795,
         "y": 630.5
       }
-    ],
-    "decorators": [],
-    "length": 50.24238541497519
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-0801edd7-ca06-4984-91fd-eb21dad3071d",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821462,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -11911,17 +10887,11 @@
         "x": 834,
         "y": 635.5
       }
-    ],
-    "decorators": [],
-    "length": 110.14304426518801
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-bafa9421-473b-44e6-8d6b-a762edbcb169",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821462,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -11991,17 +10961,11 @@
         "x": 857,
         "y": 639.5
       }
-    ],
-    "decorators": [],
-    "length": 58.56200088998912
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-7bdf7b66-c226-47ca-950c-7f7226f43ead",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821462,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -12047,17 +11011,11 @@
         "x": 809,
         "y": 646.5
       }
-    ],
-    "decorators": [],
-    "length": 20.099019513592786
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-ae59a217-c75b-421d-82f4-20042224c003",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821462,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -12223,17 +11181,11 @@
         "x": 908,
         "y": 646.5
       }
-    ],
-    "decorators": [],
-    "length": 140.6346667506843
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-349cb633-12c4-4051-aac2-abd5a20871de",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821462,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -12291,17 +11243,11 @@
         "x": 951,
         "y": 650.5
       }
-    ],
-    "decorators": [],
-    "length": 48.832694336542254
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-897cd015-4eae-4885-b7bb-db45de5abbb2",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821462,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -12371,17 +11317,11 @@
         "x": 962,
         "y": 643.5
       }
-    ],
-    "decorators": [],
-    "length": 53.050870031121036
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-147906ff-b41f-4aa0-9bac-226b22cf70b5",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821462,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -12451,17 +11391,11 @@
         "x": 983,
         "y": 652.5
       }
-    ],
-    "decorators": [],
-    "length": 43.77650596569415
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-47b27b3d-d092-4e1f-82e7-f1fefb78dd91",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821462,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -12537,17 +11471,11 @@
         "x": 1014,
         "y": 646.5
       }
-    ],
-    "decorators": [],
-    "length": 45.68390941063836
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-99e86564-cde1-49cd-b023-c467ae4247cf",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821462,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -12617,17 +11545,11 @@
         "x": 1039,
         "y": 647.5
       }
-    ],
-    "decorators": [],
-    "length": 49.306658190948426
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-12286469-e2a5-4ee3-9a50-0e0ef109f8f4",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821462,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -12667,17 +11589,11 @@
         "x": 1053,
         "y": 620.5
       }
-    ],
-    "decorators": [],
-    "length": 15.567196007456044
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-1e9bb1c8-8de0-4de3-9c9b-217f5d602173",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821462,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -12753,17 +11669,11 @@
         "x": 1063,
         "y": 643.5
       }
-    ],
-    "decorators": [],
-    "length": 63.520372334705705
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-20397d8e-14b8-436b-980c-21c5f6b458b7",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821462,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -12833,17 +11743,11 @@
         "x": 1078,
         "y": 640.5
       }
-    ],
-    "decorators": [],
-    "length": 37.91228678808466
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-494d1bed-f41a-4c96-830f-c6746839b309",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821462,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -12901,17 +11805,11 @@
         "x": 1097,
         "y": 632.5
       }
-    ],
-    "decorators": [],
-    "length": 36.83033492450313
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-e009896a-1bd5-4b85-b204-b3db586f89ee",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821462,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -13005,17 +11903,11 @@
         "x": 1102,
         "y": 670.5
       }
-    ],
-    "decorators": [],
-    "length": 56.05771274774643
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-1489ada6-0301-4429-927b-ad2f022f1883",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821462,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -13067,17 +11959,11 @@
         "x": 1116,
         "y": 636.5
       }
-    ],
-    "decorators": [],
-    "length": 33.35186936934927
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-239244b2-c3af-48ca-b385-75701f5ac8b1",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821462,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -13147,17 +12033,11 @@
         "x": 1130,
         "y": 635.5
       }
-    ],
-    "decorators": [],
-    "length": 38.48788349849262
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-70a93e44-3656-4012-93f4-df1e061a8398",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821462,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -13203,17 +12083,11 @@
         "x": 1149,
         "y": 628.5
       }
-    ],
-    "decorators": [],
-    "length": 32.37532986964189
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-13f39de6-f21f-45a2-ae78-373b30abc336",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821462,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -13265,17 +12139,11 @@
         "x": 1158,
         "y": 647.5
       }
-    ],
-    "decorators": [],
-    "length": 39.68008061872199
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-6e0f5762-aafd-47f6-ac6a-0404e7dbc636",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821463,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -13339,17 +12207,11 @@
         "x": 136,
         "y": 676.5
       }
-    ],
-    "decorators": [],
-    "length": 47.97203536228245
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-e0f6dff6-8bd2-4330-9b18-769a92f09397",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821463,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -13431,17 +12293,11 @@
         "x": 152,
         "y": 675.5
       }
-    ],
-    "decorators": [],
-    "length": 44.029614758400136
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-b59f2dd5-0c8a-4db9-b512-08d24f8a2617",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821463,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -13505,17 +12361,11 @@
         "x": 177,
         "y": 691.5
       }
-    ],
-    "decorators": [],
-    "length": 47.18448099611818
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-57b29650-bead-4e7d-9aeb-efcbdc05cc2f",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821463,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -13585,17 +12435,11 @@
         "x": 224,
         "y": 684.5
       }
-    ],
-    "decorators": [],
-    "length": 52.32810194495186
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-6760cb84-a01f-4d4e-a3c5-e2b75d2414da",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821463,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -13659,17 +12503,11 @@
         "x": 265,
         "y": 660.5
       }
-    ],
-    "decorators": [],
-    "length": 47.05861742334804
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-7ac76146-f3a2-41c1-b3ed-a42532d3332f",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821463,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -13709,149 +12547,117 @@
         "x": 257,
         "y": 680.5
       }
-    ],
-    "decorators": [],
-    "length": 17.310018222736105
+    ]
   },
   {
     "type": "stroke",
-    "id": "stroke-c8a1e56b-fc15-4825-96a4-e200e81d6831",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821463,
-    "selected": false,
-    "deleting": false,
+    "id": "stroke-80cf71e2-c337-4827-8b36-eb942ada4720",
     "style": {
       "width": 4,
       "color": "#000000",
       "opacity": 1,
       "fill": "transparent"
     },
-    "pointerId": 1,
-    "pointerType": "pen",
+    "pointerId": 0,
+    "pointerType": "mouse",
     "pointers": [
       {
-        "p": 1,
-        "t": 1715953918970,
         "x": 271,
-        "y": 665.5
+        "y": 667,
+        "t": 1716285697995,
+        "p": 1
       },
       {
-        "p": 0.77,
-        "t": 1715953919027,
-        "x": 272,
-        "y": 670.5
+        "x": 270,
+        "y": 671,
+        "t": 1716285698130,
+        "p": 0.8
       },
       {
-        "p": 0.68,
-        "t": 1715953919042,
-        "x": 272,
-        "y": 673.5
+        "x": 269,
+        "y": 674,
+        "t": 1716285698143,
+        "p": 0.68
       },
       {
-        "p": 0.76,
-        "t": 1715953919077,
-        "x": 274,
-        "y": 683.5
+        "x": 267,
+        "y": 680,
+        "t": 1716285698216,
+        "p": 0.77
       },
       {
-        "p": 0.74,
-        "t": 1715953919110,
-        "x": 277,
-        "y": 687.5
+        "x": 265,
+        "y": 692,
+        "t": 1716285698327,
+        "p": 0.65
       },
       {
-        "p": 0.7,
-        "t": 1715953919144,
+        "x": 265,
+        "y": 696,
+        "t": 1716285698367,
+        "p": 0.71
+      },
+      {
+        "x": 268,
+        "y": 696,
+        "t": 1716285698440,
+        "p": 0.68
+      },
+      {
+        "x": 276,
+        "y": 697,
+        "t": 1716285698543,
+        "p": 0.8
+      },
+      {
+        "x": 280,
+        "y": 697,
+        "t": 1716285698576,
+        "p": 0.71
+      },
+      {
+        "x": 285,
+        "y": 697,
+        "t": 1716285698610,
+        "p": 0.74
+      }
+    ]
+  },
+  {
+    "type": "stroke",
+    "id": "stroke-6a66db96-21b1-4d77-a108-f6234fab76bd",
+    "style": {
+      "width": 4,
+      "color": "#000000",
+      "opacity": 1,
+      "fill": "transparent"
+    },
+    "pointerId": 0,
+    "pointerType": "mouse",
+    "pointers": [
+      {
+        "x": 270,
+        "y": 679,
+        "t": 1716285699478,
+        "p": 1
+      },
+      {
         "x": 279,
-        "y": 690.5
+        "y": 678,
+        "t": 1716285699576,
+        "p": 0.7
+      },
+      {
+        "x": 283,
+        "y": 677,
+        "t": 1716285699721,
+        "p": 0.72
       }
-    ],
-    "decorators": [],
-    "length": 26.90260981624234
-  },
-  {
-    "type": "stroke",
-    "id": "stroke-00fe308d-195b-45c8-a314-f17f4a09abcb",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821463,
-    "selected": false,
-    "deleting": false,
-    "style": {
-      "width": 4,
-      "color": "#000000",
-      "opacity": 1,
-      "fill": "transparent"
-    },
-    "pointerId": 1,
-    "pointerType": "pen",
-    "pointers": [
-      {
-        "p": 1,
-        "t": 1715953919494,
-        "x": 272,
-        "y": 683.5
-      },
-      {
-        "p": 0.67,
-        "t": 1715953919762,
-        "x": 282,
-        "y": 678.5
-      }
-    ],
-    "decorators": [],
-    "length": 11.180339887498949
-  },
-  {
-    "type": "stroke",
-    "id": "stroke-e889176b-5f22-425a-9928-dcbca2d615d1",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821463,
-    "selected": false,
-    "deleting": false,
-    "style": {
-      "width": 4,
-      "color": "#000000",
-      "opacity": 1,
-      "fill": "transparent"
-    },
-    "pointerId": 1,
-    "pointerType": "pen",
-    "pointers": [
-      {
-        "p": 1,
-        "t": 1715953920576,
-        "x": 271,
-        "y": 680.5
-      },
-      {
-        "p": 0.81,
-        "t": 1715953920676,
-        "x": 274,
-        "y": 678.5
-      },
-      {
-        "p": 0.68,
-        "t": 1715953920710,
-        "x": 277,
-        "y": 677.5
-      },
-      {
-        "p": 0.79,
-        "t": 1715953920852,
-        "x": 284,
-        "y": 674.5
-      }
-    ],
-    "decorators": [],
-    "length": 14.383602041496278
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-fc443b9c-a021-4a05-b745-01fb62f8f898",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821463,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -13957,17 +12763,11 @@
         "x": 348,
         "y": 692.5
       }
-    ],
-    "decorators": [],
-    "length": 67.56268829365197
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-80ccdf55-6f1a-4c6b-a24e-95a168454f5f",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821463,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -13989,17 +12789,11 @@
         "x": 358,
         "y": 692.5
       }
-    ],
-    "decorators": [],
-    "length": 12.165525060596439
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-ddfc615d-e129-4b26-a390-e603024a9544",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821463,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -14015,17 +12809,11 @@
         "x": 355,
         "y": 669.5
       }
-    ],
-    "decorators": [],
-    "length": 0
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-1f9f601e-3827-473b-aaff-2a0fc491eda4",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821463,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -14059,17 +12847,11 @@
         "x": 354,
         "y": 693.5
       }
-    ],
-    "decorators": [],
-    "length": 16.20586815591588
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-a8edf396-eac2-4cf1-b3a4-d61cfa9e70c9",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821463,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -14133,17 +12915,11 @@
         "x": 374,
         "y": 682.5
       }
-    ],
-    "decorators": [],
-    "length": 38.331370449570734
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-83843102-41a5-469c-996f-51e4cfd18077",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821463,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -14219,17 +12995,11 @@
         "x": 376,
         "y": 709.5
       }
-    ],
-    "decorators": [],
-    "length": 46.233696973886566
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-cccab68c-234d-435f-9ca4-592b92beaed3",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821463,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -14299,17 +13069,11 @@
         "x": 404,
         "y": 687.5
       }
-    ],
-    "decorators": [],
-    "length": 51.38587078034502
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-6f1847e6-fb00-42bb-9a53-cc64d86f8ad0",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821463,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -14355,17 +13119,11 @@
         "x": 420,
         "y": 691.5
       }
-    ],
-    "decorators": [],
-    "length": 40.53444716155914
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-73b1c70e-4b10-4d42-abf4-5c1a253977fb",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821463,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -14399,17 +13157,11 @@
         "x": 423,
         "y": 668.5
       }
-    ],
-    "decorators": [],
-    "length": 10.89093456125003
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-20595a50-fb92-4436-9200-7c05d6d310b9",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821464,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -14467,17 +13219,11 @@
         "x": 485,
         "y": 671.5
       }
-    ],
-    "decorators": [],
-    "length": 42.150468184764364
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-3ffcda8f-4b0e-4c0f-932f-1881e7e91771",
-    "creationTime": 1715955778196,
-    "modificationDate": 1715955821464,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -14547,17 +13293,11 @@
         "x": 500,
         "y": 670.5
       }
-    ],
-    "decorators": [],
-    "length": 35.02098593233362
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-25134c92-26a5-4811-bf04-811b3b9f1b96",
-    "creationTime": 1715955778198,
-    "modificationDate": 1715955821464,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -14585,17 +13325,11 @@
         "x": 514,
         "y": 683.5
       }
-    ],
-    "decorators": [],
-    "length": 8.099019513592784
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-61540864-666a-4f50-96c3-493cdd4b9334",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821464,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -14611,17 +13345,11 @@
         "x": 512,
         "y": 665.5
       }
-    ],
-    "decorators": [],
-    "length": 0
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-fe6f7924-4eb7-4eed-b343-7195c9e8ca9c",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821464,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -14673,17 +13401,11 @@
         "x": 539,
         "y": 685.5
       }
-    ],
-    "decorators": [],
-    "length": 41.191721842059465
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-a98a8d97-1f5d-49ff-ab40-0ff68971179b",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821464,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -14717,17 +13439,11 @@
         "x": 545,
         "y": 707.5
       }
-    ],
-    "decorators": [],
-    "length": 22.63467131915771
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-745cde98-132a-44de-968d-ce1425b5183a",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821464,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -14845,17 +13561,11 @@
         "x": 571,
         "y": 693.5
       }
-    ],
-    "decorators": [],
-    "length": 120.75398843204289
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-e275f74c-5986-42fd-a2f4-f26f43d8ce65",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821464,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -14883,17 +13593,11 @@
         "x": 613,
         "y": 685.5
       }
-    ],
-    "decorators": [],
-    "length": 12.45623261899998
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-dbb62cfa-885e-4e01-a1b9-2051953bbf03",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821464,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -14939,17 +13643,11 @@
         "x": 613,
         "y": 707.5
       }
-    ],
-    "decorators": [],
-    "length": 38.1504516348275
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-c1b61bcd-b209-46f8-a787-388ac1200fda",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821464,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -14965,17 +13663,11 @@
         "x": 676,
         "y": 683.5
       }
-    ],
-    "decorators": [],
-    "length": 0
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-f8d720f9-67d8-4fe0-8ae0-c70d96ccc8df",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821464,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -14991,17 +13683,11 @@
         "x": 671,
         "y": 685.5
       }
-    ],
-    "decorators": [],
-    "length": 0
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-48315c9d-8639-4b80-8551-2d2fad486141",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821464,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -15071,17 +13757,11 @@
         "x": 681,
         "y": 653.5
       }
-    ],
-    "decorators": [],
-    "length": 56.283653750154414
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-f05fd75a-6316-491e-b6b8-e987230ab5b1",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821464,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -15121,17 +13801,11 @@
         "x": 676,
         "y": 671.5
       }
-    ],
-    "decorators": [],
-    "length": 18.723452155015703
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-b61f9f76-17b8-4d24-917d-a1625f796c3f",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821464,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -15201,17 +13875,11 @@
         "x": 697,
         "y": 685.5
       }
-    ],
-    "decorators": [],
-    "length": 43.53679354455259
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-3cb70076-9b52-4f45-8159-fdf12a089a00",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821464,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -15287,17 +13955,11 @@
         "x": 698,
         "y": 679.5
       }
-    ],
-    "decorators": [],
-    "length": 52.686101353926375
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-19fbc7f6-0cd0-4a8b-9c24-15616d11ba70",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821464,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -15337,17 +13999,11 @@
         "x": 721,
         "y": 692.5
       }
-    ],
-    "decorators": [],
-    "length": 15.407317850634978
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-9a7dcd07-ff02-463e-9fe2-dbb3ffaf7036",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821464,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -15387,17 +14043,11 @@
         "x": 743,
         "y": 673.5
       }
-    ],
-    "decorators": [],
-    "length": 22.568043904536786
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-64cbea8f-218e-487e-b5bf-dfd26ec1c389",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821464,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -15425,17 +14075,11 @@
         "x": 756,
         "y": 687.5
       }
-    ],
-    "decorators": [],
-    "length": 13.161277261891334
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-eb542950-0239-4c32-98e6-22d2d4ba0f74",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821464,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -15457,17 +14101,11 @@
         "x": 754,
         "y": 655.5
       }
-    ],
-    "decorators": [],
-    "length": 3.1622776601683795
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-9622d7d4-bde2-45b1-abd6-880cd523d368",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821464,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -15525,17 +14163,11 @@
         "x": 773,
         "y": 688.5
       }
-    ],
-    "decorators": [],
-    "length": 28.658763496882397
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-042efd1b-aea1-46dc-a0cf-d356b71a7faf",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821465,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -15587,17 +14219,11 @@
         "x": 783,
         "y": 673.5
       }
-    ],
-    "decorators": [],
-    "length": 34.46324492895049
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-4949afd4-1bba-4697-95e5-ea6c78bd8b8c",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821465,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -15715,17 +14341,11 @@
         "x": 812,
         "y": 680.5
       }
-    ],
-    "decorators": [],
-    "length": 72.87291289970979
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-77f38ed6-3e86-4eb1-9bc4-2505c5081498",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821465,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -15777,17 +14397,11 @@
         "x": 857,
         "y": 689.5
       }
-    ],
-    "decorators": [],
-    "length": 38.45454282733865
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-bd7bfded-f76c-43e2-bda8-cddb13a337aa",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821465,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -15827,17 +14441,11 @@
         "x": 868,
         "y": 667.5
       }
-    ],
-    "decorators": [],
-    "length": 17.47851092925225
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-3d8b1bd5-adfb-4a02-9dee-128066b20c47",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821465,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -15883,17 +14491,11 @@
         "x": 869,
         "y": 685.5
       }
-    ],
-    "decorators": [],
-    "length": 32.255060011577456
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-c59f8992-abe4-49a6-9535-9141616a2fae",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821465,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -15963,17 +14565,11 @@
         "x": 907,
         "y": 683.5
       }
-    ],
-    "decorators": [],
-    "length": 41.86141872980569
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-570816ce-c846-4d0e-84e6-d97283c5ecd0",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821465,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -16007,17 +14603,11 @@
         "x": 925,
         "y": 693.5
       }
-    ],
-    "decorators": [],
-    "length": 11.32455532033676
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-41208f53-3a2d-4e3a-8fab-bb903ded6f6a",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821465,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -16057,17 +14647,11 @@
         "x": 939,
         "y": 690.5
       }
-    ],
-    "decorators": [],
-    "length": 33.58479834565735
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-2f3208ae-87ad-4362-8ddf-7daeac8727b6",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821465,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -16107,17 +14691,11 @@
         "x": 950,
         "y": 696.5
       }
-    ],
-    "decorators": [],
-    "length": 35.0312195418814
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-0c83726c-f386-444e-a0c5-f8e77f2a6550",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821465,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -16169,17 +14747,11 @@
         "x": 957,
         "y": 675.5
       }
-    ],
-    "decorators": [],
-    "length": 19.447660945954418
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-3fb97c1b-3a33-4c94-8e46-dac3f2a100ef",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821465,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -16231,17 +14803,11 @@
         "x": 970,
         "y": 693.5
       }
-    ],
-    "decorators": [],
-    "length": 37.52748134652336
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-6d853680-7824-4b91-82f5-651118067218",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821465,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -16323,17 +14889,11 @@
         "x": 996,
         "y": 685.5
       }
-    ],
-    "decorators": [],
-    "length": 52.96036819116559
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-e55e1202-5934-4480-b0ac-311269e8aa71",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821465,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -16433,17 +14993,11 @@
         "x": 1008,
         "y": 698.5
       }
-    ],
-    "decorators": [],
-    "length": 99.39581298869237
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-199f0bcf-d064-413e-a3c6-2eae8d29c7e1",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821465,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -16501,17 +15055,11 @@
         "x": 1030,
         "y": 693.5
       }
-    ],
-    "decorators": [],
-    "length": 47.62670181066858
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-e74007ff-701c-4b86-aea7-c7ec27f060b1",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821465,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -16551,17 +15099,11 @@
         "x": 1045,
         "y": 668.5
       }
-    ],
-    "decorators": [],
-    "length": 18.47754906310363
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-c9a38f29-1ed6-449b-a77d-eb1cb899a975",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821465,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -16589,17 +15131,11 @@
         "x": 1051,
         "y": 690.5
       }
-    ],
-    "decorators": [],
-    "length": 9.403124237432849
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-d59fd628-26bb-451b-a318-bb447445cc78",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955849114,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -16717,17 +15253,11 @@
         "x": 870.7487804878048,
         "y": 740.2608695652175
       }
-    ],
-    "decorators": [],
-    "length": 90.90385779667928
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-f5b8b101-6897-49f3-9285-d881691da8f2",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955849114,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -16785,17 +15315,11 @@
         "x": 885.5201219512195,
         "y": 743.7391304347826
       }
-    ],
-    "decorators": [],
-    "length": 33.72750048222461
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-7794237e-5a4b-4584-abdb-0d041830439e",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955849114,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -16841,17 +15365,11 @@
         "x": 890.8378048780487,
         "y": 735.3913043478261
       }
-    ],
-    "decorators": [],
-    "length": 21.415022800933226
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-073af5e9-6b76-4a01-a072-612f27b0b962",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955849114,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -16879,17 +15397,11 @@
         "x": 896.155487804878,
         "y": 742.3478260869566
       }
-    ],
-    "decorators": [],
-    "length": 5.80574338275158
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-12a390a0-37a8-48f2-821c-6316afdb5a04",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955849114,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -16923,17 +15435,11 @@
         "x": 902.064024390244,
         "y": 748.6086956521739
       }
-    ],
-    "decorators": [],
-    "length": 18.980728044342058
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-9cc0d6e4-c430-4acd-8dd0-e00bf57982cc",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955849114,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -16997,17 +15503,11 @@
         "x": 922.7439024390243,
         "y": 743.0434782608696
       }
-    ],
-    "decorators": [],
-    "length": 35.190277082029894
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-4c312ea0-3272-48a5-ac9d-e35046c05d6a",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955849114,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -17035,17 +15535,11 @@
         "x": 938.1060975609755,
         "y": 728.4347826086956
       }
-    ],
-    "decorators": [],
-    "length": 15.589276022179671
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-56cbf4b4-4d35-4e24-9493-5c8cc3852e92",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955849114,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -17103,17 +15597,11 @@
         "x": 951.695731707317,
         "y": 745.1304347826087
       }
-    ],
-    "decorators": [],
-    "length": 34.50656379850314
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-116d749b-10a9-4ea9-a454-71871c448489",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955849114,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -17159,17 +15647,11 @@
         "x": 980.6475609756097,
         "y": 719.3913043478261
       }
-    ],
-    "decorators": [],
-    "length": 37.81798207198252
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-7c6b3d3b-f0c5-437e-827a-895093a747b3",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955849114,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -17191,17 +15673,11 @@
         "x": 976.5115853658536,
         "y": 737.4782608695652
       }
-    ],
-    "decorators": [],
-    "length": 5.485054793227504
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-49ed2634-3b97-4aa9-905d-b60be89e8687",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955849114,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -17247,17 +15723,11 @@
         "x": 977.1024390243902,
         "y": 742.3478260869566
       }
-    ],
-    "decorators": [],
-    "length": 28.31903111487567
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-60d62511-c339-4cec-b5f4-5e6c838ad13e",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955849115,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -17297,17 +15767,11 @@
         "x": 997.191463414634,
         "y": 736.7826086956522
       }
-    ],
-    "decorators": [],
-    "length": 16.570329687115407
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-daf9c9f0-1fd3-46a2-a58c-fc7fb14cf1e6",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955849115,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -17377,17 +15841,11 @@
         "x": 1025.5524390243902,
         "y": 742.3478260869566
       }
-    ],
-    "decorators": [],
-    "length": 48.07204791151843
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-df68de08-5e32-4868-8ea0-f80bf2001caa",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955849115,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -17433,17 +15891,11 @@
         "x": 1040.323780487805,
         "y": 742.3478260869566
       }
-    ],
-    "decorators": [],
-    "length": 24.781052564671697
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-1080bb31-570e-4779-ab8f-87ac4f8d47f1",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955849115,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -17471,17 +15923,11 @@
         "x": 1042.687195121951,
         "y": 736.0869565217392
       }
-    ],
-    "decorators": [],
-    "length": 13.042679534802597
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-78d8a275-4f9f-4d1b-b9cb-888f8f922c00",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955849115,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -17509,17 +15955,11 @@
         "x": 1048.595731707317,
         "y": 742.3478260869566
       }
-    ],
-    "decorators": [],
-    "length": 9.57444911182111
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-5373f7b5-8c32-481b-9cb2-200bac45d5ce",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955849115,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -17565,17 +16005,11 @@
         "x": 1049.7774390243899,
         "y": 747.2173913043479
       }
-    ],
-    "decorators": [],
-    "length": 23.4338931776501
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-f3d78f2f-526e-4c75-94f7-7af25cde2293",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955849115,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -17621,17 +16055,11 @@
         "x": 1072.2298780487804,
         "y": 740.2608695652175
       }
-    ],
-    "decorators": [],
-    "length": 27.37321557777507
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-1cf478e9-fc09-45d1-b6d7-7ca8fd7bdaad",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955849115,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -17659,17 +16087,11 @@
         "x": 1085.228658536585,
         "y": 729.8260869565219
       }
-    ],
-    "decorators": [],
-    "length": 15.565197147883477
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-d000bc17-db99-4cda-995e-0554a49d5498",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955849115,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -17727,17 +16149,11 @@
         "x": 1100,
         "y": 741.6521739130435
       }
-    ],
-    "decorators": [],
-    "length": 32.221964472747736
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-5082aa12-a268-4816-ab43-59486cb4b22c",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821466,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -17813,17 +16229,11 @@
         "x": 154.5,
         "y": 888
       }
-    ],
-    "decorators": [],
-    "length": 74.08302651204377
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-db4b7ce7-e728-4223-987b-7f5f99f23184",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821466,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -17899,17 +16309,11 @@
         "x": 186.5,
         "y": 890
       }
-    ],
-    "decorators": [],
-    "length": 54.49307673083235
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-0892e73d-d5f5-4890-bb20-f6985a60669a",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821466,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -17961,17 +16365,11 @@
         "x": 217.5,
         "y": 886
       }
-    ],
-    "decorators": [],
-    "length": 33.8234917139646
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-5fa3893f-6499-4b88-acce-39b84ebccae9",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821466,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -18023,17 +16421,11 @@
         "x": 224.5,
         "y": 899
       }
-    ],
-    "decorators": [],
-    "length": 41.141088670774366
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-439e9d34-c624-41db-b67d-094ecd2f18f3",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821467,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -18151,17 +16543,11 @@
         "x": 146.5,
         "y": 886
       }
-    ],
-    "decorators": [],
-    "length": 121.38054465050304
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-8c60c130-6634-4041-a28c-22f07965dc85",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821467,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -18279,17 +16665,11 @@
         "x": 287.5,
         "y": 887
       }
-    ],
-    "decorators": [],
-    "length": 118.55452294264319
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-5934c168-5252-4255-985f-fd1cf0989338",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821467,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -18389,17 +16769,11 @@
         "x": 332.5,
         "y": 888
       }
-    ],
-    "decorators": [],
-    "length": 76.61453006276574
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-bb6b3c0e-cac4-4f2e-8158-51a90b13fc01",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821467,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -18481,17 +16855,11 @@
         "x": 342.5,
         "y": 899
       }
-    ],
-    "decorators": [],
-    "length": 106.87655704610248
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-290a4b45-a973-4d11-a836-bda9c40326c3",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821467,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -18537,17 +16905,11 @@
         "x": 361.5,
         "y": 886
       }
-    ],
-    "decorators": [],
-    "length": 59.44884214660249
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-a63dd272-5028-456b-85f9-e1cbeac9f26f",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821467,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -18593,17 +16955,11 @@
         "x": 385.5,
         "y": 896
       }
-    ],
-    "decorators": [],
-    "length": 16.6099386061228
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-d48efd3a-e20f-4f12-883e-7725821afb8c",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821467,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -18661,17 +17017,11 @@
         "x": 409.5,
         "y": 893
       }
-    ],
-    "decorators": [],
-    "length": 51.23479565928052
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-0efdd629-49f0-4c5e-9cce-d44ef8312465",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821467,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -18729,17 +17079,11 @@
         "x": 423.5,
         "y": 919
       }
-    ],
-    "decorators": [],
-    "length": 68.69520929774365
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-81a32f50-dd48-4dcd-820a-dac3edb08474",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821467,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -18779,17 +17123,11 @@
         "x": 443.5,
         "y": 913
       }
-    ],
-    "decorators": [],
-    "length": 29.25881085627495
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-c4a6a92e-9929-42e5-853e-f0a06d821be1",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821467,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -18865,17 +17203,11 @@
         "x": 507.5,
         "y": 880
       }
-    ],
-    "decorators": [],
-    "length": 63.23741821794644
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-ca7568a4-822b-4767-a210-704b9fbaacd3",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821467,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -18939,17 +17271,11 @@
         "x": 513.5,
         "y": 916
       }
-    ],
-    "decorators": [],
-    "length": 45.34246335174829
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-10300324-328d-44ff-91e8-3c1fbc5dd567",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821467,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -19007,17 +17333,11 @@
         "x": 541.5,
         "y": 880
       }
-    ],
-    "decorators": [],
-    "length": 44.50228303835227
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-98d2aec3-edd8-408e-b0b1-c62f524ad065",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821467,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -19075,17 +17395,11 @@
         "x": 564.5,
         "y": 885
       }
-    ],
-    "decorators": [],
-    "length": 53.07640777996595
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-cd69e9ef-5f1a-4ac2-b69a-0289f0aebef8",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821468,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -19131,17 +17445,11 @@
         "x": 602.5,
         "y": 881
       }
-    ],
-    "decorators": [],
-    "length": 31.14619468626299
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-cf395384-8b0b-4838-ae85-6843f2be7686",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821468,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -19181,17 +17489,11 @@
         "x": 603.5,
         "y": 889
       }
-    ],
-    "decorators": [],
-    "length": 37.515884079652835
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-5f7d6513-163c-4a16-9532-bc456a2ba4a5",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821468,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -19243,17 +17545,11 @@
         "x": 652.5,
         "y": 875
       }
-    ],
-    "decorators": [],
-    "length": 43.24389244894046
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-1a65076d-d0ba-4b94-a7f6-743c1c91099a",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821468,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -19311,17 +17607,11 @@
         "x": 664.5,
         "y": 874
       }
-    ],
-    "decorators": [],
-    "length": 42.81182432736944
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-b60ddeb7-7ab0-4dee-ab3f-eb407078b6ed",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821468,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -19349,17 +17639,11 @@
         "x": 678.5,
         "y": 888
       }
-    ],
-    "decorators": [],
-    "length": 16.772216266291178
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-c65fb70a-ed3b-4541-9ba5-07c448b1ef9f",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821468,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -19375,17 +17659,11 @@
         "x": 676.5,
         "y": 859
       }
-    ],
-    "decorators": [],
-    "length": 0
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-af25c549-ffac-4cc2-9386-31280fb8f8f9",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821468,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -19449,17 +17727,11 @@
         "x": 703.5,
         "y": 889
       }
-    ],
-    "decorators": [],
-    "length": 53.33101498687408
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-7f8a66a2-b0c2-49d9-b641-cdcfbaf47ae6",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821468,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -19529,17 +17801,11 @@
         "x": 730.5,
         "y": 888
       }
-    ],
-    "decorators": [],
-    "length": 58.12727017730698
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-434774e1-7abe-4a01-bcc0-6fa70e13bfbc",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821468,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -19567,17 +17833,11 @@
         "x": 738.5,
         "y": 901
       }
-    ],
-    "decorators": [],
-    "length": 15.53159453702136
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-4df93750-588b-45e2-bb74-70a5bcc2a1fd",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821468,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -19641,17 +17901,11 @@
         "x": 779.5,
         "y": 879
       }
-    ],
-    "decorators": [],
-    "length": 50.411391144607016
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-18acf2ff-cb53-461d-b522-e530a562c727",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821468,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -19745,17 +17999,11 @@
         "x": 785.5,
         "y": 910
       }
-    ],
-    "decorators": [],
-    "length": 57.80341138941027
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-736e202d-921c-47f6-8879-bc69c96f3d90",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821468,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -19801,17 +18049,11 @@
         "x": 808.5,
         "y": 885
       }
-    ],
-    "decorators": [],
-    "length": 36.6280639499894
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-aa5f5f4d-9c0f-4532-9c0c-a134cb845929",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821468,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -19863,17 +18105,11 @@
         "x": 826.5,
         "y": 885
       }
-    ],
-    "decorators": [],
-    "length": 44.17229662446021
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-41da8a56-deab-45ce-b56b-d5c65280caee",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821468,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -19913,17 +18149,11 @@
         "x": 858.5,
         "y": 881
       }
-    ],
-    "decorators": [],
-    "length": 27.152283798259187
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-ce161fa4-7624-45c1-8156-d196bdd41d19",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821468,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -19969,17 +18199,11 @@
         "x": 863.5,
         "y": 891
       }
-    ],
-    "decorators": [],
-    "length": 41.06389014461999
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-29f2812b-dc9d-42e3-ac7a-3ebb1b85b024",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821468,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -20031,17 +18255,11 @@
         "x": 919.5,
         "y": 871
       }
-    ],
-    "decorators": [],
-    "length": 45.74071102995685
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-f0da3b2c-77ac-409f-8eb0-73c443e22968",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821468,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -20087,17 +18305,11 @@
         "x": 934.5,
         "y": 866
       }
-    ],
-    "decorators": [],
-    "length": 44.62990533945788
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-b1d9f1b0-11b4-41ce-9d67-24b87ec25b41",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821468,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -20161,17 +18373,11 @@
         "x": 953.5,
         "y": 885
       }
-    ],
-    "decorators": [],
-    "length": 44.339818453290206
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-f5849672-3230-411f-8ae2-6875fafe132e",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821469,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -20223,17 +18429,11 @@
         "x": 959.5,
         "y": 893
       }
-    ],
-    "decorators": [],
-    "length": 44.86173937932362
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-f70167df-58eb-42b2-80bb-6dbe626f4832",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821469,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -20291,17 +18491,11 @@
         "x": 985.5,
         "y": 885
       }
-    ],
-    "decorators": [],
-    "length": 44.19123229010273
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-fde270d8-afff-4b53-82ea-23421a4ffdd5",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821469,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -20359,17 +18553,11 @@
         "x": 986.5,
         "y": 875
       }
-    ],
-    "decorators": [],
-    "length": 53.21708594058035
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-7bc8709a-dd2b-4ee0-bcbc-49072a8afd17",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821469,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -20457,17 +18645,11 @@
         "x": 1029.5,
         "y": 885
       }
-    ],
-    "decorators": [],
-    "length": 71.21361235110255
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-4bd61318-eb63-44af-adf7-3dffc239e224",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821469,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -20543,17 +18725,11 @@
         "x": 1052.5,
         "y": 885
       }
-    ],
-    "decorators": [],
-    "length": 55.16103746524562
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-fc64cd36-3ee1-4db3-b71d-52952632f05b",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821469,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -20623,17 +18799,11 @@
         "x": 141.5,
         "y": 940
       }
-    ],
-    "decorators": [],
-    "length": 50.635999955596084
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-d2b13f2b-a22e-4b9e-a4a6-844420e14969",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821469,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -20703,17 +18873,11 @@
         "x": 147.5,
         "y": 936
       }
-    ],
-    "decorators": [],
-    "length": 43.10962914480256
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-f12f2c09-e8dd-474e-953e-6f080ab58065",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821469,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -20747,17 +18911,11 @@
         "x": 165.5,
         "y": 945
       }
-    ],
-    "decorators": [],
-    "length": 16.88138965795931
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-7277bf47-842d-4443-a56e-ff259dd831d1",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821469,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -20791,17 +18949,11 @@
         "x": 194.5,
         "y": 946
       }
-    ],
-    "decorators": [],
-    "length": 32.64777027848206
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-7bec5916-4b97-4f0d-a53b-fec555e911cf",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821469,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -20907,17 +19059,11 @@
         "x": 258.5,
         "y": 939
       }
-    ],
-    "decorators": [],
-    "length": 76.77853785353248
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-cbba36d6-b157-4751-b498-b26b0e166e6c",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821469,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -20969,17 +19115,11 @@
         "x": 269.5,
         "y": 932
       }
-    ],
-    "decorators": [],
-    "length": 45.78378645693758
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-55998fe7-7f7f-4d18-b69b-d49a6e683bd0",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821469,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -21025,17 +19165,11 @@
         "x": 291.5,
         "y": 950
       }
-    ],
-    "decorators": [],
-    "length": 22.30344551311661
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-b19d5abc-2ea2-4770-8554-658d3041d54e",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821469,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -21111,17 +19245,11 @@
         "x": 313.5,
         "y": 947
       }
-    ],
-    "decorators": [],
-    "length": 85.19785378134087
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-e8371e1a-a1c4-46c2-9769-ec82a956f84f",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821469,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -21179,17 +19307,11 @@
         "x": 338.5,
         "y": 943
       }
-    ],
-    "decorators": [],
-    "length": 53.72445369892887
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-138567f6-2546-41bf-ad77-a55e96394cd6",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821470,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -21235,17 +19357,11 @@
         "x": 392.5,
         "y": 926
       }
-    ],
-    "decorators": [],
-    "length": 34.18798778093069
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-c8e7dc3d-afc9-430e-b3e9-bb2788a9a8ea",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821470,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -21339,17 +19455,11 @@
         "x": 388.5,
         "y": 963
       }
-    ],
-    "decorators": [],
-    "length": 54.29452688591103
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-cdfddcab-d17a-49b5-8d0a-6aa24176cb42",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821470,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -21389,17 +19499,11 @@
         "x": 421.5,
         "y": 937
       }
-    ],
-    "decorators": [],
-    "length": 39.69174178055416
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-3de5a251-bb65-45ac-b83f-698cda017622",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821470,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -21457,17 +19561,11 @@
         "x": 449.5,
         "y": 932
       }
-    ],
-    "decorators": [],
-    "length": 49.11863952788969
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-133e2fdd-738f-4d9e-9bb9-445918048f8f",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821470,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -21513,17 +19611,11 @@
         "x": 482.5,
         "y": 930
       }
-    ],
-    "decorators": [],
-    "length": 32.231475540043135
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-d7c690ff-9247-4b67-8e8f-d03f7f0a83bf",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821470,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -21569,17 +19661,11 @@
         "x": 491.5,
         "y": 939
       }
-    ],
-    "decorators": [],
-    "length": 38.42096173759989
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-8aa3bcd4-2492-4785-be6f-da63aafa9306",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821470,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -21673,17 +19759,11 @@
         "x": 562.5,
         "y": 946
       }
-    ],
-    "decorators": [],
-    "length": 105.07120718686798
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-3dccd624-4fc7-40cb-a4ab-d602154476bf",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821470,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -21753,17 +19833,11 @@
         "x": 600.5,
         "y": 934
       }
-    ],
-    "decorators": [],
-    "length": 53.12094496348284
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-016e9981-6596-4f61-a216-5e6654fbcf5a",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821470,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -21821,17 +19895,11 @@
         "x": 604.5,
         "y": 924
       }
-    ],
-    "decorators": [],
-    "length": 48.81393230157018
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-4a442381-cbf7-4008-8ef2-82d36fce901c",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821470,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -21937,17 +20005,11 @@
         "x": 637.5,
         "y": 939
       }
-    ],
-    "decorators": [],
-    "length": 113.50856702106688
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-894f5e5f-0752-47d1-ac83-9d75b8b7b911",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821470,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -21987,17 +20049,11 @@
         "x": 666.5,
         "y": 932
       }
-    ],
-    "decorators": [],
-    "length": 44.30683535918706
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-7b6a00a0-e1a9-4d82-bb4c-0fe82561a0c0",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955821470,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#000000",
@@ -22079,17 +20135,11 @@
         "x": 694.5,
         "y": 934
       }
-    ],
-    "decorators": [],
-    "length": 66.53026076832754
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-d6649e2d-3153-4ec7-8680-08aaf96ea34d",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955841893,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -22129,17 +20179,11 @@
         "x": 971.7901062230719,
         "y": 984.1935483870968
       }
-    ],
-    "decorators": [],
-    "length": 24.949644599875896
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-19ceb96f-9f2f-46dc-a1de-2bfd978ca19f",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955841893,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -22173,17 +20217,11 @@
         "x": 984.1476863461493,
         "y": 974.5967741935485
       }
-    ],
-    "decorators": [],
-    "length": 12.515253406493484
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-103ef1f8-6a26-41d8-9c9d-5afa5c75fe85",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955841893,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -22223,17 +20261,11 @@
         "x": 990.3264764076879,
         "y": 985.3225806451615
       }
-    ],
-    "decorators": [],
-    "length": 28.69879692735482
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-9d5a64a1-9c8c-41f5-8a78-8911cde0a79e",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955841893,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -22279,17 +20311,11 @@
         "x": 1003.4564052884577,
         "y": 987.0161290322583
       }
-    ],
-    "decorators": [],
-    "length": 27.624961975141527
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-8e5b3780-3aaa-415d-bc2b-95676196c13e",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955841893,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -22347,17 +20373,11 @@
         "x": 1017.3586829269198,
         "y": 987.5806451612905
       }
-    ],
-    "decorators": [],
-    "length": 30.07804447361104
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-d35ca203-433f-42e1-8ef8-3ff0b5171b07",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955841893,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -22403,17 +20423,11 @@
         "x": 1031.2609605653818,
         "y": 974.5967741935485
       }
-    ],
-    "decorators": [],
-    "length": 23.444874258280464
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-b67a5f21-46ae-436e-9d7a-dffef6891ce0",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955841894,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -22435,17 +20449,11 @@
         "x": 1039.7567968999974,
         "y": 981.9354838709678
       }
-    ],
-    "decorators": [],
-    "length": 7.995847386059821
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-006e1811-f978-40fb-803c-03844f59db2e",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955841894,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -22497,17 +20505,11 @@
         "x": 1037.4397506269204,
         "y": 996.6129032258066
       }
-    ],
-    "decorators": [],
-    "length": 30.925856300095198
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-3cbc8cd2-bf75-4897-be7b-ca285881ea0c",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955841894,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -22553,17 +20555,11 @@
         "x": 1088.4147686346148,
         "y": 968.9516129032259
       }
-    ],
-    "decorators": [],
-    "length": 41.59171566488015
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-8a0182f9-397c-42e2-bfc0-cfbb89115b8b",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955841894,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -22603,17 +20599,11 @@
         "x": 1095.365907453846,
         "y": 988.1451612903227
       }
-    ],
-    "decorators": [],
-    "length": 23.019567277922093
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-2d170bc2-f81a-4b69-8a19-0bf033ea7b60",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955841894,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -22647,17 +20637,11 @@
         "x": 1100,
         "y": 989.2741935483873
       }
-    ],
-    "decorators": [],
-    "length": 19.560183422142913
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-16ee93a4-d43b-44aa-a6d9-95b61aa2e8cc",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955778199,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -22763,17 +20747,11 @@
         "x": 736.520491706882,
         "y": 108.91891891891892
       }
-    ],
-    "decorators": [],
-    "length": 121.95295628554112
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-b27c4222-e560-4fcb-bc3c-7b3aba33ec06",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955778199,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -22861,17 +20839,11 @@
         "x": 766.3653991926598,
         "y": 172.59459459459458
       }
-    ],
-    "decorators": [],
-    "length": 82.98954625461245
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-362da26f-613b-45ac-a05b-56d6d47c6c3f",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955778199,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -22947,17 +20919,11 @@
         "x": 791.7888389027669,
         "y": 130.7027027027027
       }
-    ],
-    "decorators": [],
-    "length": 105.86870079539116
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-6866e124-4ce9-4bf3-91ab-61de44715387",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955778199,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -23015,17 +20981,11 @@
         "x": 796.2103066784376,
         "y": 122.32432432432432
       }
-    ],
-    "decorators": [],
-    "length": 65.02994402009548
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-b9947d1d-74da-42b8-aa56-ed069f7ccfba",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955778199,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -23071,17 +21031,11 @@
         "x": 822.7391133324624,
         "y": 145.78378378378378
       }
-    ],
-    "decorators": [],
-    "length": 82.67993854889983
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-14125259-03c8-4d2c-8c4a-bec0edb6559b",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955778199,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -23127,17 +21081,11 @@
         "x": 832.6874158277217,
         "y": 83.78378378378379
       }
-    ],
-    "decorators": [],
-    "length": 26.386858643496687
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-72422409-cd7e-401e-b431-18acbe716f2b",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955778199,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -23219,17 +21167,11 @@
         "x": 852.5840208182402,
         "y": 127.35135135135135
       }
-    ],
-    "decorators": [],
-    "length": 84.90918579510114
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-dc17a984-4ec4-4854-ab36-e78b8fc7b1de",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955778199,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 4,
       "color": "#008000",
@@ -23293,17 +21235,11 @@
         "x": 849.2679199864872,
         "y": 154.16216216216216
       }
-    ],
-    "decorators": [],
-    "length": 71.62550969658726
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-b8c3e3a7-9055-4676-83c2-d6e6d956745f",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955895498,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -23343,17 +21279,11 @@
         "x": 905.3358208955224,
         "y": 464.66666666666674
       }
-    ],
-    "decorators": [],
-    "length": 19.758118674954115
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-99100e62-b2be-4439-8b26-3b815293c9da",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955895498,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -23405,17 +21335,11 @@
         "x": 903.8283582089553,
         "y": 492
       }
-    ],
-    "decorators": [],
-    "length": 23.85211424624491
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-9c4fd0ae-ffe9-4b31-bbac-2e458b9a45a0",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955895499,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -23461,17 +21385,11 @@
         "x": 924.9328358208955,
         "y": 475.33333333333337
       }
-    ],
-    "decorators": [],
-    "length": 34.612152517656746
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-7d48a322-6b3b-4ea6-9933-12010d9866cb",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955895499,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -23523,17 +21441,11 @@
         "x": 933.9776119402985,
         "y": 472.66666666666674
       }
-    ],
-    "decorators": [],
-    "length": 38.83464551786197
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-385144ea-22ca-4ca6-952e-cabdadbbf296",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955895500,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -23597,17 +21509,11 @@
         "x": 951.3134328358209,
         "y": 479.33333333333337
       }
-    ],
-    "decorators": [],
-    "length": 45.668460652471126
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-c8830562-e599-4f53-a019-70615cce081a",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955895500,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -23653,17 +21559,11 @@
         "x": 954.3283582089553,
         "y": 492
       }
-    ],
-    "decorators": [],
-    "length": 27.84530182991412
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-ba1ca526-3cf3-4d4b-8aaa-8a076e6411b5",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955895500,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -23733,17 +21633,11 @@
         "x": 969.4029850746268,
         "y": 462.66666666666674
       }
-    ],
-    "decorators": [],
-    "length": 36.183823072170796
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-b68b0778-f475-481a-b292-3079a51a4790",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955895500,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -23783,17 +21677,11 @@
         "x": 976.9402985074627,
         "y": 489.33333333333337
       }
-    ],
-    "decorators": [],
-    "length": 23.72048090615615
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-d5a206a6-cf61-487b-9ec7-25e5abe6e8c1",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955895500,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -23815,17 +21703,11 @@
         "x": 978.4477611940299,
         "y": 476
       }
-    ],
-    "decorators": [],
-    "length": 3.0877531394225657
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-1e8658e2-12c0-4b34-9d47-fa21603a00f8",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955895500,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -23889,17 +21771,11 @@
         "x": 994.276119402985,
         "y": 489.33333333333337
       }
-    ],
-    "decorators": [],
-    "length": 50.90082309262596
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-7819cf83-c559-42a2-a815-5fdf1348e5b4",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955895500,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -24005,17 +21881,11 @@
         "x": 1031.9626865671642,
         "y": 462
       }
-    ],
-    "decorators": [],
-    "length": 96.08342640183213
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-762ba974-cb7f-463d-8830-c1294a86a9e0",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955895500,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -24055,17 +21925,11 @@
         "x": 1040.2537313432836,
         "y": 484.66666666666674
       }
-    ],
-    "decorators": [],
-    "length": 16.79753826718062
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-ae88a95a-51c6-40cc-b53c-c6f790481a47",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955895500,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -24081,17 +21945,11 @@
         "x": 1038.7462686567164,
         "y": 468.66666666666674
       }
-    ],
-    "decorators": [],
-    "length": 0
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-921afc06-e150-4f39-bc61-ecfc26ec997c",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955895500,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -24149,17 +22007,11 @@
         "x": 1046.283582089552,
         "y": 480.66666666666674
       }
-    ],
-    "decorators": [],
-    "length": 33.68763099212283
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-9f345db1-e7dd-4f20-b59a-67fd41e0d598",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955895500,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -24223,17 +22075,11 @@
         "x": 1053.0671641791046,
         "y": 506
       }
-    ],
-    "decorators": [],
-    "length": 30.38327349274566
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-b1be1239-0486-4b7f-bc3c-34dfe2913e86",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955895500,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -24297,17 +22143,11 @@
         "x": 1075.6791044776119,
         "y": 488.66666666666674
       }
-    ],
-    "decorators": [],
-    "length": 58.853820861418995
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-f4ff9269-9e65-4b1b-82d8-991fb6f910d4",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955895500,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -24347,17 +22187,11 @@
         "x": 1081.7089552238808,
         "y": 492.66666666666674
       }
-    ],
-    "decorators": [],
-    "length": 34.04257433457679
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-f1d7c1cc-a97c-4def-b011-38d5d752946a",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955895500,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -24379,17 +22213,11 @@
         "x": 1087.7388059701493,
         "y": 474
       }
-    ],
-    "decorators": [],
-    "length": 5.441986193691781
+    ]
   },
   {
     "type": "stroke",
     "id": "stroke-a3d9e685-1b99-464c-8af9-e016f7ec3d00",
-    "creationTime": 1715955778199,
-    "modificationDate": 1715955895500,
-    "selected": false,
-    "deleting": false,
     "style": {
       "width": 2,
       "color": "#00af00",
@@ -24417,8 +22245,6 @@
         "x": 965.0149253731344,
         "y": 473.66666666666674
       }
-    ],
-    "decorators": [],
-    "length": 6.16227766016838
+    ]
   }
 ]
