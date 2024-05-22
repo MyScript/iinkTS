@@ -43,6 +43,7 @@ export default function App()
 	const setAppToState = useCallback((editor: Editor) =>
 	{
 		setEditor(editor)
+		editor.setCurrentTool("draw")
 	}, [])
 
 	useEffect(() =>
