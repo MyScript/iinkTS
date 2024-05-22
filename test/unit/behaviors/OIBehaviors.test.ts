@@ -66,7 +66,7 @@ describe("OIBehaviors.ts", () =>
     })
     test("should unselectAll on change intention", () =>
     {
-      oib.unselectAll= jest.fn()
+      oib.unselectAll = jest.fn()
       oib.intention = Intention.Erase
       expect(oib.unselectAll).toBeCalledTimes(1)
     })
@@ -611,7 +611,7 @@ describe("OIBehaviors.ts", () =>
       oib.renderer.drawSymbol = jest.fn()
       oib.menu.render = jest.fn()
       oib.menu.update = jest.fn()
-      oib.svgDebugger.apply = jest.fn()
+      oib.svgDebugger.apply = jest.fn(() => Promise.resolve())
       oib.recognizer.init = jest.fn(() => Promise.resolve())
       oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
@@ -643,7 +643,7 @@ describe("OIBehaviors.ts", () =>
       oib.renderer.drawSymbol = jest.fn()
       oib.menu.render = jest.fn()
       oib.menu.update = jest.fn()
-      oib.svgDebugger.apply = jest.fn()
+      oib.svgDebugger.apply = jest.fn(() => Promise.resolve())
       oib.recognizer.init = jest.fn(() => Promise.resolve())
       oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
@@ -668,6 +668,40 @@ describe("OIBehaviors.ts", () =>
       expect(oib.model.symbols).toHaveLength(pStrokes.length)
       expect(oib.renderer.drawSymbol).toHaveBeenCalledTimes(2)
     })
+    test("should emit error if recognizer.addStrokes is rejected", async () =>
+      {
+        const layerInfo = document.createElement("div")
+        const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+        oib.grabber.attach = jest.fn()
+        oib.renderer.drawSymbol = jest.fn()
+        oib.menu.render = jest.fn()
+        oib.menu.update = jest.fn()
+        oib.svgDebugger.apply = jest.fn(() => Promise.resolve())
+        oib.recognizer.init = jest.fn(() => Promise.resolve())
+        oib.recognizer.addStrokes = jest.fn(() => Promise.reject("importPointsEvent-error"))
+        oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
+        oib.internalEvent.emitError = jest.fn()
+        const stroke = buildOIStroke()
+        oib.model.addSymbol(stroke)
+        const pStrokes: PartialDeep<TStroke>[] = [
+          {
+            pointers: [
+              { x: 254, y: 37, t: 1, p: 1 },
+              { x: 253, y: 42, t: 2, p: 0.7 },
+            ]
+          },
+          {
+            pointers: [
+              { x: 222, y: 386, t: 3, p: 0.5 },
+              { x: 226, y: 385, t: 4, p: 0.8 },
+            ],
+            style: { width: 3, color: "#1A8CFF" }
+          }
+        ]
+        await expect(oib.importPointEvents(pStrokes)).rejects.toEqual("importPointsEvent-error")
+        expect(oib.internalEvent.emitError).toHaveBeenCalledTimes(1)
+        expect(oib.internalEvent.emitError).toHaveBeenCalledWith("importPointsEvent-error")
+      })
   })
 
   describe("undo", () =>
@@ -814,6 +848,73 @@ describe("OIBehaviors.ts", () =>
     })
   })
 
+  describe("Download", () =>
+  {
+    const layerInfo = document.createElement("div")
+    const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+    const stroke1 = buildOIStroke()
+    stroke1.selected = true
+    oib.model.addSymbol(stroke1)
+    const stroke2 = buildOIStroke()
+    oib.model.addSymbol(stroke2)
+
+    oib.renderer.getElementById = jest.fn((id) =>
+    {
+      const p = document.createElementNS("http://www.w3.org/2000/svg", "path")
+      p.id = id
+      return p
+    })
+
+
+    test("should call trigger download svg file", async () =>
+    {
+      global.URL.createObjectURL = jest.fn(() => 'download-svg-url')
+      const link = document.createElement("a")
+      link.click = jest.fn()
+      jest.spyOn(document, 'createElement').mockImplementation(() => link)
+      oib.downloadAsSVG()
+      expect(link.href).toContain('download-svg-url')
+      expect(link.download).toContain("iink-ts-")
+      expect(link.download).toContain(".svg")
+      expect(link.click).toHaveBeenCalledTimes(1)
+    })
+
+    // //fix problem with with onload
+    // test.skip("should call trigger download jpg file", async () =>
+    // {
+    //   global.URL.createObjectURL = jest.fn(() => 'download-jpg-url')
+    //   oib.downloadAsJPG()
+    //   expect(link.href).toContain('download-jpg-url')
+    //   expect(link.click).toHaveBeenCalledTimes(1)
+    // })
+    test("should call trigger download json file", async () =>
+    {
+      const link = document.createElement("a")
+      link.click = jest.fn()
+      jest.spyOn(document, 'createElement').mockImplementation(() => link)
+      oib.downloadAsJson()
+      expect(link.href).toContain('data:text/json;charset=utf-8,')
+      expect(link.href).toContain(stroke1.id)
+      expect(link.href).toContain(stroke2.id)
+      expect(link.download).toContain("iink-ts-")
+      expect(link.download).toContain(".json")
+      expect(link.click).toHaveBeenCalledTimes(1)
+    })
+    test("should call trigger download json file with only selected files", async () =>
+    {
+      const link = document.createElement("a")
+      link.click = jest.fn()
+      jest.spyOn(document, 'createElement').mockImplementation(() => link)
+      oib.downloadAsJson(true)
+      expect(link.href).toContain('data:text/json;charset=utf-8,')
+      expect(link.href).toContain(stroke1.id)
+      expect(link.href).not.toContain(stroke2.id)
+      expect(link.download).toContain("iink-ts-")
+      expect(link.download).toContain(".json")
+      expect(link.click).toHaveBeenCalledTimes(1)
+    })
+  })
+
   describe("export", () =>
   {
     test("should call recognizer.export", async () =>
@@ -847,6 +948,32 @@ describe("OIBehaviors.ts", () =>
       await oib.init(wrapperHTML)
       await oib.export()
       expect(oib.internalEvent.emitError).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe("convert", () =>
+  {
+    test("should call converter.apply", async () =>
+    {
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+      oib.svgDebugger.apply = jest.fn()
+      oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
+      oib.converter.apply = jest.fn(() => Promise.resolve())
+      await oib.convert()
+      await expect(oib.converter.apply).toBeCalledTimes(1)
+    })
+    test("should emit error if recognizer.clear is rejected", async () =>
+    {
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+      oib.svgDebugger.apply = jest.fn()
+      oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
+      oib.converter.apply = jest.fn(() => Promise.reject("convert-error"))
+      oib.internalEvent.emitError = jest.fn()
+      await oib.convert()
+      expect(oib.internalEvent.emitError).toHaveBeenCalledTimes(1)
+      expect(oib.internalEvent.emitError).toHaveBeenCalledWith("convert-error")
     })
   })
 
@@ -889,26 +1016,25 @@ describe("OIBehaviors.ts", () =>
       const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
       oib.svgDebugger.apply = jest.fn()
       oib.renderer.clear = jest.fn()
-      oib.recognizer.eraseStrokes = jest.fn()
+      oib.recognizer.clear = jest.fn(() => Promise.resolve())
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
       const stroke = buildOIStroke()
       oib.model.addSymbol(stroke)
       await oib.clear()
       await expect(oib.renderer.clear).toBeCalledTimes(1)
     })
-    test("should call recognizer.eraseStrokes", async () =>
+    test("should call recognizer.clear", async () =>
     {
       const layerInfo = document.createElement("div")
       const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
       oib.svgDebugger.apply = jest.fn()
       oib.renderer.clear = jest.fn()
-      oib.recognizer.eraseStrokes = jest.fn()
+      oib.recognizer.clear = jest.fn(() => Promise.resolve())
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
       const stroke = buildOIStroke()
       oib.model.addSymbol(stroke)
       oib.clear()
-      await expect(oib.recognizer.eraseStrokes).toBeCalledTimes(1)
-      await expect(oib.recognizer.eraseStrokes).toBeCalledWith([stroke.id])
+      await expect(oib.recognizer.clear).toBeCalledTimes(1)
     })
     test("should clear model", async () =>
     {
@@ -916,11 +1042,11 @@ describe("OIBehaviors.ts", () =>
       const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
       oib.svgDebugger.apply = jest.fn()
       oib.renderer.clear = jest.fn()
-      oib.recognizer.eraseStrokes = jest.fn()
+      oib.recognizer.clear = jest.fn(() => Promise.resolve())
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
       const stroke = buildOIStroke()
       oib.model.addSymbol(stroke)
-      oib.clear()
+      await oib.clear()
       const newModel = await oib.clear()
       await expect(newModel.symbols).toHaveLength(0)
       await expect(oib.model.symbols).toHaveLength(0)
@@ -931,11 +1057,26 @@ describe("OIBehaviors.ts", () =>
       const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
       oib.svgDebugger.apply = jest.fn()
       oib.renderer.clear = jest.fn()
-      oib.recognizer.eraseStrokes = jest.fn()
+      oib.recognizer.clear = jest.fn(() => Promise.resolve())
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
-      oib.clear()
+      await oib.clear()
       await expect(oib.renderer.clear).toBeCalledTimes(0)
-      await expect(oib.recognizer.eraseStrokes).toBeCalledTimes(0)
+      await expect(oib.recognizer.clear).toBeCalledTimes(0)
+    })
+    test("should emit error if recognizer.clear is rejected", async () =>
+    {
+      const layerInfo = document.createElement("div")
+      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+      oib.svgDebugger.apply = jest.fn()
+      oib.renderer.clear = jest.fn()
+      oib.recognizer.clear = jest.fn(() => Promise.reject("clear-error"))
+      oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
+      oib.internalEvent.emitError = jest.fn()
+      const stroke = buildOIStroke()
+      oib.model.addSymbol(stroke)
+      await oib.clear()
+      expect(oib.internalEvent.emitError).toHaveBeenCalledTimes(1)
+      expect(oib.internalEvent.emitError).toHaveBeenCalledWith("clear-error")
     })
   })
 
