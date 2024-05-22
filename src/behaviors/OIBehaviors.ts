@@ -846,16 +846,9 @@ export class OIBehaviors implements IBehaviors
 
   downloadAsJson(selection = false)
   {
-    const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" }
-    let exportName: string
-    try {
-      exportName = `iink-ts-${ new Date().toLocaleDateString(navigator.language, options) }`
-    } catch {
-      exportName = `iink-ts-${ new Date().toLocaleDateString("en-US", options) }`
-    }
     const symbolsToExport = selection ? this.model.symbolsSelected : this.model.symbols
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(symbolsToExport, null, 2))
-    this.triggerDownload(exportName + ".json", dataStr)
+    this.triggerDownload(this.getExportName("json"), dataStr)
   }
 
   async export(mimeTypes?: string[]): Promise<OIModel>
@@ -912,7 +905,7 @@ export class OIBehaviors implements IBehaviors
       this.#logger.info("clear")
       this.internalEvent.emitIdle(false)
       if (this.model.symbols.length) {
-        await this.recognizer.eraseStrokes(this.model.symbols.filter(s => s.type === SymbolType.Stroke).map(s => s.id))
+        await this.recognizer.clear()
         this.renderer.clear()
         this.model.clear()
         this.selector.removeSelectedGroup()
