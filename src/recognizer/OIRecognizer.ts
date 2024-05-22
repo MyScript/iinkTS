@@ -55,6 +55,7 @@ export class OIRecognizer
   protected waitForIdleDeferred?: DeferredPromise<void>
   protected undoDeferred?: DeferredPromise<void>
   protected redoDeferred?: DeferredPromise<void>
+  protected clearDeferred?: DeferredPromise<void>
 
   url: string
 
@@ -166,6 +167,7 @@ export class OIRecognizer
       this.eraseStrokeDeferred?.promise,
       this.undoDeferred?.promise,
       this.redoDeferred?.promise,
+      this.clearDeferred?.promise,
     ])
     return Promise.resolve()
   }
@@ -198,6 +200,9 @@ export class OIRecognizer
     }
     if (this.redoDeferred?.isPending) {
       this.redoDeferred?.reject(error)
+    }
+    if (this.clearDeferred?.isPending) {
+      this.clearDeferred?.reject(error)
     }
     if (this.exportDeferred?.isPending) {
       this.exportDeferred?.reject(error)
@@ -345,6 +350,7 @@ export class OIRecognizer
             this.replaceStrokeDeferred?.resolve()
             this.undoDeferred?.resolve()
             this.redoDeferred?.resolve()
+            this.clearDeferred?.resolve()
             break
           case "exported":
             this.manageExportMessage(websocketMessage)
@@ -576,7 +582,16 @@ export class OIRecognizer
     }
     await this.send(message)
     return await this.exportDeferred?.promise
+  }
 
+
+  async clear(): Promise<void>
+  {
+    this.clearDeferred = new DeferredPromise<void>()
+    await this.send({
+      type: "clear"
+    })
+    return this.clearDeferred?.promise
   }
 
   async close(code: number, reason: string): Promise<void>

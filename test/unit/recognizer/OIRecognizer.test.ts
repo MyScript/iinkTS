@@ -676,8 +676,7 @@ describe("OIRecognizer.ts", () =>
       expect.assertions(1)
       await expect(oiRecognizer.undo()).rejects.toEqual(new Error("Recognizer must be initilized"))
     })
-
-    test("should send eraseStrokes message & resolve when receive contentChanged message", async () =>
+    test("should send undo message & resolve when receive contentChanged message", async () =>
     {
       expect.assertions(1)
       await oiRecognizer.init()
@@ -732,7 +731,7 @@ describe("OIRecognizer.ts", () =>
       await expect(oiRecognizer.redo()).rejects.toEqual(new Error("Recognizer must be initilized"))
     })
 
-    test("should send eraseStrokes message & resolve when receive contentChanged message", async () =>
+    test("should send redo message & resolve when receive contentChanged message", async () =>
     {
       expect.assertions(1)
       await oiRecognizer.init()
@@ -751,6 +750,61 @@ describe("OIRecognizer.ts", () =>
       expect.assertions(3)
       await oiRecognizer.init()
       const promise = oiRecognizer.redo()
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
+      mockServer.sendNotGrantedErrorMessage()
+      await expect(promise).rejects.toEqual(ErrorConst.WRONG_CREDENTIALS)
+      await expect(spyEmitError).toHaveBeenCalledTimes(1)
+      await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
+    })
+  })
+
+  describe("clear", () =>
+  {
+    const serverConfig: TServerConfiguration = {
+      ...ServerConfig,
+      host: "clear-test"
+    }
+    let mockServer: ServerOIWebsocketMock
+    let oiRecognizer: OIRecognizer
+
+    beforeEach(() =>
+    {
+      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
+      mockServer.init()
+    })
+    afterEach(async () =>
+    {
+      await oiRecognizer.destroy()
+      mockServer.close()
+    })
+
+    test("should throw error if recognizer has not been initialize", async () =>
+    {
+      expect.assertions(1)
+      await expect(oiRecognizer.clear()).rejects.toEqual(new Error("Recognizer must be initilized"))
+    })
+
+    test("should send clear message & resolve when receive contentChanged message", async () =>
+    {
+      expect.assertions(1)
+      await oiRecognizer.init()
+      const promise = oiRecognizer.clear()
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
+      mockServer.sendContentChangeMessage()
+      await promise
+      const messageSent = JSON.parse(mockServer.getLastMessage() as string)
+      const messageSentExpected = { type: "clear" }
+      await expect(messageSent).toMatchObject(messageSentExpected)
+    })
+    test("should reject if receive error message", async () =>
+    {
+      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
+      expect.assertions(3)
+      await oiRecognizer.init()
+      const promise = oiRecognizer.clear()
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       mockServer.sendNotGrantedErrorMessage()
