@@ -9,7 +9,7 @@ import { DefaultLoggerConfiguration, TConfiguration, TConverstionState, TLoggerC
 import { IModel, TExport, TJIIXExport } from "./model"
 import { TOISymbol, TStroke } from "./primitive"
 import { InternalEvent, PublicEvent } from "./event"
-import { TUndoRedoContext } from "./undo-redo"
+import { TUndoRedoContext } from "./history"
 import { IGrabber } from "./grabber"
 import { TPenStyle, TTheme } from "./style"
 
@@ -121,7 +121,7 @@ export class Editor
 
   get context(): TUndoRedoContext
   {
-    return this.behaviors.context
+    return this.behaviors.history.context
   }
 
   get grabber(): IGrabber

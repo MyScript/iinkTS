@@ -472,13 +472,13 @@ export class OIMenuAction extends OIMenu
       this.isMobile ? this.menuLanguage.wrap() : this.menuLanguage.unwrap()
     }
     if (this.menuClear) {
-      this.menuClear.disabled = this.behaviors.context.empty
+      this.menuClear.disabled = this.behaviors.history.context.empty
     }
     if (this.menuUndo) {
-      this.menuUndo.disabled = !this.behaviors.context.canUndo
+      this.menuUndo.disabled = !this.behaviors.history.context.canUndo
     }
     if (this.menuRedo) {
-      this.menuRedo.disabled = !this.behaviors.context.canRedo
+      this.menuRedo.disabled = !this.behaviors.history.context.canRedo
     }
     if (this.menuConvert) {
       this.menuConvert.disabled = this.model.symbols.length === 0 || !this.model.symbols.some(s => s.type === SymbolType.Stroke)

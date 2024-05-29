@@ -75,14 +75,9 @@ describe("OIBehaviors.ts", () =>
       expect(oib.model).toBeDefined()
       expect(oib.model.symbols).toHaveLength(0)
     })
-    test("should have context property initialize", () =>
+    test("should have historyManager initialize", () =>
     {
-      expect(oib.context).toBeDefined()
-      expect(oib.context.canRedo).toEqual(false)
-      expect(oib.context.canUndo).toEqual(false)
-      expect(oib.context.empty).toEqual(true)
-      expect(oib.context.stack.length).toEqual(1)
-      expect(oib.context.stackIndex).toEqual(0)
+      expect(oib.history).toBeDefined()
     })
   })
 
@@ -216,13 +211,11 @@ describe("OIBehaviors.ts", () =>
       oib.recognizer.send = jest.fn()
       oib.recognizer.init = jest.fn(() => Promise.resolve())
       oib.init(wrapperHTML)
-      await expect(oib.context).toMatchObject({
-        canRedo: false,
-        canUndo: false,
-        empty: true,
-        stackIndex: 0,
-        possibleUndoCount: 0
-      })
+      expect(oib.history.context.canRedo).toEqual(false)
+      expect(oib.history.context.canUndo).toEqual(false)
+      expect(oib.history.context.empty).toEqual(true)
+      expect(oib.history.context.stackIndex).toEqual(0)
+      expect(oib.history.stack.length).toEqual(1)
       await expect(oib.grabber.attach).toBeCalledTimes(1)
       await expect(oib.renderer.init).toBeCalledTimes(1)
       await expect(oib.recognizer.init).toBeCalledTimes(1)
@@ -720,9 +713,9 @@ describe("OIBehaviors.ts", () =>
       const stroke1 = buildOIStroke()
       const firstModel = oib.model.clone()
       firstModel.addSymbol(stroke1)
-      oib.context.canUndo = true
-      oib.context.stackIndex = 1
-      oib.context.stack.unshift(firstModel)
+      oib.history.context.canUndo = true
+      oib.history.context.stackIndex = 1
+      oib.history.stack.unshift(firstModel)
       await oib.undo()
       expect(oib.recognizer.undo).toBeCalledTimes(1)
       expect(oib.renderer.drawSymbol).toBeCalledTimes(1)
@@ -742,9 +735,9 @@ describe("OIBehaviors.ts", () =>
       const stroke1 = buildOIStroke()
       oib.model.addSymbol(stroke1)
       const firstModel = new OIModel(1, 1)
-      oib.context.canUndo = true
-      oib.context.stackIndex = 1
-      oib.context.stack.unshift(firstModel)
+      oib.history.context.canUndo = true
+      oib.history.context.stackIndex = 1
+      oib.history.stack.unshift(firstModel)
       await oib.undo()
       expect(oib.recognizer.undo).toBeCalledTimes(1)
       expect(oib.renderer.removeSymbol).toBeCalledTimes(1)
@@ -764,9 +757,9 @@ describe("OIBehaviors.ts", () =>
       const stroke1 = buildOIStroke()
       const firstModel = new OIModel(1, 1)
       firstModel.addSymbol(stroke1)
-      oib.context.canUndo = true
-      oib.context.stackIndex = 1
-      oib.context.stack.unshift(firstModel)
+      oib.history.context.canUndo = true
+      oib.history.context.stackIndex = 1
+      oib.history.stack.unshift(firstModel)
       const modelReceive = await oib.undo()
       expect(modelReceive).toEqual(firstModel)
     })
@@ -784,6 +777,7 @@ describe("OIBehaviors.ts", () =>
     {
       const layerInfo = document.createElement("div")
       const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+      oib.history.stack.push(oib.model)
       oib.selector.removeSelectedGroup = jest.fn()
       oib.svgDebugger.apply = jest.fn()
       oib.recognizer.redo = jest.fn(() => Promise.resolve())
@@ -794,8 +788,9 @@ describe("OIBehaviors.ts", () =>
       const stroke1 = buildOIStroke()
       const secondModel = oib.model.clone()
       secondModel.addSymbol(stroke1)
-      oib.context.canRedo = true
-      oib.context.stack.push(secondModel)
+      oib.history.context.canRedo = true
+      oib.history.context.stackIndex = 0
+      oib.history.stack.push(secondModel)
       await oib.redo()
       expect(oib.recognizer.redo).toBeCalledTimes(1)
       expect(oib.renderer.drawSymbol).toBeCalledTimes(1)
@@ -805,6 +800,7 @@ describe("OIBehaviors.ts", () =>
     {
       const layerInfo = document.createElement("div")
       const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+      oib.history.stack.push(oib.model)
       oib.selector.removeSelectedGroup = jest.fn()
       oib.svgDebugger.apply = jest.fn()
       oib.recognizer.redo = jest.fn(() => Promise.resolve())
@@ -815,8 +811,8 @@ describe("OIBehaviors.ts", () =>
       const stroke1 = buildOIStroke()
       oib.model.addSymbol(stroke1)
       const secondModel = new OIModel(1, 1)
-      oib.context.canRedo = true
-      oib.context.stack.push(secondModel)
+      oib.history.context.canRedo = true
+      oib.history.stack.push(secondModel)
       await oib.redo()
       expect(oib.recognizer.redo).toBeCalledTimes(1)
       expect(oib.renderer.removeSymbol).toBeCalledTimes(1)
@@ -826,6 +822,7 @@ describe("OIBehaviors.ts", () =>
     {
       const layerInfo = document.createElement("div")
       const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
+      oib.history.stack.push(oib.model)
       oib.selector.removeSelectedGroup = jest.fn()
       oib.svgDebugger.apply = jest.fn()
       oib.recognizer.redo = jest.fn(() => Promise.resolve())
@@ -835,8 +832,8 @@ describe("OIBehaviors.ts", () =>
       const stroke1 = buildOIStroke()
       const secondModel = new OIModel(1, 1)
       secondModel.addSymbol(stroke1)
-      oib.context.canRedo = true
-      oib.context.stack.push(secondModel)
+      oib.history.context.canRedo = true
+      oib.history.stack.push(secondModel)
       const modelReceive = await oib.redo()
       expect(modelReceive).toEqual(secondModel)
     })
@@ -880,7 +877,7 @@ describe("OIBehaviors.ts", () =>
     })
 
     // //fix problem with with onload
-    // test.skip("should call trigger download jpg file", async () =>
+    // test("should call trigger download jpg file", async () =>
     // {
     //   global.URL.createObjectURL = jest.fn(() => 'download-jpg-url')
     //   oib.downloadAsJPG()

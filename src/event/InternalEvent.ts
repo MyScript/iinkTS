@@ -4,7 +4,7 @@ import { LoggerManager } from "../logger"
 import { TExport, TJIIXExport } from "../model"
 import { TOISymbol } from "../primitive"
 import { TWSMessageEventSVGPatch } from "../recognizer"
-import { TUndoRedoContext } from "../undo-redo"
+import { TUndoRedoContext } from "../history"
 
 /**
  * @group Event

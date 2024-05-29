@@ -85,7 +85,7 @@
         [iink.LoggerClass.STROKE]: iink.LoggerLevel.ERROR,
         [iink.LoggerClass.SMARTGUIDE]: iink.LoggerLevel.ERROR,
         [iink.LoggerClass.STYLE]: iink.LoggerLevel.ERROR,
-        [iink.LoggerClass.UNDO_REDO]: iink.LoggerLevel.ERROR
+        [iink.LoggerClass.HISTORY]: iink.LoggerLevel.ERROR
       };
 
       Object.keys(iink.LoggerLevel).forEach((level) => {
@@ -158,7 +158,7 @@
           loggerConfig[iink.LoggerClass.STROKE] = evt.target.value;
           loggerConfig[iink.LoggerClass.SMARTGUIDE] = evt.target.value;
           loggerConfig[iink.LoggerClass.STYLE] = evt.target.value;
-          loggerConfig[iink.LoggerClass.UNDO_REDO] = evt.target.value;
+          loggerConfig[iink.LoggerClass.HISTORY] = evt.target.value;
           Array.from(document.getElementsByClassName("specific-logger-level-input")).forEach(input => {
             input.value = evt.target.value
           })

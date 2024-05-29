@@ -13,7 +13,7 @@ import
 import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
 import { TStyle } from "../style"
-import { UndoRedoManager } from "../undo-redo"
+import { HistoryManager } from "../history"
 import { getClosestPoints, isBetween, isPointInsidePolygon } from "../utils"
 import { TGesture, StrikeThroughAction, SurroundAction } from "../gesture"
 import { OITranslateManager } from "./OITranslateManager"
@@ -64,9 +64,9 @@ export class OIGestureManager
     return this.behaviors.model
   }
 
-  get undoRedoManager(): UndoRedoManager
+  get undoRedoManager(): HistoryManager
   {
-    return this.behaviors.undoRedoManager
+    return this.behaviors.history
   }
 
   get selector(): OISelectionManager
@@ -113,7 +113,7 @@ export class OIGestureManager
           this.model.updateSymbol(s)
           this.renderer.drawSymbol(s)
         })
-        this.undoRedoManager.addModelToStack(this.model)
+        this.undoRedoManager.push(this.model)
         break
       }
       case SurroundAction.Surround: {
@@ -125,7 +125,7 @@ export class OIGestureManager
           this.model.updateSymbol(s)
           this.renderer.drawSymbol(s)
         })
-        this.undoRedoManager.addModelToStack(this.model)
+        this.undoRedoManager.push(this.model)
         break
       }
       default:
@@ -210,7 +210,7 @@ export class OIGestureManager
       }
       await Promise.all(promises)
     }
-    this.undoRedoManager.addModelToStack(this.model)
+    this.undoRedoManager.push(this.model)
   }
 
   async applyJoinGesture(gestureStroke: OIStroke): Promise<void>
@@ -268,9 +268,8 @@ export class OIGestureManager
       }
     }
 
-    this.undoRedoManager.addModelToStack(this.model)
+    this.undoRedoManager.push(this.model)
     await Promise.all(promises)
-    this.undoRedoManager.updateModelInStack(this.model)
   }
 
   async applyInsertGesture(gestureStroke: OIStroke, gesture: TGesture): Promise<void>
@@ -327,9 +326,8 @@ export class OIGestureManager
       }
     }
 
-    this.undoRedoManager.addModelToStack(this.model)
+    this.undoRedoManager.push(this.model)
     await Promise.all(promises)
-    this.undoRedoManager.updateModelInStack(this.model)
   }
 
   async applyUnderlineGesture(gesture: TGesture): Promise<void>
@@ -348,7 +346,7 @@ export class OIGestureManager
       this.model.updateSymbol(s)
       this.renderer.drawSymbol(s)
     })
-    this.undoRedoManager.addModelToStack(this.model)
+    this.undoRedoManager.push(this.model)
   }
 
   async applyStrikeThroughGesture(gesture: TGesture): Promise<void>
@@ -369,7 +367,7 @@ export class OIGestureManager
           this.model.updateSymbol(s)
           this.renderer.drawSymbol(s)
         })
-        this.undoRedoManager.addModelToStack(this.model)
+        this.undoRedoManager.push(this.model)
         break
       }
       case StrikeThroughAction.Erase: {
@@ -379,7 +377,7 @@ export class OIGestureManager
           this.renderer.removeSymbol(id)
         })
         await this.recognizer.eraseStrokes(gesture.strokeIds)
-        this.undoRedoManager.addModelToStack(this.model)
+        this.undoRedoManager.push(this.model)
         break
       }
       default:
