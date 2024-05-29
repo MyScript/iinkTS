@@ -20,7 +20,7 @@ import
 } from "../primitive"
 import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
-import { UndoRedoManager } from "../undo-redo"
+import { HistoryManager } from "../history"
 import { computeAngleRadian, converDegreeToRadian, convertRadianToDegree, rotatePoint } from "../utils"
 import { OIDebugSVGManager } from "./OIDebugSVGManager"
 import { OISelectionManager } from "./OISelectionManager"
@@ -54,9 +54,9 @@ export class OIRotationManager
     return this.behaviors.renderer
   }
 
-  get undoRedoManager(): UndoRedoManager
+  get undoRedoManager(): HistoryManager
   {
-    return this.behaviors.undoRedoManager
+    return this.behaviors.history
   }
 
   get texter(): OITextManager
@@ -230,7 +230,7 @@ export class OIRotationManager
       }
     })
     this.selector.resetSelectedGroup(this.model.symbolsSelected)
-    this.undoRedoManager.addModelToStack(this.model)
+    this.undoRedoManager.push(this.model)
     const promise = this.recognizer.replaceStrokes(strokesRotated.map(s => s.id), strokesRotated)
     this.interactElementsGroup = undefined
     this.selector.showInteractElements()

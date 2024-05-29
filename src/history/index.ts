@@ -1,2 +1,2 @@
 export * from "./UndoRedoContext"
-export * from "./UndoRedoManager"
+export * from "./HistoryManager"

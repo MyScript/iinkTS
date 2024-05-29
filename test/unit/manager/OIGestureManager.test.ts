@@ -185,7 +185,7 @@ describe("OIGestureManager.ts", () =>
     gestMan.behaviors.internalEvent.emitSelected = jest.fn()
     gestMan.renderer.drawSymbol = jest.fn()
     gestMan.selector.drawSelectedGroup = jest.fn()
-    gestMan.undoRedoManager.addModelToStack = jest.fn()
+    gestMan.undoRedoManager.push = jest.fn()
 
     test("should do nothing if gesture as no strokeIds", async () =>
     {
@@ -200,7 +200,7 @@ describe("OIGestureManager.ts", () =>
       expect(gestMan.behaviors.internalEvent.emitSelected).toHaveBeenCalledTimes(0)
       expect(gestMan.renderer.drawSymbol).toHaveBeenCalledTimes(0)
       expect(gestMan.selector.drawSelectedGroup).toHaveBeenCalledTimes(0)
-      expect(gestMan.undoRedoManager.addModelToStack).toHaveBeenCalledTimes(0)
+      expect(gestMan.undoRedoManager.push).toHaveBeenCalledTimes(0)
     })
 
     test("should have a selection as the default action on surround", () =>
@@ -222,7 +222,7 @@ describe("OIGestureManager.ts", () =>
       expect(gestMan.selector.drawSelectedGroup).toHaveBeenCalledWith([stroke])
       expect(gestMan.behaviors.internalEvent.emitSelected).toHaveBeenCalledTimes(1)
       expect(gestMan.behaviors.internalEvent.emitSelected).toHaveBeenCalledWith([stroke])
-      expect(gestMan.undoRedoManager.addModelToStack).toHaveBeenCalledTimes(0)
+      expect(gestMan.undoRedoManager.push).toHaveBeenCalledTimes(0)
     })
 
     test("should show Highlight", async () =>
@@ -240,7 +240,7 @@ describe("OIGestureManager.ts", () =>
       expect(gestMan.renderer.drawSymbol).toHaveBeenCalledWith(expect.objectContaining({
         id: stroke.id,
       }))
-      expect(gestMan.undoRedoManager.addModelToStack).toHaveBeenCalledTimes(1)
+      expect(gestMan.undoRedoManager.push).toHaveBeenCalledTimes(1)
     })
 
     test("should show Surround", async () =>
@@ -292,7 +292,7 @@ describe("OIGestureManager.ts", () =>
     manager.model.replaceSymbol = jest.fn(id => [id])
     manager.recognizer.eraseStrokes = jest.fn((() => Promise.resolve()))
     manager.recognizer.replaceStrokes = jest.fn((() => Promise.resolve()))
-    manager.undoRedoManager.addModelToStack = jest.fn()
+    manager.undoRedoManager.push = jest.fn()
 
     beforeEach(() =>
     {
@@ -313,7 +313,7 @@ describe("OIGestureManager.ts", () =>
       expect(manager.renderer.removeSymbol).toHaveBeenCalledTimes(0)
       expect(manager.model.removeSymbol).toHaveBeenCalledTimes(0)
       expect(manager.recognizer.eraseStrokes).toHaveBeenCalledTimes(0)
-      expect(manager.undoRedoManager.addModelToStack).toHaveBeenCalledTimes(0)
+      expect(manager.undoRedoManager.push).toHaveBeenCalledTimes(0)
     })
 
     test("should erase text symbol", async () =>
@@ -353,7 +353,7 @@ describe("OIGestureManager.ts", () =>
       expect(manager.model.removeSymbol).toHaveBeenCalledTimes(1)
       expect(manager.recognizer.eraseStrokes).toHaveBeenCalledTimes(0)
       expect(manager.texter.adjustText).toHaveBeenCalledTimes(1)
-      expect(manager.undoRedoManager.addModelToStack).toHaveBeenCalledTimes(1)
+      expect(manager.undoRedoManager.push).toHaveBeenCalledTimes(1)
     })
 
     test("should partially erase text symbol", async () =>
@@ -393,7 +393,7 @@ describe("OIGestureManager.ts", () =>
       expect(manager.model.removeSymbol).toHaveBeenCalledTimes(0)
       expect(manager.recognizer.eraseStrokes).toHaveBeenCalledTimes(0)
       expect(manager.texter.adjustText).toHaveBeenCalledTimes(1)
-      expect(manager.undoRedoManager.addModelToStack).toHaveBeenCalledTimes(1)
+      expect(manager.undoRedoManager.push).toHaveBeenCalledTimes(1)
     })
 
     test("should erase stroke symbol", async () =>
@@ -414,7 +414,7 @@ describe("OIGestureManager.ts", () =>
       expect(manager.renderer.removeSymbol).toHaveBeenCalledTimes(1)
       expect(manager.model.removeSymbol).toHaveBeenCalledTimes(1)
       expect(manager.recognizer.eraseStrokes).toHaveBeenCalledTimes(1)
-      expect(manager.undoRedoManager.addModelToStack).toHaveBeenCalledTimes(1)
+      expect(manager.undoRedoManager.push).toHaveBeenCalledTimes(1)
     })
 
     test("should partially erase stroke symbol", async () =>
@@ -440,7 +440,7 @@ describe("OIGestureManager.ts", () =>
       expect(manager.renderer.replaceSymbol).toHaveBeenCalledTimes(1)
       expect(manager.recognizer.eraseStrokes).toHaveBeenCalledTimes(0)
       expect(manager.recognizer.replaceStrokes).toHaveBeenCalledTimes(1)
-      expect(manager.undoRedoManager.addModelToStack).toHaveBeenCalledTimes(1)
+      expect(manager.undoRedoManager.push).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -455,8 +455,7 @@ describe("OIGestureManager.ts", () =>
     behaviors.model.addSymbol(stroke21)
     const gestMan = new OIGestureManager(behaviors)
     gestMan.translator.translate = jest.fn((() => Promise.resolve()))
-    gestMan.undoRedoManager.addModelToStack = jest.fn()
-    gestMan.undoRedoManager.updateModelInStack = jest.fn()
+    gestMan.undoRedoManager.push = jest.fn()
 
     test("should join strokes if between 2 strokes", async () =>
     {
@@ -464,8 +463,7 @@ describe("OIGestureManager.ts", () =>
       await gestMan.applyJoinGesture(strokeGesture)
       expect(gestMan.translator.translate).toHaveBeenCalledTimes(1)
       expect(gestMan.translator.translate).toHaveBeenCalledWith([stroke12], stroke11.boundingBox.xMax - stroke12.boundingBox.xMin, 0)
-      expect(gestMan.undoRedoManager.addModelToStack).toHaveBeenCalledTimes(1)
-      expect(gestMan.undoRedoManager.updateModelInStack).toHaveBeenCalledTimes(1)
+      expect(gestMan.undoRedoManager.push).toHaveBeenCalledTimes(1)
     })
 
     test("should go up strokes if strokesAfter and stroke in previous row", async () =>
@@ -474,8 +472,7 @@ describe("OIGestureManager.ts", () =>
       await gestMan.applyJoinGesture(strokeGesture)
       expect(gestMan.translator.translate).toHaveBeenCalledTimes(1)
       expect(gestMan.translator.translate).toHaveBeenCalledWith([stroke21], stroke12.boundingBox.xMax - stroke21.boundingBox.xMin + 50, -rowHeight)
-      expect(gestMan.undoRedoManager.addModelToStack).toHaveBeenCalledTimes(1)
-      expect(gestMan.undoRedoManager.updateModelInStack).toHaveBeenCalledTimes(1)
+      expect(gestMan.undoRedoManager.push).toHaveBeenCalledTimes(1)
     })
 
     test("should go up strokes if strokesAfter and stroke in previous row", async () =>
@@ -486,8 +483,7 @@ describe("OIGestureManager.ts", () =>
       await gestMan.applyJoinGesture(strokeGesture)
       expect(gestMan.translator.translate).toHaveBeenCalledTimes(1)
       expect(gestMan.translator.translate).toHaveBeenCalledWith([stroke51], 0, -rowHeight)
-      expect(gestMan.undoRedoManager.addModelToStack).toHaveBeenCalledTimes(1)
-      expect(gestMan.undoRedoManager.updateModelInStack).toHaveBeenCalledTimes(1)
+      expect(gestMan.undoRedoManager.push).toHaveBeenCalledTimes(1)
     })
 
   })
@@ -504,7 +500,7 @@ describe("OIGestureManager.ts", () =>
     gestMan.recognizer.eraseStrokes = jest.fn((() => Promise.resolve()))
     gestMan.recognizer.replaceStrokes = jest.fn((() => Promise.resolve()))
     gestMan.recognizer.translateStrokes = jest.fn((() => Promise.resolve()))
-    gestMan.undoRedoManager.addModelToStack = jest.fn()
+    gestMan.undoRedoManager.push = jest.fn()
 
     test("should split", async () =>
     {
@@ -521,7 +517,7 @@ describe("OIGestureManager.ts", () =>
       expect(gestMan.renderer.removeSymbol).toHaveBeenCalledTimes(1)
       expect(gestMan.renderer.drawSymbol).toHaveBeenCalledTimes(2)
       expect(gestMan.recognizer.translateStrokes).toHaveBeenCalledTimes(0)
-      expect(gestMan.undoRedoManager.addModelToStack).toHaveBeenCalledTimes(1)
+      expect(gestMan.undoRedoManager.push).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -534,7 +530,7 @@ describe("OIGestureManager.ts", () =>
     gestMan.renderer.drawSymbol = jest.fn()
     gestMan.model.addSymbol = jest.fn()
     gestMan.model.updateSymbol = jest.fn()
-    gestMan.undoRedoManager.addModelToStack = jest.fn()
+    gestMan.undoRedoManager.push = jest.fn()
 
     test("should do nothing if gesture as no strokeIds", async () =>
     {
@@ -549,7 +545,7 @@ describe("OIGestureManager.ts", () =>
       expect(gestMan.renderer.drawSymbol).toHaveBeenCalledTimes(0)
       expect(gestMan.model.addSymbol).toHaveBeenCalledTimes(0)
       expect(gestMan.model.updateSymbol).toHaveBeenCalledTimes(0)
-      expect(gestMan.undoRedoManager.addModelToStack).toHaveBeenCalledTimes(0)
+      expect(gestMan.undoRedoManager.push).toHaveBeenCalledTimes(0)
     })
 
     test("should draw symbol", async () =>
@@ -576,7 +572,7 @@ describe("OIGestureManager.ts", () =>
     gestMan.renderer.drawSymbol = jest.fn()
     gestMan.model.addSymbol = jest.fn()
     gestMan.model.updateSymbol = jest.fn()
-    gestMan.undoRedoManager.addModelToStack = jest.fn()
+    gestMan.undoRedoManager.push = jest.fn()
 
     test("should do nothing if gesture as no strokeIds", async () =>
     {
@@ -591,7 +587,7 @@ describe("OIGestureManager.ts", () =>
       expect(gestMan.renderer.drawSymbol).toHaveBeenCalledTimes(0)
       expect(gestMan.model.addSymbol).toHaveBeenCalledTimes(0)
       expect(gestMan.model.updateSymbol).toHaveBeenCalledTimes(0)
-      expect(gestMan.undoRedoManager.addModelToStack).toHaveBeenCalledTimes(0)
+      expect(gestMan.undoRedoManager.push).toHaveBeenCalledTimes(0)
     })
 
     test("should draw symbol", async () =>

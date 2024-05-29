@@ -261,13 +261,13 @@ describe("Editor.ts", () =>
 
   describe("context", () =>
   {
-    test("should get context", async () =>
+    test("should get behaviors context", async () =>
     {
       const wrapperHTML: HTMLElement = document.createElement("div")
       wrapperHTML.style.height = "100px"
       wrapperHTML.style.width = "100px"
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
-      expect(editor.context).toBe(editor.behaviors.context)
+      expect(editor.context).toBe(editor.behaviors.history.context)
     })
   })
 
@@ -665,7 +665,7 @@ describe("Editor.ts", () =>
     {
       editor.events.emitChanged = jest.fn()
       expect(editor.events.emitChanged).toBeCalledTimes(0)
-      InternalEvent.getInstance().emitContextChange({ canRedo: true, canUndo: true, empty: false, possibleUndoCount: 10, stack: [], stackIndex: 11 })
+      InternalEvent.getInstance().emitContextChange({ canRedo: true, canUndo: true, empty: false, possibleUndoCount: 10, stackIndex: 11 })
       expect(editor.events.emitChanged).toBeCalledTimes(1)
     })
     // TODO problem with internal event singleton

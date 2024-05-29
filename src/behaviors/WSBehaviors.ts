@@ -7,7 +7,7 @@ import { IModel, Model, TExport } from "../model"
 import { TWSMessageEventSVGPatch, WSRecognizer } from "../recognizer"
 import { WSSVGRenderer } from "../renderer"
 import { DefaultPenStyle, StyleManager, TPenStyle, TTheme } from "../style"
-import { TUndoRedoContext, UndoRedoManager } from "../undo-redo"
+import { HistoryManager } from "../history"
 import { DeferredPromise, PartialDeep } from "../utils"
 import { Stroke, TStroke, TPointer } from "../primitive"
 import { IBehaviors, TBehaviorOptions } from "./IBehaviors"
@@ -26,7 +26,7 @@ export class WSBehaviors implements IBehaviors
   grabber: PointerEventGrabber
   renderer: WSSVGRenderer
   recognizer: WSRecognizer
-  undoRedoManager: UndoRedoManager
+  history: HistoryManager
   styleManager: StyleManager
   intention: Intention
 
@@ -55,7 +55,7 @@ export class WSBehaviors implements IBehaviors
 
     this.intention = Intention.Write
     this.#model = new Model()
-    this.undoRedoManager = new UndoRedoManager(this.#configuration["undo-redo"], this.model)
+    this.history = new HistoryManager(this.#configuration["undo-redo"])
   }
 
   get internalEvent(): InternalEvent
@@ -66,11 +66,6 @@ export class WSBehaviors implements IBehaviors
   get model(): Model
   {
     return this.#model
-  }
-
-  get context(): TUndoRedoContext
-  {
-    return this.undoRedoManager.context
   }
 
   get configuration(): TConfiguration
@@ -167,7 +162,7 @@ export class WSBehaviors implements IBehaviors
     const compStyles = window.getComputedStyle(domElement);
     this.model.width = Math.max(parseInt(compStyles.width.replace("px","")), this.#configuration.rendering.minWidth)
     this.model.height = Math.max(parseInt(compStyles.height.replace("px","")), this.#configuration.rendering.minHeight)
-    this.undoRedoManager.updateModelInStack(this.model)
+    this.history.push(this.model)
 
     this.renderer.init(domElement)
 
@@ -200,11 +195,11 @@ export class WSBehaviors implements IBehaviors
     if (this.#configuration.triggers.exportContent !== "DEMAND") {
       const unsentStrokes = this.model.extractUnsentStrokes()
       this.model.updatePositionSent()
-      this.undoRedoManager.addModelToStack(this.model)
+      this.history.push(this.model)
       this.renderer.clearErasingStrokes()
       const exports = await this.recognizer.addStrokes(unsentStrokes)
       this.model.mergeExport(exports)
-      this.undoRedoManager.updateModelInStack(this.model)
+      this.history.updateStack(this.model)
     }
     this.#logger.debug("synchronizeModelWithBackend", this.model)
     return this.model
@@ -240,20 +235,20 @@ export class WSBehaviors implements IBehaviors
   async convert(conversionState?: TConverstionState): Promise<IModel>
   {
     this.#logger.info("convert", { conversionState })
-    this.undoRedoManager.addModelToStack(this.model)
-    this.context.stack.push(this.model.clone())
+    this.history.push(this.model)
+    this.history.stack.push(this.model.clone())
     this.#model = await this.recognizer.convert(this.model, conversionState)
     this.#logger.debug("convert", this.model)
-    this.undoRedoManager.addModelToStack(this.model)
+    this.history.push(this.model)
     return this.model
   }
 
   async import(data: Blob, mimeType?: string): Promise<IModel>
   {
     this.#logger.info("import", { data, mimeType })
-    this.context.stack.push(this.model.clone())
+    this.history.stack.push(this.model.clone())
     const m = await this.recognizer.import(this.model, data, mimeType)
-    this.undoRedoManager.addModelToStack(m)
+    this.history.push(m)
     return m
   }
 
@@ -340,8 +335,8 @@ export class WSBehaviors implements IBehaviors
   async undo(): Promise<IModel>
   {
     this.#logger.info("undo")
-    if (this.context.canUndo) {
-      this.#model = this.undoRedoManager.undo() as Model
+    if (this.history.context.canUndo) {
+      this.#model = this.history.undo() as Model
       return this.recognizer.undo(this.model)
     }
     else {
@@ -352,8 +347,8 @@ export class WSBehaviors implements IBehaviors
   async redo(): Promise<IModel>
   {
     this.#logger.info("redo")
-    if (this.context.canRedo) {
-      this.#model = this.undoRedoManager.redo() as Model
+    if (this.history.context.canRedo) {
+      this.#model = this.history.redo() as Model
       this.#logger.debug("undo", this.#model)
       return this.recognizer.redo(this.model)
     }
@@ -366,7 +361,7 @@ export class WSBehaviors implements IBehaviors
   {
     this.#logger.info("clear")
     this.model.clear()
-    this.undoRedoManager.addModelToStack(this.model)
+    this.history.push(this.model)
     return this.recognizer.clear(this.model)
   }
 

@@ -25,7 +25,7 @@ import
 import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
 import { TStyle } from "../style"
-import { UndoRedoManager } from "../undo-redo"
+import { HistoryManager } from "../history"
 import { OIGestureManager } from "./OIGestureManager"
 import { OISnapManager } from "./OISnapManager"
 
@@ -75,9 +75,9 @@ export class OIWriteManager
     return this.behaviors.renderer
   }
 
-  get undoRedoManager(): UndoRedoManager
+  get undoRedoManager(): HistoryManager
   {
-    return this.behaviors.undoRedoManager
+    return this.behaviors.history
   }
 
   get gestureManager(): OIGestureManager
@@ -252,14 +252,13 @@ export class OIWriteManager
         }
         else {
           this.model.addSymbol(symbol)
-          this.undoRedoManager.addModelToStack(this.model)
+          this.undoRedoManager.push(this.model)
         }
       }
-      this.undoRedoManager.updateModelInStack(this.model)
     }
     else {
       this.model.addSymbol(symbol)
-      this.undoRedoManager.addModelToStack(this.model)
+      this.undoRedoManager.push(this.model)
     }
   }
 }

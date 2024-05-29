@@ -5,7 +5,7 @@ import { OIModel, TJIIXChar, TJIIXEdgeArc, TJIIXEdgeElement, TJIIXEdgeLine, TJII
 import { Box, DecoratorKind, EdgeKind, OIDecorator, OIEdgeArc, OIEdgeLine, OIShapeCircle, OIShapeEllipse, OIShapePolygon, OIStroke, OIText, SymbolType, TOIEdge, TOIShape, TOISymbol, TOISymbolChar, TPoint } from "../primitive"
 import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
-import { UndoRedoManager } from "../undo-redo"
+import { HistoryManager } from "../history"
 import { computeAngleAxeRadian, computeAverage, convertBoundingBoxMillimeterToPixel, convertMillimeterToPixel, createUUID, rotatePoint } from "../utils"
 import { OISelectionManager } from "./OISelectionManager"
 import { OITextManager } from "./OITextManager"
@@ -30,9 +30,9 @@ export class OIConversionManager
     return this.behaviors.model
   }
 
-  get undoRedoManager(): UndoRedoManager
+  get undoRedoManager(): HistoryManager
   {
-    return this.behaviors.undoRedoManager
+    return this.behaviors.history
   }
 
   get selector(): OISelectionManager
@@ -369,7 +369,7 @@ export class OIConversionManager
 
       this.behaviors.texter.adjustText()
       await this.recognizer.eraseStrokes(convertedSymbols.flatMap(cs => cs.strokeIds))
-      this.undoRedoManager.addModelToStack(this.model)
+      this.undoRedoManager.push(this.model)
     }
 
   }

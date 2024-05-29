@@ -21,7 +21,7 @@ import
 } from "../primitive"
 import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
-import { UndoRedoManager } from "../undo-redo"
+import { HistoryManager } from "../history"
 import { OIDebugSVGManager } from "./OIDebugSVGManager"
 import { OISelectionManager } from "./OISelectionManager"
 import { OISnapManager } from "./OISnapManager"
@@ -52,9 +52,9 @@ export class OIResizeManager
     return this.behaviors.model
   }
 
-  get undoRedoManager(): UndoRedoManager
+  get undoRedoManager(): HistoryManager
   {
-    return this.behaviors.undoRedoManager
+    return this.behaviors.history
   }
 
   get selector(): OISelectionManager
@@ -293,7 +293,7 @@ export class OIResizeManager
     })
     const promise = this.recognizer.replaceStrokes(strokesResized.map(s => s.id), strokesResized)
     this.selector.resetSelectedGroup(this.model.symbolsSelected)
-    this.undoRedoManager.addModelToStack(this.model)
+    this.undoRedoManager.push(this.model)
     this.interactElementsGroup = undefined
     this.selector.showInteractElements()
     await promise
