@@ -178,6 +178,14 @@ export type TJIIXEdgeLine = TJIIXEdgeElement & {
 /**
  * @group Model/Export
  */
+export type TJIIXEdgePolyEdge = TJIIXEdgeElement & {
+  kind: EdgeKind.PolyEdge
+  edges: TJIIXEdgeLine[]
+}
+
+/**
+ * @group Model/Export
+ */
 export type TJIIXEdgeArc = TJIIXEdgeElement & {
   kind: EdgeKind.Arc
   cx: number,
