@@ -1,8 +1,8 @@
 import { LoggerClass } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerManager } from "../logger"
-import { OIModel, TJIIXChar, TJIIXEdgeArc, TJIIXEdgeElement, TJIIXEdgeLine, TJIIXExport, TJIIXNodeCircle, TJIIXNodeElement, TJIIXNodeEllipse, TJIIXNodePolygon, TJIIXNodeRectangle, TJIIXTextElement, TJIIXWord } from "../model"
-import { Box, DecoratorKind, EdgeKind, OIDecorator, OIEdgeArc, OIEdgeLine, OIShapeCircle, OIShapeEllipse, OIShapePolygon, OIStroke, OIText, SymbolType, TOIEdge, TOIShape, TOISymbol, TOISymbolChar, TPoint } from "../primitive"
+import { OIModel, TJIIXChar, TJIIXEdgeArc, TJIIXEdgeElement, TJIIXEdgeLine, TJIIXEdgePolyEdge, TJIIXExport, TJIIXNodeCircle, TJIIXNodeElement, TJIIXNodeEllipse, TJIIXNodePolygon, TJIIXNodeRectangle, TJIIXTextElement, TJIIXWord } from "../model"
+import { Box, DecoratorKind, EdgeKind, OIDecorator, OIEdgeArc, OIEdgeLine, OIEdgePolyLine, OIShapeCircle, OIShapeEllipse, OIShapePolygon, OIStroke, OIText, SymbolType, TOIEdge, TOIShape, TOISymbol, TOISymbolChar, TPoint } from "../primitive"
 import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
 import { OIHistoryManager } from "../history"
@@ -276,6 +276,29 @@ export class OIConversionManager
     return new OIEdgeLine(strokes[0]?.style, point1, point2, line.p1Decoration, line.p2Decoration)
   }
 
+  buildPolyEdge(polyline: TJIIXEdgePolyEdge, strokes: OIStroke[]): OIEdgePolyLine
+  {
+    const start: TPoint = { x: convertMillimeterToPixel(polyline.edges[0].x1), y: convertMillimeterToPixel(polyline.edges[0].y1) }
+    const points = polyline.edges.map(e => ({ x: convertMillimeterToPixel(e.x2), y: convertMillimeterToPixel(e.y2) }))
+    points.unshift(start)
+    for (let index = 0; index < points.length - 1; index++) {
+      const p1 = points[index]
+      const p2 = points[index]
+      const angle = computeAngleAxeRadian(p1, p2)
+      if (Math.abs(angle) < 0.1) {
+        p1.y = computeAverage([p1.y, p2.y])
+        p2.y = computeAverage([p1.y, p2.y])
+      }
+      else if (Math.abs(angle) - Math.PI / 2 < 0.1) {
+        p1.x = computeAverage([p1.x, p2.x])
+        p2.x = computeAverage([p1.x, p2.x])
+      }
+    }
+    points.shift()
+    const end = points.pop()!
+    return new OIEdgePolyLine(strokes[0]?.style, start, points, end, polyline.edges[0].p1Decoration, polyline.edges.at(-1)!.p2Decoration)
+  }
+
   buildArc(arc: TJIIXEdgeArc, strokes: OIStroke[]): OIEdgeArc
   {
     const center: TPoint = { x: convertMillimeterToPixel(arc.cx), y: convertMillimeterToPixel(arc.cy) }
@@ -291,21 +314,32 @@ export class OIConversionManager
 
   convertEdge(edge: TJIIXEdgeElement): { symbol: TOIEdge, strokes: OIStroke[] } | undefined
   {
-    const associatedStroke = this.strokes.filter(s => edge.items?.some(i => i["full-id"] === s.id))
-    if (!associatedStroke.length) return
-    const uniqStrokes = associatedStroke.filter((a, i) => associatedStroke.findIndex((s) => a.id === s.id) === i)
-
     let oiEdge: TOIEdge
-    switch (edge.kind) {
-      case EdgeKind.Line:
-        oiEdge = this.buildLine(edge as TJIIXEdgeLine, uniqStrokes)
-        break
-      case EdgeKind.Arc:
-        oiEdge = this.buildArc(edge as TJIIXEdgeArc, uniqStrokes)
-        break
-      default:
-        this.#logger.warn("convertEdge", `Conversion of Edge with kind equal to ${ edge.kind } is unknow`)
-        return
+    let uniqStrokes: OIStroke[] = []
+    if (edge.kind === EdgeKind.PolyEdge) {
+      const poly = edge as TJIIXEdgePolyEdge
+
+      const associatedStroke = this.strokes.filter(s => poly.edges.flatMap(e => e.items)?.some(i => i!["full-id"] === s.id))
+      if (!associatedStroke.length) return
+      uniqStrokes = associatedStroke.filter((a, i) => associatedStroke.findIndex((s) => a.id === s.id) === i)
+
+      oiEdge = this.buildPolyEdge(edge as TJIIXEdgePolyEdge, uniqStrokes)
+    }
+    else {
+      const associatedStroke = this.strokes.filter(s => edge.items?.some(i => i["full-id"] === s.id))
+      if (!associatedStroke.length) return
+      uniqStrokes = associatedStroke.filter((a, i) => associatedStroke.findIndex((s) => a.id === s.id) === i)
+      switch (edge.kind) {
+        case EdgeKind.Line:
+          oiEdge = this.buildLine(edge as TJIIXEdgeLine, uniqStrokes)
+          break
+        case EdgeKind.Arc:
+          oiEdge = this.buildArc(edge as TJIIXEdgeArc, uniqStrokes)
+          break
+        default:
+          this.#logger.warn("convertEdge", `Conversion of Edge with kind equal to ${ edge.kind } is unknow`)
+          return
+      }
     }
 
     return { symbol: oiEdge, strokes: uniqStrokes }

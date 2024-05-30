@@ -12,6 +12,7 @@ import { SymbolType } from "./Symbol"
 export enum EdgeKind
 {
   Line = "line",
+  PolyEdge = "polyedge",
   Arc = "arc",
 }
 
