@@ -20,7 +20,7 @@ import
 } from "../primitive"
 import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
-import { HistoryManager } from "../history"
+import { OIHistoryManager } from "../history"
 import { computeAngleRadian, converDegreeToRadian, convertRadianToDegree, rotatePoint } from "../utils"
 import { OIDebugSVGManager } from "./OIDebugSVGManager"
 import { OISelectionManager } from "./OISelectionManager"
@@ -54,7 +54,7 @@ export class OIRotationManager
     return this.behaviors.renderer
   }
 
-  get undoRedoManager(): HistoryManager
+  get history(): OIHistoryManager
   {
     return this.behaviors.history
   }
@@ -220,6 +220,7 @@ export class OIRotationManager
     const angleDegree = this.continue(point)
     const strokesRotated: OIStroke[] = []
     const angleRad = 2 * Math.PI - converDegreeToRadian(angleDegree)
+    const oldSymbols = this.model.symbolsSelected.map(s => s.clone())
     this.model.symbolsSelected.forEach(s =>
     {
       this.applyToSymbol(s, this.center, angleRad)
@@ -230,8 +231,8 @@ export class OIRotationManager
       }
     })
     this.selector.resetSelectedGroup(this.model.symbolsSelected)
-    this.undoRedoManager.push(this.model)
     const promise = this.recognizer.replaceStrokes(strokesRotated.map(s => s.id), strokesRotated)
+    this.history.push(this.model, { replaced: { oldSymbols, newSymbols: this.model.symbolsSelected } })
     this.interactElementsGroup = undefined
     this.selector.showInteractElements()
     await promise

@@ -5,7 +5,7 @@ import { OIModel } from "../model"
 import { OIEraser, SymbolType, TPointer } from "../primitive"
 import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
-import { HistoryManager } from "../history"
+import { OIHistoryManager } from "../history"
 
 /**
  * @group Manager
@@ -33,7 +33,7 @@ export class OIEraseManager
     return this.behaviors.renderer
   }
 
-  get undoRedoManager(): HistoryManager
+  get history(): OIHistoryManager
   {
     return this.behaviors.history
   }
@@ -77,7 +77,7 @@ export class OIEraseManager
         this.model.removeSymbol(s.id)
         this.renderer.removeSymbol(s.id)
       })
-      this.undoRedoManager.push(this.model)
+      this.history.push(this.model, { erased: symbolsToDelete })
       await this.recognizer.eraseStrokes(symbolsToDelete.filter(s => s.type === SymbolType.Stroke).map(s => s.id))
     }
   }

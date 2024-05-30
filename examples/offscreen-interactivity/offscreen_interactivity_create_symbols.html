@@ -162,9 +162,9 @@
         });
 
         editor.events.addEventListener("changed", (event) => {
-          createAllBtn.disabled = symbolsCreated.some(sc => event.detail.stack[event.detail.stackIndex].symbols.some(s => s.id === sc.id));
+          createAllBtn.disabled = symbolsCreated.some(sc => editor.model.symbols.some(s => s.id === sc.id));
           symbols.forEach(sc => {
-            document.getElementById(`add-symbol-${sc.type}-btn`).disabled = symbolsCreated.some(sc => event.detail.stack[event.detail.stackIndex].symbols.some(s => s.id === sc.id && s.type === sc.type));
+            document.getElementById(`add-symbol-${sc.type}-btn`).disabled = symbolsCreated.some(sc => editor.model.symbols.some(s => s.id === sc.id && s.type === sc.type));
           })
         });
 
