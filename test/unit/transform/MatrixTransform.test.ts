@@ -1,5 +1,3 @@
-
-
 import { MatrixTransform, TPoint } from "../../../src/iink"
 
 describe("MatrixTransform.ts", () =>
@@ -67,6 +65,19 @@ describe("MatrixTransform.ts", () =>
     expect(MatrixTransform.toCssString(matrix)).toBe("matrix(1, 0, 0, 1, 20, 25)")
   })
 
+  test("should invert matrix translate to x:20 & y: 25", () =>
+  {
+    const matrix = new MatrixTransform(1, 0, 0, 1, 20, 25)
+    matrix.invert()
+    expect(matrix.tx).toBe(-20)
+    expect(matrix.ty).toBe(-25)
+    expect(matrix.xx).toBe(1)
+    expect(matrix.xy).toBe(-0)
+    expect(matrix.yx).toBe(-0)
+    expect(matrix.yy).toBe(1)
+    expect(MatrixTransform.toCssString(matrix)).toBe("matrix(1, 0, 0, 1, -20, -25)")
+  })
+
   test("should scale to 0.5 & rotate to 90°", () =>
   {
     const matrix = new MatrixTransform(1, 0, 0, 1, 0, 0)
@@ -93,6 +104,32 @@ describe("MatrixTransform.ts", () =>
     expect(matrix.yx).toBe(0.5)
     expect(matrix.yy).toBe(0)
     expect(MatrixTransform.toCssString(matrix)).toBe("matrix(0, 0.5, -0.5, 0, 0, 0)")
+  })
+
+  test("should invert matrix rotate to 90° & scale to 0.5", () =>
+  {
+    const matrix = new MatrixTransform(0, 0.5, -0.5, 0, 0, 0)
+    matrix.invert()
+    expect(matrix.tx).toBe(-0)
+    expect(matrix.ty).toBe(0)
+    expect(matrix.xx).toBe(0)
+    expect(matrix.xy).toBe(2)
+    expect(matrix.yx).toBe(-2)
+    expect(matrix.yy).toBe(0)
+    expect(MatrixTransform.toCssString(matrix)).toBe("matrix(0, -2, 2, 0, 0, 0)")
+  })
+
+  test("should get identity when multiply matrix with inverse", () =>
+  {
+    const matrix = new MatrixTransform(0, -2, 2, 0, 0, 0)
+    const inverse = new MatrixTransform(0, 0.5, -0.5, 0, 0, 0)
+    matrix.multiply(inverse)
+    expect(matrix.tx).toBe(0)
+    expect(matrix.ty).toBe(0)
+    expect(matrix.xx).toBe(1)
+    expect(matrix.xy).toBe(0)
+    expect(matrix.yx).toBe(0)
+    expect(matrix.yy).toBe(1)
   })
 
   describe("applyToPoint", () =>

@@ -25,7 +25,7 @@ import
 import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
 import { TStyle } from "../style"
-import { HistoryManager } from "../history"
+import { OIHistoryManager } from "../history"
 import { OIGestureManager } from "./OIGestureManager"
 import { OISnapManager } from "./OISnapManager"
 
@@ -75,7 +75,7 @@ export class OIWriteManager
     return this.behaviors.renderer
   }
 
-  get undoRedoManager(): HistoryManager
+  get history(): OIHistoryManager
   {
     return this.behaviors.history
   }
@@ -252,13 +252,13 @@ export class OIWriteManager
         }
         else {
           this.model.addSymbol(symbol)
-          this.undoRedoManager.push(this.model)
+          this.history.push(this.model, { added: [symbol]})
         }
       }
     }
     else {
       this.model.addSymbol(symbol)
-      this.undoRedoManager.push(this.model)
+      this.history.push(this.model, { added: [symbol]})
     }
   }
 }

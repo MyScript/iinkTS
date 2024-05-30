@@ -21,7 +21,7 @@ import
 } from "../primitive"
 import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
-import { HistoryManager } from "../history"
+import { OIHistoryManager } from "../history"
 import { OIDebugSVGManager } from "./OIDebugSVGManager"
 import { OISelectionManager } from "./OISelectionManager"
 import { OISnapManager } from "./OISnapManager"
@@ -52,7 +52,7 @@ export class OIResizeManager
     return this.behaviors.model
   }
 
-  get undoRedoManager(): HistoryManager
+  get history(): OIHistoryManager
   {
     return this.behaviors.history
   }
@@ -202,7 +202,8 @@ export class OIResizeManager
     this.transformOrigin = origin
     this.boundingBox = Box.createFromPoints(this.model.symbolsSelected.flatMap(s => s.vertices))
     this.setTransformOrigin(this.interactElementsGroup!.id, this.transformOrigin.x, this.transformOrigin.y)
-    this.model.symbolsSelected.forEach(s => {
+    this.model.symbolsSelected.forEach(s =>
+    {
       this.setTransformOrigin(s.id, this.transformOrigin.x, this.transformOrigin.y)
     })
 
@@ -267,7 +268,8 @@ export class OIResizeManager
       }
     }
     this.scaleElement(this.interactElementsGroup.id, scaleX, scaleY)
-    this.model.symbolsSelected.forEach(s => {
+    this.model.symbolsSelected.forEach(s =>
+    {
       this.scaleElement(s.id, scaleX, scaleY)
     })
     return {
@@ -282,6 +284,7 @@ export class OIResizeManager
     const { scaleX, scaleY } = this.continue(point)
     this.snaps.clearSnapToElementLines()
     const strokesResized: OIStroke[] = []
+    const oldSymbols = this.model.symbolsSelected.map(s => s.clone())
     this.model.symbolsSelected.forEach(s =>
     {
       this.applyToSymbol(s, this.transformOrigin, scaleX, scaleY)
@@ -293,7 +296,7 @@ export class OIResizeManager
     })
     const promise = this.recognizer.replaceStrokes(strokesResized.map(s => s.id), strokesResized)
     this.selector.resetSelectedGroup(this.model.symbolsSelected)
-    this.undoRedoManager.push(this.model)
+    this.history.push(this.model, { replaced: { oldSymbols, newSymbols: this.model.symbolsSelected } })
     this.interactElementsGroup = undefined
     this.selector.showInteractElements()
     await promise

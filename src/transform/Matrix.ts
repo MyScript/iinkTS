@@ -89,6 +89,18 @@ export class MatrixTransform implements TMatrixTransform
     return `matrix(${ matrix.xx }, ${ matrix.yx }, ${ matrix.xy }, ${ matrix.yy }, ${ matrix.tx }, ${ matrix.ty })`
   }
 
+	invert() {
+		const { xx, yx, xy, yy, tx, ty } = this
+		const denom = xx * yy - yx * xy
+		this.xx = yy / denom
+		this.yx = yx / -denom
+		this.xy = xy / -denom
+		this.yy = xx / denom
+		this.tx = (yy * tx - xy * ty) / -denom
+		this.ty = (yx * tx - xx * ty) / denom
+		return this
+	}
+
   multiply(m: TMatrixTransform): MatrixTransform
   {
     const { xx, yx, xy, yy, tx, ty } = this

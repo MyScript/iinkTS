@@ -3,12 +3,13 @@ import { TUndoRedoConfiguration } from "../configuration"
 import { InternalEvent } from "../event"
 import { LoggerManager } from "../logger"
 import { IModel } from "../model"
+import { IHistoryManager } from "./IHistoryManager"
 import { TUndoRedoContext, getInitialUndoRedoContext } from "./UndoRedoContext"
 
 /**
  * @group History
  */
-export class HistoryManager
+export class HistoryManager implements IHistoryManager
 {
   #logger = LoggerManager.getLogger(LoggerClass.HISTORY)
 
