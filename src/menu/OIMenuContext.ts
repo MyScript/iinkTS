@@ -2,8 +2,9 @@ import ArrowDown from "../assets/svg/nav-arrow-down.svg"
 import { LoggerClass, SELECTION_MARGIN } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerManager } from "../logger"
-import { Box, DecoratorKind, OIDecorator, OIStroke, OIText, SymbolType, TOISymbol } from "../primitive"
+import { Box, DecoratorKind, OIDecorator, OIStroke, OISymbolGroup, OIText, SymbolType, TOISymbol } from "../primitive"
 import { OIMenu, TMenuItemBoolean, TMenuItemButton, TMenuItemColorList } from "./OIMenu"
+import { createUUID } from "../utils"
 
 /**
  * @group Menu
@@ -18,6 +19,7 @@ export class OIMenuContext extends OIMenu
   decoratorMenu?: HTMLDivElement
   menuExport?: HTMLDivElement
   duplicateBtn?: HTMLButtonElement
+  groupBtn?: HTMLButtonElement
   removeBtn?: HTMLButtonElement
 
   position: {
@@ -45,9 +47,9 @@ export class OIMenuContext extends OIMenu
     return this.symbolsSelected.length > 0
   }
 
-  get symbolsDecorable(): (OIStroke | OIText)[]
+  get symbolsDecorable(): (OIStroke | OIText | OISymbolGroup)[]
   {
-    return this.symbolsSelected.filter(s => s.type === SymbolType.Stroke || s.type === SymbolType.Text) as (OIStroke | OIText)[]
+    return this.symbolsSelected.filter(s => [SymbolType.Stroke.toString(), SymbolType.Text.toString(), SymbolType.Group.toString()].includes(s.type)) as (OIStroke | OIText)[]
   }
   get showDecorator(): boolean
   {
@@ -67,10 +69,12 @@ export class OIMenuContext extends OIMenu
       const duplicatedSymbols = symbolsToDuplicate.map(s =>
       {
         const clone = s.clone()
-        let duplicateNumber = 1
         while (this.behaviors.model.symbols.find(s => s.id === clone.id)) {
-          clone.id = clone.id + `_${ duplicateNumber }`
-          duplicateNumber++
+          clone.id = clone.id.slice(0, -36) + `-${ createUUID() }`
+          if (clone.type === SymbolType.Group) {
+            const groupClone = clone as OISymbolGroup
+            groupClone.extractSymbols().forEach(s => s.id = s.id.slice(0, -36)+ `-${ createUUID() }`)
+          }
         }
         clone.selected = true
         this.behaviors.translator.applyToSymbol(clone, selectionBox.width + 2 * SELECTION_MARGIN, 0)
@@ -82,6 +86,30 @@ export class OIMenuContext extends OIMenu
       this.behaviors.selector.drawSelectedGroup(duplicatedSymbols)
     })
     return this.duplicateBtn
+  }
+
+  protected createMenuGroup(): HTMLElement
+  {
+    this.groupBtn = document.createElement("button")
+    this.groupBtn.id = `${ this.id }-duplicate`
+    this.groupBtn.textContent = "Group"
+    this.groupBtn.classList.add("ms-menu-button")
+    this.groupBtn.addEventListener("pointerup", async () =>
+    {
+      if (this.symbolsSelected.length === 1 && this.symbolsSelected[0].type === SymbolType.Group)
+      {
+        const symbols = this.behaviors.ungroupSymbol(this.symbolsSelected[0] as OISymbolGroup)
+        this.behaviors.select(symbols.map(s => s.id))
+      }
+      else {
+        const symbols = this.symbolsSelected.slice()
+        this.behaviors.unselectAll()
+        const group = this.behaviors.groupSymbols(symbols)
+        group.selected = true
+        this.behaviors.select([group.id])
+      }
+    })
+    return this.groupBtn
   }
 
   protected createMenuRemove(): HTMLButtonElement
@@ -372,10 +400,27 @@ export class OIMenuContext extends OIMenu
     }
   }
 
+  protected updateGroupMenu(): void
+  {
+    if (this.groupBtn && this.haveSymbolsSelected) {
+      this.groupBtn.style.removeProperty("display")
+      if (this.symbolsSelected.length === 1 && this.symbolsSelected[0].type === SymbolType.Group) {
+        this.groupBtn.textContent = "UnGroup"
+      }
+      else {
+        this.groupBtn.textContent = "Group"
+      }
+    }
+    else {
+      this.groupBtn?.style.setProperty("display", "none")
+    }
+  }
+
   update(): void
   {
     this.wrapper?.style.setProperty("left", `${ this.position.x - this.position.scrollLeft }px`)
     this.wrapper?.style.setProperty("top", `${ this.position.y - this.position.scrollTop }px`)
+
     if (this.haveSymbolsSelected)
     {
       this.reorderMenu?.style.removeProperty("display")
@@ -394,6 +439,7 @@ export class OIMenuContext extends OIMenu
       this.menuExport?.style.setProperty("display", "none")
     }
     this.updateDecoratorSubMenu()
+    this.updateGroupMenu()
   }
 
   render(domElement: HTMLElement): void
@@ -403,6 +449,7 @@ export class OIMenuContext extends OIMenu
     this.wrapper.classList.add("ms-menu", "ms-menu-context")
     this.wrapper.appendChild(this.createMenuDecorator())
     this.wrapper.appendChild(this.createMenuDuplicate())
+    this.wrapper.appendChild(this.createMenuGroup())
     this.wrapper.appendChild(this.createMenuReorder())
     this.wrapper.appendChild(this.createMenuExport())
     this.wrapper.appendChild(this.createMenuSelectAll())

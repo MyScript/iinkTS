@@ -157,8 +157,8 @@ async function loadEditor() {
    */
   await editor.initialize();
 
-  const strokeRes = await fetch("../assets/datas/shakespeare-quotes.json");
-  const pointersToImport = await strokeRes.json();
+  const symbolsToCreateResponse = await fetch("../assets/datas/shakespeare-quotes.json");
+  const symbolsToCreate = await symbolsToCreateResponse.json();
 
   let exportTimeout;
   editor.events.addEventListener("changed", (event) => {
@@ -166,7 +166,7 @@ async function loadEditor() {
       importBtn.disabled = false;
     }
     else {
-      importBtn.disabled = editor.model.symbols.some(s1 => pointersToImport.some(s2 => s2.id === s1.id))
+      importBtn.disabled = editor.model.symbols.some(s1 => symbolsToCreate.some(s2 => s2.id === s1.id))
     }
     clearTimeout(exportTimeout)
     exportTimeout = setTimeout(() => editor.export(["text/html"]), 1000);
@@ -175,6 +175,9 @@ async function loadEditor() {
   editor.events.addEventListener("exported", (event) => {
     if (event.detail?.["text/html"]) {
       exportHtmlBody.srcdoc = event.detail["text/html"];
+    }
+    else {
+      exportHtmlBody.srcdoc = ""
     }
   });
 
@@ -196,12 +199,12 @@ async function loadEditor() {
 
   importBtn.addEventListener("pointerup", async () => {
     importBtn.disabled = true;
-    await editor.importPointEvents(pointersToImport);
+    await editor.behaviors.createSymbols(symbolsToCreate);
   });
 
   showImportBtn.addEventListener("pointerup", async () => {
     const title = `Pointers to import`;
-    showModal(title, renderjson(pointersToImport));
+    showModal(title, renderjson(symbolsToCreate));
   });
 
   showJIIXBtn.addEventListener("pointerup", async () => {

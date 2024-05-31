@@ -2,7 +2,7 @@ import { LoggerClass } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerManager } from "../logger"
 import { OIModel } from "../model"
-import { Box, OIText, SymbolType, TOISymbolChar } from "../primitive"
+import { Box, OISymbolGroup, OIText, SymbolType, TOISymbolChar } from "../primitive"
 import { OISVGRenderer } from "../renderer"
 import { computeAverage } from "../utils"
 
@@ -41,7 +41,7 @@ export class OITextManager
     clone.id = "text-to-measure"
     clone.chars.forEach(c => c.id += "to-measure")
     this.renderer.layer.querySelector(`#${ clone.id }`)?.remove()
-    const el = this.renderer.getSymbolElement(clone) as SVGGElement
+    const el = this.renderer.util.getSymbolElement(clone) as SVGGElement
     el.setAttribute("visibility", "hidden")
     this.renderer.prependElement(el)
     return el
@@ -105,24 +105,26 @@ export class OITextManager
 
   alignTextToRow(textSymbols: OIText[]): void
   {
-    let lastX = textSymbols[0].point.x
-    const symbolWhitoutSpaceBefore = [",", "."]
-    textSymbols.forEach((s, i) =>
-    {
-      const textSymbol = s as OIText
-      const fontSize = computeAverage(textSymbol.chars.map(c => c.fontSize))
-      const whiteSpaceWidth = (i === 0 || symbolWhitoutSpaceBefore.includes(textSymbol.label)) ? 0 : this.getSpaceWidth(fontSize)
-      textSymbol.point.y = Math.round(textSymbol.point.y / this.rowHeight) * this.rowHeight
-      textSymbol.point.x = lastX + whiteSpaceWidth
-      textSymbol.boundingBox.x = lastX + whiteSpaceWidth
+    if (textSymbols?.length) {
+      let lastX = textSymbols[0].point.x
+      const symbolWhitoutSpaceBefore = [",", "."]
+      textSymbols.forEach((s, i) =>
+      {
+        const textSymbol = s as OIText
+        const fontSize = computeAverage(textSymbol.chars.map(c => c.fontSize))
+        const whiteSpaceWidth = (i === 0 || symbolWhitoutSpaceBefore.includes(textSymbol.label)) ? 0 : this.getSpaceWidth(fontSize)
+        textSymbol.point.y = Math.round(textSymbol.point.y / this.rowHeight) * this.rowHeight
+        textSymbol.point.x = lastX + whiteSpaceWidth
+        textSymbol.boundingBox.x = lastX + whiteSpaceWidth
 
-      lastX = textSymbol.boundingBox.xMax
+        lastX = textSymbol.boundingBox.xMax
 
-      const textGroupEl = this.renderer.drawSymbol(textSymbol) as SVGGElement
-      textSymbol.boundingBox = this.getElementBoundingBox(textGroupEl)
-      this.setCharsBoundingBox(textSymbol, textGroupEl)
-      this.model.updateSymbol(s)
-    })
+        const textGroupEl = this.renderer.drawSymbol(textSymbol) as SVGGElement
+        textSymbol.boundingBox = this.getElementBoundingBox(textGroupEl)
+        this.setCharsBoundingBox(textSymbol, textGroupEl)
+        this.model.updateSymbol(s)
+      })
+    }
   }
 
   adjustText(): void
@@ -131,12 +133,19 @@ export class OITextManager
 
     rows.forEach((r) =>
     {
-      const isTextRow = !r.symbols.some(s =>
+      const isTextRow = r.symbols.every(s =>
       {
-        return s.type !== SymbolType.Text || (s.type === SymbolType.Text && (s as OIText).rotation)
+        if (s.type === SymbolType.Edge) return false
+        if (s.type === SymbolType.Shape) return false
+        if (s.type === SymbolType.Text && (s as OIText).rotation) return false
+        if (s.type === SymbolType.Group) {
+          const g = s as OISymbolGroup
+          return g.extractSymbols().some(gs => gs.type === SymbolType.Edge || gs.type === SymbolType.Shape || (s.type === SymbolType.Text && (s as OIText).rotation))
+        }
+        return true
       })
       if (isTextRow) {
-        this.alignTextToRow(r.symbols as OIText[])
+        this.alignTextToRow(r.symbols.filter(s => s.type == SymbolType.Text) as OIText[])
       }
       else {
         r.symbols

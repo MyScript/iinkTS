@@ -1,12 +1,11 @@
 import { OIEraser, TPointer } from "../../primitive"
-import { SVGBuilder } from "./SVGBuilder"
 
 /**
  * @group Renderer
  */
-export class OISVGEraserUtil
+export class OISVGRendererEraserUtil
 {
-  getSVGPath(eraser: OIEraser): string
+  static getSVGPath(eraser: OIEraser): string
   {
     if (eraser.pointers.length < 1) return ""
 
@@ -27,22 +26,6 @@ export class OISVGEraserUtil
     }, "Q")
 
     return `${ startPathMoveTo } ${ middlePathQuadratic }`
-  }
-
-  getSVGElement(eraser: OIEraser): SVGGraphicsElement
-  {
-    const attrs: { [key: string]: string } = {
-      "id": eraser.id,
-      "type": "eraser",
-      "stroke-width":  "12",
-      "stroke": "grey",
-      "opacity": "0.2",
-      "shadowBlur": "5",
-      "stroke-linecap": "round",
-      "fill": "transparent",
-      "d": this.getSVGPath(eraser)
-    }
-    return SVGBuilder.createPath(attrs)
   }
 
 }

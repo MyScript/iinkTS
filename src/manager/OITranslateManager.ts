@@ -12,6 +12,7 @@ import
   OIShapePolygon,
   OIStroke,
   OIText,
+  OISymbolGroup,
   ShapeKind,
   SymbolType,
   TOIEdge,
@@ -162,6 +163,12 @@ export class OITranslateManager
     return this.texter.updateTextBoundingBox(text)
   }
 
+  protected applyOnGroup(group: OISymbolGroup, tx: number, ty: number): OISymbolGroup
+  {
+    group.symbols.forEach(s => this.applyToSymbol(s, tx, ty))
+    return group
+  }
+
   applyToSymbol(symbol: TOISymbol, tx: number, ty: number): TOISymbol
   {
     this.#logger.info("applyToSymbol", { symbol, tx, ty })
@@ -174,21 +181,26 @@ export class OITranslateManager
         return this.applyToEdge(symbol as TOIEdge, tx, ty)
       case SymbolType.Text:
         return this.applyOnText(symbol as OIText, tx, ty)
+      case SymbolType.Group:
+        return this.applyOnGroup(symbol as OISymbolGroup, tx, ty)
       default:
         throw new Error(`Can't apply translate on symbol, type unknow: ${ symbol.type }`)
     }
   }
 
-  translate(symbols: TOISymbol[], tx: number, ty: number): Promise<void>
+  translate(symbols: TOISymbol[], tx: number, ty: number, addToHistory = true): Promise<void>
   {
     this.#logger.info("translate", { symbols, tx, ty })
-    symbols.forEach(s =>
-    {
+    symbols.forEach(s => {
       this.applyToSymbol(s, tx, ty)
       this.model.updateSymbol(s)
       this.renderer.drawSymbol(s)
     })
-    return this.recognizer.transformTranslate(symbols.filter(s => s.type === SymbolType.Stroke).map(s => s.id), tx, ty)
+    if (addToHistory) {
+      this.history.push(this.model, { translate: [{ symbols: this.model.symbolsSelected, tx, ty }] })
+    }
+    const strokes = this.behaviors.extractStrokesFromSymbols(symbols)
+    return this.recognizer.transformTranslate(strokes.map(s => s.id), tx, ty)
   }
 
   translateElement(id: string, tx: number, ty: number): void
@@ -235,23 +247,12 @@ export class OITranslateManager
     this.#logger.info("end", { point })
     const { tx, ty } = this.continue(point)
     this.snaps.clearSnapToElementLines()
-    const strokesTranslated: OIStroke[] = []
-    this.model.symbolsSelected.forEach(s =>
-    {
-      this.applyToSymbol(s, tx, ty)
-      this.renderer.drawSymbol(s)
-      this.model.updateSymbol(s)
-      if (s.type === SymbolType.Stroke) {
-        strokesTranslated.push(s as OIStroke)
-      }
-    })
-    const promise = this.recognizer.transformTranslate(strokesTranslated.map(s => s.id), tx, ty)
+    this.translate(this.model.symbolsSelected, tx, ty)
+
     this.selector.resetSelectedGroup(this.model.symbolsSelected)
-    this.history.push(this.model, { transformed: [{ transformationType: "TRANSLATE", symbols: this.model.symbolsSelected, tx, ty }] })
     this.interactElementsGroup = undefined
     this.selector.showInteractElements()
-    await promise
-    await this.svgDebugger.apply()
+    this.svgDebugger.apply()
   }
 
 }

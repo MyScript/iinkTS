@@ -283,7 +283,7 @@ describe("OIBehaviors.ts", () =>
       await oib.addSymbol(shape)
       expect(oib.model.addSymbol).toHaveBeenNthCalledWith(1, shape)
       expect(oib.renderer.drawSymbol).toHaveBeenNthCalledWith(1, shape)
-      expect(oib.recognizer.addStrokes).not.toHaveBeenCalled()
+      expect(oib.recognizer.addStrokes).toHaveBeenNthCalledWith(1, [], false)
     })
     test("create stroke", async () =>
     {
@@ -307,13 +307,13 @@ describe("OIBehaviors.ts", () =>
       await oib.createSymbol(shape)
       expect(oib.model.addSymbol).toHaveBeenNthCalledWith(1, expect.objectContaining(shape))
       expect(oib.renderer.drawSymbol).toHaveBeenNthCalledWith(1, expect.objectContaining(shape))
-      expect(oib.recognizer.addStrokes).not.toHaveBeenCalled()
+      expect(oib.recognizer.addStrokes).toHaveBeenNthCalledWith(1, [], false)
     })
     test("replace stroke by stroke", async () =>
     {
       const stroke1 = buildOIStroke()
       const stroke2 = buildOIStroke()
-      await oib.replaceSymbol(stroke1, [stroke2])
+      await oib.replaceSymbols([stroke1], [stroke2])
       expect(oib.model.replaceSymbol).toHaveBeenNthCalledWith(1, stroke1.id, [stroke2])
       expect(oib.renderer.replaceSymbol).toHaveBeenNthCalledWith(1, stroke1.id, [stroke2])
       expect(oib.recognizer.replaceStrokes).toHaveBeenNthCalledWith(1, [stroke1.id], [stroke2])
@@ -322,7 +322,7 @@ describe("OIBehaviors.ts", () =>
     {
       const stroke = buildOIStroke()
       const shape = buildOICircle()
-      await oib.replaceSymbol(stroke, [shape])
+      await oib.replaceSymbols([stroke], [shape])
       expect(oib.model.replaceSymbol).toHaveBeenNthCalledWith(1, stroke.id, [shape])
       expect(oib.renderer.replaceSymbol).toHaveBeenNthCalledWith(1, stroke.id, [shape])
       expect(oib.recognizer.eraseStrokes).toHaveBeenNthCalledWith(1, [stroke.id])
@@ -331,7 +331,7 @@ describe("OIBehaviors.ts", () =>
     {
       const stroke = buildOIStroke()
       const shape = buildOICircle()
-      await oib.replaceSymbol(shape, [stroke])
+      await oib.replaceSymbols([shape], [stroke])
       expect(oib.model.replaceSymbol).toHaveBeenNthCalledWith(1, shape.id, [stroke])
       expect(oib.renderer.replaceSymbol).toHaveBeenNthCalledWith(1, shape.id, [stroke])
       expect(oib.recognizer.addStrokes).toHaveBeenNthCalledWith(1, [stroke], false)
@@ -342,14 +342,6 @@ describe("OIBehaviors.ts", () =>
       await oib.changeOrderSymbol(stroke, "last")
       expect(oib.model.changeOrderSymbol).toHaveBeenNthCalledWith(1, stroke.id, "last")
       expect(oib.renderer.changeOrderSymbol).toHaveBeenNthCalledWith(1, stroke, "last")
-    })
-    test("not remove stroke if not in model", async () =>
-    {
-      const stroke = buildOIStroke()
-      await oib.removeSymbol(stroke.id)
-      expect(oib.model.removeSymbol).not.toHaveBeenCalled()
-      expect(oib.renderer.removeSymbol).not.toHaveBeenCalled()
-      expect(oib.recognizer.eraseStrokes).not.toHaveBeenCalled()
     })
     test("remove stroke", async () =>
     {
@@ -367,7 +359,6 @@ describe("OIBehaviors.ts", () =>
       await oib.removeSymbol(shape.id)
       expect(oib.model.removeSymbol).toHaveBeenNthCalledWith(1, shape.id)
       expect(oib.renderer.removeSymbol).toHaveBeenNthCalledWith(1, shape.id)
-      expect(oib.recognizer.eraseStrokes).not.toHaveBeenCalled()
     })
   })
 
@@ -693,7 +684,7 @@ describe("OIBehaviors.ts", () =>
       const stroke1 = buildOIStroke()
       const firstModel = oib.model.clone()
       firstModel.addSymbol(stroke1)
-      oib.history.undo = jest.fn(() => ({ model: firstModel, actions: { added: [stroke1] } }))
+      oib.history.undo = jest.fn(() => ({ model: firstModel, changes: { added: [stroke1] } }))
       oib.history.context.canUndo = true
       await oib.undo()
       expect(oib.recognizer.undo).toBeCalledTimes(1)
@@ -707,7 +698,7 @@ describe("OIBehaviors.ts", () =>
       const circle = buildOICircle()
       const firstModel = oib.model.clone()
       firstModel.addSymbol(circle)
-      oib.history.undo = jest.fn(() => ({ model: firstModel, actions: { added: [circle] } }))
+      oib.history.undo = jest.fn(() => ({ model: firstModel, changes: { added: [circle] } }))
       oib.history.context.canUndo = true
       await oib.undo()
       expect(oib.recognizer.undo).toBeCalledTimes(0)
@@ -720,7 +711,7 @@ describe("OIBehaviors.ts", () =>
       const stroke1 = buildOIStroke()
       const firstModel = oib.model.clone()
       oib.model.addSymbol(stroke1)
-      oib.history.undo = jest.fn(() => ({ model: firstModel, actions: { erased: [stroke1] } }))
+      oib.history.undo = jest.fn(() => ({ model: firstModel, changes: { erased: [stroke1] } }))
       oib.history.context.canUndo = true
       await oib.undo()
       expect(oib.recognizer.undo).toBeCalledTimes(1)
@@ -736,11 +727,11 @@ describe("OIBehaviors.ts", () =>
       const firstModel = oib.model.clone()
       firstModel.addSymbol(stroke1)
       oib.model.addSymbol(stroke2)
-      oib.history.undo = jest.fn(() => ({ model: firstModel, actions: { replaced: { newSymbols: [stroke2], oldSymbols: [stroke1] } } }))
+      oib.history.undo = jest.fn(() => ({ model: firstModel, changes: { replaced: { newSymbols: [stroke2], oldSymbols: [stroke1] } } }))
       oib.history.context.canUndo = true
       await oib.undo()
       expect(oib.recognizer.undo).toBeCalledTimes(1)
-      expect(oib.recognizer.undo).toBeCalledWith(expect.objectContaining({ replaced: { newSymbols: [stroke2], oldSymbols: [stroke1] } }))
+      expect(oib.recognizer.undo).toBeCalledWith(expect.objectContaining({ replaced: { newStrokes: [stroke2], oldStrokes: [stroke1] } }))
       expect(oib.renderer.drawSymbol).toBeCalledTimes(1)
       expect(oib.renderer.drawSymbol).toBeCalledWith(stroke1)
       expect(oib.renderer.removeSymbol).toBeCalledTimes(1)
@@ -781,7 +772,7 @@ describe("OIBehaviors.ts", () =>
       const secondModel = oib.model.clone()
       secondModel.addSymbol(stroke1)
       oib.history.context.canRedo = true
-      oib.history.redo = jest.fn(() => ({ model: secondModel, actions: { added: [stroke1] } }))
+      oib.history.redo = jest.fn(() => ({ model: secondModel, changes: { added: [stroke1] } }))
       await oib.redo()
       expect(oib.recognizer.redo).toBeCalledTimes(1)
       expect(oib.renderer.drawSymbol).toBeCalledTimes(1)
@@ -793,7 +784,7 @@ describe("OIBehaviors.ts", () =>
       const circle = buildOICircle()
       const firstModel = oib.model.clone()
       firstModel.addSymbol(circle)
-      oib.history.redo = jest.fn(() => ({ model: firstModel, actions: { added: [circle] } }))
+      oib.history.redo = jest.fn(() => ({ model: firstModel, changes: { added: [circle] } }))
       oib.history.context.canRedo = true
       await oib.redo()
       expect(oib.recognizer.redo).toBeCalledTimes(0)
@@ -806,7 +797,7 @@ describe("OIBehaviors.ts", () =>
       const stroke1 = buildOIStroke()
       const firstModel = oib.model.clone()
       oib.model.addSymbol(stroke1)
-      oib.history.redo = jest.fn(() => ({ model: firstModel, actions: { erased: [stroke1] } }))
+      oib.history.redo = jest.fn(() => ({ model: firstModel, changes: { erased: [stroke1] } }))
       oib.history.context.canRedo = true
       await oib.redo()
       expect(oib.recognizer.redo).toBeCalledTimes(1)
@@ -822,11 +813,11 @@ describe("OIBehaviors.ts", () =>
       const firstModel = oib.model.clone()
       firstModel.addSymbol(stroke1)
       oib.model.addSymbol(stroke2)
-      oib.history.redo = jest.fn(() => ({ model: firstModel, actions: { replaced: { newSymbols: [stroke2], oldSymbols: [stroke1] } } }))
+      oib.history.redo = jest.fn(() => ({ model: firstModel, changes: { replaced: { newSymbols: [stroke2], oldSymbols: [stroke1] } } }))
       oib.history.context.canRedo = true
       await oib.redo()
       expect(oib.recognizer.redo).toBeCalledTimes(1)
-      expect(oib.recognizer.redo).toBeCalledWith(expect.objectContaining({ replaced: { newSymbols: [stroke2], oldSymbols: [stroke1] } }))
+      expect(oib.recognizer.redo).toBeCalledWith(expect.objectContaining({ replaced: { newStrokes: [stroke2], oldStrokes: [stroke1] } }))
       expect(oib.renderer.drawSymbol).toBeCalledTimes(1)
       expect(oib.renderer.drawSymbol).toBeCalledWith(stroke1)
       expect(oib.renderer.removeSymbol).toBeCalledTimes(1)

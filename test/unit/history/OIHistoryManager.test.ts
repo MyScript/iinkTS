@@ -48,7 +48,7 @@ describe("OIHistoryManager.ts", () =>
       expect(manager.stack).toHaveLength(1)
       expect(manager.stack[manager.context.stackIndex].model).toEqual(model1)
       expect(manager.stack[manager.context.stackIndex].model).not.toBe(model1)
-      expect(manager.stack[manager.context.stackIndex].actions).toEqual({})
+      expect(manager.stack[manager.context.stackIndex].changes).toEqual({})
     })
 
     test("should add model to stack with action added", () =>
@@ -62,7 +62,7 @@ describe("OIHistoryManager.ts", () =>
       expect(manager.stack).toHaveLength(2)
       expect(manager.stack[manager.context.stackIndex].model).toEqual(model2)
       expect(manager.stack[manager.context.stackIndex].model).not.toBe(model2)
-      expect(manager.stack[manager.context.stackIndex].actions).toEqual({ added: [stroke2] })
+      expect(manager.stack[manager.context.stackIndex].changes).toEqual({ added: [stroke2] })
     })
 
     test("should splice end of stack if stackIndex no last", () =>
@@ -88,7 +88,7 @@ describe("OIHistoryManager.ts", () =>
 
       expect(manager.stack[manager.context.stackIndex].model).toEqual(model3)
       expect(manager.stack[manager.context.stackIndex].model).not.toBe(model3)
-      expect(manager.stack[manager.context.stackIndex].actions).toEqual({ added: [stroke] })
+      expect(manager.stack[manager.context.stackIndex].changes).toEqual({ added: [stroke] })
     })
 
     test("should shift the first element of the stack when maxStackSize is exceeded", () =>
@@ -149,7 +149,7 @@ describe("OIHistoryManager.ts", () =>
       const stroke = buildOIStroke()
       manager.push(model2, { added: [stroke] })
       const previousStackItem = manager.undo()
-      expect(previousStackItem.actions).toEqual({ erased: [stroke] })
+      expect(previousStackItem.changes).toEqual({ erased: [stroke] })
     })
 
     test("should invert erased action", () =>
@@ -158,7 +158,7 @@ describe("OIHistoryManager.ts", () =>
       const stroke = buildOIStroke()
       manager.push(model2, { erased: [stroke] })
       const previousStackItem = manager.undo()
-      expect(previousStackItem.actions).toEqual({ added: [stroke] })
+      expect(previousStackItem.changes).toEqual({ added: [stroke] })
     })
 
     test("should invert replaced action", () =>
@@ -168,16 +168,16 @@ describe("OIHistoryManager.ts", () =>
       const newStroke = buildOIStroke()
       manager.push(model2, { replaced: { newSymbols: [newStroke], oldSymbols: [oldStroke] } })
       const previousStackItem = manager.undo()
-      expect(previousStackItem.actions).toEqual({ replaced: { newSymbols: [oldStroke], oldSymbols: [newStroke] } })
+      expect(previousStackItem.changes).toEqual({ replaced: { newSymbols: [oldStroke], oldSymbols: [newStroke] } })
     })
 
     test("should invert translate action", () =>
     {
       const model2 = new OIModel(27, 5)
       const stroke = buildOIStroke()
-      manager.push(model2, { transformed: [{ transformationType: "TRANSLATE", symbols: [stroke], tx: 42, ty: 24 }] })
+      manager.push(model2, { translate: [{ symbols: [stroke], tx: 42, ty: 24 }] })
       const previousStackItem = manager.undo()
-      expect(previousStackItem.actions).toEqual({ transformed: [{ transformationType: "TRANSLATE", symbols: [stroke], tx: -42, ty: -24 }] })
+      expect(previousStackItem.changes).toEqual({ translate: [{ symbols: [stroke], tx: -42, ty: -24 }] })
     })
 
     test("should invert matrix action", () =>
@@ -185,9 +185,9 @@ describe("OIHistoryManager.ts", () =>
       const model2 = new OIModel(27, 5)
       const stroke = buildOIStroke()
       const matrix = MatrixTransform.identity().rotate(Math.PI / 2).translate(2, 5)
-      manager.push(model2, { transformed: [{ transformationType: "MATRIX", symbols: [stroke], matrix }] })
+      manager.push(model2, { matrix: { symbols: [stroke], matrix } })
       const previousStackItem = manager.undo()
-      expect(previousStackItem.actions).toEqual({ transformed: [{ transformationType: "MATRIX", symbols: [stroke], matrix: matrix.invert()}] })
+      expect(previousStackItem.changes).toEqual({ matrix: { symbols: [stroke], matrix: matrix.invert()} })
     })
   })
 
@@ -213,7 +213,7 @@ describe("OIHistoryManager.ts", () =>
       expect(manager.stack).toHaveLength(2)
       expect(manager.stack[manager.context.stackIndex].model).toEqual(lastStackItem.model)
       expect(manager.stack[manager.context.stackIndex].model).toBe(lastStackItem.model)
-      expect(manager.stack[manager.context.stackIndex].actions).toEqual(lastStackItem.actions)
+      expect(manager.stack[manager.context.stackIndex].changes).toEqual(lastStackItem.changes)
 
       expect(manager.context.canUndo).toStrictEqual(true)
       expect(manager.context.canRedo).toStrictEqual(false)

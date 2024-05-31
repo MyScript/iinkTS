@@ -265,7 +265,7 @@ describe("OIMenuAction.ts", () =>
     test("should set guide size to false on change", () =>
     {
       behaviors.configuration.rendering.guides.gap = 100
-      const btn = layer.querySelector("#ms-menu-action-guide-size-20-btn") as HTMLButtonElement
+      const btn = layer.querySelector("#ms-menu-action-guide-size-25-btn") as HTMLButtonElement
       const pointerEvt = new LeftClickEventMock("pointerup", {
         pointerType: "pen",
         clientX: 300,
@@ -273,7 +273,7 @@ describe("OIMenuAction.ts", () =>
         pressure: 1
       })
       btn.dispatchEvent(pointerEvt)
-      expect(behaviors.configuration.rendering.guides.gap).toEqual(20)
+      expect(behaviors.configuration.rendering.guides.gap).toEqual(25)
     })
   })
 

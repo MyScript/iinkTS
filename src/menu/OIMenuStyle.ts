@@ -108,7 +108,7 @@ export class OIMenuStyle extends OIMenu
   {
     const wrapper = document.createElement("div")
     wrapper.id = `${ this.id }-thickness-list`
-    wrapper.classList.add("ms-menu-row")
+    wrapper.classList.add("ms-menu-row", "thickness-list")
 
     const symbolsStyles = this.symbolsSelected.map(s => s.style)
     const hasUniqWidth = symbolsStyles.length && symbolsStyles.every(st => st.width === symbolsStyles[0]?.width)
@@ -145,8 +145,7 @@ export class OIMenuStyle extends OIMenu
   {
     const wrapper = document.createElement("div")
     wrapper.id = `${ this.id }-font-size-list`
-    wrapper.classList.add("ms-menu-row")
-
+    wrapper.classList.add("ms-menu-row", "font-size-list")
 
     this.fontSizeList.forEach((size) =>
     {

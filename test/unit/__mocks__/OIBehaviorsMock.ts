@@ -33,14 +33,38 @@ export class OIBehaviorsMock extends OIBehaviors
   setPenStyleClasses = jest.fn()
   setTheme = jest.fn()
 
+  createSymbol = jest.fn()
+  createSymbols = jest.fn()
+
   addSymbol = jest.fn()
-  replaceSymbol = jest.fn()
-  changeOrderSymbol = jest.fn()
-  removeSymbol = jest.fn()
+  addSymbols = jest.fn()
+
+  updateSymbol = jest.fn()
+  updateSymbols = jest.fn()
   updateSymbolsStyle = jest.fn()
+  updateTextFontSize = jest.fn()
+  replaceSymbols = jest.fn()
+  changeOrderSymbol = jest.fn()
+  changeOrderSymbols = jest.fn()
+  groupSymbols = jest.fn()
+  ungroupSymbol = jest.fn()
+  groupStrokesByJIIXElement = jest.fn()
+
+  removeSymbol = jest.fn()
+  removeSymbols = jest.fn()
+  unselectAll = jest.fn()
+
+  select = jest.fn()
+  selectAll = jest.fn()
 
   changeLanguage = jest.fn()
   importPointEvents = jest.fn()
+
+  downloadAsSVG = jest.fn()
+  downloadAsJPG = jest.fn()
+  downloadAsJson = jest.fn()
+
+  // extractStrokesFromSymbols = jest.fn()
 
   undo = jest.fn()
   redo = jest.fn()

@@ -151,6 +151,24 @@ describe("OIStroke.ts", () =>
       expect(clone).toEqual(stroke)
       expect(clone).not.toBe(stroke)
     })
+    test("should not update origin pointers", () =>
+    {
+      const style: TStyle = {
+        color: "blue",
+        width: 20
+      }
+      const stroke = new OIStroke(style)
+      stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
+      stroke.pointers.push({ p: 1, t: 1, x: 11, y: 11 })
+
+      const clone = stroke.clone()
+      clone.pointers.forEach(p => {
+        p.x += 10
+        p.y += 10
+      })
+      expect(stroke.pointers[0]).toEqual({ p: 1, t: 1, x: 1, y: 1 })
+      expect(clone.pointers[0]).toEqual({ p: 1, t: 1, x: 11, y: 11 })
+    })
   })
 
   describe("convertPartialStrokesToOIStrokes", () =>

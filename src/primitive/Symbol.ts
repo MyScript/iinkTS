@@ -6,6 +6,7 @@ import { TStyle } from "../style"
 export enum SymbolType
 {
   Stroke = "stroke",
+  Group = "group",
   Shape = "shape",
   Edge = "edge",
   Text = "text",

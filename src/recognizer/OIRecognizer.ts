@@ -1,13 +1,13 @@
 import { TRecognitionConfiguration, TServerConfiguration } from "../configuration"
 import { Error as ErrorConst, LoggerClass } from "../Constants"
 import { InternalEvent } from "../event"
-import { TOIActions } from "../history"
+import { TOIHistoryBackendChanges, TUndoRedoContext } from "../history"
 import { LoggerManager } from "../logger"
 import { TExport, TJIIXExport } from "../model"
 import { OIStroke } from "../primitive"
 import { TMatrixTransform } from "../transform"
 import { computeHmac, DeferredPromise } from "../utils"
-import { TOIMessageEvent, TOIMessageEventContextlessGesture, TOIMessageEventError, TOIMessageEventExport, TOIMessageEventGesture, TOIMessageEventHMACChallenge, TOIMessageEventPartChange, TSessionDescriptionMessage } from "./OIRecognizerMessage"
+import { TOIMessageEvent, TOIMessageEventContentChange, TOIMessageEventContextlessGesture, TOIMessageEventError, TOIMessageEventExport, TOIMessageEventGesture, TOIMessageEventHMACChallenge, TOIMessageEventPartChange, TSessionDescriptionMessage } from "./OIRecognizerMessage"
 
 /**
  * A websocket dialog have this sequence :
@@ -51,7 +51,7 @@ export class OIRecognizer
   protected transformStrokeDeferred?: DeferredPromise<void>
   protected eraseStrokeDeferred?: DeferredPromise<void>
   protected replaceStrokeDeferred?: DeferredPromise<void>
-  protected exportDeferred?: DeferredPromise<TExport>
+  protected exportDeferredMap: Map<string, DeferredPromise<TExport>>
   protected closeDeferred?: DeferredPromise<void>
   protected waitForIdleDeferred?: DeferredPromise<void>
   protected undoDeferred?: DeferredPromise<void>
@@ -67,6 +67,8 @@ export class OIRecognizer
     this.recognitionConfiguration = recognitionConfig
     const scheme = (this.serverConfiguration.scheme === "https") ? "wss" : "ws"
     this.url = `${ scheme }://${ this.serverConfiguration.host }/api/v4.0/iink/offscreen?applicationKey=${ this.serverConfiguration.applicationKey }`
+
+    this.exportDeferredMap = new Map()
   }
 
   get mimeTypes(): string[]
@@ -137,6 +139,9 @@ export class OIRecognizer
       this.internalEvent.emitError(error)
       this.rejectDeferredPending(message)
     }
+    else {
+      this.addStrokeDeferred?.resolve(undefined)
+    }
     this.internalEvent.emitWSClosed()
   }
 
@@ -171,29 +176,37 @@ export class OIRecognizer
     this.undoDeferred?.reject(error)
     this.redoDeferred?.reject(error)
     this.clearDeferred?.reject(error)
-    this.exportDeferred?.reject(error)
+    Array.from(this.exportDeferredMap.values())
+      .forEach(v =>
+      {
+        v.reject(error)
+      })
     this.waitForIdleDeferred?.reject(error)
   }
 
   protected openCallback(): void
   {
     this.connected?.resolve()
+    this.reconnectionCount = 0
     const params: TOIMessageEvent = {
       type: "authenticate",
       "myscript-client-name": "iink-ts",
       "myscript-client-version": "1.0.0-buildVersion",
     }
-    this.send(params)
+    this.send(params, { waitInitialized: false })
   }
 
   protected async manageHMACChallenge(websocketMessage: TOIMessageEvent): Promise<void>
   {
     try {
       const hmacChallengeMessage = websocketMessage as TOIMessageEventHMACChallenge
-      this.send({
-        type: "hmac",
-        hmac: await computeHmac(hmacChallengeMessage.hmacChallenge, this.serverConfiguration.applicationKey, this.serverConfiguration.hmacKey)
-      })
+      this.send(
+        {
+          type: "hmac",
+          hmac: await computeHmac(hmacChallengeMessage.hmacChallenge, this.serverConfiguration.applicationKey, this.serverConfiguration.hmacKey)
+        },
+        { waitInitialized: false }
+      )
     } catch (error) {
       this.internalEvent.emitError(new Error(error as string))
     }
@@ -209,21 +222,20 @@ export class OIRecognizer
       scaleY: pixelTomm,
       configuration: this.recognitionConfiguration
     }
-    this.send(params)
+    this.send(params, { waitInitialized: false })
   }
 
   protected manageSessionDescriptionMessage(websocketMessage: TOIMessageEvent): void
   {
     const sessionDescription = websocketMessage as TSessionDescriptionMessage
-    this.reconnectionCount = 0
     if (sessionDescription.iinkSessionId) {
       this.sessionId = sessionDescription.iinkSessionId
     }
     if (this.currentPartId) {
-      this.send({ type: "openContentPart", id: this.currentPartId })
+      this.send({ type: "openContentPart", id: this.currentPartId }, { waitInitialized: false })
     }
     else {
-      this.send({ type: "newContentPart", contentType: this.recognitionConfiguration.type, mimeTypes: this.mimeTypes })
+      this.send({ type: "newContentPart", contentType: this.recognitionConfiguration.type, mimeTypes: this.mimeTypes }, { waitInitialized: false })
     }
   }
 
@@ -234,13 +246,37 @@ export class OIRecognizer
     this.currentPartId = partChangeMessage.partId
   }
 
+  protected manageContentChangedMessage(websocketMessage: TOIMessageEvent): void
+  {
+    this.initialized?.resolve()
+    const contentChange = websocketMessage as TOIMessageEventContentChange
+    this.replaceStrokeDeferred?.resolve()
+    this.transformStrokeDeferred?.resolve()
+    this.eraseStrokeDeferred?.resolve()
+    this.undoDeferred?.resolve()
+    this.redoDeferred?.resolve()
+    this.clearDeferred?.resolve()
+    this.internalEvent.emitContextChange({
+      canRedo: contentChange.canRedo,
+      canUndo: contentChange.canRedo,
+    } as TUndoRedoContext)
+  }
+
   protected manageExportMessage(websocketMessage: TOIMessageEvent): void
   {
     const exportMessage = websocketMessage as TOIMessageEventExport
+
     if (exportMessage.exports["application/vnd.myscript.jiix"]) {
       exportMessage.exports["application/vnd.myscript.jiix"] = JSON.parse(exportMessage.exports["application/vnd.myscript.jiix"].toString()) as TJIIXExport
     }
-    this.exportDeferred?.resolve(exportMessage.exports)
+
+    Object.keys(exportMessage.exports)
+      .forEach(key =>
+      {
+        if (this.exportDeferredMap.has(key)) {
+          this.exportDeferredMap.get(key)!.resolve(exportMessage.exports)
+        }
+      })
     this.internalEvent.emitExported(exportMessage.exports)
   }
 
@@ -304,9 +340,7 @@ export class OIRecognizer
             this.managePartChangeMessage(websocketMessage)
             break
           case "contentChanged":
-            this.undoDeferred?.resolve()
-            this.redoDeferred?.resolve()
-            this.clearDeferred?.resolve()
+            this.manageContentChangedMessage(websocketMessage)
             break
           case "exported":
             this.manageExportMessage(websocketMessage)
@@ -365,28 +399,27 @@ export class OIRecognizer
     }
   }
 
-  async send(message: TOIMessageEvent): Promise<void>
+  async send(message: TOIMessageEvent, { waitInitialized } = { waitInitialized: true }): Promise<void>
   {
     if (!this.connected) {
       return Promise.reject(new Error("Recognizer must be initilized"))
     }
     await this.connected.promise
     if (this.socket.readyState === this.socket.OPEN) {
+      if (waitInitialized) {
+        await this.initialized?.promise
+      }
       this.socket.send(JSON.stringify(message))
       return Promise.resolve()
     }
     else {
       if (this.socket.readyState != this.socket.CONNECTING && this.serverConfiguration.websocket.autoReconnect) {
         this.reconnectionCount++
-        if (this.serverConfiguration.websocket.maxRetryCount >= this.reconnectionCount) {
+        await this.initialized?.promise
+        if (this.serverConfiguration.websocket.maxRetryCount > this.reconnectionCount) {
           this.internalEvent.emitClearMessage()
-          if (!this.initialized) {
-            await this.init()
-            await this.waitForIdle()
-          }
-          else {
-            await this.initialized.promise
-          }
+          await this.init()
+          await this.waitForIdle()
           return this.send(message)
         }
         else {
@@ -396,7 +429,7 @@ export class OIRecognizer
     }
   }
 
-  private buildAddStrokes(strokes: OIStroke[], processGestures = true): TOIMessageEvent
+  protected buildAddStrokes(strokes: OIStroke[], processGestures = true): TOIMessageEvent
   {
     return {
       type: "addStrokes",
@@ -416,7 +449,7 @@ export class OIRecognizer
     return this.addStrokeDeferred?.promise
   }
 
-  private buildReplaceStrokes(oldStrokeIds: string[], newStrokes: OIStroke[]): TOIMessageEvent
+  protected buildReplaceStrokes(oldStrokeIds: string[], newStrokes: OIStroke[]): TOIMessageEvent
   {
     return {
       type: "replaceStrokes",
@@ -436,7 +469,7 @@ export class OIRecognizer
     return this.replaceStrokeDeferred?.promise
   }
 
-  private buildTransformTranslate(strokeIds: string[], tx: number, ty: number): TOIMessageEvent
+  protected buildTransformTranslate(strokeIds: string[], tx: number, ty: number): TOIMessageEvent
   {
     return {
       type: "transform",
@@ -458,7 +491,7 @@ export class OIRecognizer
     return this.transformStrokeDeferred?.promise
   }
 
-  private buildTransformMatrix(strokeIds: string[], matrix: TMatrixTransform): TOIMessageEvent
+  protected buildTransformMatrix(strokeIds: string[], matrix: TMatrixTransform): TOIMessageEvent
   {
     return {
       type: "transform",
@@ -479,7 +512,7 @@ export class OIRecognizer
     return this.transformStrokeDeferred?.promise
   }
 
-  private buildEraseStrokes(strokeIds: string[]): TOIMessageEvent
+  protected buildEraseStrokes(strokeIds: string[]): TOIMessageEvent
   {
     return {
       type: "eraseStrokes",
@@ -518,7 +551,9 @@ export class OIRecognizer
   async waitForIdle(): Promise<void>
   {
     await this.initialized?.promise
-    this.waitForIdleDeferred = new DeferredPromise<void>()
+    if (!this.waitForIdleDeferred || this.waitForIdleDeferred.isFullFilled) {
+      this.waitForIdleDeferred = new DeferredPromise<void>()
+    }
     const message: TOIMessageEvent = {
       type: "waitForIdle",
     }
@@ -526,34 +561,31 @@ export class OIRecognizer
     return this.waitForIdleDeferred?.promise
   }
 
-  private buildUndoRedoChanges(actions: TOIActions): TOIMessageEvent[]
+  protected buildUndoRedoChanges(changes: TOIHistoryBackendChanges): TOIMessageEvent[]
   {
-    const changes: TOIMessageEvent[] = []
-    if (actions.added?.length) {
-      changes.push(this.buildAddStrokes(actions.added as OIStroke[], false))
+    const changesMessages: TOIMessageEvent[] = []
+    if (changes.added?.length) {
+      changesMessages.push(this.buildAddStrokes(changes.added, false))
     }
-    if (actions.erased?.length) {
-      changes.push(this.buildEraseStrokes(actions.erased.map(s => s.id)))
+    if (changes.erased?.length) {
+      changesMessages.push(this.buildEraseStrokes(changes.erased.map(s => s.id)))
     }
-    if (actions.replaced?.newSymbols.length) {
-      changes.push(this.buildReplaceStrokes(actions.replaced.oldSymbols.map(s => s.id), actions.replaced.newSymbols as OIStroke[]))
+    if (changes.replaced?.newStrokes.length) {
+      changesMessages.push(this.buildReplaceStrokes(changes.replaced.oldStrokes.map(s => s.id), changes.replaced.newStrokes))
     }
-    if (actions.transformed?.length) {
-      actions.transformed.forEach(t => {
-        switch (t.transformationType) {
-          case "MATRIX":
-            changes.push(this.buildTransformMatrix(t.symbols.map(s => s.id), t.matrix))
-            break
-          case "TRANSLATE":
-            changes.push(this.buildTransformTranslate(t.symbols.map(s => s.id), t.tx, t.ty))
-            break
-        }
+    if (changes.matrix?.strokes.length) {
+      changesMessages.push(this.buildTransformMatrix(changes.matrix.strokes.map(s => s.id), changes.matrix.matrix))
+    }
+    if (changes.translate?.length) {
+      changes.translate.forEach(tr =>
+      {
+        changesMessages.push(this.buildTransformTranslate(tr.strokes.map(s => s.id), tr.tx, tr.ty))
       })
     }
-    return changes
+    return changesMessages
   }
 
-  async undo(actions: TOIActions): Promise<void>
+  async undo(actions: TOIHistoryBackendChanges): Promise<void>
   {
     this.undoDeferred = new DeferredPromise<void>()
     const message: TOIMessageEvent = {
@@ -564,7 +596,7 @@ export class OIRecognizer
     return this.undoDeferred?.promise
   }
 
-  async redo(actions: TOIActions): Promise<void>
+  async redo(actions: TOIHistoryBackendChanges): Promise<void>
   {
     this.redoDeferred = new DeferredPromise<void>()
     const message: TOIMessageEvent = {
@@ -577,15 +609,21 @@ export class OIRecognizer
 
   async export(requestedMimeTypes?: string[]): Promise<TExport>
   {
-    this.exportDeferred = new DeferredPromise<TExport>()
-    const mimeTypes: string[] = requestedMimeTypes || this.mimeTypes
+    const mimeTypes: string[] = requestedMimeTypes || this.mimeTypes.slice()
+    await Promise.all(mimeTypes.map(mt => this.exportDeferredMap.get(mt)?.promise))
+    mimeTypes.forEach(mt =>
+    {
+      this.exportDeferredMap.set(mt, new DeferredPromise<TExport>())
+    })
+
     const message: TOIMessageEvent = {
       type: "export",
       partId: this.currentPartId,
       mimeTypes
     }
     await this.send(message)
-    return await this.exportDeferred?.promise
+    const exports = await Promise.all(mimeTypes.map(mt => this.exportDeferredMap.get(mt)!.promise))
+    return Object.assign({}, ...exports)
   }
 
   async clear(): Promise<void>
@@ -618,7 +656,7 @@ export class OIRecognizer
     this.transformStrokeDeferred = undefined
     this.eraseStrokeDeferred = undefined
     this.replaceStrokeDeferred = undefined
-    this.exportDeferred = undefined
+    this.exportDeferredMap.clear()
     this.waitForIdleDeferred = undefined
     this.closeDeferred = undefined
     if (this.socket) {

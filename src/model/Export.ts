@@ -31,7 +31,7 @@ export type TJIIXElement = TJIIXBase & {
   /** @hidden */
   [key: string]: unknown
   id: string
-  type: string
+  type: "Text" | "Node" | "Edge"
 }
 
 /**
