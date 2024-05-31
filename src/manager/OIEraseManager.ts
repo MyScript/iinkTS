@@ -2,10 +2,8 @@ import { LoggerClass } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerManager } from "../logger"
 import { OIModel } from "../model"
-import { OIEraser, SymbolType, TPointer } from "../primitive"
-import { OIRecognizer } from "../recognizer"
+import { OIEraser, TPointer } from "../primitive"
 import { OISVGRenderer } from "../renderer"
-import { OIHistoryManager } from "../history"
 
 /**
  * @group Manager
@@ -31,16 +29,6 @@ export class OIEraseManager
   get renderer(): OISVGRenderer
   {
     return this.behaviors.renderer
-  }
-
-  get history(): OIHistoryManager
-  {
-    return this.behaviors.history
-  }
-
-  get recognizer(): OIRecognizer
-  {
-    return this.behaviors.recognizer
   }
 
   start(pointer: TPointer): void
@@ -70,15 +58,6 @@ export class OIEraseManager
 
     this.renderer.removeSymbol(this.currentEraser!.id)
     this.currentEraser = undefined
-    if (this.model.symbolsToDelete.length) {
-      const symbolsToDelete = this.model.symbolsToDelete.slice()
-      symbolsToDelete.forEach(s =>
-      {
-        this.model.removeSymbol(s.id)
-        this.renderer.removeSymbol(s.id)
-      })
-      this.history.push(this.model, { erased: symbolsToDelete })
-      await this.recognizer.eraseStrokes(symbolsToDelete.filter(s => s.type === SymbolType.Stroke).map(s => s.id))
-    }
+    this.behaviors.removeSymbols(this.model.symbolsToDelete.map(s => s.id))
   }
 }

@@ -14,7 +14,7 @@ import { OIBehaviors } from "../behaviors"
 import { LoggerManager } from "../logger"
 import { OIModel } from "../model"
 import { OIMenu, TMenuItemBoolean, TMenuItemButton, TMenuItemButtonList, TMenuItemSelect } from "./OIMenu"
-import { SymbolType } from "../primitive"
+import { OISymbolGroup, SymbolType } from "../primitive"
 import { StrikeThroughAction, SurroundAction } from "../gesture"
 import { OIMenuSub } from "./OIMenuSub"
 import { getAvailableLanguageList } from "../utils"
@@ -36,10 +36,10 @@ export class OIMenuAction extends OIMenu
   menuConvert?: HTMLButtonElement
 
   guideGaps = [
-    { label: "S", value: "10" },
-    { label: "M", value: "20" },
-    { label: "L", value: "50" },
-    { label: "XL", value: "100" },
+    { label: "S", value: "25" },
+    { label: "M", value: "50" },
+    { label: "L", value: "100" },
+    { label: "XL", value: "150" },
   ]
 
   constructor(behaviors: OIBehaviors, id = "ms-menu-action")
@@ -481,7 +481,8 @@ export class OIMenuAction extends OIMenu
       this.menuRedo.disabled = !this.behaviors.history.context.canRedo
     }
     if (this.menuConvert) {
-      this.menuConvert.disabled = this.model.symbols.length === 0 || !this.model.symbols.some(s => s.type === SymbolType.Stroke)
+      this.menuConvert.disabled = this.model.symbols.length === 0 ||
+        !this.model.symbols.some(s => s.type === SymbolType.Stroke || (s.type === SymbolType.Group && (s as OISymbolGroup).extractStrokes().length))
     }
   }
 

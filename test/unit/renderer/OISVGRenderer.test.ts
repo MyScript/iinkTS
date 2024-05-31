@@ -32,6 +32,8 @@ describe("OISVGRenderer.ts", () =>
     {
       const divElement: HTMLDivElement = document.createElement("div")
       const customConf = JSON.parse(JSON.stringify(DefaultRenderingConfiguration)) as TRenderingConfiguration
+      customConf.minHeight = customConf.guides.gap * 2
+      customConf.minWidth = customConf.guides.gap * 2
       customConf.guides.type = "point"
       const rendererCustom = new OISVGRenderer(customConf)
       rendererCustom.init(divElement)
@@ -57,6 +59,8 @@ describe("OISVGRenderer.ts", () =>
       const divElement: HTMLDivElement = document.createElement("div")
       const customConf = JSON.parse(JSON.stringify(DefaultRenderingConfiguration)) as TRenderingConfiguration
       customConf.guides.type = "line"
+      customConf.minHeight = customConf.guides.gap * 2
+      customConf.minWidth = customConf.guides.gap * 2
       const rendererCustom = new OISVGRenderer(customConf)
       rendererCustom.init(divElement)
       const guidesGroup = divElement.querySelector("#guides-wrapper") as SVGGElement
@@ -74,7 +78,7 @@ describe("OISVGRenderer.ts", () =>
       const guidesGroup = divElement.querySelector("#guides-wrapper") as SVGGElement
       expect(guidesGroup).toBeDefined()
       const guideLines = guidesGroup.getElementsByTagName("line")
-      expect(guideLines).toHaveLength(20)
+      expect(guideLines).toHaveLength(10)
     })
     test("should write error if guides.type unknow", () =>
     {

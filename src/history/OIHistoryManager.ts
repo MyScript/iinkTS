@@ -3,7 +3,7 @@ import { TUndoRedoConfiguration } from "../configuration"
 import { InternalEvent } from "../event"
 import { LoggerManager } from "../logger"
 import { OIModel } from "../model"
-import { OIDecorator, TOISymbol } from "../primitive"
+import { OIDecorator, OIStroke, TOISymbol } from "../primitive"
 import { TStyle } from "../style"
 import { MatrixTransform, TMatrixTransform } from "../transform"
 import { IHistoryManager } from "./IHistoryManager"
@@ -12,61 +12,37 @@ import { TUndoRedoContext, getInitialUndoRedoContext } from "./UndoRedoContext"
 /**
  * @group History
  */
-export type TOIActionsTransform = {
-  transformationType: "TRANSLATE" | "MATRIX" | "STYLE" | "DECORATOR"
-  symbols: TOISymbol[]
-}
-
-/**
- * @group History
- */
-export type TOIActionsTransformStyle = TOIActionsTransform & {
-  transformationType: "STYLE"
-  style?: TStyle
-  fontSize?: number
-}
-
-/**
- * @group History
- */
-export type TOIActionsTransformDecorator = TOIActionsTransform & {
-  transformationType: "DECORATOR"
-  decorators: OIDecorator[]
-}
-
-/**
- * @group History
- */
-export type TOIActionsTransformTranslate = TOIActionsTransform & {
-  transformationType: "TRANSLATE"
-  tx: number
-  ty: number
-}
-
-/**
- * @group History
- */
-export type TOIActionsTransformMatrix = TOIActionsTransform & {
-  transformationType: "MATRIX"
-  matrix: TMatrixTransform
-}
-
-/**
- * @group History
- * @remarks actions are messages sent to the backend
- */
-export type TOIActions = {
+export type TOIHistoryChanges = {
   added?: TOISymbol[]
-  replaced?: { oldSymbols: TOISymbol[], newSymbols: TOISymbol[] }
+  updated?: TOISymbol[]
   erased?: TOISymbol[]
-  transformed?: (TOIActionsTransformTranslate | TOIActionsTransformMatrix | TOIActionsTransformStyle | TOIActionsTransformDecorator)[]
+  replaced?: { oldSymbols: TOISymbol[], newSymbols: TOISymbol[] }
+  matrix?: { symbols: TOISymbol[], matrix: TMatrixTransform }
+  translate?: { symbols: TOISymbol[], tx: number, ty: number }[]
+  style?: { symbols: TOISymbol[], style?: TStyle, fontSize?: number }
+  order?: { symbols: TOISymbol[], position: "first" | "last" | "forward" | "backward" }
+  decorator?: { symbol: TOISymbol, decorator: OIDecorator, added: boolean }[]
+  group?: { symbols: TOISymbol[] }
+  ungroup?: { group: TOISymbol }
+}
+
+/**
+ * @group History
+ * @remarks used to send messages to the backend on undo or redo
+ */
+export type TOIHistoryBackendChanges = {
+  added?: OIStroke[]
+  erased?: OIStroke[]
+  replaced?: { oldStrokes: OIStroke[], newStrokes: OIStroke[] }
+  matrix?: { strokes: OIStroke[], matrix: TMatrixTransform },
+  translate?: { strokes: OIStroke[], tx: number, ty: number }[]
 }
 
 /**
  * @group History
  */
 export type TOIHistoryStackItem = {
-  actions: TOIActions
+  changes: TOIHistoryChanges
   model: OIModel
 }
 
@@ -101,14 +77,14 @@ export class OIHistoryManager implements IHistoryManager
     this.context.empty = this.stack[this.context.stackIndex].model.symbols.length === 0
   }
 
-  push(model: OIModel, actions: TOIActions): void
+  push(model: OIModel, changes: TOIHistoryChanges): void
   {
-    this.#logger.info("push", { model, actions })
+    this.#logger.info("push", { model, changes })
     if (this.context.stackIndex + 1 < this.stack.length) {
       this.stack.splice(this.context.stackIndex + 1)
     }
 
-    this.stack.push({ model: model.clone(), actions })
+    this.stack.push({ model: model.clone(), changes: changes })
     this.context.stackIndex = this.stack.length - 1
 
     if (this.stack.length > this.configuration.maxStackSize) {
@@ -120,46 +96,47 @@ export class OIHistoryManager implements IHistoryManager
     this.internalEvent.emitContextChange(this.context)
   }
 
-  protected inverteActions(actions: TOIActions): TOIActions
+  pop(): void
   {
-    const invertedActions: TOIActions = {}
-    if (actions.added) {
-      invertedActions.erased = actions.added
+    this.#logger.info("pop")
+    this.stack.pop()
+    this.context.stackIndex = this.stack.length - 1
+    this.updateContext()
+  }
+
+  protected reverseChanges(changes: TOIHistoryChanges): TOIHistoryChanges
+  {
+    const reversedChanges: TOIHistoryChanges = {}
+    if (changes.added) {
+      reversedChanges.erased = changes.added
     }
-    if (actions.erased) {
-      invertedActions.added = actions.erased
+    if (changes.erased) {
+      reversedChanges.added = changes.erased
     }
-    if (actions.replaced) {
-      invertedActions.replaced = {
-        newSymbols: actions.replaced.oldSymbols,
-        oldSymbols: actions.replaced.newSymbols
+    if (changes.replaced) {
+      reversedChanges.replaced = {
+        newSymbols: changes.replaced.oldSymbols,
+        oldSymbols: changes.replaced.newSymbols
       }
     }
-    if (actions.transformed?.length) {
-      invertedActions.transformed = []
-      actions.transformed.forEach(a =>
-      {
-        switch (a.transformationType) {
-          case "TRANSLATE":
-            invertedActions.transformed!.push({
-              transformationType: a.transformationType,
-              symbols: a.symbols,
-              tx: -a.tx,
-              ty: -a.ty,
-            })
-            break
-          case "MATRIX":
-            invertedActions.transformed!.push({
-              transformationType: a.transformationType,
-              symbols: a.symbols,
-              matrix: new MatrixTransform(a.matrix.xx, a.matrix.yx, a.matrix.xy, a.matrix.yy, a.matrix.tx, a.matrix.ty).invert()
-            })
-            break
+    if (changes.matrix) {
+      reversedChanges.matrix = {
+        symbols: changes.matrix.symbols,
+        matrix: new MatrixTransform(changes.matrix.matrix.xx, changes.matrix.matrix.yx, changes.matrix.matrix.xy, changes.matrix.matrix.yy, changes.matrix.matrix.tx, changes.matrix.matrix.ty).invert()
+      }
+    }
+    if (changes.translate?.length) {
+      reversedChanges.translate = changes.translate.map(tr => {
+        return {
+          symbols: tr.symbols,
+          tx: -tr.tx,
+          ty: -tr.ty,
         }
       })
+
     }
 
-    return invertedActions
+    return reversedChanges
   }
 
   undo(): TOIHistoryStackItem
@@ -175,7 +152,7 @@ export class OIHistoryManager implements IHistoryManager
     this.#logger.debug("undo", previousStackItem)
     return {
       model: previousStackItem.model,
-      actions: this.inverteActions(currentStackItem.actions)
+      changes: this.reverseChanges(currentStackItem.changes)
     }
   }
 

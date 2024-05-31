@@ -17,7 +17,7 @@ export class OIMenuManager
   context: OIMenuContext
   style: OIMenuStyle
 
-  constructor(behaviors: OIBehaviors, custom?: PartialDeep<{ style?: OIMenuStyle, intention?: OIMenuIntention, action?: OIMenuAction, context?: OIMenuContext}>)
+  constructor(behaviors: OIBehaviors, custom?: PartialDeep<{ style?: OIMenuStyle, intention?: OIMenuIntention, action?: OIMenuAction, context?: OIMenuContext }>)
   {
     this.#logger.info("constructor")
     this.behaviors = behaviors

@@ -2,9 +2,7 @@ import { LoggerClass } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerManager } from "../logger"
 import { OIModel, TJIIXChar, TJIIXEdgeArc, TJIIXEdgeElement, TJIIXEdgeLine, TJIIXEdgePolyEdge, TJIIXExport, TJIIXNodeCircle, TJIIXNodeElement, TJIIXNodeEllipse, TJIIXNodePolygon, TJIIXNodeRectangle, TJIIXTextElement, TJIIXWord } from "../model"
-import { Box, DecoratorKind, EdgeKind, OIDecorator, OIEdgeArc, OIEdgeLine, OIEdgePolyLine, OIShapeCircle, OIShapeEllipse, OIShapePolygon, OIStroke, OIText, SymbolType, TOIEdge, TOIShape, TOISymbol, TOISymbolChar, TPoint } from "../primitive"
-import { OIRecognizer } from "../recognizer"
-import { OISVGRenderer } from "../renderer"
+import { Box, DecoratorKind, EdgeKind, OIDecorator, OIEdgeArc, OIEdgeLine, OIEdgePolyLine, OIShapeCircle, OIShapeEllipse, OIShapePolygon, OIShapeRectangle, OIStroke, OISymbolGroup, OIText, SymbolType, TOIEdge, TOIShape, TOISymbol, TOISymbolChar, TPoint } from "../primitive"
 import { OIHistoryManager } from "../history"
 import { computeAngleAxeRadian, computeAverage, convertBoundingBoxMillimeterToPixel, convertMillimeterToPixel, createUUID } from "../utils"
 import { OISelectionManager } from "./OISelectionManager"
@@ -45,16 +43,6 @@ export class OIConversionManager
     return this.behaviors.texter
   }
 
-  get renderer(): OISVGRenderer
-  {
-    return this.behaviors.renderer
-  }
-
-  get recognizer(): OIRecognizer
-  {
-    return this.behaviors.recognizer
-  }
-
   get rowHeight(): number
   {
     return this.behaviors.configuration.rendering.guides.gap
@@ -62,10 +50,15 @@ export class OIConversionManager
 
   get strokes(): OIStroke[]
   {
-    return this.model.symbolsSelected.length ?
-      this.model.symbolsSelected.filter(s => s.type === SymbolType.Stroke) as OIStroke[] :
-      this.model.symbols.filter(s => s.type === SymbolType.Stroke) as OIStroke[]
+    const symbols = (this.model.symbolsSelected.length ? this.model.symbolsSelected : this.model.symbols)
+    const strokes = symbols.filter(s => s.type === SymbolType.Stroke) as OIStroke[]
+
+    const groups = symbols.filter(s => s.type === SymbolType.Group) as OISymbolGroup[]
+    strokes.push(...groups.flatMap(g => g.extractStrokes()))
+
+    return strokes
   }
+
 
   buildChar(char: TJIIXChar, strokes: OIStroke[], fontSize?: number): TOISymbolChar
   {
@@ -100,6 +93,20 @@ export class OIConversionManager
     })
     const text = new OIText({}, charSymbols, startPoint, boundingBox)
     const decorators = strokes.flatMap(s => s.decorators)
+    strokes.forEach(s => {
+      const sym = this.model.getRootSymbol(s.id)
+      if (sym?.type === SymbolType.Group) {
+        const g = sym as OISymbolGroup
+        const hightlight = g.decorators.find(d => d.kind === DecoratorKind.Highlight)
+        if (hightlight) decorators.push(hightlight)
+        const strikethrough = g.decorators.find(d => d.kind === DecoratorKind.Strikethrough)
+        if (strikethrough) decorators.push(strikethrough)
+        const surround = g.decorators.find(d => d.kind === DecoratorKind.Surround)
+        if (surround) decorators.push(surround)
+        const underline = g.decorators.find(d => d.kind === DecoratorKind.Underline)
+        if (underline) decorators.push(underline)
+      }
+    })
     if (decorators.length) {
       const hightlight = decorators.find(d => d.kind === DecoratorKind.Highlight)
       if (hightlight) {
@@ -145,7 +152,7 @@ export class OIConversionManager
       y: bb.y + this.rowHeight
     }
     let fontSize = onlyText ? Math.ceil(computeAverage(jiixWords.map(w => convertMillimeterToPixel(w["bounding-box"]?.height || 0) || this.rowHeight)) * this.rowHeight / this.rowHeight) : undefined
-    if (onlyText && this.model.symbols.filter(s => [SymbolType.Text.toString(), SymbolType.Stroke.toString()].includes(s.type)).length === this.model.symbols.length) {
+    if (onlyText && this.model.symbols.filter(s => [SymbolType.Text.toString(), SymbolType.Stroke.toString(), SymbolType.Group.toString()].includes(s.type)).length === this.model.symbols.length) {
       const textSym = this.model.symbols.find(s => s.type === SymbolType.Text) as OIText
       if (textSym) {
         fontSize = textSym.chars[0].fontSize
@@ -221,7 +228,7 @@ export class OIConversionManager
       { x: x + width, y: y + height },
       { x, y: y + height }
     ]
-    return new OIShapePolygon(strokes[0]?.style, points, rectangle.kind)
+    return new OIShapeRectangle(strokes[0]?.style, points)
   }
 
   buildPolygon(polygon: TJIIXNodePolygon, strokes: OIStroke[]): OIShapePolygon
@@ -359,28 +366,28 @@ export class OIConversionManager
     const jiix = this.model.exports?.["application/vnd.myscript.jiix"] as TJIIXExport
     if (jiix?.elements?.length) {
       const onlyText = !jiix.elements?.some(e => e.type !== "Text")
-      const convertedSymbols: { symbol: TOISymbol, strokes: OIStroke[] }[] = []
+      const conversionResults: { symbol: TOISymbol, strokes: OIStroke[] }[] = []
       jiix.elements.forEach(e =>
       {
         switch (e.type) {
           case "Text": {
             const conversion = this.convertText(e as TJIIXTextElement, onlyText)
             if (conversion) {
-              convertedSymbols.push(...conversion)
+              conversionResults.push(...conversion)
             }
             break
           }
           case "Node": {
             const conversion = this.convertNode(e as TJIIXNodeElement)
             if (conversion) {
-              convertedSymbols.push(conversion)
+              conversionResults.push(conversion)
             }
             break
           }
           case "Edge": {
             const conversion = this.convertEdge(e as TJIIXEdgeElement)
             if (conversion) {
-              convertedSymbols.push(conversion)
+              conversionResults.push(conversion)
             }
             break
           }
@@ -389,21 +396,12 @@ export class OIConversionManager
           }
         }
       })
-      convertedSymbols.forEach(cs =>
-      {
-        this.model.addSymbol(cs.symbol)
-        this.renderer.drawSymbol(cs.symbol)
-        cs.strokes.forEach(s =>
-        {
-          this.renderer.removeSymbol(s.id)
-          this.model.removeSymbol(s.id)
-        })
-      })
 
+      this.behaviors.addSymbols(conversionResults.map(cs => cs.symbol), false)
+      this.behaviors.removeSymbols(conversionResults.flatMap(cs => cs.strokes.map(s => s.id)), false)
       this.behaviors.texter.adjustText()
-      await this.recognizer.eraseStrokes(convertedSymbols.flatMap(cs => cs.strokes.map(s => s.id)))
-      this.history.push(this.model, { added: convertedSymbols.map(c => c.symbol), erased: convertedSymbols.flatMap(cs => cs.strokes) })
-    }
 
+      this.history.push(this.model, { added: conversionResults.map(c => c.symbol), erased: conversionResults.flatMap(cs => cs.strokes) })
+    }
   }
 }

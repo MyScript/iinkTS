@@ -32,7 +32,7 @@ export abstract class OISymbol implements TOISymbol
   modificationDate: number
   selected: boolean
   deleting: boolean
-  style: TStyle
+  protected _style: TStyle
 
   constructor(type: SymbolType, style: TStyle)
   {
@@ -44,7 +44,17 @@ export abstract class OISymbol implements TOISymbol
     this.selected = false
     this.deleting = false
 
-    this.style = Object.assign({}, DefaultStyle, style)
+    this._style = Object.assign({}, DefaultStyle, style)
+  }
+
+  get style(): TStyle
+  {
+    return this._style
+  }
+
+  set style(style: TStyle)
+  {
+    this._style = style
   }
 
   abstract get vertices(): TPoint[]

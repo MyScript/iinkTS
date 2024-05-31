@@ -490,11 +490,32 @@
     gap: 2px;
     cursor: pointer;
     flex-wrap: wrap;
-    margin: 0px;
+    margin: auto;
     padding: 0px;
     min-width: 150px;
     max-width: 150px;
 }
+
+.ms-editor .ms-menu .thickness-list {
+    gap: 2px;
+    cursor: pointer;
+    flex-wrap: wrap;
+    margin: auto;
+    padding: 0px;
+    min-width: 150px;
+    max-width: 150px;
+}
+
+.ms-editor .ms-menu .font-size-list {
+    gap: 2px;
+    cursor: pointer;
+    flex-wrap: wrap;
+    margin: auto;
+    padding: 0px;
+    min-width: 150px;
+    max-width: 150px;
+}
+
 .ms-editor .ms-menu .ms-menu-button {
     display: flex;
     justify-content: space-between;

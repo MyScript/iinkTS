@@ -3,11 +3,12 @@ import { Configuration, TConfiguration, TConverstionState, TRenderingConfigurati
 import { InternalEvent } from "../event"
 import { OIPointerEventGrabber } from "../grabber"
 import { LoggerManager } from "../logger"
-import { OIModel, TExport } from "../model"
+import { OIModel, TExport, TJIIXTextElement } from "../model"
 import
 {
   Box,
   EdgeKind,
+  OIDecorator,
   OIEdge,
   OIEdgeArc,
   OIEdgeLine,
@@ -20,6 +21,7 @@ import
   OIShapeRectangle,
   OIShapeTriangle,
   OIStroke,
+  OISymbolGroup,
   OIText,
   ShapeKind,
   SymbolType,
@@ -47,7 +49,7 @@ import
   OIMoveManager,
   OIMenuManager
 } from "../manager"
-import { OIHistoryManager, TOIActions } from "../history"
+import { OIHistoryManager, TOIHistoryBackendChanges, TOIHistoryChanges } from "../history"
 import { PartialDeep, mergeDeep } from "../utils"
 import { IBehaviors, TBehaviorOptions } from "./IBehaviors"
 
@@ -279,16 +281,16 @@ export class OIBehaviors implements IBehaviors
     try {
       switch (this.#intention) {
         case Intention.Erase:
-          await this.eraser.end(pointer)
+          this.eraser.end(pointer)
           break
         case Intention.Select:
-          await this.selector.end(pointer)
+          this.selector.end(pointer)
           break
         case Intention.Move:
           this.move.end(evt)
           break
         default:
-          await this.writer.end(pointer)
+          this.writer.end(pointer)
           break
       }
     }
@@ -413,40 +415,35 @@ export class OIBehaviors implements IBehaviors
     }
   }
 
-
-  async createSymbols(partialSymbols: PartialDeep<TOISymbol>[]): Promise<TOISymbol[]>
+  protected createGroup(partialGroup: PartialDeep<OISymbolGroup>): OISymbolGroup
   {
-    try {
-      const errors: string[] = []
-      const symbols: (TOISymbol | undefined)[] = partialSymbols.map(s =>
-      {
-        switch (s.type) {
-          case SymbolType.Stroke:
-            return OIStroke.create(s as PartialDeep<OIStroke>)
-          case SymbolType.Shape:
-            return this.createShape(s as PartialDeep<OIStroke>)
-          case SymbolType.Edge:
-            return this.createEdge(s as PartialDeep<OIEdge>)
-          case SymbolType.Text:
-            return OIText.create(s as PartialDeep<OIText>)
-          default:
-            errors.push(`Unable to create symbol, type: "${ s.type }" is unknown`)
-            return
-        }
-      })
-      if (errors.length) {
-        throw new Error(errors.join("\n"))
+    if (!partialGroup.symbols?.length) {
+      throw new Error(`Unable to create group, no symbols`)
+    }
+
+    const symbols = partialGroup.symbols.map(partialSymbol =>
+    {
+      switch (partialSymbol?.type) {
+        case SymbolType.Stroke:
+          return OIStroke.create(partialSymbol as PartialDeep<OIStroke>)
+        case SymbolType.Shape:
+          return this.createShape(partialSymbol as PartialDeep<OIStroke>)
+        case SymbolType.Edge:
+          return this.createEdge(partialSymbol as PartialDeep<OIEdge>)
+        case SymbolType.Text:
+          return OIText.create(partialSymbol as PartialDeep<OIText>)
+        default:
+          throw new Error(`Unable to create group, symbol type '${ partialSymbol?.type } is unknow`)
       }
-      return await this.addSymbols(symbols as TOISymbol[])
+    })
+    const group = new OISymbolGroup(partialGroup.style!, symbols)
+    if (partialGroup.id) {
+      group.id = partialGroup.id
     }
-    catch (error) {
-      this.#logger.error("createSymbols", error)
-      this.menu.update()
-      this.svgDebugger.apply()
-      this.recognizer.waitForIdle()
-      this.internalEvent.emitError(error as Error)
-      throw error
+    if (partialGroup.decorators) {
+      group.decorators = partialGroup.decorators.map(d => new OIDecorator(d!.kind!, d!.style!))
     }
+    return group
   }
 
   async createSymbol(partialSymbol: PartialDeep<TOISymbol>): Promise<TOISymbol>
@@ -459,6 +456,10 @@ export class OIBehaviors implements IBehaviors
           return await this.addSymbol(this.createShape(partialSymbol as PartialDeep<OIStroke>))
         case SymbolType.Edge:
           return await this.addSymbol(this.createEdge(partialSymbol as PartialDeep<OIEdge>))
+        case SymbolType.Text:
+          return await this.addSymbol(OIText.create(partialSymbol as PartialDeep<OIText>))
+        case SymbolType.Group:
+          return await this.addSymbol(this.createGroup(partialSymbol as PartialDeep<OISymbolGroup>))
         default:
           throw new Error(`Unable to create symbol, type: "${ partialSymbol.type }" is unknown`)
       }
@@ -473,122 +474,375 @@ export class OIBehaviors implements IBehaviors
     }
   }
 
-  async addSymbol(symbolToAdd: TOISymbol): Promise<TOISymbol>
+  async createSymbols(partialSymbols: PartialDeep<TOISymbol>[]): Promise<TOISymbol[]>
   {
-    this.#logger.info("addSymbol", { symbolToAdd })
-    this.internalEvent.emitIdle(false)
-    this.model.addSymbol(symbolToAdd)
-    this.renderer.drawSymbol(symbolToAdd)
-    if (symbolToAdd.type === SymbolType.Stroke) {
-      this.recognizer.addStrokes([symbolToAdd as OIStroke], false)
+    try {
+      const errors: string[] = []
+      const symbols: (TOISymbol | undefined)[] = partialSymbols.map(partialSym =>
+      {
+        switch (partialSym.type) {
+          case SymbolType.Stroke:
+            return OIStroke.create(partialSym as PartialDeep<OIStroke>)
+          case SymbolType.Shape:
+            return this.createShape(partialSym as PartialDeep<OIStroke>)
+          case SymbolType.Edge:
+            return this.createEdge(partialSym as PartialDeep<OIEdge>)
+          case SymbolType.Text:
+            return OIText.create(partialSym as PartialDeep<OIText>)
+          case SymbolType.Group:
+            return this.createGroup(partialSym as PartialDeep<OISymbolGroup>)
+          default:
+            errors.push(`Unable to create symbol, type: "${ partialSym.type }" is unknown`)
+            return
+        }
+      })
+      if (errors.length) {
+        throw new Error(errors.join("\n"))
+      }
+      return await this.addSymbols(symbols as TOISymbol[])
+    } catch (error) {
+      this.#logger.error("importPointEvents", error)
+      this.internalEvent.emitError(error as Error)
+      throw error
     }
-    this.history.push(this.model, { added: [symbolToAdd] })
+  }
+
+  async addSymbol(sym: TOISymbol, addToHistory = true): Promise<TOISymbol>
+  {
+    this.#logger.info("addSymbol", { sym })
+    this.internalEvent.emitIdle(false)
+    this.model.addSymbol(sym)
+    this.renderer.drawSymbol(sym)
+
+    const strokes = this.extractStrokesFromSymbols([sym])
+    this.recognizer.addStrokes(strokes, false)
+
+    if (addToHistory) {
+      this.history.push(this.model, { added: [sym] })
+    }
     this.menu.update()
     this.svgDebugger.apply()
     this.recognizer.waitForIdle()
-    return symbolToAdd
+    return sym
   }
 
-  async addSymbols(symbolsToAdd: TOISymbol[]): Promise<TOISymbol[]>
+  async addSymbols(symList: TOISymbol[], addToHistory = true): Promise<TOISymbol[]>
   {
-    this.#logger.info("addSymbol", { symbolsToAdd })
+    this.#logger.info("addSymbol", { symList })
     this.internalEvent.emitIdle(false)
-    const strokes = symbolsToAdd.filter(s => s.type === SymbolType.Stroke) as OIStroke[]
-    this.recognizer.addStrokes(strokes, false)
-    symbolsToAdd.forEach(s =>
+    symList.forEach(s =>
     {
       this.model.addSymbol(s)
       this.renderer.drawSymbol(s)
     })
-    this.history.push(this.model, { added: symbolsToAdd })
+    const strokes = this.extractStrokesFromSymbols(symList)
+    this.recognizer.addStrokes(strokes, false)
+    if (addToHistory) {
+      this.history.push(this.model, { added: symList })
+    }
     this.menu.update()
     this.svgDebugger.apply()
     this.recognizer.waitForIdle()
-    return symbolsToAdd
+    return symList
   }
 
-  async updateSymbol(symbolToUpdate: TOISymbol): Promise<TOISymbol>
+  async updateSymbol(sym: TOISymbol, addToHistory = true): Promise<TOISymbol>
   {
-    this.#logger.info("updateSymbol", { symbolToUpdate })
+    this.#logger.info("updateSymbol", { sym })
     this.internalEvent.emitIdle(false)
-    this.model.updateSymbol(symbolToUpdate)
-    this.renderer.drawSymbol(symbolToUpdate)
-    if (symbolToUpdate.type === SymbolType.Stroke) {
-      this.recognizer.replaceStrokes([symbolToUpdate.id], [symbolToUpdate as OIStroke])
+    this.model.updateSymbol(sym)
+    this.renderer.drawSymbol(sym)
+    const strokes = this.extractStrokesFromSymbols([sym])
+    this.recognizer.replaceStrokes(strokes.map(s => s.id), strokes)
+    if (addToHistory) {
+      this.history.push(this.model, { updated: [sym] })
     }
-    this.history.push(this.model, { replaced: { oldSymbols: [symbolToUpdate], newSymbols: [symbolToUpdate] } })
     this.menu.update()
     this.recognizer.waitForIdle()
     this.svgDebugger.apply()
-    return symbolToUpdate
+    return sym
   }
 
-  async replaceSymbol(symbolToReplace: TOISymbol, newSymbols: TOISymbol[]): Promise<void>
+  async updateSymbols(symList: TOISymbol[], addToHistory = true): Promise<TOISymbol[]>
   {
-    this.#logger.info("replaceSymbol", { symbolToReplace, newSymbols })
+    this.#logger.info("updateSymbol", { symList })
     this.internalEvent.emitIdle(false)
-    this.model.replaceSymbol(symbolToReplace.id, newSymbols)
-    this.renderer.replaceSymbol(symbolToReplace.id, newSymbols)
-    const newStrokes = newSymbols.filter(s => s.type === SymbolType.Stroke) as OIStroke[]
-    if (symbolToReplace.type === SymbolType.Stroke && newStrokes.length) {
-      this.recognizer.replaceStrokes([symbolToReplace.id], newStrokes)
+    symList.forEach(s =>
+    {
+      this.model.updateSymbol(s)
+      this.renderer.drawSymbol(s)
+    })
+    const strokes = this.extractStrokesFromSymbols(symList)
+    this.recognizer.replaceStrokes(strokes.map(s => s.id), strokes)
+    if (addToHistory) {
+      this.history.push(this.model, { updated: symList })
     }
-    else if (symbolToReplace.type === SymbolType.Stroke) {
-      this.recognizer.eraseStrokes([symbolToReplace.id])
-    }
-    else if (newStrokes.length) {
-      this.recognizer.addStrokes(newStrokes, false)
-    }
-    this.history.push(this.model, { replaced: { oldSymbols: [symbolToReplace], newSymbols } })
     this.menu.update()
     this.recognizer.waitForIdle()
     this.svgDebugger.apply()
+    return symList
   }
 
-  changeOrderSymbols(symbols: TOISymbol[], position: "first" | "last" | "forward" | "backward")
+  updateSymbolsStyle(symbolIds: string[], style: TStyle, addToHistory = true): void
   {
-    symbols.forEach(s => this.changeOrderSymbol(s, position))
+    this.#logger.info("updateSymbolsStyle", { symbolIds, style })
+    const symbols: TOISymbol[] = []
+    this.model.symbols.forEach(s =>
+    {
+      if (symbolIds.includes(s.id)) {
+        s.style = Object.assign(s.style, style)
+        if (s.type === SymbolType.Text) {
+          (s as OIText).chars.forEach(c =>
+          {
+            if (style.color) {
+              c.color = style.color
+            }
+            if (style.width) {
+              c.fontWeight = style.width * 100
+            }
+          })
+        }
+        this.renderer.drawSymbol(s)
+        this.model.updateSymbol(s)
+        s.modificationDate = Date.now()
+        symbols.push(s)
+      }
+    })
+    if (addToHistory && symbols.length) {
+      this.history.push(this.model, { style: { symbols, style } })
+    }
+  }
+
+  updateTextFontSize(textIds: string[], fontSize: number): void
+  {
+    this.#logger.info("updateTextFontSize", { textIds, fontSize })
+    const symbols: OIText[] = []
+    this.model.symbols.forEach(s =>
+    {
+      if (textIds.includes(s.id) && s.type === SymbolType.Text) {
+        const textSymbol = s as OIText
+        textSymbol.chars.forEach(tc => tc.fontSize = fontSize)
+        this.texter.updateTextBoundingBox(textSymbol)
+        this.renderer.drawSymbol(s)
+        s.modificationDate = Date.now()
+        symbols.push(textSymbol)
+      }
+    })
+    if (symbols.length) {
+      this.texter.adjustText()
+      this.history.push(this.model, { style: { symbols, fontSize } })
+    }
+  }
+
+  async replaceSymbols(oldSymbols: TOISymbol[], newSymbols: TOISymbol[], addToHistory = true): Promise<void>
+  {
+    this.#logger.info("replaceSymbol", { oldSymbols, newSymbols })
+    this.internalEvent.emitIdle(false)
+
+    const oldStrokes = this.extractStrokesFromSymbols(oldSymbols)
+    const newStrokes = this.extractStrokesFromSymbols(newSymbols)
+
+    const firstSym = oldSymbols[0]
+
+    if (firstSym) {
+      this.model.replaceSymbol(firstSym.id, newSymbols)
+      this.renderer.replaceSymbol(firstSym.id, newSymbols)
+
+      oldSymbols.slice(1).forEach(s =>
+      {
+        this.renderer.removeSymbol(s.id)
+        this.model.removeSymbol(s.id)
+      })
+
+      if (oldStrokes.length && newStrokes.length) {
+        this.recognizer.replaceStrokes(oldStrokes.map(s => s.id), newStrokes)
+      }
+      else if (oldStrokes.length) {
+        this.recognizer.eraseStrokes(oldStrokes.map(s => s.id))
+      }
+      else {
+        this.recognizer.addStrokes(newStrokes, false)
+      }
+
+      if (addToHistory) {
+        this.history.push(this.model, { replaced: { oldSymbols, newSymbols } })
+      }
+      this.menu.update()
+      this.recognizer.waitForIdle()
+      this.svgDebugger.apply()
+    }
   }
 
   changeOrderSymbol(symbol: TOISymbol, position: "first" | "last" | "forward" | "backward"): void
   {
     this.model.changeOrderSymbol(symbol.id, position)
     this.renderer.changeOrderSymbol(symbol, position)
+    this.history.push(this.model, { order: { symbols: [symbol], position } })
   }
 
-  async removeSymbols(ids: string[]): Promise<void>
+  changeOrderSymbols(symbols: TOISymbol[], position: "first" | "last" | "forward" | "backward")
   {
-    this.#logger.info("removeSymbol", { ids })
-    this.internalEvent.emitIdle(false)
-    const symbolsToRemove = this.model.symbols.filter(s => ids.includes(s.id))
-    this.recognizer.eraseStrokes(symbolsToRemove.filter(s => s.type === SymbolType.Stroke).map(s => s.id))
-    symbolsToRemove.forEach(s =>
+    symbols.forEach(s =>
+    {
+      this.model.changeOrderSymbol(s.id, position)
+      this.renderer.changeOrderSymbol(s, position)
+    })
+    this.history.push(this.model, { order: { symbols, position } })
+  }
+
+  groupSymbols(symbols: TOISymbol[]): OISymbolGroup
+  {
+    const group = new OISymbolGroup({}, symbols)
+    symbols.forEach(s =>
     {
       this.model.removeSymbol(s.id)
       this.renderer.removeSymbol(s.id)
     })
-    this.history.push(this.model, { erased: symbolsToRemove })
-    this.menu.update()
-    this.svgDebugger.apply()
-    this.recognizer.waitForIdle()
+    this.model.addSymbol(group)
+    this.history.push(this.model, { group: { symbols } })
+    return group
   }
 
-  async removeSymbol(id: string): Promise<void>
+  ungroupSymbol(group: OISymbolGroup): TOISymbol[]
+  {
+    group.symbols.forEach(s => this.renderer.drawSymbol(s))
+    this.renderer.removeSymbol(group.id)
+    this.model.replaceSymbol(group.id, group.symbols)
+    this.history.push(this.model, { ungroup: { group } })
+    return group.symbols
+  }
+
+  async groupStrokesByJIIXElement(): Promise<void>
+  {
+    await this.export(["application/vnd.myscript.jiix"])
+    const strokes = this.model.symbols.filter(s => s.type === SymbolType.Stroke) as OIStroke[]
+    const jiix = this.model.exports?.["application/vnd.myscript.jiix"]
+    jiix?.elements?.forEach(el =>
+    {
+      if (el.type === "Text") {
+        const jiixText = el as TJIIXTextElement
+        jiixText.words?.forEach(w =>
+        {
+          const wordStrokes = strokes.filter(s => w.items?.map(s => s["full-id"]).includes(s.id))
+          if (wordStrokes.length) {
+            const orginDeco: OIDecorator[] = []
+            let orginStyle: TStyle = this.currentPenStyle
+            if (w.items?.length !== wordStrokes.length) {
+              w.items?.forEach(i =>
+              {
+                const sym = this.model.getRootSymbol(i["full-id"] as string)
+                if (sym?.type === SymbolType.Group) {
+                  const group = sym as OISymbolGroup
+                  orginDeco.push(...group.decorators)
+                  orginStyle = Object.assign(orginStyle, group.style)
+                  wordStrokes.push(...group.extractStrokes())
+                  this.model.removeSymbol(group.id)
+                  this.renderer.removeSymbol(group.id)
+                }
+              })
+            }
+            const wordSymb = new OISymbolGroup(orginStyle, wordStrokes)
+            orginDeco.forEach(d =>
+            {
+              if (!wordSymb.decorators.some(wd => wd.kind === d.kind)) {
+                wordSymb.decorators.push(d)
+              }
+            })
+            wordStrokes.map(s =>
+            {
+              this.model.removeSymbol(s.id)
+              this.renderer.removeSymbol(s.id)
+            })
+            this.model.addSymbol(wordSymb)
+            this.renderer.drawSymbol(wordSymb)
+          }
+        })
+      }
+      else {
+        const strokesAssociated = strokes.filter(s => el.items?.map(s => s["full-id"]).includes(s.id))
+        if (strokes.length) {
+          const group = new OISymbolGroup({}, strokesAssociated)
+          strokesAssociated.map(s =>
+          {
+            this.model.removeSymbol(s.id)
+            this.renderer.removeSymbol(s.id)
+          })
+          this.model.addSymbol(group)
+          this.renderer.drawSymbol(group)
+        }
+      }
+    })
+  }
+
+  async removeSymbol(id: string, addToHistory = true): Promise<void>
   {
     this.#logger.info("removeSymbol", { id })
-    const symbol = this.model.symbols.find(s => s.id === id)
+    this.recognizer.eraseStrokes([id])
+    const symbol = this.model.getRootSymbol(id)
     if (symbol) {
       this.internalEvent.emitIdle(false)
-      this.model.removeSymbol(symbol.id)
-      this.renderer.removeSymbol(symbol.id)
-      if (symbol.type === SymbolType.Stroke) {
-        this.recognizer.eraseStrokes([symbol.id])
+      if (symbol.type === SymbolType.Group) {
+        const group = symbol as OISymbolGroup
+        const groupStrokeIds = group.extractStrokes().map(s => s.id)
+        if (group.removeChilds([id])) {
+          this.model.updateSymbol(group)
+          this.renderer.drawSymbol(group)
+        }
+        else {
+          this.recognizer.eraseStrokes(groupStrokeIds)
+          this.model.removeSymbol(symbol.id)
+          this.renderer.removeSymbol(symbol.id)
+        }
       }
-      this.history.push(this.model, { erased: [symbol] })
+      else {
+        this.model.removeSymbol(symbol.id)
+        this.renderer.removeSymbol(symbol.id)
+      }
+      if (addToHistory) {
+        this.history.push(this.model, { erased: [symbol] })
+      }
       this.menu.update()
       this.svgDebugger.apply()
       this.recognizer.waitForIdle()
     }
+  }
+
+  async removeSymbols(ids: string[], addToHistory = true): Promise<TOISymbol[]>
+  {
+    this.#logger.info("removeSymbol", { ids })
+    this.recognizer.eraseStrokes(ids)
+
+    const symbolsToRemove = ids.map(id => this.model.getRootSymbol(id)).filter(s => !!s) as TOISymbol[]
+    if (symbolsToRemove.length) {
+      this.internalEvent.emitIdle(false)
+      symbolsToRemove.forEach(s =>
+      {
+        if (s.type === SymbolType.Group) {
+          this.recognizer.eraseStrokes((s as OISymbolGroup).extractStrokes().map(s => s.id))
+        }
+        this.model.removeSymbol(s.id)
+        this.renderer.removeSymbol(s.id)
+      })
+      if (addToHistory) {
+        this.history.push(this.model, { erased: symbolsToRemove })
+      }
+      this.menu.update()
+      this.svgDebugger.apply()
+      this.recognizer.waitForIdle()
+    }
+    return symbolsToRemove
+  }
+
+  select(ids: string[]): void
+  {
+    this.selector.removeSelectedGroup()
+    this.model.symbols.forEach(s =>
+    {
+      s.selected = ids.includes(s.id)
+      this.renderer.drawSymbol(s)
+    })
+    this.selector.drawSelectedGroup(this.model.symbolsSelected)
+    this.internalEvent.emitSelected(this.model.symbolsSelected)
   }
 
   selectAll(): void
@@ -618,56 +872,6 @@ export class OIBehaviors implements IBehaviors
     }
   }
 
-  updateSymbolsStyle(symbolIds: string[], style: TStyle): void
-  {
-    this.#logger.info("updateSymbolsStyle", { symbolIds, style })
-    const symbols: TOISymbol[] = []
-    this.model.symbols.forEach(s =>
-    {
-      if (symbolIds.includes(s.id)) {
-        Object.assign(s.style, style)
-        if (s.type === SymbolType.Text) {
-          (s as OIText).chars.forEach(c =>
-          {
-            if (style.color) {
-              c.color = style.color
-            }
-            if (style.width) {
-              c.fontWeight = style.width * 100
-            }
-          })
-        }
-        this.renderer.drawSymbol(s)
-        s.modificationDate = Date.now()
-        symbols.push(s)
-      }
-    })
-    if (symbols.length) {
-      this.history.push(this.model, { transformed: [{ transformationType: "STYLE", symbols, style }] })
-    }
-  }
-
-  updateTextFontSize(textIds: string[], fontSize: number): void
-  {
-    this.#logger.info("updateTextFontSize", { textIds, fontSize })
-    const textSymbols: OIText[] = []
-    this.model.symbols.forEach(s =>
-    {
-      if (textIds.includes(s.id) && s.type === SymbolType.Text) {
-        const textSymbol = s as OIText
-        textSymbol.chars.forEach(tc => tc.fontSize = fontSize)
-        this.texter.updateTextBoundingBox(textSymbol)
-        this.renderer.drawSymbol(s)
-        s.modificationDate = Date.now()
-        textSymbols.push(textSymbol)
-      }
-    })
-    if (textSymbols.length) {
-      this.texter.adjustText()
-      this.history.push(this.model, { transformed: [{ transformationType: "STYLE", symbols: textSymbols, fontSize }] })
-    }
-  }
-
   async importPointEvents(partialStrokes: PartialDeep<OIStroke>[]): Promise<OIModel>
   {
     this.#logger.info("importPointEvents", { partialStrokes })
@@ -687,76 +891,6 @@ export class OIBehaviors implements IBehaviors
     return this.model
   }
 
-  private extractActionsToBackend(actions: TOIActions): TOIActions
-  {
-    return {
-      added: actions.added?.filter(s => s.type === SymbolType.Stroke),
-      erased: actions.erased?.filter(s => s.type === SymbolType.Stroke),
-      replaced: {
-        oldSymbols: actions.replaced?.oldSymbols.filter(s => s.type === SymbolType.Stroke) || [],
-        newSymbols: actions.replaced?.newSymbols.filter(s => s.type === SymbolType.Stroke) || [],
-      },
-      transformed: actions.transformed?.filter(t => ["TRANSLATE", "MATRIX"].includes(t.transformationType) && t.symbols.some(s => s.type === SymbolType.Stroke)),
-    }
-  }
-
-  async undo(): Promise<OIModel>
-  {
-    this.#logger.info("undo")
-    if (this.history.context.canUndo) {
-      this.internalEvent.emitIdle(false)
-      this.unselectAll()
-      const previousStackItem = this.history.undo()
-      const modifications = previousStackItem.model.extractDifferenceSymbols(this.model)
-      this.#model = previousStackItem.model.clone()
-      this.#logger.debug("undo", { previousStackItem })
-      const actionsToBackend = this.extractActionsToBackend(previousStackItem.actions)
-      modifications.removed.forEach(s => this.renderer.removeSymbol(s.id))
-      modifications.added.forEach(s => this.renderer.drawSymbol(s))
-      if (
-        actionsToBackend.added?.length ||
-        actionsToBackend.erased?.length ||
-        actionsToBackend.replaced?.newSymbols.length ||
-        actionsToBackend.transformed?.length
-      ) {
-        await this.recognizer.undo(actionsToBackend)
-      }
-
-      this.menu.update()
-      this.recognizer.waitForIdle()
-      this.svgDebugger.apply()
-    }
-    return this.model
-  }
-
-  async redo(): Promise<OIModel>
-  {
-    this.#logger.info("redo")
-    if (this.history.context.canRedo) {
-      this.internalEvent.emitIdle(false)
-      this.unselectAll()
-      const nextStackItem = this.history.redo()
-      const modifications = nextStackItem.model.extractDifferenceSymbols(this.model)
-      this.#model = nextStackItem.model.clone()
-      this.#logger.debug("redo", { modifications })
-      const actionsToBackend = this.extractActionsToBackend(nextStackItem.actions)
-      modifications.removed.forEach(s => this.renderer.removeSymbol(s.id))
-      modifications.added.forEach(s => this.renderer.drawSymbol(s))
-      if (
-        actionsToBackend.added?.length ||
-        actionsToBackend.erased?.length ||
-        actionsToBackend.replaced?.newSymbols.length ||
-        actionsToBackend.transformed?.length
-      ) {
-        await this.recognizer.redo(actionsToBackend)
-      }
-      this.menu.update()
-      this.recognizer.waitForIdle()
-      this.svgDebugger.apply()
-    }
-    return this.model
-  }
-
   protected triggerDownload(fileName: string, urlData: string): void
   {
     const downloadAnchorNode = document.createElement("a")
@@ -767,13 +901,13 @@ export class OIBehaviors implements IBehaviors
     downloadAnchorNode.remove()
   }
 
-  protected getSymbolsBounds(symbols: TOISymbol[]): Box
+  getSymbolsBounds(symbols: TOISymbol[], margin = SELECTION_MARGIN): Box
   {
     const box = Box.createFromBoxes(symbols.map(s => s.boundingBox))
-    box.x -= SELECTION_MARGIN
-    box.y -= SELECTION_MARGIN
-    box.width += SELECTION_MARGIN * 2
-    box.height += SELECTION_MARGIN * 2
+    box.x -= margin
+    box.y -= margin
+    box.width += margin * 2
+    box.height += margin * 2
     return box
   }
 
@@ -851,16 +985,125 @@ export class OIBehaviors implements IBehaviors
     this.triggerDownload(this.getExportName("json"), dataStr)
   }
 
+  extractStrokesFromSymbols(symbols: TOISymbol[] | undefined): OIStroke[]
+  {
+    if (!symbols?.length) return []
+    const strokes = symbols.filter(s => s.type === SymbolType.Stroke) as OIStroke[]
+    const groups = symbols.filter(s => s.type === SymbolType.Group) as OISymbolGroup[]
+    return strokes.concat(groups.flatMap(g => g.extractStrokes()))
+  }
+
+  protected extractBackendChanges(changes: TOIHistoryChanges): TOIHistoryBackendChanges
+  {
+    const backendChanges: TOIHistoryBackendChanges = {}
+    backendChanges.added = this.extractStrokesFromSymbols(changes.added)
+    backendChanges.erased = this.extractStrokesFromSymbols(changes.erased)
+
+    const updated = this.extractStrokesFromSymbols(changes.updated)
+
+    const oldStrokes = updated.concat(this.extractStrokesFromSymbols(changes.replaced?.oldSymbols))
+    const newStrokes = updated.concat(this.extractStrokesFromSymbols(changes.replaced?.newSymbols))
+    if (oldStrokes.length && newStrokes.length) {
+      backendChanges.replaced = {
+        oldStrokes,
+        newStrokes
+      }
+    }
+    else {
+      backendChanges.added.push(...newStrokes)
+      backendChanges.erased.push(...oldStrokes)
+    }
+
+    if (changes.matrix) {
+      backendChanges.matrix = {
+        strokes: this.extractStrokesFromSymbols(changes.matrix.symbols),
+        matrix: changes.matrix.matrix,
+      }
+    }
+
+    if (changes.translate?.length) {
+      backendChanges.translate = []
+      changes.translate.forEach(tr =>
+      {
+        const strokes = this.extractStrokesFromSymbols(tr.symbols)
+        if (strokes.length) {
+          backendChanges.translate!.push({
+            strokes,
+            tx: tr.tx,
+            ty: tr.ty
+          })
+        }
+      })
+
+    }
+    return backendChanges
+  }
+
+  async undo(): Promise<OIModel>
+  {
+    this.#logger.info("undo")
+    if (this.history.context.canUndo) {
+      this.internalEvent.emitIdle(false)
+      this.unselectAll()
+      const previousStackItem = this.history.undo()
+      const modifications = previousStackItem.model.extractDifferenceSymbols(this.model)
+      this.#model = previousStackItem.model.clone()
+      this.#logger.debug("undo", { previousStackItem })
+      const actionsToBackend = this.extractBackendChanges(previousStackItem.changes)
+      modifications.removed.forEach(s => this.renderer.removeSymbol(s.id))
+      modifications.added.forEach(s => this.renderer.drawSymbol(s))
+      if (
+        actionsToBackend.added?.length ||
+        actionsToBackend.erased?.length ||
+        actionsToBackend.replaced ||
+        actionsToBackend.matrix ||
+        actionsToBackend.translate
+      ) {
+        await this.recognizer.undo(actionsToBackend)
+      }
+
+      this.menu.update()
+      this.svgDebugger.apply()
+      await this.recognizer.waitForIdle()
+    }
+    return this.model
+  }
+
+  async redo(): Promise<OIModel>
+  {
+    this.#logger.info("redo")
+    if (this.history.context.canRedo) {
+      this.internalEvent.emitIdle(false)
+      this.unselectAll()
+      const nextStackItem = this.history.redo()
+      const modifications = nextStackItem.model.extractDifferenceSymbols(this.model)
+      this.#model = nextStackItem.model.clone()
+      this.#logger.debug("redo", { modifications })
+      const actionsToBackend = this.extractBackendChanges(nextStackItem.changes)
+      modifications.removed.forEach(s => this.renderer.removeSymbol(s.id))
+      modifications.added.forEach(s => this.renderer.drawSymbol(s))
+      if (
+        actionsToBackend.added?.length ||
+        actionsToBackend.erased?.length ||
+        actionsToBackend.replaced ||
+        actionsToBackend.matrix ||
+        actionsToBackend.translate
+      ) {
+        await this.recognizer.redo(actionsToBackend)
+      }
+      this.menu.update()
+      await this.svgDebugger.apply()
+      await this.recognizer.waitForIdle()
+    }
+    return this.model
+  }
+
   async export(mimeTypes?: string[]): Promise<OIModel>
   {
     try {
       this.#logger.info("export", { mimeTypes })
-      const needExport = !mimeTypes?.length && !this.model.exports?.["application/vnd.myscript.jiix"] || mimeTypes?.some(mt => !this.model.exports?.[mt])
-      if (needExport) {
-        await this.recognizer.waitForIdle()
-        const exports = await this.recognizer.export(mimeTypes)
-        this.model.mergeExport(exports as TExport)
-      }
+      const exports = await this.recognizer.export(mimeTypes)
+      this.model.mergeExport(exports as TExport)
     }
     catch (error) {
       this.#logger.error("export", { error })
@@ -912,9 +1155,7 @@ export class OIBehaviors implements IBehaviors
       this.renderer.clear()
       this.model.clear()
       this.history.push(this.model, { erased })
-      if (erased.some(s => s.type === SymbolType.Stroke)) {
-        this.recognizer.clear()
-      }
+      this.recognizer.clear()
       this.internalEvent.emitSelected(this.model.symbolsSelected)
     }
     this.menu.update()

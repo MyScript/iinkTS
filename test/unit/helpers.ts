@@ -13,6 +13,8 @@ import
   TOISymbolChar,
   TPoint,
   DecoratorKind,
+  OISymbolGroup,
+  TOISymbol,
 } from "../../src/iink"
 
 export const delay = (delayInms: number) =>
@@ -32,7 +34,7 @@ export function randomIntFromInterval(min: number, max: number): number
 
 const defaultBox: TBoundingBox = { height: 10, width: 10, x: 1, y: 1 }
 
-export function buildStroke({ box = defaultBox, style = DefaultPenStyle, nbPoint = 5,  pointerType = "pen" } = {}): Stroke
+export function buildStroke({ box = defaultBox, style = DefaultPenStyle, nbPoint = 5, pointerType = "pen" } = {}): Stroke
 {
   const stroke = new Stroke(style, pointerType)
   for (let i = 0; i < nbPoint; i++) {
@@ -49,12 +51,14 @@ export function buildStroke({ box = defaultBox, style = DefaultPenStyle, nbPoint
 export function buildOIStroke({ box = defaultBox, style = DefaultStyle, nbPoint = 5, pointerType = "pen" } = {}): OIStroke
 {
   const stroke = new OIStroke(style, pointerType)
+  const stepX = box.width / (nbPoint - 1)
+  const stepY = box.height / (nbPoint - 1)
   for (let i = 0; i < nbPoint; i++) {
     stroke.pointers.push({
       p: Math.random(),
       t: Date.now() + i,
-      x: randomIntFromInterval(box.x, box.x + box.width),
-      y: randomIntFromInterval(box.y, box.y + box.height),
+      x: box.x + stepX * i,
+      y: box.y + stepY * i,
     })
   }
   return stroke
@@ -75,7 +79,31 @@ export function buildOILine({ start = { x: 0, y: 0 }, end = { x: 5, y: 5 }, styl
   return new OIEdgeLine(style, start, end)
 }
 
-export function buildOIText({ chars = [], point = { x: 0, y: 0 }, boundingBox = { x: 0, y: 10, width: 20, height: 30 }, style = DefaultStyle }: { chars?: TOISymbolChar[], point?: TPoint, boundingBox?: TBoundingBox, style?: TStyle } = {}): OIText
+export function buildOIText(
+  { chars = [], point = { x: 0, y: 0 }, boundingBox = { x: 0, y: 10, width: 20, height: 30 }, style = DefaultStyle }:
+    { chars?: TOISymbolChar[], point?: TPoint, boundingBox?: TBoundingBox, style?: TStyle } = {}
+): OIText
 {
   return new OIText(style, chars, point, boundingBox)
+}
+
+export function buildOIGroup(
+  { style = DefaultStyle, nbOIStroke = 2, nbOICircle = 0, nbOILine = 0, nbOIText = 0 }:
+    { style?: TStyle, nbOIStroke?: number, nbOICircle?: number, nbOILine?: number, nbOIText?: number } = {}
+): OISymbolGroup
+{
+  const symbols: TOISymbol[] = []
+  for (let index = 0; index < nbOIStroke; index++) {
+    symbols.push(buildOIStroke())
+  }
+  for (let index = 0; index < nbOICircle; index++) {
+    symbols.push(buildOICircle())
+  }
+  for (let index = 0; index < nbOILine; index++) {
+    symbols.push(buildOILine())
+  }
+  for (let index = 0; index < nbOIText; index++) {
+    symbols.push(buildOIText())
+  }
+  return new OISymbolGroup(style, symbols)
 }

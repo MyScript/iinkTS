@@ -13,6 +13,7 @@ import
   OIShapeEllipse,
   OIShapePolygon,
   OIStroke,
+  OISymbolGroup,
   OIText,
   ShapeKind,
   SymbolType,
@@ -186,6 +187,12 @@ export class OIResizeManager
     return this.texter.updateTextBoundingBox(text)
   }
 
+  protected applyOnGroup(group: OISymbolGroup, origin: TPoint, scaleX: number, scaleY: number): OISymbolGroup
+  {
+    group.symbols.forEach(s => this.applyToSymbol(s, origin, scaleX, scaleY))
+    return group
+  }
+
   applyToSymbol(symbol: TOISymbol, origin: TPoint, scaleX: number, scaleY: number): TOISymbol
   {
     this.#logger.info("applyToSymbol", { symbol, scaleX, scaleY })
@@ -198,6 +205,8 @@ export class OIResizeManager
         return this.applyToEdge(symbol as TOIEdge, origin, scaleX, scaleY)
       case SymbolType.Text:
         return this.applyOnText(symbol as OIText, origin, scaleX, scaleY)
+      case SymbolType.Group:
+        return this.applyOnGroup(symbol as OISymbolGroup, origin, scaleX, scaleY)
       default:
         throw new Error(`Can't apply resize on symbol, type unknow: ${ symbol.type }`)
     }
@@ -306,23 +315,21 @@ export class OIResizeManager
     this.#logger.info("end", { point })
     const { scaleX, scaleY } = this.continue(point)
     this.snaps.clearSnapToElementLines()
-    const strokesResized: OIStroke[] = []
     const oldSymbols = this.model.symbolsSelected.map(s => s.clone())
     this.model.symbolsSelected.forEach(s =>
     {
       this.applyToSymbol(s, this.transformOrigin, scaleX, scaleY)
       this.renderer.drawSymbol(s)
       this.model.updateSymbol(s)
-      if (s.type === SymbolType.Stroke) {
-        strokesResized.push(s as OIStroke)
-      }
     })
-    const promise = this.recognizer.replaceStrokes(strokesResized.map(s => s.id), strokesResized)
+
+    const strokesFromSymbols = this.behaviors.extractStrokesFromSymbols(this.model.symbolsSelected)
+    this.recognizer.replaceStrokes(strokesFromSymbols.map(s => s.id), strokesFromSymbols)
+
     this.selector.resetSelectedGroup(this.model.symbolsSelected)
     this.history.push(this.model, { replaced: { oldSymbols, newSymbols: this.model.symbolsSelected } })
     this.interactElementsGroup = undefined
     this.selector.showInteractElements()
-    await promise
-    await this.svgDebugger.apply()
+    this.svgDebugger.apply()
   }
 }

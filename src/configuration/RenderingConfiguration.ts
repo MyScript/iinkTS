@@ -16,7 +16,7 @@ export type TGuidesConfiguration = {
  */
 export const DefaultGuidesConfiguration: TGuidesConfiguration = {
   enable: true,
-  gap: 50,
+  gap: 100,
   /**
    * @remarks only usable in the case of offscreen
    */

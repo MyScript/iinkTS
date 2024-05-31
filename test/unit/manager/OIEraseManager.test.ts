@@ -63,13 +63,10 @@ describe("OIEraseManager.ts", () =>
       const point: TPointer = { t: 1, p: 0.5, x: 20, y: 20 }
       await manager.end(point)
       expect(manager.currentEraser).toBeUndefined()
-      expect(manager.renderer.removeSymbol).toHaveBeenCalledTimes(3)
+      expect(manager.renderer.removeSymbol).toHaveBeenCalledTimes(1)
       expect(manager.renderer.removeSymbol).toHaveBeenNthCalledWith(1, eraserId)
-      expect(manager.renderer.removeSymbol).toHaveBeenNthCalledWith(2, strokeToErase.id)
-      expect(manager.renderer.removeSymbol).toHaveBeenNthCalledWith(3, circleToErase.id)
-      expect(manager.recognizer.eraseStrokes).toHaveBeenCalledTimes(1)
-      expect(manager.recognizer.eraseStrokes).toHaveBeenCalledWith([strokeToErase.id])
-      expect(manager.model.symbols).toHaveLength(1)
+
+      expect(manager.behaviors.removeSymbols).toHaveBeenNthCalledWith(1, [strokeToErase.id, circleToErase.id])
     })
     test("should throw error if continu when currentEraser is undefine", async () =>
     {

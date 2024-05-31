@@ -58,7 +58,7 @@ describe("OITextManager.ts", () =>
     const behaviors = new OIBehaviorsMock()
     const manager = new OITextManager(behaviors)
     const text = buildOIText({ chars })
-    const textEl = manager.renderer.getSymbolElement(text) as SVGGElement
+    const textEl = manager.renderer.util.getSymbolElement(text) as SVGGElement
     manager.setCharsBoundingBox(text, textEl)
 
     expect(chars[0].boundingBox).toEqual({ height: 0, width: 0, x: 0, y: 0 })
@@ -70,7 +70,7 @@ describe("OITextManager.ts", () =>
     const behaviors = new OIBehaviorsMock()
     const manager = new OITextManager(behaviors)
     const text = buildOIText({ chars })
-    const textEl = manager.renderer.getSymbolElement(text) as SVGGElement
+    const textEl = manager.renderer.util.getSymbolElement(text) as SVGGElement
     expect(manager.getElementBoundingBox(textEl)).toEqual({ x: 0, y: 0, width: 10, height: 10 })
   })
 

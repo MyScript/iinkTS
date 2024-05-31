@@ -1,14 +1,10 @@
 import { LoggerClass, SvgElementRole } from "../../Constants"
 import { TRenderingConfiguration } from "../../configuration"
 import { LoggerManager } from "../../logger"
-import { OIStroke, SymbolType, TOIEdge, TOISymbol, TPoint, TOIShape, TBoundingBox, OIText, Box, OIEraser } from "../../primitive"
+import { TOISymbol, TPoint, TBoundingBox, Box } from "../../primitive"
 import { getClosestPoints } from "../../utils"
-import { OISVGDecoratorUtil } from "./OISVGDecoratorUtil"
-import { OISVGEdgeUtil } from "./OISVGEdgeUtil"
-import { OISVGEraserUtil } from "./OISVGEraserUtil"
-import { OISVGShapeUtil } from "./OISVGShapeUtil"
-import { OISVGStrokeUtil } from "./OISVGStrokeUtil"
-import { OISVGTextUtil } from "./OISVGTextUtil"
+import { OISVGRendererEraserUtil } from "./OISVGRendererEraserUtil"
+import { OISVGRendererUtil } from "./OISVGRendererUtil"
 import { SVGBuilder } from "./SVGBuilder"
 
 /**
@@ -34,13 +30,9 @@ export class OISVGRenderer
   layer!: SVGElement
   definitionGroup!: SVGGElement
 
+  util: OISVGRendererUtil
 
-  strokeUtil: OISVGStrokeUtil
-  eraserUtil: OISVGEraserUtil
-  shapeUtil: OISVGShapeUtil
-  edgeUtil: OISVGEdgeUtil
-  textUtil: OISVGTextUtil
-  decoratorUtil: OISVGDecoratorUtil
+  eraserUtil: OISVGRendererEraserUtil
 
   verticalGuides: number[] = []
   horizontalGuides: number[] = []
@@ -49,13 +41,10 @@ export class OISVGRenderer
   {
     this.#logger.info("constructor", { configuration })
     this.configuration = configuration
-    this.strokeUtil = new OISVGStrokeUtil(this.selectionFilterId, this.removalFilterId)
-    this.eraserUtil = new OISVGEraserUtil()
-    this.shapeUtil = new OISVGShapeUtil(this.selectionFilterId, this.removalFilterId)
-    this.edgeUtil = new OISVGEdgeUtil(this.selectionFilterId, this.removalFilterId, this.arrowHeadStartMarker, this.arrowHeadEndMaker)
-    this.textUtil = new OISVGTextUtil(this.selectionFilterId, this.removalFilterId)
-    this.decoratorUtil = new OISVGDecoratorUtil(this.selectionFilterId, this.removalFilterId)
 
+    this.util = new OISVGRendererUtil(this.selectionFilterId, this.removalFilterId, this.arrowHeadStartMarker, this.arrowHeadEndMaker)
+
+    this.eraserUtil = new OISVGRendererEraserUtil()
   }
 
   protected initLayer(): void
@@ -276,30 +265,11 @@ export class OISVGRenderer
     }
   }
 
-  getSymbolElement(symbol: TOISymbol): SVGGraphicsElement | undefined
-  {
-    switch (symbol.type) {
-      case SymbolType.Stroke:
-        return this.strokeUtil.getSVGElement(symbol as OIStroke)
-      case SymbolType.Eraser:
-        return this.eraserUtil.getSVGElement(symbol as OIEraser)
-      case SymbolType.Shape:
-        return this.shapeUtil.getSVGElement(symbol as TOIShape)
-      case SymbolType.Edge:
-        return this.edgeUtil.getSVGElement(symbol as TOIEdge)
-      case SymbolType.Text:
-        return this.textUtil.getSVGElement(symbol as OIText)
-      default:
-        this.#logger.error("getSymbolElement", `symbol type is unknow: "${ symbol.type }"`)
-        return
-    }
-  }
-
   drawSymbol(symbol: TOISymbol): SVGGraphicsElement | undefined
   {
     this.#logger.debug("drawSymbol", { symbol })
     const oldNode = this.layer.querySelector(`#${ symbol?.id }`)
-    const svgEl = this.getSymbolElement(symbol)
+    const svgEl = this.util.getSymbolElement(symbol)
 
     if (svgEl) {
       if (oldNode) {
@@ -316,7 +286,7 @@ export class OISVGRenderer
   {
     this.#logger.debug("drawSymbol", { symbols })
     const oldNode = this.layer.querySelector(`#${ id }`)
-    const elements = symbols.map(s => this.getSymbolElement(s)).filter(x => !!x) as SVGGraphicsElement[]
+    const elements = symbols.map(s => this.util.getSymbolElement(s)).filter(x => !!x) as SVGGraphicsElement[]
 
     if (elements.length) {
       if (oldNode) {

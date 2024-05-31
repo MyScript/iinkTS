@@ -1,26 +1,13 @@
-import { DecoratorKind, OIStroke, OIDecorator, TPointer } from "../../primitive"
-import { DefaultStyle } from "../../style"
+import { OIStroke, TPointer } from "../../primitive"
 import { computeAngleAxeRadian, computeLinksPointers, computeMiddlePointer } from "../../utils"
-import { OISVGDecoratorUtil } from "./OISVGDecoratorUtil"
-import { SVGBuilder } from "./SVGBuilder"
 
 /**
  * @group Renderer
  */
-export class OISVGStrokeUtil
+export class OISVGRendererStrokeUtil
 {
-  removalFilterId: string
-  selectionFilterId: string
-  decoratorUtil: OISVGDecoratorUtil
 
-  constructor(selectionFilterId: string, removalFilterId: string)
-  {
-    this.selectionFilterId = selectionFilterId
-    this.removalFilterId = removalFilterId
-    this.decoratorUtil = new OISVGDecoratorUtil(this.selectionFilterId, this.removalFilterId)
-  }
-
-  protected getArcPath(center: TPointer, radius: number): string
+  protected static getArcPath(center: TPointer, radius: number): string
   {
     const svgPath = [
       `M ${ center.x } ${ center.y }`,
@@ -31,7 +18,7 @@ export class OISVGStrokeUtil
     return svgPath
   }
 
-  protected getLinePath(begin: TPointer, end: TPointer, width: number): string
+  protected static getLinePath(begin: TPointer, end: TPointer, width: number): string
   {
     const linkPoints1 = computeLinksPointers(begin, computeAngleAxeRadian(begin, end), width)
     const linkPoints2 = computeLinksPointers(end, computeAngleAxeRadian(begin, end), width)
@@ -44,7 +31,7 @@ export class OISVGStrokeUtil
     return svgPath
   }
 
-  protected getFinalPath(begin: TPointer, end: TPointer, width: number): string
+  protected static getFinalPath(begin: TPointer, end: TPointer, width: number): string
   {
     const ARCSPLIT = 6
     const angle = computeAngleAxeRadian(begin, end)
@@ -60,7 +47,7 @@ export class OISVGStrokeUtil
     return svgPath
   }
 
-  protected getQuadraticPath(begin: TPointer, end: TPointer, central: TPointer, width: number): string
+  protected static getQuadraticPath(begin: TPointer, end: TPointer, central: TPointer, width: number): string
   {
     const linkPoints1 = computeLinksPointers(begin, computeAngleAxeRadian(begin, central), width)
     const linkPoints2 = computeLinksPointers(end, computeAngleAxeRadian(central, end), width)
@@ -74,7 +61,7 @@ export class OISVGStrokeUtil
     return svgPath
   }
 
-  getSVGPath(stroke: OIStroke): string
+  static getSVGPath(stroke: OIStroke): string
   {
     const STROKE_LENGTH = stroke.pointers.length
     if (!STROKE_LENGTH) return ""
@@ -104,44 +91,5 @@ export class OISVGStrokeUtil
     return parts.join(" ")
   }
 
-  getSVGElement(stroke: OIStroke): SVGGraphicsElement
-  {
-    const attrs: { [key: string]: string } = {
-      "id": stroke.id,
-      "type": "stroke",
-      "vector-effect": "non-scaling-stroke",
-      "stroke-linecap": "round",
-      "stroke-linejoin": "round",
-      "fill": stroke.style.color || DefaultStyle.color!,
-      "stroke-width": (stroke.style.width || DefaultStyle.width!).toString(),
-      "opacity": (stroke.style.opacity || DefaultStyle.opacity!).toString(),
-    }
-
-    if (stroke.deleting) {
-      attrs["filter"] = `url(#${ this.removalFilterId })`
-    }
-
-    const strokeGroup = SVGBuilder.createGroup(attrs)
-
-    const strokeAttrs: { [key: string]: string } = { "d": this.getSVGPath(stroke) }
-    if (stroke.selected) {
-      strokeAttrs["filter"] = `url(#${ this.selectionFilterId })`
-    }
-    strokeGroup.append(SVGBuilder.createPath(strokeAttrs))
-
-    stroke.decorators.forEach(d => {
-      const deco = this.decoratorUtil.getSVGElement(d as OIDecorator, stroke)
-      if (deco) {
-        if (d.kind === DecoratorKind.Highlight) {
-          strokeGroup.prepend(deco)
-        }
-        else {
-          strokeGroup.append(deco)
-        }
-      }
-    })
-
-    return strokeGroup
-  }
 
 }

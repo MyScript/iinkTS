@@ -10,7 +10,7 @@ import
   TRecognitionConfiguration,
   TMatrixTransform,
   MatrixTransform,
-  TOIActions,
+  TOIHistoryBackendChanges,
   OIStroke,
 } from "../../../src/iink"
 
@@ -242,7 +242,7 @@ describe("OIRecognizer.ts", () =>
       const testDataToSend = { type: "test", data: "test-data" }
       await oiRecognizer.send(testDataToSend)
       //¯\_(ツ)_/¯  required to wait server received message
-      await delay(100)
+      await delay(300)
       const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       expect(messageSent).toEqual(testDataToSend)
     })
@@ -683,12 +683,12 @@ describe("OIRecognizer.ts", () =>
     {
       expect.assertions(1)
       await oiRecognizer.init()
-      const actions: TOIActions = { added: [buildOIStroke()] }
-      oiRecognizer.undo(actions)
+      const changes: TOIHistoryBackendChanges = { added: [buildOIStroke()] }
+      oiRecognizer.undo(changes)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       const messageSent = JSON.parse(mockServer.getLastMessage() as string)
-      const messageSentExpected = { type: "undo", changes: [{ type: "addStrokes", strokes: [(actions.added![0] as OIStroke).formatToSend()] }] }
+      const messageSentExpected = { type: "undo", changes: [{ type: "addStrokes", strokes: [(changes.added![0] as OIStroke).formatToSend()] }] }
       await expect(messageSent).toMatchObject(messageSentExpected)
     })
     test("should reject if receive error message", async () =>

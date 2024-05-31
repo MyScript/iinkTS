@@ -2,6 +2,8 @@ import { LoggerClass } from "../Constants"
 import { LoggerManager } from "../logger"
 import
 {
+  OISymbolGroup,
+  SymbolType,
   TOISymbol,
   TPoint,
 } from "../primitive"
@@ -50,7 +52,7 @@ export class OIModel implements IModel
 
   selectSymbol(id: string): void
   {
-    const symbol = this.symbols.find(s => s.id === id)
+    const symbol = this.symbols.find(s => s.id === id || (s.type === SymbolType.Group && (s as OISymbolGroup).containsSymbol(id)))
     if (symbol) {
       symbol.selected = true
     }
@@ -80,15 +82,21 @@ export class OIModel implements IModel
     this.symbols.forEach(s => s.selected = false)
   }
 
+  getRootSymbol(id: string): TOISymbol | undefined
+  {
+    return this.symbols.find(s =>
+    {
+      if (s.id === id) return s
+      if (s.type === SymbolType.Group && (s as OISymbolGroup).containsSymbol(id)) {
+        return s
+      }
+      return
+    })
+  }
+
   getSymbolRowIndex(symbol: TOISymbol): number
   {
     return Math.round(symbol.boundingBox.yMid / this.rowHeight)
-  }
-
-  getSymbolInRowOrdered(rowIndex: number): TOISymbol[]
-  {
-    return this.symbols.filter(s => this.getSymbolRowIndex(s) === rowIndex)
-      .sort((s1, s2) => s1.boundingBox.xMid - s2.boundingBox.xMid)
   }
 
   getSymbolsByRowOrdered(): { index: number, symbols: TOISymbol[] }[]
@@ -117,7 +125,7 @@ export class OIModel implements IModel
     this.#logger.info("addSymbol", { symbol })
     const sIndex = this.symbols.findIndex(s => s.id === symbol.id)
     if (sIndex > -1) {
-      throw new Error(`Symbol id already exist: ${symbol.id}`)
+      throw new Error(`Symbol id already exist: ${ symbol.id }`)
     }
     this.symbols.push(symbol)
     this.modificationDate = Date.now()
@@ -212,7 +220,8 @@ export class OIModel implements IModel
     this.#logger.info("clone")
     const clonedModel = new OIModel(this.width, this.height, this.rowHeight, this.creationTime)
     clonedModel.modificationDate = this.modificationDate
-    clonedModel.symbols = this.symbols.map(s => {
+    clonedModel.symbols = this.symbols.map(s =>
+    {
       const c = s.clone()
       c.selected = false
       return c

@@ -14,6 +14,7 @@ import
   OIShapeRectangle,
   OIShapeTriangle,
   OIStroke,
+  OISymbolGroup,
   ShapeKind,
   SymbolType,
   TOIEdge,
@@ -93,6 +94,16 @@ export class OIWriteManager
   get recognizer(): OIRecognizer
   {
     return this.behaviors.recognizer
+  }
+
+  get needContextLessGesture(): boolean
+  {
+    return this.detectGesture && this.model.symbols.some(s =>
+    {
+      if (s.type === SymbolType.Stroke) return false
+      if (s.type === SymbolType.Group && (s as OISymbolGroup).containsOnlyStroke()) return false
+      return true
+    })
   }
 
   protected createCurrentSymbol(pointer: TPointer, style: TStyle, pointerType: string): TOISymbol
@@ -236,28 +247,25 @@ export class OIWriteManager
     this.model.currentSymbol = undefined
     this.currentSymbolOrigin = undefined
 
+    this.model.addSymbol(symbol)
+
     if (symbol.type === SymbolType.Stroke) {
       let gestureFromContextLess: TGesture | undefined
       const currentStroke = symbol as OIStroke
-      if (this.detectGesture && this.model.symbols.some(s => s.type !== SymbolType.Stroke && currentStroke.boundingBox.overlaps(s.boundingBox)) ) {
+      if (this.needContextLessGesture) {
         gestureFromContextLess = await this.gestureManager.getGestureFromContextLess(currentStroke)
       }
       if (gestureFromContextLess) {
-        await this.gestureManager.apply(currentStroke, gestureFromContextLess)
+        this.gestureManager.apply(currentStroke, gestureFromContextLess)
       }
       else {
-        this.model.addSymbol(symbol)
-        this.history.push(this.model, { added: [symbol]})
+        this.history.push(this.model, { added: [symbol] })
         const gesture = await this.recognizer.addStrokes([currentStroke], this.detectGesture)
         if (gesture) {
-          this.history.stack.pop()
-          this.gestureManager.apply(currentStroke, gesture)
+          this.history.pop()
+          this.gestureManager.apply(this.model.getRootSymbol(gesture.gestureStrokeId) as OIStroke, gesture)
         }
       }
-    }
-    else {
-      this.model.addSymbol(symbol)
-      this.history.push(this.model, { added: [symbol]})
     }
   }
 }

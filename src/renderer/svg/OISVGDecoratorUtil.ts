@@ -1,5 +1,5 @@
-import { DecoratorKind, OIDecorator, OIStroke, OIText, TBoundingBox } from "../../primitive"
-import { DefaultStyle } from "../../style"
+import { Box, DecoratorKind, OIDecorator, TBoundingBox } from "../../primitive"
+import { DefaultStyle, TStyle } from "../../style"
 import { SVGBuilder } from "./SVGBuilder"
 
 /**
@@ -16,7 +16,7 @@ export class OISVGDecoratorUtil
     this.removalFilterId = removalFilterId
   }
 
-  getSVGElement(decorator: OIDecorator, parent: OIStroke | OIText): SVGGeometryElement | undefined
+  getSVGElement(decorator: OIDecorator, { deleting, style, boundingBox }: { deleting: boolean, style: TStyle, boundingBox: Box }): SVGGeometryElement | undefined
   {
     const attrs: { [key: string]: string } = {
       "id": decorator.id,
@@ -27,7 +27,7 @@ export class OISVGDecoratorUtil
       "stroke-linejoin": "round",
     }
     attrs["opacity"] = (decorator.style.opacity || DefaultStyle.opacity!).toString()
-    if (parent.deleting) {
+    if (deleting) {
       attrs["opacity"] = ((decorator.style.opacity || DefaultStyle.opacity!) * 0.5).toString()
     }
 
@@ -35,14 +35,14 @@ export class OISVGDecoratorUtil
 
     switch (decorator.kind) {
       case DecoratorKind.Highlight: {
-        attrs["opacity"] = parent.deleting ? "0.25" : "0.5"
+        attrs["opacity"] = deleting ? "0.25" : "0.5"
         attrs["stroke"] = "transparent"
         attrs["fill"] = decorator.style.color || DefaultStyle.color!
         const bounds: TBoundingBox = {
-          x: parent.boundingBox.x - (parent.style.width || 1),
-          y: parent.boundingBox.y - (parent.style.width || 1),
-          height: parent.boundingBox.height + (parent.style.width || 1) * 2,
-          width: parent.boundingBox.width + (parent.style.width || 1) * 2,
+          x: boundingBox.x - (style.width || 1),
+          y: boundingBox.y - (style.width || 1),
+          height: boundingBox.height + (style.width || 1) * 2,
+          width: boundingBox.width + (style.width || 1) * 2,
         }
         element = SVGBuilder.createRect(bounds, attrs)
         break
@@ -52,10 +52,10 @@ export class OISVGDecoratorUtil
         attrs["stroke"] = decorator.style.color || DefaultStyle.color!
         attrs["stroke-width"] = (decorator.style.width || DefaultStyle.width!).toString()
         const bounds: TBoundingBox = {
-          x: parent.boundingBox.x - (parent.style.width || 1),
-          y: parent.boundingBox.y - (parent.style.width || 1),
-          height: parent.boundingBox.height + (parent.style.width || 1) * 2,
-          width: parent.boundingBox.width + (parent.style.width || 1) * 2,
+          x: boundingBox.x - (style.width || 1),
+          y: boundingBox.y - (style.width || 1),
+          height: boundingBox.height + (style.width || 1) * 2,
+          width: boundingBox.width + (style.width || 1) * 2,
         }
         element = SVGBuilder.createRect(bounds, attrs)
         break
@@ -65,12 +65,12 @@ export class OISVGDecoratorUtil
         attrs["stroke"] = decorator.style.color || DefaultStyle.color!
         attrs["stroke-width"] = (decorator.style.width || DefaultStyle.width!).toString()
         const p1 = {
-          x: parent.boundingBox.xMin,
-          y: parent.boundingBox.yMid
+          x: boundingBox.xMin,
+          y: boundingBox.yMid
         }
         const p2 = {
-          x: parent.boundingBox.xMax,
-          y: parent.boundingBox.yMid
+          x: boundingBox.xMax,
+          y: boundingBox.yMid
         }
         element = SVGBuilder.createLine(p1, p2, attrs)
         break
@@ -80,12 +80,12 @@ export class OISVGDecoratorUtil
         attrs["stroke"] = decorator.style.color || DefaultStyle.color!
         attrs["stroke-width"] = (decorator.style.width || DefaultStyle.width!).toString()
         const p1 = {
-          x: parent.boundingBox.xMin,
-          y: parent.boundingBox.yMax + (parent.style.width || 1)
+          x: boundingBox.xMin,
+          y: boundingBox.yMax + (style.width || 1)
         }
         const p2 = {
-          x: parent.boundingBox.xMax,
-          y: parent.boundingBox.yMax + (parent.style.width || 1)
+          x: boundingBox.xMax,
+          y: boundingBox.yMax + (style.width || 1)
         }
         element = SVGBuilder.createLine(p1, p2, attrs)
         break

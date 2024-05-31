@@ -86,10 +86,9 @@ export abstract class OIMenu
 
   fontSizeList = [
     { label: "Auto", value: 0 },
-    { label: "S", value: 0.25 },
+    { label: "S", value: 0.5 },
     { label: "M", value: 0.75 },
     { label: "L", value: 1 },
-    { label: "XL", value: 1.5 },
   ]
 
   colors = [
