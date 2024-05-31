@@ -69,7 +69,7 @@ export class OIMenuContext extends OIMenu
         const clone = s.clone()
         let duplicateNumber = 1
         while (this.behaviors.model.symbols.find(s => s.id === clone.id)) {
-          clone.id = clone.id.split("_")[0] + `_${ duplicateNumber }`
+          clone.id = clone.id + `_${ duplicateNumber }`
           duplicateNumber++
         }
         clone.selected = true
