@@ -57,9 +57,17 @@ describe("OIMenuStyle.ts", () =>
         expect(menuThickness).not.toBeNull()
         expect(menuThickness.style.display).toEqual("block")
         const list = menuThickness.querySelector("#ms-menu-style-thickness-list") as HTMLElement
-        expect(list.childElementCount).toEqual(menu.sizes.length)
+        expect(list.childElementCount).toEqual(menu.thicknessList.length)
       })
-      test("should render menu thickness", () =>
+      test("should render menu font-size", () =>
+      {
+        const menuThickness = layer.querySelector("#ms-menu-style-font-size") as HTMLElement
+        expect(menuThickness).not.toBeNull()
+        expect(menuThickness.style.display).toEqual("block")
+        const list = menuThickness.querySelector("#ms-menu-style-font-size-list") as HTMLElement
+        expect(list.childElementCount).toEqual(menu.fontSizeList.length)
+      })
+      test("should render menu opacity", () =>
       {
         const menuOpacity = layer.querySelector("#ms-menu-style-opacity") as HTMLElement
         expect(menuOpacity).not.toBeNull()
@@ -107,9 +115,17 @@ describe("OIMenuStyle.ts", () =>
         expect(menuThickness).not.toBeNull()
         expect(menuThickness.style.display).toEqual("block")
         const list = menuThickness.querySelector("#ms-menu-style-thickness-list") as HTMLElement
-        expect(list.childElementCount).toEqual(menu.sizes.length)
+        expect(list.childElementCount).toEqual(menu.thicknessList.length)
       })
-      test("should render menu thickness", () =>
+      test("should render menu font-size", () =>
+      {
+        const menuThickness = layer.querySelector("#ms-menu-style-font-size") as HTMLElement
+        expect(menuThickness).not.toBeNull()
+        expect(menuThickness.style.display).toEqual("block")
+        const list = menuThickness.querySelector("#ms-menu-style-font-size-list") as HTMLElement
+        expect(list.childElementCount).toEqual(menu.fontSizeList.length)
+      })
+      test("should render menu opacity", () =>
       {
         const menuOpacity = layer.querySelector("#ms-menu-style-opacity") as HTMLElement
         expect(menuOpacity).not.toBeNull()

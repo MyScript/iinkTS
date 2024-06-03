@@ -122,7 +122,7 @@ export class OIConversionManager
     return text
   }
 
-  convertText(text: TJIIXTextElement, alignTextToGuide: boolean): { symbol: OIText, strokes: OIStroke[] }[] | undefined
+  convertText(text: TJIIXTextElement, onlyText: boolean): { symbol: OIText, strokes: OIStroke[] }[] | undefined
   {
     if (!text.words) {
       throw new Error("You need to active configuration.recognition.export.jiix.text.words = true")
@@ -142,9 +142,15 @@ export class OIConversionManager
     const bb = convertBoundingBoxMillimeterToPixel(text["bounding-box"])
     let startPoint: TPoint = {
       x: bb.x,
-      y: bb.y + this.rowHeight
+      y: bb.y + bb.height
     }
-    const fontSize = alignTextToGuide ? Math.ceil(computeAverage(jiixWords.map(w => w["bounding-box"]?.height || this.rowHeight)) * this.rowHeight / this.rowHeight) : undefined
+    let fontSize = onlyText ? Math.ceil(computeAverage(jiixWords.map(w => w["bounding-box"]?.height || this.rowHeight)) * this.rowHeight / this.rowHeight) : undefined
+    if (onlyText && this.model.symbols.filter(s => [SymbolType.Text.toString(), SymbolType.Stroke.toString()].includes(s.type)).length === this.model.symbols.length) {
+      const textSym = this.model.symbols.find(s => s.type === SymbolType.Text) as OIText
+      if (textSym) {
+        fontSize = textSym.chars[0].fontSize
+      }
+    }
     jiixWords.forEach(word =>
     {
       const wordStrokes = this.strokes.filter(s => word.items?.some(i => i["full-id"] === s.id)) as OIStroke[]
@@ -152,8 +158,8 @@ export class OIConversionManager
         const chars = jiixChars.slice(word["first-char"] as number, (word["last-char"] || 0) + 1)
         const textSymbol = this.buildWord(word, chars, wordStrokes, startPoint, this.fontSize || fontSize)
 
-        if (alignTextToGuide) {
-          textSymbol.point.y = Math.trunc(textSymbol.point.y / this.rowHeight) * this.rowHeight
+        if (onlyText) {
+          textSymbol.point.y = Math.round((bb.y + bb.height / 2) / this.rowHeight) * this.rowHeight
         }
         this.texter.setBoundingBox(textSymbol)
         result.push({
@@ -354,13 +360,13 @@ export class OIConversionManager
     this.selector.removeSelectedGroup()
     const jiix = this.model.exports?.["application/vnd.myscript.jiix"] as TJIIXExport
     if (jiix?.elements?.length) {
-      const alignTextToGuide = !jiix.elements?.some(e => e.type !== "Text")
+      const onlyText = !jiix.elements?.some(e => e.type !== "Text")
       const convertedSymbols: { symbol: TOISymbol, strokes: OIStroke[] }[] = []
       jiix.elements.forEach(e =>
       {
         switch (e.type) {
           case "Text": {
-            const conversion = this.convertText(e as TJIIXTextElement, alignTextToGuide)
+            const conversion = this.convertText(e as TJIIXTextElement, onlyText)
             if (conversion) {
               convertedSymbols.push(...conversion)
             }

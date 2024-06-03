@@ -26,6 +26,7 @@ import
   TPoint,
   TPointer,
   TStroke,
+  TSymbol,
   convertPartialStrokesToOIStrokes
 } from "../primitive"
 import { OIRecognizer } from "../recognizer"
@@ -657,6 +658,7 @@ export class OIBehaviors implements IBehaviors
   updateSymbolsStyle(symbolIds: string[], style: TStyle): void
   {
     this.#logger.info("updateSymbolsStyle", { symbolIds, style })
+    const symbols: TSymbol[] = []
     this.model.symbols.forEach(s =>
     {
       if (symbolIds.includes(s.id)) {
@@ -674,9 +676,33 @@ export class OIBehaviors implements IBehaviors
         }
         this.renderer.drawSymbol(s)
         s.modificationDate = Date.now()
+        symbols.push(s)
       }
     })
-    this.history.push(this.model, { transformed: [{ transformationType: "STYLE", symbols: this.model.symbols.filter(s => symbolIds.includes(s.id)), style }] })
+    if (symbols.length) {
+      this.history.push(this.model, { transformed: [{ transformationType: "STYLE", symbols, style }] })
+    }
+  }
+
+  updateTextFontSize(textIds: string[], fontSize: number): void
+  {
+    this.#logger.info("updateTextFontSize", { textIds, fontSize })
+    const textSymbols: OIText[] = []
+    this.model.symbols.forEach(s =>
+    {
+      if (textIds.includes(s.id) && s.type === SymbolType.Text) {
+        const textSymbol = s as OIText
+        textSymbol.chars.forEach(tc => tc.fontSize = fontSize)
+        this.texter.updateTextBoundingBox(textSymbol)
+        this.renderer.drawSymbol(s)
+        s.modificationDate = Date.now()
+        textSymbols.push(textSymbol)
+      }
+    })
+    if (textSymbols.length) {
+      this.texter.adjustText()
+      this.history.push(this.model, { transformed: [{ transformationType: "STYLE", symbols: textSymbols, fontSize }] })
+    }
   }
 
   async importPointEvents(partialStrokes: PartialDeep<TStroke>[]): Promise<OIModel>
@@ -716,7 +742,7 @@ export class OIBehaviors implements IBehaviors
         oldSymbols: actions.replaced?.oldSymbols.filter(s => s.type === SymbolType.Stroke) || [],
         newSymbols: actions.replaced?.newSymbols.filter(s => s.type === SymbolType.Stroke) || [],
       },
-      transformed: actions.transformed?.filter(t => ["TRANSLATE","MATRIX"].includes(t.transformationType) && t.symbols.some(s => s.type === SymbolType.Stroke)),
+      transformed: actions.transformed?.filter(t => ["TRANSLATE", "MATRIX"].includes(t.transformationType) && t.symbols.some(s => s.type === SymbolType.Stroke)),
     }
   }
 

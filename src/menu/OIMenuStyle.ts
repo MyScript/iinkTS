@@ -3,7 +3,7 @@ import { Intention, WriteTool, LoggerClass } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerManager } from "../logger"
 import { OIModel } from "../model"
-import { SymbolType, TOISymbol } from "../primitive"
+import { OIText, SymbolType, TOISymbol } from "../primitive"
 import { OIMenu, TMenuItemColorList } from "./OIMenu"
 import { OIMenuSub } from "./OIMenuSub"
 
@@ -22,6 +22,7 @@ export class OIMenuStyle extends OIMenu
   menuColorStroke?: HTMLDivElement
   menuColorFill?: HTMLDivElement
   menuThickness?: HTMLDivElement
+  menuFontSize?: HTMLDivElement
   menuStrokeOpacity?: HTMLDivElement
 
   constructor(behaviors: OIBehaviors, id = "ms-menu-style")
@@ -45,6 +46,11 @@ export class OIMenuStyle extends OIMenu
   get writeShape(): boolean
   {
     return ![WriteTool.Arrow, WriteTool.DoubleArrow, WriteTool.Line, WriteTool.Pencil].includes(this.behaviors.writer.tool)
+  }
+
+  get rowHeight(): number
+  {
+    return this.behaviors.configuration.rendering.guides.gap
   }
 
   get isMobile(): boolean
@@ -108,7 +114,7 @@ export class OIMenuStyle extends OIMenu
     const hasUniqWidth = symbolsStyles.length && symbolsStyles.every(st => st.width === symbolsStyles[0]?.width)
     const width = hasUniqWidth ? symbolsStyles[0]?.width : (this.behaviors.currentPenStyle.width || 4)
 
-    this.sizes.forEach((size) =>
+    this.thicknessList.forEach((size) =>
     {
       const btn = document.createElement("button")
       btn.id = `${ this.id }-thickness-${ size.label }-btn`
@@ -133,6 +139,48 @@ export class OIMenuStyle extends OIMenu
     this.menuThickness = this.createWrapCollapsible(wrapper, "Thickness")
     this.menuThickness.id = `${ this.id }-thickness`
     return this.menuThickness
+  }
+
+  protected createMenuFontSize(): HTMLDivElement
+  {
+    const wrapper = document.createElement("div")
+    wrapper.id = `${ this.id }-font-size-list`
+    wrapper.classList.add("ms-menu-row")
+
+
+    this.fontSizeList.forEach((size) =>
+    {
+      const btn = document.createElement("button")
+      btn.id = `${ this.id }-font-size-${ size.label }-btn`
+      btn.classList.add("ms-menu-button", "square")
+      btn.textContent = size.label
+      if ((this.behaviors.converter.fontSize || 0) === size.value) {
+        btn.classList.add("active")
+      }
+      btn.addEventListener("pointerup", (e) =>
+      {
+        e.preventDefault()
+        e.stopPropagation()
+        wrapper.querySelectorAll("*").forEach(e => e.classList.remove("active"))
+        btn.classList.add("active")
+        if (size.value === 0) {
+          this.behaviors.converter.fontSize = undefined
+        }
+        else {
+          const fontSize = size.value * this.rowHeight
+          this.behaviors.converter.fontSize = fontSize
+          const textSymbols = this.symbolsSelected.filter(s => s.type === SymbolType.Text) as OIText[]
+          this.behaviors.updateTextFontSize(textSymbols.map(s => s.id), fontSize)
+          if (textSymbols.length) {
+            this.behaviors.selector.resetSelectedGroup(this.symbolsSelected)
+          }
+        }
+      })
+      wrapper.appendChild(btn)
+    })
+    this.menuFontSize = this.createWrapCollapsible(wrapper, "Font size")
+    this.menuFontSize.id = `${ this.id }-font-size`
+    return this.menuFontSize
   }
 
   protected createMenuOpacity(): HTMLDivElement
@@ -188,6 +236,7 @@ export class OIMenuStyle extends OIMenu
       subMenuContent.appendChild(this.createMenuStroke())
       subMenuContent.appendChild(this.createMenuColorFill())
       subMenuContent.appendChild(this.createMenuThickness())
+      subMenuContent.appendChild(this.createMenuFontSize())
       subMenuContent.appendChild(this.createMenuOpacity())
       this.subMenu = this.createSubMenu(this.createToolTip(this.triggerBtn, "Style", "left"), subMenuContent, "bottom-left")
 
@@ -216,6 +265,9 @@ export class OIMenuStyle extends OIMenu
       if (this.menuThickness) {
         this.menuThickness.style.display = "block"
       }
+      if (this.menuFontSize) {
+        this.menuFontSize.style.display = "block"
+      }
       if (this.menuStrokeOpacity) {
         this.menuStrokeOpacity.style.display = "block"
       }
@@ -231,6 +283,9 @@ export class OIMenuStyle extends OIMenu
       }
       if (this.menuThickness) {
         this.menuThickness.style.display = "block"
+      }
+      if (this.menuFontSize) {
+        this.menuFontSize.style.display = "block"
       }
       if (this.menuStrokeOpacity) {
         this.menuStrokeOpacity.style.display = "block"
