@@ -919,7 +919,9 @@ export class OIBehaviors implements IBehaviors
       this.#logger.info("clear")
       this.internalEvent.emitIdle(false)
       if (this.model.symbols.length) {
-        await this.recognizer.clear()
+        if (this.model.symbols.some(s => s.type === SymbolType.Stroke)) {
+          await this.recognizer.clear()
+        }
         this.renderer.clear()
         this.model.clear()
         this.selector.removeSelectedGroup()
