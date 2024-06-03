@@ -22,7 +22,8 @@ export type TOIActionsTransform = {
  */
 export type TOIActionsTransformStyle = TOIActionsTransform & {
   transformationType: "STYLE"
-  style: TStyle
+  style?: TStyle
+  fontSize?: number
 }
 
 /**
