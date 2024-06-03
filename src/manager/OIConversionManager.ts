@@ -142,7 +142,7 @@ export class OIConversionManager
     const bb = convertBoundingBoxMillimeterToPixel(text["bounding-box"])
     let startPoint: TPoint = {
       x: bb.x,
-      y: bb.y + bb.height
+      y: bb.y + this.rowHeight
     }
     let fontSize = onlyText ? Math.ceil(computeAverage(jiixWords.map(w => w["bounding-box"]?.height || this.rowHeight)) * this.rowHeight / this.rowHeight) : undefined
     if (onlyText && this.model.symbols.filter(s => [SymbolType.Text.toString(), SymbolType.Stroke.toString()].includes(s.type)).length === this.model.symbols.length) {
@@ -159,7 +159,8 @@ export class OIConversionManager
         const textSymbol = this.buildWord(word, chars, wordStrokes, startPoint, this.fontSize || fontSize)
 
         if (onlyText) {
-          textSymbol.point.y = Math.round((bb.y + bb.height / 2) / this.rowHeight) * this.rowHeight
+          startPoint.y = Math.round(startPoint.y / this.rowHeight) * this.rowHeight
+          textSymbol.point.y = startPoint.y
         }
         this.texter.setBoundingBox(textSymbol)
         result.push({
