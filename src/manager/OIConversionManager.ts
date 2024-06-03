@@ -272,13 +272,16 @@ export class OIConversionManager
     const point1: TPoint = { x: convertMillimeterToPixel(line.x1), y: convertMillimeterToPixel(line.y1) }
     const point2: TPoint = { x: convertMillimeterToPixel(line.x2), y: convertMillimeterToPixel(line.y2) }
     const angle = computeAngleAxeRadian(point1, point2)
+
     if (Math.abs(angle) < 0.1) {
-      point1.y = computeAverage([point1.y, point2.y])
-      point2.y = computeAverage([point1.y, point2.y])
+      // to adjust the line with the horizontal
+      point1.y = +computeAverage([point1.y, point2.y]).toFixed(3)
+      point2.y = point1.y
     }
-    else if (Math.abs(angle) - Math.PI / 2 < 0.1) {
-      point1.x = computeAverage([point1.x, point2.x])
-      point2.x = computeAverage([point1.x, point2.x])
+    else if (Math.abs(angle / (Math.PI / 2) - 1) < 0.1) {
+      // to adjust the line with the vertical
+      point1.x = +computeAverage([point1.x, point2.x]).toFixed(3)
+      point2.x = point1.x
     }
     return new OIEdgeLine(strokes[0]?.style, point1, point2, line.p1Decoration, line.p2Decoration)
   }
