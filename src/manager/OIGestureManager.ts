@@ -437,13 +437,16 @@ export class OIGestureManager
       }
       case StrikeThroughAction.Erase: {
         const symbolsToErase: TSymbol[] = this.model.symbols.filter(s => gesture.strokeIds.includes(s.id))
-        gesture.strokeIds.forEach(id =>
-        {
-          this.model.removeSymbol(id)
-          this.renderer.removeSymbol(id)
-        })
-        await this.recognizer.eraseStrokes(gesture.strokeIds)
         if (symbolsToErase.length) {
+          gesture.strokeIds.forEach(id =>
+          {
+            this.model.removeSymbol(id)
+            this.renderer.removeSymbol(id)
+          })
+          const strokesToErase = symbolsToErase.filter(s => s.type === SymbolType.Stroke)
+          if (strokesToErase.length) {
+            await this.recognizer.eraseStrokes(strokesToErase.map(s => s.id))
+          }
           this.history.push(this.model, { erased: symbolsToErase })
         }
         break
