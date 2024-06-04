@@ -19,7 +19,7 @@ import
 } from "../primitive"
 import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer/svg/OISVGRenderer"
-import { UndoRedoManager } from "../undo-redo"
+import { OIHistoryManager } from "../history"
 import { OIDebugSVGManager } from "./OIDebugSVGManager"
 import { OISelectionManager } from "./OISelectionManager"
 import { OISnapManager } from "./OISnapManager"
@@ -46,9 +46,9 @@ export class OITranslateManager
     return this.behaviors.model
   }
 
-  get undoRedoManager(): UndoRedoManager
+  get history(): OIHistoryManager
   {
-    return this.behaviors.undoRedoManager
+    return this.behaviors.history
   }
 
   get selector(): OISelectionManager
@@ -170,7 +170,7 @@ export class OITranslateManager
       this.model.updateSymbol(s)
       this.renderer.drawSymbol(s)
     })
-    return this.recognizer.translateStrokes(symbols.filter(s => s.type === SymbolType.Stroke).map(s => s.id), tx, ty)
+    return this.recognizer.transformTranslate(symbols.filter(s => s.type === SymbolType.Stroke).map(s => s.id), tx, ty)
   }
 
   translateElement(id: string, tx: number, ty: number): void
@@ -202,7 +202,8 @@ export class OITranslateManager
     ty = nudge.y
 
     this.translateElement(this.interactElementsGroup.id as string, tx, ty)
-    this.model.symbolsSelected.forEach(s => {
+    this.model.symbolsSelected.forEach(s =>
+    {
       this.translateElement(s.id as string, tx, ty)
     })
     return {
@@ -226,9 +227,9 @@ export class OITranslateManager
         strokesTranslated.push(s as OIStroke)
       }
     })
-    const promise = this.recognizer.translateStrokes(strokesTranslated.map(s => s.id), tx, ty)
+    const promise = this.recognizer.transformTranslate(strokesTranslated.map(s => s.id), tx, ty)
     this.selector.resetSelectedGroup(this.model.symbolsSelected)
-    this.undoRedoManager.addModelToStack(this.model)
+    this.history.push(this.model, { transformed: [{ transformationType: "TRANSLATE", symbols: this.model.symbolsSelected, tx, ty }] })
     this.interactElementsGroup = undefined
     this.selector.showInteractElements()
     await promise

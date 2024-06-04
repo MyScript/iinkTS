@@ -1,4 +1,4 @@
-import { EdgeDecoration, EdgeKind, OIEdgeArc, OIEdgeLine, TOIEdge } from "../../primitive"
+import { EdgeDecoration, EdgeKind, OIEdgeArc, OIEdgeLine, OIEdgePolyLine, TOIEdge } from "../../primitive"
 import { DefaultStyle } from "../../style"
 import { computeDistance } from "../../utils"
 import { SVGBuilder } from "./SVGBuilder"
@@ -26,6 +26,11 @@ export class OISVGEdgeUtil
     return `M ${ line.start.x } ${ line.start.y } L ${ line.end.x } ${ line.end.y }`
   }
 
+  getPolyLinePath(line: OIEdgePolyLine): string
+  {
+    return `M ${ line.start.x } ${ line.start.y } ${ line.middles.map(p => `L ${ p.x } ${ p.y }`)} L ${ line.end.x } ${ line.end.y }`
+  }
+
   getArcPath(arc: OIEdgeArc): string
   {
     const dist12 = computeDistance(arc.middle, arc.start)
@@ -47,6 +52,8 @@ export class OISVGEdgeUtil
     switch (edge.kind) {
       case EdgeKind.Line:
         return this.getLinePath(edge as OIEdgeLine)
+      case EdgeKind.PolyEdge:
+        return this.getPolyLinePath(edge as OIEdgePolyLine)
       case EdgeKind.Arc:
         return this.getArcPath(edge as OIEdgeArc)
       default:

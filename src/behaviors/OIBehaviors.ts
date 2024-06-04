@@ -26,6 +26,7 @@ import
   TPoint,
   TPointer,
   TStroke,
+  TSymbol,
   convertPartialStrokesToOIStrokes
 } from "../primitive"
 import { OIRecognizer } from "../recognizer"
@@ -47,7 +48,7 @@ import
   OIMoveManager,
   OIMenuManager
 } from "../manager"
-import { TUndoRedoContext, UndoRedoManager } from "../undo-redo"
+import { OIHistoryManager, TOIActions } from "../history"
 import { PartialDeep, mergeDeep } from "../utils"
 import { IBehaviors, TBehaviorOptions } from "./IBehaviors"
 
@@ -67,8 +68,8 @@ export class OIBehaviors implements IBehaviors
   renderer: OISVGRenderer
   recognizer: OIRecognizer
 
-  styleManager: StyleManager
-  undoRedoManager: UndoRedoManager
+  styler: StyleManager
+  history: OIHistoryManager
   writer: OIWriteManager
   eraser: OIEraseManager
   gesture: OIGestureManager
@@ -88,12 +89,13 @@ export class OIBehaviors implements IBehaviors
     this.#logger.info("constructor", { options })
     this.#configuration = new Configuration(options?.configuration)
     this.layerInfos = layerInfos
-    this.styleManager = new StyleManager(Object.assign({}, DefaultStyle, options?.penStyle), options?.theme)
+    this.styler = new StyleManager(Object.assign({}, DefaultStyle, options?.penStyle), options?.theme)
 
     this.grabber = new OIPointerEventGrabber(this.#configuration.grabber)
     this.recognizer = new OIRecognizer(this.#configuration.server, this.#configuration.recognition)
     this.renderer = new OISVGRenderer(this.#configuration.rendering)
 
+    this.history = new OIHistoryManager(this.#configuration["undo-redo"])
     this.writer = new OIWriteManager(this)
     this.eraser = new OIEraseManager(this)
     this.gesture = new OIGestureManager(this)
@@ -111,7 +113,6 @@ export class OIBehaviors implements IBehaviors
     this.#intention = Intention.Write
     this.#model = new OIModel(this.#configuration.rendering.minWidth, this.#configuration.rendering.minHeight, this.configuration.rendering.guides.gap)
 
-    this.undoRedoManager = new UndoRedoManager(this.#configuration["undo-redo"], this.model)
   }
 
   //#region Properties
@@ -161,11 +162,6 @@ export class OIBehaviors implements IBehaviors
     return this.#model
   }
 
-  get context(): TUndoRedoContext
-  {
-    return this.undoRedoManager.context
-  }
-
   get configuration(): TConfiguration
   {
     return this.#configuration
@@ -182,39 +178,39 @@ export class OIBehaviors implements IBehaviors
   //#region Style
   get currentPenStyle(): TStyle
   {
-    return this.styleManager.currentPenStyle
+    return this.styler.currentPenStyle
   }
 
   get penStyle(): TStyle
   {
-    return this.styleManager.penStyle
+    return this.styler.penStyle
   }
   async setPenStyle(penStyle?: TStyle | undefined): Promise<void>
   {
     this.#logger.info("setPenStyle", { penStyle })
-    this.styleManager.setPenStyle(Object.assign({}, this.currentPenStyle, penStyle))
+    this.styler.setPenStyle(Object.assign({}, this.currentPenStyle, penStyle))
     return Promise.resolve()
   }
 
   get penStyleClasses(): string
   {
-    return this.styleManager.penStyleClasses
+    return this.styler.penStyleClasses
   }
   async setPenStyleClasses(penStyleClasses?: string | undefined): Promise<void>
   {
     this.#logger.info("setPenStyleClasses", { penStyleClasses })
-    this.styleManager.setPenStyleClasses(penStyleClasses)
+    this.styler.setPenStyleClasses(penStyleClasses)
     return Promise.resolve()
   }
 
   get theme(): TTheme
   {
-    return this.styleManager.theme
+    return this.styler.theme
   }
   async setTheme(theme?: TTheme): Promise<void>
   {
     this.#logger.info("setTheme", { theme })
-    this.styleManager.setTheme(theme)
+    this.styler.setTheme(theme)
     return Promise.resolve()
   }
   //#endregion
@@ -351,7 +347,7 @@ export class OIBehaviors implements IBehaviors
       this.model.width = Math.max(domElement.clientWidth, this.#configuration.rendering.minWidth)
       this.model.height = Math.max(domElement.clientHeight, this.#configuration.rendering.minHeight)
       this.model.rowHeight = this.configuration.rendering.guides.gap
-      this.undoRedoManager.updateModelInStack(this.model)
+      this.history.push(this.model, {})
 
       await this.recognizer.init()
       await this.setPenStyle(this.penStyle)
@@ -475,7 +471,7 @@ export class OIBehaviors implements IBehaviors
       if (symbolToAdd.type === SymbolType.Stroke) {
         await this.recognizer.addStrokes([symbolToAdd as OIStroke], false)
       }
-      this.undoRedoManager.addModelToStack(this.model)
+      this.history.push(this.model, { added: [symbolToAdd] })
       return symbolToAdd
     } catch (error) {
       this.#logger.error("addSymbol", error)
@@ -501,7 +497,7 @@ export class OIBehaviors implements IBehaviors
         this.model.addSymbol(s)
         this.renderer.drawSymbol(s)
       })
-      this.undoRedoManager.addModelToStack(this.model)
+      this.history.push(this.model, { added: symbolsToAdd })
       return symbolsToAdd
     } catch (error) {
       this.#logger.error("addSymbol", error)
@@ -525,7 +521,7 @@ export class OIBehaviors implements IBehaviors
       if (symbolToUpdate.type === SymbolType.Stroke) {
         await this.recognizer.replaceStrokes([symbolToUpdate.id], [symbolToUpdate as OIStroke])
       }
-      this.undoRedoManager.addModelToStack(this.model)
+      this.history.push(this.model, { replaced: { oldSymbols: [symbolToUpdate], newSymbols: [symbolToUpdate] } })
       return symbolToUpdate
     } catch (error) {
       this.#logger.error("addSymbol", error)
@@ -555,7 +551,7 @@ export class OIBehaviors implements IBehaviors
       else if (newStrokes.length) {
         await this.recognizer.addStrokes(newStrokes, false)
       }
-      this.undoRedoManager.addModelToStack(this.model)
+      this.history.push(this.model, { replaced: { oldSymbols: [symbolToReplace], newSymbols } })
     } catch (error) {
       this.#logger.error("replaceSymbol", error)
       this.internalEvent.emitError(error as Error)
@@ -593,7 +589,7 @@ export class OIBehaviors implements IBehaviors
       })
       await this.recognizer.eraseStrokes(strokeIdsToRemove)
 
-      this.undoRedoManager.addModelToStack(this.model)
+      this.history.push(this.model, { erased: symbolsToRemove })
     } catch (error) {
       this.#logger.error("removeSymbol", error)
       this.internalEvent.emitError(error as Error)
@@ -618,7 +614,7 @@ export class OIBehaviors implements IBehaviors
         if (symbol.type === SymbolType.Stroke) {
           await this.recognizer.eraseStrokes([symbol.id])
         }
-        this.undoRedoManager.addModelToStack(this.model)
+        this.history.push(this.model, { erased: [symbol] })
       }
     } catch (error) {
       this.#logger.error("removeSymbol", error)
@@ -662,6 +658,7 @@ export class OIBehaviors implements IBehaviors
   updateSymbolsStyle(symbolIds: string[], style: TStyle): void
   {
     this.#logger.info("updateSymbolsStyle", { symbolIds, style })
+    const symbols: TSymbol[] = []
     this.model.symbols.forEach(s =>
     {
       if (symbolIds.includes(s.id)) {
@@ -679,9 +676,33 @@ export class OIBehaviors implements IBehaviors
         }
         this.renderer.drawSymbol(s)
         s.modificationDate = Date.now()
+        symbols.push(s)
       }
     })
-    this.undoRedoManager.addModelToStack(this.model)
+    if (symbols.length) {
+      this.history.push(this.model, { transformed: [{ transformationType: "STYLE", symbols, style }] })
+    }
+  }
+
+  updateTextFontSize(textIds: string[], fontSize: number): void
+  {
+    this.#logger.info("updateTextFontSize", { textIds, fontSize })
+    const textSymbols: OIText[] = []
+    this.model.symbols.forEach(s =>
+    {
+      if (textIds.includes(s.id) && s.type === SymbolType.Text) {
+        const textSymbol = s as OIText
+        textSymbol.chars.forEach(tc => tc.fontSize = fontSize)
+        this.texter.updateTextBoundingBox(textSymbol)
+        this.renderer.drawSymbol(s)
+        s.modificationDate = Date.now()
+        textSymbols.push(textSymbol)
+      }
+    })
+    if (textSymbols.length) {
+      this.texter.adjustText()
+      this.history.push(this.model, { transformed: [{ transformationType: "STYLE", symbols: textSymbols, fontSize }] })
+    }
   }
 
   async importPointEvents(partialStrokes: PartialDeep<TStroke>[]): Promise<OIModel>
@@ -695,9 +716,8 @@ export class OIBehaviors implements IBehaviors
         this.model.addSymbol(s)
         this.renderer.drawSymbol(s)
       })
-      this.undoRedoManager.addModelToStack(this.model)
       await this.recognizer.addStrokes(strokes, false)
-      this.undoRedoManager.updateModelInStack(this.model)
+      this.history.push(this.model, { added: strokes })
       this.#logger.debug("importPointEvents", this.model)
       return this.model
     } catch (error) {
@@ -713,18 +733,37 @@ export class OIBehaviors implements IBehaviors
     return this.model
   }
 
+  private extractActionsToBackend(actions: TOIActions): TOIActions
+  {
+    return {
+      added: actions.added?.filter(s => s.type === SymbolType.Stroke),
+      erased: actions.erased?.filter(s => s.type === SymbolType.Stroke),
+      replaced: {
+        oldSymbols: actions.replaced?.oldSymbols.filter(s => s.type === SymbolType.Stroke) || [],
+        newSymbols: actions.replaced?.newSymbols.filter(s => s.type === SymbolType.Stroke) || [],
+      },
+      transformed: actions.transformed?.filter(t => ["TRANSLATE", "MATRIX"].includes(t.transformationType) && t.symbols.some(s => s.type === SymbolType.Stroke)),
+    }
+  }
+
   async undo(): Promise<OIModel>
   {
     this.#logger.info("undo")
-    if (this.context.canUndo) {
+    if (this.history.context.canUndo) {
       this.internalEvent.emitIdle(false)
       this.unselectAll()
-      const modelToApply = this.undoRedoManager.undo() as OIModel
-      const modifications = modelToApply.extractDifferenceSymbols(this.model)
-      this.#model = modelToApply
-      this.#logger.debug("undo", { modifications })
-      if (modifications.removed.some(s => s.type === SymbolType.Stroke) || modifications.added.some(s => s.type === SymbolType.Stroke)) {
-        await this.recognizer.undo()
+      const previousStackItem = this.history.undo()
+      const modifications = previousStackItem.model.extractDifferenceSymbols(this.model)
+      this.#model = previousStackItem.model.clone()
+      this.#logger.debug("undo", { previousStackItem })
+      const actionsToBackend = this.extractActionsToBackend(previousStackItem.actions)
+      if (
+        actionsToBackend.added?.length ||
+        actionsToBackend.erased?.length ||
+        actionsToBackend.replaced?.newSymbols.length ||
+        actionsToBackend.transformed?.length
+      ) {
+        await this.recognizer.undo(actionsToBackend)
       }
       modifications.removed.forEach(s => this.renderer.removeSymbol(s.id))
       modifications.added.forEach(s => this.renderer.drawSymbol(s))
@@ -738,15 +777,16 @@ export class OIBehaviors implements IBehaviors
   async redo(): Promise<OIModel>
   {
     this.#logger.info("redo")
-    if (this.context.canRedo) {
+    if (this.history.context.canRedo) {
       this.internalEvent.emitIdle(false)
       this.unselectAll()
-      const modelToApply = this.undoRedoManager.redo() as OIModel
-      const modifications = modelToApply.extractDifferenceSymbols(this.model)
-      this.#model = modelToApply
+      const nextStackItem = this.history.redo()
+      const modifications = nextStackItem.model.extractDifferenceSymbols(this.model)
+      this.#model = nextStackItem.model.clone()
       this.#logger.debug("redo", { modifications })
-      if (modifications.removed.some(s => s.type === SymbolType.Stroke) || modifications.added.some(s => s.type === SymbolType.Stroke)) {
-        await this.recognizer.redo()
+      const actionsToBackend = this.extractActionsToBackend(nextStackItem.actions)
+      if (actionsToBackend.added?.length || actionsToBackend.erased?.length || actionsToBackend.replaced?.newSymbols.length || actionsToBackend.transformed?.length) {
+        await this.recognizer.redo(actionsToBackend)
       }
       modifications.removed.forEach(s => this.renderer.removeSymbol(s.id))
       modifications.added.forEach(s => this.renderer.drawSymbol(s))
@@ -800,9 +840,9 @@ export class OIBehaviors implements IBehaviors
   {
     const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" }
     try {
-      return `iink-ts-${ new Date().toLocaleDateString(navigator.language, options) }.${extension}`
+      return `iink-ts-${ new Date().toLocaleDateString(navigator.language, options) }.${ extension }`
     } catch {
-      return `iink-ts-${ new Date().toLocaleDateString("en-US", options) }.${extension}`
+      return `iink-ts-${ new Date().toLocaleDateString("en-US", options) }.${ extension }`
     }
   }
 
@@ -905,11 +945,13 @@ export class OIBehaviors implements IBehaviors
       this.#logger.info("clear")
       this.internalEvent.emitIdle(false)
       if (this.model.symbols.length) {
-        await this.recognizer.clear()
+        if (this.model.symbols.some(s => s.type === SymbolType.Stroke)) {
+          await this.recognizer.clear()
+        }
         this.renderer.clear()
         this.model.clear()
         this.selector.removeSelectedGroup()
-        this.undoRedoManager.addModelToStack(this.model)
+        this.history.push(this.model, { erased: this.model.symbols })
         this.internalEvent.emitSelected(this.model.symbolsSelected)
       }
       this.menu.update()

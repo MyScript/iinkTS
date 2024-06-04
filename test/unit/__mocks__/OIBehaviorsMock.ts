@@ -17,7 +17,7 @@ export class OIBehaviorsMock extends OIBehaviors
     this.model.width = Math.max(domElement.clientWidth, this.configuration.rendering.minWidth)
     this.model.height = Math.max(domElement.clientHeight, this.configuration.rendering.minHeight)
     this.model.rowHeight = this.configuration.rendering.guides.gap
-    this.undoRedoManager.updateModelInStack(this.model)
+    this.history.push(this.model, {})
 
     this.renderer.init(domElement)
     // this.menu.render(this.layerInfos)

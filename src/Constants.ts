@@ -187,7 +187,7 @@ export enum LoggerClass
   RENDERER = "RENDERER",
   SMARTGUIDE = "SMARTGUIDE",
   STYLE = "STYLE",
-  UNDO_REDO = "UNDO_REDO",
+  HISTORY = "HISTORY",
   STROKE = "STROKE",
   SHAPE = "SHAPE",
   EDGE = "EDGE",

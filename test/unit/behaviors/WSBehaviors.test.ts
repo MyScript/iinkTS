@@ -50,7 +50,7 @@ describe("WSBehaviors.ts", () =>
       wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
       wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
       wsb.init(wrapperHTML)
-      await expect(wsb.context).toMatchObject({
+      await expect(wsb.history.context).toMatchObject({
         canRedo: false,
         canUndo: false,
         empty: true,
@@ -435,9 +435,9 @@ describe("WSBehaviors.ts", () =>
       wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
       wsb.recognizer.undo = jest.fn(m => Promise.resolve(m))
       await wsb.init(wrapperHTML)
-      wsb.context.canUndo = true
-      wsb.context.stackIndex = 1
-      wsb.context.stack.push(new Model(100, 200))
+      wsb.history.context.canUndo = true
+      wsb.history.context.stackIndex = 1
+      wsb.history.stack.push(new Model(100, 200))
       await wsb.undo()
       await expect(wsb.recognizer.undo).toBeCalledTimes(1)
     })
@@ -454,11 +454,11 @@ describe("WSBehaviors.ts", () =>
       wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
       wsb.recognizer.undo = jest.fn(m => Promise.resolve(m))
       await wsb.init(wrapperHTML)
-      expect(wsb.model).toEqual(wsb.context.stack[0])
-      wsb.context.canUndo = true
-      wsb.context.stackIndex = 1
-      wsb.context.stack.push(new Model(100, 200))
-      await expect(wsb.undo()).resolves.toEqual(wsb.context.stack[0])
+      expect(wsb.model).toEqual(wsb.history.stack[0])
+      wsb.history.context.canUndo = true
+      wsb.history.context.stackIndex = 1
+      wsb.history.stack.push(new Model(100, 200))
+      await expect(wsb.undo()).resolves.toEqual(wsb.history.stack[0])
     })
     test("should throw error if context.canUndo = false", async () =>
     {
@@ -492,9 +492,9 @@ describe("WSBehaviors.ts", () =>
       wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
       wsb.recognizer.redo = jest.fn(m => Promise.resolve(m))
       await wsb.init(wrapperHTML)
-      wsb.context.canRedo = true
-      wsb.context.stackIndex = 0
-      wsb.context.stack.push(new Model(100, 200))
+      wsb.history.context.canRedo = true
+      wsb.history.context.stackIndex = 0
+      wsb.history.stack.push(new Model(100, 200))
       await wsb.redo()
       await expect(wsb.recognizer.redo).toBeCalledTimes(1)
     })
@@ -511,11 +511,11 @@ describe("WSBehaviors.ts", () =>
       wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
       wsb.recognizer.redo = jest.fn(m => Promise.resolve(m))
       await wsb.init(wrapperHTML)
-      wsb.context.canRedo = true
-      wsb.context.stackIndex = 0
+      wsb.history.context.canRedo = true
+      wsb.history.context.stackIndex = 0
       const nextModel = new Model(100, 200)
-      wsb.context.stack.push(nextModel)
-      await expect(wsb.redo()).resolves.toEqual(wsb.context.stack[1])
+      wsb.history.stack.push(nextModel)
+      await expect(wsb.redo()).resolves.toEqual(wsb.history.stack[1])
     })
     test("should reject if recognizer.redo rejected", async () =>
     {
@@ -530,10 +530,10 @@ describe("WSBehaviors.ts", () =>
       wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
       wsb.recognizer.redo = jest.fn(() => Promise.reject("pony"))
       await wsb.init(wrapperHTML)
-      wsb.context.canRedo = true
-      wsb.context.stackIndex = 0
-      wsb.context.stack.push(new Model(100, 200))
-      wsb.context.stack.push(new Model(42, 12))
+      wsb.history.context.canRedo = true
+      wsb.history.context.stackIndex = 0
+      wsb.history.stack.push(new Model(100, 200))
+      wsb.history.stack.push(new Model(42, 12))
       await expect(wsb.redo()).rejects.toEqual("pony")
     })
     test("should throw error if context.canRedo = false", async () =>

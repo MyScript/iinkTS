@@ -1,6 +1,7 @@
 import { TRecognitionConfiguration, TServerConfiguration } from "../configuration"
 import { Error as ErrorConst, LoggerClass } from "../Constants"
 import { InternalEvent } from "../event"
+import { TOIActions } from "../history"
 import { LoggerManager } from "../logger"
 import { TExport, TJIIXExport } from "../model"
 import { OIStroke } from "../primitive"
@@ -434,6 +435,15 @@ export class OIRecognizer
     }
   }
 
+  private buildAddStrokes(strokes: OIStroke[], processGestures = true): TOIMessageEvent
+  {
+    return {
+      type: "addStrokes",
+      processGestures,
+      strokes: strokes.map(s => s.formatToSend())
+    }
+  }
+
   async addStrokes(strokes: OIStroke[], processGestures = true): Promise<TOIMessageEventGesture | undefined>
   {
     this.addStrokeDeferred?.resolve(undefined)
@@ -443,12 +453,17 @@ export class OIRecognizer
       this.addStrokeDeferred.resolve(undefined)
       return this.addStrokeDeferred?.promise
     }
-    await this.send({
-      type: "addStrokes",
-      processGestures,
-      strokes: strokes.map(s => s.formatToSend())
-    })
+    await this.send(this.buildAddStrokes(strokes, processGestures))
     return this.addStrokeDeferred?.promise
+  }
+
+  private buildReplaceStrokes(oldStrokeIds: string[], newStrokes: OIStroke[]): TOIMessageEvent
+  {
+    return {
+      type: "replaceStrokes",
+      oldStrokeIds,
+      newStrokes: newStrokes.map(s => s.formatToSend())
+    }
   }
 
   async replaceStrokes(oldStrokeIds: string[], newStrokes: OIStroke[]): Promise<void>
@@ -459,33 +474,22 @@ export class OIRecognizer
       this.replaceStrokeDeferred.resolve()
       return this.replaceStrokeDeferred?.promise
     }
-    await this.send({
-      type: "replaceStrokes",
-      oldStrokeIds,
-      newStrokes: newStrokes.map(s => s.formatToSend())
-    })
+    await this.send(this.buildReplaceStrokes(oldStrokeIds, newStrokes))
     return this.replaceStrokeDeferred?.promise
   }
 
-  async translateStrokes(strokeIds: string[], tx: number, ty: number): Promise<void>
+  private buildTransformTranslate(strokeIds: string[], tx: number, ty: number): TOIMessageEvent
   {
-    await this.waitPromises()
-    this.transformStrokeDeferred = new DeferredPromise<void>()
-    if (strokeIds.length === 0) {
-      this.transformStrokeDeferred.resolve()
-      return this.transformStrokeDeferred?.promise
-    }
-    await this.send({
+    return {
       type: "transform",
       transformationType: "TRANSLATE",
       strokeIds,
       tx,
       ty
-    })
-    return this.transformStrokeDeferred?.promise
+    }
   }
 
-  async transformStrokes(strokeIds: string[], matrix: TMatrixTransform): Promise<void>
+  async transformTranslate(strokeIds: string[], tx: number, ty: number): Promise<void>
   {
     await this.waitPromises()
     this.transformStrokeDeferred = new DeferredPromise<void>()
@@ -493,13 +497,38 @@ export class OIRecognizer
       this.transformStrokeDeferred.resolve()
       return this.transformStrokeDeferred?.promise
     }
-    await this.send({
+    await this.send(this.buildTransformTranslate(strokeIds, tx, ty))
+    return this.transformStrokeDeferred?.promise
+  }
+
+  private buildTransformMatrix(strokeIds: string[], matrix: TMatrixTransform): TOIMessageEvent
+  {
+    return {
       type: "transform",
       transformationType: "MATRIX",
       strokeIds,
       ...matrix
-    })
+    }
+  }
+
+  async transformMatrix(strokeIds: string[], matrix: TMatrixTransform): Promise<void>
+  {
+    await this.waitPromises()
+    this.transformStrokeDeferred = new DeferredPromise<void>()
+    if (strokeIds.length === 0) {
+      this.transformStrokeDeferred.resolve()
+      return this.transformStrokeDeferred?.promise
+    }
+    await this.send(this.buildTransformMatrix(strokeIds, matrix))
     return this.transformStrokeDeferred?.promise
+  }
+
+  private buildEraseStrokes(strokeIds: string[]): TOIMessageEvent
+  {
+    return {
+      type: "eraseStrokes",
+      strokeIds
+    }
   }
 
   async eraseStrokes(strokeIds: string[]): Promise<void>
@@ -510,10 +539,7 @@ export class OIRecognizer
       this.eraseStrokeDeferred.resolve()
       return this.eraseStrokeDeferred?.promise
     }
-    await this.send({
-      type: "eraseStrokes",
-      strokeIds
-    })
+    await this.send(this.buildEraseStrokes(strokeIds))
     return this.eraseStrokeDeferred?.promise
   }
 
@@ -546,25 +572,55 @@ export class OIRecognizer
     return this.waitForIdleDeferred?.promise
   }
 
-  async undo(): Promise<void>
+  private buildUndoRedoChanges(actions: TOIActions): TOIMessageEvent[]
+  {
+    const changes: TOIMessageEvent[] = []
+    if (actions.added?.length) {
+      changes.push(this.buildAddStrokes(actions.added as OIStroke[], false))
+    }
+    if (actions.erased?.length) {
+      changes.push(this.buildEraseStrokes(actions.erased.map(s => s.id)))
+    }
+    if (actions.replaced?.newSymbols.length) {
+      changes.push(this.buildReplaceStrokes(actions.replaced.oldSymbols.map(s => s.id), actions.replaced.newSymbols as OIStroke[]))
+    }
+    if (actions.transformed?.length) {
+      actions.transformed.forEach(t => {
+        switch (t.transformationType) {
+          case "MATRIX":
+            changes.push(this.buildTransformMatrix(t.symbols.map(s => s.id), t.matrix))
+            break
+          case "TRANSLATE":
+            changes.push(this.buildTransformTranslate(t.symbols.map(s => s.id), t.tx, t.ty))
+            break
+        }
+      })
+    }
+    return changes
+  }
+
+  async undo(actions: TOIActions): Promise<void>
   {
     await this.initialized?.promise
     await this.undoDeferred?.promise
     this.undoDeferred = new DeferredPromise<void>()
+
     const message: TOIMessageEvent = {
       type: "undo",
+      changes: this.buildUndoRedoChanges(actions)
     }
     await this.send(message)
     return this.undoDeferred?.promise
   }
 
-  async redo(): Promise<void>
+  async redo(actions: TOIActions): Promise<void>
   {
     await this.initialized?.promise
     await this.redoDeferred?.promise
     this.redoDeferred = new DeferredPromise<void>()
     const message: TOIMessageEvent = {
       type: "redo",
+      changes: this.buildUndoRedoChanges(actions)
     }
     await this.send(message)
     return this.redoDeferred?.promise
@@ -583,7 +639,6 @@ export class OIRecognizer
     await this.send(message)
     return await this.exportDeferred?.promise
   }
-
 
   async clear(): Promise<void>
   {
