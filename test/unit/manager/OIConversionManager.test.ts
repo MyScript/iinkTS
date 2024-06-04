@@ -1,8 +1,7 @@
-//@ts-nocheck
 import { arcJIIX, circleJIIX, ellipseJIIX, helloJIIX, lineJIIX, parallelogramJIIX, polygonJIIX, rectangleJIIX, rhombusJIIX, triangleJIIX } from "../__dataset__/jiix.dataset"
 import { buildOIStroke } from "../helpers"
 import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
-import { Box, OIConversionManager, TJIIXEdgeElement, TJIIXNodeElement, TJIIXTextElement } from "../../../src/iink"
+import { OIConversionManager, TJIIXEdgeElement, TJIIXNodeElement, TJIIXTextElement } from "../../../src/iink"
 
 describe("OIConversionManager.ts", () =>
 {
@@ -89,21 +88,20 @@ describe("OIConversionManager.ts", () =>
       noItems.chars?.forEach(c => delete c.items)
       await expect(async () => await manager.convertText(noItems, false)).rejects.toThrowError("You need to active configuration.recognition.export.jiix.strokes = true")
     })
-    test("should return converted symbol & strokeIds associate", async () =>
+    test("should return converted symbol & strokes associate", async () =>
     {
       const helloStroke = buildOIStroke()
       helloStroke.id = "stroke-78f208b6-dcc4-4f76-8c5b-e0093a9e2e62"
       manager.model.symbols.push(helloStroke)
-      const result = manager.convertText(helloTextJIIX, false)
+      const result = manager.convertText(helloTextJIIX, false)!
       expect(result).toHaveLength(1)
-      expect(result[0].strokeIds).toEqual([helloStroke.id])
+      expect(result[0].strokes).toEqual([helloStroke])
       expect(result[0].symbol.label).toEqual("h")
     })
   })
 
   describe("convertNode", () =>
   {
-    const symEl = document.createElementNS("http://www.w3.org/2000/svg", "path")
     const behaviors = new OIBehaviorsMock()
     behaviors.export = jest.fn(() => Promise.resolve(behaviors.model))
     const manager = new OIConversionManager(behaviors)
@@ -119,72 +117,72 @@ describe("OIConversionManager.ts", () =>
     test("should should return nothing when shape.kind unknow", async () =>
     {
       const stroke = buildOIStroke()
-      stroke.id = "stroke-95ec1ea8-3dc9-4d63-945c-eaaa1d926367"
+      stroke.id = "stroke-95ec1ea8-3dc9-4d63-945c-eaaa1d92636711"
       manager.model.symbols.push(stroke)
       //@ts-ignore
       expect(manager.convertNode({ ...jiixNodeRect, kind: "pouet" })).toBeUndefined()
     })
-    test("should return converted symbol & strokeIds associate when rectangle", async () =>
+    test("should return converted symbol & strokes associate when rectangle", async () =>
     {
       const stroke = buildOIStroke()
       stroke.id = "stroke-95ec1ea8-3dc9-4d63-945c-eaaa1d926367"
       manager.model.symbols.push(stroke)
-      const result = manager.convertNode(jiixNodeRect)
-      expect(result.strokeIds).toEqual([stroke.id])
+      const result = manager.convertNode(jiixNodeRect)!
+      expect(result.strokes).toEqual([stroke])
       expect(result.symbol.kind).toEqual("rectangle")
     })
-    test("should return converted symbol & strokeIds associate when rectangle", async () =>
+    test("should return converted symbol & strokes associate when rectangle", async () =>
     {
       const stroke = buildOIStroke()
       stroke.id = "stroke-e3ab0f2b-7846-4440-9e49-97ae560813ee"
       manager.model.symbols.push(stroke)
-      const result = manager.convertNode(jiixNodeCircle)
-      expect(result.strokeIds).toEqual([stroke.id])
+      const result = manager.convertNode(jiixNodeCircle)!
+      expect(result.strokes).toEqual([stroke])
       expect(result.symbol.kind).toEqual("circle")
     })
-    test("should return converted symbol & strokeIds associate when ellipse", async () =>
+    test("should return converted symbol & strokes associate when ellipse", async () =>
     {
       const stroke = buildOIStroke()
       stroke.id = "stroke-c5f186da-33c9-41ce-8750-1909e52fbf4c"
       manager.model.symbols.push(stroke)
-      const result = manager.convertNode(jiixNodeEllipse)
-      expect(result.strokeIds).toEqual([stroke.id])
+      const result = manager.convertNode(jiixNodeEllipse)!
+      expect(result.strokes).toEqual([stroke])
       expect(result.symbol.kind).toEqual("ellipse")
     })
-    test("should return converted symbol & strokeIds associate when triangle", async () =>
+    test("should return converted symbol & strokes associate when triangle", async () =>
     {
       const stroke = buildOIStroke()
       stroke.id = "stroke-024da324-4196-41d0-8f51-16c2a21b9226"
       manager.model.symbols.push(stroke)
-      const result = manager.convertNode(jiixNodeTriangle)
-      expect(result.strokeIds).toEqual([stroke.id])
+      const result = manager.convertNode(jiixNodeTriangle)!
+      expect(result.strokes).toEqual([stroke])
       expect(result.symbol.kind).toEqual("triangle")
     })
-    test("should return converted symbol & strokeIds associate when parallelogram", async () =>
+    test("should return converted symbol & strokes associate when parallelogram", async () =>
     {
       const stroke = buildOIStroke()
       stroke.id = "stroke-768451fe-6737-43e7-b3a5-d7f2b3da8caa"
       manager.model.symbols.push(stroke)
-      const result = manager.convertNode(jiixNodeParrallelogram)
-      expect(result.strokeIds).toEqual([stroke.id])
+      const result = manager.convertNode(jiixNodeParrallelogram)!
+      expect(result.strokes).toEqual([stroke])
       expect(result.symbol.kind).toEqual("parallelogram")
     })
-    test("should return converted symbol & strokeIds associate when rhombus", async () =>
+    test("should return converted symbol & strokes associate when rhombus", async () =>
     {
       const stroke = buildOIStroke()
       stroke.id = "stroke-1d68a985-9ca6-48dd-88b5-d385df793105"
       manager.model.symbols.push(stroke)
-      const result = manager.convertNode(jiixNodeRhombus)
-      expect(result.strokeIds).toEqual([stroke.id])
+      const result = manager.convertNode(jiixNodeRhombus)!
+      expect(result.strokes).toEqual([stroke])
       expect(result.symbol.kind).toEqual("rhombus")
     })
-    test("should return converted symbol & strokeIds associate when polygon", async () =>
+    test("should return converted symbol & strokes associate when polygon", async () =>
     {
       const stroke = buildOIStroke()
       stroke.id = "stroke-fa6ee3fd-6189-4bdf-8c06-1907588f298f"
       manager.model.symbols.push(stroke)
-      const result = manager.convertNode(jiixNodePolygon)
-      expect(result.strokeIds).toEqual([stroke.id])
+      const result = manager.convertNode(jiixNodePolygon)!
+      expect(result.strokes).toEqual([stroke])
       expect(result.symbol.kind).toEqual("polygon")
     })
   })
@@ -204,27 +202,27 @@ describe("OIConversionManager.ts", () =>
     test("should return nothing when when edge.kind unknow", async () =>
     {
       const stroke = buildOIStroke()
-      stroke.id = "stroke-2632b9c1-697d-44e6-bba4-44c498203182"
+      stroke.id = "stroke-2632b9c1-697d-44e6-bba4-44c49820318211"
       manager.model.symbols.push(stroke)
       //@ts-ignore
       expect(manager.convertEdge({ ...jiixEdgeLine, kind: "pouet" })).toBeUndefined()
     })
-    test("should return converted symbol & strokeIds associate when line", async () =>
+    test("should return converted symbol & strokes associate when line", async () =>
     {
       const stroke = buildOIStroke()
       stroke.id = "stroke-2632b9c1-697d-44e6-bba4-44c498203182"
       manager.model.symbols.push(stroke)
-      const result = manager.convertEdge(jiixEdgeLine)
-      expect(result.strokeIds).toEqual([stroke.id])
+      const result = manager.convertEdge(jiixEdgeLine)!
+      expect(result.strokes).toEqual([stroke])
       expect(result.symbol.kind).toEqual("line")
     })
-    test("should return converted symbol & strokeIds associate when arc", async () =>
+    test("should return converted symbol & strokes associate when arc", async () =>
     {
       const stroke = buildOIStroke()
       stroke.id = "stroke-a3aea978-6ea3-449e-8b02-74772a8233bb"
       manager.model.symbols.push(stroke)
-      const result = manager.convertEdge(jiixEdgeArc)
-      expect(result.strokeIds).toEqual([stroke.id])
+      const result = manager.convertEdge(jiixEdgeArc)!
+      expect(result.strokes).toEqual([stroke])
       expect(result.symbol.kind).toEqual("arc")
     })
   })

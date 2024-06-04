@@ -5,7 +5,7 @@ import { TBoundingBox } from "../primitive"
  */
 export function convertMillimeterToPixel(mm: number): number
 {
-  return mm * 96 / 25.4
+  return +(mm * 96 / 25.4).toFixed(3)
 }
 
 /**
@@ -13,7 +13,7 @@ export function convertMillimeterToPixel(mm: number): number
  */
 export function convertPixelToMillimeter(px: number): number
 {
-  return px / 96 * 25.4
+  return +(px / 96 * 25.4).toFixed(3)
 }
 
 /**

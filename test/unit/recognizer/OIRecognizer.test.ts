@@ -10,6 +10,8 @@ import
   TRecognitionConfiguration,
   TMatrixTransform,
   MatrixTransform,
+  TOIActions,
+  OIStroke,
 } from "../../../src/iink"
 
 describe("OIRecognizer.ts", () =>
@@ -383,7 +385,7 @@ describe("OIRecognizer.ts", () =>
     })
   })
 
-  describe("translateStrokes", () =>
+  describe("transformTranslate", () =>
   {
     const serverConfig: TServerConfiguration = {
       ...ServerConfig,
@@ -409,23 +411,23 @@ describe("OIRecognizer.ts", () =>
     test("should throw error if recognizer has not been initialize", async () =>
     {
       expect.assertions(1)
-      await expect(oiRecognizer.translateStrokes(strokeIds, tx, ty)).rejects.toEqual(new Error("Recognizer must be initilized"))
+      await expect(oiRecognizer.transformTranslate(strokeIds, tx, ty)).rejects.toEqual(new Error("Recognizer must be initilized"))
     })
-    test("should not send translateStrokes message if 0 strokes", async () =>
+    test("should not send transformTranslate message if 0 strokes", async () =>
     {
       expect.assertions(1)
       await oiRecognizer.init()
-      await oiRecognizer.translateStrokes([], tx, ty)
+      await oiRecognizer.transformTranslate([], tx, ty)
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
       const messageSent = JSON.parse(mockServer.getLastMessage() as string)
-      await expect(messageSent.type).not.toEqual("translateStrokes")
+      await expect(messageSent.type).not.toEqual("transformTranslate")
     })
-    test("should send translateStrokes message & resolve when receive contentChanged message", async () =>
+    test("should send transformTranslate message & resolve when receive contentChanged message", async () =>
     {
       expect.assertions(1)
       await oiRecognizer.init()
-      const promise = oiRecognizer.translateStrokes(strokeIds, tx, ty)
+      const promise = oiRecognizer.transformTranslate(strokeIds, tx, ty)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       mockServer.sendContentChangeMessage()
@@ -445,7 +447,7 @@ describe("OIRecognizer.ts", () =>
       const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
       expect.assertions(3)
       await oiRecognizer.init()
-      const promise = oiRecognizer.translateStrokes(strokeIds, tx, ty)
+      const promise = oiRecognizer.transformTranslate(strokeIds, tx, ty)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       mockServer.sendNotGrantedErrorMessage()
@@ -455,7 +457,7 @@ describe("OIRecognizer.ts", () =>
     })
   })
 
-  describe("transformStrokes", () =>
+  describe("transformMatrix", () =>
   {
     const serverConfig: TServerConfiguration = {
       ...ServerConfig,
@@ -481,23 +483,23 @@ describe("OIRecognizer.ts", () =>
     test("should throw error if recognizer has not been initialize", async () =>
     {
       expect.assertions(1)
-      await expect(oiRecognizer.transformStrokes(strokeIds, matrix)).rejects.toEqual(new Error("Recognizer must be initilized"))
+      await expect(oiRecognizer.transformMatrix(strokeIds, matrix)).rejects.toEqual(new Error("Recognizer must be initilized"))
     })
-    test("should not send transformStrokes message if 0 strokes", async () =>
+    test("should not send transformMatrix message if 0 strokes", async () =>
     {
       expect.assertions(1)
       await oiRecognizer.init()
-      await oiRecognizer.transformStrokes([], matrix)
+      await oiRecognizer.transformMatrix([], matrix)
       //¯\_(ツ)_/¯  required to wait server received message
       await delay(100)
       const messageSent = JSON.parse(mockServer.getLastMessage() as string)
-      await expect(messageSent.type).not.toEqual("transformStrokes")
+      await expect(messageSent.type).not.toEqual("transformMatrix")
     })
-    test("should send transformStrokes message & resolve when receive contentChanged message", async () =>
+    test("should send transformMatrix message & resolve when receive contentChanged message", async () =>
     {
       expect.assertions(1)
       await oiRecognizer.init()
-      const promise = oiRecognizer.transformStrokes(strokeIds, matrix)
+      const promise = oiRecognizer.transformMatrix(strokeIds, matrix)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       mockServer.sendContentChangeMessage()
@@ -516,7 +518,7 @@ describe("OIRecognizer.ts", () =>
       const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
       expect.assertions(3)
       await oiRecognizer.init()
-      const promise = oiRecognizer.transformStrokes(strokeIds, matrix)
+      const promise = oiRecognizer.transformMatrix(strokeIds, matrix)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       mockServer.sendNotGrantedErrorMessage()
@@ -674,13 +676,13 @@ describe("OIRecognizer.ts", () =>
     test("should throw error if recognizer has not been initialize", async () =>
     {
       expect.assertions(1)
-      await expect(oiRecognizer.undo()).rejects.toEqual(new Error("Recognizer must be initilized"))
+      await expect(oiRecognizer.undo({})).rejects.toEqual(new Error("Recognizer must be initilized"))
     })
     test("should send undo message & resolve when receive contentChanged message", async () =>
     {
       expect.assertions(1)
       await oiRecognizer.init()
-      const promise = oiRecognizer.undo()
+      const promise = oiRecognizer.undo({})
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       mockServer.sendContentChangeMessage()
@@ -689,12 +691,26 @@ describe("OIRecognizer.ts", () =>
       const messageSentExpected = { type: "undo" }
       await expect(messageSent).toMatchObject(messageSentExpected)
     })
+    test("should send undo message with changes added", async () =>
+    {
+      expect.assertions(1)
+      await oiRecognizer.init()
+      const actions: TOIActions = { added: [buildOIStroke()] }
+      const promise = oiRecognizer.undo(actions)
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
+      mockServer.sendContentChangeMessage()
+      await promise
+      const messageSent = JSON.parse(mockServer.getLastMessage() as string)
+      const messageSentExpected = { type: "undo", changes: [{ type: "addStrokes", strokes: [(actions.added![0] as OIStroke).formatToSend()] }] }
+      await expect(messageSent).toMatchObject(messageSentExpected)
+    })
     test("should reject if receive error message", async () =>
     {
       const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
       expect.assertions(3)
       await oiRecognizer.init()
-      const promise = oiRecognizer.undo()
+      const promise = oiRecognizer.undo({})
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       mockServer.sendNotGrantedErrorMessage()
@@ -728,14 +744,13 @@ describe("OIRecognizer.ts", () =>
     test("should throw error if recognizer has not been initialize", async () =>
     {
       expect.assertions(1)
-      await expect(oiRecognizer.redo()).rejects.toEqual(new Error("Recognizer must be initilized"))
+      await expect(oiRecognizer.redo({})).rejects.toEqual(new Error("Recognizer must be initilized"))
     })
-
     test("should send redo message & resolve when receive contentChanged message", async () =>
     {
       expect.assertions(1)
       await oiRecognizer.init()
-      const promise = oiRecognizer.redo()
+      const promise = oiRecognizer.redo({})
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       mockServer.sendContentChangeMessage()
@@ -749,7 +764,7 @@ describe("OIRecognizer.ts", () =>
       const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
       expect.assertions(3)
       await oiRecognizer.init()
-      const promise = oiRecognizer.redo()
+      const promise = oiRecognizer.redo({})
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       mockServer.sendNotGrantedErrorMessage()

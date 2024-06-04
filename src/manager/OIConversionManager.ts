@@ -1,11 +1,11 @@
 import { LoggerClass } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerManager } from "../logger"
-import { OIModel, TJIIXChar, TJIIXEdgeArc, TJIIXEdgeElement, TJIIXEdgeLine, TJIIXExport, TJIIXNodeCircle, TJIIXNodeElement, TJIIXNodeEllipse, TJIIXNodePolygon, TJIIXNodeRectangle, TJIIXTextElement, TJIIXWord } from "../model"
-import { Box, DecoratorKind, EdgeKind, OIDecorator, OIEdgeArc, OIEdgeLine, OIShapeCircle, OIShapeEllipse, OIShapePolygon, OIStroke, OIText, SymbolType, TOIEdge, TOIShape, TOISymbol, TOISymbolChar, TPoint } from "../primitive"
+import { OIModel, TJIIXChar, TJIIXEdgeArc, TJIIXEdgeElement, TJIIXEdgeLine, TJIIXEdgePolyEdge, TJIIXExport, TJIIXNodeCircle, TJIIXNodeElement, TJIIXNodeEllipse, TJIIXNodePolygon, TJIIXNodeRectangle, TJIIXTextElement, TJIIXWord } from "../model"
+import { Box, DecoratorKind, EdgeKind, OIDecorator, OIEdgeArc, OIEdgeLine, OIEdgePolyLine, OIShapeCircle, OIShapeEllipse, OIShapePolygon, OIStroke, OIText, SymbolType, TOIEdge, TOIShape, TOISymbol, TOISymbolChar, TPoint } from "../primitive"
 import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
-import { UndoRedoManager } from "../undo-redo"
+import { OIHistoryManager } from "../history"
 import { computeAngleAxeRadian, computeAverage, convertBoundingBoxMillimeterToPixel, convertMillimeterToPixel, createUUID, rotatePoint } from "../utils"
 import { OISelectionManager } from "./OISelectionManager"
 import { OITextManager } from "./OITextManager"
@@ -30,9 +30,9 @@ export class OIConversionManager
     return this.behaviors.model
   }
 
-  get undoRedoManager(): UndoRedoManager
+  get history(): OIHistoryManager
   {
-    return this.behaviors.undoRedoManager
+    return this.behaviors.history
   }
 
   get selector(): OISelectionManager
@@ -122,7 +122,7 @@ export class OIConversionManager
     return text
   }
 
-  convertText(text: TJIIXTextElement, alignTextToGuide: boolean): { symbol: OIText, strokeIds: string[], decoratorsIds: string[] }[] | undefined
+  convertText(text: TJIIXTextElement, onlyText: boolean): { symbol: OIText, strokes: OIStroke[] }[] | undefined
   {
     if (!text.words) {
       throw new Error("You need to active configuration.recognition.export.jiix.text.words = true")
@@ -137,31 +137,35 @@ export class OIConversionManager
     const jiixWords = text.words as TJIIXWord[]
     const jiixChars = text.chars as TJIIXChar[]
 
-    const result: { symbol: OIText, strokeIds: string[], decoratorsIds: string[] }[] = []
+    const result: { symbol: OIText, strokes: OIStroke[] }[] = []
 
     const bb = convertBoundingBoxMillimeterToPixel(text["bounding-box"])
     let startPoint: TPoint = {
       x: bb.x,
       y: bb.y + this.rowHeight
     }
-    const fontSize = alignTextToGuide ? Math.ceil(computeAverage(jiixWords.map(w => w["bounding-box"]?.height || this.rowHeight)) * this.rowHeight / this.rowHeight) : undefined
+    let fontSize = onlyText ? Math.ceil(computeAverage(jiixWords.map(w => w["bounding-box"]?.height || this.rowHeight)) * this.rowHeight / this.rowHeight) : undefined
+    if (onlyText && this.model.symbols.filter(s => [SymbolType.Text.toString(), SymbolType.Stroke.toString()].includes(s.type)).length === this.model.symbols.length) {
+      const textSym = this.model.symbols.find(s => s.type === SymbolType.Text) as OIText
+      if (textSym) {
+        fontSize = textSym.chars[0].fontSize
+      }
+    }
     jiixWords.forEach(word =>
     {
       const wordStrokes = this.strokes.filter(s => word.items?.some(i => i["full-id"] === s.id)) as OIStroke[]
       if (wordStrokes.length) {
-        const strokeIds: string[] = wordStrokes.map(s => s.id)
-        const decoratorsIds: string[] = wordStrokes.flatMap(s => s.decorators.map(d => d.id))
         const chars = jiixChars.slice(word["first-char"] as number, (word["last-char"] || 0) + 1)
         const textSymbol = this.buildWord(word, chars, wordStrokes, startPoint, this.fontSize || fontSize)
 
-        if (alignTextToGuide) {
-          textSymbol.point.y = Math.trunc(textSymbol.point.y / this.rowHeight) * this.rowHeight
+        if (onlyText) {
+          startPoint.y = Math.round(startPoint.y / this.rowHeight) * this.rowHeight
+          textSymbol.point.y = startPoint.y
         }
         this.texter.setBoundingBox(textSymbol)
         result.push({
           symbol: textSymbol,
-          strokeIds: [...new Set(strokeIds)],
-          decoratorsIds: [...new Set(decoratorsIds)]
+          strokes: wordStrokes
         })
         startPoint = {
           x: startPoint.x + textSymbol.boundingBox.width,
@@ -232,33 +236,35 @@ export class OIConversionManager
     return new OIShapePolygon(strokes[0]?.style, points, polygon.kind)
   }
 
-  convertNode(node: TJIIXNodeElement): { symbol: TOIShape, strokeIds: string[] } | undefined
+  convertNode(node: TJIIXNodeElement): { symbol: TOIShape, strokes: OIStroke[] } | undefined
   {
     const associatedStroke = this.strokes.filter(s => node.items?.some(i => i["full-id"] === s.id))
     if (!associatedStroke.length) return
 
+    const uniqStrokes = associatedStroke.filter((a, i) => associatedStroke.findIndex((s) => a.id === s.id) === i)
+
     let shape: TOIShape
     switch (node.kind) {
       case "circle":
-        shape = this.buildCircle(node as TJIIXNodeCircle, associatedStroke)
+        shape = this.buildCircle(node as TJIIXNodeCircle, uniqStrokes)
         break
       case "ellipse":
-        shape = this.buildEllipse(node as TJIIXNodeEllipse, associatedStroke)
+        shape = this.buildEllipse(node as TJIIXNodeEllipse, uniqStrokes)
         break
       case "rectangle":
-        shape = this.buildRectangle(node as TJIIXNodeRectangle, associatedStroke)
+        shape = this.buildRectangle(node as TJIIXNodeRectangle, uniqStrokes)
         break
       case "triangle":
       case "parallelogram":
       case "rhombus":
       case "polygon":
-        shape = this.buildPolygon(node as TJIIXNodePolygon, associatedStroke)
+        shape = this.buildPolygon(node as TJIIXNodePolygon, uniqStrokes)
         break
       default:
         this.#logger.warn("convertNode", `Conversion of Node with kind equal to ${ node.kind } is unknow`)
         return
     }
-    return { symbol: shape, strokeIds: [...new Set(associatedStroke.map(s => s.id))] }
+    return { symbol: shape, strokes: uniqStrokes }
   }
 
   buildLine(line: TJIIXEdgeLine, strokes: OIStroke[]): OIEdgeLine
@@ -266,15 +272,41 @@ export class OIConversionManager
     const point1: TPoint = { x: convertMillimeterToPixel(line.x1), y: convertMillimeterToPixel(line.y1) }
     const point2: TPoint = { x: convertMillimeterToPixel(line.x2), y: convertMillimeterToPixel(line.y2) }
     const angle = computeAngleAxeRadian(point1, point2)
+
     if (Math.abs(angle) < 0.1) {
-      point1.y = computeAverage([point1.y, point2.y])
-      point2.y = computeAverage([point1.y, point2.y])
+      // to adjust the line with the horizontal
+      point1.y = +computeAverage([point1.y, point2.y]).toFixed(3)
+      point2.y = point1.y
     }
-    else if (Math.abs(angle) - Math.PI / 2 < 0.1) {
-      point1.x = computeAverage([point1.x, point2.x])
-      point2.x = computeAverage([point1.x, point2.x])
+    else if (Math.abs(angle / (Math.PI / 2) - 1) < 0.1) {
+      // to adjust the line with the vertical
+      point1.x = +computeAverage([point1.x, point2.x]).toFixed(3)
+      point2.x = point1.x
     }
     return new OIEdgeLine(strokes[0]?.style, point1, point2, line.p1Decoration, line.p2Decoration)
+  }
+
+  buildPolyEdge(polyline: TJIIXEdgePolyEdge, strokes: OIStroke[]): OIEdgePolyLine
+  {
+    const start: TPoint = { x: convertMillimeterToPixel(polyline.edges[0].x1), y: convertMillimeterToPixel(polyline.edges[0].y1) }
+    const points = polyline.edges.map(e => ({ x: convertMillimeterToPixel(e.x2), y: convertMillimeterToPixel(e.y2) }))
+    points.unshift(start)
+    for (let index = 0; index < points.length - 1; index++) {
+      const p1 = points[index]
+      const p2 = points[index]
+      const angle = computeAngleAxeRadian(p1, p2)
+      if (Math.abs(angle) < 0.1) {
+        p1.y = computeAverage([p1.y, p2.y])
+        p2.y = computeAverage([p1.y, p2.y])
+      }
+      else if (Math.abs(angle) - Math.PI / 2 < 0.1) {
+        p1.x = computeAverage([p1.x, p2.x])
+        p2.x = computeAverage([p1.x, p2.x])
+      }
+    }
+    points.shift()
+    const end = points.pop()!
+    return new OIEdgePolyLine(strokes[0]?.style, start, points, end, polyline.edges[0].p1Decoration, polyline.edges.at(-1)!.p2Decoration)
   }
 
   buildArc(arc: TJIIXEdgeArc, strokes: OIStroke[]): OIEdgeArc
@@ -290,25 +322,37 @@ export class OIConversionManager
     return new OIEdgeArc(strokes[0]?.style, start, middle, end, arc.startDecoration, arc.endDecoration)
   }
 
-  convertEdge(edge: TJIIXEdgeElement): { symbol: TOIEdge, strokeIds: string[] } | undefined
+  convertEdge(edge: TJIIXEdgeElement): { symbol: TOIEdge, strokes: OIStroke[] } | undefined
   {
-    const associatedStroke = this.strokes.filter(s => edge.items?.some(i => i["full-id"] === s.id))
-    if (!associatedStroke.length) return
-
     let oiEdge: TOIEdge
-    switch (edge.kind) {
-      case EdgeKind.Line:
-        oiEdge = this.buildLine(edge as TJIIXEdgeLine, associatedStroke)
-        break
-      case EdgeKind.Arc:
-        oiEdge = this.buildArc(edge as TJIIXEdgeArc, associatedStroke)
-        break
-      default:
-        this.#logger.warn("convertEdge", `Conversion of Edge with kind equal to ${ edge.kind } is unknow`)
-        return
+    let uniqStrokes: OIStroke[] = []
+    if (edge.kind === EdgeKind.PolyEdge) {
+      const poly = edge as TJIIXEdgePolyEdge
+
+      const associatedStroke = this.strokes.filter(s => poly.edges.flatMap(e => e.items)?.some(i => i!["full-id"] === s.id))
+      if (!associatedStroke.length) return
+      uniqStrokes = associatedStroke.filter((a, i) => associatedStroke.findIndex((s) => a.id === s.id) === i)
+
+      oiEdge = this.buildPolyEdge(edge as TJIIXEdgePolyEdge, uniqStrokes)
+    }
+    else {
+      const associatedStroke = this.strokes.filter(s => edge.items?.some(i => i["full-id"] === s.id))
+      if (!associatedStroke.length) return
+      uniqStrokes = associatedStroke.filter((a, i) => associatedStroke.findIndex((s) => a.id === s.id) === i)
+      switch (edge.kind) {
+        case EdgeKind.Line:
+          oiEdge = this.buildLine(edge as TJIIXEdgeLine, uniqStrokes)
+          break
+        case EdgeKind.Arc:
+          oiEdge = this.buildArc(edge as TJIIXEdgeArc, uniqStrokes)
+          break
+        default:
+          this.#logger.warn("convertEdge", `Conversion of Edge with kind equal to ${ edge.kind } is unknow`)
+          return
+      }
     }
 
-    return { symbol: oiEdge, strokeIds: [...new Set(associatedStroke.map(s => s.id))] }
+    return { symbol: oiEdge, strokes: uniqStrokes }
   }
 
   async apply(): Promise<void>
@@ -320,13 +364,13 @@ export class OIConversionManager
     this.selector.removeSelectedGroup()
     const jiix = this.model.exports?.["application/vnd.myscript.jiix"] as TJIIXExport
     if (jiix?.elements?.length) {
-      const alignTextToGuide = !jiix.elements?.some(e => e.type !== "Text")
-      const convertedSymbols: { symbol: TOISymbol, strokeIds: string[], decoratorsIds?: string[] }[] = []
+      const onlyText = !jiix.elements?.some(e => e.type !== "Text")
+      const convertedSymbols: { symbol: TOISymbol, strokes: OIStroke[] }[] = []
       jiix.elements.forEach(e =>
       {
         switch (e.type) {
           case "Text": {
-            const conversion = this.convertText(e as TJIIXTextElement, alignTextToGuide)
+            const conversion = this.convertText(e as TJIIXTextElement, onlyText)
             if (conversion) {
               convertedSymbols.push(...conversion)
             }
@@ -355,21 +399,16 @@ export class OIConversionManager
       {
         this.model.addSymbol(cs.symbol)
         this.renderer.drawSymbol(cs.symbol)
-        cs.strokeIds.forEach(id =>
+        cs.strokes.forEach(s =>
         {
-          this.renderer.removeSymbol(id)
-          this.model.removeSymbol(id)
-        })
-        cs.decoratorsIds?.forEach(id =>
-        {
-          this.renderer.removeSymbol(id)
-          this.model.removeSymbol(id)
+          this.renderer.removeSymbol(s.id)
+          this.model.removeSymbol(s.id)
         })
       })
 
       this.behaviors.texter.adjustText()
-      await this.recognizer.eraseStrokes(convertedSymbols.flatMap(cs => cs.strokeIds))
-      this.undoRedoManager.addModelToStack(this.model)
+      await this.recognizer.eraseStrokes(convertedSymbols.flatMap(cs => cs.strokes.map(s => s.id)))
+      this.history.push(this.model, { added: convertedSymbols.map(c => c.symbol), erased: convertedSymbols.flatMap(cs => cs.strokes) })
     }
 
   }

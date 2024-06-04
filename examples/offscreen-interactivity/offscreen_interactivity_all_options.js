@@ -5,6 +5,7 @@ const showImportBtn = document.getElementById("show-import");
 
 const showJIIXBtn = document.getElementById("show-jiix");
 const showModelBtn = document.getElementById("show-model");
+const showHistorylBtn = document.getElementById("show-history");
 
 const modal = document.getElementById("modal");
 const modalTitle = document.getElementById("modal-title");
@@ -165,7 +166,7 @@ async function loadEditor() {
       importBtn.disabled = false;
     }
     else {
-      importBtn.disabled = event.detail.stack[event.detail.stackIndex].symbols.some(s1 => pointersToImport.some(s2 => s2.id === s1.id))
+      importBtn.disabled = editor.model.symbols.some(s1 => pointersToImport.some(s2 => s2.id === s1.id))
     }
     clearTimeout(exportTimeout)
     exportTimeout = setTimeout(() => editor.export(["text/html"]), 1000);
@@ -219,6 +220,11 @@ async function loadEditor() {
   showModelBtn.addEventListener("pointerup", () => {
     const title = "Model";
     showModal(title, renderjson(editor.model));
+  });
+
+  showHistorylBtn.addEventListener("pointerup", () => {
+    const title = "History";
+    showModal(title, renderjson(editor.behaviors.history.stack));
   });
 
   menuActionToggle.addEventListener("change", (event) => {

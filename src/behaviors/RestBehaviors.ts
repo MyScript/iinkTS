@@ -8,7 +8,7 @@ import { Stroke, TStroke, TPointer } from "../primitive"
 import { RestRecognizer } from "../recognizer"
 import { CanvasRenderer } from "../renderer"
 import { DefaultPenStyle, StyleManager, TPenStyle, TTheme } from "../style"
-import { TUndoRedoContext, UndoRedoManager } from "../undo-redo"
+import { HistoryManager } from "../history"
 import { DeferredPromise, PartialDeep } from "../utils"
 import { IBehaviors, TBehaviorOptions } from "./IBehaviors"
 
@@ -27,7 +27,7 @@ export class RestBehaviors implements IBehaviors
   grabber: PointerEventGrabber
   renderer: CanvasRenderer
   recognizer: RestRecognizer
-  undoRedoManager: UndoRedoManager
+  history: HistoryManager
   styleManager: StyleManager
   intention: Intention
 
@@ -55,7 +55,7 @@ export class RestBehaviors implements IBehaviors
 
     this.intention = Intention.Write
     this.#model = new Model()
-    this.undoRedoManager = new UndoRedoManager(this.#configuration["undo-redo"], this.model)
+    this.history = new HistoryManager(this.#configuration["undo-redo"])
   }
 
   protected onPointerDown(evt: PointerEvent, point: TPointer): void
@@ -106,7 +106,7 @@ export class RestBehaviors implements IBehaviors
     switch (this.intention) {
       case Intention.Erase:
         this.model.removeStrokesFromPoint(point)
-        if (this.context.stack.at(-1)?.modificationDate !== this.model.modificationDate) {
+        if (this.history.stack.at(-1)?.modificationDate !== this.model.modificationDate) {
           await this.updateModelRendering()
         }
         break
@@ -128,11 +128,6 @@ export class RestBehaviors implements IBehaviors
   get model(): Model
   {
     return this.#model
-  }
-
-  get context(): TUndoRedoContext
-  {
-    return this.undoRedoManager.context
   }
 
   get currentPenStyle(): TPenStyle
@@ -183,7 +178,8 @@ export class RestBehaviors implements IBehaviors
     this.#logger.info("init", { domElement })
     this.model.width = Math.max(domElement.clientWidth, this.#configuration.rendering.minWidth)
     this.model.height = Math.max(domElement.clientHeight, this.#configuration.rendering.minHeight)
-    this.undoRedoManager.updateModelInStack(this.model)
+
+    this.history.push(this.model)
 
     this.renderer.init(domElement)
 
@@ -205,7 +201,7 @@ export class RestBehaviors implements IBehaviors
     this.#logger.info("updateModelRendering")
     this.renderer.drawModel(this.model)
     const deferred = new DeferredPromise<Model>()
-    this.undoRedoManager.addModelToStack(this.model)
+    this.history.push(this.model)
     if (this.#configuration.triggers.exportContent !== "DEMAND") {
       clearTimeout(this.#exportTimer)
       let currentModel = this.model.clone()
@@ -213,7 +209,7 @@ export class RestBehaviors implements IBehaviors
       {
         try {
           currentModel = await this.recognizer.export(currentModel)
-          this.undoRedoManager.updateModelInStack(currentModel)
+          this.history.updateStack(currentModel)
           if (this.model.modificationDate === currentModel.modificationDate) {
             this.model.exports = currentModel.exports
           }
@@ -240,7 +236,7 @@ export class RestBehaviors implements IBehaviors
     if (this.model.modificationDate === newModel.modificationDate) {
       this.model.mergeExport(newModel.exports as TExport)
     }
-    this.undoRedoManager.updateModelInStack(newModel)
+    this.history.updateStack(newModel)
     this.#logger.debug("export", this.model)
     return this.model
   }
@@ -343,10 +339,10 @@ export class RestBehaviors implements IBehaviors
   async undo(): Promise<IModel>
   {
     this.#logger.info("undo")
-    this.#model = this.undoRedoManager.undo() as Model
+    this.#model = this.history.undo() as Model
     this.renderer.drawModel(this.#model)
     this.#model = await this.recognizer.export(this.#model)
-    this.undoRedoManager.updateModelInStack(this.#model)
+    this.history.updateStack(this.#model)
     this.internalEvent.emitExported(this.#model.exports as TExport)
     this.#logger.debug("undo", this.#model)
     return this.#model
@@ -355,10 +351,10 @@ export class RestBehaviors implements IBehaviors
   async redo(): Promise<IModel>
   {
     this.#logger.info("redo")
-    this.#model = this.undoRedoManager.redo() as Model
+    this.#model = this.history.redo() as Model
     this.renderer.drawModel(this.#model)
     this.#model = await this.recognizer.export(this.#model)
-    this.undoRedoManager.updateModelInStack(this.#model)
+    this.history.updateStack(this.#model)
     this.internalEvent.emitExported(this.#model.exports as TExport)
     this.#logger.debug("redo", this.#model)
     return this.#model
@@ -368,7 +364,7 @@ export class RestBehaviors implements IBehaviors
   {
     this.#logger.info("clear")
     this.model.clear()
-    this.undoRedoManager.addModelToStack(this.model)
+    this.history.push(this.model)
     this.renderer.drawModel(this.model)
     this.internalEvent.emitExported(this.model.exports as TExport)
     this.#logger.debug("clear", this.model)

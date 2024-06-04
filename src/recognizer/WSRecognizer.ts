@@ -5,7 +5,7 @@ import { LoggerManager } from "../logger"
 import { Model, TExport, TJIIXExport } from "../model"
 import { Stroke } from "../primitive"
 import { StyleHelper, TPenStyle, TTheme } from "../style"
-import { TUndoRedoContext } from "../undo-redo"
+import { TUndoRedoContext } from "../history"
 import { DeferredPromise, PartialDeep, computeHmac, isVersionSuperiorOrEqual } from "../utils"
 import { TWSMessageEvent, TWSMessageEventContentChange, TWSMessageEventError, TWSMessageEventExport, TWSMessageEventHMACChallenge, TWSMessageEventPartChange, TWSMessageEventSVGPatch } from "./WSRecognizerMessage"
 
@@ -329,7 +329,6 @@ export class WSRecognizer
       empty: contentChangeMessage.empty,
       stackIndex: contentChangeMessage.undoStackIndex,
       possibleUndoCount: contentChangeMessage.possibleUndoCount,
-      stack: []
     }
     this.internalEvent.emitContextChange(context)
   }

@@ -2,7 +2,7 @@ import { EventType, Intention, LoggerClass } from "../Constants"
 import { LoggerManager } from "../logger"
 import { IModel, TExport } from "../model"
 import { TOISymbol } from "../primitive"
-import { TUndoRedoContext } from "../undo-redo"
+import { TUndoRedoContext } from "../history"
 
 /**
  * @group Event

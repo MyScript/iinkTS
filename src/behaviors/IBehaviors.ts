@@ -6,7 +6,7 @@ import { IModel } from "../model"
 import { TStroke } from "../primitive"
 import { OIRecognizer, RestRecognizer, WSRecognizer } from "../recognizer"
 import { TStyle, TTheme } from "../style"
-import { TUndoRedoContext } from "../undo-redo"
+import { IHistoryManager } from "../history"
 import { PartialDeep } from "../utils"
 
 /**
@@ -35,7 +35,7 @@ export interface IBehaviors
 {
   name: string
   grabber: IGrabber
-  context: TUndoRedoContext
+  history: IHistoryManager
   intention: Intention
 
   get currentPenStyle(): TStyle
