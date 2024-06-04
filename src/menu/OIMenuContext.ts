@@ -6,7 +6,7 @@ import { Box, DecoratorKind, OIDecorator, OIStroke, OIText, SymbolType, TOISymbo
 import { OIMenu, TMenuItemBoolean, TMenuItemButton, TMenuItemColorList } from "./OIMenu"
 
 /**
- * Menu
+ * @group Menu
  */
 export class OIMenuContext extends OIMenu
 {

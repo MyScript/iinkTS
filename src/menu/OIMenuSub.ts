@@ -1,5 +1,5 @@
 /**
- * Menu
+ * @group Menu
  */
 export class OIMenuSub
 {

@@ -99,7 +99,7 @@ describe("OIRotationManager.ts", () =>
     })
   })
 
-  describe("resize process on stroke", () =>
+  describe("rotate process on stroke", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
     const behaviors = new OIBehaviorsMock()
