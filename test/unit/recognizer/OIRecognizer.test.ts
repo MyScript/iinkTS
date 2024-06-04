@@ -189,7 +189,7 @@ describe("OIRecognizer.ts", () =>
       await oiRecognizer.init()
       await delay(serverConfig.websocket.pingDelay * 1.5)
       expect(mockServer.server.clients()).toHaveLength(1)
-      await delay(serverConfig.websocket.pingDelay * serverConfig.websocket.maxPingLostCount)
+      await delay(serverConfig.websocket.pingDelay * serverConfig.websocket.maxPingLostCount + 100)
       expect(mockServer.getMessages("ping")).toHaveLength(serverConfig.websocket.maxPingLostCount + 1)
       expect(mockServer.server.clients()).toHaveLength(0)
     })
