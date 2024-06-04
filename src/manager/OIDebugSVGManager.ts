@@ -1,11 +1,14 @@
 import { LoggerClass } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerManager } from "../logger"
-import { OIModel, TJIIXEdgeElement, TJIIXNodeElement, TJIIXTextElement } from "../model"
-import { OIText, SymbolType, TBoundingBox, TOISymbol } from "../primitive"
+import { OIModel, TJIIXEdgeElement, TJIIXEdgePolyEdge, TJIIXNodeElement, TJIIXTextElement } from "../model"
+import { Box, EdgeKind, OIText, SymbolType, TBoundingBox, TOISymbol } from "../primitive"
 import { NO_SELECTION, OISVGRenderer, SVGBuilder } from "../renderer"
 import { convertBoundingBoxMillimeterToPixel, createUUID } from "../utils"
 
+/**
+ * @group Manager
+ */
 export class OIDebugSVGManager
 {
   #logger = LoggerManager.getLogger(LoggerClass.SVGDEBUG)
@@ -302,7 +305,14 @@ export class OIDebugSVGManager
           }
           case "Edge": {
             const edge = e as TJIIXEdgeElement
-            if (edge["bounding-box"]) {
+            if (edge.kind === EdgeKind.PolyEdge) {
+              const polyline = edge as TJIIXEdgePolyEdge
+              const hideProperties = ["bounding-box", "items", "id", "x1", "x2", "y1", "y2", "ports", "connected"]
+              const infos = Object.keys(edge).filter(k => !hideProperties.includes(k)).map(k => `${ k }: ${ JSON.stringify(edge[k as keyof typeof edge]) }`)
+              const box = convertBoundingBoxMillimeterToPixel(Box.createFromBoxes(polyline.edges.map(e => e["bounding-box"] as TBoundingBox)))
+              this.drawRecognitionBox(box, infos)
+            }
+            else if (edge["bounding-box"]) {
               const box = convertBoundingBoxMillimeterToPixel(edge["bounding-box"])
               const hideProperties = ["bounding-box", "items", "id", "x1", "x2", "y1", "y2", "ports", "connected"]
               const infos = Object.keys(edge).filter(k => !hideProperties.includes(k)).map(k => `${ k }: ${ JSON.stringify(edge[k as keyof typeof edge]) }`)
@@ -431,7 +441,14 @@ export class OIDebugSVGManager
           }
           case "Edge": {
             const edge = e as TJIIXEdgeElement
-            if (edge["bounding-box"]) {
+            if (edge.kind === EdgeKind.PolyEdge) {
+              const polyline = edge as TJIIXEdgePolyEdge
+              polyline.edges.forEach(e => {
+                const box = convertBoundingBoxMillimeterToPixel(e["bounding-box"])
+                this.drawRecognitionItemBox(box, e.kind)
+              })
+            }
+            else if (edge["bounding-box"]) {
               const box = convertBoundingBoxMillimeterToPixel(edge["bounding-box"])
               this.drawRecognitionItemBox(box, edge.kind)
             }

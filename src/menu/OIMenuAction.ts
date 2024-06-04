@@ -20,7 +20,7 @@ import { OIMenuSub } from "./OIMenuSub"
 import { getAvailableLanguageList } from "../utils"
 
 /**
- * Menu
+ * @group Menu
  */
 export class OIMenuAction extends OIMenu
 {

@@ -18,6 +18,9 @@ export type TMenuConfiguration = {
   }
 }
 
+/**
+ * @group Configuration
+ */
 export const DefaultMenuConfiguration: TMenuConfiguration = {
   enable: true,
   style: {

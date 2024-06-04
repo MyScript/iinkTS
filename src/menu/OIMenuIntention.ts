@@ -15,7 +15,7 @@ import { LoggerManager } from "../logger"
 import { OIMenu } from "./OIMenu"
 
 /**
- * Menu
+ * @group Menu
  */
 export class OIMenuIntention extends OIMenu
 {

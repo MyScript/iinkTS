@@ -2,7 +2,7 @@ import ArrowDown from "../assets/svg/nav-arrow-down.svg"
 import { OIMenuSub } from "./OIMenuSub"
 
 /**
- * Menu
+ * @group Menu
  */
 export type TMenuItem = {
   id: string,
@@ -12,7 +12,7 @@ export type TMenuItem = {
 }
 
 /**
- * Menu
+ * @group Menu
  */
 export type TMenuItemButton = TMenuItem & {
   type: "button"
@@ -25,7 +25,7 @@ export type TMenuItemButton = TMenuItem & {
 }
 
 /**
- * Menu
+ * @group Menu
  */
 export type TMenuItemButtonList = TMenuItem & {
   type: "list"
@@ -39,7 +39,7 @@ export type TMenuItemButtonList = TMenuItem & {
 }
 
 /**
- * Menu
+ * @group Menu
  */
 export type TMenuItemColorList = TMenuItem & {
   type: "colors"
@@ -54,7 +54,7 @@ export type TMenuItemColorList = TMenuItem & {
 }
 
 /**
- * Menu
+ * @group Menu
  */
 export type TMenuItemBoolean = TMenuItem & {
   type: "checkbox",
@@ -63,7 +63,7 @@ export type TMenuItemBoolean = TMenuItem & {
 }
 
 /**
- * Menu
+ * @group Menu
  */
 export type TMenuItemSelect = TMenuItem & {
   type: "select",
@@ -73,7 +73,7 @@ export type TMenuItemSelect = TMenuItem & {
 }
 
 /**
- * Menu
+ * @group Menu
  */
 export abstract class OIMenu
 {

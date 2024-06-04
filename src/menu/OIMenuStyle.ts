@@ -8,7 +8,7 @@ import { OIMenu, TMenuItemColorList } from "./OIMenu"
 import { OIMenuSub } from "./OIMenuSub"
 
 /**
- * Menu
+ * @group Menu
  */
 export class OIMenuStyle extends OIMenu
 {
