@@ -955,7 +955,7 @@ export class OIBehaviors implements IBehaviors
         this.renderer.clear()
         this.model.clear()
         this.history.push(this.model, { erased })
-        if (this.model.symbols.some(s => s.type === SymbolType.Stroke)) {
+        if (erased.some(s => s.type === SymbolType.Stroke)) {
           await this.recognizer.clear()
         }
         this.internalEvent.emitSelected(this.model.symbolsSelected)
