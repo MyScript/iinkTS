@@ -1,7 +1,7 @@
 import { LoggerClass, SELECTION_MARGIN } from "../Constants"
 import { LoggerManager } from "../logger"
 import { DefaultStyle, TStyle } from "../style"
-import { PartialDeep, computeDistanceBetweenPointAndSegment, converDegreeToRadian, createUUID, findIntersectionBetween2Segment, isPointInsidePolygon, rotatePoint } from "../utils"
+import { PartialDeep, computeDistanceBetweenPointAndSegment, converDegreeToRadian, createUUID, findIntersectionBetween2Segment, isPointInsidePolygon, computeRotatedPoint } from "../utils"
 import { TPoint, TSegment } from "./Point"
 import { SymbolType } from "./Symbol"
 import { Box, TBoundingBox } from "./Box"
@@ -70,7 +70,7 @@ export class OIText implements TOISymbol
       return this.boundingBox.corners
         .map(p =>
         {
-          return rotatePoint(p, center, rad)
+          return computeRotatedPoint(p, center, rad)
         })
     }
     else {
@@ -106,7 +106,7 @@ export class OIText implements TOISymbol
       return points
         .map(p =>
         {
-          return rotatePoint(p, center, rad)
+          return computeRotatedPoint(p, center, rad)
         })
     }
     return points
@@ -129,7 +129,7 @@ export class OIText implements TOISymbol
       return boxBox.corners
         .map(p =>
         {
-          return rotatePoint(p, center, rad)
+          return computeRotatedPoint(p, center, rad)
         })
     }
     return boxBox.corners

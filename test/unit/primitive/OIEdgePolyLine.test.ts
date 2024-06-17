@@ -14,21 +14,18 @@ describe("OIEdgePolyLine.ts", () =>
   {
     test("should create", () =>
     {
-      const start: TPoint = { x: 0, y: 0 }
-      const middles: TPoint[] = [{ x: 5, y: 0 }]
-      const end: TPoint = { x: 5, y: 5 }
+      const points: TPoint[] = [{ x: 0, y: 0 }, { x: 5, y: 0 }, { x: 5, y: 5 }]
       const style: TStyle = {
         color: "blue",
         width: 20,
       }
-      const line = new OIEdgePolyLine(style, start, middles, end)
+      const line = new OIEdgePolyLine(style, points)
       expect(line).toBeDefined()
       expect(line.creationTime).toBeLessThanOrEqual(Date.now())
       expect(line.creationTime).toEqual(line.modificationDate)
       expect(line.style).toEqual(expect.objectContaining(style))
       expect(line.selected).toEqual(false)
-      expect(line.start).toEqual(start)
-      expect(line.end).toEqual(end)
+      expect(line.points).toEqual(points)
       expect(line.boundingBox.x).toEqual(-5)
       expect(line.boundingBox.y).toEqual(-5)
       expect(line.boundingBox.width).toEqual(15)
@@ -37,23 +34,15 @@ describe("OIEdgePolyLine.ts", () =>
     })
     test("should create with default style", () =>
     {
-      const start: TPoint = { x: 0, y: 0 }
-      const middles: TPoint[] = [{ x: 5, y: 0 }]
-      const end: TPoint = { x: 5, y: 5 }
-      const line = new OIEdgePolyLine({}, start, middles, end)
+      const points: TPoint[] = [{ x: 0, y: 0 }, { x: 5, y: 0 }, { x: 5, y: 5 }]
+      const line = new OIEdgePolyLine({}, points)
       expect(line.style).toEqual(DefaultStyle)
     })
   })
   describe("isCloseToPoint", () =>
   {
-    const start: TPoint = { x: 0, y: 0 }
-    const middles: TPoint[] = [{ x: 50, y: 0 }]
-    const end: TPoint = { x: 50, y: 50 }
-    const style: TStyle = {
-      color: "blue",
-      width: 20
-    }
-    const line = new OIEdgePolyLine(style, start, middles, end)
+    const middles: TPoint[] = [{ x: 0, y: 0 }, { x: 50, y: 0 }, { x: 50, y: 50 }]
+    const line = new OIEdgePolyLine({}, middles)
     test(`should return true when the point is within ${ SELECTION_MARGIN } pixel vertice`, () =>
     {
       const closePoint: TPoint = { x: 0, y: SELECTION_MARGIN / 2 }
@@ -72,14 +61,8 @@ describe("OIEdgePolyLine.ts", () =>
   })
   describe("overlaps", () =>
   {
-    const start: TPoint = { x: 0, y: 0 }
-    const middles: TPoint[] = [{ x: 15, y: 15 }]
-    const end: TPoint = { x: 0, y: 25 }
-    const style: TStyle = {
-      color: "blue",
-      width: 20
-    }
-    const line = new OIEdgePolyLine(style, start, middles, end)
+    const middles: TPoint[] = [{ x: 0, y: 0 }, { x: 15, y: 15 }, { x: 0, y: 25 }]
+    const line = new OIEdgePolyLine({}, middles)
     test(`should return true if partially wrap`, () =>
     {
       const boundaries: TBoundingBox = { height: 10, width: 10, x: -5, y: -5 }
@@ -100,14 +83,8 @@ describe("OIEdgePolyLine.ts", () =>
   {
     test("should return clone", () =>
     {
-      const start: TPoint = { x: 0, y: 0 }
-      const middles: TPoint[] = [{ x: 15, y: 15 }]
-      const end: TPoint = { x: 0, y: 25 }
-      const style: TStyle = {
-        color: "blue",
-        width: 20
-      }
-      const line = new OIEdgePolyLine(style, start, middles, end)
+      const middles: TPoint[] = [{ x: 0, y: 0 }, { x: 15, y: 15 }, { x: 0, y: 25 }]
+      const line = new OIEdgePolyLine({}, middles)
       const clone = line.clone()
       expect(clone).toEqual(line)
       expect(clone).not.toBe(line)

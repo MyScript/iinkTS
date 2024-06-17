@@ -1,7 +1,7 @@
 import { LoggerClass, SELECTION_MARGIN } from "../Constants"
 import { LoggerManager } from "../logger"
 import { DefaultStyle, TStyle } from "../style"
-import { PartialDeep, computeDistance, findIntersectBetweenSegmentAndCircle, isValidNumber, rotatePoint } from "../utils"
+import { PartialDeep, computeDistance, findIntersectBetweenSegmentAndCircle, isValidNumber, computeRotatedPoint } from "../utils"
 import { TPoint, isValidPoint } from "./Point"
 import { OIShape, ShapeKind } from "./OIShape"
 import { Box, TBoundingBox } from "./Box"
@@ -14,6 +14,7 @@ export class OIShapeCircle extends OIShape
   #logger = LoggerManager.getLogger(LoggerClass.SHAPE)
   center: TPoint
   radius: number
+  protected _vertices: Map<string, TPoint[]>
 
   constructor(style: TStyle, center: TPoint, radius: number)
   {
@@ -21,9 +22,16 @@ export class OIShapeCircle extends OIShape
     this.#logger.debug("constructor", { style, center, radius })
     this.center = center
     this.radius = radius
+    this._vertices = new Map<string, TPoint[]>()
+    this._vertices.set(this.verticesId, this.computedVertices())
   }
 
-  get vertices(): TPoint[]
+  protected get verticesId(): string
+  {
+    return `${ this.center.x }-${ this.center.y }-${ this.radius }`
+  }
+
+  protected computedVertices(): TPoint[]
   {
     const firstPoint: TPoint = {
       x: this.center.x,
@@ -34,9 +42,17 @@ export class OIShapeCircle extends OIShape
     const points: TPoint[] = []
     for (let i = 0; i < nbPoint; i++) {
       const rad = 2 * Math.PI * (i / nbPoint)
-      points.push(rotatePoint(firstPoint, this.center, rad))
+      points.push(computeRotatedPoint(firstPoint, this.center, rad))
     }
     return points
+  }
+
+  get vertices(): TPoint[]
+  {
+    if (!this._vertices.has(this.verticesId)) {
+      this._vertices.set(this.verticesId, this.computedVertices())
+    }
+    return this._vertices.get(this.verticesId)!
   }
 
   override get boundingBox(): Box

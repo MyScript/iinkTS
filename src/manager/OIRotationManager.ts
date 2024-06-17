@@ -7,6 +7,8 @@ import
   Box,
   EdgeKind,
   OIEdgeArc,
+  OIEdgeLine,
+  OIEdgePolyLine,
   OIShapeCircle,
   OIShapeEllipse,
   OIShapePolygon,
@@ -21,7 +23,7 @@ import
 import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
 import { OIHistoryManager } from "../history"
-import { computeAngleRadian, converDegreeToRadian, convertRadianToDegree, rotatePoint } from "../utils"
+import { computeAngleRadian, converDegreeToRadian, convertRadianToDegree, computeRotatedPoint } from "../utils"
 import { OIDebugSVGManager } from "./OIDebugSVGManager"
 import { OISelectionManager } from "./OISelectionManager"
 import { OISnapManager } from "./OISnapManager"
@@ -88,7 +90,7 @@ export class OIRotationManager
   {
     stroke.pointers.forEach(p =>
     {
-      const { x, y } = rotatePoint(p, center, angleRad)
+      const { x, y } = computeRotatedPoint(p, center, angleRad)
       p.x = x
       p.y = y
     })
@@ -100,12 +102,12 @@ export class OIRotationManager
     switch (shape.kind) {
       case ShapeKind.Ellipse: {
         const ellipse = shape as OIShapeEllipse
-        ellipse.center = rotatePoint(ellipse.center, center, angleRad)
+        ellipse.center = computeRotatedPoint(ellipse.center, center, angleRad)
         return ellipse
       }
       case ShapeKind.Circle: {
         const circle = shape as OIShapeCircle
-        circle.center = rotatePoint(circle.center, center, angleRad)
+        circle.center = computeRotatedPoint(circle.center, center, angleRad)
         return circle
       }
       case ShapeKind.Rectangle:
@@ -116,7 +118,7 @@ export class OIRotationManager
         const polygon = shape as OIShapePolygon
         polygon.points.forEach(p =>
         {
-          const { x, y } = rotatePoint(p, center, angleRad)
+          const { x, y } = computeRotatedPoint(p, center, angleRad)
           p.x = x
           p.y = y
         })
@@ -129,12 +131,24 @@ export class OIRotationManager
 
   protected applyToEdge(edge: TOIEdge, center: TPoint, angleRad: number): TOIEdge
   {
-    edge.start = rotatePoint(edge.start, center, angleRad)
-    edge.end = rotatePoint(edge.end, center, angleRad)
-    if (edge.kind === EdgeKind.Arc) {
-      const arc = edge as OIEdgeArc
-      arc.middle = rotatePoint(arc.middle, center, angleRad)
-      return arc
+    switch (edge.kind) {
+      case EdgeKind.Arc: {
+        const arc = edge as OIEdgeArc
+        arc.startAngle -= angleRad
+        arc.center = computeRotatedPoint(arc.center, center, angleRad)
+        return arc
+      }
+      case EdgeKind.Line: {
+        const line = edge as OIEdgeLine
+        line.start = computeRotatedPoint(line.start, center, angleRad)
+        line.end = computeRotatedPoint(line.end, center, angleRad)
+        return line
+      }
+      case EdgeKind.PolyEdge: {
+        const polyline = edge as OIEdgePolyLine
+        polyline.points = polyline.points.map(p => computeRotatedPoint(p, center, angleRad))
+        return polyline
+      }
     }
     return edge
   }
@@ -187,7 +201,8 @@ export class OIRotationManager
     }
     this.origin = origin
     this.setTransformOrigin(this.interactElementsGroup.id, this.center.x, this.center.y)
-    this.model.symbolsSelected.forEach(s => {
+    this.model.symbolsSelected.forEach(s =>
+    {
       this.setTransformOrigin(s.id, this.center.x, this.center.y)
     })
     this.selector.hideInteractElements()
@@ -208,7 +223,8 @@ export class OIRotationManager
     }
 
     this.rotateElement(this.interactElementsGroup.id, angleDegree)
-    this.model.symbolsSelected.forEach(s => {
+    this.model.symbolsSelected.forEach(s =>
+    {
       this.rotateElement(s.id, angleDegree)
     })
     return angleDegree

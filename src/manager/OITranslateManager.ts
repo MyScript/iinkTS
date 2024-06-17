@@ -6,6 +6,8 @@ import
 {
   EdgeKind,
   OIEdgeArc,
+  OIEdgeLine,
+  OIEdgePolyLine,
   OIShapeCircle,
   OIShapePolygon,
   OIStroke,
@@ -121,16 +123,32 @@ export class OITranslateManager
 
   protected applyToEdge(edge: TOIEdge, tx: number, ty: number): TOIEdge
   {
-    edge.start.x += tx
-    edge.start.y += ty
-    edge.end.x += tx
-    edge.end.y += ty
-    if (edge.kind === EdgeKind.Arc) {
-      const arc = edge as OIEdgeArc
-      arc.middle.x += tx
-      arc.middle.y += ty
-      return arc
+    switch (edge.kind) {
+      case EdgeKind.Arc: {
+        const arc = edge as OIEdgeArc
+        arc.center.x += tx
+        arc.center.y += ty
+        return arc
+      }
+      case EdgeKind.Line: {
+        const line = edge as OIEdgeLine
+        line.start.x += tx
+        line.start.y += ty
+        line.end.x += tx
+        line.end.y += ty
+        return line
+      }
+      case EdgeKind.PolyEdge: {
+        const polyline = edge as OIEdgePolyLine
+        polyline.points.forEach(p =>
+        {
+          p.x += tx
+          p.y += ty
+        })
+        return polyline
+      }
     }
+
     return edge
   }
 

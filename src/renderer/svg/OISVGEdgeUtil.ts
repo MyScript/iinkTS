@@ -1,6 +1,5 @@
 import { EdgeDecoration, EdgeKind, OIEdgeArc, OIEdgeLine, OIEdgePolyLine, TOIEdge } from "../../primitive"
 import { DefaultStyle } from "../../style"
-import { computeDistance } from "../../utils"
 import { SVGBuilder } from "./SVGBuilder"
 
 /**
@@ -28,23 +27,12 @@ export class OISVGEdgeUtil
 
   getPolyLinePath(line: OIEdgePolyLine): string
   {
-    return `M ${ line.start.x } ${ line.start.y } ${ line.middles.map(p => `L ${ p.x } ${ p.y }`)} L ${ line.end.x } ${ line.end.y }`
+    return `M ${ line.vertices[0].x } ${ line.vertices[0].y } ${ line.vertices.map(p => `L ${ p.x } ${ p.y }`).join(" ") }`
   }
 
   getArcPath(arc: OIEdgeArc): string
   {
-    const dist12 = computeDistance(arc.middle, arc.start)
-    const dist23 = computeDistance(arc.end, arc.middle)
-    const dist13 = computeDistance(arc.start, arc.middle)
-
-    const angle = Math.acos((Math.pow(dist23, 2) + Math.pow(dist12, 2) - Math.pow(dist13, 2)) / (2 * dist23 * dist12))
-
-    const K = dist23 * dist12 * Math.sin(angle) / 2
-    const r = Math.round(dist23 * dist12 * dist13 / 4 / K * 1000) / 1000
-    const laf = +(Math.PI / 2 > angle)
-    const saf = +((arc.end.x - arc.start.x) * (arc.middle.y - arc.start.y) - (arc.end.y - arc.start.y) * (arc.middle.x - arc.start.x) < 0)
-
-    return `M ${ arc.start.x } ${ arc.start.y } A ${ r } ${ r } 0 ${ laf } ${ saf } ${ arc.end.x } ${ arc.end.y }`
+    return `M ${ arc.vertices[0].x } ${ arc.vertices[0].y } Q ${ arc.vertices.map(p => `${p.x} ${p.y}`).join(" ") }`
   }
 
   getSVGPath(edge: TOIEdge): string

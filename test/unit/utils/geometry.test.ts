@@ -14,7 +14,8 @@ import
   findIntersectBetweenSegmentAndCircle,
   findIntersectionBetween2Segment,
   isPointInsidePolygon,
-  rotatePoint
+  computeRotatedPoint,
+  computePointOnEllipse
 } from "../../../src/iink"
 
 describe("geometry.ts", () =>
@@ -227,7 +228,7 @@ describe("geometry.ts", () =>
 
   })
 
-  describe("rotatePoint", () =>
+  describe("computeRotatedPoint", () =>
   {
     const testDatas = [
       { point: { x: 2, y: 3 }, center: { x: 0, y: 0 }, radian: Math.PI / 4, expected: { x: 3.536, y: 0.707 } },
@@ -243,7 +244,29 @@ describe("geometry.ts", () =>
     {
       test(`shoud rotate P[${ JSON.stringify(d.point) }]° by ${ d.radian } rad with center C[${ JSON.stringify(d.center) }]`, () =>
       {
-        const result = rotatePoint(d.point, d.center, d.radian)
+        const result = computeRotatedPoint(d.point, d.center, d.radian)
+        expect(result.x.toFixed(3)).toEqual(d.expected.x.toFixed(3))
+        expect(result.y.toFixed(3)).toEqual(d.expected.y.toFixed(3))
+      })
+
+    })
+  })
+
+  describe("computePointOnEllipse", () =>
+  {
+    const testDatas = [
+      { center: { x: 0, y: 0 }, radiusX: 5, radiusY: 10, phi: 0, radian: Math.PI / 4, expected: { x: 3.536, y: 3.536 } },
+      { center: { x: 0, y: 0 }, radiusX: 10, radiusY: 5, phi: 0, radian: Math.PI / 4, expected: { x: 7.071, y: 7.071 } },
+      { center: { x: 0, y: 0 }, radiusX: 10, radiusY: 5, phi: 0, radian: -Math.PI / 4, expected: { x: 7.071, y: -7.071 } },
+      { center: { x: 0, y: 0 }, radiusX: 50, radiusY: 5, phi: 0, radian: Math.PI / 4, expected: { x: 35.355, y: 35.355 } },
+      { center: { x: 0, y: 0 }, radiusX: 50, radiusY: 5, phi: 0, radian: Math.PI / 2, expected: { x: 0, y: 50 } },
+      { center: { x: 0, y: 0 }, radiusX: 50, radiusY: 5, phi: 0, radian: -Math.PI / 2, expected: { x: 0, y: -50 } },
+    ]
+    testDatas.forEach(d =>
+    {
+      test(`shoud compute P[${ JSON.stringify(d.expected) }]° for arc ith center C[${ JSON.stringify(d.center) }] & radiusX=${d.radiusX} & radiusY=${d.radiusY} & ${ d.radian }rad`, () =>
+      {
+        const result = computePointOnEllipse(d.center, d.radiusX, d.radiusY, d.phi, d.radian)
         expect(result.x.toFixed(3)).toEqual(d.expected.x.toFixed(3))
         expect(result.y.toFixed(3)).toEqual(d.expected.y.toFixed(3))
       })

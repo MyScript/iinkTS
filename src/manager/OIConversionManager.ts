@@ -6,7 +6,7 @@ import { Box, DecoratorKind, EdgeKind, OIDecorator, OIEdgeArc, OIEdgeLine, OIEdg
 import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
 import { OIHistoryManager } from "../history"
-import { computeAngleAxeRadian, computeAverage, convertBoundingBoxMillimeterToPixel, convertMillimeterToPixel, createUUID, rotatePoint } from "../utils"
+import { computeAngleAxeRadian, computeAverage, convertBoundingBoxMillimeterToPixel, convertMillimeterToPixel, createUUID } from "../utils"
 import { OISelectionManager } from "./OISelectionManager"
 import { OITextManager } from "./OITextManager"
 
@@ -275,12 +275,12 @@ export class OIConversionManager
 
     if (Math.abs(angle) < 0.1) {
       // to adjust the line with the horizontal
-      point1.y = +computeAverage([point1.y, point2.y]).toFixed(3)
+      point1.y = +((point1.y + point2.y) / 2).toFixed(3)
       point2.y = point1.y
     }
-    else if (Math.abs(angle / (Math.PI / 2) - 1) < 0.1) {
+    else if (Math.abs(angle - Math.PI / 2) - 1 < 0.1) {
       // to adjust the line with the vertical
-      point1.x = +computeAverage([point1.x, point2.x]).toFixed(3)
+      point1.x = +((point1.x + point2.x) / 2).toFixed(3)
       point2.x = point1.x
     }
     return new OIEdgeLine(strokes[0]?.style, point1, point2, line.p1Decoration, line.p2Decoration)
@@ -293,33 +293,27 @@ export class OIConversionManager
     points.unshift(start)
     for (let index = 0; index < points.length - 1; index++) {
       const p1 = points[index]
-      const p2 = points[index]
+      const p2 = points[index + 1]
       const angle = computeAngleAxeRadian(p1, p2)
       if (Math.abs(angle) < 0.1) {
-        p1.y = computeAverage([p1.y, p2.y])
-        p2.y = computeAverage([p1.y, p2.y])
+        p1.y = +((p1.y + p2.y) / 2).toFixed(3)
+        p2.y = p1.y
       }
-      else if (Math.abs(angle) - Math.PI / 2 < 0.1) {
-        p1.x = computeAverage([p1.x, p2.x])
-        p2.x = computeAverage([p1.x, p2.x])
+      else if (Math.abs(angle - Math.PI / 2) < 0.1) {
+        p1.x = +((p1.x + p2.x) / 2).toFixed(3)
+        p2.x = p1.x
       }
     }
-    points.shift()
-    const end = points.pop()!
-    return new OIEdgePolyLine(strokes[0]?.style, start, points, end, polyline.edges[0].p1Decoration, polyline.edges.at(-1)!.p2Decoration)
+
+    return new OIEdgePolyLine(strokes[0]?.style, points, polyline.edges[0].p1Decoration, polyline.edges.at(-1)!.p2Decoration)
   }
 
   buildArc(arc: TJIIXEdgeArc, strokes: OIStroke[]): OIEdgeArc
   {
     const center: TPoint = { x: convertMillimeterToPixel(arc.cx), y: convertMillimeterToPixel(arc.cy) }
-    const radius = convertMillimeterToPixel(arc.rx + arc.ry) / 2
-
-    const point: TPoint = { x: center.x + radius, y: center.y }
-    const start: TPoint = rotatePoint(point, center, arc.startAngle)
-    const middle: TPoint = rotatePoint(point, center, -(arc.startAngle + arc.sweepAngle / 2))
-    const end: TPoint = rotatePoint(point, center, -(arc.startAngle + arc.sweepAngle))
-
-    return new OIEdgeArc(strokes[0]?.style, start, middle, end, arc.startDecoration, arc.endDecoration)
+    const radiusX = convertMillimeterToPixel(arc.rx)
+    const radiusY = convertMillimeterToPixel(arc.ry)
+    return new OIEdgeArc(strokes[0]?.style, center, arc.startAngle, arc.sweepAngle, radiusX, radiusY, arc.phi, arc.startDecoration, arc.endDecoration)
   }
 
   convertEdge(edge: TJIIXEdgeElement): { symbol: TOIEdge, strokes: OIStroke[] } | undefined
