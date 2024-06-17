@@ -38,6 +38,7 @@ export class OISVGShapeUtil
       case ShapeKind.Triangle:
       case ShapeKind.Rectangle:
       case ShapeKind.Rhombus:
+      case ShapeKind.Polygon:
         return this.getPolygonePath(shape as OIShapePolygon)
       case ShapeKind.Circle:
         return this.getCirclePath(shape as OIShapeCircle)
