@@ -144,7 +144,7 @@ export class OIConversionManager
       x: bb.x,
       y: bb.y + this.rowHeight
     }
-    let fontSize = onlyText ? Math.ceil(computeAverage(jiixWords.map(w => w["bounding-box"]?.height || this.rowHeight)) * this.rowHeight / this.rowHeight) : undefined
+    let fontSize = onlyText ? Math.ceil(computeAverage(jiixWords.map(w => convertMillimeterToPixel(w["bounding-box"]?.height || 0) || this.rowHeight)) * this.rowHeight / this.rowHeight) : undefined
     if (onlyText && this.model.symbols.filter(s => [SymbolType.Text.toString(), SymbolType.Stroke.toString()].includes(s.type)).length === this.model.symbols.length) {
       const textSym = this.model.symbols.find(s => s.type === SymbolType.Text) as OIText
       if (textSym) {
