@@ -757,6 +757,8 @@ export class OIBehaviors implements IBehaviors
       this.#model = previousStackItem.model.clone()
       this.#logger.debug("undo", { previousStackItem })
       const actionsToBackend = this.extractActionsToBackend(previousStackItem.actions)
+      modifications.removed.forEach(s => this.renderer.removeSymbol(s.id))
+      modifications.added.forEach(s => this.renderer.drawSymbol(s))
       if (
         actionsToBackend.added?.length ||
         actionsToBackend.erased?.length ||
@@ -765,8 +767,7 @@ export class OIBehaviors implements IBehaviors
       ) {
         await this.recognizer.undo(actionsToBackend)
       }
-      modifications.removed.forEach(s => this.renderer.removeSymbol(s.id))
-      modifications.added.forEach(s => this.renderer.drawSymbol(s))
+
       this.menu.update()
       this.svgDebugger.apply()
       await this.recognizer.waitForIdle()
@@ -785,12 +786,16 @@ export class OIBehaviors implements IBehaviors
       this.#model = nextStackItem.model.clone()
       this.#logger.debug("redo", { modifications })
       const actionsToBackend = this.extractActionsToBackend(nextStackItem.actions)
-      if (actionsToBackend.added?.length || actionsToBackend.erased?.length || actionsToBackend.replaced?.newSymbols.length || actionsToBackend.transformed?.length) {
-        await this.recognizer.redo(actionsToBackend)
-      }
       modifications.removed.forEach(s => this.renderer.removeSymbol(s.id))
       modifications.added.forEach(s => this.renderer.drawSymbol(s))
-
+      if (
+        actionsToBackend.added?.length ||
+        actionsToBackend.erased?.length ||
+        actionsToBackend.replaced?.newSymbols.length ||
+        actionsToBackend.transformed?.length
+      ) {
+        await this.recognizer.redo(actionsToBackend)
+      }
       this.menu.update()
       await this.svgDebugger.apply()
       await this.recognizer.waitForIdle()
