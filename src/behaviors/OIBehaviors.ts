@@ -945,13 +945,14 @@ export class OIBehaviors implements IBehaviors
       this.#logger.info("clear")
       this.internalEvent.emitIdle(false)
       if (this.model.symbols.length) {
+        this.selector.removeSelectedGroup()
+        const erased = this.model.symbols
+        this.renderer.clear()
+        this.model.clear()
+        this.history.push(this.model, { erased })
         if (this.model.symbols.some(s => s.type === SymbolType.Stroke)) {
           await this.recognizer.clear()
         }
-        this.renderer.clear()
-        this.model.clear()
-        this.selector.removeSelectedGroup()
-        this.history.push(this.model, { erased: this.model.symbols })
         this.internalEvent.emitSelected(this.model.symbolsSelected)
       }
       this.menu.update()
