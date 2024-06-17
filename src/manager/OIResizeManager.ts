@@ -162,12 +162,11 @@ export class OIResizeManager
       }
       case EdgeKind.PolyEdge: {
         const polyline = edge as OIEdgePolyLine
-        polyline.edges.forEach(e =>
+        polyline.points = polyline.points.map(p =>
         {
-          e.p1.x = origin.x + scaleX * (e.p1.x - origin.x)
-          e.p1.y = origin.y + scaleY * (e.p1.y - origin.y)
-          e.p2.x = origin.x + scaleX * (e.p2.x - origin.x)
-          e.p2.y = origin.y + scaleY * (e.p2.y - origin.y)
+          p.x = origin.x + scaleX * (p.x - origin.x)
+          p.y = origin.y + scaleY * (p.y - origin.y)
+          return p
         })
         return polyline
       }
@@ -276,8 +275,8 @@ export class OIResizeManager
       deltaY = localPoint.y - this.boundingBox.yMax
     }
 
-    let scaleX = 1 + (deltaX / this.boundingBox.width)
-    let scaleY = 1 + (deltaY / this.boundingBox.height)
+    let scaleX = this.boundingBox.width ? 1 + (deltaX / this.boundingBox.width) : 1
+    let scaleY = this.boundingBox.height ? 1 + (deltaY / this.boundingBox.height) : 1
 
     if (this.keepRatio) {
       if ([ResizeDirection.North, ResizeDirection.South].includes(this.direction)) {
