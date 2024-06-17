@@ -15,6 +15,7 @@ export class OIShapeEllipse extends OIShape
   center: TPoint
   radiusX: number
   radiusY: number
+  protected _vertices: Map<string, TPoint[]>
 
   constructor(style: TStyle, center: TPoint, radiusX: number, radiusY: number)
   {
@@ -23,9 +24,16 @@ export class OIShapeEllipse extends OIShape
     this.center = center
     this.radiusX = radiusX
     this.radiusY = radiusY
+    this._vertices = new Map<string, TPoint[]>()
+    this._vertices.set(this.verticesId, this.computedVertices())
   }
 
-  get vertices(): TPoint[]
+  protected get verticesId(): string
+  {
+    return `${ this.center.x }-${ this.center.y }-${ this.radiusX }-${ this.radiusY }`
+  }
+
+  protected computedVertices(): TPoint[]
   {
     const points: TPoint[] = []
     const perimeter = 2 * Math.PI * Math.sqrt((Math.pow(this.radiusX, 2) + Math.pow(this.radiusY, 2)) / 2)
@@ -38,6 +46,14 @@ export class OIShapeEllipse extends OIShape
     }
 
     return points
+  }
+
+  get vertices(): TPoint[]
+  {
+    if (!this._vertices.has(this.verticesId)) {
+      this._vertices.set(this.verticesId, this.computedVertices())
+    }
+    return this._vertices.get(this.verticesId)!
   }
 
   isCloseToPoint(point: TPoint): boolean

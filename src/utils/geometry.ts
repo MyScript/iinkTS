@@ -86,13 +86,44 @@ export function converDegreeToRadian(degree: number): number
 /**
  * @group Utils
  */
-export function rotatePoint(point: TPoint, center: TPoint, radian: number): TPoint
+export function computeRotatedPoint(point: TPoint, center: TPoint, radian: number): TPoint
 {
   const xM = point.x - center.x
   const yM = point.y - center.y
   const x = Math.cos(radian) * xM + Math.sin(radian) * yM + center.x
   const y = Math.cos(radian) * yM - Math.sin(radian) * xM + center.y
   return { x, y }
+}
+
+/**
+ * @group Utils
+ */
+export function computePointOnEllipse(center: TPoint, radiusX: number, radiusY: number, phi: number, radian: number): TPoint
+{
+  const cosPhi = Math.cos(phi)
+  const sinPhi = Math.sin(phi)
+
+  return  {
+    x: +(center.x + cosPhi * Math.cos(radian) * radiusX - sinPhi * Math.sin(radian) * radiusY).toFixed(3),
+    y: +(center.y + sinPhi * Math.cos(radian) * radiusY + cosPhi * Math.sin(radian) * radiusX).toFixed(3)
+  }
+}
+
+/**
+ * @group Utils
+ */
+export function computeArcLength(center: TPoint, radiusX: number, radiusY: number, startAngle: number, sweepAngle: number, phi: number): number
+{
+  let length = 0
+  let previousPoint: TPoint = computePointOnEllipse(center, radiusX, radiusY, phi, startAngle)
+
+  for (let angle = startAngle; angle <= startAngle + sweepAngle; angle += sweepAngle / 5) {
+    const currentPoint = computePointOnEllipse(center, radiusX, radiusY, phi, angle)
+    length += computeDistance(previousPoint, currentPoint)
+    previousPoint = currentPoint
+  }
+
+  return length
 }
 
 /**
@@ -240,7 +271,7 @@ export function getClosestPoint(points: TPoint[], point: TPoint): { point?: TPoi
 /**
  * @group Utils
  */
-export const isPointInsidePolygon = (point: TPoint, points: TPoint[]) =>
+export function isPointInsidePolygon(point: TPoint, points: TPoint[])
 {
   let inside = false
   for (let i = 0, j = points.length - 1; i < points.length; j = i++) {

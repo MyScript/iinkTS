@@ -30,8 +30,6 @@ export enum EdgeDecoration
 export type TOIEdge = TOISymbol & {
   type: SymbolType
   kind: EdgeKind
-  start: TPoint
-  end: TPoint
   startDecoration?: EdgeDecoration
   endDecoration?: EdgeDecoration
 }
@@ -42,19 +40,15 @@ export type TOIEdge = TOISymbol & {
 export abstract class OIEdge extends OISymbol implements TOIEdge
 {
   readonly kind: EdgeKind
-  start: TPoint
-  end: TPoint
   startDecoration?: EdgeDecoration
   endDecoration?: EdgeDecoration
 
-  constructor(kind: EdgeKind, style: TStyle, start: TPoint, end: TPoint, startDecoration?: EdgeDecoration, endDecoration?: EdgeDecoration)
+  constructor(kind: EdgeKind, style: TStyle, startDecoration?: EdgeDecoration, endDecoration?: EdgeDecoration)
   {
     super(SymbolType.Edge, style)
     this.id = `${ this.type }-${ kind }-${ createUUID() }`
     this.kind = kind
 
-    this.start = start
-    this.end = end
     this.startDecoration = startDecoration
     this.endDecoration = endDecoration
   }

@@ -7,6 +7,8 @@ import
   Box,
   EdgeKind,
   OIEdgeArc,
+  OIEdgeLine,
+  OIEdgePolyLine,
   OIShapeCircle,
   OIShapeEllipse,
   OIShapePolygon,
@@ -103,32 +105,32 @@ export class OIResizeManager
     this.#logger.debug("applyToShape", { shape, origin, scaleX, scaleY })
     switch (shape.kind) {
       case ShapeKind.Ellipse: {
-        const c = shape as OIShapeEllipse
-        c.radiusX *= scaleX
-        c.radiusY *= scaleY
-        c.center.x = origin.x + scaleX * (c.center.x - origin.x)
-        c.center.y = origin.y + scaleY * (c.center.y - origin.y)
-        return c
+        const ellipse = shape as OIShapeEllipse
+        ellipse.radiusX *= scaleX
+        ellipse.radiusY *= scaleY
+        ellipse.center.x = origin.x + scaleX * (ellipse.center.x - origin.x)
+        ellipse.center.y = origin.y + scaleY * (ellipse.center.y - origin.y)
+        return ellipse
       }
       case ShapeKind.Circle: {
-        const c = shape as OIShapeCircle
-        c.radius *= (scaleX + scaleY) / 2
-        c.center.x = origin.x + scaleX * (c.center.x - origin.x)
-        c.center.y = origin.y + scaleY * (c.center.y - origin.y)
-        return c
+        const circle = shape as OIShapeCircle
+        circle.radius *= (scaleX + scaleY) / 2
+        circle.center.x = origin.x + scaleX * (circle.center.x - origin.x)
+        circle.center.y = origin.y + scaleY * (circle.center.y - origin.y)
+        return circle
       }
       case ShapeKind.Rectangle:
       case ShapeKind.Triangle:
       case ShapeKind.Parallelogram:
       case ShapeKind.Polygon:
       case ShapeKind.Rhombus: {
-        const p = shape as OIShapePolygon
-        p.points.forEach(p =>
+        const polygon = shape as OIShapePolygon
+        polygon.points.forEach(p =>
         {
           p.x = origin.x + scaleX * (p.x - origin.x)
           p.y = origin.y + scaleY * (p.y - origin.y)
         })
-        return p
+        return polygon
       }
       default:
         throw new Error(`Can't apply resize on shape, kind unknow: ${ shape.kind }`)
@@ -138,15 +140,37 @@ export class OIResizeManager
   protected applyToEdge(edge: TOIEdge, origin: TPoint, scaleX: number, scaleY: number): TOIEdge
   {
     this.#logger.debug("applyToEdge", { edge, origin, scaleX, scaleY })
-    edge.start.x = origin.x + scaleX * (edge.start.x - origin.x)
-    edge.start.y = origin.y + scaleY * (edge.start.y - origin.y)
-    edge.end.x = origin.x + scaleX * (edge.end.x - origin.x)
-    edge.end.y = origin.y + scaleY * (edge.end.y - origin.y)
-    if (edge.kind === EdgeKind.Arc) {
-      const arc = edge as OIEdgeArc
-      arc.middle.x = origin.x + scaleX * (arc.middle.x - origin.x)
-      arc.middle.y = origin.y + scaleY * (arc.middle.y - origin.y)
-      return arc
+    switch (edge.kind) {
+      case EdgeKind.Arc: {
+        const arc = edge as OIEdgeArc
+
+        arc.center.x = +(arc.center.x + (scaleX - 1) * (arc.center.x - origin.x) / 2).toFixed(3)
+        arc.center.y = +(arc.center.y + (scaleY - 1) * (arc.center.y - origin.y) / 2).toFixed(3)
+
+        arc.radiusX = +(arc.radiusX * scaleX).toFixed(3)
+        arc.radiusY = +(arc.radiusY * scaleY).toFixed(3)
+
+        return arc
+      }
+      case EdgeKind.Line: {
+        const line = edge as OIEdgeLine
+        line.start.x = origin.x + scaleX * (line.start.x - origin.x)
+        line.start.y = origin.y + scaleY * (line.start.y - origin.y)
+        line.end.x = origin.x + scaleX * (line.end.x - origin.x)
+        line.end.y = origin.y + scaleY * (line.end.y - origin.y)
+        return line
+      }
+      case EdgeKind.PolyEdge: {
+        const polyline = edge as OIEdgePolyLine
+        polyline.edges.forEach(e =>
+        {
+          e.p1.x = origin.x + scaleX * (e.p1.x - origin.x)
+          e.p1.y = origin.y + scaleY * (e.p1.y - origin.y)
+          e.p2.x = origin.x + scaleX * (e.p2.x - origin.x)
+          e.p2.y = origin.y + scaleY * (e.p2.y - origin.y)
+        })
+        return polyline
+      }
     }
     return edge
   }

@@ -9,7 +9,7 @@ import
   OIStroke,
   SvgElementRole,
   TPoint,
-  rotatePoint,
+  computeRotatedPoint,
 } from "../../../src/iink"
 
 describe("OIRotationManager.ts", () =>
@@ -133,19 +133,19 @@ describe("OIRotationManager.ts", () =>
 
     const testDatas = [
       {
-        rotateToPoint: rotatePoint(rotateOrigin, rotateCenter, Math.PI / 5),
+        rotateToPoint: computeRotatedPoint(rotateOrigin, rotateCenter, Math.PI / 5),
         angle: 36,
       },
       {
-        rotateToPoint: rotatePoint(rotateOrigin, rotateCenter, Math.PI / 2),
+        rotateToPoint: computeRotatedPoint(rotateOrigin, rotateCenter, Math.PI / 2),
         angle: 90,
       },
       {
-        rotateToPoint: rotatePoint(rotateOrigin, rotateCenter, -Math.PI / 5),
+        rotateToPoint: computeRotatedPoint(rotateOrigin, rotateCenter, -Math.PI / 5),
         angle: 324,
       },
       {
-        rotateToPoint: rotatePoint(rotateOrigin, rotateCenter, -Math.PI / 2),
+        rotateToPoint: computeRotatedPoint(rotateOrigin, rotateCenter, -Math.PI / 2),
         angle: 270,
       },
     ]

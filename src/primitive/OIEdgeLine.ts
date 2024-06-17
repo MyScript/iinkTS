@@ -11,11 +11,14 @@ import { TPoint, isValidPoint } from "./Point"
 export class OIEdgeLine extends OIEdge
 {
   #logger = LoggerManager.getLogger(LoggerClass.EDGE)
-
+  start: TPoint
+  end: TPoint
 
   constructor(style: TStyle, start: TPoint, end: TPoint, startDecoration?: EdgeDecoration, endDecoration?: EdgeDecoration)
   {
-    super(EdgeKind.Line, style, start, end, startDecoration, endDecoration)
+    super(EdgeKind.Line, style, startDecoration, endDecoration)
+    this.start = start
+    this.end = end
   }
 
   get vertices(): TPoint[]
