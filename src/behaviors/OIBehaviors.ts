@@ -11,6 +11,7 @@ import
   OIEdge,
   OIEdgeArc,
   OIEdgeLine,
+  OIEdgePolyLine,
   OIShape,
   OIShapeCircle,
   OIShapeEllipse,
@@ -407,10 +408,13 @@ export class OIBehaviors implements IBehaviors
         return OIEdgeArc.create(partialEdge)
       case EdgeKind.Line:
         return OIEdgeLine.create(partialEdge)
+      case EdgeKind.PolyEdge:
+        return OIEdgePolyLine.create(partialEdge)
       default:
         throw new Error(`Unable to create edge, kind: "${ partialEdge.kind }" is unknown`)
     }
   }
+
 
   async createSymbols(partialSymbols: PartialDeep<TOISymbol>[]): Promise<TOISymbol[]>
   {
@@ -425,6 +429,8 @@ export class OIBehaviors implements IBehaviors
             return this.createShape(s as PartialDeep<OIStroke>)
           case SymbolType.Edge:
             return this.createEdge(s as PartialDeep<OIEdge>)
+          case SymbolType.Text:
+            return OIText.create(s as PartialDeep<OIText>)
           default:
             errors.push(`Unable to create symbol, type: "${ s.type }" is unknown`)
             return
