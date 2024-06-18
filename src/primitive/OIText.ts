@@ -2,7 +2,7 @@ import { LoggerClass, SELECTION_MARGIN } from "../Constants"
 import { LoggerManager } from "../logger"
 import { DefaultStyle, TStyle } from "../style"
 import { PartialDeep, computeDistanceBetweenPointAndSegment, converDegreeToRadian, createUUID, findIntersectionBetween2Segment, isPointInsidePolygon, computeRotatedPoint } from "../utils"
-import { TPoint, TSegment } from "./Point"
+import { TPoint, TSegment, isValidPoint } from "./Point"
 import { SymbolType } from "./Symbol"
 import { Box, TBoundingBox } from "./Box"
 import { OIDecorator } from "./OIDecorator"
@@ -174,5 +174,12 @@ export class OIText implements TOISymbol
       rotation: this.rotation,
       decorators: this.decorators.length ? this.decorators : undefined
     }
+  }
+
+  static create(partial: PartialDeep<OIText>): OIText
+  {
+    if (!isValidPoint(partial?.point)) throw new Error(`Unable to create a OIText, point are invalid`)
+    if (!partial.chars?.length) throw new Error(`Unable to create a OIText, no chars`)
+    return new OIText(partial.style || DefaultStyle, partial.chars as TOISymbolChar[], partial.point as TPoint, partial.boundingBox as TBoundingBox)
   }
 }
