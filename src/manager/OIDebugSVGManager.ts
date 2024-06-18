@@ -307,14 +307,26 @@ export class OIDebugSVGManager
             const edge = e as TJIIXEdgeElement
             if (edge.kind === EdgeKind.PolyEdge) {
               const polyline = edge as TJIIXEdgePolyEdge
-              const hideProperties = ["bounding-box", "items", "id", "x1", "x2", "y1", "y2", "ports", "connected"]
-              const infos = Object.keys(edge).filter(k => !hideProperties.includes(k)).map(k => `${ k }: ${ JSON.stringify(edge[k as keyof typeof edge]) }`)
+              const infos = [
+                `type: ${polyline.type}`,
+                `kind: ${polyline.kind}`,
+              ]
+              polyline.edges.forEach((e, i) => {
+                let inf = `edge-${i}: [{ x1: ${e.x1}, y2: ${e.y1} },{ x2: ${e.x2}, y2: ${e.y2} }]`
+                if (e.p1Decoration) {
+                  inf += `, p1Decoration: ${e.p1Decoration}`
+                }
+                if (e.p2Decoration) {
+                  inf += `, p2Decoration: ${e.p2Decoration}`
+                }
+                infos.push(inf)
+              })
               const box = convertBoundingBoxMillimeterToPixel(Box.createFromBoxes(polyline.edges.map(e => e["bounding-box"] as TBoundingBox)))
               this.drawRecognitionBox(box, infos)
             }
             else if (edge["bounding-box"]) {
               const box = convertBoundingBoxMillimeterToPixel(edge["bounding-box"])
-              const hideProperties = ["bounding-box", "items", "id", "x1", "x2", "y1", "y2", "ports", "connected"]
+              const hideProperties = ["bounding-box", "items", "id", "ports", "connected"]
               const infos = Object.keys(edge).filter(k => !hideProperties.includes(k)).map(k => `${ k }: ${ JSON.stringify(edge[k as keyof typeof edge]) }`)
               this.drawRecognitionBox(box, infos)
             }
