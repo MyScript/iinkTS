@@ -131,6 +131,7 @@ export class OIRecognizer
     }
 
     this.rejectDeferredPending(message)
+    this.clearSocketListener()
 
     if (!this.currentErrorCode && evt.code !== 1000) {
       const error = new Error(message)
@@ -382,7 +383,7 @@ export class OIRecognizer
       this.initialized = new DeferredPromise<void>()
       this.pingCount = 0
       this.socket = new WebSocket(this.url)
-
+      this.clearSocketListener()
       this.socket.addEventListener("open", this.openCallback.bind(this))
       this.socket.addEventListener("close", this.closeCallback.bind(this))
       this.socket.addEventListener("message", this.messageCallback.bind(this))
@@ -418,7 +419,6 @@ export class OIRecognizer
         this.reconnectionCount++
         if (this.serverConfiguration.websocket.maxRetryCount >= this.reconnectionCount) {
           this.internalEvent.emitClearMessage()
-          await this.destroy()
           if (!this.initialized) {
             await this.init()
             await this.waitForIdle()
@@ -649,13 +649,17 @@ export class OIRecognizer
     return this.clearDeferred?.promise
   }
 
+  clearSocketListener(): void
+  {
+    this.socket.removeEventListener("open", this.openCallback.bind(this))
+    this.socket.removeEventListener("close", this.closeCallback.bind(this))
+    this.socket.removeEventListener("message", this.messageCallback.bind(this))
+  }
+
   async close(code: number, reason: string): Promise<void>
   {
     this.closeDeferred = new DeferredPromise<void>()
     if (this.socket.readyState === this.socket.OPEN || this.socket.readyState === this.socket.CONNECTING) {
-      this.socket.removeEventListener("open", this.openCallback.bind(this))
-      this.socket.removeEventListener("close", this.closeCallback.bind(this))
-      this.socket.removeEventListener("message", this.messageCallback.bind(this))
       this.socket.close(code, reason)
     }
     else {
@@ -677,9 +681,6 @@ export class OIRecognizer
     this.waitForIdleDeferred = undefined
     this.closeDeferred = undefined
     if (this.socket) {
-      this.socket.removeEventListener("open", this.openCallback.bind(this))
-      this.socket.removeEventListener("close", this.closeCallback.bind(this))
-      this.socket.removeEventListener("message", this.messageCallback.bind(this))
       await this.close(1000, "Recognizer destroyed")
     }
   }
