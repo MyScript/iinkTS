@@ -108,7 +108,6 @@ export class DoubleTouchEventMock extends EventMock
     }]
   }
 }
-
 export class ChangeEventMock extends Event
 {
   constructor(props: EventChangeFakeProps)

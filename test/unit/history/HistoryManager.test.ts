@@ -10,9 +10,9 @@ import
   DefaultPenStyle
 } from "../../../src/iink"
 
-describe("UndoRedoManager.ts", () =>
+describe("HistoryManager.ts", () =>
 {
-  test("should instanciate UndoRedoManager", () =>
+  test("should instanciate HistoryManager", () =>
   {
     const manager = new HistoryManager(DefaultConfiguration["undo-redo"])
     expect(manager).toBeDefined()

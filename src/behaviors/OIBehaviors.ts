@@ -26,8 +26,6 @@ import
   TOISymbol,
   TPoint,
   TPointer,
-  TStroke,
-  TSymbol,
   convertPartialStrokesToOIStrokes
 } from "../primitive"
 import { OIRecognizer } from "../recognizer"
@@ -664,7 +662,7 @@ export class OIBehaviors implements IBehaviors
   updateSymbolsStyle(symbolIds: string[], style: TStyle): void
   {
     this.#logger.info("updateSymbolsStyle", { symbolIds, style })
-    const symbols: TSymbol[] = []
+    const symbols: TOISymbol[] = []
     this.model.symbols.forEach(s =>
     {
       if (symbolIds.includes(s.id)) {
@@ -711,7 +709,7 @@ export class OIBehaviors implements IBehaviors
     }
   }
 
-  async importPointEvents(partialStrokes: PartialDeep<TStroke>[]): Promise<OIModel>
+  async importPointEvents(partialStrokes: PartialDeep<OIStroke>[]): Promise<OIModel>
   {
     try {
       this.#logger.info("importPointEvents", { partialStrokes })
