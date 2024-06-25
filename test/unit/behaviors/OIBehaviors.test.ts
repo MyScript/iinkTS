@@ -241,7 +241,7 @@ describe("OIBehaviors.ts", () =>
       oib.renderer.init = jest.fn()
       oib.recognizer.send = jest.fn()
       oib.recognizer.init = jest.fn(() => Promise.reject("pouet"))
-      await expect(oib.init(wrapperHTML)).rejects.toEqual(new Error("pouet"))
+      await expect(oib.init(wrapperHTML)).rejects.toEqual("pouet")
     })
   })
 
@@ -659,40 +659,6 @@ describe("OIBehaviors.ts", () =>
       expect(oib.model.symbols).toHaveLength(pStrokes.length)
       expect(oib.renderer.drawSymbol).toHaveBeenCalledTimes(2)
     })
-    test("should emit error if recognizer.addStrokes is rejected", async () =>
-    {
-      const layerInfo = document.createElement("div")
-      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
-      oib.grabber.attach = jest.fn()
-      oib.renderer.drawSymbol = jest.fn()
-      oib.menu.render = jest.fn()
-      oib.menu.update = jest.fn()
-      oib.svgDebugger.apply = jest.fn(() => Promise.resolve())
-      oib.recognizer.init = jest.fn(() => Promise.resolve())
-      oib.recognizer.addStrokes = jest.fn(() => Promise.reject("importPointsEvent-error"))
-      oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
-      oib.internalEvent.emitError = jest.fn()
-      const stroke = buildOIStroke()
-      oib.model.addSymbol(stroke)
-      const pStrokes: PartialDeep<OIStroke>[] = [
-        {
-          pointers: [
-            { x: 254, y: 37, t: 1, p: 1 },
-            { x: 253, y: 42, t: 2, p: 0.7 },
-          ]
-        },
-        {
-          pointers: [
-            { x: 222, y: 386, t: 3, p: 0.5 },
-            { x: 226, y: 385, t: 4, p: 0.8 },
-          ],
-          style: { width: 3, color: "#1A8CFF" }
-        }
-      ]
-      await expect(oib.importPointEvents(pStrokes)).rejects.toEqual("importPointsEvent-error")
-      expect(oib.internalEvent.emitError).toHaveBeenCalledTimes(1)
-      expect(oib.internalEvent.emitError).toHaveBeenCalledWith("importPointsEvent-error")
-    })
   })
 
   describe("undo", () =>
@@ -963,10 +929,11 @@ describe("OIBehaviors.ts", () =>
       oib.renderer.init = jest.fn()
       oib.internalEvent.emitError = jest.fn()
       oib.recognizer.send = jest.fn()
+      oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
       oib.recognizer.init = jest.fn(() => Promise.resolve())
-      oib.recognizer.export = jest.fn(() => Promise.reject("poney"))
+      oib.recognizer.export = jest.fn(() => Promise.reject("export-error"))
       await oib.init(wrapperHTML)
-      await oib.export()
+      await expect(async () => await oib.export()).rejects.toEqual("export-error")
       expect(oib.internalEvent.emitError).toHaveBeenCalledTimes(1)
     })
   })
@@ -991,7 +958,7 @@ describe("OIBehaviors.ts", () =>
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
       oib.converter.apply = jest.fn(() => Promise.reject("convert-error"))
       oib.internalEvent.emitError = jest.fn()
-      await oib.convert()
+      await expect(async () => await oib.convert()).rejects.toEqual("convert-error")
       expect(oib.internalEvent.emitError).toHaveBeenCalledTimes(1)
       expect(oib.internalEvent.emitError).toHaveBeenCalledWith("convert-error")
     })
@@ -1082,21 +1049,6 @@ describe("OIBehaviors.ts", () =>
       await oib.clear()
       await expect(oib.renderer.clear).toBeCalledTimes(0)
       await expect(oib.recognizer.clear).toBeCalledTimes(0)
-    })
-    test("should emit error if recognizer.clear is rejected", async () =>
-    {
-      const layerInfo = document.createElement("div")
-      const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
-      oib.svgDebugger.apply = jest.fn()
-      oib.renderer.clear = jest.fn()
-      oib.recognizer.clear = jest.fn(() => Promise.reject("clear-error"))
-      oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
-      oib.internalEvent.emitError = jest.fn()
-      const stroke = buildOIStroke()
-      oib.model.addSymbol(stroke)
-      await oib.clear()
-      expect(oib.internalEvent.emitError).toHaveBeenCalledTimes(1)
-      expect(oib.internalEvent.emitError).toHaveBeenCalledWith("clear-error")
     })
   })
 

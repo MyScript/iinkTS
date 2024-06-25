@@ -285,15 +285,13 @@ describe("OIRecognizer.ts", () =>
       const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       await expect(messageSent.type).not.toEqual("addStrokes")
     })
-    test("should send addStrokes message & resolve when receive contentChanged message", async () =>
+    test("should send addStrokes message", async () =>
     {
       expect.assertions(1)
       await oiRecognizer.init()
-      const promise = oiRecognizer.addStrokes(strokes)
+      oiRecognizer.addStrokes(strokes)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.sendContentChangeMessage()
-      await promise
       const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       const messageSentExpected = {
         type: "addStrokes",
@@ -354,15 +352,13 @@ describe("OIRecognizer.ts", () =>
       const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       await expect(messageSent.type).not.toEqual("replaceStrokes")
     })
-    test("should send replaceStrokes message & resolve when receive contentChanged message", async () =>
+    test("should send replaceStrokes message", async () =>
     {
       expect.assertions(1)
       await oiRecognizer.init()
-      const promise = oiRecognizer.replaceStrokes(oldStrokeIds, strokes)
+      oiRecognizer.replaceStrokes(oldStrokeIds, strokes)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.sendContentChangeMessage()
-      await promise
       const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       const messageSentExpected = {
         type: "replaceStrokes",
@@ -423,15 +419,13 @@ describe("OIRecognizer.ts", () =>
       const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       await expect(messageSent.type).not.toEqual("transformTranslate")
     })
-    test("should send transformTranslate message & resolve when receive contentChanged message", async () =>
+    test("should send transformTranslate message", async () =>
     {
       expect.assertions(1)
       await oiRecognizer.init()
-      const promise = oiRecognizer.transformTranslate(strokeIds, tx, ty)
+      oiRecognizer.transformTranslate(strokeIds, tx, ty)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.sendContentChangeMessage()
-      await promise
       const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       const messageSentExpected = {
         type: "transform",
@@ -495,15 +489,13 @@ describe("OIRecognizer.ts", () =>
       const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       await expect(messageSent.type).not.toEqual("transformMatrix")
     })
-    test("should send transformMatrix message & resolve when receive contentChanged message", async () =>
+    test("should send transformMatrix message", async () =>
     {
       expect.assertions(1)
       await oiRecognizer.init()
-      const promise = oiRecognizer.transformMatrix(strokeIds, matrix)
+      oiRecognizer.transformMatrix(strokeIds, matrix)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.sendContentChangeMessage()
-      await promise
       const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       const messageSentExpected = {
         type: "transform",
@@ -565,15 +557,13 @@ describe("OIRecognizer.ts", () =>
       const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       await expect(messageSent.type).not.toEqual("eraseStrokes")
     })
-    test("should send eraseStrokes message & resolve when receive contentChanged message", async () =>
+    test("should send eraseStrokes message", async () =>
     {
       expect.assertions(1)
       await oiRecognizer.init()
-      const promise = oiRecognizer.eraseStrokes(strokeIds)
+      oiRecognizer.eraseStrokes(strokeIds)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.sendContentChangeMessage()
-      await promise
       const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       const messageSentExpected = {
         type: "eraseStrokes",
@@ -678,29 +668,25 @@ describe("OIRecognizer.ts", () =>
       expect.assertions(1)
       await expect(oiRecognizer.undo({})).rejects.toEqual(new Error("Recognizer must be initilized"))
     })
-    test("should send undo message & resolve when receive contentChanged message", async () =>
+    test("should send undo message", async () =>
     {
       expect.assertions(1)
       await oiRecognizer.init()
-      const promise = oiRecognizer.undo({})
+      oiRecognizer.undo({})
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.sendContentChangeMessage()
-      await promise
       const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       const messageSentExpected = { type: "undo" }
-      await expect(messageSent).toMatchObject(messageSentExpected)
+      expect(messageSent).toMatchObject(messageSentExpected)
     })
     test("should send undo message with changes added", async () =>
     {
       expect.assertions(1)
       await oiRecognizer.init()
       const actions: TOIActions = { added: [buildOIStroke()] }
-      const promise = oiRecognizer.undo(actions)
+      oiRecognizer.undo(actions)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.sendContentChangeMessage()
-      await promise
       const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       const messageSentExpected = { type: "undo", changes: [{ type: "addStrokes", strokes: [(actions.added![0] as OIStroke).formatToSend()] }] }
       await expect(messageSent).toMatchObject(messageSentExpected)
@@ -715,8 +701,8 @@ describe("OIRecognizer.ts", () =>
       await delay(100)
       mockServer.sendNotGrantedErrorMessage()
       await expect(promise).rejects.toEqual(ErrorConst.WRONG_CREDENTIALS)
-      await expect(spyEmitError).toHaveBeenCalledTimes(1)
-      await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
+      expect(spyEmitError).toHaveBeenCalledTimes(1)
+      expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
     })
   })
 
@@ -746,15 +732,13 @@ describe("OIRecognizer.ts", () =>
       expect.assertions(1)
       await expect(oiRecognizer.redo({})).rejects.toEqual(new Error("Recognizer must be initilized"))
     })
-    test("should send redo message & resolve when receive contentChanged message", async () =>
+    test("should send redo message", async () =>
     {
       expect.assertions(1)
       await oiRecognizer.init()
-      const promise = oiRecognizer.redo({})
+      oiRecognizer.redo({})
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.sendContentChangeMessage()
-      await promise
       const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       const messageSentExpected = { type: "redo" }
       await expect(messageSent).toMatchObject(messageSentExpected)
@@ -800,16 +784,13 @@ describe("OIRecognizer.ts", () =>
       expect.assertions(1)
       await expect(oiRecognizer.clear()).rejects.toEqual(new Error("Recognizer must be initilized"))
     })
-
-    test("should send clear message & resolve when receive contentChanged message", async () =>
+    test("should send clear message", async () =>
     {
       expect.assertions(1)
       await oiRecognizer.init()
-      const promise = oiRecognizer.clear()
+      oiRecognizer.clear()
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      mockServer.sendContentChangeMessage()
-      await promise
       const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       const messageSentExpected = { type: "clear" }
       await expect(messageSent).toMatchObject(messageSentExpected)

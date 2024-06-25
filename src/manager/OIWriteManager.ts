@@ -246,13 +246,12 @@ export class OIWriteManager
         await this.gestureManager.apply(currentStroke, gestureFromContextLess)
       }
       else {
+        this.model.addSymbol(symbol)
+        this.history.push(this.model, { added: [symbol]})
         const gesture = await this.recognizer.addStrokes([currentStroke], this.detectGesture)
         if (gesture) {
-          await this.gestureManager.apply(currentStroke, gesture)
-        }
-        else {
-          this.model.addSymbol(symbol)
-          this.history.push(this.model, { added: [symbol]})
+          this.history.stack.pop()
+          this.gestureManager.apply(currentStroke, gesture)
         }
       }
     }
