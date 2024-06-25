@@ -487,12 +487,12 @@ export class OIDebugSVGManager
     }
   }
 
-  async apply(): Promise<void>
+  apply(): void
   {
     this.debugBoundingBox()
     this.debugVertices()
     this.debugSnapPoints()
-    await this.debugRecognitionBox()
-    await this.debugRecognitionItemBox()
+    this.debugRecognitionBox()
+    this.debugRecognitionItemBox()
   }
 }

@@ -234,7 +234,8 @@ export class OIBehaviors implements IBehaviors
           this.writer.start(this.currentPenStyle, pointer, evt.pointerType)
           break
       }
-    } catch (error) {
+    }
+    catch (error) {
       this.#logger.error("onPointerDown", error)
       this.grabber.stopPointerEvent()
       this.internalEvent.emitError(error as Error)
@@ -262,7 +263,8 @@ export class OIBehaviors implements IBehaviors
           this.writer.continue(pointer)
           break
       }
-    } catch (error) {
+    }
+    catch (error) {
       this.#logger.error("onPointerMove", error)
       this.internalEvent.emitError(error as Error)
     }
@@ -289,15 +291,16 @@ export class OIBehaviors implements IBehaviors
           await this.writer.end(pointer)
           break
       }
-    } catch (error) {
+    }
+    catch (error) {
       this.undo()
       this.#logger.error("onPointerUp", error)
       this.internalEvent.emitError(error as Error)
     }
     finally {
       this.menu.update()
-      await this.svgDebugger.apply()
-      await this.recognizer.waitForIdle()
+      this.svgDebugger.apply()
+      this.recognizer.waitForIdle()
     }
   }
 
@@ -331,30 +334,26 @@ export class OIBehaviors implements IBehaviors
 
   async init(domElement: HTMLElement): Promise<void>
   {
-    try {
-      this.#logger.info("init", { domElement })
+    this.#logger.info("init", { domElement })
 
-      this.renderer.init(domElement)
-      this.menu.render(this.layerInfos)
+    this.renderer.init(domElement)
+    this.menu.render(this.layerInfos)
 
-      this.grabber.attach(this.renderer.layer as unknown as HTMLElement)
-      this.grabber.onPointerDown = this.onPointerDown.bind(this)
-      this.grabber.onPointerMove = this.onPointerMove.bind(this)
-      this.grabber.onPointerUp = this.onPointerUp.bind(this)
-      this.grabber.onContextMenu = this.onContextMenu.bind(this)
+    this.grabber.attach(this.renderer.layer as unknown as HTMLElement)
+    this.grabber.onPointerDown = this.onPointerDown.bind(this)
+    this.grabber.onPointerMove = this.onPointerMove.bind(this)
+    this.grabber.onPointerUp = this.onPointerUp.bind(this)
+    this.grabber.onContextMenu = this.onContextMenu.bind(this)
 
-      this.model.width = Math.max(domElement.clientWidth, this.#configuration.rendering.minWidth)
-      this.model.height = Math.max(domElement.clientHeight, this.#configuration.rendering.minHeight)
-      this.model.rowHeight = this.configuration.rendering.guides.gap
-      this.history.push(this.model, {})
+    this.model.width = Math.max(domElement.clientWidth, this.#configuration.rendering.minWidth)
+    this.model.height = Math.max(domElement.clientHeight, this.#configuration.rendering.minHeight)
+    this.model.rowHeight = this.configuration.rendering.guides.gap
+    this.history.push(this.model, {})
 
-      await this.recognizer.init()
-      await this.setPenStyle(this.penStyle)
-      await this.setTheme(this.theme)
-      await this.setPenStyleClasses(this.penStyleClasses)
-    } catch (error) {
-      throw new Error(error as string)
-    }
+    await this.recognizer.init()
+    await this.setPenStyle(this.penStyle)
+    await this.setTheme(this.theme)
+    await this.setPenStyleClasses(this.penStyleClasses)
   }
 
   async changeLanguage(code: string): Promise<void>
@@ -367,15 +366,16 @@ export class OIBehaviors implements IBehaviors
       this.recognizer = new OIRecognizer(this.#configuration.server, this.#configuration.recognition)
       await this.recognizer.init()
       await this.recognizer.addStrokes(this.model.symbols.filter(s => s.type === SymbolType.Stroke) as OIStroke[], false)
-    } catch (error) {
+    }
+    catch (error) {
       this.#logger.error("changeLanguage", error)
       this.internalEvent.emitError(error as Error)
       throw error
     }
     finally {
       this.menu.update()
-      await this.svgDebugger.apply()
-      await this.recognizer.waitForIdle()
+      this.svgDebugger.apply()
+      this.recognizer.waitForIdle()
     }
   }
 
@@ -438,8 +438,12 @@ export class OIBehaviors implements IBehaviors
         throw new Error(errors.join("\n"))
       }
       return await this.addSymbols(symbols as TOISymbol[])
-    } catch (error) {
-      this.#logger.error("importPointEvents", error)
+    }
+    catch (error) {
+      this.#logger.error("createSymbols", error)
+      this.menu.update()
+      this.svgDebugger.apply()
+      this.recognizer.waitForIdle()
       this.internalEvent.emitError(error as Error)
       throw error
     }
@@ -458,8 +462,12 @@ export class OIBehaviors implements IBehaviors
         default:
           throw new Error(`Unable to create symbol, type: "${ partialSymbol.type }" is unknown`)
       }
-    } catch (error) {
-      this.#logger.error("importPointEvents", error)
+    }
+    catch (error) {
+      this.#logger.error("createSymbol", error)
+      this.menu.update()
+      this.svgDebugger.apply()
+      this.recognizer.waitForIdle()
       this.internalEvent.emitError(error as Error)
       throw error
     }
@@ -467,105 +475,74 @@ export class OIBehaviors implements IBehaviors
 
   async addSymbol(symbolToAdd: TOISymbol): Promise<TOISymbol>
   {
-    try {
-      this.#logger.info("addSymbol", { symbolToAdd })
-      this.internalEvent.emitIdle(false)
-      this.model.addSymbol(symbolToAdd)
-      this.renderer.drawSymbol(symbolToAdd)
-      if (symbolToAdd.type === SymbolType.Stroke) {
-        await this.recognizer.addStrokes([symbolToAdd as OIStroke], false)
-      }
-      this.history.push(this.model, { added: [symbolToAdd] })
-      return symbolToAdd
-    } catch (error) {
-      this.#logger.error("addSymbol", error)
-      this.internalEvent.emitError(error as Error)
-      throw error
+    this.#logger.info("addSymbol", { symbolToAdd })
+    this.internalEvent.emitIdle(false)
+    this.model.addSymbol(symbolToAdd)
+    this.renderer.drawSymbol(symbolToAdd)
+    if (symbolToAdd.type === SymbolType.Stroke) {
+      this.recognizer.addStrokes([symbolToAdd as OIStroke], false)
     }
-    finally {
-      this.menu.update()
-      await this.svgDebugger.apply()
-      await this.recognizer.waitForIdle()
-    }
+    this.history.push(this.model, { added: [symbolToAdd] })
+    this.menu.update()
+    this.svgDebugger.apply()
+    this.recognizer.waitForIdle()
+    return symbolToAdd
   }
 
   async addSymbols(symbolsToAdd: TOISymbol[]): Promise<TOISymbol[]>
   {
-    try {
-      this.#logger.info("addSymbol", { symbolsToAdd })
-      this.internalEvent.emitIdle(false)
-      const strokes = symbolsToAdd.filter(s => s.type === SymbolType.Stroke) as OIStroke[]
-      await this.recognizer.addStrokes(strokes, false)
-      symbolsToAdd.forEach(s =>
-      {
-        this.model.addSymbol(s)
-        this.renderer.drawSymbol(s)
-      })
-      this.history.push(this.model, { added: symbolsToAdd })
-      return symbolsToAdd
-    } catch (error) {
-      this.#logger.error("addSymbol", error)
-      this.internalEvent.emitError(error as Error)
-      throw error
-    }
-    finally {
-      this.menu.update()
-      await this.svgDebugger.apply()
-      await this.recognizer.waitForIdle()
-    }
+    this.#logger.info("addSymbol", { symbolsToAdd })
+    this.internalEvent.emitIdle(false)
+    const strokes = symbolsToAdd.filter(s => s.type === SymbolType.Stroke) as OIStroke[]
+    this.recognizer.addStrokes(strokes, false)
+    symbolsToAdd.forEach(s =>
+    {
+      this.model.addSymbol(s)
+      this.renderer.drawSymbol(s)
+    })
+    this.history.push(this.model, { added: symbolsToAdd })
+    this.menu.update()
+    this.svgDebugger.apply()
+    this.recognizer.waitForIdle()
+    return symbolsToAdd
   }
 
   async updateSymbol(symbolToUpdate: TOISymbol): Promise<TOISymbol>
   {
-    try {
-      this.#logger.info("updateSymbol", { symbolToUpdate })
-      this.internalEvent.emitIdle(false)
-      this.model.updateSymbol(symbolToUpdate)
-      this.renderer.drawSymbol(symbolToUpdate)
-      if (symbolToUpdate.type === SymbolType.Stroke) {
-        await this.recognizer.replaceStrokes([symbolToUpdate.id], [symbolToUpdate as OIStroke])
-      }
-      this.history.push(this.model, { replaced: { oldSymbols: [symbolToUpdate], newSymbols: [symbolToUpdate] } })
-      return symbolToUpdate
-    } catch (error) {
-      this.#logger.error("addSymbol", error)
-      this.internalEvent.emitError(error as Error)
-      throw error
+    this.#logger.info("updateSymbol", { symbolToUpdate })
+    this.internalEvent.emitIdle(false)
+    this.model.updateSymbol(symbolToUpdate)
+    this.renderer.drawSymbol(symbolToUpdate)
+    if (symbolToUpdate.type === SymbolType.Stroke) {
+      this.recognizer.replaceStrokes([symbolToUpdate.id], [symbolToUpdate as OIStroke])
     }
-    finally {
-      this.menu.update()
-      await this.svgDebugger.apply()
-    }
+    this.history.push(this.model, { replaced: { oldSymbols: [symbolToUpdate], newSymbols: [symbolToUpdate] } })
+    this.menu.update()
+    this.recognizer.waitForIdle()
+    this.svgDebugger.apply()
+    return symbolToUpdate
   }
 
   async replaceSymbol(symbolToReplace: TOISymbol, newSymbols: TOISymbol[]): Promise<void>
   {
-    try {
-      this.#logger.info("replaceSymbol", { symbolToReplace, newSymbols })
-      this.internalEvent.emitIdle(false)
-      this.model.replaceSymbol(symbolToReplace.id, newSymbols)
-      this.renderer.replaceSymbol(symbolToReplace.id, newSymbols)
-      const newStrokes = newSymbols.filter(s => s.type === SymbolType.Stroke) as OIStroke[]
-      if (symbolToReplace.type === SymbolType.Stroke && newStrokes.length) {
-        await this.recognizer.replaceStrokes([symbolToReplace.id], newStrokes)
-      }
-      else if (symbolToReplace.type === SymbolType.Stroke) {
-        await this.recognizer.eraseStrokes([symbolToReplace.id])
-      }
-      else if (newStrokes.length) {
-        await this.recognizer.addStrokes(newStrokes, false)
-      }
-      this.history.push(this.model, { replaced: { oldSymbols: [symbolToReplace], newSymbols } })
-    } catch (error) {
-      this.#logger.error("replaceSymbol", error)
-      this.internalEvent.emitError(error as Error)
-      throw error
+    this.#logger.info("replaceSymbol", { symbolToReplace, newSymbols })
+    this.internalEvent.emitIdle(false)
+    this.model.replaceSymbol(symbolToReplace.id, newSymbols)
+    this.renderer.replaceSymbol(symbolToReplace.id, newSymbols)
+    const newStrokes = newSymbols.filter(s => s.type === SymbolType.Stroke) as OIStroke[]
+    if (symbolToReplace.type === SymbolType.Stroke && newStrokes.length) {
+      this.recognizer.replaceStrokes([symbolToReplace.id], newStrokes)
     }
-    finally {
-      this.menu.update()
-      await this.svgDebugger.apply()
-      await this.recognizer.waitForIdle()
+    else if (symbolToReplace.type === SymbolType.Stroke) {
+      this.recognizer.eraseStrokes([symbolToReplace.id])
     }
+    else if (newStrokes.length) {
+      this.recognizer.addStrokes(newStrokes, false)
+    }
+    this.history.push(this.model, { replaced: { oldSymbols: [symbolToReplace], newSymbols } })
+    this.menu.update()
+    this.recognizer.waitForIdle()
+    this.svgDebugger.apply()
   }
 
   changeOrderSymbols(symbols: TOISymbol[], position: "first" | "last" | "forward" | "backward")
@@ -581,54 +558,36 @@ export class OIBehaviors implements IBehaviors
 
   async removeSymbols(ids: string[]): Promise<void>
   {
-    try {
-      this.#logger.info("removeSymbol", { ids })
-      this.internalEvent.emitIdle(false)
-      const symbolsToRemove = this.model.symbols.filter(s => ids.includes(s.id))
-      const strokeIdsToRemove = symbolsToRemove.filter(s => s.type === SymbolType.Stroke).map(s => s.id)
-      symbolsToRemove.forEach(s =>
-      {
-        this.model.removeSymbol(s.id)
-        this.renderer.removeSymbol(s.id)
-      })
-      await this.recognizer.eraseStrokes(strokeIdsToRemove)
-
-      this.history.push(this.model, { erased: symbolsToRemove })
-    } catch (error) {
-      this.#logger.error("removeSymbol", error)
-      this.internalEvent.emitError(error as Error)
-      throw error
-    }
-    finally {
-      this.menu.update()
-      await this.svgDebugger.apply()
-      await this.recognizer.waitForIdle()
-    }
+    this.#logger.info("removeSymbol", { ids })
+    this.internalEvent.emitIdle(false)
+    const symbolsToRemove = this.model.symbols.filter(s => ids.includes(s.id))
+    this.recognizer.eraseStrokes(symbolsToRemove.filter(s => s.type === SymbolType.Stroke).map(s => s.id))
+    symbolsToRemove.forEach(s =>
+    {
+      this.model.removeSymbol(s.id)
+      this.renderer.removeSymbol(s.id)
+    })
+    this.history.push(this.model, { erased: symbolsToRemove })
+    this.menu.update()
+    this.svgDebugger.apply()
+    this.recognizer.waitForIdle()
   }
 
   async removeSymbol(id: string): Promise<void>
   {
-    try {
-      this.#logger.info("removeSymbol", { id })
+    this.#logger.info("removeSymbol", { id })
+    const symbol = this.model.symbols.find(s => s.id === id)
+    if (symbol) {
       this.internalEvent.emitIdle(false)
-      const symbol = this.model.symbols.find(s => s.id === id)
-      if (symbol) {
-        this.model.removeSymbol(symbol.id)
-        this.renderer.removeSymbol(symbol.id)
-        if (symbol.type === SymbolType.Stroke) {
-          await this.recognizer.eraseStrokes([symbol.id])
-        }
-        this.history.push(this.model, { erased: [symbol] })
+      this.model.removeSymbol(symbol.id)
+      this.renderer.removeSymbol(symbol.id)
+      if (symbol.type === SymbolType.Stroke) {
+        this.recognizer.eraseStrokes([symbol.id])
       }
-    } catch (error) {
-      this.#logger.error("removeSymbol", error)
-      this.internalEvent.emitError(error as Error)
-      throw error
-    }
-    finally {
+      this.history.push(this.model, { erased: [symbol] })
       this.menu.update()
-      await this.svgDebugger.apply()
-      await this.recognizer.waitForIdle()
+      this.svgDebugger.apply()
+      this.recognizer.waitForIdle()
     }
   }
 
@@ -711,29 +670,20 @@ export class OIBehaviors implements IBehaviors
 
   async importPointEvents(partialStrokes: PartialDeep<OIStroke>[]): Promise<OIModel>
   {
-    try {
-      this.#logger.info("importPointEvents", { partialStrokes })
-      this.internalEvent.emitIdle(false)
-      const strokes = convertPartialStrokesToOIStrokes(partialStrokes)
-      strokes.forEach(s =>
-      {
-        this.model.addSymbol(s)
-        this.renderer.drawSymbol(s)
-      })
-      await this.recognizer.addStrokes(strokes, false)
-      this.history.push(this.model, { added: strokes })
-      this.#logger.debug("importPointEvents", this.model)
-      return this.model
-    } catch (error) {
-      this.#logger.error("importPointEvents", error)
-      this.internalEvent.emitError(error as Error)
-      throw error
-    }
-    finally {
-      this.menu.update()
-      await this.svgDebugger.apply()
-      await this.recognizer.waitForIdle()
-    }
+    this.#logger.info("importPointEvents", { partialStrokes })
+    this.internalEvent.emitIdle(false)
+    const strokes = convertPartialStrokesToOIStrokes(partialStrokes)
+    strokes.forEach(s =>
+    {
+      this.model.addSymbol(s)
+      this.renderer.drawSymbol(s)
+    })
+    this.recognizer.addStrokes(strokes, false)
+    this.history.push(this.model, { added: strokes })
+    this.#logger.debug("importPointEvents", this.model)
+    this.menu.update()
+    this.recognizer.waitForIdle()
+    this.svgDebugger.apply()
     return this.model
   }
 
@@ -773,8 +723,8 @@ export class OIBehaviors implements IBehaviors
       }
 
       this.menu.update()
+      this.recognizer.waitForIdle()
       this.svgDebugger.apply()
-      await this.recognizer.waitForIdle()
     }
     return this.model
   }
@@ -801,8 +751,8 @@ export class OIBehaviors implements IBehaviors
         await this.recognizer.redo(actionsToBackend)
       }
       this.menu.update()
-      await this.svgDebugger.apply()
-      await this.recognizer.waitForIdle()
+      this.recognizer.waitForIdle()
+      this.svgDebugger.apply()
     }
     return this.model
   }
@@ -850,7 +800,8 @@ export class OIBehaviors implements IBehaviors
     const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit", second: "2-digit" }
     try {
       return `iink-ts-${ new Date().toLocaleDateString(navigator.language, options) }.${ extension }`
-    } catch {
+    }
+    catch {
       return `iink-ts-${ new Date().toLocaleDateString("en-US", options) }.${ extension }`
     }
   }
@@ -904,16 +855,17 @@ export class OIBehaviors implements IBehaviors
   {
     try {
       this.#logger.info("export", { mimeTypes })
-      const needExport = !mimeTypes?.length && !this.model.exports?.["application/vnd.myscript.jiix"] ||
-        mimeTypes?.some(mt => !this.model.exports?.[mt])
+      const needExport = !mimeTypes?.length && !this.model.exports?.["application/vnd.myscript.jiix"] || mimeTypes?.some(mt => !this.model.exports?.[mt])
       if (needExport) {
+        await this.recognizer.waitForIdle()
         const exports = await this.recognizer.export(mimeTypes)
         this.model.mergeExport(exports as TExport)
-        await this.recognizer.waitForIdle()
       }
-    } catch (error) {
+    }
+    catch (error) {
       this.#logger.error("export", { error })
       this.internalEvent.emitError(error as Error)
+      throw error
     }
     return this.model
   }
@@ -924,14 +876,16 @@ export class OIBehaviors implements IBehaviors
     try {
       this.internalEvent.emitIdle(false)
       await this.converter.apply()
-    } catch (error) {
+    }
+    catch (error) {
       this.#logger.error("convert", error)
       this.internalEvent.emitError(error as Error)
+      throw error
     }
     finally {
       this.menu.update()
-      await this.svgDebugger.apply()
-      await this.recognizer.waitForIdle()
+      this.svgDebugger.apply()
+      this.recognizer.waitForIdle()
     }
     return this.model
   }
@@ -950,31 +904,22 @@ export class OIBehaviors implements IBehaviors
 
   async clear(): Promise<OIModel>
   {
-    try {
-      this.#logger.info("clear")
-      this.internalEvent.emitIdle(false)
-      if (this.model.symbols.length) {
-        this.selector.removeSelectedGroup()
-        const erased = this.model.symbols
-        this.renderer.clear()
-        this.model.clear()
-        this.history.push(this.model, { erased })
-        if (erased.some(s => s.type === SymbolType.Stroke)) {
-          await this.recognizer.clear()
-        }
-        this.internalEvent.emitSelected(this.model.symbolsSelected)
+    this.#logger.info("clear")
+    this.internalEvent.emitIdle(false)
+    if (this.model.symbols.length) {
+      this.selector.removeSelectedGroup()
+      const erased = this.model.symbols
+      this.renderer.clear()
+      this.model.clear()
+      this.history.push(this.model, { erased })
+      if (erased.some(s => s.type === SymbolType.Stroke)) {
+        this.recognizer.clear()
       }
-      this.menu.update()
+      this.internalEvent.emitSelected(this.model.symbolsSelected)
     }
-    catch (error) {
-      this.#logger.error("clear", error)
-      this.internalEvent.emitError(error as Error)
-    }
-    finally {
-      this.menu.update()
-      await this.svgDebugger.apply()
-      await this.recognizer.waitForIdle()
-    }
+    this.menu.update()
+    this.svgDebugger.apply()
+    this.recognizer.waitForIdle()
     return this.model
   }
 

@@ -130,12 +130,12 @@ export class OIRecognizer
       }
     }
 
-    this.rejectDeferredPending(message)
     this.clearSocketListener()
-
+    this.closeDeferred?.resolve()
     if (!this.currentErrorCode && evt.code !== 1000) {
       const error = new Error(message)
       this.internalEvent.emitError(error)
+      this.rejectDeferredPending(message)
     }
     this.internalEvent.emitWSClosed()
   }
@@ -159,62 +159,20 @@ export class OIRecognizer
     }
   }
 
-  protected async waitPromises(): Promise<void>
-  {
-    await Promise.all([
-      this.initialized?.promise,
-      this.addStrokeDeferred?.promise,
-      this.transformStrokeDeferred?.promise,
-      this.replaceStrokeDeferred?.promise,
-      this.eraseStrokeDeferred?.promise,
-      this.undoDeferred?.promise,
-      this.redoDeferred?.promise,
-      this.clearDeferred?.promise,
-    ])
-    return Promise.resolve()
-  }
-
   protected rejectDeferredPending(error: Error | string): void
   {
-    if (this.connected?.isPending) {
-      this.connected?.reject(error)
-    }
-    if (this.initialized?.isPending) {
-      this.initialized?.reject(error)
-    }
-    if (this.addStrokeDeferred?.isPending) {
-      this.addStrokeDeferred?.reject(error)
-    }
-    if (this.recognizeGestureDeferred?.isPending) {
-      this.recognizeGestureDeferred?.reject(error)
-    }
-    if (this.transformStrokeDeferred?.isPending) {
-      this.transformStrokeDeferred?.reject(error)
-    }
-    if (this.eraseStrokeDeferred?.isPending) {
-      this.eraseStrokeDeferred?.reject(error)
-    }
-    if (this.replaceStrokeDeferred?.isPending) {
-      this.replaceStrokeDeferred?.reject(error)
-    }
-    if (this.undoDeferred?.isPending) {
-      this.undoDeferred?.reject(error)
-    }
-    if (this.redoDeferred?.isPending) {
-      this.redoDeferred?.reject(error)
-    }
-    if (this.clearDeferred?.isPending) {
-      this.clearDeferred?.reject(error)
-    }
-    if (this.exportDeferred?.isPending) {
-      this.exportDeferred?.reject(error)
-    }
-    if (this.waitForIdleDeferred?.isPending) {
-      this.waitForIdleDeferred?.reject(error)
-    }
-    if (this.closeDeferred?.isPending) {
-      this.closeDeferred?.resolve()
-    }
+    this.connected?.reject(error)
+    this.initialized?.reject(error)
+    this.addStrokeDeferred?.reject(error)
+    this.recognizeGestureDeferred?.reject(error)
+    this.transformStrokeDeferred?.reject(error)
+    this.eraseStrokeDeferred?.reject(error)
+    this.replaceStrokeDeferred?.reject(error)
+    this.undoDeferred?.reject(error)
+    this.redoDeferred?.reject(error)
+    this.clearDeferred?.reject(error)
+    this.exportDeferred?.reject(error)
+    this.waitForIdleDeferred?.reject(error)
   }
 
   protected openCallback(): void
@@ -346,10 +304,6 @@ export class OIRecognizer
             this.managePartChangeMessage(websocketMessage)
             break
           case "contentChanged":
-            this.addStrokeDeferred?.resolve(undefined)
-            this.transformStrokeDeferred?.resolve()
-            this.eraseStrokeDeferred?.resolve()
-            this.replaceStrokeDeferred?.resolve()
             this.undoDeferred?.resolve()
             this.redoDeferred?.resolve()
             this.clearDeferred?.resolve()
@@ -374,6 +328,13 @@ export class OIRecognizer
     } catch (error) {
       this.internalEvent.emitError(new Error(message.data))
     }
+  }
+
+  clearSocketListener(): void
+  {
+    this.socket.removeEventListener("open", this.openCallback.bind(this))
+    this.socket.removeEventListener("close", this.closeCallback.bind(this))
+    this.socket.removeEventListener("message", this.messageCallback.bind(this))
   }
 
   async init(): Promise<void>
@@ -446,8 +407,6 @@ export class OIRecognizer
 
   async addStrokes(strokes: OIStroke[], processGestures = true): Promise<TOIMessageEventGesture | undefined>
   {
-    this.addStrokeDeferred?.resolve(undefined)
-    await this.waitPromises()
     this.addStrokeDeferred = new DeferredPromise<TOIMessageEventGesture | undefined>()
     if (strokes.length === 0) {
       this.addStrokeDeferred.resolve(undefined)
@@ -468,7 +427,6 @@ export class OIRecognizer
 
   async replaceStrokes(oldStrokeIds: string[], newStrokes: OIStroke[]): Promise<void>
   {
-    await this.waitPromises()
     this.replaceStrokeDeferred = new DeferredPromise<void>()
     if (oldStrokeIds.length === 0) {
       this.replaceStrokeDeferred.resolve()
@@ -491,7 +449,6 @@ export class OIRecognizer
 
   async transformTranslate(strokeIds: string[], tx: number, ty: number): Promise<void>
   {
-    await this.waitPromises()
     this.transformStrokeDeferred = new DeferredPromise<void>()
     if (strokeIds.length === 0) {
       this.transformStrokeDeferred.resolve()
@@ -513,7 +470,6 @@ export class OIRecognizer
 
   async transformMatrix(strokeIds: string[], matrix: TMatrixTransform): Promise<void>
   {
-    await this.waitPromises()
     this.transformStrokeDeferred = new DeferredPromise<void>()
     if (strokeIds.length === 0) {
       this.transformStrokeDeferred.resolve()
@@ -533,7 +489,6 @@ export class OIRecognizer
 
   async eraseStrokes(strokeIds: string[]): Promise<void>
   {
-    await this.waitPromises()
     this.eraseStrokeDeferred = new DeferredPromise<void>()
     if (strokeIds.length === 0) {
       this.eraseStrokeDeferred.resolve()
@@ -545,7 +500,6 @@ export class OIRecognizer
 
   async recognizeGesture(strokes: OIStroke[]): Promise<TOIMessageEventContextlessGesture | undefined>
   {
-    await this.waitPromises()
     this.recognizeGestureDeferred = new DeferredPromise<TOIMessageEventContextlessGesture | undefined>()
     if (strokes.length === 0) {
       this.recognizeGestureDeferred.resolve(undefined)
@@ -601,10 +555,7 @@ export class OIRecognizer
 
   async undo(actions: TOIActions): Promise<void>
   {
-    await this.initialized?.promise
-    await this.undoDeferred?.promise
     this.undoDeferred = new DeferredPromise<void>()
-
     const message: TOIMessageEvent = {
       type: "undo",
       changes: this.buildUndoRedoChanges(actions)
@@ -615,8 +566,6 @@ export class OIRecognizer
 
   async redo(actions: TOIActions): Promise<void>
   {
-    await this.initialized?.promise
-    await this.redoDeferred?.promise
     this.redoDeferred = new DeferredPromise<void>()
     const message: TOIMessageEvent = {
       type: "redo",
@@ -628,7 +577,6 @@ export class OIRecognizer
 
   async export(requestedMimeTypes?: string[]): Promise<TExport>
   {
-    await this.initialized?.promise
     this.exportDeferred = new DeferredPromise<TExport>()
     const mimeTypes: string[] = requestedMimeTypes || this.mimeTypes
     const message: TOIMessageEvent = {
@@ -647,13 +595,6 @@ export class OIRecognizer
       type: "clear"
     })
     return this.clearDeferred?.promise
-  }
-
-  clearSocketListener(): void
-  {
-    this.socket.removeEventListener("open", this.openCallback.bind(this))
-    this.socket.removeEventListener("close", this.closeCallback.bind(this))
-    this.socket.removeEventListener("message", this.messageCallback.bind(this))
   }
 
   async close(code: number, reason: string): Promise<void>
