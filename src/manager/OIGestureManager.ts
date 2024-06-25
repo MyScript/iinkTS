@@ -9,7 +9,7 @@ import
   SymbolType,
   OIText,
   DecoratorKind,
-  TSymbol,
+  TOISymbol,
 } from "../primitive"
 import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
@@ -148,8 +148,8 @@ export class OIGestureManager
       this.#logger.warn("applyScratchGesture", "Unable to apply underline because there are no strokes")
       return
     }
-    const symbolsErased: TSymbol[] = []
-    const symbolsReplaced: { oldSymbols: TSymbol[], newSymbols: TSymbol[] } = { oldSymbols: [], newSymbols: [] }
+    const symbolsErased: TOISymbol[] = []
+    const symbolsReplaced: { oldSymbols: TOISymbol[], newSymbols: TOISymbol[] } = { oldSymbols: [], newSymbols: [] }
 
     const shapesOrEdgeToErase = this.model.symbols.filter(s => [SymbolType.Shape.toString(), SymbolType.Edge.toString()].includes(s.type) && gesture.strokeIds.includes(s.id)) as OIText[]
     shapesOrEdgeToErase.forEach(s =>
@@ -325,7 +325,7 @@ export class OIGestureManager
     const symbolsAfterInCurrentRow = currentRow?.symbols.filter(s => s.boundingBox.xMid > gestureStroke.boundingBox.xMid)
 
     const transformed: TOIActionsTransformTranslate[] = []
-    const symbolsReplaced: { oldSymbols: TSymbol[], newSymbols: TSymbol[] } = { oldSymbols: [], newSymbols: [] }
+    const symbolsReplaced: { oldSymbols: TOISymbol[], newSymbols: TOISymbol[] } = { oldSymbols: [], newSymbols: [] }
 
     if (gesture.strokeIds.length && gesture.subStrokes?.length) {
       // we can split only one stroke
@@ -436,7 +436,7 @@ export class OIGestureManager
         break
       }
       case StrikeThroughAction.Erase: {
-        const symbolsToErase: TSymbol[] = this.model.symbols.filter(s => gesture.strokeIds.includes(s.id))
+        const symbolsToErase: TOISymbol[] = this.model.symbols.filter(s => gesture.strokeIds.includes(s.id))
         if (symbolsToErase.length) {
           gesture.strokeIds.forEach(id =>
           {

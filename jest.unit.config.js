@@ -2,7 +2,7 @@ export default {
   clearMocks: true,
   // collectCoverage: true,
   collectCoverageFrom: [
-    "./src/**/*.ts",
+    "./src/**/**.ts",
     "!./src/modules.d.ts",
     "!./src/Constants.ts",
   ],
@@ -15,7 +15,7 @@ export default {
     },
   },
   coverageDirectory: "coverage",
-  coverageProvider: "v8",
+  coverageProvider: "v8", // "babel"
   moduleFileExtensions: [
     "ts",
     "js"
@@ -32,7 +32,7 @@ export default {
   ],
   testEnvironment: "jsdom",
   testMatch: [
-    "**/unit/**/*.test.ts"
+    "**/unit/**/**.test.ts"
   ],
   testPathIgnorePatterns: [
     "/node_modules/"

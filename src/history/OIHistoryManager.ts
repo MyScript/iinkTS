@@ -3,7 +3,7 @@ import { TUndoRedoConfiguration } from "../configuration"
 import { InternalEvent } from "../event"
 import { LoggerManager } from "../logger"
 import { OIModel } from "../model"
-import { OIDecorator, TSymbol } from "../primitive"
+import { OIDecorator, TOISymbol } from "../primitive"
 import { TStyle } from "../style"
 import { MatrixTransform, TMatrixTransform } from "../transform"
 import { IHistoryManager } from "./IHistoryManager"
@@ -14,7 +14,7 @@ import { TUndoRedoContext, getInitialUndoRedoContext } from "./UndoRedoContext"
  */
 export type TOIActionsTransform = {
   transformationType: "TRANSLATE" | "MATRIX" | "STYLE" | "DECORATOR"
-  symbols: TSymbol[]
+  symbols: TOISymbol[]
 }
 
 /**
@@ -56,9 +56,9 @@ export type TOIActionsTransformMatrix = TOIActionsTransform & {
  * @remarks actions are messages sent to the backend
  */
 export type TOIActions = {
-  added?: TSymbol[]
-  replaced?: { oldSymbols: TSymbol[], newSymbols: TSymbol[]}
-  erased?: TSymbol[]
+  added?: TOISymbol[]
+  replaced?: { oldSymbols: TOISymbol[], newSymbols: TOISymbol[] }
+  erased?: TOISymbol[]
   transformed?: (TOIActionsTransformTranslate | TOIActionsTransformMatrix | TOIActionsTransformStyle | TOIActionsTransformDecorator)[]
 }
 
@@ -98,7 +98,7 @@ export class OIHistoryManager implements IHistoryManager
   {
     this.context.canRedo = this.stack.length - 1 > this.context.stackIndex
     this.context.canUndo = this.context.stackIndex > 0
-    this.context.empty = this.stack[this.context.stackIndex]?.model.symbols.length === 0
+    this.context.empty = this.stack[this.context.stackIndex].model.symbols.length === 0
   }
 
   push(model: OIModel, actions: TOIActions): void
@@ -108,7 +108,7 @@ export class OIHistoryManager implements IHistoryManager
       this.stack.splice(this.context.stackIndex + 1)
     }
 
-    this.stack.push({model: model.clone(), actions})
+    this.stack.push({ model: model.clone(), actions })
     this.context.stackIndex = this.stack.length - 1
 
     if (this.stack.length > this.configuration.maxStackSize) {
@@ -120,28 +120,7 @@ export class OIHistoryManager implements IHistoryManager
     this.internalEvent.emitContextChange(this.context)
   }
 
-  pop(): void
-  {
-    this.#logger.info("pop")
-    if (this.context.stackIndex === this.stack.length - 1) {
-      this.context.stackIndex--
-    }
-    this.stack.pop()
-    this.updateContext()
-  }
-
-  updateStack(model: OIModel): void
-  {
-    this.#logger.info("updateStack", { model })
-    const index = this.stack.findIndex(m => m.model.modificationDate === model.modificationDate)
-    if (index > -1 && this.stack[index]) {
-      this.stack[index].model = model.clone()
-    }
-    this.updateContext()
-    this.internalEvent.emitContextChange(this.context)
-  }
-
-  inverteActions(actions: TOIActions): TOIActions
+  protected inverteActions(actions: TOIActions): TOIActions
   {
     const invertedActions: TOIActions = {}
     if (actions.added) {
@@ -153,15 +132,16 @@ export class OIHistoryManager implements IHistoryManager
     if (actions.replaced) {
       invertedActions.replaced = {
         newSymbols: actions.replaced.oldSymbols,
-        oldSymbols: actions.replaced.newSymbols,
+        oldSymbols: actions.replaced.newSymbols
       }
     }
     if (actions.transformed?.length) {
       invertedActions.transformed = []
-      actions.transformed.forEach(a => {
+      actions.transformed.forEach(a =>
+      {
         switch (a.transformationType) {
           case "TRANSLATE":
-            invertedActions.transformed?.push({
+            invertedActions.transformed!.push({
               transformationType: a.transformationType,
               symbols: a.symbols,
               tx: -a.tx,
@@ -169,7 +149,7 @@ export class OIHistoryManager implements IHistoryManager
             })
             break
           case "MATRIX":
-            invertedActions.transformed?.push({
+            invertedActions.transformed!.push({
               transformationType: a.transformationType,
               symbols: a.symbols,
               matrix: new MatrixTransform(a.matrix.xx, a.matrix.yx, a.matrix.xy, a.matrix.yy, a.matrix.tx, a.matrix.ty).invert()

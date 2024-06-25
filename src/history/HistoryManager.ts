@@ -34,7 +34,7 @@ export class HistoryManager implements IHistoryManager
   {
     this.context.canRedo = this.stack.length - 1 > this.context.stackIndex
     this.context.canUndo = this.context.stackIndex > 0
-    this.context.empty = this.stack[this.context.stackIndex]?.symbols.length === 0
+    this.context.empty = this.stack[this.context.stackIndex].symbols.length === 0
   }
 
   push(model: IModel): void
@@ -54,16 +54,6 @@ export class HistoryManager implements IHistoryManager
 
     this.updateContext()
     this.internalEvent.emitContextChange(this.context)
-  }
-
-  pop(): void
-  {
-    this.#logger.info("pop")
-    if (this.context.stackIndex === this.stack.length - 1) {
-      this.context.stackIndex--
-    }
-    this.stack.pop()
-    this.updateContext()
   }
 
   updateStack(model: IModel): void

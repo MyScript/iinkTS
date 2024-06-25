@@ -13,11 +13,10 @@ import
   TStyle,
   TTheme,
   PartialDeep,
-  TStroke,
+  OIStroke,
   DefaultStyle,
   SymbolType,
   OIShapeCircle,
-  OIStroke,
   ShapeKind,
 } from "../../../src/iink"
 
@@ -608,7 +607,7 @@ describe("OIBehaviors.ts", () =>
       oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
       await oib.init(wrapperHTML)
-      const pStrokes: PartialDeep<TStroke>[] = [
+      const pStrokes: PartialDeep<OIStroke>[] = [
         {
           pointers: [
             { x: 254, y: 37, t: 1, p: 1 },
@@ -641,7 +640,7 @@ describe("OIBehaviors.ts", () =>
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
       expect(oib.model.symbols).toHaveLength(0)
       await oib.init(wrapperHTML)
-      const pStrokes: PartialDeep<TStroke>[] = [
+      const pStrokes: PartialDeep<OIStroke>[] = [
         {
           pointers: [
             { x: 254, y: 37, t: 1, p: 1 },
@@ -675,7 +674,7 @@ describe("OIBehaviors.ts", () =>
       oib.internalEvent.emitError = jest.fn()
       const stroke = buildOIStroke()
       oib.model.addSymbol(stroke)
-      const pStrokes: PartialDeep<TStroke>[] = [
+      const pStrokes: PartialDeep<OIStroke>[] = [
         {
           pointers: [
             { x: 254, y: 37, t: 1, p: 1 },
