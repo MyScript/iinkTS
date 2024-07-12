@@ -413,9 +413,9 @@ export class Editor
   async initialize(): Promise<void>
   {
     this.logger.info("initialize")
+    this.#addInternalListeners()
     await this.#initializeBehaviors()
     this.#initializeSmartGuide()
-    this.#addInternalListeners()
   }
 
   async waitForIdle(): Promise<void>
