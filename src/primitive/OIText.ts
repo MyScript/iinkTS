@@ -172,6 +172,7 @@ export class OIText implements TOISymbol
       chars: this.chars,
       style: this.style,
       rotation: this.rotation,
+      boundingBox: this.boundingBox,
       decorators: this.decorators.length ? this.decorators : undefined
     }
   }
@@ -180,6 +181,7 @@ export class OIText implements TOISymbol
   {
     if (!isValidPoint(partial?.point)) throw new Error(`Unable to create a OIText, point are invalid`)
     if (!partial.chars?.length) throw new Error(`Unable to create a OIText, no chars`)
+    if (!partial.boundingBox) throw new Error(`Unable to create a OIText, no boundingBox`)
     return new OIText(partial.style || DefaultStyle, partial.chars as TOISymbolChar[], partial.point as TPoint, partial.boundingBox as TBoundingBox)
   }
 }
