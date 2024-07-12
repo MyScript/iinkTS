@@ -61,7 +61,7 @@ export class OIBehaviorsMock extends OIBehaviors
   importPointEvents = jest.fn()
 
   downloadAsSVG = jest.fn()
-  downloadAsJPG = jest.fn()
+  downloadAsPNG = jest.fn()
   downloadAsJson = jest.fn()
 
   // extractStrokesFromSymbols = jest.fn()
