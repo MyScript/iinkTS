@@ -949,7 +949,7 @@ export class OIBehaviors implements IBehaviors
     this.triggerDownload(this.getExportName("svg"), url)
   }
 
-  downloadAsJPG(selection = false)
+  downloadAsPNG(selection = false)
   {
     const symbols = selection ? this.model.symbolsSelected : this.model.symbols
     const box = this.getSymbolsBounds(symbols)
@@ -974,7 +974,7 @@ export class OIBehaviors implements IBehaviors
         .toDataURL("image/png")
         .replace("image/png", "image/octet-stream")
 
-      this.triggerDownload(this.getExportName("jpg"), imgURI)
+      this.triggerDownload(this.getExportName("png"), imgURI)
     }
   }
 

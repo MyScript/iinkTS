@@ -408,11 +408,11 @@ export class OIMenuAction extends OIMenu
       },
       {
         type: "button",
-        id: `${ this.id }-export-jpg`,
-        label: "jpg",
+        id: `${ this.id }-export-png`,
+        label: "png",
         callback: () =>
         {
-          this.behaviors.downloadAsJPG()
+          this.behaviors.downloadAsPNG()
         }
       },
     ]

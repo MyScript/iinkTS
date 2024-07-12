@@ -318,9 +318,9 @@ export class OIMenuContext extends OIMenu
       },
       {
         type: "button",
-        id: `${ this.id }-export-jpg`,
-        label: "jpg",
-        callback: () => this.behaviors.downloadAsJPG(this.haveSymbolsSelected)
+        id: `${ this.id }-export-png`,
+        label: "png",
+        callback: () => this.behaviors.downloadAsPNG(this.haveSymbolsSelected)
       },
     ]
     const subMenuWrapper = document.createElement("div")
