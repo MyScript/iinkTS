@@ -23,8 +23,8 @@ export type TImageConfiguration = {
 export type TJiixConfiguration = {
   "bounding-box": boolean
   strokes: boolean
-  ids: boolean,
-  "full-stroke-ids": boolean,
+  ids: boolean
+  "full-stroke-ids": boolean
   text: {
     chars: boolean
     words: boolean

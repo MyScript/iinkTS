@@ -183,3 +183,50 @@ export class OIShapeRectangle extends OIShapePolygon
     return new OIShapeRectangle(partial.style || DefaultStyle, partial.points as TPoint[])
   }
 }
+
+/**
+ * @group Primitive
+ */
+export class OIShapeRhombus extends OIShapePolygon
+{
+  #logger = LoggerManager.getLogger(LoggerClass.SHAPE)
+
+  constructor(style: TStyle, points: TPoint[])
+  {
+    super(style, points, ShapeKind.Rhombus)
+    this.#logger.debug("constructor", { style, points })
+  }
+
+  static createFromLine(style: TStyle, origin: TPoint, target: TPoint): OIShapeRhombus
+  {
+    const box = Box.createFromPoints([origin, target])
+    const points: TPoint[] = [
+      { x: box.xMid, y: box.yMin },
+      { x: box.xMax, y: box.yMid },
+      { x: box.xMid, y: box.yMax },
+      { x: box.xMin, y: box.yMid },
+    ]
+    return new OIShapeRhombus(style, points)
+  }
+
+  static updateFromLine(rect: OIShapeRhombus, origin: TPoint, target: TPoint): OIShapeRhombus
+  {
+    const box = Box.createFromPoints([origin, target])
+    const points: TPoint[] = [
+      { x: box.xMid, y: box.yMin },
+      { x: box.xMax, y: box.yMid },
+      { x: box.xMid, y: box.yMax },
+      { x: box.xMin, y: box.yMid },
+    ]
+    rect.points = points
+    rect.modificationDate = Date.now()
+    return rect
+  }
+
+  static create(partial: PartialDeep<OIShapeRhombus>): OIShapeRhombus
+  {
+    if (partial?.points?.length !== 4) throw new Error(`Unable to create rhombus, invalid points number`)
+    if (partial?.points?.some(p => !isValidPoint(p))) throw new Error(`Unable to create a rhombus, one or more points are invalid`)
+    return new OIShapeRhombus(partial.style || DefaultStyle, partial.points as TPoint[])
+  }
+}

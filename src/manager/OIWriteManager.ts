@@ -12,6 +12,7 @@ import
   OIShapeEllipse,
   OIShapeParallelogram,
   OIShapeRectangle,
+  OIShapeRhombus,
   OIShapeTriangle,
   OIStroke,
   OISymbolGroup,
@@ -129,6 +130,9 @@ export class OIWriteManager
       case WriteTool.Parallelogram:
         this.model.currentSymbol = OIShapeParallelogram.createFromLine(style, pointer, pointer)
         break
+      case WriteTool.Rhombus:
+        this.model.currentSymbol = OIShapeRhombus.createFromLine(style, pointer, pointer)
+        break
       case WriteTool.Line:
       case WriteTool.Arrow:
       case WriteTool.DoubleArrow: {
@@ -153,6 +157,9 @@ export class OIWriteManager
   {
     const shape = this.model.currentSymbol as TOIShape
     switch (shape.kind) {
+      case ShapeKind.Rhombus:
+        OIShapeRhombus.updateFromLine(shape as OIShapeRhombus, this.currentSymbolOrigin!, pointer)
+        break
       case ShapeKind.Rectangle:
         OIShapeRectangle.updateFromLine(shape as OIShapeRectangle, this.currentSymbolOrigin!, pointer)
         break
