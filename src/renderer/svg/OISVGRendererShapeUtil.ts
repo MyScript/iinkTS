@@ -23,6 +23,7 @@ export class OISVGRendererShapeUtil
   static getSVGPath(shape: TOIShape): string
   {
     switch(shape.kind) {
+      case ShapeKind.Polygon:
       case ShapeKind.Parallelogram:
       case ShapeKind.Triangle:
       case ShapeKind.Rectangle:
