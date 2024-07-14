@@ -4,6 +4,26 @@ import { TExport } from "../model"
 /**
  * @group Recognizer
  */
+export enum TOIMessageType
+{
+  HMAC_Challenge = "hmacChallenge",
+  Authenticated = "authenticated",
+  SessionDescription = "sessionDescription",
+  NewPart = "newPart",
+  PartChanged = "partChanged",
+  ContentChanged = "contentChanged",
+  Idle = "idle",
+  Pong = "pong",
+  Exported = "exported",
+  GestureDetected = "gestureDetected",
+  Gesture = "Gesture",
+  Error = "error",
+}
+
+/**
+ * @group Recognizer
+ * @description use to type message to send to backend
+ */
 export type TOIMessageEvent = {
   type: string
   [key: string]: unknown
@@ -12,20 +32,19 @@ export type TOIMessageEvent = {
 /**
  * @group Recognizer
  */
-export type TOIMessageEventError = {
-  type: string
-  code?: number | string
-  message?: string
-  data? : {
-    code: number | string
-    message: string
-  }
+export type TOIMessage<T = string> = {
+  type: T
 }
 
 /**
  * @group Recognizer
  */
-export type TOIMessageEventHMACChallenge = TOIMessageEvent & {
+export type TOIMessageEventAuthenticated = TOIMessage<TOIMessageType.Authenticated>
+
+/**
+ * @group Recognizer
+ */
+export type TOIMessageEventHMACChallenge = TOIMessage<TOIMessageType.HMAC_Challenge> & {
   hmacChallenge: string
   iinkSessionId: string
 }
@@ -33,7 +52,7 @@ export type TOIMessageEventHMACChallenge = TOIMessageEvent & {
 /**
  * @group Recognizer
  */
-export type TSessionDescriptionMessage = TOIMessageEvent & {
+export type TOISessionDescriptionMessage = TOIMessage<TOIMessageType.SessionDescription> & {
   contentPartCount: number
   iinkSessionId: string
 }
@@ -41,7 +60,15 @@ export type TSessionDescriptionMessage = TOIMessageEvent & {
 /**
  * @group Recognizer
  */
-export type TOIMessageEventPartChange = TOIMessageEvent & {
+export type TOIMessageEventNewPart = TOIMessage<TOIMessageType.NewPart> & {
+  id: string
+  idx: null
+}
+
+/**
+ * @group Recognizer
+ */
+export type TOIMessageEventPartChange = TOIMessage<TOIMessageType.PartChanged> & {
   partIdx: number
   partId: string
   partCount: number
@@ -50,7 +77,7 @@ export type TOIMessageEventPartChange = TOIMessageEvent & {
 /**
  * @group Recognizer
  */
-export type TOIMessageEventContentChange = TOIMessageEvent & {
+export type TOIMessageEventContentChange = TOIMessage<TOIMessageType.ContentChanged> & {
   partId: string
   canUndo: boolean
   canRedo: boolean
@@ -62,7 +89,7 @@ export type TOIMessageEventContentChange = TOIMessageEvent & {
 /**
  * @group Recognizer
  */
-export type TOIMessageEventExport = TOIMessageEvent & {
+export type TOIMessageEventExport = TOIMessage<TOIMessageType.Exported> & {
   partId: string
   exports: TExport
 }
@@ -70,17 +97,57 @@ export type TOIMessageEventExport = TOIMessageEvent & {
 /**
  * @group Recognizer
  */
-export type TOIMessageEventGesture = TOIMessageEvent & TGesture
+export type TOIMessageEventGesture = TOIMessage<TOIMessageType.GestureDetected> & TGesture
 
 /**
  * @group Recognizer
  */
 export type TContextlessGestureType = {
-  type: "none" | "scratch" | "left-right" | "right-left" | "bottom-top" | "top-bottom" | "surround" | string,
+  type: "none" | "scratch" | "left-right" | "right-left" | "bottom-top" | "top-bottom" | "surround" | string
 }
+
 /**
  * @group Recognizer
  */
-export type TOIMessageEventContextlessGesture = TOIMessageEvent & {
+export type TOIMessageEventContextlessGesture = TOIMessage<TOIMessageType.Gesture> & {
   gestures: TContextlessGestureType[]
 }
+
+/**
+ * @group Recognizer
+ */
+export type TOIMessageEventPong = TOIMessage<TOIMessageType.Pong>
+
+/**
+ * @group Recognizer
+ */
+export type TOIMessageEventIdle = TOIMessage<TOIMessageType.Idle>
+
+/**
+ * @group Recognizer
+ */
+export type TOIMessageEventError = TOIMessage<TOIMessageType.Error> & {
+  code?: number | string
+  message?: string
+  data?: {
+    code: number | string
+    message: string
+  }
+}
+
+/**
+ * @group Recognizer
+ */
+export type TOIMessageReceived =
+  TOIMessageEventAuthenticated |
+  TOIMessageEventHMACChallenge |
+  TOISessionDescriptionMessage |
+  TOIMessageEventNewPart |
+  TOIMessageEventPartChange |
+  TOIMessageEventContentChange |
+  TOIMessageEventExport |
+  TOIMessageEventGesture |
+  TOIMessageEventContextlessGesture |
+  TOIMessageEventPong |
+  TOIMessageEventIdle |
+  TOIMessageEventError

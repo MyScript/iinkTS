@@ -7,7 +7,20 @@ import { TExport, TJIIXExport } from "../model"
 import { OIStroke } from "../primitive"
 import { TMatrixTransform } from "../transform"
 import { computeHmac, DeferredPromise } from "../utils"
-import { TOIMessageEvent, TOIMessageEventContentChange, TOIMessageEventContextlessGesture, TOIMessageEventError, TOIMessageEventExport, TOIMessageEventGesture, TOIMessageEventHMACChallenge, TOIMessageEventPartChange, TSessionDescriptionMessage } from "./OIRecognizerMessage"
+import {
+  TOIMessageEvent,
+  TOIMessageEventContentChange,
+  TOIMessageEventContextlessGesture,
+  TOIMessageEventError,
+  TOIMessageEventExport,
+  TOIMessageEventGesture,
+  TOIMessageEventHMACChallenge,
+  TOIMessageEventNewPart,
+  TOIMessageEventPartChange,
+  TOIMessageReceived,
+  TOIMessageType,
+  TOISessionDescriptionMessage
+} from "./OIRecognizerMessage"
 
 /**
  * A websocket dialog have this sequence :
@@ -196,10 +209,9 @@ export class OIRecognizer
     this.send(params, { waitInitialized: false })
   }
 
-  protected async manageHMACChallenge(websocketMessage: TOIMessageEvent): Promise<void>
+  protected async manageHMACChallenge(hmacChallengeMessage: TOIMessageEventHMACChallenge): Promise<void>
   {
     try {
-      const hmacChallengeMessage = websocketMessage as TOIMessageEventHMACChallenge
       this.send(
         {
           type: "hmac",
@@ -225,11 +237,10 @@ export class OIRecognizer
     this.send(params, { waitInitialized: false })
   }
 
-  protected manageSessionDescriptionMessage(websocketMessage: TOIMessageEvent): void
+  protected manageSessionDescriptionMessage(sessionDescriptionMessage: TOISessionDescriptionMessage): void
   {
-    const sessionDescription = websocketMessage as TSessionDescriptionMessage
-    if (sessionDescription.iinkSessionId) {
-      this.sessionId = sessionDescription.iinkSessionId
+    if (sessionDescriptionMessage.iinkSessionId) {
+      this.sessionId = sessionDescriptionMessage.iinkSessionId
     }
     if (this.currentPartId) {
       this.send({ type: "openContentPart", id: this.currentPartId }, { waitInitialized: false })
@@ -239,17 +250,21 @@ export class OIRecognizer
     }
   }
 
-  protected managePartChangeMessage(websocketMessage: TOIMessageEvent): void
+  protected manageNewPartMessage(newPartMessage: TOIMessageEventNewPart): void
   {
     this.initialized?.resolve()
-    const partChangeMessage = websocketMessage as TOIMessageEventPartChange
+    this.currentPartId = newPartMessage.id
+  }
+
+  protected managePartChangeMessage(partChangeMessage: TOIMessageEventPartChange): void
+  {
+    this.initialized?.resolve()
     this.currentPartId = partChangeMessage.partId
   }
 
-  protected manageContentChangedMessage(websocketMessage: TOIMessageEvent): void
+  protected manageContentChangedMessage(contentChangeMessage: TOIMessageEventContentChange): void
   {
     this.initialized?.resolve()
-    const contentChange = websocketMessage as TOIMessageEventContentChange
     this.replaceStrokeDeferred?.resolve()
     this.transformStrokeDeferred?.resolve()
     this.eraseStrokeDeferred?.resolve()
@@ -257,15 +272,13 @@ export class OIRecognizer
     this.redoDeferred?.resolve()
     this.clearDeferred?.resolve()
     this.internalEvent.emitContextChange({
-      canRedo: contentChange.canRedo,
-      canUndo: contentChange.canRedo,
+      canRedo: contentChangeMessage.canRedo,
+      canUndo: contentChangeMessage.canRedo,
     } as TUndoRedoContext)
   }
 
-  protected manageExportMessage(websocketMessage: TOIMessageEvent): void
+  protected manageExportMessage(exportMessage: TOIMessageEventExport): void
   {
-    const exportMessage = websocketMessage as TOIMessageEventExport
-
     if (exportMessage.exports["application/vnd.myscript.jiix"]) {
       exportMessage.exports["application/vnd.myscript.jiix"] = JSON.parse(exportMessage.exports["application/vnd.myscript.jiix"].toString()) as TJIIXExport
     }
@@ -286,11 +299,10 @@ export class OIRecognizer
     this.internalEvent.emitIdle(true)
   }
 
-  protected manageErrorMessage(websocketMessage: TOIMessageEvent): void
+  protected manageErrorMessage(errorMessage: TOIMessageEventError): void
   {
-    const err = websocketMessage as TOIMessageEventError
-    this.currentErrorCode = err.data?.code || err.code
-    let message = err.data?.message || err.message || ErrorConst.UNKNOW
+    this.currentErrorCode = errorMessage.data?.code || errorMessage.code
+    let message = errorMessage.data?.message || errorMessage.message || ErrorConst.UNKNOW
 
     switch (this.currentErrorCode) {
       case "no.activity":
@@ -307,15 +319,13 @@ export class OIRecognizer
     this.internalEvent.emitError(new Error(message))
   }
 
-  protected manageGestureDetected(websocketMessage: TOIMessageEvent): void
+  protected manageGestureDetected(gestureMessage: TOIMessageEventGesture): void
   {
-    const gestureMessage = websocketMessage as TOIMessageEventGesture
     this.addStrokeDeferred?.resolve(gestureMessage)
   }
 
-  protected manageContextlessGesture(websocketMessage: TOIMessageEvent): void
+  protected manageContextlessGesture(gestureMessage: TOIMessageEventContextlessGesture): void
   {
-    const gestureMessage = websocketMessage as TOIMessageEventContextlessGesture
     this.recognizeGestureDeferred?.resolve(gestureMessage)
   }
 
@@ -323,41 +333,48 @@ export class OIRecognizer
   {
     this.currentErrorCode = undefined
     try {
-      const websocketMessage: TOIMessageEvent = JSON.parse(message.data)
-      if (websocketMessage.type !== "pong") {
-        this.pingCount = 0
-        switch (websocketMessage.type) {
-          case "hmacChallenge":
-            this.manageHMACChallenge(websocketMessage)
-            break
-          case "authenticated":
-            this.manageAuthenticated()
-            break
-          case "sessionDescription":
-            this.manageSessionDescriptionMessage(websocketMessage)
-            break
-          case "partChanged":
-            this.managePartChangeMessage(websocketMessage)
-            break
-          case "contentChanged":
-            this.manageContentChangedMessage(websocketMessage)
-            break
-          case "exported":
-            this.manageExportMessage(websocketMessage)
-            break
-          case "gestureDetected":
-            this.manageGestureDetected(websocketMessage)
-            break
-          case "Gesture":
-            this.manageContextlessGesture(websocketMessage)
-            break
-          case "idle":
-            this.manageWaitForIdle()
-            break
-          case "error":
-            this.manageErrorMessage(websocketMessage)
-            break
-        }
+      const websocketMessage: TOIMessageReceived = JSON.parse(message.data)
+      this.pingCount = 0
+      switch (websocketMessage.type) {
+        case TOIMessageType.HMAC_Challenge:
+          this.manageHMACChallenge(websocketMessage)
+          break
+        case TOIMessageType.Authenticated:
+          this.manageAuthenticated()
+          break
+        case TOIMessageType.SessionDescription:
+          this.manageSessionDescriptionMessage(websocketMessage)
+          break
+        case TOIMessageType.NewPart:
+          this.manageNewPartMessage(websocketMessage)
+          break
+        case TOIMessageType.PartChanged:
+          this.managePartChangeMessage(websocketMessage)
+          break
+        case TOIMessageType.ContentChanged:
+          this.manageContentChangedMessage(websocketMessage)
+          break
+        case TOIMessageType.Exported:
+          this.manageExportMessage(websocketMessage)
+          break
+        case TOIMessageType.GestureDetected:
+          this.manageGestureDetected(websocketMessage)
+          break
+        case TOIMessageType.Gesture:
+          this.manageContextlessGesture(websocketMessage)
+          break
+        case TOIMessageType.Error:
+          this.manageErrorMessage(websocketMessage)
+          break
+        case TOIMessageType.Idle:
+          this.manageWaitForIdle()
+          break
+        case TOIMessageType.Pong:
+          this.#logger.info("messageCallback", `Pong Message received".`)
+          break
+        default:
+          this.#logger.warn("messageCallback", `Message type unknow: "${ websocketMessage }".`)
+          break
       }
     } catch (error) {
       this.internalEvent.emitError(new Error(message.data))
