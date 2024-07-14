@@ -1,8 +1,8 @@
 import { LoggerClass } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerManager } from "../logger"
-import { OIModel, TJIIXEdgeElement, TJIIXEdgePolyEdge, TJIIXNodeElement, TJIIXTextElement } from "../model"
-import { Box, EdgeKind, OIText, SymbolType, TBoundingBox, TOISymbol } from "../primitive"
+import { OIModel, TJIIXEdgeKind } from "../model"
+import { Box, OIText, SymbolType, TBoundingBox, TOISymbol } from "../primitive"
 import { NO_SELECTION, OISVGRenderer, SVGBuilder } from "../renderer"
 import { convertBoundingBoxMillimeterToPixel, createUUID } from "../utils"
 
@@ -251,7 +251,7 @@ export class OIDebugSVGManager
         y: rectBox.y + ty,
       }
       this.renderer.removeSymbol(`connection-${ infosGroup.id }`)
-      this.renderer.drawConnectionBetweenBox(`connection-${ infosGroup.id }`, box, newRectBox, { stroke: COLOR, debug: "recognition-box-link"})
+      this.renderer.drawConnectionBetweenBox(`connection-${ infosGroup.id }`, box, newRectBox, { stroke: COLOR, debug: "recognition-box-link" })
     }
 
     rectTranslate.addEventListener("pointerdown", e =>
@@ -268,6 +268,7 @@ export class OIDebugSVGManager
       this.renderer.layer.addEventListener("pointercancel", () => this.renderer.layer.removeEventListener("pointermove", translateEl))
     })
   }
+
   protected async showRecognitionBox(): Promise<void>
   {
     this.#logger.info("showRecognitionBox")
@@ -279,61 +280,58 @@ export class OIDebugSVGManager
         this.#logger.warn("drawRecognitionBox", "You must to enabled configuration.recognition.exports[\"bounding-box\"]")
         return
       }
-      jiix.elements?.forEach(e =>
+      jiix.elements?.forEach(el =>
       {
-        switch (e.type) {
+        switch (el.type) {
           case "Node": {
-            const node = e as TJIIXNodeElement
-            if (node["bounding-box"]) {
-              const box = convertBoundingBoxMillimeterToPixel(node["bounding-box"])
+            if (el["bounding-box"]) {
+              const box = convertBoundingBoxMillimeterToPixel(el["bounding-box"])
               const hideProperties = ["bounding-box", "items", "id"]
-              const infos = Object.keys(node).filter(k => !hideProperties.includes(k)).map(k => `${ k }: ${ JSON.stringify(node[k as keyof typeof node]) }`)
+              const infos = Object.keys(el).filter(k => !hideProperties.includes(k)).map(k => `${ k }: ${ JSON.stringify(el[k as keyof typeof el]) }`)
               this.drawRecognitionBox(box, infos)
             }
             break
           }
           case "Text": {
-            const text = e as TJIIXTextElement
-            text.words?.forEach(w =>
+            el.words?.forEach(w =>
             {
               if (w?.["bounding-box"]) {
                 const box = convertBoundingBoxMillimeterToPixel(w["bounding-box"])
-                this.drawRecognitionBox(box, [`type: ${ text.type }`, `candidates: ${ JSON.stringify(w.candidates || []) }`])
+                this.drawRecognitionBox(box, [`type: ${ el.type }`, `candidates: ${ JSON.stringify(w.candidates || []) }`])
               }
             })
             break
           }
           case "Edge": {
-            const edge = e as TJIIXEdgeElement
-            if (edge.kind === EdgeKind.PolyEdge) {
-              const polyline = edge as TJIIXEdgePolyEdge
+            if (el.kind === TJIIXEdgeKind.PolyEdge) {
               const infos = [
-                `type: ${polyline.type}`,
-                `kind: ${polyline.kind}`,
+                `type: ${ el.type }`,
+                `kind: ${ el.kind }`,
               ]
-              polyline.edges.forEach((e, i) => {
-                let inf = `edge-${i}: [{ x1: ${e.x1}, y2: ${e.y1} },{ x2: ${e.x2}, y2: ${e.y2} }]`
+              el.edges.forEach((e, i) =>
+              {
+                let inf = `edge-${ i }: [{ x1: ${ e.x1 }, y2: ${ e.y1 } },{ x2: ${ e.x2 }, y2: ${ e.y2 } }]`
                 if (e.p1Decoration) {
-                  inf += `, p1Decoration: ${e.p1Decoration}`
+                  inf += `, p1Decoration: ${ e.p1Decoration }`
                 }
                 if (e.p2Decoration) {
-                  inf += `, p2Decoration: ${e.p2Decoration}`
+                  inf += `, p2Decoration: ${ e.p2Decoration }`
                 }
                 infos.push(inf)
               })
-              const box = convertBoundingBoxMillimeterToPixel(Box.createFromBoxes(polyline.edges.map(e => e["bounding-box"] as TBoundingBox)))
+              const box = convertBoundingBoxMillimeterToPixel(Box.createFromBoxes(el.edges.map(e => e["bounding-box"] as TBoundingBox)))
               this.drawRecognitionBox(box, infos)
             }
-            else if (edge["bounding-box"]) {
-              const box = convertBoundingBoxMillimeterToPixel(edge["bounding-box"])
+            else if (el["bounding-box"]) {
+              const box = convertBoundingBoxMillimeterToPixel(el["bounding-box"])
               const hideProperties = ["bounding-box", "items", "id", "ports", "connected"]
-              const infos = Object.keys(edge).filter(k => !hideProperties.includes(k)).map(k => `${ k }: ${ JSON.stringify(edge[k as keyof typeof edge]) }`)
+              const infos = Object.keys(el).filter(k => !hideProperties.includes(k)).map(k => `${ k }: ${ JSON.stringify(el[k as keyof typeof el]) }`)
               this.drawRecognitionBox(box, infos)
             }
             break
           }
           default: {
-            this.#logger.warn("drawRecognitionBox", `Unknow jiix element type: ${ e.type }`)
+            this.#logger.warn("drawRecognitionBox", `Unknow jiix element type: ${ el.type }`)
             break
           }
         }
@@ -404,7 +402,7 @@ export class OIDebugSVGManager
         y: rectBox.y + ty,
       }
       this.renderer.removeSymbol(`connection-${ charsGroup.id }`)
-      this.renderer.drawConnectionBetweenBox(`connection-${ charsGroup.id }`, box, newRectBox, { stroke: COLOR, debug: "recognition-item-box-link"})
+      this.renderer.drawConnectionBetweenBox(`connection-${ charsGroup.id }`, box, newRectBox, { stroke: COLOR, debug: "recognition-item-box-link" })
     }
 
     rectTranslate.addEventListener("pointerdown", e =>
@@ -429,12 +427,11 @@ export class OIDebugSVGManager
     const jiix = this.model.exports?.["application/vnd.myscript.jiix"]
     this.#logger.debug("showRecognitionBoxItem", { jiix })
     if (jiix) {
-      jiix.elements?.forEach(e =>
+      jiix.elements?.forEach(el =>
       {
-        switch (e.type) {
+        switch (el.type) {
           case "Text": {
-            const text = e as TJIIXTextElement
-            text.chars?.forEach(c =>
+            el.chars?.forEach(c =>
             {
               if (c?.["bounding-box"]) {
                 const box = convertBoundingBoxMillimeterToPixel(c["bounding-box"])
@@ -444,30 +441,28 @@ export class OIDebugSVGManager
             break
           }
           case "Node": {
-            const node = e as TJIIXNodeElement
-            if (node?.["bounding-box"]) {
-              const box = convertBoundingBoxMillimeterToPixel(node["bounding-box"])
-              this.drawRecognitionItemBox(box, node.kind)
+            if (el?.["bounding-box"]) {
+              const box = convertBoundingBoxMillimeterToPixel(el["bounding-box"])
+              this.drawRecognitionItemBox(box, el.kind)
             }
             break
           }
           case "Edge": {
-            const edge = e as TJIIXEdgeElement
-            if (edge.kind === EdgeKind.PolyEdge) {
-              const polyline = edge as TJIIXEdgePolyEdge
-              polyline.edges.forEach(e => {
+            if (el.kind === TJIIXEdgeKind.PolyEdge) {
+              el.edges.forEach(e =>
+              {
                 const box = convertBoundingBoxMillimeterToPixel(e["bounding-box"])
                 this.drawRecognitionItemBox(box, e.kind)
               })
             }
-            else if (edge["bounding-box"]) {
-              const box = convertBoundingBoxMillimeterToPixel(edge["bounding-box"])
-              this.drawRecognitionItemBox(box, edge.kind)
+            else if (el["bounding-box"]) {
+              const box = convertBoundingBoxMillimeterToPixel(el["bounding-box"])
+              this.drawRecognitionItemBox(box, el.kind)
             }
             break
           }
           default:
-            this.#logger.warn("drawRecognitionBoxItem", `Unknow jiix element type: ${ e.type }`)
+            this.#logger.warn("drawRecognitionBoxItem", `Unknow jiix element type: ${ el.type }`)
             break
         }
       })

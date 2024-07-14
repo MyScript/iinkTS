@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { TJIIXExport } from "../../../src/iink"
 
 export const helloJIIX: TJIIXExport = {
