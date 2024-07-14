@@ -3,6 +3,7 @@ import cursorIcon from "../assets/svg/frame-select.svg"
 import eraseIcon from "../assets/svg/erase.svg"
 import handIcon from "../assets/svg/drag-hand-gesture.svg"
 import rectangleIcon from "../assets/svg/rectangle.svg"
+import rhombusIcon from "../assets/svg/rhombus.svg"
 import circleIcon from "../assets/svg/circle.svg"
 import ellipseIcon from "../assets/svg/ellipse.svg"
 import triangleIcon from "../assets/svg/triangle.svg"
@@ -34,6 +35,7 @@ export class OIMenuIntention extends OIMenu
     circle: HTMLButtonElement,
     triangle: HTMLButtonElement,
     ellipse: HTMLButtonElement
+    rhombus: HTMLButtonElement
   }
   menuEdge?: HTMLButtonElement
   subMenuEdge?: {
@@ -144,6 +146,7 @@ export class OIMenuIntention extends OIMenu
       rectangle: this.createShapeSubMenu(rectangleIcon, WriteTool.Rectangle),
       triangle: this.createShapeSubMenu(triangleIcon, WriteTool.Triangle),
       ellipse: this.createShapeSubMenu(ellipseIcon, WriteTool.Ellipse),
+      rhombus: this.createShapeSubMenu(rhombusIcon, WriteTool.Rhombus),
     }
     const subMenuContent = document.createElement("div")
     subMenuContent.id = `${this.id}-write-shape-list`
@@ -152,6 +155,7 @@ export class OIMenuIntention extends OIMenu
     subMenuContent.appendChild(this.subMenuShape.circle)
     subMenuContent.appendChild(this.subMenuShape.ellipse)
     subMenuContent.appendChild(this.subMenuShape.triangle)
+    subMenuContent.appendChild(this.subMenuShape.rhombus)
 
     return this.createSubMenu(this.menuShape, subMenuContent).element
   }

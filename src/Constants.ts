@@ -149,6 +149,7 @@ export enum WriteTool
 {
   Pencil = "pencil",
   Rectangle = "rectangle",
+  Rhombus = "rhombus",
   Circle = "circle",
   Ellipse = "ellipse",
   Triangle = "triangle",
