@@ -52,7 +52,7 @@ export class Synchronizer
     {
       seg.points.forEach((p, i) =>
       {
-        stroke.pointers.push({
+        stroke.addPointer({
           p: 1,
           t: Date.now() + i * 20,
           x: p.x + shape.x,
@@ -153,10 +153,12 @@ export class Synchronizer
       this.drawShapeToAdd = this.drawShapeToAdd.filter(s => !s.props.isComplete)
       if (newDrawShapeCompleted.length) {
         let gesture = await this.determinesContextlessGesture(newDrawShapeCompleted)
-        const addStrokeResult = await this.recognizer.addStrokes(newDrawShapeCompleted.map(this.formatDrawShapeToSend), !gesture)
-        if (!gesture) {
-          gesture = addStrokeResult
-        }
+        this.recognizer.addStrokes(newDrawShapeCompleted.map(this.formatDrawShapeToSend), !gesture && newDrawShapeCompleted.length < 20)
+          .then(addStrokeResponse => {
+            if (addStrokeResponse) {
+              this.gesture.apply(addStrokeResponse)
+            }
+          })
         if (gesture) {
           await this.gesture.apply(gesture)
         }

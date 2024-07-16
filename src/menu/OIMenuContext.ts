@@ -65,7 +65,7 @@ export class OIMenuContext extends OIMenu
     this.duplicateBtn.addEventListener("pointerup", async () =>
     {
       const symbolsToDuplicate = this.symbolsSelected
-      const selectionBox = Box.createFromBoxes(symbolsToDuplicate.map(s => s.boundingBox))
+      const selectionBox = Box.createFromBoxes(symbolsToDuplicate.map(s => s.bounds))
       const duplicatedSymbols = symbolsToDuplicate.map(s =>
       {
         const clone = s.clone()

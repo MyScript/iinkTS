@@ -33,15 +33,10 @@ import
   OIEdgePolyLine,
   OIShapeCircle,
   OIShapeEllipse,
-  OIShapeParallelogram,
   OIShapePolygon,
-  OIShapeRectangle,
-  OIShapeRhombus,
-  OIShapeTriangle,
   OIStroke,
   OISymbolGroup,
   OIText,
-  ShapeKind,
   SymbolType,
   TOIEdge,
   TOIShape,
@@ -79,12 +74,7 @@ export class OIConversionManager
   get strokes(): OIStroke[]
   {
     const symbols = (this.model.symbolsSelected.length ? this.model.symbolsSelected : this.model.symbols)
-    const strokes = symbols.filter(s => s.type === SymbolType.Stroke) as OIStroke[]
-
-    const groups = symbols.filter(s => s.type === SymbolType.Group) as OISymbolGroup[]
-    strokes.push(...groups.flatMap(g => g.extractStrokes()))
-
-    return strokes
+    return this.behaviors.extractStrokesFromSymbols(symbols)
   }
 
   buildChar(char: TJIIXChar, strokes: OIStroke[], fontSize?: number): TOISymbolChar
@@ -103,7 +93,7 @@ export class OIConversionManager
       color,
       fontSize: fontSize || Math.ceil(Math.round((boundingBox.yMax - boundingBox.yMin) / 2) / 8) * 8,
       fontWeight,
-      boundingBox
+      bounds: boundingBox
     }
   }
 
@@ -118,7 +108,7 @@ export class OIConversionManager
         charSymbols.push(this.buildChar(char, charStrokes, fontSize))
       }
     })
-    const text = new OIText({}, charSymbols, startPoint, boundingBox)
+    const text = new OIText(charSymbols, startPoint, boundingBox)
     const decorators = strokes.flatMap(s => s.decorators)
     strokes.forEach(s =>
     {
@@ -203,7 +193,7 @@ export class OIConversionManager
           strokes: wordStrokes
         })
         startPoint = {
-          x: startPoint.x + textSymbol.boundingBox.width,
+          x: startPoint.x + textSymbol.bounds.width,
           y: startPoint.y
         }
       }
@@ -232,7 +222,7 @@ export class OIConversionManager
       x: convertMillimeterToPixel(circle.cx),
       y: convertMillimeterToPixel(circle.cy)
     }
-    return new OIShapeCircle(strokes[0]?.style, center, convertMillimeterToPixel(circle.r))
+    return new OIShapeCircle(center, convertMillimeterToPixel(circle.r), strokes[0]?.style)
   }
 
   buildEllipse(ellipse: TJIIXNodeEllipse, strokes: OIStroke[]): OIShapeEllipse
@@ -241,10 +231,10 @@ export class OIConversionManager
       x: convertMillimeterToPixel(ellipse.cx),
       y: convertMillimeterToPixel(ellipse.cy),
     }
-    return new OIShapeEllipse(strokes[0]?.style, center, convertMillimeterToPixel(ellipse.rx), convertMillimeterToPixel(ellipse.ry))
+    return new OIShapeEllipse(center, convertMillimeterToPixel(ellipse.rx), convertMillimeterToPixel(ellipse.ry), strokes[0]?.style,)
   }
 
-  buildRectangle(rectangle: TJIIXNodeRectangle, strokes: OIStroke[]): OIShapeRectangle
+  buildRectangle(rectangle: TJIIXNodeRectangle, strokes: OIStroke[]): OIShapePolygon
   {
     const height = convertMillimeterToPixel(rectangle.height)
     const width = convertMillimeterToPixel(rectangle.width)
@@ -256,7 +246,7 @@ export class OIConversionManager
       { x: x + width, y: y + height },
       { x, y: y + height }
     ]
-    return new OIShapeRectangle(strokes[0]?.style, points)
+    return new OIShapePolygon(points, strokes[0]?.style)
   }
 
   buildPolygon(polygon: TJIIXNodePolygon, strokes: OIStroke[]): OIShapePolygon
@@ -269,10 +259,10 @@ export class OIConversionManager
       })
     }
 
-    return new OIShapePolygon(strokes[0]?.style, points, ShapeKind.Polygon)
+    return new OIShapePolygon(points, strokes[0]?.style)
   }
 
-  buildRhombus(polygon: TJIIXNodeRhombus, strokes: OIStroke[]): OIShapeRhombus
+  buildRhombus(polygon: TJIIXNodeRhombus, strokes: OIStroke[]): OIShapePolygon
   {
     const points: TPoint[] = []
     for (let i = 0; i < polygon.points.length; i += 2) {
@@ -282,10 +272,10 @@ export class OIConversionManager
       })
     }
 
-    return new OIShapeRhombus(strokes[0]?.style, points)
+    return new OIShapePolygon(points, strokes[0]?.style)
   }
 
-  buildTriangle(polygon: TJIIXNodeTriangle, strokes: OIStroke[]): OIShapeTriangle
+  buildTriangle(polygon: TJIIXNodeTriangle, strokes: OIStroke[]): OIShapePolygon
   {
     const points: TPoint[] = []
     for (let i = 0; i < polygon.points.length; i += 2) {
@@ -295,10 +285,10 @@ export class OIConversionManager
       })
     }
 
-    return new OIShapeTriangle(strokes[0]?.style, points)
+    return new OIShapePolygon(points, strokes[0]?.style)
   }
 
-  buildParallelogram(polygon: TJIIXNodeParrallelogram, strokes: OIStroke[]): OIShapeParallelogram
+  buildParallelogram(polygon: TJIIXNodeParrallelogram, strokes: OIStroke[]): OIShapePolygon
   {
     const points: TPoint[] = []
     for (let i = 0; i < polygon.points.length; i += 2) {
@@ -308,7 +298,7 @@ export class OIConversionManager
       })
     }
 
-    return new OIShapeParallelogram(strokes[0]?.style, points)
+    return new OIShapePolygon(points, strokes[0]?.style)
   }
 
   convertNode(node: TJIIXNodeElement): { symbol: TOIShape, strokes: OIStroke[] } | undefined
@@ -364,7 +354,7 @@ export class OIConversionManager
       point1.x = +((point1.x + point2.x) / 2).toFixed(3)
       point2.x = point1.x
     }
-    return new OIEdgeLine(strokes[0]?.style, point1, point2, line.p1Decoration, line.p2Decoration)
+    return new OIEdgeLine(point1, point2, line.p1Decoration, line.p2Decoration, strokes[0]?.style)
   }
 
   buildPolyEdge(polyline: TJIIXEdgePolyEdge, strokes: OIStroke[]): OIEdgePolyLine
@@ -386,7 +376,7 @@ export class OIConversionManager
       }
     }
 
-    return new OIEdgePolyLine(strokes[0]?.style, points, polyline.edges[0].p1Decoration, polyline.edges.at(-1)!.p2Decoration)
+    return new OIEdgePolyLine(points, polyline.edges[0].p1Decoration, polyline.edges.at(-1)!.p2Decoration, strokes[0]?.style)
   }
 
   buildArc(arc: TJIIXEdgeArc, strokes: OIStroke[]): OIEdgeArc
@@ -394,7 +384,7 @@ export class OIConversionManager
     const center: TPoint = { x: convertMillimeterToPixel(arc.cx), y: convertMillimeterToPixel(arc.cy) }
     const radiusX = convertMillimeterToPixel(arc.rx)
     const radiusY = convertMillimeterToPixel(arc.ry)
-    return new OIEdgeArc(strokes[0]?.style, center, arc.startAngle, arc.sweepAngle, radiusX, radiusY, arc.phi, arc.startDecoration, arc.endDecoration)
+    return new OIEdgeArc(center, arc.startAngle, arc.sweepAngle, radiusX, radiusY, arc.phi, arc.startDecoration, arc.endDecoration, strokes[0]?.style)
   }
 
   convertEdge(edge: TJIIXEdgeElement): { symbol: TOIEdge, strokes: OIStroke[] } | undefined

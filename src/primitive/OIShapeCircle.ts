@@ -1,29 +1,33 @@
-import { LoggerClass, SELECTION_MARGIN } from "../Constants"
-import { LoggerManager } from "../logger"
-import { DefaultStyle, TStyle } from "../style"
+import { SELECTION_MARGIN } from "../Constants"
+import { TStyle } from "../style"
 import { PartialDeep, computeDistance, findIntersectBetweenSegmentAndCircle, isValidNumber, computeRotatedPoint } from "../utils"
 import { TPoint, isValidPoint } from "./Point"
-import { OIShape, ShapeKind } from "./OIShape"
+import { OIShapeBase, ShapeKind } from "./OIShape"
 import { Box, TBoundingBox } from "./Box"
 
 /**
  * @group Primitive
  */
-export class OIShapeCircle extends OIShape
+export class OIShapeCircle extends OIShapeBase<ShapeKind.Circle>
 {
-  #logger = LoggerManager.getLogger(LoggerClass.SHAPE)
   center: TPoint
   radius: number
   protected _vertices: Map<string, TPoint[]>
+  protected _bounds: Map<string, Box>
 
-  constructor(style: TStyle, center: TPoint, radius: number)
+  constructor(
+    center: TPoint,
+    radius: number,
+    style?: PartialDeep<TStyle>
+  )
   {
     super(ShapeKind.Circle, style)
-    this.#logger.debug("constructor", { style, center, radius })
     this.center = center
     this.radius = radius
     this._vertices = new Map<string, TPoint[]>()
     this._vertices.set(this.verticesId, this.computedVertices())
+    this._bounds = new Map<string, Box>()
+    this._bounds.set(this.verticesId, this.computedBondingBox())
   }
 
   protected get verticesId(): string
@@ -47,15 +51,7 @@ export class OIShapeCircle extends OIShape
     return points
   }
 
-  get vertices(): TPoint[]
-  {
-    if (!this._vertices.has(this.verticesId)) {
-      this._vertices.set(this.verticesId, this.computedVertices())
-    }
-    return this._vertices.get(this.verticesId)!
-  }
-
-  override get boundingBox(): Box
+  protected computedBondingBox(): Box
   {
     const boundingBox: TBoundingBox = {
       x: this.center.x - this.radius,
@@ -63,7 +59,24 @@ export class OIShapeCircle extends OIShape
       height: this.radius * 2,
       width: this.radius * 2
     }
+    this._bounds
     return new Box(boundingBox)
+  }
+
+  get bounds(): Box
+  {
+    if (!this._bounds.has(this.verticesId)) {
+      this._bounds.set(this.verticesId, this.computedBondingBox())
+    }
+    return this._bounds.get(this.verticesId)!
+  }
+
+  get vertices(): TPoint[]
+  {
+    if (!this._vertices.has(this.verticesId)) {
+      this._vertices.set(this.verticesId, this.computedVertices())
+    }
+    return this._vertices.get(this.verticesId)!
   }
 
   isCloseToPoint(point: TPoint): boolean
@@ -73,13 +86,13 @@ export class OIShapeCircle extends OIShape
 
   overlaps(box: TBoundingBox): boolean
   {
-    return this.boundingBox.isContained(box) ||
+    return this.bounds.isContained(box) ||
       Box.getSides(box).some(seg => findIntersectBetweenSegmentAndCircle(seg, this.center, this.radius).length)
   }
 
   clone(): OIShapeCircle
   {
-    const clone = new OIShapeCircle(structuredClone(this.style), structuredClone(this.center), this.radius)
+    const clone = new OIShapeCircle(structuredClone(this.center), this.radius, structuredClone(this.style))
     clone.id = this.id
     clone.selected = this.selected
     clone.deleting = this.deleting
@@ -100,7 +113,7 @@ export class OIShapeCircle extends OIShape
     }
   }
 
-  static createFromLine(style: TStyle, origin: TPoint, target: TPoint): OIShapeCircle
+  static createBetweenPoints(origin: TPoint, target: TPoint, style?: PartialDeep<TStyle>): OIShapeCircle
   {
     const center = {
       x: (origin.x + target.x) / 2,
@@ -110,10 +123,9 @@ export class OIShapeCircle extends OIShape
     const width = Math.abs(origin.x - target.x)
     const height = Math.abs(origin.y - target.y)
     const radius = Math.min(width, height) / 2
-    return new OIShapeCircle(style, center, radius)
+    return new OIShapeCircle(center, radius, style)
   }
-
-  static updateFromLine(circle: OIShapeCircle, origin: TPoint, target: TPoint): OIShapeCircle
+  static updateBetweenPoints(circle: OIShapeCircle, origin: TPoint, target: TPoint): OIShapeCircle
   {
     circle.center = {
       x: (origin.x + target.x) / 2,
@@ -129,6 +141,6 @@ export class OIShapeCircle extends OIShape
   {
     if (!isValidPoint(partial.center)) throw new Error(`Unable to create circle, center is invalid`)
     if (!isValidNumber(partial.radius)) throw new Error(`Unable to create circle, radius is undefined`)
-    return new OIShapeCircle(partial.style || DefaultStyle, partial.center as TPoint, partial.radius!)
+    return new OIShapeCircle(partial.center as TPoint, partial.radius!, partial.style)
   }
 }

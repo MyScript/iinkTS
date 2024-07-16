@@ -1,22 +1,25 @@
-import { LoggerClass } from "../Constants"
-import { LoggerManager } from "../logger"
-import { DefaultStyle, TStyle } from "../style"
+import { TStyle } from "../style"
 import { PartialDeep } from "../utils"
-import { EdgeDecoration, EdgeKind, OIEdge } from "./OIEdge"
+import { EdgeDecoration, EdgeKind, OIEdgeBase } from "./OIEdge"
 import { TPoint, isValidPoint } from "./Point"
 
 /**
  * @group Primitive
  */
-export class OIEdgeLine extends OIEdge
+export class OIEdgeLine extends OIEdgeBase<EdgeKind.Line>
 {
-  #logger = LoggerManager.getLogger(LoggerClass.EDGE)
   start: TPoint
   end: TPoint
 
-  constructor(style: TStyle, start: TPoint, end: TPoint, startDecoration?: EdgeDecoration, endDecoration?: EdgeDecoration)
+  constructor(
+    start: TPoint,
+    end: TPoint,
+    startDecoration?: EdgeDecoration,
+    endDecoration?: EdgeDecoration,
+    style?: PartialDeep<TStyle>
+  )
   {
-    super(EdgeKind.Line, style, startDecoration, endDecoration)
+    super(EdgeKind.Line, startDecoration, endDecoration, style)
     this.start = start
     this.end = end
   }
@@ -31,8 +34,7 @@ export class OIEdgeLine extends OIEdge
 
   clone(): OIEdgeLine
   {
-    this.#logger.info("clone", this)
-    const clone = new OIEdgeLine(structuredClone(this.style), structuredClone(this.start), structuredClone(this.end), this.startDecoration, this.endDecoration)
+    const clone = new OIEdgeLine(structuredClone(this.start), structuredClone(this.end), this.startDecoration, this.endDecoration, structuredClone(this.style))
     clone.id = this.id
     clone.selected = this.selected
     clone.deleting = this.deleting
@@ -59,6 +61,6 @@ export class OIEdgeLine extends OIEdge
   {
     if (!isValidPoint(partial?.start)) throw new Error(`Unable to create a arc, start point is invalid`)
     if (!isValidPoint(partial?.end)) throw new Error(`Unable to create a arc, end point is invalid`)
-    return new OIEdgeLine(partial.style || DefaultStyle, partial?.start as TPoint, partial?.end as TPoint, partial.startDecoration, partial.endDecoration)
+    return new OIEdgeLine(partial?.start as TPoint, partial?.end as TPoint, partial.startDecoration, partial.endDecoration, partial.style)
   }
 }

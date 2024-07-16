@@ -24,19 +24,13 @@ export class OISVGRendererShapeUtil
   {
     switch(shape.kind) {
       case ShapeKind.Polygon:
-      case ShapeKind.Parallelogram:
-      case ShapeKind.Triangle:
-      case ShapeKind.Rectangle:
-      case ShapeKind.Rhombus:
         return OISVGRendererShapeUtil.getPolygonePath(shape as OIShapePolygon)
       case ShapeKind.Circle:
         return OISVGRendererShapeUtil.getCirclePath(shape as OIShapeCircle)
       case ShapeKind.Ellipse:
         return OISVGRendererShapeUtil.getEllipsePath(shape as OIShapeEllipse)
       default:
-        throw new Error(`Can't getSVGPath for shape cause kind is unknow: "${shape.kind}"`)
+        throw new Error(`Can't getSVGPath for shape cause kind is unknow: "${ JSON.stringify(shape) }"`)
     }
   }
-
-
 }

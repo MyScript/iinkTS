@@ -6,13 +6,9 @@ import
 {
   Box,
   EdgeKind,
-  OIEdgeArc,
-  OIEdgeLine,
-  OIEdgePolyLine,
-  OIShapeCircle,
-  OIShapeEllipse,
-  OIShapePolygon,
-  OIStroke, OISymbolGroup, OIText,
+  OIStroke,
+  OISymbolGroup,
+  OIText,
   ShapeKind,
   SymbolType,
   TOIEdge,
@@ -101,31 +97,24 @@ export class OIRotationManager
   {
     switch (shape.kind) {
       case ShapeKind.Ellipse: {
-        const ellipse = shape as OIShapeEllipse
-        ellipse.center = computeRotatedPoint(ellipse.center, center, angleRad)
-        return ellipse
+        shape.center = computeRotatedPoint(shape.center, center, angleRad)
+        return shape
       }
       case ShapeKind.Circle: {
-        const circle = shape as OIShapeCircle
-        circle.center = computeRotatedPoint(circle.center, center, angleRad)
-        return circle
+        shape.center = computeRotatedPoint(shape.center, center, angleRad)
+        return shape
       }
-      case ShapeKind.Rectangle:
-      case ShapeKind.Triangle:
-      case ShapeKind.Parallelogram:
-      case ShapeKind.Polygon:
-      case ShapeKind.Rhombus: {
-        const polygon = shape as OIShapePolygon
-        polygon.points.forEach(p =>
+      case ShapeKind.Polygon: {
+        shape.points.forEach(p =>
         {
           const { x, y } = computeRotatedPoint(p, center, angleRad)
           p.x = x
           p.y = y
         })
-        return polygon
+        return shape
       }
       default:
-        throw new Error(`Can't apply rotate on shape, kind unknow: ${ shape.kind }`)
+        throw new Error(`Can't apply rotate on shape, kind unknow: ${ JSON.stringify(shape) }`)
     }
   }
 
@@ -133,22 +122,21 @@ export class OIRotationManager
   {
     switch (edge.kind) {
       case EdgeKind.Arc: {
-        const arc = edge as OIEdgeArc
-        arc.startAngle -= angleRad
-        arc.center = computeRotatedPoint(arc.center, center, angleRad)
-        return arc
+        edge.startAngle -= angleRad
+        edge.center = computeRotatedPoint(edge.center, center, angleRad)
+        return edge
       }
       case EdgeKind.Line: {
-        const line = edge as OIEdgeLine
-        line.start = computeRotatedPoint(line.start, center, angleRad)
-        line.end = computeRotatedPoint(line.end, center, angleRad)
-        return line
+        edge.start = computeRotatedPoint(edge.start, center, angleRad)
+        edge.end = computeRotatedPoint(edge.end, center, angleRad)
+        return edge
       }
       case EdgeKind.PolyEdge: {
-        const polyline = edge as OIEdgePolyLine
-        polyline.points = polyline.points.map(p => computeRotatedPoint(p, center, angleRad))
-        return polyline
+        edge.points = edge.points.map(p => computeRotatedPoint(p, center, angleRad))
+        return edge
       }
+      default:
+        throw new Error(`Can't apply rotate on edge, kind unknow: ${ JSON.stringify(edge) }`)
     }
     return edge
   }
@@ -164,7 +152,7 @@ export class OIRotationManager
 
   protected applyOnGroup(group: OISymbolGroup, center: TPoint, angleRad: number): OISymbolGroup
   {
-    group.symbols.forEach(s => this.applyToSymbol(s, center, angleRad))
+    group.children.forEach(s => this.applyToSymbol(s, center, angleRad))
     return group
   }
 
@@ -172,17 +160,17 @@ export class OIRotationManager
   {
     switch (symbol.type) {
       case SymbolType.Stroke:
-        return this.applyToStroke(symbol as OIStroke, center, angleRad)
+        return this.applyToStroke(symbol, center, angleRad)
       case SymbolType.Shape:
-        return this.applyToShape(symbol as TOIShape, center, angleRad)
+        return this.applyToShape(symbol, center, angleRad)
       case SymbolType.Edge:
-        return this.applyToEdge(symbol as TOIEdge, center, angleRad)
+        return this.applyToEdge(symbol, center, angleRad)
       case SymbolType.Text:
-        return this.applyOnText(symbol as OIText, center, angleRad)
+        return this.applyOnText(symbol, center, angleRad)
       case SymbolType.Group:
-        return this.applyOnGroup(symbol as OISymbolGroup, center, angleRad)
+        return this.applyOnGroup(symbol, center, angleRad)
       default:
-        throw new Error(`Can't apply rotate on symbol, type unknow: ${ symbol.type }`)
+        throw new Error(`Can't apply rotate on symbol, type unknow: ${ JSON.stringify(symbol) }`)
     }
   }
 

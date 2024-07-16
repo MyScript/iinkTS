@@ -7,7 +7,8 @@ import { TExport, TJIIXExport } from "../model"
 import { OIStroke } from "../primitive"
 import { TMatrixTransform } from "../transform"
 import { computeHmac, DeferredPromise } from "../utils"
-import {
+import
+{
   TOIMessageEvent,
   TOIMessageEventContentChange,
   TOIMessageEventContextlessGesture,
@@ -201,12 +202,11 @@ export class OIRecognizer
   {
     this.connected?.resolve()
     this.reconnectionCount = 0
-    const params: TOIMessageEvent = {
+    this.send({
       type: "authenticate",
       "myscript-client-name": "iink-ts",
       "myscript-client-version": "1.0.0-buildVersion",
-    }
-    this.send(params, { waitInitialized: false })
+    })
   }
 
   protected async manageHMACChallenge(hmacChallengeMessage: TOIMessageEventHMACChallenge): Promise<void>
@@ -216,8 +216,7 @@ export class OIRecognizer
         {
           type: "hmac",
           hmac: await computeHmac(hmacChallengeMessage.hmacChallenge, this.serverConfiguration.applicationKey, this.serverConfiguration.hmacKey)
-        },
-        { waitInitialized: false }
+        }
       )
     } catch (error) {
       this.internalEvent.emitError(new Error(error as string))
@@ -227,14 +226,13 @@ export class OIRecognizer
   protected manageAuthenticated(): void
   {
     const pixelTomm = 25.4 / 96
-    const params: TOIMessageEvent = {
+    this.send({
       type: this.sessionId ? "restoreSession" : "initSession",
       iinkSessionId: this.sessionId,
       scaleX: pixelTomm,
       scaleY: pixelTomm,
       configuration: this.recognitionConfiguration
-    }
-    this.send(params, { waitInitialized: false })
+    })
   }
 
   protected manageSessionDescriptionMessage(sessionDescriptionMessage: TOISessionDescriptionMessage): void
@@ -243,10 +241,10 @@ export class OIRecognizer
       this.sessionId = sessionDescriptionMessage.iinkSessionId
     }
     if (this.currentPartId) {
-      this.send({ type: "openContentPart", id: this.currentPartId }, { waitInitialized: false })
+      this.send({ type: "openContentPart", id: this.currentPartId })
     }
     else {
-      this.send({ type: "newContentPart", contentType: this.recognitionConfiguration.type, mimeTypes: this.mimeTypes }, { waitInitialized: false })
+      this.send({ type: "newContentPart", contentType: this.recognitionConfiguration.type, mimeTypes: this.mimeTypes })
     }
   }
 
@@ -334,6 +332,9 @@ export class OIRecognizer
     this.currentErrorCode = undefined
     try {
       const websocketMessage: TOIMessageReceived = JSON.parse(message.data)
+      if (websocketMessage.type === TOIMessageType.Pong) {
+        return
+      }
       this.pingCount = 0
       switch (websocketMessage.type) {
         case TOIMessageType.HMAC_Challenge:
@@ -368,9 +369,6 @@ export class OIRecognizer
           break
         case TOIMessageType.Idle:
           this.manageWaitForIdle()
-          break
-        case TOIMessageType.Pong:
-          this.#logger.info("messageCallback", `Pong Message received".`)
           break
         default:
           this.#logger.warn("messageCallback", `Message type unknow: "${ websocketMessage }".`)
@@ -416,16 +414,13 @@ export class OIRecognizer
     }
   }
 
-  async send(message: TOIMessageEvent, { waitInitialized } = { waitInitialized: true }): Promise<void>
+  async send(message: TOIMessageEvent): Promise<void>
   {
     if (!this.connected) {
       return Promise.reject(new Error("Recognizer must be initilized"))
     }
     await this.connected.promise
     if (this.socket.readyState === this.socket.OPEN) {
-      if (waitInitialized) {
-        await this.initialized?.promise
-      }
       this.socket.send(JSON.stringify(message))
       return Promise.resolve()
     }
@@ -457,6 +452,7 @@ export class OIRecognizer
 
   async addStrokes(strokes: OIStroke[], processGestures = true): Promise<TOIMessageEventGesture | undefined>
   {
+    await this.initialized?.promise
     this.addStrokeDeferred = new DeferredPromise<TOIMessageEventGesture | undefined>()
     if (strokes.length === 0) {
       this.addStrokeDeferred.resolve(undefined)
@@ -477,6 +473,7 @@ export class OIRecognizer
 
   async replaceStrokes(oldStrokeIds: string[], newStrokes: OIStroke[]): Promise<void>
   {
+    await this.initialized?.promise
     this.replaceStrokeDeferred = new DeferredPromise<void>()
     if (oldStrokeIds.length === 0) {
       this.replaceStrokeDeferred.resolve()
@@ -499,6 +496,7 @@ export class OIRecognizer
 
   async transformTranslate(strokeIds: string[], tx: number, ty: number): Promise<void>
   {
+    await this.initialized?.promise
     this.transformStrokeDeferred = new DeferredPromise<void>()
     if (strokeIds.length === 0) {
       this.transformStrokeDeferred.resolve()
@@ -520,6 +518,7 @@ export class OIRecognizer
 
   async transformMatrix(strokeIds: string[], matrix: TMatrixTransform): Promise<void>
   {
+    await this.initialized?.promise
     this.transformStrokeDeferred = new DeferredPromise<void>()
     if (strokeIds.length === 0) {
       this.transformStrokeDeferred.resolve()
@@ -539,6 +538,7 @@ export class OIRecognizer
 
   async eraseStrokes(strokeIds: string[]): Promise<void>
   {
+    await this.initialized?.promise
     this.eraseStrokeDeferred = new DeferredPromise<void>()
     if (strokeIds.length === 0) {
       this.eraseStrokeDeferred.resolve()
@@ -550,6 +550,7 @@ export class OIRecognizer
 
   async recognizeGesture(strokes: OIStroke[]): Promise<TOIMessageEventContextlessGesture | undefined>
   {
+    await this.initialized?.promise
     this.recognizeGestureDeferred = new DeferredPromise<TOIMessageEventContextlessGesture | undefined>()
     if (strokes.length === 0) {
       this.recognizeGestureDeferred.resolve(undefined)
@@ -604,6 +605,7 @@ export class OIRecognizer
 
   async undo(actions: TOIHistoryBackendChanges): Promise<void>
   {
+    await this.initialized?.promise
     this.undoDeferred = new DeferredPromise<void>()
     const message: TOIMessageEvent = {
       type: "undo",
@@ -615,6 +617,7 @@ export class OIRecognizer
 
   async redo(actions: TOIHistoryBackendChanges): Promise<void>
   {
+    await this.initialized?.promise
     this.redoDeferred = new DeferredPromise<void>()
     const message: TOIMessageEvent = {
       type: "redo",
@@ -626,6 +629,7 @@ export class OIRecognizer
 
   async export(requestedMimeTypes?: string[]): Promise<TExport>
   {
+    await this.initialized?.promise
     const mimeTypes: string[] = requestedMimeTypes || this.mimeTypes.slice()
     await Promise.all(mimeTypes.map(mt => this.exportDeferredMap.get(mt)?.promise))
     mimeTypes.forEach(mt =>
@@ -645,6 +649,7 @@ export class OIRecognizer
 
   async clear(): Promise<void>
   {
+    await this.initialized?.promise
     this.clearDeferred = new DeferredPromise<void>()
     await this.send({
       type: "clear"

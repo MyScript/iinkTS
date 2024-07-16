@@ -314,10 +314,10 @@ export class OISelectionManager
     const box1 = Box.createFromBoxes(symbols.map(s =>
     {
       return {
-        x: s.boundingBox.x - (s.style.width || 1),
-        y: s.boundingBox.y - (s.style.width || 1),
-        height: s.boundingBox.height + (s.style.width || 1) * 2,
-        width: s.boundingBox.width + (s.style.width || 1) * 2,
+        x: s.bounds.x - (s.style.width || 1),
+        y: s.bounds.y - (s.style.width || 1),
+        height: s.bounds.height + (s.style.width || 1) * 2,
+        width: s.bounds.width + (s.style.width || 1) * 2,
       }
     }))
 
@@ -345,10 +345,10 @@ export class OISelectionManager
     {
       if (s.element) {
         const bounds: TBoundingBox = {
-          x: s.symbol.boundingBox.x - (s.symbol.style.width || 1),
-          y: s.symbol.boundingBox.y - (s.symbol.style.width || 1),
-          height: s.symbol.boundingBox.height + (s.symbol.style.width || 1) * 2,
-          width: s.symbol.boundingBox.width + (s.symbol.style.width || 1) * 2,
+          x: s.symbol.bounds.x - (s.symbol.style.width || 1),
+          y: s.symbol.bounds.y - (s.symbol.style.width || 1),
+          height: s.symbol.bounds.height + (s.symbol.style.width || 1) * 2,
+          width: s.symbol.bounds.width + (s.symbol.style.width || 1) * 2,
         }
         if (s.symbol.type === SymbolType.Text) {
           const t = s.symbol as OIText

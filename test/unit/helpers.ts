@@ -54,7 +54,7 @@ export function buildOIStroke({ box = defaultBox, style = DefaultStyle, nbPoint 
   const stepX = box.width / (nbPoint - 1)
   const stepY = box.height / (nbPoint - 1)
   for (let i = 0; i < nbPoint; i++) {
-    stroke.pointers.push({
+    stroke.addPointer({
       p: Math.random(),
       t: Date.now() + i,
       x: box.x + stepX * i,
@@ -71,12 +71,12 @@ export function buildOIDecorator(kind: DecoratorKind, style: TStyle = DefaultSty
 
 export function buildOICircle({ center = { x: 0, y: 0 }, radius = 5, style = DefaultStyle }: { center?: TPoint, radius?: number, style?: TStyle } = {}): OIShapeCircle
 {
-  return new OIShapeCircle(style, center, radius)
+  return new OIShapeCircle(center, radius, style)
 }
 
 export function buildOILine({ start = { x: 0, y: 0 }, end = { x: 5, y: 5 }, style = DefaultStyle }: { start?: TPoint, end?: TPoint, style?: TStyle } = {}): OIEdgeLine
 {
-  return new OIEdgeLine(style, start, end)
+  return new OIEdgeLine(start, end, undefined, undefined, style)
 }
 
 export function buildOIText(
@@ -84,7 +84,7 @@ export function buildOIText(
     { chars?: TOISymbolChar[], point?: TPoint, boundingBox?: TBoundingBox, style?: TStyle } = {}
 ): OIText
 {
-  return new OIText(style, chars, point, boundingBox)
+  return new OIText(chars, point, boundingBox, style)
 }
 
 export function buildOIGroup(
@@ -105,5 +105,5 @@ export function buildOIGroup(
   for (let index = 0; index < nbOIText; index++) {
     symbols.push(buildOIText())
   }
-  return new OISymbolGroup(style, symbols)
+  return new OISymbolGroup(symbols, style)
 }

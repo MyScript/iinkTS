@@ -2,7 +2,7 @@ import { LoggerClass } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerManager } from "../logger"
 import { OIModel } from "../model"
-import { Box, OISymbolGroup, OIText, SymbolType, TOISymbolChar } from "../primitive"
+import { Box, OIText, SymbolType, TOISymbolChar } from "../primitive"
 import { OISVGRenderer } from "../renderer"
 import { computeAverage } from "../utils"
 
@@ -55,7 +55,7 @@ export class OITextManager
         const char = text.chars.at(i)
         if (char) {
           const ext = textEl.getExtentOfChar(i)
-          char.boundingBox = new Box(ext)
+          char.bounds = new Box(ext)
         }
       }
     }
@@ -65,7 +65,7 @@ export class OITextManager
   setBoundingBox(text: OIText): void
   {
     const element = this.drawSymbolHidden(text)
-    text.boundingBox = this.getElementBoundingBox(element)
+    text.bounds = this.getElementBoundingBox(element)
     this.setCharsBoundingBox(text, element)
   }
 
@@ -89,15 +89,15 @@ export class OITextManager
       color: "",
       fontSize,
       fontWeight: 0,
-      boundingBox
+      bounds: boundingBox
     }
-    return this.getBoundingBox(new OIText({}, [charSymbol], { x: 0, y: 0 }, boundingBox))?.width as number
+    return this.getBoundingBox(new OIText([charSymbol], { x: 0, y: 0 }, boundingBox))?.width as number
   }
 
   updateTextBoundingBox(textSymbol: OIText): OIText
   {
     const textGroupEl = this.drawSymbolHidden(textSymbol)
-    textSymbol.boundingBox = this.getElementBoundingBox(textGroupEl)
+    textSymbol.bounds = this.getElementBoundingBox(textGroupEl)
     this.setCharsBoundingBox(textSymbol, textGroupEl)
     this.model.updateSymbol(textSymbol)
     return textSymbol
@@ -115,12 +115,12 @@ export class OITextManager
         const whiteSpaceWidth = (i === 0 || symbolWhitoutSpaceBefore.includes(textSymbol.label)) ? 0 : this.getSpaceWidth(fontSize)
         textSymbol.point.y = Math.round(textSymbol.point.y / this.rowHeight) * this.rowHeight
         textSymbol.point.x = lastX + whiteSpaceWidth
-        textSymbol.boundingBox.x = lastX + whiteSpaceWidth
+        textSymbol.bounds.x = lastX + whiteSpaceWidth
 
-        lastX = textSymbol.boundingBox.xMax
+        lastX = textSymbol.bounds.xMax
 
         const textGroupEl = this.renderer.drawSymbol(textSymbol) as SVGGElement
-        textSymbol.boundingBox = this.getElementBoundingBox(textGroupEl)
+        textSymbol.bounds = this.getElementBoundingBox(textGroupEl)
         this.setCharsBoundingBox(textSymbol, textGroupEl)
         this.model.updateSymbol(s)
       })
@@ -139,8 +139,7 @@ export class OITextManager
         if (s.type === SymbolType.Shape) return false
         if (s.type === SymbolType.Text && (s as OIText).rotation) return false
         if (s.type === SymbolType.Group) {
-          const g = s as OISymbolGroup
-          return g.extractSymbols().some(gs => gs.type === SymbolType.Edge || gs.type === SymbolType.Shape || (s.type === SymbolType.Text && (s as OIText).rotation))
+          return s.extractSymbols().some(gs => gs.type === SymbolType.Edge || gs.type === SymbolType.Shape || (gs.type === SymbolType.Text && gs.rotation))
         }
         return true
       })

@@ -1,12 +1,11 @@
-import { LoggerClass, SELECTION_MARGIN } from "../Constants"
-import { LoggerManager } from "../logger"
-import { DefaultStyle, TStyle } from "../style"
-import { PartialDeep, computeDistanceBetweenPointAndSegment, converDegreeToRadian, createUUID, findIntersectionBetween2Segment, isPointInsidePolygon, computeRotatedPoint } from "../utils"
+import { SELECTION_MARGIN } from "../Constants"
+import { TStyle } from "../style"
+import { PartialDeep, computeDistanceBetweenPointAndSegment, converDegreeToRadian, findIntersectionBetween2Segment, isPointInsidePolygon, computeRotatedPoint } from "../utils"
 import { TPoint, TSegment, isValidPoint } from "./Point"
 import { SymbolType } from "./Symbol"
 import { Box, TBoundingBox } from "./Box"
 import { OIDecorator } from "./OIDecorator"
-import { TOISymbol } from "./OISymbol"
+import { OISymbolBase } from "./OISymbolBase"
 
 /**
  * @group Primitive
@@ -17,42 +16,33 @@ export type TOISymbolChar = {
   fontSize: number
   fontWeight: number
   color: string
-  boundingBox: TBoundingBox
+  bounds: TBoundingBox
 }
 
 /**
  * @group Primitive
  */
-export class OIText implements TOISymbol
+export class OIText extends OISymbolBase<SymbolType.Text>
 {
-  #logger = LoggerManager.getLogger(LoggerClass.TEXT)
-  readonly type = SymbolType.Text
-  id: string
-  creationTime: number
-  modificationDate: number
-  selected: boolean
-  deleting: boolean
-  style: TStyle
   point: TPoint
-  boundingBox: Box
   chars: TOISymbolChar[]
   decorators: OIDecorator[]
+  bounds: Box
   rotation?: {
     degree: number,
     center: TPoint
   }
 
-  constructor(style: TStyle, chars: TOISymbolChar[], point: TPoint, boundingBox: TBoundingBox)
+  constructor(
+    chars: TOISymbolChar[],
+    point: TPoint,
+    bounds: TBoundingBox,
+    style?: PartialDeep<TStyle>
+  )
   {
-    this.#logger.debug("constructor", { style, chars, point })
-    this.id = `${ this.type }-${ createUUID() }`
-    this.creationTime = Date.now()
-    this.modificationDate = this.creationTime
-    this.style = Object.assign({}, DefaultStyle, style)
-    this.selected = false
-    this.deleting = false
+    super(SymbolType.Text, style)
     this.point = point
-    this.boundingBox = new Box(boundingBox)
+    this.bounds = new Box(bounds)
     this.chars = chars
     this.decorators = []
   }
@@ -67,14 +57,14 @@ export class OIText implements TOISymbol
     if (this.rotation) {
       const center = this.rotation.center
       const rad = converDegreeToRadian(-this.rotation.degree)
-      return this.boundingBox.corners
+      return this.bounds.corners
         .map(p =>
         {
           return computeRotatedPoint(p, center, rad)
         })
     }
     else {
-      return this.boundingBox.corners
+      return this.bounds.corners
     }
   }
 
@@ -93,12 +83,12 @@ export class OIText implements TOISymbol
 
   get snapPoints(): TPoint[]
   {
-    const offsetY = this.boundingBox.yMax - this.point.y
+    const offsetY = this.bounds.yMax - this.point.y
     const points = [
-      { x: this.boundingBox.x, y: this.boundingBox.yMin + offsetY },
-      { x: this.boundingBox.xMax, y: this.boundingBox.yMin + offsetY },
-      { x: this.boundingBox.xMax, y: this.boundingBox.yMax - offsetY },
-      { x: this.boundingBox.x, y: this.boundingBox.yMax - offsetY },
+      { x: this.bounds.x, y: this.bounds.yMin + offsetY },
+      { x: this.bounds.xMax, y: this.bounds.yMin + offsetY },
+      { x: this.bounds.xMax, y: this.bounds.yMax - offsetY },
+      { x: this.bounds.x, y: this.bounds.yMax - offsetY },
     ]
     if (this.rotation) {
       const center = this.rotation.center
@@ -122,7 +112,7 @@ export class OIText implements TOISymbol
 
   protected getCharCorners(char: TOISymbolChar): TPoint[]
   {
-    const boxBox = new Box(char.boundingBox)
+    const boxBox = new Box(char.bounds)
     if (this.rotation) {
       const center = this.rotation.center
       const rad = converDegreeToRadian(-this.rotation.degree)
@@ -152,7 +142,7 @@ export class OIText implements TOISymbol
 
   clone(): OIText
   {
-    const clone = new OIText(structuredClone(this.style), structuredClone(this.chars), structuredClone(this.point), this.boundingBox)
+    const clone = new OIText(structuredClone(this.chars), structuredClone(this.point), this.bounds, structuredClone(this.style))
     clone.id = this.id
     clone.selected = this.selected
     clone.deleting = this.deleting
@@ -172,7 +162,7 @@ export class OIText implements TOISymbol
       chars: this.chars,
       style: this.style,
       rotation: this.rotation,
-      boundingBox: this.boundingBox,
+      bounds: this.bounds,
       decorators: this.decorators.length ? this.decorators : undefined
     }
   }
@@ -181,7 +171,7 @@ export class OIText implements TOISymbol
   {
     if (!isValidPoint(partial?.point)) throw new Error(`Unable to create a OIText, point are invalid`)
     if (!partial.chars?.length) throw new Error(`Unable to create a OIText, no chars`)
-    if (!partial.boundingBox) throw new Error(`Unable to create a OIText, no boundingBox`)
-    return new OIText(partial.style || DefaultStyle, partial.chars as TOISymbolChar[], partial.point as TPoint, partial.boundingBox as TBoundingBox)
+    if (!partial.bounds) throw new Error(`Unable to create a OIText, no boundingBox`)
+    return new OIText(partial.chars as TOISymbolChar[], partial.point as TPoint, partial.bounds as TBoundingBox, partial.style)
   }
 }

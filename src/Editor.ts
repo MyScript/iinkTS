@@ -7,7 +7,7 @@ import { LoggerManager } from "./logger"
 import { ExportType, Intention, LoggerClass } from "./Constants"
 import { DefaultLoggerConfiguration, TConfiguration, TConverstionState, TLoggerConfiguration, TMarginConfiguration } from "./configuration"
 import { IModel, TExport, TJIIXExport } from "./model"
-import { TOISymbol, TStroke } from "./primitive"
+import { TSymbol, TStroke } from "./primitive"
 import { InternalEvent, PublicEvent } from "./event"
 import { TUndoRedoContext } from "./history"
 import { IGrabber } from "./grabber"
@@ -370,7 +370,7 @@ export class Editor
     this.internalEvents.addIntentionListener(this.#onIntentionChange.bind(this))
   }
 
-  #onSelectionChange = (symbols: TOISymbol[]) =>
+  #onSelectionChange = (symbols: TSymbol[]) =>
   {
     this.events.emitSelected(symbols)
   }

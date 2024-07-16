@@ -27,14 +27,14 @@ describe("OIStroke.ts", () =>
       expect(stroke.pointerType).toEqual("pen")
       expect(stroke.pointers).toHaveLength(0)
       expect(stroke.selected).toEqual(false)
-      expect(stroke.boundingBox.x).toEqual(0)
-      expect(stroke.boundingBox.y).toEqual(0)
-      expect(stroke.boundingBox.height).toEqual(0)
-      expect(stroke.boundingBox.width).toEqual(0)
+      expect(stroke.bounds.x).toEqual(0)
+      expect(stroke.bounds.y).toEqual(0)
+      expect(stroke.bounds.height).toEqual(0)
+      expect(stroke.bounds.width).toEqual(0)
     })
     test("should create with custom style", () =>
     {
-      const stroke = new OIStroke({})
+      const stroke = new OIStroke()
       expect(stroke.style).toEqual(DefaultStyle)
     })
   })
@@ -98,20 +98,20 @@ describe("OIStroke.ts", () =>
     test("should get without pointers", () =>
     {
       const stroke = new OIStroke(DefaultStyle)
-      expect(stroke.boundingBox.height).toEqual(0)
-      expect(stroke.boundingBox.width).toEqual(0)
-      expect(stroke.boundingBox.x).toEqual(0)
-      expect(stroke.boundingBox.y).toEqual(0)
+      expect(stroke.bounds.height).toEqual(0)
+      expect(stroke.bounds.width).toEqual(0)
+      expect(stroke.bounds.x).toEqual(0)
+      expect(stroke.bounds.y).toEqual(0)
     })
     test("should get with pointers", () =>
     {
       const stroke = new OIStroke(DefaultStyle)
-      stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
-      stroke.pointers.push({ p: 1, t: 1, x: 11, y: 11 })
-      expect(stroke.boundingBox.height).toEqual(10)
-      expect(stroke.boundingBox.width).toEqual(10)
-      expect(stroke.boundingBox.x).toEqual(1)
-      expect(stroke.boundingBox.y).toEqual(1)
+      stroke.addPointer({ p: 1, t: 1, x: 1, y: 1 })
+      stroke.addPointer({ p: 1, t: 1, x: 11, y: 11 })
+      expect(stroke.bounds.height).toEqual(10)
+      expect(stroke.bounds.width).toEqual(10)
+      expect(stroke.bounds.x).toEqual(1)
+      expect(stroke.bounds.y).toEqual(1)
     })
   })
 
@@ -120,8 +120,8 @@ describe("OIStroke.ts", () =>
     test("should return array of x, y, t, and p", () =>
     {
       const stroke = new OIStroke(DefaultStyle)
-      stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
-      stroke.pointers.push({ p: 1, t: 1, x: 11, y: 11 })
+      stroke.addPointer({ p: 1, t: 1, x: 1, y: 1 })
+      stroke.addPointer({ p: 1, t: 1, x: 11, y: 11 })
 
       const jsonToSend = stroke.formatToSend()
       expect(jsonToSend).toEqual({
@@ -144,8 +144,8 @@ describe("OIStroke.ts", () =>
         width: 20
       }
       const stroke = new OIStroke(style)
-      stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
-      stroke.pointers.push({ p: 1, t: 1, x: 11, y: 11 })
+      stroke.addPointer({ p: 1, t: 1, x: 1, y: 1 })
+      stroke.addPointer({ p: 1, t: 1, x: 11, y: 11 })
 
       const clone = stroke.clone()
       expect(clone).toEqual(stroke)
@@ -158,8 +158,8 @@ describe("OIStroke.ts", () =>
         width: 20
       }
       const stroke = new OIStroke(style)
-      stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
-      stroke.pointers.push({ p: 1, t: 1, x: 11, y: 11 })
+      stroke.addPointer({ p: 1, t: 1, x: 1, y: 1 })
+      stroke.addPointer({ p: 1, t: 1, x: 11, y: 11 })
 
       const clone = stroke.clone()
       clone.pointers.forEach(p => {

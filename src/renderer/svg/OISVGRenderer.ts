@@ -1,7 +1,7 @@
 import { LoggerClass, SvgElementRole } from "../../Constants"
 import { TRenderingConfiguration } from "../../configuration"
 import { LoggerManager } from "../../logger"
-import { TOISymbol, TPoint, TBoundingBox, Box } from "../../primitive"
+import { TOISymbol, TPoint, TBoundingBox, Box, OIEraser } from "../../primitive"
 import { getClosestPoints } from "../../utils"
 import { OISVGRendererEraserUtil } from "./OISVGRendererEraserUtil"
 import { OISVGRendererUtil } from "./OISVGRendererUtil"
@@ -265,7 +265,7 @@ export class OISVGRenderer
     }
   }
 
-  drawSymbol(symbol: TOISymbol): SVGGraphicsElement | undefined
+  drawSymbol(symbol: TOISymbol | OIEraser): SVGGraphicsElement | undefined
   {
     this.#logger.debug("drawSymbol", { symbol })
     const oldNode = this.layer.querySelector(`#${ symbol?.id }`)

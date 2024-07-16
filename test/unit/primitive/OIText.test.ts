@@ -9,7 +9,7 @@ describe("OIText.ts", () =>
       fontWeight: 400,
       id: 'id-1',
       label: "first",
-      boundingBox: { height: 10, width: 5, x: 1, y: 2}
+      bounds: { height: 10, width: 5, x: 1, y: 2}
     },
     {
       color: "red",
@@ -17,7 +17,7 @@ describe("OIText.ts", () =>
       fontWeight: 200,
       id: 'id-2',
       label: "second",
-      boundingBox: { height: 10, width: 5, x: 6, y: 2}
+      bounds: { height: 10, width: 5, x: 6, y: 2}
     },
   ]
   const point: TPoint = { x: 0, y: 0 }
@@ -25,19 +25,19 @@ describe("OIText.ts", () =>
   const box = new Box(boundingBox)
   test("should instanciate", () =>
   {
-    const text = new OIText({}, chars, point, box)
+    const text = new OIText(chars, point, box)
     expect(text).toBeDefined()
   })
 
   test("should get label", () =>
   {
-    const text = new OIText({}, chars, point, box)
+    const text = new OIText(chars, point, box)
     expect(text.label).toEqual("firstsecond")
   })
 
   describe("isCloseToPoint", () =>
   {
-    const text = new OIText({}, chars, point, box)
+    const text = new OIText(chars, point, box)
     test(`should return true when the point is within ${ SELECTION_MARGIN } pixel vertice`, () =>
     {
       const closePoint: TPoint = { x: 0, y: 0 + SELECTION_MARGIN / 2 }
@@ -57,7 +57,7 @@ describe("OIText.ts", () =>
 
   describe("overlaps", () =>
   {
-    const text = new OIText({}, chars, point, box)
+    const text = new OIText(chars, point, box)
     test(`should return true if partially wrap`, () =>
     {
       const boundaries: TBoundingBox = { height: 10, width: 10, x: -5, y: -5 }
@@ -79,7 +79,7 @@ describe("OIText.ts", () =>
   {
     test("should return clone", () =>
     {
-      const text = new OIText({}, chars, point, box)
+      const text = new OIText(chars, point, box)
       const clone = text.clone()
       expect(clone).toEqual(text)
       expect(clone).not.toBe(text)

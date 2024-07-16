@@ -12,7 +12,7 @@ describe("OITextManager.ts", () =>
 {
   const chars: TOISymbolChar[] = [
     {
-      boundingBox: { height: 0, width: 0, x: 0, y: 0 },
+      bounds: { height: 0, width: 0, x: 0, y: 0 },
       color: "black",
       fontSize: 12,
       fontWeight: 400,
@@ -20,7 +20,7 @@ describe("OITextManager.ts", () =>
       label: "A"
     },
     {
-      boundingBox: { height: 0, width: 0, x: 0, y: 0 },
+      bounds: { height: 0, width: 0, x: 0, y: 0 },
       color: "black",
       fontSize: 16,
       fontWeight: 400,
@@ -61,8 +61,8 @@ describe("OITextManager.ts", () =>
     const textEl = manager.renderer.util.getSymbolElement(text) as SVGGElement
     manager.setCharsBoundingBox(text, textEl)
 
-    expect(chars[0].boundingBox).toEqual({ height: 0, width: 0, x: 0, y: 0 })
-    expect(chars[1].boundingBox).toEqual({ height: 3, width: 4, x: 1, y: 2 })
+    expect(chars[0].bounds).toEqual({ height: 0, width: 0, x: 0, y: 0 })
+    expect(chars[1].bounds).toEqual({ height: 3, width: 4, x: 1, y: 2 })
   })
 
   test("should get element BoundingBox", () =>
@@ -105,7 +105,7 @@ describe("OITextManager.ts", () =>
     manager.setCharsBoundingBox = jest.fn()
     const text = buildOIText({ chars })
     manager.updateTextBoundingBox(text)
-    expect(text.boundingBox).toEqual({ x: 1989, y: 27, width: 5, height: 42 })
+    expect(text.bounds).toEqual({ x: 1989, y: 27, width: 5, height: 42 })
     expect(manager.getElementBoundingBox).toBeCalledTimes(1)
     expect(manager.setCharsBoundingBox).toBeCalledTimes(1)
   })

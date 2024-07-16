@@ -5,7 +5,6 @@ import
   OIRotationManager,
   OIShapeCircle,
   OIShapePolygon,
-  OIShapeRectangle,
   OIStroke,
   SvgElementRole,
   TPoint,
@@ -30,7 +29,7 @@ describe("OIRotationManager.ts", () =>
 
     test("rotate stroke", () =>
     {
-      const stroke = new OIStroke({})
+      const stroke = new OIStroke()
       const origin: TPoint = { x: 0, y: 0 }
       stroke.addPointer({ p: 1, t: 1, x: 1, y: 1 })
       stroke.addPointer({ p: 1, t: 10, x: 10, y: 0 })
@@ -45,32 +44,11 @@ describe("OIRotationManager.ts", () =>
     {
       const center: TPoint = { x: 5, y: 5 }
       const radius = 4
-      const circle = new OIShapeCircle({}, center, radius)
+      const circle = new OIShapeCircle(center, radius)
       const origin: TPoint = { x: 1, y: 2 }
       manager.applyToSymbol(circle, origin, Math.PI / 2)
       expect(circle.radius).toEqual(radius)
       expect(circle.center).toEqual({ x: 4, y: -2 })
-    })
-    test("rotate shape Rectangle", () =>
-    {
-      const points: TPoint[] = [
-        { x: 0, y: 0 },
-        { x: 0, y: 5 },
-        { x: 5, y: 5 },
-        { x: 5, y: 0 }
-      ]
-      const rect = new OIShapeRectangle({}, points)
-      const origin: TPoint = { x: 0, y: 0 }
-      manager.applyToSymbol(rect, origin, Math.PI / 2)
-      expect(rect.points[0].x.toFixed(0)).toEqual("0")
-      expect(rect.points[0].y.toFixed(0)).toEqual("0")
-      expect(rect.points[1].x.toFixed(0)).toEqual("5")
-      expect(rect.points[1].y.toFixed(0)).toEqual("0")
-      expect(rect.points[2].x.toFixed(0)).toEqual("5")
-      expect(rect.points[2].y.toFixed(0)).toEqual("-5")
-      expect(rect.points[3].x.toFixed(0)).toEqual("0")
-      expect(rect.points[3].y.toFixed(0)).toEqual("-5")
-
     })
     test("rotate shape with kind unknow", () =>
     {
@@ -80,16 +58,17 @@ describe("OIRotationManager.ts", () =>
         { x: 5, y: 5 },
         { x: 5, y: 0 }
       ]
+      const poly = new OIShapePolygon(points)
       //@ts-ignore
-      const rect = new OIShapePolygon({}, points, "pouet")
+      poly.kind = "pouet"
       const origin: TPoint = { x: 0, y: 0 }
-      expect(() => manager.applyToSymbol(rect, origin, Math.PI / 2)).toThrowError("Can't apply rotate on shape, kind unknow: pouet")
+      expect(() => manager.applyToSymbol(poly, origin, Math.PI / 2)).toThrowError(expect.objectContaining({ message: expect.stringContaining("Can't apply rotate on shape, kind unknow: ") }))
     })
     test("rotate edge Line", () =>
     {
       const start: TPoint = { x: 0, y: 0 }
       const end: TPoint = { x: 0, y: 5 }
-      const line = new OIEdgeLine({}, start, end)
+      const line = new OIEdgeLine(start, end)
       const origin: TPoint = { x: 0, y: 0 }
       manager.applyToSymbol(line, origin, Math.PI / 2)
       expect(line.start.x.toFixed(0)).toEqual("0")
@@ -123,12 +102,12 @@ describe("OIRotationManager.ts", () =>
     behaviors.model.addSymbol(stroke)
 
     const rotateCenter: TPoint = {
-      x: (stroke.boundingBox.xMax + stroke.boundingBox.xMin) / 2,
-      y: (stroke.boundingBox.yMin + stroke.boundingBox.yMax) / 2
+      x: (stroke.bounds.xMax + stroke.bounds.xMin) / 2,
+      y: (stroke.bounds.yMin + stroke.bounds.yMax) / 2
     }
     const rotateOrigin: TPoint = {
-      x: (stroke.boundingBox.xMax + stroke.boundingBox.xMin) / 2,
-      y: stroke.boundingBox.yMax
+      x: (stroke.bounds.xMax + stroke.bounds.xMin) / 2,
+      y: stroke.bounds.yMax
     }
 
     const testDatas = [

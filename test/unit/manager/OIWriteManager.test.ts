@@ -68,7 +68,7 @@ describe("OIWriteManager.ts", () =>
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Shape)
       const shape = manager.model.currentSymbol as TOIShape
-      expect(shape.kind).toBe(ShapeKind.Rectangle)
+      expect(shape.kind).toBe(ShapeKind.Polygon)
       expect(manager.renderer.drawSymbol).toHaveBeenCalledTimes(1)
       expect(manager.renderer.drawSymbol).toHaveBeenCalledWith(manager.model.currentSymbol)
     })
@@ -107,7 +107,7 @@ describe("OIWriteManager.ts", () =>
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Shape)
       const shape = manager.model.currentSymbol as TOIShape
-      expect(shape.kind).toBe(ShapeKind.Triangle)
+      expect(shape.kind).toBe(ShapeKind.Polygon)
       expect(manager.renderer.drawSymbol).toHaveBeenCalledTimes(1)
       expect(manager.renderer.drawSymbol).toHaveBeenCalledWith(manager.model.currentSymbol)
     })
@@ -120,7 +120,7 @@ describe("OIWriteManager.ts", () =>
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Shape)
       const shape = manager.model.currentSymbol as TOIShape
-      expect(shape.kind).toBe(ShapeKind.Parallelogram)
+      expect(shape.kind).toBe(ShapeKind.Polygon)
       expect(manager.renderer.drawSymbol).toHaveBeenCalledTimes(1)
       expect(manager.renderer.drawSymbol).toHaveBeenCalledWith(manager.model.currentSymbol)
     })

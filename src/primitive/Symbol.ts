@@ -20,6 +20,6 @@ export interface TSymbol {
   id: string
   creationTime: number
   modificationDate: number
-  type: SymbolType | string
+  type: string
   style: TStyle
 }

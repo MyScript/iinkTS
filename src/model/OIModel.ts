@@ -2,7 +2,6 @@ import { LoggerClass } from "../Constants"
 import { LoggerManager } from "../logger"
 import
 {
-  OISymbolGroup,
   SymbolType,
   TOISymbol,
   TPoint,
@@ -52,7 +51,7 @@ export class OIModel implements IModel
 
   selectSymbol(id: string): void
   {
-    const symbol = this.symbols.find(s => s.id === id || (s.type === SymbolType.Group && (s as OISymbolGroup).containsSymbol(id)))
+    const symbol = this.symbols.find(s => s.id === id || (s.type === SymbolType.Group && s.containsSymbol(id)))
     if (symbol) {
       symbol.selected = true
     }
@@ -87,7 +86,7 @@ export class OIModel implements IModel
     return this.symbols.find(s =>
     {
       if (s.id === id) return s
-      if (s.type === SymbolType.Group && (s as OISymbolGroup).containsSymbol(id)) {
+      if (s.type === SymbolType.Group && s.containsSymbol(id)) {
         return s
       }
       return
@@ -96,7 +95,7 @@ export class OIModel implements IModel
 
   getSymbolRowIndex(symbol: TOISymbol): number
   {
-    return Math.round(symbol.boundingBox.yMid / this.rowHeight)
+    return Math.round(symbol.bounds.yMid / this.rowHeight)
   }
 
   getSymbolsByRowOrdered(): { index: number, symbols: TOISymbol[] }[]
@@ -115,7 +114,7 @@ export class OIModel implements IModel
     })
     rows.forEach(r =>
     {
-      r.symbols.sort((s1, s2) => s1.boundingBox.xMid - s2.boundingBox.xMid)
+      r.symbols.sort((s1, s2) => s1.bounds.xMid - s2.bounds.xMid)
     })
     return rows.sort((r1, r2) => r1.index - r2.index)
   }

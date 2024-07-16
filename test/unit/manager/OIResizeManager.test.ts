@@ -5,7 +5,6 @@ import
   OIResizeManager,
   OIShapeCircle,
   OIShapePolygon,
-  OIShapeRectangle,
   OIStroke,
   ResizeDirection,
   SvgElementRole,
@@ -28,7 +27,7 @@ describe("OIResizeManager.ts", () =>
 
     test("resize stroke", () =>
     {
-      const stroke = new OIStroke({})
+      const stroke = new OIStroke()
       const origin: TPoint = { x: 1, y: 2 }
       stroke.addPointer({ p: 1, t: 1, x: 1, y: 2 })
       stroke.addPointer({ p: 1, t: 10, x: 21, y: 42 })
@@ -40,27 +39,11 @@ describe("OIResizeManager.ts", () =>
     {
       const center: TPoint = { x: 5, y: 5 }
       const radius = 4
-      const circle = new OIShapeCircle({}, center, radius)
+      const circle = new OIShapeCircle(center, radius)
       const origin: TPoint = { x: 1, y: 2 }
       manager.applyToSymbol(circle, origin, 2, 4)
       expect(circle.radius).toEqual(12)
       expect(circle.center).toEqual({ x: 9, y: 14 })
-    })
-    test("resize shape Rectangle", () =>
-    {
-      const points: TPoint[] = [
-        { x: 0, y: 0 },
-        { x: 0, y: 5 },
-        { x: 5, y: 5 },
-        { x: 5, y: 0 }
-      ]
-      const rect = new OIShapeRectangle({}, points)
-      const origin: TPoint = { x: 0, y: 0 }
-      manager.applyToSymbol(rect, origin, 2, 3)
-      expect(rect.points[0]).toEqual({ x: 0, y: 0 })
-      expect(rect.points[1]).toEqual({ x: 0, y: 15 })
-      expect(rect.points[2]).toEqual({ x: 10, y: 15 })
-      expect(rect.points[3]).toEqual({ x: 10, y: 0 })
     })
     test("resize shape with kind unknow", () =>
     {
@@ -70,16 +53,17 @@ describe("OIResizeManager.ts", () =>
         { x: 5, y: 5 },
         { x: 5, y: 0 }
       ]
+      const poly = new OIShapePolygon(points)
       //@ts-ignore
-      const rect = new OIShapePolygon({}, points, "pouet")
+      poly.kind = "pouet"
       const origin: TPoint = { x: 0, y: 0 }
-      expect(() => manager.applyToSymbol(rect, origin, 2, 3)).toThrowError("Can't apply resize on shape, kind unknow: pouet")
+      expect(() => manager.applyToSymbol(poly, origin, 2, 3)).toThrowError(expect.objectContaining({ message: expect.stringContaining("Can't apply resize on shape, kind unknow:")}))
     })
     test("resize edge Line", () =>
     {
       const start: TPoint = { x: 0, y: 0 }
       const end: TPoint = { x: 0, y: 5 }
-      const line = new OIEdgeLine({}, start, end)
+      const line = new OIEdgeLine(start, end)
       const origin: TPoint = { x: 0, y: 0 }
       manager.applyToSymbol(line, origin, 2, 3)
       expect(line.start).toEqual({ x: 0, y: 0 })
@@ -113,97 +97,97 @@ describe("OIResizeManager.ts", () =>
     behaviors.model.addSymbol(stroke)
 
     const resizeToPoint: TPoint = {
-      x: (stroke.boundingBox.xMax + stroke.boundingBox.xMin) / 4,
-      y: (stroke.boundingBox.yMax + stroke.boundingBox.yMin) / 4
+      x: (stroke.bounds.xMax + stroke.bounds.xMin) / 4,
+      y: (stroke.bounds.yMax + stroke.bounds.yMin) / 4
     }
 
     const testDatas = [
       {
         direction: ResizeDirection.North,
         transformOrigin: {
-          x: stroke.boundingBox.xMid,
-          y: stroke.boundingBox.yMax
+          x: stroke.bounds.xMid,
+          y: stroke.bounds.yMax
         },
         scale: {
           x: 1,
-          y: 1 + (stroke.boundingBox.yMin - resizeToPoint.y) / stroke.boundingBox.height
+          y: 1 + (stroke.bounds.yMin - resizeToPoint.y) / stroke.bounds.height
         }
       },
       {
         direction: ResizeDirection.East,
         transformOrigin: {
-          x: stroke.boundingBox.xMin,
-          y: stroke.boundingBox.yMid
+          x: stroke.bounds.xMin,
+          y: stroke.bounds.yMid
         },
         scale: {
-          x: 1 + (resizeToPoint.x - stroke.boundingBox.xMax) / stroke.boundingBox.width,
+          x: 1 + (resizeToPoint.x - stroke.bounds.xMax) / stroke.bounds.width,
           y: 1
         }
       },
       {
         direction: ResizeDirection.South,
         transformOrigin: {
-          x: stroke.boundingBox.xMid,
-          y: stroke.boundingBox.yMin
+          x: stroke.bounds.xMid,
+          y: stroke.bounds.yMin
         },
         scale: {
           x: 1,
-          y: 1 + (resizeToPoint.y - stroke.boundingBox.yMax) / stroke.boundingBox.height,
+          y: 1 + (resizeToPoint.y - stroke.bounds.yMax) / stroke.bounds.height,
         }
       },
       {
         direction: ResizeDirection.West,
         transformOrigin: {
-          x: stroke.boundingBox.xMax,
-          y: stroke.boundingBox.yMid
+          x: stroke.bounds.xMax,
+          y: stroke.bounds.yMid
         },
         scale: {
-          x: 1 + (stroke.boundingBox.xMin - resizeToPoint.x) / stroke.boundingBox.width,
+          x: 1 + (stroke.bounds.xMin - resizeToPoint.x) / stroke.bounds.width,
           y: 1
         }
       },
       {
         direction: ResizeDirection.NorthEast,
         transformOrigin: {
-          x: stroke.boundingBox.xMin,
-          y: stroke.boundingBox.yMax
+          x: stroke.bounds.xMin,
+          y: stroke.bounds.yMax
         },
         scale: {
-          x: 1 + (resizeToPoint.x - stroke.boundingBox.xMax) / stroke.boundingBox.width,
-          y: 1 + (stroke.boundingBox.yMin - resizeToPoint.y) / stroke.boundingBox.height
+          x: 1 + (resizeToPoint.x - stroke.bounds.xMax) / stroke.bounds.width,
+          y: 1 + (stroke.bounds.yMin - resizeToPoint.y) / stroke.bounds.height
         }
       },
       {
         direction: ResizeDirection.NorthWest,
         transformOrigin: {
-          x: stroke.boundingBox.xMax,
-          y: stroke.boundingBox.yMax
+          x: stroke.bounds.xMax,
+          y: stroke.bounds.yMax
         },
         scale: {
-          x: 1 + (stroke.boundingBox.xMin - resizeToPoint.x) / stroke.boundingBox.width,
-          y: 1 + (stroke.boundingBox.yMin - resizeToPoint.y) / stroke.boundingBox.height
+          x: 1 + (stroke.bounds.xMin - resizeToPoint.x) / stroke.bounds.width,
+          y: 1 + (stroke.bounds.yMin - resizeToPoint.y) / stroke.bounds.height
         }
       },
       {
         direction: ResizeDirection.SouthEast,
         transformOrigin: {
-          x: stroke.boundingBox.xMin,
-          y: stroke.boundingBox.yMin
+          x: stroke.bounds.xMin,
+          y: stroke.bounds.yMin
         },
         scale: {
-          x: 1 + (resizeToPoint.x - stroke.boundingBox.xMax) / stroke.boundingBox.width,
-          y: 1 + (resizeToPoint.y - stroke.boundingBox.yMax) / stroke.boundingBox.height,
+          x: 1 + (resizeToPoint.x - stroke.bounds.xMax) / stroke.bounds.width,
+          y: 1 + (resizeToPoint.y - stroke.bounds.yMax) / stroke.bounds.height,
         }
       },
       {
         direction: ResizeDirection.SouthWest,
         transformOrigin: {
-          x: stroke.boundingBox.xMax,
-          y: stroke.boundingBox.yMin
+          x: stroke.bounds.xMax,
+          y: stroke.bounds.yMin
         },
         scale: {
-          x: 1 + (stroke.boundingBox.xMin - resizeToPoint.x) / stroke.boundingBox.width,
-          y: 1 + (resizeToPoint.y - stroke.boundingBox.yMax) / stroke.boundingBox.height,
+          x: 1 + (stroke.bounds.xMin - resizeToPoint.x) / stroke.bounds.width,
+          y: 1 + (resizeToPoint.y - stroke.bounds.yMax) / stroke.bounds.height,
         }
       },
     ]
@@ -226,7 +210,7 @@ describe("OIResizeManager.ts", () =>
       {
         manager.start(resizeElement, data.transformOrigin)
         expect(manager.interactElementsGroup).toEqual(group)
-        expect(manager.boundingBox).toEqual(stroke.boundingBox)
+        expect(manager.boundingBox).toEqual(stroke.bounds)
         expect(manager.direction).toEqual(data.direction)
         expect(manager.transformOrigin).toEqual(data.transformOrigin)
         expect(behaviors.renderer.setAttribute).toHaveBeenNthCalledWith(1, group.id, "transform-origin", `${ data.transformOrigin.x }px ${ data.transformOrigin.y }px`)

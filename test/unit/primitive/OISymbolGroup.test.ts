@@ -22,7 +22,7 @@ describe("OISymbolGroup.ts", () =>
         color: "blue",
         width: 20
       }
-      const group = new OISymbolGroup(style, symbols)
+      const group = new OISymbolGroup(symbols, style)
       expect(group).toBeDefined()
       expect(group.style).toEqual(expect.objectContaining(style))
       expect(group.snapPoints).toHaveLength(5)
@@ -33,7 +33,7 @@ describe("OISymbolGroup.ts", () =>
         buildOICircle(),
         buildOIStroke(),
       ]
-      const group = new OISymbolGroup({}, symbols)
+      const group = new OISymbolGroup(symbols)
       expect(group).toBeDefined()
       expect(group.style).toEqual(DefaultStyle)
     })
@@ -43,11 +43,7 @@ describe("OISymbolGroup.ts", () =>
   {
     const circle = buildOICircle()
     const stroke = buildOIStroke()
-    const style: TStyle = {
-      color: "blue",
-      width: 20
-    }
-    const group = new OISymbolGroup(style, [circle, stroke])
+    const group = new OISymbolGroup([circle, stroke])
     test(`should return true when the point is within ${ SELECTION_MARGIN } pixel of a symbol`, () =>
     {
       const closePoint: TPoint = { x: circle.vertices[0].x, y: circle.vertices[0].y + SELECTION_MARGIN / 2 }
@@ -65,18 +61,22 @@ describe("OISymbolGroup.ts", () =>
   {
     const circle = buildOICircle()
     const stroke = buildOIStroke()
-    const group = new OISymbolGroup({}, [circle, stroke])
+    const group = new OISymbolGroup([circle, stroke])
     test("should apply color to symbols ", () =>
     {
-      expect(circle.style.color).not.toEqual("red")
       expect(circle.style.width).not.toEqual(10)
-      expect(stroke.style.color).not.toEqual("red")
       expect(stroke.style.width).not.toEqual(10)
-      group.style = { color: "red", width: 10 }
+      group.style.width = 20
+      expect(circle.style.width).toEqual(20)
+      expect(stroke.style.width).toEqual(20)
+    })
+    test("should apply width to symbols ", () =>
+    {
+      expect(circle.style.color).not.toEqual("red")
+      expect(stroke.style.color).not.toEqual("red")
+      group.style.color = "red"
       expect(circle.style.color).toEqual("red")
-      expect(circle.style.width).toEqual(10)
       expect(stroke.style.color).toEqual("red")
-      expect(stroke.style.width).toEqual(10)
     })
   })
 
@@ -84,10 +84,10 @@ describe("OISymbolGroup.ts", () =>
   {
     const circle = buildOICircle()
     const stroke = buildOIStroke()
-    const group = new OISymbolGroup({}, [circle, stroke])
+    const group = new OISymbolGroup([circle, stroke])
     test("should return true", () =>
     {
-      expect(group.overlaps(circle.boundingBox)).toEqual(true)
+      expect(group.overlaps(circle.bounds)).toEqual(true)
     })
     test("should return false", () =>
     {
@@ -101,12 +101,12 @@ describe("OISymbolGroup.ts", () =>
     const stroke = buildOIStroke()
 
     const stroke1 = buildOIStroke()
-    const groupChild = new OISymbolGroup({}, [stroke1])
+    const groupChild = new OISymbolGroup([stroke1])
 
     const stroke2 = buildOIStroke()
-    const groupSubChild = new OISymbolGroup({}, [new OISymbolGroup({}, [stroke2])])
+    const groupSubChild = new OISymbolGroup([new OISymbolGroup([stroke2])])
 
-    const group = new OISymbolGroup({}, [circle, stroke, groupChild, groupSubChild])
+    const group = new OISymbolGroup([circle, stroke, groupChild, groupSubChild])
     test("should return true when symbol in first level", () =>
     {
       expect(group.containsSymbol(circle.id)).toEqual(true)
@@ -129,38 +129,38 @@ describe("OISymbolGroup.ts", () =>
   {
     test("should return true when only stroke in first level", () =>
     {
-      const group = new OISymbolGroup({}, [buildOIStroke()])
+      const group = new OISymbolGroup([buildOIStroke()])
       expect(group.containsOnlyStroke()).toEqual(true)
     })
     test("should return false when only circle in first level", () =>
     {
-      const group = new OISymbolGroup({}, [buildOICircle()])
+      const group = new OISymbolGroup([buildOICircle()])
       expect(group.containsOnlyStroke()).toEqual(false)
     })
     test("should return true when only stroke in second level", () =>
     {
-      const groupChild = new OISymbolGroup({}, [buildOIStroke(), buildOIStroke()])
-      const group = new OISymbolGroup({}, [groupChild])
+      const groupChild = new OISymbolGroup([buildOIStroke(), buildOIStroke()])
+      const group = new OISymbolGroup([groupChild])
       expect(group.containsOnlyStroke()).toEqual(true)
     })
     test("should return false when stroke and circle in second level", () =>
     {
-      const groupChild = new OISymbolGroup({}, [buildOIStroke(), buildOICircle()])
-      const group = new OISymbolGroup({}, [groupChild])
+      const groupChild = new OISymbolGroup([buildOIStroke(), buildOICircle()])
+      const group = new OISymbolGroup([groupChild])
       expect(group.containsOnlyStroke()).toEqual(false)
     })
     test("should return false when stroke and circle in third level", () =>
     {
-      const groupSubChild = new OISymbolGroup({}, [buildOIStroke(), buildOICircle()])
-      const groupChild = new OISymbolGroup({}, [buildOIStroke(), groupSubChild])
-      const group = new OISymbolGroup({}, [buildOIStroke(), groupChild])
+      const groupSubChild = new OISymbolGroup([buildOIStroke(), buildOICircle()])
+      const groupChild = new OISymbolGroup([buildOIStroke(), groupSubChild])
+      const group = new OISymbolGroup([buildOIStroke(), groupChild])
       expect(group.containsOnlyStroke()).toEqual(false)
     })
     test("should return false when only stroke in third level", () =>
     {
-      const groupSubChild = new OISymbolGroup({}, [buildOIStroke(), buildOIStroke()])
-      const groupChild = new OISymbolGroup({}, [buildOIStroke(), groupSubChild])
-      const group = new OISymbolGroup({}, [buildOIStroke(), groupChild])
+      const groupSubChild = new OISymbolGroup([buildOIStroke(), buildOIStroke()])
+      const groupChild = new OISymbolGroup([buildOIStroke(), groupSubChild])
+      const group = new OISymbolGroup([buildOIStroke(), groupChild])
       expect(group.containsOnlyStroke()).toEqual(true)
     })
   })
@@ -172,12 +172,12 @@ describe("OISymbolGroup.ts", () =>
 
     const stroke21 = buildOIStroke()
     const stroke22 = buildOIStroke()
-    const groupSubChild = new OISymbolGroup({}, [new OISymbolGroup({}, [stroke21, stroke22])])
+    const groupSubChild = new OISymbolGroup([new OISymbolGroup([stroke21, stroke22])])
 
     const stroke1 = buildOIStroke()
-    const groupChild = new OISymbolGroup({}, [stroke1, groupSubChild])
+    const groupChild = new OISymbolGroup([stroke1, groupSubChild])
 
-    const group = new OISymbolGroup({}, [circle, stroke, groupChild])
+    const group = new OISymbolGroup([circle, stroke, groupChild])
     test("should return true when symbol in first level", () =>
     {
       expect(group.extractStrokes()).toEqual([
@@ -200,56 +200,56 @@ describe("OISymbolGroup.ts", () =>
     stroke21.id = "stroke-21"
     const stroke22 = buildOIStroke()
     stroke22.id = "stroke-22"
-    const groupSubChild = new OISymbolGroup({}, [stroke21, stroke22])
+    const groupSubChild = new OISymbolGroup([stroke21, stroke22])
     groupSubChild.id = "sub-sub-group"
 
     const stroke1 = buildOIStroke()
     stroke1.id = "stroke-1"
-    const groupChild = new OISymbolGroup({}, [stroke1, groupSubChild])
+    const groupChild = new OISymbolGroup([stroke1, groupSubChild])
     groupChild.id = "sub-group"
 
-    const group = new OISymbolGroup({}, [circle, stroke, groupChild])
+    const group = new OISymbolGroup([circle, stroke, groupChild])
     test("should remove stroke at first level", () =>
     {
-      expect(group.symbols).toContain(stroke)
+      expect(group.children).toContain(stroke)
       group.removeChilds([stroke.id])
-      expect(group.symbols).not.toContain(stroke)
+      expect(group.children).not.toContain(stroke)
     })
     test("should remove stroke at second level", () =>
     {
-      expect(group.symbols).toHaveLength(2)
+      expect(group.children).toHaveLength(2)
       group.removeChilds([stroke1.id])
-      expect(group.symbols).toHaveLength(2)
-      const subGroup = group.symbols.find(s => s.id === groupChild.id)
+      expect(group.children).toHaveLength(2)
+      const subGroup = group.children.find(s => s.id === groupChild.id)
       expect(subGroup).toBeDefined()
       expect(subGroup).toBe(groupChild)
-      expect(groupChild.symbols).toContain(groupSubChild)
-      expect(groupChild.symbols).not.toContain(stroke1)
+      expect(groupChild.children).toContain(groupSubChild)
+      expect(groupChild.children).not.toContain(stroke1)
     })
     test("should remove stroke at second level", () =>
     {
-      expect(group.symbols).toHaveLength(2)
-      expect(groupSubChild.symbols).toContain(stroke21)
+      expect(group.children).toHaveLength(2)
+      expect(groupSubChild.children).toContain(stroke21)
       group.removeChilds([stroke21.id])
-      expect(group.symbols).toHaveLength(2)
-      expect(groupSubChild.symbols).not.toContain(stroke21)
-      expect(groupSubChild.symbols).toContain(stroke22)
+      expect(group.children).toHaveLength(2)
+      expect(groupSubChild.children).not.toContain(stroke21)
+      expect(groupSubChild.children).toContain(stroke22)
     })
     test("should remove group if empty cause by sub group empty", () =>
     {
-      expect(group.symbols).toHaveLength(2)
-      expect(groupSubChild.symbols).toContain(stroke22)
+      expect(group.children).toHaveLength(2)
+      expect(groupSubChild.children).toContain(stroke22)
       group.removeChilds([stroke22.id])
-      expect(group.symbols).toHaveLength(1)
-      expect(groupSubChild.symbols).not.toContain(stroke22)
-      expect(groupChild.symbols).not.toContain(groupSubChild)
+      expect(group.children).toHaveLength(1)
+      expect(groupSubChild.children).not.toContain(stroke22)
+      expect(groupChild.children).not.toContain(groupSubChild)
     })
     test("should return undefined if symbols empty", () =>
     {
-      expect(group.symbols).toHaveLength(1)
-      expect(group.symbols).toContain(circle)
+      expect(group.children).toHaveLength(1)
+      expect(group.children).toContain(circle)
       expect(group.removeChilds([circle.id])).toBeUndefined()
-      expect(group.symbols).toHaveLength(0)
+      expect(group.children).toHaveLength(0)
     })
   })
 
@@ -257,7 +257,7 @@ describe("OISymbolGroup.ts", () =>
   {
     const circle = buildOICircle()
     const stroke = buildOIStroke()
-    const group = new OISymbolGroup({}, [circle, stroke])
+    const group = new OISymbolGroup([circle, stroke])
     test("should return true", () =>
     {
       const clone = group.clone()

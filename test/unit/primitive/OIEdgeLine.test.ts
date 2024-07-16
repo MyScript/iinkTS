@@ -20,7 +20,7 @@ describe("OIEdgeLine.ts", () =>
         color: "blue",
         width: 20,
       }
-      const line = new OIEdgeLine(style, start, end)
+      const line = new OIEdgeLine(start, end, undefined, undefined, style)
       expect(line).toBeDefined()
       expect(line.creationTime).toBeLessThanOrEqual(Date.now())
       expect(line.creationTime).toEqual(line.modificationDate)
@@ -28,17 +28,17 @@ describe("OIEdgeLine.ts", () =>
       expect(line.selected).toEqual(false)
       expect(line.start).toEqual(start)
       expect(line.end).toEqual(end)
-      expect(line.boundingBox.x).toEqual(-5)
-      expect(line.boundingBox.y).toEqual(-5)
-      expect(line.boundingBox.width).toEqual(15)
-      expect(line.boundingBox.height).toEqual(15)
+      expect(line.bounds.x).toEqual(-5)
+      expect(line.bounds.y).toEqual(-5)
+      expect(line.bounds.width).toEqual(15)
+      expect(line.bounds.height).toEqual(15)
       expect(line.vertices).toHaveLength(2)
     })
     test("should create with default style", () =>
     {
       const start: TPoint = { x: 0, y: 0 }
       const end: TPoint = { x: 5, y: 5 }
-      const line = new OIEdgeLine({}, start, end)
+      const line = new OIEdgeLine(start, end)
       expect(line.style).toEqual(DefaultStyle)
     })
   })
@@ -46,11 +46,7 @@ describe("OIEdgeLine.ts", () =>
   {
     const start: TPoint = { x: 0, y: 0 }
     const end: TPoint = { x: 0, y: 50 }
-    const style: TStyle = {
-      color: "blue",
-      width: 20
-    }
-    const line = new OIEdgeLine(style, start, end)
+    const line = new OIEdgeLine(start, end)
     test(`should return true when the point is within ${ SELECTION_MARGIN } pixel vertice`, () =>
     {
       const closePoint: TPoint = { x: 0, y: 0 + SELECTION_MARGIN / 2 }
@@ -71,11 +67,7 @@ describe("OIEdgeLine.ts", () =>
   {
     const start: TPoint = { x: 0, y: 0 }
     const end: TPoint = { x: 0, y: 25 }
-    const style: TStyle = {
-      color: "blue",
-      width: 20
-    }
-    const line = new OIEdgeLine(style, start, end)
+    const line = new OIEdgeLine(start, end)
     test(`should return true if partially wrap`, () =>
     {
       const boundaries: TBoundingBox = { height: 10, width: 10, x: -5, y: -5 }
@@ -102,7 +94,7 @@ describe("OIEdgeLine.ts", () =>
         color: "blue",
         width: 20
       }
-      const line = new OIEdgeLine(style, start, end)
+      const line = new OIEdgeLine(start, end, undefined, undefined, style)
       const clone = line.clone()
       expect(clone).toEqual(line)
       expect(clone).not.toBe(line)

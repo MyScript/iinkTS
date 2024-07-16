@@ -1,8 +1,8 @@
 import { SELECTION_MARGIN } from "../Constants"
 import { TStyle } from "../style"
-import { computeDistanceBetweenPointAndSegment, createUUID, findIntersectionBetween2Segment } from "../utils"
+import { computeDistanceBetweenPointAndSegment, findIntersectionBetween2Segment, PartialDeep } from "../utils"
 import { Box, TBoundingBox } from "./Box"
-import { OISymbol, TOISymbol } from "./OISymbol"
+import { OISymbolBase } from "./OISymbolBase"
 import { TPoint, TSegment } from "./Point"
 import { SymbolType } from "./Symbol"
 
@@ -27,26 +27,20 @@ export enum EdgeDecoration
 /**
  * @group Primitive
  */
-export type TOIEdge = TOISymbol & {
-  type: SymbolType
-  kind: EdgeKind
-  startDecoration?: EdgeDecoration
-  endDecoration?: EdgeDecoration
-}
-
-/**
- * @group Primitive
- */
-export abstract class OIEdge extends OISymbol implements TOIEdge
+export abstract class OIEdgeBase<K = EdgeKind> extends OISymbolBase<SymbolType.Edge>
 {
-  readonly kind: EdgeKind
+  readonly kind: K
   startDecoration?: EdgeDecoration
   endDecoration?: EdgeDecoration
 
-  constructor(kind: EdgeKind, style: TStyle, startDecoration?: EdgeDecoration, endDecoration?: EdgeDecoration)
+  constructor(
+    kind: K,
+    startDecoration?: EdgeDecoration,
+    endDecoration?: EdgeDecoration,
+    style?: PartialDeep<TStyle>
+  )
   {
     super(SymbolType.Edge, style)
-    this.id = `${ this.type }-${ kind }-${ createUUID() }`
     this.kind = kind
 
     this.startDecoration = startDecoration
@@ -55,7 +49,7 @@ export abstract class OIEdge extends OISymbol implements TOIEdge
 
   abstract get vertices(): TPoint[]
 
-  override get boundingBox(): Box
+  get bounds(): Box
   {
     const bb = Box.createFromPoints(this.vertices)
     bb.x -= SELECTION_MARGIN / 2
@@ -70,6 +64,7 @@ export abstract class OIEdge extends OISymbol implements TOIEdge
     }
     return bb
   }
+
 
   get snapPoints(): TPoint[]
   {
@@ -94,9 +89,9 @@ export abstract class OIEdge extends OISymbol implements TOIEdge
 
   overlaps(box: TBoundingBox): boolean
   {
-    return this.boundingBox.isContained(box) ||
+    return this.bounds.isContained(box) ||
       this.edges.some(e1 => Box.getSides(box).some(e2 => !!findIntersectionBetween2Segment(e1, e2)))
   }
 
-  abstract clone(): OIEdge
+  abstract clone(): OIEdgeBase
 }

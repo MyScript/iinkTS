@@ -74,10 +74,10 @@ describe("OISelectionManager.ts", () =>
       const group = behaviors.renderer.layer.querySelector(`[role=${ SvgElementRole.InteractElementsGroup }]`) as SVGGElement
       expect(group).not.toBeNull()
       const translateRect = group?.querySelector(`[role=${ SvgElementRole.Translate }]`)
-      expect(translateRect?.getAttribute("x")).toEqual((stroke.boundingBox.x - (stroke.style.width || 1)).toString())
-      expect(translateRect?.getAttribute("y")).toEqual((stroke.boundingBox.y - (stroke.style.width || 1)).toString())
-      expect(translateRect?.getAttribute("width")).toEqual((stroke.boundingBox.width + 2 * (stroke.style.width || 1)).toString())
-      expect(translateRect?.getAttribute("height")).toEqual((stroke.boundingBox.height + 2 * (stroke.style.width || 1)).toString())
+      expect(translateRect?.getAttribute("x")).toEqual((stroke.bounds.x - (stroke.style.width || 1)).toString())
+      expect(translateRect?.getAttribute("y")).toEqual((stroke.bounds.y - (stroke.style.width || 1)).toString())
+      expect(translateRect?.getAttribute("width")).toEqual((stroke.bounds.width + 2 * (stroke.style.width || 1)).toString())
+      expect(translateRect?.getAttribute("height")).toEqual((stroke.bounds.height + 2 * (stroke.style.width || 1)).toString())
 
       const rotateCircles = group.querySelectorAll(`circle[role=${ SvgElementRole.Rotate }]`)
       expect(rotateCircles).toHaveLength(2)

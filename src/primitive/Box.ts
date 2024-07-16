@@ -199,5 +199,4 @@ export class Box implements TBox
   {
     return Box.overlaps(this, boundaries)
   }
-
 }

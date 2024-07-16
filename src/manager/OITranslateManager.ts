@@ -5,11 +5,6 @@ import { OIModel } from "../model"
 import
 {
   EdgeKind,
-  OIEdgeArc,
-  OIEdgeLine,
-  OIEdgePolyLine,
-  OIShapeCircle,
-  OIShapePolygon,
   OIStroke,
   OIText,
   OISymbolGroup,
@@ -99,26 +94,20 @@ export class OITranslateManager
     switch (shape.kind) {
       case ShapeKind.Ellipse:
       case ShapeKind.Circle: {
-        const c = shape as OIShapeCircle
-        c.center.x += tx
-        c.center.y += ty
-        return c
+        shape.center.x += tx
+        shape.center.y += ty
+        return shape
       }
-      case ShapeKind.Rectangle:
-      case ShapeKind.Triangle:
-      case ShapeKind.Parallelogram:
-      case ShapeKind.Polygon:
-      case ShapeKind.Rhombus: {
-        const p = shape as OIShapePolygon
-        p.points.forEach(p =>
+      case ShapeKind.Polygon:{
+        shape.points.forEach(p =>
         {
           p.x += tx
           p.y += ty
         })
-        return p
+        return shape
       }
       default:
-        throw new Error(`Can't apply translate on shape, kind unknow: ${ shape.kind }`)
+        throw new Error(`Can't apply translate on shape, kind unknow: ${ JSON.stringify(shape) }`)
     }
   }
 
@@ -126,27 +115,24 @@ export class OITranslateManager
   {
     switch (edge.kind) {
       case EdgeKind.Arc: {
-        const arc = edge as OIEdgeArc
-        arc.center.x += tx
-        arc.center.y += ty
-        return arc
+        edge.center.x += tx
+        edge.center.y += ty
+        return edge
       }
       case EdgeKind.Line: {
-        const line = edge as OIEdgeLine
-        line.start.x += tx
-        line.start.y += ty
-        line.end.x += tx
-        line.end.y += ty
-        return line
+        edge.start.x += tx
+        edge.start.y += ty
+        edge.end.x += tx
+        edge.end.y += ty
+        return edge
       }
       case EdgeKind.PolyEdge: {
-        const polyline = edge as OIEdgePolyLine
-        polyline.points.forEach(p =>
+        edge.points.forEach(p =>
         {
           p.x += tx
           p.y += ty
         })
-        return polyline
+        return edge
       }
     }
 
@@ -165,7 +151,7 @@ export class OITranslateManager
 
   protected applyOnGroup(group: OISymbolGroup, tx: number, ty: number): OISymbolGroup
   {
-    group.symbols.forEach(s => this.applyToSymbol(s, tx, ty))
+    group.children.forEach(s => this.applyToSymbol(s, tx, ty))
     return group
   }
 
@@ -174,17 +160,17 @@ export class OITranslateManager
     this.#logger.info("applyToSymbol", { symbol, tx, ty })
     switch (symbol.type) {
       case SymbolType.Stroke:
-        return this.applyToStroke(symbol as OIStroke, tx, ty)
+        return this.applyToStroke(symbol, tx, ty)
       case SymbolType.Shape:
-        return this.applyToShape(symbol as TOIShape, tx, ty)
+        return this.applyToShape(symbol, tx, ty)
       case SymbolType.Edge:
-        return this.applyToEdge(symbol as TOIEdge, tx, ty)
+        return this.applyToEdge(symbol, tx, ty)
       case SymbolType.Text:
-        return this.applyOnText(symbol as OIText, tx, ty)
+        return this.applyOnText(symbol, tx, ty)
       case SymbolType.Group:
-        return this.applyOnGroup(symbol as OISymbolGroup, tx, ty)
+        return this.applyOnGroup(symbol, tx, ty)
       default:
-        throw new Error(`Can't apply translate on symbol, type unknow: ${ symbol.type }`)
+        throw new Error(`Can't apply translate on symbol, type unknow: ${ JSON.stringify(symbol) }`)
     }
   }
 
@@ -247,7 +233,7 @@ export class OITranslateManager
     this.#logger.info("end", { point })
     const { tx, ty } = this.continue(point)
     this.snaps.clearSnapToElementLines()
-    this.translate(this.model.symbolsSelected, tx, ty)
+    this.translate(this.model.symbolsSelected, tx, ty, false)
 
     this.selector.resetSelectedGroup(this.model.symbolsSelected)
     this.interactElementsGroup = undefined

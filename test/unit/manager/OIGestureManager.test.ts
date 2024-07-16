@@ -181,10 +181,10 @@ describe("OIGestureManager.ts", () =>
     {
       const gestureStroke = buildOIStroke({
         box: {
-          height: stroke.boundingBox.height * 2,
-          width: stroke.boundingBox.width * 2,
-          x: stroke.boundingBox.x - stroke.boundingBox.width,
-          y: stroke.boundingBox.y - stroke.boundingBox.height
+          height: stroke.bounds.height * 2,
+          width: stroke.bounds.width * 2,
+          x: stroke.bounds.x - stroke.bounds.width,
+          y: stroke.bounds.y - stroke.bounds.height
         },
       })
       const gesture: TGesture = {
@@ -204,10 +204,10 @@ describe("OIGestureManager.ts", () =>
     {
       const gestureStroke = buildOIStroke({
         box: {
-          height: stroke.boundingBox.height * 2,
-          width: stroke.boundingBox.width * 2,
-          x: stroke.boundingBox.x - stroke.boundingBox.width,
-          y: stroke.boundingBox.y - stroke.boundingBox.height
+          height: stroke.bounds.height * 2,
+          width: stroke.bounds.width * 2,
+          x: stroke.bounds.x - stroke.bounds.width,
+          y: stroke.bounds.y - stroke.bounds.height
         },
       })
       const gesture: TGesture = {
@@ -230,10 +230,10 @@ describe("OIGestureManager.ts", () =>
     {
       const gestureStroke = buildOIStroke({
         box: {
-          height: stroke.boundingBox.height * 2,
-          width: stroke.boundingBox.width * 2,
-          x: stroke.boundingBox.x - stroke.boundingBox.width,
-          y: stroke.boundingBox.y - stroke.boundingBox.height
+          height: stroke.bounds.height * 2,
+          width: stroke.bounds.width * 2,
+          x: stroke.bounds.x - stroke.bounds.width,
+          y: stroke.bounds.y - stroke.bounds.height
         },
       })
       const gesture: TGesture = {
@@ -256,10 +256,10 @@ describe("OIGestureManager.ts", () =>
     {
       const gestureStroke = buildOIStroke({
         box: {
-          height: stroke.boundingBox.height * 2,
-          width: stroke.boundingBox.width * 2,
-          x: stroke.boundingBox.x - stroke.boundingBox.width,
-          y: stroke.boundingBox.y - stroke.boundingBox.height
+          height: stroke.bounds.height * 2,
+          width: stroke.bounds.width * 2,
+          x: stroke.bounds.x - stroke.bounds.width,
+          y: stroke.bounds.y - stroke.bounds.height
         },
       })
       const gesture: TGesture = {
@@ -282,10 +282,10 @@ describe("OIGestureManager.ts", () =>
     {
       const gestureStroke = buildOIStroke({
         box: {
-          height: stroke.boundingBox.height * 2,
-          width: stroke.boundingBox.width * 2,
-          x: stroke.boundingBox.x - stroke.boundingBox.width,
-          y: stroke.boundingBox.y - stroke.boundingBox.height
+          height: stroke.bounds.height * 2,
+          width: stroke.bounds.width * 2,
+          x: stroke.bounds.x - stroke.bounds.width,
+          y: stroke.bounds.y - stroke.bounds.height
         },
       })
       const gesture: TGesture = {
@@ -309,10 +309,10 @@ describe("OIGestureManager.ts", () =>
       console.error = jest.fn()
       const gestureStroke = buildOIStroke({
         box: {
-          height: stroke.boundingBox.height * 2,
-          width: stroke.boundingBox.width * 2,
-          x: stroke.boundingBox.x - stroke.boundingBox.width,
-          y: stroke.boundingBox.y - stroke.boundingBox.height
+          height: stroke.bounds.height * 2,
+          width: stroke.bounds.width * 2,
+          x: stroke.bounds.x - stroke.bounds.width,
+          y: stroke.bounds.y - stroke.bounds.height
         },
       })
       const gesture: TGesture = {
@@ -372,7 +372,7 @@ describe("OIGestureManager.ts", () =>
     {
       const circle = buildOICircle()
       behaviors.model.addSymbol(circle)
-      const gestureStroke = buildOIStroke({ box: circle.boundingBox, nbPoint: 100 })
+      const gestureStroke = buildOIStroke({ box: circle.bounds, nbPoint: 100 })
       const gesture: TGesture = {
         gestureType: "SCRATCH",
         gestureStrokeId: gestureStroke.id,
@@ -391,7 +391,7 @@ describe("OIGestureManager.ts", () =>
     {
       const chars: TOISymbolChar[] = [
         {
-          boundingBox: { height: 10, width: 5, x: 0, y: 10 },
+          bounds: { height: 10, width: 5, x: 0, y: 10 },
           color: "black",
           fontSize: 16,
           fontWeight: 400,
@@ -399,7 +399,7 @@ describe("OIGestureManager.ts", () =>
           label: "A"
         },
         {
-          boundingBox: { height: 10, width: 5, x: 5, y: 10 },
+          bounds: { height: 10, width: 5, x: 5, y: 10 },
           color: "black",
           fontSize: 16,
           fontWeight: 400,
@@ -429,7 +429,7 @@ describe("OIGestureManager.ts", () =>
     {
       const chars: TOISymbolChar[] = [
         {
-          boundingBox: { height: 10, width: 5, x: 0, y: 10 },
+          bounds: { height: 10, width: 5, x: 0, y: 10 },
           color: "black",
           fontSize: 16,
           fontWeight: 400,
@@ -437,7 +437,7 @@ describe("OIGestureManager.ts", () =>
           label: "A"
         },
         {
-          boundingBox: { height: 10, width: 5, x: 5, y: 10 },
+          bounds: { height: 10, width: 5, x: 5, y: 10 },
           color: "black",
           fontSize: 16,
           fontWeight: 400,
@@ -447,7 +447,7 @@ describe("OIGestureManager.ts", () =>
       ]
       const text = buildOIText({ chars, boundingBox: { height: 10, width: 10, x: 0, y: 10 } })
       behaviors.model.addSymbol(text)
-      const gestureStroke = buildOIStroke({ box: chars[0].boundingBox })
+      const gestureStroke = buildOIStroke({ box: chars[0].bounds })
       const gesture: TGesture = {
         gestureType: "SCRATCH",
         gestureStrokeId: gestureStroke.id,
@@ -543,7 +543,7 @@ describe("OIGestureManager.ts", () =>
         strokeAfterIds: []
       }
       await gestMan.applyJoinGesture(strokeGesture, gesture)
-      expect(gestMan.translator.translate).toHaveBeenNthCalledWith(1, [stroke21], stroke12.boundingBox.xMax - stroke21.boundingBox.xMin + 50, -rowHeight, false)
+      expect(gestMan.translator.translate).toHaveBeenNthCalledWith(1, [stroke21], stroke12.bounds.xMax - stroke21.bounds.xMin + 50, -rowHeight, false)
       expect(gestMan.history.push).toHaveBeenCalledTimes(1)
     })
 
@@ -594,7 +594,7 @@ describe("OIGestureManager.ts", () =>
 
     test("should go down stroke", async () =>
     {
-      const strokeGesture = buildOIStroke({ box: { height: stroke.boundingBox.height, width: 5, x: stroke.boundingBox.xMin - 10, y: stroke.boundingBox.yMin } })
+      const strokeGesture = buildOIStroke({ box: { height: stroke.bounds.height, width: 5, x: stroke.bounds.xMin - 10, y: stroke.bounds.yMin } })
       const gesture: TGesture = {
         gestureType: "JOIN",
         gestureStrokeId: strokeGesture.id,

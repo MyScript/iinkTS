@@ -1,63 +1,62 @@
-import { LoggerClass } from "../Constants"
-import { LoggerManager } from "../logger"
 import { TStyle } from "../style"
 import { PartialDeep } from "../utils"
 import { TPoint } from "./Point"
-import { TBoundingBox } from "./Box"
+import { Box, TBoundingBox } from "./Box"
 import { SymbolType } from "./Symbol"
 import { OIDecorator } from "./OIDecorator"
-import { TOISymbol, OISymbol } from "./OISymbol"
+import { OISymbolBase } from "./OISymbolBase"
 import { OIStroke } from "./OIStroke"
+import { TOISymbol } from "."
 
 /**
  * @group Primitive
  */
-export class OISymbolGroup extends OISymbol
+export class OISymbolGroup extends OISymbolBase<SymbolType.Group>
 {
-  #logger = LoggerManager.getLogger(LoggerClass.STROKE)
-  symbols: TOISymbol[]
+  children: TOISymbol[]
   decorators: OIDecorator[]
 
-  constructor(style: TStyle, symbols: TOISymbol[])
+  constructor(
+    children: TOISymbol[],
+    style?: PartialDeep<TStyle>
+  )
   {
     super(SymbolType.Group, style)
-    this.#logger.info("constructor", { style })
-    this.symbols = symbols
+    this.children = children
     this.decorators = []
-  }
-
-  override get style(): TStyle
-  {
-    return this._style
-  }
-
-  override set style(style: TStyle)
-  {
-    super.style = style
-    this.symbols.forEach(s =>
-    {
-      s.style = Object.assign(s.style, style)
+    this.style = new Proxy(this.style, {
+      set: (target: TStyle, p: PropertyKey, newValue: string): boolean =>
+      {
+        target = Object.assign({}, target, { [p]: newValue })
+        this.children.forEach(c => c.style = Object.assign({}, c.style, target))
+        return true
+      },
     })
   }
 
   get snapPoints(): TPoint[]
   {
-    return this.boundingBox.snapPoints
+    return this.bounds.snapPoints
   }
 
   get vertices(): TPoint[]
   {
-    return this.symbols.flatMap(s => s.vertices)
+    return this.children.flatMap(s => s.vertices)
+  }
+
+  get bounds(): Box
+  {
+    return Box.createFromBoxes(this.children.map(c => c.bounds))
   }
 
   overlaps(box: TBoundingBox): boolean
   {
-    return this.symbols.some(s => s.overlaps(box))
+    return this.children.some(s => s.overlaps(box))
   }
 
   isCloseToPoint(point: TPoint): boolean
   {
-    return this.symbols.some(s => s.isCloseToPoint(point))
+    return this.children.some(s => s.isCloseToPoint(point))
   }
 
   containsSymbol(strokeId: string): boolean
@@ -87,7 +86,7 @@ export class OISymbolGroup extends OISymbol
 
   static containsOnlyStroke(group: OISymbolGroup): boolean
   {
-    return group.symbols.every(s =>
+    return group.children.every(s =>
     {
       if (s.type === SymbolType.Group) {
         return OISymbolGroup.containsOnlyStroke(s as OISymbolGroup)
@@ -101,7 +100,7 @@ export class OISymbolGroup extends OISymbol
 
   static extractSymbols(group: OISymbolGroup): TOISymbol[]
   {
-    return group.symbols.flatMap(s =>
+    return group.children.flatMap(s =>
     {
       if (s.type === SymbolType.Group) {
         return OISymbolGroup.extractSymbols(s as OISymbolGroup).concat(s)
@@ -112,7 +111,7 @@ export class OISymbolGroup extends OISymbol
 
   static extractStrokes(group: OISymbolGroup): OIStroke[]
   {
-    return group.symbols.flatMap(s =>
+    return group.children.flatMap(s =>
     {
       if (s.type === SymbolType.Stroke) {
         return s as OIStroke
@@ -126,7 +125,7 @@ export class OISymbolGroup extends OISymbol
 
   static containsSymbol(group: OISymbolGroup, symbolId: string): boolean
   {
-    return group.symbols.some(symbol =>
+    return group.children.some(symbol =>
     {
       if (symbol.type === SymbolType.Group) {
         return OISymbolGroup.containsSymbol(symbol as OISymbolGroup, symbolId)
@@ -137,23 +136,24 @@ export class OISymbolGroup extends OISymbol
 
   static removeChilds(group: OISymbolGroup, symbolIds: string[]): OISymbolGroup | undefined
   {
-    group.symbols = group.symbols.filter(s => !symbolIds.includes(s.id))
-    if (!group.symbols.length) return
-    const symbolsToRemove = group.symbols.slice()
-    symbolsToRemove.forEach(s => {
+    group.children = group.children.filter(s => !symbolIds.includes(s.id))
+    if (!group.children.length) return
+    const symbolsToRemove = group.children.slice()
+    symbolsToRemove.forEach(s =>
+    {
       if (s.type === SymbolType.Group) {
-        const g = s as  OISymbolGroup
+        const g = s as OISymbolGroup
         if (!OISymbolGroup.removeChilds(g, symbolIds)) {
-          group.symbols = group.symbols.filter(s1 => s1.id !== g.id)
+          group.children = group.children.filter(s1 => s1.id !== g.id)
         }
       }
     })
-    return group.symbols.length ?  group : undefined
+    return group.children.length ? group : undefined
   }
 
   clone(): OISymbolGroup
   {
-    const clone = new OISymbolGroup(this.style, this.symbols.map(s => s.clone()))
+    const clone = new OISymbolGroup(this.children.map(s => s.clone()), structuredClone({ ...this.style }))
     clone.id = this.id
     clone.selected = this.selected
     clone.deleting = this.deleting
@@ -168,7 +168,7 @@ export class OISymbolGroup extends OISymbol
     return {
       id: this.id,
       type: this.type,
-      symbols: JSON.parse(JSON.stringify(this.symbols)),
+      children: JSON.parse(JSON.stringify(this.children)),
       decorators: this.decorators.length ? JSON.parse(JSON.stringify(this.decorators)) : undefined
     }
   }
