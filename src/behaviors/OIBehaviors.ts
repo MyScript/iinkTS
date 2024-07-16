@@ -9,17 +9,14 @@ import
   Box,
   EdgeKind,
   OIDecorator,
-  OIEdge,
+  TOIEdge,
   OIEdgeArc,
   OIEdgeLine,
   OIEdgePolyLine,
-  OIShape,
+  TOIShape,
   OIShapeCircle,
   OIShapeEllipse,
-  OIShapeParallelogram,
   OIShapePolygon,
-  OIShapeRectangle,
-  OIShapeTriangle,
   OIStroke,
   OISymbolGroup,
   OIText,
@@ -381,35 +378,29 @@ export class OIBehaviors implements IBehaviors
     }
   }
 
-  protected createShape(partialShape: PartialDeep<OIShape>): OIShape
+  protected createShape(partialShape: PartialDeep<TOIShape>): TOIShape
   {
     switch (partialShape.kind) {
       case ShapeKind.Circle:
         return OIShapeCircle.create(partialShape as PartialDeep<OIShapeCircle>)
       case ShapeKind.Ellipse:
         return OIShapeEllipse.create(partialShape as PartialDeep<OIShapeEllipse>)
-      case ShapeKind.Parallelogram:
-        return OIShapeParallelogram.create(partialShape as PartialDeep<OIShapeParallelogram>)
       case ShapeKind.Polygon:
         return OIShapePolygon.create(partialShape as PartialDeep<OIShapePolygon>)
-      case ShapeKind.Rectangle:
-        return OIShapeRectangle.create(partialShape as PartialDeep<OIShapeRectangle>)
-      case ShapeKind.Triangle:
-        return OIShapeTriangle.create(partialShape as PartialDeep<OIShapeTriangle>)
       default:
         throw new Error(`Unable to create shape, kind: "${ partialShape.kind }" is unknown`)
     }
   }
 
-  protected createEdge(partialEdge: PartialDeep<OIEdge>): OIEdge
+  protected createEdge(partialEdge: PartialDeep<TOIEdge>): TOIEdge
   {
     switch (partialEdge.kind) {
       case EdgeKind.Arc:
-        return OIEdgeArc.create(partialEdge)
+        return OIEdgeArc.create(partialEdge as PartialDeep<OIEdgeArc>)
       case EdgeKind.Line:
-        return OIEdgeLine.create(partialEdge)
+        return OIEdgeLine.create(partialEdge as PartialDeep<OIEdgeLine>)
       case EdgeKind.PolyEdge:
-        return OIEdgePolyLine.create(partialEdge)
+        return OIEdgePolyLine.create(partialEdge as PartialDeep<OIEdgePolyLine>)
       default:
         throw new Error(`Unable to create edge, kind: "${ partialEdge.kind }" is unknown`)
     }
@@ -417,26 +408,28 @@ export class OIBehaviors implements IBehaviors
 
   protected createGroup(partialGroup: PartialDeep<OISymbolGroup>): OISymbolGroup
   {
-    if (!partialGroup.symbols?.length) {
-      throw new Error(`Unable to create group, no symbols`)
+    if (!partialGroup.children?.length) {
+      throw new Error(`Unable to create group, no children`)
     }
 
-    const symbols = partialGroup.symbols.map(partialSymbol =>
+    const children = partialGroup.children.map(partialSymbol =>
     {
       switch (partialSymbol?.type) {
         case SymbolType.Stroke:
           return OIStroke.create(partialSymbol as PartialDeep<OIStroke>)
         case SymbolType.Shape:
-          return this.createShape(partialSymbol as PartialDeep<OIStroke>)
+          return this.createShape(partialSymbol as PartialDeep<TOIShape>)
         case SymbolType.Edge:
-          return this.createEdge(partialSymbol as PartialDeep<OIEdge>)
+          return this.createEdge(partialSymbol as PartialDeep<TOIEdge>)
         case SymbolType.Text:
           return OIText.create(partialSymbol as PartialDeep<OIText>)
+        case SymbolType.Group:
+          return this.createGroup(partialSymbol as PartialDeep<OISymbolGroup>)
         default:
-          throw new Error(`Unable to create group, symbol type '${ partialSymbol?.type } is unknow`)
+          throw new Error(`Unable to create group, symbol type '${ JSON.stringify(partialSymbol) } is unknow`)
       }
     })
-    const group = new OISymbolGroup(partialGroup.style!, symbols)
+    const group = new OISymbolGroup(children, partialGroup.style)
     if (partialGroup.id) {
       group.id = partialGroup.id
     }
@@ -453,9 +446,9 @@ export class OIBehaviors implements IBehaviors
         case SymbolType.Stroke:
           return await this.addSymbol(OIStroke.create(partialSymbol as PartialDeep<OIStroke>))
         case SymbolType.Shape:
-          return await this.addSymbol(this.createShape(partialSymbol as PartialDeep<OIStroke>))
+          return await this.addSymbol(this.createShape(partialSymbol as PartialDeep<TOIShape>))
         case SymbolType.Edge:
-          return await this.addSymbol(this.createEdge(partialSymbol as PartialDeep<OIEdge>))
+          return await this.addSymbol(this.createEdge(partialSymbol as PartialDeep<TOIEdge>))
         case SymbolType.Text:
           return await this.addSymbol(OIText.create(partialSymbol as PartialDeep<OIText>))
         case SymbolType.Group:
@@ -484,9 +477,9 @@ export class OIBehaviors implements IBehaviors
           case SymbolType.Stroke:
             return OIStroke.create(partialSym as PartialDeep<OIStroke>)
           case SymbolType.Shape:
-            return this.createShape(partialSym as PartialDeep<OIStroke>)
+            return this.createShape(partialSym as PartialDeep<TOIShape>)
           case SymbolType.Edge:
-            return this.createEdge(partialSym as PartialDeep<OIEdge>)
+            return this.createEdge(partialSym as PartialDeep<TOIEdge>)
           case SymbolType.Text:
             return OIText.create(partialSym as PartialDeep<OIText>)
           case SymbolType.Group:
@@ -620,12 +613,11 @@ export class OIBehaviors implements IBehaviors
     this.model.symbols.forEach(s =>
     {
       if (textIds.includes(s.id) && s.type === SymbolType.Text) {
-        const textSymbol = s as OIText
-        textSymbol.chars.forEach(tc => tc.fontSize = fontSize)
-        this.texter.updateTextBoundingBox(textSymbol)
+        s.chars.forEach(tc => tc.fontSize = fontSize)
+        this.texter.updateTextBoundingBox(s)
         this.renderer.drawSymbol(s)
         s.modificationDate = Date.now()
-        symbols.push(textSymbol)
+        symbols.push(s)
       }
     })
     if (symbols.length) {
@@ -692,7 +684,7 @@ export class OIBehaviors implements IBehaviors
 
   groupSymbols(symbols: TOISymbol[]): OISymbolGroup
   {
-    const group = new OISymbolGroup({}, symbols)
+    const group = new OISymbolGroup(symbols)
     symbols.forEach(s =>
     {
       this.model.removeSymbol(s.id)
@@ -705,17 +697,17 @@ export class OIBehaviors implements IBehaviors
 
   ungroupSymbol(group: OISymbolGroup): TOISymbol[]
   {
-    group.symbols.forEach(s => this.renderer.drawSymbol(s))
+    group.children.forEach(s => this.renderer.drawSymbol(s))
     this.renderer.removeSymbol(group.id)
-    this.model.replaceSymbol(group.id, group.symbols)
+    this.model.replaceSymbol(group.id, group.children)
     this.history.push(this.model, { ungroup: { group } })
-    return group.symbols
+    return group.children
   }
 
   async groupStrokesByJIIXElement(): Promise<void>
   {
     await this.export(["application/vnd.myscript.jiix"])
-    const strokes = this.model.symbols.filter(s => s.type === SymbolType.Stroke) as OIStroke[]
+    const strokes = this.model.symbols.filter(s => s.type === SymbolType.Stroke)
     const jiix = this.model.exports?.["application/vnd.myscript.jiix"]
     jiix?.elements?.forEach(el =>
     {
@@ -741,7 +733,7 @@ export class OIBehaviors implements IBehaviors
                 }
               })
             }
-            const wordSymb = new OISymbolGroup(orginStyle, wordStrokes)
+            const wordSymb = new OISymbolGroup(wordStrokes, orginStyle)
             orginDeco.forEach(d =>
             {
               if (!wordSymb.decorators.some(wd => wd.kind === d.kind)) {
@@ -761,7 +753,7 @@ export class OIBehaviors implements IBehaviors
       else {
         const strokesAssociated = strokes.filter(s => el.items?.map(s => s["full-id"]).includes(s.id))
         if (strokes.length) {
-          const group = new OISymbolGroup({}, strokesAssociated)
+          const group = new OISymbolGroup(strokesAssociated)
           strokesAssociated.map(s =>
           {
             this.model.removeSymbol(s.id)
@@ -810,16 +802,29 @@ export class OIBehaviors implements IBehaviors
   async removeSymbols(ids: string[], addToHistory = true): Promise<TOISymbol[]>
   {
     this.#logger.info("removeSymbol", { ids })
-    this.recognizer.eraseStrokes(ids)
 
-    const symbolsToRemove = ids.map(id => this.model.getRootSymbol(id)).filter(s => !!s) as TOISymbol[]
+    const symbolsToRemove: TOISymbol[] = []
+    const strokesIds: string[] = []
+    ids.forEach(id => {
+      const sym = this.model.getRootSymbol(id)
+      if (sym) {
+        symbolsToRemove.push(sym)
+        switch (sym.type) {
+          case SymbolType.Stroke:
+            strokesIds.push(sym.id)
+            break;
+          case SymbolType.Group:
+            strokesIds.push(...sym.extractStrokes().map(s => s.id))
+            break;
+        }
+      }
+    })
+    this.recognizer.eraseStrokes(strokesIds)
+
     if (symbolsToRemove.length) {
       this.internalEvent.emitIdle(false)
       symbolsToRemove.forEach(s =>
       {
-        if (s.type === SymbolType.Group) {
-          this.recognizer.eraseStrokes((s as OISymbolGroup).extractStrokes().map(s => s.id))
-        }
         this.model.removeSymbol(s.id)
         this.renderer.removeSymbol(s.id)
       })
@@ -903,7 +908,7 @@ export class OIBehaviors implements IBehaviors
 
   getSymbolsBounds(symbols: TOISymbol[], margin = SELECTION_MARGIN): Box
   {
-    const box = Box.createFromBoxes(symbols.map(s => s.boundingBox))
+    const box = Box.createFromBoxes(symbols.map(s => s.bounds))
     box.x -= margin
     box.y -= margin
     box.width += margin * 2
@@ -988,9 +993,18 @@ export class OIBehaviors implements IBehaviors
   extractStrokesFromSymbols(symbols: TOISymbol[] | undefined): OIStroke[]
   {
     if (!symbols?.length) return []
-    const strokes = symbols.filter(s => s.type === SymbolType.Stroke) as OIStroke[]
-    const groups = symbols.filter(s => s.type === SymbolType.Group) as OISymbolGroup[]
-    return strokes.concat(groups.flatMap(g => g.extractStrokes()))
+    const strokes: OIStroke[] = []
+    symbols.forEach(s => {
+      switch (s.type) {
+        case SymbolType.Stroke:
+          strokes.push(s)
+          break;
+        case SymbolType.Group:
+          strokes.push(...s.extractStrokes())
+          break;
+      }
+    })
+    return strokes
   }
 
   protected extractBackendChanges(changes: TOIHistoryChanges): TOIHistoryBackendChanges

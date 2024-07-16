@@ -24,13 +24,13 @@ export class OISVGRendererEdgeUtil
   {
     switch (edge.kind) {
       case EdgeKind.Line:
-        return OISVGRendererEdgeUtil.getLinePath(edge as OIEdgeLine)
+        return OISVGRendererEdgeUtil.getLinePath(edge)
       case EdgeKind.PolyEdge:
-        return OISVGRendererEdgeUtil.getPolyLinePath(edge as OIEdgePolyLine)
+        return OISVGRendererEdgeUtil.getPolyLinePath(edge)
       case EdgeKind.Arc:
-        return OISVGRendererEdgeUtil.getArcPath(edge as OIEdgeArc)
+        return OISVGRendererEdgeUtil.getArcPath(edge)
       default:
-        throw new Error(`Can't getSVGPath for edge cause kind is unknow: "${ edge.kind }"`)
+        throw new Error(`Can't getSVGPath for edge cause kind is unknow: "${ JSON.stringify(edge) }"`)
     }
   }
 

@@ -1,8 +1,8 @@
 import { SELECTION_MARGIN } from "../Constants"
 import { TStyle } from "../style"
-import { computeDistanceBetweenPointAndSegment, createUUID, findIntersectionBetween2Segment } from "../utils"
+import { computeDistanceBetweenPointAndSegment, findIntersectionBetween2Segment, PartialDeep } from "../utils"
 import { Box, TBoundingBox } from "./Box"
-import { OISymbol, TOISymbol } from "./OISymbol"
+import { OISymbolBase } from "./OISymbolBase"
 import { TPoint, TSegment } from "./Point"
 import { SymbolType } from "./Symbol"
 
@@ -13,39 +13,21 @@ export enum ShapeKind
 {
   Circle = "circle",
   Ellipse = "ellipse",
-  Rectangle = "rectangle",
-  Triangle = "triangle",
-  Parallelogram = "parallelogram",
   Polygon = "polygon",
-  Rhombus = "rhombus",
   Table = "table"
 }
 
 /**
  * @group Primitive
  */
-export type TOIShape = TOISymbol & {
-  kind: ShapeKind
-}
-
-/**
- * @group Primitive
- */
-export abstract class OIShape extends OISymbol implements TOIShape
+export abstract class OIShapeBase<K = ShapeKind> extends OISymbolBase<SymbolType.Shape>
 {
-  readonly kind: ShapeKind
-  constructor(kind: ShapeKind, style: TStyle)
+  readonly kind: K
+
+  constructor(kind: K, style?: PartialDeep<TStyle>)
   {
     super(SymbolType.Shape, style)
-    this.id = `${ this.type }-${ kind }-${ createUUID() }`
     this.kind = kind
-  }
-
-  abstract get vertices(): TPoint[]
-
-  get snapPoints(): TPoint[]
-  {
-    return this.boundingBox.snapPoints
   }
 
   get edges(): TSegment[]
@@ -61,9 +43,19 @@ export abstract class OIShape extends OISymbol implements TOIShape
     })
   }
 
+  get bounds(): Box
+  {
+    return Box.createFromPoints(this.vertices)
+  }
+
+  get snapPoints(): TPoint[]
+  {
+    return this.bounds.snapPoints
+  }
+
   overlaps(box: TBoundingBox): boolean
   {
-    return this.boundingBox.isContained(box) ||
+    return this.bounds.isContained(box) ||
       this.edges.some(e1 => Box.getSides(box).some(e2 => !!findIntersectionBetween2Segment(e1, e2)))
   }
 
@@ -75,5 +67,4 @@ export abstract class OIShape extends OISymbol implements TOIShape
     })
   }
 
-  abstract clone(): OIShape
 }

@@ -13,12 +13,17 @@ describe("OIEraser.ts", () =>
     expect(eraser.creationTime).toEqual(eraser.modificationDate)
     expect(eraser.pointers).toHaveLength(0)
     expect(eraser.selected).toEqual(false)
-    expect(eraser.boundingBox.x).toEqual(0)
-    expect(eraser.boundingBox.y).toEqual(0)
-    expect(eraser.boundingBox.height).toEqual(0)
-    expect(eraser.boundingBox.width).toEqual(0)
+    expect(eraser.bounds.x).toEqual(0)
+    expect(eraser.bounds.y).toEqual(0)
+    expect(eraser.bounds.height).toEqual(0)
+    expect(eraser.bounds.width).toEqual(0)
     expect(eraser.snapPoints).toHaveLength(0)
-    expect(eraser.style).toEqual({})
+    expect(eraser.style).toEqual({
+      "color": "grey",
+      "fill": "none",
+      "opacity": 0.2,
+      "width": 12,
+    })
   })
 
   describe("boundingBox", () =>
@@ -26,54 +31,54 @@ describe("OIEraser.ts", () =>
     test("should get without pointers", () =>
     {
       const eraser = new OIEraser()
-      expect(eraser.boundingBox.height).toEqual(0)
-      expect(eraser.boundingBox.width).toEqual(0)
-      expect(eraser.boundingBox.x).toEqual(0)
-      expect(eraser.boundingBox.y).toEqual(0)
+      expect(eraser.bounds.height).toEqual(0)
+      expect(eraser.bounds.width).toEqual(0)
+      expect(eraser.bounds.x).toEqual(0)
+      expect(eraser.bounds.y).toEqual(0)
     })
     test("should get with pointers", () =>
     {
       const eraser = new OIEraser()
       eraser.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
       eraser.pointers.push({ p: 1, t: 1, x: 11, y: 11 })
-      expect(eraser.boundingBox.height).toEqual(10)
-      expect(eraser.boundingBox.width).toEqual(10)
-      expect(eraser.boundingBox.x).toEqual(1)
-      expect(eraser.boundingBox.y).toEqual(1)
+      expect(eraser.bounds.height).toEqual(10)
+      expect(eraser.bounds.width).toEqual(10)
+      expect(eraser.bounds.x).toEqual(1)
+      expect(eraser.bounds.y).toEqual(1)
     })
   })
 
-  describe("overlaps", () =>
+    describe("overlaps", () =>
   {
     const eraser = new OIEraser()
     eraser.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
     eraser.pointers.push({ p: 1, t: 1, x: 11, y: 11 })
     test("should return true", () =>
     {
-      expect(eraser.overlaps({ height: 10, width: 10, x: 0, y: 0})).toEqual(true)
+      expect(eraser.overlaps({ height: 10, width: 10, x: 0, y: 0 })).toEqual(true)
     })
     test("should return false", () =>
     {
-      expect(eraser.overlaps({ height: 10, width: 10, x: 100, y: 0})).toEqual(false)
+      expect(eraser.overlaps({ height: 10, width: 10, x: 100, y: 0 })).toEqual(false)
     })
   })
 
-  describe("isCloseToPoint", () =>
+    describe("isCloseToPoint", () =>
   {
     const eraser = new OIEraser()
     eraser.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
     eraser.pointers.push({ p: 1, t: 1, x: 11, y: 11 })
     test("should return true", () =>
     {
-      expect(eraser.isCloseToPoint({ x: 0, y: 0})).toEqual(true)
+      expect(eraser.isCloseToPoint({ x: 0, y: 0 })).toEqual(true)
     })
     test("should return false", () =>
     {
-      expect(eraser.isCloseToPoint({ x: 35, y: 0})).toEqual(false)
+      expect(eraser.isCloseToPoint({ x: 35, y: 0 })).toEqual(false)
     })
   })
 
-  describe("clone", () =>
+    describe("clone", () =>
   {
     test("should return clone", () =>
     {
@@ -86,4 +91,4 @@ describe("OIEraser.ts", () =>
       expect(clone).not.toBe(eraser)
     })
   })
-})
+  })

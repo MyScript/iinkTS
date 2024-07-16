@@ -1,21 +1,23 @@
-import { LoggerClass } from "../Constants"
-import { LoggerManager } from "../logger"
-import { DefaultStyle, TStyle } from "../style"
+import { TStyle } from "../style"
 import { PartialDeep } from "../utils"
-import { EdgeDecoration, EdgeKind, OIEdge } from "./OIEdge"
+import { EdgeDecoration, EdgeKind, OIEdgeBase } from "./OIEdge"
 import { TPoint, isValidPoint } from "./Point"
 
 /**
  * @group Primitive
  */
-export class OIEdgePolyLine extends OIEdge
+export class OIEdgePolyLine extends OIEdgeBase<EdgeKind.PolyEdge>
 {
-  #logger = LoggerManager.getLogger(LoggerClass.EDGE)
   points: TPoint[]
 
-  constructor(style: TStyle, points: TPoint[], startDecoration?: EdgeDecoration, endDecoration?: EdgeDecoration)
+  constructor(
+    points: TPoint[],
+    startDecoration?: EdgeDecoration,
+    endDecoration?: EdgeDecoration,
+    style?: PartialDeep<TStyle>
+  )
   {
-    super(EdgeKind.PolyEdge, style, startDecoration, endDecoration)
+    super(EdgeKind.PolyEdge, startDecoration, endDecoration, style)
     this.points = points
   }
 
@@ -26,8 +28,7 @@ export class OIEdgePolyLine extends OIEdge
 
   clone(): OIEdgePolyLine
   {
-    this.#logger.info("clone", this)
-    const clone = new OIEdgePolyLine(structuredClone(this.style), structuredClone(this.points),this.startDecoration, this.endDecoration)
+    const clone = new OIEdgePolyLine(structuredClone(this.points),this.startDecoration, this.endDecoration, structuredClone(this.style))
     clone.id = this.id
     clone.selected = this.selected
     clone.deleting = this.deleting
@@ -52,6 +53,6 @@ export class OIEdgePolyLine extends OIEdge
   static create(partial: PartialDeep<OIEdgePolyLine>): OIEdgePolyLine
   {
     if (!partial?.points?.map(p => isValidPoint(p))) throw new Error(`Unable to create a PolyLine, points are invalid`)
-    return new OIEdgePolyLine(partial.style || DefaultStyle, partial?.points as TPoint[], partial.startDecoration, partial.endDecoration)
+    return new OIEdgePolyLine(partial?.points as TPoint[], partial.startDecoration, partial.endDecoration, partial.style)
   }
 }

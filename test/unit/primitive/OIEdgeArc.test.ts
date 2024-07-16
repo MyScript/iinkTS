@@ -25,17 +25,17 @@ describe("OIEdgeArc.ts", () =>
         color: "blue",
         width: 20,
       }
-      const arc = new OIEdgeArc(style, center, startAngle, sweepAngle, radiusX, radiusY, phi)
+      const arc = new OIEdgeArc(center, startAngle, sweepAngle, radiusX, radiusY, phi, undefined, undefined, style)
       expect(arc).toBeDefined()
       expect(arc.creationTime).toBeLessThanOrEqual(Date.now())
       expect(arc.creationTime).toEqual(arc.modificationDate)
       expect(arc.style).toEqual(expect.objectContaining(style))
       expect(arc.selected).toEqual(false)
       expect(arc.center).toEqual(center)
-      expect(arc.boundingBox.x).toEqual(-14.989)
-      expect(arc.boundingBox.y).toEqual(-4.529)
-      expect(+arc.boundingBox.width.toFixed(0)).toEqual(27)
-      expect(+arc.boundingBox.height.toFixed(0)).toEqual(20)
+      expect(arc.bounds.x).toEqual(-14.989)
+      expect(arc.bounds.y).toEqual(-4.529)
+      expect(+arc.bounds.width.toFixed(0)).toEqual(27)
+      expect(+arc.bounds.height.toFixed(0)).toEqual(20)
       expect(arc.vertices).toHaveLength(50)
     })
     test("should create with default style", () =>
@@ -46,7 +46,7 @@ describe("OIEdgeArc.ts", () =>
       const radiusX = 10
       const radiusY = 50
       const phi = 0
-      const arc = new OIEdgeArc({}, center, startAngle, sweepAngle, radiusX, radiusY, phi)
+      const arc = new OIEdgeArc(center, startAngle, sweepAngle, radiusX, radiusY, phi)
       expect(arc.style).toEqual(DefaultStyle)
     })
   })
@@ -58,7 +58,7 @@ describe("OIEdgeArc.ts", () =>
     const radiusX = 10
     const radiusY = 50
     const phi = 0
-    const arc = new OIEdgeArc({}, center, startAngle, sweepAngle, radiusX, radiusY, phi)
+    const arc = new OIEdgeArc(center, startAngle, sweepAngle, radiusX, radiusY, phi)
     test(`should return true when the point is within ${ SELECTION_MARGIN } pixel vertice`, () =>
     {
       const closePoint: TPoint = { x: 0, y: 0 + SELECTION_MARGIN / 2 }
@@ -83,7 +83,7 @@ describe("OIEdgeArc.ts", () =>
     const radiusX = 10
     const radiusY = 50
     const phi = 0
-    const arc = new OIEdgeArc({}, center, startAngle, sweepAngle, radiusX, radiusY, phi)
+    const arc = new OIEdgeArc(center, startAngle, sweepAngle, radiusX, radiusY, phi)
     test(`should return true if partially wrap`, () =>
     {
       const boundaries: TBoundingBox = { height: 20, width: 20, x: 5, y: 0 }
@@ -114,7 +114,7 @@ describe("OIEdgeArc.ts", () =>
         color: "blue",
         width: 20
       }
-      const arc = new OIEdgeArc(style, center, startAngle, sweepAngle, radiusX, radiusY, phi)
+      const arc = new OIEdgeArc(center, startAngle, sweepAngle, radiusX, radiusY, phi, undefined, undefined, style)
       const clone = arc.clone()
       expect(clone).toEqual(arc)
       expect(clone).not.toBe(arc)

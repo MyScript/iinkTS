@@ -1,5 +1,3 @@
-import { LoggerClass } from "../Constants"
-import { LoggerManager } from "../logger"
 import { DefaultPenStyle, TPenStyle } from "../style"
 import { PartialDeep, createUUID } from "../utils"
 import { TPointer } from "./Point"
@@ -47,7 +45,6 @@ export type TStrokeGroup = {
  */
 export class Stroke implements TStroke
 {
-  #logger = LoggerManager.getLogger(LoggerClass.STROKE)
   type = SymbolType.Stroke
   id: string
   creationTime: number
@@ -59,8 +56,6 @@ export class Stroke implements TStroke
 
   constructor(style: TPenStyle, pointerType = "pen")
   {
-    this.#logger.info("constructor", { style, pointerType })
-
     this.id = `${this.type}-${createUUID()}`
     this.creationTime = Date.now()
     this.modificationDate = this.creationTime

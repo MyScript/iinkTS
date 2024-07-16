@@ -6,12 +6,6 @@ import
 {
   Box,
   EdgeKind,
-  OIEdgeArc,
-  OIEdgeLine,
-  OIEdgePolyLine,
-  OIShapeCircle,
-  OIShapeEllipse,
-  OIShapePolygon,
   OIStroke,
   OISymbolGroup,
   OIText,
@@ -106,35 +100,28 @@ export class OIResizeManager
     this.#logger.debug("applyToShape", { shape, origin, scaleX, scaleY })
     switch (shape.kind) {
       case ShapeKind.Ellipse: {
-        const ellipse = shape as OIShapeEllipse
-        ellipse.radiusX *= scaleX
-        ellipse.radiusY *= scaleY
-        ellipse.center.x = origin.x + scaleX * (ellipse.center.x - origin.x)
-        ellipse.center.y = origin.y + scaleY * (ellipse.center.y - origin.y)
-        return ellipse
+        shape.radiusX *= scaleX
+        shape.radiusY *= scaleY
+        shape.center.x = origin.x + scaleX * (shape.center.x - origin.x)
+        shape.center.y = origin.y + scaleY * (shape.center.y - origin.y)
+        return shape
       }
       case ShapeKind.Circle: {
-        const circle = shape as OIShapeCircle
-        circle.radius *= (scaleX + scaleY) / 2
-        circle.center.x = origin.x + scaleX * (circle.center.x - origin.x)
-        circle.center.y = origin.y + scaleY * (circle.center.y - origin.y)
-        return circle
+        shape.radius *= (scaleX + scaleY) / 2
+        shape.center.x = origin.x + scaleX * (shape.center.x - origin.x)
+        shape.center.y = origin.y + scaleY * (shape.center.y - origin.y)
+        return shape
       }
-      case ShapeKind.Rectangle:
-      case ShapeKind.Triangle:
-      case ShapeKind.Parallelogram:
-      case ShapeKind.Polygon:
-      case ShapeKind.Rhombus: {
-        const polygon = shape as OIShapePolygon
-        polygon.points.forEach(p =>
+      case ShapeKind.Polygon: {
+        shape.points.forEach(p =>
         {
           p.x = origin.x + scaleX * (p.x - origin.x)
           p.y = origin.y + scaleY * (p.y - origin.y)
         })
-        return polygon
+        return shape
       }
       default:
-        throw new Error(`Can't apply resize on shape, kind unknow: ${ shape.kind }`)
+        throw new Error(`Can't apply resize on shape, kind unknow: ${ JSON.stringify(shape) }`)
     }
   }
 
@@ -143,34 +130,30 @@ export class OIResizeManager
     this.#logger.debug("applyToEdge", { edge, origin, scaleX, scaleY })
     switch (edge.kind) {
       case EdgeKind.Arc: {
-        const arc = edge as OIEdgeArc
-
-        arc.center.x = +(arc.center.x + (scaleX - 1) * (arc.center.x - origin.x) / 2).toFixed(3)
-        arc.center.y = +(arc.center.y + (scaleY - 1) * (arc.center.y - origin.y) / 2).toFixed(3)
-
-        arc.radiusX = +(arc.radiusX * scaleX).toFixed(3)
-        arc.radiusY = +(arc.radiusY * scaleY).toFixed(3)
-
-        return arc
+        edge.center.x = +(edge.center.x + (scaleX - 1) * (edge.center.x - origin.x) / 2).toFixed(3)
+        edge.center.y = +(edge.center.y + (scaleY - 1) * (edge.center.y - origin.y) / 2).toFixed(3)
+        edge.radiusX = +(edge.radiusX * scaleX).toFixed(3)
+        edge.radiusY = +(edge.radiusY * scaleY).toFixed(3)
+        return edge
       }
       case EdgeKind.Line: {
-        const line = edge as OIEdgeLine
-        line.start.x = origin.x + scaleX * (line.start.x - origin.x)
-        line.start.y = origin.y + scaleY * (line.start.y - origin.y)
-        line.end.x = origin.x + scaleX * (line.end.x - origin.x)
-        line.end.y = origin.y + scaleY * (line.end.y - origin.y)
-        return line
+        edge.start.x = origin.x + scaleX * (edge.start.x - origin.x)
+        edge.start.y = origin.y + scaleY * (edge.start.y - origin.y)
+        edge.end.x = origin.x + scaleX * (edge.end.x - origin.x)
+        edge.end.y = origin.y + scaleY * (edge.end.y - origin.y)
+        return edge
       }
       case EdgeKind.PolyEdge: {
-        const polyline = edge as OIEdgePolyLine
-        polyline.points = polyline.points.map(p =>
+        edge.points.forEach(p =>
         {
           p.x = origin.x + scaleX * (p.x - origin.x)
           p.y = origin.y + scaleY * (p.y - origin.y)
           return p
         })
-        return polyline
+        return edge
       }
+      default:
+        throw new Error(`Can't apply resize on edge, kind unknow: ${ JSON.stringify(edge) }`)
     }
     return edge
   }
@@ -189,7 +172,7 @@ export class OIResizeManager
 
   protected applyOnGroup(group: OISymbolGroup, origin: TPoint, scaleX: number, scaleY: number): OISymbolGroup
   {
-    group.symbols.forEach(s => this.applyToSymbol(s, origin, scaleX, scaleY))
+    group.children.forEach(s => this.applyToSymbol(s, origin, scaleX, scaleY))
     return group
   }
 
@@ -198,17 +181,17 @@ export class OIResizeManager
     this.#logger.info("applyToSymbol", { symbol, scaleX, scaleY })
     switch (symbol.type) {
       case SymbolType.Stroke:
-        return this.applyToStroke(symbol as OIStroke, origin, scaleX, scaleY)
+        return this.applyToStroke(symbol, origin, scaleX, scaleY)
       case SymbolType.Shape:
-        return this.applyToShape(symbol as TOIShape, origin, scaleX, scaleY)
+        return this.applyToShape(symbol, origin, scaleX, scaleY)
       case SymbolType.Edge:
-        return this.applyToEdge(symbol as TOIEdge, origin, scaleX, scaleY)
+        return this.applyToEdge(symbol, origin, scaleX, scaleY)
       case SymbolType.Text:
-        return this.applyOnText(symbol as OIText, origin, scaleX, scaleY)
+        return this.applyOnText(symbol, origin, scaleX, scaleY)
       case SymbolType.Group:
-        return this.applyOnGroup(symbol as OISymbolGroup, origin, scaleX, scaleY)
+        return this.applyOnGroup(symbol, origin, scaleX, scaleY)
       default:
-        throw new Error(`Can't apply resize on symbol, type unknow: ${ symbol.type }`)
+        throw new Error(`Can't apply resize on symbol, type unknow: ${ JSON.stringify(symbol) }`)
     }
   }
 

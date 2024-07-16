@@ -1,17 +1,13 @@
-import { LoggerClass } from "../Constants"
-import { LoggerManager } from "../logger"
-import { DefaultStyle, TStyle } from "../style"
+import { TStyle } from "../style"
 import { PartialDeep, computePointOnEllipse, isValidNumber } from "../utils"
-import { EdgeDecoration, EdgeKind, OIEdge } from "./OIEdge"
+import { EdgeDecoration, EdgeKind, OIEdgeBase } from "./OIEdge"
 import { TPoint, isValidPoint } from "./Point"
 
 /**
  * @group Primitive
  */
-export class OIEdgeArc extends OIEdge
+export class OIEdgeArc extends OIEdgeBase<EdgeKind.Arc>
 {
-  #logger = LoggerManager.getLogger(LoggerClass.EDGE)
-
   center: TPoint
   startAngle: number
   sweepAngle: number
@@ -20,9 +16,19 @@ export class OIEdgeArc extends OIEdge
   phi: number
   protected _vertices: Map<string, TPoint[]>
 
-  constructor(style: TStyle, center: TPoint, startAngle: number, sweepAngle: number, radiusX: number, radiusY: number, phi: number, startDecoration?: EdgeDecoration, endDecoration?: EdgeDecoration)
+  constructor(
+    center: TPoint,
+    startAngle: number,
+    sweepAngle: number,
+    radiusX: number,
+    radiusY: number,
+    phi: number,
+    startDecoration?: EdgeDecoration,
+    endDecoration?: EdgeDecoration,
+    style?: PartialDeep<TStyle>,
+  )
   {
-    super(EdgeKind.Arc, style, startDecoration, endDecoration)
+    super(EdgeKind.Arc, startDecoration, endDecoration, style)
     this.center = center
     this.startAngle = startAngle
     this.sweepAngle = sweepAngle
@@ -71,8 +77,17 @@ export class OIEdgeArc extends OIEdge
 
   clone(): OIEdgeArc
   {
-    this.#logger.info("clone", this)
-    const clone = new OIEdgeArc(structuredClone(this.style), structuredClone(this.center), this.startAngle, this.sweepAngle, this.radiusX, this.radiusY, this.phi, this.startDecoration, this.endDecoration)
+    const clone = new OIEdgeArc(
+      structuredClone(this.center),
+      this.startAngle,
+      this.sweepAngle,
+      this.radiusX,
+      this.radiusY,
+      this.phi,
+      this.startDecoration,
+      this.endDecoration,
+      structuredClone(this.style)
+    )
     clone.id = this.id
     clone.selected = this.selected
     clone.deleting = this.deleting
@@ -93,8 +108,8 @@ export class OIEdgeArc extends OIEdge
       radiusX: this.radiusX,
       radiusY: this.radiusY,
       phi: this.phi,
-      style: this.style,
       startDecoration: this.startDecoration,
+      style: this.style,
       endDecoration: this.endDecoration,
     }
   }
@@ -106,6 +121,16 @@ export class OIEdgeArc extends OIEdge
     if (!isValidNumber(partial?.sweepAngle)) throw new Error(`Unable to create a arc, sweepAngle is invalid`)
     if (!isValidNumber(partial?.radiusX)) throw new Error(`Unable to create a arc, radiusX is invalid`)
     if (!isValidNumber(partial?.radiusY)) throw new Error(`Unable to create a arc, radiusY is invalid`)
-    return new OIEdgeArc(partial.style || DefaultStyle, partial?.center as TPoint, partial.startAngle!, partial.sweepAngle!, partial.radiusX!, partial.radiusY!, partial.phi || 0, partial.startDecoration, partial.endDecoration)
+    return new OIEdgeArc(
+      partial?.center as TPoint,
+      partial.startAngle!,
+      partial.sweepAngle!,
+      partial.radiusX!,
+      partial.radiusY!,
+      partial.phi || 0,
+      partial.startDecoration,
+      partial.endDecoration,
+      partial.style
+    )
   }
 }

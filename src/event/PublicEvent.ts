@@ -1,7 +1,7 @@
 import { EventType, Intention, LoggerClass } from "../Constants"
 import { LoggerManager } from "../logger"
 import { IModel, TExport } from "../model"
-import { TOISymbol } from "../primitive"
+import { TSymbol } from "../primitive"
 import { TUndoRedoContext } from "../history"
 
 /**
@@ -85,7 +85,7 @@ export class PublicEvent extends EventTarget
     this.#emit(EventType.IMPORTED, exports)
   }
 
-  emitSelected(symbols: TOISymbol[]): void
+  emitSelected(symbols: TSymbol[]): void
   {
     this.#emit(EventType.SELECTED, symbols)
   }

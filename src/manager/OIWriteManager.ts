@@ -8,18 +8,13 @@ import
   EdgeDecoration,
   EdgeKind,
   OIEdgeLine,
+  OIShapePolygon,
   OIShapeCircle,
   OIShapeEllipse,
-  OIShapeParallelogram,
-  OIShapeRectangle,
-  OIShapeRhombus,
-  OIShapeTriangle,
   OIStroke,
   OISymbolGroup,
-  ShapeKind,
   SymbolType,
   TOIEdge,
-  TOIShape,
   TOISymbol,
   TPoint,
   TPointer
@@ -116,22 +111,22 @@ export class OIWriteManager
         this.model.currentSymbol = new OIStroke(style, pointerType)
         break
       case WriteTool.Rectangle:
-        this.model.currentSymbol = OIShapeRectangle.createFromLine(style, pointer, pointer)
-        break
-      case WriteTool.Circle:
-        this.model.currentSymbol = OIShapeCircle.createFromLine(style, pointer, pointer)
-        break
-      case WriteTool.Ellipse:
-        this.model.currentSymbol = OIShapeEllipse.createFromLine(style, pointer, pointer)
+        this.model.currentSymbol = OIShapePolygon.createRectangleBetweenPoints(pointer, pointer, style)
         break
       case WriteTool.Triangle:
-        this.model.currentSymbol = OIShapeTriangle.createFromLine(style, pointer, pointer)
+        this.model.currentSymbol = OIShapePolygon.createTriangleBetweenPoints(pointer, pointer, style)
         break
       case WriteTool.Parallelogram:
-        this.model.currentSymbol = OIShapeParallelogram.createFromLine(style, pointer, pointer)
+        this.model.currentSymbol = OIShapePolygon.createParallelogramBetweenPoints(pointer, pointer, style)
         break
       case WriteTool.Rhombus:
-        this.model.currentSymbol = OIShapeRhombus.createFromLine(style, pointer, pointer)
+        this.model.currentSymbol = OIShapePolygon.createRhombusBetweenPoints(pointer, pointer, style)
+        break
+      case WriteTool.Circle:
+        this.model.currentSymbol = OIShapeCircle.createBetweenPoints(pointer, pointer, style)
+        break
+      case WriteTool.Ellipse:
+        this.model.currentSymbol = OIShapeEllipse.createBetweenPoints(pointer, pointer, style)
         break
       case WriteTool.Line:
       case WriteTool.Arrow:
@@ -144,7 +139,7 @@ export class OIWriteManager
           startDecoration = EdgeDecoration.Arrow
           endDecoration = EdgeDecoration.Arrow
         }
-        this.model.currentSymbol = new OIEdgeLine(style, pointer, pointer, startDecoration, endDecoration)
+        this.model.currentSymbol = new OIEdgeLine(pointer, pointer, startDecoration, endDecoration, style)
         break
       }
       default:
@@ -155,25 +150,24 @@ export class OIWriteManager
 
   protected updateCurrentSymbolShape(pointer: TPointer): void
   {
-    const shape = this.model.currentSymbol as TOIShape
-    switch (shape.kind) {
-      case ShapeKind.Rhombus:
-        OIShapeRhombus.updateFromLine(shape as OIShapeRhombus, this.currentSymbolOrigin!, pointer)
+    switch (this.tool) {
+      case WriteTool.Rectangle:
+        OIShapePolygon.updateRectangleBetweenPoints(this.model.currentSymbol as OIShapePolygon, this.currentSymbolOrigin!, pointer)
         break
-      case ShapeKind.Rectangle:
-        OIShapeRectangle.updateFromLine(shape as OIShapeRectangle, this.currentSymbolOrigin!, pointer)
+      case WriteTool.Triangle:
+        OIShapePolygon.updateTriangleBetweenPoints(this.model.currentSymbol as OIShapePolygon, this.currentSymbolOrigin!, pointer)
         break
-      case ShapeKind.Circle:
-        OIShapeCircle.updateFromLine(shape as OIShapeCircle, this.currentSymbolOrigin!, pointer)
+      case WriteTool.Parallelogram:
+        OIShapePolygon.updateParallelogramBetweenPoints(this.model.currentSymbol as OIShapePolygon, this.currentSymbolOrigin!, pointer)
         break
-      case ShapeKind.Ellipse:
-        OIShapeEllipse.updateFromLine(shape as OIShapeEllipse, this.currentSymbolOrigin!, pointer)
+      case WriteTool.Rhombus:
+        OIShapePolygon.updateRhombusBetweenPoints(this.model.currentSymbol as OIShapePolygon, this.currentSymbolOrigin!, pointer)
         break
-      case ShapeKind.Triangle:
-        OIShapeTriangle.updateFromLine(shape as OIShapeTriangle, this.currentSymbolOrigin!, pointer)
+      case WriteTool.Circle:
+        OIShapeCircle.updateBetweenPoints(this.model.currentSymbol as OIShapeCircle, this.currentSymbolOrigin!, pointer)
         break
-      case ShapeKind.Parallelogram:
-        OIShapeParallelogram.updateFromLine(shape as OIShapeParallelogram, this.currentSymbolOrigin!, pointer)
+      case WriteTool.Ellipse:
+        OIShapeEllipse.updateBetweenPoints(this.model.currentSymbol as OIShapeEllipse, this.currentSymbolOrigin!, pointer)
         break
     }
   }
@@ -183,7 +177,7 @@ export class OIWriteManager
     const edge = this.model.currentSymbol as TOIEdge
     switch (edge.kind) {
       case EdgeKind.Line:
-        (this.model.currentSymbol as OIEdgeLine).end = pointer
+        edge.end = pointer
         break
     }
   }
@@ -197,7 +191,7 @@ export class OIWriteManager
 
     switch (this.model.currentSymbol.type) {
       case SymbolType.Stroke:
-        (this.model.currentSymbol as OIStroke).addPointer(pointer)
+        this.model.currentSymbol!.addPointer(pointer)
         break
       case SymbolType.Shape:
         this.updateCurrentSymbolShape(pointer)
@@ -213,8 +207,6 @@ export class OIWriteManager
   {
     this.#logger.info("startWriting", { style, pointer, pointerType })
     const localPointer = pointer
-    this.currentSymbolOrigin = localPointer
-    this.createCurrentSymbol(localPointer, style, pointerType)
     if (this.tool !== WriteTool.Pencil) {
       const { x, y } = this.snaps.snapResize(pointer)
       localPointer.x = x
@@ -255,18 +247,19 @@ export class OIWriteManager
     this.currentSymbolOrigin = undefined
 
     this.model.addSymbol(symbol)
+    this.history.push(this.model, { added: [symbol] })
 
     if (symbol.type === SymbolType.Stroke) {
       let gestureFromContextLess: TGesture | undefined
-      const currentStroke = symbol as OIStroke
+      const currentStroke = symbol
       if (this.needContextLessGesture) {
         gestureFromContextLess = await this.gestureManager.getGestureFromContextLess(currentStroke)
       }
       if (gestureFromContextLess) {
+        this.history.pop()
         this.gestureManager.apply(currentStroke, gestureFromContextLess)
       }
       else {
-        this.history.push(this.model, { added: [symbol] })
         const gesture = await this.recognizer.addStrokes([currentStroke], this.detectGesture)
         if (gesture) {
           this.history.pop()

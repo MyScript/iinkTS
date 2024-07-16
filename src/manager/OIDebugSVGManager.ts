@@ -165,21 +165,21 @@ export class OIDebugSVGManager
               char: c.label,
               transform
             }
-            symEl.insertAdjacentElement("beforebegin", SVGBuilder.createRect(c.boundingBox, ca))
+            symEl.insertAdjacentElement("beforebegin", SVGBuilder.createRect(c.bounds, ca))
           })
           const sa = {
             ...symbolAttrs,
             symbol: s.id,
             transform
           }
-          symEl.insertAdjacentElement("beforebegin", SVGBuilder.createRect(s.boundingBox, sa))
+          symEl.insertAdjacentElement("beforebegin", SVGBuilder.createRect(s.bounds, sa))
         }
         else {
           const sa = {
             ...symbolAttrs,
             symbol: s.id,
           }
-          symEl.insertAdjacentElement("beforebegin", SVGBuilder.createRect(s.boundingBox, sa))
+          symEl.insertAdjacentElement("beforebegin", SVGBuilder.createRect(s.bounds, sa))
         }
       }
     })

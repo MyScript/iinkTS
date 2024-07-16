@@ -225,7 +225,7 @@ export class OISVGRendererUtil
     }
     const groupEl = SVGBuilder.createGroup(attrs)
 
-    groupSym.symbols.forEach(sym => {
+    groupSym.children.forEach(sym => {
       groupEl.append(this.getSymbolElement(sym)!)
     })
 
@@ -244,23 +244,23 @@ export class OISVGRendererUtil
     return groupEl
   }
 
-  getSymbolElement(symbol: TOISymbol): SVGGraphicsElement | undefined
+  getSymbolElement(symbol: TOISymbol | OIEraser): SVGGraphicsElement | undefined
   {
     switch (symbol.type) {
       case SymbolType.Stroke:
-        return this.getStrokeElement(symbol as OIStroke)
+        return this.getStrokeElement(symbol)
       case SymbolType.Eraser:
-        return this.getEraserElement(symbol as OIEraser)
+        return this.getEraserElement(symbol)
       case SymbolType.Shape:
-        return this.getShapeElement(symbol as TOIShape)
+        return this.getShapeElement(symbol)
       case SymbolType.Edge:
-        return this.getEdgeElement(symbol as TOIEdge)
+        return this.getEdgeElement(symbol)
       case SymbolType.Text:
-        return this.getTextElement(symbol as OIText)
+        return this.getTextElement(symbol)
       case SymbolType.Group:
-        return this.getGroupElement(symbol as OISymbolGroup)
+        return this.getGroupElement(symbol)
       default:
-        this.#logger.error("getSymbolElement", `symbol type is unknow: "${ symbol.type }"`)
+        this.#logger.error("getSymbolElement", `symbol unknow: "${ JSON.stringify(symbol) }"`)
         return
     }
   }

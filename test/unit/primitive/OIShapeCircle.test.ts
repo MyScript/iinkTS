@@ -21,7 +21,7 @@ describe("OIShapeCircle.ts", () =>
         color: "blue",
         width: 20
       }
-      const circle = new OIShapeCircle(style, center, radius)
+      const circle = new OIShapeCircle(center, radius, style)
       expect(circle).toBeDefined()
       expect(circle.creationTime).toBeLessThanOrEqual(Date.now())
       expect(circle.creationTime).toEqual(circle.modificationDate)
@@ -29,33 +29,29 @@ describe("OIShapeCircle.ts", () =>
       expect(circle.selected).toEqual(false)
       expect(circle.center).toEqual(center)
       expect(circle.radius).toEqual(radius)
-      expect(circle.boundingBox.x).toEqual(0)
-      expect(circle.boundingBox.y).toEqual(-5)
-      expect(circle.boundingBox.width).toEqual(10)
-      expect(circle.boundingBox.height).toEqual(10)
+      expect(circle.bounds.x).toEqual(0)
+      expect(circle.bounds.y).toEqual(-5)
+      expect(circle.bounds.width).toEqual(10)
+      expect(circle.bounds.height).toEqual(10)
       expect(circle.vertices).toHaveLength(8)
     })
     test("should create with default style", () =>
     {
       const center: TPoint = { x: 5, y: 0 }
       const radius = 5
-      const circle = new OIShapeCircle({}, center, radius)
+      const circle = new OIShapeCircle(center, radius)
       expect(circle.style).toEqual(DefaultStyle)
     })
     test("should create and have many vertices", () =>
     {
       const center: TPoint = { x: 5, y: 0 }
       const radius = 50
-      const style: TStyle = {
-        color: "blue",
-        width: 20
-      }
-      const circle = new OIShapeCircle(style, center, radius)
+      const circle = new OIShapeCircle(center, radius)
       expect(circle.vertices).toHaveLength(31)
     })
   })
 
-  describe("createFromLine", () =>
+  describe("createBetweenPoints", () =>
   {
     test("should create", () =>
     {
@@ -65,7 +61,7 @@ describe("OIShapeCircle.ts", () =>
         color: "blue",
         width: 20
       }
-      const circle = OIShapeCircle.createFromLine(style, origin, target)
+      const circle = OIShapeCircle.createBetweenPoints(origin, target, style)
       expect(circle).toBeDefined()
       expect(circle.creationTime).toBeLessThanOrEqual(Date.now())
       expect(circle.creationTime).toEqual(circle.modificationDate)
@@ -76,126 +72,102 @@ describe("OIShapeCircle.ts", () =>
     {
       const origin: TPoint = { x: 1, y: 2 }
       const target: TPoint = { x: 4, y: 6 }
-      const circle = OIShapeCircle.createFromLine({}, origin, target)
+      const circle = OIShapeCircle.createBetweenPoints(origin, target)
       expect(circle.style).toEqual(DefaultStyle)
     })
     test("should create when origin is equal to target", () =>
     {
       const origin: TPoint = { x: 1, y: 2 }
       const target: TPoint = { x: 1, y: 2 }
-      const style: TStyle = {
-        color: "blue",
-        width: 20
-      }
-      const circle = OIShapeCircle.createFromLine(style, origin, target)
+      const circle = OIShapeCircle.createBetweenPoints(origin, target)
       expect(circle.center).toEqual(origin)
       expect(circle.radius).toEqual(0)
-      expect(circle.boundingBox.height).toEqual(0)
-      expect(circle.boundingBox.width).toEqual(0)
-      expect(circle.boundingBox.x).toEqual(1)
-      expect(circle.boundingBox.y).toEqual(2)
+      expect(circle.bounds.height).toEqual(0)
+      expect(circle.bounds.width).toEqual(0)
+      expect(circle.bounds.x).toEqual(1)
+      expect(circle.bounds.y).toEqual(2)
       expect(circle.vertices).toHaveLength(8)
     })
     test("should create when origin is at the top left", () =>
     {
       const origin: TPoint = { x: 1, y: 2 }
       const target: TPoint = { x: 11, y: 22 }
-      const style: TStyle = {
-        color: "blue",
-        width: 20
-      }
-      const circle = OIShapeCircle.createFromLine(style, origin, target)
+      const circle = OIShapeCircle.createBetweenPoints(origin, target)
       expect(circle.center).toEqual({ x: 6, y: 12 })
       expect(round(circle.radius, 0)).toEqual(5)
-      expect(round(circle.boundingBox.width, 0)).toEqual(10)
-      expect(round(circle.boundingBox.height, 0)).toEqual(10)
-      expect(round(circle.boundingBox.x, 0)).toEqual(1)
-      expect(round(circle.boundingBox.y, 0)).toEqual(7)
+      expect(round(circle.bounds.width, 0)).toEqual(10)
+      expect(round(circle.bounds.height, 0)).toEqual(10)
+      expect(round(circle.bounds.x, 0)).toEqual(1)
+      expect(round(circle.bounds.y, 0)).toEqual(7)
     })
     test("should create when origin is at the top right", () =>
     {
       const origin: TPoint = { x: 11, y: 2 }
       const target: TPoint = { x: 1, y: 22 }
-      const style: TStyle = {
-        color: "blue",
-        width: 20
-      }
-      const circle = OIShapeCircle.createFromLine(style, origin, target)
+      const circle = OIShapeCircle.createBetweenPoints(origin, target)
       expect(circle.center).toEqual({ x: 6, y: 12 })
       expect(round(circle.radius, 0)).toEqual(5)
-      expect(round(circle.boundingBox.width, 0)).toEqual(10)
-      expect(round(circle.boundingBox.height, 0)).toEqual(10)
-      expect(round(circle.boundingBox.x, 0)).toEqual(1)
-      expect(round(circle.boundingBox.y, 0)).toEqual(7)
+      expect(round(circle.bounds.width, 0)).toEqual(10)
+      expect(round(circle.bounds.height, 0)).toEqual(10)
+      expect(round(circle.bounds.x, 0)).toEqual(1)
+      expect(round(circle.bounds.y, 0)).toEqual(7)
     })
     test("should create when origin is at the bottom right", () =>
     {
       const origin: TPoint = { x: 11, y: 22 }
       const target: TPoint = { x: 1, y: 2 }
-      const style: TStyle = {
-        color: "blue",
-        width: 20
-      }
-      const circle = OIShapeCircle.createFromLine(style, origin, target)
+      const circle = OIShapeCircle.createBetweenPoints(origin, target)
       expect(circle.center).toEqual({ x: 6, y: 12 })
       expect(round(circle.radius, 0)).toEqual(5)
-      expect(round(circle.boundingBox.width, 0)).toEqual(10)
-      expect(round(circle.boundingBox.height, 0)).toEqual(10)
-      expect(round(circle.boundingBox.x, 0)).toEqual(1)
-      expect(round(circle.boundingBox.y, 0)).toEqual(7)
+      expect(round(circle.bounds.width, 0)).toEqual(10)
+      expect(round(circle.bounds.height, 0)).toEqual(10)
+      expect(round(circle.bounds.x, 0)).toEqual(1)
+      expect(round(circle.bounds.y, 0)).toEqual(7)
     })
     test("should create when origin is at the bottom left", () =>
     {
       const origin: TPoint = { x: 1, y: 22 }
       const target: TPoint = { x: 11, y: 2 }
-      const style: TStyle = {
-        color: "blue",
-        width: 20
-      }
-      const circle = OIShapeCircle.createFromLine(style, origin, target)
+      const circle = OIShapeCircle.createBetweenPoints(origin, target)
       expect(circle.center).toEqual({ x: 6, y: 12 })
       expect(round(circle.radius, 0)).toEqual(5)
-      expect(round(circle.boundingBox.width, 0)).toEqual(10)
-      expect(round(circle.boundingBox.height, 0)).toEqual(10)
-      expect(round(circle.boundingBox.x, 0)).toEqual(1)
-      expect(round(circle.boundingBox.y, 0)).toEqual(7)
+      expect(round(circle.bounds.width, 0)).toEqual(10)
+      expect(round(circle.bounds.height, 0)).toEqual(10)
+      expect(round(circle.bounds.x, 0)).toEqual(1)
+      expect(round(circle.bounds.y, 0)).toEqual(7)
     })
   })
 
-  describe("updateFromLine", () =>
+  describe("updateBetweenPoints", () =>
   {
     const origin: TPoint = { x: 1, y: 2 }
     const target: TPoint = { x: 4, y: 6 }
-    const style: TStyle = {
-      color: "blue",
-      width: 20
-    }
-    const circle = OIShapeCircle.createFromLine(style, origin, target)
-    test("should updateFromLine when target x increas", () =>
+    const circle = OIShapeCircle.createBetweenPoints(origin, target)
+    test("should updateBetweenPoints when target x increas", () =>
     {
       expect(circle.center).toEqual({ x: 2.5, y: 4 })
       expect(round(circle.radius, 0)).toEqual(2)
-      expect(round(circle.boundingBox.width, 0)).toEqual(3)
-      expect(round(circle.boundingBox.height, 0)).toEqual(3)
-      expect(round(circle.boundingBox.x, 0)).toEqual(1)
-      expect(round(circle.boundingBox.y, 0)).toEqual(3)
-      OIShapeCircle.updateFromLine(circle, origin, { x: target.x + 6, y: target.y })
+      expect(round(circle.bounds.width, 0)).toEqual(3)
+      expect(round(circle.bounds.height, 0)).toEqual(3)
+      expect(round(circle.bounds.x, 0)).toEqual(1)
+      expect(round(circle.bounds.y, 0)).toEqual(3)
+      OIShapeCircle.updateBetweenPoints(circle, origin, { x: target.x + 6, y: target.y })
       expect(circle.center).toEqual({ x: 5.5, y: 4 })
       expect(round(circle.radius, 0)).toEqual(2)
-      expect(round(circle.boundingBox.width, 0)).toEqual(4)
-      expect(round(circle.boundingBox.height, 0)).toEqual(4)
-      expect(round(circle.boundingBox.x, 0)).toEqual(4)
-      expect(round(circle.boundingBox.y, 0)).toEqual(2)
+      expect(round(circle.bounds.width, 0)).toEqual(4)
+      expect(round(circle.bounds.height, 0)).toEqual(4)
+      expect(round(circle.bounds.x, 0)).toEqual(4)
+      expect(round(circle.bounds.y, 0)).toEqual(2)
     })
-    test("should updateFromLine when target y increase", () =>
+    test("should updateBetweenPoints when target y increase", () =>
     {
-      OIShapeCircle.updateFromLine(circle, origin, { x: target.x, y: target.y + 4 })
+      OIShapeCircle.updateBetweenPoints(circle, origin, { x: target.x, y: target.y + 4 })
       expect(circle.center).toEqual({ x: 2.5, y: 6 })
       expect(round(circle.radius, 0)).toEqual(2)
-      expect(round(circle.boundingBox.width, 0)).toEqual(3)
-      expect(round(circle.boundingBox.height, 0)).toEqual(3)
-      expect(round(circle.boundingBox.x, 0)).toEqual(1)
-      expect(round(circle.boundingBox.y, 0)).toEqual(5)
+      expect(round(circle.bounds.width, 0)).toEqual(3)
+      expect(round(circle.bounds.height, 0)).toEqual(3)
+      expect(round(circle.bounds.x, 0)).toEqual(1)
+      expect(round(circle.bounds.y, 0)).toEqual(5)
     })
   })
 
@@ -203,11 +175,7 @@ describe("OIShapeCircle.ts", () =>
   {
     const center: TPoint = { x: 5, y: 0 }
     const radius = 50
-    const style: TStyle = {
-      color: "blue",
-      width: 20
-    }
-    const circle = new OIShapeCircle(style, center, radius)
+    const circle = new OIShapeCircle(center, radius)
     test(`should return true when the point is within ${ SELECTION_MARGIN } pixel of an edge`, () =>
     {
       const closePoint: TPoint = { x: center.x, y: center.y + radius + SELECTION_MARGIN / 2 }
@@ -228,11 +196,7 @@ describe("OIShapeCircle.ts", () =>
   {
     const center: TPoint = { x: 10, y: 10 }
     const radius = 10
-    const style: TStyle = {
-      color: "blue",
-      width: 20
-    }
-    const circle = new OIShapeCircle(style, center, radius)
+    const circle = new OIShapeCircle(center, radius)
     test(`should return true if partially wrap`, () =>
     {
       const boundaries: TBoundingBox = { height: 10, width: 10, x: -5, y: -5 }
@@ -265,7 +229,7 @@ describe("OIShapeCircle.ts", () =>
         color: "blue",
         width: 20
       }
-      const circle = new OIShapeCircle(style, center, radius)
+      const circle = new OIShapeCircle(center, radius, style)
       const clone = circle.clone()
       expect(clone).toEqual(circle)
       expect(clone).not.toBe(circle)

@@ -1,49 +1,55 @@
-import { LoggerClass, SELECTION_MARGIN } from "../Constants"
-import { LoggerManager } from "../logger"
-import { PartialDeep, computeDistance, createUUID } from "../utils"
+import { SELECTION_MARGIN } from "../Constants"
+import { computeDistance, createUUID, PartialDeep } from "../utils"
 import { TPoint, TPointer } from "./Point"
 import { Box, TBoundingBox } from "./Box"
 import { SymbolType } from "./Symbol"
-
-import { TOISymbol } from "./OISymbol"
+import { OISymbolBase } from "./OISymbolBase"
 import { TStyle } from "../style"
+
+const style: TStyle = {
+  color: "grey",
+  fill: "none",
+  width: 12,
+  opacity: 0.2
+}
 
 /**
  * @group Primitive
  */
-export class OIEraser implements TOISymbol
+export class OIEraser extends OISymbolBase<SymbolType.Eraser>
 {
-  #logger = LoggerManager.getLogger(LoggerClass.STROKE)
-  readonly type = SymbolType.Eraser
-  id: string
-  creationTime: number
-  modificationDate: number
   pointers: TPointer[]
-  selected = false
-  deleting = false
 
   constructor()
   {
-    this.#logger.info("constructor")
+    super(SymbolType.Eraser, style)
     this.id = `${ this.type }-${ createUUID() }`
     this.creationTime = Date.now()
     this.modificationDate = this.creationTime
     this.pointers = []
   }
 
+  get bounds(): Box
+  {
+    return Box.createFromPoints(this.vertices)
+  }
+
   get vertices(): TPoint[]
   {
     return this.pointers
   }
-  get boundingBox(): Box {
-    return Box.createFromPoints(this.vertices)
-  }
-  get snapPoints(): TPoint[] {
+
+  get snapPoints(): TPoint[]
+  {
     return []
   }
-  get style(): TStyle
+
+  clone(): OISymbolBase
   {
-    return { }
+    const clone = new OIEraser()
+    clone.id = this.id
+    clone.pointers = structuredClone(this.pointers)
+    return clone
   }
 
   overlaps(box: TBoundingBox): boolean
@@ -63,22 +69,12 @@ export class OIEraser implements TOISymbol
     })
   }
 
-  clone(): OIEraser
-  {
-    const clone = new OIEraser()
-    clone.id = this.id
-    clone.creationTime = this.creationTime
-    clone.modificationDate = this.modificationDate
-    clone.pointers = structuredClone(this.pointers)
-    return clone
-  }
-
   toJSON(): PartialDeep<OIEraser>
   {
     return {
       id: this.id,
-      type: this.type,
-      pointers: this.pointers
+      pointers: this.pointers,
+      style: this.style
     }
   }
 }

@@ -129,7 +129,7 @@ describe("OIConversionManager.ts", () =>
       manager.model.symbols.push(stroke)
       const result = manager.convertNode(jiixNodeRect)!
       expect(result.strokes).toEqual([stroke])
-      expect(result.symbol.kind).toEqual("rectangle")
+      expect(result.symbol.kind).toEqual("polygon")
     })
     test("should return converted symbol & strokes associate when rectangle", async () =>
     {
@@ -156,7 +156,7 @@ describe("OIConversionManager.ts", () =>
       manager.model.symbols.push(stroke)
       const result = manager.convertNode(jiixNodeTriangle)!
       expect(result.strokes).toEqual([stroke])
-      expect(result.symbol.kind).toEqual("triangle")
+      expect(result.symbol.kind).toEqual("polygon")
     })
     test("should return converted symbol & strokes associate when parallelogram", async () =>
     {
@@ -165,7 +165,7 @@ describe("OIConversionManager.ts", () =>
       manager.model.symbols.push(stroke)
       const result = manager.convertNode(jiixNodeParrallelogram)!
       expect(result.strokes).toEqual([stroke])
-      expect(result.symbol.kind).toEqual("parallelogram")
+      expect(result.symbol.kind).toEqual("polygon")
     })
     test("should return converted symbol & strokes associate when rhombus", async () =>
     {
@@ -174,7 +174,7 @@ describe("OIConversionManager.ts", () =>
       manager.model.symbols.push(stroke)
       const result = manager.convertNode(jiixNodeRhombus)!
       expect(result.strokes).toEqual([stroke])
-      expect(result.symbol.kind).toEqual("rhombus")
+      expect(result.symbol.kind).toEqual("polygon")
     })
     test("should return converted symbol & strokes associate when polygon", async () =>
     {

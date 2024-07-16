@@ -16,7 +16,7 @@ export class OISVGDecoratorUtil
     this.removalFilterId = removalFilterId
   }
 
-  getSVGElement(decorator: OIDecorator, { deleting, style, boundingBox }: { deleting: boolean, style: TStyle, boundingBox: Box }): SVGGeometryElement | undefined
+  getSVGElement(decorator: OIDecorator, { deleting, style, bounds }: { deleting: boolean, style: TStyle, bounds: Box }): SVGGeometryElement | undefined
   {
     const attrs: { [key: string]: string } = {
       "id": decorator.id,
@@ -38,26 +38,26 @@ export class OISVGDecoratorUtil
         attrs["opacity"] = deleting ? "0.25" : "0.5"
         attrs["stroke"] = "transparent"
         attrs["fill"] = decorator.style.color || DefaultStyle.color!
-        const bounds: TBoundingBox = {
-          x: boundingBox.x - (style.width || 1),
-          y: boundingBox.y - (style.width || 1),
-          height: boundingBox.height + (style.width || 1) * 2,
-          width: boundingBox.width + (style.width || 1) * 2,
+        const boundingBox: TBoundingBox = {
+          x: bounds.x - (style.width || 1),
+          y: bounds.y - (style.width || 1),
+          height: bounds.height + (style.width || 1) * 2,
+          width: bounds.width + (style.width || 1) * 2,
         }
-        element = SVGBuilder.createRect(bounds, attrs)
+        element = SVGBuilder.createRect(boundingBox, attrs)
         break
       }
       case DecoratorKind.Surround: {
         attrs["fill"] = "transparent"
         attrs["stroke"] = decorator.style.color || DefaultStyle.color!
         attrs["stroke-width"] = (decorator.style.width || DefaultStyle.width!).toString()
-        const bounds: TBoundingBox = {
-          x: boundingBox.x - (style.width || 1),
-          y: boundingBox.y - (style.width || 1),
-          height: boundingBox.height + (style.width || 1) * 2,
-          width: boundingBox.width + (style.width || 1) * 2,
+        const boundingBox: TBoundingBox = {
+          x: bounds.x - (style.width || 1),
+          y: bounds.y - (style.width || 1),
+          height: bounds.height + (style.width || 1) * 2,
+          width: bounds.width + (style.width || 1) * 2,
         }
-        element = SVGBuilder.createRect(bounds, attrs)
+        element = SVGBuilder.createRect(boundingBox, attrs)
         break
       }
       case DecoratorKind.Strikethrough: {
@@ -65,12 +65,12 @@ export class OISVGDecoratorUtil
         attrs["stroke"] = decorator.style.color || DefaultStyle.color!
         attrs["stroke-width"] = (decorator.style.width || DefaultStyle.width!).toString()
         const p1 = {
-          x: boundingBox.xMin,
-          y: boundingBox.yMid
+          x: bounds.xMin,
+          y: bounds.yMid
         }
         const p2 = {
-          x: boundingBox.xMax,
-          y: boundingBox.yMid
+          x: bounds.xMax,
+          y: bounds.yMid
         }
         element = SVGBuilder.createLine(p1, p2, attrs)
         break
@@ -80,12 +80,12 @@ export class OISVGDecoratorUtil
         attrs["stroke"] = decorator.style.color || DefaultStyle.color!
         attrs["stroke-width"] = (decorator.style.width || DefaultStyle.width!).toString()
         const p1 = {
-          x: boundingBox.xMin,
-          y: boundingBox.yMax + (style.width || 1)
+          x: bounds.xMin,
+          y: bounds.yMax + (style.width || 1)
         }
         const p2 = {
-          x: boundingBox.xMax,
-          y: boundingBox.yMax + (style.width || 1)
+          x: bounds.xMax,
+          y: bounds.yMax + (style.width || 1)
         }
         element = SVGBuilder.createLine(p1, p2, attrs)
         break

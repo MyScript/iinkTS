@@ -9,17 +9,15 @@ import
   OIStroke,
   DefaultStyle,
   TStyle,
-  OIShapeRectangle,
   OIShapeCircle,
   ShapeKind,
-  OIShapeParallelogram,
-  OIShapeTriangle,
   EdgeDecoration,
   OIEdgeArc,
   OIEdgeLine,
   EdgeKind,
   OIEraser,
-  OISymbolGroup
+  OISymbolGroup,
+  OIShapePolygon,
 } from "../../../src/iink"
 
 describe("OISVGRendererUtil.ts", () =>
@@ -39,7 +37,7 @@ describe("OISVGRendererUtil.ts", () =>
         fontWeight: 400,
         id: 'id-1',
         label: "first",
-        boundingBox: {
+        bounds: {
           height: 10,
           width: 5,
           x: 0,
@@ -52,7 +50,7 @@ describe("OISVGRendererUtil.ts", () =>
         fontWeight: 200,
         id: 'id-2',
         label: "second",
-        boundingBox: {
+        bounds: {
           height: 10,
           width: 5,
           x: 5,
@@ -62,7 +60,7 @@ describe("OISVGRendererUtil.ts", () =>
     ]
     const point: TPoint = { x: 0, y: 0 }
     const boundingBox: TBoundingBox = { height: 100, width: 100, x: 0, y: 0 }
-    const text = new OIText({}, chars, point, boundingBox)
+    const text = new OIText(chars, point, boundingBox)
 
     test("should getSymbolElement with style for each char", () =>
     {
@@ -117,8 +115,8 @@ describe("OISVGRendererUtil.ts", () =>
     test("should getSymbolElement with default style", () =>
     {
       const stroke = new OIStroke({})
-      stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
-      stroke.pointers.push({ p: 1, t: 1, x: 10, y: 1 })
+      stroke.addPointer({ p: 1, t: 1, x: 1, y: 1 })
+      stroke.addPointer({ p: 1, t: 1, x: 10, y: 1 })
       const el = renderer.getSymbolElement(stroke)!
       expect(el.getAttribute("id")).toEqual(stroke.id)
       expect(el.getAttribute("type")).toEqual("stroke")
@@ -132,8 +130,8 @@ describe("OISVGRendererUtil.ts", () =>
         width: 20
       }
       const stroke = new OIStroke(style)
-      stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
-      stroke.pointers.push({ p: 1, t: 1, x: 10, y: 1 })
+      stroke.addPointer({ p: 1, t: 1, x: 1, y: 1 })
+      stroke.addPointer({ p: 1, t: 1, x: 10, y: 1 })
       const el = renderer.getSymbolElement(stroke)!
       expect(el.getAttribute("id")).toEqual(stroke.id)
       expect(el.getAttribute("type")).toEqual("stroke")
@@ -143,8 +141,8 @@ describe("OISVGRendererUtil.ts", () =>
     test("should getSymbolElement with selected filter", () =>
     {
       const stroke = new OIStroke({})
-      stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
-      stroke.pointers.push({ p: 1, t: 1, x: 10, y: 1 })
+      stroke.addPointer({ p: 1, t: 1, x: 1, y: 1 })
+      stroke.addPointer({ p: 1, t: 1, x: 10, y: 1 })
       stroke.selected = true
       const el = renderer.getSymbolElement(stroke)!
       expect(el.getAttribute("id")).toEqual(stroke.id)
@@ -153,8 +151,8 @@ describe("OISVGRendererUtil.ts", () =>
     test("should getSymbolElement with removal filter", () =>
     {
       const stroke = new OIStroke({})
-      stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
-      stroke.pointers.push({ p: 1, t: 1, x: 10, y: 1 })
+      stroke.addPointer({ p: 1, t: 1, x: 1, y: 1 })
+      stroke.addPointer({ p: 1, t: 1, x: 10, y: 1 })
       stroke.deleting = true
       const el = renderer.getSymbolElement(stroke)!
       expect(el.getAttribute("id")).toEqual(stroke.id)
@@ -164,79 +162,11 @@ describe("OISVGRendererUtil.ts", () =>
 
   describe("shape", () =>
   {
-    describe("rectangle", () =>
-    {
-      test("should getSymbolElement with default style", () =>
-      {
-        const origin: TPoint = { x: 1, y: 1 }
-        const target: TPoint = { x: 11, y: 11 }
-        const rect = OIShapeRectangle.createFromLine({}, origin, target)
-        const el = renderer.getSymbolElement(rect)!
-        expect(el.getAttribute("id")).toEqual(rect.id)
-        expect(el.getAttribute("type")).toEqual(SymbolType.Shape)
-        expect(el.getAttribute("kind")).toEqual(ShapeKind.Rectangle)
-        expect(el.getAttribute("stroke")).toEqual(DefaultStyle.color)
-        expect(el.getAttribute("stroke-width")).toEqual(DefaultStyle.width?.toString())
-      })
-      test("should getSymbolElement with custom style", () =>
-      {
-        const style: TStyle = {
-          color: "blue",
-          width: 20
-        }
-        const origin: TPoint = { x: 1, y: 1 }
-        const target: TPoint = { x: 11, y: 11 }
-        const rect = OIShapeRectangle.createFromLine(style, origin, target)
-        const el = renderer.getSymbolElement(rect)!
-        expect(el.getAttribute("id")).toEqual(rect.id)
-        expect(el.getAttribute("type")).toEqual(SymbolType.Shape)
-        expect(el.getAttribute("kind")).toEqual(ShapeKind.Rectangle)
-        expect(el.getAttribute("stroke")).toEqual(style.color)
-        expect(el.getAttribute("stroke-width")).toEqual(style.width?.toString())
-      })
-      test("should getSymbolElement when selected", () =>
-      {
-        const origin: TPoint = { x: 1, y: 1 }
-        const target: TPoint = { x: 11, y: 11 }
-        const rect = OIShapeRectangle.createFromLine({}, origin, target)
-        const elNotSelected = renderer.getSymbolElement(rect)!
-        expect(elNotSelected.getAttribute("id")).toEqual(rect.id)
-        expect(elNotSelected.getAttribute("type")).toEqual(SymbolType.Shape)
-        expect(elNotSelected.getAttribute("kind")).toEqual(ShapeKind.Rectangle)
-        expect(elNotSelected.getAttribute("filter")).toBeFalsy()
-        rect.selected = true
-        const elSelected = renderer.getSymbolElement(rect)!
-        expect(elSelected.getAttribute("id")).toEqual(rect.id)
-        expect(elSelected.getAttribute("type")).toEqual(SymbolType.Shape)
-        expect(elSelected.getAttribute("kind")).toEqual(ShapeKind.Rectangle)
-        expect(elSelected.getAttribute("filter")).toEqual(`url(#${ selectionFilterId })`)
-      })
-      test("should getSymbolElement when deleting", () =>
-      {
-        const origin: TPoint = { x: 1, y: 1 }
-        const target: TPoint = { x: 11, y: 11 }
-        const rect = OIShapeRectangle.createFromLine({}, origin, target)
-        const elNotSelected = renderer.getSymbolElement(rect)!
-        expect(elNotSelected.getAttribute("id")).toEqual(rect.id)
-        expect(elNotSelected.getAttribute("type")).toEqual(SymbolType.Shape)
-        expect(elNotSelected.getAttribute("kind")).toEqual(ShapeKind.Rectangle)
-        expect(elNotSelected.getAttribute("filter")).toBeFalsy()
-        rect.deleting = true
-        const elSelected = renderer.getSymbolElement(rect)!
-        expect(elSelected.getAttribute("id")).toEqual(rect.id)
-        expect(elSelected.getAttribute("type")).toEqual(SymbolType.Shape)
-        expect(elSelected.getAttribute("kind")).toEqual(ShapeKind.Rectangle)
-        expect(elSelected.getAttribute("filter")).toEqual(`url(#${ removalFilterId })`)
-      })
-    })
-
     describe("circle", () =>
     {
       test("should getSymbolElement with default style", () =>
       {
-        const origin: TPoint = { x: 1, y: 1 }
-        const target: TPoint = { x: 11, y: 11 }
-        const circle = OIShapeCircle.createFromLine({}, origin, target)
+        const circle = new OIShapeCircle({ x: 0, y: 0 }, 5)
         const el = renderer.getSymbolElement(circle)!
         expect(el.getAttribute("id")).toEqual(circle.id)
         expect(el.getAttribute("type")).toEqual(SymbolType.Shape)
@@ -250,21 +180,15 @@ describe("OISVGRendererUtil.ts", () =>
           color: "blue",
           width: 20
         }
-        const origin: TPoint = { x: 1, y: 1 }
-        const target: TPoint = { x: 11, y: 11 }
-        const circle = OIShapeCircle.createFromLine(style, origin, target)
+        const circle = new OIShapeCircle({ x: 0, y: 0 }, 5, style)
         const el = renderer.getSymbolElement(circle)!
         expect(el.getAttribute("id")).toEqual(circle.id)
-        expect(el.getAttribute("type")).toEqual(SymbolType.Shape)
-        expect(el.getAttribute("kind")).toEqual(ShapeKind.Circle)
         expect(el.getAttribute("stroke")).toEqual(style.color)
         expect(el.getAttribute("stroke-width")).toEqual(style.width?.toString())
       })
       test("should getSymbolElement when selected", () =>
       {
-        const origin: TPoint = { x: 1, y: 1 }
-        const target: TPoint = { x: 11, y: 11 }
-        const circle = OIShapeCircle.createFromLine({}, origin, target)
+        const circle = new OIShapeCircle({ x: 0, y: 0 }, 5)
         const elNotSelected = renderer.getSymbolElement(circle)!
         expect(elNotSelected.getAttribute("id")).toEqual(circle.id)
         expect(elNotSelected.getAttribute("type")).toEqual(SymbolType.Shape)
@@ -279,9 +203,7 @@ describe("OISVGRendererUtil.ts", () =>
       })
       test("should getSymbolElement when deleting", () =>
       {
-        const origin: TPoint = { x: 1, y: 1 }
-        const target: TPoint = { x: 11, y: 11 }
-        const circle = OIShapeCircle.createFromLine({}, origin, target)
+        const circle = new OIShapeCircle({ x: 0, y: 0 }, 5)
         const elNotSelected = renderer.getSymbolElement(circle)!
         expect(elNotSelected.getAttribute("id")).toEqual(circle.id)
         expect(elNotSelected.getAttribute("type")).toEqual(SymbolType.Shape)
@@ -296,17 +218,15 @@ describe("OISVGRendererUtil.ts", () =>
       })
     })
 
-    describe("parallelogram", () =>
+    describe("polygon", () =>
     {
       test("should getSymbolElement with default style", () =>
       {
-        const origin: TPoint = { x: 1, y: 1 }
-        const target: TPoint = { x: 11, y: 11 }
-        const parallelogram = OIShapeParallelogram.createFromLine({}, origin, target)
-        const el = renderer.getSymbolElement(parallelogram)!
-        expect(el.getAttribute("id")).toEqual(parallelogram.id)
+        const polygon = new OIShapePolygon([{ x: 1, y: 1 }, { x: 11, y: 11 }])
+        const el = renderer.getSymbolElement(polygon)!
+        expect(el.getAttribute("id")).toEqual(polygon.id)
         expect(el.getAttribute("type")).toEqual(SymbolType.Shape)
-        expect(el.getAttribute("kind")).toEqual(ShapeKind.Parallelogram)
+        expect(el.getAttribute("kind")).toEqual(ShapeKind.Polygon)
         expect(el.getAttribute("stroke")).toEqual(DefaultStyle.color)
         expect(el.getAttribute("stroke-width")).toEqual(DefaultStyle.width?.toString())
       })
@@ -316,117 +236,36 @@ describe("OISVGRendererUtil.ts", () =>
           color: "blue",
           width: 20
         }
-        const origin: TPoint = { x: 0, y: 0 }
-        const target: TPoint = { x: 10, y: 20 }
-        const parallelogram = OIShapeParallelogram.createFromLine(style, origin, target)
-        const el = renderer.getSymbolElement(parallelogram)!
-        expect(el.getAttribute("id")).toEqual(parallelogram.id)
-        expect(el.getAttribute("type")).toEqual(SymbolType.Shape)
-        expect(el.getAttribute("kind")).toEqual(ShapeKind.Parallelogram)
+        const polygon = new OIShapePolygon([{ x: 1, y: 1 }, { x: 11, y: 11 }], style)
+        const el = renderer.getSymbolElement(polygon)!
+        expect(el.getAttribute("id")).toEqual(polygon.id)
         expect(el.getAttribute("stroke")).toEqual(style.color)
         expect(el.getAttribute("stroke-width")).toEqual(style.width?.toString())
       })
       test("should getSymbolElement when selected", () =>
       {
-        const origin: TPoint = { x: 1, y: 1 }
-        const target: TPoint = { x: 11, y: 11 }
-        const parallelogram = OIShapeParallelogram.createFromLine({}, origin, target)
-        const elNotSelected = renderer.getSymbolElement(parallelogram)!
-        expect(elNotSelected.getAttribute("id")).toEqual(parallelogram.id)
-        expect(elNotSelected.getAttribute("type")).toEqual(SymbolType.Shape)
-        expect(elNotSelected.getAttribute("kind")).toEqual(ShapeKind.Parallelogram)
+        const polygon = new OIShapePolygon([{ x: 1, y: 1 }, { x: 11, y: 11 }])
+        const elNotSelected = renderer.getSymbolElement(polygon)!
+        expect(elNotSelected.getAttribute("id")).toEqual(polygon.id)
         expect(elNotSelected.getAttribute("filter")).toBeFalsy()
-        parallelogram.selected = true
-        const elSelected = renderer.getSymbolElement(parallelogram)!
-        expect(elSelected.getAttribute("id")).toEqual(parallelogram.id)
-        expect(elSelected.getAttribute("type")).toEqual(SymbolType.Shape)
-        expect(elSelected.getAttribute("kind")).toEqual(ShapeKind.Parallelogram)
+        polygon.selected = true
+        const elSelected = renderer.getSymbolElement(polygon)!
+        expect(elSelected.getAttribute("id")).toEqual(polygon.id)
         expect(elSelected.getAttribute("filter")).toEqual(`url(#${ selectionFilterId })`)
       })
       test("should getSymbolElement when deleting", () =>
       {
-        const origin: TPoint = { x: 1, y: 1 }
-        const target: TPoint = { x: 11, y: 11 }
-        const parallelogram = OIShapeParallelogram.createFromLine({}, origin, target)
-        const elNotSelected = renderer.getSymbolElement(parallelogram)!
-        expect(elNotSelected.getAttribute("id")).toEqual(parallelogram.id)
-        expect(elNotSelected.getAttribute("type")).toEqual(SymbolType.Shape)
-        expect(elNotSelected.getAttribute("kind")).toEqual(ShapeKind.Parallelogram)
+        const polygon = new OIShapePolygon([{ x: 1, y: 1 }, { x: 11, y: 11 }])
+        const elNotSelected = renderer.getSymbolElement(polygon)!
+        expect(elNotSelected.getAttribute("id")).toEqual(polygon.id)
         expect(elNotSelected.getAttribute("filter")).toBeFalsy()
-        parallelogram.deleting = true
-        const elSelected = renderer.getSymbolElement(parallelogram)!
-        expect(elSelected.getAttribute("id")).toEqual(parallelogram.id)
-        expect(elSelected.getAttribute("type")).toEqual(SymbolType.Shape)
-        expect(elSelected.getAttribute("kind")).toEqual(ShapeKind.Parallelogram)
+        polygon.deleting = true
+        const elSelected = renderer.getSymbolElement(polygon)!
+        expect(elSelected.getAttribute("id")).toEqual(polygon.id)
         expect(elSelected.getAttribute("filter")).toEqual(`url(#${ removalFilterId })`)
       })
     })
 
-    describe("triangle", () =>
-    {
-      test("should getSymbolElement with default style", () =>
-      {
-        const origin: TPoint = { x: 1, y: 1 }
-        const target: TPoint = { x: 11, y: 11 }
-        const triangle = OIShapeTriangle.createFromLine({}, origin, target)
-        const el = renderer.getSymbolElement(triangle)!
-        expect(el.getAttribute("id")).toEqual(triangle.id)
-        expect(el.getAttribute("type")).toEqual(SymbolType.Shape)
-        expect(el.getAttribute("kind")).toEqual(ShapeKind.Triangle)
-        expect(el.getAttribute("stroke")).toEqual(DefaultStyle.color)
-        expect(el.getAttribute("stroke-width")).toEqual(DefaultStyle.width?.toString())
-      })
-      test("should getSymbolElement with custom style", () =>
-      {
-        const style: TStyle = {
-          color: "blue",
-          width: 20
-        }
-        const origin: TPoint = { x: 1, y: 1 }
-        const target: TPoint = { x: 11, y: 11 }
-        const triangle = OIShapeTriangle.createFromLine(style, origin, target)
-        const el = renderer.getSymbolElement(triangle)!
-        expect(el.getAttribute("id")).toEqual(triangle.id)
-        expect(el.getAttribute("type")).toEqual(SymbolType.Shape)
-        expect(el.getAttribute("kind")).toEqual("triangle")
-        expect(el.getAttribute("stroke")).toEqual(style.color)
-        expect(el.getAttribute("stroke-width")).toEqual(style.width?.toString())
-      })
-      test("should getSymbolElement when selected", () =>
-      {
-        const origin: TPoint = { x: 1, y: 1 }
-        const target: TPoint = { x: 11, y: 11 }
-        const triangle = OIShapeTriangle.createFromLine({}, origin, target)
-        const elNotSelected = renderer.getSymbolElement(triangle)!
-        expect(elNotSelected.getAttribute("id")).toEqual(triangle.id)
-        expect(elNotSelected.getAttribute("type")).toEqual(SymbolType.Shape)
-        expect(elNotSelected.getAttribute("kind")).toEqual(ShapeKind.Triangle)
-        expect(elNotSelected.getAttribute("filter")).toBeFalsy()
-        triangle.selected = true
-        const elSelected = renderer.getSymbolElement(triangle)!
-        expect(elSelected.getAttribute("id")).toEqual(triangle.id)
-        expect(elSelected.getAttribute("type")).toEqual(SymbolType.Shape)
-        expect(elSelected.getAttribute("kind")).toEqual(ShapeKind.Triangle)
-        expect(elSelected.getAttribute("filter")).toEqual(`url(#${ selectionFilterId })`)
-      })
-      test("should getSymbolElement when deleting", () =>
-      {
-        const origin: TPoint = { x: 1, y: 1 }
-        const target: TPoint = { x: 11, y: 11 }
-        const triangle = OIShapeTriangle.createFromLine({}, origin, target)
-        const elNotSelected = renderer.getSymbolElement(triangle)!
-        expect(elNotSelected.getAttribute("id")).toEqual(triangle.id)
-        expect(elNotSelected.getAttribute("type")).toEqual(SymbolType.Shape)
-        expect(elNotSelected.getAttribute("kind")).toEqual(ShapeKind.Triangle)
-        expect(elNotSelected.getAttribute("filter")).toBeFalsy()
-        triangle.deleting = true
-        const elSelected = renderer.getSymbolElement(triangle)!
-        expect(elSelected.getAttribute("id")).toEqual(triangle.id)
-        expect(elSelected.getAttribute("type")).toEqual(SymbolType.Shape)
-        expect(elSelected.getAttribute("kind")).toEqual(ShapeKind.Triangle)
-        expect(elSelected.getAttribute("filter")).toEqual(`url(#${ removalFilterId })`)
-      })
-    })
   })
 
   describe("edge", () =>
@@ -441,7 +280,7 @@ describe("OISVGRendererUtil.ts", () =>
         }
         const start: TPoint = { x: 1, y: 1 }
         const end: TPoint = { x: 11, y: 11 }
-        const line = new OIEdgeLine(style, start, end)
+        const line = new OIEdgeLine(start, end, undefined, undefined, style)
         const el = renderer.getSymbolElement(line)!
         expect(el.getAttribute("id")).toEqual(line.id)
         expect(el.getAttribute("type")).toEqual(SymbolType.Edge)
@@ -453,7 +292,7 @@ describe("OISVGRendererUtil.ts", () =>
       {
         const start: TPoint = { x: 1, y: 1 }
         const end: TPoint = { x: 11, y: 11 }
-        const line = new OIEdgeLine({}, start, end)
+        const line = new OIEdgeLine(start, end)
         const el = renderer.getSymbolElement(line)!
         expect(el.getAttribute("id")).toEqual(line.id)
         expect(el.getAttribute("type")).toEqual(SymbolType.Edge)
@@ -464,7 +303,7 @@ describe("OISVGRendererUtil.ts", () =>
       {
         const start: TPoint = { x: 1, y: 1 }
         const end: TPoint = { x: 11, y: 11 }
-        const line = new OIEdgeLine(DefaultStyle, start, end, EdgeDecoration.Arrow)
+        const line = new OIEdgeLine(start, end, EdgeDecoration.Arrow)
         const el = renderer.getSymbolElement(line)!
         expect(el.getAttribute("id")).toEqual(line.id)
         expect(el.getAttribute("type")).toEqual(SymbolType.Edge)
@@ -474,7 +313,7 @@ describe("OISVGRendererUtil.ts", () =>
       {
         const start: TPoint = { x: 1, y: 1 }
         const end: TPoint = { x: 11, y: 11 }
-        const line = new OIEdgeLine(DefaultStyle, start, end, undefined, EdgeDecoration.Arrow)
+        const line = new OIEdgeLine(start, end, undefined, EdgeDecoration.Arrow)
         const el = renderer.getSymbolElement(line)!
         expect(el.getAttribute("id")).toEqual(line.id)
         expect(el.getAttribute("type")).toEqual(SymbolType.Edge)
@@ -484,7 +323,7 @@ describe("OISVGRendererUtil.ts", () =>
       {
         const start: TPoint = { x: 1, y: 1 }
         const end: TPoint = { x: 11, y: 11 }
-        const line = new OIEdgeLine(DefaultStyle, start, end, EdgeDecoration.Arrow, EdgeDecoration.Arrow)
+        const line = new OIEdgeLine(start, end, EdgeDecoration.Arrow, EdgeDecoration.Arrow)
         const el = renderer.getSymbolElement(line)!
         expect(el.getAttribute("id")).toEqual(line.id)
         expect(el.getAttribute("type")).toEqual(SymbolType.Edge)
@@ -495,7 +334,7 @@ describe("OISVGRendererUtil.ts", () =>
       {
         const start: TPoint = { x: 1, y: 1 }
         const end: TPoint = { x: 11, y: 11 }
-        const line = new OIEdgeLine(DefaultStyle, start, end)
+        const line = new OIEdgeLine(start, end)
         const elNotSelected = renderer.getSymbolElement(line)!
         expect(elNotSelected.getAttribute("id")).toEqual(line.id)
         expect(elNotSelected.getAttribute("type")).toEqual(SymbolType.Edge)
@@ -510,7 +349,7 @@ describe("OISVGRendererUtil.ts", () =>
       {
         const start: TPoint = { x: 1, y: 1 }
         const end: TPoint = { x: 11, y: 11 }
-        const line = new OIEdgeLine(DefaultStyle, start, end)
+        const line = new OIEdgeLine(start, end)
         const elNotSelected = renderer.getSymbolElement(line)!
         expect(elNotSelected.getAttribute("id")).toEqual(line.id)
         expect(elNotSelected.getAttribute("type")).toEqual(SymbolType.Edge)
@@ -537,7 +376,7 @@ describe("OISVGRendererUtil.ts", () =>
         const radiusX = 10
         const radiusY = 50
         const phi = 0
-        const arc = new OIEdgeArc(style, center, startAngle, sweepAngle, radiusX, radiusY, phi)
+        const arc = new OIEdgeArc(center, startAngle, sweepAngle, radiusX, radiusY, phi, undefined, undefined, style)
         const el = renderer.getSymbolElement(arc)!
         expect(el.getAttribute("id")).toEqual(arc.id)
         expect(el.getAttribute("type")).toEqual(SymbolType.Edge)
@@ -547,7 +386,7 @@ describe("OISVGRendererUtil.ts", () =>
       })
       test("should getSymbolElement with default style", () =>
       {
-        const arc = new OIEdgeArc({}, { x: 1, y: 1 }, Math.PI / 4, Math.PI, 10, 50, 0)
+        const arc = new OIEdgeArc({ x: 1, y: 1 }, Math.PI / 4, Math.PI, 10, 50, 0)
         const el = renderer.getSymbolElement(arc)!
         expect(el.getAttribute("id")).toEqual(arc.id)
         expect(el.getAttribute("type")).toEqual(SymbolType.Edge)
@@ -556,7 +395,7 @@ describe("OISVGRendererUtil.ts", () =>
       })
       test("should getSymbolElement with startDecoration", () =>
       {
-        const arc = new OIEdgeArc({}, { x: 1, y: 1 }, Math.PI / 4, Math.PI, 10, 50, 0, EdgeDecoration.Arrow)
+        const arc = new OIEdgeArc({ x: 1, y: 1 }, Math.PI / 4, Math.PI, 10, 50, 0, EdgeDecoration.Arrow)
         const el = renderer.getSymbolElement(arc)!
         expect(el.getAttribute("id")).toEqual(arc.id)
         expect(el.getAttribute("type")).toEqual(SymbolType.Edge)
@@ -564,7 +403,7 @@ describe("OISVGRendererUtil.ts", () =>
       })
       test("should getSymbolElement with endDecoration", () =>
       {
-        const arc = new OIEdgeArc({}, { x: 1, y: 1 }, Math.PI / 4, Math.PI, 10, 50, 0, undefined, EdgeDecoration.Arrow)
+        const arc = new OIEdgeArc({ x: 1, y: 1 }, Math.PI / 4, Math.PI, 10, 50, 0, undefined, EdgeDecoration.Arrow)
         const el = renderer.getSymbolElement(arc)!
         expect(el.getAttribute("id")).toEqual(arc.id)
         expect(el.getAttribute("type")).toEqual(SymbolType.Edge)
@@ -572,7 +411,7 @@ describe("OISVGRendererUtil.ts", () =>
       })
       test("should getSymbolElement with startDecoration & endDecoration", () =>
       {
-        const arc = new OIEdgeArc({}, { x: 1, y: 1 }, Math.PI / 4, Math.PI, 10, 50, 0, EdgeDecoration.Arrow, EdgeDecoration.Arrow)
+        const arc = new OIEdgeArc({ x: 1, y: 1 }, Math.PI / 4, Math.PI, 10, 50, 0, EdgeDecoration.Arrow, EdgeDecoration.Arrow)
         const el = renderer.getSymbolElement(arc)!
         expect(el.getAttribute("id")).toEqual(arc.id)
         expect(el.getAttribute("type")).toEqual(SymbolType.Edge)
@@ -581,7 +420,7 @@ describe("OISVGRendererUtil.ts", () =>
       })
       test("should getSymbolElement when selected", () =>
       {
-        const arc = new OIEdgeArc({}, { x: 1, y: 1 }, Math.PI / 4, Math.PI, 10, 50, 0)
+        const arc = new OIEdgeArc({ x: 1, y: 1 }, Math.PI / 4, Math.PI, 10, 50, 0)
         const elNotSelected = renderer.getSymbolElement(arc)!
         expect(elNotSelected.getAttribute("id")).toEqual(arc.id)
         expect(elNotSelected.getAttribute("type")).toEqual(SymbolType.Edge)
@@ -594,7 +433,7 @@ describe("OISVGRendererUtil.ts", () =>
       })
       test("should getSymbolElement when deleting", () =>
       {
-        const arc = new OIEdgeArc({}, { x: 1, y: 1 }, Math.PI / 4, Math.PI, 10, 50, 0)
+        const arc = new OIEdgeArc({ x: 1, y: 1 }, Math.PI / 4, Math.PI, 10, 50, 0)
         const elNotSelected = renderer.getSymbolElement(arc)!
         expect(elNotSelected.getAttribute("id")).toEqual(arc.id)
         expect(elNotSelected.getAttribute("type")).toEqual(SymbolType.Edge)
@@ -628,9 +467,9 @@ describe("OISVGRendererUtil.ts", () =>
     test("should getSVGElement for group", () =>
     {
       const stroke = new OIStroke({})
-      stroke.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
-      stroke.pointers.push({ p: 1, t: 1, x: 10, y: 1 })
-      const groupSym = new OISymbolGroup({}, [stroke])
+      stroke.addPointer({ p: 1, t: 1, x: 1, y: 1 })
+      stroke.addPointer({ p: 1, t: 1, x: 10, y: 1 })
+      const groupSym = new OISymbolGroup([stroke])
       const el = renderer.getSymbolElement(groupSym)!
       expect(el.getAttribute("id")).toEqual(groupSym.id)
       expect(el.getAttribute("type")).toEqual("group")

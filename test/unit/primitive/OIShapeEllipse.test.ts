@@ -21,7 +21,7 @@ describe("OIShapeEllipse.ts", () =>
         color: "blue",
         width: 20
       }
-      const ellipse = new OIShapeEllipse(style, center, radiusX, radiusY)
+      const ellipse = new OIShapeEllipse(center, radiusX, radiusY, style)
       expect(ellipse).toBeDefined()
       expect(ellipse.creationTime).toBeLessThanOrEqual(Date.now())
       expect(ellipse.creationTime).toEqual(ellipse.modificationDate)
@@ -30,10 +30,10 @@ describe("OIShapeEllipse.ts", () =>
       expect(ellipse.center).toEqual(center)
       expect(ellipse.radiusX).toEqual(radiusX)
       expect(ellipse.radiusY).toEqual(radiusY)
-      expect(ellipse.boundingBox.x).toEqual(0)
-      expect(ellipse.boundingBox.y).toEqual(-10)
-      expect(ellipse.boundingBox.width).toEqual(10)
-      expect(ellipse.boundingBox.height).toEqual(20)
+      expect(ellipse.bounds.x).toEqual(0)
+      expect(ellipse.bounds.y).toEqual(-10)
+      expect(ellipse.bounds.width).toEqual(10)
+      expect(ellipse.bounds.height).toEqual(20)
       expect(ellipse.vertices).toHaveLength(8)
     })
     test("should create with default style", () =>
@@ -41,7 +41,7 @@ describe("OIShapeEllipse.ts", () =>
       const center: TPoint = { x: 5, y: 0 }
       const radiusX = 5
       const radiusY = 10
-      const ellipse = new OIShapeEllipse({}, center, radiusX, radiusY)
+      const ellipse = new OIShapeEllipse(center, radiusX, radiusY)
       expect(ellipse.style).toEqual(DefaultStyle)
     })
     test("should create and have many vertices", () =>
@@ -49,16 +49,12 @@ describe("OIShapeEllipse.ts", () =>
       const center: TPoint = { x: 5, y: 0 }
       const radiusX = 50
       const radiusY = 100
-      const style: TStyle = {
-        color: "blue",
-        width: 20
-      }
-      const ellipse = new OIShapeEllipse(style, center, radiusX, radiusY)
+      const ellipse = new OIShapeEllipse(center, radiusX, radiusY)
       expect(ellipse.vertices).toHaveLength(50)
     })
   })
 
-  describe("createFromLine", () =>
+  describe("createBetweenPoints", () =>
   {
     test("should create", () =>
     {
@@ -68,7 +64,7 @@ describe("OIShapeEllipse.ts", () =>
         color: "blue",
         width: 20
       }
-      const ellipse = OIShapeEllipse.createFromLine(style, origin, target)
+      const ellipse = OIShapeEllipse.createBetweenPoints(origin, target, style)
       expect(ellipse).toBeDefined()
       expect(ellipse.creationTime).toBeLessThanOrEqual(Date.now())
       expect(ellipse.creationTime).toEqual(ellipse.modificationDate)
@@ -82,98 +78,78 @@ describe("OIShapeEllipse.ts", () =>
     {
       const origin: TPoint = { x: 1, y: 2 }
       const target: TPoint = { x: 4, y: 6 }
-      const ellipse = OIShapeEllipse.createFromLine({}, origin, target)
+      const ellipse = OIShapeEllipse.createBetweenPoints(origin, target)
       expect(ellipse.style).toEqual(DefaultStyle)
     })
     test("should create when origin is equal to target", () =>
     {
       const origin: TPoint = { x: 1, y: 2 }
       const target: TPoint = { x: 1, y: 2 }
-      const style: TStyle = {
-        color: "blue",
-        width: 20
-      }
-      const ellipse = OIShapeEllipse.createFromLine(style, origin, target)
+      const ellipse = OIShapeEllipse.createBetweenPoints(origin, target)
       expect(ellipse.center).toEqual(origin)
       expect(ellipse.radiusX).toEqual(0)
       expect(ellipse.radiusY).toEqual(0)
-      expect(ellipse.boundingBox.height).toEqual(0)
-      expect(ellipse.boundingBox.width).toEqual(0)
-      expect(ellipse.boundingBox.x).toEqual(1)
-      expect(ellipse.boundingBox.y).toEqual(2)
+      expect(ellipse.bounds.height).toEqual(0)
+      expect(ellipse.bounds.width).toEqual(0)
+      expect(ellipse.bounds.x).toEqual(1)
+      expect(ellipse.bounds.y).toEqual(2)
       expect(ellipse.vertices).toHaveLength(8)
     })
     test("should create when origin is at the top left", () =>
     {
       const origin: TPoint = { x: 1, y: 2 }
       const target: TPoint = { x: 11, y: 22 }
-      const style: TStyle = {
-        color: "blue",
-        width: 20
-      }
-      const ellipse = OIShapeEllipse.createFromLine(style, origin, target)
+      const ellipse = OIShapeEllipse.createBetweenPoints(origin, target)
       expect(ellipse.center).toEqual({ x: 6, y: 12 })
       expect(ellipse.radiusX).toEqual(5)
       expect(ellipse.radiusY).toEqual(10)
-      expect(ellipse.boundingBox.width).toEqual(10)
-      expect(ellipse.boundingBox.height).toEqual(20)
-      expect(ellipse.boundingBox.x).toEqual(1)
-      expect(ellipse.boundingBox.y).toEqual(2)
+      expect(ellipse.bounds.width).toEqual(10)
+      expect(ellipse.bounds.height).toEqual(20)
+      expect(ellipse.bounds.x).toEqual(1)
+      expect(ellipse.bounds.y).toEqual(2)
     })
     test("should create when origin is at the top right", () =>
     {
       const origin: TPoint = { x: 11, y: 2 }
       const target: TPoint = { x: 1, y: 22 }
-      const style: TStyle = {
-        color: "blue",
-        width: 20
-      }
-      const ellipse = OIShapeEllipse.createFromLine(style, origin, target)
+      const ellipse = OIShapeEllipse.createBetweenPoints(origin, target)
       expect(ellipse.center).toEqual({ x: 6, y: 12 })
       expect(ellipse.radiusX).toEqual(5)
       expect(ellipse.radiusY).toEqual(10)
-      expect(ellipse.boundingBox.width).toEqual(10)
-      expect(ellipse.boundingBox.height).toEqual(20)
-      expect(ellipse.boundingBox.x).toEqual(1)
-      expect(ellipse.boundingBox.y).toEqual(2)
+      expect(ellipse.bounds.width).toEqual(10)
+      expect(ellipse.bounds.height).toEqual(20)
+      expect(ellipse.bounds.x).toEqual(1)
+      expect(ellipse.bounds.y).toEqual(2)
     })
     test("should create when origin is at the bottom right", () =>
     {
       const origin: TPoint = { x: 11, y: 22 }
       const target: TPoint = { x: 1, y: 2 }
-      const style: TStyle = {
-        color: "blue",
-        width: 20
-      }
-      const ellipse = OIShapeEllipse.createFromLine(style, origin, target)
+      const ellipse = OIShapeEllipse.createBetweenPoints(origin, target)
       expect(ellipse.center).toEqual({ x: 6, y: 12 })
       expect(ellipse.radiusX).toEqual(5)
       expect(ellipse.radiusY).toEqual(10)
-      expect(ellipse.boundingBox.width).toEqual(10)
-      expect(ellipse.boundingBox.height).toEqual(20)
-      expect(ellipse.boundingBox.x).toEqual(1)
-      expect(ellipse.boundingBox.y).toEqual(2)
+      expect(ellipse.bounds.width).toEqual(10)
+      expect(ellipse.bounds.height).toEqual(20)
+      expect(ellipse.bounds.x).toEqual(1)
+      expect(ellipse.bounds.y).toEqual(2)
     })
     test("should create when origin is at the bottom left", () =>
     {
       const origin: TPoint = { x: 1, y: 22 }
       const target: TPoint = { x: 11, y: 2 }
-      const style: TStyle = {
-        color: "blue",
-        width: 20
-      }
-      const ellipse = OIShapeEllipse.createFromLine(style, origin, target)
+      const ellipse = OIShapeEllipse.createBetweenPoints(origin, target)
       expect(ellipse.center).toEqual({ x: 6, y: 12 })
       expect(ellipse.radiusX).toEqual(5)
       expect(ellipse.radiusY).toEqual(10)
-      expect(ellipse.boundingBox.width).toEqual(10)
-      expect(ellipse.boundingBox.height).toEqual(20)
-      expect(ellipse.boundingBox.x).toEqual(1)
-      expect(ellipse.boundingBox.y).toEqual(2)
+      expect(ellipse.bounds.width).toEqual(10)
+      expect(ellipse.bounds.height).toEqual(20)
+      expect(ellipse.bounds.x).toEqual(1)
+      expect(ellipse.bounds.y).toEqual(2)
     })
   })
 
-  describe("updateFromLine", () =>
+  describe("updateFrupdateBetweenPointsomLine", () =>
   {
     const origin: TPoint = { x: 1, y: 2 }
     const target: TPoint = { x: 4, y: 6 }
@@ -181,35 +157,35 @@ describe("OIShapeEllipse.ts", () =>
       color: "blue",
       width: 20
     }
-    const ellipse = OIShapeEllipse.createFromLine(style, origin, target)
-    test("should updateFromLine when target x increas", () =>
+    const ellipse = OIShapeEllipse.createBetweenPoints(origin, target, style)
+    test("should updateBetweenPoints when target x increas", () =>
     {
       expect(ellipse.center).toEqual({ x: 2.5, y: 4 })
       expect(ellipse.radiusX).toEqual(1.5)
       expect(ellipse.radiusY).toEqual(2)
-      expect(ellipse.boundingBox.width).toEqual(3)
-      expect(ellipse.boundingBox.height).toEqual(4)
-      expect(ellipse.boundingBox.x).toEqual(1)
-      expect(ellipse.boundingBox.y).toEqual(2)
-      OIShapeEllipse.updateFromLine(ellipse, origin, { x: target.x + 6, y: target.y })
+      expect(ellipse.bounds.width).toEqual(3)
+      expect(ellipse.bounds.height).toEqual(4)
+      expect(ellipse.bounds.x).toEqual(1)
+      expect(ellipse.bounds.y).toEqual(2)
+      OIShapeEllipse.updateBetweenPoints(ellipse, origin, { x: target.x + 6, y: target.y })
       expect(ellipse.center).toEqual({ x: 5.5, y: 4 })
       expect(ellipse.radiusX).toEqual(4.5)
       expect(ellipse.radiusY).toEqual(2)
-      expect(ellipse.boundingBox.width).toEqual(9)
-      expect(ellipse.boundingBox.height).toEqual(4)
-      expect(ellipse.boundingBox.x).toEqual(1)
-      expect(ellipse.boundingBox.y).toEqual(2)
+      expect(ellipse.bounds.width).toEqual(9)
+      expect(ellipse.bounds.height).toEqual(4)
+      expect(ellipse.bounds.x).toEqual(1)
+      expect(ellipse.bounds.y).toEqual(2)
     })
-    test("should updateFromLine when target y increase", () =>
+    test("should updateBetweenPoints when target y increase", () =>
     {
-      OIShapeEllipse.updateFromLine(ellipse, origin, { x: target.x, y: target.y + 4 })
+      OIShapeEllipse.updateBetweenPoints(ellipse, origin, { x: target.x, y: target.y + 4 })
       expect(ellipse.center).toEqual({ x: 2.5, y: 6 })
       expect(ellipse.radiusX).toEqual(1.5)
       expect(ellipse.radiusY).toEqual(4)
-      expect(ellipse.boundingBox.width).toEqual(3)
-      expect(ellipse.boundingBox.height).toEqual(8)
-      expect(ellipse.boundingBox.x).toEqual(1)
-      expect(ellipse.boundingBox.y).toEqual(2)
+      expect(ellipse.bounds.width).toEqual(3)
+      expect(ellipse.bounds.height).toEqual(8)
+      expect(ellipse.bounds.x).toEqual(1)
+      expect(ellipse.bounds.y).toEqual(2)
     })
   })
 
@@ -218,7 +194,7 @@ describe("OIShapeEllipse.ts", () =>
     const center: TPoint = { x: 5, y: 0 }
     const radiusX = 50
     const radiusY = 100
-    const ellipse = new OIShapeEllipse({}, center, radiusX, radiusY)
+    const ellipse = new OIShapeEllipse(center, radiusX, radiusY)
     test(`should return true when the point is within ${ SELECTION_MARGIN } pixel of an edge`, () =>
     {
       const closePoint: TPoint = { x: center.x, y: center.y + radiusY + SELECTION_MARGIN / 2 }
@@ -240,7 +216,7 @@ describe("OIShapeEllipse.ts", () =>
     const center: TPoint = { x: 5, y: 0 }
     const radiusX = 5
     const radiusY = 10
-    const ellipse = new OIShapeEllipse({}, center, radiusX, radiusY)
+    const ellipse = new OIShapeEllipse(center, radiusX, radiusY)
     test(`should return true if partially wrap`, () =>
     {
       const boundaries: TBoundingBox = { height: 10, width: 10, x: -5, y: -5 }
@@ -270,7 +246,7 @@ describe("OIShapeEllipse.ts", () =>
       const center: TPoint = { x: 5, y: 0 }
       const radiusX = 5
       const radiusY = 10
-      const ellipse = new OIShapeEllipse({}, center, radiusX, radiusY)
+      const ellipse = new OIShapeEllipse(center, radiusX, radiusY)
       const clone = ellipse.clone()
       expect(clone).toEqual(ellipse)
       expect(clone).not.toBe(ellipse)

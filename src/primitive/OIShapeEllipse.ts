@@ -1,26 +1,28 @@
-import { LoggerClass, SELECTION_MARGIN } from "../Constants"
-import { LoggerManager } from "../logger"
-import { DefaultStyle, TStyle } from "../style"
+import { SELECTION_MARGIN } from "../Constants"
+import { TStyle } from "../style"
 import { PartialDeep, computeDistanceBetweenPointAndSegment, findIntersectionBetween2Segment, isValidNumber, } from "../utils"
 import { TPoint, isValidPoint } from "./Point"
-import { OIShape, ShapeKind } from "./OIShape"
+import { OIShapeBase, ShapeKind } from "./OIShape"
 import { Box, TBoundingBox } from "./Box"
 
 /**
  * @group Primitive
  */
-export class OIShapeEllipse extends OIShape
+export class OIShapeEllipse extends OIShapeBase<ShapeKind.Ellipse>
 {
-  #logger = LoggerManager.getLogger(LoggerClass.SHAPE)
   center: TPoint
   radiusX: number
   radiusY: number
   protected _vertices: Map<string, TPoint[]>
 
-  constructor(style: TStyle, center: TPoint, radiusX: number, radiusY: number)
+  constructor(
+    center: TPoint,
+    radiusX: number,
+    radiusY: number,
+    style?: PartialDeep<TStyle>
+  )
   {
     super(ShapeKind.Ellipse, style)
-    this.#logger.debug("constructor", { style, center, radiusX, radiusY })
     this.center = center
     this.radiusX = radiusX
     this.radiusY = radiusY
@@ -64,13 +66,13 @@ export class OIShapeEllipse extends OIShape
   overlaps(box: TBoundingBox): boolean
   {
 
-    return this.boundingBox.isContained(box) ||
+    return this.bounds.isContained(box) ||
       this.edges.some(e1 => Box.getSides(box).some(e2 => !!findIntersectionBetween2Segment(e1, e2)))
   }
 
   clone(): OIShapeEllipse
   {
-    const clone = new OIShapeEllipse(structuredClone(this.style), structuredClone(this.center), this.radiusX, this.radiusY)
+    const clone = new OIShapeEllipse(structuredClone(this.center), this.radiusX, this.radiusY, structuredClone(this.style))
     clone.id = this.id
     clone.selected = this.selected
     clone.deleting = this.deleting
@@ -91,7 +93,7 @@ export class OIShapeEllipse extends OIShape
     }
   }
 
-  static createFromLine(style: TStyle, origin: TPoint, target: TPoint): OIShapeEllipse
+  static createBetweenPoints(origin: TPoint, target: TPoint, style?: PartialDeep<TStyle>): OIShapeEllipse
   {
     const center = {
       x: (origin.x + target.x) / 2,
@@ -99,10 +101,10 @@ export class OIShapeEllipse extends OIShape
     }
     const radiusX = Math.abs(origin.x - target.x) / 2
     const radiusY = Math.abs(origin.y - target.y) / 2
-    return new OIShapeEllipse(style, center, radiusX, radiusY)
+    return new OIShapeEllipse(center, radiusX, radiusY, style)
   }
 
-  static updateFromLine(ellipse: OIShapeEllipse, origin: TPoint, target: TPoint): OIShapeEllipse
+  static updateBetweenPoints(ellipse: OIShapeEllipse, origin: TPoint, target: TPoint): OIShapeEllipse
   {
     ellipse.center = {
       x: (origin.x + target.x) / 2,
@@ -118,6 +120,6 @@ export class OIShapeEllipse extends OIShape
     if (!isValidPoint(partial.center)) throw new Error(`Unable to create circle, center is undefined`)
     if (!isValidNumber(partial.radiusX)) throw new Error(`Unable to create circle, radiusX is undefined`)
     if (!isValidNumber(partial.radiusY)) throw new Error(`Unable to create circle, radiusY is undefined`)
-    return new OIShapeEllipse(partial.style || DefaultStyle, partial.center as TPoint, partial.radiusX!, partial.radiusY!)
+    return new OIShapeEllipse(partial.center as TPoint, partial.radiusX!, partial.radiusY!, partial.style)
   }
 }

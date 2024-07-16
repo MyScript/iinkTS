@@ -4,7 +4,8 @@ import
   OISVGRenderer,
   DefaultRenderingConfiguration,
   TRenderingConfiguration,
-  TOISymbol
+  TOISymbol,
+  Box
 } from "../../../src/iink"
 
 describe("OISVGRenderer.ts", () =>
@@ -173,7 +174,7 @@ describe("OISVGRenderer.ts", () =>
       const unknowSym: TOISymbol = {
         //@ts-ignore
         type: "unknow",
-        boundingBox: { height: 0, width: 0, x: 0, y: 0, xMax: 0, xMid: 0, xMin: 0, yMax: 0, yMid: 0, yMin: 0 },
+        bounds: new Box({ height: 0, width: 0, x: 0, y: 0}),
         creationTime: Date.now(),
         modificationDate: Date.now(),
         clone: jest.fn(),
@@ -185,7 +186,6 @@ describe("OISVGRenderer.ts", () =>
       const el = divElement.querySelector(`#${ stroke.id }`)!
       expect(el).toBeNull()
       expect(console.error).toHaveBeenCalledTimes(1)
-      expect(console.error).toHaveBeenCalledWith({ "error": ["symbol type is unknow: \"unknow\""], "from": "RENDERER.getSymbolElement" })
 
     })
     test("should draw new stroke", () =>

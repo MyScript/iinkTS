@@ -1,34 +1,36 @@
-import { LoggerClass, SELECTION_MARGIN } from "../Constants"
-import { LoggerManager } from "../logger"
-import { DefaultStyle, TStyle } from "../style"
-import { PartialDeep, computeDistance, getClosestPoint} from "../utils"
+import { SELECTION_MARGIN } from "../Constants"
+import { TStyle } from "../style"
+import { PartialDeep, computeDistance, getClosestPoint } from "../utils"
 import { TStroke, TStrokeToSend } from "./Stroke"
 import { TPoint, TPointer } from "./Point"
-import { TBoundingBox } from "./Box"
+import { Box, TBoundingBox } from "./Box"
 import { SymbolType } from "./Symbol"
 import { OIDecorator } from "./OIDecorator"
-import { OISymbol } from "./OISymbol"
+import { OISymbolBase } from "./OISymbolBase"
 
 /**
  * @group Primitive
  */
-export class OIStroke extends OISymbol implements TStroke
+export class OIStroke extends OISymbolBase<SymbolType.Stroke>
 {
-  #logger = LoggerManager.getLogger(LoggerClass.STROKE)
   pointerType: string
-  pointers: TPointer[]
   length: number
   decorators: OIDecorator[]
+  pointers: Array<TPointer>
 
-  constructor(style: TStyle, pointerType = "pen")
+  constructor(style?: PartialDeep<TStyle>, pointerType = "pen")
   {
     super(SymbolType.Stroke, style)
-    this.#logger.info("constructor", { style, pointerType })
 
     this.pointerType = pointerType
     this.pointers = []
     this.decorators = []
     this.length = 0
+  }
+
+  get bounds(): Box
+  {
+    return Box.createFromPoints(this.vertices)
   }
 
   static split(strokeToSplit: OIStroke, i: number): { before: OIStroke, after: OIStroke }
@@ -73,7 +75,7 @@ export class OIStroke extends OISymbol implements TStroke
 
   get snapPoints(): TPoint[]
   {
-    return this.boundingBox.snapPoints
+    return this.bounds.snapPoints
   }
 
   get vertices(): TPoint[]
@@ -106,7 +108,6 @@ export class OIStroke extends OISymbol implements TStroke
 
   addPointer(pointer: TPointer): void
   {
-    this.#logger.debug("addPoint", { pointer })
     if (this.filterPointByAcquisitionDelta(pointer)) {
       const lastPointer = this.pointers.at(-1)
       const distance = lastPointer ? computeDistance(pointer, lastPointer) : 0
@@ -184,7 +185,7 @@ export class OIStroke extends OISymbol implements TStroke
     if (!partial.pointers?.length) {
       throw new Error(`not pointers`)
     }
-    const stroke = new OIStroke(partial.style || DefaultStyle, partial.pointerType)
+    const stroke = new OIStroke(partial.style, partial.pointerType)
     if (partial.id) stroke.id = partial.id
     const errors: string[] = []
     let flag = true
@@ -242,7 +243,7 @@ export function convertPartialStrokesToOIStrokes(json: PartialDeep<TStroke>[]): 
     try {
       strokes.push(OIStroke.create(j as PartialDeep<OIStroke>))
     } catch (e) {
-      errors.push(`stroke ${i + 1} has ${(e as Error).message}`)
+      errors.push(`stroke ${ i + 1 } has ${ (e as Error).message }`)
     }
   })
 

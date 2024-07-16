@@ -220,7 +220,7 @@ describe("OIModel.ts", () =>
 
     const group2 = buildOIGroup()
     const group21 = buildOIGroup()
-    group2.symbols.push(group21)
+    group2.children.push(group21)
     model.addSymbol(group2)
 
     test("shoud get symbol if stroke root", () =>
@@ -240,12 +240,12 @@ describe("OIModel.ts", () =>
 
     test("shoud get symbol if child of group root", () =>
     {
-      expect(model.getRootSymbol(group1.symbols[0].id)).toEqual(group1)
+      expect(model.getRootSymbol(group1.children[0].id)).toEqual(group1)
     })
 
     test("shoud get symbol if sub-child of group root", () =>
     {
-      expect(model.getRootSymbol(group21.symbols[0].id)).toEqual(group2)
+      expect(model.getRootSymbol(group21.children[0].id)).toEqual(group2)
     })
 
     test("shoud get undefined if child of group root", () =>
