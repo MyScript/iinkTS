@@ -581,9 +581,9 @@ export class OIBehaviors implements IBehaviors
     this.model.symbols.forEach(s =>
     {
       if (symbolIds.includes(s.id)) {
-        s.style = Object.assign(s.style, style)
+        s.style = Object.assign({}, s.style, style)
         if (s.type === SymbolType.Text) {
-          (s as OIText).chars.forEach(c =>
+          s.chars.forEach(c =>
           {
             if (style.color) {
               c.color = style.color
@@ -593,12 +593,27 @@ export class OIBehaviors implements IBehaviors
             }
           })
         }
+        else if (s.type === SymbolType.Group) {
+          s.updateChildrenStyle()
+        }
         this.renderer.drawSymbol(s)
         this.model.updateSymbol(s)
         s.modificationDate = Date.now()
         symbols.push(s)
       }
     })
+    if (symbols.length) {
+      let needAdjutText = false
+      symbols.forEach(s => {
+        if (s.type === SymbolType.Text) {
+          this.texter.updateTextBoundingBox(s)
+          needAdjutText = true
+        }
+      })
+      if (needAdjutText) {
+        this.texter.adjustText()
+      }
+    }
     if (addToHistory && symbols.length) {
       this.history.push(this.model, { style: { symbols, style } })
     }
@@ -714,7 +729,7 @@ export class OIBehaviors implements IBehaviors
           const wordStrokes = strokes.filter(s => w.items?.map(s => s["full-id"]).includes(s.id))
           if (wordStrokes.length) {
             const orginDeco: OIDecorator[] = []
-            let orginStyle: TStyle = this.currentPenStyle
+            let orginStyle: TStyle = wordStrokes[0].style
             if (w.items?.length !== wordStrokes.length) {
               w.items?.forEach(i =>
               {
@@ -722,7 +737,7 @@ export class OIBehaviors implements IBehaviors
                 if (sym?.type === SymbolType.Group) {
                   const group = sym as OISymbolGroup
                   orginDeco.push(...group.decorators)
-                  orginStyle = Object.assign(orginStyle, group.style)
+                  orginStyle = Object.assign({}, orginStyle, group.style)
                   wordStrokes.push(...group.extractStrokes())
                   this.model.removeSymbol(group.id)
                   this.renderer.removeSymbol(group.id)

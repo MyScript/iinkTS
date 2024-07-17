@@ -24,14 +24,6 @@ export class OISymbolGroup extends OISymbolBase<SymbolType.Group>
     super(SymbolType.Group, style)
     this.children = children
     this.decorators = []
-    this.style = new Proxy(this.style, {
-      set: (target: TStyle, p: PropertyKey, newValue: string): boolean =>
-      {
-        target = Object.assign({}, target, { [p]: newValue })
-        this.children.forEach(c => c.style = Object.assign({}, c.style, target))
-        return true
-      },
-    })
   }
 
   get snapPoints(): TPoint[]
@@ -47,6 +39,24 @@ export class OISymbolGroup extends OISymbolBase<SymbolType.Group>
   get bounds(): Box
   {
     return Box.createFromBoxes(this.children.map(c => c.bounds))
+  }
+
+  updateChildrenStyle(): void
+  {
+    this.children.forEach(child => {
+      child.style = Object.assign({}, child.style, this.style)
+      if (child.type === SymbolType.Text) {
+        child.chars.forEach(c =>
+        {
+          if (child.style.color) {
+            c.color = child.style.color
+          }
+          if (child.style.width) {
+            c.fontWeight = child.style.width * 100
+          }
+        })
+      }
+    })
   }
 
   overlaps(box: TBoundingBox): boolean

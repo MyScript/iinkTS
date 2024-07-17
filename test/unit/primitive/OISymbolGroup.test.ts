@@ -62,19 +62,21 @@ describe("OISymbolGroup.ts", () =>
     const circle = buildOICircle()
     const stroke = buildOIStroke()
     const group = new OISymbolGroup([circle, stroke])
-    test("should apply color to symbols ", () =>
+    test("should apply width to symbols ", () =>
     {
       expect(circle.style.width).not.toEqual(10)
       expect(stroke.style.width).not.toEqual(10)
       group.style.width = 20
+      group.updateChildrenStyle()
       expect(circle.style.width).toEqual(20)
       expect(stroke.style.width).toEqual(20)
     })
-    test("should apply width to symbols ", () =>
+    test("should apply color to symbols ", () =>
     {
       expect(circle.style.color).not.toEqual("red")
       expect(stroke.style.color).not.toEqual("red")
       group.style.color = "red"
+      group.updateChildrenStyle()
       expect(circle.style.color).toEqual("red")
       expect(stroke.style.color).toEqual("red")
     })

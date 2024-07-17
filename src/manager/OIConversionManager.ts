@@ -108,7 +108,7 @@ export class OIConversionManager
         charSymbols.push(this.buildChar(char, charStrokes, fontSize))
       }
     })
-    const text = new OIText(charSymbols, startPoint, boundingBox)
+    const text = new OIText(charSymbols, startPoint, boundingBox, strokes[0].style)
     const decorators = strokes.flatMap(s => s.decorators)
     strokes.forEach(s =>
     {

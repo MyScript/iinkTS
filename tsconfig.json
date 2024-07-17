@@ -26,9 +26,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "skipLibCheck": true,
-    "esModuleInterop": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true
+    "esModuleInterop": true
   },
   "types": [
     "./node_modules/@types/**",
