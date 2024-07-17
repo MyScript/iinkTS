@@ -169,7 +169,9 @@ async function loadEditor() {
       importBtn.disabled = editor.model.symbols.some(s1 => symbolsToCreate.some(s2 => s2.id === s1.id))
     }
     clearTimeout(exportTimeout)
-    exportTimeout = setTimeout(() => editor.export(["text/html"]), 1000);
+    exportTimeout = setTimeout(async () => {
+      await editor.export(["text/html"])
+    }, 1000);
   });
 
   editor.events.addEventListener("exported", (event) => {

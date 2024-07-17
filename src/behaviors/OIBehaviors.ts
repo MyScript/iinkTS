@@ -60,6 +60,7 @@ export class OIBehaviors implements IBehaviors
   #configuration: TConfiguration
   #model: OIModel
   #intention: Intention
+  #layerInfosTimer?: ReturnType<typeof setTimeout>
   layerInfos: HTMLDivElement
 
   grabber: OIPointerEventGrabber
@@ -213,6 +214,17 @@ export class OIBehaviors implements IBehaviors
   }
   //#endregion
 
+
+  protected updateLayerInfos(): void
+  {
+    clearTimeout(this.#layerInfosTimer)
+    this.#layerInfosTimer = setTimeout(() => {
+      this.menu.update()
+      this.svgDebugger.apply()
+      this.recognizer.waitForIdle()
+    }, 1500)
+  }
+
   protected onPointerDown(evt: PointerEvent, pointer: TPointer): void
   {
     this.#logger.debug("onPointerDown", { evt, pointer })
@@ -297,9 +309,7 @@ export class OIBehaviors implements IBehaviors
       this.internalEvent.emitError(error as Error)
     }
     finally {
-      this.menu.update()
-      this.svgDebugger.apply()
-      this.recognizer.waitForIdle()
+      this.updateLayerInfos()
     }
   }
 
@@ -372,9 +382,7 @@ export class OIBehaviors implements IBehaviors
       throw error
     }
     finally {
-      this.menu.update()
-      this.svgDebugger.apply()
-      this.recognizer.waitForIdle()
+      this.updateLayerInfos()
     }
   }
 
@@ -459,9 +467,7 @@ export class OIBehaviors implements IBehaviors
     }
     catch (error) {
       this.#logger.error("createSymbol", error)
-      this.menu.update()
-      this.svgDebugger.apply()
-      this.recognizer.waitForIdle()
+      this.updateLayerInfos()
       this.internalEvent.emitError(error as Error)
       throw error
     }
@@ -513,9 +519,7 @@ export class OIBehaviors implements IBehaviors
     if (addToHistory) {
       this.history.push(this.model, { added: [sym] })
     }
-    this.menu.update()
-    this.svgDebugger.apply()
-    this.recognizer.waitForIdle()
+    this.updateLayerInfos()
     return sym
   }
 
@@ -533,9 +537,7 @@ export class OIBehaviors implements IBehaviors
     if (addToHistory) {
       this.history.push(this.model, { added: symList })
     }
-    this.menu.update()
-    this.svgDebugger.apply()
-    this.recognizer.waitForIdle()
+    this.updateLayerInfos()
     return symList
   }
 
@@ -550,9 +552,7 @@ export class OIBehaviors implements IBehaviors
     if (addToHistory) {
       this.history.push(this.model, { updated: [sym] })
     }
-    this.menu.update()
-    this.recognizer.waitForIdle()
-    this.svgDebugger.apply()
+    this.updateLayerInfos()
     return sym
   }
 
@@ -570,9 +570,7 @@ export class OIBehaviors implements IBehaviors
     if (addToHistory) {
       this.history.push(this.model, { updated: symList })
     }
-    this.menu.update()
-    this.recognizer.waitForIdle()
-    this.svgDebugger.apply()
+    this.updateLayerInfos()
     return symList
   }
 
@@ -659,9 +657,7 @@ export class OIBehaviors implements IBehaviors
       if (addToHistory) {
         this.history.push(this.model, { replaced: { oldSymbols, newSymbols } })
       }
-      this.menu.update()
-      this.recognizer.waitForIdle()
-      this.svgDebugger.apply()
+      this.updateLayerInfos()
     }
   }
 
@@ -793,9 +789,7 @@ export class OIBehaviors implements IBehaviors
       if (addToHistory) {
         this.history.push(this.model, { erased: [symbol] })
       }
-      this.menu.update()
-      this.svgDebugger.apply()
-      this.recognizer.waitForIdle()
+      this.updateLayerInfos()
     }
   }
 
@@ -831,9 +825,7 @@ export class OIBehaviors implements IBehaviors
       if (addToHistory) {
         this.history.push(this.model, { erased: symbolsToRemove })
       }
-      this.menu.update()
-      this.svgDebugger.apply()
-      this.recognizer.waitForIdle()
+      this.updateLayerInfos()
     }
     return symbolsToRemove
   }
@@ -890,9 +882,7 @@ export class OIBehaviors implements IBehaviors
     this.recognizer.addStrokes(strokes, false)
     this.history.push(this.model, { added: strokes })
     this.#logger.debug("importPointEvents", this.model)
-    this.menu.update()
-    this.recognizer.waitForIdle()
-    this.svgDebugger.apply()
+    this.updateLayerInfos()
     return this.model
   }
 
@@ -1076,9 +1066,7 @@ export class OIBehaviors implements IBehaviors
         await this.recognizer.undo(actionsToBackend)
       }
 
-      this.menu.update()
-      this.svgDebugger.apply()
-      await this.recognizer.waitForIdle()
+      this.updateLayerInfos()
     }
     return this.model
   }
@@ -1105,9 +1093,7 @@ export class OIBehaviors implements IBehaviors
       ) {
         await this.recognizer.redo(actionsToBackend)
       }
-      this.menu.update()
-      await this.svgDebugger.apply()
-      await this.recognizer.waitForIdle()
+      this.updateLayerInfos()
     }
     return this.model
   }
@@ -1140,9 +1126,7 @@ export class OIBehaviors implements IBehaviors
       throw error
     }
     finally {
-      this.menu.update()
-      this.svgDebugger.apply()
-      this.recognizer.waitForIdle()
+      this.updateLayerInfos()
     }
     return this.model
   }
@@ -1172,9 +1156,7 @@ export class OIBehaviors implements IBehaviors
       this.recognizer.clear()
       this.internalEvent.emitSelected(this.model.symbolsSelected)
     }
-    this.menu.update()
-    this.svgDebugger.apply()
-    this.recognizer.waitForIdle()
+    this.updateLayerInfos()
     return this.model
   }
 
