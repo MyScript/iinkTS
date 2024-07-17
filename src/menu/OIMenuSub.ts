@@ -17,16 +17,27 @@ export class OIMenuSub
     this.content.appendChild(subMenu)
     this.element.appendChild(this.content)
 
-    trigger.addEventListener("pointerdown", () => {
-      this.content.classList.toggle("open")
-      const close = (e: PointerEvent) => {
-        if (!this.element.contains(e.target as HTMLElement)) {
-          this.content.classList.remove("open")
-          document.removeEventListener("pointerdown", close)
-        }
+    trigger.addEventListener("pointerdown", () => this.toggle())
+    document.addEventListener("pointerdown", (e) => {
+      if (!this.element.contains(e.target as HTMLElement)) {
+        this.close()
       }
-      document.addEventListener("pointerdown", close)
     })
+  }
+
+  open(): void
+  {
+    this.content.classList.add("open")
+  }
+
+  close(): void
+  {
+    this.content.classList.remove("open")
+  }
+
+  toggle(): void
+  {
+    this.content.classList.toggle("open")
   }
 
   unwrap(): void
