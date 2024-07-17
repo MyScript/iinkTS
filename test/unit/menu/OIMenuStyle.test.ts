@@ -146,6 +146,7 @@ describe("OIMenuStyle.ts", () =>
     })
     const layer = document.createElement("div")
     const behaviors = new OIBehaviorsMock()
+    behaviors.selector.resetSelectedGroup = jest.fn()
 
     behaviors.init(behaviors.layerInfos)
     const menu = new OIMenuStyle(behaviors)

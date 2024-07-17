@@ -3,7 +3,7 @@ import { Intention, WriteTool, LoggerClass } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerManager } from "../logger"
 import { OIModel } from "../model"
-import { OIText, SymbolType, TOISymbol } from "../primitive"
+import { SymbolType, TOISymbol } from "../primitive"
 import { OIMenu, TMenuItemColorList } from "./OIMenu"
 import { OIMenuSub } from "./OIMenuSub"
 
@@ -132,6 +132,7 @@ export class OIMenuStyle extends OIMenu
         btn.classList.add("active")
         if (this.symbolsSelected.length) {
           this.behaviors.updateSymbolsStyle(this.symbolsSelected.map(s => s.id), { width: size.value })
+          this.behaviors.selector.resetSelectedGroup(this.symbolsSelected)
         }
       })
       wrapper.appendChild(btn)
@@ -168,11 +169,9 @@ export class OIMenuStyle extends OIMenu
         else {
           const fontSize = size.value * this.rowHeight
           this.behaviors.converter.fontSize = fontSize
-          const textSymbols = this.symbolsSelected.filter(s => s.type === SymbolType.Text) as OIText[]
+          const textSymbols = this.symbolsSelected.filter(s => s.type === SymbolType.Text)
           this.behaviors.updateTextFontSize(textSymbols.map(s => s.id), fontSize)
-          if (textSymbols.length) {
-            this.behaviors.selector.resetSelectedGroup(this.symbolsSelected)
-          }
+          this.behaviors.selector.resetSelectedGroup(this.symbolsSelected)
         }
       })
       wrapper.appendChild(btn)
