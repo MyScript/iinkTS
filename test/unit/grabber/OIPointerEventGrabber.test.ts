@@ -20,7 +20,7 @@ describe("OIPointerEventGrabber.ts", () =>
     expect(grabber).toBeDefined()
   })
 
-  describe.skip("should attach & detach", () =>
+  describe("should attach & detach", () =>
   {
     const wrapperHTML: HTMLElement = document.createElement("div")
     wrapperHTML.style.width = "100px"
@@ -108,7 +108,7 @@ describe("OIPointerEventGrabber.ts", () =>
     })
   })
 
-  describe.skip("Should extract TPointer from event", () =>
+  describe("Should extract TPointer from event", () =>
   {
     const wrapperHTML: HTMLElement = document.createElement("div")
     wrapperHTML.style.width = "100px"
@@ -164,7 +164,7 @@ describe("OIPointerEventGrabber.ts", () =>
     })
   })
 
-  describe.skip("Should use configuration", () =>
+  describe("Should use configuration", () =>
   {
     const wrapperHTML: HTMLElement = document.createElement("div")
     wrapperHTML.style.width = "100px"
@@ -249,7 +249,7 @@ describe("OIPointerEventGrabber.ts", () =>
     })
   })
 
-  describe.skip("Should ignore Event", () =>
+  describe("Should ignore Event", () =>
   {
     const wrapperHTML: HTMLElement = document.createElement("div")
     wrapperHTML.style.width = "100px"
