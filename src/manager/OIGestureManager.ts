@@ -635,7 +635,7 @@ export class OIGestureManager
     if (!gesture?.gestures.length) return
     switch (gesture.gestures[0].type) {
       case "surround": {
-        const symbolsToSelect = this.model.symbols.filter(s => gestureStroke.bounds.contains(s.bounds))
+        const symbolsToSelect = this.model.symbols.filter(s => s.id !== gestureStroke.id && gestureStroke.bounds.contains(s.bounds))
         if (symbolsToSelect.length) {
           return {
             gestureType: "SURROUND",
@@ -684,9 +684,12 @@ export class OIGestureManager
       case "scratch": {
         const symbolsToErase = this.model.symbols.filter(s =>
         {
-          return gestureStroke.bounds.overlaps(s.bounds) ||
-            SymbolType.Text === s.type && gestureStroke.pointers.some(p => isPointInsidePolygon(p, s.vertices)) ||
-            gestureStroke.bounds.contains(s.bounds)
+          return
+            s.id !== gestureStroke.id &&
+            (
+              gestureStroke.bounds.overlaps(s.bounds) ||
+              SymbolType.Text === s.type && gestureStroke.pointers.some(p => isPointInsidePolygon(p, s.vertices))
+            )
         })
         if (symbolsToErase.length) {
           return {
@@ -701,6 +704,7 @@ export class OIGestureManager
       }
       case "bottom-top": {
         const hasSymbolsInRow = this.model.symbols.some(s =>
+          s.id !== gestureStroke.id &&
           [SymbolType.Text.toString(), SymbolType.Stroke.toString(), SymbolType.Group.toString()].includes(s.type) &&
           isBetween(s.bounds.yMid, gestureStroke.bounds.yMin, gestureStroke.bounds.yMax)
         )
@@ -717,6 +721,7 @@ export class OIGestureManager
       }
       case "top-bottom": {
         const hasSymbolsInRow = this.model.symbols.some(s =>
+          s.id !== gestureStroke.id &&
           [SymbolType.Text.toString(), SymbolType.Stroke.toString(), SymbolType.Group.toString()].includes(s.type) &&
           isBetween(s.bounds.yMid, gestureStroke.bounds.yMin, gestureStroke.bounds.yMax)
         )
