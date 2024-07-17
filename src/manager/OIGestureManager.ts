@@ -652,7 +652,7 @@ export class OIGestureManager
         const symbolsToUnderline = this.model.symbols.filter(s =>
         {
           return [SymbolType.Text.toString(), SymbolType.Stroke.toString(), SymbolType.Group.toString()].includes(s.type) &&
-            isBetween(gestureStroke.bounds.xMid, s.bounds.xMin, s.bounds.xMax) &&
+            isBetween(s.bounds.xMid, gestureStroke.bounds.xMin, gestureStroke.bounds.xMax) &&
             isBetween(gestureStroke.bounds.yMid, s.bounds.y + s.bounds.height * 3 / 4, s.bounds.y + s.bounds.height * 5 / 4)
         })
         if (symbolsToUnderline.length) {
@@ -667,7 +667,7 @@ export class OIGestureManager
         const symbolsToStrikeThrough = this.model.symbols.filter(s =>
         {
           return [SymbolType.Text.toString(), SymbolType.Stroke.toString(), SymbolType.Group.toString()].includes(s.type) &&
-            isBetween(gestureStroke.bounds.xMid, s.bounds.xMin, s.bounds.xMax) &&
+            isBetween(s.bounds.xMid, gestureStroke.bounds.xMin, gestureStroke.bounds.xMax) &&
             isBetween(gestureStroke.bounds.yMid, s.bounds.y + s.bounds.height / 4, s.bounds.y + s.bounds.height * 3 / 4)
         })
         if (symbolsToStrikeThrough.length) {
