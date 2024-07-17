@@ -453,7 +453,7 @@ export class OIMenuAction extends OIMenu
 
       this.wrapper = document.createElement("div")
       this.wrapper.classList.add("ms-menu", "ms-menu-top-left", "ms-menu-row")
-      this.wrapper.appendChild(this.createSubMenu(this.createToolTip(menuTrigger, "Menu", "bottom"), subMenuWrapper, "bottom").element)
+      this.wrapper.appendChild(this.createSubMenu(this.createToolTip(menuTrigger, "Menu", "right"), subMenuWrapper, "bottom").element)
       this.wrapper.appendChild(this.createMenuLanguage())
       this.wrapper.appendChild(this.createMenuClear())
       this.wrapper.appendChild(this.createMenuUndo())

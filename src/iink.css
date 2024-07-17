@@ -169,27 +169,26 @@
     display: none;
     opacity: 1 !important;
 }
-.ms-editor .ms-tooltip:hover .ms-tooltip-content,
-.ms-editor .ms-tooltip .ms-tooltip-content.show {
+.ms-editor .ms-tooltip:hover .ms-tooltip-content {
     display: block;
 }
 .ms-editor .ms-tooltip .ms-tooltip-content.top {
-    top: -12px;
+    top: 0px;
     left: 50%;
     transform: translate(-50%, -100%);
 }
 .ms-editor .ms-tooltip .ms-tooltip-content.left {
     top: 50%;
-    left: -12px;
+    left: 0px;
     transform: translate(-100%, -50%);
 }
 .ms-editor .ms-tooltip .ms-tooltip-content.right {
     top: 50%;
-    right: -12px;
+    right: 0px;
     transform: translate(100%, -50%);
 }
 .ms-editor .ms-tooltip .ms-tooltip-content.bottom {
-    bottom: -12px;
+    bottom: 0px;
     left: 50%;
     transform: translate(-50%, 100%);
 }
