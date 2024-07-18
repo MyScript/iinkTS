@@ -1,8 +1,64 @@
-import { EventType, Intention, LoggerClass } from "../Constants"
-import { LoggerManager } from "../logger"
+import { Intention } from "../Constants"
+import { LoggerManager, LoggerClass } from "../logger"
 import { IModel, TExport } from "../model"
 import { TSymbol } from "../primitive"
 import { TUndoRedoContext } from "../history"
+
+/**
+ * @group Event
+ * @description Lists all events that can be listened to on the editor or DOM element
+ * @example
+ * You can run code on "EventType" raised by using
+ * ```ts
+ * editor.events.addEventListener(EventType.CHANGED, (evt) => console.log(evt.detail))
+ * ```
+ */
+export enum EventType {
+  /**
+   * @description event emitted when history has changed i.e. the context of undo-redo
+   */
+  CHANGED = "changed",
+  /**
+   * @description event emitted when clearing is complete
+   */
+  CLEARED = "cleared",
+  /**
+   * @description event emitted after the conversion is complete
+   */
+  CONVERTED = "converted",
+  /**
+   * @description event emitted when the editor encounters an error
+   */
+  ERROR = "error",
+  /**
+   * @description event emitted on click on pointer events
+   */
+  POINTEREVENTS = "pointer_events",
+  /**
+   * @description event emitted after the end of the export
+   */
+  EXPORTED = "exported",
+  /**
+   * @description event emitted after the end of the import
+   */
+  IMPORTED = "imported",
+  /**
+   * @description event emitted when the server is idle after a job
+   */
+  IDLE = "idle",
+  /**
+   * @description event emitted after full editor initialization
+   */
+  LOADED = "loaded",
+  /**
+  * @description event emitted after
+  */
+  SELECTED = "selected",
+  /**
+  * @description event emitted after
+  */
+  INTENTION = "intention",
+}
 
 /**
  * @group Event

@@ -1,6 +1,6 @@
-import { LoggerClass, SvgElementRole } from "../Constants"
+import { SvgElementRole } from "../Constants"
 import { OIBehaviors } from "../behaviors"
-import { LoggerManager } from "../logger"
+import { LoggerClass, LoggerManager } from "../logger"
 import { OIModel } from "../model"
 import
 {

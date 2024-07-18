@@ -1,10 +1,35 @@
-import { Intention, InternalEventType, LoggerClass } from "../Constants"
+import { Intention } from "../Constants"
 import { TConverstionState } from "../configuration"
-import { LoggerManager } from "../logger"
+import { LoggerManager, LoggerClass } from "../logger"
 import { TExport, TJIIXExport } from "../model"
 import { TOISymbol } from "../primitive"
 import { TWSMessageEventSVGPatch } from "../recognizer"
 import { TUndoRedoContext } from "../history"
+
+
+/**
+ * @group Event
+ * @description Lists all internal library events
+ * @example
+ * You can run code on "EventType" raised by using
+ * ```ts
+ * editor.internalEvents.addEventListener(InternalEventType.SVG_PATCH, (evt) => console.log(evt.detail))
+ * ```
+ */
+export enum InternalEventType {
+  SVG_PATCH = "internal_svg_patch",
+  EXPORTED = "internal_exported",
+  CLEAR_MESSAGE = "internal_clear_message",
+  ERROR = "internal_error",
+  NOTIF = "internal_notif",
+  IMPORT_JIIX = "internal_import_jiix",
+  CONVERT = "internal_convert",
+  CLEAR = "internal_clear",
+  CONTEXT_CHANGE = "internal_context_change",
+  IDLE = "internal_idle",
+  SELECTED = "internal_selected",
+  INTENTION = "internal_intention",
+}
 
 /**
  * @group Event
@@ -86,17 +111,6 @@ export class InternalEvent extends EventTarget
   {
     this.#logger.info("addErrorListener", { callback })
     this.addEventListener(InternalEventType.ERROR, (evt: unknown) => callback(((evt as CustomEvent).detail as Error)), { signal: this.#abortController.signal })
-  }
-
-  emitWSClosed(): void
-  {
-    this.#logger.info("emitWSClosed")
-    this.#emit(InternalEventType.WS_CLOSED)
-  }
-  addWSClosedListener(callback: () => void): void
-  {
-    this.#logger.info("addWSClosedListener", { callback })
-    this.addEventListener(InternalEventType.WS_CLOSED, () => callback(), { signal: this.#abortController.signal })
   }
 
   emitNotif(notif: { message: string, timeout?: number }): void

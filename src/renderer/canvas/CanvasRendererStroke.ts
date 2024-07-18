@@ -1,5 +1,4 @@
-import { LoggerClass } from "../../Constants"
-import { LoggerManager } from "../../logger"
+import { LoggerClass, LoggerManager } from "../../logger"
 import { Stroke, TPointer } from "../../primitive"
 import { computeAngleAxeRadian, computeLinksPointers, computeMiddlePointer } from "../../utils"
 

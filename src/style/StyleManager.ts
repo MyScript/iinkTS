@@ -1,5 +1,4 @@
-import { LoggerClass } from "../Constants"
-import { LoggerManager } from "../logger"
+import { LoggerClass, LoggerManager } from "../logger"
 import { PartialDeep, mergeDeep } from "../utils"
 import { DefaultPenStyle, TPenStyle } from "./PenStyle"
 import { DefaultTheme, TTheme } from "./Theme"

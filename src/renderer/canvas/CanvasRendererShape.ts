@@ -1,5 +1,4 @@
-import { LoggerClass } from "../../Constants"
-import { LoggerManager } from "../../logger"
+import { LoggerClass, LoggerManager } from "../../logger"
 import { TPoint, TCanvasShapeEllipseSymbol, TCanvasShapeLineSymbol, TCanvasShapeTableSymbol, TSymbol } from "../../primitive"
 
 /**

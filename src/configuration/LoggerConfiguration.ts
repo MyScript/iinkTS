@@ -1,4 +1,4 @@
-import { LoggerClass, LoggerLevel } from "../Constants"
+import { LoggerClass, LoggerLevel } from "../logger"
 
 /**
  * @group Configuration

@@ -1,8 +1,8 @@
-import { Intention, InternalEventType, LoggerClass, SELECTION_MARGIN } from "../Constants"
+import { Intention, SELECTION_MARGIN } from "../Constants"
 import { Configuration, TConfiguration, TConverstionState, TRenderingConfiguration } from "../configuration"
 import { InternalEvent } from "../event"
 import { OIPointerEventGrabber } from "../grabber"
-import { LoggerManager } from "../logger"
+import { LoggerClass, LoggerManager } from "../logger"
 import { OIModel, TExport, TJIIXTextElement } from "../model"
 import
 {
@@ -1181,7 +1181,7 @@ export class OIBehaviors implements IBehaviors
     this.grabber.detach()
     this.renderer.destroy()
     this.menu.destroy()
-    this.recognizer.close(1000, InternalEventType.WS_CLOSED)
+    this.recognizer.destroy()
     return Promise.resolve()
   }
 }

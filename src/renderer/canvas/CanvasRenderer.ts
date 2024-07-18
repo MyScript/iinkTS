@@ -1,6 +1,5 @@
-import { LoggerClass } from "../../Constants"
 import { TRenderingConfiguration } from "../../configuration"
-import { LoggerManager } from "../../logger"
+import { LoggerClass, LoggerManager } from "../../logger"
 import { IModel } from "../../model"
 import { Stroke, TSymbol } from "../../primitive"
 import { CanvasRendererShape } from "./CanvasRendererShape"

@@ -1,7 +1,7 @@
-import { WriteTool, LoggerClass } from "../Constants"
+import { WriteTool } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { TGesture } from "../gesture"
-import { LoggerManager } from "../logger"
+import { LoggerClass, LoggerManager } from "../logger"
 import { OIModel } from "../model"
 import
 {

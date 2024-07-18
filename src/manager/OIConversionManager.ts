@@ -1,20 +1,19 @@
-import { LoggerClass } from "../Constants"
 import { OIBehaviors } from "../behaviors"
-import { LoggerManager } from "../logger"
+import { LoggerManager, LoggerClass } from "../logger"
 import
 {
   OIModel,
   TJIIXChar,
   TJIIXEdgeArc,
   TJIIXEdgeElement,
-  TJIIXEdgeKind,
+  JIIXEdgeKind,
   TJIIXEdgeLine,
   TJIIXEdgePolyEdge,
   TJIIXExport,
   TJIIXNodeCircle,
   TJIIXNodeElement,
   TJIIXNodeEllipse,
-  TJIIXNodeKind,
+  JIIXNodeKind,
   TJIIXNodeParrallelogram,
   TJIIXNodePolygon,
   TJIIXNodeRectangle,
@@ -310,25 +309,25 @@ export class OIConversionManager
 
     let shape: TOIShape
     switch (node.kind) {
-      case TJIIXNodeKind.Circle:
+      case JIIXNodeKind.Circle:
         shape = this.buildCircle(node, uniqStrokes)
         break
-      case TJIIXNodeKind.Ellipse:
+      case JIIXNodeKind.Ellipse:
         shape = this.buildEllipse(node, uniqStrokes)
         break
-      case TJIIXNodeKind.Rectangle:
+      case JIIXNodeKind.Rectangle:
         shape = this.buildRectangle(node, uniqStrokes)
         break
-      case TJIIXNodeKind.Triangle:
+      case JIIXNodeKind.Triangle:
         shape = this.buildTriangle(node, uniqStrokes)
         break
-      case TJIIXNodeKind.Parallelogram:
+      case JIIXNodeKind.Parallelogram:
         shape = this.buildParallelogram(node, uniqStrokes)
         break
-      case TJIIXNodeKind.Polygon:
+      case JIIXNodeKind.Polygon:
         shape = this.buildPolygon(node, uniqStrokes)
         break
-      case TJIIXNodeKind.Rhombus:
+      case JIIXNodeKind.Rhombus:
         shape = this.buildRhombus(node, uniqStrokes)
         break
       default:
@@ -390,7 +389,7 @@ export class OIConversionManager
   convertEdge(edge: TJIIXEdgeElement): { symbol: TOIEdge, strokes: OIStroke[] } | undefined
   {
     switch (edge.kind) {
-      case TJIIXEdgeKind.Line: {
+      case JIIXEdgeKind.Line: {
         const associatedStroke = this.strokes.filter(s => edge.items?.some(i => i["full-id"] === s.id))
         if (!associatedStroke.length) return
         const uniqStrokes = associatedStroke.filter((a, i) => associatedStroke.findIndex((s) => a.id === s.id) === i)
@@ -400,7 +399,7 @@ export class OIConversionManager
           strokes: uniqStrokes
         }
       }
-      case TJIIXEdgeKind.Arc: {
+      case JIIXEdgeKind.Arc: {
         const associatedStroke = this.strokes.filter(s => edge.items?.some(i => i["full-id"] === s.id))
         if (!associatedStroke.length) return
         const uniqStrokes = associatedStroke.filter((a, i) => associatedStroke.findIndex((s) => a.id === s.id) === i)
@@ -410,7 +409,7 @@ export class OIConversionManager
           strokes: uniqStrokes
         }
       }
-      case TJIIXEdgeKind.PolyEdge: {
+      case JIIXEdgeKind.PolyEdge: {
         const associatedStroke = this.strokes.filter(s => edge.edges.flatMap(e => e.items)?.some(i => i!["full-id"] === s.id))
         if (!associatedStroke.length) return
         const uniqStrokes = associatedStroke.filter((a, i) => associatedStroke.findIndex((s) => a.id === s.id) === i)
