@@ -30,7 +30,7 @@ describe("OIGestureManager.ts", () =>
     const gestMan = new OIGestureManager(behaviors)
     gestMan.applyInsertGesture = jest.fn()
     gestMan.applyJoinGesture = jest.fn()
-    gestMan.applyScratchGesture = jest.fn()
+    gestMan.applyScratch = jest.fn()
     gestMan.applyStrikeThroughGesture = jest.fn()
     gestMan.applySurroundGesture = jest.fn()
     gestMan.applyUnderlineGesture = jest.fn()
@@ -49,7 +49,7 @@ describe("OIGestureManager.ts", () =>
       expect(behaviors.removeSymbol).toHaveBeenNthCalledWith(1, gestureStroke.id, false)
       expect(gestMan.applyInsertGesture).toHaveBeenCalledTimes(0)
       expect(gestMan.applyJoinGesture).toHaveBeenCalledTimes(0)
-      expect(gestMan.applyScratchGesture).toHaveBeenCalledTimes(0)
+      expect(gestMan.applyScratch).toHaveBeenCalledTimes(0)
       expect(gestMan.applyStrikeThroughGesture).toHaveBeenCalledTimes(0)
       expect(gestMan.applySurroundGesture).toHaveBeenCalledTimes(0)
       expect(gestMan.applyUnderlineGesture).toHaveBeenCalledTimes(1)
@@ -67,7 +67,7 @@ describe("OIGestureManager.ts", () =>
       expect(behaviors.removeSymbol).toHaveBeenNthCalledWith(1, gestureStroke.id, false)
       expect(gestMan.applyInsertGesture).toHaveBeenCalledTimes(0)
       expect(gestMan.applyJoinGesture).toHaveBeenCalledTimes(0)
-      expect(gestMan.applyScratchGesture).toHaveBeenCalledTimes(1)
+      expect(gestMan.applyScratch).toHaveBeenCalledTimes(1)
       expect(gestMan.applyStrikeThroughGesture).toHaveBeenCalledTimes(0)
       expect(gestMan.applySurroundGesture).toHaveBeenCalledTimes(0)
       expect(gestMan.applyUnderlineGesture).toHaveBeenCalledTimes(0)
@@ -85,7 +85,7 @@ describe("OIGestureManager.ts", () =>
       expect(behaviors.removeSymbol).toHaveBeenNthCalledWith(1, gestureStroke.id, false)
       expect(gestMan.applyInsertGesture).toHaveBeenCalledTimes(0)
       expect(gestMan.applyJoinGesture).toHaveBeenCalledTimes(1)
-      expect(gestMan.applyScratchGesture).toHaveBeenCalledTimes(0)
+      expect(gestMan.applyScratch).toHaveBeenCalledTimes(0)
       expect(gestMan.applyStrikeThroughGesture).toHaveBeenCalledTimes(0)
       expect(gestMan.applySurroundGesture).toHaveBeenCalledTimes(0)
       expect(gestMan.applyUnderlineGesture).toHaveBeenCalledTimes(0)
@@ -103,7 +103,7 @@ describe("OIGestureManager.ts", () =>
       expect(behaviors.removeSymbol).toHaveBeenNthCalledWith(1, gestureStroke.id, false)
       expect(gestMan.applyInsertGesture).toHaveBeenCalledTimes(1)
       expect(gestMan.applyJoinGesture).toHaveBeenCalledTimes(0)
-      expect(gestMan.applyScratchGesture).toHaveBeenCalledTimes(0)
+      expect(gestMan.applyScratch).toHaveBeenCalledTimes(0)
       expect(gestMan.applyStrikeThroughGesture).toHaveBeenCalledTimes(0)
       expect(gestMan.applySurroundGesture).toHaveBeenCalledTimes(0)
       expect(gestMan.applyUnderlineGesture).toHaveBeenCalledTimes(0)
@@ -121,7 +121,7 @@ describe("OIGestureManager.ts", () =>
       expect(behaviors.removeSymbol).toHaveBeenNthCalledWith(1, gestureStroke.id, false)
       expect(gestMan.applyInsertGesture).toHaveBeenCalledTimes(0)
       expect(gestMan.applyJoinGesture).toHaveBeenCalledTimes(0)
-      expect(gestMan.applyScratchGesture).toHaveBeenCalledTimes(0)
+      expect(gestMan.applyScratch).toHaveBeenCalledTimes(0)
       expect(gestMan.applyStrikeThroughGesture).toHaveBeenCalledTimes(1)
       expect(gestMan.applySurroundGesture).toHaveBeenCalledTimes(0)
       expect(gestMan.applyUnderlineGesture).toHaveBeenCalledTimes(0)
@@ -139,7 +139,7 @@ describe("OIGestureManager.ts", () =>
       expect(behaviors.removeSymbol).toHaveBeenNthCalledWith(1, gestureStroke.id, false)
       expect(gestMan.applyInsertGesture).toHaveBeenCalledTimes(0)
       expect(gestMan.applyJoinGesture).toHaveBeenCalledTimes(0)
-      expect(gestMan.applyScratchGesture).toHaveBeenCalledTimes(0)
+      expect(gestMan.applyScratch).toHaveBeenCalledTimes(0)
       expect(gestMan.applyStrikeThroughGesture).toHaveBeenCalledTimes(0)
       expect(gestMan.applySurroundGesture).toHaveBeenCalledTimes(1)
       expect(gestMan.applyUnderlineGesture).toHaveBeenCalledTimes(0)
@@ -361,7 +361,7 @@ describe("OIGestureManager.ts", () =>
         strokeBeforeIds: [],
         strokeAfterIds: []
       }
-      await manager.applyScratchGesture(gestureStroke, gesture)
+      await manager.applyScratch(gestureStroke, gesture)
       expect(behaviors.updateSymbols).toHaveBeenCalledTimes(0)
       expect(behaviors.removeSymbols).toHaveBeenCalledTimes(0)
       expect(behaviors.replaceSymbols).toHaveBeenCalledTimes(0)
@@ -380,7 +380,7 @@ describe("OIGestureManager.ts", () =>
         strokeBeforeIds: [],
         strokeAfterIds: []
       }
-      await manager.applyScratchGesture(gestureStroke, gesture)
+      await manager.applyScratch(gestureStroke, gesture)
       expect(behaviors.updateSymbols).toHaveBeenCalledTimes(0)
       expect(behaviors.removeSymbols).toHaveBeenNthCalledWith(1, [circle.id], false)
       expect(behaviors.replaceSymbols).toHaveBeenCalledTimes(0)
@@ -417,8 +417,7 @@ describe("OIGestureManager.ts", () =>
         strokeBeforeIds: [],
         strokeAfterIds: []
       }
-      await manager.applyScratchGesture(gestureStroke, gesture)
-      expect(behaviors.updateSymbols).toHaveBeenCalledTimes(0)
+      await manager.applyScratch(gestureStroke, gesture)
       expect(behaviors.removeSymbols).toHaveBeenNthCalledWith(1, [text.id], false)
       expect(behaviors.replaceSymbols).toHaveBeenCalledTimes(0)
       expect(manager.texter.adjustText).toHaveBeenCalledTimes(1)
@@ -455,11 +454,10 @@ describe("OIGestureManager.ts", () =>
         strokeBeforeIds: [],
         strokeAfterIds: []
       }
-      await manager.applyScratchGesture(gestureStroke, gesture)
+      await manager.applyScratch(gestureStroke, gesture)
 
-      expect(behaviors.updateSymbols).toHaveBeenNthCalledWith(1, [text], false)
       expect(behaviors.removeSymbols).toHaveBeenCalledTimes(0)
-      expect(behaviors.replaceSymbols).toHaveBeenCalledTimes(0)
+      expect(behaviors.replaceSymbols).toHaveBeenCalledTimes(1)
       expect(manager.texter.adjustText).toHaveBeenCalledTimes(1)
       expect(manager.history.push).toHaveBeenCalledTimes(1)
     })
@@ -476,8 +474,7 @@ describe("OIGestureManager.ts", () =>
         strokeBeforeIds: [],
         strokeAfterIds: []
       }
-      await manager.applyScratchGesture(gestureStroke, gesture)
-      expect(behaviors.updateSymbols).toHaveBeenCalledTimes(0)
+      await manager.applyScratch(gestureStroke, gesture)
       expect(behaviors.removeSymbols).toHaveBeenNthCalledWith(1, [stroke.id], false)
       expect(behaviors.replaceSymbols).toHaveBeenCalledTimes(0)
       expect(manager.history.push).toHaveBeenCalledTimes(1)
@@ -496,7 +493,7 @@ describe("OIGestureManager.ts", () =>
         strokeAfterIds: [],
         subStrokes: [{ fullStrokeId: stroke.id, x: stroke.pointers.slice(10, 25).map(p => p.x), y: stroke.pointers.slice(10, 25).map(p => p.y) }],
       }
-      await manager.applyScratchGesture(gestureStroke, gesture)
+      await manager.applyScratch(gestureStroke, gesture)
       expect(behaviors.updateSymbols).toHaveBeenCalledTimes(0)
       expect(behaviors.removeSymbols).toHaveBeenCalledTimes(0)
       expect(behaviors.replaceSymbols).toHaveBeenNthCalledWith(1, [stroke], expect.arrayContaining([expect.objectContaining({ "type": "stroke" }), expect.objectContaining({ "type": "stroke" })]), false)
