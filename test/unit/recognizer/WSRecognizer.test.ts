@@ -9,7 +9,7 @@ import
   TRecognitionConfiguration,
   WSRecognizer,
   DefaultRecognitionConfiguration,
-  Error as ErrorConst,
+  RecognizerError,
   TRecognitionType,
   TConfiguration,
   TPenStyle,
@@ -165,9 +165,9 @@ describe("WSRecognizer.ts", () =>
       expect.assertions(3)
       const promise = wsr.init(height, width)
       mockServer.sendNotGrantedErrorMessage()
-      await expect(promise).rejects.toEqual(new Error(ErrorConst.WRONG_CREDENTIALS))
+      await expect(promise).rejects.toEqual(new Error(RecognizerError.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
-      await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
+      await expect(spyEmitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
     })
   })
 
@@ -366,9 +366,9 @@ describe("WSRecognizer.ts", () =>
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       mockServer.send(JSON.stringify(errorNotGrantedMessage))
-      await expect(promise).rejects.toEqual(new Error(ErrorConst.WRONG_CREDENTIALS))
+      await expect(promise).rejects.toEqual(new Error(RecognizerError.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
-      await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
+      await expect(spyEmitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
     })
   })
 
@@ -547,9 +547,9 @@ describe("WSRecognizer.ts", () =>
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       mockServer.send(JSON.stringify(errorNotGrantedMessage))
-      await expect(promise).rejects.toEqual(new Error(ErrorConst.WRONG_CREDENTIALS))
+      await expect(promise).rejects.toEqual(new Error(RecognizerError.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
-      await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
+      await expect(spyEmitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
     })
   })
 
@@ -627,9 +627,9 @@ describe("WSRecognizer.ts", () =>
       const promise = wsr.import(model, blobToImport, mimeType)
       await delay(100)
       mockServer.sendNotGrantedErrorMessage()
-      await expect(promise).rejects.toEqual(new Error(ErrorConst.WRONG_CREDENTIALS))
+      await expect(promise).rejects.toEqual(new Error(RecognizerError.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
-      await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
+      await expect(spyEmitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
     })
   })
 
@@ -694,9 +694,9 @@ describe("WSRecognizer.ts", () =>
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       mockServer.sendNotGrantedErrorMessage()
-      await expect(promise).rejects.toEqual(new Error(ErrorConst.WRONG_CREDENTIALS))
+      await expect(promise).rejects.toEqual(new Error(RecognizerError.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
-      await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
+      await expect(spyEmitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
     })
   })
 
@@ -765,9 +765,9 @@ describe("WSRecognizer.ts", () =>
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       mockServer.sendNotGrantedErrorMessage()
-      await expect(promise).rejects.toEqual(new Error(ErrorConst.WRONG_CREDENTIALS))
+      await expect(promise).rejects.toEqual(new Error(RecognizerError.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
-      await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
+      await expect(spyEmitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
     })
   })
 
@@ -835,9 +835,9 @@ describe("WSRecognizer.ts", () =>
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       mockServer.sendNotGrantedErrorMessage()
-      await expect(promise).rejects.toEqual(new Error(ErrorConst.WRONG_CREDENTIALS))
+      await expect(promise).rejects.toEqual(new Error(RecognizerError.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
-      await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
+      await expect(spyEmitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
     })
   })
 
@@ -905,9 +905,9 @@ describe("WSRecognizer.ts", () =>
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       mockServer.sendNotGrantedErrorMessage()
-      await expect(promise).rejects.toEqual(new Error(ErrorConst.WRONG_CREDENTIALS))
+      await expect(promise).rejects.toEqual(new Error(RecognizerError.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
-      await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
+      await expect(spyEmitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
     })
   })
 
@@ -975,9 +975,9 @@ describe("WSRecognizer.ts", () =>
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       mockServer.sendNotGrantedErrorMessage()
-      await expect(promise).rejects.toEqual(new Error(ErrorConst.WRONG_CREDENTIALS))
+      await expect(promise).rejects.toEqual(new Error(RecognizerError.WRONG_CREDENTIALS))
       await expect(spyEmitError).toHaveBeenCalledTimes(1)
-      await expect(spyEmitError).toHaveBeenCalledWith(new Error(ErrorConst.WRONG_CREDENTIALS))
+      await expect(spyEmitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
     })
   })
 
@@ -1005,19 +1005,19 @@ describe("WSRecognizer.ts", () =>
 
 
     const closeMessageOptions = [
-      { code: 1001, message: ErrorConst.GOING_AWAY },
-      { code: 1002, message: ErrorConst.PROTOCOL_ERROR },
-      { code: 1003, message: ErrorConst.UNSUPPORTED_DATA },
-      { code: 1006, message: ErrorConst.ABNORMAL_CLOSURE },
-      { code: 1007, message: ErrorConst.INVALID_FRAME_PAULOAD },
-      { code: 1008, message: ErrorConst.POLICY_VIOLATION },
-      { code: 1009, message: ErrorConst.MESSAGE_TOO_BIG },
-      { code: 1011, message: ErrorConst.INTERNAL_ERROR },
-      { code: 1012, message: ErrorConst.SERVICE_RESTART },
-      { code: 1013, message: ErrorConst.TRY_AGAIN },
-      { code: 1014, message: ErrorConst.BAD_GATEWAY },
-      { code: 1015, message: ErrorConst.TLS_HANDSHAKE },
-      { code: 42, message: ErrorConst.CANT_ESTABLISH },
+      { code: 1001, message: RecognizerError.GOING_AWAY },
+      { code: 1002, message: RecognizerError.PROTOCOL_ERROR },
+      { code: 1003, message: RecognizerError.UNSUPPORTED_DATA },
+      { code: 1006, message: RecognizerError.ABNORMAL_CLOSURE },
+      { code: 1007, message: RecognizerError.INVALID_FRAME_PAULOAD },
+      { code: 1008, message: RecognizerError.POLICY_VIOLATION },
+      { code: 1009, message: RecognizerError.MESSAGE_TOO_BIG },
+      { code: 1011, message: RecognizerError.INTERNAL_ERROR },
+      { code: 1012, message: RecognizerError.SERVICE_RESTART },
+      { code: 1013, message: RecognizerError.TRY_AGAIN },
+      { code: 1014, message: RecognizerError.BAD_GATEWAY },
+      { code: 1015, message: RecognizerError.TLS_HANDSHAKE },
+      { code: 42, message: RecognizerError.CANT_ESTABLISH },
     ]
     closeMessageOptions.forEach(async (closeEvent) =>
     {

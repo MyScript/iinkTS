@@ -1,6 +1,5 @@
-import { LoggerClass } from "../../Constants"
 import { TRenderingConfiguration } from "../../configuration"
-import { LoggerManager } from "../../logger"
+import { LoggerClass, LoggerManager } from "../../logger"
 import { IModel } from "../../model"
 import { TStroke } from "../../primitive"
 import { TUpdatePatch, TUpdatePatchAppendChild, TUpdatePatchInsertBefore, TUpdatePatchRemoveAttribut, TUpdatePatchRemoveChild, TUpdatePatchRemoveElement, TUpdatePatchReplaceAll, TUpdatePatchReplaceELement, TUpdatePatchSetAttribut } from "../../recognizer"

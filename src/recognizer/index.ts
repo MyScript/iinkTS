@@ -1,3 +1,4 @@
+export * from "./RecognizerError"
 export * from "./OIRecognizer"
 export * from "./OIRecognizerMessage"
 export * from "./RestRecognizer"

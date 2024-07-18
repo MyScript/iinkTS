@@ -10,9 +10,9 @@ import triangleIcon from "../assets/svg/triangle.svg"
 import lineIcon from "../assets/svg/linear.svg"
 import arrowIcon from "../assets/svg/linear-arrow.svg"
 import doubleArrowIcon from "../assets/svg/linear-double-arrow.svg"
-import { Intention, WriteTool, LoggerClass } from "../Constants"
+import { Intention, WriteTool } from "../Constants"
 import { OIBehaviors } from "../behaviors"
-import { LoggerManager } from "../logger"
+import { LoggerClass, LoggerManager } from "../logger"
 import { OIMenu } from "./OIMenu"
 
 /**

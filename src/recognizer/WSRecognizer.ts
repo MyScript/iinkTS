@@ -1,13 +1,22 @@
-import { LoggerClass, Error as ErrorConst } from "../Constants"
 import { TConverstionState, TRecognitionConfiguration, TServerConfiguration } from "../configuration"
 import { InternalEvent } from "../event"
-import { LoggerManager } from "../logger"
+import { LoggerClass, LoggerManager } from "../logger"
 import { Model, TExport, TJIIXExport } from "../model"
 import { Stroke } from "../primitive"
 import { StyleHelper, TPenStyle, TTheme } from "../style"
 import { TUndoRedoContext } from "../history"
 import { DeferredPromise, PartialDeep, computeHmac, isVersionSuperiorOrEqual } from "../utils"
-import { TWSMessageEvent, TWSMessageEventContentChange, TWSMessageEventError, TWSMessageEventExport, TWSMessageEventHMACChallenge, TWSMessageEventPartChange, TWSMessageEventSVGPatch } from "./WSRecognizerMessage"
+import
+{
+  TWSMessageEvent,
+  TWSMessageEventContentChange,
+  TWSMessageEventError,
+  TWSMessageEventExport,
+  TWSMessageEventHMACChallenge,
+  TWSMessageEventPartChange,
+  TWSMessageEventSVGPatch
+} from "./WSRecognizerMessage"
+import { RecognizerError } from "./RecognizerError"
 
 /**
  * A websocket dialog have this sequence :
@@ -179,44 +188,44 @@ export class WSRecognizer
           // Normal Closure
           break
         case 1001:
-          message = ErrorConst.GOING_AWAY
+          message = RecognizerError.GOING_AWAY
           break
         case 1002:
-          message = ErrorConst.PROTOCOL_ERROR
+          message = RecognizerError.PROTOCOL_ERROR
           break
         case 1003:
-          message = ErrorConst.UNSUPPORTED_DATA
+          message = RecognizerError.UNSUPPORTED_DATA
           break
         case 1006:
-          message = ErrorConst.ABNORMAL_CLOSURE
+          message = RecognizerError.ABNORMAL_CLOSURE
           break
         case 1007:
-          message = ErrorConst.INVALID_FRAME_PAULOAD
+          message = RecognizerError.INVALID_FRAME_PAULOAD
           break
         case 1008:
-          message = ErrorConst.POLICY_VIOLATION
+          message = RecognizerError.POLICY_VIOLATION
           break
         case 1009:
-          message = ErrorConst.MESSAGE_TOO_BIG
+          message = RecognizerError.MESSAGE_TOO_BIG
           break
         case 1011:
-          message = ErrorConst.INTERNAL_ERROR
+          message = RecognizerError.INTERNAL_ERROR
           break
         case 1012:
-          message = ErrorConst.SERVICE_RESTART
+          message = RecognizerError.SERVICE_RESTART
           break
         case 1013:
-          message = ErrorConst.TRY_AGAIN
+          message = RecognizerError.TRY_AGAIN
           break
         case 1014:
-          message = ErrorConst.BAD_GATEWAY
+          message = RecognizerError.BAD_GATEWAY
           break
         case 1015:
-          message = ErrorConst.TLS_HANDSHAKE
+          message = RecognizerError.TLS_HANDSHAKE
           break
         default:
           this.#logger.warn("closeCallback", "unknow CloseEvent.code", { evt })
-          message = ErrorConst.CANT_ESTABLISH
+          message = RecognizerError.CANT_ESTABLISH
           break
       }
     }
@@ -301,17 +310,17 @@ export class WSRecognizer
   {
     const err = websocketMessage as TWSMessageEventError
     this.currentErrorCode = err.data?.code || err.code
-    let message = err.data?.message || err.message || ErrorConst.UNKNOW
+    let message = err.data?.message || err.message || RecognizerError.UNKNOW
 
     switch (this.currentErrorCode) {
       case "no.activity":
-        message = ErrorConst.NO_ACTIVITY
+        message = RecognizerError.NO_ACTIVITY
         break
       case "access.not.granted":
-        message = ErrorConst.WRONG_CREDENTIALS
+        message = RecognizerError.WRONG_CREDENTIALS
         break
       case "session.too.old":
-        message = ErrorConst.TOO_OLD
+        message = RecognizerError.TOO_OLD
         break
     }
     const error = new Error(message)
@@ -406,7 +415,7 @@ export class WSRecognizer
       return this.initialized.promise
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      const error = new Error(ErrorConst.CANT_ESTABLISH)
+      const error = new Error(RecognizerError.CANT_ESTABLISH)
       this.internalEvent.emitError(error)
       this.initialized?.reject(error)
       return this.initialized?.promise

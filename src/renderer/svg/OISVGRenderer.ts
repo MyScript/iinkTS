@@ -1,6 +1,6 @@
-import { LoggerClass, SvgElementRole } from "../../Constants"
+import { SvgElementRole } from "../../Constants"
 import { TRenderingConfiguration } from "../../configuration"
-import { LoggerManager } from "../../logger"
+import { LoggerClass, LoggerManager } from "../../logger"
 import { TOISymbol, TPoint, TBoundingBox, Box, OIEraser } from "../../primitive"
 import { getClosestPoints } from "../../utils"
 import { OISVGRendererEraserUtil } from "./OISVGRendererEraserUtil"

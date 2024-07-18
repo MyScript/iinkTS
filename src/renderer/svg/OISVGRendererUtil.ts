@@ -1,5 +1,4 @@
-import { LoggerClass } from "../../Constants"
-import { LoggerManager } from "../../logger"
+import { LoggerClass, LoggerManager } from "../../logger"
 import { DecoratorKind, EdgeDecoration, OIDecorator, OIEraser, OIStroke, OISymbolGroup, OIText, SymbolType, TOIEdge, TOIShape, TOISymbol } from "../../primitive"
 import { DefaultStyle } from "../../style"
 import { OISVGDecoratorUtil } from "./OISVGDecoratorUtil"

@@ -6,7 +6,6 @@ import
   OIBehaviors,
   DefaultConfiguration,
   Intention,
-  InternalEventType,
   DefaultTheme,
   InternalEvent,
   TBehaviorOptions,
@@ -1051,7 +1050,7 @@ describe("OIBehaviors.ts", () =>
       const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
       oib.grabber.detach = jest.fn()
       oib.renderer.destroy = jest.fn()
-      oib.recognizer.close = jest.fn()
+      oib.recognizer.destroy = jest.fn()
       oib.destroy()
       await expect(oib.grabber.detach).toBeCalledTimes(1)
     })
@@ -1062,7 +1061,7 @@ describe("OIBehaviors.ts", () =>
       const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
       oib.grabber.detach = jest.fn()
       oib.renderer.destroy = jest.fn()
-      oib.recognizer.close = jest.fn()
+      oib.recognizer.destroy = jest.fn()
       oib.destroy()
       await expect(oib.renderer.destroy).toBeCalledTimes(1)
     })
@@ -1073,10 +1072,9 @@ describe("OIBehaviors.ts", () =>
       const oib = new OIBehaviors(DefaultBehaviorsOptions, layerInfo)
       oib.grabber.detach = jest.fn()
       oib.renderer.destroy = jest.fn()
-      oib.recognizer.close = jest.fn()
+      oib.recognizer.destroy = jest.fn()
       oib.destroy()
-      await expect(oib.recognizer.close).toBeCalledTimes(1)
-      await expect(oib.recognizer.close).toBeCalledWith(1000, InternalEventType.WS_CLOSED)
+      await expect(oib.recognizer.destroy).toBeCalledTimes(1)
     })
 
   })

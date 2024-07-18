@@ -1,5 +1,4 @@
-import { LoggerClass } from "../Constants"
-import { LoggerManager } from "../logger"
+import { LoggerClass, LoggerManager } from "../logger"
 import { TPenStyle } from "../style"
 import { computeDistance } from "../utils"
 import { TExport } from "./Export"

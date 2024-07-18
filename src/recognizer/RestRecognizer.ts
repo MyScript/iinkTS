@@ -1,10 +1,10 @@
-import { LoggerClass, Error as ErrorConst } from "../Constants"
 import { TConverstionState, TDiagramConfiguration, TExportConfiguration, TMathConfiguration, TRawContentConfiguration, TRecognitionConfiguration, TServerConfiguration, TTextConfiguration } from "../configuration"
-import { LoggerManager } from "../logger"
+import { LoggerClass, LoggerManager } from "../logger"
 import { Model, TExport, TJIIXExport } from "../model"
 import { TStrokeGroup, TStrokeGroupToSend } from "../primitive"
 import { StyleHelper, TPenStyle } from "../style"
 import { computeHmac, isVersionSuperiorOrEqual } from "../utils"
+import { RecognizerError } from "./RecognizerError"
 
 type ApiError = {
   code?: string
@@ -214,11 +214,11 @@ export class RestRecognizer
       .catch((err) =>
       {
         this.#logger.error("tryFetch", { data, mimeType, err })
-        let message = err.message || ErrorConst.UNKNOW
+        let message = err.message || RecognizerError.UNKNOW
         if (!err.code) {
-          message = ErrorConst.CANT_ESTABLISH
+          message = RecognizerError.CANT_ESTABLISH
         } else if (err.code === "access.not.granted") {
-          message = ErrorConst.WRONG_CREDENTIALS
+          message = RecognizerError.WRONG_CREDENTIALS
         }
         const error = new Error(message)
         throw error

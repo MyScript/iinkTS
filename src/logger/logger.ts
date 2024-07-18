@@ -1,4 +1,40 @@
-import { LoggerClass, LoggerLevel } from "../Constants"
+/**
+ * @group Logger
+ */
+export enum LoggerLevel
+{
+  DEBUG = "1",
+  INFO = "2",
+  WARN = "3",
+  ERROR = "4"
+}
+
+/**
+ * @group Logger
+ */
+export enum LoggerClass
+{
+  EDITOR = "EDITOR",
+  RECOGNIZER = "RECOGNIZER",
+  GRABBER = "GRABBER",
+  BEHAVIORS = "BEHAVIORS",
+  GESTURE = "GESTURE",
+  CONFIGURATION = "CONFIGURATION",
+  PUBLIC_EVENT = "PUBLIC_EVENT",
+  MODEL = "MODEL",
+  RENDERER = "RENDERER",
+  SMARTGUIDE = "SMARTGUIDE",
+  STYLE = "STYLE",
+  HISTORY = "HISTORY",
+  SYMBOL = "SYMBOL",
+  INTERNAL_EVENT = "INTERNAL_EVENT",
+  WRITE = "WRITE",
+  TRANSFORMER = "TRANSFORMER",
+  CONVERTER = "CONVERTER",
+  SELECTION = "SELECTION",
+  SVGDEBUG = "SVGDEBUG",
+  MENU = "MENU"
+}
 
 /**
  * @group Logger

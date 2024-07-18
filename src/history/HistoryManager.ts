@@ -1,7 +1,6 @@
-import { LoggerClass } from "../Constants"
 import { TUndoRedoConfiguration } from "../configuration"
 import { InternalEvent } from "../event"
-import { LoggerManager } from "../logger"
+import { LoggerClass, LoggerManager } from "../logger"
 import { IModel } from "../model"
 import { IHistoryManager } from "./IHistoryManager"
 import { TUndoRedoContext, getInitialUndoRedoContext } from "./UndoRedoContext"

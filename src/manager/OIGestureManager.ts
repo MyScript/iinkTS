@@ -1,6 +1,6 @@
-import { Intention, LoggerClass } from "../Constants"
+import { Intention } from "../Constants"
 import { OIBehaviors } from "../behaviors"
-import { LoggerManager } from "../logger"
+import { LoggerManager, LoggerClass } from "../logger"
 import { OIModel } from "../model"
 import
 {

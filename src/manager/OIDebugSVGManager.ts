@@ -1,7 +1,6 @@
-import { LoggerClass } from "../Constants"
 import { OIBehaviors } from "../behaviors"
-import { LoggerManager } from "../logger"
-import { OIModel, TJIIXEdgeKind } from "../model"
+import { LoggerManager, LoggerClass } from "../logger"
+import { OIModel, JIIXEdgeKind } from "../model"
 import { Box, OIText, SymbolType, TBoundingBox, TOISymbol } from "../primitive"
 import { NO_SELECTION, OISVGRenderer, SVGBuilder } from "../renderer"
 import { convertBoundingBoxMillimeterToPixel, createUUID } from "../utils"
@@ -303,7 +302,7 @@ export class OIDebugSVGManager
             break
           }
           case "Edge": {
-            if (el.kind === TJIIXEdgeKind.PolyEdge) {
+            if (el.kind === JIIXEdgeKind.PolyEdge) {
               const infos = [
                 `type: ${ el.type }`,
                 `kind: ${ el.kind }`,
@@ -448,7 +447,7 @@ export class OIDebugSVGManager
             break
           }
           case "Edge": {
-            if (el.kind === TJIIXEdgeKind.PolyEdge) {
+            if (el.kind === JIIXEdgeKind.PolyEdge) {
               el.edges.forEach(e =>
               {
                 const box = convertBoundingBoxMillimeterToPixel(e["bounding-box"])

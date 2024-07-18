@@ -1,6 +1,5 @@
-import { LoggerClass } from "../Constants"
 import { OIBehaviors } from "../behaviors"
-import { LoggerManager } from "../logger"
+import { LoggerClass, LoggerManager } from "../logger"
 import { OIModel } from "../model"
 import { Box, TPoint, TSegment } from "../primitive"
 import { NO_SELECTION, OISVGRenderer } from "../renderer"

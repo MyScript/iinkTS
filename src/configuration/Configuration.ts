@@ -1,6 +1,5 @@
 
-import { LoggerClass } from "../Constants"
-import { LoggerManager } from "../logger"
+import { LoggerClass, LoggerManager } from "../logger"
 import { PartialDeep, mergeDeep } from "../utils"
 import { DefaultGrabberConfiguration, TGrabberConfiguration } from "./GrabberConfiguration"
 import { DefaultMenuConfiguration, TMenuConfiguration } from "./MenuConfiguration"

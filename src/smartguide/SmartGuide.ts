@@ -1,7 +1,6 @@
-import { LoggerClass } from "../Constants"
 import { TMarginConfiguration, TRenderingConfiguration } from "../configuration"
 import { InternalEvent } from "../event"
-import { LoggerManager } from "../logger"
+import { LoggerClass, LoggerManager } from "../logger"
 import { TJIIXExport, TJIIXWord } from "../model"
 import { convertMillimeterToPixel, createUUID } from "../utils"
 

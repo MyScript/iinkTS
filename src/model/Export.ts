@@ -1,10 +1,24 @@
 import { EdgeDecoration, TBoundingBox, TPoint } from "../primitive"
 
 /**
- * @group JIIX
+ * @group Exports
+ * @description List all supported MIME types for export. Please note, the MIME types supported depend on the recognition type configured
+ */
+export enum ExportType
+{
+  JIIX = "application/vnd.myscript.jiix",
+  TEXT = "text/plain",
+  LATEX = "application/x-latex",
+  MATHML = "application/mathml+xml",
+  SVG = "image/svg+xml",
+  OFFICE_DOCUMENT = "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+}
+
+/**
+ * @group Exports
  * @remarks {@link https://developer.preprod.myscript.com/docs/interactive-ink/latest/reference/jiix  Element type}
  */
-export enum TJIIXELementType
+export enum JIIXELementType
 {
   Text = "Text",
   Node = "Node",
@@ -13,10 +27,10 @@ export enum TJIIXELementType
 }
 
 /**
- * @group JIIX
+ * @group Exports
  * @remarks {@link https://developer.preprod.myscript.com/docs/interactive-ink/latest/reference/jiix/#diagram-item-blocks | Element node kind}
  */
-export enum TJIIXNodeKind
+export enum JIIXNodeKind
 {
   Circle = "circle",
   Ellipse = "ellipse",
@@ -28,9 +42,9 @@ export enum TJIIXNodeKind
 }
 
 /**
- * @group JIIX
+ * @group Exports
  */
-export enum TJIIXEdgeKind
+export enum JIIXEdgeKind
 {
   Line = "line",
   PolyEdge = "polyedge",
@@ -38,7 +52,7 @@ export enum TJIIXEdgeKind
 }
 
 /**
- * @group JIIX
+ * @group Exports
  * @remarks {@link https://developer.preprod.myscript.com/docs/interactive-ink/latest/reference/jiix/#stroke-item | Stroke item}
  */
 export type TJIIXStrokeItem = {
@@ -53,7 +67,7 @@ export type TJIIXStrokeItem = {
 }
 
 /**
- * @group JIIX
+ * @group Exports
  */
 export type TJIIXBase = {
   "bounding-box"?: TBoundingBox
@@ -61,7 +75,7 @@ export type TJIIXBase = {
 }
 
 /**
- * @group JIIX
+ * @group Exports
  */
 export type TJIIXElementBase<T = string> = TJIIXBase & {
   id: string
@@ -69,7 +83,7 @@ export type TJIIXElementBase<T = string> = TJIIXBase & {
 }
 
 /**
- * @group JIIX
+ * @group Exports
  * @remarks {@link https://developer.preprod.myscript.com/docs/interactive-ink/latest/reference/jiix/#word-object | Word object}
  */
 export type TJIIXWord = TJIIXBase & {
@@ -81,7 +95,7 @@ export type TJIIXWord = TJIIXBase & {
 }
 
 /**
- * @group JIIX
+ * @group Exports
  * @remarks {@link https://developer.preprod.myscript.com/docs/interactive-ink/latest/reference/jiix/#character-object | Character object}
  */
 export type TJIIXChar = TJIIXBase & {
@@ -92,10 +106,10 @@ export type TJIIXChar = TJIIXBase & {
 }
 
 /**
- * @group JIIX
+ * @group Exports
  * @remarks {@link https://developer.preprod.myscript.com/docs/interactive-ink/latest/reference/jiix/#text-interpretation | Text Element }
  */
-export type TJIIXTextElement = TJIIXElementBase<TJIIXELementType.Text> & {
+export type TJIIXTextElement = TJIIXElementBase<JIIXELementType.Text> & {
   id: string
   "bounding-box"?: TBoundingBox
   label: string
@@ -104,17 +118,17 @@ export type TJIIXTextElement = TJIIXElementBase<TJIIXELementType.Text> & {
 }
 
 /**
- * @group JIIX
+ * @group Exports
  */
-export type TJIIXNodeElementBase<K = string> = TJIIXElementBase<TJIIXELementType.Node> & {
+export type TJIIXNodeElementBase<K = string> = TJIIXElementBase<JIIXELementType.Node> & {
   id: string
   kind: K
 }
 
 /**
- * @group JIIX
+ * @group Exports
  */
-export type TJIIXNodeCircle = TJIIXNodeElementBase<TJIIXNodeKind.Circle> & {
+export type TJIIXNodeCircle = TJIIXNodeElementBase<JIIXNodeKind.Circle> & {
   id: string
   cx: number
   cy: number
@@ -122,9 +136,9 @@ export type TJIIXNodeCircle = TJIIXNodeElementBase<TJIIXNodeKind.Circle> & {
 }
 
 /**
- * @group JIIX
+ * @group Exports
  */
-export type TJIIXNodeEllipse = TJIIXNodeElementBase<TJIIXNodeKind.Ellipse> & {
+export type TJIIXNodeEllipse = TJIIXNodeElementBase<JIIXNodeKind.Ellipse> & {
   id: string
   cx: number
   cy: number
@@ -133,9 +147,9 @@ export type TJIIXNodeEllipse = TJIIXNodeElementBase<TJIIXNodeKind.Ellipse> & {
 }
 
 /**
- * @group JIIX
+ * @group Exports
  */
-export type TJIIXNodeRectangle = TJIIXNodeElementBase<TJIIXNodeKind.Rectangle> & {
+export type TJIIXNodeRectangle = TJIIXNodeElementBase<JIIXNodeKind.Rectangle> & {
   id: string
   height: number
   width: number
@@ -144,39 +158,39 @@ export type TJIIXNodeRectangle = TJIIXNodeElementBase<TJIIXNodeKind.Rectangle> &
 }
 
 /**
- * @group JIIX
+ * @group Exports
  */
-export type TJIIXNodeTriangle = TJIIXNodeElementBase<TJIIXNodeKind.Triangle> & {
+export type TJIIXNodeTriangle = TJIIXNodeElementBase<JIIXNodeKind.Triangle> & {
   id: string
   points: number[]
 }
 
 /**
- * @group JIIX
+ * @group Exports
  */
-export type TJIIXNodeParrallelogram = TJIIXNodeElementBase<TJIIXNodeKind.Parallelogram> & {
+export type TJIIXNodeParrallelogram = TJIIXNodeElementBase<JIIXNodeKind.Parallelogram> & {
   id: string
   points: number[]
 }
 
 /**
- * @group JIIX
+ * @group Exports
  */
-export type TJIIXNodePolygon = TJIIXNodeElementBase<TJIIXNodeKind.Polygon> & {
+export type TJIIXNodePolygon = TJIIXNodeElementBase<JIIXNodeKind.Polygon> & {
   id: string
   points: number[]
 }
 
 /**
- * @group JIIX
+ * @group Exports
  */
-export type TJIIXNodeRhombus = TJIIXNodeElementBase<TJIIXNodeKind.Rhombus> & {
+export type TJIIXNodeRhombus = TJIIXNodeElementBase<JIIXNodeKind.Rhombus> & {
   id: string
   points: number[]
 }
 
 /**
- * @group JIIX
+ * @group Exports
  */
 export type TJIIXNodeElement =
   TJIIXNodeCircle |
@@ -188,17 +202,17 @@ export type TJIIXNodeElement =
   TJIIXNodeRhombus
 
 /**
- * @group JIIX
+ * @group Exports
  */
-export type TJIIXEdgeElementBase<K = string> = TJIIXElementBase<TJIIXELementType.Edge> & {
+export type TJIIXEdgeElementBase<K = string> = TJIIXElementBase<JIIXELementType.Edge> & {
   kind: K
 }
 
 /**
- * @group JIIX
+ * @group Exports
  * @remarks {@link https://developer.preprod.myscript.com/docs/interactive-ink/latest/reference/jiix/#line-item | Element line}
  */
-export type TJIIXEdgeLine = TJIIXEdgeElementBase<TJIIXEdgeKind.Line> & {
+export type TJIIXEdgeLine = TJIIXEdgeElementBase<JIIXEdgeKind.Line> & {
   x1: number
   x2: number
   y1: number
@@ -208,17 +222,17 @@ export type TJIIXEdgeLine = TJIIXEdgeElementBase<TJIIXEdgeKind.Line> & {
 }
 
 /**
- * @group JIIX
+ * @group Exports
  */
-export type TJIIXEdgePolyEdge = TJIIXEdgeElementBase<TJIIXEdgeKind.PolyEdge> & {
+export type TJIIXEdgePolyEdge = TJIIXEdgeElementBase<JIIXEdgeKind.PolyEdge> & {
   edges: TJIIXEdgeLine[]
 }
 
 /**
- * @group JIIX
+ * @group Exports
  * @remarks {@link https://developer.preprod.myscript.com/docs/interactive-ink/latest/reference/jiix/#arc-item | Element arc}
  */
-export type TJIIXEdgeArc = TJIIXEdgeElementBase<TJIIXEdgeKind.Arc> & {
+export type TJIIXEdgeArc = TJIIXEdgeElementBase<JIIXEdgeKind.Arc> & {
   cx: number,
   cy: number,
   rx: number,
@@ -231,7 +245,7 @@ export type TJIIXEdgeArc = TJIIXEdgeElementBase<TJIIXEdgeKind.Arc> & {
 }
 
 /**
- * @group JIIX
+ * @group Exports
  */
 export type TJIIXEdgeElement =
   TJIIXEdgeLine |
@@ -239,8 +253,8 @@ export type TJIIXEdgeElement =
   TJIIXEdgeArc
 
 /**
- * @group JIIX
- * {@link https://developer.preprod.myscript.com/docs/interactive-ink/latest/reference/web/jiix}
+ * @group Exports
+ * @remarks {@link https://developer.preprod.myscript.com/docs/interactive-ink/latest/reference/web/jiix | Exports}
  */
 export type TJIIXElement =
   TJIIXTextElement |
@@ -248,7 +262,7 @@ export type TJIIXElement =
   TJIIXEdgeElement
 
 /**
- * @group JIIX
+ * @group Exports
  */
 export type TJIIXExport = {
   type: string
@@ -262,7 +276,7 @@ export type TJIIXExport = {
 }
 
 /**
- * @group JIIX
+ * @group Exports
  * @remarks
  * List all supported MIME types for export.
  *
