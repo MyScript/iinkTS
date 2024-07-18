@@ -16,7 +16,7 @@ import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
 import { TStyle } from "../style"
 import { OIHistoryManager, TOIHistoryChanges } from "../history"
-import { getClosestPoints, isBetween, isPointInsidePolygon } from "../utils"
+import { getClosestPoints, isBetween } from "../utils"
 import { TGesture, StrikeThroughAction, SurroundAction } from "../gesture"
 import { OITranslateManager } from "./OITranslateManager"
 import { OITextManager } from "./OITextManager"
@@ -148,39 +148,101 @@ export class OIGestureManager
     return
   }
 
-  protected computeScratchGestureOnStrokes(gesture: TGesture, strokes: OIStroke[]): { replaced: { oldSymbols: TOISymbol[], newSymbols: TOISymbol[] }, erased: TOISymbol[] }
+  protected computeScratcheOnStrokes(gesture: TGesture, stroke: OIStroke): OIStroke[]
   {
-    const replaced: { oldSymbols: TOISymbol[], newSymbols: TOISymbol[] } = { oldSymbols: [], newSymbols: [] }
-    const erased: TOISymbol[] = []
-    strokes.forEach(sd =>
-    {
-      const partPointersToRemove = gesture.subStrokes?.find(ss => ss.fullStrokeId === sd.id)
-      if (partPointersToRemove) {
-        const strokePartToErase = new OIStroke({}, "eraser")
-        partPointersToRemove.x.forEach((x, i) => strokePartToErase.addPointer({ x, y: partPointersToRemove.y[i], p: 1, t: 1 }))
-        const subStrokes = OIStroke.substract(sd, strokePartToErase)
-        const newStrokes: OIStroke[] = []
-        if (subStrokes.before) newStrokes.push(subStrokes.before)
-        if (subStrokes.after) newStrokes.push(subStrokes.after)
-        if (newStrokes.length) {
-          replaced.newSymbols.push(...newStrokes)
-          replaced.oldSymbols.push(sd)
-        }
-        else {
-          erased.push(sd)
-        }
-      }
-      else {
-        erased.push(sd)
-      }
-    })
-    return {
-      replaced,
-      erased
+    const newStrokes: OIStroke[] = []
+    const partPointersToRemove = gesture.subStrokes?.find(ss => ss.fullStrokeId === stroke.id)
+    if (partPointersToRemove) {
+      const strokePartToErase = new OIStroke()
+      partPointersToRemove.x.forEach((x, i) => strokePartToErase.addPointer({ x, y: partPointersToRemove.y[i], p: 1, t: 1 }))
+      const subStrokes = OIStroke.substract(stroke, strokePartToErase)
+      if (subStrokes.before) newStrokes.push(subStrokes.before)
+      if (subStrokes.after) newStrokes.push(subStrokes.after)
+    }
+    return newStrokes
+  }
+
+  protected computeScratchOnText(gestureStroke: OIStroke, textSymbol: OIText): OIText | undefined
+  {
+    const charsToRemove = textSymbol.getCharsOverlaps(gestureStroke.pointers)
+    if (textSymbol.chars.length == charsToRemove.length) {
+      return
+    }
+    else {
+      charsToRemove.forEach(c =>
+      {
+        const cIndex = textSymbol.chars.findIndex(c1 => c1.id === c.id)
+        textSymbol.chars.splice(cIndex, 1)
+      })
+      this.texter.updateTextBoundingBox(textSymbol)
+      return textSymbol
     }
   }
 
-  async applyScratchGesture(gestureStroke: OIStroke, gesture: TGesture): Promise<void>
+  protected computeScratchOnSymbol(gestureStroke: OIStroke, gesture: TGesture, symbol: TOISymbol): { erased?: boolean, replaced?: TOISymbol[] }
+  {
+    switch (symbol.type) {
+      case SymbolType.Stroke: {
+        const strokesScratchedResult = this.computeScratcheOnStrokes(gesture, symbol)
+        if (strokesScratchedResult.length) {
+          return {
+            replaced: strokesScratchedResult
+          }
+        }
+        else {
+          return { erased: true }
+        }
+      }
+      case SymbolType.Group: {
+        const childrenNotTouch = symbol.extractSymbols().filter(s => !gestureStroke.bounds.overlaps(s.bounds))
+        const childrenTouch = symbol.extractSymbols().filter(s => gestureStroke.bounds.overlaps(s.bounds))
+        const results = childrenTouch.map(s =>
+        {
+          return {
+            symbol: s,
+            result: this.computeScratchOnSymbol(gestureStroke, gesture, s)
+          }
+        })
+        if (childrenNotTouch.length === 0 && results.every(r => r.result.erased)) {
+          return { erased: true }
+        }
+        else {
+          const symbolsGroup: TOISymbol[] = childrenNotTouch
+          results.forEach(r =>
+          {
+            if (r.result.replaced) {
+              symbolsGroup.push(...r.result.replaced)
+            }
+          })
+          const newGroup = new OISymbolGroup(symbolsGroup, symbol.style)
+          newGroup.decorators = symbol.decorators
+          return {
+            replaced: [newGroup]
+          }
+        }
+      }
+      case SymbolType.Text: {
+        const textScratchedResult = this.computeScratchOnText(gestureStroke, symbol)
+        if (textScratchedResult) {
+          return {
+            replaced: [textScratchedResult]
+          }
+        }
+        else {
+          return {
+            erased: true
+          }
+        }
+      }
+      case SymbolType.Shape:
+      case SymbolType.Edge:
+        return {
+          erased: true
+        }
+    }
+  }
+
+  async applyScratch(gestureStroke: OIStroke, gesture: TGesture): Promise<void>
   {
     this.#logger.debug("applyScratchGesture", { gestureStroke, gesture })
     if (!gesture.strokeIds.length) {
@@ -191,50 +253,18 @@ export class OIGestureManager
     const symbolsToErase: TOISymbol[] = []
     const symbolsToReplace: { oldSymbols: TOISymbol[], newSymbols: TOISymbol[] } = { oldSymbols: [], newSymbols: [] }
 
-    symbolsToErase.push(...this.model.symbols.filter(s => [SymbolType.Shape.toString(), SymbolType.Edge.toString()].includes(s.type) && gesture.strokeIds.includes(s.id)))
-
-    const textScratched = this.model.symbols.filter(s => s.type === SymbolType.Text && gesture.strokeIds.includes(s.id)) as OIText[]
-    if (textScratched.length) {
-      textScratched.forEach(te =>
-      {
-        const charsToRemove = te.getCharsOverlaps(gestureStroke.pointers)
-        if (te.chars.length == charsToRemove.length) {
-          symbolsToErase.push(te)
+    gesture.strokeIds.forEach(id =>
+    {
+      const sym = this.model.getRootSymbol(id)
+      if (sym && !symbolsToErase.some(s => s.id === sym.id) && !symbolsToReplace.oldSymbols.some(s => s.id === sym.id)) {
+        const result = this.computeScratchOnSymbol(gestureStroke, gesture, sym)
+        if (result.erased) symbolsToErase.push(sym)
+        else if (result.replaced) {
+          symbolsToReplace.newSymbols.push(...result.replaced)
+          symbolsToReplace.oldSymbols.push(sym)
         }
-        else {
-          charsToRemove.forEach(c =>
-          {
-            const cIndex = te.chars.findIndex(c1 => c1.id === c.id)
-            te.chars.splice(cIndex, 1)
-          })
-          this.texter.updateTextBoundingBox(te)
-          symbolsToUpdate.push(te)
-        }
-      })
-      this.texter.adjustText()
-    }
-
-    const strokesScratched = this.model.symbols.filter(s => s.type === SymbolType.Stroke && gesture.strokeIds.includes(s.id)) as OIStroke[]
-    const strokesScratchedResult = this.computeScratchGestureOnStrokes(gesture, strokesScratched)
-    symbolsToErase.push(...strokesScratchedResult.erased)
-    symbolsToReplace.newSymbols.push(...strokesScratchedResult.replaced.newSymbols)
-    symbolsToReplace.oldSymbols.push(...strokesScratchedResult.replaced.oldSymbols)
-
-    const groupsScratched = this.model.symbols.filter(s => s.type === SymbolType.Group && gesture.strokeIds.some(id => s.containsSymbol(id))) as OISymbolGroup[]
-    if (groupsScratched.length) {
-      groupsScratched.forEach(gs =>
-      {
-        const childSymbolsToRemove = gs.children.filter(s => gestureStroke.bounds.contains(s.bounds))
-        if (childSymbolsToRemove.length === gs.children.length) {
-          symbolsToErase.push(gs)
-        }
-        else {
-          symbolsToReplace.oldSymbols.push(gs.clone())
-          gs.children = gs.children.filter(s => !gestureStroke.bounds.contains(s.bounds))
-          symbolsToReplace.newSymbols.push(gs)
-        }
-      })
-    }
+      }
+    })
 
     const promises: Promise<void | TOISymbol[]>[] = []
     const changes: TOIHistoryChanges = {}
@@ -242,14 +272,17 @@ export class OIGestureManager
       promises.push(this.behaviors.updateSymbols(symbolsToUpdate, false))
       changes.updated = symbolsToUpdate
     }
+
     if (symbolsToErase.length) {
       promises.push(this.behaviors.removeSymbols(symbolsToErase.map(s => s.id), false))
       changes.erased = symbolsToErase
     }
+
     if (symbolsToReplace.newSymbols.length) {
       changes.replaced = symbolsToReplace
       promises.push(this.behaviors.replaceSymbols(symbolsToReplace.oldSymbols, symbolsToReplace.newSymbols, false))
     }
+    this.texter.adjustText()
     this.history.push(this.model, changes)
     await Promise.all(promises)
   }
@@ -606,7 +639,7 @@ export class OIGestureManager
         await this.applyUnderlineGesture(gestureStroke, gesture)
         break
       case "SCRATCH":
-        await this.applyScratchGesture(gestureStroke, gesture)
+        await this.applyScratch(gestureStroke, gesture)
         break
       case "JOIN":
         await this.applyJoinGesture(gestureStroke, gesture)
@@ -684,13 +717,13 @@ export class OIGestureManager
       case "scratch": {
         const symbolsToErase = this.model.symbols.filter(s =>
         {
-          return
-            s.id !== gestureStroke.id &&
-            (
-              gestureStroke.bounds.overlaps(s.bounds) ||
-              SymbolType.Text === s.type && gestureStroke.pointers.some(p => isPointInsidePolygon(p, s.vertices))
-            )
+          return s.id !== gestureStroke.id &&
+          (
+            gestureStroke.bounds.overlaps(s.bounds) && [SymbolType.Stroke, SymbolType.Text, SymbolType.Group].includes(s.type) ||
+            gestureStroke.bounds.contains(s.bounds) && [SymbolType.Shape, SymbolType.Edge].includes(s.type)
+          )
         })
+
         if (symbolsToErase.length) {
           return {
             gestureType: "SCRATCH",
