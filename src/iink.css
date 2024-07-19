@@ -169,7 +169,7 @@
     display: none;
     opacity: 1 !important;
 }
-.ms-editor .ms-tooltip:hover .ms-tooltip-content {
+.ms-editor .ms-tooltip:hover:not(:focus, :active) .ms-tooltip-content {
     display: block;
 }
 .ms-editor .ms-tooltip .ms-tooltip-content.top {
