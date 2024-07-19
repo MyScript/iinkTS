@@ -103,7 +103,7 @@ export class OIGestureManager
         gesture.strokeIds.forEach(id =>
         {
           const sym = this.model.getRootSymbol(id)
-          if (sym && [SymbolType.Group.toString(), SymbolType.Stroke.toString(), SymbolType.Text.toString()].includes(sym.type) && !symbolIds.includes(sym.id)) {
+          if (sym && [SymbolType.Group, SymbolType.Stroke, SymbolType.Text].includes(sym.type) && !symbolIds.includes(sym.id)) {
             const symWithDec = sym as (OIText | OIStroke | OISymbolGroup)
             const highlight = new OIDecorator(DecoratorKind.Highlight, this.currentStyle)
             const index = symWithDec.decorators.findIndex(d => d.kind === DecoratorKind.Highlight)
@@ -126,7 +126,7 @@ export class OIGestureManager
         gesture.strokeIds.forEach(id =>
         {
           const sym = this.model.getRootSymbol(id)
-          if (sym && [SymbolType.Group.toString(), SymbolType.Stroke.toString(), SymbolType.Text.toString()].includes(sym.type) && !symbolIds.includes(sym.id)) {
+          if (sym && [SymbolType.Group, SymbolType.Stroke, SymbolType.Text].includes(sym.type) && !symbolIds.includes(sym.id)) {
             const symWithDec = sym as (OIText | OIStroke | OISymbolGroup)
             const surround = new OIDecorator(DecoratorKind.Surround, this.currentStyle)
             const index = symWithDec.decorators.findIndex(d => d.kind === DecoratorKind.Surround)
@@ -148,7 +148,7 @@ export class OIGestureManager
     return
   }
 
-  protected computeScratcheOnStrokes(gesture: TGesture, stroke: OIStroke): OIStroke[]
+  protected computeScratchOnStrokes(gesture: TGesture, stroke: OIStroke): OIStroke[]
   {
     const newStrokes: OIStroke[] = []
     const partPointersToRemove = gesture.subStrokes?.find(ss => ss.fullStrokeId === stroke.id)
@@ -183,7 +183,7 @@ export class OIGestureManager
   {
     switch (symbol.type) {
       case SymbolType.Stroke: {
-        const strokesScratchedResult = this.computeScratcheOnStrokes(gesture, symbol)
+        const strokesScratchedResult = this.computeScratchOnStrokes(gesture, symbol)
         if (strokesScratchedResult.length) {
           return {
             replaced: strokesScratchedResult
@@ -287,79 +287,23 @@ export class OIGestureManager
     await Promise.all(promises)
   }
 
-  protected isSymbolAbove(source: TOISymbol, target: TOISymbol): boolean
-  {
-    return source.bounds.yMid - this.rowHeight / 2 > target.bounds.yMid
-  }
-
-  protected isSymbolInRow(source: TOISymbol, target: TOISymbol): boolean
-  {
-    return Math.abs(source.bounds.yMid - target.bounds.yMid) <= this.rowHeight / 2
-  }
-
-  protected isSymbolBelow(source: TOISymbol, target: TOISymbol): boolean
-  {
-    return source.bounds.yMid + this.rowHeight / 2 < target.bounds.yMid
-  }
-
-  protected getFirstSymbol(symbols: TOISymbol[]): TOISymbol | undefined
-  {
-    if (!symbols.length) return
-    return symbols.reduce((previous, current) =>
-    {
-      if (previous) {
-        if (Math.round(previous.bounds.yMid / this.rowHeight) < Math.round(current.bounds.yMid / this.rowHeight)) {
-          return previous
-        }
-        else if (Math.round(previous.bounds.yMid / this.rowHeight) == Math.round(current.bounds.yMid / this.rowHeight) && previous.bounds.xMid < current.bounds.xMid) {
-          return previous
-        }
-      }
-      return current
-    })
-  }
-
-  protected getLastSymbol(symbols: TOISymbol[]): TOISymbol | undefined
-  {
-    if (!symbols.length) return
-    return symbols.reduce((previous, current) =>
-    {
-      if (previous) {
-        if (previous.bounds.yMid - current.bounds.yMid > this.rowHeight / 2) {
-          return previous
-        }
-        if (previous.bounds.yMid - current.bounds.yMid < this.rowHeight / 2) {
-          return current
-        }
-        else if (previous.bounds.xMid > current.bounds.xMid) {
-          return previous
-        }
-      }
-      return current
-    })
-  }
-
-  protected roundToLineGuide(y: number): number
-  {
-    return Math.round(y / this.rowHeight) * this.rowHeight
-  }
-
   async applyJoinGesture(gestureStroke: OIStroke, gesture: TGesture): Promise<void>
   {
     this.#logger.debug("applyJoinGesture", { gestureStroke, gesture })
 
-    const symbolsAbove = this.model.symbols.filter(s => this.isSymbolAbove(gestureStroke, s))
-    const symbolsRow = this.model.symbols.filter(s => this.isSymbolInRow(gestureStroke, s))
-    const symbolsBeforeGestureInRow = symbolsRow.filter(s => s.bounds.xMid < gestureStroke.bounds.xMid)
-    const symbolsAfterGestureInRow = symbolsRow.filter(s => s.bounds.xMid > gestureStroke.bounds.xMid)
-    const symbolsBelow = this.model.symbols.filter(s => this.isSymbolBelow(gestureStroke, s))
+    const symbolsAbove = this.model.symbols.filter(s => this.model.isSymbolAbove(gestureStroke, s))
+    const symbolsRow = this.model.symbols.filter(s => this.model.isSymbolInRow(gestureStroke, s))
+    const symbolsBeforeGestureInRow = symbolsRow.filter(s => s.bounds.xMax <= gestureStroke.bounds.xMid)
+    const symbolsOnGestureInRow = symbolsRow.filter(s => s.bounds.xMax > gestureStroke.bounds.xMid && s.bounds.xMin <= gestureStroke.bounds.xMid)
+    const symbolsAfterGestureInRow = symbolsRow.filter(s => s.bounds.xMin > gestureStroke.bounds.xMid)
+    const symbolsBelow = this.model.symbols.filter(s => this.model.isSymbolBelow(gestureStroke, s))
 
     const changes: TOIHistoryChanges = {}
     const translate: { symbols: TOISymbol[], tx: number, ty: number }[] = []
 
     if (symbolsBeforeGestureInRow.length && symbolsAfterGestureInRow.length) {
-      const lastSymbBefore = symbolsBeforeGestureInRow.reduce((previous, current) => previous && previous.bounds.xMax > current.bounds.xMax ? previous : current)
-      const firstSymbolAfter = symbolsAfterGestureInRow.reduce((previous, current) => previous && previous.bounds.xMin < current.bounds.xMin ? previous : current)
+      const lastSymbBefore = this.model.getLastSymbol(symbolsBeforeGestureInRow)!
+      const firstSymbolAfter = this.model.getFirstSymbol(symbolsAfterGestureInRow)!
 
       const lastXBefore = Math.max(...symbolsBeforeGestureInRow.map(s => s.bounds.xMax))
       const firstXAfter = Math.min(...symbolsAfterGestureInRow.map(s => s.bounds.xMin))
@@ -372,13 +316,13 @@ export class OIGestureManager
       symbolsToGroup.push(...(firstSymbolAfterClone.type === SymbolType.Group ? (firstSymbolAfterClone as OISymbolGroup).extractSymbols() : [firstSymbolAfterClone]))
 
       const group = new OISymbolGroup(symbolsToGroup, lastSymbBefore.style)
-      if ([SymbolType.Group.toString(), SymbolType.Stroke.toString(), SymbolType.Text.toString()].includes(lastSymbBefore.type)) {
+      if ([SymbolType.Group, SymbolType.Stroke, SymbolType.Text].includes(lastSymbBefore.type)) {
         (lastSymbBefore as OIStroke).decorators.forEach(d =>
         {
           group.decorators.push(new OIDecorator(d.kind, d.style))
         })
       }
-      if ([SymbolType.Group.toString(), SymbolType.Stroke.toString(), SymbolType.Text.toString()].includes(firstSymbolAfter.type)) {
+      if ([SymbolType.Group, SymbolType.Stroke, SymbolType.Text].includes(firstSymbolAfter.type)) {
         (firstSymbolAfter as OIStroke).decorators.forEach(d =>
         {
           if (!group.decorators.some(d1 => d1.kind == d.kind)) {
@@ -396,19 +340,47 @@ export class OIGestureManager
         translate.push({ symbols: rest, tx: translateX, ty: 0 })
       }
     }
-    else if (symbolsBeforeGestureInRow.length) {
-      const lastSymbolBeforeGesture = this.getLastSymbol(symbolsBeforeGestureInRow)!
-      const firstSymbolAfterGesture = this.getFirstSymbol(symbolsBelow)!
+    else if (symbolsOnGestureInRow.length) {
+      const symbolToJoin = symbolsOnGestureInRow[0]
+      if (symbolToJoin?.type === SymbolType.Group) {
+        const children = symbolToJoin.extractSymbols().map(c => c.clone())
+        const childBefore = children.filter(c => c.bounds.xMid <= gestureStroke.bounds.xMid)
+        const childAfter = children.filter(c => c.bounds.xMid > gestureStroke.bounds.xMid)
+        const tx = Math.max(...childBefore.map(c => c.bounds.xMax)) - Math.min(...childAfter.map(c => c.bounds.xMin))
+        childAfter.forEach(c => this.translator.applyToSymbol(c, tx, 0))
 
-      if (this.roundToLineGuide(lastSymbolBeforeGesture.bounds.yMid) >= this.roundToLineGuide(firstSymbolAfterGesture.bounds.yMid - this.rowHeight)) {
-        const symbolInNextRow = symbolsBelow.filter(s => this.isSymbolInRow(firstSymbolAfterGesture, s))
-        if (symbolInNextRow.length) {
-          const translateX = lastSymbolBeforeGesture.bounds.xMax + this.strokeSpaceWidth - firstSymbolAfterGesture.bounds.xMin
-          translate.push({ symbols: symbolInNextRow, tx: translateX, ty: -this.rowHeight })
+        const newGroup = new OISymbolGroup(children, symbolToJoin.style)
+        newGroup.decorators = symbolToJoin.decorators.map(d => d.clone())
+
+        changes.replaced = {
+          oldSymbols: [symbolToJoin],
+          newSymbols: [newGroup]
         }
-        const symbolsAfterNextRow = symbolsBelow.filter(s => this.isSymbolBelow(firstSymbolAfterGesture, s))
+
+        if (symbolsAfterGestureInRow.length) {
+
+          translate.push({ symbols: symbolsAfterGestureInRow, tx, ty: -this.rowHeight })
+        }
+        const symbolsAfterNextRow = symbolsBelow.filter(s => this.model.isSymbolBelow(symbolToJoin, s))
         if (symbolsAfterNextRow.length) {
           translate.push({ symbols: symbolsAfterNextRow, tx: 0, ty: -this.rowHeight })
+        }
+      }
+    }
+    else if (symbolsBeforeGestureInRow.length) {
+      const lastSymbolBeforeGesture = this.model.getLastSymbol(symbolsBeforeGestureInRow)!
+      const firstSymbolAfterGesture = this.model.getFirstSymbol(symbolsBelow)
+      if (firstSymbolAfterGesture) {
+        if (this.model.roundToLineGuide(lastSymbolBeforeGesture.bounds.yMid) >= this.model.roundToLineGuide(firstSymbolAfterGesture.bounds.yMid - this.rowHeight)) {
+          const symbolInNextRow = symbolsBelow.filter(s => this.model.isSymbolInRow(firstSymbolAfterGesture, s))
+          if (symbolInNextRow.length) {
+            const translateX = lastSymbolBeforeGesture.bounds.xMax + this.strokeSpaceWidth - firstSymbolAfterGesture.bounds.xMin
+            translate.push({ symbols: symbolInNextRow, tx: translateX, ty: -this.rowHeight })
+          }
+          const symbolsAfterNextRow = symbolsBelow.filter(s => this.model.isSymbolBelow(firstSymbolAfterGesture, s))
+          if (symbolsAfterNextRow.length) {
+            translate.push({ symbols: symbolsAfterNextRow, tx: 0, ty: -this.rowHeight })
+          }
         }
       }
       else {
@@ -416,10 +388,10 @@ export class OIGestureManager
       }
     }
     else if (symbolsAfterGestureInRow.length) {
-      const firstSymbolAfterGesture = this.getFirstSymbol(symbolsAfterGestureInRow)!
-      const lastSymbolAbove = this.getLastSymbol(symbolsAbove)
+      const firstSymbolAfterGesture = this.model.getFirstSymbol(symbolsAfterGestureInRow)!
+      const lastSymbolAbove = this.model.getLastSymbol(symbolsAbove)
       if (lastSymbolAbove) {
-        if (this.roundToLineGuide(lastSymbolAbove.bounds.yMid) >= this.roundToLineGuide(firstSymbolAfterGesture.bounds.yMid - this.rowHeight)) {
+        if (this.model.roundToLineGuide(lastSymbolAbove.bounds.yMid) >= this.model.roundToLineGuide(firstSymbolAfterGesture.bounds.yMid - this.rowHeight)) {
           const translateX = lastSymbolAbove.bounds.xMax + this.strokeSpaceWidth - firstSymbolAfterGesture.bounds.xMin
           translate.push({ symbols: symbolsAfterGestureInRow, tx: translateX, ty: -this.rowHeight })
         }
@@ -450,12 +422,12 @@ export class OIGestureManager
   {
     this.#logger.debug("applyInsertGesture", { gestureStroke, gesture })
 
-    const symbolsRow = this.model.symbols.filter(s => this.isSymbolInRow(gestureStroke, s))
+    const symbolsRow = this.model.symbols.filter(s => this.model.isSymbolInRow(gestureStroke, s))
     const symbolsBeforeGestureInRow = symbolsRow.filter(s => gestureStroke.bounds.xMid > s.bounds.xMax)
     const groupsStrokesToSplit = symbolsRow.filter(s => s.type === SymbolType.Group && isBetween(gestureStroke.bounds.xMid, s.bounds.xMin, s.bounds.xMax)) as OISymbolGroup[]
     const symbolsAfterGestureInRow = symbolsRow.filter(s => gestureStroke.bounds.xMid < s.bounds.xMin)
 
-    const symbolsBelow = this.model.symbols.filter(s => this.isSymbolBelow(gestureStroke, s))
+    const symbolsBelow = this.model.symbols.filter(s => this.model.isSymbolBelow(gestureStroke, s))
 
     const translate: { symbols: TOISymbol[], tx: number, ty: number }[] = []
     const replaced: { oldSymbols: TOISymbol[], newSymbols: TOISymbol[] } = { oldSymbols: [], newSymbols: [] }
@@ -480,7 +452,7 @@ export class OIGestureManager
           const newStrokes = OIStroke.split(strokeToSplit, indexToSplit)
           groupBefore.children.push(newStrokes.before)
           this.translator.applyToSymbol(newStrokes.after, this.strokeSpaceWidth, 0)
-          groupBefore.children.push(newStrokes.after)
+          groupAfter.children.push(newStrokes.after)
           replaced.oldSymbols.push(groupWithStrokeToSplit)
           replaced.newSymbols.push(groupBefore)
           replaced.newSymbols.push(groupAfter)
@@ -571,7 +543,7 @@ export class OIGestureManager
     gesture.strokeIds.forEach(id =>
     {
       const sym = this.model.getRootSymbol(id)
-      if (sym && [SymbolType.Group.toString(), SymbolType.Stroke.toString(), SymbolType.Text.toString()].includes(sym.type) && !symbolIds.includes(sym.id)) {
+      if (sym && [SymbolType.Group, SymbolType.Stroke, SymbolType.Text].includes(sym.type) && !symbolIds.includes(sym.id)) {
         const symWithDec = sym as (OIText | OIStroke | OISymbolGroup)
         const underline = new OIDecorator(DecoratorKind.Underline, this.currentStyle)
         const index = symWithDec.decorators.findIndex(d => d.kind === DecoratorKind.Underline)
@@ -602,7 +574,7 @@ export class OIGestureManager
         gesture.strokeIds.forEach(id =>
         {
           const symbol = this.model.getRootSymbol(id)
-          if (symbol && [SymbolType.Group.toString(), SymbolType.Stroke.toString(), SymbolType.Text.toString()].includes(symbol.type) && !symbolIds.includes(symbol.id)) {
+          if (symbol && [SymbolType.Group, SymbolType.Stroke, SymbolType.Text].includes(symbol.type) && !symbolIds.includes(symbol.id)) {
             const symWithDec = symbol as (OIText | OIStroke | OISymbolGroup)
             const strikethrough = new OIDecorator(DecoratorKind.Strikethrough, this.currentStyle)
             const index = symWithDec.decorators.findIndex(d => d.kind === DecoratorKind.Strikethrough)
@@ -684,7 +656,7 @@ export class OIGestureManager
       case "right-left": {
         const symbolsToUnderline = this.model.symbols.filter(s =>
         {
-          return [SymbolType.Text.toString(), SymbolType.Stroke.toString(), SymbolType.Group.toString()].includes(s.type) &&
+          return [SymbolType.Text, SymbolType.Stroke, SymbolType.Group].includes(s.type) &&
             isBetween(s.bounds.xMid, gestureStroke.bounds.xMin, gestureStroke.bounds.xMax) &&
             isBetween(gestureStroke.bounds.yMid, s.bounds.y + s.bounds.height * 3 / 4, s.bounds.y + s.bounds.height * 5 / 4)
         })
@@ -699,7 +671,7 @@ export class OIGestureManager
         }
         const symbolsToStrikeThrough = this.model.symbols.filter(s =>
         {
-          return [SymbolType.Text.toString(), SymbolType.Stroke.toString(), SymbolType.Group.toString()].includes(s.type) &&
+          return [SymbolType.Text, SymbolType.Stroke, SymbolType.Group].includes(s.type) &&
             isBetween(s.bounds.xMid, gestureStroke.bounds.xMin, gestureStroke.bounds.xMax) &&
             isBetween(gestureStroke.bounds.yMid, s.bounds.y + s.bounds.height / 4, s.bounds.y + s.bounds.height * 3 / 4)
         })
@@ -718,10 +690,10 @@ export class OIGestureManager
         const symbolsToErase = this.model.symbols.filter(s =>
         {
           return s.id !== gestureStroke.id &&
-          (
-            gestureStroke.bounds.overlaps(s.bounds) && [SymbolType.Stroke, SymbolType.Text, SymbolType.Group].includes(s.type) ||
-            gestureStroke.bounds.contains(s.bounds) && [SymbolType.Shape, SymbolType.Edge].includes(s.type)
-          )
+            (
+              gestureStroke.bounds.overlaps(s.bounds) && [SymbolType.Stroke, SymbolType.Text, SymbolType.Group].includes(s.type) ||
+              gestureStroke.bounds.contains(s.bounds) && [SymbolType.Shape, SymbolType.Edge].includes(s.type)
+            )
         })
 
         if (symbolsToErase.length) {
@@ -738,7 +710,7 @@ export class OIGestureManager
       case "bottom-top": {
         const hasSymbolsInRow = this.model.symbols.some(s =>
           s.id !== gestureStroke.id &&
-          [SymbolType.Text.toString(), SymbolType.Stroke.toString(), SymbolType.Group.toString()].includes(s.type) &&
+          [SymbolType.Text, SymbolType.Stroke, SymbolType.Group].includes(s.type) &&
           isBetween(s.bounds.yMid, gestureStroke.bounds.yMin, gestureStroke.bounds.yMax)
         )
         if (hasSymbolsInRow) {
@@ -755,7 +727,7 @@ export class OIGestureManager
       case "top-bottom": {
         const hasSymbolsInRow = this.model.symbols.some(s =>
           s.id !== gestureStroke.id &&
-          [SymbolType.Text.toString(), SymbolType.Stroke.toString(), SymbolType.Group.toString()].includes(s.type) &&
+          [SymbolType.Text, SymbolType.Stroke, SymbolType.Group].includes(s.type) &&
           isBetween(s.bounds.yMid, gestureStroke.bounds.yMin, gestureStroke.bounds.yMax)
         )
         if (hasSymbolsInRow) {

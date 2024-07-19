@@ -19,7 +19,7 @@ import
 import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
 import { OIHistoryManager } from "../history"
-import { computeAngleRadian, converDegreeToRadian, convertRadianToDegree, computeRotatedPoint } from "../utils"
+import { computeAngleRadian, convertDegreeToRadian, convertRadianToDegree, computeRotatedPoint } from "../utils"
 import { OIDebugSVGManager } from "./OIDebugSVGManager"
 import { OISelectionManager } from "./OISelectionManager"
 import { OISnapManager } from "./OISnapManager"
@@ -230,7 +230,7 @@ export class OIRotationManager
   {
     this.#logger.info("end", { point })
     const angleDegree = this.continue(point)
-    const angleRad = 2 * Math.PI - converDegreeToRadian(angleDegree)
+    const angleRad = 2 * Math.PI - convertDegreeToRadian(angleDegree)
     const oldSymbols = this.model.symbolsSelected.map(s => s.clone())
     this.model.symbolsSelected.forEach(s =>
     {

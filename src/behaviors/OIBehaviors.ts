@@ -735,12 +735,11 @@ export class OIBehaviors implements IBehaviors
               {
                 const sym = this.model.getRootSymbol(i["full-id"] as string)
                 if (sym?.type === SymbolType.Group) {
-                  const group = sym as OISymbolGroup
-                  orginDeco.push(...group.decorators)
-                  orginStyle = Object.assign({}, orginStyle, group.style)
-                  wordStrokes.push(...group.extractStrokes())
-                  this.model.removeSymbol(group.id)
-                  this.renderer.removeSymbol(group.id)
+                  orginDeco.push(...sym.decorators)
+                  orginStyle = Object.assign({}, orginStyle, sym.style)
+                  wordStrokes.push(...sym.extractStrokes())
+                  this.model.removeSymbol(sym.id)
+                  this.renderer.removeSymbol(sym.id)
                 }
               })
             }
