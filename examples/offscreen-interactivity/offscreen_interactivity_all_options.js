@@ -178,9 +178,6 @@ async function loadEditor() {
     if (event.detail?.["text/html"]) {
       exportHtmlBody.srcdoc = event.detail["text/html"];
     }
-    else {
-      exportHtmlBody.srcdoc = ""
-    }
   });
 
   editor.events.addEventListener("selected", (event) => {

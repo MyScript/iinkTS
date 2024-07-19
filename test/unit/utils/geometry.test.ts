@@ -8,7 +8,7 @@ import
   computeDistance,
   computeDistanceBetweenPointAndSegment,
   computeNearestPointOnSegment,
-  converDegreeToRadian,
+  convertDegreeToRadian,
   convertRadianToDegree,
   createPointsOnSegment,
   findIntersectBetweenSegmentAndCircle,
@@ -200,7 +200,7 @@ describe("geometry.ts", () =>
     {
       test(`shoud couvert ${ d.degree }° to ${ d.radian } rad`, () =>
       {
-        expect(converDegreeToRadian(d.degree)).toEqual(d.radian)
+        expect(convertDegreeToRadian(d.degree)).toEqual(d.radian)
       })
     })
 

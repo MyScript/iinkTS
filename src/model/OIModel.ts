@@ -118,6 +118,63 @@ export class OIModel implements IModel
     return rows.sort((r1, r2) => r1.index - r2.index)
   }
 
+  roundToLineGuide(y: number): number
+  {
+    return Math.round(y / this.rowHeight) * this.rowHeight
+  }
+
+  isSymbolAbove(source: TOISymbol, target: TOISymbol): boolean
+  {
+    return source.bounds.yMid - this.rowHeight / 2 > target.bounds.yMid
+  }
+
+  isSymbolInRow(source: TOISymbol, target: TOISymbol): boolean
+  {
+    return Math.abs(source.bounds.yMid - target.bounds.yMid) <= this.rowHeight / 2
+  }
+
+  isSymbolBelow(source: TOISymbol, target: TOISymbol): boolean
+  {
+    return source.bounds.yMid + this.rowHeight / 2 < target.bounds.yMid
+  }
+
+  getFirstSymbol(symbols: TOISymbol[]): TOISymbol | undefined
+  {
+    if (!symbols.length) return
+    return symbols.reduce((previous, current) =>
+    {
+      if (previous) {
+        if (Math.round(previous.bounds.yMid / this.rowHeight) < Math.round(current.bounds.yMid / this.rowHeight)) {
+          return previous
+        }
+        else if (Math.round(previous.bounds.yMid / this.rowHeight) == Math.round(current.bounds.yMid / this.rowHeight) && previous.bounds.xMid < current.bounds.xMid) {
+          return previous
+        }
+      }
+      return current
+    })
+  }
+
+  getLastSymbol(symbols: TOISymbol[]): TOISymbol | undefined
+  {
+    if (!symbols.length) return
+    return symbols.reduce((previous, current) =>
+    {
+      if (previous) {
+        if (previous.bounds.yMid - current.bounds.yMid > this.rowHeight / 2) {
+          return previous
+        }
+        if (previous.bounds.yMid - current.bounds.yMid < this.rowHeight / 2) {
+          return current
+        }
+        else if (previous.bounds.xMid > current.bounds.xMid) {
+          return previous
+        }
+      }
+      return current
+    })
+  }
+
   addSymbol(symbol: TOISymbol): void
   {
     this.#logger.info("addSymbol", { symbol })

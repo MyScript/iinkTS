@@ -1,6 +1,6 @@
 import { SELECTION_MARGIN } from "../Constants"
 import { TStyle } from "../style"
-import { PartialDeep, computeDistanceBetweenPointAndSegment, converDegreeToRadian, findIntersectionBetween2Segment, isPointInsidePolygon, computeRotatedPoint } from "../utils"
+import { PartialDeep, computeDistanceBetweenPointAndSegment, convertDegreeToRadian, findIntersectionBetween2Segment, isPointInsidePolygon, computeRotatedPoint } from "../utils"
 import { TPoint, TSegment, isValidPoint } from "./Point"
 import { SymbolType } from "./Symbol"
 import { Box, TBoundingBox } from "./Box"
@@ -56,7 +56,7 @@ export class OIText extends OISymbolBase<SymbolType.Text>
   {
     if (this.rotation) {
       const center = this.rotation.center
-      const rad = converDegreeToRadian(-this.rotation.degree)
+      const rad = convertDegreeToRadian(-this.rotation.degree)
       return this.bounds.corners
         .map(p =>
         {
@@ -92,7 +92,7 @@ export class OIText extends OISymbolBase<SymbolType.Text>
     ]
     if (this.rotation) {
       const center = this.rotation.center
-      const rad = converDegreeToRadian(-this.rotation.degree)
+      const rad = convertDegreeToRadian(-this.rotation.degree)
       return points
         .map(p =>
         {
@@ -115,7 +115,7 @@ export class OIText extends OISymbolBase<SymbolType.Text>
     const boxBox = new Box(char.bounds)
     if (this.rotation) {
       const center = this.rotation.center
-      const rad = converDegreeToRadian(-this.rotation.degree)
+      const rad = convertDegreeToRadian(-this.rotation.degree)
       return boxBox.corners
         .map(p =>
         {

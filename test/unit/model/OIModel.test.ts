@@ -156,7 +156,7 @@ describe("OIModel.ts", () =>
     })
   })
 
-  describe("get symbols", () =>
+  describe("get symbols with row index", () =>
   {
     const model = new OIModel(width, height, rowHeight)
 
@@ -227,31 +227,119 @@ describe("OIModel.ts", () =>
     {
       expect(model.getRootSymbol(stroke1.id)).toEqual(stroke1)
     })
-
     test("shoud get symbol if group root", () =>
     {
       expect(model.getRootSymbol(group1.id)).toEqual(group1)
     })
-
     test("shoud get symbol if circle root", () =>
     {
       expect(model.getRootSymbol(circle1.id)).toEqual(circle1)
     })
-
     test("shoud get symbol if child of group root", () =>
     {
       expect(model.getRootSymbol(group1.children[0].id)).toEqual(group1)
     })
-
     test("shoud get symbol if sub-child of group root", () =>
     {
       expect(model.getRootSymbol(group21.children[0].id)).toEqual(group2)
     })
-
     test("shoud get undefined if child of group root", () =>
     {
 
       expect(model.getRootSymbol("pouet")).toBeUndefined()
+    })
+  })
+
+  describe("roundToLineGuide", () =>
+  {
+    const model = new OIModel(width, height, rowHeight)
+    test("should return row height", () => {
+      expect(model.roundToLineGuide(1.4 * rowHeight)).toEqual(rowHeight)
+    })
+    test("should return 2 row height", () => {
+      expect(model.roundToLineGuide(1.6 * rowHeight)).toEqual(2 * rowHeight)
+    })
+  })
+
+  describe("isSymbol", () =>
+  {
+    const model = new OIModel(width, height, rowHeight)
+    const s11 = buildOIStroke({ box: { height: rowHeight / 2, width: 5, x: 5, y: rowHeight }})
+    const s12 = buildOIStroke({ box: { height: rowHeight / 2, width: 5, x: 50, y: rowHeight }})
+    const s21 = buildOIStroke({ box: { height: rowHeight * 2, width: 5, x: 5, y: rowHeight }})
+    const s22 = buildOIStroke({ box: { height: rowHeight * 2, width: 5, x: 50, y: rowHeight }})
+    test("above should return false", () => {
+      expect(model.isSymbolAbove(s11, s12)).toEqual(false)
+    })
+    test("above should return false", () => {
+      expect(model.isSymbolAbove(s11, s21)).toEqual(false)
+    })
+    test("above should return false", () => {
+      expect(model.isSymbolAbove(s12, s21)).toEqual(false)
+    })
+    test("above should return true", () => {
+      expect(model.isSymbolAbove(s21, s12)).toEqual(true)
+    })
+    test("above should return false", () => {
+      expect(model.isSymbolAbove(s21, s22)).toEqual(false)
+    })
+    test("in row should return false", () => {
+      expect(model.isSymbolInRow(s11, s12)).toEqual(true)
+    })
+    test("in row should return false", () => {
+      expect(model.isSymbolInRow(s11, s21)).toEqual(false)
+    })
+    test("in row should return false", () => {
+      expect(model.isSymbolInRow(s12, s21)).toEqual(false)
+    })
+    test("in row should return true", () => {
+      expect(model.isSymbolInRow(s21, s12)).toEqual(false)
+    })
+    test("in row should return false", () => {
+      expect(model.isSymbolInRow(s21, s22)).toEqual(true)
+    })
+    test("below should return false", () => {
+      expect(model.isSymbolBelow(s11, s12)).toEqual(false)
+    })
+    test("below should return false", () => {
+      expect(model.isSymbolBelow(s11, s21)).toEqual(true)
+    })
+    test("below should return false", () => {
+      expect(model.isSymbolBelow(s12, s21)).toEqual(true)
+    })
+    test("below should return true", () => {
+      expect(model.isSymbolBelow(s21, s12)).toEqual(false)
+    })
+    test("below should return false", () => {
+      expect(model.isSymbolBelow(s21, s22)).toEqual(false)
+    })
+  })
+
+  describe("get first/last symbol", () =>
+  {
+    const model = new OIModel(width, height, rowHeight)
+    const s11 = buildOIStroke({ box: { height: rowHeight / 2, width: 5, x: 5, y: rowHeight }})
+    const s21 = buildOIStroke({ box: { height: rowHeight * 2, width: 5, x: 5, y: rowHeight }})
+    const s22 = buildOIStroke({ box: { height: rowHeight * 2, width: 5, x: 50, y: rowHeight }})
+    const s23 = buildOIStroke({ box: { height: rowHeight * 2, width: 5, x: 150, y: rowHeight }})
+    const s31 = buildOIStroke({ box: { height: rowHeight * 3, width: 5, x: 5, y: rowHeight }})
+    test("should return first symbol when different rows", () => {
+      expect(model.getFirstSymbol([s11, s21, s31])).toEqual(s11)
+    })
+    test("should return first symbol when in same row", () => {
+      expect(model.getFirstSymbol([s21, s22, s23])).toEqual(s21)
+    })
+    test("should return first symbol when only 1 symbol", () => {
+      expect(model.getFirstSymbol([s21])).toEqual(s21)
+    })
+    test("should return last symbol when different rows", () => {
+      expect(model.getLastSymbol([s11, s21, s31])).toEqual(s31)
+    })
+    test("should return last symbol when in same row", () => {
+      expect(model.getLastSymbol([s21, s22, s23])).toEqual(s23)
+    })
+    test("should return last symbol when only 1 symbol", () => {
+      expect(model.getLastSymbol([s21])).toEqual(s21)
     })
   })
 

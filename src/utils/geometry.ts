@@ -78,7 +78,7 @@ export function convertRadianToDegree(radian: number): number
 /**
  * @group Utils
  */
-export function converDegreeToRadian(degree: number): number
+export function convertDegreeToRadian(degree: number): number
 {
   return +((degree % 360) / 180 * Math.PI).toFixed(4)
 }

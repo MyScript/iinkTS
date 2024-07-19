@@ -24,18 +24,13 @@ export type TSegment = {
   p2: TPoint
 }
 
+/**
+ * @group Primitive
+ */
 export function isValidPoint(p?: PartialDeep<TPoint>): boolean
 {
   if (!p) return false
   if (!isValidNumber(p.x)) return false
   if (!isValidNumber(p.y)) return false
-  return true
-}
-
-export function isValidSegment(s?: PartialDeep<TSegment>): boolean
-{
-  if (!s) return false
-  if (!isValidPoint(s.p1)) return false
-  if (!isValidPoint(s.p2)) return false
   return true
 }
