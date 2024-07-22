@@ -76,10 +76,10 @@ export class Synchronizer
       return
     }
 
-    const gestureResult = await this.recognizer.recognizeGesture(drawShapes.map(this.formatDrawShapeToSend))
+    const gestureResult = await this.recognizer.recognizeGesture(this.formatDrawShapeToSend(gestureShape))
     if (gestureResult) {
       if (
-        gestureResult.gestures[0].type.toLocaleLowerCase() == "surround" &&
+        gestureResult.gestureType == "surround" &&
         othersPageShape.some(s => gestureBounds.contains(this.editor.getShapePageBounds(s)!))
       ) {
         return {
@@ -91,7 +91,7 @@ export class Synchronizer
         }
       }
       else if (
-        gestureResult.gestures[0].type.toLocaleLowerCase() == "scratch" &&
+        gestureResult.gestureType == "scratch" &&
         othersPageShape.some(s => gestureBounds.contains(this.editor.getShapePageBounds(s)!))
       ) {
         return {

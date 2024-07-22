@@ -61,7 +61,7 @@ export class OIRecognizer
   protected connected?: DeferredPromise<void>
   protected initialized?: DeferredPromise<void>
   protected addStrokeDeferred?: DeferredPromise<TOIMessageEventGesture | undefined>
-  protected recognizeGestureDeferred?: DeferredPromise<TOIMessageEventContextlessGesture | undefined>
+  protected contextlessGestureDeferred: Map<string, DeferredPromise<TOIMessageEventContextlessGesture>>
   protected transformStrokeDeferred?: DeferredPromise<void>
   protected eraseStrokeDeferred?: DeferredPromise<void>
   protected replaceStrokeDeferred?: DeferredPromise<void>
@@ -83,6 +83,7 @@ export class OIRecognizer
     this.url = `${ scheme }://${ this.serverConfiguration.host }/api/v4.0/iink/offscreen?applicationKey=${ this.serverConfiguration.applicationKey }`
 
     this.exportDeferredMap = new Map()
+    this.contextlessGestureDeferred = new Map()
   }
 
   get mimeTypes(): string[]
@@ -182,13 +183,17 @@ export class OIRecognizer
     this.connected?.reject(error)
     this.initialized?.reject(error)
     this.addStrokeDeferred?.reject(error)
-    this.recognizeGestureDeferred?.reject(error)
     this.transformStrokeDeferred?.reject(error)
     this.eraseStrokeDeferred?.reject(error)
     this.replaceStrokeDeferred?.reject(error)
     this.undoDeferred?.reject(error)
     this.redoDeferred?.reject(error)
     this.clearDeferred?.reject(error)
+    Array.from(this.contextlessGestureDeferred.values())
+      .forEach(v =>
+      {
+        v.reject(error)
+      })
     Array.from(this.exportDeferredMap.values())
       .forEach(v =>
       {
@@ -323,7 +328,7 @@ export class OIRecognizer
 
   protected manageContextlessGesture(gestureMessage: TOIMessageEventContextlessGesture): void
   {
-    this.recognizeGestureDeferred?.resolve(gestureMessage)
+    this.contextlessGestureDeferred.get(gestureMessage.strokeId)?.resolve(gestureMessage)
   }
 
   protected messageCallback(message: MessageEvent<string>): void
@@ -360,7 +365,7 @@ export class OIRecognizer
         case TOIMessageType.GestureDetected:
           this.manageGestureDetected(websocketMessage)
           break
-        case TOIMessageType.Gesture:
+        case TOIMessageType.ContextlessGesture:
           this.manageContextlessGesture(websocketMessage)
           break
         case TOIMessageType.Error:
@@ -547,22 +552,23 @@ export class OIRecognizer
     return this.eraseStrokeDeferred?.promise
   }
 
-  async recognizeGesture(strokes: OIStroke[]): Promise<TOIMessageEventContextlessGesture | undefined>
+  async recognizeGesture(stroke: OIStroke): Promise<TOIMessageEventContextlessGesture | undefined>
   {
     await this.initialized?.promise
-    this.recognizeGestureDeferred = new DeferredPromise<TOIMessageEventContextlessGesture | undefined>()
-    if (strokes.length === 0) {
-      this.recognizeGestureDeferred.resolve(undefined)
-      return this.recognizeGestureDeferred?.promise
+    if (!stroke) {
+      return
     }
+    this.contextlessGestureDeferred.set(stroke.id, new DeferredPromise<TOIMessageEventContextlessGesture>())
     const pixelTomm = 25.4 / 96
     await this.send({
       type: "contextlessGesture",
       scaleX: pixelTomm,
       scaleY: pixelTomm,
-      strokes: strokes.map(s => s.formatToSend())
+      stroke: stroke.formatToSend()
     })
-    return this.recognizeGestureDeferred?.promise
+    const result = this.contextlessGestureDeferred.get(stroke.id)
+    this.contextlessGestureDeferred.delete(stroke.id)
+    return result?.promise
   }
 
   async waitForIdle(): Promise<void>
@@ -673,7 +679,7 @@ export class OIRecognizer
     this.connected = undefined
     this.initialized = undefined
     this.addStrokeDeferred = undefined
-    this.recognizeGestureDeferred = undefined
+    this.contextlessGestureDeferred.clear()
     this.transformStrokeDeferred = undefined
     this.eraseStrokeDeferred = undefined
     this.replaceStrokeDeferred = undefined

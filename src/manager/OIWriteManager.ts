@@ -230,6 +230,27 @@ export class OIWriteManager
     this.renderer.drawSymbol(this.model.currentSymbol!)
   }
 
+  protected async interactWithBackend(stroke: OIStroke): Promise<void>
+  {
+    const localStroke = stroke.clone()
+    let gestureFromContextLess: TGesture | undefined
+    if (this.needContextLessGesture) {
+      gestureFromContextLess = await this.gestureManager.getGestureFromContextLess(localStroke)
+    }
+    if (gestureFromContextLess) {
+      this.history.pop()
+      this.recognizer.addStrokes([localStroke], this.detectGesture)
+      this.gestureManager.apply(localStroke, gestureFromContextLess)
+    }
+    else {
+      const gesture = await this.recognizer.addStrokes([localStroke], this.detectGesture)
+      if (gesture) {
+        this.history.pop()
+        this.gestureManager.apply(this.model.getRootSymbol(gesture.gestureStrokeId) as OIStroke, gesture)
+      }
+    }
+  }
+
   async end(pointer: TPointer): Promise<void>
   {
     this.#logger.info("finishWriting", { pointer })
@@ -249,21 +270,7 @@ export class OIWriteManager
     this.history.push(this.model, { added: [localSymbol] })
 
     if (localSymbol.type === SymbolType.Stroke) {
-      let gestureFromContextLess: TGesture | undefined
-      if (this.needContextLessGesture) {
-        gestureFromContextLess = await this.gestureManager.getGestureFromContextLess(localSymbol)
-      }
-      if (gestureFromContextLess) {
-        this.history.pop()
-        this.gestureManager.apply(localSymbol, gestureFromContextLess)
-      }
-      else {
-        const gesture = await this.recognizer.addStrokes([localSymbol], this.detectGesture)
-        if (gesture) {
-          this.history.pop()
-          this.gestureManager.apply(this.model.getRootSymbol(gesture.gestureStrokeId) as OIStroke, gesture)
-        }
-      }
+      await this.interactWithBackend(localSymbol)
     }
   }
 }
