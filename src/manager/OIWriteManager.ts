@@ -239,28 +239,26 @@ export class OIWriteManager
       localPointer.x = x
       localPointer.y = y
     }
-    this.updateCurrentSymbol(localPointer)
-    this.renderer.drawSymbol(this.model.currentSymbol!)
-    this.snaps.clearSnapToElementLines()
-    const symbol = this.model.currentSymbol as TOISymbol
+    const localSymbol = this.updateCurrentSymbol(localPointer)
     this.model.currentSymbol = undefined
     this.currentSymbolOrigin = undefined
+    this.snaps.clearSnapToElementLines()
 
-    this.model.addSymbol(symbol)
-    this.history.push(this.model, { added: [symbol] })
+    this.renderer.drawSymbol(localSymbol!)
+    this.model.addSymbol(localSymbol)
+    this.history.push(this.model, { added: [localSymbol] })
 
-    if (symbol.type === SymbolType.Stroke) {
+    if (localSymbol.type === SymbolType.Stroke) {
       let gestureFromContextLess: TGesture | undefined
-      const currentStroke = symbol
       if (this.needContextLessGesture) {
-        gestureFromContextLess = await this.gestureManager.getGestureFromContextLess(currentStroke)
+        gestureFromContextLess = await this.gestureManager.getGestureFromContextLess(localSymbol)
       }
       if (gestureFromContextLess) {
         this.history.pop()
-        this.gestureManager.apply(currentStroke, gestureFromContextLess)
+        this.gestureManager.apply(localSymbol, gestureFromContextLess)
       }
       else {
-        const gesture = await this.recognizer.addStrokes([currentStroke], this.detectGesture)
+        const gesture = await this.recognizer.addStrokes([localSymbol], this.detectGesture)
         if (gesture) {
           this.history.pop()
           this.gestureManager.apply(this.model.getRootSymbol(gesture.gestureStrokeId) as OIStroke, gesture)
