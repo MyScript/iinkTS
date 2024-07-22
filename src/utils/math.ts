@@ -17,7 +17,7 @@ export function isBetween(val: number, min: number, max: number): boolean
 /**
  * @group Utils
  */
-export function computeAverage(arr: number[]): number | typeof NaN
+export function computeAverage(arr: number[]): number
 {
-  return arr.reduce((p, c) => p + c, 0) / arr.length
+  return arr.reduce((p, c) => p + c, 0) / (arr.length || 1)
 }

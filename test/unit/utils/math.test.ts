@@ -54,7 +54,7 @@ describe("Average", () =>
     { values: [12, 12, 2, 2], expected: 7 },
     { values: [33, 11], expected: 22 },
     { values: [8], expected: 8 },
-    { values: [], expected: NaN },
+    { values: [], expected: 0 },
   ]
   testDatas.forEach(data =>
   {

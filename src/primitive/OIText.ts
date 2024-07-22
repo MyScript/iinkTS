@@ -172,6 +172,14 @@ export class OIText extends OISymbolBase<SymbolType.Text>
     if (!isValidPoint(partial?.point)) throw new Error(`Unable to create a OIText, point are invalid`)
     if (!partial.chars?.length) throw new Error(`Unable to create a OIText, no chars`)
     if (!partial.bounds) throw new Error(`Unable to create a OIText, no boundingBox`)
-    return new OIText(partial.chars as TOISymbolChar[], partial.point as TPoint, partial.bounds as TBoundingBox, partial.style)
+    const text = new OIText(partial.chars as TOISymbolChar[], partial.point as TPoint, partial.bounds as TBoundingBox, partial.style)
+    if (partial.decorators?.length) {
+      partial.decorators.forEach(d => {
+        if(d?.kind) {
+          text.decorators.push(new OIDecorator(d.kind, Object.assign({}, text.style, d.style)))
+        }
+      })
+    }
+    return text
   }
 }
