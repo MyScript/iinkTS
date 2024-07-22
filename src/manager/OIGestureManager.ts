@@ -18,7 +18,7 @@ import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
 import { TStyle } from "../style"
 import { OIHistoryManager, TOIHistoryChanges } from "../history"
-import { computeAverage, getClosestPoints, isBetween } from "../utils"
+import { computeAverage, isBetween } from "../utils"
 import { TGesture, StrikeThroughAction, SurroundAction } from "../gesture"
 import { OITranslateManager } from "./OITranslateManager"
 import { OITextManager } from "./OITextManager"
@@ -432,6 +432,38 @@ export class OIGestureManager
     this.history.push(this.model, changes)
   }
 
+  protected createStrokesFromGestureSubStroke(strokeOrigin: OIStroke, subStrokes: { x: number[], y: number[] }[]): OIStroke[]
+  {
+    const strokes: OIStroke[] = []
+    if (subStrokes[0]) {
+      const subStroke = new OIStroke(strokeOrigin.style)
+      subStrokes![0].x.forEach((x, i) =>
+      {
+        subStroke.pointers.push({
+          x,
+          y: subStrokes![0].y[i],
+          p: strokeOrigin.pointers.at(i)?.p || 1,
+          t: strokeOrigin.pointers.at(i)?.t || 1
+        })
+      })
+      strokes.push(subStroke)
+    }
+    if (subStrokes[1]) {
+      const subStroke = new OIStroke(strokeOrigin.style)
+      subStrokes[1].x.forEach((x, i) =>
+      {
+        subStroke.pointers.push({
+          x,
+          y: subStrokes![1].y[i],
+          p: strokeOrigin.pointers.at(subStroke.pointers.length + i)?.p || 1,
+          t: strokeOrigin.pointers.at(subStroke.pointers.length + i)?.t || 1
+        })
+      })
+      strokes.push(subStroke)
+    }
+    return strokes
+  }
+
   async applyInsertGesture(gestureStroke: OIStroke, gesture: TGesture): Promise<void>
   {
     this.#logger.debug("applyInsertGesture", { gestureStroke, gesture })
@@ -452,44 +484,53 @@ export class OIGestureManager
       const symbolToSplit = this.model.getRootSymbol(gesture.strokeIds[0])
       if (symbolToSplit?.type === SymbolType.Group) {
         const groupWithStrokeToSplit = symbolToSplit as OISymbolGroup
-        const groupStrokes = groupWithStrokeToSplit.extractStrokes().sort((a, b) => a.bounds.xMid - b.bounds.xMid)
-        const strokeIndex = groupStrokes.findIndex(s => gesture.strokeIds[0] === s.id)
-        const groupBefore = new OISymbolGroup(groupStrokes.slice(0, strokeIndex), groupWithStrokeToSplit.style)
-        const strokeToSplit = groupStrokes[strokeIndex]
-        const groupAfter = new OISymbolGroup(groupStrokes.slice(strokeIndex + 1), groupWithStrokeToSplit.style)
-        const intersectPoint = {
-          x: gesture.subStrokes[0].x.at(-1) as number,
-          y: gesture.subStrokes[0].y.at(-1) as number
+        const groupSymbols = groupWithStrokeToSplit.extractSymbols()
+
+        const symbolsBefore: TOISymbol[] = []
+        const symbolsAfter: TOISymbol[] = []
+
+        groupSymbols.forEach(s =>
+        {
+          if (s.id === gesture.subStrokes![0].fullStrokeId) {
+            const subStroke = this.createStrokesFromGestureSubStroke(s as OIStroke, gesture.subStrokes!)
+            if (subStroke[0]) {
+              symbolsBefore.push(subStroke[0])
+            }
+            if (subStroke[1]) {
+              this.translator.applyToSymbol(subStroke[1], this.strokeSpaceWidth, 0)
+              symbolsAfter.push(subStroke[1])
+            }
+          }
+          else if (s.bounds.xMid < gestureStroke.bounds.xMid) {
+            symbolsBefore.push(s)
+          }
+          else if (s.bounds.xMid > gestureStroke.bounds.xMid) {
+            this.translator.applyToSymbol(s, this.strokeSpaceWidth, 0)
+            symbolsAfter.push(s)
+
+          }
+        })
+
+        if (symbolsBefore.length) {
+          replaced.newSymbols.push(new OISymbolGroup(symbolsBefore, groupWithStrokeToSplit.style))
         }
-        const nearestPoint = getClosestPoints([intersectPoint], strokeToSplit.pointers)
-        const indexToSplit = strokeToSplit.pointers.findIndex(p => nearestPoint.p2.x === p.x && nearestPoint.p2.y === p.y)
-        if (indexToSplit > -1) {
-          const newStrokes = OIStroke.split(strokeToSplit, indexToSplit)
-          groupBefore.children.push(newStrokes.before)
-          this.translator.applyToSymbol(newStrokes.after, this.strokeSpaceWidth, 0)
-          groupAfter.children.push(newStrokes.after)
-          replaced.oldSymbols.push(groupWithStrokeToSplit)
-          replaced.newSymbols.push(groupBefore)
-          replaced.newSymbols.push(groupAfter)
+        if (symbolsAfter.length) {
+          replaced.newSymbols.push(new OISymbolGroup(symbolsAfter, groupWithStrokeToSplit.style))
+        }
+        if (replaced.newSymbols.length) {
+          replaced.oldSymbols.push(symbolToSplit)
         }
       }
       else if (symbolToSplit?.type === SymbolType.Stroke) {
-        const strokeToSplit = symbolToSplit as OIStroke
-        const intersectPoint = {
-          x: gesture.subStrokes[0].x.at(-1) as number,
-          y: gesture.subStrokes[0].y.at(-1) as number
+        const subStroke = this.createStrokesFromGestureSubStroke(symbolToSplit as OIStroke, gesture.subStrokes!)
+        if (subStroke[0]) {
+          replaced.newSymbols.push(subStroke[0])
         }
-        const nearestPoint = getClosestPoints([intersectPoint], strokeToSplit.pointers)
-        const indexToSplit = strokeToSplit.pointers.findIndex(p => nearestPoint.p2.x === p.x && nearestPoint.p2.y === p.y)
-        if (indexToSplit > -1) {
-          const newStrokes = OIStroke.split(strokeToSplit, indexToSplit)
-          replaced.oldSymbols.push(strokeToSplit)
-          this.translator.applyToSymbol(newStrokes.after, this.strokeSpaceWidth, 0)
-          replaced.newSymbols.push(newStrokes.before, newStrokes.after)
+        if (subStroke[1]) {
+          this.translator.applyToSymbol(subStroke[1], this.strokeSpaceWidth, 0)
+          replaced.newSymbols.push(subStroke[1])
         }
-      }
-      if (symbolsAfterGestureInRow?.length) {
-        translate.push({ symbols: symbolsAfterGestureInRow.filter(s => s.id !== gesture.strokeIds[0]), tx: this.strokeSpaceWidth, ty: 0 })
+        replaced.oldSymbols.push(symbolToSplit)
       }
     }
     else if (groupToSplit) {
