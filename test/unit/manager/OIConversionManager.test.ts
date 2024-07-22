@@ -62,6 +62,7 @@ describe("OIConversionManager.ts", () =>
     const behaviors = new OIBehaviorsMock()
     behaviors.export = jest.fn(() => Promise.resolve(behaviors.model))
     behaviors.texter.setBoundingBox = jest.fn()
+    behaviors.texter.getSpaceWidth = jest.fn(() => 10)
     behaviors.renderer.drawSymbol = jest.fn(() => symEl)
     behaviors.renderer.removeSymbol = jest.fn()
     behaviors.model.addSymbol = jest.fn()

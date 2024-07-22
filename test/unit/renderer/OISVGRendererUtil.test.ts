@@ -18,6 +18,10 @@ import
   OIEraser,
   OISymbolGroup,
   OIShapePolygon,
+  OIDecorator,
+  DecoratorKind,
+  LoggerManager,
+  LoggerClass,
 } from "../../../src/iink"
 
 describe("OISVGRendererUtil.ts", () =>
@@ -27,6 +31,18 @@ describe("OISVGRendererUtil.ts", () =>
   const arrowStartDecoration = "arrowStartDecoration"
   const arrowEndDecoration = "arrowEndDecoration"
   const renderer = new OISVGRendererUtil(selectionFilterId, removalFilterId, arrowStartDecoration, arrowEndDecoration)
+
+  test("should return undefined on getSymbolElement with symbol.type unknow", () =>
+  {
+    const logger = LoggerManager.getLogger(LoggerClass.RENDERER)
+    logger.error = jest.fn()
+    const stroke = new OIStroke({})
+    //@ts-ignore
+    stroke.type = "pouet"
+    const el = renderer.getSymbolElement(stroke)
+    expect(el).toBeUndefined()
+    expect(logger.error).toHaveBeenNthCalledWith(1, "getSymbolElement", expect.stringContaining("symbol unknow:"))
+  })
 
   describe("text", () =>
   {
@@ -108,6 +124,39 @@ describe("OISVGRendererUtil.ts", () =>
       expect(elDeleting.getAttribute("type")).toEqual(SymbolType.Text)
       expect(elDeleting.getAttribute("filter")).toEqual(`url(#${ removalFilterId })`)
     })
+    test("should getSymbolElement with transform rotate", () =>
+    {
+      const elNotRotate = renderer.getSymbolElement(text)!
+      expect(elNotRotate.getAttribute("id")).toEqual(text.id)
+      expect(elNotRotate.getAttribute("type")).toEqual(SymbolType.Text)
+      expect(elNotRotate.getAttribute("transform")).toBeFalsy()
+
+      text.rotation = { center: { x: 12, y: 25 }, degree: 45 }
+      const elRotating = renderer.getSymbolElement(text)!
+      expect(elRotating.getAttribute("id")).toEqual(text.id)
+      expect(elRotating.getAttribute("type")).toEqual(SymbolType.Text)
+      expect(elRotating.getAttribute("transform")).toEqual(`rotate(${ text.rotation.degree }, ${ text.rotation.center.x }, ${ text.rotation.center.y })`)
+    })
+    test("should getSymbolElement with decorators", () =>
+    {
+      const elWithoutDecorator = renderer.getSymbolElement(text)!
+      expect(elWithoutDecorator.getAttribute("id")).toEqual(text.id)
+      expect(elWithoutDecorator.querySelectorAll("[type=decorator]")).toHaveLength(0)
+
+      text.decorators.push(new OIDecorator(DecoratorKind.Highlight, { color: "red"}))
+      text.decorators.push(new OIDecorator(DecoratorKind.Underline, { color: "blue", width: 12}))
+
+      const elDecorated = renderer.getSymbolElement(text)!
+      expect(elDecorated.getAttribute("id")).toEqual(text.id)
+      expect(elDecorated.querySelectorAll("[type=decorator]")).toHaveLength(2)
+
+      const highlight = elDecorated.querySelector(`[kind=${DecoratorKind.Highlight}]`)
+      expect(highlight?.getAttribute("fill")).toEqual("red")
+
+      const underline = elDecorated.querySelector(`[kind=${DecoratorKind.Underline}]`)
+      expect(underline?.getAttribute("stroke")).toEqual("blue")
+      expect(underline?.getAttribute("stroke-width")).toEqual("12")
+    })
   })
 
   describe("stroke", () =>
@@ -157,6 +206,27 @@ describe("OISVGRendererUtil.ts", () =>
       const el = renderer.getSymbolElement(stroke)!
       expect(el.getAttribute("id")).toEqual(stroke.id)
       expect(el.getAttribute("filter")).toEqual(`url(#${ removalFilterId })`)
+    })
+    test("should getSymbolElement with decorators", () =>
+    {
+      const stroke = new OIStroke({})
+      const elWithoutDecorator = renderer.getSymbolElement(stroke)!
+      expect(elWithoutDecorator.getAttribute("id")).toEqual(stroke.id)
+      expect(elWithoutDecorator.querySelectorAll("[type=decorator]")).toHaveLength(0)
+
+      stroke.decorators.push(new OIDecorator(DecoratorKind.Highlight, { color: "red"}))
+      stroke.decorators.push(new OIDecorator(DecoratorKind.Underline, { color: "blue", width: 12}))
+
+      const elDecorated = renderer.getSymbolElement(stroke)!
+      expect(elDecorated.getAttribute("id")).toEqual(stroke.id)
+      expect(elDecorated.querySelectorAll("[type=decorator]")).toHaveLength(2)
+
+      const highlight = elDecorated.querySelector(`[kind=${DecoratorKind.Highlight}]`)
+      expect(highlight?.getAttribute("fill")).toEqual("red")
+
+      const underline = elDecorated.querySelector(`[kind=${DecoratorKind.Underline}]`)
+      expect(underline?.getAttribute("stroke")).toEqual("blue")
+      expect(underline?.getAttribute("stroke-width")).toEqual("12")
     })
   })
 
@@ -473,6 +543,52 @@ describe("OISVGRendererUtil.ts", () =>
       const el = renderer.getSymbolElement(groupSym)!
       expect(el.getAttribute("id")).toEqual(groupSym.id)
       expect(el.getAttribute("type")).toEqual("group")
+    })
+    test("should getSymbolElement with selected filter", () =>
+      {
+        const stroke = new OIStroke({})
+        stroke.addPointer({ p: 1, t: 1, x: 1, y: 1 })
+        stroke.addPointer({ p: 1, t: 1, x: 10, y: 1 })
+        const groupSym = new OISymbolGroup([stroke])
+        groupSym.selected = true
+        const el = renderer.getSymbolElement(groupSym)!
+        expect(el.getAttribute("id")).toEqual(groupSym.id)
+        expect(el.getAttribute("filter")).toEqual(`url(#${ selectionFilterId })`)
+      })
+      test("should getSymbolElement with removal filter", () =>
+      {
+        const stroke = new OIStroke({})
+        stroke.addPointer({ p: 1, t: 1, x: 1, y: 1 })
+        stroke.addPointer({ p: 1, t: 1, x: 10, y: 1 })
+        const groupSym = new OISymbolGroup([stroke])
+        groupSym.deleting = true
+        const el = renderer.getSymbolElement(groupSym)!
+        expect(el.getAttribute("id")).toEqual(groupSym.id)
+        expect(el.getAttribute("filter")).toEqual(`url(#${ removalFilterId })`)
+      })
+    test("should getSymbolElement with decorators", () =>
+    {
+      const stroke = new OIStroke({})
+      stroke.addPointer({ p: 1, t: 1, x: 1, y: 1 })
+      const groupSym = new OISymbolGroup([stroke])
+
+      const elWithoutDecorator = renderer.getSymbolElement(groupSym)!
+      expect(elWithoutDecorator.getAttribute("id")).toEqual(groupSym.id)
+      expect(elWithoutDecorator.querySelectorAll("[type=decorator]")).toHaveLength(0)
+
+      groupSym.decorators.push(new OIDecorator(DecoratorKind.Highlight, { color: "red"}))
+      groupSym.decorators.push(new OIDecorator(DecoratorKind.Underline, { color: "blue", width: 12}))
+
+      const elDecorated = renderer.getSymbolElement(groupSym)!
+      expect(elDecorated.getAttribute("id")).toEqual(groupSym.id)
+      expect(elDecorated.querySelectorAll("[type=decorator]")).toHaveLength(2)
+
+      const highlight = elDecorated.querySelector(`[kind=${DecoratorKind.Highlight}]`)
+      expect(highlight?.getAttribute("fill")).toEqual("red")
+
+      const underline = elDecorated.querySelector(`[kind=${DecoratorKind.Underline}]`)
+      expect(underline?.getAttribute("stroke")).toEqual("blue")
+      expect(underline?.getAttribute("stroke-width")).toEqual("12")
     })
   })
 })

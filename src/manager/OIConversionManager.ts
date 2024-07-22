@@ -96,7 +96,7 @@ export class OIConversionManager
     }
   }
 
-  buildWord(word: TJIIXWord, chars: TJIIXChar[], strokes: OIStroke[], startPoint: TPoint, fontSize?: number): OIText
+  buildWord(word: TJIIXWord, chars: TJIIXChar[], strokes: OIStroke[], fontSize?: number): OIText
   {
     const boundingBox = Box.createFromBoxes([convertBoundingBoxMillimeterToPixel(word["bounding-box"])])
     const charSymbols: TOISymbolChar[] = []
@@ -107,7 +107,11 @@ export class OIConversionManager
         charSymbols.push(this.buildChar(char, charStrokes, fontSize))
       }
     })
-    const text = new OIText(charSymbols, startPoint, boundingBox, strokes[0].style)
+    const point: TPoint = {
+      x: boundingBox.xMin,
+      y: boundingBox.yMax
+    }
+    const text = new OIText(charSymbols, point, boundingBox, strokes[0].style)
     const decorators = strokes.flatMap(s => s.decorators)
     strokes.forEach(s =>
     {
@@ -146,6 +150,14 @@ export class OIConversionManager
     return text
   }
 
+  protected computeFontSize(word: TJIIXWord): number
+  {
+    if (word["bounding-box"]?.height) {
+      return Math.round(convertMillimeterToPixel(word["bounding-box"]?.height) / this.rowHeight) * this.rowHeight
+    }
+    return this.rowHeight * 0.75
+  }
+
   convertText(text: TJIIXTextElement, onlyText: boolean): { symbol: OIText, strokes: OIStroke[] }[] | undefined
   {
     if (!text.words) {
@@ -163,53 +175,39 @@ export class OIConversionManager
 
     const result: { symbol: OIText, strokes: OIStroke[] }[] = []
 
-    const bb = convertBoundingBoxMillimeterToPixel(text["bounding-box"])
-    let startPoint: TPoint = {
-      x: bb.x,
-      y: bb.y + this.rowHeight
+    const textBounds = convertBoundingBoxMillimeterToPixel(text["bounding-box"])
+    let fontSize = this.fontSize
+    if (onlyText && !fontSize) {
+      fontSize = computeAverage(jiixWords.filter(w => w.items?.length).map(w => this.computeFontSize(w)))
     }
-    let fontSize = onlyText ? Math.ceil(computeAverage(jiixWords.map(w => convertMillimeterToPixel(w["bounding-box"]?.height || 0) || this.rowHeight)) * this.rowHeight / this.rowHeight) : undefined
-    if (onlyText && this.model.symbols.filter(s => [SymbolType.Text.toString(), SymbolType.Stroke.toString(), SymbolType.Group.toString()].includes(s.type)).length === this.model.symbols.length) {
-      const textSym = this.model.symbols.find(s => s.type === SymbolType.Text) as OIText
-      if (textSym) {
-        fontSize = textSym.chars[0].fontSize
-      }
-    }
+
+    let isNewLine = true
     jiixWords.forEach(word =>
     {
       const wordStrokes = this.strokes.filter(s => word.items?.some(i => i["full-id"] === s.id)) as OIStroke[]
       if (wordStrokes.length) {
         const chars = jiixChars.slice(word["first-char"] as number, (word["last-char"] || 0) + 1)
-        const textSymbol = this.buildWord(word, chars, wordStrokes, startPoint, this.fontSize || fontSize)
+        if (!onlyText) {
+          fontSize = this.computeFontSize(word)
+        }
+        const textSymbol = this.buildWord(word, chars, wordStrokes, fontSize)
 
         if (onlyText) {
-          startPoint.y = Math.round(startPoint.y / this.rowHeight) * this.rowHeight
-          textSymbol.point.y = startPoint.y
+          textSymbol.point.y = Math.round(textSymbol.point.y / this.rowHeight) * this.rowHeight
+        }
+        if (isNewLine) {
+          isNewLine = false
+          if (Math.abs(textSymbol.point.x - textBounds.x) < this.behaviors.texter.getSpaceWidth(fontSize!)) {
+            textSymbol.point.x = textBounds.x
+          }
         }
         this.behaviors.texter.setBoundingBox(textSymbol)
         result.push({
           symbol: textSymbol,
           strokes: wordStrokes
         })
-        startPoint = {
-          x: startPoint.x + textSymbol.bounds.width,
-          y: startPoint.y
-        }
       }
-      else {
-        if (word.label === "\n") {
-          startPoint = {
-            x: bb.x,
-            y: startPoint.y + this.rowHeight
-          }
-        }
-        else {
-          startPoint = {
-            x: startPoint.x + convertMillimeterToPixel(word["bounding-box"]?.width || 1),
-            y: startPoint.y
-          }
-        }
-      }
+      isNewLine = word.label === "\n"
     })
 
     return result

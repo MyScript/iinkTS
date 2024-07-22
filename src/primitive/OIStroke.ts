@@ -226,6 +226,13 @@ export class OIStroke extends OISymbolBase<SymbolType.Stroke>
     if (errors.length) {
       throw new Error(errors.join(" and "))
     }
+    if (partial.decorators?.length) {
+      partial.decorators.forEach(d => {
+        if(d?.kind) {
+          stroke.decorators.push(new OIDecorator(d.kind, Object.assign({}, stroke.style, d.style)))
+        }
+      })
+    }
     return stroke
   }
 }
