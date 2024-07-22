@@ -805,6 +805,9 @@ export class OIBehaviors implements IBehaviors
       }
       this.updateLayerInfos()
     }
+    else {
+      this.renderer.removeSymbol(id)
+    }
   }
 
   async removeSymbols(ids: string[], addToHistory = true): Promise<TOISymbol[]>
