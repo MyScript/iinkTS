@@ -194,6 +194,10 @@ export class OIConversionManager
 
         if (onlyText) {
           textSymbol.point.y = Math.round(textSymbol.point.y / this.rowHeight) * this.rowHeight
+          const textInRow = this.model.symbols.find(t => t.type === SymbolType.Text && t.point.y === textSymbol.point.y) as OIText | undefined
+          if (textInRow) {
+            textSymbol.chars.forEach(c => c.fontSize = textInRow.chars[0].fontSize)
+          }
         }
         if (isNewLine) {
           isNewLine = false
