@@ -609,10 +609,14 @@ export class OIRecognizer
   async undo(actions: TOIHistoryBackendChanges): Promise<void>
   {
     await this.initialized?.promise
+    const changes = this.buildUndoRedoChanges(actions)
+    if(changes.length === 0) {
+      return
+    }
     this.undoDeferred = new DeferredPromise<void>()
     const message: TOIMessageEvent = {
       type: "undo",
-      changes: this.buildUndoRedoChanges(actions)
+      changes
     }
     await this.send(message)
     return this.undoDeferred?.promise
@@ -621,10 +625,15 @@ export class OIRecognizer
   async redo(actions: TOIHistoryBackendChanges): Promise<void>
   {
     await this.initialized?.promise
+    const changes = this.buildUndoRedoChanges(actions)
+    if(changes.length === 0) {
+      return
+    }
     this.redoDeferred = new DeferredPromise<void>()
+
     const message: TOIMessageEvent = {
       type: "redo",
-      changes: this.buildUndoRedoChanges(actions)
+      changes
     }
     await this.send(message)
     return this.redoDeferred?.promise
