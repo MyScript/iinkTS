@@ -173,6 +173,7 @@ export class OIText extends OISymbolBase<SymbolType.Text>
     if (!partial.chars?.length) throw new Error(`Unable to create a OIText, no chars`)
     if (!partial.bounds) throw new Error(`Unable to create a OIText, no boundingBox`)
     const text = new OIText(partial.chars as TOISymbolChar[], partial.point as TPoint, partial.bounds as TBoundingBox, partial.style)
+    if (partial.id) text.id = partial.id
     if (partial.decorators?.length) {
       partial.decorators.forEach(d => {
         if(d?.kind) {

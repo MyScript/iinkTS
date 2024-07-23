@@ -16,7 +16,7 @@ export enum TOIMessageType
   Pong = "pong",
   Exported = "exported",
   GestureDetected = "gestureDetected",
-  Gesture = "Gesture",
+  ContextlessGesture = "contextlessGesture",
   Error = "error",
 }
 
@@ -102,15 +102,9 @@ export type TOIMessageEventGesture = TOIMessage<TOIMessageType.GestureDetected> 
 /**
  * @group Recognizer
  */
-export type TContextlessGestureType = {
-  type: "none" | "scratch" | "left-right" | "right-left" | "bottom-top" | "top-bottom" | "surround" | string
-}
-
-/**
- * @group Recognizer
- */
-export type TOIMessageEventContextlessGesture = TOIMessage<TOIMessageType.Gesture> & {
-  gestures: TContextlessGestureType[]
+export type TOIMessageEventContextlessGesture = TOIMessage<TOIMessageType.ContextlessGesture> & {
+  gestureType: "none" | "scratch" | "left-right" | "right-left" | "bottom-top" | "top-bottom" | "surround",
+  strokeId: string
 }
 
 /**
