@@ -294,7 +294,7 @@ export class OIGestureManager
     this.#logger.debug("applyJoinGesture", { gestureStroke, gesture })
 
     const symbolsAbove = this.model.symbols.filter(s => this.model.isSymbolAbove(gestureStroke, s))
-    const symbolsRow = this.model.symbols.filter(s => this.model.isSymbolInRow(gestureStroke, s))
+    const symbolsRow = this.model.symbols.filter(s => gestureStroke.id !== s.id && this.model.isSymbolInRow(gestureStroke, s))
     const symbolsBeforeGestureInRow = symbolsRow.filter(s => s.bounds.xMax <= gestureStroke.bounds.xMid)
     const symbolsOnGestureInRow = symbolsRow.filter(s => s.bounds.xMax > gestureStroke.bounds.xMid && s.bounds.xMin <= gestureStroke.bounds.xMid)
     const symbolsAfterGestureInRow = symbolsRow.filter(s => s.bounds.xMin > gestureStroke.bounds.xMid)
@@ -373,7 +373,7 @@ export class OIGestureManager
 
         if (symbolsAfterGestureInRow.length) {
 
-          translate.push({ symbols: symbolsAfterGestureInRow, tx, ty: -this.rowHeight })
+          translate.push({ symbols: symbolsAfterGestureInRow, tx, ty: 0 })
         }
         const symbolsAfterNextRow = symbolsBelow.filter(s => this.model.isSymbolBelow(symbolToJoin, s))
         if (symbolsAfterNextRow.length) {
@@ -443,7 +443,7 @@ export class OIGestureManager
           x,
           y: subStrokes![0].y[i],
           p: strokeOrigin.pointers.at(i)?.p || 1,
-          t: strokeOrigin.pointers.at(i)?.t || 1
+          t: strokeOrigin.pointers.at(i)?.t || Math.max(...subStroke.pointers.map(p => p.t + 20))
         })
       })
       strokes.push(subStroke)
@@ -456,7 +456,7 @@ export class OIGestureManager
           x,
           y: subStrokes![1].y[i],
           p: strokeOrigin.pointers.at(subStroke.pointers.length + i)?.p || 1,
-          t: strokeOrigin.pointers.at(subStroke.pointers.length + i)?.t || 1
+          t: strokeOrigin.pointers.at(subStroke.pointers.length + i)?.t || Math.max(...subStroke.pointers.map(p => p.t + 20))
         })
       })
       strokes.push(subStroke)
@@ -468,7 +468,7 @@ export class OIGestureManager
   {
     this.#logger.debug("applyInsertGesture", { gestureStroke, gesture })
 
-    const symbolsRow = this.model.symbols.filter(s => this.model.isSymbolInRow(gestureStroke, s))
+    const symbolsRow = this.model.symbols.filter(s => gestureStroke.id !== s.id && this.model.isSymbolInRow(gestureStroke, s))
     const symbolsBeforeGestureInRow = symbolsRow.filter(s => gestureStroke.bounds.xMid > s.bounds.xMax)
     const textToSplit = symbolsRow.find(s => s.type === SymbolType.Text && isBetween(gestureStroke.bounds.xMid, s.bounds.xMin, s.bounds.xMax)) as OIText | undefined
     const groupToSplit = symbolsRow.find(s => s.type === SymbolType.Group && isBetween(gestureStroke.bounds.xMid, s.bounds.xMin, s.bounds.xMax)) as OISymbolGroup | undefined
@@ -532,6 +532,9 @@ export class OIGestureManager
         }
         replaced.oldSymbols.push(symbolToSplit)
       }
+      if (symbolsAfterGestureInRow.length) {
+        translate.push({ symbols: symbolsAfterGestureInRow, tx: this.strokeSpaceWidth, ty: 0})
+      }
     }
     else if (groupToSplit) {
       const groupSymbolsBefore = groupToSplit.children.filter(s => s.bounds.xMid <= gestureStroke.bounds.xMid)
@@ -575,9 +578,9 @@ export class OIGestureManager
         translate.push({ symbols: symbolsAfterGestureInRow.filter(s => s.id !== gestureStroke.id), tx: this.strokeSpaceWidth, ty: 0 })
       }
     }
-    else if (symbolsAfterGestureInRow?.length) {
+    else if (symbolsAfterGestureInRow.length) {
       let translateX = 0
-      if (symbolsBeforeGestureInRow?.length) {
+      if (symbolsBeforeGestureInRow.length) {
         translateX = Math.min(...symbolsBeforeGestureInRow.map(s => s.bounds.xMin)) - Math.min(...symbolsAfterGestureInRow.map(s => s.bounds.xMin))
       }
       translate.push({ symbols: symbolsAfterGestureInRow, tx: translateX, ty: this.rowHeight })
