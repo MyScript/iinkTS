@@ -90,9 +90,9 @@ export class OIGestureManager
   {
     this.#logger.info("applySurroundGesture", { gestureStroke, gesture })
     const changes: TOIHistoryChanges = {}
+    const ids = this.model.symbols.filter(s => gestureStroke.bounds.contains(s.bounds)).map(s => s.id)
     switch (this.surroundAction) {
       case SurroundAction.Select: {
-        const ids = this.model.symbols.filter(s => gestureStroke.bounds.contains(s.bounds)).map(s => s.id)
         if (ids.length) {
           this.behaviors.internalEvent.emitIntention(Intention.Select)
           this.behaviors.select(ids)
@@ -102,7 +102,7 @@ export class OIGestureManager
       case SurroundAction.Highlight: {
         const symbolIds: string[] = []
         changes.decorator = []
-        gesture.strokeIds.forEach(id =>
+        ids.forEach(id =>
         {
           const sym = this.model.getRootSymbol(id)
           if (sym && [SymbolType.Group, SymbolType.Stroke, SymbolType.Text].includes(sym.type) && !symbolIds.includes(sym.id)) {
@@ -125,7 +125,7 @@ export class OIGestureManager
       case SurroundAction.Surround: {
         const symbolIds: string[] = []
         changes.decorator = []
-        gesture.strokeIds.forEach(id =>
+        ids.forEach(id =>
         {
           const sym = this.model.getRootSymbol(id)
           if (sym && [SymbolType.Group, SymbolType.Stroke, SymbolType.Text].includes(sym.type) && !symbolIds.includes(sym.id)) {
@@ -718,7 +718,12 @@ export class OIGestureManager
     if (!gesture) return
     switch (gesture.gestureType) {
       case "surround": {
-        const hasSymbolsToSurrond = this.model.symbols.some(s => s.id !== gestureStroke.id && gestureStroke.bounds.contains(s.bounds))
+        const hasSymbolsToSurrond = this.model.symbols.some(s => {
+          if (s.id !== gestureStroke.id && gestureStroke.bounds.contains(s.bounds)) {
+            return this.surroundAction === SurroundAction.Select || [SymbolType.Group, SymbolType.Stroke, SymbolType.Text].includes(s.type)
+          }
+          return false
+        })
         if (hasSymbolsToSurrond) {
           return {
             gestureType: "SURROUND",
