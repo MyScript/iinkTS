@@ -566,9 +566,7 @@ export class OIRecognizer
       scaleY: pixelTomm,
       stroke: stroke.formatToSend()
     })
-    const result = this.contextlessGestureDeferred.get(stroke.id)
-    this.contextlessGestureDeferred.delete(stroke.id)
-    return result?.promise
+    return this.contextlessGestureDeferred.get(stroke.id)!.promise
   }
 
   async waitForIdle(): Promise<void>
