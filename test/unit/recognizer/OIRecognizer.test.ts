@@ -666,19 +666,24 @@ describe("OIRecognizer.ts", () =>
     test("should throw error if recognizer has not been initialize", async () =>
     {
       expect.assertions(1)
-      await expect(oiRecognizer.undo({})).rejects.toEqual(new Error("Recognizer must be initilized"))
+      const changes: TOIHistoryBackendChanges = { added: [buildOIStroke()] }
+      await expect(oiRecognizer.undo(changes)).rejects.toEqual(new Error("Recognizer must be initilized"))
     })
-    test("should send undo message", async () =>
+
+    test("should not send message if no changes", async () =>
     {
-      expect.assertions(1)
+      expect.assertions(2)
       await oiRecognizer.init()
+      oiRecognizer.send = jest.fn()
       oiRecognizer.undo({})
-      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
-      const messageSent = JSON.parse(mockServer.getLastMessage() as string)
-      const messageSentExpected = { type: "undo" }
-      expect(messageSent).toMatchObject(messageSentExpected)
+      expect(oiRecognizer.send).toHaveBeenCalledTimes(0)
+      const changes: TOIHistoryBackendChanges = { added: [buildOIStroke()] }
+      oiRecognizer.undo(changes)
+      await delay(100)
+      expect(oiRecognizer.send).toHaveBeenCalledTimes(1)
     })
+
     test("should send undo message with changes added", async () =>
     {
       expect.assertions(1)
@@ -696,7 +701,8 @@ describe("OIRecognizer.ts", () =>
       const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
       expect.assertions(3)
       await oiRecognizer.init()
-      const promise = oiRecognizer.undo({})
+      const changes: TOIHistoryBackendChanges = { added: [buildOIStroke()] }
+      const promise = oiRecognizer.undo(changes)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       mockServer.sendNotGrantedErrorMessage()
@@ -730,13 +736,15 @@ describe("OIRecognizer.ts", () =>
     test("should throw error if recognizer has not been initialize", async () =>
     {
       expect.assertions(1)
-      await expect(oiRecognizer.redo({})).rejects.toEqual(new Error("Recognizer must be initilized"))
+      const changes: TOIHistoryBackendChanges = { added: [buildOIStroke()] }
+      await expect(oiRecognizer.redo(changes)).rejects.toEqual(new Error("Recognizer must be initilized"))
     })
     test("should send redo message", async () =>
     {
       expect.assertions(1)
       await oiRecognizer.init()
-      oiRecognizer.redo({})
+      const changes: TOIHistoryBackendChanges = { added: [buildOIStroke()] }
+      oiRecognizer.redo(changes)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       const messageSent = JSON.parse(mockServer.getLastMessage() as string)
@@ -748,7 +756,8 @@ describe("OIRecognizer.ts", () =>
       const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
       expect.assertions(3)
       await oiRecognizer.init()
-      const promise = oiRecognizer.redo({})
+      const changes: TOIHistoryBackendChanges = { added: [buildOIStroke()] }
+      const promise = oiRecognizer.redo(changes)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       mockServer.sendNotGrantedErrorMessage()

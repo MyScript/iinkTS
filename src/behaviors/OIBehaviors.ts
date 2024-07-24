@@ -1078,11 +1078,10 @@ export class OIBehaviors implements IBehaviors
         actionsToBackend.erased?.length ||
         actionsToBackend.replaced ||
         actionsToBackend.matrix ||
-        actionsToBackend.translate
+        actionsToBackend.translate?.length
       ) {
         await this.recognizer.undo(actionsToBackend)
       }
-
       this.updateLayerInfos()
     }
     return this.model
@@ -1091,6 +1090,7 @@ export class OIBehaviors implements IBehaviors
   async redo(): Promise<OIModel>
   {
     this.#logger.info("redo")
+
     if (this.history.context.canRedo) {
       this.internalEvent.emitIdle(false)
       this.unselectAll()
@@ -1106,10 +1106,11 @@ export class OIBehaviors implements IBehaviors
         actionsToBackend.erased?.length ||
         actionsToBackend.replaced ||
         actionsToBackend.matrix ||
-        actionsToBackend.translate
+        actionsToBackend.translate?.length
       ) {
         await this.recognizer.redo(actionsToBackend)
       }
+
       this.updateLayerInfos()
     }
     return this.model

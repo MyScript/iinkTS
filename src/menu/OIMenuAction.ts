@@ -111,10 +111,10 @@ export class OIMenuAction extends OIMenu
     this.menuUndo.id = `${ this.id }-undo`
     this.menuUndo.classList.add("ms-menu-button", "square")
     this.menuUndo.innerHTML = undoIcon
-    this.menuUndo.addEventListener("pointerup", () =>
+    this.menuUndo.addEventListener("pointerup", async () =>
     {
       this.#logger.info(`${ this.id }.undo`)
-      this.behaviors.undo()
+      await this.behaviors.undo()
     })
     return this.createToolTip(this.menuUndo, "Undo", "bottom")
   }
@@ -125,10 +125,10 @@ export class OIMenuAction extends OIMenu
     this.menuRedo.id = `${ this.id }-redo`
     this.menuRedo.classList.add("ms-menu-button", "square")
     this.menuRedo.innerHTML = redoIcon
-    this.menuRedo.addEventListener("pointerup", () =>
+    this.menuRedo.addEventListener("pointerup", async () =>
     {
       this.#logger.info(`${ this.id }.redo`)
-      this.behaviors.redo()
+      await this.behaviors.redo()
     })
     return this.createToolTip(this.menuRedo, "Redo", "bottom")
   }
