@@ -2,7 +2,7 @@ import ArrowDown from "../assets/svg/nav-arrow-down.svg"
 import { SELECTION_MARGIN } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerClass, LoggerManager } from "../logger"
-import { Box, DecoratorKind, OIDecorator, OIStroke, OISymbolGroup, OIText, SymbolType, TOISymbol } from "../primitive"
+import { DecoratorKind, OIDecorator, OIStroke, OISymbolGroup, OIText, SymbolType, TOISymbol } from "../primitive"
 import { OIMenu, TMenuItemBoolean, TMenuItemButton, TMenuItemColorList } from "./OIMenu"
 import { createUUID } from "../utils"
 
@@ -65,7 +65,6 @@ export class OIMenuContext extends OIMenu
     this.duplicateBtn.addEventListener("pointerup", async () =>
     {
       const symbolsToDuplicate = this.symbolsSelected
-      const selectionBox = Box.createFromBoxes(symbolsToDuplicate.map(s => s.bounds))
       const duplicatedSymbols = symbolsToDuplicate.map(s =>
       {
         const clone = s.clone()
@@ -73,11 +72,11 @@ export class OIMenuContext extends OIMenu
           clone.id = clone.id.slice(0, -36) + `-${ createUUID() }`
           if (clone.type === SymbolType.Group) {
             const groupClone = clone as OISymbolGroup
-            groupClone.extractSymbols().forEach(s => s.id = s.id.slice(0, -36)+ `-${ createUUID() }`)
+            groupClone.extractSymbols().forEach(s => s.id = s.id.slice(0, -36) + `-${ createUUID() }`)
           }
         }
         clone.selected = true
-        this.behaviors.translator.applyToSymbol(clone, selectionBox.width + 2 * SELECTION_MARGIN, 0)
+        this.behaviors.translator.applyToSymbol(clone, SELECTION_MARGIN, SELECTION_MARGIN)
         return clone
       })
 
@@ -96,8 +95,7 @@ export class OIMenuContext extends OIMenu
     this.groupBtn.classList.add("ms-menu-button")
     this.groupBtn.addEventListener("pointerup", async () =>
     {
-      if (this.symbolsSelected.length === 1 && this.symbolsSelected[0].type === SymbolType.Group)
-      {
+      if (this.symbolsSelected.length === 1 && this.symbolsSelected[0].type === SymbolType.Group) {
         const symbols = this.behaviors.ungroupSymbol(this.symbolsSelected[0] as OISymbolGroup)
         this.behaviors.select(symbols.map(s => s.id))
       }
@@ -146,7 +144,8 @@ export class OIMenuContext extends OIMenu
         type: "button",
         id: `${ this.id }-reorder-first`,
         label: "Bring to front",
-        callback: () => {
+        callback: () =>
+        {
           this.behaviors.changeOrderSymbols(this.symbolsSelected, "last")
           this.behaviors.selector.resetSelectedGroup(this.symbolsSelected)
         }
@@ -155,7 +154,8 @@ export class OIMenuContext extends OIMenu
         type: "button",
         id: `${ this.id }-reorder-forward`,
         label: "Bring forward",
-        callback: () => {
+        callback: () =>
+        {
           this.behaviors.changeOrderSymbols(this.symbolsSelected, "forward")
           this.behaviors.selector.resetSelectedGroup(this.symbolsSelected)
         }
@@ -164,7 +164,8 @@ export class OIMenuContext extends OIMenu
         type: "button",
         id: `${ this.id }-reorder-backward`,
         label: "Send backward",
-        callback: () => {
+        callback: () =>
+        {
           this.behaviors.changeOrderSymbols(this.symbolsSelected, "backward")
           this.behaviors.selector.resetSelectedGroup(this.symbolsSelected)
         }
@@ -173,7 +174,8 @@ export class OIMenuContext extends OIMenu
         type: "button",
         id: `${ this.id }-reorder-last`,
         label: "Send to back",
-        callback: () => {
+        callback: () =>
+        {
           this.behaviors.changeOrderSymbols(this.symbolsSelected.slice().reverse(), "first")
           this.behaviors.selector.resetSelectedGroup(this.symbolsSelected)
         }
@@ -192,7 +194,7 @@ export class OIMenuContext extends OIMenu
   protected createDecoratorSubMenu(label: string, kind: DecoratorKind): HTMLElement
   {
     const trigger = document.createElement("button")
-    trigger.id = `${ this.id }-decorator-${kind}`
+    trigger.id = `${ this.id }-decorator-${ kind }`
     trigger.classList.add("ms-menu-button")
     const labelEL = document.createElement("span")
     labelEL.innerText = label
@@ -203,14 +205,16 @@ export class OIMenuContext extends OIMenu
     icon.innerHTML = ArrowDown
     trigger.appendChild(icon)
 
-    const menuItems: (TMenuItemBoolean | TMenuItemColorList )[] = [
+    const menuItems: (TMenuItemBoolean | TMenuItemColorList)[] = [
       {
         type: "checkbox",
-        id: `${ this.id }-decorator-${kind}-enable`,
+        id: `${ this.id }-decorator-${ kind }-enable`,
         label: "Enable",
         initValue: false,
-        callback: (enable) => {
-          this.symbolsDecorable.forEach(s => {
+        callback: (enable) =>
+        {
+          this.symbolsDecorable.forEach(s =>
+          {
             if (enable) {
               if (!s.decorators.some(d => d.kind === kind)) {
                 s.decorators.push(new OIDecorator(kind, this.behaviors.currentPenStyle))
@@ -226,25 +230,28 @@ export class OIMenuContext extends OIMenu
             this.behaviors.renderer.drawSymbol(s)
           })
 
-          document.querySelectorAll(`#${ this.id }-decorator-${kind}-color button`).forEach(b => {
+          document.querySelectorAll(`#${ this.id }-decorator-${ kind }-color button`).forEach(b =>
+          {
             (b as HTMLButtonElement).disabled = !enable
             b.classList.remove("active")
           })
           if (enable) {
-            document.querySelector(`#${ this.id }-decorator-${kind}-color button`)?.classList.add("active")
+            document.querySelector(`#${ this.id }-decorator-${ kind }-color button`)?.classList.add("active")
           }
         }
       },
       {
         type: "colors",
         label: "Colors",
-        id: `${ this.id }-decorator-${kind}-color`,
+        id: `${ this.id }-decorator-${ kind }-color`,
         fill: false,
         values: this.colors.filter((_c, i) => !(i % 4)),
         initValue: this.colors[0],
         disabled: true,
-        callback: (color) => {
-          this.symbolsDecorable.forEach(s => {
+        callback: (color) =>
+        {
+          this.symbolsDecorable.forEach(s =>
+          {
             const deco = s.decorators.find(d => d.kind === kind)
             if (deco) {
               deco.style.color = color
@@ -358,28 +365,31 @@ export class OIMenuContext extends OIMenu
     if (this.showDecorator) {
       this.decoratorMenu?.style.removeProperty("display")
 
-      Object.values(DecoratorKind).forEach(kind => {
-        const checkbox = document.getElementById(`${ this.id }-decorator-${kind}-enable`) as HTMLInputElement
+      Object.values(DecoratorKind).forEach(kind =>
+      {
+        const checkbox = document.getElementById(`${ this.id }-decorator-${ kind }-enable`) as HTMLInputElement
         if (checkbox) {
-          document.querySelectorAll(`#${ this.id }-decorator-${kind}-color button`).forEach(e => e.classList.remove("active"))
+          document.querySelectorAll(`#${ this.id }-decorator-${ kind }-color button`).forEach(e => e.classList.remove("active"))
           const decos = this.symbolsDecorable.flatMap(s => s.decorators).filter(d => d.kind === kind)
 
           if (decos.length && decos.every(d => d.style.color === decos[0].style.color)) {
-            const btnToActivate = document.getElementById(`${ this.id }-decorator-${kind}-color-${decos[0].style.color?.replace("#", "")}-btn`)
+            const btnToActivate = document.getElementById(`${ this.id }-decorator-${ kind }-color-${ decos[0].style.color?.replace("#", "") }-btn`)
             btnToActivate?.classList.add("active")
           }
 
           if (this.symbolsDecorable.filter(s => s.decorators.some(d => d.kind === kind)).length === this.symbolsDecorable.length) {
             checkbox.checked = true
 
-            document.querySelectorAll(`#${ this.id }-decorator-${kind}-color button`).forEach(b => {
+            document.querySelectorAll(`#${ this.id }-decorator-${ kind }-color button`).forEach(b =>
+            {
               (b as HTMLButtonElement).disabled = false
             })
             checkbox.indeterminate = false
           }
           else if (this.symbolsDecorable.filter(s => !s.decorators.some(d => d.kind === kind)).length === this.symbolsDecorable.length) {
             checkbox.checked = false
-            document.querySelectorAll(`#${ this.id }-decorator-${kind}-color button`).forEach(b => {
+            document.querySelectorAll(`#${ this.id }-decorator-${ kind }-color button`).forEach(b =>
+            {
               (b as HTMLButtonElement).disabled = true
             })
             checkbox.indeterminate = false
@@ -387,7 +397,8 @@ export class OIMenuContext extends OIMenu
           else {
             checkbox.setAttribute("indeterminate", "true")
             checkbox.indeterminate = true
-            document.querySelectorAll(`#${ this.id }-decorator-${kind}-color button`).forEach(b => {
+            document.querySelectorAll(`#${ this.id }-decorator-${ kind }-color button`).forEach(b =>
+            {
               (b as HTMLButtonElement).disabled = false
             })
           }
@@ -421,8 +432,7 @@ export class OIMenuContext extends OIMenu
     this.wrapper?.style.setProperty("left", `${ this.position.x - this.position.scrollLeft }px`)
     this.wrapper?.style.setProperty("top", `${ this.position.y - this.position.scrollTop }px`)
 
-    if (this.haveSymbolsSelected)
-    {
+    if (this.haveSymbolsSelected) {
       this.reorderMenu?.style.removeProperty("display")
       this.duplicateBtn?.style.removeProperty("display")
       this.removeBtn?.style.removeProperty("display")
@@ -457,7 +467,8 @@ export class OIMenuContext extends OIMenu
     this.wrapper.appendChild(this.createMenuRemove())
     this.wrapper.style.setProperty("display", "none")
     domElement.appendChild(this.wrapper)
-    domElement.parentElement?.addEventListener("scroll", () => {
+    domElement.parentElement?.addEventListener("scroll", () =>
+    {
       this.position.scrollLeft = domElement.parentElement?.scrollLeft || 0
       this.position.scrollTop = domElement.parentElement?.scrollTop || 0
       this.update()
