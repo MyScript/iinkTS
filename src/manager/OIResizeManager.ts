@@ -132,8 +132,11 @@ export class OIResizeManager
       case EdgeKind.Arc: {
         edge.center.x = +(edge.center.x + (scaleX - 1) * (edge.center.x - origin.x) / 2).toFixed(3)
         edge.center.y = +(edge.center.y + (scaleY - 1) * (edge.center.y - origin.y) / 2).toFixed(3)
-        edge.radiusX = +(edge.radiusX * scaleX).toFixed(3)
-        edge.radiusY = +(edge.radiusY * scaleY).toFixed(3)
+        edge.radiusX = +(edge.radiusX * Math.abs(scaleX)).toFixed(3)
+        edge.radiusY = +(edge.radiusY * Math.abs(scaleY)).toFixed(3)
+        if (scaleX * scaleY < 0) {
+          edge.sweepAngle *= -1
+        }
         return edge
       }
       case EdgeKind.Line: {
@@ -155,7 +158,6 @@ export class OIResizeManager
       default:
         throw new Error(`Can't apply resize on edge, kind unknow: ${ JSON.stringify(edge) }`)
     }
-    return edge
   }
 
   protected applyOnText(text: OIText, origin: TPoint, scaleX: number, scaleY: number): OIText
