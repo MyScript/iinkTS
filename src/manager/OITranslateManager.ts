@@ -233,7 +233,7 @@ export class OITranslateManager
     this.#logger.info("end", { point })
     const { tx, ty } = this.continue(point)
     this.snaps.clearSnapToElementLines()
-    this.translate(this.model.symbolsSelected, tx, ty, false)
+    this.translate(this.model.symbolsSelected, tx, ty)
 
     this.selector.resetSelectedGroup(this.model.symbolsSelected)
     this.interactElementsGroup = undefined
