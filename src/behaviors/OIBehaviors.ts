@@ -357,7 +357,7 @@ export class OIBehaviors implements IBehaviors
     this.model.width = Math.max(domElement.clientWidth, this.#configuration.rendering.minWidth)
     this.model.height = Math.max(domElement.clientHeight, this.#configuration.rendering.minHeight)
     this.model.rowHeight = this.configuration.rendering.guides.gap
-    this.history.push(this.model, {})
+    this.history.init(this.model)
 
     await this.recognizer.init()
     await this.setPenStyle(this.penStyle)

@@ -45,6 +45,23 @@ export type TOIHistoryStackItem = {
   model: OIModel
 }
 
+export function isChangesEmpty(changes: TOIHistoryChanges): boolean
+{
+  return !(
+    changes.added?.length ||
+    changes.updated?.length ||
+    changes.erased?.length ||
+    changes.replaced?.oldSymbols.length ||
+    changes.matrix?.symbols.length ||
+    changes.translate?.length ||
+    changes.style?.symbols?.length ||
+    changes.order?.symbols?.length ||
+    changes.decorator?.length ||
+    changes.group?.symbols.length ||
+    changes.ungroup?.group
+  )
+}
+
 /**
  * @group History
  */
@@ -76,14 +93,22 @@ export class OIHistoryManager implements IHistoryManager
     this.context.empty = this.stack[this.context.stackIndex].model.symbols.length === 0
   }
 
+  init(model: OIModel): void
+  {
+    this.stack.push({ model: model.clone(), changes: {} })
+    this.internalEvent.emitContextChange(this.context)
+  }
+
   push(model: OIModel, changes: TOIHistoryChanges): void
   {
     this.#logger.info("push", { model, changes })
+    if (isChangesEmpty(changes)) return
+
     if (this.context.stackIndex + 1 < this.stack.length) {
       this.stack.splice(this.context.stackIndex + 1)
     }
 
-    this.stack.push({ model: model.clone(), changes: changes })
+    this.stack.push({ model: model.clone(), changes })
     this.context.stackIndex = this.stack.length - 1
 
     if (this.stack.length > this.configuration.maxStackSize) {
@@ -125,7 +150,8 @@ export class OIHistoryManager implements IHistoryManager
       }
     }
     if (changes.translate?.length) {
-      reversedChanges.translate = changes.translate.map(tr => {
+      reversedChanges.translate = changes.translate.map(tr =>
+      {
         return {
           symbols: tr.symbols,
           tx: -tr.tx,
