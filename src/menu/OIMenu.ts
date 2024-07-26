@@ -78,9 +78,9 @@ export type TMenuItemSelect = TMenuItem & {
 export abstract class OIMenu
 {
   thicknessList = [
-    { label: "S", value: 2 },
-    { label: "M", value: 4 },
-    { label: "L", value: 6 },
+    { label: "S", value: 1 },
+    { label: "M", value: 2 },
+    { label: "L", value: 4 },
     { label: "XL", value: 8 },
   ]
 

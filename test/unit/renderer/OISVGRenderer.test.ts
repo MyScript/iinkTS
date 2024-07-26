@@ -74,12 +74,14 @@ describe("OISVGRenderer.ts", () =>
       const divElement: HTMLDivElement = document.createElement("div")
       const customConf = JSON.parse(JSON.stringify(DefaultRenderingConfiguration)) as TRenderingConfiguration
       customConf.guides.type = "grid"
+      customConf.minHeight = customConf.guides.gap * 2
+      customConf.minWidth = customConf.guides.gap * 2
       const rendererCustom = new OISVGRenderer(customConf)
       rendererCustom.init(divElement)
       const guidesGroup = divElement.querySelector("#guides-wrapper") as SVGGElement
       expect(guidesGroup).toBeDefined()
       const guideLines = guidesGroup.getElementsByTagName("line")
-      expect(guideLines).toHaveLength(10)
+      expect(guideLines).toHaveLength(20)
     })
     test("should write error if guides.type unknow", () =>
     {
