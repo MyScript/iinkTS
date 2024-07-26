@@ -112,7 +112,7 @@ export class OIMenuStyle extends OIMenu
 
     const symbolsStyles = this.symbolsSelected.map(s => s.style)
     const hasUniqWidth = symbolsStyles.length && symbolsStyles.every(st => st.width === symbolsStyles[0]?.width)
-    const width = hasUniqWidth ? symbolsStyles[0]?.width : (this.behaviors.currentPenStyle.width || 4)
+    const width = hasUniqWidth ? symbolsStyles[0]?.width : (this.behaviors.currentPenStyle.width || 2)
 
     this.thicknessList.forEach((size) =>
     {

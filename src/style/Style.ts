@@ -15,7 +15,7 @@ export type TStyle = {
  * @group Style
  */
 export const DefaultStyle: TStyle = {
-  width: 4,
+  width: 2,
   color: "#000000",
   opacity: 1,
   fill: "transparent",

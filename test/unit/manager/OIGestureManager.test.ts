@@ -540,7 +540,7 @@ describe("OIGestureManager.ts", () =>
         strokeAfterIds: []
       }
       await gestMan.applyJoinGesture(strokeGesture, gesture)
-      expect(gestMan.translator.translate).toHaveBeenNthCalledWith(1, [stroke21], stroke12.bounds.xMax - stroke21.bounds.xMin + 50, -rowHeight, false)
+      expect(gestMan.translator.translate).toHaveBeenNthCalledWith(1, [stroke21], stroke12.bounds.xMax - stroke21.bounds.xMin + rowHeight / 2, -rowHeight, false)
       expect(gestMan.history.push).toHaveBeenCalledTimes(1)
     })
 
@@ -600,7 +600,7 @@ describe("OIGestureManager.ts", () =>
         strokeAfterIds: []
       }
       await gestMan.applyInsertGesture(strokeGesture, gesture)
-      expect(gestMan.translator.translate).toHaveBeenNthCalledWith(1, [stroke], 0, 100, false)
+      expect(gestMan.translator.translate).toHaveBeenNthCalledWith(1, [stroke], 0, gestMan.rowHeight, false)
       expect(behaviors.replaceSymbols).toHaveBeenCalledTimes(0)
       expect(gestMan.history.push).toHaveBeenCalledTimes(1)
     })
