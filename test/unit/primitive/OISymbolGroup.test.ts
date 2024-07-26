@@ -246,11 +246,11 @@ describe("OISymbolGroup.ts", () =>
       expect(groupSubChild.children).not.toContain(stroke22)
       expect(groupChild.children).not.toContain(groupSubChild)
     })
-    test("should return undefined if symbols empty", () =>
+    test("should remove last symbol", () =>
     {
       expect(group.children).toHaveLength(1)
       expect(group.children).toContain(circle)
-      expect(group.removeChilds([circle.id])).toBeUndefined()
+      expect(group.removeChilds([circle.id]).children).toHaveLength(0)
       expect(group.children).toHaveLength(0)
     })
   })
