@@ -7,7 +7,7 @@
       "opacity": 0.5,
       "fill": "#00ffff"
     },
-    "kind": "rectangle",
+    "kind": "polygon",
     "points": [
       {
         "x": 300,
