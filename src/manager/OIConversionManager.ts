@@ -76,7 +76,7 @@ export class OIConversionManager
     return this.behaviors.extractStrokesFromSymbols(symbols)
   }
 
-  buildChar(char: TJIIXChar, strokes: OIStroke[], fontSize?: number): TOISymbolChar
+  buildChar(char: TJIIXChar, strokes: OIStroke[], fontSize: number): TOISymbolChar
   {
     const grid = char.grid.map(p => ({
       x: convertMillimeterToPixel(p.x),
@@ -90,7 +90,7 @@ export class OIConversionManager
       id: `text-char-${ createUUID() }`,
       label: char.label,
       color,
-      fontSize: fontSize || Math.ceil(Math.round((boundingBox.yMax - boundingBox.yMin) / 2) / 8) * 8,
+      fontSize,
       fontWeight,
       bounds: boundingBox
     }
@@ -100,11 +100,13 @@ export class OIConversionManager
   {
     const boundingBox = Box.createFromBoxes([convertBoundingBoxMillimeterToPixel(word["bounding-box"])])
     const charSymbols: TOISymbolChar[] = []
+    fontSize = fontSize || Math.ceil(Math.round(convertMillimeterToPixel(computeAverage(chars.map(c => c["bounding-box"]?.height || 1)) / 2) / 8) * 8)
+
     chars.forEach(char =>
     {
       const charStrokes = strokes.filter(s => char.items?.some(i => i["full-id"] === s.id)) as OIStroke[]
       if (charStrokes.length) {
-        charSymbols.push(this.buildChar(char, charStrokes, fontSize))
+        charSymbols.push(this.buildChar(char, charStrokes, fontSize!))
       }
     })
     const point: TPoint = {
@@ -178,10 +180,11 @@ export class OIConversionManager
     const textBounds = convertBoundingBoxMillimeterToPixel(text["bounding-box"])
     let fontSize = this.fontSize
     if (onlyText && !fontSize) {
-      fontSize = computeAverage(jiixWords.filter(w => w.items?.length).map(w => this.computeFontSize(w)))
+      fontSize = Math.round(computeAverage(jiixWords.filter(w => w.items?.length).map(w => this.computeFontSize(w))) / 2) * 2
     }
 
     let isNewLine = true
+    let currentY = textBounds.y
     jiixWords.forEach(word =>
     {
       const wordStrokes = this.strokes.filter(s => word.items?.some(i => i["full-id"] === s.id)) as OIStroke[]
@@ -193,18 +196,21 @@ export class OIConversionManager
         const textSymbol = this.buildWord(word, chars, wordStrokes, fontSize)
 
         if (onlyText) {
-          textSymbol.point.y = Math.round(textSymbol.point.y / this.rowHeight) * this.rowHeight
+          if (isNewLine) {
+            isNewLine = false
+            const nbRow = Math.round((textSymbol.point.y - currentY) / this.rowHeight) || 1
+            currentY += nbRow * this.rowHeight
+            if (Math.abs(textSymbol.point.x - textBounds.x) < this.behaviors.texter.getSpaceWidth(fontSize!)) {
+              textSymbol.point.x = textBounds.x
+            }
+          }
+          textSymbol.point.y = Math.round(currentY / this.rowHeight) * this.rowHeight
           const textInRow = this.model.symbols.find(t => t.type === SymbolType.Text && t.point.y === textSymbol.point.y) as OIText | undefined
           if (textInRow) {
             textSymbol.chars.forEach(c => c.fontSize = textInRow.chars[0].fontSize)
           }
         }
-        if (isNewLine) {
-          isNewLine = false
-          if (Math.abs(textSymbol.point.x - textBounds.x) < this.behaviors.texter.getSpaceWidth(fontSize!)) {
-            textSymbol.point.x = textBounds.x
-          }
-        }
+
         this.behaviors.texter.setBoundingBox(textSymbol)
         result.push({
           symbol: textSymbol,
