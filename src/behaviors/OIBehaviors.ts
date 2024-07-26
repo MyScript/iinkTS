@@ -171,6 +171,8 @@ export class OIBehaviors implements IBehaviors
     const height = Math.max(this.renderer.parent.clientHeight, this.configuration.rendering.minHeight)
     const width = Math.max(this.renderer.parent.clientWidth, this.configuration.rendering.minWidth)
     this.renderer.resize(height, width)
+    this.model.rowHeight = this.configuration.rendering.guides.gap
+    this.history.stack.forEach(i => i.model.rowHeight = this.model.rowHeight)
   }
   //#endregion
 
@@ -218,7 +220,8 @@ export class OIBehaviors implements IBehaviors
   protected updateLayerInfos(): void
   {
     clearTimeout(this.#layerInfosTimer)
-    this.#layerInfosTimer = setTimeout(() => {
+    this.#layerInfosTimer = setTimeout(() =>
+    {
       this.menu.update()
       this.svgDebugger.apply()
       this.recognizer.waitForIdle()
@@ -447,20 +450,30 @@ export class OIBehaviors implements IBehaviors
     return group
   }
 
+  protected createStroke(partialSymbol: PartialDeep<OIStroke>): OIStroke
+  {
+    return OIStroke.create(partialSymbol as PartialDeep<OIStroke>)
+  }
+
+  protected createText(partialSymbol: PartialDeep<OIText>): OIText
+  {
+    return OIText.create(partialSymbol as PartialDeep<OIText>)
+  }
+
   async createSymbol(partialSymbol: PartialDeep<TOISymbol>): Promise<TOISymbol>
   {
     try {
       switch (partialSymbol.type) {
         case SymbolType.Stroke:
-          return await this.addSymbol(OIStroke.create(partialSymbol as PartialDeep<OIStroke>))
+          return await this.addSymbol(this.createStroke(partialSymbol))
         case SymbolType.Shape:
-          return await this.addSymbol(this.createShape(partialSymbol as PartialDeep<TOIShape>))
+          return await this.addSymbol(this.createShape(partialSymbol))
         case SymbolType.Edge:
-          return await this.addSymbol(this.createEdge(partialSymbol as PartialDeep<TOIEdge>))
+          return await this.addSymbol(this.createEdge(partialSymbol))
         case SymbolType.Text:
-          return await this.addSymbol(OIText.create(partialSymbol as PartialDeep<OIText>))
+          return await this.addSymbol(this.createText(partialSymbol))
         case SymbolType.Group:
-          return await this.addSymbol(this.createGroup(partialSymbol as PartialDeep<OISymbolGroup>))
+          return await this.addSymbol(this.createGroup(partialSymbol))
         default:
           throw new Error(`Unable to create symbol, type: "${ partialSymbol.type }" is unknown`)
       }
@@ -477,22 +490,31 @@ export class OIBehaviors implements IBehaviors
   {
     try {
       const errors: string[] = []
-      const symbols: (TOISymbol | undefined)[] = partialSymbols.map(partialSym =>
+      const symbols: TOISymbol[] = []
+      partialSymbols.forEach(partialSymbol =>
       {
-        switch (partialSym.type) {
-          case SymbolType.Stroke:
-            return OIStroke.create(partialSym as PartialDeep<OIStroke>)
-          case SymbolType.Shape:
-            return this.createShape(partialSym as PartialDeep<TOIShape>)
-          case SymbolType.Edge:
-            return this.createEdge(partialSym as PartialDeep<TOIEdge>)
-          case SymbolType.Text:
-            return OIText.create(partialSym as PartialDeep<OIText>)
-          case SymbolType.Group:
-            return this.createGroup(partialSym as PartialDeep<OISymbolGroup>)
-          default:
-            errors.push(`Unable to create symbol, type: "${ partialSym.type }" is unknown`)
-            return
+        try {
+          switch (partialSymbol.type) {
+            case SymbolType.Stroke:
+              symbols.push(this.createStroke(partialSymbol))
+              break
+            case SymbolType.Shape:
+              symbols.push(this.createShape(partialSymbol))
+              break
+            case SymbolType.Edge:
+              symbols.push(this.createEdge(partialSymbol))
+              break
+            case SymbolType.Text:
+              symbols.push(this.createText(partialSymbol))
+              break
+            case SymbolType.Group:
+              symbols.push(this.createGroup(partialSymbol))
+              break
+            default:
+              errors.push(`Unable to create symbol, type: "${ partialSymbol.type }" is unknown`)
+          }
+        } catch (error) {
+          errors.push(((error as Error).message || error) as string)
         }
       })
       if (errors.length) {
@@ -604,7 +626,8 @@ export class OIBehaviors implements IBehaviors
     })
     if (symbols.length) {
       let needAdjutText = false
-      symbols.forEach(s => {
+      symbols.forEach(s =>
+      {
         if (s.type === SymbolType.Text) {
           this.texter.updateTextBoundingBox(s)
           needAdjutText = true
@@ -695,7 +718,7 @@ export class OIBehaviors implements IBehaviors
 
   groupSymbols(symbols: TOISymbol[]): OISymbolGroup
   {
-    const group = new OISymbolGroup(symbols)
+    const group = this.createGroup({ children: symbols })
     symbols.forEach(s =>
     {
       this.model.removeSymbol(s.id)
@@ -743,7 +766,7 @@ export class OIBehaviors implements IBehaviors
                 }
               })
             }
-            const wordSymb = new OISymbolGroup(wordStrokes, orginStyle)
+            const wordSymb = this.createGroup({ children: wordStrokes, style: orginStyle })
             orginDeco.forEach(d =>
             {
               if (!wordSymb.decorators.some(wd => wd.kind === d.kind)) {
@@ -762,8 +785,8 @@ export class OIBehaviors implements IBehaviors
       }
       else {
         const strokesAssociated = strokes.filter(s => el.items?.map(s => s["full-id"]).includes(s.id))
-        if (strokes.length) {
-          const group = new OISymbolGroup(strokesAssociated)
+        if (strokesAssociated.length) {
+          const group = this.createGroup({ children: strokesAssociated })
           strokesAssociated.map(s =>
           {
             this.model.removeSymbol(s.id)
@@ -779,16 +802,18 @@ export class OIBehaviors implements IBehaviors
   async removeSymbol(id: string, addToHistory = true): Promise<void>
   {
     this.#logger.info("removeSymbol", { id })
-    this.recognizer.eraseStrokes([id])
     const symbol = this.model.getRootSymbol(id)
     if (symbol) {
       this.internalEvent.emitIdle(false)
       if (symbol.type === SymbolType.Group) {
-        const group = symbol as OISymbolGroup
-        const groupStrokeIds = group.extractStrokes().map(s => s.id)
-        if (group.removeChilds([id])) {
-          this.model.updateSymbol(group)
-          this.renderer.drawSymbol(group)
+        const groupStrokeIds = symbol.extractStrokes().map(s => s.id)
+        symbol.removeChilds([id])
+        if (symbol.children.length) {
+          this.model.updateSymbol(symbol)
+          this.renderer.drawSymbol(symbol)
+          if (groupStrokeIds.includes(id)) {
+            this.recognizer.eraseStrokes([id])
+          }
         }
         else {
           this.recognizer.eraseStrokes(groupStrokeIds)
@@ -797,6 +822,7 @@ export class OIBehaviors implements IBehaviors
         }
       }
       else {
+        this.recognizer.eraseStrokes([id])
         this.model.removeSymbol(symbol.id)
         this.renderer.removeSymbol(symbol.id)
       }
@@ -807,26 +833,27 @@ export class OIBehaviors implements IBehaviors
     }
     else {
       this.renderer.removeSymbol(id)
+      this.recognizer.eraseStrokes([id])
     }
   }
 
   async removeSymbols(ids: string[], addToHistory = true): Promise<TOISymbol[]>
   {
     this.#logger.info("removeSymbol", { ids })
-
     const symbolsToRemove: TOISymbol[] = []
     const strokesIds: string[] = []
-    ids.forEach(id => {
+    ids.forEach(id =>
+    {
       const sym = this.model.getRootSymbol(id)
       if (sym) {
         symbolsToRemove.push(sym)
         switch (sym.type) {
           case SymbolType.Stroke:
             strokesIds.push(sym.id)
-            break;
+            break
           case SymbolType.Group:
             strokesIds.push(...sym.extractStrokes().map(s => s.id))
-            break;
+            break
         }
       }
     })
@@ -1001,14 +1028,15 @@ export class OIBehaviors implements IBehaviors
   {
     if (!symbols?.length) return []
     const strokes: OIStroke[] = []
-    symbols.forEach(s => {
+    symbols.forEach(s =>
+    {
       switch (s.type) {
         case SymbolType.Stroke:
           strokes.push(s)
-          break;
+          break
         case SymbolType.Group:
           strokes.push(...s.extractStrokes())
-          break;
+          break
       }
     })
     return strokes
