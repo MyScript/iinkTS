@@ -89,7 +89,7 @@ export class OISymbolGroup extends OISymbolBase<SymbolType.Group>
     return OISymbolGroup.extractStrokes(this)
   }
 
-  removeChilds(symbolIds: string[]): OISymbolGroup | undefined
+  removeChilds(symbolIds: string[]): OISymbolGroup
   {
     return OISymbolGroup.removeChilds(this, symbolIds)
   }
@@ -144,21 +144,20 @@ export class OISymbolGroup extends OISymbolBase<SymbolType.Group>
     })
   }
 
-  static removeChilds(group: OISymbolGroup, symbolIds: string[]): OISymbolGroup | undefined
+  static removeChilds(group: OISymbolGroup, symbolIds: string[]): OISymbolGroup
   {
     group.children = group.children.filter(s => !symbolIds.includes(s.id))
-    if (!group.children.length) return
     const symbolsToRemove = group.children.slice()
     symbolsToRemove.forEach(s =>
     {
       if (s.type === SymbolType.Group) {
         const g = s as OISymbolGroup
-        if (!OISymbolGroup.removeChilds(g, symbolIds)) {
+        if (!OISymbolGroup.removeChilds(g, symbolIds).children.length) {
           group.children = group.children.filter(s1 => s1.id !== g.id)
         }
       }
     })
-    return group.children.length ? group : undefined
+    return group
   }
 
   clone(): OISymbolGroup
