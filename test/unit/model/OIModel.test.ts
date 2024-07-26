@@ -194,13 +194,13 @@ describe("OIModel.ts", () =>
     test("shoud get symbols group by row and ordered", () =>
     {
       const rows = model.getSymbolsByRowOrdered()
-      expect(rows[0].index).toEqual(1)
+      expect(rows[0].rowIndex).toEqual(1)
       expect(rows[0].symbols).toEqual([stroke11, stroke12, circle13])
-      expect(rows[1].index).toEqual(2)
+      expect(rows[1].rowIndex).toEqual(2)
       expect(rows[1].symbols).toEqual([stroke21, circle22])
-      expect(rows[2].index).toEqual(3)
+      expect(rows[2].rowIndex).toEqual(3)
       expect(rows[2].symbols).toEqual([stroke31])
-      expect(rows[3].index).toEqual(5)
+      expect(rows[3].rowIndex).toEqual(5)
       expect(rows[3].symbols).toEqual([stroke51])
     })
   })

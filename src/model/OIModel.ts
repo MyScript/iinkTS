@@ -97,25 +97,25 @@ export class OIModel implements IModel
     return Math.round(symbol.bounds.yMid / this.rowHeight)
   }
 
-  getSymbolsByRowOrdered(): { index: number, symbols: TOISymbol[] }[]
+  getSymbolsByRowOrdered(): { rowIndex: number, symbols: TOISymbol[] }[]
   {
-    const rows: { index: number, symbols: TOISymbol[] }[] = []
+    const rows: { rowIndex: number, symbols: TOISymbol[] }[] = []
     this.symbols.forEach(s =>
     {
       const rowIndex = this.getSymbolRowIndex(s)
-      const row = rows.find(r => r.index === rowIndex)
+      const row = rows.find(r => r.rowIndex === rowIndex)
       if (row) {
         row.symbols.push(s)
       }
       else {
-        rows.push({ index: rowIndex, symbols: [s] })
+        rows.push({ rowIndex, symbols: [s] })
       }
     })
     rows.forEach(r =>
     {
       r.symbols.sort((s1, s2) => s1.bounds.xMid - s2.bounds.xMid)
     })
-    return rows.sort((r1, r2) => r1.index - r2.index)
+    return rows.sort((r1, r2) => r1.rowIndex - r2.rowIndex)
   }
 
   roundToLineGuide(y: number): number
