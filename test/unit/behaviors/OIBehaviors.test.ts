@@ -385,7 +385,7 @@ describe("OIBehaviors.ts", () =>
     test("should update symbol width and draw", async () =>
     {
       await oib.init(div)
-      expect(oib.model.symbols[1].style.width).toEqual(4)
+      expect(oib.model.symbols[1].style.width).toEqual(2)
       oib.updateSymbolsStyle([stroke2.id], { width: 42 })
       expect(oib.model.symbols[1].style.width).toEqual(42)
       expect(oib.renderer.drawSymbol).toHaveBeenCalledTimes(1)
