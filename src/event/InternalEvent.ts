@@ -16,7 +16,8 @@ import { TUndoRedoContext } from "../history"
  * editor.internalEvents.addEventListener(InternalEventType.SVG_PATCH, (evt) => console.log(evt.detail))
  * ```
  */
-export enum InternalEventType {
+export enum InternalEventType
+{
   SVG_PATCH = "internal_svg_patch",
   EXPORTED = "internal_exported",
   CLEAR_MESSAGE = "internal_clear_message",
@@ -106,7 +107,6 @@ export class InternalEvent extends EventTarget
     this.#logger.info("emitError", { err })
     this.#emit(InternalEventType.ERROR, err)
   }
-
   addErrorListener(callback: (err: Error) => void): void
   {
     this.#logger.info("addErrorListener", { callback })

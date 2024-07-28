@@ -1,7 +1,12 @@
-import {
+import
+{
   InternalEvent,
-  TWSMessageEventSVGPatch
+  TWSMessageEventSVGPatch,
+  TExport,
+  TUndoRedoContext,
+  Intention
 } from "../../../src/iink"
+import { buildOICircle, buildOIStroke } from "../helpers"
 
 describe("InternalEvent.ts", () =>
 {
@@ -30,14 +35,24 @@ describe("InternalEvent.ts", () =>
     expect(testFunction).toBeCalledWith(svgPatch)
   })
 
-  test("should execute callback on emitNotif", () =>
+  test("should execute callback on emitExported", () =>
   {
     const testFunction = jest.fn()
-    internalEvent.addNotifListener(testFunction)
-    const notif = { message: "this is the end", timeout: 666 }
-    internalEvent.emitNotif(notif)
+    internalEvent.addExportedListener(testFunction)
+    const data: TExport = {
+      "text/plain": "test"
+    }
+    internalEvent.emitExported(data)
     expect(testFunction).toBeCalledTimes(1)
-    expect(testFunction).toBeCalledWith(notif)
+    expect(testFunction).toBeCalledWith(data)
+  })
+
+  test("should execute callback on emitClear", () =>
+  {
+    const testFunction = jest.fn()
+    internalEvent.addClearListener(testFunction)
+    internalEvent.emitClear()
+    expect(testFunction).toBeCalledTimes(1)
   })
 
   test("should execute callback on emitError", () =>
@@ -50,21 +65,14 @@ describe("InternalEvent.ts", () =>
     expect(testFunction).toBeCalledWith(error)
   })
 
-  test("should execute callback on emitClear", () =>
+  test("should execute callback on emitNotif", () =>
   {
     const testFunction = jest.fn()
-    internalEvent.addClearListener(testFunction)
-    internalEvent.emitClear()
+    internalEvent.addNotifListener(testFunction)
+    const notif = { message: "this is the end", timeout: 666 }
+    internalEvent.emitNotif(notif)
     expect(testFunction).toBeCalledTimes(1)
-  })
-
-  test("should execute callback on emitConvert", () =>
-  {
-    const testFunction = jest.fn()
-    internalEvent.addConvertListener(testFunction)
-    internalEvent.emitConvert("DIGITAL_EDIT")
-    expect(testFunction).toBeCalledTimes(1)
-    expect(testFunction).toBeCalledWith("DIGITAL_EDIT")
+    expect(testFunction).toBeCalledWith(notif)
   })
 
   test("should execute callback on emitImportJIIX", () =>
@@ -78,7 +86,7 @@ describe("InternalEvent.ts", () =>
         {
           "id": "1",
           "label": "hello",
-          "candidates": [ "hello", "helle", "hellor", "hells", "hellon" ]
+          "candidates": ["hello", "helle", "hellor", "hells", "hellon"]
         }
       ],
       "version": "3",
@@ -89,11 +97,73 @@ describe("InternalEvent.ts", () =>
     expect(testFunction).toBeCalledWith(jiix)
   })
 
-  test("should execute callback on emitClearMessage", () =>
+  test("should execute callback on emitConvert with default value", () =>
+  {
+    const testFunction = jest.fn()
+    internalEvent.addConvertListener(testFunction)
+    internalEvent.emitConvert()
+    expect(testFunction).toBeCalledTimes(1)
+    expect(testFunction).toBeCalledWith("DIGITAL_EDIT")
+  })
+
+  test("should execute callback on emitConvert", () =>
+  {
+    const testFunction = jest.fn()
+    internalEvent.addConvertListener(testFunction)
+    internalEvent.emitConvert("HANDWRITING")
+    expect(testFunction).toBeCalledTimes(1)
+    expect(testFunction).toBeCalledWith("HANDWRITING")
+  })
+
+  test("should execute callback on emitClear", () =>
   {
     const testFunction = jest.fn()
     internalEvent.addClearMessageListener(testFunction)
     internalEvent.emitClearMessage()
     expect(testFunction).toBeCalledTimes(1)
+  })
+
+  test("should execute callback on emitContextChange", () =>
+  {
+    const testFunction = jest.fn()
+    internalEvent.addContextChangeListener(testFunction)
+    const context: TUndoRedoContext = {
+      canRedo: true,
+      canUndo: true,
+      empty: false,
+      possibleUndoCount: 2,
+      stackIndex: 2
+    }
+    internalEvent.emitContextChange(context)
+    expect(testFunction).toBeCalledTimes(1)
+    expect(testFunction).toBeCalledWith(context)
+  })
+
+  test("should execute callback on emitIdle", () =>
+  {
+    const testFunction = jest.fn()
+    internalEvent.addIdleListener(testFunction)
+    internalEvent.emitIdle(true)
+    expect(testFunction).toBeCalledTimes(1)
+    expect(testFunction).toBeCalledWith(true)
+  })
+
+  test("should execute callback on emitSelected", () =>
+  {
+    const testFunction = jest.fn()
+    internalEvent.addSelectedListener(testFunction)
+    const symbols = [buildOICircle(), buildOIStroke()]
+    internalEvent.emitSelected(symbols)
+    expect(testFunction).toBeCalledTimes(1)
+    expect(testFunction).toBeCalledWith(symbols)
+  })
+
+  test("should execute callback on emitIntention", () =>
+  {
+    const testFunction = jest.fn()
+    internalEvent.addIntentionListener(testFunction)
+    internalEvent.emitIntention(Intention.Select)
+    expect(testFunction).toBeCalledTimes(1)
+    expect(testFunction).toBeCalledWith(Intention.Select)
   })
 })

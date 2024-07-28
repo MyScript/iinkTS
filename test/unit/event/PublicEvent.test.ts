@@ -1,10 +1,13 @@
-import {
-  PublicEvent,
-  EventType,
-  Model,
-  TExport,
-  TJIIXExport
-} from "../../../src/iink"
+import
+  {
+    PublicEvent,
+    EventType,
+    Model,
+    TExport,
+    TJIIXExport,
+    Intention
+  } from "../../../src/iink"
+import { buildOICircle, buildOIStroke } from "../helpers"
 
 describe('PublicEvent.ts', () =>
 {
@@ -31,7 +34,7 @@ describe('PublicEvent.ts', () =>
   {
     const testFunction = jest.fn()
     publicEvent.addEventListener(EventType.EXPORTED, testFunction)
-    const exports:TExport = { 'text/plain': 'tatapouet' }
+    const exports: TExport = { 'text/plain': 'tatapouet' }
     publicEvent.emitExported(exports)
     expect(testFunction).toBeCalledTimes(1)
     expect(testFunction).toBeCalledWith(
@@ -115,7 +118,7 @@ describe('PublicEvent.ts', () =>
         {
           "id": "1",
           "label": "hello",
-          "candidates": [ "hello", "helle", "hellor", "hells", "hellon" ]
+          "candidates": ["hello", "helle", "hellor", "hells", "hellon"]
         }
       ],
       "version": "3",
@@ -130,6 +133,33 @@ describe('PublicEvent.ts', () =>
       expect.objectContaining({
         detail: exports
       }),
+    )
+  })
+
+  test('should emit & listen SELECTED', () =>
+  {
+    const testFunction = jest.fn()
+    publicEvent.addEventListener(EventType.SELECTED, testFunction)
+    const symbols = [buildOICircle(), buildOIStroke()]
+    publicEvent.emitSelected(symbols)
+    expect(testFunction).toBeCalledTimes(1)
+    expect(testFunction).toBeCalledWith(
+      expect.objectContaining({
+        detail: symbols
+      })
+    )
+  })
+
+  test('should emit & listen INTENTION', () =>
+  {
+    const testFunction = jest.fn()
+    publicEvent.addEventListener(EventType.INTENTION, testFunction)
+    publicEvent.emitIntention(Intention.Write)
+    expect(testFunction).toBeCalledTimes(1)
+    expect(testFunction).toBeCalledWith(
+      expect.objectContaining({
+        detail: Intention.Write
+      })
     )
   })
 
