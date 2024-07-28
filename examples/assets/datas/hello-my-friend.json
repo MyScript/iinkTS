@@ -4,7 +4,7 @@
     "id": "stroke-h",
     "style": {
       "color": "#e01b24",
-      "width": "9",
+      "width": 9,
       "opacity": 1
     },
     "pointers": [
@@ -201,7 +201,7 @@
     "id": "stroke-ello",
     "style": {
       "color": "#33d17a",
-      "width": "7",
+      "width": 7,
       "opacity": 1
     },
     "pointerType": "mouse",
@@ -651,7 +651,7 @@
     "id": "stroke-my",
     "style": {
       "color": "#3584e4",
-      "width": "4",
+      "width": 4,
       "opacity": 1
     },
     "pointers": [
@@ -968,7 +968,7 @@
     "id": "stroke-friend",
     "style": {
       "color": "#3584e4",
-      "width": "4",
+      "width": 4,
       "opacity": 1
     },
     "pointers": [
@@ -1585,7 +1585,7 @@
     "id": "stroke-dot-of-i",
     "style": {
       "color": "#3584e4",
-      "width": "4",
+      "width": 4,
       "opacity": 1
     },
     "pointers": [
@@ -1620,7 +1620,7 @@
     "id": "stroke-how",
     "style": {
       "color": "#000000",
-      "width": "4",
+      "width": 4,
       "opacity": 1
     },
     "pointers": [
@@ -1967,7 +1967,7 @@
     "id": "stroke-are",
     "style": {
       "color": "#000000",
-      "width": "4",
+      "width": 4,
       "opacity": 1
     },
     "pointers": [
@@ -2200,7 +2200,7 @@
     "id": "stroke-you",
     "style": {
       "color": "#000000",
-      "width": "4",
+      "width": 4,
       "opacity": 1
     },
     "pointers": [
@@ -2517,7 +2517,7 @@
     "id": "stroke-question-mark",
     "style": {
       "color": "#000000",
-      "width": "4",
+      "width": 4,
       "opacity": 1
     },
     "pointers": [
@@ -2618,7 +2618,7 @@
     "id": "stroke-dot-of-question-mark",
     "style": {
       "color": "#000000",
-      "width": "4",
+      "width": 4,
       "opacity": 1
     },
     "pointers": [
