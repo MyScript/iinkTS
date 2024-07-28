@@ -76,13 +76,21 @@ export class OIConversionManager
     return this.behaviors.extractStrokesFromSymbols(symbols)
   }
 
+  protected computeFontSize(chars: TJIIXChar[]): number
+  {
+    if (chars.some(c => c["bounding-box"])) {
+      const height = convertMillimeterToPixel(computeAverage(chars.map(c => c["bounding-box"]?.height || 1)))
+      return Math.round(Math.round(height * this.rowHeight) / this.rowHeight / 2) * 2
+    }
+    return Math.round(this.rowHeight / 2)
+  }
+
   buildChar(char: TJIIXChar, strokes: OIStroke[], fontSize: number): TOISymbolChar
   {
-    const grid = char.grid.map(p => ({
+    const points = char.grid.map(p => ({
       x: convertMillimeterToPixel(p.x),
       y: convertMillimeterToPixel(p.y),
     }))
-    const boundingBox = Box.createFromPoints(grid)
     const fontWeight = Math.min(1000, Math.max(100, Math.round(strokes[0].style.width || 1) * 100))
 
     const color = strokes[0].style.color || "black"
@@ -92,7 +100,7 @@ export class OIConversionManager
       color,
       fontSize,
       fontWeight,
-      bounds: boundingBox
+      bounds: Box.createFromPoints(points)
     }
   }
 
@@ -100,7 +108,7 @@ export class OIConversionManager
   {
     const boundingBox = Box.createFromBoxes([convertBoundingBoxMillimeterToPixel(word["bounding-box"])])
     const charSymbols: TOISymbolChar[] = []
-    fontSize = fontSize || Math.ceil(Math.round(convertMillimeterToPixel(computeAverage(chars.map(c => c["bounding-box"]?.height || 1)) / 2) / 8) * 8)
+    fontSize = fontSize || this.computeFontSize(chars)
 
     chars.forEach(char =>
     {
@@ -152,14 +160,6 @@ export class OIConversionManager
     return text
   }
 
-  protected computeFontSize(word: TJIIXWord): number
-  {
-    if (word["bounding-box"]?.height) {
-      return Math.round(convertMillimeterToPixel(word["bounding-box"]?.height) / this.rowHeight) * this.rowHeight
-    }
-    return this.rowHeight * 0.75
-  }
-
   convertText(text: TJIIXTextElement, onlyText: boolean): { symbol: OIText, strokes: OIStroke[] }[] | undefined
   {
     if (!text.words) {
@@ -180,7 +180,7 @@ export class OIConversionManager
     const textBounds = convertBoundingBoxMillimeterToPixel(text["bounding-box"])
     let fontSize = this.fontSize
     if (onlyText && !fontSize) {
-      fontSize = Math.round(computeAverage(jiixWords.filter(w => w.items?.length).map(w => this.computeFontSize(w))) / 2) * 2
+      fontSize = Math.round(this.computeFontSize(jiixChars.filter(c => c.items?.length)) / 2) * 2
     }
 
     let isNewLine = true
@@ -190,9 +190,6 @@ export class OIConversionManager
       const wordStrokes = this.strokes.filter(s => word.items?.some(i => i["full-id"] === s.id)) as OIStroke[]
       if (wordStrokes.length) {
         const chars = jiixChars.slice(word["first-char"] as number, (word["last-char"] || 0) + 1)
-        if (!onlyText) {
-          fontSize = this.computeFontSize(word)
-        }
         const textSymbol = this.buildWord(word, chars, wordStrokes, fontSize)
 
         if (onlyText) {
@@ -200,16 +197,12 @@ export class OIConversionManager
             isNewLine = false
             const nbRow = Math.round((textSymbol.point.y - currentY) / this.rowHeight) || 1
             currentY += nbRow * this.rowHeight
-            if (Math.abs(textSymbol.point.x - textBounds.x) < this.behaviors.texter.getSpaceWidth(fontSize!)) {
+            if (Math.abs(textSymbol.point.x - textBounds.x) < this.behaviors.texter.getSpaceWidth(fontSize!) * 2) {
               textSymbol.point.x = textBounds.x
             }
           }
-          textSymbol.point.y = Math.round(currentY / this.rowHeight) * this.rowHeight
-          const textInRow = this.model.symbols.find(t => t.type === SymbolType.Text && t.point.y === textSymbol.point.y) as OIText | undefined
-          if (textInRow) {
-            textSymbol.chars.forEach(c => c.fontSize = textInRow.chars[0].fontSize)
-          }
-        }
+          textSymbol.point.y = this.model.roundToLineGuide(currentY)
+         }
 
         this.behaviors.texter.setBoundingBox(textSymbol)
         result.push({
