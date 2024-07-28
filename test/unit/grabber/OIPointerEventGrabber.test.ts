@@ -1,22 +1,23 @@
-import {
+import
+{
   ContextMenuEventMock,
   DoubleTouchEventMock,
   LeftClickEventMock,
   RightClickEventMock,
   TouchEventMock
 } from "../__mocks__/EventMock"
-import {
+import
+{
   DefaultConfiguration,
   OIPointerEventGrabber,
   TGrabberConfiguration,
-  IGrabber
 } from "../../../src/iink"
 
 describe("OIPointerEventGrabber.ts", () =>
 {
   test("should create with default configuration", () =>
   {
-    const grabber: IGrabber = new OIPointerEventGrabber(DefaultConfiguration.grabber)
+    const grabber = new OIPointerEventGrabber(DefaultConfiguration.grabber)
     expect(grabber).toBeDefined()
   })
 
@@ -27,7 +28,7 @@ describe("OIPointerEventGrabber.ts", () =>
     wrapperHTML.style.height = "100px"
     document.body.appendChild(wrapperHTML)
 
-    const grabber: IGrabber = new OIPointerEventGrabber(DefaultConfiguration.grabber)
+    const grabber = new OIPointerEventGrabber(DefaultConfiguration.grabber)
     grabber.attach(wrapperHTML)
     grabber.onPointerDown = jest.fn()
     grabber.onPointerMove = jest.fn()
@@ -56,27 +57,47 @@ describe("OIPointerEventGrabber.ts", () =>
     })
     pointerUpEvt.pointerId = pointerDownEvt.pointerId
 
+    test("should not listen pointermove event if no pointerdown before", () =>
+    {
+      wrapperHTML.dispatchEvent(pointerMoveEvt)
+      expect(grabber.onPointerMove).toBeCalledTimes(0)
+    })
+
+    test("should not listen pointerup event if no pointerdown before", () =>
+    {
+      wrapperHTML.dispatchEvent(pointerUpEvt)
+      expect(grabber.onPointerUp).toBeCalledTimes(0)
+    })
+
     test("should listen pointerdown event", () =>
     {
       wrapperHTML.dispatchEvent(pointerDownEvt)
       expect(grabber.onPointerDown).toBeCalledTimes(1)
     })
 
-    test("should listen pointermove event", () =>
+    test("should listen pointermove event if pointerdown before", () =>
     {
       wrapperHTML.dispatchEvent(pointerMoveEvt)
       expect(grabber.onPointerMove).toBeCalledTimes(1)
     })
 
-    test("should listen pointerup event", () =>
+    test("should listen pointerup event if pointerdown before", () =>
     {
       wrapperHTML.dispatchEvent(pointerUpEvt)
       expect(grabber.onPointerUp).toBeCalledTimes(1)
     })
 
+    test("should not listen pointerdown event if stopPointerEvent called", () =>
+    {
+      wrapperHTML.dispatchEvent(pointerDownEvt)
+      grabber.stopPointerEvent()
+      wrapperHTML.dispatchEvent(pointerMoveEvt)
+      expect(grabber.onPointerMove).toBeCalledTimes(0)
+    })
+
     test("should call detach if already attach", () =>
     {
-      const g: IGrabber = new OIPointerEventGrabber(DefaultConfiguration.grabber)
+      const g = new OIPointerEventGrabber(DefaultConfiguration.grabber)
       g.onPointerDown = jest.fn()
       g.onPointerMove = jest.fn()
       g.onPointerUp = jest.fn()
@@ -88,21 +109,21 @@ describe("OIPointerEventGrabber.ts", () =>
 
     test("should not listen pointerdown event after detach", () =>
     {
-      grabber.detach(wrapperHTML)
+      grabber.detach()
       wrapperHTML.dispatchEvent(pointerDownEvt)
       expect(grabber.onPointerDown).not.toBeCalled()
     })
 
     test("should not listen pointermove event after detach", () =>
     {
-      grabber.detach(wrapperHTML)
+      grabber.detach()
       wrapperHTML.dispatchEvent(pointerMoveEvt)
       expect(grabber.onPointerMove).not.toBeCalled()
     })
 
     test("should not listen pointerup event after detach", () =>
     {
-      grabber.detach(wrapperHTML)
+      grabber.detach()
       wrapperHTML.dispatchEvent(pointerUpEvt)
       expect(grabber.onPointerUp).not.toBeCalled()
     })
@@ -115,7 +136,7 @@ describe("OIPointerEventGrabber.ts", () =>
     wrapperHTML.style.height = "100px"
     document.body.appendChild(wrapperHTML)
 
-    const grabber: IGrabber = new OIPointerEventGrabber(DefaultConfiguration.grabber)
+    const grabber = new OIPointerEventGrabber(DefaultConfiguration.grabber)
     grabber.onPointerDown = jest.fn()
     grabber.attach(wrapperHTML)
 
@@ -180,7 +201,7 @@ describe("OIPointerEventGrabber.ts", () =>
 
     test("should not round values with default configuration", () =>
     {
-      const grabber: IGrabber = new OIPointerEventGrabber(DefaultConfiguration.grabber)
+      const grabber = new OIPointerEventGrabber(DefaultConfiguration.grabber)
       grabber.onPointerDown = jest.fn()
       grabber.onPointerMove = jest.fn()
       grabber.onPointerUp = jest.fn()
@@ -203,7 +224,7 @@ describe("OIPointerEventGrabber.ts", () =>
     test("should round values from configuration", () =>
     {
       const grabberConfig: TGrabberConfiguration = { ...DefaultConfiguration.grabber, xyFloatPrecision: 2 }
-      const grabber: IGrabber = new OIPointerEventGrabber(grabberConfig)
+      const grabber = new OIPointerEventGrabber(grabberConfig)
       grabber.onPointerDown = jest.fn()
       grabber.onPointerMove = jest.fn()
       grabber.onPointerUp = jest.fn()
@@ -227,7 +248,7 @@ describe("OIPointerEventGrabber.ts", () =>
     test("should not round values from configuration if negative precision", () =>
     {
       const grabberConfig: TGrabberConfiguration = { ...DefaultConfiguration.grabber, xyFloatPrecision: -2 }
-      const grabber: IGrabber = new OIPointerEventGrabber(grabberConfig)
+      const grabber = new OIPointerEventGrabber(grabberConfig)
       grabber.onPointerDown = jest.fn()
       grabber.onPointerMove = jest.fn()
       grabber.onPointerUp = jest.fn()
@@ -256,7 +277,7 @@ describe("OIPointerEventGrabber.ts", () =>
     wrapperHTML.style.height = "100px"
     document.body.appendChild(wrapperHTML)
 
-    const grabber: IGrabber = new OIPointerEventGrabber(DefaultConfiguration.grabber)
+    const grabber = new OIPointerEventGrabber(DefaultConfiguration.grabber)
     grabber.attach(wrapperHTML)
     grabber.onPointerDown = jest.fn()
 
@@ -270,10 +291,10 @@ describe("OIPointerEventGrabber.ts", () =>
       })
       wrapperHTML.dispatchEvent(pointerDownEvt)
       expect(grabber.onPointerDown).not.toBeCalled()
-      grabber.detach(wrapperHTML)
+      grabber.detach()
     })
 
-    test("should not listen right click event", () =>
+    test("should not listen double touch event", () =>
     {
       const pointerDownEvt = new DoubleTouchEventMock("pointerdown", {
         pointerType: "pen",
@@ -283,11 +304,11 @@ describe("OIPointerEventGrabber.ts", () =>
       })
       wrapperHTML.dispatchEvent(pointerDownEvt)
       expect(grabber.onPointerDown).not.toBeCalled()
-      grabber.detach(wrapperHTML)
+      grabber.detach()
     })
   })
 
-  describe("Should ignore Event", () =>
+  describe("Context menu", () =>
   {
     const wrapperHTML: HTMLElement = document.createElement("div")
     wrapperHTML.style.width = "100px"

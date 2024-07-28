@@ -8,14 +8,12 @@ import { IGrabber } from "./IGrabber"
  */
 export class OIPointerEventGrabber implements IGrabber
 {
-  protected configuration: TGrabberConfiguration
-
-  protected domElement!: HTMLElement
-
-  protected activePointerId?: number
-
-  protected prevent = (e: Event) => e.preventDefault()
   #logger = LoggerManager.getLogger(LoggerClass.GRABBER)
+
+  protected configuration: TGrabberConfiguration
+  protected domElement!: HTMLElement
+  protected activePointerId?: number
+  protected prevent = (e: Event) => e.preventDefault()
 
   onPointerDown!: (evt: PointerEvent, point: TPointer) => void
   onPointerMove!: (evt: PointerEvent, point: TPointer) => void
@@ -51,7 +49,7 @@ export class OIPointerEventGrabber implements IGrabber
       x: this.roundFloat(clientX - rect.left - this.domElement.clientLeft + this.domElement.scrollLeft, this.configuration.xyFloatPrecision),
       y: this.roundFloat(clientY - rect.top - this.domElement.clientTop + this.domElement.scrollTop, this.configuration.xyFloatPrecision),
       t: this.roundFloat(Date.now(), this.configuration.timestampFloatPrecision),
-      p: (event as PointerEvent).pressure || 1,
+      p: (event as PointerEvent).pressure,
     }
     this.#logger.debug("extractPoint", { event, pointer })
     return pointer
@@ -98,21 +96,6 @@ export class OIPointerEventGrabber implements IGrabber
     }
   }
 
-  protected pointerOutHandler = (evt: PointerEvent) =>
-  {
-    if (
-      this.activePointerId != undefined && this.activePointerId === evt.pointerId &&
-      !this.domElement.contains(evt.target as HTMLElement)
-    ) {
-      evt.stopPropagation()
-      this.activePointerId = undefined
-      if (this.onPointerUp) {
-        const point = this.extractPoint(evt)
-        this.onPointerUp(evt, point)
-      }
-    }
-  }
-
   protected contextMenuHandler = (evt: MouseEvent) =>
   {
     const point = this.extractPoint(evt)
@@ -136,7 +119,6 @@ export class OIPointerEventGrabber implements IGrabber
     this.domElement.addEventListener("pointerup", this.pointerUpHandler, this.configuration.listenerOptions)
     this.domElement.addEventListener("pointerleave", this.pointerUpHandler, this.configuration.listenerOptions)
     this.domElement.addEventListener("pointercancel", this.pointerUpHandler, this.configuration.listenerOptions)
-    this.domElement.addEventListener("pointerout", this.pointerOutHandler, this.configuration.listenerOptions)
     this.domElement.addEventListener("contextmenu", this.contextMenuHandler)
   }
 
@@ -148,7 +130,6 @@ export class OIPointerEventGrabber implements IGrabber
     this.domElement?.removeEventListener("pointerup", this.pointerUpHandler, this.configuration.listenerOptions)
     this.domElement?.removeEventListener("pointerleave", this.pointerUpHandler, this.configuration.listenerOptions)
     this.domElement?.removeEventListener("pointercancel", this.pointerUpHandler, this.configuration.listenerOptions)
-    this.domElement?.removeEventListener("pointerout", this.pointerOutHandler, this.configuration.listenerOptions)
     this.domElement?.removeEventListener("contextmenu", this.contextMenuHandler)
   }
 }
