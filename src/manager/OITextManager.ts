@@ -102,26 +102,25 @@ export class OITextManager
     return textSymbol
   }
 
-  alignTextToRow(textSymbols: OIText[]): void
+  alignTextToRow(rowIndex: number, textSymbols: OIText[]): void
   {
-    if (textSymbols?.length) {
+    if (textSymbols.length) {
       let lastX = textSymbols[0].point.x
       const symbolWhitoutSpaceBefore = [",", "."]
-      textSymbols.forEach((s, i) =>
+      textSymbols.forEach((text, i) =>
       {
-        const textSymbol = s as OIText
-        const fontSize = computeAverage(textSymbol.chars.map(c => c.fontSize))
-        const whiteSpaceWidth = (i === 0 || symbolWhitoutSpaceBefore.includes(textSymbol.label)) ? 0 : this.getSpaceWidth(fontSize)
-        textSymbol.point.y = Math.round(textSymbol.point.y / this.rowHeight) * this.rowHeight
-        textSymbol.point.x = lastX + whiteSpaceWidth
-        textSymbol.bounds.x = lastX + whiteSpaceWidth
+        const fontSize = computeAverage(text.chars.map(c => c.fontSize))
+        const whiteSpaceWidth = (i === 0 || symbolWhitoutSpaceBefore.includes(text.label)) ? 0 : this.getSpaceWidth(fontSize)
+        text.point.y = rowIndex * this.rowHeight
+        text.point.x = lastX + whiteSpaceWidth
+        text.bounds.x = lastX + whiteSpaceWidth
 
-        lastX = textSymbol.bounds.xMax
+        lastX = text.bounds.xMax
 
-        const textGroupEl = this.renderer.drawSymbol(textSymbol) as SVGGElement
-        textSymbol.bounds = this.getElementBoundingBox(textGroupEl)
-        this.setCharsBoundingBox(textSymbol, textGroupEl)
-        this.model.updateSymbol(s)
+        const textGroupEl = this.renderer.drawSymbol(text) as SVGGElement
+        text.bounds = this.getElementBoundingBox(textGroupEl)
+        this.setCharsBoundingBox(text, textGroupEl)
+        this.model.updateSymbol(text)
       })
     }
   }
@@ -143,15 +142,15 @@ export class OITextManager
         return true
       })
       if (isTextRow) {
-        this.alignTextToRow(r.symbols.filter(s => s.type == SymbolType.Text) as OIText[])
+        this.alignTextToRow(r.rowIndex, r.symbols.filter(s => s.type == SymbolType.Text) as OIText[])
       }
       else {
-        r.symbols
-          .filter(s => s.type === SymbolType.Text)
-          .forEach(s =>
-          {
-            this.updateTextBoundingBox(s as OIText)
-          })
+        r.symbols.forEach(s =>
+        {
+          if (s.type === SymbolType.Text) {
+            this.updateTextBoundingBox(s)
+          }
+        })
       }
     })
   }
