@@ -39,10 +39,10 @@ export class OISVGDecoratorUtil
         attrs["stroke"] = "transparent"
         attrs["fill"] = decorator.style.color || DefaultStyle.color!
         const boundingBox: TBoundingBox = {
-          x: bounds.x - (style.width || 1),
-          y: bounds.y - (style.width || 1),
-          height: bounds.height + (style.width || 1) * 2,
-          width: bounds.width + (style.width || 1) * 2,
+          x: bounds.x - +(style.width || DefaultStyle.width!),
+          y: bounds.y - +(style.width || DefaultStyle.width!),
+          height: bounds.height + +(style.width || DefaultStyle.width!) * 2,
+          width: bounds.width + +(style.width || DefaultStyle.width!) * 2,
         }
         element = SVGBuilder.createRect(boundingBox, attrs)
         break
@@ -52,10 +52,10 @@ export class OISVGDecoratorUtil
         attrs["stroke"] = decorator.style.color || DefaultStyle.color!
         attrs["stroke-width"] = (decorator.style.width || DefaultStyle.width!).toString()
         const boundingBox: TBoundingBox = {
-          x: bounds.x - (style.width || 1),
-          y: bounds.y - (style.width || 1),
-          height: bounds.height + (style.width || 1) * 2,
-          width: bounds.width + (style.width || 1) * 2,
+          x: bounds.x - +(style.width || DefaultStyle.width!),
+          y: bounds.y - +(style.width || DefaultStyle.width!),
+          height: bounds.height + +(style.width || DefaultStyle.width!) * 2,
+          width: bounds.width + +(style.width || DefaultStyle.width!) * 2,
         }
         element = SVGBuilder.createRect(boundingBox, attrs)
         break
@@ -81,11 +81,11 @@ export class OISVGDecoratorUtil
         attrs["stroke-width"] = (decorator.style.width || DefaultStyle.width!).toString()
         const p1 = {
           x: bounds.xMin,
-          y: bounds.yMax + (style.width || 1)
+          y: bounds.yMax + +(style.width || DefaultStyle.width!)
         }
         const p2 = {
           x: bounds.xMax,
-          y: bounds.yMax + (style.width || 1)
+          y: bounds.yMax + +(style.width || DefaultStyle.width!)
         }
         element = SVGBuilder.createLine(p1, p2, attrs)
         break
