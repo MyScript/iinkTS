@@ -37,6 +37,15 @@ describe("OIStroke.ts", () =>
       const stroke = new OIStroke()
       expect(stroke.style).toEqual(DefaultStyle)
     })
+    test("should create and cast opacity and width to number", () =>
+    {
+      //@ts-ignore
+      const style = { opacity: "1", width: "1" }
+      //@ts-ignore
+      const stroke = new OIStroke(style)
+      expect(stroke.style.opacity).toEqual(+style.width)
+      expect(stroke.style.width).toEqual(+style.width)
+    })
   })
 
   describe("addPointer", () =>

@@ -29,8 +29,8 @@ export abstract class OISymbolBase<T extends string = SymbolType> implements TSy
     this.deleting = false
 
     this.style = Object.assign({}, DefaultStyle, style)
-    this.style.opacity = +(this.style.opacity || DefaultStyle.opacity!)
-    this.style.width = +(this.style.width || DefaultStyle.width!)
+    this.style.opacity = +this.style.opacity!
+    this.style.width = +this.style.width!
   }
 
   abstract get vertices(): TPoint[]
