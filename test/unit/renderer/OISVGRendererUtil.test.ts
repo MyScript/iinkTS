@@ -50,7 +50,7 @@ describe("OISVGRendererUtil.ts", () =>
       {
         color: "blue",
         fontSize: 18,
-        fontWeight: 400,
+        fontWeight: "normal",
         id: 'id-1',
         label: "first",
         bounds: {
@@ -63,7 +63,7 @@ describe("OISVGRendererUtil.ts", () =>
       {
         color: "red",
         fontSize: 12,
-        fontWeight: 200,
+        fontWeight: "normal",
         id: 'id-2',
         label: "second",
         bounds: {

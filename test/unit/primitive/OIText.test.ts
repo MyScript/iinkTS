@@ -6,7 +6,7 @@ describe("OIText.ts", () =>
     {
       color: "blue",
       fontSize: 18,
-      fontWeight: 400,
+      fontWeight: "normal",
       id: 'id-1',
       label: "first",
       bounds: { height: 10, width: 5, x: 1, y: 2 }
@@ -14,7 +14,7 @@ describe("OIText.ts", () =>
     {
       color: "red",
       fontSize: 12,
-      fontWeight: 200,
+      fontWeight: "normal",
       id: 'id-2',
       label: "second",
       bounds: { height: 10, width: 5, x: 6, y: 2 }

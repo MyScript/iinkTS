@@ -51,9 +51,6 @@ export class OISymbolGroup extends OISymbolBase<SymbolType.Group>
           if (child.style.color) {
             c.color = child.style.color
           }
-          if (child.style.width) {
-            c.fontWeight = child.style.width * 100
-          }
         })
       }
       else if (child.type === SymbolType.Group) {

@@ -87,7 +87,7 @@ export class OITextManager
       label: "-",
       color: "",
       fontSize,
-      fontWeight: 0,
+      fontWeight: "normal",
       bounds: boundingBox
     }
     return this.getBoundingBox(new OIText([charSymbol], { x: 0, y: 0 }, boundingBox))?.width as number
