@@ -59,7 +59,7 @@ describe("OITextManager.ts", () =>
     const manager = new OITextManager(behaviors)
     const text = buildOIText({ chars })
     const textEl = manager.renderer.util.getSymbolElement(text) as SVGGElement
-    manager.setCharsBoundingBox(text, textEl)
+    manager.setCharsBounds(text, textEl)
 
     expect(chars[0].bounds).toEqual({ height: 0, width: 0, x: 0, y: 0 })
     expect(chars[1].bounds).toEqual({ height: 3, width: 4, x: 1, y: 2 })
@@ -102,12 +102,12 @@ describe("OITextManager.ts", () =>
     manager.renderer.layer = SVGBuilder.createLayer({ x: 0, y: 0, width: 100, height: 100 })
     manager.renderer.prependElement = jest.fn()
     manager.getElementBoundingBox = jest.fn(() => new Box({ x: 1989, y: 27, width: 5, height: 42 }))
-    manager.setCharsBoundingBox = jest.fn()
+    manager.setCharsBounds = jest.fn()
     const text = buildOIText({ chars })
-    manager.updateTextBoundingBox(text)
+    manager.updateBounds(text)
     expect(text.bounds).toEqual({ x: 1989, y: 27, width: 5, height: 42 })
     expect(manager.getElementBoundingBox).toBeCalledTimes(1)
-    expect(manager.setCharsBoundingBox).toBeCalledTimes(1)
+    expect(manager.setCharsBounds).toBeCalledTimes(1)
   })
 
 })

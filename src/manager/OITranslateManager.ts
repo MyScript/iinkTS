@@ -146,7 +146,7 @@ export class OITranslateManager
     }
     text.point.x += tx
     text.point.y += ty
-    return this.texter.updateTextBoundingBox(text)
+    return this.texter.updateBounds(text)
   }
 
   protected applyOnGroup(group: OISymbolGroup, tx: number, ty: number): OISymbolGroup

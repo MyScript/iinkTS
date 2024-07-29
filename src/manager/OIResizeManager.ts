@@ -169,7 +169,7 @@ export class OIResizeManager
     {
       c.fontSize *= (scaleX + scaleY) / 2
     })
-    return this.texter.updateTextBoundingBox(text)
+    return this.texter.updateBounds(text)
   }
 
   protected applyOnGroup(group: OISymbolGroup, origin: TPoint, scaleX: number, scaleY: number): OISymbolGroup
