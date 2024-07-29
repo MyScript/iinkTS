@@ -42,7 +42,7 @@ export class OIBehaviorsMock extends OIBehaviors
   updateSymbol = jest.fn()
   updateSymbols = jest.fn()
   updateSymbolsStyle = jest.fn()
-  updateTextFontSize = jest.fn()
+  updateTextFontStyle = jest.fn()
   replaceSymbols = jest.fn()
   changeOrderSymbol = jest.fn()
   changeOrderSymbols = jest.fn()

@@ -91,6 +91,12 @@ export abstract class OIMenu
     { label: "L", value: 1 },
   ]
 
+  fontWeightList = [
+    { label: "Auto", value: undefined },
+    { label: "Normal", value: "normal" },
+    { label: "Bold", value: "bold" },
+  ]
+
   colors = [
     "#000000", "#808080", "#ffffff", "transparent",
     "#ff0000", "#ff6400", "#ffc800", "#ffff00",

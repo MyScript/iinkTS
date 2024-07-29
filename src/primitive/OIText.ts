@@ -14,7 +14,7 @@ export type TOISymbolChar = {
   id: string
   label: string
   fontSize: number
-  fontWeight: number
+  fontWeight: "normal" | "bold"
   color: string
   bounds: TBoundingBox
 }

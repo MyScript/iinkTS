@@ -540,6 +540,9 @@
     width: 20px;
     height: 20px;
 }
+.ms-editor .ms-menu .ms-menu-button.center {
+    justify-content: center;
+}
 .ms-editor .ms-menu .ms-menu-button.square {
     width: 32px;
     justify-content: center;

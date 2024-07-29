@@ -15,7 +15,7 @@ describe("OITextManager.ts", () =>
       bounds: { height: 0, width: 0, x: 0, y: 0 },
       color: "black",
       fontSize: 12,
-      fontWeight: 400,
+      fontWeight: "normal",
       id: "char-1",
       label: "A"
     },
@@ -23,7 +23,7 @@ describe("OITextManager.ts", () =>
       bounds: { height: 0, width: 0, x: 0, y: 0 },
       color: "black",
       fontSize: 16,
-      fontWeight: 400,
+      fontWeight: "normal",
       id: "char-1",
       label: "A"
     },

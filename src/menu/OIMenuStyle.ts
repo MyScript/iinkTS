@@ -23,6 +23,7 @@ export class OIMenuStyle extends OIMenu
   menuColorFill?: HTMLDivElement
   menuThickness?: HTMLDivElement
   menuFontSize?: HTMLDivElement
+  menuFontWeight?: HTMLDivElement
   menuStrokeOpacity?: HTMLDivElement
 
   constructor(behaviors: OIBehaviors, id = "ms-menu-style")
@@ -70,7 +71,8 @@ export class OIMenuStyle extends OIMenu
       fill: false,
       values: this.colors,
       initValue: color,
-      callback: (color) => {
+      callback: (color) =>
+      {
         this.behaviors.setPenStyle({ color })
         this.behaviors.updateSymbolsStyle(this.symbolsSelected.map(s => s.id), { color })
       },
@@ -93,7 +95,8 @@ export class OIMenuStyle extends OIMenu
       fill: true,
       values: this.colors,
       initValue: color,
-      callback: (fill) => {
+      callback: (fill) =>
+      {
         this.behaviors.setPenStyle({ fill })
         this.behaviors.updateSymbolsStyle(this.symbolsSelected.map(s => s.id), { fill })
       },
@@ -169,8 +172,8 @@ export class OIMenuStyle extends OIMenu
         else {
           const fontSize = size.value * this.rowHeight
           this.behaviors.converter.fontSize = fontSize
-          const textSymbols = this.symbolsSelected.filter(s => s.type === SymbolType.Text || (s.type === SymbolType.Group && s.extractSymbols().some(c => c.type === SymbolType.Text)) )
-          this.behaviors.updateTextFontSize(textSymbols.map(s => s.id), fontSize)
+          const textSymbols = this.symbolsSelected.filter(s => s.type === SymbolType.Text || (s.type === SymbolType.Group && s.extractSymbols().some(c => c.type === SymbolType.Text)))
+          this.behaviors.updateTextFontStyle(textSymbols.map(s => s.id), { fontSize })
           this.behaviors.selector.resetSelectedGroup(this.symbolsSelected)
         }
       })
@@ -179,6 +182,41 @@ export class OIMenuStyle extends OIMenu
     this.menuFontSize = this.createWrapCollapsible(wrapper, "Font size")
     this.menuFontSize.id = `${ this.id }-font-size`
     return this.menuFontSize
+  }
+
+  protected createMenuFontWeight(): HTMLDivElement
+  {
+    const wrapper = document.createElement("div")
+    wrapper.id = `${ this.id }-font-weight-list`
+    wrapper.classList.add("ms-menu-row", "font-weight-list")
+
+    this.fontWeightList.forEach((weight) =>
+    {
+      const btn = document.createElement("button")
+      btn.id = `${ this.id }-font-weight-${ weight.label }-btn`
+      btn.classList.add("ms-menu-button", "center")
+      btn.textContent = weight.label
+      if (this.behaviors.converter.fontWeight === weight.value) {
+        btn.classList.add("active")
+      }
+      btn.addEventListener("pointerup", (e) =>
+      {
+        e.preventDefault()
+        e.stopPropagation()
+        wrapper.querySelectorAll("*").forEach(e => e.classList.remove("active"))
+        btn.classList.add("active")
+        this.behaviors.converter.fontWeight = weight.value === "" ? undefined : weight.value as "normal" | "bold"
+        if (this.behaviors.converter.fontWeight) {
+          const textSymbols = this.symbolsSelected.filter(s => s.type === SymbolType.Text || (s.type === SymbolType.Group && s.extractSymbols().some(c => c.type === SymbolType.Text)))
+          this.behaviors.updateTextFontStyle(textSymbols.map(s => s.id), { fontWeight: this.behaviors.converter.fontWeight })
+          this.behaviors.selector.resetSelectedGroup(this.symbolsSelected)
+        }
+      })
+      wrapper.appendChild(btn)
+    })
+    this.menuFontWeight = this.createWrapCollapsible(wrapper, "Font weight")
+    this.menuFontWeight.id = `${ this.id }-font-weight`
+    return this.menuFontWeight
   }
 
   protected createMenuOpacity(): HTMLDivElement
@@ -235,6 +273,7 @@ export class OIMenuStyle extends OIMenu
       subMenuContent.appendChild(this.createMenuColorFill())
       subMenuContent.appendChild(this.createMenuThickness())
       subMenuContent.appendChild(this.createMenuFontSize())
+      subMenuContent.appendChild(this.createMenuFontWeight())
       subMenuContent.appendChild(this.createMenuOpacity())
       this.subMenu = this.createSubMenu(this.createToolTip(this.triggerBtn, "Style", "left"), subMenuContent, "bottom-left")
 
@@ -266,6 +305,9 @@ export class OIMenuStyle extends OIMenu
       if (this.menuFontSize) {
         this.menuFontSize.style.display = "block"
       }
+      if (this.menuFontWeight) {
+        this.menuFontWeight.style.display = "block"
+      }
       if (this.menuStrokeOpacity) {
         this.menuStrokeOpacity.style.display = "block"
       }
@@ -284,6 +326,9 @@ export class OIMenuStyle extends OIMenu
       }
       if (this.menuFontSize) {
         this.menuFontSize.style.display = "block"
+      }
+      if (this.menuFontWeight) {
+        this.menuFontWeight.style.display = "block"
       }
       if (this.menuStrokeOpacity) {
         this.menuStrokeOpacity.style.display = "block"
@@ -321,6 +366,8 @@ export class OIMenuStyle extends OIMenu
       this.menuColorStroke = undefined
       this.menuColorFill = undefined
       this.menuThickness = undefined
+      this.menuFontSize = undefined
+      this.menuFontWeight = undefined
       this.menuStrokeOpacity = undefined
     }
   }

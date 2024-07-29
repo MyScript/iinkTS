@@ -654,26 +654,10 @@ export class OIBehaviors implements IBehaviors
             if (style.color) {
               c.color = style.color
             }
-            if (style.width) {
-              c.fontWeight = style.width * 100
-            }
           })
         }
         else if (s.type === SymbolType.Group) {
-          s.extractSymbols().forEach(child =>
-          {
-            if (child.type === SymbolType.Text) {
-              child.chars.forEach(char =>
-              {
-                if (style.color) {
-                  char.color = style.color
-                }
-                if (style.width) {
-                  char.fontWeight = style.width * 100
-                }
-              })
-            }
-          })
+          s.updateChildrenStyle()
         }
         this.renderer.drawSymbol(s)
         this.model.updateSymbol(s)
@@ -699,15 +683,22 @@ export class OIBehaviors implements IBehaviors
     }
   }
 
-  updateTextFontSize(textIds: string[], fontSize: number): void
+  updateTextFontStyle(textIds: string[], { fontSize, fontWeight }: { fontSize?: number, fontWeight?: "normal" | "bold" }): void
   {
-    this.#logger.info("updateTextFontSize", { textIds, fontSize })
+    this.#logger.info("updateTextFontStyle", { textIds, fontSize, fontWeight })
     const symbols: (OIText | OISymbolGroup)[] = []
     this.model.symbols.forEach(s =>
     {
       if (textIds.includes(s.id)) {
         if (s.type === SymbolType.Text) {
-          s.chars.forEach(tc => tc.fontSize = fontSize)
+          s.chars.forEach(tc => {
+            if (fontSize) {
+              tc.fontSize = fontSize
+            }
+            if (fontWeight) {
+              tc.fontWeight = fontWeight
+            }
+          })
           this.texter.updateBounds(s)
           this.renderer.drawSymbol(s)
           s.modificationDate = Date.now()
@@ -717,7 +708,14 @@ export class OIBehaviors implements IBehaviors
           s.extractSymbols().forEach(c =>
           {
             if (c.type === SymbolType.Text) {
-              c.chars.forEach(tc => tc.fontSize = fontSize)
+              c.chars.forEach(tc => {
+                if (fontSize) {
+                  tc.fontSize = fontSize
+                }
+                if (fontWeight) {
+                  tc.fontWeight = fontWeight
+                }
+              })
               this.texter.updateBounds(c)
               c.modificationDate = Date.now()
             }

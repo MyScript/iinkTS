@@ -53,6 +53,7 @@ export class OIConversionManager
   #logger = LoggerManager.getLogger(LoggerClass.CONVERTER)
   behaviors: OIBehaviors
   fontSize?: number
+  fontWeight?: "bold" | "normal"
 
   constructor(behaviors: OIBehaviors)
   {
@@ -91,7 +92,10 @@ export class OIConversionManager
       x: convertMillimeterToPixel(p.x),
       y: convertMillimeterToPixel(p.y),
     }))
-    const fontWeight = Math.min(1000, Math.max(100, Math.round(strokes[0].style.width || 1) * 100))
+    let fontWeight = this.fontWeight
+    if (!fontWeight) {
+      fontWeight = (strokes[0].style.width || 1) > 2 ? "bold": "normal"
+    }
 
     const color = strokes[0].style.color || "black"
     return {

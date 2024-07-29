@@ -394,7 +394,7 @@ describe("OIGestureManager.ts", () =>
           bounds: { height: 10, width: 5, x: 0, y: 10 },
           color: "black",
           fontSize: 16,
-          fontWeight: 400,
+          fontWeight: "normal",
           id: "char-1",
           label: "A"
         },
@@ -402,7 +402,7 @@ describe("OIGestureManager.ts", () =>
           bounds: { height: 10, width: 5, x: 5, y: 10 },
           color: "black",
           fontSize: 16,
-          fontWeight: 400,
+          fontWeight: "normal",
           id: "char-2",
           label: "b"
         }
@@ -431,7 +431,7 @@ describe("OIGestureManager.ts", () =>
           bounds: { height: 10, width: 5, x: 0, y: 10 },
           color: "black",
           fontSize: 16,
-          fontWeight: 400,
+          fontWeight: "normal",
           id: "char-1",
           label: "A"
         },
@@ -439,7 +439,7 @@ describe("OIGestureManager.ts", () =>
           bounds: { height: 10, width: 5, x: 5, y: 10 },
           color: "black",
           fontSize: 16,
-          fontWeight: 400,
+          fontWeight: "normal",
           id: "char-2",
           label: "b"
         }
