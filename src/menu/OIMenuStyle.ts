@@ -169,7 +169,7 @@ export class OIMenuStyle extends OIMenu
         else {
           const fontSize = size.value * this.rowHeight
           this.behaviors.converter.fontSize = fontSize
-          const textSymbols = this.symbolsSelected.filter(s => s.type === SymbolType.Text)
+          const textSymbols = this.symbolsSelected.filter(s => s.type === SymbolType.Text || (s.type === SymbolType.Group && s.extractSymbols().some(c => c.type === SymbolType.Text)) )
           this.behaviors.updateTextFontSize(textSymbols.map(s => s.id), fontSize)
           this.behaviors.selector.resetSelectedGroup(this.symbolsSelected)
         }
