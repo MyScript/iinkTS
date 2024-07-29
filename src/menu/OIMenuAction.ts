@@ -9,15 +9,16 @@ import guideIcon from "../assets/svg/orthogonal-view.svg"
 import snapIcon from "../assets/svg/arrow-to-dot.svg"
 import debugIcon from "../assets/svg/wolf.svg"
 import downloadIcon from "../assets/svg/download.svg"
+import uploadIcon from "../assets/svg/upload.svg"
 import { Intention, WriteTool } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerClass, LoggerManager } from "../logger"
 import { OIModel } from "../model"
 import { OIMenu, TMenuItemBoolean, TMenuItemButton, TMenuItemButtonList, TMenuItemSelect } from "./OIMenu"
-import { OISymbolGroup, SymbolType } from "../primitive"
+import { OISymbolGroup, SymbolType, TOISymbol } from "../primitive"
 import { StrikeThroughAction, SurroundAction } from "../gesture"
 import { OIMenuSub } from "./OIMenuSub"
-import { getAvailableLanguageList } from "../utils"
+import { getAvailableLanguageList, PartialDeep } from "../utils"
 
 /**
  * @group Menu
@@ -425,6 +426,67 @@ export class OIMenuAction extends OIMenu
     return this.createSubMenu(this.createToolTip(trigger, "Export", "right"), subMenuWrapper, "right").element
   }
 
+  protected async readFileAsText(file: File): Promise<string>
+  {
+    return new Promise((resolve, reject) =>
+    {
+      const reader = new FileReader()
+      reader.onerror = reject;
+      reader.onload = () => {
+        resolve(reader.result as string)
+      }
+      if (file) {
+        reader.readAsText(file)
+      }
+    })
+  }
+
+  protected createMenuImport(): HTMLElement
+  {
+    const trigger = document.createElement("button")
+    trigger.id = `${ this.id }-import`
+    trigger.classList.add("ms-menu-button", "square")
+    trigger.innerHTML = uploadIcon
+
+    const subMenuWrapper = document.createElement("div")
+    subMenuWrapper.classList.add("ms-menu-colmun")
+
+    const importInput = document.createElement("input")
+    importInput.type = "file"
+    importInput.accept = ".json"
+    importInput.multiple = false
+    importInput.addEventListener("change", () => {
+      importBtn.disabled = !importInput.files?.length
+    })
+
+    subMenuWrapper.appendChild(importInput)
+    const importBtn = document.createElement("button")
+    importBtn.classList.add("ms-menu-button")
+    importBtn.innerText = "Import"
+    importBtn.disabled = true
+    subMenuWrapper.appendChild(importBtn)
+    importBtn.addEventListener("pointerup", async (e) =>
+    {
+      e.preventDefault()
+      e.stopPropagation()
+      try {
+        if (importInput.files?.length) {
+          const fileString = await this.readFileAsText(importInput.files[0])
+          const symbols = JSON.parse(fileString) as PartialDeep<TOISymbol>[]
+
+          await this.behaviors.createSymbols(symbols)
+          importInput.value = ""
+          importBtn.disabled = true
+        }
+      } catch (error) {
+        this.behaviors.internalEvent.emitError(new Error(error as string))
+      }
+
+    })
+
+    return this.createSubMenu(this.createToolTip(trigger, "Import", "right"), subMenuWrapper, "right").element
+  }
+
   protected unselectAll(): void
   {
     this.wrapper?.querySelectorAll("*").forEach(e => e.classList.remove("active"))
@@ -449,6 +511,7 @@ export class OIMenuAction extends OIMenu
       subMenuWrapper.appendChild(this.createMenuGuide())
       subMenuWrapper.appendChild(this.createMenuSnap())
       subMenuWrapper.appendChild(this.createMenuDebug())
+      subMenuWrapper.appendChild(this.createMenuImport())
       subMenuWrapper.appendChild(this.createMenuExport())
 
       this.wrapper = document.createElement("div")
