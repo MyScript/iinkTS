@@ -269,7 +269,7 @@ export class Converter
     while (drawShapesClone.length && limit >= 0) {
       const ds = drawShapesClone.shift() as TLDrawShape
       const jiixElts = this.findJiixElements(ds)
-      let shapeIds = [...new Set([
+      const shapeIds = [...new Set([
         ...jiixElts.map(e => e.items?.map(i => i['full-id'])).flat() as TLShapeId[],
         ...jiixElts.map(e => (e as TJIIXTextElement).words?.map(w => w.items?.map(i => i['full-id']))).flat(2) as TLShapeId[],
         ...jiixElts.map(e => (e as TJIIXTextElement).chars?.map(c => c.items?.map(i => i['full-id']))).flat(2) as TLShapeId[]

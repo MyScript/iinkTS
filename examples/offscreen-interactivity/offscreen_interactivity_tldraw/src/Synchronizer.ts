@@ -152,8 +152,8 @@ export class Synchronizer
       const newDrawShapeCompleted = this.drawShapeToAdd.filter(s => s.props.isComplete)
       this.drawShapeToAdd = this.drawShapeToAdd.filter(s => !s.props.isComplete)
       if (newDrawShapeCompleted.length) {
-        let gesture = await this.determinesContextlessGesture(newDrawShapeCompleted)
-        this.recognizer.addStrokes(newDrawShapeCompleted.map(this.formatDrawShapeToSend), !gesture && newDrawShapeCompleted.length < 20)
+        let gesture = newDrawShapeCompleted.length === 1 ? await this.determinesContextlessGesture(newDrawShapeCompleted) : undefined
+        this.recognizer.addStrokes(newDrawShapeCompleted.map(this.formatDrawShapeToSend), !gesture && newDrawShapeCompleted.length > 1)
           .then(addStrokeResponse => {
             if (addStrokeResponse) {
               this.gesture.apply(addStrokeResponse)
