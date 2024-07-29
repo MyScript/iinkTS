@@ -17,7 +17,7 @@ export class OIMenuContext extends OIMenu
   wrapper?: HTMLElement
   editMenu?: HTMLDivElement
   editInput?: HTMLInputElement
-  editValidBtn?: HTMLButtonElement
+  editSaveBtn?: HTMLButtonElement
   reorderMenu?: HTMLDivElement
   decoratorMenu?: HTMLDivElement
   menuExport?: HTMLDivElement
@@ -77,11 +77,11 @@ export class OIMenuContext extends OIMenu
     subMenuWrapper.classList.add("ms-menu-colmun")
     this.editInput = document.createElement("input")
     subMenuWrapper.appendChild(this.editInput)
-    this.editValidBtn = document.createElement("button")
-    this.editValidBtn.classList.add("ms-menu-button")
-    this.editValidBtn.innerText = "Valide"
-    subMenuWrapper.appendChild(this.editValidBtn)
-    this.editValidBtn.addEventListener("pointerdown", async (e) => {
+    this.editSaveBtn = document.createElement("button")
+    this.editSaveBtn.classList.add("ms-menu-button")
+    this.editSaveBtn.innerText = "Save"
+    subMenuWrapper.appendChild(this.editSaveBtn)
+    this.editSaveBtn.addEventListener("pointerdown", async (e) => {
       e.stopPropagation()
       const textSymbol = this.behaviors.model.symbolsSelected.find(s => s.type === SymbolType.Text) as OIText
       if (textSymbol) {
