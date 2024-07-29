@@ -56,6 +56,9 @@ export class OISymbolGroup extends OISymbolBase<SymbolType.Group>
           }
         })
       }
+      else if (child.type === SymbolType.Group) {
+        child.updateChildrenStyle()
+      }
     })
   }
 
