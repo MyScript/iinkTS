@@ -112,23 +112,6 @@ export function computePointOnEllipse(center: TPoint, radiusX: number, radiusY: 
 /**
  * @group Utils
  */
-export function computeArcLength(center: TPoint, radiusX: number, radiusY: number, startAngle: number, sweepAngle: number, phi: number): number
-{
-  let length = 0
-  let previousPoint: TPoint = computePointOnEllipse(center, radiusX, radiusY, phi, startAngle)
-
-  for (let angle = startAngle; angle <= startAngle + sweepAngle; angle += sweepAngle / 5) {
-    const currentPoint = computePointOnEllipse(center, radiusX, radiusY, phi, angle)
-    length += computeDistance(previousPoint, currentPoint)
-    previousPoint = currentPoint
-  }
-
-  return length
-}
-
-/**
- * @group Utils
- */
 export function computeDistanceBetweenPointAndSegment(p: TPoint, seg: TSegment): number
 {
   return computeDistance(p, computeNearestPointOnSegment(p, seg))
