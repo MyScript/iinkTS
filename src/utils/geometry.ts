@@ -90,8 +90,8 @@ export function computeRotatedPoint(point: TPoint, center: TPoint, radian: numbe
 {
   const xM = point.x - center.x
   const yM = point.y - center.y
-  const x = Math.cos(radian) * xM + Math.sin(radian) * yM + center.x
-  const y = Math.cos(radian) * yM - Math.sin(radian) * xM + center.y
+  const x = +(Math.cos(radian) * xM + Math.sin(radian) * yM + center.x).toFixed(3)
+  const y = +(Math.cos(radian) * yM - Math.sin(radian) * xM + center.y).toFixed(3)
   return { x, y }
 }
 
