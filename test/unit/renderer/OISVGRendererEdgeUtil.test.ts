@@ -36,7 +36,7 @@ describe("OISVGRendererEdgeUtil.ts", () =>
     const radiusY = 50
     const phi = 0
     const arc = new OIEdgeArc(center, startAngle, sweepAngle, radiusX, radiusY, phi)
-    expect(OISVGRendererEdgeUtil.getSVGPath(arc)).toContain("M 8.071 8.071 Q 8.071 8.071 7.613 8.501")
+    expect(OISVGRendererEdgeUtil.getSVGPath(arc)).toEqual("M 8.071 8.071 Q 8.071 8.071 6.811 9.138 5.392 9.984 3.853 10.584 2.237 10.923 0.587 10.991 -1.052 10.787 -2.635 10.316 -4.119 9.591 -5.463 8.631 -6.631 7.463 -7.591 6.119 -8.316 4.635 -8.787 3.052 -8.991 1.413 -8.923 -0.237 -8.584 -1.853 -7.984 -3.392 -7.138 -4.811")
   })
 
 })

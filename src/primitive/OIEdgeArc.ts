@@ -1,3 +1,4 @@
+import { SELECTION_MARGIN } from "../Constants"
 import { TStyle } from "../style"
 import { PartialDeep, computePointOnEllipse, isValidNumber } from "../utils"
 import { EdgeDecoration, EdgeKind, OIEdgeBase } from "./OIEdge"
@@ -46,13 +47,16 @@ export class OIEdgeArc extends OIEdgeBase<EdgeKind.Arc>
 
   protected computedVertices(): TPoint[]
   {
+    const length = Math.round((this.radiusX + this.radiusY) * Math.abs(this.sweepAngle) / 2)
+    const nbVertices = Math.max(8, Math.round(length / SELECTION_MARGIN * 2))
+    const angleStep = this.sweepAngle / nbVertices
     const v: TPoint[] = []
-    if (this.startAngle + this.sweepAngle > this.startAngle) {
-      for (let angle = this.startAngle; angle <= this.startAngle + this.sweepAngle; angle += this.sweepAngle / 50) {
+    if (this.sweepAngle > 0) {
+      for (let angle = this.startAngle; angle <= this.startAngle + this.sweepAngle; angle += angleStep) {
         v.push(computePointOnEllipse(this.center, this.radiusX, this.radiusY, this.phi, angle))
       }
     } else {
-      for (let angle = this.startAngle; angle >= this.startAngle + this.sweepAngle; angle += this.sweepAngle / 50) {
+      for (let angle = this.startAngle; angle >= this.startAngle + this.sweepAngle; angle += angleStep) {
         v.push(computePointOnEllipse(this.center, this.radiusX, this.radiusY, this.phi, angle))
       }
     }
@@ -121,7 +125,7 @@ export class OIEdgeArc extends OIEdgeBase<EdgeKind.Arc>
     if (!isValidNumber(partial?.sweepAngle)) throw new Error(`Unable to create a arc, sweepAngle is invalid`)
     if (!isValidNumber(partial?.radiusX)) throw new Error(`Unable to create a arc, radiusX is invalid`)
     if (!isValidNumber(partial?.radiusY)) throw new Error(`Unable to create a arc, radiusY is invalid`)
-    return new OIEdgeArc(
+    const arc = new OIEdgeArc(
       partial?.center as TPoint,
       partial.startAngle!,
       partial.sweepAngle!,
@@ -132,5 +136,9 @@ export class OIEdgeArc extends OIEdgeBase<EdgeKind.Arc>
       partial.endDecoration,
       partial.style
     )
+    if (partial.id) {
+      arc.id = partial.id
+    }
+    return arc
   }
 }

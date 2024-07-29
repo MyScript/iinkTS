@@ -32,11 +32,10 @@ describe("OIEdgeArc.ts", () =>
       expect(arc.style).toEqual(expect.objectContaining(style))
       expect(arc.selected).toEqual(false)
       expect(arc.center).toEqual(center)
-      expect(arc.bounds.x).toEqual(-14.989)
-      expect(arc.bounds.y).toEqual(-4.529)
+      expect(arc.bounds.x).toEqual(-15)
+      expect(arc.bounds.y).toEqual(-5)
       expect(+arc.bounds.width.toFixed(0)).toEqual(27)
       expect(+arc.bounds.height.toFixed(0)).toEqual(20)
-      expect(arc.vertices).toHaveLength(50)
     })
     test("should create with default style", () =>
     {
@@ -50,6 +49,71 @@ describe("OIEdgeArc.ts", () =>
       expect(arc.style).toEqual(DefaultStyle)
     })
   })
+
+  describe("properties", () =>
+  {
+    const center: TPoint = { x: 0, y: 0 }
+    const smallClockwiseArc = new OIEdgeArc(center, Math.PI / 4, Math.PI / 4, 5, 5, 0)
+    const largeClockwiseArc = new OIEdgeArc(center, Math.PI / 4, 3 * Math.PI / 4, 50, 50, 0)
+    const smallCounterClockwiseArc = new OIEdgeArc(center, Math.PI / 4, -Math.PI / 4, 5, 5, 0)
+    const largeCounterClockwiseArc = new OIEdgeArc(center, Math.PI / 4, -3 * Math.PI / 4, 50, 50, 0)
+
+    test(`should get vertices for small clockwise arc`, () =>
+    {
+      expect(smallClockwiseArc.vertices).toHaveLength(8)
+      expect(smallClockwiseArc.vertices).toEqual(expect.arrayContaining(
+        [
+          { x: 3.536, y: 3.536 },
+          { x: 2.357, y: 4.41 },
+          { x: 0.49, y: 4.976 }
+        ]
+      ))
+    })
+    test(`should get vertices for large clockwise arc`, () =>
+    {
+      expect(largeClockwiseArc.vertices).toHaveLength(24)
+      expect(largeClockwiseArc.vertices).toEqual(expect.arrayContaining(
+        [
+          { x: 35.355, y: 35.355 },
+          { x: -0, y: 50 },
+          { x: -49.759, y: 4.901 }
+        ]
+      ))
+    })
+    test(`should get vertices for small counter-clockwise arc`, () =>
+    {
+      expect(smallCounterClockwiseArc.vertices).toHaveLength(9)
+      expect(smallCounterClockwiseArc.vertices).toEqual(expect.arrayContaining(
+        [
+          { x: 3.536, y: 3.536 },
+          { x: 4.41, y: 2.357 },
+          { x: 5, y: 0 }
+        ]
+      ))
+    })
+    test(`should get vertices for large counter-clockwise arc`, () =>
+    {
+      expect(largeCounterClockwiseArc.vertices).toHaveLength(24)
+      expect(largeCounterClockwiseArc.vertices).toEqual(expect.arrayContaining(
+        [
+          { x: 35.355, y: 35.355 },
+          { x: 50, y: 0 },
+          { x: 4.901, y: -49.759 }
+        ]
+      ))
+    })
+
+    test(`should get snap points for small clockwise arc`, () =>
+    {
+      expect(smallClockwiseArc.snapPoints).toHaveLength(2)
+      expect(smallClockwiseArc.snapPoints).toEqual([
+        { x: 3.536, y: 3.536 },
+        { x: 0.49, y: 4.976 }
+      ])
+    })
+  })
+
+
   describe("isCloseToPoint", () =>
   {
     const center: TPoint = { x: 0, y: 0 }
@@ -75,6 +139,7 @@ describe("OIEdgeArc.ts", () =>
       expect(arc.isCloseToPoint(closePoint)).toEqual(false)
     })
   })
+
   describe("overlaps", () =>
   {
     const center: TPoint = { x: 0, y: 0 }
@@ -100,6 +165,7 @@ describe("OIEdgeArc.ts", () =>
       expect(arc.overlaps(boundaries)).toEqual(false)
     })
   })
+
   describe("clone", () =>
   {
     test("should return clone", () =>
