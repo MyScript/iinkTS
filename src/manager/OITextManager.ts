@@ -111,7 +111,7 @@ export class OITextManager
         const whiteSpaceWidth = (i === 0 || symbolWhitoutSpaceBefore.includes(text.label)) ? 0 : this.getSpaceWidth(fontSize)
         text.point.y = rowIndex * this.rowHeight
         text.point.x = lastX + whiteSpaceWidth
-        text.bounds.x = lastX + whiteSpaceWidth
+        text.bounds.x = text.point.x
 
         lastX = text.bounds.xMax
 
@@ -129,13 +129,20 @@ export class OITextManager
 
     rows.forEach((r) =>
     {
-      const isTextRow = r.symbols.every(s =>
+      const isTextRow = r.symbols.every(symbol =>
       {
-        if (s.type === SymbolType.Edge) return false
-        if (s.type === SymbolType.Shape) return false
-        if (s.type === SymbolType.Text && (s as OIText).rotation) return false
-        if (s.type === SymbolType.Group) {
-          return s.extractSymbols().some(gs => gs.type === SymbolType.Edge || gs.type === SymbolType.Shape || (gs.type === SymbolType.Text && gs.rotation))
+        if (symbol.type === SymbolType.Edge) return false
+        if (symbol.type === SymbolType.Shape) return false
+        if (symbol.type === SymbolType.Text) {
+          if (symbol.rotation) {
+            return false
+          }
+          else if (this.model.symbols.some(s => [SymbolType.Edge, SymbolType.Shape].includes(s.type) && s.overlaps(symbol.bounds))) {
+            return false
+          }
+        }
+        if (symbol.type === SymbolType.Group) {
+          return symbol.extractSymbols().some(gs => gs.type === SymbolType.Edge || gs.type === SymbolType.Shape || (gs.type === SymbolType.Text && gs.rotation))
         }
         return true
       })
