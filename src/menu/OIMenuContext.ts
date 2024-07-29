@@ -15,6 +15,9 @@ export class OIMenuContext extends OIMenu
   behaviors: OIBehaviors
   id: string
   wrapper?: HTMLElement
+  editMenu?: HTMLDivElement
+  editInput?: HTMLInputElement
+  editValidBtn?: HTMLButtonElement
   reorderMenu?: HTMLDivElement
   decoratorMenu?: HTMLDivElement
   menuExport?: HTMLDivElement
@@ -54,6 +57,53 @@ export class OIMenuContext extends OIMenu
   get showDecorator(): boolean
   {
     return this.symbolsDecorable.length > 0
+  }
+
+  protected createMenuEdit(): HTMLElement
+  {
+    const trigger = document.createElement("button")
+    trigger.id = `${ this.id }-edit-trigger`
+    trigger.classList.add("ms-menu-button")
+    const label = document.createElement("span")
+    label.innerText = "Edit"
+    trigger.appendChild(label)
+    const icon = document.createElement("span")
+    icon.style.setProperty("width", "32px")
+    icon.style.setProperty("transform", "rotate(270deg)")
+    icon.innerHTML = ArrowDown
+    trigger.appendChild(icon)
+
+    const subMenuWrapper = document.createElement("div")
+    subMenuWrapper.classList.add("ms-menu-colmun")
+    this.editInput = document.createElement("input")
+    subMenuWrapper.appendChild(this.editInput)
+    this.editValidBtn = document.createElement("button")
+    this.editValidBtn.classList.add("ms-menu-button")
+    this.editValidBtn.innerText = "Valide"
+    subMenuWrapper.appendChild(this.editValidBtn)
+    this.editValidBtn.addEventListener("pointerdown", async (e) => {
+      e.stopPropagation()
+      const textSymbol = this.behaviors.model.symbolsSelected.find(s => s.type === SymbolType.Text) as OIText
+      if (textSymbol) {
+        const firstChar = textSymbol.chars[0]
+        textSymbol.chars = []
+        for (let i = 0; i < this.editInput!.value.length; i++) {
+          textSymbol.chars.push({
+            label: this.editInput!.value.charAt(i),
+            id: createUUID(),
+            color: firstChar.color,
+            fontSize: firstChar.fontSize,
+            fontWeight: firstChar.fontWeight,
+            bounds: firstChar.bounds
+          })
+        }
+        await this.behaviors.updateSymbol(textSymbol)
+        this.behaviors.selector.resetSelectedGroup([textSymbol])
+      }
+    })
+    this.editMenu = this.createSubMenu(trigger, subMenuWrapper, "right").element
+
+    return this.editMenu
   }
 
   protected createMenuDuplicate(): HTMLElement
@@ -433,19 +483,24 @@ export class OIMenuContext extends OIMenu
     this.wrapper?.style.setProperty("top", `${ this.position.y - this.position.scrollTop }px`)
 
     if (this.haveSymbolsSelected) {
+      const textSymbol = this.behaviors.model.symbolsSelected.find(s => s.type === SymbolType.Text)
+      if (this.editMenu && this.editInput && this.behaviors.model.symbolsSelected.length === 1 && textSymbol) {
+        this.editMenu.style.removeProperty("display")
+        this.editInput.value = (textSymbol as OIText).label
+      }
+      else {
+        this.editMenu?.style.setProperty("display", "none")
+      }
       this.reorderMenu?.style.removeProperty("display")
       this.duplicateBtn?.style.removeProperty("display")
       this.removeBtn?.style.removeProperty("display")
-    }
-    else {
-      this.reorderMenu?.style.setProperty("display", "none")
-      this.duplicateBtn?.style.setProperty("display", "none")
-      this.removeBtn?.style.setProperty("display", "none")
-    }
-    if (this.behaviors.model.symbols.length) {
       this.menuExport?.style.removeProperty("display")
     }
     else {
+      this.editMenu?.style.setProperty("display", "none")
+      this.reorderMenu?.style.setProperty("display", "none")
+      this.duplicateBtn?.style.setProperty("display", "none")
+      this.removeBtn?.style.setProperty("display", "none")
       this.menuExport?.style.setProperty("display", "none")
     }
     this.updateDecoratorSubMenu()
@@ -457,6 +512,7 @@ export class OIMenuContext extends OIMenu
     this.wrapper = document.createElement("div")
     this.wrapper.id = `${ this.id }-wrapper`
     this.wrapper.classList.add("ms-menu", "ms-menu-context")
+    this.wrapper.appendChild(this.createMenuEdit())
     this.wrapper.appendChild(this.createMenuDecorator())
     this.wrapper.appendChild(this.createMenuDuplicate())
     this.wrapper.appendChild(this.createMenuGroup())
