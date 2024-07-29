@@ -89,6 +89,7 @@ export class OIText extends OISymbolBase<SymbolType.Text>
       { x: this.bounds.xMax, y: this.bounds.yMin + offsetY },
       { x: this.bounds.xMax, y: this.bounds.yMax - offsetY },
       { x: this.bounds.x, y: this.bounds.yMax - offsetY },
+      this.bounds.center
     ]
     if (this.rotation) {
       const center = this.rotation.center

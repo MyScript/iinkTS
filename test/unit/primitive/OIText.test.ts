@@ -81,7 +81,13 @@ describe("OIText.ts", () =>
     test(`should get snapPoints without rotation`, () =>
     {
       const text = new OIText(chars, point, box)
-      expect(text.snapPoints).toEqual(box.snapPoints)
+      expect(text.snapPoints).toEqual([
+        { "x": 1, "y": 14 },
+        { "x": 11, "y": 14 },
+        { "x": 11, "y": 0 },
+        { "x": 1, "y": 0 },
+        { "x": 6, "y": 7 }
+    ])
     })
     test(`should get snapPoints with rotation 90°`, () =>
     {
@@ -91,10 +97,10 @@ describe("OIText.ts", () =>
         center: { x: 0, y: 0 }
       }
       expect(text.snapPoints).toEqual([
-        { "x": -2, "y": 1 },
-        { "x": -2, "y": 11 },
-        { "x": -12, "y": 11 },
-        { "x": -12, "y": 1 },
+        { "x": -14, "y": 1 },
+        { "x": -14, "y": 11 },
+        { "x": -0, "y": 11 },
+        { "x": -0, "y": 1 },
         { "x": -7, "y": 6 }
       ])
     })
