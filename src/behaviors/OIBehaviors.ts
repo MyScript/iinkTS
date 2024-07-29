@@ -520,7 +520,7 @@ export class OIBehaviors implements IBehaviors
       if (errors.length) {
         throw new Error(errors.join("\n"))
       }
-      return await this.addSymbols(symbols as TOISymbol[])
+      return await this.addSymbols(symbols)
     } catch (error) {
       this.#logger.error("importPointEvents", error)
       this.internalEvent.emitError(error as Error)
@@ -532,6 +532,17 @@ export class OIBehaviors implements IBehaviors
   {
     this.#logger.info("addSymbol", { sym })
     this.internalEvent.emitIdle(false)
+    if (sym.type === SymbolType.Text) {
+      this.texter.updateBounds(sym)
+    }
+    else if (sym.type === SymbolType.Group) {
+      sym.extractSymbols().forEach(t =>
+      {
+        if (t.type === SymbolType.Text) {
+          this.texter.updateBounds(t)
+        }
+      })
+    }
     this.model.addSymbol(sym)
     this.renderer.drawSymbol(sym)
 
@@ -551,6 +562,17 @@ export class OIBehaviors implements IBehaviors
     this.internalEvent.emitIdle(false)
     symList.forEach(s =>
     {
+      if (s.type === SymbolType.Text) {
+        this.texter.updateBounds(s)
+      }
+      else if (s.type === SymbolType.Group) {
+        s.extractSymbols().forEach(t =>
+        {
+          if (t.type === SymbolType.Text) {
+            this.texter.updateBounds(t)
+          }
+        })
+      }
       this.model.addSymbol(s)
       this.renderer.drawSymbol(s)
     })
@@ -567,6 +589,17 @@ export class OIBehaviors implements IBehaviors
   {
     this.#logger.info("updateSymbol", { sym })
     this.internalEvent.emitIdle(false)
+    if (sym.type === SymbolType.Text) {
+      this.texter.updateBounds(sym)
+    }
+    else if (sym.type === SymbolType.Group) {
+      sym.extractSymbols().forEach(t =>
+      {
+        if (t.type === SymbolType.Text) {
+          this.texter.updateBounds(t)
+        }
+      })
+    }
     this.model.updateSymbol(sym)
     this.renderer.drawSymbol(sym)
     const strokes = this.extractStrokesFromSymbols([sym])
@@ -584,6 +617,17 @@ export class OIBehaviors implements IBehaviors
     this.internalEvent.emitIdle(false)
     symList.forEach(s =>
     {
+      if (s.type === SymbolType.Text) {
+        this.texter.updateBounds(s)
+      }
+      else if (s.type === SymbolType.Group) {
+        s.extractSymbols().forEach(t =>
+        {
+          if (t.type === SymbolType.Text) {
+            this.texter.updateBounds(t)
+          }
+        })
+      }
       this.model.updateSymbol(s)
       this.renderer.drawSymbol(s)
     })
@@ -616,7 +660,20 @@ export class OIBehaviors implements IBehaviors
           })
         }
         else if (s.type === SymbolType.Group) {
-          s.updateChildrenStyle()
+          s.extractSymbols().forEach(child =>
+          {
+            if (child.type === SymbolType.Text) {
+              child.chars.forEach(char =>
+              {
+                if (style.color) {
+                  char.color = style.color
+                }
+                if (style.width) {
+                  char.fontWeight = style.width * 100
+                }
+              })
+            }
+          })
         }
         this.renderer.drawSymbol(s)
         this.model.updateSymbol(s)
@@ -629,7 +686,7 @@ export class OIBehaviors implements IBehaviors
       symbols.forEach(s =>
       {
         if (s.type === SymbolType.Text) {
-          this.texter.updateTextBoundingBox(s)
+          this.texter.updateBounds(s)
           needAdjutText = true
         }
       })
@@ -645,15 +702,31 @@ export class OIBehaviors implements IBehaviors
   updateTextFontSize(textIds: string[], fontSize: number): void
   {
     this.#logger.info("updateTextFontSize", { textIds, fontSize })
-    const symbols: OIText[] = []
+    const symbols: (OIText | OISymbolGroup)[] = []
     this.model.symbols.forEach(s =>
     {
-      if (textIds.includes(s.id) && s.type === SymbolType.Text) {
-        s.chars.forEach(tc => tc.fontSize = fontSize)
-        this.texter.updateTextBoundingBox(s)
-        this.renderer.drawSymbol(s)
-        s.modificationDate = Date.now()
-        symbols.push(s)
+      if (textIds.includes(s.id)) {
+        if (s.type === SymbolType.Text) {
+          s.chars.forEach(tc => tc.fontSize = fontSize)
+          this.texter.updateBounds(s)
+          this.renderer.drawSymbol(s)
+          s.modificationDate = Date.now()
+          symbols.push(s)
+        }
+        else if ((s.type === SymbolType.Group && s.extractSymbols().some(c => c.type === SymbolType.Text))) {
+          s.extractSymbols().forEach(c =>
+          {
+            if (c.type === SymbolType.Text) {
+              c.chars.forEach(tc => tc.fontSize = fontSize)
+              this.texter.updateBounds(c)
+              c.modificationDate = Date.now()
+            }
+          })
+          s.modificationDate = Date.now()
+          this.renderer.drawSymbol(s)
+          symbols.push(s)
+
+        }
       }
     })
     if (symbols.length) {

@@ -46,7 +46,7 @@ export class OITextManager
     return el
   }
 
-  setCharsBoundingBox(text: OIText, textGroupEl: SVGGElement): OIText
+  setCharsBounds(text: OIText, textGroupEl: SVGGElement): OIText
   {
     const textEl = textGroupEl.querySelector("text")
     if (textEl) {
@@ -61,11 +61,11 @@ export class OITextManager
     return text
   }
 
-  setBoundingBox(text: OIText): void
+  setBounds(text: OIText): void
   {
     const element = this.drawSymbolHidden(text)
     text.bounds = this.getElementBoundingBox(element)
-    this.setCharsBoundingBox(text, element)
+    this.setCharsBounds(text, element)
   }
 
   getElementBoundingBox(textElement: SVGElement): Box
@@ -93,11 +93,9 @@ export class OITextManager
     return this.getBoundingBox(new OIText([charSymbol], { x: 0, y: 0 }, boundingBox))?.width as number
   }
 
-  updateTextBoundingBox(textSymbol: OIText): OIText
+  updateBounds(textSymbol: OIText): OIText
   {
-    const textGroupEl = this.drawSymbolHidden(textSymbol)
-    textSymbol.bounds = this.getElementBoundingBox(textGroupEl)
-    this.setCharsBoundingBox(textSymbol, textGroupEl)
+    this.setBounds(textSymbol)
     this.model.updateSymbol(textSymbol)
     return textSymbol
   }
@@ -119,7 +117,7 @@ export class OITextManager
 
         const textGroupEl = this.renderer.drawSymbol(text) as SVGGElement
         text.bounds = this.getElementBoundingBox(textGroupEl)
-        this.setCharsBoundingBox(text, textGroupEl)
+        this.setCharsBounds(text, textGroupEl)
         this.model.updateSymbol(text)
       })
     }
@@ -148,7 +146,7 @@ export class OITextManager
         r.symbols.forEach(s =>
         {
           if (s.type === SymbolType.Text) {
-            this.updateTextBoundingBox(s)
+            this.updateBounds(s)
           }
         })
       }

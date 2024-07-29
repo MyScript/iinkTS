@@ -204,7 +204,7 @@ export class OIConversionManager
           textSymbol.point.y = this.model.roundToLineGuide(currentY)
          }
 
-        this.behaviors.texter.setBoundingBox(textSymbol)
+        this.behaviors.texter.setBounds(textSymbol)
         result.push({
           symbol: textSymbol,
           strokes: wordStrokes

@@ -147,7 +147,7 @@ export class OIRotationManager
       degree: convertRadianToDegree(-angleRad) + (text.rotation?.degree || 0),
       center: center
     }
-    return this.texter.updateTextBoundingBox(text)
+    return this.texter.updateBounds(text)
   }
 
   protected applyOnGroup(group: OISymbolGroup, center: TPoint, angleRad: number): OISymbolGroup
@@ -210,7 +210,7 @@ export class OIRotationManager
     if (!this.interactElementsGroup) {
       throw new Error("Can't rotate, you must call start before")
     }
-    let angleDegree = +convertRadianToDegree(computeAngleRadian(this.origin, this.center, point))
+    let angleDegree = Math.round(convertRadianToDegree(computeAngleRadian(this.origin, this.center, point)))
 
     angleDegree = this.snaps.snapRotation(angleDegree)
 

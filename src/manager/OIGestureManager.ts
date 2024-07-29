@@ -176,7 +176,7 @@ export class OIGestureManager
         const cIndex = textSymbol.chars.findIndex(c1 => c1.id === c.id)
         textSymbol.chars.splice(cIndex, 1)
       })
-      this.texter.updateTextBoundingBox(textSymbol)
+      this.texter.updateBounds(textSymbol)
       return textSymbol
     }
   }
@@ -320,7 +320,7 @@ export class OIGestureManager
       if (symbolsToGroup.every(s => s.type === SymbolType.Text)) {
         const texts = symbolsToGroup as OIText[]
         const text = new OIText(texts.flatMap(s => s.chars), texts[0].point, Box.createFromBoxes(texts.map(t => t.bounds)))
-        this.texter.setBoundingBox(text)
+        this.texter.setBounds(text)
         changes.replaced = {
           oldSymbols: [lastSymbBefore, firstSymbolAfter],
           newSymbols: [text]
@@ -562,14 +562,14 @@ export class OIGestureManager
       const newTexts: OIText[] = []
       if (charsBefore.length && charsAfter.length) {
         const textBefore = new OIText(charsBefore, textToSplit.point, Box.createFromBoxes(charsBefore.map(c => c.bounds)))
-        this.texter.setBoundingBox(textBefore)
+        this.texter.setBounds(textBefore)
         newTexts.push(textBefore)
         const pointAfter: TPoint = {
           x: textBefore.point.x + textBefore.bounds.width + this.texter.getSpaceWidth(computeAverage(textBefore.chars.map(c => c.fontSize))),
           y: textBefore.point.y
         }
         const textAfter = new OIText(charsAfter, pointAfter, Box.createFromBoxes(charsAfter.map(c => c.bounds)))
-        this.texter.setBoundingBox(textAfter)
+        this.texter.setBounds(textAfter)
         newTexts.push(textAfter)
         replaced.newSymbols = newTexts
         replaced.oldSymbols = [textToSplit]
