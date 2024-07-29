@@ -94,7 +94,7 @@ export class OIConversionManager
     }))
     let fontWeight = this.fontWeight
     if (!fontWeight) {
-      fontWeight = (strokes[0].style.width || 1) > 2 ? "bold": "normal"
+      fontWeight = (strokes[0].style.width || 1) > 2 ? "bold" : "normal"
     }
 
     const color = strokes[0].style.color || "black"
@@ -206,7 +206,7 @@ export class OIConversionManager
             }
           }
           textSymbol.point.y = this.model.roundToLineGuide(currentY)
-         }
+        }
 
         this.behaviors.texter.setBounds(textSymbol)
         result.push({
@@ -348,12 +348,12 @@ export class OIConversionManager
     const point2: TPoint = { x: convertMillimeterToPixel(line.x2), y: convertMillimeterToPixel(line.y2) }
     const angle = computeAngleAxeRadian(point1, point2)
 
-    if (Math.abs(angle) < 0.1) {
+    if (Math.abs(angle % Math.PI) < 0.1) {
       // to adjust the line with the horizontal
       point1.y = +((point1.y + point2.y) / 2).toFixed(3)
       point2.y = point1.y
     }
-    else if (Math.abs(angle - Math.PI / 2) - 1 < 0.1) {
+    else if (Math.abs(angle % (Math.PI / 2)) < 0.1) {
       // to adjust the line with the vertical
       point1.x = +((point1.x + point2.x) / 2).toFixed(3)
       point2.x = point1.x
@@ -370,11 +370,11 @@ export class OIConversionManager
       const p1 = points[index]
       const p2 = points[index + 1]
       const angle = computeAngleAxeRadian(p1, p2)
-      if (Math.abs(angle) < 0.1) {
+      if (Math.abs(angle % Math.PI) < 0.1) {
         p1.y = +((p1.y + p2.y) / 2).toFixed(3)
         p2.y = p1.y
       }
-      else if (Math.abs(angle - Math.PI / 2) < 0.1) {
+      else if (Math.abs(angle % (Math.PI / 2)) < 0.1) {
         p1.x = +((p1.x + p2.x) / 2).toFixed(3)
         p2.x = p1.x
       }
