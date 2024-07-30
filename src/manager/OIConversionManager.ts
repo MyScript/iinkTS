@@ -187,8 +187,8 @@ export class OIConversionManager
       fontSize = Math.round(this.computeFontSize(jiixChars.filter(c => c.items?.length)) / 2) * 2
     }
 
-    let isNewLine = true
-    let currentY = textBounds.y
+    let isNewLine = false
+    let currentY = textBounds.y + this.rowHeight
     jiixWords.forEach(word =>
     {
       const wordStrokes = this.strokes.filter(s => word.items?.some(i => i["full-id"] === s.id)) as OIStroke[]
