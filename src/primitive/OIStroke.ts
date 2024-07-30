@@ -186,7 +186,9 @@ export class OIStroke extends OISymbolBase<SymbolType.Stroke>
       throw new Error(`not pointers`)
     }
     const stroke = new OIStroke(partial.style, partial.pointerType)
-    if (partial.id) stroke.id = partial.id
+    if (partial.id) {
+      stroke.id = partial.id
+    }
     const errors: string[] = []
     let flag = true
     partial.pointers?.forEach((pp, pIndex) =>

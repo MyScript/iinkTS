@@ -89,8 +89,8 @@ export class OIResizeManager
     this.#logger.debug("applyToStroke", { stroke, origin, scaleX, scaleY })
     stroke.pointers.forEach(p =>
     {
-      p.x = origin.x + scaleX * (p.x - origin.x)
-      p.y = origin.y + scaleY * (p.y - origin.y)
+      p.x = +(origin.x + scaleX * (p.x - origin.x)).toFixed(3)
+      p.y = +(origin.y + scaleY * (p.y - origin.y)).toFixed(3)
     })
     return stroke
   }
@@ -130,8 +130,9 @@ export class OIResizeManager
     this.#logger.debug("applyToEdge", { edge, origin, scaleX, scaleY })
     switch (edge.kind) {
       case EdgeKind.Arc: {
-        edge.center.x = +(edge.center.x + (scaleX - 1) * (edge.center.x - origin.x) / 2).toFixed(3)
-        edge.center.y = +(edge.center.y + (scaleY - 1) * (edge.center.y - origin.y) / 2).toFixed(3)
+        edge.center.x = +(edge.center.x + (edge.center.x - origin.x)).toFixed(3)
+        edge.center.y = +(edge.center.x + (edge.center.y - origin.y)).toFixed(3)
+
         edge.radiusX = +(edge.radiusX * Math.abs(scaleX)).toFixed(3)
         edge.radiusY = +(edge.radiusY * Math.abs(scaleY)).toFixed(3)
         if (scaleX * scaleY < 0) {

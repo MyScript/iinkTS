@@ -242,7 +242,7 @@ export class OIConversionManager
       x: convertMillimeterToPixel(ellipse.cx),
       y: convertMillimeterToPixel(ellipse.cy),
     }
-    return new OIShapeEllipse(center, convertMillimeterToPixel(ellipse.rx), convertMillimeterToPixel(ellipse.ry), strokes[0]?.style,)
+    return new OIShapeEllipse(center, convertMillimeterToPixel(ellipse.rx), convertMillimeterToPixel(ellipse.ry), ellipse.orientation, strokes[0]?.style)
   }
 
   buildRectangle(rectangle: TJIIXNodeRectangle, strokes: OIStroke[]): OIShapePolygon

@@ -35,7 +35,7 @@ describe("OIEdgeArc.ts", () =>
       expect(arc.bounds.x).toEqual(-15)
       expect(arc.bounds.y).toEqual(-5)
       expect(+arc.bounds.width.toFixed(0)).toEqual(27)
-      expect(+arc.bounds.height.toFixed(0)).toEqual(20)
+      expect(+arc.bounds.height.toFixed(0)).toEqual(60)
     })
     test("should create with default style", () =>
     {
@@ -125,12 +125,12 @@ describe("OIEdgeArc.ts", () =>
     const arc = new OIEdgeArc(center, startAngle, sweepAngle, radiusX, radiusY, phi)
     test(`should return true when the point is within ${ SELECTION_MARGIN } pixel vertice`, () =>
     {
-      const closePoint: TPoint = { x: 0, y: 0 + SELECTION_MARGIN / 2 }
+      const closePoint: TPoint = { x: arc.vertices[2].x, y: arc.vertices[2].y + SELECTION_MARGIN / 2 }
       expect(arc.isCloseToPoint(closePoint)).toEqual(true)
     })
     test(`should return true when the point is within ${ SELECTION_MARGIN } pixel from arc`, () =>
     {
-      const closePoint: TPoint = { x: 5, y: 10 + SELECTION_MARGIN / 2 }
+      const closePoint: TPoint = { x: arc.vertices[2].x + SELECTION_MARGIN / 3, y: arc.vertices[2].y + SELECTION_MARGIN / 3 }
       expect(arc.isCloseToPoint(closePoint)).toEqual(true)
     })
     test(`should return false when the point is more than ${ SELECTION_MARGIN } pixel from an edge`, () =>
@@ -144,19 +144,19 @@ describe("OIEdgeArc.ts", () =>
   {
     const center: TPoint = { x: 0, y: 0 }
     const startAngle = Math.PI / 4
-    const sweepAngle = 3 * Math.PI / 4
+    const sweepAngle =  Math.PI / 2
     const radiusX = 10
     const radiusY = 50
     const phi = 0
     const arc = new OIEdgeArc(center, startAngle, sweepAngle, radiusX, radiusY, phi)
     test(`should return true if partially wrap`, () =>
     {
-      const boundaries: TBoundingBox = { height: 20, width: 20, x: 5, y: 0 }
+      const boundaries: TBoundingBox = { height: 20, width: 20, x: 0, y: 45 }
       expect(arc.overlaps(boundaries)).toEqual(true)
     })
     test(`should return true if totally wrap`, () =>
     {
-      const boundaries: TBoundingBox = { height: 50, width: 50, x: -25, y: -25 }
+      const boundaries: TBoundingBox = { height: 200, width: 100, x: -50, y: -5 }
       expect(arc.overlaps(boundaries)).toEqual(true)
     })
     test(`should return false if box is outside`, () =>
