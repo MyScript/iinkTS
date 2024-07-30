@@ -53,6 +53,10 @@ export class OIEdgePolyLine extends OIEdgeBase<EdgeKind.PolyEdge>
   static create(partial: PartialDeep<OIEdgePolyLine>): OIEdgePolyLine
   {
     if (!partial?.points?.map(p => isValidPoint(p))) throw new Error(`Unable to create a PolyLine, points are invalid`)
-    return new OIEdgePolyLine(partial?.points as TPoint[], partial.startDecoration, partial.endDecoration, partial.style)
+    const polyline = new OIEdgePolyLine(partial?.points as TPoint[], partial.startDecoration, partial.endDecoration, partial.style)
+    if (partial.id) {
+      polyline.id = partial.id
+    }
+    return polyline
   }
 }

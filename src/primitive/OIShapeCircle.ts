@@ -141,6 +141,10 @@ export class OIShapeCircle extends OIShapeBase<ShapeKind.Circle>
   {
     if (!isValidPoint(partial.center)) throw new Error(`Unable to create circle, center is invalid`)
     if (!isValidNumber(partial.radius)) throw new Error(`Unable to create circle, radius is undefined`)
-    return new OIShapeCircle(partial.center as TPoint, partial.radius!, partial.style)
+    const circle = new OIShapeCircle(partial.center as TPoint, partial.radius!, partial.style)
+    if (partial.id) {
+      circle.id = partial.id
+    }
+    return circle
   }
 }

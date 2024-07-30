@@ -21,7 +21,8 @@ describe("OIShapeEllipse.ts", () =>
         color: "blue",
         width: 20
       }
-      const ellipse = new OIShapeEllipse(center, radiusX, radiusY, style)
+      const phi = 0
+      const ellipse = new OIShapeEllipse(center, radiusX, radiusY, phi, style)
       expect(ellipse).toBeDefined()
       expect(ellipse.creationTime).toBeLessThanOrEqual(Date.now())
       expect(ellipse.creationTime).toEqual(ellipse.modificationDate)
@@ -41,7 +42,8 @@ describe("OIShapeEllipse.ts", () =>
       const center: TPoint = { x: 5, y: 0 }
       const radiusX = 5
       const radiusY = 10
-      const ellipse = new OIShapeEllipse(center, radiusX, radiusY)
+      const phi = 0
+      const ellipse = new OIShapeEllipse(center, radiusX, radiusY, phi)
       expect(ellipse.style).toEqual(DefaultStyle)
     })
     test("should create and have many vertices", () =>
@@ -49,7 +51,8 @@ describe("OIShapeEllipse.ts", () =>
       const center: TPoint = { x: 5, y: 0 }
       const radiusX = 50
       const radiusY = 100
-      const ellipse = new OIShapeEllipse(center, radiusX, radiusY)
+      const phi = 0
+      const ellipse = new OIShapeEllipse(center, radiusX, radiusY, phi)
       expect(ellipse.vertices).toHaveLength(50)
     })
   })
@@ -194,7 +197,8 @@ describe("OIShapeEllipse.ts", () =>
     const center: TPoint = { x: 5, y: 0 }
     const radiusX = 50
     const radiusY = 100
-    const ellipse = new OIShapeEllipse(center, radiusX, radiusY)
+    const phi = 0
+    const ellipse = new OIShapeEllipse(center, radiusX, radiusY, phi)
     test(`should return true when the point is within ${ SELECTION_MARGIN } pixel of an edge`, () =>
     {
       const closePoint: TPoint = { x: center.x, y: center.y + radiusY + SELECTION_MARGIN / 2 }
@@ -216,7 +220,8 @@ describe("OIShapeEllipse.ts", () =>
     const center: TPoint = { x: 5, y: 0 }
     const radiusX = 5
     const radiusY = 10
-    const ellipse = new OIShapeEllipse(center, radiusX, radiusY)
+    const phi = 0
+    const ellipse = new OIShapeEllipse(center, radiusX, radiusY, phi)
     test(`should return true if partially wrap`, () =>
     {
       const boundaries: TBoundingBox = { height: 10, width: 10, x: -5, y: -5 }
@@ -246,7 +251,8 @@ describe("OIShapeEllipse.ts", () =>
       const center: TPoint = { x: 5, y: 0 }
       const radiusX = 5
       const radiusY = 10
-      const ellipse = new OIShapeEllipse(center, radiusX, radiusY)
+      const phi = Math.PI
+      const ellipse = new OIShapeEllipse(center, radiusX, radiusY, phi)
       const clone = ellipse.clone()
       expect(clone).toEqual(ellipse)
       expect(clone).not.toBe(ellipse)

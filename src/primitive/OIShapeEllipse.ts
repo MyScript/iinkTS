@@ -1,6 +1,6 @@
 import { SELECTION_MARGIN } from "../Constants"
 import { TStyle } from "../style"
-import { PartialDeep, computeDistanceBetweenPointAndSegment, findIntersectionBetween2Segment, isValidNumber, } from "../utils"
+import { PartialDeep, computeDistanceBetweenPointAndSegment, computePointOnEllipse, findIntersectionBetween2Segment, isValidNumber, } from "../utils"
 import { TPoint, isValidPoint } from "./Point"
 import { OIShapeBase, ShapeKind } from "./OIShape"
 import { Box, TBoundingBox } from "./Box"
@@ -13,12 +13,14 @@ export class OIShapeEllipse extends OIShapeBase<ShapeKind.Ellipse>
   center: TPoint
   radiusX: number
   radiusY: number
+  orientation: number
   protected _vertices: Map<string, TPoint[]>
 
   constructor(
     center: TPoint,
     radiusX: number,
     radiusY: number,
+    orientation: number,
     style?: PartialDeep<TStyle>
   )
   {
@@ -26,13 +28,13 @@ export class OIShapeEllipse extends OIShapeBase<ShapeKind.Ellipse>
     this.center = center
     this.radiusX = radiusX
     this.radiusY = radiusY
+    this.orientation = orientation
     this._vertices = new Map<string, TPoint[]>()
-    this._vertices.set(this.verticesId, this.computedVertices())
   }
 
   protected get verticesId(): string
   {
-    return `${ this.center.x }-${ this.center.y }-${ this.radiusX }-${ this.radiusY }`
+    return `${ this.center.x }-${ this.center.y }-${ this.radiusX }-${ this.radiusY }-${ this.orientation }`
   }
 
   protected computedVertices(): TPoint[]
@@ -41,10 +43,8 @@ export class OIShapeEllipse extends OIShapeBase<ShapeKind.Ellipse>
     const perimeter = 2 * Math.PI * Math.sqrt((Math.pow(this.radiusX, 2) + Math.pow(this.radiusY, 2)) / 2)
     const nbPoint = Math.max(8, Math.round(perimeter / SELECTION_MARGIN))
     for (let i = 0; i < nbPoint; i++) {
-      const rad = 2 * Math.PI * (i / nbPoint)
-      const x = this.center.x + Math.cos(rad) * this.radiusX
-      const y = this.center.y + Math.sin(rad) * this.radiusY
-      points.push({ x, y })
+      const theta = 2 * Math.PI * (i / nbPoint)
+      points.push(computePointOnEllipse(this.center, this.radiusX, this.radiusY, this.orientation, theta))
     }
 
     return points
@@ -72,7 +72,7 @@ export class OIShapeEllipse extends OIShapeBase<ShapeKind.Ellipse>
 
   clone(): OIShapeEllipse
   {
-    const clone = new OIShapeEllipse(structuredClone(this.center), this.radiusX, this.radiusY, structuredClone(this.style))
+    const clone = new OIShapeEllipse(structuredClone(this.center), this.radiusX, this.radiusY, this.orientation, structuredClone(this.style))
     clone.id = this.id
     clone.selected = this.selected
     clone.deleting = this.deleting
@@ -87,6 +87,8 @@ export class OIShapeEllipse extends OIShapeBase<ShapeKind.Ellipse>
       id: this.id,
       type: this.type,
       kind: this.kind,
+      center: this.center,
+      orientation: this.orientation,
       radiusX: this.radiusX,
       radiusY: this.radiusY,
       style: this.style,
@@ -101,7 +103,7 @@ export class OIShapeEllipse extends OIShapeBase<ShapeKind.Ellipse>
     }
     const radiusX = Math.abs(origin.x - target.x) / 2
     const radiusY = Math.abs(origin.y - target.y) / 2
-    return new OIShapeEllipse(center, radiusX, radiusY, style)
+    return new OIShapeEllipse(center, radiusX, radiusY, 0, style)
   }
 
   static updateBetweenPoints(ellipse: OIShapeEllipse, origin: TPoint, target: TPoint): OIShapeEllipse
@@ -117,9 +119,13 @@ export class OIShapeEllipse extends OIShapeBase<ShapeKind.Ellipse>
 
   static create(partial: PartialDeep<OIShapeEllipse>): OIShapeEllipse
   {
-    if (!isValidPoint(partial.center)) throw new Error(`Unable to create circle, center is undefined`)
-    if (!isValidNumber(partial.radiusX)) throw new Error(`Unable to create circle, radiusX is undefined`)
-    if (!isValidNumber(partial.radiusY)) throw new Error(`Unable to create circle, radiusY is undefined`)
-    return new OIShapeEllipse(partial.center as TPoint, partial.radiusX!, partial.radiusY!, partial.style)
+    if (!isValidPoint(partial.center)) throw new Error(`Unable to create ellipse, center is undefined`)
+    if (!isValidNumber(partial.radiusX)) throw new Error(`Unable to create ellipse, radiusX is undefined`)
+    if (!isValidNumber(partial.radiusY)) throw new Error(`Unable to create ellipse, radiusY is undefined`)
+    const ellipse = new OIShapeEllipse(partial.center as TPoint, partial.radiusX!, partial.radiusY!, partial.orientation || 0, partial.style)
+    if (partial.id) {
+      ellipse.id = partial.id
+    }
+    return ellipse
   }
 }

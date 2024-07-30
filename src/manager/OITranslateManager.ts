@@ -98,7 +98,7 @@ export class OITranslateManager
         shape.center.y += ty
         return shape
       }
-      case ShapeKind.Polygon:{
+      case ShapeKind.Polygon: {
         shape.points.forEach(p =>
         {
           p.x += tx
@@ -177,7 +177,8 @@ export class OITranslateManager
   translate(symbols: TOISymbol[], tx: number, ty: number, addToHistory = true): Promise<void>
   {
     this.#logger.info("translate", { symbols, tx, ty })
-    symbols.forEach(s => {
+    symbols.forEach(s =>
+    {
       this.applyToSymbol(s, tx, ty)
       this.model.updateSymbol(s)
       this.renderer.drawSymbol(s)
@@ -237,7 +238,6 @@ export class OITranslateManager
 
     this.selector.resetSelectedGroup(this.model.symbolsSelected)
     this.interactElementsGroup = undefined
-    this.selector.showInteractElements()
     this.svgDebugger.apply()
   }
 

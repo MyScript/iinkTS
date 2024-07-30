@@ -88,24 +88,30 @@ export function convertDegreeToRadian(degree: number): number
  */
 export function computeRotatedPoint(point: TPoint, center: TPoint, radian: number): TPoint
 {
-  const xM = point.x - center.x
-  const yM = point.y - center.y
-  const x = +(Math.cos(radian) * xM + Math.sin(radian) * yM + center.x).toFixed(3)
-  const y = +(Math.cos(radian) * yM - Math.sin(radian) * xM + center.y).toFixed(3)
-  return { x, y }
+  const dx = point.x - center.x
+  const dy = point.y - center.y
+  const cos = Math.cos(radian)
+  const sin = Math.sin(radian)
+  return {
+    x: +(center.x + cos * dx + sin * dy).toFixed(3),
+    y: +(center.y + cos * dy - sin * dx).toFixed(3)
+  }
 }
 
 /**
  * @group Utils
  */
-export function computePointOnEllipse(center: TPoint, radiusX: number, radiusY: number, phi: number, radian: number): TPoint
+export function computePointOnEllipse(center: TPoint, radiusX: number, radiusY: number, phi: number, theta: number): TPoint
 {
   const cosPhi = Math.cos(phi)
   const sinPhi = Math.sin(phi)
 
-  return  {
-    x: +(center.x + cosPhi * Math.cos(radian) * radiusX - sinPhi * Math.sin(radian) * radiusY).toFixed(3),
-    y: +(center.y + sinPhi * Math.cos(radian) * radiusY + cosPhi * Math.sin(radian) * radiusX).toFixed(3)
+  const M = Math.abs(radiusX) * Math.cos(theta)
+  const N = Math.abs(radiusY) * Math.sin(theta)
+
+  return {
+    x: +(center.x + cosPhi * M - sinPhi * N).toFixed(3),
+    y: +(center.y + sinPhi * M + cosPhi * N).toFixed(3)
   }
 }
 
