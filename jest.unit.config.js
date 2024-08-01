@@ -20,6 +20,10 @@ export default {
     "ts",
     "js"
   ],
+  modulePathIgnorePatterns: [
+    "./test/unit/__dataset__",
+    "./test/unit/__mocks__"
+  ],
   preset: "ts-jest",
   setupFiles: [
     "jest-canvas-mock",

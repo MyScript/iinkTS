@@ -284,7 +284,7 @@ export class OIGestureManager
       changes.replaced = symbolsToReplace
       promises.push(this.behaviors.replaceSymbols(symbolsToReplace.oldSymbols, symbolsToReplace.newSymbols, false))
     }
-    this.texter.adjustText()
+
     this.history.push(this.model, changes)
     await Promise.all(promises)
   }

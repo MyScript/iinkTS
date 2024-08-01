@@ -666,17 +666,17 @@ export class OIBehaviors implements IBehaviors
       }
     })
     if (symbols.length) {
-      let needAdjutText = false
       symbols.forEach(s =>
       {
         if (s.type === SymbolType.Text) {
+          const lastWidth = s.bounds.width
           this.texter.updateBounds(s)
-          needAdjutText = true
+          const tx = s.bounds.width - lastWidth
+          if (tx !== 0) {
+            this.texter.moveTextAfter(s, tx)
+          }
         }
       })
-      if (needAdjutText) {
-        this.texter.adjustText()
-      }
     }
     if (addToHistory && symbols.length) {
       this.history.push(this.model, { style: { symbols, style } })
@@ -687,6 +687,7 @@ export class OIBehaviors implements IBehaviors
   {
     this.#logger.info("updateTextFontStyle", { textIds, fontSize, fontWeight })
     const symbols: (OIText | OISymbolGroup)[] = []
+    const translate: { symbols: TOISymbol[], tx: number, ty: number }[] = []
     this.model.symbols.forEach(s =>
     {
       if (textIds.includes(s.id)) {
@@ -699,8 +700,20 @@ export class OIBehaviors implements IBehaviors
               tc.fontWeight = fontWeight
             }
           })
+          const lastWidth = s.bounds.width
           this.texter.updateBounds(s)
           this.renderer.drawSymbol(s)
+          const tx = s.bounds.width - lastWidth
+          if (tx !== 0) {
+            const symbolsTranslated = this.texter.moveTextAfter(s, tx)
+            if (symbolsTranslated?.length) {
+              translate.push({
+                symbols: symbolsTranslated,
+                tx,
+                ty: 0
+              })
+            }
+          }
           s.modificationDate = Date.now()
           symbols.push(s)
         }
@@ -716,7 +729,17 @@ export class OIBehaviors implements IBehaviors
                   tc.fontWeight = fontWeight
                 }
               })
+              const lastWidth = s.bounds.width
               this.texter.updateBounds(c)
+              const tx = s.bounds.width - lastWidth
+              const symbolsTranslated = this.texter.moveTextAfter(c, tx)
+              if (symbolsTranslated?.length) {
+                translate.push({
+                  symbols: symbolsTranslated,
+                  tx,
+                  ty: 0
+                })
+              }
               c.modificationDate = Date.now()
             }
           })
@@ -728,8 +751,7 @@ export class OIBehaviors implements IBehaviors
       }
     })
     if (symbols.length) {
-      this.texter.adjustText()
-      this.history.push(this.model, { style: { symbols, fontSize } })
+      this.history.push(this.model, { style: { symbols, fontSize }, translate })
     }
   }
 

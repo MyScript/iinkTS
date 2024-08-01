@@ -334,7 +334,6 @@ describe("OIGestureManager.ts", () =>
   {
     const behaviors = new OIBehaviorsMock()
     const manager = new OIGestureManager(behaviors)
-    manager.texter.adjustText = jest.fn()
     manager.texter.updateBounds = jest.fn()
     manager.renderer.drawSymbol = jest.fn()
     manager.renderer.removeSymbol = jest.fn()
@@ -420,7 +419,6 @@ describe("OIGestureManager.ts", () =>
       await manager.applyScratch(gestureStroke, gesture)
       expect(behaviors.removeSymbols).toHaveBeenNthCalledWith(1, [text.id], false)
       expect(behaviors.replaceSymbols).toHaveBeenCalledTimes(0)
-      expect(manager.texter.adjustText).toHaveBeenCalledTimes(1)
       expect(manager.history.push).toHaveBeenCalledTimes(1)
     })
 
@@ -458,7 +456,6 @@ describe("OIGestureManager.ts", () =>
 
       expect(behaviors.removeSymbols).toHaveBeenCalledTimes(0)
       expect(behaviors.replaceSymbols).toHaveBeenCalledTimes(1)
-      expect(manager.texter.adjustText).toHaveBeenCalledTimes(1)
       expect(manager.history.push).toHaveBeenCalledTimes(1)
     })
 
