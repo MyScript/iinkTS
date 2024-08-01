@@ -1,9 +1,8 @@
 import { OIBehaviors } from "../behaviors"
 import { LoggerClass, LoggerManager } from "../logger"
 import { OIModel } from "../model"
-import { Box, OIText, SymbolType, TOISymbolChar } from "../primitive"
+import { Box, OIText, SymbolType, TOISymbol, TOISymbolChar } from "../primitive"
 import { OISVGRenderer } from "../renderer"
-import { computeAverage } from "../utils"
 
 /**
  * @group Manager
@@ -100,64 +99,19 @@ export class OITextManager
     return textSymbol
   }
 
-  alignTextToRow(rowIndex: number, textSymbols: OIText[]): void
+  moveTextAfter(text: OIText, tx: number): TOISymbol[] | undefined
   {
-    if (textSymbols.length) {
-      let lastX = textSymbols[0].point.x
-      const symbolWhitoutSpaceBefore = [",", "."]
-      textSymbols.forEach((text, i) =>
-      {
-        const fontSize = computeAverage(text.chars.map(c => c.fontSize))
-        const whiteSpaceWidth = (i === 0 || symbolWhitoutSpaceBefore.includes(text.label)) ? 0 : this.getSpaceWidth(fontSize)
-        text.point.y = rowIndex * this.rowHeight
-        text.point.x = lastX + whiteSpaceWidth
-        text.bounds.x = text.point.x
-
-        lastX = text.bounds.xMax
-
-        const textGroupEl = this.renderer.drawSymbol(text) as SVGGElement
-        text.bounds = this.getElementBoundingBox(textGroupEl)
-        this.setCharsBounds(text, textGroupEl)
-        this.model.updateSymbol(text)
+    const row = this.model.getSymbolsByRowOrdered().find(r => r.rowIndex === this.model.getSymbolRowIndex(text))
+    if (row) {
+      const textsAfter = row.symbols.filter(s => s.type === SymbolType.Text && s.bounds.xMid > text.bounds.xMid) as OIText[]
+      textsAfter.forEach(symbol => {
+        symbol.point.x += tx
+        this.updateBounds(symbol)
+        this.model.updateSymbol(symbol)
+        this.renderer.drawSymbol(symbol)
       })
+      return textsAfter
     }
+    return
   }
-
-  adjustText(): void
-  {
-    const rows = this.model.getSymbolsByRowOrdered()
-
-    rows.forEach((r) =>
-    {
-      const isTextRow = r.symbols.every(symbol =>
-      {
-        if (symbol.type === SymbolType.Edge) return false
-        if (symbol.type === SymbolType.Shape) return false
-        if (symbol.type === SymbolType.Text) {
-          if (symbol.rotation) {
-            return false
-          }
-          else if (this.model.symbols.some(s => [SymbolType.Edge, SymbolType.Shape].includes(s.type) && s.overlaps(symbol.bounds))) {
-            return false
-          }
-        }
-        if (symbol.type === SymbolType.Group) {
-          return symbol.extractSymbols().some(gs => gs.type === SymbolType.Edge || gs.type === SymbolType.Shape || (gs.type === SymbolType.Text && gs.rotation))
-        }
-        return true
-      })
-      if (isTextRow) {
-        this.alignTextToRow(r.rowIndex, r.symbols.filter(s => s.type == SymbolType.Text) as OIText[])
-      }
-      else {
-        r.symbols.forEach(s =>
-        {
-          if (s.type === SymbolType.Text) {
-            this.updateBounds(s)
-          }
-        })
-      }
-    })
-  }
-
 }

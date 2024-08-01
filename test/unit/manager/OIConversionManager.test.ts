@@ -15,7 +15,6 @@ describe("OIConversionManager.ts", () =>
   describe("apply", () =>
   {
     const behaviors = new OIBehaviorsMock()
-    behaviors.texter.adjustText = jest.fn()
     behaviors.export = jest.fn(() => Promise.resolve(behaviors.model))
     behaviors.selector.removeSelectedGroup = jest.fn()
     const manager = new OIConversionManager(behaviors)
@@ -36,7 +35,6 @@ describe("OIConversionManager.ts", () =>
       await manager.apply()
       expect(behaviors.selector.removeSelectedGroup).toHaveBeenCalledTimes(1)
       expect(manager.convertText).toHaveBeenCalledTimes(1)
-      expect(behaviors.texter.adjustText).toHaveBeenCalledTimes(1)
     })
     test("should call convertNode", async () =>
     {

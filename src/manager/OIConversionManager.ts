@@ -189,8 +189,13 @@ export class OIConversionManager
 
     let isNewLine = false
     let currentY = textBounds.y + this.rowHeight
+    let currentX = convertMillimeterToPixel(jiixWords[0]["bounding-box"]?.x || 0)
     jiixWords.forEach(word =>
     {
+      if (word.label === " ") {
+        currentX += this.behaviors.texter.getSpaceWidth(result.at(-1)?.symbol.chars[0].fontSize || (this.rowHeight / 2))
+        return
+      }
       const wordStrokes = this.strokes.filter(s => word.items?.some(i => i["full-id"] === s.id)) as OIStroke[]
       if (wordStrokes.length) {
         const chars = jiixChars.slice(word["first-char"] as number, (word["last-char"] || 0) + 1)
@@ -202,13 +207,15 @@ export class OIConversionManager
             const nbRow = Math.round((textSymbol.point.y - currentY) / this.rowHeight) || 1
             currentY += nbRow * this.rowHeight
             if (Math.abs(textSymbol.point.x - textBounds.x) < this.behaviors.texter.getSpaceWidth(fontSize!) * 2) {
-              textSymbol.point.x = textBounds.x
+              currentX = textBounds.x
             }
           }
+          textSymbol.point.x = currentX
           textSymbol.point.y = this.model.roundToLineGuide(currentY)
         }
 
         this.behaviors.texter.setBounds(textSymbol)
+        currentX += textSymbol.bounds.width
         result.push({
           symbol: textSymbol,
           strokes: wordStrokes
@@ -473,8 +480,6 @@ export class OIConversionManager
 
       this.behaviors.addSymbols(conversionResults.map(cs => cs.symbol), false)
       this.behaviors.removeSymbols(conversionResults.flatMap(cs => cs.strokes.map(s => s.id)), false)
-      this.behaviors.texter.adjustText()
-
       this.behaviors.history.push(this.model, { added: conversionResults.map(c => c.symbol), erased: conversionResults.flatMap(cs => cs.strokes) })
     }
   }
