@@ -96,6 +96,21 @@ export class OIPointerEventGrabber implements IGrabber
     }
   }
 
+  protected pointerOutHandler = (evt: PointerEvent) =>
+  {
+    if (
+      this.activePointerId != undefined && this.activePointerId === evt.pointerId &&
+      !this.domElement.contains(evt.target as HTMLElement)
+    ) {
+      evt.stopPropagation()
+      this.activePointerId = undefined
+      if (this.onPointerUp) {
+        const point = this.extractPoint(evt)
+        this.onPointerUp(evt, point)
+      }
+    }
+  }
+
   protected contextMenuHandler = (evt: MouseEvent) =>
   {
     const point = this.extractPoint(evt)
@@ -119,6 +134,7 @@ export class OIPointerEventGrabber implements IGrabber
     this.domElement.addEventListener("pointerup", this.pointerUpHandler, this.configuration.listenerOptions)
     this.domElement.addEventListener("pointerleave", this.pointerUpHandler, this.configuration.listenerOptions)
     this.domElement.addEventListener("pointercancel", this.pointerUpHandler, this.configuration.listenerOptions)
+    this.domElement.addEventListener("pointerout", this.pointerOutHandler, this.configuration.listenerOptions)
     this.domElement.addEventListener("contextmenu", this.contextMenuHandler)
   }
 
@@ -130,6 +146,7 @@ export class OIPointerEventGrabber implements IGrabber
     this.domElement?.removeEventListener("pointerup", this.pointerUpHandler, this.configuration.listenerOptions)
     this.domElement?.removeEventListener("pointerleave", this.pointerUpHandler, this.configuration.listenerOptions)
     this.domElement?.removeEventListener("pointercancel", this.pointerUpHandler, this.configuration.listenerOptions)
+    this.domElement?.removeEventListener("pointerout", this.pointerOutHandler, this.configuration.listenerOptions)
     this.domElement?.removeEventListener("contextmenu", this.contextMenuHandler)
   }
 }
