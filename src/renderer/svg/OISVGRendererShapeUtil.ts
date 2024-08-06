@@ -1,5 +1,6 @@
 import { OIShapeCircle, OIShapeEllipse, OIShapePolygon, ShapeKind, TOIShape } from "../../primitive"
 import { DefaultStyle } from "../../style"
+import { convertRadianToDegree } from "../../utils"
 import { OISVGRendererConst } from "./OISVGRendererConst"
 import { SVGBuilder } from "./SVGBuilder"
 
@@ -62,6 +63,9 @@ export class OISVGRendererShapeUtil
       "stroke-width": (shape.style.width || DefaultStyle.width!).toString(),
       "opacity": (shape.style.opacity || DefaultStyle.opacity!).toString(),
       "d": OISVGRendererShapeUtil.getSVGPath(shape),
+    }
+    if (shape.kind === ShapeKind.Ellipse) {
+      pathAttrs.transform = `rotate(${ convertRadianToDegree(shape.orientation) }, ${shape.center.x}, ${shape.center.y})`
     }
 
     group.appendChild(SVGBuilder.createPath(pathAttrs))

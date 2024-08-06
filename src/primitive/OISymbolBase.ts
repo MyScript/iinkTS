@@ -3,6 +3,7 @@ import { TBoundingBox } from "./Box"
 import { TPoint } from "./Point"
 import { SymbolType, TSymbol } from "./Symbol"
 import { DefaultStyle, TStyle } from "../style"
+import { MatrixTransform } from "../transform"
 
 /**
  * @group Primitive
@@ -17,6 +18,7 @@ export abstract class OISymbolBase<T extends string = SymbolType> implements TSy
   modificationDate: number
   selected: boolean
   deleting: boolean
+  transform: MatrixTransform
 
   constructor(type: T, style?: PartialDeep<TStyle>)
   {
@@ -27,6 +29,8 @@ export abstract class OISymbolBase<T extends string = SymbolType> implements TSy
     this.modificationDate = this.creationTime
     this.selected = false
     this.deleting = false
+
+    this.transform = MatrixTransform.identity()
 
     this.style = Object.assign({}, DefaultStyle, style)
     this.style.opacity = +this.style.opacity!
