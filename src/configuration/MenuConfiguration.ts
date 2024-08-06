@@ -1,6 +1,7 @@
 
 /**
  * @group Configuration
+ * @remarks only usable in the case of offscreen
  */
 export type TMenuConfiguration = {
   enable: boolean,
@@ -20,6 +21,7 @@ export type TMenuConfiguration = {
 
 /**
  * @group Configuration
+ * @remarks only usable in the case of offscreen
  */
 export const DefaultMenuConfiguration: TMenuConfiguration = {
   enable: true,
