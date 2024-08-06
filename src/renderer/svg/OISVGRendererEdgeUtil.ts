@@ -1,4 +1,7 @@
-import { EdgeKind, OIEdgeArc, OIEdgeLine, OIEdgePolyLine, TOIEdge } from "../../primitive"
+import { EdgeDecoration, EdgeKind, OIEdgeArc, OIEdgeLine, OIEdgePolyLine, TOIEdge } from "../../primitive"
+import { DefaultStyle } from "../../style"
+import { OISVGRendererConst } from "./OISVGRendererConst"
+import { SVGBuilder } from "./SVGBuilder"
 
 /**
  * @group Renderer
@@ -17,7 +20,7 @@ export class OISVGRendererEdgeUtil
 
   static getArcPath(arc: OIEdgeArc): string
   {
-    return `M ${ arc.vertices[0].x } ${ arc.vertices[0].y } Q ${ arc.vertices.map(p => `${p.x} ${p.y}`).join(" ") }`
+    return `M ${ arc.vertices[0].x } ${ arc.vertices[0].y } Q ${ arc.vertices.map(p => `${ p.x } ${ p.y }`).join(" ") }`
   }
 
   static getSVGPath(edge: TOIEdge): string
@@ -32,6 +35,39 @@ export class OISVGRendererEdgeUtil
       default:
         throw new Error(`Can't getSVGPath for edge cause kind is unknow: "${ JSON.stringify(edge) }"`)
     }
+  }
+
+  static getSVGElement(edge: TOIEdge): SVGPathElement
+  {
+    const attrs: { [key: string]: string } = {
+      "id": edge.id,
+      "type": edge.type,
+      "kind": edge.kind,
+      "vector-effect": "non-scaling-stroke",
+      "stroke-linecap": "round",
+      "stroke-linejoin": "round",
+      "fill": "transparent",
+      "stroke": edge.style.color || DefaultStyle.color!,
+      "stroke-width": (edge.style.width || DefaultStyle.width!).toString(),
+      "opacity": (edge.style.opacity || DefaultStyle.opacity!).toString(),
+      "d": OISVGRendererEdgeUtil.getSVGPath(edge),
+    }
+
+    if (edge.startDecoration === EdgeDecoration.Arrow) {
+      attrs["marker-start"] = `url(#${ OISVGRendererConst.arrowHeadStartMarker })`
+    }
+    if (edge.endDecoration === EdgeDecoration.Arrow) {
+      attrs["marker-end"] = `url(#${ OISVGRendererConst.arrowHeadEndMaker })`
+    }
+
+    if (edge.selected) {
+      attrs["filter"] = `url(#${ OISVGRendererConst.selectionFilterId })`
+    }
+    if (edge.deleting) {
+      attrs["filter"] = `url(#${ OISVGRendererConst.removalFilterId })`
+    }
+
+    return SVGBuilder.createPath(attrs)
   }
 
 

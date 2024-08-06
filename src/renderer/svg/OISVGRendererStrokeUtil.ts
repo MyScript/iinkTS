@@ -1,5 +1,9 @@
-import { OIStroke, TPointer } from "../../primitive"
+import { DecoratorKind, OIStroke, TPointer } from "../../primitive"
+import { DefaultStyle } from "../../style"
 import { computeAngleAxeRadian, computeLinksPointers, computeMiddlePointer } from "../../utils"
+import { OISVGRendererDecoratorUtil } from "./OISVGRendererDecoratorUtil"
+import { OISVGRendererConst } from "./OISVGRendererConst"
+import { SVGBuilder } from "./SVGBuilder"
 
 /**
  * @group Renderer
@@ -91,5 +95,46 @@ export class OISVGRendererStrokeUtil
     return parts.join(" ")
   }
 
+  static getSVGElement(stroke: OIStroke): SVGGraphicsElement
+  {
+    const attrs: { [key: string]: string } = {
+      "id": stroke.id,
+      "type": "stroke",
+      "vector-effect": "non-scaling-stroke",
+      "stroke-linecap": "round",
+      "stroke-linejoin": "round",
+    }
+    if (stroke.selected) {
+      attrs["filter"] = `url(#${ OISVGRendererConst.selectionFilterId })`
+    }
+    if (stroke.deleting) {
+      attrs["filter"] = `url(#${ OISVGRendererConst.removalFilterId })`
+    }
+
+    const strokeGroup = SVGBuilder.createGroup(attrs)
+
+    const strokeAttrs: { [key: string]: string } = {
+      "fill": stroke.style.color || DefaultStyle.color!,
+      "stroke-width": (stroke.style.width || DefaultStyle.width!).toString(),
+      "opacity": (stroke.style.opacity || DefaultStyle.opacity!).toString(),
+      "d": OISVGRendererStrokeUtil.getSVGPath(stroke)
+    }
+    strokeGroup.append(SVGBuilder.createPath(strokeAttrs))
+
+    stroke.decorators.forEach(d =>
+    {
+      const deco = OISVGRendererDecoratorUtil.getSVGElement(d, stroke)
+      if (deco) {
+        if (d.kind === DecoratorKind.Highlight) {
+          strokeGroup.prepend(deco)
+        }
+        else {
+          strokeGroup.append(deco)
+        }
+      }
+    })
+
+    return strokeGroup
+  }
 
 }

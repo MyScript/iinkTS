@@ -2,7 +2,7 @@ import { OIBehaviors } from "../behaviors"
 import { LoggerManager, LoggerClass } from "../logger"
 import { OIModel, JIIXEdgeKind } from "../model"
 import { Box, OIText, SymbolType, TBoundingBox, TOISymbol } from "../primitive"
-import { NO_SELECTION, OISVGRenderer, SVGBuilder } from "../renderer"
+import { OISVGRenderer, OISVGRendererConst, SVGBuilder } from "../renderer"
 import { convertBoundingBoxMillimeterToPixel, createUUID } from "../utils"
 
 /**
@@ -210,7 +210,7 @@ export class OIDebugSVGManager
     const TEXT_HEIGHT = 20
     const recognitionGroup = SVGBuilder.createGroup({ "debug": "recognition-box" })
 
-    const rect = SVGBuilder.createRect(box, { fill: "transparent", stroke: COLOR, style: NO_SELECTION })
+    const rect = SVGBuilder.createRect(box, { fill: "transparent", stroke: COLOR, style: OISVGRendererConst.noSelection })
     recognitionGroup.appendChild(rect)
 
     const infosGroup = SVGBuilder.createGroup({ id: `infos-group-${ createUUID() }` })
@@ -218,7 +218,7 @@ export class OIDebugSVGManager
     let infoY = box.y + TEXT_HEIGHT / 2
     infos?.forEach(w =>
     {
-      infosGroup.appendChild(SVGBuilder.createText({ x: infoX, y: infoY }, w, { stroke: COLOR, style: NO_SELECTION }))
+      infosGroup.appendChild(SVGBuilder.createText({ x: infoX, y: infoY }, w, { stroke: COLOR, style: OISVGRendererConst.noSelection }))
       infoY += TEXT_HEIGHT
     })
     recognitionGroup.appendChild(infosGroup)
@@ -357,7 +357,7 @@ export class OIDebugSVGManager
     const CHAR_SIZE = 14
 
     const recognitionItemGroup = SVGBuilder.createGroup({ "debug": "recognition-item-box" })
-    const rect = SVGBuilder.createRect(box, { fill: "transparent", stroke: COLOR, style: NO_SELECTION })
+    const rect = SVGBuilder.createRect(box, { fill: "transparent", stroke: COLOR, style: OISVGRendererConst.noSelection })
     recognitionItemGroup.appendChild(rect)
 
     const charX = box.x
@@ -365,11 +365,11 @@ export class OIDebugSVGManager
 
     const charsGroup = SVGBuilder.createGroup({ id: `chars-group-${ createUUID() }` })
     if (label) {
-      charsGroup.appendChild(SVGBuilder.createText({ x: charX, y: charY }, `label: ${ label }`, { fill: COLOR, "font-size": CHAR_SIZE.toString(), style: NO_SELECTION }))
+      charsGroup.appendChild(SVGBuilder.createText({ x: charX, y: charY }, `label: ${ label }`, { fill: COLOR, "font-size": CHAR_SIZE.toString(), style: OISVGRendererConst.noSelection }))
     }
     if (chars?.length) {
       charY += CHAR_SIZE
-      charsGroup.appendChild(SVGBuilder.createText({ x: charX, y: charY }, `[${ chars.join(", ") }]`, { fill: COLOR, "font-size": CHAR_SIZE.toString(), style: NO_SELECTION }))
+      charsGroup.appendChild(SVGBuilder.createText({ x: charX, y: charY }, `[${ chars.join(", ") }]`, { fill: COLOR, "font-size": CHAR_SIZE.toString(), style: OISVGRendererConst.noSelection }))
     }
 
     recognitionItemGroup.appendChild(charsGroup)

@@ -39,7 +39,7 @@ export class OITextManager
     clone.id = "text-to-measure"
     clone.chars.forEach(c => c.id += "to-measure")
     this.renderer.layer.querySelector(`#${ clone.id }`)?.remove()
-    const el = this.renderer.util.getSymbolElement(clone) as SVGGElement
+    const el = this.renderer.buildElementFromSymbol(clone)!
     el.setAttribute("visibility", "hidden")
     this.renderer.prependElement(el)
     return el

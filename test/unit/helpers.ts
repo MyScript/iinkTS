@@ -15,6 +15,7 @@ import
   DecoratorKind,
   OISymbolGroup,
   TOISymbol,
+  OIEraser,
 } from "../../src/iink"
 
 export const delay = (delayInms: number) =>
@@ -62,6 +63,22 @@ export function buildOIStroke({ box = defaultBox, style = DefaultStyle, nbPoint 
     })
   }
   return stroke
+}
+
+export function buildOIEraser({ box = defaultBox, nbPoint = 5 } = {}): OIEraser
+{
+  const eraser = new OIEraser()
+  const stepX = box.width / (nbPoint - 1)
+  const stepY = box.height / (nbPoint - 1)
+  for (let i = 0; i < nbPoint; i++) {
+    eraser.pointers.push({
+      p: Math.random(),
+      t: Date.now() + i,
+      x: box.x + stepX * i,
+      y: box.y + stepY * i,
+    })
+  }
+  return eraser
 }
 
 export function buildOIDecorator(kind: DecoratorKind, style: TStyle = DefaultStyle): OIDecorator

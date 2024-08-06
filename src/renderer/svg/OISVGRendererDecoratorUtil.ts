@@ -5,18 +5,9 @@ import { SVGBuilder } from "./SVGBuilder"
 /**
  * @group Renderer
  */
-export class OISVGDecoratorUtil
+export class OISVGRendererDecoratorUtil
 {
-  selectionFilterId: string
-  removalFilterId: string
-
-  constructor(selectionFilterId: string, removalFilterId: string)
-  {
-    this.selectionFilterId = selectionFilterId
-    this.removalFilterId = removalFilterId
-  }
-
-  getSVGElement(decorator: OIDecorator, { deleting, style, bounds }: { deleting: boolean, style: TStyle, bounds: Box }): SVGGeometryElement | undefined
+  static getSVGElement(decorator: OIDecorator, { deleting, style, bounds }: { deleting: boolean, style: TStyle, bounds: Box }): SVGGeometryElement | undefined
   {
     const attrs: { [key: string]: string } = {
       "id": decorator.id,
@@ -94,5 +85,4 @@ export class OISVGDecoratorUtil
 
     return element
   }
-
 }
