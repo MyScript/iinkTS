@@ -1,11 +1,12 @@
-import { buildOICircle, buildOILine, buildOIStroke } from "../helpers"
+import { buildOICircle, buildOIEraser, buildOIGroup, buildOILine, buildOIStroke, buildOIText } from "../helpers"
 import
 {
   OISVGRenderer,
   DefaultRenderingConfiguration,
   TRenderingConfiguration,
   TOISymbol,
-  Box
+  Box,
+  TOISymbolChar,
 } from "../../../src/iink"
 
 describe("OISVGRenderer.ts", () =>
@@ -166,9 +167,6 @@ describe("OISVGRenderer.ts", () =>
     const divElement: HTMLDivElement = document.createElement("div")
     const renderer = new OISVGRenderer(DefaultRenderingConfiguration)
     renderer.init(divElement)
-    const stroke = buildOIStroke()
-    const circle = buildOICircle()
-    const line = buildOILine()
 
     test("should write error if symbol type unknow", () =>
     {
@@ -176,57 +174,61 @@ describe("OISVGRenderer.ts", () =>
       const unknowSym: TOISymbol = {
         //@ts-ignore
         type: "unknow",
-        bounds: new Box({ height: 0, width: 0, x: 0, y: 0}),
+        bounds: new Box({ height: 0, width: 0, x: 0, y: 0 }),
         creationTime: Date.now(),
         modificationDate: Date.now(),
         clone: jest.fn(),
         overlaps: jest.fn(),
         isCloseToPoint: jest.fn(),
+        id: "unknow"
 
       }
       renderer.drawSymbol(unknowSym)
-      const el = divElement.querySelector(`#${ stroke.id }`)!
+      const el = divElement.querySelector(`#${ unknowSym.id }`)!
       expect(el).toBeNull()
       expect(console.error).toHaveBeenCalledTimes(1)
 
     })
-    test("should draw new stroke", () =>
+    test("should draw eraser", () =>
     {
+      const eraser = buildOIEraser()
+      renderer.drawSymbol(eraser)
+      const el = divElement.querySelector(`#${ eraser.id }`)!
+      expect(el).toBeDefined()
+      expect(el.getAttribute("id")).toEqual(eraser.id)
+      expect(el.getAttribute("type")).toEqual(eraser.type)
+      expect(el.getAttribute("fill")).toEqual("transparent")
+      expect(el.getAttribute("stroke")).toEqual("grey")
+      expect(el.getAttribute("opacity")).toEqual("0.2")
+      expect(el.getAttribute("stroke-width")).toEqual("12")
+    })
+    test("should draw stroke", () =>
+    {
+      const stroke = buildOIStroke()
       renderer.drawSymbol(stroke)
       const el = divElement.querySelector(`#${ stroke.id }`)!
       expect(el).toBeDefined()
       expect(el.getAttribute("id")).toEqual(stroke.id)
       expect(el.getAttribute("type")).toEqual("stroke")
-      expect(el.getAttribute("fill")).toEqual(stroke.style.color)
-      expect(el.getAttribute("stroke-width")).toEqual(stroke.style.width?.toString())
+      const path = el.querySelector("path")!
+      expect(path.getAttribute("fill")).toEqual(stroke.style.color)
+      expect(path.getAttribute("stroke-width")).toEqual(stroke.style.width?.toString())
     })
-    test("should replace stroke", () =>
+    test("should draw circle", () =>
     {
-      const oldEl = divElement.querySelector(`#${ stroke.id }`)!
-      stroke.addPointer({ x: 20, y: 50, p: 1, t: 1 })
-      renderer.drawSymbol(stroke)
-      const el = divElement.querySelector(`#${ stroke.id }`)!
-      expect(el).toBeDefined()
-      expect(oldEl).not.toEqual(el)
-    })
-    test("should removeSymbol stroke", () =>
-    {
-      renderer.removeSymbol(stroke.id)
-      const el = divElement.querySelector(`#${ stroke.id }`)!
-      expect(el).toBeNull()
-    })
-    test("should draw new circle", () =>
-    {
+      const circle = buildOICircle()
       renderer.drawSymbol(circle)
       const el = divElement.querySelector(`#${ circle.id }`)!
       expect(el).toBeDefined()
       expect(el.getAttribute("id")).toEqual(circle.id)
       expect(el.getAttribute("type")).toEqual("shape")
-      expect(el.getAttribute("stroke")).toEqual(circle.style.color)
-      expect(el.getAttribute("stroke-width")).toEqual(circle.style.width?.toString())
+      const path = el.querySelector("path")!
+      expect(path.getAttribute("stroke")).toEqual(circle.style.color)
+      expect(path.getAttribute("stroke-width")).toEqual(circle.style.width?.toString())
     })
-    test("should draw new line", () =>
+    test("should draw line", () =>
     {
+      const line = buildOILine()
       renderer.drawSymbol(line)
       const el = divElement.querySelector(`#${ line.id }`)!
       expect(el).toBeDefined()
@@ -235,6 +237,144 @@ describe("OISVGRenderer.ts", () =>
       expect(el.getAttribute("stroke")).toEqual(line.style.color)
       expect(el.getAttribute("stroke-width")).toEqual(line.style.width?.toString())
     })
+    test("should draw text", () =>
+    {
+      const chars: TOISymbolChar[] = [
+        {
+          bounds: { height: 10, width: 5, x: 0, y: 10 },
+          color: "black",
+          fontSize: 16,
+          fontWeight: "normal",
+          id: "char-1",
+          label: "A"
+        },
+        {
+          bounds: { height: 10, width: 5, x: 5, y: 10 },
+          color: "red",
+          fontSize: 16,
+          fontWeight: "bold",
+          id: "char-2",
+          label: "b"
+        }
+      ]
+      const text = buildOIText({ chars, boundingBox: { height: 10, width: 10, x: 0, y: 10 } })
+      renderer.drawSymbol(text)
+      const el = divElement.querySelector(`#${ text.id }`)!
+      expect(el).toBeDefined()
+      expect(el.getAttribute("id")).toEqual(text.id)
+      expect(el.getAttribute("type")).toEqual(text.type)
+      const charsElements = el.querySelectorAll("tspan")
+      expect(charsElements).toHaveLength(2)
+      expect(charsElements[0].getAttribute("id")).toEqual(chars[0].id)
+      expect(charsElements[0].getAttribute("fill")).toEqual(chars[0].color)
+      expect(charsElements[0].getAttribute("font-size")).toEqual(chars[0].fontSize + "px")
+      expect(charsElements[0].getAttribute("font-weight")).toEqual(chars[0].fontWeight)
+    })
+    test("should draw group", () =>
+    {
+      const groupSym = buildOIGroup({ nbOIStroke: 1, nbOILine: 1 })
+      renderer.drawSymbol(groupSym)
+      const el = divElement.querySelector(`#${ groupSym.id }`)!
+      expect(el).toBeDefined()
+      expect(el.children).toHaveLength(2)
+    })
+    test("should draw stroke already renderer", () =>
+    {
+      const stroke = buildOIStroke()
+      renderer.drawSymbol(stroke)
+      const oldPath = divElement.querySelector(`#${ stroke.id }`)!.querySelector("path")!.getAttribute("d")
+      for (let x = 0; x < 10; x++) {
+        stroke.addPointer({
+          x,
+          y: x * 2,
+          p: 1,
+          t: x
+        })
+      }
+      renderer.drawSymbol(stroke)
+      expect(divElement.querySelector(`#${ stroke.id }`)!.querySelector("path")!.getAttribute("d")!).not.toEqual(oldPath)
+    })
+    test("should replace stroke by circle", () =>
+    {
+      const stroke = buildOIStroke()
+      renderer.drawSymbol(stroke)
+      const oldEl = divElement.querySelector(`#${ stroke.id }`)!
+      expect(oldEl).toBeDefined()
+
+      const circle = buildOICircle()
+      renderer.replaceSymbol(stroke.id, [circle])
+      const el = divElement.querySelector(`#${ circle.id }`)!
+      expect(el).toBeDefined()
+      expect(oldEl).not.toEqual(el)
+      expect(divElement.querySelector(`#${ stroke.id }`)).toBeNull()
+    })
+    test("should append circle if replace symbol not rendered", () =>
+    {
+      const circle = buildOICircle()
+      renderer.replaceSymbol("not-rendered", [circle])
+      const el = divElement.querySelector(`#${ circle.id }`)!
+      expect(el).toBeDefined()
+
+    })
+    test("should removeSymbol stroke", () =>
+    {
+      const stroke = buildOIStroke()
+      renderer.drawSymbol(stroke)
+      expect(divElement.querySelector(`#${ stroke.id }`)).toBeDefined()
+      renderer.removeSymbol(stroke.id)
+      const el = divElement.querySelector(`#${ stroke.id }`)!
+      expect(el).toBeNull()
+    })
+  })
+
+  test("should drawCircle", () =>
+  {
+    const divElement: HTMLDivElement = document.createElement("div")
+    const renderer = new OISVGRenderer(DefaultRenderingConfiguration)
+    renderer.init(divElement)
+    renderer.drawCircle({ x: 10, y: 5 }, 42, { id: "test", fill: "red" })
+
+    expect(divElement.children).toHaveLength(1)
+    const el = divElement.querySelector("#test")!
+    expect(el.tagName).toEqual("circle")
+    expect(el.getAttribute("cx")).toEqual("10")
+    expect(el.getAttribute("cy")).toEqual("5")
+    expect(el.getAttribute("r")).toEqual("42")
+    expect(el.getAttribute("fill")).toEqual("red")
+  })
+
+  test("should drawRect", () =>
+  {
+    const divElement: HTMLDivElement = document.createElement("div")
+    const renderer = new OISVGRenderer(DefaultRenderingConfiguration)
+    renderer.init(divElement)
+    renderer.drawRect({ height: 10, width: 5, x: 0, y: 2 }, { id: "test", stroke: "blue" })
+
+    expect(divElement.children).toHaveLength(1)
+    const el = divElement.querySelector("#test")!
+    expect(el.tagName).toEqual("rect")
+    expect(el.getAttribute("x")).toEqual("0")
+    expect(el.getAttribute("y")).toEqual("2")
+    expect(el.getAttribute("height")).toEqual("10")
+    expect(el.getAttribute("width")).toEqual("5")
+    expect(el.getAttribute("stroke")).toEqual("blue")
+  })
+
+  test("should drawLine", () =>
+  {
+    const divElement: HTMLDivElement = document.createElement("div")
+    const renderer = new OISVGRenderer(DefaultRenderingConfiguration)
+    renderer.init(divElement)
+    renderer.drawLine({ x: 0, y: 1 }, { x: 5, y: 10 }, { id: "test", stroke: "blue" })
+
+    expect(divElement.children).toHaveLength(1)
+    const el = divElement.querySelector("#test")!
+    expect(el.tagName).toEqual("line")
+    expect(el.getAttribute("x1")).toEqual("0")
+    expect(el.getAttribute("y1")).toEqual("1")
+    expect(el.getAttribute("x2")).toEqual("5")
+    expect(el.getAttribute("y2")).toEqual("10")
+    expect(el.getAttribute("stroke")).toEqual("blue")
   })
 
   describe("resize", () =>

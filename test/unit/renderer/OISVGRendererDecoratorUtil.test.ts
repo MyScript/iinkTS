@@ -1,21 +1,11 @@
 import { buildOIDecorator, buildOIStroke } from "../helpers"
-import { DecoratorKind, DefaultStyle, OISVGDecoratorUtil, TStyle } from "../../../src/iink"
+import { DecoratorKind, DefaultStyle, OISVGRendererDecoratorUtil, TStyle } from "../../../src/iink"
 
-describe("OISVGDecoratorUtil.ts", () =>
+describe("OISVGRendererDecoratorUtil.ts", () =>
 {
-  test("should instanciate", () =>
-  {
-    const selectionFilterId = "selectionFilterId"
-    const removalFilterId = "removalFilterId"
-    const renderer = new OISVGDecoratorUtil(selectionFilterId, removalFilterId)
-    expect(renderer).toBeDefined()
-  })
 
   describe("getSVGElement", () =>
   {
-    const selectionFilterId = "selectionFilterId"
-    const removalFilterId = "removalFilterId"
-    const renderer = new OISVGDecoratorUtil(selectionFilterId, removalFilterId)
     test("should get Highlight", () =>
     {
       const sym = buildOIStroke()
@@ -23,7 +13,7 @@ describe("OISVGDecoratorUtil.ts", () =>
         color: "red",
       }
       const decorator = buildOIDecorator(DecoratorKind.Highlight, style)
-      const el = renderer.getSVGElement(decorator, sym) as SVGGeometryElement
+      const el = OISVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
       expect(el).toBeDefined()
       expect(el.getAttribute("kind")).toEqual(DecoratorKind.Highlight)
       expect(el.getAttribute("opacity")).toEqual("0.5")
@@ -34,7 +24,7 @@ describe("OISVGDecoratorUtil.ts", () =>
     {
       const sym = buildOIStroke()
       const decorator = buildOIDecorator(DecoratorKind.Highlight, {})
-      const el = renderer.getSVGElement(decorator, sym) as SVGGeometryElement
+      const el = OISVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
       expect(el).toBeDefined()
       expect(el.getAttribute("kind")).toEqual(DecoratorKind.Highlight)
       expect(el.getAttribute("opacity")).toEqual("0.5")
@@ -45,10 +35,10 @@ describe("OISVGDecoratorUtil.ts", () =>
     {
       const sym = buildOIStroke()
       const decorator = buildOIDecorator(DecoratorKind.Highlight)
-      const elNotToDelete = renderer.getSVGElement(decorator, sym) as SVGGeometryElement
+      const elNotToDelete = OISVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
       expect(elNotToDelete.getAttribute("opacity")).toEqual(`0.5`)
       sym.deleting = true
-      const elToDelete = renderer.getSVGElement(decorator, sym) as SVGGeometryElement
+      const elToDelete = OISVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
       expect(elToDelete.getAttribute("opacity")).toEqual(`0.25`)
     })
     test("should get Surround", () =>
@@ -60,7 +50,7 @@ describe("OISVGDecoratorUtil.ts", () =>
         width: 4
       }
       const decorator = buildOIDecorator(DecoratorKind.Surround, style)
-      const el = renderer.getSVGElement(decorator, sym) as SVGGeometryElement
+      const el = OISVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
       expect(el).toBeDefined()
       expect(el.getAttribute("kind")).toEqual(DecoratorKind.Surround)
       expect(el.getAttribute("fill")).toEqual("transparent")
@@ -72,7 +62,7 @@ describe("OISVGDecoratorUtil.ts", () =>
     {
       const sym = buildOIStroke()
       const decorator = buildOIDecorator(DecoratorKind.Surround, {})
-      const el = renderer.getSVGElement(decorator, sym) as SVGGeometryElement
+      const el = OISVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
       expect(el).toBeDefined()
       expect(el.getAttribute("kind")).toEqual(DecoratorKind.Surround)
       expect(el.getAttribute("fill")).toEqual("transparent")
@@ -89,7 +79,7 @@ describe("OISVGDecoratorUtil.ts", () =>
         width: 4
       }
       const decorator = buildOIDecorator(DecoratorKind.Strikethrough, style)
-      const el = renderer.getSVGElement(decorator, sym) as SVGGeometryElement
+      const el = OISVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
       expect(el).toBeDefined()
       expect(el.getAttribute("kind")).toEqual(DecoratorKind.Strikethrough)
       expect(el.getAttribute("fill")).toEqual("transparent")
@@ -101,7 +91,7 @@ describe("OISVGDecoratorUtil.ts", () =>
     {
       const sym = buildOIStroke()
       const decorator = buildOIDecorator(DecoratorKind.Strikethrough, {})
-      const el = renderer.getSVGElement(decorator, sym) as SVGGeometryElement
+      const el = OISVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
       expect(el).toBeDefined()
       expect(el.getAttribute("kind")).toEqual(DecoratorKind.Strikethrough)
       expect(el.getAttribute("fill")).toEqual("transparent")
@@ -118,7 +108,7 @@ describe("OISVGDecoratorUtil.ts", () =>
         width: 4
       }
       const decorator = buildOIDecorator(DecoratorKind.Underline, style)
-      const el = renderer.getSVGElement(decorator, sym) as SVGGeometryElement
+      const el = OISVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
       expect(el).toBeDefined()
       expect(el.getAttribute("kind")).toEqual(DecoratorKind.Underline)
       expect(el.getAttribute("fill")).toEqual("transparent")
@@ -130,7 +120,7 @@ describe("OISVGDecoratorUtil.ts", () =>
     {
       const sym = buildOIStroke()
       const decorator = buildOIDecorator(DecoratorKind.Underline, {})
-      const el = renderer.getSVGElement(decorator, sym) as SVGGeometryElement
+      const el = OISVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
       expect(el).toBeDefined()
       expect(el.getAttribute("kind")).toEqual(DecoratorKind.Underline)
       expect(el.getAttribute("fill")).toEqual("transparent")

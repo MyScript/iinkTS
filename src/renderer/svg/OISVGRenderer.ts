@@ -1,16 +1,16 @@
 import { SvgElementRole } from "../../Constants"
 import { TRenderingConfiguration } from "../../configuration"
 import { LoggerClass, LoggerManager } from "../../logger"
-import { TOISymbol, TPoint, TBoundingBox, Box, OIEraser } from "../../primitive"
+import { TOISymbol, TPoint, TBoundingBox, Box, OIEraser, SymbolType } from "../../primitive"
 import { getClosestPoints } from "../../utils"
+import { OISVGRendererConst } from "./OISVGRendererConst"
+import { OISVGRendererEdgeUtil } from "./OISVGRendererEdgeUtil"
 import { OISVGRendererEraserUtil } from "./OISVGRendererEraserUtil"
-import { OISVGRendererUtil } from "./OISVGRendererUtil"
+import { OISVGRendererGroupUtil } from "./OISVGRendererGroupUtil"
+import { OISVGRendererShapeUtil } from "./OISVGRendererShapeUtil"
+import { OISVGRendererStrokeUtil } from "./OISVGRendererStrokeUtil"
+import { OISVGRendererTextUtil } from "./OISVGRendererTextUtil"
 import { SVGBuilder } from "./SVGBuilder"
-
-/**
- * @group Renderer
- */
-export const NO_SELECTION = "pointer-events: none; -webkit-touch-callout: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;"
 
 /**
  * @group Renderer
@@ -19,20 +19,11 @@ export class OISVGRenderer
 {
   #logger = LoggerManager.getLogger(LoggerClass.RENDERER)
   groupGuidesId = "guides-wrapper"
-  selectionFilterId = "selection-filter"
-  removalFilterId = "removal-filter"
-  arrowHeadStartMarker = "arrow-head-start"
-  arrowHeadEndMaker = "arrow-head-end"
-  crossMarker = "cross-head"
 
   configuration: TRenderingConfiguration
   parent!: HTMLElement
   layer!: SVGElement
   definitionGroup!: SVGGElement
-
-  util: OISVGRendererUtil
-
-  eraserUtil: OISVGRendererEraserUtil
 
   verticalGuides: number[] = []
   horizontalGuides: number[] = []
@@ -41,10 +32,6 @@ export class OISVGRenderer
   {
     this.#logger.info("constructor", { configuration })
     this.configuration = configuration
-
-    this.util = new OISVGRendererUtil(this.selectionFilterId, this.removalFilterId, this.arrowHeadStartMarker, this.arrowHeadEndMaker)
-
-    this.eraserUtil = new OISVGRendererEraserUtil()
   }
 
   protected initLayer(): void
@@ -66,7 +53,7 @@ export class OISVGRenderer
     const SIZE = 5
     const REFX = SIZE - 1, REFY = SIZE / 2
     const arrowHeadMarkerAttrs = {
-      style: NO_SELECTION,
+      style: OISVGRendererConst.noSelection,
       fill: "context-stroke",
       markerWidth: SIZE.toString(),
       markerHeight: SIZE.toString(),
@@ -74,23 +61,23 @@ export class OISVGRenderer
       refY: REFY.toString(),
     }
 
-    const arrowHeadStart = SVGBuilder.createMarker(this.arrowHeadStartMarker, { ...arrowHeadMarkerAttrs, orient: "auto-start-reverse" })
+    const arrowHeadStart = SVGBuilder.createMarker(OISVGRendererConst.arrowHeadStartMarker, { ...arrowHeadMarkerAttrs, orient: "auto-start-reverse" })
     arrowHeadStart.appendChild(SVGBuilder.createPolygon([0, 0, SIZE, REFY, 0, SIZE], arrowHeadMarkerAttrs))
     defs.appendChild(arrowHeadStart)
 
-    const arrowHeadEnd = SVGBuilder.createMarker(this.arrowHeadEndMaker, { ...arrowHeadMarkerAttrs, orient: "auto" })
+    const arrowHeadEnd = SVGBuilder.createMarker(OISVGRendererConst.arrowHeadEndMaker, { ...arrowHeadMarkerAttrs, orient: "auto" })
     arrowHeadEnd.appendChild(SVGBuilder.createPolygon([0, 0, SIZE, REFY, 0, SIZE], arrowHeadMarkerAttrs))
     defs.appendChild(arrowHeadEnd)
 
     const crossMarkerAttrs = {
-      style: NO_SELECTION,
+      style: OISVGRendererConst.noSelection,
       markerWidth: "5",
       markerHeight: "5",
       refX: "0",
       refY: "0",
       viewBox: "-5 -5 10 10"
     }
-    const cross = SVGBuilder.createMarker(this.crossMarker, crossMarkerAttrs)
+    const cross = SVGBuilder.createMarker(OISVGRendererConst.crossMarker, crossMarkerAttrs)
     cross.appendChild(SVGBuilder.createPath({ d: "M -4,-4 L 4,4 M -4,4 L 4,-4", stroke: "white", "stroke-width": "3" }))
     cross.appendChild(SVGBuilder.createPath({ d: "M -4,-4 L 4,4 M -4,4 L 4,-4", stroke: "context-stroke", "stroke-width": "2" }))
     defs.appendChild(cross)
@@ -101,14 +88,14 @@ export class OISVGRenderer
   protected createFilters(): SVGGElement
   {
     const filtersGroup = SVGBuilder.createGroup({ id: "definition-group" })
-    const removalFilter = SVGBuilder.createFilter(this.removalFilterId, { filterUnits: "userSpaceOnUse" })
+    const removalFilter = SVGBuilder.createFilter(OISVGRendererConst.removalFilterId, { filterUnits: "userSpaceOnUse" })
     const bfeComponentTransfer = SVGBuilder.createComponentTransfert()
     const bfeFuncA = SVGBuilder.createTransfertFunctionTable("feFuncA", "0 0.25")
     bfeComponentTransfer.appendChild(bfeFuncA)
     removalFilter.appendChild(bfeComponentTransfer)
     filtersGroup.appendChild(removalFilter)
 
-    const selectionFilter = SVGBuilder.createFilter(this.selectionFilterId, { filterUnits: "userSpaceOnUse" })
+    const selectionFilter = SVGBuilder.createFilter(OISVGRendererConst.selectionFilterId, { filterUnits: "userSpaceOnUse" })
     selectionFilter.appendChild(SVGBuilder.createDropShadow({ dx: -1, dy: -1, deviation: 1 }))
     filtersGroup.appendChild(selectionFilter)
 
@@ -127,7 +114,7 @@ export class OISVGRenderer
       id: this.groupGuidesId,
       stroke: "grey",
       opacity: "0.5",
-      style: NO_SELECTION,
+      style: OISVGRendererConst.noSelection,
       role: SvgElementRole.Guide
     }
     const guidesGroup = SVGBuilder.createGroup(attrs)
@@ -137,7 +124,7 @@ export class OISVGRenderer
           const begin: TPoint = { x: offSet, y }
           const end: TPoint = { x: width - offSet, y }
           this.horizontalGuides.push(y)
-          const svgLine = SVGBuilder.createLine(begin, end, { "stroke-width": "1", style: NO_SELECTION })
+          const svgLine = SVGBuilder.createLine(begin, end, { "stroke-width": "1", style: OISVGRendererConst.noSelection })
           guidesGroup.appendChild(svgLine)
         }
         break
@@ -145,24 +132,24 @@ export class OISVGRenderer
         for (let y = 0; y < height; y += offSet) {
           const begin: TPoint = { x: 0, y }
           const end: TPoint = { x: width, y }
-          const svgLine = SVGBuilder.createLine(begin, end, { "stroke-width": "1", style: NO_SELECTION })
+          const svgLine = SVGBuilder.createLine(begin, end, { "stroke-width": "1", style: OISVGRendererConst.noSelection })
           guidesGroup.appendChild(svgLine)
           this.horizontalGuides.push(y)
           for (let subY = y + subOffSet; subY < y + offSet; subY += subOffSet) {
             this.horizontalGuides.push(subY)
-            const svgLine = SVGBuilder.createLine({ x: 0, y: subY }, { x: width, y: subY }, { "stroke-width": "0.25", style: NO_SELECTION })
+            const svgLine = SVGBuilder.createLine({ x: 0, y: subY }, { x: width, y: subY }, { "stroke-width": "0.25", style: OISVGRendererConst.noSelection })
             guidesGroup.appendChild(svgLine)
           }
         }
         for (let x = 0; x < width; x += offSet) {
           const begin: TPoint = { x, y: 0 }
           const end: TPoint = { x, y: height }
-          const svgLine = SVGBuilder.createLine(begin, end, { "stroke-width": "1", style: NO_SELECTION })
+          const svgLine = SVGBuilder.createLine(begin, end, { "stroke-width": "1", style: OISVGRendererConst.noSelection })
           guidesGroup.appendChild(svgLine)
           this.verticalGuides.push(x)
           for (let subX = x + subOffSet; subX < x + offSet; subX += subOffSet) {
             this.verticalGuides.push(subX)
-            const svgLine = SVGBuilder.createLine({ x: subX, y: 0 }, { x: subX, y: height }, { "stroke-width": "0.25", style: NO_SELECTION })
+            const svgLine = SVGBuilder.createLine({ x: subX, y: 0 }, { x: subX, y: height }, { "stroke-width": "0.25", style: OISVGRendererConst.noSelection })
             guidesGroup.appendChild(svgLine)
           }
         }
@@ -224,6 +211,34 @@ export class OISVGRenderer
     element?.setAttribute(name, value)
   }
 
+  buildElementFromSymbol(symbol: TOISymbol | OIEraser): SVGGraphicsElement | undefined
+  {
+    let element: SVGGraphicsElement | undefined
+    switch (symbol.type) {
+      case SymbolType.Stroke:
+        element = OISVGRendererStrokeUtil.getSVGElement(symbol)
+        break
+      case SymbolType.Eraser:
+        element = OISVGRendererEraserUtil.getSVGElement(symbol)
+        break
+      case SymbolType.Shape:
+        element = OISVGRendererShapeUtil.getSVGElement(symbol)
+        break
+      case SymbolType.Edge:
+        element = OISVGRendererEdgeUtil.getSVGElement(symbol)
+        break
+      case SymbolType.Text:
+        element = OISVGRendererTextUtil.getSVGElement(symbol)
+        break
+      case SymbolType.Group:
+        element = OISVGRendererGroupUtil.getSVGElement(symbol)
+        break
+      default:
+        this.#logger.error("buildElementFromSymbol", `symbol unknow: "${ JSON.stringify(symbol) }"`)
+    }
+    return element
+  }
+
   prependElement(el: Element): void
   {
     this.layer.prepend(el)
@@ -269,7 +284,7 @@ export class OISVGRenderer
   {
     this.#logger.debug("drawSymbol", { symbol })
     const oldNode = this.layer.querySelector(`#${ symbol?.id }`)
-    const svgEl = this.util.getSymbolElement(symbol)
+    const svgEl = this.buildElementFromSymbol(symbol)
 
     if (svgEl) {
       if (oldNode) {
@@ -286,7 +301,7 @@ export class OISVGRenderer
   {
     this.#logger.debug("drawSymbol", { symbols })
     const oldNode = this.layer.querySelector(`#${ id }`)
-    const elements = symbols.map(s => this.util.getSymbolElement(s)).filter(x => !!x) as SVGGraphicsElement[]
+    const elements = symbols.map(s => this.buildElementFromSymbol(s)).filter(x => !!x) as SVGGraphicsElement[]
 
     if (elements.length) {
       if (oldNode) {
@@ -321,8 +336,7 @@ export class OISVGRenderer
   drawLine(p1: TPoint, p2: TPoint, attrs: { [key: string]: string } = {}): void
   {
     this.#logger.info("drawLine", { p1, p2, attrs })
-    const line = SVGBuilder.createLine(p1, p2, attrs)
-    this.layer.appendChild(line)
+    this.layer.appendChild(SVGBuilder.createLine(p1, p2, attrs))
   }
 
   drawConnectionBetweenBox(id: string, box1: TBoundingBox, box2: TBoundingBox, attrs?: { [key: string]: string }): void
@@ -333,7 +347,7 @@ export class OISVGRenderer
     const attrsLine = {
       id,
       fill: "transparent",
-      style: NO_SELECTION,
+      style: OISVGRendererConst.noSelection,
       ...attrs
     }
     this.drawLine(p1, p2, attrsLine)

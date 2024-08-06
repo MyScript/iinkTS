@@ -1,4 +1,7 @@
 import { OIShapeCircle, OIShapeEllipse, OIShapePolygon, ShapeKind, TOIShape } from "../../primitive"
+import { DefaultStyle } from "../../style"
+import { OISVGRendererConst } from "./OISVGRendererConst"
+import { SVGBuilder } from "./SVGBuilder"
 
 /**
  * @group Renderer
@@ -32,5 +35,37 @@ export class OISVGRendererShapeUtil
       default:
         throw new Error(`Can't getSVGPath for shape cause kind is unknow: "${ JSON.stringify(shape) }"`)
     }
+  }
+
+  static getSVGElement(shape: TOIShape): SVGGraphicsElement
+  {
+    const attrs: { [key: string]: string } = {
+      "id": shape.id,
+      "type": shape.type,
+      "kind": shape.kind,
+      "vector-effect": "non-scaling-stroke",
+      "stroke-linecap": "round",
+      "stroke-linejoin": "round",
+    }
+    if (shape.selected) {
+      attrs["filter"] = `url(#${ OISVGRendererConst.selectionFilterId })`
+    }
+    if (shape.deleting) {
+      attrs["filter"] = `url(#${ OISVGRendererConst.removalFilterId })`
+    }
+
+    const group = SVGBuilder.createGroup(attrs)
+
+    const pathAttrs: { [key: string]: string } = {
+      "fill": shape.style.fill || "transparent",
+      "stroke": shape.style.color || DefaultStyle.color!,
+      "stroke-width": (shape.style.width || DefaultStyle.width!).toString(),
+      "opacity": (shape.style.opacity || DefaultStyle.opacity!).toString(),
+      "d": OISVGRendererShapeUtil.getSVGPath(shape),
+    }
+
+    group.appendChild(SVGBuilder.createPath(pathAttrs))
+
+    return group
   }
 }

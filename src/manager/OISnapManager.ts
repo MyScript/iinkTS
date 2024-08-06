@@ -2,7 +2,8 @@ import { OIBehaviors } from "../behaviors"
 import { LoggerClass, LoggerManager } from "../logger"
 import { OIModel } from "../model"
 import { Box, TPoint, TSegment } from "../primitive"
-import { NO_SELECTION, OISVGRenderer } from "../renderer"
+import { OISVGRenderer } from "../renderer"
+import { OISVGRendererConst } from "../renderer/svg/OISVGRendererConst"
 
 /**
  * @group Snap
@@ -101,9 +102,9 @@ export class OISnapManager
       fill: "transparent",
       stroke: "blue",
       "stroke-width": "2",
-      style: NO_SELECTION,
-      "marker-start": `url(#${ this.renderer.crossMarker })`,
-      "marker-end": `url(#${ this.renderer.crossMarker })`
+      style: OISVGRendererConst.noSelection,
+      "marker-start": `url(#${ OISVGRendererConst.crossMarker })`,
+      "marker-end": `url(#${ OISVGRendererConst.crossMarker })`
     }
     lines.forEach(seg =>
     {
