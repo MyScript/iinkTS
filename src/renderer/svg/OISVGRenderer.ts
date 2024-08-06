@@ -199,10 +199,10 @@ export class OISVGRenderer
     this.initLayer()
   }
 
-  getAttribute(id: string, name: string): string
+  getAttribute(id: string, name: string): string | undefined | null
   {
     const element = this.layer.querySelector(`#${ id }`) as HTMLElement | null
-    return element?.getAttribute(name) as string
+    return element?.getAttribute(name)
   }
 
   setAttribute(id: string, name: string, value: string): void

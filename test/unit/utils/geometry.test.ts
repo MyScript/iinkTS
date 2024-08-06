@@ -255,12 +255,12 @@ describe("geometry.ts", () =>
   describe("computePointOnEllipse", () =>
   {
     const testDatas = [
-      { center: { x: 0, y: 0 }, radiusX: 5, radiusY: 10, phi: 0, radian: Math.PI / 4, expected: { x: 3.536, y: 3.536 } },
-      { center: { x: 0, y: 0 }, radiusX: 10, radiusY: 5, phi: 0, radian: Math.PI / 4, expected: { x: 7.071, y: 7.071 } },
-      { center: { x: 0, y: 0 }, radiusX: 10, radiusY: 5, phi: 0, radian: -Math.PI / 4, expected: { x: 7.071, y: -7.071 } },
-      { center: { x: 0, y: 0 }, radiusX: 50, radiusY: 5, phi: 0, radian: Math.PI / 4, expected: { x: 35.355, y: 35.355 } },
-      { center: { x: 0, y: 0 }, radiusX: 50, radiusY: 5, phi: 0, radian: Math.PI / 2, expected: { x: 0, y: 50 } },
-      { center: { x: 0, y: 0 }, radiusX: 50, radiusY: 5, phi: 0, radian: -Math.PI / 2, expected: { x: 0, y: -50 } },
+      { center: { x: 0, y: 0 }, radiusX: 5, radiusY: 10, phi: 0, radian: Math.PI / 4, expected: { x: 3.536, y: 7.071 } },
+      { center: { x: 0, y: 0 }, radiusX: 10, radiusY: 5, phi: 0, radian: Math.PI / 4, expected: { x: 7.071, y: 3.536 } },
+      { center: { x: 0, y: 0 }, radiusX: 10, radiusY: 5, phi: 0, radian: -Math.PI / 4, expected: { x: 7.071, y: -3.536 } },
+      { center: { x: 0, y: 0 }, radiusX: 50, radiusY: 5, phi: 0, radian: Math.PI / 4, expected: { x: 35.355, y: 3.536 } },
+      { center: { x: 0, y: 0 }, radiusX: 50, radiusY: 5, phi: 0, radian: Math.PI / 2, expected: { x: 0, y: 5 } },
+      { center: { x: 0, y: 0 }, radiusX: 50, radiusY: 5, phi: 0, radian: -Math.PI / 2, expected: { x: 0, y: -5 } },
     ]
     testDatas.forEach(d =>
     {

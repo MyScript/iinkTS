@@ -17,7 +17,7 @@ describe("OISVGRendererShapeUtil.ts", () =>
   })
   test("should getSVGPath for ellipse", () =>
   {
-    const ellipse = new OIShapeEllipse({ x: 0, y: 0 }, 5, 10)
+    const ellipse = new OIShapeEllipse({ x: 0, y: 0 }, 5, 10, 0)
     expect(OISVGRendererShapeUtil.getSVGPath(ellipse)).toEqual("M -5 0 a 5 10 0 1 1 10 0 a 5 10 0 1 1 -10 0 Z")
   })
   test("should getSVGPath for parallelogram", () =>

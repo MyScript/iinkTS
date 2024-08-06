@@ -53,7 +53,11 @@ export class OIShapePolygon extends OIShapeBase<ShapeKind.Polygon>
   {
     if (!partial?.points || partial?.points?.length < 3) throw new Error(`Unable to create polygon at least 3 points required`)
     if (partial?.points?.some(p => !isValidPoint(p))) throw new Error(`Unable to create a polygon, one or more points are invalid`)
-    return new OIShapePolygon(partial.points as TPoint[], partial.style)
+    const polygon = new OIShapePolygon(partial.points as TPoint[], partial.style)
+    if (partial.id) {
+      polygon.id = partial.id
+    }
+    return polygon
   }
 
   static createTriangleBetweenPoints(origin: TPoint, target: TPoint, style?: PartialDeep<TStyle>): OIShapePolygon

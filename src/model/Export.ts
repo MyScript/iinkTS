@@ -144,6 +144,7 @@ export type TJIIXNodeEllipse = TJIIXNodeElementBase<JIIXNodeKind.Ellipse> & {
   cy: number
   rx: number
   ry: number
+  orientation: number
 }
 
 /**
