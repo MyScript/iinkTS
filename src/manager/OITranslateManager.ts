@@ -15,13 +15,6 @@ import
   TOISymbol,
   TPoint
 } from "../primitive"
-import { OIRecognizer } from "../recognizer"
-import { OISVGRenderer } from "../renderer/svg/OISVGRenderer"
-import { OIHistoryManager } from "../history"
-import { OIDebugSVGManager } from "./OIDebugSVGManager"
-import { OISelectionManager } from "./OISelectionManager"
-import { OISnapManager } from "./OISnapManager"
-import { OITextManager } from "./OITextManager"
 
 /**
  * @group Manager
@@ -42,41 +35,6 @@ export class OITranslateManager
   get model(): OIModel
   {
     return this.behaviors.model
-  }
-
-  get history(): OIHistoryManager
-  {
-    return this.behaviors.history
-  }
-
-  get selector(): OISelectionManager
-  {
-    return this.behaviors.selector
-  }
-
-  get texter(): OITextManager
-  {
-    return this.behaviors.texter
-  }
-
-  get renderer(): OISVGRenderer
-  {
-    return this.behaviors.renderer
-  }
-
-  get recognizer(): OIRecognizer
-  {
-    return this.behaviors.recognizer
-  }
-
-  get snaps(): OISnapManager
-  {
-    return this.behaviors.snaps
-  }
-
-  get svgDebugger(): OIDebugSVGManager
-  {
-    return this.behaviors.svgDebugger
   }
 
   protected applyToStroke(stroke: OIStroke, tx: number, ty: number): OIStroke
@@ -146,7 +104,7 @@ export class OITranslateManager
     }
     text.point.x += tx
     text.point.y += ty
-    return this.texter.updateBounds(text)
+    return this.behaviors.texter.updateBounds(text)
   }
 
   protected applyOnGroup(group: OISymbolGroup, tx: number, ty: number): OISymbolGroup
@@ -181,19 +139,19 @@ export class OITranslateManager
     {
       this.applyToSymbol(s, tx, ty)
       this.model.updateSymbol(s)
-      this.renderer.drawSymbol(s)
+      this.behaviors.renderer.drawSymbol(s)
     })
     if (addToHistory) {
-      this.history.push(this.model, { translate: [{ symbols: this.model.symbolsSelected, tx, ty }] })
+      this.behaviors.history.push(this.model, { translate: [{ symbols: this.model.symbolsSelected, tx, ty }] })
     }
     const strokes = this.behaviors.extractStrokesFromSymbols(symbols)
-    return this.recognizer.transformTranslate(strokes.map(s => s.id), tx, ty)
+    return this.behaviors.recognizer.transformTranslate(strokes.map(s => s.id), tx, ty)
   }
 
   translateElement(id: string, tx: number, ty: number): void
   {
     this.#logger.info("translateElement", { id, tx, ty })
-    this.renderer.setAttribute(id, "transform", `translate(${ tx },${ ty })`)
+    this.behaviors.renderer.setAttribute(id, "transform", `translate(${ tx },${ ty })`)
   }
 
   start(target: Element, origin: TPoint): void
@@ -201,7 +159,7 @@ export class OITranslateManager
     this.#logger.info("start", { origin })
     this.interactElementsGroup = (target.closest(`[role=${ SvgElementRole.InteractElementsGroup }]`) as unknown) as SVGGElement
     this.transformOrigin = origin
-    this.selector.hideInteractElements()
+    this.behaviors.selector.hideInteractElements()
   }
 
   continue(point: TPoint): { tx: number, ty: number }
@@ -214,7 +172,7 @@ export class OITranslateManager
     let tx = point.x - this.transformOrigin.x
     let ty = point.y - this.transformOrigin.y
 
-    const nudge = this.snaps.snapTranslate(tx, ty)
+    const nudge = this.behaviors.snaps.snapTranslate(tx, ty)
     tx = nudge.x
     ty = nudge.y
 
@@ -233,12 +191,12 @@ export class OITranslateManager
   {
     this.#logger.info("end", { point })
     const { tx, ty } = this.continue(point)
-    this.snaps.clearSnapToElementLines()
+    this.behaviors.snaps.clearSnapToElementLines()
     this.translate(this.model.symbolsSelected, tx, ty)
 
-    this.selector.resetSelectedGroup(this.model.symbolsSelected)
+    this.behaviors.selector.resetSelectedGroup(this.model.symbolsSelected)
     this.interactElementsGroup = undefined
-    this.svgDebugger.apply()
+    this.behaviors.svgDebugger.apply()
   }
 
 }

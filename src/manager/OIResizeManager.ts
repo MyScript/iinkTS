@@ -16,13 +16,6 @@ import
   TOISymbol,
   TPoint
 } from "../primitive"
-import { OIRecognizer } from "../recognizer"
-import { OISVGRenderer } from "../renderer"
-import { OIHistoryManager } from "../history"
-import { OIDebugSVGManager } from "./OIDebugSVGManager"
-import { OISelectionManager } from "./OISelectionManager"
-import { OISnapManager } from "./OISnapManager"
-import { OITextManager } from "./OITextManager"
 
 /**
  * @group Manager
@@ -49,41 +42,6 @@ export class OIResizeManager
     return this.behaviors.model
   }
 
-  get history(): OIHistoryManager
-  {
-    return this.behaviors.history
-  }
-
-  get selector(): OISelectionManager
-  {
-    return this.behaviors.selector
-  }
-
-  get texter(): OITextManager
-  {
-    return this.behaviors.texter
-  }
-
-  get renderer(): OISVGRenderer
-  {
-    return this.behaviors.renderer
-  }
-
-  get recognizer(): OIRecognizer
-  {
-    return this.behaviors.recognizer
-  }
-
-  get snaps(): OISnapManager
-  {
-    return this.behaviors.snaps
-  }
-
-  get svgDebugger(): OIDebugSVGManager
-  {
-    return this.behaviors.svgDebugger
-  }
-
   protected applyToStroke(stroke: OIStroke, origin: TPoint, scaleX: number, scaleY: number): OIStroke
   {
     this.#logger.debug("applyToStroke", { stroke, origin, scaleX, scaleY })
@@ -100,23 +58,25 @@ export class OIResizeManager
     this.#logger.debug("applyToShape", { shape, origin, scaleX, scaleY })
     switch (shape.kind) {
       case ShapeKind.Ellipse: {
-        shape.radiusX *= scaleX
-        shape.radiusY *= scaleY
-        shape.center.x = origin.x + scaleX * (shape.center.x - origin.x)
-        shape.center.y = origin.y + scaleY * (shape.center.y - origin.y)
+        const cosPhi = Math.cos(shape.orientation)
+        const sinPhi = Math.sin(shape.orientation)
+        shape.center.x = +(shape.center.x + ((scaleX - 1) * cosPhi + (scaleY - 1) * sinPhi) * (shape.center.x - origin.x)).toFixed(3)
+        shape.center.y = +(shape.center.y + ((scaleX - 1) * -sinPhi + (scaleY - 1) * cosPhi) * (shape.center.y - origin.y)).toFixed(3)
+        shape.radiusX = +(Math.abs(shape.radiusX * (scaleX * cosPhi - scaleY * sinPhi))).toFixed(3)
+        shape.radiusY = +(Math.abs(shape.radiusY * (scaleX * sinPhi + scaleY * cosPhi))).toFixed(3)
         return shape
       }
       case ShapeKind.Circle: {
-        shape.radius *= (scaleX + scaleY) / 2
-        shape.center.x = origin.x + scaleX * (shape.center.x - origin.x)
-        shape.center.y = origin.y + scaleY * (shape.center.y - origin.y)
+        shape.radius = +(shape.radius * (scaleX + scaleY) / 2).toFixed(3)
+        shape.center.x = +(origin.x + scaleX * (shape.center.x - origin.x)).toFixed(3)
+        shape.center.y = +(origin.y + scaleY * (shape.center.y - origin.y)).toFixed(3)
         return shape
       }
       case ShapeKind.Polygon: {
         shape.points.forEach(p =>
         {
-          p.x = origin.x + scaleX * (p.x - origin.x)
-          p.y = origin.y + scaleY * (p.y - origin.y)
+          p.x = +(origin.x + scaleX * (p.x - origin.x)).toFixed(3)
+          p.y = +(origin.y + scaleY * (p.y - origin.y)).toFixed(3)
         })
         return shape
       }
@@ -130,28 +90,34 @@ export class OIResizeManager
     this.#logger.debug("applyToEdge", { edge, origin, scaleX, scaleY })
     switch (edge.kind) {
       case EdgeKind.Arc: {
-        edge.center.x = +(edge.center.x + (edge.center.x - origin.x)).toFixed(3)
-        edge.center.y = +(edge.center.x + (edge.center.y - origin.y)).toFixed(3)
+        const cosPhi = Math.cos(edge.phi)
+        const sinPhi = Math.sin(edge.phi)
+        edge.center.x = +(edge.center.x + ((scaleX - 1) * cosPhi + (scaleY - 1) * sinPhi) * (edge.center.x - origin.x)).toFixed(3)
+        edge.center.y = +(edge.center.y + ((scaleX - 1) * -sinPhi + (scaleY - 1) * cosPhi) * (edge.center.y - origin.y)).toFixed(3)
+        edge.radiusX = +(edge.radiusX * Math.abs(scaleX * cosPhi + scaleY * sinPhi)).toFixed(3)
+        edge.radiusY = +(edge.radiusY * Math.abs(scaleX * sinPhi + scaleY * cosPhi)).toFixed(3)
 
-        edge.radiusX = +(edge.radiusX * Math.abs(scaleX)).toFixed(3)
-        edge.radiusY = +(edge.radiusY * Math.abs(scaleY)).toFixed(3)
-        if (scaleX * scaleY < 0) {
+        if (scaleX < 0) {
+          edge.startAngle = +(Math.PI - edge.startAngle).toFixed(3)
+          edge.sweepAngle *= -1
+        }
+        else if (scaleY < 0) {
           edge.sweepAngle *= -1
         }
         return edge
       }
       case EdgeKind.Line: {
-        edge.start.x = origin.x + scaleX * (edge.start.x - origin.x)
-        edge.start.y = origin.y + scaleY * (edge.start.y - origin.y)
-        edge.end.x = origin.x + scaleX * (edge.end.x - origin.x)
-        edge.end.y = origin.y + scaleY * (edge.end.y - origin.y)
+        edge.start.x = +(origin.x + scaleX * (edge.start.x - origin.x)).toFixed(3)
+        edge.start.y = +(origin.y + scaleY * (edge.start.y - origin.y)).toFixed(3)
+        edge.end.x = +(origin.x + scaleX * (edge.end.x - origin.x)).toFixed(3)
+        edge.end.y = +(origin.y + scaleY * (edge.end.y - origin.y)).toFixed(3)
         return edge
       }
       case EdgeKind.PolyEdge: {
         edge.points.forEach(p =>
         {
-          p.x = origin.x + scaleX * (p.x - origin.x)
-          p.y = origin.y + scaleY * (p.y - origin.y)
+          p.x = +(origin.x + scaleX * (p.x - origin.x)).toFixed(3)
+          p.y = +(origin.y + scaleY * (p.y - origin.y)).toFixed(3)
           return p
         })
         return edge
@@ -163,14 +129,14 @@ export class OIResizeManager
 
   protected applyOnText(text: OIText, origin: TPoint, scaleX: number, scaleY: number): OIText
   {
-    text.point.x = origin.x + scaleX * (text.point.x - origin.x)
-    text.point.y = origin.y + scaleY * (text.point.y - origin.y)
+    text.point.x = +(origin.x + scaleX * (text.point.x - origin.x)).toFixed(3)
+    text.point.y = +(origin.y + scaleY * (text.point.y - origin.y)).toFixed(3)
 
     text.chars.forEach(c =>
     {
-      c.fontSize *= (scaleX + scaleY) / 2
+      c.fontSize = +(c.fontSize * (scaleX + scaleY) / 2).toFixed(3)
     })
-    return this.texter.updateBounds(text)
+    return this.behaviors.texter.updateBounds(text)
   }
 
   protected applyOnGroup(group: OISymbolGroup, origin: TPoint, scaleX: number, scaleY: number): OISymbolGroup
@@ -200,13 +166,13 @@ export class OIResizeManager
 
   setTransformOrigin(id: string, originX: number, originY: number): void
   {
-    this.renderer.setAttribute(id, "transform-origin", `${ originX }px ${ originY }px`)
+    this.behaviors.renderer.setAttribute(id, "transform-origin", `${ originX }px ${ originY }px`)
   }
 
   scaleElement(id: string, sx: number, sy: number): void
   {
     this.#logger.info("scaleElement", { id, sx, sy })
-    this.renderer.setAttribute(id, "transform", `scale(${ sx },${ sy })`)
+    this.behaviors.renderer.setAttribute(id, "transform", `scale(${ sx },${ sy })`)
   }
 
   start(target: Element, origin: TPoint): void
@@ -225,7 +191,7 @@ export class OIResizeManager
       this.setTransformOrigin(s.id, this.transformOrigin.x, this.transformOrigin.y)
     })
 
-    this.selector.hideInteractElements()
+    this.behaviors.selector.hideInteractElements()
   }
 
   continue(point: TPoint): { scaleX: number, scaleY: number }
@@ -251,7 +217,7 @@ export class OIResizeManager
       ResizeDirection.SouthEast,
       ResizeDirection.SouthWest
     ].includes(this.direction)
-    const { x, y } = this.snaps.snapResize(point, horizontalResize, verticalResize)
+    const { x, y } = this.behaviors.snaps.snapResize(point, horizontalResize, verticalResize)
     localPoint.x = x
     localPoint.y = y
 
@@ -300,22 +266,22 @@ export class OIResizeManager
   {
     this.#logger.info("end", { point })
     const { scaleX, scaleY } = this.continue(point)
-    this.snaps.clearSnapToElementLines()
+    this.behaviors.snaps.clearSnapToElementLines()
     const oldSymbols = this.model.symbolsSelected.map(s => s.clone())
     this.model.symbolsSelected.forEach(s =>
     {
       this.applyToSymbol(s, this.transformOrigin, scaleX, scaleY)
-      this.renderer.drawSymbol(s)
+      this.behaviors.renderer.drawSymbol(s)
       this.model.updateSymbol(s)
     })
 
     const strokesFromSymbols = this.behaviors.extractStrokesFromSymbols(this.model.symbolsSelected)
-    this.recognizer.replaceStrokes(strokesFromSymbols.map(s => s.id), strokesFromSymbols)
+    this.behaviors.recognizer.replaceStrokes(strokesFromSymbols.map(s => s.id), strokesFromSymbols)
 
-    this.selector.resetSelectedGroup(this.model.symbolsSelected)
-    this.history.push(this.model, { replaced: { oldSymbols, newSymbols: this.model.symbolsSelected } })
+    this.behaviors.selector.resetSelectedGroup(this.model.symbolsSelected)
+    this.behaviors.history.push(this.model, { replaced: { oldSymbols, newSymbols: this.model.symbolsSelected } })
     this.interactElementsGroup = undefined
-    this.selector.showInteractElements()
-    this.svgDebugger.apply()
+    this.behaviors.selector.showInteractElements()
+    this.behaviors.svgDebugger.apply()
   }
 }
