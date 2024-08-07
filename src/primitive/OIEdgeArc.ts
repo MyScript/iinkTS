@@ -47,19 +47,21 @@ export class OIEdgeArc extends OIEdgeBase<EdgeKind.Arc>
 
   protected computedVertices(): TPoint[]
   {
-    const length = Math.round((this.radiusX + this.radiusY) * Math.abs(this.sweepAngle) / 2)
-    const nbVertices = Math.max(8, Math.round(length / SELECTION_MARGIN * 2))
+    const length = Math.abs(this.sweepAngle) * Math.sqrt((Math.pow(this.radiusX, 2) + Math.pow(this.radiusY, 2)) / 2)
+    const nbVertices = Math.max(8, Math.round(length / SELECTION_MARGIN))
     const angleStep = this.sweepAngle / nbVertices
     const v: TPoint[] = []
+    const endAngle = this.startAngle + this.sweepAngle
     if (this.sweepAngle > 0) {
-      for (let angle = this.startAngle; angle <= this.startAngle + this.sweepAngle; angle += angleStep) {
+      for (let angle = this.startAngle; angle < endAngle; angle += angleStep) {
         v.push(computePointOnEllipse(this.center, this.radiusX, this.radiusY, this.phi, angle))
       }
     } else {
-      for (let angle = this.startAngle; angle >= this.startAngle + this.sweepAngle; angle += angleStep) {
+      for (let angle = this.startAngle; angle > endAngle; angle += angleStep) {
         v.push(computePointOnEllipse(this.center, this.radiusX, this.radiusY, this.phi, angle))
       }
     }
+    v.push(computePointOnEllipse(this.center, this.radiusX, this.radiusY, this.phi, endAngle))
     return v
   }
 
