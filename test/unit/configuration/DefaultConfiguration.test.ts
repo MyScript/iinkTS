@@ -64,14 +64,14 @@ describe("DefaultConfiguration.ts", () =>
     })
     test("should have diagram", () =>
     {
+      expect(DefaultConfiguration.recognition.diagram.convert?.types).toEqual(["text", "shape"])
       expect(DefaultConfiguration.recognition.diagram.mimeTypes).toStrictEqual(["application/vnd.myscript.jiix"])
       expect(DefaultConfiguration.recognition.diagram.eraser?.["erase-precisely"]).toStrictEqual(false)
     })
     test("should have raw-content", () =>
     {
       expect(DefaultConfiguration.recognition["raw-content"]).not.toHaveProperty("mimeTypes")
-      expect(DefaultConfiguration.recognition["raw-content"].recognition?.text).toStrictEqual(true)
-      expect(DefaultConfiguration.recognition["raw-content"].recognition?.shape).toStrictEqual(true)
+      expect(DefaultConfiguration.recognition["raw-content"].recognition?.types).toEqual(["text", "shape"])
       expect(DefaultConfiguration.recognition["raw-content"].eraser?.["erase-precisely"]).toStrictEqual(false)
     })
   })

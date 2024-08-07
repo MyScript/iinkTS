@@ -81,10 +81,24 @@ export class Configuration implements TConfiguration
     this["undo-redo"] = mergeDeep({}, defaultConf["undo-redo"], configuration?.["undo-redo"])
     this.menu = mergeDeep({}, defaultConf.menu, configuration?.menu)
 
-    this.recognition.text.mimeTypes = (configuration?.recognition?.text?.mimeTypes || defaultConf.recognition.text.mimeTypes) as ("text/plain" | "application/vnd.myscript.jiix")[]
-    this.recognition.math.mimeTypes = (configuration?.recognition?.math?.mimeTypes || defaultConf.recognition.math.mimeTypes) as ("application/vnd.myscript.jiix" | "application/x-latex" | "application/mathml+xml")[]
-    this.recognition.diagram.mimeTypes = (configuration?.recognition?.diagram?.mimeTypes || defaultConf.recognition.diagram.mimeTypes) as ("application/vnd.myscript.jiix" | "application/vnd.openxmlformats-officedocument.presentationml.presentation" | "image/svg+xml")[]
-    this.recognition["raw-content"].gestures = (configuration?.recognition?.["raw-content"]?.gestures || defaultConf.recognition["raw-content"].gestures) as ("underline" | "scratch-out" | "join" | "insert" | "strike-through" | "surround")[] | undefined
+    if (configuration?.recognition?.text?.mimeTypes) {
+      this.recognition.text.mimeTypes = configuration.recognition.text.mimeTypes as ("text/plain" | "application/vnd.myscript.jiix")[]
+    }
+    if (configuration?.recognition?.math?.mimeTypes) {
+      this.recognition.math.mimeTypes = configuration.recognition.math.mimeTypes as ("application/vnd.myscript.jiix" | "application/x-latex" | "application/mathml+xml")[]
+    }
+    if (configuration?.recognition?.diagram?.mimeTypes) {
+      this.recognition.diagram.mimeTypes = configuration.recognition.diagram.mimeTypes as ("application/vnd.myscript.jiix" | "application/vnd.openxmlformats-officedocument.presentationml.presentation" | "image/svg+xml")[]
+    }
+    if (configuration?.recognition?.diagram?.convert?.types) {
+      this.recognition.diagram.convert!.types = configuration.recognition.diagram.convert.types as ("text" | "shape")[]
+    }
+    if (configuration?.recognition?.["raw-content"]?.gestures) {
+      this.recognition["raw-content"].gestures = configuration.recognition["raw-content"].gestures as ("underline" | "scratch-out" | "join" | "insert" | "strike-through" | "surround")[]
+    }
+    if (configuration?.recognition?.["raw-content"]?.recognition?.types) {
+      this.recognition["raw-content"].recognition!.types = configuration.recognition["raw-content"].recognition.types as ("text" | "shape")[]
+    }
 
     if (this.server?.useWindowLocation) {
       this.server.scheme = window.location.protocol.indexOf("s") > -1 ? "https" : "http"
