@@ -234,8 +234,9 @@ describe("OISVGRenderer.ts", () =>
       expect(el).toBeDefined()
       expect(el.getAttribute("id")).toEqual(line.id)
       expect(el.getAttribute("type")).toEqual("edge")
-      expect(el.getAttribute("stroke")).toEqual(line.style.color)
-      expect(el.getAttribute("stroke-width")).toEqual(line.style.width?.toString())
+      const path = el.querySelector("path")!
+      expect(path.getAttribute("stroke")).toEqual(line.style.color)
+      expect(path.getAttribute("stroke-width")).toEqual(line.style.width?.toString())
     })
     test("should draw text", () =>
     {

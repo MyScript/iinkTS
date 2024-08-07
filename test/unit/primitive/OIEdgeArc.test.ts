@@ -60,23 +60,23 @@ describe("OIEdgeArc.ts", () =>
 
     test(`should get vertices for small clockwise arc`, () =>
     {
-      expect(smallClockwiseArc.vertices).toHaveLength(8)
+      expect(smallClockwiseArc.vertices).toHaveLength(9)
       expect(smallClockwiseArc.vertices).toEqual(expect.arrayContaining(
         [
           { x: 3.536, y: 3.536 },
           { x: 2.357, y: 4.41 },
-          { x: 0.49, y: 4.976 }
+          { x: 0, y: 5 }
         ]
       ))
     })
     test(`should get vertices for large clockwise arc`, () =>
     {
-      expect(largeClockwiseArc.vertices).toHaveLength(24)
+      expect(largeClockwiseArc.vertices).toHaveLength(13)
       expect(largeClockwiseArc.vertices).toEqual(expect.arrayContaining(
         [
           { x: 35.355, y: 35.355 },
-          { x: -0, y: 50 },
-          { x: -49.759, y: 4.901 }
+          { x: 0, y: 50 },
+          { x: -49.039, y: 9.755 }
         ]
       ))
     })
@@ -93,32 +93,30 @@ describe("OIEdgeArc.ts", () =>
     })
     test(`should get vertices for large counter-clockwise arc`, () =>
     {
-      expect(largeCounterClockwiseArc.vertices).toHaveLength(24)
+      expect(largeCounterClockwiseArc.vertices).toHaveLength(13)
       expect(largeCounterClockwiseArc.vertices).toEqual(expect.arrayContaining(
         [
           { x: 35.355, y: 35.355 },
           { x: 50, y: 0 },
-          { x: 4.901, y: -49.759 }
+          { x: 0, y: -50 }
         ]
       ))
     })
-
     test(`should get snap points for small clockwise arc`, () =>
     {
       expect(smallClockwiseArc.snapPoints).toHaveLength(2)
       expect(smallClockwiseArc.snapPoints).toEqual([
         { x: 3.536, y: 3.536 },
-        { x: 0.49, y: 4.976 }
+        { x: 0, y: 5 }
       ])
     })
   })
 
-
   describe("isCloseToPoint", () =>
   {
     const center: TPoint = { x: 0, y: 0 }
-    const startAngle = Math.PI / 4
-    const sweepAngle = 3 * Math.PI / 4
+    const startAngle = -Math.PI
+    const sweepAngle = Math.PI
     const radiusX = 10
     const radiusY = 50
     const phi = 0
@@ -135,7 +133,7 @@ describe("OIEdgeArc.ts", () =>
     })
     test(`should return false when the point is more than ${ SELECTION_MARGIN } pixel from an edge`, () =>
     {
-      const closePoint: TPoint = { x: 25, y: 25 }
+      const closePoint: TPoint = { x: -50, y: 50 }
       expect(arc.isCloseToPoint(closePoint)).toEqual(false)
     })
   })
