@@ -5,26 +5,12 @@ import { TTextConfConfiguration } from "./TextConfiguration"
 /**
  * @group Configuration
  */
-export type TRawContentRecognitionConfiguration = {
-  text: boolean
-  shape: boolean
-}
-
-/**
- * @group Configuration
- */
-export const DefaultRawContentRecognitionConfiguration: TRawContentRecognitionConfiguration = {
-  text: true,
-  shape: true
-}
-
-/**
- * @group Configuration
- */
 export type TRawContentConfiguration = {
   text?: TTextConfConfiguration
   "session-time"?: number
-  recognition?: TRawContentRecognitionConfiguration
+  recognition?: {
+    types: ("text" | "shape")[]
+  }
   eraser?: TEraserConfiguration
   /**
    * @description allows you to define the detected gestures
@@ -37,7 +23,9 @@ export type TRawContentConfiguration = {
  * @group Configuration
  */
 export const DefaultRawContentConfiguration: TRawContentConfiguration = {
-  recognition: DefaultRawContentRecognitionConfiguration,
+  recognition: {
+    types: ["text", "shape"]
+  },
   eraser: DefaultEraserConfiguration,
   /**
    * @remarks only usable in the case of offscreen

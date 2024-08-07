@@ -214,13 +214,13 @@ export const AllOverrideConfiguration: PartialDeep<TConfiguration> = {
         'erase-precisely': true
       },
       convert: {
+        types: ["shape"],
         "match-text-size": true,
       },
     },
     'raw-content': {
       recognition: {
-        text: false,
-        shape: true
+        types: ["text"]
       },
       eraser: {
         'erase-precisely': true

@@ -6,9 +6,7 @@ import { TTextConfConfiguration } from "./TextConfiguration"
  * @group Configuration
  */
 export type TDiagramConvertConfiguration = {
-  edge?: boolean
-  node?: boolean
-  text?: boolean
+  types?: ("text" | "shape")[]
   "match-text-size"?: boolean
 }
 
@@ -28,6 +26,7 @@ export type TDiagramConfiguration = {
  * @group Configuration
  */
 export const DefaultDiagramConvertConfiguration: TDiagramConvertConfiguration = {
+  types: ["text", "shape"],
   "match-text-size": true
 }
 
