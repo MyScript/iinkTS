@@ -30,8 +30,12 @@ export class Editor
   wrapperHTML: HTMLEditorElement
   #layerInfos!: HTMLDivElement
   #loaderHTML!: HTMLDivElement
-  #messageEl!: HTMLDivElement
+
+  #messageContainer!: HTMLDivElement
+  #messageModal!: HTMLDivElement
+  #messageOverlay!: HTMLDivElement
   #messageText!: HTMLParagraphElement
+
   #stateHTML!: HTMLDivElement
   #busyHTML!: HTMLDivElement
   #idleHTML!: HTMLDivElement
@@ -185,16 +189,6 @@ export class Editor
     }
   }
 
-  #createLayerInfos(): HTMLDivElement
-  {
-    this.#layerInfos = document.createElement("div")
-    this.#layerInfos.classList.add("ms-layer-infos")
-    this.#layerInfos.appendChild(this.#createLoader())
-    this.#layerInfos.appendChild(this.#createMessage())
-    this.#layerInfos.appendChild(this.#createEditorState())
-    return this.#layerInfos
-  }
-
   #createLoader(): HTMLDivElement
   {
     this.#loaderHTML = document.createElement("div")
@@ -205,17 +199,27 @@ export class Editor
 
   #createMessage(): HTMLDivElement
   {
-    this.#messageEl = document.createElement("div")
-    this.#messageEl.classList.add("message")
+    this.#messageContainer = document.createElement("div")
+    this.#messageContainer.classList.add("message-container")
+
+    this.#messageOverlay = document.createElement("div")
+    this.#messageOverlay.classList.add("message-overlay")
+    this.#messageOverlay.style.display = "none"
+    this.#messageContainer.appendChild(this.#messageOverlay)
+
+    this.#messageModal = document.createElement("div")
+    this.#messageModal.classList.add("message-modal")
+
     const closeBtn = document.createElement("button")
     closeBtn.classList.add("ms-button", "close")
-    closeBtn.addEventListener("pointerup", this.cleanMessage.bind(this))
-    this.#messageEl.appendChild(closeBtn)
-    this.#messageEl.style.display = "none"
+    closeBtn.addEventListener("pointerup", this.closeMessageModal.bind(this))
+    this.#messageModal.appendChild(closeBtn)
+    this.#messageModal.style.display = "none"
 
     this.#messageText = document.createElement("p")
-    this.#messageEl.appendChild(this.#messageText)
-    return this.#messageEl
+    this.#messageModal.appendChild(this.#messageText)
+    this.#messageContainer.appendChild(this.#messageModal)
+    return this.#messageContainer
   }
 
   #createEditorState(): HTMLDivElement
@@ -252,6 +256,16 @@ export class Editor
     }
   }
 
+  #createLayerInfos(): HTMLDivElement
+  {
+    this.#layerInfos = document.createElement("div")
+    this.#layerInfos.classList.add("ms-layer-infos")
+    this.#layerInfos.appendChild(this.#createLoader())
+    this.#layerInfos.appendChild(this.#createMessage())
+    this.#layerInfos.appendChild(this.#createEditorState())
+    return this.#layerInfos
+  }
+
   #instantiateBehaviors(options: PartialDeep<TBehaviorOptions>)
   {
     this.logger.info("instantiateBehaviors", { options })
@@ -278,7 +292,7 @@ export class Editor
     this.logger.info("initializeBehaviors", "start")
     this.#initializationDeferred = new DeferredPromise<void>()
     this.#loaderHTML.style.display = "initial"
-    this.cleanMessage()
+    this.closeMessageModal()
     return this.behaviors.init(this.wrapperHTML)
       .then(async () =>
       {
@@ -329,39 +343,47 @@ export class Editor
     }
   }
 
-  cleanMessage()
+  async closeMessageModal(): Promise<void>
   {
-    this.#messageEl.style.display = "none"
+    this.#messageModal.style.display = "none"
+    this.#messageOverlay.style.display = "none"
     this.#messageText.innerText = ""
+    if (this.#messageModal.classList.contains("error-msg")) {
+      this.#messageModal.classList.remove("error-msg")
+      await this.behaviors.destroy()
+      this.initialize()
+    }
   }
 
   showError(err: Error | string)
   {
-    this.#messageEl.style.display = "initial"
-    this.#messageEl.classList.add("error-msg")
-    this.#messageEl.classList.remove("info-msg")
+    this.#messageModal.classList.add("error-msg")
+    this.#messageModal.classList.remove("info-msg")
+    this.#messageModal.style.display = "initial"
+    this.#messageOverlay.style.display = "initial"
     this.#messageText.innerText = typeof err === "string" ? err : err.message
   }
 
   showNotif(notif: { message: string, timeout?: number })
   {
-    this.#messageEl.style.display = "initial"
-    this.#messageEl.classList.add("info-msg")
-    this.#messageEl.classList.remove("error-msg")
+    this.#messageModal.style.display = "initial"
+    this.#messageModal.classList.add("info-msg")
+    this.#messageModal.classList.remove("error-msg")
     this.#messageText.innerText = notif.message
     setTimeout(() =>
     {
-      this.cleanMessage()
+      this.closeMessageModal()
     }, notif.timeout || 2500)
   }
 
   #addInternalListeners(): void
   {
+    this.internalEvents.removeAllListeners()
     this.internalEvents.addConvertListener(this.convert.bind(this))
     this.internalEvents.addClearListener(this.clear.bind(this))
     this.internalEvents.addErrorListener(this.showError.bind(this))
     this.internalEvents.addNotifListener(this.showNotif.bind(this))
-    this.internalEvents.addClearMessageListener(this.cleanMessage.bind(this))
+    this.internalEvents.addClearMessageListener(this.closeMessageModal.bind(this))
     this.internalEvents.addImportJIIXListener(this.#onImportJIIX.bind(this))
     this.internalEvents.addExportedListener(this.#onExport.bind(this))
     this.internalEvents.addContextChangeListener(this.#onContextChange.bind(this))

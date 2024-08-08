@@ -1009,7 +1009,7 @@ describe("WSRecognizer.ts", () =>
       { code: 1002, message: RecognizerError.PROTOCOL_ERROR },
       { code: 1003, message: RecognizerError.UNSUPPORTED_DATA },
       { code: 1006, message: RecognizerError.ABNORMAL_CLOSURE },
-      { code: 1007, message: RecognizerError.INVALID_FRAME_PAULOAD },
+      { code: 1007, message: RecognizerError.INVALID_FRAME_PAYLOAD },
       { code: 1008, message: RecognizerError.POLICY_VIOLATION },
       { code: 1009, message: RecognizerError.MESSAGE_TOO_BIG },
       { code: 1011, message: RecognizerError.INTERNAL_ERROR },

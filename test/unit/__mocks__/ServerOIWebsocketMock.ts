@@ -14,7 +14,7 @@ export const authenticatedMessage = {
 export const sessionDescriptionMessage = {
   "type": "sessionDescription",
   "contentPartCount": 0,
-  "iinkSessionId":	"39311164-39fb-4ae1-be8f-fa955c89dbd7"
+  "iinkSessionId": "39311164-39fb-4ae1-be8f-fa955c89dbd7"
 }
 
 export const partChangeMessage = {
@@ -22,6 +22,30 @@ export const partChangeMessage = {
   "partIdx": 0,
   "partId": "yyrrutgk",
   "partCount": 1
+}
+
+export const newPartMessage = {
+  "type": "newPart",
+  "idx": 0,
+  "id": "yyrrutgk"
+}
+
+export const gestureDetectedMessage = {
+  "type": "gestureDetected",
+  "gestureType": "SCRATCH",
+  "gestureStrokeId": "stroke-289febca-93fd-4745-846b-414b57e4807e",
+  "strokeIds": [
+    "stroke-c0fb2df7-11eb-4ec7-88b2-9df8403be4cd"
+  ],
+  "strokeBeforeIds": [],
+  "strokeAfterIds": [],
+  "subStrokes": []
+}
+
+export const contextlessGestureMessage = {
+  "type": "contextlessGesture",
+  "gestureType": "scratch",
+  "strokeId": "stroke-cf218593-0be2-474b-b981-10b46bfe9d7d"
 }
 
 export const contentChangeMessage = {
@@ -51,6 +75,10 @@ export const hExportedMessage = {
   }
 }
 
+export const idleMessage = {
+  "type": "idle",
+}
+
 export const errorNotGrantedMessage = {
   "type": "error",
   "message": "Access not granted",
@@ -59,7 +87,11 @@ export const errorNotGrantedMessage = {
 
 export class ServerOIWebsocketMock extends Server
 {
-  init(withHMAC = false)
+  init(
+    { withHMAC, withIdle }:
+      { withHMAC?: boolean, withIdle?: boolean } =
+      { withHMAC: true, withIdle: true }
+  )
   {
     this.on("connection", (socket) =>
     {
@@ -86,6 +118,11 @@ export class ServerOIWebsocketMock extends Server
           case "openContentPart":
             socket.send(JSON.stringify(partChangeMessage))
             break
+          case "waitForIdle":
+            if (withIdle) {
+              socket.send(JSON.stringify(idleMessage))
+            }
+            break
           default:
             break
         }
@@ -108,6 +145,11 @@ export class ServerOIWebsocketMock extends Server
     this.send(JSON.stringify(sessionDescriptionMessage))
   }
 
+  sendNewPartMessage()
+  {
+    this.send(JSON.stringify(newPartMessage))
+  }
+
   sendPartChangeMessage()
   {
     this.send(JSON.stringify(partChangeMessage))
@@ -116,6 +158,16 @@ export class ServerOIWebsocketMock extends Server
   sendContentChangeMessage()
   {
     this.send(JSON.stringify(contentChangeMessage))
+  }
+
+  sendGestureDetectedMessage()
+  {
+    this.send(JSON.stringify(gestureDetectedMessage))
+  }
+
+  sendContextlessGestureMessage()
+  {
+    this.send(JSON.stringify(contextlessGestureMessage))
   }
 
   sendHExportMessage()

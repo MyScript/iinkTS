@@ -200,7 +200,7 @@ export class WSRecognizer
           message = RecognizerError.ABNORMAL_CLOSURE
           break
         case 1007:
-          message = RecognizerError.INVALID_FRAME_PAULOAD
+          message = RecognizerError.INVALID_FRAME_PAYLOAD
           break
         case 1008:
           message = RecognizerError.POLICY_VIOLATION
