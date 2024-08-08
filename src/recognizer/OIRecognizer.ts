@@ -96,6 +96,51 @@ export class OIRecognizer
     return InternalEvent.getInstance()
   }
 
+  protected rejectDeferredPending(error: Error | string): void
+  {
+    this.connected?.reject(error)
+    this.initialized?.reject(error)
+    this.addStrokeDeferred?.reject(error)
+    this.transformStrokeDeferred?.reject(error)
+    this.eraseStrokeDeferred?.reject(error)
+    this.replaceStrokeDeferred?.reject(error)
+    this.undoDeferred?.reject(error)
+    this.redoDeferred?.reject(error)
+    this.clearDeferred?.reject(error)
+    Array.from(this.contextlessGestureDeferred.values())
+      .forEach(v =>
+      {
+        v.reject(error)
+      })
+    Array.from(this.exportDeferredMap.values())
+      .forEach(v =>
+      {
+        v.reject(error)
+      })
+    this.waitForIdleDeferred?.reject(error)
+  }
+
+  protected clearAllDeferred(): void
+  {
+    this.connected = undefined
+    this.initialized = undefined
+    this.addStrokeDeferred = undefined
+    this.contextlessGestureDeferred.clear()
+    this.transformStrokeDeferred = undefined
+    this.eraseStrokeDeferred = undefined
+    this.replaceStrokeDeferred = undefined
+    this.exportDeferredMap.clear()
+    this.waitForIdleDeferred = undefined
+    this.closeDeferred = undefined
+  }
+
+  protected clearSocketListener(): void
+  {
+    this.socket.removeEventListener("open", this.openCallback.bind(this))
+    this.socket.removeEventListener("close", this.closeCallback.bind(this))
+    this.socket.removeEventListener("message", this.messageCallback.bind(this))
+  }
+
   protected closeCallback(evt: CloseEvent): void
   {
     this.#logger.info("closeCallback", { evt })
@@ -118,7 +163,7 @@ export class OIRecognizer
           message = RecognizerError.ABNORMAL_CLOSURE
           break
         case 1007:
-          message = RecognizerError.INVALID_FRAME_PAULOAD
+          message = RecognizerError.INVALID_FRAME_PAYLOAD
           break
         case 1008:
           message = RecognizerError.POLICY_VIOLATION
@@ -154,16 +199,13 @@ export class OIRecognizer
       this.internalEvent.emitError(error)
       this.rejectDeferredPending(message)
     }
-    else {
-      this.addStrokeDeferred?.resolve(undefined)
-    }
+    this.clearAllDeferred()
   }
 
   protected infinitePing(): void
   {
     if (this.serverConfiguration.websocket.maxPingLostCount < this.pingCount) {
       this.socket.close(1000, "PING_LOST")
-      this.initialized = undefined
     } else if (this.socket.readyState <= 1) {
       setTimeout(() =>
       {
@@ -176,30 +218,6 @@ export class OIRecognizer
         this.infinitePing()
       }, this.serverConfiguration.websocket.pingDelay)
     }
-  }
-
-  protected rejectDeferredPending(error: Error | string): void
-  {
-    this.connected?.reject(error)
-    this.initialized?.reject(error)
-    this.addStrokeDeferred?.reject(error)
-    this.transformStrokeDeferred?.reject(error)
-    this.eraseStrokeDeferred?.reject(error)
-    this.replaceStrokeDeferred?.reject(error)
-    this.undoDeferred?.reject(error)
-    this.redoDeferred?.reject(error)
-    this.clearDeferred?.reject(error)
-    Array.from(this.contextlessGestureDeferred.values())
-      .forEach(v =>
-      {
-        v.reject(error)
-      })
-    Array.from(this.exportDeferredMap.values())
-      .forEach(v =>
-      {
-        v.reject(error)
-      })
-    this.waitForIdleDeferred?.reject(error)
   }
 
   protected openCallback(): void
@@ -215,16 +233,10 @@ export class OIRecognizer
 
   protected async manageHMACChallenge(hmacChallengeMessage: TOIMessageEventHMACChallenge): Promise<void>
   {
-    try {
-      this.send(
-        {
-          type: "hmac",
-          hmac: await computeHmac(hmacChallengeMessage.hmacChallenge, this.serverConfiguration.applicationKey, this.serverConfiguration.hmacKey)
-        }
-      )
-    } catch (error) {
-      this.internalEvent.emitError(new Error(error as string))
-    }
+    this.send({
+      type: "hmac",
+      hmac: await computeHmac(hmacChallengeMessage.hmacChallenge, this.serverConfiguration.applicationKey, this.serverConfiguration.hmacKey)
+    })
   }
 
   protected manageAuthenticated(): void
@@ -237,6 +249,9 @@ export class OIRecognizer
       scaleY: pixelTomm,
       configuration: this.recognitionConfiguration
     })
+    if (this.serverConfiguration.websocket.pingEnabled) {
+      this.infinitePing()
+    }
   }
 
   protected manageSessionDescriptionMessage(sessionDescriptionMessage: TOISessionDescriptionMessage): void
@@ -306,19 +321,25 @@ export class OIRecognizer
     this.currentErrorCode = errorMessage.data?.code || errorMessage.code
     let message = errorMessage.data?.message || errorMessage.message || RecognizerError.UNKNOW
 
-    switch (this.currentErrorCode) {
-      case "no.activity":
-        message = RecognizerError.NO_ACTIVITY
-        break
-      case "access.not.granted":
-        message = RecognizerError.WRONG_CREDENTIALS
-        break
-      case "session.too.old":
-        message = RecognizerError.TOO_OLD
-        break
+    if (this.currentErrorCode === "no.activity") {
+      this.rejectDeferredPending(message)
+      this.internalEvent.emitNotif({ message: RecognizerError.NO_ACTIVITY, timeout: Infinity})
     }
-    this.rejectDeferredPending(message)
-    this.internalEvent.emitError(new Error(message))
+    else {
+      switch (this.currentErrorCode) {
+        case "access.not.granted":
+          message = RecognizerError.WRONG_CREDENTIALS
+          break
+        case "session.too.old":
+          message = RecognizerError.TOO_OLD
+          break
+        case "restore.session.not.found":
+          message = RecognizerError.NO_SESSION_FOUND
+          break
+      }
+      this.rejectDeferredPending(message)
+      this.internalEvent.emitError(new Error(message))
+    }
   }
 
   protected manageGestureDetected(gestureMessage: TOIMessageEventGesture): void
@@ -378,52 +399,36 @@ export class OIRecognizer
           this.#logger.warn("messageCallback", `Message type unknow: "${ websocketMessage }".`)
           break
       }
-    } catch (error) {
+    }
+    catch (error) {
       this.internalEvent.emitError(new Error(message.data))
     }
   }
 
-  clearSocketListener(): void
-  {
-    this.socket.removeEventListener("open", this.openCallback.bind(this))
-    this.socket.removeEventListener("close", this.closeCallback.bind(this))
-    this.socket.removeEventListener("message", this.messageCallback.bind(this))
-  }
-
   async init(): Promise<void>
   {
-    try {
-      this.connected = new DeferredPromise<void>()
-      this.initialized = new DeferredPromise<void>()
-      this.pingCount = 0
-      this.socket = new WebSocket(this.url)
-      this.clearSocketListener()
-      this.socket.addEventListener("open", this.openCallback.bind(this))
-      this.socket.addEventListener("close", this.closeCallback.bind(this))
-      this.socket.addEventListener("message", this.messageCallback.bind(this))
-
-      await this.initialized.promise
-
-      if (this.serverConfiguration.websocket.pingEnabled) {
-        this.infinitePing()
-      }
-
-      return this.initialized.promise
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      const error = new Error(RecognizerError.CANT_ESTABLISH)
-      this.internalEvent.emitError(error)
-      this.initialized?.reject(error)
-      return this.initialized?.promise
+    this.connected = new DeferredPromise<void>()
+    this.initialized = new DeferredPromise<void>()
+    if (this.currentErrorCode === "restore.session.not.found") {
+      this.currentErrorCode === undefined
+      this.sessionId = undefined
+      this.currentPartId = undefined
     }
+    this.pingCount = 0
+    this.socket = new WebSocket(this.url)
+    this.clearSocketListener()
+    this.socket.addEventListener("open", this.openCallback.bind(this))
+    this.socket.addEventListener("close", this.closeCallback.bind(this))
+    this.socket.addEventListener("message", this.messageCallback.bind(this))
+    return this.initialized?.promise
   }
 
   async send(message: TOIMessageEvent): Promise<void>
   {
-    if (!this.connected) {
+    if (!this.socket) {
       return Promise.reject(new Error("Recognizer must be initilized"))
     }
-    await this.connected.promise
+    await this.connected?.promise
     if (this.socket.readyState === this.socket.OPEN) {
       this.socket.send(JSON.stringify(message))
       return Promise.resolve()
@@ -610,7 +615,7 @@ export class OIRecognizer
   {
     await this.initialized?.promise
     const changes = this.buildUndoRedoChanges(actions)
-    if(changes.length === 0) {
+    if (changes.length === 0) {
       return
     }
     this.undoDeferred = new DeferredPromise<void>()
@@ -626,7 +631,7 @@ export class OIRecognizer
   {
     await this.initialized?.promise
     const changes = this.buildUndoRedoChanges(actions)
-    if(changes.length === 0) {
+    if (changes.length === 0) {
       return
     }
     this.redoDeferred = new DeferredPromise<void>()
@@ -683,16 +688,7 @@ export class OIRecognizer
 
   async destroy(): Promise<void>
   {
-    this.connected = undefined
-    this.initialized = undefined
-    this.addStrokeDeferred = undefined
-    this.contextlessGestureDeferred.clear()
-    this.transformStrokeDeferred = undefined
-    this.eraseStrokeDeferred = undefined
-    this.replaceStrokeDeferred = undefined
-    this.exportDeferredMap.clear()
-    this.waitForIdleDeferred = undefined
-    this.closeDeferred = undefined
+    this.clearAllDeferred()
     if (this.socket) {
       await this.close(1000, "Recognizer destroyed")
     }

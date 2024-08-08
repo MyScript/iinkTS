@@ -393,18 +393,18 @@ export class OISVGRenderer
   clear(): void
   {
     this.#logger.info("clear")
-    while (this.layer.firstChild) {
-      this.layer.firstChild.remove()
+    if (this.layer) {
+      while (this.layer.firstChild) {
+        this.layer.firstChild.remove()
+      }
+      this.layer.appendChild(this.createSVGTools())
     }
-    this.layer.appendChild(this.createSVGTools())
   }
 
   destroy(): void
   {
-    if (this.parent) {
-      while (this.parent.firstChild) {
-        this.parent.firstChild.remove()
-      }
+    if (this.layer) {
+      this.layer.remove()
     }
   }
 }

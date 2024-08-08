@@ -1,5 +1,5 @@
 import { Intention, SELECTION_MARGIN } from "../Constants"
-import { Configuration, TConfiguration, TConverstionState, TRenderingConfiguration } from "../configuration"
+import { Configuration, TConfiguration, TRenderingConfiguration } from "../configuration"
 import { InternalEvent } from "../event"
 import { OIPointerEventGrabber } from "../grabber"
 import { LoggerClass, LoggerManager } from "../logger"
@@ -1252,8 +1252,7 @@ export class OIBehaviors implements IBehaviors
     return this.model
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async convert(_conversionState?: TConverstionState, _requestedMimeTypes?: string[]): Promise<OIModel>
+  async convert(): Promise<OIModel>
   {
     try {
       this.internalEvent.emitIdle(false)
