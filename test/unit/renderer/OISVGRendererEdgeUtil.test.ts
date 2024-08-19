@@ -36,7 +36,7 @@ describe("OISVGRendererEdgeUtil.ts", () =>
     const radiusY = 50
     const phi = 0
     const arc = new OIEdgeArc(center, startAngle, sweepAngle, radiusX, radiusY, phi)
-    expect(OISVGRendererEdgeUtil.getSVGPath(arc)).toEqual("M 8.071 36.355 Q 8.071 36.355 6.811 41.692 5.392 45.92 3.853 48.921 2.237 50.616 0.587 50.957 -1.052 49.936 -2.635 47.58 -4.119 43.953 -5.463 39.154 -6.631 33.315 -7.591 26.594 -8.316 19.175 -8.787 11.261 -8.991 3.066 -8.923 -5.185 -8.584 -13.267 -7.984 -20.96 -7.138 -28.054")
+    expect(OISVGRendererEdgeUtil.getSVGPath(arc)).toEqual("M 8.071 36.355 Q 8.071 36.355 5.792 44.884 3.126 49.857 0.287 50.873 -2.495 47.847 -4.993 41.027 -7.005 30.964 -8.369 18.473 -8.975 4.567 -8.771 -9.628 -7.777 -22.962 -6.071 -34.355 -6.071 -34.355")
   })
 
   describe("getSVGElement", () =>
@@ -54,8 +54,9 @@ describe("OISVGRendererEdgeUtil.ts", () =>
       expect(el.getAttribute("id")).toEqual(line.id)
       expect(el.getAttribute("type")).toEqual(SymbolType.Edge)
       expect(el.getAttribute("kind")).toEqual(EdgeKind.Line)
-      expect(el.getAttribute("stroke")).toEqual(style.color)
-      expect(el.getAttribute("stroke-width")).toEqual(style.width?.toString())
+      const path = el.querySelector("path")!
+      expect(path.getAttribute("stroke")).toEqual(style.color)
+      expect(path.getAttribute("stroke-width")).toEqual(style.width?.toString())
     })
     test("should get line with default style", () =>
     {
@@ -65,8 +66,9 @@ describe("OISVGRendererEdgeUtil.ts", () =>
       const el = OISVGRendererEdgeUtil.getSVGElement(line)!
       expect(el.getAttribute("id")).toEqual(line.id)
       expect(el.getAttribute("type")).toEqual(SymbolType.Edge)
-      expect(el.getAttribute("stroke")).toEqual(DefaultStyle.color)
-      expect(el.getAttribute("stroke-width")).toEqual(DefaultStyle.width?.toString())
+      const path = el.querySelector("path")!
+      expect(path.getAttribute("stroke")).toEqual(DefaultStyle.color)
+      expect(path.getAttribute("stroke-width")).toEqual(DefaultStyle.width?.toString())
     })
     test("should get line with startDecoration", () =>
     {
@@ -76,7 +78,8 @@ describe("OISVGRendererEdgeUtil.ts", () =>
       const el = OISVGRendererEdgeUtil.getSVGElement(line)!
       expect(el.getAttribute("id")).toEqual(line.id)
       expect(el.getAttribute("type")).toEqual(SymbolType.Edge)
-      expect(el.getAttribute("marker-start")).toEqual(`url(#${ OISVGRendererConst. arrowHeadStartMarker })`)
+      const path = el.querySelector("path")!
+      expect(path.getAttribute("marker-start")).toEqual(`url(#${ OISVGRendererConst. arrowHeadStartMarker })`)
     })
     test("should get line with endDecoration", () =>
     {
@@ -86,7 +89,8 @@ describe("OISVGRendererEdgeUtil.ts", () =>
       const el = OISVGRendererEdgeUtil.getSVGElement(line)!
       expect(el.getAttribute("id")).toEqual(line.id)
       expect(el.getAttribute("type")).toEqual(SymbolType.Edge)
-      expect(el.getAttribute("marker-end")).toEqual(`url(#${ OISVGRendererConst.arrowHeadEndMaker })`)
+      const path = el.querySelector("path")!
+      expect(path.getAttribute("marker-end")).toEqual(`url(#${ OISVGRendererConst.arrowHeadEndMaker })`)
     })
     test("should get line with startDecoration & endDecoration", () =>
     {
@@ -96,8 +100,9 @@ describe("OISVGRendererEdgeUtil.ts", () =>
       const el = OISVGRendererEdgeUtil.getSVGElement(line)!
       expect(el.getAttribute("id")).toEqual(line.id)
       expect(el.getAttribute("type")).toEqual(SymbolType.Edge)
-      expect(el.getAttribute("marker-start")).toEqual(`url(#${ OISVGRendererConst.arrowHeadStartMarker })`)
-      expect(el.getAttribute("marker-end")).toEqual(`url(#${ OISVGRendererConst.arrowHeadEndMaker })`)
+      const path = el.querySelector("path")!
+      expect(path.getAttribute("marker-start")).toEqual(`url(#${ OISVGRendererConst.arrowHeadStartMarker })`)
+      expect(path.getAttribute("marker-end")).toEqual(`url(#${ OISVGRendererConst.arrowHeadEndMaker })`)
     })
     test("should get line when selected", () =>
     {
@@ -146,8 +151,9 @@ describe("OISVGRendererEdgeUtil.ts", () =>
       expect(el.getAttribute("id")).toEqual(arc.id)
       expect(el.getAttribute("type")).toEqual(SymbolType.Edge)
       expect(el.getAttribute("kind")).toEqual(EdgeKind.Arc)
-      expect(el.getAttribute("stroke")).toEqual(style.color)
-      expect(el.getAttribute("stroke-width")).toEqual(style.width?.toString())
+      const path = el.querySelector("path")!
+      expect(path.getAttribute("stroke")).toEqual(style.color)
+      expect(path.getAttribute("stroke-width")).toEqual(style.width?.toString())
     })
     test("should get arc with default style", () =>
     {
@@ -155,8 +161,9 @@ describe("OISVGRendererEdgeUtil.ts", () =>
       const el = OISVGRendererEdgeUtil.getSVGElement(arc)!
       expect(el.getAttribute("id")).toEqual(arc.id)
       expect(el.getAttribute("type")).toEqual(SymbolType.Edge)
-      expect(el.getAttribute("stroke")).toEqual(DefaultStyle.color)
-      expect(el.getAttribute("stroke-width")).toEqual(DefaultStyle.width?.toString())
+      const path = el.querySelector("path")!
+      expect(path.getAttribute("stroke")).toEqual(DefaultStyle.color)
+      expect(path.getAttribute("stroke-width")).toEqual(DefaultStyle.width?.toString())
     })
     test("should get arc with startDecoration", () =>
     {
@@ -164,7 +171,8 @@ describe("OISVGRendererEdgeUtil.ts", () =>
       const el = OISVGRendererEdgeUtil.getSVGElement(arc)!
       expect(el.getAttribute("id")).toEqual(arc.id)
       expect(el.getAttribute("type")).toEqual(SymbolType.Edge)
-      expect(el.getAttribute("marker-start")).toEqual(`url(#${ OISVGRendererConst.arrowHeadStartMarker })`)
+      const path = el.querySelector("path")!
+      expect(path.getAttribute("marker-start")).toEqual(`url(#${ OISVGRendererConst.arrowHeadStartMarker })`)
     })
     test("should get arc with endDecoration", () =>
     {
@@ -172,7 +180,8 @@ describe("OISVGRendererEdgeUtil.ts", () =>
       const el = OISVGRendererEdgeUtil.getSVGElement(arc)!
       expect(el.getAttribute("id")).toEqual(arc.id)
       expect(el.getAttribute("type")).toEqual(SymbolType.Edge)
-      expect(el.getAttribute("marker-end")).toEqual(`url(#${ OISVGRendererConst.arrowHeadEndMaker })`)
+      const path = el.querySelector("path")!
+      expect(path.getAttribute("marker-end")).toEqual(`url(#${ OISVGRendererConst.arrowHeadEndMaker })`)
     })
     test("should get arc with startDecoration & endDecoration", () =>
     {
@@ -180,8 +189,9 @@ describe("OISVGRendererEdgeUtil.ts", () =>
       const el = OISVGRendererEdgeUtil.getSVGElement(arc)!
       expect(el.getAttribute("id")).toEqual(arc.id)
       expect(el.getAttribute("type")).toEqual(SymbolType.Edge)
-      expect(el.getAttribute("marker-start")).toEqual(`url(#${ OISVGRendererConst.arrowHeadStartMarker })`)
-      expect(el.getAttribute("marker-end")).toEqual(`url(#${ OISVGRendererConst.arrowHeadEndMaker })`)
+      const path = el.querySelector("path")!
+      expect(path.getAttribute("marker-start")).toEqual(`url(#${ OISVGRendererConst.arrowHeadStartMarker })`)
+      expect(path.getAttribute("marker-end")).toEqual(`url(#${ OISVGRendererConst.arrowHeadEndMaker })`)
     })
     test("should get arc when selected", () =>
     {

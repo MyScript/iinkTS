@@ -37,7 +37,7 @@ export class OISVGRendererEdgeUtil
     }
   }
 
-  static getSVGElement(edge: TOIEdge): SVGPathElement
+  static getSVGElement(edge: TOIEdge): SVGGraphicsElement
   {
     const attrs: { [key: string]: string } = {
       "id": edge.id,
@@ -46,6 +46,16 @@ export class OISVGRendererEdgeUtil
       "vector-effect": "non-scaling-stroke",
       "stroke-linecap": "round",
       "stroke-linejoin": "round",
+    }
+    if (edge.selected) {
+      attrs["filter"] = `url(#${ OISVGRendererConst.selectionFilterId })`
+    }
+    if (edge.deleting) {
+      attrs["filter"] = `url(#${ OISVGRendererConst.removalFilterId })`
+    }
+    const group = SVGBuilder.createGroup(attrs)
+
+    const pathAttrs: { [key: string]: string } = {
       "fill": "transparent",
       "stroke": edge.style.color || DefaultStyle.color!,
       "stroke-width": (edge.style.width || DefaultStyle.width!).toString(),
@@ -54,20 +64,13 @@ export class OISVGRendererEdgeUtil
     }
 
     if (edge.startDecoration === EdgeDecoration.Arrow) {
-      attrs["marker-start"] = `url(#${ OISVGRendererConst.arrowHeadStartMarker })`
+      pathAttrs["marker-start"] = `url(#${ OISVGRendererConst.arrowHeadStartMarker })`
     }
     if (edge.endDecoration === EdgeDecoration.Arrow) {
-      attrs["marker-end"] = `url(#${ OISVGRendererConst.arrowHeadEndMaker })`
+      pathAttrs["marker-end"] = `url(#${ OISVGRendererConst.arrowHeadEndMaker })`
     }
-
-    if (edge.selected) {
-      attrs["filter"] = `url(#${ OISVGRendererConst.selectionFilterId })`
-    }
-    if (edge.deleting) {
-      attrs["filter"] = `url(#${ OISVGRendererConst.removalFilterId })`
-    }
-
-    return SVGBuilder.createPath(attrs)
+    group.appendChild(SVGBuilder.createPath(pathAttrs))
+    return group
   }
 
 

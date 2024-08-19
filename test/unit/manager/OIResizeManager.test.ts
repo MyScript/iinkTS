@@ -1,15 +1,21 @@
 import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
 import
 {
+  OIEdgeArc,
   OIEdgeLine,
+  OIEdgePolyLine,
   OIResizeManager,
   OIShapeCircle,
+  OIShapeEllipse,
   OIShapePolygon,
   OIStroke,
+  OIText,
   ResizeDirection,
   SvgElementRole,
+  TOISymbolChar,
   TPoint
 } from "../../../src/iink"
+import { buildOIStroke } from "../helpers"
 
 describe("OIResizeManager.ts", () =>
 {
@@ -20,12 +26,19 @@ describe("OIResizeManager.ts", () =>
     expect(manager).toBeDefined()
   })
 
-  describe("should applyToSymbol", () =>
+  describe("applyToSymbol", () =>
   {
     const behaviors = new OIBehaviorsMock()
     const manager = new OIResizeManager(behaviors)
-
-    test("resize stroke", () =>
+    test("should not resize symbol with type unknow", () =>
+    {
+      const stroke = buildOIStroke()
+      //@ts-ignore
+      stroke.type = "pouet"
+      const origin: TPoint = { x: 0, y: 0 }
+      expect(() => manager.applyToSymbol(stroke, origin, 2, 3)).toThrowError(expect.objectContaining({ message: expect.stringContaining("Can't apply resize on symbol, type unknow:") }))
+    })
+    test("should resize stroke", () =>
     {
       const stroke = new OIStroke()
       const origin: TPoint = { x: 1, y: 2 }
@@ -35,17 +48,7 @@ describe("OIResizeManager.ts", () =>
       expect(stroke.pointers[0]).toEqual(expect.objectContaining({ x: 1, y: 2 }))
       expect(stroke.pointers[1]).toEqual(expect.objectContaining({ x: 41, y: 122 }))
     })
-    test("resize shape Circle", () =>
-    {
-      const center: TPoint = { x: 5, y: 5 }
-      const radius = 4
-      const circle = new OIShapeCircle(center, radius)
-      const origin: TPoint = { x: 1, y: 2 }
-      manager.applyToSymbol(circle, origin, 2, 4)
-      expect(circle.radius).toEqual(12)
-      expect(circle.center).toEqual({ x: 9, y: 14 })
-    })
-    test("resize shape with kind unknow", () =>
+    test("should not resize shape with kind unknow", () =>
     {
       const points: TPoint[] = [
         { x: 0, y: 0 },
@@ -57,17 +60,132 @@ describe("OIResizeManager.ts", () =>
       //@ts-ignore
       poly.kind = "pouet"
       const origin: TPoint = { x: 0, y: 0 }
-      expect(() => manager.applyToSymbol(poly, origin, 2, 3)).toThrowError(expect.objectContaining({ message: expect.stringContaining("Can't apply resize on shape, kind unknow:")}))
+      expect(() => manager.applyToSymbol(poly, origin, 2, 3)).toThrowError(expect.objectContaining({ message: expect.stringContaining("Can't apply resize on shape, kind unknow:") }))
+    })
+    test("should resize shape Circle", () =>
+    {
+      const center: TPoint = { x: 5, y: 5 }
+      const radius = 4
+      const shape = new OIShapeCircle(center, radius)
+      const origin: TPoint = { x: 1, y: 2 }
+      manager.applyToSymbol(shape, origin, 2, 4)
+      expect(shape.radius).toEqual(12)
+      expect(shape.center).toEqual({ x: 9, y: 14 })
+    })
+    test("should resize shape Ellipse", () =>
+    {
+      const center: TPoint = { x: 0, y: 0 }
+      const radiusX = 50
+      const radiusY = 10
+      const orientation = 0
+      const shape = new OIShapeEllipse(center, radiusX, radiusY, orientation)
+      const scaleX = 2
+      const scaleY = 4
+      const origin: TPoint = { x: shape.bounds.xMin, y: shape.bounds.yMin }
+      manager.applyToSymbol(shape, origin, scaleX, scaleY)
+      expect(shape.radiusX).toEqual(radiusX * scaleX)
+      expect(shape.radiusY).toEqual(radiusY * scaleY)
+      expect(shape.center).toEqual({ x: 49.534, y: 29.931 })
+    })
+    test("should resize shape Polygon", () =>
+    {
+      const points: TPoint[] = [
+        { x: 0, y: 0 },
+        { x: 20, y: 0 },
+        { x: 20, y: 10 },
+        { x: 0, y: 10 },
+      ]
+      const shape = new OIShapePolygon(points)
+      const scaleX = 2
+      const scaleY = 4
+      const origin: TPoint = { x: shape.bounds.xMin, y: shape.bounds.yMin }
+      manager.applyToSymbol(shape, origin, scaleX, scaleY)
+      expect(shape.points[0].x).toEqual(0)
+      expect(shape.points[0].y).toEqual(0)
+      expect(shape.points[1].x).toEqual(40)
+      expect(shape.points[1].y).toEqual(0)
+      expect(shape.points[2].x).toEqual(40)
+      expect(shape.points[2].y).toEqual(40)
+      expect(shape.points[3].x).toEqual(0)
+      expect(shape.points[3].y).toEqual(40)
+    })
+    test("should not resize edge with kind unknow", () =>
+    {
+      const start: TPoint = { x: 0, y: 0 }
+      const end: TPoint = { x: 0, y: 5 }
+      const edge = new OIEdgeLine(start, end)
+      //@ts-ignore
+      edge.kind = "pouet"
+      const origin: TPoint = { x: 0, y: 0 }
+      expect(() => manager.applyToSymbol(edge, origin, 2, 3)).toThrowError(expect.objectContaining({ message: expect.stringContaining("Can't apply resize on edge, kind unknow:") }))
+    })
+    test("should resize edge Arc", () =>
+    {
+      const center: TPoint = { x: 0, y: 0 }
+      const startAngle = -Math.PI
+      const sweepAngle = Math.PI
+      const radiusX = 50
+      const radiusY = 10
+      const phi = 0
+      const edge = new OIEdgeArc(center, startAngle, sweepAngle, radiusX, radiusY, phi)
+      const origin: TPoint = { x: edge.bounds.xMin, y: edge.bounds.yMin }
+      const scaleX = 2
+      const scaleY = 3
+      manager.applyToSymbol(edge, origin, scaleX, scaleY)
+      expect(edge.center).toEqual({ x: 55, y: 29.796 })
+      expect(edge.radiusX).toEqual(radiusX * scaleX)
+      expect(edge.radiusY).toEqual(radiusY * scaleY)
     })
     test("resize edge Line", () =>
     {
       const start: TPoint = { x: 0, y: 0 }
       const end: TPoint = { x: 0, y: 5 }
-      const line = new OIEdgeLine(start, end)
+      const edge = new OIEdgeLine(start, end)
       const origin: TPoint = { x: 0, y: 0 }
-      manager.applyToSymbol(line, origin, 2, 3)
-      expect(line.start).toEqual({ x: 0, y: 0 })
-      expect(line.end).toEqual({ x: 0, y: 15 })
+      manager.applyToSymbol(edge, origin, 2, 3)
+      expect(edge.start).toEqual({ x: 0, y: 0 })
+      expect(edge.end).toEqual({ x: 0, y: 15 })
+    })
+    test("resize edge PolyEdge", () =>
+    {
+      const points: TPoint[] = [
+        { x: 0, y: 0 },
+        { x: 20, y: 0 },
+        { x: 20, y: 10 },
+        { x: 0, y: 10 },
+      ]
+      const edge = new OIEdgePolyLine(points)
+      const origin: TPoint = { x: 0, y: 0 }
+      manager.applyToSymbol(edge, origin, 2, 3)
+      expect(edge.points[0].x).toEqual(0)
+      expect(edge.points[0].y).toEqual(0)
+      expect(edge.points[1].x).toEqual(40)
+      expect(edge.points[1].y).toEqual(0)
+      expect(edge.points[2].x).toEqual(40)
+      expect(edge.points[2].y).toEqual(30)
+      expect(edge.points[3].x).toEqual(0)
+      expect(edge.points[3].y).toEqual(30)
+    })
+    test("resize edge Text", () =>
+    {
+      manager.behaviors.texter.updateBounds = jest.fn()
+      const point: TPoint = { x: 0, y: 0 }
+      const chars: TOISymbolChar[] = [
+        {
+          bounds: { height: 10, width: 5, x: 0, y: 0 },
+          color: "black",
+          fontSize: 12,
+          fontWeight: "normal",
+          id: "char-1",
+          label: "A"
+        }
+      ]
+      const text = new OIText(chars, point, { height: 10, width: 5, x: 0, y: 0 })
+      const origin: TPoint = { x: 0, y: 0 }
+      manager.applyToSymbol(text, origin, 2, 3)
+      expect(text.point).toEqual({ x: 0, y: 0 })
+      expect(chars[0].fontSize).toEqual(30)
+      expect(manager.behaviors.texter.updateBounds).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -80,13 +198,13 @@ describe("OIResizeManager.ts", () =>
     behaviors.renderer.setAttribute = jest.fn()
     behaviors.selector.resetSelectedGroup = jest.fn()
     behaviors.renderer.drawSymbol = jest.fn()
+    behaviors.snaps.snapToGrid = false
+    behaviors.snaps.snapToElement = false
     behaviors.setPenStyle = jest.fn(() => Promise.resolve())
     behaviors.setTheme = jest.fn(() => Promise.resolve())
     behaviors.setPenStyleClasses = jest.fn(() => Promise.resolve())
 
     const manager = new OIResizeManager(behaviors)
-    manager.snaps.snapToGrid = false
-    manager.snaps.snapToElement = false
     manager.applyToSymbol = jest.fn()
 
     const stroke = new OIStroke({})

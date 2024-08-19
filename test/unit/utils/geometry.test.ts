@@ -341,6 +341,14 @@ describe("geometry.ts", () =>
           y: 1.5
         }
       },
+      {
+        p: { x: -50, y: 50 },
+        seg: { p1: { x: 10, y: -0 }, p2: { x: 10, y: 0 } },
+        expected: {
+          x: 10,
+          y: -0
+        }
+      },
     ]
     testDatas.forEach(d =>
     {

@@ -52,6 +52,9 @@ export function computeNearestPointOnSegment(p: TPoint, seg: TSegment): TPoint
 {
   const vectP1P = { x: p.x - seg.p1.x, y: p.y - seg.p1.y }
   const vectP1P2 = { x: seg.p2.x - seg.p1.x, y: seg.p2.y - seg.p1.y }
+  if (vectP1P2.x === 0 && vectP1P2.y === 0) {
+    return seg.p1
+  }
   const scalaireP1P_P1P2 = scalaire(vectP1P, vectP1P2)
   const scalaireP1P2_P1P2 = scalaire(vectP1P2, vectP1P2)
 
