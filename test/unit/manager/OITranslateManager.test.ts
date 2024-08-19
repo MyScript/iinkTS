@@ -70,6 +70,8 @@ describe("OITranslateManager.ts", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
     const behaviors = new OIBehaviorsMock()
+    behaviors.snaps.snapToGrid = false
+    behaviors.snaps.snapToElement = false
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     behaviors.recognizer.transformTranslate = jest.fn(() => Promise.resolve())
     behaviors.renderer.setAttribute = jest.fn()
@@ -80,8 +82,6 @@ describe("OITranslateManager.ts", () =>
     behaviors.setPenStyleClasses = jest.fn(() => Promise.resolve())
 
     const manager = new OITranslateManager(behaviors)
-    manager.snaps.snapToGrid = false
-    manager.snaps.snapToElement = false
     manager.applyToSymbol = jest.fn()
 
     const stroke = new OIStroke({})

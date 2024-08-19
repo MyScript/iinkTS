@@ -23,9 +23,9 @@ describe("OIRotationManager.ts", () =>
   describe("should applyToSymbol", () =>
   {
     const behaviors = new OIBehaviorsMock()
+    behaviors.texter.updateBounds = jest.fn()
+    behaviors.renderer.setAttribute = jest.fn()
     const manager = new OIRotationManager(behaviors)
-    manager.texter.updateBounds = jest.fn()
-    manager.renderer.setAttribute = jest.fn()
 
     test("rotate stroke", () =>
     {

@@ -20,7 +20,7 @@ describe("OISVGRendererShapeUtil.ts", () =>
     const ellipse = new OIShapeEllipse({ x: 0, y: 0 }, 5, 10, 0)
     expect(OISVGRendererShapeUtil.getSVGPath(ellipse)).toEqual("M -5 0 a 5 10 0 1 1 10 0 a 5 10 0 1 1 -10 0 Z")
   })
-  test("should getSVGPath for parallelogram", () =>
+  test("should getSVGPath for polygon", () =>
   {
     const points: TPoint[] = [
       { x: 0, y: 0 },
