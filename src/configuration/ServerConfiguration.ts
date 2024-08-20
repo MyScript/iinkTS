@@ -43,8 +43,8 @@ export const DefaultServerConfiguration: TServerConfiguration = {
   useWindowLocation: false,
   websocket: {
     pingEnabled: true,
-    pingDelay: 30000,
-    maxPingLostCount: 10,
+    pingDelay: 15000,
+    maxPingLostCount: 20,
     autoReconnect: true,
     maxRetryCount: 2,
     fileChunkSize: 300000
