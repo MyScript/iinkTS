@@ -23,6 +23,7 @@ export class OIMenuContext extends OIMenu
   menuExport?: HTMLDivElement
   duplicateBtn?: HTMLButtonElement
   groupBtn?: HTMLButtonElement
+  convertBtn?: HTMLButtonElement
   removeBtn?: HTMLButtonElement
 
   position: {
@@ -81,7 +82,8 @@ export class OIMenuContext extends OIMenu
     this.editSaveBtn.classList.add("ms-menu-button")
     this.editSaveBtn.innerText = "Save"
     subMenuWrapper.appendChild(this.editSaveBtn)
-    this.editSaveBtn.addEventListener("pointerdown", async (e) => {
+    this.editSaveBtn.addEventListener("pointerdown", async (e) =>
+    {
       e.stopPropagation()
       const textSymbol = this.behaviors.model.symbolsSelected.find(s => s.type === SymbolType.Text) as OIText
       if (textSymbol) {
@@ -158,6 +160,30 @@ export class OIMenuContext extends OIMenu
       }
     })
     return this.groupBtn
+  }
+
+  protected createMenuConvert(): HTMLElement
+  {
+    this.convertBtn = document.createElement("button")
+    this.convertBtn.id = `${ this.id }-convert`
+    this.convertBtn.textContent = "Convert"
+    this.convertBtn.classList.add("ms-menu-button")
+    this.convertBtn.addEventListener("pointerup", async () =>
+    {
+      try {
+        this.behaviors.internalEvent.emitIdle(false)
+        await this.behaviors.converter.apply(this.symbolsSelected)
+      }
+      catch (error) {
+        this.#logger.error("convert", error)
+        this.behaviors.internalEvent.emitError(error as Error)
+        throw error
+      }
+      finally {
+        this.behaviors.updateLayerInfos()
+      }
+    })
+    return this.convertBtn
   }
 
   protected createMenuRemove(): HTMLButtonElement
@@ -400,16 +426,6 @@ export class OIMenuContext extends OIMenu
     return btn
   }
 
-  protected createMenuUnSelectAll(): HTMLElement
-  {
-    const btn = document.createElement("button")
-    btn.id = `${ this.id }-duplicate`
-    btn.textContent = "Unselect all"
-    btn.classList.add("ms-menu-button")
-    btn.addEventListener("pointerup", async () => this.behaviors.unselectAll())
-    return btn
-  }
-
   protected updateDecoratorSubMenu(): void
   {
     if (this.showDecorator) {
@@ -491,6 +507,15 @@ export class OIMenuContext extends OIMenu
       else {
         this.editMenu?.style.setProperty("display", "none")
       }
+
+      if(this.behaviors.extractStrokesFromSymbols(this.symbolsSelected).length) {
+        this.convertBtn?.style.removeProperty("display")
+      }
+      else {
+        this.convertBtn?.style.setProperty("display", "none")
+      }
+
+
       this.reorderMenu?.style.removeProperty("display")
       this.duplicateBtn?.style.removeProperty("display")
       this.removeBtn?.style.removeProperty("display")
@@ -498,6 +523,7 @@ export class OIMenuContext extends OIMenu
     }
     else {
       this.editMenu?.style.setProperty("display", "none")
+      this.convertBtn?.style.setProperty("display", "none")
       this.reorderMenu?.style.setProperty("display", "none")
       this.duplicateBtn?.style.setProperty("display", "none")
       this.removeBtn?.style.setProperty("display", "none")
@@ -514,13 +540,13 @@ export class OIMenuContext extends OIMenu
     this.wrapper.classList.add("ms-menu", "ms-menu-context")
     this.wrapper.appendChild(this.createMenuEdit())
     this.wrapper.appendChild(this.createMenuDecorator())
-    this.wrapper.appendChild(this.createMenuDuplicate())
-    this.wrapper.appendChild(this.createMenuGroup())
     this.wrapper.appendChild(this.createMenuReorder())
     this.wrapper.appendChild(this.createMenuExport())
-    this.wrapper.appendChild(this.createMenuSelectAll())
-    this.wrapper.appendChild(this.createMenuUnSelectAll())
+    this.wrapper.appendChild(this.createMenuConvert())
+    this.wrapper.appendChild(this.createMenuGroup())
+    this.wrapper.appendChild(this.createMenuDuplicate())
     this.wrapper.appendChild(this.createMenuRemove())
+    this.wrapper.appendChild(this.createMenuSelectAll())
     this.wrapper.style.setProperty("display", "none")
     domElement.appendChild(this.wrapper)
     domElement.parentElement?.addEventListener("scroll", () =>

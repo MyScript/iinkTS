@@ -15,7 +15,7 @@ import { OIBehaviors } from "../behaviors"
 import { LoggerClass, LoggerManager } from "../logger"
 import { OIModel } from "../model"
 import { OIMenu, TMenuItemBoolean, TMenuItemButton, TMenuItemButtonList, TMenuItemSelect } from "./OIMenu"
-import { OISymbolGroup, SymbolType, TOISymbol } from "../primitive"
+import { TOISymbol } from "../primitive"
 import { StrikeThroughAction, SurroundAction } from "../gesture"
 import { OIMenuSub } from "./OIMenuSub"
 import { getAvailableLanguageList, PartialDeep } from "../utils"
@@ -47,7 +47,6 @@ export class OIMenuAction extends OIMenu
   {
     super()
     this.id = id
-    this.#logger.info("constructor")
     this.behaviors = behaviors
   }
 
@@ -544,8 +543,7 @@ export class OIMenuAction extends OIMenu
       this.menuRedo.disabled = !this.behaviors.history.context.canRedo
     }
     if (this.menuConvert) {
-      this.menuConvert.disabled = this.model.symbols.length === 0 ||
-        !this.model.symbols.some(s => s.type === SymbolType.Stroke || (s.type === SymbolType.Group && (s as OISymbolGroup).extractStrokes().length))
+      this.menuConvert.disabled = !this.behaviors.extractStrokesFromSymbols(this.model.symbols).length
     }
   }
 

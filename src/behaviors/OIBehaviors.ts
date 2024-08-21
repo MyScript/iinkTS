@@ -217,7 +217,7 @@ export class OIBehaviors implements IBehaviors
   //#endregion
 
 
-  protected updateLayerInfos(): void
+  updateLayerInfos(): void
   {
     clearTimeout(this.#layerInfosTimer)
     this.#layerInfosTimer = setTimeout(() =>

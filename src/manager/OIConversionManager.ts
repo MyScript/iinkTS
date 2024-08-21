@@ -71,12 +71,6 @@ export class OIConversionManager
     return this.behaviors.configuration.rendering.guides.gap
   }
 
-  get strokes(): OIStroke[]
-  {
-    const symbols = (this.model.symbolsSelected.length ? this.model.symbolsSelected : this.model.symbols)
-    return this.behaviors.extractStrokesFromSymbols(symbols)
-  }
-
   protected computeFontSize(chars: TJIIXChar[]): number
   {
     if (chars.some(c => c["bounding-box"])) {
@@ -164,7 +158,7 @@ export class OIConversionManager
     return text
   }
 
-  convertText(text: TJIIXTextElement, onlyText: boolean): { symbol: OIText, strokes: OIStroke[] }[] | undefined
+  convertText(text: TJIIXTextElement, strokes: OIStroke[], onlyText: boolean): { symbol: OIText, strokes: OIStroke[] }[] | undefined
   {
     if (!text.words) {
       throw new Error("You need to active configuration.recognition.export.jiix.text.words = true")
@@ -196,7 +190,7 @@ export class OIConversionManager
         currentX += this.behaviors.texter.getSpaceWidth(result.at(-1)?.symbol.chars[0].fontSize || (this.rowHeight / 2))
         return
       }
-      const wordStrokes = this.strokes.filter(s => word.items?.some(i => i["full-id"] === s.id)) as OIStroke[]
+      const wordStrokes = strokes.filter(s => word.items?.some(i => i["full-id"] === s.id)) as OIStroke[]
       if (wordStrokes.length) {
         const chars = jiixChars.slice(word["first-char"] as number, (word["last-char"] || 0) + 1)
         const textSymbol = this.buildWord(word, chars, wordStrokes, fontSize)
@@ -312,9 +306,9 @@ export class OIConversionManager
     return new OIShapePolygon(points, strokes[0]?.style)
   }
 
-  convertNode(node: TJIIXNodeElement): { symbol: TOIShape, strokes: OIStroke[] } | undefined
+  convertNode(node: TJIIXNodeElement, strokes: OIStroke[]): { symbol: TOIShape, strokes: OIStroke[] } | undefined
   {
-    const associatedStroke = this.strokes.filter(s => node.items?.some(i => i["full-id"] === s.id))
+    const associatedStroke = strokes.filter(s => node.items?.some(i => i["full-id"] === s.id))
     if (!associatedStroke.length) return
 
     const uniqStrokes = associatedStroke.filter((a, i) => associatedStroke.findIndex((s) => a.id === s.id) === i)
@@ -398,11 +392,11 @@ export class OIConversionManager
     return new OIEdgeArc(center, arc.startAngle, arc.sweepAngle, radiusX, radiusY, arc.phi, arc.startDecoration, arc.endDecoration, strokes[0]?.style)
   }
 
-  convertEdge(edge: TJIIXEdgeElement): { symbol: TOIEdge, strokes: OIStroke[] } | undefined
+  convertEdge(edge: TJIIXEdgeElement, strokes: OIStroke[]): { symbol: TOIEdge, strokes: OIStroke[] } | undefined
   {
     switch (edge.kind) {
       case JIIXEdgeKind.Line: {
-        const associatedStroke = this.strokes.filter(s => edge.items?.some(i => i["full-id"] === s.id))
+        const associatedStroke = strokes.filter(s => edge.items?.some(i => i["full-id"] === s.id))
         if (!associatedStroke.length) return
         const uniqStrokes = associatedStroke.filter((a, i) => associatedStroke.findIndex((s) => a.id === s.id) === i)
         const oiEdge = this.buildLine(edge, uniqStrokes)
@@ -412,7 +406,7 @@ export class OIConversionManager
         }
       }
       case JIIXEdgeKind.Arc: {
-        const associatedStroke = this.strokes.filter(s => edge.items?.some(i => i["full-id"] === s.id))
+        const associatedStroke = strokes.filter(s => edge.items?.some(i => i["full-id"] === s.id))
         if (!associatedStroke.length) return
         const uniqStrokes = associatedStroke.filter((a, i) => associatedStroke.findIndex((s) => a.id === s.id) === i)
         const oiEdge = this.buildArc(edge, uniqStrokes)
@@ -422,7 +416,7 @@ export class OIConversionManager
         }
       }
       case JIIXEdgeKind.PolyEdge: {
-        const associatedStroke = this.strokes.filter(s => edge.edges.flatMap(e => e.items)?.some(i => i!["full-id"] === s.id))
+        const associatedStroke = strokes.filter(s => edge.edges.flatMap(e => e.items)?.some(i => i!["full-id"] === s.id))
         if (!associatedStroke.length) return
         const uniqStrokes = associatedStroke.filter((a, i) => associatedStroke.findIndex((s) => a.id === s.id) === i)
         const oiEdge = this.buildPolyEdge(edge, uniqStrokes)
@@ -437,7 +431,7 @@ export class OIConversionManager
     }
   }
 
-  async apply(): Promise<void>
+  async apply(symbols: TOISymbol[] = []): Promise<void>
   {
     this.#logger.info("convert")
     if (!this.model.exports?.["application/vnd.myscript.jiix"]) {
@@ -446,27 +440,30 @@ export class OIConversionManager
     this.behaviors.selector.removeSelectedGroup()
     const jiix = this.model.exports?.["application/vnd.myscript.jiix"] as TJIIXExport
     if (jiix?.elements?.length) {
+      const strokesToConvert = this.behaviors.extractStrokesFromSymbols(symbols.length ? symbols : this.model.symbols)
+
+
       const onlyText = !jiix.elements?.some(e => e.type !== "Text")
       const conversionResults: { symbol: TOISymbol, strokes: OIStroke[] }[] = []
       jiix.elements.forEach(el =>
       {
         switch (el.type) {
           case "Text": {
-            const conversion = this.convertText(el, onlyText)
+            const conversion = this.convertText(el, strokesToConvert, onlyText)
             if (conversion) {
               conversionResults.push(...conversion)
             }
             break
           }
           case "Node": {
-            const conversion = this.convertNode(el)
+            const conversion = this.convertNode(el, strokesToConvert)
             if (conversion) {
               conversionResults.push(conversion)
             }
             break
           }
           case "Edge": {
-            const conversion = this.convertEdge(el)
+            const conversion = this.convertEdge(el, strokesToConvert)
             if (conversion) {
               conversionResults.push(conversion)
             }

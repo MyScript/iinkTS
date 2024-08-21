@@ -18,9 +18,9 @@ describe("OIConversionManager.ts", () =>
     behaviors.export = jest.fn(() => Promise.resolve(behaviors.model))
     behaviors.selector.removeSelectedGroup = jest.fn()
     const manager = new OIConversionManager(behaviors)
-    manager.convertText = jest.fn((_t: TJIIXTextElement, _a: boolean) => undefined)
-    manager.convertNode = jest.fn((_t: TJIIXNodeElement) => undefined)
-    manager.convertEdge = jest.fn((_t: TJIIXEdgeElement) => undefined)
+    manager.convertText = jest.fn()
+    manager.convertNode = jest.fn()
+    manager.convertEdge = jest.fn()
     test("should call behaviors.export if no model.exports?.[\"application/vnd.myscript.jiix\"]", async () =>
     {
       await manager.apply()
@@ -73,26 +73,26 @@ describe("OIConversionManager.ts", () =>
     {
       const noChars = JSON.parse(JSON.stringify(helloTextJIIX)) as TJIIXTextElement
       delete noChars.words
-      await expect(async () => await manager.convertText(noChars, false)).rejects.toThrowError("You need to active configuration.recognition.export.jiix.text.words = true")
+      await expect(async () => await manager.convertText(noChars, [], false)).rejects.toThrowError("You need to active configuration.recognition.export.jiix.text.words = true")
     })
     test("should throw Error if jiix has no char", async () =>
     {
       const noChars = JSON.parse(JSON.stringify(helloTextJIIX)) as TJIIXTextElement
       delete noChars.chars
-      await expect(async () => await manager.convertText(noChars, false)).rejects.toThrowError("You need to active configuration.recognition.export.jiix.text.chars = true")
+      await expect(async () => await manager.convertText(noChars, [], false)).rejects.toThrowError("You need to active configuration.recognition.export.jiix.text.chars = true")
     })
     test("should throw Error if jiix char has no items", async () =>
     {
       const noItems = JSON.parse(JSON.stringify(helloTextJIIX)) as TJIIXTextElement
       noItems.chars?.forEach(c => delete c.items)
-      await expect(async () => await manager.convertText(noItems, false)).rejects.toThrowError("You need to active configuration.recognition.export.jiix.strokes = true")
+      await expect(async () => await manager.convertText(noItems, [], false)).rejects.toThrowError("You need to active configuration.recognition.export.jiix.strokes = true")
     })
     test("should return converted symbol & strokes associate", async () =>
     {
       const helloStroke = buildOIStroke()
       helloStroke.id = "stroke-78f208b6-dcc4-4f76-8c5b-e0093a9e2e62"
       manager.model.symbols.push(helloStroke)
-      const result = manager.convertText(helloTextJIIX, false)!
+      const result = manager.convertText(helloTextJIIX, [helloStroke], false)!
       expect(result).toHaveLength(1)
       expect(result[0].strokes).toEqual([helloStroke])
       expect(result[0].symbol.label).toEqual("h")
@@ -119,14 +119,14 @@ describe("OIConversionManager.ts", () =>
       stroke.id = "stroke-95ec1ea8-3dc9-4d63-945c-eaaa1d92636711"
       manager.model.symbols.push(stroke)
       //@ts-ignore
-      expect(manager.convertNode({ ...jiixNodeRect, kind: "pouet" })).toBeUndefined()
+      expect(manager.convertNode({ ...jiixNodeRect, kind: "pouet" }, [stroke])).toBeUndefined()
     })
     test("should return converted symbol & strokes associate when rectangle", async () =>
     {
       const stroke = buildOIStroke()
       stroke.id = "stroke-95ec1ea8-3dc9-4d63-945c-eaaa1d926367"
       manager.model.symbols.push(stroke)
-      const result = manager.convertNode(jiixNodeRect)!
+      const result = manager.convertNode(jiixNodeRect, [stroke])!
       expect(result.strokes).toEqual([stroke])
       expect(result.symbol.kind).toEqual("polygon")
     })
@@ -135,7 +135,7 @@ describe("OIConversionManager.ts", () =>
       const stroke = buildOIStroke()
       stroke.id = "stroke-e3ab0f2b-7846-4440-9e49-97ae560813ee"
       manager.model.symbols.push(stroke)
-      const result = manager.convertNode(jiixNodeCircle)!
+      const result = manager.convertNode(jiixNodeCircle, [stroke])!
       expect(result.strokes).toEqual([stroke])
       expect(result.symbol.kind).toEqual("circle")
     })
@@ -144,7 +144,7 @@ describe("OIConversionManager.ts", () =>
       const stroke = buildOIStroke()
       stroke.id = "stroke-c5f186da-33c9-41ce-8750-1909e52fbf4c"
       manager.model.symbols.push(stroke)
-      const result = manager.convertNode(jiixNodeEllipse)!
+      const result = manager.convertNode(jiixNodeEllipse, [stroke])!
       expect(result.strokes).toEqual([stroke])
       expect(result.symbol.kind).toEqual("ellipse")
     })
@@ -153,7 +153,7 @@ describe("OIConversionManager.ts", () =>
       const stroke = buildOIStroke()
       stroke.id = "stroke-024da324-4196-41d0-8f51-16c2a21b9226"
       manager.model.symbols.push(stroke)
-      const result = manager.convertNode(jiixNodeTriangle)!
+      const result = manager.convertNode(jiixNodeTriangle, [stroke])!
       expect(result.strokes).toEqual([stroke])
       expect(result.symbol.kind).toEqual("polygon")
     })
@@ -162,7 +162,7 @@ describe("OIConversionManager.ts", () =>
       const stroke = buildOIStroke()
       stroke.id = "stroke-768451fe-6737-43e7-b3a5-d7f2b3da8caa"
       manager.model.symbols.push(stroke)
-      const result = manager.convertNode(jiixNodeParrallelogram)!
+      const result = manager.convertNode(jiixNodeParrallelogram, [stroke])!
       expect(result.strokes).toEqual([stroke])
       expect(result.symbol.kind).toEqual("polygon")
     })
@@ -171,7 +171,7 @@ describe("OIConversionManager.ts", () =>
       const stroke = buildOIStroke()
       stroke.id = "stroke-1d68a985-9ca6-48dd-88b5-d385df793105"
       manager.model.symbols.push(stroke)
-      const result = manager.convertNode(jiixNodeRhombus)!
+      const result = manager.convertNode(jiixNodeRhombus, [stroke])!
       expect(result.strokes).toEqual([stroke])
       expect(result.symbol.kind).toEqual("polygon")
     })
@@ -180,7 +180,7 @@ describe("OIConversionManager.ts", () =>
       const stroke = buildOIStroke()
       stroke.id = "stroke-fa6ee3fd-6189-4bdf-8c06-1907588f298f"
       manager.model.symbols.push(stroke)
-      const result = manager.convertNode(jiixNodePolygon)!
+      const result = manager.convertNode(jiixNodePolygon, [stroke])!
       expect(result.strokes).toEqual([stroke])
       expect(result.symbol.kind).toEqual("polygon")
     })
@@ -204,14 +204,14 @@ describe("OIConversionManager.ts", () =>
       stroke.id = "stroke-2632b9c1-697d-44e6-bba4-44c49820318211"
       manager.model.symbols.push(stroke)
       //@ts-ignore
-      expect(manager.convertEdge({ ...jiixEdgeLine, kind: "pouet" })).toBeUndefined()
+      expect(manager.convertEdge({ ...jiixEdgeLine, kind: "pouet" }, [stroke])).toBeUndefined()
     })
     test("should return converted symbol & strokes associate when line", async () =>
     {
       const stroke = buildOIStroke()
       stroke.id = "stroke-2632b9c1-697d-44e6-bba4-44c498203182"
       manager.model.symbols.push(stroke)
-      const result = manager.convertEdge(jiixEdgeLine)!
+      const result = manager.convertEdge(jiixEdgeLine, [stroke])!
       expect(result.strokes).toEqual([stroke])
       expect(result.symbol.kind).toEqual("line")
     })
@@ -220,7 +220,7 @@ describe("OIConversionManager.ts", () =>
       const stroke = buildOIStroke()
       stroke.id = "stroke-a3aea978-6ea3-449e-8b02-74772a8233bb"
       manager.model.symbols.push(stroke)
-      const result = manager.convertEdge(jiixEdgeArc)!
+      const result = manager.convertEdge(jiixEdgeArc, [stroke])!
       expect(result.strokes).toEqual([stroke])
       expect(result.symbol.kind).toEqual("arc")
     })
