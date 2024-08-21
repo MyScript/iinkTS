@@ -1,7 +1,6 @@
-import { SELECTION_MARGIN } from "../Constants"
 import { TStyle } from "../style"
-import { PartialDeep, computeDistanceBetweenPointAndSegment, convertDegreeToRadian, findIntersectionBetween2Segment, isPointInsidePolygon, computeRotatedPoint } from "../utils"
-import { TPoint, TSegment, isValidPoint } from "./Point"
+import { PartialDeep, convertDegreeToRadian, findIntersectionBetween2Segment, isPointInsidePolygon, computeRotatedPoint } from "../utils"
+import { TPoint, isValidPoint } from "./Point"
 import { SymbolType } from "./Symbol"
 import { Box, TBoundingBox } from "./Box"
 import { OIDecorator } from "./OIDecorator"
@@ -24,6 +23,8 @@ export type TOISymbolChar = {
  */
 export class OIText extends OISymbolBase<SymbolType.Text>
 {
+  readonly isClosed = true
+
   point: TPoint
   chars: TOISymbolChar[]
   decorators: OIDecorator[]
@@ -68,19 +69,6 @@ export class OIText extends OISymbolBase<SymbolType.Text>
     }
   }
 
-  get edges(): TSegment[]
-  {
-    return this.vertices.map((p, i) =>
-    {
-      if (i === this.vertices.length - 1) {
-        return { p1: this.vertices[0], p2: p }
-      }
-      else {
-        return { p1: p, p2: this.vertices[i + 1] }
-      }
-    })
-  }
-
   get snapPoints(): TPoint[]
   {
     const offsetY = this.bounds.yMax - this.point.y
@@ -101,14 +89,6 @@ export class OIText extends OISymbolBase<SymbolType.Text>
         })
     }
     return points
-  }
-
-  isCloseToPoint(point: TPoint): boolean
-  {
-    return this.edges.some(seg =>
-    {
-      return computeDistanceBetweenPointAndSegment(point, seg) < SELECTION_MARGIN
-    })
   }
 
   protected getCharCorners(char: TOISymbolChar): TPoint[]

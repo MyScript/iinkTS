@@ -24,7 +24,6 @@ describe("OIEraseManager.ts", () =>
     const manager = new OIEraseManager(behaviors)
     manager.renderer.drawSymbol = jest.fn()
     manager.renderer.removeSymbol = jest.fn()
-    manager.model.setToDeleteSymbolsFromPoint = jest.fn()
     behaviors.init(wrapperHTML)
 
     test("should init currentEraser", async () =>
@@ -38,15 +37,13 @@ describe("OIEraseManager.ts", () =>
       expect(manager.renderer.drawSymbol).toHaveBeenCalledTimes(1)
       expect(manager.renderer.drawSymbol).toHaveBeenCalledWith(manager.currentEraser)
     })
-    test("should update currentEraser and call manager.model.setToDeleteSymbolsFromPoint", async () =>
+    test("should update currentEraser", async () =>
     {
       const point: TPointer = { t: 1, p: 0.5, x: 15, y: 15 }
       manager.continue(point)
       expect(manager.currentEraser).toBeDefined()
       expect(manager.currentEraser?.type).toBe(SymbolType.Eraser)
       expect(manager.currentEraser?.pointers).toHaveLength(2)
-      expect(manager.model.setToDeleteSymbolsFromPoint).toHaveBeenCalledTimes(1)
-      expect(manager.model.setToDeleteSymbolsFromPoint).toHaveBeenCalledWith(point)
       expect(manager.renderer.drawSymbol).toHaveBeenCalledTimes(1)
       expect(manager.renderer.drawSymbol).toHaveBeenCalledWith(manager.currentEraser)
     })

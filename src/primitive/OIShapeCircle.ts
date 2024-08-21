@@ -1,6 +1,6 @@
 import { SELECTION_MARGIN } from "../Constants"
 import { TStyle } from "../style"
-import { PartialDeep, computeDistance, findIntersectBetweenSegmentAndCircle, isValidNumber, computeRotatedPoint } from "../utils"
+import { PartialDeep, findIntersectBetweenSegmentAndCircle, isValidNumber, computeRotatedPoint } from "../utils"
 import { TPoint, isValidPoint } from "./Point"
 import { OIShapeBase, ShapeKind } from "./OIShape"
 import { Box, TBoundingBox } from "./Box"
@@ -79,10 +79,6 @@ export class OIShapeCircle extends OIShapeBase<ShapeKind.Circle>
     return this._vertices.get(this.verticesId)!
   }
 
-  isCloseToPoint(point: TPoint): boolean
-  {
-    return Math.abs(computeDistance(point, this.center) - this.radius) < SELECTION_MARGIN
-  }
 
   overlaps(box: TBoundingBox): boolean
   {

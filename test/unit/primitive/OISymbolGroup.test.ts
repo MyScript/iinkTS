@@ -2,8 +2,6 @@ import
 {
   DefaultStyle,
   OISymbolGroup,
-  SELECTION_MARGIN,
-  TPoint,
   TStyle,
 } from "../../../src/iink"
 import { buildOICircle, buildOIStroke } from "../helpers"
@@ -37,24 +35,6 @@ describe("OISymbolGroup.ts", () =>
       expect(group).toBeDefined()
       expect(group.style).toEqual(DefaultStyle)
     })
-  })
-
-  describe("isCloseToPoint", () =>
-  {
-    const circle = buildOICircle()
-    const stroke = buildOIStroke()
-    const group = new OISymbolGroup([circle, stroke])
-    test(`should return true when the point is within ${ SELECTION_MARGIN } pixel of a symbol`, () =>
-    {
-      const closePoint: TPoint = { x: circle.vertices[0].x, y: circle.vertices[0].y + SELECTION_MARGIN / 2 }
-      expect(group.isCloseToPoint(closePoint)).toEqual(true)
-    })
-    test(`should return false when the point is more than ${ SELECTION_MARGIN } pixel of a symbols`, () =>
-    {
-      const closePoint: TPoint = { x: circle.vertices[0].x, y: circle.vertices[0].y + SELECTION_MARGIN * 3 }
-      expect(group.isCloseToPoint(closePoint)).toEqual(false)
-    })
-
   })
 
   describe("style", () =>

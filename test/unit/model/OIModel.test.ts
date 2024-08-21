@@ -377,35 +377,6 @@ describe("OIModel.ts", () =>
     })
   })
 
-  describe("deleting", () =>
-  {
-    const model = new OIModel(width, height, rowHeight)
-    const stroke1 = buildOIStroke({ box: { height: 10, width: 10, x: 0, y: 0 } })
-    model.addSymbol(stroke1)
-    const stroke2 = buildOIStroke({ box: { height: 10, width: 10, x: 20, y: 0 } })
-    model.addSymbol(stroke2)
-    test("should set stroke.deleting = true when point close", () =>
-    {
-      expect(model.symbolsToDelete).toHaveLength(0)
-      const point = JSON.parse(JSON.stringify(stroke1.pointers[0]))
-      point.x += 1
-      point.y += 1
-      model.setToDeleteSymbolsFromPoint(point)
-      expect(model.symbolsToDelete).toHaveLength(1)
-      expect(model.symbolsToDelete[0].id).toEqual(stroke1.id)
-    })
-    test("should not set stroke.deleting = true when the point is far away", () =>
-    {
-      model.symbols.forEach(s => s.deleting = false)
-      expect(model.symbolsToDelete).toHaveLength(0)
-      const point = JSON.parse(JSON.stringify(stroke1.pointers[0]))
-      point.x += 1000
-      point.y += 1000
-      model.setToDeleteSymbolsFromPoint(point)
-      expect(model.symbolsToDelete).toHaveLength(0)
-    })
-  })
-
   describe("extract", () =>
   {
     const model = new OIModel(width, height, rowHeight)

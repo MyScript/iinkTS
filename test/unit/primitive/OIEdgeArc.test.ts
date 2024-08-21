@@ -4,7 +4,6 @@ import
   TPoint,
   DefaultStyle,
   TStyle,
-  SELECTION_MARGIN,
   TBoundingBox,
 } from "../../../src/iink"
 
@@ -109,32 +108,6 @@ describe("OIEdgeArc.ts", () =>
         { x: 3.536, y: 3.536 },
         { x: 0, y: 5 }
       ])
-    })
-  })
-
-  describe("isCloseToPoint", () =>
-  {
-    const center: TPoint = { x: 0, y: 0 }
-    const startAngle = -Math.PI
-    const sweepAngle = Math.PI
-    const radiusX = 10
-    const radiusY = 50
-    const phi = 0
-    const arc = new OIEdgeArc(center, startAngle, sweepAngle, radiusX, radiusY, phi)
-    test(`should return true when the point is within ${ SELECTION_MARGIN } pixel vertice`, () =>
-    {
-      const closePoint: TPoint = { x: arc.vertices[2].x, y: arc.vertices[2].y + SELECTION_MARGIN / 2 }
-      expect(arc.isCloseToPoint(closePoint)).toEqual(true)
-    })
-    test(`should return true when the point is within ${ SELECTION_MARGIN } pixel from arc`, () =>
-    {
-      const closePoint: TPoint = { x: arc.vertices[2].x + SELECTION_MARGIN / 3, y: arc.vertices[2].y + SELECTION_MARGIN / 3 }
-      expect(arc.isCloseToPoint(closePoint)).toEqual(true)
-    })
-    test(`should return false when the point is more than ${ SELECTION_MARGIN } pixel from an edge`, () =>
-    {
-      const closePoint: TPoint = { x: -50, y: 50 }
-      expect(arc.isCloseToPoint(closePoint)).toEqual(false)
     })
   })
 

@@ -1,5 +1,4 @@
-import { SELECTION_MARGIN } from "../Constants"
-import { computeDistance, createUUID, PartialDeep } from "../utils"
+import { createUUID, PartialDeep } from "../utils"
 import { TPoint, TPointer } from "./Point"
 import { Box, TBoundingBox } from "./Box"
 import { SymbolType } from "./Symbol"
@@ -18,6 +17,7 @@ const style: TStyle = {
  */
 export class OIEraser extends OISymbolBase<SymbolType.Eraser>
 {
+  readonly isClosed = false
   pointers: TPointer[]
 
   constructor()
@@ -60,14 +60,6 @@ export class OIEraser extends OISymbolBase<SymbolType.Eraser>
     {
       return p.x >= box.x && p.x <= box.x + box.width
         && p.y >= box.y && p.y <= box.y + box.height
-    })
-  }
-
-  isCloseToPoint(point: TPoint): boolean
-  {
-    return this.pointers.some(pointer =>
-    {
-      return computeDistance(point, pointer) < SELECTION_MARGIN
     })
   }
 

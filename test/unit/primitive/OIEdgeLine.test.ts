@@ -4,7 +4,6 @@ import
   TPoint,
   DefaultStyle,
   TStyle,
-  SELECTION_MARGIN,
   TBoundingBox,
 } from "../../../src/iink"
 
@@ -40,27 +39,6 @@ describe("OIEdgeLine.ts", () =>
       const end: TPoint = { x: 5, y: 5 }
       const line = new OIEdgeLine(start, end)
       expect(line.style).toEqual(DefaultStyle)
-    })
-  })
-  describe("isCloseToPoint", () =>
-  {
-    const start: TPoint = { x: 0, y: 0 }
-    const end: TPoint = { x: 0, y: 50 }
-    const line = new OIEdgeLine(start, end)
-    test(`should return true when the point is within ${ SELECTION_MARGIN } pixel vertice`, () =>
-    {
-      const closePoint: TPoint = { x: 0, y: 0 + SELECTION_MARGIN / 2 }
-      expect(line.isCloseToPoint(closePoint)).toEqual(true)
-    })
-    test(`should return true when the point is within ${ SELECTION_MARGIN } pixel from line`, () =>
-    {
-      const closePoint: TPoint = { x: SELECTION_MARGIN / 2, y: 25 }
-      expect(line.isCloseToPoint(closePoint)).toEqual(true)
-    })
-    test(`should return false when the point is more than ${ SELECTION_MARGIN } pixel from an edge`, () =>
-    {
-      const closePoint: TPoint = { x: 25, y: 25 }
-      expect(line.isCloseToPoint(closePoint)).toEqual(false)
     })
   })
   describe("overlaps", () =>

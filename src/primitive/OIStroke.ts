@@ -1,4 +1,3 @@
-import { SELECTION_MARGIN } from "../Constants"
 import { TStyle } from "../style"
 import { PartialDeep, computeDistance, getClosestPoint } from "../utils"
 import { TStroke, TStrokeToSend } from "./Stroke"
@@ -13,6 +12,8 @@ import { OISymbolBase } from "./OISymbolBase"
  */
 export class OIStroke extends OISymbolBase<SymbolType.Stroke>
 {
+  readonly isClosed = false
+
   pointerType: string
   length: number
   decorators: OIDecorator[]
@@ -124,14 +125,6 @@ export class OIStroke extends OISymbolBase<SymbolType.Stroke>
     {
       return p.x >= box.x && p.x <= box.x + box.width
         && p.y >= box.y && p.y <= box.y + box.height
-    })
-  }
-
-  isCloseToPoint(point: TPoint): boolean
-  {
-    return this.pointers.some(pointer =>
-    {
-      return computeDistance(point, pointer) < SELECTION_MARGIN
     })
   }
 
