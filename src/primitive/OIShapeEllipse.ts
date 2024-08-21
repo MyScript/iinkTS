@@ -1,6 +1,6 @@
 import { SELECTION_MARGIN } from "../Constants"
 import { TStyle } from "../style"
-import { PartialDeep, computeDistanceBetweenPointAndSegment, computePointOnEllipse, findIntersectionBetween2Segment, isValidNumber, } from "../utils"
+import { PartialDeep, computePointOnEllipse, findIntersectionBetween2Segment, isValidNumber, } from "../utils"
 import { TPoint, isValidPoint } from "./Point"
 import { OIShapeBase, ShapeKind } from "./OIShape"
 import { Box, TBoundingBox } from "./Box"
@@ -56,11 +56,6 @@ export class OIShapeEllipse extends OIShapeBase<ShapeKind.Ellipse>
       this._vertices.set(this.verticesId, this.computedVertices())
     }
     return this._vertices.get(this.verticesId)!
-  }
-
-  isCloseToPoint(point: TPoint): boolean
-  {
-    return this.edges.some(e => computeDistanceBetweenPointAndSegment(point, e) < SELECTION_MARGIN)
   }
 
   overlaps(box: TBoundingBox): boolean

@@ -179,7 +179,6 @@ describe("OISVGRenderer.ts", () =>
         modificationDate: Date.now(),
         clone: jest.fn(),
         overlaps: jest.fn(),
-        isCloseToPoint: jest.fn(),
         id: "unknow"
 
       }

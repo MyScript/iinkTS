@@ -1,7 +1,7 @@
 import { OIBehaviors } from "../behaviors"
 import { LoggerClass, LoggerManager } from "../logger"
 import { OIModel } from "../model"
-import { OIEraser, TPointer } from "../primitive"
+import { OIEraser, TPointer, TSegment } from "../primitive"
 import { OISVGRenderer } from "../renderer"
 
 /**
@@ -44,9 +44,18 @@ export class OIEraseManager
     if (!this.currentEraser) {
       throw new Error("Can't update current eraser because currentEraser is undefined")
     }
-    this.renderer.drawSymbol(this.currentEraser!)
     this.currentEraser.pointers.push(pointer)
-    this.model.setToDeleteSymbolsFromPoint(pointer)
+    this.renderer.drawSymbol(this.currentEraser)
+    const lastSeg: TSegment = {
+      p1: this.currentEraser.pointers.at(-1)!,
+      p2: this.currentEraser.pointers.at(-2)!
+    }
+    this.model.symbols.forEach(s => {
+      if (s.isIntersected(lastSeg))
+      {
+        s.deleting = true
+      }
+    })
     this.model.symbolsToDelete.map(s => this.renderer.drawSymbol(s))
   }
 

@@ -4,7 +4,6 @@ import
   TPoint,
   DefaultStyle,
   TStyle,
-  SELECTION_MARGIN,
   TBoundingBox
 } from "../../../src/iink"
 
@@ -189,29 +188,6 @@ describe("OIShapeEllipse.ts", () =>
       expect(ellipse.bounds.height).toEqual(8)
       expect(ellipse.bounds.x).toEqual(1)
       expect(ellipse.bounds.y).toEqual(2)
-    })
-  })
-
-  describe("isCloseToPoint", () =>
-  {
-    const center: TPoint = { x: 5, y: 0 }
-    const radiusX = 50
-    const radiusY = 100
-    const phi = 0
-    const ellipse = new OIShapeEllipse(center, radiusX, radiusY, phi)
-    test(`should return true when the point is within ${ SELECTION_MARGIN } pixel of an edge`, () =>
-    {
-      const closePoint: TPoint = { x: center.x, y: center.y + radiusY + SELECTION_MARGIN / 2 }
-      expect(ellipse.isCloseToPoint(closePoint)).toEqual(true)
-    })
-    test(`should return false when the point is more than ${ SELECTION_MARGIN } pixel from an edge`, () =>
-    {
-      const closePoint: TPoint = { x: center.x, y: center.y + radiusY + SELECTION_MARGIN * 2 }
-      expect(ellipse.isCloseToPoint(closePoint)).toEqual(false)
-    })
-    test(`should return false when the point is more than ${ SELECTION_MARGIN } pixel from an edge`, () =>
-    {
-      expect(ellipse.isCloseToPoint(ellipse.center)).toEqual(false)
     })
   })
 

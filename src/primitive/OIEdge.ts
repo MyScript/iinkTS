@@ -1,9 +1,9 @@
 import { SELECTION_MARGIN } from "../Constants"
 import { TStyle } from "../style"
-import { computeDistanceBetweenPointAndSegment, findIntersectionBetween2Segment, PartialDeep } from "../utils"
+import { findIntersectionBetween2Segment, PartialDeep } from "../utils"
 import { Box, TBoundingBox } from "./Box"
 import { OISymbolBase } from "./OISymbolBase"
-import { TPoint, TSegment } from "./Point"
+import { TPoint } from "./Point"
 import { SymbolType } from "./Symbol"
 
 /**
@@ -30,6 +30,8 @@ export enum EdgeDecoration
 export abstract class OIEdgeBase<K = EdgeKind> extends OISymbolBase<SymbolType.Edge>
 {
   readonly kind: K
+  readonly isClosed = false
+
   startDecoration?: EdgeDecoration
   endDecoration?: EdgeDecoration
 
@@ -65,26 +67,9 @@ export abstract class OIEdgeBase<K = EdgeKind> extends OISymbolBase<SymbolType.E
     return bb
   }
 
-
   get snapPoints(): TPoint[]
   {
     return this.vertices
-  }
-
-  get edges(): TSegment[]
-  {
-    return this.vertices.slice(0, -1).map((p, i) =>
-    {
-      return { p1: p, p2: this.vertices[i + 1] }
-    })
-  }
-
-  isCloseToPoint(point: TPoint): boolean
-  {
-    return this.edges.some(seg =>
-    {
-      return computeDistanceBetweenPointAndSegment(point, seg) < SELECTION_MARGIN
-    })
   }
 
   overlaps(box: TBoundingBox): boolean

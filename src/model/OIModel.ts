@@ -3,7 +3,6 @@ import
 {
   SymbolType,
   TOISymbol,
-  TPoint,
 } from "../primitive"
 import { TExport } from "./Export"
 import { IModel } from "./IModel"
@@ -54,17 +53,6 @@ export class OIModel implements IModel
     if (symbol) {
       symbol.selected = true
     }
-  }
-
-  setToDeleteSymbolsFromPoint(point: TPoint): void
-  {
-    this.#logger.info("appendSelectedStrokesFromPoint", { point })
-    this.symbols.forEach(s =>
-    {
-      if (s.isCloseToPoint(point)) {
-        s.deleting = true
-      }
-    })
   }
 
   unselectSymbol(id: string): void

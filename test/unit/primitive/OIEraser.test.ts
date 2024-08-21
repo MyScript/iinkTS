@@ -48,7 +48,7 @@ describe("OIEraser.ts", () =>
     })
   })
 
-    describe("overlaps", () =>
+  describe("overlaps", () =>
   {
     const eraser = new OIEraser()
     eraser.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
@@ -63,22 +63,9 @@ describe("OIEraser.ts", () =>
     })
   })
 
-    describe("isCloseToPoint", () =>
-  {
-    const eraser = new OIEraser()
-    eraser.pointers.push({ p: 1, t: 1, x: 1, y: 1 })
-    eraser.pointers.push({ p: 1, t: 1, x: 11, y: 11 })
-    test("should return true", () =>
-    {
-      expect(eraser.isCloseToPoint({ x: 0, y: 0 })).toEqual(true)
-    })
-    test("should return false", () =>
-    {
-      expect(eraser.isCloseToPoint({ x: 35, y: 0 })).toEqual(false)
-    })
-  })
 
-    describe("clone", () =>
+
+  describe("clone", () =>
   {
     test("should return clone", () =>
     {
@@ -91,4 +78,4 @@ describe("OIEraser.ts", () =>
       expect(clone).not.toBe(eraser)
     })
   })
-  })
+})

@@ -5,7 +5,6 @@ import
   TPoint,
   DefaultStyle,
   TStyle,
-  SELECTION_MARGIN,
   TBoundingBox
 } from "../../../src/iink"
 
@@ -168,27 +167,6 @@ describe("OIShapeCircle.ts", () =>
       expect(round(circle.bounds.height, 0)).toEqual(3)
       expect(round(circle.bounds.x, 0)).toEqual(1)
       expect(round(circle.bounds.y, 0)).toEqual(5)
-    })
-  })
-
-  describe("isCloseToPoint", () =>
-  {
-    const center: TPoint = { x: 5, y: 0 }
-    const radius = 50
-    const circle = new OIShapeCircle(center, radius)
-    test(`should return true when the point is within ${ SELECTION_MARGIN } pixel of an edge`, () =>
-    {
-      const closePoint: TPoint = { x: center.x, y: center.y + radius + SELECTION_MARGIN / 2 }
-      expect(circle.isCloseToPoint(closePoint)).toEqual(true)
-    })
-    test(`should return false when the point is more than ${ SELECTION_MARGIN } pixel from an edge`, () =>
-    {
-      const closePoint: TPoint = { x: center.x, y: center.y + radius + SELECTION_MARGIN * 2 }
-      expect(circle.isCloseToPoint(closePoint)).toEqual(false)
-    })
-    test(`should return false when the point is more than ${ SELECTION_MARGIN } pixel from an edge`, () =>
-    {
-      expect(circle.isCloseToPoint(circle.center)).toEqual(false)
     })
   })
 

@@ -1,6 +1,6 @@
-import { PartialDeep, createUUID } from "../utils"
+import { PartialDeep, createUUID, findIntersectionBetween2Segment } from "../utils"
 import { TBoundingBox } from "./Box"
-import { TPoint } from "./Point"
+import { TPoint, TSegment } from "./Point"
 import { SymbolType, TSymbol } from "./Symbol"
 import { DefaultStyle, TStyle } from "../style"
 import { MatrixTransform } from "../transform"
@@ -11,6 +11,7 @@ import { MatrixTransform } from "../transform"
 export abstract class OISymbolBase<T extends string = SymbolType> implements TSymbol
 {
   readonly type: T
+  abstract readonly isClosed: boolean
   style: TStyle
 
   id: string
@@ -41,11 +42,38 @@ export abstract class OISymbolBase<T extends string = SymbolType> implements TSy
 
   abstract get snapPoints(): TPoint[]
 
-  abstract overlaps(box: TBoundingBox): boolean
+  get edges(): TSegment[]
+  {
+    if (this.isClosed) {
+      return this.vertices.map((p, i) =>
+        {
+          if (i === this.vertices.length - 1) {
+            return { p1: p, p2: this.vertices[0] }
+          }
+          else {
+            return { p1: p, p2: this.vertices[i + 1] }
+          }
+        })
+    }
+    else {
+      return this.vertices.slice(0, -1).map((p, i) =>
+      {
+        return { p1: p, p2: this.vertices[i + 1] }
+      })
+    }
+  }
 
-  abstract isCloseToPoint(point: TPoint): boolean
+  abstract overlaps(box: TBoundingBox): boolean
 
   abstract clone(): OISymbolBase
 
   abstract toJSON(): PartialDeep<OISymbolBase>
+
+  isIntersected(seg: TSegment): boolean
+  {
+    return this.edges.some(edge =>
+    {
+      return findIntersectionBetween2Segment(edge, seg)
+    })
+  }
 }

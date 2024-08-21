@@ -1,4 +1,4 @@
-import { Box, OIText, SELECTION_MARGIN, TBoundingBox, TOISymbolChar, TPoint } from "../../../src/iink"
+import { Box, OIText, TBoundingBox, TOISymbolChar, TPoint } from "../../../src/iink"
 
 describe("OIText.ts", () =>
 {
@@ -61,7 +61,7 @@ describe("OIText.ts", () =>
         { "p1": { "x": 1, "y": 2 }, "p2": { "x": 11, "y": 2 } },
         { "p1": { "x": 11, "y": 2 }, "p2": { "x": 11, "y": 12 } },
         { "p1": { "x": 11, "y": 12 }, "p2": { "x": 1, "y": 12 } },
-        { "p1": { "x": 1, "y": 2 }, "p2": { "x": 1, "y": 12 } }
+        { "p1": { "x": 1, "y": 12 }, "p2": { "x": 1, "y": 2 } }
       ])
     })
     test(`should get edges with rotation 90°`, () =>
@@ -75,7 +75,7 @@ describe("OIText.ts", () =>
         { "p1": { "x": -2, "y": 1 }, "p2": { "x": -2, "y": 11 } },
         { "p1": { "x": -2, "y": 11 }, "p2": { "x": -12, "y": 11 } },
         { "p1": { "x": -12, "y": 11 }, "p2": { "x": -12, "y": 1 } },
-        { "p1": { "x": -2, "y": 1 }, "p2": { "x": -12, "y": 1 } }
+        { "p1": { "x": -12, "y": 1 }, "p2": { "x": -2, "y": 1 } }
       ])
     })
     test(`should get snapPoints without rotation`, () =>
@@ -103,26 +103,6 @@ describe("OIText.ts", () =>
         { "x": -0, "y": 1 },
         { "x": -7, "y": 6 }
       ])
-    })
-  })
-
-  describe("isCloseToPoint", () =>
-  {
-    const text = new OIText(chars, point, box)
-    test(`should return true when the point is within ${ SELECTION_MARGIN } pixel vertice`, () =>
-    {
-      const closePoint: TPoint = { x: 0, y: 0 + SELECTION_MARGIN / 2 }
-      expect(text.isCloseToPoint(closePoint)).toEqual(true)
-    })
-    test(`should return true when the point is within ${ SELECTION_MARGIN } pixel from edge`, () =>
-    {
-      const closePoint: TPoint = { x: 5, y: SELECTION_MARGIN / 2 }
-      expect(text.isCloseToPoint(closePoint)).toEqual(true)
-    })
-    test(`should return false when the point is more than ${ SELECTION_MARGIN } pixel from an edge`, () =>
-    {
-      const closePoint: TPoint = { x: 5, y: 15 + SELECTION_MARGIN * 2 }
-      expect(text.isCloseToPoint(closePoint)).toEqual(false)
     })
   })
 

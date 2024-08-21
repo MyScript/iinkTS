@@ -4,7 +4,6 @@ import
   TPoint,
   DefaultStyle,
   TStyle,
-  SELECTION_MARGIN,
   TBoundingBox,
 } from "../../../src/iink"
 
@@ -37,26 +36,6 @@ describe("OIEdgePolyLine.ts", () =>
       const points: TPoint[] = [{ x: 0, y: 0 }, { x: 5, y: 0 }, { x: 5, y: 5 }]
       const line = new OIEdgePolyLine(points)
       expect(line.style).toEqual(DefaultStyle)
-    })
-  })
-  describe("isCloseToPoint", () =>
-  {
-    const middles: TPoint[] = [{ x: 0, y: 0 }, { x: 50, y: 0 }, { x: 50, y: 50 }]
-    const line = new OIEdgePolyLine(middles)
-    test(`should return true when the point is within ${ SELECTION_MARGIN } pixel vertice`, () =>
-    {
-      const closePoint: TPoint = { x: 0, y: SELECTION_MARGIN / 2 }
-      expect(line.isCloseToPoint(closePoint)).toEqual(true)
-    })
-    test(`should return true when the point is within ${ SELECTION_MARGIN } pixel from line`, () =>
-    {
-      const closePoint: TPoint = { x: 25, y: SELECTION_MARGIN / 2 }
-      expect(line.isCloseToPoint(closePoint)).toEqual(true)
-    })
-    test(`should return false when the point is more than ${ SELECTION_MARGIN } pixel from an edge`, () =>
-    {
-      const closePoint: TPoint = { x: 25, y: 25 }
-      expect(line.isCloseToPoint(closePoint)).toEqual(false)
     })
   })
   describe("overlaps", () =>

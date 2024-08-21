@@ -13,6 +13,8 @@ import { TOISymbol } from "."
  */
 export class OISymbolGroup extends OISymbolBase<SymbolType.Group>
 {
+  readonly isClosed = false
+
   children: TOISymbol[]
   decorators: OIDecorator[]
 
@@ -62,11 +64,6 @@ export class OISymbolGroup extends OISymbolBase<SymbolType.Group>
   overlaps(box: TBoundingBox): boolean
   {
     return this.children.some(s => s.overlaps(box))
-  }
-
-  isCloseToPoint(point: TPoint): boolean
-  {
-    return this.children.some(s => s.isCloseToPoint(point))
   }
 
   containsSymbol(strokeId: string): boolean
