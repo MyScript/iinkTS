@@ -105,7 +105,7 @@
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        const editor = new iink.Editor(editorElement, options);
+        editor = new iink.Editor(editorElement, options);
 
         const strokeRes = await fetch("../assets/datas/hello-my-friend.json");
         pointerEventsObjectElement.value = JSON.stringify(await strokeRes.json(), null, 2);
