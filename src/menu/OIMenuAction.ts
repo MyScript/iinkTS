@@ -16,7 +16,7 @@ import { LoggerClass, LoggerManager } from "../logger"
 import { OIModel } from "../model"
 import { OIMenu, TMenuItemBoolean, TMenuItemButton, TMenuItemButtonList, TMenuItemSelect } from "./OIMenu"
 import { TOISymbol } from "../primitive"
-import { StrikeThroughAction, SurroundAction } from "../gesture"
+import { InsertAction, StrikeThroughAction, SurroundAction } from "../gesture"
 import { OIMenuSub } from "./OIMenuSub"
 import { getAvailableLanguageList, PartialDeep } from "../utils"
 
@@ -166,6 +166,11 @@ export class OIMenuAction extends OIMenu
       const value = StrikeThroughAction[key as keyof typeof StrikeThroughAction]
       strikeThroughActionValues.push({ label: key, value })
     }
+    const splitActionValues: { label: string, value: string }[] = []
+    for (const key in InsertAction) {
+      const value = InsertAction[key as keyof typeof InsertAction]
+      splitActionValues.push({ label: key, value })
+    }
     const menuItems: (TMenuItemBoolean | TMenuItemSelect)[] = [
       {
         type: "checkbox",
@@ -208,13 +213,27 @@ export class OIMenuAction extends OIMenu
           this.behaviors.writer.tool = WriteTool.Pencil
         }
       },
+      {
+        type: "select",
+        id: `${ this.id }-gesture-strikethrough`,
+        label: "On insert",
+        values: splitActionValues,
+        initValue: this.behaviors.gesture.insertAction,
+        callback: (value) =>
+        {
+          this.#logger.info(`${ this.id }.gesture-InsertAction`, { value })
+          this.behaviors.gesture.insertAction = value as InsertAction
+          this.behaviors.intention = Intention.Write
+          this.behaviors.writer.tool = WriteTool.Pencil
+        }
+      },
     ]
     menuItems.forEach(i =>
     {
       subMenuWrapper.appendChild(this.createMenuItem(i))
     })
 
-    return this.createSubMenu(this.createToolTip(trigger, "Gesture", "right"), subMenuWrapper, "right").element
+    return this.createSubMenu(this.createToolTip(trigger, "Gesture", "right"), subMenuWrapper, "right-top").element
   }
 
   protected createMenuGuide(): HTMLDivElement
@@ -276,7 +295,7 @@ export class OIMenuAction extends OIMenu
       subMenuWrapper.appendChild(this.createMenuItem(i))
     })
 
-    return this.createSubMenu(this.createToolTip(trigger, "Guide", "right"), subMenuWrapper, "right").element
+    return this.createSubMenu(this.createToolTip(trigger, "Guide", "right"), subMenuWrapper, "right-top").element
   }
 
   protected createMenuSnap(): HTMLDivElement
@@ -324,7 +343,7 @@ export class OIMenuAction extends OIMenu
     {
       subMenuWrapper.appendChild(this.createMenuItem(i))
     })
-    return this.createSubMenu(this.createToolTip(trigger, "Snap", "right"), subMenuWrapper, "right").element
+    return this.createSubMenu(this.createToolTip(trigger, "Snap", "right"), subMenuWrapper, "right-top").element
   }
 
   protected createMenuDebug(): HTMLDivElement
@@ -377,7 +396,7 @@ export class OIMenuAction extends OIMenu
     {
       subMenuWrapper.appendChild(this.createMenuItem(i))
     })
-    return this.createSubMenu(this.createToolTip(trigger, "Debug", "right"), subMenuWrapper, "right").element
+    return this.createSubMenu(this.createToolTip(trigger, "Debug", "right"), subMenuWrapper, "right-top").element
   }
 
   protected createMenuExport(): HTMLElement
@@ -422,7 +441,7 @@ export class OIMenuAction extends OIMenu
     {
       subMenuWrapper.appendChild(this.createMenuItem(i))
     })
-    return this.createSubMenu(this.createToolTip(trigger, "Export", "right"), subMenuWrapper, "right").element
+    return this.createSubMenu(this.createToolTip(trigger, "Export", "right"), subMenuWrapper, "right-top").element
   }
 
   protected async readFileAsText(file: File): Promise<string>
@@ -483,7 +502,7 @@ export class OIMenuAction extends OIMenu
 
     })
 
-    return this.createSubMenu(this.createToolTip(trigger, "Import", "right"), subMenuWrapper, "right").element
+    return this.createSubMenu(this.createToolTip(trigger, "Import", "right"), subMenuWrapper, "right-top").element
   }
 
   protected unselectAll(): void

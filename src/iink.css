@@ -8,6 +8,61 @@
 	height: 100%;
 }
 
+.ms-editor input:not([type="checkbox"]):not([type="color"]):not([type="range"]),
+.ms-editor select {
+  height: 2rem;
+  padding: 0 10px;
+  border-radius: 3px;
+  color: #131F26;
+  font: 600 14px "Source Sans Pro", sans-serif;
+  border: 1px solid #CED5D9;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.ms-editor input[type="file"] {
+    border: none !important;
+}
+.ms-editor input[type="file"]:focus {
+    border: none !important;
+    box-shadow: none !important;
+}
+.ms-editor input[type="file"]:focus::file-selector-button {
+    border: 1px solid #1a9fff !important;
+}
+.ms-editor input[type="file"]::file-selector-button {
+    border-radius: 4px;
+    padding: 0 16px;
+    margin: 0 8px;
+    cursor: pointer;
+    background-color: white;
+    border: 1px solid rgba(0, 0, 0, 0.16);
+    box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.05);
+    margin-right: auto;
+    height: 2rem;
+    transition: background-color 200ms;
+}
+.ms-editor input[type="file"]::file-selector-button:hover {
+    background-color: #f3f4f6;
+}
+
+.ms-editor input[type="file"]::file-selector-button:active {
+    background-color: #e5e7eb;
+}
+
+.ms-editor select {
+  padding: 0 25px 0 10px;
+  background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTQiIHZpZXdCb3g9IjAgMCAxOCAxNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik00LjQyMi4yNmMtLjIzMy0uMzM3LS42MS0uMzM3LS44NDQgMEwuMTc1IDUuMTdDLS4xNDIgNS42MjguMDQ4IDYgLjYxIDZoNi43OGMuNTU4IDAgLjc1NC0uMzcuNDM1LS44M0w0LjQyMi4yNnptLjAyIDEzLjQ3Yy0uMjM2LjM0Mi0uNjE4LjM0Ny0uODUuMDFMLjE2NyA4LjgxOEMtLjE0NiA4LjM2Ny4wNDggOCAuNjA4IDhoNi43ODNjLjU1OCAwIC43NTUuMzcuNDM3LjgzbC0zLjM4NSA0Ljl6IiBmaWxsPSIjMTMxRjI2Ii8+PC9nPjwvc3ZnPg==) right center no-repeat #fff;
+}
+
+.ms-editor input:not([type="checkbox"]):not([type="color"]):not([type="range"]):not([type="file"]):focus,
+.ms-editor select:focus {
+  outline: 0;
+  border: 1px solid #1a9fff;
+  box-shadow: 0 1px 1px 0 rgba(0, 0, 0, .16);
+}
+
+
 .ms-editor.draw {
     cursor: url('data:image/svg+xml,<svg width="24px" height="24px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M14.3632 5.65156L15.8431 4.17157C16.6242 3.39052 17.8905 3.39052 18.6716 4.17157L20.0858 5.58579C20.8668 6.36683 20.8668 7.63316 20.0858 8.41421L18.6058 9.8942M14.3632 5.65156L4.74749 15.2672C4.41542 15.5993 4.21079 16.0376 4.16947 16.5054L3.92738 19.2459C3.87261 19.8659 4.39148 20.3848 5.0115 20.33L7.75191 20.0879C8.21972 20.0466 8.65806 19.8419 8.99013 19.5099L18.6058 9.8942M14.3632 5.65156L18.6058 9.8942" stroke="%23000000" fill="white" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" ></path></svg>') 5 20, pointer;
 }
@@ -465,11 +520,6 @@
     gap: 5px;
     width: 100%;
 }
-.ms-editor .ms-menu-item select,
-.ms-editor .ms-menu-item input:not([type=checkbox]) {
-    min-width: 125px;
-    max-width: 125px;
-}
 .ms-editor .ms-menu .select-language {
     width: auto;
     height: 32px;
@@ -583,29 +633,6 @@
     border: 1px solid #1A9FFF;
     color: #1A9FFF;
 }
-.ms-editor .ms-menu input[type="file"] {
-    border: none;
-}
-.ms-editor .ms-menu input[type="file"]::file-selector-button {
-    border-radius: 4px;
-    padding: 0 16px;
-    cursor: pointer;
-    background-color: white;
-    border: 1px solid rgba(0, 0, 0, 0.16);
-    box-shadow: 0px 1px 0px rgba(0, 0, 0, 0.05);
-    margin-right: auto;
-    height: 2rem;
-    transition: background-color 200ms;
-}
-
-.ms-editor .ms-menu input[type="file"]::file-selector-button:hover {
-    background-color: #f3f4f6;
-}
-
-  /* file upload button active state */
-.ms-editor .ms-menu input[type="file"]::file-selector-button:active {
-    background-color: #e5e7eb;
-}
 
 .ms-editor .sub-menu {
     position: relative;
@@ -633,13 +660,18 @@
 }
 .ms-editor .sub-menu .sub-menu-content.bottom {
     bottom: -8px;
-    transform: translate(0%, 100%);
-    left: 0;
+    left: 50%;
+    transform: translate(-50%, 100%);
 }
 .ms-editor .sub-menu .sub-menu-content.bottom-left {
     bottom: -8px;
     transform: translate(-0%, 100%);
     right: 0;
+}
+.ms-editor .sub-menu .sub-menu-content.right-top {
+    top: 0%;
+    transform: translate(100%, 0%);
+    right: -8px;
 }
 .ms-editor .sub-menu .sub-menu-content.right {
     top: 50%;

@@ -10,7 +10,8 @@ import { DefaultPenStyle, StyleManager, TPenStyle, TTheme } from "../style"
 import { HistoryManager } from "../history"
 import { DeferredPromise, PartialDeep } from "../utils"
 import { Stroke, TStroke, TPointer } from "../primitive"
-import { IBehaviors, TBehaviorOptions } from "./IBehaviors"
+import { IBehaviors } from "./IBehaviors"
+import { TBehaviorOptions } from "./TBehaviorOptions"
 
 /**
  * @group Behavior
