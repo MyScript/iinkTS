@@ -6,7 +6,7 @@ export class OIMenuSub
   element: HTMLDivElement
   content: HTMLElement
 
-  constructor(trigger: HTMLElement, subMenu: HTMLElement, position: "top" | "left" | "right" | "bottom" | "bottom-left" = "top")
+  constructor(trigger: HTMLElement, subMenu: HTMLElement, position: "top" | "left" | "right" | "right-top" | "bottom" | "bottom-left" = "top")
   {
     this.element = document.createElement("div")
     this.element.classList.add("sub-menu")

@@ -30,13 +30,13 @@ export class OISnapManager
   snapToElement: boolean
   snapAngle: number
 
-  constructor(behaviors: OIBehaviors)
+  constructor(behaviors: OIBehaviors, options?: { grid?: boolean, element?: boolean, angle?: number })
   {
     this.#logger.info("constructor")
     this.behaviors = behaviors
-    this.snapToElement = true
-    this.snapToGrid = true
-    this.snapAngle = 0
+    this.snapToElement = options?.element !== undefined ? options.element : true
+    this.snapToGrid = options?.grid !== undefined ? options.grid : true
+    this.snapAngle = options?.angle !== undefined ? options.angle : 0
   }
 
   get model(): OIModel
@@ -136,19 +136,19 @@ export class OISnapManager
         if (this.snapThreshold > Math.abs(p2.x - p1.x)) {
           if (Math.abs(infos.nudge.x) > Math.abs(p2.x - p1.x)) {
             infos.nudge.x = p2.x - p1.x
-            infos.verticales = [{ p1: {...p1}, p2 }]
+            infos.verticales = [{ p1: { ...p1 }, p2 }]
           }
           else if (infos.nudge.x === p2.x - p1.x) {
-            infos.verticales.push({ p1: {...p1}, p2 })
+            infos.verticales.push({ p1: { ...p1 }, p2 })
           }
         }
         if (this.snapThreshold > Math.abs(p2.y - p1.y)) {
           if (Math.abs(infos.nudge.y) > Math.abs(p2.y - p1.y)) {
             infos.nudge.y = p2.y - p1.y
-            infos.horizontales = [{ p1: {...p1}, p2 }]
+            infos.horizontales = [{ p1: { ...p1 }, p2 }]
           }
           else if (infos.nudge.y === p2.y - p1.y) {
-            infos.horizontales.push({ p1: {...p1}, p2 })
+            infos.horizontales.push({ p1: { ...p1 }, p2 })
           }
         }
       })
@@ -230,7 +230,8 @@ export class OISnapManager
       }
     }
     if (snapLines.length) {
-      snapLines.forEach(l => {
+      snapLines.forEach(l =>
+      {
         l.p1.x += nudge.x - tx
         l.p1.y += nudge.y - ty
       })
