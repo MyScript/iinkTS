@@ -6,7 +6,7 @@ const {
   getEditorConfiguration,
   getExportsFromEditorModel,
   waitEditorIdle,
-  writePointers,
+  writeStrokesPointers,
 } = require('../helper')
 const { equation1, one } = require('../strokesDatas')
 
@@ -65,7 +65,7 @@ describe('Rest Math', () => {
     test('should only request application/x-latex by default', async () => {
       await Promise.all([
         getDatasFromExportedEvent(page),
-        writePointers(page, one.strokes),
+        writeStrokesPointers(page, one.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(1)
       expect(mimeTypeRequest[0]).toContain('application/x-latex')
@@ -78,7 +78,7 @@ describe('Rest Math', () => {
 
       await Promise.all([
         getDatasFromExportedEvent(page),
-        writePointers(page, one.strokes),
+        writeStrokesPointers(page, one.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(1)
       expect(mimeTypeRequest[0]).toContain('application/mathml+xml')
@@ -94,7 +94,7 @@ describe('Rest Math', () => {
 
       await Promise.all([
         getDatasFromExportedEvent(page),
-        writePointers(page, one.strokes),
+        writeStrokesPointers(page, one.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(2)
       const allMimeTypesRequested = mimeTypeRequest.join(' ')
@@ -112,7 +112,7 @@ describe('Rest Math', () => {
     test('should clear', async () => {
       const [exportedDatas] = await Promise.all([
         getDatasFromExportedEvent(page),
-        writePointers(page, one.strokes)
+        writeStrokesPointers(page, one.strokes)
       ])
 
       expect(exportedDatas['application/x-latex']).toStrictEqual(one.exports.LATEX.at(-1))

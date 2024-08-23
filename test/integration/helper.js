@@ -50,7 +50,7 @@ module.exports.write = async (page, strokes, offsetTop = 0, offsetLeft = 0) => {
  * @param {Number} [offsetTop=0]
  * @param {Number} [offsetLeft=0]
  */
-module.exports.writePointers = async (page, strokes, offsetTop = 0, offsetLeft = 0) => {
+module.exports.writeStrokesPointers = async (page, strokes, offsetTop = 0, offsetLeft = 0) => {
   const editorEl = await page.waitForSelector('#editor')
   const boundingBox = await editorEl.evaluate((node) => node.getBoundingClientRect())
   const offsetX = offsetLeft + boundingBox.x
@@ -70,6 +70,39 @@ module.exports.writePointers = async (page, strokes, offsetTop = 0, offsetLeft =
     await page.mouse.up()
     await page.waitForTimeout(500)
   }
+}
+
+/**
+ * @param {Page} page - Playwright Page
+ * @param {Array} strokes
+ * @param {Object} strokes[0]
+ * @param {Array} strokes[0].pointers
+ * @param {Object} strokes[0].pointers[0]
+ * @param {Number} strokes[0].pointers[0].x
+ * @param {Number} strokes[0].pointers[0].y
+ * @param {Number} strokes[0].pointers[0].t
+ * @param {Number} strokes[0].pointers[0].p
+ * @param {Number} [offsetTop=0]
+ * @param {Number} [offsetLeft=0]
+ */
+module.exports.writePointers = async (page, pointers, offsetTop = 0, offsetLeft = 0) => {
+  const editorEl = await page.waitForSelector('#editor')
+  const boundingBox = await editorEl.evaluate((node) => node.getBoundingClientRect())
+  const offsetX = offsetLeft + boundingBox.x
+  const offsetY = offsetTop + boundingBox.y
+  const firstPointer = pointers[0]
+  let oldTimestamp = firstPointer.t
+  await page.mouse.move(offsetX + firstPointer.x, offsetY + firstPointer.y)
+  await page.mouse.down()
+  for(p of pointers) {
+    let waitTime = 0
+    waitTime = p.t - oldTimestamp
+    oldTimestamp = p.t
+    await page.waitForTimeout(waitTime)
+    await page.mouse.move(offsetX + p.x, offsetY + p.y)
+  }
+  await page.mouse.up()
+  await page.waitForTimeout(500)
 }
 
 /**
@@ -205,6 +238,18 @@ module.exports.waitForEditorWebSocket = async (page) => {
   await Promise.all([
     page.waitForSelector('svg[data-layer="CAPTURE"]'),
     page.waitForSelector('svg[data-layer="MODEL"]'),
+  ])
+  return page.evaluate('editor.initializationPromise')
+}
+
+module.exports.waitForServerConfiguration = async (page) => {
+  return page.waitForResponse(req => req.url().includes('server-configuration.json'))
+}
+
+module.exports.waitForEditorOffscreen = async (page) => {
+  await Promise.all([
+    page.waitForSelector('#editor .ms-layer-infos'),
+    page.waitForSelector('#editor svg'),
   ])
   return page.evaluate('editor.initializationPromise')
 }

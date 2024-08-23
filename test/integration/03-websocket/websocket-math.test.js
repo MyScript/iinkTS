@@ -2,7 +2,7 @@
 const {
   waitForEditorWebSocket,
   write,
-  writePointers,
+  writeStrokesPointers,
   getDatasFromExportedEvent,
   getExportsTypeFromEditorModel,
   getEditorConfiguration,
@@ -314,7 +314,7 @@ describe('Websocket Math', function () {
     setEditorConfiguration(page, configuration)
     await waitForEditorWebSocket(page)
 
-    await writePointers(page, threeScratchOut.strokes)
+    await writeStrokesPointers(page, threeScratchOut.strokes)
     await waitEditorIdle(page)
     const exports = await getExportsFromEditorModel(page)
     const latex = exports["application/x-latex"]
@@ -326,7 +326,7 @@ describe('Websocket Math', function () {
     const undoRedoExport = undoRedoModelExport["application/x-latex"]
     expect(undoRedoExport).toEqual("")
 
-    const [oneModelExport] = await Promise.all([getDatasFromExportedEvent(page), writePointers(page, one.strokes, 100, 150)])
+    const [oneModelExport] = await Promise.all([getDatasFromExportedEvent(page), writeStrokesPointers(page, one.strokes, 100, 150)])
     const oneExport = oneModelExport["application/x-latex"]
     expect(oneExport).toEqual("1")
   })
