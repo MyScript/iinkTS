@@ -209,13 +209,14 @@ describe("Editor.ts", () =>
       wrapperHTML.style.width = "100px"
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.reject(new Error("pouet")))
-      const messageElement = wrapperHTML.querySelector(".message-modal") as HTMLElement
+      const messageContainer = wrapperHTML.querySelector(".message-container") as HTMLElement
+      const messageElement = messageContainer.querySelector(".message-modal p") as HTMLElement
       try {
-        expect(messageElement!.style.display).toEqual("none")
+        expect(messageContainer!.style.display).toEqual("none")
         await editor.initialize()
       } catch (error) {
-        expect(messageElement!.style.display).toEqual("initial")
-        expect(messageElement!.querySelector("p")!.innerText).toEqual("pouet")
+        expect(messageContainer.style.display).toEqual("block")
+        expect(messageElement.innerText).toEqual("pouet")
       }
     })
   })
