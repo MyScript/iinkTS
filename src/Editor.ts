@@ -201,10 +201,10 @@ export class Editor
   {
     this.#messageContainer = document.createElement("div")
     this.#messageContainer.classList.add("message-container")
+    this.#messageContainer.style.display = "none"
 
     this.#messageOverlay = document.createElement("div")
     this.#messageOverlay.classList.add("message-overlay")
-    this.#messageOverlay.style.display = "none"
     this.#messageContainer.appendChild(this.#messageOverlay)
 
     this.#messageModal = document.createElement("div")
@@ -212,9 +212,8 @@ export class Editor
 
     const closeBtn = document.createElement("button")
     closeBtn.classList.add("ms-button", "close")
-    closeBtn.addEventListener("pointerup", this.closeMessageModal.bind(this))
+    closeBtn.addEventListener("pointerup", () => this.closeMessageModal())
     this.#messageModal.appendChild(closeBtn)
-    this.#messageModal.style.display = "none"
 
     this.#messageText = document.createElement("p")
     this.#messageModal.appendChild(this.#messageText)
@@ -345,8 +344,7 @@ export class Editor
 
   async closeMessageModal(): Promise<void>
   {
-    this.#messageModal.style.display = "none"
-    this.#messageOverlay.style.display = "none"
+    this.#messageContainer.style.display = "none"
     this.#messageText.innerText = ""
     if (this.#messageModal.classList.contains("error-msg")) {
       this.#messageModal.classList.remove("error-msg")
@@ -359,16 +357,15 @@ export class Editor
   {
     this.#messageModal.classList.add("error-msg")
     this.#messageModal.classList.remove("info-msg")
-    this.#messageModal.style.display = "initial"
-    this.#messageOverlay.style.display = "initial"
+    this.#messageContainer.style.display = "block"
     this.#messageText.innerText = typeof err === "string" ? err : err.message
   }
 
   showNotif(notif: { message: string, timeout?: number })
   {
-    this.#messageModal.style.display = "initial"
     this.#messageModal.classList.add("info-msg")
     this.#messageModal.classList.remove("error-msg")
+    this.#messageContainer.style.display = "block"
     this.#messageText.innerText = notif.message
     setTimeout(() =>
     {
