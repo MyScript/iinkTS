@@ -114,7 +114,7 @@ export abstract class OIMenu
     return el
   }
 
-  protected createSubMenu(trigger: HTMLElement, subMenu: HTMLElement, position: "top" | "left" | "right" | "bottom" | "bottom-left" = "top"): OIMenuSub
+  protected createSubMenu(trigger: HTMLElement, subMenu: HTMLElement, position: "top" | "left" | "right" | "right-top" | "bottom" | "bottom-left" = "top"): OIMenuSub
   {
     return new OIMenuSub(trigger, subMenu, position)
   }

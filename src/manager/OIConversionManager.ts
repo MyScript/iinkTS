@@ -55,10 +55,12 @@ export class OIConversionManager
   fontSize?: number
   fontWeight?: "bold" | "normal"
 
-  constructor(behaviors: OIBehaviors)
+  constructor(behaviors: OIBehaviors, fontStyle?: { size?: number | undefined, weight?: ("bold" | "normal") | undefined })
   {
     this.#logger.info("constructor")
     this.behaviors = behaviors
+    this.fontSize = fontStyle?.size
+    this.fontWeight = fontStyle?.weight
   }
 
   get model(): OIModel

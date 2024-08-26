@@ -157,7 +157,7 @@ export class OIMenuStyle extends OIMenu
       btn.id = `${ this.id }-font-size-${ size.label }-btn`
       btn.classList.add("ms-menu-button", "square")
       btn.textContent = size.label
-      if ((this.behaviors.converter.fontSize || 0) === size.value) {
+      if ((this.behaviors.converter.fontSize || 0) === size.value * this.rowHeight) {
         btn.classList.add("active")
       }
       btn.addEventListener("pointerup", (e) =>
