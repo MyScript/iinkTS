@@ -48,10 +48,10 @@ describe("OIText.ts", () =>
         center: { x: 0, y: 0 }
       }
       expect(text.vertices).toEqual([
-        { x: -2, y: 1 },
-        { x: -2, y: 11 },
-        { x: -12, y: 11 },
-        { x: -12, y: 1 },
+        { x: 2, y: -1 },
+        { x: 2, y: -11 },
+        { x: 12, y: -11 },
+        { x: 12, y: -1 },
       ])
     })
     test(`should get edges without rotation`, () =>
@@ -72,10 +72,10 @@ describe("OIText.ts", () =>
         center: { x: 0, y: 0 }
       }
       expect(text.edges).toEqual([
-        { "p1": { "x": -2, "y": 1 }, "p2": { "x": -2, "y": 11 } },
-        { "p1": { "x": -2, "y": 11 }, "p2": { "x": -12, "y": 11 } },
-        { "p1": { "x": -12, "y": 11 }, "p2": { "x": -12, "y": 1 } },
-        { "p1": { "x": -12, "y": 1 }, "p2": { "x": -2, "y": 1 } }
+        { "p1": { "x": 2, "y": -1 }, "p2": { "x": 2, "y": -11 } },
+        { "p1": { "x": 2, "y": -11 }, "p2": { "x": 12, "y": -11 } },
+        { "p1": { "x": 12, "y": -11 }, "p2": { "x": 12, "y": -1 } },
+        { "p1": { "x": 12, "y": -1 }, "p2": { "x": 2, "y": -1 } }
       ])
     })
     test(`should get snapPoints without rotation`, () =>
@@ -97,11 +97,11 @@ describe("OIText.ts", () =>
         center: { x: 0, y: 0 }
       }
       expect(text.snapPoints).toEqual([
-        { "x": -14, "y": 1 },
-        { "x": -14, "y": 11 },
-        { "x": -0, "y": 11 },
-        { "x": -0, "y": 1 },
-        { "x": -7, "y": 6 }
+        { "x": 14, "y": -1 },
+        { "x": 14, "y": -11 },
+        { "x": -0, "y": -11 },
+        { "x": -0, "y": -1 },
+        { "x": 7, "y": -6 }
       ])
     })
   })

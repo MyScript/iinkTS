@@ -9,6 +9,7 @@ import
   SvgElementRole,
   TPoint,
   computeRotatedPoint,
+  convertDegreeToRadian,
 } from "../../../src/iink"
 
 describe("OIRotationManager.ts", () =>
@@ -27,30 +28,7 @@ describe("OIRotationManager.ts", () =>
     behaviors.renderer.setAttribute = jest.fn()
     const manager = new OIRotationManager(behaviors)
 
-    test("rotate stroke", () =>
-    {
-      const stroke = new OIStroke()
-      const origin: TPoint = { x: 0, y: 0 }
-      stroke.addPointer({ p: 1, t: 1, x: 1, y: 1 })
-      stroke.addPointer({ p: 1, t: 10, x: 10, y: 0 })
-      manager.applyToSymbol(stroke, origin, Math.PI / 2)
-      expect(stroke.pointers[0].x.toFixed(0)).toEqual("1")
-      expect(stroke.pointers[0].y.toFixed(0)).toEqual("-1")
-      expect(stroke.pointers[1].x.toFixed(0)).toEqual("0")
-      expect(stroke.pointers[1].y.toFixed(0)).toEqual("-10")
-
-    })
-    test("rotate shape Circle", () =>
-    {
-      const center: TPoint = { x: 5, y: 5 }
-      const radius = 4
-      const circle = new OIShapeCircle(center, radius)
-      const origin: TPoint = { x: 1, y: 2 }
-      manager.applyToSymbol(circle, origin, Math.PI / 2)
-      expect(circle.radius).toEqual(radius)
-      expect(circle.center).toEqual({ x: 4, y: -2 })
-    })
-    test("rotate shape with kind unknow", () =>
+    test("not rotate shape with kind unknow", () =>
     {
       const points: TPoint[] = [
         { x: 0, y: 0 },
@@ -64,6 +42,29 @@ describe("OIRotationManager.ts", () =>
       const origin: TPoint = { x: 0, y: 0 }
       expect(() => manager.applyToSymbol(poly, origin, Math.PI / 2)).toThrowError(expect.objectContaining({ message: expect.stringContaining("Can't apply rotate on shape, kind unknow: ") }))
     })
+    test("rotate stroke", () =>
+    {
+      const stroke = new OIStroke()
+      const origin: TPoint = { x: 0, y: 0 }
+      stroke.addPointer({ p: 1, t: 1, x: 1, y: 1 })
+      stroke.addPointer({ p: 1, t: 10, x: 10, y: 0 })
+      manager.applyToSymbol(stroke, origin, Math.PI / 2)
+      expect(stroke.pointers[0].x.toFixed(0)).toEqual("-1")
+      expect(stroke.pointers[0].y.toFixed(0)).toEqual("1")
+      expect(stroke.pointers[1].x.toFixed(0)).toEqual("0")
+      expect(stroke.pointers[1].y.toFixed(0)).toEqual("10")
+
+    })
+    test("rotate shape Circle", () =>
+    {
+      const center: TPoint = { x: 5, y: 5 }
+      const radius = 4
+      const circle = new OIShapeCircle(center, radius)
+      const origin: TPoint = { x: 1, y: 2 }
+      manager.applyToSymbol(circle, origin, Math.PI / 2)
+      expect(circle.radius).toEqual(radius)
+      expect(circle.center).toEqual({ x: -2, y: 6 })
+    })
     test("rotate edge Line", () =>
     {
       const start: TPoint = { x: 0, y: 0 }
@@ -73,7 +74,7 @@ describe("OIRotationManager.ts", () =>
       manager.applyToSymbol(line, origin, Math.PI / 2)
       expect(line.start.x.toFixed(0)).toEqual("0")
       expect(line.start.y.toFixed(0)).toEqual("0")
-      expect(line.end.x.toFixed(0)).toEqual("5")
+      expect(line.end.x.toFixed(0)).toEqual("-5")
       expect(line.end.y.toFixed(0)).toEqual("0")
     })
   })
@@ -83,7 +84,7 @@ describe("OIRotationManager.ts", () =>
     const divElement: HTMLDivElement = document.createElement("div")
     const behaviors = new OIBehaviorsMock()
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
-    behaviors.recognizer.replaceStrokes = jest.fn(() => Promise.resolve())
+    behaviors.recognizer.transformRotate = jest.fn(() => Promise.resolve())
     behaviors.renderer.setAttribute = jest.fn()
     behaviors.renderer.drawSymbol = jest.fn()
     behaviors.selector.resetSelectedGroup = jest.fn()
@@ -113,19 +114,19 @@ describe("OIRotationManager.ts", () =>
     const testDatas = [
       {
         rotateToPoint: computeRotatedPoint(rotateOrigin, rotateCenter, Math.PI / 5),
-        angle: 36,
-      },
-      {
-        rotateToPoint: computeRotatedPoint(rotateOrigin, rotateCenter, Math.PI / 2),
-        angle: 90,
-      },
-      {
-        rotateToPoint: computeRotatedPoint(rotateOrigin, rotateCenter, -Math.PI / 5),
         angle: 324,
       },
       {
-        rotateToPoint: computeRotatedPoint(rotateOrigin, rotateCenter, -Math.PI / 2),
+        rotateToPoint: computeRotatedPoint(rotateOrigin, rotateCenter, Math.PI / 2),
         angle: 270,
+      },
+      {
+        rotateToPoint: computeRotatedPoint(rotateOrigin, rotateCenter, -Math.PI / 5),
+        angle: 36,
+      },
+      {
+        rotateToPoint: computeRotatedPoint(rotateOrigin, rotateCenter, -Math.PI / 2),
+        angle: 90,
       },
     ]
 
@@ -170,8 +171,8 @@ describe("OIRotationManager.ts", () =>
         expect(behaviors.selector.resetSelectedGroup).toHaveBeenCalledWith([stroke])
         expect(behaviors.renderer.drawSymbol).toHaveBeenCalledTimes(1)
         expect(behaviors.renderer.drawSymbol).toHaveBeenCalledWith(stroke)
-        expect(behaviors.recognizer.replaceStrokes).toHaveBeenCalledTimes(1)
-        expect(behaviors.recognizer.replaceStrokes).toHaveBeenCalledWith([stroke.id], [stroke])
+        expect(behaviors.recognizer.transformRotate).toHaveBeenCalledTimes(1)
+        expect(behaviors.recognizer.transformRotate).toHaveBeenCalledWith([stroke.id], convertDegreeToRadian(data.angle), rotateCenter.x, rotateCenter.y)
         expect(stroke).not.toEqual(strokeNotRotate)
       })
     })

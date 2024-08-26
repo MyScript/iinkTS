@@ -103,7 +103,7 @@ export class OIRotationManager
   protected applyOnText(text: OIText, center: TPoint, angleRad: number): OIText
   {
     text.rotation = {
-      degree: convertRadianToDegree(-angleRad) + (text.rotation?.degree || 0),
+      degree: convertRadianToDegree(angleRad) + (text.rotation?.degree || 0),
       center: center
     }
     return this.behaviors.texter.updateBounds(text)
@@ -189,7 +189,7 @@ export class OIRotationManager
   {
     this.#logger.info("end", { point })
     const angleDegree = this.continue(point)
-    const angleRad = 2 * Math.PI - convertDegreeToRadian(angleDegree)
+    const angleRad = convertDegreeToRadian(angleDegree) % (2 * Math.PI)
     const oldSymbols = this.model.symbolsSelected.map(s => s.clone())
     this.model.symbolsSelected.forEach(s =>
     {
@@ -198,8 +198,8 @@ export class OIRotationManager
       this.model.updateSymbol(s)
     })
     const strokesFromSymbols = this.behaviors.extractStrokesFromSymbols(this.model.symbolsSelected)
-    this.behaviors.recognizer.replaceStrokes(strokesFromSymbols.map(s => s.id), strokesFromSymbols)
-    this.behaviors.history.push(this.model, { replaced: { oldSymbols, newSymbols: this.model.symbolsSelected } })
+    this.behaviors.recognizer.transformRotate(strokesFromSymbols.map(s => s.id), angleRad, this.center.x, this.center.y)
+    this.behaviors.history.push(this.model, { rotate: [{ symbols: oldSymbols, angle: angleRad, center: {...this.center}, }] })
 
     this.behaviors.selector.resetSelectedGroup(this.model.symbolsSelected)
     this.interactElementsGroup = undefined
