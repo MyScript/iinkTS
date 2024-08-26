@@ -42,3 +42,20 @@ export enum StrikeThroughAction
   Erase = "erase",
   Draw = "draw"
 }
+
+/**
+ * @group Gesture
+ * @description List all action allowed on split detected
+ * @remarks only usable in the case of offscreen
+ */
+export enum InsertAction
+{
+  /**
+   * Add lien break on gesture place
+   */
+  LineBreak = "line-break",
+  /**
+   * Insert place in gesture place
+   */
+  Insert = "insert"
+}

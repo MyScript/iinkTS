@@ -48,7 +48,8 @@ import
 } from "../manager"
 import { OIHistoryManager, TOIHistoryBackendChanges, TOIHistoryChanges } from "../history"
 import { PartialDeep, mergeDeep } from "../utils"
-import { IBehaviors, TBehaviorOptions } from "./IBehaviors"
+import { IBehaviors } from "./IBehaviors"
+import { TBehaviorOptions } from "./TBehaviorOptions"
 
 /**
  * @group Behavior
@@ -97,15 +98,15 @@ export class OIBehaviors implements IBehaviors
     this.history = new OIHistoryManager(this.#configuration["undo-redo"])
     this.writer = new OIWriteManager(this)
     this.eraser = new OIEraseManager(this)
-    this.gesture = new OIGestureManager(this)
+    this.gesture = new OIGestureManager(this, options.behaviors?.gesture)
     this.resizer = new OIResizeManager(this)
     this.rotator = new OIRotationManager(this)
     this.translator = new OITranslateManager(this)
-    this.converter = new OIConversionManager(this)
+    this.converter = new OIConversionManager(this, options.fontStyle)
     this.texter = new OITextManager(this)
     this.selector = new OISelectionManager(this)
     this.svgDebugger = new OIDebugSVGManager(this)
-    this.snaps = new OISnapManager(this)
+    this.snaps = new OISnapManager(this, options.behaviors?.snap)
     this.move = new OIMoveManager(this)
     this.menu = new OIMenuManager(this, options.behaviors?.menu)
 
