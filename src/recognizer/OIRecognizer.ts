@@ -450,7 +450,7 @@ export class OIRecognizer
     }
   }
 
-  protected buildAddStrokes(strokes: OIStroke[], processGestures = true): TOIMessageEvent
+  protected buildAddStrokesMessage(strokes: OIStroke[], processGestures = true): TOIMessageEvent
   {
     return {
       type: "addStrokes",
@@ -458,7 +458,6 @@ export class OIRecognizer
       strokes: strokes.map(s => s.formatToSend())
     }
   }
-
   async addStrokes(strokes: OIStroke[], processGestures = true): Promise<TOIMessageEventGesture | undefined>
   {
     await this.initialized?.promise
@@ -467,11 +466,11 @@ export class OIRecognizer
       this.addStrokeDeferred.resolve(undefined)
       return this.addStrokeDeferred?.promise
     }
-    await this.send(this.buildAddStrokes(strokes, processGestures))
+    await this.send(this.buildAddStrokesMessage(strokes, processGestures))
     return this.addStrokeDeferred?.promise
   }
 
-  protected buildReplaceStrokes(oldStrokeIds: string[], newStrokes: OIStroke[]): TOIMessageEvent
+  protected buildReplaceStrokesMessage(oldStrokeIds: string[], newStrokes: OIStroke[]): TOIMessageEvent
   {
     return {
       type: "replaceStrokes",
@@ -479,7 +478,6 @@ export class OIRecognizer
       newStrokes: newStrokes.map(s => s.formatToSend())
     }
   }
-
   async replaceStrokes(oldStrokeIds: string[], newStrokes: OIStroke[]): Promise<void>
   {
     await this.initialized?.promise
@@ -488,11 +486,11 @@ export class OIRecognizer
       this.replaceStrokeDeferred.resolve()
       return this.replaceStrokeDeferred?.promise
     }
-    await this.send(this.buildReplaceStrokes(oldStrokeIds, newStrokes))
+    await this.send(this.buildReplaceStrokesMessage(oldStrokeIds, newStrokes))
     return this.replaceStrokeDeferred?.promise
   }
 
-  protected buildTransformTranslate(strokeIds: string[], tx: number, ty: number): TOIMessageEvent
+  protected buildTransformTranslateMessage(strokeIds: string[], tx: number, ty: number): TOIMessageEvent
   {
     return {
       type: "transform",
@@ -502,7 +500,6 @@ export class OIRecognizer
       ty
     }
   }
-
   async transformTranslate(strokeIds: string[], tx: number, ty: number): Promise<void>
   {
     await this.initialized?.promise
@@ -511,11 +508,58 @@ export class OIRecognizer
       this.transformStrokeDeferred.resolve()
       return this.transformStrokeDeferred?.promise
     }
-    await this.send(this.buildTransformTranslate(strokeIds, tx, ty))
+    await this.send(this.buildTransformTranslateMessage(strokeIds, tx, ty))
     return this.transformStrokeDeferred?.promise
   }
 
-  protected buildTransformMatrix(strokeIds: string[], matrix: TMatrixTransform): TOIMessageEvent
+  protected buildTransformRotateMessage(strokeIds: string[], angle: number, x0: number = 0, y0: number = 0): TOIMessageEvent
+  {
+    return {
+      type: "transform",
+      transformationType: "ROTATE",
+      strokeIds,
+      angle,
+      x0,
+      y0
+    }
+  }
+  async transformRotate(strokeIds: string[], angle: number, x0: number = 0, y0: number = 0): Promise<void>
+  {
+    await this.initialized?.promise
+    this.transformStrokeDeferred = new DeferredPromise<void>()
+    if (strokeIds.length === 0) {
+      this.transformStrokeDeferred.resolve()
+      return this.transformStrokeDeferred?.promise
+    }
+    await this.send(this.buildTransformRotateMessage(strokeIds, angle, x0, y0))
+    return this.transformStrokeDeferred?.promise
+  }
+
+  protected buildTransformScaleMessage(strokeIds: string[], scaleX: number, scaleY: number, x0: number = 0, y0: number = 0): TOIMessageEvent
+  {
+    return {
+      type: "transform",
+      transformationType: "SCALE",
+      strokeIds,
+      scaleX,
+      scaleY,
+      x0,
+      y0
+    }
+  }
+  async transformScale(strokeIds: string[], scaleX: number, scaleY: number, x0: number = 0, y0: number = 0): Promise<void>
+  {
+    await this.initialized?.promise
+    this.transformStrokeDeferred = new DeferredPromise<void>()
+    if (strokeIds.length === 0) {
+      this.transformStrokeDeferred.resolve()
+      return this.transformStrokeDeferred?.promise
+    }
+    await this.send(this.buildTransformScaleMessage(strokeIds, scaleX, scaleY, x0, y0))
+    return this.transformStrokeDeferred?.promise
+  }
+
+  protected buildTransformMatrixMessage(strokeIds: string[], matrix: TMatrixTransform): TOIMessageEvent
   {
     return {
       type: "transform",
@@ -524,7 +568,6 @@ export class OIRecognizer
       ...matrix
     }
   }
-
   async transformMatrix(strokeIds: string[], matrix: TMatrixTransform): Promise<void>
   {
     await this.initialized?.promise
@@ -533,18 +576,17 @@ export class OIRecognizer
       this.transformStrokeDeferred.resolve()
       return this.transformStrokeDeferred?.promise
     }
-    await this.send(this.buildTransformMatrix(strokeIds, matrix))
+    await this.send(this.buildTransformMatrixMessage(strokeIds, matrix))
     return this.transformStrokeDeferred?.promise
   }
 
-  protected buildEraseStrokes(strokeIds: string[]): TOIMessageEvent
+  protected buildEraseStrokesMessage(strokeIds: string[]): TOIMessageEvent
   {
     return {
       type: "eraseStrokes",
       strokeIds
     }
   }
-
   async eraseStrokes(strokeIds: string[]): Promise<void>
   {
     await this.initialized?.promise
@@ -553,7 +595,7 @@ export class OIRecognizer
       this.eraseStrokeDeferred.resolve()
       return this.eraseStrokeDeferred?.promise
     }
-    await this.send(this.buildEraseStrokes(strokeIds))
+    await this.send(this.buildEraseStrokesMessage(strokeIds))
     return this.eraseStrokeDeferred?.promise
   }
 
@@ -591,21 +633,33 @@ export class OIRecognizer
   {
     const changesMessages: TOIMessageEvent[] = []
     if (changes.added?.length) {
-      changesMessages.push(this.buildAddStrokes(changes.added, false))
+      changesMessages.push(this.buildAddStrokesMessage(changes.added, false))
     }
     if (changes.erased?.length) {
-      changesMessages.push(this.buildEraseStrokes(changes.erased.map(s => s.id)))
+      changesMessages.push(this.buildEraseStrokesMessage(changes.erased.map(s => s.id)))
     }
     if (changes.replaced?.newStrokes.length) {
-      changesMessages.push(this.buildReplaceStrokes(changes.replaced.oldStrokes.map(s => s.id), changes.replaced.newStrokes))
+      changesMessages.push(this.buildReplaceStrokesMessage(changes.replaced.oldStrokes.map(s => s.id), changes.replaced.newStrokes))
     }
     if (changes.matrix?.strokes.length) {
-      changesMessages.push(this.buildTransformMatrix(changes.matrix.strokes.map(s => s.id), changes.matrix.matrix))
+      changesMessages.push(this.buildTransformMatrixMessage(changes.matrix.strokes.map(s => s.id), changes.matrix.matrix))
     }
     if (changes.translate?.length) {
       changes.translate.forEach(tr =>
       {
-        changesMessages.push(this.buildTransformTranslate(tr.strokes.map(s => s.id), tr.tx, tr.ty))
+        changesMessages.push(this.buildTransformTranslateMessage(tr.strokes.map(s => s.id), tr.tx, tr.ty))
+      })
+    }
+    if (changes.rotate?.length) {
+      changes.rotate.forEach(tr =>
+      {
+        changesMessages.push(this.buildTransformRotateMessage(tr.strokes.map(s => s.id), tr.angle, tr.center.x, tr.center.y))
+      })
+    }
+    if (changes.scale?.length) {
+      changes.scale.forEach(tr =>
+      {
+        changesMessages.push(this.buildTransformScaleMessage(tr.strokes.map(s => s.id), tr.scaleX, tr.scaleY, tr.origin.x, tr.origin.y))
       })
     }
     return changesMessages

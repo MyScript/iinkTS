@@ -2,7 +2,7 @@ import { TUndoRedoConfiguration } from "../configuration"
 import { InternalEvent } from "../event"
 import { LoggerClass, LoggerManager } from "../logger"
 import { OIModel } from "../model"
-import { OIDecorator, OIStroke, TOISymbol } from "../primitive"
+import { OIDecorator, OIStroke, TOISymbol, TPoint } from "../primitive"
 import { TStyle } from "../style"
 import { MatrixTransform, TMatrixTransform } from "../transform"
 import { IHistoryManager } from "./IHistoryManager"
@@ -18,6 +18,8 @@ export type TOIHistoryChanges = {
   replaced?: { oldSymbols: TOISymbol[], newSymbols: TOISymbol[] }
   matrix?: { symbols: TOISymbol[], matrix: TMatrixTransform }
   translate?: { symbols: TOISymbol[], tx: number, ty: number }[]
+  scale?: { symbols: TOISymbol[], scaleX: number, scaleY: number, origin: TPoint }[]
+  rotate?: { symbols: TOISymbol[], angle: number, center: TPoint }[]
   style?: { symbols: TOISymbol[], style?: TStyle, fontSize?: number }
   order?: { symbols: TOISymbol[], position: "first" | "last" | "forward" | "backward" }
   decorator?: { symbol: TOISymbol, decorator: OIDecorator, added: boolean }[]
@@ -35,6 +37,8 @@ export type TOIHistoryBackendChanges = {
   replaced?: { oldStrokes: OIStroke[], newStrokes: OIStroke[] }
   matrix?: { strokes: OIStroke[], matrix: TMatrixTransform },
   translate?: { strokes: OIStroke[], tx: number, ty: number }[]
+  scale?: { strokes: OIStroke[], scaleX: number, scaleY: number, origin: TPoint }[]
+  rotate?: { strokes: OIStroke[], angle: number, center: TPoint }[]
 }
 
 /**
@@ -85,6 +89,8 @@ export class OIHistoryManager implements IHistoryManager
       changes.replaced?.oldSymbols.length ||
       changes.matrix?.symbols.length ||
       changes.translate?.length ||
+      changes.rotate?.length ||
+      changes.scale?.length ||
       changes.style?.symbols?.length ||
       changes.order?.symbols?.length ||
       changes.decorator?.length ||
@@ -158,7 +164,27 @@ export class OIHistoryManager implements IHistoryManager
           ty: -tr.ty,
         }
       })
-
+    }
+    if (changes.rotate?.length) {
+      reversedChanges.rotate = changes.rotate.map(tr =>
+      {
+        return {
+          symbols: tr.symbols,
+          angle: 2 * Math.PI - tr.angle,
+          center: tr.center
+        }
+      })
+    }
+    if (changes.scale?.length) {
+      reversedChanges.scale = changes.scale.map(tr =>
+      {
+        return {
+          symbols: tr.symbols,
+          origin: tr.origin,
+          scaleX: 1 / tr.scaleX,
+          scaleY: 1 / tr.scaleY
+        }
+      })
     }
 
     return reversedChanges

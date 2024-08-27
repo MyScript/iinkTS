@@ -1177,7 +1177,35 @@ export class OIBehaviors implements IBehaviors
           })
         }
       })
-
+    }
+    if (changes.scale?.length) {
+      backendChanges.scale = []
+      changes.scale.forEach(tr =>
+      {
+        const strokes = this.extractStrokesFromSymbols(tr.symbols)
+        if (strokes.length) {
+          backendChanges.scale!.push({
+            strokes,
+            origin: tr.origin,
+            scaleX: tr.scaleX,
+            scaleY: tr.scaleY
+          })
+        }
+      })
+    }
+    if (changes.rotate?.length) {
+      backendChanges.rotate = []
+      changes.rotate.forEach(tr =>
+      {
+        const strokes = this.extractStrokesFromSymbols(tr.symbols)
+        if (strokes.length) {
+          backendChanges.rotate!.push({
+            strokes,
+            center: tr.center,
+            angle: tr.angle
+          })
+        }
+      })
     }
     return backendChanges
   }
@@ -1200,7 +1228,9 @@ export class OIBehaviors implements IBehaviors
         actionsToBackend.erased?.length ||
         actionsToBackend.replaced ||
         actionsToBackend.matrix ||
-        actionsToBackend.translate?.length
+        actionsToBackend.translate?.length ||
+        actionsToBackend.scale?.length ||
+        actionsToBackend.rotate?.length
       ) {
         await this.recognizer.undo(actionsToBackend)
       }
@@ -1228,7 +1258,9 @@ export class OIBehaviors implements IBehaviors
         actionsToBackend.erased?.length ||
         actionsToBackend.replaced ||
         actionsToBackend.matrix ||
-        actionsToBackend.translate?.length
+        actionsToBackend.translate?.length ||
+        actionsToBackend.scale?.length ||
+        actionsToBackend.rotate?.length
       ) {
         await this.recognizer.redo(actionsToBackend)
       }

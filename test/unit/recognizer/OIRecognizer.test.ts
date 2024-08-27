@@ -10,7 +10,6 @@ import
   TMatrixTransform,
   MatrixTransform,
   TOIHistoryBackendChanges,
-  OIStroke,
 } from "../../../src/iink"
 import { toResolve } from 'jest-extended'
 expect.extend({ toResolve })
@@ -507,6 +506,169 @@ describe("OIRecognizer.ts", () =>
     })
   })
 
+  describe("transformRotate", () =>
+  {
+    const serverConfig: TServerConfiguration = {
+      ...ServerConfig,
+      host: "replace-strokes-test"
+    }
+    let mockServer: ServerOIWebsocketMock
+    let oiRecognizer: OIRecognizer
+    const strokeIds = ["id-1", "id-2"]
+    const angle = Math.PI / 2, x0 = 10, y0 = 20
+
+    beforeEach(() =>
+    {
+      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
+      mockServer.init()
+    })
+    afterEach(async () =>
+    {
+      await oiRecognizer.destroy()
+      mockServer.close()
+    })
+
+    test("should throw error if recognizer has not been initialize", async () =>
+    {
+      expect.assertions(1)
+      await expect(oiRecognizer.transformRotate(strokeIds, angle, x0, y0)).rejects.toEqual(new Error("Recognizer must be initilized"))
+    })
+    test("should not send transformRotate message if 0 strokes", async () =>
+    {
+      expect.assertions(1)
+      await oiRecognizer.init()
+      await oiRecognizer.transformRotate([], angle, x0, y0)
+      //¯\_(ツ)_/¯  required to wait server received message
+      await delay(100)
+      const messageSent = JSON.parse(mockServer.getLastMessage() as string)
+      await expect(messageSent.type).not.toEqual("transformRotate")
+    })
+    test("should send transformRotate message", async () =>
+    {
+      expect.assertions(1)
+      await oiRecognizer.init()
+      oiRecognizer.transformRotate(strokeIds, angle, x0, y0)
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
+      const messageSent = JSON.parse(mockServer.getLastMessage() as string)
+      const messageSentExpected = {
+        type: "transform",
+        transformationType: "ROTATE",
+        strokeIds,
+        angle,
+        x0,
+        y0
+      }
+      await expect(messageSent).toMatchObject(messageSentExpected)
+    })
+    test("should resolve transformRotate when received contentChanged", async () =>
+    {
+      expect.assertions(1)
+      await oiRecognizer.init()
+      const promise = oiRecognizer.transformRotate(strokeIds, angle, x0, y0)
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
+      mockServer.sendContentChangeMessage()
+      await expect(promise).toResolve()
+    })
+    test("should reject if receive error message", async () =>
+    {
+      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
+      expect.assertions(3)
+      await oiRecognizer.init()
+      const promise = oiRecognizer.transformRotate(strokeIds, angle, x0, y0)
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
+      mockServer.sendNotGrantedErrorMessage()
+      await expect(promise).rejects.toEqual(RecognizerError.WRONG_CREDENTIALS)
+      await expect(spyEmitError).toHaveBeenCalledTimes(1)
+      await expect(spyEmitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
+    })
+  })
+
+  describe("transformScale", () =>
+  {
+    const serverConfig: TServerConfiguration = {
+      ...ServerConfig,
+      host: "replace-strokes-test"
+    }
+    let mockServer: ServerOIWebsocketMock
+    let oiRecognizer: OIRecognizer
+    const strokeIds = ["id-1", "id-2"]
+    const scaleX = 2, scaleY = 2, x0 = 10, y0 = 20
+
+    beforeEach(() =>
+    {
+      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
+      mockServer.init()
+    })
+    afterEach(async () =>
+    {
+      await oiRecognizer.destroy()
+      mockServer.close()
+    })
+
+    test("should throw error if recognizer has not been initialize", async () =>
+    {
+      expect.assertions(1)
+      await expect(oiRecognizer.transformScale(strokeIds, scaleX, scaleY, x0, y0)).rejects.toEqual(new Error("Recognizer must be initilized"))
+    })
+    test("should not send transformScale message if 0 strokes", async () =>
+    {
+      expect.assertions(1)
+      await oiRecognizer.init()
+      await oiRecognizer.transformScale([], scaleX, scaleY, x0, y0)
+      //¯\_(ツ)_/¯  required to wait server received message
+      await delay(100)
+      const messageSent = JSON.parse(mockServer.getLastMessage() as string)
+      await expect(messageSent.type).not.toEqual("transformScale")
+    })
+    test("should send transformScale message", async () =>
+    {
+      expect.assertions(1)
+      await oiRecognizer.init()
+      oiRecognizer.transformScale(strokeIds, scaleX, scaleY, x0, y0)
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
+      const messageSent = JSON.parse(mockServer.getLastMessage() as string)
+      const messageSentExpected = {
+        type: "transform",
+        transformationType: "SCALE",
+        strokeIds,
+        scaleX,
+        scaleY,
+        x0,
+        y0
+      }
+      await expect(messageSent).toMatchObject(messageSentExpected)
+    })
+    test("should resolve transformScale when received contentChanged", async () =>
+    {
+      expect.assertions(1)
+      await oiRecognizer.init()
+      const promise = oiRecognizer.transformScale(strokeIds, scaleX, scaleY, x0, y0)
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
+      mockServer.sendContentChangeMessage()
+      await expect(promise).toResolve()
+    })
+    test("should reject if receive error message", async () =>
+    {
+      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
+      expect.assertions(3)
+      await oiRecognizer.init()
+      const promise = oiRecognizer.transformScale(strokeIds, scaleX, scaleY, x0, y0)
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
+      mockServer.sendNotGrantedErrorMessage()
+      await expect(promise).rejects.toEqual(RecognizerError.WRONG_CREDENTIALS)
+      await expect(spyEmitError).toHaveBeenCalledTimes(1)
+      await expect(spyEmitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
+    })
+  })
+
   describe("transformMatrix", () =>
   {
     const serverConfig: TServerConfiguration = {
@@ -836,17 +998,96 @@ describe("OIRecognizer.ts", () =>
       await delay(100)
       expect(oiRecognizer.send).toHaveBeenCalledTimes(1)
     })
-    test("should send undo message with changes added", async () =>
+    test("should send undo message with changes", async () =>
     {
-      expect.assertions(1)
       await oiRecognizer.init()
-      const changes: TOIHistoryBackendChanges = { added: [buildOIStroke()] }
+      const changes: TOIHistoryBackendChanges = {
+        added: [buildOIStroke()],
+        erased: [buildOIStroke()],
+        replaced: { newStrokes: [buildOIStroke()], oldStrokes: [buildOIStroke()] },
+        matrix: { matrix: new MatrixTransform(1, 2, 3, 4, 5, 6), strokes: [buildOIStroke()] },
+        rotate: [{ angle: Math.PI / 2, center: { x: 5, y: 10 }, strokes: [buildOIStroke()] }],
+        scale: [{ origin: { x: 2, y: 4 }, scaleX: 2, scaleY: 3, strokes: [buildOIStroke()] }],
+        translate: [{ strokes: [buildOIStroke()], tx: 12, ty: 42 }]
+      }
       oiRecognizer.undo(changes)
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
       await delay(100)
       const messageSent = JSON.parse(mockServer.getLastMessage() as string)
-      const messageSentExpected = { type: "undo", changes: [{ type: "addStrokes", strokes: [(changes.added![0] as OIStroke).formatToSend()] }] }
-      await expect(messageSent).toMatchObject(messageSentExpected)
+      expect(messageSent.type).toEqual("undo")
+      expect(messageSent.changes).toHaveLength(Object.keys(changes).length)
+      expect(messageSent.changes).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: "addStrokes",
+            strokes: changes.added!.map(s => s.formatToSend()),
+            processGestures: false
+          })
+        ])
+      )
+      expect(messageSent.changes).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+              type: "eraseStrokes",
+              strokeIds: changes.erased!.map(s => s.id)
+            })
+        ])
+      )
+      expect(messageSent.changes).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: "replaceStrokes",
+            oldStrokeIds: changes.replaced!.oldStrokes.map(s => s.id),
+            newStrokes: changes.replaced!.newStrokes.map(s => s.formatToSend())
+          })
+        ])
+      )
+      expect(messageSent.changes).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: "transform",
+            transformationType: "MATRIX",
+            strokeIds: changes.matrix!.strokes.map(s => s.id),
+            ...changes.matrix!.matrix
+          })
+        ])
+      )
+      expect(messageSent.changes).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: "transform",
+            transformationType: "ROTATE",
+            strokeIds: changes.rotate![0].strokes.map(s => s.id),
+            angle: changes.rotate![0].angle,
+            x0: changes.rotate![0].center.x,
+            y0: changes.rotate![0].center.y
+          })
+        ])
+      )
+      expect(messageSent.changes).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: "transform",
+            transformationType: "SCALE",
+            strokeIds: changes.scale![0].strokes.map(s => s.id),
+            scaleX: changes.scale![0].scaleX,
+            scaleY: changes.scale![0].scaleY,
+            x0: changes.scale![0].origin.x,
+            y0: changes.scale![0].origin.y
+          })
+        ])
+      )
+      expect(messageSent.changes).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            type: "transform",
+            transformationType: "TRANSLATE",
+            strokeIds: changes.translate![0].strokes.map(s => s.id),
+            tx: changes.translate![0].tx,
+            ty: changes.translate![0].ty
+          })
+        ])
+      )
     })
     test("should resolve undo when received contentChanged", async () =>
     {
