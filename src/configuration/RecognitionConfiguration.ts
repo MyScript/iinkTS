@@ -60,7 +60,7 @@ export const DefaultRecognitionConfiguration: TRecognitionConfiguration = {
   lang: "en_US",
   gesture: {
     enable: true,
-    ignoreGestureStrokes: true,
+    ignoreGestureStrokes: false,
   },
   convert: DefaultConvertionConfiguration,
 }

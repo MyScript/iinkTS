@@ -96,8 +96,8 @@ export function computeRotatedPoint(point: TPoint, center: TPoint, radian: numbe
   const cos = Math.cos(radian)
   const sin = Math.sin(radian)
   return {
-    x: +(center.x + cos * dx + sin * dy).toFixed(3),
-    y: +(center.y + cos * dy - sin * dx).toFixed(3)
+    x: +(center.x + cos * dx - sin * dy).toFixed(3),
+    y: +(center.y + sin * dx + cos * dy).toFixed(3)
   }
 }
 

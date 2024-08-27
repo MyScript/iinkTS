@@ -276,10 +276,10 @@ export class OIResizeManager
     })
 
     const strokesFromSymbols = this.behaviors.extractStrokesFromSymbols(this.model.symbolsSelected)
-    this.behaviors.recognizer.replaceStrokes(strokesFromSymbols.map(s => s.id), strokesFromSymbols)
+    this.behaviors.recognizer.transformScale(strokesFromSymbols.map(s => s.id), scaleX, scaleY, this.transformOrigin.x, this.transformOrigin.y)
+    this.behaviors.history.push(this.model, { scale: [{ symbols: oldSymbols, origin: {...this.transformOrigin}, scaleX, scaleY }] })
 
     this.behaviors.selector.resetSelectedGroup(this.model.symbolsSelected)
-    this.behaviors.history.push(this.model, { replaced: { oldSymbols, newSymbols: this.model.symbolsSelected } })
     this.interactElementsGroup = undefined
     this.behaviors.selector.showInteractElements()
     this.behaviors.svgDebugger.apply()
