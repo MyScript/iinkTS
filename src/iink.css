@@ -236,8 +236,14 @@
     display: none;
     opacity: 1 !important;
 }
-.ms-editor .ms-tooltip:hover:not(:focus, :active) .ms-tooltip-content {
-    display: block;
+.ms-editor .ms-menu-title {
+    margin-top: 0px;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 2px;
+    background-color: #b3dfff;
+    border-radius: 5px 5px 0 0;
+    text-align: center;
 }
 .ms-editor .ms-tooltip .ms-tooltip-content.top {
     top: 0px;
@@ -413,6 +419,7 @@
 }
 .ms-editor .smartguide .more-menu .options-label-button:hover {
     background-color: #EEEEEE;
+    padding: 4px;
 }
 .ms-editor .smartguide .more-menu .options-label-button:active {
     background-color: #E0E0E0;
@@ -552,7 +559,7 @@
     cursor: pointer;
     flex-wrap: wrap;
     margin: auto;
-    padding: 0px;
+    padding: 4px;
     min-width: 150px;
     max-width: 150px;
 }
