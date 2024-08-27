@@ -323,7 +323,7 @@ export class OIRecognizer
 
     if (this.currentErrorCode === "no.activity") {
       this.rejectDeferredPending(message)
-      this.internalEvent.emitNotif({ message: RecognizerError.NO_ACTIVITY, timeout: Infinity})
+      this.internalEvent.emitNotif({ message: RecognizerError.NO_ACTIVITY, timeout: Infinity })
     }
     else {
       switch (this.currentErrorCode) {
@@ -433,7 +433,7 @@ export class OIRecognizer
       this.socket.send(JSON.stringify(message))
       return Promise.resolve()
     }
-    else {
+    else if (this.currentErrorCode !== "restore.session.not.found") {
       if (this.socket.readyState != this.socket.CONNECTING && this.serverConfiguration.websocket.autoReconnect) {
         this.reconnectionCount++
         await this.initialized?.promise

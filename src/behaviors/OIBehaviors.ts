@@ -1306,6 +1306,8 @@ export class OIBehaviors implements IBehaviors
     this.renderer.destroy()
     this.menu.destroy()
     this.recognizer.destroy()
+    this.model.clear()
+    this.history.clear()
     return Promise.resolve()
   }
 }

@@ -193,4 +193,10 @@ export class OIHistoryManager implements IHistoryManager
     this.#logger.debug("redo", nextStackItem)
     return nextStackItem
   }
+
+  clear(): void
+  {
+    this.context = getInitialUndoRedoContext()
+    this.stack = []
+  }
 }
