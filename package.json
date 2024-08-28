@@ -74,6 +74,7 @@
     "rollup-plugin-serve": "^2.0.2",
     "rollup-plugin-svg-import": "^3.0.0",
     "rollup-plugin-typescript2": "^0.36.0",
+    "rollup-plugin-web-worker-loader": "^1.6.1",
     "ts-jest": "^29.1.1",
     "ts-node": "^10.9.1",
     "tslib": "^2.6.2",

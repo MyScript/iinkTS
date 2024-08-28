@@ -22,6 +22,7 @@ import
   TOISessionDescriptionMessage
 } from "./OIRecognizerMessage"
 import { RecognizerError } from "./RecognizerError"
+import PingWorker from "web-worker:../worker/ping.worker.ts"
 
 /**
  * A websocket dialog have this sequence :
@@ -52,6 +53,7 @@ export class OIRecognizer
   protected recognitionConfiguration: TRecognitionConfiguration
 
   protected socket!: WebSocket
+  protected pingWorker?: Worker
   protected pingCount = 0
   protected reconnectionCount = 0
   protected sessionId?: string
@@ -202,21 +204,12 @@ export class OIRecognizer
     this.clearAllDeferred()
   }
 
-  protected infinitePing(): void
+  protected sendPing(): void
   {
-    if (this.serverConfiguration.websocket.maxPingLostCount < this.pingCount) {
-      this.socket.close(1000, "PING_LOST")
-    } else if (this.socket.readyState <= 1) {
-      setTimeout(() =>
-      {
-        if (this.socket.readyState === this.socket.OPEN) {
-          this.socket.send(JSON.stringify({ type: "ping" }))
-          this.pingCount++
-        } else {
-          this.#logger.info("infinitePing", "try to ping but websocket is not open yet")
-        }
-        this.infinitePing()
-      }, this.serverConfiguration.websocket.pingDelay)
+    if (this.socket.readyState === this.socket.OPEN) {
+      this.socket.send(JSON.stringify({ type: "ping" }))
+    } else {
+      this.#logger.info("infinitePing", "try to ping but websocket is not open yet")
     }
   }
 
@@ -239,6 +232,25 @@ export class OIRecognizer
     })
   }
 
+  protected initPing(): void
+  {
+    this.pingWorker = new PingWorker()
+    this.pingWorker.postMessage({
+      pingDelay: this.serverConfiguration.websocket.pingDelay,
+    })
+    this.pingWorker.onmessage = () =>
+    {
+      if (this.pingCount < this.serverConfiguration.websocket.maxPingLostCount) {
+        this.sendPing()
+      }
+      else {
+        this.close(1000, "MAXIMUM_PING_REACHED")
+        this.pingWorker?.terminate()
+      }
+      this.pingCount++
+    }
+  }
+
   protected manageAuthenticated(): void
   {
     const pixelTomm = 25.4 / 96
@@ -249,9 +261,6 @@ export class OIRecognizer
       scaleY: pixelTomm,
       configuration: this.recognitionConfiguration
     })
-    if (this.serverConfiguration.websocket.pingEnabled) {
-      this.infinitePing()
-    }
   }
 
   protected manageSessionDescriptionMessage(sessionDescriptionMessage: TOISessionDescriptionMessage): void
@@ -414,13 +423,16 @@ export class OIRecognizer
       this.sessionId = undefined
       this.currentPartId = undefined
     }
-    this.pingCount = 0
     this.socket = new WebSocket(this.url)
     this.clearSocketListener()
     this.socket.addEventListener("open", this.openCallback.bind(this))
     this.socket.addEventListener("close", this.closeCallback.bind(this))
     this.socket.addEventListener("message", this.messageCallback.bind(this))
-    return this.initialized?.promise
+    await this.initialized?.promise
+    if (this.serverConfiguration.websocket.pingEnabled) {
+      this.pingCount = 0
+      this.initPing()
+    }
   }
 
   async send(message: TOIMessageEvent): Promise<void>
