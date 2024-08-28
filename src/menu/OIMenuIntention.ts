@@ -162,7 +162,7 @@ export class OIMenuIntention extends OIMenu
     const params: TSubMenuParam = {
       trigger: this.menuShape,
       subMenu: subMenuContent,
-      position: "bottom"
+      position: "top"
     }
 
     return new OIMenuSub(params).element
@@ -211,7 +211,7 @@ export class OIMenuIntention extends OIMenu
     const params: TSubMenuParam = {
       trigger: this.menuEdge,
       subMenu: subMenuContent,
-      position: "bottom"
+      position: "top"
     }
 
     return new OIMenuSub(params).element
