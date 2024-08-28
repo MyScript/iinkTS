@@ -104,6 +104,9 @@
   align-items: center;
   gap: 24px;
   padding: 24px 12px;
+  details > summary::-webkit-details-marker {
+    display: none;
+  }
 }
 
 .home .home-main .example-recognition {

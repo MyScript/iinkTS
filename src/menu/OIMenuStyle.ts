@@ -6,6 +6,7 @@ import { OIModel } from "../model"
 import { SymbolType, TOISymbol } from "../primitive"
 import { OIMenu, TMenuItemColorList } from "./OIMenu"
 import { OIMenuSub } from "./OIMenuSub"
+import { TSubMenuParam } from "./OIMenuSub"
 
 /**
  * @group Menu
@@ -275,7 +276,13 @@ export class OIMenuStyle extends OIMenu
       subMenuContent.appendChild(this.createMenuFontSize())
       subMenuContent.appendChild(this.createMenuFontWeight())
       subMenuContent.appendChild(this.createMenuOpacity())
-      this.subMenu = this.createSubMenu(this.createToolTip(this.triggerBtn, "Style", "left"), subMenuContent, "bottom-left")
+
+      const params: TSubMenuParam = {
+        trigger: this.triggerBtn,
+        subMenu: subMenuContent,
+        position: "bottom-left",
+      }
+      this.subMenu = new OIMenuSub(params)
 
       this.wrapper = document.createElement("div")
       this.wrapper.classList.add("ms-menu", "ms-menu-top-right")
