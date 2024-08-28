@@ -1,23 +1,33 @@
 /**
  * @group Menu
  */
-export class OIMenuSub
+export type TSubMenuParam =
 {
+  trigger: HTMLElement,
+  menuTitle?: string,
+  subMenu: HTMLElement,
+  position: "top" | "left" | "right" | "right-top" | "bottom" | "bottom-left" | "bottom-right"
+}
+export class OIMenuSub {
   element: HTMLDivElement
   content: HTMLElement
 
-  constructor(trigger: HTMLElement, subMenu: HTMLElement, position: "top" | "left" | "right" | "right-top" | "bottom" | "bottom-left" = "top")
-  {
+  constructor(param : TSubMenuParam) {
     this.element = document.createElement("div")
     this.element.classList.add("sub-menu")
-    this.element.appendChild(trigger)
-
+    this.element.appendChild(param.trigger)
     this.content = document.createElement("div")
-    this.content.classList.add("sub-menu-content", position)
-    this.content.appendChild(subMenu)
+    if(param.menuTitle) {
+      const menuTitleElement = document.createElement("h3")
+      menuTitleElement.classList.add("ms-menu-title")
+      menuTitleElement.textContent = param.menuTitle
+      this.content.appendChild(menuTitleElement)
+    }
+    this.content.classList.add("sub-menu-content", param.position)
+    this.content.appendChild(param.subMenu)
     this.element.appendChild(this.content)
 
-    trigger.addEventListener("pointerdown", () => this.toggle())
+    param.trigger.addEventListener("pointerdown", () => this.toggle())
     document.addEventListener("pointerdown", (e) => {
       if (!this.element.contains(e.target as HTMLElement)) {
         this.close()
@@ -25,30 +35,25 @@ export class OIMenuSub
     })
   }
 
-  open(): void
-  {
+  open(): void {
     this.content.classList.add("open")
   }
 
-  close(): void
-  {
+  close(): void {
     this.content.classList.remove("open")
   }
 
-  toggle(): void
-  {
+  toggle(): void {
     this.content.classList.toggle("open")
   }
 
-  unwrap(): void
-  {
+  unwrap(): void {
     this.content.classList.remove("sub-menu-content")
     this.element.insertAdjacentElement("beforebegin", this.content)
     this.element.style.display = "none"
   }
 
-  wrap(): void
-  {
+  wrap(): void {
     this.content.classList.add("sub-menu-content")
     this.element.appendChild(this.content)
     this.element.style.display = "block"

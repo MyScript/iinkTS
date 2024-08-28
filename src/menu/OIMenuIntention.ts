@@ -14,6 +14,8 @@ import { Intention, WriteTool } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerClass, LoggerManager } from "../logger"
 import { OIMenu } from "./OIMenu"
+import { OIMenuSub } from "./OIMenuSub"
+import { TSubMenuParam } from "./OIMenuSub"
 
 /**
  * @group Menu
@@ -157,7 +159,13 @@ export class OIMenuIntention extends OIMenu
     subMenuContent.appendChild(this.subMenuShape.triangle)
     subMenuContent.appendChild(this.subMenuShape.rhombus)
 
-    return this.createSubMenu(this.menuShape, subMenuContent).element
+    const params: TSubMenuParam = {
+      trigger: this.menuShape,
+      subMenu: subMenuContent,
+      position: "bottom"
+    }
+
+    return new OIMenuSub(params).element
   }
 
   protected createEdgeSubMenu(square: string, tool: WriteTool): HTMLButtonElement
@@ -200,7 +208,13 @@ export class OIMenuIntention extends OIMenu
     subMenuContent.appendChild(this.subMenuEdge.arrow)
     subMenuContent.appendChild(this.subMenuEdge.doubleArrow)
 
-    return this.createSubMenu(this.menuEdge, subMenuContent).element
+    const params: TSubMenuParam = {
+      trigger: this.menuEdge,
+      subMenu: subMenuContent,
+      position: "bottom"
+    }
+
+    return new OIMenuSub(params).element
   }
 
   protected unselectAll(): void

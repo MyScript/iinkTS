@@ -5,7 +5,7 @@ import { LoggerClass, LoggerManager } from "../logger"
 import { DecoratorKind, OIDecorator, OIStroke, OISymbolGroup, OIText, SymbolType, TOISymbol } from "../primitive"
 import { OIMenu, TMenuItemBoolean, TMenuItemButton, TMenuItemColorList } from "./OIMenu"
 import { createUUID } from "../utils"
-
+import { OIMenuSub, TSubMenuParam } from "./OIMenuSub"
 /**
  * @group Menu
  */
@@ -103,7 +103,12 @@ export class OIMenuContext extends OIMenu
         this.behaviors.selector.resetSelectedGroup([textSymbol])
       }
     })
-    this.editMenu = this.createSubMenu(trigger, subMenuWrapper, "right").element
+    const params: TSubMenuParam = {
+      trigger: trigger,
+      subMenu: subMenuWrapper,
+      position: "right"
+    }
+    this.editMenu = new OIMenuSub(params).element
 
     return this.editMenu
   }
@@ -263,7 +268,12 @@ export class OIMenuContext extends OIMenu
     {
       subMenuWrapper.appendChild(this.createMenuItem(i))
     })
-    this.reorderMenu = this.createSubMenu(trigger, subMenuWrapper, "right").element
+    const params: TSubMenuParam = {
+      trigger: trigger,
+      subMenu: subMenuWrapper,
+      position: "right"
+    }
+    this.reorderMenu = new OIMenuSub(params).element
     return this.reorderMenu
   }
 
@@ -344,7 +354,12 @@ export class OIMenuContext extends OIMenu
     {
       subMenuWrapper.appendChild(this.createMenuItem(i))
     })
-    return this.decoratorMenu = this.createSubMenu(trigger, subMenuWrapper, "right").element
+    const params: TSubMenuParam = {
+      trigger: trigger,
+      subMenu: subMenuWrapper,
+      position: "right"
+    }
+    return this.decoratorMenu = new OIMenuSub(params).element
   }
 
   protected createMenuDecorator(): HTMLElement
@@ -368,7 +383,12 @@ export class OIMenuContext extends OIMenu
     subMenuWrapper.appendChild(this.createDecoratorSubMenu("Underline", DecoratorKind.Underline))
     subMenuWrapper.appendChild(this.createDecoratorSubMenu("Strikethrough", DecoratorKind.Strikethrough))
 
-    this.decoratorMenu = this.createSubMenu(trigger, subMenuWrapper, "right").element
+    const params: TSubMenuParam = {
+      trigger: trigger,
+      subMenu: subMenuWrapper,
+      position: "right"
+    }
+    this.decoratorMenu = new OIMenuSub(params).element
     return this.decoratorMenu
   }
 
@@ -412,7 +432,12 @@ export class OIMenuContext extends OIMenu
     {
       subMenuWrapper.appendChild(this.createMenuItem(i))
     })
-    this.menuExport = this.createSubMenu(trigger, subMenuWrapper, "right").element
+    const params: TSubMenuParam = {
+      trigger: trigger,
+      subMenu: subMenuWrapper,
+      position: "right"
+    }
+    this.menuExport = new OIMenuSub(params).element
     return this.menuExport
   }
 

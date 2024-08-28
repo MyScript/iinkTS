@@ -1,5 +1,4 @@
 import ArrowDown from "../assets/svg/nav-arrow-down.svg"
-import { OIMenuSub } from "./OIMenuSub"
 
 /**
  * @group Menu
@@ -112,11 +111,6 @@ export abstract class OIMenu
     tooltipContent.textContent = text
     el.appendChild(tooltipContent)
     return el
-  }
-
-  protected createSubMenu(trigger: HTMLElement, subMenu: HTMLElement, position: "top" | "left" | "right" | "right-top" | "bottom" | "bottom-left" = "top"): OIMenuSub
-  {
-    return new OIMenuSub(trigger, subMenu, position)
   }
 
   protected createWrapCollapsible(el: Node, title: string): HTMLDivElement

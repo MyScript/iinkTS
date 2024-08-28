@@ -17,7 +17,7 @@ import { OIModel } from "../model"
 import { OIMenu, TMenuItemBoolean, TMenuItemButton, TMenuItemButtonList, TMenuItemSelect } from "./OIMenu"
 import { TOISymbol } from "../primitive"
 import { InsertAction, StrikeThroughAction, SurroundAction } from "../gesture"
-import { OIMenuSub } from "./OIMenuSub"
+import { OIMenuSub, TSubMenuParam } from "./OIMenuSub"
 import { getAvailableLanguageList, PartialDeep } from "../utils"
 
 /**
@@ -101,7 +101,12 @@ export class OIMenuAction extends OIMenu
       const value = (e.target as HTMLInputElement).value
       this.behaviors.changeLanguage(value)
     })
-    this.menuLanguage = this.createSubMenu(this.createToolTip(triggerBtn, "Language", "bottom"), select, "bottom")
+    const params: TSubMenuParam = {
+      trigger: triggerBtn,
+      subMenu: select,
+      position: "bottom-right"
+    }
+    this.menuLanguage = new OIMenuSub(params)
     return this.menuLanguage.element
   }
 
@@ -232,8 +237,13 @@ export class OIMenuAction extends OIMenu
     {
       subMenuWrapper.appendChild(this.createMenuItem(i))
     })
-
-    return this.createSubMenu(this.createToolTip(trigger, "Gesture", "right"), subMenuWrapper, "right-top").element
+    const params: TSubMenuParam = {
+      trigger: trigger,
+      menuTitle: "Gesture",
+      subMenu: subMenuWrapper,
+      position: "right-top"
+    }
+    return new OIMenuSub(params).element
   }
 
   protected createMenuGuide(): HTMLDivElement
@@ -294,8 +304,13 @@ export class OIMenuAction extends OIMenu
     {
       subMenuWrapper.appendChild(this.createMenuItem(i))
     })
-
-    return this.createSubMenu(this.createToolTip(trigger, "Guide", "right"), subMenuWrapper, "right-top").element
+    const params: TSubMenuParam = {
+      trigger: trigger,
+      menuTitle: "Guide",
+      subMenu: subMenuWrapper,
+      position: "right-top"
+    }
+    return new OIMenuSub(params).element
   }
 
   protected createMenuSnap(): HTMLDivElement
@@ -343,7 +358,13 @@ export class OIMenuAction extends OIMenu
     {
       subMenuWrapper.appendChild(this.createMenuItem(i))
     })
-    return this.createSubMenu(this.createToolTip(trigger, "Snap", "right"), subMenuWrapper, "right-top").element
+    const params: TSubMenuParam = {
+      trigger: trigger,
+      menuTitle: "Snap",
+      subMenu: subMenuWrapper,
+      position: "right-top"
+    }
+    return new OIMenuSub(params).element
   }
 
   protected createMenuDebug(): HTMLDivElement
@@ -396,7 +417,13 @@ export class OIMenuAction extends OIMenu
     {
       subMenuWrapper.appendChild(this.createMenuItem(i))
     })
-    return this.createSubMenu(this.createToolTip(trigger, "Debug", "right"), subMenuWrapper, "right-top").element
+    const params: TSubMenuParam = {
+      trigger: trigger,
+      menuTitle: "Debug",
+      subMenu: subMenuWrapper,
+      position: "right-top"
+    }
+    return new OIMenuSub(params).element
   }
 
   protected createMenuExport(): HTMLElement
@@ -441,7 +468,13 @@ export class OIMenuAction extends OIMenu
     {
       subMenuWrapper.appendChild(this.createMenuItem(i))
     })
-    return this.createSubMenu(this.createToolTip(trigger, "Export", "right"), subMenuWrapper, "right-top").element
+    const params: TSubMenuParam = {
+      trigger: trigger,
+      menuTitle: "Export",
+      subMenu: subMenuWrapper,
+      position: "right-top"
+    }
+    return new OIMenuSub(params).element
   }
 
   protected async readFileAsText(file: File): Promise<string>
@@ -501,8 +534,13 @@ export class OIMenuAction extends OIMenu
       }
 
     })
-
-    return this.createSubMenu(this.createToolTip(trigger, "Import", "right"), subMenuWrapper, "right-top").element
+    const params: TSubMenuParam = {
+      trigger: trigger,
+      menuTitle: "Import",
+      subMenu: subMenuWrapper,
+      position: "right-top"
+    }
+    return new OIMenuSub(params).element
   }
 
   protected unselectAll(): void
@@ -534,7 +572,7 @@ export class OIMenuAction extends OIMenu
 
       this.wrapper = document.createElement("div")
       this.wrapper.classList.add("ms-menu", "ms-menu-top-left", "ms-menu-row")
-      this.wrapper.appendChild(this.createSubMenu(this.createToolTip(menuTrigger, "Menu", "right"), subMenuWrapper, "bottom").element)
+      this.wrapper.appendChild(new OIMenuSub({ trigger: menuTrigger, subMenu: subMenuWrapper, position: "bottom" }).element)
       this.wrapper.appendChild(this.createMenuLanguage())
       this.wrapper.appendChild(this.createMenuClear())
       this.wrapper.appendChild(this.createMenuUndo())
