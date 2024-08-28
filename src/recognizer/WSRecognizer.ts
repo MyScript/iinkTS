@@ -111,7 +111,7 @@ export class WSRecognizer
   {
     this.pingCount++
     if (this.serverConfiguration.websocket.maxPingLostCount < this.pingCount) {
-      this.socket.close(1000, "PING_LOST")
+      this.socket.close(1000, "MAXIMUM_PING_REACHED")
     } else if (this.socket.readyState <= 1) {
       setTimeout(() =>
       {

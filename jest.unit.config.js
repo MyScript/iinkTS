@@ -20,6 +20,9 @@ export default {
     "ts",
     "js"
   ],
+  moduleNameMapper: {
+    "web-worker:(.*)\\.worker.ts": '<rootDir>/src/worker/$1.worker.ts',
+  },
   modulePathIgnorePatterns: [
     "./test/unit/__dataset__",
     "./test/unit/__mocks__"
