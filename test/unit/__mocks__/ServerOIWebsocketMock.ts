@@ -89,8 +89,8 @@ export class ServerOIWebsocketMock extends Server
 {
   init(
     { withHMAC, withIdle }:
-      { withHMAC?: boolean, withIdle?: boolean } =
-      { withHMAC: true, withIdle: true }
+    { withHMAC?: boolean, withIdle?: boolean } =
+    { withHMAC: true, withIdle: true }
   )
   {
     this.on("connection", (socket) =>
