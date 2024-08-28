@@ -56,7 +56,7 @@ export class OIRotationManager
     switch (shape.kind) {
       case ShapeKind.Ellipse: {
         shape.center = computeRotatedPoint(shape.center, center, angleRad)
-        shape.orientation = (shape.orientation - angleRad) % (2 * Math.PI)
+        shape.orientation = (shape.orientation + angleRad) % (2 * Math.PI)
         return shape
       }
       case ShapeKind.Circle: {
