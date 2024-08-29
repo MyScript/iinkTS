@@ -45,7 +45,7 @@ export const useRecognizer = async (): Promise<Recognizer> =>
   if (!Recognizer.initializing) {
     Recognizer.initializing = true
     const res = await fetch("../../../server-configuration.json");
-    const server = await res.json() as TServerConfiguration;
+    const server = await res.json() as PartialDeep<TServerConfiguration>;
     const recognition: PartialDeep<TRecognitionConfiguration> = {
       "raw-content": {
         gestures: ["underline", "scratch-out", "join", "insert", "strike-through", "surround"]

@@ -46,15 +46,27 @@ export default function App()
 		editor.setCurrentTool("draw")
 	}, [])
 
+	let updateExportsDebounce: ReturnType<typeof setTimeout>
+	const updateExports = async () =>
+	{
+		clearTimeout(updateExportsDebounce)
+		updateExportsDebounce = setTimeout(async () => {
+			const exports = await recognizer.export(['application/vnd.myscript.jiix', 'text/html'])
+			dispatch(setExports(exports))
+		}, 500)
+	}
+
 	useEffect(() =>
 	{
 		if (!editor || !recognizer) return
+
+		recognizer.event.addContextChangeListener(updateExports)
 
 		const handleChangeEvent: TLEventMapHandler<'change'> = async (change) =>
 		{
 			if (change.source === 'user') {
 				try {
-					dispatch(setExports(await useSynchronizer(editor, recognizer).sync(change.changes)))
+					await useSynchronizer(editor, recognizer).sync(change.changes)
 				} catch (error) {
 					dispatch(addError(typeof error === "string" ? error as string : (error as Error).message))
 				}
@@ -188,9 +200,6 @@ export default function App()
 						</div>
 						<div className={`tab-content ${ tabName === "JIIX" ? "active" : "" }`}>
 							<ReactJson src={exports['application/vnd.myscript.jiix'] as object} collapsed={true} />
-						</div>
-						<div className={`tab-content ${ tabName === "JIIX" ? "active" : "" }`}>
-							<ReactJson src={exports['application/vnd.myscript.jiix'] as object} />
 						</div>
 						<div className={`tab-content ${ tabName === "HTML" ? "active" : "" }`}>
 							{ExportHTMLTab(exports['text/html'] as string)}
