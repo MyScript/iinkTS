@@ -107,7 +107,7 @@ export class Synchronizer
   }
 
   //@ts-ignore
-  async sync(changes: RecordsDiff<TLShape>): Promise<TExport>
+  async sync(changes: RecordsDiff<TLShape>): Promise<void>
   {
     for (const record of Object.values((changes.added as Record<TLShapeId, TLShape>))) {
       if (record.typeName === 'shape') {
@@ -147,7 +147,6 @@ export class Synchronizer
     if (!this.drawShapeToAdd.filter(s => s.props.isComplete).length && !this.drawShapeToUpdate.length && !this.drawShapeToRemove.length) {
       return false
     }
-
     if (this.drawShapeToAdd.length) {
       const newDrawShapeCompleted = this.drawShapeToAdd.filter(s => s.props.isComplete)
       this.drawShapeToAdd = this.drawShapeToAdd.filter(s => !s.props.isComplete)
@@ -202,8 +201,6 @@ export class Synchronizer
       this.drawShapeToRemove = []
       await promise
     }
-
-    return Recognizer.instance.export(['application/vnd.myscript.jiix', 'text/html'])
   }
 }
 
