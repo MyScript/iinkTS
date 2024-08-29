@@ -145,7 +145,7 @@ export class Synchronizer
     }
 
     if (!this.drawShapeToAdd.filter(s => s.props.isComplete).length && !this.drawShapeToUpdate.length && !this.drawShapeToRemove.length) {
-      return false
+      return
     }
     if (this.drawShapeToAdd.length) {
       const newDrawShapeCompleted = this.drawShapeToAdd.filter(s => s.props.isComplete)

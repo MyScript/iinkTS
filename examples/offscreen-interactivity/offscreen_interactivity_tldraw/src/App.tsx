@@ -51,7 +51,7 @@ export default function App()
 	{
 		clearTimeout(updateExportsDebounce)
 		updateExportsDebounce = setTimeout(async () => {
-			const exports = await recognizer.export(['application/vnd.myscript.jiix', 'text/html'])
+			const exports = await recognizer!.export(['application/vnd.myscript.jiix', 'text/html'])
 			dispatch(setExports(exports))
 		}, 500)
 	}

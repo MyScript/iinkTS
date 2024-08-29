@@ -8,7 +8,7 @@ import
 	useEditor,
 } from 'tldraw'
 import { useConverter } from '../Converter'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
 export function ContextMenu()
 {
@@ -28,7 +28,7 @@ export function ContextMenu()
 	}
 
 
-	editor.on("update", (b) =>
+	editor.on("update", () =>
 	{
 		setShapesToConvert(editor.getSelectedShapes().filter(s => s.type === "draw") as TLDrawShape[])
 	}, editor)
