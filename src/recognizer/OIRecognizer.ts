@@ -60,8 +60,9 @@ export class OIRecognizer
   protected currentPartId?: string
   protected currentErrorCode?: string | number
 
-  protected connected?: DeferredPromise<void>
-  protected initialized?: DeferredPromise<void>
+  protected connected: DeferredPromise<void>
+  protected initialized: DeferredPromise<void>
+
   protected addStrokeDeferred?: DeferredPromise<TOIMessageEventGesture | undefined>
   protected contextlessGestureDeferred: Map<string, DeferredPromise<TOIMessageEventContextlessGesture>>
   protected transformStrokeDeferred?: DeferredPromise<void>
@@ -86,6 +87,9 @@ export class OIRecognizer
 
     this.exportDeferredMap = new Map()
     this.contextlessGestureDeferred = new Map()
+
+    this.connected = new DeferredPromise<void>()
+    this.initialized = new DeferredPromise<void>()
   }
 
   get mimeTypes(): string[]
@@ -93,15 +97,27 @@ export class OIRecognizer
     return ["application/vnd.myscript.jiix"]
   }
 
-  get internalEvent(): InternalEvent
+  get event(): InternalEvent
   {
     return InternalEvent.getInstance()
   }
 
+  #send(message: TOIMessageEvent): void
+  {
+    if (!this.socket) {
+      throw new Error("Recognizer must be initilized")
+    }
+    if (this.socket.readyState === this.socket.OPEN) {
+      this.socket.send(JSON.stringify(message))
+    }
+    else {
+      throw new Error(`Connection not ready, state: ${ this.socket.readyState }}`)
+    }
+  }
+
   protected rejectDeferredPending(error: Error | string): void
   {
-    this.connected?.reject(error)
-    this.initialized?.reject(error)
+    this.initialized.reject(error)
     this.addStrokeDeferred?.reject(error)
     this.transformStrokeDeferred?.reject(error)
     this.eraseStrokeDeferred?.reject(error)
@@ -122,10 +138,10 @@ export class OIRecognizer
     this.waitForIdleDeferred?.reject(error)
   }
 
-  protected clearAllDeferred(): void
+  protected resetAllDeferred(): void
   {
-    this.connected = undefined
-    this.initialized = undefined
+    this.connected = new DeferredPromise<void>()
+    this.initialized = new DeferredPromise<void>()
     this.addStrokeDeferred = undefined
     this.contextlessGestureDeferred.clear()
     this.transformStrokeDeferred = undefined
@@ -198,26 +214,18 @@ export class OIRecognizer
     this.closeDeferred?.resolve()
     if (!this.currentErrorCode && evt.code !== 1000) {
       const error = new Error(message)
-      this.internalEvent.emitError(error)
+      this.event.emitError(error)
       this.rejectDeferredPending(message)
     }
-    this.clearAllDeferred()
-  }
-
-  protected sendPing(): void
-  {
-    if (this.socket.readyState === this.socket.OPEN) {
-      this.socket.send(JSON.stringify({ type: "ping" }))
-    } else {
-      this.#logger.info("infinitePing", "try to ping but websocket is not open yet")
-    }
+    this.pingWorker?.terminate()
+    this.resetAllDeferred()
   }
 
   protected openCallback(): void
   {
-    this.connected?.resolve()
+    this.connected.resolve()
     this.reconnectionCount = 0
-    this.send({
+    this.#send({
       type: "authenticate",
       "myscript-client-name": "iink-ts",
       "myscript-client-version": "1.0.0-buildVersion",
@@ -226,7 +234,7 @@ export class OIRecognizer
 
   protected async manageHMACChallenge(hmacChallengeMessage: TOIMessageEventHMACChallenge): Promise<void>
   {
-    this.send({
+    this.#send({
       type: "hmac",
       hmac: await computeHmac(hmacChallengeMessage.hmacChallenge, this.serverConfiguration.applicationKey, this.serverConfiguration.hmacKey)
     })
@@ -241,7 +249,7 @@ export class OIRecognizer
     this.pingWorker.onmessage = () =>
     {
       if (this.pingCount < this.serverConfiguration.websocket.maxPingLostCount) {
-        this.sendPing()
+        this.#send({ type: "ping" })
       }
       else {
         this.close(1000, "MAXIMUM_PING_REACHED")
@@ -254,7 +262,7 @@ export class OIRecognizer
   protected manageAuthenticated(): void
   {
     const pixelTomm = 25.4 / 96
-    this.send({
+    this.#send({
       type: this.sessionId ? "restoreSession" : "initSession",
       iinkSessionId: this.sessionId,
       scaleX: pixelTomm,
@@ -269,16 +277,16 @@ export class OIRecognizer
       this.sessionId = sessionDescriptionMessage.iinkSessionId
     }
     if (this.currentPartId) {
-      this.send({ type: "openContentPart", id: this.currentPartId })
+      this.#send({ type: "openContentPart", id: this.currentPartId })
     }
     else {
-      this.send({ type: "newContentPart", contentType: this.recognitionConfiguration.type, mimeTypes: this.mimeTypes })
+      this.#send({ type: "newContentPart", contentType: this.recognitionConfiguration.type, mimeTypes: this.mimeTypes })
     }
   }
 
   protected manageNewPartMessage(newPartMessage: TOIMessageEventNewPart): void
   {
-    this.initialized?.resolve()
+    this.initialized.resolve()
     this.currentPartId = newPartMessage.id
   }
 
@@ -297,7 +305,7 @@ export class OIRecognizer
     this.undoDeferred?.resolve()
     this.redoDeferred?.resolve()
     this.clearDeferred?.resolve()
-    this.internalEvent.emitContextChange({
+    this.event.emitContextChange({
       canRedo: contentChangeMessage.canRedo,
       canUndo: contentChangeMessage.canRedo,
     } as TUndoRedoContext)
@@ -316,13 +324,13 @@ export class OIRecognizer
           this.exportDeferredMap.get(key)!.resolve(exportMessage.exports)
         }
       })
-    this.internalEvent.emitExported(exportMessage.exports)
+    this.event.emitExported(exportMessage.exports)
   }
 
   protected manageWaitForIdle(): void
   {
     this.waitForIdleDeferred?.resolve()
-    this.internalEvent.emitIdle(true)
+    this.event.emitIdle(true)
   }
 
   protected manageErrorMessage(errorMessage: TOIMessageEventError): void
@@ -332,7 +340,7 @@ export class OIRecognizer
 
     if (this.currentErrorCode === "no.activity") {
       this.rejectDeferredPending(message)
-      this.internalEvent.emitNotif({ message: RecognizerError.NO_ACTIVITY, timeout: Infinity })
+      this.event.emitNotif({ message: RecognizerError.NO_ACTIVITY, timeout: Infinity })
     }
     else {
       switch (this.currentErrorCode) {
@@ -347,7 +355,7 @@ export class OIRecognizer
           break
       }
       this.rejectDeferredPending(message)
-      this.internalEvent.emitError(new Error(message))
+      this.event.emitError(new Error(message))
     }
   }
 
@@ -410,14 +418,12 @@ export class OIRecognizer
       }
     }
     catch (error) {
-      this.internalEvent.emitError(new Error(message.data))
+      this.event.emitError(new Error(message.data))
     }
   }
 
   async init(): Promise<void>
   {
-    this.connected = new DeferredPromise<void>()
-    this.initialized = new DeferredPromise<void>()
     if (this.currentErrorCode === "restore.session.not.found") {
       this.currentErrorCode === undefined
       this.sessionId = undefined
@@ -428,7 +434,7 @@ export class OIRecognizer
     this.socket.addEventListener("open", this.openCallback.bind(this))
     this.socket.addEventListener("close", this.closeCallback.bind(this))
     this.socket.addEventListener("message", this.messageCallback.bind(this))
-    await this.initialized?.promise
+    await this.initialized.promise
     if (this.serverConfiguration.websocket.pingEnabled) {
       this.pingCount = 0
       this.initPing()
@@ -440,25 +446,31 @@ export class OIRecognizer
     if (!this.socket) {
       return Promise.reject(new Error("Recognizer must be initilized"))
     }
-    await this.connected?.promise
-    if (this.socket.readyState === this.socket.OPEN) {
-      this.socket.send(JSON.stringify(message))
-      return Promise.resolve()
-    }
-    else if (this.currentErrorCode !== "restore.session.not.found") {
-      if (this.socket.readyState != this.socket.CONNECTING && this.serverConfiguration.websocket.autoReconnect) {
-        this.reconnectionCount++
-        await this.initialized?.promise
-        if (this.serverConfiguration.websocket.maxRetryCount > this.reconnectionCount) {
-          this.internalEvent.emitClearMessage()
-          await this.init()
-          await this.waitForIdle()
-          return this.send(message)
+
+    switch (this.socket.readyState) {
+      case this.socket.CONNECTING:
+      case this.socket.OPEN:
+        await this.initialized.promise
+        this.#send(message)
+        return Promise.resolve()
+      case this.socket.CLOSING:
+      case this.socket.CLOSED:
+        if (this.serverConfiguration.websocket.autoReconnect) {
+          this.reconnectionCount++
+          if (this.serverConfiguration.websocket.maxRetryCount > this.reconnectionCount) {
+            this.event.emitClearMessage()
+            await this.init()
+            await this.waitForIdle()
+            return this.send(message)
+          }
+          else {
+            return Promise.reject(new Error("Unable to send message. The maximum number of connection attempts has been reached."))
+          }
         }
         else {
-          return Promise.reject(new Error("Unable to send message. The maximum number of connection attempts has been reached."))
+          return Promise.reject(new Error("Unable to send message. Connection closed and automatic reconnection disabled"))
         }
-      }
+        break
     }
   }
 
@@ -472,7 +484,6 @@ export class OIRecognizer
   }
   async addStrokes(strokes: OIStroke[], processGestures = true): Promise<TOIMessageEventGesture | undefined>
   {
-    await this.initialized?.promise
     this.addStrokeDeferred = new DeferredPromise<TOIMessageEventGesture | undefined>()
     if (strokes.length === 0) {
       this.addStrokeDeferred.resolve(undefined)
@@ -492,7 +503,6 @@ export class OIRecognizer
   }
   async replaceStrokes(oldStrokeIds: string[], newStrokes: OIStroke[]): Promise<void>
   {
-    await this.initialized?.promise
     this.replaceStrokeDeferred = new DeferredPromise<void>()
     if (oldStrokeIds.length === 0) {
       this.replaceStrokeDeferred.resolve()
@@ -514,7 +524,6 @@ export class OIRecognizer
   }
   async transformTranslate(strokeIds: string[], tx: number, ty: number): Promise<void>
   {
-    await this.initialized?.promise
     this.transformStrokeDeferred = new DeferredPromise<void>()
     if (strokeIds.length === 0) {
       this.transformStrokeDeferred.resolve()
@@ -537,7 +546,6 @@ export class OIRecognizer
   }
   async transformRotate(strokeIds: string[], angle: number, x0: number = 0, y0: number = 0): Promise<void>
   {
-    await this.initialized?.promise
     this.transformStrokeDeferred = new DeferredPromise<void>()
     if (strokeIds.length === 0) {
       this.transformStrokeDeferred.resolve()
@@ -561,7 +569,6 @@ export class OIRecognizer
   }
   async transformScale(strokeIds: string[], scaleX: number, scaleY: number, x0: number = 0, y0: number = 0): Promise<void>
   {
-    await this.initialized?.promise
     this.transformStrokeDeferred = new DeferredPromise<void>()
     if (strokeIds.length === 0) {
       this.transformStrokeDeferred.resolve()
@@ -582,7 +589,6 @@ export class OIRecognizer
   }
   async transformMatrix(strokeIds: string[], matrix: TMatrixTransform): Promise<void>
   {
-    await this.initialized?.promise
     this.transformStrokeDeferred = new DeferredPromise<void>()
     if (strokeIds.length === 0) {
       this.transformStrokeDeferred.resolve()
@@ -601,7 +607,6 @@ export class OIRecognizer
   }
   async eraseStrokes(strokeIds: string[]): Promise<void>
   {
-    await this.initialized?.promise
     this.eraseStrokeDeferred = new DeferredPromise<void>()
     if (strokeIds.length === 0) {
       this.eraseStrokeDeferred.resolve()
@@ -613,7 +618,6 @@ export class OIRecognizer
 
   async recognizeGesture(stroke: OIStroke): Promise<TOIMessageEventContextlessGesture | undefined>
   {
-    await this.initialized?.promise
     if (!stroke) {
       return
     }
@@ -630,7 +634,6 @@ export class OIRecognizer
 
   async waitForIdle(): Promise<void>
   {
-    await this.initialized?.promise
     if (!this.waitForIdleDeferred || this.waitForIdleDeferred.isFullFilled) {
       this.waitForIdleDeferred = new DeferredPromise<void>()
     }
@@ -679,7 +682,6 @@ export class OIRecognizer
 
   async undo(actions: TOIHistoryBackendChanges): Promise<void>
   {
-    await this.initialized?.promise
     const changes = this.buildUndoRedoChanges(actions)
     if (changes.length === 0) {
       return
@@ -695,7 +697,6 @@ export class OIRecognizer
 
   async redo(actions: TOIHistoryBackendChanges): Promise<void>
   {
-    await this.initialized?.promise
     const changes = this.buildUndoRedoChanges(actions)
     if (changes.length === 0) {
       return
@@ -712,7 +713,6 @@ export class OIRecognizer
 
   async export(requestedMimeTypes?: string[]): Promise<TExport>
   {
-    await this.initialized?.promise
     const mimeTypes: string[] = requestedMimeTypes || this.mimeTypes.slice()
     await Promise.all(mimeTypes.map(mt => this.exportDeferredMap.get(mt)?.promise))
     mimeTypes.forEach(mt =>
@@ -732,7 +732,6 @@ export class OIRecognizer
 
   async clear(): Promise<void>
   {
-    await this.initialized?.promise
     this.clearDeferred = new DeferredPromise<void>()
     await this.send({
       type: "clear"
@@ -754,7 +753,7 @@ export class OIRecognizer
 
   async destroy(): Promise<void>
   {
-    this.clearAllDeferred()
+    this.resetAllDeferred()
     if (this.socket) {
       await this.close(1000, "Recognizer destroyed")
     }

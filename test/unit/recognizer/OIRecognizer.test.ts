@@ -146,7 +146,7 @@ describe("OIRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
-      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
+      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.event, "emitError")
       expect.assertions(3)
       const promise = oiRecognizer.init()
       //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
@@ -337,7 +337,7 @@ describe("OIRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
-      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
+      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.event, "emitError")
       expect.assertions(3)
       await oiRecognizer.init()
       const promise = oiRecognizer.addStrokes(strokes)
@@ -414,7 +414,7 @@ describe("OIRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
-      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
+      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.event, "emitError")
       expect.assertions(3)
       await oiRecognizer.init()
       const promise = oiRecognizer.replaceStrokes(oldStrokeIds, strokes)
@@ -494,7 +494,7 @@ describe("OIRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
-      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
+      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.event, "emitError")
       expect.assertions(3)
       await oiRecognizer.init()
       const promise = oiRecognizer.transformTranslate(strokeIds, tx, ty)
@@ -575,7 +575,7 @@ describe("OIRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
-      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
+      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.event, "emitError")
       expect.assertions(3)
       await oiRecognizer.init()
       const promise = oiRecognizer.transformRotate(strokeIds, angle, x0, y0)
@@ -657,7 +657,7 @@ describe("OIRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
-      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
+      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.event, "emitError")
       expect.assertions(3)
       await oiRecognizer.init()
       const promise = oiRecognizer.transformScale(strokeIds, scaleX, scaleY, x0, y0)
@@ -736,7 +736,7 @@ describe("OIRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
-      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
+      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.event, "emitError")
       expect.assertions(3)
       await oiRecognizer.init()
       const promise = oiRecognizer.transformMatrix(strokeIds, matrix)
@@ -812,7 +812,7 @@ describe("OIRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
-      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
+      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.event, "emitError")
       expect.assertions(3)
       await oiRecognizer.init()
       const promise = oiRecognizer.eraseStrokes(strokeIds)
@@ -890,7 +890,7 @@ describe("OIRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
-      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
+      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.event, "emitError")
       expect.assertions(3)
       await oiRecognizer.init()
       const promise = oiRecognizer.recognizeGesture(stroke)
@@ -946,7 +946,7 @@ describe("OIRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
-      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
+      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.event, "emitError")
       expect.assertions(3)
       await oiRecognizer.init()
       const promise = oiRecognizer.waitForIdle()
@@ -1103,7 +1103,7 @@ describe("OIRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
-      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
+      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.event, "emitError")
       expect.assertions(3)
       await oiRecognizer.init()
       const changes: TOIHistoryBackendChanges = { added: [buildOIStroke()] }
@@ -1169,7 +1169,7 @@ describe("OIRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
-      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
+      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.event, "emitError")
       expect.assertions(3)
       await oiRecognizer.init()
       const changes: TOIHistoryBackendChanges = { added: [buildOIStroke()] }
@@ -1232,7 +1232,7 @@ describe("OIRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
-      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
+      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.event, "emitError")
       expect.assertions(3)
       await oiRecognizer.init()
       const promise = oiRecognizer.clear()
@@ -1315,7 +1315,7 @@ describe("OIRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
-      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
+      const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.event, "emitError")
       expect.assertions(3)
       await oiRecognizer.init()
       const promise = oiRecognizer.export()
@@ -1368,7 +1368,7 @@ describe("OIRecognizer.ts", () =>
     {
       test(`should emit error if the server closes the connection abnormally code == ${ closeEvent.code }`, async () =>
       {
-        const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.internalEvent, "emitError")
+        const spyEmitError: jest.SpyInstance = jest.spyOn(oiRecognizer.event, "emitError")
         expect.assertions(2)
         await oiRecognizer.init()
         mockServer.close({ code: closeEvent.code, reason: closeEvent.message, wasClean: false })
