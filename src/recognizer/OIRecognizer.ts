@@ -228,7 +228,7 @@ export class OIRecognizer
     this.#send({
       type: "authenticate",
       "myscript-client-name": "iink-ts",
-      "myscript-client-version": "1.0.0-buildVersion",
+      "myscript-client-version": "1.0.6",
     })
   }
 
