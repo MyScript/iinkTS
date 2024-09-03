@@ -298,6 +298,7 @@ export class OIGestureManager
 
     const symbolsAbove = this.model.symbols.filter(s => this.model.isSymbolAbove(gestureStroke, s))
     const symbolsRow = this.model.symbols.filter(s => gestureStroke.id !== s.id && this.model.isSymbolInRow(gestureStroke, s))
+
     const symbolsBeforeGestureInRow = symbolsRow.filter(s => s.bounds.xMax <= gestureStroke.bounds.xMid)
     const symbolsOnGestureInRow = symbolsRow.filter(s => s.bounds.xMax > gestureStroke.bounds.xMid && s.bounds.xMin <= gestureStroke.bounds.xMid)
     const symbolsAfterGestureInRow = symbolsRow.filter(s => s.bounds.xMin > gestureStroke.bounds.xMid)
@@ -305,8 +306,36 @@ export class OIGestureManager
 
     const changes: TOIHistoryChanges = {}
     const translate: { symbols: TOISymbol[], tx: number, ty: number }[] = []
-
-    if (symbolsBeforeGestureInRow.length && symbolsAfterGestureInRow.length) {
+    if (symbolsOnGestureInRow.length) {
+      const symbolToJoin = symbolsOnGestureInRow[0]
+      if (symbolToJoin?.type === SymbolType.Group) {
+        const children = symbolToJoin.extractSymbols().map(c => c.clone())
+        const childBefore = children.filter(c => c.bounds.xMid <= gestureStroke.bounds.xMid)
+        const childAfter = children.filter(c => c.bounds.xMid > gestureStroke.bounds.xMid)
+        if (childBefore.length && childAfter.length) {
+          const tx = Math.max(...childBefore.map(c => c.bounds.xMax)) - Math.min(...childAfter.map(c => c.bounds.xMin))
+          childAfter.forEach(c => this.translator.applyToSymbol(c, tx, 0))
+          const newGroup = new OISymbolGroup(children, symbolToJoin.style)
+          newGroup.decorators = symbolToJoin.decorators.map(d => d.clone())
+          changes.replaced = {
+            oldSymbols: [symbolToJoin],
+            newSymbols: [newGroup]
+          }
+          if (symbolsAfterGestureInRow.length) {
+            translate.push({ symbols: symbolsAfterGestureInRow, tx, ty: 0 })
+          }
+          const symbolsAfterNextRow = symbolsBelow.filter(s => this.model.isSymbolBelow(symbolToJoin, s))
+          if (symbolsAfterNextRow.length) {
+            translate.push({ symbols: symbolsAfterNextRow, tx: 0, ty: -this.rowHeight })
+          }
+        }
+        else if (symbolsAfterGestureInRow.length) {
+          const tx = symbolToJoin.bounds.xMax - Math.min(...symbolsAfterGestureInRow.map(s => s.bounds.xMin))
+          translate.push({ symbols: symbolsAfterGestureInRow, tx, ty: 0 })
+        }
+      }
+    }
+    else if (symbolsBeforeGestureInRow.length && symbolsAfterGestureInRow.length) {
       const lastSymbBefore = this.model.getLastSymbol(symbolsBeforeGestureInRow)!
       const firstSymbolAfter = this.model.getFirstSymbol(symbolsAfterGestureInRow)!
 
@@ -355,33 +384,6 @@ export class OIGestureManager
       const rest = symbolsAfterGestureInRow.filter(s => s.id !== firstSymbolAfter.id)
       if (rest.length) {
         translate.push({ symbols: rest, tx: translateX, ty: 0 })
-      }
-    }
-    else if (symbolsOnGestureInRow.length) {
-      const symbolToJoin = symbolsOnGestureInRow[0]
-      if (symbolToJoin?.type === SymbolType.Group) {
-        const children = symbolToJoin.extractSymbols().map(c => c.clone())
-        const childBefore = children.filter(c => c.bounds.xMid <= gestureStroke.bounds.xMid)
-        const childAfter = children.filter(c => c.bounds.xMid > gestureStroke.bounds.xMid)
-        const tx = Math.max(...childBefore.map(c => c.bounds.xMax)) - Math.min(...childAfter.map(c => c.bounds.xMin))
-        childAfter.forEach(c => this.translator.applyToSymbol(c, tx, 0))
-
-        const newGroup = new OISymbolGroup(children, symbolToJoin.style)
-        newGroup.decorators = symbolToJoin.decorators.map(d => d.clone())
-
-        changes.replaced = {
-          oldSymbols: [symbolToJoin],
-          newSymbols: [newGroup]
-        }
-
-        if (symbolsAfterGestureInRow.length) {
-
-          translate.push({ symbols: symbolsAfterGestureInRow, tx, ty: 0 })
-        }
-        const symbolsAfterNextRow = symbolsBelow.filter(s => this.model.isSymbolBelow(symbolToJoin, s))
-        if (symbolsAfterNextRow.length) {
-          translate.push({ symbols: symbolsAfterNextRow, tx: 0, ty: -this.rowHeight })
-        }
       }
     }
     else if (symbolsBeforeGestureInRow.length) {
