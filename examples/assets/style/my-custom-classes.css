@@ -74,14 +74,24 @@ nav {
 
 .my-custom-class .smartguide {
     position: absolute;
-    height: 48px;
+    font-size: 16px;
     line-height: 48px;
     z-index: 40;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    cursor: default;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    box-shadow: 2px 2px 12px #BDBDBD;
     font-size: 16px;
     background-color: rgba(60, 60, 60, 0.5);
     pointer-events: all;
 }
-
+.my-custom-class .smartguide .smartguide-wrapper {
+    display: flex;
+    border-bottom: 1px solid #959da6;
+}
 .my-custom-class .smartguide .tag-icon {
     padding: 0 18px;
     border: 1px solid #959DA6;
@@ -91,16 +101,13 @@ nav {
     -webkit-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    position: absolute;
     z-index: 31;
     height: 48px;
     line-height: 48px;
     color: white;
 }
-
 .my-custom-class .smartguide .ellipsis {
     cursor: pointer;
-    position: absolute;
     z-index: 31;
     height: 48px;
     line-height: 38px;
@@ -116,21 +123,17 @@ nav {
     color: white;
     border: 1px solid #959DA6;
 }
-
 .my-custom-class .smartguide .ellipsis:active {
     background-color: #e0e0e0;
 }
-
 .my-custom-class .smartguide .prompter-container {
     height: 48px;
+    width: 100%;
     line-height: 48px;
     overflow: hidden;
     white-space: nowrap;
     display: block;
     text-align: left;
-    border-bottom: 1px solid #959DA6;
-    position: absolute;
-    z-index: 30;
     color: #757575;
     -moz-user-select: none;
     -webkit-user-select: none;
@@ -138,22 +141,14 @@ nav {
     user-select: none;
     -webkit-tap-highlight-color: transparent;
 }
-
-.my-custom-class .smartguide .prompter-container > div > span {
-    cursor: pointer;
-    display: inline-block;
+.my-custom-class .smartguide .prompter-container .prompter-text {
+    display: flex;
 }
-
+.my-custom-class .smartguide .prompter-container .prompter-text > span {
+    cursor: pointer;
+}
 .my-custom-class .smartguide .prompter-container .prompter-text {
     margin-left: 12px;
-}
-
-.my-custom-class .added-word {
-    animation: 1s linear word-added-anim, 1s ease-in-out color-input-anim;
-}
-
-.my-custom-class .modified-word {
-    animation: 1s linear word-modified-anim;
 }
 
 .my-custom-class .smartguide .candidates {
@@ -163,38 +158,49 @@ nav {
     line-height: 30px;
     border-radius: 0px 0px 5px 5px;
     position: absolute;
+    transform: translateX(-50%);
     z-index: 100;
     background-color: rgba(60, 60, 60, 1);
     box-shadow: 2px 2px 12px #BDBDBD, -2px 2px 12px #BDBDBD;
     -webkit-tap-highlight-color: transparent;
+    border: 1px solid red;
+    margin-top: 11px;
 }
-
+.my-custom-class .smartguide .candidates:before {
+    content: " ";
+	border-bottom: 11px solid red;
+	border-left: 8px solid transparent;
+	border-right: 8px solid transparent;
+    position: absolute;
+    top: -11px;
+    left: 50%;
+    transform: translateX(-50%);
+}
 .my-custom-class .smartguide .candidates > span {
     cursor: pointer;
     padding: 2px 20px;
 }
-
 .my-custom-class .smartguide .candidates > span:hover {
     background-color: #c7c7c7;
 }
-
 .my-custom-class .smartguide .candidates > span:active {
     background-color: #E0E0E0;
 }
-
 .my-custom-class .smartguide .candidates .selected-word {
     font-weight: bold;
     color: #1A9FFF;
 }
-
 .my-custom-class .smartguide .more-menu {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    transform: translateY(100%);
+    z-index: 100;
     display: flex;
     flex-direction: column;
     margin-right: 12px;
     line-height: 30px;
     border-radius: 3px;
-    position: absolute;
-    z-index: 100;
     box-shadow: 2px 2px 12px #BDBDBD;
     overflow: hidden;
     transition: max-height 1s ease-out, opacity 1s, visibility 0.5s linear;
@@ -224,13 +230,19 @@ nav {
     outline: none;
     -webkit-tap-highlight-color: transparent;
 }
-
 .my-custom-class .smartguide .more-menu .options-label-button:hover {
     background-color: rgba(100, 100, 100, 0.5);
 }
-
 .my-custom-class .smartguide .more-menu .options-label-button:active {
     background-color: rgba(100, 100, 100, 0.5);
+}
+
+.my-custom-class .added-word {
+    animation: 1s linear word-added-anim, 1s ease-in-out color-input-anim;
+}
+
+.my-custom-class .modified-word {
+    animation: 1s linear word-modified-anim;
 }
 
 @keyframes color-input-anim {
