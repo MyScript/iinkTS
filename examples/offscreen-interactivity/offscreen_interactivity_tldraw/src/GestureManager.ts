@@ -1,14 +1,18 @@
 import
 {
+  createShapeId,
   Editor,
   TLDrawShape,
-  TLShapeId
+  TLShapeId,
+  VecModel
 } from "tldraw"
 import { TGesture } from "iink-ts"
 
 export class GestureManager
 {
   editor: Editor
+  onUnderline: "draw" | "size" = "size"
+  onStrikethrough: "draw" | "erase" = "erase"
 
   constructor(editor: Editor)
   {
@@ -54,6 +58,47 @@ export class GestureManager
     }
   }
 
+  protected async applyUnderline(gesture: TGesture): Promise<void>
+  {
+    const gestureShape = this.editor.getCurrentPageShapes().find(s => s.id === gesture.gestureStrokeId)
+    const shapeToApplyGesture = this.editor.getCurrentPageShapes().filter(s => gesture.strokeIds.includes(s.id)) as TLDrawShape[]
+    if (!gestureShape || !shapeToApplyGesture.length) return
+
+    if (this.onUnderline === "size") {
+      const size = ["s", "m", "l", "xl"]
+      const mapToUpdate: Partial<TLDrawShape>[] = []
+      shapeToApplyGesture.forEach(s =>
+      {
+        const currentSizeIndex = size.indexOf(s.props.size)
+        mapToUpdate.push({
+          id: s.id,
+          props: {
+            size: size[Math.min(currentSizeIndex + 1, size.length - 1)]
+          }
+        })
+      })
+
+      if (mapToUpdate.length) {
+        this.editor.batch(() =>
+        {
+          this.editor.deleteShape(gestureShape)
+          this.editor.updateShapes(mapToUpdate)
+        })
+      }
+    }
+  }
+
+  protected async applyStrikeThrough(gesture: TGesture): Promise<void>
+  {
+    if (this.onStrikethrough === "erase") {
+      const gestureShape = this.editor.getCurrentPageShapes().find(s => s.id === gesture.gestureStrokeId)
+      const drawShapeToApplyGesture = this.editor.getCurrentPageShapes().filter(s => gesture.strokeIds.includes(s.id)) as TLDrawShape[]
+      if (!gestureShape || !drawShapeToApplyGesture.length) return
+
+      this.editor.deleteShapes([gestureShape, ...drawShapeToApplyGesture])
+    }
+  }
+
   async apply(gesture: TGesture): Promise<void>
   {
     switch (gesture.gestureType) {
@@ -61,12 +106,25 @@ export class GestureManager
         return this.applyScratch(gesture)
       case "SURROUND":
         return this.applySurround(gesture)
+      case "STRIKETHROUGH":
+        this.applyStrikeThrough(gesture)
+        break
+      case "UNDERLINE":
+        this.applyUnderline(gesture)
+        break
       case "INSERT":
       case "JOIN":
-      case "STRIKETHROUGH":
-      case "UNDERLINE":
+          break
       default:
         break
     }
   }
+}
+
+export const useGestureManager = (editor: Editor): GestureManager =>
+{
+  if (!GestureManager.instance) {
+    GestureManager.instance = new GestureManager(editor)
+  }
+  return GestureManager.instance
 }

@@ -12,11 +12,16 @@ import { useConverter } from "../Converter"
 import { useSynchronizer } from '../Synchronizer'
 import { useRecognizer } from '../Recognizer'
 import { useEffect, useState } from 'react'
+import { useGestureManager } from '../GestureManager'
 export function MainMenu()
 {
 	const editor = useEditor()
 	const converter = useConverter()
-  const [processGesture, setProcessGesture] = useState(true)
+	const synchronizer = useSynchronizer(editor)
+	const gestureManager = useGestureManager(editor)
+  const [processGesture, setProcessGesture] = useState(synchronizer.processGestures)
+  const [onUnderlineChangeSize, setOnUnderlineChangeSize] = useState(gestureManager.onUnderline === "size")
+  const [onStrikethroughEraseSize, setOnStrikethroughEraseSize] = useState(gestureManager.onStrikethrough === "erase")
 
 	const OnConvert = () =>
 	{
@@ -27,28 +32,42 @@ export function MainMenu()
 			editor.createShapes(toConvert)
 		})
 	}
-	const toggleGestureActivation = async () =>
-	{
-		setProcessGesture(!processGesture)
-		const synchronizer = useSynchronizer(editor)
-		synchronizer.processGestures = processGesture
-		console.log('processGesture: ', processGesture);
-		console.log('synchronizer.processGestures: ', synchronizer.processGestures);
-	}
 
 	useEffect(() => {
-
+		synchronizer.processGestures = processGesture
 	}, [processGesture])
+
+	useEffect(() => {
+		gestureManager.onUnderline = onUnderlineChangeSize ? "size" : "draw"
+	}, [onUnderlineChangeSize])
+
+	useEffect(() => {
+		gestureManager.onStrikethrough = onStrikethroughEraseSize ? "erase" : "draw"
+	}, [onStrikethroughEraseSize])
 
 	return (
 		<DefaultMainMenu>
-			<TldrawUiMenuGroup id="example">
+			<TldrawUiMenuGroup id="gesture-group" label={"Gesture"}>
 				<TldrawUiMenuCheckboxItem
 					id="gesture"
 					checked={processGesture}
-					label="Gesture"
-					onSelect={toggleGestureActivation}
+					label="Gesture enable"
+					onSelect={() => setProcessGesture(!processGesture)}
 				/>
+				<TldrawUiMenuCheckboxItem
+					id="on-underline"
+					checked={onUnderlineChangeSize}
+					label="Change size on underline (only draw shape)"
+					onSelect={() => setOnUnderlineChangeSize(!onUnderlineChangeSize)}
+				/>
+				<TldrawUiMenuCheckboxItem
+					id="on-strikethrough"
+					checked={onStrikethroughEraseSize}
+					label="Erase on strikethrough (only draw shape)"
+					onSelect={() => setOnStrikethroughEraseSize(!onStrikethroughEraseSize)}
+				/>
+			</TldrawUiMenuGroup>
+			<TldrawUiMenuGroup id="convert-group">
 				<TldrawUiMenuItem
 					id="convert"
 					label="Convert"
