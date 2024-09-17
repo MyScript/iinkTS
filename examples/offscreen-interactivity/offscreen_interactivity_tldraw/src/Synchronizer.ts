@@ -14,27 +14,27 @@ import
 } from "iink-ts"
 import
 {
-  Recognizer
+  Recognizer,
+  useRecognizer
 } from "./Recognizer"
-import { Gesture } from "./Gesture"
+import { GestureManager } from "./GestureManager"
 
 export class Synchronizer
 {
   static instance: Synchronizer
   editor: Editor
-  recognizer: Recognizer
-  gesture: Gesture
+  gestureManager: GestureManager
+  processGestures: boolean = true
   updateDebounce?: ReturnType<typeof setTimeout>
 
   protected drawShapeToAdd: TLDrawShape[] = []
   protected drawShapeToUpdate: TLDrawShape[] = []
   protected drawShapeToRemove: TLDrawShape[] = []
 
-  constructor(editor: Editor, recognizer: Recognizer)
+  constructor(editor: Editor)
   {
     this.editor = editor
-    this.recognizer = recognizer
-    this.gesture = new Gesture(editor)
+    this.gestureManager = new GestureManager(editor)
   }
 
   protected formatDrawShapeToSend(shape: TLDrawShape): OIStroke
@@ -67,8 +67,9 @@ export class Synchronizer
   protected async determinesContextlessGesture(drawShapes: TLDrawShape[]): Promise<TGesture | undefined>
   {
     const gestureShape = drawShapes[0]
-    const othersPageShape = this.editor.getCurrentPageShapes().filter(s => s.id !== gestureShape.id)
-    if (!gestureShape || !othersPageShape.length) return
+    if (!gestureShape) return
+    const othersPageShape = this.editor.getCurrentPageShapes().filter(s => s.id !== gestureShape.id && s.typeName === "shape" && s.type !== "draw")
+    if(!othersPageShape.length) return
 
     const gestureBounds = this.editor.getShapePageBounds(gestureShape)!
 
@@ -76,7 +77,7 @@ export class Synchronizer
       return
     }
 
-    const gestureResult = await this.recognizer.recognizeGesture(this.formatDrawShapeToSend(gestureShape))
+    const gestureResult = await Recognizer.instance.recognizeGesture(this.formatDrawShapeToSend(gestureShape))
     if (gestureResult) {
       if (
         gestureResult.gestureType == "surround" &&
@@ -147,19 +148,20 @@ export class Synchronizer
     if (!this.drawShapeToAdd.filter(s => s.props.isComplete).length && !this.drawShapeToUpdate.length && !this.drawShapeToRemove.length) {
       return
     }
+    const recognizer = await useRecognizer()
     if (this.drawShapeToAdd.length) {
       const newDrawShapeCompleted = this.drawShapeToAdd.filter(s => s.props.isComplete)
       this.drawShapeToAdd = this.drawShapeToAdd.filter(s => !s.props.isComplete)
       if (newDrawShapeCompleted.length) {
-        let gesture = newDrawShapeCompleted.length === 1 ? await this.determinesContextlessGesture(newDrawShapeCompleted) : undefined
-        this.recognizer.addStrokes(newDrawShapeCompleted.map(this.formatDrawShapeToSend), !gesture && newDrawShapeCompleted.length > 1)
+        const gesture = this.processGestures && newDrawShapeCompleted.length === 1 ? await this.determinesContextlessGesture(newDrawShapeCompleted) : undefined
+        recognizer.addStrokes(newDrawShapeCompleted.map(this.formatDrawShapeToSend), this.processGestures && !gesture && newDrawShapeCompleted.length === 1)
           .then(addStrokeResponse => {
             if (addStrokeResponse) {
-              this.gesture.apply(addStrokeResponse)
+              this.gestureManager.apply(addStrokeResponse)
             }
           })
         if (gesture) {
-          await this.gesture.apply(gesture)
+          await this.gestureManager.apply(gesture)
         }
       }
     }
@@ -189,7 +191,7 @@ export class Synchronizer
           })
           return stroke
         })
-        await this.recognizer.replaceStrokes(newStrokes.map(s => s.id), newStrokes)
+        await recognizer.replaceStrokes(newStrokes.map(s => s.id), newStrokes)
         updatePromise.resolve()
         this.drawShapeToUpdate = []
       }, 500)
@@ -197,17 +199,17 @@ export class Synchronizer
     }
 
     if (this.drawShapeToRemove.length) {
-      const promise = this.recognizer?.eraseStrokes(this.drawShapeToRemove.map(s => s.id))
+      const promise = recognizer?.eraseStrokes(this.drawShapeToRemove.map(s => s.id))
       this.drawShapeToRemove = []
       await promise
     }
   }
 }
 
-export const useSynchronizer = (editor: Editor, recognizer: Recognizer): Synchronizer =>
+export const useSynchronizer = (editor: Editor): Synchronizer =>
 {
   if (!Synchronizer.instance) {
-    Synchronizer.instance = new Synchronizer(editor, recognizer)
+    Synchronizer.instance = new Synchronizer(editor)
   }
   return Synchronizer.instance
 }

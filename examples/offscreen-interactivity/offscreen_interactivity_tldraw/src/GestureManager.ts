@@ -6,7 +6,7 @@ import
 } from "tldraw"
 import { TGesture } from "iink-ts"
 
-export class Gesture
+export class GestureManager
 {
   editor: Editor
 
