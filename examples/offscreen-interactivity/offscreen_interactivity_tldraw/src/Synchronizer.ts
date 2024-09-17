@@ -17,7 +17,7 @@ import
   Recognizer,
   useRecognizer
 } from "./Recognizer"
-import { GestureManager } from "./GestureManager"
+import { GestureManager, useGestureManager } from "./GestureManager"
 
 export class Synchronizer
 {
@@ -34,7 +34,7 @@ export class Synchronizer
   constructor(editor: Editor)
   {
     this.editor = editor
-    this.gestureManager = new GestureManager(editor)
+    this.gestureManager = useGestureManager(editor)
   }
 
   protected formatDrawShapeToSend(shape: TLDrawShape): OIStroke
@@ -68,12 +68,12 @@ export class Synchronizer
   {
     const gestureShape = drawShapes[0]
     if (!gestureShape) return
-    const othersPageShape = this.editor.getCurrentPageShapes().filter(s => s.id !== gestureShape.id && s.typeName === "shape" && s.type !== "draw")
-    if(!othersPageShape.length) return
+    const shapesTypeset = this.editor.getCurrentPageShapes().filter(s => s.id !== gestureShape.id && s.typeName === "shape" && s.type !== "draw")
+    if(!shapesTypeset.length) return
 
     const gestureBounds = this.editor.getShapePageBounds(gestureShape)!
 
-    if (!othersPageShape.some(s => gestureBounds.contains(this.editor.getShapePageBounds(s)!))) {
+    if (!shapesTypeset.some(s => gestureBounds.contains(this.editor.getShapePageBounds(s)!))) {
       return
     }
 
@@ -81,7 +81,7 @@ export class Synchronizer
     if (gestureResult) {
       if (
         gestureResult.gestureType == "surround" &&
-        othersPageShape.some(s => gestureBounds.contains(this.editor.getShapePageBounds(s)!))
+        shapesTypeset.some(s => gestureBounds.contains(this.editor.getShapePageBounds(s)!))
       ) {
         return {
           gestureStrokeId: gestureShape.id,
@@ -93,7 +93,7 @@ export class Synchronizer
       }
       else if (
         gestureResult.gestureType == "scratch" &&
-        othersPageShape.some(s => gestureBounds.contains(this.editor.getShapePageBounds(s)!))
+        shapesTypeset.some(s => gestureBounds.contains(this.editor.getShapePageBounds(s)!))
       ) {
         return {
           gestureStrokeId: gestureShape.id,
