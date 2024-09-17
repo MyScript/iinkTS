@@ -66,7 +66,7 @@ export default function App()
 		{
 			if (change.source === 'user') {
 				try {
-					await useSynchronizer(editor, recognizer).sync(change.changes)
+					await useSynchronizer(editor).sync(change.changes)
 				} catch (error) {
 					dispatch(addError(typeof error === "string" ? error as string : (error as Error).message))
 				}
