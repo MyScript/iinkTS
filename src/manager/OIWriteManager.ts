@@ -1,4 +1,4 @@
-import { WriteTool } from "../Constants"
+import { SELECTION_MARGIN, WriteTool } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { TGesture } from "../gesture"
 import { LoggerClass, LoggerManager } from "../logger"
@@ -12,12 +12,12 @@ import
   OIShapeCircle,
   OIShapeEllipse,
   OIStroke,
-  OISymbolGroup,
   SymbolType,
   TOIEdge,
   TOISymbol,
   TPoint,
-  TPointer
+  TPointer,
+  Box
 } from "../primitive"
 import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
@@ -92,13 +92,28 @@ export class OIWriteManager
     return this.behaviors.recognizer
   }
 
-  get needContextLessGesture(): boolean
+  protected needContextLessGesture(stroke: OIStroke): boolean
   {
+    const strokeBoundsWithMargin = new Box(stroke.bounds)
+    strokeBoundsWithMargin.x -= SELECTION_MARGIN
+    strokeBoundsWithMargin.y -= SELECTION_MARGIN
+    strokeBoundsWithMargin.width += 2 * SELECTION_MARGIN
+    strokeBoundsWithMargin.height += 2 * SELECTION_MARGIN
     return this.detectGesture && this.model.symbols.some(s =>
     {
-      if (s.type === SymbolType.Stroke) return false
-      if (s.type === SymbolType.Group && (s as OISymbolGroup).containsOnlyStroke()) return false
-      return true
+      switch (s.type) {
+        case SymbolType.Stroke:
+          return false
+        case SymbolType.Group:
+          if (s.containsOnlyStroke()) {
+            return false
+          }
+          else {
+            return s.extractSymbols().some(subS => subS.bounds.overlaps(strokeBoundsWithMargin))
+          }
+        default:
+          return s.bounds.overlaps(strokeBoundsWithMargin)
+      }
     })
   }
 
@@ -234,7 +249,7 @@ export class OIWriteManager
   {
     const localStroke = stroke.clone()
     let gestureFromContextLess: TGesture | undefined
-    if (this.needContextLessGesture) {
+    if (this.needContextLessGesture(stroke)) {
       gestureFromContextLess = await this.gestureManager.getGestureFromContextLess(localStroke)
     }
     if (gestureFromContextLess) {
