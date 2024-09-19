@@ -1,15 +1,15 @@
 import
 {
-  createShapeId,
   Editor,
   TLDrawShape,
-  TLShapeId,
-  VecModel
+  TLShapeId
 } from "tldraw"
 import { TGesture } from "iink-ts"
 
 export class GestureManager
 {
+  static instance: GestureManager
+
   editor: Editor
   onUnderline: "draw" | "size" = "size"
   onStrikethrough: "draw" | "erase" = "erase"
@@ -66,14 +66,15 @@ export class GestureManager
 
     if (this.onUnderline === "size") {
       const size = ["s", "m", "l", "xl"]
-      const mapToUpdate: Partial<TLDrawShape>[] = []
+      const mapToUpdate: TLDrawShape[] = []
       shapeToApplyGesture.forEach(s =>
       {
         const currentSizeIndex = size.indexOf(s.props.size)
         mapToUpdate.push({
-          id: s.id,
+          ...s,
           props: {
-            size: size[Math.min(currentSizeIndex + 1, size.length - 1)]
+            ...s.props,
+            size: size[Math.min(currentSizeIndex + 1, size.length - 1)] as "s" | "m" | "l" | "xl"
           }
         })
       })
