@@ -41,7 +41,7 @@ export class Converter
 
   protected findJiixElements(shape: TLDrawShape): TJIIXElement[]
   {
-    return this.jiixExport.elements?.filter(e =>
+    return this.jiixExport?.elements?.filter(e =>
     {
       return e.items?.some(i => i['full-id'] === shape.id) ||
         (e as TJIIXTextElement).words?.some(w => w.items?.some(i2 => i2['full-id'] === shape.id)) ||
@@ -152,6 +152,7 @@ export class Converter
 
     const firstShape = associatedShapes[0]
     const scale = Math.ceil((text.words![0]['bounding-box']?.height || 10) / 10)
+    const { dy } = this.findDerivation(associatedShapes)
     return {
       typeName: "shape",
       type: "text",
@@ -160,7 +161,7 @@ export class Converter
       isLocked: firstShape.isLocked,
       opacity: firstShape.opacity,
       x: firstShape.x,
-      y: firstShape.y,
+      y: firstShape.y + dy,
       rotation: 0,
       props: {
         w: convertMillimeterToPixel(text.words![0]['bounding-box']!.width),

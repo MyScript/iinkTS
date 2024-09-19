@@ -10,9 +10,9 @@ import
 } from 'tldraw'
 import { useConverter } from "../Converter"
 import { useSynchronizer } from '../Synchronizer'
-import { useRecognizer } from '../Recognizer'
 import { useEffect, useState } from 'react'
 import { useGestureManager } from '../GestureManager'
+
 export function MainMenu()
 {
 	const editor = useEditor()
