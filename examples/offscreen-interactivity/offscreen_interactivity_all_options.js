@@ -141,8 +141,8 @@ async function loadEditor() {
       offscreen: true,
       server,
       rendering: {
-        minHeight: 4000,
-        minWidth: 4000,
+        minHeight: 2000,
+        minWidth: 2000,
       },
     }
   };
