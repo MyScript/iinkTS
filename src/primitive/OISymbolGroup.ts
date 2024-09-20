@@ -148,9 +148,8 @@ export class OISymbolGroup extends OISymbolBase<SymbolType.Group>
     symbolsToRemove.forEach(s =>
     {
       if (s.type === SymbolType.Group) {
-        const g = s as OISymbolGroup
-        if (!OISymbolGroup.removeChilds(g, symbolIds).children.length) {
-          group.children = group.children.filter(s1 => s1.id !== g.id)
+        if (!s.removeChilds(symbolIds).children.length) {
+          group.children = group.children.filter(s1 => s1.id !== s.id)
         }
       }
     })
