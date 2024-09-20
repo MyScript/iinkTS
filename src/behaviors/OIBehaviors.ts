@@ -693,7 +693,8 @@ export class OIBehaviors implements IBehaviors
     {
       if (textIds.includes(s.id)) {
         if (s.type === SymbolType.Text) {
-          s.chars.forEach(tc => {
+          s.chars.forEach(tc =>
+          {
             if (fontSize) {
               tc.fontSize = fontSize
             }
@@ -722,7 +723,8 @@ export class OIBehaviors implements IBehaviors
           s.extractSymbols().forEach(c =>
           {
             if (c.type === SymbolType.Text) {
-              c.chars.forEach(tc => {
+              c.chars.forEach(tc =>
+              {
                 if (fontSize) {
                   tc.fontSize = fontSize
                 }
@@ -935,36 +937,65 @@ export class OIBehaviors implements IBehaviors
   {
     this.#logger.info("removeSymbol", { ids })
     const symbolsToRemove: TOISymbol[] = []
+    const symbolsToUpdate: TOISymbol[] = []
     const strokesIds: string[] = []
     ids.forEach(id =>
     {
       const sym = this.model.getRootSymbol(id)
       if (sym) {
-        symbolsToRemove.push(sym)
-        switch (sym.type) {
-          case SymbolType.Stroke:
-            strokesIds.push(sym.id)
-            break
-          case SymbolType.Group:
-            strokesIds.push(...sym.extractStrokes().map(s => s.id))
-            break
+        if (sym.id === id) {
+          symbolsToRemove.push(sym)
+          switch (sym.type) {
+            case SymbolType.Stroke:
+              strokesIds.push(sym.id)
+              break
+            case SymbolType.Group:
+              strokesIds.push(...sym.extractStrokes().map(s => s.id))
+              break
+          }
+        }
+        else {
+          /** we want to remove element in group */
+          const gr = sym.clone() as OISymbolGroup
+          strokesIds.push(...gr.extractStrokes().map(s => s.id).filter(id => ids.includes(id)))
+          gr.removeChilds(ids)
+          if (gr.children.length) {
+            symbolsToUpdate.push(gr)
+          }
+          else {
+            symbolsToRemove.push(gr)
+          }
         }
       }
     })
     this.recognizer.eraseStrokes(strokesIds)
+    symbolsToRemove.forEach(s =>
+    {
+      this.model.removeSymbol(s.id)
+      this.renderer.removeSymbol(s.id)
+    })
 
-    if (symbolsToRemove.length) {
-      this.internalEvent.emitIdle(false)
-      symbolsToRemove.forEach(s =>
-      {
-        this.model.removeSymbol(s.id)
-        this.renderer.removeSymbol(s.id)
-      })
-      if (addToHistory) {
-        this.history.push(this.model, { erased: symbolsToRemove })
+    symbolsToUpdate.forEach(s =>
+    {
+      this.model.updateSymbol(s)
+      this.renderer.drawSymbol(s)
+    })
+
+
+    if (addToHistory) {
+      const changes: TOIHistoryChanges = {}
+      if (symbolsToRemove.length || symbolsToUpdate.length) {
+        if (symbolsToRemove.length) {
+          changes.erased = symbolsToRemove
+        }
+        if (symbolsToUpdate.length) {
+          changes.updated = symbolsToUpdate
+        }
+        this.history.push(this.model, changes)
+        this.updateLayerInfos()
       }
-      this.updateLayerInfos()
     }
+    this.internalEvent.emitIdle(false)
     return symbolsToRemove
   }
 

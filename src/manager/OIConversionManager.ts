@@ -444,7 +444,6 @@ export class OIConversionManager
     if (jiix?.elements?.length) {
       const strokesToConvert = this.behaviors.extractStrokesFromSymbols(symbols.length ? symbols : this.model.symbols)
 
-
       const onlyText = !jiix.elements?.some(e => e.type !== "Text")
       const conversionResults: { symbol: TOISymbol, strokes: OIStroke[] }[] = []
       jiix.elements.forEach(el =>
