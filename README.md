@@ -4,10 +4,12 @@
 [![Examples](https://img.shields.io/badge/Link%20to-examples-blue.svg)](https://myscript.github.io/iinkTS/examples/)
 [![Documentation](https://img.shields.io/badge/Link%20to-documentation-green.svg)](https://developer.myscript.com/docs/interactive-ink/latest/web/iinkts/)
 
+
 > The fastest way to integrate rich **handwriting** features in your webapp.
+> :point_right: [Examples](https://myscript.github.io/iinkTS/examples/):point_left:
 
 <div align="center">
-  <img src="https://myscript.github.io/iinkTS/preview.gif">
+  <img src="https://raw.githubusercontent.com/MyScript/iinkTS/master/preview.gif">
 </div>
 
 iinkTS is a JavaScript library that can be used in every web application to bring handwriting recognition.
@@ -18,8 +20,8 @@ It integrates all you need:
 * Digital ink rendering,
 * Link to MyScript Cloud to bring handwriting recognition.
 
-## Table of contents
 
+## Table of contents
 * [Features](#features)
 * [Requirements](#requirements)
 * [Installation](#installation)
