@@ -50,7 +50,8 @@ export default function App()
 	const updateExports = async () =>
 	{
 		clearTimeout(updateExportsDebounce)
-		updateExportsDebounce = setTimeout(async () => {
+		updateExportsDebounce = setTimeout(async () =>
+		{
 			const exports = await recognizer!.export(['application/vnd.myscript.jiix', 'text/html'])
 			dispatch(setExports(exports))
 		}, 500)
@@ -93,8 +94,6 @@ export default function App()
 	{
 		const resizeColumns = (e: PointerEvent) => setLeftColumnWidthPercent(e.clientX / window.innerWidth * 100)
 		document.body.addEventListener('pointermove', resizeColumns)
-		document.body.addEventListener('pointercancel', () => document.body.removeEventListener('pointermove', resizeColumns))
-		document.body.addEventListener('pointerleave', () => document.body.removeEventListener('pointermove', resizeColumns))
 		document.body.addEventListener('pointerup', () => document.body.removeEventListener('pointermove', resizeColumns))
 	}
 
@@ -201,10 +200,10 @@ export default function App()
 						<div className={`tab-content ${ tabName === "JIIX" ? "active" : "" }`}>
 							<ReactJson src={exports['application/vnd.myscript.jiix'] as object} collapsed={true} />
 						</div>
-						<div className={`tab-content ${ tabName === "HTML" ? "active" : "" }`}>
+						<div style={{ pointerEvents: 'none' }} className={`tab-content ${ tabName === "HTML" ? "active" : "" }`}>
 							{ExportHTMLTab(exports['text/html'] as string)}
 						</div>
-						<div className={`tab-content ${ tabName === "Messages" ? "active" : "" }`}>
+						<div style={{ pointerEvents: 'none' }} className={`tab-content ${ tabName === "Messages" ? "active" : "" }`}>
 							{WSMessagesTab(recognizer?.messages || [])}
 						</div>
 					</div>
