@@ -1,3 +1,15 @@
+# [v2.0.1](https://github.com/MyScript/iinkTS/tree/v2.0.1)
+
+## Features
+- feat(example) add underline & strikethrought gestures on tldraw example
+- feat(example) add possibility to disable gesture on tldraw example
+
+## Bugs fix
+- fix(Convert) converted word in a group with a stroke disappears after conversion - IIC-1215
+- fix(Gesture) don't send contextLessGesture if stroke not overlaps symbol
+- fix(examples) wrong placement of text after convert in tldraw example
+- fix(examples) style broken on websocket_text_customize_editor_css.html
+
 # [v2.0.0](https://github.com/MyScript/iinkTS/tree/v2.0.0)
 
 ## Features
