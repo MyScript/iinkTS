@@ -36,10 +36,10 @@ export class GestureManager
     const selectedShapes = othersPageShape.filter(s => surroundBounds.contains(this.editor.getShapePageBounds(s)!))
 
     if (selectedShapes.length) {
+      this.editor.setCurrentTool('select')
       this.editor.setSelectedShapes(selectedShapes)
-      this.editor.setCurrentTool("select")
+      this.editor.deleteShape(gestureShape)
     }
-    this.editor.deleteShape(gestureShape)
   }
 
   protected async applyScratch(gesture: TGesture): Promise<void>
