@@ -1,6 +1,6 @@
 {
   "scheme": "https",
-  "host": "cloud.preprod.myscript.com",
-  "applicationKey": "df0e4940-0927-45f0-9873-686bfd51395d",
-  "hmacKey": "b12a8e02-ce2a-4539-b4d8-b8c1b09fda1d"
+  "host": "cloud.myscript.com",
+  "applicationKey": "58cce6d2-d2a7-4ad3-b3bf-166f7b43619e",
+  "hmacKey": "92731ec6-605b-4a07-8b82-076675cd25ed"
 }
