@@ -32,6 +32,7 @@ type arrowheadType = "none" | "diamond" | "triangle" | "arrow" | "bar" | "dot" |
 export class Converter
 {
   static instance: Converter
+  font: "draw" | "mono" | "sans" | "serif" = "draw"
 
   get jiixExport(): TJIIXExport
   {
@@ -151,7 +152,6 @@ export class Converter
     if (!associatedShapes.length) return
 
     const firstShape = associatedShapes[0]
-    const scale = Math.ceil((text.words![0]['bounding-box']?.height || 10) / 10)
     const { dy } = this.findDerivation(associatedShapes)
     return {
       typeName: "shape",
@@ -164,14 +164,11 @@ export class Converter
       y: firstShape.y + dy,
       rotation: 0,
       props: {
-        w: convertMillimeterToPixel(text.words![0]['bounding-box']!.width),
         color: firstShape.props.color,
         size: firstShape.props.size,
         text: text.label,
-        font: "draw",
-        align: "middle",
-        autoSize: true,
-        scale
+        font: this.font,
+        align: "start",
       },
     }
   }
