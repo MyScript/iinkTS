@@ -185,6 +185,7 @@ export class OIConversionManager
 
     let isNewLine = false
     let currentY = textBounds.y + this.rowHeight
+    const leftX = textBounds.x
     let currentX = convertMillimeterToPixel(jiixWords[0]["bounding-box"]?.x || 0)
     jiixWords.forEach(word =>
     {
@@ -195,25 +196,28 @@ export class OIConversionManager
       const wordStrokes = strokes.filter(s => word.items?.some(i => i["full-id"] === s.id)) as OIStroke[]
       if (wordStrokes.length) {
         const chars = jiixChars.slice(word["first-char"] as number, (word["last-char"] || 0) + 1)
-        const textSymbol = this.buildWord(word, chars, wordStrokes, fontSize)
+        const wordSymbol = this.buildWord(word, chars, wordStrokes, fontSize)
 
         if (onlyText) {
           if (isNewLine) {
             isNewLine = false
-            const nbRow = Math.round((textSymbol.point.y - currentY) / this.rowHeight) || 1
+            const nbRow = Math.round((wordSymbol.point.y - currentY) / this.rowHeight) || 1
             currentY += nbRow * this.rowHeight
-            if (Math.abs(textSymbol.point.x - textBounds.x) < this.behaviors.texter.getSpaceWidth(fontSize!) * 2) {
-              currentX = textBounds.x
+            if (Math.abs(wordSymbol.point.x - leftX) < this.rowHeight) {
+              currentX = leftX
+            }
+            else {
+              currentX = wordSymbol.point.x
             }
           }
-          textSymbol.point.x = currentX
-          textSymbol.point.y = this.model.roundToLineGuide(currentY)
+          wordSymbol.point.x = currentX
+          wordSymbol.point.y = this.model.roundToLineGuide(currentY)
         }
 
-        this.behaviors.texter.setBounds(textSymbol)
-        currentX += textSymbol.bounds.width
+        this.behaviors.texter.setBounds(wordSymbol)
+        currentX += wordSymbol.bounds.width
         result.push({
-          symbol: textSymbol,
+          symbol: wordSymbol,
           strokes: wordStrokes
         })
       }
