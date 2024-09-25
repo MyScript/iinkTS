@@ -10,7 +10,7 @@ import { Recognizer, useRecognizer } from './Recognizer'
 import { useSynchronizer } from './Synchronizer'
 
 import { Loading } from './components/Loading'
-import { WSMessagesTab } from './components/WSMessagesTab'
+
 import { ExportHTMLTab } from './components/ExportHTMLTab'
 import { MainMenu } from './components/MainMenu'
 import { ContextMenu } from './components/ContextMenu'
