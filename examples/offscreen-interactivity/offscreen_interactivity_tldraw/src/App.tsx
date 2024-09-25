@@ -203,8 +203,8 @@ export default function App()
 						<div style={{ pointerEvents: 'none' }} className={`tab-content ${ tabName === "HTML" ? "active" : "" }`}>
 							{ExportHTMLTab(exports['text/html'] as string)}
 						</div>
-						<div style={{ pointerEvents: 'none' }} className={`tab-content ${ tabName === "Messages" ? "active" : "" }`}>
-							{WSMessagesTab(recognizer?.messages || [])}
+						<div className={`tab-content ${ tabName === "Messages" ? "active" : "" }`}>
+							<ReactJson src={recognizer?.messages || []} collapsed={true} />
 						</div>
 					</div>
 				</div>
