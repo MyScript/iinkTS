@@ -12,7 +12,7 @@ export class Recognizer extends OIRecognizer
 {
   static initializing = false
   static instance: Recognizer
-  messages: string[]
+  messages: { state: "Sent" | "Received", message: TOIMessageEvent }[]
 
   constructor(serverConfig: TServerConfiguration, recognitionConfig: TRecognitionConfiguration)
   {
@@ -24,12 +24,12 @@ export class Recognizer extends OIRecognizer
   {
     super.messageCallback(message)
     const websocketMessage: TOIMessageEvent = JSON.parse(message.data)
-    this.messages.push(`Received: ${ websocketMessage.type }`)
+    this.messages.push({ state: "Received", message: websocketMessage })
   }
 
   override send(message: TOIMessageEvent): Promise<void>
   {
-    this.messages.push(`Sent: ${ JSON.stringify(message.type) }`)
+    this.messages.push({ state: "Sent", message })
     return super.send(message)
   }
 
@@ -44,8 +44,8 @@ export const useRecognizer = async (): Promise<Recognizer> =>
 {
   if (!Recognizer.initializing) {
     Recognizer.initializing = true
-    const res = await fetch("../../../server-configuration.json");
-    const server = await res.json() as PartialDeep<TServerConfiguration>;
+    const res = await fetch("../../../server-configuration.json")
+    const server = await res.json() as PartialDeep<TServerConfiguration>
     const recognition: PartialDeep<TRecognitionConfiguration> = {
       "raw-content": {
         gestures: ["underline", "scratch-out", "join", "insert", "strike-through", "surround"]
