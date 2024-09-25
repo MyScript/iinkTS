@@ -259,7 +259,6 @@ describe("OIRecognizer.ts", () =>
       const messageSent = JSON.parse(mockServer.getLastMessage() as string)
       expect(messageSent).toEqual(testDataToSend)
     })
-    //TODO fix test
     test("should reconnect before send message", async () =>
     {
       expect.assertions(1)
