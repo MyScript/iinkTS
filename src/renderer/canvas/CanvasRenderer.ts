@@ -81,9 +81,11 @@ export class CanvasRenderer
   {
     this.#logger.info("init", { element })
     const renderingCanvas: HTMLCanvasElement = this.createCanvas("ms-rendering-canvas")
+    renderingCanvas.setAttribute("data-layer", "MODEL")
     element.appendChild(renderingCanvas)
 
     const capturingCanvas: HTMLCanvasElement = this.createCanvas("ms-capture-canvas")
+    capturingCanvas.setAttribute("data-layer", "CAPTURE")
     element.appendChild(capturingCanvas)
 
     this.context = {

@@ -15,7 +15,6 @@ describe("OIEraseManager.ts", () =>
 
   describe("writing process", () =>
   {
-    const wrapperHTML: HTMLElement = document.createElement("div")
     const behaviors = new OIBehaviorsMock()
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     behaviors.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
@@ -24,7 +23,7 @@ describe("OIEraseManager.ts", () =>
     const manager = new OIEraseManager(behaviors)
     manager.renderer.drawSymbol = jest.fn()
     manager.renderer.removeSymbol = jest.fn()
-    behaviors.init(wrapperHTML)
+    behaviors.init()
 
     test("should init currentEraser", async () =>
     {

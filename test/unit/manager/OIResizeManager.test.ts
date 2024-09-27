@@ -191,7 +191,6 @@ describe("OIResizeManager.ts", () =>
 
   describe("resize process on stroke without snap", () =>
   {
-    const divElement: HTMLDivElement = document.createElement("div")
     const behaviors = new OIBehaviorsMock()
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     behaviors.recognizer.transformScale = jest.fn(() => Promise.resolve())
@@ -312,7 +311,7 @@ describe("OIResizeManager.ts", () =>
 
     beforeAll(async () =>
     {
-      await behaviors.init(divElement)
+      await behaviors.init()
     })
 
     testDatas.forEach(data =>

@@ -81,7 +81,6 @@ describe("OIRotationManager.ts", () =>
 
   describe("rotate process on stroke", () =>
   {
-    const divElement: HTMLDivElement = document.createElement("div")
     const behaviors = new OIBehaviorsMock()
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     behaviors.recognizer.transformRotate = jest.fn(() => Promise.resolve())
@@ -132,7 +131,7 @@ describe("OIRotationManager.ts", () =>
 
     beforeAll(async () =>
     {
-      await behaviors.init(divElement)
+      await behaviors.init()
     })
 
     testDatas.forEach(data =>

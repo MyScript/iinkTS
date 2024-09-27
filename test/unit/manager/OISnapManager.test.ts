@@ -53,7 +53,6 @@ describe("OISnapManager.ts", () =>
 
   describe("snapResize", () =>
   {
-    const wrapperHTML: HTMLElement = document.createElement("div")
     const behaviors = new OIBehaviorsMock()
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     behaviors.configuration.rendering.guides.gap = 10
@@ -63,7 +62,7 @@ describe("OISnapManager.ts", () =>
 
     beforeAll(async () =>
     {
-      await behaviors.init(wrapperHTML)
+      await behaviors.init()
     })
 
     test("should do nothing if snapToElement & snapToGrid are equal to false", () =>
@@ -179,7 +178,6 @@ describe("OISnapManager.ts", () =>
 
   describe("snapTranslate", () =>
   {
-    const wrapperHTML: HTMLElement = document.createElement("div")
     const behaviors = new OIBehaviorsMock()
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     behaviors.configuration.rendering.guides.gap = 10
@@ -194,7 +192,7 @@ describe("OISnapManager.ts", () =>
 
     beforeAll(async () =>
     {
-      await behaviors.init(wrapperHTML)
+      await behaviors.init()
     })
 
     test("should do nothing if snapToElement & snapToGrid are equal to false", () =>

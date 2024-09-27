@@ -23,13 +23,13 @@ describe("OIPointerEventGrabber.ts", () =>
 
   describe("should attach & detach", () =>
   {
-    const wrapperHTML: HTMLElement = document.createElement("div")
-    wrapperHTML.style.width = "100px"
-    wrapperHTML.style.height = "100px"
-    document.body.appendChild(wrapperHTML)
+    const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg") as SVGElement
+    svgElement.style.width = "100px"
+    svgElement.style.height = "100px"
+    document.body.appendChild(svgElement)
 
     const grabber = new OIPointerEventGrabber(DefaultConfiguration.grabber)
-    grabber.attach(wrapperHTML)
+    grabber.attach(svgElement)
     grabber.onPointerDown = jest.fn()
     grabber.onPointerMove = jest.fn()
     grabber.onPointerUp = jest.fn()
@@ -59,39 +59,39 @@ describe("OIPointerEventGrabber.ts", () =>
 
     test("should not listen pointermove event if no pointerdown before", () =>
     {
-      wrapperHTML.dispatchEvent(pointerMoveEvt)
+      svgElement.dispatchEvent(pointerMoveEvt)
       expect(grabber.onPointerMove).toBeCalledTimes(0)
     })
 
     test("should not listen pointerup event if no pointerdown before", () =>
     {
-      wrapperHTML.dispatchEvent(pointerUpEvt)
+      svgElement.dispatchEvent(pointerUpEvt)
       expect(grabber.onPointerUp).toBeCalledTimes(0)
     })
 
     test("should listen pointerdown event", () =>
     {
-      wrapperHTML.dispatchEvent(pointerDownEvt)
+      svgElement.dispatchEvent(pointerDownEvt)
       expect(grabber.onPointerDown).toBeCalledTimes(1)
     })
 
     test("should listen pointermove event if pointerdown before", () =>
     {
-      wrapperHTML.dispatchEvent(pointerMoveEvt)
+      svgElement.dispatchEvent(pointerMoveEvt)
       expect(grabber.onPointerMove).toBeCalledTimes(1)
     })
 
     test("should listen pointerup event if pointerdown before", () =>
     {
-      wrapperHTML.dispatchEvent(pointerUpEvt)
+      svgElement.dispatchEvent(pointerUpEvt)
       expect(grabber.onPointerUp).toBeCalledTimes(1)
     })
 
     test("should not listen pointerdown event if stopPointerEvent called", () =>
     {
-      wrapperHTML.dispatchEvent(pointerDownEvt)
+      svgElement.dispatchEvent(pointerDownEvt)
       grabber.stopPointerEvent()
-      wrapperHTML.dispatchEvent(pointerMoveEvt)
+      svgElement.dispatchEvent(pointerMoveEvt)
       expect(grabber.onPointerMove).toBeCalledTimes(0)
     })
 
@@ -102,43 +102,43 @@ describe("OIPointerEventGrabber.ts", () =>
       g.onPointerMove = jest.fn()
       g.onPointerUp = jest.fn()
       g.detach = jest.fn()
-      g.attach(wrapperHTML)
-      g.attach(wrapperHTML)
+      g.attach(svgElement)
+      g.attach(svgElement)
       expect(g.detach).toBeCalledTimes(1)
     })
 
     test("should not listen pointerdown event after detach", () =>
     {
       grabber.detach()
-      wrapperHTML.dispatchEvent(pointerDownEvt)
+      svgElement.dispatchEvent(pointerDownEvt)
       expect(grabber.onPointerDown).not.toBeCalled()
     })
 
     test("should not listen pointermove event after detach", () =>
     {
       grabber.detach()
-      wrapperHTML.dispatchEvent(pointerMoveEvt)
+      svgElement.dispatchEvent(pointerMoveEvt)
       expect(grabber.onPointerMove).not.toBeCalled()
     })
 
     test("should not listen pointerup event after detach", () =>
     {
       grabber.detach()
-      wrapperHTML.dispatchEvent(pointerUpEvt)
+      svgElement.dispatchEvent(pointerUpEvt)
       expect(grabber.onPointerUp).not.toBeCalled()
     })
   })
 
   describe("Should extract TPointer from event", () =>
   {
-    const wrapperHTML: HTMLElement = document.createElement("div")
-    wrapperHTML.style.width = "100px"
-    wrapperHTML.style.height = "100px"
-    document.body.appendChild(wrapperHTML)
+    const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg") as SVGElement
+    svgElement.style.width = "100px"
+    svgElement.style.height = "100px"
+    document.body.appendChild(svgElement)
 
     const grabber = new OIPointerEventGrabber(DefaultConfiguration.grabber)
     grabber.onPointerDown = jest.fn()
-    grabber.attach(wrapperHTML)
+    grabber.attach(svgElement)
 
     test("should extract TPointer from mouseEvent", () =>
     {
@@ -149,7 +149,7 @@ describe("OIPointerEventGrabber.ts", () =>
         pressure: 1
       })
 
-      wrapperHTML.dispatchEvent(mouseDownEvt)
+      svgElement.dispatchEvent(mouseDownEvt)
 
       expect(grabber.onPointerDown)
         .toBeCalledWith(
@@ -171,7 +171,7 @@ describe("OIPointerEventGrabber.ts", () =>
         pressure: 1
       })
 
-      wrapperHTML.dispatchEvent(touchDownEvt)
+      svgElement.dispatchEvent(touchDownEvt)
 
       expect(grabber.onPointerDown)
         .toBeCalledWith(
@@ -187,10 +187,10 @@ describe("OIPointerEventGrabber.ts", () =>
 
   describe("Should use configuration", () =>
   {
-    const wrapperHTML: HTMLElement = document.createElement("div")
-    wrapperHTML.style.width = "100px"
-    wrapperHTML.style.height = "100px"
-    document.body.appendChild(wrapperHTML)
+    const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg") as SVGElement
+    svgElement.style.width = "100px"
+    svgElement.style.height = "100px"
+    document.body.appendChild(svgElement)
 
     const pointerDownEvt = new LeftClickEventMock("pointerdown", {
       pointerType: "pen",
@@ -205,9 +205,9 @@ describe("OIPointerEventGrabber.ts", () =>
       grabber.onPointerDown = jest.fn()
       grabber.onPointerMove = jest.fn()
       grabber.onPointerUp = jest.fn()
-      grabber.attach(wrapperHTML)
+      grabber.attach(svgElement)
 
-      wrapperHTML.dispatchEvent(pointerDownEvt)
+      svgElement.dispatchEvent(pointerDownEvt)
 
       expect(grabber.onPointerDown)
         .toBeCalledWith(
@@ -228,11 +228,11 @@ describe("OIPointerEventGrabber.ts", () =>
       grabber.onPointerDown = jest.fn()
       grabber.onPointerMove = jest.fn()
       grabber.onPointerUp = jest.fn()
-      grabber.attach(wrapperHTML)
+      grabber.attach(svgElement)
 
       grabber.onPointerDown = jest.fn()
 
-      wrapperHTML.dispatchEvent(pointerDownEvt)
+      svgElement.dispatchEvent(pointerDownEvt)
 
       expect(grabber.onPointerDown)
         .toBeCalledWith(
@@ -252,11 +252,11 @@ describe("OIPointerEventGrabber.ts", () =>
       grabber.onPointerDown = jest.fn()
       grabber.onPointerMove = jest.fn()
       grabber.onPointerUp = jest.fn()
-      grabber.attach(wrapperHTML)
+      grabber.attach(svgElement)
 
       grabber.onPointerDown = jest.fn()
 
-      wrapperHTML.dispatchEvent(pointerDownEvt)
+      svgElement.dispatchEvent(pointerDownEvt)
 
       expect(grabber.onPointerDown)
         .toBeCalledWith(
@@ -272,13 +272,13 @@ describe("OIPointerEventGrabber.ts", () =>
 
   describe("Should ignore Event", () =>
   {
-    const wrapperHTML: HTMLElement = document.createElement("div")
-    wrapperHTML.style.width = "100px"
-    wrapperHTML.style.height = "100px"
-    document.body.appendChild(wrapperHTML)
+    const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg") as SVGElement
+    svgElement.style.width = "100px"
+    svgElement.style.height = "100px"
+    document.body.appendChild(svgElement)
 
     const grabber = new OIPointerEventGrabber(DefaultConfiguration.grabber)
-    grabber.attach(wrapperHTML)
+    grabber.attach(svgElement)
     grabber.onPointerDown = jest.fn()
 
     test("should not listen right click event", () =>
@@ -289,7 +289,7 @@ describe("OIPointerEventGrabber.ts", () =>
         clientY: 500,
         pressure: 1
       })
-      wrapperHTML.dispatchEvent(pointerDownEvt)
+      svgElement.dispatchEvent(pointerDownEvt)
       expect(grabber.onPointerDown).not.toBeCalled()
       grabber.detach()
     })
@@ -302,7 +302,7 @@ describe("OIPointerEventGrabber.ts", () =>
         clientY: 500,
         pressure: 1
       })
-      wrapperHTML.dispatchEvent(pointerDownEvt)
+      svgElement.dispatchEvent(pointerDownEvt)
       expect(grabber.onPointerDown).not.toBeCalled()
       grabber.detach()
     })
@@ -310,13 +310,13 @@ describe("OIPointerEventGrabber.ts", () =>
 
   describe("Context menu", () =>
   {
-    const wrapperHTML: HTMLElement = document.createElement("div")
-    wrapperHTML.style.width = "100px"
-    wrapperHTML.style.height = "100px"
-    document.body.appendChild(wrapperHTML)
+    const svgElement = document.createElementNS("http://www.w3.org/2000/svg", "svg") as SVGElement
+    svgElement.style.width = "100px"
+    svgElement.style.height = "100px"
+    document.body.appendChild(svgElement)
 
     const grabber = new OIPointerEventGrabber(DefaultConfiguration.grabber)
-    grabber.attach(wrapperHTML)
+    grabber.attach(svgElement)
     grabber.onContextMenu = jest.fn()
 
     test("should call onContextMenu", () =>
@@ -327,7 +327,7 @@ describe("OIPointerEventGrabber.ts", () =>
         clientY: 500,
         pressure: 1
       })
-      wrapperHTML.dispatchEvent(pointerDownEvt)
+      svgElement.dispatchEvent(pointerDownEvt)
       expect(grabber.onContextMenu).toHaveBeenCalledTimes(1)
       grabber.detach()
     })

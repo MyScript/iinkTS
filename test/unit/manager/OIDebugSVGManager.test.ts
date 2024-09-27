@@ -22,7 +22,6 @@ describe("OIDebugSVGManager.ts", () =>
 
   describe("bounding box", () =>
   {
-    const wrapperHTML: HTMLElement = document.createElement("div")
     const behaviors = new OIBehaviorsMock()
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
 
@@ -30,7 +29,7 @@ describe("OIDebugSVGManager.ts", () =>
 
     beforeAll(async () =>
     {
-      await behaviors.init(wrapperHTML)
+      await behaviors.init()
     })
 
     afterEach(() =>
@@ -84,7 +83,6 @@ describe("OIDebugSVGManager.ts", () =>
 
   describe("vertices", () =>
   {
-    const wrapperHTML: HTMLElement = document.createElement("div")
     const behaviors = new OIBehaviorsMock()
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
 
@@ -92,7 +90,7 @@ describe("OIDebugSVGManager.ts", () =>
 
     beforeAll(async () =>
     {
-      await behaviors.init(wrapperHTML)
+      await behaviors.init()
     })
 
     test("should show/hide stroke vertices", async () =>
@@ -111,7 +109,6 @@ describe("OIDebugSVGManager.ts", () =>
 
   describe("recognition box", () =>
   {
-    const wrapperHTML: HTMLElement = document.createElement("div")
     const behaviors = new OIBehaviorsMock()
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     Object.defineProperty(global.SVGElement.prototype, 'getBBox', {
@@ -127,7 +124,7 @@ describe("OIDebugSVGManager.ts", () =>
 
     beforeAll(async () =>
     {
-      await behaviors.init(wrapperHTML)
+      await behaviors.init()
     })
 
     test("should show/hide stroke recognition box", async () =>
@@ -166,7 +163,6 @@ describe("OIDebugSVGManager.ts", () =>
 
   describe("recognition item box", () =>
   {
-    const wrapperHTML: HTMLElement = document.createElement("div")
     const behaviors = new OIBehaviorsMock()
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     Object.defineProperty(global.SVGElement.prototype, 'getBBox', {
@@ -182,7 +178,7 @@ describe("OIDebugSVGManager.ts", () =>
 
     beforeAll(async () =>
     {
-      await behaviors.init(wrapperHTML)
+      await behaviors.init()
     })
 
     test("should show/hide stroke recognition box", async () =>

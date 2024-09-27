@@ -68,7 +68,6 @@ describe("OITranslateManager.ts", () =>
 
   describe("translate process on stroke without snap", () =>
   {
-    const divElement: HTMLDivElement = document.createElement("div")
     const behaviors = new OIBehaviorsMock()
     behaviors.snaps.snapToGrid = false
     behaviors.snaps.snapToElement = false
@@ -116,7 +115,7 @@ describe("OITranslateManager.ts", () =>
 
     beforeAll(async () =>
     {
-      await behaviors.init(divElement)
+      await behaviors.init()
     })
 
     testDatas.forEach(data =>

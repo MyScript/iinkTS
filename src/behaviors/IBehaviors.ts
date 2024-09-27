@@ -6,6 +6,7 @@ import { TStroke } from "../primitive"
 import { TStyle, TTheme } from "../style"
 import { IHistoryManager } from "../history"
 import { PartialDeep } from "../utils"
+import { EditorLayer } from "../EditorLayer"
 
 /**
  * @group Behavior
@@ -16,6 +17,7 @@ export interface IBehaviors
   grabber: IGrabber
   history: IHistoryManager
   intention: Intention
+  layers: EditorLayer
 
   get currentPenStyle(): TStyle
 
@@ -33,7 +35,7 @@ export interface IBehaviors
   get configuration(): TConfiguration
   set configuration(conf: TConfiguration)
 
-  init(element: HTMLElement): Promise<void>
+  init(): Promise<void>
   export(mimeTypes?: string[]): Promise<IModel>
   convert(conversionState?: TConverstionState, requestedMimeTypes?: string[]): Promise<IModel>
   resize(height: number, width: number): Promise<IModel>

@@ -50,6 +50,7 @@ import { OIHistoryManager, TOIHistoryBackendChanges, TOIHistoryChanges } from ".
 import { PartialDeep, mergeDeep } from "../utils"
 import { IBehaviors } from "./IBehaviors"
 import { TBehaviorOptions } from "./TBehaviorOptions"
+import { EditorLayer } from "../EditorLayer"
 
 /**
  * @group Behavior
@@ -60,9 +61,9 @@ export class OIBehaviors implements IBehaviors
   #logger = LoggerManager.getLogger(LoggerClass.BEHAVIORS)
   #configuration: TConfiguration
   #model: OIModel
-  #intention: Intention
-  #layerInfosTimer?: ReturnType<typeof setTimeout>
-  layerInfos: HTMLDivElement
+  #intention: Intention = Intention.Write
+  #layerUITimer?: ReturnType<typeof setTimeout>
+  layers: EditorLayer
 
   grabber: OIPointerEventGrabber
   renderer: OISVGRenderer
@@ -84,11 +85,11 @@ export class OIBehaviors implements IBehaviors
   move: OIMoveManager
   menu: OIMenuManager
 
-  constructor(options: PartialDeep<TBehaviorOptions>, layerInfos: HTMLDivElement)
+  constructor(options: PartialDeep<TBehaviorOptions>, layers: EditorLayer)
   {
     this.#logger.info("constructor", { options })
+    this.layers = layers
     this.#configuration = new Configuration(options?.configuration)
-    this.layerInfos = layerInfos
     this.styler = new StyleManager(Object.assign({}, DefaultStyle, options?.penStyle), options?.theme)
 
     this.grabber = new OIPointerEventGrabber(this.#configuration.grabber)
@@ -110,9 +111,10 @@ export class OIBehaviors implements IBehaviors
     this.move = new OIMoveManager(this)
     this.menu = new OIMenuManager(this, options.behaviors?.menu)
 
-    this.#intention = Intention.Write
     this.#model = new OIModel(this.#configuration.rendering.minWidth, this.#configuration.rendering.minHeight, this.configuration.rendering.guides.gap)
 
+    this.setCursorStyle()
+    this.layers.showState()
   }
 
   //#region Properties
@@ -128,32 +130,7 @@ export class OIBehaviors implements IBehaviors
   set intention(i: Intention)
   {
     this.#intention = i
-    switch (this.#intention) {
-      case Intention.Erase:
-        this.renderer.parent?.classList.remove("draw")
-        this.renderer.parent?.classList.add("erase")
-        this.renderer.parent?.classList.remove("select")
-        this.renderer.parent?.classList.remove("move")
-        break
-      case Intention.Select:
-        this.renderer.parent?.classList.remove("draw")
-        this.renderer.parent?.classList.remove("erase")
-        this.renderer.parent?.classList.add("select")
-        this.renderer.parent?.classList.remove("move")
-        break
-      case Intention.Move:
-        this.renderer.parent?.classList.remove("draw")
-        this.renderer.parent?.classList.remove("erase")
-        this.renderer.parent?.classList.remove("select")
-        this.renderer.parent?.classList.add("move")
-        break
-      default:
-        this.renderer.parent?.classList.add("draw")
-        this.renderer.parent?.classList.remove("erase")
-        this.renderer.parent?.classList.remove("select")
-        this.renderer.parent?.classList.remove("move")
-        break
-    }
+    this.setCursorStyle()
     this.unselectAll()
   }
 
@@ -218,15 +195,45 @@ export class OIBehaviors implements IBehaviors
   //#endregion
 
 
-  updateLayerInfos(): void
+  updateLayerUI(): void
   {
-    clearTimeout(this.#layerInfosTimer)
-    this.#layerInfosTimer = setTimeout(() =>
+    clearTimeout(this.#layerUITimer)
+    this.#layerUITimer = setTimeout(() =>
     {
       this.menu.update()
       this.svgDebugger.apply()
       this.recognizer.waitForIdle()
     }, 1500)
+  }
+
+  protected setCursorStyle(): void
+  {
+    switch (this.#intention) {
+      case Intention.Erase:
+        this.layers.root.classList.remove("draw")
+        this.layers.root.classList.add("erase")
+        this.layers.root.classList.remove("select")
+        this.layers.root.classList.remove("move")
+        break
+      case Intention.Select:
+        this.layers.root.classList.remove("draw")
+        this.layers.root.classList.remove("erase")
+        this.layers.root.classList.add("select")
+        this.layers.root.classList.remove("move")
+        break
+      case Intention.Move:
+        this.layers.root.classList.remove("draw")
+        this.layers.root.classList.remove("erase")
+        this.layers.root.classList.remove("select")
+        this.layers.root.classList.add("move")
+        break
+      default:
+        this.layers.root.classList.add("draw")
+        this.layers.root.classList.remove("erase")
+        this.layers.root.classList.remove("select")
+        this.layers.root.classList.remove("move")
+        break
+    }
   }
 
   protected onPointerDown(evt: PointerEvent, pointer: TPointer): void
@@ -313,7 +320,7 @@ export class OIBehaviors implements IBehaviors
       this.internalEvent.emitError(error as Error)
     }
     finally {
-      this.updateLayerInfos()
+      this.updateLayerUI()
     }
   }
 
@@ -345,24 +352,23 @@ export class OIBehaviors implements IBehaviors
     }
   }
 
-  async init(domElement: HTMLElement): Promise<void>
+  async init(): Promise<void>
   {
-    this.#logger.info("init", { domElement })
+    this.#logger.info("init")
 
-    this.renderer.init(domElement)
-    this.menu.render(this.layerInfos)
+    this.renderer.init(this.layers.render)
+    this.menu.render(this.layers.ui.root)
 
-    this.grabber.attach(this.renderer.layer as unknown as HTMLElement)
+    this.grabber.attach(this.renderer.layer)
     this.grabber.onPointerDown = this.onPointerDown.bind(this)
     this.grabber.onPointerMove = this.onPointerMove.bind(this)
     this.grabber.onPointerUp = this.onPointerUp.bind(this)
     this.grabber.onContextMenu = this.onContextMenu.bind(this)
 
-    this.model.width = Math.max(domElement.clientWidth, this.#configuration.rendering.minWidth)
-    this.model.height = Math.max(domElement.clientHeight, this.#configuration.rendering.minHeight)
+    this.model.width = Math.max(this.layers.root.clientWidth, this.#configuration.rendering.minWidth)
+    this.model.height = Math.max(this.layers.root.clientHeight, this.#configuration.rendering.minHeight)
     this.model.rowHeight = this.configuration.rendering.guides.gap
     this.history.init(this.model)
-
     await this.recognizer.init()
     await this.setPenStyle(this.penStyle)
     await this.setTheme(this.theme)
@@ -386,7 +392,7 @@ export class OIBehaviors implements IBehaviors
       throw error
     }
     finally {
-      this.updateLayerInfos()
+      this.updateLayerUI()
     }
   }
 
@@ -481,7 +487,7 @@ export class OIBehaviors implements IBehaviors
     }
     catch (error) {
       this.#logger.error("createSymbol", error)
-      this.updateLayerInfos()
+      this.updateLayerUI()
       this.internalEvent.emitError(error as Error)
       throw error
     }
@@ -553,7 +559,7 @@ export class OIBehaviors implements IBehaviors
     if (addToHistory) {
       this.history.push(this.model, { added: [sym] })
     }
-    this.updateLayerInfos()
+    this.updateLayerUI()
     return sym
   }
 
@@ -582,7 +588,7 @@ export class OIBehaviors implements IBehaviors
     if (addToHistory) {
       this.history.push(this.model, { added: symList })
     }
-    this.updateLayerInfos()
+    this.updateLayerUI()
     return symList
   }
 
@@ -608,7 +614,7 @@ export class OIBehaviors implements IBehaviors
     if (addToHistory) {
       this.history.push(this.model, { updated: [sym] })
     }
-    this.updateLayerInfos()
+    this.updateLayerUI()
     return sym
   }
 
@@ -637,7 +643,7 @@ export class OIBehaviors implements IBehaviors
     if (addToHistory) {
       this.history.push(this.model, { updated: symList })
     }
-    this.updateLayerInfos()
+    this.updateLayerUI()
     return symList
   }
 
@@ -791,7 +797,7 @@ export class OIBehaviors implements IBehaviors
       if (addToHistory) {
         this.history.push(this.model, { replaced: { oldSymbols, newSymbols } })
       }
-      this.updateLayerInfos()
+      this.updateLayerUI()
     }
   }
 
@@ -925,7 +931,7 @@ export class OIBehaviors implements IBehaviors
       if (addToHistory) {
         this.history.push(this.model, { erased: [symbol] })
       }
-      this.updateLayerInfos()
+      this.updateLayerUI()
     }
     else {
       this.renderer.removeSymbol(id)
@@ -992,7 +998,7 @@ export class OIBehaviors implements IBehaviors
           changes.updated = symbolsToUpdate
         }
         this.history.push(this.model, changes)
-        this.updateLayerInfos()
+        this.updateLayerUI()
       }
     }
     this.internalEvent.emitIdle(false)
@@ -1051,7 +1057,7 @@ export class OIBehaviors implements IBehaviors
     this.recognizer.addStrokes(strokes, false)
     this.history.push(this.model, { added: strokes })
     this.#logger.debug("importPointEvents", this.model)
-    this.updateLayerInfos()
+    this.updateLayerUI()
     return this.model
   }
 
@@ -1265,7 +1271,7 @@ export class OIBehaviors implements IBehaviors
       ) {
         await this.recognizer.undo(actionsToBackend)
       }
-      this.updateLayerInfos()
+      this.updateLayerUI()
     }
     return this.model
   }
@@ -1296,7 +1302,7 @@ export class OIBehaviors implements IBehaviors
         await this.recognizer.redo(actionsToBackend)
       }
 
-      this.updateLayerInfos()
+      this.updateLayerUI()
     }
     return this.model
   }
@@ -1328,7 +1334,7 @@ export class OIBehaviors implements IBehaviors
       throw error
     }
     finally {
-      this.updateLayerInfos()
+      this.updateLayerUI()
     }
     return this.model
   }
@@ -1358,7 +1364,7 @@ export class OIBehaviors implements IBehaviors
       this.recognizer.clear()
       this.internalEvent.emitSelected(this.model.symbolsSelected)
     }
-    this.updateLayerInfos()
+    this.updateLayerUI()
     return this.model
   }
 

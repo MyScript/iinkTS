@@ -1,13 +1,14 @@
+import { WSBehaviors } from "../behaviors"
 import { TMarginConfiguration, TRenderingConfiguration } from "../configuration"
 import { InternalEvent } from "../event"
 import { LoggerClass, LoggerManager } from "../logger"
-import { TJIIXExport, TJIIXWord } from "../model"
+import { ExportType, TJIIXExport, TJIIXWord } from "../model"
 import { convertMillimeterToPixel, createUUID } from "../utils"
 
 /**
- * @group SmartGuide
+ * @group WSSmartGuide
  */
-export class SmartGuide
+export class WSSmartGuide
 {
   uuid: string
   #smartGuideElement!: HTMLDivElement
@@ -22,6 +23,7 @@ export class SmartGuide
   #copyElement!: HTMLButtonElement
   #deleteElement!: HTMLButtonElement
   #isMenuOpen!: boolean
+  behaviors: WSBehaviors
   margin: TMarginConfiguration
   renderingConfiguration!: TRenderingConfiguration
   jiix?: TJIIXExport
@@ -29,10 +31,11 @@ export class SmartGuide
   wordToChange?: TJIIXWord
   #logger = LoggerManager.getLogger(LoggerClass.SMARTGUIDE)
 
-  constructor()
+  constructor(behaviors: WSBehaviors)
   {
     this.#logger.info("constructor")
     this.uuid = createUUID()
+    this.behaviors = behaviors
     this.margin = {
       bottom: 0,
       left: 0,
@@ -229,7 +232,7 @@ export class SmartGuide
     this.#logger.info("onClickConvert", { evt })
     evt.preventDefault()
     evt.stopPropagation()
-    this.internalEvent.emitConvert()
+    this.behaviors.convert()
     this.#closeMenu()
   }
 
@@ -291,7 +294,7 @@ export class SmartGuide
     this.#logger.info("onClickDelete", { evt })
     evt.preventDefault()
     evt.stopPropagation()
-    this.internalEvent.emitClear()
+    this.behaviors.clear()
     this.#closeMenu()
   }
 
@@ -304,7 +307,7 @@ export class SmartGuide
     const candidate = target.innerText
     if (this.jiix?.words && candidate !== this.wordToChange?.label && this.wordToChange?.candidates?.includes(candidate)) {
       this.jiix.words[parseInt(this.wordToChange?.id as string)].label = candidate
-      this.internalEvent.emitImportJIIX(this.jiix)
+      this.behaviors.import(new Blob([JSON.stringify(this.jiix)], { type: ExportType.JIIX }), ExportType.JIIX)
     }
     this.#candidatesElement.style.display = "none"
   }

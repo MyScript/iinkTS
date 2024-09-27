@@ -1,17 +1,17 @@
 
 import style from "./iink.css"
 import { IBehaviors, OIBehaviors, RestBehaviors, TBehaviorOptions, WSBehaviors } from "./behaviors"
-import { SmartGuide } from "./smartguide"
 import { DeferredPromise, PartialDeep, mergeDeep } from "./utils"
 import { LoggerClass, LoggerManager } from "./logger"
 import { Intention } from "./Constants"
-import { DefaultLoggerConfiguration, TConfiguration, TConverstionState, TLoggerConfiguration, TMarginConfiguration } from "./configuration"
-import { ExportType, IModel, TExport, TJIIXExport } from "./model"
+import { DefaultLoggerConfiguration, TConfiguration, TConverstionState, TLoggerConfiguration } from "./configuration"
+import { IModel, TExport, TJIIXExport } from "./model"
 import { TSymbol, TStroke } from "./primitive"
 import { InternalEvent, PublicEvent } from "./event"
 import { TUndoRedoContext } from "./history"
 import { IGrabber } from "./grabber"
 import { TPenStyle, TTheme } from "./style"
+import { EditorLayer } from "./EditorLayer"
 
 /**
  * @group Editor
@@ -27,43 +27,32 @@ export type HTMLEditorElement = HTMLElement &
 export class Editor
 {
   logger = LoggerManager.getLogger(LoggerClass.EDITOR)
-  wrapperHTML: HTMLEditorElement
-  #layerInfos!: HTMLDivElement
-  #loaderHTML!: HTMLDivElement
+  layers: EditorLayer
 
-  #messageContainer!: HTMLDivElement
-  #messageModal!: HTMLDivElement
-  #messageOverlay!: HTMLDivElement
-  #messageText!: HTMLParagraphElement
-
-  #stateHTML!: HTMLDivElement
-  #busyHTML!: HTMLDivElement
-  #idleHTML!: HTMLDivElement
   #behaviors!: IBehaviors
-  #smartGuide?: SmartGuide
   #initializationDeferred: DeferredPromise<void>
 
   #loggerConfiguration!: TLoggerConfiguration
 
-  constructor(wrapperHTML: HTMLElement, options: PartialDeep<TBehaviorOptions>, globalClassCss = "ms-editor")
+  constructor(rootElement: HTMLElement, options: PartialDeep<TBehaviorOptions>, globalClassCss = "ms-editor")
   {
+    this.logger.info("constructor", { rootElement, options, globalClassCss })
+
     this.#initializationDeferred = new DeferredPromise<void>()
     this.loggerConfiguration = mergeDeep({}, options.logger, DefaultLoggerConfiguration)
-    this.logger.info("constructor", { wrapperHTML, options, globalClassCss })
 
-    this.wrapperHTML = wrapperHTML as HTMLEditorElement
-    this.wrapperHTML.classList.add(globalClassCss)
-    this.wrapperHTML.classList.add("draw")
-    this.events.setElement(this.wrapperHTML)
+    this.events.setElement(rootElement)
+    this.layers = new EditorLayer(rootElement, globalClassCss)
+    this.layers.onCloseModal = this.closeMessageModal.bind(this)
 
     const styleElement = document.createElement("style")
     styleElement.appendChild(document.createTextNode(style as string))
-    this.wrapperHTML.appendChild(styleElement)
-
-    this.wrapperHTML.appendChild(this.#createLayerInfos())
+    this.layers.root.prepend(styleElement)
 
     this.#instantiateBehaviors(options)
   }
+
+  //#region Properties
 
   get loggerConfiguration(): TLoggerConfiguration
   {
@@ -110,7 +99,6 @@ export class Editor
   {
     this.logger.info("set intention", i)
     this.behaviors.intention = i
-    this.#setCursorIntention()
   }
 
   get events(): PublicEvent
@@ -168,102 +156,7 @@ export class Editor
     this.behaviors.setPenStyleClasses(styleClasses)
   }
 
-  #setCursorIntention(): void
-  {
-    switch (this.behaviors.intention) {
-      case Intention.Erase:
-        this.wrapperHTML.classList.remove("draw")
-        this.wrapperHTML.classList.add("erase")
-        this.wrapperHTML.classList.remove("select")
-        break
-      case Intention.Select:
-        this.wrapperHTML.classList.remove("draw")
-        this.wrapperHTML.classList.remove("erase")
-        this.wrapperHTML.classList.add("select")
-        break
-      default:
-        this.wrapperHTML.classList.add("draw")
-        this.wrapperHTML.classList.remove("erase")
-        this.wrapperHTML.classList.remove("select")
-        break
-    }
-  }
-
-  #createLoader(): HTMLDivElement
-  {
-    this.#loaderHTML = document.createElement("div")
-    this.#loaderHTML.classList.add("loader")
-    this.#loaderHTML.style.display = "none"
-    return this.#loaderHTML
-  }
-
-  #createMessage(): HTMLDivElement
-  {
-    this.#messageContainer = document.createElement("div")
-    this.#messageContainer.classList.add("message-container")
-    this.#messageContainer.style.display = "none"
-
-    this.#messageOverlay = document.createElement("div")
-    this.#messageOverlay.classList.add("message-overlay")
-    this.#messageContainer.appendChild(this.#messageOverlay)
-
-    this.#messageModal = document.createElement("div")
-    this.#messageModal.classList.add("message-modal")
-
-    const closeBtn = document.createElement("button")
-    closeBtn.classList.add("ms-button", "close")
-    closeBtn.addEventListener("pointerup", () => this.closeMessageModal())
-    this.#messageModal.appendChild(closeBtn)
-
-    this.#messageText = document.createElement("p")
-    this.#messageModal.appendChild(this.#messageText)
-    this.#messageContainer.appendChild(this.#messageModal)
-    return this.#messageContainer
-  }
-
-  #createEditorState(): HTMLDivElement
-  {
-    this.#stateHTML = document.createElement("div")
-    this.#stateHTML.classList.add("state")
-    this.#idleHTML = document.createElement("div")
-    this.#idleHTML.textContent = "idle"
-    this.#idleHTML.style.display = "block"
-    this.#stateHTML.appendChild(this.#idleHTML)
-    this.#busyHTML = document.createElement("div")
-    this.#busyHTML.classList.add("busy")
-    this.#busyHTML.style.display = "none"
-    this.#stateHTML.appendChild(this.#busyHTML)
-    this.#stateHTML.style.display = "none"
-    return this.#stateHTML
-  }
-
-  #updateEditorState(idle: boolean): void
-  {
-    if (this.configuration.offscreen) {
-      this.#stateHTML.style.display = "block"
-      if (idle) {
-        this.#idleHTML.style.display = "block"
-        this.#busyHTML.style.display = "none"
-      }
-      else {
-        this.#idleHTML.style.display = "none"
-        this.#busyHTML.style.display = "block"
-      }
-    }
-    else {
-      this.#stateHTML.style.display = "none"
-    }
-  }
-
-  #createLayerInfos(): HTMLDivElement
-  {
-    this.#layerInfos = document.createElement("div")
-    this.#layerInfos.classList.add("ms-layer-infos")
-    this.#layerInfos.appendChild(this.#createLoader())
-    this.#layerInfos.appendChild(this.#createMessage())
-    this.#layerInfos.appendChild(this.#createEditorState())
-    return this.#layerInfos
-  }
+  //#endregion
 
   #instantiateBehaviors(options: PartialDeep<TBehaviorOptions>)
   {
@@ -276,12 +169,12 @@ export class Editor
       this.#behaviors.destroy()
     }
     if (options.configuration.offscreen) {
-      this.#behaviors = new OIBehaviors(options, this.#layerInfos)
+      this.#behaviors = new OIBehaviors(options, this.layers)
     }
     else if (options.configuration.server?.protocol === "REST") {
-      this.#behaviors = new RestBehaviors(options)
+      this.#behaviors = new RestBehaviors(options, this.layers)
     } else {
-      this.#behaviors = new WSBehaviors(options)
+      this.#behaviors = new WSBehaviors(options, this.layers)
     }
     this.logger.debug("instantiateBehaviors", this.#behaviors)
   }
@@ -290,13 +183,13 @@ export class Editor
   {
     this.logger.info("initializeBehaviors", "start")
     this.#initializationDeferred = new DeferredPromise<void>()
-    this.#loaderHTML.style.display = "initial"
+    this.layers.showLoader()
     this.closeMessageModal()
-    return this.behaviors.init(this.wrapperHTML)
+    return this.behaviors.init()
       .then(async () =>
       {
-        this.logger.info("initializeBehaviors", "then")
-        this.wrapperHTML.editor = this
+        this.logger.info("initializeBehaviors", "then");
+        (this.layers.root as HTMLEditorElement).editor = this
         this.#initializationDeferred.resolve()
         this.events.emitLoaded()
       })
@@ -304,89 +197,38 @@ export class Editor
       {
         this.logger.error("initializeBehaviors", error)
         this.#initializationDeferred.reject(error)
-        this.showError(error)
+        this.layers.showMessageError(error)
       })
       .finally(() =>
       {
         this.logger.debug("initializeBehaviors", "finally")
-        this.#loaderHTML.style.display = "none"
-        this.#updateEditorState(true)
+        this.layers.hideLoader()
+        this.layers.updateState(true)
         return this.#initializationDeferred.promise
       })
   }
 
-  #initializeSmartGuide(): void
+  closeMessageModal(inError?: boolean): void
   {
-    this.#smartGuide?.destroy()
-    this.logger.info("initializeSmartGuide", { smartGuide: this.configuration.rendering.smartGuide })
-    if (this.configuration.rendering.smartGuide.enable) {
-      this.#smartGuide = new SmartGuide()
-      let margin: TMarginConfiguration
-      switch (this.configuration.recognition.type) {
-        case "TEXT":
-          margin = this.configuration.recognition.text.margin
-          break
-        case "MATH":
-          margin = this.configuration.recognition.math.margin
-          break
-        default:
-          margin = {
-            top: 20,
-            left: 10,
-            right: 10,
-            bottom: 10
-          }
-          break
-      }
-      this.#smartGuide.init(this.#layerInfos, margin, this.configuration.rendering)
+    if (inError) {
+      this.behaviors.destroy()
+        .then(() => this.initialize())
     }
-  }
-
-  async closeMessageModal(): Promise<void>
-  {
-    this.#messageContainer.style.display = "none"
-    this.#messageText.innerText = ""
-    if (this.#messageModal.classList.contains("error-msg")) {
-      this.#messageModal.classList.remove("error-msg")
-      await this.behaviors.destroy()
-      this.initialize()
-    }
-  }
-
-  showError(err: Error | string)
-  {
-    this.#messageModal.classList.add("error-msg")
-    this.#messageModal.classList.remove("info-msg")
-    this.#messageContainer.style.display = "block"
-    this.#messageText.innerText = typeof err === "string" ? err : err.message
-  }
-
-  showNotif(notif: { message: string, timeout?: number })
-  {
-    this.#messageModal.classList.add("info-msg")
-    this.#messageModal.classList.remove("error-msg")
-    this.#messageContainer.style.display = "block"
-    this.#messageText.innerText = notif.message
-    setTimeout(() =>
-    {
-      this.closeMessageModal()
-    }, notif.timeout || 2500)
   }
 
   #addInternalListeners(): void
   {
     this.internalEvents.removeAllListeners()
     this.internalEvents.addConvertListener(this.convert.bind(this))
-    this.internalEvents.addClearListener(this.clear.bind(this))
-    this.internalEvents.addErrorListener(this.showError.bind(this))
-    this.internalEvents.addNotifListener(this.showNotif.bind(this))
-    this.internalEvents.addClearMessageListener(this.closeMessageModal.bind(this))
-    this.internalEvents.addImportJIIXListener(this.#onImportJIIX.bind(this))
     this.internalEvents.addExportedListener(this.#onExport.bind(this))
     this.internalEvents.addContextChangeListener(this.#onContextChange.bind(this))
     this.internalEvents.addIdleListener(this.#onIdleChange.bind(this))
     this.internalEvents.addSelectedListener(this.#onSelectionChange.bind(this))
     this.internalEvents.addIntentionListener(this.#onIntentionChange.bind(this))
+
+    this.internalEvents.addErrorListener(this.layers.showMessageError.bind(this.layers))
+    this.internalEvents.addNotifListener(this.layers.showMessageInfo.bind(this.layers))
+    this.internalEvents.addClearMessageListener(this.layers.closeMessageModal.bind(this.layers))
   }
 
   #onSelectionChange = (symbols: TSymbol[]) =>
@@ -407,26 +249,14 @@ export class Editor
 
   #onIdleChange = (idle: boolean) =>
   {
-    this.#updateEditorState(idle)
+    this.layers.updateState(idle)
     this.events.emitIdle(idle)
   }
 
   #onExport(exports: TExport): void
   {
     this.logger.info("onExport", { exports })
-    if (this.configuration.rendering.smartGuide.enable) {
-      if (exports && exports["application/vnd.myscript.jiix"]) {
-        const jjix = exports["application/vnd.myscript.jiix"] as TJIIXExport
-        this.#smartGuide?.update(jjix)
-      }
-    }
     this.events.emitExported(exports)
-  }
-
-  #onImportJIIX(jiix: TJIIXExport): void
-  {
-    this.logger.info("onImportJIIX", { jiix })
-    this.import(new Blob([JSON.stringify(jiix)], { type: ExportType.JIIX }), ExportType.JIIX)
   }
 
   async initialize(): Promise<void>
@@ -434,7 +264,6 @@ export class Editor
     this.logger.info("initialize")
     this.#addInternalListeners()
     await this.#initializeBehaviors()
-    this.#initializeSmartGuide()
   }
 
   async waitForIdle(): Promise<void>
@@ -477,10 +306,7 @@ export class Editor
   {
     this.logger.info("resize")
     await this.#initializationDeferred.promise
-    if (this.configuration.rendering.smartGuide.enable) {
-      this.#smartGuide?.resize()
-    }
-    const compStyles = window.getComputedStyle(this.wrapperHTML)
+    const compStyles = window.getComputedStyle(this.layers.root)
     const height = Math.max(parseInt(compStyles.height.replace("px", "")), this.configuration.rendering.minHeight)
     const width = Math.max(parseInt(compStyles.width.replace("px", "")), this.configuration.rendering.minWidth)
     await this.behaviors.resize(height, width)

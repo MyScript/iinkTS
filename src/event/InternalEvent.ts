@@ -1,7 +1,7 @@
 import { Intention } from "../Constants"
 import { TConverstionState } from "../configuration"
 import { LoggerManager, LoggerClass } from "../logger"
-import { TExport, TJIIXExport } from "../model"
+import { TExport } from "../model"
 import { TOISymbol } from "../primitive"
 import { TWSMessageEventSVGPatch } from "../recognizer"
 import { TUndoRedoContext } from "../history"
@@ -124,17 +124,6 @@ export class InternalEvent extends EventTarget
     this.addEventListener(InternalEventType.NOTIF, (evt: unknown) => callback(((evt as CustomEvent).detail as { message: string, timeout?: number })), { signal: this.#abortController.signal })
   }
 
-  emitImportJIIX(jiix: TJIIXExport): void
-  {
-    this.#logger.info("emitImportJIIX", { jiix })
-    this.#emit(InternalEventType.IMPORT_JIIX, jiix)
-  }
-  addImportJIIXListener(callback: (jiix: TJIIXExport) => void): void
-  {
-    this.#logger.info("addImportJIIXListener", { callback })
-    this.addEventListener(InternalEventType.IMPORT_JIIX, (evt: unknown) => callback(((evt as CustomEvent).detail as TJIIXExport)), { signal: this.#abortController.signal })
-  }
-
   emitConvert(conversionState: TConverstionState = "DIGITAL_EDIT"): void
   {
     this.#logger.info("emitConvert", { conversionState })
@@ -144,17 +133,6 @@ export class InternalEvent extends EventTarget
   {
     this.#logger.info("addConvertListener", { callback })
     this.addEventListener(InternalEventType.CONVERT, (evt: unknown) => callback(((evt as CustomEvent).detail as { conversionState?: TConverstionState, mimeTypes?: string[] })), { signal: this.#abortController.signal })
-  }
-
-  emitClear(): void
-  {
-    this.#logger.info("emitClear")
-    this.#emit(InternalEventType.CLEAR)
-  }
-  addClearListener(callback: () => void): void
-  {
-    this.#logger.info("addClearListener", { callback })
-    this.addEventListener(InternalEventType.CLEAR, () => callback(), { signal: this.#abortController.signal })
   }
 
   emitContextChange(context: TUndoRedoContext): void

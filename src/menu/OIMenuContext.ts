@@ -185,7 +185,7 @@ export class OIMenuContext extends OIMenu
         throw error
       }
       finally {
-        this.behaviors.updateLayerInfos()
+        this.behaviors.updateLayerUI()
       }
     })
     return this.convertBtn

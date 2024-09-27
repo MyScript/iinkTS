@@ -1,10 +1,11 @@
 import { Intention } from "../Constants"
-import { Configuration, TConfiguration, TConverstionState } from "../configuration"
+import { Configuration, TConfiguration, TConverstionState, TMarginConfiguration } from "../configuration"
 import { InternalEvent } from "../event"
 import { PointerEventGrabber } from "../grabber"
 import { LoggerClass, LoggerManager } from "../logger"
-import { IModel, Model, TExport } from "../model"
+import { IModel, Model, TExport, TJIIXExport } from "../model"
 import { TWSMessageEventSVGPatch, WSRecognizer } from "../recognizer"
+import { WSSmartGuide } from "../smartguide"
 import { WSSVGRenderer } from "../renderer"
 import { DefaultPenStyle, StyleManager, TPenStyle, TTheme } from "../style"
 import { HistoryManager } from "../history"
@@ -12,6 +13,7 @@ import { DeferredPromise, PartialDeep } from "../utils"
 import { Stroke, TStroke, TPointer } from "../primitive"
 import { IBehaviors } from "./IBehaviors"
 import { TBehaviorOptions } from "./TBehaviorOptions"
+import { EditorLayer } from "../EditorLayer"
 
 /**
  * @group Behavior
@@ -23,18 +25,20 @@ export class WSBehaviors implements IBehaviors
   #configuration: TConfiguration
   #model: Model
   #resizeTimer?: ReturnType<typeof setTimeout>
+  layers: EditorLayer
 
+  smartGuide?: WSSmartGuide
   grabber: PointerEventGrabber
   renderer: WSSVGRenderer
   recognizer: WSRecognizer
   history: HistoryManager
   styleManager: StyleManager
-  intention: Intention
+  #intention: Intention = Intention.Write
 
-
-  constructor(options: PartialDeep<TBehaviorOptions>)
+  constructor(options: PartialDeep<TBehaviorOptions>, layers: EditorLayer)
   {
     this.#logger.info("constructor", { options })
+    this.layers = layers
     this.#configuration = new Configuration(options?.configuration)
     this.styleManager = new StyleManager(options?.penStyle, options?.theme)
 
@@ -57,6 +61,37 @@ export class WSBehaviors implements IBehaviors
     this.intention = Intention.Write
     this.#model = new Model()
     this.history = new HistoryManager(this.#configuration["undo-redo"])
+  }
+
+  get intention(): Intention
+  {
+    return this.#intention
+  }
+  set intention(i: Intention)
+  {
+    this.#intention = i
+    this.setCursorStyle()
+  }
+
+  protected setCursorStyle(): void
+  {
+    switch (this.intention) {
+      case Intention.Erase:
+        this.layers.root.classList.remove("draw")
+        this.layers.root.classList.add("erase")
+        this.layers.root.classList.remove("select")
+        break
+      case Intention.Select:
+        this.layers.root.classList.remove("draw")
+        this.layers.root.classList.remove("erase")
+        this.layers.root.classList.add("select")
+        break
+      default:
+        this.layers.root.classList.add("draw")
+        this.layers.root.classList.remove("erase")
+        this.layers.root.classList.remove("select")
+        break
+    }
   }
 
   get internalEvent(): InternalEvent
@@ -118,6 +153,10 @@ export class WSBehaviors implements IBehaviors
   protected onExport(exports: TExport): void
   {
     this.#logger.debug("onExport", { exports })
+    if (this.smartGuide && exports?.["application/vnd.myscript.jiix"]) {
+      const jjix = exports["application/vnd.myscript.jiix"] as TJIIXExport
+      this.smartGuide.update(jjix)
+    }
     this.model.mergeExport(exports)
   }
 
@@ -157,17 +196,36 @@ export class WSBehaviors implements IBehaviors
     this.renderer.updatesLayer(evt.layer, evt.updates)
   }
 
-  async init(domElement: HTMLElement): Promise<void>
+  protected initializeSmartGuide(): void
   {
-    this.#logger.info("init", { domElement })
-    const compStyles = window.getComputedStyle(domElement);
+    this.smartGuide?.destroy()
+    this.#logger.info("initializeSmartGuide", { smartGuide: this.configuration.rendering.smartGuide })
+    if (this.configuration.rendering.smartGuide.enable) {
+      this.smartGuide = new WSSmartGuide(this)
+      let margin: TMarginConfiguration = { top: 20, left: 10, right: 10, bottom: 10 }
+      switch (this.configuration.recognition.type) {
+        case "TEXT":
+          margin = this.configuration.recognition.text.margin
+          break
+        case "MATH":
+          margin = this.configuration.recognition.math.margin
+          break
+      }
+      this.smartGuide.init(this.layers.ui.root, margin, this.configuration.rendering)
+    }
+  }
+
+  async init(): Promise<void>
+  {
+    this.#logger.info("init")
+    const compStyles = window.getComputedStyle(this.layers.root);
     this.model.width = Math.max(parseInt(compStyles.width.replace("px","")), this.#configuration.rendering.minWidth)
     this.model.height = Math.max(parseInt(compStyles.height.replace("px","")), this.#configuration.rendering.minHeight)
     this.history.push(this.model)
 
-    this.renderer.init(domElement)
+    this.renderer.init(this.layers.render)
 
-    this.grabber.attach(domElement)
+    this.grabber.attach(this.layers.render)
     this.grabber.onPointerDown = this.onPointerDown.bind(this)
     this.grabber.onPointerMove = this.onPointerMove.bind(this)
     this.grabber.onPointerUp = this.onPointerUp.bind(this)
@@ -176,6 +234,7 @@ export class WSBehaviors implements IBehaviors
     this.internalEvent.addSVGPatchListener(this.onSVGPatch.bind(this))
 
     await this.recognizer.init(this.model.height, this.model.width)
+    this.initializeSmartGuide()
     await this.setPenStyle(this.penStyle)
     await this.setTheme(this.theme as PartialDeep<TTheme>)
     await this.setPenStyleClasses(this.penStyleClasses)
@@ -328,6 +387,7 @@ export class WSBehaviors implements IBehaviors
     }, this.#configuration.triggers.resizeTriggerDelay)
 
     this.#model = await deferredResize.promise
+    this.smartGuide?.resize()
     this.internalEvent.emitExported(this.model.exports as TExport)
     this.#logger.debug("resize", this.model)
     return this.model
@@ -372,6 +432,7 @@ export class WSBehaviors implements IBehaviors
     this.grabber.detach()
     this.renderer.destroy()
     this.recognizer.destroy()
+    this.smartGuide?.destroy()
     return Promise.resolve()
   }
 }
