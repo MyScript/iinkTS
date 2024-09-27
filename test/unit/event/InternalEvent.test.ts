@@ -47,14 +47,6 @@ describe("InternalEvent.ts", () =>
     expect(testFunction).toBeCalledWith(data)
   })
 
-  test("should execute callback on emitClear", () =>
-  {
-    const testFunction = jest.fn()
-    internalEvent.addClearListener(testFunction)
-    internalEvent.emitClear()
-    expect(testFunction).toBeCalledTimes(1)
-  })
-
   test("should execute callback on emitError", () =>
   {
     const testFunction = jest.fn()
@@ -75,28 +67,6 @@ describe("InternalEvent.ts", () =>
     expect(testFunction).toBeCalledWith(notif)
   })
 
-  test("should execute callback on emitImportJIIX", () =>
-  {
-    const testFunction = jest.fn()
-    internalEvent.addImportJIIXListener(testFunction)
-    const jiix = {
-      "type": "Text",
-      "label": "hello",
-      "words": [
-        {
-          "id": "1",
-          "label": "hello",
-          "candidates": ["hello", "helle", "hellor", "hells", "hellon"]
-        }
-      ],
-      "version": "3",
-      "id": "MainBlock"
-    }
-    internalEvent.emitImportJIIX(jiix)
-    expect(testFunction).toBeCalledTimes(1)
-    expect(testFunction).toBeCalledWith(jiix)
-  })
-
   test("should execute callback on emitConvert with default value", () =>
   {
     const testFunction = jest.fn()
@@ -113,14 +83,6 @@ describe("InternalEvent.ts", () =>
     internalEvent.emitConvert("HANDWRITING")
     expect(testFunction).toBeCalledTimes(1)
     expect(testFunction).toBeCalledWith("HANDWRITING")
-  })
-
-  test("should execute callback on emitClear", () =>
-  {
-    const testFunction = jest.fn()
-    internalEvent.addClearMessageListener(testFunction)
-    internalEvent.emitClearMessage()
-    expect(testFunction).toBeCalledTimes(1)
   })
 
   test("should execute callback on emitContextChange", () =>

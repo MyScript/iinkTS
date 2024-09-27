@@ -6,7 +6,7 @@ const XMLNS = "http://www.w3.org/2000/svg"
  */
 export class SVGBuilder
 {
-  static createLayer(boundingBox: TBoundingBox, attrs: { [key: string]: string } = {}): SVGElement
+  static createLayer(boundingBox: TBoundingBox, attrs: { [key: string]: string } = {}): SVGSVGElement
   {
     const svgEl = document.createElementNS(XMLNS, "svg")
     svgEl.setAttribute("width", `${ boundingBox.width }px`)

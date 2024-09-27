@@ -177,7 +177,7 @@ describe("Editor.ts", () =>
       const loaderElement = wrapperHTML.querySelector(".loader") as HTMLElement
       expect(loaderElement.style.display).toEqual("none")
       editor.initialize()
-      expect(loaderElement.style.display).toEqual("initial")
+      expect(loaderElement.style.display).toEqual("block")
       await delay(LOAD_TIMEOUT)
       expect(loaderElement.style.display).toEqual("none")
     })
@@ -645,14 +645,6 @@ describe("Editor.ts", () =>
   {
     const wrapperHTML: HTMLElement = document.createElement("div")
     const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
-    // TODO problem with internal event singleton
-    test.skip("should call clear when internalEvent emit clear", () =>
-    {
-      editor.clear = jest.fn()
-      expect(editor.clear).toBeCalledTimes(0)
-      InternalEvent.getInstance().emitClear()
-      expect(editor.clear).toBeCalledTimes(1)
-    })
     // TODO problem with internal event singleton
     test.skip("should call convert when internalEvent emit convert", () =>
     {

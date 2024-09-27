@@ -54,10 +54,10 @@ export class OIWriteManager
   {
     this.#tool = wt
     if (wt !== WriteTool.Pencil) {
-      this.renderer.parent.classList.add("shape")
+      this.behaviors.layers.root.classList.add("shape")
     }
     else {
-      this.renderer.parent.classList.remove("shape")
+      this.behaviors.layers.root.classList.remove("shape")
     }
     this.behaviors.unselectAll()
   }

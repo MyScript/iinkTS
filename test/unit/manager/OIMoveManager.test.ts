@@ -14,9 +14,8 @@ describe("OIMoveManager.ts", () =>
 
   describe("move process", () =>
   {
-    const wrapperHTML: HTMLElement = document.createElement("div")
     const behaviors = new OIBehaviorsMock()
-    behaviors.init(wrapperHTML)
+    behaviors.init()
 
     const manager = new OIMoveManager(behaviors)
 

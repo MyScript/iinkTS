@@ -7,7 +7,8 @@ import {
   DefaultPenStyle,
   TBehaviorOptions,
   TConfiguration,
-  TPointer
+  TPointer,
+  EditorLayer
 } from "../../../src/iink"
 
 describe("RestBehaviors.ts", () =>
@@ -19,29 +20,30 @@ describe("RestBehaviors.ts", () =>
 
   test("should instanciate RestBehaviors", () =>
   {
-    //@ts-ignore TODO IIC-1006
-    const rb = new RestBehaviors(DefaultBehaviorsOptions)
+    const layers = new EditorLayer(document.createElement("div"))
+    //@ts-ignore IIC-1006 Type instantiation is excessively deep and possibly infinite.
+    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers)
     expect(rb).toBeDefined()
   })
 
   test("should init", async () =>
   {
-    const wrapperHTML: HTMLElement = document.createElement("div")
-    const rb = new RestBehaviors(DefaultBehaviorsOptions)
+    const layers = new EditorLayer(document.createElement("div"))
+    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers)
     rb.grabber.attach = jest.fn()
     rb.renderer.init = jest.fn()
-    await rb.init(wrapperHTML)
+    await rb.init()
     expect(rb.grabber.attach).toBeCalledTimes(1)
-    expect(rb.grabber.attach).toBeCalledWith(wrapperHTML)
+    expect(rb.grabber.attach).toBeCalledWith(layers.render)
     expect(rb.renderer.init).toBeCalledTimes(1)
-    expect(rb.renderer.init).toBeCalledWith(wrapperHTML)
+    expect(rb.renderer.init).toBeCalledWith(layers.render)
   })
 
   test("should call renderer on drawCurrentStroke", async () =>
   {
-    const wrapperHTML: HTMLElement = document.createElement("div")
-    const rb = new RestBehaviors(DefaultBehaviorsOptions)
-    await rb.init(wrapperHTML)
+    const layers = new EditorLayer(document.createElement("div"))
+    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers)
+    await rb.init()
     rb.renderer.drawPendingStroke = jest.fn()
     const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
     const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
@@ -56,9 +58,9 @@ describe("RestBehaviors.ts", () =>
   {
     test("should call renderer.drawModel", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement("div")
-      const rb = new RestBehaviors(DefaultBehaviorsOptions)
-      await rb.init(wrapperHTML)
+      const layers = new EditorLayer(document.createElement("div"))
+      const rb = new RestBehaviors(DefaultBehaviorsOptions, layers)
+      await rb.init()
       rb.renderer.drawModel = jest.fn()
       rb.recognizer.export = jest.fn(m => Promise.resolve(m))
       rb.updateModelRendering()
@@ -67,9 +69,9 @@ describe("RestBehaviors.ts", () =>
 
     test("should call recognizer.export", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement("div")
-      const rb = new RestBehaviors(DefaultBehaviorsOptions)
-      await rb.init(wrapperHTML)
+      const layers = new EditorLayer(document.createElement("div"))
+      const rb = new RestBehaviors(DefaultBehaviorsOptions, layers)
+      await rb.init()
       rb.renderer.drawModel = jest.fn()
       rb.recognizer.export = jest.fn(m => Promise.resolve(m))
       await rb.updateModelRendering()
@@ -79,9 +81,9 @@ describe("RestBehaviors.ts", () =>
 
     test("should reject if recognizer.export in error", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement("div")
-      const rb = new RestBehaviors(DefaultBehaviorsOptions)
-      await rb.init(wrapperHTML)
+      const layers = new EditorLayer(document.createElement("div"))
+      const rb = new RestBehaviors(DefaultBehaviorsOptions, layers)
+      await rb.init()
       rb.renderer.drawModel = jest.fn()
       rb.recognizer.export = jest.fn(() => Promise.reject("pouet"))
       expect(rb.updateModelRendering()).rejects.toEqual("pouet")
@@ -89,11 +91,11 @@ describe("RestBehaviors.ts", () =>
 
     test("should not call recognizer.export when exportContent = DEMAND", async () =>
     {
-      const wrapperHTML: HTMLElement = document.createElement("div")
+      const layers = new EditorLayer(document.createElement("div"))
       const configuration: TConfiguration = JSON.parse(JSON.stringify(DefaultConfiguration))
       configuration.triggers.exportContent = "DEMAND"
-      const rb = new RestBehaviors({ configuration })
-      await rb.init(wrapperHTML)
+      const rb = new RestBehaviors({ configuration }, layers)
+      await rb.init()
       rb.renderer.drawModel = jest.fn()
       rb.recognizer.export = jest.fn(m => Promise.resolve(m))
       await rb.updateModelRendering()
@@ -104,9 +106,9 @@ describe("RestBehaviors.ts", () =>
 
   test("should export", async () =>
   {
-    const wrapperHTML: HTMLElement = document.createElement("div")
-    const rb = new RestBehaviors(DefaultBehaviorsOptions)
-    await rb.init(wrapperHTML)
+    const layers = new EditorLayer(document.createElement("div"))
+    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers)
+    await rb.init()
     rb.recognizer.export = jest.fn(m => Promise.resolve(m))
     rb.export()
     await delay(DefaultConfiguration.triggers.exportContentDelay)
@@ -115,9 +117,9 @@ describe("RestBehaviors.ts", () =>
 
   test("should convert", async () =>
   {
-    const wrapperHTML: HTMLElement = document.createElement("div")
-    const rb = new RestBehaviors(DefaultBehaviorsOptions)
-    await rb.init(wrapperHTML)
+    const layers = new EditorLayer(document.createElement("div"))
+    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers)
+    await rb.init()
     rb.recognizer.convert = jest.fn(m => Promise.resolve(m))
     rb.convert("DIGITAL_EDIT", ["mime-type"])
     await delay(DefaultConfiguration.triggers.exportContentDelay)
@@ -126,11 +128,11 @@ describe("RestBehaviors.ts", () =>
 
   test("should resize", async () =>
   {
-    const wrapperHTML: HTMLElement = document.createElement("div")
-    const rb = new RestBehaviors(DefaultBehaviorsOptions)
+    const layers = new EditorLayer(document.createElement("div"))
+    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers)
     rb.renderer.resize = jest.fn()
     rb.recognizer.resize = jest.fn(m => Promise.resolve(m))
-    await rb.init(wrapperHTML)
+    await rb.init()
     const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
     const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
     rb.model.initCurrentStroke(p1, "pen", DefaultPenStyle)
@@ -142,9 +144,9 @@ describe("RestBehaviors.ts", () =>
 
   test("should not call recognizer on resize if no strokes", async () =>
   {
-    const wrapperHTML: HTMLElement = document.createElement("div")
-    const rb = new RestBehaviors(DefaultBehaviorsOptions)
-    await rb.init(wrapperHTML)
+    const layers = new EditorLayer(document.createElement("div"))
+    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers)
+    await rb.init()
     rb.renderer.resize = jest.fn()
     rb.recognizer.resize = jest.fn(m => Promise.resolve(m))
     await rb.resize(1, 2)
@@ -154,9 +156,9 @@ describe("RestBehaviors.ts", () =>
 
   test("should undo", async () =>
   {
-    const wrapperHTML: HTMLElement = document.createElement("div")
-    const rb = new RestBehaviors(DefaultBehaviorsOptions)
-    await rb.init(wrapperHTML)
+    const layers = new EditorLayer(document.createElement("div"))
+    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers)
+    await rb.init()
     const model1 = new Model()
     rb.recognizer.export = jest.fn(m => Promise.resolve(m))
     rb.renderer.drawModel = jest.fn()
@@ -168,9 +170,9 @@ describe("RestBehaviors.ts", () =>
 
   test("should redo", async () =>
   {
-    const wrapperHTML: HTMLElement = document.createElement("div")
-    const rb = new RestBehaviors(DefaultBehaviorsOptions)
-    await rb.init(wrapperHTML)
+    const layers = new EditorLayer(document.createElement("div"))
+    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers)
+    await rb.init()
     const model2 = new Model(width, height)
     const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
     const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
@@ -185,9 +187,9 @@ describe("RestBehaviors.ts", () =>
 
   test("should clear", async () =>
   {
-    const wrapperHTML: HTMLElement = document.createElement("div")
-    const rb = new RestBehaviors(DefaultBehaviorsOptions)
-    await rb.init(wrapperHTML)
+    const layers = new EditorLayer(document.createElement("div"))
+    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers)
+    await rb.init()
     rb.renderer.drawModel = jest.fn()
     const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
     const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
@@ -201,9 +203,9 @@ describe("RestBehaviors.ts", () =>
 
   test("should destroy", async () =>
   {
-    const wrapperHTML: HTMLElement = document.createElement("div")
-    const rb = new RestBehaviors(DefaultBehaviorsOptions)
-    await rb.init(wrapperHTML)
+    const layers = new EditorLayer(document.createElement("div"))
+    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers)
+    await rb.init()
     rb.grabber.detach = jest.fn()
     rb.renderer.destroy = jest.fn()
     rb.history.push = jest.fn(m => m)

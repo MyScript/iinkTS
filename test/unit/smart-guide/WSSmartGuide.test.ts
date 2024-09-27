@@ -1,35 +1,37 @@
 import { LeftClickEventMock } from "../__mocks__/EventMock"
 import {
-  SmartGuide,
+  WSSmartGuide,
   DefaultRenderingConfiguration,
   InternalEvent,
   TMarginConfiguration
 } from "../../../src/iink"
+import { WSBehaviorsMock } from "../__mocks__/WSBehaviorsMock"
 
-describe("SmartGuide.ts", () =>
+describe("WSSmartGuide.ts", () =>
 {
+  const mockBehaviors = new WSBehaviorsMock()
   const margin: TMarginConfiguration = {
     bottom: 100,
     top: 20,
     left: 30,
     right: 40
   }
-  test("should instanciate SmartGuide", () =>
+  test("should instanciate WSSmartGuide", () =>
   {
-    const sm = new SmartGuide()
+    const sm = new WSSmartGuide(mockBehaviors)
     expect(sm).toBeDefined()
   })
 
   test("should have internalEvent property", () =>
   {
-    const sm = new SmartGuide()
+    const sm = new WSSmartGuide(mockBehaviors)
     expect(sm.internalEvent).toBe(InternalEvent.getInstance())
   })
 
   describe("Initilize", () =>
   {
     const domElement = document.createElement("div")
-    const sm = new SmartGuide()
+    const sm = new WSSmartGuide(mockBehaviors)
     sm.init(domElement, margin, DefaultRenderingConfiguration)
 
     test("should init wrapper", () =>
@@ -85,7 +87,7 @@ describe("SmartGuide.ts", () =>
   describe("Menu visibility", () =>
   {
     const domElement = document.createElement("div")
-    const sm = new SmartGuide()
+    const sm = new WSSmartGuide(mockBehaviors)
     sm.init(domElement, margin, DefaultRenderingConfiguration)
 
     const pointerDownEvt = new LeftClickEventMock("pointerdown", {
@@ -121,9 +123,8 @@ describe("SmartGuide.ts", () =>
   describe("Menu actions", () =>
   {
     const domElement = document.createElement("div")
-    const sm = new SmartGuide()
+    const sm = new WSSmartGuide(mockBehaviors)
     sm.internalEvent.emitConvert = jest.fn()
-    sm.internalEvent.emitClear = jest.fn()
     sm.init(domElement, margin, DefaultRenderingConfiguration)
 
     const pointerDownEvt = new LeftClickEventMock("pointerdown", {
@@ -134,28 +135,30 @@ describe("SmartGuide.ts", () =>
     })
     const ellispis = domElement.querySelector(".ellipsis") as HTMLDivElement
     ellispis.dispatchEvent(pointerDownEvt)
-    test("should emit CONVERT", () =>
+    test("should call behaviors.convert", () =>
     {
+      expect(mockBehaviors.convert).toBeCalledTimes(0)
       const btn = domElement.querySelector(`#convert-${ sm.uuid }`) as HTMLDivElement
       btn.dispatchEvent(pointerDownEvt)
-      expect(sm.internalEvent.emitConvert).toBeCalledTimes(1)
+      expect(mockBehaviors.convert).toBeCalledTimes(1)
     })
     test.skip("should COPY", () =>
     {
       // TODO
     })
-    test("should emit CLEAR", () =>
+    test("should call behavior.clear", () =>
     {
+      expect(mockBehaviors.clear).toBeCalledTimes(0)
       const btn = domElement.querySelector(`#delete-${ sm.uuid }`) as HTMLDivElement
       btn.dispatchEvent(pointerDownEvt)
-      expect(sm.internalEvent.emitClear).toBeCalledTimes(1)
+      expect(mockBehaviors.clear).toBeCalledTimes(1)
     })
   })
 
   describe("Display", () =>
   {
     const domElement = document.createElement("div")
-    const sm = new SmartGuide()
+    const sm = new WSSmartGuide(mockBehaviors)
     sm.init(domElement, margin, DefaultRenderingConfiguration)
     const jiix = {
       "type": "Text",

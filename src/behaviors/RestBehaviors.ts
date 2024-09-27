@@ -12,6 +12,7 @@ import { HistoryManager } from "../history"
 import { DeferredPromise, PartialDeep } from "../utils"
 import { IBehaviors } from "./IBehaviors"
 import { TBehaviorOptions } from "./TBehaviorOptions"
+import { EditorLayer } from "../EditorLayer"
 
 /**
  * @group Behavior
@@ -24,17 +25,19 @@ export class RestBehaviors implements IBehaviors
   #model: Model
   #resizeTimer?: ReturnType<typeof setTimeout>
   #exportTimer?: ReturnType<typeof setTimeout>
+  layers: EditorLayer
 
   grabber: PointerEventGrabber
   renderer: CanvasRenderer
   recognizer: RestRecognizer
   history: HistoryManager
   styleManager: StyleManager
-  intention: Intention
+  #intention: Intention = Intention.Write
 
-  constructor(options: PartialDeep<TBehaviorOptions>)
+  constructor(options: PartialDeep<TBehaviorOptions>, layers: EditorLayer)
   {
     this.#logger.info("constructor", { options })
+    this.layers = layers
     this.#configuration = new Configuration(options?.configuration)
     this.styleManager = new StyleManager(options?.penStyle, options?.theme)
 
@@ -121,6 +124,37 @@ export class RestBehaviors implements IBehaviors
     }
   }
 
+  get intention(): Intention
+  {
+    return this.#intention
+  }
+  set intention(i: Intention)
+  {
+    this.#intention = i
+    this.setCursorStyle()
+  }
+
+  protected setCursorStyle(): void
+  {
+    switch (this.intention) {
+      case Intention.Erase:
+        this.layers.root.classList.remove("draw")
+        this.layers.root.classList.add("erase")
+        this.layers.root.classList.remove("select")
+        break
+      case Intention.Select:
+        this.layers.root.classList.remove("draw")
+        this.layers.root.classList.remove("erase")
+        this.layers.root.classList.add("select")
+        break
+      default:
+        this.layers.root.classList.add("draw")
+        this.layers.root.classList.remove("erase")
+        this.layers.root.classList.remove("select")
+        break
+    }
+  }
+
   get internalEvent(): InternalEvent
   {
     return InternalEvent.getInstance()
@@ -174,17 +208,17 @@ export class RestBehaviors implements IBehaviors
     return this.#configuration
   }
 
-  async init(domElement: HTMLElement): Promise<void>
+  async init(): Promise<void>
   {
-    this.#logger.info("init", { domElement })
-    this.model.width = Math.max(domElement.clientWidth, this.#configuration.rendering.minWidth)
-    this.model.height = Math.max(domElement.clientHeight, this.#configuration.rendering.minHeight)
+    this.#logger.info("init")
+    this.model.width = Math.max(this.layers.root.clientWidth, this.#configuration.rendering.minWidth)
+    this.model.height = Math.max(this.layers.root.clientHeight, this.#configuration.rendering.minHeight)
 
     this.history.push(this.model)
 
-    this.renderer.init(domElement)
+    this.renderer.init(this.layers.render)
 
-    this.grabber.attach(domElement)
+    this.grabber.attach(this.layers.render)
     this.grabber.onPointerDown = this.onPointerDown.bind(this)
     this.grabber.onPointerMove = this.onPointerMove.bind(this)
     this.grabber.onPointerUp = this.onPointerUp.bind(this)
@@ -260,13 +294,14 @@ export class RestBehaviors implements IBehaviors
       const stroke = new Stroke(s.style || DefaultPenStyle, s.pointerType)
       if (s.id) stroke.id = s.id
       if (!s.pointers?.length) {
-        errors.push(`stroke ${strokeIndex + 1} has not pointers`)
+        errors.push(`stroke ${ strokeIndex + 1 } has not pointers`)
         flag = false
         return
       }
-      s.pointers?.forEach((pp, pIndex) => {
+      s.pointers?.forEach((pp, pIndex) =>
+      {
         if (!pp) {
-          errors.push(`stroke ${strokeIndex + 1} has no pointer at ${pIndex}`)
+          errors.push(`stroke ${ strokeIndex + 1 } has no pointer at ${ pIndex }`)
           flag = false
           return
         }
@@ -277,7 +312,7 @@ export class RestBehaviors implements IBehaviors
           y: 0
         }
         if (pp?.x == undefined || pp?.x == null) {
-          errors.push(`stroke ${strokeIndex + 1} has no x at pointer at ${pIndex}`)
+          errors.push(`stroke ${ strokeIndex + 1 } has no x at pointer at ${ pIndex }`)
           flag = false
           return
         }
@@ -285,7 +320,7 @@ export class RestBehaviors implements IBehaviors
           pointer.x = pp.x
         }
         if (pp?.y == undefined || pp?.y == null) {
-          errors.push(`stroke ${strokeIndex + 1} has no y at pointer at ${pIndex}`)
+          errors.push(`stroke ${ strokeIndex + 1 } has no y at pointer at ${ pIndex }`)
           flag = false
           return
         }
@@ -302,7 +337,7 @@ export class RestBehaviors implements IBehaviors
     })
 
     if (errors.length) {
-      this.internalEvent.emitError( new Error(errors.join("\n")))
+      this.internalEvent.emitError(new Error(errors.join("\n")))
     }
     try {
       const newModel = await this.updateModelRendering()

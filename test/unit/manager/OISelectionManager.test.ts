@@ -53,7 +53,6 @@ describe("OISelectionManager.ts", () =>
         height: 10
       }),
     })
-    const wrapperHTML: HTMLElement = document.createElement("div")
     const behaviors = new OIBehaviorsMock()
     const manager = new OISelectionManager(behaviors)
     const stroke = buildOIStroke()
@@ -63,7 +62,7 @@ describe("OISelectionManager.ts", () =>
 
     beforeAll(async () =>
     {
-      await behaviors.init(wrapperHTML)
+      await behaviors.init()
       behaviors.model.addSymbol(stroke)
       behaviors.renderer.drawSymbol(stroke)
     })

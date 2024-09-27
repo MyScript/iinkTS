@@ -1,6 +1,7 @@
 
 export * from "./Constants"
 export * from "./Editor"
+export * from "./EditorLayer"
 export * from "./behaviors"
 export * from "./configuration"
 export * from "./event"

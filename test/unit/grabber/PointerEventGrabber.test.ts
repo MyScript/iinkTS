@@ -1,11 +1,11 @@
 import { DoubleTouchEventMock, LeftClickEventMock, RightClickEventMock, TouchEventMock } from "../__mocks__/EventMock"
-import { DefaultConfiguration, PointerEventGrabber, TGrabberConfiguration, IGrabber } from "../../../src/iink"
+import { DefaultConfiguration, PointerEventGrabber, TGrabberConfiguration } from "../../../src/iink"
 
 describe("PointerEventGrabber.ts", () =>
 {
   test("should create with default configuration", () =>
   {
-    const grabber: IGrabber = new PointerEventGrabber(DefaultConfiguration.grabber)
+    const grabber = new PointerEventGrabber(DefaultConfiguration.grabber)
     expect(grabber).toBeDefined()
   })
 
@@ -16,7 +16,7 @@ describe("PointerEventGrabber.ts", () =>
     wrapperHTML.style.height = "100px"
     document.body.appendChild(wrapperHTML)
 
-    const grabber: IGrabber = new PointerEventGrabber(DefaultConfiguration.grabber)
+    const grabber = new PointerEventGrabber(DefaultConfiguration.grabber)
     grabber.attach(wrapperHTML)
     grabber.onPointerDown = jest.fn()
     grabber.onPointerMove = jest.fn()
@@ -65,7 +65,7 @@ describe("PointerEventGrabber.ts", () =>
 
     test("should call detach if already attach", () =>
     {
-      const g: IGrabber = new PointerEventGrabber(DefaultConfiguration.grabber)
+      const g = new PointerEventGrabber(DefaultConfiguration.grabber)
       g.onPointerDown = jest.fn()
       g.onPointerMove = jest.fn()
       g.onPointerUp = jest.fn()
@@ -77,21 +77,21 @@ describe("PointerEventGrabber.ts", () =>
 
     test("should not listen pointerdown event after detach", () =>
     {
-      grabber.detach(wrapperHTML)
+      grabber.detach()
       wrapperHTML.dispatchEvent(pointerDownEvt)
       expect(grabber.onPointerDown).not.toBeCalled()
     })
 
     test("should not listen pointermove event after detach", () =>
     {
-      grabber.detach(wrapperHTML)
+      grabber.detach()
       wrapperHTML.dispatchEvent(pointerMoveEvt)
       expect(grabber.onPointerMove).not.toBeCalled()
     })
 
     test("should not listen pointerup event after detach", () =>
     {
-      grabber.detach(wrapperHTML)
+      grabber.detach()
       wrapperHTML.dispatchEvent(pointerUpEvt)
       expect(grabber.onPointerUp).not.toBeCalled()
     })
@@ -104,7 +104,7 @@ describe("PointerEventGrabber.ts", () =>
     wrapperHTML.style.height = "100px"
     document.body.appendChild(wrapperHTML)
 
-    const grabber: IGrabber = new PointerEventGrabber(DefaultConfiguration.grabber)
+    const grabber = new PointerEventGrabber(DefaultConfiguration.grabber)
     grabber.onPointerDown = jest.fn()
     grabber.attach(wrapperHTML)
 
@@ -169,7 +169,7 @@ describe("PointerEventGrabber.ts", () =>
 
     test("should not round values with default configuration", () =>
     {
-      const grabber: IGrabber = new PointerEventGrabber(DefaultConfiguration.grabber)
+      const grabber = new PointerEventGrabber(DefaultConfiguration.grabber)
       grabber.onPointerDown = jest.fn()
       grabber.onPointerMove = jest.fn()
       grabber.onPointerUp = jest.fn()
@@ -192,7 +192,7 @@ describe("PointerEventGrabber.ts", () =>
     test("should round values from configuration", () =>
     {
       const grabberConfig: TGrabberConfiguration = { ...DefaultConfiguration.grabber, xyFloatPrecision: 2 }
-      const grabber: IGrabber = new PointerEventGrabber(grabberConfig)
+      const grabber = new PointerEventGrabber(grabberConfig)
       grabber.onPointerDown = jest.fn()
       grabber.onPointerMove = jest.fn()
       grabber.onPointerUp = jest.fn()
@@ -216,7 +216,7 @@ describe("PointerEventGrabber.ts", () =>
     test("should not round values from configuration if negative precision", () =>
     {
       const grabberConfig: TGrabberConfiguration = { ...DefaultConfiguration.grabber, xyFloatPrecision: -2 }
-      const grabber: IGrabber = new PointerEventGrabber(grabberConfig)
+      const grabber = new PointerEventGrabber(grabberConfig)
       grabber.onPointerDown = jest.fn()
       grabber.onPointerMove = jest.fn()
       grabber.onPointerUp = jest.fn()
@@ -245,7 +245,7 @@ describe("PointerEventGrabber.ts", () =>
     wrapperHTML.style.height = "100px"
     document.body.appendChild(wrapperHTML)
 
-    const grabber: IGrabber = new PointerEventGrabber(DefaultConfiguration.grabber)
+    const grabber = new PointerEventGrabber(DefaultConfiguration.grabber)
     grabber.attach(wrapperHTML)
     grabber.onPointerDown = jest.fn()
 
@@ -259,7 +259,7 @@ describe("PointerEventGrabber.ts", () =>
       })
       wrapperHTML.dispatchEvent(pointerDownEvt)
       expect(grabber.onPointerDown).not.toBeCalled()
-      grabber.detach(wrapperHTML)
+      grabber.detach()
     })
 
     test("should not listen right click event", () =>
@@ -272,7 +272,7 @@ describe("PointerEventGrabber.ts", () =>
       })
       wrapperHTML.dispatchEvent(pointerDownEvt)
       expect(grabber.onPointerDown).not.toBeCalled()
-      grabber.detach(wrapperHTML)
+      grabber.detach()
     })
   })
 

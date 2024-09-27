@@ -3,10 +3,11 @@ import { TPointer } from "../primitive"
 /**
  * @group Grabber
  */
-export interface IGrabber {
-  attach(domElement?: HTMLElement): void
+export interface IGrabber
+{
+  attach(element: HTMLElement | SVGElement): void
 
-  detach(domElement?: HTMLElement): void
+  detach(): void
 
   onPointerDown(evt: PointerEvent, point: TPointer): void
 

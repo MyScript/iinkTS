@@ -1,5 +1,9 @@
-import { OIBehaviors, TBehaviorOptions } from "../../../src/behaviors"
-import { DefaultConfiguration } from "../../../src/configuration"
+import {
+  TBehaviorOptions,
+  OIBehaviors,
+  DefaultConfiguration,
+  EditorLayer
+} from "../../../src/iink"
 
 const behaviorsOptions: TBehaviorOptions = {
   configuration: JSON.parse(JSON.stringify(DefaultConfiguration))
@@ -10,19 +14,19 @@ export class OIBehaviorsMock extends OIBehaviors
 {
   constructor() {
     //@ts-ignore
-    super(behaviorsOptions, document.createElement("div"))
+    super(behaviorsOptions, new EditorLayer(document.createElement("div")))
   }
 
-  init = jest.fn((domElement) => {
-    this.model.width = Math.max(domElement.clientWidth, this.configuration.rendering.minWidth)
-    this.model.height = Math.max(domElement.clientHeight, this.configuration.rendering.minHeight)
+  init = jest.fn(() => {
+    this.model.width = Math.max(this.layers.root.clientWidth, this.configuration.rendering.minWidth)
+    this.model.height = Math.max(this.layers.root.clientHeight, this.configuration.rendering.minHeight)
     this.model.rowHeight = this.configuration.rendering.guides.gap
     this.history.push(this.model, {})
 
-    this.renderer.init(domElement)
-    // this.menu.render(this.layerInfos)
+    this.renderer.init(this.layers.render)
+    // this.menu.render(this.layers.infos.root)
 
-    this.grabber.attach(this.renderer.layer as unknown as HTMLElement)
+    this.grabber.attach(this.renderer.layer)
     this.grabber.onPointerDown = this.onPointerDown.bind(this)
     this.grabber.onPointerMove = this.onPointerMove.bind(this)
     this.grabber.onPointerUp = this.onPointerUp.bind(this)

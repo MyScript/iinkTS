@@ -14,31 +14,38 @@ const getComputedStyle = async (locator) => {
 const colorMap = [
   {
     id: "black-btn",
-    color: "rgb(0, 0, 0)"
+    color: "rgb(0, 0, 0)",
+    backgroundColor: "rgba(0, 0, 0, 0.5)"
   },
   {
     id: "dark-grey-btn",
-    color: "rgb(128, 128, 128)"
+    color: "rgb(128, 128, 128)",
+    backgroundColor: "rgba(128, 128, 128, 0.5)",
   },
   {
     id: "light-grey-btn",
-    color: "rgb(217, 217, 217)"
+    color: "rgb(217, 217, 217)",
+    backgroundColor: "rgba(217, 217, 217, 0.5)",
   },
   {
     id: "blue-btn",
-    color: "rgb(26, 140, 255)"
+    color: "rgb(26, 140, 255)",
+    backgroundColor: "rgba(26, 140, 255, 0.5)",
   },
   {
     id: "red-btn",
-    color: "rgb(255, 26, 64)"
+    color: "rgb(255, 26, 64)",
+    backgroundColor: "rgba(255, 26, 64, 0.5)",
   },
   {
     id: "green-btn",
-    color: "rgb(43, 217, 101)"
+    color: "rgb(43, 217, 101)",
+    backgroundColor: "rgba(43, 217, 101, 0.5)",
   },
   {
     id: "yellow-btn",
-    color: "rgb(255, 221, 51)"
+    color: "rgb(255, 221, 51)",
+    backgroundColor: "rgba(255, 221, 51, 0.5)"
   },
 
 ]
@@ -73,7 +80,7 @@ describe("Websocket Text highlight words", () => {
     await waitEditorIdle(page)
     expect(await page.locator("#highlight-list > li").count()).toEqual(1)
     const style = await getComputedStyle(page.locator("#highlight-list > li"))
-    expect(style.backgroundColor).toContain("rgb(0, 0, 0)")
+    expect(style.backgroundColor).toContain("rgba(0, 0, 0, 0.5)")
   })
 
   test("should write, surround and is in list then remove from list", async () => {
@@ -105,7 +112,7 @@ describe("Websocket Text highlight words", () => {
       expect(await page.locator("#highlight-list > li").count()).toEqual(1)
 
       const style = await getComputedStyle(page.locator("#highlight-list > li"))
-      expect(style.backgroundColor).toContain(currentColor.color)
+      expect(style.backgroundColor).toContain(currentColor.backgroundColor)
       await Promise.all([
         getDatasFromExportedEvent(page),
         write(page, [helloOneSurrounded.strokes[1]])
@@ -133,7 +140,7 @@ describe("Websocket Text highlight words", () => {
     await waitEditorIdle(page)
     expect(await page.locator("#highlight-list > li").count()).toEqual(1)
     const style = await getComputedStyle(page.locator("#highlight-list > li"))
-    expect(style.backgroundColor).toContain(highlightColor.color)
+    expect(style.backgroundColor).toContain(highlightColor.backgroundColor)
     expect(style.color).toContain(strokeColor.color)
   })
   require("../_partials/text/nav-actions-text-undo-redo-test")

@@ -26,7 +26,6 @@ describe("OIWriteManager.ts", () =>
 
   describe("writing process", () =>
   {
-    const wrapperHTML: HTMLElement = document.createElement("div")
     const behaviors = new OIBehaviorsMock()
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     behaviors.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
@@ -34,7 +33,7 @@ describe("OIWriteManager.ts", () =>
     const manager = new OIWriteManager(behaviors)
     manager.renderer.drawSymbol = jest.fn()
 
-    behaviors.init(wrapperHTML)
+    behaviors.init()
 
     test("should init model.currentSymbol with pencil", async () =>
     {
@@ -60,9 +59,9 @@ describe("OIWriteManager.ts", () =>
     })
     test("should init model.currentSymbol with Rectangle", () =>
     {
-      expect(wrapperHTML.classList.contains("shape")).toBe(false)
+      expect(behaviors.layers.root.classList.contains("shape")).toBe(false)
       manager.tool = WriteTool.Rectangle
-      expect(wrapperHTML.classList.contains("shape")).toBe(true)
+      expect(behaviors.layers.root.classList.contains("shape")).toBe(true)
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       manager.start(DefaultStyle, point, "mouse")
       expect(manager.model.currentSymbol).toBeDefined()
@@ -75,7 +74,7 @@ describe("OIWriteManager.ts", () =>
     test("should init model.currentSymbol with Circle", () =>
     {
       manager.tool = WriteTool.Circle
-      expect(wrapperHTML.classList.contains("shape")).toBe(true)
+      expect(behaviors.layers.root.classList.contains("shape")).toBe(true)
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       manager.start(DefaultStyle, point, "mouse")
       expect(manager.model.currentSymbol).toBeDefined()
@@ -88,7 +87,7 @@ describe("OIWriteManager.ts", () =>
     test("should init model.currentSymbol with Ellipse", () =>
     {
       manager.tool = WriteTool.Ellipse
-      expect(wrapperHTML.classList.contains("shape")).toBe(true)
+      expect(behaviors.layers.root.classList.contains("shape")).toBe(true)
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       manager.start(DefaultStyle, point, "mouse")
       expect(manager.model.currentSymbol).toBeDefined()
@@ -101,7 +100,7 @@ describe("OIWriteManager.ts", () =>
     test("should init model.currentSymbol with Triangle", () =>
     {
       manager.tool = WriteTool.Triangle
-      expect(wrapperHTML.classList.contains("shape")).toBe(true)
+      expect(behaviors.layers.root.classList.contains("shape")).toBe(true)
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       manager.start(DefaultStyle, point, "mouse")
       expect(manager.model.currentSymbol).toBeDefined()
@@ -114,7 +113,7 @@ describe("OIWriteManager.ts", () =>
     test("should init model.currentSymbol with Parallelogram", () =>
     {
       manager.tool = WriteTool.Parallelogram
-      expect(wrapperHTML.classList.contains("shape")).toBe(true)
+      expect(behaviors.layers.root.classList.contains("shape")).toBe(true)
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       manager.start(DefaultStyle, point, "mouse")
       expect(manager.model.currentSymbol).toBeDefined()
@@ -127,7 +126,7 @@ describe("OIWriteManager.ts", () =>
     test("should init model.currentSymbol with Line", () =>
     {
       manager.tool = WriteTool.Line
-      expect(wrapperHTML.classList.contains("shape")).toBe(true)
+      expect(behaviors.layers.root.classList.contains("shape")).toBe(true)
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       manager.start(DefaultStyle, point, "mouse")
       expect(manager.model.currentSymbol).toBeDefined()
@@ -142,7 +141,7 @@ describe("OIWriteManager.ts", () =>
     test("should init model.currentSymbol with Arrow", () =>
     {
       manager.tool = WriteTool.Arrow
-      expect(wrapperHTML.classList.contains("shape")).toBe(true)
+      expect(behaviors.layers.root.classList.contains("shape")).toBe(true)
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       manager.start(DefaultStyle, point, "mouse")
       expect(manager.model.currentSymbol).toBeDefined()
@@ -157,7 +156,7 @@ describe("OIWriteManager.ts", () =>
     test("should init model.currentSymbol with DoubleArrow", () =>
     {
       manager.tool = WriteTool.DoubleArrow
-      expect(wrapperHTML.classList.contains("shape")).toBe(true)
+      expect(behaviors.layers.root.classList.contains("shape")).toBe(true)
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       manager.start(DefaultStyle, point, "mouse")
       expect(manager.model.currentSymbol).toBeDefined()

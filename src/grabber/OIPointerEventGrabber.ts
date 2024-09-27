@@ -11,7 +11,7 @@ export class OIPointerEventGrabber implements IGrabber
   #logger = LoggerManager.getLogger(LoggerClass.GRABBER)
 
   protected configuration: TGrabberConfiguration
-  protected domElement!: HTMLElement
+  protected layerCapture!: SVGElement
   protected activePointerId?: number
   protected prevent = (e: Event) => e.preventDefault()
 
@@ -44,10 +44,10 @@ export class OIPointerEventGrabber implements IGrabber
     } else {
       ({ clientX, clientY } = event)
     }
-    const rect: DOMRect = this.domElement.getBoundingClientRect()
+    const rect: DOMRect = this.layerCapture.getBoundingClientRect()
     const pointer = {
-      x: this.roundFloat(clientX - rect.left - this.domElement.clientLeft + this.domElement.scrollLeft, this.configuration.xyFloatPrecision),
-      y: this.roundFloat(clientY - rect.top - this.domElement.clientTop + this.domElement.scrollTop, this.configuration.xyFloatPrecision),
+      x: this.roundFloat(clientX - rect.left - this.layerCapture.clientLeft + this.layerCapture.scrollLeft, this.configuration.xyFloatPrecision),
+      y: this.roundFloat(clientY - rect.top - this.layerCapture.clientTop + this.layerCapture.scrollTop, this.configuration.xyFloatPrecision),
       t: this.roundFloat(Date.now(), this.configuration.timestampFloatPrecision),
       p: (event as PointerEvent).pressure,
     }
@@ -100,7 +100,7 @@ export class OIPointerEventGrabber implements IGrabber
   {
     if (
       this.activePointerId != undefined && this.activePointerId === evt.pointerId &&
-      !this.domElement.contains(evt.target as HTMLElement)
+      !this.layerCapture.contains(evt.target as HTMLElement)
     ) {
       evt.stopPropagation()
       this.activePointerId = undefined
@@ -113,8 +113,10 @@ export class OIPointerEventGrabber implements IGrabber
 
   protected contextMenuHandler = (evt: MouseEvent) =>
   {
-    const point = this.extractPoint(evt)
-    this.onContextMenu(evt.target as HTMLElement, point)
+    if (evt.target) {
+      const point = this.extractPoint(evt)
+      this.onContextMenu(evt.target as HTMLElement, point)
+    }
   }
 
   stopPointerEvent(): void
@@ -122,31 +124,31 @@ export class OIPointerEventGrabber implements IGrabber
     this.activePointerId = undefined
   }
 
-  attach(domElement: HTMLElement)
+  attach(layerCapture: SVGElement)
   {
-    this.#logger.info("attach", { domElement })
-    if (this.domElement) {
+    this.#logger.info("attach", { domElement: layerCapture })
+    if (this.layerCapture) {
       this.detach()
     }
-    this.domElement = domElement
-    this.domElement.addEventListener("pointerdown", this.pointerDownHandler, this.configuration.listenerOptions)
-    this.domElement.addEventListener("pointermove", this.pointerMoveHandler, this.configuration.listenerOptions)
-    this.domElement.addEventListener("pointerup", this.pointerUpHandler, this.configuration.listenerOptions)
-    this.domElement.addEventListener("pointerleave", this.pointerUpHandler, this.configuration.listenerOptions)
-    this.domElement.addEventListener("pointercancel", this.pointerUpHandler, this.configuration.listenerOptions)
-    this.domElement.addEventListener("pointerout", this.pointerOutHandler, this.configuration.listenerOptions)
-    this.domElement.addEventListener("contextmenu", this.contextMenuHandler)
+    this.layerCapture = layerCapture
+    this.layerCapture.addEventListener("pointerdown", this.pointerDownHandler, this.configuration.listenerOptions)
+    this.layerCapture.addEventListener("pointermove", this.pointerMoveHandler, this.configuration.listenerOptions)
+    this.layerCapture.addEventListener("pointerup", this.pointerUpHandler, this.configuration.listenerOptions)
+    this.layerCapture.addEventListener("pointerleave", this.pointerUpHandler, this.configuration.listenerOptions)
+    this.layerCapture.addEventListener("pointercancel", this.pointerUpHandler, this.configuration.listenerOptions)
+    this.layerCapture.addEventListener("pointerout", this.pointerOutHandler, this.configuration.listenerOptions)
+    this.layerCapture.addEventListener("contextmenu", this.contextMenuHandler)
   }
 
   detach()
   {
     this.#logger.info("detach")
-    this.domElement?.removeEventListener("pointerdown", this.pointerDownHandler, this.configuration.listenerOptions)
-    this.domElement?.removeEventListener("pointermove", this.pointerMoveHandler, this.configuration.listenerOptions)
-    this.domElement?.removeEventListener("pointerup", this.pointerUpHandler, this.configuration.listenerOptions)
-    this.domElement?.removeEventListener("pointerleave", this.pointerUpHandler, this.configuration.listenerOptions)
-    this.domElement?.removeEventListener("pointercancel", this.pointerUpHandler, this.configuration.listenerOptions)
-    this.domElement?.removeEventListener("pointerout", this.pointerOutHandler, this.configuration.listenerOptions)
-    this.domElement?.removeEventListener("contextmenu", this.contextMenuHandler)
+    this.layerCapture?.removeEventListener("pointerdown", this.pointerDownHandler, this.configuration.listenerOptions)
+    this.layerCapture?.removeEventListener("pointermove", this.pointerMoveHandler, this.configuration.listenerOptions)
+    this.layerCapture?.removeEventListener("pointerup", this.pointerUpHandler, this.configuration.listenerOptions)
+    this.layerCapture?.removeEventListener("pointerleave", this.pointerUpHandler, this.configuration.listenerOptions)
+    this.layerCapture?.removeEventListener("pointercancel", this.pointerUpHandler, this.configuration.listenerOptions)
+    this.layerCapture?.removeEventListener("pointerout", this.pointerOutHandler, this.configuration.listenerOptions)
+    this.layerCapture?.removeEventListener("contextmenu", this.contextMenuHandler)
   }
 }

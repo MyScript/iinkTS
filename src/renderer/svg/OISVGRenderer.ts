@@ -22,7 +22,7 @@ export class OISVGRenderer
 
   configuration: TRenderingConfiguration
   parent!: HTMLElement
-  layer!: SVGElement
+  layer!: SVGSVGElement
   definitionGroup!: SVGGElement
 
   verticalGuides: number[] = []

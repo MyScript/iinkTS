@@ -81,15 +81,24 @@
     cursor: context-menu;
 }
 
-.ms-editor canvas,
-.ms-editor svg {
-    z-index: 20;
+.ms-editor .ms-layer-render {
     position: absolute;
     left: 0;
     top: 0;
+    z-index: 20;
+    height: 100%;
+    width: 100%;
 }
 
-.ms-editor canvas.ms-rendering-canvas {
+.ms-editor [data-layer="MODEL"],
+.ms-editor [data-layer="CAPTURE"] {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 20;
+}
+
+.ms-editor .ms-rendering-canvas {
     z-index: 9;
     pointer-events: none;
     background-image: linear-gradient(to right, #F5F6F7 1px, transparent 1px), linear-gradient(to bottom, #F5F6F7 1px, transparent 1px);
@@ -97,7 +106,7 @@
 }
 
 /** layer infos **/
-.ms-editor .ms-layer-infos {
+.ms-editor .ms-layer-ui {
     position: sticky;
     z-index: 25;
     left: 0;
@@ -107,7 +116,7 @@
     pointer-events: none;
     user-select: none;
 }
-.ms-editor .ms-layer-infos > * {
+.ms-editor .ms-layer-ui > * {
     cursor: auto;
     pointer-events: all;
     user-select: none;

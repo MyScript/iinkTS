@@ -15,7 +15,7 @@ describe("OIMenuStyle.ts", () =>
   describe("render", () =>
   {
     const behaviors = new OIBehaviorsMock()
-    behaviors.init(behaviors.layerInfos)
+    behaviors.init()
     const menu = new OIMenuStyle(behaviors)
     describe("isMobile", () =>
     {
@@ -148,7 +148,7 @@ describe("OIMenuStyle.ts", () =>
     const behaviors = new OIBehaviorsMock()
     behaviors.selector.resetSelectedGroup = jest.fn()
 
-    behaviors.init(behaviors.layerInfos)
+    behaviors.init()
     const menu = new OIMenuStyle(behaviors)
     menu.render(layer)
 
@@ -227,7 +227,7 @@ describe("OIMenuStyle.ts", () =>
   {
     const layer = document.createElement("div")
     const behaviors = new OIBehaviorsMock()
-    behaviors.init(behaviors.layerInfos)
+    behaviors.init()
     const menu = new OIMenuStyle(behaviors)
     menu.render(layer)
 
@@ -366,7 +366,7 @@ describe("OIMenuStyle.ts", () =>
   {
     const layer = document.createElement("div")
     const behaviors = new OIBehaviorsMock()
-    behaviors.init(behaviors.layerInfos)
+    behaviors.init()
     const menu = new OIMenuStyle(behaviors)
     menu.render(layer)
     test("should hide", () =>
@@ -387,7 +387,7 @@ describe("OIMenuStyle.ts", () =>
   {
     const layer = document.createElement("div")
     const behaviors = new OIBehaviorsMock()
-    behaviors.init(behaviors.layerInfos)
+    behaviors.init()
     const menu = new OIMenuStyle(behaviors)
     menu.render(layer)
     test("should remove elements", () =>

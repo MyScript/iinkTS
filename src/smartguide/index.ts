@@ -1,1 +1,1 @@
-export * from "./SmartGuide"
+export * from "./WSSmartGuide"

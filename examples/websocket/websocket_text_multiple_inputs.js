@@ -7,7 +7,7 @@ const answersColumns = document.getElementById("answers-colum");
 const editorElement = document.getElementById("editor");
 
 function getWrittenStrokes() {
-  return editor.wrapperHTML.querySelector("[data-layer=MODEL]").cloneNode(true)
+  return editor.layers.root.querySelector("[data-layer=MODEL]").cloneNode(true)
 }
 
 function getResultElementFromInput(input) {
@@ -90,7 +90,7 @@ for (let i = 0; i < questions.length; i++) {
 
   inputEl.addEventListener("pointerdown", async (evt) => {
     evt.preventDefault()
-    if (!inputEl.contains(editor.wrapperHTML)) {
+    if (!inputEl.contains(editor.layers.root)) {
       switchEditorInput(inputEl)
     }
   })
