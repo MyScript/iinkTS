@@ -121,8 +121,8 @@
         undoElement.disabled = isPreview;
         redoElement.disabled = isPreview;
         clearElement.disabled = isPreview;
-        eraserElement.disabled = isPreview || editor.intention === iink.Intention.Erase;
-        penElement.disabled = isPreview || editor.intention === iink.Intention.Write;
+        eraserElement.disabled = isPreview || editor.tool === iink.EditorTool.Erase;
+        penElement.disabled = isPreview || editor.tool === iink.EditorTool.Write;
         if (isPreview) {
           conversionContainer.style.visibility = "visible";
           editorElement.style.visibility = "hidden";
@@ -165,18 +165,18 @@
          */
         await editor.initialize();
 
-        editor.events.addEventListener("changed", (event) => {
+        editor.event.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo || isPreview;
           redoElement.disabled = !event.detail.canRedo || isPreview;
           clearElement.disabled = !event.detail.canClear || isPreview;
-          eraserElement.disabled = !event.detail.canClear || editor.intention === iink.Intention.Erase || isPreview;
+          eraserElement.disabled = !event.detail.canClear || editor.tool === iink.EditorTool.Erase || isPreview;
         });
 
-        editor.events.addEventListener("exported", (event) => {
+        editor.event.addEventListener("exported", (event) => {
           resultElement.innerHTML = JSON.stringify(event.detail || {});
         });
 
-        editor.events.addEventListener("converted", (evt) => {
+        editor.event.addEventListener("converted", (evt) => {
           const exports = evt.detail;
           if (exports && exports["image/svg+xml"]) {
             progressElement.style.transition = " width 0.3s";
@@ -211,7 +211,7 @@
         eraserElement.addEventListener("click", () => {
           eraserElement.disabled = true;
           penElement.disabled = false;
-          editorElement.editor.intention = iink.Intention.Erase;
+          editorElement.editor.tool = iink.EditorTool.Erase;
           eraserElement.disabled = true;
           eraserElement.classList.add("active");
           penElement.disabled = false;
@@ -221,7 +221,7 @@
         penElement.addEventListener("click", () => {
           eraserElement.disabled = false;
           penElement.disabled = true;
-          editorElement.editor.intention = iink.Intention.Write;
+          editorElement.editor.tool = iink.EditorTool.Write;
           eraserElement.disabled = false;
           eraserElement.classList.remove("active");
           penElement.disabled = true;

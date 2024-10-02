@@ -2,7 +2,6 @@ import { buildStroke, delay } from "../helpers"
 import
 {
   WSBehaviors,
-  InternalEvent,
   Model,
   DefaultConfiguration,
   DefaultPenStyle,
@@ -13,30 +12,86 @@ import
   TPointer,
   TPenStyle,
   TTheme,
-  EditorLayer
+  EditorLayer,
+  WSRecognizer,
+  PointerEventGrabber,
+  EditorTool
 } from "../../../src/iink"
+import { EditorEventMock } from "../__mocks__/EditorEventMock"
 
 describe("WSBehaviors.ts", () =>
 {
   const height = 100, width = 100
+  const editorEventMock = new EditorEventMock(document.createElement("div"))
   const DefaultBehaviorsOptions: TBehaviorOptions = {
     configuration: DefaultConfiguration
   }
 
-  test("should instanciate WSBehaviors", () =>
+  describe("constructor", () =>
+  {
+    test("should instanciate with default grabber & recognizer", () =>
+    {
+      const layers = new EditorLayer(document.createElement("div"))
+      //@ts-ignore IIC-1006 Type instantiation is excessively deep and possibly infinite.
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
+      expect(wsb).toBeDefined()
+      expect(wsb.grabber).toBeDefined()
+      expect(wsb.grabber instanceof PointerEventGrabber).toBe(true)
+      expect(wsb.recognizer).toBeDefined()
+      expect(wsb.recognizer instanceof WSRecognizer).toBe(true)
+    })
+
+    test("should instanciate with custom grabber", () =>
+    {
+      class CustomGrabber extends PointerEventGrabber
+      {
+        name = "custom-grabber"
+      }
+      const customBehaviorsOptions = structuredClone(DefaultBehaviorsOptions)
+      //@ts-ignore
+      customBehaviorsOptions.behaviors = { grabber: CustomGrabber }
+      const layers = new EditorLayer(document.createElement("div"))
+      //@ts-ignore IIC-1006 Type instantiation is excessively deep and possibly infinite.
+      const wsb = new WSBehaviors(customBehaviorsOptions, layers, event)
+      expect(wsb).toBeDefined()
+      expect(wsb.grabber).toBeDefined()
+      expect(wsb.grabber instanceof CustomGrabber).toBe(true)
+    })
+
+    test("should instanciate with custom recognizer", () =>
+    {
+      class CustomRecognizer extends WSRecognizer
+      {
+        name = "custom-recognizer"
+      }
+      const customBehaviorsOptions = structuredClone(DefaultBehaviorsOptions)
+      //@ts-ignore
+      customBehaviorsOptions.behaviors = { recognizer: CustomRecognizer }
+      const layers = new EditorLayer(document.createElement("div"))
+      //@ts-ignore IIC-1006 Type instantiation is excessively deep and possibly infinite.
+      const wsb = new WSBehaviors(customBehaviorsOptions, layers, event)
+      expect(wsb).toBeDefined()
+      expect(wsb.recognizer).toBeDefined()
+      expect(wsb.recognizer instanceof WSRecognizer).toBe(true)
+    })
+  })
+
+  describe("tool", () =>
   {
     const layers = new EditorLayer(document.createElement("div"))
     //@ts-ignore IIC-1006 Type instantiation is excessively deep and possibly infinite.
-    const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
-    expect(wsb).toBeDefined()
-  })
-
-  test("should have internalEvent property", () =>
-  {
-    const layers = new EditorLayer(document.createElement("div"))
-    const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
-    expect(wsb.internalEvent).toBe(InternalEvent.getInstance())
-    expect(wsb.internalEvent).toEqual(InternalEvent.getInstance())
+    const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
+    test("should set class draw on root element by default", () =>
+    {
+      expect(layers.root.classList.contains("draw")).toBe(true)
+      expect(layers.root.classList.contains("erase")).toBe(false)
+    })
+    test("should set class erase when set tool eraser", () =>
+    {
+      wsb.tool = EditorTool.Erase
+      expect(layers.root.classList.contains("draw")).toBe(false)
+      expect(layers.root.classList.contains("erase")).toBe(true)
+    })
   })
 
   describe("init", () =>
@@ -44,7 +99,7 @@ describe("WSBehaviors.ts", () =>
     test("should init grabber, renderer & recognizer & context", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
@@ -70,7 +125,7 @@ describe("WSBehaviors.ts", () =>
     test("should resolve init when recognizer.init is resolve", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
@@ -85,7 +140,7 @@ describe("WSBehaviors.ts", () =>
     test("should reject init when recognizer.init is reject", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
@@ -99,7 +154,7 @@ describe("WSBehaviors.ts", () =>
     test("should call renderer.drawPendingStroke", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
@@ -119,7 +174,7 @@ describe("WSBehaviors.ts", () =>
     {
 
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
@@ -139,7 +194,7 @@ describe("WSBehaviors.ts", () =>
     test("should call recognizer.addStrokes", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.renderer.clearErasingStrokes = jest.fn()
@@ -156,7 +211,7 @@ describe("WSBehaviors.ts", () =>
     test("should call renderer.clearErasingStrokes", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.renderer.clearErasingStrokes = jest.fn()
@@ -175,7 +230,7 @@ describe("WSBehaviors.ts", () =>
       const layers = new EditorLayer(document.createElement("div"))
       const configuration: TConfiguration = JSON.parse(JSON.stringify(DefaultConfiguration))
       configuration.triggers.exportContent = "DEMAND"
-      const wsb = new WSBehaviors({ configuration }, layers)
+      const wsb = new WSBehaviors({ configuration }, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.renderer.clearPendingStroke = jest.fn()
@@ -192,7 +247,7 @@ describe("WSBehaviors.ts", () =>
     test("should reject if recognizer.addStrokes rejected", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.renderer.clearErasingStrokes = jest.fn()
@@ -212,7 +267,7 @@ describe("WSBehaviors.ts", () =>
     test("should call recognizer.export", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
@@ -228,7 +283,7 @@ describe("WSBehaviors.ts", () =>
     test("should reject if recognizer.export rejected", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.renderer.clearPendingStroke = jest.fn()
@@ -246,7 +301,7 @@ describe("WSBehaviors.ts", () =>
       const layers = new EditorLayer(document.createElement("div"))
       const configuration: TConfiguration = JSON.parse(JSON.stringify(DefaultConfiguration))
       configuration.triggers.exportContent = "DEMAND"
-      const wsb = new WSBehaviors({ configuration }, layers)
+      const wsb = new WSBehaviors({ configuration }, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
@@ -266,7 +321,7 @@ describe("WSBehaviors.ts", () =>
       const layers = new EditorLayer(document.createElement("div"))
       const configuration: TConfiguration = JSON.parse(JSON.stringify(DefaultConfiguration))
       configuration.triggers.exportContent = "DEMAND"
-      const wsb = new WSBehaviors({ configuration }, layers)
+      const wsb = new WSBehaviors({ configuration }, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.renderer.clearPendingStroke = jest.fn()
@@ -286,7 +341,7 @@ describe("WSBehaviors.ts", () =>
     test("should call recognizer.convert", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
@@ -306,7 +361,7 @@ describe("WSBehaviors.ts", () =>
     test("should call recognizer.import", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
@@ -327,7 +382,7 @@ describe("WSBehaviors.ts", () =>
       const exportExpected: TExport = { "test/plain": "cofveve" }
       const model = new Model(width, height)
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
@@ -354,7 +409,7 @@ describe("WSBehaviors.ts", () =>
     test("should call recognizer.importPointsEvents", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
@@ -373,7 +428,7 @@ describe("WSBehaviors.ts", () =>
     test("should call renderer.resize", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
@@ -390,7 +445,7 @@ describe("WSBehaviors.ts", () =>
     test("should reject if renderer.resize rejected", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
@@ -406,7 +461,7 @@ describe("WSBehaviors.ts", () =>
     test("should call recognizer.resize after resizeTriggerDelay", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
@@ -428,7 +483,7 @@ describe("WSBehaviors.ts", () =>
     test("should call recognizer.undo", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
@@ -447,7 +502,7 @@ describe("WSBehaviors.ts", () =>
     test("should return previous model", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
@@ -466,7 +521,7 @@ describe("WSBehaviors.ts", () =>
     test("should throw error if context.canUndo = false", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
@@ -485,7 +540,7 @@ describe("WSBehaviors.ts", () =>
     test("should call recognizer.redo", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
@@ -504,7 +559,7 @@ describe("WSBehaviors.ts", () =>
     test("should return next model", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
@@ -523,7 +578,7 @@ describe("WSBehaviors.ts", () =>
     test("should reject if recognizer.redo rejected", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
@@ -542,7 +597,7 @@ describe("WSBehaviors.ts", () =>
     test("should throw error if context.canRedo = false", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
@@ -561,7 +616,7 @@ describe("WSBehaviors.ts", () =>
     test("should call recognizer.clear", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
@@ -581,7 +636,7 @@ describe("WSBehaviors.ts", () =>
     test("should call grabber.detach", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.detach = jest.fn()
       wsb.renderer.destroy = jest.fn()
       wsb.recognizer.close = jest.fn()
@@ -592,7 +647,7 @@ describe("WSBehaviors.ts", () =>
     test("should call renderer.destroy", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.detach = jest.fn()
       wsb.renderer.destroy = jest.fn()
       wsb.recognizer.close = jest.fn()
@@ -603,7 +658,7 @@ describe("WSBehaviors.ts", () =>
     test("should call recognizer.destroy", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.detach = jest.fn()
       wsb.renderer.destroy = jest.fn()
       wsb.recognizer.destroy = jest.fn()
@@ -615,10 +670,56 @@ describe("WSBehaviors.ts", () =>
 
   describe("Event", () =>
   {
+    test("should emitExported when recognizer emitExported", async () =>
+    {
+      const layers = new EditorLayer(document.createElement("div"))
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
+      wsb.grabber.attach = jest.fn()
+      wsb.renderer.init = jest.fn()
+      wsb.recognizer.send = jest.fn()
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
+      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
+      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
+      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
+      wsb.recognizer.export = jest.fn(m => Promise.resolve(m))
+      await wsb.init()
+      wsb.recognizer.event.emitExported({ "text/plain": "test-exported" })
+      expect(editorEventMock.emitExported).toHaveBeenNthCalledWith(1, { "text/plain": "test-exported" })
+    })
+    test("should update smarguide when recognizer emitExported", async () =>
+    {
+      const layers = new EditorLayer(document.createElement("div"))
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
+      wsb.grabber.attach = jest.fn()
+      wsb.renderer.init = jest.fn()
+      wsb.recognizer.send = jest.fn()
+      wsb.recognizer.init = jest.fn(() => Promise.resolve())
+      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
+      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
+      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
+      wsb.recognizer.export = jest.fn(m => Promise.resolve(m))
+      await wsb.init()
+      //@ts-ignore
+      wsb.smartGuide.update = jest.fn()
+      const jiix = {
+        type: "Text",
+        label: "h",
+        words: [
+          {
+            label: "h",
+            candidates: ["h", "k", "hi", "hr", "hn"],
+          },
+        ],
+        version: "3",
+        id: "MainBlock",
+      }
+      wsb.recognizer.event.emitExported({ "application/vnd.myscript.jiix": jiix })
+      expect(wsb.smartGuide?.update).toHaveBeenNthCalledWith(1, jiix)
+    })
     test("should updatesLayer when recognizer emit SVG_PATCH", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
@@ -633,7 +734,7 @@ describe("WSBehaviors.ts", () =>
         layer: "MODEL",
         updates: []
       }
-      wsb.recognizer.internalEvent.emitSVGPatch(svgPatch)
+      wsb.recognizer.event.emitSVGPatch(svgPatch)
       await expect(wsb.renderer.updatesLayer).toBeCalledTimes(1)
       await expect(wsb.renderer.updatesLayer).toBeCalledWith(svgPatch.layer, svgPatch.updates)
     })
@@ -647,7 +748,7 @@ describe("WSBehaviors.ts", () =>
       const customPenStyle: TPenStyle = { color: "#d1d1d1" }
       const customBehaviorsOptions: TBehaviorOptions = JSON.parse(JSON.stringify(DefaultBehaviorsOptions))
       customBehaviorsOptions.penStyle = customPenStyle
-      const wsb = new WSBehaviors(customBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(customBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
@@ -666,7 +767,7 @@ describe("WSBehaviors.ts", () =>
     test("should change PenStyle", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
@@ -709,7 +810,7 @@ describe("WSBehaviors.ts", () =>
         }
       }
       customBehaviorsOptions.theme = customTheme
-      const wsb = new WSBehaviors(customBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(customBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
@@ -728,7 +829,7 @@ describe("WSBehaviors.ts", () =>
     test("should change Theme", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()
@@ -770,7 +871,7 @@ describe("WSBehaviors.ts", () =>
     test("should change PenStyleClasses", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers)
+      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.recognizer.send = jest.fn()

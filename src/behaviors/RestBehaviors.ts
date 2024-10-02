@@ -1,6 +1,5 @@
-import { Intention } from "../Constants"
+import { EditorTool } from "../Constants"
 import { Configuration, TConfiguration, TConverstionState } from "../configuration"
-import { InternalEvent } from "../event"
 import { PointerEventGrabber } from "../grabber"
 import { LoggerClass, LoggerManager } from "../logger"
 import { IModel, Model, TExport } from "../model"
@@ -13,6 +12,7 @@ import { DeferredPromise, PartialDeep } from "../utils"
 import { IBehaviors } from "./IBehaviors"
 import { TBehaviorOptions } from "./TBehaviorOptions"
 import { EditorLayer } from "../EditorLayer"
+import { EditorEvent } from "../EditorEvent"
 
 /**
  * @group Behavior
@@ -26,18 +26,20 @@ export class RestBehaviors implements IBehaviors
   #resizeTimer?: ReturnType<typeof setTimeout>
   #exportTimer?: ReturnType<typeof setTimeout>
   layers: EditorLayer
+  event: EditorEvent
 
   grabber: PointerEventGrabber
   renderer: CanvasRenderer
   recognizer: RestRecognizer
   history: HistoryManager
   styleManager: StyleManager
-  #intention: Intention = Intention.Write
+  #tool: EditorTool = EditorTool.Write
 
-  constructor(options: PartialDeep<TBehaviorOptions>, layers: EditorLayer)
+  constructor(options: PartialDeep<TBehaviorOptions>, layers: EditorLayer, event: EditorEvent)
   {
     this.#logger.info("constructor", { options })
     this.layers = layers
+    this.event = event
     this.#configuration = new Configuration(options?.configuration)
     this.styleManager = new StyleManager(options?.penStyle, options?.theme)
 
@@ -57,107 +59,95 @@ export class RestBehaviors implements IBehaviors
     }
     this.renderer = new CanvasRenderer(this.#configuration.rendering)
 
-    this.intention = Intention.Write
+    this.tool = EditorTool.Write
     this.#model = new Model()
-    this.history = new HistoryManager(this.#configuration["undo-redo"])
+    this.history = new HistoryManager(this.#configuration["undo-redo"], this.event)
   }
 
   protected onPointerDown(evt: PointerEvent, point: TPointer): void
   {
-    this.#logger.info("onPointerDown", { intention: this.intention, evt, point })
+    this.#logger.info("onPointerDown", { tool: this.tool, evt, point })
     const { pointerType } = evt
     const style: TPenStyle = Object.assign({}, this.theme?.ink, this.currentPenStyle)
-    switch (this.intention) {
-      case Intention.Erase: {
+    switch (this.tool) {
+      case EditorTool.Erase: {
         if (this.model.removeStrokesFromPoint(point).length > 0) {
           this.renderer.drawModel(this.model)
         }
         break
       }
-      case Intention.Write:
+      case EditorTool.Write:
         this.model.initCurrentStroke(point, pointerType, style)
         this.drawCurrentStroke()
         break
       default:
-        this.#logger.warn("#onPointerDown", `onPointerDown intention unknow: "${ this.intention }"`)
+        this.#logger.warn("#onPointerDown", `onPointerDown tool unknow: "${ this.tool }"`)
         break
     }
   }
 
   protected onPointerMove(_evt: PointerEvent, point: TPointer): void
   {
-    this.#logger.info("onPointerMove", { intention: this.intention, point })
-    switch (this.intention) {
-      case Intention.Erase: {
+    this.#logger.info("onPointerMove", { tool: this.tool, point })
+    switch (this.tool) {
+      case EditorTool.Erase: {
         if (this.model.removeStrokesFromPoint(point).length > 0) {
           this.renderer.drawModel(this.model)
         }
         break
       }
-      case Intention.Write:
+      case EditorTool.Write:
         this.model.appendToCurrentStroke(point)
         this.drawCurrentStroke()
         break
       default:
-        this.#logger.warn("#onPointerMove", `onPointerMove intention unknow: "${ this.intention }"`)
+        this.#logger.warn("#onPointerMove", `onPointerMove tool unknow: "${ this.tool }"`)
         break
     }
   }
 
   protected async onPointerUp(_evt: PointerEvent, point: TPointer): Promise<void>
   {
-    this.#logger.info("onPointerUp", { intention: this.intention, point })
-    switch (this.intention) {
-      case Intention.Erase:
+    this.#logger.info("onPointerUp", { tool: this.tool, point })
+    switch (this.tool) {
+      case EditorTool.Erase:
         this.model.removeStrokesFromPoint(point)
         if (this.history.stack.at(-1)?.modificationDate !== this.model.modificationDate) {
           await this.updateModelRendering()
         }
         break
-      case Intention.Write:
+      case EditorTool.Write:
         this.model.endCurrentStroke(point)
         await this.updateModelRendering()
         break
       default:
-        this.#logger.warn("#onPointerUp", `onPointerUp intention unknow: "${ this.intention }"`)
+        this.#logger.warn("#onPointerUp", `onPointerUp tool unknow: "${ this.tool }"`)
         break
     }
   }
 
-  get intention(): Intention
+  get tool(): EditorTool
   {
-    return this.#intention
+    return this.#tool
   }
-  set intention(i: Intention)
+  set tool(i: EditorTool)
   {
-    this.#intention = i
+    this.#tool = i
     this.setCursorStyle()
   }
 
   protected setCursorStyle(): void
   {
-    switch (this.intention) {
-      case Intention.Erase:
+    switch (this.tool) {
+      case EditorTool.Erase:
         this.layers.root.classList.remove("draw")
         this.layers.root.classList.add("erase")
-        this.layers.root.classList.remove("select")
-        break
-      case Intention.Select:
-        this.layers.root.classList.remove("draw")
-        this.layers.root.classList.remove("erase")
-        this.layers.root.classList.add("select")
         break
       default:
         this.layers.root.classList.add("draw")
         this.layers.root.classList.remove("erase")
-        this.layers.root.classList.remove("select")
         break
     }
-  }
-
-  get internalEvent(): InternalEvent
-  {
-    return InternalEvent.getInstance()
   }
 
   get model(): Model
@@ -251,7 +241,7 @@ export class RestBehaviors implements IBehaviors
           deferred.resolve(this.model)
         } catch (error) {
           this.#logger.error("updateModelRendering", { error })
-          this.internalEvent.emitError(error as Error)
+          this.event.emitError(error as Error)
           deferred.reject(error as Error)
         }
       }, this.#configuration.triggers.exportContent === "QUIET_PERIOD" ? this.#configuration.triggers.exportContentDelay : 0)
@@ -259,7 +249,7 @@ export class RestBehaviors implements IBehaviors
       deferred.resolve(this.model)
     }
     await deferred.promise
-    this.internalEvent.emitExported(this.model.exports as TExport)
+    this.event.emitExported(this.model.exports as TExport)
     this.#logger.debug("updateModelRendering", this.model.exports)
     return deferred.promise
   }
@@ -281,6 +271,7 @@ export class RestBehaviors implements IBehaviors
     this.#logger.info("convert", { conversionState, requestedMimeTypes })
     const newModel = await this.recognizer.convert(this.model, conversionState, requestedMimeTypes)
     Object.assign(this.#model, newModel)
+    this.event.emitConverted(this.model.converts as TExport)
     this.#logger.debug("convert", this.model)
     return this.model
   }
@@ -337,14 +328,15 @@ export class RestBehaviors implements IBehaviors
     })
 
     if (errors.length) {
-      this.internalEvent.emitError(new Error(errors.join("\n")))
+      this.event.emitError(new Error(errors.join("\n")))
     }
     try {
       const newModel = await this.updateModelRendering()
       Object.assign(this.#model, newModel)
+      this.event.emitImported(this.model.exports as TExport)
       return this.model
     } catch (error) {
-      this.internalEvent.emitError(error as Error)
+      this.event.emitError(error as Error)
       throw error as Error
     }
   }
@@ -368,7 +360,7 @@ export class RestBehaviors implements IBehaviors
     }
     this.#model = await deferredResize.promise
     this.#logger.debug("resize", { model: this.model })
-    this.internalEvent.emitExported(this.model.exports as TExport)
+    this.event.emitExported(this.model.exports as TExport)
     return this.model
   }
 
@@ -379,7 +371,7 @@ export class RestBehaviors implements IBehaviors
     this.renderer.drawModel(this.#model)
     this.#model = await this.recognizer.export(this.#model)
     this.history.updateStack(this.#model)
-    this.internalEvent.emitExported(this.#model.exports as TExport)
+    this.event.emitExported(this.#model.exports as TExport)
     this.#logger.debug("undo", this.#model)
     return this.#model
   }
@@ -391,7 +383,7 @@ export class RestBehaviors implements IBehaviors
     this.renderer.drawModel(this.#model)
     this.#model = await this.recognizer.export(this.#model)
     this.history.updateStack(this.#model)
-    this.internalEvent.emitExported(this.#model.exports as TExport)
+    this.event.emitExported(this.#model.exports as TExport)
     this.#logger.debug("redo", this.#model)
     return this.#model
   }
@@ -402,7 +394,8 @@ export class RestBehaviors implements IBehaviors
     this.model.clear()
     this.history.push(this.model)
     this.renderer.drawModel(this.model)
-    this.internalEvent.emitExported(this.model.exports as TExport)
+    this.event.emitExported(this.model.exports as TExport)
+    this.event.emitCleared()
     this.#logger.debug("clear", this.model)
     return this.model
   }

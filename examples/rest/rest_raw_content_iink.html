@@ -91,7 +91,7 @@
          */
         await editor.initialize();
 
-        editor.events.addEventListener("changed", (event) => {
+        editor.event.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo;
           redoElement.disabled = !event.detail.canRedo;
           clearElement.disabled = !event.detail.canClear;
@@ -104,7 +104,7 @@
           languageElement.options[languageElement.options.length] = new Option(availableLanguageListResponse.result[key], key, selected, selected);
         });
 
-        editor.events.addEventListener("exported", (evt) => {
+        editor.event.addEventListener("exported", (evt) => {
           const exports = evt.detail;
           if (exports && exports["application/vnd.myscript.jiix"]) {
             resultElement.innerHTML = `<span>${JSON.stringify(exports["application/vnd.myscript.jiix"].elements)}</span>`;

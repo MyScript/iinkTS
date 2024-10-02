@@ -1,5 +1,4 @@
 import { TConverstionState, TRecognitionConfiguration, TServerConfiguration } from "../configuration"
-import { InternalEvent } from "../event"
 import { LoggerClass, LoggerManager } from "../logger"
 import { Model, TExport, TJIIXExport } from "../model"
 import { Stroke } from "../primitive"
@@ -17,6 +16,7 @@ import
   TWSMessageEventSVGPatch
 } from "./WSRecognizerMessage"
 import { RecognizerError } from "./RecognizerError"
+import { RecognizerEvent } from "./RecognizerEvent"
 
 /**
  * A websocket dialog have this sequence :
@@ -80,6 +80,7 @@ export class WSRecognizer
   protected waitForIdleDeferred?: DeferredPromise<void>
 
   url: string
+  event: RecognizerEvent
 
   constructor(serverConfig: TServerConfiguration, recognitionConfig: TRecognitionConfiguration)
   {
@@ -87,6 +88,7 @@ export class WSRecognizer
     this.recognitionConfiguration = recognitionConfig
     const scheme = (this.serverConfiguration.scheme === "https") ? "wss" : "ws"
     this.url = `${ scheme }://${ this.serverConfiguration.host }/api/v4.0/iink/document?applicationKey=${ this.serverConfiguration.applicationKey }`
+    this.event = new RecognizerEvent()
     this.#logger.info("constructor", { serverConfig, recognitionConfig, url: this.url })
   }
 
@@ -100,11 +102,6 @@ export class WSRecognizer
       default:
         throw new Error(`Unauthorized recognition type: "${ this.recognitionConfiguration.type }"`)
     }
-  }
-
-  get internalEvent(): InternalEvent
-  {
-    return InternalEvent.getInstance()
   }
 
   protected infinitePing(): void
@@ -156,6 +153,9 @@ export class WSRecognizer
     if (this.exportDeferred?.isPending) {
       this.exportDeferred?.reject(error)
     }
+    if (this.importPointEventsDeferred?.isPending) {
+      this.importPointEventsDeferred?.reject(error)
+    }
     if (this.convertDeferred?.isPending) {
       this.convertDeferred?.reject(error)
     }
@@ -164,6 +164,9 @@ export class WSRecognizer
     }
     if (this.resizeDeferred?.isPending) {
       this.resizeDeferred?.reject(error)
+    }
+    if (this.waitForIdleDeferred?.isPending) {
+      this.waitForIdleDeferred?.reject(error)
     }
     if (this.undoDeferred?.isPending) {
       this.undoDeferred?.reject(error)
@@ -234,7 +237,7 @@ export class WSRecognizer
     this.rejectDeferredPending(error)
 
     if (!this.currentErrorCode && evt.code !== 1000) {
-      this.internalEvent.emitError(error)
+      this.event.emitError(error)
     }
   }
 
@@ -297,12 +300,12 @@ export class WSRecognizer
     this.redoDeferred?.resolve(exportMessage.exports)
     this.clearDeferred?.resolve(exportMessage.exports)
     this.importPointEventsDeferred?.resolve(exportMessage.exports)
-    this.internalEvent.emitExported(exportMessage.exports)
+    this.event.emitExported(exportMessage.exports)
   }
 
   protected async manageWaitForIdle(): Promise<void>
   {
-    this.internalEvent.emitIdle(true)
+    this.event.emitIdle(true)
     this.waitForIdleDeferred?.resolve()
   }
 
@@ -325,7 +328,7 @@ export class WSRecognizer
     }
     const error = new Error(message)
     this.rejectDeferredPending(error)
-    this.internalEvent.emitError(error)
+    this.event.emitError(error)
   }
 
   protected manageContentChangeMessage(websocketMessage: TWSMessageEvent): void
@@ -339,7 +342,7 @@ export class WSRecognizer
       stackIndex: contentChangeMessage.undoStackIndex,
       possibleUndoCount: contentChangeMessage.possibleUndoCount,
     }
-    this.internalEvent.emitContextChange(context)
+    this.event.emitContentChanged(context)
   }
 
   protected manageSVGPatchMessage(websocketMessage: TWSMessageEvent): void
@@ -347,7 +350,7 @@ export class WSRecognizer
     this.#logger.info("manageSVGPatchMessage", { websocketMessage })
     this.resizeDeferred?.resolve()
     const svgPatchMessage = websocketMessage as TWSMessageEventSVGPatch
-    this.internalEvent.emitSVGPatch(svgPatchMessage)
+    this.event.emitSVGPatch(svgPatchMessage)
   }
 
   protected messageCallback(message: MessageEvent<string>): void
@@ -394,6 +397,7 @@ export class WSRecognizer
   async init(height: number, width: number): Promise<void>
   {
     try {
+      this.event.emitStartInitialization()
       this.#logger.info("init", { height, width })
       this.destroy()
       this.connected = new DeferredPromise<void>()
@@ -411,13 +415,11 @@ export class WSRecognizer
       this.socket.addEventListener("open", this.openCallback.bind(this))
       this.socket.addEventListener("close", this.closeCallback.bind(this))
       this.socket.addEventListener("message", this.messageCallback.bind(this))
-
-      return this.initialized.promise
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      const error = new Error(RecognizerError.CANT_ESTABLISH)
-      this.internalEvent.emitError(error)
-      this.initialized?.reject(error)
+      this.event.emitEndtInitialization()
+      await this.connected.promise
+      await this.initialized.promise
+    } catch (err: unknown) {
+      this.rejectDeferredPending(err as Error)
       return this.initialized?.promise
     }
   }
@@ -437,7 +439,6 @@ export class WSRecognizer
         this.reconnectionCount++
         if (this.serverConfiguration.websocket.maxRetryCount >= this.reconnectionCount) {
           this.#logger.debug("send", `try to reconnect number: ${ this.reconnectionCount }.`)
-          this.internalEvent.emitClearMessage()
           await this.init(this.viewSizeHeight, this.viewSizeWidth)
           await this.setPenStyle(this.penStyle as TPenStyle)
           await this.setPenStyleClasses(this.penStyleClasses as string)
@@ -616,11 +617,8 @@ export class WSRecognizer
       type: "pointerEvents",
       events: strokes.map(s => s.formatToSend())
     }
-    this.send(message)
-    const exportPoints = await this.importPointEventsDeferred?.promise
-    this.importPointEventsDeferred = undefined
-    this.#logger.debug("importPointEvents", { exportPoints })
-    return exportPoints as TExport
+    await this.send(message)
+    return this.importPointEventsDeferred?.promise
   }
 
   async convert(model: Model, conversionState?: TConverstionState): Promise<Model>
@@ -728,6 +726,8 @@ export class WSRecognizer
     this.exportDeferred = undefined
     this.convertDeferred = undefined
     this.importDeferred = undefined
+    this.importPointEventsDeferred = undefined
+    this.waitForIdleDeferred = undefined
     this.resizeDeferred = undefined
     this.undoDeferred = undefined
     this.redoDeferred = undefined

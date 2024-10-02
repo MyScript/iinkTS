@@ -79,7 +79,7 @@
         [iink.LoggerClass.GRABBER]: iink.LoggerLevel.ERROR,
         [iink.LoggerClass.RENDERER]: iink.LoggerLevel.ERROR,
         [iink.LoggerClass.CONFIGURATION]: iink.LoggerLevel.ERROR,
-        [iink.LoggerClass.PUBLIC_EVENT]: iink.LoggerLevel.ERROR,
+        [iink.LoggerClass.EDITOR_EVENT]: iink.LoggerLevel.ERROR,
         [iink.LoggerClass.INTERNAL_EVENT]: iink.LoggerLevel.ERROR,
         [iink.LoggerClass.MODEL]: iink.LoggerLevel.ERROR,
         [iink.LoggerClass.STROKE]: iink.LoggerLevel.ERROR,
@@ -152,7 +152,7 @@
           loggerConfig[iink.LoggerClass.GRABBER] = evt.target.value;
           loggerConfig[iink.LoggerClass.RENDERER] = evt.target.value;
           loggerConfig[iink.LoggerClass.CONFIGURATION] = evt.target.value;
-          loggerConfig[iink.LoggerClass.PUBLIC_EVENT] = evt.target.value;
+          loggerConfig[iink.LoggerClass.EDITOR_EVENT] = evt.target.value;
           loggerConfig[iink.LoggerClass.INTERNAL_EVENT] = evt.target.value;
           loggerConfig[iink.LoggerClass.MODEL] = evt.target.value;
           loggerConfig[iink.LoggerClass.STROKE] = evt.target.value;
@@ -165,13 +165,13 @@
           editor.loggerConfiguration = loggerConfig;
         });
 
-        editor.events.addEventListener("changed", (event) => {
+        editor.event.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo;
           redoElement.disabled = !event.detail.canRedo;
           clearElement.disabled = !event.detail.canClear;
         });
 
-        editor.events.addEventListener("exported", (event) => {
+        editor.event.addEventListener("exported", (event) => {
           resultElement.innerHTML =
             event.detail && event.detail["application/vnd.myscript.jiix"] ? event.detail["application/vnd.myscript.jiix"].label : "";
         });

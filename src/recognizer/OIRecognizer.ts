@@ -1,5 +1,4 @@
 import { TRecognitionConfiguration, TServerConfiguration } from "../configuration"
-import { InternalEvent } from "../event"
 import { TOIHistoryBackendChanges, TUndoRedoContext } from "../history"
 import { LoggerClass, LoggerManager } from "../logger"
 import { TExport, TJIIXExport } from "../model"
@@ -23,6 +22,7 @@ import
 } from "./OIRecognizerMessage"
 import { RecognizerError } from "./RecognizerError"
 import PingWorker from "web-worker:../worker/ping.worker.ts"
+import { RecognizerEvent } from "./RecognizerEvent"
 
 /**
  * A websocket dialog have this sequence :
@@ -76,8 +76,9 @@ export class OIRecognizer
   protected clearDeferred?: DeferredPromise<void>
 
   url: string
+  event: RecognizerEvent
 
-  constructor(serverConfig: TServerConfiguration, recognitionConfig: TRecognitionConfiguration)
+  constructor(serverConfig: TServerConfiguration, recognitionConfig: TRecognitionConfiguration, event?: RecognizerEvent)
   {
     this.#logger.info("constructor", { serverConfig, recognitionConfig })
     this.serverConfiguration = serverConfig
@@ -85,6 +86,7 @@ export class OIRecognizer
     const scheme = (this.serverConfiguration.scheme === "https") ? "wss" : "ws"
     this.url = `${ scheme }://${ this.serverConfiguration.host }/api/v4.0/iink/offscreen?applicationKey=${ this.serverConfiguration.applicationKey }`
 
+    this.event = event || new RecognizerEvent()
     this.exportDeferredMap = new Map()
     this.contextlessGestureDeferred = new Map()
   }
@@ -94,10 +96,6 @@ export class OIRecognizer
     return ["application/vnd.myscript.jiix"]
   }
 
-  get event(): InternalEvent
-  {
-    return InternalEvent.getInstance()
-  }
 
   async #send(message: TOIMessageEvent): Promise<void>
   {
@@ -305,7 +303,7 @@ export class OIRecognizer
     this.undoDeferred?.resolve()
     this.redoDeferred?.resolve()
     this.clearDeferred?.resolve()
-    this.event.emitContextChange({
+    this.event.emitContentChanged({
       canRedo: contentChangeMessage.canRedo,
       canUndo: contentChangeMessage.canRedo,
     } as TUndoRedoContext)
@@ -340,7 +338,7 @@ export class OIRecognizer
 
     if (this.currentErrorCode === "no.activity") {
       this.rejectDeferredPending(message)
-      this.event.emitNotif({ message: RecognizerError.NO_ACTIVITY, timeout: Infinity })
+      this.event.emitConnectionClose({ code: 1000,  message: RecognizerError.NO_ACTIVITY })
     }
     else {
       switch (this.currentErrorCode) {
@@ -424,6 +422,7 @@ export class OIRecognizer
 
   async init(): Promise<void>
   {
+    this.event.emitStartInitialization()
     if (this.currentErrorCode === "restore.session.not.found") {
       this.currentErrorCode === undefined
       this.sessionId = undefined
@@ -441,6 +440,7 @@ export class OIRecognizer
       this.pingCount = 0
       this.initPing()
     }
+    this.event.emitEndtInitialization()
   }
 
   async send(message: TOIMessageEvent): Promise<void>
@@ -459,7 +459,6 @@ export class OIRecognizer
         if (this.serverConfiguration.websocket.autoReconnect) {
           this.reconnectionCount++
           if (this.serverConfiguration.websocket.maxRetryCount > this.reconnectionCount) {
-            this.event.emitClearMessage()
             await this.init()
             await this.waitForIdle()
             return this.#send(message)

@@ -1,5 +1,5 @@
 import styleIcon from "../assets/svg/palette.svg"
-import { Intention, WriteTool } from "../Constants"
+import { EditorTool, EditorWriteTool } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerClass, LoggerManager } from "../logger"
 import { OIModel } from "../model"
@@ -47,7 +47,7 @@ export class OIMenuStyle extends OIMenu
 
   get writeShape(): boolean
   {
-    return ![WriteTool.Arrow, WriteTool.DoubleArrow, WriteTool.Line, WriteTool.Pencil].includes(this.behaviors.writer.tool)
+    return ![EditorWriteTool.Arrow, EditorWriteTool.DoubleArrow, EditorWriteTool.Line, EditorWriteTool.Pencil].includes(this.behaviors.writer.tool)
   }
 
   get rowHeight(): number
@@ -298,7 +298,7 @@ export class OIMenuStyle extends OIMenu
       this.isMobile ? this.subMenu.wrap() : this.subMenu.unwrap()
     }
 
-    if (this.behaviors.intention === Intention.Write) {
+    if (this.behaviors.tool === EditorTool.Write) {
       this.show()
       if (this.menuColorStroke) {
         this.menuColorStroke.style.display = "block"
@@ -319,7 +319,7 @@ export class OIMenuStyle extends OIMenu
         this.menuStrokeOpacity.style.display = "block"
       }
     }
-    else if (this.behaviors.intention === Intention.Select) {
+    else if (this.behaviors.tool === EditorTool.Select) {
       this.show()
       if (this.menuColorStroke) {
         this.menuColorStroke.style.display = "block"

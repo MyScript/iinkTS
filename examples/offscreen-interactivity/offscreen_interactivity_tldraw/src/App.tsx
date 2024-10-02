@@ -61,7 +61,7 @@ export default function App()
 	{
 		if (!editor || !recognizer) return
 
-		recognizer.event.addContextChangeListener(updateExports)
+		recognizer.event.addContentChangedListener(updateExports)
 
 		const handleChangeEvent: TLEventMapHandler<'change'> = async (change) =>
 		{

@@ -190,8 +190,6 @@ export class OIResizeManager
     {
       this.setTransformOrigin(s.id, this.transformOrigin.x, this.transformOrigin.y)
     })
-
-    this.behaviors.selector.hideInteractElements()
   }
 
   continue(point: TPoint): { scaleX: number, scaleY: number }
@@ -281,7 +279,6 @@ export class OIResizeManager
 
     this.behaviors.selector.resetSelectedGroup(this.model.symbolsSelected)
     this.interactElementsGroup = undefined
-    this.behaviors.selector.showInteractElements()
     this.behaviors.svgDebugger.apply()
   }
 }

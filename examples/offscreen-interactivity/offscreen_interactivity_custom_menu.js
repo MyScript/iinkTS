@@ -78,7 +78,7 @@ class CustomMenuStyle extends iink.OIMenuStyle {
   }
 }
 
-class CustomMenuIntention extends iink.OIMenuIntention {
+class CustomMenuTool extends iink.OIMenuTool {
 
   sizes = [
     { label: "S", value: 2 },
@@ -141,7 +141,7 @@ class CustomMenuIntention extends iink.OIMenuIntention {
   render(layer)
   {
     this.wrapper = document.createElement("div")
-    this.wrapper.classList.add("ms-menu", "custom-menu-intention")
+    this.wrapper.classList.add("ms-menu", "custom-menu-tool")
 
     this.wrapper.appendChild(this.createMenuWrite())
     this.wrapper.appendChild(this.createSeparatorVertical())

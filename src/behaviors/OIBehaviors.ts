@@ -1,6 +1,5 @@
-import { Intention, SELECTION_MARGIN } from "../Constants"
+import { EditorTool, SELECTION_MARGIN } from "../Constants"
 import { Configuration, TConfiguration, TRenderingConfiguration } from "../configuration"
-import { InternalEvent } from "../event"
 import { OIPointerEventGrabber } from "../grabber"
 import { LoggerClass, LoggerManager } from "../logger"
 import { OIModel, TExport, TJIIXTextElement } from "../model"
@@ -51,6 +50,7 @@ import { PartialDeep, mergeDeep } from "../utils"
 import { IBehaviors } from "./IBehaviors"
 import { TBehaviorOptions } from "./TBehaviorOptions"
 import { EditorLayer } from "../EditorLayer"
+import { EditorEvent } from "../EditorEvent"
 
 /**
  * @group Behavior
@@ -61,9 +61,10 @@ export class OIBehaviors implements IBehaviors
   #logger = LoggerManager.getLogger(LoggerClass.BEHAVIORS)
   #configuration: TConfiguration
   #model: OIModel
-  #intention: Intention = Intention.Write
+  #tool: EditorTool = EditorTool.Write
   #layerUITimer?: ReturnType<typeof setTimeout>
   layers: EditorLayer
+  event: EditorEvent
 
   grabber: OIPointerEventGrabber
   renderer: OISVGRenderer
@@ -85,10 +86,11 @@ export class OIBehaviors implements IBehaviors
   move: OIMoveManager
   menu: OIMenuManager
 
-  constructor(options: PartialDeep<TBehaviorOptions>, layers: EditorLayer)
+  constructor(options: PartialDeep<TBehaviorOptions>, layers: EditorLayer, events: EditorEvent)
   {
     this.#logger.info("constructor", { options })
     this.layers = layers
+    this.event = events
     this.#configuration = new Configuration(options?.configuration)
     this.styler = new StyleManager(Object.assign({}, DefaultStyle, options?.penStyle), options?.theme)
 
@@ -96,7 +98,7 @@ export class OIBehaviors implements IBehaviors
     this.recognizer = new OIRecognizer(this.#configuration.server, this.#configuration.recognition)
     this.renderer = new OISVGRenderer(this.#configuration.rendering)
 
-    this.history = new OIHistoryManager(this.#configuration["undo-redo"])
+    this.history = new OIHistoryManager(this.#configuration["undo-redo"], this.event)
     this.writer = new OIWriteManager(this)
     this.eraser = new OIEraseManager(this)
     this.gesture = new OIGestureManager(this, options.behaviors?.gesture)
@@ -118,18 +120,13 @@ export class OIBehaviors implements IBehaviors
   }
 
   //#region Properties
-  get internalEvent(): InternalEvent
+  get tool(): EditorTool
   {
-    return InternalEvent.getInstance()
+    return this.#tool
   }
-
-  get intention(): Intention
+  set tool(i: EditorTool)
   {
-    return this.#intention
-  }
-  set intention(i: Intention)
-  {
-    this.#intention = i
+    this.#tool = i
     this.setCursorStyle()
     this.unselectAll()
   }
@@ -208,20 +205,20 @@ export class OIBehaviors implements IBehaviors
 
   protected setCursorStyle(): void
   {
-    switch (this.#intention) {
-      case Intention.Erase:
+    switch (this.#tool) {
+      case EditorTool.Erase:
         this.layers.root.classList.remove("draw")
         this.layers.root.classList.add("erase")
         this.layers.root.classList.remove("select")
         this.layers.root.classList.remove("move")
         break
-      case Intention.Select:
+      case EditorTool.Select:
         this.layers.root.classList.remove("draw")
         this.layers.root.classList.remove("erase")
         this.layers.root.classList.add("select")
         this.layers.root.classList.remove("move")
         break
-      case Intention.Move:
+      case EditorTool.Move:
         this.layers.root.classList.remove("draw")
         this.layers.root.classList.remove("erase")
         this.layers.root.classList.remove("select")
@@ -239,17 +236,17 @@ export class OIBehaviors implements IBehaviors
   protected onPointerDown(evt: PointerEvent, pointer: TPointer): void
   {
     this.#logger.debug("onPointerDown", { evt, pointer })
-    this.internalEvent.emitIdle(false)
+    this.event.emitIdle(false)
     try {
       this.unselectAll()
-      switch (this.#intention) {
-        case Intention.Erase:
+      switch (this.#tool) {
+        case EditorTool.Erase:
           this.eraser.start(pointer)
           break
-        case Intention.Select:
+        case EditorTool.Select:
           this.selector.start(pointer)
           break
-        case Intention.Move:
+        case EditorTool.Move:
           this.move.start(evt)
           break
         default:
@@ -260,7 +257,7 @@ export class OIBehaviors implements IBehaviors
     catch (error) {
       this.#logger.error("onPointerDown", error)
       this.grabber.stopPointerEvent()
-      this.internalEvent.emitError(error as Error)
+      this.event.emitError(error as Error)
     }
     finally {
       this.svgDebugger.apply()
@@ -271,14 +268,14 @@ export class OIBehaviors implements IBehaviors
   {
     this.#logger.debug("onPointerMove", { pointer })
     try {
-      switch (this.#intention) {
-        case Intention.Erase:
+      switch (this.#tool) {
+        case EditorTool.Erase:
           this.eraser.continue(pointer)
           break
-        case Intention.Select:
+        case EditorTool.Select:
           this.selector.continue(pointer)
           break
-        case Intention.Move:
+        case EditorTool.Move:
           this.move.continue(evt)
           break
         default:
@@ -288,7 +285,7 @@ export class OIBehaviors implements IBehaviors
     }
     catch (error) {
       this.#logger.error("onPointerMove", error)
-      this.internalEvent.emitError(error as Error)
+      this.event.emitError(error as Error)
     }
     finally {
       this.svgDebugger.apply()
@@ -299,14 +296,14 @@ export class OIBehaviors implements IBehaviors
   {
     this.#logger.debug("onPointerUp", { pointer })
     try {
-      switch (this.#intention) {
-        case Intention.Erase:
+      switch (this.#tool) {
+        case EditorTool.Erase:
           this.eraser.end(pointer)
           break
-        case Intention.Select:
+        case EditorTool.Select:
           this.selector.end(pointer)
           break
-        case Intention.Move:
+        case EditorTool.Move:
           this.move.end(evt)
           break
         default:
@@ -317,7 +314,7 @@ export class OIBehaviors implements IBehaviors
     catch (error) {
       this.undo()
       this.#logger.error("onPointerUp", error)
-      this.internalEvent.emitError(error as Error)
+      this.event.emitError(error as Error)
     }
     finally {
       this.updateLayerUI()
@@ -326,7 +323,7 @@ export class OIBehaviors implements IBehaviors
 
   protected async onContextMenu(el: HTMLElement, point: TPoint): Promise<void>
   {
-    if (this.intention === Intention.Select) {
+    if (this.tool === EditorTool.Select) {
       let found = false
       let currentEl: HTMLElement | null = el
       const symbolTypesAllowed = [SymbolType.Edge.toString(), SymbolType.Shape.toString(), SymbolType.Stroke.toString(), SymbolType.Text.toString()]
@@ -379,7 +376,7 @@ export class OIBehaviors implements IBehaviors
   {
     try {
       this.#logger.info("changeLanguage", { code })
-      this.internalEvent.emitIdle(false)
+      this.event.emitIdle(false)
       this.configuration.recognition.lang = code
       await this.recognizer.destroy()
       this.recognizer = new OIRecognizer(this.#configuration.server, this.#configuration.recognition)
@@ -388,7 +385,7 @@ export class OIBehaviors implements IBehaviors
     }
     catch (error) {
       this.#logger.error("changeLanguage", error)
-      this.internalEvent.emitError(error as Error)
+      this.event.emitError(error as Error)
       throw error
     }
     finally {
@@ -488,7 +485,7 @@ export class OIBehaviors implements IBehaviors
     catch (error) {
       this.#logger.error("createSymbol", error)
       this.updateLayerUI()
-      this.internalEvent.emitError(error as Error)
+      this.event.emitError(error as Error)
       throw error
     }
   }
@@ -530,7 +527,7 @@ export class OIBehaviors implements IBehaviors
       return await this.addSymbols(symbols)
     } catch (error) {
       this.#logger.error("importPointEvents", error)
-      this.internalEvent.emitError(error as Error)
+      this.event.emitError(error as Error)
       throw error
     }
   }
@@ -538,7 +535,7 @@ export class OIBehaviors implements IBehaviors
   async addSymbol(sym: TOISymbol, addToHistory = true): Promise<TOISymbol>
   {
     this.#logger.info("addSymbol", { sym })
-    this.internalEvent.emitIdle(false)
+    this.event.emitIdle(false)
     if (sym.type === SymbolType.Text) {
       this.texter.updateBounds(sym)
     }
@@ -566,7 +563,7 @@ export class OIBehaviors implements IBehaviors
   async addSymbols(symList: TOISymbol[], addToHistory = true): Promise<TOISymbol[]>
   {
     this.#logger.info("addSymbol", { symList })
-    this.internalEvent.emitIdle(false)
+    this.event.emitIdle(false)
     symList.forEach(s =>
     {
       if (s.type === SymbolType.Text) {
@@ -595,7 +592,7 @@ export class OIBehaviors implements IBehaviors
   async updateSymbol(sym: TOISymbol, addToHistory = true): Promise<TOISymbol>
   {
     this.#logger.info("updateSymbol", { sym })
-    this.internalEvent.emitIdle(false)
+    this.event.emitIdle(false)
     if (sym.type === SymbolType.Text) {
       this.texter.updateBounds(sym)
     }
@@ -621,7 +618,7 @@ export class OIBehaviors implements IBehaviors
   async updateSymbols(symList: TOISymbol[], addToHistory = true): Promise<TOISymbol[]>
   {
     this.#logger.info("updateSymbol", { symList })
-    this.internalEvent.emitIdle(false)
+    this.event.emitIdle(false)
     symList.forEach(s =>
     {
       if (s.type === SymbolType.Text) {
@@ -767,7 +764,7 @@ export class OIBehaviors implements IBehaviors
   async replaceSymbols(oldSymbols: TOISymbol[], newSymbols: TOISymbol[], addToHistory = true): Promise<void>
   {
     this.#logger.info("replaceSymbol", { oldSymbols, newSymbols })
-    this.internalEvent.emitIdle(false)
+    this.event.emitIdle(false)
 
     const oldStrokes = this.extractStrokesFromSymbols(oldSymbols)
     const newStrokes = this.extractStrokesFromSymbols(newSymbols)
@@ -906,7 +903,7 @@ export class OIBehaviors implements IBehaviors
     this.#logger.info("removeSymbol", { id })
     const symbol = this.model.getRootSymbol(id)
     if (symbol) {
-      this.internalEvent.emitIdle(false)
+      this.event.emitIdle(false)
       if (symbol.type === SymbolType.Group) {
         const groupStrokeIds = symbol.extractStrokes().map(s => s.id)
         symbol.removeChilds([id])
@@ -1001,7 +998,7 @@ export class OIBehaviors implements IBehaviors
         this.updateLayerUI()
       }
     }
-    this.internalEvent.emitIdle(false)
+    this.event.emitIdle(false)
     return symbolsToRemove
   }
 
@@ -1014,7 +1011,7 @@ export class OIBehaviors implements IBehaviors
       this.renderer.drawSymbol(s)
     })
     this.selector.drawSelectedGroup(this.model.symbolsSelected)
-    this.internalEvent.emitSelected(this.model.symbolsSelected)
+    this.event.emitSelected(this.model.symbolsSelected)
   }
 
   selectAll(): void
@@ -1026,7 +1023,7 @@ export class OIBehaviors implements IBehaviors
       this.renderer.drawSymbol(s)
     })
     this.selector.drawSelectedGroup(this.model.symbolsSelected)
-    this.internalEvent.emitSelected(this.model.symbolsSelected)
+    this.event.emitSelected(this.model.symbolsSelected)
   }
 
   unselectAll(): void
@@ -1040,14 +1037,14 @@ export class OIBehaviors implements IBehaviors
         this.renderer.drawSymbol(s)
       })
       this.selector.removeSelectedGroup()
-      this.internalEvent.emitSelected(this.model.symbolsSelected)
+      this.event.emitSelected(this.model.symbolsSelected)
     }
   }
 
   async importPointEvents(partialStrokes: PartialDeep<OIStroke>[]): Promise<OIModel>
   {
     this.#logger.info("importPointEvents", { partialStrokes })
-    this.internalEvent.emitIdle(false)
+    this.event.emitIdle(false)
     const strokes = convertPartialStrokesToOIStrokes(partialStrokes)
     strokes.forEach(s =>
     {
@@ -1058,6 +1055,7 @@ export class OIBehaviors implements IBehaviors
     this.history.push(this.model, { added: strokes })
     this.#logger.debug("importPointEvents", this.model)
     this.updateLayerUI()
+    this.event.emitImported(this.model.exports as TExport)
     return this.model
   }
 
@@ -1251,7 +1249,7 @@ export class OIBehaviors implements IBehaviors
   {
     this.#logger.info("undo")
     if (this.history.context.canUndo) {
-      this.internalEvent.emitIdle(false)
+      this.event.emitIdle(false)
       this.unselectAll()
       const previousStackItem = this.history.undo()
       const modifications = previousStackItem.model.extractDifferenceSymbols(this.model)
@@ -1281,7 +1279,7 @@ export class OIBehaviors implements IBehaviors
     this.#logger.info("redo")
 
     if (this.history.context.canRedo) {
-      this.internalEvent.emitIdle(false)
+      this.event.emitIdle(false)
       this.unselectAll()
       const nextStackItem = this.history.redo()
       const modifications = nextStackItem.model.extractDifferenceSymbols(this.model)
@@ -1316,7 +1314,7 @@ export class OIBehaviors implements IBehaviors
     }
     catch (error) {
       this.#logger.error("export", { error })
-      this.internalEvent.emitError(error as Error)
+      this.event.emitError(error as Error)
       throw error
     }
     return this.model
@@ -1324,13 +1322,20 @@ export class OIBehaviors implements IBehaviors
 
   async convert(): Promise<OIModel>
   {
+    await this.convertSymbols()
+    return this.model
+  }
+
+  async convertSymbols(symbols?: TOISymbol[]): Promise<OIModel>
+  {
     try {
-      this.internalEvent.emitIdle(false)
-      await this.converter.apply()
+      this.event.emitIdle(false)
+      await this.converter.apply(symbols)
+      this.event.emitConverted(this.model.converts as TExport)
     }
     catch (error) {
       this.#logger.error("convert", error)
-      this.internalEvent.emitError(error as Error)
+      this.event.emitError(error as Error)
       throw error
     }
     finally {
@@ -1341,20 +1346,20 @@ export class OIBehaviors implements IBehaviors
 
   async resize(height: number, width: number): Promise<OIModel>
   {
-    this.internalEvent.emitIdle(false)
+    this.event.emitIdle(false)
     this.#logger.info("resize", { height, width })
     this.model.height = height
     this.model.width = width
     this.renderer.resize(height, width)
     this.menu.update()
-    this.internalEvent.emitIdle(true)
+    this.event.emitIdle(true)
     return this.model
   }
 
   async clear(): Promise<OIModel>
   {
     this.#logger.info("clear")
-    this.internalEvent.emitIdle(false)
+    this.event.emitIdle(false)
     if (this.model.symbols.length) {
       this.selector.removeSelectedGroup()
       const erased = this.model.symbols
@@ -1362,9 +1367,10 @@ export class OIBehaviors implements IBehaviors
       this.model.clear()
       this.history.push(this.model, { erased })
       this.recognizer.clear()
-      this.internalEvent.emitSelected(this.model.symbolsSelected)
+      this.event.emitSelected(this.model.symbolsSelected)
     }
     this.updateLayerUI()
+    this.event.emitCleared()
     return this.model
   }
 

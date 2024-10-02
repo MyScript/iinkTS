@@ -6,7 +6,7 @@ import
   SymbolType,
   TPointer,
   TStyle,
-  WriteTool,
+  EditorWriteTool,
   ShapeKind,
   TOIShape,
   TOIEdge,
@@ -60,7 +60,7 @@ describe("OIWriteManager.ts", () =>
     test("should init model.currentSymbol with Rectangle", () =>
     {
       expect(behaviors.layers.root.classList.contains("shape")).toBe(false)
-      manager.tool = WriteTool.Rectangle
+      manager.tool = EditorWriteTool.Rectangle
       expect(behaviors.layers.root.classList.contains("shape")).toBe(true)
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       manager.start(DefaultStyle, point, "mouse")
@@ -73,7 +73,7 @@ describe("OIWriteManager.ts", () =>
     })
     test("should init model.currentSymbol with Circle", () =>
     {
-      manager.tool = WriteTool.Circle
+      manager.tool = EditorWriteTool.Circle
       expect(behaviors.layers.root.classList.contains("shape")).toBe(true)
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       manager.start(DefaultStyle, point, "mouse")
@@ -86,7 +86,7 @@ describe("OIWriteManager.ts", () =>
     })
     test("should init model.currentSymbol with Ellipse", () =>
     {
-      manager.tool = WriteTool.Ellipse
+      manager.tool = EditorWriteTool.Ellipse
       expect(behaviors.layers.root.classList.contains("shape")).toBe(true)
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       manager.start(DefaultStyle, point, "mouse")
@@ -99,7 +99,7 @@ describe("OIWriteManager.ts", () =>
     })
     test("should init model.currentSymbol with Triangle", () =>
     {
-      manager.tool = WriteTool.Triangle
+      manager.tool = EditorWriteTool.Triangle
       expect(behaviors.layers.root.classList.contains("shape")).toBe(true)
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       manager.start(DefaultStyle, point, "mouse")
@@ -112,7 +112,7 @@ describe("OIWriteManager.ts", () =>
     })
     test("should init model.currentSymbol with Parallelogram", () =>
     {
-      manager.tool = WriteTool.Parallelogram
+      manager.tool = EditorWriteTool.Parallelogram
       expect(behaviors.layers.root.classList.contains("shape")).toBe(true)
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       manager.start(DefaultStyle, point, "mouse")
@@ -125,7 +125,7 @@ describe("OIWriteManager.ts", () =>
     })
     test("should init model.currentSymbol with Line", () =>
     {
-      manager.tool = WriteTool.Line
+      manager.tool = EditorWriteTool.Line
       expect(behaviors.layers.root.classList.contains("shape")).toBe(true)
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       manager.start(DefaultStyle, point, "mouse")
@@ -140,7 +140,7 @@ describe("OIWriteManager.ts", () =>
     })
     test("should init model.currentSymbol with Arrow", () =>
     {
-      manager.tool = WriteTool.Arrow
+      manager.tool = EditorWriteTool.Arrow
       expect(behaviors.layers.root.classList.contains("shape")).toBe(true)
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       manager.start(DefaultStyle, point, "mouse")
@@ -155,7 +155,7 @@ describe("OIWriteManager.ts", () =>
     })
     test("should init model.currentSymbol with DoubleArrow", () =>
     {
-      manager.tool = WriteTool.DoubleArrow
+      manager.tool = EditorWriteTool.DoubleArrow
       expect(behaviors.layers.root.classList.contains("shape")).toBe(true)
       const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       manager.start(DefaultStyle, point, "mouse")
@@ -178,7 +178,7 @@ describe("OIWriteManager.ts", () =>
     })
     test("should update currentSymbol", () =>
     {
-      manager.tool = WriteTool.Pencil
+      manager.tool = EditorWriteTool.Pencil
       const point1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       manager.start(DefaultStyle, point1, "mouse")
       const point2: TPointer = { t: 15, p: 15, x: 15, y: 15 }

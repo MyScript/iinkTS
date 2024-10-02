@@ -1,7 +1,7 @@
 import { TConfiguration, TLoggerConfiguration } from "../configuration"
 import { InsertAction, StrikeThroughAction, SurroundAction } from "../gesture"
 import { IGrabber } from "../grabber"
-import { OIMenuAction, OIMenuIntention, OIMenuStyle } from "../menu"
+import { OIMenuAction, OIMenuTool, OIMenuStyle } from "../menu"
 import { OIRecognizer, RestRecognizer, WSRecognizer } from "../recognizer"
 import { TStyle, TTheme } from "../style"
 
@@ -16,7 +16,7 @@ export type TBehaviorOptions = {
     recognizer?: RestRecognizer | WSRecognizer | OIRecognizer
     menu?: {
       style?: OIMenuStyle
-      intention?: OIMenuIntention
+      tool?: OIMenuTool
       action?: OIMenuAction
     },
     gesture?: {

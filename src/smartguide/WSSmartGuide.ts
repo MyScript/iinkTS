@@ -1,6 +1,5 @@
 import { WSBehaviors } from "../behaviors"
 import { TMarginConfiguration, TRenderingConfiguration } from "../configuration"
-import { InternalEvent } from "../event"
 import { LoggerClass, LoggerManager } from "../logger"
 import { ExportType, TJIIXExport, TJIIXWord } from "../model"
 import { convertMillimeterToPixel, createUUID } from "../utils"
@@ -53,11 +52,6 @@ export class WSSmartGuide
     this.#createConvertElement()
     this.#createCopyElement()
     this.#createDeleteElement()
-  }
-
-  get internalEvent(): InternalEvent
-  {
-    return InternalEvent.getInstance()
   }
 
   #createRootElement(): void
@@ -282,10 +276,10 @@ export class WSSmartGuide
         document.execCommand("copy")
         fakeEl.remove()
       }
-      this.internalEvent.emitNotif({ message, timeout: 1500 })
+      this.behaviors.event.emitNotif({ message, timeout: 1500 })
     } catch (error) {
       this.#logger.error("onClickCopy", error)
-      this.internalEvent.emitError(error as Error)
+      this.behaviors.event.emitError(error as Error)
     }
   }
 

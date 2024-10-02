@@ -2,7 +2,7 @@
  * @group Editor
  * @description List the possibilities of interactions
  */
-export enum Intention
+export enum EditorTool
 {
   Write = "write",
   Erase = "erase",
@@ -21,7 +21,7 @@ export enum Intention
  * @description List all the shapes that can be drawn
  * @remarks only usable in the case of offscreen
  */
-export enum WriteTool
+export enum EditorWriteTool
 {
   Pencil = "pencil",
   Rectangle = "rectangle",

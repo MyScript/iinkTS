@@ -460,11 +460,11 @@
           menuButtons[0].style.marginTop = "-95px";
         }
 
-        editor.events.addEventListener("exported", (event) => {
+        editor.event.addEventListener("exported", (event) => {
           resultElement.innerHTML = JSON.stringify(event.detail);
         });
 
-        editor.events.addEventListener("changed", (event) => {
+        editor.event.addEventListener("changed", (event) => {
           exportBtn.disabled = !event.detail.canExport && triggersExportContentElement.value !== "DEMAND";
         });
 

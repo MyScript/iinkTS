@@ -1,5 +1,5 @@
 import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
-import { Intention, OIMenuAction, StrikeThroughAction, SurroundAction } from "../../../src/iink"
+import { EditorTool, OIMenuAction, StrikeThroughAction, SurroundAction } from "../../../src/iink"
 import { ChangeEventMock, LeftClickEventMock } from "../__mocks__/EventMock"
 
 describe("OIMenuAction.ts", () =>
@@ -107,7 +107,7 @@ describe("OIMenuAction.ts", () =>
     test("should call behaviors.changeLanguage on change", () =>
     {
       expect(behaviors.changeLanguage).not.toBeCalled()
-      behaviors.intention = Intention.Select
+      behaviors.tool = EditorTool.Select
       const changeEvt = new ChangeEventMock({
         target: { value: "fr_FR" } as unknown as HTMLInputElement
       })
@@ -188,19 +188,19 @@ describe("OIMenuAction.ts", () =>
     test("should define behaviors to write on change gesture detected", () =>
     {
       behaviors.writer.detectGesture = true
-      behaviors.intention = Intention.Select
+      behaviors.tool = EditorTool.Select
       const changeEvt = new ChangeEventMock({
         target: { value: false } as unknown as HTMLInputElement
       })
       const input = behaviors.layers.ui.root.querySelector("#ms-menu-action-gesture-detect") as HTMLInputElement
       input.checked = false
       input.dispatchEvent(changeEvt)
-      expect(behaviors.intention).toEqual(Intention.Write)
+      expect(behaviors.tool).toEqual(EditorTool.Write)
       expect(behaviors.writer.detectGesture).toEqual(false)
     })
     test("should define behaviors to write on change gesture surround", () =>
     {
-      behaviors.intention = Intention.Select
+      behaviors.tool = EditorTool.Select
       behaviors.gesture.surroundAction = SurroundAction.Select
       const changeEvt = new ChangeEventMock({
         target: { value: SurroundAction.Surround } as unknown as HTMLInputElement
@@ -208,12 +208,12 @@ describe("OIMenuAction.ts", () =>
       const input = behaviors.layers.ui.root.querySelector("#ms-menu-action-gesture-surround") as HTMLInputElement
       input.value = SurroundAction.Surround
       input.dispatchEvent(changeEvt)
-      expect(behaviors.intention).toEqual(Intention.Write)
+      expect(behaviors.tool).toEqual(EditorTool.Write)
       expect(behaviors.gesture.surroundAction).toEqual(SurroundAction.Surround)
     })
     test("should define behaviors to write on change gesture strikethrough", () =>
     {
-      behaviors.intention = Intention.Select
+      behaviors.tool = EditorTool.Select
       behaviors.gesture.strikeThroughAction = StrikeThroughAction.Draw
       const changeEvt = new ChangeEventMock({
         target: { value: StrikeThroughAction.Erase } as unknown as HTMLInputElement
@@ -221,7 +221,7 @@ describe("OIMenuAction.ts", () =>
       const input = behaviors.layers.ui.root.querySelector("#ms-menu-action-gesture-strikethrough") as HTMLInputElement
       input.value = StrikeThroughAction.Erase
       input.dispatchEvent(changeEvt)
-      expect(behaviors.intention).toEqual(Intention.Write)
+      expect(behaviors.tool).toEqual(EditorTool.Write)
       expect(behaviors.gesture.strikeThroughAction).toEqual(StrikeThroughAction.Erase)
     })
     test("should open guide sub menu", () =>

@@ -17,7 +17,7 @@ describe('Websocket Text erase', () => {
     expect(title).toMatch('Websocket Text Eraser')
   })
 
-  test('should toggle intention writing <-> erasing', async () => {
+  test('should toggle tool writing <-> erasing', async () => {
     expect(await page.locator("#pen").isDisabled()).toBe(true)
     expect(await page.locator("#eraser").isDisabled()).toBe(false)
     expect(await page.locator("#editor").getAttribute('class')).not.toContain('erase')

@@ -1,10 +1,10 @@
 
 export * from "./Constants"
 export * from "./Editor"
+export * from "./EditorEvent"
 export * from "./EditorLayer"
 export * from "./behaviors"
 export * from "./configuration"
-export * from "./event"
 export * from "./gesture"
 export * from "./grabber"
 export * from "./logger"

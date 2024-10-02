@@ -154,12 +154,12 @@
          */
         await editor.initialize();
 
-        editor.events.addEventListener("changed", (event) => {
+        editor.event.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo;
           redoElement.disabled = !event.detail.canRedo;
         });
 
-        editor.events.addEventListener("exported", (evt) => {
+        editor.event.addEventListener("exported", (evt) => {
           const exports = evt.detail;
           if (exports && exports["text/plain"]) {
             checkAnswer(exports["text/plain"]);

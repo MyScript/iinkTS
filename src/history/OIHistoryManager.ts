@@ -1,5 +1,5 @@
 import { TUndoRedoConfiguration } from "../configuration"
-import { InternalEvent } from "../event"
+import { EditorEvent } from "../EditorEvent"
 import { LoggerClass, LoggerManager } from "../logger"
 import { OIModel } from "../model"
 import { OIDecorator, OIStroke, TOISymbol, TPoint } from "../primitive"
@@ -57,20 +57,17 @@ export class OIHistoryManager implements IHistoryManager
   #logger = LoggerManager.getLogger(LoggerClass.HISTORY)
 
   configuration: TUndoRedoConfiguration
+  event: EditorEvent
   context: TUndoRedoContext
   stack: TOIHistoryStackItem[]
 
-  constructor(configuration: TUndoRedoConfiguration)
+  constructor(configuration: TUndoRedoConfiguration, event: EditorEvent)
   {
     this.#logger.info("constructor", { configuration })
     this.configuration = configuration
+    this.event = event
     this.context = getInitialUndoRedoContext()
     this.stack = []
-  }
-
-  get internalEvent(): InternalEvent
-  {
-    return InternalEvent.getInstance()
   }
 
   private updateContext(): void
@@ -102,7 +99,7 @@ export class OIHistoryManager implements IHistoryManager
   init(model: OIModel): void
   {
     this.stack.push({ model: model.clone(), changes: {} })
-    this.internalEvent.emitContextChange(this.context)
+    this.event.emitChanged(this.context)
   }
 
   push(model: OIModel, changes: TOIHistoryChanges): void
@@ -123,7 +120,7 @@ export class OIHistoryManager implements IHistoryManager
     }
 
     this.updateContext()
-    this.internalEvent.emitContextChange(this.context)
+    this.event.emitChanged(this.context)
   }
 
   pop(): void
@@ -197,7 +194,7 @@ export class OIHistoryManager implements IHistoryManager
     if (this.context.canUndo) {
       this.context.stackIndex--
       this.updateContext()
-      this.internalEvent.emitContextChange(this.context)
+      this.event.emitChanged(this.context)
     }
     const previousStackItem = this.stack[this.context.stackIndex]
     this.#logger.debug("undo", previousStackItem)
@@ -213,7 +210,7 @@ export class OIHistoryManager implements IHistoryManager
     if (this.context.canRedo) {
       this.context.stackIndex++
       this.updateContext()
-      this.internalEvent.emitContextChange(this.context)
+      this.event.emitChanged(this.context)
     }
     const nextStackItem = this.stack[this.context.stackIndex]
     this.#logger.debug("redo", nextStackItem)

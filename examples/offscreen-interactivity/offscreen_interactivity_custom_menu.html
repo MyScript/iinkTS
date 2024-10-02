@@ -45,7 +45,7 @@
         flex-direction: column;
         justify-content: center;
       }
-      .custom-menu-intention {
+      .custom-menu-tool {
         position: absolute;
         top: 0px;
         right: 0px;
@@ -85,10 +85,10 @@
         </div>
       </div>
       <div class="flex-container wrap">
-        <label class="label">Show/hide Menu Intention</label>
+        <label class="label">Show/hide Menu Tool</label>
         <div class="toggle-switch">
-          <input class="toggle-input" id="menu-intention-toggle" type="checkbox" checked />
-          <label class="toggle-label" for="menu-intention-toggle"></label>
+          <input class="toggle-input" id="menu-tool-toggle" type="checkbox" checked />
+          <label class="toggle-label" for="menu-tool-toggle"></label>
         </div>
       </div>
     </nav>
@@ -99,7 +99,7 @@
       const editorElement = document.getElementById("editor");
 
       const menuStyleToggle = document.getElementById("menu-style-toggle");
-      const menuIntentionToggle = document.getElementById("menu-intention-toggle");
+      const menuIntentionToggle = document.getElementById("menu-tool-toggle");
       const menuActionToggle = document.getElementById("menu-action-toggle");
 
 
@@ -119,7 +119,7 @@
               style: {
                 enable: true
               },
-              intention: {
+              tool: {
                 enable: true
               },
               action: {
@@ -130,7 +130,7 @@
           behaviors: {
             menu: {
               style: CustomMenuStyle,
-              intention: CustomMenuIntention,
+              tool: CustomMenuTool,
               action: CustomMenuAction
             }
           }
@@ -150,7 +150,7 @@
           menuStyleToggle.checked ? editor.behaviors.menu.style.show() : editor.behaviors.menu.style.hide();
         });
         menuIntentionToggle.addEventListener("change", () => {
-          menuIntentionToggle.checked ? editor.behaviors.menu.intention.show() : editor.behaviors.menu.intention.hide();
+          menuIntentionToggle.checked ? editor.behaviors.menu.tool.show() : editor.behaviors.menu.tool.hide();
         });
         menuActionToggle.addEventListener("change", () => {
           menuActionToggle.checked ? editor.behaviors.menu.action.show() : editor.behaviors.menu.action.hide();

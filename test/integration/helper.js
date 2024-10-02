@@ -121,7 +121,7 @@ module.exports.setEditorConfiguration = async (page, configuration) => {
 
 const exported = `(async () => {
   return new Promise((resolve, reject) => {
-    editor.events.addEventListener('exported', (e) => {
+    editor.event.addEventListener('exported', (e) => {
       resolve(e.detail);
     });
   });
@@ -137,7 +137,7 @@ module.exports.getDatasFromExportedEvent = async (page) => {
 
 const imported = `(async () => {
   return new Promise((resolve, reject) => {
-    editor.events.addEventListener('imported', (e) => {
+    editor.event.addEventListener('imported', (e) => {
       resolve(e.detail);
     });
   });
@@ -153,7 +153,7 @@ module.exports.getDatasFromImportedEvent = async (page) => {
 
 const converted = `(async () => {
   return new Promise((resolve, reject) => {
-    editor.events.addEventListener('converted', (e) => {
+    editor.event.addEventListener('converted', (e) => {
       resolve(e.detail);
     });
   });
@@ -179,7 +179,7 @@ module.exports.waitEditorIdle = async (page) => {
 
 const loaded = `(async () => {
   return new Promise((resolve, reject) => {
-    editor.events.addEventListener('loaded', (e) => {
+    editor.event.addEventListener('loaded', (e) => {
       resolve();
     });
   });

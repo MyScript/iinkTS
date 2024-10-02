@@ -94,13 +94,13 @@
           languageElement.options[languageElement.options.length] = new Option(availableLanguageListResponse.result[key], key, selected, selected);
         });
 
-        editor.events.addEventListener("changed", (event) => {
+        editor.event.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo;
           redoElement.disabled = !event.detail.canRedo;
           clearElement.disabled = !event.detail.canClear;
         });
 
-        editor.events.addEventListener("exported", (event) => {
+        editor.event.addEventListener("exported", (event) => {
           resultElement.innerHTML = event.detail ? event.detail["text/plain"] : "";
         });
 

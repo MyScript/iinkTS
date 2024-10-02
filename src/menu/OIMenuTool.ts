@@ -10,7 +10,7 @@ import triangleIcon from "../assets/svg/triangle.svg"
 import lineIcon from "../assets/svg/linear.svg"
 import arrowIcon from "../assets/svg/linear-arrow.svg"
 import doubleArrowIcon from "../assets/svg/linear-double-arrow.svg"
-import { Intention, WriteTool } from "../Constants"
+import { EditorTool, EditorWriteTool } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerClass, LoggerManager } from "../logger"
 import { OIMenu } from "./OIMenu"
@@ -20,7 +20,7 @@ import { TSubMenuParam } from "./OIMenuSub"
 /**
  * @group Menu
  */
-export class OIMenuIntention extends OIMenu
+export class OIMenuTool extends OIMenu
 {
   #logger = LoggerManager.getLogger(LoggerClass.MENU)
 
@@ -46,7 +46,7 @@ export class OIMenuIntention extends OIMenu
     doubleArrow: HTMLButtonElement,
   }
 
-  constructor(behaviors: OIBehaviors, id = "ms-menu-intention")
+  constructor(behaviors: OIBehaviors, id = "ms-menu-tool")
   {
     super()
     this.id = id
@@ -64,8 +64,8 @@ export class OIMenuIntention extends OIMenu
     {
       this.unselectAll()
       this.writeBtn!.classList.add("active")
-      this.behaviors.intention = Intention.Write
-      this.behaviors.writer.tool = WriteTool.Pencil
+      this.behaviors.tool = EditorTool.Write
+      this.behaviors.writer.tool = EditorWriteTool.Pencil
     })
     return this.createToolTip(this.writeBtn, "Write")
   }
@@ -80,7 +80,7 @@ export class OIMenuIntention extends OIMenu
     {
       this.unselectAll()
       this.menuMove!.classList.add("active")
-      this.behaviors.intention = Intention.Move
+      this.behaviors.tool = EditorTool.Move
     })
     return this.createToolTip(this.menuMove, "Move")
   }
@@ -95,7 +95,7 @@ export class OIMenuIntention extends OIMenu
     {
       this.unselectAll()
       this.menuSelect!.classList.add("active")
-      this.behaviors.intention = Intention.Select
+      this.behaviors.tool = EditorTool.Select
     })
     return this.createToolTip(this.menuSelect, "Select")
   }
@@ -110,12 +110,12 @@ export class OIMenuIntention extends OIMenu
     {
       this.unselectAll()
       this.menuErase!.classList.add("active")
-      this.behaviors.intention = Intention.Erase
+      this.behaviors.tool = EditorTool.Erase
     })
     return this.createToolTip(this.menuErase, "Erase")
   }
 
-  protected createShapeSubMenu(icon: string, tool: WriteTool): HTMLButtonElement
+  protected createShapeSubMenu(icon: string, tool: EditorWriteTool): HTMLButtonElement
   {
     const subMenuShape = document.createElement("button")
     subMenuShape.id = `${this.id}-write-shape-${tool}`
@@ -124,7 +124,7 @@ export class OIMenuIntention extends OIMenu
     subMenuShape.addEventListener("pointerup", () =>
     {
       this.unselectAll()
-      this.behaviors.intention = Intention.Write
+      this.behaviors.tool = EditorTool.Write
       this.behaviors.writer.tool = tool
       subMenuShape.classList.add("active")
       this.menuShape!.innerHTML = icon
@@ -144,11 +144,11 @@ export class OIMenuIntention extends OIMenu
     this.menuShape.classList.add("ms-menu-button", "square")
     this.menuShape.innerHTML = rectangleIcon
     this.subMenuShape = {
-      circle: this.createShapeSubMenu(circleIcon, WriteTool.Circle),
-      rectangle: this.createShapeSubMenu(rectangleIcon, WriteTool.Rectangle),
-      triangle: this.createShapeSubMenu(triangleIcon, WriteTool.Triangle),
-      ellipse: this.createShapeSubMenu(ellipseIcon, WriteTool.Ellipse),
-      rhombus: this.createShapeSubMenu(rhombusIcon, WriteTool.Rhombus),
+      circle: this.createShapeSubMenu(circleIcon, EditorWriteTool.Circle),
+      rectangle: this.createShapeSubMenu(rectangleIcon, EditorWriteTool.Rectangle),
+      triangle: this.createShapeSubMenu(triangleIcon, EditorWriteTool.Triangle),
+      ellipse: this.createShapeSubMenu(ellipseIcon, EditorWriteTool.Ellipse),
+      rhombus: this.createShapeSubMenu(rhombusIcon, EditorWriteTool.Rhombus),
     }
     const subMenuContent = document.createElement("div")
     subMenuContent.id = `${this.id}-write-shape-list`
@@ -168,7 +168,7 @@ export class OIMenuIntention extends OIMenu
     return new OIMenuSub(params).element
   }
 
-  protected createEdgeSubMenu(square: string, tool: WriteTool): HTMLButtonElement
+  protected createEdgeSubMenu(square: string, tool: EditorWriteTool): HTMLButtonElement
   {
     const subMenuEdge = document.createElement("button")
     subMenuEdge.id = `${this.id}-write-edge-${tool}`
@@ -177,7 +177,7 @@ export class OIMenuIntention extends OIMenu
     subMenuEdge.addEventListener("pointerup", () =>
     {
       this.unselectAll()
-      this.behaviors.intention = Intention.Write
+      this.behaviors.tool = EditorTool.Write
       this.behaviors.writer.tool = tool
       subMenuEdge.classList.add("active")
       this.menuEdge!.innerHTML = square
@@ -197,9 +197,9 @@ export class OIMenuIntention extends OIMenu
     this.menuEdge.classList.add("ms-menu-button", "square")
     this.menuEdge.innerHTML = lineIcon
     this.subMenuEdge = {
-      line: this.createEdgeSubMenu(lineIcon, WriteTool.Line),
-      arrow: this.createEdgeSubMenu(arrowIcon, WriteTool.Arrow),
-      doubleArrow: this.createEdgeSubMenu(doubleArrowIcon, WriteTool.DoubleArrow),
+      line: this.createEdgeSubMenu(lineIcon, EditorWriteTool.Line),
+      arrow: this.createEdgeSubMenu(arrowIcon, EditorWriteTool.Arrow),
+      doubleArrow: this.createEdgeSubMenu(doubleArrowIcon, EditorWriteTool.DoubleArrow),
     }
     const subMenuContent = document.createElement("div")
     subMenuContent.id = `${this.id}-write-edge-list`
@@ -225,43 +225,43 @@ export class OIMenuIntention extends OIMenu
   update(): void
   {
     this.unselectAll()
-    switch (this.behaviors.intention) {
-      case Intention.Erase:
+    switch (this.behaviors.tool) {
+      case EditorTool.Erase:
         this.menuErase?.classList.add("active")
         break;
-      case Intention.Move:
+      case EditorTool.Move:
         this.menuMove?.classList.add("active")
         break;
-      case Intention.Select:
+      case EditorTool.Select:
         this.menuSelect?.classList.add("active")
         break;
-      case Intention.Write:
+      case EditorTool.Write:
         switch (this.behaviors.writer.tool) {
-          case WriteTool.Circle:
+          case EditorWriteTool.Circle:
             this.menuShape?.classList.add("active")
             this.subMenuShape?.circle?.classList.add("active")
             break;
-          case WriteTool.Ellipse:
+          case EditorWriteTool.Ellipse:
             this.menuShape?.classList.add("active")
             this.subMenuShape?.ellipse?.classList.add("active")
             break;
-          case WriteTool.Triangle:
+          case EditorWriteTool.Triangle:
             this.menuShape?.classList.add("active")
             this.subMenuShape?.triangle?.classList.add("active")
             break;
-          case WriteTool.Rectangle:
+          case EditorWriteTool.Rectangle:
             this.menuShape?.classList.add("active")
             this.subMenuShape?.rectangle?.classList.add("active")
             break;
-          case WriteTool.Line:
+          case EditorWriteTool.Line:
             this.menuEdge?.classList.add("active")
             this.subMenuEdge?.line?.classList.add("active")
             break;
-          case WriteTool.Arrow:
+          case EditorWriteTool.Arrow:
             this.menuEdge?.classList.add("active")
             this.subMenuEdge?.arrow?.classList.add("active")
             break;
-          case WriteTool.DoubleArrow:
+          case EditorWriteTool.DoubleArrow:
             this.menuEdge?.classList.add("active")
             this.subMenuEdge?.doubleArrow?.classList.add("active")
             break;
@@ -275,7 +275,7 @@ export class OIMenuIntention extends OIMenu
 
   render(domElement: HTMLElement): void
   {
-    if (this.behaviors.configuration.menu.intention.enable) {
+    if (this.behaviors.configuration.menu.tool.enable) {
       this.wrapper = document.createElement("div")
       this.wrapper.classList.add("ms-menu", "ms-menu-bottom", "ms-menu-row")
 

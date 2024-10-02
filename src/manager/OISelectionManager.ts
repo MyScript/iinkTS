@@ -1,6 +1,5 @@
 import { ResizeDirection, SELECTION_MARGIN, SvgElementRole } from "../Constants"
 import { OIBehaviors } from "../behaviors"
-import { InternalEvent } from "../event"
 import { LoggerClass, LoggerManager } from "../logger"
 import { OIModel } from "../model"
 import { Box, OIText, SymbolType, TBoundingBox, TOISymbol, TPoint } from "../primitive"
@@ -36,11 +35,6 @@ export class OISelectionManager
   get renderer(): OISVGRenderer
   {
     return this.behaviors.renderer
-  }
-
-  get internalEvent(): InternalEvent
-  {
-    return this.behaviors.internalEvent
   }
 
   get rotator(): OIRotationManager
@@ -132,6 +126,7 @@ export class OISelectionManager
       }
       ev.preventDefault()
       ev.stopPropagation()
+      this.hideInteractElements()
       this.translator.start(ev.target as Element, this.getPoint(ev))
       this.renderer.layer.addEventListener("pointermove", handler)
       this.renderer.layer.addEventListener("pointercancel", endHandler)
@@ -199,6 +194,7 @@ export class OISelectionManager
       }
       ev.preventDefault()
       ev.stopPropagation()
+      this.hideInteractElements()
       this.rotator.start(ev.target as Element, this.getPoint(ev))
       this.renderer.layer.addEventListener("pointermove", handler)
       this.renderer.layer.addEventListener("pointercancel", endHandler)
@@ -247,6 +243,7 @@ export class OISelectionManager
         }
         ev.preventDefault()
         ev.stopPropagation()
+        this.hideInteractElements()
         this.resizer.start(ev.target as Element, transformOrigin)
         this.renderer.layer.addEventListener("pointermove", handler)
         this.renderer.layer.addEventListener("pointercancel", endHandler)
@@ -403,14 +400,6 @@ export class OISelectionManager
       })
   }
 
-  showInteractElements(): void
-  {
-    this.behaviors.menu.context.show()
-    const query = `[role=${ SvgElementRole.Resize }],[role=${ SvgElementRole.Rotate }],[role=${ SvgElementRole.Translate }]`
-    this.selectedGroup?.querySelectorAll(query)
-      .forEach(el => el.setAttribute("visibility", "visible"))
-  }
-
   start(point: TPoint): void
   {
     this.startSelectionPoint = point
@@ -445,7 +434,7 @@ export class OISelectionManager
     this.endSelectionPoint = undefined
     this.clearSelectingRect()
     this.drawSelectedGroup(this.model.symbolsSelected)
-    this.internalEvent.emitSelected(this.model.symbolsSelected)
+    this.behaviors.event.emitSelected(this.model.symbolsSelected)
     this.behaviors.menu.style.update()
     return updatedSymbols
   }

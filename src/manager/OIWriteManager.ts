@@ -1,4 +1,4 @@
-import { SELECTION_MARGIN, WriteTool } from "../Constants"
+import { SELECTION_MARGIN, EditorWriteTool } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { TGesture } from "../gesture"
 import { LoggerClass, LoggerManager } from "../logger"
@@ -35,7 +35,7 @@ export class OIWriteManager
   #logger = LoggerManager.getLogger(LoggerClass.WRITE)
   behaviors: OIBehaviors
 
-  #tool: WriteTool = WriteTool.Pencil
+  #tool: EditorWriteTool = EditorWriteTool.Pencil
   detectGesture: boolean = true
 
   currentSymbolOrigin?: TPoint
@@ -46,14 +46,14 @@ export class OIWriteManager
     this.behaviors = behaviors
   }
 
-  get tool(): WriteTool
+  get tool(): EditorWriteTool
   {
     return this.#tool
   }
-  set tool(wt: WriteTool)
+  set tool(wt: EditorWriteTool)
   {
     this.#tool = wt
-    if (wt !== WriteTool.Pencil) {
+    if (wt !== EditorWriteTool.Pencil) {
       this.behaviors.layers.root.classList.add("shape")
     }
     else {
@@ -122,35 +122,35 @@ export class OIWriteManager
     this.#logger.debug("createCurrentSymbol", { pointer, style, pointerType })
 
     switch (this.tool) {
-      case WriteTool.Pencil:
+      case EditorWriteTool.Pencil:
         this.model.currentSymbol = new OIStroke(style, pointerType)
         break
-      case WriteTool.Rectangle:
+      case EditorWriteTool.Rectangle:
         this.model.currentSymbol = OIShapePolygon.createRectangleBetweenPoints(pointer, pointer, style)
         break
-      case WriteTool.Triangle:
+      case EditorWriteTool.Triangle:
         this.model.currentSymbol = OIShapePolygon.createTriangleBetweenPoints(pointer, pointer, style)
         break
-      case WriteTool.Parallelogram:
+      case EditorWriteTool.Parallelogram:
         this.model.currentSymbol = OIShapePolygon.createParallelogramBetweenPoints(pointer, pointer, style)
         break
-      case WriteTool.Rhombus:
+      case EditorWriteTool.Rhombus:
         this.model.currentSymbol = OIShapePolygon.createRhombusBetweenPoints(pointer, pointer, style)
         break
-      case WriteTool.Circle:
+      case EditorWriteTool.Circle:
         this.model.currentSymbol = OIShapeCircle.createBetweenPoints(pointer, pointer, style)
         break
-      case WriteTool.Ellipse:
+      case EditorWriteTool.Ellipse:
         this.model.currentSymbol = OIShapeEllipse.createBetweenPoints(pointer, pointer, style)
         break
-      case WriteTool.Line:
-      case WriteTool.Arrow:
-      case WriteTool.DoubleArrow: {
+      case EditorWriteTool.Line:
+      case EditorWriteTool.Arrow:
+      case EditorWriteTool.DoubleArrow: {
         let startDecoration, endDecoration
-        if (this.tool === WriteTool.Arrow) {
+        if (this.tool === EditorWriteTool.Arrow) {
           endDecoration = EdgeDecoration.Arrow
         }
-        else if (this.tool === WriteTool.DoubleArrow) {
+        else if (this.tool === EditorWriteTool.DoubleArrow) {
           startDecoration = EdgeDecoration.Arrow
           endDecoration = EdgeDecoration.Arrow
         }
@@ -166,22 +166,22 @@ export class OIWriteManager
   protected updateCurrentSymbolShape(pointer: TPointer): void
   {
     switch (this.tool) {
-      case WriteTool.Rectangle:
+      case EditorWriteTool.Rectangle:
         OIShapePolygon.updateRectangleBetweenPoints(this.model.currentSymbol as OIShapePolygon, this.currentSymbolOrigin!, pointer)
         break
-      case WriteTool.Triangle:
+      case EditorWriteTool.Triangle:
         OIShapePolygon.updateTriangleBetweenPoints(this.model.currentSymbol as OIShapePolygon, this.currentSymbolOrigin!, pointer)
         break
-      case WriteTool.Parallelogram:
+      case EditorWriteTool.Parallelogram:
         OIShapePolygon.updateParallelogramBetweenPoints(this.model.currentSymbol as OIShapePolygon, this.currentSymbolOrigin!, pointer)
         break
-      case WriteTool.Rhombus:
+      case EditorWriteTool.Rhombus:
         OIShapePolygon.updateRhombusBetweenPoints(this.model.currentSymbol as OIShapePolygon, this.currentSymbolOrigin!, pointer)
         break
-      case WriteTool.Circle:
+      case EditorWriteTool.Circle:
         OIShapeCircle.updateBetweenPoints(this.model.currentSymbol as OIShapeCircle, this.currentSymbolOrigin!, pointer)
         break
-      case WriteTool.Ellipse:
+      case EditorWriteTool.Ellipse:
         OIShapeEllipse.updateBetweenPoints(this.model.currentSymbol as OIShapeEllipse, this.currentSymbolOrigin!, pointer)
         break
     }
@@ -222,7 +222,7 @@ export class OIWriteManager
   {
     this.#logger.info("startWriting", { style, pointer, pointerType })
     const localPointer = pointer
-    if (this.tool !== WriteTool.Pencil) {
+    if (this.tool !== EditorWriteTool.Pencil) {
       const { x, y } = this.snaps.snapResize(pointer)
       localPointer.x = x
       localPointer.y = y
@@ -236,7 +236,7 @@ export class OIWriteManager
   {
     this.#logger.info("continueWriting", { pointer })
     const localPointer = pointer
-    if (this.tool !== WriteTool.Pencil) {
+    if (this.tool !== EditorWriteTool.Pencil) {
       const { x, y } = this.snaps.snapResize(pointer)
       localPointer.x = x
       localPointer.y = y
@@ -270,7 +270,7 @@ export class OIWriteManager
   {
     this.#logger.info("finishWriting", { pointer })
     const localPointer = pointer
-    if (this.tool !== WriteTool.Pencil) {
+    if (this.tool !== EditorWriteTool.Pencil) {
       const { x, y } = this.snaps.snapResize(pointer)
       localPointer.x = x
       localPointer.y = y
