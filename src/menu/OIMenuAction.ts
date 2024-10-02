@@ -10,7 +10,7 @@ import snapIcon from "../assets/svg/arrow-to-dot.svg"
 import debugIcon from "../assets/svg/wolf.svg"
 import downloadIcon from "../assets/svg/download.svg"
 import uploadIcon from "../assets/svg/upload.svg"
-import { Intention, WriteTool } from "../Constants"
+import { EditorTool, EditorWriteTool } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerClass, LoggerManager } from "../logger"
 import { OIModel } from "../model"
@@ -186,8 +186,8 @@ export class OIMenuAction extends OIMenu
         {
           this.#logger.info(`${ this.id }.gesture-detect`, { value })
           this.behaviors.writer.detectGesture = value
-          this.behaviors.intention = Intention.Write
-          this.behaviors.writer.tool = WriteTool.Pencil
+          this.behaviors.tool = EditorTool.Write
+          this.behaviors.writer.tool = EditorWriteTool.Pencil
         }
       },
       {
@@ -200,8 +200,8 @@ export class OIMenuAction extends OIMenu
         {
           this.#logger.info(`${ this.id }.gesture-surround`, { value })
           this.behaviors.gesture.surroundAction = value as SurroundAction
-          this.behaviors.intention = Intention.Write
-          this.behaviors.writer.tool = WriteTool.Pencil
+          this.behaviors.tool = EditorTool.Write
+          this.behaviors.writer.tool = EditorWriteTool.Pencil
         }
       },
       {
@@ -214,8 +214,8 @@ export class OIMenuAction extends OIMenu
         {
           this.#logger.info(`${ this.id }.gesture-strikethrough`, { value })
           this.behaviors.gesture.strikeThroughAction = value as StrikeThroughAction
-          this.behaviors.intention = Intention.Write
-          this.behaviors.writer.tool = WriteTool.Pencil
+          this.behaviors.tool = EditorTool.Write
+          this.behaviors.writer.tool = EditorWriteTool.Pencil
         }
       },
       {
@@ -228,8 +228,8 @@ export class OIMenuAction extends OIMenu
         {
           this.#logger.info(`${ this.id }.gesture-InsertAction`, { value })
           this.behaviors.gesture.insertAction = value as InsertAction
-          this.behaviors.intention = Intention.Write
-          this.behaviors.writer.tool = WriteTool.Pencil
+          this.behaviors.tool = EditorTool.Write
+          this.behaviors.writer.tool = EditorWriteTool.Pencil
         }
       },
     ]
@@ -530,7 +530,7 @@ export class OIMenuAction extends OIMenu
           importBtn.disabled = true
         }
       } catch (error) {
-        this.behaviors.internalEvent.emitError(new Error(error as string))
+        this.behaviors.event.emitError(new Error(error as string))
       }
 
     })

@@ -1,7 +1,7 @@
 import { LeftClickEventMock } from "../__mocks__/EventMock"
 import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
 import { buildOICircle, buildOIStroke } from "../helpers"
-import { Intention, OIMenuStyle, WriteTool } from "../../../src/iink"
+import { EditorTool, OIMenuStyle, EditorWriteTool } from "../../../src/iink"
 
 describe("OIMenuStyle.ts", () =>
 {
@@ -231,11 +231,11 @@ describe("OIMenuStyle.ts", () =>
     const menu = new OIMenuStyle(behaviors)
     menu.render(layer)
 
-    describe("when intention == write with pencil", () =>
+    describe("when tool == write with pencil", () =>
     {
       beforeAll(() => {
-        behaviors.intention = Intention.Write
-        behaviors.writer.tool = WriteTool.Pencil
+        behaviors.tool = EditorTool.Write
+        behaviors.writer.tool = EditorWriteTool.Pencil
         menu.update()
       })
       test("should display menu color", () =>
@@ -260,11 +260,11 @@ describe("OIMenuStyle.ts", () =>
       })
     })
 
-    describe("when intention == write with circle", () =>
+    describe("when tool == write with circle", () =>
     {
       beforeAll(() => {
-        behaviors.intention = Intention.Write
-        behaviors.writer.tool = WriteTool.Circle
+        behaviors.tool = EditorTool.Write
+        behaviors.writer.tool = EditorWriteTool.Circle
         menu.update()
       })
       test("should display menu color", () =>
@@ -289,10 +289,10 @@ describe("OIMenuStyle.ts", () =>
       })
     })
 
-    describe("when intention == select", () =>
+    describe("when tool == select", () =>
     {
       beforeAll(() => {
-        behaviors.intention = Intention.Select
+        behaviors.tool = EditorTool.Select
         menu.update()
       })
       test("should display menu color", () =>
@@ -317,10 +317,10 @@ describe("OIMenuStyle.ts", () =>
       })
     })
 
-    describe("when intention == select and shape selected", () =>
+    describe("when tool == select and shape selected", () =>
     {
       beforeAll(() => {
-        behaviors.intention = Intention.Select
+        behaviors.tool = EditorTool.Select
         const shape = buildOICircle()
         shape.selected = true
         behaviors.model.addSymbol(shape)
@@ -348,10 +348,10 @@ describe("OIMenuStyle.ts", () =>
       })
     })
 
-    describe("when intention == select and shape selected", () =>
+    describe("when tool == select and shape selected", () =>
     {
       beforeAll(() => {
-        behaviors.intention = Intention.Move
+        behaviors.tool = EditorTool.Move
         menu.update()
       })
       test("should hide", () =>

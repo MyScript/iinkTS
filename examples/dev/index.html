@@ -222,15 +222,15 @@
         });
 
         /**
-         * You can use `editor.events` or directly `editorElement` to add event listener
+         * You can use `editor.event` or directly `editorElement` to add event listener
          */
-        editor.events.addEventListener("changed", (event) => {
+        editor.event.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo;
           redoElement.disabled = !event.detail.canRedo;
           clearElement.disabled = !event.detail.canClear;
         });
 
-        editor.events.addEventListener("exported", (event) => {
+        editor.event.addEventListener("exported", (event) => {
           resultElement.innerHTML =
             event.detail && event.detail["application/vnd.myscript.jiix"] ? event.detail["application/vnd.myscript.jiix"].label : "";
         });

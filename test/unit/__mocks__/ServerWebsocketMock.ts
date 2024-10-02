@@ -93,6 +93,10 @@ export const svgPatchMessage = {
   "layer": "MODEL"
 }
 
+export const idleMessage = {
+  "type": "idle",
+}
+
 export const errorNotGrantedMessage = {
   "type": "error",
   "message": "Access not granted",
@@ -176,6 +180,11 @@ export class ServerWebsocketMock extends Server
   sendSVGPatchMessage()
   {
     this.send(JSON.stringify(svgPatchMessage))
+  }
+
+  sendIdlehMessage()
+  {
+    this.send(JSON.stringify(idleMessage))
   }
 
   getMessages(type: string): DeserializedMessage<object>[]

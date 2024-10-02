@@ -1,4 +1,3 @@
-
 import { delay } from "../helpers"
 import {
   RestBehaviors,
@@ -8,28 +7,68 @@ import {
   TBehaviorOptions,
   TConfiguration,
   TPointer,
-  EditorLayer
+  EditorLayer,
+  PointerEventGrabber,
+  RestRecognizer
 } from "../../../src/iink"
+import { EditorEventMock } from "../__mocks__/EditorEventMock"
 
 describe("RestBehaviors.ts", () =>
 {
+  const event = new EditorEventMock(document.createElement("div"))
   const height = 100, width = 100
   const DefaultBehaviorsOptions: TBehaviorOptions = {
     configuration: DefaultConfiguration
   }
 
-  test("should instanciate RestBehaviors", () =>
+  test("should instanciate RestBehaviors with default grabber & recognizer", () =>
   {
     const layers = new EditorLayer(document.createElement("div"))
     //@ts-ignore IIC-1006 Type instantiation is excessively deep and possibly infinite.
-    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers)
+    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers, event)
     expect(rb).toBeDefined()
+    expect(rb.grabber).toBeDefined()
+    expect(rb.grabber instanceof PointerEventGrabber).toBe(true)
+    expect(rb.recognizer).toBeDefined()
+    expect(rb.recognizer instanceof RestRecognizer).toBe(true)
+  })
+
+  test("should instanciate RestBehaviors with custom grabber", () =>
+  {
+    class CustomGrabber extends PointerEventGrabber {
+      name = "custom-grabber"
+    }
+    const customBehaviorsOptions = structuredClone(DefaultBehaviorsOptions)
+    //@ts-ignore
+    customBehaviorsOptions.behaviors = { grabber: CustomGrabber }
+    const layers = new EditorLayer(document.createElement("div"))
+    //@ts-ignore IIC-1006 Type instantiation is excessively deep and possibly infinite.
+    const rb = new RestBehaviors(customBehaviorsOptions, layers, event)
+    expect(rb).toBeDefined()
+    expect(rb.grabber).toBeDefined()
+    expect(rb.grabber instanceof CustomGrabber).toBe(true)
+  })
+
+  test("should instanciate RestBehaviors with custom recognizer", () =>
+  {
+    class CustomRecognizer extends RestRecognizer {
+      name = "custom-recognizer"
+    }
+    const customBehaviorsOptions = structuredClone(DefaultBehaviorsOptions)
+    //@ts-ignore
+    customBehaviorsOptions.behaviors = { recognizer: CustomRecognizer }
+    const layers = new EditorLayer(document.createElement("div"))
+    //@ts-ignore IIC-1006 Type instantiation is excessively deep and possibly infinite.
+    const rb = new RestBehaviors(customBehaviorsOptions, layers, event)
+    expect(rb).toBeDefined()
+    expect(rb.recognizer).toBeDefined()
+    expect(rb.recognizer instanceof CustomRecognizer).toBe(true)
   })
 
   test("should init", async () =>
   {
     const layers = new EditorLayer(document.createElement("div"))
-    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers)
+    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers, event)
     rb.grabber.attach = jest.fn()
     rb.renderer.init = jest.fn()
     await rb.init()
@@ -42,7 +81,7 @@ describe("RestBehaviors.ts", () =>
   test("should call renderer on drawCurrentStroke", async () =>
   {
     const layers = new EditorLayer(document.createElement("div"))
-    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers)
+    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers, event)
     await rb.init()
     rb.renderer.drawPendingStroke = jest.fn()
     const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
@@ -59,7 +98,7 @@ describe("RestBehaviors.ts", () =>
     test("should call renderer.drawModel", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const rb = new RestBehaviors(DefaultBehaviorsOptions, layers)
+      const rb = new RestBehaviors(DefaultBehaviorsOptions, layers, event)
       await rb.init()
       rb.renderer.drawModel = jest.fn()
       rb.recognizer.export = jest.fn(m => Promise.resolve(m))
@@ -70,7 +109,7 @@ describe("RestBehaviors.ts", () =>
     test("should call recognizer.export", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const rb = new RestBehaviors(DefaultBehaviorsOptions, layers)
+      const rb = new RestBehaviors(DefaultBehaviorsOptions, layers, event)
       await rb.init()
       rb.renderer.drawModel = jest.fn()
       rb.recognizer.export = jest.fn(m => Promise.resolve(m))
@@ -82,7 +121,7 @@ describe("RestBehaviors.ts", () =>
     test("should reject if recognizer.export in error", async () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
-      const rb = new RestBehaviors(DefaultBehaviorsOptions, layers)
+      const rb = new RestBehaviors(DefaultBehaviorsOptions, layers, event)
       await rb.init()
       rb.renderer.drawModel = jest.fn()
       rb.recognizer.export = jest.fn(() => Promise.reject("pouet"))
@@ -94,7 +133,7 @@ describe("RestBehaviors.ts", () =>
       const layers = new EditorLayer(document.createElement("div"))
       const configuration: TConfiguration = JSON.parse(JSON.stringify(DefaultConfiguration))
       configuration.triggers.exportContent = "DEMAND"
-      const rb = new RestBehaviors({ configuration }, layers)
+      const rb = new RestBehaviors({ configuration }, layers, event)
       await rb.init()
       rb.renderer.drawModel = jest.fn()
       rb.recognizer.export = jest.fn(m => Promise.resolve(m))
@@ -107,7 +146,7 @@ describe("RestBehaviors.ts", () =>
   test("should export", async () =>
   {
     const layers = new EditorLayer(document.createElement("div"))
-    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers)
+    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers, event)
     await rb.init()
     rb.recognizer.export = jest.fn(m => Promise.resolve(m))
     rb.export()
@@ -118,7 +157,7 @@ describe("RestBehaviors.ts", () =>
   test("should convert", async () =>
   {
     const layers = new EditorLayer(document.createElement("div"))
-    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers)
+    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers, event)
     await rb.init()
     rb.recognizer.convert = jest.fn(m => Promise.resolve(m))
     rb.convert("DIGITAL_EDIT", ["mime-type"])
@@ -129,7 +168,7 @@ describe("RestBehaviors.ts", () =>
   test("should resize", async () =>
   {
     const layers = new EditorLayer(document.createElement("div"))
-    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers)
+    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers, event)
     rb.renderer.resize = jest.fn()
     rb.recognizer.resize = jest.fn(m => Promise.resolve(m))
     await rb.init()
@@ -145,7 +184,7 @@ describe("RestBehaviors.ts", () =>
   test("should not call recognizer on resize if no strokes", async () =>
   {
     const layers = new EditorLayer(document.createElement("div"))
-    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers)
+    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers, event)
     await rb.init()
     rb.renderer.resize = jest.fn()
     rb.recognizer.resize = jest.fn(m => Promise.resolve(m))
@@ -157,7 +196,7 @@ describe("RestBehaviors.ts", () =>
   test("should undo", async () =>
   {
     const layers = new EditorLayer(document.createElement("div"))
-    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers)
+    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers, event)
     await rb.init()
     const model1 = new Model()
     rb.recognizer.export = jest.fn(m => Promise.resolve(m))
@@ -171,7 +210,7 @@ describe("RestBehaviors.ts", () =>
   test("should redo", async () =>
   {
     const layers = new EditorLayer(document.createElement("div"))
-    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers)
+    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers, event)
     await rb.init()
     const model2 = new Model(width, height)
     const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
@@ -188,7 +227,7 @@ describe("RestBehaviors.ts", () =>
   test("should clear", async () =>
   {
     const layers = new EditorLayer(document.createElement("div"))
-    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers)
+    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers, event)
     await rb.init()
     rb.renderer.drawModel = jest.fn()
     const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
@@ -204,7 +243,7 @@ describe("RestBehaviors.ts", () =>
   test("should destroy", async () =>
   {
     const layers = new EditorLayer(document.createElement("div"))
-    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers)
+    const rb = new RestBehaviors(DefaultBehaviorsOptions, layers, event)
     await rb.init()
     rb.grabber.detach = jest.fn()
     rb.renderer.destroy = jest.fn()

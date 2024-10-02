@@ -1,5 +1,5 @@
 import { TUndoRedoConfiguration } from "../configuration"
-import { InternalEvent } from "../event"
+import { EditorEvent } from "../EditorEvent"
 import { LoggerClass, LoggerManager } from "../logger"
 import { IModel } from "../model"
 import { IHistoryManager } from "./IHistoryManager"
@@ -13,20 +13,17 @@ export class HistoryManager implements IHistoryManager
   #logger = LoggerManager.getLogger(LoggerClass.HISTORY)
 
   configuration: TUndoRedoConfiguration
+  event: EditorEvent
   context: TUndoRedoContext
   stack: IModel[]
 
-  constructor(configuration: TUndoRedoConfiguration)
+  constructor(configuration: TUndoRedoConfiguration, event: EditorEvent)
   {
     this.#logger.info("constructor", { configuration })
     this.configuration = configuration
+    this.event = event
     this.context = getInitialUndoRedoContext()
     this.stack = []
-  }
-
-  get internalEvent(): InternalEvent
-  {
-    return InternalEvent.getInstance()
   }
 
   private updateContext(): void
@@ -52,7 +49,7 @@ export class HistoryManager implements IHistoryManager
     }
 
     this.updateContext()
-    this.internalEvent.emitContextChange(this.context)
+    this.event.emitChanged(this.context)
   }
 
   updateStack(model: IModel): void
@@ -63,7 +60,7 @@ export class HistoryManager implements IHistoryManager
       this.stack.splice(index, 1, model.clone())
     }
     this.updateContext()
-    this.internalEvent.emitContextChange(this.context)
+    this.event.emitChanged(this.context)
   }
 
   undo(): IModel
@@ -72,7 +69,7 @@ export class HistoryManager implements IHistoryManager
     if (this.context.canUndo) {
       this.context.stackIndex--
       this.updateContext()
-      this.internalEvent.emitContextChange(this.context)
+      this.event.emitChanged(this.context)
     }
     const previousModel = this.stack[this.context.stackIndex].clone()
     this.#logger.debug("undo", previousModel)
@@ -85,7 +82,7 @@ export class HistoryManager implements IHistoryManager
     if (this.context.canRedo) {
       this.context.stackIndex++
       this.updateContext()
-      this.internalEvent.emitContextChange(this.context)
+      this.event.emitChanged(this.context)
     }
     const nextModel = this.stack[this.context.stackIndex].clone()
     this.#logger.debug("redo", nextModel)

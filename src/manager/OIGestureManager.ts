@@ -1,4 +1,4 @@
-import { Intention } from "../Constants"
+import { EditorTool } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerManager, LoggerClass } from "../logger"
 import { OIModel } from "../model"
@@ -97,7 +97,7 @@ export class OIGestureManager
     switch (this.surroundAction) {
       case SurroundAction.Select: {
         if (ids.length) {
-          this.behaviors.internalEvent.emitIntention(Intention.Select)
+          this.behaviors.event.emitTool(EditorTool.Select)
           this.behaviors.select(ids)
         }
         break

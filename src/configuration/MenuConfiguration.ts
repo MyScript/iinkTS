@@ -8,7 +8,7 @@ export type TMenuConfiguration = {
   style: {
     enable: boolean,
   }
-  intention: {
+  tool: {
     enable: boolean,
   }
   action: {
@@ -28,7 +28,7 @@ export const DefaultMenuConfiguration: TMenuConfiguration = {
   style: {
     enable: true
   },
-  intention: {
+  tool: {
     enable: true
   },
   action: {

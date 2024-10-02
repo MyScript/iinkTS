@@ -160,7 +160,6 @@ export class OIRotationManager
     {
       this.setTransformOrigin(s.id, this.center.x, this.center.y)
     })
-    this.behaviors.selector.hideInteractElements()
   }
 
   continue(point: TPoint): number
@@ -203,7 +202,6 @@ export class OIRotationManager
 
     this.behaviors.selector.resetSelectedGroup(this.model.symbolsSelected)
     this.interactElementsGroup = undefined
-    this.behaviors.selector.showInteractElements()
     this.behaviors.svgDebugger.apply()
   }
 }

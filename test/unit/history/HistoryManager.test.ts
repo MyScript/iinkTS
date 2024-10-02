@@ -9,18 +9,20 @@ import
   DefaultConfiguration,
   DefaultPenStyle
 } from "../../../src/iink"
+import { EditorEventMock } from "../__mocks__/EditorEventMock"
 
 describe("HistoryManager.ts", () =>
 {
+  const event = new EditorEventMock(document.createElement("div"))
   test("should instanciate HistoryManager", () =>
   {
-    const manager = new HistoryManager(DefaultConfiguration["undo-redo"])
+    const manager = new HistoryManager(DefaultConfiguration["undo-redo"], event)
     expect(manager).toBeDefined()
   })
 
   test("should initialize UndoRedoContext", () =>
   {
-    const manager = new HistoryManager(DefaultConfiguration["undo-redo"])
+    const manager = new HistoryManager(DefaultConfiguration["undo-redo"], event)
     const context = getInitialUndoRedoContext()
     expect(manager.context).toStrictEqual(context)
   })
@@ -31,9 +33,9 @@ describe("HistoryManager.ts", () =>
     const model1 = new Model(27, 5)
     const model2 = new Model(42, 72)
     const model3 = new Model(42, 72)
-    const manager = new HistoryManager(configuration)
+    const manager = new HistoryManager(configuration, event)
 
-    test("should add model to stack", () =>
+    test("should add model to stack and emitChanged", () =>
     {
       manager.push(model1)
 
@@ -44,9 +46,10 @@ describe("HistoryManager.ts", () =>
       expect(manager.stack).toHaveLength(1)
       expect(manager.stack[manager.context.stackIndex]).toEqual(model1)
       expect(manager.stack[manager.context.stackIndex]).not.toBe(model1)
+      expect(manager.event.emitChanged).toHaveBeenNthCalledWith(1, manager.context)
     })
 
-    test("should add model to stack", () =>
+    test("should add 2nd model to stack and emitChanged", () =>
     {
       model2.initCurrentStroke({ t: 1, p: 0.5, x: 1, y: 1 }, "pen", DefaultPenStyle)
       model2.endCurrentStroke({ t: 15, p: 0.5, x: 10, y: 1 })
@@ -59,9 +62,10 @@ describe("HistoryManager.ts", () =>
       expect(manager.stack).toHaveLength(2)
       expect(manager.stack[manager.context.stackIndex]).toEqual(model2)
       expect(manager.stack[manager.context.stackIndex]).not.toBe(model2)
+      expect(manager.event.emitChanged).toHaveBeenNthCalledWith(1, manager.context)
     })
 
-    test("should splice end of stack if stackIndex no last", () =>
+    test("should splice end of stack if stackIndex no last and emitChanged", () =>
     {
       const NB_STROKE = 4
       for (let i = 0; i < NB_STROKE; i++) {
@@ -87,9 +91,10 @@ describe("HistoryManager.ts", () =>
 
       expect(manager.stack[manager.context.stackIndex]).toEqual(model3)
       expect(manager.stack[manager.context.stackIndex]).not.toBe(model3)
+      expect(manager.event.emitChanged).toHaveBeenNthCalledWith(1, manager.context)
     })
 
-    test("should shift the first element of the stack when maxStackSize is exceeded", () =>
+    test("should shift the first element of the stack when maxStackSize is exceeded and emitChanged", () =>
     {
       const NB_STROKE = 10
       for (let i = 0; i < NB_STROKE; i++) {
@@ -111,15 +116,16 @@ describe("HistoryManager.ts", () =>
 
       expect(manager.context.canUndo).toStrictEqual(true)
       expect(manager.context.canRedo).toStrictEqual(false)
+      expect(manager.event.emitChanged).toHaveBeenNthCalledWith(1, manager.context)
     })
   })
 
   describe("undo", () =>
   {
     const model = new Model(27, 5)
-    const manager = new HistoryManager(DefaultConfiguration["undo-redo"])
+    const manager = new HistoryManager(DefaultConfiguration["undo-redo"], event)
     manager.push(model)
-    test("should get the previous model", () =>
+    test("should get the previous model and emitChanged", () =>
     {
       model.initCurrentStroke({ t: 1, p: 0.5, x: 1, y: 1 }, "pen", DefaultPenStyle)
       model.endCurrentStroke({ t: 15, p: 0.5, x: 10, y: 1 })
@@ -134,13 +140,14 @@ describe("HistoryManager.ts", () =>
 
       expect(manager.context.canUndo).toStrictEqual(false)
       expect(manager.context.canRedo).toStrictEqual(true)
+      expect(manager.event.emitChanged).toHaveBeenNthCalledWith(1, manager.context)
     })
   })
 
   describe("redo", () =>
   {
     const model = new Model(27, 5)
-    const manager = new HistoryManager(DefaultConfiguration["undo-redo"])
+    const manager = new HistoryManager(DefaultConfiguration["undo-redo"], event)
     manager.push(model)
     test("should get the next model", () =>
     {
@@ -161,6 +168,7 @@ describe("HistoryManager.ts", () =>
 
       expect(manager.context.canUndo).toStrictEqual(true)
       expect(manager.context.canRedo).toStrictEqual(false)
+      expect(manager.event.emitChanged).toHaveBeenNthCalledWith(1, manager.context)
     })
   })
 
@@ -169,7 +177,7 @@ describe("HistoryManager.ts", () =>
     test("should update last model in stack", async () =>
     {
       const model = new Model(27, 5)
-      const manager = new HistoryManager(DefaultConfiguration["undo-redo"])
+      const manager = new HistoryManager(DefaultConfiguration["undo-redo"], event)
       manager.push(model)
       const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       // wait a few seconds and have a different model.modificationDate
@@ -194,7 +202,7 @@ describe("HistoryManager.ts", () =>
     test("should update previous model in stack", async () =>
     {
       const model = new Model(27, 5)
-      const manager = new HistoryManager(DefaultConfiguration["undo-redo"])
+      const manager = new HistoryManager(DefaultConfiguration["undo-redo"], event)
       manager.push(model)
 
       const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }

@@ -80,10 +80,10 @@ describe("WSRecognizer.ts", () =>
     let mockServer: ServerWebsocketMock
     let wsr: WSRecognizer
 
-
     beforeEach(() =>
     {
       wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+      wsr.event.emitError = jest.fn()
       mockServer = new ServerWebsocketMock(wsr.url)
     })
     afterEach(async () =>
@@ -157,17 +157,14 @@ describe("WSRecognizer.ts", () =>
       await promise
       expect(1).toEqual(1)
     })
-    //fix test
-    //maybe refactor of internal event to remove singleton
-    test.skip("should reject if receive error message", async () =>
+    test("should reject if receive error message", async () =>
     {
-      const spyEmitError: jest.SpyInstance = jest.spyOn(wsr.internalEvent, "emitError")
       expect.assertions(3)
       const promise = wsr.init(height, width)
       mockServer.sendNotGrantedErrorMessage()
       await expect(promise).rejects.toEqual(new Error(RecognizerError.WRONG_CREDENTIALS))
-      await expect(spyEmitError).toHaveBeenCalledTimes(1)
-      await expect(spyEmitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
+      await expect(wsr.event.emitError).toHaveBeenCalledTimes(1)
+      await expect(wsr.event.emitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
     })
   })
 
@@ -299,7 +296,7 @@ describe("WSRecognizer.ts", () =>
     beforeEach(() =>
     {
       wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
-
+      wsr.event.emitError = jest.fn()
       mockServer = new ServerWebsocketMock(wsr.url)
       mockServer.init()
     })
@@ -358,7 +355,6 @@ describe("WSRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
-      let spyEmitError = jest.spyOn(wsr.internalEvent, "emitError")
       expect.assertions(3)
       const stroke = buildStroke()
       await wsr.init(height, width)
@@ -367,8 +363,8 @@ describe("WSRecognizer.ts", () =>
       await delay(100)
       mockServer.send(JSON.stringify(errorNotGrantedMessage))
       await expect(promise).rejects.toEqual(new Error(RecognizerError.WRONG_CREDENTIALS))
-      await expect(spyEmitError).toHaveBeenCalledTimes(1)
-      await expect(spyEmitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
+      await expect(wsr.event.emitError).toHaveBeenCalledTimes(1)
+      await expect(wsr.event.emitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
     })
   })
 
@@ -471,6 +467,7 @@ describe("WSRecognizer.ts", () =>
     beforeEach(() =>
     {
       wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+      wsr.event.emitError = jest.fn()
 
       mockServer = new ServerWebsocketMock(wsr.url)
       mockServer.init()
@@ -540,7 +537,6 @@ describe("WSRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
-      const spyEmitError: jest.SpyInstance = jest.spyOn(wsr.internalEvent, "emitError")
       expect.assertions(3)
       await wsr.init(height, width)
       const promise = wsr.export(model)
@@ -548,8 +544,8 @@ describe("WSRecognizer.ts", () =>
       await delay(100)
       mockServer.send(JSON.stringify(errorNotGrantedMessage))
       await expect(promise).rejects.toEqual(new Error(RecognizerError.WRONG_CREDENTIALS))
-      await expect(spyEmitError).toHaveBeenCalledTimes(1)
-      await expect(spyEmitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
+      await expect(wsr.event.emitError).toHaveBeenCalledTimes(1)
+      await expect(wsr.event.emitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
     })
   })
 
@@ -569,6 +565,7 @@ describe("WSRecognizer.ts", () =>
     beforeEach(() =>
     {
       wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+      wsr.event.emitError = jest.fn()
 
       mockServer = new ServerWebsocketMock(wsr.url)
       mockServer.init()
@@ -621,15 +618,83 @@ describe("WSRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
-      const spyEmitError: jest.SpyInstance = jest.spyOn(wsr.internalEvent, "emitError")
       expect.assertions(3)
       await wsr.init(height, width)
       const promise = wsr.import(model, blobToImport, mimeType)
       await delay(100)
       mockServer.sendNotGrantedErrorMessage()
       await expect(promise).rejects.toEqual(new Error(RecognizerError.WRONG_CREDENTIALS))
-      await expect(spyEmitError).toHaveBeenCalledTimes(1)
-      await expect(spyEmitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
+      await expect(wsr.event.emitError).toHaveBeenCalledTimes(1)
+      await expect(wsr.event.emitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
+    })
+  })
+
+  describe("importPointEvents", () =>
+  {
+    const strokes = [buildStroke()]
+    const serverConfig = {
+      ...ConfigurationTextWebsocket.server,
+      host: "importPointEvents-test"
+    } as TServerConfiguration
+    let mockServer: ServerWebsocketMock
+    let wsr: WSRecognizer
+
+    beforeEach(() =>
+    {
+      wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+      wsr.event.emitError = jest.fn()
+
+      mockServer = new ServerWebsocketMock(wsr.url)
+      mockServer.init()
+    })
+    afterEach(async () =>
+    {
+      await wsr.destroy()
+      mockServer.close()
+    })
+
+    test("should throw error if recognizer has not been initialize", async () =>
+    {
+      await expect(wsr.importPointEvents(strokes)).rejects.toEqual(new Error("Recognizer must be initilized"))
+    })
+    test("should send importPointEvents message", async () =>
+    {
+      await wsr.init(height, width)
+      wsr.importPointEvents(strokes)
+      //¯\_(ツ)_/¯  required to wait server received message
+      await delay(100)
+      const importPointEventsMessages = mockServer.getMessages("pointerEvents")
+      expect(importPointEventsMessages).toHaveLength(1)
+      //@ts-ignore
+      const importPointEventsMes = JSON.parse(importPointEventsMessages[0])
+      //@ts-ignore
+      expect(importPointEventsMes.events).toHaveLength(strokes.length)
+      expect(importPointEventsMes.events[0]).toEqual(expect.objectContaining({ id: strokes[0].id}))
+    })
+    test("should resolve when receive exported message", async () =>
+    {
+      expect.assertions(1)
+      await wsr.init(height, width)
+      const promise = wsr.importPointEvents(strokes)
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
+      mockServer.sendEmptyExportMessage()
+      await expect(promise).resolves.toEqual(
+        expect.objectContaining({
+          "application/vnd.myscript.jiix": emptyJIIX
+        })
+      )
+    })
+    test("should reject if receive error message", async () =>
+    {
+      expect.assertions(3)
+      await wsr.init(height, width)
+      const promise = wsr.importPointEvents(strokes)
+      await delay(100)
+      mockServer.sendNotGrantedErrorMessage()
+      await expect(promise).rejects.toEqual(new Error(RecognizerError.WRONG_CREDENTIALS))
+      await expect(wsr.event.emitError).toHaveBeenCalledTimes(1)
+      await expect(wsr.event.emitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
     })
   })
 
@@ -646,6 +711,7 @@ describe("WSRecognizer.ts", () =>
     beforeEach(() =>
     {
       wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+      wsr.event.emitError = jest.fn()
 
       mockServer = new ServerWebsocketMock(wsr.url)
       mockServer.init()
@@ -687,7 +753,6 @@ describe("WSRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
-      const spyEmitError: jest.SpyInstance = jest.spyOn(wsr.internalEvent, "emitError")
       expect.assertions(3)
       await wsr.init(height, width)
       const promise = wsr.resize(model)
@@ -695,8 +760,8 @@ describe("WSRecognizer.ts", () =>
       await delay(100)
       mockServer.sendNotGrantedErrorMessage()
       await expect(promise).rejects.toEqual(new Error(RecognizerError.WRONG_CREDENTIALS))
-      await expect(spyEmitError).toHaveBeenCalledTimes(1)
-      await expect(spyEmitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
+      await expect(wsr.event.emitError).toHaveBeenCalledTimes(1)
+      await expect(wsr.event.emitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
     })
   })
 
@@ -713,6 +778,7 @@ describe("WSRecognizer.ts", () =>
     beforeEach(() =>
     {
       wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+      wsr.event.emitError = jest.fn()
 
       mockServer = new ServerWebsocketMock(wsr.url)
       mockServer.init()
@@ -758,7 +824,6 @@ describe("WSRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
-      const spyEmitError: jest.SpyInstance = jest.spyOn(wsr.internalEvent, "emitError")
       expect.assertions(3)
       await wsr.init(height, width)
       const promise = wsr.convert(model)
@@ -766,8 +831,71 @@ describe("WSRecognizer.ts", () =>
       await delay(100)
       mockServer.sendNotGrantedErrorMessage()
       await expect(promise).rejects.toEqual(new Error(RecognizerError.WRONG_CREDENTIALS))
-      await expect(spyEmitError).toHaveBeenCalledTimes(1)
-      await expect(spyEmitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
+      await expect(wsr.event.emitError).toHaveBeenCalledTimes(1)
+      await expect(wsr.event.emitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
+    })
+  })
+
+  describe("waitForIdle", () =>
+  {
+    const serverConfig = {
+      ...ConfigurationTextWebsocket.server,
+      host: "waitForIdle-test"
+    } as TServerConfiguration
+    let mockServer: ServerWebsocketMock
+    let wsr: WSRecognizer
+
+    beforeEach(() =>
+    {
+      wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+      wsr.event.emitError = jest.fn()
+
+      mockServer = new ServerWebsocketMock(wsr.url)
+      mockServer.init()
+    })
+    afterEach(async () =>
+    {
+      await wsr.destroy()
+      mockServer.close()
+    })
+
+    test("should throw error if recognizer has not been initialize", async () =>
+    {
+      expect.assertions(1)
+      await expect(wsr.waitForIdle()).rejects.toEqual(new Error("Recognizer must be initilized"))
+    })
+    test("should send waitForIdle message", async () =>
+    {
+      expect.assertions(1)
+      await wsr.init(height, width)
+      wsr.waitForIdle()
+      //¯\_(ツ)_/¯  required to wait server received message
+      await delay(100)
+      const idleMessageSent = mockServer.getLastMessage()
+      const idleMessageSentToTest = JSON.stringify({ type: "waitForIdle" })
+      await expect(idleMessageSent).toEqual(idleMessageSentToTest)
+    })
+    test("should resolve when receive exported message", async () =>
+    {
+      expect.assertions(1)
+      await wsr.init(height, width)
+      const promise = wsr.waitForIdle()
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
+      mockServer.sendIdlehMessage()
+      await expect(promise).resolves.toBeUndefined()
+    })
+    test("should reject if receive error message", async () =>
+    {
+      expect.assertions(3)
+      await wsr.init(height, width)
+      const promise = wsr.waitForIdle()
+      //¯\_(ツ)_/¯  required to wait for the instantiation of the promise of the recognizer
+      await delay(100)
+      mockServer.sendNotGrantedErrorMessage()
+      await expect(promise).rejects.toEqual(new Error(RecognizerError.WRONG_CREDENTIALS))
+      await expect(wsr.event.emitError).toHaveBeenCalledTimes(1)
+      await expect(wsr.event.emitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
     })
   })
 
@@ -784,6 +912,7 @@ describe("WSRecognizer.ts", () =>
     beforeEach(() =>
     {
       wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+      wsr.event.emitError = jest.fn()
 
       mockServer = new ServerWebsocketMock(wsr.url)
       mockServer.init()
@@ -828,7 +957,6 @@ describe("WSRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
-      const spyEmitError: jest.SpyInstance = jest.spyOn(wsr.internalEvent, "emitError")
       expect.assertions(3)
       await wsr.init(height, width)
       const promise = wsr.undo(model)
@@ -836,8 +964,8 @@ describe("WSRecognizer.ts", () =>
       await delay(100)
       mockServer.sendNotGrantedErrorMessage()
       await expect(promise).rejects.toEqual(new Error(RecognizerError.WRONG_CREDENTIALS))
-      await expect(spyEmitError).toHaveBeenCalledTimes(1)
-      await expect(spyEmitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
+      await expect(wsr.event.emitError).toHaveBeenCalledTimes(1)
+      await expect(wsr.event.emitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
     })
   })
 
@@ -854,6 +982,7 @@ describe("WSRecognizer.ts", () =>
     beforeEach(() =>
     {
       wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+      wsr.event.emitError = jest.fn()
 
       mockServer = new ServerWebsocketMock(wsr.url)
       mockServer.init()
@@ -898,7 +1027,6 @@ describe("WSRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
-      const spyEmitError: jest.SpyInstance = jest.spyOn(wsr.internalEvent, "emitError")
       expect.assertions(3)
       await wsr.init(height, width)
       const promise = wsr.redo(model)
@@ -906,8 +1034,8 @@ describe("WSRecognizer.ts", () =>
       await delay(100)
       mockServer.sendNotGrantedErrorMessage()
       await expect(promise).rejects.toEqual(new Error(RecognizerError.WRONG_CREDENTIALS))
-      await expect(spyEmitError).toHaveBeenCalledTimes(1)
-      await expect(spyEmitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
+      await expect(wsr.event.emitError).toHaveBeenCalledTimes(1)
+      await expect(wsr.event.emitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
     })
   })
 
@@ -924,6 +1052,7 @@ describe("WSRecognizer.ts", () =>
     beforeEach(() =>
     {
       wsr = new WSRecognizer(serverConfig, DefaultRecognitionConfiguration)
+      wsr.event.emitError = jest.fn()
 
       mockServer = new ServerWebsocketMock(wsr.url)
       mockServer.init()
@@ -968,7 +1097,6 @@ describe("WSRecognizer.ts", () =>
     })
     test("should reject if receive error message", async () =>
     {
-      const spyEmitError: jest.SpyInstance = jest.spyOn(wsr.internalEvent, "emitError")
       expect.assertions(3)
       await wsr.init(height, width)
       const promise = wsr.clear(model)
@@ -976,8 +1104,8 @@ describe("WSRecognizer.ts", () =>
       await delay(100)
       mockServer.sendNotGrantedErrorMessage()
       await expect(promise).rejects.toEqual(new Error(RecognizerError.WRONG_CREDENTIALS))
-      await expect(spyEmitError).toHaveBeenCalledTimes(1)
-      await expect(spyEmitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
+      await expect(wsr.event.emitError).toHaveBeenCalledTimes(1)
+      await expect(wsr.event.emitError).toHaveBeenCalledWith(new Error(RecognizerError.WRONG_CREDENTIALS))
     })
   })
 
@@ -993,6 +1121,7 @@ describe("WSRecognizer.ts", () =>
     beforeEach(() =>
     {
       wsr = new WSRecognizer(serverConfig, DefaultRecognitionConfiguration)
+      wsr.event.emitError = jest.fn()
 
       mockServer = new ServerWebsocketMock(wsr.url)
       mockServer.init()
@@ -1023,12 +1152,11 @@ describe("WSRecognizer.ts", () =>
     {
       test(`should emit error if the server closes the connection abnormally code == ${ closeEvent.code }`, async () =>
       {
-        const spyEmitError: jest.SpyInstance = jest.spyOn(wsr.internalEvent, "emitError")
         expect.assertions(2)
         await wsr.init(height, width)
         mockServer.server.close({ code: closeEvent.code, reason: closeEvent.message, wasClean: false })
-        expect(spyEmitError).toHaveBeenCalledTimes(1)
-        expect(spyEmitError).toHaveBeenCalledWith(new Error(closeEvent.message))
+        expect(wsr.event.emitError).toHaveBeenCalledTimes(1)
+        expect(wsr.event.emitError).toHaveBeenCalledWith(new Error(closeEvent.message))
       })
     })
   })

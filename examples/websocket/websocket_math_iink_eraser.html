@@ -172,7 +172,7 @@
         });
 
         eraserElement.addEventListener("click", () => {
-          editor.intention = iink.Intention.Erase;
+          editor.tool = iink.EditorTool.Erase;
           eraserElement.disabled = true;
           eraserElement.classList.add("active");
           penElement.disabled = false;
@@ -180,7 +180,7 @@
         });
 
         penElement.addEventListener("click", () => {
-          editor.intention = iink.Intention.Write;
+          editor.tool = iink.EditorTool.Write;
           eraserElement.disabled = false;
           eraserElement.classList.remove("active");
           penElement.disabled = true;

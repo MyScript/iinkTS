@@ -173,21 +173,7 @@ export class OIMenuContext extends OIMenu
     this.convertBtn.id = `${ this.id }-convert`
     this.convertBtn.textContent = "Convert"
     this.convertBtn.classList.add("ms-menu-button")
-    this.convertBtn.addEventListener("pointerup", async () =>
-    {
-      try {
-        this.behaviors.internalEvent.emitIdle(false)
-        await this.behaviors.converter.apply(this.symbolsSelected)
-      }
-      catch (error) {
-        this.#logger.error("convert", error)
-        this.behaviors.internalEvent.emitError(error as Error)
-        throw error
-      }
-      finally {
-        this.behaviors.updateLayerUI()
-      }
-    })
+    this.convertBtn.addEventListener("pointerup", () => this.behaviors.convertSymbols(this.symbolsSelected))
     return this.convertBtn
   }
 

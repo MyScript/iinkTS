@@ -13,15 +13,11 @@ import
   DefaultPenStyle,
   DefaultTheme,
   Model,
-  PublicEvent,
-  InternalEvent,
-  Intention,
-  EventType,
+  EditorTool,
 } from "../../src/iink"
 
 describe("Editor.ts", () =>
 {
-  const publicEvent = PublicEvent.getInstance()
   const DefaultBehaviorsOptions: TBehaviorOptions = { configuration: DefaultConfiguration }
 
   describe("constructor", () =>
@@ -237,25 +233,25 @@ describe("Editor.ts", () =>
     })
   })
 
-  describe("intention", () =>
+  describe("tool", () =>
   {
     const wrapperHTML: HTMLElement = document.createElement("div")
     //@ts-ignore TODO IIC-1006
     const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
-    test("should init intention = Write", () =>
+    test("should init tool = Write", () =>
     {
-      expect(editor.intention).toBe(Intention.Write)
+      expect(editor.tool).toBe(EditorTool.Write)
     })
-    test("should set intention = erase", () =>
+    test("should set tool = erase", () =>
     {
-      editor.intention = Intention.Erase
+      editor.tool = EditorTool.Erase
       expect(wrapperHTML.classList).toContain("erase")
     })
-    test("should toggle intention", () =>
+    test("should toggle tool", () =>
     {
-      editor.intention = Intention.Erase
+      editor.tool = EditorTool.Erase
       expect(wrapperHTML.classList).toContain("erase")
-      editor.intention = Intention.Write
+      editor.tool = EditorTool.Write
       expect(wrapperHTML.classList).not.toContain("erase")
     })
   })
@@ -339,19 +335,6 @@ describe("Editor.ts", () =>
       editor.behaviors.clear = jest.fn(() => Promise.reject("pouet"))
       expect(editor.clear()).rejects.toEqual("pouet")
     })
-    test("should emit cleared event", async () =>
-    {
-      const testFunction = jest.fn()
-      publicEvent.addEventListener(EventType.CLEARED, testFunction)
-      const wrapperHTML: HTMLElement = document.createElement("div")
-      const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
-      const modelExpected = new Model(100, 100)
-      editor.behaviors.init = jest.fn(() => Promise.resolve())
-      editor.behaviors.clear = jest.fn(() => Promise.resolve(modelExpected))
-      await editor.initialize()
-      await editor.clear()
-      expect(testFunction).toBeCalledTimes(1)
-    })
   })
 
   describe("resize", () =>
@@ -433,9 +416,7 @@ describe("Editor.ts", () =>
       await editor.initialize()
       const model = new Model(100, 50)
       editor.behaviors.import = jest.fn(() => Promise.resolve(model))
-      editor.events.emitImported = jest.fn()
       await editor.import(new Blob(), "text/plain")
-      expect(editor.events.emitImported).toBeCalledTimes(1)
       expect(editor.behaviors.import).toBeCalledTimes(1)
     })
     test("should reject import Blob if behaviors.import is rejected", async () =>
@@ -445,7 +426,6 @@ describe("Editor.ts", () =>
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       await editor.initialize()
       editor.behaviors.import = jest.fn(() => Promise.reject("pouet"))
-      editor.events.emitImported = jest.fn()
       expect(editor.import(new Blob(), "text/plain")).rejects.toEqual("pouet")
     })
     test("should reject import Blob if behaviors.import is not define", async () =>
@@ -455,11 +435,10 @@ describe("Editor.ts", () =>
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       await editor.initialize()
       editor.behaviors.import = undefined
-      editor.events.emitImported = jest.fn()
       expect(editor.import(new Blob(), "text/plain")).rejects.toEqual("Import impossible, behaviors has no import function")
     })
 
-    test("should resolve import Text  when behaviors.import is resolved", async () =>
+    test("should resolve import Text when behaviors.import is resolved", async () =>
     {
       const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
@@ -467,9 +446,7 @@ describe("Editor.ts", () =>
       await editor.initialize()
       const model = new Model(100, 50)
       editor.behaviors.import = jest.fn(() => Promise.resolve(model))
-      editor.events.emitImported = jest.fn()
       await editor.import("hello", "text/plain")
-      expect(editor.events.emitImported).toBeCalledTimes(1)
       expect(editor.behaviors.import).toBeCalledTimes(1)
     })
     test("should reject import Text if behaviors.import is rejected", async () =>
@@ -479,7 +456,6 @@ describe("Editor.ts", () =>
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       await editor.initialize()
       editor.behaviors.import = jest.fn(() => Promise.reject("pouet"))
-      editor.events.emitImported = jest.fn()
       expect(editor.import("hello", "text/plain")).rejects.toEqual("pouet")
     })
     test("should reject import Text if behaviors.import is not define", async () =>
@@ -489,7 +465,6 @@ describe("Editor.ts", () =>
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       await editor.initialize()
       editor.behaviors.import = undefined
-      editor.events.emitImported = jest.fn()
       expect(editor.import("hello", "text/plain")).rejects.toEqual("Import impossible, behaviors has no import function")
     })
 
@@ -501,7 +476,6 @@ describe("Editor.ts", () =>
       await editor.initialize()
       const model = new Model(100, 50)
       editor.behaviors.import = jest.fn(() => Promise.resolve(model))
-      editor.events.emitImported = jest.fn()
       const jiix: TJIIXExport = {
         type: "Text",
         label: "h",
@@ -515,7 +489,6 @@ describe("Editor.ts", () =>
         id: "MainBlock",
       }
       await editor.import(jiix)
-      expect(editor.events.emitImported).toBeCalledTimes(1)
       expect(editor.behaviors.import).toBeCalledTimes(1)
     })
     test("should reject import JIIX if behaviors.import is rejected", async () =>
@@ -525,7 +498,6 @@ describe("Editor.ts", () =>
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       await editor.initialize()
       editor.behaviors.import = jest.fn(() => Promise.reject("pouet"))
-      editor.events.emitImported = jest.fn()
       const jiix: TJIIXExport = {
         type: "Text",
         label: "h",
@@ -547,7 +519,6 @@ describe("Editor.ts", () =>
       editor.behaviors.init = jest.fn(() => Promise.resolve())
       await editor.initialize()
       editor.behaviors.import = undefined
-      editor.events.emitImported = jest.fn()
       const jiix: TJIIXExport = {
         type: "Text",
         label: "h",
@@ -568,12 +539,11 @@ describe("Editor.ts", () =>
       const wrapperHTML: HTMLElement = document.createElement("div")
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       editor.behaviors.init = jest.fn(() => Promise.resolve())
+      editor.behaviors.importPointEvents = jest.fn(() => Promise.resolve(model))
       await editor.initialize()
       const model = new Model(100, 50)
       const strokeToImport = buildStroke()
-      editor.behaviors.importPointEvents = jest.fn(() => Promise.resolve(model))
       await editor.importPointEvents([strokeToImport])
-      expect(editor.events.emitImported).toBeCalledTimes(1)
       expect(editor.behaviors.importPointEvents).toBeCalledTimes(1)
     })
     test("should resolve import points Events  when behaviors.importPointEvents is resolved", async () =>
@@ -638,36 +608,6 @@ describe("Editor.ts", () =>
       editor.penStyle = customPenStyle
       expect(editor.behaviors.setPenStyle).toBeCalledTimes(1)
       expect(editor.behaviors.setPenStyle).toBeCalledWith(customPenStyle)
-    })
-  })
-
-  describe("Events", () =>
-  {
-    const wrapperHTML: HTMLElement = document.createElement("div")
-    const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
-    // TODO problem with internal event singleton
-    test.skip("should call convert when internalEvent emit convert", () =>
-    {
-      editor.convert = jest.fn()
-      expect(editor.convert).toBeCalledTimes(0)
-      InternalEvent.getInstance().emitConvert()
-      expect(editor.convert).toBeCalledTimes(1)
-    })
-    // TODO problem with internal event singleton
-    test.skip("should emit changed when internalEvent emit changed", () =>
-    {
-      editor.events.emitChanged = jest.fn()
-      expect(editor.events.emitChanged).toBeCalledTimes(0)
-      InternalEvent.getInstance().emitContextChange({ canRedo: true, canUndo: true, empty: false, possibleUndoCount: 10, stackIndex: 11 })
-      expect(editor.events.emitChanged).toBeCalledTimes(1)
-    })
-    // TODO problem with internal event singleton
-    test.skip("should emit idle when internalEvent emit idle", () =>
-    {
-      editor.events.emitIdle = jest.fn()
-      expect(editor.events.emitIdle).toBeCalledTimes(0)
-      InternalEvent.getInstance().emitIdle(true)
-      expect(editor.events.emitIdle).toBeCalledTimes(1)
     })
   })
 

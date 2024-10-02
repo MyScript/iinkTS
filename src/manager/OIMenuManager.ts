@@ -1,6 +1,6 @@
 import { OIBehaviors } from "../behaviors"
 import { LoggerClass, LoggerManager } from "../logger"
-import { OIMenuAction, OIMenuIntention, OIMenuStyle, OIMenuContext } from "../menu"
+import { OIMenuAction, OIMenuTool, OIMenuStyle, OIMenuContext } from "../menu"
 import { PartialDeep } from "../utils"
 
 /**
@@ -12,11 +12,11 @@ export class OIMenuManager
   behaviors: OIBehaviors
   layer?: HTMLElement
   action: OIMenuAction
-  intention: OIMenuIntention
+  tool: OIMenuTool
   context: OIMenuContext
   style: OIMenuStyle
 
-  constructor(behaviors: OIBehaviors, custom?: PartialDeep<{ style?: OIMenuStyle, intention?: OIMenuIntention, action?: OIMenuAction, context?: OIMenuContext }>)
+  constructor(behaviors: OIBehaviors, custom?: PartialDeep<{ style?: OIMenuStyle, tool?: OIMenuTool, action?: OIMenuAction, context?: OIMenuContext }>)
   {
     this.#logger.info("constructor")
     this.behaviors = behaviors
@@ -28,12 +28,12 @@ export class OIMenuManager
     else {
       this.style = new OIMenuStyle(this.behaviors)
     }
-    if (custom?.intention) {
-      const CustomMenuIntention = custom.intention as unknown as typeof OIMenuIntention
-      this.intention = new CustomMenuIntention(this.behaviors)
+    if (custom?.tool) {
+      const CustomMenuTool = custom.tool as unknown as typeof OIMenuTool
+      this.tool = new CustomMenuTool(this.behaviors)
     }
     else {
-      this.intention = new OIMenuIntention(this.behaviors)
+      this.tool = new OIMenuTool(this.behaviors)
     }
     if (custom?.action) {
       const CustomMenuAction = custom.action as unknown as typeof OIMenuAction
@@ -61,8 +61,8 @@ export class OIMenuManager
       if (this.behaviors.configuration.menu.style.enable) {
         this.style.render(this.layer)
       }
-      if (this.behaviors.configuration.menu.intention.enable) {
-        this.intention.render(this.layer)
+      if (this.behaviors.configuration.menu.tool.enable) {
+        this.tool.render(this.layer)
       }
       if (this.behaviors.configuration.menu.context.enable) {
         this.context.render(this.layer)
@@ -73,28 +73,28 @@ export class OIMenuManager
   update(): void
   {
     this.action.update()
-    this.intention.update()
+    this.tool.update()
     this.style.update()
   }
 
   show(): void
   {
     this.action.show()
-    this.intention.show()
+    this.tool.show()
     this.style.show()
   }
 
   hide(): void
   {
     this.action.hide()
-    this.intention.hide()
+    this.tool.hide()
     this.style.hide()
   }
 
   destroy(): void
   {
     this.action.destroy()
-    this.intention.destroy()
+    this.tool.destroy()
     this.style.destroy()
   }
 }

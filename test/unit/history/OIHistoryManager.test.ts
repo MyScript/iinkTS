@@ -8,18 +8,20 @@ import
   DefaultConfiguration,
   MatrixTransform,
 } from "../../../src/iink"
+import { EditorEventMock } from "../__mocks__/EditorEventMock"
 
 describe("OIHistoryManager.ts", () =>
 {
+  const event = new EditorEventMock(document.createElement("div"))
   test("should instanciate OIHistoryManager", () =>
   {
-    const manager = new OIHistoryManager(DefaultConfiguration["undo-redo"])
+    const manager = new OIHistoryManager(DefaultConfiguration["undo-redo"], event)
     expect(manager).toBeDefined()
   })
 
   describe("init", () =>
   {
-    const manager = new OIHistoryManager(DefaultConfiguration["undo-redo"])
+    const manager = new OIHistoryManager(DefaultConfiguration["undo-redo"], event)
     test("should initialize UndoRedoContext", () =>
     {
       const context = getInitialUndoRedoContext()
@@ -38,13 +40,14 @@ describe("OIHistoryManager.ts", () =>
       expect(manager.stack[manager.context.stackIndex].model).toEqual(model1)
       expect(manager.stack[manager.context.stackIndex].model).not.toBe(model1)
       expect(manager.stack[manager.context.stackIndex].changes).toEqual({})
+      expect(manager.event.emitChanged).toHaveBeenNthCalledWith(1, manager.context)
     })
   })
 
   describe("push", () =>
   {
     const configuration: TUndoRedoConfiguration = { maxStackSize: 5 }
-    const manager = new OIHistoryManager(configuration)
+    const manager = new OIHistoryManager(configuration, event)
 
     const model1 = new OIModel(27, 5)
     manager.init(model1)
@@ -55,7 +58,7 @@ describe("OIHistoryManager.ts", () =>
 
     const model3 = new OIModel(18, 89)
 
-    test("should not push item to stack without actions", () =>
+    test("should not push item to stack without actions and not emitChanged", () =>
     {
       expect(manager.context.stackIndex).toStrictEqual(0)
       expect(manager.context.canUndo).toStrictEqual(false)
@@ -70,9 +73,10 @@ describe("OIHistoryManager.ts", () =>
       expect(manager.context.canRedo).toStrictEqual(false)
       expect(manager.context.empty).toStrictEqual(true)
       expect(manager.stack).toHaveLength(1)
+      expect(manager.event.emitChanged).toHaveBeenCalledTimes(0)
     })
 
-    test("should add model to stack with action added", () =>
+    test("should add model to stack with action added and emitChanged", () =>
     {
       manager.push(model2, { added: [stroke2] })
 
@@ -84,9 +88,10 @@ describe("OIHistoryManager.ts", () =>
       expect(manager.stack[manager.context.stackIndex].model).toEqual(model2)
       expect(manager.stack[manager.context.stackIndex].model).not.toBe(model2)
       expect(manager.stack[manager.context.stackIndex].changes).toEqual({ added: [stroke2] })
+      expect(manager.event.emitChanged).toHaveBeenNthCalledWith(1, manager.context)
     })
 
-    test("should splice end of stack if stackIndex no last", () =>
+    test("should splice end of stack if stackIndex no last and emitChanged", () =>
     {
       const NB_STROKE = 5
       for (let i = 0; i < NB_STROKE; i++) {
@@ -110,9 +115,10 @@ describe("OIHistoryManager.ts", () =>
       expect(manager.stack[manager.context.stackIndex].model).toEqual(model3)
       expect(manager.stack[manager.context.stackIndex].model).not.toBe(model3)
       expect(manager.stack[manager.context.stackIndex].changes).toEqual({ added: [stroke] })
+      expect(manager.event.emitChanged).toHaveBeenNthCalledWith(1, manager.context)
     })
 
-    test("should shift the first element of the stack when maxStackSize is exceeded", () =>
+    test("should shift the first element of the stack when maxStackSize is exceeded and emitChanged", () =>
     {
       const NB_STROKE = 10
       for (let i = 0; i < NB_STROKE; i++) {
@@ -130,13 +136,14 @@ describe("OIHistoryManager.ts", () =>
 
       expect(manager.context.canUndo).toStrictEqual(true)
       expect(manager.context.canRedo).toStrictEqual(false)
+      expect(manager.event.emitChanged).toHaveBeenNthCalledWith(1, manager.context)
     })
   })
 
   describe("undo", () =>
   {
     const model = new OIModel(27, 5)
-    const manager = new OIHistoryManager(DefaultConfiguration["undo-redo"])
+    const manager = new OIHistoryManager(DefaultConfiguration["undo-redo"], event)
     manager.init(model)
 
     test("should define canUndo to false and canRedo to false", () =>
@@ -215,7 +222,7 @@ describe("OIHistoryManager.ts", () =>
   describe("redo", () =>
   {
     const model = new OIModel(27, 5)
-    const manager = new OIHistoryManager(DefaultConfiguration["undo-redo"])
+    const manager = new OIHistoryManager(DefaultConfiguration["undo-redo"], event)
 
     const stroke = buildOIStroke()
     model.addSymbol(stroke)

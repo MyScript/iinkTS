@@ -140,13 +140,13 @@
          */
         await editor.initialize();
 
-        editor.events.addEventListener("changed", (event) => {
+        editor.event.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo;
           redoElement.disabled = !event.detail.canRedo;
           clearElement.disabled = !event.detail.canClear;
         });
 
-        editor.events.addEventListener("exported", (evt) => {
+        editor.event.addEventListener("exported", (evt) => {
           const exports = evt.detail;
           resultElement.innerHTML =
             event.detail && event.detail["application/vnd.myscript.jiix"] ? event.detail["application/vnd.myscript.jiix"].label : "";

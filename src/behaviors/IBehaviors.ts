@@ -1,4 +1,4 @@
-import { Intention } from "../Constants"
+import { EditorTool } from "../Constants"
 import { TConfiguration, TConverstionState } from "../configuration"
 import { IGrabber } from "../grabber"
 import { IModel } from "../model"
@@ -16,7 +16,7 @@ export interface IBehaviors
   name: string
   grabber: IGrabber
   history: IHistoryManager
-  intention: Intention
+  tool: EditorTool
   layers: EditorLayer
 
   get currentPenStyle(): TStyle

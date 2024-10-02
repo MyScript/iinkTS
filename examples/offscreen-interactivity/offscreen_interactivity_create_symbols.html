@@ -163,7 +163,7 @@
           document.querySelectorAll(".create-btn").forEach((b) => (b.disabled = true));
         });
 
-        editor.events.addEventListener("changed", (event) => {
+        editor.event.addEventListener("changed", (event) => {
           createAllBtn.disabled = symbolsCreated.some(sc => editor.model.symbols.some(s => s.id === sc.id));
           symbols.forEach(sc => {
             document.getElementById(`add-symbol-${sc.type}-btn`).disabled = symbolsCreated.some(sc => editor.model.symbols.some(s => s.id === sc.id && s.type === sc.type));

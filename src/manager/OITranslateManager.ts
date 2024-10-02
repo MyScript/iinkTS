@@ -159,7 +159,6 @@ export class OITranslateManager
     this.#logger.info("start", { origin })
     this.interactElementsGroup = (target.closest(`[role=${ SvgElementRole.InteractElementsGroup }]`) as unknown) as SVGGElement
     this.transformOrigin = origin
-    this.behaviors.selector.hideInteractElements()
   }
 
   continue(point: TPoint): { tx: number, ty: number }

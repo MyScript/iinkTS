@@ -14,7 +14,7 @@ const modalCloseBtn = document.getElementById("modal-close-btn");
 
 const menuActionToggle = document.getElementById("menu-action-toggle");
 const menuStyleToggle = document.getElementById("menu-style-toggle");
-const menuIntentionToggle = document.getElementById("menu-intention-toggle");
+const menuIntentionToggle = document.getElementById("menu-tool-toggle");
 
 const recognitionBoxToggle = document.getElementById("toggle-recognition-box");
 const recognitionItemBoxToggle = document.getElementById("toggle-recognition-item-box");
@@ -161,7 +161,7 @@ async function loadEditor() {
   const symbolsToCreate = await symbolsToCreateResponse.json();
 
   let exportTimeout;
-  editor.events.addEventListener("changed", (event) => {
+  editor.event.addEventListener("changed", (event) => {
     if (event.detail.empty) {
       importBtn.disabled = false;
     }
@@ -174,13 +174,13 @@ async function loadEditor() {
     }, 1000);
   });
 
-  editor.events.addEventListener("exported", (event) => {
+  editor.event.addEventListener("exported", (event) => {
     if (event.detail?.["text/html"]) {
       exportHtmlBody.srcdoc = event.detail["text/html"];
     }
   });
 
-  editor.events.addEventListener("selected", (event) => {
+  editor.event.addEventListener("selected", (event) => {
     selectionBody.innerHTML = "";
     const list = document.createElement("ul");
     if (event.detail) {
@@ -238,7 +238,7 @@ async function loadEditor() {
   });
 
   menuIntentionToggle.addEventListener("change", (event) => {
-    event.target.checked ? editor.behaviors.menu.intention.show() : editor.behaviors.menu.intention.hide();
+    event.target.checked ? editor.behaviors.menu.tool.show() : editor.behaviors.menu.tool.hide();
   });
 
   window.addEventListener("resize", () => {

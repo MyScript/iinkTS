@@ -43,7 +43,7 @@ async function switchEditorInput(input) {
   currentInput = input
 
   const textAnswered = getResultElementFromInput(currentInput)?.textContent
-  editor.clear()
+  await editor.clear()
   await editor.waitForIdle()
   if (textAnswered) {
     const pointers = currentInput.getAttribute("pointers")
@@ -134,7 +134,7 @@ async function initEditor() {
 
   editor = new iink.Editor(editorElement, options);
   await editor.initialize();
-  editor.events.addEventListener("exported", (evt) => {
+  editor.event.addEventListener("exported", (evt) => {
     const answerId = currentInput?.getAttribute("answer-id")
     if (answerId) {
       const answerEl = document.getElementById(answerId)

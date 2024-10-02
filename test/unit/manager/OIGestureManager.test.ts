@@ -7,7 +7,7 @@ import
   SurroundAction,
   TOISymbolChar,
   OIGestureManager,
-  Intention,
+  EditorTool,
   DecoratorKind,
   StrikeThroughAction
 } from "../../../src/iink"
@@ -153,7 +153,6 @@ describe("OIGestureManager.ts", () =>
     behaviors.model.addSymbol(stroke)
 
     const gestMan = new OIGestureManager(behaviors)
-    gestMan.behaviors.internalEvent.emitIntention = jest.fn()
     gestMan.renderer.drawSymbol = jest.fn()
     gestMan.history.push = jest.fn()
 
@@ -195,7 +194,7 @@ describe("OIGestureManager.ts", () =>
         strokeAfterIds: []
       }
       await gestMan.applySurroundGesture(gestureStroke, gesture)
-      expect(gestMan.behaviors.internalEvent.emitIntention).toHaveBeenNthCalledWith(1, Intention.Select)
+      expect(gestMan.behaviors.event.emitTool).toHaveBeenNthCalledWith(1, EditorTool.Select)
       expect(gestMan.behaviors.select).toHaveBeenNthCalledWith(1, [stroke.id])
       expect(gestMan.history.push).toHaveBeenCalledTimes(0)
     })

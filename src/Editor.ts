@@ -3,14 +3,14 @@ import style from "./iink.css"
 import { IBehaviors, OIBehaviors, RestBehaviors, TBehaviorOptions, WSBehaviors } from "./behaviors"
 import { DeferredPromise, PartialDeep, mergeDeep } from "./utils"
 import { LoggerClass, LoggerManager } from "./logger"
-import { Intention } from "./Constants"
+import { EditorTool } from "./Constants"
 import { DefaultLoggerConfiguration, TConfiguration, TConverstionState, TLoggerConfiguration } from "./configuration"
-import { IModel, TExport, TJIIXExport } from "./model"
-import { TSymbol, TStroke } from "./primitive"
-import { InternalEvent, PublicEvent } from "./event"
+import { IModel, TJIIXExport } from "./model"
+import { TStroke } from "./primitive"
 import { TUndoRedoContext } from "./history"
 import { IGrabber } from "./grabber"
 import { TPenStyle, TTheme } from "./style"
+import { EditorEvent } from "./EditorEvent"
 import { EditorLayer } from "./EditorLayer"
 
 /**
@@ -28,6 +28,7 @@ export class Editor
 {
   logger = LoggerManager.getLogger(LoggerClass.EDITOR)
   layers: EditorLayer
+  event: EditorEvent
 
   #behaviors!: IBehaviors
   #initializationDeferred: DeferredPromise<void>
@@ -41,7 +42,7 @@ export class Editor
     this.#initializationDeferred = new DeferredPromise<void>()
     this.loggerConfiguration = mergeDeep({}, options.logger, DefaultLoggerConfiguration)
 
-    this.events.setElement(rootElement)
+    this.event = new EditorEvent(rootElement)
     this.layers = new EditorLayer(rootElement, globalClassCss)
     this.layers.onCloseModal = this.closeMessageModal.bind(this)
 
@@ -91,24 +92,14 @@ export class Editor
     this.initialize()
   }
 
-  get intention(): Intention
+  get tool(): EditorTool
   {
-    return this.behaviors.intention
+    return this.behaviors.tool
   }
-  set intention(i: Intention)
+  set tool(i: EditorTool)
   {
-    this.logger.info("set intention", i)
-    this.behaviors.intention = i
-  }
-
-  get events(): PublicEvent
-  {
-    return PublicEvent.getInstance()
-  }
-
-  get internalEvents(): InternalEvent
-  {
-    return InternalEvent.getInstance()
+    this.logger.info("set tool", i)
+    this.behaviors.tool = i
   }
 
   get context(): TUndoRedoContext
@@ -164,17 +155,17 @@ export class Editor
     if (!options?.configuration) {
       throw new Error("Configuration required")
     }
-    this.internalEvents.removeAllListeners()
     if (this.#behaviors) {
       this.#behaviors.destroy()
     }
     if (options.configuration.offscreen) {
-      this.#behaviors = new OIBehaviors(options, this.layers)
+      this.#behaviors = new OIBehaviors(options, this.layers, this.event)
     }
     else if (options.configuration.server?.protocol === "REST") {
-      this.#behaviors = new RestBehaviors(options, this.layers)
-    } else {
-      this.#behaviors = new WSBehaviors(options, this.layers)
+      this.#behaviors = new RestBehaviors(options, this.layers, this.event)
+    }
+    else {
+      this.#behaviors = new WSBehaviors(options, this.layers, this.event)
     }
     this.logger.debug("instantiateBehaviors", this.#behaviors)
   }
@@ -191,7 +182,7 @@ export class Editor
         this.logger.info("initializeBehaviors", "then");
         (this.layers.root as HTMLEditorElement).editor = this
         this.#initializationDeferred.resolve()
-        this.events.emitLoaded()
+        this.event.emitLoaded()
       })
       .catch((error: Error) =>
       {
@@ -216,53 +207,9 @@ export class Editor
     }
   }
 
-  #addInternalListeners(): void
-  {
-    this.internalEvents.removeAllListeners()
-    this.internalEvents.addConvertListener(this.convert.bind(this))
-    this.internalEvents.addExportedListener(this.#onExport.bind(this))
-    this.internalEvents.addContextChangeListener(this.#onContextChange.bind(this))
-    this.internalEvents.addIdleListener(this.#onIdleChange.bind(this))
-    this.internalEvents.addSelectedListener(this.#onSelectionChange.bind(this))
-    this.internalEvents.addIntentionListener(this.#onIntentionChange.bind(this))
-
-    this.internalEvents.addErrorListener(this.layers.showMessageError.bind(this.layers))
-    this.internalEvents.addNotifListener(this.layers.showMessageInfo.bind(this.layers))
-    this.internalEvents.addClearMessageListener(this.layers.closeMessageModal.bind(this.layers))
-  }
-
-  #onSelectionChange = (symbols: TSymbol[]) =>
-  {
-    this.events.emitSelected(symbols)
-  }
-
-  #onIntentionChange = (intention: Intention) =>
-  {
-    this.intention = intention
-    this.events.emitIntention(intention)
-  }
-
-  #onContextChange = (context: TUndoRedoContext) =>
-  {
-    this.events.emitChanged(context)
-  }
-
-  #onIdleChange = (idle: boolean) =>
-  {
-    this.layers.updateState(idle)
-    this.events.emitIdle(idle)
-  }
-
-  #onExport(exports: TExport): void
-  {
-    this.logger.info("onExport", { exports })
-    this.events.emitExported(exports)
-  }
-
   async initialize(): Promise<void>
   {
     this.logger.info("initialize")
-    this.#addInternalListeners()
     await this.#initializeBehaviors()
   }
 
@@ -276,94 +223,129 @@ export class Editor
 
   async undo(): Promise<IModel>
   {
-    this.logger.info("undo")
-    await this.#initializationDeferred.promise
-    await this.behaviors.undo()
-    this.logger.debug("undo", this.model)
-    return this.model
+    try {
+      this.logger.info("undo")
+      await this.#initializationDeferred.promise
+      await this.behaviors.undo()
+      this.logger.debug("undo", this.model)
+      return this.model
+    } catch (error) {
+      this.layers.showMessageError(error as Error)
+      throw error
+    }
   }
 
   async redo(): Promise<IModel>
   {
-    this.logger.info("redo")
-    await this.#initializationDeferred.promise
-    await this.behaviors.redo()
-    this.logger.debug("redo", this.model)
-    return this.model
+    try {
+      this.logger.info("redo")
+      await this.#initializationDeferred.promise
+      await this.behaviors.redo()
+      this.logger.debug("redo", this.model)
+      return this.model
+    } catch (error) {
+      this.layers.showMessageError(error as Error)
+      throw error
+    }
   }
 
   async clear(): Promise<IModel>
   {
-    this.logger.info("clear")
-    await this.#initializationDeferred.promise
-    await this.behaviors.clear()
-    this.events.emitCleared(this.model)
-    this.logger.debug("clear", this.model)
-    return this.model
+    try {
+      this.logger.info("clear")
+      await this.#initializationDeferred.promise
+      await this.behaviors.clear()
+      this.logger.debug("clear", this.model)
+      return this.model
+    } catch (error) {
+      this.layers.showMessageError(error as Error)
+      throw error
+    }
   }
 
   async resize(): Promise<IModel>
   {
-    this.logger.info("resize")
-    await this.#initializationDeferred.promise
-    const compStyles = window.getComputedStyle(this.layers.root)
-    const height = Math.max(parseInt(compStyles.height.replace("px", "")), this.configuration.rendering.minHeight)
-    const width = Math.max(parseInt(compStyles.width.replace("px", "")), this.configuration.rendering.minWidth)
-    await this.behaviors.resize(height, width)
-    this.logger.debug("resize", this.model)
-    return this.model
+    try {
+      this.logger.info("resize")
+      await this.#initializationDeferred.promise
+      const compStyles = window.getComputedStyle(this.layers.root)
+      const height = Math.max(parseInt(compStyles.height.replace("px", "")), this.configuration.rendering.minHeight)
+      const width = Math.max(parseInt(compStyles.width.replace("px", "")), this.configuration.rendering.minWidth)
+      await this.behaviors.resize(height, width)
+      this.logger.debug("resize", this.model)
+      return this.model
+    } catch (error) {
+      this.layers.showMessageError(error as Error)
+      throw error
+    }
   }
 
   async export(mimeTypes?: string[]): Promise<IModel>
   {
-    this.logger.info("export", { mimeTypes })
-    await this.#initializationDeferred.promise
-    await this.behaviors.export(mimeTypes)
-    this.logger.debug("export", this.model)
-    return this.model
+    try {
+      this.logger.info("export", { mimeTypes })
+      await this.#initializationDeferred.promise
+      await this.behaviors.export(mimeTypes)
+      this.logger.debug("export", this.model)
+      return this.model
+    } catch (error) {
+      this.layers.showMessageError(error as Error)
+      throw error
+    }
   }
 
   async convert(params?: { conversionState?: TConverstionState, mimeTypes?: string[] }): Promise<IModel | never>
   {
-    this.logger.info("export", { params })
-    await this.#initializationDeferred.promise
-    await this.behaviors.convert(params?.conversionState, params?.mimeTypes)
-    this.events.emitConverted(this.model.converts as TExport)
-    this.logger.debug("convert", this.model)
-    return this.model
+    try {
+      this.logger.info("export", { params })
+      await this.#initializationDeferred.promise
+      await this.behaviors.convert(params?.conversionState, params?.mimeTypes)
+      this.logger.debug("convert", this.model)
+      return this.model
+    } catch (error) {
+      this.layers.showMessageError(error as Error)
+      throw error
+    }
   }
 
   async import(data: Blob | string | TJIIXExport, mimeType?: string): Promise<IModel | never>
   {
-    this.logger.info("import", { data, mimeType })
-    await this.#initializationDeferred.promise
-    if (this.behaviors.import) {
-      let blobToImport: Blob
-      if (data instanceof Blob) {
-        blobToImport = data
+    try {
+      this.logger.info("import", { data, mimeType })
+      await this.#initializationDeferred.promise
+      if (this.behaviors.import) {
+        let blobToImport: Blob
+        if (data instanceof Blob) {
+          blobToImport = data
+        }
+        else if (typeof data === "string") {
+          blobToImport = new Blob([data])
+        }
+        else {
+          blobToImport = new Blob([JSON.stringify(data)])
+        }
+        await this.behaviors.import(blobToImport, mimeType)
+        this.logger.debug("import", this.model)
+        return this.model
       }
-      else if (typeof data === "string") {
-        blobToImport = new Blob([data])
-      }
-      else {
-        blobToImport = new Blob([JSON.stringify(data)])
-      }
-      await this.behaviors.import(blobToImport, mimeType)
-      this.events.emitImported(this.model.exports as TExport)
-      this.logger.debug("import", this.model)
-      return this.model
+      return Promise.reject("Import impossible, behaviors has no import function")
+    } catch (error) {
+      this.layers.showMessageError(error as Error)
+      throw error
     }
-    return Promise.reject("Import impossible, behaviors has no import function")
   }
 
   async importPointEvents(strokes: PartialDeep<TStroke>[]): Promise<IModel>
   {
-    this.logger.info("importPointEvents", { strokes })
-    await this.#initializationDeferred.promise
-    await this.behaviors.importPointEvents(strokes)
-    this.events.emitImported(this.model.exports as TExport)
-    this.logger.debug("importPointEvents", this.model)
-    return this.model
-    return Promise.reject("Import impossible, behaviors has no importPointEvents function")
+    try {
+      this.logger.info("importPointEvents", { strokes })
+      await this.#initializationDeferred.promise
+      await this.behaviors.importPointEvents(strokes)
+      this.logger.debug("importPointEvents", this.model)
+      return this.model
+    } catch (error) {
+      this.layers.showMessageError(error as Error)
+      throw error
+    }
   }
 }

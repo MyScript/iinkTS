@@ -3,7 +3,7 @@ import
 {
   OIMenuManager,
   OIMenuStyle,
-  OIMenuIntention,
+  OIMenuTool,
   OIMenuAction
 } from "../../../src/iink"
 
@@ -30,17 +30,17 @@ describe("OIMenuManager.ts", () =>
       //@ts-ignore
       expect(manager.style.name).toEqual("override-style")
     })
-    test("should override menu intention", () =>
+    test("should override menu tool", () =>
     {
-      class CustomMenuIntention extends OIMenuIntention
+      class CustomMenuTool extends OIMenuTool
       {
-        name = "override-intention"
+        name = "override-tool"
       }
       const behaviors = new OIBehaviorsMock()
       //@ts-ignore
-      const manager = new OIMenuManager(behaviors, { intention: CustomMenuIntention })
+      const manager = new OIMenuManager(behaviors, { tool: CustomMenuTool })
       //@ts-ignore
-      expect(manager.intention.name).toEqual("override-intention")
+      expect(manager.tool.name).toEqual("override-tool")
     })
     test("should override menu action", () =>
     {
@@ -64,47 +64,47 @@ describe("OIMenuManager.ts", () =>
     const manager = new OIMenuManager(behaviors)
     manager.action.render = jest.fn()
     manager.style.render = jest.fn()
-    manager.intention.render = jest.fn()
+    manager.tool.render = jest.fn()
     test("should do nothing if configuration.menu.enable =  false", () =>
     {
       behaviors.configuration.menu.enable = false
       manager.render(layer)
       expect(manager.action.render).toBeCalledTimes(0)
       expect(manager.style.render).toBeCalledTimes(0)
-      expect(manager.intention.render).toBeCalledTimes(0)
+      expect(manager.tool.render).toBeCalledTimes(0)
     })
     test("should render only action", () =>
     {
       behaviors.configuration.menu.enable = true
       behaviors.configuration.menu.action.enable = true
       behaviors.configuration.menu.style.enable = false
-      behaviors.configuration.menu.intention.enable = false
+      behaviors.configuration.menu.tool.enable = false
       manager.render(layer)
       expect(manager.action.render).toBeCalledTimes(1)
       expect(manager.style.render).toBeCalledTimes(0)
-      expect(manager.intention.render).toBeCalledTimes(0)
+      expect(manager.tool.render).toBeCalledTimes(0)
     })
     test("should render only style", () =>
     {
       behaviors.configuration.menu.enable = true
       behaviors.configuration.menu.action.enable = false
       behaviors.configuration.menu.style.enable = true
-      behaviors.configuration.menu.intention.enable = false
+      behaviors.configuration.menu.tool.enable = false
       manager.render(layer)
       expect(manager.action.render).toBeCalledTimes(0)
       expect(manager.style.render).toBeCalledTimes(1)
-      expect(manager.intention.render).toBeCalledTimes(0)
+      expect(manager.tool.render).toBeCalledTimes(0)
     })
-    test("should render only intention", () =>
+    test("should render only tool", () =>
     {
       behaviors.configuration.menu.enable = true
       behaviors.configuration.menu.action.enable = false
       behaviors.configuration.menu.style.enable = false
-      behaviors.configuration.menu.intention.enable = true
+      behaviors.configuration.menu.tool.enable = true
       manager.render(layer)
       expect(manager.action.render).toBeCalledTimes(0)
       expect(manager.style.render).toBeCalledTimes(0)
-      expect(manager.intention.render).toBeCalledTimes(1)
+      expect(manager.tool.render).toBeCalledTimes(1)
     })
   })
 
@@ -115,14 +115,14 @@ describe("OIMenuManager.ts", () =>
     const manager = new OIMenuManager(behaviors)
     manager.action.update = jest.fn()
     manager.style.update = jest.fn()
-    manager.intention.update = jest.fn()
+    manager.tool.update = jest.fn()
 
     test("should update all menu", () =>
     {
       manager.update()
       expect(manager.action.update).toBeCalledTimes(1)
       expect(manager.style.update).toBeCalledTimes(1)
-      expect(manager.intention.update).toBeCalledTimes(1)
+      expect(manager.tool.update).toBeCalledTimes(1)
     })
   })
 
@@ -135,22 +135,22 @@ describe("OIMenuManager.ts", () =>
     manager.action.hide = jest.fn()
     manager.style.show = jest.fn()
     manager.style.hide = jest.fn()
-    manager.intention.show = jest.fn()
-    manager.intention.hide = jest.fn()
+    manager.tool.show = jest.fn()
+    manager.tool.hide = jest.fn()
 
     test("should show all menu", () =>
     {
       manager.show()
       expect(manager.action.show).toBeCalledTimes(1)
       expect(manager.style.show).toBeCalledTimes(1)
-      expect(manager.intention.show).toBeCalledTimes(1)
+      expect(manager.tool.show).toBeCalledTimes(1)
     })
     test("should hide all menu", () =>
     {
       manager.hide()
       expect(manager.action.hide).toBeCalledTimes(1)
       expect(manager.style.hide).toBeCalledTimes(1)
-      expect(manager.intention.hide).toBeCalledTimes(1)
+      expect(manager.tool.hide).toBeCalledTimes(1)
     })
   })
 
@@ -161,14 +161,14 @@ describe("OIMenuManager.ts", () =>
     const manager = new OIMenuManager(behaviors)
     manager.action.destroy = jest.fn()
     manager.style.destroy = jest.fn()
-    manager.intention.destroy = jest.fn()
+    manager.tool.destroy = jest.fn()
 
     test("should destroy all menu", () =>
     {
       manager.destroy()
       expect(manager.action.destroy).toBeCalledTimes(1)
       expect(manager.style.destroy).toBeCalledTimes(1)
-      expect(manager.intention.destroy).toBeCalledTimes(1)
+      expect(manager.tool.destroy).toBeCalledTimes(1)
     })
   })
 

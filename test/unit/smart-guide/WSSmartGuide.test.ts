@@ -2,7 +2,6 @@ import { LeftClickEventMock } from "../__mocks__/EventMock"
 import {
   WSSmartGuide,
   DefaultRenderingConfiguration,
-  InternalEvent,
   TMarginConfiguration
 } from "../../../src/iink"
 import { WSBehaviorsMock } from "../__mocks__/WSBehaviorsMock"
@@ -20,12 +19,6 @@ describe("WSSmartGuide.ts", () =>
   {
     const sm = new WSSmartGuide(mockBehaviors)
     expect(sm).toBeDefined()
-  })
-
-  test("should have internalEvent property", () =>
-  {
-    const sm = new WSSmartGuide(mockBehaviors)
-    expect(sm.internalEvent).toBe(InternalEvent.getInstance())
   })
 
   describe("Initilize", () =>
@@ -124,7 +117,6 @@ describe("WSSmartGuide.ts", () =>
   {
     const domElement = document.createElement("div")
     const sm = new WSSmartGuide(mockBehaviors)
-    sm.internalEvent.emitConvert = jest.fn()
     sm.init(domElement, margin, DefaultRenderingConfiguration)
 
     const pointerDownEvt = new LeftClickEventMock("pointerdown", {

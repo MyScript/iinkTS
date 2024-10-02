@@ -4,6 +4,7 @@ import {
   DefaultConfiguration,
   EditorLayer
 } from "../../../src/iink"
+import { EditorEventMock } from "./EditorEventMock"
 
 const behaviorsOptions: TBehaviorOptions = {
   configuration: JSON.parse(JSON.stringify(DefaultConfiguration))
@@ -14,7 +15,7 @@ export class OIBehaviorsMock extends OIBehaviors
 {
   constructor() {
     //@ts-ignore
-    super(behaviorsOptions, new EditorLayer(document.createElement("div")))
+    super(behaviorsOptions, new EditorLayer(document.createElement("div")), new EditorEventMock(document.createElement("div")))
   }
 
   init = jest.fn(() => {
