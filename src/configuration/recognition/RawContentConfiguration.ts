@@ -11,6 +11,9 @@ export type TRawContentConfiguration = {
   recognition?: {
     types: ("text" | "shape")[]
   }
+  classification?: {
+    types: ("text" | "shape")[]
+  }
   eraser?: TEraserConfiguration
   /**
    * @description allows you to define the detected gestures
@@ -24,6 +27,9 @@ export type TRawContentConfiguration = {
  */
 export const DefaultRawContentConfiguration: TRawContentConfiguration = {
   recognition: {
+    types: ["text", "shape"]
+  },
+  classification: {
     types: ["text", "shape"]
   },
   eraser: DefaultEraserConfiguration,
