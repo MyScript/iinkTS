@@ -113,6 +113,7 @@ export class Configuration implements TConfiguration
       this.recognition.export.jiix.ids = true
       this.recognition.export.jiix.text.words = true
       this.recognition.export.jiix.text.chars = true
+      this.recognition.export.jiix.text.lines = true
       this.recognition.export.jiix["bounding-box"]= true
     }
     else {
