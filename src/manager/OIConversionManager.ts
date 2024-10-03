@@ -53,14 +53,14 @@ export class OIConversionManager
   #logger = LoggerManager.getLogger(LoggerClass.CONVERTER)
   behaviors: OIBehaviors
   fontSize?: number
-  fontWeight?: "bold" | "normal"
+  fontWeight: "normal" | "bold" | "auto"
 
-  constructor(behaviors: OIBehaviors, fontStyle?: { size?: number | undefined, weight?: ("bold" | "normal") | undefined })
+  constructor(behaviors: OIBehaviors, fontStyle?: { size?: number | undefined, weight?: ("bold" | "normal" | "auto") | undefined })
   {
     this.#logger.info("constructor")
     this.behaviors = behaviors
     this.fontSize = fontStyle?.size
-    this.fontWeight = fontStyle?.weight
+    this.fontWeight = fontStyle?.weight || "auto"
   }
 
   get model(): OIModel
@@ -89,7 +89,7 @@ export class OIConversionManager
       y: convertMillimeterToPixel(p.y),
     }))
     let fontWeight = this.fontWeight
-    if (!fontWeight) {
+    if (fontWeight === "auto") {
       fontWeight = (strokes[0].style.width || 1) > 2 ? "bold" : "normal"
     }
 
