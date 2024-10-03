@@ -99,6 +99,9 @@ export class Configuration implements TConfiguration
     if (configuration?.recognition?.["raw-content"]?.recognition?.types) {
       this.recognition["raw-content"].recognition!.types = configuration.recognition["raw-content"].recognition.types as ("text" | "shape")[]
     }
+    if (configuration?.recognition?.["raw-content"]?.classification?.types) {
+      this.recognition["raw-content"].classification!.types = configuration.recognition["raw-content"].classification.types as ("text" | "shape")[]
+    }
 
     if (this.server?.useWindowLocation) {
       this.server.scheme = window.location.protocol.indexOf("s") > -1 ? "https" : "http"

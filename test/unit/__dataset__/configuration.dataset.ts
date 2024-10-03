@@ -161,7 +161,8 @@ export const AllOverrideConfiguration: PartialDeep<TConfiguration> = {
         ids: true,
         text: {
           chars: true,
-          words: false
+          words: false,
+          lines: true
         },
       },
     },
@@ -220,6 +221,9 @@ export const AllOverrideConfiguration: PartialDeep<TConfiguration> = {
     },
     'raw-content': {
       recognition: {
+        types: ["text"]
+      },
+      classification: {
         types: ["text"]
       },
       eraser: {
