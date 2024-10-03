@@ -28,6 +28,7 @@ export type TJiixConfiguration = {
   text: {
     chars: boolean
     words: boolean
+    lines: boolean
   }
   style?: boolean
 }
@@ -42,7 +43,8 @@ export const DefaultJiixConfiguration: TJiixConfiguration = {
   "full-stroke-ids": false,
   text: {
     chars: false,
-    words: true
+    words: true,
+    lines: false
   },
 }
 
