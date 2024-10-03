@@ -91,7 +91,7 @@ export abstract class OIMenu
   ]
 
   fontWeightList = [
-    { label: "Auto", value: undefined },
+    { label: "Auto", value: "auto" },
     { label: "Normal", value: "normal" },
     { label: "Bold", value: "bold" },
   ]

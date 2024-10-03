@@ -206,8 +206,8 @@ export class OIMenuStyle extends OIMenu
         e.stopPropagation()
         wrapper.querySelectorAll("*").forEach(e => e.classList.remove("active"))
         btn.classList.add("active")
-        this.behaviors.converter.fontWeight = weight.value === "" ? undefined : weight.value as "normal" | "bold"
-        if (this.behaviors.converter.fontWeight) {
+        this.behaviors.converter.fontWeight = weight.value as "auto" | "normal" | "bold"
+        if (this.behaviors.converter.fontWeight !== "auto") {
           const textSymbols = this.symbolsSelected.filter(s => s.type === SymbolType.Text || (s.type === SymbolType.Group && s.extractSymbols().some(c => c.type === SymbolType.Text)))
           this.behaviors.updateTextFontStyle(textSymbols.map(s => s.id), { fontWeight: this.behaviors.converter.fontWeight })
           this.behaviors.selector.resetSelectedGroup(this.symbolsSelected)
