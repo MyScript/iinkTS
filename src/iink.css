@@ -140,10 +140,9 @@
 .ms-editor .state {
     z-index: 99;
     position: absolute;
-    width: 50px;
-    height: 50px;
-    top: calc(100% - 50px);
-    padding: 12px;
+    width: 42px;
+    height: 42px;
+    bottom: 8px;
     left: 0px;
     background-color: #F5F6F7;
     cursor: auto;
@@ -151,6 +150,10 @@
     box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.25), -1px -1px 5px rgba(0, 0, 0, 0.25);
 }
 .ms-editor .state .busy {
+    margin-top: 6px;
+    margin-left: 6px;
+    height: 30px;
+    width: 30px;
     color: #717171;
     border: 4px solid #F5F6F7;
     border-radius: 100%;
@@ -159,13 +162,6 @@
     border-bottom-color: #1A9FFF;
     -webkit-animation: spin 2s linear infinite;
     animation: spin 2s linear infinite;
-    height: 100%;
-    width: 100%;
-}
-.ms-editor .state .idle {
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 /** message **/

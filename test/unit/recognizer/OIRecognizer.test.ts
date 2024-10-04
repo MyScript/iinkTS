@@ -1,5 +1,5 @@
 import { OffScreenOverrideConfiguration } from "../__dataset__/configuration.dataset"
-import { ServerOIWebsocketMock, contextlessGestureMessage, gestureDetectedMessage, hJIIX, partChangeMessage } from "../__mocks__/ServerOIWebsocketMock"
+import { ServerOIWebsocketMock, contextlessGestureMessage, gestureDetectedMessage, hTextJIIX, partChangeMessage } from "../__mocks__/ServerOIWebsocketMock"
 import { buildOIStroke, delay } from "../helpers"
 import
 {
@@ -1291,7 +1291,7 @@ describe("OIRecognizer.ts", () =>
       expect(exportMessageSent).toContain(exportmessageSentExpected)
       await expect(promise).resolves.toEqual(
         expect.objectContaining({
-          "application/vnd.myscript.jiix": hJIIX
+          "application/vnd.myscript.jiix": hTextJIIX
         })
       )
       oiRecognizer.destroy()
@@ -1307,7 +1307,7 @@ describe("OIRecognizer.ts", () =>
       mockServer.sendHExportMessage()
       await expect(promise).resolves.toEqual(
         expect.objectContaining({
-          "application/vnd.myscript.jiix": hJIIX
+          "application/vnd.myscript.jiix": hTextJIIX
         })
       )
       oiRecognizer.destroy()

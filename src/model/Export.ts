@@ -109,12 +109,24 @@ export type TJIIXChar = TJIIXBase & {
  * @group Exports
  * @remarks {@link https://developer.preprod.myscript.com/docs/interactive-ink/latest/reference/jiix/#text-interpretation | Text Element }
  */
+export type TJIIXLine = {
+  "baseline-y": number
+  "first-char"?: number
+  "last-char"?: number
+  "x-height": number
+}
+
+/**
+ * @group Exports
+ * @remarks {@link https://developer.preprod.myscript.com/docs/interactive-ink/latest/reference/jiix/#text-interpretation | Text Element }
+ */
 export type TJIIXTextElement = TJIIXElementBase<JIIXELementType.Text> & {
   id: string
   "bounding-box"?: TBoundingBox
   label: string
   words?: TJIIXWord[]
   chars?: TJIIXChar[]
+  lines?: TJIIXLine[]
 }
 
 /**

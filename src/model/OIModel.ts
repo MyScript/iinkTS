@@ -76,13 +76,16 @@ export class OIModel implements IModel
       if (s.type === SymbolType.Group && s.containsSymbol(id)) {
         return s
       }
+      if (s.type === SymbolType.StrokeText && s.containsStroke(id)) {
+        return s
+      }
       return
     })
   }
 
   getSymbolRowIndex(symbol: TOISymbol): number
   {
-    return Math.round(symbol.bounds.yMid / this.rowHeight)
+    return Math.round((symbol.type === SymbolType.StrokeText ? symbol.baseline : symbol.bounds.yMid) / this.rowHeight)
   }
 
   getSymbolsByRowOrdered(): { rowIndex: number, symbols: TOISymbol[] }[]
@@ -113,17 +116,17 @@ export class OIModel implements IModel
 
   isSymbolAbove(source: TOISymbol, target: TOISymbol): boolean
   {
-    return source.bounds.yMid - this.rowHeight / 2 > target.bounds.yMid
+    return this.getSymbolRowIndex(source) > this.getSymbolRowIndex(target)
   }
 
   isSymbolInRow(source: TOISymbol, target: TOISymbol): boolean
   {
-    return Math.abs(source.bounds.yMid - target.bounds.yMid) <= this.rowHeight / 2
+    return this.getSymbolRowIndex(source) === this.getSymbolRowIndex(target)
   }
 
   isSymbolBelow(source: TOISymbol, target: TOISymbol): boolean
   {
-    return source.bounds.yMid + this.rowHeight / 2 < target.bounds.yMid
+    return this.getSymbolRowIndex(source) < this.getSymbolRowIndex(target)
   }
 
   getFirstSymbol(symbols: TOISymbol[]): TOISymbol | undefined
@@ -132,10 +135,10 @@ export class OIModel implements IModel
     return symbols.reduce((previous, current) =>
     {
       if (previous) {
-        if (Math.round(previous.bounds.yMid / this.rowHeight) < Math.round(current.bounds.yMid / this.rowHeight)) {
+        if (this.getSymbolRowIndex(previous) < this.getSymbolRowIndex(current)) {
           return previous
         }
-        else if (Math.round(previous.bounds.yMid / this.rowHeight) == Math.round(current.bounds.yMid / this.rowHeight) && previous.bounds.xMid < current.bounds.xMid) {
+        else if (this.getSymbolRowIndex(previous) == this.getSymbolRowIndex(current) && previous.bounds.xMid < current.bounds.xMid) {
           return previous
         }
       }
@@ -149,10 +152,10 @@ export class OIModel implements IModel
     return symbols.reduce((previous, current) =>
     {
       if (previous) {
-        if (previous.bounds.yMid - current.bounds.yMid > this.rowHeight / 2) {
+        if (this.getSymbolRowIndex(previous) > this.getSymbolRowIndex(current)) {
           return previous
         }
-        if (previous.bounds.yMid - current.bounds.yMid < this.rowHeight / 2) {
+        if (this.getSymbolRowIndex(previous) < this.getSymbolRowIndex(current)) {
           return current
         }
         else if (previous.bounds.xMid > current.bounds.xMid) {

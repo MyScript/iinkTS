@@ -46,6 +46,7 @@ export class OIMenuContext extends OIMenu
   {
     return this.behaviors.model.symbolsSelected
   }
+
   get haveSymbolsSelected(): boolean
   {
     return this.symbolsSelected.length > 0
@@ -53,8 +54,9 @@ export class OIMenuContext extends OIMenu
 
   get symbolsDecorable(): (OIStroke | OIText | OISymbolGroup)[]
   {
-    return this.symbolsSelected.filter(s => [SymbolType.Stroke.toString(), SymbolType.Text.toString(), SymbolType.Group.toString()].includes(s.type)) as (OIStroke | OIText)[]
+    return this.symbolsSelected.filter(s => [SymbolType.Stroke.toString(), SymbolType.Text.toString(), SymbolType.Group.toString(), SymbolType.StrokeText.toString()].includes(s.type)) as (OIStroke | OIText)[]
   }
+
   get showDecorator(): boolean
   {
     return this.symbolsDecorable.length > 0

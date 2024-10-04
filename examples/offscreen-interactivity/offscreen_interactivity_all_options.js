@@ -1,120 +1,179 @@
 const editorElement = document.getElementById("editor");
 
 const importBtn = document.getElementById("import");
-const showImportBtn = document.getElementById("show-import");
 
-const showJIIXBtn = document.getElementById("show-jiix");
-const showModelBtn = document.getElementById("show-model");
-const showHistorylBtn = document.getElementById("show-history");
-
-const modal = document.getElementById("modal");
-const modalTitle = document.getElementById("modal-title");
-const modalBody = document.getElementById("modal-body");
-const modalCloseBtn = document.getElementById("modal-close-btn");
-
-const menuActionToggle = document.getElementById("menu-action-toggle");
-const menuStyleToggle = document.getElementById("menu-style-toggle");
-const menuIntentionToggle = document.getElementById("menu-tool-toggle");
-
-const recognitionBoxToggle = document.getElementById("toggle-recognition-box");
-const recognitionItemBoxToggle = document.getElementById("toggle-recognition-item-box");
-const snapPointsVisibilityToggle = document.getElementById("toggle-snap-points-visibility");
-const verticesVisibilityToggle = document.getElementById("toggle-vertices-visibility");
-const boundingBoxVisibilityToggle = document.getElementById("toggle-bounding-box-visibility");
-
-const selectionToggle = document.getElementById("toggle-selection-pan");
+const leftPanToggle = document.getElementById("toggle-left-pan");
 const htmlPanToggle = document.getElementById("toggle-export-html-pan");
-
-const selectionPan = document.getElementById("selection-panel");
-const selectionBody = document.getElementById("selection-body");
 
 const exportHtmlPan = document.getElementById("export-html-pan");
 const htmlPanCloseBtn = document.getElementById("html-pan-close-btn");
 const exportHtmlBody = document.getElementById("export-html-body");
 
-function resetMenuBtn() {
-  Array.from(document.getElementsByClassName("menu-button"))
-    .forEach(btn => {
-      btn.classList.remove("active");
-    });
-};
+let currentTabId = "symbols-tab";
+const copyTabToClipboard = document.getElementById("copy-content-tab");
+const contentTab = document.getElementById("content-tab");
 
-function showModal(title, body) {
-  modal.style.display = "block";
-  modalTitle.innerText = title;
-  while (modalBody.firstChild) {
-    modalBody.firstChild.remove()
+copyTabToClipboard.addEventListener("pointerdown", () => {
+  try {
+    navigator.clipboard.writeText(contentTab.getAttribute("data-string"));
+  } catch (err) {
+    console.error(err);
+    alert("Copy to clipboard disabled");
   }
-  modalBody.appendChild(body);
-};
+});
+
+function setCurrentTab(tabId) {
+  currentTabId = tabId;
+  document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"));
+  document.getElementById(tabId).classList.add("active");
+  updateTabContent();
+}
+async function updateTabContent() {
+  let content;
+  let dataString = "";
+  contentTab.innerHTML = '<div class="loader"></div>';
+  copyTabToClipboard.disabled = true;
+
+  switch (currentTabId) {
+    case "jiix-tab":
+      const { exports } = await editor.export(["application/vnd.myscript.jiix"]);
+      const jiix = exports["application/vnd.myscript.jiix"];
+      content = renderjson(jiix);
+      dataString = JSON.stringify(jiix);
+      break;
+    case "symbols-tab":
+      if (editor.model.symbols.length) {
+        content = renderjson(editor.model.symbols);
+        dataString = JSON.stringify(editor.model.symbols);
+      } else {
+        const mes = document.createElement("p");
+        mes.textContent = "No symbols";
+        dataString = "No symbols";
+        content = mes;
+      }
+      break;
+    case "history-tab":
+      content = renderjson({
+        context: editor.behaviors.history.context,
+        stack: editor.behaviors.history.stack
+      });
+      dataString = JSON.stringify({
+        context: editor.behaviors.history.context,
+        stack: editor.behaviors.history.stack
+      });
+      break;
+    case "selection-tab":
+      if (editor.model.symbolsSelected.length) {
+        const list = document.createElement("ul");
+        editor.model.symbolsSelected.forEach((symbol) => {
+          const listItem = document.createElement("li");
+          const span = document.createElement("span");
+          span.textContent = symbol.id;
+          listItem.appendChild(span);
+          listItem.appendChild(createStrokeInputWrapper(symbol));
+          listItem.addEventListener("pointerover", () => {
+            listItem.style.setProperty("background-color", "#1a9fff50");
+            document.getElementById(symbol.id).style.setProperty("outline", "2px ridge #1a9fff");
+          });
+          listItem.addEventListener("pointerout", () => {
+            listItem.style.removeProperty("background-color");
+            document.getElementById(symbol.id).style.removeProperty("outline");
+          });
+          list.appendChild(listItem);
+        });
+        content = list;
+        dataString = JSON.stringify(editor.model.symbolsSelected);
+      } else {
+        const mes = document.createElement("p");
+        mes.textContent = "No symbols selected";
+        dataString = "No symbols selected";
+        content = mes;
+      }
+      break;
+  }
+  while (contentTab.firstChild) {
+    contentTab.firstChild.remove();
+  }
+  contentTab.setAttribute("data-string", dataString);
+  contentTab.appendChild(content);
+  copyTabToClipboard.disabled = false;
+}
+document.querySelectorAll(".tab").forEach((tab) =>
+  tab.addEventListener("pointerup", (evt) => {
+    setCurrentTab(evt.target.dataset.tabid);
+  })
+);
 
 function closeHtmlPanVisibilty() {
   exportHtmlPan.style.setProperty("display", "none");
-};
+}
 
-function closeModal() {
-  modal.style.display = "none";
-};
-
-function createStrokeInputColor(stroke) {
+function createSymbolInputColor(symbol) {
   const inputColor = document.createElement("input");
   inputColor.setAttribute("type", "color");
-  inputColor.value = stroke.style.color;
-  inputColor.classList.add("stroke-input")
+  inputColor.value = symbol.style.color;
+  inputColor.classList.add("symbol-input");
   inputColor.addEventListener("change", (evt) => {
-    editor.behaviors.updateSymbolsStyle([stroke.id], { color: evt.target.value });
-  })
-  return inputColor
-};
+    editor.behaviors.updateSymbolsStyle([symbol.id], { color: evt.target.value });
+  });
+  return inputColor;
+}
 
-function createStrokeInputsWidth(stroke) {
+function createSymbolInputWidth(symbol) {
   const minus = document.createElement("button");
-  minus.classList.add("stroke-input");
+  minus.classList.add("symbol-input");
   minus.textContent = "-";
   minus.addEventListener("pointerup", () => {
-    stroke.style.width--;
-    if (stroke.style.width <= 1) {
-      minus.setAttribute('disabled', true);
+    symbol.style.width--;
+    if (symbol.style.width <= 1) {
+      minus.setAttribute("disabled", true);
+    } else {
+      minus.removeAttribute("disabled");
     }
-    else {
-      minus.removeAttribute('disabled');
-    }
-    editor.behaviors.updateSymbolsStyle([stroke.id], { width: stroke.style.width });
-  })
+    editor.behaviors.updateSymbolsStyle([symbol.id], { width: symbol.style.width });
+  });
 
   const plus = document.createElement("button");
   plus.textContent = "+";
-  plus.classList.add("stroke-input");
-  if (stroke.style.width <= 1) {
-    minus.setAttribute('disabled', true);
+  plus.classList.add("symbol-input");
+  if (symbol.style.width <= 1) {
+    minus.setAttribute("disabled", true);
   }
   plus.addEventListener("pointerup", () => {
-    stroke.style.width++;
-    if (stroke.style.width <= 1) {
-      minus.setAttribute('disabled', true);
+    symbol.style.width++;
+    if (symbol.style.width <= 1) {
+      minus.setAttribute("disabled", true);
+    } else {
+      minus.removeAttribute("disabled");
     }
-    else {
-      minus.removeAttribute('disabled');
-    }
-    editor.behaviors.updateSymbolsStyle([stroke.id], { width: stroke.style.width });
-  })
-  return { minus, plus }
-};
+    editor.behaviors.updateSymbolsStyle([symbol.id], { width: symbol.style.width });
+  });
+  return { minus, plus };
+}
 
-function createStrokeInputWrapper(stroke) {
+function createStrokeInputWrapper(symbol) {
   const inputWrapper = document.createElement("div");
-  inputWrapper.classList.add("stroke-input-wrapper");
-  inputWrapper.appendChild(createStrokeInputColor(stroke));
-  const inputs = createStrokeInputsWidth(stroke);
+  inputWrapper.classList.add("symbol-input-wrapper");
+  inputWrapper.appendChild(createSymbolInputColor(symbol));
+  const inputs = createSymbolInputWidth(symbol);
   inputWrapper.appendChild(inputs.minus);
   inputWrapper.appendChild(inputs.plus);
-  return inputWrapper
-};
+  return inputWrapper;
+}
 
-modalCloseBtn.addEventListener("pointerup", () => {
-  closeModal();
+if (leftPanToggle.checked) {
+  document.getElementById("left-pan").classList.add("open");
+} else {
+  document.getElementById("left-pan").classList.remove("open");
+}
+exportHtmlPan.style.setProperty("display", htmlPanToggle.checked ? "block" : "none");
+
+leftPanToggle.addEventListener("change", () => {
+  document.getElementById("left-pan").classList.toggle("open");
+  editor?.resize();
 });
 
+exportHtmlBody.srcdoc = "";
 htmlPanToggle.addEventListener("change", (event) => {
   exportHtmlPan.style.setProperty("display", event.target.checked ? "block" : "none");
 });
@@ -122,10 +181,6 @@ htmlPanToggle.addEventListener("change", (event) => {
 htmlPanCloseBtn.addEventListener("pointerup", () => {
   htmlPanToggle.checked = false;
   closeHtmlPanVisibilty();
-});
-
-selectionToggle.addEventListener("change", (event) => {
-  event.target.checked ? selectionPan.classList.add("open") : selectionPan.classList.remove("open");
 });
 
 /**
@@ -142,8 +197,8 @@ async function loadEditor() {
       server,
       rendering: {
         minHeight: 2000,
-        minWidth: 2000,
-      },
+        minWidth: 2000
+      }
     }
   };
   /**
@@ -156,6 +211,7 @@ async function loadEditor() {
    *  async initialize editor behaviors
    */
   await editor.initialize();
+  setCurrentTab(currentTabId);
 
   const symbolsToCreateResponse = await fetch("../assets/datas/shakespeare-quotes.json");
   const symbolsToCreate = await symbolsToCreateResponse.json();
@@ -164,13 +220,13 @@ async function loadEditor() {
   editor.event.addEventListener("changed", (event) => {
     if (event.detail.empty) {
       importBtn.disabled = false;
+    } else {
+      importBtn.disabled = editor.model.symbols.some((s1) => symbolsToCreate.some((s2) => s2.id === s1.id));
     }
-    else {
-      importBtn.disabled = editor.model.symbols.some(s1 => symbolsToCreate.some(s2 => s2.id === s1.id))
-    }
-    clearTimeout(exportTimeout)
+    updateTabContent();
+    clearTimeout(exportTimeout);
     exportTimeout = setTimeout(async () => {
-      await editor.export(["text/html"])
+      await editor.export(["text/html"]);
     }, 1000);
   });
 
@@ -181,19 +237,7 @@ async function loadEditor() {
   });
 
   editor.event.addEventListener("selected", (event) => {
-    selectionBody.innerHTML = "";
-    const list = document.createElement("ul");
-    if (event.detail) {
-      event.detail.forEach((stroke) => {
-        const listItem = document.createElement("li");
-        const span = document.createElement("span");
-        span.textContent = stroke.id;
-        listItem.appendChild(span);
-        listItem.appendChild(createStrokeInputWrapper(stroke));
-        list.appendChild(listItem);
-      });
-      selectionBody.appendChild(list);
-    }
+    updateTabContent();
   });
 
   importBtn.addEventListener("pointerup", async () => {
@@ -201,49 +245,9 @@ async function loadEditor() {
     await editor.behaviors.createSymbols(symbolsToCreate);
   });
 
-  showImportBtn.addEventListener("pointerup", async () => {
-    const title = `Pointers to import`;
-    showModal(title, renderjson(symbolsToCreate));
-  });
-
-  showJIIXBtn.addEventListener("pointerup", async () => {
-    const { exports } = await editor.export(["application/vnd.myscript.jiix"]);
-    const jiix = exports["application/vnd.myscript.jiix"];
-    const title = `Export application/vnd.myscript.jiix`;
-    showModal(title, renderjson(jiix));
-    try {
-      navigator.clipboard.writeText(JSON.stringify(jiix));
-    }
-    catch(err) {
-      console.error(err);
-    }
-  });
-
-  showModelBtn.addEventListener("pointerup", () => {
-    const title = "Model";
-    showModal(title, renderjson(editor.model));
-  });
-
-  showHistorylBtn.addEventListener("pointerup", () => {
-    const title = "History";
-    showModal(title, renderjson(editor.behaviors.history.stack));
-  });
-
-  menuActionToggle.addEventListener("change", (event) => {
-    event.target.checked ? editor.behaviors.menu.action.show() : editor.behaviors.menu.action.hide();
-  });
-
-  menuStyleToggle.addEventListener("change", (event) => {
-    event.target.checked ? editor.behaviors.menu.style.show() : editor.behaviors.menu.style.hide();
-  });
-
-  menuIntentionToggle.addEventListener("change", (event) => {
-    event.target.checked ? editor.behaviors.menu.tool.show() : editor.behaviors.menu.tool.hide();
-  });
-
   window.addEventListener("resize", () => {
     editor.resize();
   });
 }
 
-loadEditor().catch(error => console.error(error));
+loadEditor().catch((error) => console.error(error));

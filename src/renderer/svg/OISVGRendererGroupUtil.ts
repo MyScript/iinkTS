@@ -7,6 +7,7 @@ import { OISVGRendererStrokeUtil } from "./OISVGRendererStrokeUtil"
 import { OISVGRendererConst } from "./OISVGRendererConst"
 import { SVGBuilder } from "./SVGBuilder"
 import { OISVGRendererTextUtil } from "./OISVGRendererTextUtil"
+import { OISVGRendererStrokeTextUtil } from "./OISVGRendererStrokeTextUtil"
 
 /**
  * @group Renderer
@@ -32,6 +33,9 @@ export class OISVGRendererGroupUtil
         break
       case SymbolType.Group:
         element = OISVGRendererGroupUtil.getSVGElement(symbol)
+        break
+      case SymbolType.StrokeText:
+        element = OISVGRendererStrokeTextUtil.getSVGElement(symbol)
         break
     }
     return element

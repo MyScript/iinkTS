@@ -16,6 +16,8 @@ import
   OISymbolGroup,
   TOISymbol,
   OIEraser,
+  OIStrokeText,
+  PartialDeep,
 } from "../../src/iink"
 
 export const delay = (delayInms: number) =>
@@ -123,4 +125,17 @@ export function buildOIGroup(
     symbols.push(buildOIText())
   }
   return new OISymbolGroup(symbols, style)
+}
+
+export function buildOIStrokeText(
+  nbStroke: number = 1,
+  { baseline, xHeight }: { baseline: number, xHeight: number } = { baseline: 10, xHeight: 10 },
+  style?: PartialDeep<TStyle>
+): OIStrokeText
+{
+  const strokes: OIStroke[] = []
+  for (let i = 0; i < nbStroke; i++) {
+    strokes.push(buildOIStroke())
+  }
+  return new OIStrokeText(strokes, { baseline, xHeight }, style)
 }

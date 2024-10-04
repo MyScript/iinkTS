@@ -13,12 +13,16 @@
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
     <style>
+      .content {
+        width: 100dvw;
+        height: calc(100dvh - 62px);
+      }
       #editor {
         width: 100%;
         height: calc(100dvh - 62px);
         touch-action: none;
       }
-      @media only screen and (max-width: 386px) {
+      @media only screen and (max-width: 466px) {
         #editor {
           height: calc(100dvh - 110px);
         }
@@ -59,98 +63,85 @@
     </style>
 
     <style>
-      #modal {
-        position: absolute;
-        top: 10%;
-        height: 80%;
-        left: 10%;
-        width: 80%;
-        background-color: white;
-        z-index: 999;
-        border-radius: 20px;
-        display: none;
-        border: 1px solid grey;
-        box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.5);
+      .loader {
+        margin: auto;
+        border: 16px solid #f3f3f3;
+        border-top: 16px solid #3498db;
+        border-radius: 50%;
+        width: 120px;
+        height: 120px;
+        animation: spin 2s linear infinite;
       }
-      @media only screen and (max-width: 500px) {
-        #modal {
-          top: 0;
-          height: 100%;
-          left: 0;
-          width: 100%;
-          border-radius: 0px;
-        }
-      }
-      #modal .modal-header {
-        display: flex;
-        padding: 12px;
-        overflow: hidden;
-        border-bottom: 1px solid grey;
-      }
-      #modal .modal-header #modal-title {
-        margin: auto 0;
-        padding-left: 20px;
-        font-size: 25px;
-      }
-      #modal-body {
-        height: calc(100% - 62px);
-        padding: 12px;
-        max-width: 100%;
-        overflow: auto;
-        border: none;
+
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
       }
     </style>
 
     <style>
-      #selection-panel {
-        position: absolute;
-        top: 105px;
-        height: calc(100dvh - 160px);
-        z-index: 11;
-        background-color: white;
-        box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.5);
+      .left-pan {
+        height: 100%;
         width: 0px;
-        -webkit-transition: width 0.3s ease-in-out;
-        -moz-transition: width 0.3s ease-in-out;
-        -o-transition: width 0.3s ease-in-out;
-        transition: width 0.3s ease-in-out;
+        background-color: white;
+        /* box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.5); */
+        border-right: 1px solid #D7DDE3;
         overflow: hidden;
       }
-      #selection-panel.open {
-        width: 450px;
+      .left-pan.open {
+        width: 25%;
+        min-width: 400px;
       }
-      #selection-panel .selection-header {
-        display: flex;
-        padding: 10px;
-        border-bottom: 1px solid grey;
+      .tabs {
+        padding: 0px;
       }
-      #selection-panel .selection-title {
-        margin: auto 0;
-        padding-left: 20px;
-        font-size: 18px;
+      .tab {
+        width: 25%;
+        padding: 12px;
+        color: darkgrey;
+        text-align: center;
+        font-size: large;
+        cursor: pointer;
       }
-      #selection-panel #selection-body {
+      .tab:hover {
+        background-color: rgb(150, 150, 150);
+        color: white;
+      }
+      .tab.active {
+        background-color: rgb(50, 50, 50);
+        color: white;
+        font-size: larger;
+      }
+      .content-tab {
         overflow: auto;
-        padding: 10px;
-        max-height: calc(100% - 45px);
+        height: calc(100% - 80px);
+        padding: 12px;
       }
-      #selection-panel #selection-body ul {
-        margin-left: -20px;
+      #copy-content-tab {
+        justify-content: center;
+        width: 100%;
       }
-      #selection-panel #selection-body li {
+      .content-tab ul {
+        padding: 0;
+        list-style-type: none;
+      }
+      .content-tab li {
         display: flex;
         justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 2px;
         margin-bottom: 12px;
       }
-      #selection-panel #selection-body li span {
+      .content-tab li span {
         margin: auto 0;
+        word-wrap: anywhere;
       }
-      #selection-panel #selection-body li .stroke-input-wrapper {
+      .content-tab li .symbol-input-wrapper {
         display: flex;
         width: 66px;
         gap: 2px;
       }
-      #selection-panel #selection-body li .stroke-input {
+      .content-tab li .symbol-input {
         height: 20px;
         width: 20px;
         border-radius: 4px;
@@ -159,26 +150,6 @@
         box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.225);
         background-color: white;
         display: block;
-      }
-    </style>
-
-    <style>
-      #import {
-        border-top-right-radius: 0px;
-        border-bottom-right-radius: 0px;
-      }
-      #show-import {
-        margin: 0;
-        margin-left: -4px;
-        padding: 0 4px;
-        border-top-left-radius: 0px;
-        border-bottom-left-radius: 0px;
-        box-shadow: none;
-        border-left: 1px solid #0f4e7b;
-      }
-      #show-import img {
-        margin: 0;
-        padding: 0;
       }
     </style>
 
@@ -212,7 +183,7 @@
         color: darkblue;
       }
       .renderjson .keyword {
-        color: lightgoldenrodyellow;
+        color: darkgray;
       }
       .renderjson .object.syntax,
       .renderjson .array.syntax {
@@ -225,96 +196,49 @@
   </head>
 
   <body>
-    <div id="modal">
-      <div class="modal-header">
-        <div id="modal-title">title</div>
-        <button id="modal-close-btn" class="close-btn">
-          <img src="../assets/img/cross.svg" />
-        </button>
-      </div>
-      <div id="modal-body"></div>
-    </div>
 
     <nav class="flex-container gap wrap center">
-      <span class="flex-container">
-        <button class="classic-btn" id="import">Import</button>
-        <button class="classic-btn " id="show-import">
-          <img src="../assets/img/nav-arrow-down.svg" />
-        </button>
-      </span>
-      <button class="classic-btn" id="show-jiix">Show JIIX</button>
-      <button class="classic-btn" id="show-model">Show model</button>
-      <button class="classic-btn" id="show-history">Show history</button>
-      <div class="flex-container global-options">
-        <div class="dropdown-menu">
-          <button class="menu-button">
-            <img src="../assets/img/menu.svg" />
-          </button>
-          <ul>
-            <li class="dropdown-menu full-width horizontal left">
-              <label class="label flex-container between gap">
-                <img src="../assets/img/caret-left.svg" />
-                Menu
-              </label>
-              <ul>
-                <li class="flex-container">
-                  <label class="label">Action</label>
-                  <div class="toggle-switch">
-                    <input class="toggle-input" id="menu-action-toggle" type="checkbox" checked />
-                    <label class="toggle-label" for="menu-action-toggle"></label>
-                  </div>
-                </li>
-                <li class="flex-container">
-                  <label class="label">Style</label>
-                  <div class="toggle-switch">
-                    <input class="toggle-input" id="menu-style-toggle" type="checkbox" checked />
-                    <label class="toggle-label" for="menu-style-toggle"></label>
-                  </div>
-                </li>
-                <li class="flex-container">
-                  <label class="label">Tool</label>
-                  <div class="toggle-switch">
-                    <input class="toggle-input" id="menu-tool-toggle" type="checkbox" checked />
-                    <label class="toggle-label" for="menu-tool-toggle"></label>
-                  </div>
-                </li>
-              </ul>
-            </li>
-            <li class="dropdown-menu full-width horizontal left">
-              <label class="label flex-container between gap">
-                <img src="../assets/img/caret-left.svg" />
-                Others
-              </label>
-              <ul>
-                <li class="flex-container">
-                  <label class="label">Show selection</label>
-                  <div class="toggle-switch">
-                    <input class="toggle-input" id="toggle-selection-pan" type="checkbox" />
-                    <label class="toggle-label" for="toggle-selection-pan"></label>
-                  </div>
-                </li>
-                <li class="flex-container">
-                  <label class="label">Show backend rendering</label>
-                  <div class="toggle-switch">
-                    <input class="toggle-input" id="toggle-export-html-pan" type="checkbox" />
-                    <label class="toggle-label" for="toggle-export-html-pan"></label>
-                  </div>
-                </li>
-              </ul>
-            </li>
-          </ul>
+      <button class="classic-btn" id="import">Import</button>
+      <div class="flex-container">
+        <label class="label">Show left pan</label>
+        <div class="toggle-switch">
+          <input class="toggle-input" id="toggle-left-pan" type="checkbox" />
+          <label class="toggle-label" for="toggle-left-pan"></label>
+        </div>
+      </div>
+      <div class="flex-container">
+        <label class="label">Show backend rendering</label>
+        <div class="toggle-switch">
+          <input class="toggle-input" id="toggle-export-html-pan" type="checkbox" />
+          <label class="toggle-label" for="toggle-export-html-pan"></label>
         </div>
       </div>
     </nav>
 
-    <div id="selection-panel">
-      <div class="selection-header">
-        <div class="selection-title">Selection</div>
+    <div class="content flex-container">
+      <div id="left-pan" class="left-pan">
+        <nav class="tabs flex-container between">
+          <div id="jiix-tab" data-tabid="jiix-tab" class="tab">
+            JIIX
+          </div>
+          <div id="symbols-tab" data-tabid="symbols-tab" class="tab">
+            Symbols
+          </div>
+          <div id="history-tab" data-tabid="history-tab" class="tab">
+            History
+          </div>
+          <div id="selection-tab" data-tabid="selection-tab" class="tab">
+            Selection
+          </div>
+        </nav>
+        <button id="copy-content-tab" class="classic-btn" disabled>Copy to clipboard</button>
+        <div id="content-tab" class="content-tab">
+          <div class="loader"></div>
+        </div>
       </div>
-      <div id="selection-body"></div>
-    </div>
 
-    <div id="editor" touch-action="none"></div>
+      <div id="editor" touch-action="none"></div>
+    </div>
 
     <div id="export-html-pan">
       <div class="export-html-header">

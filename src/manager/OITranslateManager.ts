@@ -13,7 +13,8 @@ import
   TOIEdge,
   TOIShape,
   TOISymbol,
-  TPoint
+  TPoint,
+  OIStrokeText
 } from "../primitive"
 
 /**
@@ -113,6 +114,13 @@ export class OITranslateManager
     return group
   }
 
+  protected applyOnStrokeText(strokeText: OIStrokeText, tx: number, ty: number): OIStrokeText
+  {
+    strokeText.strokes.forEach(s => this.applyToStroke(s, tx, ty))
+    strokeText.baseline += ty
+    return strokeText
+  }
+
   applyToSymbol(symbol: TOISymbol, tx: number, ty: number): TOISymbol
   {
     this.#logger.info("applyToSymbol", { symbol, tx, ty })
@@ -127,6 +135,8 @@ export class OITranslateManager
         return this.applyOnText(symbol, tx, ty)
       case SymbolType.Group:
         return this.applyOnGroup(symbol, tx, ty)
+      case SymbolType.StrokeText:
+        return this.applyOnStrokeText(symbol, tx, ty)
       default:
         throw new Error(`Can't apply translate on symbol, type unknow: ${ JSON.stringify(symbol) }`)
     }

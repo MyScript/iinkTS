@@ -10,10 +10,9 @@ import {
 
 describe("OIStroke.ts", () =>
 {
-
   describe("instanciate", () =>
   {
-    test("should create with default style", () =>
+    test("should create with custom style", () =>
     {
       const style: TStyle = {
         color: "blue",
@@ -32,7 +31,7 @@ describe("OIStroke.ts", () =>
       expect(stroke.bounds.height).toEqual(0)
       expect(stroke.bounds.width).toEqual(0)
     })
-    test("should create with custom style", () =>
+    test("should create with default style", () =>
     {
       const stroke = new OIStroke()
       expect(stroke.style).toEqual(DefaultStyle)
@@ -242,6 +241,5 @@ describe("OIStroke.ts", () =>
       ]
       expect(() => convertPartialStrokesToOIStrokes(pStrokes)).toThrow("stroke 1 has no y at pointer at 1")
     })
-
   })
 })

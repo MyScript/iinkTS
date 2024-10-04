@@ -46,7 +46,7 @@ export const emptyExportedMessage = {
   }
 }
 
-export const hJIIX = {
+export const hTextJIIX = {
   "type": "Text",
   "label": "hello",
   "words": [{
@@ -59,7 +59,7 @@ export const hExportedMessage = {
   "type": "exported",
   "partid": 0,
   "exports": {
-    "application/vnd.myscript.jiix": JSON.stringify(hJIIX)
+    "application/vnd.myscript.jiix": JSON.stringify(hTextJIIX)
   }
 }
 

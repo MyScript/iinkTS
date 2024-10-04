@@ -13,7 +13,6 @@ export type EditorLayerUIMessage = {
 export type EditorLayerUIState = {
   root: HTMLDivElement
   busy: HTMLDivElement
-  idle: HTMLDivElement
 }
 
 export type EditorLayerUI = {
@@ -128,16 +127,7 @@ export class EditorLayer
   {
     const busy = document.createElement("div")
     busy.classList.add("busy")
-    busy.style.display = "none"
     return busy
-  }
-  createIdle(): HTMLDivElement
-  {
-    const idle = document.createElement("div")
-    idle.classList.add("idle")
-    idle.textContent = "idle"
-    idle.style.display = "block"
-    return idle
   }
   createState(): EditorLayerUIState
   {
@@ -148,12 +138,9 @@ export class EditorLayer
     const busy = this.createBusy()
     root.appendChild(busy)
 
-    const idle = this.createIdle()
-    root.appendChild(idle)
     return {
       root,
-      busy,
-      idle
+      busy
     }
   }
   showState(): void
@@ -167,12 +154,10 @@ export class EditorLayer
   updateState(idle: boolean): void
   {
     if (idle) {
-      this.ui.state.idle.style.display = "block"
-      this.ui.state.busy.style.display = "none"
+      this.hideState()
     }
     else {
-      this.ui.state.idle.style.display = "none"
-      this.ui.state.busy.style.display = "block"
+      this.showState()
     }
   }
 

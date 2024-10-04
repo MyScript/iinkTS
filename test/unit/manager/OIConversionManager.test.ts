@@ -1,4 +1,4 @@
-import { arcJIIX, circleJIIX, ellipseJIIX, helloJIIX, lineJIIX, parallelogramJIIX, polygonJIIX, rectangleJIIX, rhombusJIIX, triangleJIIX } from "../__dataset__/jiix.dataset"
+import { arcJIIX, circleJIIX, ellipseJIIX, hTextJIIX, lineJIIX, parallelogramJIIX, polygonJIIX, rectangleJIIX, rhombusJIIX, triangleJIIX } from "../__dataset__/jiix.dataset"
 import { buildOIStroke } from "../helpers"
 import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
 import { OIConversionManager, TJIIXEdgeElement, TJIIXNodeElement, TJIIXTextElement } from "../../../src/iink"
@@ -31,7 +31,7 @@ describe("OIConversionManager.ts", () =>
     test("should call convertText", async () =>
     {
       expect(manager.convertText).toHaveBeenCalledTimes(0)
-      manager.model.exports = { "application/vnd.myscript.jiix": helloJIIX }
+      manager.model.exports = { "application/vnd.myscript.jiix": hTextJIIX }
       await manager.apply()
       expect(behaviors.selector.removeSelectedGroup).toHaveBeenCalledTimes(1)
       expect(manager.convertText).toHaveBeenCalledTimes(1)
@@ -67,32 +67,38 @@ describe("OIConversionManager.ts", () =>
     behaviors.model.removeSymbol = jest.fn()
     const manager = new OIConversionManager(behaviors)
 
-    const helloTextJIIX = helloJIIX.elements?.[0] as TJIIXTextElement
+    const hTextJIIXElement = hTextJIIX.elements?.[0] as TJIIXTextElement
 
+    test("should throw Error if jiix has no lines", async () =>
+    {
+      const hTextJIIXElementClone = JSON.parse(JSON.stringify(hTextJIIXElement)) as TJIIXTextElement
+      delete hTextJIIXElementClone.lines
+      await expect(async () => await manager.convertText(hTextJIIXElementClone, [], false)).rejects.toThrowError("You need to active configuration.recognition.export.jiix.text.lines = true")
+    })
     test("should throw Error if jiix has no word", async () =>
     {
-      const noChars = JSON.parse(JSON.stringify(helloTextJIIX)) as TJIIXTextElement
-      delete noChars.words
-      await expect(async () => await manager.convertText(noChars, [], false)).rejects.toThrowError("You need to active configuration.recognition.export.jiix.text.words = true")
+      const hTextJIIXElementClone = JSON.parse(JSON.stringify(hTextJIIXElement)) as TJIIXTextElement
+      delete hTextJIIXElementClone.words
+      await expect(async () => await manager.convertText(hTextJIIXElementClone, [], false)).rejects.toThrowError("You need to active configuration.recognition.export.jiix.text.words = true")
     })
     test("should throw Error if jiix has no char", async () =>
     {
-      const noChars = JSON.parse(JSON.stringify(helloTextJIIX)) as TJIIXTextElement
-      delete noChars.chars
-      await expect(async () => await manager.convertText(noChars, [], false)).rejects.toThrowError("You need to active configuration.recognition.export.jiix.text.chars = true")
+      const hTextJIIXElementClone = JSON.parse(JSON.stringify(hTextJIIXElement)) as TJIIXTextElement
+      delete hTextJIIXElementClone.chars
+      await expect(async () => await manager.convertText(hTextJIIXElementClone, [], false)).rejects.toThrowError("You need to active configuration.recognition.export.jiix.text.chars = true")
     })
     test("should throw Error if jiix char has no items", async () =>
     {
-      const noItems = JSON.parse(JSON.stringify(helloTextJIIX)) as TJIIXTextElement
-      noItems.chars?.forEach(c => delete c.items)
-      await expect(async () => await manager.convertText(noItems, [], false)).rejects.toThrowError("You need to active configuration.recognition.export.jiix.strokes = true")
+      const hTextJIIXElementClone = JSON.parse(JSON.stringify(hTextJIIXElement)) as TJIIXTextElement
+      hTextJIIXElementClone.chars?.forEach(c => delete c.items)
+      await expect(async () => await manager.convertText(hTextJIIXElementClone, [], false)).rejects.toThrowError("You need to active configuration.recognition.export.jiix.strokes = true")
     })
     test("should return converted symbol & strokes associate", async () =>
     {
       const helloStroke = buildOIStroke()
-      helloStroke.id = "stroke-78f208b6-dcc4-4f76-8c5b-e0093a9e2e62"
+      helloStroke.id = hTextJIIXElement.words![0].items![0]["full-id"]!
       manager.model.symbols.push(helloStroke)
-      const result = manager.convertText(helloTextJIIX, [helloStroke], false)!
+      const result = manager.convertText(hTextJIIXElement, [helloStroke], false)!
       expect(result).toHaveLength(1)
       expect(result[0].strokes).toEqual([helloStroke])
       expect(result[0].symbol.label).toEqual("h")
