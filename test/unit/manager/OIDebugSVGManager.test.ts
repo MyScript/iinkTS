@@ -1,4 +1,4 @@
-import { helloJIIX, lineJIIX, rectangleJIIX } from "../__dataset__/jiix.dataset"
+import { hTextJIIX, lineJIIX, rectangleJIIX } from "../__dataset__/jiix.dataset"
 import { buildOIStroke, buildOIText, delay } from "../helpers"
 import
 {
@@ -129,11 +129,11 @@ describe("OIDebugSVGManager.ts", () =>
 
     test("should show/hide stroke recognition box", async () =>
     {
-      behaviors.model.exports = { "application/vnd.myscript.jiix": helloJIIX }
+      behaviors.model.exports = { "application/vnd.myscript.jiix": hTextJIIX }
       expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-box\"]")).toHaveLength(0)
       manager.recognitionBoxVisibility = true
       await delay(100)
-      expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-box\"]")).toHaveLength(helloJIIX.elements!.length)
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-box\"]")).toHaveLength(hTextJIIX.elements!.length)
       manager.recognitionBoxVisibility = false
       expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-box\"]")).toHaveLength(0)
     })
@@ -183,11 +183,11 @@ describe("OIDebugSVGManager.ts", () =>
 
     test("should show/hide stroke recognition box", async () =>
     {
-      behaviors.model.exports = { "application/vnd.myscript.jiix": helloJIIX }
+      behaviors.model.exports = { "application/vnd.myscript.jiix": hTextJIIX }
       expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-item-box\"]")).toHaveLength(0)
       manager.recognitionItemBoxVisibility = true
       await delay(100)
-      expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-item-box\"]")).toHaveLength(helloJIIX.elements!.length)
+      expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-item-box\"]")).toHaveLength(hTextJIIX.elements!.length)
       manager.recognitionItemBoxVisibility = false
       expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-item-box\"]")).toHaveLength(0)
     })

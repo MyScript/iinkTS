@@ -11,6 +11,7 @@ export enum SymbolType
   Edge = "edge",
   Text = "text",
   Eraser = "eraser",
+  StrokeText = "stroke-text"
 }
 
 /**

@@ -1,99 +1,108 @@
 //@ts-nocheck
 import { TJIIXExport } from "../../../src/iink"
 
-export const helloJIIX: TJIIXExport = {
-  "type": "Raw Content",
-  "bounding-box": {
-    "x": 113.829163,
-    "y": 59.5895805,
-    "width": 7.8208313,
-    "height": 19.1979179
+export const hTextJIIX: TJIIXExport = {
+  "type":"Raw Content",
+  "bounding-box":{
+     "x":97.9541626,
+     "y":78.1104126,
+     "width":10.2020874,
+     "height":16.5520859
   },
-  "elements": [
-    {
-      "id": "raw-content/11",
-      "type": "Text",
-      "bounding-box": {
-        "x": 113.829163,
-        "y": 59.5895805,
-        "width": 7.8208313,
-        "height": 19.1979179
-      },
-      "label": "h",
-      "words": [
-        {
-          "label": "h",
-          "candidates": [
-            "h",
-            "k",
-            "L",
-            "hr",
-            "hi"
-          ],
-          "first-char": 0,
-          "last-char": 0,
-          "bounding-box": {
-            "x": 113.829163,
-            "y": 59.5895805,
-            "width": 7.8208313,
-            "height": 19.1979179
-          },
-          "items": [
-            {
-              "type": "stroke",
-              "id": "stroke-78f208b6-dcc4-4f76-8c5b-e0093a9e2e62",
-              "full-id": "stroke-78f208b6-dcc4-4f76-8c5b-e0093a9e2e62"
-            }
-          ]
-        }
-      ],
-      "chars": [
-        {
-          "label": "h",
-          "candidates": [
-            "h",
-            "k",
-            "L",
-            "R"
-          ],
-          "word": 0,
-          "grid": [
-            {
-              "x": 113.925514,
-              "y": 56.5168686
-            },
-            {
-              "x": 121.553642,
-              "y": 56.5168686
-            },
-            {
-              "x": 121.553642,
-              "y": 92.6629028
-            },
-            {
-              "x": 113.925514,
-              "y": 92.6629028
-            }
-          ],
-          "bounding-box": {
-            "x": 113.829163,
-            "y": 59.5895805,
-            "width": 7.8208313,
-            "height": 19.1979179
-          },
-          "items": [
-            {
-              "type": "stroke",
-              "id": "stroke-78f208b6-dcc4-4f76-8c5b-e0093a9e2e62",
-              "full-id": "stroke-78f208b6-dcc4-4f76-8c5b-e0093a9e2e62"
-            }
-          ]
-        }
-      ]
-    }
+  "elements":[
+     {
+        "id":"raw-content/11",
+        "type":"Text",
+        "bounding-box":{
+           "x":97.9541626,
+           "y":78.1104126,
+           "width":10.2020874,
+           "height":16.5520859
+        },
+        "label":"h",
+        "words":[
+           {
+              "label":"h",
+              "candidates":[
+                 "h",
+                 "k",
+                 "ʰ",
+                 "hi",
+                 "hr"
+              ],
+              "first-char":0,
+              "last-char":0,
+              "bounding-box":{
+                 "x":97.9541626,
+                 "y":78.1104126,
+                 "width":10.2020874,
+                 "height":16.5520859
+              },
+              "items":[
+                 {
+                    "type":"stroke",
+                    "id":"stroke-7d4b2518-619d-4cf8-af49-1c93481d85eb",
+                    "full-id":"stroke-7d4b2518-619d-4cf8-af49-1c93481d85eb"
+                 }
+              ]
+           }
+        ],
+        "chars":[
+           {
+              "label":"h",
+              "candidates":[
+                 "h",
+                 "k",
+                 "ʰ",
+                 "A",
+                 "a"
+              ],
+              "word":0,
+              "grid":[
+                 {
+                    "x":98.3699265,
+                    "y":75.6002731
+                 },
+                 {
+                    "x":107.928909,
+                    "y":75.6002731
+                 },
+                 {
+                    "x":107.928909,
+                    "y":106.506668
+                 },
+                 {
+                    "x":98.3699265,
+                    "y":106.506668
+                 }
+              ],
+              "bounding-box":{
+                 "x":97.9541626,
+                 "y":78.1104126,
+                 "width":10.2020874,
+                 "height":16.5520859
+              },
+              "items":[
+                 {
+                    "type":"stroke",
+                    "id":"stroke-7d4b2518-619d-4cf8-af49-1c93481d85eb",
+                    "full-id":"stroke-7d4b2518-619d-4cf8-af49-1c93481d85eb"
+                 }
+              ]
+           }
+        ],
+        "lines":[
+           {
+              "first-char":0,
+              "last-char":0,
+              "baseline-y":94.9167709,
+              "x-height":7.72659969
+           }
+        ]
+     }
   ],
-  "id": "MainBlock",
-  "version": "3"
+  "id":"MainBlock",
+  "version":"3"
 }
 
 export const rectangleJIIX: TJIIXExport = {

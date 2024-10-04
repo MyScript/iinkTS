@@ -1,5 +1,5 @@
 import { ConfigurationMathWebsocket, ConfigurationTextWebsocket } from "../__dataset__/configuration.dataset"
-import { ServerWebsocketMock, emptyJIIX, errorNotGrantedMessage, hJIIX, partChangeMessage } from "../__mocks__/ServerWebsocketMock"
+import { ServerWebsocketMock, emptyJIIX, errorNotGrantedMessage, hTextJIIX, partChangeMessage } from "../__mocks__/ServerWebsocketMock"
 import { buildStroke, delay } from "../helpers"
 
 
@@ -530,7 +530,7 @@ describe("WSRecognizer.ts", () =>
       await expect(promise).resolves.toEqual(
         expect.objectContaining({
           exports: {
-            "application/vnd.myscript.jiix": hJIIX
+            "application/vnd.myscript.jiix": hTextJIIX
           }
         })
       )

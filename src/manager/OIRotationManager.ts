@@ -9,6 +9,7 @@ import
   OIStroke,
   OISymbolGroup,
   OIText,
+  OIStrokeText,
   ShapeKind,
   SymbolType,
   TOIEdge,
@@ -115,6 +116,12 @@ export class OIRotationManager
     return group
   }
 
+  protected applyOnStrokeText(strokeText: OIStrokeText, center: TPoint, angleRad: number): OIStrokeText
+  {
+    strokeText.strokes.forEach(s => this.applyToStroke(s, center, angleRad))
+    return strokeText
+  }
+
   applyToSymbol(symbol: TOISymbol, center: TPoint, angleRad: number): TOISymbol
   {
     switch (symbol.type) {
@@ -128,6 +135,8 @@ export class OIRotationManager
         return this.applyOnText(symbol, center, angleRad)
       case SymbolType.Group:
         return this.applyOnGroup(symbol, center, angleRad)
+      case SymbolType.StrokeText:
+        return this.applyOnStrokeText(symbol, center, angleRad)
       default:
         throw new Error(`Can't apply rotate on symbol, type unknow: ${ JSON.stringify(symbol) }`)
     }

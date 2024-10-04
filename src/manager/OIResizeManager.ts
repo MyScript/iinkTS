@@ -9,6 +9,7 @@ import
   OIStroke,
   OISymbolGroup,
   OIText,
+  OIStrokeText,
   ShapeKind,
   SymbolType,
   TOIEdge,
@@ -145,6 +146,13 @@ export class OIResizeManager
     return group
   }
 
+  protected applyOnStrokeText(strokeText: OIStrokeText, origin: TPoint, scaleX: number, scaleY: number): OIStrokeText
+  {
+    strokeText.strokes.forEach(s => this.applyToStroke(s, origin, scaleX, scaleY))
+    strokeText.xHeight *= scaleY
+    return strokeText
+  }
+
   applyToSymbol(symbol: TOISymbol, origin: TPoint, scaleX: number, scaleY: number): TOISymbol
   {
     this.#logger.info("applyToSymbol", { symbol, scaleX, scaleY })
@@ -159,6 +167,8 @@ export class OIResizeManager
         return this.applyOnText(symbol, origin, scaleX, scaleY)
       case SymbolType.Group:
         return this.applyOnGroup(symbol, origin, scaleX, scaleY)
+      case SymbolType.StrokeText:
+        return this.applyOnStrokeText(symbol, origin, scaleX, scaleY)
       default:
         throw new Error(`Can't apply resize on symbol, type unknow: ${ JSON.stringify(symbol) }`)
     }

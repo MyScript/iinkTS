@@ -520,19 +520,13 @@ export class OIMenuAction extends OIMenu
     {
       e.preventDefault()
       e.stopPropagation()
-      try {
-        if (importInput.files?.length) {
-          const fileString = await this.readFileAsText(importInput.files[0])
-          const symbols = JSON.parse(fileString) as PartialDeep<TOISymbol>[]
-
-          await this.behaviors.createSymbols(symbols)
-          importInput.value = ""
-          importBtn.disabled = true
-        }
-      } catch (error) {
-        this.behaviors.event.emitError(new Error(error as string))
+      if (importInput.files?.length) {
+        const fileString = await this.readFileAsText(importInput.files[0])
+        const symbols = JSON.parse(fileString) as PartialDeep<TOISymbol>[]
+        await this.behaviors.createSymbols(symbols)
+        importInput.value = ""
+        importBtn.disabled = true
       }
-
     })
     const params: TSubMenuParam = {
       trigger: trigger,

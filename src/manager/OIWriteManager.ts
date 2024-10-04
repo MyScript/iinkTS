@@ -95,13 +95,14 @@ export class OIWriteManager
   protected needContextLessGesture(stroke: OIStroke): boolean
   {
     const strokeBoundsWithMargin = new Box(stroke.bounds)
-    strokeBoundsWithMargin.x -= SELECTION_MARGIN
-    strokeBoundsWithMargin.y -= SELECTION_MARGIN
-    strokeBoundsWithMargin.width += 2 * SELECTION_MARGIN
+    strokeBoundsWithMargin.x -= 2 *SELECTION_MARGIN
+    strokeBoundsWithMargin.y = SELECTION_MARGIN
+    strokeBoundsWithMargin.width += 4 * SELECTION_MARGIN
     strokeBoundsWithMargin.height += 2 * SELECTION_MARGIN
     return this.detectGesture && this.model.symbols.some(s =>
     {
       switch (s.type) {
+        case SymbolType.StrokeText:
         case SymbolType.Stroke:
           return false
         case SymbolType.Group:

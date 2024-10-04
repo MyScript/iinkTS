@@ -10,6 +10,7 @@ import { OISVGRendererGroupUtil } from "./OISVGRendererGroupUtil"
 import { OISVGRendererShapeUtil } from "./OISVGRendererShapeUtil"
 import { OISVGRendererStrokeUtil } from "./OISVGRendererStrokeUtil"
 import { OISVGRendererTextUtil } from "./OISVGRendererTextUtil"
+import { OISVGRendererStrokeTextUtil } from "./OISVGRendererStrokeTextUtil"
 import { SVGBuilder } from "./SVGBuilder"
 
 /**
@@ -232,6 +233,9 @@ export class OISVGRenderer
         break
       case SymbolType.Group:
         element = OISVGRendererGroupUtil.getSVGElement(symbol)
+        break
+      case SymbolType.StrokeText:
+        element = OISVGRendererStrokeTextUtil.getSVGElement(symbol)
         break
       default:
         this.#logger.error("buildElementFromSymbol", `symbol unknow: "${ JSON.stringify(symbol) }"`)

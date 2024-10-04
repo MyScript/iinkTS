@@ -79,7 +79,6 @@ export class OIShapeCircle extends OIShapeBase<ShapeKind.Circle>
     return this._vertices.get(this.verticesId)!
   }
 
-
   overlaps(box: TBoundingBox): boolean
   {
     return this.bounds.isContained(box) ||
@@ -121,6 +120,7 @@ export class OIShapeCircle extends OIShapeBase<ShapeKind.Circle>
     const radius = Math.min(width, height) / 2
     return new OIShapeCircle(center, radius, style)
   }
+
   static updateBetweenPoints(circle: OIShapeCircle, origin: TPoint, target: TPoint): OIShapeCircle
   {
     circle.center = {

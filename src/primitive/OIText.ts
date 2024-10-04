@@ -106,6 +106,15 @@ export class OIText extends OISymbolBase<SymbolType.Text>
     return boxBox.corners
   }
 
+  updateChildrenStyle(): void
+  {
+    this.chars.forEach(c => {
+      if (this.style.color) {
+        c.color = this.style.color
+      }
+    })
+  }
+
   getCharsOverlaps(points: TPoint[]): TOISymbolChar[]
   {
     return this.chars.filter(c =>

@@ -34,7 +34,6 @@ import
   OIShapeEllipse,
   OIShapePolygon,
   OIStroke,
-  OISymbolGroup,
   OIText,
   SymbolType,
   TOIEdge,
@@ -104,7 +103,7 @@ export class OIConversionManager
     }
   }
 
-  buildWord(word: TJIIXWord, chars: TJIIXChar[], strokes: OIStroke[], fontSize?: number): OIText
+  buildText(word: TJIIXWord, chars: TJIIXChar[], strokes: OIStroke[], fontSize?: number): OIText
   {
     const boundingBox = Box.createFromBoxes([convertBoundingBoxMillimeterToPixel(word["bounding-box"])])
     const charSymbols: TOISymbolChar[] = []
@@ -126,15 +125,14 @@ export class OIConversionManager
     strokes.forEach(s =>
     {
       const sym = this.model.getRootSymbol(s.id)
-      if (sym?.type === SymbolType.Group) {
-        const g = sym as OISymbolGroup
-        const hightlight = g.decorators.find(d => d.kind === DecoratorKind.Highlight)
+      if (sym?.type === SymbolType.StrokeText || sym?.type === SymbolType.Group) {
+        const hightlight = sym.decorators.find(d => d.kind === DecoratorKind.Highlight)
         if (hightlight) decorators.push(hightlight)
-        const strikethrough = g.decorators.find(d => d.kind === DecoratorKind.Strikethrough)
+        const strikethrough = sym.decorators.find(d => d.kind === DecoratorKind.Strikethrough)
         if (strikethrough) decorators.push(strikethrough)
-        const surround = g.decorators.find(d => d.kind === DecoratorKind.Surround)
+        const surround = sym.decorators.find(d => d.kind === DecoratorKind.Surround)
         if (surround) decorators.push(surround)
-        const underline = g.decorators.find(d => d.kind === DecoratorKind.Underline)
+        const underline = sym.decorators.find(d => d.kind === DecoratorKind.Underline)
         if (underline) decorators.push(underline)
       }
     })
@@ -162,6 +160,9 @@ export class OIConversionManager
 
   convertText(text: TJIIXTextElement, strokes: OIStroke[], onlyText: boolean): { symbol: OIText, strokes: OIStroke[] }[] | undefined
   {
+    if (!text.lines) {
+      throw new Error("You need to active configuration.recognition.export.jiix.text.lines = true")
+    }
     if (!text.words) {
       throw new Error("You need to active configuration.recognition.export.jiix.text.words = true")
     }
@@ -177,15 +178,14 @@ export class OIConversionManager
 
     const result: { symbol: OIText, strokes: OIStroke[] }[] = []
 
-    const textBounds = convertBoundingBoxMillimeterToPixel(text["bounding-box"])
     let fontSize = this.fontSize
     if (onlyText && !fontSize) {
       fontSize = Math.round(this.computeFontSize(jiixChars.filter(c => c.items?.length)) / 2) * 2
     }
 
     let isNewLine = false
-    let currentY = textBounds.y + this.rowHeight
-    const leftX = textBounds.x
+    let currentY = convertMillimeterToPixel(text.lines[0]["baseline-y"])
+    const leftX = convertMillimeterToPixel(text["bounding-box"]?.x || 0)
     let currentX = convertMillimeterToPixel(jiixWords[0]["bounding-box"]?.x || 0)
     jiixWords.forEach(word =>
     {
@@ -196,7 +196,7 @@ export class OIConversionManager
       const wordStrokes = strokes.filter(s => word.items?.some(i => i["full-id"] === s.id)) as OIStroke[]
       if (wordStrokes.length) {
         const chars = jiixChars.slice(word["first-char"] as number, (word["last-char"] || 0) + 1)
-        const wordSymbol = this.buildWord(word, chars, wordStrokes, fontSize)
+        const wordSymbol = this.buildText(word, chars, wordStrokes, fontSize)
 
         if (onlyText) {
           if (isNewLine) {
