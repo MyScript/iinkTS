@@ -1,3 +1,4 @@
+import style from "./WSSmartguide.css"
 import { WSBehaviors } from "../behaviors"
 import { TMarginConfiguration, TRenderingConfiguration } from "../configuration"
 import { LoggerClass, LoggerManager } from "../logger"
@@ -144,6 +145,12 @@ export class WSSmartGuide
   init(domElement: HTMLElement, margin: TMarginConfiguration, renderingConfiguration: TRenderingConfiguration): void
   {
     this.#logger.info("init", { domElement, margin, renderingConfiguration })
+
+    const styleElement = document.createElement("style")
+    styleElement.appendChild(document.createTextNode(style as string))
+    domElement.appendChild(styleElement)
+
+
     domElement.appendChild(this.#smartGuideElement)
     this.#smartGuideElement.appendChild(this.#wrapperElement)
 
