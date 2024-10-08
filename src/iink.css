@@ -5,34 +5,40 @@
     font-family: sans-serif;
     overflow: auto;
     width: 100%;
-	height: 100%;
+    height: 100%;
 }
-#editor:active, #editor:focus {
+
+#editor:active,
+#editor:focus {
     -webkit-tap-highlight-color: transparent;
 }
 
 .ms-editor input:not([type="checkbox"]):not([type="color"]):not([type="range"]),
 .ms-editor select {
-  height: 2rem;
-  padding: 0 10px;
-  border-radius: 3px;
-  color: #131F26;
-  font: 600 14px "Source Sans Pro", sans-serif;
-  border: 1px solid #CED5D9;
-  -webkit-appearance: none;
-  appearance: none;
-  -webkit-tap-highlight-color: transparent;
+    height: 2rem;
+    padding: 0 10px;
+    border-radius: 3px;
+    color: #131F26;
+    font: 600 14px "Source Sans Pro", sans-serif;
+    border: 1px solid #CED5D9;
+    -webkit-appearance: none;
+    appearance: none;
+    -webkit-tap-highlight-color: transparent;
 }
+
 .ms-editor input[type="file"] {
     border: none !important;
 }
+
 .ms-editor input[type="file"]:focus {
     border: none !important;
     box-shadow: none !important;
 }
+
 .ms-editor input[type="file"]:focus::file-selector-button {
     border: 1px solid #1a9fff !important;
 }
+
 .ms-editor input[type="file"]::file-selector-button {
     border-radius: 4px;
     padding: 0 16px;
@@ -45,6 +51,7 @@
     height: 2rem;
     transition: background-color 200ms;
 }
+
 .ms-editor input[type="file"]::file-selector-button:hover {
     background-color: #f3f4f6;
 }
@@ -54,29 +61,55 @@
 }
 
 .ms-editor select {
-  padding: 0 25px 0 10px;
-  background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTQiIHZpZXdCb3g9IjAgMCAxOCAxNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik00LjQyMi4yNmMtLjIzMy0uMzM3LS42MS0uMzM3LS44NDQgMEwuMTc1IDUuMTdDLS4xNDIgNS42MjguMDQ4IDYgLjYxIDZoNi43OGMuNTU4IDAgLjc1NC0uMzcuNDM1LS44M0w0LjQyMi4yNnptLjAyIDEzLjQ3Yy0uMjM2LjM0Mi0uNjE4LjM0Ny0uODUuMDFMLjE2NyA4LjgxOEMtLjE0NiA4LjM2Ny4wNDggOCAuNjA4IDhoNi43ODNjLjU1OCAwIC43NTUuMzcuNDM3LjgzbC0zLjM4NSA0Ljl6IiBmaWxsPSIjMTMxRjI2Ii8+PC9nPjwvc3ZnPg==) right center no-repeat #fff;
+    padding: 0 25px 0 10px;
+    background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTQiIHZpZXdCb3g9IjAgMCAxOCAxNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik00LjQyMi4yNmMtLjIzMy0uMzM3LS42MS0uMzM3LS44NDQgMEwuMTc1IDUuMTdDLS4xNDIgNS42MjguMDQ4IDYgLjYxIDZoNi43OGMuNTU4IDAgLjc1NC0uMzcuNDM1LS44M0w0LjQyMi4yNnptLjAyIDEzLjQ3Yy0uMjM2LjM0Mi0uNjE4LjM0Ny0uODUuMDFMLjE2NyA4LjgxOEMtLjE0NiA4LjM2Ny4wNDggOCAuNjA4IDhoNi43ODNjLjU1OCAwIC43NTUuMzcuNDM3LjgzbC0zLjM4NSA0Ljl6IiBmaWxsPSIjMTMxRjI2Ii8+PC9nPjwvc3ZnPg==) right center no-repeat #fff;
 }
 
 .ms-editor input:not([type="checkbox"]):not([type="color"]):not([type="range"]):not([type="file"]):focus,
 .ms-editor select:focus {
-  outline: 0;
-  border: 1px solid #1a9fff;
-  box-shadow: 0 1px 1px 0 rgba(0, 0, 0, .16);
+    outline: 0;
+    border: 1px solid #1a9fff;
+    box-shadow: 0 1px 1px 0 rgba(0, 0, 0, .16);
+}
+
+.ms-editor output.tooltip {
+    position: absolute;
+    left: 50%;
+    bottom: 0px;
+    transform: translate(-50%, -100%);
+    white-space: nowrap;
+    background-color: white;
+    color: black;
+    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.225);
+    font-weight: bold;
+    width: auto;
+    padding: 5px;
+    border-radius: 5px;
+    display: none;
+}
+
+.ms-editor input:hover+output.tooltip,
+.ms-editor input:focus+output.tooltip,
+.ms-editor input:focus-visible+output.tooltip {
+    display: block;
 }
 
 .ms-editor.draw {
     cursor: url('data:image/svg+xml,<svg width="24px" height="24px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M14.3632 5.65156L15.8431 4.17157C16.6242 3.39052 17.8905 3.39052 18.6716 4.17157L20.0858 5.58579C20.8668 6.36683 20.8668 7.63316 20.0858 8.41421L18.6058 9.8942M14.3632 5.65156L4.74749 15.2672C4.41542 15.5993 4.21079 16.0376 4.16947 16.5054L3.92738 19.2459C3.87261 19.8659 4.39148 20.3848 5.0115 20.33L7.75191 20.0879C8.21972 20.0466 8.65806 19.8419 8.99013 19.5099L18.6058 9.8942M14.3632 5.65156L18.6058 9.8942" stroke="%23000000" fill="white" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" ></path></svg>') 5 20, pointer;
 }
+
 .ms-editor.draw.shape {
     cursor: crosshair;
 }
+
 .ms-editor.erase {
     cursor: url('data:image/svg+xml,<svg width="24px" height="24px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M2.8934 12.6066L12.0858 3.41421C12.8668 2.63317 14.1332 2.63317 14.9142 3.41421L19.864 8.36396C20.645 9.14501 20.645 10.4113 19.864 11.1924L10.6213 20.435C10.2596 20.7968 9.76894 21 9.25736 21C8.74577 21 8.25514 20.7968 7.8934 20.435L2.8934 15.435C2.11235 14.654 2.11235 13.3877 2.8934 12.6066Z" stroke="%23000000" fill="white" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" ></path><path d="M21 21L9 21" stroke="%23000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M15.889 14.8891L8.46436 7.46448" stroke="%23000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path></svg>') 5 20, auto;
 }
+
 .ms-editor.move {
     cursor: url('data:image/svg+xml,<svg width="24px" height="24px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="white"><path d="M7 10.5L4.99591 13.1721C4.41845 13.9421 4.47127 15.0141 5.1216 15.7236L8.9055 19.8515C9.28432 20.2647 9.81826 20.5 10.3789 20.5C11.4651 20.5 13.2415 20.5 15 20.5C17.4 20.5 19 19 19 16.5C19 16.5 19 16.5 19 16.5C19 16.5 19 9.64287 19 7.92859" stroke="%23000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" ></path><path d="M16 8.49995C16 8.49995 16 8.37483 16 7.92852C16 5.6428 19 5.6428 19 7.92852" stroke="%23000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" ></path><path d="M13 8.50008C13 8.50008 13 7.91978 13 7.02715M13 6.50008C13 6.50008 13 6.804 13 7.02715M16 8.50008C16 8.50008 16 8.37496 16 7.92865C16 7.70549 16 7.25031 16 7.02715C16 4.74144 13 4.74144 13 7.02715" stroke="%23000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" ></path><path d="M13 8.50008C13 8.50008 13 7.91978 13 7.02715C13 4.74144 16 4.74144 16 7.02715C16 7.25031 16 7.70549 16 7.92865C16 8.37496 16 8.50008 16 8.50008" stroke="%23000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" ></path><path d="M10 8.50005C10 8.50005 10 7.85719 10 6.50005C10 4.21434 13 4.21434 13 6.50005C13 6.50005 13 6.50005 13 6.50005C13 6.50005 13 6.80397 13 7.02713C13 7.91975 13 8.50005 13 8.50005" stroke="%23000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" ></path><path d="M7 13.5001V6.50006C7 5.67164 7.67157 5.00006 8.5 5.00006V5.00006C9.32843 5.00006 10 5.55527 10 6.38369C10 6.42151 10 6.4603 10 6.50006C10 7.85721 10 8.50006 10 8.50006" stroke="%23000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" ></path></svg>') 10 10, auto;
 }
+
 .ms-editor.select {
     cursor: context-menu;
 }
@@ -116,11 +149,13 @@
     pointer-events: none;
     user-select: none;
 }
+
 .ms-editor .ms-layer-ui > * {
     cursor: auto;
     pointer-events: all;
     user-select: none;
 }
+
 /** loader **/
 .ms-editor .loader {
     z-index: 30;
@@ -136,6 +171,24 @@
     animation: spin 2s linear infinite;
 }
 
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@-webkit-keyframes spin {
+    0% {
+        -webkit-transform: rotate(0deg);
+    }
+    100% {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
 /** state **/
 .ms-editor .state {
     z-index: 99;
@@ -149,6 +202,7 @@
     color: #717171;
     box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.25), -1px -1px 5px rgba(0, 0, 0, 0.25);
 }
+
 .ms-editor .state .busy {
     margin-top: 6px;
     margin-left: 6px;
@@ -170,6 +224,7 @@
     width: 100%;
     height: 100%;
 }
+
 .ms-editor .message-overlay {
     z-index: 99;
     position: absolute;
@@ -177,6 +232,7 @@
     height: 100%;
     background-color: rgba(186, 186, 186, 0.25);
 }
+
 .ms-editor .message-modal {
     z-index: 999;
     position: absolute;
@@ -193,9 +249,11 @@
     box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.25), -1px -1px 5px rgba(0, 0, 0, 0.25);
     padding: 12px;
 }
+
 .ms-editor .message-modal.error-msg::before {
     content: url("data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCA3Ni41IDYxMiA0NTkiIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaW5ZTWluIG1lZXQiPgogICAgPHBhdGggZmlsbD0iIzFBOUZGRiIgZD0iTTQ5NC43LDIyOS41Yy0xNy44NTEtODYuNy05NC4zNTEtMTUzLTE4OC43LTE1M2MtMzguMjUsMC03My45NSwxMC4yLTEwMiwzMC42bDM4LjI1LDM4LjI1IGMxNy44NS0xMi43NSw0MC44LTE3Ljg1LDYzLjc1LTE3Ljg1Yzc2LjUsMCwxNDAuMjUsNjMuNzUsMTQwLjI1LDE0MC4yNXYxMi43NWgzOC4yNWM0My4zNSwwLDc2LjUsMzMuMTUsNzYuNSw3Ni41IGMwLDI4LjA1LTE1LjMsNTMuNTUtNDAuOCw2Ni4zbDM4LjI1LDM4LjI1QzU5MS42LDQzOC42LDYxMiw0MDAuMzUsNjEyLDM1N0M2MTIsMjkwLjcsNTU4LjQ1LDIzNC42LDQ5NC43LDIyOS41eiBNNzYuNSwxMDkuNjUgbDcxLjQsNjguODVDNjYuMywxODMuNiwwLDI0OS45LDAsMzMxLjVjMCw4NC4xNSw2OC44NSwxNTMsMTUzLDE1M2gyOTguMzVsNTEsNTFsMzMuMTUtMzMuMTVMMTA5LjY1LDc2LjVMNzYuNSwxMDkuNjV6IE0xOTYuMzUsMjI5LjVsMjA0LDIwNEgxNTNjLTU2LjEsMC0xMDItNDUuOS0xMDItMTAyYzAtNTYuMSw0NS45LTEwMiwxMDItMTAySDE5Ni4zNXoiIC8+Cjwvc3ZnPgo=");
 }
+
 .ms-editor .message-modal.info-msg::before {
     content: "";
     background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciCiAgdmlld0JveD0iMCAwIDI0IDI0IgogIGZpbGw9Im5vbmUiCiAgc3Ryb2tlPSIjMUE5RkZGIgogIHN0cm9rZS13aWR0aD0iMiIKICBzdHJva2UtbGluZWNhcD0icm91bmQiCiAgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIKPgogIDxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjEwIiAvPgogIDxsaW5lIHgxPSIxMiIgeTE9IjE2IiB4Mj0iMTIiIHkyPSIxMiIgLz4KICA8bGluZSB4MT0iMTIiIHkxPSI4IiB4Mj0iMTIuMDEiIHkyPSI4IiAvPgo8L3N2Zz4=");
@@ -206,6 +264,7 @@
     height: 25px;
     width: 25px;
 }
+
 .ms-editor .message-modal .ms-button {
     position: absolute;
     top: 0px;
@@ -223,214 +282,9 @@
     background-color: rgba(255, 255, 255, 1);
     color: rgba(0, 0, 0, 1);
 }
+
 .ms-editor .message-modal .ms-button:hover {
     background-color: #EEEEEE;
-}
-
-/** tooltip **/
-.ms-editor .ms-tooltip .ms-tooltip-content {
-    position: absolute;
-    z-index: 9999;
-    white-space: nowrap;
-    background-color: white;
-    color: black;
-    box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.225);
-    font-weight: bold;
-    width: auto;
-    padding: 5px;
-    border-radius: 5px;
-    display: none;
-    opacity: 1 !important;
-}
-.ms-editor .ms-menu-title {
-    margin-top: 0px;
-    font-size: 16px;
-    font-weight: bold;
-    padding: 2px;
-    background-color: #b3dfff;
-    border-radius: 5px 5px 0 0;
-    text-align: center;
-}
-.ms-editor .ms-tooltip .ms-tooltip-content.top {
-    top: 0px;
-    left: 50%;
-    transform: translate(-50%, -100%);
-}
-.ms-editor .ms-tooltip .ms-tooltip-content.left {
-    top: 50%;
-    left: 0px;
-    transform: translate(-100%, -50%);
-}
-.ms-editor .ms-tooltip .ms-tooltip-content.right {
-    top: 50%;
-    right: 0px;
-    transform: translate(100%, -50%);
-}
-.ms-editor .ms-tooltip .ms-tooltip-content.bottom {
-    bottom: 0px;
-    left: 50%;
-    transform: translate(-50%, 100%);
-}
-
-/** smartguide **/
-.ms-editor .smartguide {
-    position: absolute;
-    z-index: 40;
-    font-size: 16px;
-    line-height: 48px;
-    top: 0px;
-    left: 0px;
-    width: 100%;
-    cursor: default;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    box-shadow: 2px 2px 12px #BDBDBD;
-}
-.ms-editor .smartguide .smartguide-wrapper {
-    display: flex;
-    border-bottom: 1px solid #959da6;
-}
-.ms-editor .smartguide .tag-icon {
-    padding: 0 18px;
-    border-left: 1px solid #959DA6;
-    border-top: 1px solid #959DA6;
-    border-right: 1px solid #959DA6;
-    font-weight: bold;
-    font-size: large;
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    z-index: 31;
-    height: 100%;
-    line-height: 48px;
-    height: 48px;
-    width: 48px;
-    background-color: rgba(255, 255, 255, 0.9);
-    color: #959DA6;
-}
-.ms-editor .smartguide .ellipsis {
-    cursor: pointer;
-    height: 48px;
-    width: 48px;
-    line-height: 38px;
-    padding: 0 8px;
-    font-weight: bold;
-    font-size: x-large;
-    color: #959DA6;
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-}
-.ms-editor .smartguide .ellipsis:active {
-    background-color: #e0e0e0;
-}
-.ms-editor .smartguide .prompter-container {
-    height: 48px;
-    width: calc(100% - 96px);
-    line-height: 48px;
-    overflow: hidden;
-    white-space: nowrap;
-    display: block;
-    text-align: left;
-    color: #bfbfbf;
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    -webkit-tap-highlight-color: transparent;
-}
-.ms-editor .smartguide .prompter-container > div > span {
-    cursor: pointer;
-    display: inline-block;
-}
-.ms-editor .smartguide .prompter-container .prompter-text {
-    margin-left: 12px;
-}
-.ms-editor .smartguide .prompter-container .prompter-text .added-word {
-    animation: 0.1s linear word-added,
-    3s ease-in-out color-input;
-}
-.ms-editor .smartguide .prompter-container .prompter-text .modified-word {
-    animation: 0.1s linear word-modified,
-    3s ease-in-out color-input;
-}
-.ms-editor .smartguide .candidates {
-    z-index: 100;
-    position: absolute;
-    color: black;
-    flex-direction: column;
-    text-align: center;
-    line-height: 30px;
-    border-radius: 3px;
-    box-shadow: 2px 2px 12px #BDBDBD, -2px 2px 12px #BDBDBD;
-    background-color: #F5F5F5;
-    -webkit-tap-highlight-color: transparent;
-}
-.ms-editor .smartguide .candidates > span {
-    cursor: pointer;
-    padding: 2px 20px;
-}
-.ms-editor .smartguide .candidates > span:hover {
-    background-color: #EEEEEE;
-}
-.ms-editor .smartguide .candidates > span:active {
-    background-color: #E0E0E0;
-}
-.ms-editor .smartguide .candidates .selected-word {
-    font-weight: bold;
-    background-color: #E0E0E0;
-}
-.ms-editor .smartguide .more-menu {
-    display: flex;
-    flex-direction: column;
-    margin-right: 12px;
-    line-height: 30px;
-    border-radius: 3px;
-    position: absolute;
-    z-index: 100;
-    box-shadow: 2px 2px 12px #BDBDBD;
-    background-color: #F5F5F5;
-    overflow: hidden;
-    transition: max-height 1s ease-out, opacity 1s, visibility 0.5s linear;
-    right: 0;
-    bottom: 0;
-    transform: translateY(100%)
-}
-.ms-editor .smartguide .more-menu.open {
-    max-height: 500px;
-    visibility: visible;
-    opacity: 1;
-}
-.ms-editor .smartguide .more-menu.close {
-    max-height: 0;
-    visibility: hidden;
-    opacity: 0;
-}
-.ms-editor .smartguide .more-menu .options-label-button {
-    color: black;
-    font-size: 16px;
-    cursor: pointer;
-    box-sizing: border-box;
-    background: transparent;
-    border: none;
-    padding: 0 24px;
-    margin: 0;
-    height: 40px;
-    outline: none;
-    -webkit-tap-highlight-color: transparent;
-}
-.ms-editor .smartguide .more-menu .options-label-button:hover {
-    background-color: #EEEEEE;
-    padding: 4px;
-}
-.ms-editor .smartguide .more-menu .options-label-button:active {
-    background-color: #E0E0E0;
-}
-.ms-editor .ps__rail-x {
-    top: 32px !important;
 }
 
 /** collapsible */
@@ -441,9 +295,11 @@
     cursor: pointer;
     color: rgb(66, 66, 66);
 }
+
 .ms-editor .collapsible-wrapper .collapsible-header:hover {
     background-color: rgb(239, 239, 239, 1);
 }
+
 .ms-editor .collapsible-wrapper .collapsible-header .collapsible-header-icon {
     display: flex;
     justify-content: center;
@@ -454,14 +310,17 @@
     padding: 4px;
     transition: transform 500ms;
 }
+
 .ms-editor .collapsible-wrapper.active .collapsible-header .collapsible-header-icon {
     transform: rotate(180deg);
 }
+
 .ms-editor .collapsible-wrapper .collapsible-content {
     overflow: auto;
     max-height: 0px;
     transition: max-height 500ms;
 }
+
 .ms-editor .collapsible-wrapper.active .collapsible-content {
     max-height: 200px;
 }
@@ -714,67 +573,8 @@
 .ms-editor input:focus-visible + output.tooltip {
     display: block;
 }
-
 /** animations **/
 .ms-editor .removed-stroke {
     opacity: 0;
     transition: opacity 0.1s ease-in-out;
-}
-
-.ms-editor .added-stroke {
-    animation: 0.2s opacity-appear;
-}
-
-@keyframes color-input {
-    0% {
-        color: black;
-    }
-    100% {
-        color: #bfbfbf;
-    }
-}
-
-@keyframes word-added {
-    0% {
-        transform: translate(5px, 0);
-    }
-    100% {
-        transform: none;
-    }
-}
-
-@keyframes word-modified {
-    0% {
-        transform: translate(0, 5px);
-    }
-    100% {
-        transform: none;
-    }
-}
-
-@keyframes opacity-appear {
-    0% {
-        opacity: 0;
-    }
-    100% {
-        opacity : 1;
-    }
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-@-webkit-keyframes spin {
-    0% {
-        -webkit-transform: rotate(0deg);
-    }
-    100% {
-        -webkit-transform: rotate(360deg);
-    }
 }
