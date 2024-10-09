@@ -109,8 +109,8 @@ export class OIGestureManager
         ids.forEach(id =>
         {
           const sym = this.model.getRootSymbol(id)
-          if (sym && [SymbolType.Group, SymbolType.Stroke, SymbolType.Text].includes(sym.type) && !symbolIds.includes(sym.id)) {
-            const symWithDec = sym as (OIText | OIStroke | OISymbolGroup)
+          if (sym && [SymbolType.Group, SymbolType.Stroke, SymbolType.Text, SymbolType.StrokeText].includes(sym.type) && !symbolIds.includes(sym.id)) {
+            const symWithDec = sym as (OIText | OIStroke | OISymbolGroup | OIStrokeText)
             const highlight = new OIDecorator(DecoratorKind.Highlight, this.currentStyle)
             const index = symWithDec.decorators.findIndex(d => d.kind === DecoratorKind.Highlight)
             const added = index === -1
@@ -132,8 +132,8 @@ export class OIGestureManager
         ids.forEach(id =>
         {
           const sym = this.model.getRootSymbol(id)
-          if (sym && [SymbolType.Group, SymbolType.Stroke, SymbolType.Text].includes(sym.type) && !symbolIds.includes(sym.id)) {
-            const symWithDec = sym as (OIText | OIStroke | OISymbolGroup)
+          if (sym && [SymbolType.Group, SymbolType.Stroke, SymbolType.Text, SymbolType.StrokeText].includes(sym.type) && !symbolIds.includes(sym.id)) {
+            const symWithDec = sym as (OIText | OIStroke | OISymbolGroup | OIStrokeText)
             const surround = new OIDecorator(DecoratorKind.Surround, this.currentStyle)
             const index = symWithDec.decorators.findIndex(d => d.kind === DecoratorKind.Surround)
             const added = index === -1
@@ -792,7 +792,7 @@ export class OIGestureManager
     {
       const sym = this.model.getRootSymbol(id)
       if (sym && [SymbolType.Group, SymbolType.Stroke, SymbolType.Text, SymbolType.StrokeText].includes(sym.type) && !symbolIds.includes(sym.id)) {
-        const symWithDec = sym as (OIText | OIStroke | OISymbolGroup)
+        const symWithDec = sym as (OIText | OIStroke | OISymbolGroup | OIStrokeText)
         const underline = new OIDecorator(DecoratorKind.Underline, this.currentStyle)
         const index = symWithDec.decorators.findIndex(d => d.kind === DecoratorKind.Underline)
         const added = index === -1
@@ -823,7 +823,7 @@ export class OIGestureManager
         {
           const symbol = this.model.getRootSymbol(id)
           if (symbol && [SymbolType.Group, SymbolType.Stroke, SymbolType.Text, SymbolType.StrokeText].includes(symbol.type) && !symbolIds.includes(symbol.id)) {
-            const symWithDec = symbol as (OIText | OIStroke | OISymbolGroup)
+            const symWithDec = symbol as (OIText | OIStroke | OISymbolGroup | OIStrokeText)
             const strikethrough = new OIDecorator(DecoratorKind.Strikethrough, this.currentStyle)
             const index = symWithDec.decorators.findIndex(d => d.kind === DecoratorKind.Strikethrough)
             const added = index === -1
