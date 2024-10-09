@@ -67,7 +67,7 @@ export class OIMenuTool extends OIMenu
       this.behaviors.tool = EditorTool.Write
       this.behaviors.writer.tool = EditorWriteTool.Pencil
     })
-    return this.createToolTip(this.writeBtn, "Write")
+    return this.writeBtn
   }
 
   protected createMenuMove(): HTMLElement
@@ -82,7 +82,7 @@ export class OIMenuTool extends OIMenu
       this.menuMove!.classList.add("active")
       this.behaviors.tool = EditorTool.Move
     })
-    return this.createToolTip(this.menuMove, "Move")
+    return this.menuMove
   }
 
   protected createMenuSelect(): HTMLElement
@@ -97,7 +97,7 @@ export class OIMenuTool extends OIMenu
       this.menuSelect!.classList.add("active")
       this.behaviors.tool = EditorTool.Select
     })
-    return this.createToolTip(this.menuSelect, "Select")
+    return this.menuSelect
   }
 
   protected createMenuErase(): HTMLElement
@@ -112,7 +112,7 @@ export class OIMenuTool extends OIMenu
       this.menuErase!.classList.add("active")
       this.behaviors.tool = EditorTool.Erase
     })
-    return this.createToolTip(this.menuErase, "Erase")
+    return this.menuErase
   }
 
   protected createShapeSubMenu(icon: string, tool: EditorWriteTool): HTMLButtonElement
@@ -134,7 +134,7 @@ export class OIMenuTool extends OIMenu
         (subMenuContent as HTMLElement).classList.remove("open")
       }
     })
-    return this.createToolTip(subMenuShape, tool.toString()) as HTMLButtonElement
+    return subMenuShape
   }
 
   protected createMenuShape(): HTMLElement
@@ -187,7 +187,7 @@ export class OIMenuTool extends OIMenu
         (subMenuContent as HTMLElement).classList.remove("open")
       }
     })
-    return this.createToolTip(subMenuEdge, tool.toString()) as HTMLButtonElement
+    return subMenuEdge
   }
 
   protected createMenuEdge(): HTMLElement

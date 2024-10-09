@@ -1,3 +1,4 @@
+import style from "../menu/menu.css"
 import { OIBehaviors } from "../behaviors"
 import { LoggerClass, LoggerManager } from "../logger"
 import { OIMenuAction, OIMenuTool, OIMenuStyle, OIMenuContext } from "../menu"
@@ -55,6 +56,11 @@ export class OIMenuManager
   {
     if (this.behaviors.configuration.menu.enable) {
       this.layer = layer
+
+      const styleElement = document.createElement("style")
+      styleElement.appendChild(document.createTextNode(style as string))
+      this.layer.prepend(styleElement)
+
       if (this.behaviors.configuration.menu.action.enable) {
         this.action.render(this.layer)
       }

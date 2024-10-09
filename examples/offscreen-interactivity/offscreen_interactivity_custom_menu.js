@@ -144,7 +144,6 @@ class CustomMenuTool extends iink.OIMenuTool {
     this.wrapper.classList.add("ms-menu", "custom-menu-tool")
 
     this.wrapper.appendChild(this.createMenuWrite())
-    this.wrapper.appendChild(this.createSeparatorVertical())
     this.wrapper.appendChild(this.createMenuErase())
 
     layer.appendChild(this.wrapper)
