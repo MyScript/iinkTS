@@ -173,7 +173,7 @@ export class OIMenuStyle extends OIMenu
         else {
           const fontSize = size.value * this.rowHeight
           this.behaviors.converter.fontSize = fontSize
-          const textSymbols = this.symbolsSelected.filter(s => s.type === SymbolType.Text || (s.type === SymbolType.Group && s.extractSymbols().some(c => c.type === SymbolType.Text)))
+          const textSymbols = this.symbolsSelected.filter(s => s.type === SymbolType.Text || (s.type === SymbolType.Group && s.extractText().length))
           this.behaviors.updateTextFontStyle(textSymbols.map(s => s.id), { fontSize })
           this.behaviors.selector.resetSelectedGroup(this.symbolsSelected)
         }
@@ -208,7 +208,7 @@ export class OIMenuStyle extends OIMenu
         btn.classList.add("active")
         this.behaviors.converter.fontWeight = weight.value as "auto" | "normal" | "bold"
         if (this.behaviors.converter.fontWeight !== "auto") {
-          const textSymbols = this.symbolsSelected.filter(s => s.type === SymbolType.Text || (s.type === SymbolType.Group && s.extractSymbols().some(c => c.type === SymbolType.Text)))
+          const textSymbols = this.symbolsSelected.filter(s => s.type === SymbolType.Text || (s.type === SymbolType.Group && s.extractText().length))
           this.behaviors.updateTextFontStyle(textSymbols.map(s => s.id), { fontWeight: this.behaviors.converter.fontWeight })
           this.behaviors.selector.resetSelectedGroup(this.symbolsSelected)
         }

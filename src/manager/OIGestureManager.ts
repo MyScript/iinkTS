@@ -222,8 +222,8 @@ export class OIGestureManager
         }
       }
       case SymbolType.Group: {
-        const childrenNotTouch = symbol.extractSymbols().filter(s => !gestureStroke.bounds.overlaps(s.bounds))
-        const childrenTouch = symbol.extractSymbols().filter(s => gestureStroke.bounds.overlaps(s.bounds))
+        const childrenNotTouch = symbol.children.filter(s => !gestureStroke.bounds.overlaps(s.bounds))
+        const childrenTouch = symbol.children.filter(s => gestureStroke.bounds.overlaps(s.bounds))
         const results = childrenTouch.map(s =>
         {
           return {
@@ -333,7 +333,7 @@ export class OIGestureManager
     if (symbolsOnGestureInRow.length) {
       const symbolToJoin = symbolsOnGestureInRow[0]
       if (symbolToJoin?.type === SymbolType.Group) {
-        const children = symbolToJoin.extractSymbols().map(c => c.clone())
+        const children = symbolToJoin.children.map(c => c.clone())
         const childBefore = children.filter(c => c.bounds.xMid <= gestureStroke.bounds.xMid)
         const childAfter = children.filter(c => c.bounds.xMid > gestureStroke.bounds.xMid)
         if (childBefore.length && childAfter.length) {
@@ -386,8 +386,8 @@ export class OIGestureManager
       const lastSymbBeforeClone = lastSymbBefore.clone()
       const firstSymbolAfterClone = firstSymbolAfter.clone()
       this.translator.applyToSymbol(firstSymbolAfterClone, translateX, 0)
-      const symbolsToGroup = lastSymbBefore.type === SymbolType.Group ? (lastSymbBeforeClone as OISymbolGroup).extractSymbols() : [lastSymbBeforeClone]
-      symbolsToGroup.push(...(firstSymbolAfterClone.type === SymbolType.Group ? (firstSymbolAfterClone as OISymbolGroup).extractSymbols() : [firstSymbolAfterClone]))
+      const symbolsToGroup = lastSymbBefore.type === SymbolType.Group ? (lastSymbBeforeClone as OISymbolGroup).children : [lastSymbBeforeClone]
+      symbolsToGroup.push(...(firstSymbolAfterClone.type === SymbolType.Group ? (firstSymbolAfterClone as OISymbolGroup).children : [firstSymbolAfterClone]))
 
       if (symbolsToGroup.every(s => s.type === SymbolType.Text)) {
         const texts = symbolsToGroup as OIText[]
@@ -535,14 +535,12 @@ export class OIGestureManager
   protected computeSplitStrokeInGroup(gestureStroke: OIStroke, group: OISymbolGroup, subStrokes: { fullStrokeId: string, x: number[], y: number[] }[]): OISymbolGroup[]
   {
     const newGroups: OISymbolGroup[] = []
-    const groupSymbols = group.extractSymbols()
-
     const symbolsBefore: TOISymbol[] = []
     const symbolsAfter: TOISymbol[] = []
 
     const strokeIdToSplit = subStrokes[0].fullStrokeId
 
-    groupSymbols.forEach(gs =>
+    group.children.forEach(gs =>
     {
       if (gs.id === strokeIdToSplit) {
         const subStroke = this.computeSplitStroke(gs as OIStroke, subStrokes)

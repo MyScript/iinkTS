@@ -554,21 +554,21 @@ export class OIBehaviors implements IBehaviors
     }
   }
 
+  protected updateTextBounds(symbol: TOISymbol): void
+  {
+    if (symbol.type === SymbolType.Text) {
+      this.texter.updateBounds(symbol)
+    }
+    else if (symbol.type === SymbolType.Group) {
+      symbol.extractText().forEach(t => this.texter.updateBounds(t))
+    }
+  }
+
   async addSymbol(sym: TOISymbol, addToHistory = true): Promise<TOISymbol>
   {
     this.#logger.info("addSymbol", { sym })
     this.updateLayerState(false)
-    if (sym.type === SymbolType.Text) {
-      this.texter.updateBounds(sym)
-    }
-    else if (sym.type === SymbolType.Group) {
-      sym.extractSymbols().forEach(t =>
-      {
-        if (t.type === SymbolType.Text) {
-          this.texter.updateBounds(t)
-        }
-      })
-    }
+    this.updateTextBounds(sym)
     this.model.addSymbol(sym)
     this.renderer.drawSymbol(sym)
 
@@ -588,17 +588,7 @@ export class OIBehaviors implements IBehaviors
     this.updateLayerState(false)
     symList.forEach(s =>
     {
-      if (s.type === SymbolType.Text) {
-        this.texter.updateBounds(s)
-      }
-      else if (s.type === SymbolType.Group) {
-        s.extractSymbols().forEach(t =>
-        {
-          if (t.type === SymbolType.Text) {
-            this.texter.updateBounds(t)
-          }
-        })
-      }
+      this.updateTextBounds(s)
       this.model.addSymbol(s)
       this.renderer.drawSymbol(s)
     })
@@ -615,17 +605,7 @@ export class OIBehaviors implements IBehaviors
   {
     this.#logger.info("updateSymbol", { sym })
     this.updateLayerState(false)
-    if (sym.type === SymbolType.Text) {
-      this.texter.updateBounds(sym)
-    }
-    else if (sym.type === SymbolType.Group) {
-      sym.extractSymbols().forEach(t =>
-      {
-        if (t.type === SymbolType.Text) {
-          this.texter.updateBounds(t)
-        }
-      })
-    }
+    this.updateTextBounds(sym)
     this.model.updateSymbol(sym)
     this.renderer.drawSymbol(sym)
     const strokes = this.extractStrokesFromSymbols([sym])
@@ -643,17 +623,7 @@ export class OIBehaviors implements IBehaviors
     this.updateLayerState(false)
     symList.forEach(s =>
     {
-      if (s.type === SymbolType.Text) {
-        this.texter.updateBounds(s)
-      }
-      else if (s.type === SymbolType.Group) {
-        s.extractSymbols().forEach(t =>
-        {
-          if (t.type === SymbolType.Text) {
-            this.texter.updateBounds(t)
-          }
-        })
-      }
+      this.updateTextBounds(s)
       this.model.updateSymbol(s)
       this.renderer.drawSymbol(s)
     })
@@ -704,7 +674,7 @@ export class OIBehaviors implements IBehaviors
     }
   }
 
-  updateTextFontStyle(textIds: string[], { fontSize, fontWeight }: { fontSize?: number, fontWeight?: "normal" | "bold" }): void
+  updateTextFontStyle(textIds: string[], { fontSize, fontWeight }: { fontSize?: number, fontWeight?: "normal" | "bold" | "auto" }): void
   {
     this.#logger.info("updateTextFontStyle", { textIds, fontSize, fontWeight })
     const symbols: (OIText | OISymbolGroup)[] = []
@@ -718,7 +688,7 @@ export class OIBehaviors implements IBehaviors
             if (fontSize) {
               tc.fontSize = fontSize
             }
-            if (fontWeight) {
+            if (fontWeight && fontWeight !== "auto") {
               tc.fontWeight = fontWeight
             }
           })
@@ -739,16 +709,17 @@ export class OIBehaviors implements IBehaviors
           s.modificationDate = Date.now()
           symbols.push(s)
         }
-        else if ((s.type === SymbolType.Group && s.extractSymbols().some(c => c.type === SymbolType.Text))) {
-          s.extractSymbols().forEach(c =>
-          {
-            if (c.type === SymbolType.Text) {
+        else if (s.type === SymbolType.Group) {
+          const textChildren = s.extractText()
+          if (textChildren.length) {
+            textChildren.forEach(c =>
+            {
               c.chars.forEach(tc =>
               {
                 if (fontSize) {
                   tc.fontSize = fontSize
                 }
-                if (fontWeight) {
+                if (fontWeight && fontWeight !== "auto") {
                   tc.fontWeight = fontWeight
                 }
               })
@@ -764,11 +735,11 @@ export class OIBehaviors implements IBehaviors
                 })
               }
               c.modificationDate = Date.now()
-            }
-          })
-          s.modificationDate = Date.now()
-          this.renderer.drawSymbol(s)
-          symbols.push(s)
+            })
+            s.modificationDate = Date.now()
+            this.renderer.drawSymbol(s)
+            symbols.push(s)
+          }
 
         }
       }
@@ -1227,6 +1198,24 @@ export class OIBehaviors implements IBehaviors
       }
     })
     return strokes
+  }
+
+  extractTextsFromSymbols(symbols: TOISymbol[] | undefined): OIText[]
+  {
+    if (!symbols?.length) return []
+    const texts: OIText[] = []
+    symbols.forEach(s =>
+    {
+      switch (s.type) {
+        case SymbolType.Text:
+          texts.push(s)
+          break
+        case SymbolType.Group:
+          texts.push(...s.extractText())
+          break
+      }
+    })
+    return texts
   }
 
   protected extractBackendChanges(changes: TOIHistoryChanges): TOIHistoryBackendChanges
