@@ -6,6 +6,7 @@ import { SymbolType } from "./Symbol"
 import { OIDecorator } from "./OIDecorator"
 import { OISymbolBase } from "./OISymbolBase"
 import { OIStroke } from "./OIStroke"
+import { OIText } from "./OIText"
 import { TOISymbol } from "."
 
 /**
@@ -76,9 +77,9 @@ export class OISymbolGroup extends OISymbolBase<SymbolType.Group>
     return OISymbolGroup.containsOnlyStroke(this)
   }
 
-  extractSymbols(): TOISymbol[]
+  extractText(): OIText[]
   {
-    return OISymbolGroup.extractSymbols(this)
+    return OISymbolGroup.extractText(this)
   }
 
   extractStrokes(): OIStroke[]
@@ -105,29 +106,41 @@ export class OISymbolGroup extends OISymbolBase<SymbolType.Group>
     })
   }
 
-  static extractSymbols(group: OISymbolGroup): TOISymbol[]
+  static extractText(group: OISymbolGroup): OIText[]
   {
-    return group.children.flatMap(s =>
+    const texts: OIText[] = []
+    group.children.forEach(s =>
     {
-      if (s.type === SymbolType.Group) {
-        return OISymbolGroup.extractSymbols(s as OISymbolGroup).concat(s)
+      switch (s.type) {
+        case SymbolType.Text:
+          texts.push(s)
+          break;
+        case SymbolType.Group:
+          texts.push(...OISymbolGroup.extractText(s))
+          break;
       }
-      return s
     })
+    return texts
   }
 
   static extractStrokes(group: OISymbolGroup): OIStroke[]
   {
-    return group.children.flatMap(s =>
+    const strokes: OIStroke[] = []
+    group.children.forEach(s =>
     {
-      if (s.type === SymbolType.Stroke) {
-        return s as OIStroke
+      switch (s.type) {
+        case SymbolType.Stroke:
+          strokes.push(s)
+          break;
+        case SymbolType.StrokeText:
+          strokes.push(...s.strokes)
+          break;
+        case SymbolType.Group:
+          strokes.push(...OISymbolGroup.extractStrokes(s))
+          break;
       }
-      if (s.type === SymbolType.Group) {
-        return OISymbolGroup.extractStrokes(s as OISymbolGroup)
-      }
-      return
-    }).filter(s => !!s) as OIStroke[]
+    })
+    return strokes
   }
 
   static containsSymbol(group: OISymbolGroup, symbolId: string): boolean

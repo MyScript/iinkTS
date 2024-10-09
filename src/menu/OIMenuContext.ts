@@ -124,14 +124,30 @@ export class OIMenuContext extends OIMenu
     this.duplicateBtn.addEventListener("pointerup", async () =>
     {
       const symbolsToDuplicate = this.symbolsSelected
+
+      const updateDeepIdInGroup = (gr: OISymbolGroup) => {
+        gr.children.forEach(s => {
+          s.id = s.id.slice(0, -36) + `-${ createUUID() }`
+          switch (s.type) {
+            case SymbolType.Group:
+              updateDeepIdInGroup(s)
+              break;
+            case SymbolType.StrokeText:
+              s.strokes.forEach(s => s.id = s.id.slice(0, -36) + `-${ createUUID() }`)
+              break
+          }
+        })
+      }
       const duplicatedSymbols = symbolsToDuplicate.map(s =>
       {
         const clone = s.clone()
         while (this.behaviors.model.symbols.find(s => s.id === clone.id)) {
           clone.id = clone.id.slice(0, -36) + `-${ createUUID() }`
           if (clone.type === SymbolType.Group) {
-            const groupClone = clone as OISymbolGroup
-            groupClone.extractSymbols().forEach(s => s.id = s.id.slice(0, -36) + `-${ createUUID() }`)
+            updateDeepIdInGroup(clone)
+          }
+          else if(clone.type === SymbolType.StrokeText) {
+            clone.strokes.forEach(s => s.id = s.id.slice(0, -36) + `-${ createUUID() }`)
           }
         }
         clone.selected = true

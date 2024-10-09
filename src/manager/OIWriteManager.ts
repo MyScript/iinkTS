@@ -110,7 +110,7 @@ export class OIWriteManager
             return false
           }
           else {
-            return s.extractSymbols().some(subS => subS.bounds.overlaps(strokeBoundsWithMargin))
+            return s.bounds.overlaps(strokeBoundsWithMargin)
           }
         default:
           return s.bounds.overlaps(strokeBoundsWithMargin)
