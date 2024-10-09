@@ -71,7 +71,7 @@ export class OIMenuAction extends OIMenu
       this.#logger.info(`${ this.id }.clear`)
       this.behaviors.clear()
     })
-    return this.createToolTip(this.menuClear, "Clear", "bottom")
+    return this.menuClear
   }
 
   protected createMenuLanguage(): HTMLElement
@@ -121,7 +121,7 @@ export class OIMenuAction extends OIMenu
       this.#logger.info(`${ this.id }.undo`)
       await this.behaviors.undo()
     })
-    return this.createToolTip(this.menuUndo, "Undo", "bottom")
+    return this.menuUndo
   }
 
   protected createMenuRedo(): HTMLElement
@@ -135,7 +135,7 @@ export class OIMenuAction extends OIMenu
       this.#logger.info(`${ this.id }.redo`)
       await this.behaviors.redo()
     })
-    return this.createToolTip(this.menuRedo, "Redo", "bottom")
+    return this.menuRedo
   }
 
   protected createMenuConvert(): HTMLElement
@@ -149,7 +149,7 @@ export class OIMenuAction extends OIMenu
       this.#logger.info(`${ this.id }.convert`)
       this.behaviors.convert()
     })
-    return this.createToolTip(this.menuConvert, "Convert", "bottom")
+    return this.menuConvert
   }
 
   protected createMenuGesture(): HTMLDivElement

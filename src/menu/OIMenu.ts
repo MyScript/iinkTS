@@ -15,10 +15,6 @@ export type TMenuItem = {
  */
 export type TMenuItemButton = TMenuItem & {
   type: "button"
-  tooltip?: {
-    label: string,
-    position: "top" | "left" | "right" | "bottom"
-  },
   icon?: string
   callback: () => void
 }
@@ -28,10 +24,6 @@ export type TMenuItemButton = TMenuItem & {
  */
 export type TMenuItemButtonList = TMenuItem & {
   type: "list"
-  tooltip?: {
-    label: string,
-    position: "top" | "left" | "right" | "bottom"
-  }
   initValue: string,
   values: { label: string, value: string }[]
   callback: (value: string) => void
@@ -42,10 +34,6 @@ export type TMenuItemButtonList = TMenuItem & {
  */
 export type TMenuItemColorList = TMenuItem & {
   type: "colors"
-  tooltip?: {
-    label: string,
-    position: "top" | "left" | "right" | "bottom"
-  },
   initValue: string,
   values: string[]
   fill: boolean
@@ -103,16 +91,6 @@ export abstract class OIMenu
     "#008000", "#00af00", "#00e100", "#00ff00"
   ]
 
-  protected createToolTip(el: HTMLElement, text: string, position: "top" | "left" | "right" | "bottom" = "top"): HTMLElement
-  {
-    el.classList.add("ms-tooltip")
-    const tooltipContent = document.createElement("span")
-    tooltipContent.classList.add("ms-tooltip-content", position)
-    tooltipContent.textContent = text
-    el.appendChild(tooltipContent)
-    return el
-  }
-
   protected createWrapCollapsible(el: Node, title: string): HTMLDivElement
   {
     const wrapper = document.createElement("div")
@@ -132,22 +110,6 @@ export abstract class OIMenu
     content.appendChild(el)
     wrapper.appendChild(content)
     return wrapper
-  }
-
-  protected createSeparatorHorizontal(): HTMLHRElement
-  {
-    const separator = document.createElement("hr")
-    separator.classList.add("separator")
-    separator.classList.add("horizontal")
-    return separator
-  }
-
-  protected createSeparatorVertical(): HTMLHRElement
-  {
-    const separator = document.createElement("hr")
-    separator.classList.add("separator")
-    separator.classList.add("vertical")
-    return separator
   }
 
   protected createMenuItemBoolean(item: TMenuItemBoolean): HTMLDivElement
@@ -202,12 +164,7 @@ export abstract class OIMenu
     btn.classList.add("ms-menu-item", "ms-menu-button")
     btn.innerHTML = item.icon || item.label
     btn.addEventListener("pointerup", item.callback)
-    if (item.tooltip) {
-      return this.createToolTip(btn, item.tooltip.label, item.tooltip.position)
-    }
-    else {
-      return btn
-    }
+    return btn
   }
 
   protected createMenuItemButtonList(item: TMenuItemButtonList): HTMLElement

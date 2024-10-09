@@ -239,7 +239,6 @@ export class OIMenuStyle extends OIMenu
 
     const output = document.createElement("output")
     output.setAttribute("for", `opacity`)
-    output.classList.add("tooltip")
     output.innerHTML = currentOpacity ? `${ currentOpacity }` : "-"
     wrapper.appendChild(output)
 
