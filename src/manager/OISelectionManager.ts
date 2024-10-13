@@ -2,7 +2,7 @@ import { ResizeDirection, SELECTION_MARGIN, SvgElementRole } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerClass, LoggerManager } from "../logger"
 import { OIModel } from "../model"
-import { Box, OIText, SymbolType, TBoundingBox, TOISymbol, TPoint } from "../primitive"
+import { Box, OIText, SymbolType, TBoundingBox, TOIEdge, TOISymbol, TPoint } from "../primitive"
 import { OISVGRenderer, SVGBuilder } from "../renderer"
 import { OIResizeManager } from "./OIResizeManager"
 import { OIRotationManager } from "./OIRotationManager"
@@ -360,10 +360,101 @@ export class OISelectionManager
     return surroundGroup
   }
 
+  protected createEdgeResizeGroup(edge: TOIEdge): SVGGElement
+  {
+    const group = SVGBuilder.createGroup({
+      role: SvgElementRole.Resize,
+      "vector-effect": "non-scaling-size",
+      "stroke-width": "4",
+      "stroke": "#3e68ff",
+    })
+
+    const radius = 5
+    const attrs = {
+      role: SvgElementRole.Resize,
+      "stroke-width": "8",
+      "stroke": "transparent",
+      fill: "black",
+      style: `cursor:grab;`
+    }
+    const bindEl = (el: SVGCircleElement, pointIndex: number) =>
+    {
+      const handler = (ev: PointerEvent) =>
+      {
+        ev.preventDefault()
+        ev.stopPropagation()
+        const point = this.getPoint(ev)
+        const { x, y } = this.behaviors.snaps.snapResize(point)
+        edge.vertices[pointIndex].x = x
+        edge.vertices[pointIndex].y = y
+        this.model.updateSymbol(edge)
+        this.renderer.drawSymbol(edge)
+      }
+      const endHandler = (ev: PointerEvent) =>
+      {
+        ev.preventDefault()
+        ev.stopPropagation()
+        const point = this.getPoint(ev)
+        const { x, y } = this.behaviors.snaps.snapResize(point)
+        edge.vertices[pointIndex].x = x
+        edge.vertices[pointIndex].y = y
+        this.renderer.layer.style.cursor = ""
+        this.behaviors.updateSymbol(edge)
+        this.renderer.layer.removeEventListener("pointermove", handler)
+        this.renderer.layer.removeEventListener("pointercancel", endHandler)
+        this.renderer.layer.removeEventListener("pointerleave", endHandler)
+        this.renderer.layer.removeEventListener("pointerup", endHandler)
+        this.behaviors.snaps.clearSnapToElementLines()
+        this.behaviors.selector.resetSelectedGroup(this.model.symbolsSelected)
+      }
+
+      el.addEventListener("pointerdown", (ev) =>
+      {
+        if (ev.button !== 0 || ev.buttons !== 1) {
+          return
+        }
+        this.renderer.layer.style.cursor = "grabbing"
+        this.hideInteractElements()
+        ev.preventDefault()
+        ev.stopPropagation()
+        this.renderer.layer.addEventListener("pointermove", handler)
+        this.renderer.layer.addEventListener("pointercancel", endHandler)
+        this.renderer.layer.addEventListener("pointerleave", endHandler)
+        this.renderer.layer.addEventListener("pointerup", endHandler)
+      })
+    }
+    edge.vertices.forEach((p, i) =>
+    {
+      const pointEl = SVGBuilder.createCircle(p, radius, attrs)
+      bindEl(pointEl, i)
+      group.appendChild(pointEl)
+    })
+
+    return group
+  }
+
+  protected createInteractEdgeGroup(edge: TOIEdge): SVGGElement | undefined
+  {
+    this.#logger.info("createInteractEdgeGroup", { edge })
+    const attrs = {
+      id: `selected-${ Date.now() }`,
+      role: SvgElementRole.InteractElementsGroup,
+    }
+    const surroundGroup = SVGBuilder.createGroup(attrs)
+    surroundGroup.appendChild(this.createTranslateRect(edge.bounds))
+    surroundGroup.appendChild(this.createEdgeResizeGroup(edge.clone()))
+    return surroundGroup
+  }
+
   drawSelectedGroup(symbols: TOISymbol[]): void
   {
     if (!symbols.length) return
-    this.selectedGroup = this.createInteractElementsGroup(symbols)
+    if (symbols.length === 1 && symbols[0].type === SymbolType.Edge) {
+      this.selectedGroup = this.createInteractEdgeGroup(symbols[0] as TOIEdge)
+    }
+    else {
+      this.selectedGroup = this.createInteractElementsGroup(symbols)
+    }
     if (this.selectedGroup) {
       this.renderer.layer.appendChild(this.selectedGroup)
       const groupBox = this.selectedGroup.getBBox()
