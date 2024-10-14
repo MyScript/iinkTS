@@ -209,7 +209,6 @@ export class OIRotationManager
     this.behaviors.recognizer.transformRotate(strokesFromSymbols.map(s => s.id), angleRad, this.center.x, this.center.y)
     this.behaviors.history.push(this.model, { rotate: [{ symbols: oldSymbols, angle: angleRad, center: {...this.center}, }] })
 
-    this.behaviors.selector.resetSelectedGroup(this.model.symbolsSelected)
     this.interactElementsGroup = undefined
     this.behaviors.svgDebugger.apply()
   }

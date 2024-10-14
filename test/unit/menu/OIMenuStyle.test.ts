@@ -200,6 +200,7 @@ describe("OIMenuStyle.ts", () =>
       btn.dispatchEvent(pointerUpEvt)
       expect(behaviors.updateSymbolsStyle).toHaveBeenCalledTimes(1)
       expect(behaviors.updateSymbolsStyle).toHaveBeenCalledWith([stroke.id], { width: 8 })
+      expect(behaviors.selector.resetSelectedGroup).toHaveBeenNthCalledWith(1, [stroke])
     })
     test("should update style opacity", () =>
     {

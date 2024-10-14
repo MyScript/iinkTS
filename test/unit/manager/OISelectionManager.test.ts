@@ -107,7 +107,7 @@ describe("OISelectionManager.ts", () =>
     })
   })
 
-  describe("selected group", () =>
+  describe("interact elements", () =>
   {
     Object.defineProperty(global.SVGElement.prototype, 'getBBox', {
       writable: true,
@@ -129,6 +129,7 @@ describe("OISelectionManager.ts", () =>
     behaviors.resizer.continue = jest.fn()
     behaviors.resizer.end = jest.fn()
     const manager = new OISelectionManager(behaviors)
+    manager.resetSelectedGroup = jest.fn()
     const stroke = buildOIStroke()
 
     beforeAll(async () =>
@@ -188,6 +189,7 @@ describe("OISelectionManager.ts", () =>
       }) as PointerEvent
       behaviors.renderer.layer.dispatchEvent(pointerUp)
       expect(behaviors.translator.end).toHaveBeenNthCalledWith(1, { x: 5, y: 6 })
+      expect(manager.resetSelectedGroup).toHaveBeenCalledTimes(1)
     })
 
     test("should not call rotator.start on right pointerdown on rotateEl", () =>
@@ -239,6 +241,7 @@ describe("OISelectionManager.ts", () =>
       }) as PointerEvent
       behaviors.renderer.layer.dispatchEvent(pointerUp)
       expect(behaviors.rotator.end).toHaveBeenNthCalledWith(1, { x: 5, y: 6 })
+      expect(manager.resetSelectedGroup).toHaveBeenCalledTimes(1)
     })
 
     test("should not call resizer.start on right pointerdown on north resizeEl", () =>
@@ -290,6 +293,7 @@ describe("OISelectionManager.ts", () =>
       }) as PointerEvent
       behaviors.renderer.layer.dispatchEvent(pointerUp)
       expect(behaviors.resizer.end).toHaveBeenNthCalledWith(1, { x: 5, y: 6 })
+      expect(manager.resetSelectedGroup).toHaveBeenCalledTimes(1)
     })
 
   })

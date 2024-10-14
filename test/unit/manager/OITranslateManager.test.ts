@@ -75,7 +75,6 @@ describe("OITranslateManager.ts", () =>
     behaviors.recognizer.transformTranslate = jest.fn(() => Promise.resolve())
     behaviors.renderer.setAttribute = jest.fn()
     behaviors.renderer.drawSymbol = jest.fn()
-    behaviors.selector.resetSelectedGroup = jest.fn()
     behaviors.setPenStyle = jest.fn(() => Promise.resolve())
     behaviors.setTheme = jest.fn(() => Promise.resolve())
     behaviors.setPenStyleClasses = jest.fn(() => Promise.resolve())
@@ -145,8 +144,6 @@ describe("OITranslateManager.ts", () =>
         await manager.end(data.translateToPoint)
 
         expect(manager.applyToSymbol).toHaveBeenCalledTimes(1)
-        expect(behaviors.selector.resetSelectedGroup).toHaveBeenCalledTimes(1)
-        expect(behaviors.selector.resetSelectedGroup).toHaveBeenCalledWith([stroke])
         expect(behaviors.renderer.drawSymbol).toHaveBeenCalledTimes(1)
         expect(behaviors.renderer.drawSymbol).toHaveBeenCalledWith(stroke)
         expect(behaviors.recognizer.transformTranslate).toHaveBeenCalledTimes(1)
