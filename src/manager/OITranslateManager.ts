@@ -203,7 +203,6 @@ export class OITranslateManager
     this.behaviors.snaps.clearSnapToElementLines()
     this.translate(this.model.symbolsSelected, tx, ty)
 
-    this.behaviors.selector.resetSelectedGroup(this.model.symbolsSelected)
     this.interactElementsGroup = undefined
     this.behaviors.svgDebugger.apply()
   }

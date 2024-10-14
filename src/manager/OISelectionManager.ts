@@ -117,6 +117,8 @@ export class OISelectionManager
       this.renderer.layer.removeEventListener("pointercancel", endHandler)
       this.renderer.layer.removeEventListener("pointerleave", endHandler)
       this.renderer.layer.removeEventListener("pointerup", endHandler)
+      this.renderer.layer.style.cursor = ""
+      this.resetSelectedGroup(this.model.symbolsSelected)
     }
 
     translateEl.addEventListener("pointerdown", (ev) =>
@@ -132,6 +134,8 @@ export class OISelectionManager
       this.renderer.layer.addEventListener("pointercancel", endHandler)
       this.renderer.layer.addEventListener("pointerleave", endHandler)
       this.renderer.layer.addEventListener("pointerup", endHandler)
+
+      this.renderer.layer.style.cursor = "move"
     })
     return translateEl
   }
@@ -185,6 +189,7 @@ export class OISelectionManager
       this.renderer.layer.removeEventListener("pointercancel", endHandler)
       this.renderer.layer.removeEventListener("pointerleave", endHandler)
       this.renderer.layer.removeEventListener("pointerup", endHandler)
+      this.resetSelectedGroup(this.model.symbolsSelected)
     }
 
     group.addEventListener("pointerdown", (ev) =>
@@ -217,7 +222,7 @@ export class OISelectionManager
     const P_SE: TPoint = { x: box.x + box.width + SELECTION_MARGIN, y: box.y + box.height + SELECTION_MARGIN }
     const P_SW: TPoint = { x: box.x - SELECTION_MARGIN, y: box.y + box.height + SELECTION_MARGIN }
 
-    const bindEl = (el: SVGElement, transformOrigin: TPoint) =>
+    const bindEl = (el: SVGElement, transformOrigin: TPoint, cursor: string) =>
     {
       const handler = (ev: PointerEvent) =>
       {
@@ -234,6 +239,9 @@ export class OISelectionManager
         this.renderer.layer.removeEventListener("pointercancel", endHandler)
         this.renderer.layer.removeEventListener("pointerleave", endHandler)
         this.renderer.layer.removeEventListener("pointerup", endHandler)
+
+        this.renderer.layer.style.cursor = ""
+        this.resetSelectedGroup(this.model.symbolsSelected)
       }
 
       el.addEventListener("pointerdown", (ev) =>
@@ -244,6 +252,7 @@ export class OISelectionManager
         ev.preventDefault()
         ev.stopPropagation()
         this.hideInteractElements()
+        this.renderer.layer.style.cursor = cursor
         this.resizer.start(ev.target as Element, transformOrigin)
         this.renderer.layer.addEventListener("pointermove", handler)
         this.renderer.layer.addEventListener("pointercancel", endHandler)
@@ -267,7 +276,7 @@ export class OISelectionManager
         style: `cursor:${ def.direction };`
       }
       const lineResize = SVGBuilder.createLine(def.p1, def.p2, attrs)
-      bindEl(lineResize, def.transformOrigin)
+      bindEl(lineResize, def.transformOrigin, def.direction)
       group.appendChild(lineResize)
     })
     const cornerResizeDefs = [
@@ -288,7 +297,7 @@ export class OISelectionManager
         style: `cursor:${ def.direction };`
       }
       const cornerResize = SVGBuilder.createCircle(def.p, 5, attrs)
-      bindEl(cornerResize, def.transformOrigin)
+      bindEl(cornerResize, def.transformOrigin, def.direction)
       group.appendChild(cornerResize)
     })
     return group
@@ -372,9 +381,9 @@ export class OISelectionManager
     const radius = 5
     const attrs = {
       role: SvgElementRole.Resize,
-      "stroke-width": "8",
-      "stroke": "transparent",
-      fill: "black",
+      "stroke-width": "4",
+      "stroke": "#3e68ff",
+      fill: "white",
       style: `cursor:grab;`
     }
     const bindEl = (el: SVGCircleElement, pointIndex: number) =>
@@ -405,7 +414,7 @@ export class OISelectionManager
         this.renderer.layer.removeEventListener("pointerleave", endHandler)
         this.renderer.layer.removeEventListener("pointerup", endHandler)
         this.behaviors.snaps.clearSnapToElementLines()
-        this.behaviors.selector.resetSelectedGroup(this.model.symbolsSelected)
+        this.resetSelectedGroup(this.model.symbolsSelected)
       }
 
       el.addEventListener("pointerdown", (ev) =>

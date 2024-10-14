@@ -195,7 +195,6 @@ describe("OIResizeManager.ts", () =>
     behaviors.recognizer.init = jest.fn(() => Promise.resolve())
     behaviors.recognizer.transformScale = jest.fn(() => Promise.resolve())
     behaviors.renderer.setAttribute = jest.fn()
-    behaviors.selector.resetSelectedGroup = jest.fn()
     behaviors.renderer.drawSymbol = jest.fn()
     behaviors.snaps.snapToGrid = false
     behaviors.snaps.snapToElement = false
@@ -343,8 +342,6 @@ describe("OIResizeManager.ts", () =>
       {
         await manager.end(resizeToPoint)
         expect(manager.applyToSymbol).toHaveBeenCalledTimes(1)
-        expect(behaviors.selector.resetSelectedGroup).toHaveBeenCalledTimes(1)
-        expect(behaviors.selector.resetSelectedGroup).toHaveBeenCalledWith([stroke])
         expect(behaviors.renderer.drawSymbol).toHaveBeenCalledTimes(1)
         expect(behaviors.renderer.drawSymbol).toHaveBeenCalledWith(stroke)
         expect(behaviors.recognizer.transformScale).toHaveBeenCalledTimes(1)

@@ -489,7 +489,7 @@ export class OIBehaviors implements IBehaviors
     return OIText.create(partialSymbol as PartialDeep<OIText>)
   }
 
-  buildSymbol(partialSymbol: PartialDeep<TOISymbol>): TOISymbol
+  protected buildSymbol(partialSymbol: PartialDeep<TOISymbol>): TOISymbol
   {
     try {
       switch (partialSymbol.type) {
