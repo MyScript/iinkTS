@@ -208,7 +208,7 @@ export class OIBehaviors implements IBehaviors
       this.menu.update()
       this.svgDebugger.apply()
       this.waitForIdle()
-    }, 1500)
+    }, 1000)
   }
 
   manageError(error: Error): void
@@ -1049,13 +1049,12 @@ export class OIBehaviors implements IBehaviors
       this.renderer.drawSymbol(s)
     })
     this.selector.drawSelectedGroup(this.model.symbolsSelected)
+    this.updateLayerUI()
     this.event.emitSelected(this.model.symbolsSelected)
   }
 
   unselectAll(): void
   {
-    this.menu.context.hide()
-    this.menu.update()
     if (this.model.symbolsSelected.length) {
       this.model.symbolsSelected.forEach(s =>
       {
@@ -1063,6 +1062,7 @@ export class OIBehaviors implements IBehaviors
         this.renderer.drawSymbol(s)
       })
       this.selector.removeSelectedGroup()
+      this.updateLayerUI()
       this.event.emitSelected(this.model.symbolsSelected)
     }
   }
@@ -1150,9 +1150,7 @@ export class OIBehaviors implements IBehaviors
     const svgBlob = this.buildBlobFromSymbols(symbols, box)
 
     const url = URL.createObjectURL(svgBlob)
-    const image = new Image()
-    image.width = box.width
-    image.height = box.height
+    const image = new Image(box.width, box.height)
     image.src = url
     image.onload = () =>
     {

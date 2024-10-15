@@ -1,22 +1,21 @@
 import { jiixText } from "../__dataset__/exports.dataset"
 import { LeftClickEventMock } from "../__mocks__/EventMock"
-import { buildOICircle, buildOIStroke } from "../helpers"
+import { buildOICircle, buildOIGroup, buildOIStroke, buildOIStrokeText, buildOIText, delay } from "../helpers"
 import
 {
   OIBehaviors,
   DefaultConfiguration,
   EditorTool,
-  DefaultTheme,
   TBehaviorOptions,
   TStyle,
   TTheme,
   PartialDeep,
   OIStroke,
-  DefaultStyle,
   SymbolType,
   OIShapeCircle,
   ShapeKind,
   EditorLayer,
+  TOISymbol,
 } from "../../../src/iink"
 import { EditorEventMock } from "../__mocks__/EditorEventMock"
 
@@ -45,77 +44,52 @@ describe("OIBehaviors.ts", () =>
 
   describe("Style", () =>
   {
+    const customBehaviorsOptions: TBehaviorOptions = JSON.parse(JSON.stringify(DefaultBehaviorsOptions))
+    const customStyle: TStyle = { color: "#d1d1d1" }
+    customBehaviorsOptions.penStyle = customStyle
+    const customTheme: TTheme = {
+      ink: {
+        width: 42,
+        color: "#2E7D32",
+        "-myscript-pen-width": 2,
+        "-myscript-pen-fill-style": "purple",
+        "-myscript-pen-fill-color": "#FFFFFF00"
+      },
+      ".math": {
+        "font-family": "STIXGeneral"
+      },
+      ".math-solved": {
+        "font-family": "STIXGeneral",
+        color: "blue"
+      },
+      ".text": {
+        "font-family": "Rubik Distressed",
+        "font-size": 10
+      }
+    }
+    customBehaviorsOptions.theme = customTheme
+    const layers = new EditorLayer(document.createElement("div"))
+    const oib = new OIBehaviors(customBehaviorsOptions, layers, editorEventMock)
+    oib.styler.setPenStyle = jest.fn()
+    oib.styler.setTheme = jest.fn()
+    oib.styler.setPenStyleClasses = jest.fn()
+
     test("should define style", async () =>
     {
-      const customStyle: TStyle = { color: "#d1d1d1" }
-      const customBehaviorsOptions: TBehaviorOptions = JSON.parse(JSON.stringify(DefaultBehaviorsOptions))
-      customBehaviorsOptions.penStyle = customStyle
-      const layers = new EditorLayer(document.createElement("div"))
-      const oib = new OIBehaviors(customBehaviorsOptions, layers, editorEventMock)
-      oib.grabber.attach = jest.fn()
-      oib.renderer.init = jest.fn()
-      oib.recognizer.send = jest.fn()
       await expect(oib.penStyle).toEqual(expect.objectContaining(customStyle))
     })
     test("should change Style", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      oib.menu.render = jest.fn()
-      oib.grabber.attach = jest.fn()
-      oib.renderer.init = jest.fn()
-      oib.recognizer.send = jest.fn()
-      oib.recognizer.init = jest.fn(() => Promise.resolve())
-      oib.styler.setPenStyle = jest.fn()
-      await oib.init()
       const customStyle: TStyle = { color: "#d1d1d1" }
       await oib.setPenStyle(customStyle)
-      await expect(oib.styler.setPenStyle).toHaveBeenNthCalledWith(1, DefaultStyle)
-      await expect(oib.styler.setPenStyle).toHaveBeenNthCalledWith(2, expect.objectContaining(customStyle))
+      await expect(oib.styler.setPenStyle).toHaveBeenNthCalledWith(1, expect.objectContaining(customStyle))
     })
     test("should define theme", async () =>
     {
-      const customBehaviorsOptions: TBehaviorOptions = JSON.parse(JSON.stringify(DefaultBehaviorsOptions))
-      const customTheme: TTheme = {
-        ink: {
-          width: 42,
-          color: "#2E7D32",
-          "-myscript-pen-width": 2,
-          "-myscript-pen-fill-style": "purple",
-          "-myscript-pen-fill-color": "#FFFFFF00"
-        },
-        ".math": {
-          "font-family": "STIXGeneral"
-        },
-        ".math-solved": {
-          "font-family": "STIXGeneral",
-          color: "blue"
-        },
-        ".text": {
-          "font-family": "Rubik Distressed",
-          "font-size": 10
-        }
-      }
-      customBehaviorsOptions.theme = customTheme
-      const layers = new EditorLayer(document.createElement("div"))
-      const oib = new OIBehaviors(customBehaviorsOptions, layers, editorEventMock)
-      oib.grabber.attach = jest.fn()
-      oib.renderer.init = jest.fn()
-      oib.recognizer.send = jest.fn()
-      oib.recognizer.init = jest.fn(() => Promise.resolve())
       await expect(oib.theme).toEqual(customTheme)
     })
     test("should change Theme", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      oib.menu.render = jest.fn()
-      oib.grabber.attach = jest.fn()
-      oib.renderer.init = jest.fn()
-      oib.recognizer.send = jest.fn()
-      oib.recognizer.init = jest.fn(() => Promise.resolve())
-      oib.styler.setTheme = jest.fn()
-      await oib.init()
       const customTheme: TTheme = {
         ink: {
           width: 42,
@@ -137,36 +111,28 @@ describe("OIBehaviors.ts", () =>
         }
       }
       await oib.setTheme(customTheme)
-      await expect(oib.styler.setTheme).toHaveBeenNthCalledWith(1, DefaultTheme)
-      await expect(oib.styler.setTheme).toHaveBeenNthCalledWith(2, customTheme)
+      await expect(oib.styler.setTheme).toHaveBeenNthCalledWith(1, customTheme)
     })
     test("should change PenStyleClasses", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      oib.menu.render = jest.fn()
-      oib.grabber.attach = jest.fn()
-      oib.renderer.init = jest.fn()
-      oib.recognizer.send = jest.fn()
-      oib.recognizer.init = jest.fn(() => Promise.resolve())
-      oib.styler.setPenStyleClasses = jest.fn()
-      await oib.init()
       await oib.setPenStyleClasses("pouet")
-      await expect(oib.styler.setPenStyleClasses).toHaveBeenNthCalledWith(1, "")
-      await expect(oib.styler.setPenStyleClasses).toHaveBeenNthCalledWith(2, "pouet")
+      await expect(oib.styler.setPenStyleClasses).toHaveBeenNthCalledWith(1, "pouet")
     })
   })
 
   describe("init", () =>
   {
+    const layers = new EditorLayer(document.createElement("div"))
+    const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
+    oib.menu.render = jest.fn()
+    oib.grabber.attach = jest.fn()
+    oib.renderer.init = jest.fn()
+    oib.setPenStyle = jest.fn()
+    oib.setTheme = jest.fn()
+    oib.setPenStyleClasses = jest.fn()
+
     test("should init grabber, renderer & recognizer & context", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      oib.menu.render = jest.fn()
-      oib.grabber.attach = jest.fn()
-      oib.renderer.init = jest.fn()
-      oib.recognizer.send = jest.fn()
       oib.recognizer.init = jest.fn(() => Promise.resolve())
       oib.init()
       expect(oib.history.context.canRedo).toEqual(false)
@@ -180,24 +146,20 @@ describe("OIBehaviors.ts", () =>
     })
     test("should resolve init when recognizer.init is resolve", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      oib.menu.render = jest.fn()
-      oib.grabber.attach = jest.fn()
-      oib.renderer.init = jest.fn()
-      oib.recognizer.send = jest.fn()
       oib.recognizer.init = jest.fn(() => Promise.resolve())
       await oib.init()
       await expect(oib.recognizer.init).toBeCalledTimes(1)
     })
+    test("should set style after recognizer init", async () =>
+    {
+      oib.recognizer.init = jest.fn(() => Promise.resolve())
+      await oib.init()
+      expect(oib.setPenStyle).toBeCalledTimes(1)
+      expect(oib.setTheme).toBeCalledTimes(1)
+      expect(oib.setPenStyleClasses).toBeCalledTimes(1)
+    })
     test("should reject init when recognizer.init is reject", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      oib.menu.render = jest.fn()
-      oib.grabber.attach = jest.fn()
-      oib.renderer.init = jest.fn()
-      oib.recognizer.send = jest.fn()
       oib.recognizer.init = jest.fn(() => Promise.reject("pouet"))
       await expect(oib.init()).rejects.toEqual("pouet")
     })
@@ -474,20 +436,47 @@ describe("OIBehaviors.ts", () =>
     })
   })
 
-  describe("Selector", () =>
+  describe("Select", () =>
   {
     const layers = new EditorLayer(document.createElement("div"))
     const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
     oib.tool = EditorTool.Select
-    oib.recognizer.init = jest.fn()
+    oib.updateLayerUI = jest.fn()
+    oib.renderer.drawSymbol = jest.fn()
+    oib.recognizer.init = jest.fn(() => Promise.resolve())
     oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
     oib.selector.start = jest.fn()
     oib.selector.continue = jest.fn()
     oib.selector.end = jest.fn()
+    oib.selector.removeSelectedGroup = jest.fn()
+    oib.selector.drawSelectedGroup = jest.fn()
+    oib.event.emitSelected = jest.fn()
     const pointerId = 666
+    const stroke = buildOIStroke()
+    const circle = buildOICircle()
+
+    beforeAll(async () => {
+      await oib.init()
+      oib.model.addSymbol(stroke)
+      oib.model.addSymbol(circle)
+    })
+
+    test("should select all symbols", async () =>
+    {
+      oib.selectAll()
+      expect(oib.renderer.drawSymbol).toHaveBeenCalledTimes(2)
+      expect(oib.selector.drawSelectedGroup).toHaveBeenNthCalledWith(1,[stroke, circle])
+      expect(oib.event.emitSelected).toHaveBeenNthCalledWith(1,[stroke, circle])
+    })
+    test("should unselect all symbols", async () =>
+    {
+      oib.unselectAll()
+      expect(oib.renderer.drawSymbol).toHaveBeenCalledTimes(2)
+      expect(oib.selector.removeSelectedGroup).toHaveBeenCalledTimes(1)
+      expect(oib.event.emitSelected).toHaveBeenNthCalledWith(1,[])
+    })
     test("should call selector.start on pointerdown", async () =>
     {
-      await oib.init()
       const target = layers.root.querySelector("svg") as SVGSVGElement
       const pointerDown = new LeftClickEventMock("pointerdown", {
         pointerType: "pen",
@@ -538,69 +527,172 @@ describe("OIBehaviors.ts", () =>
 
   describe("importPointsEvent", () =>
   {
+    const pStrokes: PartialDeep<OIStroke>[] = [
+      {
+        pointers: [
+          { x: 254, y: 37, t: 1, p: 1 },
+          { x: 253, y: 42, t: 2, p: 0.7 },
+        ]
+      },
+      {
+        pointers: [
+          { x: 222, y: 386, t: 3, p: 0.5 },
+          { x: 226, y: 385, t: 4, p: 0.8 },
+        ],
+        style: { width: 3, color: "#1A8CFF" }
+      }
+    ]
+
+    const layers = new EditorLayer(document.createElement("div"))
+    const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
+    oib.event.emitIdle = jest.fn()
+    oib.layers.updateState = jest.fn()
+    oib.renderer.drawSymbol = jest.fn()
+    oib.recognizer.addStrokes = jest.fn()
+    oib.updateLayerUI = jest.fn()
+    oib.event.emitImported = jest.fn()
+
+    test("should update layer state", async () =>
+    {
+      await oib.importPointEvents(pStrokes)
+      expect(oib.event.emitIdle).toHaveBeenNthCalledWith(1, false)
+      expect(oib.layers.updateState).toHaveBeenNthCalledWith(1, false)
+    })
     test("should call recognizer.addStrokes", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      oib.grabber.attach = jest.fn()
-      oib.renderer.drawSymbol = jest.fn()
-      oib.menu.render = jest.fn()
-      oib.menu.update = jest.fn()
-      oib.svgDebugger.apply = jest.fn(() => Promise.resolve())
-      oib.recognizer.init = jest.fn(() => Promise.resolve())
-      oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
-      oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
-      await oib.init()
-      const pStrokes: PartialDeep<OIStroke>[] = [
-        {
-          pointers: [
-            { x: 254, y: 37, t: 1, p: 1 },
-            { x: 253, y: 42, t: 2, p: 0.7 },
-          ]
-        },
-        {
-          pointers: [
-            { x: 222, y: 386, t: 3, p: 0.5 },
-            { x: 226, y: 385, t: 4, p: 0.8 },
-          ],
-          style: { width: 3, color: "#1A8CFF" }
-        }
-      ]
       await oib.importPointEvents(pStrokes)
       expect(oib.recognizer.addStrokes).toBeCalledTimes(1)
     })
     test("should add symbols to model and draw", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      oib.grabber.attach = jest.fn()
-      oib.renderer.drawSymbol = jest.fn()
-      oib.menu.render = jest.fn()
-      oib.menu.update = jest.fn()
-      oib.svgDebugger.apply = jest.fn(() => Promise.resolve())
-      oib.recognizer.init = jest.fn(() => Promise.resolve())
-      oib.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
-      oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
-      expect(oib.model.symbols).toHaveLength(0)
-      await oib.init()
-      const pStrokes: PartialDeep<OIStroke>[] = [
-        {
-          pointers: [
-            { x: 254, y: 37, t: 1, p: 1 },
-            { x: 253, y: 42, t: 2, p: 0.7 },
-          ]
-        },
-        {
-          pointers: [
-            { x: 222, y: 386, t: 3, p: 0.5 },
-            { x: 226, y: 385, t: 4, p: 0.8 },
-          ],
-          style: { width: 3, color: "#1A8CFF" }
-        }
-      ]
+      oib.model.symbols = []
       await oib.importPointEvents(pStrokes)
       expect(oib.model.symbols).toHaveLength(pStrokes.length)
       expect(oib.renderer.drawSymbol).toHaveBeenCalledTimes(2)
+    })
+    test("should update layer UI", async () =>
+    {
+      await oib.importPointEvents(pStrokes)
+      expect(oib.updateLayerUI).toHaveBeenCalledTimes(1)
+    })
+    test("should emit Imported", async () =>
+    {
+      await oib.importPointEvents(pStrokes)
+      expect(oib.event.emitImported).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe("Download", () =>
+  {
+    const layers = new EditorLayer(document.createElement("div"))
+    const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
+    const stroke1 = buildOIStroke()
+    stroke1.selected = true
+    oib.model.addSymbol(stroke1)
+    const stroke2 = buildOIStroke()
+    oib.model.addSymbol(stroke2)
+
+    oib.renderer.getElementById = jest.fn((id) =>
+    {
+      const p = document.createElementNS("http://www.w3.org/2000/svg", "path")
+      p.id = id
+      return p
+    })
+
+    test("should call trigger download svg file", async () =>
+    {
+      global.URL.createObjectURL = jest.fn(() => 'download-svg-url')
+      const link = document.createElement("a")
+      link.click = jest.fn()
+      jest.spyOn(document, 'createElement').mockImplementationOnce(() => link)
+      oib.downloadAsSVG()
+      expect(link.href).toContain('download-svg-url')
+      expect(link.download).toContain("iink-ts-")
+      expect(link.download).toContain(".svg")
+      expect(link.click).toHaveBeenCalledTimes(1)
+    })
+    // //fix canvas.getContext
+    test.skip("should call trigger download png file", async () =>
+    {
+      global.URL.createObjectURL = jest.fn(() => 'download-png-url')
+      //@ts-ignore
+      global.Image = class
+      {
+        onload: () => void
+        //@ts-ignore
+        constructor(width?: number, height?: number)
+        {
+          this.onload = jest.fn()
+          setTimeout(() =>
+          {
+            this.onload()
+          }, 50)
+        }
+      } as unknown as HTMLImageElement
+      const link = document.createElement("a")
+      link.click = jest.fn()
+      jest.spyOn(document, 'createElement').mockImplementationOnce(() => link)
+      oib.downloadAsPNG()
+      await delay(101)
+      expect(link.href).toContain('download-png-url')
+      expect(link.click).toHaveBeenCalledTimes(1)
+    })
+    test("should call trigger download json file", async () =>
+    {
+      const link = document.createElement("a")
+      link.click = jest.fn()
+      jest.spyOn(document, 'createElement').mockImplementationOnce(() => link)
+      oib.downloadAsJson()
+      expect(link.href).toContain('data:text/json;charset=utf-8,')
+      expect(link.href).toContain(stroke1.id)
+      expect(link.href).toContain(stroke2.id)
+      expect(link.download).toContain("iink-ts-")
+      expect(link.download).toContain(".json")
+      expect(link.click).toHaveBeenCalledTimes(1)
+    })
+    test("should call trigger download json file with only selected files", async () =>
+    {
+      const link = document.createElement("a")
+      link.click = jest.fn()
+      jest.spyOn(document, 'createElement').mockImplementationOnce(() => link)
+      oib.downloadAsJson(true)
+      expect(link.href).toContain('data:text/json;charset=utf-8,')
+      expect(link.href).toContain(stroke1.id)
+      expect(link.href).not.toContain(stroke2.id)
+      expect(link.download).toContain("iink-ts-")
+      expect(link.download).toContain(".json")
+      expect(link.click).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  describe("extract symbols", () =>
+  {
+    const layers = new EditorLayer(document.createElement("div"))
+    const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
+    const text1 = buildOIText()
+    const text2 = buildOIText()
+    const stroke1 = buildOIStroke()
+    const stroke2 = buildOIStroke()
+    const strokeText = buildOIStrokeText()
+    const group = buildOIGroup({ nbOIText: 1, nbOIStroke: 1 })
+    const symbols: TOISymbol[] = [
+      stroke1,
+      text1,
+      stroke2,
+      strokeText,
+      text2,
+      buildOICircle(),
+      group
+    ]
+    test("should extract strokes", () =>
+    {
+      const strokes = oib.extractStrokesFromSymbols(symbols)
+      expect(strokes).toEqual([stroke1, stroke2, ...strokeText.strokes, ...group.children.filter(s => s.type === SymbolType.Stroke)])
+    })
+    test("should extract texts", () =>
+    {
+      const texts = oib.extractTextsFromSymbols(symbols)
+      expect(texts).toEqual([text1, text2, ...group.children.filter(s => s.type === SymbolType.Text)])
     })
   })
 
@@ -829,106 +921,20 @@ describe("OIBehaviors.ts", () =>
     })
   })
 
-  describe("Download", () =>
+  describe("export", () =>
   {
     const layers = new EditorLayer(document.createElement("div"))
     const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-    const stroke1 = buildOIStroke()
-    stroke1.selected = true
-    oib.model.addSymbol(stroke1)
-    const stroke2 = buildOIStroke()
-    oib.model.addSymbol(stroke2)
 
-    oib.renderer.getElementById = jest.fn((id) =>
-    {
-      const p = document.createElementNS("http://www.w3.org/2000/svg", "path")
-      p.id = id
-      return p
-    })
-
-    test("should call trigger download svg file", async () =>
-    {
-      global.URL.createObjectURL = jest.fn(() => 'download-svg-url')
-      const link = document.createElement("a")
-      link.click = jest.fn()
-      jest.spyOn(document, 'createElement').mockImplementationOnce(() => link)
-      oib.downloadAsSVG()
-      expect(link.href).toContain('download-svg-url')
-      expect(link.download).toContain("iink-ts-")
-      expect(link.download).toContain(".svg")
-      expect(link.click).toHaveBeenCalledTimes(1)
-    })
-    // //fix problem with image.onload
-    test.skip("should call trigger download png file", async () =>
-    {
-      global.URL.createObjectURL = jest.fn(() => 'download-png-url')
-      const link = document.createElement("a")
-      link.click = jest.fn()
-      jest.spyOn(document, 'createElement').mockImplementationOnce(() => link)
-      oib.downloadAsPNG()
-      expect(link.href).toContain('download-png-url')
-      expect(link.click).toHaveBeenCalledTimes(1)
-    })
-
-    test("should call trigger download json file", async () =>
-    {
-      const link = document.createElement("a")
-      link.click = jest.fn()
-      jest.spyOn(document, 'createElement').mockImplementationOnce(() => link)
-      // document.createElement = jest.fn(() => link)
-      oib.downloadAsJson()
-      expect(link.href).toContain('data:text/json;charset=utf-8,')
-      expect(link.href).toContain(stroke1.id)
-      expect(link.href).toContain(stroke2.id)
-      expect(link.download).toContain("iink-ts-")
-      expect(link.download).toContain(".json")
-      expect(link.click).toHaveBeenCalledTimes(1)
-    })
-    test("should call trigger download json file with only selected files", async () =>
-    {
-      const link = document.createElement("a")
-      link.click = jest.fn()
-      jest.spyOn(document, 'createElement').mockImplementationOnce(() => link)
-      oib.downloadAsJson(true)
-      expect(link.href).toContain('data:text/json;charset=utf-8,')
-      expect(link.href).toContain(stroke1.id)
-      expect(link.href).not.toContain(stroke2.id)
-      expect(link.download).toContain("iink-ts-")
-      expect(link.download).toContain(".json")
-      expect(link.click).toHaveBeenCalledTimes(1)
-    })
-  })
-
-  describe("export", () =>
-  {
     test("should call recognizer.export", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      oib.menu.render = jest.fn()
-      oib.grabber.attach = jest.fn()
-      oib.renderer.init = jest.fn()
-      oib.recognizer.send = jest.fn()
-      oib.recognizer.init = jest.fn(() => Promise.resolve())
       oib.recognizer.export = jest.fn(() => Promise.resolve(jiixText))
-      oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
-      await oib.init()
       await oib.export()
       await expect(oib.recognizer.export).toBeCalledTimes(1)
     })
     test("should reject if recognizer.export rejected", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      oib.menu.render = jest.fn()
-      oib.grabber.attach = jest.fn()
-      oib.renderer.init = jest.fn()
-      oib.event.emitError = jest.fn()
-      oib.recognizer.send = jest.fn()
-      oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
-      oib.recognizer.init = jest.fn(() => Promise.resolve())
       oib.recognizer.export = jest.fn(() => Promise.reject("export-error"))
-      await oib.init()
       await expect(async () => await oib.export()).rejects.toEqual("export-error")
       expect(oib.event.emitError).toHaveBeenCalledTimes(1)
     })
@@ -936,31 +942,24 @@ describe("OIBehaviors.ts", () =>
 
   describe("convert", () =>
   {
+    const layers = new EditorLayer(document.createElement("div"))
+    const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
+    oib.svgDebugger.apply = jest.fn()
+    oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
+    oib.converter.apply = jest.fn(() => Promise.resolve())
+
     test("should call converter.apply", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      oib.svgDebugger.apply = jest.fn()
-      oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
-      oib.converter.apply = jest.fn(() => Promise.resolve())
       await oib.convert()
       await expect(oib.converter.apply).toBeCalledTimes(1)
     })
     test("should emitConverted", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      oib.svgDebugger.apply = jest.fn()
-      oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
-      oib.converter.apply = jest.fn(() => Promise.resolve())
       await oib.convert()
       expect(editorEventMock.emitConverted).toBeCalledTimes(1)
     })
     test("should emit error if converter.apply is rejected", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      oib.svgDebugger.apply = jest.fn()
       oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
       oib.converter.apply = jest.fn(() => Promise.reject("convert-error"))
       oib.event.emitError = jest.fn()
@@ -970,29 +969,55 @@ describe("OIBehaviors.ts", () =>
     })
   })
 
+  describe("idle", () =>
+  {
+    const layers = new EditorLayer(document.createElement("div"))
+    const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
+    oib.recognizer.init = jest.fn(() => Promise.resolve())
+    oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
+    oib.event.emitIdle = jest.fn()
+    oib.layers.updateState = jest.fn()
+
+    beforeAll(async () =>
+    {
+      await oib.init()
+    })
+
+    test("should call recognizer.waitForIdle", async () =>
+    {
+      await oib.waitForIdle()
+      await expect(oib.recognizer.waitForIdle).toBeCalledTimes(1)
+    })
+    test("should emit idle & call layers.updateState when recognizer emit idle", async () =>
+    {
+      oib.recognizer.event.emitIdle(true)
+      expect(oib.event.emitIdle).toHaveBeenNthCalledWith(1, true)
+      expect(oib.layers.updateState).toHaveBeenNthCalledWith(1, true)
+    })
+  })
+
   describe("resize", () =>
   {
+    const layers = new EditorLayer(document.createElement("div"))
+    const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
+    oib.menu.render = jest.fn()
+    oib.menu.style.update = jest.fn()
+    oib.renderer.resize = jest.fn()
+    oib.recognizer.init = jest.fn(() => Promise.resolve())
+
+    beforeAll(async () =>
+    {
+      await oib.init()
+    })
+
     test("should call renderer.resize", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      oib.menu.render = jest.fn()
-      oib.menu.style.update = jest.fn()
-      oib.renderer.resize = jest.fn()
-      oib.recognizer.init = jest.fn(() => Promise.resolve())
       await oib.init()
       await oib.resize(1, 2)
       await expect(oib.renderer.resize).toBeCalledTimes(1)
     })
     test("should update model", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      oib.menu.render = jest.fn()
-      oib.menu.style.update = jest.fn()
-      oib.recognizer.init = jest.fn(() => Promise.resolve())
-      oib.renderer.resize = jest.fn()
-      await oib.init()
       await oib.resize(1, 2)
       await expect(oib.model.height).toEqual(1)
       await expect(oib.model.width).toEqual(2)
@@ -1001,27 +1026,35 @@ describe("OIBehaviors.ts", () =>
 
   describe("clear", () =>
   {
+    const layers = new EditorLayer(document.createElement("div"))
+    const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
+    oib.svgDebugger.apply = jest.fn()
+    oib.selector.removeSelectedGroup = jest.fn()
+    oib.renderer.clear = jest.fn()
+    oib.recognizer.clear = jest.fn(() => Promise.resolve())
+    oib.recognizer.init = jest.fn(() => Promise.resolve())
+
+    beforeAll(async () =>
+    {
+      await oib.init()
+    })
+
     test("should call renderer.clear", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      oib.svgDebugger.apply = jest.fn()
-      oib.renderer.clear = jest.fn()
-      oib.recognizer.clear = jest.fn(() => Promise.resolve())
-      oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
       const stroke = buildOIStroke()
       oib.model.addSymbol(stroke)
       await oib.clear()
       await expect(oib.renderer.clear).toBeCalledTimes(1)
     })
+    test("should call selector.removeSelectedGroup", async () =>
+    {
+      const stroke = buildOIStroke()
+      oib.model.addSymbol(stroke)
+      await oib.clear()
+      await expect(oib.selector.removeSelectedGroup).toBeCalledTimes(1)
+    })
     test("should call recognizer.clear", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      oib.svgDebugger.apply = jest.fn()
-      oib.renderer.clear = jest.fn()
-      oib.recognizer.clear = jest.fn(() => Promise.resolve())
-      oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
       const stroke = buildOIStroke()
       oib.model.addSymbol(stroke)
       oib.clear()
@@ -1029,12 +1062,6 @@ describe("OIBehaviors.ts", () =>
     })
     test("should clear model", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      oib.svgDebugger.apply = jest.fn()
-      oib.renderer.clear = jest.fn()
-      oib.recognizer.clear = jest.fn(() => Promise.resolve())
-      oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
       const stroke = buildOIStroke()
       oib.model.addSymbol(stroke)
       await oib.clear()
@@ -1044,12 +1071,6 @@ describe("OIBehaviors.ts", () =>
     })
     test("should do nothing if strokes empty", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      oib.svgDebugger.apply = jest.fn()
-      oib.renderer.clear = jest.fn()
-      oib.recognizer.clear = jest.fn(() => Promise.resolve())
-      oib.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
       await oib.clear()
       await expect(oib.renderer.clear).toBeCalledTimes(0)
       await expect(oib.recognizer.clear).toBeCalledTimes(0)
@@ -1058,35 +1079,26 @@ describe("OIBehaviors.ts", () =>
 
   describe("destroy", () =>
   {
+    const layers = new EditorLayer(document.createElement("div"))
+    const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
+    oib.grabber.detach = jest.fn()
+    oib.renderer.destroy = jest.fn()
+    oib.recognizer.destroy = jest.fn()
+
     test("should call grabber.detach", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      oib.grabber.detach = jest.fn()
-      oib.renderer.destroy = jest.fn()
-      oib.recognizer.destroy = jest.fn()
       oib.destroy()
       await expect(oib.grabber.detach).toBeCalledTimes(1)
     })
 
     test("should call renderer.destroy", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      oib.grabber.detach = jest.fn()
-      oib.renderer.destroy = jest.fn()
-      oib.recognizer.destroy = jest.fn()
       oib.destroy()
       await expect(oib.renderer.destroy).toBeCalledTimes(1)
     })
 
     test("should call recognizer.destroy", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const oib = new OIBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      oib.grabber.detach = jest.fn()
-      oib.renderer.destroy = jest.fn()
-      oib.recognizer.destroy = jest.fn()
       oib.destroy()
       await expect(oib.recognizer.destroy).toBeCalledTimes(1)
     })
