@@ -1095,7 +1095,7 @@ export class OIBehaviors implements IBehaviors
     downloadAnchorNode.remove()
   }
 
-  getSymbolsBounds(symbols: TOISymbol[], margin = SELECTION_MARGIN): Box
+  getSymbolsBounds(symbols: TOISymbol[], margin: number = SELECTION_MARGIN): Box
   {
     const box = Box.createFromBoxes(symbols.map(s => s.bounds))
     box.x -= margin

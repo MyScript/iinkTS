@@ -125,13 +125,15 @@ export class OIMenuContext extends OIMenu
     {
       const symbolsToDuplicate = this.symbolsSelected
 
-      const updateDeepIdInGroup = (gr: OISymbolGroup) => {
-        gr.children.forEach(s => {
+      const updateDeepIdInGroup = (gr: OISymbolGroup) =>
+      {
+        gr.children.forEach(s =>
+        {
           s.id = s.id.slice(0, -36) + `-${ createUUID() }`
           switch (s.type) {
             case SymbolType.Group:
               updateDeepIdInGroup(s)
-              break;
+              break
             case SymbolType.StrokeText:
               s.strokes.forEach(s => s.id = s.id.slice(0, -36) + `-${ createUUID() }`)
               break
@@ -146,7 +148,7 @@ export class OIMenuContext extends OIMenu
           if (clone.type === SymbolType.Group) {
             updateDeepIdInGroup(clone)
           }
-          else if(clone.type === SymbolType.StrokeText) {
+          else if (clone.type === SymbolType.StrokeText) {
             clone.strokes.forEach(s => s.id = s.id.slice(0, -36) + `-${ createUUID() }`)
           }
         }
@@ -537,7 +539,7 @@ export class OIMenuContext extends OIMenu
         this.editMenu?.style.setProperty("display", "none")
       }
 
-      if(this.behaviors.extractStrokesFromSymbols(this.symbolsSelected).length) {
+      if (this.behaviors.extractStrokesFromSymbols(this.symbolsSelected).length) {
         this.convertBtn?.style.removeProperty("display")
       }
       else {
@@ -562,7 +564,7 @@ export class OIMenuContext extends OIMenu
     this.updateGroupMenu()
   }
 
-  render(domElement: HTMLElement): void
+  render(layer: HTMLElement): void
   {
     this.wrapper = document.createElement("div")
     this.wrapper.id = `${ this.id }-wrapper`
@@ -577,11 +579,12 @@ export class OIMenuContext extends OIMenu
     this.wrapper.appendChild(this.createMenuRemove())
     this.wrapper.appendChild(this.createMenuSelectAll())
     this.wrapper.style.setProperty("display", "none")
-    domElement.appendChild(this.wrapper)
-    domElement.parentElement?.addEventListener("scroll", () =>
+    layer.appendChild(this.wrapper)
+
+    this.behaviors.layers.render.addEventListener("scroll", () =>
     {
-      this.position.scrollLeft = domElement.parentElement?.scrollLeft || 0
-      this.position.scrollTop = domElement.parentElement?.scrollTop || 0
+      this.position.scrollLeft = this.behaviors.layers.render.scrollLeft || 0
+      this.position.scrollTop = this.behaviors.layers.render.scrollTop || 0
       this.update()
     })
   }
@@ -599,6 +602,9 @@ export class OIMenuContext extends OIMenu
 
   destroy(): void
   {
-
+    while (this.wrapper?.lastChild) {
+      this.wrapper.removeChild(this.wrapper.lastChild)
+    }
+    this.wrapper?.remove()
   }
 }
