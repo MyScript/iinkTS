@@ -66,7 +66,6 @@ export class WSRecognizer
   protected theme?: TTheme
 
   protected connected?: DeferredPromise<void>
-  protected initialized?: DeferredPromise<void>
   protected ackDeferred?: DeferredPromise<void>
   protected addStrokeDeferred?: DeferredPromise<TExport>
   protected exportDeferred?: DeferredPromise<TExport>
@@ -79,6 +78,7 @@ export class WSRecognizer
   protected importPointEventsDeferred?: DeferredPromise<TExport>
   protected waitForIdleDeferred?: DeferredPromise<void>
 
+  initialized: DeferredPromise<void>
   url: string
   event: RecognizerEvent
 
@@ -90,6 +90,7 @@ export class WSRecognizer
     this.url = `${ scheme }://${ this.serverConfiguration.host }/api/v4.0/iink/document?applicationKey=${ this.serverConfiguration.applicationKey }`
     this.event = new RecognizerEvent()
     this.#logger.info("constructor", { serverConfig, recognitionConfig, url: this.url })
+    this.initialized = new DeferredPromise<void>()
   }
 
   get mimeTypes(): string[]
@@ -144,8 +145,8 @@ export class WSRecognizer
     if (this.connected?.isPending) {
       this.connected?.reject(error)
     }
-    if (this.initialized?.isPending) {
-      this.initialized?.reject(error)
+    if (this.initialized.isPending) {
+      this.initialized.reject(error)
     }
     if (this.addStrokeDeferred?.isPending) {
       this.addStrokeDeferred?.reject(error)
@@ -232,11 +233,10 @@ export class WSRecognizer
           break
       }
     }
-    const error = new Error(message || evt.reason)
-
-    this.rejectDeferredPending(error)
 
     if (!this.currentErrorCode && evt.code !== 1000) {
+      const error = new Error(message || evt.reason)
+      this.rejectDeferredPending(error)
       this.event.emitError(error)
     }
   }
@@ -281,7 +281,7 @@ export class WSRecognizer
     this.#logger.info("managePartChangeMessage", { websocketMessage })
     const partChangeMessage = websocketMessage as TWSMessageEventPartChange
     this.currentPartId = partChangeMessage.partId
-    this.initialized?.resolve()
+    this.initialized.resolve()
   }
 
   protected manageExportMessage(websocketMessage: TWSMessageEvent): void
@@ -291,7 +291,7 @@ export class WSRecognizer
     if (exportMessage.exports["application/vnd.myscript.jiix"]) {
       exportMessage.exports["application/vnd.myscript.jiix"] = JSON.parse(exportMessage.exports["application/vnd.myscript.jiix"].toString()) as TJIIXExport
     }
-    this.initialized?.resolve()
+    this.initialized.resolve()
     this.addStrokeDeferred?.resolve(exportMessage.exports)
     this.exportDeferred?.resolve(exportMessage.exports)
     this.convertDeferred?.resolve(exportMessage.exports)
@@ -371,7 +371,7 @@ export class WSRecognizer
           this.managePartChangeMessage(websocketMessage)
           break
         case "newPart":
-          this.initialized?.resolve()
+          this.initialized.resolve()
           break
         case "contentChanged":
           this.manageContentChangeMessage(websocketMessage)
@@ -420,16 +420,16 @@ export class WSRecognizer
       await this.initialized.promise
     } catch (err: unknown) {
       this.rejectDeferredPending(err as Error)
-      return this.initialized?.promise
+      return this.initialized.promise
     }
   }
 
   async send(message: TWSMessageEvent): Promise<void>
   {
-    if (!this.connected) {
+    if (!this.socket) {
       return Promise.reject(new Error("Recognizer must be initilized"))
     }
-    await this.connected.promise
+    await this.connected?.promise
     if (this.socket.readyState === this.socket.OPEN) {
       this.#logger.debug("send", { message })
       this.socket.send(JSON.stringify(message))
@@ -455,7 +455,7 @@ export class WSRecognizer
   async addStrokes(strokes: Stroke[]): Promise<TExport>
   {
     this.#logger.info("addStrokes", { strokes })
-    await this.initialized?.promise
+    await this.initialized.promise
     this.addStrokeDeferred = new DeferredPromise<TExport>()
     if (strokes.length === 0) {
       this.addStrokeDeferred.resolve({} as TExport)
@@ -472,7 +472,7 @@ export class WSRecognizer
   async setPenStyle(penStyle: TPenStyle): Promise<void>
   {
     this.#logger.info("setPenStyle", { penStyle })
-    await this.initialized?.promise
+    await this.initialized.promise
     this.penStyle = penStyle
     const message: TWSMessageEvent = {
       type: "setPenStyle",
@@ -483,7 +483,7 @@ export class WSRecognizer
 
   async setPenStyleClasses(penStyleClasses: string): Promise<void>
   {
-    await this.initialized?.promise
+    await this.initialized.promise
     this.penStyleClasses = penStyleClasses
     this.#logger.info("setPenStyleClasses", { penStyleClasses })
     const message: TWSMessageEvent = {
@@ -496,7 +496,7 @@ export class WSRecognizer
   async setTheme(theme: TTheme): Promise<void>
   {
     this.#logger.info("setTheme", { theme })
-    await this.initialized?.promise
+    await this.initialized.promise
     this.theme = theme
     const message: TWSMessageEvent = {
       type: "setTheme",
@@ -508,7 +508,7 @@ export class WSRecognizer
   async export(model: Model, requestedMimeTypes?: string[]): Promise<Model>
   {
     this.#logger.info("export", { model, requestedMimeTypes })
-    await this.initialized?.promise
+    await this.initialized.promise
     this.exportDeferred = new DeferredPromise<TExport>()
     const localModel = model.clone()
     let mimeTypes: string[] = requestedMimeTypes || []
@@ -551,7 +551,7 @@ export class WSRecognizer
   async import(model: Model, data: Blob, mimeType?: string): Promise<Model>
   {
     this.#logger.info("import", { data, mimeType })
-    await this.initialized?.promise
+    await this.initialized.promise
     const localModel = model.clone()
     const chunkSize = this.serverConfiguration.websocket.fileChunkSize
     const importFileId = Math.random().toString(10).substring(2, 6)
@@ -593,7 +593,7 @@ export class WSRecognizer
   async resize(model: Model): Promise<Model>
   {
     this.#logger.info("resize", { model })
-    await this.initialized?.promise
+    await this.initialized.promise
     this.resizeDeferred = new DeferredPromise<void>()
     const localModel = model.clone()
     this.viewSizeHeight = localModel.height
@@ -611,7 +611,7 @@ export class WSRecognizer
   async importPointEvents(strokes: Stroke[]): Promise<TExport>
   {
     this.#logger.info("importPointsEvents", { strokes })
-    await this.initialized?.promise
+    await this.initialized.promise
     this.importPointEventsDeferred = new DeferredPromise<TExport>()
     const message: TWSMessageEvent = {
       type: "pointerEvents",
@@ -624,7 +624,7 @@ export class WSRecognizer
   async convert(model: Model, conversionState?: TConverstionState): Promise<Model>
   {
     this.#logger.info("convert", { model, conversionState })
-    await this.initialized?.promise
+    await this.initialized.promise
     this.convertDeferred = new DeferredPromise<TExport>()
     const localModel = model.clone()
     const message: TWSMessageEvent = {
@@ -641,7 +641,7 @@ export class WSRecognizer
 
   async waitForIdle(): Promise<void>
   {
-    await this.initialized?.promise
+    await this.initialized.promise
     this.waitForIdleDeferred = new DeferredPromise<void>()
     const message: TWSMessageEvent = {
       type: "waitForIdle",
@@ -653,7 +653,7 @@ export class WSRecognizer
   async undo(model: Model): Promise<Model>
   {
     this.#logger.info("undo", { model })
-    await this.initialized?.promise
+    await this.initialized.promise
     const localModel = model.clone()
     this.undoDeferred = new DeferredPromise<TExport>()
     const message: TWSMessageEvent = {
@@ -671,7 +671,7 @@ export class WSRecognizer
   async redo(model: Model): Promise<Model>
   {
     this.#logger.info("redo", { model })
-    await this.initialized?.promise
+    await this.initialized.promise
     const localModel = model.clone()
     this.redoDeferred = new DeferredPromise<TExport>()
     const message: TWSMessageEvent = {
@@ -689,7 +689,7 @@ export class WSRecognizer
   async clear(model: Model): Promise<Model>
   {
     this.#logger.info("clear", { model })
-    await this.initialized?.promise
+    await this.initialized.promise
     const localModel = model.clone()
     localModel.modificationDate = Date.now()
     this.clearDeferred = new DeferredPromise<TExport>()
@@ -720,7 +720,6 @@ export class WSRecognizer
   {
     this.#logger.info("destroy")
     this.connected = undefined
-    this.initialized = undefined
     this.ackDeferred = undefined
     this.addStrokeDeferred = undefined
     this.exportDeferred = undefined

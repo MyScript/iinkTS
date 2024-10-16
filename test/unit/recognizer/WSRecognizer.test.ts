@@ -86,9 +86,9 @@ describe("WSRecognizer.ts", () =>
       wsr.event.emitError = jest.fn()
       mockServer = new ServerWebsocketMock(wsr.url)
     })
-    afterEach(async () =>
+    afterEach(() =>
     {
-      await wsr.destroy()
+      wsr.destroy()
       mockServer.close()
     })
 
@@ -306,12 +306,6 @@ describe("WSRecognizer.ts", () =>
       mockServer.close()
     })
 
-    test("should throw error if recognizer has not been initialize", async () =>
-    {
-      expect.assertions(1)
-      const stroke = buildStroke()
-      await expect(wsr.addStrokes([stroke])).rejects.toEqual(new Error("Recognizer must be initilized"))
-    })
     test("should send addStrokes message", async () =>
     {
       expect.assertions(1)
@@ -478,11 +472,6 @@ describe("WSRecognizer.ts", () =>
       mockServer.close()
     })
 
-    test("should throw error if recognizer has not been initialize", async () =>
-    {
-      expect.assertions(1)
-      await expect(wsr.export(model)).rejects.toEqual(new Error("Recognizer must be initilized"))
-    })
     testDatas.forEach(({ type, config }) =>
     {
       test(`should send export message for ${ type }`, async () =>
@@ -576,10 +565,6 @@ describe("WSRecognizer.ts", () =>
       mockServer.close()
     })
 
-    test("should throw error if recognizer has not been initialize", async () =>
-    {
-      await expect(wsr.import(model, blobToImport, mimeType)).rejects.toEqual(new Error("Recognizer must be initilized"))
-    })
     test("should send import message", async () =>
     {
       await wsr.init(height, width)
@@ -653,10 +638,6 @@ describe("WSRecognizer.ts", () =>
       mockServer.close()
     })
 
-    test("should throw error if recognizer has not been initialize", async () =>
-    {
-      await expect(wsr.importPointEvents(strokes)).rejects.toEqual(new Error("Recognizer must be initilized"))
-    })
     test("should send importPointEvents message", async () =>
     {
       await wsr.init(height, width)
@@ -722,12 +703,6 @@ describe("WSRecognizer.ts", () =>
       mockServer.close()
     })
 
-
-    test("should throw error if recognizer has not been initialize", async () =>
-    {
-      expect.assertions(1)
-      await expect(wsr.resize(model)).rejects.toEqual(new Error("Recognizer must be initilized"))
-    })
     test("should send resize message", async () =>
     {
       expect.assertions(1)
@@ -789,11 +764,6 @@ describe("WSRecognizer.ts", () =>
       mockServer.close()
     })
 
-    test("should throw error if recognizer has not been initialize", async () =>
-    {
-      expect.assertions(1)
-      await expect(wsr.convert(model)).rejects.toEqual(new Error("Recognizer must be initilized"))
-    })
     test("should send convert message", async () =>
     {
       expect.assertions(1)
@@ -859,11 +829,6 @@ describe("WSRecognizer.ts", () =>
       mockServer.close()
     })
 
-    test("should throw error if recognizer has not been initialize", async () =>
-    {
-      expect.assertions(1)
-      await expect(wsr.waitForIdle()).rejects.toEqual(new Error("Recognizer must be initilized"))
-    })
     test("should send waitForIdle message", async () =>
     {
       expect.assertions(1)
@@ -923,11 +888,6 @@ describe("WSRecognizer.ts", () =>
       mockServer.close()
     })
 
-    test("should throw error if recognizer has not been initialize", async () =>
-    {
-      expect.assertions(1)
-      await expect(wsr.undo(model)).rejects.toEqual(new Error("Recognizer must be initilized"))
-    })
     test("should send undo message", async () =>
     {
       expect.assertions(1)
@@ -993,11 +953,6 @@ describe("WSRecognizer.ts", () =>
       mockServer.close()
     })
 
-    test("should throw error if recognizer has not been initialize", async () =>
-    {
-      expect.assertions(1)
-      await expect(wsr.redo(model)).rejects.toEqual(new Error("Recognizer must be initilized"))
-    })
     test("should send redo message", async () =>
     {
       expect.assertions(1)
@@ -1063,11 +1018,6 @@ describe("WSRecognizer.ts", () =>
       mockServer.close()
     })
 
-    test("should throw error if recognizer has not been initialize", async () =>
-    {
-      expect.assertions(1)
-      await expect(wsr.clear(model)).rejects.toEqual(new Error("Recognizer must be initilized"))
-    })
     test("should send clear message", async () =>
     {
       expect.assertions(1)

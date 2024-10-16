@@ -18,6 +18,7 @@ import
   EditorTool
 } from "../../../src/iink"
 import { EditorEventMock } from "../__mocks__/EditorEventMock"
+import { WSRecognizerMock } from "../__mocks__/WSRecognizerMock"
 
 describe("WSBehaviors.ts", () =>
 {
@@ -102,7 +103,6 @@ describe("WSBehaviors.ts", () =>
       const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
       wsb.recognizer.init = jest.fn(() => Promise.resolve())
       wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
       wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
@@ -115,10 +115,8 @@ describe("WSBehaviors.ts", () =>
         stackIndex: 0,
         possibleUndoCount: 0
       })
-      await expect(wsb.grabber.attach).toBeCalledTimes(1)
-      await expect(wsb.grabber.attach).toBeCalledWith(layers.render)
-      await expect(wsb.renderer.init).toBeCalledTimes(1)
-      await expect(wsb.renderer.init).toBeCalledWith(layers.render)
+      await expect(wsb.grabber.attach).toHaveBeenNthCalledWith(1, layers.render)
+      await expect(wsb.renderer.init).toHaveBeenNthCalledWith(1, layers.render)
       await expect(wsb.recognizer.init).toBeCalledTimes(1)
     })
 
@@ -128,11 +126,16 @@ describe("WSBehaviors.ts", () =>
       const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
+      //@ts-ignore
+      wsb.recognizer.init = jest.fn((height: number, width: number) =>
+      {
+        wsb.recognizer.initialized.resolve()
+        return wsb.recognizer.initialized.promise
+      })
       wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
       wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
       wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
+
       await wsb.init()
       await expect(wsb.recognizer.init).toBeCalledTimes(1)
     })
@@ -143,89 +146,70 @@ describe("WSBehaviors.ts", () =>
       const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.reject("pouet"))
+      //@ts-ignore
+      wsb.recognizer.init = jest.fn((height: number, width: number) =>
+      {
+        wsb.recognizer.initialized.reject("pouet")
+        return wsb.recognizer.initialized.promise
+      })
+
       await expect(wsb.init()).rejects.toEqual("pouet")
     })
   })
 
   describe("drawCurrentStroke", () =>
   {
+    const layers = new EditorLayer(document.createElement("div"))
+    const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
+    wsb.grabber.attach = jest.fn()
+    wsb.renderer.init = jest.fn()
+    wsb.recognizer = new WSRecognizerMock()
+    wsb.renderer.drawPendingStroke = jest.fn()
+    beforeAll(async () =>
+    {
+      await wsb.init()
+    })
+    test("should not call renderer.drawPendingStroke if currentSymbol is null", async () =>
+    {
+      wsb.drawCurrentStroke()
+      await expect(wsb.renderer.drawPendingStroke).toBeCalledTimes(0)
+    })
     test("should call renderer.drawPendingStroke", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.renderer.drawPendingStroke = jest.fn()
-      await wsb.init()
       const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
       wsb.model.initCurrentStroke(p1, "pen", DefaultPenStyle)
       wsb.drawCurrentStroke()
       await expect(wsb.renderer.drawPendingStroke).toBeCalledTimes(1)
       await expect(wsb.renderer.drawPendingStroke).toBeCalledWith(wsb.model.currentSymbol)
     })
-    test("should not call renderer.drawPendingStroke if currentSymbol is null", async () =>
-    {
-
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.renderer.drawPendingStroke = jest.fn()
-      await wsb.init()
-      wsb.drawCurrentStroke()
-      await expect(wsb.renderer.drawPendingStroke).toBeCalledTimes(0)
-    })
   })
 
   describe("synchronizeModelWithBackend", () =>
   {
-    test("should call recognizer.addStrokes", async () =>
+    describe("with exportContent = 'POINTER_UP", () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
       const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.renderer.clearErasingStrokes = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.addStrokes = jest.fn(() => Promise.resolve({} as TExport))
-      await wsb.init()
-      await wsb.synchronizeModelWithBackend()
-      await expect(wsb.recognizer.addStrokes).toBeCalledTimes(1)
+      wsb.recognizer = new WSRecognizerMock()
+      beforeAll(async () =>
+      {
+        await wsb.init()
+      })
+      test("should call recognizer.addStrokes", async () =>
+      {
+        await wsb.synchronizeModelWithBackend()
+        await expect(wsb.recognizer.addStrokes).toBeCalledTimes(1)
+      })
+      test("should call renderer.clearErasingStrokes", async () =>
+      {
+        await wsb.synchronizeModelWithBackend()
+        await expect(wsb.renderer.clearErasingStrokes).toBeCalledTimes(1)
+      })
     })
-    test("should call renderer.clearErasingStrokes", async () =>
-    {
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.renderer.clearErasingStrokes = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.addStrokes = jest.fn(() => Promise.resolve({} as TExport))
-      await wsb.init()
-      await wsb.synchronizeModelWithBackend()
-      await expect(wsb.renderer.clearErasingStrokes).toBeCalledTimes(1)
-    })
-    test("should not call recognizer.addStrokes when exportContent = DEMAND", async () =>
+    describe("with exportContent = 'DEMAND", () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
       const configuration: TConfiguration = JSON.parse(JSON.stringify(DefaultConfiguration))
@@ -234,69 +218,66 @@ describe("WSBehaviors.ts", () =>
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
       wsb.renderer.clearPendingStroke = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.addStrokes = jest.fn(() => Promise.resolve({} as TExport))
-      await wsb.init()
-      await wsb.synchronizeModelWithBackend()
-      await expect(wsb.recognizer.addStrokes).toBeCalledTimes(0)
+      wsb.recognizer = new WSRecognizerMock()
+      beforeAll(async () =>
+      {
+        await wsb.init()
+      })
+      test("should not call recognizer.addStrokes when exportContent = DEMAND", async () =>
+      {
+        await wsb.synchronizeModelWithBackend()
+        await expect(wsb.recognizer.addStrokes).toBeCalledTimes(0)
+      })
     })
-    test("should reject if recognizer.addStrokes rejected", async () =>
+  })
+
+  describe("idle", () =>
+  {
+    const layers = new EditorLayer(document.createElement("div"))
+    const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
+    wsb.grabber.attach = jest.fn()
+    wsb.renderer.init = jest.fn()
+    wsb.recognizer = new WSRecognizerMock()
+    wsb.event.emitError = jest.fn()
+    beforeAll(async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.renderer.clearErasingStrokes = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.addStrokes = jest.fn(() => Promise.reject("poney"))
       await wsb.init()
-      await expect(wsb.synchronizeModelWithBackend()).rejects.toEqual("poney")
+    })
+    test("should call recognizer.waitForIdle", async () =>
+    {
+      await wsb.waitForIdle()
+      await expect(wsb.recognizer.waitForIdle).toBeCalledTimes(1)
     })
   })
 
   describe("export", () =>
   {
-    test("should call recognizer.export", async () =>
+    describe("with exportContent = 'POINTER_UP", () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
       const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.export = jest.fn(m => Promise.resolve(m))
-      await wsb.init()
-      await wsb.export()
-      await expect(wsb.recognizer.export).toBeCalledTimes(1)
+      wsb.recognizer = new WSRecognizerMock()
+      wsb.event.emitError = jest.fn()
+      beforeAll(async () =>
+      {
+        await wsb.init()
+      })
+      test("should call recognizer.export", async () =>
+      {
+        wsb.recognizer.export = jest.fn(m => Promise.resolve(m))
+        await wsb.export()
+        await expect(wsb.recognizer.export).toBeCalledTimes(1)
+      })
+      test("should reject if recognizer.export rejected", async () =>
+      {
+        wsb.recognizer.export = jest.fn(() => Promise.reject("poney"))
+        await expect(wsb.export()).rejects.toEqual("poney")
+        expect(wsb.event.emitError).toHaveBeenNthCalledWith(1, "poney")
+      })
     })
-    test("should reject if recognizer.export rejected", async () =>
-    {
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.renderer.clearPendingStroke = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.export = jest.fn(() => Promise.reject("poney"))
-      await wsb.init()
-      await expect(wsb.export()).rejects.toEqual("poney")
-    })
-    test("should call recognizer.addStrokes when exportContent = DEMAND", async () =>
+    describe("with exportContent = 'POINTER_UP", () =>
     {
       const layers = new EditorLayer(document.createElement("div"))
       const configuration: TConfiguration = JSON.parse(JSON.stringify(DefaultConfiguration))
@@ -304,401 +285,323 @@ describe("WSBehaviors.ts", () =>
       const wsb = new WSBehaviors({ configuration }, layers, editorEventMock)
       wsb.grabber.attach = jest.fn()
       wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.addStrokes = jest.fn(() => Promise.resolve({} as TExport))
-      wsb.recognizer.export = jest.fn(m => Promise.resolve(m))
-      await wsb.init()
-      await wsb.export()
-      await expect(wsb.recognizer.addStrokes).toBeCalledTimes(1)
-      await expect(wsb.recognizer.export).toBeCalledTimes(0)
-    })
-    test("should reject if recognizer.addStrokes rejected when exportContent = DEMAND", async () =>
-    {
-      const layers = new EditorLayer(document.createElement("div"))
-      const configuration: TConfiguration = JSON.parse(JSON.stringify(DefaultConfiguration))
-      configuration.triggers.exportContent = "DEMAND"
-      const wsb = new WSBehaviors({ configuration }, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.renderer.clearPendingStroke = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.addStrokes = jest.fn(() => Promise.reject("poney"))
-      await wsb.init()
-      await expect(wsb.export()).rejects.toEqual("poney")
+      wsb.recognizer = new WSRecognizerMock()
+      wsb.event.emitError = jest.fn()
+      beforeAll(async () =>
+      {
+        await wsb.init()
+      })
+      test("should call recognizer.addStrokes when exportContent = DEMAND", async () =>
+      {
+        await wsb.init()
+        await wsb.export()
+        await expect(wsb.recognizer.addStrokes).toBeCalledTimes(1)
+        await expect(wsb.recognizer.export).toBeCalledTimes(0)
+      })
+      test("should reject if recognizer.addStrokes rejected when exportContent = DEMAND", async () =>
+      {
+        wsb.recognizer.addStrokes = jest.fn(() => Promise.reject("poney"))
+        await wsb.init()
+        await expect(wsb.export()).rejects.toEqual("poney")
+        expect(wsb.event.emitError).toHaveBeenNthCalledWith(1, "poney")
+      })
     })
   })
 
   describe("convert", () =>
   {
+    const layers = new EditorLayer(document.createElement("div"))
+    const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
+    wsb.grabber.attach = jest.fn()
+    wsb.renderer.init = jest.fn()
+    wsb.recognizer = new WSRecognizerMock()
+    beforeAll(async () =>
+    {
+      await wsb.init()
+    })
     test("should call recognizer.convert", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.convert = jest.fn(m => Promise.resolve(m))
-      await wsb.init()
       await wsb.convert()
       await expect(wsb.recognizer.convert).toBeCalledTimes(1)
+    })
+    test("should emot Converted recognizer.convert", async () =>
+    {
+      await wsb.convert()
+      await expect(wsb.event.emitConverted).toBeCalledTimes(1)
     })
   })
 
   describe("import", () =>
   {
+    const layers = new EditorLayer(document.createElement("div"))
+    const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
+    wsb.grabber.attach = jest.fn()
+    wsb.renderer.init = jest.fn()
+    wsb.recognizer = new WSRecognizerMock()
+    beforeAll(async () =>
+    {
+      await wsb.init()
+    })
     test("should call recognizer.import", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.import = jest.fn(m => Promise.resolve(m))
-      await wsb.init()
       const mimeType = "text/plain"
       const textImport = "winter is comming"
       const blob = new Blob([textImport], { type: mimeType })
       await wsb.import(blob, mimeType)
       await expect(wsb.recognizer.import).toBeCalledTimes(1)
     })
-    test("should return model form recognizer when recognizer emit EXPORTED", async () =>
+    test("should return model with new export", async () =>
     {
       const exportExpected: TExport = { "test/plain": "cofveve" }
       const model = new Model(width, height)
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
       wsb.recognizer.import = jest.fn(() =>
       {
         model.exports = exportExpected
         return Promise.resolve(model)
       })
-      await wsb.init()
       const mimeType = "text/plain"
       const textImport = "winter is comming"
       const blob = new Blob([textImport], { type: mimeType })
       const modelReceive = await wsb.import(blob, mimeType)
       await await expect(modelReceive.exports).toBe(exportExpected)
     })
+    test("should emit Imported", async () =>
+    {
+      const exportExpected: TExport = { "test/plain": "cofveve" }
+      const mimeType = "text/plain"
+      const textImport = "winter is comming"
+      const blob = new Blob([textImport], { type: mimeType })
+      const model = new Model(width, height)
+      wsb.recognizer.import = jest.fn(() =>
+      {
+        model.exports = exportExpected
+        return Promise.resolve(model)
+      })
+      wsb.event.emitImported = jest.fn()
+      await wsb.import(blob, mimeType)
+      await expect(wsb.event.emitImported).toHaveBeenNthCalledWith(1, model.exports)
+    })
   })
 
   describe("importPointsEvent", () =>
   {
+    const layers = new EditorLayer(document.createElement("div"))
+    const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
+    wsb.grabber.attach = jest.fn()
+    wsb.renderer.init = jest.fn()
+    wsb.recognizer = new WSRecognizerMock()
+    beforeAll(async () =>
+    {
+      await wsb.init()
+    })
     test("should call recognizer.importPointsEvents", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn()
-      wsb.recognizer.importPointEvents = jest.fn()
       await wsb.init()
       const strokeToImport = buildStroke()
       await wsb.importPointEvents([strokeToImport])
       expect(wsb.recognizer.importPointEvents).toBeCalledTimes(1)
-      // expect(wsb.recognizer.importPointEvents).toBeCalledWith([strokeToImport])
     })
   })
 
   describe("resize", () =>
   {
+    const layers = new EditorLayer(document.createElement("div"))
+    const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
+    wsb.grabber.attach = jest.fn()
+    wsb.renderer.init = jest.fn()
+    wsb.renderer.resize = jest.fn()
+    wsb.recognizer = new WSRecognizerMock()
+    beforeAll(async () =>
+    {
+      await wsb.init()
+    })
     test("should call renderer.resize", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.renderer.resize = jest.fn()
-      wsb.recognizer.resize = jest.fn(m => Promise.resolve(m))
-      await wsb.init()
       await wsb.resize(1, 2)
       await expect(wsb.renderer.resize).toBeCalledTimes(1)
     })
-    test("should reject if renderer.resize rejected", async () =>
-    {
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.renderer.resize = jest.fn()
-      wsb.recognizer.resize = jest.fn(() => Promise.reject("pony"))
-      await wsb.init()
-      await expect(wsb.resize(1, 2)).rejects.toEqual("pony")
-    })
     test("should call recognizer.resize after resizeTriggerDelay", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.renderer.resize = jest.fn()
-      wsb.recognizer.resize = jest.fn(m => Promise.resolve(m))
-      await wsb.init()
       wsb.resize(1, 2)
       await delay(DefaultConfiguration.triggers.resizeTriggerDelay)
       await expect(wsb.recognizer.resize).toBeCalledTimes(1)
+    })
+    test("should reject if renderer.resize rejected", async () =>
+    {
+      wsb.recognizer.resize = jest.fn(() => Promise.reject("pony"))
+      await expect(wsb.resize(1, 2)).rejects.toEqual("pony")
     })
   })
 
   describe("undo", () =>
   {
+    const layers = new EditorLayer(document.createElement("div"))
+    const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
+    wsb.grabber.attach = jest.fn()
+    wsb.renderer.init = jest.fn()
+    wsb.renderer.resize = jest.fn()
+    wsb.recognizer = new WSRecognizerMock()
+
+    const firstModel = new Model(200, 200)
+    const secondModel = new Model(42, 12)
+    wsb.history.stack = [firstModel, secondModel]
+    beforeAll(async () =>
+    {
+      await wsb.init()
+    })
     test("should call recognizer.undo", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.undo = jest.fn(m => Promise.resolve(m))
-      await wsb.init()
       wsb.history.context.canUndo = true
       wsb.history.context.stackIndex = 1
-      wsb.history.stack.push(new Model(100, 200))
       await wsb.undo()
       await expect(wsb.recognizer.undo).toBeCalledTimes(1)
     })
     test("should return previous model", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.undo = jest.fn(m => Promise.resolve(m))
-      await wsb.init()
-      expect(wsb.model).toEqual(wsb.history.stack[0])
       wsb.history.context.canUndo = true
       wsb.history.context.stackIndex = 1
-      wsb.history.stack.push(new Model(100, 200))
-      await expect(wsb.undo()).resolves.toEqual(wsb.history.stack[0])
+      await expect(wsb.undo()).resolves.toEqual(firstModel)
+    })
+    test("should reject if recognizer.redo rejected", async () =>
+    {
+      wsb.history.context.canUndo = true
+      wsb.history.context.stackIndex = 1
+      wsb.recognizer.undo = jest.fn(() => Promise.reject("pony"))
+      await expect(wsb.undo()).rejects.toEqual("pony")
     })
     test("should throw error if context.canUndo = false", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.undo = jest.fn(m => Promise.resolve(m))
-      await wsb.init()
+      wsb.history.context.canUndo = false
       await expect(wsb.undo()).rejects.toEqual(new Error("Undo not allowed"))
     })
   })
 
   describe("redo", () =>
   {
+    const layers = new EditorLayer(document.createElement("div"))
+    const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
+    wsb.grabber.attach = jest.fn()
+    wsb.renderer.init = jest.fn()
+    wsb.renderer.resize = jest.fn()
+    wsb.recognizer = new WSRecognizerMock()
+    const firstModel = new Model(200, 200)
+    const secondModel = new Model(42, 12)
+    wsb.history.stack = [firstModel, secondModel]
+    beforeAll(async () =>
+    {
+      await wsb.init()
+    })
     test("should call recognizer.redo", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.redo = jest.fn(m => Promise.resolve(m))
-      await wsb.init()
       wsb.history.context.canRedo = true
       wsb.history.context.stackIndex = 0
-      wsb.history.stack.push(new Model(100, 200))
       await wsb.redo()
       await expect(wsb.recognizer.redo).toBeCalledTimes(1)
     })
     test("should return next model", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.redo = jest.fn(m => Promise.resolve(m))
-      await wsb.init()
       wsb.history.context.canRedo = true
       wsb.history.context.stackIndex = 0
-      const nextModel = new Model(100, 200)
-      wsb.history.stack.push(nextModel)
+      wsb.history.stack.push(secondModel)
       await expect(wsb.redo()).resolves.toEqual(wsb.history.stack[1])
     })
     test("should reject if recognizer.redo rejected", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.redo = jest.fn(() => Promise.reject("pony"))
-      await wsb.init()
       wsb.history.context.canRedo = true
       wsb.history.context.stackIndex = 0
-      wsb.history.stack.push(new Model(100, 200))
-      wsb.history.stack.push(new Model(42, 12))
+      wsb.recognizer.redo = jest.fn(() => Promise.reject("pony"))
       await expect(wsb.redo()).rejects.toEqual("pony")
     })
     test("should throw error if context.canRedo = false", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.redo = jest.fn(m => Promise.resolve(m))
-      await wsb.init()
+      wsb.history.context.canRedo = false
       await expect(wsb.redo()).rejects.toEqual(new Error("Redo not allowed"))
     })
   })
 
   describe("clear", () =>
   {
+    const layers = new EditorLayer(document.createElement("div"))
+    const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
+    wsb.grabber.attach = jest.fn()
+    wsb.renderer.init = jest.fn()
+    wsb.renderer.resize = jest.fn()
+    wsb.recognizer = new WSRecognizerMock()
+    beforeAll(async () =>
+    {
+      await wsb.init()
+    })
+    test("should call model.clear", async () =>
+    {
+      wsb.model.clear = jest.fn()
+      await wsb.clear()
+      await expect(wsb.model.clear).toBeCalledTimes(1)
+    })
     test("should call recognizer.clear", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.clear = jest.fn()
-      await wsb.init()
       await wsb.clear()
       await expect(wsb.recognizer.clear).toBeCalledTimes(1)
+    })
+    test("should call recognizer.clear", async () =>
+    {
+      wsb.event.emitCleared = jest.fn()
+      await wsb.clear()
+      await expect(wsb.event.emitCleared).toBeCalledTimes(1)
     })
   })
 
   describe("destroy", () =>
   {
+    const layers = new EditorLayer(document.createElement("div"))
+    const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
+    wsb.grabber.attach = jest.fn()
+    wsb.grabber.detach = jest.fn()
+    wsb.renderer.init = jest.fn()
+    wsb.renderer.destroy = jest.fn()
+    wsb.recognizer = new WSRecognizerMock()
+    beforeAll(async () =>
+    {
+      await wsb.init()
+    })
     test("should call grabber.detach", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.detach = jest.fn()
-      wsb.renderer.destroy = jest.fn()
-      wsb.recognizer.close = jest.fn()
       wsb.destroy()
-      await expect(wsb.grabber.detach).toBeCalledTimes(1)
+      expect(wsb.grabber.detach).toBeCalledTimes(1)
     })
 
     test("should call renderer.destroy", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.detach = jest.fn()
-      wsb.renderer.destroy = jest.fn()
-      wsb.recognizer.close = jest.fn()
       wsb.destroy()
-      await expect(wsb.renderer.destroy).toBeCalledTimes(1)
+      expect(wsb.renderer.destroy).toBeCalledTimes(1)
     })
 
     test("should call recognizer.destroy", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.detach = jest.fn()
-      wsb.renderer.destroy = jest.fn()
-      wsb.recognizer.destroy = jest.fn()
       wsb.destroy()
-      await expect(wsb.recognizer.destroy).toBeCalledTimes(1)
+      expect(wsb.recognizer.destroy).toBeCalledTimes(1)
     })
 
   })
 
   describe("Event", () =>
   {
+    const layers = new EditorLayer(document.createElement("div"))
+    const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
+    wsb.grabber.attach = jest.fn()
+    wsb.renderer.init = jest.fn()
+    wsb.renderer.updatesLayer = jest.fn()
+    wsb.recognizer = new WSRecognizerMock()
+    beforeAll(async () =>
+    {
+      await wsb.init()
+    })
     test("should emitExported when recognizer emitExported", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.export = jest.fn(m => Promise.resolve(m))
-      await wsb.init()
       wsb.recognizer.event.emitExported({ "text/plain": "test-exported" })
       expect(editorEventMock.emitExported).toHaveBeenNthCalledWith(1, { "text/plain": "test-exported" })
     })
     test("should update smarguide when recognizer emitExported", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.export = jest.fn(m => Promise.resolve(m))
-      await wsb.init()
       //@ts-ignore
       wsb.smartGuide.update = jest.fn()
       const jiix = {
@@ -718,17 +621,6 @@ describe("WSBehaviors.ts", () =>
     })
     test("should updatesLayer when recognizer emit SVG_PATCH", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.renderer.updatesLayer = jest.fn()
-      await wsb.init()
       const svgPatch: TWSMessageEventSVGPatch = {
         type: "REPLACE_ALL",
         layer: "MODEL",
@@ -742,107 +634,61 @@ describe("WSBehaviors.ts", () =>
 
   describe("Style", () =>
   {
-    test("should call styleManager.setPenStyle & recognizer.setPenStyle on init", async () =>
+    const layers = new EditorLayer(document.createElement("div"))
+    const customBehaviorsOptions: TBehaviorOptions = JSON.parse(JSON.stringify(DefaultBehaviorsOptions))
+    const customPenStyle: TPenStyle = { color: "#d1d1d1" }
+    customBehaviorsOptions.penStyle = customPenStyle
+    const customTheme: TTheme = {
+      ink: {
+        width: 42,
+        color: "#2E7D32",
+        "-myscript-pen-width": 2,
+        "-myscript-pen-fill-style": "purple",
+        "-myscript-pen-fill-color": "#FFFFFF00"
+      },
+      ".math": {
+        "font-family": "STIXGeneral"
+      },
+      ".math-solved": {
+        "font-family": "STIXGeneral",
+        color: "blue"
+      },
+      ".text": {
+        "font-family": "Rubik Distressed",
+        "font-size": 10
+      }
+    }
+    customBehaviorsOptions.theme = customTheme
+    const wsb = new WSBehaviors(customBehaviorsOptions, layers, editorEventMock)
+    wsb.grabber.attach = jest.fn()
+    wsb.renderer.init = jest.fn()
+    wsb.renderer.updatesLayer = jest.fn()
+    wsb.styleManager.setPenStyle = jest.fn()
+    wsb.styleManager.setPenStyleClasses = jest.fn()
+    wsb.styleManager.setTheme = jest.fn()
+    wsb.recognizer = new WSRecognizerMock()
+    test("should have set PenStyle on initialization", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const customPenStyle: TPenStyle = { color: "#d1d1d1" }
-      const customBehaviorsOptions: TBehaviorOptions = JSON.parse(JSON.stringify(DefaultBehaviorsOptions))
-      customBehaviorsOptions.penStyle = customPenStyle
-      const wsb = new WSBehaviors(customBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.styleManager.setPenStyle = jest.fn()
       await wsb.init()
-      await expect(wsb.styleManager.setPenStyle).toBeCalledTimes(1)
-      await expect(wsb.styleManager.setPenStyle).toBeCalledWith(customPenStyle)
-      await expect(wsb.recognizer.setPenStyle).toBeCalledTimes(1)
-      await expect(wsb.recognizer.setPenStyle).toBeCalledWith(customPenStyle)
+      await expect(wsb.styleManager.setPenStyle).toHaveBeenNthCalledWith(1, customPenStyle)
+      await expect(wsb.recognizer.setPenStyle).toHaveBeenNthCalledWith(1, customPenStyle)
     })
     test("should change PenStyle", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.styleManager.setPenStyle = jest.fn()
-      await wsb.init()
-      const customPenStyle: TPenStyle = { color: "#d1d1d1" }
-      await wsb.setPenStyle(customPenStyle)
-      await expect(wsb.styleManager.setPenStyle).toBeCalledTimes(2)
-      await expect(wsb.styleManager.setPenStyle).toHaveBeenNthCalledWith(2, customPenStyle)
-      await expect(wsb.recognizer.setPenStyle).toBeCalledTimes(2)
-      await expect(wsb.recognizer.setPenStyle).toHaveBeenNthCalledWith(2, wsb.styleManager.penStyle)
+      const customPenStyle2: TPenStyle = { color: "red" }
+      await wsb.setPenStyle(customPenStyle2)
+      await expect(wsb.styleManager.setPenStyle).toHaveBeenNthCalledWith(1, customPenStyle2)
+      await expect(wsb.recognizer.setPenStyle).toHaveBeenNthCalledWith(1, wsb.styleManager.penStyle)
     })
-    test("should call styleManager.setTheme & recognizer.setTheme on init", async () =>
+    test("should have set Theme on initialization", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const customBehaviorsOptions: TBehaviorOptions = JSON.parse(JSON.stringify(DefaultBehaviorsOptions))
-      const customTheme: TTheme = {
-        ink: {
-          width: 42,
-          color: "#2E7D32",
-          "-myscript-pen-width": 2,
-          "-myscript-pen-fill-style": "purple",
-          "-myscript-pen-fill-color": "#FFFFFF00"
-        },
-        ".math": {
-          "font-family": "STIXGeneral"
-        },
-        ".math-solved": {
-          "font-family": "STIXGeneral",
-          color: "blue"
-        },
-        ".text": {
-          "font-family": "Rubik Distressed",
-          "font-size": 10
-        }
-      }
-      customBehaviorsOptions.theme = customTheme
-      const wsb = new WSBehaviors(customBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.styleManager.setTheme = jest.fn()
       await wsb.init()
-      await expect(wsb.styleManager.setTheme).toBeCalledTimes(1)
-      await expect(wsb.styleManager.setTheme).toBeCalledWith(customTheme)
-      await expect(wsb.recognizer.setTheme).toBeCalledTimes(1)
-      await expect(wsb.recognizer.setTheme).toBeCalledWith(wsb.styleManager.theme)
+      await expect(wsb.styleManager.setTheme).toHaveBeenNthCalledWith(1, customTheme)
+      await expect(wsb.recognizer.setTheme).toHaveBeenNthCalledWith(1, wsb.styleManager.theme)
     })
     test("should change Theme", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.styleManager.setTheme = jest.fn()
-      await wsb.init()
-      await expect(wsb.recognizer.setTheme).toBeCalledTimes(1)
-      await expect(wsb.styleManager.setTheme).toBeCalledTimes(1)
-      const customTheme: TTheme = {
+      const customTheme2: TTheme = {
         ink: {
           width: 42,
           color: "#2E7D32",
@@ -862,33 +708,21 @@ describe("WSBehaviors.ts", () =>
           "font-size": 10
         }
       }
-      await wsb.setTheme(customTheme)
-      await expect(wsb.styleManager.setTheme).toBeCalledTimes(2)
-      await expect(wsb.styleManager.setTheme).toHaveBeenNthCalledWith(2, customTheme)
-      await expect(wsb.recognizer.setTheme).toBeCalledTimes(2)
-      await expect(wsb.recognizer.setTheme).toHaveBeenNthCalledWith(2, wsb.styleManager.theme)
+      await wsb.setTheme(customTheme2)
+      await expect(wsb.styleManager.setTheme).toHaveBeenNthCalledWith(1, customTheme2)
+      await expect(wsb.recognizer.setTheme).toHaveBeenNthCalledWith(1, wsb.styleManager.theme)
+    })
+    test("should have set Theme on initialization", async () =>
+    {
+      await wsb.init()
+      await expect(wsb.recognizer.setPenStyleClasses).toHaveBeenNthCalledWith(1, "")
+      await expect(wsb.styleManager.setPenStyleClasses).toHaveBeenNthCalledWith(1, "")
     })
     test("should change PenStyleClasses", async () =>
     {
-      const layers = new EditorLayer(document.createElement("div"))
-      const wsb = new WSBehaviors(DefaultBehaviorsOptions, layers, editorEventMock)
-      wsb.grabber.attach = jest.fn()
-      wsb.renderer.init = jest.fn()
-      wsb.recognizer.send = jest.fn()
-      wsb.recognizer.init = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyle = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setTheme = jest.fn(() => Promise.resolve())
-      wsb.recognizer.setPenStyleClasses = jest.fn(() => Promise.resolve())
-      wsb.styleManager.setPenStyleClasses = jest.fn()
-      await wsb.init()
-      await expect(wsb.recognizer.setPenStyleClasses).toBeCalledTimes(1)
-      await expect(wsb.styleManager.setPenStyleClasses).toBeCalledTimes(1)
       await wsb.setPenStyleClasses("pouet")
-      await expect(wsb.styleManager.setPenStyleClasses).toBeCalledTimes(2)
-      await expect(wsb.styleManager.setPenStyleClasses).toHaveBeenNthCalledWith(2, "pouet")
-      await expect(wsb.recognizer.setPenStyleClasses).toBeCalledTimes(2)
-      await expect(wsb.recognizer.setPenStyleClasses).toHaveBeenNthCalledWith(2, wsb.styleManager.penStyleClasses)
+      await expect(wsb.styleManager.setPenStyleClasses).toHaveBeenNthCalledWith(1, "pouet")
+      await expect(wsb.recognizer.setPenStyleClasses).toHaveBeenNthCalledWith(1, wsb.styleManager.penStyleClasses)
     })
   })
 

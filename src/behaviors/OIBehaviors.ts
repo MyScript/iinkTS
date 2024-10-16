@@ -120,6 +120,11 @@ export class OIBehaviors implements IBehaviors
     this.layers.updateState(true)
   }
 
+  get initPromise(): Promise<void>
+  {
+    return this.recognizer.initialized?.promise || new Promise(() => {})
+  }
+
   //#region Properties
   get tool(): EditorTool
   {
@@ -400,6 +405,7 @@ export class OIBehaviors implements IBehaviors
       this.recognizer = new OIRecognizer(this.#configuration.server, this.#configuration.recognition)
       await this.recognizer.init()
       await this.recognizer.addStrokes(this.model.symbols.filter(s => s.type === SymbolType.Stroke) as OIStroke[], false)
+      this.event.emitLoaded()
     }
     catch (error) {
       this.#logger.error("changeLanguage", error)
