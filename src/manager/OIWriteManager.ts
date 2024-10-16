@@ -16,8 +16,7 @@ import
   TOIEdge,
   TOISymbol,
   TPoint,
-  TPointer,
-  Box
+  TPointer
 } from "../primitive"
 import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
@@ -94,11 +93,7 @@ export class OIWriteManager
 
   protected needContextLessGesture(stroke: OIStroke): boolean
   {
-    const strokeBoundsWithMargin = new Box(stroke.bounds)
-    strokeBoundsWithMargin.x -= (2 * SELECTION_MARGIN)
-    strokeBoundsWithMargin.y -= (2 * SELECTION_MARGIN)
-    strokeBoundsWithMargin.width += (4 * SELECTION_MARGIN)
-    strokeBoundsWithMargin.height += (4 * SELECTION_MARGIN)
+    const strokeBoundsWithMargin = this.behaviors.getSymbolsBounds([stroke], 2 * SELECTION_MARGIN)
     return this.detectGesture && this.model.symbols.some(s =>
     {
       switch (s.type) {

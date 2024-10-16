@@ -273,7 +273,7 @@ export class OIMenuTool extends OIMenu
     }
   }
 
-  render(domElement: HTMLElement): void
+  render(layer: HTMLElement): void
   {
     if (this.behaviors.configuration.menu.tool.enable) {
       this.wrapper = document.createElement("div")
@@ -286,7 +286,7 @@ export class OIMenuTool extends OIMenu
       this.wrapper.appendChild(this.createMenuEdge())
       this.wrapper.appendChild(this.createMenuShape())
 
-      domElement.appendChild(this.wrapper)
+      layer.appendChild(this.wrapper)
       this.update()
       this.show()
     }
