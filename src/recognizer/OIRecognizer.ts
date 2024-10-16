@@ -61,7 +61,7 @@ export class OIRecognizer
   protected currentErrorCode?: string | number
 
   protected connected?: DeferredPromise<void>
-  protected initialized?: DeferredPromise<void>
+  initialized?: DeferredPromise<void>
 
   protected addStrokeDeferred?: DeferredPromise<TOIMessageEventGesture | undefined>
   protected contextlessGestureDeferred: Map<string, DeferredPromise<TOIMessageEventContextlessGesture>>
@@ -95,7 +95,6 @@ export class OIRecognizer
   {
     return ["application/vnd.myscript.jiix"]
   }
-
 
   async #send(message: TOIMessageEvent): Promise<void>
   {

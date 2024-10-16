@@ -1,7 +1,7 @@
 
 import style from "./iink.css"
 import { IBehaviors, OIBehaviors, RestBehaviors, TBehaviorOptions, WSBehaviors } from "./behaviors"
-import { DeferredPromise, PartialDeep, mergeDeep } from "./utils"
+import { PartialDeep, mergeDeep } from "./utils"
 import { LoggerClass, LoggerManager } from "./logger"
 import { EditorTool } from "./Constants"
 import { DefaultLoggerConfiguration, TConfiguration, TConverstionState, TLoggerConfiguration } from "./configuration"
@@ -31,7 +31,6 @@ export class Editor
   event: EditorEvent
 
   #behaviors!: IBehaviors
-  #initializationDeferred: DeferredPromise<void>
 
   #loggerConfiguration!: TLoggerConfiguration
 
@@ -39,7 +38,6 @@ export class Editor
   {
     this.logger.info("constructor", { rootElement, options, globalClassCss })
 
-    this.#initializationDeferred = new DeferredPromise<void>()
     this.loggerConfiguration = mergeDeep({}, options.logger, DefaultLoggerConfiguration)
 
     this.event = new EditorEvent(rootElement)
@@ -68,7 +66,7 @@ export class Editor
 
   get initializationPromise(): Promise<void>
   {
-    return this.#initializationDeferred.promise
+    return this.#behaviors.initPromise
   }
 
   get model(): IModel
@@ -173,7 +171,6 @@ export class Editor
   async #initializeBehaviors(): Promise<void>
   {
     this.logger.info("initializeBehaviors", "start")
-    this.#initializationDeferred = new DeferredPromise<void>()
     this.layers.showLoader()
     this.closeMessageModal()
     return this.behaviors.init()
@@ -181,21 +178,19 @@ export class Editor
       {
         this.logger.info("initializeBehaviors", "then");
         (this.layers.root as HTMLEditorElement).editor = this
-        this.#initializationDeferred.resolve()
         this.event.emitLoaded()
       })
       .catch((error: Error) =>
       {
         this.logger.error("initializeBehaviors", error)
-        this.#initializationDeferred.reject(error)
         this.layers.showMessageError(error)
+        throw error
       })
       .finally(() =>
       {
         this.logger.debug("initializeBehaviors", "finally")
         this.layers.hideLoader()
         this.layers.updateState(true)
-        return this.#initializationDeferred.promise
       })
   }
 
@@ -225,7 +220,6 @@ export class Editor
   {
     try {
       this.logger.info("undo")
-      await this.#initializationDeferred.promise
       await this.behaviors.undo()
       this.logger.debug("undo", this.model)
       return this.model
@@ -239,7 +233,6 @@ export class Editor
   {
     try {
       this.logger.info("redo")
-      await this.#initializationDeferred.promise
       await this.behaviors.redo()
       this.logger.debug("redo", this.model)
       return this.model
@@ -253,7 +246,6 @@ export class Editor
   {
     try {
       this.logger.info("clear")
-      await this.#initializationDeferred.promise
       await this.behaviors.clear()
       this.logger.debug("clear", this.model)
       return this.model
@@ -267,7 +259,6 @@ export class Editor
   {
     try {
       this.logger.info("resize")
-      await this.#initializationDeferred.promise
       const compStyles = window.getComputedStyle(this.layers.root)
       const height = Math.max(parseInt(compStyles.height.replace("px", "")), this.configuration.rendering.minHeight)
       const width = Math.max(parseInt(compStyles.width.replace("px", "")), this.configuration.rendering.minWidth)
@@ -284,7 +275,6 @@ export class Editor
   {
     try {
       this.logger.info("export", { mimeTypes })
-      await this.#initializationDeferred.promise
       await this.behaviors.export(mimeTypes)
       this.logger.debug("export", this.model)
       return this.model
@@ -298,7 +288,6 @@ export class Editor
   {
     try {
       this.logger.info("export", { params })
-      await this.#initializationDeferred.promise
       await this.behaviors.convert(params?.conversionState, params?.mimeTypes)
       this.logger.debug("convert", this.model)
       return this.model
@@ -312,7 +301,6 @@ export class Editor
   {
     try {
       this.logger.info("import", { data, mimeType })
-      await this.#initializationDeferred.promise
       if (this.behaviors.import) {
         let blobToImport: Blob
         if (data instanceof Blob) {
@@ -339,7 +327,6 @@ export class Editor
   {
     try {
       this.logger.info("importPointEvents", { strokes })
-      await this.#initializationDeferred.promise
       await this.behaviors.importPointEvents(strokes)
       this.logger.debug("importPointEvents", this.model)
       return this.model

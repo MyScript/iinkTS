@@ -126,6 +126,11 @@ export class RestBehaviors implements IBehaviors
     }
   }
 
+  get initPromise(): Promise<void>
+  {
+    return Promise.resolve()
+  }
+
   get tool(): EditorTool
   {
     return this.#tool

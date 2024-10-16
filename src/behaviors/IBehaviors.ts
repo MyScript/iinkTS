@@ -18,6 +18,7 @@ export interface IBehaviors
   history: IHistoryManager
   tool: EditorTool
   layers: EditorLayer
+  get initPromise(): Promise<void>
 
   get currentPenStyle(): TStyle
 

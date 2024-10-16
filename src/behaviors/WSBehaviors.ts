@@ -65,6 +65,11 @@ export class WSBehaviors implements IBehaviors
     this.history = new HistoryManager(this.#configuration["undo-redo"], this.event)
   }
 
+  get initPromise(): Promise<void>
+  {
+    return this.recognizer.initialized.promise
+  }
+
   get tool(): EditorTool
   {
     return this.#tool
@@ -219,7 +224,6 @@ export class WSBehaviors implements IBehaviors
     this.model.width = Math.max(parseInt(compStyles.width.replace("px", "")), this.#configuration.rendering.minWidth)
     this.model.height = Math.max(parseInt(compStyles.height.replace("px", "")), this.#configuration.rendering.minHeight)
     this.history.push(this.model)
-
     this.renderer.init(this.layers.render)
 
     this.grabber.attach(this.layers.render)
@@ -238,6 +242,7 @@ export class WSBehaviors implements IBehaviors
     await this.setPenStyle(this.penStyle)
     await this.setTheme(this.theme as PartialDeep<TTheme>)
     await this.setPenStyleClasses(this.penStyleClasses)
+    return this.initPromise
   }
 
   drawCurrentStroke(): void
@@ -281,15 +286,15 @@ export class WSBehaviors implements IBehaviors
         this.model.updatePositionReceived()
         this.model.mergeExport(exports)
         this.#logger.debug("export", this.model)
-        return this.model
       } else {
-        return this.recognizer.export(this.model, mimeTypes)
+        return await this.recognizer.export(this.model, mimeTypes)
       }
     } catch (error) {
       this.#logger.error("export", { error })
       this.event.emitError(error as Error)
       return Promise.reject(error)
     }
+    return this.model
   }
 
   async convert(conversionState?: TConverstionState): Promise<IModel>
@@ -308,10 +313,10 @@ export class WSBehaviors implements IBehaviors
   {
     this.#logger.info("import", { data, mimeType })
     this.history.stack.push(this.model.clone())
-    const m = await this.recognizer.import(this.model, data, mimeType)
-    this.history.push(m)
+    this.#model = await this.recognizer.import(this.model, data, mimeType)
+    this.history.push(this.model)
     this.event.emitImported(this.model.exports as TExport)
-    return m
+    return this.model
   }
 
   async importPointEvents(strokes: PartialDeep<TStroke>[]): Promise<IModel>
@@ -366,6 +371,7 @@ export class WSBehaviors implements IBehaviors
     strokesToImport.map(s => this.model.addStroke(s))
     const exportPoints = await this.recognizer.importPointEvents(strokesToImport)
     this.model.mergeExport(exportPoints)
+    this.event.emitImported(this.model.exports as TExport)
     this.#logger.debug("importPointEvents", this.model)
     return this.model
   }
