@@ -242,12 +242,6 @@ describe("OIRecognizer.ts", () =>
       mockServer.close()
     })
 
-    test("should throw error if recognizer has not been initialize", async () =>
-    {
-      expect.assertions(1)
-      const testDataToSend = { type: "test", data: "test-data" }
-      await expect(oiRecognizer.send(testDataToSend)).rejects.toEqual(new Error("Recognizer must be initilized"))
-    })
     test("should send message", async () =>
     {
       expect.assertions(1)
@@ -295,11 +289,6 @@ describe("OIRecognizer.ts", () =>
       mockServer.close()
     })
 
-    test("should throw error if recognizer has not been initialize", async () =>
-    {
-      expect.assertions(1)
-      await expect(oiRecognizer.addStrokes(strokes)).rejects.toEqual(new Error("Recognizer must be initilized"))
-    })
     test("should not send addStrokes message if 0 strokes", async () =>
     {
       expect.assertions(1)
@@ -372,11 +361,6 @@ describe("OIRecognizer.ts", () =>
       mockServer.close()
     })
 
-    test("should throw error if recognizer has not been initialize", async () =>
-    {
-      expect.assertions(1)
-      await expect(oiRecognizer.replaceStrokes(oldStrokeIds, strokes)).rejects.toEqual(new Error("Recognizer must be initilized"))
-    })
     test("should not send replaceStrokes message if 0 strokes", async () =>
     {
       expect.assertions(1)
@@ -449,11 +433,6 @@ describe("OIRecognizer.ts", () =>
       mockServer.close()
     })
 
-    test("should throw error if recognizer has not been initialize", async () =>
-    {
-      expect.assertions(1)
-      await expect(oiRecognizer.transformTranslate(strokeIds, tx, ty)).rejects.toEqual(new Error("Recognizer must be initilized"))
-    })
     test("should not send transformTranslate message if 0 strokes", async () =>
     {
       expect.assertions(1)
@@ -529,11 +508,6 @@ describe("OIRecognizer.ts", () =>
       mockServer.close()
     })
 
-    test("should throw error if recognizer has not been initialize", async () =>
-    {
-      expect.assertions(1)
-      await expect(oiRecognizer.transformRotate(strokeIds, angle, x0, y0)).rejects.toEqual(new Error("Recognizer must be initilized"))
-    })
     test("should not send transformRotate message if 0 strokes", async () =>
     {
       expect.assertions(1)
@@ -610,11 +584,6 @@ describe("OIRecognizer.ts", () =>
       mockServer.close()
     })
 
-    test("should throw error if recognizer has not been initialize", async () =>
-    {
-      expect.assertions(1)
-      await expect(oiRecognizer.transformScale(strokeIds, scaleX, scaleY, x0, y0)).rejects.toEqual(new Error("Recognizer must be initilized"))
-    })
     test("should not send transformScale message if 0 strokes", async () =>
     {
       expect.assertions(1)
@@ -692,11 +661,6 @@ describe("OIRecognizer.ts", () =>
       mockServer.close()
     })
 
-    test("should throw error if recognizer has not been initialize", async () =>
-    {
-      expect.assertions(1)
-      await expect(oiRecognizer.transformMatrix(strokeIds, matrix)).rejects.toEqual(new Error("Recognizer must be initilized"))
-    })
     test("should not send transformMatrix message if 0 strokes", async () =>
     {
       expect.assertions(1)
@@ -770,11 +734,6 @@ describe("OIRecognizer.ts", () =>
       mockServer.close()
     })
 
-    test("should throw error if recognizer has not been initialize", async () =>
-    {
-      expect.assertions(1)
-      await expect(oiRecognizer.eraseStrokes(strokeIds)).rejects.toEqual(new Error("Recognizer must be initilized"))
-    })
     test("should not send eraseStrokes message if 0 strokes", async () =>
     {
       expect.assertions(1)
@@ -846,11 +805,6 @@ describe("OIRecognizer.ts", () =>
       mockServer.close()
     })
 
-    test("should throw error if recognizer has not been initialize", async () =>
-    {
-      expect.assertions(1)
-      await expect(oiRecognizer.recognizeGesture(stroke)).rejects.toEqual(new Error("Recognizer must be initilized"))
-    })
     test("should not send recognizeGesture message if 0 strokes", async () =>
     {
       expect.assertions(1)
@@ -923,11 +877,6 @@ describe("OIRecognizer.ts", () =>
       mockServer.close()
     })
 
-    test("should throw error if recognizer has not been initialize", async () =>
-    {
-      expect.assertions(1)
-      await expect(oiRecognizer.export()).rejects.toEqual(new Error("Recognizer must be initilized"))
-    })
     test("should send waitForIdle & resolve when receive idle message", async () =>
     {
       expect.assertions(2)
@@ -979,12 +928,6 @@ describe("OIRecognizer.ts", () =>
       mockServer.close()
     })
 
-    test("should throw error if recognizer has not been initialize", async () =>
-    {
-      expect.assertions(1)
-      const changes: TOIHistoryBackendChanges = { added: [buildOIStroke()] }
-      await expect(oiRecognizer.undo(changes)).rejects.toEqual(new Error("Recognizer must be initilized"))
-    })
     test("should not send message if no changes", async () =>
     {
       expect.assertions(2)
@@ -1137,12 +1080,6 @@ describe("OIRecognizer.ts", () =>
       mockServer.close()
     })
 
-    test("should throw error if recognizer has not been initialize", async () =>
-    {
-      expect.assertions(1)
-      const changes: TOIHistoryBackendChanges = { added: [buildOIStroke()] }
-      await expect(oiRecognizer.redo(changes)).rejects.toEqual(new Error("Recognizer must be initilized"))
-    })
     test("should send redo message", async () =>
     {
       expect.assertions(1)
@@ -1203,11 +1140,6 @@ describe("OIRecognizer.ts", () =>
       mockServer.close()
     })
 
-    test("should throw error if recognizer has not been initialize", async () =>
-    {
-      expect.assertions(1)
-      await expect(oiRecognizer.clear()).rejects.toEqual(new Error("Recognizer must be initilized"))
-    })
     test("should send clear message", async () =>
     {
       expect.assertions(1)
@@ -1265,11 +1197,6 @@ describe("OIRecognizer.ts", () =>
       mockServer.close()
     })
 
-    test("should throw error if recognizer has not been initialize", async () =>
-    {
-      expect.assertions(1)
-      await expect(oiRecognizer.export()).rejects.toEqual(new Error("Recognizer must be initilized"))
-    })
     test("should send export", async () =>
     {
       await oiRecognizer.init()

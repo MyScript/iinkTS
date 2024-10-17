@@ -122,7 +122,7 @@ export class OIBehaviors implements IBehaviors
 
   get initPromise(): Promise<void>
   {
-    return this.recognizer.initialized?.promise || new Promise(() => {})
+    return this.recognizer.initialized.promise
   }
 
   //#region Properties
