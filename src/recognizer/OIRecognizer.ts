@@ -61,7 +61,6 @@ export class OIRecognizer
   protected currentErrorCode?: string | number
 
   protected connected?: DeferredPromise<void>
-  initialized?: DeferredPromise<void>
 
   protected addStrokeDeferred?: DeferredPromise<TOIMessageEventGesture | undefined>
   protected contextlessGestureDeferred: Map<string, DeferredPromise<TOIMessageEventContextlessGesture>>
@@ -75,6 +74,7 @@ export class OIRecognizer
   protected redoDeferred?: DeferredPromise<void>
   protected clearDeferred?: DeferredPromise<void>
 
+  initialized: DeferredPromise<void>
   url: string
   event: RecognizerEvent
 
@@ -87,6 +87,7 @@ export class OIRecognizer
     this.url = `${ scheme }://${ this.serverConfiguration.host }/api/v4.0/iink/offscreen?applicationKey=${ this.serverConfiguration.applicationKey }`
 
     this.event = event || new RecognizerEvent()
+    this.initialized = new DeferredPromise<void>()
     this.exportDeferredMap = new Map()
     this.contextlessGestureDeferred = new Map()
   }
@@ -112,7 +113,7 @@ export class OIRecognizer
 
   protected rejectDeferredPending(error: Error | string): void
   {
-    this.initialized?.reject(error)
+    this.initialized.reject(error)
     this.addStrokeDeferred?.reject(error)
     this.transformStrokeDeferred?.reject(error)
     this.eraseStrokeDeferred?.reject(error)
@@ -136,7 +137,6 @@ export class OIRecognizer
   protected resetAllDeferred(): void
   {
     this.connected = undefined
-    this.initialized = undefined
     this.addStrokeDeferred = undefined
     this.contextlessGestureDeferred.clear()
     this.transformStrokeDeferred = undefined
@@ -283,19 +283,19 @@ export class OIRecognizer
 
   protected manageNewPartMessage(newPartMessage: TOIMessageEventNewPart): void
   {
-    this.initialized?.resolve()
+    this.initialized.resolve()
     this.currentPartId = newPartMessage.id
   }
 
   protected managePartChangeMessage(partChangeMessage: TOIMessageEventPartChange): void
   {
-    this.initialized?.resolve()
+    this.initialized.resolve()
     this.currentPartId = partChangeMessage.partId
   }
 
   protected manageContentChangedMessage(contentChangeMessage: TOIMessageEventContentChange): void
   {
-    this.initialized?.resolve()
+    this.initialized.resolve()
     this.replaceStrokeDeferred?.resolve()
     this.transformStrokeDeferred?.resolve()
     this.eraseStrokeDeferred?.resolve()
@@ -434,7 +434,7 @@ export class OIRecognizer
     this.socket.addEventListener("open", this.openCallback.bind(this))
     this.socket.addEventListener("close", this.closeCallback.bind(this))
     this.socket.addEventListener("message", this.messageCallback.bind(this))
-    await this.initialized?.promise
+    await this.initialized.promise
     if (this.serverConfiguration.websocket.pingEnabled) {
       this.pingCount = 0
       this.initPing()
@@ -488,7 +488,7 @@ export class OIRecognizer
       this.addStrokeDeferred.resolve(undefined)
       return this.addStrokeDeferred?.promise
     }
-    await this.initialized?.promise
+    await this.initialized.promise
     await this.send(this.buildAddStrokesMessage(strokes, processGestures))
     return this.addStrokeDeferred?.promise
   }
@@ -508,7 +508,7 @@ export class OIRecognizer
       this.replaceStrokeDeferred.resolve()
       return this.replaceStrokeDeferred?.promise
     }
-    await this.initialized?.promise
+    await this.initialized.promise
     await this.send(this.buildReplaceStrokesMessage(oldStrokeIds, newStrokes))
     return this.replaceStrokeDeferred?.promise
   }
@@ -530,7 +530,7 @@ export class OIRecognizer
       this.transformStrokeDeferred.resolve()
       return this.transformStrokeDeferred?.promise
     }
-    await this.initialized?.promise
+    await this.initialized.promise
     await this.send(this.buildTransformTranslateMessage(strokeIds, tx, ty))
     return this.transformStrokeDeferred?.promise
   }
@@ -553,7 +553,7 @@ export class OIRecognizer
       this.transformStrokeDeferred.resolve()
       return this.transformStrokeDeferred?.promise
     }
-    await this.initialized?.promise
+    await this.initialized.promise
     await this.send(this.buildTransformRotateMessage(strokeIds, angle, x0, y0))
     return this.transformStrokeDeferred?.promise
   }
@@ -577,7 +577,7 @@ export class OIRecognizer
       this.transformStrokeDeferred.resolve()
       return this.transformStrokeDeferred?.promise
     }
-    await this.initialized?.promise
+    await this.initialized.promise
     await this.send(this.buildTransformScaleMessage(strokeIds, scaleX, scaleY, x0, y0))
     return this.transformStrokeDeferred?.promise
   }
@@ -598,7 +598,7 @@ export class OIRecognizer
       this.transformStrokeDeferred.resolve()
       return this.transformStrokeDeferred?.promise
     }
-    await this.initialized?.promise
+    await this.initialized.promise
     await this.send(this.buildTransformMatrixMessage(strokeIds, matrix))
     return this.transformStrokeDeferred?.promise
   }
@@ -617,7 +617,7 @@ export class OIRecognizer
       this.eraseStrokeDeferred.resolve()
       return this.eraseStrokeDeferred?.promise
     }
-    await this.initialized?.promise
+    await this.initialized.promise
     await this.send(this.buildEraseStrokesMessage(strokeIds))
     return this.eraseStrokeDeferred?.promise
   }
@@ -629,7 +629,7 @@ export class OIRecognizer
     }
     this.contextlessGestureDeferred.set(stroke.id, new DeferredPromise<TOIMessageEventContextlessGesture>())
     const pixelTomm = 25.4 / 96
-    await this.initialized?.promise
+    await this.initialized.promise
     await this.send({
       type: "contextlessGesture",
       scaleX: pixelTomm,
@@ -647,7 +647,7 @@ export class OIRecognizer
     const message: TOIMessageEvent = {
       type: "waitForIdle",
     }
-    await this.initialized?.promise
+    await this.initialized.promise
     await this.send(message)
     return this.waitForIdleDeferred?.promise
   }
@@ -699,7 +699,7 @@ export class OIRecognizer
       type: "undo",
       changes
     }
-    await this.initialized?.promise
+    await this.initialized.promise
     await this.send(message)
     return this.undoDeferred?.promise
   }
@@ -716,7 +716,7 @@ export class OIRecognizer
       type: "redo",
       changes
     }
-    await this.initialized?.promise
+    await this.initialized.promise
     await this.send(message)
     return this.redoDeferred?.promise
   }
@@ -735,7 +735,7 @@ export class OIRecognizer
       partId: this.currentPartId,
       mimeTypes
     }
-    await this.initialized?.promise
+    await this.initialized.promise
     await this.send(message)
     const exports = await Promise.all(mimeTypes.map(mt => this.exportDeferredMap.get(mt)!.promise))
     return Object.assign({}, ...exports)
@@ -744,7 +744,7 @@ export class OIRecognizer
   async clear(): Promise<void>
   {
     this.clearDeferred = new DeferredPromise<void>()
-    await this.initialized?.promise
+    await this.initialized.promise
     await this.send({
       type: "clear"
     })
