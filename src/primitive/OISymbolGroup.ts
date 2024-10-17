@@ -147,10 +147,14 @@ export class OISymbolGroup extends OISymbolBase<SymbolType.Group>
   {
     return group.children.some(symbol =>
     {
+      if (symbol.id === symbolId) return true
       if (symbol.type === SymbolType.Group) {
         return OISymbolGroup.containsSymbol(symbol as OISymbolGroup, symbolId)
       }
-      return symbol.id === symbolId
+      else if (symbol.type === SymbolType.StrokeText) {
+        return symbol.containsStroke(symbolId)
+      }
+      return false
     })
   }
 
@@ -163,6 +167,12 @@ export class OISymbolGroup extends OISymbolBase<SymbolType.Group>
       if (s.type === SymbolType.Group) {
         if (!s.removeChilds(symbolIds).children.length) {
           group.children = group.children.filter(s1 => s1.id !== s.id)
+        }
+      }
+      else if (s.type === SymbolType.StrokeText) {
+        s.removeStrokes(symbolIds)
+        if (!s.strokes.length) {
+          group.removeChilds([s.id])
         }
       }
     })
