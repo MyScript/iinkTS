@@ -207,7 +207,6 @@ export class OIMenuContext extends OIMenu
     {
       this.behaviors.selector.removeSelectedGroup()
       await this.behaviors.removeSymbols(this.symbolsSelected.map(s => s.id))
-      this.behaviors.menu.update()
     })
     return this.removeBtn
   }

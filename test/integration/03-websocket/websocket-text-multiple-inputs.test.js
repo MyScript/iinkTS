@@ -1,4 +1,4 @@
-const { waitForEditorWebSocket, writeStrokesPointers, waitEditorIdle } = require('../helper')
+const { waitForEditorWebSocket, writeStrokes, waitEditorIdle } = require('../helper')
 const { centralProcessingUnit, oneThousandNineHundredAndFortyThree, oneThousandNineHundredAndNintyThree } = require('../strokesDatas')
 
 const switchToOtherQuestion = async (page, inputId) => {
@@ -30,7 +30,7 @@ describe('Websocket Text Multiple Inputs', () => {
   }
 
   test('should answer the first question', async () => {
-    await writeStrokesPointers(page, data0.text.strokes)
+    await writeStrokes(page, data0.text.strokes)
     await waitEditorIdle(page)
     const answerText = await getAnswerText(page, data0.answerId)
     expect(answerText).toEqual(data0.text.exports["text/plain"])
@@ -44,7 +44,7 @@ describe('Websocket Text Multiple Inputs', () => {
 
   test("should answer the second question", async () => {
     await switchToOtherQuestion(page, data1.inputId)
-    await writeStrokesPointers(page, data1.text.strokes)
+    await writeStrokes(page, data1.text.strokes)
     await waitEditorIdle(page)
     const answerText = await getAnswerText(page, data1.answerId)
     expect(answerText).toEqual(data1.text.exports["text/plain"])
@@ -58,7 +58,7 @@ describe('Websocket Text Multiple Inputs', () => {
 
   test("should answer the third question", async () => {
     await switchToOtherQuestion(page, data2.inputId)
-    await writeStrokesPointers(page, data2.text.strokes)
+    await writeStrokes(page, data2.text.strokes)
     await waitEditorIdle(page)
     const answerText = await getAnswerText(page, data2.answerId)
     expect(answerText).toEqual(data2.text.exports["text/plain"])
@@ -72,7 +72,7 @@ describe('Websocket Text Multiple Inputs', () => {
 
   test("should answer the fourth question", async () => {
     await switchToOtherQuestion(page, data3.inputId)
-    await writeStrokesPointers(page, data3.text.strokes)
+    await writeStrokes(page, data3.text.strokes)
     await waitEditorIdle(page)
     const answerText = await getAnswerText(page, data3.answerId)
     expect(answerText).toEqual(data3.text.exports["text/plain"])

@@ -1,6 +1,6 @@
 const {
   waitForEditorRest,
-  write,
+  writeStrokes,
   getDatasFromExportedEvent,
   setEditorConfiguration,
   getEditorConfiguration,
@@ -30,7 +30,7 @@ describe('Rest Text', () => {
   test('should display text/plain into result', async () => {
     const [exportedDatas] = await Promise.all([
       getDatasFromExportedEvent(page),
-      write(page, h.strokes),
+      writeStrokes(page, h.strokes),
     ])
     const resultText = await page.locator('#result').textContent()
     expect(resultText).toStrictEqual(exportedDatas['text/plain'])
@@ -61,7 +61,7 @@ describe('Rest Text', () => {
     test('should only request text/plain by default', async () => {
       await Promise.all([
         getDatasFromExportedEvent(page),
-        write(page, h.strokes),
+        writeStrokes(page, h.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(1)
       expect(mimeTypeRequest[0]).toContain('text/plain')
@@ -75,7 +75,7 @@ describe('Rest Text', () => {
       await setEditorConfiguration(page, configuration)
       await Promise.all([
         getDatasFromExportedEvent(page),
-        write(page, h.strokes),
+        writeStrokes(page, h.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(1)
       expect(mimeTypeRequest[0]).toContain('application/vnd.myscript.jiix')
@@ -90,7 +90,7 @@ describe('Rest Text', () => {
       await setEditorConfiguration(page, configuration)
       await Promise.all([
         getDatasFromExportedEvent(page),
-        write(page, h.strokes),
+        writeStrokes(page, h.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(2)
       const allMimeTypesRequested = mimeTypeRequest.join(' ')
@@ -103,7 +103,7 @@ describe('Rest Text', () => {
     test('should clear', async () => {
       const [exportedDatas] = await Promise.all([
         getDatasFromExportedEvent(page),
-        write(page, h.strokes),
+        writeStrokes(page, h.strokes),
       ])
       const resultText = await page.locator('#result').textContent()
       expect(resultText).toStrictEqual(exportedDatas['text/plain'])
@@ -124,7 +124,7 @@ describe('Rest Text', () => {
       const editorEl = await page.waitForSelector('#editor')
       await Promise.all([
         getDatasFromExportedEvent(page),
-        write(page, hello.strokes)
+        writeStrokes(page, hello.strokes)
       ])
 
       await page.waitForTimeout(1500)
@@ -156,7 +156,7 @@ describe('Rest Text', () => {
     test('should change language', async () => {
       const [requestEn] = await Promise.all([
         page.waitForRequest(req => req.url().includes('/api/v4.0/iink/batch') && req.method() === "POST"),
-        write(page, h.strokes),
+        writeStrokes(page, h.strokes),
       ])
       const enPostData = (await requestEn).postDataJSON()
       expect(enPostData.configuration.lang).toEqual("en_US")
@@ -167,7 +167,7 @@ describe('Rest Text', () => {
 
       const [requestFr] = await Promise.all([
         page.waitForRequest(req => req.url().includes('/api/v4.0/iink/batch') && req.method() === "POST"),
-        write(page, h.strokes),
+        writeStrokes(page, h.strokes),
       ])
       const frPostData = (await requestFr).postDataJSON()
       expect(frPostData.configuration.lang).toEqual("fr_FR")

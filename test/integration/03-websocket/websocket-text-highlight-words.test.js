@@ -1,4 +1,4 @@
-const { waitForEditorWebSocket, write, getDatasFromExportedEvent, waitEditorIdle } = require("../helper")
+const { waitForEditorWebSocket, writeStrokes, getDatasFromExportedEvent, waitEditorIdle } = require("../helper")
 const { helloOneSurrounded, helloOneStroke } = require("../strokesDatas")
 
 const getComputedStyle = async (locator) => {
@@ -67,7 +67,7 @@ describe("Websocket Text highlight words", () => {
 
   test('should write and isn\'t in list', async () => {
     await Promise.all([
-      write(page, helloOneStroke.strokes),
+      writeStrokes(page, helloOneStroke.strokes),
     ])
     await waitEditorIdle(page)
     expect(await page.locator("#highlight-list > li").count()).toEqual(0)
@@ -75,7 +75,7 @@ describe("Websocket Text highlight words", () => {
 
   test('should write, surround and is in list', async () => {
     await Promise.all([
-      write(page, helloOneSurrounded.strokes),
+      writeStrokes(page, helloOneSurrounded.strokes),
     ])
     await waitEditorIdle(page)
     expect(await page.locator("#highlight-list > li").count()).toEqual(1)
@@ -86,13 +86,13 @@ describe("Websocket Text highlight words", () => {
   test("should write, surround and is in list then remove from list", async () => {
     expect(await page.locator("#highlight-list > li").count()).toEqual(0)
     await Promise.all([
-      write(page, helloOneSurrounded.strokes),
+      writeStrokes(page, helloOneSurrounded.strokes),
     ])
     await waitEditorIdle(page)
     expect(await page.locator("#highlight-list > li").count()).toEqual(1)
     await Promise.all([
       getDatasFromExportedEvent(page),
-      write(page, [helloOneSurrounded.strokes[1]])
+      writeStrokes(page, [helloOneSurrounded.strokes[1]])
     ])
     expect(await page.locator("#highlight-list > li").count()).toEqual(0)
   })
@@ -102,12 +102,12 @@ describe("Websocket Text highlight words", () => {
       const currentColor = colorMap[index]
       await Promise.all([
         getDatasFromExportedEvent(page),
-        write(page, [helloOneSurrounded.strokes[0]])
+        writeStrokes(page, [helloOneSurrounded.strokes[0]])
       ])
       await page.locator(`#${currentColor.id}`).click()
       await Promise.all([
         getDatasFromExportedEvent(page),
-        write(page, [helloOneSurrounded.strokes[1]])
+        writeStrokes(page, [helloOneSurrounded.strokes[1]])
       ])
       expect(await page.locator("#highlight-list > li").count()).toEqual(1)
 
@@ -115,7 +115,7 @@ describe("Websocket Text highlight words", () => {
       expect(style.backgroundColor).toContain(currentColor.backgroundColor)
       await Promise.all([
         getDatasFromExportedEvent(page),
-        write(page, [helloOneSurrounded.strokes[1]])
+        writeStrokes(page, [helloOneSurrounded.strokes[1]])
       ])
       expect(await page.locator("#highlight-list > li").count()).toEqual(0)
     })
@@ -127,7 +127,7 @@ describe("Websocket Text highlight words", () => {
     await page.click(`#${strokeColor.id}`)
     await Promise.all([
       getDatasFromExportedEvent(page),
-      write(page, [helloOneSurrounded.strokes[0]])
+      writeStrokes(page, [helloOneSurrounded.strokes[0]])
     ])
     await waitEditorIdle(page)
     expect(await page.locator("#highlight-list > li").count()).toEqual(0)
@@ -135,7 +135,7 @@ describe("Websocket Text highlight words", () => {
     await page.click(`#${highlightColor.id}`)
     await Promise.all([
       getDatasFromExportedEvent(page),
-      write(page, [helloOneSurrounded.strokes[1]])
+      writeStrokes(page, [helloOneSurrounded.strokes[1]])
     ])
     await waitEditorIdle(page)
     expect(await page.locator("#highlight-list > li").count()).toEqual(1)

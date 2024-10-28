@@ -1,4 +1,4 @@
-const { waitForEditorWebSocket, write, getDatasFromExportedEvent, waitEditorIdle } = require('../helper')
+const { waitForEditorWebSocket, getDatasFromExportedEvent, waitEditorIdle } = require('../helper')
 const { h } = require('../strokesDatas')
 
 describe('Websocket Text Import Content', () => {

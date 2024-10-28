@@ -1,4 +1,4 @@
-const { write, getDatasFromExportedEvent, waitForEditorWebSocket, waitEditorIdle } = require("../helper")
+const { writeStrokes, getDatasFromExportedEvent, waitForEditorWebSocket, waitEditorIdle } = require("../helper")
 const { abrausorus } = require("../strokesDatas")
 
 describe("Websocket Text Custom Resource", () => {
@@ -16,7 +16,7 @@ describe("Websocket Text Custom Resource", () => {
   test("should export application/vnd.myscript.jiix", async () => {
     const [exports] = await Promise.all([
       getDatasFromExportedEvent(page),
-      write(page, abrausorus.strokes),
+      writeStrokes(page, abrausorus.strokes),
     ])
     await waitEditorIdle(page)
     const jiixExpected = abrausorus.exports["application/vnd.myscript.jiix"]

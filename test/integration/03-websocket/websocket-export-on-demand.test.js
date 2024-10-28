@@ -1,5 +1,5 @@
-const { helloHowAreYou } = require('../strokesDatas')
-const { waitForEditorWebSocket, waitEditorIdle, getExportsFromEditorModel, write } = require('../helper')
+const { hello } = require('../strokesDatas')
+const { waitForEditorWebSocket, waitEditorIdle, getExportsFromEditorModel, writeStrokes } = require('../helper')
 
 describe('Websocket on-demand export', function () {
   beforeAll(async () => {
@@ -13,7 +13,7 @@ describe('Websocket on-demand export', function () {
   })
 
   test('should not export', async () => {
-    await write(page, helloHowAreYou.strokes)
+    await writeStrokes(page, hello.strokes)
     await waitEditorIdle(page)
     const exports = await getExportsFromEditorModel(page)
     expect(exports).toBeUndefined()
@@ -25,7 +25,7 @@ describe('Websocket on-demand export', function () {
     await waitEditorIdle(page)
     const exports = await getExportsFromEditorModel(page)
     const jiix = exports['application/vnd.myscript.jiix']
-    expect(jiix.label).toEqual(helloHowAreYou.exports["text/plain"].at(-1))
-    expect(await page.locator("#result").textContent()).toEqual(helloHowAreYou.exports["text/plain"].at(-1))
+    expect(jiix.label).toEqual(hello.exports["text/plain"].at(-1))
+    expect(await page.locator("#result").textContent()).toEqual(hello.exports["text/plain"].at(-1))
   })
 })

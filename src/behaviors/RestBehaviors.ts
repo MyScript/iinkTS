@@ -267,6 +267,7 @@ export class RestBehaviors implements IBehaviors
       this.model.mergeExport(newModel.exports as TExport)
     }
     this.history.updateStack(newModel)
+    this.event.emitExported(this.model.exports as TExport)
     this.#logger.debug("export", this.model)
     return this.model
   }

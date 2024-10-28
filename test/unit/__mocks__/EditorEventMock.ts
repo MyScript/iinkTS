@@ -12,5 +12,5 @@ export class EditorEventMock extends EditorEvent
   emitLoaded = jest.fn()
   emitNotif = jest.fn()
   emitSelected = jest.fn()
-  emitTool = jest.fn()
+  emitToolChanged = jest.fn()
 }

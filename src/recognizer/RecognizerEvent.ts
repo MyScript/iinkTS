@@ -46,6 +46,10 @@ export enum RecognizerEventName
    * @remarks only usable in the case of websocket
    */
   SVG_PATCH = "svg-patch",
+  /**
+   * @description event emitted session opened
+   */
+  SESSION_OPENED = "session-opened",
 
 }
 
@@ -96,6 +100,19 @@ export class RecognizerEvent extends EventTarget
     this.addEventListener(
       RecognizerEventName.END_INITIALIZATION,
       () => callback(),
+      { signal: this.abortController.signal }
+    )
+  }
+
+  emitSessionOpened(sessionId: string): void
+  {
+    this.emit(RecognizerEventName.SESSION_OPENED, sessionId)
+  }
+  addSessionOpenedListener(callback: (sessionId: string) => void): void
+  {
+    this.addEventListener(
+      RecognizerEventName.SESSION_OPENED,
+      (evt: unknown) => callback((evt as CustomEvent).detail as string),
       { signal: this.abortController.signal }
     )
   }
