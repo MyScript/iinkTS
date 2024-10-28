@@ -1,6 +1,6 @@
 const {
   waitForEditorRest,
-  write,
+  writeStrokes,
   getDatasFromExportedEvent,
   setEditorConfiguration,
   getEditorConfiguration,
@@ -27,7 +27,7 @@ describe('Rest Diagram', () => {
   test('should display application/vnd.myscript.jiix into result', async () => {
     const [lineExportedDatas] = await Promise.all([
       getDatasFromExportedEvent(page),
-      write(page, [rectangle.strokes[0]]),
+      writeStrokes(page, [rectangle.strokes[0]]),
     ])
     const lineResultText = await page.locator('#result').textContent()
     const lineResultJson = JSON.parse(lineResultText)
@@ -36,7 +36,7 @@ describe('Rest Diagram', () => {
 
     const [rectExportedDatas] = await Promise.all([
       getDatasFromExportedEvent(page),
-      write(page, [rectangle.strokes[1]]),
+      writeStrokes(page, [rectangle.strokes[1]]),
     ])
     const rectResultText = await page.locator('#result').textContent()
     const rectResultJson = JSON.parse(rectResultText)
@@ -68,7 +68,7 @@ describe('Rest Diagram', () => {
     test('should only request application/vnd.myscript.jiix by default', async () => {
       await Promise.all([
         getDatasFromExportedEvent(page),
-        write(page, line.strokes),
+        writeStrokes(page, line.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(1)
       expect(mimeTypeRequest[0]).toContain('application/vnd.myscript.jiix')
@@ -82,7 +82,7 @@ describe('Rest Diagram', () => {
       await setEditorConfiguration(page, configuration)
       await Promise.all([
         getDatasFromExportedEvent(page),
-        write(page, line.strokes),
+        writeStrokes(page, line.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(1)
       expect(mimeTypeRequest[0]).toContain('application/vnd.openxmlformats-officedocument.presentationml.presentation')
@@ -97,7 +97,7 @@ describe('Rest Diagram', () => {
       await setEditorConfiguration(page, configuration)
       await Promise.all([
         getDatasFromExportedEvent(page),
-        write(page, line.strokes),
+        writeStrokes(page, line.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(2)
       const allMimeTypesRequested = mimeTypeRequest.join(' ')
@@ -110,7 +110,7 @@ describe('Rest Diagram', () => {
     test('should clear', async () => {
       const [exportedDatas] = await Promise.all([
         getDatasFromExportedEvent(page),
-        write(page, line.strokes),
+        writeStrokes(page, line.strokes),
       ])
       const resultText = await page.locator('#result').textContent()
       const rectResultJson = JSON.parse(resultText)
@@ -132,11 +132,11 @@ describe('Rest Diagram', () => {
       const editorEl = await page.waitForSelector('#editor')
       await Promise.all([
         getDatasFromExportedEvent(page),
-        write(page, [rectangle.strokes[0]])
+        writeStrokes(page, [rectangle.strokes[0]])
       ])
       await Promise.all([
         getDatasFromExportedEvent(page),
-        write(page, [rectangle.strokes[1]])
+        writeStrokes(page, [rectangle.strokes[1]])
       ])
       let resultText = await page.locator('#result').textContent()
       let rectResultJson = JSON.parse(resultText)

@@ -1,4 +1,4 @@
-const { writeStrokesPointers, getDatasFromExportedEvent, waitForEditorWebSocket, waitEditorIdle, getExportsTypeFromEditorModel } = require("../helper")
+const { writeStrokes, getDatasFromExportedEvent, waitForEditorWebSocket, waitEditorIdle, getExportsTypeFromEditorModel } = require("../helper")
 const { paris, tokyo, madrid, rome, buenosAires } = require("../strokesDatas")
 
 
@@ -20,7 +20,7 @@ describe("Websocket Text interact", () => {
   })
 
   test(`should answer question capital of France`, async () => {
-    await writeStrokesPointers(page, paris.strokes)
+    await writeStrokes(page, paris.strokes)
     await waitEditorIdle(page)
     const textExpected = paris.exports["text/plain"].at(-1)
     const textReceived = await getExportsTypeFromEditorModel(page, "text/plain")
@@ -35,7 +35,7 @@ describe("Websocket Text interact", () => {
   })
 
   test(`should answer question capital of Italy`, async () => {
-    await writeStrokesPointers(page, rome.strokes)
+    await writeStrokes(page, rome.strokes)
     await waitEditorIdle(page)
     const textExpected = rome.exports["text/plain"].at(-1)
     const textReceived = await getExportsTypeFromEditorModel(page, "text/plain")
@@ -50,7 +50,7 @@ describe("Websocket Text interact", () => {
   })
 
   test(`should answer question capital of Spain`, async () => {
-    await writeStrokesPointers(page, madrid.strokes)
+    await writeStrokes(page, madrid.strokes)
     await waitEditorIdle(page)
     const textExpected = madrid.exports["text/plain"].at(-1)
     const textReceived = await getExportsTypeFromEditorModel(page, "text/plain")
@@ -65,7 +65,7 @@ describe("Websocket Text interact", () => {
   })
 
   test(`should answer question capital of Argentina`, async () => {
-    await writeStrokesPointers(page, buenosAires.strokes)
+    await writeStrokes(page, buenosAires.strokes)
     await waitEditorIdle(page)
     const textExpected = buenosAires.exports["text/plain"].at(-1)
     const textReceived = await getExportsTypeFromEditorModel(page, "text/plain")
@@ -80,7 +80,7 @@ describe("Websocket Text interact", () => {
   })
 
   test(`should answer question capital of Japan`, async () => {
-    await writeStrokesPointers(page, tokyo.strokes)
+    await writeStrokes(page, tokyo.strokes)
     await waitEditorIdle(page)
     const textExpected = tokyo.exports["text/plain"].at(-1)
     const textReceived = await getExportsTypeFromEditorModel(page, "text/plain")

@@ -1,7 +1,7 @@
 const {
   waitForEditorRest,
   getDatasFromExportedEvent,
-  write
+  writeStrokes
 } = require('../helper')
 const { h } = require('../strokesDatas')
 
@@ -27,7 +27,7 @@ describe('Rest customize stroke', () => {
   test('should display text/plain into result', async () => {
     const [exportedDatas] = await Promise.all([
       getDatasFromExportedEvent(page),
-      write(page, h.strokes),
+      writeStrokes(page, h.strokes),
     ])
     const resultText = await page.locator('#result').textContent()
     expect(resultText).toStrictEqual(exportedDatas['text/plain'])
@@ -38,7 +38,7 @@ describe('Rest customize stroke', () => {
     const requestEn = page.waitForRequest(req => req.url().includes('/api/v4.0/iink/batch') && req.method() === "POST")
     const [exportedDatas] = await Promise.all([
       getDatasFromExportedEvent(page),
-      write(page, h.strokes),
+      writeStrokes(page, h.strokes),
     ])
     const enPostData = (await requestEn).postDataJSON()
     expect(enPostData.configuration.lang).toEqual("en_US")
@@ -55,7 +55,7 @@ describe('Rest customize stroke', () => {
     const requestFr = page.waitForRequest(req => req.url().includes('/api/v4.0/iink/batch') && req.method() === "POST")
     await Promise.all([
       getDatasFromExportedEvent(page),
-      write(page, h.strokes),
+      writeStrokes(page, h.strokes),
     ])
     const frPostData = (await requestFr).postDataJSON()
     expect(frPostData.configuration.lang).toEqual("fr_FR")
@@ -70,7 +70,7 @@ describe('Rest customize stroke', () => {
 
     const [exportedDatas] = await Promise.all([
       getDatasFromExportedEvent(page),
-      write(page, h.strokes),
+      writeStrokes(page, h.strokes),
     ])
     const resultText = await page.locator('#result').textContent()
     expect(resultText).toStrictEqual(exportedDatas['text/plain'])
@@ -86,7 +86,7 @@ describe('Rest customize stroke', () => {
     await widthLocator.fill('5')
     const [exportedDatas] = await Promise.all([
       getDatasFromExportedEvent(page),
-      write(page, h.strokes),
+      writeStrokes(page, h.strokes),
     ])
     const style = await page.evaluate('editor.behaviors.styleManager.penStyle')
     expect(style).toEqual({ color: '#1a5fb4', "-myscript-pen-width": '5' })
@@ -106,7 +106,7 @@ describe('Rest customize stroke', () => {
 
     await Promise.all([
       getDatasFromExportedEvent(page),
-      write(page, h.strokes),
+      writeStrokes(page, h.strokes),
     ])
 
     await page.setChecked('#penenabled', false)

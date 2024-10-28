@@ -56,13 +56,21 @@ export enum EditorEventName
    */
   LOADED = "loaded",
   /**
+   * @description event emitted session opened
+   */
+  SESSION_OPENED = "session-opened",
+  /**
    * @description event emitted after selection change
    */
   SELECTED = "selected",
   /**
    * @description event emitted after mode change
    */
-  MODE = "mode"
+  MODE_CHANGED = "mode-changed",
+  /**
+   * @description event emitted after mode change
+   */
+  UI_UPDATED = "ui-updated"
 }
 
 /**
@@ -97,6 +105,21 @@ export class EditorEvent extends EventTarget
     this.element?.dispatchEvent(evt)
   }
 
+  emitSessionOpened(sessionId: string): void
+  {
+    this.#logger.info("emitSessionOpened")
+    this.emit(EditorEventName.SESSION_OPENED, sessionId)
+  }
+  addSessionOpenedListener(callback: (sessionId: string) => void): void
+  {
+    this.#logger.info("addSessionOpenedListener", { callback })
+    this.addEventListener(
+      EditorEventName.SESSION_OPENED,
+      (evt: unknown) => callback((evt as CustomEvent).detail as string),
+      { signal: this.abortController.signal }
+    )
+  }
+
   emitLoaded(): void
   {
     this.#logger.info("emitLoaded")
@@ -104,7 +127,7 @@ export class EditorEvent extends EventTarget
   }
   addLoadedListener(callback: () => void): void
   {
-    this.#logger.info("addConvertListener", { callback })
+    this.#logger.info("addLoadedListener", { callback })
     this.addEventListener(
       EditorEventName.LOADED,
       () => callback(),
@@ -114,7 +137,7 @@ export class EditorEvent extends EventTarget
 
   emitNotif(notif: { message: string; timeout?: number }): void
   {
-    this.#logger.info("emitWNotif", { notif })
+    this.#logger.info("emitNotif", { notif })
     this.emit(EditorEventName.NOTIF, notif)
   }
   addNotifListener(callback: (notif: { message: string; timeout?: number }) => void): void
@@ -149,7 +172,7 @@ export class EditorEvent extends EventTarget
   }
   addExportedListener(callback: (exports: TExport) => void): void
   {
-    this.#logger.info("addConvertListener", { callback })
+    this.#logger.info("addExportedListener", { callback })
     this.addEventListener(
       EditorEventName.EXPORTED,
       (evt: unknown) => callback((evt as CustomEvent).detail as TExport),
@@ -167,7 +190,7 @@ export class EditorEvent extends EventTarget
   }
   addChangedListener(callback: (context: TUndoRedoContext) => void): void
   {
-    this.#logger.info("emitChanged", { callback })
+    this.#logger.info("addChangedListener", { callback })
     this.addEventListener(
       EditorEventName.CHANGED,
       (evt: unknown) => callback((evt as CustomEvent).detail as TUndoRedoContext),
@@ -197,7 +220,7 @@ export class EditorEvent extends EventTarget
   }
   addClearedListener(callback: () => void): void
   {
-    this.#logger.info("addClearListener", { callback })
+    this.#logger.info("addClearedListener", { callback })
     this.addEventListener(
       EditorEventName.CLEARED,
       () => callback(),
@@ -212,7 +235,7 @@ export class EditorEvent extends EventTarget
   }
   addConvertedListener(callback: (exports: TExport) => void): void
   {
-    this.#logger.info("addConvertListener", { callback })
+    this.#logger.info("addConvertedListener", { callback })
     this.addEventListener(
       EditorEventName.CONVERTED,
       (evt: unknown) => callback((evt as CustomEvent).detail as TExport),
@@ -227,7 +250,7 @@ export class EditorEvent extends EventTarget
   }
   addImportedListener(callback: (exports: TExport) => void): void
   {
-    this.#logger.info("addIdleListener", { callback })
+    this.#logger.info("addImportedListener", { callback })
     this.addEventListener(
       EditorEventName.IMPORTED,
       (evt: unknown) => callback((evt as CustomEvent).detail as TExport),
@@ -237,6 +260,7 @@ export class EditorEvent extends EventTarget
 
   emitSelected(symbols: TSymbol[]): void
   {
+    this.#logger.info("emitSelected")
     this.emit(EditorEventName.SELECTED, symbols)
   }
   addSelectedListener(callback: (symbols: TOISymbol[]) => void): void
@@ -249,16 +273,32 @@ export class EditorEvent extends EventTarget
     )
   }
 
-  emitTool(mode: EditorTool): void
+  emitToolChanged(mode: EditorTool): void
   {
-    this.emit(EditorEventName.MODE, mode)
+    this.#logger.info("emitToolChanged")
+    this.emit(EditorEventName.MODE_CHANGED, mode)
   }
-  addToolListener(callback: (mode: EditorTool) => void): void
+  addToolChangedListener(callback: (mode: EditorTool) => void): void
   {
-    this.#logger.info("addSelectedListener", { callback })
+    this.#logger.info("addToolChangedListener", { callback })
     this.addEventListener(
-      EditorEventName.MODE,
+      EditorEventName.MODE_CHANGED,
       (evt: unknown) => callback((evt as CustomEvent).detail as EditorTool),
+      { signal: this.abortController.signal }
+    )
+  }
+
+  emitUIpdated(): void
+  {
+    this.#logger.info("emitUIpdated")
+    this.emit(EditorEventName.UI_UPDATED)
+  }
+  addUIpdatedListener(callback: () => void): void
+  {
+    this.#logger.info("addUIpdatedListener", { callback })
+    this.addEventListener(
+      EditorEventName.UI_UPDATED,
+      () => callback(),
       { signal: this.abortController.signal }
     )
   }

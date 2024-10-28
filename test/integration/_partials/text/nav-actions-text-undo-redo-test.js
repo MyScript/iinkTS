@@ -1,4 +1,4 @@
-const { getExportsFromEditorModel, write, getDatasFromExportedEvent, waitEditorIdle } = require("../../helper")
+const { getExportsFromEditorModel, writeStrokes, getDatasFromExportedEvent, waitEditorIdle } = require("../../helper")
 const { hello } = require("../../strokesDatas")
 
 describe('Nav actions text undo/redo', () => {
@@ -11,7 +11,7 @@ describe('Nav actions text undo/redo', () => {
     const editorEl = await page.waitForSelector('#editor')
     for (const s of hello.strokes) {
       await Promise.all([
-        write(page, [s]),
+        writeStrokes(page, [s]),
         getDatasFromExportedEvent(page),
       ])
     }

@@ -37,7 +37,8 @@ export class OITextManager
   {
     const clone = text.clone()
     clone.id = "text-to-measure"
-    clone.chars.forEach(c => c.id += "to-measure")
+    clone.chars.forEach(c => c.id += "-to-measure")
+    clone.decorators = []
     this.renderer.layer.querySelector(`#${ clone.id }`)?.remove()
     const el = this.renderer.buildElementFromSymbol(clone)!
     el.setAttribute("visibility", "hidden")

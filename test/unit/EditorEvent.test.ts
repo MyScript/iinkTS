@@ -24,7 +24,8 @@ describe('EditorEvent.ts', () =>
     const convertedCallback = jest.fn()
     const importedCallback = jest.fn()
     const selectedCallback = jest.fn()
-    const modeCallback = jest.fn()
+    const toolCallback = jest.fn()
+    const uiCallback = jest.fn()
 
     test("should execute callback on emitLoaded", () =>
     {
@@ -126,11 +127,18 @@ describe('EditorEvent.ts', () =>
       expect(selectedCallback).toHaveBeenNthCalledWith(1, symbols)
     })
 
-    test("should execute callback on emitTool", () =>
+    test("should execute callback on emitToolChanged", () =>
     {
-      events.addToolListener(modeCallback)
-      events.emitTool(EditorTool.Write)
-      expect(modeCallback).toHaveBeenNthCalledWith(1, EditorTool.Write)
+      events.addToolChangedListener(toolCallback)
+      events.emitToolChanged(EditorTool.Write)
+      expect(toolCallback).toHaveBeenNthCalledWith(1, EditorTool.Write)
+    })
+
+    test("should execute callback on emitToolChanged", () =>
+    {
+      events.addUIpdatedListener(uiCallback)
+      events.emitUIpdated()
+      expect(uiCallback).toHaveBeenCalledTimes(1)
     })
 
     test("remove all listeners", () =>
@@ -263,12 +271,20 @@ describe('EditorEvent.ts', () =>
       expect(testCallback).toHaveBeenNthCalledWith(1, expect.objectContaining({ detail: symbols }))
     })
 
-    test("should execute callback on emitTool", () =>
+    test("should execute callback on emitToolChanged", () =>
     {
       const testCallback = jest.fn()
-      element.addEventListener(EditorEventName.MODE, testCallback)
-      events.emitTool(EditorTool.Write)
+      element.addEventListener(EditorEventName.MODE_CHANGED, testCallback)
+      events.emitToolChanged(EditorTool.Write)
       expect(testCallback).toHaveBeenNthCalledWith(1, expect.objectContaining({ detail: EditorTool.Write }))
+    })
+
+    test("should execute callback on emitUIpdated", () =>
+    {
+      const testCallback = jest.fn()
+      element.addEventListener(EditorEventName.UI_UPDATED, testCallback)
+      events.emitUIpdated()
+      expect(testCallback).toHaveBeenCalledTimes(1)
     })
   })
 
