@@ -77,7 +77,7 @@ export class OIMenuAction extends OIMenu
   protected createMenuLanguage(): HTMLElement
   {
     const triggerBtn = document.createElement("button")
-    triggerBtn.id = this.id
+    triggerBtn.id = `${ this.id }-language-trigger`
     triggerBtn.classList.add("ms-menu-button", "square")
     triggerBtn.innerHTML = languageIcon
 
@@ -220,7 +220,7 @@ export class OIMenuAction extends OIMenu
       },
       {
         type: "select",
-        id: `${ this.id }-gesture-strikethrough`,
+        id: `${ this.id }-gesture-insert`,
         label: "On insert",
         values: splitActionValues,
         initValue: this.behaviors.gesture.insertAction,

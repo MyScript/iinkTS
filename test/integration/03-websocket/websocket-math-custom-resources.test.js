@@ -1,4 +1,4 @@
-const { waitForEditorWebSocket, write, getDatasFromExportedEvent, waitEditorIdle, getEditorConfiguration, setEditorConfiguration } = require("../helper")
+const { waitForEditorWebSocket, writeStrokes, getDatasFromExportedEvent, waitEditorIdle, getEditorConfiguration, setEditorConfiguration } = require("../helper")
 const { h } = require("../strokesDatas")
 
 describe("Websocket Math", function () {
@@ -18,7 +18,7 @@ describe("Websocket Math", function () {
   })
 
   test("should not recognize text", async () => {
-    await Promise.all([getDatasFromExportedEvent(page), write(page, h.strokes)])
+    await Promise.all([getDatasFromExportedEvent(page), writeStrokes(page, h.strokes)])
     let resultElement = page.locator("#result")
     resultText = await resultElement.textContent()
     expect(resultText).not.toEqual("h")
@@ -31,7 +31,7 @@ describe("Websocket Math", function () {
     await setEditorConfiguration(page, config)
     await waitForEditorWebSocket(page)
 
-    await Promise.all([getDatasFromExportedEvent(page), write(page, h.strokes)])
+    await Promise.all([getDatasFromExportedEvent(page), writeStrokes(page, h.strokes)])
     let resultElement = page.locator("#result")
     resultText = await resultElement.textContent()
     expect(resultText).toEqual("h")

@@ -1,4 +1,4 @@
-const { waitForEditorWebSocket, write, getDatasFromExportedEvent, waitEditorIdle } = require('../helper')
+const { waitForEditorWebSocket, writeStrokes, getDatasFromExportedEvent, waitEditorIdle } = require('../helper')
 const { ponyErase, ponyErasePrecisely } = require('../strokesDatas')
 
 describe('Websocket Text erase', () => {
@@ -30,7 +30,7 @@ describe('Websocket Text erase', () => {
   test('should export erase stroke', async () => {
     const [ponyExports] = await Promise.all([
       getDatasFromExportedEvent(page),
-      write(page, [ponyErase.strokes[0]]),
+      writeStrokes(page, [ponyErase.strokes[0]]),
     ])
     const ponyJiixExpected = ponyErase.exports[0]['application/vnd.myscript.jiix']
     const ponyJiixReceived = ponyExports['application/vnd.myscript.jiix']
@@ -40,7 +40,7 @@ describe('Websocket Text erase', () => {
 
     const [ponyEraseExports] = await Promise.all([
       getDatasFromExportedEvent(page),
-      write(page, [ponyErase.strokes[1]]),
+      writeStrokes(page, [ponyErase.strokes[1]]),
     ])
     const ponyEraseJiixExpected = ponyErase.exports[1]['application/vnd.myscript.jiix']
     const ponyEraseJiixReceived = ponyEraseExports['application/vnd.myscript.jiix']
@@ -56,7 +56,7 @@ describe('Websocket Text erase', () => {
 
     const [ponyExports] = await Promise.all([
       getDatasFromExportedEvent(page),
-      write(page, [ponyErasePrecisely.strokes[0]]),
+      writeStrokes(page, [ponyErasePrecisely.strokes[0]]),
     ])
     const ponyJiixExpected = ponyErasePrecisely.exports[0]['application/vnd.myscript.jiix']
     const ponyJiixReceived = ponyExports['application/vnd.myscript.jiix']
@@ -66,7 +66,7 @@ describe('Websocket Text erase', () => {
 
     const [ponyEraseExports] = await Promise.all([
       getDatasFromExportedEvent(page),
-      write(page, [ponyErasePrecisely.strokes[1]]),
+      writeStrokes(page, [ponyErasePrecisely.strokes[1]]),
     ])
     const ponyEraseJiixExpected = ponyErasePrecisely.exports[1]['application/vnd.myscript.jiix']
     const ponyEraseJiixReceived = ponyEraseExports['application/vnd.myscript.jiix']

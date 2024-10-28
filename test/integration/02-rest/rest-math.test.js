@@ -1,12 +1,11 @@
 const {
   waitForEditorRest,
-  write,
+  writeStrokes,
   getDatasFromExportedEvent,
   setEditorConfiguration,
   getEditorConfiguration,
   getExportsFromEditorModel,
-  waitEditorIdle,
-  writePointers,
+  waitEditorIdle
 } = require('../helper')
 const { equation1, one } = require('../strokesDatas')
 
@@ -28,7 +27,7 @@ describe('Rest Math', () => {
     for (let s of equation1.strokes) {
       [exportedDatas] = await Promise.all([
         getDatasFromExportedEvent(page),
-        write(page, [s]),
+        writeStrokes(page, [s]),
       ])
     }
 
@@ -65,7 +64,7 @@ describe('Rest Math', () => {
     test('should only request application/x-latex by default', async () => {
       await Promise.all([
         getDatasFromExportedEvent(page),
-        writePointers(page, one.strokes),
+        writeStrokes(page, one.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(1)
       expect(mimeTypeRequest[0]).toContain('application/x-latex')
@@ -78,7 +77,7 @@ describe('Rest Math', () => {
 
       await Promise.all([
         getDatasFromExportedEvent(page),
-        writePointers(page, one.strokes),
+        writeStrokes(page, one.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(1)
       expect(mimeTypeRequest[0]).toContain('application/mathml+xml')
@@ -94,7 +93,7 @@ describe('Rest Math', () => {
 
       await Promise.all([
         getDatasFromExportedEvent(page),
-        writePointers(page, one.strokes),
+        writeStrokes(page, one.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(2)
       const allMimeTypesRequested = mimeTypeRequest.join(' ')
@@ -112,7 +111,7 @@ describe('Rest Math', () => {
     test('should clear', async () => {
       const [exportedDatas] = await Promise.all([
         getDatasFromExportedEvent(page),
-        writePointers(page, one.strokes)
+        writeStrokes(page, one.strokes)
       ])
 
       expect(exportedDatas['application/x-latex']).toStrictEqual(one.exports.LATEX.at(-1))
@@ -132,7 +131,7 @@ describe('Rest Math', () => {
     test('should undo/redo', async () => {
       const editorEl = await page.waitForSelector('#editor')
 
-      await write(page, equation1.strokes)
+      await writeStrokes(page, equation1.strokes)
       await waitEditorIdle(page)
 
       await Promise.all([getDatasFromExportedEvent(page), page.click('#undo')])

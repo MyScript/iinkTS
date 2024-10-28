@@ -1,4 +1,4 @@
-const { writePointers, waitForEditorWebSocket, getExportsFromEditorModel, waitEditorIdle } = require("../helper")
+const { writeStrokes, waitForEditorWebSocket, getExportsFromEditorModel, waitEditorIdle } = require("../helper")
 const { covfefe } = require("../strokesDatas")
 
 describe("Websocket Text Custom Lexicon", () => {
@@ -14,7 +14,7 @@ describe("Websocket Text Custom Lexicon", () => {
   })
 
   test("should not recognize 'covfefe'", async () => {
-    await writePointers(page, covfefe.strokes)
+    await writeStrokes(page, covfefe.strokes)
     await waitEditorIdle(page)
     const exports = await getExportsFromEditorModel(page)
     const jiixReceived = exports["application/vnd.myscript.jiix"]
@@ -27,7 +27,7 @@ describe("Websocket Text Custom Lexicon", () => {
       page.locator("#lexicon").fill("covfefe"),
       page.locator("#reinit").click(),
     ])
-    await writePointers(page, covfefe.strokes)
+    await writeStrokes(page, covfefe.strokes)
     await waitEditorIdle(page)
     const exports = await getExportsFromEditorModel(page)
     const jiixReceived = exports["application/vnd.myscript.jiix"]

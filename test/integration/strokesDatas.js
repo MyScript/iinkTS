@@ -1,4 +1,4 @@
-const hStrokes = require("./strokes/h.json")
+const hStrokes = require("./strokes/hPointers.json")
 module.exports.h = {
   type: "TEXT",
   strokes: hStrokes,
@@ -19,7 +19,7 @@ module.exports.h = {
   },
 }
 
-const helloStrokes = require("./strokes/hello.json")
+const helloStrokes = require("./strokes/helloPointers.json")
 module.exports.hello = {
   type: "TEXT",
   strokes: helloStrokes,
@@ -40,7 +40,7 @@ module.exports.hello = {
   },
 }
 
-const helloStrike = require("./strokes/helloStrike.json")
+const helloStrike = require("./strokes/helloStrikePointers.json")
 module.exports.helloStrikeStroke = {
   name: "helloStrike",
   type: "TEXT",
@@ -51,7 +51,7 @@ module.exports.helloStrikeStroke = {
   },
 }
 
-const helloOne = require("./strokes/helloOneStroke.json")
+const helloOne = require("./strokes/helloOneStrokePointers.json")
 module.exports.helloOneStroke = {
   type: "TEXT",
   strokes: helloOne,
@@ -72,7 +72,16 @@ module.exports.helloOneStroke = {
   },
 }
 
-const helloHowAreYouStrokes = require("./strokes/helloHowAreYou.json")
+const helloOneInsert = require("./strokes/helloInsertPointers.json")
+module.exports.helloOneInsert = {
+  type: "TEXT",
+  strokes: helloOneInsert,
+  exports: {
+    "text/plain": ["hello"]
+  }
+}
+
+const helloHowAreYouStrokes = require("./strokes/helloHowAreYouPointers.json")
 module.exports.helloHowAreYou = {
   type: "TEXT",
   strokes: helloHowAreYouStrokes,
@@ -89,6 +98,27 @@ module.exports.helloHowAreYou = {
   },
 }
 
+const laLeconStrokes = require("./strokes/laLeconPointers.json")
+module.exports.laLecon = {
+  type: "TEXT",
+  strokes: laLeconStrokes,
+  exports: {
+    "text/plain": ["la leçon"],
+    "application/vnd.myscript.jiix": {
+      type: "Text",
+      label: "la leçon",
+      words: [
+        {
+          label: "la leçon",
+          candidates: ["la leçon"],
+        },
+      ],
+      version: "3",
+      id: "MainBlock",
+    }
+  }
+}
+
 const oneStrokes = require("./strokes/one.json")
 module.exports.one = {
   type: "MATH",
@@ -98,7 +128,7 @@ module.exports.one = {
   },
 }
 
-const equation1Stroke = require("./strokes/equation1.json")
+const equation1Stroke = require("./strokes/equation1Pointers.json")
 module.exports.equation1 = {
   type: "MATH",
   strokes: equation1Stroke,
@@ -110,7 +140,7 @@ module.exports.equation1 = {
   },
 }
 
-const equation2Stroke = require('./strokes/equation2.json')
+const equation2Stroke = require('./strokes/equation2Pointers.json')
 module.exports.equation2 = {
   type: 'MATH',
   strokes: equation2Stroke,
@@ -119,7 +149,7 @@ module.exports.equation2 = {
   },
 }
 
-const fenceStroke = require("./strokes/fence.json")
+const fenceStroke = require("./strokes/fencePointers.json")
 module.exports.fence = {
   type: "MATH",
   strokes: fenceStroke,
@@ -174,7 +204,7 @@ module.exports.fence = {
   },
 }
 
-const lineStroke = require("./strokes/line.json")
+const lineStroke = require("./strokes/linePointers.json")
 module.exports.line = {
   type: "DIAGRAM",
   strokes: lineStroke,
@@ -201,7 +231,7 @@ module.exports.line = {
   ],
 }
 
-const rectangleStroke = require("./strokes/rectangle.json")
+const rectangleStroke = require("./strokes/rectanglePointers.json")
 module.exports.rectangle = {
   type: "DIAGRAM",
   strokes: rectangleStroke,
@@ -245,7 +275,7 @@ module.exports.rectangle = {
   ],
 }
 
-const ponyEraseStroke = require("./strokes/ponyErase.json")
+const ponyEraseStroke = require("./strokes/ponyErasePointers.json")
 module.exports.ponyErase = {
   type: "TEXT",
   strokes: ponyEraseStroke,
@@ -315,7 +345,7 @@ module.exports.ponyErasePrecisely = {
   ],
 }
 
-const sumStroke = require('./strokes/sum.json')
+const sumStroke = require('./strokes/sumPointers.json')
 module.exports.sum = {
   type: 'MATH',
   strokes: sumStroke,
@@ -450,7 +480,7 @@ module.exports.buenosAires = {
   },
 }
 
-const abrausorusStrokes = require("./strokes/abrausorus.json")
+const abrausorusStrokes = require("./strokes/abrausorusPointers.json")
 module.exports.abrausorus = {
   type: "TEXT",
   strokes: abrausorusStrokes,
@@ -498,7 +528,7 @@ module.exports.oneThousandNineHundredAndNintyThree = {
   },
 }
 
-const helloOneSurrounded = require("./strokes/helloOneStrokeSurrounded.json")
+const helloOneSurrounded = require("./strokes/helloOneStrokeSurroundedPointers.json")
 module.exports.helloOneSurrounded = {
   type: "TEXT",
   strokes: helloOneSurrounded,

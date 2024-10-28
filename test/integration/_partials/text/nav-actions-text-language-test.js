@@ -1,4 +1,4 @@
-const { getDatasFromExportedEvent, write, waitEditorIdle } = require("../../helper")
+const { getDatasFromExportedEvent, writeStrokes, waitEditorIdle } = require("../../helper")
 const { h } = require("../../strokesDatas")
 
 describe('Nav actions text language', () => {
@@ -10,7 +10,7 @@ describe('Nav actions text language', () => {
   test('should change language', async () => {
     await Promise.all([
       getDatasFromExportedEvent(page),
-      write(page, h.strokes),
+      writeStrokes(page, h.strokes),
     ])
 
     await waitEditorIdle(page)

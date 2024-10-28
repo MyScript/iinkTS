@@ -37,7 +37,7 @@ async function updateTabContent() {
   switch (currentTabId) {
     case "jiix-tab":
       const { exports } = await editor.export(["application/vnd.myscript.jiix"]);
-      const jiix = exports["application/vnd.myscript.jiix"];
+      const jiix = exports?.["application/vnd.myscript.jiix"] || {};
       content = renderjson(jiix);
       dataString = JSON.stringify(jiix);
       break;
@@ -207,6 +207,7 @@ async function loadEditor() {
    * @param {Object} The Editor parameters
    */
   editor = new iink.Editor(editorElement, options);
+
   /**
    *  async initialize editor behaviors
    */
