@@ -60,7 +60,6 @@ export class OIRecognizer
   protected currentPartId?: string
   protected currentErrorCode?: string | number
 
-  protected connected?: DeferredPromise<void>
 
   protected addStrokeDeferred?: DeferredPromise<TOIMessageEventGesture | undefined>
   protected contextlessGestureDeferred: Map<string, DeferredPromise<TOIMessageEventContextlessGesture>>
@@ -102,12 +101,11 @@ export class OIRecognizer
     if (!this.socket) {
       throw new Error("Recognizer must be initilized")
     }
-    await this.connected?.promise
     if (this.socket.readyState === this.socket.OPEN) {
       this.socket.send(JSON.stringify(message))
     }
     else {
-      throw new Error(`Connection not ready, state: ${ this.socket.readyState }}`)
+      throw new Error(`Can not send message: ${message.type}, connection not ready, state: ${ this.socket.readyState }`)
     }
   }
 
@@ -136,7 +134,7 @@ export class OIRecognizer
 
   protected resetAllDeferred(): void
   {
-    this.connected = undefined
+    this.initialized = new DeferredPromise<void>()
     this.addStrokeDeferred = undefined
     this.contextlessGestureDeferred.clear()
     this.transformStrokeDeferred = undefined
@@ -218,7 +216,6 @@ export class OIRecognizer
 
   protected openCallback(): void
   {
-    this.connected?.resolve()
     this.reconnectionCount = 0
     this.send({
       type: "authenticate",
@@ -272,6 +269,7 @@ export class OIRecognizer
   {
     if (sessionDescriptionMessage.iinkSessionId) {
       this.sessionId = sessionDescriptionMessage.iinkSessionId
+      this.event.emitSessionOpened(this.sessionId)
     }
     if (this.currentPartId) {
       this.send({ type: "openContentPart", id: this.currentPartId })
@@ -419,6 +417,20 @@ export class OIRecognizer
     }
   }
 
+  async newSession(serverConfiguration?: TServerConfiguration, recognitionConfiguration?: TRecognitionConfiguration): Promise<void>
+  {
+    await this.close(1000, "new-session")
+    if (serverConfiguration) {
+      this.serverConfiguration = serverConfiguration
+    }
+    if (recognitionConfiguration) {
+      this.recognitionConfiguration = recognitionConfiguration
+    }
+    this.sessionId = undefined
+    this.currentPartId = undefined
+    await this.init()
+  }
+
   async init(): Promise<void>
   {
     this.event.emitStartInitialization()
@@ -427,7 +439,6 @@ export class OIRecognizer
       this.sessionId = undefined
       this.currentPartId = undefined
     }
-    this.connected = new DeferredPromise<void>()
     this.initialized = new DeferredPromise<void>()
     this.socket = new WebSocket(this.url)
     this.clearSocketListener()
@@ -753,6 +764,7 @@ export class OIRecognizer
 
   async close(code: number, reason: string): Promise<void>
   {
+    this.resetAllDeferred()
     this.closeDeferred = new DeferredPromise<void>()
     if (this.socket.readyState === this.socket.OPEN || this.socket.readyState === this.socket.CONNECTING) {
       this.socket.close(code, reason)
@@ -760,12 +772,11 @@ export class OIRecognizer
     else {
       this.closeDeferred.resolve()
     }
-    return this.closeDeferred.promise
+    await this.closeDeferred.promise
   }
 
   async destroy(): Promise<void>
   {
-    this.resetAllDeferred()
     if (this.socket) {
       await this.close(1000, "Recognizer destroyed")
     }

@@ -1,4 +1,4 @@
-const { writePointers, getDatasFromExportedEvent, waitEditorIdle } = require("../../helper")
+const { writeStrokes, getDatasFromExportedEvent, waitEditorIdle } = require("../../helper")
 const { one } = require("../../strokesDatas")
 
 describe('Nav actions text clear', () => {
@@ -10,7 +10,7 @@ describe('Nav actions text clear', () => {
   test('should clear', async () => {
     const [exportBeforeClear] = await Promise.all([
       getDatasFromExportedEvent(page),
-      writePointers(page, one.strokes, 100)
+      writeStrokes(page, one.strokes, 100)
     ])
     expect(exportBeforeClear["application/vnd.myscript.jiix"].label).toStrictEqual("1")
 

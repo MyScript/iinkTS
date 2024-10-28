@@ -62,7 +62,7 @@ describe('Home Page', () =>
     }
   })
 
-  test('each "View example" link should ok', async () =>
+  test('each "View example" link should be ok', async () =>
   {
     const exampleLink = await page.locator('text=View example')
 

@@ -1,7 +1,7 @@
 const { toMatchImageSnapshot } = require('jest-image-snapshot')
 const {
   waitForEditorWebSocket,
-  write,
+  writeStrokes,
   getDatasFromExportedEvent,
   waitEditorIdle
 } = require('../helper')
@@ -24,14 +24,14 @@ describe('Websocket Math', function () {
     for (const s of equation1.strokes) {
       await Promise.all([
         getDatasFromExportedEvent(page),
-        write(page, [s], 100, 100)
+        writeStrokes(page, [s], 100, 100)
       ])
     }
     const img = await page.screenshot()
 
     // To update the snapshot, uncomment the following 2 lines
-    // const fs = require('fs')
-    // fs.writeFile(__dirname + '../__image_snapshots__/websocket-math-with-graph-test-js-snapshot.png', img);
+    //const fs = require('fs')
+    //fs.writeFile(__dirname + '/../__image_snapshots__/websocket-math-with-graph-test-js-snapshot.png', img, (err) => err && console.error(err));
 
     expect(img).toMatchImageSnapshot({
 

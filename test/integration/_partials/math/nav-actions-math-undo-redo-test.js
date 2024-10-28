@@ -1,5 +1,5 @@
 const {
-  write,
+  writeStrokes,
   getDatasFromExportedEvent,
   getExportsTypeFromEditorModel,
   getEditorConfiguration,
@@ -24,7 +24,7 @@ describe("Nav actions math undo/redo", () => {
     await waitEditorIdle(page)
 
     let latex
-    await write(page, equation1.strokes, 100, 100)
+    await writeStrokes(page, equation1.strokes, 100, 100)
     await waitEditorIdle(page)
 
     const [clearExport] = await Promise.all([getDatasFromExportedEvent(page), page.click("#clear")])
@@ -70,7 +70,7 @@ describe("Nav actions math undo/redo", () => {
     await waitEditorIdle(page)
 
     let latex
-    await write(page, equation1.strokes)
+    await writeStrokes(page, equation1.strokes)
     await waitEditorIdle(page)
     latex = await getExportsTypeFromEditorModel(page, "application/x-latex")
     expect(latex).toEqual(equation1.exports.LATEX.at(-1))

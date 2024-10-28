@@ -194,7 +194,7 @@ describe("OIGestureManager.ts", () =>
         strokeAfterIds: []
       }
       await gestMan.applySurroundGesture(gestureStroke, gesture)
-      expect(gestMan.behaviors.event.emitTool).toHaveBeenNthCalledWith(1, EditorTool.Select)
+      expect(gestMan.behaviors.event.emitToolChanged).toHaveBeenNthCalledWith(1, EditorTool.Select)
       expect(gestMan.behaviors.select).toHaveBeenNthCalledWith(1, [stroke.id])
       expect(gestMan.history.push).toHaveBeenCalledTimes(0)
     })

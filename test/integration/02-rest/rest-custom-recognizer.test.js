@@ -1,6 +1,6 @@
 const {
   waitForEditorRest,
-  write,
+  writeStrokes,
   getDatasFromExportedEvent
 } = require('../helper')
 const { h } = require('../strokesDatas')
@@ -29,7 +29,7 @@ describe('Rest Text', () => {
   test("should have info in recognizer-info div", async () => {
     await Promise.all([
       getDatasFromExportedEvent(page),
-      write(page, h.strokes)
+      writeStrokes(page, h.strokes)
     ])
     const url = await page.$eval("#recognizer-url", el => el.textContent)
     expect(url).toContain("Server url: ")

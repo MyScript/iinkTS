@@ -1,4 +1,4 @@
-const { write, getDatasFromExportedEvent, waitForEditorWebSocket } = require("../helper")
+const { writeStrokes, getDatasFromExportedEvent, waitForEditorWebSocket } = require("../helper")
 const { helloOneStroke } = require("../strokesDatas")
 
   describe("Websocket Text Search Without Smartguide", () => {
@@ -15,7 +15,7 @@ const { helloOneStroke } = require("../strokesDatas")
     test("should draw stroke hello", async () => {
       const [exports] = await Promise.all([
         getDatasFromExportedEvent(page),
-        write(page, helloOneStroke.strokes),
+        writeStrokes(page, helloOneStroke.strokes),
       ])
 
       const jiixExpected = helloOneStroke.exports["application/vnd.myscript.jiix"].label
@@ -26,7 +26,7 @@ const { helloOneStroke } = require("../strokesDatas")
     test("should not see guides", async () => {
         await Promise.all([
             getDatasFromExportedEvent(page),
-            write(page, helloOneStroke.strokes),
+            writeStrokes(page, helloOneStroke.strokes),
         ])
         const line = await page.locator("line").all()
         expect(line.length).toEqual(0)

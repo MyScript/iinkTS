@@ -134,8 +134,8 @@ export class OIBehaviors implements IBehaviors
   {
     this.#tool = i
     this.menu.tool.update()
-    this.event.emitTool(i)
     this.setCursorStyle()
+    this.event.emitToolChanged(i)
     this.unselectAll()
   }
 
@@ -213,6 +213,7 @@ export class OIBehaviors implements IBehaviors
       this.menu.update()
       this.svgDebugger.apply()
       this.waitForIdle()
+      this.event.emitUIpdated()
     }, 1000)
   }
 
@@ -359,6 +360,7 @@ export class OIBehaviors implements IBehaviors
         this.model.selectSymbol(currentEl.id)
         this.renderer.drawSymbol(this.model.symbolsSelected[0])
         this.selector.drawSelectedGroup(this.model.symbolsSelected)
+        this.updateLayerUI()
       }
       else {
         this.menu.context.position.x = point.x + this.renderer.parent.clientLeft
@@ -372,6 +374,10 @@ export class OIBehaviors implements IBehaviors
   {
     this.#logger.info("init")
 
+    this.model.width = Math.max(this.layers.root.clientWidth, this.#configuration.rendering.minWidth)
+    this.model.height = Math.max(this.layers.root.clientHeight, this.#configuration.rendering.minHeight)
+    this.model.rowHeight = this.configuration.rendering.guides.gap
+
     this.renderer.init(this.layers.render)
     this.menu.render(this.layers.ui.root)
 
@@ -380,15 +386,14 @@ export class OIBehaviors implements IBehaviors
     this.grabber.onPointerMove = this.onPointerMove.bind(this)
     this.grabber.onPointerUp = this.onPointerUp.bind(this)
     this.grabber.onContextMenu = this.onContextMenu.bind(this)
+
+    this.history.init(this.model)
+
     this.recognizer.event.addExportedListener(this.event.emitExported.bind(this.event))
     this.recognizer.event.addContentChangedListener(this.event.emitChanged.bind(this.event))
-    this.recognizer.event.addStartInitialization(this.layers.closeMessageModal.bind(this.layers))
+    this.recognizer.event.addSessionOpenedListener(this.event.emitSessionOpened.bind(this.event))
+    this.recognizer.event.addEndInitialization(this.layers.closeMessageModal.bind(this.layers))
     this.recognizer.event.addIdleListener(this.updateLayerState.bind(this))
-
-    this.model.width = Math.max(this.layers.root.clientWidth, this.#configuration.rendering.minWidth)
-    this.model.height = Math.max(this.layers.root.clientHeight, this.#configuration.rendering.minHeight)
-    this.model.rowHeight = this.configuration.rendering.guides.gap
-    this.history.init(this.model)
     await this.recognizer.init()
     await this.setPenStyle(this.penStyle)
     await this.setTheme(this.theme)
@@ -401,10 +406,8 @@ export class OIBehaviors implements IBehaviors
       this.#logger.info("changeLanguage", { code })
       this.updateLayerState(false)
       this.configuration.recognition.lang = code
-      await this.recognizer.destroy()
-      this.recognizer = new OIRecognizer(this.#configuration.server, this.#configuration.recognition)
-      await this.recognizer.init()
-      await this.recognizer.addStrokes(this.model.symbols.filter(s => s.type === SymbolType.Stroke) as OIStroke[], false)
+      await this.recognizer.newSession(this.configuration.server, this.configuration.recognition)
+      this.recognizer.addStrokes(this.extractStrokesFromSymbols(this.model.symbols), false)
       this.event.emitLoaded()
     }
     catch (error) {
@@ -517,7 +520,6 @@ export class OIBehaviors implements IBehaviors
     }
     catch (error) {
       this.#logger.error("createSymbol", error)
-      this.updateLayerUI()
       this.manageError(error as Error)
       throw error
     }
@@ -530,9 +532,11 @@ export class OIBehaviors implements IBehaviors
     }
     catch (error) {
       this.#logger.error("createSymbol", error)
-      this.updateLayerUI()
       this.manageError(error as Error)
       throw error
+    }
+    finally {
+      this.updateLayerUI()
     }
   }
 
@@ -1043,6 +1047,7 @@ export class OIBehaviors implements IBehaviors
       this.renderer.drawSymbol(s)
     })
     this.selector.drawSelectedGroup(this.model.symbolsSelected)
+    this.updateLayerUI()
     this.event.emitSelected(this.model.symbolsSelected)
   }
 
@@ -1407,8 +1412,7 @@ export class OIBehaviors implements IBehaviors
     this.model.height = height
     this.model.width = width
     this.renderer.resize(height, width)
-    this.menu.update()
-    this.svgDebugger.apply()
+    this.updateLayerUI()
     this.updateLayerState(true)
     return this.model
   }
