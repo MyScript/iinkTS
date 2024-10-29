@@ -536,7 +536,7 @@ describe("OIGestureManager.ts", () =>
         strokeAfterIds: []
       }
       await gestMan.applyJoinGesture(strokeGesture, gesture)
-      expect(gestMan.translator.translate).toHaveBeenNthCalledWith(1, [stroke21], stroke12.bounds.xMax - stroke21.bounds.xMin + rowHeight / 2, -rowHeight, false)
+      expect(gestMan.translator.translate).toHaveBeenNthCalledWith(1, [stroke21], stroke12.bounds.xMax - stroke21.bounds.xMin + rowHeight * 2, -rowHeight, false)
       expect(gestMan.history.push).toHaveBeenCalledTimes(1)
     })
 
