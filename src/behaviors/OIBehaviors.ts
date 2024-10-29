@@ -222,6 +222,7 @@ export class OIBehaviors implements IBehaviors
       this.menu.update()
       this.svgDebugger.apply()
       this.waitForIdle()
+      this.event.emitUIpdated()
     }, timeout)
   }
 
