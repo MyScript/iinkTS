@@ -88,7 +88,7 @@ export class OIGestureManager
 
   get strokeSpaceWidth(): number
   {
-    return this.behaviors.configuration.rendering.guides.gap / 2
+    return this.behaviors.configuration.rendering.guides.gap * 2
   }
 
   async applySurroundGesture(gestureStroke: OIStroke, gesture: TGesture): Promise<void>
@@ -881,7 +881,7 @@ export class OIGestureManager
         this.#logger.warn("apply", `Gesture unknow: ${ gesture.gestureType }`)
         break
     }
-
+    this.behaviors.event.emitGestured({ gestureType: gesture.gestureType, stroke: gestureStroke })
     this.behaviors.svgDebugger.apply()
     return Promise.resolve()
   }
