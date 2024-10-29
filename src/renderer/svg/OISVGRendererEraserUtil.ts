@@ -1,4 +1,4 @@
-import { OIEraser, TPointer } from "../../primitive"
+import { OIEraser, TPointer } from "../../symbol"
 import { SVGBuilder } from "./SVGBuilder"
 
 /**

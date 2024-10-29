@@ -1,4 +1,4 @@
-import { TBoundingBox, TPoint } from "../../primitive"
+import { TBox, TPoint } from "../../symbol"
 
 const XMLNS = "http://www.w3.org/2000/svg"
 /**
@@ -6,7 +6,7 @@ const XMLNS = "http://www.w3.org/2000/svg"
  */
 export class SVGBuilder
 {
-  static createLayer(boundingBox: TBoundingBox, attrs: { [key: string]: string } = {}): SVGSVGElement
+  static createLayer(boundingBox: TBox, attrs: { [key: string]: string } = {}): SVGSVGElement
   {
     const svgEl = document.createElementNS(XMLNS, "svg")
     svgEl.setAttribute("width", `${ boundingBox.width }px`)
@@ -128,7 +128,7 @@ export class SVGBuilder
     return polygonEl
   }
 
-  static createRect(box: TBoundingBox, attrs: { [key: string]: string } = {}): SVGRectElement
+  static createRect(box: TBox, attrs: { [key: string]: string } = {}): SVGRectElement
   {
     const rectEl = document.createElementNS(XMLNS, "rect")
     rectEl.setAttribute("x", box.x.toString())
@@ -153,7 +153,7 @@ export class SVGBuilder
     return tSpanEl
   }
 
-  static createForeignObject(box: TBoundingBox, node: HTMLElement, attrs: { [key: string]: string } = {}): SVGForeignObjectElement
+  static createForeignObject(box: TBox, node: HTMLElement, attrs: { [key: string]: string } = {}): SVGForeignObjectElement
   {
     const objEl = document.createElementNS(XMLNS, "foreignObject")
     objEl.setAttribute("x", box.x.toString())

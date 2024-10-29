@@ -1,4 +1,4 @@
-import { OIShapeCircle, OIShapeEllipse, OIShapePolygon, ShapeKind, SymbolType, TPoint } from "../../../src/primitive"
+import { OIShapeCircle, OIShapeEllipse, OIShapePolygon, ShapeKind, SymbolType, TPoint } from "../../../src/symbol"
 import { OISVGRendererConst, OISVGRendererShapeUtil } from "../../../src/renderer"
 import { DefaultStyle, TStyle } from "../../../src/style"
 

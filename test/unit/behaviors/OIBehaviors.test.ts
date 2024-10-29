@@ -1,6 +1,6 @@
 import { jiixText } from "../__dataset__/exports.dataset"
 import { LeftClickEventMock } from "../__mocks__/EventMock"
-import { buildOICircle, buildOIGroup, buildOIStroke, buildOIStrokeText, buildOIText, delay } from "../helpers"
+import { buildOICircle, buildOIGroup, buildOIStroke, buildRecognizedText, buildOIText, delay } from "../helpers"
 import
 {
   OIBehaviors,
@@ -673,7 +673,7 @@ describe("OIBehaviors.ts", () =>
     const text2 = buildOIText()
     const stroke1 = buildOIStroke()
     const stroke2 = buildOIStroke()
-    const strokeText = buildOIStrokeText()
+    const strokeText = buildRecognizedText()
     const group = buildOIGroup({ nbOIText: 1, nbOIStroke: 1 })
     const symbols: TOISymbol[] = [
       stroke1,

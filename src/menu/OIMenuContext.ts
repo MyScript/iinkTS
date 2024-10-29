@@ -2,7 +2,7 @@ import ArrowDown from "../assets/svg/nav-arrow-down.svg"
 import { SELECTION_MARGIN } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerClass, LoggerManager } from "../logger"
-import { DecoratorKind, OIDecorator, OIStroke, OISymbolGroup, OIText, SymbolType, TOISymbol } from "../primitive"
+import { DecoratorKind, OIDecorator, OIRecognizedText, OIStroke, OISymbolGroup, OIText, RecognizedKind, SymbolType, TOISymbol } from "../symbol"
 import { OIMenu, TMenuItemBoolean, TMenuItemButton, TMenuItemColorList } from "./OIMenu"
 import { createUUID } from "../utils"
 import { OIMenuSub, TSubMenuParam } from "./OIMenuSub"
@@ -52,9 +52,9 @@ export class OIMenuContext extends OIMenu
     return this.symbolsSelected.length > 0
   }
 
-  get symbolsDecorable(): (OIStroke | OIText | OISymbolGroup)[]
+  get symbolsDecorable(): (OIStroke | OIText | OISymbolGroup | OIRecognizedText)[]
   {
-    return this.symbolsSelected.filter(s => [SymbolType.Stroke.toString(), SymbolType.Text.toString(), SymbolType.Group.toString(), SymbolType.StrokeText.toString()].includes(s.type)) as (OIStroke | OIText)[]
+    return this.symbolsSelected.filter(s => [SymbolType.Stroke, SymbolType.Text, SymbolType.Group].includes(s.type) || (s.type === SymbolType.Recognized && s.kind === RecognizedKind.Text)) as (OIStroke | OIText | OISymbolGroup | OIRecognizedText)[]
   }
 
   get showDecorator(): boolean
@@ -134,7 +134,7 @@ export class OIMenuContext extends OIMenu
             case SymbolType.Group:
               updateDeepIdInGroup(s)
               break
-            case SymbolType.StrokeText:
+            case SymbolType.Recognized:
               s.strokes.forEach(s => s.id = s.id.slice(0, -36) + `-${ createUUID() }`)
               break
           }
@@ -148,7 +148,7 @@ export class OIMenuContext extends OIMenu
           if (clone.type === SymbolType.Group) {
             updateDeepIdInGroup(clone)
           }
-          else if (clone.type === SymbolType.StrokeText) {
+          else if (clone.type === SymbolType.Recognized) {
             clone.strokes.forEach(s => s.id = s.id.slice(0, -36) + `-${ createUUID() }`)
           }
         }

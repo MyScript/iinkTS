@@ -1,4 +1,4 @@
-import { DecoratorKind, OIText } from "../../primitive"
+import { DecoratorKind, OIText } from "../../symbol"
 import { DefaultStyle } from "../../style"
 import { OISVGRendererDecoratorUtil } from "./OISVGRendererDecoratorUtil"
 import { OISVGRendererConst } from "./OISVGRendererConst"

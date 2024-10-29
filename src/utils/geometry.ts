@@ -1,4 +1,4 @@
-import { TBoundingBox, TPoint, TSegment } from "../primitive"
+import { TBox, TPoint, TSegment } from "../symbol"
 import { isBetween } from "./math"
 
 /**
@@ -65,7 +65,7 @@ export function computeNearestPointOnSegment(p: TPoint, seg: TSegment): TPoint
 /**
  * @group Utils
  */
-export function isPointInsideBox(point: TPoint, box: TBoundingBox): boolean
+export function isPointInsideBox(point: TPoint, box: TBox): boolean
 {
   return isBetween(point.x, box.x, box.x + box.width) && isBetween(point.y, box.y, box.y + box.height)
 }

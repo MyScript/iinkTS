@@ -1,7 +1,7 @@
 import { TConverstionState, TRecognitionConfiguration, TServerConfiguration } from "../configuration"
 import { LoggerClass, LoggerManager } from "../logger"
 import { Model, TExport, TJIIXExport } from "../model"
-import { Stroke } from "../primitive"
+import { Stroke } from "../symbol"
 import { StyleHelper, TPenStyle, TTheme } from "../style"
 import { TUndoRedoContext } from "../history"
 import { DeferredPromise, PartialDeep, computeHmac, isVersionSuperiorOrEqual } from "../utils"

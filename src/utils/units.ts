@@ -1,4 +1,4 @@
-import { TBoundingBox } from "../primitive"
+import { TBox } from "../symbol"
 
 /**
  * @group Utils
@@ -19,7 +19,7 @@ export function convertPixelToMillimeter(px: number): number
 /**
  * @group Utils
  */
-export function convertBoundingBoxMillimeterToPixel(box?: TBoundingBox): TBoundingBox
+export function convertBoundingBoxMillimeterToPixel(box?: TBox): TBox
 {
   if (!box) {
     return { height: 0, width: 0, x: 0, y: 0}

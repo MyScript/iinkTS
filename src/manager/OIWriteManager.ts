@@ -17,7 +17,7 @@ import
   TOISymbol,
   TPoint,
   TPointer
-} from "../primitive"
+} from "../symbol"
 import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
 import { TStyle } from "../style"
@@ -97,7 +97,7 @@ export class OIWriteManager
     return this.detectGesture && this.model.symbols.some(s =>
     {
       switch (s.type) {
-        case SymbolType.StrokeText:
+        case SymbolType.Recognized:
         case SymbolType.Stroke:
           return false
         case SymbolType.Group:
@@ -257,7 +257,7 @@ export class OIWriteManager
       const gesture = await this.recognizer.addStrokes([localStroke], this.detectGesture)
       if (gesture) {
         this.history.pop()
-        this.gestureManager.apply(this.model.getRootSymbol(gesture.gestureStrokeId) as OIStroke, gesture)
+        this.gestureManager.apply(localStroke, gesture)
       }
     }
   }

@@ -26,6 +26,7 @@ describe('EditorEvent.ts', () =>
     const selectedCallback = jest.fn()
     const toolCallback = jest.fn()
     const uiCallback = jest.fn()
+    const synchronizedCallback = jest.fn()
 
     test("should execute callback on emitLoaded", () =>
     {
@@ -139,6 +140,13 @@ describe('EditorEvent.ts', () =>
       events.addUIpdatedListener(uiCallback)
       events.emitUIpdated()
       expect(uiCallback).toHaveBeenCalledTimes(1)
+    })
+
+    test("should execute callback on emitSynchronized", () =>
+    {
+      events.addSynchronizedListener(synchronizedCallback)
+      events.emitSynchronized()
+      expect(synchronizedCallback).toHaveBeenCalledTimes(1)
     })
 
     test("remove all listeners", () =>
@@ -286,6 +294,14 @@ describe('EditorEvent.ts', () =>
       events.emitUIpdated()
       expect(testCallback).toHaveBeenCalledTimes(1)
     })
+
+    test("should execute callback on emitSynchronized", () =>
+      {
+        const testCallback = jest.fn()
+        element.addEventListener(EditorEventName.SYNCHRONIZED, testCallback)
+        events.emitSynchronized()
+        expect(testCallback).toHaveBeenCalledTimes(1)
+      })
   })
 
 })

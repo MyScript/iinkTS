@@ -1,4 +1,4 @@
-import { OIShapeCircle, OIShapeEllipse, OIShapePolygon, ShapeKind, TOIShape } from "../../primitive"
+import { OIShapeCircle, OIShapeEllipse, OIShapePolygon, ShapeKind, TOIShape } from "../../symbol"
 import { DefaultStyle } from "../../style"
 import { convertRadianToDegree } from "../../utils"
 import { OISVGRendererConst } from "./OISVGRendererConst"

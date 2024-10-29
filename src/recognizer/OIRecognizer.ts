@@ -2,7 +2,7 @@ import { TRecognitionConfiguration, TServerConfiguration } from "../configuratio
 import { TOIHistoryBackendChanges, TUndoRedoContext } from "../history"
 import { LoggerClass, LoggerManager } from "../logger"
 import { TExport, TJIIXExport } from "../model"
-import { OIStroke } from "../primitive"
+import { OIStroke } from "../symbol"
 import { TMatrixTransform } from "../transform"
 import { computeHmac, DeferredPromise } from "../utils"
 import
@@ -217,7 +217,7 @@ export class OIRecognizer
   protected openCallback(): void
   {
     this.reconnectionCount = 0
-    this.send({
+    this.#send({
       type: "authenticate",
       "myscript-client-name": "iink-ts",
       "myscript-client-version": "1.0.0-buildVersion",
@@ -226,7 +226,7 @@ export class OIRecognizer
 
   protected async manageHMACChallenge(hmacChallengeMessage: TOIMessageEventHMACChallenge): Promise<void>
   {
-    this.send({
+    this.#send({
       type: "hmac",
       hmac: await computeHmac(hmacChallengeMessage.hmacChallenge, this.serverConfiguration.applicationKey, this.serverConfiguration.hmacKey)
     })
@@ -256,7 +256,7 @@ export class OIRecognizer
   protected manageAuthenticated(): void
   {
     const pixelTomm = 25.4 / 96
-    this.send({
+    this.#send({
       type: this.sessionId ? "restoreSession" : "initSession",
       iinkSessionId: this.sessionId,
       scaleX: pixelTomm,
@@ -272,10 +272,10 @@ export class OIRecognizer
       this.event.emitSessionOpened(this.sessionId)
     }
     if (this.currentPartId) {
-      this.send({ type: "openContentPart", id: this.currentPartId })
+      this.#send({ type: "openContentPart", id: this.currentPartId })
     }
     else {
-      this.send({ type: "newContentPart", contentType: this.recognitionConfiguration.type, mimeTypes: this.mimeTypes })
+      this.#send({ type: "newContentPart", contentType: this.recognitionConfiguration.type, mimeTypes: this.mimeTypes })
     }
   }
 
@@ -462,6 +462,7 @@ export class OIRecognizer
     switch (this.socket.readyState) {
       case this.socket.CONNECTING:
       case this.socket.OPEN:
+        await this.initialized.promise
         this.#send(message)
         return Promise.resolve()
       case this.socket.CLOSING:
@@ -499,7 +500,6 @@ export class OIRecognizer
       this.addStrokeDeferred.resolve(undefined)
       return this.addStrokeDeferred?.promise
     }
-    await this.initialized.promise
     await this.send(this.buildAddStrokesMessage(strokes, processGestures))
     return this.addStrokeDeferred?.promise
   }
@@ -519,7 +519,6 @@ export class OIRecognizer
       this.replaceStrokeDeferred.resolve()
       return this.replaceStrokeDeferred?.promise
     }
-    await this.initialized.promise
     await this.send(this.buildReplaceStrokesMessage(oldStrokeIds, newStrokes))
     return this.replaceStrokeDeferred?.promise
   }
@@ -541,7 +540,6 @@ export class OIRecognizer
       this.transformStrokeDeferred.resolve()
       return this.transformStrokeDeferred?.promise
     }
-    await this.initialized.promise
     await this.send(this.buildTransformTranslateMessage(strokeIds, tx, ty))
     return this.transformStrokeDeferred?.promise
   }
@@ -564,7 +562,6 @@ export class OIRecognizer
       this.transformStrokeDeferred.resolve()
       return this.transformStrokeDeferred?.promise
     }
-    await this.initialized.promise
     await this.send(this.buildTransformRotateMessage(strokeIds, angle, x0, y0))
     return this.transformStrokeDeferred?.promise
   }
@@ -588,7 +585,6 @@ export class OIRecognizer
       this.transformStrokeDeferred.resolve()
       return this.transformStrokeDeferred?.promise
     }
-    await this.initialized.promise
     await this.send(this.buildTransformScaleMessage(strokeIds, scaleX, scaleY, x0, y0))
     return this.transformStrokeDeferred?.promise
   }
@@ -609,7 +605,6 @@ export class OIRecognizer
       this.transformStrokeDeferred.resolve()
       return this.transformStrokeDeferred?.promise
     }
-    await this.initialized.promise
     await this.send(this.buildTransformMatrixMessage(strokeIds, matrix))
     return this.transformStrokeDeferred?.promise
   }
@@ -628,7 +623,6 @@ export class OIRecognizer
       this.eraseStrokeDeferred.resolve()
       return this.eraseStrokeDeferred?.promise
     }
-    await this.initialized.promise
     await this.send(this.buildEraseStrokesMessage(strokeIds))
     return this.eraseStrokeDeferred?.promise
   }
@@ -640,7 +634,6 @@ export class OIRecognizer
     }
     this.contextlessGestureDeferred.set(stroke.id, new DeferredPromise<TOIMessageEventContextlessGesture>())
     const pixelTomm = 25.4 / 96
-    await this.initialized.promise
     await this.send({
       type: "contextlessGesture",
       scaleX: pixelTomm,
@@ -658,7 +651,6 @@ export class OIRecognizer
     const message: TOIMessageEvent = {
       type: "waitForIdle",
     }
-    await this.initialized.promise
     await this.send(message)
     return this.waitForIdleDeferred?.promise
   }
@@ -710,7 +702,6 @@ export class OIRecognizer
       type: "undo",
       changes
     }
-    await this.initialized.promise
     await this.send(message)
     return this.undoDeferred?.promise
   }
@@ -727,7 +718,6 @@ export class OIRecognizer
       type: "redo",
       changes
     }
-    await this.initialized.promise
     await this.send(message)
     return this.redoDeferred?.promise
   }
@@ -746,7 +736,6 @@ export class OIRecognizer
       partId: this.currentPartId,
       mimeTypes
     }
-    await this.initialized.promise
     await this.send(message)
     const exports = await Promise.all(mimeTypes.map(mt => this.exportDeferredMap.get(mt)!.promise))
     return Object.assign({}, ...exports)
@@ -755,7 +744,6 @@ export class OIRecognizer
   async clear(): Promise<void>
   {
     this.clearDeferred = new DeferredPromise<void>()
-    await this.initialized.promise
     await this.send({
       type: "clear"
     })

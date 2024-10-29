@@ -1,4 +1,4 @@
-import { DecoratorKind, OIEraser, OISymbolGroup, SymbolType, TOISymbol } from "../../primitive"
+import { DecoratorKind, OIEraser, OISymbolGroup, SymbolType, TOISymbol } from "../../symbol"
 import { DefaultStyle } from "../../style"
 import { OISVGRendererDecoratorUtil } from "./OISVGRendererDecoratorUtil"
 import { OISVGRendererEdgeUtil } from "./OISVGRendererEdgeUtil"
@@ -7,7 +7,7 @@ import { OISVGRendererStrokeUtil } from "./OISVGRendererStrokeUtil"
 import { OISVGRendererConst } from "./OISVGRendererConst"
 import { SVGBuilder } from "./SVGBuilder"
 import { OISVGRendererTextUtil } from "./OISVGRendererTextUtil"
-import { OISVGRendererStrokeTextUtil } from "./OISVGRendererStrokeTextUtil"
+import { OISVGRendererRecognizedUtil } from "./OISVGRendererRecognizedUtil"
 
 /**
  * @group Renderer
@@ -34,8 +34,8 @@ export class OISVGRendererGroupUtil
       case SymbolType.Group:
         element = OISVGRendererGroupUtil.getSVGElement(symbol)
         break
-      case SymbolType.StrokeText:
-        element = OISVGRendererStrokeTextUtil.getSVGElement(symbol)
+      case SymbolType.Recognized:
+        element = OISVGRendererRecognizedUtil.getSVGElement(symbol)
         break
     }
     return element

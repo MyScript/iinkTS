@@ -1,7 +1,7 @@
 import { OIBehaviors } from "../behaviors"
 import { LoggerManager, LoggerClass } from "../logger"
 import { OIModel, JIIXEdgeKind } from "../model"
-import { Box, OIText, SymbolType, TBoundingBox, TOISymbol } from "../primitive"
+import { Box, OIText, SymbolType, TBox, TOISymbol } from "../symbol"
 import { OISVGRenderer, OISVGRendererConst, SVGBuilder } from "../renderer"
 import { convertBoundingBoxMillimeterToPixel, createUUID } from "../utils"
 
@@ -204,7 +204,7 @@ export class OIDebugSVGManager
     }
   }
 
-  protected drawRecognitionBox(box: TBoundingBox, infos?: string[]): void
+  protected drawRecognitionBox(box: TBox, infos?: string[]): void
   {
     const COLOR = "green"
     const TEXT_HEIGHT = 20
@@ -318,7 +318,7 @@ export class OIDebugSVGManager
                 }
                 infos.push(inf)
               })
-              const box = convertBoundingBoxMillimeterToPixel(Box.createFromBoxes(el.edges.map(e => e["bounding-box"] as TBoundingBox)))
+              const box = convertBoundingBoxMillimeterToPixel(Box.createFromBoxes(el.edges.map(e => e["bounding-box"] as TBox)))
               this.drawRecognitionBox(box, infos)
             }
             else if (el["bounding-box"]) {
@@ -351,7 +351,7 @@ export class OIDebugSVGManager
     }
   }
 
-  protected drawRecognitionItemBox(box: TBoundingBox, label?: string, chars?: string[]): void
+  protected drawRecognitionItemBox(box: TBox, label?: string, chars?: string[]): void
   {
     const COLOR = "blue"
     const CHAR_SIZE = 14

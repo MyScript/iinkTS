@@ -53,7 +53,7 @@ export class OIBehaviorsMock extends OIBehaviors
   changeOrderSymbols = jest.fn()
   groupSymbols = jest.fn()
   ungroupSymbol = jest.fn()
-  groupStrokesByJIIXElement = jest.fn()
+  synchronizeStrokesWithJIIX = jest.fn()
 
   removeSymbol = jest.fn()
   removeSymbols = jest.fn()

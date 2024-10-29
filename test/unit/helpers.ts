@@ -2,7 +2,7 @@ import
 {
   DefaultPenStyle,
   DefaultStyle,
-  TBoundingBox,
+  TBox,
   TStyle,
   Stroke,
   OIStroke,
@@ -16,7 +16,7 @@ import
   OISymbolGroup,
   TOISymbol,
   OIEraser,
-  OIStrokeText,
+  OIRecognizedText,
   PartialDeep,
 } from "../../src/iink"
 
@@ -35,7 +35,7 @@ export function randomIntFromInterval(min: number, max: number): number
   return Math.floor(Math.random() * (max - min) + min)
 }
 
-const defaultBox: TBoundingBox = { height: 10, width: 10, x: 1, y: 1 }
+const defaultBox: TBox = { height: 10, width: 10, x: 1, y: 1 }
 
 export function buildStroke({ box = defaultBox, style = DefaultPenStyle, nbPoint = 5, pointerType = "pen" } = {}): Stroke
 {
@@ -100,7 +100,7 @@ export function buildOILine({ start = { x: 0, y: 0 }, end = { x: 5, y: 5 }, styl
 
 export function buildOIText(
   { chars = [], point = { x: 0, y: 0 }, boundingBox = { x: 0, y: 10, width: 20, height: 30 }, style = DefaultStyle }:
-    { chars?: TOISymbolChar[], point?: TPoint, boundingBox?: TBoundingBox, style?: TStyle } = {}
+    { chars?: TOISymbolChar[], point?: TPoint, boundingBox?: TBox, style?: TStyle } = {}
 ): OIText
 {
   return new OIText(chars, point, boundingBox, style)
@@ -127,15 +127,15 @@ export function buildOIGroup(
   return new OISymbolGroup(symbols, style)
 }
 
-export function buildOIStrokeText(
+export function buildRecognizedText(
   nbStroke: number = 1,
   { baseline, xHeight }: { baseline: number, xHeight: number } = { baseline: 10, xHeight: 10 },
   style?: PartialDeep<TStyle>
-): OIStrokeText
+): OIRecognizedText
 {
   const strokes: OIStroke[] = []
   for (let i = 0; i < nbStroke; i++) {
     strokes.push(buildOIStroke())
   }
-  return new OIStrokeText(strokes, { baseline, xHeight }, style)
+  return new OIRecognizedText(strokes, { baseline, xHeight }, style)
 }

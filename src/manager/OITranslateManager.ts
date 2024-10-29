@@ -14,8 +14,9 @@ import
   TOIShape,
   TOISymbol,
   TPoint,
-  OIStrokeText
-} from "../primitive"
+  TOIRecognized,
+  RecognizedKind
+} from "../symbol"
 
 /**
  * @group Manager
@@ -114,11 +115,13 @@ export class OITranslateManager
     return group
   }
 
-  protected applyOnStrokeText(strokeText: OIStrokeText, tx: number, ty: number): OIStrokeText
+  protected applyOnRecognizedSymbol(recognizedSymbol: TOIRecognized, tx: number, ty: number): TOIRecognized
   {
-    strokeText.strokes.forEach(s => this.applyToStroke(s, tx, ty))
-    strokeText.baseline += ty
-    return strokeText
+    recognizedSymbol.strokes.forEach(s => this.applyToStroke(s, tx, ty))
+    if (recognizedSymbol.kind === RecognizedKind.Text) {
+      recognizedSymbol.baseline += ty
+    }
+    return recognizedSymbol
   }
 
   applyToSymbol(symbol: TOISymbol, tx: number, ty: number): TOISymbol
@@ -135,8 +138,8 @@ export class OITranslateManager
         return this.applyOnText(symbol, tx, ty)
       case SymbolType.Group:
         return this.applyOnGroup(symbol, tx, ty)
-      case SymbolType.StrokeText:
-        return this.applyOnStrokeText(symbol, tx, ty)
+      case SymbolType.Recognized:
+        return this.applyOnRecognizedSymbol(symbol, tx, ty)
       default:
         throw new Error(`Can't apply translate on symbol, type unknow: ${ JSON.stringify(symbol) }`)
     }

@@ -6,7 +6,7 @@ import { LoggerClass, LoggerManager } from "./logger"
 import { EditorTool } from "./Constants"
 import { DefaultLoggerConfiguration, TConfiguration, TConverstionState, TLoggerConfiguration } from "./configuration"
 import { IModel, TJIIXExport } from "./model"
-import { TStroke } from "./primitive"
+import { TStroke } from "./symbol"
 import { TUndoRedoContext } from "./history"
 import { IGrabber } from "./grabber"
 import { TPenStyle, TTheme } from "./style"
@@ -153,8 +153,8 @@ export class Editor
     if (!options?.configuration) {
       throw new Error("Configuration required")
     }
-    if (this.#behaviors) {
-      this.#behaviors.destroy()
+    if (this.behaviors) {
+      this.behaviors.destroy()
     }
     if (options.configuration.offscreen) {
       this.#behaviors = new OIBehaviors(options, this.layers, this.event)

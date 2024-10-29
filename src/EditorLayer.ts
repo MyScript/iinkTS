@@ -67,6 +67,11 @@ export class EditorLayer
   closeMessageModal(): void
   {
     this.onCloseModal?.(this.ui.message.modal.root.classList.contains("error-msg"))
+    this.hideMessageModal()
+  }
+
+  hideMessageModal(): void
+  {
     this.ui.message.root.style.display = "none"
     this.ui.message.modal.text.innerText = ""
     this.ui.message.modal.root.classList.remove("error-msg")

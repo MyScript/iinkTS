@@ -1,7 +1,7 @@
 import { TConverstionState, TDiagramConfiguration, TExportConfiguration, TMathConfiguration, TRawContentConfiguration, TRecognitionConfiguration, TServerConfiguration, TTextConfiguration } from "../configuration"
 import { LoggerClass, LoggerManager } from "../logger"
 import { Model, TExport, TJIIXExport } from "../model"
-import { TStrokeGroup, TStrokeGroupToSend } from "../primitive"
+import { TStrokeGroup, TStrokeGroupToSend } from "../symbol"
 import { StyleHelper, TPenStyle } from "../style"
 import { computeHmac, isVersionSuperiorOrEqual } from "../utils"
 import { RecognizerError } from "./RecognizerError"

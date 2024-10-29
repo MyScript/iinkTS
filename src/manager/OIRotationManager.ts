@@ -9,14 +9,14 @@ import
   OIStroke,
   OISymbolGroup,
   OIText,
-  OIStrokeText,
+  TOIRecognized,
   ShapeKind,
   SymbolType,
   TOIEdge,
   TOIShape,
   TOISymbol,
   TPoint
-} from "../primitive"
+} from "../symbol"
 import { computeAngleRadian, convertDegreeToRadian, convertRadianToDegree, computeRotatedPoint } from "../utils"
 
 /**
@@ -116,7 +116,7 @@ export class OIRotationManager
     return group
   }
 
-  protected applyOnStrokeText(strokeText: OIStrokeText, center: TPoint, angleRad: number): OIStrokeText
+  protected applyOnRecognizedSymbol(strokeText: TOIRecognized, center: TPoint, angleRad: number): TOIRecognized
   {
     strokeText.strokes.forEach(s => this.applyToStroke(s, center, angleRad))
     return strokeText
@@ -135,8 +135,8 @@ export class OIRotationManager
         return this.applyOnText(symbol, center, angleRad)
       case SymbolType.Group:
         return this.applyOnGroup(symbol, center, angleRad)
-      case SymbolType.StrokeText:
-        return this.applyOnStrokeText(symbol, center, angleRad)
+      case SymbolType.Recognized:
+        return this.applyOnRecognizedSymbol(symbol, center, angleRad)
       default:
         throw new Error(`Can't apply rotate on symbol, type unknow: ${ JSON.stringify(symbol) }`)
     }

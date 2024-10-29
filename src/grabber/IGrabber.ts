@@ -1,4 +1,4 @@
-import { TPointer } from "../primitive"
+import { TPointer } from "../symbol"
 
 /**
  * @group Grabber

@@ -2,7 +2,7 @@ import { EditorTool, SELECTION_MARGIN } from "../Constants"
 import { Configuration, TConfiguration, TRenderingConfiguration } from "../configuration"
 import { OIPointerEventGrabber } from "../grabber"
 import { LoggerClass, LoggerManager } from "../logger"
-import { OIModel, TExport } from "../model"
+import { JIIXEdgeKind, JIIXELementType, JIIXNodeKind, OIModel, TExport, TJIIXStrokeItem } from "../model"
 import
 {
   Box,
@@ -17,7 +17,7 @@ import
   OIShapeEllipse,
   OIShapePolygon,
   OIStroke,
-  OIStrokeText,
+  OIRecognizedText,
   OISymbolGroup,
   OIText,
   ShapeKind,
@@ -26,7 +26,11 @@ import
   TPoint,
   TPointer,
   convertPartialStrokesToOIStrokes,
-} from "../primitive"
+  TOIRecognized,
+  OIRecognizedLine,
+  OIRecognizedPolyLine,
+  OIRecognizedArc,
+} from "../symbol"
 import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer, SVGBuilder } from "../renderer"
 import { DefaultStyle, StyleManager, TStyle, TTheme } from "../style"
@@ -46,12 +50,16 @@ import
   OIMoveManager,
   OIMenuManager
 } from "../manager"
-import { OIHistoryManager, TOIHistoryBackendChanges, TOIHistoryChanges } from "../history"
+import { OIHistoryManager, TOIHistoryBackendChanges, TOIHistoryChanges, TUndoRedoContext } from "../history"
 import { PartialDeep, convertMillimeterToPixel, mergeDeep } from "../utils"
 import { IBehaviors } from "./IBehaviors"
 import { TBehaviorOptions } from "./TBehaviorOptions"
 import { EditorLayer } from "../EditorLayer"
 import { EditorEvent } from "../EditorEvent"
+import { RecognizedKind } from "../symbol/recognized/OIRecognizedBase"
+import { OIRecognizedCircle } from "../symbol/recognized/OIRecognizedCircle"
+import { OIRecognizedEllipse } from "../symbol/recognized/OIRecognizedEllipse"
+import { OIRecognizedPolygon } from "../symbol/recognized/OIRecognizedPolygon"
 
 /**
  * @group Behavior
@@ -64,6 +72,7 @@ export class OIBehaviors implements IBehaviors
   #model: OIModel
   #tool: EditorTool = EditorTool.Write
   #layerUITimer?: ReturnType<typeof setTimeout>
+  #recognizeStrokeTimer?: ReturnType<typeof setTimeout>
   layers: EditorLayer
   event: EditorEvent
 
@@ -205,7 +214,7 @@ export class OIBehaviors implements IBehaviors
     this.layers.updateState(idle)
   }
 
-  updateLayerUI(): void
+  updateLayerUI(timeout: number = 500): void
   {
     clearTimeout(this.#layerUITimer)
     this.#layerUITimer = setTimeout(() =>
@@ -213,8 +222,7 @@ export class OIBehaviors implements IBehaviors
       this.menu.update()
       this.svgDebugger.apply()
       this.waitForIdle()
-      this.event.emitUIpdated()
-    }, 1000)
+    }, timeout)
   }
 
   manageError(error: Error): void
@@ -318,16 +326,16 @@ export class OIBehaviors implements IBehaviors
     try {
       switch (this.#tool) {
         case EditorTool.Erase:
-          this.eraser.end(pointer)
+          await this.eraser.end(pointer)
           break
         case EditorTool.Select:
-          this.selector.end(pointer)
+          await this.selector.end(pointer)
           break
         case EditorTool.Move:
-          this.move.end(evt)
+          await this.move.end(evt)
           break
         default:
-          this.writer.end(pointer)
+          await this.writer.end(pointer)
           break
       }
     }
@@ -370,6 +378,17 @@ export class OIBehaviors implements IBehaviors
     }
   }
 
+  protected async onContentChanged(undoRedoContext: TUndoRedoContext): Promise<void>
+  {
+    clearTimeout(this.#recognizeStrokeTimer)
+    this.#recognizeStrokeTimer = setTimeout(async () =>
+    {
+      await this.synchronizeStrokesWithJIIX()
+      this.updateLayerUI(0)
+      this.event.emitChanged(undoRedoContext)
+    }, 500)
+  }
+
   async init(): Promise<void>
   {
     this.#logger.info("init")
@@ -389,10 +408,11 @@ export class OIBehaviors implements IBehaviors
 
     this.history.init(this.model)
 
+    this.recognizer.event.addErrorListener(this.manageError.bind(this))
     this.recognizer.event.addExportedListener(this.event.emitExported.bind(this.event))
-    this.recognizer.event.addContentChangedListener(this.event.emitChanged.bind(this.event))
+    this.recognizer.event.addContentChangedListener(this.onContentChanged.bind(this))
     this.recognizer.event.addSessionOpenedListener(this.event.emitSessionOpened.bind(this.event))
-    this.recognizer.event.addEndInitialization(this.layers.closeMessageModal.bind(this.layers))
+    this.recognizer.event.addEndInitialization(this.layers.hideMessageModal.bind(this.layers))
     this.recognizer.event.addIdleListener(this.updateLayerState.bind(this))
     await this.recognizer.init()
     await this.setPenStyle(this.penStyle)
@@ -408,6 +428,8 @@ export class OIBehaviors implements IBehaviors
       this.configuration.recognition.lang = code
       await this.recognizer.newSession(this.configuration.server, this.configuration.recognition)
       this.recognizer.addStrokes(this.extractStrokesFromSymbols(this.model.symbols), false)
+      await this.synchronizeStrokesWithJIIX(true)
+      this.layers.hideLoader()
       this.event.emitLoaded()
     }
     catch (error) {
@@ -448,6 +470,28 @@ export class OIBehaviors implements IBehaviors
     }
   }
 
+  protected buildRecognized(partialSymbol: PartialDeep<TOIRecognized>): TOIRecognized
+  {
+    switch (partialSymbol.kind) {
+      case RecognizedKind.Text:
+        return OIRecognizedText.create(partialSymbol)
+      case RecognizedKind.Arc:
+        return OIRecognizedArc.create(partialSymbol)
+      case RecognizedKind.Circle:
+        return OIRecognizedCircle.create(partialSymbol)
+      case RecognizedKind.Ellipse:
+        return OIRecognizedEllipse.create(partialSymbol)
+      case RecognizedKind.Polygone:
+        return OIRecognizedPolygon.create(partialSymbol)
+      case RecognizedKind.Line:
+        return OIRecognizedLine.create(partialSymbol)
+      case RecognizedKind.PolyEdge:
+        return OIRecognizedPolyLine.create(partialSymbol)
+      default:
+        throw new Error(`Unable to create recognized, symbol type '${ JSON.stringify(partialSymbol) } is unknow`)
+    }
+  }
+
   protected buildGroup(partialGroup: PartialDeep<OISymbolGroup>): OISymbolGroup
   {
     if (!partialGroup.children?.length) {
@@ -467,8 +511,8 @@ export class OIBehaviors implements IBehaviors
           return OIText.create(partialSymbol as PartialDeep<OIText>)
         case SymbolType.Group:
           return this.buildGroup(partialSymbol as PartialDeep<OISymbolGroup>)
-        case SymbolType.StrokeText:
-          return this.buildStrokeText(partialSymbol as PartialDeep<OIStrokeText>)
+        case SymbolType.Recognized:
+          return this.buildRecognized(partialSymbol as PartialDeep<TOIRecognized>)
         default:
           throw new Error(`Unable to create group, symbol type '${ JSON.stringify(partialSymbol) } is unknow`)
       }
@@ -488,9 +532,9 @@ export class OIBehaviors implements IBehaviors
     return OIStroke.create(partialSymbol as PartialDeep<OIStroke>)
   }
 
-  protected buildStrokeText(partialSymbol: PartialDeep<OIStrokeText>): OIStrokeText
+  protected buildStrokeText(partialSymbol: PartialDeep<OIRecognizedText>): OIRecognizedText
   {
-    return OIStrokeText.create(partialSymbol as PartialDeep<OIStrokeText>)
+    return OIRecognizedText.create(partialSymbol as PartialDeep<OIRecognizedText>)
   }
 
   protected buildText(partialSymbol: PartialDeep<OIText>): OIText
@@ -512,8 +556,8 @@ export class OIBehaviors implements IBehaviors
           return this.buildText(partialSymbol)
         case SymbolType.Group:
           return this.buildGroup(partialSymbol)
-        case SymbolType.StrokeText:
-          return this.buildStrokeText(partialSymbol)
+        case SymbolType.Recognized:
+          return this.buildRecognized(partialSymbol as PartialDeep<TOIRecognized>)
         default:
           throw new Error(`Unable to build symbol, type: "${ partialSymbol.type }" is unknown`)
       }
@@ -657,7 +701,7 @@ export class OIBehaviors implements IBehaviors
         if (
           SymbolType.Text === s.type ||
           SymbolType.Group === s.type ||
-          SymbolType.StrokeText === s.type) {
+          SymbolType.Recognized === s.type) {
           s.updateChildrenStyle()
         }
         this.renderer.drawSymbol(s)
@@ -693,15 +737,7 @@ export class OIBehaviors implements IBehaviors
     {
       if (textIds.includes(s.id)) {
         if (s.type === SymbolType.Text) {
-          s.chars.forEach(tc =>
-          {
-            if (fontSize) {
-              tc.fontSize = fontSize
-            }
-            if (fontWeight && fontWeight !== "auto") {
-              tc.fontWeight = fontWeight
-            }
-          })
+          s.updateChildrenFont({ fontSize, fontWeight: fontWeight === "auto" ? undefined : fontWeight })
           const lastWidth = s.bounds.width
           this.texter.updateBounds(s)
           this.renderer.drawSymbol(s)
@@ -722,21 +758,13 @@ export class OIBehaviors implements IBehaviors
         else if (s.type === SymbolType.Group) {
           const textChildren = s.extractText()
           if (textChildren.length) {
-            textChildren.forEach(c =>
+            textChildren.forEach(text =>
             {
-              c.chars.forEach(tc =>
-              {
-                if (fontSize) {
-                  tc.fontSize = fontSize
-                }
-                if (fontWeight && fontWeight !== "auto") {
-                  tc.fontWeight = fontWeight
-                }
-              })
+              text.updateChildrenFont({ fontSize, fontWeight: fontWeight === "auto" ? undefined : fontWeight })
               const lastWidth = s.bounds.width
-              this.texter.updateBounds(c)
+              this.texter.updateBounds(text)
               const tx = s.bounds.width - lastWidth
-              const symbolsTranslated = this.texter.moveTextAfter(c, tx)
+              const symbolsTranslated = this.texter.moveTextAfter(text, tx)
               if (symbolsTranslated?.length) {
                 translate.push({
                   symbols: symbolsTranslated,
@@ -744,7 +772,6 @@ export class OIBehaviors implements IBehaviors
                   ty: 0
                 })
               }
-              c.modificationDate = Date.now()
             })
             s.modificationDate = Date.now()
             this.renderer.drawSymbol(s)
@@ -836,80 +863,194 @@ export class OIBehaviors implements IBehaviors
     return group.children
   }
 
-  async groupStrokesByJIIXElement(): Promise<void>
+  async synchronizeStrokesWithJIIX(force: boolean = false): Promise<void>
   {
     //if there is no stroke, jiix should not have changed
-    if (!this.model.symbols.some(s => s.type === SymbolType.Stroke))
-    {
+    const strokes = this.model.symbols.filter(s => s.type === SymbolType.Stroke)
+    if (!force && !strokes.length) {
+      this.event.emitSynchronized()
       return
     }
     await this.export(["application/vnd.myscript.jiix"])
-    const strokes = this.model.symbols.filter(s => s.type === SymbolType.Stroke)
+
+    const getSymbolsAndStrokesAssociatedFromJIIXStrokeItems = (items: TJIIXStrokeItem[] = []): { symbols: TOISymbol[], strokes: OIStroke[] } =>
+    {
+      const symbols: TOISymbol[] = []
+      const strokes: OIStroke[] = []
+      const strokeIdsUsed: string[] = []
+      items.forEach(i =>
+      {
+        const strokeId = i["full-id"]!
+        if (strokeIdsUsed.includes(strokeId)) {
+          return
+        }
+        strokeIdsUsed.push(strokeId)
+        const sym = this.model.getRootSymbol(strokeId)
+        if (sym) {
+          switch (sym?.type) {
+            // we do not modify a group created by the user
+            // case SymbolType.Group:
+            //   strokes.push(...sym.extractStrokes())
+            //   break
+            case SymbolType.Recognized:
+              // if it's recognized symbol with same number of strokes
+              // the recognition has been already done
+              // if (sym.strokes.length === items.length) {
+              //   return
+              // }
+              strokes.push(sym.strokes.find(s => s.id === i["full-id"]!)!)
+              break
+            default:
+              strokes.push(sym as OIStroke)
+              break
+          }
+          const symIdx = symbols.findIndex(s => s.id === sym.id)
+          if (symIdx < 0) {
+            symbols.push(sym)
+          }
+          else {
+            symbols[symIdx] = sym
+          }
+        }
+      })
+      return {
+        symbols,
+        strokes
+      }
+    }
+
     const jiix = this.model.exports?.["application/vnd.myscript.jiix"]
     jiix?.elements?.forEach(el =>
     {
-      if (el.type === "Text") {
-        el.words?.forEach(w =>
-        {
-          const line = el.lines!.find(l => l["first-char"]! <= w["first-char"]! && l["last-char"]! >= w["last-char"]!)!
-          const wordStrokesMatch = strokes.filter(s => w.items?.map(s => s["full-id"]).includes(s.id))
-          if (wordStrokesMatch.length) {
-
-            const orginDeco: OIDecorator[] = []
-            let orginStyle: TStyle = wordStrokesMatch[0].style
-            if (w.items?.length !== wordStrokesMatch.length) {
-              w.items?.forEach(i =>
-              {
-                const sym = this.model.getRootSymbol(i["full-id"] as string)
-                switch (sym?.type) {
-                  case SymbolType.Group:
-                    orginDeco.push(...sym.decorators)
-                    orginStyle = Object.assign({}, orginStyle, sym.style)
-                    wordStrokesMatch.push(...sym.extractStrokes())
-                    this.model.removeSymbol(sym.id)
-                    this.renderer.removeSymbol(sym.id)
-                    break
-                  case SymbolType.StrokeText:
-                    orginDeco.push(...sym.decorators)
-                    orginStyle = Object.assign({}, orginStyle, sym.style)
-                    wordStrokesMatch.push(...sym.strokes)
-                    this.model.removeSymbol(sym.id)
-                    this.renderer.removeSymbol(sym.id)
-                    break
-                }
-              })
-            }
-            const strokeText = new OIStrokeText(wordStrokesMatch as OIStroke[], { baseline: convertMillimeterToPixel(line["baseline-y"]), xHeight: convertMillimeterToPixel(line["x-height"]) }, orginStyle)
-            orginDeco.forEach(d =>
-            {
-              if (!strokeText.decorators.some(wd => wd.kind === d.kind)) {
-                strokeText.decorators.push(d)
-              }
-            })
-            wordStrokesMatch.map(s =>
-            {
-              this.model.removeSymbol(s.id)
-              this.renderer.removeSymbol(s.id)
-            })
-            this.model.addSymbol(strokeText)
-            this.renderer.drawSymbol(strokeText)
-          }
-        })
-      }
-      else {
-        const strokesAssociated = strokes.filter(s => el.items?.map(s => s["full-id"]).includes(s.id))
-        if (strokesAssociated.length) {
-          const group = this.buildGroup({ children: strokesAssociated })
-          strokesAssociated.map(s =>
+      switch (el.type) {
+        case JIIXELementType.Text: {
+          el.words?.forEach(w =>
           {
-            this.model.removeSymbol(s.id)
-            this.renderer.removeSymbol(s.id)
+            const jiixAssociation = getSymbolsAndStrokesAssociatedFromJIIXStrokeItems(w.items)
+            if (jiixAssociation.strokes.length) {
+              if (jiixAssociation.symbols.length === 1) {
+                const symAsso = jiixAssociation.symbols[0]
+                if (
+                  symAsso.type === SymbolType.Recognized && symAsso.kind === RecognizedKind.Text &&
+                  symAsso.label === w.label &&
+                  symAsso.strokes.length === symAsso.strokes.length
+                ) {
+                  return
+                }
+              }
+              const line = el.lines!.find(l => l["first-char"]! <= w["first-char"]! && l["last-char"]! >= w["last-char"]!)!
+              const recognizedText = new OIRecognizedText(jiixAssociation.strokes, { baseline: convertMillimeterToPixel(line["baseline-y"]), xHeight: convertMillimeterToPixel(line["x-height"]) })
+              recognizedText.label = w.label
+              jiixAssociation.symbols.forEach(sym =>
+              {
+                if (sym.type === SymbolType.Recognized && sym.kind === RecognizedKind.Text) {
+                  sym.decorators.forEach(d =>
+                  {
+                    if (!recognizedText.decorators.some(wd => wd.kind === d.kind)) {
+                      recognizedText.decorators.push(d)
+                    }
+                  })
+                }
+                this.model.removeSymbol(sym.id)
+                this.renderer.removeSymbol(sym.id)
+              })
+              this.model.addSymbol(recognizedText)
+              this.renderer.drawSymbol(recognizedText)
+            }
           })
-          this.model.addSymbol(group)
-          this.renderer.drawSymbol(group)
+          break
         }
+        case JIIXELementType.Node: {
+          let symbolRecognized: TOIRecognized | undefined
+          const jiixAssociation = getSymbolsAndStrokesAssociatedFromJIIXStrokeItems(el.items)
+          if (jiixAssociation.strokes.length) {
+            if (jiixAssociation.symbols.length === 1) {
+              const symAsso = jiixAssociation.symbols[0]
+              if (symAsso.type === SymbolType.Recognized &&
+                symAsso.strokes.length === jiixAssociation.strokes.length) {
+                return
+              }
+            }
+            switch (el.kind) {
+              case JIIXNodeKind.Circle: {
+                symbolRecognized = new OIRecognizedCircle(jiixAssociation.strokes)
+                break
+              }
+              case JIIXNodeKind.Ellipse: {
+                symbolRecognized = new OIRecognizedEllipse(jiixAssociation.strokes)
+                break
+              }
+              case JIIXNodeKind.Rectangle:
+              case JIIXNodeKind.Triangle:
+              case JIIXNodeKind.Parallelogram:
+              case JIIXNodeKind.Polygon:
+              case JIIXNodeKind.Rhombus: {
+                symbolRecognized = new OIRecognizedPolygon(jiixAssociation.strokes)
+                break
+              }
+              default:
+                this.#logger.warn("synchronizeStrokesWithJIIX", `Can not create recognized shape symbol, kind unknow: ${ el }`)
+                break
+            }
+            if (symbolRecognized) {
+              jiixAssociation.symbols.forEach(sym =>
+              {
+                this.model.removeSymbol(sym.id)
+                this.renderer.removeSymbol(sym.id)
+              })
+              this.model.addSymbol(symbolRecognized)
+              this.renderer.drawSymbol(symbolRecognized)
+            }
+          }
+          break
+        }
+        case JIIXELementType.Edge: {
+          let symbolRecognized: TOIRecognized | undefined
+          const jiixAssociation = getSymbolsAndStrokesAssociatedFromJIIXStrokeItems(el.kind === JIIXEdgeKind.PolyEdge ? el.edges.flatMap(e => e.items!) : el.items)
+          if (jiixAssociation.strokes.length) {
+            if (jiixAssociation.symbols.length === 1) {
+              const symAsso = jiixAssociation.symbols[0]
+              if (symAsso.type === SymbolType.Recognized &&
+                symAsso.strokes.length === jiixAssociation.strokes.length) {
+                return
+              }
+            }
+            switch (el.kind) {
+              case JIIXEdgeKind.Line: {
+                symbolRecognized = new OIRecognizedLine(jiixAssociation.strokes)
+                break
+              }
+              case JIIXEdgeKind.PolyEdge: {
+                symbolRecognized = new OIRecognizedPolyLine(jiixAssociation.strokes)
+                break
+              }
+              case JIIXEdgeKind.Arc: {
+                symbolRecognized = new OIRecognizedArc(jiixAssociation.strokes)
+                break
+              }
+              default:
+                this.#logger.warn("synchronizeStrokesWithJIIX", `Can not create recognized edge symbol, kind unknow: ${ el }`)
+                break
+            }
+            if (symbolRecognized) {
+              jiixAssociation.symbols.forEach(sym =>
+              {
+                this.model.removeSymbol(sym.id)
+                this.renderer.removeSymbol(sym.id)
+              })
+              this.model.addSymbol(symbolRecognized)
+              this.renderer.drawSymbol(symbolRecognized)
+            }
+          }
+          break
+        }
+        default:
+          this.#logger.warn("synchronizeStrokesWithJIIX", `Can not create recognized symbol, type unknow: ${ el }`)
+          break
       }
     })
+    this.history.update(this.model)
+    this.event.emitSynchronized()
   }
 
   async removeSymbol(id: string, addToHistory = true): Promise<void>
@@ -967,7 +1108,7 @@ export class OIBehaviors implements IBehaviors
             case SymbolType.Stroke:
               strokesIds.push(sym.id)
               break
-            case SymbolType.StrokeText:
+            case SymbolType.Recognized:
               strokesIds.push(...sym.strokes.map(s => s.id))
               break
             case SymbolType.Group:
@@ -990,7 +1131,7 @@ export class OIBehaviors implements IBehaviors
               }
               break
             }
-            case SymbolType.StrokeText: {
+            case SymbolType.Recognized: {
               strokesIds.push(id)
               const ws = sym.clone()
               ws.removeStrokes(ids)
@@ -1198,7 +1339,7 @@ export class OIBehaviors implements IBehaviors
         case SymbolType.Stroke:
           strokes.push(s)
           break
-        case SymbolType.StrokeText:
+        case SymbolType.Recognized:
           strokes.push(...s.strokes)
           break
         case SymbolType.Group:

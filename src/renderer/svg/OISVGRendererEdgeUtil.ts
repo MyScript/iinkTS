@@ -1,4 +1,4 @@
-import { EdgeDecoration, EdgeKind, OIEdgeArc, OIEdgeLine, OIEdgePolyLine, TOIEdge } from "../../primitive"
+import { EdgeDecoration, EdgeKind, OIEdgeArc, OIEdgeLine, OIEdgePolyLine, TOIEdge } from "../../symbol"
 import { DefaultStyle } from "../../style"
 import { OISVGRendererConst } from "./OISVGRendererConst"
 import { SVGBuilder } from "./SVGBuilder"
