@@ -21,7 +21,7 @@ describe("Offscreen Get Started", () => {
     await waitEditorIdle(page)
   })
 
-  describe.skip("clear, undo and redo", () => {
+  describe("clear, undo and redo", () => {
     beforeAll(async () => {
       await page.evaluate("editor.clear()")
     })
@@ -117,7 +117,7 @@ describe("Offscreen Get Started", () => {
     })
   })
 
-  describe.skip("convert", () => {
+  describe("convert", () => {
     beforeAll(async () => {
       await page.evaluate("editor.clear()")
       let symbols = await page.evaluate("editor.model.symbols")
@@ -152,7 +152,7 @@ describe("Offscreen Get Started", () => {
     })
   })
 
-  describe.skip("language", () => {
+  describe("language", () => {
     beforeAll(async () => {
       await page.evaluate("editor.clear()")
     })
@@ -188,7 +188,7 @@ describe("Offscreen Get Started", () => {
     })
   })
 
-  describe.skip("strikethrough", () => {
+  describe("strikethrough", () => {
     beforeAll(async () => {
       await page.evaluate("editor.clear()")
     })
@@ -435,7 +435,7 @@ describe("Offscreen Get Started", () => {
     })
   })
 
-  describe.skip("insert gesture", () => {
+  describe("insert gesture", () => {
     beforeAll(async () => {
       await page.evaluate("editor.clear()")
     })
