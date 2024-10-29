@@ -1,4 +1,4 @@
-import { DecoratorKind, OIDecorator, OIStroke, OISymbolGroup } from "../../../src/primitive"
+import { DecoratorKind, OIDecorator, OIStroke, OISymbolGroup } from "../../../src/symbol"
 import { OISVGRendererConst, OISVGRendererGroupUtil } from "../../../src/renderer"
 import { buildOIGroup } from "../helpers"
 

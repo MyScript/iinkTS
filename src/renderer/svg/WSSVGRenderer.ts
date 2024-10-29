@@ -1,7 +1,7 @@
 import { TRenderingConfiguration } from "../../configuration"
 import { LoggerClass, LoggerManager } from "../../logger"
 import { IModel } from "../../model"
-import { TStroke } from "../../primitive"
+import { TStroke } from "../../symbol"
 import { TUpdatePatch, TUpdatePatchAppendChild, TUpdatePatchInsertBefore, TUpdatePatchRemoveAttribut, TUpdatePatchRemoveChild, TUpdatePatchRemoveElement, TUpdatePatchReplaceAll, TUpdatePatchReplaceELement, TUpdatePatchSetAttribut } from "../../recognizer"
 import { SVGStroker } from "./SVGStroker"
 

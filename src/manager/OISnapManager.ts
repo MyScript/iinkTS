@@ -1,7 +1,7 @@
 import { OIBehaviors } from "../behaviors"
 import { LoggerClass, LoggerManager } from "../logger"
 import { OIModel } from "../model"
-import { Box, TPoint, TSegment } from "../primitive"
+import { Box, TPoint, TSegment } from "../symbol"
 import { OISVGRenderer } from "../renderer"
 import { OISVGRendererConst } from "../renderer/svg/OISVGRendererConst"
 

@@ -1,4 +1,4 @@
-import { EdgeDecoration, TBoundingBox, TPoint } from "../primitive"
+import { EdgeDecoration, TBox, TPoint } from "../symbol"
 
 /**
  * @group Exports
@@ -70,7 +70,7 @@ export type TJIIXStrokeItem = {
  * @group Exports
  */
 export type TJIIXBase = {
-  "bounding-box"?: TBoundingBox
+  "bounding-box"?: TBox
   items?: TJIIXStrokeItem[]
 }
 
@@ -122,7 +122,7 @@ export type TJIIXLine = {
  */
 export type TJIIXTextElement = TJIIXElementBase<JIIXELementType.Text> & {
   id: string
-  "bounding-box"?: TBoundingBox
+  "bounding-box"?: TBox
   label: string
   words?: TJIIXWord[]
   chars?: TJIIXChar[]
@@ -280,7 +280,7 @@ export type TJIIXElement =
 export type TJIIXExport = {
   type: string
   id: string
-  "bounding-box"?: TBoundingBox
+  "bounding-box"?: TBox
   version: string
   elements?: TJIIXElement[]
   label?: string

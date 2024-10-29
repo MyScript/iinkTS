@@ -1,6 +1,6 @@
 import { TGrabberConfiguration } from "../configuration"
 import { LoggerClass, LoggerManager } from "../logger"
-import { TPointer } from "../primitive"
+import { TPointer } from "../symbol"
 import { IGrabber } from "./IGrabber"
 
 /**

@@ -1,4 +1,4 @@
-import { DecoratorKind, OIDecorator, OIText, SymbolType, TBoundingBox, TOISymbolChar, TPoint } from "../../../src/primitive"
+import { DecoratorKind, OIDecorator, OIText, SymbolType, TBox, TOISymbolChar, TPoint } from "../../../src/symbol"
 import { OISVGRendererConst, OISVGRendererTextUtil } from "../../../src/renderer"
 
 describe("teOISVGRendererTextUtilxt", () =>
@@ -32,7 +32,7 @@ describe("teOISVGRendererTextUtilxt", () =>
       },
     ]
     const point: TPoint = { x: 0, y: 0 }
-    const boundingBox: TBoundingBox = { height: 100, width: 100, x: 0, y: 0 }
+    const boundingBox: TBox = { height: 100, width: 100, x: 0, y: 0 }
     const text = new OIText(chars, point, boundingBox)
 
     test("should getSymbolElement with style for each char", () =>

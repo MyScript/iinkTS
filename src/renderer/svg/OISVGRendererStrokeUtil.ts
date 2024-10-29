@@ -1,4 +1,4 @@
-import { DecoratorKind, OIStroke, TPointer } from "../../primitive"
+import { DecoratorKind, OIStroke, TPointer } from "../../symbol"
 import { DefaultStyle } from "../../style"
 import { computeAngleAxeRadian, computeLinksPointers, computeMiddlePointer } from "../../utils"
 import { OISVGRendererDecoratorUtil } from "./OISVGRendererDecoratorUtil"

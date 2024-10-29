@@ -1,7 +1,7 @@
 import { TRenderingConfiguration } from "../../configuration"
 import { LoggerClass, LoggerManager } from "../../logger"
 import { IModel } from "../../model"
-import { Stroke, TSymbol } from "../../primitive"
+import { Stroke, TSymbol } from "../../symbol"
 import { CanvasRendererShape } from "./CanvasRendererShape"
 import { CanvasRendererStroke } from "./CanvasRendererStroke"
 import { CanvasRendererText } from "./CanvasRendererText"

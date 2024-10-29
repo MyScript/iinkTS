@@ -3,7 +3,7 @@ import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
 import
 {
   OISelectionManager,
-  TBoundingBox,
+  TBox,
   SvgElementRole,
   ResizeDirection,
 } from "../../../src/iink"
@@ -24,7 +24,7 @@ describe("OISelectionManager.ts", () =>
     const manager = new OISelectionManager(behaviors)
     manager.renderer.clearElements = jest.fn()
     manager.renderer.appendElement = jest.fn()
-    const box: TBoundingBox = {
+    const box: TBox = {
       height: 10,
       width: 20,
       x: 1,

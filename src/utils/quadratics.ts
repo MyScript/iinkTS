@@ -1,4 +1,4 @@
-import { TPoint, TPointer } from "../primitive"
+import { TPoint, TPointer } from "../symbol"
 
 /**
  * @group Utils

@@ -1,4 +1,4 @@
-import { TPointer, TStroke } from "../../primitive"
+import { TPointer, TStroke } from "../../symbol"
 import { computeAngleAxeRadian, computeLinksPointers, computeMiddlePointer } from "../../utils"
 
 /**

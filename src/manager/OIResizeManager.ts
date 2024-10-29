@@ -9,14 +9,15 @@ import
   OIStroke,
   OISymbolGroup,
   OIText,
-  OIStrokeText,
   ShapeKind,
   SymbolType,
   TOIEdge,
   TOIShape,
   TOISymbol,
-  TPoint
-} from "../primitive"
+  TPoint,
+  TOIRecognized,
+  RecognizedKind
+} from "../symbol"
 
 /**
  * @group Manager
@@ -146,11 +147,13 @@ export class OIResizeManager
     return group
   }
 
-  protected applyOnStrokeText(strokeText: OIStrokeText, origin: TPoint, scaleX: number, scaleY: number): OIStrokeText
+  protected applyOnRecognizedSymbol(recognizedSymbol: TOIRecognized, origin: TPoint, scaleX: number, scaleY: number): TOIRecognized
   {
-    strokeText.strokes.forEach(s => this.applyToStroke(s, origin, scaleX, scaleY))
-    strokeText.xHeight *= scaleY
-    return strokeText
+    recognizedSymbol.strokes.forEach(s => this.applyToStroke(s, origin, scaleX, scaleY))
+    if (recognizedSymbol.kind === RecognizedKind.Text) {
+      recognizedSymbol.xHeight *= scaleY
+    }
+    return recognizedSymbol
   }
 
   applyToSymbol(symbol: TOISymbol, origin: TPoint, scaleX: number, scaleY: number): TOISymbol
@@ -167,8 +170,8 @@ export class OIResizeManager
         return this.applyOnText(symbol, origin, scaleX, scaleY)
       case SymbolType.Group:
         return this.applyOnGroup(symbol, origin, scaleX, scaleY)
-      case SymbolType.StrokeText:
-        return this.applyOnStrokeText(symbol, origin, scaleX, scaleY)
+      case SymbolType.Recognized:
+        return this.applyOnRecognizedSymbol(symbol, origin, scaleX, scaleY)
       default:
         throw new Error(`Can't apply resize on symbol, type unknow: ${ JSON.stringify(symbol) }`)
     }

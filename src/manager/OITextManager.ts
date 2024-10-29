@@ -1,7 +1,7 @@
 import { OIBehaviors } from "../behaviors"
 import { LoggerClass, LoggerManager } from "../logger"
 import { OIModel } from "../model"
-import { Box, OIText, SymbolType, TOISymbol, TOISymbolChar } from "../primitive"
+import { Box, OIText, SymbolType, TOISymbol, TOISymbolChar } from "../symbol"
 import { OISVGRenderer } from "../renderer"
 
 /**

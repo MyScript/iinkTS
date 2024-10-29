@@ -1,9 +1,10 @@
 import { LoggerClass, LoggerManager } from "../logger"
 import
 {
+  RecognizedKind,
   SymbolType,
   TOISymbol,
-} from "../primitive"
+} from "../symbol"
 import { TExport } from "./Export"
 import { IModel } from "./IModel"
 
@@ -76,7 +77,7 @@ export class OIModel implements IModel
       if (s.type === SymbolType.Group && s.containsSymbol(id)) {
         return s
       }
-      if (s.type === SymbolType.StrokeText && s.containsStroke(id)) {
+      if (s.type === SymbolType.Recognized && s.containsStroke(id)) {
         return s
       }
       return
@@ -85,7 +86,7 @@ export class OIModel implements IModel
 
   getSymbolRowIndex(symbol: TOISymbol): number
   {
-    return Math.round((symbol.type === SymbolType.StrokeText ? symbol.baseline : symbol.bounds.yMid) / this.rowHeight)
+    return Math.round((symbol.type === SymbolType.Recognized && symbol.kind === RecognizedKind.Text ? symbol.baseline : symbol.bounds.yMid) / this.rowHeight)
   }
 
   getSymbolsByRowOrdered(): { rowIndex: number, symbols: TOISymbol[] }[]

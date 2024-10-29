@@ -2,7 +2,7 @@ import { TUndoRedoConfiguration } from "../configuration"
 import { EditorEvent } from "../EditorEvent"
 import { LoggerClass, LoggerManager } from "../logger"
 import { OIModel } from "../model"
-import { OIDecorator, OIStroke, TOISymbol, TPoint } from "../primitive"
+import { OIDecorator, OIStroke, TOISymbol, TPoint } from "../symbol"
 import { TStyle } from "../style"
 import { MatrixTransform, TMatrixTransform } from "../transform"
 import { IHistoryManager } from "./IHistoryManager"
@@ -121,6 +121,16 @@ export class OIHistoryManager implements IHistoryManager
 
     this.updateContext()
     this.event.emitChanged(this.context)
+  }
+
+  update(model: OIModel): void
+  {
+    this.#logger.info("pop")
+    const stackIdx = this.stack.findIndex(s => s.model.modificationDate === model.modificationDate)
+    if (stackIdx > -1) {
+      this.stack[stackIdx].model = model
+      this.updateContext()
+    }
   }
 
   pop(): void

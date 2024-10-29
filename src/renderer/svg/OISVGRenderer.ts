@@ -1,7 +1,7 @@
 import { SvgElementRole } from "../../Constants"
 import { TRenderingConfiguration } from "../../configuration"
 import { LoggerClass, LoggerManager } from "../../logger"
-import { TOISymbol, TPoint, TBoundingBox, Box, OIEraser, SymbolType } from "../../primitive"
+import { TOISymbol, TPoint, TBox, Box, OIEraser, SymbolType } from "../../symbol"
 import { getClosestPoints } from "../../utils"
 import { OISVGRendererConst } from "./OISVGRendererConst"
 import { OISVGRendererEdgeUtil } from "./OISVGRendererEdgeUtil"
@@ -10,7 +10,7 @@ import { OISVGRendererGroupUtil } from "./OISVGRendererGroupUtil"
 import { OISVGRendererShapeUtil } from "./OISVGRendererShapeUtil"
 import { OISVGRendererStrokeUtil } from "./OISVGRendererStrokeUtil"
 import { OISVGRendererTextUtil } from "./OISVGRendererTextUtil"
-import { OISVGRendererStrokeTextUtil } from "./OISVGRendererStrokeTextUtil"
+import { OISVGRendererRecognizedUtil } from "./OISVGRendererRecognizedUtil"
 import { SVGBuilder } from "./SVGBuilder"
 
 /**
@@ -234,8 +234,8 @@ export class OISVGRenderer
       case SymbolType.Group:
         element = OISVGRendererGroupUtil.getSVGElement(symbol)
         break
-      case SymbolType.StrokeText:
-        element = OISVGRendererStrokeTextUtil.getSVGElement(symbol)
+      case SymbolType.Recognized:
+        element = OISVGRendererRecognizedUtil.getSVGElement(symbol)
         break
       default:
         this.#logger.error("buildElementFromSymbol", `symbol unknow: "${ JSON.stringify(symbol) }"`)
@@ -331,7 +331,7 @@ export class OISVGRenderer
     this.layer.appendChild(SVGBuilder.createCircle(point, radius, attrs))
   }
 
-  drawRect(box: TBoundingBox, attrs: { [key: string]: string } = {}): void
+  drawRect(box: TBox, attrs: { [key: string]: string } = {}): void
   {
     this.#logger.info("drawCircle", { box, attrs })
     this.layer.appendChild(SVGBuilder.createRect(box, attrs))
@@ -343,7 +343,7 @@ export class OISVGRenderer
     this.layer.appendChild(SVGBuilder.createLine(p1, p2, attrs))
   }
 
-  drawConnectionBetweenBox(id: string, box1: TBoundingBox, box2: TBoundingBox, attrs?: { [key: string]: string }): void
+  drawConnectionBetweenBox(id: string, box1: TBox, box2: TBox, attrs?: { [key: string]: string }): void
   {
     const points1: TPoint[] = new Box(box1).corners
     const points2: TPoint[] = new Box(box2).corners

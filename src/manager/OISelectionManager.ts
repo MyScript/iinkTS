@@ -2,7 +2,7 @@ import { ResizeDirection, SELECTION_MARGIN, SvgElementRole } from "../Constants"
 import { OIBehaviors } from "../behaviors"
 import { LoggerClass, LoggerManager } from "../logger"
 import { OIModel } from "../model"
-import { Box, OIText, SymbolType, TBoundingBox, TOIEdge, TOISymbol, TPoint } from "../primitive"
+import { Box, OIText, SymbolType, TBox, TOIEdge, TOISymbol, TPoint } from "../symbol"
 import { OISVGRenderer, SVGBuilder } from "../renderer"
 import { OIResizeManager } from "./OIResizeManager"
 import { OIRotationManager } from "./OIRotationManager"
@@ -60,7 +60,7 @@ export class OISelectionManager
     return
   }
 
-  drawSelectingRect(box: TBoundingBox): void
+  drawSelectingRect(box: TBox): void
   {
     this.clearSelectingRect()
     const attrs = {
@@ -87,7 +87,7 @@ export class OISelectionManager
     }
   }
 
-  protected createTranslateRect(box: TBoundingBox): SVGRectElement
+  protected createTranslateRect(box: TBox): SVGRectElement
   {
     const attrs = {
       role: SvgElementRole.Translate,
@@ -95,7 +95,7 @@ export class OISelectionManager
       fill: "transparent",
       stroke: "transparent",
     }
-    const boxWithMarge: TBoundingBox = {
+    const boxWithMarge: TBox = {
       height: box.height,
       width: box.width,
       x: box.x,
@@ -140,7 +140,7 @@ export class OISelectionManager
     return translateEl
   }
 
-  protected createRotateGroup(box: TBoundingBox): SVGGElement
+  protected createRotateGroup(box: TBox): SVGGElement
   {
     const group = SVGBuilder.createGroup({
       role: SvgElementRole.Rotate,
@@ -209,7 +209,7 @@ export class OISelectionManager
     return group
   }
 
-  protected createResizeGroup(box: TBoundingBox): SVGGElement
+  protected createResizeGroup(box: TBox): SVGGElement
   {
     const group = SVGBuilder.createGroup({
       role: SvgElementRole.Resize,
@@ -350,7 +350,7 @@ export class OISelectionManager
     symbolElementMap.forEach(s =>
     {
       if (s.element) {
-        const bounds: TBoundingBox = {
+        const bounds: TBox = {
           x: s.symbol.bounds.x - (s.symbol.style.width || 1),
           y: s.symbol.bounds.y - (s.symbol.style.width || 1),
           height: s.symbol.bounds.height + (s.symbol.style.width || 1) * 2,

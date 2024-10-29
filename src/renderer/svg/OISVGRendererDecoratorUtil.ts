@@ -1,4 +1,4 @@
-import { DecoratorKind, OIDecorator, SymbolType, TBoundingBox, TOISymbol } from "../../primitive"
+import { DecoratorKind, OIDecorator, RecognizedKind, SymbolType, TBox, TOISymbol } from "../../symbol"
 import { DefaultStyle } from "../../style"
 import { SVGBuilder } from "./SVGBuilder"
 
@@ -29,7 +29,7 @@ export class OISVGRendererDecoratorUtil
         attrs["opacity"] = symbol.deleting ? "0.25" : "0.5"
         attrs["stroke"] = "transparent"
         attrs["fill"] = decorator.style.color || DefaultStyle.color!
-        const boundingBox: TBoundingBox = {
+        const boundingBox: TBox = {
           x: symbol.bounds.x - +(symbol.style.width || DefaultStyle.width!),
           y: symbol.bounds.y - +(symbol.style.width || DefaultStyle.width!),
           height: symbol.bounds.height + +(symbol.style.width || DefaultStyle.width!) * 2,
@@ -42,7 +42,7 @@ export class OISVGRendererDecoratorUtil
         attrs["fill"] = "transparent"
         attrs["stroke"] = decorator.style.color || DefaultStyle.color!
         attrs["stroke-width"] = (decorator.style.width || DefaultStyle.width!).toString()
-        const boundingBox: TBoundingBox = {
+        const boundingBox: TBox = {
           x: symbol.bounds.x - +(symbol.style.width || DefaultStyle.width!),
           y: symbol.bounds.y - +(symbol.style.width || DefaultStyle.width!),
           height: symbol.bounds.height + +(symbol.style.width || DefaultStyle.width!) * 2,
@@ -63,7 +63,7 @@ export class OISVGRendererDecoratorUtil
           x: symbol.bounds.xMax,
           y: symbol.bounds.yMid
         }
-        if (symbol.type === SymbolType.StrokeText) {
+        if (symbol.type === SymbolType.Recognized && symbol.kind === RecognizedKind.Text) {
           p1.y = symbol.baseline - symbol.xHeight / 2
           p2.y = symbol.baseline - symbol.xHeight / 2
         }
@@ -82,7 +82,7 @@ export class OISVGRendererDecoratorUtil
           x: symbol.bounds.xMax,
           y: symbol.bounds.yMax + +(symbol.style.width || DefaultStyle.width!)
         }
-        if (symbol.type === SymbolType.StrokeText) {
+        if (symbol.type === SymbolType.Recognized && symbol.kind === RecognizedKind.Text) {
           p1.y = symbol.baseline + symbol.xHeight / 2
           p2.y = symbol.baseline + symbol.xHeight / 2
         }

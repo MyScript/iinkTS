@@ -3,7 +3,7 @@ import { TPenStyle } from "../style"
 import { computeDistance } from "../utils"
 import { TExport } from "./Export"
 import { IModel } from "./IModel"
-import { Stroke, TPoint, TPointer } from "../primitive"
+import { Stroke, TPoint, TPointer } from "../symbol"
 
 /**
  * @group Model

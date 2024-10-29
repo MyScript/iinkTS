@@ -1,7 +1,7 @@
 import { EditorTool } from "./Constants"
 import { LoggerManager, LoggerClass } from "./logger"
 import { TExport } from "./model"
-import { TOISymbol, TSymbol } from "./primitive"
+import { TOISymbol, TSymbol } from "./symbol"
 import { TUndoRedoContext } from "./history"
 
 /**
@@ -70,7 +70,11 @@ export enum EditorEventName
   /**
    * @description event emitted after mode change
    */
-  UI_UPDATED = "ui-updated"
+  UI_UPDATED = "ui-updated",
+  /**
+   * @description event emitted after stroke synchronized with jiix
+   */
+  SYNCHRONIZED = "synchronized"
 }
 
 /**
@@ -298,6 +302,21 @@ export class EditorEvent extends EventTarget
     this.#logger.info("addUIpdatedListener", { callback })
     this.addEventListener(
       EditorEventName.UI_UPDATED,
+      () => callback(),
+      { signal: this.abortController.signal }
+    )
+  }
+
+  emitSynchronized(): void
+  {
+    this.#logger.info("emitSynchronized")
+    this.emit(EditorEventName.SYNCHRONIZED)
+  }
+  addSynchronizedListener(callback: () => void): void
+  {
+    this.#logger.info("addSynchronizedListener", { callback })
+    this.addEventListener(
+      EditorEventName.SYNCHRONIZED,
       () => callback(),
       { signal: this.abortController.signal }
     )

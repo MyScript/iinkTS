@@ -41,7 +41,8 @@ import
   TOISymbol,
   TOISymbolChar,
   TPoint
-} from "../primitive"
+} from "../symbol"
+import { RecognizedKind } from "../symbol/recognized/OIRecognizedBase"
 import { computeAngleAxeRadian, computeAverage, convertBoundingBoxMillimeterToPixel, convertMillimeterToPixel, createUUID } from "../utils"
 
 /**
@@ -125,7 +126,7 @@ export class OIConversionManager
     strokes.forEach(s =>
     {
       const sym = this.model.getRootSymbol(s.id)
-      if (sym?.type === SymbolType.StrokeText || sym?.type === SymbolType.Group) {
+      if ((sym?.type === SymbolType.Recognized && sym.kind === RecognizedKind.Text) || sym?.type === SymbolType.Group) {
         const hightlight = sym.decorators.find(d => d.kind === DecoratorKind.Highlight)
         if (hightlight) decorators.push(hightlight)
         const strikethrough = sym.decorators.find(d => d.kind === DecoratorKind.Strikethrough)

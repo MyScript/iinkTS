@@ -3,7 +3,7 @@ import { Configuration, TConfiguration, TConverstionState } from "../configurati
 import { PointerEventGrabber } from "../grabber"
 import { LoggerClass, LoggerManager } from "../logger"
 import { IModel, Model, TExport } from "../model"
-import { Stroke, TStroke, TPointer } from "../primitive"
+import { Stroke, TStroke, TPointer } from "../symbol"
 import { RestRecognizer } from "../recognizer"
 import { CanvasRenderer } from "../renderer"
 import { DefaultPenStyle, StyleManager, TPenStyle, TTheme } from "../style"
