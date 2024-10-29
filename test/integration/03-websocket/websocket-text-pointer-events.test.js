@@ -1,4 +1,4 @@
-const { waitForEditorWebSocket, getDatasFromExportedEvent, waitEditorIdle } = require('../helper')
+const { waitForEditorWebSocket, waitForExportedEvent, waitEditorIdle } = require('../helper')
 
 describe('Websocket Text Pointer Events', () => {
   beforeAll(async () => {
@@ -14,7 +14,7 @@ describe('Websocket Text Pointer Events', () => {
 
   test('should import points with button', async () => {
     const [exports] = await Promise.all([
-        getDatasFromExportedEvent(page),
+        waitForExportedEvent(page),
         page.locator('#pointerEvents').click(),
     ])
     const jiixReceived = exports['application/vnd.myscript.jiix']

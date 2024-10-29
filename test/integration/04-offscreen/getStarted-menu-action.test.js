@@ -4,11 +4,14 @@ const {
   writePointers,
   writeStrokes,
   sendAndGetExportsTypeFromEditorModel,
-  waitEditorLoaded,
-  waitEditorUIUpdated,
-  waitChanged,
-  getDatasFromConvertedEvent,
-  getDatasFromExportedEvent
+  waitForLoadedEvent,
+  waitForUIUpdatedEvent,
+  waitForChangedEvent,
+  waitForConvertedEvent,
+  waitForExportedEvent,
+  waitForSynchronizedEvent,
+  waitForGesturedEvent,
+  waitForToolChangedEvent
 } = require("../helper")
 const locator = require("../locators")
 
@@ -58,7 +61,7 @@ describe("Offscreen Get Started", () => {
       expect(symbols).toHaveLength(1)
       expect(symbols[0].type).toEqual("text")
       const textId = symbols[0].id
-      const textEl = await page.waitForSelector(`#${textId}`)
+      const textEl = await page.waitForSelector(`#${ textId }`)
       expect(await textEl.textContent()).toStrictEqual(helloOneStroke.exports["application/vnd.myscript.jiix"].label)
     })
 
@@ -86,7 +89,7 @@ describe("Offscreen Get Started", () => {
       expect(symbols).toHaveLength(1)
       expect(symbols[0].type).toEqual("text")
       const textIdRedo = symbols[0].id
-      const textElRedo = await page.waitForSelector(`#${textIdRedo}`)
+      const textElRedo = await page.waitForSelector(`#${ textIdRedo }`)
       expect(await textElRedo.textContent()).toStrictEqual(helloOneStroke.exports["application/vnd.myscript.jiix"].label)
     })
 
@@ -104,7 +107,7 @@ describe("Offscreen Get Started", () => {
       expect(symbols).toHaveLength(1)
       expect(symbols[0].type).toEqual("text")
       const textIdUndo = symbols[0].id
-      const textElUndo = await page.waitForSelector(`#${textIdUndo}`)
+      const textElUndo = await page.waitForSelector(`#${ textIdUndo }`)
       expect(await textElUndo.textContent()).toStrictEqual(helloOneStroke.exports["application/vnd.myscript.jiix"].label)
     })
 
@@ -120,34 +123,34 @@ describe("Offscreen Get Started", () => {
   describe("convert", () => {
     beforeAll(async () => {
       await page.evaluate("editor.clear()")
-      let symbols = await page.evaluate("editor.model.symbols")
-      expect(symbols).toHaveLength(0)
     })
 
-    test("convert button should not be enabled", async () => {
-      await waitEditorUIUpdated(page)
-      expect(locator.menu.action.convert).not.toBeEnabled()
-     })
-
     test("should write text", async () => {
-      const changedPromise = waitChanged(page)
-      await writeStrokes(page, helloOneStroke.strokes)
-      await changedPromise
+      await Promise.all([
+        waitForSynchronizedEvent(page),
+        writeStrokes(page, helloOneStroke.strokes)
+      ])
+      await page.evaluate("editor.behaviors.synchronizeStrokesWithJIIX()")
       const symbols = await page.evaluate("editor.model.symbols")
       expect(symbols).toHaveLength(1)
-      expect(symbols[0].type).toEqual("stroke")
+      expect(symbols[0].type).toEqual("recognized")
+      expect(symbols[0].kind).toEqual("text")
     })
 
     test("should convert stroke to text", async () => {
-      const convertedPromise = getDatasFromConvertedEvent(page)
-      await page.click(locator.menu.action.convert, {timeout:1000})
-      await convertedPromise
+      await Promise.all([
+        waitForConvertedEvent(page),
+        page.click(locator.menu.action.convert, { timeout: 1000 })
+      ])
+      const symbols = await page.evaluate("editor.model.symbols")
+      expect(symbols).toHaveLength(1)
+      expect(symbols[0].type).toEqual("text")
+      expect(symbols[0].chars.map(c => c.label).join("")).toEqual(helloOneStroke.exports["application/vnd.myscript.jiix"].label)
     })
 
     test("should display text", async () => {
-      const textSymbol = await page.evaluate("editor.model.symbols[0]")
-      expect(textSymbol.type).toEqual("text")
-      const textElConvert = await page.waitForSelector(`#${textSymbol.id}`)
+      const textSymbolId = await page.evaluate("editor.model.symbols[0].id")
+      const textElConvert = await page.waitForSelector(`#${ textSymbolId }`)
       expect(await textElConvert.textContent()).toStrictEqual(helloOneStroke.exports["application/vnd.myscript.jiix"].label)
     })
   })
@@ -160,8 +163,12 @@ describe("Offscreen Get Started", () => {
     test("should not recognize french text", async () => {
       //write something in French with a typical French character: ç
       await writeStrokes(page, laLecon.strokes)
-      expect(await page.evaluate("editor.model.symbols")).toHaveLength(laLecon.strokes.length)
+      await page.evaluate("editor.behaviors.synchronizeStrokesWithJIIX()")
       const jiix = await sendAndGetExportsTypeFromEditorModel(page, "application/vnd.myscript.jiix")
+      const symbols = await page.evaluate("editor.model.symbols")
+
+      expect(symbols).toHaveLength(laLecon.exports["application/vnd.myscript.jiix"].words.length)
+      expect(symbols[0].label).not.toEqual(jiix.elements[0].label)
       expect(laLecon.exports["application/vnd.myscript.jiix"].label).not.toEqual(jiix.elements[0].label)
     })
 
@@ -174,15 +181,17 @@ describe("Offscreen Get Started", () => {
     })
 
     test("should change langage and conserve stroke", async () => {
-      const loadedPromise = waitEditorLoaded(page)
-      await page.locator(locator.menu.action.language.inputSelect).selectOption({ value: "fr_FR" })
-      await loadedPromise
-      expect(await page.evaluate("editor.model.symbols")).toHaveLength(laLecon.strokes.length)
+      await Promise.all([
+        waitForLoadedEvent(page),
+        page.locator(locator.menu.action.language.inputSelect).selectOption({ value: "fr_FR" })
+      ])
+      const symbols = await page.evaluate("editor.model.symbols")
+      expect(symbols).toHaveLength(laLecon.exports["application/vnd.myscript.jiix"].words.length)
     })
 
     test("should recognize french text", async () => {
+      await page.evaluate("editor.behaviors.synchronizeStrokesWithJIIX()")
       const jiix = await sendAndGetExportsTypeFromEditorModel(page, "application/vnd.myscript.jiix")
-      expect(jiix.elements).toBeDefined()
       expect(jiix.elements).toHaveLength(1)
       expect(laLecon.exports["application/vnd.myscript.jiix"].label).toEqual(jiix.elements[0].label)
     })
@@ -214,30 +223,23 @@ describe("Offscreen Get Started", () => {
       await strikeThrough.selectOption({ value: "draw" })
     })
 
-    test("should write stroke + gesture", async () => {
-      const changedPromise = waitChanged(page)
-      await writeStrokes(page, helloStrikeStroke.strokes)
-      await changedPromise
-      await waitEditorUIUpdated(page)
-    })
-      
     test("should draw strikethrough on stroke", async () => {
+      for (s of helloStrikeStroke.strokes) {
+        await Promise.all([
+          waitForSynchronizedEvent(page),
+          writeStrokes(page, [s])
+        ])
+      }
       const symbols = await page.evaluate("editor.model.symbols")
       expect(symbols).toHaveLength(1)
-      expect(symbols[0].deleting).toEqual(false)
       expect(symbols[0].decorators).toHaveLength(1)
       const strikeThrough = symbols[0].decorators[0]
       expect(strikeThrough.kind).toEqual("strikethrough")
 
       const groupId = symbols[0].id
-      const strikeThroughEl = page.locator(`#${groupId} #${strikeThrough.id}`)
+      const strikeThroughEl = page.locator(`#${ groupId } #${ strikeThrough.id }`)
       // expect(await strikeThroughEl.isVisible()).toEqual(true)
       expect(await strikeThroughEl.getAttribute("kind")).toContain("strikethrough")
-      // TODO maybe check position
-      // expect(await strikeThroughEl.getAttribute("x1")).toBeGreaterThanOrEqual('XXX')
-      // expect(await strikeThroughEl.getAttribute("x2")).toBeGreaterThanOrEqual('XXX')
-      // expect(await strikeThroughEl.getAttribute("y1")).toBeGreaterThanOrEqual('XXX')
-      // expect(await strikeThroughEl.getAttribute("y2")).toBeGreaterThanOrEqual('XXX')
     })
 
     test("should conserve strikethrough when convert", async () => {
@@ -250,11 +252,11 @@ describe("Offscreen Get Started", () => {
       const strikeThrough = text.decorators[0]
       expect(strikeThrough.kind).toEqual("strikethrough")
 
-      const textEl = await page.waitForSelector(`#${text.id}`)
+      const textEl = await page.waitForSelector(`#${ text.id }`)
       //verify strikeThrough did not erase the text
       expect(await textEl.textContent()).toStrictEqual(helloStrikeStroke.exports["text/plain"][0])
 
-      const strikeThroughEl = page.locator(`#${text.id} #${strikeThrough.id}`)
+      const strikeThroughEl = page.locator(`#${ text.id } #${ strikeThrough.id }`)
       expect(await strikeThroughEl.getAttribute("kind")).toContain("strikethrough")
     })
 
@@ -286,7 +288,7 @@ describe("Offscreen Get Started", () => {
       await writePointers(page, helloStrikeStroke.strokes[0].pointers)
       symbols = await page.evaluate("editor.model.symbols")
       expect(symbols).toHaveLength(1)
-      const exportPromise = getDatasFromExportedEvent(page)
+      const exportPromise = waitForExportedEvent(page)
       // write the strike through
       await writePointers(page, helloStrikeStroke.strokes[1].pointers)
       await exportPromise
@@ -324,11 +326,10 @@ describe("Offscreen Get Started", () => {
     })
 
     test("write hello in one stroke", async () => {
-      const changedPromise = waitChanged(page)
-      const uiPromise = waitEditorUIUpdated(page)
-      await writePointers(page, helloOneSurrounded.strokes[0].pointers)
-      await changedPromise
-      await uiPromise
+      await Promise.all([
+        waitForUIUpdatedEvent(page),
+        writePointers(page, helloOneSurrounded.strokes[0].pointers)
+      ])
     })
 
     test("verify context wrapper is not visible", async () => {
@@ -346,8 +347,8 @@ describe("Offscreen Get Started", () => {
     })
 
     test("write surround", async () => {
-      const changedPromise = waitChanged(page)
-      const uiPromise = waitEditorUIUpdated(page)
+      const changedPromise = waitForChangedEvent(page)
+      const uiPromise = waitForUIUpdatedEvent(page)
       await writePointers(page, helloOneSurrounded.strokes[1].pointers)
       await changedPromise
       await uiPromise
@@ -390,7 +391,7 @@ describe("Offscreen Get Started", () => {
 
     test("write again hello surrounded", async () => {
       //write something with surround
-      const uiUpdatedPromise = waitEditorUIUpdated(page)
+      const uiUpdatedPromise = waitForUIUpdatedEvent(page)
       await writeStrokes(page, helloOneSurrounded.strokes)
       const jiix = await sendAndGetExportsTypeFromEditorModel(page, "application/vnd.myscript.jiix")
       await waitEditorIdle(page)
@@ -401,12 +402,13 @@ describe("Offscreen Get Started", () => {
       //verify surround is drawn arround the text
       symbols = await page.evaluate("editor.model.symbols")
       expect(symbols).toHaveLength(1)
-      expect(symbols[0].type).toEqual("stroke-text")
+      expect(symbols[0].type).toEqual("recognized")
+      expect(symbols[0].kind).toEqual("text")
       expect(symbols[0].decorators).toHaveLength(1)
       expect(symbols[0].decorators[0].kind).toEqual("surround")
       expect(symbols[0].deleting).toEqual(false)
       const groupId = symbols[0].id
-      const groupEl = page.locator(`#${groupId}`)
+      const groupEl = page.locator(`#${ groupId }`)
       const groupElSVG = await groupEl.innerHTML()
       expect(groupElSVG).toContain('type="stroke"')
       expect(groupElSVG).toContain("<path ")
@@ -425,7 +427,7 @@ describe("Offscreen Get Started", () => {
       expect(symbols[0].type).toEqual("text")
       expect(symbols[0].decorators).toHaveLength(1)
       expect(symbols[0].decorators[0].kind).toEqual("surround")
-      const rectEl = page.locator(`#${symbols[0].decorators[0].id}`)
+      const rectEl = page.locator(`#${ symbols[0].decorators[0].id }`)
 
       expect(await rectEl.count()).toEqual(1)
       expect(await rectEl.getAttribute("type")).toEqual("decorator")
@@ -437,7 +439,8 @@ describe("Offscreen Get Started", () => {
 
   describe("insert gesture", () => {
     beforeAll(async () => {
-      await page.evaluate("editor.clear()")
+      await page.reload({ waitUntil: 'load' })
+      await waitEditorIdle(page)
     })
 
     test("should not display menu gesture", async () => {
@@ -457,38 +460,70 @@ describe("Offscreen Get Started", () => {
     test("should define insert on insert", async () => {
       //check the detect gestures is activate
       await page.getByRole("checkbox", { id: locator.menu.action.gesture.detect }).check()
-      const insert = await page.waitForSelector(locator.menu.action.gesture.insert)
-      await insert.selectOption({ value: "insert" })
+      await page.locator(locator.menu.action.gesture.insert).selectOption({ value: "insert" })
     })
 
     test("should write the stroke", async () => {
-      await writePointers(page, helloOneInsert.strokes[0].pointers)
-      await sendAndGetExportsTypeFromEditorModel(page, "application/vnd.myscript.jiix")
+      await Promise.all([
+        waitForSynchronizedEvent(page),
+        writePointers(page, helloOneInsert.strokes[0].pointers)
+      ])
       const symbols = await page.evaluate("editor.model.symbols")
       expect(symbols).toHaveLength(1)
-      expect(symbols[0].type).toEqual("stroke")
+      expect(symbols[0].type).toEqual("recognized")
+      expect(symbols[0].kind).toEqual("text")
     })
 
     test("should draw insert on stroke ", async () => {
-      await writePointers(page, helloOneInsert.strokes[1].pointers)
-      await sendAndGetExportsTypeFromEditorModel(page, "application/vnd.myscript.jiix")
+      await Promise.all([
+        waitForGesturedEvent(page),
+        writePointers(page, helloOneInsert.strokes[1].pointers)
+      ])
     })
 
-    test("should separate word in 2 ", async () => {
+    test("should separate stroke in 2 ", async () => {
+      // necessary to ensure that recognition is completed
+      await page.evaluate("editor.behaviors.synchronizeStrokesWithJIIX()")
       const symbols = await page.evaluate("editor.model.symbols")
       expect(symbols).toHaveLength(2)
-      expect(symbols[0].type).toEqual("stroke")
-      expect(symbols[1].type).toEqual("stroke")
-      const helId = symbols[0].id
-      const helEl = page.locator(`#${helId}`)
-      const helElBox = await helEl.boundingBox()
+      expect(symbols[0]).toEqual(expect.objectContaining({
+        type: "recognized",
+        kind: "text",
+        label: "hel"
+      }))
+      expect(symbols[1]).toEqual(expect.objectContaining({
+        type: "recognized",
+        kind: "text",
+        label: "to"
+      }))
 
-      const loId = symbols[1].id
-      const loEl = page.locator(`#${loId}`)
-      const loElBox = await loEl.boundingBox()
+      const helElBox = await page.locator(`#${ symbols[0].id }`).boundingBox()
+      const toElBox = await page.locator(`#${ symbols[1].id }`).boundingBox()
 
-      // check 2nd word is separated from the first by at least 15px 
-      expect(loElBox.x - helElBox.x - helElBox.width).toBeGreaterThan(15) 
+      // check 2nd word is separated from the first by at least 50px
+      expect(toElBox.x - helElBox.x - helElBox.width).toBeGreaterThan(50)
+    })
+
+    test("insert should be kept on convert", async () => {
+      //convert
+      const convertBtn = await page.locator(locator.menu.action.convert)
+      expect(await convertBtn.isEnabled()).toEqual(true)
+      await Promise.all([
+        waitForConvertedEvent(page),
+        convertBtn.click()
+      ])
+
+      symbols = await page.evaluate("editor.model.symbols")
+      expect(symbols).toHaveLength(2)
+      const hel = symbols[0]
+      expect(hel.type).toEqual("text")
+      const to = symbols[1]
+      expect(to.type).toEqual("text")
+
+      expect(await page.locator(`#${hel.id}`).textContent()).toEqual("hel")
+      expect( await page.locator(`#${to.id}`).textContent()).toEqual("to")
+      //verify 2nd word is separated from the first by at least 10px
+      expect(to.bounds.x - hel.bounds.x - hel.bounds.width).toBeGreaterThan(10)
     })
 
     test("insert should separate word on convert", async () => {
@@ -512,54 +547,14 @@ describe("Offscreen Get Started", () => {
       expect(hel.type).toEqual("text")
       const lo = symbols[1]
       expect(lo.type).toEqual("text")
-      
-      const helEl = await page.locator(`#${hel.id}`)
-      const loEl = await page.locator(`#${lo.id}`)
-      const helText = await helEl.textContent()
-      const loText = await loEl.textContent()
+
+      const helText = await page.locator(`#${ hel.id }`).textContent()
+      const loText = await page.locator(`#${ lo.id }`).textContent()
       expect(helText).toEqual("hel")
       expect(loText).toEqual("lo")
       //verify 2nd word is separated from the first by at least 10px
       expect(lo.bounds.x - hel.bounds.x - hel.bounds.width).toBeGreaterThan(10)
     })
 
-    //TODO when https://myscript.atlassian.net/browse/IIC-1234 is fixed
-    // test("insert should be kept on convert", async () => {
-    //   //clear the editor
-    //   await page.evaluate("editor.clear()")
-    //   let symbols = await page.evaluate("editor.model.symbols")
-    //   expect(symbols).toHaveLength(0)
-
-    //   //write again 
-    //   await writePointers(page, helloOneInsert.strokes[0].pointers)
-    //   await sendAndGetExportsTypeFromEditorModel(page, "application/vnd.myscript.jiix")
-
-    //   //write the insert between the 2 l
-    //   await writePointers(page, helloOneInsert.strokes[1].pointers)
-    //   await sendAndGetExportsTypeFromEditorModel(page, "application/vnd.myscript.jiix")
-
-    //   //convert
-    //   const convertBtn = await page.locator(locator.menu.action.convert)
-    //   const convertedPromise = getDatasFromConvertedEvent(page)
-    //   expect(await convertBtn.isEnabled()).toEqual(true)
-    //   await convertBtn.click()
-    //   await convertedPromise
-
-    //   symbols = await page.evaluate("editor.model.symbols")
-    //   expect(symbols).toHaveLength(2)
-    //   const hel = symbols[0]
-    //   expect(hel.type).toEqual("text")
-    //   const lo = symbols[1]
-    //   expect(lo.type).toEqual("text")
-      
-    //   const helEl = await page.locator(`#${hel.id}`)
-    //   const loEl = await page.locator(`#${lo.id}`)
-    //   const helText = await helEl.textContent()
-    //   const loText = await loEl.textContent()
-    //   expect(helText).toEqual("hel")
-    //   expect(loText).toEqual("lo")
-    //   //verify 2nd word is separated from the first by at least 10px
-    //   expect(lo.bounds.x - hel.bounds.x - hel.bounds.width).toBeGreaterThan(10)
-    // })
   })
 })

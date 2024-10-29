@@ -1,6 +1,6 @@
 const {
   writeStrokes,
-  getDatasFromExportedEvent,
+  waitForExportedEvent,
   getExportsTypeFromEditorModel,
   getEditorConfiguration,
   setEditorConfiguration,
@@ -27,32 +27,32 @@ describe("Nav actions math undo/redo", () => {
     await writeStrokes(page, equation1.strokes, 100, 100)
     await waitEditorIdle(page)
 
-    const [clearExport] = await Promise.all([getDatasFromExportedEvent(page), page.click("#clear")])
+    const [clearExport] = await Promise.all([waitForExportedEvent(page), page.click("#clear")])
     const modelExportCleared = await getExportsFromEditorModel(page)
     if (modelExportCleared) {
       expect(modelExportCleared["application/x-latex"]).toEqual("")
       expect(clearExport["application/x-latex"]).toEqual("")
     }
 
-    const [undo1Export] = await Promise.all([getDatasFromExportedEvent(page), page.click("#undo")])
+    const [undo1Export] = await Promise.all([waitForExportedEvent(page), page.click("#undo")])
     latex = await getExportsTypeFromEditorModel(page, "application/x-latex")
     expect(undo1Export["application/x-latex"]).toEqual(latex)
     expect(equation1.exports.LATEX.at(-1)).toEqual(undo1Export["application/x-latex"])
 
     await waitEditorIdle(page)
-    const [undo2Export] = await Promise.all([getDatasFromExportedEvent(page), page.click("#undo")])
+    const [undo2Export] = await Promise.all([waitForExportedEvent(page), page.click("#undo")])
     latex = await getExportsTypeFromEditorModel(page, "application/x-latex")
     expect(undo2Export["application/x-latex"]).toEqual(latex)
     expect(equation1.exports.LATEX.at(-2)).toEqual(undo2Export["application/x-latex"])
 
     await waitEditorIdle(page)
-    const [undo3Export] = await Promise.all([getDatasFromExportedEvent(page), page.click("#undo")])
+    const [undo3Export] = await Promise.all([waitForExportedEvent(page), page.click("#undo")])
     latex = await getExportsTypeFromEditorModel(page, "application/x-latex")
     expect(undo3Export["application/x-latex"]).toEqual(latex)
     expect(equation1.exports.LATEX.at(-3)).toEqual(undo3Export["application/x-latex"])
 
     await waitEditorIdle(page)
-    const [redoExport] = await Promise.all([getDatasFromExportedEvent(page), page.click("#redo")])
+    const [redoExport] = await Promise.all([waitForExportedEvent(page), page.click("#redo")])
     latex = await getExportsTypeFromEditorModel(page, "application/x-latex")
     expect(redoExport["application/x-latex"]).toEqual(latex)
     expect(equation1.exports.LATEX.at(-2)).toEqual(redoExport["application/x-latex"])
@@ -75,7 +75,7 @@ describe("Nav actions math undo/redo", () => {
     latex = await getExportsTypeFromEditorModel(page, "application/x-latex")
     expect(latex).toEqual(equation1.exports.LATEX.at(-1))
 
-    const [clearExport] = await Promise.all([getDatasFromExportedEvent(page), page.click("#clear")])
+    const [clearExport] = await Promise.all([waitForExportedEvent(page), page.click("#clear")])
     const modelExportCleared = await getExportsFromEditorModel(page)
     if (modelExportCleared) {
       expect(modelExportCleared["application/x-latex"]).toEqual("")
@@ -83,19 +83,19 @@ describe("Nav actions math undo/redo", () => {
     }
 
     await waitEditorIdle(page)
-    const [undo1Export] = await Promise.all([getDatasFromExportedEvent(page), page.click("#undo")])
+    const [undo1Export] = await Promise.all([waitForExportedEvent(page), page.click("#undo")])
     latex = await getExportsTypeFromEditorModel(page, "application/x-latex")
     expect(undo1Export["application/x-latex"]).toEqual(latex)
     expect(undo1Export["application/x-latex"]).toEqual(equation1.exports.LATEX.at(-1))
 
     await waitEditorIdle(page)
-    const [undo2Export] = await Promise.all([getDatasFromExportedEvent(page), page.click("#undo")])
+    const [undo2Export] = await Promise.all([waitForExportedEvent(page), page.click("#undo")])
     latex = await getExportsTypeFromEditorModel(page, "application/x-latex")
     expect(undo2Export["application/x-latex"]).toEqual(latex)
     expect(latex).toEqual("")
 
     await waitEditorIdle(page)
-    const [redoExport] = await Promise.all([getDatasFromExportedEvent(page), page.click("#redo")])
+    const [redoExport] = await Promise.all([waitForExportedEvent(page), page.click("#redo")])
     latex = await getExportsTypeFromEditorModel(page, "application/x-latex")
     expect(redoExport["application/x-latex"]).toEqual(latex)
     expect(redoExport["application/x-latex"]).toEqual(equation1.exports.LATEX.at(-1))

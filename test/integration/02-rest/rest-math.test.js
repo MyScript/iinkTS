@@ -1,7 +1,7 @@
 const {
   waitForEditorRest,
   writeStrokes,
-  getDatasFromExportedEvent,
+  waitForExportedEvent,
   setEditorConfiguration,
   getEditorConfiguration,
   getExportsFromEditorModel,
@@ -26,7 +26,7 @@ describe('Rest Math', () => {
     let exportedDatas
     for (let s of equation1.strokes) {
       [exportedDatas] = await Promise.all([
-        getDatasFromExportedEvent(page),
+        waitForExportedEvent(page),
         writeStrokes(page, [s]),
       ])
     }
@@ -63,7 +63,7 @@ describe('Rest Math', () => {
 
     test('should only request application/x-latex by default', async () => {
       await Promise.all([
-        getDatasFromExportedEvent(page),
+        waitForExportedEvent(page),
         writeStrokes(page, one.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(1)
@@ -76,7 +76,7 @@ describe('Rest Math', () => {
       await setEditorConfiguration(page, configuration)
 
       await Promise.all([
-        getDatasFromExportedEvent(page),
+        waitForExportedEvent(page),
         writeStrokes(page, one.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(1)
@@ -92,7 +92,7 @@ describe('Rest Math', () => {
       await setEditorConfiguration(page, configuration)
 
       await Promise.all([
-        getDatasFromExportedEvent(page),
+        waitForExportedEvent(page),
         writeStrokes(page, one.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(2)
@@ -110,14 +110,14 @@ describe('Rest Math', () => {
 
     test('should clear', async () => {
       const [exportedDatas] = await Promise.all([
-        getDatasFromExportedEvent(page),
+        waitForExportedEvent(page),
         writeStrokes(page, one.strokes)
       ])
 
       expect(exportedDatas['application/x-latex']).toStrictEqual(one.exports.LATEX.at(-1))
 
       const promisesResult = await Promise.all([
-        getDatasFromExportedEvent(page),
+        waitForExportedEvent(page),
         page.click('#clear'),
       ])
       expect(promisesResult[0]).toBeNull()
@@ -134,15 +134,15 @@ describe('Rest Math', () => {
       await writeStrokes(page, equation1.strokes)
       await waitEditorIdle(page)
 
-      await Promise.all([getDatasFromExportedEvent(page), page.click('#undo')])
+      await Promise.all([waitForExportedEvent(page), page.click('#undo')])
       let raw = await editorEl.evaluate((node) => node.editor.model.symbols)
       expect(raw.length).toStrictEqual(equation1.strokes.length - 1)
 
-      await Promise.all([getDatasFromExportedEvent(page), page.click('#undo')])
+      await Promise.all([waitForExportedEvent(page), page.click('#undo')])
       raw = await editorEl.evaluate((node) => node.editor.model.symbols)
       expect(raw.length).toStrictEqual(equation1.strokes.length - 2)
 
-      await Promise.all([getDatasFromExportedEvent(page), page.click('#redo')])
+      await Promise.all([waitForExportedEvent(page), page.click('#redo')])
       raw = await editorEl.evaluate((node) => node.editor.model.symbols)
       expect(raw.length).toStrictEqual(equation1.strokes.length - 1)
     })

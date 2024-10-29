@@ -46,11 +46,11 @@ module.exports.writePointers = async (page, pointers, offsetTop = 0, offsetLeft 
       waitTime = p.t - oldTimestamp;
       oldTimestamp = p.t;
     }
-    await page.waitForTimeout(waitTime);
+    await page.waitForTimeout(waitTime / 10);
     await page.mouse.move(offsetX + p.x, offsetY + p.y);
   }
   await page.mouse.up();
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(250);
 };
 
 /**
@@ -98,13 +98,13 @@ module.exports.waitEditorIdle = async (page) => {
   return page.evaluate("editor.waitForIdle()");
 }
 
-const waitForEditorEvent = async (page, eventName) => {
+const waitForEvent = async (page, eventName) => {
   await page.waitForFunction(() => !!window.editor);
   return page.evaluate(`(async () => {
     return new Promise((resolve, reject) => {
       editor.event.addEventListener('${eventName}', (e) => {
         resolve(e.detail);
-      });
+      }, { once: true });
     });
   })()`);
 };
@@ -112,51 +112,73 @@ const waitForEditorEvent = async (page, eventName) => {
  * @param {Page} page - Playwright Page
  * @returns Promise<unknow>
  */
-module.exports.waitForEditorEvent = waitForEditorEvent;
+module.exports.waitForEvent = waitForEvent;
 
 /**
  * @param {Page} page - Playwright Page
  * @returns Promise<TExport>
  */
-module.exports.getDatasFromExportedEvent = async (page) => waitForEditorEvent(page, "exported");
+module.exports.waitForExportedEvent = async (page) => waitForEvent(page, "exported");
 
 /**
  * @param {Page} page - Playwright Page
  * @returns Promise<TExport>
  */
-module.exports.getDatasFromImportedEvent = async (page) => waitForEditorEvent(page, "imported");
+module.exports.waitForImportedEvent = async (page) => waitForEvent(page, "imported");
 
 /**
  * @param {Page} page - Playwright Page
  * @returns Promise<void>
  */
-module.exports.waitChanged = async (page) => waitForEditorEvent(page, "changed");
+module.exports.waitForChangedEvent = async (page) => waitForEvent(page, "changed");
 
 /**
  * @param {Page} page - Playwright Page
  * @returns Promise<Exports>
  */
-module.exports.getDatasFromConvertedEvent = async (page) => waitForEditorEvent(page, "converted");
+module.exports.waitForConvertedEvent = async (page) => waitForEvent(page, "converted");
 
 /**
  * @param {Page} page - Playwright Page
  * @returns Promise<void>
  */
-module.exports.waitEditorLoaded = async (page) => waitForEditorEvent(page, "loaded");
+module.exports.waitForLoadedEvent = async (page) => waitForEvent(page, "loaded");
 
 /**
  * @param {Page} page - Playwright Page
  * @returns Promise<void>
  */
-module.exports.waitEditorUIUpdated = async (page) => waitForEditorEvent(page, "ui-updated");
-
-
+module.exports.waitForUIUpdatedEvent = async (page) => waitForEvent(page, "ui-updated");
 
 /**
  * @param {Page} page - Playwright Page
  * @returns Promise<void>
  */
-module.exports.waitSessionOpened = async (page) => waitForEditorEvent(page, "session-opened");
+module.exports.waitForSessionOpenedEvent = async (page) => waitForEvent(page, "session-opened");
+
+/**
+ * @param {Page} page - Playwright Page
+ * @returns Promise<void>
+ */
+module.exports.waitForSynchronizedEvent = async (page) => waitForEvent(page, "synchronized");
+
+/**
+ * @param {Page} page - Playwright Page
+ * @returns Promise<void>
+ */
+module.exports.waitForToolChangedEvent = async (page) => waitForEvent(page, "tool-changed");
+
+/**
+ * @param {Page} page - Playwright Page
+ * @returns Promise<void>
+ */
+module.exports.waitForSelectedEvent = async (page) => waitForEvent(page, "selected");
+
+/**
+ * @param {Page} page - Playwright Page
+ * @returns Promise<void>
+ */
+module.exports.waitForGesturedEvent = async (page) => waitForEvent(page, "gestured");
 
 module.exports.waitForEditorRest = async (page) => {
   await Promise.all([page.waitForSelector("#ms-rendering-canvas"), page.waitForSelector("#ms-capture-canvas")]);

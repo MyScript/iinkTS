@@ -1,4 +1,4 @@
-const { getDatasFromExportedEvent, writeStrokes, waitEditorIdle } = require("../../helper")
+const { waitForExportedEvent, writeStrokes, waitEditorIdle } = require("../../helper")
 const { h } = require("../../strokesDatas")
 
 describe('Nav actions text language', () => {
@@ -9,7 +9,7 @@ describe('Nav actions text language', () => {
 
   test('should change language', async () => {
     await Promise.all([
-      getDatasFromExportedEvent(page),
+      waitForExportedEvent(page),
       writeStrokes(page, h.strokes),
     ])
 
@@ -19,7 +19,7 @@ describe('Nav actions text language', () => {
     expect(resultText).toStrictEqual(h.exports['text/plain'].at(-1))
 
     await Promise.all([
-      getDatasFromExportedEvent(page),
+      waitForExportedEvent(page),
       page.selectOption('#language', 'fr_FR'),
     ])
 

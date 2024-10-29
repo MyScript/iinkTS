@@ -135,7 +135,7 @@ describe('EditorEvent.ts', () =>
       expect(toolCallback).toHaveBeenNthCalledWith(1, EditorTool.Write)
     })
 
-    test("should execute callback on emitToolChanged", () =>
+    test("should execute callback on emitUIpdated", () =>
     {
       events.addUIpdatedListener(uiCallback)
       events.emitUIpdated()
@@ -282,7 +282,7 @@ describe('EditorEvent.ts', () =>
     test("should execute callback on emitToolChanged", () =>
     {
       const testCallback = jest.fn()
-      element.addEventListener(EditorEventName.MODE_CHANGED, testCallback)
+      element.addEventListener(EditorEventName.TOOL_CHANGED, testCallback)
       events.emitToolChanged(EditorTool.Write)
       expect(testCallback).toHaveBeenNthCalledWith(1, expect.objectContaining({ detail: EditorTool.Write }))
     })

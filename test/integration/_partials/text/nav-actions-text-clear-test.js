@@ -1,4 +1,4 @@
-const { writeStrokes, getDatasFromExportedEvent, waitEditorIdle } = require("../../helper")
+const { writeStrokes, waitForExportedEvent, waitEditorIdle } = require("../../helper")
 const { one } = require("../../strokesDatas")
 
 describe('Nav actions text clear', () => {
@@ -9,13 +9,13 @@ describe('Nav actions text clear', () => {
 
   test('should clear', async () => {
     const [exportBeforeClear] = await Promise.all([
-      getDatasFromExportedEvent(page),
+      waitForExportedEvent(page),
       writeStrokes(page, one.strokes, 100)
     ])
     expect(exportBeforeClear["application/vnd.myscript.jiix"].label).toStrictEqual("1")
 
     const [exportAfterClear] = await Promise.all([
-      getDatasFromExportedEvent(page),
+      waitForExportedEvent(page),
       page.click("#clear")
     ])
     const emptyJiix = { "type": "Text", "label": "", "words": [], "version": "3", "id": "MainBlock" }

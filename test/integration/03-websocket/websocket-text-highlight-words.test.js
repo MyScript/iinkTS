@@ -1,4 +1,4 @@
-const { waitForEditorWebSocket, writeStrokes, getDatasFromExportedEvent, waitEditorIdle } = require("../helper")
+const { waitForEditorWebSocket, writeStrokes, waitForExportedEvent, waitEditorIdle } = require("../helper")
 const { helloOneSurrounded, helloOneStroke } = require("../strokesDatas")
 
 const getComputedStyle = async (locator) => {
@@ -91,7 +91,7 @@ describe("Websocket Text highlight words", () => {
     await waitEditorIdle(page)
     expect(await page.locator("#highlight-list > li").count()).toEqual(1)
     await Promise.all([
-      getDatasFromExportedEvent(page),
+      waitForExportedEvent(page),
       writeStrokes(page, [helloOneSurrounded.strokes[1]])
     ])
     expect(await page.locator("#highlight-list > li").count()).toEqual(0)
@@ -101,12 +101,12 @@ describe("Websocket Text highlight words", () => {
     test(`should write text in color ${colorMap[index].id} and highlight them`, async () => {
       const currentColor = colorMap[index]
       await Promise.all([
-        getDatasFromExportedEvent(page),
+        waitForExportedEvent(page),
         writeStrokes(page, [helloOneSurrounded.strokes[0]])
       ])
       await page.locator(`#${currentColor.id}`).click()
       await Promise.all([
-        getDatasFromExportedEvent(page),
+        waitForExportedEvent(page),
         writeStrokes(page, [helloOneSurrounded.strokes[1]])
       ])
       expect(await page.locator("#highlight-list > li").count()).toEqual(1)
@@ -114,7 +114,7 @@ describe("Websocket Text highlight words", () => {
       const style = await getComputedStyle(page.locator("#highlight-list > li"))
       expect(style.backgroundColor).toContain(currentColor.backgroundColor)
       await Promise.all([
-        getDatasFromExportedEvent(page),
+        waitForExportedEvent(page),
         writeStrokes(page, [helloOneSurrounded.strokes[1]])
       ])
       expect(await page.locator("#highlight-list > li").count()).toEqual(0)
@@ -126,7 +126,7 @@ describe("Websocket Text highlight words", () => {
     const highlightColor = colorMap[5]
     await page.click(`#${strokeColor.id}`)
     await Promise.all([
-      getDatasFromExportedEvent(page),
+      waitForExportedEvent(page),
       writeStrokes(page, [helloOneSurrounded.strokes[0]])
     ])
     await waitEditorIdle(page)
@@ -134,7 +134,7 @@ describe("Websocket Text highlight words", () => {
 
     await page.click(`#${highlightColor.id}`)
     await Promise.all([
-      getDatasFromExportedEvent(page),
+      waitForExportedEvent(page),
       writeStrokes(page, [helloOneSurrounded.strokes[1]])
     ])
     await waitEditorIdle(page)

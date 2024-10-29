@@ -1,4 +1,4 @@
-const { waitForEditorWebSocket, writeStrokes, getDatasFromExportedEvent, waitEditorIdle } = require('../helper')
+const { waitForEditorWebSocket, writeStrokes, waitForExportedEvent, waitEditorIdle } = require('../helper')
 const { h } = require('../strokesDatas')
 
 function hexToRgbA(hex) {
@@ -34,7 +34,7 @@ describe('Websocket Text Customize Stroke Style', () => {
 
   test('should draw stroke with DefaultTheme', async () => {
     await Promise.all([
-      getDatasFromExportedEvent(page),
+      waitForExportedEvent(page),
       writeStrokes(page, h.strokes),
     ])
     const defaultThemeColor = await page.evaluate('editor.theme.ink.color')
@@ -46,7 +46,7 @@ describe('Websocket Text Customize Stroke Style', () => {
     await page.click('#penStyleClasses')
 
     await Promise.all([
-      getDatasFromExportedEvent(page),
+      waitForExportedEvent(page),
       writeStrokes(page, h.strokes),
     ])
 
@@ -61,7 +61,7 @@ describe('Websocket Text Customize Stroke Style', () => {
     await page.selectOption('#theme', 'bold-red'),
 
     await Promise.all([
-      getDatasFromExportedEvent(page),
+      waitForExportedEvent(page),
       writeStrokes(page, h.strokes),
     ])
 
@@ -79,7 +79,7 @@ describe('Websocket Text Customize Stroke Style', () => {
     expect(await page.locator('#penwidth').isDisabled()).toEqual(false)
 
     await Promise.all([
-      getDatasFromExportedEvent(page),
+      waitForExportedEvent(page),
       writeStrokes(page, h.strokes),
     ])
 
@@ -104,7 +104,7 @@ describe('Websocket Text Customize Stroke Style', () => {
     await page.fill('#pencolor', penColorExpected)
 
     await Promise.all([
-      getDatasFromExportedEvent(page),
+      waitForExportedEvent(page),
       writeStrokes(page, h.strokes),
     ])
 

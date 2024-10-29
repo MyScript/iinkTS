@@ -1,4 +1,4 @@
-const { writeStrokes, waitForEditorWebSocket, waitEditorIdle, getDatasFromExportedEvent } = require("../helper")
+const { writeStrokes, waitForEditorWebSocket, waitEditorIdle, waitForExportedEvent } = require("../helper")
 const { h } = require("../strokesDatas")
 
 describe("Websocket Custom recognizer", () => {
@@ -24,7 +24,7 @@ describe("Websocket Custom recognizer", () => {
 
   test("should have info in recognizer-info div", async () => {
     await Promise.all([
-      getDatasFromExportedEvent(page),
+      waitForExportedEvent(page),
       writeStrokes(page, h.strokes)
     ])
     const result = await page.$eval("#result", el => el.textContent)
