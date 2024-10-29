@@ -2,7 +2,7 @@ const { toMatchImageSnapshot } = require('jest-image-snapshot')
 const {
   waitForEditorWebSocket,
   writeStrokes,
-  getDatasFromExportedEvent,
+  waitForExportedEvent,
   waitEditorIdle
 } = require('../helper')
 const { equation1 } = require('../strokesDatas')
@@ -23,7 +23,7 @@ describe('Websocket Math', function () {
   test('should draw equation on graph', async () => {
     for (const s of equation1.strokes) {
       await Promise.all([
-        getDatasFromExportedEvent(page),
+        waitForExportedEvent(page),
         writeStrokes(page, [s], 100, 100)
       ])
     }

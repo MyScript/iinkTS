@@ -1,8 +1,9 @@
 import { EditorTool } from "./Constants"
 import { LoggerManager, LoggerClass } from "./logger"
 import { TExport } from "./model"
-import { TOISymbol, TSymbol } from "./symbol"
+import { OIStroke, TOISymbol, TSymbol } from "./symbol"
 import { TUndoRedoContext } from "./history"
+import { TGestureType } from "./gesture"
 
 /**
  * @group Event
@@ -64,9 +65,9 @@ export enum EditorEventName
    */
   SELECTED = "selected",
   /**
-   * @description event emitted after mode change
+   * @description event emitted after tool change
    */
-  MODE_CHANGED = "mode-changed",
+  TOOL_CHANGED = "tool-changed",
   /**
    * @description event emitted after mode change
    */
@@ -74,7 +75,11 @@ export enum EditorEventName
   /**
    * @description event emitted after stroke synchronized with jiix
    */
-  SYNCHRONIZED = "synchronized"
+  SYNCHRONIZED = "synchronized",
+  /**
+   * @description event emitted after applying a gesture
+   */
+  GESTURED = "gestured"
 }
 
 /**
@@ -100,7 +105,6 @@ export class EditorEvent extends EventTarget
     this.abortController.abort()
     this.abortController = new AbortController()
   }
-
 
   protected emit(type: string, data?: unknown): void
   {
@@ -280,13 +284,13 @@ export class EditorEvent extends EventTarget
   emitToolChanged(mode: EditorTool): void
   {
     this.#logger.info("emitToolChanged")
-    this.emit(EditorEventName.MODE_CHANGED, mode)
+    this.emit(EditorEventName.TOOL_CHANGED, mode)
   }
   addToolChangedListener(callback: (mode: EditorTool) => void): void
   {
     this.#logger.info("addToolChangedListener", { callback })
     this.addEventListener(
-      EditorEventName.MODE_CHANGED,
+      EditorEventName.TOOL_CHANGED,
       (evt: unknown) => callback((evt as CustomEvent).detail as EditorTool),
       { signal: this.abortController.signal }
     )
@@ -318,6 +322,21 @@ export class EditorEvent extends EventTarget
     this.addEventListener(
       EditorEventName.SYNCHRONIZED,
       () => callback(),
+      { signal: this.abortController.signal }
+    )
+  }
+
+  emitGestured(gesture: { gestureType: TGestureType, stroke: OIStroke }): void
+  {
+    this.#logger.info("emitSynchronized")
+    this.emit(EditorEventName.GESTURED, gesture)
+  }
+  addGesturedListener(callback: (gesture: { gestureType: TGestureType, stroke: OIStroke }) => void): void
+  {
+    this.#logger.info("addSynchronizedListener", { callback })
+    this.addEventListener(
+      EditorEventName.GESTURED,
+      (evt) => callback((evt as CustomEvent).detail as { gestureType: TGestureType, stroke: OIStroke }),
       { signal: this.abortController.signal }
     )
   }

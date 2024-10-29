@@ -1,4 +1,4 @@
-const { writeStrokes, getDatasFromExportedEvent, waitForEditorWebSocket } = require("../helper")
+const { writeStrokes, waitForExportedEvent, waitForEditorWebSocket } = require("../helper")
 const { hello } = require("../strokesDatas")
 
 describe("Websocket Text search", () => {
@@ -14,7 +14,7 @@ describe("Websocket Text search", () => {
 
   test("should write hello", async () => {
     const [exported] = await Promise.all([
-      getDatasFromExportedEvent(page),
+      waitForExportedEvent(page),
       writeStrokes(page, hello.strokes)
     ])
 

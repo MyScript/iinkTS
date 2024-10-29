@@ -1,6 +1,6 @@
 const {
   waitForEditorRest,
-  getDatasFromExportedEvent,
+  waitForExportedEvent,
   writeStrokes
 } = require('../helper')
 const { h } = require('../strokesDatas')
@@ -29,7 +29,7 @@ describe('Rest Text', () => {
 
   test("should have info in recognizer-info div", async () => {
     await Promise.all([
-      getDatasFromExportedEvent(page),
+      waitForExportedEvent(page),
       writeStrokes(page, h.strokes)
     ])
     const result = await page.$eval("#result", el => el.textContent)

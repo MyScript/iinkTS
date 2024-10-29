@@ -2,13 +2,13 @@
 const {
   waitForEditorWebSocket,
   writeStrokes,
-  getDatasFromExportedEvent,
+  waitForExportedEvent,
   getExportsTypeFromEditorModel,
   getEditorConfiguration,
   setEditorConfiguration,
   getConvertsFromEditorModel,
   getExportsFromEditorModel,
-  getDatasFromConvertedEvent,
+  waitForConvertedEvent,
   waitEditorIdle
 } = require('../helper')
 const { equation1, fence, sum, threeScratchOut, one } = require('../strokesDatas')
@@ -32,7 +32,7 @@ describe('Websocket Math', function () {
   test('should only export latex by default', async () => {
     for(const s of equation1.strokes) {
       await Promise.all([
-        getDatasFromExportedEvent(page),
+        waitForExportedEvent(page),
         writeStrokes(page, [s], 100, 100)
       ])
     }
@@ -52,7 +52,7 @@ describe('Websocket Math', function () {
 
     for(const s of equation1.strokes) {
       await Promise.all([
-        getDatasFromExportedEvent(page),
+        waitForExportedEvent(page),
         writeStrokes(page, [s], 100, 100)
       ])
     }
@@ -88,14 +88,14 @@ describe('Websocket Math', function () {
     let latex
     for(const s of equation1.strokes) {
       await Promise.all([
-        getDatasFromExportedEvent(page),
+        waitForExportedEvent(page),
         writeStrokes(page, [s], 100, 100)
       ])
     }
     await waitEditorIdle(page)
 
     const [clearExport] = await Promise.all([
-      getDatasFromExportedEvent(page),
+      waitForExportedEvent(page),
       page.click('#clear')
     ])
     const modelExportCleared = await getExportsFromEditorModel(page)
@@ -105,7 +105,7 @@ describe('Websocket Math', function () {
     }
 
     const [undo1Export] = await Promise.all([
-      getDatasFromExportedEvent(page),
+      waitForExportedEvent(page),
       page.click('#undo')
     ])
     latex = await getExportsTypeFromEditorModel(page, 'application/x-latex')
@@ -114,7 +114,7 @@ describe('Websocket Math', function () {
 
     await waitEditorIdle(page)
     const [undo2Export] = await Promise.all([
-      getDatasFromExportedEvent(page),
+      waitForExportedEvent(page),
       page.click('#undo')
     ])
     latex = await getExportsTypeFromEditorModel(page, 'application/x-latex')
@@ -123,7 +123,7 @@ describe('Websocket Math', function () {
 
     await waitEditorIdle(page)
     const [undo3Export] = await Promise.all([
-      getDatasFromExportedEvent(page),
+      waitForExportedEvent(page),
       page.click('#undo')
     ])
     latex = await getExportsTypeFromEditorModel(page, 'application/x-latex')
@@ -132,7 +132,7 @@ describe('Websocket Math', function () {
 
     await waitEditorIdle(page)
     const [redoExport] = await Promise.all([
-      getDatasFromExportedEvent(page),
+      waitForExportedEvent(page),
       page.click('#redo')
     ])
     latex = await getExportsTypeFromEditorModel(page, 'application/x-latex')
@@ -156,7 +156,7 @@ describe('Websocket Math', function () {
     expect(latex).toEqual(equation1.exports.LATEX.at(-1))
 
     const [clearExport] = await Promise.all([
-      getDatasFromExportedEvent(page),
+      waitForExportedEvent(page),
       page.click('#clear')
     ])
     const modelExportCleared = await getExportsFromEditorModel(page)
@@ -167,7 +167,7 @@ describe('Websocket Math', function () {
 
     await waitEditorIdle(page)
     const [undo1Export] = await Promise.all([
-      getDatasFromExportedEvent(page),
+      waitForExportedEvent(page),
       page.click('#undo')
     ])
     latex = await getExportsTypeFromEditorModel(page, 'application/x-latex')
@@ -176,7 +176,7 @@ describe('Websocket Math', function () {
 
     await waitEditorIdle(page)
     const [undo2Export] = await Promise.all([
-      getDatasFromExportedEvent(page),
+      waitForExportedEvent(page),
       page.click('#undo')
     ])
     latex = await getExportsTypeFromEditorModel(page, 'application/x-latex')
@@ -185,7 +185,7 @@ describe('Websocket Math', function () {
 
     await waitEditorIdle(page)
     const [redoExport] = await Promise.all([
-      getDatasFromExportedEvent(page),
+      waitForExportedEvent(page),
       page.click('#redo')
     ])
     latex = await getExportsTypeFromEditorModel(page, 'application/x-latex')
@@ -201,7 +201,7 @@ describe('Websocket Math', function () {
     await waitForEditorWebSocket(page)
     for(const s of fence.strokes) {
       await Promise.all([
-        getDatasFromExportedEvent(page),
+        waitForExportedEvent(page),
         writeStrokes(page, [s])
       ])
     }
@@ -217,7 +217,7 @@ describe('Websocket Math', function () {
     await waitForEditorWebSocket(page)
     for(const s of fence.strokes) {
       await Promise.all([
-        getDatasFromExportedEvent(page),
+        waitForExportedEvent(page),
         writeStrokes(page, [s])
       ])
     }
@@ -228,7 +228,7 @@ describe('Websocket Math', function () {
   test('should convert svg path', async () => {
     for(const s of equation1.strokes) {
       await Promise.all([
-        getDatasFromExportedEvent(page),
+        waitForExportedEvent(page),
         writeStrokes(page, [s], 100, 100)
       ])
     }
@@ -237,7 +237,7 @@ describe('Websocket Math', function () {
     expect(await page.locator('path').count()).toEqual(equation1.strokes.length)
 
     await Promise.all([
-      getDatasFromConvertedEvent(page),
+      waitForConvertedEvent(page),
       page.click('#convert')
     ])
 
@@ -256,7 +256,7 @@ describe('Websocket Math', function () {
     let numStroke = 0
     for(const s of sum.strokes) {
       const [exports] = await Promise.all([
-        getDatasFromExportedEvent(page),
+        waitForExportedEvent(page),
         writeStrokes(page, [s])
       ])
       expect(exports['application/x-latex']).toEqual(sum.exports.LATEX.at(numStroke))
@@ -266,7 +266,7 @@ describe('Websocket Math', function () {
     expect(emptyConvert).toBeUndefined()
 
     await Promise.all([
-      getDatasFromConvertedEvent(page),
+      waitForConvertedEvent(page),
       page.click('#convert')
     ])
     const convert = await getConvertsFromEditorModel(page)
@@ -283,7 +283,7 @@ describe('Websocket Math', function () {
     let numStroke = 0
     for(const s of sum.strokes) {
       const [exports] = await Promise.all([
-        getDatasFromExportedEvent(page),
+        waitForExportedEvent(page),
         writeStrokes(page, [s])
       ])
       expect(exports['application/x-latex']).toEqual(sum.exports.LATEX.at(numStroke))
@@ -293,7 +293,7 @@ describe('Websocket Math', function () {
     expect(emptyConvert).toBeUndefined()
 
     await Promise.all([
-      getDatasFromConvertedEvent(page),
+      waitForConvertedEvent(page),
       page.click('#convert')
     ])
     const convert = await getConvertsFromEditorModel(page)
@@ -321,11 +321,11 @@ describe('Websocket Math', function () {
 
     await page.click('#undo')
     await waitEditorIdle(page)
-    const [undoRedoModelExport] = await Promise.all([getDatasFromExportedEvent(page), page.click('#redo')])
+    const [undoRedoModelExport] = await Promise.all([waitForExportedEvent(page), page.click('#redo')])
     const undoRedoExport = undoRedoModelExport["application/x-latex"]
     expect(undoRedoExport).toEqual("")
 
-    const [oneModelExport] = await Promise.all([getDatasFromExportedEvent(page), writeStrokes(page, one.strokes, 100, 150)])
+    const [oneModelExport] = await Promise.all([waitForExportedEvent(page), writeStrokes(page, one.strokes, 100, 150)])
     const oneExport = oneModelExport["application/x-latex"]
     expect(oneExport).toEqual("1")
   })

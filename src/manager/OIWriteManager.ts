@@ -251,13 +251,13 @@ export class OIWriteManager
     if (gestureFromContextLess) {
       this.history.pop()
       this.recognizer.addStrokes([localStroke], this.detectGesture)
-      this.gestureManager.apply(localStroke, gestureFromContextLess)
+      await this.gestureManager.apply(localStroke, gestureFromContextLess)
     }
     else {
       const gesture = await this.recognizer.addStrokes([localStroke], this.detectGesture)
       if (gesture) {
         this.history.pop()
-        this.gestureManager.apply(localStroke, gesture)
+        await this.gestureManager.apply(localStroke, gesture)
       }
     }
   }

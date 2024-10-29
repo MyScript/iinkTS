@@ -1,7 +1,7 @@
 const {
   waitForEditorRest,
   writeStrokes,
-  getDatasFromExportedEvent,
+  waitForExportedEvent,
   setEditorConfiguration,
   getEditorConfiguration,
   getExportsFromEditorModel,
@@ -29,7 +29,7 @@ describe('Rest Text', () => {
 
   test('should display text/plain into result', async () => {
     const [exportedDatas] = await Promise.all([
-      getDatasFromExportedEvent(page),
+      waitForExportedEvent(page),
       writeStrokes(page, h.strokes),
     ])
     const resultText = await page.locator('#result').textContent()
@@ -60,7 +60,7 @@ describe('Rest Text', () => {
 
     test('should only request text/plain by default', async () => {
       await Promise.all([
-        getDatasFromExportedEvent(page),
+        waitForExportedEvent(page),
         writeStrokes(page, h.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(1)
@@ -74,7 +74,7 @@ describe('Rest Text', () => {
       ]
       await setEditorConfiguration(page, configuration)
       await Promise.all([
-        getDatasFromExportedEvent(page),
+        waitForExportedEvent(page),
         writeStrokes(page, h.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(1)
@@ -89,7 +89,7 @@ describe('Rest Text', () => {
       ]
       await setEditorConfiguration(page, configuration)
       await Promise.all([
-        getDatasFromExportedEvent(page),
+        waitForExportedEvent(page),
         writeStrokes(page, h.strokes),
       ])
       expect(mimeTypeRequest).toHaveLength(2)
@@ -102,7 +102,7 @@ describe('Rest Text', () => {
   describe('Nav actions', () => {
     test('should clear', async () => {
       const [exportedDatas] = await Promise.all([
-        getDatasFromExportedEvent(page),
+        waitForExportedEvent(page),
         writeStrokes(page, h.strokes),
       ])
       const resultText = await page.locator('#result').textContent()
@@ -112,7 +112,7 @@ describe('Rest Text', () => {
       expect(await getExportsFromEditorModel(page)).toBeDefined()
 
       const promisesResult = await Promise.all([
-        getDatasFromExportedEvent(page),
+        waitForExportedEvent(page),
         page.click('#clear'),
       ])
       expect(promisesResult[0]).toBeNull()
@@ -123,7 +123,7 @@ describe('Rest Text', () => {
     test('should undo/redo', async () => {
       const editorEl = await page.waitForSelector('#editor')
       await Promise.all([
-        getDatasFromExportedEvent(page),
+        waitForExportedEvent(page),
         writeStrokes(page, hello.strokes)
       ])
 
@@ -134,19 +134,19 @@ describe('Rest Text', () => {
       let strokes = await editorEl.evaluate((node) => node.editor.model.symbols)
       expect(strokes.length).toStrictEqual(hello.strokes.length)
 
-      await Promise.all([getDatasFromExportedEvent(page), page.click('#undo')])
+      await Promise.all([waitForExportedEvent(page), page.click('#undo')])
       expect(await page.locator('#result').textContent()).toStrictEqual(hello.exports['text/plain'].at(-2))
 
       strokes = await editorEl.evaluate((node) => node.editor.model.symbols)
       expect(strokes.length).toStrictEqual(hello.strokes.length - 1)
 
-      await Promise.all([getDatasFromExportedEvent(page), page.click('#undo')])
+      await Promise.all([waitForExportedEvent(page), page.click('#undo')])
       expect(await page.locator('#result').textContent()).toStrictEqual(hello.exports['text/plain'].at(-3))
 
       strokes = await editorEl.evaluate((node) => node.editor.model.symbols)
       expect(strokes.length).toStrictEqual(hello.strokes.length - 2)
 
-      await Promise.all([getDatasFromExportedEvent(page), page.click('#redo')])
+      await Promise.all([waitForExportedEvent(page), page.click('#redo')])
       expect(await page.locator('#result').textContent()).toStrictEqual(hello.exports['text/plain'].at(-2))
 
       strokes = await editorEl.evaluate((node) => node.editor.model.symbols)

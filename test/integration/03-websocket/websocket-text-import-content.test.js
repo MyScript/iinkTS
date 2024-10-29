@@ -1,4 +1,4 @@
-const { waitForEditorWebSocket, getDatasFromExportedEvent, waitEditorIdle } = require('../helper')
+const { waitForEditorWebSocket, waitForExportedEvent, waitEditorIdle } = require('../helper')
 const { h } = require('../strokesDatas')
 
 describe('Websocket Text Import Content', () => {
@@ -17,7 +17,7 @@ describe('Websocket Text Import Content', () => {
     await Promise.all([
         page.locator("#importContentField").fill("hello"),
         page.locator("#importContent").click(),
-        getDatasFromExportedEvent(page),
+        waitForExportedEvent(page),
     ])
 
     const prompterText = await page.waitForSelector('.prompter-text')
@@ -29,7 +29,7 @@ describe('Websocket Text Import Content', () => {
     await Promise.all([
         page.locator("#importContentField").fill("pony"),
         page.locator("#importContent").click(),
-        getDatasFromExportedEvent(page),
+        waitForExportedEvent(page),
     ])
 
     const prompterText = await page.waitForSelector('.prompter-text')

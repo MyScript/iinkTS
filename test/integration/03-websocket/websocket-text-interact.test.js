@@ -1,4 +1,4 @@
-const { writeStrokes, getDatasFromExportedEvent, waitForEditorWebSocket, waitEditorIdle, getExportsTypeFromEditorModel } = require("../helper")
+const { writeStrokes, waitForExportedEvent, waitForEditorWebSocket, waitEditorIdle, getExportsTypeFromEditorModel } = require("../helper")
 const { paris, tokyo, madrid, rome, buenosAires } = require("../strokesDatas")
 
 

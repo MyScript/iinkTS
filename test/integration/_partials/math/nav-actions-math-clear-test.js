@@ -1,4 +1,4 @@
-const { writeStrokes, getDatasFromExportedEvent, waitEditorIdle } = require("../../helper")
+const { writeStrokes, waitForExportedEvent, waitEditorIdle } = require("../../helper")
 const { sumSimple } = require("../../strokesDatas")
 
 describe('Nav actions math clear', () => {
@@ -9,7 +9,7 @@ describe('Nav actions math clear', () => {
 
   test("should clear", async () => {
     await Promise.all([
-      getDatasFromExportedEvent(page),
+      waitForExportedEvent(page),
       writeStrokes(page, sumSimple.strokes)
     ])
 
@@ -17,7 +17,7 @@ describe('Nav actions math clear', () => {
     expect(resultText).toBeDefined()
 
     const [clearExport] = await Promise.all([
-      getDatasFromExportedEvent(page),
+      waitForExportedEvent(page),
       page.click("#clear")
     ])
 

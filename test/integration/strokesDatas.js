@@ -109,8 +109,10 @@ module.exports.laLecon = {
       label: "la leçon",
       words: [
         {
-          label: "la leçon",
-          candidates: ["la leçon"],
+          label: "la",
+        },
+        {
+          label: "leçon",
         },
       ],
       version: "3",
