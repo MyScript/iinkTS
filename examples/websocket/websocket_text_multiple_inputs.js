@@ -43,7 +43,9 @@ async function switchEditorInput(input) {
   currentInput = input
 
   const textAnswered = getResultElementFromInput(currentInput)?.textContent
-  await editor.clear()
+  // can't wait clear
+  // because clear empty model does not trigger event from backend
+  editor.clear()
   await editor.waitForIdle()
   if (textAnswered) {
     const pointers = currentInput.getAttribute("pointers")
