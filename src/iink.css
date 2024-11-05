@@ -6,6 +6,8 @@
     overflow: auto;
     width: 100%;
     height: 100%;
+    container-type: inline-size;
+    container-name: editor;
 }
 
 #editor:active,
@@ -138,7 +140,6 @@
     -webkit-animation: spin 2s linear infinite;
     animation: spin 2s linear infinite;
 }
-
 /** message **/
 .ms-editor .message-container {
     position: absolute;
@@ -157,12 +158,12 @@
 .ms-editor .message-modal {
     z-index: 999;
     position: absolute;
-    width: 300px;
-    max-height: 50%;
-    overflow: auto;
-    left: calc(50% - 150px);
+    max-height: calc(100% - 100px);
+    max-width: calc(100% - 8px);
+    left: 50%;
     top: 50%;
-    transform: translateY(-50%);
+    transform: translate(-50%, -50%);
+    overflow: auto;
     font-size: 16px;
     text-align: center;
     word-wrap: break-word;
@@ -171,7 +172,26 @@
     padding: 12px;
 }
 
+@container editor (max-width: 400px) {
+    .ms-editor .message-modal {
+        width: 100%;
+    }
+}
+@container editor (min-width: 401px) and (max-width: 800px) {
+    .ms-editor .message-modal {
+        width: 66%;
+    }
+}
+@container editor (min-width: 801px) {
+    .ms-editor .message-modal {
+        width: 50%;
+    }
+}
+
 .ms-editor .message-modal.error-msg::before {
+    display: block;
+    width: 100px;
+    margin: auto;
     content: url("data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCA3Ni41IDYxMiA0NTkiIHByZXNlcnZlQXNwZWN0UmF0aW89InhNaW5ZTWluIG1lZXQiPgogICAgPHBhdGggZmlsbD0iIzFBOUZGRiIgZD0iTTQ5NC43LDIyOS41Yy0xNy44NTEtODYuNy05NC4zNTEtMTUzLTE4OC43LTE1M2MtMzguMjUsMC03My45NSwxMC4yLTEwMiwzMC42bDM4LjI1LDM4LjI1IGMxNy44NS0xMi43NSw0MC44LTE3Ljg1LDYzLjc1LTE3Ljg1Yzc2LjUsMCwxNDAuMjUsNjMuNzUsMTQwLjI1LDE0MC4yNXYxMi43NWgzOC4yNWM0My4zNSwwLDc2LjUsMzMuMTUsNzYuNSw3Ni41IGMwLDI4LjA1LTE1LjMsNTMuNTUtNDAuOCw2Ni4zbDM4LjI1LDM4LjI1QzU5MS42LDQzOC42LDYxMiw0MDAuMzUsNjEyLDM1N0M2MTIsMjkwLjcsNTU4LjQ1LDIzNC42LDQ5NC43LDIyOS41eiBNNzYuNSwxMDkuNjUgbDcxLjQsNjguODVDNjYuMywxODMuNiwwLDI0OS45LDAsMzMxLjVjMCw4NC4xNSw2OC44NSwxNTMsMTUzLDE1M2gyOTguMzVsNTEsNTFsMzMuMTUtMzMuMTVMMTA5LjY1LDc2LjVMNzYuNSwxMDkuNjV6IE0xOTYuMzUsMjI5LjVsMjA0LDIwNEgxNTNjLTU2LjEsMC0xMDItNDUuOS0xMDItMTAyYzAtNTYuMSw0NS45LTEwMiwxMDItMTAySDE5Ni4zNXoiIC8+Cjwvc3ZnPgo=");
 }
 

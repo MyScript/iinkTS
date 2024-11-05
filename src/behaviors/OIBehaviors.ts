@@ -1554,7 +1554,7 @@ export class OIBehaviors implements IBehaviors
     this.model.height = height
     this.model.width = width
     this.renderer.resize(height, width)
-    this.updateLayerUI()
+    this.updateLayerUI(50)
     this.updateLayerState(true)
     return this.model
   }
