@@ -1,7 +1,8 @@
 [
   {
-    "id": "stroke-text-f63323d5-74dc-4307-abce-a6985c557a09",
-    "type": "stroke-text",
+    "id": "recognized-text-f63323d5-74dc-4307-abce-a6985c557a09",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 100.792,
     "xHeight": 18.811,
     "strokes": [
@@ -770,8 +771,9 @@
     ]
   },
   {
-    "id": "stroke-text-f0c8b258-2408-4713-8a35-96e359845674",
-    "type": "stroke-text",
+    "id": "recognized-text-f0c8b258-2408-4713-8a35-96e359845674",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 100.792,
     "xHeight": 18.811,
     "strokes": [
@@ -1948,8 +1950,9 @@
     ]
   },
   {
-    "id": "stroke-text-ee7014ec-8d3f-4b29-8b92-6143f19cd1a2",
-    "type": "stroke-text",
+    "id": "recognized-text-ee7014ec-8d3f-4b29-8b92-6143f19cd1a2",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 100.792,
     "xHeight": 18.811,
     "strokes": [
@@ -2574,8 +2577,9 @@
     ]
   },
   {
-    "id": "stroke-text-ef1d07c1-b781-458f-914e-4da03600764f",
-    "type": "stroke-text",
+    "id": "recognized-text-ef1d07c1-b781-458f-914e-4da03600764f",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 200.846,
     "xHeight": 16.442,
     "strokes": [
@@ -3146,8 +3150,9 @@
     ]
   },
   {
-    "id": "stroke-text-092034e8-2b47-43c0-a3f6-72646cb6220e",
-    "type": "stroke-text",
+    "id": "recognized-text-092034e8-2b47-43c0-a3f6-72646cb6220e",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 200.846,
     "xHeight": 16.442,
     "strokes": [
@@ -3400,8 +3405,9 @@
     ]
   },
   {
-    "id": "stroke-text-1caecf71-8200-479b-924f-ba37c7213e6f",
-    "type": "stroke-text",
+    "id": "recognized-text-1caecf71-8200-479b-924f-ba37c7213e6f",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 200.846,
     "xHeight": 16.442,
     "strokes": [
@@ -3912,8 +3918,9 @@
     ]
   },
   {
-    "id": "stroke-text-f28a9a04-3379-4722-b880-686541daf23f",
-    "type": "stroke-text",
+    "id": "recognized-text-f28a9a04-3379-4722-b880-686541daf23f",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 200.846,
     "xHeight": 16.442,
     "strokes": [
@@ -4088,8 +4095,9 @@
     ]
   },
   {
-    "id": "stroke-text-2a788cfa-557a-424b-84d5-b0b42b71f869",
-    "type": "stroke-text",
+    "id": "recognized-text-2a788cfa-557a-424b-84d5-b0b42b71f869",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 200.846,
     "xHeight": 16.442,
     "strokes": [
@@ -4354,8 +4362,9 @@
     ]
   },
   {
-    "id": "stroke-text-506d9c31-ecbe-4061-99af-023c608e9826",
-    "type": "stroke-text",
+    "id": "recognized-text-506d9c31-ecbe-4061-99af-023c608e9826",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 200.846,
     "xHeight": 16.442,
     "strokes": [
@@ -4410,8 +4419,9 @@
     ]
   },
   {
-    "id": "stroke-text-3f279024-906a-4aca-abcf-6b56da0fc150",
-    "type": "stroke-text",
+    "id": "recognized-text-3f279024-906a-4aca-abcf-6b56da0fc150",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 200.846,
     "xHeight": 16.442,
     "strokes": [
@@ -4736,8 +4746,9 @@
     ]
   },
   {
-    "id": "stroke-text-2d65c25a-0294-49ea-a8c3-d3c213645525",
-    "type": "stroke-text",
+    "id": "recognized-text-2d65c25a-0294-49ea-a8c3-d3c213645525",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 200.846,
     "xHeight": 16.442,
     "strokes": [
@@ -4966,8 +4977,9 @@
     ]
   },
   {
-    "id": "stroke-text-41da73b3-af83-4b10-b343-9a55fb108998",
-    "type": "stroke-text",
+    "id": "recognized-text-41da73b3-af83-4b10-b343-9a55fb108998",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 200.846,
     "xHeight": 16.442,
     "strokes": [
@@ -5226,8 +5238,9 @@
     ]
   },
   {
-    "id": "stroke-text-8b641d73-2b48-405c-b72e-5aabbb610bca",
-    "type": "stroke-text",
+    "id": "recognized-text-8b641d73-2b48-405c-b72e-5aabbb610bca",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 200.846,
     "xHeight": 16.442,
     "strokes": [
@@ -5540,8 +5553,9 @@
     ]
   },
   {
-    "id": "stroke-text-ca8075dd-22bf-4b9b-bc0a-806529578b52",
-    "type": "stroke-text",
+    "id": "recognized-text-ca8075dd-22bf-4b9b-bc0a-806529578b52",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 248.329,
     "xHeight": 13.429,
     "strokes": [
@@ -5830,8 +5844,9 @@
     ]
   },
   {
-    "id": "stroke-text-d34b521b-ffae-497d-8094-ce2144b81e32",
-    "type": "stroke-text",
+    "id": "recognized-text-d34b521b-ffae-497d-8094-ce2144b81e32",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 248.329,
     "xHeight": 13.429,
     "strokes": [
@@ -6126,8 +6141,9 @@
     ]
   },
   {
-    "id": "stroke-text-4f333332-9b0d-4b5d-8c13-9a3b5a7196f6",
-    "type": "stroke-text",
+    "id": "recognized-text-4f333332-9b0d-4b5d-8c13-9a3b5a7196f6",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 248.329,
     "xHeight": 13.429,
     "strokes": [
@@ -6836,8 +6852,9 @@
     ]
   },
   {
-    "id": "stroke-text-a2a695a9-ec84-487d-8b09-22ca54b2ee6c",
-    "type": "stroke-text",
+    "id": "recognized-text-a2a695a9-ec84-487d-8b09-22ca54b2ee6c",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 248.329,
     "xHeight": 13.429,
     "strokes": [
@@ -7012,8 +7029,9 @@
     ]
   },
   {
-    "id": "stroke-text-91f2250c-a92c-4936-b244-0d33ed25fac6",
-    "type": "stroke-text",
+    "id": "recognized-text-91f2250c-a92c-4936-b244-0d33ed25fac6",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 248.329,
     "xHeight": 13.429,
     "strokes": [
@@ -7500,8 +7518,9 @@
     ]
   },
   {
-    "id": "stroke-text-b6fc89c5-f823-43a1-8592-37b3fd1b65dc",
-    "type": "stroke-text",
+    "id": "recognized-text-b6fc89c5-f823-43a1-8592-37b3fd1b65dc",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 248.329,
     "xHeight": 13.429,
     "strokes": [
@@ -7886,8 +7905,9 @@
     ]
   },
   {
-    "id": "stroke-text-92e8ae93-4ecd-4f4e-9525-5607239fbf7f",
-    "type": "stroke-text",
+    "id": "recognized-text-92e8ae93-4ecd-4f4e-9525-5607239fbf7f",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 248.329,
     "xHeight": 13.429,
     "strokes": [
@@ -8440,8 +8460,9 @@
     ]
   },
   {
-    "id": "stroke-text-a01e5286-043c-4dd9-affa-f6abe4a8f14b",
-    "type": "stroke-text",
+    "id": "recognized-text-a01e5286-043c-4dd9-affa-f6abe4a8f14b",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 297.471,
     "xHeight": 14.213,
     "strokes": [
@@ -8712,8 +8733,9 @@
     ]
   },
   {
-    "id": "stroke-text-36df7834-f46b-4c92-a755-cd786593ebd4",
-    "type": "stroke-text",
+    "id": "recognized-text-36df7834-f46b-4c92-a755-cd786593ebd4",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 297.471,
     "xHeight": 14.213,
     "strokes": [
@@ -9074,8 +9096,9 @@
     ]
   },
   {
-    "id": "stroke-text-3c50adb7-ddbb-4df8-a4f7-51f5b6404d3a",
-    "type": "stroke-text",
+    "id": "recognized-text-3c50adb7-ddbb-4df8-a4f7-51f5b6404d3a",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 297.471,
     "xHeight": 14.213,
     "strokes": [
@@ -9304,8 +9327,9 @@
     ]
   },
   {
-    "id": "stroke-text-ad3bba8a-8757-43f7-993a-c539a21e6054",
-    "type": "stroke-text",
+    "id": "recognized-text-ad3bba8a-8757-43f7-993a-c539a21e6054",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 297.471,
     "xHeight": 14.213,
     "strokes": [
@@ -9534,8 +9558,9 @@
     ]
   },
   {
-    "id": "stroke-text-2efa451d-e1eb-467e-876a-ca549e23db29",
-    "type": "stroke-text",
+    "id": "recognized-text-2efa451d-e1eb-467e-876a-ca549e23db29",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 297.471,
     "xHeight": 14.213,
     "strokes": [
@@ -10052,8 +10077,9 @@
     ]
   },
   {
-    "id": "stroke-text-2b71038e-4b1d-4917-8209-7610ee1f18d5",
-    "type": "stroke-text",
+    "id": "recognized-text-2b71038e-4b1d-4917-8209-7610ee1f18d5",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 297.471,
     "xHeight": 14.213,
     "strokes": [
@@ -10084,8 +10110,9 @@
     ]
   },
   {
-    "id": "stroke-text-5fdce329-f3e1-49ef-8980-b0f928eb63ff",
-    "type": "stroke-text",
+    "id": "recognized-text-5fdce329-f3e1-49ef-8980-b0f928eb63ff",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 343.892,
     "xHeight": 14.043,
     "strokes": [
@@ -10818,8 +10845,9 @@
     ]
   },
   {
-    "id": "stroke-text-c18bb6f0-68f5-4f90-8d11-fb60419dff30",
-    "type": "stroke-text",
+    "id": "recognized-text-c18bb6f0-68f5-4f90-8d11-fb60419dff30",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 343.892,
     "xHeight": 14.043,
     "strokes": [
@@ -11372,8 +11400,9 @@
     ]
   },
   {
-    "id": "stroke-text-12c19916-e168-4a55-ad3c-e8c3621ad032",
-    "type": "stroke-text",
+    "id": "recognized-text-12c19916-e168-4a55-ad3c-e8c3621ad032",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 400.298,
     "xHeight": 16.377,
     "strokes": [
@@ -11698,8 +11727,9 @@
     ]
   },
   {
-    "id": "stroke-text-197d7e65-489e-4d74-8a98-7281328ae323",
-    "type": "stroke-text",
+    "id": "recognized-text-197d7e65-489e-4d74-8a98-7281328ae323",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 400.298,
     "xHeight": 16.377,
     "strokes": [
@@ -12276,8 +12306,9 @@
     ]
   },
   {
-    "id": "stroke-text-ab832016-b9ad-4374-8e79-f940c2b70fe9",
-    "type": "stroke-text",
+    "id": "recognized-text-ab832016-b9ad-4374-8e79-f940c2b70fe9",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 400.298,
     "xHeight": 16.377,
     "strokes": [
@@ -12548,8 +12579,9 @@
     ]
   },
   {
-    "id": "stroke-text-ce84b4bb-e29e-4182-9592-ee8f2b37c184",
-    "type": "stroke-text",
+    "id": "recognized-text-ce84b4bb-e29e-4182-9592-ee8f2b37c184",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 400.298,
     "xHeight": 16.377,
     "strokes": [
@@ -13138,8 +13170,9 @@
     ]
   },
   {
-    "id": "stroke-text-4fe5cc82-40da-471b-8554-478c62360bd1",
-    "type": "stroke-text",
+    "id": "recognized-text-4fe5cc82-40da-471b-8554-478c62360bd1",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 400.298,
     "xHeight": 16.377,
     "strokes": [
@@ -13200,8 +13233,9 @@
     ]
   },
   {
-    "id": "stroke-text-44a09c3a-fdd4-4308-9757-e18fe5a41819",
-    "type": "stroke-text",
+    "id": "recognized-text-44a09c3a-fdd4-4308-9757-e18fe5a41819",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 450.394,
     "xHeight": 14.614,
     "strokes": [
@@ -13532,8 +13566,9 @@
     ]
   },
   {
-    "id": "stroke-text-7e57fb2e-ce33-4ffc-81f4-03595b0f57a7",
-    "type": "stroke-text",
+    "id": "recognized-text-7e57fb2e-ce33-4ffc-81f4-03595b0f57a7",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 450.394,
     "xHeight": 14.614,
     "strokes": [
@@ -13972,8 +14007,9 @@
     ]
   },
   {
-    "id": "stroke-text-9f68de12-3b70-4fd9-9389-02d2687827de",
-    "type": "stroke-text",
+    "id": "recognized-text-9f68de12-3b70-4fd9-9389-02d2687827de",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 450.394,
     "xHeight": 14.614,
     "strokes": [
@@ -14142,8 +14178,9 @@
     ]
   },
   {
-    "id": "stroke-text-b07db991-3b42-4d64-97b4-ab61a6300443",
-    "type": "stroke-text",
+    "id": "recognized-text-b07db991-3b42-4d64-97b4-ab61a6300443",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 450.394,
     "xHeight": 14.614,
     "strokes": [
@@ -14492,8 +14529,9 @@
     ]
   },
   {
-    "id": "stroke-text-5932068b-87a5-40c4-9821-dd8af4152fcc",
-    "type": "stroke-text",
+    "id": "recognized-text-5932068b-87a5-40c4-9821-dd8af4152fcc",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 450.394,
     "xHeight": 14.614,
     "strokes": [
@@ -14764,8 +14802,9 @@
     ]
   },
   {
-    "id": "stroke-text-ec5557e9-64cb-4cdb-81b1-ced80591ee4d",
-    "type": "stroke-text",
+    "id": "recognized-text-ec5557e9-64cb-4cdb-81b1-ced80591ee4d",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 450.394,
     "xHeight": 14.614,
     "strokes": [
@@ -15162,8 +15201,9 @@
     ]
   },
   {
-    "id": "stroke-text-dcc5279f-9158-41b4-aa7e-57594903ecfd",
-    "type": "stroke-text",
+    "id": "recognized-text-dcc5279f-9158-41b4-aa7e-57594903ecfd",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 450.394,
     "xHeight": 14.614,
     "strokes": [
@@ -15368,8 +15408,9 @@
     ]
   },
   {
-    "id": "stroke-text-0b37b26e-6266-4a85-8c0b-f793b312cbb6",
-    "type": "stroke-text",
+    "id": "recognized-text-0b37b26e-6266-4a85-8c0b-f793b312cbb6",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 450.394,
     "xHeight": 14.614,
     "strokes": [
@@ -15664,8 +15705,9 @@
     ]
   },
   {
-    "id": "stroke-text-c507cac7-014d-49f1-919f-ee443bc674f2",
-    "type": "stroke-text",
+    "id": "recognized-text-c507cac7-014d-49f1-919f-ee443bc674f2",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 450.394,
     "xHeight": 14.614,
     "strokes": [
@@ -16122,8 +16164,9 @@
     ]
   },
   {
-    "id": "stroke-text-6689ad15-51ac-486c-9f27-90c7c189098f",
-    "type": "stroke-text",
+    "id": "recognized-text-6689ad15-51ac-486c-9f27-90c7c189098f",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 450.394,
     "xHeight": 14.614,
     "strokes": [
@@ -16370,8 +16413,9 @@
     ]
   },
   {
-    "id": "stroke-text-7c661611-8873-4d1f-9d26-3074bef4017b",
-    "type": "stroke-text",
+    "id": "recognized-text-7c661611-8873-4d1f-9d26-3074bef4017b",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 450.394,
     "xHeight": 14.614,
     "strokes": [
@@ -16420,8 +16464,9 @@
     ]
   },
   {
-    "id": "stroke-text-af3c9828-0b8e-4992-97bf-bb430c081dc6",
-    "type": "stroke-text",
+    "id": "recognized-text-af3c9828-0b8e-4992-97bf-bb430c081dc6",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 502.328,
     "xHeight": 15.597,
     "strokes": [
@@ -16692,8 +16737,9 @@
     ]
   },
   {
-    "id": "stroke-text-7d14c1d7-c723-4648-93a3-62d37a13852f",
-    "type": "stroke-text",
+    "id": "recognized-text-7d14c1d7-c723-4648-93a3-62d37a13852f",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 502.328,
     "xHeight": 15.597,
     "strokes": [
@@ -17294,8 +17340,9 @@
     ]
   },
   {
-    "id": "stroke-text-74674206-9a97-4c62-ad88-3ba4260ea128",
-    "type": "stroke-text",
+    "id": "recognized-text-74674206-9a97-4c62-ad88-3ba4260ea128",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 502.328,
     "xHeight": 15.597,
     "strokes": [
@@ -17956,8 +18003,9 @@
     ]
   },
   {
-    "id": "stroke-text-264f4c94-2791-4346-b64b-4e165065fa5d",
-    "type": "stroke-text",
+    "id": "recognized-text-264f4c94-2791-4346-b64b-4e165065fa5d",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 502.328,
     "xHeight": 15.597,
     "strokes": [
@@ -17994,8 +18042,9 @@
     ]
   },
   {
-    "id": "stroke-text-721b2702-61e5-41ab-8254-5f25b11e8f51",
-    "type": "stroke-text",
+    "id": "recognized-text-721b2702-61e5-41ab-8254-5f25b11e8f51",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 548.03,
     "xHeight": 11.319,
     "strokes": [
@@ -18614,8 +18663,9 @@
     ]
   },
   {
-    "id": "stroke-text-1e3f8faf-bb7a-4961-973f-088d762eb0a4",
-    "type": "stroke-text",
+    "id": "recognized-text-1e3f8faf-bb7a-4961-973f-088d762eb0a4",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 548.03,
     "xHeight": 11.319,
     "strokes": [
@@ -18796,8 +18846,9 @@
     ]
   },
   {
-    "id": "stroke-text-42e1f5b0-ffcf-408b-8ba2-2c776fb8aac7",
-    "type": "stroke-text",
+    "id": "recognized-text-42e1f5b0-ffcf-408b-8ba2-2c776fb8aac7",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 548.03,
     "xHeight": 11.319,
     "strokes": [
@@ -19332,8 +19383,9 @@
     ]
   },
   {
-    "id": "stroke-text-a6197405-bb64-4a63-b149-d20c28382327",
-    "type": "stroke-text",
+    "id": "recognized-text-a6197405-bb64-4a63-b149-d20c28382327",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 601.85,
     "xHeight": 15.405,
     "strokes": [
@@ -19772,8 +19824,9 @@
     ]
   },
   {
-    "id": "stroke-text-7f892056-c33f-403c-8db8-1a15a7adceb3",
-    "type": "stroke-text",
+    "id": "recognized-text-7f892056-c33f-403c-8db8-1a15a7adceb3",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 601.85,
     "xHeight": 15.405,
     "strokes": [
@@ -20392,8 +20445,9 @@
     ]
   },
   {
-    "id": "stroke-text-f756be26-b213-4aa5-98a2-916a3ed0b0af",
-    "type": "stroke-text",
+    "id": "recognized-text-f756be26-b213-4aa5-98a2-916a3ed0b0af",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 601.85,
     "xHeight": 15.405,
     "strokes": [
@@ -20442,8 +20496,9 @@
     ]
   },
   {
-    "id": "stroke-text-f57aaede-886f-4ed7-a047-a94fd578c0a7",
-    "type": "stroke-text",
+    "id": "recognized-text-f57aaede-886f-4ed7-a047-a94fd578c0a7",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 601.85,
     "xHeight": 15.405,
     "strokes": [
@@ -20912,8 +20967,9 @@
     ]
   },
   {
-    "id": "stroke-text-3b8a8331-fa90-4204-9d24-f575831e5ad0",
-    "type": "stroke-text",
+    "id": "recognized-text-3b8a8331-fa90-4204-9d24-f575831e5ad0",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 601.85,
     "xHeight": 15.405,
     "strokes": [
@@ -21232,8 +21288,9 @@
     ]
   },
   {
-    "id": "stroke-text-8652daa5-f039-4860-9b2a-c864a65df891",
-    "type": "stroke-text",
+    "id": "recognized-text-8652daa5-f039-4860-9b2a-c864a65df891",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 601.85,
     "xHeight": 15.405,
     "strokes": [
@@ -21282,8 +21339,9 @@
     ]
   },
   {
-    "id": "stroke-text-8c177119-f049-4173-9e9d-c2879d621558",
-    "type": "stroke-text",
+    "id": "recognized-text-8c177119-f049-4173-9e9d-c2879d621558",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 601.85,
     "xHeight": 15.405,
     "strokes": [
@@ -21668,8 +21726,9 @@
     ]
   },
   {
-    "id": "stroke-text-2c6732aa-018d-4e30-9109-e2fcf5956778",
-    "type": "stroke-text",
+    "id": "recognized-text-2c6732aa-018d-4e30-9109-e2fcf5956778",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 601.85,
     "xHeight": 15.405,
     "strokes": [
@@ -22186,8 +22245,9 @@
     ]
   },
   {
-    "id": "stroke-text-87451127-e970-43b4-8ee8-da9250bbabe0",
-    "type": "stroke-text",
+    "id": "recognized-text-87451127-e970-43b4-8ee8-da9250bbabe0",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 650.938,
     "xHeight": 14.424,
     "strokes": [
@@ -22488,8 +22548,9 @@
     ]
   },
   {
-    "id": "stroke-text-248c7834-1991-4dc5-ad18-93b345496e82",
-    "type": "stroke-text",
+    "id": "recognized-text-248c7834-1991-4dc5-ad18-93b345496e82",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 650.938,
     "xHeight": 14.424,
     "strokes": [
@@ -22910,8 +22971,9 @@
     ]
   },
   {
-    "id": "stroke-text-7decad27-5a2a-4b8a-b247-28175b98d4c2",
-    "type": "stroke-text",
+    "id": "recognized-text-7decad27-5a2a-4b8a-b247-28175b98d4c2",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 650.938,
     "xHeight": 14.424,
     "strokes": [
@@ -23308,8 +23370,9 @@
     ]
   },
   {
-    "id": "stroke-text-e9afe950-7513-4dc0-8969-d6d6a5ab8b27",
-    "type": "stroke-text",
+    "id": "recognized-text-e9afe950-7513-4dc0-8969-d6d6a5ab8b27",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 650.938,
     "xHeight": 14.424,
     "strokes": [
@@ -23790,8 +23853,9 @@
     ]
   },
   {
-    "id": "stroke-text-8f925af0-87c0-42ba-877d-36814e294b39",
-    "type": "stroke-text",
+    "id": "recognized-text-8f925af0-87c0-42ba-877d-36814e294b39",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 650.938,
     "xHeight": 14.424,
     "strokes": [
@@ -23822,8 +23886,9 @@
     ]
   },
   {
-    "id": "stroke-text-a689e8db-74e5-4675-a030-193e2fb541cd",
-    "type": "stroke-text",
+    "id": "recognized-text-a689e8db-74e5-4675-a030-193e2fb541cd",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 704.55,
     "xHeight": 19.986,
     "strokes": [
@@ -24274,8 +24339,9 @@
     ]
   },
   {
-    "id": "stroke-text-93586ec4-9cf8-4eb7-ad01-08ef89e1b8ec",
-    "type": "stroke-text",
+    "id": "recognized-text-93586ec4-9cf8-4eb7-ad01-08ef89e1b8ec",
+    "type": "recognized",
+    "kind": "text",
     "baseline": 704.55,
     "xHeight": 19.986,
     "strokes": [
