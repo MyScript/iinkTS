@@ -15,6 +15,7 @@ export class OISVGRendererRecognizedUtil
     const attrs: { [key: string]: string } = {
       "id": recognizedSymbol.id,
       "type": recognizedSymbol.type,
+      "kind": recognizedSymbol.kind,
       "vector-effect": "non-scaling-stroke",
       "stroke-linecap": "round",
       "stroke-linejoin": "round",
