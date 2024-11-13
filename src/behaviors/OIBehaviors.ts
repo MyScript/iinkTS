@@ -1050,6 +1050,8 @@ export class OIBehaviors implements IBehaviors
           break
       }
     })
+    // because model.export is emptied when you change symbols
+    this.model.mergeExport({ "application/vnd.myscript.jiix": jiix })
     this.history.update(this.model)
     this.event.emitSynchronized()
   }

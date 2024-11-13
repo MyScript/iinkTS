@@ -33,8 +33,7 @@
     "./node_modules/@types/**",
     "@types/jest",
     "jest-websocket-mock",
-    "jest-playwright-preset",
-    "expect-playwright",
+    "playwright/test",
   ],
   "include": [
     "src",

@@ -4,7 +4,8 @@ coverage
 !.vscode/launch.json
 
 docker/examples/delivery
-test/integration/screenshots
+test/examples/screenshots
+test-results/
 docs
 dist
 

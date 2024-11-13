@@ -99,10 +99,10 @@
       function checkAnswer(exportText) {
         if (exportText.toLowerCase() === capitals[countQuestion]) {
           resultElement.innerHTML = "<span> Yes, it is " + exportText + ".</span>";
-          resultElement.style.cssText = "color: green;";
+          resultElement.style.setProperty("color", "green");
         } else {
           resultElement.innerHTML = "<span> No, it is not " + exportText + ".</span>";
-          resultElement.style.cssText = "color: red;";
+          resultElement.style.setProperty("color", "red");
         }
       }
 
@@ -111,7 +111,7 @@
         if (countQuestion > 4) {
           countQuestion = 0;
         }
-        questionElement.innerHTML = countries[countQuestion] ? "What is the capital of " + countries[countQuestion] + " ?" : "You won !";
+        questionElement.innerHTML = countries[countQuestion] ? "What is the capital of " + countries[countQuestion] + "?" : "You won !";
         editor.clear();
         resultElement.innerHTML = "";
       }

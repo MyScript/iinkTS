@@ -148,8 +148,7 @@
 
         editor.event.addEventListener("exported", (evt) => {
           const exports = evt.detail;
-          resultElement.innerHTML =
-            event.detail && event.detail["application/vnd.myscript.jiix"] ? event.detail["application/vnd.myscript.jiix"].label : "";
+          resultElement.innerHTML = event.detail && event.detail["application/vnd.myscript.jiix"] ? event.detail["application/vnd.myscript.jiix"].label : "";
           colors.forEach((color, index) => {
             calculator.setExpression({ id: index, latex: '', color: colors[index] });
           });

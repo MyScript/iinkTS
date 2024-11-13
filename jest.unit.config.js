@@ -21,7 +21,7 @@ export default {
     "js"
   ],
   moduleNameMapper: {
-    "web-worker:(.*)\\.worker.ts": '<rootDir>/src/worker/$1.worker.ts',
+    "web-worker:(.*)\\.worker.ts": "<rootDir>/src/worker/$1.worker.ts",
   },
   modulePathIgnorePatterns: [
     "./test/unit/__dataset__",
