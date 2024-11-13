@@ -550,9 +550,9 @@ describe("Offscreen Get Started", () => {
 
       const helText = await page.locator(`#${ hel.id }`).textContent()
       const loText = await page.locator(`#${ lo.id }`).textContent()
-      expect(helText).toEqual("hel")
-      expect(loText).toEqual("lo")
-      //verify 2nd word is separated from the first by at least 10px
+      expect(helText).toEqual(hel.chars.map(c => c.label).join(''))
+      expect(loText).toEqual(lo.chars.map(c => c.label).join(''))
+      //verify 2nd word is separatedr fom the first by at least 10px
       expect(lo.bounds.x - hel.bounds.x - hel.bounds.width).toBeGreaterThan(10)
     })
 
