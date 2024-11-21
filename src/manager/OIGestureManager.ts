@@ -914,7 +914,7 @@ export class OIGestureManager
       case "right-left": {
         const symbolsToUnderline = this.model.symbols.filter(s =>
         {
-          return [SymbolType.Text, SymbolType.Stroke, SymbolType.Group].includes(s.type) &&
+          return s.id !== gestureStroke.id && [SymbolType.Text, SymbolType.Stroke, SymbolType.Group].includes(s.type) &&
             isBetween(s.bounds.xMid, gestureStroke.bounds.xMin, gestureStroke.bounds.xMax) &&
             isBetween(gestureStroke.bounds.yMid, s.bounds.y + s.bounds.height * 3 / 4, s.bounds.y + s.bounds.height * 5 / 4)
         })
@@ -929,7 +929,7 @@ export class OIGestureManager
         }
         const symbolsToStrikeThrough = this.model.symbols.filter(s =>
         {
-          return [SymbolType.Text, SymbolType.Stroke, SymbolType.Group].includes(s.type) &&
+          return s.id !== gestureStroke.id && [SymbolType.Text, SymbolType.Stroke, SymbolType.Group].includes(s.type) &&
             isBetween(s.bounds.xMid, gestureStroke.bounds.xMin, gestureStroke.bounds.xMax) &&
             isBetween(gestureStroke.bounds.yMid, s.bounds.y + s.bounds.height / 4, s.bounds.y + s.bounds.height * 3 / 4)
         })
