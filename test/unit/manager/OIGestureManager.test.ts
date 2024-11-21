@@ -9,7 +9,9 @@ import
   OIGestureManager,
   EditorTool,
   DecoratorKind,
-  StrikeThroughAction
+  StrikeThroughAction,
+  OIStroke,
+  TOIMessageType
 } from "../../../src/iink"
 
 describe("OIGestureManager.ts", () =>
@@ -163,7 +165,7 @@ describe("OIGestureManager.ts", () =>
 
     test("should do nothing if gestureStroke not contains symbols", async () =>
     {
-      const gestureStroke = buildOIStroke({ box: { height: 2, width: 2, x: 500, y: 500 }})
+      const gestureStroke = buildOIStroke({ box: { height: 2, width: 2, x: 500, y: 500 } })
       const gesture: TGesture = {
         gestureType: "SURROUND",
         gestureStrokeId: "stroke-5b5c63a1-d546-4eb8-a63a-6db512ce2aaf",
@@ -730,6 +732,204 @@ describe("OIGestureManager.ts", () =>
       await gestMan.applyStrikeThroughGesture(stroke, gesture)
       expect(behaviors.removeSymbols).toHaveBeenNthCalledWith(1, [stroke.id])
     })
+  })
+
+  describe("getGestureFromContextLess", () =>
+  {
+    const behaviors = new OIBehaviorsMock()
+    // behaviors.model.addSymbol(stroke)
+    const gestMan = new OIGestureManager(behaviors)
+
+    beforeEach(() => {
+      behaviors.model.clear()
+    })
+
+    test("should return undefined when recognizeGesture return nothing", async () =>
+    {
+      gestMan.recognizer.recognizeGesture = jest.fn()
+      const gestureStroke = buildOIStroke()
+      expect(await gestMan.getGestureFromContextLess(gestureStroke)).toBeUndefined()
+    })
+
+    test("should return undefined when recognizeGesture return nothing", async () =>
+    {
+      gestMan.recognizer.recognizeGesture = jest.fn((stroke: OIStroke) => Promise.resolve({
+        type: TOIMessageType.ContextlessGesture,
+        gestureType: "none",
+        strokeId: stroke.id
+      }))
+      const gestureStroke = buildOIStroke()
+      expect(await gestMan.getGestureFromContextLess(gestureStroke)).toBeUndefined()
+    })
+
+    describe("surround", () =>
+    {
+
+      beforeAll(() =>
+      {
+        gestMan.recognizer.recognizeGesture = jest.fn((stroke: OIStroke) => Promise.resolve({
+          type: TOIMessageType.ContextlessGesture,
+          gestureType: "surround",
+          strokeId: stroke.id
+        }))
+      })
+
+      test("should return undefined when there is no symbols", async () =>
+      {
+        const gestureStroke = buildOIStroke()
+        expect(await gestMan.getGestureFromContextLess(gestureStroke)).toBeUndefined()
+      })
+      test("should return undefined when the gesture stroke contains no symbols", async () =>
+      {
+        const gestureStroke = buildOIStroke({ box: { height: 10, width: 10, x: 0, y: 0 } })
+        behaviors.model.addSymbol(buildOICircle({ center: gestureStroke.bounds.center, radius: Math.max(gestureStroke.bounds.width * 2, gestureStroke.bounds.height * 2) }))
+        expect(await gestMan.getGestureFromContextLess(gestureStroke)).toBeUndefined()
+      })
+      test("should return gesture when the gesture stroke contains symbol", async () =>
+      {
+        const gestureStroke = buildOIStroke({ box: { height: 10, width: 10, x: 0, y: 0 } })
+        behaviors.model.addSymbol(buildOICircle({ center: gestureStroke.bounds.center, radius: Math.min(gestureStroke.bounds.width / 2, gestureStroke.bounds.height / 2) }))
+        expect(await gestMan.getGestureFromContextLess(gestureStroke)).toEqual(expect.objectContaining({
+          gestureType: "SURROUND",
+          gestureStrokeId: gestureStroke.id
+        }))
+      })
+    })
+
+    describe("left-right", () =>
+    {
+      beforeAll(() =>
+      {
+        gestMan.recognizer.recognizeGesture = jest.fn((stroke: OIStroke) => Promise.resolve({
+          type: TOIMessageType.ContextlessGesture,
+          gestureType: "left-right",
+          strokeId: stroke.id
+        }))
+      })
+      beforeEach(() => {
+        behaviors.model.clear()
+      })
+      test("must return undefined when the gesture stroke does not match either the underline or the strikethrough of the symbols", async () =>
+      {
+        const gestureStroke = buildOIStroke({ box: { height: 2, width: 10, x: 0, y: 50 } })
+        behaviors.model.addSymbol(buildOIText({ boundingBox: { height: 10, width: 10, x: 0, y: 0 } }))
+        expect(await gestMan.getGestureFromContextLess(gestureStroke)).toBeUndefined()
+      })
+      test("should return gesture underline when the gesture stroke match symbol", async () =>
+      {
+        const gestureStroke = buildOIStroke({ box: { height: 2, width: 10, x: 0, y: 10 } })
+        const text = buildOIText({ boundingBox: { height: 12, width: 10, x: 0, y: 0 } })
+        behaviors.model.addSymbol(gestureStroke)
+        behaviors.model.addSymbol(text)
+        expect(await gestMan.getGestureFromContextLess(gestureStroke)).toEqual(expect.objectContaining({
+          gestureType: "UNDERLINE",
+          gestureStrokeId: gestureStroke.id,
+          strokeIds: [text.id],
+        }))
+      })
+      test("should return gesture strikethrough when the gesture stroke match symbol", async () =>
+      {
+        const gestureStroke = buildOIStroke({ box: { height: 2, width: 10, x: 0, y: 5 } })
+        const text = buildOIText({ boundingBox: { height: 12, width: 10, x: 0, y: 0 } })
+        behaviors.model.addSymbol(gestureStroke)
+        behaviors.model.addSymbol(text)
+        expect(await gestMan.getGestureFromContextLess(gestureStroke)).toEqual(expect.objectContaining({
+          gestureType: "STRIKETHROUGH",
+          gestureStrokeId: gestureStroke.id,
+          strokeIds: [text.id],
+        }))
+      })
+    })
+
+    describe("scratch", () =>
+    {
+
+      beforeAll(() =>
+      {
+        gestMan.recognizer.recognizeGesture = jest.fn((stroke: OIStroke) => Promise.resolve({
+          type: TOIMessageType.ContextlessGesture,
+          gestureType: "scratch",
+          strokeId: stroke.id
+        }))
+      })
+      test("must return undefined when the gesture stroke does not match either the underline or the strikethrough of the symbols", async () =>
+      {
+        const gestureStroke = buildOIStroke({ box: { height: 2, width: 10, x: 0, y: 50 } })
+        behaviors.model.addSymbol(buildOIText({ boundingBox: { height: 10, width: 10, x: 0, y: 0 } }))
+        expect(await gestMan.getGestureFromContextLess(gestureStroke)).toBeUndefined()
+      })
+      test("should return gesture underline when the gesture stroke match symbol", async () =>
+      {
+        const gestureStroke = buildOIStroke({ box: { height: 2, width: 10, x: 0, y: 10 } })
+        const text = buildOIText({ boundingBox: { height: 12, width: 10, x: 0, y: 0 } })
+        behaviors.model.addSymbol(gestureStroke)
+        behaviors.model.addSymbol(text)
+        expect(await gestMan.getGestureFromContextLess(gestureStroke)).toEqual(expect.objectContaining({
+          gestureType: "SCRATCH",
+          gestureStrokeId: gestureStroke.id,
+          strokeIds: [text.id],
+        }))
+      })
+    })
+
+    describe("bottom-top", () =>
+    {
+      beforeAll(() =>
+      {
+        gestMan.recognizer.recognizeGesture = jest.fn((stroke: OIStroke) => Promise.resolve({
+          type: TOIMessageType.ContextlessGesture,
+          gestureType: "bottom-top",
+          strokeId: stroke.id
+        }))
+      })
+      test("must return undefined when the gesture stroke has no symbols in row", async () =>
+      {
+        const gestureStroke = buildOIStroke({ box: { height: 10, width: 10, x: 0, y: behaviors.model.rowHeight } })
+        behaviors.model.addSymbol(buildOIText({ boundingBox: { height: 10, width: 10, x: 0, y: 2 * behaviors.model.rowHeight } }))
+        expect(await gestMan.getGestureFromContextLess(gestureStroke)).toBeUndefined()
+      })
+      test("should return gesture join when there is symbol in gesture row", async () =>
+      {
+        const gestureStroke = buildOIStroke({ box: { height: 20, width: 10, x: 0, y: behaviors.model.rowHeight } })
+        const text = buildOIText({ boundingBox: { height: 12, width: 10, x: 0, y: behaviors.model.rowHeight } })
+        behaviors.model.addSymbol(gestureStroke)
+        behaviors.model.addSymbol(text)
+        expect(await gestMan.getGestureFromContextLess(gestureStroke)).toEqual(expect.objectContaining({
+          gestureType: "JOIN",
+          gestureStrokeId: gestureStroke.id,
+        }))
+      })
+    })
+
+    describe("top-bottom", () =>
+    {
+      beforeAll(() =>
+      {
+        gestMan.recognizer.recognizeGesture = jest.fn((stroke: OIStroke) => Promise.resolve({
+          type: TOIMessageType.ContextlessGesture,
+          gestureType: "top-bottom",
+          strokeId: stroke.id
+        }))
+      })
+      test("must return undefined when the gesture stroke has no symbols in row", async () =>
+      {
+        const gestureStroke = buildOIStroke({ box: { height: 10, width: 10, x: 0, y: behaviors.model.rowHeight } })
+        behaviors.model.addSymbol(buildOIText({ boundingBox: { height: 10, width: 10, x: 0, y: 2 * behaviors.model.rowHeight } }))
+        expect(await gestMan.getGestureFromContextLess(gestureStroke)).toBeUndefined()
+      })
+      test("should return gesture insert when there is symbol in gesture row", async () =>
+      {
+        const gestureStroke = buildOIStroke({ box: { height: 20, width: 10, x: 0, y: behaviors.model.rowHeight } })
+        const text = buildOIText({ boundingBox: { height: 12, width: 10, x: 0, y: behaviors.model.rowHeight } })
+        behaviors.model.addSymbol(gestureStroke)
+        behaviors.model.addSymbol(text)
+        expect(await gestMan.getGestureFromContextLess(gestureStroke)).toEqual(expect.objectContaining({
+          gestureType: "INSERT",
+          gestureStrokeId: gestureStroke.id,
+        }))
+      })
+    })
+
   })
 
 })

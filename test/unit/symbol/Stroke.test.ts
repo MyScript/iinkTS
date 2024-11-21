@@ -1,4 +1,4 @@
-import { Stroke, DefaultPenStyle, TPenStyle } from "../../../src/iink"
+import { Stroke, convertPartialStrokesToStrokes, DefaultPenStyle, TPenStyle, PartialDeep, TStroke } from "../../../src/iink"
 
 describe("Stroke.ts", () =>
 {
@@ -39,5 +39,74 @@ describe("Stroke.ts", () =>
     expect(stroke.style["-myscript-pen-width"]).toBe(penStyle["-myscript-pen-width"])
     expect(stroke.style.color).toBe(penStyle.color)
     expect(stroke.style.width).toBe(penStyle.width)
+  })
+
+  describe("convertPartialStrokesToStrokes", () =>
+  {
+    test("should convert", () =>
+    {
+      const pStrokes: PartialDeep<TStroke>[] = [
+        {
+          pointers: [
+            { x: 254, y: 37, t: 1, p: 1 },
+            { x: 253, y: 42, t: 2, p: 0.7 },
+          ]
+        },
+        {
+          pointers: [
+            { x: 222, y: 386, t: 3, p: 0.5 },
+            { x: 226, y: 385, t: 4, p: 0.8 },
+          ],
+          style: { width: 3, color: "#1A8CFF" }
+        }
+      ]
+      const strokes = convertPartialStrokesToStrokes(pStrokes)
+      expect(strokes).toHaveLength(2)
+      expect(strokes[0].pointers[0]).toEqual(pStrokes[0]?.pointers?.[0])
+      expect(strokes[0].style).toEqual(DefaultPenStyle)
+      expect(strokes[1].pointers[1]).toEqual(pStrokes[1]?.pointers?.[1])
+      expect(strokes[1].style).toEqual(expect.objectContaining(pStrokes[1]?.style))
+    })
+    test("should throw error if no pointers", () =>
+    {
+      const pStrokes: PartialDeep<TStroke>[] = [
+        {
+        },
+      ]
+      expect(() => convertPartialStrokesToStrokes(pStrokes)).toThrow("stroke 1 has not pointers")
+    })
+    test("should throw error if pointers have empty object", () =>
+    {
+      const pStrokes: PartialDeep<TStroke>[] = [
+        {
+          pointers: [undefined]
+        },
+      ]
+      expect(() => convertPartialStrokesToStrokes(pStrokes)).toThrow("stroke 1 has no pointer at 0")
+    })
+    test("should throw an error if an x ​​is missing on pointers ", () =>
+    {
+      const pStrokes: PartialDeep<TStroke>[] = [
+        {
+          pointers: [
+            { x: 254, y: 37, t: 1, p: 0.5 },
+            { y: 42, t: 2, p: 0.7 },
+          ]
+        },
+      ]
+      expect(() => convertPartialStrokesToStrokes(pStrokes)).toThrow("stroke 1 has no x at pointer at 1")
+    })
+    test("should throw an error if an y ​​is missing on pointers ", () =>
+    {
+      const pStrokes: PartialDeep<TStroke>[] = [
+        {
+          pointers: [
+            { x: 254, y: 37, t: 1, p: 0.5 },
+            { x: 254, t: 2, p: 0.7 },
+          ]
+        },
+      ]
+      expect(() => convertPartialStrokesToStrokes(pStrokes)).toThrow("stroke 1 has no y at pointer at 1")
+    })
   })
 })
