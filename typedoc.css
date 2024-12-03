@@ -1,3 +1,6 @@
 .tsd-accordion-summary {
   display: flex;
 }
+.tsd-member-summaries .tsd-member-summary .tsd-comment {
+  margin: -1rem 0 1rem 0;
+}

@@ -2,7 +2,7 @@ import { EdgeDecoration, TBox, TPoint } from "../symbol"
 
 /**
  * @group Exports
- * @description List all supported MIME types for export. Please note, the MIME types supported depend on the recognition type configured
+ * @remarks List all supported MIME types for export. Please note, the MIME types supported depend on the recognition type configured
  */
 export enum ExportType
 {

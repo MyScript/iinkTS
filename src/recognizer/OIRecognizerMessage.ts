@@ -22,7 +22,7 @@ export enum TOIMessageType
 
 /**
  * @group Recognizer
- * @description use to type message to send to backend
+ * @remarks use to type message to send to backend
  */
 export type TOIMessageEvent = {
   type: string

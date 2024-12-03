@@ -4,7 +4,8 @@ import { TWSMessageEventSVGPatch } from "./WSRecognizerMessage"
 
 /**
  * @group Event
- * @description Lists all events that can be listened to on the editor or DOM element
+ * @summary
+ * Lists all events that can be listened to on the editor or DOM element
  * @example
  * You can run code on "RecognizerEventName" raised by using
  * ```ts
@@ -14,40 +15,42 @@ import { TWSMessageEventSVGPatch } from "./WSRecognizerMessage"
 export enum RecognizerEventName
 {
   /**
-   * @description event emitted at the start of connection initialization
+   * @summary event emitted at the start of connection initialization
    */
   START_INITIALIZATION = "start-initialization",
   /**
-   * @description event emitted after full recognizer initialization
+   * @summary event emitted after full recognizer initialization
    */
   END_INITIALIZATION = "end-initialization",
   /**
-   * @description event emitted after receiving an "contentChanged" message
+   * @summary event emitted after receiving an "contentChanged" message
    */
   CONTENT_CHANGED = "content-changed",
   /**
-   * @description event emitted after receiving an "idle" message
+   * @summary event emitted after receiving an "idle" message
    */
   IDLE = "idle",
   /**
-   * @description event emitted after receiving an "exported" message
+   * @summary event emitted after receiving an "exported" message
    */
   EXPORTED = "exported",
   /**
-   * @description event emitted when the recognizer encounters an error
+   * @summary event emitted when the recognizer encounters an error
    */
   ERROR = "error",
   /**
-   * @description event emitted after connection closed
+   * @remarks event emitted after connection closed
    */
   CONNECTION_CLOSE = "connection-close",
   /**
-   * @description event emitted after receiving an "svgPatch" message
-   * @remarks only usable in the case of websocket
+   * @summary
+   * event emitted after receiving an "svgPatch" message
+   * @remarks
+   * only usable in the case of websocket
    */
   SVG_PATCH = "svg-patch",
   /**
-   * @description event emitted session opened
+   * @summary event emitted session opened
    */
   SESSION_OPENED = "session-opened",
 

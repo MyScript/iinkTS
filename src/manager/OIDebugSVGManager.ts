@@ -62,6 +62,7 @@ export class OIDebugSVGManager
   set boundingBoxVisibility(show: boolean)
   {
     this.#boundingBoxVisibility = show
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     this.#boundingBoxVisibility ? this.showBoundingBox() : this.hideBoundingBox()
   }
 

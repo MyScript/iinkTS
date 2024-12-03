@@ -2,7 +2,6 @@
   "entryPoints": [
     "src/iink.ts"
   ],
-  "includes": "src",
   "exclude": [
     "config",
     "coverage",
@@ -12,10 +11,6 @@
     "examples",
     "test",
     "node_modules"
-  ],
-  "plugin": [
-    "typedoc-plugin-missing-exports",
-    "./plugins/typdoc-default-object.ts"
   ],
   "sort": [
     "alphabetical",

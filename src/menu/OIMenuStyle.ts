@@ -294,6 +294,7 @@ export class OIMenuStyle extends OIMenu
   update(): void
   {
     if (this.subMenu) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       this.isMobile ? this.subMenu.wrap() : this.subMenu.unwrap()
     }
 

@@ -1,20 +1,32 @@
 
+/**
+ * @group Editor
+ */
 export type EditorLayerUIInfoModal = {
   root: HTMLDivElement,
   text: HTMLParagraphElement
 }
 
+/**
+ * @group Editor
+ */
 export type EditorLayerUIMessage = {
   root: HTMLDivElement
   overlay: HTMLDivElement
   modal: EditorLayerUIInfoModal
 }
 
+/**
+ * @group Editor
+ */
 export type EditorLayerUIState = {
   root: HTMLDivElement
   busy: HTMLDivElement
 }
 
+/**
+ * @group Editor
+ */
 export type EditorLayerUI = {
   root: HTMLDivElement
   loader: HTMLDivElement
@@ -22,6 +34,9 @@ export type EditorLayerUI = {
   state: EditorLayerUIState
 }
 
+/**
+ * @group Editor
+ */
 export class EditorLayer
 {
   root: HTMLElement

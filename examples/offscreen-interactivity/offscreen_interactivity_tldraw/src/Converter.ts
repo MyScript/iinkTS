@@ -77,12 +77,10 @@ export class Converter
         size: shapeOrigin.props.size,
         bend,
         start: {
-          type: "point",
           x: 0,
           y: 0
         },
         end: {
-          type: "point",
           x: xEnd,
           y: yEnd
         },
@@ -168,7 +166,7 @@ export class Converter
         size: firstShape.props.size,
         text: text.label,
         font: this.font,
-        align: "start",
+        textAlign: "start",
       },
     }
   }

@@ -16,8 +16,10 @@ export type TRawContentConfiguration = {
   }
   eraser?: TEraserConfiguration
   /**
-   * @description allows you to define the detected gestures
-   * @remarks only usable in the case of offscreen
+   * @summary
+   * lists of detectable gestures
+   * @remarks
+   * only usable in the case of offscreen
    */
   gestures? : ("underline" | "scratch-out" | "join" | "insert" | "strike-through" | "surround")[]
 }

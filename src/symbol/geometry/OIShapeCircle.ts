@@ -59,7 +59,6 @@ export class OIShapeCircle extends OIShapeBase<ShapeKind.Circle>
       height: this.radius * 2,
       width: this.radius * 2
     }
-    this._bounds
     return new Box(boundingBox)
   }
 

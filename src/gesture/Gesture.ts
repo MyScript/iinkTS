@@ -1,7 +1,7 @@
 
 /**
  * @group Gesture
- * @description List all authorized gestures
+ * @summary List all authorized gestures
  */
 export type TGestureType = "UNDERLINE" | "SCRATCH" | "JOIN" | "INSERT" | "STRIKETHROUGH" | "SURROUND"
 
@@ -22,8 +22,10 @@ export type TGesture = {
 
 /**
  * @group Gesture
- * @description List all action allowed on surround detected
- * @remarks only usable in the case of offscreen
+ * @summary
+ * List all action allowed on surround detected
+ * @remarks
+ * only usable in the case of offscreen
  */
 export enum SurroundAction
 {
@@ -34,8 +36,10 @@ export enum SurroundAction
 
 /**
  * @group Gesture
- * @description List all action allowed on strikeThrough detected
- * @remarks only usable in the case of offscreen
+ * @summary
+ * List all action allowed on strikeThrough detected
+ * @remarks
+ * only usable in the case of offscreen
  */
 export enum StrikeThroughAction
 {
@@ -45,17 +49,19 @@ export enum StrikeThroughAction
 
 /**
  * @group Gesture
- * @description List all action allowed on split detected
- * @remarks only usable in the case of offscreen
+ * @summary
+ * List all action allowed on split detected
+ * @remarks
+ * only usable in the case of offscreen
  */
 export enum InsertAction
 {
   /**
-   * Add lien break on gesture place
+   * @remarks Add line break on gesture place
    */
   LineBreak = "line-break",
   /**
-   * Insert place in gesture place
+   * @remarks Insert place in gesture place
    */
   Insert = "insert"
 }

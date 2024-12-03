@@ -133,7 +133,6 @@ export class PointerEventGrabber implements IGrabber
     this.domElement.addEventListener("touchmove", this.prevent)
 
     // FIXME investigate why this is needed for iOS devices
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
     document.documentElement.addEventListener("pointerdown", () => { })
   }
 
@@ -147,7 +146,6 @@ export class PointerEventGrabber implements IGrabber
     this.domElement?.removeEventListener("pointercancel", this.pointerUpHandler, this.configuration.listenerOptions)
     this.domElement?.removeEventListener("pointerout", this.pointerOutHandler, this.configuration.listenerOptions)
     this.domElement?.removeEventListener("touchmove", this.prevent)
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
     document.documentElement.removeEventListener("pointerdown", () => { })
   }
 }
