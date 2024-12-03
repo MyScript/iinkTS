@@ -26,7 +26,7 @@ export default [
       commonjs({
         include: ["node_modules/json-css/**"],
       }),
-      resolve(),
+      resolve({ browser: true }),
       typescript(),
       terser({
         keep_fnames: true,

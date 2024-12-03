@@ -7,7 +7,7 @@ import { TGestureType } from "./gesture"
 
 /**
  * @group Event
- * @description Lists all events that can be listened to on the editor or DOM element
+ * @remarks Lists all events that can be listened to on the editor or DOM element
  * @example
  * You can run code on "EditorEventName" raised by using
  * ```ts
@@ -17,67 +17,67 @@ import { TGestureType } from "./gesture"
 export enum EditorEventName
 {
   /**
-   * @description event emitted when history has changed i.e. the context of undo-redo
+   * @remarks event emitted when history has changed i.e. the context of undo-redo
    */
   CHANGED = "changed",
   /**
-   * @description event emitted when clearing is complete
+   * @remarks event emitted when clearing is complete
    */
   CLEARED = "cleared",
   /**
-   * @description event emitted after the conversion is complete
+   * @remarks event emitted after the conversion is complete
    */
   CONVERTED = "converted",
   /**
-   * @description event emitted when the editor encounters an error
+   * @remarks event emitted when the editor encounters an error
    */
   ERROR = "error",
   /**
-   * @description event emitted on click on pointer events
+   * @remarks event emitted on click on pointer events
    */
   POINTEREVENTS = "pointer_events",
   /**
-   * @description event emitted after
+   * @remarks event emitted after
    */
   NOTIF = "notif",
   /**
-   * @description event emitted after the end of the export
+   * @remarks event emitted after the end of the export
    */
   EXPORTED = "exported",
   /**
-   * @description event emitted after the end of the import
+   * @remarks event emitted after the end of the import
    */
   IMPORTED = "imported",
   /**
-   * @description event emitted when the server is idle after a job
+   * @remarks event emitted when the server is idle after a job
    */
   IDLE = "idle",
   /**
-   * @description event emitted after full editor initialization
+   * @remarks event emitted after full editor initialization
    */
   LOADED = "loaded",
   /**
-   * @description event emitted session opened
+   * @remarks event emitted session opened
    */
   SESSION_OPENED = "session-opened",
   /**
-   * @description event emitted after selection change
+   * @remarks event emitted after selection change
    */
   SELECTED = "selected",
   /**
-   * @description event emitted after tool change
+   * @remarks event emitted after tool change
    */
   TOOL_CHANGED = "tool-changed",
   /**
-   * @description event emitted after mode change
+   * @remarks event emitted after mode change
    */
   UI_UPDATED = "ui-updated",
   /**
-   * @description event emitted after stroke synchronized with jiix
+   * @remarks event emitted after stroke synchronized with jiix
    */
   SYNCHRONIZED = "synchronized",
   /**
-   * @description event emitted after applying a gesture
+   * @remarks event emitted after applying a gesture
    */
   GESTURED = "gestured"
 }

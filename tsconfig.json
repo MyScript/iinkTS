@@ -27,7 +27,8 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "skipLibCheck": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "allowJs": false
   },
   "types": [
     "./node_modules/@types/**",
@@ -43,7 +44,6 @@
     "node_modules",
     "dist",
     "examples/**",
-    "plugins",
-    "*.js"
+    "plugins"
   ]
 }

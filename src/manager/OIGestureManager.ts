@@ -115,6 +115,7 @@ export class OIGestureManager
             const highlight = new OIDecorator(DecoratorKind.Highlight, this.currentStyle)
             const index = symWithDec.decorators.findIndex(d => d.kind === DecoratorKind.Highlight)
             const added = index === -1
+            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
             added ? symWithDec.decorators.push(highlight) : symWithDec.decorators.splice(index, 1)
             this.model.updateSymbol(symWithDec)
             this.renderer.drawSymbol(symWithDec)
@@ -138,6 +139,7 @@ export class OIGestureManager
             const surround = new OIDecorator(DecoratorKind.Surround, this.currentStyle)
             const index = symWithDec.decorators.findIndex(d => d.kind === DecoratorKind.Surround)
             const added = index === -1
+            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
             added ? symWithDec.decorators.push(surround) : symWithDec.decorators.splice(index, 1)
             this.model.updateSymbol(symWithDec)
             this.renderer.drawSymbol(symWithDec)
@@ -800,6 +802,7 @@ export class OIGestureManager
         const underline = new OIDecorator(DecoratorKind.Underline, this.currentStyle)
         const index = symWithDec.decorators.findIndex(d => d.kind === DecoratorKind.Underline)
         const added = index === -1
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         added ? symWithDec.decorators.push(underline) : symWithDec.decorators.splice(index, 1)
         this.model.updateSymbol(symWithDec)
         this.renderer.drawSymbol(symWithDec)
@@ -831,6 +834,7 @@ export class OIGestureManager
             const strikethrough = new OIDecorator(DecoratorKind.Strikethrough, this.currentStyle)
             const index = symWithDec.decorators.findIndex(d => d.kind === DecoratorKind.Strikethrough)
             const added = index === -1
+            // eslint-disable-next-line @typescript-eslint/no-unused-expressions
             added ? symWithDec.decorators.push(strikethrough) : symWithDec.decorators.splice(index, 1)
             this.model.updateSymbol(symWithDec)
             this.renderer.drawSymbol(symWithDec)

@@ -412,7 +412,7 @@ export class OIRecognizer
           break
       }
     }
-    catch (error) {
+    catch {
       this.event.emitError(new Error(message.data))
     }
   }
@@ -435,7 +435,7 @@ export class OIRecognizer
   {
     this.event.emitStartInitialization()
     if (this.currentErrorCode === "restore.session.not.found") {
-      this.currentErrorCode === undefined
+      this.currentErrorCode = undefined
       this.sessionId = undefined
       this.currentPartId = undefined
     }

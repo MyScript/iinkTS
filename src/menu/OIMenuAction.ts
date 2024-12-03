@@ -582,6 +582,7 @@ export class OIMenuAction extends OIMenu
   update(): void
   {
     if (this.menuLanguage) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       this.isMobile ? this.menuLanguage.wrap() : this.menuLanguage.unwrap()
     }
     if (this.menuClear) {

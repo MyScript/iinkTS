@@ -601,12 +601,12 @@ describe("OIBehaviors.ts", () =>
 
     test("should call trigger download svg file", async () =>
     {
-      global.URL.createObjectURL = jest.fn(() => 'download-svg-url')
+      global.URL.createObjectURL = jest.fn(() => "download-svg-url")
       const link = document.createElement("a")
       link.click = jest.fn()
-      jest.spyOn(document, 'createElement').mockImplementationOnce(() => link)
+      jest.spyOn(document, "createElement").mockImplementationOnce(() => link)
       oib.downloadAsSVG()
-      expect(link.href).toContain('download-svg-url')
+      expect(link.href).toContain("download-svg-url")
       expect(link.download).toContain("iink-ts-")
       expect(link.download).toContain(".svg")
       expect(link.click).toHaveBeenCalledTimes(1)
@@ -614,13 +614,13 @@ describe("OIBehaviors.ts", () =>
     // //fix canvas.getContext
     test.skip("should call trigger download png file", async () =>
     {
-      global.URL.createObjectURL = jest.fn(() => 'download-png-url')
+      global.URL.createObjectURL = jest.fn(() => "download-png-url")
       //@ts-ignore
       global.Image = class
       {
         onload: () => void
         //@ts-ignore
-        constructor(width?: number, height?: number)
+        constructor()
         {
           this.onload = jest.fn()
           setTimeout(() =>
@@ -631,19 +631,19 @@ describe("OIBehaviors.ts", () =>
       } as unknown as HTMLImageElement
       const link = document.createElement("a")
       link.click = jest.fn()
-      jest.spyOn(document, 'createElement').mockImplementationOnce(() => link)
+      jest.spyOn(document, "createElement").mockImplementationOnce(() => link)
       oib.downloadAsPNG()
       await delay(101)
-      expect(link.href).toContain('download-png-url')
+      expect(link.href).toContain("download-png-url")
       expect(link.click).toHaveBeenCalledTimes(1)
     })
     test("should call trigger download json file", async () =>
     {
       const link = document.createElement("a")
       link.click = jest.fn()
-      jest.spyOn(document, 'createElement').mockImplementationOnce(() => link)
+      jest.spyOn(document, "createElement").mockImplementationOnce(() => link)
       oib.downloadAsJson()
-      expect(link.href).toContain('data:text/json;charset=utf-8,')
+      expect(link.href).toContain("data:text/json;charset=utf-8,")
       expect(link.href).toContain(stroke1.id)
       expect(link.href).toContain(stroke2.id)
       expect(link.download).toContain("iink-ts-")
@@ -654,9 +654,9 @@ describe("OIBehaviors.ts", () =>
     {
       const link = document.createElement("a")
       link.click = jest.fn()
-      jest.spyOn(document, 'createElement').mockImplementationOnce(() => link)
+      jest.spyOn(document, "createElement").mockImplementationOnce(() => link)
       oib.downloadAsJson(true)
-      expect(link.href).toContain('data:text/json;charset=utf-8,')
+      expect(link.href).toContain("data:text/json;charset=utf-8,")
       expect(link.href).toContain(stroke1.id)
       expect(link.href).not.toContain(stroke2.id)
       expect(link.download).toContain("iink-ts-")

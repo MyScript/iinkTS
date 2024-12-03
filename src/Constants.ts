@@ -1,6 +1,7 @@
 /**
  * @group Editor
- * @description List the possibilities of interactions
+ * @summary
+ * List the possibilities of interactions
  */
 export enum EditorTool
 {
@@ -18,8 +19,10 @@ export enum EditorTool
 
 /**
  * @group Editor
- * @description List all the shapes that can be drawn
- * @remarks only usable in the case of offscreen
+ * @summary
+ * List all the shapes that can be drawn
+ * @remarks
+ * only usable in the case of offscreen
  */
 export enum EditorWriteTool
 {
@@ -37,8 +40,10 @@ export enum EditorWriteTool
 
 /**
  * @group Renderer
- * @description List all svg elements roles
- * @remarks only usable in the case of offscreen
+ * @summary
+ * List all svg elements roles
+ * @remarks
+ * only usable in the case of offscreen
  */
 export enum SvgElementRole
 {
@@ -51,8 +56,10 @@ export enum SvgElementRole
 
 /**
  * @group Renderer
- * @description List all svg elements resize direction
- * @remarks only usable in the case of offscreen
+ * @summary
+ * List all svg elements resize direction
+ * @remarks
+ * only usable in the case of offscreen
  */
 export const enum ResizeDirection
 {

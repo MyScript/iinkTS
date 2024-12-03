@@ -169,7 +169,10 @@ describe("Editor.ts", () =>
       wrapperHTML.style.width = "100px"
       const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
       const LOAD_TIMEOUT = 200
-      editor.behaviors.init = jest.fn(async () => { await delay(LOAD_TIMEOUT); return Promise.resolve() })
+      editor.behaviors.init = jest.fn(async () => {
+        await delay(LOAD_TIMEOUT);
+        return Promise.resolve()
+      })
       const loaderElement = wrapperHTML.querySelector(".loader") as HTMLElement
       expect(loaderElement.style.display).toEqual("none")
       editor.initialize()
@@ -210,7 +213,7 @@ describe("Editor.ts", () =>
       try {
         expect(messageContainer!.style.display).toEqual("none")
         await editor.initialize()
-      } catch (error) {
+      } catch {
         expect(messageContainer.style.display).toEqual("block")
         expect(messageElement.innerText).toEqual("pouet")
       }
@@ -561,7 +564,7 @@ describe("Editor.ts", () =>
   describe("Style", () =>
   {
     const wrapperHTML: HTMLElement = document.createElement("div")
-    let editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
+    const editor = new Editor(wrapperHTML, DefaultBehaviorsOptions)
     test("should init theme", () =>
     {
       expect(editor.theme).toStrictEqual(DefaultTheme)

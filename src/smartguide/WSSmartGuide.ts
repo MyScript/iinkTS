@@ -224,6 +224,7 @@ export class WSSmartGuide
     this.#logger.info("onClickEllipsis", { evt })
     evt.preventDefault()
     evt.stopPropagation()
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     this.#isMenuOpen ? this.#closeMenu() : this.#openMenu()
     this.#hideCandidates()
   }
