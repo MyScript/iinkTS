@@ -31,15 +31,8 @@
     "esModuleInterop": true,
     "allowJs": false
   },
-  "types": [
-    "./node_modules/@types/**",
-    "@types/jest",
-    "jest-websocket-mock",
-    "playwright/test",
-  ],
   "include": [
-    "src",
-    "test/unit"
+    "src"
   ],
   "exclude": [
     "node_modules",
