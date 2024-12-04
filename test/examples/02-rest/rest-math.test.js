@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test"
 import {
-  waitForEditorRest,
+  waitForEditorInit,
   writeStrokes,
   waitForExportedEvent,
   setEditorConfiguration,
@@ -15,7 +15,7 @@ test.describe("Rest Math", () => {
 
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/rest/rest_math_iink.html")
-    await waitForEditorRest(page)
+    await waitForEditorInit(page)
   })
 
   test("should have title", async ({ page }) => {
@@ -112,9 +112,7 @@ test.describe("Rest Math", () => {
       expect(promisesResult[0]).toBeNull()
       expect(await getEditorExports(page)).toBeFalsy()
 
-      const resultElement = page.locator("#result")
-      const resultText = await resultElement.textContent()
-      expect(resultText).toBe("")
+      await expect(page.locator("#result")).toBeEmpty()
     })
 
     test("should undo/redo", async ({ page }) => {

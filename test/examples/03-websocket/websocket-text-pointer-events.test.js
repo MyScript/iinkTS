@@ -1,11 +1,11 @@
 import { test, expect } from "@playwright/test"
-import { waitForEditorWebSocket, waitForExportedEvent, callEditorIdle } from "../helper"
+import { waitForEditorInit, waitForExportedEvent, callEditorIdle } from "../helper"
 
 test.describe("Websocket Text Pointer Events", () => {
 
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/websocket/websocket_text_pointer_events.html")
-    await waitForEditorWebSocket(page)
+    await waitForEditorInit(page)
     await callEditorIdle(page)
   })
 

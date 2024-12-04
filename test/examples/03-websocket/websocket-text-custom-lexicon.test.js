@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test"
 import {
   writeStrokes,
-  waitForEditorWebSocket,
+  waitForEditorInit,
   getEditorExports,
   callEditorIdle
 } from "../helper"
@@ -11,7 +11,7 @@ import covfefe from "../__dataset__/covfefe"
 test.describe("Websocket Text Custom Lexicon", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/websocket/websocket_text_custom_lexicon.html")
-    await waitForEditorWebSocket(page)
+    await waitForEditorInit(page)
     await callEditorIdle(page)
   })
 
@@ -27,9 +27,9 @@ test.describe("Websocket Text Custom Lexicon", () => {
     expect(jiixReceived.label).not.toEqual(covfefe.exports["text/plain"].at(-1))
   })
 
-  test("should recognize 'covfefe' after ", async ({ page }) => {
+  test("should recognize 'covfefe' after", async ({ page }) => {
     await Promise.all([
-      waitForEditorWebSocket(page),
+      waitForEditorInit(page),
       page.locator("#lexicon").fill("covfefe"),
       page.locator("#reinit").click(),
     ])

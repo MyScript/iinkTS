@@ -1,11 +1,11 @@
 import { test, expect } from "@playwright/test"
-import { waitForEditorWebSocket } from "../helper"
+import { waitForEditorInit } from "../helper"
 import TextNavActions from "../_partials/text-nav-actions"
 
 test.describe("Websocket Text Search Without Smartguide", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/websocket/websocket_text_iink_no_guides.html")
-    await waitForEditorWebSocket(page)
+    await waitForEditorInit(page)
   })
 
   test("should have title", async ({ page }) => {

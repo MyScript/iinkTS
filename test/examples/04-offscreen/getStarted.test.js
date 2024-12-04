@@ -1,11 +1,11 @@
 import { test, expect } from "@playwright/test"
-import { callEditorIdle, waitForEditorOffscreen, writeStrokes, callEditorExport, waitForSynchronizedEvent, getEditorSymbols } from "../helper"
+import { callEditorIdle, waitForEditorInit, writeStrokes, callEditorExport, waitForSynchronizedEvent, getEditorSymbols } from "../helper"
 import helloOneStroke from "../__dataset__/helloOneStroke"
 
 test.describe("Offscreen Get Started", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/offscreen-interactivity/index.html")
-    await waitForEditorOffscreen(page)
+    await waitForEditorInit(page)
     await callEditorIdle(page)
   })
 

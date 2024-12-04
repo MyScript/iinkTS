@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test"
 import {
   callEditorIdle,
-  waitForEditorOffscreen,
+  waitForEditorInit,
   writePointers,
   writeStrokes,
   callEditorExport,
@@ -26,7 +26,7 @@ import helloOneStrokeSurrounded from "../__dataset__/helloOneStrokeSurrounded"
 test.describe("Offscreen Get Started Menu Action", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/offscreen-interactivity/index.html")
-    await waitForEditorOffscreen(page)
+    await waitForEditorInit(page)
     await callEditorIdle(page)
   })
 
@@ -42,7 +42,7 @@ test.describe("Offscreen Get Started Menu Action", () => {
       expect(symbols[0].label).toEqual(helloOneStroke.exports["text/plain"].at(-1))
     })
 
-    await test.step("should undo the last stroke written ", async () => {
+    await test.step("should undo the last stroke written", async () => {
       await Promise.all([
         waitForChangedEvent(page),
         page.locator(locator.menu.action.undoBtn).click()
@@ -69,7 +69,7 @@ test.describe("Offscreen Get Started Menu Action", () => {
       const symbols = await getEditorSymbols(page)
       expect(symbols).toHaveLength(1)
       expect(symbols[0].type).toEqual("text")
-      await expect(await page.locator(`#${ symbols[0].id }`)).toHaveText(helloOneStroke.exports["application/vnd.myscript.jiix"].label)
+      await expect(page.locator(`#${ symbols[0].id }`)).toHaveText(helloOneStroke.exports["application/vnd.myscript.jiix"].label)
     })
 
     await test.step("should undo convert", async () => {
@@ -315,14 +315,10 @@ test.describe("Offscreen Get Started Menu Action", () => {
 
     await test.step("verify menu intention is still set on writing mode", async () => {
       await expect(page.locator(locator.menu.context.wrapper)).toBeHidden()
-
-      const selectIntentionLocator = page.locator(locator.menu.intention.select)
-      await expect(selectIntentionLocator).toBeVisible()
-      await expect(selectIntentionLocator).not.toHaveClass(/active/)
-
-      const writeIntentionLocator = await page.locator(locator.menu.intention.writePencil)
-      await expect(writeIntentionLocator).toBeVisible()
-      await expect(writeIntentionLocator).toHaveClass(/active/)
+      await expect(page.locator(locator.menu.intention.select)).toBeVisible()
+      await expect(page.locator(locator.menu.intention.select)).not.toHaveClass(/active/)
+      await expect(page.locator(locator.menu.intention.writePencil)).toBeVisible()
+      await expect(page.locator(locator.menu.intention.writePencil)).toHaveClass(/active/)
     })
 
     await test.step("write surround", async () => {
@@ -334,7 +330,7 @@ test.describe("Offscreen Get Started Menu Action", () => {
     })
 
     await test.step("verify context wrapper is visible", async () => {
-      expect(await page.locator(locator.menu.context.wrapper)).toBeVisible()
+      await expect(page.locator(locator.menu.context.wrapper)).toBeVisible()
       const selectIntentionLocator = page.locator(locator.menu.intention.select)
       await expect(selectIntentionLocator).toBeVisible()
       await expect(selectIntentionLocator).toHaveClass(/active/)
@@ -456,7 +452,7 @@ test.describe("Offscreen Get Started Menu Action", () => {
       expect(symbols[0].kind).toEqual("text")
     })
 
-    await test.step("should separate stroke in 2 on insert gesture ", async () => {
+    await test.step("should separate stroke in 2 on insert gesture", async () => {
       await Promise.all([
         waitForGesturedEvent(page),
         writePointers(page, helloInsert.strokes[1].pointers)
@@ -485,8 +481,8 @@ test.describe("Offscreen Get Started Menu Action", () => {
 
     await test.step("insert should be kept on convert", async () => {
       //convert
-      const convertBtn = await page.locator(locator.menu.action.convertBtn)
-      expect(await convertBtn.isEnabled()).toEqual(true)
+      const convertBtn = page.locator(locator.menu.action.convertBtn)
+      await expect(convertBtn).toBeEnabled()
       await Promise.all([
         waitForConvertedEvent(page),
         convertBtn.click()

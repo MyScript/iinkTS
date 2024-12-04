@@ -27,6 +27,7 @@
   "scripts": {
     "lint": "eslint ./src",
     "lint:fix": "eslint ./src --fix",
+    "lint:te": "eslint --config=./test/examples/eslint.config.mjs ./test/examples",
     "dev": "rollup -c config/rollup.config.dev.mjs -w --sourcemap",
     "dev:tldraw": "cd ./examples/offscreen-interactivity/offscreen_interactivity_tldraw && yarn dev",
     "test:unit": "jest --config=test/unit/jest.config.js",

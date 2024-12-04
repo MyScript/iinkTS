@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test"
 import {
-  waitForEditorWebSocket,
+  waitForEditorInit,
   writeStrokes,
   waitForExportedEvent,
   getEditorExportsType,
@@ -21,7 +21,7 @@ import equation from "../__dataset__/equation"
 test.describe("Websocket Math", function () {
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/websocket/websocket_math_iink.html")
-    await waitForEditorWebSocket(page)
+    await waitForEditorInit(page)
     await callEditorIdle(page)
   })
 
@@ -46,7 +46,7 @@ test.describe("Websocket Math", function () {
     const config = await getEditorConfiguration(page)
     config.recognition.math.mimeTypes = ["application/vnd.myscript.jiix"]
     await setEditorConfiguration(page, config)
-    await waitForEditorWebSocket(page)
+    await waitForEditorInit(page)
 
     await Promise.all([
       waitForExportedEvent(page),
@@ -64,7 +64,7 @@ test.describe("Websocket Math", function () {
     const config = await getEditorConfiguration(page)
     config.recognition.math.mimeTypes = ["application/mathml+xml"]
     await setEditorConfiguration(page, config)
-    await waitForEditorWebSocket(page)
+    await waitForEditorInit(page)
 
     await Promise.all([
       waitForExportedEvent(page),
@@ -83,7 +83,7 @@ test.describe("Websocket Math", function () {
     config.recognition.math.mimeTypes = ["application/mathml+xml"]
     config.recognition.export.mathml = { flavor: "standard" }
     await setEditorConfiguration(page, config)
-    await waitForEditorWebSocket(page)
+    await waitForEditorInit(page)
     await writeStrokes(page, fence.strokes)
     await callEditorIdle(page)
     const mathml = await getEditorExportsType(page, "application/mathml+xml")
@@ -95,7 +95,7 @@ test.describe("Websocket Math", function () {
     config.recognition.math.mimeTypes = ["application/mathml+xml"]
     config.recognition.export.mathml = { flavor: "ms-office" }
     await setEditorConfiguration(page, config)
-    await waitForEditorWebSocket(page)
+    await waitForEditorInit(page)
     await writeStrokes(page, fence.strokes)
     await callEditorIdle(page)
     const mathml = await getEditorExportsType(page, "application/mathml+xml")
@@ -187,7 +187,7 @@ test.describe("Websocket Math", function () {
         // 10000 = time to write equation
         config.recognition.math["session-time"] = 10000
         await setEditorConfiguration(page, config)
-        await waitForEditorWebSocket(page)
+        await waitForEditorInit(page)
       })
 
       await test.step("should write stroke", async () => {
@@ -297,7 +297,7 @@ test.describe("Websocket Math", function () {
       const config = await getEditorConfiguration(page)
       config.recognition.math.solver.enable = false
       await setEditorConfiguration(page, config)
-      await waitForEditorWebSocket(page)
+      await waitForEditorInit(page)
 
       let numStroke = 0
       for (const s of sum.strokes) {

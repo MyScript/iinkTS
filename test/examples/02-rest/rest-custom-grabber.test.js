@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test"
 import {
-  waitForEditorRest,
+  waitForEditorInit,
   waitForExportedEvent,
   writeStrokes
 } from "../helper"
@@ -10,7 +10,7 @@ test.describe("Rest custom grabber", () => {
 
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/dev/rest_custom_grabber.html")
-    await waitForEditorRest(page)
+    await waitForEditorInit(page)
   })
 
   test("should have title", async ({ page }) => {

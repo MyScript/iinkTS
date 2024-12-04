@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 import {
-  waitForEditorWebSocket,
+  waitForEditorInit,
   writeStrokes,
   waitForExportedEvent
 } from '../helper'
@@ -10,7 +10,7 @@ import TextNavActions from '../_partials/text-nav-actions'
 test.describe('Websocket Text local storage', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/examples/websocket/websocket_text_local_storage_text.html')
-    await waitForEditorWebSocket(page)
+    await waitForEditorInit(page)
   })
 
   test('should have title', async ({ page }) => {
@@ -26,7 +26,7 @@ test.describe('Websocket Text local storage', () => {
     expect(await page.evaluate("localStorage.getItem(\"editorTextContent\")")).toEqual(helloOneStroke.exports['text/plain'].at(-1))
 
     await page.reload({ waitUntil: 'load' })
-    await waitForEditorWebSocket(page)
+    await waitForEditorInit(page)
     await expect(page.locator('.prompter-text')).toHaveText('hello')
   })
 

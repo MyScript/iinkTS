@@ -3,7 +3,6 @@ import { test, expect } from "@playwright/test"
 test.describe("Websocket handle error", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/websocket/websocket_handle_errors.html")
-    await page.waitForSelector(".message-modal")
   })
 
   test("should have title", async ({ page }) => {

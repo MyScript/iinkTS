@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test"
 import {
-  waitForEditorRest,
+  waitForEditorInit,
   writeStrokes,
   waitForExportedEvent,
   setEditorConfiguration,
@@ -8,6 +8,7 @@ import {
   getEditorExports,
 } from "../helper"
 import h from "../__dataset__/h"
+import { toBeEmpty } from "jest-extended"
 
 test.describe("Rest Text", () => {
 
@@ -15,7 +16,7 @@ test.describe("Rest Text", () => {
     await page.goto("/examples/rest/rest_text_iink.html")
     await Promise.all([
       page.waitForResponse(req => req.url().includes("/api/v4.0/iink/availableLanguageList")),
-      waitForEditorRest(page)
+      waitForEditorInit(page)
     ])
   })
 
@@ -101,9 +102,8 @@ test.describe("Rest Text", () => {
         waitForExportedEvent(page),
         writeStrokes(page, h.strokes),
       ])
-      const resultText = await page.locator("#result").textContent()
-      expect(resultText).toEqual(exportedDatas["text/plain"])
-      expect(resultText).toEqual(h.exports["text/plain"].at(-1))
+      await expect(page.locator("#result")).toHaveText(exportedDatas["text/plain"])
+      await expect(page.locator("#result")).toHaveText(h.exports["text/plain"].at(-1))
     })
 
     await test.step("should clear", async () => {
@@ -113,7 +113,7 @@ test.describe("Rest Text", () => {
       ])
       expect(promisesResult[0]).toBeNull()
       expect(await getEditorExports(page)).toBeFalsy()
-      expect(await page.locator("#result").textContent()).toBe("")
+      await expect(page.locator("#result")).toBeEmpty()
     })
 
     await test.step("should undo clear", async () => {
@@ -122,7 +122,7 @@ test.describe("Rest Text", () => {
         page.click("#undo")
       ])
       expect(await page.locator("#editor").evaluate((node) => node.editor.model.symbols)).toHaveLength(1)
-      expect(await page.locator("#result").textContent()).toEqual(h.exports["text/plain"][0])
+      await expect(page.locator("#result")).toHaveText(h.exports["text/plain"][0])
     })
 
     await test.step("should undo write", async () => {
@@ -131,7 +131,7 @@ test.describe("Rest Text", () => {
         page.click("#undo")
       ])
       expect(await page.locator("#editor").evaluate((node) => node.editor.model.symbols)).toHaveLength(0)
-      expect(await page.locator("#result").textContent()).toEqual("")
+      await expect(page.locator("#result")).toBeEmpty()
     })
 
     await test.step("should redo write", async () => {
@@ -140,7 +140,7 @@ test.describe("Rest Text", () => {
         page.click("#redo")
       ])
       expect(await page.locator("#editor").evaluate((node) => node.editor.model.symbols)).toHaveLength(1)
-      expect(await page.locator("#result").textContent()).toEqual(h.exports["text/plain"][0])
+      await expect(page.locator("#result")).toHaveText(h.exports["text/plain"][0])
     })
 
     await test.step("should change language", async () => {
@@ -153,7 +153,7 @@ test.describe("Rest Text", () => {
 
       await page.selectOption("#language", "fr_FR")
 
-      expect(await page.locator("#result").textContent()).toBe("")
+      await expect(page.locator("#result")).toBeEmpty()
 
       const [requestFr] = await Promise.all([
         page.waitForRequest(req => req.url().includes("/api/v4.0/iink/batch") && req.method() === "POST"),

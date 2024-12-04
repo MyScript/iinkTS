@@ -1,11 +1,11 @@
 import { test, expect } from "@playwright/test"
-import { writeStrokes, waitForEditorWebSocket, callEditorIdle, waitForExportedEvent } from "../helper"
+import { writeStrokes, waitForEditorInit, callEditorIdle, waitForExportedEvent } from "../helper"
 import h from "../__dataset__/h"
 
 test.describe("Websocket custom grabber", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/dev/websocket_custom_grabber.html")
-    await waitForEditorWebSocket(page)
+    await waitForEditorInit(page)
     await callEditorIdle(page)
   })
 

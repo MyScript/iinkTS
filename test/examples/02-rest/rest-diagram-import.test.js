@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test"
 import {
-  waitForEditorRest,
+  waitForEditorInit,
   waitForExportedEvent,
   getEditorExports,
   getEditorSymbols,
@@ -9,7 +9,7 @@ import {
 test.describe("Rest Diagram Import", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/rest/rest_diagram_iink_import.html")
-    await waitForEditorRest(page)
+    await waitForEditorInit(page)
   })
 
   test("should have title", async ({ page }) => {

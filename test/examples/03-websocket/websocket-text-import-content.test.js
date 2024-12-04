@@ -1,11 +1,11 @@
 import { test, expect } from "@playwright/test"
-import { waitForEditorWebSocket, waitForExportedEvent, callEditorIdle } from "../helper"
+import { waitForEditorInit, waitForExportedEvent, callEditorIdle } from "../helper"
 import TextNavActions from "../_partials/text-nav-actions"
 
 test.describe("Websocket Text Import Content", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/websocket/websocket_text_import_content.html")
-    await waitForEditorWebSocket(page)
+    await waitForEditorInit(page)
     await callEditorIdle(page)
   })
 

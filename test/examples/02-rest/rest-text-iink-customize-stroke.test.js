@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test"
 import {
-  waitForEditorRest,
+  waitForEditorInit,
   waitForExportedEvent,
   writeStrokes
 } from "../helper"
@@ -12,7 +12,7 @@ test.describe("Rest Text Styling", () => {
     await page.goto("/examples/rest/rest_text_iink_customize_stroke_style.html")
     await Promise.all([
       page.waitForResponse(req => req.url().includes("/api/v4.0/iink/availableLanguageList")),
-      waitForEditorRest(page)
+      waitForEditorInit(page)
     ])
   })
 

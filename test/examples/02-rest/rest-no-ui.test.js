@@ -11,8 +11,8 @@ test.describe("Rest no UI", () => {
   })
 
   test("should display text/plain into result", async ({ page }) => {
-    expect(await page.locator("#interpretatedTextContent").textContent()).toBe("")
-    expect(await page.locator("#interpretatedImageContent > *").count()).toEqual(0)
+    await expect(page.locator("#interpretatedTextContent")).toBeEmpty()
+    await expect(page.locator("#interpretatedImageContent > *")).toHaveCount(0)
 
     const textPlainExport =  page.waitForResponse(async (resp) => {
       const headers = await resp.allHeaders()
@@ -26,11 +26,11 @@ test.describe("Rest no UI", () => {
       imagePngExport,
       page.click("#recognize")
     ])
-    // for wait rendering after convertBlobToBase64
-    await page.waitForTimeout(1000)
+    // // for wait rendering after convertBlobToBase64
+    // await page.waitForTimeout(1000)
 
-    expect(await page.locator("#interpretatedTextContent").textContent()).not.toBe("")
-    expect(await page.locator("#interpretatedImageContent > *").count()).toEqual(1)
+    await expect(page.locator("#interpretatedTextContent")).not.toBeEmpty()
+    await expect(page.locator("#interpretatedImageContent > *")).toHaveCount(1)
     expect(await page.locator("#interpretatedImageContent > img").getAttribute("src")).toContain("data:image/png;base64")
   })
 })

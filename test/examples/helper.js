@@ -10,7 +10,7 @@
  * @param {Number} [offsetLeft=0]
  */
 export const writePointers = async (page, pointers, offsetTop = 0, offsetLeft = 0) => {
-  const editorEl = await page.waitForSelector("#editor");
+  const editorEl = page.locator("#editor");
   const boundingBox = await editorEl.evaluate((node) => node.getBoundingClientRect());
   const offsetX = offsetLeft + boundingBox.x;
   const offsetY = offsetTop + boundingBox.y;
@@ -27,10 +27,12 @@ export const writePointers = async (page, pointers, offsetTop = 0, offsetLeft = 
       waitTime = p.t - oldTimestamp;
       oldTimestamp = p.t;
     }
+    // eslint-disable-next-line playwright/no-wait-for-timeout
     await page.waitForTimeout(waitTime / 10);
     await page.mouse.move(offsetX + p.x, offsetY + p.y);
   }
   await page.mouse.up();
+  // eslint-disable-next-line playwright/no-wait-for-timeout
   await page.waitForTimeout(150);
 };
 
@@ -211,23 +213,13 @@ export const waitForSelectedEvent = async (page) => waitForEvent(page, "selected
  */
 export const waitForGesturedEvent = async (page) => waitForEvent(page, "gestured");
 
-export const waitForEditorRest = async (page) => {
-  await Promise.all([page.waitForSelector("#ms-rendering-canvas"), page.waitForSelector("#ms-capture-canvas")]);
-  return page.evaluate("editor.initializationPromise");
-};
-
-export const waitForEditorWebSocket = async (page) => {
-  await Promise.all([page.waitForSelector('svg[data-layer="CAPTURE"]'), page.waitForSelector('svg[data-layer="MODEL"]')]);
+export const waitForEditorInit = async (page) => {
+  await page.waitForFunction(() => !!window.editor);
   return page.evaluate("editor.initializationPromise");
 };
 
 export const waitForServerConfiguration = async (page) => {
   return page.waitForResponse((req) => req.url().includes("server-configuration.json"));
-};
-
-export const waitForEditorOffscreen = async (page) => {
-  await Promise.all([page.waitForSelector("#editor .ms-layer-ui"), page.waitForSelector("#editor svg")]);
-  return page.evaluate("editor.initializationPromise");
 };
 
 export const findValuesByKey = (obj, key, list = []) => {

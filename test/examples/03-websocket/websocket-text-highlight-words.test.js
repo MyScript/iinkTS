@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test"
-import { waitForEditorWebSocket, writeStrokes, waitForExportedEvent, callEditorIdle } from "../helper"
+import { waitForEditorInit, writeStrokes, waitForExportedEvent, callEditorIdle } from "../helper"
 import helloOneStroke from "../__dataset__/helloOneStroke"
 import helloOneStrokeSurrounded from "../__dataset__/helloOneStrokeSurrounded"
 import TextNavActions from "../_partials/text-nav-actions"
@@ -56,7 +56,7 @@ const colorMap = [
 test.describe("Websocket Text highlight words", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/websocket/websocket_text_highlight_words.html")
-    await waitForEditorWebSocket(page)
+    await waitForEditorInit(page)
   })
 
   test("should have title", async ({ page }) => {
