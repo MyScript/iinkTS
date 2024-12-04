@@ -1,10 +1,11 @@
 export default {
+  rootDir: "../../",
   clearMocks: true,
   // collectCoverage: true,
   collectCoverageFrom: [
-    "./src/**/**.ts",
-    "!./src/modules.d.ts",
-    "!./src/Constants.ts",
+    "<rootDir>/src/**/**.ts",
+    "!<rootDir>/src/modules.d.ts",
+    "!<rootDir>/src/Constants.ts",
   ],
   coverageThreshold: {
     global: {
@@ -24,18 +25,18 @@ export default {
     "web-worker:(.*)\\.worker.ts": "<rootDir>/src/worker/$1.worker.ts",
   },
   modulePathIgnorePatterns: [
-    "./test/unit/__dataset__",
-    "./test/unit/__mocks__"
+    "<rootDir>/test/unit/__dataset__",
+    "<rootDir>/test/unit/__mocks__"
   ],
   preset: "ts-jest",
   setupFiles: [
     "jest-canvas-mock",
-    "./test/unit/jest.setup.js",
-    "./test/unit/text-encoder.mock.ts"
+    "<rootDir>/test/unit/__config__/jest.setup.ts",
+    "<rootDir>/test/unit/__config__/text-encoder.mock.ts",
+    "<rootDir>/test/unit/__config__/setupTests.ts"
   ],
   setupFilesAfterEnv: [
     "jest-websocket-mock",
-    "./test/unit/setupTests.ts"
   ],
   testEnvironment: "jsdom",
   testMatch: [
@@ -46,7 +47,7 @@ export default {
   ],
   transform: {
     "^.+\\.css$": "jest-transform-css",
-    "^.+\\.svg$": "<rootDir>/test/unit/svgTransform.js",
+    "^.+\\.svg$": "<rootDir>/test/unit/__config__/svgTransform.ts",
   },
   verbose: false
 }
