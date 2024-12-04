@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test"
 import {
-  waitForEditorWebSocket,
+  waitForEditorInit,
   getEditorExportsType,
   haveSameLabels,
   waitForImportedEvent
@@ -9,7 +9,7 @@ import {
 test.describe("Websocket Math Import JIIX", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/websocket/websocket_math_import_jiix.html")
-    await waitForEditorWebSocket(page)
+    await waitForEditorInit(page)
   })
 
   test("should have title", async ({ page }) => {

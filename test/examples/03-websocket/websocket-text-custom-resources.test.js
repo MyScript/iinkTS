@@ -1,10 +1,10 @@
 import { test, expect } from "@playwright/test"
 import TextNavActions from "../_partials/text-nav-actions"
-import { waitForEditorWebSocket } from "../helper"
+import { waitForEditorInit } from "../helper"
 // import {
 //   writeStrokes,
 //   waitForExportedEvent,
-//   waitForEditorWebSocket,
+//   waitForEditorInit,
 //   callEditorIdle
 // } from "../helper"
 // import abrausorus from "../__dataset__/abrausorus"
@@ -12,7 +12,7 @@ import { waitForEditorWebSocket } from "../helper"
 test.describe("Websocket Custom pre-loaded resources", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/websocket/websocket_text_custom_resources.html")
-    await waitForEditorWebSocket(page)
+    await waitForEditorInit(page)
   })
 
   test("should have title", async ({ page }) => {

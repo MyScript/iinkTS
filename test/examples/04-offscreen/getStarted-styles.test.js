@@ -3,18 +3,17 @@ import {
   getEditorSymbols,
   callEditorIdle,
   waitForConvertedEvent,
-  waitForEditorOffscreen,
+  waitForEditorInit,
   waitForSynchronizedEvent,
   writeStrokes,
-  callEditoConvert,
-  callEditoClear,
+  callEditoConvert
 } from "../helper"
 import helloOneStroke from "../__dataset__/helloOneStroke"
 
 test.describe("Offscreen Get Started Menu Style", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/offscreen-interactivity/index.html")
-    await waitForEditorOffscreen(page)
+    await waitForEditorInit(page)
     await callEditorIdle(page)
   })
 
@@ -115,7 +114,7 @@ test.describe("Offscreen Get Started Menu Style", () => {
 
         for (const char of chars) {
           expect(char.fontSize).toStrictEqual(fontSize.pixels)
-          expect(page.locator(`#${ char.id }`)).toHaveAttribute("font-size", fontSize.pixels.toString() + "px")
+          await expect(page.locator(`#${ char.id }`)).toHaveAttribute("font-size", fontSize.pixels.toString() + "px")
         }
       })
     })

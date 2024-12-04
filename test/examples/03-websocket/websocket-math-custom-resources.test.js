@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test"
 import {
-  waitForEditorWebSocket,
+  waitForEditorInit,
   waitForExportedEvent,
   callEditorIdle,
   getEditorConfiguration,
@@ -14,7 +14,7 @@ test.describe("Custom resources math", () => {
 
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/websocket/websocket_math_custom_resources.html")
-    await waitForEditorWebSocket(page)
+    await waitForEditorInit(page)
     await callEditorIdle(page)
   })
 
@@ -38,7 +38,7 @@ test.describe("Custom resources math", () => {
     const config = await getEditorConfiguration(page)
     config.recognition.math.customGrammarContent = undefined
     await setEditorConfiguration(page, config)
-    await waitForEditorWebSocket(page)
+    await waitForEditorInit(page)
 
     for(const s of equation.strokes) {
       await Promise.all([

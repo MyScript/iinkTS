@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test"
-import { waitForEditorWebSocket, writeStrokes, waitForExportedEvent, callEditorIdle } from "../helper"
+import { waitForEditorInit, writeStrokes, waitForExportedEvent, callEditorIdle } from "../helper"
 import h from "../__dataset__/h"
 
 function hexToRgbA(hex) {
@@ -22,7 +22,7 @@ test.describe("Websocket Text Customize Stroke Style", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/websocket/websocket_text_customize_stroke_style.html")
     await Promise.all([
-      waitForEditorWebSocket(page),
+      waitForEditorInit(page),
       page.waitForResponse(req => req.url().includes("api/v4.0/iink/font/google/language/en_US"))
     ])
     await callEditorIdle(page)
@@ -44,7 +44,6 @@ test.describe("Websocket Text Customize Stroke Style", () => {
 
   test("should draw stroke with penStyleClasses", async ({ page }) => {
     await page.locator("#penStyleClasses").check()
-    await page.waitForTimeout(2000)
 
     await Promise.all([
       waitForExportedEvent(page),
@@ -72,11 +71,11 @@ test.describe("Websocket Text Customize Stroke Style", () => {
   })
 
   test("should draw stroke with default penStyle", async ({ page }) => {
-    expect(await page.locator("#pencolor").isDisabled()).toEqual(true)
-    expect(await page.locator("#penwidth").isDisabled()).toEqual(true)
+    await expect(page.locator("#pencolor")).toBeDisabled()
+    await expect(page.locator("#penwidth")).toBeDisabled()
     await page.setChecked("#penenabled", true)
-    expect(await page.locator("#pencolor").isDisabled()).toEqual(false)
-    expect(await page.locator("#penwidth").isDisabled()).toEqual(false)
+    await expect(page.locator("#pencolor")).toBeEnabled()
+    await expect(page.locator("#penwidth")).toBeEnabled()
 
     await Promise.all([
       waitForExportedEvent(page),
@@ -88,18 +87,18 @@ test.describe("Websocket Text Customize Stroke Style", () => {
     expect(await path.count()).toEqual(1)
 
     await page.setChecked("#penenabled", false)
-    expect(await page.locator("#pencolor").isDisabled()).toEqual(true)
-    expect(await page.locator("#penwidth").isDisabled()).toEqual(true)
+    await expect(page.locator("#pencolor")).toBeDisabled()
+    await expect(page.locator("#penwidth")).toBeDisabled()
   })
 
   test("should draw stroke with selected penStyle", async ({ page }) => {
     const penColorExpected = "#1a5fb4"
-    expect(await page.locator("#pencolor").isDisabled()).toEqual(true)
-    expect(await page.locator("#penwidth").isDisabled()).toEqual(true)
+    await expect(page.locator("#pencolor")).toBeDisabled()
+    await expect(page.locator("#penwidth")).toBeDisabled()
 
     await page.setChecked("#penenabled", true)
-    expect(await page.locator("#pencolor").isDisabled()).toEqual(false)
-    expect(await page.locator("#penwidth").isDisabled()).toEqual(false)
+    await expect(page.locator("#pencolor")).toBeEnabled()
+    await expect(page.locator("#penwidth")).toBeEnabled()
 
     await page.fill("#pencolor", penColorExpected)
 

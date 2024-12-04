@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test"
 import {
-  waitForEditorWebSocket,
+  waitForEditorInit,
   callEditorIdle,
   writePointers,
   waitForExportedEvent
@@ -19,7 +19,7 @@ const switchToOtherQuestion = async (page, inputId) => {
 test.describe("Websocket Text Multiple Inputs", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/websocket/websocket_text_multiple_inputs.html")
-    await waitForEditorWebSocket(page)
+    await waitForEditorInit(page)
   })
 
   test("should have title", async ({ page }) => {

@@ -37,7 +37,6 @@ let projects
 if (process.env.PROJECT) {
   const proj = defaultProject.find(p => process.env.PROJECT === p.name)
   if (!proj) {
-    // eslint-disable-next-line no-console
     console.error(`PROJECT not found: ${process.env.PROJECT}, values allowed are: [${defaultProject.map(p => p.name).join(", ")}]` )
   }
   else {

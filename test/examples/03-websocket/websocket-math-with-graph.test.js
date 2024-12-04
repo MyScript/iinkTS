@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test"
 import {
-  waitForEditorWebSocket,
+  waitForEditorInit,
   waitForExportedEvent,
   callEditorIdle,
   writePointers
@@ -11,7 +11,7 @@ import equation from "../__dataset__/equation"
 test.describe("Websocket Math With Graph", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/websocket/websocket_math_with_graph.html")
-    await waitForEditorWebSocket(page)
+    await waitForEditorInit(page)
     await callEditorIdle(page)
   })
 

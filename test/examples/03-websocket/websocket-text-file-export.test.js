@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test"
 import {
   writeStrokes,
   waitForExportedEvent,
-  waitForEditorWebSocket,
+  waitForEditorInit,
   callEditorIdle
 } from "../helper"
 import hello from "../__dataset__/helloOneStroke"
@@ -11,7 +11,7 @@ import TextNavActions from "../_partials/text-nav-actions"
 test.describe("Websocket Text file export", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/websocket/websocket_text_file_export.html")
-    await waitForEditorWebSocket(page)
+    await waitForEditorInit(page)
     await callEditorIdle(page)
   })
 

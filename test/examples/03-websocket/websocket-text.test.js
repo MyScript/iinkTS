@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 import {
-  waitForEditorWebSocket,
+  waitForEditorInit,
   writeStrokes,
   waitForExportedEvent,
   getEditorExportsType,
@@ -19,7 +19,7 @@ test.describe('Websocket Text', () => {
     await page.goto('/examples/websocket/websocket_text_iink.html')
     await Promise.all([
       page.waitForResponse((req) => req.url().includes('/api/v4.0/iink/availableLanguageList')),
-      waitForEditorWebSocket(page)
+      waitForEditorInit(page)
     ])
     await callEditorIdle(page)
   })
@@ -48,7 +48,7 @@ test.describe('Websocket Text', () => {
       await setEditorConfiguration(page, configuration)
       await Promise.all([
         exportPormise,
-        waitForEditorWebSocket(page)
+        waitForEditorInit(page)
       ])
 
       const [firstModelExports] = await Promise.all([
@@ -73,7 +73,7 @@ test.describe('Websocket Text', () => {
       await setEditorConfiguration(page, configuration)
       await Promise.all([
         exportPormise,
-        waitForEditorWebSocket(page)
+        waitForEditorInit(page)
       ])
 
       const [firstModelExports] = await Promise.all([
@@ -98,7 +98,7 @@ test.describe('Websocket Text', () => {
       await setEditorConfiguration(page, configuration)
       await Promise.all([
         exportPormise,
-        waitForEditorWebSocket(page)
+        waitForEditorInit(page)
       ])
 
       const [firstModelExports] = await Promise.all([
@@ -143,16 +143,16 @@ test.describe('Websocket Text', () => {
       await setEditorConfiguration(page, configuration)
       await Promise.all([
         waitForExportedEvent(page),
-        waitForEditorWebSocket(page)
+        waitForEditorInit(page)
       ])
-      await expect(page.locator('.smartguide')).not.toBeVisible()
+      await expect(page.locator('.smartguide')).toBeHidden()
     })
 
     await test.step('should display', async () => {
       const configuration = await getEditorConfiguration(page)
       configuration.rendering.smartGuide.enable = true
       setEditorConfiguration(page, configuration)
-      await waitForEditorWebSocket(page)
+      await waitForEditorInit(page)
       await expect(page.locator('.smartguide')).toBeVisible()
     })
 
@@ -169,7 +169,7 @@ test.describe('Websocket Text', () => {
     await test.step('should select candidate', async () => {
       const jiixExport = await getEditorExportsType(page, 'application/vnd.myscript.jiix')
       await expect(page.locator('.prompter-text')).toHaveText(jiixExport.label)
-      await expect(page.locator('.candidates')).not.toBeVisible()
+      await expect(page.locator('.candidates')).toBeHidden()
 
       await page.click(`.prompter-text > span`)
       await expect(page.locator('.candidates')).toBeVisible()
@@ -181,11 +181,11 @@ test.describe('Websocket Text', () => {
       ])
 
       await expect(page.locator('.prompter-text')).toHaveText(candidate)
-      await expect(page.locator('.candidates')).not.toBeVisible()
+      await expect(page.locator('.candidates')).toBeHidden()
     })
 
     await test.step('should open menu more', async () => {
-      await expect(page.locator('.more-menu')).not.toBeVisible()
+      await expect(page.locator('.more-menu')).toBeHidden()
       await page.click(`.ellipsis`)
       await expect(page.locator('.more-menu')).toBeVisible()
     })
@@ -200,35 +200,25 @@ test.describe('Websocket Text', () => {
       const convert = await getEditorExports(page)
       expect(convert).toBeDefined()
 
-      const convertedPath = await page.locator('path').first().getAttribute('d')
-      expect(wrotePath).not.toEqual(convertedPath)
+      await expect(page.locator('path').first()).not.toHaveAttribute(wrotePath)
     })
 
     await test.step('should close menu more after convert', async () => {
-      // wait for css animation
-      await page.waitForTimeout(1000)
-      await expect(page.locator('.more-menu')).not.toBeVisible()
+      await expect(page.locator('.more-menu')).toBeHidden()
     })
 
     await test.step('should Delete', async () => {
       await page.click(`.ellipsis`)
-      // wait for css animation
-      await page.waitForTimeout(1000)
       await expect(page.locator('.more-menu')).toBeVisible()
 
       await Promise.all([
         waitForExportedEvent(page),
         page.click(`.more-menu > button >> text=Delete`)
       ])
-
-      // wait for css animation
-      await page.waitForTimeout(1000)
       expect(await page.locator('path').count()).toEqual(0)
     })
 
     await test.step('should close menu more after delete', async () => {
-      // wait for css animation
-      await page.waitForTimeout(1000)
       await expect(page.locator('.more-menu')).toBeHidden()
     })
 

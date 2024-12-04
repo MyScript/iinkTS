@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test"
 import {
-  waitForEditorRest,
+  waitForEditorInit,
   writeStrokes,
   waitForExportedEvent,
   setEditorConfiguration,
@@ -14,7 +14,7 @@ test.describe("Rest Diagram", () => {
 
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/rest/rest_diagram_iink.html")
-    await waitForEditorRest(page)
+    await waitForEditorInit(page)
   })
 
   test("should have title", async ({ page }) => {
@@ -122,11 +122,11 @@ test.describe("Rest Diagram", () => {
       ])
       expect(promisesResult[0]).toBeNull()
       expect(await getEditorExports(page)).toBeFalsy()
-      expect(await page.locator("#result").textContent()).toBe("{}")
+      await expect(page.locator("#result")).toHaveText("{}")
     })
 
     test("should undo/redo", async ({ page }) => {
-      const editorEl = await page.waitForSelector("#editor")
+      const editorEl = page.locator("#editor")
       await Promise.all([
         waitForExportedEvent(page),
         writeStrokes(page, [rectangle.strokes[0]])

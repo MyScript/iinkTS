@@ -14,29 +14,28 @@ test.describe("Home Page", () => {
   })
 
   test("each table of contents link must be associated with a detail", async ({ page }) => {
-    const links = await page.locator("#table-of-content li")
-    const sectionParts = await page.locator("details")
+    const links = page.locator("#table-of-content li")
+    const sectionParts = page.locator("details")
     const linksCount = await links.count()
     const secctionPartsCount = await sectionParts.count()
     expect(linksCount).toBe(secctionPartsCount)
 
     for (let i = 0; i < linksCount; i++) {
-      const linkHref = await links.nth(i).locator("a").getAttribute("href")
       const sectionPartName = await sectionParts.nth(i).getAttribute("name")
-      expect(linkHref).toBe("#" + sectionPartName)
+      await expect(links.nth(i).locator("a")).toHaveAttribute("href", "#" + sectionPartName)
     }
   })
 
   test("for each example-recognition each example-item should have 2 links", async ({ page }) => {
-    const exampleDetails = await page.locator(".example-recognition")
+    const exampleDetails = page.locator(".example-recognition")
 
     for (let i = 0; i < await exampleDetails.count(); i++) {
       const currentDetail = exampleDetails.nth(i);
       await currentDetail.click()
-      const exampleItems = await currentDetail.locator(".example-item")
+      const exampleItems = currentDetail.locator(".example-item")
 
       for (let i = 0; i < await exampleItems.count(); i++) {
-        const links = await exampleItems.nth(i).locator("a")
+        const links = exampleItems.nth(i).locator("a")
         expect(await links.count()).toBe(2)
 
         const exampleLink = links.nth(0)
@@ -55,7 +54,7 @@ test.describe("Home Page", () => {
   })
 
   test("each \"View example\" link should be ok", async ({ page }) => {
-    const exampleLink = await page.locator("text=View example")
+    const exampleLink = page.locator("text=View example")
 
     const currentUrl = page.url()
     const linksInErrors = []
@@ -63,6 +62,7 @@ test.describe("Home Page", () => {
       const link = exampleLink.nth(i)
       const href = await link.getAttribute("href")
       const examplePage = await page.request.get(currentUrl.replace("index.html", href));
+      // eslint-disable-next-line playwright/no-conditional-in-test
       if (!examplePage.ok()) {
         linksInErrors.push(href)
       }
@@ -71,13 +71,13 @@ test.describe("Home Page", () => {
   })
 
   test("each \"Get source code\" link should target https://github.com/MyScript/iinkTS", async ({ page }) => {
-    const exampleDetails = await page.locator(".example-recognition")
+    const exampleDetails = page.locator(".example-recognition")
     for (let i = 0; i < await exampleDetails.count(); i++) {
       const currentDetail = exampleDetails.nth(i);
       await currentDetail.click()
     }
-    const codeLinks = await page.locator("text=Get source code")
-    const exampleLinks = await page.locator("text=View example")
+    const codeLinks = page.locator("text=Get source code")
+    const exampleLinks = page.locator("text=View example")
     for (let i = 0; i < await exampleLinks.count(); i++) {
       // const exampleHref = await exampleLinks.nth(i).getAttribute("href")
       const linkHref = await codeLinks.nth(i).getAttribute("href")

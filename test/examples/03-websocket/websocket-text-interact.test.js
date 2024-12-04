@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test"
 import {
   writeStrokes,
-  waitForEditorWebSocket,
+  waitForEditorInit,
   callEditorIdle,
   getEditorExportsType,
   waitForExportedEvent,
@@ -17,7 +17,7 @@ import TextNavActions from "../_partials/text-nav-actions"
 test.describe("Websocket Text interact", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/websocket/websocket_text_interact.html")
-    await waitForEditorWebSocket(page)
+    await waitForEditorInit(page)
     await callEditorIdle(page)
   })
 
