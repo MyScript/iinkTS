@@ -32,7 +32,8 @@
     "allowJs": false
   },
   "include": [
-    "src"
+    "src",
+    "./eslint.config.mjs"
   ],
   "exclude": [
     "node_modules",
