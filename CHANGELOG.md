@@ -1,3 +1,30 @@
+# [v2.0.2](https://github.com/MyScript/iinkTS/tree/v2.0.1)
+
+## Features
+- configuration update
+  - added classification to raw-content
+  - added base lines on jiix
+- can resize edges by vertices
+- sync strokes with jiix element continuously
+
+## Refactor
+- centralize layers, move smartguide into WSBehaviors
+- centralize event, rename intention to tool
+- separation of smart guide style into a specific file
+- separation of menu style into a specific file
+
+## Bugs fix
+- fix(Convert) misalignment when converting text
+- fix(Interact) keep cursor during shape transformation
+- fix(Behaviors) fix change langage to reset init promise and raise event loaded
+- fix(RestBehaviors) missing exported event when export function ended
+
+## Samples
+- updating the display of exchanged Websocket messages on TLDraw example
+
+## Chore
+- chore(deps): upgrade all dependencies
+
 # [v2.0.1](https://github.com/MyScript/iinkTS/tree/v2.0.1)
 
 ## Features
