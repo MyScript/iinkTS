@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test"
-import { callEditorIdle, waitForEditorInit, writeStrokes, callEditorExport, waitForSynchronizedEvent, getEditorSymbols } from "../helper"
+import { callEditorIdle, waitForEditorInit, writeStrokes, waitForSynchronizedEvent, getEditorSymbols } from "../helper"
 import helloOneStroke from "../__dataset__/helloOneStroke"
 
 test.describe("Offscreen Get Started", () => {

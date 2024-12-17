@@ -165,6 +165,7 @@ export class OIBehaviors implements IBehaviors
     this.renderer.resize(height, width)
     this.model.rowHeight = this.configuration.rendering.guides.gap
     this.history.stack.forEach(i => i.model.rowHeight = this.model.rowHeight)
+    this.event.emitUIpdated()
   }
   //#endregion
 

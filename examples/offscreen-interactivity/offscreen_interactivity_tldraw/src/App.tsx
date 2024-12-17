@@ -194,16 +194,16 @@ export default function App()
 							padding: 12
 						}}
 					>
-						<div className={`tab-content ${ tabName === "Shapes" ? "active" : "" }`}>
+						<div id="shapes-tab-content" className={`tab-content ${ tabName === "Shapes" ? "active" : "" }`}>
 							<ReactJson src={editor?.getCurrentPageShapes() as object} collapsed={true} />
 						</div>
-						<div className={`tab-content ${ tabName === "JIIX" ? "active" : "" }`}>
+						<div id="jiix-tab-content" className={`tab-content ${ tabName === "JIIX" ? "active" : "" }`}>
 							<ReactJson src={exports['application/vnd.myscript.jiix'] as object} collapsed={true} />
 						</div>
-						<div style={{ pointerEvents: 'none' }} className={`tab-content ${ tabName === "HTML" ? "active" : "" }`}>
+						<div id="html-tab-content" style={{ pointerEvents: 'none' }} className={`tab-content ${ tabName === "HTML" ? "active" : "" }`}>
 							{ExportHTMLTab(exports['text/html'] as string)}
 						</div>
-						<div className={`tab-content ${ tabName === "Messages" ? "active" : "" }`}>
+						<div id="messages-tab-content" className={`tab-content ${ tabName === "Messages" ? "active" : "" }`}>
 							<ReactJson src={recognizer?.messages || []} collapsed={true} />
 						</div>
 					</div>
