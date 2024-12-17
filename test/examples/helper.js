@@ -11,9 +11,14 @@
  */
 export const writePointers = async (page, pointers, offsetTop = 0, offsetLeft = 0) => {
   const editorEl = page.locator("#editor");
-  const boundingBox = await editorEl.evaluate((node) => node.getBoundingClientRect());
-  const offsetX = offsetLeft + boundingBox.x;
-  const offsetY = offsetTop + boundingBox.y;
+  const editorExist = await editorEl.count() != 0;
+  let offsetX = 0;
+  let offsetY = 0;
+  if(editorExist) {
+    const boundingBox = await editorEl.evaluate((node) => node.getBoundingClientRect());
+    offsetX = offsetLeft + boundingBox.x;
+    offsetY = offsetTop + boundingBox.y;
+  }
   const firstPointer = pointers[0];
   let oldTimestamp = 0;
   if (firstPointer.t) {
@@ -256,3 +261,20 @@ export const haveSameLabels = (jiix1, jiix2) => {
   const labels2 = findValuesByKey(jiix2, "label");
   return JSON.stringify(labels1) === JSON.stringify(labels2);
 };
+
+export class DeferredPromise {
+  constructor()
+  {
+    this.promise = new Promise((resolve, reject) =>
+    {
+      this.reject = async (v) =>
+      {
+        return reject(v)
+      }
+      this.resolve = async (v) =>
+      {
+        return resolve(v)
+      }
+    })
+  }
+}

@@ -1,4 +1,5 @@
 export default {
+  guidesWrapper: "#guides-wrapper",
   menu: {
     action: {
       gesture: {
@@ -7,6 +8,21 @@ export default {
         strikeThroughSelect: "#ms-menu-action-gesture-strikethrough",
         surroundSelect: "#ms-menu-action-gesture-surround",
         insertSelect: "#ms-menu-action-gesture-insert"
+      },
+      guide: {
+        triggerBtn: "#ms-menu-action-guide",
+        enable: "#ms-menu-action-guide-enable",
+        types: "#ms-menu-action-guide-type",
+        sizeS: "#ms-menu-action-guide-size-25-btn",
+        sizeM: "#ms-menu-action-guide-size-50-btn",
+        sizeL: "#ms-menu-action-guide-size-100-btn",
+        sizeXL: "#ms-menu-action-guide-size-150-btn"
+      },
+      snap: {
+        triggerBtn: "#ms-menu-action-snap",
+        snapToGuide: "#ms-menu-action-snap-to-guide",
+        snapToElement: "#ms-menu-action-snap-to-element",
+        snapAngle: "#ms-menu-action-snap-angle"
       },
       convertBtn: "#ms-menu-action-convert",
       undoBtn: "#ms-menu-action-undo",
