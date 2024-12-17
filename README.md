@@ -142,7 +142,7 @@ yarn add iink-ts
         </style>
     </head>
     <body>
-        <div id="editor" touch-action="none"></div>
+        <div id="editor"></div>
         <script>
             const editorElement = document.getElementById('editor');
 
@@ -172,7 +172,7 @@ yarn add iink-ts
         </style>
     </head>
     <body>
-        <div id="editor" touch-action="none"></div>
+        <div id="editor"></div>
         <script>
             const editorElement = document.getElementById('editor');
 
