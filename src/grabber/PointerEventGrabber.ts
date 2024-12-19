@@ -1,5 +1,5 @@
 import { TGrabberConfiguration } from "../configuration"
-import { LoggerClass, LoggerManager } from "../logger"
+import { LoggerClass, LoggerLevel, LoggerManager } from "../logger"
 import { TPointer } from "../symbol"
 import { IGrabber } from "./IGrabber"
 
@@ -12,7 +12,8 @@ export class PointerEventGrabber implements IGrabber
 
   protected domElement!: HTMLElement
 
-  protected activePointerId?: number
+  protected capturing: boolean = false
+  protected pointerType?: string
 
   protected prevent = (e: Event) => e.preventDefault()
   #logger = LoggerManager.getLogger(LoggerClass.GRABBER)
@@ -56,63 +57,103 @@ export class PointerEventGrabber implements IGrabber
     return pointer
   }
 
+  protected getPointerInfos(evt: PointerEvent): { clientX: number, clientY: number, isPrimary: boolean, type: string, pointerType: string, target: string }
+  {
+    return {
+      clientX: evt.clientX,
+      clientY: evt.clientY,
+      isPrimary: evt.isPrimary,
+      type: evt.type,
+      target: (evt.target as HTMLElement)?.tagName,
+      pointerType: evt.pointerType,
+    }
+  }
+
   protected pointerDownHandler = (evt: PointerEvent) =>
   {
-    this.#logger.info("pointerDown", { evt })
+    this.#logger.debug("pointerDownHandler", { evt })
 
     // exit if not a left click or multi-touch
     if (evt.button !== 0 || evt.buttons !== 1) {
       return
     }
+    this.capturing = true
+    this.pointerType = evt.pointerType
 
-    this.activePointerId = evt.pointerId
+    if (this.#logger.level === LoggerLevel.INFO) {
+      this.#logger.info("pointerDownHandler", this.getPointerInfos(evt))
+    }
 
     if (this.onPointerDown) {
+      evt.stopPropagation()
       const point = this.extractPoint(evt)
       this.onPointerDown(evt, point)
     }
   }
 
+  protected isOrIsInDomElement(target: HTMLElement): boolean
+  {
+    return this.domElement == target || this.domElement.contains(target)
+  }
+
   protected pointerMoveHandler = (evt: PointerEvent) =>
   {
-    this.#logger.info("pointerMove", { evt })
-    if (this.activePointerId != undefined && this.activePointerId === evt.pointerId) {
-      if ((evt.target as HTMLElement).classList.contains("smartguide")) {
+    this.#logger.debug("pointerMoveHandler", { evt })
+    if (this.capturing && this.pointerType === evt.pointerType) {
+      if (this.#logger.level === LoggerLevel.INFO) {
+        this.#logger.info("pointerMoveHandler", this.getPointerInfos(evt))
+      }
+      if (
+        !evt.target ||
+        !this.isOrIsInDomElement(evt.target as HTMLElement) ||
+        (evt.target as HTMLElement).classList.contains("smartguide")
+      ) {
         this.pointerUpHandler(evt)
         return
       }
       if (this.onPointerMove) {
+        evt.stopPropagation()
         const point = this.extractPoint(evt)
         this.onPointerMove(evt, point)
       }
     }
   }
 
+  protected applyEndCapture(evt: PointerEvent): void
+  {
+    this.#logger.debug("applyEndCapture", { evt })
+    this.pointerType = undefined
+    this.capturing = false
+    if (this.onPointerUp) {
+      evt.stopPropagation()
+      const point = this.extractPoint(evt)
+      this.onPointerUp(evt, point)
+    }
+  }
+
   protected pointerUpHandler = (evt: PointerEvent) =>
   {
-    this.#logger.info("pointerUp", { evt })
-    if (this.activePointerId != undefined && this.activePointerId === evt.pointerId) {
-      this.activePointerId = undefined
-      evt.stopPropagation()
-      if (this.onPointerUp) {
-        const point = this.extractPoint(evt)
-        this.onPointerUp(evt, point)
+    this.#logger.debug("pointerUpHandler", { evt })
+    if (this.capturing && this.pointerType === evt.pointerType) {
+      if (this.#logger.level === LoggerLevel.INFO) {
+        this.#logger.info("pointerUpHandler", this.getPointerInfos(evt))
       }
+      this.applyEndCapture(evt)
     }
   }
 
   protected pointerOutHandler = (evt: PointerEvent) =>
   {
+    this.#logger.debug("pointerOutHandler", { evt })
     if (
-      this.activePointerId != undefined && this.activePointerId === evt.pointerId &&
-      !this.domElement.contains(evt.target as HTMLElement)
+      this.capturing &&
+      this.pointerType === evt.pointerType &&
+      (!evt.target || !this.isOrIsInDomElement(evt.target as HTMLElement))
     ) {
-      evt.stopPropagation()
-      this.activePointerId = undefined
-      if (this.onPointerUp) {
-        const point = this.extractPoint(evt)
-        this.onPointerUp(evt, point)
+      if (this.#logger.level === LoggerLevel.INFO) {
+        this.#logger.info("pointerOutHandler", this.getPointerInfos(evt))
       }
+      this.applyEndCapture(evt)
     }
   }
 
@@ -123,11 +164,14 @@ export class PointerEventGrabber implements IGrabber
       this.detach()
     }
     this.domElement = domElement
+    // The touch-action CSS property prevents the input from continuing.
+    // https://developer.mozilla.org/en-US/docs/Web/API/Element/pointercancel_event
+    domElement.style.setProperty("touch-action", "none")
     this.domElement.addEventListener("pointerdown", this.pointerDownHandler, this.configuration.listenerOptions)
     this.domElement.addEventListener("pointermove", this.pointerMoveHandler, this.configuration.listenerOptions)
     this.domElement.addEventListener("pointerup", this.pointerUpHandler, this.configuration.listenerOptions)
-    this.domElement.addEventListener("pointerleave", this.pointerUpHandler, this.configuration.listenerOptions)
     this.domElement.addEventListener("pointercancel", this.pointerUpHandler, this.configuration.listenerOptions)
+    this.domElement.addEventListener("pointerleave", this.pointerUpHandler, this.configuration.listenerOptions)
     this.domElement.addEventListener("pointerout", this.pointerOutHandler, this.configuration.listenerOptions)
 
     this.domElement.addEventListener("touchmove", this.prevent)

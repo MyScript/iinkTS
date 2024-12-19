@@ -1,5 +1,5 @@
 import { TGrabberConfiguration } from "../configuration"
-import { LoggerClass, LoggerManager } from "../logger"
+import { LoggerClass, LoggerLevel, LoggerManager } from "../logger"
 import { TPointer } from "../symbol"
 import { IGrabber } from "./IGrabber"
 
@@ -12,7 +12,8 @@ export class OIPointerEventGrabber implements IGrabber
 
   protected configuration: TGrabberConfiguration
   protected layerCapture!: SVGElement
-  protected activePointerId?: number
+  protected capturing: boolean = false
+  protected pointerType?: string
   protected prevent = (e: Event) => e.preventDefault()
 
   onPointerDown!: (evt: PointerEvent, point: TPointer) => void
@@ -55,16 +56,32 @@ export class OIPointerEventGrabber implements IGrabber
     return pointer
   }
 
+  protected getPointerInfos(evt: PointerEvent): { clientX: number, clientY: number, isPrimary: boolean, type: string, pointerType: string, target: string }
+  {
+    return {
+      clientX: evt.clientX,
+      clientY: evt.clientY,
+      isPrimary: evt.isPrimary,
+      type: evt.type,
+      target: (evt.target as HTMLElement)?.tagName,
+      pointerType: evt.pointerType,
+    }
+  }
+
   protected pointerDownHandler = (evt: PointerEvent) =>
   {
-    this.#logger.info("pointerDown", { evt })
+    this.#logger.debug("pointerDownHandler", { evt })
 
     // exit if not a left click or multi-touch
     if (evt.button !== 0 || evt.buttons !== 1) {
       return
     }
+    this.capturing = true
+    this.pointerType = evt.pointerType
 
-    this.activePointerId = evt.pointerId
+    if (this.#logger.level === LoggerLevel.INFO) {
+      this.#logger.info("pointerDownHandler", this.getPointerInfos(evt))
+    }
 
     if (this.onPointerDown) {
       const point = this.extractPoint(evt)
@@ -74,8 +91,11 @@ export class OIPointerEventGrabber implements IGrabber
 
   protected pointerMoveHandler = (evt: PointerEvent) =>
   {
-    this.#logger.info("pointerMove", { evt })
-    if (this.activePointerId != undefined && this.activePointerId === evt.pointerId) {
+    this.#logger.debug("pointerMoveHandler", { evt })
+    if (this.capturing && this.pointerType === evt.pointerType) {
+      if (this.#logger.level === LoggerLevel.INFO) {
+        this.#logger.info("pointerMoveHandler", this.getPointerInfos(evt))
+      }
       if (this.onPointerMove) {
         const point = this.extractPoint(evt)
         this.onPointerMove(evt, point)
@@ -85,10 +105,13 @@ export class OIPointerEventGrabber implements IGrabber
 
   protected pointerUpHandler = (evt: PointerEvent) =>
   {
-    this.#logger.info("pointerUp", { evt })
-    if (this.activePointerId != undefined && this.activePointerId === evt.pointerId) {
-      this.activePointerId = undefined
-      evt.stopPropagation()
+    this.#logger.debug("pointerUpHandler", { evt })
+    if (this.capturing && this.pointerType === evt.pointerType) {
+      if (this.#logger.level === LoggerLevel.INFO) {
+        this.#logger.info("pointerUpHandler", this.getPointerInfos(evt))
+      }
+      this.pointerType = undefined
+      this.capturing = false
       if (this.onPointerUp) {
         const point = this.extractPoint(evt)
         this.onPointerUp(evt, point)
@@ -98,12 +121,13 @@ export class OIPointerEventGrabber implements IGrabber
 
   protected pointerOutHandler = (evt: PointerEvent) =>
   {
-    if (
-      this.activePointerId != undefined && this.activePointerId === evt.pointerId &&
-      !this.layerCapture.contains(evt.target as HTMLElement)
-    ) {
-      evt.stopPropagation()
-      this.activePointerId = undefined
+    this.#logger.debug("pointerOutHandler", this.getPointerInfos(evt))
+    if (this.capturing && this.pointerType === evt.pointerType && !this.layerCapture.contains(evt.target as HTMLElement)) {
+      if (this.#logger.level === LoggerLevel.INFO) {
+        this.#logger.info("pointerOutHandler", this.getPointerInfos(evt))
+      }
+      this.pointerType = undefined
+      this.capturing = false
       if (this.onPointerUp) {
         const point = this.extractPoint(evt)
         this.onPointerUp(evt, point)
@@ -113,7 +137,11 @@ export class OIPointerEventGrabber implements IGrabber
 
   protected contextMenuHandler = (evt: MouseEvent) =>
   {
+    this.#logger.debug("contextMenuHandler", evt)
     if (evt.target) {
+      if (this.#logger.level === LoggerLevel.INFO) {
+        this.#logger.info("contextMenuHandler", this.getPointerInfos(evt as PointerEvent))
+      }
       const point = this.extractPoint(evt)
       this.onContextMenu(evt.target as HTMLElement, point)
     }
@@ -121,7 +149,8 @@ export class OIPointerEventGrabber implements IGrabber
 
   stopPointerEvent(): void
   {
-    this.activePointerId = undefined
+    this.capturing = false
+    this.pointerType = undefined
   }
 
   attach(layerCapture: SVGElement)
@@ -130,6 +159,9 @@ export class OIPointerEventGrabber implements IGrabber
     if (this.layerCapture) {
       this.detach()
     }
+    // The touch-action CSS property prevents the input from continuing.
+    // https://developer.mozilla.org/en-US/docs/Web/API/Element/pointercancel_event
+    layerCapture.style.setProperty("touch-action", "none")
     this.layerCapture = layerCapture
     this.layerCapture.addEventListener("pointerdown", this.pointerDownHandler, this.configuration.listenerOptions)
     this.layerCapture.addEventListener("pointermove", this.pointerMoveHandler, this.configuration.listenerOptions)
