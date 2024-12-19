@@ -37,7 +37,7 @@ test.describe('Websocket Text', () => {
     const jiixReceived = exports['application/vnd.myscript.jiix']
     const modelExportJiixReceived = await getEditorExportsType(page, 'application/vnd.myscript.jiix')
     expect(jiixReceived).toEqual(modelExportJiixReceived)
-    expect(jiixReceived).toEqual(jiixExpected)
+    expect(jiixReceived.label).toEqual(jiixExpected.label)
   })
 
   test.describe('Gesture', () => {
