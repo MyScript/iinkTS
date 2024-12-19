@@ -1,4 +1,4 @@
-# [v2.0.2](https://github.com/MyScript/iinkTS/tree/v2.0.1)
+# [v2.0.2](https://github.com/MyScript/iinkTS/tree/v2.0.2)
 
 ## Features
 - configuration update
@@ -14,6 +14,7 @@
 - separation of menu style into a specific file
 
 ## Bugs fix
+- fix(Grabber) prevents the pointer cancel for touch event
 - fix(Convert) misalignment when converting text
 - fix(Interact) keep cursor during shape transformation
 - fix(Behaviors) fix change langage to reset init promise and raise event loaded
