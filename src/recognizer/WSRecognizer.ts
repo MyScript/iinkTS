@@ -3,7 +3,7 @@ import { Model, TExport, TJIIXExport } from "../model"
 import { Stroke } from "../symbol"
 import { StyleHelper, TPenStyle, TTheme } from "../style"
 import { THistoryContext } from "../history"
-import { DeferredPromise, PartialDeep, computeHmac, isVersionSuperiorOrEqual } from "../utils"
+import { DeferredPromise, PartialDeep, computeHmac, getApiInfos, isVersionSuperiorOrEqual } from "../utils"
 import
 {
   TWSMessageEvent,
@@ -49,7 +49,6 @@ import { TConverstionState } from "./RecognitionConfiguration"
 export class WSRecognizer
 {
   #logger = LoggerManager.getLogger(LoggerCategory.RECOGNIZER)
-  protected configuration: TWSRecognizerConfiguration
 
   protected socket!: WebSocket
   protected pingCount = 0
@@ -78,6 +77,7 @@ export class WSRecognizer
   protected importPointEventsDeferred?: DeferredPromise<TExport>
   protected waitForIdleDeferred?: DeferredPromise<void>
 
+  configuration: TWSRecognizerConfiguration
   initialized: DeferredPromise<void>
   url: string
   event: RecognizerEvent
@@ -132,7 +132,7 @@ export class WSRecognizer
       viewSizeHeight: this.viewSizeHeight,
       viewSizeWidth: this.viewSizeWidth
     }
-    if (isVersionSuperiorOrEqual(this.configuration.server.version, "2.0.4")) {
+    if (isVersionSuperiorOrEqual(this.configuration.server.version!, "2.0.4")) {
       params["myscript-client-name"] = "iink-ts"
       params["myscript-client-version"] = "1.0.0-buildVersion"
     }
@@ -253,7 +253,12 @@ export class WSRecognizer
     if (hmacChallengeMessage.iinkSessionId) {
       this.sessionId = hmacChallengeMessage.iinkSessionId
     }
-
+    if (!isVersionSuperiorOrEqual(this.configuration.server.version!, "2.3.0")) {
+      delete this.configuration.recognition.convert
+    }
+    if (!isVersionSuperiorOrEqual(this.configuration.server.version!, "3.2.0")) {
+      delete this.configuration.recognition.export.jiix.text.lines
+    }
     this.send({ ...this.configuration.recognition, type: "configuration" })
     this.ackDeferred?.resolve()
   }
@@ -395,6 +400,10 @@ export class WSRecognizer
       this.event.emitStartInitialization()
       this.#logger.info("init", { height, width })
       this.destroy()
+
+      if (!this.configuration.server.version) {
+        this.configuration.server.version = (await getApiInfos(this.configuration)).version
+      }
       this.connected = new DeferredPromise<void>()
       this.initialized = new DeferredPromise<void>()
       this.ackDeferred = new DeferredPromise<void>()

@@ -26,6 +26,7 @@ describe("EditorOffscreen.ts", () =>
   const EditorOptions: TEditorOffscreenOptions = {
     configuration: JSON.parse(JSON.stringify(DefaultEditorOffscreenConfiguration))
   }
+  EditorOptions.configuration!.server!.version = "3.0.0"
 
   test("should instanciate", () =>
   {

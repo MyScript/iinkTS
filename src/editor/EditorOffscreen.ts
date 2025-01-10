@@ -410,6 +410,10 @@ export class EditorOffscreen extends AbstractEditor
 
       this.history.init(this.model)
 
+      if(!this.recognizer.configuration.server.version) {
+        await this.loadInfo(this.configuration.server)
+        this.recognizer.configuration.server.version = this.info!.version
+      }
       await this.recognizer.init()
     } catch (error) {
       this.logger.error("initialize", error)

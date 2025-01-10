@@ -259,6 +259,10 @@ export class EditorWebSocket extends AbstractEditor
 
       this.initializeSmartGuide()
 
+      if(!this.recognizer.configuration.server.version) {
+        await this.loadInfo(this.configuration.server)
+        this.recognizer.configuration.server.version = this.info!.version
+      }
       await this.recognizer.init(this.model.height, this.model.width)
       this.recognizer.event.addExportedListener(this.onExport.bind(this))
       this.recognizer.event.addSVGPatchListener(this.onSVGPatch.bind(this))
