@@ -42,7 +42,7 @@ export type TRecognitionConfiguration = {
     enable: boolean,
     ignoreGestureStrokes: boolean
   }
-  convert: TConvertionConfiguration
+  convert?: TConvertionConfiguration
 }
 
 /**

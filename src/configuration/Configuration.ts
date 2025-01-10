@@ -1,6 +1,6 @@
 
 import { LoggerClass, LoggerManager } from "../logger"
-import { PartialDeep, mergeDeep } from "../utils"
+import { PartialDeep, isVersionSuperiorOrEqual, mergeDeep } from "../utils"
 import { DefaultGrabberConfiguration, TGrabberConfiguration } from "./GrabberConfiguration"
 import { DefaultMenuConfiguration, TMenuConfiguration } from "./MenuConfiguration"
 import { DefaultRecognitionConfiguration, TRecognitionConfiguration } from "./RecognitionConfiguration"
@@ -117,7 +117,7 @@ export class Configuration implements TConfiguration
       this.recognition.export.jiix.text.words = true
       this.recognition.export.jiix.text.chars = true
       this.recognition.export.jiix.text.lines = true
-      this.recognition.export.jiix["bounding-box"]= true
+      this.recognition.export.jiix["bounding-box"] = true
     }
     else {
       if (
@@ -147,6 +147,15 @@ export class Configuration implements TConfiguration
       delete this.recognition["raw-content"].gestures
       this.menu.style.enable = false
     }
+
+    if (!isVersionSuperiorOrEqual(this.server.version, "2.3.0")) {
+      delete this.recognition.convert
+    }
+    if (!isVersionSuperiorOrEqual(this.server.version, "3.2.0")) {
+      delete this.recognition.export.jiix.text.lines
+      delete this.recognition["raw-content"].classification
+    }
+
     this.#logger.debug("overrideDefaultConfiguration", { configuration: this })
   }
 }

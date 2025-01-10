@@ -4,7 +4,7 @@ import { Model, TExport, TJIIXExport } from "../model"
 import { Stroke } from "../symbol"
 import { StyleHelper, TPenStyle, TTheme } from "../style"
 import { TUndoRedoContext } from "../history"
-import { DeferredPromise, PartialDeep, computeHmac, isVersionSuperiorOrEqual } from "../utils"
+import { DeferredPromise, computeHmac, isVersionSuperiorOrEqual } from "../utils"
 import
 {
   TWSMessageEvent,
@@ -255,11 +255,7 @@ export class WSRecognizer
       this.sessionId = hmacChallengeMessage.iinkSessionId
     }
 
-    const recognitionConfig = structuredClone(this.recognitionConfiguration) as PartialDeep<TRecognitionConfiguration>
-    if (!isVersionSuperiorOrEqual(this.serverConfiguration.version, "2.3.0")) {
-      delete recognitionConfig.convert
-    }
-    this.send({ ...recognitionConfig, type: "configuration" })
+    this.send({ ...this.recognitionConfiguration, type: "configuration" })
     this.ackDeferred?.resolve()
   }
 

@@ -235,5 +235,10 @@ To correct the problem, you have 2 options:
 - either update your server
 - either add in the iink-ts configuration `configuration.server.version = 2.2.0`
 
+If you encounter the error: `Unrecognized property: configuration.export.jiix.text.lines`, this means your server version is lower than 3.2.0.
+To correct the problem, you have 2 options:
+- either update your server
+- either add in the iink-ts configuration `configuration.server.version = 3.1.0`
+
 ## License
 This library is licensed under the [Apache 2.0](http://opensource.org/licenses/Apache-2.0).
