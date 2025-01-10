@@ -1,10 +1,12 @@
-import { TConverstionState, TDiagramConfiguration, TExportConfiguration, TMathConfiguration, TRawContentConfiguration, TRecognitionConfiguration, TServerConfiguration, TTextConfiguration } from "../configuration"
-import { LoggerClass, LoggerManager } from "../logger"
+import { LoggerCategory, LoggerManager } from "../logger"
 import { Model, TExport, TJIIXExport } from "../model"
 import { TStrokeGroup, TStrokeGroupToSend } from "../symbol"
 import { StyleHelper, TPenStyle } from "../style"
-import { computeHmac, isVersionSuperiorOrEqual } from "../utils"
+import { computeHmac, isVersionSuperiorOrEqual, PartialDeep } from "../utils"
 import { RecognizerError } from "./RecognizerError"
+import { RestRecognizerConfiguration, TRestRecognizerConfiguration } from "./RestRecognizerConfiguration"
+import { TConverstionState } from "./RecognitionConfiguration"
+import { TDiagramConfiguration, TExportConfiguration, TMathConfiguration, TRawContentConfiguration, TTextConfiguration } from "./recognition"
 
 type ApiError = {
   code?: string
@@ -42,52 +44,50 @@ export type TRestPostData = {
  */
 export class RestRecognizer
 {
-  #logger = LoggerManager.getLogger(LoggerClass.RECOGNIZER)
+  #logger = LoggerManager.getLogger(LoggerCategory.RECOGNIZER)
 
-  protected serverConfiguration: TServerConfiguration
-  protected recognitionConfiguration: TRecognitionConfiguration
+  protected configuration: RestRecognizerConfiguration
 
-  constructor(serverConfig: TServerConfiguration, recognitionConfig: TRecognitionConfiguration)
+  constructor(config: PartialDeep<TRestRecognizerConfiguration>)
   {
-    this.#logger.info("constructor", { serverConfig, recognitionConfig })
-    this.serverConfiguration = serverConfig
-    this.recognitionConfiguration = recognitionConfig
+    this.#logger.info("constructor", { config })
+    this.configuration = new RestRecognizerConfiguration(config)
   }
 
   get url()
   {
-    return `${ this.serverConfiguration.scheme }://${ this.serverConfiguration.host }/api/v4.0/iink/batch`
+    return `${ this.configuration.server.scheme }://${ this.configuration.server.host }/api/v4.0/iink/batch`
   }
 
   get postConfig(): TRestPostConfiguration
   {
-    switch (this.recognitionConfiguration.type) {
+    switch (this.configuration.recognition.type) {
       case "DIAGRAM":
         return {
-          lang: this.recognitionConfiguration.lang,
-          diagram: this.recognitionConfiguration.diagram,
-          export: this.recognitionConfiguration.export
+          lang: this.configuration.recognition.lang,
+          diagram: this.configuration.recognition.diagram,
+          export: this.configuration.recognition.export
         }
       case "MATH":
         return {
-          lang: this.recognitionConfiguration.lang,
-          math: this.recognitionConfiguration.math,
-          export: this.recognitionConfiguration.export
+          lang: this.configuration.recognition.lang,
+          math: this.configuration.recognition.math,
+          export: this.configuration.recognition.export
         }
       case "Raw Content":
         return {
-          lang: this.recognitionConfiguration.lang,
-          "raw-content": this.recognitionConfiguration["raw-content"],
-          export: this.recognitionConfiguration.export
+          lang: this.configuration.recognition.lang,
+          "raw-content": this.configuration.recognition["raw-content"],
+          export: this.configuration.recognition.export
         }
       case "TEXT":
         return {
-          lang: this.recognitionConfiguration.lang,
-          text: this.recognitionConfiguration.text,
-          export: this.recognitionConfiguration.export
+          lang: this.configuration.recognition.lang,
+          text: this.configuration.recognition.text,
+          export: this.configuration.recognition.export
         }
       default:
-        throw new Error(`get postConfig error Recognition type unkow "${ this.recognitionConfiguration.type }"`)
+        throw new Error(`get postConfig error Recognition type unkow "${ this.configuration.recognition.type }"`)
         break
     }
   }
@@ -129,9 +129,9 @@ export class RestRecognizer
       strokeGroupsToSend.push(newGroup)
     })
 
-    const contentType: string = this.recognitionConfiguration.type === "Raw Content" ?
+    const contentType: string = this.configuration.recognition.type === "Raw Content" ?
       "Raw Content" :
-      this.recognitionConfiguration.type.charAt(0).toUpperCase() + this.recognitionConfiguration.type.slice(1).toLowerCase()
+      this.configuration.recognition.type.charAt(0).toUpperCase() + this.configuration.recognition.type.slice(1).toLowerCase()
 
     const data = {
       configuration: this.postConfig,
@@ -151,16 +151,16 @@ export class RestRecognizer
     this.#logger.info("post", { data, mimeType })
     const headers = new Headers()
     headers.append("Accept", "application/json," + mimeType)
-    headers.append("applicationKey", this.serverConfiguration.applicationKey)
+    headers.append("applicationKey", this.configuration.server.applicationKey)
     try {
-      const hmac = await computeHmac(JSON.stringify(data), this.serverConfiguration.applicationKey, this.serverConfiguration.hmacKey)
+      const hmac = await computeHmac(JSON.stringify(data), this.configuration.server.applicationKey, this.configuration.server.hmacKey)
       headers.append("hmac", hmac)
     } catch (error) {
       this.#logger.error("post.computeHmac", error)
     }
     headers.append("Content-Type", "application/json")
 
-    if (isVersionSuperiorOrEqual(this.serverConfiguration.version, "2.0.4")) {
+    if (isVersionSuperiorOrEqual(this.configuration.server.version, "2.0.4")) {
       headers.append("myscript-client-name", "iink-ts")
       headers.append("myscript-client-version", "1.0.0-buildVersion")
     }
@@ -230,21 +230,21 @@ export class RestRecognizer
     this.#logger.info("getMimeTypes", { requestedMimeTypes })
     let mimeTypes: string[] = requestedMimeTypes || []
     if (!mimeTypes.length) {
-      switch (this.recognitionConfiguration.type) {
+      switch (this.configuration.recognition.type) {
         case "DIAGRAM":
-          mimeTypes = this.recognitionConfiguration.diagram.mimeTypes
+          mimeTypes = this.configuration.recognition.diagram.mimeTypes
           break
         case "MATH":
-          mimeTypes = this.recognitionConfiguration.math.mimeTypes
+          mimeTypes = this.configuration.recognition.math.mimeTypes
           break
         case "Raw Content":
           mimeTypes = ["application/vnd.myscript.jiix"]
           break
         case "TEXT":
-          mimeTypes = this.recognitionConfiguration.text.mimeTypes
+          mimeTypes = this.configuration.recognition.text.mimeTypes
           break
         default:
-          throw new Error(`Recognition type "${ this.recognitionConfiguration.type }" is unknown.\n Possible types are:\n -DIAGRAM\n -MATH\n -Raw Content\n -TEXT`)
+          throw new Error(`Recognition type "${ this.configuration.recognition.type }" is unknown.\n Possible types are:\n -DIAGRAM\n -MATH\n -Raw Content\n -TEXT`)
           break
       }
     }

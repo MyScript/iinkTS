@@ -2,11 +2,11 @@ import { delay } from "../helpers"
 import
 {
   TPointer,
-  TUndoRedoConfiguration,
-  getInitialUndoRedoContext,
+  THistoryConfiguration,
+  getInitialHistoryContext,
   HistoryManager,
   Model,
-  DefaultConfiguration,
+  DefaultHistoryConfiguration,
   DefaultPenStyle
 } from "../../../src/iink"
 import { EditorEventMock } from "../__mocks__/EditorEventMock"
@@ -16,20 +16,20 @@ describe("HistoryManager.ts", () =>
   const event = new EditorEventMock(document.createElement("div"))
   test("should instanciate HistoryManager", () =>
   {
-    const manager = new HistoryManager(DefaultConfiguration["undo-redo"], event)
+    const manager = new HistoryManager(DefaultHistoryConfiguration, event)
     expect(manager).toBeDefined()
   })
 
-  test("should initialize UndoRedoContext", () =>
+  test("should initialize HistoryContext", () =>
   {
-    const manager = new HistoryManager(DefaultConfiguration["undo-redo"], event)
-    const context = getInitialUndoRedoContext()
+    const manager = new HistoryManager(DefaultHistoryConfiguration, event)
+    const context = getInitialHistoryContext()
     expect(manager.context).toStrictEqual(context)
   })
 
   describe("push", () =>
   {
-    const configuration: TUndoRedoConfiguration = { maxStackSize: 5 }
+    const configuration: THistoryConfiguration = { maxStackSize: 5 }
     const model1 = new Model(27, 5)
     const model2 = new Model(42, 72)
     const model3 = new Model(42, 72)
@@ -123,7 +123,7 @@ describe("HistoryManager.ts", () =>
   describe("undo", () =>
   {
     const model = new Model(27, 5)
-    const manager = new HistoryManager(DefaultConfiguration["undo-redo"], event)
+    const manager = new HistoryManager(DefaultHistoryConfiguration, event)
     manager.push(model)
     test("should get the previous model and emitChanged", () =>
     {
@@ -147,7 +147,7 @@ describe("HistoryManager.ts", () =>
   describe("redo", () =>
   {
     const model = new Model(27, 5)
-    const manager = new HistoryManager(DefaultConfiguration["undo-redo"], event)
+    const manager = new HistoryManager(DefaultHistoryConfiguration, event)
     manager.push(model)
     test("should get the next model", () =>
     {
@@ -177,7 +177,7 @@ describe("HistoryManager.ts", () =>
     test("should update last model in stack", async () =>
     {
       const model = new Model(27, 5)
-      const manager = new HistoryManager(DefaultConfiguration["undo-redo"], event)
+      const manager = new HistoryManager(DefaultHistoryConfiguration, event)
       manager.push(model)
       const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
       // wait a few seconds and have a different model.modificationDate
@@ -202,7 +202,7 @@ describe("HistoryManager.ts", () =>
     test("should update previous model in stack", async () =>
     {
       const model = new Model(27, 5)
-      const manager = new HistoryManager(DefaultConfiguration["undo-redo"], event)
+      const manager = new HistoryManager(DefaultHistoryConfiguration, event)
       manager.push(model)
 
       const p1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }

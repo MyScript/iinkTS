@@ -1,8 +1,8 @@
 import { SvgElementRole } from "../../Constants"
-import { TRenderingConfiguration } from "../../configuration"
-import { LoggerClass, LoggerManager } from "../../logger"
-import { TOISymbol, TPoint, TBox, Box, OIEraser, SymbolType } from "../../symbol"
 import { getClosestPoints } from "../../utils"
+import { LoggerCategory, LoggerManager } from "../../logger"
+import { TOISymbol, TPoint, TBox, Box, OIEraser, SymbolType } from "../../symbol"
+import { TOIRendererConfiguration } from "../RendererConfiguration"
 import { OISVGRendererConst } from "./OISVGRendererConst"
 import { OISVGRendererEdgeUtil } from "./OISVGRendererEdgeUtil"
 import { OISVGRendererEraserUtil } from "./OISVGRendererEraserUtil"
@@ -18,10 +18,10 @@ import { SVGBuilder } from "./SVGBuilder"
  */
 export class OISVGRenderer
 {
-  #logger = LoggerManager.getLogger(LoggerClass.RENDERER)
+  #logger = LoggerManager.getLogger(LoggerCategory.RENDERER)
   groupGuidesId = "guides-wrapper"
 
-  configuration: TRenderingConfiguration
+  configuration: TOIRendererConfiguration
   parent!: HTMLElement
   layer!: SVGSVGElement
   definitionGroup!: SVGGElement
@@ -29,7 +29,7 @@ export class OISVGRenderer
   verticalGuides: number[] = []
   horizontalGuides: number[] = []
 
-  constructor(configuration: TRenderingConfiguration)
+  constructor(configuration: TOIRendererConfiguration)
   {
     this.#logger.info("constructor", { configuration })
     this.configuration = configuration

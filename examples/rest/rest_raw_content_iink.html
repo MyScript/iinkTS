@@ -59,37 +59,57 @@
       const redoElement = document.getElementById("redo");
 
       /**
-       * we expose the editor for use in the integration test
+       * we expose the editor so we can access it in tests
        */
       let editor;
+
+      undoElement.addEventListener("click", () => {
+        editor?.undo();
+      });
+
+      redoElement.addEventListener("click", () => {
+        editor?.redo();
+      });
+
+      clearElement.addEventListener("click", () => {
+        editor?.clear();
+        resultElement.innerHTML = "";
+      });
+
+      window.addEventListener("resize", () => {
+        editor?.resize();
+      });
+
+      let serverConfiguration
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            type: "Raw Content"
+          }
+        }
+      };
+
+      languageElement.addEventListener("change", (e) => {
+        editorOptions.configuration.recognition.lang = e.target.value;
+        loadEditor(editorOptions);
+      });
 
       /**
        * We use a function to wait the server configuration to load
        */
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const conf = await res.json();
-        const options = {
-          configuration: {
-            server: {
-              ...conf,
-              protocol: "REST"
-            },
-            recognition: {
-              type: "Raw Content"
-            }
-          }
-        };
+      async function loadEditor(options) {
+        if (!serverConfiguration) {
+          const res = await fetch("../server-configuration.json");
+          serverConfiguration = await res.json();
+        }
+        options.configuration.server = serverConfiguration
+
         /**
-         * Instanciate editor
+         * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = new iink.Editor(editorElement, options);
-        /**
-         *  async initialize editor behaviors
-         */
-        await editor.initialize();
+        editor = await iink.Editor.load(editorElement, "REST", options);
 
         editor.event.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo;
@@ -113,31 +133,9 @@
           }
         });
 
-        languageElement.addEventListener("change", (e) => {
-          const configuration = JSON.parse(JSON.stringify(editor.configuration));
-          configuration.recognition.lang = e.target.value;
-          editor.configuration = configuration;
-        });
-
-        undoElement.addEventListener("click", () => {
-          editor.undo();
-        });
-
-        redoElement.addEventListener("click", () => {
-          editor.redo();
-        });
-
-        clearElement.addEventListener("click", () => {
-          editor.clear();
-          resultElement.innerHTML = "";
-        });
-
-        window.addEventListener("resize", () => {
-          editor.resize();
-        });
       };
 
-      loadEditor().catch(error => console.error(error));
+      loadEditor(editorOptions).catch(error => console.error(error));
     </script>
   </body>
 </html>

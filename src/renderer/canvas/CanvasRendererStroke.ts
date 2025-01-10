@@ -1,4 +1,4 @@
-import { LoggerClass, LoggerManager } from "../../logger"
+import { LoggerCategory, LoggerManager } from "../../logger"
 import { Stroke, TPointer } from "../../symbol"
 import { computeAngleAxeRadian, computeLinksPointers, computeMiddlePointer } from "../../utils"
 
@@ -7,7 +7,7 @@ import { computeAngleAxeRadian, computeLinksPointers, computeMiddlePointer } fro
  */
 export class CanvasRendererStroke
 {
-  #logger = LoggerManager.getLogger(LoggerClass.RENDERER)
+  #logger = LoggerManager.getLogger(LoggerCategory.RENDERER)
 
   protected renderArc(context2d: CanvasRenderingContext2D, center: TPointer, radius: number): void
   {

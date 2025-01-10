@@ -147,11 +147,9 @@
       }
       document.getElementById("recognize").addEventListener("click", async () => {
         const res = await fetch("../server-configuration.json");
-        const serverConfiguration = await res.json();
-        // Creating a configuration
-        const configuration = new iink.Configuration({ server: serverConfiguration });
+        const server = await res.json();
         // Creating a recognizer
-        const iinkRecognizer = new iink.RestRecognizer(configuration.server, configuration.recognition);
+        const iinkRecognizer = new iink.RestRecognizer({ server });
         // Creating a empty model
         const model = new iink.Model();
         // Filling the model with the stroke

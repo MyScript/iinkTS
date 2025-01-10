@@ -36,6 +36,7 @@ export type TTheme = {
 
 /**
  * @group Style
+ * @source
  */
 export const DefaultTheme: TTheme = {
   ink: {

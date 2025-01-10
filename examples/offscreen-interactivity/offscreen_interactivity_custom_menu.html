@@ -17,7 +17,6 @@
       #editor {
         width: 100vw;
         height: calc(100dvh - 62px);
-        touch-action: none;
       }
       @media only screen and (max-width: 631px) {
         #editor {
@@ -104,7 +103,7 @@
 
 
       /**
-       * we expose the editor for use in the integration test
+       * we expose the editor so we can access it in tests
        */
       let editor;
 
@@ -113,7 +112,6 @@
         const server = await res.json();
         const options = {
           configuration: {
-            offscreen: true,
             server,
             menu: {
               style: {
@@ -127,7 +125,7 @@
               }
             },
           },
-          behaviors: {
+          override: {
             menu: {
               style: CustomMenuStyle,
               tool: CustomMenuTool,
@@ -135,25 +133,22 @@
             }
           }
         };
+
         /**
-         * Instanciate editor
+         * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = new iink.Editor(editorElement, options);
-        /**
-         *  async initialize editor behaviors
-         */
-        await editor.initialize();
+        editor = await iink.Editor.load(editorElement, "OFFSCREEN", options);
 
         menuStyleToggle.addEventListener("change", () => {
-          menuStyleToggle.checked ? editor.behaviors.menu.style.show() : editor.behaviors.menu.style.hide();
+          menuStyleToggle.checked ? editor.menu.style.show() : editor.menu.style.hide();
         });
         menuIntentionToggle.addEventListener("change", () => {
-          menuIntentionToggle.checked ? editor.behaviors.menu.tool.show() : editor.behaviors.menu.tool.hide();
+          menuIntentionToggle.checked ? editor.menu.tool.show() : editor.menu.tool.hide();
         });
         menuActionToggle.addEventListener("change", () => {
-          menuActionToggle.checked ? editor.behaviors.menu.action.show() : editor.behaviors.menu.action.hide();
+          menuActionToggle.checked ? editor.menu.action.show() : editor.menu.action.hide();
         });
 
         window.addEventListener("resize", () => {

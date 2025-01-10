@@ -58,9 +58,11 @@ export class OISVGRendererEdgeUtil
     const pathAttrs: { [key: string]: string } = {
       "fill": "transparent",
       "stroke": edge.style.color || DefaultStyle.color!,
-      "stroke-width": (edge.style.width || DefaultStyle.width!).toString(),
-      "opacity": (edge.style.opacity || DefaultStyle.opacity!).toString(),
+      "stroke-width": (edge.style.width || DefaultStyle.width).toString(),
       "d": OISVGRendererEdgeUtil.getSVGPath(edge),
+    }
+    if (edge.style.opacity) {
+      pathAttrs["opacity"] = edge.style.opacity.toString()
     }
 
     if (edge.startDecoration === EdgeDecoration.Arrow) {

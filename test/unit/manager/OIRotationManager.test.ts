@@ -1,4 +1,4 @@
-import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
+import { EditorOffscreenMock } from "../__mocks__/EditorOffscreenMock"
 import
 {
   OIEdgeLine,
@@ -16,17 +16,17 @@ describe("OIRotationManager.ts", () =>
 {
   test("should create", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    const manager = new OIRotationManager(behaviors)
+    const editor = new EditorOffscreenMock()
+    const manager = new OIRotationManager(editor)
     expect(manager).toBeDefined()
   })
 
   describe("should applyToSymbol", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    behaviors.texter.updateBounds = jest.fn()
-    behaviors.renderer.setAttribute = jest.fn()
-    const manager = new OIRotationManager(behaviors)
+    const editor = new EditorOffscreenMock()
+    editor.texter.updateBounds = jest.fn()
+    editor.renderer.setAttribute = jest.fn()
+    const manager = new OIRotationManager(editor)
 
     test("not rotate shape with kind unknow", () =>
     {
@@ -81,16 +81,16 @@ describe("OIRotationManager.ts", () =>
 
   describe("rotate process on stroke", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    behaviors.recognizer.init = jest.fn(() => Promise.resolve())
-    behaviors.recognizer.transformRotate = jest.fn(() => Promise.resolve())
-    behaviors.renderer.setAttribute = jest.fn()
-    behaviors.renderer.drawSymbol = jest.fn()
-    behaviors.setPenStyle = jest.fn(() => Promise.resolve())
-    behaviors.setTheme = jest.fn(() => Promise.resolve())
-    behaviors.setPenStyleClasses = jest.fn(() => Promise.resolve())
+    const editor = new EditorOffscreenMock()
+    editor.recognizer.init = jest.fn(() => Promise.resolve())
+    editor.recognizer.transformRotate = jest.fn(() => Promise.resolve())
+    editor.renderer.setAttribute = jest.fn()
+    editor.renderer.drawSymbol = jest.fn()
+    editor.setPenStyle = jest.fn(() => Promise.resolve())
+    editor.setTheme = jest.fn(() => Promise.resolve())
+    editor.setPenStyleClasses = jest.fn(() => Promise.resolve())
 
-    const manager = new OIRotationManager(behaviors)
+    const manager = new OIRotationManager(editor)
     manager.applyToSymbol = jest.fn()
 
     const stroke = new OIStroke({})
@@ -98,7 +98,7 @@ describe("OIRotationManager.ts", () =>
     stroke.addPointer({ p: 1, t: 1, x: 10, y: 50 })
     stroke.selected = true
     const strokeNotRotate = stroke.clone()
-    behaviors.model.addSymbol(stroke)
+    editor.model.addSymbol(stroke)
 
     const rotateCenter: TPoint = {
       x: (stroke.bounds.xMax + stroke.bounds.xMin) / 2,
@@ -130,7 +130,7 @@ describe("OIRotationManager.ts", () =>
 
     beforeAll(async () =>
     {
-      await behaviors.init()
+      await editor.init()
     })
 
     testDatas.forEach(data =>
@@ -150,25 +150,25 @@ describe("OIRotationManager.ts", () =>
         expect(manager.interactElementsGroup).toEqual(group)
         expect(manager.center).toEqual(rotateCenter)
         expect(manager.origin).toEqual(rotateOrigin)
-        expect(behaviors.renderer.setAttribute).toHaveBeenNthCalledWith(1, group.id, "transform-origin", `${ rotateCenter.x }px ${ rotateCenter.y }px`)
-        expect(behaviors.renderer.setAttribute).toHaveBeenNthCalledWith(2, stroke.id, "transform-origin", `${ rotateCenter.x }px ${ rotateCenter.y }px`)
+        expect(editor.renderer.setAttribute).toHaveBeenNthCalledWith(1, group.id, "transform-origin", `${ rotateCenter.x }px ${ rotateCenter.y }px`)
+        expect(editor.renderer.setAttribute).toHaveBeenNthCalledWith(2, stroke.id, "transform-origin", `${ rotateCenter.x }px ${ rotateCenter.y }px`)
       })
       test(`shoud continu with angle: "${ data.angle }°`, () =>
       {
         expect(manager.continue(data.rotateToPoint)).toEqual(data.angle)
 
-        expect(behaviors.renderer.setAttribute).toHaveBeenNthCalledWith(1, group.id, "transform", `rotate(${ data.angle })`)
-        expect(behaviors.renderer.setAttribute).toHaveBeenNthCalledWith(2, stroke.id, "transform", `rotate(${ data.angle })`)
+        expect(editor.renderer.setAttribute).toHaveBeenNthCalledWith(1, group.id, "transform", `rotate(${ data.angle })`)
+        expect(editor.renderer.setAttribute).toHaveBeenNthCalledWith(2, stroke.id, "transform", `rotate(${ data.angle })`)
       })
       test(`shoud end with angle: "${ data.angle }°`, async () =>
       {
         await manager.end(data.rotateToPoint)
 
         expect(manager.applyToSymbol).toHaveBeenCalledTimes(1)
-        expect(behaviors.renderer.drawSymbol).toHaveBeenCalledTimes(1)
-        expect(behaviors.renderer.drawSymbol).toHaveBeenCalledWith(stroke)
-        expect(behaviors.recognizer.transformRotate).toHaveBeenCalledTimes(1)
-        expect(behaviors.recognizer.transformRotate).toHaveBeenCalledWith([stroke.id], convertDegreeToRadian(data.angle), rotateCenter.x, rotateCenter.y)
+        expect(editor.renderer.drawSymbol).toHaveBeenCalledTimes(1)
+        expect(editor.renderer.drawSymbol).toHaveBeenCalledWith(stroke)
+        expect(editor.recognizer.transformRotate).toHaveBeenCalledTimes(1)
+        expect(editor.recognizer.transformRotate).toHaveBeenCalledWith([stroke.id], convertDegreeToRadian(data.angle), rotateCenter.x, rotateCenter.y)
         expect(stroke).not.toEqual(strokeNotRotate)
       })
     })

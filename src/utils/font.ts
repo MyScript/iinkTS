@@ -1,10 +1,10 @@
-import { TConfiguration } from "../configuration"
+import { TServerHTTPConfiguration } from "../recognizer"
 import { PartialDeep } from "./types"
 
 /**
  * @group Utils
  */
-export async function getAvailableFontList(configuration: PartialDeep<TConfiguration>): Promise<Array<string>>
+export async function getAvailableFontList(configuration: PartialDeep<{ server: TServerHTTPConfiguration, recognition: { lang: string }}>): Promise<Array<string>>
 {
   if (!configuration?.server?.scheme && !configuration?.server?.host) {
     return Promise.reject("Failed to get fonts: configuration.server.scheme & configuration.server.host are required!")

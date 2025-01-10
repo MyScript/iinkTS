@@ -1,14 +1,13 @@
 import { LeftClickEventMock } from "../__mocks__/EventMock"
 import {
   WSSmartGuide,
-  DefaultRenderingConfiguration,
   TMarginConfiguration
 } from "../../../src/iink"
-import { WSBehaviorsMock } from "../__mocks__/WSBehaviorsMock"
+import { EditorWebSocketMock } from "../__mocks__/EditorWebSocketMock"
 
 describe("WSSmartGuide.ts", () =>
 {
-  const mockBehaviors = new WSBehaviorsMock()
+  const editorMock = new EditorWebSocketMock()
   const margin: TMarginConfiguration = {
     bottom: 100,
     top: 20,
@@ -17,15 +16,15 @@ describe("WSSmartGuide.ts", () =>
   }
   test("should instanciate WSSmartGuide", () =>
   {
-    const sm = new WSSmartGuide(mockBehaviors)
+    const sm = new WSSmartGuide(editorMock)
     expect(sm).toBeDefined()
   })
 
   describe("Initilize", () =>
   {
     const domElement = document.createElement("div")
-    const sm = new WSSmartGuide(mockBehaviors)
-    sm.init(domElement, margin, DefaultRenderingConfiguration)
+    const sm = new WSSmartGuide(editorMock)
+    sm.init(domElement, margin)
 
     test("should init wrapper", () =>
     {
@@ -80,8 +79,8 @@ describe("WSSmartGuide.ts", () =>
   describe("Menu visibility", () =>
   {
     const domElement = document.createElement("div")
-    const sm = new WSSmartGuide(mockBehaviors)
-    sm.init(domElement, margin, DefaultRenderingConfiguration)
+    const sm = new WSSmartGuide(editorMock)
+    sm.init(domElement, margin)
 
     const pointerDownEvt = new LeftClickEventMock("pointerdown", {
       pointerType: "pen",
@@ -116,8 +115,8 @@ describe("WSSmartGuide.ts", () =>
   describe("Menu actions", () =>
   {
     const domElement = document.createElement("div")
-    const sm = new WSSmartGuide(mockBehaviors)
-    sm.init(domElement, margin, DefaultRenderingConfiguration)
+    const sm = new WSSmartGuide(editorMock)
+    sm.init(domElement, margin)
 
     const pointerDownEvt = new LeftClickEventMock("pointerdown", {
       pointerType: "pen",
@@ -127,12 +126,12 @@ describe("WSSmartGuide.ts", () =>
     })
     const ellispis = domElement.querySelector(".ellipsis") as HTMLDivElement
     ellispis.dispatchEvent(pointerDownEvt)
-    test("should call behaviors.convert", () =>
+    test("should call editor.convert", () =>
     {
-      expect(mockBehaviors.convert).toBeCalledTimes(0)
+      expect(editorMock.convert).toBeCalledTimes(0)
       const btn = domElement.querySelector(`#convert-${ sm.uuid }`) as HTMLDivElement
       btn.dispatchEvent(pointerDownEvt)
-      expect(mockBehaviors.convert).toBeCalledTimes(1)
+      expect(editorMock.convert).toBeCalledTimes(1)
     })
     test.skip("should COPY", () =>
     {
@@ -140,18 +139,18 @@ describe("WSSmartGuide.ts", () =>
     })
     test("should call behavior.clear", () =>
     {
-      expect(mockBehaviors.clear).toBeCalledTimes(0)
+      expect(editorMock.clear).toBeCalledTimes(0)
       const btn = domElement.querySelector(`#delete-${ sm.uuid }`) as HTMLDivElement
       btn.dispatchEvent(pointerDownEvt)
-      expect(mockBehaviors.clear).toBeCalledTimes(1)
+      expect(editorMock.clear).toBeCalledTimes(1)
     })
   })
 
   describe("Display", () =>
   {
     const domElement = document.createElement("div")
-    const sm = new WSSmartGuide(mockBehaviors)
-    sm.init(domElement, margin, DefaultRenderingConfiguration)
+    const sm = new WSSmartGuide(editorMock)
+    sm.init(domElement, margin)
     const jiix = {
       "type": "Text",
       "label": "hello how",

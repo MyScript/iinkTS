@@ -34,8 +34,10 @@ export abstract class OISymbolBase<T extends string = SymbolType> implements TSy
     this.transform = MatrixTransform.identity()
 
     this.style = Object.assign({}, DefaultStyle, style)
-    this.style.opacity = +this.style.opacity!
-    this.style.width = +this.style.width!
+    if (this.style.opacity) {
+      this.style.opacity = +this.style.opacity
+    }
+    this.style.width = +this.style.width
   }
 
   abstract get vertices(): TPoint[]
@@ -46,14 +48,14 @@ export abstract class OISymbolBase<T extends string = SymbolType> implements TSy
   {
     if (this.isClosed) {
       return this.vertices.map((p, i) =>
-        {
-          if (i === this.vertices.length - 1) {
-            return { p1: p, p2: this.vertices[0] }
-          }
-          else {
-            return { p1: p, p2: this.vertices[i + 1] }
-          }
-        })
+      {
+        if (i === this.vertices.length - 1) {
+          return { p1: p, p2: this.vertices[0] }
+        }
+        else {
+          return { p1: p, p2: this.vertices[i + 1] }
+        }
+      })
     }
     else {
       return this.vertices.slice(0, -1).map((p, i) =>

@@ -1,4 +1,4 @@
-import { LoggerClass, LoggerManager } from "../logger"
+import { LoggerCategory, LoggerManager } from "../logger"
 import
 {
   RecognizedKind,
@@ -6,14 +6,13 @@ import
   TOISymbol,
 } from "../symbol"
 import { TExport } from "./Export"
-import { IModel } from "./IModel"
 
 /**
  * @group Model
  */
-export class OIModel implements IModel
+export class OIModel
 {
-  #logger = LoggerManager.getLogger(LoggerClass.MODEL)
+  #logger = LoggerManager.getLogger(LoggerCategory.MODEL)
   readonly creationTime: number
   modificationDate: number
   currentSymbol?: TOISymbol

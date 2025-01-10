@@ -8,6 +8,10 @@ export type TSubMenuParam =
   subMenu: HTMLElement,
   position: "top" | "left" | "right" | "right-top" | "bottom" | "bottom-left" | "bottom-right"
 }
+
+/**
+ * @group Menu
+ */
 export class OIMenuSub {
   element: HTMLDivElement
   content: HTMLElement

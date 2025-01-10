@@ -39,8 +39,6 @@ test.describe("Offscreen Get Started Menu Style", () => {
         const stroke = symbols[0].strokes[0]
         expect(stroke.style.color).toStrictEqual("#" + color.rgb)
         expect(stroke.style.width).toStrictEqual(2)
-        expect(stroke.style.opacity).toStrictEqual(1)
-        expect(stroke.style.fill).toStrictEqual("transparent")
 
         const strokePathLocator = page.locator(` #${ stroke.id } path`)
         await expect(strokePathLocator).toBeVisible()
@@ -72,8 +70,6 @@ test.describe("Offscreen Get Started Menu Style", () => {
         const stroke = symbols[0].strokes[0]
         expect(stroke.style.color).toStrictEqual("#000000")
         expect(stroke.style.width).toStrictEqual(thickness.width)
-        expect(stroke.style.opacity).toStrictEqual(1)
-        expect(stroke.style.fill).toStrictEqual("transparent")
 
         const strokePathLocator = page.locator(` #${ stroke.id } path`)
         await expect(strokePathLocator).toBeVisible()

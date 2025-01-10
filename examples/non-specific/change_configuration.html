@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/renderjson.css" />
 
     <link
       rel="stylesheet"
@@ -27,19 +28,35 @@
       crossorigin="anonymous"
     ></script>
 
+    <script type="text/javascript" src="../assets/renderjson/renderjson.js"></script>
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
 
     <style>
+      .wrapper {
+        height: 100dvh;
+        width: 100dvw;
+      }
       #result {
         border-bottom: solid gray 1px;
-        overflow: auto;
         display: block;
+        text-align: start;
         padding: 12px;
+        cursor: zoom-in;
+      }
+      #result.open {
+        position: absolute;
+        z-index: 999;
+        overflow: visible;
+        height: 100dvh;
+        width: 100dvw;
+        max-height: 100dvh;
+        background-color: white;
+        cursor: zoom-out;
       }
 
       .content {
         width: calc(100vw - 400px);
-        min-height: calc(100% - 105px);
+        height: 100%;
       }
       .ms-editor {
         width: 100%;
@@ -55,8 +72,12 @@
         max-width: 400px;
       }
 
+      .configuration-container .configuration-title {
+        text-align: center;
+      }
+
       .configuration-container .params {
-        height: calc(100% - 66px);
+        height: calc(100% - 180px);
         overflow: auto;
       }
 
@@ -106,23 +127,24 @@
         top: 12px;
       }
       @media screen and (max-width: 1000px) {
+
+        .content {
+          width: 100vw;
+        }
         .configuration-container {
           position: fixed;
           right: 0;
           z-index: 99;
-          display: none; /* Masquer le menu par défaut */
-          width: 100%;
+          padding-top: 60px;
+          overflow: hidden;
+          width: 0;
+          transition: width 0.75s ease;
         }
-        .content {
-          width: 100vw;
-          height: 100dvh;
-        }
-
         #menu-button {
           display: block;
         }
-        .configuration-container.active {
-          display: block;
+        .configuration-container.open {
+          width: 100vw;
         }
       }
 
@@ -133,85 +155,21 @@
     <button id="menu-button" class="menu-button">
       <img src="../assets/img/menu.svg" />
     </button>
-    <div class="flex-container">
+    <div class="wrapper flex-container">
       <div class="content">
         <div id="result"></div>
         <div id="editor" class="editor"></div>
       </div>
-      <div id="menu-content" class="configuration-container">
-        <div class="params">
-          <div class="card">
-            <div class="card-title">Server</div>
-            <div class="card-content">
-              <label for="server-protocol">Protocol:</label>
-              <select id="server-protocol" name="server-protocol">
-                <option value="WEBSOCKET">WEBSOCKET</option>
-                <option value="REST">REST</option>
-              </select>
-              <label for="server-scheme">Scheme:</label>
-              <select id="server-scheme" name="server-scheme">
-                <option value="http">http</option>
-                <option value="https">https</option>
-              </select>
-              <label for="server-host">Host:</label>
-              <input id="server-host" name="server-host" />
-              <label for="server-applicationKey">Application key:</label>
-              <input id="server-applicationKey" name="server-applicationKey" />
-              <label for="server-hmacKey">HMAC key:</label>
-              <input id="server-hmacKey" name="server-hmacKey" />
-              <label for="server-version">Version:</label>
-              <input id="server-version" name="server-version" />
-            </div>
+      <div id="configuration-container" class="configuration-container">
+        <h2 class="configuration-title">Configuration</h2>
+        <div class="card">
+          <div class="flex-container between">
+            <label for="editor-type">Editor type:</label>
+            <select id="editor-type" name="server-protocol">
+            </select>
           </div>
-          <div class="card">
-            <div class="card-title">Recognition</div>
-            <div class="card-content">
-              <label for="recognition-type">Type:</label>
-              <select id="recognition-type" name="recognition-type">
-                <option value="TEXT">TEXT</option>
-                <option value="MATH">MATH</option>
-                <option value="DIAGRAM">DIAGRAM</option>
-                <option value="Raw Content">Raw Content</option>
-              </select>
-              <label for="recognition-language">Language:</label>
-              <select id="recognition-language" name="recognition-language"></select>
-              <div class="flex-container between">
-                <label for="recognition-guides">Guides:</label>
-                <input type="checkbox" id="recognition-guides" name="recognition-guides" />
-              </div>
-              <div class="flex-container between">
-                <label for="recognition-gesture">Gesture:</label>
-                <input type="checkbox" id="recognition-gesture" name="recognition-gesture" />
-              </div>
-              <label for="mime-types">MIME types:</label>
-              <select id="mime-types" name="mime-types" multiple style="height: auto"></select>
-              <div style="font-style: italic; font-size: small; color: gray">application/vnd.myscript.jiix is mandatory when smartGuide active</div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-title">Rendering</div>
-            <div class="card-content">
-              <div class="flex-container between">
-                <label for="rendering-smartGuide">Smart guide:</label>
-                <input type="checkbox" id="rendering-smartGuide" name="rendering-smartGuide" />
-              </div>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-title">Triggers</div>
-            <div class="card-content">
-              <label for="triggers-exportContent">ExportContent:</label>
-              <select id="triggers-exportContent" name="triggers-exportContent">
-                <option value="POINTER_UP">POINTER_UP</option>
-                <option value="DEMAND">DEMAND</option>
-                <option value="QUIET_PERIOD">QUIET_PERIOD</option>
-              </select>
-              <label for="triggers-exportContent-delay"> ExportContent Delay: </label>
-              <input type="number" id="triggers-exportContent-delay" name="triggers-exportContent-delay" />
-              <label for="triggers-resize-delay">Resize Delay:</label>
-              <input type="number" id="triggers-resize-delay" name="triggers-resize-delay" />
-            </div>
-          </div>
+        </div>
+        <div id="configuration-content" class="params">
         </div>
         <div class="buttons-wrapper">
           <button class="classic-btn" id="export-btn">Export</button>
@@ -221,315 +179,14 @@
       </div>
     </div>
     <script>
-      const editorElement = document.getElementById("editor");
-      const resultElement = document.getElementById("result");
-
-      const serverProtocolElement = document.getElementById("server-protocol");
-      const serverSchemelElement = document.getElementById("server-scheme");
-      const serverHostlElement = document.getElementById("server-host");
-      const serverApplicationKeyElement = document.getElementById("server-applicationKey");
-      const serverHMACKeyElement = document.getElementById("server-hmacKey");
-
-      const recognitionTypeElement = document.getElementById("recognition-type");
-      const recognitionLanguageElement = document.getElementById("recognition-language");
-      const recognitionGuidesElement = document.getElementById("recognition-guides");
-      const recognitionGestureElement = document.getElementById("recognition-gesture");
-      const recognitionMimeTypesElement = document.getElementById("mime-types");
-      const serverVersionElement = document.getElementById("server-version");
-
-      const renderingSmartGuideElement = document.getElementById("rendering-smartGuide");
-      const triggersExportContentElement = document.getElementById("triggers-exportContent");
-      const triggersExportContentDelayElement = document.getElementById("triggers-exportContent-delay");
-      const triggersResizeDelayElement = document.getElementById("triggers-resize-delay");
-
-      const exportBtn = document.getElementById("export-btn");
-      const validBtn = document.getElementById("valid-btn");
-      const resetBtn = document.getElementById("reset-btn");
-
       const menuButton = document.getElementById("menu-button");
-      const mainMenu = document.getElementById("menu-content");
+      const mainMenu = document.getElementById("configuration-container");
 
       menuButton.addEventListener("click", () => {
-        mainMenu.classList.toggle("active");
+        mainMenu.classList.toggle("open");
       });
 
-      const defaultConfiguration = {
-        server: {
-          protocol: "WEBSOCKET",
-          scheme: "https",
-          host: "cloud.myscript.com",
-          applicationKey: "80a7f78d-939c-48e0-84a8-7794d6fbf624",
-          hmacKey: "df2ba19a-7703-4ab4-9164-00dd33357745",
-          version: "2.3.0"
-        },
-        recognition: {
-          type: "TEXT",
-          lang: "en_US",
-          gesture: {
-            enable: true
-          },
-          math: {
-            mimeTypes: ["application/x-latex"]
-          },
-          text: {
-            guides: {
-              enable: true
-            },
-            mimeTypes: ["text/plain"],
-            margin: {
-              top: 20,
-              left: 10,
-              right: 10
-            }
-          },
-          diagram: {
-            mimeTypes: ["image/svg+xml"]
-          },
-          "raw-content": {
-            recognition: {
-              text: true,
-              shape: false
-            },
-            eraser: {
-              "erase-precisely": false
-            }
-          },
-          export: {
-            jiix: {
-              strokes: true
-            }
-          }
-        },
-        rendering: {
-          smartGuide: {
-            enable: true,
-          }
-        },
-        triggers: {
-          exportContent: "POINTER_UP",
-          exportContentDelay: 2000,
-          resizeTriggerDelay: 50
-        }
-      };
-
-      const cardELements = document.getElementsByClassName("card");
-      for (let i = 0; i < cardELements.length; i++) {
-        const btn = cardELements[i].getElementsByClassName("card-title")[0];
-        btn.addEventListener("click", function () {
-          const content = this.nextElementSibling;
-          if (content.style.display === "block") {
-            content.style.display = "none";
-          } else {
-            content.style.display = "block";
-          }
-        });
-      }
-
-      const mimeTypesList = {
-        TEXT: ["text/plain", "application/vnd.myscript.jiix"],
-        MATH: ["application/x-latex", "application/mathml+xml", "application/vnd.myscript.jiix"],
-        DIAGRAM: ["application/vnd.myscript.jiix", "application/vnd.openxmlformats-officedocument.presentationml.presentation"]
-      };
-
-      function initInputsValues() {
-        serverProtocolElement.value = defaultConfiguration.server.protocol;
-        serverSchemelElement.value = defaultConfiguration.server.scheme;
-        serverHostlElement.value = defaultConfiguration.server.host;
-        serverApplicationKeyElement.value = defaultConfiguration.server.applicationKey;
-        serverHMACKeyElement.value = defaultConfiguration.server.hmacKey;
-        serverVersionElement.value = defaultConfiguration.server.version;
-
-        recognitionTypeElement.value = defaultConfiguration.recognition.type;
-        recognitionLanguageElement.value = defaultConfiguration.recognition.lang;
-        recognitionGuidesElement.checked = defaultConfiguration.recognition.text.guides.enable;
-        recognitionGestureElement.checked = defaultConfiguration.recognition.gesture.enable;
-
-        const defaultMimeTypes = defaultConfiguration.recognition[defaultConfiguration.recognition.type.toLocaleLowerCase()].mimeTypes;
-        recognitionMimeTypesElement.options = [];
-        mimeTypesList[recognitionTypeElement.value].forEach((mt, i) => {
-          const selected = defaultMimeTypes.indexOf(mt) > -1 || (mt == "application/vnd.myscript.jiix" && defaultConfiguration.rendering.smartGuide);
-          recognitionMimeTypesElement.options[i] = new Option(mt, mt, selected, selected);
-          recognitionMimeTypesElement.options[i].disabled = mt == "application/vnd.myscript.jiix" && defaultConfiguration.rendering.smartGuide;
-        });
-
-        renderingSmartGuideElement.checked = defaultConfiguration.rendering.smartGuide;
-
-        triggersExportContentElement.value = defaultConfiguration.triggers.exportContent;
-        triggersExportContentDelayElement.value = defaultConfiguration.triggers.exportContentDelay;
-        triggersResizeDelayElement.value = defaultConfiguration.triggers.resizeTriggerDelay;
-
-        exportBtn.disabled = defaultConfiguration.triggers.exportContent !== "DEMAND";
-      }
-
-      serverProtocolElement.addEventListener("change", (e) => {
-        if (e.target.value === "REST") {
-          /**
-           * When server protocol is REST
-           *  - Trigger export content 'POINTER_UP' is not allowed
-           *  - Smart guide is not allowed
-           *  - Recognition guides is not allowed
-           */
-          if (triggersExportContentElement.value === "POINTER_UP") {
-            triggersExportContentElement.value = "QUIET_PERIOD";
-          }
-          triggersExportContentElement.querySelector('option[value="POINTER_UP"]').disabled = true;
-          renderingSmartGuideElement.disabled = true;
-          renderingSmartGuideElement.checked = false;
-          recognitionGuidesElement.disabled = true;
-          recognitionGuidesElement.checked = false;
-        } else {
-          recognitionTypeElement.querySelector('option[value="Raw Content"]').disabled = false;
-          recognitionTypeElement.value = "TEXT";
-          triggersExportContentElement.querySelector('option[value="POINTER_UP"]').disabled = false;
-          renderingSmartGuideElement.disabled = false;
-          renderingSmartGuideElement.checked = true;
-          recognitionGuidesElement.disabled = false;
-          recognitionGuidesElement.checked = true;
-        }
-      });
-
-      recognitionTypeElement.addEventListener("change", (e) => {
-        recognitionMimeTypesElement.options = [];
-        if (recognitionTypeElement.value === "Raw Content") {
-          // There is no MIME Type to set when recognition type is Raw Content
-          recognitionMimeTypesElement.innerHTML = "";
-          serverProtocolElement.value = "REST";
-        } else {
-          const defaultMimeTypes = defaultConfiguration.recognition[recognitionTypeElement.value.toLocaleLowerCase()].mimeTypes;
-          mimeTypesList[recognitionTypeElement.value].forEach((mt, i) => {
-            const selected =
-              defaultMimeTypes.indexOf(mt) > -1 || (mt == "application/vnd.myscript.jiix" && defaultConfiguration.rendering.smartGuide);
-            recognitionMimeTypesElement.options[i] = new Option(mt, mt, selected, selected);
-          });
-        }
-      });
-
-      renderingSmartGuideElement.addEventListener("change", (e) => {
-        if (e.srcElement.checked) {
-          // Smart guide needs application/vnd.myscript.jiix export
-          recognitionMimeTypesElement.querySelector('option[value="application/vnd.myscript.jiix"]').selected = true;
-        }
-        recognitionMimeTypesElement.querySelector('option[value="application/vnd.myscript.jiix"]').disabled = e.srcElement.checked;
-      });
-
-
-      let editor;
-
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const conf = await res.json();
-        defaultConfiguration.server = {
-          ...defaultConfiguration.server,
-          ...conf
-        };
-
-        initInputsValues()
-
-        const options = {
-          configuration: defaultConfiguration
-        };
-
-        /**
-         * Instanciate editor
-         * @param {Element} The DOM element to attach the ink paper
-         */
-        editor = new iink.Editor(editorElement, options);
-
-        /**
-         *  async initialize editor behaviors
-         */
-        await editor.initialize();
-        const currentLanguage = editor.configuration.recognition.lang;
-        const availableLanguageResponse = await iink.getAvailableLanguageList(editor.configuration);
-        Object.keys(availableLanguageResponse.result).forEach(function (key) {
-          const selected = currentLanguage === key;
-          recognitionLanguageElement.options[recognitionLanguageElement.options.length] = new Option(availableLanguageResponse.result[key], key, selected, selected);
-        });
-
-        function detectMob() {
-          const toMatch = [/Android/i, /webOS/i, /iPhone/i, /iPad/i, /iPod/i, /BlackBerry/i, /Windows Phone/i];
-
-          return toMatch.some((toMatchItem) => {
-            return navigator.userAgent.match(toMatchItem);
-          });
-        }
-
-        const isMobile = detectMob();
-        if (isMobile) {
-          const menuButtons = document.getElementsByClassName("buttons-wrapper");
-          menuButtons[0].style.marginTop = "-95px";
-        }
-
-        editor.event.addEventListener("exported", (event) => {
-          resultElement.innerHTML = JSON.stringify(event.detail);
-        });
-
-        editor.event.addEventListener("changed", (event) => {
-          exportBtn.disabled = !event.detail.canExport && triggersExportContentElement.value !== "DEMAND";
-        });
-
-        resetBtn.addEventListener("click", initInputsValues);
-
-        exportBtn.addEventListener("click", () => {
-          editor.export();
-        });
-
-        validBtn.addEventListener("click", () => {
-          let selectedMimeTypes = [];
-          for (let o of recognitionMimeTypesElement.selectedOptions) {
-            selectedMimeTypes.push(o.value);
-          }
-          if (selectedMimeTypes.length === 0) {
-            selectedMimeTypes = undefined;
-          }
-          exportBtn.disabled = triggersExportContentElement.value !== "DEMAND";
-          resultElement.innerHTML = "";
-          editor.configuration = {
-            server: {
-              protocol: serverProtocolElement.value,
-              scheme: serverSchemelElement.value,
-              host: serverHostlElement.value,
-              applicationKey: serverApplicationKeyElement.value,
-              hmacKey: serverHMACKeyElement.value,
-              version: serverVersionElement.value
-            },
-            recognition: {
-              type: recognitionTypeElement.value,
-              lang: recognitionLanguageElement.value,
-              gesture: {
-                enable: recognitionGestureElement.checked
-              },
-              math: {
-                mimeTypes: recognitionTypeElement.value === "MATH" ? selectedMimeTypes : []
-              },
-              text: {
-                mimeTypes: recognitionTypeElement.value === "TEXT" ? selectedMimeTypes : [],
-                guides: {
-                  enable: recognitionGuidesElement.checked
-                }
-              },
-              diagram: {
-                mimeTypes: recognitionTypeElement.value === "DIAGRAM" ? selectedMimeTypes : []
-              }
-            },
-            rendering: {
-              smartGuide: {
-                enable: renderingSmartGuideElement.checked
-              }
-            },
-            triggers: {
-              triggerDelay: triggersExportContentDelayElement.value,
-              exportContent: triggersExportContentElement.value
-            }
-          };
-        });
-
-        window.addEventListener("resize", () => {
-          editor.resize();
-        });
-      }
-
-      loadEditor();
     </script>
+    <script src="./change_configuration.js"></script>
   </body>
 </html>

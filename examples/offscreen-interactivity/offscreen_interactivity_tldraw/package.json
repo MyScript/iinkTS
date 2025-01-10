@@ -19,7 +19,7 @@
     "react-dom": "^18.3.1",
     "react-json-view": "^1.21.3",
     "react-redux": "^9.1.2",
-    "tldraw": "^3.5.1"
+    "tldraw": "^3.7.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.13",

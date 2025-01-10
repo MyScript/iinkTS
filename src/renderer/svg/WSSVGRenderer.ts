@@ -1,7 +1,7 @@
-import { TRenderingConfiguration } from "../../configuration"
-import { LoggerClass, LoggerManager } from "../../logger"
-import { IModel } from "../../model"
+import { LoggerCategory, LoggerManager } from "../../logger"
+import { Model } from "../../model"
 import { TStroke } from "../../symbol"
+import { TRendererConfiguration } from "../RendererConfiguration"
 import { TUpdatePatch, TUpdatePatchAppendChild, TUpdatePatchInsertBefore, TUpdatePatchRemoveAttribut, TUpdatePatchRemoveChild, TUpdatePatchRemoveElement, TUpdatePatchReplaceAll, TUpdatePatchReplaceELement, TUpdatePatchSetAttribut } from "../../recognizer"
 import { SVGStroker } from "./SVGStroker"
 
@@ -10,15 +10,15 @@ import { SVGStroker } from "./SVGStroker"
  */
 export class WSSVGRenderer
 {
-  #logger = LoggerManager.getLogger(LoggerClass.RENDERER)
+  #logger = LoggerManager.getLogger(LoggerCategory.RENDERER)
 
-  config: TRenderingConfiguration
+  config: TRendererConfiguration
   stroker: SVGStroker
   context!: {
     parent: HTMLElement
   }
 
-  constructor(config: TRenderingConfiguration)
+  constructor(config: TRendererConfiguration)
   {
     this.#logger.info("constructor", { config })
     this.config = config
@@ -190,7 +190,7 @@ export class WSSVGRenderer
     })
   }
 
-  resize(model: IModel): void
+  resize(model: Model): void
   {
     this.#logger.info("resize", { model })
     const rect = this.context.parent.getBoundingClientRect()

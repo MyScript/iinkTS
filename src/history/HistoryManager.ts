@@ -1,28 +1,27 @@
-import { TUndoRedoConfiguration } from "../configuration"
-import { EditorEvent } from "../EditorEvent"
-import { LoggerClass, LoggerManager } from "../logger"
-import { IModel } from "../model"
-import { IHistoryManager } from "./IHistoryManager"
-import { TUndoRedoContext, getInitialUndoRedoContext } from "./UndoRedoContext"
+import { EditorEvent } from "../editor/EditorEvent"
+import { LoggerCategory, LoggerManager } from "../logger"
+import { Model } from "../model"
+import { THistoryConfiguration } from "./HistoryConfiguration"
+import { THistoryContext, getInitialHistoryContext } from "./HistoryContext"
 
 /**
  * @group History
  */
-export class HistoryManager implements IHistoryManager
+export class HistoryManager
 {
-  #logger = LoggerManager.getLogger(LoggerClass.HISTORY)
+  #logger = LoggerManager.getLogger(LoggerCategory.HISTORY)
 
-  configuration: TUndoRedoConfiguration
+  configuration: THistoryConfiguration
   event: EditorEvent
-  context: TUndoRedoContext
-  stack: IModel[]
+  context: THistoryContext
+  stack: Model[]
 
-  constructor(configuration: TUndoRedoConfiguration, event: EditorEvent)
+  constructor(configuration: THistoryConfiguration, event: EditorEvent)
   {
     this.#logger.info("constructor", { configuration })
     this.configuration = configuration
     this.event = event
-    this.context = getInitialUndoRedoContext()
+    this.context = getInitialHistoryContext()
     this.stack = []
   }
 
@@ -33,7 +32,7 @@ export class HistoryManager implements IHistoryManager
     this.context.empty = this.stack[this.context.stackIndex].symbols.length === 0
   }
 
-  push(model: IModel): void
+  push(model: Model): void
   {
     this.#logger.info("push", { model })
     if (this.context.stackIndex + 1 < this.stack.length) {
@@ -52,7 +51,7 @@ export class HistoryManager implements IHistoryManager
     this.event.emitChanged(this.context)
   }
 
-  updateStack(model: IModel): void
+  updateStack(model: Model): void
   {
     this.#logger.info("updateStack", { model })
     const index = this.stack.findIndex(m => m.modificationDate === model.modificationDate)
@@ -63,7 +62,7 @@ export class HistoryManager implements IHistoryManager
     this.event.emitChanged(this.context)
   }
 
-  undo(): IModel
+  undo(): Model
   {
     this.#logger.info("undo")
     if (this.context.canUndo) {
@@ -76,7 +75,7 @@ export class HistoryManager implements IHistoryManager
     return previousModel
   }
 
-  redo(): IModel
+  redo(): Model
   {
     this.#logger.info("redo")
     if (this.context.canRedo) {

@@ -45,6 +45,9 @@ select {
   appearance: none;
   -webkit-tap-highlight-color: transparent;
 }
+select[multiple=true] {
+    height: auto;
+}
 
 select {
   padding: 0 35px 0 15px;

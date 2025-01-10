@@ -1,10 +1,9 @@
-import { TConverstionState, TRecognitionConfiguration, TServerConfiguration } from "../configuration"
-import { LoggerClass, LoggerManager } from "../logger"
+import { LoggerCategory, LoggerManager } from "../logger"
 import { Model, TExport, TJIIXExport } from "../model"
 import { Stroke } from "../symbol"
 import { StyleHelper, TPenStyle, TTheme } from "../style"
-import { TUndoRedoContext } from "../history"
-import { DeferredPromise, computeHmac, isVersionSuperiorOrEqual } from "../utils"
+import { THistoryContext } from "../history"
+import { DeferredPromise, PartialDeep, computeHmac, isVersionSuperiorOrEqual } from "../utils"
 import
 {
   TWSMessageEvent,
@@ -17,6 +16,8 @@ import
 } from "./WSRecognizerMessage"
 import { RecognizerError } from "./RecognizerError"
 import { RecognizerEvent } from "./RecognizerEvent"
+import { TWSRecognizerConfiguration, WSRecognizerConfiguration } from "./WSRecognizerConfiguration"
+import { TConverstionState } from "./RecognitionConfiguration"
 
 /**
  * A websocket dialog have this sequence :
@@ -47,9 +48,8 @@ import { RecognizerEvent } from "./RecognizerEvent"
  */
 export class WSRecognizer
 {
-  #logger = LoggerManager.getLogger(LoggerClass.RECOGNIZER)
-  protected serverConfiguration: TServerConfiguration
-  protected recognitionConfiguration: TRecognitionConfiguration
+  #logger = LoggerManager.getLogger(LoggerCategory.RECOGNIZER)
+  protected configuration: TWSRecognizerConfiguration
 
   protected socket!: WebSocket
   protected pingCount = 0
@@ -82,33 +82,32 @@ export class WSRecognizer
   url: string
   event: RecognizerEvent
 
-  constructor(serverConfig: TServerConfiguration, recognitionConfig: TRecognitionConfiguration)
+  constructor(config?: PartialDeep<TWSRecognizerConfiguration>)
   {
-    this.serverConfiguration = serverConfig
-    this.recognitionConfiguration = recognitionConfig
-    const scheme = (this.serverConfiguration.scheme === "https") ? "wss" : "ws"
-    this.url = `${ scheme }://${ this.serverConfiguration.host }/api/v4.0/iink/document?applicationKey=${ this.serverConfiguration.applicationKey }`
+    this.#logger.info("constructor", { config })
+    this.configuration = new WSRecognizerConfiguration(config)
+    const scheme = (this.configuration.server.scheme === "https") ? "wss" : "ws"
+    this.url = `${ scheme }://${ this.configuration.server.host }/api/v4.0/iink/document?applicationKey=${ this.configuration.server.applicationKey }`
     this.event = new RecognizerEvent()
-    this.#logger.info("constructor", { serverConfig, recognitionConfig, url: this.url })
     this.initialized = new DeferredPromise<void>()
   }
 
   get mimeTypes(): string[]
   {
-    switch (this.recognitionConfiguration.type.toLocaleLowerCase()) {
+    switch (this.configuration.recognition.type.toLocaleLowerCase()) {
       case "text":
-        return this.recognitionConfiguration.text.mimeTypes
+        return this.configuration.recognition.text.mimeTypes
       case "math":
-        return this.recognitionConfiguration.math.mimeTypes
+        return this.configuration.recognition.math.mimeTypes
       default:
-        throw new Error(`Unauthorized recognition type: "${ this.recognitionConfiguration.type }"`)
+        throw new Error(`Unauthorized recognition type: "${ this.configuration.recognition.type }"`)
     }
   }
 
   protected infinitePing(): void
   {
     this.pingCount++
-    if (this.serverConfiguration.websocket.maxPingLostCount < this.pingCount) {
+    if (this.configuration.server.websocket.maxPingLostCount < this.pingCount) {
       this.socket.close(1000, "MAXIMUM_PING_REACHED")
     } else if (this.socket.readyState <= 1) {
       setTimeout(() =>
@@ -117,7 +116,7 @@ export class WSRecognizer
           this.socket.send(JSON.stringify({ type: "ping" }))
           this.infinitePing()
         }
-      }, this.serverConfiguration.websocket.pingDelay)
+      }, this.configuration.server.websocket.pingDelay)
     }
   }
 
@@ -127,13 +126,13 @@ export class WSRecognizer
     const params: TWSMessageEvent = {
       type: this.sessionId ? "restoreIInkSession" : "newContentPackage",
       iinkSessionId: this.sessionId,
-      applicationKey: this.serverConfiguration.applicationKey,
+      applicationKey: this.configuration.server.applicationKey,
       xDpi: 96,
       yDpi: 96,
       viewSizeHeight: this.viewSizeHeight,
       viewSizeWidth: this.viewSizeWidth
     }
-    if (isVersionSuperiorOrEqual(this.serverConfiguration.version, "2.0.4")) {
+    if (isVersionSuperiorOrEqual(this.configuration.server.version, "2.0.4")) {
       params["myscript-client-name"] = "iink-ts"
       params["myscript-client-version"] = "1.0.0-buildVersion"
     }
@@ -248,14 +247,14 @@ export class WSRecognizer
     if (hmacChallengeMessage.hmacChallenge) {
       this.send({
         type: "hmac",
-        hmac: await computeHmac(hmacChallengeMessage.hmacChallenge, this.serverConfiguration.applicationKey, this.serverConfiguration.hmacKey)
+        hmac: await computeHmac(hmacChallengeMessage.hmacChallenge, this.configuration.server.applicationKey, this.configuration.server.hmacKey)
       })
     }
     if (hmacChallengeMessage.iinkSessionId) {
       this.sessionId = hmacChallengeMessage.iinkSessionId
     }
 
-    this.send({ ...this.recognitionConfiguration, type: "configuration" })
+    this.send({ ...this.configuration.recognition, type: "configuration" })
     this.ackDeferred?.resolve()
   }
 
@@ -268,7 +267,7 @@ export class WSRecognizer
       this.send({ type: "openContentPart", id: this.currentPartId, mimeTypes: this.mimeTypes })
     }
     else {
-      this.send({ type: "newContentPart", contentType: this.recognitionConfiguration.type, mimeTypes: this.mimeTypes })
+      this.send({ type: "newContentPart", contentType: this.configuration.recognition.type, mimeTypes: this.mimeTypes })
     }
   }
 
@@ -331,7 +330,7 @@ export class WSRecognizer
   {
     this.#logger.info("manageContentChangeMessage", { websocketMessage })
     const contentChangeMessage = websocketMessage as TWSMessageEventContentChange
-    const context: TUndoRedoContext = {
+    const context: THistoryContext = {
       canRedo: contentChangeMessage.canRedo,
       canUndo: contentChangeMessage.canUndo,
       empty: contentChangeMessage.empty,
@@ -404,7 +403,7 @@ export class WSRecognizer
       this.pingCount = 0
       this.socket = new WebSocket(this.url)
 
-      if (this.serverConfiguration.websocket.pingEnabled) {
+      if (this.configuration.server.websocket.pingEnabled) {
         this.infinitePing()
       }
 
@@ -431,9 +430,9 @@ export class WSRecognizer
       this.socket.send(JSON.stringify(message))
       return Promise.resolve()
     } else {
-      if (this.socket.readyState != this.socket.CONNECTING && this.serverConfiguration.websocket.autoReconnect) {
+      if (this.socket.readyState != this.socket.CONNECTING && this.configuration.server.websocket.autoReconnect) {
         this.reconnectionCount++
-        if (this.serverConfiguration.websocket.maxRetryCount >= this.reconnectionCount) {
+        if (this.configuration.server.websocket.maxRetryCount >= this.reconnectionCount) {
           this.#logger.debug("send", `try to reconnect number: ${ this.reconnectionCount }.`)
           await this.init(this.viewSizeHeight, this.viewSizeWidth)
           await this.setPenStyle(this.penStyle as TPenStyle)
@@ -509,26 +508,20 @@ export class WSRecognizer
     const localModel = model.clone()
     let mimeTypes: string[] = requestedMimeTypes || []
     if (!mimeTypes.length) {
-      switch (this.recognitionConfiguration.type) {
-        case "DIAGRAM":
-          mimeTypes = this.recognitionConfiguration.diagram.mimeTypes
-          break
+      switch (this.configuration.recognition.type) {
         case "MATH":
-          mimeTypes = this.recognitionConfiguration.math.mimeTypes
-          break
-        case "Raw Content":
-          mimeTypes = ["application/vnd.myscript.jiix"]
+          mimeTypes = this.configuration.recognition.math.mimeTypes
           break
         case "TEXT":
-          mimeTypes = this.recognitionConfiguration.text.mimeTypes
+          mimeTypes = this.configuration.recognition.text.mimeTypes
           break
         default:
-          throw new Error(`Recognition type "${ this.recognitionConfiguration.type }" is unknown.\n Possible types are:\n -DIAGRAM\n -MATH\n -Raw Content\n -TEXT`)
+          throw new Error(`Recognition type "${ this.configuration.recognition.type }" is unknown.\n Possible types are:\n -MATH\n -TEXT`)
       }
     }
 
     if (!mimeTypes.length) {
-      return Promise.reject(new Error(`Export failed, no mimeTypes define in recognition ${ this.recognitionConfiguration.type } configuration`))
+      return Promise.reject(new Error(`Export failed, no mimeTypes define in recognition ${ this.configuration.recognition.type } configuration`))
     }
 
     const message: TWSMessageEvent = {
@@ -549,7 +542,7 @@ export class WSRecognizer
     this.#logger.info("import", { data, mimeType })
     await this.initialized.promise
     const localModel = model.clone()
-    const chunkSize = this.serverConfiguration.websocket.fileChunkSize
+    const chunkSize = this.configuration.server.websocket.fileChunkSize
     const importFileId = Math.random().toString(10).substring(2, 6)
     this.importDeferred = new DeferredPromise<TExport>()
     const readBlob = (blob: Blob): Promise<string | never> =>

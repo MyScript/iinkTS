@@ -1,18 +1,18 @@
 import ArrowDown from "../assets/svg/nav-arrow-down.svg"
 import { SELECTION_MARGIN } from "../Constants"
-import { OIBehaviors } from "../behaviors"
-import { LoggerClass, LoggerManager } from "../logger"
+import { LoggerCategory, LoggerManager } from "../logger"
 import { DecoratorKind, OIDecorator, OIRecognizedText, OIStroke, OISymbolGroup, OIText, RecognizedKind, SymbolType, TOISymbol } from "../symbol"
 import { OIMenu, TMenuItemBoolean, TMenuItemButton, TMenuItemColorList } from "./OIMenu"
 import { createUUID } from "../utils"
 import { OIMenuSub, TSubMenuParam } from "./OIMenuSub"
+import { EditorOffscreen } from "../editor"
 /**
  * @group Menu
  */
 export class OIMenuContext extends OIMenu
 {
-  #logger = LoggerManager.getLogger(LoggerClass.MENU)
-  behaviors: OIBehaviors
+  #logger = LoggerManager.getLogger(LoggerCategory.MENU)
+  editor: EditorOffscreen
   id: string
   wrapper?: HTMLElement
   editMenu?: HTMLDivElement
@@ -33,18 +33,18 @@ export class OIMenuContext extends OIMenu
     scrollLeft: number
   }
 
-  constructor(behaviors: OIBehaviors, id = "ms-menu-context")
+  constructor(editor: EditorOffscreen, id = "ms-menu-context")
   {
     super()
     this.id = id
     this.#logger.info("constructor")
-    this.behaviors = behaviors
+    this.editor = editor
     this.position = { x: 0, y: 0, scrollLeft: 0, scrollTop: 0 }
   }
 
   get symbolsSelected(): TOISymbol[]
   {
-    return this.behaviors.model.symbolsSelected
+    return this.editor.model.symbolsSelected
   }
 
   get haveSymbolsSelected(): boolean
@@ -87,7 +87,7 @@ export class OIMenuContext extends OIMenu
     this.editSaveBtn.addEventListener("pointerdown", async (e) =>
     {
       e.stopPropagation()
-      const textSymbol = this.behaviors.model.symbolsSelected.find(s => s.type === SymbolType.Text) as OIText
+      const textSymbol = this.editor.model.symbolsSelected.find(s => s.type === SymbolType.Text) as OIText
       if (textSymbol) {
         const firstChar = textSymbol.chars[0]
         textSymbol.chars = []
@@ -101,8 +101,8 @@ export class OIMenuContext extends OIMenu
             bounds: firstChar.bounds
           })
         }
-        await this.behaviors.updateSymbol(textSymbol)
-        this.behaviors.selector.resetSelectedGroup([textSymbol])
+        await this.editor.updateSymbol(textSymbol)
+        this.editor.selector.resetSelectedGroup([textSymbol])
       }
     })
     const params: TSubMenuParam = {
@@ -143,7 +143,7 @@ export class OIMenuContext extends OIMenu
       const duplicatedSymbols = symbolsToDuplicate.map(s =>
       {
         const clone = s.clone()
-        while (this.behaviors.model.symbols.find(s => s.id === clone.id)) {
+        while (this.editor.model.symbols.find(s => s.id === clone.id)) {
           clone.id = clone.id.slice(0, -36) + `-${ createUUID() }`
           if (clone.type === SymbolType.Group) {
             updateDeepIdInGroup(clone)
@@ -153,13 +153,13 @@ export class OIMenuContext extends OIMenu
           }
         }
         clone.selected = true
-        this.behaviors.translator.applyToSymbol(clone, SELECTION_MARGIN, SELECTION_MARGIN)
+        this.editor.translator.applyToSymbol(clone, SELECTION_MARGIN, SELECTION_MARGIN)
         return clone
       })
 
-      this.behaviors.unselectAll()
-      await this.behaviors.addSymbols(duplicatedSymbols)
-      this.behaviors.selector.drawSelectedGroup(duplicatedSymbols)
+      this.editor.unselectAll()
+      await this.editor.addSymbols(duplicatedSymbols)
+      this.editor.selector.drawSelectedGroup(duplicatedSymbols)
     })
     return this.duplicateBtn
   }
@@ -173,15 +173,15 @@ export class OIMenuContext extends OIMenu
     this.groupBtn.addEventListener("pointerup", async () =>
     {
       if (this.symbolsSelected.length === 1 && this.symbolsSelected[0].type === SymbolType.Group) {
-        const symbols = this.behaviors.ungroupSymbol(this.symbolsSelected[0] as OISymbolGroup)
-        this.behaviors.select(symbols.map(s => s.id))
+        const symbols = this.editor.ungroupSymbol(this.symbolsSelected[0] as OISymbolGroup)
+        this.editor.select(symbols.map(s => s.id))
       }
       else {
         const symbols = this.symbolsSelected.slice()
-        this.behaviors.unselectAll()
-        const group = this.behaviors.groupSymbols(symbols)
+        this.editor.unselectAll()
+        const group = this.editor.groupSymbols(symbols)
         group.selected = true
-        this.behaviors.select([group.id])
+        this.editor.select([group.id])
       }
     })
     return this.groupBtn
@@ -193,7 +193,7 @@ export class OIMenuContext extends OIMenu
     this.convertBtn.id = `${ this.id }-convert`
     this.convertBtn.textContent = "Convert"
     this.convertBtn.classList.add("ms-menu-button")
-    this.convertBtn.addEventListener("pointerup", () => this.behaviors.convertSymbols(this.symbolsSelected))
+    this.convertBtn.addEventListener("pointerup", () => this.editor.convertSymbols(this.symbolsSelected))
     return this.convertBtn
   }
 
@@ -205,8 +205,8 @@ export class OIMenuContext extends OIMenu
     this.removeBtn.classList.add("ms-menu-button")
     this.removeBtn.addEventListener("pointerup", async () =>
     {
-      this.behaviors.selector.removeSelectedGroup()
-      await this.behaviors.removeSymbols(this.symbolsSelected.map(s => s.id))
+      this.editor.selector.removeSelectedGroup()
+      await this.editor.removeSymbols(this.symbolsSelected.map(s => s.id))
     })
     return this.removeBtn
   }
@@ -232,8 +232,8 @@ export class OIMenuContext extends OIMenu
         label: "Bring to front",
         callback: () =>
         {
-          this.behaviors.changeOrderSymbols(this.symbolsSelected, "last")
-          this.behaviors.selector.resetSelectedGroup(this.symbolsSelected)
+          this.editor.changeOrderSymbols(this.symbolsSelected, "last")
+          this.editor.selector.resetSelectedGroup(this.symbolsSelected)
         }
       },
       {
@@ -242,8 +242,8 @@ export class OIMenuContext extends OIMenu
         label: "Bring forward",
         callback: () =>
         {
-          this.behaviors.changeOrderSymbols(this.symbolsSelected, "forward")
-          this.behaviors.selector.resetSelectedGroup(this.symbolsSelected)
+          this.editor.changeOrderSymbols(this.symbolsSelected, "forward")
+          this.editor.selector.resetSelectedGroup(this.symbolsSelected)
         }
       },
       {
@@ -252,8 +252,8 @@ export class OIMenuContext extends OIMenu
         label: "Send backward",
         callback: () =>
         {
-          this.behaviors.changeOrderSymbols(this.symbolsSelected, "backward")
-          this.behaviors.selector.resetSelectedGroup(this.symbolsSelected)
+          this.editor.changeOrderSymbols(this.symbolsSelected, "backward")
+          this.editor.selector.resetSelectedGroup(this.symbolsSelected)
         }
       },
       {
@@ -262,8 +262,8 @@ export class OIMenuContext extends OIMenu
         label: "Send to back",
         callback: () =>
         {
-          this.behaviors.changeOrderSymbols(this.symbolsSelected.slice().reverse(), "first")
-          this.behaviors.selector.resetSelectedGroup(this.symbolsSelected)
+          this.editor.changeOrderSymbols(this.symbolsSelected.slice().reverse(), "first")
+          this.editor.selector.resetSelectedGroup(this.symbolsSelected)
         }
       },
     ]
@@ -308,7 +308,7 @@ export class OIMenuContext extends OIMenu
           {
             if (enable) {
               if (!s.decorators.some(d => d.kind === kind)) {
-                s.decorators.push(new OIDecorator(kind, this.behaviors.currentPenStyle))
+                s.decorators.push(new OIDecorator(kind, this.editor.penStyle))
               }
             }
             else {
@@ -317,8 +317,8 @@ export class OIMenuContext extends OIMenu
                 s.decorators.splice(decoIndex, 1)
               }
             }
-            this.behaviors.model.updateSymbol(s)
-            this.behaviors.renderer.drawSymbol(s)
+            this.editor.model.updateSymbol(s)
+            this.editor.renderer.drawSymbol(s)
           })
 
           document.querySelectorAll(`#${ this.id }-decorator-${ kind }-color button`).forEach(b =>
@@ -346,8 +346,8 @@ export class OIMenuContext extends OIMenu
             const deco = s.decorators.find(d => d.kind === kind)
             if (deco) {
               deco.style.color = color
-              this.behaviors.model.updateSymbol(s)
-              this.behaviors.renderer.drawSymbol(s)
+              this.editor.model.updateSymbol(s)
+              this.editor.renderer.drawSymbol(s)
             }
           })
         },
@@ -416,19 +416,19 @@ export class OIMenuContext extends OIMenu
         type: "button",
         id: `${ this.id }-export-json`,
         label: "json",
-        callback: () => this.behaviors.downloadAsJson(this.haveSymbolsSelected)
+        callback: () => this.editor.downloadAsJson(this.haveSymbolsSelected)
       },
       {
         type: "button",
         id: `${ this.id }-export-svg`,
         label: "svg",
-        callback: () => this.behaviors.downloadAsSVG(this.haveSymbolsSelected)
+        callback: () => this.editor.downloadAsSVG(this.haveSymbolsSelected)
       },
       {
         type: "button",
         id: `${ this.id }-export-png`,
         label: "png",
-        callback: () => this.behaviors.downloadAsPNG(this.haveSymbolsSelected)
+        callback: () => this.editor.downloadAsPNG(this.haveSymbolsSelected)
       },
     ]
     const subMenuWrapper = document.createElement("div")
@@ -452,7 +452,7 @@ export class OIMenuContext extends OIMenu
     btn.id = `${ this.id }-duplicate`
     btn.textContent = "Select all"
     btn.classList.add("ms-menu-button")
-    btn.addEventListener("pointerup", async () => this.behaviors.selectAll())
+    btn.addEventListener("pointerup", async () => this.editor.selectAll())
     return btn
   }
 
@@ -529,8 +529,8 @@ export class OIMenuContext extends OIMenu
     this.wrapper?.style.setProperty("top", `${ this.position.y - this.position.scrollTop }px`)
 
     if (this.haveSymbolsSelected) {
-      const textSymbol = this.behaviors.model.symbolsSelected.find(s => s.type === SymbolType.Text)
-      if (this.editMenu && this.editInput && this.behaviors.model.symbolsSelected.length === 1 && textSymbol) {
+      const textSymbol = this.editor.model.symbolsSelected.find(s => s.type === SymbolType.Text)
+      if (this.editMenu && this.editInput && this.editor.model.symbolsSelected.length === 1 && textSymbol) {
         this.editMenu.style.removeProperty("display")
         this.editInput.value = (textSymbol as OIText).label
       }
@@ -538,7 +538,7 @@ export class OIMenuContext extends OIMenu
         this.editMenu?.style.setProperty("display", "none")
       }
 
-      if (this.behaviors.extractStrokesFromSymbols(this.symbolsSelected).length) {
+      if (this.editor.extractStrokesFromSymbols(this.symbolsSelected).length) {
         this.convertBtn?.style.removeProperty("display")
       }
       else {
@@ -580,10 +580,10 @@ export class OIMenuContext extends OIMenu
     this.wrapper.style.setProperty("display", "none")
     layer.appendChild(this.wrapper)
 
-    this.behaviors.layers.render.addEventListener("scroll", () =>
+    this.editor.layers.rendering.addEventListener("scroll", () =>
     {
-      this.position.scrollLeft = this.behaviors.layers.render.scrollLeft || 0
-      this.position.scrollTop = this.behaviors.layers.render.scrollTop || 0
+      this.position.scrollLeft = this.editor.layers.rendering.scrollLeft || 0
+      this.position.scrollTop = this.editor.layers.rendering.scrollTop || 0
       this.update()
     })
   }

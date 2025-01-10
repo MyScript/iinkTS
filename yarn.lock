@@ -5099,6 +5099,16 @@ typed-array-length@^1.0.6:
     possible-typed-array-names "^1.0.0"
     reflect.getprototypeof "^1.0.6"
 
+typedoc-plugin-expand-object-like-types@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/typedoc-plugin-expand-object-like-types/-/typedoc-plugin-expand-object-like-types-0.1.2.tgz#7b97e2e0ccb5f0d7e784677a62b89b2ce163fc39"
+  integrity sha512-RRMOCWMElQHBOVraWMWrh/0tDqCdS5oxYwaWMZBB3KlUUUUCxKllpvJPsRH/uFLO1nOuy28CbJxGVU1umv7LOQ==
+
+typedoc-plugin-inline-sources@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/typedoc-plugin-inline-sources/-/typedoc-plugin-inline-sources-1.2.0.tgz#b64bd89255a25b65a5ec204e55d924df8329be0b"
+  integrity sha512-gCjief4B71vRJw25Lwl7J69DuxzDjjG6pvUUPmjxY3uePyzcFGiw4eqbq+tmIPLXlnKAQujmglX/G+ZDnLUzug==
+
 typedoc-plugin-missing-exports@^3.1.0:
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/typedoc-plugin-missing-exports/-/typedoc-plugin-missing-exports-3.1.0.tgz#cab4952c19cae1ab3f91cbbf2d7d17564682b023"

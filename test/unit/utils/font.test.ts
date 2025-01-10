@@ -1,4 +1,4 @@
-import { ConfigurationTextWebsocket } from "../__dataset__/configuration.dataset"
+import { WSRecognizerTextConfiguration } from "../__dataset__/configuration.dataset"
 import { getAvailableFontList } from "../../../src/iink"
 
 describe("font.ts", () =>
@@ -11,9 +11,9 @@ describe("font.ts", () =>
 
   test("should call fetch with good url", async () =>
   {
-    await getAvailableFontList(ConfigurationTextWebsocket)
+    await getAvailableFontList(WSRecognizerTextConfiguration)
     expect(fetch).toBeCalledTimes(1)
-    expect(fetch).toBeCalledWith(`${ ConfigurationTextWebsocket?.server?.scheme }://${ ConfigurationTextWebsocket?.server?.host }/api/v4.0/iink/font/google/language/${ ConfigurationTextWebsocket?.recognition?.lang }`)
+    expect(fetch).toBeCalledWith(`${ WSRecognizerTextConfiguration?.server?.scheme }://${ WSRecognizerTextConfiguration?.server?.host }/api/v4.0/iink/font/google/language/${ WSRecognizerTextConfiguration?.recognition?.lang }`)
   })
 
   test("should reject getAvailableFontList if no configuration", async () =>
@@ -28,7 +28,7 @@ describe("font.ts", () =>
 
   test("should reject getAvailableFontList if configuration.server is empty", async () =>
   {
-    const conf = JSON.parse(JSON.stringify(ConfigurationTextWebsocket))
+    const conf = JSON.parse(JSON.stringify(WSRecognizerTextConfiguration))
     delete conf?.server
     getAvailableFontList(conf)
       .catch(e =>
@@ -39,7 +39,7 @@ describe("font.ts", () =>
 
   test("should reject getAvailableFontList if configuration.server.scheme is empty", async () =>
   {
-    const conf = JSON.parse(JSON.stringify(ConfigurationTextWebsocket))
+    const conf = JSON.parse(JSON.stringify(WSRecognizerTextConfiguration))
     delete conf?.server?.scheme
     getAvailableFontList(conf)
       .catch(e =>
@@ -50,7 +50,7 @@ describe("font.ts", () =>
 
   test("should reject getAvailableFontList if configuration.server.host empty", async () =>
   {
-    const conf = JSON.parse(JSON.stringify(ConfigurationTextWebsocket))
+    const conf = JSON.parse(JSON.stringify(WSRecognizerTextConfiguration))
     delete conf?.server?.host
     getAvailableFontList(conf)
       .catch(e =>
@@ -61,7 +61,7 @@ describe("font.ts", () =>
 
   test("should reject getAvailableFontList if configuration.server.host empty", async () =>
   {
-    const conf = JSON.parse(JSON.stringify(ConfigurationTextWebsocket))
+    const conf = JSON.parse(JSON.stringify(WSRecognizerTextConfiguration))
     delete conf?.recognition?.lang
     getAvailableFontList(conf)
       .catch(e =>

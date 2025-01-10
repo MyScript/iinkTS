@@ -3,9 +3,9 @@ import {
   waitForEditorInit,
   writeStrokes,
   waitForExportedEvent,
-  setEditorConfiguration,
-  getEditorConfiguration,
   getEditorExports,
+  loadEditor,
+  getEditorConfiguration,
 } from "../helper"
 import rectangle from "../__dataset__/rectangle"
 import line from "../__dataset__/line"
@@ -73,10 +73,20 @@ test.describe("Rest Diagram", () => {
 
     test("should only request application/vnd.openxmlformats-officedocument.presentationml.presentation", async ({ page }) => {
       const configuration = await getEditorConfiguration(page)
-      configuration.recognition.diagram.mimeTypes = [
-        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-      ]
-      await setEditorConfiguration(page, configuration)
+      const options = {
+        configuration: {
+          server: configuration.server,
+          recognition: {
+            type: "DIAGRAM",
+            diagram: {
+              mimeTypes: [
+                "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+              ]
+            }
+          }
+        }
+      }
+      await loadEditor(page, "REST", options)
       await Promise.all([
         waitForExportedEvent(page),
         writeStrokes(page, line.strokes),
@@ -87,11 +97,22 @@ test.describe("Rest Diagram", () => {
 
     test("should request application/vnd.myscript.jiix & application/vnd.openxmlformats-officedocument.presentationml.presentation", async ({ page }) => {
       const configuration = await getEditorConfiguration(page)
-      configuration.recognition.diagram.mimeTypes = [
-        "application/vnd.myscript.jiix",
-        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-      ]
-      await setEditorConfiguration(page, configuration)
+      const options = {
+        type: "REST",
+        configuration: {
+          server: configuration.server,
+          recognition: {
+            type: "DIAGRAM",
+            diagram: {
+              mimeTypes: [
+                "application/vnd.myscript.jiix",
+                "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+              ]
+            }
+          }
+        }
+      }
+      await loadEditor(page, "REST", options)
       await Promise.all([
         waitForExportedEvent(page),
         writeStrokes(page, line.strokes),

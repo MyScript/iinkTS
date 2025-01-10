@@ -16,7 +16,6 @@
       #editor {
         width: calc(100vw - 300px);
         height: calc(100dvh - 62px);
-        touch-action: none;
       }
       #show-import {
         display: none;
@@ -112,7 +111,7 @@
         btn.textContent = "Create";
         inputsWrapper.appendChild(btn);
         btn.addEventListener("pointerup", async () => {
-          symbolsCreated.push(await document.getElementById("editor").editor.behaviors.createSymbol(JSON.parse(textarea.value)));
+          symbolsCreated.push(await document.getElementById("editor").editor.createSymbol(JSON.parse(textarea.value)));
           createAllBtn.disabled = true;
           btn.disabled = true;
         });
@@ -121,7 +120,7 @@
       }
 
       /**
-       * we expose the editor for use in the integration test
+       * we expose the editor so we can access it in tests
        */
       let editor;
 
@@ -131,7 +130,6 @@
 
         const options = {
           configuration: {
-            offscreen: true,
             server,
             rendering: {
               minHeight: 800,
@@ -141,14 +139,14 @@
         };
 
         /**
-         * Instanciate editor
+         * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = new iink.Editor(editorElement, options);
+        editor = await iink.Editor.load(editorElement, "OFFSCREEN", options);
 
         /**
-         *  async initialize editor behaviors
+         *  async initialize editor
          */
         await editor.initialize();
 
@@ -159,7 +157,7 @@
         });
 
         createAllBtn.addEventListener("pointerup", async () => {
-          symbolsCreated.push(await editor.behaviors.createSymbols(symbols));
+          symbolsCreated.push(await editor.createSymbols(symbols));
           document.querySelectorAll(".create-btn").forEach((b) => (b.disabled = true));
         });
 

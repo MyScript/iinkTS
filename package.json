@@ -79,6 +79,8 @@
     "ts-jest": "^29.2.5",
     "tslib": "^2.8.1",
     "typedoc": "^0.27.2",
+    "typedoc-plugin-expand-object-like-types": "^0.1.2",
+    "typedoc-plugin-inline-sources": "^1.2.0",
     "typedoc-plugin-missing-exports": "^3.1.0",
     "typescript": "^5.7.2"
   },

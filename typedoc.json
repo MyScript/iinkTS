@@ -12,6 +12,11 @@
     "test",
     "node_modules"
   ],
+  "plugin": [
+    "typedoc-plugin-missing-exports",
+    "typedoc-plugin-expand-object-like-types",
+    "typedoc-plugin-inline-sources"
+  ],
   "sort": [
     "alphabetical",
   ],
@@ -25,7 +30,6 @@
   "categoryOrder": [],
   "groupOrder": [
     "Editor",
-    "Configuration",
     "Behavior",
     "Renderer",
     "Recognizer",
@@ -33,7 +37,6 @@
     "Model",
     "Model/Export",
     "Constants",
-    "Event",
     "*"
   ],
   "navigation": {
@@ -50,5 +53,44 @@
   },
   "out": "./docs",
   "pretty": true,
-  "customCss": "./typedoc.css"
+  "customCss": "./typedoc.css",
+  "blockTags": [
+    "@defaultValue",
+    "@deprecated",
+    "@example",
+    "@param",
+    "@privateRemarks",
+    "@remarks",
+    "@returns",
+    "@see",
+    "@throws",
+    "@typeParam",
+    "@author",
+    "@callback",
+    "@category",
+    "@categoryDescription",
+    "@default",
+    "@document",
+    "@extends",
+    "@augments",
+    "@yields",
+    "@group",
+    "@groupDescription",
+    "@import",
+    "@inheritDoc",
+    "@jsx",
+    "@license",
+    "@module",
+    "@mergeModuleWith",
+    "@prop",
+    "@property",
+    "@return",
+    "@satisfies",
+    "@since",
+    "@template",
+    "@type",
+    "@typedef",
+    "@summary",
+    "@source"
+  ]
 }

@@ -81,21 +81,17 @@
           configuration: {
             server
           },
-          behaviors: {
+          override: {
             grabber: CustomGrabber
           }
         };
+
         /**
-         * Instanciate editor
+         * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = new iink.Editor(editorElement, options);
-        /**
-         *  async initialize editor behaviors
-         */
-        await editor.initialize();
-
+        editor = await iink.Editor.load(editorElement, "WEBSOCKET", options);
 
         editor.event.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo;

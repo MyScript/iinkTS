@@ -50,8 +50,10 @@ export class OISVGRendererGroupUtil
       "stroke-linecap": "round",
       "stroke-linejoin": "round",
       "fill": symbolGroup.style.color || DefaultStyle.color!,
-      "stroke-width": (symbolGroup.style.width || DefaultStyle.width!).toString(),
-      "opacity": (symbolGroup.style.opacity || DefaultStyle.opacity!).toString(),
+      "stroke-width": (symbolGroup.style.width || DefaultStyle.width).toString(),
+    }
+    if (symbolGroup.style.opacity) {
+      attrs["opacity"] = symbolGroup.style.opacity.toString()
     }
     if (symbolGroup.selected) {
       attrs["filter"] = `url(#${ OISVGRendererConst.selectionFilterId })`

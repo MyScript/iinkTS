@@ -54,12 +54,12 @@ async function updateTabContent() {
       break;
     case "history-tab":
       content = renderjson({
-        context: editor.behaviors.history.context,
-        stack: editor.behaviors.history.stack
+        context: editor.history.context,
+        stack: editor.history.stack
       });
       dataString = JSON.stringify({
-        context: editor.behaviors.history.context,
-        stack: editor.behaviors.history.stack
+        context: editor.history.context,
+        stack: editor.history.stack
       });
       break;
     case "selection-tab":
@@ -114,7 +114,7 @@ function createSymbolInputColor(symbol) {
   inputColor.value = symbol.style.color;
   inputColor.classList.add("symbol-input");
   inputColor.addEventListener("change", (evt) => {
-    editor.behaviors.updateSymbolsStyle([symbol.id], { color: evt.target.value });
+    editor.updateSymbolsStyle([symbol.id], { color: evt.target.value });
   });
   return inputColor;
 }
@@ -130,7 +130,7 @@ function createSymbolInputWidth(symbol) {
     } else {
       minus.removeAttribute("disabled");
     }
-    editor.behaviors.updateSymbolsStyle([symbol.id], { width: symbol.style.width });
+    editor.updateSymbolsStyle([symbol.id], { width: symbol.style.width });
   });
 
   const plus = document.createElement("button");
@@ -146,7 +146,7 @@ function createSymbolInputWidth(symbol) {
     } else {
       minus.removeAttribute("disabled");
     }
-    editor.behaviors.updateSymbolsStyle([symbol.id], { width: symbol.style.width });
+    editor.updateSymbolsStyle([symbol.id], { width: symbol.style.width });
   });
   return { minus, plus };
 }
@@ -184,7 +184,7 @@ htmlPanCloseBtn.addEventListener("pointerup", () => {
 });
 
 /**
- * we expose the editor for use in the integration test
+ * we expose the editor so we can access it in tests
  */
 let editor;
 
@@ -193,7 +193,6 @@ async function loadEditor() {
   const server = await res.json();
   const options = {
     configuration: {
-      offscreen: true,
       server,
       rendering: {
         minHeight: 2000,
@@ -202,16 +201,12 @@ async function loadEditor() {
     }
   };
   /**
-   * Instanciate editor
+   * get editor instance from type
    * @param {Element} The DOM element to attach the ink paper
    * @param {Object} The Editor parameters
    */
-  editor = new iink.Editor(editorElement, options);
+  editor = await iink.Editor.load(editorElement, "OFFSCREEN", options);
 
-  /**
-   *  async initialize editor behaviors
-   */
-  await editor.initialize();
   setCurrentTab(currentTabId);
 
   const symbolsToCreateResponse = await fetch("../assets/datas/shakespeare-quotes.json");
@@ -243,7 +238,7 @@ async function loadEditor() {
 
   importBtn.addEventListener("pointerup", async () => {
     importBtn.disabled = true;
-    await editor.behaviors.createSymbols(symbolsToCreate);
+    await editor.createSymbols(symbolsToCreate);
   });
 
   window.addEventListener("resize", () => {

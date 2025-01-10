@@ -1,7 +1,6 @@
 import { SELECTION_MARGIN, EditorWriteTool } from "../Constants"
-import { OIBehaviors } from "../behaviors"
 import { TGesture } from "../gesture"
-import { LoggerClass, LoggerManager } from "../logger"
+import { LoggerCategory, LoggerManager } from "../logger"
 import { OIModel } from "../model"
 import
 {
@@ -22,8 +21,9 @@ import { OIRecognizer } from "../recognizer"
 import { OISVGRenderer } from "../renderer"
 import { TStyle } from "../style"
 import { OIHistoryManager } from "../history"
-import { OIGestureManager } from "./OIGestureManager"
-import { OISnapManager } from "./OISnapManager"
+import { OIGestureManager } from "../gesture/OIGestureManager"
+import { OISnapManager } from "../snap/OISnapManager"
+import { EditorOffscreen } from "../editor/EditorOffscreen"
 
 
 /**
@@ -31,18 +31,18 @@ import { OISnapManager } from "./OISnapManager"
  */
 export class OIWriteManager
 {
-  #logger = LoggerManager.getLogger(LoggerClass.WRITE)
-  behaviors: OIBehaviors
+  #logger = LoggerManager.getLogger(LoggerCategory.WRITE)
+  editor: EditorOffscreen
 
   #tool: EditorWriteTool = EditorWriteTool.Pencil
   detectGesture: boolean = true
 
   currentSymbolOrigin?: TPoint
 
-  constructor(behaviors: OIBehaviors)
+  constructor(editor: EditorOffscreen)
   {
     this.#logger.info("constructor")
-    this.behaviors = behaviors
+    this.editor = editor
   }
 
   get tool(): EditorWriteTool
@@ -53,47 +53,47 @@ export class OIWriteManager
   {
     this.#tool = wt
     if (wt !== EditorWriteTool.Pencil) {
-      this.behaviors.layers.root.classList.add("shape")
+      this.editor.layers.root.classList.add("shape")
     }
     else {
-      this.behaviors.layers.root.classList.remove("shape")
+      this.editor.layers.root.classList.remove("shape")
     }
-    this.behaviors.unselectAll()
+    this.editor.unselectAll()
   }
 
   get model(): OIModel
   {
-    return this.behaviors.model
+    return this.editor.model
   }
 
   get renderer(): OISVGRenderer
   {
-    return this.behaviors.renderer
+    return this.editor.renderer
   }
 
   get history(): OIHistoryManager
   {
-    return this.behaviors.history
+    return this.editor.history
   }
 
   get gestureManager(): OIGestureManager
   {
-    return this.behaviors.gesture
+    return this.editor.gesture
   }
 
   get snaps(): OISnapManager
   {
-    return this.behaviors.snaps
+    return this.editor.snaps
   }
 
   get recognizer(): OIRecognizer
   {
-    return this.behaviors.recognizer
+    return this.editor.recognizer
   }
 
   protected needContextLessGesture(stroke: OIStroke): boolean
   {
-    const strokeBoundsWithMargin = this.behaviors.getSymbolsBounds([stroke], 2 * SELECTION_MARGIN)
+    const strokeBoundsWithMargin = this.editor.getSymbolsBounds([stroke], 2 * SELECTION_MARGIN)
     return this.detectGesture && this.model.symbols.some(s =>
     {
       switch (s.type) {

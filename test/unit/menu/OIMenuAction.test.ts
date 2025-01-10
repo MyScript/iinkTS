@@ -1,4 +1,4 @@
-import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
+import { EditorOffscreenMock } from "../__mocks__/EditorOffscreenMock"
 import { EditorTool, OIMenuAction, StrikeThroughAction, SurroundAction } from "../../../src/iink"
 import { ChangeEventMock, LeftClickEventMock } from "../__mocks__/EventMock"
 
@@ -13,65 +13,65 @@ describe("OIMenuAction.ts", () =>
 
   test("should create", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    const menu = new OIMenuAction(behaviors)
+    const editor = new EditorOffscreenMock()
+    const menu = new OIMenuAction(editor)
     expect(menu).toBeDefined()
   })
 
   describe("render", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    behaviors.init()
-    const menu = new OIMenuAction(behaviors)
-    menu.render(behaviors.layers.ui.root)
+    const editor = new EditorOffscreenMock()
+    editor.init()
+    const menu = new OIMenuAction(editor)
+    menu.render(editor.layers.ui.root)
     test("should render menu action", () =>
     {
-      expect(behaviors.layers.ui.root.querySelector("#ms-menu-action")).not.toBeNull()
+      expect(editor.layers.ui.root.querySelector("#ms-menu-action")).not.toBeNull()
     })
     test("should render menu gesture", () =>
     {
-      expect(behaviors.layers.ui.root.querySelector("#ms-menu-action-gesture")).not.toBeNull()
+      expect(editor.layers.ui.root.querySelector("#ms-menu-action-gesture")).not.toBeNull()
     })
     test("should render menu guide", () =>
     {
-      expect(behaviors.layers.ui.root.querySelector("#ms-menu-action-guide")).not.toBeNull()
+      expect(editor.layers.ui.root.querySelector("#ms-menu-action-guide")).not.toBeNull()
     })
     test("should render menu snap", () =>
     {
-      expect(behaviors.layers.ui.root.querySelector("#ms-menu-action-snap")).not.toBeNull()
+      expect(editor.layers.ui.root.querySelector("#ms-menu-action-snap")).not.toBeNull()
     })
     test("should render menu debug", () =>
     {
-      expect(behaviors.layers.ui.root.querySelector("#ms-menu-action-debug")).not.toBeNull()
+      expect(editor.layers.ui.root.querySelector("#ms-menu-action-debug")).not.toBeNull()
     })
     test("should render menu clear", () =>
     {
-      expect(behaviors.layers.ui.root.querySelector("#ms-menu-action-clear")).not.toBeNull()
+      expect(editor.layers.ui.root.querySelector("#ms-menu-action-clear")).not.toBeNull()
     })
     test("should render menu language", () =>
     {
-      expect(behaviors.layers.ui.root.querySelector("#ms-menu-action-language")).not.toBeNull()
+      expect(editor.layers.ui.root.querySelector("#ms-menu-action-language")).not.toBeNull()
     })
     test("should render menu undo", () =>
     {
-      expect(behaviors.layers.ui.root.querySelector("#ms-menu-action-undo")).not.toBeNull()
+      expect(editor.layers.ui.root.querySelector("#ms-menu-action-undo")).not.toBeNull()
     })
     test("should render menu redo", () =>
     {
-      expect(behaviors.layers.ui.root.querySelector("#ms-menu-action-redo")).not.toBeNull()
+      expect(editor.layers.ui.root.querySelector("#ms-menu-action-redo")).not.toBeNull()
     })
     test("should render menu convert", () =>
     {
-      expect(behaviors.layers.ui.root.querySelector("#ms-menu-action-convert")).not.toBeNull()
+      expect(editor.layers.ui.root.querySelector("#ms-menu-action-convert")).not.toBeNull()
     })
   })
 
   describe("show/hide", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    behaviors.init()
-    const menu = new OIMenuAction(behaviors)
-    menu.render(behaviors.layers.ui.root)
+    const editor = new EditorOffscreenMock()
+    editor.init()
+    const menu = new OIMenuAction(editor)
+    menu.render(editor.layers.ui.root)
     test("should hide", () =>
     {
       expect(menu.wrapper?.style.visibility).toEqual("visible")
@@ -88,79 +88,79 @@ describe("OIMenuAction.ts", () =>
 
   describe("Main menu", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    behaviors.init()
-    const menu = new OIMenuAction(behaviors)
-    menu.render(behaviors.layers.ui.root)
-    test("should call behaviors.clear on pointerup", () =>
+    const editor = new EditorOffscreenMock()
+    editor.init()
+    const menu = new OIMenuAction(editor)
+    menu.render(editor.layers.ui.root)
+    test("should call editor.clear on pointerup", () =>
     {
-      expect(behaviors.clear).not.toBeCalled()
+      expect(editor.clear).not.toBeCalled()
       const pointerEvt = new LeftClickEventMock("pointerup", {
         pointerType: "pen",
         clientX: 300,
         clientY: 500,
         pressure: 1
       })
-      behaviors.layers.ui.root.querySelector("#ms-menu-action-clear")?.dispatchEvent(pointerEvt)
-      expect(behaviors.clear).toBeCalled()
+      editor.layers.ui.root.querySelector("#ms-menu-action-clear")?.dispatchEvent(pointerEvt)
+      expect(editor.clear).toBeCalled()
     })
-    test("should call behaviors.changeLanguage on change", () =>
+    test("should call editor.changeLanguage on change", () =>
     {
-      expect(behaviors.changeLanguage).not.toBeCalled()
-      behaviors.tool = EditorTool.Select
+      expect(editor.changeLanguage).not.toBeCalled()
+      editor.tool = EditorTool.Select
       const changeEvt = new ChangeEventMock({
         target: { value: "fr_FR" } as unknown as HTMLInputElement
       })
-      behaviors.layers.ui.root.querySelector("#ms-menu-action-language")?.dispatchEvent(changeEvt)
-      expect(behaviors.changeLanguage).toBeCalled()
+      editor.layers.ui.root.querySelector("#ms-menu-action-language")?.dispatchEvent(changeEvt)
+      expect(editor.changeLanguage).toBeCalled()
     })
-    test("should call behaviors.undo on pointerup", () =>
+    test("should call editor.undo on pointerup", () =>
     {
-      expect(behaviors.undo).not.toBeCalled()
+      expect(editor.undo).not.toBeCalled()
       const pointerEvt = new LeftClickEventMock("pointerup", {
         pointerType: "pen",
         clientX: 300,
         clientY: 500,
         pressure: 1
       })
-      behaviors.layers.ui.root.querySelector("#ms-menu-action-undo")?.dispatchEvent(pointerEvt)
-      expect(behaviors.undo).toBeCalled()
+      editor.layers.ui.root.querySelector("#ms-menu-action-undo")?.dispatchEvent(pointerEvt)
+      expect(editor.undo).toBeCalled()
     })
-    test("should call behaviors.redo on pointerup", () =>
+    test("should call editor.redo on pointerup", () =>
     {
-      expect(behaviors.redo).not.toBeCalled()
+      expect(editor.redo).not.toBeCalled()
       const pointerEvt = new LeftClickEventMock("pointerup", {
         pointerType: "pen",
         clientX: 300,
         clientY: 500,
         pressure: 1
       })
-      behaviors.layers.ui.root.querySelector("#ms-menu-action-redo")?.dispatchEvent(pointerEvt)
-      expect(behaviors.redo).toBeCalled()
+      editor.layers.ui.root.querySelector("#ms-menu-action-redo")?.dispatchEvent(pointerEvt)
+      expect(editor.redo).toBeCalled()
     })
-    test("should call behaviors.convert on pointerup", () =>
+    test("should call editor.convert on pointerup", () =>
     {
-      expect(behaviors.convert).not.toBeCalled()
+      expect(editor.convert).not.toBeCalled()
       const pointerEvt = new LeftClickEventMock("pointerup", {
         pointerType: "pen",
         clientX: 300,
         clientY: 500,
         pressure: 1
       })
-      behaviors.layers.ui.root.querySelector("#ms-menu-action-convert")?.dispatchEvent(pointerEvt)
-      expect(behaviors.convert).toBeCalled()
+      editor.layers.ui.root.querySelector("#ms-menu-action-convert")?.dispatchEvent(pointerEvt)
+      expect(editor.convert).toBeCalled()
     })
   })
 
   describe("Sub menu", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    behaviors.init()
-    const menu = new OIMenuAction(behaviors)
-    menu.render(behaviors.layers.ui.root)
+    const editor = new EditorOffscreenMock()
+    editor.init()
+    const menu = new OIMenuAction(editor)
+    menu.render(editor.layers.ui.root)
     test("submenu should be hidden", () =>
     {
-      expect(behaviors.layers.ui.root.querySelector(".sub-menu-content")?.classList).not.toContain("open")
+      expect(editor.layers.ui.root.querySelector(".sub-menu-content")?.classList).not.toContain("open")
     })
     test("submenu should be displayed", () =>
     {
@@ -170,98 +170,98 @@ describe("OIMenuAction.ts", () =>
         clientY: 500,
         pressure: 1
       })
-      behaviors.layers.ui.root.querySelector("#ms-menu-action")?.dispatchEvent(pointerEvt)
-      expect(behaviors.layers.ui.root.querySelector(".sub-menu-content")?.classList).toContain("open")
+      editor.layers.ui.root.querySelector("#ms-menu-action")?.dispatchEvent(pointerEvt)
+      expect(editor.layers.ui.root.querySelector(".sub-menu-content")?.classList).toContain("open")
     })
     test("should open gesture sub menu", () =>
     {
-      expect(behaviors.layers.ui.root.querySelector("#ms-menu-action-gesture + .sub-menu-content")?.classList).not.toContain("open")
+      expect(editor.layers.ui.root.querySelector("#ms-menu-action-gesture + .sub-menu-content")?.classList).not.toContain("open")
       const pointerEvt = new LeftClickEventMock("pointerdown", {
         pointerType: "pen",
         clientX: 300,
         clientY: 500,
         pressure: 1
       })
-      behaviors.layers.ui.root.querySelector("#ms-menu-action-gesture")?.dispatchEvent(pointerEvt)
-      expect(behaviors.layers.ui.root.querySelector("#ms-menu-action-gesture + .sub-menu-content")?.classList).toContain("open")
+      editor.layers.ui.root.querySelector("#ms-menu-action-gesture")?.dispatchEvent(pointerEvt)
+      expect(editor.layers.ui.root.querySelector("#ms-menu-action-gesture + .sub-menu-content")?.classList).toContain("open")
     })
-    test("should define behaviors to write on change gesture detected", () =>
+    test("should define editor to write on change gesture detected", () =>
     {
-      behaviors.writer.detectGesture = true
-      behaviors.tool = EditorTool.Select
+      editor.writer.detectGesture = true
+      editor.tool = EditorTool.Select
       const changeEvt = new ChangeEventMock({
         target: { value: false } as unknown as HTMLInputElement
       })
-      const input = behaviors.layers.ui.root.querySelector("#ms-menu-action-gesture-detect") as HTMLInputElement
+      const input = editor.layers.ui.root.querySelector("#ms-menu-action-gesture-detect") as HTMLInputElement
       input.checked = false
       input.dispatchEvent(changeEvt)
-      expect(behaviors.tool).toEqual(EditorTool.Write)
-      expect(behaviors.writer.detectGesture).toEqual(false)
+      expect(editor.tool).toEqual(EditorTool.Write)
+      expect(editor.writer.detectGesture).toEqual(false)
     })
-    test("should define behaviors to write on change gesture surround", () =>
+    test("should define editor to write on change gesture surround", () =>
     {
-      behaviors.tool = EditorTool.Select
-      behaviors.gesture.surroundAction = SurroundAction.Select
+      editor.tool = EditorTool.Select
+      editor.gesture.surroundAction = SurroundAction.Select
       const changeEvt = new ChangeEventMock({
         target: { value: SurroundAction.Surround } as unknown as HTMLInputElement
       })
-      const input = behaviors.layers.ui.root.querySelector("#ms-menu-action-gesture-surround") as HTMLInputElement
+      const input = editor.layers.ui.root.querySelector("#ms-menu-action-gesture-surround") as HTMLInputElement
       input.value = SurroundAction.Surround
       input.dispatchEvent(changeEvt)
-      expect(behaviors.tool).toEqual(EditorTool.Write)
-      expect(behaviors.gesture.surroundAction).toEqual(SurroundAction.Surround)
+      expect(editor.tool).toEqual(EditorTool.Write)
+      expect(editor.gesture.surroundAction).toEqual(SurroundAction.Surround)
     })
-    test("should define behaviors to write on change gesture strikethrough", () =>
+    test("should define editor to write on change gesture strikethrough", () =>
     {
-      behaviors.tool = EditorTool.Select
-      behaviors.gesture.strikeThroughAction = StrikeThroughAction.Draw
+      editor.tool = EditorTool.Select
+      editor.gesture.strikeThroughAction = StrikeThroughAction.Draw
       const changeEvt = new ChangeEventMock({
         target: { value: StrikeThroughAction.Erase } as unknown as HTMLInputElement
       })
-      const input = behaviors.layers.ui.root.querySelector("#ms-menu-action-gesture-strikethrough") as HTMLInputElement
+      const input = editor.layers.ui.root.querySelector("#ms-menu-action-gesture-strikethrough") as HTMLInputElement
       input.value = StrikeThroughAction.Erase
       input.dispatchEvent(changeEvt)
-      expect(behaviors.tool).toEqual(EditorTool.Write)
-      expect(behaviors.gesture.strikeThroughAction).toEqual(StrikeThroughAction.Erase)
+      expect(editor.tool).toEqual(EditorTool.Write)
+      expect(editor.gesture.strikeThroughAction).toEqual(StrikeThroughAction.Erase)
     })
     test("should open guide sub menu", () =>
     {
-      expect(behaviors.layers.ui.root.querySelector("#ms-menu-action-guide + .sub-menu-content")?.classList).not.toContain("open")
+      expect(editor.layers.ui.root.querySelector("#ms-menu-action-guide + .sub-menu-content")?.classList).not.toContain("open")
       const pointerEvt = new LeftClickEventMock("pointerdown", {
         pointerType: "pen",
         clientX: 300,
         clientY: 500,
         pressure: 1
       })
-      behaviors.layers.ui.root.querySelector("#ms-menu-action-guide")?.dispatchEvent(pointerEvt)
-      expect(behaviors.layers.ui.root.querySelector("#ms-menu-action-guide + .sub-menu-content")?.classList).toContain("open")
+      editor.layers.ui.root.querySelector("#ms-menu-action-guide")?.dispatchEvent(pointerEvt)
+      expect(editor.layers.ui.root.querySelector("#ms-menu-action-guide + .sub-menu-content")?.classList).toContain("open")
     })
     test("should set guide enable to false on change", () =>
     {
-      behaviors.configuration.rendering.guides.enable = true
+      editor.configuration.rendering.guides.enable = true
       const changeEvt = new ChangeEventMock({
         target: { checked: false } as unknown as HTMLInputElement
       })
-      const input = behaviors.layers.ui.root.querySelector("#ms-menu-action-guide-enable") as HTMLInputElement
+      const input = editor.layers.ui.root.querySelector("#ms-menu-action-guide-enable") as HTMLInputElement
       input.checked = false
       input.dispatchEvent(changeEvt)
-      expect(behaviors.configuration.rendering.guides.enable).toEqual(false)
+      expect(editor.configuration.rendering.guides.enable).toEqual(false)
     })
     test("should set guide type to false on change", () =>
     {
-      behaviors.configuration.rendering.guides.type = "point"
+      editor.configuration.rendering.guides.type = "point"
       const changeEvt = new ChangeEventMock({
         target: { checked: "grid" } as unknown as HTMLInputElement
       })
-      const input = behaviors.layers.ui.root.querySelector("#ms-menu-action-guide-type") as HTMLInputElement
+      const input = editor.layers.ui.root.querySelector("#ms-menu-action-guide-type") as HTMLInputElement
       input.value = "grid"
       input.dispatchEvent(changeEvt)
-      expect(behaviors.configuration.rendering.guides.type).toEqual("grid")
+      expect(editor.configuration.rendering.guides.type).toEqual("grid")
     })
     test("should set guide size to false on change", () =>
     {
-      behaviors.configuration.rendering.guides.gap = 100
-      const btn = behaviors.layers.ui.root.querySelector("#ms-menu-action-guide-size-25-btn") as HTMLButtonElement
+      editor.configuration.rendering.guides.gap = 100
+      const btn = editor.layers.ui.root.querySelector("#ms-menu-action-guide-size-25-btn") as HTMLButtonElement
       const pointerEvt = new LeftClickEventMock("pointerup", {
         pointerType: "pen",
         clientX: 300,
@@ -269,22 +269,22 @@ describe("OIMenuAction.ts", () =>
         pressure: 1
       })
       btn.dispatchEvent(pointerEvt)
-      expect(behaviors.configuration.rendering.guides.gap).toEqual(25)
+      expect(editor.configuration.rendering.guides.gap).toEqual(25)
     })
   })
 
   describe("destroy", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    behaviors.init()
-    const menu = new OIMenuAction(behaviors)
-    menu.render(behaviors.layers.ui.root)
+    const editor = new EditorOffscreenMock()
+    editor.init()
+    const menu = new OIMenuAction(editor)
+    menu.render(editor.layers.ui.root)
     test("should remove elements", () =>
     {
-      expect(behaviors.layers.ui.root.contains(menu.wrapper!)).toEqual(true)
+      expect(editor.layers.ui.root.contains(menu.wrapper!)).toEqual(true)
       expect(menu.wrapper?.childElementCount).toEqual(6)
       menu.destroy()
-      expect(behaviors.layers.ui.root.contains(menu.wrapper!)).toEqual(false)
+      expect(editor.layers.ui.root.contains(menu.wrapper!)).toEqual(false)
       expect(menu.wrapper).toBeUndefined()
     })
   })

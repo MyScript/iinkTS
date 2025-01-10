@@ -28,7 +28,6 @@ test.describe("Home Page", () => {
 
   test("for each example-recognition each example-item should have 2 links", async ({ page }) => {
     const exampleDetails = page.locator(".example-recognition")
-
     for (let i = 0; i < await exampleDetails.count(); i++) {
       const currentDetail = exampleDetails.nth(i);
       await currentDetail.click()

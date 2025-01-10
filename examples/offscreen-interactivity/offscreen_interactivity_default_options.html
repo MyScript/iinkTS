@@ -22,15 +22,13 @@
   </head>
 
   <body>
-
-
     <div id="editor"></div>
 
     <script>
       const editorElement = document.getElementById("editor");
 
       /**
-       * we expose the editor for use in the integration test
+       * we expose the editor so we can access it in tests
        */
       let editor;
 
@@ -39,46 +37,40 @@
         const server = await res.json();
         const options = {
           configuration: {
-            offscreen: true,
             server,
             rendering: {
               guides: {
                 gap: 25,
                 type: "line"
               }
-            }
-          },
-          behaviors: {
+            },
             gesture: {
               surround: iink.SurroundAction.Highlight,
               strikeThrough: iink.StrikeThroughAction.Erase,
-              insert: iink.InsertAction.Insert,
+              insert: iink.InsertAction.Insert
             },
             snap: {
-              grid: false,
-              element: false,
+              guide: false,
+              symbol: false,
               angle: 90
+            },
+            penStyle: {
+              color: "#00af00",
+              width: 1 // values: [1, 2, 4, 8]
+            },
+            fontStyle: {
+              weight: "normal",
+              size: 1 // values: ['auto', 0.5, 0.75, 1]
             }
-          },
-          penStyle: {
-            color: "#00af00",
-            width: 1
-          },
-          fontStyle: {
-            weight: "normal",
-            size: 18.75
           }
-        };
+        }
+
         /**
-         * Instanciate editor
+         * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = new iink.Editor(editorElement, options);
-        /**
-         *  async initialize editor behaviors
-         */
-        await editor.initialize();
+        editor = await iink.Editor.load(editorElement, "OFFSCREEN", options);
 
         window.addEventListener("resize", () => {
           editor.resize();

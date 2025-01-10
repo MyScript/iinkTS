@@ -1,5 +1,5 @@
-import { TGrabberConfiguration } from "../configuration"
-import { LoggerClass, LoggerLevel, LoggerManager } from "../logger"
+import { TGrabberConfiguration } from "./GrabberConfiguration"
+import { LoggerCategory, LoggerLevel, LoggerManager } from "../logger"
 import { TPointer } from "../symbol"
 import { IGrabber } from "./IGrabber"
 
@@ -8,7 +8,7 @@ import { IGrabber } from "./IGrabber"
  */
 export class OIPointerEventGrabber implements IGrabber
 {
-  #logger = LoggerManager.getLogger(LoggerClass.GRABBER)
+  #logger = LoggerManager.getLogger(LoggerCategory.GRABBER)
 
   protected configuration: TGrabberConfiguration
   protected layerCapture!: SVGElement

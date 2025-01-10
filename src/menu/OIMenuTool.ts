@@ -11,20 +11,20 @@ import lineIcon from "../assets/svg/linear.svg"
 import arrowIcon from "../assets/svg/linear-arrow.svg"
 import doubleArrowIcon from "../assets/svg/linear-double-arrow.svg"
 import { EditorTool, EditorWriteTool } from "../Constants"
-import { OIBehaviors } from "../behaviors"
-import { LoggerClass, LoggerManager } from "../logger"
+import { LoggerCategory, LoggerManager } from "../logger"
 import { OIMenu } from "./OIMenu"
 import { OIMenuSub } from "./OIMenuSub"
 import { TSubMenuParam } from "./OIMenuSub"
+import { EditorOffscreen } from "../editor"
 
 /**
  * @group Menu
  */
 export class OIMenuTool extends OIMenu
 {
-  #logger = LoggerManager.getLogger(LoggerClass.MENU)
+  #logger = LoggerManager.getLogger(LoggerCategory.MENU)
 
-  behaviors: OIBehaviors
+  editor: EditorOffscreen
   id: string
   wrapper?: HTMLDivElement
   writeBtn?: HTMLButtonElement
@@ -46,12 +46,12 @@ export class OIMenuTool extends OIMenu
     doubleArrow: HTMLButtonElement,
   }
 
-  constructor(behaviors: OIBehaviors, id = "ms-menu-tool")
+  constructor(editor: EditorOffscreen, id = "ms-menu-tool")
   {
     super()
     this.id = id
     this.#logger.info("constructor")
-    this.behaviors = behaviors
+    this.editor = editor
   }
 
   protected createMenuWrite(): HTMLElement
@@ -64,8 +64,8 @@ export class OIMenuTool extends OIMenu
     {
       this.unselectAll()
       this.writeBtn!.classList.add("active")
-      this.behaviors.tool = EditorTool.Write
-      this.behaviors.writer.tool = EditorWriteTool.Pencil
+      this.editor.tool = EditorTool.Write
+      this.editor.writer.tool = EditorWriteTool.Pencil
     })
     return this.writeBtn
   }
@@ -80,7 +80,7 @@ export class OIMenuTool extends OIMenu
     {
       this.unselectAll()
       this.menuMove!.classList.add("active")
-      this.behaviors.tool = EditorTool.Move
+      this.editor.tool = EditorTool.Move
     })
     return this.menuMove
   }
@@ -95,7 +95,7 @@ export class OIMenuTool extends OIMenu
     {
       this.unselectAll()
       this.menuSelect!.classList.add("active")
-      this.behaviors.tool = EditorTool.Select
+      this.editor.tool = EditorTool.Select
     })
     return this.menuSelect
   }
@@ -110,7 +110,7 @@ export class OIMenuTool extends OIMenu
     {
       this.unselectAll()
       this.menuErase!.classList.add("active")
-      this.behaviors.tool = EditorTool.Erase
+      this.editor.tool = EditorTool.Erase
     })
     return this.menuErase
   }
@@ -124,8 +124,8 @@ export class OIMenuTool extends OIMenu
     subMenuShape.addEventListener("pointerup", () =>
     {
       this.unselectAll()
-      this.behaviors.tool = EditorTool.Write
-      this.behaviors.writer.tool = tool
+      this.editor.tool = EditorTool.Write
+      this.editor.writer.tool = tool
       subMenuShape.classList.add("active")
       this.menuShape!.innerHTML = icon
       this.menuShape!.classList.add("active")
@@ -177,8 +177,8 @@ export class OIMenuTool extends OIMenu
     subMenuEdge.addEventListener("pointerup", () =>
     {
       this.unselectAll()
-      this.behaviors.tool = EditorTool.Write
-      this.behaviors.writer.tool = tool
+      this.editor.tool = EditorTool.Write
+      this.editor.writer.tool = tool
       subMenuEdge.classList.add("active")
       this.menuEdge!.innerHTML = square
       this.menuEdge!.classList.add("active")
@@ -225,7 +225,7 @@ export class OIMenuTool extends OIMenu
   update(): void
   {
     this.unselectAll()
-    switch (this.behaviors.tool) {
+    switch (this.editor.tool) {
       case EditorTool.Erase:
         this.menuErase?.classList.add("active")
         break;
@@ -236,7 +236,7 @@ export class OIMenuTool extends OIMenu
         this.menuSelect?.classList.add("active")
         break;
       case EditorTool.Write:
-        switch (this.behaviors.writer.tool) {
+        switch (this.editor.writer.tool) {
           case EditorWriteTool.Circle:
             this.menuShape?.classList.add("active")
             this.subMenuShape?.circle?.classList.add("active")
@@ -275,7 +275,7 @@ export class OIMenuTool extends OIMenu
 
   render(layer: HTMLElement): void
   {
-    if (this.behaviors.configuration.menu.tool.enable) {
+    if (this.editor.configuration.menu.tool.enable) {
       this.wrapper = document.createElement("div")
       this.wrapper.classList.add("ms-menu", "ms-menu-bottom", "ms-menu-row")
 

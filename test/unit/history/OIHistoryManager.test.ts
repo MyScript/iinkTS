@@ -1,11 +1,11 @@
 import { buildOIStroke } from "../helpers"
 import
 {
-  TUndoRedoConfiguration,
-  getInitialUndoRedoContext,
+  THistoryConfiguration,
+  getInitialHistoryContext,
   OIHistoryManager,
   OIModel,
-  DefaultConfiguration,
+  DefaultHistoryConfiguration,
   MatrixTransform,
 } from "../../../src/iink"
 import { EditorEventMock } from "../__mocks__/EditorEventMock"
@@ -15,16 +15,16 @@ describe("OIHistoryManager.ts", () =>
   const event = new EditorEventMock(document.createElement("div"))
   test("should instanciate OIHistoryManager", () =>
   {
-    const manager = new OIHistoryManager(DefaultConfiguration["undo-redo"], event)
+    const manager = new OIHistoryManager(DefaultHistoryConfiguration, event)
     expect(manager).toBeDefined()
   })
 
   describe("init", () =>
   {
-    const manager = new OIHistoryManager(DefaultConfiguration["undo-redo"], event)
-    test("should initialize UndoRedoContext", () =>
+    const manager = new OIHistoryManager(DefaultHistoryConfiguration, event)
+    test("should initialize HistoryContext", () =>
     {
-      const context = getInitialUndoRedoContext()
+      const context = getInitialHistoryContext()
       expect(manager.context).toStrictEqual(context)
     })
     test("should init stack without actions", () =>
@@ -46,7 +46,7 @@ describe("OIHistoryManager.ts", () =>
 
   describe("push", () =>
   {
-    const configuration: TUndoRedoConfiguration = { maxStackSize: 5 }
+    const configuration: THistoryConfiguration = { maxStackSize: 5 }
     const manager = new OIHistoryManager(configuration, event)
 
     const model1 = new OIModel(27, 5)
@@ -143,7 +143,7 @@ describe("OIHistoryManager.ts", () =>
   describe("undo", () =>
   {
     const model = new OIModel(27, 5)
-    const manager = new OIHistoryManager(DefaultConfiguration["undo-redo"], event)
+    const manager = new OIHistoryManager(DefaultHistoryConfiguration, event)
     manager.init(model)
 
     test("should define canUndo to false and canRedo to false", () =>
@@ -222,7 +222,7 @@ describe("OIHistoryManager.ts", () =>
   describe("redo", () =>
   {
     const model = new OIModel(27, 5)
-    const manager = new OIHistoryManager(DefaultConfiguration["undo-redo"], event)
+    const manager = new OIHistoryManager(DefaultHistoryConfiguration, event)
 
     const stroke = buildOIStroke()
     model.addSymbol(stroke)

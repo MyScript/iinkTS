@@ -1,38 +1,38 @@
-import { OIBehaviors } from "../behaviors"
-import { LoggerManager, LoggerClass } from "../logger"
+import { LoggerManager, LoggerCategory } from "../logger"
 import { OIModel, JIIXEdgeKind } from "../model"
 import { Box, OIText, SymbolType, TBox, TOISymbol } from "../symbol"
 import { OISVGRenderer, OISVGRendererConst, SVGBuilder } from "../renderer"
 import { convertBoundingBoxMillimeterToPixel, createUUID } from "../utils"
+import { EditorOffscreen } from "../editor/EditorOffscreen"
 
 /**
  * @group Manager
  */
 export class OIDebugSVGManager
 {
-  #logger = LoggerManager.getLogger(LoggerClass.SVGDEBUG)
+  #logger = LoggerManager.getLogger(LoggerCategory.SVGDEBUG)
   #snapPointsVisibility = false
   #verticesVisibility = false
   #boundingBoxVisibility = false
   #recognitionBoxVisibility = false
   #recognitionItemBoxVisibility = false
 
-  behaviors: OIBehaviors
+  editor: EditorOffscreen
 
-  constructor(behaviors: OIBehaviors)
+  constructor(editor: EditorOffscreen)
   {
     this.#logger.info("constructor")
-    this.behaviors = behaviors
+    this.editor = editor
   }
 
   get model(): OIModel
   {
-    return this.behaviors.model
+    return this.editor.model
   }
 
   get renderer(): OISVGRenderer
   {
-    return this.behaviors.renderer
+    return this.editor.renderer
   }
 
   get snapPointsVisibility(): boolean
@@ -272,7 +272,7 @@ export class OIDebugSVGManager
   protected async showRecognitionBox(): Promise<void>
   {
     this.#logger.info("showRecognitionBox")
-    await this.behaviors.export(["application/vnd.myscript.jiix"])
+    await this.editor.export(["application/vnd.myscript.jiix"])
     const jiix = this.model.exports?.["application/vnd.myscript.jiix"]
     this.#logger.debug("showRecognitionBox", { jiix })
     if (jiix) {
@@ -423,7 +423,7 @@ export class OIDebugSVGManager
   protected async showRecognitionItemBox(): Promise<void>
   {
     this.#logger.info("showRecognitionBoxItem")
-    await this.behaviors.export(["application/vnd.myscript.jiix"])
+    await this.editor.export(["application/vnd.myscript.jiix"])
     const jiix = this.model.exports?.["application/vnd.myscript.jiix"]
     this.#logger.debug("showRecognitionBoxItem", { jiix })
     if (jiix) {

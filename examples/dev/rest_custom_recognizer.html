@@ -83,25 +83,21 @@
       async function loadEditor() {
         const res = await fetch("../server-configuration.json");
         const server = await res.json();
-        const configuration = new iink.Configuration({ server })
-        configuration.server.protocol = "REST"
         const options = {
-          configuration,
-          behaviors: {
+          configuration: {
+            server
+          },
+          override: {
             recognizer: CustomRestRecognizer
           }
         };
+
         /**
-         * Instanciate editor
+         * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = new iink.Editor(editorElement, options);
-        /**
-         *  async initialize editor behaviors
-         */
-        await editor.initialize();
-
+        editor = await iink.Editor.load(editorElement, "REST", options);
 
         editor.event.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo;

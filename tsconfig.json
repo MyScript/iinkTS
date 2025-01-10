@@ -29,11 +29,13 @@
     "noUnusedParameters": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "allowJs": false
+    "allowJs": false,
+    "experimentalDecorators": true
   },
   "include": [
     "src",
     "config",
+    "plugins",
     "./eslint.config.mjs"
   ],
   "exclude": [

@@ -1,4 +1,4 @@
-import { LoggerClass, LoggerManager } from "../../logger"
+import { LoggerCategory, LoggerManager } from "../../logger"
 import { TPoint, TCanvasShapeEllipseSymbol, TCanvasShapeLineSymbol, TCanvasShapeTableSymbol, TSymbol } from "../../symbol"
 
 /**
@@ -6,7 +6,7 @@ import { TPoint, TCanvasShapeEllipseSymbol, TCanvasShapeLineSymbol, TCanvasShape
  */
 export class CanvasRendererShape
 {
-  #logger = LoggerManager.getLogger(LoggerClass.RENDERER)
+  #logger = LoggerManager.getLogger(LoggerCategory.RENDERER)
 
   symbols = {
     table: "table",

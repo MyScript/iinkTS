@@ -5,18 +5,20 @@
 
  */
 export type TStyle = {
-  width?: number
-  color?: string
+  [key: string]: string | number | undefined
+  width: number
+  color: string
   opacity?: number
   fill?: string
 }
 
 /**
  * @group Style
+ * @source
  */
 export const DefaultStyle: TStyle = {
   width: 2,
   color: "#000000",
-  opacity: 1,
-  fill: "transparent",
+//   opacity: 1,
+//   fill: "transparent",
 } as const

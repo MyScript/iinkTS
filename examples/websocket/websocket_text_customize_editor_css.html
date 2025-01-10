@@ -44,43 +44,33 @@
 
       async function loadEditor() {
         const res = await fetch("../server-configuration.json");
-        const conf = await res.json();
+        const server = await res.json();
         const options = {
-          penStyle: {
-            color: "#ffffff"
-          },
-          theme: {
-            ink: {
-              color: "#ffffff"
-            }
-          },
           configuration: {
-            server: {
-              ...conf,
-              protocol: "WEBSOCKET"
-            },
+            server,
             recognition: {
               type: "TEXT"
             },
-            rendering: {
-              smartGuide: {
-                enable: true,
+             penStyle: {
+              color: "#ffffff"
+            },
+            theme: {
+              ink: {
+                color: "#ffffff"
               }
-            }
+            },
+          },
+          override: {
+            cssClass: "my-custom-class"
           }
         };
 
-        const editorCustomClasses = "my-custom-class"
         /**
-         * Instanciate editor
+         * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-         editor = new iink.Editor(editorElement, options, editorCustomClasses);
-        /**
-         *  async initialize editor behaviors
-         */
-        await editor.initialize();
+        editor = await iink.Editor.load(editorElement, "WEBSOCKET", options);
 
         editorElement.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo;
@@ -94,15 +84,6 @@
         redoElement.addEventListener("click", () => {
           editorElement.editor.redo();
         });
-
-        const penStyle = {
-          color: "#ffffff"
-        };
-        const theme = {
-          ink: {
-            color: "#ffffff"
-          }
-        };
 
         window.addEventListener("resize", () => {
           editorElement.editor.resize();

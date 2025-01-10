@@ -1,7 +1,7 @@
-import { TRenderingConfiguration } from "../../configuration"
-import { LoggerClass, LoggerManager } from "../../logger"
-import { IModel } from "../../model"
+import { LoggerCategory, LoggerManager } from "../../logger"
+import { Model } from "../../model"
 import { Stroke, TSymbol } from "../../symbol"
+import { TRendererConfiguration } from "../RendererConfiguration"
 import { CanvasRendererShape } from "./CanvasRendererShape"
 import { CanvasRendererStroke } from "./CanvasRendererStroke"
 import { CanvasRendererText } from "./CanvasRendererText"
@@ -11,8 +11,8 @@ import { CanvasRendererText } from "./CanvasRendererText"
  */
 export class CanvasRenderer
 {
-  #logger = LoggerManager.getLogger(LoggerClass.RENDERER)
-  configuration: TRenderingConfiguration
+  #logger = LoggerManager.getLogger(LoggerCategory.RENDERER)
+  configuration: Omit<TRendererConfiguration, "guides">
   strokeRenderer: CanvasRendererStroke
   shapeRenderer: CanvasRendererShape
   textRenderer: CanvasRendererText
@@ -24,7 +24,7 @@ export class CanvasRenderer
     capturingCanvasContext: CanvasRenderingContext2D
   }
 
-  constructor(config: TRenderingConfiguration)
+  constructor(config: Omit<TRendererConfiguration, "guides">)
   {
     this.#logger.info("constructor", { config })
     this.configuration = config
@@ -99,7 +99,7 @@ export class CanvasRenderer
     this.resizeContent()
   }
 
-  drawModel(model: IModel): void
+  drawModel(model: Model): void
   {
     this.#logger.info("drawModel", { model })
     this.context.renderingCanvasContext?.clearRect(0, 0, this.context.renderingCanvas.width, this.context.renderingCanvas.height)
@@ -116,7 +116,7 @@ export class CanvasRenderer
     }
   }
 
-  resize(model: IModel): void
+  resize(model: Model): void
   {
     this.#logger.info("resize", { model })
     this.resizeContent()

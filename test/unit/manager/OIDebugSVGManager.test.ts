@@ -5,14 +5,14 @@ import
   OIDebugSVGManager,
   TOISymbolChar,
 } from "../../../src/iink"
-import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
+import { EditorOffscreenMock } from "../__mocks__/EditorOffscreenMock"
 
 describe("OIDebugSVGManager.ts", () =>
 {
   test("should create", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    const manager = new OIDebugSVGManager(behaviors)
+    const editor = new EditorOffscreenMock()
+    const manager = new OIDebugSVGManager(editor)
     expect(manager).toBeDefined()
     expect(manager.verticesVisibility).toEqual(false)
     expect(manager.boundingBoxVisibility).toEqual(false)
@@ -22,20 +22,20 @@ describe("OIDebugSVGManager.ts", () =>
 
   describe("bounding box", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    behaviors.recognizer.init = jest.fn(() => Promise.resolve())
+    const editor = new EditorOffscreenMock()
+    editor.recognizer.init = jest.fn(() => Promise.resolve())
 
-    const manager = new OIDebugSVGManager(behaviors)
+    const manager = new OIDebugSVGManager(editor)
 
     beforeAll(async () =>
     {
-      await behaviors.init()
+      await editor.init()
     })
 
     afterEach(() =>
     {
-      behaviors.model.clear()
-      behaviors.renderer.clear()
+      editor.model.clear()
+      editor.renderer.clear()
     })
 
     test("should show/hide stroke bounding box", async () =>
@@ -83,14 +83,14 @@ describe("OIDebugSVGManager.ts", () =>
 
   describe("vertices", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    behaviors.recognizer.init = jest.fn(() => Promise.resolve())
+    const editor = new EditorOffscreenMock()
+    editor.recognizer.init = jest.fn(() => Promise.resolve())
 
-    const manager = new OIDebugSVGManager(behaviors)
+    const manager = new OIDebugSVGManager(editor)
 
     beforeAll(async () =>
     {
-      await behaviors.init()
+      await editor.init()
     })
 
     test("should show/hide stroke vertices", async () =>
@@ -109,8 +109,8 @@ describe("OIDebugSVGManager.ts", () =>
 
   describe("recognition box", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    behaviors.recognizer.init = jest.fn(() => Promise.resolve())
+    const editor = new EditorOffscreenMock()
+    editor.recognizer.init = jest.fn(() => Promise.resolve())
     Object.defineProperty(global.SVGElement.prototype, 'getBBox', {
       writable: true,
       value: jest.fn().mockReturnValue({
@@ -120,16 +120,16 @@ describe("OIDebugSVGManager.ts", () =>
         height: 10
       }),
     })
-    const manager = new OIDebugSVGManager(behaviors)
+    const manager = new OIDebugSVGManager(editor)
 
     beforeAll(async () =>
     {
-      await behaviors.init()
+      await editor.init()
     })
 
     test("should show/hide stroke recognition box", async () =>
     {
-      behaviors.model.exports = { "application/vnd.myscript.jiix": hTextJIIX }
+      editor.model.exports = { "application/vnd.myscript.jiix": hTextJIIX }
       expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-box\"]")).toHaveLength(0)
       manager.recognitionBoxVisibility = true
       await delay(100)
@@ -140,7 +140,7 @@ describe("OIDebugSVGManager.ts", () =>
 
     test("should show/hide node recognition box", async () =>
     {
-      behaviors.model.exports = { "application/vnd.myscript.jiix": rectangleJIIX }
+      editor.model.exports = { "application/vnd.myscript.jiix": rectangleJIIX }
       expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-box\"]")).toHaveLength(0)
       manager.recognitionBoxVisibility = true
       await delay(100)
@@ -151,7 +151,7 @@ describe("OIDebugSVGManager.ts", () =>
 
     test("should show/hide edge recognition box", async () =>
     {
-      behaviors.model.exports = { "application/vnd.myscript.jiix": lineJIIX }
+      editor.model.exports = { "application/vnd.myscript.jiix": lineJIIX }
       expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-box\"]")).toHaveLength(0)
       manager.recognitionBoxVisibility = true
       await delay(100)
@@ -163,8 +163,8 @@ describe("OIDebugSVGManager.ts", () =>
 
   describe("recognition item box", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    behaviors.recognizer.init = jest.fn(() => Promise.resolve())
+    const editor = new EditorOffscreenMock()
+    editor.recognizer.init = jest.fn(() => Promise.resolve())
     Object.defineProperty(global.SVGElement.prototype, 'getBBox', {
       writable: true,
       value: jest.fn().mockReturnValue({
@@ -174,16 +174,16 @@ describe("OIDebugSVGManager.ts", () =>
         height: 10
       }),
     })
-    const manager = new OIDebugSVGManager(behaviors)
+    const manager = new OIDebugSVGManager(editor)
 
     beforeAll(async () =>
     {
-      await behaviors.init()
+      await editor.init()
     })
 
     test("should show/hide stroke recognition box", async () =>
     {
-      behaviors.model.exports = { "application/vnd.myscript.jiix": hTextJIIX }
+      editor.model.exports = { "application/vnd.myscript.jiix": hTextJIIX }
       expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-item-box\"]")).toHaveLength(0)
       manager.recognitionItemBoxVisibility = true
       await delay(100)
@@ -194,7 +194,7 @@ describe("OIDebugSVGManager.ts", () =>
 
     test("should show/hide node recognition box", async () =>
     {
-      behaviors.model.exports = { "application/vnd.myscript.jiix": rectangleJIIX }
+      editor.model.exports = { "application/vnd.myscript.jiix": rectangleJIIX }
       expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-item-box\"]")).toHaveLength(0)
       manager.recognitionItemBoxVisibility = true
       await delay(100)
@@ -205,7 +205,7 @@ describe("OIDebugSVGManager.ts", () =>
 
     test("should show/hide edge recognition box", async () =>
     {
-      behaviors.model.exports = { "application/vnd.myscript.jiix": lineJIIX }
+      editor.model.exports = { "application/vnd.myscript.jiix": lineJIIX }
       expect(manager.renderer.layer.querySelectorAll("[debug=\"recognition-item-box\"]")).toHaveLength(0)
       manager.recognitionItemBoxVisibility = true
       await delay(100)

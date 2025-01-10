@@ -1,10 +1,10 @@
-import { TConfiguration } from "../configuration"
+import { TServerHTTPConfiguration } from "../recognizer"
 import { PartialDeep } from "./types"
 
 /**
  * @group Utils
  */
-export async function getAvailableLanguageList(configuration: PartialDeep<TConfiguration>): Promise<{ result: { [key: string]: string } }>
+export async function getAvailableLanguageList(configuration: PartialDeep<{ server: TServerHTTPConfiguration }>): Promise<{ result: { [key: string]: string } }>
 {
   if (configuration?.server?.scheme && configuration?.server?.host) {
     const serverConfig = configuration.server

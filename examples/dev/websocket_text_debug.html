@@ -73,19 +73,17 @@
 
       let editor;
       const loggerConfig = {
-        [iink.LoggerClass.EDITOR]: iink.LoggerLevel.ERROR,
-        [iink.LoggerClass.BEHAVIORS]: iink.LoggerLevel.ERROR,
-        [iink.LoggerClass.RECOGNIZER]: iink.LoggerLevel.ERROR,
-        [iink.LoggerClass.GRABBER]: iink.LoggerLevel.ERROR,
-        [iink.LoggerClass.RENDERER]: iink.LoggerLevel.ERROR,
-        [iink.LoggerClass.CONFIGURATION]: iink.LoggerLevel.ERROR,
-        [iink.LoggerClass.EDITOR_EVENT]: iink.LoggerLevel.ERROR,
-        [iink.LoggerClass.INTERNAL_EVENT]: iink.LoggerLevel.ERROR,
-        [iink.LoggerClass.MODEL]: iink.LoggerLevel.ERROR,
-        [iink.LoggerClass.STROKE]: iink.LoggerLevel.ERROR,
-        [iink.LoggerClass.SMARTGUIDE]: iink.LoggerLevel.ERROR,
-        [iink.LoggerClass.STYLE]: iink.LoggerLevel.ERROR,
-        [iink.LoggerClass.HISTORY]: iink.LoggerLevel.ERROR
+        [iink.LoggerCategory.EDITOR]: iink.LoggerLevel.ERROR,
+        [iink.LoggerCategory.RECOGNIZER]: iink.LoggerLevel.ERROR,
+        [iink.LoggerCategory.GRABBER]: iink.LoggerLevel.ERROR,
+        [iink.LoggerCategory.RENDERER]: iink.LoggerLevel.ERROR,
+        [iink.LoggerCategory.EDITOR_EVENT]: iink.LoggerLevel.ERROR,
+        [iink.LoggerCategory.INTERNAL_EVENT]: iink.LoggerLevel.ERROR,
+        [iink.LoggerCategory.MODEL]: iink.LoggerLevel.ERROR,
+        [iink.LoggerCategory.STROKE]: iink.LoggerLevel.ERROR,
+        [iink.LoggerCategory.SMARTGUIDE]: iink.LoggerLevel.ERROR,
+        [iink.LoggerCategory.STYLE]: iink.LoggerLevel.ERROR,
+        [iink.LoggerCategory.HISTORY]: iink.LoggerLevel.ERROR
       };
 
       Object.keys(iink.LoggerLevel).forEach((level) => {
@@ -94,7 +92,7 @@
         globalLoggerLevelSelect.appendChild(opt);
       });
 
-      Object.keys(iink.LoggerClass).forEach((c) => {
+      Object.keys(iink.LoggerCategory).forEach((c) => {
         const li = document.createElement("li");
         li.classList.add("flex-container", "between", "gap")
         const label = document.createElement("label");
@@ -121,44 +119,36 @@
        */
       async function loadEditor() {
         const res = await fetch("../server-configuration.json");
-        const conf = await res.json();
+        const server = await res.json();
         const options = {
-          logger: loggerConfig,
           configuration: {
-            server: {
-              ...conf,
-              protocol: "WEBSOCKET"
-            },
+            server,
             recognition: {
               type: "TEXT"
-            }
+            },
+            logger: loggerConfig,
           }
         };
+
         /**
-         * Instanciate editor
+         * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = new iink.Editor(editorElement, options);
-        /**
-         *  async initialize editor behaviors
-         */
-        await editor.initialize();
+        editor = await iink.Editor.load(editorElement, "WEBSOCKET", options);
 
         globalLoggerLevelSelect.addEventListener("change", (evt) => {
-          loggerConfig[iink.LoggerClass.EDITOR] = evt.target.value;
-          loggerConfig[iink.LoggerClass.BEHAVIORS] = evt.target.value;
-          loggerConfig[iink.LoggerClass.RECOGNIZER] = evt.target.value;
-          loggerConfig[iink.LoggerClass.GRABBER] = evt.target.value;
-          loggerConfig[iink.LoggerClass.RENDERER] = evt.target.value;
-          loggerConfig[iink.LoggerClass.CONFIGURATION] = evt.target.value;
-          loggerConfig[iink.LoggerClass.EDITOR_EVENT] = evt.target.value;
-          loggerConfig[iink.LoggerClass.INTERNAL_EVENT] = evt.target.value;
-          loggerConfig[iink.LoggerClass.MODEL] = evt.target.value;
-          loggerConfig[iink.LoggerClass.STROKE] = evt.target.value;
-          loggerConfig[iink.LoggerClass.SMARTGUIDE] = evt.target.value;
-          loggerConfig[iink.LoggerClass.STYLE] = evt.target.value;
-          loggerConfig[iink.LoggerClass.HISTORY] = evt.target.value;
+          loggerConfig[iink.LoggerCategory.EDITOR] = evt.target.value;
+          loggerConfig[iink.LoggerCategory.RECOGNIZER] = evt.target.value;
+          loggerConfig[iink.LoggerCategory.GRABBER] = evt.target.value;
+          loggerConfig[iink.LoggerCategory.RENDERER] = evt.target.value;
+          loggerConfig[iink.LoggerCategory.EDITOR_EVENT] = evt.target.value;
+          loggerConfig[iink.LoggerCategory.INTERNAL_EVENT] = evt.target.value;
+          loggerConfig[iink.LoggerCategory.MODEL] = evt.target.value;
+          loggerConfig[iink.LoggerCategory.STROKE] = evt.target.value;
+          loggerConfig[iink.LoggerCategory.SMARTGUIDE] = evt.target.value;
+          loggerConfig[iink.LoggerCategory.STYLE] = evt.target.value;
+          loggerConfig[iink.LoggerCategory.HISTORY] = evt.target.value;
           Array.from(document.getElementsByClassName("specific-logger-level-input")).forEach(input => {
             input.value = evt.target.value
           })

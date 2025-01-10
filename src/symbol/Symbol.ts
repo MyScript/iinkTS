@@ -1,4 +1,5 @@
 import { TStyle } from "../style"
+import { PartialDeep } from "../utils"
 
 /**
  * @group Symbol
@@ -22,5 +23,5 @@ export interface TSymbol {
   creationTime: number
   modificationDate: number
   type: string
-  style: TStyle
+  style: PartialDeep<TStyle>
 }

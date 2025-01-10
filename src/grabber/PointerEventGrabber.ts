@@ -1,7 +1,8 @@
-import { TGrabberConfiguration } from "../configuration"
-import { LoggerClass, LoggerLevel, LoggerManager } from "../logger"
+import { DefaultGrabberConfiguration, TGrabberConfiguration } from "./GrabberConfiguration"
+import { LoggerCategory, LoggerLevel, LoggerManager } from "../logger"
 import { TPointer } from "../symbol"
 import { IGrabber } from "./IGrabber"
+import { mergeDeep, PartialDeep } from "../utils"
 
 /**
  * @group Grabber
@@ -16,16 +17,16 @@ export class PointerEventGrabber implements IGrabber
   protected pointerType?: string
 
   protected prevent = (e: Event) => e.preventDefault()
-  #logger = LoggerManager.getLogger(LoggerClass.GRABBER)
+  #logger = LoggerManager.getLogger(LoggerCategory.GRABBER)
 
   onPointerDown!: (evt: PointerEvent, point: TPointer) => void
   onPointerMove!: (evt: PointerEvent, point: TPointer) => void
   onPointerUp!: (evt: PointerEvent, point: TPointer) => void
 
-  constructor(configuration: TGrabberConfiguration)
+  constructor(configuration?: PartialDeep<TGrabberConfiguration>)
   {
     this.#logger.info("constructor", { configuration })
-    this.configuration = configuration
+    this.configuration = mergeDeep({}, DefaultGrabberConfiguration, configuration)
   }
 
   protected roundFloat(oneFloat: number, requestedFloatPrecision: number): number

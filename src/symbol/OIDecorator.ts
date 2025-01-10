@@ -1,5 +1,5 @@
-import { createUUID } from "../utils"
-import { TStyle } from "../style"
+import { createUUID, mergeDeep, PartialDeep } from "../utils"
+import { DefaultStyle, TStyle } from "../style"
 
 /**
  * @group Symbol
@@ -21,10 +21,10 @@ export class OIDecorator
   kind: DecoratorKind
   style: TStyle
 
-  constructor(kind: DecoratorKind, style: TStyle)
+  constructor(kind: DecoratorKind, style: PartialDeep<TStyle>)
   {
     this.id = `${ kind }-${ createUUID() }`
-    this.style = structuredClone(style)
+    this.style = structuredClone(mergeDeep({}, DefaultStyle ,style))
     this.kind = kind
   }
 

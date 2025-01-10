@@ -72,7 +72,7 @@ export abstract class OIMenu
   ]
 
   fontSizeList = [
-    { label: "Auto", value: 0 },
+    { label: "Auto", value: "auto" },
     { label: "S", value: 0.5 },
     { label: "M", value: 0.75 },
     { label: "L", value: 1 },

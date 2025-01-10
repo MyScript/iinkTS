@@ -1,21 +1,21 @@
 import styleIcon from "../assets/svg/palette.svg"
 import { EditorTool, EditorWriteTool } from "../Constants"
-import { OIBehaviors } from "../behaviors"
-import { LoggerClass, LoggerManager } from "../logger"
+import { LoggerCategory, LoggerManager } from "../logger"
 import { OIModel } from "../model"
 import { SymbolType, TOISymbol } from "../symbol"
 import { OIMenu, TMenuItemColorList } from "./OIMenu"
 import { OIMenuSub } from "./OIMenuSub"
 import { TSubMenuParam } from "./OIMenuSub"
+import { EditorOffscreen } from "../editor"
 
 /**
  * @group Menu
  */
 export class OIMenuStyle extends OIMenu
 {
-  #logger = LoggerManager.getLogger(LoggerClass.MENU)
+  #logger = LoggerManager.getLogger(LoggerCategory.MENU)
 
-  behaviors: OIBehaviors
+  editor: EditorOffscreen
   id: string
   wrapper?: HTMLDivElement
   subMenu?: OIMenuSub
@@ -27,17 +27,17 @@ export class OIMenuStyle extends OIMenu
   menuFontWeight?: HTMLDivElement
   menuStrokeOpacity?: HTMLDivElement
 
-  constructor(behaviors: OIBehaviors, id = "ms-menu-style")
+  constructor(editor: EditorOffscreen, id = "ms-menu-style")
   {
     super()
     this.id = id
     this.#logger.info("constructor")
-    this.behaviors = behaviors
+    this.editor = editor
   }
 
   get model(): OIModel
   {
-    return this.behaviors.model
+    return this.editor.model
   }
 
   get symbolsSelected(): TOISymbol[]
@@ -47,24 +47,24 @@ export class OIMenuStyle extends OIMenu
 
   get writeShape(): boolean
   {
-    return ![EditorWriteTool.Arrow, EditorWriteTool.DoubleArrow, EditorWriteTool.Line, EditorWriteTool.Pencil].includes(this.behaviors.writer.tool)
+    return ![EditorWriteTool.Arrow, EditorWriteTool.DoubleArrow, EditorWriteTool.Line, EditorWriteTool.Pencil].includes(this.editor.writer.tool)
   }
 
   get rowHeight(): number
   {
-    return this.behaviors.configuration.rendering.guides.gap
+    return this.editor.configuration.rendering.guides.gap
   }
 
   get isMobile(): boolean
   {
-    return this.behaviors.renderer.parent.clientWidth < 700
+    return this.editor.renderer.parent.clientWidth < 700
   }
 
   protected createMenuStroke(): HTMLDivElement
   {
     const symbolsStyles = this.symbolsSelected.map(s => s.style)
     const hasUniqColor = symbolsStyles.length && symbolsStyles.every(st => st.color === symbolsStyles[0]?.color)
-    const color = hasUniqColor && symbolsStyles[0]?.color ? symbolsStyles[0]?.color : (this.behaviors.currentPenStyle.color || "rgb(0, 0, 0)") as string
+    const color = hasUniqColor && symbolsStyles[0]?.color ? symbolsStyles[0]?.color : this.editor.penStyle.color as string
     const menuColorStrokeDef: TMenuItemColorList = {
       type: "colors",
       label: "Colors",
@@ -74,8 +74,8 @@ export class OIMenuStyle extends OIMenu
       initValue: color,
       callback: (color) =>
       {
-        this.behaviors.setPenStyle({ color })
-        this.behaviors.updateSymbolsStyle(this.symbolsSelected.map(s => s.id), { color })
+        this.editor.penStyle = { color }
+        this.editor.updateSymbolsStyle(this.symbolsSelected.map(s => s.id), { color })
       },
     }
     const menuColor = this.createColorList(menuColorStrokeDef)
@@ -88,7 +88,7 @@ export class OIMenuStyle extends OIMenu
   {
     const symbolsStyles = this.symbolsSelected.map(s => s.style)
     const hasUniqColor = symbolsStyles.length && symbolsStyles.every(st => st.color === symbolsStyles[0]?.color)
-    const color = hasUniqColor && symbolsStyles[0]?.color ? symbolsStyles[0]?.color : (this.behaviors.currentPenStyle.color || "rgb(0, 0, 0)") as string
+    const color = hasUniqColor && symbolsStyles[0].color ? symbolsStyles[0].color : this.editor.penStyle.color as string
     const menuColorStrokeDef: TMenuItemColorList = {
       type: "colors",
       label: "Fill",
@@ -98,8 +98,8 @@ export class OIMenuStyle extends OIMenu
       initValue: color,
       callback: (fill) =>
       {
-        this.behaviors.setPenStyle({ fill })
-        this.behaviors.updateSymbolsStyle(this.symbolsSelected.map(s => s.id), { fill })
+        this.editor.penStyle = { fill }
+        this.editor.updateSymbolsStyle(this.symbolsSelected.map(s => s.id), { fill })
       },
     }
     const menuColor = this.createColorList(menuColorStrokeDef)
@@ -115,8 +115,8 @@ export class OIMenuStyle extends OIMenu
     wrapper.classList.add("ms-menu-row", "thickness-list")
 
     const symbolsStyles = this.symbolsSelected.map(s => s.style)
-    const hasUniqWidth = symbolsStyles.length && symbolsStyles.every(st => st.width === symbolsStyles[0]?.width)
-    const width = hasUniqWidth ? symbolsStyles[0]?.width : (this.behaviors.currentPenStyle.width || 2)
+    const hasUniqWidth = symbolsStyles.length && symbolsStyles.every(st => st.width === symbolsStyles[0].width)
+    const width = hasUniqWidth ? symbolsStyles[0].width : this.editor.penStyle.width
 
     this.thicknessList.forEach((size) =>
     {
@@ -131,12 +131,12 @@ export class OIMenuStyle extends OIMenu
       {
         e.preventDefault()
         e.stopPropagation()
-        this.behaviors.setPenStyle({ width: size.value })
+        this.editor.penStyle = { width: size.value }
         wrapper.querySelectorAll("*").forEach(e => e.classList.remove("active"))
         btn.classList.add("active")
         if (this.symbolsSelected.length) {
-          this.behaviors.updateSymbolsStyle(this.symbolsSelected.map(s => s.id), { width: size.value })
-          this.behaviors.selector.resetSelectedGroup(this.symbolsSelected)
+          this.editor.updateSymbolsStyle(this.symbolsSelected.map(s => s.id), { width: size.value })
+          this.editor.selector.resetSelectedGroup(this.symbolsSelected)
         }
       })
       wrapper.appendChild(btn)
@@ -158,7 +158,7 @@ export class OIMenuStyle extends OIMenu
       btn.id = `${ this.id }-font-size-${ size.label }-btn`
       btn.classList.add("ms-menu-button", "square")
       btn.textContent = size.label
-      if ((this.behaviors.converter.fontSize || 0) === size.value * this.rowHeight) {
+      if (this.editor.configuration.fontStyle.size === size.value) {
         btn.classList.add("active")
       }
       btn.addEventListener("pointerup", (e) =>
@@ -167,15 +167,15 @@ export class OIMenuStyle extends OIMenu
         e.stopPropagation()
         wrapper.querySelectorAll("*").forEach(e => e.classList.remove("active"))
         btn.classList.add("active")
-        if (size.value === 0) {
-          this.behaviors.converter.fontSize = undefined
+        if (size.value === "auto") {
+          this.editor.configuration.fontStyle.size = "auto"
         }
         else {
-          const fontSize = size.value * this.rowHeight
-          this.behaviors.converter.fontSize = fontSize
+          const fontSize = (size.value as number)
+          this.editor.configuration.fontStyle.size = fontSize
           const textSymbols = this.symbolsSelected.filter(s => s.type === SymbolType.Text || (s.type === SymbolType.Group && s.extractText().length))
-          this.behaviors.updateTextFontStyle(textSymbols.map(s => s.id), { fontSize })
-          this.behaviors.selector.resetSelectedGroup(this.symbolsSelected)
+          this.editor.updateTextFontStyle(textSymbols.map(s => s.id), { fontSize: fontSize * this.rowHeight })
+          this.editor.selector.resetSelectedGroup(this.symbolsSelected)
         }
       })
       wrapper.appendChild(btn)
@@ -197,7 +197,7 @@ export class OIMenuStyle extends OIMenu
       btn.id = `${ this.id }-font-weight-${ weight.label }-btn`
       btn.classList.add("ms-menu-button", "center")
       btn.textContent = weight.label
-      if (this.behaviors.converter.fontWeight === weight.value) {
+      if (this.editor.configuration.fontStyle.weight === weight.value) {
         btn.classList.add("active")
       }
       btn.addEventListener("pointerup", (e) =>
@@ -206,11 +206,11 @@ export class OIMenuStyle extends OIMenu
         e.stopPropagation()
         wrapper.querySelectorAll("*").forEach(e => e.classList.remove("active"))
         btn.classList.add("active")
-        this.behaviors.converter.fontWeight = weight.value as "auto" | "normal" | "bold"
-        if (this.behaviors.converter.fontWeight !== "auto") {
+        this.editor.configuration.fontStyle.weight = weight.value as "auto" | "normal" | "bold"
+        if (this.editor.configuration.fontStyle.weight !== "auto") {
           const textSymbols = this.symbolsSelected.filter(s => s.type === SymbolType.Text || (s.type === SymbolType.Group && s.extractText().length))
-          this.behaviors.updateTextFontStyle(textSymbols.map(s => s.id), { fontWeight: this.behaviors.converter.fontWeight })
-          this.behaviors.selector.resetSelectedGroup(this.symbolsSelected)
+          this.editor.updateTextFontStyle(textSymbols.map(s => s.id), { fontWeight: this.editor.configuration.fontStyle.weight })
+          this.editor.selector.resetSelectedGroup(this.symbolsSelected)
         }
       })
       wrapper.appendChild(btn)
@@ -224,7 +224,7 @@ export class OIMenuStyle extends OIMenu
   {
     const symbolsStyles = this.symbolsSelected.map(s => s.style)
     const hasUniqOpacity = symbolsStyles.length && symbolsStyles.every(st => st.opacity === symbolsStyles[0]?.opacity)
-    const currentOpacity = (hasUniqOpacity && symbolsStyles[0]?.opacity ? symbolsStyles[0]?.opacity : (this.behaviors.currentPenStyle.opacity || 1)) * 100 as number
+    const currentOpacity = (hasUniqOpacity && symbolsStyles[0]?.opacity ? symbolsStyles[0]?.opacity : (this.editor.penStyle.opacity || 1)) * 100 as number
 
     const wrapper = document.createElement("div")
     wrapper.id = `${ this.id }-opacity-input-wrapper`
@@ -249,9 +249,9 @@ export class OIMenuStyle extends OIMenu
     {
       const value = (evt.target as HTMLInputElement).value as unknown as number
       output.innerHTML = `${ value }%`
-      this.behaviors.setPenStyle({ opacity: value / 100 })
+      this.editor.penStyle = { opacity: value / 100 }
       if (this.symbolsSelected.length) {
-        this.behaviors.updateSymbolsStyle(this.symbolsSelected.map(s => s.id), { opacity: value / 100 })
+        this.editor.updateSymbolsStyle(this.symbolsSelected.map(s => s.id), { opacity: value / 100 })
       }
     })
     this.menuStrokeOpacity = this.createWrapCollapsible(wrapper, "Opacity")
@@ -261,7 +261,7 @@ export class OIMenuStyle extends OIMenu
 
   render(layer: HTMLElement): void
   {
-    if (this.behaviors.configuration.menu.style.enable) {
+    if (this.editor.configuration.menu.style.enable) {
       this.triggerBtn = document.createElement("button")
       this.triggerBtn.id = this.id
       this.triggerBtn.classList.add("ms-menu-button", "square")
@@ -298,7 +298,7 @@ export class OIMenuStyle extends OIMenu
       this.isMobile ? this.subMenu.wrap() : this.subMenu.unwrap()
     }
 
-    if (this.behaviors.tool === EditorTool.Write) {
+    if (this.editor.tool === EditorTool.Write) {
       this.show()
       if (this.menuColorStroke) {
         this.menuColorStroke.style.display = "block"
@@ -319,7 +319,7 @@ export class OIMenuStyle extends OIMenu
         this.menuStrokeOpacity.style.display = "block"
       }
     }
-    else if (this.behaviors.tool === EditorTool.Select) {
+    else if (this.editor.tool === EditorTool.Select) {
       this.show()
       if (this.menuColorStroke) {
         this.menuColorStroke.style.display = "block"

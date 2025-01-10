@@ -1,0 +1,35 @@
+.renderjson a {
+    text-decoration: none;
+  }
+  .renderjson span {
+    height: 16px;
+  }
+  .renderjson .disclosure {
+    color: gray;
+    font-size: 150%;
+    padding-right: 12px;
+    font-weight: 900;
+    vertical-align: sub;
+  }
+  .renderjson .syntax {
+    color: grey;
+  }
+  .renderjson .string {
+    color: red;
+  }
+  .renderjson .number {
+    color: green;
+  }
+  .renderjson .boolean {
+    color: blue;
+  }
+  .renderjson .key {
+    color: darkblue;
+  }
+  .renderjson .keyword {
+    color: darkgray;
+  }
+  .renderjson .object.syntax,
+  .renderjson .array.syntax {
+    color: darkblue;
+  }

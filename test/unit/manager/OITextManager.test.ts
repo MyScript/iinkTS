@@ -1,5 +1,5 @@
 import { buildOIText } from "../helpers"
-import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
+import { EditorOffscreenMock } from "../__mocks__/EditorOffscreenMock"
 import
 {
   OITextManager,
@@ -48,15 +48,15 @@ describe("OITextManager.ts", () =>
 
   test("should create", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    const manager = new OITextManager(behaviors)
+    const editor = new EditorOffscreenMock()
+    const manager = new OITextManager(editor)
     expect(manager).toBeDefined()
   })
 
   test("should set chars BoundingBox", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    const manager = new OITextManager(behaviors)
+    const editor = new EditorOffscreenMock()
+    const manager = new OITextManager(editor)
     const text = buildOIText({ chars })
     const textEl = manager.renderer.buildElementFromSymbol(text) as SVGGElement
     manager.setCharsBounds(text, textEl)
@@ -67,8 +67,8 @@ describe("OITextManager.ts", () =>
 
   test("should get element BoundingBox", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    const manager = new OITextManager(behaviors)
+    const editor = new EditorOffscreenMock()
+    const manager = new OITextManager(editor)
     const text = buildOIText({ chars })
     const textEl = manager.renderer.buildElementFromSymbol(text) as SVGGElement
     expect(manager.getElementBoundingBox(textEl)).toEqual({ x: 0, y: 0, width: 10, height: 10 })
@@ -76,8 +76,8 @@ describe("OITextManager.ts", () =>
 
   test("should get BoundingBox", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    const manager = new OITextManager(behaviors)
+    const editor = new EditorOffscreenMock()
+    const manager = new OITextManager(editor)
     manager.renderer.layer = SVGBuilder.createLayer({ x: 0, y: 0, width: 100, height: 100 })
     manager.renderer.prependElement = jest.fn()
     const text = buildOIText({ chars })
@@ -88,8 +88,8 @@ describe("OITextManager.ts", () =>
 
   test("shoud get Space Width", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    const manager = new OITextManager(behaviors)
+    const editor = new EditorOffscreenMock()
+    const manager = new OITextManager(editor)
     manager.getBoundingBox = jest.fn(() => new Box({ height: 12, width: 42, x: 0, y: 0 }))
     expect(manager.getSpaceWidth(12)).toEqual(42)
     expect(manager.getBoundingBox).toBeCalledTimes(1)
@@ -97,8 +97,8 @@ describe("OITextManager.ts", () =>
 
   test("should update Text BoundingBox", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    const manager = new OITextManager(behaviors)
+    const editor = new EditorOffscreenMock()
+    const manager = new OITextManager(editor)
     manager.renderer.layer = SVGBuilder.createLayer({ x: 0, y: 0, width: 100, height: 100 })
     manager.renderer.prependElement = jest.fn()
     manager.getElementBoundingBox = jest.fn(() => new Box({ x: 1989, y: 27, width: 5, height: 42 }))

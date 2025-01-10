@@ -27,6 +27,7 @@ export type TStrokeGroupToSend = {
  * @group Symbol
  */
 export type TStroke = TSymbol & {
+  style: TPenStyle
   pointerType: string
   pointers: TPointer[]
   length: number

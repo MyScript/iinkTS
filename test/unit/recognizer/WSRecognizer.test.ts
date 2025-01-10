@@ -1,41 +1,38 @@
-import { ConfigurationMathWebsocket, ConfigurationTextWebsocket } from "../__dataset__/configuration.dataset"
+//@ts-nocheck
+import { ConfigurationMathWebsocket, WSRecognizerTextConfiguration } from "../__dataset__/configuration.dataset"
 import { ServerWebsocketMock, emptyJIIX, errorNotGrantedMessage, hTextJIIX, partChangeMessage } from "../__mocks__/ServerWebsocketMock"
 import { buildStroke, delay } from "../helpers"
 
-
 import
 {
-  TServerConfiguration,
-  TRecognitionConfiguration,
   WSRecognizer,
-  DefaultRecognitionConfiguration,
   RecognizerError,
   TRecognitionType,
-  TConfiguration,
   TPenStyle,
   TTheme,
   Model,
   TConverstionState,
+  TWSRecognizerConfiguration,
 } from "../../../src/iink"
 
 describe("WSRecognizer.ts", () =>
 {
   const height = 100, width = 100
 
-  const testDatas: { type: TRecognitionType, config: TConfiguration }[] = [
+  const testDatas: { type: TRecognitionType, config: TWSRecognizerConfiguration }[] = [
     {
       type: "TEXT",
-      config: ConfigurationTextWebsocket as TConfiguration
+      config: WSRecognizerTextConfiguration as TWSRecognizerConfiguration
     },
     {
       type: "MATH",
-      config: ConfigurationMathWebsocket as TConfiguration
+      config: ConfigurationMathWebsocket as TWSRecognizerConfiguration
     },
   ]
 
   test("should instanciate WSRecognizer", () =>
   {
-    const wsr = new WSRecognizer(ConfigurationTextWebsocket.server as TServerConfiguration, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+    const wsr = new WSRecognizer(WSRecognizerTextConfiguration)
     expect(wsr).toBeDefined()
   })
 
@@ -43,14 +40,11 @@ describe("WSRecognizer.ts", () =>
   {
     test("should get url", () =>
     {
-      const serverConfig = {
-        ...ConfigurationTextWebsocket.server,
-        scheme: "http",
-        host: "pony",
-        applicationKey: "applicationKey"
-      } as TServerConfiguration
-
-      const wsr = new WSRecognizer(serverConfig, DefaultRecognitionConfiguration)
+      const customConf = structuredClone(WSRecognizerTextConfiguration)
+      customConf.server.scheme = "http"
+      customConf.server.host = "pony"
+      customConf.server.applicationKey = "applicationKey"
+      const wsr = new WSRecognizer(customConf)
       expect(wsr.url).toEqual("ws://pony/api/v4.0/iink/document?applicationKey=applicationKey")
     })
 
@@ -58,7 +52,9 @@ describe("WSRecognizer.ts", () =>
     {
       test(`should get mimeTypes for ${ type }`, () =>
       {
-        const wsr = new WSRecognizer(config.server, config.recognition)
+        const customConf = structuredClone(WSRecognizerTextConfiguration)
+        customConf.recognition = config.recognition
+        const wsr = new WSRecognizer(customConf)
         switch (type) {
           case "TEXT":
             expect(wsr.mimeTypes).toEqual(config.recognition.text.mimeTypes)
@@ -73,16 +69,14 @@ describe("WSRecognizer.ts", () =>
 
   describe("init", () =>
   {
-    const serverConfig = {
-      ...ConfigurationTextWebsocket.server,
-      host: "init-test"
-    } as TServerConfiguration
+    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    customConf.server.host = "init-test"
     let mockServer: ServerWebsocketMock
     let wsr: WSRecognizer
 
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+      wsr = new WSRecognizer(customConf)
       wsr.event.emitError = jest.fn()
       mockServer = new ServerWebsocketMock(wsr.url)
     })
@@ -170,61 +164,55 @@ describe("WSRecognizer.ts", () =>
 
   describe("Ping", () =>
   {
-    const serverConfig = {
-      ...JSON.parse(JSON.stringify(ConfigurationTextWebsocket.server)),
-      host: "ping-test"
-    } as TServerConfiguration
+    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    customConf.server.host = "ping-test"
     let mockServer: ServerWebsocketMock
-    let wsr: WSRecognizer
-
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
-
-      mockServer = new ServerWebsocketMock(wsr.url)
+      const url = new WSRecognizer(customConf).url
+      mockServer = new ServerWebsocketMock(url)
       mockServer.init()
     })
     afterEach(async () =>
     {
-      await wsr.destroy()
       mockServer.close()
     })
 
     test("should send ping message", async () =>
     {
       expect.assertions(2)
-      serverConfig.websocket.pingEnabled = true
-      const wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+      customConf.server.websocket.pingEnabled = true
+      const wsr = new WSRecognizer(customConf)
       await wsr.init(height, width)
-      await delay(serverConfig.websocket.pingDelay * 1.5)
+      await delay(customConf.server.websocket.pingDelay * 1.5)
       expect(mockServer.getMessages("ping")).toHaveLength(1)
-      await delay(serverConfig.websocket.pingDelay)
+      await delay(customConf.server.websocket.pingDelay)
       expect(mockServer.getMessages("ping")).toHaveLength(2)
       await wsr.destroy()
     })
     test("should not send ping message", async () =>
     {
       expect.assertions(2)
-      serverConfig.websocket.pingEnabled = false
-      const wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+      customConf.server.websocket.pingEnabled = false
+      const wsr = new WSRecognizer(customConf)
       await wsr.init(height, width)
-      await delay(serverConfig.websocket.pingDelay * 1.5)
+      await delay(customConf.server.websocket.pingDelay * 1.5)
       expect(mockServer.getMessages("ping")).toHaveLength(0)
-      await delay(serverConfig.websocket.pingDelay)
+      await delay(customConf.server.websocket.pingDelay)
       expect(mockServer.getMessages("ping")).toHaveLength(0)
       await wsr.destroy()
     })
     test("should close the connection when maxPingLostCount is reached", async () =>
     {
       expect.assertions(3)
-      serverConfig.websocket.pingEnabled = true
-      serverConfig.websocket.maxPingLostCount = 2
-      const wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+      customConf.server.websocket.pingEnabled = true
+      customConf.server.websocket.maxPingLostCount = 2
+      const wsr = new WSRecognizer(customConf)
       await wsr.init(height, width)
-      await delay(serverConfig.websocket.pingDelay * 1.5)
+      await delay(customConf.server.websocket.pingDelay * 1.5)
       expect(mockServer.server.clients()).toHaveLength(1)
-      await delay(serverConfig.websocket.pingDelay * serverConfig.websocket.maxPingLostCount)
-      expect(mockServer.getMessages("ping")).toHaveLength(serverConfig.websocket.maxPingLostCount + 1)
+      await delay(customConf.server.websocket.pingDelay * customConf.server.websocket.maxPingLostCount)
+      expect(mockServer.getMessages("ping")).toHaveLength(customConf.server.websocket.maxPingLostCount + 1)
       expect(mockServer.server.clients()).toHaveLength(0)
       await wsr.destroy()
     })
@@ -232,16 +220,14 @@ describe("WSRecognizer.ts", () =>
 
   describe("send", () =>
   {
-    const serverConfig = {
-      ...ConfigurationTextWebsocket.server,
-      host: "send-test"
-    } as TServerConfiguration
+    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    customConf.server.host = "send-test"
     let mockServer: ServerWebsocketMock
     let wsr: WSRecognizer
 
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+      wsr = new WSRecognizer(customConf)
 
       mockServer = new ServerWebsocketMock(wsr.url)
       mockServer.init()
@@ -286,16 +272,14 @@ describe("WSRecognizer.ts", () =>
 
   describe("addStrokes", () =>
   {
-    const serverConfig = {
-      ...ConfigurationTextWebsocket.server,
-      host: "add-strokes-test"
-    } as TServerConfiguration
+    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    customConf.server.host = "add-strokes-test"
     let mockServer: ServerWebsocketMock
     let wsr: WSRecognizer
 
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+      wsr = new WSRecognizer(customConf)
       wsr.event.emitError = jest.fn()
       mockServer = new ServerWebsocketMock(wsr.url)
       mockServer.init()
@@ -364,16 +348,14 @@ describe("WSRecognizer.ts", () =>
 
   describe("Style", () =>
   {
-    const serverConfig = {
-      ...ConfigurationTextWebsocket.server,
-      host: "style-test"
-    } as TServerConfiguration
+    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    customConf.server.host = "style-test"
     let mockServer: ServerWebsocketMock
     let wsr: WSRecognizer
 
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+      wsr = new WSRecognizer(customConf)
 
       mockServer = new ServerWebsocketMock(wsr.url)
       mockServer.init()
@@ -450,17 +432,15 @@ describe("WSRecognizer.ts", () =>
 
   describe("export", () =>
   {
-    const model = new Model(width, height)
-    const serverConfig = {
-      ...ConfigurationTextWebsocket.server,
-      host: "export-test"
-    } as TServerConfiguration
+    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    customConf.server.host = "export-test"
     let mockServer: ServerWebsocketMock
     let wsr: WSRecognizer
+    const model = new Model()
 
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+      wsr = new WSRecognizer(customConf)
       wsr.event.emitError = jest.fn()
 
       mockServer = new ServerWebsocketMock(wsr.url)
@@ -477,11 +457,8 @@ describe("WSRecognizer.ts", () =>
       test(`should send export message for ${ type }`, async () =>
       {
         expect.assertions(1)
-        const recognitionConfig: TRecognitionConfiguration = {
-          ...config.recognition,
-          type
-        }
-        const my_wsr = new WSRecognizer(serverConfig, recognitionConfig)
+        customConf.recognition.type = type
+        const my_wsr = new WSRecognizer(customConf)
         await my_wsr.init(height, width)
         my_wsr.export(model)
         //¯\_(ツ)_/¯  required to wait server received message
@@ -540,20 +517,18 @@ describe("WSRecognizer.ts", () =>
 
   describe("import", () =>
   {
+    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    customConf.server.host = "import-test"
+    let mockServer: ServerWebsocketMock
+    let wsr: WSRecognizer
+
     const model = new Model(width, height)
     const mimeType = "text/plain"
     const textImport = "winter is comming"
     const blobToImport = new Blob([textImport])
-    const serverConfig = {
-      ...ConfigurationTextWebsocket.server,
-      host: "import-test"
-    } as TServerConfiguration
-    let mockServer: ServerWebsocketMock
-    let wsr: WSRecognizer
-
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+      wsr = new WSRecognizer(customConf)
       wsr.event.emitError = jest.fn()
 
       mockServer = new ServerWebsocketMock(wsr.url)
@@ -616,17 +591,15 @@ describe("WSRecognizer.ts", () =>
 
   describe("importPointEvents", () =>
   {
-    const strokes = [buildStroke()]
-    const serverConfig = {
-      ...ConfigurationTextWebsocket.server,
-      host: "importPointEvents-test"
-    } as TServerConfiguration
+    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    customConf.server.host = "import-pointerd-test"
     let mockServer: ServerWebsocketMock
     let wsr: WSRecognizer
+    const strokes = [buildStroke()]
 
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+      wsr = new WSRecognizer(customConf)
       wsr.event.emitError = jest.fn()
 
       mockServer = new ServerWebsocketMock(wsr.url)
@@ -681,17 +654,15 @@ describe("WSRecognizer.ts", () =>
 
   describe("resize", () =>
   {
-    const model = new Model(width, height)
-    const serverConfig = {
-      ...ConfigurationTextWebsocket.server,
-      host: "resize-test"
-    } as TServerConfiguration
+    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    customConf.server.host = "resize-test"
     let mockServer: ServerWebsocketMock
     let wsr: WSRecognizer
+    const model = new Model(width, height)
 
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+      wsr = new WSRecognizer(customConf)
       wsr.event.emitError = jest.fn()
 
       mockServer = new ServerWebsocketMock(wsr.url)
@@ -742,17 +713,15 @@ describe("WSRecognizer.ts", () =>
 
   describe("convert", () =>
   {
+    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    customConf.server.host = "convert-test"
     const model = new Model(width, height)
-    const serverConfig = {
-      ...ConfigurationTextWebsocket.server,
-      host: "convert-test"
-    } as TServerConfiguration
     let mockServer: ServerWebsocketMock
     let wsr: WSRecognizer
 
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+      wsr = new WSRecognizer(customConf)
       wsr.event.emitError = jest.fn()
 
       mockServer = new ServerWebsocketMock(wsr.url)
@@ -808,16 +777,14 @@ describe("WSRecognizer.ts", () =>
 
   describe("waitForIdle", () =>
   {
-    const serverConfig = {
-      ...ConfigurationTextWebsocket.server,
-      host: "waitForIdle-test"
-    } as TServerConfiguration
+    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    customConf.server.host = "wait-for-idle-test"
     let mockServer: ServerWebsocketMock
     let wsr: WSRecognizer
 
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+      wsr = new WSRecognizer(customConf)
       wsr.event.emitError = jest.fn()
 
       mockServer = new ServerWebsocketMock(wsr.url)
@@ -866,17 +833,15 @@ describe("WSRecognizer.ts", () =>
 
   describe("undo", () =>
   {
+    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    customConf.server.host = "undo-test"
     const model = new Model(width, height)
-    const serverConfig = {
-      ...ConfigurationTextWebsocket.server,
-      host: "undo-test"
-    } as TServerConfiguration
     let mockServer: ServerWebsocketMock
     let wsr: WSRecognizer
 
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+      wsr = new WSRecognizer(customConf)
       wsr.event.emitError = jest.fn()
 
       mockServer = new ServerWebsocketMock(wsr.url)
@@ -931,17 +896,15 @@ describe("WSRecognizer.ts", () =>
 
   describe("redo", () =>
   {
+    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    customConf.server.host = "redo-test"
     const model = new Model(width, height)
-    const serverConfig = {
-      ...ConfigurationTextWebsocket.server,
-      host: "undo-test"
-    } as TServerConfiguration
     let mockServer: ServerWebsocketMock
     let wsr: WSRecognizer
 
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(serverConfig, ConfigurationTextWebsocket.recognition as TRecognitionConfiguration)
+      wsr = new WSRecognizer(customConf)
       wsr.event.emitError = jest.fn()
 
       mockServer = new ServerWebsocketMock(wsr.url)
@@ -996,17 +959,15 @@ describe("WSRecognizer.ts", () =>
 
   describe("clear", () =>
   {
+    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    customConf.server.host = "clear-test"
     const model = new Model(width, height)
-    const serverConfig = {
-      ...ConfigurationTextWebsocket.server,
-      host: "clear-test"
-    } as TServerConfiguration
     let mockServer: ServerWebsocketMock
     let wsr: WSRecognizer
 
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(serverConfig, DefaultRecognitionConfiguration)
+      wsr = new WSRecognizer(customConf)
       wsr.event.emitError = jest.fn()
 
       mockServer = new ServerWebsocketMock(wsr.url)
@@ -1061,16 +1022,14 @@ describe("WSRecognizer.ts", () =>
 
   describe("Connection lost", () =>
   {
-    const serverConfig = {
-      ...ConfigurationTextWebsocket.server,
-      host: "close-test"
-    } as TServerConfiguration
+    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    customConf.server.host = "close-test"
     let mockServer: ServerWebsocketMock
     let wsr: WSRecognizer
 
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(serverConfig, DefaultRecognitionConfiguration)
+      wsr = new WSRecognizer(customConf)
       wsr.event.emitError = jest.fn()
 
       mockServer = new ServerWebsocketMock(wsr.url)
@@ -1113,15 +1072,13 @@ describe("WSRecognizer.ts", () =>
 
   describe("destroy", () =>
   {
-    const serverConfig = {
-      ...ConfigurationTextWebsocket.server,
-      host: "destroy-test"
-    } as TServerConfiguration
+    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    customConf.server.host = "destroy-test"
     let mockServer: ServerWebsocketMock
     test("should close socket", async () =>
     {
       expect.assertions(2)
-      const wsr = new WSRecognizer(serverConfig, DefaultRecognitionConfiguration)
+      const wsr = new WSRecognizer(customConf)
       mockServer = new ServerWebsocketMock(wsr.url)
       mockServer.init()
 

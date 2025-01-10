@@ -1,6 +1,6 @@
 import { SvgElementRole } from "../Constants"
-import { OIBehaviors } from "../behaviors"
-import { LoggerClass, LoggerManager } from "../logger"
+import { EditorOffscreen } from "../editor/EditorOffscreen"
+import { LoggerCategory, LoggerManager } from "../logger"
 import { OIModel } from "../model"
 import
 {
@@ -23,20 +23,20 @@ import
  */
 export class OITranslateManager
 {
-  #logger = LoggerManager.getLogger(LoggerClass.TRANSFORMER)
-  behaviors: OIBehaviors
+  #logger = LoggerManager.getLogger(LoggerCategory.TRANSFORMER)
+  editor: EditorOffscreen
   interactElementsGroup?: SVGElement
   transformOrigin!: TPoint
 
-  constructor(behaviors: OIBehaviors)
+  constructor(editor: EditorOffscreen)
   {
     this.#logger.info("constructor")
-    this.behaviors = behaviors
+    this.editor = editor
   }
 
   get model(): OIModel
   {
-    return this.behaviors.model
+    return this.editor.model
   }
 
   protected applyToStroke(stroke: OIStroke, tx: number, ty: number): OIStroke
@@ -106,7 +106,7 @@ export class OITranslateManager
     }
     text.point.x += tx
     text.point.y += ty
-    return this.behaviors.texter.updateBounds(text)
+    return this.editor.texter.updateBounds(text)
   }
 
   protected applyOnGroup(group: OISymbolGroup, tx: number, ty: number): OISymbolGroup
@@ -152,19 +152,19 @@ export class OITranslateManager
     {
       this.applyToSymbol(s, tx, ty)
       this.model.updateSymbol(s)
-      this.behaviors.renderer.drawSymbol(s)
+      this.editor.renderer.drawSymbol(s)
     })
     if (addToHistory) {
-      this.behaviors.history.push(this.model, { translate: [{ symbols: this.model.symbolsSelected, tx, ty }] })
+      this.editor.history.push(this.model, { translate: [{ symbols: this.model.symbolsSelected, tx, ty }] })
     }
-    const strokes = this.behaviors.extractStrokesFromSymbols(symbols)
-    return this.behaviors.recognizer.transformTranslate(strokes.map(s => s.id), tx, ty)
+    const strokes = this.editor.extractStrokesFromSymbols(symbols)
+    return this.editor.recognizer.transformTranslate(strokes.map(s => s.id), tx, ty)
   }
 
   translateElement(id: string, tx: number, ty: number): void
   {
     this.#logger.info("translateElement", { id, tx, ty })
-    this.behaviors.renderer.setAttribute(id, "transform", `translate(${ tx },${ ty })`)
+    this.editor.renderer.setAttribute(id, "transform", `translate(${ tx },${ ty })`)
   }
 
   start(target: Element, origin: TPoint): void
@@ -184,7 +184,7 @@ export class OITranslateManager
     let tx = point.x - this.transformOrigin.x
     let ty = point.y - this.transformOrigin.y
 
-    const nudge = this.behaviors.snaps.snapTranslate(tx, ty)
+    const nudge = this.editor.snaps.snapTranslate(tx, ty)
     tx = nudge.x
     ty = nudge.y
 
@@ -203,11 +203,11 @@ export class OITranslateManager
   {
     this.#logger.info("end", { point })
     const { tx, ty } = this.continue(point)
-    this.behaviors.snaps.clearSnapToElementLines()
+    this.editor.snaps.clearSnapToElementLines()
     this.translate(this.model.symbolsSelected, tx, ty)
 
     this.interactElementsGroup = undefined
-    this.behaviors.svgDebugger.apply()
+    this.editor.svgDebugger.apply()
   }
 
 }
