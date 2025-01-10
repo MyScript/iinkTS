@@ -1,4 +1,4 @@
-import { mergeDeep, isVersionSuperiorOrEqual, PartialDeep } from "../utils"
+import { isVersionSuperiorOrEqual, mergeDeep, PartialDeep } from "../utils"
 import {
   DefaultDiagramConfiguration,
   DefaultExportConfiguration,
@@ -102,12 +102,13 @@ export class RestRecognizerConfiguration implements TRestRecognizerConfiguration
     if (configuration?.recognition?.["raw-content"]?.classification?.types) {
       this.recognition["raw-content"].classification!.types = configuration?.recognition?.["raw-content"]?.classification?.types as ("text" | "shape")[]
     }
-
-    if (!isVersionSuperiorOrEqual(this.server.version, "2.3.0")) {
-      delete this.recognition.convert
-    }
-    if (!isVersionSuperiorOrEqual(this.server.version, "3.2.0")) {
-      delete this.recognition.export.jiix.text.lines
+    if (this.server.version) {
+      if (!isVersionSuperiorOrEqual(this.server.version, "2.3.0")) {
+        delete this.recognition.convert
+      }
+      if (!isVersionSuperiorOrEqual(this.server.version, "3.2.0")) {
+        delete this.recognition.export.jiix.text.lines
+      }
     }
   }
 }

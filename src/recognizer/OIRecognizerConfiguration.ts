@@ -105,7 +105,7 @@ export class OIRecognizerConfiguration implements TOIRecognizerConfiguration
     if (configuration?.recognition?.["raw-content"]?.gestures) {
       this.recognition["raw-content"].gestures = configuration.recognition["raw-content"].gestures as ("underline" | "scratch-out" | "join" | "insert" | "strike-through" | "surround")[]
     }
-    if (!isVersionSuperiorOrEqual(this.server.version, "3.2.0")) {
+    if (this.server.version && !isVersionSuperiorOrEqual(this.server.version, "3.2.0")) {
       delete this.recognition.export.jiix.text.lines
       delete this.recognition["raw-content"].classification
     }

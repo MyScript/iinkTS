@@ -2,7 +2,7 @@ import { LoggerCategory, LoggerManager } from "../logger"
 import { Model, TExport, TJIIXExport } from "../model"
 import { TStrokeGroup, TStrokeGroupToSend } from "../symbol"
 import { StyleHelper, TPenStyle } from "../style"
-import { computeHmac, isVersionSuperiorOrEqual, PartialDeep } from "../utils"
+import { computeHmac, getApiInfos, isVersionSuperiorOrEqual, PartialDeep } from "../utils"
 import { RecognizerError } from "./RecognizerError"
 import { RestRecognizerConfiguration, TRestRecognizerConfiguration } from "./RestRecognizerConfiguration"
 import { TConverstionState } from "./RecognitionConfiguration"
@@ -46,7 +46,7 @@ export class RestRecognizer
 {
   #logger = LoggerManager.getLogger(LoggerCategory.RECOGNIZER)
 
-  protected configuration: RestRecognizerConfiguration
+  configuration: RestRecognizerConfiguration
 
   constructor(config: PartialDeep<TRestRecognizerConfiguration>)
   {
@@ -160,9 +160,18 @@ export class RestRecognizer
     }
     headers.append("Content-Type", "application/json")
 
-    if (isVersionSuperiorOrEqual(this.configuration.server.version, "2.0.4")) {
+    if (!this.configuration.server.version) {
+      this.configuration.server.version = (await getApiInfos(this.configuration)).version
+    }
+    if (isVersionSuperiorOrEqual(this.configuration.server.version!, "2.0.4")) {
       headers.append("myscript-client-name", "iink-ts")
       headers.append("myscript-client-version", "1.0.0-buildVersion")
+    }
+    if (!isVersionSuperiorOrEqual(this.configuration.server.version!, "2.3.0")) {
+      delete this.configuration.recognition.convert
+    }
+    if (!isVersionSuperiorOrEqual(this.configuration.server.version!, "3.2.0")) {
+      delete this.configuration.recognition.export.jiix.text.lines
     }
 
     const reqInit: RequestInit = {

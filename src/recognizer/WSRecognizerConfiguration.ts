@@ -1,4 +1,4 @@
-import { mergeDeep, isVersionSuperiorOrEqual, PartialDeep } from "../utils"
+import { isVersionSuperiorOrEqual, mergeDeep, PartialDeep } from "../utils"
 import {
   DefaultExportConfiguration,
   DefaultMathConfiguration,
@@ -79,11 +79,13 @@ export class WSRecognizerConfiguration implements TWSRecognizerConfiguration
     }
     this.recognition.math.mimeTypes = [...new Set(this.recognition.math.mimeTypes)]
 
-    if (!isVersionSuperiorOrEqual(this.server.version, "2.3.0")) {
-      delete this.recognition.convert
-    }
-    if (!isVersionSuperiorOrEqual(this.server.version, "3.2.0")) {
-      delete this.recognition.export.jiix.text.lines
+    if (this.server.version) {
+      if (!isVersionSuperiorOrEqual(this.server.version, "2.3.0")) {
+        delete this.recognition.convert
+      }
+      if (!isVersionSuperiorOrEqual(this.server.version, "3.2.0")) {
+        delete this.recognition.export.jiix.text.lines
+      }
     }
   }
 }

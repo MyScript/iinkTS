@@ -1,4 +1,4 @@
-//@ts-nocheck
+
 import { ConfigurationMathWebsocket, WSRecognizerTextConfiguration } from "../__dataset__/configuration.dataset"
 import { ServerWebsocketMock, emptyJIIX, errorNotGrantedMessage, hTextJIIX, partChangeMessage } from "../__mocks__/ServerWebsocketMock"
 import { buildStroke, delay } from "../helpers"
