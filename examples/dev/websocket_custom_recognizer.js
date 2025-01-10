@@ -1,7 +1,7 @@
 class CustomWebsocketRecognizer extends iink.WSRecognizer {
 
-  constructor(serverConfig, recognitionConfig) {
-    super(serverConfig, recognitionConfig)
+  constructor(config) {
+    super(config)
     this.urlElement = document.getElementById("recognizer-url")
     this.sentElement = document.getElementById("recognizer-sent")
     this.receivedElement = document.getElementById("recognizer-received")

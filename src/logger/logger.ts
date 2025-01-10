@@ -12,14 +12,12 @@ export enum LoggerLevel
 /**
  * @group Logger
  */
-export enum LoggerClass
+export enum LoggerCategory
 {
   EDITOR = "EDITOR",
   RECOGNIZER = "RECOGNIZER",
   GRABBER = "GRABBER",
-  BEHAVIORS = "BEHAVIORS",
   GESTURE = "GESTURE",
-  CONFIGURATION = "CONFIGURATION",
   EDITOR_EVENT = "EDITOR_EVENT",
   MODEL = "MODEL",
   RENDERER = "RENDERER",
@@ -40,12 +38,12 @@ export enum LoggerClass
  */
 export class Logger
 {
-  instanceName: LoggerClass
+  category: LoggerCategory
   level: LoggerLevel
 
-  constructor(instanceName: LoggerClass, level: LoggerLevel)
+  constructor(category: LoggerCategory, level: LoggerLevel)
   {
-    this.instanceName = instanceName
+    this.category = category
     this.level = level
   }
 
@@ -54,7 +52,8 @@ export class Logger
   {
     if (LoggerLevel.DEBUG >= this.level) {
       const dataLog = {
-        from: `${this.instanceName}.${functionName}`,
+        level: "debug",
+        from: `${ this.category }.${ functionName }`,
         message: data,
       }
       console.debug(dataLog)
@@ -65,7 +64,8 @@ export class Logger
   {
     if (LoggerLevel.INFO >= this.level) {
       const dataLog = {
-        from: `${this.instanceName}.${functionName}`,
+        level: "info",
+        from: `${ this.category }.${ functionName }`,
         message: data,
       }
       console.info(dataLog)
@@ -76,7 +76,8 @@ export class Logger
   {
     if (LoggerLevel.WARN >= this.level) {
       const dataLog = {
-        from: `${this.instanceName}.${functionName}`,
+        level: "warn",
+        from: `${ this.category }.${ functionName }`,
         message: data,
       }
       console.warn(dataLog)
@@ -86,8 +87,9 @@ export class Logger
   error(functionName: string, ...error: any)
   {
     const dataLog = {
-      from: `${this.instanceName}.${functionName}`,
-      error,
+      level: "error",
+      from: `${ this.category }.${ functionName }`,
+      message: error,
     }
     console.error(dataLog)
   }

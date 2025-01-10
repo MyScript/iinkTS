@@ -1,63 +1,60 @@
-import { OffScreenOverrideConfiguration } from "../__dataset__/configuration.dataset"
+import { OffScreenEditorOverrideConfiguration } from "../__dataset__/configuration.dataset"
 import { ServerOIWebsocketMock, contextlessGestureMessage, gestureDetectedMessage, hTextJIIX, partChangeMessage } from "../__mocks__/ServerOIWebsocketMock"
 import { buildOIStroke, delay } from "../helpers"
 import
 {
   OIRecognizer,
   RecognizerError,
-  TServerConfiguration,
-  TRecognitionConfiguration,
   TMatrixTransform,
   MatrixTransform,
   TOIHistoryBackendChanges,
+  TOIRecognizerConfiguration,
 } from "../../../src/iink"
 import { toResolve } from 'jest-extended'
 expect.extend({ toResolve })
 
 describe("OIRecognizer.ts", () =>
 {
-  const ServerConfig = OffScreenOverrideConfiguration.server as TServerConfiguration
-  const RecognitionConfig = OffScreenOverrideConfiguration.recognition as TRecognitionConfiguration
+  const configuration: TOIRecognizerConfiguration = {
+    recognition: OffScreenEditorOverrideConfiguration.recognition,
+    server: OffScreenEditorOverrideConfiguration.server
+  }
 
   test("should instanciate OIRecognizer", () =>
   {
-    const oiRecognizer = new OIRecognizer(ServerConfig, RecognitionConfig)
+    const oiRecognizer = new OIRecognizer(configuration)
     expect(oiRecognizer).toBeDefined()
   })
 
   describe("Properties", () =>
   {
+    const conf = structuredClone(configuration)
+    conf.server.scheme = "http",
+    conf.server.host = "pony",
+    conf.server.applicationKey = "applicationKey"
     test("should get url", () =>
     {
-      const serverConfig = {
-        ...ServerConfig,
-        scheme: "http",
-        host: "pony",
-        applicationKey: "applicationKey"
-      } as TServerConfiguration
-      const oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      const oiRecognizer = new OIRecognizer(conf)
       expect(oiRecognizer.url).toEqual("ws://pony/api/v4.0/iink/offscreen?applicationKey=applicationKey")
     })
 
     test(`should get mimeTypes`, () =>
     {
-      const oiRecognizer = new OIRecognizer(ServerConfig, RecognitionConfig)
+      const oiRecognizer = new OIRecognizer(conf)
       expect(oiRecognizer.mimeTypes).toEqual(["application/vnd.myscript.jiix"])
     })
   })
 
   describe("init", () =>
   {
-    const serverConfig: TServerConfiguration = {
-      ...ServerConfig,
-      host: "init-test"
-    }
+    const conf = structuredClone(configuration)
+    conf.server.host = "init-test"
     let mockServer: ServerOIWebsocketMock
     let oiRecognizer: OIRecognizer
 
     beforeEach(() =>
     {
-      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      oiRecognizer = new OIRecognizer(conf)
       mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
     })
     afterEach(async () =>
@@ -161,20 +158,19 @@ describe("OIRecognizer.ts", () =>
   //TODO fix mock web worker
   describe.skip("Ping", () =>
   {
-    const serverConfig: TServerConfiguration = {
-      ...JSON.parse(JSON.stringify(ServerConfig)),
-      host: "ping-test"
-    }
+    const conf = structuredClone(configuration)
+    conf.server.host = "ping-test"
     let mockServer: ServerOIWebsocketMock
     let oiRecognizer: OIRecognizer
 
     beforeEach(() =>
     {
-      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      oiRecognizer = new OIRecognizer(conf)
 
       mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
       mockServer.init()
     })
+
     afterEach(async () =>
     {
       await oiRecognizer.destroy()
@@ -184,55 +180,53 @@ describe("OIRecognizer.ts", () =>
     test("should send ping message", async () =>
     {
       expect.assertions(2)
-      serverConfig.websocket.pingEnabled = true
-      const oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      conf.server.websocket.pingEnabled = true
+      const oiRecognizer = new OIRecognizer(conf)
       await oiRecognizer.init()
-      await delay(serverConfig.websocket.pingDelay * 1.5)
+      await delay(conf.server.websocket.pingDelay * 1.5)
       expect(mockServer.getMessages("ping")).toHaveLength(1)
-      await delay(serverConfig.websocket.pingDelay)
+      await delay(conf.server.websocket.pingDelay)
       expect(mockServer.getMessages("ping")).toHaveLength(2)
       await oiRecognizer.destroy()
     })
     test("should not send ping message", async () =>
     {
       expect.assertions(2)
-      serverConfig.websocket.pingEnabled = false
-      const oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      conf.server.websocket.pingEnabled = false
+      const oiRecognizer = new OIRecognizer(conf)
       await oiRecognizer.init()
-      await delay(serverConfig.websocket.pingDelay * 1.5)
+      await delay(conf.server.websocket.pingDelay * 1.5)
       expect(mockServer.getMessages("ping")).toHaveLength(0)
-      await delay(serverConfig.websocket.pingDelay)
+      await delay(conf.server.websocket.pingDelay)
       expect(mockServer.getMessages("ping")).toHaveLength(0)
       await oiRecognizer.destroy()
     })
     test("should close the connection when maxPingLostCount is reached", async () =>
     {
       expect.assertions(3)
-      serverConfig.websocket.pingEnabled = true
-      serverConfig.websocket.maxPingLostCount = 2
-      const oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      conf.server.websocket.pingEnabled = true
+      conf.server.websocket.maxPingLostCount = 2
+      const oiRecognizer = new OIRecognizer(conf)
       await oiRecognizer.init()
-      await delay(serverConfig.websocket.pingDelay * 1.5)
+      await delay(conf.server.websocket.pingDelay * 1.5)
       expect(mockServer.server.clients()).toHaveLength(1)
-      await delay(serverConfig.websocket.pingDelay * serverConfig.websocket.maxPingLostCount + 100)
-      expect(mockServer.getMessages("ping")).toHaveLength(serverConfig.websocket.maxPingLostCount + 1)
+      await delay(conf.server.websocket.pingDelay * conf.server.websocket.maxPingLostCount + 100)
+      expect(mockServer.getMessages("ping")).toHaveLength(conf.server.websocket.maxPingLostCount + 1)
       expect(mockServer.server.clients()).toHaveLength(0)
     })
   })
 
   describe("send", () =>
   {
-    const serverConfig: TServerConfiguration = {
-      ...ServerConfig,
-      host: "send-test"
-    }
-    serverConfig.websocket.autoReconnect = true
+    const conf = structuredClone(configuration)
+    conf.server.host = "send-test"
+    conf.server.websocket.autoReconnect = true
     let mockServer: ServerOIWebsocketMock
     let oiRecognizer: OIRecognizer
 
     beforeEach(() =>
     {
-      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      oiRecognizer = new OIRecognizer(conf)
       mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
       mockServer.init()
     })
@@ -269,17 +263,15 @@ describe("OIRecognizer.ts", () =>
 
   describe("addStrokes", () =>
   {
-    const serverConfig: TServerConfiguration = {
-      ...ServerConfig,
-      host: "add-strokes-test"
-    }
+    const conf = structuredClone(configuration)
+    conf.server.host = "add-strokes-test"
     let mockServer: ServerOIWebsocketMock
     let oiRecognizer: OIRecognizer
     const strokes = [buildOIStroke()]
 
     beforeEach(() =>
     {
-      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      oiRecognizer = new OIRecognizer(conf)
       mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
       mockServer.init()
     })
@@ -340,10 +332,8 @@ describe("OIRecognizer.ts", () =>
 
   describe("replaceStrokes", () =>
   {
-    const serverConfig: TServerConfiguration = {
-      ...ServerConfig,
-      host: "replace-strokes-test"
-    }
+    const conf = structuredClone(configuration)
+    conf.server.host = "replace-strokes-test"
     let mockServer: ServerOIWebsocketMock
     let oiRecognizer: OIRecognizer
     const strokes = [buildOIStroke()]
@@ -351,7 +341,7 @@ describe("OIRecognizer.ts", () =>
 
     beforeEach(() =>
     {
-      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      oiRecognizer = new OIRecognizer(conf)
       mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
       mockServer.init()
     })
@@ -412,10 +402,8 @@ describe("OIRecognizer.ts", () =>
 
   describe("transformTranslate", () =>
   {
-    const serverConfig: TServerConfiguration = {
-      ...ServerConfig,
-      host: "replace-strokes-test"
-    }
+    const conf = structuredClone(configuration)
+    conf.server.host = "transform-translate-test"
     let mockServer: ServerOIWebsocketMock
     let oiRecognizer: OIRecognizer
     const strokeIds = ["id-1", "id-2"]
@@ -423,7 +411,7 @@ describe("OIRecognizer.ts", () =>
 
     beforeEach(() =>
     {
-      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      oiRecognizer = new OIRecognizer(conf)
       mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
       mockServer.init()
     })
@@ -487,10 +475,8 @@ describe("OIRecognizer.ts", () =>
 
   describe("transformRotate", () =>
   {
-    const serverConfig: TServerConfiguration = {
-      ...ServerConfig,
-      host: "replace-strokes-test"
-    }
+    const conf = structuredClone(configuration)
+    conf.server.host = "transform-rotate-test"
     let mockServer: ServerOIWebsocketMock
     let oiRecognizer: OIRecognizer
     const strokeIds = ["id-1", "id-2"]
@@ -498,7 +484,7 @@ describe("OIRecognizer.ts", () =>
 
     beforeEach(() =>
     {
-      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      oiRecognizer = new OIRecognizer(conf)
       mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
       mockServer.init()
     })
@@ -563,10 +549,8 @@ describe("OIRecognizer.ts", () =>
 
   describe("transformScale", () =>
   {
-    const serverConfig: TServerConfiguration = {
-      ...ServerConfig,
-      host: "replace-strokes-test"
-    }
+    const conf = structuredClone(configuration)
+    conf.server.host = "transform-scale-test"
     let mockServer: ServerOIWebsocketMock
     let oiRecognizer: OIRecognizer
     const strokeIds = ["id-1", "id-2"]
@@ -574,7 +558,7 @@ describe("OIRecognizer.ts", () =>
 
     beforeEach(() =>
     {
-      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      oiRecognizer = new OIRecognizer(conf)
       mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
       mockServer.init()
     })
@@ -640,10 +624,8 @@ describe("OIRecognizer.ts", () =>
 
   describe("transformMatrix", () =>
   {
-    const serverConfig: TServerConfiguration = {
-      ...ServerConfig,
-      host: "transform-strokes-test"
-    }
+    const conf = structuredClone(configuration)
+    conf.server.host = "transform-matrix-test"
     let mockServer: ServerOIWebsocketMock
     let oiRecognizer: OIRecognizer
     const strokeIds = ["id-1", "id-2"]
@@ -651,7 +633,7 @@ describe("OIRecognizer.ts", () =>
 
     beforeEach(() =>
     {
-      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      oiRecognizer = new OIRecognizer(conf)
       mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
       mockServer.init()
     })
@@ -714,17 +696,15 @@ describe("OIRecognizer.ts", () =>
 
   describe("eraseStrokes", () =>
   {
-    const serverConfig: TServerConfiguration = {
-      ...ServerConfig,
-      host: "erase-strokes-test"
-    }
+    const conf = structuredClone(configuration)
+    conf.server.host = "erase-strokes-test"
     let mockServer: ServerOIWebsocketMock
     let oiRecognizer: OIRecognizer
     const strokeIds = ["erase-1"]
 
     beforeEach(() =>
     {
-      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      oiRecognizer = new OIRecognizer(conf)
       mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
       mockServer.init()
     })
@@ -785,17 +765,15 @@ describe("OIRecognizer.ts", () =>
 
   describe("recognizeGesture", () =>
   {
-    const serverConfig: TServerConfiguration = {
-      ...ServerConfig,
-      host: "erase-strokes-test"
-    }
+    const conf = structuredClone(configuration)
+    conf.server.host = "recognize-gesture-test"
     let mockServer: ServerOIWebsocketMock
     let oiRecognizer: OIRecognizer
     const stroke = buildOIStroke()
 
     beforeEach(() =>
     {
-      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      oiRecognizer = new OIRecognizer(conf)
       mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
       mockServer.init()
     })
@@ -858,16 +836,14 @@ describe("OIRecognizer.ts", () =>
 
   describe("waitForIdle", () =>
   {
-    const serverConfig: TServerConfiguration = {
-      ...ServerConfig,
-      host: "waitForIdle-test"
-    }
+    const conf = structuredClone(configuration)
+    conf.server.host = "wait-for-idle-test"
     let mockServer: ServerOIWebsocketMock
     let oiRecognizer: OIRecognizer
 
     beforeEach(() =>
     {
-      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      oiRecognizer = new OIRecognizer(conf)
       mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
       mockServer.init({ withIdle: false })
     })
@@ -909,16 +885,14 @@ describe("OIRecognizer.ts", () =>
 
   describe("undo", () =>
   {
-    const serverConfig: TServerConfiguration = {
-      ...ServerConfig,
-      host: "undo-test"
-    }
+    const conf = structuredClone(configuration)
+    conf.server.host = "undo-test"
     let mockServer: ServerOIWebsocketMock
     let oiRecognizer: OIRecognizer
 
     beforeEach(() =>
     {
-      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      oiRecognizer = new OIRecognizer(conf)
       mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
       mockServer.init()
     })
@@ -971,9 +945,9 @@ describe("OIRecognizer.ts", () =>
       expect(messageSent.changes).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-              type: "eraseStrokes",
-              strokeIds: changes.erased!.map(s => s.id)
-            })
+            type: "eraseStrokes",
+            strokeIds: changes.erased!.map(s => s.id)
+          })
         ])
       )
       expect(messageSent.changes).toEqual(
@@ -1061,16 +1035,14 @@ describe("OIRecognizer.ts", () =>
 
   describe("redo", () =>
   {
-    const serverConfig: TServerConfiguration = {
-      ...ServerConfig,
-      host: "redo-test"
-    }
+    const conf = structuredClone(configuration)
+    conf.server.host = "redo-test"
     let mockServer: ServerOIWebsocketMock
     let oiRecognizer: OIRecognizer
 
     beforeEach(() =>
     {
-      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      oiRecognizer = new OIRecognizer(conf)
       mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
       mockServer.init()
     })
@@ -1121,16 +1093,14 @@ describe("OIRecognizer.ts", () =>
 
   describe("clear", () =>
   {
-    const serverConfig: TServerConfiguration = {
-      ...ServerConfig,
-      host: "clear-test"
-    }
+    const conf = structuredClone(configuration)
+    conf.server.host = "clear-test"
     let mockServer: ServerOIWebsocketMock
     let oiRecognizer: OIRecognizer
 
     beforeEach(() =>
     {
-      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      oiRecognizer = new OIRecognizer(conf)
       mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
       mockServer.init()
     })
@@ -1178,16 +1148,14 @@ describe("OIRecognizer.ts", () =>
 
   describe("export", () =>
   {
-    const serverConfig: TServerConfiguration = {
-      ...ServerConfig,
-      host: "export-test"
-    }
+    const conf = structuredClone(configuration)
+    conf.server.host = "export-test"
     let mockServer: ServerOIWebsocketMock
     let oiRecognizer: OIRecognizer
 
     beforeEach(() =>
     {
-      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      oiRecognizer = new OIRecognizer(conf)
       mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
       mockServer.init()
     })
@@ -1256,16 +1224,14 @@ describe("OIRecognizer.ts", () =>
 
   describe("Connection lost", () =>
   {
-    const serverConfig: TServerConfiguration = {
-      ...ServerConfig,
-      host: "close-test"
-    }
+    const conf = structuredClone(configuration)
+    conf.server.host = "close-test"
     let mockServer: ServerOIWebsocketMock
     let oiRecognizer: OIRecognizer
 
     beforeEach(() =>
     {
-      oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      oiRecognizer = new OIRecognizer(conf)
       mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
       mockServer.init()
     })
@@ -1306,15 +1272,13 @@ describe("OIRecognizer.ts", () =>
 
   describe("destroy", () =>
   {
-    const serverConfig = {
-      ...ServerConfig,
-      host: "destroy-test"
-    } as TServerConfiguration
+    const conf = structuredClone(configuration)
+    conf.server.host = "destroy-test"
     let mockServer: ServerOIWebsocketMock
 
     test("should close socket", async () =>
     {
-      const oiRecognizer = new OIRecognizer(serverConfig, RecognitionConfig)
+      const oiRecognizer = new OIRecognizer(conf)
       mockServer = new ServerOIWebsocketMock(oiRecognizer.url)
       mockServer.init()
       await oiRecognizer.init()

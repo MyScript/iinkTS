@@ -1,5 +1,4 @@
 import { DecoratorKind, OIText } from "../../symbol"
-import { DefaultStyle } from "../../style"
 import { OISVGRendererDecoratorUtil } from "./OISVGRendererDecoratorUtil"
 import { OISVGRendererConst } from "./OISVGRendererConst"
 import { SVGBuilder } from "./SVGBuilder"
@@ -18,7 +17,9 @@ export class OISVGRendererTextUtil
       "stroke-linecap": "round",
       "stroke-linejoin": "round",
       "style": OISVGRendererConst.noSelection,
-      "opacity": (text.style.opacity || DefaultStyle.opacity!).toString(),
+    }
+    if (text.style.opacity) {
+      attrs.opacity = text.style.opacity.toString()
     }
     if (text.rotation) {
       attrs.transform = `rotate(${ text.rotation.degree }, ${ text.rotation.center.x }, ${ text.rotation.center.y })`

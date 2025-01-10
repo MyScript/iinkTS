@@ -105,13 +105,10 @@ async function initEditor() {
   currentInput.appendChild(editorElement)
 
   const res = await fetch("../server-configuration.json");
-  const conf = await res.json();
+  const server = await res.json();
   const options = {
     configuration: {
-      server: {
-        ...conf,
-        protocol: "WEBSOCKET"
-      },
+      server,
       recognition: {
         type: "TEXT",
         text: {
@@ -126,16 +123,19 @@ async function initEditor() {
           }
         },
       },
-      rendering: {
-        smartGuide: {
-            enable: false
-        }
+      smartGuide: {
+        enable: false
       }
-    }
+    },
   };
 
-  editor = new iink.Editor(editorElement, options);
-  await editor.initialize();
+  /**
+   * get editor instance from type
+   * @param {Element} The DOM element to attach the ink paper
+   * @param {Object} The Editor parameters
+   */
+  editor = await iink.Editor.load(editorElement, "WEBSOCKET", options);
+
   editor.event.addEventListener("exported", (evt) => {
     const answerId = currentInput?.getAttribute("answer-id")
     if (answerId) {

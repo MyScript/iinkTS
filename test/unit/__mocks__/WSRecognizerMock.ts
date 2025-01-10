@@ -1,17 +1,20 @@
-import { DefaultConfiguration, TRecognitionConfiguration, TServerConfiguration } from "../../../src/configuration"
-import { Model, TExport } from "../../../src/model"
-import { WSRecognizer } from "../../../src/recognizer"
-
-const serverConfig: TServerConfiguration = structuredClone(DefaultConfiguration.server)
-const recognitionConfig: TRecognitionConfiguration = structuredClone(DefaultConfiguration.recognition)
+import
+{
+  Model,
+  TExport,
+  WSRecognizer,
+  DefaultEditorWebSocketConfiguration
+} from "../../../src/iink"
 
 export class WSRecognizerMock extends WSRecognizer
 {
-  constructor() {
-    super(serverConfig, recognitionConfig);
+  constructor()
+  {
+    super(DefaultEditorWebSocketConfiguration)
   }
   //@ts-ignore
-  init = jest.fn((height: number, width: number) => {
+  init = jest.fn((height: number, width: number) =>
+  {
     this.initialized.resolve()
     return this.initialized.promise
   })

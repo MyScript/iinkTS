@@ -1,11 +1,11 @@
 import
 {
   OIRecognizer,
-  Configuration,
-  TServerConfiguration,
-  TRecognitionConfiguration,
+  TOIRecognizerConfiguration,
   TOIMessageEvent,
-  PartialDeep
+  PartialDeep,
+  TServerWebsocketConfiguration,
+  TOIRecognitionConfiguration
 } from 'iink-ts'
 
 export class Recognizer extends OIRecognizer
@@ -14,9 +14,9 @@ export class Recognizer extends OIRecognizer
   static instance: Recognizer
   messages: { state: "Sent" | "Received", message: TOIMessageEvent }[]
 
-  constructor(serverConfig: TServerConfiguration, recognitionConfig: TRecognitionConfiguration)
+  constructor(config: PartialDeep<TOIRecognizerConfiguration>)
   {
-    super(serverConfig, recognitionConfig)
+    super(config)
     this.messages = []
   }
 
@@ -45,8 +45,8 @@ export const useRecognizer = async (): Promise<Recognizer> =>
   if (!Recognizer.initializing) {
     Recognizer.initializing = true
     const res = await fetch("../../../server-configuration.json")
-    const server = await res.json() as PartialDeep<TServerConfiguration>
-    const recognition: PartialDeep<TRecognitionConfiguration> = {
+    const server = await res.json() as PartialDeep<TServerWebsocketConfiguration>
+    const recognition: PartialDeep<TOIRecognitionConfiguration> = {
       "raw-content": {
         gestures: ["underline", "scratch-out", "join", "insert", "strike-through", "surround"]
       },
@@ -55,8 +55,7 @@ export const useRecognizer = async (): Promise<Recognizer> =>
         ignoreGestureStrokes: false
       }
     }
-    const configuration = new Configuration({ offscreen: true, server, recognition })
-    Recognizer.instance = new Recognizer(configuration.server, configuration.recognition)
+    Recognizer.instance = new Recognizer({ server, recognition })
     await Recognizer.instance.init()
   }
 

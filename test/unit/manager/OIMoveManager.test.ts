@@ -1,4 +1,4 @@
-import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
+import { EditorOffscreenMock } from "../__mocks__/EditorOffscreenMock"
 import { OIMoveManager } from "../../../src/iink"
 
 
@@ -6,18 +6,18 @@ describe("OIMoveManager.ts", () =>
 {
   test("should instanciate", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    const manager = new OIMoveManager(behaviors)
+    const editor = new EditorOffscreenMock()
+    const manager = new OIMoveManager(editor)
     expect(manager).toBeDefined()
     expect(manager.origin).toBeUndefined()
   })
 
   describe("move process", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    behaviors.init()
+    const editor = new EditorOffscreenMock()
+    editor.init()
 
-    const manager = new OIMoveManager(behaviors)
+    const manager = new OIMoveManager(editor)
 
     test("should init origin on start", async () =>
     {

@@ -1,4 +1,4 @@
-import { LoggerClass, LoggerManager } from "../logger"
+import { LoggerCategory, LoggerManager } from "../logger"
 import { PartialDeep, mergeDeep } from "../utils"
 import { DefaultPenStyle, TPenStyle } from "./PenStyle"
 import { DefaultTheme, TTheme } from "./Theme"
@@ -12,7 +12,7 @@ export class StyleManager
   #theme!: TTheme
   #penStyleClasses!: string
   #currentPenStyle!: TPenStyle
-  #logger =  LoggerManager.getLogger(LoggerClass.STYLE)
+  #logger =  LoggerManager.getLogger(LoggerCategory.STYLE)
 
   constructor(penStyle?: PartialDeep<TPenStyle>, theme?: PartialDeep<TTheme>)
   {

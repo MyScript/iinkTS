@@ -43,7 +43,7 @@ class CustomGrabber extends iink.PointerEventGrabber {
       this.moveElement.textContent = "Move to:"
       this.upElement.textContent = "Up to:"
       /**
-       * onPointerDown is bind with the behaviors
+       * onPointerDown is bind with the editor
        */
       this.onPointerDown(evt, point)
     }
@@ -56,7 +56,7 @@ class CustomGrabber extends iink.PointerEventGrabber {
         const point = this.extractPoint(evt)
         this.moveElement.textContent = `Move to: ${JSON.stringify(point)}`
         /**
-         * onPointerMove is bind with the behaviors
+         * onPointerMove is bind with the editor
          */
         this.onPointerMove(evt, point)
       }
@@ -73,7 +73,7 @@ class CustomGrabber extends iink.PointerEventGrabber {
         const point = this.extractPoint(evt)
         this.upElement.textContent = `Up at: ${JSON.stringify(point)}`
         /**
-         * onPointerUp is bind with the behaviors
+         * onPointerUp is bind with the editor
          */
         this.onPointerUp(evt, point)
       }

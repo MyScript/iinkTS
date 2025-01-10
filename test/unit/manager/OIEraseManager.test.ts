@@ -1,5 +1,5 @@
 import { buildOICircle, buildOIStroke } from "../helpers"
-import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
+import { EditorOffscreenMock } from "../__mocks__/EditorOffscreenMock"
 import { OIEraseManager, SymbolType, TPointer } from "../../../src/iink"
 
 
@@ -7,23 +7,23 @@ describe("OIEraseManager.ts", () =>
 {
   test("should create", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    const manager = new OIEraseManager(behaviors)
+    const editor = new EditorOffscreenMock()
+    const manager = new OIEraseManager(editor)
     expect(manager).toBeDefined()
     expect(manager.currentEraser).toBeUndefined()
   })
 
   describe("writing process", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    behaviors.recognizer.init = jest.fn(() => Promise.resolve())
-    behaviors.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
-    behaviors.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
+    const editor = new EditorOffscreenMock()
+    editor.recognizer.init = jest.fn(() => Promise.resolve())
+    editor.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
+    editor.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
 
-    const manager = new OIEraseManager(behaviors)
+    const manager = new OIEraseManager(editor)
     manager.renderer.drawSymbol = jest.fn()
     manager.renderer.removeSymbol = jest.fn()
-    behaviors.init()
+    editor.init()
 
     test("should init currentEraser", async () =>
     {
@@ -62,7 +62,7 @@ describe("OIEraseManager.ts", () =>
       expect(manager.renderer.removeSymbol).toHaveBeenCalledTimes(1)
       expect(manager.renderer.removeSymbol).toHaveBeenNthCalledWith(1, eraserId)
 
-      expect(manager.behaviors.removeSymbols).toHaveBeenNthCalledWith(1, [strokeToErase.id, circleToErase.id])
+      expect(manager.editor.removeSymbols).toHaveBeenNthCalledWith(1, [strokeToErase.id, circleToErase.id])
     })
     test("should throw error if continu when currentEraser is undefine", async () =>
     {

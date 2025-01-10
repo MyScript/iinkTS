@@ -60,9 +60,11 @@ export class OISVGRendererShapeUtil
     const pathAttrs: { [key: string]: string } = {
       "fill": shape.style.fill || "transparent",
       "stroke": shape.style.color || DefaultStyle.color!,
-      "stroke-width": (shape.style.width || DefaultStyle.width!).toString(),
-      "opacity": (shape.style.opacity || DefaultStyle.opacity!).toString(),
+      "stroke-width": (shape.style.width || DefaultStyle.width).toString(),
       "d": OISVGRendererShapeUtil.getSVGPath(shape),
+    }
+    if (shape.style.opacity) {
+      pathAttrs["opacity"] = shape.style.opacity.toString()
     }
     if (shape.kind === ShapeKind.Ellipse) {
       pathAttrs.transform = `rotate(${ convertRadianToDegree(shape.orientation) }, ${shape.center.x}, ${shape.center.y})`

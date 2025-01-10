@@ -8,7 +8,7 @@ import
 } from "../__mocks__/EventMock"
 import
 {
-  DefaultConfiguration,
+  DefaultGrabberConfiguration,
   OIPointerEventGrabber,
   TGrabberConfiguration,
 } from "../../../src/iink"
@@ -17,7 +17,7 @@ describe("OIPointerEventGrabber.ts", () =>
 {
   test("should create with default configuration", () =>
   {
-    const grabber = new OIPointerEventGrabber(DefaultConfiguration.grabber)
+    const grabber = new OIPointerEventGrabber(DefaultGrabberConfiguration)
     expect(grabber).toBeDefined()
   })
 
@@ -28,7 +28,7 @@ describe("OIPointerEventGrabber.ts", () =>
     svgElement.style.height = "100px"
     document.body.appendChild(svgElement)
 
-    const grabber = new OIPointerEventGrabber(DefaultConfiguration.grabber)
+    const grabber = new OIPointerEventGrabber(DefaultGrabberConfiguration)
     grabber.attach(svgElement)
     grabber.onPointerDown = jest.fn()
     grabber.onPointerMove = jest.fn()
@@ -97,7 +97,7 @@ describe("OIPointerEventGrabber.ts", () =>
 
     test("should call detach if already attach", () =>
     {
-      const g = new OIPointerEventGrabber(DefaultConfiguration.grabber)
+      const g = new OIPointerEventGrabber(DefaultGrabberConfiguration)
       g.onPointerDown = jest.fn()
       g.onPointerMove = jest.fn()
       g.onPointerUp = jest.fn()
@@ -136,7 +136,7 @@ describe("OIPointerEventGrabber.ts", () =>
     svgElement.style.height = "100px"
     document.body.appendChild(svgElement)
 
-    const grabber = new OIPointerEventGrabber(DefaultConfiguration.grabber)
+    const grabber = new OIPointerEventGrabber(DefaultGrabberConfiguration)
     grabber.onPointerDown = jest.fn()
     grabber.attach(svgElement)
 
@@ -201,7 +201,7 @@ describe("OIPointerEventGrabber.ts", () =>
 
     test("should not round values with default configuration", () =>
     {
-      const grabber = new OIPointerEventGrabber(DefaultConfiguration.grabber)
+      const grabber = new OIPointerEventGrabber(DefaultGrabberConfiguration)
       grabber.onPointerDown = jest.fn()
       grabber.onPointerMove = jest.fn()
       grabber.onPointerUp = jest.fn()
@@ -223,7 +223,7 @@ describe("OIPointerEventGrabber.ts", () =>
 
     test("should round values from configuration", () =>
     {
-      const grabberConfig: TGrabberConfiguration = { ...DefaultConfiguration.grabber, xyFloatPrecision: 2 }
+      const grabberConfig: TGrabberConfiguration = { ...DefaultGrabberConfiguration, xyFloatPrecision: 2 }
       const grabber = new OIPointerEventGrabber(grabberConfig)
       grabber.onPointerDown = jest.fn()
       grabber.onPointerMove = jest.fn()
@@ -247,7 +247,7 @@ describe("OIPointerEventGrabber.ts", () =>
 
     test("should not round values from configuration if negative precision", () =>
     {
-      const grabberConfig: TGrabberConfiguration = { ...DefaultConfiguration.grabber, xyFloatPrecision: -2 }
+      const grabberConfig: TGrabberConfiguration = { ...DefaultGrabberConfiguration, xyFloatPrecision: -2 }
       const grabber = new OIPointerEventGrabber(grabberConfig)
       grabber.onPointerDown = jest.fn()
       grabber.onPointerMove = jest.fn()
@@ -277,7 +277,7 @@ describe("OIPointerEventGrabber.ts", () =>
     svgElement.style.height = "100px"
     document.body.appendChild(svgElement)
 
-    const grabber = new OIPointerEventGrabber(DefaultConfiguration.grabber)
+    const grabber = new OIPointerEventGrabber(DefaultGrabberConfiguration)
     grabber.attach(svgElement)
     grabber.onPointerDown = jest.fn()
 
@@ -315,7 +315,7 @@ describe("OIPointerEventGrabber.ts", () =>
     svgElement.style.height = "100px"
     document.body.appendChild(svgElement)
 
-    const grabber = new OIPointerEventGrabber(DefaultConfiguration.grabber)
+    const grabber = new OIPointerEventGrabber(DefaultGrabberConfiguration)
     grabber.attach(svgElement)
     grabber.onContextMenu = jest.fn()
 

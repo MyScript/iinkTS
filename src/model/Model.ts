@@ -1,8 +1,7 @@
-import { LoggerClass, LoggerManager } from "../logger"
+import { LoggerCategory, LoggerManager } from "../logger"
 import { TPenStyle } from "../style"
 import { computeDistance } from "../utils"
 import { TExport } from "./Export"
-import { IModel } from "./IModel"
 import { Stroke, TPoint, TPointer } from "../symbol"
 
 /**
@@ -16,7 +15,7 @@ export type TRecognitionPositions = {
 /**
  * @group Model
  */
-export class Model implements IModel
+export class Model
 {
   readonly creationTime: number
   modificationDate: number
@@ -29,7 +28,7 @@ export class Model implements IModel
   height: number
   rowHeight: number
   idle: boolean
-  #logger = LoggerManager.getLogger(LoggerClass.MODEL)
+  #logger = LoggerManager.getLogger(LoggerCategory.MODEL)
 
   constructor(width = 100, height = 100, rowHeight = 0, creationDate = Date.now())
   {

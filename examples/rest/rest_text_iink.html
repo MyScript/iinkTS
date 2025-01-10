@@ -52,47 +52,71 @@
       const redoElement = document.getElementById("redo");
 
       /**
-       * we expose the editor for use in the integration test
+       * we expose the editor so we can access it in tests
        */
       let editor;
+      clearElement.addEventListener("click", async () => {
+        editor?.clear();
+      });
+
+      undoElement.addEventListener("click", () => {
+        editor?.undo();
+      });
+
+      redoElement.addEventListener("click", () => {
+        editor?.redo();
+      });
+
+      window.addEventListener("resize", () => {
+        editor?.resize();
+      });
+
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            type: "TEXT",
+            lang: "en_US",
+            text: {
+              mimeTypes: ["text/plain"]
+            }
+          }
+        }
+      };
+      let serverConfiguration;
+      let languageList;
+
+      languageElement.addEventListener("change", (e) => {
+        editorOptions.configuration.recognition.lang = e.target.value;
+        loadEditor(editorOptions)
+      });
 
       /**
        * We use a function to wait the server configuration to load
        */
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const conf = await res.json();
-        const options = {
-          configuration: {
-            server: {
-              ...conf,
-              protocol: "REST"
-            },
-            recognition: {
-              type: "TEXT",
-              text: {
-                mimeTypes: ["text/plain"]
-              }
-            }
-          }
-        };
+      async function loadEditor(options) {
+        resultElement.innerHTML = "";
+        if (!serverConfiguration) {
+          const res = await fetch("../server-configuration.json");
+          serverConfiguration = await res.json();
+        }
+        options.configuration.server = serverConfiguration
+
+        if (!languageList) {
+          const currentLanguage = options.configuration.recognition.lang;
+          languageList = await iink.getAvailableLanguageList({ server: serverConfiguration });
+          Object.keys(languageList.result).forEach(function (key) {
+            const selected = currentLanguage === key;
+            languageElement.options[languageElement.options.length] = new Option(languageList.result[key], key, selected, selected);
+          });
+        }
+
         /**
-         * Instanciate editor
+         * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = new iink.Editor(editorElement, options);
-        /**
-         *  async initialize editor behaviors
-         */
-        await editor.initialize();
+        editor = await iink.Editor.load(editorElement, "REST", options);
 
-        const currentLanguage = editor.configuration.recognition.lang;
-        const availableLanguageListResponse = await iink.getAvailableLanguageList(editor.configuration);
-        Object.keys(availableLanguageListResponse.result).forEach(function (key) {
-          const selected = currentLanguage === key;
-          languageElement.options[languageElement.options.length] = new Option(availableLanguageListResponse.result[key], key, selected, selected);
-        });
 
         editor.event.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo;
@@ -103,32 +127,9 @@
         editor.event.addEventListener("exported", (event) => {
           resultElement.innerHTML = event.detail ? event.detail["text/plain"] : "";
         });
-
-        clearElement.addEventListener("click", async () => {
-          editor.clear();
-        });
-
-        undoElement.addEventListener("click", () => {
-          editor.undo();
-        });
-
-        redoElement.addEventListener("click", () => {
-          editor.redo();
-        });
-
-        languageElement.addEventListener("change", (e) => {
-          const configuration = JSON.parse(JSON.stringify(editor.configuration));
-          configuration.recognition.lang = e.target.value;
-          editor.configuration = configuration;
-          resultElement.innerHTML = "";
-        });
-
-        window.addEventListener("resize", () => {
-          editor.resize();
-        });
       };
 
-      loadEditor().catch(error => console.error(error));
+      loadEditor(editorOptions).catch(error => console.error(error));
     </script>
   </body>
 </html>

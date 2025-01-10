@@ -1,6 +1,6 @@
 import { ResizeDirection, SvgElementRole } from "../Constants"
-import { OIBehaviors } from "../behaviors"
-import { LoggerClass, LoggerManager } from "../logger"
+import { EditorOffscreen } from "../editor/EditorOffscreen"
+import { LoggerCategory, LoggerManager } from "../logger"
 import { OIModel } from "../model"
 import
 {
@@ -24,8 +24,8 @@ import
  */
 export class OIResizeManager
 {
-  #logger = LoggerManager.getLogger(LoggerClass.TRANSFORMER)
-  behaviors: OIBehaviors
+  #logger = LoggerManager.getLogger(LoggerCategory.TRANSFORMER)
+  editor: EditorOffscreen
 
   interactElementsGroup?: SVGElement
   direction!: ResizeDirection
@@ -33,15 +33,15 @@ export class OIResizeManager
   transformOrigin!: TPoint
   keepRatio = false
 
-  constructor(behaviors: OIBehaviors)
+  constructor(editor: EditorOffscreen)
   {
     this.#logger.info("constructor")
-    this.behaviors = behaviors
+    this.editor = editor
   }
 
   get model(): OIModel
   {
-    return this.behaviors.model
+    return this.editor.model
   }
 
   protected applyToStroke(stroke: OIStroke, origin: TPoint, scaleX: number, scaleY: number): OIStroke
@@ -138,7 +138,7 @@ export class OIResizeManager
     {
       c.fontSize = +(c.fontSize * (scaleX + scaleY) / 2).toFixed(3)
     })
-    return this.behaviors.texter.updateBounds(text)
+    return this.editor.texter.updateBounds(text)
   }
 
   protected applyOnGroup(group: OISymbolGroup, origin: TPoint, scaleX: number, scaleY: number): OISymbolGroup
@@ -179,13 +179,13 @@ export class OIResizeManager
 
   setTransformOrigin(id: string, originX: number, originY: number): void
   {
-    this.behaviors.renderer.setAttribute(id, "transform-origin", `${ originX }px ${ originY }px`)
+    this.editor.renderer.setAttribute(id, "transform-origin", `${ originX }px ${ originY }px`)
   }
 
   scaleElement(id: string, sx: number, sy: number): void
   {
     this.#logger.info("scaleElement", { id, sx, sy })
-    this.behaviors.renderer.setAttribute(id, "transform", `scale(${ sx },${ sy })`)
+    this.editor.renderer.setAttribute(id, "transform", `scale(${ sx },${ sy })`)
   }
 
   start(target: Element, origin: TPoint): void
@@ -228,7 +228,7 @@ export class OIResizeManager
       ResizeDirection.SouthEast,
       ResizeDirection.SouthWest
     ].includes(this.direction)
-    const { x, y } = this.behaviors.snaps.snapResize(point, horizontalResize, verticalResize)
+    const { x, y } = this.editor.snaps.snapResize(point, horizontalResize, verticalResize)
     localPoint.x = x
     localPoint.y = y
 
@@ -277,20 +277,20 @@ export class OIResizeManager
   {
     this.#logger.info("end", { point })
     const { scaleX, scaleY } = this.continue(point)
-    this.behaviors.snaps.clearSnapToElementLines()
+    this.editor.snaps.clearSnapToElementLines()
     const oldSymbols = this.model.symbolsSelected.map(s => s.clone())
     this.model.symbolsSelected.forEach(s =>
     {
       this.applyToSymbol(s, this.transformOrigin, scaleX, scaleY)
-      this.behaviors.renderer.drawSymbol(s)
+      this.editor.renderer.drawSymbol(s)
       this.model.updateSymbol(s)
     })
 
-    const strokesFromSymbols = this.behaviors.extractStrokesFromSymbols(this.model.symbolsSelected)
-    this.behaviors.recognizer.transformScale(strokesFromSymbols.map(s => s.id), scaleX, scaleY, this.transformOrigin.x, this.transformOrigin.y)
-    this.behaviors.history.push(this.model, { scale: [{ symbols: oldSymbols, origin: {...this.transformOrigin}, scaleX, scaleY }] })
+    const strokesFromSymbols = this.editor.extractStrokesFromSymbols(this.model.symbolsSelected)
+    this.editor.recognizer.transformScale(strokesFromSymbols.map(s => s.id), scaleX, scaleY, this.transformOrigin.x, this.transformOrigin.y)
+    this.editor.history.push(this.model, { scale: [{ symbols: oldSymbols, origin: {...this.transformOrigin}, scaleX, scaleY }] })
 
     this.interactElementsGroup = undefined
-    this.behaviors.svgDebugger.apply()
+    this.editor.svgDebugger.apply()
   }
 }

@@ -180,39 +180,64 @@
       const undoElement = document.getElementById("undo");
       const redoElement = document.getElementById("redo");
 
+      let editor
+
+      clearElement.addEventListener("click", async () => {
+        await editor?.clear();
+      });
+
+      undoElement.addEventListener("click", async () => {
+        await editor?.undo();
+      });
+
+      redoElement.addEventListener("click", async () => {
+        await editor?.redo();
+      });
+
+      window.addEventListener("resize", async () => {
+        await editor?.resize();
+      });
+
+      const options = {
+        configuration: {
+          server: {
+            scheme: "https",
+            host: "cloud.myscript.com",
+            applicationKey: "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+            hmacKey: "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+          },
+          recognition: {
+            type: "TEXT"
+          }
+        }
+      };
+
+      languageElement.addEventListener("change", (e) => {
+        editor.configuration.recognition.lang = e.target.value;
+        options.configuration = editor.configuration
+        loadEditor(options)
+      });
+
       /**
        * we use an asynchronous function to be able to wait for the end of the initialization of the editor
        * before connecting the different event listeners
        */
-      async function loadEditor() {
-        const options = {
-          configuration: {
-            server: {
-              protocol: "WEBSOCKET",
-              scheme: "https",
-              host: "cloud.myscript.com",
-              applicationKey: "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
-              hmacKey: "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
-            },
-            recognition: {
-              type: "TEXT"
-            }
-          }
-        };
-
+      async function loadEditor(options) {
         /**
-         * Instanciate editor
+         * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
-         * @param {Object} The Editor parameters {@link https://myscript.github.io/iinkTS/docs/types/_internal_.TBehaviorOptions.html}
-         * @remarks You can see the editor methods at this address {@link https://myscript.github.io/iinkTS/docs/classes/Editor.html}
+         * @param {String} Editor type [OFFSCREEN", "WEBSOCKET", "REST"]
+         * @param {Object} Editor options depend on editor type
+         * - {@link https://myscript.github.io/iinkTS/docs/types/TEditorOffscreenOptions.html}
+         * - {@link https://myscript.github.io/iinkTS/docs/types/TEditorWebsocketOptions.html}
+         * - {@link https://myscript.github.io/iinkTS/docs/types/TEditorRestOptions.html}
+         *
+         * @return {Object} Editor options depend on editor type
+         * - {@link https://myscript.github.io/iinkTS/docs/classes/EditorOffscreen.html}
+         * - {@link https://myscript.github.io/iinkTS/docs/classes/EditorWebSocket.html}
+         * - {@link https://myscript.github.io/iinkTS/docs/classes/EditorRest.html}
          */
-
-        const editor = new iink.Editor(editorElement, options);
-
-        /**
-         *  async initialize editor behaviors
-         */
-        await editor.initialize();
+         editor = await iink.Editor.load(editorElement, "WEBSOCKET", options);
 
         const currentLanguage = editor.configuration.recognition.lang;
         const availableLanguageResponse = await iink.getAvailableLanguageList(editor.configuration);
@@ -231,34 +256,11 @@
         });
 
         editor.event.addEventListener("exported", (event) => {
-          resultElement.innerHTML =
-            event.detail && event.detail["application/vnd.myscript.jiix"] ? event.detail["application/vnd.myscript.jiix"].label : "";
-        });
-
-        clearElement.addEventListener("click", async () => {
-          await editor.clear();
-        });
-
-        undoElement.addEventListener("click", async () => {
-          await editor.undo();
-        });
-
-        redoElement.addEventListener("click", async () => {
-          await editor.redo();
-        });
-
-        languageElement.addEventListener("change", (e) => {
-          const configuration = JSON.parse(JSON.stringify(editor.configuration));
-          configuration.recognition.lang = e.target.value;
-          editor.configuration = configuration;
-        });
-
-        window.addEventListener("resize", () => {
-          editor.resize();
+          resultElement.innerHTML = event.detail && event.detail["application/vnd.myscript.jiix"] ? event.detail["application/vnd.myscript.jiix"].label : "";
         });
       }
 
-      loadEditor().catch((error) => console.error(error));
+      loadEditor(options).catch((error) => console.error(error));
     </script>
   </body>
 </html>

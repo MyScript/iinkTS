@@ -19,9 +19,11 @@ export class OISVGRendererRecognizedUtil
       "vector-effect": "non-scaling-stroke",
       "stroke-linecap": "round",
       "stroke-linejoin": "round",
-      "fill": recognizedSymbol.style.color || DefaultStyle.color!,
-      "stroke-width": (recognizedSymbol.style.width || DefaultStyle.width!).toString(),
-      "opacity": (recognizedSymbol.style.opacity || DefaultStyle.opacity!).toString(),
+      "fill": recognizedSymbol.style.color || DefaultStyle.color,
+      "stroke-width": (recognizedSymbol.style.width || DefaultStyle.width).toString(),
+    }
+    if (recognizedSymbol.style.opacity) {
+      attrs["opacity"] = recognizedSymbol.style.opacity.toString()
     }
     if (recognizedSymbol.selected) {
       attrs["filter"] = `url(#${ OISVGRendererConst.selectionFilterId })`

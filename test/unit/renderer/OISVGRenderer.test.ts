@@ -2,8 +2,8 @@ import { buildOICircle, buildOIEraser, buildOIGroup, buildOILine, buildOIStroke,
 import
 {
   OISVGRenderer,
-  DefaultRenderingConfiguration,
-  TRenderingConfiguration,
+  DefaultOIRendererConfiguration,
+  TOIRendererConfiguration,
   TOISymbol,
   Box,
   TOISymbolChar,
@@ -13,15 +13,15 @@ describe("OISVGRenderer.ts", () =>
 {
   test("should instanciate", () =>
   {
-    const renderer = new OISVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new OISVGRenderer(DefaultOIRendererConfiguration)
     expect(renderer).toBeDefined()
-    expect(renderer.configuration).toEqual(DefaultRenderingConfiguration)
+    expect(renderer.configuration).toEqual(DefaultOIRendererConfiguration)
   })
 
   describe("init", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const renderer = new OISVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new OISVGRenderer(DefaultOIRendererConfiguration)
     renderer.init(divElement)
     test("should create layer", () =>
     {
@@ -33,7 +33,7 @@ describe("OISVGRenderer.ts", () =>
     test("should create guides with default gap", () =>
     {
       const divElement: HTMLDivElement = document.createElement("div")
-      const customConf = JSON.parse(JSON.stringify(DefaultRenderingConfiguration)) as TRenderingConfiguration
+      const customConf = JSON.parse(JSON.stringify(DefaultOIRendererConfiguration)) as TOIRendererConfiguration
       customConf.minHeight = customConf.guides.gap * 2
       customConf.minWidth = customConf.guides.gap * 2
       customConf.guides.type = "point"
@@ -47,7 +47,7 @@ describe("OISVGRenderer.ts", () =>
     test("should create guides with custom gap", () =>
     {
       const divElement: HTMLDivElement = document.createElement("div")
-      const customConf = JSON.parse(JSON.stringify(DefaultRenderingConfiguration)) as TRenderingConfiguration
+      const customConf = JSON.parse(JSON.stringify(DefaultOIRendererConfiguration)) as TOIRendererConfiguration
       customConf.guides.gap = 5
       const rendererCustom = new OISVGRenderer(customConf)
       rendererCustom.init(divElement)
@@ -59,7 +59,7 @@ describe("OISVGRenderer.ts", () =>
     test("should create guides line", () =>
     {
       const divElement: HTMLDivElement = document.createElement("div")
-      const customConf = JSON.parse(JSON.stringify(DefaultRenderingConfiguration)) as TRenderingConfiguration
+      const customConf = JSON.parse(JSON.stringify(DefaultOIRendererConfiguration)) as TOIRendererConfiguration
       customConf.guides.type = "line"
       customConf.minHeight = customConf.guides.gap * 2
       customConf.minWidth = customConf.guides.gap * 2
@@ -73,7 +73,7 @@ describe("OISVGRenderer.ts", () =>
     test("should create guides grid", () =>
     {
       const divElement: HTMLDivElement = document.createElement("div")
-      const customConf = JSON.parse(JSON.stringify(DefaultRenderingConfiguration)) as TRenderingConfiguration
+      const customConf = JSON.parse(JSON.stringify(DefaultOIRendererConfiguration)) as TOIRendererConfiguration
       customConf.guides.type = "grid"
       customConf.minHeight = customConf.guides.gap * 2
       customConf.minWidth = customConf.guides.gap * 2
@@ -87,17 +87,17 @@ describe("OISVGRenderer.ts", () =>
     test("should write error if guides.type unknow", () =>
     {
       const divElement: HTMLDivElement = document.createElement("div")
-      const customConf = JSON.parse(JSON.stringify(DefaultRenderingConfiguration))
+      const customConf = JSON.parse(JSON.stringify(DefaultOIRendererConfiguration))
       customConf.guides.type = "test"
       const rendererCustom = new OISVGRenderer(customConf)
       rendererCustom.init(divElement)
       expect(console.error).toBeCalledTimes(1)
-      expect(console.error).toBeCalledWith({ "error": ["Guide type unknow: test"], "from": "RENDERER.drawGuides" })
+      expect(console.error).toBeCalledWith({ level: "error", message: ["Guide type unknow: test"], "from": "RENDERER.drawGuides" })
     })
     test("should not create guides", () =>
     {
       const divElement: HTMLDivElement = document.createElement("div")
-      const customConf = JSON.parse(JSON.stringify(DefaultRenderingConfiguration))
+      const customConf = JSON.parse(JSON.stringify(DefaultOIRendererConfiguration))
       customConf.guides.enable = false
       const rendererCustom = new OISVGRenderer(customConf)
       rendererCustom.init(divElement)
@@ -109,7 +109,7 @@ describe("OISVGRenderer.ts", () =>
   describe("attribute", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const renderer = new OISVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new OISVGRenderer(DefaultOIRendererConfiguration)
     renderer.init(divElement)
     const element = document.createElement("path")
     element.id = "attribut-test-id"
@@ -134,7 +134,7 @@ describe("OISVGRenderer.ts", () =>
   describe("element", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const renderer = new OISVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new OISVGRenderer(DefaultOIRendererConfiguration)
     renderer.init(divElement)
 
     const elementToPreprend = document.createElement("path")
@@ -165,7 +165,7 @@ describe("OISVGRenderer.ts", () =>
   describe("symbol", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const renderer = new OISVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new OISVGRenderer(DefaultOIRendererConfiguration)
     renderer.init(divElement)
 
     test("should write error if symbol type unknow", () =>
@@ -196,7 +196,6 @@ describe("OISVGRenderer.ts", () =>
       expect(el).toBeDefined()
       expect(el.getAttribute("id")).toEqual(eraser.id)
       expect(el.getAttribute("type")).toEqual(eraser.type)
-      expect(el.getAttribute("fill")).toEqual("transparent")
       expect(el.getAttribute("stroke")).toEqual("grey")
       expect(el.getAttribute("opacity")).toEqual("0.2")
       expect(el.getAttribute("stroke-width")).toEqual("12")
@@ -330,7 +329,7 @@ describe("OISVGRenderer.ts", () =>
   test("should drawCircle", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const renderer = new OISVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new OISVGRenderer(DefaultOIRendererConfiguration)
     renderer.init(divElement)
     renderer.drawCircle({ x: 10, y: 5 }, 42, { id: "test", fill: "red" })
 
@@ -346,7 +345,7 @@ describe("OISVGRenderer.ts", () =>
   test("should drawRect", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const renderer = new OISVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new OISVGRenderer(DefaultOIRendererConfiguration)
     renderer.init(divElement)
     renderer.drawRect({ height: 10, width: 5, x: 0, y: 2 }, { id: "test", stroke: "blue" })
 
@@ -363,7 +362,7 @@ describe("OISVGRenderer.ts", () =>
   test("should drawLine", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const renderer = new OISVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new OISVGRenderer(DefaultOIRendererConfiguration)
     renderer.init(divElement)
     renderer.drawLine({ x: 0, y: 1 }, { x: 5, y: 10 }, { id: "test", stroke: "blue" })
 
@@ -380,7 +379,7 @@ describe("OISVGRenderer.ts", () =>
   describe("resize", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const renderer = new OISVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new OISVGRenderer(DefaultOIRendererConfiguration)
     renderer.init(divElement)
 
     test("should update height, width & viewbox", () =>
@@ -405,7 +404,7 @@ describe("OISVGRenderer.ts", () =>
   describe("clearElements", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const renderer = new OISVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new OISVGRenderer(DefaultOIRendererConfiguration)
     renderer.init(divElement)
 
     test("should clearElements by tagName", () =>
@@ -446,7 +445,7 @@ describe("OISVGRenderer.ts", () =>
   test("should clear", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const renderer = new OISVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new OISVGRenderer(DefaultOIRendererConfiguration)
     renderer.init(divElement)
     const initChildNumber = renderer.layer.childElementCount
     const stroke = buildOIStroke()
@@ -459,7 +458,7 @@ describe("OISVGRenderer.ts", () =>
   test("should destroy", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const renderer = new OISVGRenderer(DefaultRenderingConfiguration)
+    const renderer = new OISVGRenderer(DefaultOIRendererConfiguration)
     renderer.init(divElement)
     expect(divElement.childElementCount).toEqual(1)
     renderer.destroy()

@@ -1,39 +1,39 @@
 import { arcJIIX, circleJIIX, ellipseJIIX, hTextJIIX, lineJIIX, parallelogramJIIX, polygonJIIX, rectangleJIIX, rhombusJIIX, triangleJIIX } from "../__dataset__/jiix.dataset"
 import { buildOIStroke } from "../helpers"
-import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
+import { EditorOffscreenMock } from "../__mocks__/EditorOffscreenMock"
 import { OIConversionManager, TJIIXEdgeElement, TJIIXNodeElement, TJIIXTextElement } from "../../../src/iink"
 
 describe("OIConversionManager.ts", () =>
 {
   test("should create", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    const manager = new OIConversionManager(behaviors)
+    const editor = new EditorOffscreenMock()
+    const manager = new OIConversionManager(editor)
     expect(manager).toBeDefined()
   })
 
   describe("apply", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    behaviors.export = jest.fn(() => Promise.resolve(behaviors.model))
-    behaviors.selector.removeSelectedGroup = jest.fn()
-    const manager = new OIConversionManager(behaviors)
+    const editor = new EditorOffscreenMock()
+    editor.export = jest.fn(() => Promise.resolve(editor.model))
+    editor.selector.removeSelectedGroup = jest.fn()
+    const manager = new OIConversionManager(editor)
     manager.convertText = jest.fn()
     manager.convertNode = jest.fn()
     manager.convertEdge = jest.fn()
-    test("should call behaviors.export if no model.exports?.[\"application/vnd.myscript.jiix\"]", async () =>
+    test("should call editor.export if no model.exports?.[\"application/vnd.myscript.jiix\"]", async () =>
     {
       await manager.apply()
-      expect(behaviors.selector.removeSelectedGroup).toHaveBeenCalledTimes(1)
-      expect(behaviors.export).toHaveBeenCalledTimes(1)
-      expect(behaviors.export).toHaveBeenCalledWith(["application/vnd.myscript.jiix"])
+      expect(editor.selector.removeSelectedGroup).toHaveBeenCalledTimes(1)
+      expect(editor.export).toHaveBeenCalledTimes(1)
+      expect(editor.export).toHaveBeenCalledWith(["application/vnd.myscript.jiix"])
     })
     test("should call convertText", async () =>
     {
       expect(manager.convertText).toHaveBeenCalledTimes(0)
       manager.model.exports = { "application/vnd.myscript.jiix": hTextJIIX }
       await manager.apply()
-      expect(behaviors.selector.removeSelectedGroup).toHaveBeenCalledTimes(1)
+      expect(editor.selector.removeSelectedGroup).toHaveBeenCalledTimes(1)
       expect(manager.convertText).toHaveBeenCalledTimes(1)
     })
     test("should call convertNode", async () =>
@@ -41,7 +41,7 @@ describe("OIConversionManager.ts", () =>
       expect(manager.convertNode).toHaveBeenCalledTimes(0)
       manager.model.exports = { "application/vnd.myscript.jiix": rectangleJIIX }
       await manager.apply()
-      expect(behaviors.selector.removeSelectedGroup).toHaveBeenCalledTimes(1)
+      expect(editor.selector.removeSelectedGroup).toHaveBeenCalledTimes(1)
       expect(manager.convertNode).toHaveBeenCalledTimes(1)
     })
     test("should call convertEdge", async () =>
@@ -49,7 +49,7 @@ describe("OIConversionManager.ts", () =>
       expect(manager.convertEdge).toHaveBeenCalledTimes(0)
       manager.model.exports = { "application/vnd.myscript.jiix": lineJIIX }
       await manager.apply()
-      expect(behaviors.selector.removeSelectedGroup).toHaveBeenCalledTimes(1)
+      expect(editor.selector.removeSelectedGroup).toHaveBeenCalledTimes(1)
       expect(manager.convertEdge).toHaveBeenCalledTimes(1)
     })
   })
@@ -57,15 +57,15 @@ describe("OIConversionManager.ts", () =>
   describe("convertText", () =>
   {
     const symEl = document.createElementNS("http://www.w3.org/2000/svg", "path")
-    const behaviors = new OIBehaviorsMock()
-    behaviors.export = jest.fn(() => Promise.resolve(behaviors.model))
-    behaviors.texter.setBounds = jest.fn()
-    behaviors.texter.getSpaceWidth = jest.fn(() => 10)
-    behaviors.renderer.drawSymbol = jest.fn(() => symEl)
-    behaviors.renderer.removeSymbol = jest.fn()
-    behaviors.model.addSymbol = jest.fn()
-    behaviors.model.removeSymbol = jest.fn()
-    const manager = new OIConversionManager(behaviors)
+    const editor = new EditorOffscreenMock()
+    editor.export = jest.fn(() => Promise.resolve(editor.model))
+    editor.texter.setBounds = jest.fn()
+    editor.texter.getSpaceWidth = jest.fn(() => 10)
+    editor.renderer.drawSymbol = jest.fn(() => symEl)
+    editor.renderer.removeSymbol = jest.fn()
+    editor.model.addSymbol = jest.fn()
+    editor.model.removeSymbol = jest.fn()
+    const manager = new OIConversionManager(editor)
 
     const hTextJIIXElement = hTextJIIX.elements?.[0] as TJIIXTextElement
 
@@ -107,9 +107,9 @@ describe("OIConversionManager.ts", () =>
 
   describe("convertNode", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    behaviors.export = jest.fn(() => Promise.resolve(behaviors.model))
-    const manager = new OIConversionManager(behaviors)
+    const editor = new EditorOffscreenMock()
+    editor.export = jest.fn(() => Promise.resolve(editor.model))
+    const manager = new OIConversionManager(editor)
 
     const jiixNodeRect = rectangleJIIX.elements?.[0] as TJIIXNodeElement
     const jiixNodeCircle = circleJIIX.elements?.[0] as TJIIXNodeElement
@@ -195,11 +195,11 @@ describe("OIConversionManager.ts", () =>
   describe("convertEdge", () =>
   {
     const symEl = document.createElementNS("http://www.w3.org/2000/svg", "path")
-    const behaviors = new OIBehaviorsMock()
-    behaviors.export = jest.fn(() => Promise.resolve(behaviors.model))
-    behaviors.renderer.drawSymbol = jest.fn(() => symEl)
-    behaviors.renderer.removeSymbol = jest.fn()
-    const manager = new OIConversionManager(behaviors)
+    const editor = new EditorOffscreenMock()
+    editor.export = jest.fn(() => Promise.resolve(editor.model))
+    editor.renderer.drawSymbol = jest.fn(() => symEl)
+    editor.renderer.removeSymbol = jest.fn()
+    const manager = new OIConversionManager(editor)
 
     const jiixEdgeLine = lineJIIX.elements?.[0] as TJIIXEdgeElement
     const jiixEdgeArc = arcJIIX.elements?.[0] as TJIIXEdgeElement

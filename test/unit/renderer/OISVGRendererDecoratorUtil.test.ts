@@ -11,6 +11,7 @@ describe("OISVGRendererDecoratorUtil.ts", () =>
       const sym = buildOIStroke()
       const style: TStyle = {
         color: "red",
+        width: 42
       }
       const decorator = buildOIDecorator(DecoratorKind.Highlight, style)
       const el = OISVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
@@ -18,7 +19,7 @@ describe("OISVGRendererDecoratorUtil.ts", () =>
       expect(el.getAttribute("kind")).toEqual(DecoratorKind.Highlight)
       expect(el.getAttribute("opacity")).toEqual("0.5")
       expect(el.getAttribute("stroke")).toEqual("transparent")
-      expect(el.getAttribute("fill")).toEqual(style.color!)
+      expect(el.getAttribute("fill")).toEqual(style.color)
     })
     test("should get Highlight with DefaultStyle", () =>
     {
@@ -29,7 +30,7 @@ describe("OISVGRendererDecoratorUtil.ts", () =>
       expect(el.getAttribute("kind")).toEqual(DecoratorKind.Highlight)
       expect(el.getAttribute("opacity")).toEqual("0.5")
       expect(el.getAttribute("stroke")).toEqual("transparent")
-      expect(el.getAttribute("fill")).toEqual(DefaultStyle.color!)
+      expect(el.getAttribute("fill")).toEqual(DefaultStyle.color)
     })
     test("should Highlight to delete", () =>
     {
@@ -68,7 +69,6 @@ describe("OISVGRendererDecoratorUtil.ts", () =>
       expect(el.getAttribute("fill")).toEqual("transparent")
       expect(el.getAttribute("stroke")).toEqual(DefaultStyle.color!)
       expect(el.getAttribute("stroke-width")).toEqual(DefaultStyle.width?.toString())
-      expect(el.getAttribute("opacity")).toEqual(DefaultStyle.opacity?.toString())
     })
     test("should get Strikethrough", () =>
     {
@@ -97,7 +97,6 @@ describe("OISVGRendererDecoratorUtil.ts", () =>
       expect(el.getAttribute("fill")).toEqual("transparent")
       expect(el.getAttribute("stroke")).toEqual(DefaultStyle.color!)
       expect(el.getAttribute("stroke-width")).toEqual(DefaultStyle.width?.toString())
-      expect(el.getAttribute("opacity")).toEqual(DefaultStyle.opacity?.toString())
     })
     test("should get Underline", () =>
     {
@@ -126,7 +125,6 @@ describe("OISVGRendererDecoratorUtil.ts", () =>
       expect(el.getAttribute("fill")).toEqual("transparent")
       expect(el.getAttribute("stroke")).toEqual(DefaultStyle.color!)
       expect(el.getAttribute("stroke-width")).toEqual(DefaultStyle.width?.toString())
-      expect(el.getAttribute("opacity")).toEqual(DefaultStyle.opacity?.toString())
     })
   })
 

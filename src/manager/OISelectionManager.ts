@@ -1,55 +1,55 @@
 import { ResizeDirection, SELECTION_MARGIN, SvgElementRole } from "../Constants"
-import { OIBehaviors } from "../behaviors"
-import { LoggerClass, LoggerManager } from "../logger"
+import { LoggerCategory, LoggerManager } from "../logger"
 import { OIModel } from "../model"
 import { Box, OIText, SymbolType, TBox, TOIEdge, TOISymbol, TPoint } from "../symbol"
 import { OISVGRenderer, SVGBuilder } from "../renderer"
 import { OIResizeManager } from "./OIResizeManager"
 import { OIRotationManager } from "./OIRotationManager"
 import { OITranslateManager } from "./OITranslateManager"
+import { EditorOffscreen } from "../editor/EditorOffscreen"
 
 /**
  * @group Manager
  */
 export class OISelectionManager
 {
-  #logger = LoggerManager.getLogger(LoggerClass.SELECTION)
+  #logger = LoggerManager.getLogger(LoggerCategory.SELECTION)
   #selectingId = "selecting-rect"
   startSelectionPoint?: TPoint
   endSelectionPoint?: TPoint
   selectedGroup?: SVGGElement
 
-  behaviors: OIBehaviors
+  editor: EditorOffscreen
 
-  constructor(behaviors: OIBehaviors)
+  constructor(editor: EditorOffscreen)
   {
     this.#logger.info("constructor")
-    this.behaviors = behaviors
+    this.editor = editor
   }
 
   get model(): OIModel
   {
-    return this.behaviors.model
+    return this.editor.model
   }
 
   get renderer(): OISVGRenderer
   {
-    return this.behaviors.renderer
+    return this.editor.renderer
   }
 
   get rotator(): OIRotationManager
   {
-    return this.behaviors.rotator
+    return this.editor.rotator
   }
 
   get translator(): OITranslateManager
   {
-    return this.behaviors.translator
+    return this.editor.translator
   }
 
   get resizer(): OIResizeManager
   {
-    return this.behaviors.resizer
+    return this.editor.resizer
   }
 
   get selectionBox(): Box | undefined
@@ -393,7 +393,7 @@ export class OISelectionManager
         ev.preventDefault()
         ev.stopPropagation()
         const point = this.getPoint(ev)
-        const { x, y } = this.behaviors.snaps.snapResize(point)
+        const { x, y } = this.editor.snaps.snapResize(point)
         edge.vertices[pointIndex].x = x
         edge.vertices[pointIndex].y = y
         this.model.updateSymbol(edge)
@@ -404,16 +404,16 @@ export class OISelectionManager
         ev.preventDefault()
         ev.stopPropagation()
         const point = this.getPoint(ev)
-        const { x, y } = this.behaviors.snaps.snapResize(point)
+        const { x, y } = this.editor.snaps.snapResize(point)
         edge.vertices[pointIndex].x = x
         edge.vertices[pointIndex].y = y
         this.renderer.layer.style.cursor = ""
-        this.behaviors.updateSymbol(edge)
+        this.editor.updateSymbol(edge)
         this.renderer.layer.removeEventListener("pointermove", handler)
         this.renderer.layer.removeEventListener("pointercancel", endHandler)
         this.renderer.layer.removeEventListener("pointerleave", endHandler)
         this.renderer.layer.removeEventListener("pointerup", endHandler)
-        this.behaviors.snaps.clearSnapToElementLines()
+        this.editor.snaps.clearSnapToElementLines()
         this.resetSelectedGroup(this.model.symbolsSelected)
       }
 
@@ -467,11 +467,11 @@ export class OISelectionManager
     if (this.selectedGroup) {
       this.renderer.layer.appendChild(this.selectedGroup)
       const groupBox = this.selectedGroup.getBBox()
-      this.behaviors.menu.context.position.x = groupBox.x + groupBox.width / 2 - this.renderer.parent.clientLeft
-      this.behaviors.menu.context.position.y = groupBox.y + groupBox.height - this.renderer.parent.clientTop
-      this.behaviors.menu.context.show()
+      this.editor.menu.context.position.x = groupBox.x + groupBox.width / 2 - this.renderer.parent.clientLeft
+      this.editor.menu.context.position.y = groupBox.y + groupBox.height - this.renderer.parent.clientTop
+      this.editor.menu.context.show()
     }
-    this.behaviors.menu.update()
+    this.editor.menu.update()
   }
 
   resetSelectedGroup(symbols: TOISymbol[]): void
@@ -484,14 +484,14 @@ export class OISelectionManager
   removeSelectedGroup(): void
   {
     this.#logger.info("removeSelectedGroup")
-    this.behaviors.menu.context.hide()
+    this.editor.menu.context.hide()
     this.selectedGroup?.remove()
     this.selectedGroup = undefined
   }
 
   hideInteractElements(): void
   {
-    this.behaviors.menu.context.hide()
+    this.editor.menu.context.hide()
     const query = `[role=${ SvgElementRole.Resize }],[role=${ SvgElementRole.Rotate }],[role=${ SvgElementRole.Translate }]`
     this.selectedGroup?.querySelectorAll(query)
       .forEach(el =>
@@ -534,8 +534,8 @@ export class OISelectionManager
     this.endSelectionPoint = undefined
     this.clearSelectingRect()
     this.drawSelectedGroup(this.model.symbolsSelected)
-    this.behaviors.event.emitSelected(this.model.symbolsSelected)
-    this.behaviors.menu.style.update()
+    this.editor.event.emitSelected(this.model.symbolsSelected)
+    this.editor.menu.style.update()
     return updatedSymbols
   }
 }

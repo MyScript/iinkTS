@@ -83,24 +83,24 @@ export function buildOIEraser({ box = defaultBox, nbPoint = 5 } = {}): OIEraser
   return eraser
 }
 
-export function buildOIDecorator(kind: DecoratorKind, style: TStyle = DefaultStyle): OIDecorator
+export function buildOIDecorator(kind: DecoratorKind, style: PartialDeep<TStyle> = DefaultStyle): OIDecorator
 {
   return new OIDecorator(kind, style)
 }
 
-export function buildOICircle({ center = { x: 0, y: 0 }, radius = 5, style = DefaultStyle }: { center?: TPoint, radius?: number, style?: TStyle } = {}): OIShapeCircle
+export function buildOICircle({ center = { x: 0, y: 0 }, radius = 5, style = DefaultStyle }: { center?: TPoint, radius?: number, style?: PartialDeep<TStyle> } = {}): OIShapeCircle
 {
   return new OIShapeCircle(center, radius, style)
 }
 
-export function buildOILine({ start = { x: 0, y: 0 }, end = { x: 5, y: 5 }, style = DefaultStyle }: { start?: TPoint, end?: TPoint, style?: TStyle } = {}): OIEdgeLine
+export function buildOILine({ start = { x: 0, y: 0 }, end = { x: 5, y: 5 }, style = DefaultStyle }: { start?: TPoint, end?: TPoint, style?: PartialDeep<TStyle> } = {}): OIEdgeLine
 {
   return new OIEdgeLine(start, end, undefined, undefined, style)
 }
 
 export function buildOIText(
   { chars = [], point = { x: 0, y: 0 }, boundingBox = { x: 0, y: 10, width: 20, height: 30 }, style = DefaultStyle }:
-    { chars?: TOISymbolChar[], point?: TPoint, boundingBox?: TBox, style?: TStyle } = {}
+    { chars?: TOISymbolChar[], point?: TPoint, boundingBox?: TBox, style?: PartialDeep<TStyle> } = {}
 ): OIText
 {
   return new OIText(chars, point, boundingBox, style)
@@ -108,7 +108,7 @@ export function buildOIText(
 
 export function buildOIGroup(
   { style = DefaultStyle, nbOIStroke = 2, nbOICircle = 0, nbOILine = 0, nbOIText = 0 }:
-    { style?: TStyle, nbOIStroke?: number, nbOICircle?: number, nbOILine?: number, nbOIText?: number } = {}
+    { style?: PartialDeep<TStyle>, nbOIStroke?: number, nbOICircle?: number, nbOILine?: number, nbOIText?: number } = {}
 ): OISymbolGroup
 {
   const symbols: TOISymbol[] = []

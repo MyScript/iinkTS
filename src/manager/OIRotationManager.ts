@@ -1,6 +1,6 @@
 import { SvgElementRole } from "../Constants"
-import { OIBehaviors } from "../behaviors"
-import { LoggerClass, LoggerManager } from "../logger"
+import { EditorOffscreen } from "../editor/EditorOffscreen"
+import { LoggerCategory, LoggerManager } from "../logger"
 import { OIModel } from "../model"
 import
 {
@@ -24,21 +24,21 @@ import { computeAngleRadian, convertDegreeToRadian, convertRadianToDegree, compu
  */
 export class OIRotationManager
 {
-  #logger = LoggerManager.getLogger(LoggerClass.TRANSFORMER)
-  behaviors: OIBehaviors
+  #logger = LoggerManager.getLogger(LoggerCategory.TRANSFORMER)
+  editor: EditorOffscreen
   interactElementsGroup?: SVGElement
   center!: TPoint
   origin!: TPoint
 
-  constructor(behaviors: OIBehaviors)
+  constructor(editor: EditorOffscreen)
   {
     this.#logger.info("constructor")
-    this.behaviors = behaviors
+    this.editor = editor
   }
 
   get model(): OIModel
   {
-    return this.behaviors.model
+    return this.editor.model
   }
 
   protected applyToStroke(stroke: OIStroke, center: TPoint, angleRad: number): OIStroke
@@ -107,7 +107,7 @@ export class OIRotationManager
       degree: convertRadianToDegree(angleRad) + (text.rotation?.degree || 0),
       center: center
     }
-    return this.behaviors.texter.updateBounds(text)
+    return this.editor.texter.updateBounds(text)
   }
 
   protected applyOnGroup(group: OISymbolGroup, center: TPoint, angleRad: number): OISymbolGroup
@@ -144,13 +144,13 @@ export class OIRotationManager
 
   setTransformOrigin(id: string, originX: number, originY: number): void
   {
-    this.behaviors.renderer.setAttribute(id, "transform-origin", `${ originX }px ${ originY }px`)
+    this.editor.renderer.setAttribute(id, "transform-origin", `${ originX }px ${ originY }px`)
   }
 
   rotateElement(id: string, degree: number): void
   {
     this.#logger.info("rotateElement", { id, degree })
-    this.behaviors.renderer.setAttribute(id, "transform", `rotate(${ degree })`)
+    this.editor.renderer.setAttribute(id, "transform", `rotate(${ degree })`)
   }
 
   start(target: Element, origin: TPoint): void
@@ -179,7 +179,7 @@ export class OIRotationManager
     }
     let angleDegree = Math.round(convertRadianToDegree(computeAngleRadian(this.origin, this.center, point)))
 
-    angleDegree = this.behaviors.snaps.snapRotation(angleDegree)
+    angleDegree = this.editor.snaps.snapRotation(angleDegree)
 
     if (point.x - this.center.x < 0) {
       angleDegree = 360 - angleDegree
@@ -202,14 +202,14 @@ export class OIRotationManager
     this.model.symbolsSelected.forEach(s =>
     {
       this.applyToSymbol(s, this.center, angleRad)
-      this.behaviors.renderer.drawSymbol(s)
+      this.editor.renderer.drawSymbol(s)
       this.model.updateSymbol(s)
     })
-    const strokesFromSymbols = this.behaviors.extractStrokesFromSymbols(this.model.symbolsSelected)
-    this.behaviors.recognizer.transformRotate(strokesFromSymbols.map(s => s.id), angleRad, this.center.x, this.center.y)
-    this.behaviors.history.push(this.model, { rotate: [{ symbols: oldSymbols, angle: angleRad, center: {...this.center}, }] })
+    const strokesFromSymbols = this.editor.extractStrokesFromSymbols(this.model.symbolsSelected)
+    this.editor.recognizer.transformRotate(strokesFromSymbols.map(s => s.id), angleRad, this.center.x, this.center.y)
+    this.editor.history.push(this.model, { rotate: [{ symbols: oldSymbols, angle: angleRad, center: {...this.center}, }] })
 
     this.interactElementsGroup = undefined
-    this.behaviors.svgDebugger.apply()
+    this.editor.svgDebugger.apply()
   }
 }

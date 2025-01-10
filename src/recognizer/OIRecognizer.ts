@@ -1,10 +1,9 @@
-import { TRecognitionConfiguration, TServerConfiguration } from "../configuration"
-import { TOIHistoryBackendChanges, TUndoRedoContext } from "../history"
-import { LoggerClass, LoggerManager } from "../logger"
+import { TOIHistoryBackendChanges, THistoryContext } from "../history"
+import { LoggerCategory, LoggerManager } from "../logger"
 import { TExport, TJIIXExport } from "../model"
 import { OIStroke } from "../symbol"
 import { TMatrixTransform } from "../transform"
-import { computeHmac, DeferredPromise } from "../utils"
+import { computeHmac, mergeDeep, DeferredPromise, PartialDeep } from "../utils"
 import
 {
   TOIMessageEvent,
@@ -23,6 +22,7 @@ import
 import { RecognizerError } from "./RecognizerError"
 import PingWorker from "web-worker:../worker/ping.worker.ts"
 import { RecognizerEvent } from "./RecognizerEvent"
+import { OIRecognizerConfiguration, TOIRecognizerConfiguration } from "./OIRecognizerConfiguration"
 
 /**
  * A websocket dialog have this sequence :
@@ -48,9 +48,8 @@ import { RecognizerEvent } from "./RecognizerEvent"
  */
 export class OIRecognizer
 {
-  #logger = LoggerManager.getLogger(LoggerClass.RECOGNIZER)
-  protected serverConfiguration: TServerConfiguration
-  protected recognitionConfiguration: TRecognitionConfiguration
+  #logger = LoggerManager.getLogger(LoggerCategory.RECOGNIZER)
+  protected config: OIRecognizerConfiguration
 
   protected socket!: WebSocket
   protected pingWorker?: Worker
@@ -59,7 +58,6 @@ export class OIRecognizer
   protected sessionId?: string
   protected currentPartId?: string
   protected currentErrorCode?: string | number
-
 
   protected addStrokeDeferred?: DeferredPromise<TOIMessageEventGesture | undefined>
   protected contextlessGestureDeferred: Map<string, DeferredPromise<TOIMessageEventContextlessGesture>>
@@ -77,13 +75,12 @@ export class OIRecognizer
   url: string
   event: RecognizerEvent
 
-  constructor(serverConfig: TServerConfiguration, recognitionConfig: TRecognitionConfiguration, event?: RecognizerEvent)
+  constructor(config: PartialDeep<TOIRecognizerConfiguration>, event?: RecognizerEvent)
   {
-    this.#logger.info("constructor", { serverConfig, recognitionConfig })
-    this.serverConfiguration = serverConfig
-    this.recognitionConfiguration = recognitionConfig
-    const scheme = (this.serverConfiguration.scheme === "https") ? "wss" : "ws"
-    this.url = `${ scheme }://${ this.serverConfiguration.host }/api/v4.0/iink/offscreen?applicationKey=${ this.serverConfiguration.applicationKey }`
+    this.#logger.info("constructor", { config })
+    this.config = new OIRecognizerConfiguration(config)
+    const scheme = (this.config.server.scheme === "https") ? "wss" : "ws"
+    this.url = `${ scheme }://${ this.config.server.host }/api/v4.0/iink/offscreen?applicationKey=${ this.config.server.applicationKey }`
 
     this.event = event || new RecognizerEvent()
     this.initialized = new DeferredPromise<void>()
@@ -228,7 +225,7 @@ export class OIRecognizer
   {
     this.#send({
       type: "hmac",
-      hmac: await computeHmac(hmacChallengeMessage.hmacChallenge, this.serverConfiguration.applicationKey, this.serverConfiguration.hmacKey)
+      hmac: await computeHmac(hmacChallengeMessage.hmacChallenge, this.config.server.applicationKey, this.config.server.hmacKey)
     })
   }
 
@@ -236,12 +233,12 @@ export class OIRecognizer
   {
     this.pingWorker = new PingWorker()
     this.pingWorker.postMessage({
-      pingDelay: this.serverConfiguration.websocket.pingDelay,
+      pingDelay: this.config.server.websocket.pingDelay,
     })
     this.pingWorker.onmessage = () =>
     {
       if (this.socket.readyState <= 1) {
-        if (this.pingCount < this.serverConfiguration.websocket.maxPingLostCount) {
+        if (this.pingCount < this.config.server.websocket.maxPingLostCount) {
           this.send({ type: "ping" })
         }
         else {
@@ -261,7 +258,7 @@ export class OIRecognizer
       iinkSessionId: this.sessionId,
       scaleX: pixelTomm,
       scaleY: pixelTomm,
-      configuration: this.recognitionConfiguration
+      configuration: this.config.recognition
     })
   }
 
@@ -275,7 +272,7 @@ export class OIRecognizer
       this.#send({ type: "openContentPart", id: this.currentPartId })
     }
     else {
-      this.#send({ type: "newContentPart", contentType: this.recognitionConfiguration.type, mimeTypes: this.mimeTypes })
+      this.#send({ type: "newContentPart", contentType: "Raw Content", mimeTypes: this.mimeTypes })
     }
   }
 
@@ -303,7 +300,7 @@ export class OIRecognizer
     this.event.emitContentChanged({
       canRedo: contentChangeMessage.canRedo,
       canUndo: contentChangeMessage.canRedo,
-    } as TUndoRedoContext)
+    } as THistoryContext)
   }
 
   protected manageExportMessage(exportMessage: TOIMessageEventExport): void
@@ -417,15 +414,10 @@ export class OIRecognizer
     }
   }
 
-  async newSession(serverConfiguration?: TServerConfiguration, recognitionConfiguration?: TRecognitionConfiguration): Promise<void>
+  async newSession(config: PartialDeep<TOIRecognizerConfiguration>): Promise<void>
   {
     await this.close(1000, "new-session")
-    if (serverConfiguration) {
-      this.serverConfiguration = serverConfiguration
-    }
-    if (recognitionConfiguration) {
-      this.recognitionConfiguration = recognitionConfiguration
-    }
+    this.config = mergeDeep({}, this.config, config)
     this.sessionId = undefined
     this.currentPartId = undefined
     await this.init()
@@ -446,7 +438,7 @@ export class OIRecognizer
     this.socket.addEventListener("close", this.closeCallback.bind(this))
     this.socket.addEventListener("message", this.messageCallback.bind(this))
     await this.initialized.promise
-    if (this.serverConfiguration.websocket.pingEnabled) {
+    if (this.config.server.websocket.pingEnabled) {
       this.pingCount = 0
       this.initPing()
     }
@@ -467,9 +459,9 @@ export class OIRecognizer
         return Promise.resolve()
       case this.socket.CLOSING:
       case this.socket.CLOSED:
-        if (this.serverConfiguration.websocket.autoReconnect) {
+        if (this.config.server.websocket.autoReconnect) {
           this.reconnectionCount++
-          if (this.serverConfiguration.websocket.maxRetryCount > this.reconnectionCount) {
+          if (this.config.server.websocket.maxRetryCount > this.reconnectionCount) {
             await this.init()
             await this.waitForIdle()
             return this.#send(message)

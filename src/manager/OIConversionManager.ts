@@ -1,5 +1,5 @@
-import { OIBehaviors } from "../behaviors"
-import { LoggerManager, LoggerClass } from "../logger"
+import { EditorOffscreen } from "../editor"
+import { LoggerManager, LoggerCategory } from "../logger"
 import
 {
   OIModel,
@@ -50,27 +50,27 @@ import { computeAngleAxeRadian, computeAverage, convertBoundingBoxMillimeterToPi
  */
 export class OIConversionManager
 {
-  #logger = LoggerManager.getLogger(LoggerClass.CONVERTER)
-  behaviors: OIBehaviors
-  fontSize?: number
-  fontWeight: "normal" | "bold" | "auto"
+  #logger = LoggerManager.getLogger(LoggerCategory.CONVERTER)
+  editor: EditorOffscreen
 
-  constructor(behaviors: OIBehaviors, fontStyle?: { size?: number | undefined, weight?: ("bold" | "normal" | "auto") | undefined })
+  constructor(editor: EditorOffscreen)
   {
     this.#logger.info("constructor")
-    this.behaviors = behaviors
-    this.fontSize = fontStyle?.size
-    this.fontWeight = fontStyle?.weight || "auto"
+    this.editor = editor
+  }
+
+  get configuration(): { size: number | "auto", weight: "bold" | "normal" | "auto" } {
+    return this.editor.configuration.fontStyle
   }
 
   get model(): OIModel
   {
-    return this.behaviors.model
+    return this.editor.model
   }
 
   get rowHeight(): number
   {
-    return this.behaviors.configuration.rendering.guides.gap
+    return this.editor.configuration.rendering.guides.gap
   }
 
   protected computeFontSize(chars: TJIIXChar[]): number
@@ -88,7 +88,7 @@ export class OIConversionManager
       x: convertMillimeterToPixel(p.x),
       y: convertMillimeterToPixel(p.y),
     }))
-    let fontWeight = this.fontWeight
+    let fontWeight = this.configuration.weight
     if (fontWeight === "auto") {
       fontWeight = (strokes[0].style.width || 1) > 2 ? "bold" : "normal"
     }
@@ -104,17 +104,17 @@ export class OIConversionManager
     }
   }
 
-  buildText(word: TJIIXWord, chars: TJIIXChar[], strokes: OIStroke[], fontSize?: number): OIText
+  buildText(word: TJIIXWord, chars: TJIIXChar[], strokes: OIStroke[], size: number | "auto"): OIText
   {
     const boundingBox = Box.createFromBoxes([convertBoundingBoxMillimeterToPixel(word["bounding-box"])])
     const charSymbols: TOISymbolChar[] = []
-    fontSize = fontSize || this.computeFontSize(chars)
+    const charFontSize = size === "auto" ? this.computeFontSize(chars) : size
 
     chars.forEach(char =>
     {
       const charStrokes = strokes.filter(s => char.items?.some(i => i["full-id"] === s.id)) as OIStroke[]
       if (charStrokes.length) {
-        charSymbols.push(this.buildChar(char, charStrokes, fontSize!))
+        charSymbols.push(this.buildChar(char, charStrokes, charFontSize))
       }
     })
     const point: TPoint = {
@@ -179,9 +179,13 @@ export class OIConversionManager
 
     const result: { symbol: OIText, strokes: OIStroke[] }[] = []
 
-    let fontSize = this.fontSize
-    if (onlyText && !fontSize) {
-      fontSize = Math.round(this.computeFontSize(jiixChars.filter(c => c.items?.length)) / 2) * 2
+
+    let textFontSize = this.configuration.size
+    if (onlyText && textFontSize === "auto") {
+      textFontSize = Math.round(this.computeFontSize(jiixChars.filter(c => c.items?.length)) / 2) * 2
+    }
+    else if (this.configuration.size !== "auto") {
+      textFontSize = this.configuration.size * this.rowHeight
     }
 
     let isNewLine = false
@@ -191,13 +195,13 @@ export class OIConversionManager
     jiixWords.forEach(word =>
     {
       if (word.label === " ") {
-        currentX += this.behaviors.texter.getSpaceWidth(result.at(-1)?.symbol.chars[0].fontSize || (this.rowHeight / 2))
+        currentX += this.editor.texter.getSpaceWidth(result.at(-1)?.symbol.chars[0].fontSize|| (this.rowHeight / 2))
         return
       }
       const wordStrokes = strokes.filter(s => word.items?.some(i => i["full-id"] === s.id)) as OIStroke[]
       if (wordStrokes.length) {
         const chars = jiixChars.slice(word["first-char"] as number, (word["last-char"] || 0) + 1)
-        const wordSymbol = this.buildText(word, chars, wordStrokes, fontSize)
+        const wordSymbol = this.buildText(word, chars, wordStrokes, textFontSize)
 
         if (onlyText) {
           if (isNewLine) {
@@ -215,7 +219,7 @@ export class OIConversionManager
           wordSymbol.point.y = this.model.roundToLineGuide(currentY)
         }
 
-        this.behaviors.texter.setBounds(wordSymbol)
+        this.editor.texter.setBounds(wordSymbol)
         currentX += wordSymbol.bounds.width
         result.push({
           symbol: wordSymbol,
@@ -442,12 +446,12 @@ export class OIConversionManager
   {
     this.#logger.info("convert")
     if (!this.model.exports?.["application/vnd.myscript.jiix"]) {
-      await this.behaviors.export(["application/vnd.myscript.jiix"])
+      await this.editor.export(["application/vnd.myscript.jiix"])
     }
-    this.behaviors.selector.removeSelectedGroup()
+    this.editor.selector.removeSelectedGroup()
     const jiix = this.model.exports?.["application/vnd.myscript.jiix"] as TJIIXExport
     if (jiix?.elements?.length) {
-      const strokesToConvert = this.behaviors.extractStrokesFromSymbols(symbols.length ? symbols : this.model.symbols)
+      const strokesToConvert = this.editor.extractStrokesFromSymbols(symbols.length ? symbols : this.model.symbols)
 
       const onlyText = !jiix.elements?.some(e => e.type !== "Text")
       const conversionResults: { symbol: TOISymbol, strokes: OIStroke[] }[] = []
@@ -481,9 +485,9 @@ export class OIConversionManager
         }
       })
 
-      this.behaviors.addSymbols(conversionResults.map(cs => cs.symbol), false)
-      this.behaviors.removeSymbols(conversionResults.flatMap(cs => cs.strokes.map(s => s.id)), false)
-      this.behaviors.history.push(this.model, { added: conversionResults.map(c => c.symbol), erased: conversionResults.flatMap(cs => cs.strokes) })
+      this.editor.addSymbols(conversionResults.map(cs => cs.symbol), false)
+      this.editor.removeSymbols(conversionResults.flatMap(cs => cs.strokes.map(s => s.id)), false)
+      this.editor.history.push(this.model, { added: conversionResults.map(c => c.symbol), erased: conversionResults.flatMap(cs => cs.strokes) })
     }
   }
 }

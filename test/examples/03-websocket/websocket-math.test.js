@@ -5,11 +5,11 @@ import {
   waitForExportedEvent,
   getEditorExportsType,
   getEditorConfiguration,
-  setEditorConfiguration,
   getEditorConverts,
   getEditorExports,
   waitForConvertedEvent,
-  callEditorIdle
+  callEditorIdle,
+  loadEditor
 } from "../helper"
 
 import one from "../__dataset__/1"
@@ -44,9 +44,18 @@ test.describe("Websocket Math", function () {
 
   test("should only export jiix", async ({ page }) => {
     const config = await getEditorConfiguration(page)
-    config.recognition.math.mimeTypes = ["application/vnd.myscript.jiix"]
-    await setEditorConfiguration(page, config)
-    await waitForEditorInit(page)
+    const options = {
+        configuration: {
+          server: config.server,
+          recognition: {
+            type: "MATH",
+            math: {
+              mimeTypes: ["application/vnd.myscript.jiix"]
+            }
+          }
+        }
+      }
+    await loadEditor(page, "WEBSOCKET", options)
 
     await Promise.all([
       waitForExportedEvent(page),
@@ -62,9 +71,18 @@ test.describe("Websocket Math", function () {
 
   test("should only export mathml+xml", async ({ page }) => {
     const config = await getEditorConfiguration(page)
-    config.recognition.math.mimeTypes = ["application/mathml+xml"]
-    await setEditorConfiguration(page, config)
-    await waitForEditorInit(page)
+    const options = {
+      configuration: {
+        server: config.server,
+        recognition: {
+          type: "MATH",
+          math: {
+            mimeTypes: ["application/mathml+xml"]
+          }
+        }
+      }
+    }
+    await loadEditor(page, "WEBSOCKET", options)
 
     await Promise.all([
       waitForExportedEvent(page),
@@ -80,10 +98,23 @@ test.describe("Websocket Math", function () {
 
   test("should export mathml with flavor \"standard\"", async ({ page }) => {
     const config = await getEditorConfiguration(page)
-    config.recognition.math.mimeTypes = ["application/mathml+xml"]
-    config.recognition.export.mathml = { flavor: "standard" }
-    await setEditorConfiguration(page, config)
-    await waitForEditorInit(page)
+    const options = {
+      configuration: {
+        server: config.server,
+        recognition: {
+          type: "MATH",
+          math: {
+            mimeTypes: ["application/mathml+xml"]
+          },
+          export: {
+            mathml: {
+              flavor: "standard"
+            }
+          }
+        }
+      }
+    }
+    await loadEditor(page, "WEBSOCKET", options)
     await writeStrokes(page, fence.strokes)
     await callEditorIdle(page)
     const mathml = await getEditorExportsType(page, "application/mathml+xml")
@@ -92,9 +123,23 @@ test.describe("Websocket Math", function () {
 
   test("should export mathml with flavor \"ms-office\"", async ({ page }) => {
     const config = await getEditorConfiguration(page)
-    config.recognition.math.mimeTypes = ["application/mathml+xml"]
-    config.recognition.export.mathml = { flavor: "ms-office" }
-    await setEditorConfiguration(page, config)
+    const options = {
+      configuration: {
+        server: config.server,
+        recognition: {
+          type: "MATH",
+          math: {
+            mimeTypes: ["application/mathml+xml"]
+          },
+          export: {
+            mathml: {
+              flavor: "ms-office"
+            }
+          }
+        }
+      }
+    }
+    await loadEditor(page, "WEBSOCKET", options)
     await waitForEditorInit(page)
     await writeStrokes(page, fence.strokes)
     await callEditorIdle(page)
@@ -182,12 +227,50 @@ test.describe("Websocket Math", function () {
 
       await test.step("should set undo/redo mode set to \"session\"", async () => {
         const config = await getEditorConfiguration(page)
-        config.recognition.math.mimeTypes = ["application/x-latex"]
-        config.recognition.math["undo-redo"].mode = "session"
-        // 10000 = time to write equation
-        config.recognition.math["session-time"] = 10000
-        await setEditorConfiguration(page, config)
+        const options = {
+          configuration: {
+            server: config.server,
+            recognition: {
+              type: "MATH",
+              math: {
+                "undo-redo": {
+                  mode: "session"
+                },
+                // 10000 = time to write equation
+                "session-time": 10000,
+                mimeTypes: ["application/x-latex"]
+              },
+              export: {
+                mathml: {
+                  flavor: "ms-office"
+                }
+              }
+            }
+          }
+        }
+        await loadEditor(page, "WEBSOCKET", options)
         await waitForEditorInit(page)
+        await page.evaluate(`
+          editor.event.addEventListener("changed", (event) => {
+            undoElement.disabled = !event.detail.canUndo;
+            redoElement.disabled = !event.detail.canRedo;
+            clearElement.disabled = !event.detail.canClear;
+          });
+          editor.event.addEventListener("exported", (evt) => {
+            const exports = evt.detail;
+            if (exports && exports["application/x-latex"]) {
+              convertElement.disabled = false;
+              try {
+                katex.render(cleanLatex(exports["application/x-latex"]), resultElement);
+              } catch (error) {
+                resultElement.innerHTML = '<span>' + cleanLatex(exports['application/x-latex']) + '</span>';
+              }
+            } else {
+              convertElement.disabled = true;
+              resultElement.innerHTML = "";
+            }
+          });
+        `)
       })
 
       await test.step("should write stroke", async () => {
@@ -295,10 +378,42 @@ test.describe("Websocket Math", function () {
 
     test("should convert and not solve sum", async ({ page }) => {
       const config = await getEditorConfiguration(page)
-      config.recognition.math.solver.enable = false
-      await setEditorConfiguration(page, config)
-      await waitForEditorInit(page)
-
+      const options = {
+        configuration: {
+          server: config.server,
+          recognition: {
+            type: "MATH",
+            math: {
+              mimeTypes: ["application/x-latex"],
+              solver: {
+                enable: false
+              }
+            },
+          }
+        }
+      }
+      await loadEditor(page, "WEBSOCKET", options)
+      await page.evaluate(`
+        editor.event.addEventListener("changed", (event) => {
+          undoElement.disabled = !event.detail.canUndo;
+          redoElement.disabled = !event.detail.canRedo;
+          clearElement.disabled = !event.detail.canClear;
+        });
+        editor.event.addEventListener("exported", (evt) => {
+          const exports = evt.detail;
+          if (exports && exports["application/x-latex"]) {
+            convertElement.disabled = false;
+            try {
+              katex.render(cleanLatex(exports["application/x-latex"]), resultElement);
+            } catch (error) {
+              resultElement.innerHTML = '<span>' + cleanLatex(exports['application/x-latex']) + '</span>';
+            }
+          } else {
+            convertElement.disabled = true;
+            resultElement.innerHTML = "";
+          }
+        });
+    `)
       let numStroke = 0
       for (const s of sum.strokes) {
         const [exports] = await Promise.all([

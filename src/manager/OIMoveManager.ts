@@ -1,4 +1,4 @@
-import { OIBehaviors } from "../behaviors"
+import { EditorOffscreen } from "../editor/EditorOffscreen"
 import { OISVGRenderer } from "../renderer"
 
 /**
@@ -6,7 +6,7 @@ import { OISVGRenderer } from "../renderer"
  */
 export class OIMoveManager
 {
-  behaviors: OIBehaviors
+  editor: EditorOffscreen
   origin?: {
     left: number,
     top: number,
@@ -14,14 +14,14 @@ export class OIMoveManager
     y: number
   }
 
-  constructor(behaviors: OIBehaviors)
+  constructor(editor: EditorOffscreen)
   {
-    this.behaviors = behaviors
+    this.editor = editor
   }
 
   get renderer(): OISVGRenderer
   {
-    return this.behaviors.renderer
+    return this.editor.renderer
   }
 
   start(evt: PointerEvent): void

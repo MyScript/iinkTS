@@ -1,33 +1,33 @@
-import { OIBehaviors } from "../behaviors"
-import { LoggerClass, LoggerManager } from "../logger"
+import { LoggerCategory, LoggerManager } from "../logger"
 import { OIModel } from "../model"
 import { OIEraser, TPointer, TSegment } from "../symbol"
 import { OISVGRenderer } from "../renderer"
+import { EditorOffscreen } from "../editor/EditorOffscreen"
 
 /**
  * @group Manager
  */
 export class OIEraseManager
 {
-  #logger = LoggerManager.getLogger(LoggerClass.WRITE)
-  behaviors: OIBehaviors
+  #logger = LoggerManager.getLogger(LoggerCategory.WRITE)
+  editor: EditorOffscreen
 
   currentEraser?: OIEraser
 
-  constructor(behaviors: OIBehaviors)
+  constructor(editor: EditorOffscreen)
   {
     this.#logger.info("constructor")
-    this.behaviors = behaviors
+    this.editor = editor
   }
 
   get model(): OIModel
   {
-    return this.behaviors.model
+    return this.editor.model
   }
 
   get renderer(): OISVGRenderer
   {
-    return this.behaviors.renderer
+    return this.editor.renderer
   }
 
   start(pointer: TPointer): void
@@ -66,6 +66,6 @@ export class OIEraseManager
 
     this.renderer.removeSymbol(this.currentEraser!.id)
     this.currentEraser = undefined
-    this.behaviors.removeSymbols(this.model.symbolsToDelete.map(s => s.id))
+    this.editor.removeSymbols(this.model.symbolsToDelete.map(s => s.id))
   }
 }

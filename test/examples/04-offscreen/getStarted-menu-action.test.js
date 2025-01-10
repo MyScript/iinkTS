@@ -261,11 +261,16 @@ test.describe("Offscreen Get Started Menu Action", () => {
       await page.evaluate("editor.clear()")
       expect(await getEditorSymbols(page)).toHaveLength(0)
 
-      //check the detect gestures is activated
+      await expect(page.locator(`${locator.menu.action.triggerBtn} + .sub-menu-content`)).toBeHidden()
       await page.locator(locator.menu.action.triggerBtn).click()
+      await expect(page.locator(`${locator.menu.action.triggerBtn} + .sub-menu-content`)).toHaveClass(/open/)
+      await expect(page.locator(`${locator.menu.action.triggerBtn} + .sub-menu-content`)).toBeVisible()
 
       //open gestures sub menu
+      await expect(page.locator(`${locator.menu.action.gesture.triggerBtn} + .sub-menu-content`)).toBeHidden()
       await page.locator(locator.menu.action.gesture.triggerBtn).click()
+      await expect(page.locator(`${locator.menu.action.gesture.triggerBtn} + .sub-menu-content`)).toHaveClass(/open/)
+      await expect(page.locator(`${locator.menu.action.gesture.triggerBtn} + .sub-menu-content`)).toBeVisible()
 
       //check the detect gestures checkbox
       await page.locator(locator.menu.action.gesture.detectCheckbox).check()
@@ -387,7 +392,6 @@ test.describe("Offscreen Get Started Menu Action", () => {
       await expect(surroundLocator).toHaveAttribute("y")
       await expect(surroundLocator).toHaveAttribute("height")
       await expect(surroundLocator).toHaveAttribute("width")
-      await expect(surroundLocator).toHaveAttribute("fill", "transparent")
       await expect(surroundLocator).toHaveAttribute("stroke", surrondSym.style.color)
     })
 
@@ -417,7 +421,6 @@ test.describe("Offscreen Get Started Menu Action", () => {
       await expect(surroundLocator).toHaveAttribute("y")
       await expect(surroundLocator).toHaveAttribute("height")
       await expect(surroundLocator).toHaveAttribute("width")
-      await expect(surroundLocator).toHaveAttribute("fill", "transparent")
       await expect(surroundLocator).toHaveAttribute("stroke", surrondSym.style.color)
     })
   })
@@ -458,7 +461,7 @@ test.describe("Offscreen Get Started Menu Action", () => {
         writePointers(page, helloInsert.strokes[1].pointers)
       ])
       // necessary to ensure that recognition is completed
-      await page.evaluate("editor.behaviors.synchronizeStrokesWithJIIX()")
+      await page.evaluate("editor.synchronizeStrokesWithJIIX()")
       const symbols = await getEditorSymbols(page)
       expect(symbols).toHaveLength(2)
       expect(symbols[0]).toEqual(expect.objectContaining({
@@ -509,12 +512,17 @@ test.describe("Offscreen Get Started Menu Action", () => {
 
       //write again and convert
       await writePointers(page, helloInsert.strokes[0].pointers)
-      await page.evaluate("editor.convert()")
-      await callEditorExport(page, "application/vnd.myscript.jiix")
+      await page.evaluate("editor.synchronizeStrokesWithJIIX()")
+      await Promise.all([
+        waitForConvertedEvent(page),
+        page.locator(locator.menu.action.convertBtn).click()
+      ])
 
       //write the insert between the 2 l
-      await writePointers(page, helloInsert.strokes[1].pointers, 0, -20)
-      await callEditorExport(page, "application/vnd.myscript.jiix")
+      await Promise.all([
+        waitForGesturedEvent(page),
+        writePointers(page, helloInsert.strokes[1].pointers, 0, -20)
+      ])
 
       symbols = await page.evaluate("editor.model.symbols")
       expect(symbols).toHaveLength(2)

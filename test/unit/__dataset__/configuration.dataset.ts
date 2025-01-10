@@ -1,9 +1,8 @@
 //@ts-nocheck
-import { PartialDeep, TConfiguration } from "../../../src/iink"
+import { PartialDeep, TEditorOffscreenConfiguration, TWSRecognizerConfiguration } from "../../../src/iink"
 
-export const ConfigurationTextWebsocket: PartialDeep<TConfiguration> = {
+export const WSRecognizerTextConfiguration: TWSRecognizerConfiguration = {
   server: {
-    protocol: 'WEBSOCKET',
     scheme: 'http',
     host: 'test.com',
     applicationKey: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
@@ -29,9 +28,8 @@ export const ConfigurationTextWebsocket: PartialDeep<TConfiguration> = {
   }
 }
 
-export const ConfigurationMathWebsocket: PartialDeep<TConfiguration> = {
+export const ConfigurationMathWebsocket: TWSRecognizerConfiguration = {
   server: {
-    protocol: 'WEBSOCKET',
     scheme: 'http',
     host: 'test.com',
     applicationKey: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
@@ -50,9 +48,8 @@ export const ConfigurationMathWebsocket: PartialDeep<TConfiguration> = {
   }
 }
 
-export const ConfigurationTextRest: PartialDeep<TConfiguration> = {
+export const ConfigurationTextRest: TRestRecognizerConfiguration = {
   server: {
-    protocol: 'REST',
     scheme: 'http',
     host: 'test.com',
     applicationKey: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
@@ -73,9 +70,8 @@ export const ConfigurationTextRest: PartialDeep<TConfiguration> = {
   }
 }
 
-export const ConfigurationDiagramRest: PartialDeep<TConfiguration> = {
+export const ConfigurationDiagramRest: TRestRecognizerConfiguration = {
   server: {
-    protocol: 'REST',
     scheme: 'http',
     host: 'test.com',
     applicationKey: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
@@ -90,9 +86,8 @@ export const ConfigurationDiagramRest: PartialDeep<TConfiguration> = {
   }
 }
 
-export const ConfigurationMathRest: PartialDeep<TConfiguration> = {
+export const ConfigurationMathRest: TRestRecognizerConfiguration = {
   server: {
-    protocol: 'REST',
     scheme: 'http',
     host: 'test.com',
     applicationKey: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
@@ -107,9 +102,8 @@ export const ConfigurationMathRest: PartialDeep<TConfiguration> = {
   }
 }
 
-export const ConfigurationRawContentRest: PartialDeep<TConfiguration> = {
+export const ConfigurationRawContentRest: TRestRecognizerConfiguration = {
   server: {
-    protocol: 'REST',
     scheme: 'http',
     host: 'test.com',
     applicationKey: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
@@ -121,15 +115,13 @@ export const ConfigurationRawContentRest: PartialDeep<TConfiguration> = {
   }
 }
 
-export const AllOverrideConfiguration: PartialDeep<TConfiguration> = {
+export const AllOverrideConfiguration: TRestRecognizerConfiguration = {
   server: {
-    protocol: 'REST',
     scheme: 'http',
     host: 'test.com',
     applicationKey: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
     hmacKey: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
     version: '3.2.0',
-    useWindowLocation: false,
     websocket: {
       pingEnabled: false,
       pingDelay: 42,
@@ -240,7 +232,7 @@ export const AllOverrideConfiguration: PartialDeep<TConfiguration> = {
     timestampFloatPrecision: 27,
     delayLongTouch: 1000
   },
-  rendering: {
+  renderer: {
     minHeight: 42,
     minWidth: 42,
     smartGuide: {
@@ -262,16 +254,13 @@ export const AllOverrideConfiguration: PartialDeep<TConfiguration> = {
   }
 }
 
-export const OffScreenOverrideConfiguration: DeepPartial<TConfiguration> = {
-  offscreen: true,
+export const OffScreenEditorOverrideConfiguration: TEditorOffscreenConfiguration = {
   server: {
-    protocol: 'REST',
     scheme: 'http',
     host: 'test.com',
     applicationKey: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
     hmacKey: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
     version: '2.0.4',
-    useWindowLocation: false,
     websocket: {
       pingEnabled: false,
       pingDelay: 100,
@@ -282,7 +271,6 @@ export const OffScreenOverrideConfiguration: DeepPartial<TConfiguration> = {
     }
   },
   recognition: {
-    type: 'DIAGRAM',
     alwaysConnected: false,
     lang: 'fr_FR',
     gesture: {
@@ -301,58 +289,6 @@ export const OffScreenOverrideConfiguration: DeepPartial<TConfiguration> = {
         }
       },
     },
-    renderer: {
-      debug: {
-        'draw-text-boxes': true,
-        'draw-image-boxes': true
-      }
-    },
-    math: {
-      mimeTypes: ['application/mathml+xml'], // 'application/mathml+xml', 'application/vnd.myscript.jiix',
-      solver: {
-        enable: false,
-        'fractional-part-digits': 4,
-        'decimal-separator': ',',
-        'rounding-mode': 'truncate',
-        'angle-unit': 'rad'
-      },
-      margin: {
-        bottom: 12,
-        left: 12,
-        right: 12,
-        top: 12
-      },
-      eraser: {
-        'erase-precisely': true
-      },
-      'undo-redo': {
-        mode: 'session'
-      }
-    },
-    text: {
-      guides: {
-        enable: false
-      },
-      mimeTypes: ['application/vnd.myscript.jiix'],
-      margin: {
-        top: 21,
-        left: 21,
-        right: 21,
-        bottom: 21
-      },
-      eraser: {
-        'erase-precisely': true
-      }
-    },
-    diagram: {
-      mimeTypes: ['application/vnd.openxmlformats-officedocument.presentationml.presentation'],
-      eraser: {
-        'erase-precisely': true
-      },
-      convert: {
-        "match-text-size": true,
-      },
-    },
     'raw-content': {
       recognition: {
         text: false,
@@ -361,7 +297,7 @@ export const OffScreenOverrideConfiguration: DeepPartial<TConfiguration> = {
       eraser: {
         'erase-precisely': true
       },
-      gestures : ["scratch-out"]
+      gestures: ["scratch-out"]
     }
   },
   grabber: {
@@ -372,16 +308,9 @@ export const OffScreenOverrideConfiguration: DeepPartial<TConfiguration> = {
     xyFloatPrecision: 27,
     timestampFloatPrecision: 27
   },
-  rendering: {
+  renderer: {
     minHeight: 42,
     minWidth: 42,
-    smartGuide: {
-      enable: false,
-      fadeOut: {
-        enable: true,
-        duration: 42
-      }
-    },
     guides: {
       enable: true,
       gap: 27,

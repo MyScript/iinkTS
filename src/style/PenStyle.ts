@@ -1,3 +1,4 @@
+import { PartialDeep } from "../utils"
 import { TStyle } from "./Style"
 
 /**
@@ -6,7 +7,7 @@ import { TStyle } from "./Style"
  * @property {String} -myscript-pen-fill-style=none
  * @property {String} -myscript-pen-fill-color=#FFFFFF00 Color filled inside the area delimited by strokes and primitives
  */
-export type TPenStyle = TStyle & {
+export type TPenStyle = PartialDeep<TStyle> & {
   "-myscript-pen-width"?: number
   "-myscript-pen-fill-style"?: string
   "-myscript-pen-fill-color"?: string
@@ -14,7 +15,7 @@ export type TPenStyle = TStyle & {
 
 /**
  * @group Style
+ * @source
  */
 export const DefaultPenStyle: TPenStyle = {
-
 }

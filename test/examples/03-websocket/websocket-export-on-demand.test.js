@@ -12,17 +12,13 @@ test.describe("Websocket on-demand export", function () {
     await expect(page).toHaveTitle("Websocket on-demand export")
   })
 
-  test("should not export", async ({ page }) => {
+  test("should only export on click", async ({ page }) => {
     await writeStrokes(page, hello.strokes)
     await callEditorIdle(page)
-    const exports = await getEditorExports(page)
-    expect(exports).toBeUndefined()
+    const noExport = await getEditorExports(page)
+    expect(noExport).toBeUndefined()
     await expect(page.locator("#result")).toBeEmpty()
-  })
 
-  test("should export on click", async ({ page }) => {
-    await writeStrokes(page, hello.strokes)
-    await callEditorIdle(page)
     await page.click("#export")
     await callEditorIdle(page)
     const exports = await getEditorExports(page)

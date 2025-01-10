@@ -11,23 +11,23 @@ import debugIcon from "../assets/svg/wolf.svg"
 import downloadIcon from "../assets/svg/download.svg"
 import uploadIcon from "../assets/svg/upload.svg"
 import { EditorTool, EditorWriteTool } from "../Constants"
-import { OIBehaviors } from "../behaviors"
-import { LoggerClass, LoggerManager } from "../logger"
+import { LoggerCategory, LoggerManager } from "../logger"
 import { OIModel } from "../model"
 import { OIMenu, TMenuItemBoolean, TMenuItemButton, TMenuItemButtonList, TMenuItemSelect } from "./OIMenu"
 import { TOISymbol } from "../symbol"
 import { InsertAction, StrikeThroughAction, SurroundAction } from "../gesture"
 import { OIMenuSub, TSubMenuParam } from "./OIMenuSub"
 import { getAvailableLanguageList, PartialDeep } from "../utils"
+import { EditorOffscreen } from "../editor"
 
 /**
  * @group Menu
  */
 export class OIMenuAction extends OIMenu
 {
-  #logger = LoggerManager.getLogger(LoggerClass.MENU)
+  #logger = LoggerManager.getLogger(LoggerCategory.MENU)
 
-  behaviors: OIBehaviors
+  editor: EditorOffscreen
   id: string
   wrapper?: HTMLElement
   menuLanguage!: OIMenuSub
@@ -43,21 +43,21 @@ export class OIMenuAction extends OIMenu
     { label: "XL", value: "150" },
   ]
 
-  constructor(behaviors: OIBehaviors, id = "ms-menu-action")
+  constructor(editor: EditorOffscreen, id = "ms-menu-action")
   {
     super()
     this.id = id
-    this.behaviors = behaviors
+    this.editor = editor
   }
 
   get model(): OIModel
   {
-    return this.behaviors.model
+    return this.editor.model
   }
 
   get isMobile(): boolean
   {
-    return this.behaviors.renderer.parent.clientWidth < 700
+    return this.editor.renderer.parent.clientWidth < 700
   }
 
   protected createMenuClear(): HTMLElement
@@ -69,7 +69,7 @@ export class OIMenuAction extends OIMenu
     this.menuClear.addEventListener("pointerup", () =>
     {
       this.#logger.info(`${ this.id }.clear`)
-      this.behaviors.clear()
+      this.editor.clear()
     })
     return this.menuClear
   }
@@ -84,13 +84,13 @@ export class OIMenuAction extends OIMenu
     const select = document.createElement("select")
     select.classList.add("select-language")
     select.id = `${ this.id }-language`
-    getAvailableLanguageList(this.behaviors.configuration)
+    getAvailableLanguageList(this.editor.configuration)
       .then(json =>
       {
         const languages = json.result as { [key: string]: string }
         Object.keys(languages).forEach(key =>
         {
-          const selected = key === this.behaviors.configuration.recognition.lang
+          const selected = key === this.editor.configuration.recognition.lang
           const opt = new Option(languages[key], key, selected, selected)
           select.appendChild(opt)
         })
@@ -99,7 +99,7 @@ export class OIMenuAction extends OIMenu
     {
       this.#logger.info(`${ this.id }.selectLanguage`)
       const value = (e.target as HTMLInputElement).value
-      this.behaviors.changeLanguage(value)
+      this.editor.changeLanguage(value)
     })
     const params: TSubMenuParam = {
       trigger: triggerBtn,
@@ -119,7 +119,7 @@ export class OIMenuAction extends OIMenu
     this.menuUndo.addEventListener("pointerup", async () =>
     {
       this.#logger.info(`${ this.id }.undo`)
-      await this.behaviors.undo()
+      await this.editor.undo()
     })
     return this.menuUndo
   }
@@ -133,7 +133,7 @@ export class OIMenuAction extends OIMenu
     this.menuRedo.addEventListener("pointerup", async () =>
     {
       this.#logger.info(`${ this.id }.redo`)
-      await this.behaviors.redo()
+      await this.editor.redo()
     })
     return this.menuRedo
   }
@@ -147,7 +147,7 @@ export class OIMenuAction extends OIMenu
     this.menuConvert.addEventListener("pointerup", () =>
     {
       this.#logger.info(`${ this.id }.convert`)
-      this.behaviors.convert()
+      this.editor.convert()
     })
     return this.menuConvert
   }
@@ -181,13 +181,13 @@ export class OIMenuAction extends OIMenu
         type: "checkbox",
         id: `${ this.id }-gesture-detect`,
         label: "Detect gesture",
-        initValue: this.behaviors.writer.detectGesture,
+        initValue: this.editor.writer.detectGesture,
         callback: (value) =>
         {
           this.#logger.info(`${ this.id }.gesture-detect`, { value })
-          this.behaviors.writer.detectGesture = value
-          this.behaviors.tool = EditorTool.Write
-          this.behaviors.writer.tool = EditorWriteTool.Pencil
+          this.editor.writer.detectGesture = value
+          this.editor.tool = EditorTool.Write
+          this.editor.writer.tool = EditorWriteTool.Pencil
         }
       },
       {
@@ -195,13 +195,13 @@ export class OIMenuAction extends OIMenu
         id: `${ this.id }-gesture-surround`,
         label: "On surround",
         values: surroundActionValues,
-        initValue: this.behaviors.gesture.surroundAction,
+        initValue: this.editor.gesture.surroundAction,
         callback: (value) =>
         {
           this.#logger.info(`${ this.id }.gesture-surround`, { value })
-          this.behaviors.gesture.surroundAction = value as SurroundAction
-          this.behaviors.tool = EditorTool.Write
-          this.behaviors.writer.tool = EditorWriteTool.Pencil
+          this.editor.gesture.surroundAction = value as SurroundAction
+          this.editor.tool = EditorTool.Write
+          this.editor.writer.tool = EditorWriteTool.Pencil
         }
       },
       {
@@ -209,13 +209,13 @@ export class OIMenuAction extends OIMenu
         id: `${ this.id }-gesture-strikethrough`,
         label: "On strikethrough",
         values: strikeThroughActionValues,
-        initValue: this.behaviors.gesture.strikeThroughAction,
+        initValue: this.editor.gesture.strikeThroughAction,
         callback: (value) =>
         {
           this.#logger.info(`${ this.id }.gesture-strikethrough`, { value })
-          this.behaviors.gesture.strikeThroughAction = value as StrikeThroughAction
-          this.behaviors.tool = EditorTool.Write
-          this.behaviors.writer.tool = EditorWriteTool.Pencil
+          this.editor.gesture.strikeThroughAction = value as StrikeThroughAction
+          this.editor.tool = EditorTool.Write
+          this.editor.writer.tool = EditorWriteTool.Pencil
         }
       },
       {
@@ -223,13 +223,13 @@ export class OIMenuAction extends OIMenu
         id: `${ this.id }-gesture-insert`,
         label: "On insert",
         values: splitActionValues,
-        initValue: this.behaviors.gesture.insertAction,
+        initValue: this.editor.gesture.insertAction,
         callback: (value) =>
         {
           this.#logger.info(`${ this.id }.gesture-InsertAction`, { value })
-          this.behaviors.gesture.insertAction = value as InsertAction
-          this.behaviors.tool = EditorTool.Write
-          this.behaviors.writer.tool = EditorWriteTool.Pencil
+          this.editor.gesture.insertAction = value as InsertAction
+          this.editor.tool = EditorTool.Write
+          this.editor.writer.tool = EditorWriteTool.Pencil
         }
       },
     ]
@@ -261,12 +261,12 @@ export class OIMenuAction extends OIMenu
         type: "checkbox",
         id: `${ this.id }-guide-enable`,
         label: "Show guide",
-        initValue: this.behaviors.configuration.rendering.guides.enable,
+        initValue: this.editor.configuration.rendering.guides.enable,
         callback: (value) =>
         {
           this.#logger.info(`${ this.id }.guide-enable`, { value })
-          this.behaviors.configuration.rendering.guides.enable = value as boolean
-          this.behaviors.renderingConfiguration = this.behaviors.configuration.rendering
+          this.editor.configuration.rendering.guides.enable = value as boolean
+          this.editor.renderingConfiguration = this.editor.configuration.rendering
         }
       },
       {
@@ -278,12 +278,12 @@ export class OIMenuAction extends OIMenu
           { label: "Grid", value: "grid" },
           { label: "Point", value: "point" },
         ],
-        initValue: this.behaviors.configuration.rendering.guides.type,
+        initValue: this.editor.configuration.rendering.guides.type,
         callback: (value) =>
         {
           this.#logger.info(`${ this.id }.guide-type`, { value })
-          this.behaviors.configuration.rendering.guides.type = value as ("line" | "grid" | "point")
-          this.behaviors.renderingConfiguration = this.behaviors.configuration.rendering
+          this.editor.configuration.rendering.guides.type = value as ("line" | "grid" | "point")
+          this.editor.renderingConfiguration = this.editor.configuration.rendering
         }
       },
       {
@@ -291,12 +291,12 @@ export class OIMenuAction extends OIMenu
         id: `${ this.id }-guide-size`,
         label: "Guide style",
         values: this.guideGaps,
-        initValue: this.behaviors.configuration.rendering.guides.gap.toString(),
+        initValue: this.editor.configuration.rendering.guides.gap.toString(),
         callback: (value) =>
         {
           this.#logger.info(`${ this.id }.guide-size`, { value })
-          this.behaviors.configuration.rendering.guides.gap = +value
-          this.behaviors.renderingConfiguration = this.behaviors.configuration.rendering
+          this.editor.configuration.rendering.guides.gap = +value
+          this.editor.renderingConfiguration = this.editor.configuration.rendering
         }
       },
     ]
@@ -328,15 +328,15 @@ export class OIMenuAction extends OIMenu
         type: "checkbox",
         id: `${ this.id }-snap-to-guide`,
         label: "Snap to guide",
-        initValue: this.behaviors.snaps.snapToGrid,
-        callback: (value) => this.behaviors.snaps.snapToGrid = value
+        initValue: this.editor.snaps.configuration.guide,
+        callback: (value) => this.editor.snaps.configuration.guide = value
       },
       {
         type: "checkbox",
         id: `${ this.id }-snap-to-element`,
         label: "Snap to element",
-        initValue: this.behaviors.snaps.snapToElement,
-        callback: (value) => this.behaviors.snaps.snapToElement = value
+        initValue: this.editor.snaps.configuration.symbol,
+        callback: (value) => this.editor.snaps.configuration.symbol = value
       },
       {
         type: "select",
@@ -350,8 +350,8 @@ export class OIMenuAction extends OIMenu
           { label: "90°", value: "90" },
           { label: "180°", value: "180" },
         ],
-        initValue: this.behaviors.snaps.snapAngle.toString(),
-        callback: (angle) => this.behaviors.snaps.snapAngle = +angle
+        initValue: this.editor.snaps.configuration.angle.toString(),
+        callback: (angle) => this.editor.snaps.configuration.angle = +angle
       },
     ]
     menuItems.forEach(i =>
@@ -379,36 +379,36 @@ export class OIMenuAction extends OIMenu
         type: "checkbox",
         id: `${ this.id }-debug-bounding-box`,
         label: "Show bounding box",
-        initValue: this.behaviors.svgDebugger.boundingBoxVisibility,
-        callback: (debug) => this.behaviors.svgDebugger.boundingBoxVisibility = debug
+        initValue: this.editor.svgDebugger.boundingBoxVisibility,
+        callback: (debug) => this.editor.svgDebugger.boundingBoxVisibility = debug
       },
       {
         type: "checkbox",
         id: `${ this.id }-debug-recognition-box`,
         label: "Show recognition box",
-        initValue: this.behaviors.svgDebugger.recognitionBoxVisibility,
-        callback: (debug) => this.behaviors.svgDebugger.recognitionBoxVisibility = debug
+        initValue: this.editor.svgDebugger.recognitionBoxVisibility,
+        callback: (debug) => this.editor.svgDebugger.recognitionBoxVisibility = debug
       },
       {
         type: "checkbox",
         id: `${ this.id }-debug-bounding-item-box`,
         label: "Show recognition item box",
-        initValue: this.behaviors.svgDebugger.recognitionItemBoxVisibility,
-        callback: (debug) => this.behaviors.svgDebugger.recognitionItemBoxVisibility = debug
+        initValue: this.editor.svgDebugger.recognitionItemBoxVisibility,
+        callback: (debug) => this.editor.svgDebugger.recognitionItemBoxVisibility = debug
       },
       {
         type: "checkbox",
         id: `${ this.id }-debug-snap-points`,
         label: "Show snap points",
-        initValue: this.behaviors.svgDebugger.snapPointsVisibility,
-        callback: (debug) => this.behaviors.svgDebugger.snapPointsVisibility = debug
+        initValue: this.editor.svgDebugger.snapPointsVisibility,
+        callback: (debug) => this.editor.svgDebugger.snapPointsVisibility = debug
       },
       {
         type: "checkbox",
         id: `${ this.id }-debug-vertices`,
         label: "Show vertices",
-        initValue: this.behaviors.svgDebugger.verticesVisibility,
-        callback: (debug) => this.behaviors.svgDebugger.verticesVisibility = debug
+        initValue: this.editor.svgDebugger.verticesVisibility,
+        callback: (debug) => this.editor.svgDebugger.verticesVisibility = debug
       },
     ]
     const subMenuWrapper = document.createElement("div")
@@ -440,7 +440,7 @@ export class OIMenuAction extends OIMenu
         label: "json",
         callback: () =>
         {
-          this.behaviors.downloadAsJson()
+          this.editor.downloadAsJson()
         }
       },
       {
@@ -449,7 +449,7 @@ export class OIMenuAction extends OIMenu
         label: "svg",
         callback: () =>
         {
-          this.behaviors.downloadAsSVG()
+          this.editor.downloadAsSVG()
         }
       },
       {
@@ -458,7 +458,7 @@ export class OIMenuAction extends OIMenu
         label: "png",
         callback: () =>
         {
-          this.behaviors.downloadAsPNG()
+          this.editor.downloadAsPNG()
         }
       },
     ]
@@ -523,7 +523,7 @@ export class OIMenuAction extends OIMenu
       if (importInput.files?.length) {
         const fileString = await this.readFileAsText(importInput.files[0])
         const symbols = JSON.parse(fileString) as PartialDeep<TOISymbol>[]
-        await this.behaviors.createSymbols(symbols)
+        await this.editor.createSymbols(symbols)
         importInput.value = ""
         importBtn.disabled = true
       }
@@ -549,7 +549,7 @@ export class OIMenuAction extends OIMenu
 
   render(layer: HTMLElement): void
   {
-    if (this.behaviors.configuration.menu.action.enable) {
+    if (this.editor.configuration.menu.action.enable) {
       const menuTrigger = document.createElement("button")
       menuTrigger.id = this.id
       menuTrigger.classList.add("ms-menu-button", "square")
@@ -586,16 +586,16 @@ export class OIMenuAction extends OIMenu
       this.isMobile ? this.menuLanguage.wrap() : this.menuLanguage.unwrap()
     }
     if (this.menuClear) {
-      this.menuClear.disabled = this.behaviors.history.context.empty
+      this.menuClear.disabled = this.editor.history.context.empty
     }
     if (this.menuUndo) {
-      this.menuUndo.disabled = !this.behaviors.history.context.canUndo
+      this.menuUndo.disabled = !this.editor.history.context.canUndo
     }
     if (this.menuRedo) {
-      this.menuRedo.disabled = !this.behaviors.history.context.canRedo
+      this.menuRedo.disabled = !this.editor.history.context.canRedo
     }
     if (this.menuConvert) {
-      this.menuConvert.disabled = !this.behaviors.extractStrokesFromSymbols(this.model.symbols).length
+      this.menuConvert.disabled = !this.editor.extractStrokesFromSymbols(this.model.symbols).length
     }
   }
 

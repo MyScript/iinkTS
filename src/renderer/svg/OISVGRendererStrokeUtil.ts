@@ -115,9 +115,11 @@ export class OISVGRendererStrokeUtil
 
     const strokeAttrs: { [key: string]: string } = {
       "fill": stroke.style.color || DefaultStyle.color!,
-      "stroke-width": (stroke.style.width || DefaultStyle.width!).toString(),
-      "opacity": (stroke.style.opacity || DefaultStyle.opacity!).toString(),
+      "stroke-width": stroke.style.width.toString(),
       "d": OISVGRendererStrokeUtil.getSVGPath(stroke)
+    }
+    if (stroke.style.opacity) {
+      strokeAttrs.opacity = stroke.style.opacity.toString()
     }
     strokeGroup.append(SVGBuilder.createPath(strokeAttrs))
 

@@ -3,10 +3,10 @@ import {
   waitForEditorInit,
   writeStrokes,
   waitForExportedEvent,
-  setEditorConfiguration,
   getEditorConfiguration,
   getEditorExports,
   getEditorSymbols,
+  loadEditor,
 } from "../helper"
 import one from "../__dataset__/1"
 import equation from "../__dataset__/equation"
@@ -66,8 +66,18 @@ test.describe("Rest Math", () => {
 
     test("should only request application/mathml+xml", async ({ page }) => {
       const configuration = await getEditorConfiguration(page)
-      configuration.recognition.math.mimeTypes = ["application/mathml+xml"]
-      await setEditorConfiguration(page, configuration)
+      const options = {
+        configuration: {
+          server: configuration.server,
+          recognition: {
+            type: "MATH",
+            math: {
+              mimeTypes: ["application/mathml+xml"]
+            }
+          }
+        }
+      }
+      await loadEditor(page, "REST", options)
 
       await Promise.all([
         waitForExportedEvent(page),
@@ -79,11 +89,21 @@ test.describe("Rest Math", () => {
 
     test("should request application/mathml+xml & application/x-latex", async ({ page }) => {
       const configuration = await getEditorConfiguration(page)
-      configuration.recognition.math.mimeTypes = [
-        "application/mathml+xml",
-        "application/x-latex",
-      ]
-      await setEditorConfiguration(page, configuration)
+      const options = {
+        configuration: {
+          server: configuration.server,
+          recognition: {
+            type: "MATH",
+            math: {
+              mimeTypes: [
+                "application/mathml+xml",
+                "application/x-latex",
+              ]
+            }
+          }
+        }
+      }
+      await loadEditor(page, "REST", options)
 
       await Promise.all([
         waitForExportedEvent(page),

@@ -3,12 +3,11 @@ import {
   waitForEditorInit,
   writeStrokes,
   waitForExportedEvent,
-  setEditorConfiguration,
   getEditorConfiguration,
   getEditorExports,
+  loadEditor,
 } from "../helper"
 import h from "../__dataset__/h"
-import { toBeEmpty } from "jest-extended"
 
 test.describe("Rest Text", () => {
 
@@ -66,10 +65,21 @@ test.describe("Rest Text", () => {
 
     test("should only request application/vnd.myscript.jiix", async ({ page }) => {
       const configuration = await getEditorConfiguration(page)
-      configuration.recognition.text.mimeTypes = [
-        "application/vnd.myscript.jiix",
-      ]
-      await setEditorConfiguration(page, configuration)
+      const options = {
+        configuration: {
+          server: configuration.server,
+          recognition: {
+            type: "TEXT",
+            text:  {
+              mimeTypes: [
+                "application/vnd.myscript.jiix",
+              ]
+            }
+          }
+        }
+      }
+      await loadEditor(page, "REST", options)
+
       await Promise.all([
         waitForExportedEvent(page),
         writeStrokes(page, h.strokes),
@@ -80,11 +90,21 @@ test.describe("Rest Text", () => {
 
     test("should request application/vnd.myscript.jiix & text/plain", async ({ page }) => {
       const configuration = await getEditorConfiguration(page)
-      configuration.recognition.text.mimeTypes = [
-        "application/vnd.myscript.jiix",
-        "text/plain",
-      ]
-      await setEditorConfiguration(page, configuration)
+      const options = {
+        configuration: {
+          server: configuration.server,
+          recognition: {
+            type: "TEXT",
+            text:  {
+              mimeTypes: [
+                "application/vnd.myscript.jiix",
+                "text/plain",
+              ]
+            }
+          }
+        }
+      }
+      await loadEditor(page, "REST", options)
       await Promise.all([
         waitForExportedEvent(page),
         writeStrokes(page, h.strokes),

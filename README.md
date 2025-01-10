@@ -32,6 +32,7 @@ It integrates all you need:
 * [Support](#getting-support )
 * [Feedback](#sharing-your-feedback)
 * [Contributing](#contributing)
+* [License](#license)
 
 ## Features
 
@@ -116,16 +117,14 @@ yarn add iink-ts
 ```javascript
   const editorElement = document.getElementById('editor');
 
-  const editor = new iink.Editor(editorElement, {
+  const editor = await iink.Editor.load(editorElement, "REST", /* or WEBSOCKET or OFFSCREEN */
         configuration: {
-            offscreen: true,
             server: {
                 applicationKey: '#YOUR MYSCRIPT DEVELOPER APPLICATION KEY#',
                 hmacKey: '#YOUR MYSCRIPT DEVELOPER HMAC KEY#'
             }
         }
   });
-  editor.initialize();
 ```
 
 6. Your `index.html` file should look like this:
@@ -146,46 +145,14 @@ yarn add iink-ts
         <script>
             const editorElement = document.getElementById('editor');
 
-            const editor = new iink.Editor(editorElement, {
-                configuration: {
-                    server: {
-                        applicationKey: '#YOUR MYSCRIPT DEVELOPER APPLICATION KEY#',
-                        hmacKey: '#YOUR MYSCRIPT DEVELOPER HMAC KEY#'
+            const editor = await iink.Editor.load(editorElement, "REST", /* or WEBSOCKET or OFFSCREEN */
+                    configuration: {
+                        server: {
+                            applicationKey: '#YOUR MYSCRIPT DEVELOPER APPLICATION KEY#',
+                            hmacKey: '#YOUR MYSCRIPT DEVELOPER HMAC KEY#'
+                        }
                     }
-                }
             });
-            editor.initialize();
-        </script>
-    </body>
-</html>
-```
-* In the offscreen case
-```html
-<html>
-    <head>
-        <script src="node_modules/iink-ts/dist/iink.min.js"></script>
-        <style>
-            #editor {
-                width: 100%;
-                height: 100%;
-            }
-        </style>
-    </head>
-    <body>
-        <div id="editor"></div>
-        <script>
-            const editorElement = document.getElementById('editor');
-
-            const editor = new iink.Editor(editorElement, {
-                configuration: {
-                    offscreen: true,
-                    server: {
-                        applicationKey: '#YOUR MYSCRIPT DEVELOPER APPLICATION KEY#',
-                        hmacKey: '#YOUR MYSCRIPT DEVELOPER HMAC KEY#'
-                    }
-                }
-            });
-            editor.initialize();
         </script>
     </body>
 </html>
@@ -204,8 +171,6 @@ You can find a complete documentation with the following sections on our Develop
 * **Conversion**: [how to convert your handwritten content](https://developer.myscript.com/docs/interactive-ink/latest/web/iinkts/conversion/),
 * **Import and Export**: [how to import and export your content](https://developer.myscript.com/docs/interactive-ink/latest/web/iinkts/import-and-export/),
 * **Styling**: [how to style content](https://developer.myscript.com/docs/interactive-ink/latest/web/iinkts/styling/).
-
-As well as a global [Configuration page](https://developer.myscript.com/docs/interactive-ink/latest/reference/web/configuration/).
 
 We also provide a complete [API Reference](https://myscript.github.io/iinkTS/docs/).
 

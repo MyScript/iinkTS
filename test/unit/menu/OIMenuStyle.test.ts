@@ -1,5 +1,5 @@
 import { LeftClickEventMock } from "../__mocks__/EventMock"
-import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
+import { EditorOffscreenMock } from "../__mocks__/EditorOffscreenMock"
 import { buildOICircle, buildOIStroke } from "../helpers"
 import { EditorTool, OIMenuStyle, EditorWriteTool } from "../../../src/iink"
 
@@ -7,16 +7,16 @@ describe("OIMenuStyle.ts", () =>
 {
   test("should create", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    const menu = new OIMenuStyle(behaviors)
+    const editor = new EditorOffscreenMock()
+    const menu = new OIMenuStyle(editor)
     expect(menu).toBeDefined()
   })
 
   describe("render", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    behaviors.init()
-    const menu = new OIMenuStyle(behaviors)
+    const editor = new EditorOffscreenMock()
+    editor.init()
+    const menu = new OIMenuStyle(editor)
     describe("isMobile", () =>
     {
       const layer = document.createElement("div")
@@ -145,62 +145,60 @@ describe("OIMenuStyle.ts", () =>
       pressure: 1
     })
     const layer = document.createElement("div")
-    const behaviors = new OIBehaviorsMock()
-    behaviors.selector.resetSelectedGroup = jest.fn()
+    const editor = new EditorOffscreenMock()
+    editor.selector.resetSelectedGroup = jest.fn()
 
-    behaviors.init()
-    const menu = new OIMenuStyle(behaviors)
+    editor.init()
+    const menu = new OIMenuStyle(editor)
     menu.render(layer)
 
     beforeEach(() =>
     {
-      behaviors.model.clear()
+      editor.model.clear()
     })
 
     test("should update style color", () =>
     {
       const btn = layer.querySelector("#ms-menu-style-color-808080-btn") as HTMLButtonElement
       btn.dispatchEvent(pointerUpEvt)
-      expect(behaviors.setPenStyle).toHaveBeenCalledTimes(1)
-      expect(behaviors.setPenStyle).toHaveBeenCalledWith({ color: "#808080" })
+      expect(editor.penStyle.color).toEqual("#808080")
     })
     test("should update color of selected symbols", () =>
     {
       const stroke = buildOIStroke()
       stroke.selected = true
-      behaviors.model.addSymbol(stroke)
+      editor.model.addSymbol(stroke)
       const btn = layer.querySelector("#ms-menu-style-color-808080-btn") as HTMLButtonElement
       btn.dispatchEvent(pointerUpEvt)
-      expect(behaviors.updateSymbolsStyle).toHaveBeenCalledTimes(1)
-      expect(behaviors.updateSymbolsStyle).toHaveBeenCalledWith([stroke.id], { color: "#808080" })
+      expect(editor.updateSymbolsStyle).toHaveBeenCalledTimes(1)
+      expect(editor.updateSymbolsStyle).toHaveBeenCalledWith([stroke.id], { color: "#808080" })
     })
     test("should update fill of selected symbols", () =>
     {
       const stroke = buildOIStroke()
       stroke.selected = true
-      behaviors.model.addSymbol(stroke)
+      editor.model.addSymbol(stroke)
       const btn = layer.querySelector("#ms-menu-style-fill-ffff00-btn") as HTMLButtonElement
       btn.dispatchEvent(pointerUpEvt)
-      expect(behaviors.updateSymbolsStyle).toHaveBeenCalledTimes(1)
-      expect(behaviors.updateSymbolsStyle).toHaveBeenCalledWith([stroke.id], { fill: "#ffff00" })
+      expect(editor.updateSymbolsStyle).toHaveBeenCalledTimes(1)
+      expect(editor.updateSymbolsStyle).toHaveBeenCalledWith([stroke.id], { fill: "#ffff00" })
     })
     test("should update style thickness", () =>
     {
       const btn = layer.querySelector("#ms-menu-style-thickness-XL-btn") as HTMLButtonElement
       btn.dispatchEvent(pointerUpEvt)
-      expect(behaviors.setPenStyle).toHaveBeenCalledTimes(1)
-      expect(behaviors.setPenStyle).toHaveBeenCalledWith({ width: 8 })
+      expect(editor.penStyle.width).toEqual(8)
     })
     test("should update thickness of selected symbols", () =>
     {
       const stroke = buildOIStroke()
       stroke.selected = true
-      behaviors.model.addSymbol(stroke)
+      editor.model.addSymbol(stroke)
       const btn = layer.querySelector("#ms-menu-style-thickness-XL-btn") as HTMLButtonElement
       btn.dispatchEvent(pointerUpEvt)
-      expect(behaviors.updateSymbolsStyle).toHaveBeenCalledTimes(1)
-      expect(behaviors.updateSymbolsStyle).toHaveBeenCalledWith([stroke.id], { width: 8 })
-      expect(behaviors.selector.resetSelectedGroup).toHaveBeenNthCalledWith(1, [stroke])
+      expect(editor.updateSymbolsStyle).toHaveBeenCalledTimes(1)
+      expect(editor.updateSymbolsStyle).toHaveBeenCalledWith([stroke.id], { width: 8 })
+      expect(editor.selector.resetSelectedGroup).toHaveBeenNthCalledWith(1, [stroke])
     })
     test("should update style opacity", () =>
     {
@@ -208,35 +206,34 @@ describe("OIMenuStyle.ts", () =>
       input.value = "42"
       //@ts-ignore
       input.dispatchEvent(new Event('input', { target: input }))
-      expect(behaviors.setPenStyle).toHaveBeenCalledTimes(1)
-      expect(behaviors.setPenStyle).toHaveBeenCalledWith({ opacity: 0.42 })
+      expect(editor.penStyle.opacity).toEqual(0.42)
     })
     test("should update opacity of selected symbols", () =>
     {
       const stroke = buildOIStroke()
       stroke.selected = true
-      behaviors.model.addSymbol(stroke)
+      editor.model.addSymbol(stroke)
       const input = layer.querySelector("#ms-menu-style-opacity-input") as HTMLInputElement
       input.value = "42"
       input.dispatchEvent(new Event('input'))
-      expect(behaviors.updateSymbolsStyle).toHaveBeenCalledTimes(1)
-      expect(behaviors.updateSymbolsStyle).toHaveBeenCalledWith([stroke.id], { opacity: 0.42 })
+      expect(editor.updateSymbolsStyle).toHaveBeenCalledTimes(1)
+      expect(editor.updateSymbolsStyle).toHaveBeenCalledWith([stroke.id], { opacity: 0.42 })
     })
   })
 
   describe("update", () =>
   {
     const layer = document.createElement("div")
-    const behaviors = new OIBehaviorsMock()
-    behaviors.init()
-    const menu = new OIMenuStyle(behaviors)
+    const editor = new EditorOffscreenMock()
+    editor.init()
+    const menu = new OIMenuStyle(editor)
     menu.render(layer)
 
     describe("when tool == write with pencil", () =>
     {
       beforeAll(() => {
-        behaviors.tool = EditorTool.Write
-        behaviors.writer.tool = EditorWriteTool.Pencil
+        editor.tool = EditorTool.Write
+        editor.writer.tool = EditorWriteTool.Pencil
         menu.update()
       })
       test("should display menu color", () =>
@@ -264,8 +261,8 @@ describe("OIMenuStyle.ts", () =>
     describe("when tool == write with circle", () =>
     {
       beforeAll(() => {
-        behaviors.tool = EditorTool.Write
-        behaviors.writer.tool = EditorWriteTool.Circle
+        editor.tool = EditorTool.Write
+        editor.writer.tool = EditorWriteTool.Circle
         menu.update()
       })
       test("should display menu color", () =>
@@ -293,7 +290,7 @@ describe("OIMenuStyle.ts", () =>
     describe("when tool == select", () =>
     {
       beforeAll(() => {
-        behaviors.tool = EditorTool.Select
+        editor.tool = EditorTool.Select
         menu.update()
       })
       test("should display menu color", () =>
@@ -321,10 +318,10 @@ describe("OIMenuStyle.ts", () =>
     describe("when tool == select and shape selected", () =>
     {
       beforeAll(() => {
-        behaviors.tool = EditorTool.Select
+        editor.tool = EditorTool.Select
         const shape = buildOICircle()
         shape.selected = true
-        behaviors.model.addSymbol(shape)
+        editor.model.addSymbol(shape)
         menu.update()
       })
       test("should display menu color", () =>
@@ -352,7 +349,7 @@ describe("OIMenuStyle.ts", () =>
     describe("when tool == select and shape selected", () =>
     {
       beforeAll(() => {
-        behaviors.tool = EditorTool.Move
+        editor.tool = EditorTool.Move
         menu.update()
       })
       test("should hide", () =>
@@ -366,9 +363,9 @@ describe("OIMenuStyle.ts", () =>
   describe("show/hide", () =>
   {
     const layer = document.createElement("div")
-    const behaviors = new OIBehaviorsMock()
-    behaviors.init()
-    const menu = new OIMenuStyle(behaviors)
+    const editor = new EditorOffscreenMock()
+    editor.init()
+    const menu = new OIMenuStyle(editor)
     menu.render(layer)
     test("should hide", () =>
     {
@@ -387,9 +384,9 @@ describe("OIMenuStyle.ts", () =>
   describe("destroy", () =>
   {
     const layer = document.createElement("div")
-    const behaviors = new OIBehaviorsMock()
-    behaviors.init()
-    const menu = new OIMenuStyle(behaviors)
+    const editor = new EditorOffscreenMock()
+    editor.init()
+    const menu = new OIMenuStyle(editor)
     menu.render(layer)
     test("should remove elements", () =>
     {

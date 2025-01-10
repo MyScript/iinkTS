@@ -1,11 +1,11 @@
-import { getInitialUndoRedoContext } from "../../../src/iink"
+import { getInitialHistoryContext } from "../../../src/iink"
 
-describe("UndoRedoContext.ts", () =>
+describe("HistoryContext.ts", () =>
 {
 
   test("should be initialize", () =>
   {
-    const context = getInitialUndoRedoContext()
+    const context = getInitialHistoryContext()
     expect(context.stackIndex).toStrictEqual(0)
     expect(context.possibleUndoCount).toStrictEqual(0)
     expect(context.canUndo).toStrictEqual(false)

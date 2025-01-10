@@ -5,14 +5,32 @@ import {
   waitForExportedEvent,
   getEditorExportsType,
   getEditorConfiguration,
-  setEditorConfiguration,
   callEditorIdle,
   getEditorExports,
+  loadEditor,
 } from '../helper'
 
 import TextNavActions from '../_partials/text-nav-actions'
 import h from '../__dataset__/h'
 import helloStrike from '../__dataset__/helloStrike'
+
+const createNewEditor = async (page, options) => {
+  await loadEditor(page, 'WEBSOCKET', options)
+
+  await waitForEditorInit(page)
+  await page.evaluate(`
+    editor.event.addEventListener("changed", (event) => {
+      undoElement.disabled = !event.detail.canUndo;
+      redoElement.disabled = !event.detail.canRedo;
+      clearElement.disabled = !event.detail.canClear;
+    });
+
+    editor.event.addEventListener("exported", (event) => {
+      resultElement.innerHTML = event.detail && event.detail["application/vnd.myscript.jiix"] ? event.detail["application/vnd.myscript.jiix"].label : "";
+    });
+  `)
+  await callEditorIdle(page)
+}
 
 test.describe('Websocket Text', () => {
   test.beforeEach(async ({ page }) => {
@@ -42,116 +60,135 @@ test.describe('Websocket Text', () => {
 
   test.describe('Gesture', () => {
     test('should apply gesture', async ({ page }) => {
-      const exportPormise = waitForExportedEvent(page)
       const configuration = await getEditorConfiguration(page)
-      configuration.recognition.gesture.enable = true
-      await setEditorConfiguration(page, configuration)
-      await Promise.all([
-        exportPormise,
-        waitForEditorInit(page)
-      ])
+      const options = {
+        configuration: {
+          server: configuration.server,
+          recognition: {
+            type: "TEXT",
+            gesture: {
+              enable: true
+            },
+          }
+        }
+      }
+      await createNewEditor(page, options)
 
-      const [firstModelExports] = await Promise.all([
+      await Promise.all([
         waitForExportedEvent(page),
         writeStrokes(page, [helloStrike.strokes[0]])
       ])
-      const firstJiixExport = firstModelExports['application/vnd.myscript.jiix']
-      expect(firstJiixExport.label).toEqual(helloStrike.exports['text/plain'][0])
+      await expect(page.locator("#result")).toHaveText(helloStrike.exports["text/plain"].at(0))
 
-      const [secondModelExports] = await Promise.all([
+      await Promise.all([
         waitForExportedEvent(page),
         writeStrokes(page, [helloStrike.strokes[1]])
       ])
-      const secondJiixExport = secondModelExports['application/vnd.myscript.jiix']
-      expect(secondJiixExport.label).toEqual('')
+      await expect(page.locator("#result")).toHaveText(helloStrike.exports["text/plain"].at(1))
     })
 
     test('should not apply gesture', async ({ page }) => {
-      const exportPormise = waitForExportedEvent(page)
       const configuration = await getEditorConfiguration(page)
-      configuration.recognition.gesture.enable = false
-      await setEditorConfiguration(page, configuration)
-      await Promise.all([
-        exportPormise,
-        waitForEditorInit(page)
-      ])
+      const options = {
+        configuration: {
+          server: configuration.server,
+          recognition: {
+            type: 'TEXT',
+            gesture: {
+              enable: false
+            }
+          }
+        }
+      }
+      await createNewEditor(page, options)
 
-      const [firstModelExports] = await Promise.all([
+      await Promise.all([
         waitForExportedEvent(page),
         writeStrokes(page, [helloStrike.strokes[0]])
       ])
-      const firstJiixExport = firstModelExports['application/vnd.myscript.jiix']
-      expect(firstJiixExport.label).toEqual(helloStrike.exports['text/plain'][0])
+      await expect(page.locator("#result")).toHaveText(helloStrike.exports["text/plain"].at(0))
 
-      const [secondModelExports] = await Promise.all([
+      await Promise.all([
         waitForExportedEvent(page),
         writeStrokes(page, [helloStrike.strokes[1]])
       ])
-      const secondJiixExport = secondModelExports['application/vnd.myscript.jiix']
-      expect(secondJiixExport.label).not.toEqual('')
+      await expect(page.locator("#result")).not.toHaveText(helloStrike.exports["text/plain"].at(1))
     })
 
     test('should work after gesture then undo-redo', async ({ page }) => {
-      const exportPormise = waitForExportedEvent(page)
       const configuration = await getEditorConfiguration(page)
-      configuration.recognition.gesture.enable = true
-      await setEditorConfiguration(page, configuration)
-      await Promise.all([
-        exportPormise,
-        waitForEditorInit(page)
-      ])
+      const options = {
+        configuration: {
+          server: configuration.server,
+          recognition: {
+            type: 'TEXT',
+            gesture: {
+              enable: true
+            }
+          }
+        }
+      }
+      await createNewEditor(page, options)
 
-      const [firstModelExports] = await Promise.all([
+      await Promise.all([
         waitForExportedEvent(page),
         writeStrokes(page, [helloStrike.strokes[0]])
       ])
-      const firstJiixExport = firstModelExports['application/vnd.myscript.jiix']
-      expect(firstJiixExport.label).toEqual(
-        helloStrike.exports['text/plain'][0]
-      )
+      await expect(page.locator("#result")).toHaveText(helloStrike.exports["text/plain"].at(0))
 
-      await callEditorIdle(page)
-      const [secondModelExports] = await Promise.all([
+      await Promise.all([
         waitForExportedEvent(page),
         writeStrokes(page, [helloStrike.strokes[1]])
       ])
-      const secondJiixExport = secondModelExports['application/vnd.myscript.jiix']
-      expect(secondJiixExport.label).toEqual('')
+      await expect(page.locator("#result")).toHaveText(helloStrike.exports["text/plain"].at(1))
 
-      await callEditorIdle(page)
-      const [undoModelExport] = await Promise.all([
+      await Promise.all([
         waitForExportedEvent(page),
         page.click('#undo')
       ])
-      const thirdJiixExport = undoModelExport['application/vnd.myscript.jiix']
-      expect(thirdJiixExport.label).toEqual(helloStrike.exports['text/plain'][0])
+      await expect(page.locator("#result")).toHaveText(helloStrike.exports["text/plain"].at(0))
 
-      await callEditorIdle(page)
-      const [redoModelExport] = await Promise.all([
+      await Promise.all([
         waitForExportedEvent(page),
         page.click('#redo')
       ])
-      const undoRedoJiixExport = redoModelExport['application/vnd.myscript.jiix']
-      expect(undoRedoJiixExport.label).toEqual('')
+      await expect(page.locator("#result")).toHaveText(helloStrike.exports["text/plain"].at(1))
     })
   })
 
-  test('SmartGuide', async ({ page, browserName }) => {
+  test('SmartGuide', async ({ page }) => {
     await test.step('should not display', async () => {
       const configuration = await getEditorConfiguration(page)
-      configuration.rendering.smartGuide.enable = false
-      await setEditorConfiguration(page, configuration)
-      await Promise.all([
-        waitForExportedEvent(page),
-        waitForEditorInit(page)
-      ])
+      const options = {
+        configuration: {
+          server: configuration.server,
+          recognition: {
+            type: "TEXT",
+          },
+          smartGuide: {
+            enable: false
+          }
+        }
+      }
+      await loadEditor(page, "WEBSOCKET", options)
+      await waitForEditorInit(page)
       await expect(page.locator('.smartguide')).toBeHidden()
     })
 
     await test.step('should display', async () => {
       const configuration = await getEditorConfiguration(page)
-      configuration.rendering.smartGuide.enable = true
-      setEditorConfiguration(page, configuration)
+      const options = {
+        configuration: {
+          server: configuration.server,
+          recognition: {
+            type: "TEXT",
+          },
+          smartGuide: {
+            enable: true
+          }
+        }
+      }
+      await loadEditor(page, "WEBSOCKET", options)
       await waitForEditorInit(page)
       await expect(page.locator('.smartguide')).toBeVisible()
     })

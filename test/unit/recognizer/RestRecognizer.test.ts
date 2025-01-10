@@ -5,10 +5,9 @@ import
   DefaultPenStyle,
   Model,
   TPointer,
-  TRecognitionConfiguration,
   TRecognitionType,
-  TConfiguration,
-  TServerConfiguration
+  TRestRecognizerConfiguration,
+  DefaultRestRecognizerConfiguration
 } from "../../../src/iink"
 import { ConfigurationDiagramRest, ConfigurationMathRest, ConfigurationRawContentRest, ConfigurationTextRest } from "../__dataset__/configuration.dataset"
 
@@ -27,26 +26,26 @@ describe("RestRecognizer.ts", () =>
 
   test("should instanciate RestRecognizer", () =>
   {
-    const rr = new RestRecognizer(ConfigurationTextRest.server as TServerConfiguration, ConfigurationTextRest.recognition as TRecognitionConfiguration)
+    const rr = new RestRecognizer(DefaultRestRecognizerConfiguration)
     expect(rr).toBeDefined()
   })
 
-  const testDatas: { type: TRecognitionType, config: TConfiguration }[] = [
+  const testDatas: { type: TRecognitionType, config: TRestRecognizerConfiguration }[] = [
     {
       type: "TEXT",
-      config: ConfigurationTextRest as TConfiguration
+      config: ConfigurationTextRest as TRestRecognizerConfiguration
     },
     {
       type: "DIAGRAM",
-      config: ConfigurationDiagramRest as TConfiguration
+      config: ConfigurationDiagramRest as TRestRecognizerConfiguration
     },
     {
       type: "MATH",
-      config: ConfigurationMathRest as TConfiguration
+      config: ConfigurationMathRest as TRestRecognizerConfiguration
     },
     {
       type: "Raw Content",
-      config: ConfigurationRawContentRest as TConfiguration
+      config: ConfigurationRawContentRest as TRestRecognizerConfiguration
     },
   ]
 
@@ -59,11 +58,10 @@ describe("RestRecognizer.ts", () =>
       const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
       model.initCurrentStroke(p1, "pen", DefaultPenStyle)
       model.endCurrentStroke(p2)
-      const recognitionConfig: TRecognitionConfiguration = {
-        ...config.recognition,
-        type
-      }
-      const rr = new RestRecognizer(config.server, recognitionConfig)
+      const newConf: TRestRecognizerConfiguration = structuredClone(config)
+      newConf.recognition.type = type
+
+      const rr = new RestRecognizer(newConf)
       const newModel = await rr.export(model)
 
       let mimeTypes = []
@@ -86,7 +84,8 @@ describe("RestRecognizer.ts", () =>
       }
       expect(fetchMock).toHaveBeenCalledTimes(mimeTypes.length)
       expect(model.exports).toBeUndefined()
-      mimeTypes.forEach(m => {
+      mimeTypes.forEach(m =>
+      {
         expect(newModel.exports![m]).toBeDefined()
       })
     })
@@ -101,11 +100,9 @@ describe("RestRecognizer.ts", () =>
       const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
       model.initCurrentStroke(p1, "pen", DefaultPenStyle)
       model.endCurrentStroke(p2)
-      const recognitionConfig: TRecognitionConfiguration = {
-        ...config.recognition,
-        type
-      }
-      const rr = new RestRecognizer(config.server, recognitionConfig)
+      const newConf: TRestRecognizerConfiguration = structuredClone(config)
+      newConf.recognition.type = type
+      const rr = new RestRecognizer(newConf)
       const newModel = await rr.convert(model, "DIGITAL_EDIT")
 
       let mimeTypes = []
@@ -126,7 +123,8 @@ describe("RestRecognizer.ts", () =>
 
       expect(fetchMock).toHaveBeenCalledTimes(mimeTypes.length)
       expect(model.converts).toBeUndefined()
-      mimeTypes.forEach(m => {
+      mimeTypes.forEach(m =>
+      {
         expect(newModel.converts![m]).toBeDefined()
       })
     })

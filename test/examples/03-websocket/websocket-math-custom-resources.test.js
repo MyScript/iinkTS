@@ -3,9 +3,7 @@ import {
   waitForEditorInit,
   waitForExportedEvent,
   callEditorIdle,
-  getEditorConfiguration,
-  setEditorConfiguration,
-  writePointers
+  writePointers,
 } from "../helper"
 import MathNavAction from "../_partials/math-nav-actions"
 import equation from "../__dataset__/equation"
@@ -22,7 +20,7 @@ test.describe("Custom resources math", () => {
     await expect(page).toHaveTitle("Custom resources math")
   })
 
-  test("should not recognize text", async ({ page }) => {
+  test("should not recognize equation", async ({ page }) => {
     for(const s of equation.strokes) {
       await Promise.all([
         waitForExportedEvent(page),
@@ -31,23 +29,6 @@ test.describe("Custom resources math", () => {
     }
     await callEditorIdle(page)
     await expect(page.locator("#result")).not.toHaveText(equation.exports.LATEX.at(-1))
-  })
-
-  test("should change configuration and recognize text", async ({ page }) => {
-
-    const config = await getEditorConfiguration(page)
-    config.recognition.math.customGrammarContent = undefined
-    await setEditorConfiguration(page, config)
-    await waitForEditorInit(page)
-
-    for(const s of equation.strokes) {
-      await Promise.all([
-        waitForExportedEvent(page),
-        writePointers(page, s.pointers)
-      ])
-    }
-    await callEditorIdle(page)
-    await expect(page.locator("#result")).toHaveText(equation.exports.LATEX.at(-1))
   })
 
   MathNavAction.test({ skipUndoRedo: true, resultLocator: "#result" })

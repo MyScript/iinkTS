@@ -1,4 +1,4 @@
-import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
+import { EditorOffscreenMock } from "../__mocks__/EditorOffscreenMock"
 import
 {
   OIEdgeLine,
@@ -14,15 +14,15 @@ describe("OITranslateManager.ts", () =>
 {
   test("should create", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    const manager = new OITranslateManager(behaviors)
+    const editor = new EditorOffscreenMock()
+    const manager = new OITranslateManager(editor)
     expect(manager).toBeDefined()
   })
 
   describe("should applyToSymbol", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    const manager = new OITranslateManager(behaviors)
+    const editor = new EditorOffscreenMock()
+    const manager = new OITranslateManager(editor)
 
     test("translate stroke", () =>
     {
@@ -68,18 +68,18 @@ describe("OITranslateManager.ts", () =>
 
   describe("translate process on stroke without snap", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    behaviors.snaps.snapToGrid = false
-    behaviors.snaps.snapToElement = false
-    behaviors.recognizer.init = jest.fn(() => Promise.resolve())
-    behaviors.recognizer.transformTranslate = jest.fn(() => Promise.resolve())
-    behaviors.renderer.setAttribute = jest.fn()
-    behaviors.renderer.drawSymbol = jest.fn()
-    behaviors.setPenStyle = jest.fn(() => Promise.resolve())
-    behaviors.setTheme = jest.fn(() => Promise.resolve())
-    behaviors.setPenStyleClasses = jest.fn(() => Promise.resolve())
+    const editor = new EditorOffscreenMock()
+    editor.snaps.configuration.guide = false
+    editor.snaps.configuration.symbol = false
+    editor.recognizer.init = jest.fn(() => Promise.resolve())
+    editor.recognizer.transformTranslate = jest.fn(() => Promise.resolve())
+    editor.renderer.setAttribute = jest.fn()
+    editor.renderer.drawSymbol = jest.fn()
+    editor.setPenStyle = jest.fn(() => Promise.resolve())
+    editor.setTheme = jest.fn(() => Promise.resolve())
+    editor.setPenStyleClasses = jest.fn(() => Promise.resolve())
 
-    const manager = new OITranslateManager(behaviors)
+    const manager = new OITranslateManager(editor)
     manager.applyToSymbol = jest.fn()
 
     const stroke = new OIStroke({})
@@ -87,7 +87,7 @@ describe("OITranslateManager.ts", () =>
     stroke.addPointer({ p: 1, t: 1, x: 10, y: 50 })
     stroke.selected = true
     const strokeNotTranslate = stroke.clone()
-    behaviors.model.addSymbol(stroke)
+    editor.model.addSymbol(stroke)
 
     const translationOrigin: TPoint = {
       x: (stroke.bounds.xMax + stroke.bounds.xMin) / 2,
@@ -114,7 +114,7 @@ describe("OITranslateManager.ts", () =>
 
     beforeAll(async () =>
     {
-      await behaviors.init()
+      await editor.init()
     })
 
     testDatas.forEach(data =>
@@ -136,18 +136,18 @@ describe("OITranslateManager.ts", () =>
       {
         expect(manager.continue(data.translateToPoint)).toEqual({ tx: data.tx, ty: data.ty })
 
-        expect(behaviors.renderer.setAttribute).toHaveBeenNthCalledWith(1, group.id, "transform", `translate(${ data.tx },${ data.ty })`)
-        expect(behaviors.renderer.setAttribute).toHaveBeenNthCalledWith(2, stroke.id, "transform", `translate(${ data.tx },${ data.ty })`)
+        expect(editor.renderer.setAttribute).toHaveBeenNthCalledWith(1, group.id, "transform", `translate(${ data.tx },${ data.ty })`)
+        expect(editor.renderer.setAttribute).toHaveBeenNthCalledWith(2, stroke.id, "transform", `translate(${ data.tx },${ data.ty })`)
       })
       test(`shoud end with tx: "${ data.tx } & ty ${ data.ty }`, async () =>
       {
         await manager.end(data.translateToPoint)
 
         expect(manager.applyToSymbol).toHaveBeenCalledTimes(1)
-        expect(behaviors.renderer.drawSymbol).toHaveBeenCalledTimes(1)
-        expect(behaviors.renderer.drawSymbol).toHaveBeenCalledWith(stroke)
-        expect(behaviors.recognizer.transformTranslate).toHaveBeenCalledTimes(1)
-        expect(behaviors.recognizer.transformTranslate).toHaveBeenCalledWith([stroke.id], data.tx, data.ty)
+        expect(editor.renderer.drawSymbol).toHaveBeenCalledTimes(1)
+        expect(editor.renderer.drawSymbol).toHaveBeenCalledWith(stroke)
+        expect(editor.recognizer.transformTranslate).toHaveBeenCalledTimes(1)
+        expect(editor.recognizer.transformTranslate).toHaveBeenCalledWith([stroke.id], data.tx, data.ty)
         expect(stroke).not.toEqual(strokeNotTranslate)
       })
     })

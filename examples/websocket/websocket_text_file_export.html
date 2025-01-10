@@ -75,27 +75,19 @@
 
       async function loadEditor() {
         const res = await fetch("../server-configuration.json");
-        const conf = await res.json();
-
+        const server = await res.json();
         const options = {
           configuration: {
-            server: {
-              ...conf,
-              protocol: "WEBSOCKET"
-            }
+            server,
           }
         };
 
         /**
-         * Instanciate editor
+         * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = new iink.Editor(editorElement, options);
-        /**
-         *  async initialize editor behaviors
-         */
-        await editor.initialize();
+        editor = await iink.Editor.load(editorElement, "WEBSOCKET", options);
 
         const toBlob = (data, mimeType) => new Blob([data], { type: mimeType });
 

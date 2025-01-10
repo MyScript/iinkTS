@@ -1,4 +1,4 @@
-import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
+import { EditorOffscreenMock } from "../__mocks__/EditorOffscreenMock"
 import
 {
   OIEdgeArc,
@@ -21,15 +21,15 @@ describe("OIResizeManager.ts", () =>
 {
   test("should create", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    const manager = new OIResizeManager(behaviors)
+    const editor = new EditorOffscreenMock()
+    const manager = new OIResizeManager(editor)
     expect(manager).toBeDefined()
   })
 
   describe("applyToSymbol", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    const manager = new OIResizeManager(behaviors)
+    const editor = new EditorOffscreenMock()
+    const manager = new OIResizeManager(editor)
     test("should not resize symbol with type unknow", () =>
     {
       const stroke = buildOIStroke()
@@ -168,7 +168,7 @@ describe("OIResizeManager.ts", () =>
     })
     test("resize edge Text", () =>
     {
-      manager.behaviors.texter.updateBounds = jest.fn()
+      manager.editor.texter.updateBounds = jest.fn()
       const point: TPoint = { x: 0, y: 0 }
       const chars: TOISymbolChar[] = [
         {
@@ -185,24 +185,24 @@ describe("OIResizeManager.ts", () =>
       manager.applyToSymbol(text, origin, 2, 3)
       expect(text.point).toEqual({ x: 0, y: 0 })
       expect(chars[0].fontSize).toEqual(30)
-      expect(manager.behaviors.texter.updateBounds).toHaveBeenCalledTimes(1)
+      expect(manager.editor.texter.updateBounds).toHaveBeenCalledTimes(1)
     })
   })
 
   describe("resize process on stroke without snap", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    behaviors.recognizer.init = jest.fn(() => Promise.resolve())
-    behaviors.recognizer.transformScale = jest.fn(() => Promise.resolve())
-    behaviors.renderer.setAttribute = jest.fn()
-    behaviors.renderer.drawSymbol = jest.fn()
-    behaviors.snaps.snapToGrid = false
-    behaviors.snaps.snapToElement = false
-    behaviors.setPenStyle = jest.fn(() => Promise.resolve())
-    behaviors.setTheme = jest.fn(() => Promise.resolve())
-    behaviors.setPenStyleClasses = jest.fn(() => Promise.resolve())
+    const editor = new EditorOffscreenMock()
+    editor.recognizer.init = jest.fn(() => Promise.resolve())
+    editor.recognizer.transformScale = jest.fn(() => Promise.resolve())
+    editor.renderer.setAttribute = jest.fn()
+    editor.renderer.drawSymbol = jest.fn()
+    editor.snaps.configuration.guide = false
+    editor.snaps.configuration.symbol = false
+    editor.setPenStyle = jest.fn(() => Promise.resolve())
+    editor.setTheme = jest.fn(() => Promise.resolve())
+    editor.setPenStyleClasses = jest.fn(() => Promise.resolve())
 
-    const manager = new OIResizeManager(behaviors)
+    const manager = new OIResizeManager(editor)
     manager.applyToSymbol = jest.fn()
 
     const stroke = new OIStroke({})
@@ -210,7 +210,7 @@ describe("OIResizeManager.ts", () =>
     stroke.addPointer({ p: 1, t: 1, x: 10, y: 50 })
     const strokeNotResized = stroke.clone()
     stroke.selected = true
-    behaviors.model.addSymbol(stroke)
+    editor.model.addSymbol(stroke)
 
     const resizeToPoint: TPoint = {
       x: (stroke.bounds.xMax + stroke.bounds.xMin) / 4,
@@ -310,7 +310,7 @@ describe("OIResizeManager.ts", () =>
 
     beforeAll(async () =>
     {
-      await behaviors.init()
+      await editor.init()
     })
 
     testDatas.forEach(data =>
@@ -329,23 +329,23 @@ describe("OIResizeManager.ts", () =>
         expect(manager.boundingBox).toEqual(stroke.bounds)
         expect(manager.direction).toEqual(data.direction)
         expect(manager.transformOrigin).toEqual(data.transformOrigin)
-        expect(behaviors.renderer.setAttribute).toHaveBeenNthCalledWith(1, group.id, "transform-origin", `${ data.transformOrigin.x }px ${ data.transformOrigin.y }px`)
-        expect(behaviors.renderer.setAttribute).toHaveBeenNthCalledWith(2, stroke.id, "transform-origin", `${ data.transformOrigin.x }px ${ data.transformOrigin.y }px`)
+        expect(editor.renderer.setAttribute).toHaveBeenNthCalledWith(1, group.id, "transform-origin", `${ data.transformOrigin.x }px ${ data.transformOrigin.y }px`)
+        expect(editor.renderer.setAttribute).toHaveBeenNthCalledWith(2, stroke.id, "transform-origin", `${ data.transformOrigin.x }px ${ data.transformOrigin.y }px`)
       })
       test(`shoud continu with direction: "${ data.direction }"`, () =>
       {
         expect(manager.continue(resizeToPoint)).toEqual({ scaleX: data.scale.x, scaleY: data.scale.y })
-        expect(behaviors.renderer.setAttribute).toHaveBeenNthCalledWith(1, group.id, "transform", `scale(${ data.scale.x },${ data.scale.y })`)
-        expect(behaviors.renderer.setAttribute).toHaveBeenNthCalledWith(2, stroke.id, "transform", `scale(${ data.scale.x },${ data.scale.y })`)
+        expect(editor.renderer.setAttribute).toHaveBeenNthCalledWith(1, group.id, "transform", `scale(${ data.scale.x },${ data.scale.y })`)
+        expect(editor.renderer.setAttribute).toHaveBeenNthCalledWith(2, stroke.id, "transform", `scale(${ data.scale.x },${ data.scale.y })`)
       })
       test(`shoud end with direction: "${ data.direction }"`, async () =>
       {
         await manager.end(resizeToPoint)
         expect(manager.applyToSymbol).toHaveBeenCalledTimes(1)
-        expect(behaviors.renderer.drawSymbol).toHaveBeenCalledTimes(1)
-        expect(behaviors.renderer.drawSymbol).toHaveBeenCalledWith(stroke)
-        expect(behaviors.recognizer.transformScale).toHaveBeenCalledTimes(1)
-        expect(behaviors.recognizer.transformScale).toHaveBeenCalledWith([stroke.id], data.scale.x, data.scale.y, data.transformOrigin.x, data.transformOrigin.y)
+        expect(editor.renderer.drawSymbol).toHaveBeenCalledTimes(1)
+        expect(editor.renderer.drawSymbol).toHaveBeenCalledWith(stroke)
+        expect(editor.recognizer.transformScale).toHaveBeenCalledTimes(1)
+        expect(editor.recognizer.transformScale).toHaveBeenCalledWith([stroke.id], data.scale.x, data.scale.y, data.transformOrigin.x, data.transformOrigin.y)
         expect(stroke).not.toEqual(strokeNotResized)
       })
     })

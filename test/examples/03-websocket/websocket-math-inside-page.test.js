@@ -6,6 +6,7 @@ import {
   waitForImportedEvent,
   waitForExportedEvent,
   callEditorIdle,
+  waitForEditorInit,
 } from "../helper"
 
 const mathContentList = [
@@ -205,8 +206,7 @@ test.describe("Websocket Math Inside Page", () => {
   mathContentList.forEach(async (mc) => {
     test(`Math content for ${mc.id}`, async ({ page }) => {
       await test.step(`should open modal editor`, async () => {
-        await page.waitForFunction(() => !!window.editor);
-        await page.evaluate("editor.initializationPromise")
+        await waitForEditorInit(page)
         await callEditorIdle(page)
         await expect(page.locator("#editor-modal")).toBeHidden()
         await expect(page.locator(`#${mc.id} .katex-html`)).toHaveText(mc.textContent)

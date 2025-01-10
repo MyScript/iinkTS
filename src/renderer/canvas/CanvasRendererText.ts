@@ -1,4 +1,4 @@
-import { LoggerClass, LoggerManager } from "../../logger"
+import { LoggerCategory, LoggerManager } from "../../logger"
 import { TSymbol, TCanvasTextSymbol, TCanvasTextUnderlineSymbol, TCanvasUnderLineSymbol, TPoint } from "../../symbol"
 
 /**
@@ -6,7 +6,7 @@ import { TSymbol, TCanvasTextSymbol, TCanvasTextUnderlineSymbol, TCanvasUnderLin
  */
 export class CanvasRendererText
 {
-  #logger = LoggerManager.getLogger(LoggerClass.RENDERER)
+  #logger = LoggerManager.getLogger(LoggerCategory.RENDERER)
 
   symbols = {
     char: "char",

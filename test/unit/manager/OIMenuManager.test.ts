@@ -1,4 +1,4 @@
-import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
+import { EditorOffscreenMock } from "../__mocks__/EditorOffscreenMock"
 import
 {
   OIMenuManager,
@@ -11,8 +11,8 @@ describe("OIMenuManager.ts", () =>
 {
   test("should instanciate", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    const manager = new OIMenuManager(behaviors)
+    const editor = new EditorOffscreenMock()
+    const manager = new OIMenuManager(editor)
     expect(manager).toBeDefined()
   })
 
@@ -24,9 +24,9 @@ describe("OIMenuManager.ts", () =>
       {
         name = "override-style"
       }
-      const behaviors = new OIBehaviorsMock()
+      const editor = new EditorOffscreenMock()
       //@ts-ignore
-      const manager = new OIMenuManager(behaviors, { style: CustomMenuStyle })
+      const manager = new OIMenuManager(editor, { style: CustomMenuStyle })
       //@ts-ignore
       expect(manager.style.name).toEqual("override-style")
     })
@@ -36,9 +36,9 @@ describe("OIMenuManager.ts", () =>
       {
         name = "override-tool"
       }
-      const behaviors = new OIBehaviorsMock()
+      const editor = new EditorOffscreenMock()
       //@ts-ignore
-      const manager = new OIMenuManager(behaviors, { tool: CustomMenuTool })
+      const manager = new OIMenuManager(editor, { tool: CustomMenuTool })
       //@ts-ignore
       expect(manager.tool.name).toEqual("override-tool")
     })
@@ -48,9 +48,9 @@ describe("OIMenuManager.ts", () =>
       {
         name = "override-action"
       }
-      const behaviors = new OIBehaviorsMock()
+      const editor = new EditorOffscreenMock()
       //@ts-ignore
-      const manager = new OIMenuManager(behaviors, { action: CustomMenuAction })
+      const manager = new OIMenuManager(editor, { action: CustomMenuAction })
       //@ts-ignore
       expect(manager.action.name).toEqual("override-action")
     })
@@ -59,15 +59,15 @@ describe("OIMenuManager.ts", () =>
   describe("render", () =>
   {
     const layer = document.createElement("div")
-    const behaviors = new OIBehaviorsMock()
+    const editor = new EditorOffscreenMock()
     //@ts-ignore
-    const manager = new OIMenuManager(behaviors)
+    const manager = new OIMenuManager(editor)
     manager.action.render = jest.fn()
     manager.style.render = jest.fn()
     manager.tool.render = jest.fn()
     test("should do nothing if configuration.menu.enable =  false", () =>
     {
-      behaviors.configuration.menu.enable = false
+      editor.configuration.menu.enable = false
       manager.render(layer)
       expect(manager.action.render).toBeCalledTimes(0)
       expect(manager.style.render).toBeCalledTimes(0)
@@ -75,10 +75,10 @@ describe("OIMenuManager.ts", () =>
     })
     test("should render only action", () =>
     {
-      behaviors.configuration.menu.enable = true
-      behaviors.configuration.menu.action.enable = true
-      behaviors.configuration.menu.style.enable = false
-      behaviors.configuration.menu.tool.enable = false
+      editor.configuration.menu.enable = true
+      editor.configuration.menu.action.enable = true
+      editor.configuration.menu.style.enable = false
+      editor.configuration.menu.tool.enable = false
       manager.render(layer)
       expect(manager.action.render).toBeCalledTimes(1)
       expect(manager.style.render).toBeCalledTimes(0)
@@ -86,10 +86,10 @@ describe("OIMenuManager.ts", () =>
     })
     test("should render only style", () =>
     {
-      behaviors.configuration.menu.enable = true
-      behaviors.configuration.menu.action.enable = false
-      behaviors.configuration.menu.style.enable = true
-      behaviors.configuration.menu.tool.enable = false
+      editor.configuration.menu.enable = true
+      editor.configuration.menu.action.enable = false
+      editor.configuration.menu.style.enable = true
+      editor.configuration.menu.tool.enable = false
       manager.render(layer)
       expect(manager.action.render).toBeCalledTimes(0)
       expect(manager.style.render).toBeCalledTimes(1)
@@ -97,10 +97,10 @@ describe("OIMenuManager.ts", () =>
     })
     test("should render only tool", () =>
     {
-      behaviors.configuration.menu.enable = true
-      behaviors.configuration.menu.action.enable = false
-      behaviors.configuration.menu.style.enable = false
-      behaviors.configuration.menu.tool.enable = true
+      editor.configuration.menu.enable = true
+      editor.configuration.menu.action.enable = false
+      editor.configuration.menu.style.enable = false
+      editor.configuration.menu.tool.enable = true
       manager.render(layer)
       expect(manager.action.render).toBeCalledTimes(0)
       expect(manager.style.render).toBeCalledTimes(0)
@@ -110,9 +110,9 @@ describe("OIMenuManager.ts", () =>
 
   describe("update", () =>
   {
-    const behaviors = new OIBehaviorsMock()
+    const editor = new EditorOffscreenMock()
     //@ts-ignore
-    const manager = new OIMenuManager(behaviors)
+    const manager = new OIMenuManager(editor)
     manager.action.update = jest.fn()
     manager.style.update = jest.fn()
     manager.tool.update = jest.fn()
@@ -128,9 +128,9 @@ describe("OIMenuManager.ts", () =>
 
   describe("show/hide", () =>
   {
-    const behaviors = new OIBehaviorsMock()
+    const editor = new EditorOffscreenMock()
     //@ts-ignore
-    const manager = new OIMenuManager(behaviors)
+    const manager = new OIMenuManager(editor)
     manager.action.show = jest.fn()
     manager.action.hide = jest.fn()
     manager.style.show = jest.fn()
@@ -156,9 +156,9 @@ describe("OIMenuManager.ts", () =>
 
   describe("destroy", () =>
   {
-    const behaviors = new OIBehaviorsMock()
+    const editor = new EditorOffscreenMock()
     //@ts-ignore
-    const manager = new OIMenuManager(behaviors)
+    const manager = new OIMenuManager(editor)
     manager.action.destroy = jest.fn()
     manager.style.destroy = jest.fn()
     manager.tool.destroy = jest.fn()

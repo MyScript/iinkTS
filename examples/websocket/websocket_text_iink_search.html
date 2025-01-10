@@ -50,20 +50,16 @@
       let lastJiix = undefined;
 
       /**
-       * we expose the editor for use in the integration test
+       * we expose the editor so we can access it in tests
        */
       let editor;
 
       async function loadEditor() {
         const res = await fetch("../server-configuration.json");
-        const conf = await res.json();
-
+        const server = await res.json();
         const options = {
           configuration: {
-            server: {
-              ...conf,
-              protocol: "WEBSOCKET"
-            },
+            server,
             recognition: {
               type: "TEXT",
               export: {
@@ -72,23 +68,18 @@
                 }
               }
             },
-            rendering: {
-              smartGuide: {
-                enable: false
-              }
+            smartGuide: {
+              enable: false
             }
           }
         };
+
         /**
-         * Instanciate editor
+         * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = new iink.Editor(editorElement, options);
-        /**
-         *  async initialize editor behaviors
-         */
-        await editor.initialize();
+        editor = await iink.Editor.load(editorElement, "WEBSOCKET", options);
 
         // Utility function transforming millimeters to pixel as iinkSDK is millimeters only
         function mmToPixel(mm) {

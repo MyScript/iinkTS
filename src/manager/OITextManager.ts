@@ -1,36 +1,36 @@
-import { OIBehaviors } from "../behaviors"
-import { LoggerClass, LoggerManager } from "../logger"
+import { LoggerCategory, LoggerManager } from "../logger"
 import { OIModel } from "../model"
 import { Box, OIText, SymbolType, TOISymbol, TOISymbolChar } from "../symbol"
 import { OISVGRenderer } from "../renderer"
+import { EditorOffscreen } from "../editor/EditorOffscreen"
 
 /**
  * @group Manager
  */
 export class OITextManager
 {
-  #logger = LoggerManager.getLogger(LoggerClass.CONVERTER)
-  behaviors: OIBehaviors
+  #logger = LoggerManager.getLogger(LoggerCategory.CONVERTER)
+  editor: EditorOffscreen
 
-  constructor(behaviors: OIBehaviors)
+  constructor(editor: EditorOffscreen)
   {
     this.#logger.info("constructor")
-    this.behaviors = behaviors
+    this.editor = editor
   }
 
   get renderer(): OISVGRenderer
   {
-    return this.behaviors.renderer
+    return this.editor.renderer
   }
 
   get rowHeight(): number
   {
-    return this.behaviors.configuration.rendering.guides.gap
+    return this.editor.configuration.rendering.guides.gap
   }
 
   get model(): OIModel
   {
-    return this.behaviors.model
+    return this.editor.model
   }
 
   protected drawSymbolHidden(text: OIText): SVGGElement

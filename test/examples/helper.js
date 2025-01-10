@@ -62,15 +62,20 @@ export const writeStrokes = async (page, strokes, offsetTop = 0, offsetLeft = 0)
 
 /**
  * @param {Page} page - Playwright Page
- * @returns Promise<Configuration>
+ * @returns Promise<Object>
  */
 export const getEditorConfiguration = async (page) => page.evaluate("editor.configuration");
+
 /**
  * @param {Page} page - Playwright Page
- * @param {Configuration} configuration - Editor configuration
+ * @param {Object} options - Editor options
  * @returns Promise<void>
  */
-export const setEditorConfiguration = async (page, configuration) => page.evaluate(`editor.configuration = ${JSON.stringify(configuration)};`);
+export const loadEditor = async (page, type, options) => {
+  await page.waitForFunction(() => !!editor);
+  return page.evaluate(`(async () => editor = await iink.Editor.load(editorElement, "${type}", ${JSON.stringify(options)}))()`);
+}
+
 /**
  * @param {Page} page - Playwright Page
  * @returns Promise<TExport>
@@ -97,7 +102,7 @@ export const getEditorSymbols = async (page) => page.evaluate("editor.model.symb
  * @returns Promise<TExport>
  */
 export const callEditorExport = async (page, type) => {
-  await page.waitForFunction(() => !!window.editor);
+  await page.waitForFunction(() => !!editor);
   const model = await page.evaluate(`editor.export(['${type}'])`);
   return model.exports[type];
 };
@@ -106,8 +111,8 @@ export const callEditorExport = async (page, type) => {
  * @returns Promise<TExport>
  */
 export const callEditorSynchronize = async (page) => {
-  await page.waitForFunction(() => !!window.editor);
-  return  page.evaluate(`editor.behaviors.synchronizeStrokesWithJIIX()`);
+  await page.waitForFunction(() => !!editor);
+  return  page.evaluate(`editor.synchronizeStrokesWithJIIX()`);
 };
 
 /**
@@ -115,7 +120,7 @@ export const callEditorSynchronize = async (page) => {
  * @returns Promise<void>
  */
 export const callEditorIdle = async (page) => {
-  await page.waitForFunction(() => !!window.editor);
+  await page.waitForFunction(() => !!editor);
   return page.evaluate("editor.waitForIdle()");
 }
 
@@ -124,7 +129,7 @@ export const callEditorIdle = async (page) => {
  * @returns Promise<void>
  */
 export const callEditoConvert = async (page) => {
-  await page.waitForFunction(() => !!window.editor);
+  await page.waitForFunction(() => !!editor);
   return page.evaluate("editor.convert()");
 }
 
@@ -133,7 +138,7 @@ export const callEditoConvert = async (page) => {
  * @returns Promise<void>
  */
 export const callEditoClear = async (page) => {
-  await page.waitForFunction(() => !!window.editor);
+  await page.waitForFunction(() => !!editor);
   return page.evaluate("editor.clear()");
 }
 
@@ -142,7 +147,7 @@ export const callEditoClear = async (page) => {
  * @returns Promise<unknow>
  */
 export const waitForEvent = async (page, eventName) => {
-  await page.waitForFunction(() => !!window.editor);
+  await page.waitForFunction(() => !!editor);
   return page.evaluate(`(async () => {
     return new Promise((resolve, reject) => {
       editor.event.addEventListener('${eventName}', (e) => {
@@ -219,7 +224,7 @@ export const waitForSelectedEvent = async (page) => waitForEvent(page, "selected
 export const waitForGesturedEvent = async (page) => waitForEvent(page, "gestured");
 
 export const waitForEditorInit = async (page) => {
-  await page.waitForFunction(() => !!window.editor);
+  await page.waitForFunction(() => !!editor);
   return page.evaluate("editor.initializationPromise");
 };
 

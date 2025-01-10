@@ -1,12 +1,12 @@
-import { TUndoRedoConfiguration } from "../configuration"
-import { EditorEvent } from "../EditorEvent"
-import { LoggerClass, LoggerManager } from "../logger"
+import { EditorEvent } from "../editor/EditorEvent"
+import { LoggerCategory, LoggerManager } from "../logger"
 import { OIModel } from "../model"
 import { OIDecorator, OIStroke, TOISymbol, TPoint } from "../symbol"
 import { TStyle } from "../style"
 import { MatrixTransform, TMatrixTransform } from "../transform"
-import { IHistoryManager } from "./IHistoryManager"
-import { TUndoRedoContext, getInitialUndoRedoContext } from "./UndoRedoContext"
+import { THistoryContext, getInitialHistoryContext } from "./HistoryContext"
+import { PartialDeep } from "../utils"
+import { THistoryConfiguration } from "./HistoryConfiguration"
 
 /**
  * @group History
@@ -20,7 +20,7 @@ export type TOIHistoryChanges = {
   translate?: { symbols: TOISymbol[], tx: number, ty: number }[]
   scale?: { symbols: TOISymbol[], scaleX: number, scaleY: number, origin: TPoint }[]
   rotate?: { symbols: TOISymbol[], angle: number, center: TPoint }[]
-  style?: { symbols: TOISymbol[], style?: TStyle, fontSize?: number }
+  style?: { symbols: TOISymbol[], style?: PartialDeep<TStyle>, fontSize?: number }
   order?: { symbols: TOISymbol[], position: "first" | "last" | "forward" | "backward" }
   decorator?: { symbol: TOISymbol, decorator: OIDecorator, added: boolean }[]
   group?: { symbols: TOISymbol[] }
@@ -52,21 +52,21 @@ export type TOIHistoryStackItem = {
 /**
  * @group History
  */
-export class OIHistoryManager implements IHistoryManager
+export class OIHistoryManager
 {
-  #logger = LoggerManager.getLogger(LoggerClass.HISTORY)
+  #logger = LoggerManager.getLogger(LoggerCategory.HISTORY)
 
-  configuration: TUndoRedoConfiguration
+  configuration: THistoryConfiguration
   event: EditorEvent
-  context: TUndoRedoContext
+  context: THistoryContext
   stack: TOIHistoryStackItem[]
 
-  constructor(configuration: TUndoRedoConfiguration, event: EditorEvent)
+  constructor(configuration: THistoryConfiguration, event: EditorEvent)
   {
     this.#logger.info("constructor", { configuration })
     this.configuration = configuration
     this.event = event
-    this.context = getInitialUndoRedoContext()
+    this.context = getInitialHistoryContext()
     this.stack = []
   }
 
@@ -229,7 +229,7 @@ export class OIHistoryManager implements IHistoryManager
 
   clear(): void
   {
-    this.context = getInitialUndoRedoContext()
+    this.context = getInitialHistoryContext()
     this.stack = []
   }
 }

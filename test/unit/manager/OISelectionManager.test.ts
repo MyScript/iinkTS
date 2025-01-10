@@ -1,5 +1,5 @@
 import { buildOIStroke } from "../helpers"
-import { OIBehaviorsMock } from "../__mocks__/OIBehaviorsMock"
+import { EditorOffscreenMock } from "../__mocks__/EditorOffscreenMock"
 import
 {
   OISelectionManager,
@@ -13,15 +13,15 @@ describe("OISelectionManager.ts", () =>
 {
   test("should create", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    const manager = new OISelectionManager(behaviors)
+    const editor = new EditorOffscreenMock()
+    const manager = new OISelectionManager(editor)
     expect(manager).toBeDefined()
   })
 
   test("should draw selecting rect", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    const manager = new OISelectionManager(behaviors)
+    const editor = new EditorOffscreenMock()
+    const manager = new OISelectionManager(editor)
     manager.renderer.clearElements = jest.fn()
     manager.renderer.appendElement = jest.fn()
     const box: TBox = {
@@ -37,8 +37,8 @@ describe("OISelectionManager.ts", () =>
 
   test("should clear selecting rect", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    const manager = new OISelectionManager(behaviors)
+    const editor = new EditorOffscreenMock()
+    const manager = new OISelectionManager(editor)
     manager.renderer.clearElements = jest.fn()
     manager.clearSelectingRect()
     expect(manager.renderer.clearElements).toBeCalledTimes(1)
@@ -55,22 +55,22 @@ describe("OISelectionManager.ts", () =>
         height: 10
       }),
     })
-    const behaviors = new OIBehaviorsMock()
-    behaviors.menu.context.hide = jest.fn()
-    const manager = new OISelectionManager(behaviors)
+    const editor = new EditorOffscreenMock()
+    editor.menu.context.hide = jest.fn()
+    const manager = new OISelectionManager(editor)
     const stroke = buildOIStroke()
 
     beforeAll(async () =>
     {
-      await behaviors.init()
-      behaviors.model.addSymbol(stroke)
-      behaviors.renderer.drawSymbol(stroke)
+      await editor.init()
+      editor.model.addSymbol(stroke)
+      editor.renderer.drawSymbol(stroke)
     })
 
     test("should draw selected group", () =>
     {
       manager.drawSelectedGroup([stroke])
-      const group = behaviors.renderer.layer.querySelector(`[role=${ SvgElementRole.InteractElementsGroup }]`) as SVGGElement
+      const group = editor.renderer.layer.querySelector(`[role=${ SvgElementRole.InteractElementsGroup }]`) as SVGGElement
       expect(group).not.toBeNull()
       const translateRect = group?.querySelector(`[role=${ SvgElementRole.Translate }]`)
       expect(translateRect?.getAttribute("x")).toEqual((stroke.bounds.x - (stroke.style.width || 1)).toString())
@@ -89,12 +89,12 @@ describe("OISelectionManager.ts", () =>
 
     test("should remove selected group", () =>
     {
-      let group = behaviors.renderer.layer.querySelector(`[role=${ SvgElementRole.InteractElementsGroup }]`) as SVGGElement
+      let group = editor.renderer.layer.querySelector(`[role=${ SvgElementRole.InteractElementsGroup }]`) as SVGGElement
       expect(group).not.toBeNull()
       manager.removeSelectedGroup()
-      group = behaviors.renderer.layer.querySelector(`[role=${ SvgElementRole.InteractElementsGroup }]`) as SVGGElement
+      group = editor.renderer.layer.querySelector(`[role=${ SvgElementRole.InteractElementsGroup }]`) as SVGGElement
       expect(group).toBeNull()
-      expect(behaviors.menu.context.hide).toHaveBeenCalledTimes(1)
+      expect(editor.menu.context.hide).toHaveBeenCalledTimes(1)
     })
 
     test("should reset selected group", () =>
@@ -118,31 +118,31 @@ describe("OISelectionManager.ts", () =>
         height: 10
       }),
     })
-    const behaviors = new OIBehaviorsMock()
-    behaviors.translator.start = jest.fn()
-    behaviors.translator.continue = jest.fn()
-    behaviors.translator.end = jest.fn()
-    behaviors.rotator.start = jest.fn()
-    behaviors.rotator.continue = jest.fn()
-    behaviors.rotator.end = jest.fn()
-    behaviors.resizer.start = jest.fn()
-    behaviors.resizer.continue = jest.fn()
-    behaviors.resizer.end = jest.fn()
-    const manager = new OISelectionManager(behaviors)
+    const editor = new EditorOffscreenMock()
+    editor.translator.start = jest.fn()
+    editor.translator.continue = jest.fn()
+    editor.translator.end = jest.fn()
+    editor.rotator.start = jest.fn()
+    editor.rotator.continue = jest.fn()
+    editor.rotator.end = jest.fn()
+    editor.resizer.start = jest.fn()
+    editor.resizer.continue = jest.fn()
+    editor.resizer.end = jest.fn()
+    const manager = new OISelectionManager(editor)
     manager.resetSelectedGroup = jest.fn()
     const stroke = buildOIStroke()
 
     beforeAll(async () =>
     {
-      await behaviors.init()
-      behaviors.model.addSymbol(stroke)
-      behaviors.renderer.drawSymbol(stroke)
+      await editor.init()
+      editor.model.addSymbol(stroke)
+      editor.renderer.drawSymbol(stroke)
       manager.drawSelectedGroup([stroke])
     })
 
     test("should not call translator.start on right pointerdown on translateEl", () =>
     {
-      const translateEl = behaviors.renderer.layer.querySelector(`[role=${ SvgElementRole.Translate }]`)
+      const translateEl = editor.renderer.layer.querySelector(`[role=${ SvgElementRole.Translate }]`)
       const pointerDown = new RightClickEventMock("pointerdown", {
         pointerType: "pen",
         clientX: 1,
@@ -151,11 +151,11 @@ describe("OISelectionManager.ts", () =>
         pointerId: 1
       }) as PointerEvent
       translateEl?.dispatchEvent(pointerDown)
-      expect(behaviors.translator.start).not.toHaveBeenCalled()
+      expect(editor.translator.start).not.toHaveBeenCalled()
     })
     test("should call translator.start on pointerdown on translateEl", () =>
     {
-      const translateEl = behaviors.renderer.layer.querySelector(`[role=${ SvgElementRole.Translate }]`)
+      const translateEl = editor.renderer.layer.querySelector(`[role=${ SvgElementRole.Translate }]`)
       const pointerDown = new LeftClickEventMock("pointerdown", {
         pointerType: "pen",
         clientX: 1,
@@ -164,7 +164,7 @@ describe("OISelectionManager.ts", () =>
         pointerId: 1
       }) as PointerEvent
       translateEl?.dispatchEvent(pointerDown)
-      expect(behaviors.translator.start).toHaveBeenNthCalledWith(1, translateEl, { x: 1, y: 2 })
+      expect(editor.translator.start).toHaveBeenNthCalledWith(1, translateEl, { x: 1, y: 2 })
     })
     test("should call translator.continue on pointermove on render layer", () =>
     {
@@ -175,8 +175,8 @@ describe("OISelectionManager.ts", () =>
         pressure: 1,
         pointerId: 1
       }) as PointerEvent
-      behaviors.renderer.layer.dispatchEvent(pointerMove)
-      expect(behaviors.translator.continue).toHaveBeenNthCalledWith(1, { x: 3, y: 4 })
+      editor.renderer.layer.dispatchEvent(pointerMove)
+      expect(editor.translator.continue).toHaveBeenNthCalledWith(1, { x: 3, y: 4 })
     })
     test("should call translator.end on pointerup on render layer", () =>
     {
@@ -187,14 +187,14 @@ describe("OISelectionManager.ts", () =>
         pressure: 1,
         pointerId: 1
       }) as PointerEvent
-      behaviors.renderer.layer.dispatchEvent(pointerUp)
-      expect(behaviors.translator.end).toHaveBeenNthCalledWith(1, { x: 5, y: 6 })
+      editor.renderer.layer.dispatchEvent(pointerUp)
+      expect(editor.translator.end).toHaveBeenNthCalledWith(1, { x: 5, y: 6 })
       expect(manager.resetSelectedGroup).toHaveBeenCalledTimes(1)
     })
 
     test("should not call rotator.start on right pointerdown on rotateEl", () =>
     {
-      const rotateEl = behaviors.renderer.layer.querySelector(`[role=${ SvgElementRole.Rotate }]`)
+      const rotateEl = editor.renderer.layer.querySelector(`[role=${ SvgElementRole.Rotate }]`)
       const pointerDown = new RightClickEventMock("pointerdown", {
         pointerType: "pen",
         clientX: 1,
@@ -203,11 +203,11 @@ describe("OISelectionManager.ts", () =>
         pointerId: 1
       }) as PointerEvent
       rotateEl?.dispatchEvent(pointerDown)
-      expect(behaviors.rotator.start).not.toHaveBeenCalled()
+      expect(editor.rotator.start).not.toHaveBeenCalled()
     })
     test("should call rotator.start on pointerdown on rotateEl", () =>
     {
-      const rotateEl = behaviors.renderer.layer.querySelector(`[role=${ SvgElementRole.Rotate }]`)
+      const rotateEl = editor.renderer.layer.querySelector(`[role=${ SvgElementRole.Rotate }]`)
       const pointerDown = new LeftClickEventMock("pointerdown", {
         pointerType: "pen",
         clientX: 1,
@@ -216,7 +216,7 @@ describe("OISelectionManager.ts", () =>
         pointerId: 1
       }) as PointerEvent
       rotateEl?.dispatchEvent(pointerDown)
-      expect(behaviors.rotator.start).toHaveBeenNthCalledWith(1, rotateEl, { x: 1, y: 2 })
+      expect(editor.rotator.start).toHaveBeenNthCalledWith(1, rotateEl, { x: 1, y: 2 })
     })
     test("should call rotator.continue on pointermove on render layer", () =>
     {
@@ -227,8 +227,8 @@ describe("OISelectionManager.ts", () =>
         pressure: 1,
         pointerId: 1
       }) as PointerEvent
-      behaviors.renderer.layer.dispatchEvent(pointerMove)
-      expect(behaviors.rotator.continue).toHaveBeenNthCalledWith(1, { x: 3, y: 4 })
+      editor.renderer.layer.dispatchEvent(pointerMove)
+      expect(editor.rotator.continue).toHaveBeenNthCalledWith(1, { x: 3, y: 4 })
     })
     test("should call rotator.end on pointerup on render layer", () =>
     {
@@ -239,14 +239,14 @@ describe("OISelectionManager.ts", () =>
         pressure: 1,
         pointerId: 1
       }) as PointerEvent
-      behaviors.renderer.layer.dispatchEvent(pointerUp)
-      expect(behaviors.rotator.end).toHaveBeenNthCalledWith(1, { x: 5, y: 6 })
+      editor.renderer.layer.dispatchEvent(pointerUp)
+      expect(editor.rotator.end).toHaveBeenNthCalledWith(1, { x: 5, y: 6 })
       expect(manager.resetSelectedGroup).toHaveBeenCalledTimes(1)
     })
 
     test("should not call resizer.start on right pointerdown on north resizeEl", () =>
     {
-      const resizeEl = behaviors.renderer.layer.querySelector(`[role=${ SvgElementRole.Resize }][resize-direction=${ResizeDirection.North}]`)
+      const resizeEl = editor.renderer.layer.querySelector(`[role=${ SvgElementRole.Resize }][resize-direction=${ResizeDirection.North}]`)
       const pointerDown = new RightClickEventMock("pointerdown", {
         pointerType: "pen",
         clientX: 1,
@@ -255,11 +255,11 @@ describe("OISelectionManager.ts", () =>
         pointerId: 1
       }) as PointerEvent
       resizeEl?.dispatchEvent(pointerDown)
-      expect(behaviors.resizer.start).not.toHaveBeenCalled()
+      expect(editor.resizer.start).not.toHaveBeenCalled()
     })
     test("should call resizer.start on pointerdown on north resizeEl", () =>
     {
-      const resizeEl = behaviors.renderer.layer.querySelector(`[role=${ SvgElementRole.Resize }][resize-direction=${ResizeDirection.North}]`)
+      const resizeEl = editor.renderer.layer.querySelector(`[role=${ SvgElementRole.Resize }][resize-direction=${ResizeDirection.North}]`)
       const pointerDown = new LeftClickEventMock("pointerdown", {
         pointerType: "pen",
         clientX: 1,
@@ -268,7 +268,7 @@ describe("OISelectionManager.ts", () =>
         pointerId: 1
       }) as PointerEvent
       resizeEl?.dispatchEvent(pointerDown)
-      expect(behaviors.resizer.start).toHaveBeenNthCalledWith(1, resizeEl, { x: 6, y: 13 })
+      expect(editor.resizer.start).toHaveBeenNthCalledWith(1, resizeEl, { x: 6, y: 13 })
     })
     test("should call resizer.continue on pointermove on render layer", () =>
     {
@@ -279,8 +279,8 @@ describe("OISelectionManager.ts", () =>
         pressure: 1,
         pointerId: 1
       }) as PointerEvent
-      behaviors.renderer.layer.dispatchEvent(pointerMove)
-      expect(behaviors.resizer.continue).toHaveBeenNthCalledWith(1, { x: 3, y: 4 })
+      editor.renderer.layer.dispatchEvent(pointerMove)
+      expect(editor.resizer.continue).toHaveBeenNthCalledWith(1, { x: 3, y: 4 })
     })
     test("should call resizer.end on pointerup on render layer", () =>
     {
@@ -291,8 +291,8 @@ describe("OISelectionManager.ts", () =>
         pressure: 1,
         pointerId: 1
       }) as PointerEvent
-      behaviors.renderer.layer.dispatchEvent(pointerUp)
-      expect(behaviors.resizer.end).toHaveBeenNthCalledWith(1, { x: 5, y: 6 })
+      editor.renderer.layer.dispatchEvent(pointerUp)
+      expect(editor.resizer.end).toHaveBeenNthCalledWith(1, { x: 5, y: 6 })
       expect(manager.resetSelectedGroup).toHaveBeenCalledTimes(1)
     })
 
@@ -300,8 +300,8 @@ describe("OISelectionManager.ts", () =>
 
   describe("process", () =>
   {
-    const behaviors = new OIBehaviorsMock()
-    const manager = new OISelectionManager(behaviors)
+    const editor = new EditorOffscreenMock()
+    const manager = new OISelectionManager(editor)
     const strokeToSelect = buildOIStroke({ box: { height: 10, width: 10, x: 10, y: 10 } })
     manager.model.addSymbol(strokeToSelect)
     const otherStroke = buildOIStroke({ box: { height: 10, width: 10, x: 100, y: 100 } })
@@ -334,8 +334,8 @@ describe("OISelectionManager.ts", () =>
       expect(manager.drawSelectedGroup).toBeCalledTimes(1)
       expect(manager.drawSelectedGroup).toBeCalledWith([strokeToSelect])
       expect(manager.model.symbolsSelected).toEqual([strokeToSelect])
-      expect(manager.behaviors.event.emitSelected).toBeCalledTimes(1)
-      expect(manager.behaviors.event.emitSelected).toBeCalledWith([strokeToSelect])
+      expect(manager.editor.event.emitSelected).toBeCalledTimes(1)
+      expect(manager.editor.event.emitSelected).toBeCalledWith([strokeToSelect])
     })
 
     test("continue should throw error when no start before", () =>

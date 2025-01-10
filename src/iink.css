@@ -6,6 +6,7 @@
     overflow: auto;
     width: 100%;
     height: 100%;
+    touch-action: none;
     container-type: inline-size;
     container-name: editor;
 }
@@ -35,7 +36,7 @@
     cursor: context-menu;
 }
 
-.ms-editor .ms-layer-render {
+.ms-editor .ms-layer-rendering {
     position: absolute;
     left: 0;
     top: 0;

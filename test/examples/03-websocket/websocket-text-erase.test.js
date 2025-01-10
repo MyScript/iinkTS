@@ -47,11 +47,8 @@ test.describe("Websocket Text erase", () => {
   })
 
   test("should erase stroke precisely", async ({ page }) => {
-    await Promise.all([
-      waitForEditorInit(page),
-      waitForExportedEvent(page),
-      page.setChecked("#erase-precisely", true)
-    ])
+    await page.setChecked("#erase-precisely", true)
+    await waitForEditorInit(page)
     await callEditorIdle(page)
 
     await Promise.all([

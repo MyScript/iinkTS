@@ -1,9 +1,9 @@
-import { TUndoRedoContext } from "../history"
+import { THistoryContext } from "../history"
 import { TExport } from "../model"
 import { TWSMessageEventSVGPatch } from "./WSRecognizerMessage"
 
 /**
- * @group Event
+ * @group Recognizer
  * @summary
  * Lists all events that can be listened to on the editor or DOM element
  * @example
@@ -57,7 +57,7 @@ export enum RecognizerEventName
 }
 
 /**
- * @group Event
+ * @group Recognizer
  */
 export class RecognizerEvent extends EventTarget
 {
@@ -120,18 +120,18 @@ export class RecognizerEvent extends EventTarget
     )
   }
 
-  emitContentChanged(undoRedoContext: TUndoRedoContext): void
+  emitContentChanged(undoRedoContext: THistoryContext): void
   {
     this.emit(RecognizerEventName.CONTENT_CHANGED, {
       ...undoRedoContext,
       canClear: !undoRedoContext.empty
     })
   }
-  addContentChangedListener(callback: (context: TUndoRedoContext) => void): void
+  addContentChangedListener(callback: (context: THistoryContext) => void): void
   {
     this.addEventListener(
       RecognizerEventName.CONTENT_CHANGED,
-      (evt: unknown) => callback((evt as CustomEvent).detail as TUndoRedoContext),
+      (evt: unknown) => callback((evt as CustomEvent).detail as THistoryContext),
       { signal: this.abortController.signal }
     )
   }

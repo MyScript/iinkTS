@@ -1,4 +1,4 @@
-# [v2.0.2](https://github.com/MyScript/iinkTS/tree/v2.0.2)
+# [v3.0](https://github.com/MyScript/iinkTS/tree/v3.0)
 
 ## Features
 - configuration update
@@ -8,7 +8,10 @@
 - sync strokes with jiix element continuously
 
 ## Refactor
-- centralize layers, move smartguide into WSBehaviors
+- replacing the editor constructor with an editor loader
+- delete global configuration, definition of specific configuration per editor
+- changing editor instantiation, split editor into separate editors
+- centralize layers
 - centralize event, rename intention to tool
 - separation of smart guide style into a specific file
 - separation of menu style into a specific file

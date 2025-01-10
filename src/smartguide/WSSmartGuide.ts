@@ -1,9 +1,9 @@
 import style from "./WSSmartguide.css"
-import { WSBehaviors } from "../behaviors"
-import { TMarginConfiguration, TRenderingConfiguration } from "../configuration"
-import { LoggerClass, LoggerManager } from "../logger"
+import { EditorWebSocket } from "../editor"
+import { LoggerCategory, LoggerManager } from "../logger"
 import { ExportType, TJIIXExport, TJIIXWord } from "../model"
 import { convertMillimeterToPixel, createUUID } from "../utils"
+import { TMarginConfiguration } from "../recognizer"
 
 /**
  * @group WSSmartGuide
@@ -23,19 +23,18 @@ export class WSSmartGuide
   #copyElement!: HTMLButtonElement
   #deleteElement!: HTMLButtonElement
   #isMenuOpen!: boolean
-  behaviors: WSBehaviors
+  editor: EditorWebSocket
   margin: TMarginConfiguration
-  renderingConfiguration!: TRenderingConfiguration
   jiix?: TJIIXExport
   lastWord?: TJIIXWord
   wordToChange?: TJIIXWord
-  #logger = LoggerManager.getLogger(LoggerClass.SMARTGUIDE)
+  #logger = LoggerManager.getLogger(LoggerCategory.SMARTGUIDE)
 
-  constructor(behaviors: WSBehaviors)
+  constructor(editor: EditorWebSocket)
   {
     this.#logger.info("constructor")
     this.uuid = createUUID()
-    this.behaviors = behaviors
+    this.editor = editor
     this.margin = {
       bottom: 0,
       left: 0,
@@ -142,9 +141,9 @@ export class WSSmartGuide
     this.#deleteElement.innerHTML = "Delete"
   }
 
-  init(domElement: HTMLElement, margin: TMarginConfiguration, renderingConfiguration: TRenderingConfiguration): void
+  init(domElement: HTMLElement, margin: TMarginConfiguration): void
   {
-    this.#logger.info("init", { domElement, margin, renderingConfiguration })
+    this.#logger.info("init", { domElement, margin })
 
     const styleElement = document.createElement("style")
     styleElement.appendChild(document.createTextNode(style as string))
@@ -171,7 +170,6 @@ export class WSSmartGuide
     this.#candidatesElement.style.display = "none"
     this.#wrapperElement.appendChild(this.#candidatesElement)
     this.margin = margin
-    this.renderingConfiguration = renderingConfiguration
     this.#addListeners()
 
     this.resize()
@@ -234,7 +232,7 @@ export class WSSmartGuide
     this.#logger.info("onClickConvert", { evt })
     evt.preventDefault()
     evt.stopPropagation()
-    this.behaviors.convert()
+    this.editor.convert()
     this.#closeMenu()
   }
 
@@ -284,10 +282,10 @@ export class WSSmartGuide
         document.execCommand("copy")
         fakeEl.remove()
       }
-      this.behaviors.event.emitNotif({ message, timeout: 1500 })
+      this.editor.event.emitNotif({ message, timeout: 1500 })
     } catch (error) {
       this.#logger.error("onClickCopy", error)
-      this.behaviors.event.emitError(error as Error)
+      this.editor.event.emitError(error as Error)
     }
   }
 
@@ -296,7 +294,7 @@ export class WSSmartGuide
     this.#logger.info("onClickDelete", { evt })
     evt.preventDefault()
     evt.stopPropagation()
-    this.behaviors.clear()
+    this.editor.clear()
     this.#closeMenu()
   }
 
@@ -309,7 +307,7 @@ export class WSSmartGuide
     const candidate = target.innerText
     if (this.jiix?.words && candidate !== this.wordToChange?.label && this.wordToChange?.candidates?.includes(candidate)) {
       this.jiix.words[parseInt(this.wordToChange?.id as string)].label = candidate
-      this.behaviors.import(new Blob([JSON.stringify(this.jiix)], { type: ExportType.JIIX }), ExportType.JIIX)
+      this.editor.import(new Blob([JSON.stringify(this.jiix)], { type: ExportType.JIIX }), ExportType.JIIX)
     }
     this.#candidatesElement.style.display = "none"
   }
