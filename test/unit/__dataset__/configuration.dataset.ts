@@ -128,7 +128,7 @@ export const AllOverrideConfiguration: PartialDeep<TConfiguration> = {
     host: 'test.com',
     applicationKey: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
     hmacKey: 'YYYYYYYY-YYYY-YYYY-YYYY-YYYYYYYYYYYY',
-    version: '2.0.4',
+    version: '3.2.0',
     useWindowLocation: false,
     websocket: {
       pingEnabled: false,

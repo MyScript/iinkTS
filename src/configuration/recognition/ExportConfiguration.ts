@@ -28,7 +28,7 @@ export type TJiixConfiguration = {
   text: {
     chars: boolean
     words: boolean
-    lines: boolean
+    lines?: boolean
   }
   style?: boolean
 }

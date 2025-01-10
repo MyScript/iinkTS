@@ -39,7 +39,7 @@ export const DefaultServerConfiguration: TServerConfiguration = {
   host: "cloud.myscript.com",
   applicationKey: "",
   hmacKey: "",
-  version: "2.3.0",
+  version: "3.2.0",
   useWindowLocation: false,
   websocket: {
     pingEnabled: true,
