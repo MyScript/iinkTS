@@ -20,10 +20,10 @@ function hexToRgbA(hex) {
 test.describe("Websocket Text Customize Stroke Style", () => {
 
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/websocket/websocket_text_customize_stroke_style.html")
     await Promise.all([
+      page.goto("/examples/websocket/websocket_text_customize_stroke_style.html"),
+      page.waitForResponse(req => req.url().includes("api/v4.0/iink/font/google/language/en_US")),
       waitForEditorInit(page),
-      page.waitForResponse(req => req.url().includes("api/v4.0/iink/font/google/language/en_US"))
     ])
     await callEditorIdle(page)
   })

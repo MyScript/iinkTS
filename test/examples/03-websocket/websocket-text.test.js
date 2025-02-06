@@ -34,8 +34,8 @@ const createNewEditor = async (page, options) => {
 
 test.describe('Websocket Text', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/examples/websocket/websocket_text_iink.html')
     await Promise.all([
+      page.goto('/examples/websocket/websocket_text_iink.html'),
       page.waitForResponse((req) => req.url().includes('/api/v4.0/iink/availableLanguageList')),
       waitForEditorInit(page)
     ])
