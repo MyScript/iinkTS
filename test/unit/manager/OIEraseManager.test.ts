@@ -1,6 +1,6 @@
 import { buildOICircle, buildOIStroke } from "../helpers"
 import { EditorOffscreenMock } from "../__mocks__/EditorOffscreenMock"
-import { OIEraseManager, SymbolType, TPointer } from "../../../src/iink"
+import { OIEraseManager, PointerInfo, SymbolType } from "../../../src/iink"
 
 
 describe("OIEraseManager.ts", () =>
@@ -28,8 +28,11 @@ describe("OIEraseManager.ts", () =>
     test("should init currentEraser", async () =>
     {
       expect(manager.currentEraser).toBeUndefined()
-      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      manager.start(point)
+      const info = {
+        pointer: { t: 1, p: 0.5, x: 1, y: 1 }
+
+      } as PointerInfo
+      manager.start(info)
       expect(manager.currentEraser).toBeDefined()
       expect(manager.currentEraser?.type).toBe(SymbolType.Eraser)
       expect(manager.currentEraser?.pointers).toHaveLength(1)
@@ -38,8 +41,11 @@ describe("OIEraseManager.ts", () =>
     })
     test("should update currentEraser", async () =>
     {
-      const point: TPointer = { t: 1, p: 0.5, x: 15, y: 15 }
-      manager.continue(point)
+      const info = {
+        pointer: { t: 1, p: 0.5, x: 15, y: 15 }
+
+      } as PointerInfo
+      manager.continue(info)
       expect(manager.currentEraser).toBeDefined()
       expect(manager.currentEraser?.type).toBe(SymbolType.Eraser)
       expect(manager.currentEraser?.pointers).toHaveLength(2)
@@ -56,8 +62,12 @@ describe("OIEraseManager.ts", () =>
       circleToErase.deleting = true
       manager.model.symbols.push(circleToErase)
       manager.model.symbols.push(buildOIStroke())
-      const point: TPointer = { t: 1, p: 0.5, x: 20, y: 20 }
-      await manager.end(point)
+
+      const info = {
+        pointer: { t: 1, p: 0.5, x: 20, y: 20 }
+
+      } as PointerInfo
+      await manager.end(info)
       expect(manager.currentEraser).toBeUndefined()
       expect(manager.renderer.removeSymbol).toHaveBeenCalledTimes(1)
       expect(manager.renderer.removeSymbol).toHaveBeenNthCalledWith(1, eraserId)
@@ -66,9 +76,11 @@ describe("OIEraseManager.ts", () =>
     })
     test("should throw error if continu when currentEraser is undefine", async () =>
     {
-      const point: TPointer = { t: 1, p: 0.5, x: 15, y: 15 }
+      const info = {
+        pointer: { t: 1, p: 0.5, x: 20, y: 20 }
+      } as PointerInfo
       expect(manager.currentEraser).toBeUndefined()
-      expect(() => manager.continue(point)).toThrowError("Can't update current eraser because currentEraser is undefined")
+      expect(() => manager.continue(info)).toThrowError("Can't update current eraser because currentEraser is undefined")
     })
   })
 })

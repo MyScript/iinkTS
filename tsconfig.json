@@ -29,8 +29,7 @@
     "noUnusedParameters": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
-    "allowJs": false,
-    "experimentalDecorators": true
+    "allowJs": false
   },
   "include": [
     "src",

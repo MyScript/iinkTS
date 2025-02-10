@@ -1,5 +1,5 @@
 import { EditorOffscreenMock } from "../__mocks__/EditorOffscreenMock"
-import { OIMoveManager } from "../../../src/iink"
+import { OIMoveManager, PointerInfo } from "../../../src/iink"
 
 
 describe("OIMoveManager.ts", () =>
@@ -21,44 +21,44 @@ describe("OIMoveManager.ts", () =>
 
     test("should init origin on start", async () =>
     {
-      const evt = {
+      const info = {
         clientX: 1,
         clientY: 2,
-      } as PointerEvent
+      } as PointerInfo
 
       manager.renderer.parent.scrollTop = 4
       manager.renderer.parent.scrollLeft = 8
 
-      manager.start(evt)
+      manager.start(info)
       expect(manager.origin).toBeDefined()
       expect(manager.origin).toEqual({
         left: manager.renderer.parent.scrollLeft,
         top: manager.renderer.parent.scrollTop,
-        x: evt.clientX,
-        y: evt.clientY
+        x: info.clientX,
+        y: info.clientY
       })
     })
 
     test("should update scrollTop & scrollLeft on renderer.parent on continu", async () =>
     {
-      const evt = {
+      const info = {
         clientX: 75,
         clientY: 102,
-      } as PointerEvent
+      } as PointerInfo
 
-      manager.continue(evt)
+      manager.continue(info)
       expect(manager.renderer.parent.scrollLeft).toEqual(-66)
       expect(manager.renderer.parent.scrollTop).toEqual(-96)
     })
 
     test("should update scrollTop & scrollLeft on renderer.parent and clear origin on end", async () =>
     {
-      const evt = {
+      const info = {
         clientX: -42,
         clientY: -96,
-      } as PointerEvent
+      } as PointerInfo
 
-      manager.end(evt)
+      manager.end(info)
       expect(manager.renderer.parent.scrollLeft).toEqual(51)
       expect(manager.renderer.parent.scrollTop).toEqual(102)
       expect(manager.origin).toBeUndefined()
@@ -66,12 +66,12 @@ describe("OIMoveManager.ts", () =>
 
     test("should throw error if continu without do start before", async () =>
       {
-        const evt = {
+        const info = {
           clientX: 75,
           clientY: 102,
-        } as PointerEvent
+        } as PointerInfo
 
-        expect(() => manager.continue(evt)).toThrow("Can't move cause origin is undefined")
+        expect(() => manager.continue(info)).toThrow("Can't move cause origin is undefined")
       })
   })
 })

@@ -7,6 +7,7 @@ import { OIResizeManager } from "./OIResizeManager"
 import { OIRotationManager } from "./OIRotationManager"
 import { OITranslateManager } from "./OITranslateManager"
 import { EditorOffscreen } from "../editor/EditorOffscreen"
+import { PointerEventGrabber, PointerInfo } from "../grabber"
 
 /**
  * @group Manager
@@ -14,17 +15,23 @@ import { EditorOffscreen } from "../editor/EditorOffscreen"
 export class OISelectionManager
 {
   #logger = LoggerManager.getLogger(LoggerCategory.SELECTION)
+  grabber: PointerEventGrabber
+  editor: EditorOffscreen
+
   #selectingId = "selecting-rect"
   startSelectionPoint?: TPoint
   endSelectionPoint?: TPoint
   selectedGroup?: SVGGElement
 
-  editor: EditorOffscreen
-
   constructor(editor: EditorOffscreen)
   {
     this.#logger.info("constructor")
     this.editor = editor
+    this.grabber = new PointerEventGrabber(editor.configuration.grabber)
+    this.grabber.onPointerDown = this.start.bind(this)
+    this.grabber.onPointerMove = this.continue.bind(this)
+    this.grabber.onPointerUp = this.end.bind(this)
+    this.grabber.onContextMenu = this.onContextMenu.bind(this)
   }
 
   get model(): OIModel
@@ -58,6 +65,18 @@ export class OISelectionManager
       return Box.createFromPoints([this.startSelectionPoint, this.endSelectionPoint])
     }
     return
+  }
+
+  attach(layer: HTMLElement): void
+  {
+    this.removeSelectedGroup()
+    this.grabber.attach(layer)
+  }
+
+  detach(): void
+  {
+    this.removeSelectedGroup()
+    this.grabber.detach()
   }
 
   drawSelectingRect(box: TBox): void
@@ -500,19 +519,20 @@ export class OISelectionManager
       })
   }
 
-  start(point: TPoint): void
+  start(info: PointerInfo): void
   {
-    this.startSelectionPoint = point
-    this.endSelectionPoint = point
+    this.removeSelectedGroup()
+    this.startSelectionPoint = info.pointer
+    this.endSelectionPoint = info.pointer
     this.drawSelectingRect(this.selectionBox!)
   }
 
-  continue(point: TPoint): TOISymbol[]
+  continue(info: PointerInfo): TOISymbol[]
   {
     if (!this.startSelectionPoint) {
       throw new Error("You need to call startSelectionByBox before")
     }
-    this.endSelectionPoint = point
+    this.endSelectionPoint = info.pointer
     const updatedSymbols: TOISymbol[] = []
     this.model.symbols.forEach(s =>
     {
@@ -526,10 +546,9 @@ export class OISelectionManager
     return updatedSymbols
   }
 
-  end(point: TPoint): TOISymbol[]
+  end(info: PointerInfo): TOISymbol[]
   {
-    this.endSelectionPoint = point
-    const updatedSymbols = this.continue(point)
+    const updatedSymbols = this.continue(info)
     this.startSelectionPoint = undefined
     this.endSelectionPoint = undefined
     this.clearSelectingRect()
@@ -537,5 +556,32 @@ export class OISelectionManager
     this.editor.event.emitSelected(this.model.symbolsSelected)
     this.editor.menu.style.update()
     return updatedSymbols
+  }
+
+  protected async onContextMenu(info: PointerInfo): Promise<void>
+  {
+    let found = false
+    let currentEl = info.target as HTMLElement | null
+    const symbolTypesAllowed = [SymbolType.Edge.toString(), SymbolType.Shape.toString(), SymbolType.Stroke.toString(), SymbolType.Text.toString()]
+    while (currentEl && currentEl.tagName !== "svg" && !found) {
+      if (symbolTypesAllowed.includes(currentEl.getAttribute("type") as string)) {
+        found = true
+      }
+      else {
+        currentEl = currentEl.parentElement
+      }
+    }
+    this.editor.unselectAll()
+    if (currentEl?.id) {
+      this.model.selectSymbol(currentEl.id)
+      this.renderer.drawSymbol(this.model.symbolsSelected[0])
+      this.drawSelectedGroup(this.model.symbolsSelected)
+      this.editor.updateLayerUI()
+    }
+    else {
+      this.editor.menu.context.position.x = info.pointer.x + this.renderer.parent.clientLeft
+      this.editor.menu.context.position.y = info.pointer.y + this.renderer.parent.clientTop
+      this.editor.menu.context.show()
+    }
   }
 }

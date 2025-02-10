@@ -1,5 +1,5 @@
 import { EditorTool } from "../Constants"
-import { PointerEventGrabber } from "../grabber"
+import { PointerEventGrabber, PointerInfo } from "../grabber"
 import { Model, TExport } from "../model"
 import { Stroke, TStroke, TPointer } from "../symbol"
 import { RestRecognizer, TConverstionState } from "../recognizer"
@@ -73,20 +73,19 @@ export class EditorRest extends AbstractEditor
     this.history = new HistoryManager(this.#configuration["undo-redo"], this.event)
   }
 
-  protected onPointerDown(evt: PointerEvent, point: TPointer): void
+  protected onPointerDown(info: PointerInfo): void
   {
-    this.logger.info("onPointerDown", { tool: this.tool, evt, point })
-    const { pointerType } = evt
+    this.logger.info("onPointerDown", { tool: this.tool, info })
     const style: TPenStyle = Object.assign({}, this.theme?.ink, this.currentPenStyle)
     switch (this.tool) {
       case EditorTool.Erase: {
-        if (this.model.removeStrokesFromPoint(point).length > 0) {
+        if (this.model.removeStrokesFromPoint(info.pointer).length > 0) {
           this.renderer.drawModel(this.model)
         }
         break
       }
       case EditorTool.Write:
-        this.model.initCurrentStroke(point, pointerType, style)
+        this.model.initCurrentStroke(info.pointer, info.pointerType, style)
         this.drawCurrentStroke()
         break
       default:
@@ -95,18 +94,18 @@ export class EditorRest extends AbstractEditor
     }
   }
 
-  protected onPointerMove(_evt: PointerEvent, point: TPointer): void
+  protected onPointerMove(info: PointerInfo): void
   {
-    this.logger.info("onPointerMove", { tool: this.tool, point })
+    this.logger.info("onPointerMove", { tool: this.tool, info })
     switch (this.tool) {
       case EditorTool.Erase: {
-        if (this.model.removeStrokesFromPoint(point).length > 0) {
+        if (this.model.removeStrokesFromPoint(info.pointer).length > 0) {
           this.renderer.drawModel(this.model)
         }
         break
       }
       case EditorTool.Write:
-        this.model.appendToCurrentStroke(point)
+        this.model.appendToCurrentStroke(info.pointer)
         this.drawCurrentStroke()
         break
       default:
@@ -115,18 +114,18 @@ export class EditorRest extends AbstractEditor
     }
   }
 
-  protected async onPointerUp(_evt: PointerEvent, point: TPointer): Promise<void>
+  protected async onPointerUp(info: PointerInfo): Promise<void>
   {
-    this.logger.info("onPointerUp", { tool: this.tool, point })
+    this.logger.info("onPointerUp", { tool: this.tool, info })
     switch (this.tool) {
       case EditorTool.Erase:
-        this.model.removeStrokesFromPoint(point)
+        this.model.removeStrokesFromPoint(info.pointer)
         if (this.history.stack.at(-1)?.modificationDate !== this.model.modificationDate) {
           await this.updateModelRendering()
         }
         break
       case EditorTool.Write:
-        this.model.endCurrentStroke(point)
+        this.model.endCurrentStroke(info.pointer)
         await this.updateModelRendering()
         break
       default:

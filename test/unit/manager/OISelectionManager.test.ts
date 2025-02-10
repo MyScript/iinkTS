@@ -6,6 +6,7 @@ import
   TBox,
   SvgElementRole,
   ResizeDirection,
+  PointerInfo,
 } from "../../../src/iink"
 import { LeftClickEventMock, RightClickEventMock } from "../__mocks__/EventMock"
 
@@ -313,13 +314,19 @@ describe("OISelectionManager.ts", () =>
 
     test("start", () =>
     {
-      manager.start({ x: 1, y: 2 })
+      const info = {
+        pointer: { x: 1, y: 2 }
+      } as PointerInfo
+      manager.start(info)
       expect(manager.drawSelectingRect).toBeCalledTimes(1)
     })
 
     test("continue", () =>
     {
-      manager.continue({ x: 20, y: 20 })
+      const info = {
+        pointer: { x: 20, y: 20 }
+      } as PointerInfo
+      manager.continue(info)
       expect(manager.drawSelectingRect).toBeCalledTimes(1)
       expect(manager.renderer.drawSymbol).toBeCalledTimes(1)
       expect(manager.renderer.drawSymbol).toBeCalledWith(strokeToSelect)
@@ -328,7 +335,10 @@ describe("OISelectionManager.ts", () =>
 
     test("end", () =>
     {
-      manager.end({ x: 20, y: 20 })
+      const info = {
+        pointer: { x: 20, y: 20 }
+      } as PointerInfo
+      manager.end(info)
       expect(manager.drawSelectingRect).toBeCalledTimes(1)
       expect(manager.clearSelectingRect).toBeCalledTimes(1)
       expect(manager.drawSelectedGroup).toBeCalledTimes(1)
@@ -340,7 +350,10 @@ describe("OISelectionManager.ts", () =>
 
     test("continue should throw error when no start before", () =>
     {
-      expect(() => manager.continue({ x: 20, y: 20 })).toThrowError("You need to call startSelectionByBox before")
+      const info = {
+        pointer: { x: 20, y: 20 }
+      } as PointerInfo
+      expect(() => manager.continue(info)).toThrowError("You need to call startSelectionByBox before")
     })
   })
 

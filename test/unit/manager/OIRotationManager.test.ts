@@ -86,9 +86,6 @@ describe("OIRotationManager.ts", () =>
     editor.recognizer.transformRotate = jest.fn(() => Promise.resolve())
     editor.renderer.setAttribute = jest.fn()
     editor.renderer.drawSymbol = jest.fn()
-    editor.setPenStyle = jest.fn(() => Promise.resolve())
-    editor.setTheme = jest.fn(() => Promise.resolve())
-    editor.setPenStyleClasses = jest.fn(() => Promise.resolve())
 
     const manager = new OIRotationManager(editor)
     manager.applyToSymbol = jest.fn()

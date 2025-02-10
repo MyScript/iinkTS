@@ -1,6 +1,5 @@
 import { test, expect } from "@playwright/test"
 import {
-  callEditorIdle,
   waitForEditorInit,
   getEditorConfiguration,
   waitForUIUpdatedEvent

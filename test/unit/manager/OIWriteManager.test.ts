@@ -5,14 +5,14 @@ import
   DefaultStyle,
   SymbolType,
   TPointer,
-  TStyle,
   EditorWriteTool,
   ShapeKind,
   TOIShape,
   TOIEdge,
   EdgeDecoration,
   EdgeKind,
-  OIStroke
+  OIStroke,
+  PointerInfo
 } from "../../../src/iink"
 
 describe("OIWriteManager.ts", () =>
@@ -38,8 +38,11 @@ describe("OIWriteManager.ts", () =>
     test("should init model.currentSymbol with pencil", async () =>
     {
       expect(manager.model.currentSymbol).toBeUndefined()
-      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      manager.start(DefaultStyle, point, "mouse")
+
+      const info = {
+        pointer: { t: 1, p: 0.5, x: 1, y: 1 }
+      } as PointerInfo
+      manager.start(info)
       expect(manager.model.creationTime).toStrictEqual(manager.model.modificationDate)
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toEqual(SymbolType.Stroke)
@@ -50,20 +53,25 @@ describe("OIWriteManager.ts", () =>
     })
     test("should init model.currentSymbol with pencil & custom style", () =>
     {
-      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      const style: TStyle = { color: "red", width: 42 }
-      manager.start(style, point, "mouse")
+      editor.penStyle = { color: "red", width: 42 }
+      const info = {
+        pointer: { t: 1, p: 0.5, x: 1, y: 1 }
+      } as PointerInfo
+      manager.start(info)
       expect(manager.model.currentSymbol).toBeDefined()
-      expect(manager.model.currentSymbol?.style.color).toBe(style.color)
-      expect(manager.model.currentSymbol?.style.width).toBe(style.width)
+      expect(manager.model.currentSymbol?.style.color).toBe(editor.penStyle.color)
+      expect(manager.model.currentSymbol?.style.width).toBe(editor.penStyle.width)
     })
     test("should init model.currentSymbol with Rectangle", () =>
     {
+      editor.penStyle = DefaultStyle
       expect(editor.layers.root.classList.contains("shape")).toBe(false)
       manager.tool = EditorWriteTool.Rectangle
       expect(editor.layers.root.classList.contains("shape")).toBe(true)
-      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      manager.start(DefaultStyle, point, "mouse")
+      const info = {
+        pointer: { t: 1, p: 0.5, x: 1, y: 1 }
+      } as PointerInfo
+      manager.start(info)
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Shape)
       const shape = manager.model.currentSymbol as TOIShape
@@ -75,8 +83,10 @@ describe("OIWriteManager.ts", () =>
     {
       manager.tool = EditorWriteTool.Circle
       expect(editor.layers.root.classList.contains("shape")).toBe(true)
-      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      manager.start(DefaultStyle, point, "mouse")
+      const info = {
+        pointer: { t: 1, p: 0.5, x: 1, y: 1 }
+      } as PointerInfo
+      manager.start(info)
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Shape)
       const shape = manager.model.currentSymbol as TOIShape
@@ -88,8 +98,10 @@ describe("OIWriteManager.ts", () =>
     {
       manager.tool = EditorWriteTool.Ellipse
       expect(editor.layers.root.classList.contains("shape")).toBe(true)
-      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      manager.start(DefaultStyle, point, "mouse")
+      const info = {
+        pointer: { t: 1, p: 0.5, x: 1, y: 1 }
+      } as PointerInfo
+      manager.start(info)
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Shape)
       const shape = manager.model.currentSymbol as TOIShape
@@ -101,8 +113,10 @@ describe("OIWriteManager.ts", () =>
     {
       manager.tool = EditorWriteTool.Triangle
       expect(editor.layers.root.classList.contains("shape")).toBe(true)
-      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      manager.start(DefaultStyle, point, "mouse")
+      const info = {
+        pointer: { t: 1, p: 0.5, x: 1, y: 1 }
+      } as PointerInfo
+      manager.start(info)
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Shape)
       const shape = manager.model.currentSymbol as TOIShape
@@ -114,8 +128,10 @@ describe("OIWriteManager.ts", () =>
     {
       manager.tool = EditorWriteTool.Parallelogram
       expect(editor.layers.root.classList.contains("shape")).toBe(true)
-      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      manager.start(DefaultStyle, point, "mouse")
+      const info = {
+        pointer: { t: 1, p: 0.5, x: 1, y: 1 }
+      } as PointerInfo
+      manager.start(info)
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Shape)
       const shape = manager.model.currentSymbol as TOIShape
@@ -127,8 +143,10 @@ describe("OIWriteManager.ts", () =>
     {
       manager.tool = EditorWriteTool.Line
       expect(editor.layers.root.classList.contains("shape")).toBe(true)
-      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      manager.start(DefaultStyle, point, "mouse")
+      const info = {
+        pointer: { t: 1, p: 0.5, x: 1, y: 1 }
+      } as PointerInfo
+      manager.start(info)
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Edge)
       const shape = manager.model.currentSymbol as TOIEdge
@@ -142,8 +160,10 @@ describe("OIWriteManager.ts", () =>
     {
       manager.tool = EditorWriteTool.Arrow
       expect(editor.layers.root.classList.contains("shape")).toBe(true)
-      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      manager.start(DefaultStyle, point, "mouse")
+      const info = {
+        pointer: { t: 1, p: 0.5, x: 1, y: 1 }
+      } as PointerInfo
+      manager.start(info)
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Edge)
       const shape = manager.model.currentSymbol as TOIEdge
@@ -157,8 +177,10 @@ describe("OIWriteManager.ts", () =>
     {
       manager.tool = EditorWriteTool.DoubleArrow
       expect(editor.layers.root.classList.contains("shape")).toBe(true)
-      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      manager.start(DefaultStyle, point, "mouse")
+      const info = {
+        pointer: { t: 1, p: 0.5, x: 1, y: 1 }
+      } as PointerInfo
+      manager.start(info)
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Edge)
       const shape = manager.model.currentSymbol as TOIEdge
@@ -170,19 +192,22 @@ describe("OIWriteManager.ts", () =>
     })
     test("should throw error if symbol type unknow when start", () =>
     {
-      const point: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      const style: TStyle = { color: "red", width: 42 }
+      const info = {
+        pointer: { t: 1, p: 0.5, x: 1, y: 1 }
+      } as PointerInfo
       //@ts-ignore
       manager.tool = "unknow"
-      expect(() => manager.start(style, point, "mouse")).toThrow("Can't create symbol, tool is unknow: \"unknow\"")
+      expect(() => manager.start(info)).toThrow("Can't create symbol, tool is unknow: \"unknow\"")
     })
     test("should update currentSymbol", () =>
     {
       manager.tool = EditorWriteTool.Pencil
-      const point1: TPointer = { t: 1, p: 0.5, x: 1, y: 1 }
-      manager.start(DefaultStyle, point1, "mouse")
+      const info = {
+        pointer: { t: 1, p: 0.5, x: 1, y: 1 }
+      } as PointerInfo
+      manager.start(info)
       const point2: TPointer = { t: 15, p: 15, x: 15, y: 15 }
-      manager.continue(point2)
+      manager.continue({ pointer: point2 } as PointerInfo)
       const stroke = manager.model.currentSymbol as OIStroke
       expect(stroke.pointers).toHaveLength(2)
       expect(stroke.pointers[1].x).toBe(point2.x)
@@ -193,16 +218,21 @@ describe("OIWriteManager.ts", () =>
     test("should throw error when continu if currentSymbol is undefined", () =>
     {
       manager.model.clear()
-      const point: TPointer = { t: 15, p: 15, x: 15, y: 15 }
-      expect(() => manager.continue(point)).toThrow("Can't update current symbol because currentSymbol is undefined")
+      const info = {
+        pointer: { t: 1, p: 0.5, x: 1, y: 1 }
+      } as PointerInfo
+      expect(() => manager.continue(info)).toThrow("Can't update current symbol because currentSymbol is undefined")
     })
     test("should clear currentSymbol and add into model.symbols", async () =>
     {
       manager.model.clear()
       const point: TPointer = { t: 25, p: 25, x: 25, y: 25 }
-      manager.start(DefaultStyle, point, "mouse")
-      manager.continue(point)
-      await manager.end(point)
+      const info = {
+        pointer: { t: 1, p: 0.5, x: 1, y: 1 }
+      } as PointerInfo
+      manager.start(info)
+      manager.continue({ pointer: point } as PointerInfo)
+      await manager.end({ pointer: point } as PointerInfo)
       expect(manager.model.currentSymbol).toBeUndefined()
       expect(manager.model.symbols).toHaveLength(1)
       expect(editor.recognizer.addStrokes).toHaveBeenCalledTimes(1)

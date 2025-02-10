@@ -24,6 +24,7 @@ import { OIHistoryManager } from "../history"
 import { OIGestureManager } from "../gesture/OIGestureManager"
 import { OISnapManager } from "../snap/OISnapManager"
 import { EditorOffscreen } from "../editor/EditorOffscreen"
+import { PointerEventGrabber, PointerInfo } from "../grabber"
 
 
 /**
@@ -32,6 +33,7 @@ import { EditorOffscreen } from "../editor/EditorOffscreen"
 export class OIWriteManager
 {
   #logger = LoggerManager.getLogger(LoggerCategory.WRITE)
+  grabber: PointerEventGrabber
   editor: EditorOffscreen
 
   #tool: EditorWriteTool = EditorWriteTool.Pencil
@@ -43,6 +45,7 @@ export class OIWriteManager
   {
     this.#logger.info("constructor")
     this.editor = editor
+    this.grabber = new PointerEventGrabber(editor.configuration.grabber)
   }
 
   get tool(): EditorWriteTool
@@ -89,6 +92,19 @@ export class OIWriteManager
   get recognizer(): OIRecognizer
   {
     return this.editor.recognizer
+  }
+
+  attach(layer: HTMLElement): void
+  {
+    this.grabber.attach(layer)
+    this.grabber.onPointerDown = this.start.bind(this)
+    this.grabber.onPointerMove = this.continue.bind(this)
+    this.grabber.onPointerUp = this.end.bind(this)
+  }
+
+  detach(): void
+  {
+    this.grabber.detach()
   }
 
   protected needContextLessGesture(stroke: OIStroke): boolean
@@ -214,26 +230,26 @@ export class OIWriteManager
     return this.model.currentSymbol
   }
 
-  start(style: TStyle, pointer: TPointer, pointerType: string): void
+  start(info: PointerInfo): void
   {
-    this.#logger.info("startWriting", { style, pointer, pointerType })
-    const localPointer = pointer
+    this.#logger.info("startWriting", { info })
+    const localPointer = info.pointer
     if (this.tool !== EditorWriteTool.Pencil) {
-      const { x, y } = this.snaps.snapResize(pointer)
+      const { x, y } = this.snaps.snapResize(localPointer)
       localPointer.x = x
       localPointer.y = y
     }
     this.currentSymbolOrigin = localPointer
-    this.createCurrentSymbol(localPointer, style, pointerType)
+    this.createCurrentSymbol(localPointer, this.editor.penStyle, info.pointerType)
     this.renderer.drawSymbol(this.model.currentSymbol!)
   }
 
-  continue(pointer: TPointer): void
+  continue(info: PointerInfo): void
   {
-    this.#logger.info("continueWriting", { pointer })
-    const localPointer = pointer
+    this.#logger.info("continueWriting", { info })
+    const localPointer = info.pointer
     if (this.tool !== EditorWriteTool.Pencil) {
-      const { x, y } = this.snaps.snapResize(pointer)
+      const { x, y } = this.snaps.snapResize(localPointer)
       localPointer.x = x
       localPointer.y = y
     }
@@ -262,12 +278,12 @@ export class OIWriteManager
     }
   }
 
-  async end(pointer: TPointer): Promise<void>
+  async end(info: PointerInfo): Promise<void>
   {
-    this.#logger.info("finishWriting", { pointer })
-    const localPointer = pointer
+    this.#logger.info("finishWriting", { info })
+    const localPointer = info.pointer
     if (this.tool !== EditorWriteTool.Pencil) {
-      const { x, y } = this.snaps.snapResize(pointer)
+      const { x, y } = this.snaps.snapResize(localPointer)
       localPointer.x = x
       localPointer.y = y
     }

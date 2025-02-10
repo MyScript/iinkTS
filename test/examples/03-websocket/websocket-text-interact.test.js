@@ -3,7 +3,6 @@ import {
   writeStrokes,
   waitForEditorInit,
   callEditorIdle,
-  getEditorExportsType,
   waitForExportedEvent,
   writePointers
 } from "../helper"

@@ -13,7 +13,7 @@
   <img src="https://raw.githubusercontent.com/MyScript/iinkTS/master/preview.gif">
 </div>
 
-iinkTS is a JavaScript library that can be used in every web application to bring handwriting recognition.
+iinkTS is a TypeScript library that can be used in every web application to bring handwriting recognition.
 
 It integrates all you need:
 

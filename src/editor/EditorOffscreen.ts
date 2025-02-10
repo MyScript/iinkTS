@@ -1,5 +1,4 @@
 import { EditorTool, SELECTION_MARGIN } from "../Constants"
-import { OIPointerEventGrabber } from "../grabber"
 import { JIIXEdgeKind, JIIXELementType, JIIXNodeKind, OIModel, TExport, TJIIXStrokeItem } from "../model"
 import
 {
@@ -21,8 +20,6 @@ import
   ShapeKind,
   SymbolType,
   TOISymbol,
-  TPoint,
-  TPointer,
   convertPartialStrokesToOIStrokes,
   TOIRecognized,
   OIRecognizedLine,
@@ -63,7 +60,6 @@ export type TEditorOffscreenOptions = PartialDeep<EditorOptionsBase &
   }> &
   {
     override?: {
-      grabber?: OIPointerEventGrabber
       recognizer?: OIRecognizer
       menu?: {
         style?: OIMenuStyle
@@ -83,7 +79,6 @@ export class EditorOffscreen extends AbstractEditor
   #layerUITimer?: ReturnType<typeof setTimeout>
   #recognizeStrokeTimer?: ReturnType<typeof setTimeout>
 
-  grabber: OIPointerEventGrabber
   renderer: OISVGRenderer
   recognizer: OIRecognizer
 
@@ -111,18 +106,6 @@ export class EditorOffscreen extends AbstractEditor
     this.#configuration = new EditorOffscreenConfiguration(options?.configuration)
     this.#penStyle = Object.assign({}, this.#configuration.penStyle)
 
-    if (options?.override?.grabber) {
-      const CustomGrabber = options.override.grabber as unknown as typeof OIPointerEventGrabber
-      this.grabber = new CustomGrabber(this.#configuration.grabber)
-    }
-    else {
-      this.grabber = new OIPointerEventGrabber(this.#configuration.grabber)
-    }
-    this.grabber.onPointerDown = this.onPointerDown.bind(this)
-    this.grabber.onPointerMove = this.onPointerMove.bind(this)
-    this.grabber.onPointerUp = this.onPointerUp.bind(this)
-    this.grabber.onContextMenu = this.onContextMenu.bind(this)
-
     if (options?.override?.recognizer) {
       const CustomRecognizer = options?.override.recognizer as unknown as typeof OIRecognizer
       this.recognizer = new CustomRecognizer(this.#configuration)
@@ -140,18 +123,20 @@ export class EditorOffscreen extends AbstractEditor
     this.renderer = new OISVGRenderer(this.#configuration.rendering)
 
     this.history = new OIHistoryManager(this.#configuration["undo-redo"], this.event)
+
     this.writer = new OIWriteManager(this)
     this.eraser = new OIEraseManager(this)
+    this.selector = new OISelectionManager(this)
+    this.move = new OIMoveManager(this)
+
     this.gesture = new OIGestureManager(this, this.#configuration.gesture)
     this.resizer = new OIResizeManager(this)
     this.rotator = new OIRotationManager(this)
     this.translator = new OITranslateManager(this)
     this.converter = new OIConversionManager(this)
     this.texter = new OITextManager(this)
-    this.selector = new OISelectionManager(this)
     this.svgDebugger = new OIDebugSVGManager(this)
     this.snaps = new OISnapManager(this, this.#configuration.snap)
-    this.move = new OIMoveManager(this)
     this.menu = new OIMenuManager(this, options?.override?.menu)
 
     this.#model = new OIModel(this.#configuration.rendering.minWidth, this.#configuration.rendering.minHeight, this.configuration.rendering.guides.gap)
@@ -172,8 +157,27 @@ export class EditorOffscreen extends AbstractEditor
     this.#tool = i
     this.menu.tool.update()
     this.setCursorStyle()
-    this.event.emitToolChanged(i)
     this.unselectAll()
+
+    this.eraser.detach()
+    this.selector.detach()
+    this.move.detach()
+    this.writer.detach()
+    switch (this.#tool) {
+      case EditorTool.Erase:
+        this.eraser.attach(this.layers.rendering)
+        break
+      case EditorTool.Select:
+        this.selector.attach(this.layers.rendering)
+        break
+      case EditorTool.Move:
+        this.move.attach(this.layers.rendering)
+        break
+      default:
+        this.writer.attach(this.layers.rendering)
+        break
+    }
+    this.event.emitToolChanged(i)
   }
 
   get model(): OIModel
@@ -263,122 +267,6 @@ export class EditorOffscreen extends AbstractEditor
     }
   }
 
-  protected onPointerDown(evt: PointerEvent, pointer: TPointer): void
-  {
-    this.logger.debug("onPointerDown", { evt, pointer })
-    this.updateLayerState(false)
-    try {
-      this.unselectAll()
-      switch (this.#tool) {
-        case EditorTool.Erase:
-          this.eraser.start(pointer)
-          break
-        case EditorTool.Select:
-          this.selector.start(pointer)
-          break
-        case EditorTool.Move:
-          this.move.start(evt)
-          break
-        default:
-          this.writer.start(this.penStyle, pointer, evt.pointerType)
-          break
-      }
-    }
-    catch (error) {
-      this.logger.error("onPointerDown", error)
-      this.grabber.stopPointerEvent()
-      this.manageError(error as Error)
-    }
-    finally {
-      this.svgDebugger.apply()
-    }
-  }
-
-  protected onPointerMove(evt: PointerEvent, pointer: TPointer): void
-  {
-    this.logger.debug("onPointerMove", { pointer })
-    try {
-      switch (this.#tool) {
-        case EditorTool.Erase:
-          this.eraser.continue(pointer)
-          break
-        case EditorTool.Select:
-          this.selector.continue(pointer)
-          break
-        case EditorTool.Move:
-          this.move.continue(evt)
-          break
-        default:
-          this.writer.continue(pointer)
-          break
-      }
-    }
-    catch (error) {
-      this.logger.error("onPointerMove", error)
-      this.manageError(error as Error)
-    }
-    finally {
-      this.svgDebugger.apply()
-    }
-  }
-
-  protected async onPointerUp(evt: PointerEvent, pointer: TPointer): Promise<void>
-  {
-    this.logger.debug("onPointerUp", { pointer })
-    try {
-      switch (this.#tool) {
-        case EditorTool.Erase:
-          await this.eraser.end(pointer)
-          break
-        case EditorTool.Select:
-          await this.selector.end(pointer)
-          break
-        case EditorTool.Move:
-          await this.move.end(evt)
-          break
-        default:
-          await this.writer.end(pointer)
-          break
-      }
-    }
-    catch (error) {
-      this.logger.error("onPointerUp", error)
-      this.manageError(error as Error)
-    }
-    finally {
-      this.updateLayerUI()
-    }
-  }
-
-  protected async onContextMenu(el: HTMLElement, point: TPoint): Promise<void>
-  {
-    if (this.tool === EditorTool.Select) {
-      let found = false
-      let currentEl: HTMLElement | null = el
-      const symbolTypesAllowed = [SymbolType.Edge.toString(), SymbolType.Shape.toString(), SymbolType.Stroke.toString(), SymbolType.Text.toString()]
-      while (currentEl && currentEl.tagName !== "svg" && !found) {
-        if (symbolTypesAllowed.includes(currentEl.getAttribute("type") as string)) {
-          found = true
-        }
-        else {
-          currentEl = currentEl.parentElement
-        }
-      }
-      this.unselectAll()
-      if (currentEl?.id) {
-        this.model.selectSymbol(currentEl.id)
-        this.renderer.drawSymbol(this.model.symbolsSelected[0])
-        this.selector.drawSelectedGroup(this.model.symbolsSelected)
-        this.updateLayerUI()
-      }
-      else {
-        this.menu.context.position.x = point.x + this.renderer.parent.clientLeft
-        this.menu.context.position.y = point.y + this.renderer.parent.clientTop
-        this.menu.context.show()
-      }
-    }
-  }
-
   protected async onContentChanged(undoRedoContext: THistoryContext): Promise<void>
   {
     clearTimeout(this.#recognizeStrokeTimer)
@@ -395,19 +283,15 @@ export class EditorOffscreen extends AbstractEditor
     try {
       this.logger.info("initialize")
       this.layers.render()
-      this.setCursorStyle()
       this.layers.showLoader()
+      this.tool = EditorTool.Write
+      this.renderer.init(this.layers.rendering)
+      this.menu.render(this.layers.ui.root)
 
       const compStyles = window.getComputedStyle(this.layers.root)
       this.model.width = Math.max(parseInt(compStyles.width.replace("px", "")), this.#configuration.rendering.minWidth)
       this.model.height = Math.max(parseInt(compStyles.height.replace("px", "")), this.#configuration.rendering.minHeight)
       this.model.rowHeight = this.configuration.rendering.guides.gap
-
-      this.renderer.init(this.layers.rendering)
-      this.menu.render(this.layers.ui.root)
-
-      this.grabber.attach(this.renderer.layer)
-
       this.history.init(this.model)
 
       if(!this.recognizer.configuration.server.version) {
@@ -1599,7 +1483,11 @@ export class EditorOffscreen extends AbstractEditor
   async destroy(): Promise<void>
   {
     this.logger.info("destroy")
-    this.grabber.detach()
+    this.eraser.detach()
+    this.selector.detach()
+    this.move.detach()
+    this.writer.detach()
+
     this.renderer.destroy()
     this.menu.destroy()
     this.recognizer.destroy()

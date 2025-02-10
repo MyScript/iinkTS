@@ -1,5 +1,4 @@
 import { jiixText } from "../__dataset__/exports.dataset"
-import { LeftClickEventMock } from "../__mocks__/EventMock"
 import { buildOICircle, buildOIGroup, buildOIStroke, buildRecognizedText, buildOIText, delay } from "../helpers"
 import
 {
@@ -53,29 +52,109 @@ describe("EditorOffscreen.ts", () =>
     })
   })
 
+  describe("Tool", () =>
+  {
+    const editor = new EditorOffscreen(document.createElement("div"), EditorOptions)
+    editor.recognizer.init = jest.fn(() => Promise.resolve())
+    editor.menu.render = jest.fn()
+    editor.renderer.init = jest.fn()
+
+    editor.writer.attach = jest.fn()
+    editor.selector.attach = jest.fn()
+    editor.move.attach = jest.fn()
+    editor.eraser.attach = jest.fn()
+    editor.writer.detach = jest.fn()
+    editor.selector.detach = jest.fn()
+    editor.move.detach = jest.fn()
+    editor.eraser.detach = jest.fn()
+
+    test("should set tool to write on init", async () =>
+    {
+      editor.initialize()
+      expect(editor.writer.detach).toHaveBeenCalledTimes(1)
+      expect(editor.selector.detach).toHaveBeenCalledTimes(1)
+      expect(editor.move.detach).toHaveBeenCalledTimes(1)
+      expect(editor.eraser.detach).toHaveBeenCalledTimes(1)
+
+      expect(editor.writer.attach).toHaveBeenCalledTimes(1)
+      expect(editor.selector.attach).toHaveBeenCalledTimes(0)
+      expect(editor.move.attach).toHaveBeenCalledTimes(0)
+      expect(editor.eraser.attach).toHaveBeenCalledTimes(0)
+    })
+    test("should set tool to erase", async () =>
+    {
+      editor.tool = EditorTool.Erase
+      expect(editor.writer.detach).toHaveBeenCalledTimes(1)
+      expect(editor.selector.detach).toHaveBeenCalledTimes(1)
+      expect(editor.move.detach).toHaveBeenCalledTimes(1)
+      expect(editor.eraser.detach).toHaveBeenCalledTimes(1)
+
+      expect(editor.writer.attach).toHaveBeenCalledTimes(0)
+      expect(editor.selector.attach).toHaveBeenCalledTimes(0)
+      expect(editor.move.attach).toHaveBeenCalledTimes(0)
+      expect(editor.eraser.attach).toHaveBeenCalledTimes(1)
+    })
+    test("should set tool to move", async () =>
+    {
+      editor.tool = EditorTool.Move
+      expect(editor.writer.detach).toHaveBeenCalledTimes(1)
+      expect(editor.selector.detach).toHaveBeenCalledTimes(1)
+      expect(editor.move.detach).toHaveBeenCalledTimes(1)
+      expect(editor.eraser.detach).toHaveBeenCalledTimes(1)
+
+      expect(editor.writer.attach).toHaveBeenCalledTimes(0)
+      expect(editor.selector.attach).toHaveBeenCalledTimes(0)
+      expect(editor.move.attach).toHaveBeenCalledTimes(1)
+      expect(editor.eraser.attach).toHaveBeenCalledTimes(0)
+    })
+    test("should set tool to select", async () =>
+    {
+      editor.tool = EditorTool.Select
+      expect(editor.writer.detach).toHaveBeenCalledTimes(1)
+      expect(editor.selector.detach).toHaveBeenCalledTimes(1)
+      expect(editor.move.detach).toHaveBeenCalledTimes(1)
+      expect(editor.eraser.detach).toHaveBeenCalledTimes(1)
+
+      expect(editor.writer.attach).toHaveBeenCalledTimes(0)
+      expect(editor.selector.attach).toHaveBeenCalledTimes(1)
+      expect(editor.move.attach).toHaveBeenCalledTimes(0)
+      expect(editor.eraser.attach).toHaveBeenCalledTimes(0)
+    })
+    test("should set tool to write", async () =>
+    {
+      editor.tool = EditorTool.Write
+      expect(editor.writer.detach).toHaveBeenCalledTimes(1)
+      expect(editor.selector.detach).toHaveBeenCalledTimes(1)
+      expect(editor.move.detach).toHaveBeenCalledTimes(1)
+      expect(editor.eraser.detach).toHaveBeenCalledTimes(1)
+
+      expect(editor.writer.attach).toHaveBeenCalledTimes(1)
+      expect(editor.selector.attach).toHaveBeenCalledTimes(0)
+      expect(editor.move.attach).toHaveBeenCalledTimes(0)
+      expect(editor.eraser.attach).toHaveBeenCalledTimes(0)
+    })
+  })
+
   describe("init", () =>
   {
     const editor = new EditorOffscreen(document.createElement("div"), EditorOptions)
     editor.menu.render = jest.fn()
-    editor.grabber.attach = jest.fn()
     editor.renderer.init = jest.fn()
+    editor.recognizer.init = jest.fn(() => Promise.resolve())
 
     test("should init grabber, renderer & recognizer & context", async () =>
     {
-      editor.recognizer.init = jest.fn(() => Promise.resolve())
       editor.initialize()
       expect(editor.history.context.canRedo).toEqual(false)
       expect(editor.history.context.canUndo).toEqual(false)
       expect(editor.history.context.empty).toEqual(true)
       expect(editor.history.context.stackIndex).toEqual(0)
       expect(editor.history.stack.length).toEqual(1)
-      await expect(editor.grabber.attach).toBeCalledTimes(1)
       await expect(editor.renderer.init).toBeCalledTimes(1)
       await expect(editor.recognizer.init).toBeCalledTimes(1)
     })
     test("should resolve init when recognizer.init is resolve", async () =>
     {
-      editor.recognizer.init = jest.fn(() => Promise.resolve())
       await editor.initialize()
       await expect(editor.recognizer.init).toBeCalledTimes(1)
     })
@@ -229,215 +308,6 @@ describe("EditorOffscreen.ts", () =>
       expect(editor.model.symbols[1].style.width).toEqual(42)
       expect(editor.renderer.drawSymbol).toHaveBeenCalledTimes(1)
       expect(editor.renderer.drawSymbol).toHaveBeenCalledWith(stroke2)
-    })
-  })
-
-  describe("Writer", () =>
-  {
-    const editor = new EditorOffscreen(document.createElement("div"), EditorOptions)
-    editor.recognizer.init = jest.fn()
-    editor.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
-    editor.writer.start = jest.fn()
-    editor.writer.continue = jest.fn()
-    editor.writer.end = jest.fn()
-    const pointerId = 666
-    test("should call writer.start on pointerdown", async () =>
-    {
-      await editor.initialize()
-      const target = editor.layers.root.querySelector("svg") as SVGSVGElement
-      const pointerDown = new LeftClickEventMock("pointerdown", {
-        pointerType: "pen",
-        clientX: 1,
-        clientY: 1,
-        pressure: 1,
-        pointerId
-      }) as PointerEvent
-
-      target.dispatchEvent(pointerDown)
-      expect(editor.writer.start).toBeCalledTimes(1)
-      expect(editor.writer.continue).toBeCalledTimes(0)
-      expect(editor.writer.end).toBeCalledTimes(0)
-    })
-    test("should call writer.continue on pointermove", async () =>
-    {
-      const target = editor.layers.root.querySelector("svg") as SVGSVGElement
-      const pointerMove = new LeftClickEventMock("pointermove", {
-        pointerType: "pen",
-        clientX: 5,
-        clientY: 4,
-        pressure: 1,
-        pointerId
-      }) as PointerEvent
-
-      target.dispatchEvent(pointerMove)
-      expect(editor.writer.start).toBeCalledTimes(0)
-      expect(editor.writer.continue).toBeCalledTimes(1)
-      expect(editor.writer.end).toBeCalledTimes(0)
-    })
-    test("should call writer.end on pointerup", async () =>
-    {
-      const target = editor.layers.root.querySelector("svg") as SVGSVGElement
-      const pointerUp = new LeftClickEventMock("pointerup", {
-        pointerType: "pen",
-        clientX: 10,
-        clientY: 11,
-        pressure: 1,
-        pointerId
-      }) as PointerEvent
-
-      target.dispatchEvent(pointerUp)
-      expect(editor.writer.start).toBeCalledTimes(0)
-      expect(editor.writer.continue).toBeCalledTimes(0)
-      expect(editor.writer.end).toBeCalledTimes(1)
-    })
-  })
-
-  describe("Eraser", () =>
-  {
-    const editor = new EditorOffscreen(document.createElement("div"), EditorOptions)
-    editor.tool = EditorTool.Erase
-    editor.recognizer.init = jest.fn()
-    editor.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
-    editor.eraser.start = jest.fn()
-    editor.eraser.continue = jest.fn()
-    editor.eraser.end = jest.fn()
-    const pointerId = 666
-    test("should call eraseManager.start on pointerdown", async () =>
-    {
-      await editor.initialize()
-      const target = editor.layers.root.querySelector("svg") as SVGSVGElement
-      const pointerDown = new LeftClickEventMock("pointerdown", {
-        pointerType: "pen",
-        clientX: 1,
-        clientY: 1,
-        pressure: 1,
-        pointerId
-      }) as PointerEvent
-
-      target.dispatchEvent(pointerDown)
-      expect(editor.eraser.start).toBeCalledTimes(1)
-      expect(editor.eraser.continue).toBeCalledTimes(0)
-      expect(editor.eraser.end).toBeCalledTimes(0)
-    })
-    test("should call eraseManager.continue on pointermove", async () =>
-    {
-      const target = editor.layers.root.querySelector("svg") as SVGSVGElement
-      const pointerMove = new LeftClickEventMock("pointermove", {
-        pointerType: "pen",
-        clientX: 5,
-        clientY: 4,
-        pressure: 1,
-        pointerId
-      }) as PointerEvent
-
-      target.dispatchEvent(pointerMove)
-      expect(editor.eraser.start).toBeCalledTimes(0)
-      expect(editor.eraser.continue).toBeCalledTimes(1)
-      expect(editor.eraser.end).toBeCalledTimes(0)
-    })
-    test("should call eraseManager.end on pointerup", async () =>
-    {
-      const target = editor.layers.root.querySelector("svg") as SVGSVGElement
-      const pointerUp = new LeftClickEventMock("pointerup", {
-        pointerType: "pen",
-        clientX: 10,
-        clientY: 11,
-        pressure: 1,
-        pointerId
-      }) as PointerEvent
-
-      target.dispatchEvent(pointerUp)
-      expect(editor.eraser.start).toBeCalledTimes(0)
-      expect(editor.eraser.continue).toBeCalledTimes(0)
-      expect(editor.eraser.end).toBeCalledTimes(1)
-    })
-  })
-
-  describe("Select", () =>
-  {
-    const editor = new EditorOffscreen(document.createElement("div"), EditorOptions)
-    editor.tool = EditorTool.Select
-    editor.updateLayerUI = jest.fn()
-    editor.renderer.drawSymbol = jest.fn()
-    editor.recognizer.init = jest.fn(() => Promise.resolve())
-    editor.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
-    editor.selector.start = jest.fn()
-    editor.selector.continue = jest.fn()
-    editor.selector.end = jest.fn()
-    editor.selector.removeSelectedGroup = jest.fn()
-    editor.selector.drawSelectedGroup = jest.fn()
-    editor.event.emitSelected = jest.fn()
-    const pointerId = 666
-    const stroke = buildOIStroke()
-    const circle = buildOICircle()
-
-    beforeAll(async () => {
-      await editor.initialize()
-      editor.model.addSymbol(stroke)
-      editor.model.addSymbol(circle)
-    })
-
-    test("should select all symbols", async () =>
-    {
-      editor.selectAll()
-      expect(editor.renderer.drawSymbol).toHaveBeenCalledTimes(2)
-      expect(editor.selector.drawSelectedGroup).toHaveBeenNthCalledWith(1,[stroke, circle])
-      expect(editor.event.emitSelected).toHaveBeenNthCalledWith(1,[stroke, circle])
-    })
-    test("should unselect all symbols", async () =>
-    {
-      editor.unselectAll()
-      expect(editor.renderer.drawSymbol).toHaveBeenCalledTimes(2)
-      expect(editor.selector.removeSelectedGroup).toHaveBeenCalledTimes(1)
-      expect(editor.event.emitSelected).toHaveBeenNthCalledWith(1,[])
-    })
-    test("should call selector.start on pointerdown", async () =>
-    {
-      const target = editor.layers.root.querySelector("svg") as SVGSVGElement
-      const pointerDown = new LeftClickEventMock("pointerdown", {
-        pointerType: "pen",
-        clientX: 1,
-        clientY: 1,
-        pressure: 1,
-        pointerId
-      }) as PointerEvent
-
-      target.dispatchEvent(pointerDown)
-      expect(editor.selector.start).toBeCalledTimes(1)
-      expect(editor.selector.continue).toBeCalledTimes(0)
-      expect(editor.selector.end).toBeCalledTimes(0)
-    })
-    test("should call selector.continue on pointermove", async () =>
-    {
-      const target = editor.layers.root.querySelector("svg") as SVGSVGElement
-      const pointerMove = new LeftClickEventMock("pointermove", {
-        pointerType: "pen",
-        clientX: 5,
-        clientY: 4,
-        pressure: 1,
-        pointerId
-      }) as PointerEvent
-
-      target.dispatchEvent(pointerMove)
-      expect(editor.selector.start).toBeCalledTimes(0)
-      expect(editor.selector.continue).toBeCalledTimes(1)
-      expect(editor.selector.end).toBeCalledTimes(0)
-    })
-    test("should call selector.end on pointerup", async () =>
-    {
-      const target = editor.layers.root.querySelector("svg") as SVGSVGElement
-      const pointerUp = new LeftClickEventMock("pointerup", {
-        pointerType: "pen",
-        clientX: 10,
-        clientY: 11,
-        pressure: 1,
-        pointerId
-      }) as PointerEvent
-
-      target.dispatchEvent(pointerUp)
-      expect(editor.selector.start).toBeCalledTimes(0)
-      expect(editor.selector.continue).toBeCalledTimes(0)
-      expect(editor.selector.end).toBeCalledTimes(1)
     })
   })
 
@@ -986,14 +856,21 @@ describe("EditorOffscreen.ts", () =>
   describe("destroy", () =>
   {
     const editor = new EditorOffscreen(document.createElement("div"), EditorOptions)
-    editor.grabber.detach = jest.fn()
+    editor.eraser.detach = jest.fn()
+    editor.selector.detach = jest.fn()
+    editor.move.detach = jest.fn()
+    editor.writer.detach = jest.fn()
+
     editor.renderer.destroy = jest.fn()
     editor.recognizer.destroy = jest.fn()
 
-    test("should call grabber.detach", async () =>
+    test("should detach all.managers", async () =>
     {
       editor.destroy()
-      await expect(editor.grabber.detach).toBeCalledTimes(1)
+      await expect(editor.eraser.detach).toBeCalledTimes(1)
+      await expect(editor.selector.detach).toBeCalledTimes(1)
+      await expect(editor.move.detach).toBeCalledTimes(1)
+      await expect(editor.writer.detach).toBeCalledTimes(1)
     })
 
     test("should call renderer.destroy", async () =>

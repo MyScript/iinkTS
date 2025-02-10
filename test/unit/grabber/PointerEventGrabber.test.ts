@@ -121,11 +121,12 @@ describe("PointerEventGrabber.ts", () =>
 
       expect(grabber.onPointerDown)
         .toBeCalledWith(
-          mouseDownEvt,
           expect.objectContaining({
-            x: mouseDownEvt.clientX,
-            y: mouseDownEvt.clientY,
-            p: mouseDownEvt.pressure
+            pointer: expect.objectContaining({
+              x: mouseDownEvt.clientX,
+              y: mouseDownEvt.clientY,
+              p: mouseDownEvt.pressure
+            })
           })
         )
     })
@@ -143,11 +144,12 @@ describe("PointerEventGrabber.ts", () =>
 
       expect(grabber.onPointerDown)
         .toBeCalledWith(
-          touchDownEvt,
           expect.objectContaining({
-            x: touchDownEvt.changedTouches[0].clientX,
-            y: touchDownEvt.changedTouches[0].clientY,
-            p: touchDownEvt.pressure
+            pointer: expect.objectContaining({
+              x: touchDownEvt.changedTouches[0].clientX,
+              y: touchDownEvt.changedTouches[0].clientY,
+              p: touchDownEvt.pressure
+            })
           })
         )
     })
@@ -179,11 +181,12 @@ describe("PointerEventGrabber.ts", () =>
 
       expect(grabber.onPointerDown)
         .toBeCalledWith(
-          pointerDownEvt,
           expect.objectContaining({
-            x: pointerDownEvt.clientX,
-            y: pointerDownEvt.clientY,
-            p: pointerDownEvt.pressure
+            pointer: expect.objectContaining({
+              x: pointerDownEvt.clientX,
+              y: pointerDownEvt.clientY,
+              p: pointerDownEvt.pressure
+            })
           })
         )
       grabber.detach()
@@ -204,11 +207,12 @@ describe("PointerEventGrabber.ts", () =>
 
       expect(grabber.onPointerDown)
         .toBeCalledWith(
-          pointerDownEvt,
           expect.objectContaining({
-            x: Math.round(pointerDownEvt.clientX / 100) * 100,
-            y: Math.round(pointerDownEvt.clientY / 100) * 100,
-            p: pointerDownEvt.pressure
+            pointer: expect.objectContaining({
+              x: Math.round(pointerDownEvt.clientX / 100) * 100,
+              y: Math.round(pointerDownEvt.clientY / 100) * 100,
+              p: pointerDownEvt.pressure
+            })
           })
         )
     })
@@ -228,11 +232,12 @@ describe("PointerEventGrabber.ts", () =>
 
       expect(grabber.onPointerDown)
         .toBeCalledWith(
-          pointerDownEvt,
           expect.objectContaining({
-            x: pointerDownEvt.clientX,
-            y: pointerDownEvt.clientY,
-            p: pointerDownEvt.pressure
+            pointer: expect.objectContaining({
+              x: pointerDownEvt.clientX,
+              y: pointerDownEvt.clientY,
+              p: pointerDownEvt.pressure
+            })
           })
         )
     })

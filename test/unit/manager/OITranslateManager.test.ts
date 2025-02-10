@@ -75,9 +75,6 @@ describe("OITranslateManager.ts", () =>
     editor.recognizer.transformTranslate = jest.fn(() => Promise.resolve())
     editor.renderer.setAttribute = jest.fn()
     editor.renderer.drawSymbol = jest.fn()
-    editor.setPenStyle = jest.fn(() => Promise.resolve())
-    editor.setTheme = jest.fn(() => Promise.resolve())
-    editor.setPenStyleClasses = jest.fn(() => Promise.resolve())
 
     const manager = new OITranslateManager(editor)
     manager.applyToSymbol = jest.fn()

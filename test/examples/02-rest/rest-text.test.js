@@ -15,8 +15,8 @@ test.describe("Rest Text", () => {
     await Promise.all([
       page.goto("/examples/rest/rest_text_iink.html"),
       page.waitForResponse(req => req.url().includes("/api/v4.0/iink/availableLanguageList")),
-      waitForEditorInit(page)
     ])
+    await waitForEditorInit(page)
   })
 
   test("should have title", async ({ page }) => {
