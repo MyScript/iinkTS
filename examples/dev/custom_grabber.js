@@ -36,7 +36,7 @@ class CustomGrabber extends iink.PointerEventGrabber {
 
     if (this.onPointerDown) {
       /**
-       * getPointerInfos is inherit from PointerEventGrabber
+       * getPointerInfos inherits PointerEventGrabber
        */
       const pointerInfo = this.getPointerInfos(evt)
       this.downElement.textContent = `Down at: ${JSON.stringify(pointerInfo.pointer)}`
@@ -54,7 +54,7 @@ class CustomGrabber extends iink.PointerEventGrabber {
     if (this.capturing && this.pointerType === evt.pointerType) {
       if (this.onPointerMove) {
         /**
-         * getPointerInfos is inherit from PointerEventGrabber
+         * getPointerInfos inherits PointerEventGrabber
          */
         const pointerInfo = this.getPointerInfos(evt)
         this.moveElement.textContent = `Move to: ${JSON.stringify(pointerInfo.pointer)}`
@@ -74,7 +74,7 @@ class CustomGrabber extends iink.PointerEventGrabber {
       evt.stopPropagation()
       if (this.onPointerUp) {
         /**
-         * getPointerInfos is inherit from PointerEventGrabber
+         * getPointerInfos inherits PointerEventGrabber
          */
         const pointerInfo = this.getPointerInfos(evt)
         this.upElement.textContent = `Up at: ${JSON.stringify(pointerInfo.pointer)}`
