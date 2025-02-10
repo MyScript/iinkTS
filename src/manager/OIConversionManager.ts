@@ -42,7 +42,7 @@ import
   TOISymbolChar,
   TPoint
 } from "../symbol"
-import { RecognizedKind } from "../symbol/recognized/OIRecognizedBase"
+import { RecognizedKind } from "../symbol"
 import { computeAngleAxeRadian, computeAverage, convertBoundingBoxMillimeterToPixel, convertMillimeterToPixel, createUUID } from "../utils"
 
 /**

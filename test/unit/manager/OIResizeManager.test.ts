@@ -198,9 +198,6 @@ describe("OIResizeManager.ts", () =>
     editor.renderer.drawSymbol = jest.fn()
     editor.snaps.configuration.guide = false
     editor.snaps.configuration.symbol = false
-    editor.setPenStyle = jest.fn(() => Promise.resolve())
-    editor.setTheme = jest.fn(() => Promise.resolve())
-    editor.setPenStyleClasses = jest.fn(() => Promise.resolve())
 
     const manager = new OIResizeManager(editor)
     manager.applyToSymbol = jest.fn()

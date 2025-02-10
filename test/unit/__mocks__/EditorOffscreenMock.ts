@@ -26,16 +26,8 @@ export class EditorOffscreenMock extends EditorOffscreen
     this.renderer.init(this.layers.rendering)
     // this.menu.render(this.layers.infos.root)
 
-    this.grabber.attach(this.renderer.layer)
-    this.grabber.onPointerDown = this.onPointerDown.bind(this)
-    this.grabber.onPointerMove = this.onPointerMove.bind(this)
-    this.grabber.onPointerUp = this.onPointerUp.bind(this)
     return Promise.resolve()
   })
-
-  setPenStyle = jest.fn()
-  setPenStyleClasses = jest.fn()
-  setTheme = jest.fn()
 
   createSymbol = jest.fn()
   createSymbols = jest.fn()

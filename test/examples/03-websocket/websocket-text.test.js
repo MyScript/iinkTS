@@ -37,8 +37,8 @@ test.describe('Websocket Text', () => {
     await Promise.all([
       page.goto('/examples/websocket/websocket_text_iink.html'),
       page.waitForResponse((req) => req.url().includes('/api/v4.0/iink/availableLanguageList')),
-      waitForEditorInit(page)
     ])
+    await waitForEditorInit(page)
     await callEditorIdle(page)
   })
 

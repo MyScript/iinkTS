@@ -1,8 +1,9 @@
 import { LoggerCategory, LoggerManager } from "../logger"
 import { OIModel } from "../model"
-import { OIEraser, TPointer, TSegment } from "../symbol"
+import { OIEraser, TSegment } from "../symbol"
 import { OISVGRenderer } from "../renderer"
 import { EditorOffscreen } from "../editor/EditorOffscreen"
+import { PointerEventGrabber, PointerInfo } from "../grabber"
 
 /**
  * @group Manager
@@ -10,6 +11,7 @@ import { EditorOffscreen } from "../editor/EditorOffscreen"
 export class OIEraseManager
 {
   #logger = LoggerManager.getLogger(LoggerCategory.WRITE)
+  grabber: PointerEventGrabber
   editor: EditorOffscreen
 
   currentEraser?: OIEraser
@@ -18,6 +20,7 @@ export class OIEraseManager
   {
     this.#logger.info("constructor")
     this.editor = editor
+    this.grabber = new PointerEventGrabber(editor.configuration.grabber)
   }
 
   get model(): OIModel
@@ -30,21 +33,34 @@ export class OIEraseManager
     return this.editor.renderer
   }
 
-  start(pointer: TPointer): void
+  attach(layer: HTMLElement): void
   {
-    this.#logger.info("startErase", { pointer })
+    this.grabber.attach(layer)
+    this.grabber.onPointerDown = this.start.bind(this)
+    this.grabber.onPointerMove = this.continue.bind(this)
+    this.grabber.onPointerUp = this.end.bind(this)
+  }
+
+  detach(): void
+  {
+    this.grabber.detach()
+  }
+
+  start(info: PointerInfo): void
+  {
+    this.#logger.info("startErase", { info })
     this.currentEraser = new OIEraser()
-    this.currentEraser.pointers.push(pointer)
+    this.currentEraser.pointers.push(info.pointer)
     this.renderer.drawSymbol(this.currentEraser!)
   }
 
-  continue(pointer: TPointer): void
+  continue(info: PointerInfo): void
   {
-    this.#logger.info("continueErase", { pointer })
+    this.#logger.info("continueErase", { info })
     if (!this.currentEraser) {
       throw new Error("Can't update current eraser because currentEraser is undefined")
     }
-    this.currentEraser.pointers.push(pointer)
+    this.currentEraser.pointers.push(info.pointer)
     this.renderer.drawSymbol(this.currentEraser)
     const lastSeg: TSegment = {
       p1: this.currentEraser.pointers.at(-1)!,
@@ -59,13 +75,13 @@ export class OIEraseManager
     this.model.symbolsToDelete.map(s => this.renderer.drawSymbol(s))
   }
 
-  async end(pointer: TPointer): Promise<void>
+  async end(info: PointerInfo): Promise<void>
   {
-    this.#logger.info("finishErasing", { pointer })
-    this.continue(pointer)
+    this.#logger.info("finishErasing", { info })
+    this.continue(info)
 
     this.renderer.removeSymbol(this.currentEraser!.id)
-    this.currentEraser = undefined
     this.editor.removeSymbols(this.model.symbolsToDelete.map(s => s.id))
+    this.currentEraser = undefined
   }
 }

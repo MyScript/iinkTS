@@ -36,16 +36,16 @@ class CustomGrabber extends iink.PointerEventGrabber {
 
     if (this.onPointerDown) {
       /**
-       * extractPoint is inherit from PointerEventGrabber
+       * getPointerInfos is inherit from PointerEventGrabber
        */
-      const point = this.extractPoint(evt)
-      this.downElement.textContent = `Down at: ${JSON.stringify(point)}`
+      const pointerInfo = this.getPointerInfos(evt)
+      this.downElement.textContent = `Down at: ${JSON.stringify(pointerInfo.pointer)}`
       this.moveElement.textContent = "Move to:"
       this.upElement.textContent = "Up to:"
       /**
        * onPointerDown is bind with the editor
        */
-      this.onPointerDown(evt, point)
+      this.onPointerDown(pointerInfo)
     }
   }
 
@@ -53,12 +53,15 @@ class CustomGrabber extends iink.PointerEventGrabber {
   {
     if (this.capturing && this.pointerType === evt.pointerType) {
       if (this.onPointerMove) {
-        const point = this.extractPoint(evt)
-        this.moveElement.textContent = `Move to: ${JSON.stringify(point)}`
+        /**
+         * getPointerInfos is inherit from PointerEventGrabber
+         */
+        const pointerInfo = this.getPointerInfos(evt)
+        this.moveElement.textContent = `Move to: ${JSON.stringify(pointerInfo.pointer)}`
         /**
          * onPointerMove is bind with the editor
          */
-        this.onPointerMove(evt, point)
+        this.onPointerMove(pointerInfo)
       }
     }
   }
@@ -70,12 +73,15 @@ class CustomGrabber extends iink.PointerEventGrabber {
       this.capturing = false
       evt.stopPropagation()
       if (this.onPointerUp) {
-        const point = this.extractPoint(evt)
-        this.upElement.textContent = `Up at: ${JSON.stringify(point)}`
+        /**
+         * getPointerInfos is inherit from PointerEventGrabber
+         */
+        const pointerInfo = this.getPointerInfos(evt)
+        this.upElement.textContent = `Up at: ${JSON.stringify(pointerInfo.pointer)}`
         /**
          * onPointerUp is bind with the editor
          */
-        this.onPointerUp(evt, point)
+        this.onPointerUp(pointerInfo)
       }
     }
   }

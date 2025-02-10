@@ -28,11 +28,8 @@ test.describe("Websocket Text Custom Lexicon", () => {
   })
 
   test("should recognize 'covfefe' after", async ({ page }) => {
-    await Promise.all([
-      waitForEditorInit(page),
-      page.locator("#lexicon").fill("covfefe"),
-      page.locator("#reinit").click(),
-    ])
+    await page.locator("#lexicon").fill("covfefe")
+    await page.locator("#reinit").click()
     await writeStrokes(page, covfefe.strokes)
     await callEditorIdle(page)
     const exports = await getEditorExports(page)

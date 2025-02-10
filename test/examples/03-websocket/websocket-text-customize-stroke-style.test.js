@@ -23,8 +23,8 @@ test.describe("Websocket Text Customize Stroke Style", () => {
     await Promise.all([
       page.goto("/examples/websocket/websocket_text_customize_stroke_style.html"),
       page.waitForResponse(req => req.url().includes("api/v4.0/iink/font/google/language/en_US")),
-      waitForEditorInit(page),
     ])
+    await waitForEditorInit(page)
     await callEditorIdle(page)
   })
 

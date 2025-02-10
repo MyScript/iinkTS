@@ -1,5 +1,5 @@
 import { EditorTool } from "../Constants"
-import { PointerEventGrabber } from "../grabber"
+import { PointerEventGrabber, PointerInfo } from "../grabber"
 import { Model, TExport, TJIIXExport } from "../model"
 import { TWSMessageEventSVGPatch, WSRecognizer, DefaultMarginConfiguration, TConverstionState, TMarginConfiguration } from "../recognizer"
 import { WSSmartGuide } from "../smartguide"
@@ -172,30 +172,26 @@ export class EditorWebSocket extends AbstractEditor
     this.event.emitExported(exports)
   }
 
-  protected onPointerDown(evt: PointerEvent, point: TPointer): void
+  protected onPointerDown(info: PointerInfo): void
   {
-    this.logger.info("onPointerDown", { tool: this.tool, evt, point })
-    let { pointerType } = evt
+    this.logger.info("onPointerDown", { tool: this.tool, info })
     const style: TPenStyle = Object.assign({}, this.theme?.ink, this.currentPenStyle)
-    if (this.tool === EditorTool.Erase) {
-      pointerType = "eraser"
-    }
-    this.model.initCurrentStroke(point, pointerType, style)
+    this.model.initCurrentStroke(info.pointer, this.tool === EditorTool.Erase ? "eraser" : info.pointerType, style)
     this.drawCurrentStroke()
   }
 
-  protected onPointerMove(_evt: PointerEvent, point: TPointer): void
+  protected onPointerMove(info: PointerInfo): void
   {
-    this.logger.info("onPointerMove", { tool: this.tool, point })
-    this.model.appendToCurrentStroke(point)
+    this.logger.info("onPointerMove", { tool: this.tool, info })
+    this.model.appendToCurrentStroke(info.pointer)
     this.drawCurrentStroke()
   }
 
-  protected async onPointerUp(_evt: PointerEvent, point: TPointer): Promise<void>
+  protected async onPointerUp(info: PointerInfo): Promise<void>
   {
     try {
-      this.logger.info("onPointerUp", { tool: this.tool, point })
-      this.model.endCurrentStroke(point)
+      this.logger.info("onPointerUp", { tool: this.tool, info })
+      this.model.endCurrentStroke(info.pointer)
       await this.synchronizeModelWithBackend()
     } catch (error) {
       this.event.emitError(error as Error)

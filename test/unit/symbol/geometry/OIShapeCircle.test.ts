@@ -50,6 +50,50 @@ describe("OIShapeCircle.ts", () =>
     })
   })
 
+  describe("overlaps", () =>
+  {
+    const center: TPoint = { x: 10, y: 10 }
+    const radius = 10
+    const circle = new OIShapeCircle(center, radius)
+    test(`should return true if partially wrap`, () =>
+    {
+      const boundaries: TBox = { height: 10, width: 10, x: -5, y: -5 }
+      expect(circle.overlaps(boundaries)).toEqual(true)
+    })
+    test(`should return true if totally wrap`, () =>
+    {
+      const boundaries: TBox = { height: 50, width: 50, x: -25, y: -25 }
+      expect(circle.overlaps(boundaries)).toEqual(true)
+    })
+    test(`should return false if box is outside`, () =>
+    {
+      const boundaries: TBox = { height: 2, width: 2, x: 50, y: 50 }
+      expect(circle.overlaps(boundaries)).toEqual(false)
+    })
+    test(`should return false if box is inside`, () =>
+    {
+      const boundaries: TBox = { height: 2, width: 2, x: 9, y: 9 }
+      expect(circle.overlaps(boundaries)).toEqual(false)
+    })
+  })
+
+  describe("clone", () =>
+  {
+    test("should return clone", () =>
+    {
+      const center: TPoint = { x: 10, y: 10 }
+      const radius = 10
+      const style: TStyle = {
+        color: "blue",
+        width: 20
+      }
+      const circle = new OIShapeCircle(center, radius, style)
+      const clone = circle.clone()
+      expect(clone).toEqual(circle)
+      expect(clone).not.toBe(circle)
+    })
+  })
+
   describe("createBetweenPoints", () =>
   {
     test("should create", () =>
@@ -170,47 +214,4 @@ describe("OIShapeCircle.ts", () =>
     })
   })
 
-  describe("overlaps", () =>
-  {
-    const center: TPoint = { x: 10, y: 10 }
-    const radius = 10
-    const circle = new OIShapeCircle(center, radius)
-    test(`should return true if partially wrap`, () =>
-    {
-      const boundaries: TBox = { height: 10, width: 10, x: -5, y: -5 }
-      expect(circle.overlaps(boundaries)).toEqual(true)
-    })
-    test(`should return true if totally wrap`, () =>
-    {
-      const boundaries: TBox = { height: 50, width: 50, x: -25, y: -25 }
-      expect(circle.overlaps(boundaries)).toEqual(true)
-    })
-    test(`should return false if box is outside`, () =>
-    {
-      const boundaries: TBox = { height: 2, width: 2, x: 50, y: 50 }
-      expect(circle.overlaps(boundaries)).toEqual(false)
-    })
-    test(`should return false if box is inside`, () =>
-    {
-      const boundaries: TBox = { height: 2, width: 2, x: 9, y: 9 }
-      expect(circle.overlaps(boundaries)).toEqual(false)
-    })
-  })
-
-  describe("clone", () =>
-  {
-    test("should return clone", () =>
-    {
-      const center: TPoint = { x: 10, y: 10 }
-      const radius = 10
-      const style: TStyle = {
-        color: "blue",
-        width: 20
-      }
-      const circle = new OIShapeCircle(center, radius, style)
-      const clone = circle.clone()
-      expect(clone).toEqual(circle)
-      expect(clone).not.toBe(circle)
-    })
-  })
 })

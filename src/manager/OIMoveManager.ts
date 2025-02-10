@@ -1,4 +1,5 @@
 import { EditorOffscreen } from "../editor/EditorOffscreen"
+import { PointerEventGrabber, PointerInfo } from "../grabber"
 import { OISVGRenderer } from "../renderer"
 
 /**
@@ -6,7 +7,9 @@ import { OISVGRenderer } from "../renderer"
  */
 export class OIMoveManager
 {
+  grabber: PointerEventGrabber
   editor: EditorOffscreen
+
   origin?: {
     left: number,
     top: number,
@@ -17,6 +20,7 @@ export class OIMoveManager
   constructor(editor: EditorOffscreen)
   {
     this.editor = editor
+    this.grabber = new PointerEventGrabber(editor.configuration.grabber)
   }
 
   get renderer(): OISVGRenderer
@@ -24,31 +28,44 @@ export class OIMoveManager
     return this.editor.renderer
   }
 
-  start(evt: PointerEvent): void
+  attach(layer: HTMLElement): void
+  {
+    this.grabber.attach(layer)
+    this.grabber.onPointerDown = this.start.bind(this)
+    this.grabber.onPointerMove = this.continue.bind(this)
+    this.grabber.onPointerUp = this.end.bind(this)
+  }
+
+  detach(): void
+  {
+    this.grabber.detach()
+  }
+
+  start(info: PointerInfo): void
   {
     this.origin = {
       left: this.renderer.parent.scrollLeft,
       top: this.renderer.parent.scrollTop,
-      x: evt.clientX,
-      y: evt.clientY,
+      x: info.clientX,
+      y: info.clientY,
     }
   }
 
-  continue(evt: PointerEvent): void
+  continue(info: PointerInfo): void
   {
     if (!this.origin) {
       throw new Error("Can't move cause origin is undefined")
     }
-    const dx = evt.clientX - this.origin.x
-    const dy = evt.clientY - this.origin.y
+    const dx = info.clientX - this.origin.x
+    const dy = info.clientY - this.origin.y
 
     this.renderer.parent.scrollTop = this.origin.top - dy
     this.renderer.parent.scrollLeft = this.origin.left - dx
   }
 
-  async end(evt: PointerEvent): Promise<void>
+  end(info: PointerInfo): void
   {
-    this.continue(evt)
+    this.continue(info)
     this.origin = undefined
   }
 }

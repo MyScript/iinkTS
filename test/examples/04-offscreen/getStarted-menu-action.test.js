@@ -101,13 +101,19 @@ test.describe("Offscreen Get Started Menu Action", () => {
     })
 
     await test.step("should clear model", async () => {
-      await page.evaluate("editor.clear()")
+      await Promise.all([
+        waitForChangedEvent(page),
+        page.locator(locator.menu.action.clearBtn).click()
+      ])
       const symbols = await getEditorSymbols(page)
       expect(symbols).toHaveLength(0)
     })
 
     await test.step("should undo clear", async () => {
-      await page.locator(locator.menu.action.undoBtn).click()
+      await Promise.all([
+        waitForChangedEvent(page),
+        page.locator(locator.menu.action.undoBtn).click()
+      ])
       const symbols = await getEditorSymbols(page)
       expect(symbols).toHaveLength(1)
       expect(symbols[0].type).toEqual("text")
@@ -115,7 +121,10 @@ test.describe("Offscreen Get Started Menu Action", () => {
     })
 
     await test.step("should redo clear", async () => {
-      await page.locator(locator.menu.action.redoBtn).click()
+      await Promise.all([
+        waitForChangedEvent(page),
+        page.locator(locator.menu.action.redoBtn).click()
+      ])
       const symbols = await getEditorSymbols(page)
       expect(symbols).toHaveLength(0)
     })
