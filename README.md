@@ -98,37 +98,22 @@ yarn add iink-ts
     <div id="editor"></div>
 ```
 
-5. In JavaScript and within a `<script>` tag placed before the closing tag `</body>`, create the editor using the Editor `constructor` function, your editor html element and a simple configuration, then initialize it:
-* Initialization in the standard case, i.e. websocket or rest mode
+5. In JavaScript and within a `<script>` tag placed before the closing `</body>` tag, create the editor using the `load` function of the editor, your html editor element, the type of editor desired and the possible options depending on the type of editor then initialize it:
 ```javascript
-  const editorElement = document.getElementById('editor');
+    const editorElement = document.getElementById('editor');
 
-  const editor = new iink.Editor(editorElement, {
-      configuration: {
-          server: {
-              applicationKey: '#YOUR MYSCRIPT DEVELOPER APPLICATION KEY#',
-              hmacKey: '#YOUR MYSCRIPT DEVELOPER HMAC KEY#'
-          }
-      }
-  });
-  editor.initialize();
-```
-* Initialization in the offscreen case
-```javascript
-  const editorElement = document.getElementById('editor');
-
-  const editor = await iink.Editor.load(editorElement, "REST", /* or WEBSOCKET or OFFSCREEN */
+    const editor = await iink.Editor.load(editorElement, "OFFSCREEN", /* or WEBSOCKET or REST */
+    {
         configuration: {
             server: {
                 applicationKey: '#YOUR MYSCRIPT DEVELOPER APPLICATION KEY#',
                 hmacKey: '#YOUR MYSCRIPT DEVELOPER HMAC KEY#'
             }
         }
-  });
+    });
 ```
 
 6. Your `index.html` file should look like this:
-* In the standard case
 ```html
 <html>
     <head>
@@ -145,13 +130,14 @@ yarn add iink-ts
         <script>
             const editorElement = document.getElementById('editor');
 
-            const editor = await iink.Editor.load(editorElement, "REST", /* or WEBSOCKET or OFFSCREEN */
-                    configuration: {
-                        server: {
-                            applicationKey: '#YOUR MYSCRIPT DEVELOPER APPLICATION KEY#',
-                            hmacKey: '#YOUR MYSCRIPT DEVELOPER HMAC KEY#'
-                        }
+            const editor = await iink.Editor.load(editorElement, "OFFSCREEN", /* or WEBSOCKET or REST */
+            {
+                configuration: {
+                    server: {
+                        applicationKey: '#YOUR MYSCRIPT DEVELOPER APPLICATION KEY#',
+                        hmacKey: '#YOUR MYSCRIPT DEVELOPER HMAC KEY#'
                     }
+                }
             });
         </script>
     </body>
