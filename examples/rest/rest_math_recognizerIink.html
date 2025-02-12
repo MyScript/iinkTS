@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Math Recognizer Iink</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
+      integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X"
+      crossorigin="anonymous"
+    />
+
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"
+      integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4"
+      crossorigin="anonymous"
+    ></script>
+
+    <script type="text/javascript" src="../../dist/iink.min.js"></script>
+    <style>
+      #editor {
+        height: calc(100dvh - 166px);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="result"></div>
+
+    <nav class="flex-container wrap gap">
+      <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+        <img src="../assets/img/clear.svg" />
+      </button>
+      <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+        <img src="../assets/img/undo.svg" />
+      </button>
+      <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+        <img src="../assets/img/redo.svg" />
+      </button>
+    </nav>
+
+    <div id="editor"></div>
+
+    <script>
+      const editorElement = document.getElementById("editor")
+      const resultElement = document.getElementById("result")
+      const clearElement = document.getElementById("clear")
+      const undoElement = document.getElementById("undo")
+      const redoElement = document.getElementById("redo")
+
+      function cleanLatex(latexExport) {
+        if (typeof latexExport === "number") {
+          latexExport = latexExport.toString()
+        }
+        if (latexExport.includes("\\\\")) {
+          const steps = "\\begin{align*}" + latexExport + "\\end{align*}"
+          return steps
+            .replace("\\begin{aligned}", "")
+            .replace("\\end{aligned}", "")
+            .replace(new RegExp("(align.{1})", "g"), "aligned")
+        }
+        return latexExport.replace(new RegExp("(align.{1})", "g"), "aligned")
+      }
+
+      /**
+       * we expose the editor so we can access it in tests
+       */
+      let editor
+
+      /**
+       * We use a function to wait the server configuration to load
+       */
+      async function loadEditor() {
+        const res = await fetch("../server-configuration.json")
+        const server = await res.json()
+        const options = {
+          configuration: {
+            server,
+            recognition: {
+              type: "MATH",
+              math: {
+                mimeTypes: ["application/x-latex"],
+              },
+            },
+          },
+        }
+
+        /**
+         * get editor instance from type
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Editor parameters
+         */
+        editor = await iink.Editor.load(editorElement, "REST-RECOGNIZER", options)
+
+        editor.event.addEventListener("changed", (event) => {
+          undoElement.disabled = !event.detail.canUndo
+          redoElement.disabled = !event.detail.canRedo
+          clearElement.disabled = !event.detail.canClear
+        })
+
+        editor.event.addEventListener("exported", (evt) => {
+          const exports = evt.detail
+          if (exports && exports["application/x-latex"]) {
+            try {
+              katex.render(
+                cleanLatex(exports["application/x-latex"]),
+                resultElement
+              )
+            } catch (error) {
+              resultElement.innerHTML =
+                "<span>" +
+                cleanLatex(exports["application/x-latex"]) +
+                "</span>"
+            }
+          } else {
+            resultElement.innerHTML = ""
+          }
+        })
+
+        clearElement.addEventListener("click", async () => {
+          editor.clear()
+          resultElement.innerHTML = ""
+        })
+
+        undoElement.addEventListener("click", () => {
+          editor.undo()
+        })
+
+        redoElement.addEventListener("click", () => {
+          editor.redo()
+        })
+
+        window.addEventListener("resize", () => {
+          editor.resize()
+        })
+      }
+
+      loadEditor().catch((error) => console.error(error))
+    </script>
+  </body>
+</html>

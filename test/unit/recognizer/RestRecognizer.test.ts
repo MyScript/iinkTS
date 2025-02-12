@@ -105,7 +105,7 @@ describe("RestRecognizer.ts", () =>
       const rr = new RestRecognizer(newConf)
       const newModel = await rr.convert(model, "DIGITAL_EDIT")
 
-      let mimeTypes = []
+      let mimeTypes: string[]
       switch (type) {
         case "TEXT":
           mimeTypes = config.recognition.text!.mimeTypes
@@ -119,6 +119,8 @@ describe("RestRecognizer.ts", () =>
         case "Raw Content":
           mimeTypes = ["application/vnd.myscript.jiix"]
           break
+        default:
+          throw new Error("Invalid recognition type")
       }
 
       expect(fetchMock).toHaveBeenCalledTimes(mimeTypes.length)

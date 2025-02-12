@@ -14,3 +14,6 @@ export * from "./EditorWebSocketConfiguration"
 
 export * from "./EditorOffscreen"
 export * from "./EditorOffscreenConfiguration"
+
+export * from "./EditorInk"
+export * from "./EditorInkConfiguration"

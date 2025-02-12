@@ -15,3 +15,6 @@ export * from "./WSRecognizerConfiguration"
 export * from "./RecognitionConfiguration"
 export * from "./ServerConfiguration"
 export * from "./recognition"
+
+export * from "./RecognizerInk"
+export * from "./RecognizerInkConfiguration"
