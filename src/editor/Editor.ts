@@ -3,6 +3,7 @@ import { EditorType } from "./AbstractEditor"
 import { EditorOffscreen, TEditorOffscreenOptions } from "./EditorOffscreen"
 import { EditorRest, TEditorRestOptions } from "./EditorRest"
 import { EditorWebSocket, TEditorWebsocketOptions } from "./EditorWebSocket"
+import { EditorInk, TEditorInkOptions } from "./EditorInk"
 
 /**
  * @group Editor
@@ -11,10 +12,10 @@ import { EditorWebSocket, TEditorWebsocketOptions } from "./EditorWebSocket"
 export class Editor
 {
   protected static logger = LoggerManager.getLogger(LoggerCategory.EDITOR)
-  protected static instance: EditorOffscreen | EditorRest | EditorWebSocket | undefined
+  protected static instance: EditorOffscreen | EditorRest | EditorWebSocket | EditorInk |undefined
 
-  static async load<T extends EditorType>(rootElement: HTMLElement, type: T, options: T extends "OFFSCREEN" ? TEditorOffscreenOptions : T extends "REST" ? TEditorRestOptions : TEditorWebsocketOptions):
-    Promise<T extends "OFFSCREEN" ? EditorOffscreen : T extends "REST" ? EditorRest : EditorWebSocket>
+  static async load<T extends EditorType>(rootElement: HTMLElement, type: T, options: T extends "OFFSCREEN" ? TEditorOffscreenOptions : T extends "REST" ? TEditorRestOptions : TEditorWebsocketOptions extends "REST-RECOGNIZER" ? TEditorInkOptions : TEditorWebsocketOptions):
+    Promise<T extends "OFFSCREEN" ? EditorOffscreen : T extends "REST" ? EditorRest : EditorWebSocket extends "REST-RECOGNIZER" ? EditorInk : EditorWebSocket>
   {
     Editor.logger.info("load", { type, options })
     if (!options) {
@@ -31,8 +32,9 @@ export class Editor
       case "REST":
         Editor.instance = new EditorRest(rootElement, options as TEditorRestOptions)
         break
-      // case "RECOGNIZER":
-      // break;
+      case "REST-RECOGNIZER":
+        Editor.instance = new EditorInk(rootElement, options as TEditorInkOptions)
+        break;
       // case "WEBSOCKET":
       default:
         Editor.instance = new EditorWebSocket(rootElement, options as TEditorWebsocketOptions)
@@ -41,10 +43,10 @@ export class Editor
 
     await Editor.instance.initialize()
 
-    return Editor.instance as T extends "OFFSCREEN" ? EditorOffscreen : T extends "REST" ? EditorRest : EditorWebSocket
+    return Editor.instance as T extends "OFFSCREEN" ? EditorOffscreen : T extends "REST" ? EditorRest : EditorWebSocket extends "REST-RECOGNIZER" ? EditorInk : EditorWebSocket
   }
 
-  static getInstance(): EditorOffscreen | EditorRest | EditorWebSocket | undefined
+  static getInstance(): EditorOffscreen | EditorRest | EditorWebSocket | EditorInk | undefined
   {
     return Editor.instance
   }

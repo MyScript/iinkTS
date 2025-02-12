@@ -23,6 +23,7 @@ export const DefaultServerHTTPConfiguration: TServerHTTPConfiguration = {
   host: "cloud.myscript.com",
   applicationKey: "",
   hmacKey: "",
+  version: ""
 }
 
 /**

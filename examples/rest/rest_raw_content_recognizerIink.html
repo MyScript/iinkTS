@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Raw Content Recognizer Iink</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/renderjson.css" />
+
+    <script
+      type="text/javascript"
+      src="../assets/renderjson/renderjson.js"
+    ></script>
+    <script type="text/javascript" src="../../dist/iink.min.js"></script>
+    <style>
+      #editor {
+        height: calc(100dvh - 166px);
+      }
+      @media only screen and (max-width: 451px) {
+        #editor {
+          height: calc(100dvh - 213px);
+        }
+      }
+      #result {
+        border-bottom: solid gray 1px;
+        display: block;
+        text-align: start;
+        padding: 12px;
+        cursor: zoom-in;
+      }
+      #result.open {
+        position: absolute;
+        z-index: 999;
+        overflow: visible;
+        height: 100dvh;
+        width: 100dvw;
+        max-height: 100dvh;
+        background-color: white;
+        cursor: zoom-out;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="result"></div>
+
+    <nav class="flex-container wrap gap between">
+      <div class="flex-container wrap gap">
+        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/clear.svg" />
+        </button>
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/undo.svg" />
+        </button>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/redo.svg" />
+        </button>
+      </div>
+      <select id="language"></select>
+    </nav>
+
+    <div id="editor"></div>
+
+    <script>
+      const editorElement = document.getElementById("editor")
+      const resultElement = document.getElementById("result")
+      const languageElement = document.getElementById("language")
+      const clearElement = document.getElementById("clear")
+      const undoElement = document.getElementById("undo")
+      const redoElement = document.getElementById("redo")
+
+      /**
+       * we expose the editor so we can access it in tests
+       */
+      let editor
+
+      undoElement.addEventListener("click", () => {
+        editor?.undo()
+      })
+
+      redoElement.addEventListener("click", () => {
+        editor?.redo()
+      })
+
+      clearElement.addEventListener("click", () => {
+        editor?.clear()
+        resultElement.innerHTML = ""
+      })
+
+      resultElement.addEventListener("click", () => {
+        resultElement.classList.toggle("open")
+      })
+
+      window.addEventListener("resize", () => {
+        editor?.resize()
+      })
+
+      let serverConfiguration
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            type: "Raw Content",
+          },
+        },
+      }
+
+      languageElement.addEventListener("change", (e) => {
+        editorOptions.configuration.recognition.lang = e.target.value
+        loadEditor(editorOptions)
+      })
+
+      /**
+       * We use a function to wait the server configuration to load
+       */
+      async function loadEditor(options) {
+        if (!serverConfiguration) {
+          const res = await fetch("../server-configuration.json")
+          serverConfiguration = await res.json()
+        }
+        options.configuration.server = serverConfiguration
+
+        /**
+         * get editor instance from type
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Editor parameters
+         */
+        editor = await iink.Editor.load(editorElement, "REST-RECOGNIZER", options)
+
+        editor.event.addEventListener("changed", (event) => {
+          undoElement.disabled = !event.detail.canUndo
+          redoElement.disabled = !event.detail.canRedo
+          clearElement.disabled = !event.detail.canClear
+        })
+
+        const currentLanguage = editor.configuration.recognition.lang
+        const availableLanguageListResponse =
+          await iink.getAvailableLanguageList(editor.configuration)
+        Object.keys(availableLanguageListResponse.result).forEach(function (
+          key
+        ) {
+          const selected = currentLanguage === key
+          languageElement.options[languageElement.options.length] = new Option(
+            availableLanguageListResponse.result[key],
+            key,
+            selected,
+            selected
+          )
+        })
+
+        editor.event.addEventListener("exported", (evt) => {
+          while (resultElement.firstChild) {
+            resultElement.firstChild.remove()
+          }
+          resultElement.appendChild(renderjson(event.detail))
+        })
+      }
+
+      loadEditor(editorOptions).catch((error) => console.error(error))
+    </script>
+  </body>
+</html>
