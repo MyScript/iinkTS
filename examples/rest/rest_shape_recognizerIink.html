@@ -7,11 +7,12 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
 
-    <title>Rest Diagram</title>
+    <title>Shape Recognizer Ink</title>
 
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/renderjson.css" />
     <style>
       #editor {
         height: calc(100dvh - 170px);
@@ -23,6 +24,23 @@
         height: 2px;
         background-color: #1a9fff;
         opacity: 0;
+      }
+      #result {
+        border-bottom: solid gray 1px;
+        display: block;
+        text-align: start;
+        padding: 12px;
+        cursor: zoom-in;
+      }
+      #result.open {
+        position: absolute;
+        z-index: 999;
+        overflow: visible;
+        height: 100dvh;
+        width: 100dvw;
+        max-height: 100dvh;
+        background-color: white;
+        cursor: zoom-out;
       }
       #conversion-container {
         position: absolute;
@@ -40,6 +58,10 @@
     </style>
 
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
+    <script
+      type="text/javascript"
+      src="../assets/renderjson/renderjson.js"
+    ></script>
   </head>
 
   <body>
@@ -120,7 +142,9 @@
           editorElement.style.visibility = "visible";
         }
       }
-
+      resultElement.addEventListener("click", () => {
+        resultElement.classList.toggle("open")
+      })
       /**
        * we expose the editor for use in the integration test
        */
@@ -155,9 +179,12 @@
           eraserElement.disabled = !event.detail.canClear || editor.tool === iink.EditorTool.Erase || isPreview;
         });
 
-        editor.event.addEventListener("exported", (event) => {
-          resultElement.innerHTML = JSON.stringify(event.detail || {});
-        });
+        editor.event.addEventListener("exported", (evt) => {
+          while (resultElement.firstChild) {
+            resultElement.firstChild.remove()
+          }
+          resultElement.appendChild(renderjson(event.detail))
+        })
 
         editor.event.addEventListener("converted", (evt) => {
           const exports = evt.detail;
