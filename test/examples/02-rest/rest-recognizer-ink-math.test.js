@@ -11,7 +11,7 @@ import equation from "../__dataset__/equation"
 
 test.describe("Math Recognizer Iink", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/rest/rest_math_recognizerIink.html")
+    await page.goto("/examples/rest/rest_math_recognizerInk.html")
     await waitForEditorInit(page)
   })
 
