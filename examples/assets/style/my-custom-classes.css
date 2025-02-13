@@ -16,7 +16,6 @@ nav {
     cursor: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABIAAAASCAYAAABWzo5XAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAOxAAADsQBlSsOGwAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAEsSURBVDiNrdO7SgNBFMbx/3fmCbQ1tunDIayFBvFSKxbxBfSdBPEBtLIWb3Ebl4R9AQWLkE70CWbHZl1Eg2iSr5vL+c1hhhFTMhwOdyX1gQ2gVU+PgTyldNHtdq+/1+jroCiKtpmdSupNO6ApkgZmdtzpdJ5+QGVZ9qqqugSWfkO+5F3SnrvnDVQURTuE8PgP5DNvkjJ3fzaAEMLJDAjAclVVZwCqL/ZqBqSJme2YpMN5EIAYY9+A9XkhST0DVuaFgJYtAAGoDJgsAJoYkM+rSHqwlNL5Ajq6EMBoNLoBtmbsZuDumwYQYzwCXmdw3oAjAAPIsuxF0kG98GdE0r67PzcQgLvnIYQ14P4PyF39WZuH0rRdZVluxxj7kjaA1Xp6nFLKzezc3W+/13wAItdV6XjME1AAAAAASUVORK5CYII='), auto;
 }
 
-
 .my-custom-class .ms-layer-rendering {
     position: absolute;
     left: 0;
@@ -24,6 +23,23 @@ nav {
     z-index: 20;
     height: 100%;
     width: 100%;
+    cursor: crosshair;
+}
+.my-custom-class .ms-layer-ui {
+    position: sticky;
+    z-index: 25;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 100%;
+    pointer-events: none;
+    user-select: none;
+}
+
+.my-custom-class .ms-layer-ui>* {
+    cursor: auto;
+    pointer-events: all;
+    user-select: none;
 }
 
 .my-custom-class [data-layer="MODEL"],
@@ -58,13 +74,39 @@ nav {
     animation: rotate-plan 2.4s infinite ease-in-out;
 }
 
-.my-custom-class .error-msg {
-    z-index: 25;
+.my-custom-class .message-container {
     position: absolute;
-    width: 400px;
-    height: 400px;
-    top: calc(50% - 200px);
-    left: calc(50% - 200px);
+    width: 100%;
+    height: 100%;
+}
+
+.my-custom-class .message-overlay {
+    z-index: 99;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(228, 228, 228, 0.20);
+    cursor: not-allowed;
+}
+
+.my-custom-class .message-modal {
+    z-index: 999;
+    position: absolute;
+    max-height: calc(100% - 100px);
+    max-width: calc(100% - 8px);
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    overflow: auto;
+    font-size: 16px;
+    text-align: center;
+    word-wrap: break-word;
+    background-color: rgb(107, 107, 107);
+    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.25), -1px -1px 5px rgba(0, 0, 0, 0.25);
+    padding: 12px;
+}
+
+.my-custom-class .error-msg p {
     font-size: 16px;
     text-align: center;
     word-wrap: break-word;
@@ -72,6 +114,26 @@ nav {
 
 .my-custom-class .error-msg::before {
     content: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNzYgMjc2IiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWluWU1pbiBtZWV0Ij4KICAgIDxjaXJjbGUgY3g9IjEzOCIgY3k9IjEzOCIgcj0iMTI0IiBzdHJva2U9IiNCMzAwMDAiIHN0cm9rZS13aWR0aD0iMjgiIGZpbGw9Im5vbmUiLz4KICAgIDxsaW5lIHgxPSI0NSIgeTE9IjQ1IiB4Mj0iMjMxIiB5Mj0iMjMxIiBzdHJva2U9IiNCMzAwMDAiIHN0cm9rZS13aWR0aD0iMjIiLz4KPC9zdmc+Cg==);
+}
+
+.my-custom-class .message-modal .ms-button {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    cursor: pointer;
+    height: 32px;
+    width: 32px;
+    background-image: url('data:image/svg+xml,<%3Fxml version="1.0" encoding="UTF-8"%3F><svg width="24px" height="24px" stroke-width="1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" color="%23000000"><path d="M9.17218 14.8284L12.0006 12M14.829 9.17157L12.0006 12M12.0006 12L9.17218 9.17157M12.0006 12L14.829 14.8284" stroke="%23000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="%23000000" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path></svg>');
+    background-repeat: no-repeat;
+    background-position: center;
+    border-radius: 4px;
+    border: none;
+    font-size: inherit;
+    padding: 0;
+    background-color: #757575;
+    border: 1px solid white;
+    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.25), -1px -1px 5px rgba(0, 0, 0, 0.25);
+    color: rgba(0, 0, 0, 1);
 }
 
 .my-custom-class .smartguide {
