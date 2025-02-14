@@ -56,7 +56,7 @@ export class InkRecognizer {
       case "SHAPE":
         return {
           lang: this.configuration.recognition.lang,
-          diagram: this.configuration.recognition.diagram,
+          diagram: this.configuration.recognition.shape,
           export: this.configuration.recognition.export
         }
       case "MATH":
@@ -196,7 +196,7 @@ export class InkRecognizer {
     if (!mimeTypes.length) {
       switch (this.configuration.recognition.type) {
         case "SHAPE":
-          mimeTypes = this.configuration.recognition.diagram.mimeTypes
+          mimeTypes = this.configuration.recognition.shape.mimeTypes
           break
         case "MATH":
           mimeTypes = this.configuration.recognition.math.mimeTypes
