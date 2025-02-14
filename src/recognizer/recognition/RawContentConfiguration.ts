@@ -9,10 +9,10 @@ export type TRawContentConfiguration = {
   text?: TTextConfConfiguration
   "session-time"?: number
   recognition?: {
-    types: ("text" | "shape")[]
+    types: ("text" | "shape" | "math" | "decoration")[]
   }
   classification?: {
-    types: ("text" | "shape")[]
+    types: ("text" | "shape" | "math" | "decoration" | "drawing")[]
   }
   eraser?: TEraserConfiguration
 }
@@ -23,10 +23,10 @@ export type TRawContentConfiguration = {
  */
 export const DefaultRawContentConfiguration: TRawContentConfiguration = {
   recognition: {
-    types: ["text", "shape"]
+    types: [ "text", "math", "shape", "decoration"]
   },
   classification: {
-    types: ["text", "shape"]
+    types: [ "text", "math", "shape", "decoration", "drawing"]
   },
   eraser: DefaultEraserConfiguration,
 }

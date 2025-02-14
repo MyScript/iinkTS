@@ -1,17 +1,15 @@
 import { mergeDeep, isVersionSuperiorOrEqual, PartialDeep } from "../utils"
 import {
-  DefaultDiagramConfiguration,
+  DefaultShapeConfiguration,
   DefaultExportConfiguration,
   DefaultMathConfiguration,
   DefaultRawContentConfiguration,
-  DefaultRecognitionRendererConfiguration,
   DefaultTextConfiguration,
   TConvertionConfiguration,
-  TDiagramConfiguration,
+  TShapeConfiguration,
   TExportConfiguration,
   TMathConfiguration,
   TRawContentConfiguration,
-  TRecognitionRendererConfiguration,
   TTextConfiguration
 } from "./recognition"
 import { TRecognitionType } from "./RecognitionConfiguration"
@@ -25,9 +23,8 @@ export type TInkRecognizerRecognitionConfiguration = {
   lang: string
   math: TMathConfiguration
   text: TTextConfiguration
-  diagram: TDiagramConfiguration
+  shape: TShapeConfiguration
   "raw-content": TRawContentConfiguration
-  renderer: TRecognitionRendererConfiguration
   export: TExportConfiguration
   convert?: TConvertionConfiguration
 }
@@ -39,9 +36,8 @@ export type TInkRecognizerRecognitionConfiguration = {
 export const DefaultInkRecognizerRecognitionConfiguration: TInkRecognizerRecognitionConfiguration = {
   export: DefaultExportConfiguration,
   math: DefaultMathConfiguration,
-  diagram: DefaultDiagramConfiguration,
+  shape: DefaultShapeConfiguration,
   "raw-content": DefaultRawContentConfiguration,
-  renderer: DefaultRecognitionRendererConfiguration,
   text: DefaultTextConfiguration,
   type: "TEXT",
   lang: "en_US",
@@ -87,14 +83,10 @@ export class InkRecognizerConfiguration implements TInkRecognizerConfiguration {
     }
     this.recognition.math.mimeTypes = [...new Set(this.recognition.math.mimeTypes)]
 
-    if (configuration?.recognition?.diagram?.mimeTypes) {
-      this.recognition.diagram.mimeTypes = configuration.recognition.diagram.mimeTypes as ("application/vnd.myscript.jiix" | "application/vnd.openxmlformats-officedocument.presentationml.presentation" | "image/svg+xml")[]
+    if (configuration?.recognition?.shape?.mimeTypes) {
+      this.recognition.shape.mimeTypes = configuration.recognition.shape.mimeTypes as ("application/vnd.myscript.jiix" | "application/vnd.openxmlformats-officedocument.presentationml.presentation" | "image/svg+xml")[]
     }
-    this.recognition.diagram.mimeTypes = [...new Set(this.recognition.diagram.mimeTypes)]
-
-    if (configuration?.recognition?.diagram?.convert?.types) {
-      this.recognition.diagram.convert!.types = configuration.recognition.diagram.convert.types as ("text" | "shape")[]
-    }
+    this.recognition.shape.mimeTypes = [...new Set(this.recognition.shape.mimeTypes)]
 
     if (configuration?.recognition?.["raw-content"]?.recognition?.types) {
       this.recognition["raw-content"].recognition!.types = configuration?.recognition?.["raw-content"]?.recognition?.types as ("text" | "shape")[]

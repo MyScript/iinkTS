@@ -70,7 +70,7 @@ describe("InkRecognizer.ts", () =>
             mimeTypes = config.recognition.text.mimeTypes
             break
           case "SHAPE":
-            mimeTypes = config.recognition.diagram!.mimeTypes
+            mimeTypes = ["application/vnd.myscript.jiix"]
             break
           case "MATH":
             mimeTypes = config.recognition.math!.mimeTypes
