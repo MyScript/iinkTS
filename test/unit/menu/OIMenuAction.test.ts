@@ -1,8 +1,8 @@
-import { EditorOffscreenMock } from "../__mocks__/EditorOffscreenMock"
-import { EditorTool, OIMenuAction, StrikeThroughAction, SurroundAction } from "../../../src/iink"
+import { InteractiveInkEditorMock } from "../__mocks__/InteractiveInkEditorMock"
+import { EditorTool, IIMenuAction, StrikeThroughAction, SurroundAction } from "../../../src/iink"
 import { ChangeEventMock, LeftClickEventMock } from "../__mocks__/EventMock"
 
-describe("OIMenuAction.ts", () =>
+describe("IIMenuAction.ts", () =>
 {
   global.fetch = jest.fn(() =>
     Promise.resolve({
@@ -13,16 +13,16 @@ describe("OIMenuAction.ts", () =>
 
   test("should create", () =>
   {
-    const editor = new EditorOffscreenMock()
-    const menu = new OIMenuAction(editor)
+    const editor = new InteractiveInkEditorMock()
+    const menu = new IIMenuAction(editor)
     expect(menu).toBeDefined()
   })
 
   describe("render", () =>
   {
-    const editor = new EditorOffscreenMock()
+    const editor = new InteractiveInkEditorMock()
     editor.init()
-    const menu = new OIMenuAction(editor)
+    const menu = new IIMenuAction(editor)
     menu.render(editor.layers.ui.root)
     test("should render menu action", () =>
     {
@@ -68,9 +68,9 @@ describe("OIMenuAction.ts", () =>
 
   describe("show/hide", () =>
   {
-    const editor = new EditorOffscreenMock()
+    const editor = new InteractiveInkEditorMock()
     editor.init()
-    const menu = new OIMenuAction(editor)
+    const menu = new IIMenuAction(editor)
     menu.render(editor.layers.ui.root)
     test("should hide", () =>
     {
@@ -88,9 +88,9 @@ describe("OIMenuAction.ts", () =>
 
   describe("Main menu", () =>
   {
-    const editor = new EditorOffscreenMock()
+    const editor = new InteractiveInkEditorMock()
     editor.init()
-    const menu = new OIMenuAction(editor)
+    const menu = new IIMenuAction(editor)
     menu.render(editor.layers.ui.root)
     test("should call editor.clear on pointerup", () =>
     {
@@ -154,9 +154,9 @@ describe("OIMenuAction.ts", () =>
 
   describe("Sub menu", () =>
   {
-    const editor = new EditorOffscreenMock()
+    const editor = new InteractiveInkEditorMock()
     editor.init()
-    const menu = new OIMenuAction(editor)
+    const menu = new IIMenuAction(editor)
     menu.render(editor.layers.ui.root)
     test("submenu should be hidden", () =>
     {
@@ -275,9 +275,9 @@ describe("OIMenuAction.ts", () =>
 
   describe("destroy", () =>
   {
-    const editor = new EditorOffscreenMock()
+    const editor = new InteractiveInkEditorMock()
     editor.init()
-    const menu = new OIMenuAction(editor)
+    const menu = new IIMenuAction(editor)
     menu.render(editor.layers.ui.root)
     test("should remove elements", () =>
     {

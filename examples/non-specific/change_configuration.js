@@ -214,8 +214,8 @@ function buildSelect(path, name, values, options, multiple = false) {
 }
 
 function loadEditorType() {
-  ["OFFSCREEN", "WEBSOCKET", "REST"].forEach((type) => {
-    const selected = type === (editor?.type || "WEBSOCKET")
+  ["INTERACTIVEINK", "INTERACTIVEINKSSR", "INKV1", "INKV2"].forEach((type) => {
+    const selected = type === (editor?.type || "INTERACTIVEINKSSR")
     editorTypeSelect.appendChild(
       new Option(type, type, selected, selected)
     )
@@ -315,13 +315,13 @@ const editorOptions = {
 
 function loadConfiguration() {
   switch (editorTypeSelect.value) {
-    case "WEBSOCKET":
+    case "INTERACTIVEINKSSR":
       editorOptions.configuration = structuredClone(EditorWebSocketConfiguration)
       break
-    case "REST":
+    case "INKV1":
       editorOptions.configuration = structuredClone(EditorRestConfiguration)
       break
-    case "OFFSCREEN":
+    case "INTERACTIVEINK":
       editorOptions.configuration = structuredClone(EditorOffscreenConfiguration)
       break
   }

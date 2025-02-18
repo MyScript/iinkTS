@@ -55,7 +55,7 @@ test.describe("Websocket Math", function () {
           }
         }
       }
-    await loadEditor(page, "WEBSOCKET", options)
+    await loadEditor(page, "INTERACTIVEINKSSR", options)
 
     await Promise.all([
       waitForExportedEvent(page),
@@ -82,7 +82,7 @@ test.describe("Websocket Math", function () {
         }
       }
     }
-    await loadEditor(page, "WEBSOCKET", options)
+    await loadEditor(page, "INTERACTIVEINKSSR", options)
 
     await Promise.all([
       waitForExportedEvent(page),
@@ -114,7 +114,7 @@ test.describe("Websocket Math", function () {
         }
       }
     }
-    await loadEditor(page, "WEBSOCKET", options)
+    await loadEditor(page, "INTERACTIVEINKSSR", options)
     await writeStrokes(page, fence.strokes)
     await callEditorIdle(page)
     const mathml = await getEditorExportsType(page, "application/mathml+xml")
@@ -139,7 +139,7 @@ test.describe("Websocket Math", function () {
         }
       }
     }
-    await loadEditor(page, "WEBSOCKET", options)
+    await loadEditor(page, "INTERACTIVEINKSSR", options)
     await waitForEditorInit(page)
     await writeStrokes(page, fence.strokes)
     await callEditorIdle(page)
@@ -248,7 +248,7 @@ test.describe("Websocket Math", function () {
             }
           }
         }
-        await loadEditor(page, "WEBSOCKET", options)
+        await loadEditor(page, "INTERACTIVEINKSSR", options)
         await waitForEditorInit(page)
         await page.evaluate(`
           editor.event.addEventListener("changed", (event) => {
@@ -392,7 +392,7 @@ test.describe("Websocket Math", function () {
           }
         }
       }
-      await loadEditor(page, "WEBSOCKET", options)
+      await loadEditor(page, "INTERACTIVEINKSSR", options)
       await page.evaluate(`
         editor.event.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo;

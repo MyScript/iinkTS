@@ -6,14 +6,14 @@ export * from "./EditorLayer"
 
 export * from "./EditorTriggerConfiguration"
 
-export * from "./EditorRest"
-export * from "./EditorRestConfiguration"
+export * from "./InkEditorDeprecated"
+export * from "./InkEditorDeprecatedConfiguration"
 
-export * from "./EditorWebSocket"
-export * from "./EditorWebSocketConfiguration"
+export * from "./InteractiveInkSSREditor"
+export * from "./InteractiveInkSSREditorConfiguration"
 
-export * from "./EditorOffscreen"
-export * from "./EditorOffscreenConfiguration"
+export * from "./InteractiveInkEditor"
+export * from "./InteractiveInkEditorConfiguration"
 
-export * from "./EditorInk"
-export * from "./EditorInkConfiguration"
+export * from "./InkEditor"
+export * from "./InkEditorConfiguration"

@@ -1,18 +1,18 @@
-import { EditorOffscreenMock } from "../__mocks__/EditorOffscreenMock"
+import { InteractiveInkEditorMock } from "../__mocks__/InteractiveInkEditorMock"
 import
 {
-  OIMenuManager,
-  OIMenuStyle,
-  OIMenuTool,
-  OIMenuAction
+  IIMenuManager,
+  IIMenuStyle,
+  IIMenuTool,
+  IIMenuAction
 } from "../../../src/iink"
 
-describe("OIMenuManager.ts", () =>
+describe("IIMenuManager.ts", () =>
 {
   test("should instanciate", () =>
   {
-    const editor = new EditorOffscreenMock()
-    const manager = new OIMenuManager(editor)
+    const editor = new InteractiveInkEditorMock()
+    const manager = new IIMenuManager(editor)
     expect(manager).toBeDefined()
   })
 
@@ -20,37 +20,37 @@ describe("OIMenuManager.ts", () =>
   {
     test("should override menu style", () =>
     {
-      class CustomMenuStyle extends OIMenuStyle
+      class CustomMenuStyle extends IIMenuStyle
       {
         name = "override-style"
       }
-      const editor = new EditorOffscreenMock()
+      const editor = new InteractiveInkEditorMock()
       //@ts-ignore
-      const manager = new OIMenuManager(editor, { style: CustomMenuStyle })
+      const manager = new IIMenuManager(editor, { style: CustomMenuStyle })
       //@ts-ignore
       expect(manager.style.name).toEqual("override-style")
     })
     test("should override menu tool", () =>
     {
-      class CustomMenuTool extends OIMenuTool
+      class CustomMenuTool extends IIMenuTool
       {
         name = "override-tool"
       }
-      const editor = new EditorOffscreenMock()
+      const editor = new InteractiveInkEditorMock()
       //@ts-ignore
-      const manager = new OIMenuManager(editor, { tool: CustomMenuTool })
+      const manager = new IIMenuManager(editor, { tool: CustomMenuTool })
       //@ts-ignore
       expect(manager.tool.name).toEqual("override-tool")
     })
     test("should override menu action", () =>
     {
-      class CustomMenuAction extends OIMenuAction
+      class CustomMenuAction extends IIMenuAction
       {
         name = "override-action"
       }
-      const editor = new EditorOffscreenMock()
+      const editor = new InteractiveInkEditorMock()
       //@ts-ignore
-      const manager = new OIMenuManager(editor, { action: CustomMenuAction })
+      const manager = new IIMenuManager(editor, { action: CustomMenuAction })
       //@ts-ignore
       expect(manager.action.name).toEqual("override-action")
     })
@@ -59,9 +59,9 @@ describe("OIMenuManager.ts", () =>
   describe("render", () =>
   {
     const layer = document.createElement("div")
-    const editor = new EditorOffscreenMock()
+    const editor = new InteractiveInkEditorMock()
     //@ts-ignore
-    const manager = new OIMenuManager(editor)
+    const manager = new IIMenuManager(editor)
     manager.action.render = jest.fn()
     manager.style.render = jest.fn()
     manager.tool.render = jest.fn()
@@ -110,9 +110,9 @@ describe("OIMenuManager.ts", () =>
 
   describe("update", () =>
   {
-    const editor = new EditorOffscreenMock()
+    const editor = new InteractiveInkEditorMock()
     //@ts-ignore
-    const manager = new OIMenuManager(editor)
+    const manager = new IIMenuManager(editor)
     manager.action.update = jest.fn()
     manager.style.update = jest.fn()
     manager.tool.update = jest.fn()
@@ -128,9 +128,9 @@ describe("OIMenuManager.ts", () =>
 
   describe("show/hide", () =>
   {
-    const editor = new EditorOffscreenMock()
+    const editor = new InteractiveInkEditorMock()
     //@ts-ignore
-    const manager = new OIMenuManager(editor)
+    const manager = new IIMenuManager(editor)
     manager.action.show = jest.fn()
     manager.action.hide = jest.fn()
     manager.style.show = jest.fn()
@@ -156,9 +156,9 @@ describe("OIMenuManager.ts", () =>
 
   describe("destroy", () =>
   {
-    const editor = new EditorOffscreenMock()
+    const editor = new InteractiveInkEditorMock()
     //@ts-ignore
-    const manager = new OIMenuManager(editor)
+    const manager = new IIMenuManager(editor)
     manager.action.destroy = jest.fn()
     manager.style.destroy = jest.fn()
     manager.tool.destroy = jest.fn()

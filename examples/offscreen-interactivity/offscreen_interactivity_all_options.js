@@ -205,7 +205,7 @@ async function loadEditor() {
    * @param {Element} The DOM element to attach the ink paper
    * @param {Object} The Editor parameters
    */
-  editor = await iink.Editor.load(editorElement, "OFFSCREEN", options);
+  editor = await iink.Editor.load(editorElement, "INTERACTIVEINK", options);
 
   setCurrentTab(currentTabId);
 

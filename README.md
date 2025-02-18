@@ -102,7 +102,7 @@ yarn add iink-ts
 ```javascript
     const editorElement = document.getElementById('editor');
 
-    const editor = await iink.Editor.load(editorElement, "OFFSCREEN", /* or WEBSOCKET or REST */
+    const editor = await iink.Editor.load(editorElement, "INTERACTIVEINK", /* or INTERACTIVEINKSSR or INKV1 or INKV2*/
     {
         configuration: {
             server: {
@@ -130,7 +130,7 @@ yarn add iink-ts
         <script>
             const editorElement = document.getElementById('editor');
 
-            const editor = await iink.Editor.load(editorElement, "OFFSCREEN", /* or WEBSOCKET or REST */
+            const editor = await iink.Editor.load(editorElement, "INTERACTIVEINK", /* or INTERACTIVEINKSSR or INKV1 or INKV2 */
             {
                 configuration: {
                     server: {

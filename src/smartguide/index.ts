@@ -1,1 +1,1 @@
-export * from "./WSSmartGuide"
+export * from "./InteractiveInkSSRSmartGuide"

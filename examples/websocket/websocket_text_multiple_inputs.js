@@ -134,7 +134,7 @@ async function initEditor() {
    * @param {Element} The DOM element to attach the ink paper
    * @param {Object} The Editor parameters
    */
-  editor = await iink.Editor.load(editorElement, "WEBSOCKET", options);
+  editor = await iink.Editor.load(editorElement, "INTERACTIVEINKSSR", options);
 
   editor.event.addEventListener("exported", (evt) => {
     const answerId = currentInput?.getAttribute("answer-id")

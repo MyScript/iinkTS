@@ -2,17 +2,17 @@ import { hTextJIIX, lineJIIX, rectangleJIIX } from "../__dataset__/jiix.dataset"
 import { buildOIStroke, buildOIText, delay } from "../helpers"
 import
 {
-  OIDebugSVGManager,
-  TOISymbolChar,
+  IIDebugSVGManager,
+  TIISymbolChar,
 } from "../../../src/iink"
-import { EditorOffscreenMock } from "../__mocks__/EditorOffscreenMock"
+import { InteractiveInkEditorMock } from "../__mocks__/InteractiveInkEditorMock"
 
-describe("OIDebugSVGManager.ts", () =>
+describe("IIDebugSVGManager.ts", () =>
 {
   test("should create", () =>
   {
-    const editor = new EditorOffscreenMock()
-    const manager = new OIDebugSVGManager(editor)
+    const editor = new InteractiveInkEditorMock()
+    const manager = new IIDebugSVGManager(editor)
     expect(manager).toBeDefined()
     expect(manager.verticesVisibility).toEqual(false)
     expect(manager.boundingBoxVisibility).toEqual(false)
@@ -22,10 +22,10 @@ describe("OIDebugSVGManager.ts", () =>
 
   describe("bounding box", () =>
   {
-    const editor = new EditorOffscreenMock()
+    const editor = new InteractiveInkEditorMock()
     editor.recognizer.init = jest.fn(() => Promise.resolve())
 
-    const manager = new OIDebugSVGManager(editor)
+    const manager = new IIDebugSVGManager(editor)
 
     beforeAll(async () =>
     {
@@ -52,7 +52,7 @@ describe("OIDebugSVGManager.ts", () =>
 
     test("should show/hide text and char bounding box", async () =>
     {
-      const chars: TOISymbolChar[] = [
+      const chars: TIISymbolChar[] = [
         {
           bounds: { height: 10, width: 5, x: 0, y: 10 },
           color: "black",
@@ -83,10 +83,10 @@ describe("OIDebugSVGManager.ts", () =>
 
   describe("vertices", () =>
   {
-    const editor = new EditorOffscreenMock()
+    const editor = new InteractiveInkEditorMock()
     editor.recognizer.init = jest.fn(() => Promise.resolve())
 
-    const manager = new OIDebugSVGManager(editor)
+    const manager = new IIDebugSVGManager(editor)
 
     beforeAll(async () =>
     {
@@ -109,7 +109,7 @@ describe("OIDebugSVGManager.ts", () =>
 
   describe("recognition box", () =>
   {
-    const editor = new EditorOffscreenMock()
+    const editor = new InteractiveInkEditorMock()
     editor.recognizer.init = jest.fn(() => Promise.resolve())
     Object.defineProperty(global.SVGElement.prototype, 'getBBox', {
       writable: true,
@@ -120,7 +120,7 @@ describe("OIDebugSVGManager.ts", () =>
         height: 10
       }),
     })
-    const manager = new OIDebugSVGManager(editor)
+    const manager = new IIDebugSVGManager(editor)
 
     beforeAll(async () =>
     {
@@ -163,7 +163,7 @@ describe("OIDebugSVGManager.ts", () =>
 
   describe("recognition item box", () =>
   {
-    const editor = new EditorOffscreenMock()
+    const editor = new InteractiveInkEditorMock()
     editor.recognizer.init = jest.fn(() => Promise.resolve())
     Object.defineProperty(global.SVGElement.prototype, 'getBBox', {
       writable: true,
@@ -174,7 +174,7 @@ describe("OIDebugSVGManager.ts", () =>
         height: 10
       }),
     })
-    const manager = new OIDebugSVGManager(editor)
+    const manager = new IIDebugSVGManager(editor)
 
     beforeAll(async () =>
     {

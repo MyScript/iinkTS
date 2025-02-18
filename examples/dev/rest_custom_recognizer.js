@@ -1,4 +1,4 @@
-class CustomRestRecognizer extends iink.RestRecognizer {
+class CustomRestRecognizer extends iink.InkDeprecatedRecognizer {
 
   constructor(config) {
     super(config)

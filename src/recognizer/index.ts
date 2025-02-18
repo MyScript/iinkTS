@@ -1,20 +1,20 @@
 export * from "./RecognizerEvent"
 export * from "./RecognizerError"
 
-export * from "./OIRecognizer"
-export * from "./OIRecognizerMessage"
-export * from "./OIRecognizerConfiguration"
+export * from "./InteractiveInkRecognizer"
+export * from "./InteractiveInkRecognizerMessage"
+export * from "./InteractiveInkRecognizerConfiguration"
 
-export * from "./RestRecognizer"
-export * from "./RestRecognizerConfiguration"
+export * from "./InkDeprecatedRecognizer"
+export * from "./InkDeprecatedRecognizerConfiguration"
 
-export * from "./WSRecognizer"
-export * from "./WSRecognizerMessage"
-export * from "./WSRecognizerConfiguration"
+export * from "./InteractiveInkSSRRecognizer"
+export * from "./InteractiveInkSSRRecognizerMessage"
+export * from "./InteractiveInkSSRRecognizerConfiguration"
 
 export * from "./RecognitionConfiguration"
 export * from "./ServerConfiguration"
 export * from "./recognition"
 
-export * from "./RecognizerInk"
-export * from "./RecognizerInkConfiguration"
+export * from "./InkRecognizer"
+export * from "./InkRecognizerConfiguration"

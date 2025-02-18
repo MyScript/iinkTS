@@ -1,7 +1,7 @@
 //@ts-nocheck
-import { PartialDeep, TEditorOffscreenConfiguration, TWSRecognizerConfiguration } from "../../../src/iink"
+import { PartialDeep, TInteractiveInkSSREditorConfiguration, TInteractiveInkSSREditorRecognizerConfiguration } from "../../../src/iink"
 
-export const WSRecognizerTextConfiguration: TWSRecognizerConfiguration = {
+export const InteractiveInkSSRRecognizerTextConfiguration: TInteractiveInkSSREditorRecognizerConfiguration = {
   server: {
     scheme: 'http',
     host: 'test.com',
@@ -28,7 +28,7 @@ export const WSRecognizerTextConfiguration: TWSRecognizerConfiguration = {
   }
 }
 
-export const ConfigurationMathWebsocket: TWSRecognizerConfiguration = {
+export const ConfigurationMathInteractiveInkSSR: TInteractiveInkSSREditorRecognizerConfiguration = {
   server: {
     scheme: 'http',
     host: 'test.com',
@@ -48,7 +48,7 @@ export const ConfigurationMathWebsocket: TWSRecognizerConfiguration = {
   }
 }
 
-export const ConfigurationTextRest: TRestRecognizerConfiguration = {
+export const ConfigurationTextInkDeprecated: TInkDeprecatedRecognizerConfiguration = {
   server: {
     scheme: 'http',
     host: 'test.com',
@@ -70,7 +70,7 @@ export const ConfigurationTextRest: TRestRecognizerConfiguration = {
   }
 }
 
-export const ConfigurationDiagramRest: TRestRecognizerConfiguration = {
+export const ConfigurationDiagramInkDeprecated: TInkDeprecatedRecognizerConfiguration = {
   server: {
     scheme: 'http',
     host: 'test.com',
@@ -86,7 +86,7 @@ export const ConfigurationDiagramRest: TRestRecognizerConfiguration = {
   }
 }
 
-export const ConfigurationMathRest: TRestRecognizerConfiguration = {
+export const ConfigurationMathInkDeprecated: TInkDeprecatedRecognizerConfiguration = {
   server: {
     scheme: 'http',
     host: 'test.com',
@@ -102,7 +102,7 @@ export const ConfigurationMathRest: TRestRecognizerConfiguration = {
   }
 }
 
-export const ConfigurationRawContentRest: TRestRecognizerConfiguration = {
+export const ConfigurationRawContentInkDeprecated: TInkDeprecatedRecognizerConfiguration = {
   server: {
     scheme: 'http',
     host: 'test.com',
@@ -115,7 +115,7 @@ export const ConfigurationRawContentRest: TRestRecognizerConfiguration = {
   }
 }
 
-export const AllOverrideConfiguration: TRestRecognizerConfiguration = {
+export const AllOverrideConfiguration: TInkDeprecatedRecognizerConfiguration = {
   server: {
     scheme: 'http',
     host: 'test.com',
@@ -254,7 +254,7 @@ export const AllOverrideConfiguration: TRestRecognizerConfiguration = {
   }
 }
 
-export const OffScreenEditorOverrideConfiguration: TEditorOffscreenConfiguration = {
+export const InteractiveInkEditorEditorOverrideConfiguration: TInteractiveInkEditorConfiguration = {
   server: {
     scheme: 'http',
     host: 'test.com',

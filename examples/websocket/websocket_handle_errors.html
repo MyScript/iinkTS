@@ -73,7 +73,7 @@
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(editorElement, "WEBSOCKET", options);
+        editor = await iink.Editor.load(editorElement, "INTERACTIVEINKSSR", options);
       };
 
       loadEditor().catch(error => console.error(error));

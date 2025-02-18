@@ -1,2 +1,2 @@
-export * from "./OISnapConfiguration"
-export * from "./OISnapManager"
+export * from "./IISnapConfiguration"
+export * from "./IISnapManager"

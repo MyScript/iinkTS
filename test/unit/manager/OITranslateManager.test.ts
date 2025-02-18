@@ -1,32 +1,32 @@
-import { EditorOffscreenMock } from "../__mocks__/EditorOffscreenMock"
+import { InteractiveInkEditorMock } from "../__mocks__/InteractiveInkEditorMock"
 import
 {
-  OIEdgeLine,
-  OITranslateManager,
-  OIShapeCircle,
-  OIShapePolygon,
-  OIStroke,
+  IIEdgeLine,
+  IITranslateManager,
+  IIShapeCircle,
+  IIShapePolygon,
+  IIStroke,
   TPoint,
   SvgElementRole,
 } from "../../../src/iink"
 
-describe("OITranslateManager.ts", () =>
+describe("IITranslateManager.ts", () =>
 {
   test("should create", () =>
   {
-    const editor = new EditorOffscreenMock()
-    const manager = new OITranslateManager(editor)
+    const editor = new InteractiveInkEditorMock()
+    const manager = new IITranslateManager(editor)
     expect(manager).toBeDefined()
   })
 
   describe("should applyToSymbol", () =>
   {
-    const editor = new EditorOffscreenMock()
-    const manager = new OITranslateManager(editor)
+    const editor = new InteractiveInkEditorMock()
+    const manager = new IITranslateManager(editor)
 
     test("translate stroke", () =>
     {
-      const stroke = new OIStroke()
+      const stroke = new IIStroke()
       stroke.addPointer({ p: 1, t: 1, x: 1, y: 1 })
       stroke.addPointer({ p: 1, t: 10, x: 10, y: 0 })
       manager.applyToSymbol(stroke, 10, 15)
@@ -37,7 +37,7 @@ describe("OITranslateManager.ts", () =>
     {
       const center: TPoint = { x: 5, y: 5 }
       const radius = 4
-      const circle = new OIShapeCircle(center, radius)
+      const circle = new IIShapeCircle(center, radius)
       manager.applyToSymbol(circle, 10, 15)
       expect(circle.radius).toEqual(radius)
       expect(circle.center).toEqual({ x: 15, y: 20 })
@@ -50,7 +50,7 @@ describe("OITranslateManager.ts", () =>
         { x: 5, y: 5 },
         { x: 5, y: 0 }
       ]
-      const poly = new OIShapePolygon(points)
+      const poly = new IIShapePolygon(points)
       //@ts-ignore
       poly.kind = "pouet"
       expect(() => manager.applyToSymbol(poly, 10, 15)).toThrowError(expect.objectContaining({ message: expect.stringContaining("Can't apply translate on shape, kind unknow:")}))
@@ -59,7 +59,7 @@ describe("OITranslateManager.ts", () =>
     {
       const start: TPoint = { x: 0, y: 0 }
       const end: TPoint = { x: 0, y: 5 }
-      const line = new OIEdgeLine(start, end)
+      const line = new IIEdgeLine(start, end)
       manager.applyToSymbol(line, 10, 15)
       expect(line.start).toEqual(expect.objectContaining({ x: 10, y: 15 }))
       expect(line.end).toEqual(expect.objectContaining({ x: 10, y: 20 }))
@@ -68,7 +68,7 @@ describe("OITranslateManager.ts", () =>
 
   describe("translate process on stroke without snap", () =>
   {
-    const editor = new EditorOffscreenMock()
+    const editor = new InteractiveInkEditorMock()
     editor.snaps.configuration.guide = false
     editor.snaps.configuration.symbol = false
     editor.recognizer.init = jest.fn(() => Promise.resolve())
@@ -76,10 +76,10 @@ describe("OITranslateManager.ts", () =>
     editor.renderer.setAttribute = jest.fn()
     editor.renderer.drawSymbol = jest.fn()
 
-    const manager = new OITranslateManager(editor)
+    const manager = new IITranslateManager(editor)
     manager.applyToSymbol = jest.fn()
 
-    const stroke = new OIStroke({})
+    const stroke = new IIStroke({})
     stroke.addPointer({ p: 1, t: 1, x: 0, y: 0 })
     stroke.addPointer({ p: 1, t: 1, x: 10, y: 50 })
     stroke.selected = true

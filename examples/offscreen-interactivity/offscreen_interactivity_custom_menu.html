@@ -139,7 +139,7 @@
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(editorElement, "OFFSCREEN", options);
+        editor = await iink.Editor.load(editorElement, "INTERACTIVEINK", options);
 
         menuStyleToggle.addEventListener("change", () => {
           menuStyleToggle.checked ? editor.menu.style.show() : editor.menu.style.hide();
