@@ -1,8 +1,8 @@
-jest.mock('../../../src/editor/EditorRest')
-jest.mock('../../../src/editor/EditorWebSocket')
-jest.mock('../../../src/editor/EditorOffscreen')
+jest.mock('../../../src/editor/InkEditorDeprecated')
+jest.mock('../../../src/editor/InteractiveInkSSREditor')
+jest.mock('../../../src/editor/InteractiveInkEditor')
 
-import { Editor, EditorOffscreen, EditorRest, EditorWebSocket } from "../../../src/iink"
+import { Editor, InteractiveInkEditor, InkEditorDeprecated, InteractiveInkSSREditor } from "../../../src/iink"
 
 describe('Editor.ts', () =>
 {
@@ -11,34 +11,34 @@ describe('Editor.ts', () =>
   test("should thorw error if no options", async () =>
   {
     //@ts-ignore
-    await expect(() => Editor.load(element, "REST")).rejects.toEqual(new Error(`Param 'options' missing`))
+    await expect(() => Editor.load(element, "INKV1")).rejects.toEqual(new Error(`Param 'options' missing`))
   })
 
   test("should load Rest Editor", async () =>
   {
-    const editor = await Editor.load(element, "REST", { })
+    const editor = await Editor.load(element, "INKV1", { })
     expect(Editor.getInstance()).toBe(editor)
-    expect(editor).toBeInstanceOf(EditorRest)
-    expect(editor).not.toBeInstanceOf(EditorWebSocket)
-    expect(editor).not.toBeInstanceOf(EditorOffscreen)
+    expect(editor).toBeInstanceOf(InkEditorDeprecated)
+    expect(editor).not.toBeInstanceOf(InteractiveInkSSREditor)
+    expect(editor).not.toBeInstanceOf(InteractiveInkEditor)
     expect(editor.initialize).toHaveBeenCalledTimes(1)
   })
   test("should load Rest Editor", async () =>
   {
-    const editor = await Editor.load(element, "WEBSOCKET", { })
+    const editor = await Editor.load(element, "INTERACTIVEINKSSR", { })
     expect(Editor.getInstance()).toBe(editor)
-    expect(editor).not.toBeInstanceOf(EditorRest)
-    expect(editor).toBeInstanceOf(EditorWebSocket)
-    expect(editor).not.toBeInstanceOf(EditorOffscreen)
+    expect(editor).not.toBeInstanceOf(InkEditorDeprecated)
+    expect(editor).toBeInstanceOf(InteractiveInkSSREditor)
+    expect(editor).not.toBeInstanceOf(InteractiveInkEditor)
     expect(editor.initialize).toHaveBeenCalledTimes(1)
   })
   test("should load Rest Editor", async () =>
   {
-    const editor = await Editor.load(element, "OFFSCREEN", { })
+    const editor = await Editor.load(element, "INTERACTIVEINK", { })
     expect(Editor.getInstance()).toBe(editor)
-    expect(editor).not.toBeInstanceOf(EditorRest)
-    expect(editor).not.toBeInstanceOf(EditorWebSocket)
-    expect(editor).toBeInstanceOf(EditorOffscreen)
+    expect(editor).not.toBeInstanceOf(InkEditorDeprecated)
+    expect(editor).not.toBeInstanceOf(InteractiveInkSSREditor)
+    expect(editor).toBeInstanceOf(InteractiveInkEditor)
     expect(editor.initialize).toHaveBeenCalledTimes(1)
   })
 

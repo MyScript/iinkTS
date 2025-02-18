@@ -86,7 +86,7 @@ test.describe("Rest Diagram", () => {
           }
         }
       }
-      await loadEditor(page, "REST", options)
+      await loadEditor(page, "INKV1", options)
       await Promise.all([
         waitForExportedEvent(page),
         writeStrokes(page, line.strokes),
@@ -98,7 +98,7 @@ test.describe("Rest Diagram", () => {
     test("should request application/vnd.myscript.jiix & application/vnd.openxmlformats-officedocument.presentationml.presentation", async ({ page }) => {
       const configuration = await getEditorConfiguration(page)
       const options = {
-        type: "REST",
+        type: "INKV1",
         configuration: {
           server: configuration.server,
           recognition: {
@@ -112,7 +112,7 @@ test.describe("Rest Diagram", () => {
           }
         }
       }
-      await loadEditor(page, "REST", options)
+      await loadEditor(page, "INKV1", options)
       await Promise.all([
         waitForExportedEvent(page),
         writeStrokes(page, line.strokes),

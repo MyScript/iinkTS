@@ -1,32 +1,32 @@
-import { EditorOffscreenMock } from "../__mocks__/EditorOffscreenMock"
+import { InteractiveInkEditorMock } from "../__mocks__/InteractiveInkEditorMock"
 import
 {
-  OIEdgeLine,
-  OIRotationManager,
-  OIShapeCircle,
-  OIShapePolygon,
-  OIStroke,
+  IIEdgeLine,
+  IIRotationManager,
+  IIShapeCircle,
+  IIShapePolygon,
+  IIStroke,
   SvgElementRole,
   TPoint,
   computeRotatedPoint,
   convertDegreeToRadian,
 } from "../../../src/iink"
 
-describe("OIRotationManager.ts", () =>
+describe("IIRotationManager.ts", () =>
 {
   test("should create", () =>
   {
-    const editor = new EditorOffscreenMock()
-    const manager = new OIRotationManager(editor)
+    const editor = new InteractiveInkEditorMock()
+    const manager = new IIRotationManager(editor)
     expect(manager).toBeDefined()
   })
 
   describe("should applyToSymbol", () =>
   {
-    const editor = new EditorOffscreenMock()
+    const editor = new InteractiveInkEditorMock()
     editor.texter.updateBounds = jest.fn()
     editor.renderer.setAttribute = jest.fn()
-    const manager = new OIRotationManager(editor)
+    const manager = new IIRotationManager(editor)
 
     test("not rotate shape with kind unknow", () =>
     {
@@ -36,7 +36,7 @@ describe("OIRotationManager.ts", () =>
         { x: 5, y: 5 },
         { x: 5, y: 0 }
       ]
-      const poly = new OIShapePolygon(points)
+      const poly = new IIShapePolygon(points)
       //@ts-ignore
       poly.kind = "pouet"
       const origin: TPoint = { x: 0, y: 0 }
@@ -44,7 +44,7 @@ describe("OIRotationManager.ts", () =>
     })
     test("rotate stroke", () =>
     {
-      const stroke = new OIStroke()
+      const stroke = new IIStroke()
       const origin: TPoint = { x: 0, y: 0 }
       stroke.addPointer({ p: 1, t: 1, x: 1, y: 1 })
       stroke.addPointer({ p: 1, t: 10, x: 10, y: 0 })
@@ -59,7 +59,7 @@ describe("OIRotationManager.ts", () =>
     {
       const center: TPoint = { x: 5, y: 5 }
       const radius = 4
-      const circle = new OIShapeCircle(center, radius)
+      const circle = new IIShapeCircle(center, radius)
       const origin: TPoint = { x: 1, y: 2 }
       manager.applyToSymbol(circle, origin, Math.PI / 2)
       expect(circle.radius).toEqual(radius)
@@ -69,7 +69,7 @@ describe("OIRotationManager.ts", () =>
     {
       const start: TPoint = { x: 0, y: 0 }
       const end: TPoint = { x: 0, y: 5 }
-      const line = new OIEdgeLine(start, end)
+      const line = new IIEdgeLine(start, end)
       const origin: TPoint = { x: 0, y: 0 }
       manager.applyToSymbol(line, origin, Math.PI / 2)
       expect(line.start.x.toFixed(0)).toEqual("0")
@@ -81,16 +81,16 @@ describe("OIRotationManager.ts", () =>
 
   describe("rotate process on stroke", () =>
   {
-    const editor = new EditorOffscreenMock()
+    const editor = new InteractiveInkEditorMock()
     editor.recognizer.init = jest.fn(() => Promise.resolve())
     editor.recognizer.transformRotate = jest.fn(() => Promise.resolve())
     editor.renderer.setAttribute = jest.fn()
     editor.renderer.drawSymbol = jest.fn()
 
-    const manager = new OIRotationManager(editor)
+    const manager = new IIRotationManager(editor)
     manager.applyToSymbol = jest.fn()
 
-    const stroke = new OIStroke({})
+    const stroke = new IIStroke({})
     stroke.addPointer({ p: 1, t: 1, x: 0, y: 0 })
     stroke.addPointer({ p: 1, t: 1, x: 10, y: 50 })
     stroke.selected = true

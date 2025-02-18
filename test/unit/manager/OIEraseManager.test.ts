@@ -1,26 +1,26 @@
 import { buildOICircle, buildOIStroke } from "../helpers"
-import { EditorOffscreenMock } from "../__mocks__/EditorOffscreenMock"
-import { OIEraseManager, PointerInfo, SymbolType } from "../../../src/iink"
+import { InteractiveInkEditorMock } from "../__mocks__/InteractiveInkEditorMock"
+import { IIEraseManager, PointerInfo, SymbolType } from "../../../src/iink"
 
 
-describe("OIEraseManager.ts", () =>
+describe("IIEraseManager.ts", () =>
 {
   test("should create", () =>
   {
-    const editor = new EditorOffscreenMock()
-    const manager = new OIEraseManager(editor)
+    const editor = new InteractiveInkEditorMock()
+    const manager = new IIEraseManager(editor)
     expect(manager).toBeDefined()
     expect(manager.currentEraser).toBeUndefined()
   })
 
   describe("writing process", () =>
   {
-    const editor = new EditorOffscreenMock()
+    const editor = new InteractiveInkEditorMock()
     editor.recognizer.init = jest.fn(() => Promise.resolve())
     editor.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
     editor.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
 
-    const manager = new OIEraseManager(editor)
+    const manager = new IIEraseManager(editor)
     manager.renderer.drawSymbol = jest.fn()
     manager.renderer.removeSymbol = jest.fn()
     editor.init()

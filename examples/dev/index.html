@@ -226,7 +226,7 @@
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
-         * @param {String} Editor type [OFFSCREEN", "WEBSOCKET", "REST"]
+         * @param {String} Editor type [INTERACTIVEINK", "INTERACTIVEINKSSR", "INKV1", "INKV2"]
          * @param {Object} Editor options depend on editor type
          * - {@link https://myscript.github.io/iinkTS/docs/types/TEditorOffscreenOptions.html}
          * - {@link https://myscript.github.io/iinkTS/docs/types/TEditorWebsocketOptions.html}
@@ -237,7 +237,7 @@
          * - {@link https://myscript.github.io/iinkTS/docs/classes/EditorWebSocket.html}
          * - {@link https://myscript.github.io/iinkTS/docs/classes/EditorRest.html}
          */
-         editor = await iink.Editor.load(editorElement, "WEBSOCKET", options);
+         editor = await iink.Editor.load(editorElement, "INTERACTIVEINKSSR", options);
 
         const currentLanguage = editor.configuration.recognition.lang;
         const availableLanguageResponse = await iink.getAvailableLanguageList(editor.configuration);

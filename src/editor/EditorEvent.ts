@@ -1,7 +1,7 @@
 import { EditorTool } from "../Constants"
 import { LoggerManager, LoggerCategory } from "../logger"
 import { TExport } from "../model"
-import { OIStroke, TOISymbol, TSymbol } from "../symbol"
+import { IIStroke, TIISymbol, TSymbol } from "../symbol"
 import { THistoryContext } from "../history"
 import { TGestureType } from "../gesture"
 
@@ -271,12 +271,12 @@ export class EditorEvent extends EventTarget
     this.#logger.info("emitSelected")
     this.emit(EditorEventName.SELECTED, symbols)
   }
-  addSelectedListener(callback: (symbols: TOISymbol[]) => void): void
+  addSelectedListener(callback: (symbols: TIISymbol[]) => void): void
   {
     this.#logger.info("addSelectedListener", { callback })
     this.addEventListener(
       EditorEventName.SELECTED,
-      (evt: unknown) => callback((evt as CustomEvent).detail as TOISymbol[]),
+      (evt: unknown) => callback((evt as CustomEvent).detail as TIISymbol[]),
       { signal: this.abortController.signal }
     )
   }
@@ -326,17 +326,17 @@ export class EditorEvent extends EventTarget
     )
   }
 
-  emitGestured(gesture: { gestureType: TGestureType, stroke: OIStroke }): void
+  emitGestured(gesture: { gestureType: TGestureType, stroke: IIStroke }): void
   {
     this.#logger.info("emitSynchronized")
     this.emit(EditorEventName.GESTURED, gesture)
   }
-  addGesturedListener(callback: (gesture: { gestureType: TGestureType, stroke: OIStroke }) => void): void
+  addGesturedListener(callback: (gesture: { gestureType: TGestureType, stroke: IIStroke }) => void): void
   {
     this.#logger.info("addSynchronizedListener", { callback })
     this.addEventListener(
       EditorEventName.GESTURED,
-      (evt) => callback((evt as CustomEvent).detail as { gestureType: TGestureType, stroke: OIStroke }),
+      (evt) => callback((evt as CustomEvent).detail as { gestureType: TGestureType, stroke: IIStroke }),
       { signal: this.abortController.signal }
     )
   }

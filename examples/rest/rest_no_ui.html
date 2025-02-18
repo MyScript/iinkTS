@@ -149,7 +149,7 @@
         const res = await fetch("../server-configuration.json");
         const server = await res.json();
         // Creating a recognizer
-        const iinkRecognizer = new iink.RestRecognizer({ server });
+        const iinkRecognizer = new iink.InkDeprecatedRecognizer({ server });
         // Creating a empty model
         const model = new iink.Model();
         // Filling the model with the stroke

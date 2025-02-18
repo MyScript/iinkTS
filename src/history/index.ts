@@ -1,4 +1,4 @@
 export * from "./HistoryContext"
 export * from "./HistoryManager"
-export * from "./OIHistoryManager"
+export * from "./IIHistoryManager"
 export * from "./HistoryConfiguration"

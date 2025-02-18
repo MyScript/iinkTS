@@ -1,4 +1,4 @@
-class CustomMenuStyle extends iink.OIMenuStyle {
+class CustomMenuStyle extends iink.IIMenuStyle {
 
   sizes = [
     { label: "S", value: 2 },
@@ -78,7 +78,7 @@ class CustomMenuStyle extends iink.OIMenuStyle {
   }
 }
 
-class CustomMenuTool extends iink.OIMenuTool {
+class CustomMenuTool extends iink.IIMenuTool {
 
   sizes = [
     { label: "S", value: 2 },
@@ -152,7 +152,7 @@ class CustomMenuTool extends iink.OIMenuTool {
   }
 }
 
-class CustomMenuAction extends iink.OIMenuAction {
+class CustomMenuAction extends iink.IIMenuAction {
 
   render(layer)
   {

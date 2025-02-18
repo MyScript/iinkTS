@@ -1,19 +1,19 @@
 import { buildOICircle, buildOIGroup, buildOIStroke } from "../helpers"
 
-import { OIModel, TExport, } from "../../../src/iink"
+import { IIModel, TExport, } from "../../../src/iink"
 
-describe("OIModel.ts", () =>
+describe("IIModel.ts", () =>
 {
   const width = 100, height = 100, rowHeight = 10
   test("should create", () =>
   {
-    const model = new OIModel(width, height, rowHeight)
+    const model = new IIModel(width, height, rowHeight)
     expect(model).toBeDefined()
   })
 
   describe("crud symbols", () =>
   {
-    const model = new OIModel(width, height, rowHeight)
+    const model = new IIModel(width, height, rowHeight)
     const sym = buildOIStroke()
     test("should addSymbol", () =>
     {
@@ -87,7 +87,7 @@ describe("OIModel.ts", () =>
 
   describe("change symbol order", () =>
   {
-    const model = new OIModel(width, height, rowHeight)
+    const model = new IIModel(width, height, rowHeight)
     const sym1 = buildOIStroke()
     model.addSymbol(sym1)
     const sym2 = buildOIStroke()
@@ -158,7 +158,7 @@ describe("OIModel.ts", () =>
 
   describe("get symbols with row index", () =>
   {
-    const model = new OIModel(width, height, rowHeight)
+    const model = new IIModel(width, height, rowHeight)
 
     const stroke51 = buildOIStroke({ box: { height: 9, width: 10, x: 0, y: 4.6 * rowHeight } })
     model.addSymbol(stroke51)
@@ -207,7 +207,7 @@ describe("OIModel.ts", () =>
 
   describe("get root symbol", () =>
   {
-    const model = new OIModel(width, height, rowHeight)
+    const model = new IIModel(width, height, rowHeight)
 
     const stroke1 = buildOIStroke()
     model.addSymbol(stroke1)
@@ -252,7 +252,7 @@ describe("OIModel.ts", () =>
 
   describe("roundToLineGuide", () =>
   {
-    const model = new OIModel(width, height, rowHeight)
+    const model = new IIModel(width, height, rowHeight)
     test("should return row height", () => {
       expect(model.roundToLineGuide(1.4 * rowHeight)).toEqual(rowHeight)
     })
@@ -263,7 +263,7 @@ describe("OIModel.ts", () =>
 
   describe("isSymbol", () =>
   {
-    const model = new OIModel(width, height, rowHeight)
+    const model = new IIModel(width, height, rowHeight)
     const s11 = buildOIStroke({ box: { height: rowHeight / 2, width: 5, x: 5, y: rowHeight }})
     const s12 = buildOIStroke({ box: { height: rowHeight / 2, width: 5, x: 50, y: rowHeight }})
     const s21 = buildOIStroke({ box: { height: rowHeight * 2, width: 5, x: 5, y: rowHeight }})
@@ -317,7 +317,7 @@ describe("OIModel.ts", () =>
 
   describe("get first/last symbol", () =>
   {
-    const model = new OIModel(width, height, rowHeight)
+    const model = new IIModel(width, height, rowHeight)
     const s11 = buildOIStroke({ box: { height: rowHeight / 2, width: 5, x: 5, y: rowHeight }})
     const s21 = buildOIStroke({ box: { height: rowHeight * 2, width: 5, x: 5, y: rowHeight }})
     const s22 = buildOIStroke({ box: { height: rowHeight * 2, width: 5, x: 50, y: rowHeight }})
@@ -345,7 +345,7 @@ describe("OIModel.ts", () =>
 
   describe("selection", () =>
   {
-    const model = new OIModel(width, height, rowHeight)
+    const model = new IIModel(width, height, rowHeight)
     const stroke1 = buildOIStroke({ box: { height: 10, width: 10, x: 0, y: 0 } })
     model.addSymbol(stroke1)
     const stroke2 = buildOIStroke({ box: { height: 10, width: 10, x: 20, y: 0 } })
@@ -379,7 +379,7 @@ describe("OIModel.ts", () =>
 
   describe("extract", () =>
   {
-    const model = new OIModel(width, height, rowHeight)
+    const model = new IIModel(width, height, rowHeight)
     model.addSymbol(buildOIStroke())
     model.addSymbol(buildOIStroke())
 
@@ -411,7 +411,7 @@ describe("OIModel.ts", () =>
 
   describe("export", () =>
   {
-    const model = new OIModel(width, height, rowHeight)
+    const model = new IIModel(width, height, rowHeight)
     const e: TExport = { "text/plain": "poney" }
     test("should define export to undefined", () =>
     {
@@ -447,7 +447,7 @@ describe("OIModel.ts", () =>
 
   describe("clone", () =>
   {
-    const model = new OIModel(width, height, rowHeight)
+    const model = new IIModel(width, height, rowHeight)
     const stroke = buildOIStroke()
     model.addSymbol(stroke)
     model.exports = { "text/plain": "M" }
@@ -463,7 +463,7 @@ describe("OIModel.ts", () =>
   {
     test("should clear model", () =>
     {
-      const model = new OIModel(width, height, rowHeight)
+      const model = new IIModel(width, height, rowHeight)
       model.currentSymbol = buildOIStroke()
       model.addSymbol(buildOIStroke())
       expect(model.currentSymbol).toBeDefined()

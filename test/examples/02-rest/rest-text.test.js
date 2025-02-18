@@ -78,7 +78,7 @@ test.describe("Rest Text", () => {
           }
         }
       }
-      await loadEditor(page, "REST", options)
+      await loadEditor(page, "INKV1", options)
 
       await Promise.all([
         waitForExportedEvent(page),
@@ -104,7 +104,7 @@ test.describe("Rest Text", () => {
           }
         }
       }
-      await loadEditor(page, "REST", options)
+      await loadEditor(page, "INKV1", options)
       await Promise.all([
         waitForExportedEvent(page),
         writeStrokes(page, h.strokes),

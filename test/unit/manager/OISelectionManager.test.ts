@@ -1,8 +1,8 @@
 import { buildOIStroke } from "../helpers"
-import { EditorOffscreenMock } from "../__mocks__/EditorOffscreenMock"
+import { InteractiveInkEditorMock } from "../__mocks__/InteractiveInkEditorMock"
 import
 {
-  OISelectionManager,
+  IISelectionManager,
   TBox,
   SvgElementRole,
   ResizeDirection,
@@ -10,19 +10,19 @@ import
 } from "../../../src/iink"
 import { LeftClickEventMock, RightClickEventMock } from "../__mocks__/EventMock"
 
-describe("OISelectionManager.ts", () =>
+describe("IISelectionManager.ts", () =>
 {
   test("should create", () =>
   {
-    const editor = new EditorOffscreenMock()
-    const manager = new OISelectionManager(editor)
+    const editor = new InteractiveInkEditorMock()
+    const manager = new IISelectionManager(editor)
     expect(manager).toBeDefined()
   })
 
   test("should draw selecting rect", () =>
   {
-    const editor = new EditorOffscreenMock()
-    const manager = new OISelectionManager(editor)
+    const editor = new InteractiveInkEditorMock()
+    const manager = new IISelectionManager(editor)
     manager.renderer.clearElements = jest.fn()
     manager.renderer.appendElement = jest.fn()
     const box: TBox = {
@@ -38,8 +38,8 @@ describe("OISelectionManager.ts", () =>
 
   test("should clear selecting rect", () =>
   {
-    const editor = new EditorOffscreenMock()
-    const manager = new OISelectionManager(editor)
+    const editor = new InteractiveInkEditorMock()
+    const manager = new IISelectionManager(editor)
     manager.renderer.clearElements = jest.fn()
     manager.clearSelectingRect()
     expect(manager.renderer.clearElements).toBeCalledTimes(1)
@@ -56,9 +56,9 @@ describe("OISelectionManager.ts", () =>
         height: 10
       }),
     })
-    const editor = new EditorOffscreenMock()
+    const editor = new InteractiveInkEditorMock()
     editor.menu.context.hide = jest.fn()
-    const manager = new OISelectionManager(editor)
+    const manager = new IISelectionManager(editor)
     const stroke = buildOIStroke()
 
     beforeAll(async () =>
@@ -119,7 +119,7 @@ describe("OISelectionManager.ts", () =>
         height: 10
       }),
     })
-    const editor = new EditorOffscreenMock()
+    const editor = new InteractiveInkEditorMock()
     editor.translator.start = jest.fn()
     editor.translator.continue = jest.fn()
     editor.translator.end = jest.fn()
@@ -129,7 +129,7 @@ describe("OISelectionManager.ts", () =>
     editor.resizer.start = jest.fn()
     editor.resizer.continue = jest.fn()
     editor.resizer.end = jest.fn()
-    const manager = new OISelectionManager(editor)
+    const manager = new IISelectionManager(editor)
     manager.resetSelectedGroup = jest.fn()
     const stroke = buildOIStroke()
 
@@ -301,8 +301,8 @@ describe("OISelectionManager.ts", () =>
 
   describe("process", () =>
   {
-    const editor = new EditorOffscreenMock()
-    const manager = new OISelectionManager(editor)
+    const editor = new InteractiveInkEditorMock()
+    const manager = new IISelectionManager(editor)
     const strokeToSelect = buildOIStroke({ box: { height: 10, width: 10, x: 10, y: 10 } })
     manager.model.addSymbol(strokeToSelect)
     const otherStroke = buildOIStroke({ box: { height: 10, width: 10, x: 100, y: 100 } })

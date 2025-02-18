@@ -1,6 +1,6 @@
 import Server from "jest-websocket-mock"
 import { DeserializedMessage } from "jest-websocket-mock/lib/websocket"
-import { TWSMessageEvent } from "../../../src/recognizer"
+import { TInteractiveInkSSRMessageEvent } from "../../../src/recognizer"
 
 export const ackWithHMACMessage = {
   "type": "ack",
@@ -111,7 +111,7 @@ export class ServerWebsocketMock extends Server
     {
       socket.on("message", (message: string | Blob | ArrayBuffer | ArrayBufferView) =>
       {
-        const parsedMessage: TWSMessageEvent = JSON.parse(message as string)
+        const parsedMessage: TInteractiveInkSSRMessageEvent = JSON.parse(message as string)
         switch (parsedMessage.type) {
           case "newContentPackage":
             if (withHMAC) {
@@ -191,7 +191,7 @@ export class ServerWebsocketMock extends Server
   {
     return this.messages.filter((m: DeserializedMessage<object>) =>
     {
-      const parseMessage = JSON.parse(m as string) as TWSMessageEvent
+      const parseMessage = JSON.parse(m as string) as TInteractiveInkSSRMessageEvent
       return parseMessage.type === type
     })
   }

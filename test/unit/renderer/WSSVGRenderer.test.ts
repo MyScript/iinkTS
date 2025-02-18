@@ -1,6 +1,6 @@
 import { delay } from "../helpers"
 import {
-  WSSVGRenderer,
+  InteractiveInkSSRSVGRenderer,
   DefaultRendererConfiguration,
   Model,
   Stroke,
@@ -15,7 +15,7 @@ import {
   TUpdatePatchSetAttribut
 } from "../../../src/iink"
 
-describe("WSSVGRenderer.ts", () =>
+describe("InteractiveInkSSRSVGRenderer.ts", () =>
 {
 
   const stroke = new Stroke(DefaultPenStyle)
@@ -27,7 +27,7 @@ describe("WSSVGRenderer.ts", () =>
 
   test("should instanciate", () =>
   {
-    const renderer = new WSSVGRenderer(DefaultRendererConfiguration)
+    const renderer = new InteractiveInkSSRSVGRenderer(DefaultRendererConfiguration)
     expect(renderer).toBeDefined()
     expect(renderer.config).toStrictEqual(DefaultRendererConfiguration)
     expect(renderer.stroker).toBeDefined()
@@ -36,7 +36,7 @@ describe("WSSVGRenderer.ts", () =>
   test("should initialise context", () =>
   {
     const domElement = document.createElement("div") as HTMLElement
-    const renderer = new WSSVGRenderer(DefaultRendererConfiguration)
+    const renderer = new InteractiveInkSSRSVGRenderer(DefaultRendererConfiguration)
     renderer.init(domElement)
 
     expect(renderer.context.parent).toBe(domElement)
@@ -45,7 +45,7 @@ describe("WSSVGRenderer.ts", () =>
   test("should updatesLayer when type = REPLACE_ALL on layer CAPTURE", () =>
   {
     const domElement = document.createElement("div") as HTMLElement
-    const renderer = new WSSVGRenderer(DefaultRendererConfiguration)
+    const renderer = new InteractiveInkSSRSVGRenderer(DefaultRendererConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -63,7 +63,7 @@ describe("WSSVGRenderer.ts", () =>
   test('should updatesLayer when type = REPLACE_ALL on layer MODEL', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new WSSVGRenderer(DefaultRendererConfiguration)
+    const renderer = new InteractiveInkSSRSVGRenderer(DefaultRendererConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -83,7 +83,7 @@ describe("WSSVGRenderer.ts", () =>
   test('should updatesLayer when type = REPLACE_ELEMENT', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new WSSVGRenderer(DefaultRendererConfiguration)
+    const renderer = new InteractiveInkSSRSVGRenderer(DefaultRendererConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -112,7 +112,7 @@ describe("WSSVGRenderer.ts", () =>
   test('should updatesLayer when type = REMOVE_ELEMENT on layer CAPTURE', async () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new WSSVGRenderer(DefaultRendererConfiguration)
+    const renderer = new InteractiveInkSSRSVGRenderer(DefaultRendererConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -144,7 +144,7 @@ describe("WSSVGRenderer.ts", () =>
   test('should updatesLayer when type = REMOVE_ELEMENT on layer MODEL', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new WSSVGRenderer(DefaultRendererConfiguration)
+    const renderer = new InteractiveInkSSRSVGRenderer(DefaultRendererConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -172,7 +172,7 @@ describe("WSSVGRenderer.ts", () =>
   test('should updatesLayer when type = APPEND_CHILD with parentId', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new WSSVGRenderer(DefaultRendererConfiguration)
+    const renderer = new InteractiveInkSSRSVGRenderer(DefaultRendererConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -201,7 +201,7 @@ describe("WSSVGRenderer.ts", () =>
   test('should updatesLayer when type = APPEND_CHILD without parentId', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new WSSVGRenderer(DefaultRendererConfiguration)
+    const renderer = new InteractiveInkSSRSVGRenderer(DefaultRendererConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -229,7 +229,7 @@ describe("WSSVGRenderer.ts", () =>
   test('should updatesLayer when type = REMOVE_CHILD', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new WSSVGRenderer(DefaultRendererConfiguration)
+    const renderer = new InteractiveInkSSRSVGRenderer(DefaultRendererConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -259,7 +259,7 @@ describe("WSSVGRenderer.ts", () =>
   test('should updatesLayer when type = INSERT_BEFORE', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new WSSVGRenderer(DefaultRendererConfiguration)
+    const renderer = new InteractiveInkSSRSVGRenderer(DefaultRendererConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -290,7 +290,7 @@ describe("WSSVGRenderer.ts", () =>
   test('should updatesLayer when type = SET_ATTRIBUTE with id', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new WSSVGRenderer(DefaultRendererConfiguration)
+    const renderer = new InteractiveInkSSRSVGRenderer(DefaultRendererConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -319,7 +319,7 @@ describe("WSSVGRenderer.ts", () =>
   test('should updatesLayer when type = SET_ATTRIBUTE without id', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new WSSVGRenderer(DefaultRendererConfiguration)
+    const renderer = new InteractiveInkSSRSVGRenderer(DefaultRendererConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -347,7 +347,7 @@ describe("WSSVGRenderer.ts", () =>
   test('should updatesLayer when type = REMOVE_ATTRIBUTE with id', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new WSSVGRenderer(DefaultRendererConfiguration)
+    const renderer = new InteractiveInkSSRSVGRenderer(DefaultRendererConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -375,7 +375,7 @@ describe("WSSVGRenderer.ts", () =>
   test('should updatesLayer when type = REMOVE_ATTRIBUTE without id', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new WSSVGRenderer(DefaultRendererConfiguration)
+    const renderer = new InteractiveInkSSRSVGRenderer(DefaultRendererConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -402,7 +402,7 @@ describe("WSSVGRenderer.ts", () =>
   test('should drawPendingStroke', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new WSSVGRenderer(DefaultRendererConfiguration)
+    const renderer = new InteractiveInkSSRSVGRenderer(DefaultRendererConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -422,7 +422,7 @@ describe("WSSVGRenderer.ts", () =>
   test('should drawPendingStroke when pointerType = eraser', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new WSSVGRenderer(DefaultRendererConfiguration)
+    const renderer = new InteractiveInkSSRSVGRenderer(DefaultRendererConfiguration)
     renderer.stroker.drawStroke = jest.fn()
     renderer.init(domElement)
 
@@ -448,7 +448,7 @@ describe("WSSVGRenderer.ts", () =>
   test('should delete erasing strokes', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new WSSVGRenderer(DefaultRendererConfiguration)
+    const renderer = new InteractiveInkSSRSVGRenderer(DefaultRendererConfiguration)
     renderer.init(domElement)
 
     const svgModelElement: SVGElement = document.createElementNS("http://www.w3.org/2000/svg", 'svg') as SVGElement
@@ -473,7 +473,7 @@ describe("WSSVGRenderer.ts", () =>
   test('should clearPendingStroke', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new WSSVGRenderer(DefaultRendererConfiguration)
+    const renderer = new InteractiveInkSSRSVGRenderer(DefaultRendererConfiguration)
     renderer.init(domElement)
 
     const svgModelElement: SVGElement = document.createElementNS("http://www.w3.org/2000/svg", 'svg') as SVGElement
@@ -499,7 +499,7 @@ describe("WSSVGRenderer.ts", () =>
   {
     const width = 100, height = 50
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new WSSVGRenderer(DefaultRendererConfiguration)
+    const renderer = new InteractiveInkSSRSVGRenderer(DefaultRendererConfiguration)
     const model = new Model(width, height)
     renderer.init(domElement)
 
@@ -528,7 +528,7 @@ describe("WSSVGRenderer.ts", () =>
   test('should destroy', () =>
   {
     const domElement = document.createElement('div') as HTMLElement
-    const renderer = new WSSVGRenderer(DefaultRendererConfiguration)
+    const renderer = new InteractiveInkSSRSVGRenderer(DefaultRendererConfiguration)
     renderer.init(domElement)
 
     const svgModelElement: SVGElement = document.createElementNS("http://www.w3.org/2000/svg", 'svg') as SVGElement

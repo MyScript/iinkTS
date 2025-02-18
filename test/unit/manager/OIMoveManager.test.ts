@@ -1,23 +1,23 @@
-import { EditorOffscreenMock } from "../__mocks__/EditorOffscreenMock"
-import { OIMoveManager, PointerInfo } from "../../../src/iink"
+import { InteractiveInkEditorMock } from "../__mocks__/InteractiveInkEditorMock"
+import { IIMoveManager, PointerInfo } from "../../../src/iink"
 
 
-describe("OIMoveManager.ts", () =>
+describe("IIMoveManager.ts", () =>
 {
   test("should instanciate", () =>
   {
-    const editor = new EditorOffscreenMock()
-    const manager = new OIMoveManager(editor)
+    const editor = new InteractiveInkEditorMock()
+    const manager = new IIMoveManager(editor)
     expect(manager).toBeDefined()
     expect(manager.origin).toBeUndefined()
   })
 
   describe("move process", () =>
   {
-    const editor = new EditorOffscreenMock()
+    const editor = new InteractiveInkEditorMock()
     editor.init()
 
-    const manager = new OIMoveManager(editor)
+    const manager = new IIMoveManager(editor)
 
     test("should init origin on start", async () =>
     {

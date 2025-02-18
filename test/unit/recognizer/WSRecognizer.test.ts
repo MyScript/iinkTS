@@ -1,38 +1,38 @@
 
-import { ConfigurationMathWebsocket, WSRecognizerTextConfiguration } from "../__dataset__/configuration.dataset"
+import { ConfigurationMathInkDeprecated, InteractiveInkSSRRecognizerTextConfiguration } from "../__dataset__/configuration.dataset"
 import { ServerWebsocketMock, emptyJIIX, errorNotGrantedMessage, hTextJIIX, partChangeMessage } from "../__mocks__/ServerWebsocketMock"
 import { buildStroke, delay } from "../helpers"
 
 import
 {
-  WSRecognizer,
+  InteractiveInkSSRRecognizer,
   RecognizerError,
   TRecognitionType,
   TPenStyle,
   TTheme,
   Model,
   TConverstionState,
-  TWSRecognizerConfiguration,
+  TInteractiveInkSSRRecognizerConfiguration,
 } from "../../../src/iink"
 
-describe("WSRecognizer.ts", () =>
+describe("InteractiveInkSSRRecognizer.ts", () =>
 {
   const height = 100, width = 100
 
-  const testDatas: { type: TRecognitionType, config: TWSRecognizerConfiguration }[] = [
+  const testDatas: { type: TRecognitionType, config: TInteractiveInkSSRRecognizerConfiguration }[] = [
     {
       type: "TEXT",
-      config: WSRecognizerTextConfiguration as TWSRecognizerConfiguration
+      config: InteractiveInkSSRRecognizerTextConfiguration as TInteractiveInkSSRRecognizerConfiguration
     },
     {
       type: "MATH",
-      config: ConfigurationMathWebsocket as TWSRecognizerConfiguration
+      config: ConfigurationMathInkDeprecated as TInteractiveInkSSRRecognizerConfiguration
     },
   ]
 
-  test("should instanciate WSRecognizer", () =>
+  test("should instanciate InteractiveInkSSRRecognizer", () =>
   {
-    const wsr = new WSRecognizer(WSRecognizerTextConfiguration)
+    const wsr = new InteractiveInkSSRRecognizer(InteractiveInkSSRRecognizerTextConfiguration)
     expect(wsr).toBeDefined()
   })
 
@@ -40,11 +40,11 @@ describe("WSRecognizer.ts", () =>
   {
     test("should get url", () =>
     {
-      const customConf = structuredClone(WSRecognizerTextConfiguration)
+      const customConf = structuredClone(InteractiveInkSSRRecognizerTextConfiguration)
       customConf.server.scheme = "http"
       customConf.server.host = "pony"
       customConf.server.applicationKey = "applicationKey"
-      const wsr = new WSRecognizer(customConf)
+      const wsr = new InteractiveInkSSRRecognizer(customConf)
       expect(wsr.url).toEqual("ws://pony/api/v4.0/iink/document?applicationKey=applicationKey")
     })
 
@@ -52,9 +52,9 @@ describe("WSRecognizer.ts", () =>
     {
       test(`should get mimeTypes for ${ type }`, () =>
       {
-        const customConf = structuredClone(WSRecognizerTextConfiguration)
+        const customConf = structuredClone(InteractiveInkSSRRecognizerTextConfiguration)
         customConf.recognition = config.recognition
-        const wsr = new WSRecognizer(customConf)
+        const wsr = new InteractiveInkSSRRecognizer(customConf)
         switch (type) {
           case "TEXT":
             expect(wsr.mimeTypes).toEqual(config.recognition.text.mimeTypes)
@@ -69,14 +69,14 @@ describe("WSRecognizer.ts", () =>
 
   describe("init", () =>
   {
-    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    const customConf = structuredClone(InteractiveInkSSRRecognizerTextConfiguration)
     customConf.server.host = "init-test"
     let mockServer: ServerWebsocketMock
-    let wsr: WSRecognizer
+    let wsr: InteractiveInkSSRRecognizer
 
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(customConf)
+      wsr = new InteractiveInkSSRRecognizer(customConf)
       wsr.event.emitError = jest.fn()
       mockServer = new ServerWebsocketMock(wsr.url)
     })
@@ -164,12 +164,12 @@ describe("WSRecognizer.ts", () =>
 
   describe("Ping", () =>
   {
-    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    const customConf = structuredClone(InteractiveInkSSRRecognizerTextConfiguration)
     customConf.server.host = "ping-test"
     let mockServer: ServerWebsocketMock
     beforeEach(() =>
     {
-      const url = new WSRecognizer(customConf).url
+      const url = new InteractiveInkSSRRecognizer(customConf).url
       mockServer = new ServerWebsocketMock(url)
       mockServer.init()
     })
@@ -182,7 +182,7 @@ describe("WSRecognizer.ts", () =>
     {
       expect.assertions(2)
       customConf.server.websocket.pingEnabled = true
-      const wsr = new WSRecognizer(customConf)
+      const wsr = new InteractiveInkSSRRecognizer(customConf)
       await wsr.init(height, width)
       await delay(customConf.server.websocket.pingDelay * 1.5)
       expect(mockServer.getMessages("ping")).toHaveLength(1)
@@ -194,7 +194,7 @@ describe("WSRecognizer.ts", () =>
     {
       expect.assertions(2)
       customConf.server.websocket.pingEnabled = false
-      const wsr = new WSRecognizer(customConf)
+      const wsr = new InteractiveInkSSRRecognizer(customConf)
       await wsr.init(height, width)
       await delay(customConf.server.websocket.pingDelay * 1.5)
       expect(mockServer.getMessages("ping")).toHaveLength(0)
@@ -207,7 +207,7 @@ describe("WSRecognizer.ts", () =>
       expect.assertions(3)
       customConf.server.websocket.pingEnabled = true
       customConf.server.websocket.maxPingLostCount = 2
-      const wsr = new WSRecognizer(customConf)
+      const wsr = new InteractiveInkSSRRecognizer(customConf)
       await wsr.init(height, width)
       await delay(customConf.server.websocket.pingDelay * 1.5)
       expect(mockServer.server.clients()).toHaveLength(1)
@@ -220,14 +220,14 @@ describe("WSRecognizer.ts", () =>
 
   describe("send", () =>
   {
-    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    const customConf = structuredClone(InteractiveInkSSRRecognizerTextConfiguration)
     customConf.server.host = "send-test"
     let mockServer: ServerWebsocketMock
-    let wsr: WSRecognizer
+    let wsr: InteractiveInkSSRRecognizer
 
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(customConf)
+      wsr = new InteractiveInkSSRRecognizer(customConf)
 
       mockServer = new ServerWebsocketMock(wsr.url)
       mockServer.init()
@@ -272,14 +272,14 @@ describe("WSRecognizer.ts", () =>
 
   describe("addStrokes", () =>
   {
-    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    const customConf = structuredClone(InteractiveInkSSRRecognizerTextConfiguration)
     customConf.server.host = "add-strokes-test"
     let mockServer: ServerWebsocketMock
-    let wsr: WSRecognizer
+    let wsr: InteractiveInkSSRRecognizer
 
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(customConf)
+      wsr = new InteractiveInkSSRRecognizer(customConf)
       wsr.event.emitError = jest.fn()
       mockServer = new ServerWebsocketMock(wsr.url)
       mockServer.init()
@@ -348,14 +348,14 @@ describe("WSRecognizer.ts", () =>
 
   describe("Style", () =>
   {
-    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    const customConf = structuredClone(InteractiveInkSSRRecognizerTextConfiguration)
     customConf.server.host = "style-test"
     let mockServer: ServerWebsocketMock
-    let wsr: WSRecognizer
+    let wsr: InteractiveInkSSRRecognizer
 
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(customConf)
+      wsr = new InteractiveInkSSRRecognizer(customConf)
 
       mockServer = new ServerWebsocketMock(wsr.url)
       mockServer.init()
@@ -432,15 +432,15 @@ describe("WSRecognizer.ts", () =>
 
   describe("export", () =>
   {
-    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    const customConf = structuredClone(InteractiveInkSSRRecognizerTextConfiguration)
     customConf.server.host = "export-test"
     let mockServer: ServerWebsocketMock
-    let wsr: WSRecognizer
+    let wsr: InteractiveInkSSRRecognizer
     const model = new Model()
 
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(customConf)
+      wsr = new InteractiveInkSSRRecognizer(customConf)
       wsr.event.emitError = jest.fn()
 
       mockServer = new ServerWebsocketMock(wsr.url)
@@ -458,7 +458,7 @@ describe("WSRecognizer.ts", () =>
       {
         expect.assertions(1)
         customConf.recognition.type = type
-        const my_wsr = new WSRecognizer(customConf)
+        const my_wsr = new InteractiveInkSSRRecognizer(customConf)
         await my_wsr.init(height, width)
         my_wsr.export(model)
         //¯\_(ツ)_/¯  required to wait server received message
@@ -517,10 +517,10 @@ describe("WSRecognizer.ts", () =>
 
   describe("import", () =>
   {
-    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    const customConf = structuredClone(InteractiveInkSSRRecognizerTextConfiguration)
     customConf.server.host = "import-test"
     let mockServer: ServerWebsocketMock
-    let wsr: WSRecognizer
+    let wsr: InteractiveInkSSRRecognizer
 
     const model = new Model(width, height)
     const mimeType = "text/plain"
@@ -528,7 +528,7 @@ describe("WSRecognizer.ts", () =>
     const blobToImport = new Blob([textImport])
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(customConf)
+      wsr = new InteractiveInkSSRRecognizer(customConf)
       wsr.event.emitError = jest.fn()
 
       mockServer = new ServerWebsocketMock(wsr.url)
@@ -591,15 +591,15 @@ describe("WSRecognizer.ts", () =>
 
   describe("importPointEvents", () =>
   {
-    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    const customConf = structuredClone(InteractiveInkSSRRecognizerTextConfiguration)
     customConf.server.host = "import-pointerd-test"
     let mockServer: ServerWebsocketMock
-    let wsr: WSRecognizer
+    let wsr: InteractiveInkSSRRecognizer
     const strokes = [buildStroke()]
 
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(customConf)
+      wsr = new InteractiveInkSSRRecognizer(customConf)
       wsr.event.emitError = jest.fn()
 
       mockServer = new ServerWebsocketMock(wsr.url)
@@ -654,15 +654,15 @@ describe("WSRecognizer.ts", () =>
 
   describe("resize", () =>
   {
-    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    const customConf = structuredClone(InteractiveInkSSRRecognizerTextConfiguration)
     customConf.server.host = "resize-test"
     let mockServer: ServerWebsocketMock
-    let wsr: WSRecognizer
+    let wsr: InteractiveInkSSRRecognizer
     const model = new Model(width, height)
 
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(customConf)
+      wsr = new InteractiveInkSSRRecognizer(customConf)
       wsr.event.emitError = jest.fn()
 
       mockServer = new ServerWebsocketMock(wsr.url)
@@ -713,15 +713,15 @@ describe("WSRecognizer.ts", () =>
 
   describe("convert", () =>
   {
-    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    const customConf = structuredClone(InteractiveInkSSRRecognizerTextConfiguration)
     customConf.server.host = "convert-test"
     const model = new Model(width, height)
     let mockServer: ServerWebsocketMock
-    let wsr: WSRecognizer
+    let wsr: InteractiveInkSSRRecognizer
 
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(customConf)
+      wsr = new InteractiveInkSSRRecognizer(customConf)
       wsr.event.emitError = jest.fn()
 
       mockServer = new ServerWebsocketMock(wsr.url)
@@ -777,14 +777,14 @@ describe("WSRecognizer.ts", () =>
 
   describe("waitForIdle", () =>
   {
-    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    const customConf = structuredClone(InteractiveInkSSRRecognizerTextConfiguration)
     customConf.server.host = "wait-for-idle-test"
     let mockServer: ServerWebsocketMock
-    let wsr: WSRecognizer
+    let wsr: InteractiveInkSSRRecognizer
 
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(customConf)
+      wsr = new InteractiveInkSSRRecognizer(customConf)
       wsr.event.emitError = jest.fn()
 
       mockServer = new ServerWebsocketMock(wsr.url)
@@ -833,15 +833,15 @@ describe("WSRecognizer.ts", () =>
 
   describe("undo", () =>
   {
-    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    const customConf = structuredClone(InteractiveInkSSRRecognizerTextConfiguration)
     customConf.server.host = "undo-test"
     const model = new Model(width, height)
     let mockServer: ServerWebsocketMock
-    let wsr: WSRecognizer
+    let wsr: InteractiveInkSSRRecognizer
 
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(customConf)
+      wsr = new InteractiveInkSSRRecognizer(customConf)
       wsr.event.emitError = jest.fn()
 
       mockServer = new ServerWebsocketMock(wsr.url)
@@ -896,15 +896,15 @@ describe("WSRecognizer.ts", () =>
 
   describe("redo", () =>
   {
-    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    const customConf = structuredClone(InteractiveInkSSRRecognizerTextConfiguration)
     customConf.server.host = "redo-test"
     const model = new Model(width, height)
     let mockServer: ServerWebsocketMock
-    let wsr: WSRecognizer
+    let wsr: InteractiveInkSSRRecognizer
 
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(customConf)
+      wsr = new InteractiveInkSSRRecognizer(customConf)
       wsr.event.emitError = jest.fn()
 
       mockServer = new ServerWebsocketMock(wsr.url)
@@ -959,15 +959,15 @@ describe("WSRecognizer.ts", () =>
 
   describe("clear", () =>
   {
-    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    const customConf = structuredClone(InteractiveInkSSRRecognizerTextConfiguration)
     customConf.server.host = "clear-test"
     const model = new Model(width, height)
     let mockServer: ServerWebsocketMock
-    let wsr: WSRecognizer
+    let wsr: InteractiveInkSSRRecognizer
 
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(customConf)
+      wsr = new InteractiveInkSSRRecognizer(customConf)
       wsr.event.emitError = jest.fn()
 
       mockServer = new ServerWebsocketMock(wsr.url)
@@ -1022,14 +1022,14 @@ describe("WSRecognizer.ts", () =>
 
   describe("Connection lost", () =>
   {
-    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    const customConf = structuredClone(InteractiveInkSSRRecognizerTextConfiguration)
     customConf.server.host = "close-test"
     let mockServer: ServerWebsocketMock
-    let wsr: WSRecognizer
+    let wsr: InteractiveInkSSRRecognizer
 
     beforeEach(() =>
     {
-      wsr = new WSRecognizer(customConf)
+      wsr = new InteractiveInkSSRRecognizer(customConf)
       wsr.event.emitError = jest.fn()
 
       mockServer = new ServerWebsocketMock(wsr.url)
@@ -1072,13 +1072,13 @@ describe("WSRecognizer.ts", () =>
 
   describe("destroy", () =>
   {
-    const customConf = structuredClone(WSRecognizerTextConfiguration)
+    const customConf = structuredClone(InteractiveInkSSRRecognizerTextConfiguration)
     customConf.server.host = "destroy-test"
     let mockServer: ServerWebsocketMock
     test("should close socket", async () =>
     {
       expect.assertions(2)
-      const wsr = new WSRecognizer(customConf)
+      const wsr = new InteractiveInkSSRRecognizer(customConf)
       mockServer = new ServerWebsocketMock(wsr.url)
       mockServer.init()
 

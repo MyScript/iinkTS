@@ -8,7 +8,7 @@ import
 import
 {
   DeferredPromise,
-  OIStroke,
+  IIStroke,
   TStyle,
   TGesture
 } from "iink-ts"
@@ -37,7 +37,7 @@ export class Synchronizer
     this.gestureManager = useGestureManager(editor)
   }
 
-  protected formatDrawShapeToSend(shape: TLDrawShape): OIStroke
+  protected formatDrawShapeToSend(shape: TLDrawShape): IIStroke
   {
 
     const style: TStyle = {
@@ -45,7 +45,7 @@ export class Synchronizer
       fill: shape.props.fill,
       width: 1
     }
-    const stroke = new OIStroke(style, shape.props.isPen ? "pen" : "mouse")
+    const stroke = new IIStroke(style, shape.props.isPen ? "pen" : "mouse")
     stroke.id = shape.id
 
     shape.props.segments.forEach(seg =>

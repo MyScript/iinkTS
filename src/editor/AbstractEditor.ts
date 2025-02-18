@@ -20,7 +20,7 @@ export type TEditorConfiguration = {
 /**
  * @group Editor
  */
-export type EditorType = "WEBSOCKET" | "REST" | "OFFSCREEN" | "REST-RECOGNIZER"
+export type EditorType = "INTERACTIVEINK" | "INKV1" | "INTERACTIVEINKSSR" | "INKV2"
 
 /**
  * @hidden

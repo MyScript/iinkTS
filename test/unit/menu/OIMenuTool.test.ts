@@ -1,21 +1,21 @@
-import { EditorOffscreenMock } from "../__mocks__/EditorOffscreenMock"
+import { InteractiveInkEditorMock } from "../__mocks__/InteractiveInkEditorMock"
 import { LeftClickEventMock } from "../__mocks__/EventMock"
-import { EditorTool, OIMenuTool, EditorWriteTool } from "../../../src/iink"
+import { EditorTool, IIMenuTool, EditorWriteTool } from "../../../src/iink"
 
-describe("OIMenuTool.ts", () =>
+describe("IIMenuTool.ts", () =>
 {
   test("should create", () =>
   {
-    const editor = new EditorOffscreenMock()
-    const menu = new OIMenuTool(editor)
+    const editor = new InteractiveInkEditorMock()
+    const menu = new IIMenuTool(editor)
     expect(menu).toBeDefined()
   })
 
   describe("render", () =>
   {
     const layer = document.createElement("div")
-    const editor = new EditorOffscreenMock()
-    const menu = new OIMenuTool(editor)
+    const editor = new InteractiveInkEditorMock()
+    const menu = new IIMenuTool(editor)
     menu.render(layer)
     test("should display menu write pencil", () =>
     {
@@ -41,9 +41,9 @@ describe("OIMenuTool.ts", () =>
 
   describe("change tool", () =>
   {
-    const editor = new EditorOffscreenMock()
+    const editor = new InteractiveInkEditorMock()
     editor.init()
-    const menu = new OIMenuTool(editor)
+    const menu = new IIMenuTool(editor)
     const pointerUpEvt = new LeftClickEventMock("pointerup", {
       pointerType: "pen",
       clientX: 10,
@@ -163,9 +163,9 @@ describe("OIMenuTool.ts", () =>
 
   describe("update", () =>
   {
-    const editor = new EditorOffscreenMock()
+    const editor = new InteractiveInkEditorMock()
     editor.init()
-    const menu = new OIMenuTool(editor)
+    const menu = new IIMenuTool(editor)
     menu.render(editor.layers.ui.root)
     test("should set menu select activated", () =>
     {
@@ -260,9 +260,9 @@ describe("OIMenuTool.ts", () =>
 
   describe("show/hide", () =>
   {
-    const editor = new EditorOffscreenMock()
+    const editor = new InteractiveInkEditorMock()
     editor.init()
-    const menu = new OIMenuTool(editor)
+    const menu = new IIMenuTool(editor)
     menu.render(editor.layers.ui.root)
     test("should hide", () =>
     {
@@ -280,9 +280,9 @@ describe("OIMenuTool.ts", () =>
 
   describe("destroy", () =>
   {
-    const editor = new EditorOffscreenMock()
+    const editor = new InteractiveInkEditorMock()
     editor.init()
-    const menu = new OIMenuTool(editor)
+    const menu = new IIMenuTool(editor)
     menu.render(editor.layers.ui.root)
     test("should remove elements", () =>
     {

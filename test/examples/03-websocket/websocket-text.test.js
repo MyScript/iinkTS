@@ -15,7 +15,7 @@ import h from '../__dataset__/h'
 import helloStrike from '../__dataset__/helloStrike'
 
 const createNewEditor = async (page, options) => {
-  await loadEditor(page, 'WEBSOCKET', options)
+  await loadEditor(page, 'INTERACTIVEINKSSR', options)
 
   await waitForEditorInit(page)
   await page.evaluate(`
@@ -170,7 +170,7 @@ test.describe('Websocket Text', () => {
           }
         }
       }
-      await loadEditor(page, "WEBSOCKET", options)
+      await loadEditor(page, "INTERACTIVEINKSSR", options)
       await waitForEditorInit(page)
       await expect(page.locator('.smartguide')).toBeHidden()
     })
@@ -188,7 +188,7 @@ test.describe('Websocket Text', () => {
           }
         }
       }
-      await loadEditor(page, "WEBSOCKET", options)
+      await loadEditor(page, "INTERACTIVEINKSSR", options)
       await waitForEditorInit(page)
       await expect(page.locator('.smartguide')).toBeVisible()
     })

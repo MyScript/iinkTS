@@ -1,9 +1,9 @@
 import { LoggerCategory, LoggerManager } from "../logger"
 import { EditorType } from "./AbstractEditor"
-import { EditorOffscreen, TEditorOffscreenOptions } from "./EditorOffscreen"
-import { EditorRest, TEditorRestOptions } from "./EditorRest"
-import { EditorWebSocket, TEditorWebsocketOptions } from "./EditorWebSocket"
-import { EditorInk, TEditorInkOptions } from "./EditorInk"
+import { InteractiveInkEditor, TInteractiveInkEditorOptions } from "./InteractiveInkEditor"
+import { InkEditorDeprecated, TInkEditorDeprecatedOptions } from "./InkEditorDeprecated"
+import { InteractiveInkSSREditor, TInteractiveInkSSREditorOptions } from "./InteractiveInkSSREditor"
+import { InkEditor, TInkEditorOptions } from "./InkEditor"
 
 /**
  * @group Editor
@@ -12,10 +12,10 @@ import { EditorInk, TEditorInkOptions } from "./EditorInk"
 export class Editor
 {
   protected static logger = LoggerManager.getLogger(LoggerCategory.EDITOR)
-  protected static instance: EditorOffscreen | EditorRest | EditorWebSocket | EditorInk |undefined
+  protected static instance: InteractiveInkEditor | InkEditorDeprecated | InteractiveInkSSREditor | InkEditor |undefined
 
-  static async load<T extends EditorType>(rootElement: HTMLElement, type: T, options: T extends "OFFSCREEN" ? TEditorOffscreenOptions : T extends "REST" ? TEditorRestOptions : TEditorWebsocketOptions extends "REST-RECOGNIZER" ? TEditorInkOptions : TEditorWebsocketOptions):
-    Promise<T extends "OFFSCREEN" ? EditorOffscreen : T extends "REST" ? EditorRest : EditorWebSocket extends "REST-RECOGNIZER" ? EditorInk : EditorWebSocket>
+  static async load<T extends EditorType>(rootElement: HTMLElement, type: T, options: T extends "INTERACTIVEINK" ? TInteractiveInkEditorOptions : T extends "INKV1" ? TInkEditorDeprecatedOptions : TInteractiveInkSSREditorOptions extends "INKV2" ? TInkEditorOptions : TInteractiveInkSSREditorOptions):
+    Promise<T extends "INTERACTIVEINK" ? InteractiveInkEditor : T extends "INKV1" ? InkEditorDeprecated : InteractiveInkSSREditor extends "INKV2" ? InkEditor : InteractiveInkSSREditor>
   {
     Editor.logger.info("load", { type, options })
     if (!options) {
@@ -26,27 +26,27 @@ export class Editor
     }
 
     switch (type) {
-      case "OFFSCREEN":
-        Editor.instance = new EditorOffscreen(rootElement, options as TEditorOffscreenOptions)
+      case "INTERACTIVEINK":
+        Editor.instance = new InteractiveInkEditor(rootElement, options as TInteractiveInkEditorOptions)
         break
-      case "REST":
-        Editor.instance = new EditorRest(rootElement, options as TEditorRestOptions)
+      case "INKV1":
+        Editor.instance = new InkEditorDeprecated(rootElement, options as TInkEditorDeprecatedOptions)
         break
-      case "REST-RECOGNIZER":
-        Editor.instance = new EditorInk(rootElement, options as TEditorInkOptions)
+      case "INKV2":
+        Editor.instance = new InkEditor(rootElement, options as TInkEditorOptions)
         break;
-      // case "WEBSOCKET":
+      // case "INTERACTIVEINKSSR":
       default:
-        Editor.instance = new EditorWebSocket(rootElement, options as TEditorWebsocketOptions)
+        Editor.instance = new InteractiveInkSSREditor(rootElement, options as TInteractiveInkSSREditorOptions)
         break
     }
 
     await Editor.instance.initialize()
 
-    return Editor.instance as T extends "OFFSCREEN" ? EditorOffscreen : T extends "REST" ? EditorRest : EditorWebSocket extends "REST-RECOGNIZER" ? EditorInk : EditorWebSocket
+    return Editor.instance as T extends "INTERACTIVEINK" ? InteractiveInkEditor : T extends "INKV1" ? InkEditorDeprecated : InteractiveInkSSREditor extends "INKV2" ? InkEditor : InteractiveInkSSREditor
   }
 
-  static getInstance(): EditorOffscreen | EditorRest | EditorWebSocket | EditorInk | undefined
+  static getInstance(): InteractiveInkEditor | InkEditorDeprecated | InteractiveInkSSREditor | InkEditor | undefined
   {
     return Editor.instance
   }

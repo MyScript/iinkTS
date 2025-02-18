@@ -1,20 +1,20 @@
 import
 {
-  OIRecognizer,
-  TOIRecognizerConfiguration,
-  TOIMessageEvent,
+  InteractiveInkRecognizer,
+  TInteractiveInkRecognizerConfiguration,
+  TInteractiveInkMessageEvent,
   PartialDeep,
   TServerWebsocketConfiguration,
-  TOIRecognitionConfiguration
+  TInteractiveInkRecognitionConfiguration
 } from 'iink-ts'
 
-export class Recognizer extends OIRecognizer
+export class Recognizer extends InteractiveInkRecognizer
 {
   static initializing = false
   static instance: Recognizer
-  messages: { state: "Sent" | "Received", message: TOIMessageEvent }[]
+  messages: { state: "Sent" | "Received", message: TInteractiveInkMessageEvent }[]
 
-  constructor(config: PartialDeep<TOIRecognizerConfiguration>)
+  constructor(config: PartialDeep<TInteractiveInkRecognizerConfiguration>)
   {
     super(config)
     this.messages = []
@@ -23,11 +23,11 @@ export class Recognizer extends OIRecognizer
   protected messageCallback(message: MessageEvent<string>)
   {
     super.messageCallback(message)
-    const websocketMessage: TOIMessageEvent = JSON.parse(message.data)
+    const websocketMessage: TInteractiveInkMessageEvent = JSON.parse(message.data)
     this.messages.push({ state: "Received", message: websocketMessage })
   }
 
-  override send(message: TOIMessageEvent): Promise<void>
+  override send(message: TInteractiveInkMessageEvent): Promise<void>
   {
     this.messages.push({ state: "Sent", message })
     return super.send(message)
@@ -46,7 +46,7 @@ export const useRecognizer = async (): Promise<Recognizer> =>
     Recognizer.initializing = true
     const res = await fetch("../../../server-configuration.json")
     const server = await res.json() as PartialDeep<TServerWebsocketConfiguration>
-    const recognition: PartialDeep<TOIRecognitionConfiguration> = {
+    const recognition: PartialDeep<TInteractiveInkRecognitionConfiguration> = {
       "raw-content": {
         gestures: ["underline", "scratch-out", "join", "insert", "strike-through", "surround"]
       },

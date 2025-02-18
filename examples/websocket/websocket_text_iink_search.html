@@ -79,7 +79,7 @@
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(editorElement, "WEBSOCKET", options);
+        editor = await iink.Editor.load(editorElement, "INTERACTIVEINKSSR", options);
 
         // Utility function transforming millimeters to pixel as iinkSDK is millimeters only
         function mmToPixel(mm) {

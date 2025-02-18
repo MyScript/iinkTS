@@ -14,7 +14,7 @@ test.describe('Websocket Text local storage', () => {
   })
 
   test('should have title', async ({ page }) => {
-    await expect(page).toHaveTitle('WEBSOCKET Text iink')
+    await expect(page).toHaveTitle('INTERACTIVEINKSSR Text iink')
   })
 
   test('should show hello in the prompter after page reload', async ({ page }) => {

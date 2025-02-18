@@ -1,17 +1,17 @@
 import fetchMock from "jest-fetch-mock"
 import
 {
-  RecognizerInk,
+  InkRecognizer,
   DefaultPenStyle,
   Model,
   TPointer,
   TRecognitionType,
-  TRecognizerInkConfiguration,
-  DefaultRecognizerInkConfiguration
+  TInkRecognizerConfiguration,
+  DefaultInkRecognizerConfiguration
 } from "../../../src/iink"
-import { ConfigurationMathRest, ConfigurationTextRest, ConfigurationDiagramRest, ConfigurationRawContentRest } from "../__dataset__/configuration.dataset"
+import { ConfigurationMathInteractiveInkSSR, ConfigurationTextInkDeprecated, ConfigurationDiagramInkDeprecated, ConfigurationRawContentInkDeprecated } from "../__dataset__/configuration.dataset"
 
-describe("RecognizerInk.ts", () =>
+describe("InkRecognizer.ts", () =>
 {
   const height = 100, width = 100
 
@@ -24,28 +24,28 @@ describe("RecognizerInk.ts", () =>
     fetchMock.resetMocks()
   })
 
-  test("should instanciate RecognizerInk", () =>
+  test("should instanciate InkRecognizer", () =>
   {
-    const rr = new RecognizerInk(DefaultRecognizerInkConfiguration)
+    const rr = new InkRecognizer(DefaultInkRecognizerConfiguration)
     expect(rr).toBeDefined()
   })
 
-  const testDatas: { type: TRecognitionType, config: TRecognizerInkConfiguration }[] = [
+  const testDatas: { type: TRecognitionType, config: TInkRecognizerConfiguration }[] = [
     {
       type: "TEXT",
-      config: ConfigurationTextRest as TRecognizerInkConfiguration
+      config: ConfigurationTextInkDeprecated as TInkRecognizerConfiguration
     },
     {
       type: "SHAPE",
-      config: ConfigurationDiagramRest as TRecognizerInkConfiguration
+      config: ConfigurationDiagramInkDeprecated as TInkRecognizerConfiguration
     },
     {
       type: "MATH",
-      config: ConfigurationMathRest as TRecognizerInkConfiguration
+      config: ConfigurationMathInteractiveInkSSR as TInkRecognizerConfiguration
     },
     {
       type: "Raw Content",
-      config: ConfigurationRawContentRest as TRecognizerInkConfiguration
+      config: ConfigurationRawContentInkDeprecated as TInkRecognizerConfiguration
     },
   ]
 
@@ -59,9 +59,9 @@ describe("RecognizerInk.ts", () =>
         const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
         model.initCurrentStroke(p1, "pen", DefaultPenStyle)
         model.endCurrentStroke(p2)
-        const newConf: TRecognizerInkConfiguration = structuredClone(config)
+        const newConf: TInkRecognizerConfiguration = structuredClone(config)
         newConf.recognition.type = type
-        const rr = new RecognizerInk(newConf)
+        const rr = new InkRecognizer(newConf)
         const newModel = await rr.send(model.symbols)
 
         let mimeTypes: string[]

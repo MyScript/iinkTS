@@ -1,36 +1,36 @@
-import { EditorOffscreenMock } from "../__mocks__/EditorOffscreenMock"
+import { InteractiveInkEditorMock } from "../__mocks__/InteractiveInkEditorMock"
 import
 {
-  OIWriteManager,
+  IIWriteManager,
   DefaultStyle,
   SymbolType,
   TPointer,
   EditorWriteTool,
   ShapeKind,
-  TOIShape,
-  TOIEdge,
+  TIIShape,
+  TIIEdge,
   EdgeDecoration,
   EdgeKind,
-  OIStroke,
+  IIStroke,
   PointerInfo
 } from "../../../src/iink"
 
-describe("OIWriteManager.ts", () =>
+describe("IIWriteManager.ts", () =>
 {
   test("should create", () =>
   {
-    const editor = new EditorOffscreenMock()
-    const manager = new OIWriteManager(editor)
+    const editor = new InteractiveInkEditorMock()
+    const manager = new IIWriteManager(editor)
     expect(manager).toBeDefined()
   })
 
   describe("writing process", () =>
   {
-    const editor = new EditorOffscreenMock()
+    const editor = new InteractiveInkEditorMock()
     editor.recognizer.init = jest.fn(() => Promise.resolve())
     editor.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
 
-    const manager = new OIWriteManager(editor)
+    const manager = new IIWriteManager(editor)
     manager.renderer.drawSymbol = jest.fn()
 
     editor.init()
@@ -74,7 +74,7 @@ describe("OIWriteManager.ts", () =>
       manager.start(info)
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Shape)
-      const shape = manager.model.currentSymbol as TOIShape
+      const shape = manager.model.currentSymbol as TIIShape
       expect(shape.kind).toBe(ShapeKind.Polygon)
       expect(manager.renderer.drawSymbol).toHaveBeenCalledTimes(1)
       expect(manager.renderer.drawSymbol).toHaveBeenCalledWith(manager.model.currentSymbol)
@@ -89,7 +89,7 @@ describe("OIWriteManager.ts", () =>
       manager.start(info)
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Shape)
-      const shape = manager.model.currentSymbol as TOIShape
+      const shape = manager.model.currentSymbol as TIIShape
       expect(shape.kind).toBe(ShapeKind.Circle)
       expect(manager.renderer.drawSymbol).toHaveBeenCalledTimes(1)
       expect(manager.renderer.drawSymbol).toHaveBeenCalledWith(manager.model.currentSymbol)
@@ -104,7 +104,7 @@ describe("OIWriteManager.ts", () =>
       manager.start(info)
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Shape)
-      const shape = manager.model.currentSymbol as TOIShape
+      const shape = manager.model.currentSymbol as TIIShape
       expect(shape.kind).toBe(ShapeKind.Ellipse)
       expect(manager.renderer.drawSymbol).toHaveBeenCalledTimes(1)
       expect(manager.renderer.drawSymbol).toHaveBeenCalledWith(manager.model.currentSymbol)
@@ -119,7 +119,7 @@ describe("OIWriteManager.ts", () =>
       manager.start(info)
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Shape)
-      const shape = manager.model.currentSymbol as TOIShape
+      const shape = manager.model.currentSymbol as TIIShape
       expect(shape.kind).toBe(ShapeKind.Polygon)
       expect(manager.renderer.drawSymbol).toHaveBeenCalledTimes(1)
       expect(manager.renderer.drawSymbol).toHaveBeenCalledWith(manager.model.currentSymbol)
@@ -134,7 +134,7 @@ describe("OIWriteManager.ts", () =>
       manager.start(info)
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Shape)
-      const shape = manager.model.currentSymbol as TOIShape
+      const shape = manager.model.currentSymbol as TIIShape
       expect(shape.kind).toBe(ShapeKind.Polygon)
       expect(manager.renderer.drawSymbol).toHaveBeenCalledTimes(1)
       expect(manager.renderer.drawSymbol).toHaveBeenCalledWith(manager.model.currentSymbol)
@@ -149,7 +149,7 @@ describe("OIWriteManager.ts", () =>
       manager.start(info)
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Edge)
-      const shape = manager.model.currentSymbol as TOIEdge
+      const shape = manager.model.currentSymbol as TIIEdge
       expect(shape.kind).toBe(EdgeKind.Line)
       expect(shape.startDecoration).toBeUndefined()
       expect(shape.endDecoration).toBeUndefined()
@@ -166,7 +166,7 @@ describe("OIWriteManager.ts", () =>
       manager.start(info)
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Edge)
-      const shape = manager.model.currentSymbol as TOIEdge
+      const shape = manager.model.currentSymbol as TIIEdge
       expect(shape.kind).toBe(EdgeKind.Line)
       expect(shape.startDecoration).toBeUndefined()
       expect(shape.endDecoration).toEqual(EdgeDecoration.Arrow)
@@ -183,7 +183,7 @@ describe("OIWriteManager.ts", () =>
       manager.start(info)
       expect(manager.model.currentSymbol).toBeDefined()
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Edge)
-      const shape = manager.model.currentSymbol as TOIEdge
+      const shape = manager.model.currentSymbol as TIIEdge
       expect(shape.kind).toBe(EdgeKind.Line)
       expect(shape.startDecoration).toEqual(EdgeDecoration.Arrow)
       expect(shape.endDecoration).toEqual(EdgeDecoration.Arrow)
@@ -208,7 +208,7 @@ describe("OIWriteManager.ts", () =>
       manager.start(info)
       const point2: TPointer = { t: 15, p: 15, x: 15, y: 15 }
       manager.continue({ pointer: point2 } as PointerInfo)
-      const stroke = manager.model.currentSymbol as OIStroke
+      const stroke = manager.model.currentSymbol as IIStroke
       expect(stroke.pointers).toHaveLength(2)
       expect(stroke.pointers[1].x).toBe(point2.x)
       expect(stroke.pointers[1].y).toBe(point2.y)

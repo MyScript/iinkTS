@@ -38,7 +38,7 @@ export const DefaultRendererConfiguration: TRendererConfiguration = {
 /**
  * @group Renderer
  */
-export type TOIRendererConfiguration = TRendererConfiguration & {
+export type TIIRendererConfiguration = TRendererConfiguration & {
   guides: TGuidesConfiguration & {
     type: "line" | "grid" | "point"
   },
@@ -48,7 +48,7 @@ export type TOIRendererConfiguration = TRendererConfiguration & {
  * @group Renderer
  * @source
  */
-export const DefaultOIRendererConfiguration: TOIRendererConfiguration = {
+export const DefaulTIIRendererConfiguration: TIIRendererConfiguration = {
   guides: {
     enable: true,
     gap: 50,

@@ -1,35 +1,35 @@
-import { EditorOffscreenMock } from "../__mocks__/EditorOffscreenMock"
+import { InteractiveInkEditorMock } from "../__mocks__/InteractiveInkEditorMock"
 import
 {
-  OIEdgeArc,
-  OIEdgeLine,
-  OIEdgePolyLine,
-  OIResizeManager,
-  OIShapeCircle,
-  OIShapeEllipse,
-  OIShapePolygon,
-  OIStroke,
-  OIText,
+  IIEdgeArc,
+  IIEdgeLine,
+  IIEdgePolyLine,
+  IIResizeManager,
+  IIShapeCircle,
+  IIShapeEllipse,
+  IIShapePolygon,
+  IIStroke,
+  IIText,
   ResizeDirection,
   SvgElementRole,
-  TOISymbolChar,
+  TIISymbolChar,
   TPoint
 } from "../../../src/iink"
 import { buildOIStroke } from "../helpers"
 
-describe("OIResizeManager.ts", () =>
+describe("IIResizeManager.ts", () =>
 {
   test("should create", () =>
   {
-    const editor = new EditorOffscreenMock()
-    const manager = new OIResizeManager(editor)
+    const editor = new InteractiveInkEditorMock()
+    const manager = new IIResizeManager(editor)
     expect(manager).toBeDefined()
   })
 
   describe("applyToSymbol", () =>
   {
-    const editor = new EditorOffscreenMock()
-    const manager = new OIResizeManager(editor)
+    const editor = new InteractiveInkEditorMock()
+    const manager = new IIResizeManager(editor)
     test("should not resize symbol with type unknow", () =>
     {
       const stroke = buildOIStroke()
@@ -40,7 +40,7 @@ describe("OIResizeManager.ts", () =>
     })
     test("should resize stroke", () =>
     {
-      const stroke = new OIStroke()
+      const stroke = new IIStroke()
       const origin: TPoint = { x: 1, y: 2 }
       stroke.addPointer({ p: 1, t: 1, x: 1, y: 2 })
       stroke.addPointer({ p: 1, t: 10, x: 21, y: 42 })
@@ -56,7 +56,7 @@ describe("OIResizeManager.ts", () =>
         { x: 5, y: 5 },
         { x: 5, y: 0 }
       ]
-      const poly = new OIShapePolygon(points)
+      const poly = new IIShapePolygon(points)
       //@ts-ignore
       poly.kind = "pouet"
       const origin: TPoint = { x: 0, y: 0 }
@@ -66,7 +66,7 @@ describe("OIResizeManager.ts", () =>
     {
       const center: TPoint = { x: 5, y: 5 }
       const radius = 4
-      const shape = new OIShapeCircle(center, radius)
+      const shape = new IIShapeCircle(center, radius)
       const origin: TPoint = { x: 1, y: 2 }
       manager.applyToSymbol(shape, origin, 2, 4)
       expect(shape.radius).toEqual(12)
@@ -78,7 +78,7 @@ describe("OIResizeManager.ts", () =>
       const radiusX = 50
       const radiusY = 10
       const orientation = 0
-      const shape = new OIShapeEllipse(center, radiusX, radiusY, orientation)
+      const shape = new IIShapeEllipse(center, radiusX, radiusY, orientation)
       const scaleX = 2
       const scaleY = 4
       const origin: TPoint = { x: shape.bounds.xMin, y: shape.bounds.yMin }
@@ -95,7 +95,7 @@ describe("OIResizeManager.ts", () =>
         { x: 20, y: 10 },
         { x: 0, y: 10 },
       ]
-      const shape = new OIShapePolygon(points)
+      const shape = new IIShapePolygon(points)
       const scaleX = 2
       const scaleY = 4
       const origin: TPoint = { x: shape.bounds.xMin, y: shape.bounds.yMin }
@@ -113,7 +113,7 @@ describe("OIResizeManager.ts", () =>
     {
       const start: TPoint = { x: 0, y: 0 }
       const end: TPoint = { x: 0, y: 5 }
-      const edge = new OIEdgeLine(start, end)
+      const edge = new IIEdgeLine(start, end)
       //@ts-ignore
       edge.kind = "pouet"
       const origin: TPoint = { x: 0, y: 0 }
@@ -127,7 +127,7 @@ describe("OIResizeManager.ts", () =>
       const radiusX = 50
       const radiusY = 10
       const phi = 0
-      const edge = new OIEdgeArc(center, startAngle, sweepAngle, radiusX, radiusY, phi)
+      const edge = new IIEdgeArc(center, startAngle, sweepAngle, radiusX, radiusY, phi)
       const origin: TPoint = { x: edge.bounds.xMin, y: edge.bounds.yMin }
       const scaleX = 2
       const scaleY = 3
@@ -140,7 +140,7 @@ describe("OIResizeManager.ts", () =>
     {
       const start: TPoint = { x: 0, y: 0 }
       const end: TPoint = { x: 0, y: 5 }
-      const edge = new OIEdgeLine(start, end)
+      const edge = new IIEdgeLine(start, end)
       const origin: TPoint = { x: 0, y: 0 }
       manager.applyToSymbol(edge, origin, 2, 3)
       expect(edge.start).toEqual({ x: 0, y: 0 })
@@ -154,7 +154,7 @@ describe("OIResizeManager.ts", () =>
         { x: 20, y: 10 },
         { x: 0, y: 10 },
       ]
-      const edge = new OIEdgePolyLine(points)
+      const edge = new IIEdgePolyLine(points)
       const origin: TPoint = { x: 0, y: 0 }
       manager.applyToSymbol(edge, origin, 2, 3)
       expect(edge.points[0].x).toEqual(0)
@@ -170,7 +170,7 @@ describe("OIResizeManager.ts", () =>
     {
       manager.editor.texter.updateBounds = jest.fn()
       const point: TPoint = { x: 0, y: 0 }
-      const chars: TOISymbolChar[] = [
+      const chars: TIISymbolChar[] = [
         {
           bounds: { height: 10, width: 5, x: 0, y: 0 },
           color: "black",
@@ -180,7 +180,7 @@ describe("OIResizeManager.ts", () =>
           label: "A"
         }
       ]
-      const text = new OIText(chars, point, { height: 10, width: 5, x: 0, y: 0 })
+      const text = new IIText(chars, point, { height: 10, width: 5, x: 0, y: 0 })
       const origin: TPoint = { x: 0, y: 0 }
       manager.applyToSymbol(text, origin, 2, 3)
       expect(text.point).toEqual({ x: 0, y: 0 })
@@ -191,7 +191,7 @@ describe("OIResizeManager.ts", () =>
 
   describe("resize process on stroke without snap", () =>
   {
-    const editor = new EditorOffscreenMock()
+    const editor = new InteractiveInkEditorMock()
     editor.recognizer.init = jest.fn(() => Promise.resolve())
     editor.recognizer.transformScale = jest.fn(() => Promise.resolve())
     editor.renderer.setAttribute = jest.fn()
@@ -199,10 +199,10 @@ describe("OIResizeManager.ts", () =>
     editor.snaps.configuration.guide = false
     editor.snaps.configuration.symbol = false
 
-    const manager = new OIResizeManager(editor)
+    const manager = new IIResizeManager(editor)
     manager.applyToSymbol = jest.fn()
 
-    const stroke = new OIStroke({})
+    const stroke = new IIStroke({})
     stroke.addPointer({ p: 1, t: 1, x: 0, y: 0 })
     stroke.addPointer({ p: 1, t: 1, x: 10, y: 50 })
     const strokeNotResized = stroke.clone()

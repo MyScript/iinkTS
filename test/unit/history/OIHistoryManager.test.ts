@@ -3,25 +3,25 @@ import
 {
   THistoryConfiguration,
   getInitialHistoryContext,
-  OIHistoryManager,
-  OIModel,
+  IIHistoryManager,
+  IIModel,
   DefaultHistoryConfiguration,
   MatrixTransform,
 } from "../../../src/iink"
 import { EditorEventMock } from "../__mocks__/EditorEventMock"
 
-describe("OIHistoryManager.ts", () =>
+describe("IIHistoryManager.ts", () =>
 {
   const event = new EditorEventMock(document.createElement("div"))
-  test("should instanciate OIHistoryManager", () =>
+  test("should instanciate IIHistoryManager", () =>
   {
-    const manager = new OIHistoryManager(DefaultHistoryConfiguration, event)
+    const manager = new IIHistoryManager(DefaultHistoryConfiguration, event)
     expect(manager).toBeDefined()
   })
 
   describe("init", () =>
   {
-    const manager = new OIHistoryManager(DefaultHistoryConfiguration, event)
+    const manager = new IIHistoryManager(DefaultHistoryConfiguration, event)
     test("should initialize HistoryContext", () =>
     {
       const context = getInitialHistoryContext()
@@ -29,7 +29,7 @@ describe("OIHistoryManager.ts", () =>
     })
     test("should init stack without actions", () =>
     {
-      const model1 = new OIModel(27, 5)
+      const model1 = new IIModel(27, 5)
       manager.init(model1)
 
       expect(manager.context.stackIndex).toStrictEqual(0)
@@ -47,16 +47,16 @@ describe("OIHistoryManager.ts", () =>
   describe("push", () =>
   {
     const configuration: THistoryConfiguration = { maxStackSize: 5 }
-    const manager = new OIHistoryManager(configuration, event)
+    const manager = new IIHistoryManager(configuration, event)
 
-    const model1 = new OIModel(27, 5)
+    const model1 = new IIModel(27, 5)
     manager.init(model1)
 
     const stroke2 = buildOIStroke()
-    const model2 = new OIModel(18, 89)
+    const model2 = new IIModel(18, 89)
     model2.addSymbol(stroke2)
 
-    const model3 = new OIModel(18, 89)
+    const model3 = new IIModel(18, 89)
 
     test("should not push item to stack without actions and not emitChanged", () =>
     {
@@ -142,8 +142,8 @@ describe("OIHistoryManager.ts", () =>
 
   describe("undo", () =>
   {
-    const model = new OIModel(27, 5)
-    const manager = new OIHistoryManager(DefaultHistoryConfiguration, event)
+    const model = new IIModel(27, 5)
+    const manager = new IIHistoryManager(DefaultHistoryConfiguration, event)
     manager.init(model)
 
     test("should define canUndo to false and canRedo to false", () =>
@@ -155,7 +155,7 @@ describe("OIHistoryManager.ts", () =>
 
     test("should get the previous model", () =>
     {
-      const model2 = new OIModel(27, 5)
+      const model2 = new IIModel(27, 5)
       const stroke = buildOIStroke()
       model2.addSymbol(stroke)
       manager.push(model2, { added: [stroke] })
@@ -173,7 +173,7 @@ describe("OIHistoryManager.ts", () =>
 
     test("should invert added action", () =>
     {
-      const model2 = new OIModel(27, 5)
+      const model2 = new IIModel(27, 5)
       const stroke = buildOIStroke()
       manager.push(model2, { added: [stroke] })
       const previousStackItem = manager.undo()
@@ -182,7 +182,7 @@ describe("OIHistoryManager.ts", () =>
 
     test("should invert erased action", () =>
     {
-      const model2 = new OIModel(27, 5)
+      const model2 = new IIModel(27, 5)
       const stroke = buildOIStroke()
       manager.push(model2, { erased: [stroke] })
       const previousStackItem = manager.undo()
@@ -191,7 +191,7 @@ describe("OIHistoryManager.ts", () =>
 
     test("should invert replaced action", () =>
     {
-      const model2 = new OIModel(27, 5)
+      const model2 = new IIModel(27, 5)
       const oldStroke = buildOIStroke()
       const newStroke = buildOIStroke()
       manager.push(model2, { replaced: { newSymbols: [newStroke], oldSymbols: [oldStroke] } })
@@ -201,7 +201,7 @@ describe("OIHistoryManager.ts", () =>
 
     test("should invert translate action", () =>
     {
-      const model2 = new OIModel(27, 5)
+      const model2 = new IIModel(27, 5)
       const stroke = buildOIStroke()
       manager.push(model2, { translate: [{ symbols: [stroke], tx: 42, ty: 24 }] })
       const previousStackItem = manager.undo()
@@ -210,7 +210,7 @@ describe("OIHistoryManager.ts", () =>
 
     test("should invert matrix action", () =>
     {
-      const model2 = new OIModel(27, 5)
+      const model2 = new IIModel(27, 5)
       const stroke = buildOIStroke()
       const matrix = MatrixTransform.identity().rotate(Math.PI / 2).translate(2, 5)
       manager.push(model2, { matrix: { symbols: [stroke], matrix } })
@@ -221,8 +221,8 @@ describe("OIHistoryManager.ts", () =>
 
   describe("redo", () =>
   {
-    const model = new OIModel(27, 5)
-    const manager = new OIHistoryManager(DefaultHistoryConfiguration, event)
+    const model = new IIModel(27, 5)
+    const manager = new IIHistoryManager(DefaultHistoryConfiguration, event)
 
     const stroke = buildOIStroke()
     model.addSymbol(stroke)
