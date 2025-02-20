@@ -108,9 +108,23 @@
       let serverConfiguration
       const editorOptions = {
         configuration: {
-          recognition: {
-            type: "Raw Content",
+          type: "Raw Content",
+          text: {
+            guides: {
+                enable: true,
+                "line-gap-mm": 10,
+                "origin-y-mm": 10,
+              },
           },
+          "raw-content": {
+            classification: {
+              types: ["text", "math", "shape", "drawing", "decoration"],
+            },
+            recognition: {
+              types: ["text", "math", "shape"],
+            },
+          },
+
         },
       }
 

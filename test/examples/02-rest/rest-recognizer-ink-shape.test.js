@@ -1,4 +1,4 @@
-/* import { test, expect } from "@playwright/test"
+import { test, expect } from "@playwright/test"
 import {
   waitForEditorInit,
   writeStrokes,
@@ -10,7 +10,7 @@ import line from "../__dataset__/line"
 
 test.describe("Rest Shape Recognizer Ink", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/rest/rest_shape_InkRecognizer.html")
+    await page.goto("/examples/rest/rest_shape_recognizerInk.html")
     await waitForEditorInit(page)
   })
 
@@ -123,4 +123,3 @@ test.describe("Rest Shape Recognizer Ink", () => {
     })
   })
 })
- */
