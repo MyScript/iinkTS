@@ -1,7 +1,7 @@
 import { DefaultGrabberConfiguration, TGrabberConfiguration } from "../grabber"
 import { DefaultHistoryConfiguration, THistoryConfiguration } from "../history"
 import { DefaultLoggerConfiguration, TLoggerConfiguration } from "../logger"
-import { DefaultRecognizerInkConfiguration, RecognizerInkConfiguration, TRecognizerInkConfiguration, TRecognizerInkRecognitionConfiguration, TServerHTTPConfiguration } from "../recognizer"
+import { DefaultInkRecognizerConfiguration, InkRecognizerConfiguration, TInkRecognizerConfiguration, TInkRecognizerRecognitionConfiguration, TServerHTTPConfiguration } from "../recognizer"
 import { DefaultRendererConfiguration, TRendererConfiguration } from "../renderer"
 import { DefaultStyle, TStyle } from "../style"
 import { mergeDeep, PartialDeep } from "../utils"
@@ -12,7 +12,7 @@ import { DefaultEditorTriggerConfiguration, TEditorTriggerConfiguration } from "
 /**
  * @group Editor
  */
-export type TEditorInkConfiguration = TEditorConfiguration & TRecognizerInkConfiguration & {
+export type TInkEditorConfiguration = TEditorConfiguration & TInkRecognizerConfiguration & {
   renderer: TRendererConfiguration
   "undo-redo": THistoryConfiguration
   grabber: TGrabberConfiguration
@@ -25,9 +25,9 @@ export type TEditorInkConfiguration = TEditorConfiguration & TRecognizerInkConfi
  * @group Editor
  * @source
  */
-export const DefaultEditorInkConfiguration: TEditorInkConfiguration = {
-  server: DefaultRecognizerInkConfiguration.server,
-  recognition: DefaultRecognizerInkConfiguration.recognition,
+export const DefaultInkEditorConfiguration: TInkEditorConfiguration = {
+  server: DefaultInkRecognizerConfiguration.server,
+  recognition: DefaultInkRecognizerConfiguration.recognition,
   renderer: DefaultRendererConfiguration,
   grabber: DefaultGrabberConfiguration,
   triggers: DefaultEditorTriggerConfiguration,
@@ -42,7 +42,7 @@ export const DefaultEditorInkConfiguration: TEditorInkConfiguration = {
 export class InkEditorConfiguration implements TInkEditorConfiguration
 {
   server: TServerHTTPConfiguration
-  recognition: TRecognizerInkRecognitionConfiguration
+  recognition: TInkRecognizerRecognitionConfiguration
   renderer: TRendererConfiguration
   "undo-redo": THistoryConfiguration
   grabber: TGrabberConfiguration
@@ -55,11 +55,11 @@ export class InkEditorConfiguration implements TInkEditorConfiguration
     const { server, recognition } = new InkRecognizerConfiguration(configuration)
     this.server = server
     this.recognition = recognition
-    this.renderer = mergeDeep({}, DefaultEditorInkConfiguration.renderer, configuration?.renderer)
-    this.grabber = mergeDeep({}, DefaultEditorInkConfiguration.grabber, configuration?.grabber)
-    this["undo-redo"] = mergeDeep({}, DefaultEditorInkConfiguration["undo-redo"], configuration?.["undo-redo"])
-    this.triggers = mergeDeep({}, DefaultEditorInkConfiguration.triggers, configuration?.triggers)
-    this.logger = mergeDeep({}, DefaultEditorInkConfiguration.logger, configuration?.logger)
-    this.penStyle = mergeDeep({}, DefaultEditorInkConfiguration.penStyle, configuration?.penStyle)
+    this.renderer = mergeDeep({}, DefaultInkEditorConfiguration.renderer, configuration?.renderer)
+    this.grabber = mergeDeep({}, DefaultInkEditorConfiguration.grabber, configuration?.grabber)
+    this["undo-redo"] = mergeDeep({}, DefaultInkEditorConfiguration["undo-redo"], configuration?.["undo-redo"])
+    this.triggers = mergeDeep({}, DefaultInkEditorConfiguration.triggers, configuration?.triggers)
+    this.logger = mergeDeep({}, DefaultInkEditorConfiguration.logger, configuration?.logger)
+    this.penStyle = mergeDeep({}, DefaultInkEditorConfiguration.penStyle, configuration?.penStyle)
   }
 }
