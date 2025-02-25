@@ -48,7 +48,7 @@ export type TIIRendererConfiguration = TRendererConfiguration & {
  * @group Renderer
  * @source
  */
-export const DefaulTIIRendererConfiguration: TIIRendererConfiguration = {
+export const DefaultIIRendererConfiguration: TIIRendererConfiguration = {
   guides: {
     enable: true,
     gap: 50,

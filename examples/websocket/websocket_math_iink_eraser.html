@@ -184,7 +184,6 @@
 
         erasePreciselyElement.addEventListener("change", (e) => {
           options.configuration.recognition.math.eraser["erase-precisely"] = e.target.checked;
-          console.log('options.configuration.recognition.math.eraser["erase-precisely"]: ', options.configuration.recognition.math.eraser["erase-precisely"]);
           loadEditor()
           eraserElement.disabled = false;
           eraserElement.classList.remove("active");

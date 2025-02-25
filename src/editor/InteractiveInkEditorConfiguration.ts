@@ -5,7 +5,7 @@ import { DefaultGrabberConfiguration, TGrabberConfiguration } from "../grabber"
 import { DefaultHistoryConfiguration, THistoryConfiguration } from "../history"
 import { DefaultMenuConfiguration, TMenuConfiguration } from "../menu"
 import { DefaultInteractiveInkRecognizerConfiguration, InteractiveInkRecognizerConfiguration, TInteractiveInkRecognitionConfiguration, TInteractiveInkRecognizerConfiguration, TServerWebsocketConfiguration } from "../recognizer"
-import { DefaulTIIRendererConfiguration, TIIRendererConfiguration } from "../renderer"
+import { DefaultIIRendererConfiguration, TIIRendererConfiguration } from "../renderer"
 import { DefaultGestureConfiguration, TGestureConfiguration } from "../gesture"
 import { TEditorConfiguration } from "./AbstractEditor"
 import { DefaultSnapConfiguration, SnapConfiguration, TSnapConfiguration } from "../snap"
@@ -35,7 +35,7 @@ export const DefaultInteractiveInkEditorConfiguration: TInteractiveInkEditorConf
   server: DefaultInteractiveInkRecognizerConfiguration.server,
   recognition: DefaultInteractiveInkRecognizerConfiguration.recognition,
   menu: DefaultMenuConfiguration,
-  rendering: DefaulTIIRendererConfiguration,
+  rendering: DefaultIIRendererConfiguration,
   logger: DefaultLoggerConfiguration,
   grabber: DefaultGrabberConfiguration,
   "undo-redo": DefaultHistoryConfiguration,
