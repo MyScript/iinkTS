@@ -2,7 +2,7 @@ import { buildOICircle, buildOIStroke, buildOIText } from "../helpers"
 import { InteractiveInkEditorMock } from "../__mocks__/InteractiveInkEditorMock"
 import
 {
-    DefaulTIIRendererConfiguration,
+    DefaultIIRendererConfiguration,
   TGesture,
   SurroundAction,
   TIISymbolChar,
@@ -16,7 +16,7 @@ import
 
 describe("IIGestureManager.ts", () =>
 {
-  const rowHeight = DefaulTIIRendererConfiguration.guides.gap
+  const rowHeight = DefaultIIRendererConfiguration.guides.gap
 
   test("should create", () =>
   {
