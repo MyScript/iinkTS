@@ -77,7 +77,7 @@
       <div class="flex-container wrap gap row-options">
         <div class="flex-container wrap gap nav-item">
           <label for="penStyleClasses">Apply pen style class (greenThickPen):</label>
-          <input id="penStyleClasses" type="checkbox" />
+          <input id="penStyleClasses" type="checkbox" disabled/>
         </div>
         <div class="flex-container wrap gap nav-item">
           <label for="theme">Theme:</label>
@@ -229,7 +229,7 @@
          * @param {Object} The Editor parameters
          */
         editor = await iink.Editor.load(editorElement, "INTERACTIVEINKSSR", options);
-
+        penStyleClasses.disabled = false;
         const fontsResponse = await iink.getAvailableFontList(editor.configuration)
         fontsResponse.forEach((f) => {
           fontsElement.options[fontsElement.options.length] = new Option(f);
