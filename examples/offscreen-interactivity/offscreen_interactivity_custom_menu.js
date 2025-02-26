@@ -34,7 +34,7 @@ class CustomMenuStyle extends iink.IIMenuStyle {
       {
         e.preventDefault()
         e.stopPropagation()
-        this.setPenStyle({ width: size.value })
+        this.editor.penStyle.width = size.value
         menuThickness?.querySelectorAll("*").forEach(e => e.classList.remove("active"))
         btn.classList.add("active")
         if (this.symbolsSelected.length) {
@@ -59,8 +59,10 @@ class CustomMenuStyle extends iink.IIMenuStyle {
       values: this.colors,
       initValue: color,
       callback: (color) => {
-        this.setPenStyle({ color })
-        this.updateSymbolsStyle(this.symbolsSelected.map(s => s.id), { color })
+        this.editor.penStyle.color = color
+        if (this.symbolsSelected.length) {
+          this.updateSymbolsStyle(this.symbolsSelected.map(s => s.id), { color: color })
+        }
       },
     }
     return this.createColorList(menuColorStrokeDef)
@@ -114,7 +116,7 @@ class CustomMenuTool extends iink.IIMenuTool {
       {
         e.preventDefault()
         e.stopPropagation()
-        this.setPenStyle({ width: size.value })
+        this.editor.penStyle.width = size.value
         this.menuThickness?.querySelectorAll("*").forEach(e => e.classList.remove("active"))
         btn.classList.add("active")
         if (this.symbolsSelected.length) {
