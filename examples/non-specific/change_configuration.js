@@ -1,6 +1,6 @@
-const EditorRestConfiguration = iink.DefaultEditorRestConfiguration
-const EditorWebSocketConfiguration = iink.DefaultEditorWebSocketConfiguration
-const EditorOffscreenConfiguration = iink.DefaultEditorOffscreenConfiguration
+const EditorRestConfiguration = iink.DefaultInkEditorDeprecatedConfiguration
+const EditorWebSocketConfiguration = iink.DefaultInteractiveInkSSREditorConfiguration
+const EditorOffscreenConfiguration = iink.DefaultInteractiveInkEditorConfiguration
 
 const configurationContainer = document.getElementById('configuration-container')
 const configurationContent = document.getElementById('configuration-content')
