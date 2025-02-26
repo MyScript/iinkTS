@@ -219,7 +219,8 @@ export class InkEditorDeprecated extends AbstractEditor
       this.model.width = Math.max(parseInt(compStyles.width.replace("px", "")), this.#configuration.rendering.minWidth)
       this.model.height = Math.max(parseInt(compStyles.height.replace("px", "")), this.#configuration.rendering.minHeight)
       this.history.push(this.model)
-      this.renderer.init(this.layers.rendering)
+      this.layers.rendering.classList.add(this.configuration.recognition.type.toLowerCase().replace(" ", "-"))
+      this.renderer.init(this.layers.rendering, { x: 50, y: 50 })
       this.grabber.attach(this.layers.rendering)
     } catch (error) {
       this.logger.error("initialize", error)
