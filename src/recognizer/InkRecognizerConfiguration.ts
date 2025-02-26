@@ -4,13 +4,13 @@ import {
   DefaultExportConfiguration,
   DefaultMathConfiguration,
   DefaultRawContentConfiguration,
-  DefaultTextConfiguration,
+  DefaultTextInkRecognizerConfiguration,
   TConvertionConfiguration,
   TShapeConfiguration,
   TExportConfiguration,
   TMathConfiguration,
   TRawContentConfiguration,
-  TTextConfiguration
+  TTextInkRecognizerConfiguration
 } from "./recognition"
 import { TRecognitionType } from "./RecognitionConfiguration"
 import { DefaultServerHTTPConfiguration, TServerHTTPConfiguration } from "./ServerConfiguration"
@@ -22,7 +22,7 @@ export type TInkRecognizerRecognitionConfiguration = {
   type: TRecognitionType
   lang: string
   math: TMathConfiguration
-  text: TTextConfiguration
+  text: TTextInkRecognizerConfiguration
   shape: TShapeConfiguration
   "raw-content": TRawContentConfiguration
   export: TExportConfiguration
@@ -38,7 +38,7 @@ export const DefaultInkRecognizerRecognitionConfiguration: TInkRecognizerRecogni
   math: DefaultMathConfiguration,
   shape: DefaultShapeConfiguration,
   "raw-content": DefaultRawContentConfiguration,
-  text: DefaultTextConfiguration,
+  text: DefaultTextInkRecognizerConfiguration,
   type: "TEXT",
   lang: "en_US",
 }
