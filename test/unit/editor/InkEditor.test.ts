@@ -63,7 +63,7 @@ describe("InkEditor.ts", () => {
     expect(editor.grabber.attach).toHaveBeenCalledTimes(1)
     expect(editor.grabber.attach).toHaveBeenCalledWith(editor.layers.rendering)
     expect(editor.renderer.init).toHaveBeenCalledTimes(1)
-    expect(editor.renderer.init).toHaveBeenCalledWith(editor.layers.rendering)
+    expect(editor.renderer.init).toHaveBeenCalledWith(editor.layers.rendering, {"x": 50, "y": 50})
   })
 
   test("should call renderer on drawCurrentStroke", async () => {

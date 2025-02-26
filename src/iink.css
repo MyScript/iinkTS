@@ -53,11 +53,19 @@
     z-index: 20;
 }
 
-.ms-editor .ms-rendering-canvas {
+.ms-editor .ms-layer-rendering .ms-rendering-canvas {
     z-index: 9;
     pointer-events: none;
-    background-image: linear-gradient(to right, #F5F6F7 1px, transparent 1px), linear-gradient(to bottom, #F5F6F7 1px, transparent 1px);
-    background-size: 18px 18px;
+}
+
+.ms-editor .ms-layer-rendering.text .ms-rendering-canvas {
+    background-image: linear-gradient(to bottom, #c8c8c8 1px, transparent 1px);
+}
+.ms-editor .ms-layer-rendering.diagram .ms-rendering-canvas,
+.ms-editor .ms-layer-rendering.shape .ms-rendering-canvas,
+.ms-editor .ms-layer-rendering.raw-content .ms-rendering-canvas {
+    background-image: linear-gradient(to right, #c8c8c8 1px, transparent 1px), linear-gradient(to bottom, #c8c8c8 1px, transparent 1px);
+    background-size: 40px 40px;
 }
 
 /** layer infos **/

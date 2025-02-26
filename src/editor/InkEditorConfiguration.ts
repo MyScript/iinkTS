@@ -4,7 +4,7 @@ import { DefaultLoggerConfiguration, TLoggerConfiguration } from "../logger"
 import { DefaultInkRecognizerConfiguration, InkRecognizerConfiguration, TInkRecognizerConfiguration, TInkRecognizerRecognitionConfiguration, TServerHTTPConfiguration } from "../recognizer"
 import { DefaultRendererConfiguration, TRendererConfiguration } from "../renderer"
 import { DefaultStyle, TStyle } from "../style"
-import { mergeDeep, PartialDeep } from "../utils"
+import { convertPixelToMillimeter, mergeDeep, PartialDeep } from "../utils"
 import { TEditorConfiguration } from "./AbstractEditor"
 import { DefaultEditorTriggerConfiguration, TEditorTriggerConfiguration } from "./EditorTriggerConfiguration"
 
@@ -56,6 +56,11 @@ export class InkEditorConfiguration implements TInkEditorConfiguration
     this.server = server
     this.recognition = recognition
     this.renderer = mergeDeep({}, DefaultInkEditorConfiguration.renderer, configuration?.renderer)
+    this.recognition.text.guides.enable = this.renderer.guides.enable
+    if (this.renderer.guides.enable)
+    {
+      this.recognition.text.guides["line-gap-mm"] = convertPixelToMillimeter(this.renderer.guides.gap)
+    }
     this.grabber = mergeDeep({}, DefaultInkEditorConfiguration.grabber, configuration?.grabber)
     this["undo-redo"] = mergeDeep({}, DefaultInkEditorConfiguration["undo-redo"], configuration?.["undo-redo"])
     this.triggers = mergeDeep({}, DefaultInkEditorConfiguration.triggers, configuration?.triggers)

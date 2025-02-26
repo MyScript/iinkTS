@@ -42,17 +42,9 @@
         background-color: white;
         cursor: zoom-out;
       }
-      #conversion-container {
-        position: absolute;
-        left: 0;
-        top: 170px;
-      }
       @media only screen and (max-width: 418px) {
         #editor {
           height: calc(100dvh - 220px);
-        }
-        #conversion-container {
-          top: 220px;
         }
       }
     </style>
@@ -100,51 +92,16 @@
 
     <script>
       const editorElement = document.getElementById("editor");
-      const conversionContainer = document.getElementById("conversion-container");
       const resultElement = document.getElementById("result");
       const clearElement = document.getElementById("clear");
-      const progressElement = document.getElementById("progress");
       const undoElement = document.getElementById("undo");
       const redoElement = document.getElementById("redo");
       const eraserElement = document.getElementById("eraser");
       const penElement = document.getElementById("pen");
 
-      let exports = "";
-      let firstChanged = true;
-      let undoRedoClearChanged = false;
-      let isPreview = false;
-
-      function launchLoader() {
-        progressElement.style.transition = " width 10s";
-        progressElement.style.opacity = "1";
-        progressElement.style.width = `${editorElement.clientWidth / 2}px`;
-      }
-
-      function manageEditMode(withExport) {
-        if (withExport && isPreview && editor.model.symbols.length > 0) {
-          const convertParams = {
-            conversionState: "DIGITAL_EDIT",
-            mimeTypes: ["image/svg+xml"]
-          };
-          editor.convert(convertParams);
-          launchLoader();
-        }
-        undoElement.disabled = isPreview;
-        redoElement.disabled = isPreview;
-        clearElement.disabled = isPreview;
-        eraserElement.disabled = isPreview || editor.tool === iink.EditorTool.Erase;
-        penElement.disabled = isPreview || editor.tool === iink.EditorTool.Write;
-        if (isPreview) {
-          conversionContainer.style.visibility = "visible";
-          editorElement.style.visibility = "hidden";
-        } else {
-          conversionContainer.style.visibility = "hidden";
-          editorElement.style.visibility = "visible";
-        }
-      }
       resultElement.addEventListener("click", () => {
         resultElement.classList.toggle("open")
-      })
+      });
       /**
        * we expose the editor for use in the integration test
        */
@@ -173,10 +130,10 @@
         editor = await iink.Editor.load(editorElement, "INKV2", options);
 
         editor.event.addEventListener("changed", (event) => {
-          undoElement.disabled = !event.detail.canUndo || isPreview;
-          redoElement.disabled = !event.detail.canRedo || isPreview;
-          clearElement.disabled = !event.detail.canClear || isPreview;
-          eraserElement.disabled = !event.detail.canClear || editor.tool === iink.EditorTool.Erase || isPreview;
+          undoElement.disabled = !event.detail.canUndo;
+          redoElement.disabled = !event.detail.canRedo;
+          clearElement.disabled = !event.detail.canClear;
+          eraserElement.disabled = !event.detail.canClear || editor.tool === iink.EditorTool.Erase;
         });
 
         editor.event.addEventListener("exported", (evt) => {
@@ -186,28 +143,8 @@
           resultElement.appendChild(renderjson(event.detail))
         })
 
-        editor.event.addEventListener("converted", (evt) => {
-          const exports = evt.detail;
-          if (exports && exports["image/svg+xml"]) {
-            progressElement.style.transition = " width 0.3s";
-            progressElement.style.width = `${editorElement.clientWidth}px`;
-            setTimeout(() => {
-              progressElement.style.opacity = "0";
-              progressElement.style.width = "0";
-            }, 300);
-            clearElement.disabled = false;
-            conversionContainer.innerHTML = exports["image/svg+xml"].trim();
-            conversionContainer.firstChild.setAttribute("width", editorElement.clientWidth);
-            conversionContainer.firstChild.setAttribute("height", editorElement.clientHeight);
-            conversionContainer.firstChild.setAttribute("viewBox", `0 0 ${editorElement.clientWidth / 3.77953} ${editorElement.clientHeight / 3.77953}`);
-            manageEditMode(false);
-          }
-        });
-
         clearElement.addEventListener("click", () => {
-          undoRedoClearChanged = true;
           editor.clear();
-          conversionContainer.innerHTML = "";
         });
 
         undoElement.addEventListener("click", () => {
