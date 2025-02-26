@@ -1,18 +1,15 @@
-const EditorRestConfiguration = iink.DefaultInkEditorDeprecatedConfiguration
-const EditorWebSocketConfiguration = iink.DefaultInteractiveInkSSREditorConfiguration
-const EditorOffscreenConfiguration = iink.DefaultInteractiveInkEditorConfiguration
-
+const inkEditorDeprecatedConfiguration = iink.DefaultInkEditorDeprecatedConfiguration
+const IISSREditorConfiguration = iink.DefaultInteractiveInkSSREditorConfiguration
+const IIEditorConfiguration = iink.DefaultInteractiveInkEditorConfiguration
+const inkEditorConfiguration = iink.DefaultInkEditorConfiguration
 const configurationContainer = document.getElementById('configuration-container')
 const configurationContent = document.getElementById('configuration-content')
 const editorTypeSelect = document.getElementById('editor-type')
-
 const editorElement = document.getElementById('editor')
 const resultElement = document.getElementById('result')
 const exportBtn = document.getElementById('export-btn')
 const validBtn = document.getElementById('valid-btn')
 const resetBtn = document.getElementById('reset-btn')
-
-
 const inputMap = {
   'server.scheme': {
     type: 'select',
@@ -50,6 +47,7 @@ const inputMap = {
   },
   'recognition.math.mimeTypes': {
     type: 'select',
+    multiple: true,
     values: [
       'application/vnd.myscript.jiix',
       'application/x-latex',
@@ -84,11 +82,11 @@ const inputMap = {
   },
   'recognition.text.mimeTypes': {
     type: 'select',
+    multiple: true,
     values: [
       'application/vnd.myscript.jiix',
       'text/plain',
     ].map((v) => ({ label: v, value: v }))
-
   },
   'recognition.diagram.convert.types': {
     type: 'select',
@@ -106,7 +104,6 @@ const inputMap = {
       'application/vnd.openxmlformats-officedocument.presentationml.presentation',
       'image/svg+xml'
     ].map((v) => ({ label: v, value: v }))
-
   },
   'recognition.raw-content.recognition.types': {
     type: 'select',
@@ -239,7 +236,6 @@ function renderPartialConfiguration(conf, currentPath = '') {
         case 'color':
           fragment.appendChild(buildInput(localPath, key, 'color', value))
           break
-
         default:
           break
       }
@@ -316,26 +312,29 @@ const editorOptions = {
 function loadConfiguration() {
   switch (editorTypeSelect.value) {
     case "INTERACTIVEINKSSR":
-      editorOptions.configuration = structuredClone(EditorWebSocketConfiguration)
+      editorOptions.configuration = structuredClone(IISSREditorConfiguration)
       break
     case "INKV1":
-      editorOptions.configuration = structuredClone(EditorRestConfiguration)
+      editorOptions.configuration = structuredClone(inkEditorDeprecatedConfiguration)
+      break
+    case "INKV2":
+      editorOptions.configuration = structuredClone(inkEditorConfiguration)
       break
     case "INTERACTIVEINK":
-      editorOptions.configuration = structuredClone(EditorOffscreenConfiguration)
+      editorOptions.configuration = structuredClone(IIEditorConfiguration)
       break
   }
   renderConfiguration(editorOptions.configuration)
 }
-
 async function loadEditor(options) {
   if (!serverConfiguration) {
     const res = await fetch("../server-configuration.json");
     serverConfiguration = await res.json();
     const defaultConfigurations = [
-      EditorRestConfiguration,
-      EditorWebSocketConfiguration,
-      EditorOffscreenConfiguration
+      inkEditorDeprecatedConfiguration,
+      IISSREditorConfiguration,
+      IIEditorConfiguration,
+      inkEditorConfiguration
     ]
     defaultConfigurations.forEach((c) => Object.assign(c.server, serverConfiguration))
     options.configuration.server = Object.assign({}, options.configuration.server, serverConfiguration)
