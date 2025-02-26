@@ -105,16 +105,8 @@
        * we expose the editor so we can access it in tests
        */
       let editor;
-
-      /**
-       * We use a function to wait the server configuration to load
-       */
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-        const options = {
+      const options = {
           configuration: {
-            server,
             recognition: {
               type: "MATH",
               math: {
@@ -126,6 +118,15 @@
             }
           }
         };
+      /**
+       * We use a function to wait the server configuration to load
+       */
+      async function loadEditor() {
+        if (!options.configuration.server) {
+          const res = await fetch("../server-configuration.json");
+          options.configuration.server = await res.json();
+        }
+
 
         /**
          * get editor instance from type
@@ -182,9 +183,12 @@
         });
 
         erasePreciselyElement.addEventListener("change", (e) => {
-          const configuration = { ...editorElement.editor.configuration };
-          configuration.recognition.math.eraser["erase-precisely"] = e.target.checked;
-          editorElement.editor.configuration = configuration;
+          options.configuration.recognition.math.eraser["erase-precisely"] = e.target.checked;
+          loadEditor()
+          eraserElement.disabled = false;
+          eraserElement.classList.remove("active");
+          penElement.disabled = true;
+          penElement.classList.add("active");
         });
 
         window.addEventListener("resize", () => {
