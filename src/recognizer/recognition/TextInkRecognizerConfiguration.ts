@@ -36,7 +36,7 @@ export type TTextInkRecognizerConfiguration = {
   text?: boolean
   mimeTypes: ("text/plain" | "application/vnd.myscript.jiix")[]
   margin: TMarginConfiguration
-  guides?: TTextGuidesInkRecognizerConfiguration
+  guides: TTextGuidesInkRecognizerConfiguration
   configuration?: TTextInkRecognizerConfConfiguration
   eraser?: TEraserConfiguration
 }

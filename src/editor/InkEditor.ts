@@ -180,7 +180,8 @@ export class InkEditor extends AbstractEditor {
       this.model.width = Math.max(parseInt(compStyles.width.replace("px", "")), this.#configuration.renderer.minWidth)
       this.model.height = Math.max(parseInt(compStyles.height.replace("px", "")), this.#configuration.renderer.minHeight)
       this.history.push(this.model)
-      this.renderer.init(this.layers.rendering)
+      this.layers.rendering.classList.add(this.configuration.recognition.type.toLowerCase().replace(" ", "-"))
+      this.renderer.init(this.layers.rendering, this.#configuration.renderer.guides.enable ? { x: this.#configuration.renderer.guides.gap, y: this.#configuration.renderer.guides.gap } : undefined)
       this.grabber.attach(this.layers.rendering)
     } catch (error) {
       this.logger.error("initialize", error)
