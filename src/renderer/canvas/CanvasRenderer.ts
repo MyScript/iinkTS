@@ -77,11 +77,14 @@ export class CanvasRenderer
     }
   }
 
-  init(element: HTMLElement): void
+  init(element: HTMLElement, guide?: { x?: number, y?: number } ): void
   {
     this.#logger.info("init", { element })
     const renderingCanvas: HTMLCanvasElement = this.createCanvas("ms-rendering-canvas")
     renderingCanvas.setAttribute("data-layer", "MODEL")
+    if (guide) {
+      renderingCanvas.style.backgroundSize = `${guide.x || 1}px ${guide.y || 1}px`
+    }
     element.appendChild(renderingCanvas)
 
     const capturingCanvas: HTMLCanvasElement = this.createCanvas("ms-capture-canvas")
