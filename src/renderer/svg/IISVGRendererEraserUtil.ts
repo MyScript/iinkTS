@@ -12,21 +12,18 @@ export class IISVGRendererEraserUtil
 
     const firstPoint = eraser.pointers.at(0) as TPointer
 
+    const startPath = `M ${ firstPoint.x } ${ firstPoint.y }`
+
     if (eraser.pointers.length === 1) {
       const strokeWith = eraser.style.width || 4
-      return `C ${ firstPoint.x - strokeWith / 2 } ${ firstPoint.y } Q ${ firstPoint.x  + strokeWith / 2 } ${ firstPoint.y }`
+      return `${startPath} L ${ firstPoint.x  + strokeWith / 2 } ${ firstPoint.y }`
     }
 
     const middlePoints = eraser.pointers.slice(1)
 
-    const startPathMoveTo = `M ${ firstPoint.x } ${ firstPoint.y }`
-
-
-    const middlePathQuadratic = middlePoints.reduce((acc, point) => {
-      return `${ acc } ${ point.x } ${ point.y }`
-    }, "Q")
-
-    return `${ startPathMoveTo } ${ middlePathQuadratic }`
+    return middlePoints.reduce((acc, point) => {
+      return `${ acc } L ${ point.x } ${ point.y }`
+    }, startPath)
   }
 
   static getSVGElement(eraser: IIEraser): SVGPathElement
