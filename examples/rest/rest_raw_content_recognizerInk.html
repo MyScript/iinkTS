@@ -108,16 +108,17 @@
       let serverConfiguration
       const editorOptions = {
         configuration: {
-          type: "Raw Content",
-          "raw-content": {
-            classification: {
-              types: ["text", "math", "shape", "drawing", "decoration"],
+          recognition: {
+            type: "Raw Content",
+            "raw-content": {
+              classification: {
+                types: ["text", "math", "shape", "drawing", "decoration"],
+              },
+              recognition: {
+                types: ["text", "math", "shape"],
+              },
             },
-            recognition: {
-              types: ["text", "math", "shape"],
-            },
-          },
-
+          }
         },
       }
 
@@ -149,20 +150,14 @@
           clearElement.disabled = !event.detail.canClear
         })
 
-        const currentLanguage = editor.configuration.recognition.lang
-        const availableLanguageListResponse =
-          await iink.getAvailableLanguageList(editor.configuration)
-        Object.keys(availableLanguageListResponse.result).forEach(function (
-          key
-        ) {
-          const selected = currentLanguage === key
-          languageElement.options[languageElement.options.length] = new Option(
-            availableLanguageListResponse.result[key],
-            key,
-            selected,
-            selected
-          )
-        })
+        if (!languageElement.options.length) {
+          const currentLanguage = editor.configuration.recognition.lang
+          const availableLanguageListResponse = await iink.getAvailableLanguageList(editor.configuration)
+          Object.keys(availableLanguageListResponse.result).forEach(function (key) {
+            const selected = currentLanguage === key
+            languageElement.options[languageElement.options.length] = new Option(availableLanguageListResponse.result[key], key, selected, selected)
+          })
+        }
 
         editor.event.addEventListener("exported", (evt) => {
           while (resultElement.firstChild) {
