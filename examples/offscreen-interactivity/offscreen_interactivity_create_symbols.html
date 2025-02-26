@@ -145,11 +145,6 @@
          */
         editor = await iink.Editor.load(editorElement, "INTERACTIVEINK", options);
 
-        /**
-         *  async initialize editor
-         */
-        await editor.initialize();
-
         const shapeRes = await fetch("../assets/datas/diagram-with-shape.json");
         const symbols = await shapeRes.json();
         symbols.forEach((s, i) => {
