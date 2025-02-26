@@ -315,6 +315,8 @@ export class InteractiveInkSSREditor extends AbstractEditor
     try {
       if (this.#configuration.triggers.exportContent === "DEMAND") {
         const unsentStrokes = this.model.extractUnsentStrokes()
+        this.history.push(this.model)
+        this.history.stack.push(this.model.clone())
         this.model.updatePositionSent()
         const exports = await this.recognizer.addStrokes(unsentStrokes)
         this.model.updatePositionReceived()
