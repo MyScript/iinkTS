@@ -68,7 +68,7 @@ describe("InkEditorDeprecated.ts", () =>
     expect(editor.grabber.attach).toBeCalledTimes(1)
     expect(editor.grabber.attach).toBeCalledWith(editor.layers.rendering)
     expect(editor.renderer.init).toBeCalledTimes(1)
-    expect(editor.renderer.init).toBeCalledWith(editor.layers.rendering)
+    expect(editor.renderer.init).toBeCalledWith(editor.layers.rendering, { x: 50, y: 50 })
   })
 
   test("should call renderer on drawCurrentStroke", async () =>
