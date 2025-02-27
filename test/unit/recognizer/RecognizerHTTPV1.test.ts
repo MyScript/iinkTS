@@ -1,17 +1,17 @@
 import fetchMock from "jest-fetch-mock"
 import
 {
-  InkDeprecatedRecognizer,
+  RecognizerHTTPV1,
   DefaultPenStyle,
   Model,
   TPointer,
   TRecognitionType,
-  TInkDeprecatedRecognizerConfiguration,
-  DefaultInkDeprecatedRecognizerConfiguration
+  TRecognizerHTTPV1Configuration,
+  DefaultRecognizerHTTPV1Configuration
 } from "../../../src/iink"
-import { ConfigurationDiagramInkDeprecated, ConfigurationMathInkDeprecated, ConfigurationRawContentInkDeprecated, ConfigurationTextInkDeprecated } from "../__dataset__/configuration.dataset"
+import { RecognizerHTTPV1DiagramConfiguration, RecognizerHTTPV1MathConfiguration, RecognizerHTTPV1RawContentConfiguration, RecognizerHTTPV1TextConfiguration } from "../__dataset__/configuration.dataset"
 
-describe("InkDeprecated.ts", () =>
+describe("RecognizerHTTPV1.ts", () =>
 {
   const height = 100, width = 100
 
@@ -24,28 +24,28 @@ describe("InkDeprecated.ts", () =>
     fetchMock.resetMocks()
   })
 
-  test("should instanciate InkDeprecated", () =>
+  test("should instanciate RecognizerHTTPV1", () =>
   {
-    const rr = new InkDeprecatedRecognizer(DefaultInkDeprecatedRecognizerConfiguration)
+    const rr = new RecognizerHTTPV1(DefaultRecognizerHTTPV1Configuration)
     expect(rr).toBeDefined()
   })
 
-  const testDatas: { type: TRecognitionType, config: TInkDeprecatedRecognizerConfiguration }[] = [
+  const testDatas: { type: TRecognitionType, config: TRecognizerHTTPV1Configuration }[] = [
     {
       type: "TEXT",
-      config: ConfigurationTextInkDeprecated as TInkDeprecatedRecognizerConfiguration
+      config: RecognizerHTTPV1TextConfiguration as TRecognizerHTTPV1Configuration
     },
     {
       type: "DIAGRAM",
-      config: ConfigurationDiagramInkDeprecated as TInkDeprecatedRecognizerConfiguration
+      config: RecognizerHTTPV1DiagramConfiguration as TRecognizerHTTPV1Configuration
     },
     {
       type: "MATH",
-      config: ConfigurationMathInkDeprecated as TInkDeprecatedRecognizerConfiguration
+      config: RecognizerHTTPV1MathConfiguration as TRecognizerHTTPV1Configuration
     },
     {
       type: "Raw Content",
-      config: ConfigurationRawContentInkDeprecated as TInkDeprecatedRecognizerConfiguration
+      config: RecognizerHTTPV1RawContentConfiguration as TRecognizerHTTPV1Configuration
     },
   ]
 
@@ -58,10 +58,10 @@ describe("InkDeprecated.ts", () =>
       const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
       model.initCurrentStroke(p1, "pen", DefaultPenStyle)
       model.endCurrentStroke(p2)
-      const newConf: TInkDeprecatedRecognizerConfiguration = structuredClone(config)
+      const newConf: TRecognizerHTTPV1Configuration = structuredClone(config)
       newConf.recognition.type = type
 
-      const rr = new InkDeprecatedRecognizer(newConf)
+      const rr = new RecognizerHTTPV1(newConf)
       const newModel = await rr.export(model)
 
       let mimeTypes = []
@@ -100,9 +100,9 @@ describe("InkDeprecated.ts", () =>
       const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
       model.initCurrentStroke(p1, "pen", DefaultPenStyle)
       model.endCurrentStroke(p2)
-      const newConf: TInkDeprecatedRecognizerConfiguration = structuredClone(config)
+      const newConf: TRecognizerHTTPV1Configuration = structuredClone(config)
       newConf.recognition.type = type
-      const rr = new InkDeprecatedRecognizer(newConf)
+      const rr = new RecognizerHTTPV1(newConf)
       const newModel = await rr.convert(model, "DIGITAL_EDIT")
 
       let mimeTypes: string[]

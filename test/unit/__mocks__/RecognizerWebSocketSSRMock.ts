@@ -2,11 +2,11 @@ import
 {
   Model,
   TExport,
-  InteractiveInkSSRRecognizer,
+  RecognizerWebSocketSSR,
   DefaultInteractiveInkSSREditorConfiguration
 } from "../../../src/iink"
 
-export class InteractiveInkSSRRecognizerMock extends InteractiveInkSSRRecognizer
+export class RecognizerWebSocketSSRMock extends RecognizerWebSocketSSR
 {
   constructor()
   {

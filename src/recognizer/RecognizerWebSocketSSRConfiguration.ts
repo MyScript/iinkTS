@@ -16,7 +16,7 @@ import { DefaultServerWebsocketConfiguration, TServerWebsocketConfiguration } fr
 /**
  * @group Recognizer
  */
-export type TInteractiveInkSSRRecognitionConfiguration = {
+export type TRecognizerWebSocketSSRRecognitionConfiguration = {
   type: Omit<TRecognitionType, "DIAGRAM" | "Raw Content">
   lang: string
   math: TMathConfiguration
@@ -30,7 +30,7 @@ export type TInteractiveInkSSRRecognitionConfiguration = {
  * @group Recognizer
  * @source
  */
-export const DefaultInteractiveInkSSRRecognitionConfiguration: TInteractiveInkSSRRecognitionConfiguration = {
+export const DefaultRecognizerWebSocketSSRRecognitionConfiguration: TRecognizerWebSocketSSRRecognitionConfiguration = {
   export: DefaultExportConfiguration,
   math: DefaultMathConfiguration,
   renderer: DefaultRecognitionRendererConfiguration,
@@ -42,32 +42,32 @@ export const DefaultInteractiveInkSSRRecognitionConfiguration: TInteractiveInkSS
 /**
  * @group Recognizer
  */
-export type TInteractiveInkSSRRecognizerConfiguration = {
+export type TRecognizerWebSocketSSRConfiguration = {
   server: TServerWebsocketConfiguration
-  recognition: TInteractiveInkSSRRecognitionConfiguration
+  recognition: TRecognizerWebSocketSSRRecognitionConfiguration
 }
 
 /**
  * @group Recognizer
  * @source
  */
-export const DefaultInteractiveInkSSRRecognizerConfiguration: TInteractiveInkSSRRecognizerConfiguration =
+export const DefaultRecognizerWebSocketSSRConfiguration: TRecognizerWebSocketSSRConfiguration =
 {
   server: DefaultServerWebsocketConfiguration,
-  recognition: DefaultInteractiveInkSSRRecognitionConfiguration
+  recognition: DefaultRecognizerWebSocketSSRRecognitionConfiguration
 }
 
 /**
  * @group Recognizer
  */
-export class InteractiveInkSSRRecognizerConfiguration implements TInteractiveInkSSRRecognizerConfiguration
+export class RecognizerWebSocketSSRConfiguration implements TRecognizerWebSocketSSRConfiguration
 {
-  recognition: TInteractiveInkSSRRecognitionConfiguration
+  recognition: TRecognizerWebSocketSSRRecognitionConfiguration
   server: TServerWebsocketConfiguration
 
-  constructor(configuration?: PartialDeep<TInteractiveInkSSRRecognizerConfiguration>) {
-    this.server = mergeDeep({}, DefaultInteractiveInkSSRRecognizerConfiguration.server, configuration?.server)
-    this.recognition = mergeDeep({}, DefaultInteractiveInkSSRRecognizerConfiguration.recognition, configuration?.recognition)
+  constructor(configuration?: PartialDeep<TRecognizerWebSocketSSRConfiguration>) {
+    this.server = mergeDeep({}, DefaultRecognizerWebSocketSSRConfiguration.server, configuration?.server)
+    this.recognition = mergeDeep({}, DefaultRecognizerWebSocketSSRConfiguration.recognition, configuration?.recognition)
 
     if (configuration?.recognition?.text?.mimeTypes) {
       this.recognition.text.mimeTypes = configuration.recognition.text.mimeTypes as ("text/plain" | "application/vnd.myscript.jiix")[]

@@ -15,7 +15,7 @@ import
   IIRecognizedText,
   RecognizedKind,
 } from "../symbol"
-import { InteractiveInkRecognizer } from "../recognizer"
+import { RecognizerWebSocket } from "../recognizer"
 import { IISVGRenderer } from "../renderer"
 import { IIHistoryManager, TIIHistoryChanges } from "../history"
 import { computeAverage, isBetween, PartialDeep } from "../utils"
@@ -51,7 +51,7 @@ export class IIGestureManager
     return this.editor.renderer
   }
 
-  get recognizer(): InteractiveInkRecognizer
+  get recognizer(): RecognizerWebSocket
   {
     return this.editor.recognizer
   }

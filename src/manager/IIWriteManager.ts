@@ -17,7 +17,7 @@ import
   TPoint,
   TPointer
 } from "../symbol"
-import { InteractiveInkRecognizer } from "../recognizer"
+import { RecognizerWebSocket } from "../recognizer"
 import { IISVGRenderer } from "../renderer"
 import { TStyle } from "../style"
 import { IIHistoryManager } from "../history"
@@ -89,7 +89,7 @@ export class IIWriteManager
     return this.editor.snaps
   }
 
-  get recognizer(): InteractiveInkRecognizer
+  get recognizer(): RecognizerWebSocket
   {
     return this.editor.recognizer
   }

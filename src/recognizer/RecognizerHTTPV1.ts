@@ -4,7 +4,7 @@ import { TStrokeGroup, TStrokeGroupToSend } from "../symbol"
 import { StyleHelper, TPenStyle } from "../style"
 import { computeHmac, getApiInfos, isVersionSuperiorOrEqual, PartialDeep } from "../utils"
 import { RecognizerError } from "./RecognizerError"
-import { InkDeprecatedRecognizerConfiguration, TInkDeprecatedRecognizerConfiguration } from "./InkDeprecatedRecognizerConfiguration"
+import { RecognizerHTTPV1Configuration, TRecognizerHTTPV1Configuration } from "./RecognizerHTTPV1Configuration"
 import { TConverstionState } from "./RecognitionConfiguration"
 import { TDiagramConfiguration, TExportConfiguration, TMathConfiguration, TRawContentConfiguration, TTextConfiguration } from "./recognition"
 
@@ -16,7 +16,7 @@ type ApiError = {
 /**
  * @group Recognizer
  */
-export type TInkDeprecatedPostConfiguration = {
+export type TRecognizerHTTPV1PostConfiguration = {
   lang: string,
   diagram?: TDiagramConfiguration,
   math?: TMathConfiguration,
@@ -28,8 +28,8 @@ export type TInkDeprecatedPostConfiguration = {
 /**
  * @group Recognizer
  */
-export type TInkDeprecatedPostData = {
-  configuration: TInkDeprecatedPostConfiguration,
+export type TRecognizerHTTPV1PostData = {
+  configuration: TRecognizerHTTPV1PostConfiguration,
   xDPI: number,
   yDPI: number,
   contentType: string,
@@ -40,18 +40,19 @@ export type TInkDeprecatedPostData = {
 }
 
 /**
+ * @deprecated Use {@link RecognizerHTTPV2} instead.
  * @group Recognizer
  */
-export class InkDeprecatedRecognizer
+export class RecognizerHTTPV1
 {
   #logger = LoggerManager.getLogger(LoggerCategory.RECOGNIZER)
 
-  configuration: InkDeprecatedRecognizerConfiguration
+  configuration: RecognizerHTTPV1Configuration
 
-  constructor(config: PartialDeep<TInkDeprecatedRecognizerConfiguration>)
+  constructor(config: PartialDeep<TRecognizerHTTPV1Configuration>)
   {
     this.#logger.info("constructor", { config })
-    this.configuration = new InkDeprecatedRecognizerConfiguration(config)
+    this.configuration = new RecognizerHTTPV1Configuration(config)
   }
 
   get url()
@@ -59,7 +60,7 @@ export class InkDeprecatedRecognizer
     return `${ this.configuration.server.scheme }://${ this.configuration.server.host }/api/v4.0/iink/batch`
   }
 
-  get postConfig(): TInkDeprecatedPostConfiguration
+  get postConfig(): TRecognizerHTTPV1PostConfiguration
   {
     switch (this.configuration.recognition.type) {
       case "DIAGRAM":
@@ -92,7 +93,7 @@ export class InkDeprecatedRecognizer
     }
   }
 
-  protected buildData(model: Model): TInkDeprecatedPostData
+  protected buildData(model: Model): TRecognizerHTTPV1PostData
   {
     this.#logger.info("buildData", { model })
     const isPenStyleEqual = (ps1: TPenStyle, ps2: TPenStyle) =>
@@ -209,7 +210,7 @@ export class InkDeprecatedRecognizer
     }
   }
 
-  protected async tryFetch(data: TInkDeprecatedPostData, mimeType: string): Promise<TExport | never>
+  protected async tryFetch(data: TRecognizerHTTPV1PostData, mimeType: string): Promise<TExport | never>
   {
     this.#logger.debug("tryFetch", { data, mimeType })
     return this.post(data, mimeType)

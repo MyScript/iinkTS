@@ -4,13 +4,13 @@ import {
   DefaultExportConfiguration,
   DefaultMathConfiguration,
   DefaultRawContentConfiguration,
-  DefaultTextInkRecognizerConfiguration,
+  DefaultTexConfigurationV2,
   TConvertionConfiguration,
   TShapeConfiguration,
   TExportConfiguration,
   TMathConfiguration,
   TRawContentConfiguration,
-  TTextInkRecognizerConfiguration
+  TTextRecognizerHTTPV2Configuration
 } from "./recognition"
 import { TRecognitionType } from "./RecognitionConfiguration"
 import { DefaultServerHTTPConfiguration, TServerHTTPConfiguration } from "./ServerConfiguration"
@@ -18,11 +18,11 @@ import { DefaultServerHTTPConfiguration, TServerHTTPConfiguration } from "./Serv
 /**
  * @group Recognizer
  */
-export type TInkRecognizerRecognitionConfiguration = {
+export type TRecognizerHTTPV2RecognitionConfiguration = {
   type: TRecognitionType
   lang: string
   math: TMathConfiguration
-  text: TTextInkRecognizerConfiguration
+  text: TTextRecognizerHTTPV2Configuration
   shape: TShapeConfiguration
   "raw-content": TRawContentConfiguration
   export: TExportConfiguration
@@ -33,12 +33,12 @@ export type TInkRecognizerRecognitionConfiguration = {
  * @group Recognizer
  * @source
  */
-export const DefaultInkRecognizerRecognitionConfiguration: TInkRecognizerRecognitionConfiguration = {
+export const DefaultRecognizerHTTPV2RecognitionConfiguration: TRecognizerHTTPV2RecognitionConfiguration = {
   export: DefaultExportConfiguration,
   math: DefaultMathConfiguration,
   shape: DefaultShapeConfiguration,
   "raw-content": DefaultRawContentConfiguration,
-  text: DefaultTextInkRecognizerConfiguration,
+  text: DefaultTexConfigurationV2,
   type: "TEXT",
   lang: "en_US",
 }
@@ -46,32 +46,32 @@ export const DefaultInkRecognizerRecognitionConfiguration: TInkRecognizerRecogni
 /**
  * @group Recognizer
  */
-export type TInkRecognizerConfiguration = {
+export type TRecognizerHTTPV2Configuration = {
   server: TServerHTTPConfiguration
-  recognition: TInkRecognizerRecognitionConfiguration
+  recognition: TRecognizerHTTPV2RecognitionConfiguration
 }
 
 /**
  * @group Recognizer
  */
-export const DefaultInkRecognizerConfiguration: TInkRecognizerConfiguration =
+export const DefaultRecognizerHTTPV2Configuration: TRecognizerHTTPV2Configuration =
 {
   server: DefaultServerHTTPConfiguration,
-  recognition: DefaultInkRecognizerRecognitionConfiguration
+  recognition: DefaultRecognizerHTTPV2RecognitionConfiguration
 }
 
 /**
  * @group Recognizer
  * @source
  */
-export class InkRecognizerConfiguration implements TInkRecognizerConfiguration {
-  recognition: TInkRecognizerRecognitionConfiguration
+export class RecognizerHTTPV2Configuration implements TRecognizerHTTPV2Configuration {
+  recognition: TRecognizerHTTPV2RecognitionConfiguration
   server: TServerHTTPConfiguration
 
-  constructor(configuration?: PartialDeep<TInkRecognizerConfiguration>)
+  constructor(configuration?: PartialDeep<TRecognizerHTTPV2Configuration>)
   {
-    this.server = mergeDeep({}, DefaultInkRecognizerConfiguration.server, configuration?.server)
-    this.recognition = mergeDeep({}, DefaultInkRecognizerConfiguration.recognition, configuration?.recognition)
+    this.server = mergeDeep({}, DefaultRecognizerHTTPV2Configuration.server, configuration?.server)
+    this.recognition = mergeDeep({}, DefaultRecognizerHTTPV2Configuration.recognition, configuration?.recognition)
 
     if (configuration?.recognition?.text?.mimeTypes) {
       this.recognition.text.mimeTypes = configuration.recognition.text.mimeTypes as ("text/plain" | "application/vnd.myscript.jiix")[]

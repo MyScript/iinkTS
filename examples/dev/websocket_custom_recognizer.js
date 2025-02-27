@@ -1,4 +1,4 @@
-class CustomWebsocketRecognizer extends iink.InteractiveInkSSRRecognizer {
+class CustomWebsocketRecognizer extends iink.RecognizerWebSocketSSR {
 
   constructor(config) {
     super(config)

@@ -1,7 +1,7 @@
 import { EditorTool } from "../Constants"
 import { PointerEventGrabber, PointerInfo } from "../grabber"
 import { Model, TExport, TJIIXExport } from "../model"
-import { TInteractiveInkSSRMessageEventSVGPatch, InteractiveInkSSRRecognizer, DefaultMarginConfiguration, TConverstionState, TMarginConfiguration } from "../recognizer"
+import { TRecognizerWebSocketSSRMessageSVGPatch, RecognizerWebSocketSSR, DefaultMarginConfiguration, TConverstionState, TMarginConfiguration } from "../recognizer"
 import { InteractiveInkSSRSmartGuide } from "../smartguide"
 import { InteractiveInkSSRSVGRenderer } from "../renderer"
 import { DefaultPenStyle, StyleManager, TPenStyle, TTheme } from "../style"
@@ -21,7 +21,7 @@ export type TInteractiveInkSSREditorOptions = PartialDeep<EditorOptionsBase &
   {
     override?: {
       grabber?: PointerEventGrabber
-      recognizer?: InteractiveInkSSRRecognizer
+      recognizer?: RecognizerWebSocketSSR
     }
   }
 
@@ -37,7 +37,7 @@ export class InteractiveInkSSREditor extends AbstractEditor
   smartGuide?: InteractiveInkSSRSmartGuide
   grabber: PointerEventGrabber
   renderer: InteractiveInkSSRSVGRenderer
-  recognizer: InteractiveInkSSRRecognizer
+  recognizer: RecognizerWebSocketSSR
   history: HistoryManager
   styleManager: StyleManager
   #tool: EditorTool = EditorTool.Write
@@ -58,11 +58,11 @@ export class InteractiveInkSSREditor extends AbstractEditor
     }
 
     if (options?.override?.recognizer) {
-      const CustomRecognizer = options.override.recognizer as unknown as typeof InteractiveInkSSRRecognizer
+      const CustomRecognizer = options.override.recognizer as unknown as typeof RecognizerWebSocketSSR
       this.recognizer = new CustomRecognizer(this.#configuration)
     }
     else {
-      this.recognizer = new InteractiveInkSSRRecognizer(this.#configuration)
+      this.recognizer = new RecognizerWebSocketSSR(this.#configuration)
     }
 
     this.renderer = new InteractiveInkSSRSVGRenderer(this.#configuration.rendering)
@@ -198,7 +198,7 @@ export class InteractiveInkSSREditor extends AbstractEditor
     }
   }
 
-  protected onSVGPatch(evt: TInteractiveInkSSRMessageEventSVGPatch): void
+  protected onSVGPatch(evt: TRecognizerWebSocketSSRMessageSVGPatch): void
   {
     this.logger.info("onSVGPatch", { evt })
     this.renderer.updatesLayer(evt.layer, evt.updates)

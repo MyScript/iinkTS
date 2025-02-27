@@ -7,16 +7,16 @@ import
   DefaultPenStyle,
   TInteractiveInkSSREditorConfiguration,
   TExport,
-  TInteractiveInkSSRMessageEventSVGPatch,
+  TRecognizerWebSocketSSRMessageSVGPatch,
   TPointer,
   TPenStyle,
   TTheme,
-  InteractiveInkSSRRecognizer,
+  RecognizerWebSocketSSR,
   PointerEventGrabber,
   EditorTool,
   TInteractiveInkSSREditorOptions
 } from "../../../src/iink"
-import { InteractiveInkSSRRecognizerMock } from "../__mocks__/InteractiveInkSSRRecognizerMock"
+import { RecognizerWebSocketSSRMock } from "../__mocks__/RecognizerWebSocketSSRMock"
 
 describe("InteractiveInkSSREditor.ts", () =>
 {
@@ -34,7 +34,7 @@ describe("InteractiveInkSSREditor.ts", () =>
       expect(editor.grabber).toBeDefined()
       expect(editor.grabber instanceof PointerEventGrabber).toBe(true)
       expect(editor.recognizer).toBeDefined()
-      expect(editor.recognizer instanceof InteractiveInkSSRRecognizer).toBe(true)
+      expect(editor.recognizer instanceof RecognizerWebSocketSSR).toBe(true)
     })
 
     test("should instanciate with custom grabber", () =>
@@ -57,7 +57,7 @@ describe("InteractiveInkSSREditor.ts", () =>
 
     test("should instanciate with custom recognizer", () =>
     {
-      class CustomRecognizer extends InteractiveInkSSRRecognizer
+      class CustomRecognizer extends RecognizerWebSocketSSR
       {
         name = "custom-recognizer"
       }
@@ -70,7 +70,7 @@ describe("InteractiveInkSSREditor.ts", () =>
       const editor = new InteractiveInkSSREditor(document.createElement("div"), customOptions)
       expect(editor).toBeDefined()
       expect(editor.recognizer).toBeDefined()
-      expect(editor.recognizer instanceof InteractiveInkSSRRecognizer).toBe(true)
+      expect(editor.recognizer instanceof RecognizerWebSocketSSR).toBe(true)
     })
   })
 
@@ -155,7 +155,7 @@ describe("InteractiveInkSSREditor.ts", () =>
     const editor = new InteractiveInkSSREditor(document.createElement("div"), DefaultInteractiveInkSSREditorOptions)
     editor.grabber.attach = jest.fn()
     editor.renderer.init = jest.fn()
-    editor.recognizer = new InteractiveInkSSRRecognizerMock()
+    editor.recognizer = new RecognizerWebSocketSSRMock()
     editor.renderer.drawPendingStroke = jest.fn()
     beforeAll(async () =>
     {
@@ -184,7 +184,7 @@ describe("InteractiveInkSSREditor.ts", () =>
       editor.grabber.attach = jest.fn()
       editor.renderer.init = jest.fn()
       editor.renderer.clearErasingStrokes = jest.fn()
-      editor.recognizer = new InteractiveInkSSRRecognizerMock()
+      editor.recognizer = new RecognizerWebSocketSSRMock()
       beforeAll(async () =>
       {
         await editor.initialize()
@@ -208,7 +208,7 @@ describe("InteractiveInkSSREditor.ts", () =>
       editor.grabber.attach = jest.fn()
       editor.renderer.init = jest.fn()
       editor.renderer.clearPendingStroke = jest.fn()
-      editor.recognizer = new InteractiveInkSSRRecognizerMock()
+      editor.recognizer = new RecognizerWebSocketSSRMock()
       beforeAll(async () =>
       {
         await editor.initialize()
@@ -226,7 +226,7 @@ describe("InteractiveInkSSREditor.ts", () =>
     const editor = new InteractiveInkSSREditor(document.createElement("div"), DefaultInteractiveInkSSREditorOptions)
     editor.grabber.attach = jest.fn()
     editor.renderer.init = jest.fn()
-    editor.recognizer = new InteractiveInkSSRRecognizerMock()
+    editor.recognizer = new RecognizerWebSocketSSRMock()
     editor.event.emitError = jest.fn()
     beforeAll(async () =>
     {
@@ -246,7 +246,7 @@ describe("InteractiveInkSSREditor.ts", () =>
       const editor = new InteractiveInkSSREditor(document.createElement("div"), DefaultInteractiveInkSSREditorOptions)
       editor.grabber.attach = jest.fn()
       editor.renderer.init = jest.fn()
-      editor.recognizer = new InteractiveInkSSRRecognizerMock()
+      editor.recognizer = new RecognizerWebSocketSSRMock()
       editor.event.emitError = jest.fn()
       beforeAll(async () =>
       {
@@ -272,7 +272,7 @@ describe("InteractiveInkSSREditor.ts", () =>
       const editor = new InteractiveInkSSREditor(document.createElement("div"), options)
       editor.grabber.attach = jest.fn()
       editor.renderer.init = jest.fn()
-      editor.recognizer = new InteractiveInkSSRRecognizerMock()
+      editor.recognizer = new RecognizerWebSocketSSRMock()
       editor.event.emitError = jest.fn()
       beforeAll(async () =>
       {
@@ -301,7 +301,7 @@ describe("InteractiveInkSSREditor.ts", () =>
     editor.event.emitConverted = jest.fn()
     editor.grabber.attach = jest.fn()
     editor.renderer.init = jest.fn()
-    editor.recognizer = new InteractiveInkSSRRecognizerMock()
+    editor.recognizer = new RecognizerWebSocketSSRMock()
     beforeAll(async () =>
     {
       await editor.initialize()
@@ -323,7 +323,7 @@ describe("InteractiveInkSSREditor.ts", () =>
     const editor = new InteractiveInkSSREditor(document.createElement("div"), DefaultInteractiveInkSSREditorOptions)
     editor.grabber.attach = jest.fn()
     editor.renderer.init = jest.fn()
-    editor.recognizer = new InteractiveInkSSRRecognizerMock()
+    editor.recognizer = new RecognizerWebSocketSSRMock()
     beforeAll(async () =>
     {
       await editor.initialize()
@@ -374,7 +374,7 @@ describe("InteractiveInkSSREditor.ts", () =>
     const editor = new InteractiveInkSSREditor(document.createElement("div"), DefaultInteractiveInkSSREditorOptions)
     editor.grabber.attach = jest.fn()
     editor.renderer.init = jest.fn()
-    editor.recognizer = new InteractiveInkSSRRecognizerMock()
+    editor.recognizer = new RecognizerWebSocketSSRMock()
     beforeAll(async () =>
     {
       await editor.initialize()
@@ -394,7 +394,7 @@ describe("InteractiveInkSSREditor.ts", () =>
     editor.grabber.attach = jest.fn()
     editor.renderer.init = jest.fn()
     editor.renderer.resize = jest.fn()
-    editor.recognizer = new InteractiveInkSSRRecognizerMock()
+    editor.recognizer = new RecognizerWebSocketSSRMock()
     beforeAll(async () =>
     {
       await editor.initialize()
@@ -423,7 +423,7 @@ describe("InteractiveInkSSREditor.ts", () =>
     editor.grabber.attach = jest.fn()
     editor.renderer.init = jest.fn()
     editor.renderer.resize = jest.fn()
-    editor.recognizer = new InteractiveInkSSRRecognizerMock()
+    editor.recognizer = new RecognizerWebSocketSSRMock()
 
     const firstModel = new Model(200, 200)
     const secondModel = new Model(42, 12)
@@ -465,7 +465,7 @@ describe("InteractiveInkSSREditor.ts", () =>
     editor.grabber.attach = jest.fn()
     editor.renderer.init = jest.fn()
     editor.renderer.resize = jest.fn()
-    editor.recognizer = new InteractiveInkSSRRecognizerMock()
+    editor.recognizer = new RecognizerWebSocketSSRMock()
     const firstModel = new Model(200, 200)
     const secondModel = new Model(42, 12)
     editor.history.stack = [firstModel, secondModel]
@@ -507,7 +507,7 @@ describe("InteractiveInkSSREditor.ts", () =>
     editor.grabber.attach = jest.fn()
     editor.renderer.init = jest.fn()
     editor.renderer.resize = jest.fn()
-    editor.recognizer = new InteractiveInkSSRRecognizerMock()
+    editor.recognizer = new RecognizerWebSocketSSRMock()
     beforeAll(async () =>
     {
       await editor.initialize()
@@ -538,7 +538,7 @@ describe("InteractiveInkSSREditor.ts", () =>
     editor.grabber.detach = jest.fn()
     editor.renderer.init = jest.fn()
     editor.renderer.destroy = jest.fn()
-    editor.recognizer = new InteractiveInkSSRRecognizerMock()
+    editor.recognizer = new RecognizerWebSocketSSRMock()
     beforeAll(async () =>
     {
       await editor.initialize()
@@ -570,7 +570,7 @@ describe("InteractiveInkSSREditor.ts", () =>
     editor.event.emitExported = jest.fn()
     editor.renderer.init = jest.fn()
     editor.renderer.updatesLayer = jest.fn()
-    editor.recognizer = new InteractiveInkSSRRecognizerMock()
+    editor.recognizer = new RecognizerWebSocketSSRMock()
     beforeAll(async () =>
     {
       await editor.initialize()
@@ -601,7 +601,7 @@ describe("InteractiveInkSSREditor.ts", () =>
     })
     test("should updatesLayer when recognizer emit SVG_PATCH", async () =>
     {
-      const svgPatch: TInteractiveInkSSRMessageEventSVGPatch = {
+      const svgPatch: TRecognizerWebSocketSSRMessageSVGPatch = {
         type: "REPLACE_ALL",
         layer: "MODEL",
         updates: []
@@ -645,7 +645,7 @@ describe("InteractiveInkSSREditor.ts", () =>
     editor.styleManager.setPenStyle = jest.fn()
     editor.styleManager.setPenStyleClasses = jest.fn()
     editor.styleManager.setTheme = jest.fn()
-    editor.recognizer = new InteractiveInkSSRRecognizerMock()
+    editor.recognizer = new RecognizerWebSocketSSRMock()
     test("should have set PenStyle on initialization", async () =>
     {
       await editor.initialize()

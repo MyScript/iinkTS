@@ -1,20 +1,21 @@
-export * from "./RecognizerEvent"
-export * from "./RecognizerError"
-
-export * from "./InteractiveInkRecognizer"
-export * from "./InteractiveInkRecognizerMessage"
-export * from "./InteractiveInkRecognizerConfiguration"
-
-export * from "./InkDeprecatedRecognizer"
-export * from "./InkDeprecatedRecognizerConfiguration"
-
-export * from "./InteractiveInkSSRRecognizer"
-export * from "./InteractiveInkSSRRecognizerMessage"
-export * from "./InteractiveInkSSRRecognizerConfiguration"
-
-export * from "./RecognitionConfiguration"
 export * from "./ServerConfiguration"
 export * from "./recognition"
 
-export * from "./InkRecognizer"
-export * from "./InkRecognizerConfiguration"
+export * from "./RecognizerEvent"
+export * from "./RecognizerError"
+export * from "./RecognitionConfiguration"
+
+
+export * from "./RecognizerHTTPV1"
+export * from "./RecognizerHTTPV1Configuration"
+
+export * from "./RecognizerHTTPV2"
+export * from "./RecognizerHTTPV2Configuration"
+
+export * from "./RecognizerWebSocket"
+export * from "./RecognizerWebSocketMessage"
+export * from "./RecognizerWebSocketConfiguration"
+
+export * from "./RecognizerWebSocketSSR"
+export * from "./RecognizerWebSocketSSRMessage"
+export * from "./RecognizerWebSocketSSRConfiguration"

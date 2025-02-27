@@ -4,7 +4,7 @@ import { DefaultEraserConfiguration, TEraserConfiguration } from "./EraserConfig
 /**
  * @group Recognizer
  */
-export type TTextGuidesInkRecognizerConfiguration = {
+export type TTextGuidesConfigurationV2 = {
   enable: boolean,
   "line-gap-mm"?: number,
   "origin-y-mm"?: number,
@@ -14,7 +14,7 @@ export type TTextGuidesInkRecognizerConfiguration = {
  * @group Recognizer
  * @source
  */
-export const DefaultTextGuidesInkRecognizerConfiguration: TTextGuidesInkRecognizerConfiguration = {
+export const DefaultTextGuidesConfigurationV2: TTextGuidesConfigurationV2 = {
   enable: true,
   "line-gap-mm": 100,
   "origin-y-mm": 0,
@@ -23,7 +23,7 @@ export const DefaultTextGuidesInkRecognizerConfiguration: TTextGuidesInkRecogniz
 /**
  * @group Recognizer
  */
-export type TTextInkRecognizerConfConfiguration = {
+export type TTextRecognizerHTTPV2ConfConfiguration = {
   customResources?: string[]
   customLexicon?: string[]
   addLKText?: boolean
@@ -32,12 +32,12 @@ export type TTextInkRecognizerConfConfiguration = {
 /**
  * @group Recognizer
  */
-export type TTextInkRecognizerConfiguration = {
+export type TTextRecognizerHTTPV2Configuration = {
   text?: boolean
   mimeTypes: ("text/plain" | "application/vnd.myscript.jiix")[]
   margin: TMarginConfiguration
-  guides: TTextGuidesInkRecognizerConfiguration
-  configuration?: TTextInkRecognizerConfConfiguration
+  guides: TTextGuidesConfigurationV2
+  configuration?: TTextRecognizerHTTPV2ConfConfiguration
   eraser?: TEraserConfiguration
 }
 
@@ -45,8 +45,8 @@ export type TTextInkRecognizerConfiguration = {
  * @group Recognizer
  * @source
  */
-export const DefaultTextInkRecognizerConfiguration: TTextInkRecognizerConfiguration = {
-  guides: DefaultTextGuidesInkRecognizerConfiguration,
+export const DefaultTexConfigurationV2: TTextRecognizerHTTPV2Configuration = {
+  guides: DefaultTextGuidesConfigurationV2,
   eraser: DefaultEraserConfiguration,
   margin: DefaultMarginConfiguration,
   mimeTypes: ["application/vnd.myscript.jiix"],

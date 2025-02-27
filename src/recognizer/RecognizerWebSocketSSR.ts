@@ -6,17 +6,17 @@ import { THistoryContext } from "../history"
 import { DeferredPromise, PartialDeep, computeHmac, getApiInfos, isVersionSuperiorOrEqual } from "../utils"
 import
 {
-  TInteractiveInkSSRMessageEvent,
-  TInteractiveInkSSRMessageEventContentChange,
-  TInteractiveInkSSRMessageEventError,
-  TInteractiveInkSSRMessageEventExport,
-  TInteractiveInkSSRMessageEventHMACChallenge,
-  TInteractiveInkSSRMessageEventPartChange,
-  TInteractiveInkSSRMessageEventSVGPatch
-} from "./InteractiveInkSSRRecognizerMessage"
+  TRecognizerWebSocketSSRMessage,
+  TRecognizerWebSocketSSRMessageContentChange,
+  TRecognizerWebSocketSSRMessageError,
+  TRecognizerWebSocketSSRMessageExport,
+  TRecognizerWebSocketSSRMessageHMACChallenge,
+  TRecognizerWebSocketSSRMessagePartChange,
+  TRecognizerWebSocketSSRMessageSVGPatch
+} from "./RecognizerWebSocketSSRMessage"
 import { RecognizerError } from "./RecognizerError"
 import { RecognizerEvent } from "./RecognizerEvent"
-import { TInteractiveInkSSRRecognizerConfiguration, InteractiveInkSSRRecognizerConfiguration } from "./InteractiveInkSSRRecognizerConfiguration"
+import { TRecognizerWebSocketSSRConfiguration, RecognizerWebSocketSSRConfiguration } from "./RecognizerWebSocketSSRConfiguration"
 import { TConverstionState } from "./RecognitionConfiguration"
 
 /**
@@ -46,7 +46,7 @@ import { TConverstionState } from "./RecognitionConfiguration"
 /**
  * @group Recognizer
  */
-export class InteractiveInkSSRRecognizer
+export class RecognizerWebSocketSSR
 {
   #logger = LoggerManager.getLogger(LoggerCategory.RECOGNIZER)
 
@@ -77,15 +77,15 @@ export class InteractiveInkSSRRecognizer
   protected importPointEventsDeferred?: DeferredPromise<TExport>
   protected waitForIdleDeferred?: DeferredPromise<void>
 
-  configuration: TInteractiveInkSSRRecognizerConfiguration
+  configuration: TRecognizerWebSocketSSRConfiguration
   initialized: DeferredPromise<void>
   url: string
   event: RecognizerEvent
 
-  constructor(config?: PartialDeep<TInteractiveInkSSRRecognizerConfiguration>)
+  constructor(config?: PartialDeep<TRecognizerWebSocketSSRConfiguration>)
   {
     this.#logger.info("constructor", { config })
-    this.configuration = new InteractiveInkSSRRecognizerConfiguration(config)
+    this.configuration = new RecognizerWebSocketSSRConfiguration(config)
     const scheme = (this.configuration.server.scheme === "https") ? "wss" : "ws"
     this.url = `${ scheme }://${ this.configuration.server.host }/api/v4.0/iink/document?applicationKey=${ this.configuration.server.applicationKey }`
     this.event = new RecognizerEvent()
@@ -123,7 +123,7 @@ export class InteractiveInkSSRRecognizer
   protected openCallback(): void
   {
     this.connected?.resolve()
-    const params: TInteractiveInkSSRMessageEvent = {
+    const params: TRecognizerWebSocketSSRMessage = {
       type: this.sessionId ? "restoreIInkSession" : "newContentPackage",
       iinkSessionId: this.sessionId,
       applicationKey: this.configuration.server.applicationKey,
@@ -240,10 +240,10 @@ export class InteractiveInkSSRRecognizer
     }
   }
 
-  protected async manageAckMessage(websocketMessage: TInteractiveInkSSRMessageEvent): Promise<void>
+  protected async manageAckMessage(websocketMessage: TRecognizerWebSocketSSRMessage): Promise<void>
   {
     this.#logger.info("manageAckMessage", { websocketMessage })
-    const hmacChallengeMessage = websocketMessage as TInteractiveInkSSRMessageEventHMACChallenge
+    const hmacChallengeMessage = websocketMessage as TRecognizerWebSocketSSRMessageHMACChallenge
     if (hmacChallengeMessage.hmacChallenge) {
       this.send({
         type: "hmac",
@@ -276,18 +276,18 @@ export class InteractiveInkSSRRecognizer
     }
   }
 
-  protected managePartChangeMessage(websocketMessage: TInteractiveInkSSRMessageEvent): void
+  protected managePartChangeMessage(websocketMessage: TRecognizerWebSocketSSRMessage): void
   {
     this.#logger.info("managePartChangeMessage", { websocketMessage })
-    const partChangeMessage = websocketMessage as TInteractiveInkSSRMessageEventPartChange
+    const partChangeMessage = websocketMessage as TRecognizerWebSocketSSRMessagePartChange
     this.currentPartId = partChangeMessage.partId
     this.initialized.resolve()
   }
 
-  protected manageExportMessage(websocketMessage: TInteractiveInkSSRMessageEvent): void
+  protected manageExportMessage(websocketMessage: TRecognizerWebSocketSSRMessage): void
   {
     this.#logger.info("manageExportMessage", { websocketMessage })
-    const exportMessage = websocketMessage as TInteractiveInkSSRMessageEventExport
+    const exportMessage = websocketMessage as TRecognizerWebSocketSSRMessageExport
     if (exportMessage.exports["application/vnd.myscript.jiix"]) {
       exportMessage.exports["application/vnd.myscript.jiix"] = JSON.parse(exportMessage.exports["application/vnd.myscript.jiix"].toString()) as TJIIXExport
     }
@@ -309,9 +309,9 @@ export class InteractiveInkSSRRecognizer
     this.waitForIdleDeferred?.resolve()
   }
 
-  protected manageErrorMessage(websocketMessage: TInteractiveInkSSRMessageEvent): void
+  protected manageErrorMessage(websocketMessage: TRecognizerWebSocketSSRMessage): void
   {
-    const err = websocketMessage as TInteractiveInkSSRMessageEventError
+    const err = websocketMessage as TRecognizerWebSocketSSRMessageError
     this.currentErrorCode = err.data?.code || err.code
     let message = err.data?.message || err.message || RecognizerError.UNKNOW
 
@@ -331,10 +331,10 @@ export class InteractiveInkSSRRecognizer
     this.event.emitError(error)
   }
 
-  protected manageContentChangeMessage(websocketMessage: TInteractiveInkSSRMessageEvent): void
+  protected manageContentChangeMessage(websocketMessage: TRecognizerWebSocketSSRMessage): void
   {
     this.#logger.info("manageContentChangeMessage", { websocketMessage })
-    const contentChangeMessage = websocketMessage as TInteractiveInkSSRMessageEventContentChange
+    const contentChangeMessage = websocketMessage as TRecognizerWebSocketSSRMessageContentChange
     const context: THistoryContext = {
       canRedo: contentChangeMessage.canRedo,
       canUndo: contentChangeMessage.canUndo,
@@ -345,11 +345,11 @@ export class InteractiveInkSSRRecognizer
     this.event.emitContentChanged(context)
   }
 
-  protected manageSVGPatchMessage(websocketMessage: TInteractiveInkSSRMessageEvent): void
+  protected manageSVGPatchMessage(websocketMessage: TRecognizerWebSocketSSRMessage): void
   {
     this.#logger.info("manageSVGPatchMessage", { websocketMessage })
     this.resizeDeferred?.resolve()
-    const svgPatchMessage = websocketMessage as TInteractiveInkSSRMessageEventSVGPatch
+    const svgPatchMessage = websocketMessage as TRecognizerWebSocketSSRMessageSVGPatch
     this.event.emitSVGPatch(svgPatchMessage)
   }
 
@@ -357,7 +357,7 @@ export class InteractiveInkSSRRecognizer
   {
     this.#logger.debug("messageCallback", { message })
     this.currentErrorCode = undefined
-    const websocketMessage: TInteractiveInkSSRMessageEvent = JSON.parse(message.data)
+    const websocketMessage: TRecognizerWebSocketSSRMessage = JSON.parse(message.data)
     if (websocketMessage.type !== "pong") {
       this.pingCount = 0
       switch (websocketMessage.type) {
@@ -428,7 +428,7 @@ export class InteractiveInkSSRRecognizer
     }
   }
 
-  async send(message: TInteractiveInkSSRMessageEvent): Promise<void>
+  async send(message: TRecognizerWebSocketSSRMessage): Promise<void>
   {
     if (!this.socket) {
       return Promise.reject(new Error("Recognizer must be initilized"))
@@ -478,7 +478,7 @@ export class InteractiveInkSSRRecognizer
     this.#logger.info("setPenStyle", { penStyle })
     await this.initialized.promise
     this.penStyle = penStyle
-    const message: TInteractiveInkSSRMessageEvent = {
+    const message: TRecognizerWebSocketSSRMessage = {
       type: "setPenStyle",
       style: StyleHelper.penStyleToCSS(penStyle)
     }
@@ -490,7 +490,7 @@ export class InteractiveInkSSRRecognizer
     await this.initialized.promise
     this.penStyleClasses = penStyleClasses
     this.#logger.info("setPenStyleClasses", { penStyleClasses })
-    const message: TInteractiveInkSSRMessageEvent = {
+    const message: TRecognizerWebSocketSSRMessage = {
       type: "setPenStyleClasses",
       styleClasses: penStyleClasses
     }
@@ -502,7 +502,7 @@ export class InteractiveInkSSRRecognizer
     this.#logger.info("setTheme", { theme })
     await this.initialized.promise
     this.theme = theme
-    const message: TInteractiveInkSSRMessageEvent = {
+    const message: TRecognizerWebSocketSSRMessage = {
       type: "setTheme",
       theme: StyleHelper.themeToCSS(theme)
     }
@@ -533,7 +533,7 @@ export class InteractiveInkSSRRecognizer
       return Promise.reject(new Error(`Export failed, no mimeTypes define in recognition ${ this.configuration.recognition.type } configuration`))
     }
 
-    const message: TInteractiveInkSSRMessageEvent = {
+    const message: TRecognizerWebSocketSSRMessage = {
       type: "export",
       partId: this.currentPartId,
       mimeTypes
@@ -565,7 +565,7 @@ export class InteractiveInkSSRRecognizer
       })
     }
 
-    const importFileMessage: TInteractiveInkSSRMessageEvent = {
+    const importFileMessage: TRecognizerWebSocketSSRMessage = {
       type: "importFile",
       importFileId,
       mimeType
@@ -574,7 +574,7 @@ export class InteractiveInkSSRRecognizer
     for (let i = 0; i < data.size; i += chunkSize) {
       const blobPart = data.slice(i, i + chunkSize, data.type)
       const partFileString = await readBlob(blobPart)
-      const fileChuckMessage: TInteractiveInkSSRMessageEvent = {
+      const fileChuckMessage: TRecognizerWebSocketSSRMessage = {
         type: "fileChunk",
         importFileId,
         data: partFileString,
@@ -596,7 +596,7 @@ export class InteractiveInkSSRRecognizer
     const localModel = model.clone()
     this.viewSizeHeight = localModel.height
     this.viewSizeWidth = localModel.width
-    const message: TInteractiveInkSSRMessageEvent = {
+    const message: TRecognizerWebSocketSSRMessage = {
       type: "changeViewSize",
       height: this.viewSizeHeight,
       width: this.viewSizeWidth,
@@ -611,7 +611,7 @@ export class InteractiveInkSSRRecognizer
     this.#logger.info("importPointsEvents", { strokes })
     await this.initialized.promise
     this.importPointEventsDeferred = new DeferredPromise<TExport>()
-    const message: TInteractiveInkSSRMessageEvent = {
+    const message: TRecognizerWebSocketSSRMessage = {
       type: "pointerEvents",
       events: strokes.map(s => s.formatToSend())
     }
@@ -625,7 +625,7 @@ export class InteractiveInkSSRRecognizer
     await this.initialized.promise
     this.convertDeferred = new DeferredPromise<TExport>()
     const localModel = model.clone()
-    const message: TInteractiveInkSSRMessageEvent = {
+    const message: TRecognizerWebSocketSSRMessage = {
       type: "convert",
       conversionState
     }
@@ -641,7 +641,7 @@ export class InteractiveInkSSRRecognizer
   {
     await this.initialized.promise
     this.waitForIdleDeferred = new DeferredPromise<void>()
-    const message: TInteractiveInkSSRMessageEvent = {
+    const message: TRecognizerWebSocketSSRMessage = {
       type: "waitForIdle",
     }
     await this.send(message)
@@ -654,7 +654,7 @@ export class InteractiveInkSSRRecognizer
     await this.initialized.promise
     const localModel = model.clone()
     this.undoDeferred = new DeferredPromise<TExport>()
-    const message: TInteractiveInkSSRMessageEvent = {
+    const message: TRecognizerWebSocketSSRMessage = {
       type: "undo",
     }
     await this.send(message)
@@ -672,7 +672,7 @@ export class InteractiveInkSSRRecognizer
     await this.initialized.promise
     const localModel = model.clone()
     this.redoDeferred = new DeferredPromise<TExport>()
-    const message: TInteractiveInkSSRMessageEvent = {
+    const message: TRecognizerWebSocketSSRMessage = {
       type: "redo",
     }
     await this.send(message)
@@ -691,7 +691,7 @@ export class InteractiveInkSSRRecognizer
     const localModel = model.clone()
     localModel.modificationDate = Date.now()
     this.clearDeferred = new DeferredPromise<TExport>()
-    const message: TInteractiveInkSSRMessageEvent = {
+    const message: TRecognizerWebSocketSSRMessage = {
       type: "clear",
     }
     await this.send(message)

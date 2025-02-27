@@ -3,7 +3,7 @@ import { TExport } from "../model"
 /**
  * @group Recognizer
  */
-export type TInteractiveInkSSRMessageEvent = {
+export type TRecognizerWebSocketSSRMessage = {
   type: string
   [key: string]: unknown
 }
@@ -11,7 +11,7 @@ export type TInteractiveInkSSRMessageEvent = {
 /**
  * @group Recognizer
  */
-export type TInteractiveInkSSRMessageEventError = {
+export type TRecognizerWebSocketSSRMessageError = {
   type: string
   code?: number | string
   message?: string
@@ -24,7 +24,7 @@ export type TInteractiveInkSSRMessageEventError = {
 /**
  * @group Recognizer
  */
-export type TInteractiveInkSSRMessageEventHMACChallenge = TInteractiveInkSSRMessageEvent & {
+export type TRecognizerWebSocketSSRMessageHMACChallenge = TRecognizerWebSocketSSRMessage & {
   hmacChallenge: string
   iinkSessionId: string
 }
@@ -32,14 +32,14 @@ export type TInteractiveInkSSRMessageEventHMACChallenge = TInteractiveInkSSRMess
 /**
  * @group Recognizer
  */
-export type TInteractiveInkSSRMessageEventContentPackageDescriptionMessage = TInteractiveInkSSRMessageEvent & {
+export type TRecognizerWebSocketSSRMessageContentPackageDescriptionMessage = TRecognizerWebSocketSSRMessage & {
   contentPartCount: number
 }
 
 /**
  * @group Recognizer
  */
-export type TInteractiveInkSSRMessageEventPartChange = TInteractiveInkSSRMessageEvent & {
+export type TRecognizerWebSocketSSRMessagePartChange = TRecognizerWebSocketSSRMessage & {
   partIdx: number
   partId: string
   partCount: number
@@ -48,7 +48,7 @@ export type TInteractiveInkSSRMessageEventPartChange = TInteractiveInkSSRMessage
 /**
  * @group Recognizer
  */
-export type TInteractiveInkSSRMessageEventContentChange = TInteractiveInkSSRMessageEvent & {
+export type TRecognizerWebSocketSSRMessageContentChange = TRecognizerWebSocketSSRMessage & {
   partId: string
   canUndo: boolean
   canRedo: boolean
@@ -60,7 +60,7 @@ export type TInteractiveInkSSRMessageEventContentChange = TInteractiveInkSSRMess
 /**
  * @group Recognizer
  */
-export type TInteractiveInkSSRMessageEventExport = TInteractiveInkSSRMessageEvent & {
+export type TRecognizerWebSocketSSRMessageExport = TRecognizerWebSocketSSRMessage & {
   partId: string
   exports: TExport
 }
@@ -151,7 +151,7 @@ export type TUpdatePatchSetAttribut = TUpdatePatch & {
 /**
  * @group Recognizer
  */
-export type TInteractiveInkSSRMessageEventSVGPatch = TInteractiveInkSSRMessageEvent & {
+export type TRecognizerWebSocketSSRMessageSVGPatch = TRecognizerWebSocketSSRMessage & {
   updates: TUpdatePatch[]
   layer: ("MODEL" | "CAPTURE")
 }

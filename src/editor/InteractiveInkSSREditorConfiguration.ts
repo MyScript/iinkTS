@@ -1,7 +1,7 @@
 import { DefaultGrabberConfiguration, TGrabberConfiguration } from "../grabber"
 import { DefaultHistoryConfiguration, THistoryConfiguration } from "../history"
 import { DefaultLoggerConfiguration, TLoggerConfiguration } from "../logger"
-import { DefaultInteractiveInkSSRRecognizerConfiguration, TInteractiveInkSSRRecognitionConfiguration, TInteractiveInkSSRRecognizerConfiguration, InteractiveInkSSRRecognizerConfiguration, TServerWebsocketConfiguration } from "../recognizer"
+import { DefaultRecognizerWebSocketSSRConfiguration, TRecognizerWebSocketSSRRecognitionConfiguration, TRecognizerWebSocketSSRConfiguration, RecognizerWebSocketSSRConfiguration, TServerWebsocketConfiguration } from "../recognizer"
 import { DefaultRendererConfiguration, TRendererConfiguration } from "../renderer"
 import { DefaultTheme, TPenStyle, TTheme } from "../style"
 import { mergeDeep, PartialDeep } from "../utils"
@@ -11,7 +11,7 @@ import { DefaultEditorTriggerConfiguration, TEditorTriggerConfiguration } from "
 /**
  * @group Editor
  */
-export type TInteractiveInkSSREditorConfiguration = TEditorConfiguration & TInteractiveInkSSRRecognizerConfiguration & {
+export type TInteractiveInkSSREditorConfiguration = TEditorConfiguration & TRecognizerWebSocketSSRConfiguration & {
   rendering: TRendererConfiguration
   smartGuide: {
     enable: boolean
@@ -30,8 +30,8 @@ export type TInteractiveInkSSREditorConfiguration = TEditorConfiguration & TInte
  * @source
  */
 export const DefaultInteractiveInkSSREditorConfiguration: TInteractiveInkSSREditorConfiguration = {
-  server: DefaultInteractiveInkSSRRecognizerConfiguration.server,
-  recognition: DefaultInteractiveInkSSRRecognizerConfiguration.recognition,
+  server: DefaultRecognizerWebSocketSSRConfiguration.server,
+  recognition: DefaultRecognizerWebSocketSSRConfiguration.recognition,
   rendering: DefaultRendererConfiguration,
   smartGuide: {
     enable: true
@@ -50,7 +50,7 @@ export const DefaultInteractiveInkSSREditorConfiguration: TInteractiveInkSSREdit
 export class InteractiveInkSSREditorConfiguration implements TInteractiveInkSSREditorConfiguration
 {
   server: TServerWebsocketConfiguration
-  recognition: TInteractiveInkSSRRecognitionConfiguration
+  recognition: TRecognizerWebSocketSSRRecognitionConfiguration
   rendering: TRendererConfiguration
   smartGuide: {
     enable: boolean
@@ -65,7 +65,7 @@ export class InteractiveInkSSREditorConfiguration implements TInteractiveInkSSRE
 
   constructor(configuration?: PartialDeep<TInteractiveInkSSREditorConfiguration>)
   {
-    const { server, recognition } = new InteractiveInkSSRRecognizerConfiguration(configuration)
+    const { server, recognition } = new RecognizerWebSocketSSRConfiguration(configuration)
     this.server = server
     this.recognition = recognition
 

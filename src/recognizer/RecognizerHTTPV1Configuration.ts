@@ -20,7 +20,7 @@ import { DefaultServerHTTPConfiguration, TServerHTTPConfiguration } from "./Serv
 /**
  * @group Recognizer
  */
-export type TInkDeprecatedRecognitionConfiguration = {
+export type TRecognitionHTTPV1Configuration = {
   type: TRecognitionType
   lang: string
   math: TMathConfiguration
@@ -36,7 +36,7 @@ export type TInkDeprecatedRecognitionConfiguration = {
  * @group Recognizer
  * @source
  */
-export const DefaultInkDeprecatedRecognitionConfiguration: TInkDeprecatedRecognitionConfiguration = {
+export const DefaulRecognitionHTTPV1ConfigurationConfiguration: TRecognitionHTTPV1Configuration = {
   export: DefaultExportConfiguration,
   math: DefaultMathConfiguration,
   diagram: DefaultDiagramConfiguration,
@@ -50,32 +50,32 @@ export const DefaultInkDeprecatedRecognitionConfiguration: TInkDeprecatedRecogni
 /**
  * @group Recognizer
  */
-export type TInkDeprecatedRecognizerConfiguration = {
+export type TRecognizerHTTPV1Configuration = {
   server: TServerHTTPConfiguration
-  recognition: TInkDeprecatedRecognitionConfiguration
+  recognition: TRecognitionHTTPV1Configuration
 }
 
 /**
  * @group Recognizer
  */
-export const DefaultInkDeprecatedRecognizerConfiguration: TInkDeprecatedRecognizerConfiguration =
+export const DefaultRecognizerHTTPV1Configuration: TRecognizerHTTPV1Configuration =
 {
   server: DefaultServerHTTPConfiguration,
-  recognition: DefaultInkDeprecatedRecognitionConfiguration
+  recognition: DefaulRecognitionHTTPV1ConfigurationConfiguration
 }
 
 /**
  * @group Recognizer
  * @source
  */
-export class InkDeprecatedRecognizerConfiguration implements TInkDeprecatedRecognizerConfiguration {
-  recognition: TInkDeprecatedRecognitionConfiguration
+export class RecognizerHTTPV1Configuration implements TRecognizerHTTPV1Configuration {
+  recognition: TRecognitionHTTPV1Configuration
   server: TServerHTTPConfiguration
 
-  constructor(configuration?: PartialDeep<TInkDeprecatedRecognizerConfiguration>)
+  constructor(configuration?: PartialDeep<TRecognizerHTTPV1Configuration>)
   {
-    this.server = mergeDeep({}, DefaultInkDeprecatedRecognizerConfiguration.server, configuration?.server)
-    this.recognition = mergeDeep({}, DefaultInkDeprecatedRecognizerConfiguration.recognition, configuration?.recognition)
+    this.server = mergeDeep({}, DefaultRecognizerHTTPV1Configuration.server, configuration?.server)
+    this.recognition = mergeDeep({}, DefaultRecognizerHTTPV1Configuration.recognition, configuration?.recognition)
 
     if (configuration?.recognition?.text?.mimeTypes) {
       this.recognition.text.mimeTypes = configuration.recognition.text.mimeTypes as ("text/plain" | "application/vnd.myscript.jiix")[]
