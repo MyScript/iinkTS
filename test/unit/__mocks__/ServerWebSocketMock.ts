@@ -1,6 +1,6 @@
 import Server from "jest-websocket-mock"
 import { DeserializedMessage } from "jest-websocket-mock/lib/websocket"
-import { TInteractiveInkSSRMessageEvent } from "../../../src/recognizer"
+import { TRecognizerWebSocketMessage } from "../../../src/recognizer"
 
 export const HMACChallengeMessage = {
   "type": "hmacChallenge",
@@ -85,7 +85,7 @@ export const errorNotGrantedMessage = {
   "code": "access.not.granted"
 }
 
-export class ServerInteractiveInkSSRMock extends Server
+export class ServerWebSocketMock extends Server
 {
   init(
     { withHMAC, withIdle }:
@@ -97,7 +97,7 @@ export class ServerInteractiveInkSSRMock extends Server
     {
       socket.on("message", (message: string | Blob | ArrayBuffer | ArrayBufferView) =>
       {
-        const parsedMessage: TInteractiveInkSSRMessageEvent = JSON.parse(message as string)
+        const parsedMessage: TRecognizerWebSocketMessage = JSON.parse(message as string)
         switch (parsedMessage.type) {
           case "authenticate":
             if (withHMAC) {
@@ -184,7 +184,7 @@ export class ServerInteractiveInkSSRMock extends Server
   {
     return this.messages.filter((m: DeserializedMessage<object>) =>
     {
-      const parseMessage = JSON.parse(m as string) as TInteractiveInkSSRMessageEvent
+      const parseMessage = JSON.parse(m as string) as TRecognizerWebSocketMessage
       return parseMessage.type === type
     })
   }

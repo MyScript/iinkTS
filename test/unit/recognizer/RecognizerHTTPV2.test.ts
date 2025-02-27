@@ -1,17 +1,17 @@
 import fetchMock from "jest-fetch-mock"
 import
 {
-  InkRecognizer,
+  RecognizerHTTPV2,
   DefaultPenStyle,
   Model,
   TPointer,
   TRecognitionType,
-  TInkRecognizerConfiguration,
-  DefaultInkRecognizerConfiguration
+  TRecognizerHTTPV2Configuration,
+  DefaultRecognizerHTTPV2Configuration
 } from "../../../src/iink"
-import { ConfigurationMathInteractiveInkSSR, ConfigurationTextInkDeprecated, ConfigurationDiagramInkDeprecated, ConfigurationRawContentInkDeprecated } from "../__dataset__/configuration.dataset"
+import { RecognizerHTTPV1MathConfiguration, RecognizerHTTPV1TextConfiguration, RecognizerHTTPV1DiagramConfiguration, RecognizerHTTPV1RawContentConfiguration } from "../__dataset__/configuration.dataset"
 
-describe("InkRecognizer.ts", () =>
+describe("RecognizerHTTPV2.ts", () =>
 {
   const height = 100, width = 100
 
@@ -24,28 +24,28 @@ describe("InkRecognizer.ts", () =>
     fetchMock.resetMocks()
   })
 
-  test("should instanciate InkRecognizer", () =>
+  test("should instanciate RecognizerHTTPV2", () =>
   {
-    const rr = new InkRecognizer(DefaultInkRecognizerConfiguration)
+    const rr = new RecognizerHTTPV2(DefaultRecognizerHTTPV2Configuration)
     expect(rr).toBeDefined()
   })
 
-  const testDatas: { type: TRecognitionType, config: TInkRecognizerConfiguration }[] = [
+  const testDatas: { type: TRecognitionType, config: TRecognizerHTTPV2Configuration }[] = [
     {
       type: "TEXT",
-      config: ConfigurationTextInkDeprecated as TInkRecognizerConfiguration
+      config: RecognizerHTTPV1TextConfiguration as unknown as TRecognizerHTTPV2Configuration
     },
     {
       type: "SHAPE",
-      config: ConfigurationDiagramInkDeprecated as TInkRecognizerConfiguration
+      config: RecognizerHTTPV1DiagramConfiguration as unknown as TRecognizerHTTPV2Configuration
     },
     {
       type: "MATH",
-      config: ConfigurationMathInteractiveInkSSR as TInkRecognizerConfiguration
+      config: RecognizerHTTPV1MathConfiguration as unknown as TRecognizerHTTPV2Configuration
     },
     {
       type: "Raw Content",
-      config: ConfigurationRawContentInkDeprecated as TInkRecognizerConfiguration
+      config: RecognizerHTTPV1RawContentConfiguration as unknown as TRecognizerHTTPV2Configuration
     },
   ]
 
@@ -59,9 +59,9 @@ describe("InkRecognizer.ts", () =>
         const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
         model.initCurrentStroke(p1, "pen", DefaultPenStyle)
         model.endCurrentStroke(p2)
-        const newConf: TInkRecognizerConfiguration = structuredClone(config)
+        const newConf: TRecognizerHTTPV2Configuration = structuredClone(config)
         newConf.recognition.type = type
-        const rr = new InkRecognizer(newConf)
+        const rr = new RecognizerHTTPV2(newConf)
         const newModel = await rr.send(model.symbols)
 
         let mimeTypes: string[]

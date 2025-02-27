@@ -2,7 +2,7 @@ import { EditorTool } from "../Constants"
 import { PointerEventGrabber, PointerInfo } from "../grabber"
 import { Model, TExport } from "../model"
 import { TStroke, convertPartialStrokesToStrokes } from "../symbol"
-import { InkRecognizer } from "../recognizer"
+import { RecognizerHTTPV2 } from "../recognizer"
 import { CanvasRenderer } from "../renderer"
 import { TStyle } from "../style"
 import { HistoryManager } from "../history"
@@ -20,7 +20,7 @@ export type TInkEditorOptions = PartialDeep<EditorOptionsBase &
 {
   override?: {
     grabber?: PointerEventGrabber
-    recognizer?: InkRecognizer
+    recognizer?: RecognizerHTTPV2
   }
 }
 
@@ -34,7 +34,7 @@ export class InkEditor extends AbstractEditor {
   #penStyle: TStyle
   grabber: PointerEventGrabber
   renderer: CanvasRenderer
-  recognizer: InkRecognizer
+  recognizer: RecognizerHTTPV2
   history: HistoryManager
   #tool: EditorTool = EditorTool.Write
 
@@ -57,11 +57,11 @@ export class InkEditor extends AbstractEditor {
     this.grabber.onPointerUp = this.onPointerUp.bind(this)
 
     if (options?.override?.recognizer) {
-      const CustomRecognizer = options.override.recognizer as unknown as typeof InkRecognizer
+      const CustomRecognizer = options.override.recognizer as unknown as typeof RecognizerHTTPV2
       this.recognizer = new CustomRecognizer(this.#configuration)
     }
     else {
-      this.recognizer = new InkRecognizer(this.#configuration)
+      this.recognizer = new RecognizerHTTPV2(this.#configuration)
     }
     this.renderer = new CanvasRenderer(this.#configuration.renderer)
 

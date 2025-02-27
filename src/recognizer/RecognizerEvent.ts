@@ -1,6 +1,6 @@
 import { THistoryContext } from "../history"
 import { TExport } from "../model"
-import { TInteractiveInkSSRMessageEventSVGPatch } from "./InteractiveInkSSRRecognizerMessage"
+import { TRecognizerWebSocketSSRMessageSVGPatch } from "./RecognizerWebSocketSSRMessage"
 
 /**
  * @group Recognizer
@@ -191,18 +191,18 @@ export class RecognizerEvent extends EventTarget
   /**
    * @remarks only use in the case of websocket
    */
-  emitSVGPatch(svgPatch: TInteractiveInkSSRMessageEventSVGPatch): void
+  emitSVGPatch(svgPatch: TRecognizerWebSocketSSRMessageSVGPatch): void
   {
     this.emit(RecognizerEventName.SVG_PATCH, svgPatch)
   }
   /**
    * @remarks only usable in the case of websocket
    */
-  addSVGPatchListener(callback:  (svgPatch: TInteractiveInkSSRMessageEventSVGPatch) => void): void
+  addSVGPatchListener(callback:  (svgPatch: TRecognizerWebSocketSSRMessageSVGPatch) => void): void
   {
     this.addEventListener(
       RecognizerEventName.SVG_PATCH,
-      (evt: unknown) => callback((evt as CustomEvent).detail as TInteractiveInkSSRMessageEventSVGPatch),
+      (evt: unknown) => callback((evt as CustomEvent).detail as TRecognizerWebSocketSSRMessageSVGPatch),
       { signal: this.abortController.signal }
     )
   }

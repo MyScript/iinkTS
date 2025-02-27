@@ -5,7 +5,7 @@ import { DefaultServerWebsocketConfiguration, TServerWebsocketConfiguration } fr
 /**
  * @group Recognizer
  */
-export type TInteractiveInkRecognitionConfiguration = {
+export type TRecognitionWebSocketConfiguration = {
   lang: string
   export: TExportConfiguration
   "raw-content": {
@@ -29,7 +29,7 @@ export type TInteractiveInkRecognitionConfiguration = {
  * @group Recognizer
  * @source
  */
-export const DefaultInteractiveInkRecognitionConfiguration: TInteractiveInkRecognitionConfiguration = {
+export const DefaultRecognitionWebSocketConfiguration: TRecognitionWebSocketConfiguration = {
   export: {
     jiix: {
       "bounding-box": true,
@@ -62,34 +62,34 @@ export const DefaultInteractiveInkRecognitionConfiguration: TInteractiveInkRecog
 /**
  * @group Recognizer
  */
-export type TInteractiveInkRecognizerConfiguration = {
+export type TRecognizerWebSocketConfiguration = {
   server: TServerWebsocketConfiguration
-  recognition: TInteractiveInkRecognitionConfiguration
+  recognition: TRecognitionWebSocketConfiguration
 }
 
 /**
  * @group Recognizer
  * @source
  */
-export const DefaultInteractiveInkRecognizerConfiguration: TInteractiveInkRecognizerConfiguration =
+export const DefaultRecognizerWebSocketConfiguration: TRecognizerWebSocketConfiguration =
 {
   server: DefaultServerWebsocketConfiguration,
-  recognition: DefaultInteractiveInkRecognitionConfiguration
+  recognition: DefaultRecognitionWebSocketConfiguration
 }
 
 /**
  * @group Recognizer
  */
-export class InteractiveInkRecognizerConfiguration implements TInteractiveInkRecognizerConfiguration
+export class RecognizerWebSocketConfiguration implements TRecognizerWebSocketConfiguration
 {
   server: TServerWebsocketConfiguration
-  recognition: TInteractiveInkRecognitionConfiguration
+  recognition: TRecognitionWebSocketConfiguration
 
-  constructor(configuration?: PartialDeep<TInteractiveInkRecognizerConfiguration>)
+  constructor(configuration?: PartialDeep<TRecognizerWebSocketConfiguration>)
   {
-    this.server = mergeDeep({}, DefaultInteractiveInkRecognizerConfiguration.server, configuration?.server)
+    this.server = mergeDeep({}, DefaultRecognizerWebSocketConfiguration.server, configuration?.server)
 
-    this.recognition = mergeDeep({}, DefaultInteractiveInkRecognizerConfiguration.recognition, configuration?.recognition)
+    this.recognition = mergeDeep({}, DefaultRecognizerWebSocketConfiguration.recognition, configuration?.recognition)
     this.recognition.export.jiix["full-stroke-ids"] = true
     this.recognition.export.jiix.ids = true
     this.recognition.export.jiix.text.words = true

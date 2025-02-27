@@ -7,7 +7,7 @@ import {
   TInkEditorConfiguration,
   TPointer,
   PointerEventGrabber,
-  InkRecognizer,
+  RecognizerHTTPV2,
   DefaultInkEditorConfiguration
 } from "../../../src/iink"
 
@@ -24,7 +24,7 @@ describe("InkEditor.ts", () => {
     expect(editor.grabber).toBeDefined()
     expect(editor.grabber instanceof PointerEventGrabber).toBe(true)
     expect(editor.recognizer).toBeDefined()
-    expect(editor.recognizer instanceof InkRecognizer).toBe(true)
+    expect(editor.recognizer instanceof RecognizerHTTPV2).toBe(true)
   })
 
   test("should instanciate InkEditor with custom grabber", () => {
@@ -42,7 +42,7 @@ describe("InkEditor.ts", () => {
   })
 
   test("should instanciate InkEditor with custom recognizer", () => {
-    class CustomRecognizer extends InkRecognizer {
+    class CustomRecognizer extends RecognizerHTTPV2 {
       name = "custom-recognizer"
     }
     const customBehaviorsOptions = structuredClone(DefaultEditorRestRecognizerOptions)

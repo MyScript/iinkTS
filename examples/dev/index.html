@@ -228,14 +228,16 @@
          * @param {Element} The DOM element to attach the ink paper
          * @param {String} Editor type [INTERACTIVEINK", "INTERACTIVEINKSSR", "INKV1", "INKV2"]
          * @param {Object} Editor options depend on editor type
-         * - {@link https://myscript.github.io/iinkTS/docs/types/TEditorOffscreenOptions.html}
-         * - {@link https://myscript.github.io/iinkTS/docs/types/TEditorWebsocketOptions.html}
-         * - {@link https://myscript.github.io/iinkTS/docs/types/TEditorRestOptions.html}
+         * - {@link https://myscript.github.io/iinkTS/docs/types/TInteractiveInkEditorOptions.html}
+         * - {@link https://myscript.github.io/iinkTS/docs/types/TInteractiveInkSSREditorOptions.html}
+         * - {@link https://myscript.github.io/iinkTS/docs/types/TInkEditorDeprecatedOptions.html}
+         * - {@link https://myscript.github.io/iinkTS/docs/types/TInkEditorOptions.html}
          *
-         * @return {Object} Editor options depend on editor type
-         * - {@link https://myscript.github.io/iinkTS/docs/classes/EditorOffscreen.html}
-         * - {@link https://myscript.github.io/iinkTS/docs/classes/EditorWebSocket.html}
-         * - {@link https://myscript.github.io/iinkTS/docs/classes/EditorRest.html}
+         * @return {Object} Editor (the type of editor depends on the second parameter pass to the "load" function)
+         * - {@link https://myscript.github.io/iinkTS/docs/classes/InteractiveInkEditor.html}
+         * - {@link https://myscript.github.io/iinkTS/docs/classes/InteractiveInkSSREditor.html}
+         * - {@link https://myscript.github.io/iinkTS/docs/classes/InkEditorDeprecated.html}
+         * - {@link https://myscript.github.io/iinkTS/docs/classes/InkEditor.html}
          */
          editor = await iink.Editor.load(editorElement, "INTERACTIVEINKSSR", options);
 

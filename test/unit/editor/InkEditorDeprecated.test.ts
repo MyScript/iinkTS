@@ -7,7 +7,7 @@ import {
   TInkEditorDeprecatedConfiguration,
   TPointer,
   PointerEventGrabber,
-  InkDeprecatedRecognizer,
+  RecognizerHTTPV1,
   DefaultInkEditorDeprecatedConfiguration
 } from "../../../src/iink"
 
@@ -26,7 +26,7 @@ describe("InkEditorDeprecated.ts", () =>
     expect(editor.grabber).toBeDefined()
     expect(editor.grabber instanceof PointerEventGrabber).toBe(true)
     expect(editor.recognizer).toBeDefined()
-    expect(editor.recognizer instanceof InkDeprecatedRecognizer).toBe(true)
+    expect(editor.recognizer instanceof RecognizerHTTPV1).toBe(true)
   })
 
   test("should instanciate InkEditorDeprecated with custom grabber", () =>
@@ -46,7 +46,7 @@ describe("InkEditorDeprecated.ts", () =>
 
   test("should instanciate InkEditorDeprecated with custom recognizer", () =>
   {
-    class CustomRecognizer extends InkDeprecatedRecognizer {
+    class CustomRecognizer extends RecognizerHTTPV1 {
       name = "custom-recognizer"
     }
     const customBehaviorsOptions = structuredClone(DefaultInkEditorDeprecatedOptions)

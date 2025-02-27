@@ -6,23 +6,23 @@ import { TMatrixTransform } from "../transform"
 import { computeHmac, mergeDeep, DeferredPromise, PartialDeep, isVersionSuperiorOrEqual, getApiInfos } from "../utils"
 import
 {
-  TInteractiveInkMessageEvent,
-  TInteractiveInkMessageEventContentChange,
-  TInteractiveInkMessageEventContextlessGesture,
-  TInteractiveInkMessageEventError,
-  TInteractiveInkMessageEventExport,
-  TInteractiveInkMessageEventGesture,
-  TInteractiveInkMessageEventHMACChallenge,
-  TInteractiveInkMessageEventNewPart,
-  TInteractiveInkMessageEventPartChange,
-  TInteractiveInkMessageReceived,
-  TInteractiveInkMessageType,
+  TRecognizerWebSocketMessage,
+  TRecognizerWebSocketMessageContentChange,
+  TRecognizerWebSocketMessageContextlessGesture,
+  TRecognizerWebSocketMessageError,
+  TRecognizerWebSocketMessageExport,
+  TRecognizerWebSocketMessageGesture,
+  TRecognizerWebSocketMessageHMACChallenge,
+  TRecognizerWebSocketMessageNewPart,
+  TRecognizerWebSocketMessagePartChange,
+  TRecognizerWebSocketMessageReceived,
+  TRecognizerWebSocketMessageType,
   TInteractiveInkSessionDescriptionMessage
-} from "./InteractiveInkRecognizerMessage"
+} from "./RecognizerWebSocketMessage"
 import { RecognizerError } from "./RecognizerError"
 import PingWorker from "web-worker:../worker/ping.worker.ts"
 import { RecognizerEvent } from "./RecognizerEvent"
-import { InteractiveInkRecognizerConfiguration, TInteractiveInkRecognizerConfiguration } from "./InteractiveInkRecognizerConfiguration"
+import { RecognizerWebSocketConfiguration, TRecognizerWebSocketConfiguration } from "./RecognizerWebSocketConfiguration"
 
 /**
  * A websocket dialog have this sequence :
@@ -46,7 +46,7 @@ import { InteractiveInkRecognizerConfiguration, TInteractiveInkRecognizerConfigu
 /**
  * @group Recognizer
  */
-export class InteractiveInkRecognizer
+export class RecognizerWebSocket
 {
   #logger = LoggerManager.getLogger(LoggerCategory.RECOGNIZER)
 
@@ -58,8 +58,8 @@ export class InteractiveInkRecognizer
   protected currentPartId?: string
   protected currentErrorCode?: string | number
 
-  protected addStrokeDeferred?: DeferredPromise<TInteractiveInkMessageEventGesture | undefined>
-  protected contextlessGestureDeferred: Map<string, DeferredPromise<TInteractiveInkMessageEventContextlessGesture>>
+  protected addStrokeDeferred?: DeferredPromise<TRecognizerWebSocketMessageGesture | undefined>
+  protected contextlessGestureDeferred: Map<string, DeferredPromise<TRecognizerWebSocketMessageContextlessGesture>>
   protected transformStrokeDeferred?: DeferredPromise<void>
   protected eraseStrokeDeferred?: DeferredPromise<void>
   protected replaceStrokeDeferred?: DeferredPromise<void>
@@ -70,15 +70,15 @@ export class InteractiveInkRecognizer
   protected redoDeferred?: DeferredPromise<void>
   protected clearDeferred?: DeferredPromise<void>
 
-  configuration: InteractiveInkRecognizerConfiguration
+  configuration: RecognizerWebSocketConfiguration
   initialized: DeferredPromise<void>
   url: string
   event: RecognizerEvent
 
-  constructor(config: PartialDeep<TInteractiveInkRecognizerConfiguration>, event?: RecognizerEvent)
+  constructor(config: PartialDeep<TRecognizerWebSocketConfiguration>, event?: RecognizerEvent)
   {
     this.#logger.info("constructor", { config })
-    this.configuration = new InteractiveInkRecognizerConfiguration(config)
+    this.configuration = new RecognizerWebSocketConfiguration(config)
     const scheme = (this.configuration.server.scheme === "https") ? "wss" : "ws"
     this.url = `${ scheme }://${ this.configuration.server.host }/api/v4.0/iink/offscreen?applicationKey=${ this.configuration.server.applicationKey }`
 
@@ -93,7 +93,7 @@ export class InteractiveInkRecognizer
     return ["application/vnd.myscript.jiix"]
   }
 
-  async #send(message: TInteractiveInkMessageEvent): Promise<void>
+  async #send(message: TRecognizerWebSocketMessage): Promise<void>
   {
     if (!this.socket) {
       throw new Error("Recognizer must be initilized")
@@ -221,7 +221,7 @@ export class InteractiveInkRecognizer
     })
   }
 
-  protected async manageHMACChallenge(hmacChallengeMessage: TInteractiveInkMessageEventHMACChallenge): Promise<void>
+  protected async manageHMACChallenge(hmacChallengeMessage: TRecognizerWebSocketMessageHMACChallenge): Promise<void>
   {
     this.#send({
       type: "hmac",
@@ -280,19 +280,19 @@ export class InteractiveInkRecognizer
     }
   }
 
-  protected manageNewPartMessage(newPartMessage: TInteractiveInkMessageEventNewPart): void
+  protected manageNewPartMessage(newPartMessage: TRecognizerWebSocketMessageNewPart): void
   {
     this.initialized.resolve()
     this.currentPartId = newPartMessage.id
   }
 
-  protected managePartChangeMessage(partChangeMessage: TInteractiveInkMessageEventPartChange): void
+  protected managePartChangeMessage(partChangeMessage: TRecognizerWebSocketMessagePartChange): void
   {
     this.initialized.resolve()
     this.currentPartId = partChangeMessage.partId
   }
 
-  protected manageContentChangedMessage(contentChangeMessage: TInteractiveInkMessageEventContentChange): void
+  protected manageContentChangedMessage(contentChangeMessage: TRecognizerWebSocketMessageContentChange): void
   {
     this.initialized.resolve()
     this.replaceStrokeDeferred?.resolve()
@@ -307,7 +307,7 @@ export class InteractiveInkRecognizer
     } as THistoryContext)
   }
 
-  protected manageExportMessage(exportMessage: TInteractiveInkMessageEventExport): void
+  protected manageExportMessage(exportMessage: TRecognizerWebSocketMessageExport): void
   {
     if (exportMessage.exports["application/vnd.myscript.jiix"]) {
       exportMessage.exports["application/vnd.myscript.jiix"] = JSON.parse(exportMessage.exports["application/vnd.myscript.jiix"].toString()) as TJIIXExport
@@ -329,7 +329,7 @@ export class InteractiveInkRecognizer
     this.event.emitIdle(true)
   }
 
-  protected manageErrorMessage(errorMessage: TInteractiveInkMessageEventError): void
+  protected manageErrorMessage(errorMessage: TRecognizerWebSocketMessageError): void
   {
     this.currentErrorCode = errorMessage.data?.code || errorMessage.code
     let message = errorMessage.data?.message || errorMessage.message || RecognizerError.UNKNOW
@@ -355,12 +355,12 @@ export class InteractiveInkRecognizer
     }
   }
 
-  protected manageGestureDetected(gestureMessage: TInteractiveInkMessageEventGesture): void
+  protected manageGestureDetected(gestureMessage: TRecognizerWebSocketMessageGesture): void
   {
     this.addStrokeDeferred?.resolve(gestureMessage)
   }
 
-  protected manageContextlessGesture(gestureMessage: TInteractiveInkMessageEventContextlessGesture): void
+  protected manageContextlessGesture(gestureMessage: TRecognizerWebSocketMessageContextlessGesture): void
   {
     this.contextlessGestureDeferred.get(gestureMessage.strokeId)?.resolve(gestureMessage)
   }
@@ -369,43 +369,43 @@ export class InteractiveInkRecognizer
   {
     this.currentErrorCode = undefined
     try {
-      const websocketMessage: TInteractiveInkMessageReceived = JSON.parse(message.data)
-      if (websocketMessage.type === TInteractiveInkMessageType.Pong) {
+      const websocketMessage: TRecognizerWebSocketMessageReceived = JSON.parse(message.data)
+      if (websocketMessage.type === TRecognizerWebSocketMessageType.Pong) {
         return
       }
       this.pingCount = 0
       switch (websocketMessage.type) {
-        case TInteractiveInkMessageType.HMAC_Challenge:
+        case TRecognizerWebSocketMessageType.HMAC_Challenge:
           this.manageHMACChallenge(websocketMessage)
           break
-        case TInteractiveInkMessageType.Authenticated:
+        case TRecognizerWebSocketMessageType.Authenticated:
           this.manageAuthenticated()
           break
-        case TInteractiveInkMessageType.SessionDescription:
+        case TRecognizerWebSocketMessageType.SessionDescription:
           this.manageSessionDescriptionMessage(websocketMessage)
           break
-        case TInteractiveInkMessageType.NewPart:
+        case TRecognizerWebSocketMessageType.NewPart:
           this.manageNewPartMessage(websocketMessage)
           break
-        case TInteractiveInkMessageType.PartChanged:
+        case TRecognizerWebSocketMessageType.PartChanged:
           this.managePartChangeMessage(websocketMessage)
           break
-        case TInteractiveInkMessageType.ContentChanged:
+        case TRecognizerWebSocketMessageType.ContentChanged:
           this.manageContentChangedMessage(websocketMessage)
           break
-        case TInteractiveInkMessageType.Exported:
+        case TRecognizerWebSocketMessageType.Exported:
           this.manageExportMessage(websocketMessage)
           break
-        case TInteractiveInkMessageType.GestureDetected:
+        case TRecognizerWebSocketMessageType.GestureDetected:
           this.manageGestureDetected(websocketMessage)
           break
-        case TInteractiveInkMessageType.ContextlessGesture:
+        case TRecognizerWebSocketMessageType.ContextlessGesture:
           this.manageContextlessGesture(websocketMessage)
           break
-        case TInteractiveInkMessageType.Error:
+        case TRecognizerWebSocketMessageType.Error:
           this.manageErrorMessage(websocketMessage)
           break
-        case TInteractiveInkMessageType.Idle:
+        case TRecognizerWebSocketMessageType.Idle:
           this.manageWaitForIdle()
           break
         default:
@@ -418,7 +418,7 @@ export class InteractiveInkRecognizer
     }
   }
 
-  async newSession(config: PartialDeep<TInteractiveInkRecognizerConfiguration>): Promise<void>
+  async newSession(config: PartialDeep<TRecognizerWebSocketConfiguration>): Promise<void>
   {
     await this.close(1000, "new-session")
     this.configuration = mergeDeep({}, this.configuration, config)
@@ -452,7 +452,7 @@ export class InteractiveInkRecognizer
     this.event.emitEndtInitialization()
   }
 
-  async send(message: TInteractiveInkMessageEvent): Promise<void>
+  async send(message: TRecognizerWebSocketMessage): Promise<void>
   {
     if (!this.socket) {
       return Promise.reject(new Error("Recognizer must be initilized"))
@@ -484,7 +484,7 @@ export class InteractiveInkRecognizer
     }
   }
 
-  protected buildAddStrokesMessage(strokes: IIStroke[], processGestures = true): TInteractiveInkMessageEvent
+  protected buildAddStrokesMessage(strokes: IIStroke[], processGestures = true): TRecognizerWebSocketMessage
   {
     return {
       type: "addStrokes",
@@ -492,9 +492,9 @@ export class InteractiveInkRecognizer
       strokes: strokes.map(s => s.formatToSend())
     }
   }
-  async addStrokes(strokes: IIStroke[], processGestures = true): Promise<TInteractiveInkMessageEventGesture | undefined>
+  async addStrokes(strokes: IIStroke[], processGestures = true): Promise<TRecognizerWebSocketMessageGesture | undefined>
   {
-    this.addStrokeDeferred = new DeferredPromise<TInteractiveInkMessageEventGesture | undefined>()
+    this.addStrokeDeferred = new DeferredPromise<TRecognizerWebSocketMessageGesture | undefined>()
     if (strokes.length === 0) {
       this.addStrokeDeferred.resolve(undefined)
       return this.addStrokeDeferred?.promise
@@ -503,7 +503,7 @@ export class InteractiveInkRecognizer
     return this.addStrokeDeferred?.promise
   }
 
-  protected buildReplaceStrokesMessage(oldStrokeIds: string[], newStrokes: IIStroke[]): TInteractiveInkMessageEvent
+  protected buildReplaceStrokesMessage(oldStrokeIds: string[], newStrokes: IIStroke[]): TRecognizerWebSocketMessage
   {
     return {
       type: "replaceStrokes",
@@ -522,7 +522,7 @@ export class InteractiveInkRecognizer
     return this.replaceStrokeDeferred?.promise
   }
 
-  protected buildTransformTranslateMessage(strokeIds: string[], tx: number, ty: number): TInteractiveInkMessageEvent
+  protected buildTransformTranslateMessage(strokeIds: string[], tx: number, ty: number): TRecognizerWebSocketMessage
   {
     return {
       type: "transform",
@@ -543,7 +543,7 @@ export class InteractiveInkRecognizer
     return this.transformStrokeDeferred?.promise
   }
 
-  protected buildTransformRotateMessage(strokeIds: string[], angle: number, x0: number = 0, y0: number = 0): TInteractiveInkMessageEvent
+  protected buildTransformRotateMessage(strokeIds: string[], angle: number, x0: number = 0, y0: number = 0): TRecognizerWebSocketMessage
   {
     return {
       type: "transform",
@@ -565,7 +565,7 @@ export class InteractiveInkRecognizer
     return this.transformStrokeDeferred?.promise
   }
 
-  protected buildTransformScaleMessage(strokeIds: string[], scaleX: number, scaleY: number, x0: number = 0, y0: number = 0): TInteractiveInkMessageEvent
+  protected buildTransformScaleMessage(strokeIds: string[], scaleX: number, scaleY: number, x0: number = 0, y0: number = 0): TRecognizerWebSocketMessage
   {
     return {
       type: "transform",
@@ -588,7 +588,7 @@ export class InteractiveInkRecognizer
     return this.transformStrokeDeferred?.promise
   }
 
-  protected buildTransformMatrixMessage(strokeIds: string[], matrix: TMatrixTransform): TInteractiveInkMessageEvent
+  protected buildTransformMatrixMessage(strokeIds: string[], matrix: TMatrixTransform): TRecognizerWebSocketMessage
   {
     return {
       type: "transform",
@@ -608,7 +608,7 @@ export class InteractiveInkRecognizer
     return this.transformStrokeDeferred?.promise
   }
 
-  protected buildEraseStrokesMessage(strokeIds: string[]): TInteractiveInkMessageEvent
+  protected buildEraseStrokesMessage(strokeIds: string[]): TRecognizerWebSocketMessage
   {
     return {
       type: "eraseStrokes",
@@ -626,12 +626,12 @@ export class InteractiveInkRecognizer
     return this.eraseStrokeDeferred?.promise
   }
 
-  async recognizeGesture(stroke: IIStroke): Promise<TInteractiveInkMessageEventContextlessGesture | undefined>
+  async recognizeGesture(stroke: IIStroke): Promise<TRecognizerWebSocketMessageContextlessGesture | undefined>
   {
     if (!stroke) {
       return
     }
-    this.contextlessGestureDeferred.set(stroke.id, new DeferredPromise<TInteractiveInkMessageEventContextlessGesture>())
+    this.contextlessGestureDeferred.set(stroke.id, new DeferredPromise<TRecognizerWebSocketMessageContextlessGesture>())
     const pixelTomm = 25.4 / 96
     await this.send({
       type: "contextlessGesture",
@@ -647,16 +647,16 @@ export class InteractiveInkRecognizer
     if (!this.waitForIdleDeferred || this.waitForIdleDeferred.isFullFilled) {
       this.waitForIdleDeferred = new DeferredPromise<void>()
     }
-    const message: TInteractiveInkMessageEvent = {
+    const message: TRecognizerWebSocketMessage = {
       type: "waitForIdle",
     }
     await this.send(message)
     return this.waitForIdleDeferred?.promise
   }
 
-  protected buildUndoRedoChanges(changes: TIIHistoryBackendChanges): TInteractiveInkMessageEvent[]
+  protected buildUndoRedoChanges(changes: TIIHistoryBackendChanges): TRecognizerWebSocketMessage[]
   {
-    const changesMessages: TInteractiveInkMessageEvent[] = []
+    const changesMessages: TRecognizerWebSocketMessage[] = []
     if (changes.added?.length) {
       changesMessages.push(this.buildAddStrokesMessage(changes.added, false))
     }
@@ -697,7 +697,7 @@ export class InteractiveInkRecognizer
       return
     }
     this.undoDeferred = new DeferredPromise<void>()
-    const message: TInteractiveInkMessageEvent = {
+    const message: TRecognizerWebSocketMessage = {
       type: "undo",
       changes
     }
@@ -713,7 +713,7 @@ export class InteractiveInkRecognizer
     }
     this.redoDeferred = new DeferredPromise<void>()
 
-    const message: TInteractiveInkMessageEvent = {
+    const message: TRecognizerWebSocketMessage = {
       type: "redo",
       changes
     }
@@ -730,7 +730,7 @@ export class InteractiveInkRecognizer
       this.exportDeferredMap.set(mt, new DeferredPromise<TExport>())
     })
 
-    const message: TInteractiveInkMessageEvent = {
+    const message: TRecognizerWebSocketMessage = {
       type: "export",
       partId: this.currentPartId,
       mimeTypes

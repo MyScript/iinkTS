@@ -2,7 +2,7 @@ import { EditorTool } from "../Constants"
 import { PointerEventGrabber, PointerInfo } from "../grabber"
 import { Model, TExport } from "../model"
 import { Stroke, TStroke, TPointer } from "../symbol"
-import { InkDeprecatedRecognizer, TConverstionState } from "../recognizer"
+import { RecognizerHTTPV1, TConverstionState } from "../recognizer"
 import { CanvasRenderer } from "../renderer"
 import { DefaultPenStyle, StyleManager, TPenStyle, TTheme } from "../style"
 import { HistoryManager } from "../history"
@@ -14,18 +14,19 @@ import { InkEditorDeprecatedConfiguration, TInkEditorDeprecatedConfiguration } f
  * @group Editor
  */
 export type TInkEditorDeprecatedOptions = PartialDeep<EditorOptionsBase &
-  {
-    configuration: TInkEditorDeprecatedConfiguration
-  }> &
-  {
-    override?: {
-      grabber?: PointerEventGrabber
-      recognizer?: InkDeprecatedRecognizer
-    }
+{
+  configuration: TInkEditorDeprecatedConfiguration
+}> &
+{
+  override?: {
+    grabber?: PointerEventGrabber
+    recognizer?: RecognizerHTTPV1
   }
+}
 
 /**
  * @group Editor
+ * @deprecated Use {@link InkEditor} instead.
  */
 export class InkEditorDeprecated extends AbstractEditor
 {
@@ -36,7 +37,7 @@ export class InkEditorDeprecated extends AbstractEditor
 
   grabber: PointerEventGrabber
   renderer: CanvasRenderer
-  recognizer: InkDeprecatedRecognizer
+  recognizer: RecognizerHTTPV1
   history: HistoryManager
   styleManager: StyleManager
   #tool: EditorTool = EditorTool.Write
@@ -60,11 +61,11 @@ export class InkEditorDeprecated extends AbstractEditor
     this.grabber.onPointerUp = this.onPointerUp.bind(this)
 
     if (options?.override?.recognizer) {
-      const CustomRecognizer = options.override.recognizer as unknown as typeof InkDeprecatedRecognizer
+      const CustomRecognizer = options.override.recognizer as unknown as typeof RecognizerHTTPV1
       this.recognizer = new CustomRecognizer(this.#configuration)
     }
     else {
-      this.recognizer = new InkDeprecatedRecognizer(this.#configuration)
+      this.recognizer = new RecognizerHTTPV1(this.#configuration)
     }
     this.renderer = new CanvasRenderer(this.#configuration.rendering)
 

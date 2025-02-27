@@ -1,4 +1,4 @@
-class CustomRestRecognizer extends iink.InkDeprecatedRecognizer {
+class CustomRestRecognizer extends iink.RecognizerHTTPV1 {
 
   constructor(config) {
     super(config)

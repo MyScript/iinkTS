@@ -1,20 +1,20 @@
 import
 {
-  InteractiveInkRecognizer,
-  TInteractiveInkRecognizerConfiguration,
-  TInteractiveInkMessageEvent,
+  RecognizerWebSocket,
+  TRecognizerWebSocketConfiguration,
+  TRecognizerWebSocketMessage,
   PartialDeep,
   TServerWebsocketConfiguration,
-  TInteractiveInkRecognitionConfiguration
+  TRecognitionWebSocketConfiguration
 } from 'iink-ts'
 
-export class Recognizer extends InteractiveInkRecognizer
+export class Recognizer extends RecognizerWebSocket
 {
   static initializing = false
   static instance: Recognizer
-  messages: { state: "Sent" | "Received", message: TInteractiveInkMessageEvent }[]
+  messages: { state: "Sent" | "Received", message: TRecognizerWebSocketMessage }[]
 
-  constructor(config: PartialDeep<TInteractiveInkRecognizerConfiguration>)
+  constructor(config: PartialDeep<TRecognizerWebSocketConfiguration>)
   {
     super(config)
     this.messages = []
@@ -23,11 +23,11 @@ export class Recognizer extends InteractiveInkRecognizer
   protected messageCallback(message: MessageEvent<string>)
   {
     super.messageCallback(message)
-    const websocketMessage: TInteractiveInkMessageEvent = JSON.parse(message.data)
+    const websocketMessage: TRecognizerWebSocketMessage = JSON.parse(message.data)
     this.messages.push({ state: "Received", message: websocketMessage })
   }
 
-  override send(message: TInteractiveInkMessageEvent): Promise<void>
+  override send(message: TRecognizerWebSocketMessage): Promise<void>
   {
     this.messages.push({ state: "Sent", message })
     return super.send(message)
@@ -46,7 +46,7 @@ export const useRecognizer = async (): Promise<Recognizer> =>
     Recognizer.initializing = true
     const res = await fetch("../../../server-configuration.json")
     const server = await res.json() as PartialDeep<TServerWebsocketConfiguration>
-    const recognition: PartialDeep<TInteractiveInkRecognitionConfiguration> = {
+    const recognition: PartialDeep<TRecognitionWebSocketConfiguration> = {
       "raw-content": {
         gestures: ["underline", "scratch-out", "join", "insert", "strike-through", "surround"]
       },

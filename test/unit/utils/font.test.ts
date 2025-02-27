@@ -1,4 +1,4 @@
-import { InteractiveInkSSRRecognizerTextConfiguration } from "../__dataset__/configuration.dataset"
+import { RecognizerWebSocketSSRTextConfiguration } from "../__dataset__/configuration.dataset"
 import { getAvailableFontList } from "../../../src/iink"
 
 describe("font.ts", () =>
@@ -11,9 +11,9 @@ describe("font.ts", () =>
 
   test("should call fetch with good url", async () =>
   {
-    await getAvailableFontList(InteractiveInkSSRRecognizerTextConfiguration)
+    await getAvailableFontList(RecognizerWebSocketSSRTextConfiguration)
     expect(fetch).toBeCalledTimes(1)
-    expect(fetch).toBeCalledWith(`${ InteractiveInkSSRRecognizerTextConfiguration?.server?.scheme }://${ InteractiveInkSSRRecognizerTextConfiguration?.server?.host }/api/v4.0/iink/font/google/language/${ InteractiveInkSSRRecognizerTextConfiguration?.recognition?.lang }`)
+    expect(fetch).toBeCalledWith(`${ RecognizerWebSocketSSRTextConfiguration?.server?.scheme }://${ RecognizerWebSocketSSRTextConfiguration?.server?.host }/api/v4.0/iink/font/google/language/${ RecognizerWebSocketSSRTextConfiguration?.recognition?.lang }`)
   })
 
   test("should reject getAvailableFontList if no configuration", async () =>
@@ -28,7 +28,7 @@ describe("font.ts", () =>
 
   test("should reject getAvailableFontList if configuration.server is empty", async () =>
   {
-    const conf = JSON.parse(JSON.stringify(InteractiveInkSSRRecognizerTextConfiguration))
+    const conf = JSON.parse(JSON.stringify(RecognizerWebSocketSSRTextConfiguration))
     delete conf?.server
     getAvailableFontList(conf)
       .catch(e =>
@@ -39,7 +39,7 @@ describe("font.ts", () =>
 
   test("should reject getAvailableFontList if configuration.server.scheme is empty", async () =>
   {
-    const conf = JSON.parse(JSON.stringify(InteractiveInkSSRRecognizerTextConfiguration))
+    const conf = JSON.parse(JSON.stringify(RecognizerWebSocketSSRTextConfiguration))
     delete conf?.server?.scheme
     getAvailableFontList(conf)
       .catch(e =>
@@ -50,7 +50,7 @@ describe("font.ts", () =>
 
   test("should reject getAvailableFontList if configuration.server.host empty", async () =>
   {
-    const conf = JSON.parse(JSON.stringify(InteractiveInkSSRRecognizerTextConfiguration))
+    const conf = JSON.parse(JSON.stringify(RecognizerWebSocketSSRTextConfiguration))
     delete conf?.server?.host
     getAvailableFontList(conf)
       .catch(e =>
@@ -61,7 +61,7 @@ describe("font.ts", () =>
 
   test("should reject getAvailableFontList if configuration.server.host empty", async () =>
   {
-    const conf = JSON.parse(JSON.stringify(InteractiveInkSSRRecognizerTextConfiguration))
+    const conf = JSON.parse(JSON.stringify(RecognizerWebSocketSSRTextConfiguration))
     delete conf?.recognition?.lang
     getAvailableFontList(conf)
       .catch(e =>

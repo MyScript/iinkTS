@@ -1,28 +1,34 @@
-import { InteractiveInkEditorEditorOverrideConfiguration } from "../__dataset__/configuration.dataset"
-import { ServerInteractiveInkSSRMock, contextlessGestureMessage, gestureDetectedMessage, hTextJIIX, partChangeMessage } from "../__mocks__/ServerInteractiveInkSSRMock"
+import { InteractiveInkEditorOverrideConfiguration } from "../__dataset__/configuration.dataset"
+import {
+  ServerWebSocketMock,
+  contextlessGestureMessage,
+  gestureDetectedMessage,
+  hTextJIIX,
+  partChangeMessage
+} from "../__mocks__/ServerWebSocketMock"
 import { buildOIStroke, delay } from "../helpers"
 import
 {
-  InteractiveInkRecognizer,
+  RecognizerWebSocket,
   RecognizerError,
   TMatrixTransform,
   MatrixTransform,
   TIIHistoryBackendChanges,
-  TInteractiveInkRecognizerConfiguration,
+  TRecognizerWebSocketConfiguration,
 } from "../../../src/iink"
 import { toResolve } from 'jest-extended'
 expect.extend({ toResolve })
 
-describe("InteractiveInkRecognizer.ts", () =>
+describe("RecognizerWebSocket.ts", () =>
 {
-  const configuration: TInteractiveInkRecognizerConfiguration = {
-    recognition: InteractiveInkEditorEditorOverrideConfiguration.recognition,
-    server: InteractiveInkEditorEditorOverrideConfiguration.server
+  const configuration: TRecognizerWebSocketConfiguration = {
+    recognition: InteractiveInkEditorOverrideConfiguration.recognition,
+    server: InteractiveInkEditorOverrideConfiguration.server
   }
 
-  test("should instanciate InteractiveInkRecognizer", () =>
+  test("should instanciate RecognizerWebSocket", () =>
   {
-    const oiRecognizer = new InteractiveInkRecognizer(configuration)
+    const oiRecognizer = new RecognizerWebSocket(configuration)
     expect(oiRecognizer).toBeDefined()
   })
 
@@ -34,13 +40,13 @@ describe("InteractiveInkRecognizer.ts", () =>
     conf.server.applicationKey = "applicationKey"
     test("should get url", () =>
     {
-      const oiRecognizer = new InteractiveInkRecognizer(conf)
+      const oiRecognizer = new RecognizerWebSocket(conf)
       expect(oiRecognizer.url).toEqual("ws://pony/api/v4.0/iink/offscreen?applicationKey=applicationKey")
     })
 
     test(`should get mimeTypes`, () =>
     {
-      const oiRecognizer = new InteractiveInkRecognizer(conf)
+      const oiRecognizer = new RecognizerWebSocket(conf)
       expect(oiRecognizer.mimeTypes).toEqual(["application/vnd.myscript.jiix"])
     })
   })
@@ -49,13 +55,13 @@ describe("InteractiveInkRecognizer.ts", () =>
   {
     const conf = structuredClone(configuration)
     conf.server.host = "init-test"
-    let mockServer: ServerInteractiveInkSSRMock
-    let oiRecognizer: InteractiveInkRecognizer
+    let mockServer: ServerWebSocketMock
+    let oiRecognizer: RecognizerWebSocket
 
     beforeEach(() =>
     {
-      oiRecognizer = new InteractiveInkRecognizer(conf)
-      mockServer = new ServerInteractiveInkSSRMock(oiRecognizer.url)
+      oiRecognizer = new RecognizerWebSocket(conf)
+      mockServer = new ServerWebSocketMock(oiRecognizer.url)
     })
     afterEach(async () =>
     {
@@ -160,14 +166,14 @@ describe("InteractiveInkRecognizer.ts", () =>
   {
     const conf = structuredClone(configuration)
     conf.server.host = "ping-test"
-    let mockServer: ServerInteractiveInkSSRMock
-    let oiRecognizer: InteractiveInkRecognizer
+    let mockServer: ServerWebSocketMock
+    let oiRecognizer: RecognizerWebSocket
 
     beforeEach(() =>
     {
-      oiRecognizer = new InteractiveInkRecognizer(conf)
+      oiRecognizer = new RecognizerWebSocket(conf)
 
-      mockServer = new ServerInteractiveInkSSRMock(oiRecognizer.url)
+      mockServer = new ServerWebSocketMock(oiRecognizer.url)
       mockServer.init()
     })
 
@@ -181,7 +187,7 @@ describe("InteractiveInkRecognizer.ts", () =>
     {
       expect.assertions(2)
       conf.server.websocket.pingEnabled = true
-      const oiRecognizer = new InteractiveInkRecognizer(conf)
+      const oiRecognizer = new RecognizerWebSocket(conf)
       await oiRecognizer.init()
       await delay(conf.server.websocket.pingDelay * 1.5)
       expect(mockServer.getMessages("ping")).toHaveLength(1)
@@ -193,7 +199,7 @@ describe("InteractiveInkRecognizer.ts", () =>
     {
       expect.assertions(2)
       conf.server.websocket.pingEnabled = false
-      const oiRecognizer = new InteractiveInkRecognizer(conf)
+      const oiRecognizer = new RecognizerWebSocket(conf)
       await oiRecognizer.init()
       await delay(conf.server.websocket.pingDelay * 1.5)
       expect(mockServer.getMessages("ping")).toHaveLength(0)
@@ -206,7 +212,7 @@ describe("InteractiveInkRecognizer.ts", () =>
       expect.assertions(3)
       conf.server.websocket.pingEnabled = true
       conf.server.websocket.maxPingLostCount = 2
-      const oiRecognizer = new InteractiveInkRecognizer(conf)
+      const oiRecognizer = new RecognizerWebSocket(conf)
       await oiRecognizer.init()
       await delay(conf.server.websocket.pingDelay * 1.5)
       expect(mockServer.server.clients()).toHaveLength(1)
@@ -221,13 +227,13 @@ describe("InteractiveInkRecognizer.ts", () =>
     const conf = structuredClone(configuration)
     conf.server.host = "send-test"
     conf.server.websocket.autoReconnect = true
-    let mockServer: ServerInteractiveInkSSRMock
-    let oiRecognizer: InteractiveInkRecognizer
+    let mockServer: ServerWebSocketMock
+    let oiRecognizer: RecognizerWebSocket
 
     beforeEach(() =>
     {
-      oiRecognizer = new InteractiveInkRecognizer(conf)
-      mockServer = new ServerInteractiveInkSSRMock(oiRecognizer.url)
+      oiRecognizer = new RecognizerWebSocket(conf)
+      mockServer = new ServerWebSocketMock(oiRecognizer.url)
       mockServer.init()
     })
     afterEach(async () =>
@@ -265,14 +271,14 @@ describe("InteractiveInkRecognizer.ts", () =>
   {
     const conf = structuredClone(configuration)
     conf.server.host = "add-strokes-test"
-    let mockServer: ServerInteractiveInkSSRMock
-    let oiRecognizer: InteractiveInkRecognizer
+    let mockServer: ServerWebSocketMock
+    let oiRecognizer: RecognizerWebSocket
     const strokes = [buildOIStroke()]
 
     beforeEach(() =>
     {
-      oiRecognizer = new InteractiveInkRecognizer(conf)
-      mockServer = new ServerInteractiveInkSSRMock(oiRecognizer.url)
+      oiRecognizer = new RecognizerWebSocket(conf)
+      mockServer = new ServerWebSocketMock(oiRecognizer.url)
       mockServer.init()
     })
     afterEach(async () =>
@@ -334,15 +340,15 @@ describe("InteractiveInkRecognizer.ts", () =>
   {
     const conf = structuredClone(configuration)
     conf.server.host = "replace-strokes-test"
-    let mockServer: ServerInteractiveInkSSRMock
-    let oiRecognizer: InteractiveInkRecognizer
+    let mockServer: ServerWebSocketMock
+    let oiRecognizer: RecognizerWebSocket
     const strokes = [buildOIStroke()]
     const oldStrokeIds = ["id-1", "id-2"]
 
     beforeEach(() =>
     {
-      oiRecognizer = new InteractiveInkRecognizer(conf)
-      mockServer = new ServerInteractiveInkSSRMock(oiRecognizer.url)
+      oiRecognizer = new RecognizerWebSocket(conf)
+      mockServer = new ServerWebSocketMock(oiRecognizer.url)
       mockServer.init()
     })
     afterEach(async () =>
@@ -404,15 +410,15 @@ describe("InteractiveInkRecognizer.ts", () =>
   {
     const conf = structuredClone(configuration)
     conf.server.host = "transform-translate-test"
-    let mockServer: ServerInteractiveInkSSRMock
-    let oiRecognizer: InteractiveInkRecognizer
+    let mockServer: ServerWebSocketMock
+    let oiRecognizer: RecognizerWebSocket
     const strokeIds = ["id-1", "id-2"]
     const tx = 5, ty = 10
 
     beforeEach(() =>
     {
-      oiRecognizer = new InteractiveInkRecognizer(conf)
-      mockServer = new ServerInteractiveInkSSRMock(oiRecognizer.url)
+      oiRecognizer = new RecognizerWebSocket(conf)
+      mockServer = new ServerWebSocketMock(oiRecognizer.url)
       mockServer.init()
     })
     afterEach(async () =>
@@ -477,15 +483,15 @@ describe("InteractiveInkRecognizer.ts", () =>
   {
     const conf = structuredClone(configuration)
     conf.server.host = "transform-rotate-test"
-    let mockServer: ServerInteractiveInkSSRMock
-    let oiRecognizer: InteractiveInkRecognizer
+    let mockServer: ServerWebSocketMock
+    let oiRecognizer: RecognizerWebSocket
     const strokeIds = ["id-1", "id-2"]
     const angle = Math.PI / 2, x0 = 10, y0 = 20
 
     beforeEach(() =>
     {
-      oiRecognizer = new InteractiveInkRecognizer(conf)
-      mockServer = new ServerInteractiveInkSSRMock(oiRecognizer.url)
+      oiRecognizer = new RecognizerWebSocket(conf)
+      mockServer = new ServerWebSocketMock(oiRecognizer.url)
       mockServer.init()
     })
     afterEach(async () =>
@@ -551,15 +557,15 @@ describe("InteractiveInkRecognizer.ts", () =>
   {
     const conf = structuredClone(configuration)
     conf.server.host = "transform-scale-test"
-    let mockServer: ServerInteractiveInkSSRMock
-    let oiRecognizer: InteractiveInkRecognizer
+    let mockServer: ServerWebSocketMock
+    let oiRecognizer: RecognizerWebSocket
     const strokeIds = ["id-1", "id-2"]
     const scaleX = 2, scaleY = 2, x0 = 10, y0 = 20
 
     beforeEach(() =>
     {
-      oiRecognizer = new InteractiveInkRecognizer(conf)
-      mockServer = new ServerInteractiveInkSSRMock(oiRecognizer.url)
+      oiRecognizer = new RecognizerWebSocket(conf)
+      mockServer = new ServerWebSocketMock(oiRecognizer.url)
       mockServer.init()
     })
     afterEach(async () =>
@@ -626,15 +632,15 @@ describe("InteractiveInkRecognizer.ts", () =>
   {
     const conf = structuredClone(configuration)
     conf.server.host = "transform-matrix-test"
-    let mockServer: ServerInteractiveInkSSRMock
-    let oiRecognizer: InteractiveInkRecognizer
+    let mockServer: ServerWebSocketMock
+    let oiRecognizer: RecognizerWebSocket
     const strokeIds = ["id-1", "id-2"]
     const matrix: TMatrixTransform = new MatrixTransform(6, 5, 4, 3, 2, 1)
 
     beforeEach(() =>
     {
-      oiRecognizer = new InteractiveInkRecognizer(conf)
-      mockServer = new ServerInteractiveInkSSRMock(oiRecognizer.url)
+      oiRecognizer = new RecognizerWebSocket(conf)
+      mockServer = new ServerWebSocketMock(oiRecognizer.url)
       mockServer.init()
     })
     afterEach(async () =>
@@ -698,14 +704,14 @@ describe("InteractiveInkRecognizer.ts", () =>
   {
     const conf = structuredClone(configuration)
     conf.server.host = "erase-strokes-test"
-    let mockServer: ServerInteractiveInkSSRMock
-    let oiRecognizer: InteractiveInkRecognizer
+    let mockServer: ServerWebSocketMock
+    let oiRecognizer: RecognizerWebSocket
     const strokeIds = ["erase-1"]
 
     beforeEach(() =>
     {
-      oiRecognizer = new InteractiveInkRecognizer(conf)
-      mockServer = new ServerInteractiveInkSSRMock(oiRecognizer.url)
+      oiRecognizer = new RecognizerWebSocket(conf)
+      mockServer = new ServerWebSocketMock(oiRecognizer.url)
       mockServer.init()
     })
     afterEach(async () =>
@@ -767,14 +773,14 @@ describe("InteractiveInkRecognizer.ts", () =>
   {
     const conf = structuredClone(configuration)
     conf.server.host = "recognize-gesture-test"
-    let mockServer: ServerInteractiveInkSSRMock
-    let oiRecognizer: InteractiveInkRecognizer
+    let mockServer: ServerWebSocketMock
+    let oiRecognizer: RecognizerWebSocket
     const stroke = buildOIStroke()
 
     beforeEach(() =>
     {
-      oiRecognizer = new InteractiveInkRecognizer(conf)
-      mockServer = new ServerInteractiveInkSSRMock(oiRecognizer.url)
+      oiRecognizer = new RecognizerWebSocket(conf)
+      mockServer = new ServerWebSocketMock(oiRecognizer.url)
       mockServer.init()
     })
     afterEach(async () =>
@@ -838,13 +844,13 @@ describe("InteractiveInkRecognizer.ts", () =>
   {
     const conf = structuredClone(configuration)
     conf.server.host = "wait-for-idle-test"
-    let mockServer: ServerInteractiveInkSSRMock
-    let oiRecognizer: InteractiveInkRecognizer
+    let mockServer: ServerWebSocketMock
+    let oiRecognizer: RecognizerWebSocket
 
     beforeEach(() =>
     {
-      oiRecognizer = new InteractiveInkRecognizer(conf)
-      mockServer = new ServerInteractiveInkSSRMock(oiRecognizer.url)
+      oiRecognizer = new RecognizerWebSocket(conf)
+      mockServer = new ServerWebSocketMock(oiRecognizer.url)
       mockServer.init({ withIdle: false })
     })
     afterEach(async () =>
@@ -887,13 +893,13 @@ describe("InteractiveInkRecognizer.ts", () =>
   {
     const conf = structuredClone(configuration)
     conf.server.host = "undo-test"
-    let mockServer: ServerInteractiveInkSSRMock
-    let oiRecognizer: InteractiveInkRecognizer
+    let mockServer: ServerWebSocketMock
+    let oiRecognizer: RecognizerWebSocket
 
     beforeEach(() =>
     {
-      oiRecognizer = new InteractiveInkRecognizer(conf)
-      mockServer = new ServerInteractiveInkSSRMock(oiRecognizer.url)
+      oiRecognizer = new RecognizerWebSocket(conf)
+      mockServer = new ServerWebSocketMock(oiRecognizer.url)
       mockServer.init()
     })
     afterEach(async () =>
@@ -1037,13 +1043,13 @@ describe("InteractiveInkRecognizer.ts", () =>
   {
     const conf = structuredClone(configuration)
     conf.server.host = "redo-test"
-    let mockServer: ServerInteractiveInkSSRMock
-    let oiRecognizer: InteractiveInkRecognizer
+    let mockServer: ServerWebSocketMock
+    let oiRecognizer: RecognizerWebSocket
 
     beforeEach(() =>
     {
-      oiRecognizer = new InteractiveInkRecognizer(conf)
-      mockServer = new ServerInteractiveInkSSRMock(oiRecognizer.url)
+      oiRecognizer = new RecognizerWebSocket(conf)
+      mockServer = new ServerWebSocketMock(oiRecognizer.url)
       mockServer.init()
     })
     afterEach(async () =>
@@ -1095,13 +1101,13 @@ describe("InteractiveInkRecognizer.ts", () =>
   {
     const conf = structuredClone(configuration)
     conf.server.host = "clear-test"
-    let mockServer: ServerInteractiveInkSSRMock
-    let oiRecognizer: InteractiveInkRecognizer
+    let mockServer: ServerWebSocketMock
+    let oiRecognizer: RecognizerWebSocket
 
     beforeEach(() =>
     {
-      oiRecognizer = new InteractiveInkRecognizer(conf)
-      mockServer = new ServerInteractiveInkSSRMock(oiRecognizer.url)
+      oiRecognizer = new RecognizerWebSocket(conf)
+      mockServer = new ServerWebSocketMock(oiRecognizer.url)
       mockServer.init()
     })
     afterEach(async () =>
@@ -1150,13 +1156,13 @@ describe("InteractiveInkRecognizer.ts", () =>
   {
     const conf = structuredClone(configuration)
     conf.server.host = "export-test"
-    let mockServer: ServerInteractiveInkSSRMock
-    let oiRecognizer: InteractiveInkRecognizer
+    let mockServer: ServerWebSocketMock
+    let oiRecognizer: RecognizerWebSocket
 
     beforeEach(() =>
     {
-      oiRecognizer = new InteractiveInkRecognizer(conf)
-      mockServer = new ServerInteractiveInkSSRMock(oiRecognizer.url)
+      oiRecognizer = new RecognizerWebSocket(conf)
+      mockServer = new ServerWebSocketMock(oiRecognizer.url)
       mockServer.init()
     })
     afterEach(async () =>
@@ -1226,13 +1232,13 @@ describe("InteractiveInkRecognizer.ts", () =>
   {
     const conf = structuredClone(configuration)
     conf.server.host = "close-test"
-    let mockServer: ServerInteractiveInkSSRMock
-    let oiRecognizer: InteractiveInkRecognizer
+    let mockServer: ServerWebSocketMock
+    let oiRecognizer: RecognizerWebSocket
 
     beforeEach(() =>
     {
-      oiRecognizer = new InteractiveInkRecognizer(conf)
-      mockServer = new ServerInteractiveInkSSRMock(oiRecognizer.url)
+      oiRecognizer = new RecognizerWebSocket(conf)
+      mockServer = new ServerWebSocketMock(oiRecognizer.url)
       mockServer.init()
     })
     afterEach(async () =>
@@ -1274,12 +1280,12 @@ describe("InteractiveInkRecognizer.ts", () =>
   {
     const conf = structuredClone(configuration)
     conf.server.host = "destroy-test"
-    let mockServer: ServerInteractiveInkSSRMock
+    let mockServer: ServerWebSocketMock
 
     test("should close socket", async () =>
     {
-      const oiRecognizer = new InteractiveInkRecognizer(conf)
-      mockServer = new ServerInteractiveInkSSRMock(oiRecognizer.url)
+      const oiRecognizer = new RecognizerWebSocket(conf)
+      mockServer = new ServerWebSocketMock(oiRecognizer.url)
       mockServer.init()
       await oiRecognizer.init()
 

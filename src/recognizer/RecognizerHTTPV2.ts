@@ -3,7 +3,7 @@ import { TExport, TJIIXExport } from "../model"
 import { TStroke, TStrokeToSend } from "../symbol"
 import { computeHmac, isVersionSuperiorOrEqual, PartialDeep } from "../utils"
 import { RecognizerError } from "./RecognizerError"
-import { InkRecognizerConfiguration, TInkRecognizerConfiguration } from "./InkRecognizerConfiguration"
+import { RecognizerHTTPV2Configuration, TRecognizerHTTPV2Configuration } from "./RecognizerHTTPV2Configuration"
 import { TDiagramConfiguration, TExportConfiguration, TMathConfiguration, TRawContentConfiguration, TTextConfiguration } from "./recognition"
 
 type ApiError = {
@@ -14,7 +14,7 @@ type ApiError = {
 /**
  * @group Recognizer
  */
-export type TInkRecognizerPostConfiguration = {
+export type TRecognizerHTTPV2PostConfiguration = {
   lang: string,
   diagram?: TDiagramConfiguration,
   math?: TMathConfiguration,
@@ -26,10 +26,10 @@ export type TInkRecognizerPostConfiguration = {
 /**
  * @group Recognizer
  */
-export type TInkRecognizerPostData = {
+export type TRecognizerHTTPV2PostData = {
   scaleX: number,
   scaleY: number,
-  configuration: TInkRecognizerPostConfiguration,
+  configuration: TRecognizerHTTPV2PostConfiguration,
   contentType: string,
   strokes: TStrokeToSend[]
 }
@@ -37,21 +37,21 @@ export type TInkRecognizerPostData = {
 /**
  * @group Recognizer
  */
-export class InkRecognizer {
+export class RecognizerHTTPV2 {
   #logger = LoggerManager.getLogger(LoggerCategory.RECOGNIZER)
 
-  protected configuration: InkRecognizerConfiguration
+  protected configuration: RecognizerHTTPV2Configuration
 
-  constructor(config: PartialDeep<TInkRecognizerConfiguration>) {
+  constructor(config: PartialDeep<TRecognizerHTTPV2Configuration>) {
     this.#logger.info("constructor", { config })
-    this.configuration = new InkRecognizerConfiguration(config)
+    this.configuration = new RecognizerHTTPV2Configuration(config)
   }
 
   get url() {
     return `${this.configuration.server.scheme}://${this.configuration.server.host}/api/v4.0/iink/recognize`
   }
 
-  get postConfig(): TInkRecognizerPostConfiguration {
+  get postConfig(): TRecognizerHTTPV2PostConfiguration {
     switch (this.configuration.recognition.type) {
       case "SHAPE":
         return {
@@ -96,7 +96,7 @@ export class InkRecognizer {
     })
   }
 
-  protected buildData(strokes: TStroke[]): TInkRecognizerPostData {
+  protected buildData(strokes: TStroke[]): TRecognizerHTTPV2PostData {
     this.#logger.info("buildData", { strokes })
 
     const contentType: string = this.configuration.recognition.type === "Raw Content" ?
@@ -168,7 +168,7 @@ export class InkRecognizer {
     }
   }
 
-  protected async tryFetch(data: TInkRecognizerPostData, mimeType: string): Promise<TExport | never> {
+  protected async tryFetch(data: TRecognizerHTTPV2PostData, mimeType: string): Promise<TExport | never> {
     this.#logger.debug("tryFetch", { data, mimeType })
     return this.post(data, mimeType)
       .then((res) => {

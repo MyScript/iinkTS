@@ -11,7 +11,7 @@ import
   DecoratorKind,
   StrikeThroughAction,
   IIStroke,
-  TInteractiveInkMessageType
+  TRecognizerWebSocketMessageType
 } from "../../../src/iink"
 
 describe("IIGestureManager.ts", () =>
@@ -754,7 +754,7 @@ describe("IIGestureManager.ts", () =>
     test("should return undefined when recognizeGesture return nothing", async () =>
     {
       gestMan.recognizer.recognizeGesture = jest.fn((stroke: IIStroke) => Promise.resolve({
-        type: TInteractiveInkMessageType.ContextlessGesture,
+        type: TRecognizerWebSocketMessageType.ContextlessGesture,
         gestureType: "none",
         strokeId: stroke.id
       }))
@@ -768,7 +768,7 @@ describe("IIGestureManager.ts", () =>
       beforeAll(() =>
       {
         gestMan.recognizer.recognizeGesture = jest.fn((stroke: IIStroke) => Promise.resolve({
-          type: TInteractiveInkMessageType.ContextlessGesture,
+          type: TRecognizerWebSocketMessageType.ContextlessGesture,
           gestureType: "surround",
           strokeId: stroke.id
         }))
@@ -801,7 +801,7 @@ describe("IIGestureManager.ts", () =>
       beforeAll(() =>
       {
         gestMan.recognizer.recognizeGesture = jest.fn((stroke: IIStroke) => Promise.resolve({
-          type: TInteractiveInkMessageType.ContextlessGesture,
+          type: TRecognizerWebSocketMessageType.ContextlessGesture,
           gestureType: "left-right",
           strokeId: stroke.id
         }))
@@ -847,7 +847,7 @@ describe("IIGestureManager.ts", () =>
       beforeAll(() =>
       {
         gestMan.recognizer.recognizeGesture = jest.fn((stroke: IIStroke) => Promise.resolve({
-          type: TInteractiveInkMessageType.ContextlessGesture,
+          type: TRecognizerWebSocketMessageType.ContextlessGesture,
           gestureType: "scratch",
           strokeId: stroke.id
         }))
@@ -877,7 +877,7 @@ describe("IIGestureManager.ts", () =>
       beforeAll(() =>
       {
         gestMan.recognizer.recognizeGesture = jest.fn((stroke: IIStroke) => Promise.resolve({
-          type: TInteractiveInkMessageType.ContextlessGesture,
+          type: TRecognizerWebSocketMessageType.ContextlessGesture,
           gestureType: "bottom-top",
           strokeId: stroke.id
         }))
@@ -906,7 +906,7 @@ describe("IIGestureManager.ts", () =>
       beforeAll(() =>
       {
         gestMan.recognizer.recognizeGesture = jest.fn((stroke: IIStroke) => Promise.resolve({
-          type: TInteractiveInkMessageType.ContextlessGesture,
+          type: TRecognizerWebSocketMessageType.ContextlessGesture,
           gestureType: "top-bottom",
           strokeId: stroke.id
         }))

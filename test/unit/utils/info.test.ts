@@ -1,4 +1,4 @@
-import { InteractiveInkSSRRecognizerTextConfiguration } from "../__dataset__/configuration.dataset"
+import { RecognizerWebSocketSSRTextConfiguration } from "../__dataset__/configuration.dataset"
 import { getApiInfos } from "../../../src/iink"
 
 describe("language.ts", () =>
@@ -11,9 +11,9 @@ describe("language.ts", () =>
 
   test("should call fetch with good url", async () =>
   {
-    await getApiInfos(InteractiveInkSSRRecognizerTextConfiguration)
+    await getApiInfos(RecognizerWebSocketSSRTextConfiguration)
     expect(fetch).toBeCalledTimes(1)
-    expect(fetch).toBeCalledWith(`${ InteractiveInkSSRRecognizerTextConfiguration?.server?.scheme }://${ InteractiveInkSSRRecognizerTextConfiguration?.server?.host }/api/v4.0/iink/version`)
+    expect(fetch).toBeCalledWith(`${ RecognizerWebSocketSSRTextConfiguration?.server?.scheme }://${ RecognizerWebSocketSSRTextConfiguration?.server?.host }/api/v4.0/iink/version`)
   })
 
   test("should reject getApiInfos if no configuration", async () =>
@@ -28,7 +28,7 @@ describe("language.ts", () =>
 
   test("should reject getApiInfos if configuration.server is empty", async () =>
   {
-    const conf = JSON.parse(JSON.stringify(InteractiveInkSSRRecognizerTextConfiguration))
+    const conf = JSON.parse(JSON.stringify(RecognizerWebSocketSSRTextConfiguration))
     delete conf?.server
     getApiInfos(conf)
       .catch(e =>
@@ -39,7 +39,7 @@ describe("language.ts", () =>
 
   test("should reject getApiInfos if configuration.server.scheme is empty", async () =>
   {
-    const conf = JSON.parse(JSON.stringify(InteractiveInkSSRRecognizerTextConfiguration))
+    const conf = JSON.parse(JSON.stringify(RecognizerWebSocketSSRTextConfiguration))
     delete conf?.server?.scheme
     getApiInfos(conf)
       .catch(e =>
@@ -50,7 +50,7 @@ describe("language.ts", () =>
 
   test("should reject getApiInfos if configuration.server.host empty", async () =>
   {
-    const conf = JSON.parse(JSON.stringify(InteractiveInkSSRRecognizerTextConfiguration))
+    const conf = JSON.parse(JSON.stringify(RecognizerWebSocketSSRTextConfiguration))
     delete conf?.server?.host
     getApiInfos(conf)
       .catch(e =>

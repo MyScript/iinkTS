@@ -19,6 +19,7 @@ export type TEditorConfiguration = {
 
 /**
  * @group Editor
+ * @remarks "INKV1" is deprecated use "INKV2" instead.
  */
 export type EditorType = "INTERACTIVEINK" | "INKV1" | "INTERACTIVEINKSSR" | "INKV2"
 

@@ -4,7 +4,7 @@ import { DefaultLoggerConfiguration, TLoggerConfiguration } from "../logger"
 import { DefaultGrabberConfiguration, TGrabberConfiguration } from "../grabber"
 import { DefaultHistoryConfiguration, THistoryConfiguration } from "../history"
 import { DefaultMenuConfiguration, TMenuConfiguration } from "../menu"
-import { DefaultInteractiveInkRecognizerConfiguration, InteractiveInkRecognizerConfiguration, TInteractiveInkRecognitionConfiguration, TInteractiveInkRecognizerConfiguration, TServerWebsocketConfiguration } from "../recognizer"
+import { DefaultRecognizerWebSocketConfiguration, RecognizerWebSocketConfiguration, TRecognitionWebSocketConfiguration, TRecognizerWebSocketConfiguration, TServerWebsocketConfiguration } from "../recognizer"
 import { DefaultIIRendererConfiguration, TIIRendererConfiguration } from "../renderer"
 import { DefaultGestureConfiguration, TGestureConfiguration } from "../gesture"
 import { TEditorConfiguration } from "./AbstractEditor"
@@ -13,7 +13,7 @@ import { DefaultSnapConfiguration, SnapConfiguration, TSnapConfiguration } from 
 /**
  * @group Editor
  */
-export type TInteractiveInkEditorConfiguration = TEditorConfiguration & TInteractiveInkRecognizerConfiguration & {
+export type TInteractiveInkEditorConfiguration = TEditorConfiguration & TRecognizerWebSocketConfiguration & {
  "undo-redo": THistoryConfiguration
   rendering: TIIRendererConfiguration
   grabber: TGrabberConfiguration
@@ -32,8 +32,8 @@ export type TInteractiveInkEditorConfiguration = TEditorConfiguration & TInterac
  * @source
  */
 export const DefaultInteractiveInkEditorConfiguration: TInteractiveInkEditorConfiguration = {
-  server: DefaultInteractiveInkRecognizerConfiguration.server,
-  recognition: DefaultInteractiveInkRecognizerConfiguration.recognition,
+  server: DefaultRecognizerWebSocketConfiguration.server,
+  recognition: DefaultRecognizerWebSocketConfiguration.recognition,
   menu: DefaultMenuConfiguration,
   rendering: DefaultIIRendererConfiguration,
   logger: DefaultLoggerConfiguration,
@@ -57,7 +57,7 @@ export class InteractiveInkEditorConfiguration implements TInteractiveInkEditorC
   grabber: TGrabberConfiguration
   logger: TLoggerConfiguration
   server: TServerWebsocketConfiguration
-  recognition: TInteractiveInkRecognitionConfiguration
+  recognition: TRecognitionWebSocketConfiguration
   rendering: TIIRendererConfiguration
   "undo-redo": THistoryConfiguration
   menu: TMenuConfiguration
@@ -72,7 +72,7 @@ export class InteractiveInkEditorConfiguration implements TInteractiveInkEditorC
 
   constructor(configuration?: PartialDeep<TInteractiveInkEditorConfiguration>)
   {
-    const { server, recognition } =  new InteractiveInkRecognizerConfiguration(configuration)
+    const { server, recognition } =  new RecognizerWebSocketConfiguration(configuration)
     this.recognition = recognition
     this.server = server
 

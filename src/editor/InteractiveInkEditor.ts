@@ -26,7 +26,7 @@ import
   IIRecognizedPolyLine,
   IIRecognizedArc,
 } from "../symbol"
-import { InteractiveInkRecognizer } from "../recognizer"
+import { RecognizerWebSocket } from "../recognizer"
 import { IISVGRenderer, SVGBuilder, TIIRendererConfiguration } from "../renderer"
 import { TStyle } from "../style"
 import
@@ -60,7 +60,7 @@ export type TInteractiveInkEditorOptions = PartialDeep<EditorOptionsBase &
   }> &
   {
     override?: {
-      recognizer?: InteractiveInkRecognizer
+      recognizer?: RecognizerWebSocket
       menu?: {
         style?: IIMenuStyle
         tool?: IIMenuTool
@@ -80,7 +80,7 @@ export class InteractiveInkEditor extends AbstractEditor
   #recognizeStrokeTimer?: ReturnType<typeof setTimeout>
 
   renderer: IISVGRenderer
-  recognizer: InteractiveInkRecognizer
+  recognizer: RecognizerWebSocket
 
   #penStyle: TStyle
 
@@ -107,11 +107,11 @@ export class InteractiveInkEditor extends AbstractEditor
     this.#penStyle = Object.assign({}, this.#configuration.penStyle)
 
     if (options?.override?.recognizer) {
-      const CustomRecognizer = options?.override.recognizer as unknown as typeof InteractiveInkRecognizer
+      const CustomRecognizer = options?.override.recognizer as unknown as typeof RecognizerWebSocket
       this.recognizer = new CustomRecognizer(this.#configuration)
     }
     else {
-      this.recognizer = new InteractiveInkRecognizer(this.#configuration)
+      this.recognizer = new RecognizerWebSocket(this.#configuration)
     }
     this.recognizer.event.addErrorListener(this.manageError.bind(this))
     this.recognizer.event.addExportedListener(this.event.emitExported.bind(this.event))
