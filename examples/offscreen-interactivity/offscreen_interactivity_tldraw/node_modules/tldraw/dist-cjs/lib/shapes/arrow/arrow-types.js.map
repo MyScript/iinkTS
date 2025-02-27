@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/shapes/arrow/arrow-types.ts"],
+  "sourcesContent": ["import { TLArrowShapeArrowheadStyle, VecLike } from '@tldraw/editor'\nimport { TLArrowBindings } from './shared'\n\n/** @public */\nexport interface TLArrowPoint {\n\thandle: VecLike\n\tpoint: VecLike\n\tarrowhead: TLArrowShapeArrowheadStyle\n}\n\n/** @public */\nexport interface TLArcInfo {\n\tcenter: VecLike\n\tradius: number\n\tsize: number\n\tlength: number\n\tlargeArcFlag: number\n\tsweepFlag: number\n}\n\n/** @public */\nexport type TLArrowInfo =\n\t| {\n\t\t\tbindings: TLArrowBindings\n\t\t\tisStraight: false\n\t\t\tstart: TLArrowPoint\n\t\t\tend: TLArrowPoint\n\t\t\tmiddle: VecLike\n\t\t\thandleArc: TLArcInfo\n\t\t\tbodyArc: TLArcInfo\n\t\t\tisValid: boolean\n\t  }\n\t| {\n\t\t\tbindings: TLArrowBindings\n\t\t\tisStraight: true\n\t\t\tstart: TLArrowPoint\n\t\t\tend: TLArrowPoint\n\t\t\tmiddle: VecLike\n\t\t\tisValid: boolean\n\t\t\tlength: number\n\t  }\n"],
+  "mappings": ";;;;;;;;;;;;;;AAAA;AAAA;",
+  "names": []
+}

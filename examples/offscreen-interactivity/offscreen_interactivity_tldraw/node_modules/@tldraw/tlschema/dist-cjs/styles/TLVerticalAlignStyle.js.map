@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../src/styles/TLVerticalAlignStyle.ts"],
+  "sourcesContent": ["import { T } from '@tldraw/validate'\nimport { StyleProp } from './StyleProp'\n\n/** @public */\nexport const DefaultVerticalAlignStyle = StyleProp.defineEnum('tldraw:verticalAlign', {\n\tdefaultValue: 'middle',\n\tvalues: ['start', 'middle', 'end'],\n})\n\n/** @public */\nexport type TLDefaultVerticalAlignStyle = T.TypeOf<typeof DefaultVerticalAlignStyle>\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AACA,uBAA0B;AAGnB,MAAM,4BAA4B,2BAAU,WAAW,wBAAwB;AAAA,EACrF,cAAc;AAAA,EACd,QAAQ,CAAC,SAAS,UAAU,KAAK;AAClC,CAAC;",
+  "names": []
+}

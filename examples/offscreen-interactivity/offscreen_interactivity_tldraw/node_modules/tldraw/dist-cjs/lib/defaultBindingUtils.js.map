@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../src/lib/defaultBindingUtils.ts"],
+  "sourcesContent": ["import { ArrowBindingUtil } from './bindings/arrow/ArrowBindingUtil'\n\n/** @public */\nexport const defaultBindingUtils = [ArrowBindingUtil] as const\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,8BAAiC;AAG1B,MAAM,sBAAsB,CAAC,wCAAgB;",
+  "names": []
+}

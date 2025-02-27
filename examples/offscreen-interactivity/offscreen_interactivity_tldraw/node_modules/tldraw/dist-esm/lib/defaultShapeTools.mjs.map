@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../src/lib/defaultShapeTools.ts"],
+  "sourcesContent": ["import { ArrowShapeTool } from './shapes/arrow/ArrowShapeTool'\nimport { DrawShapeTool } from './shapes/draw/DrawShapeTool'\nimport { FrameShapeTool } from './shapes/frame/FrameShapeTool'\nimport { GeoShapeTool } from './shapes/geo/GeoShapeTool'\nimport { HighlightShapeTool } from './shapes/highlight/HighlightShapeTool'\nimport { LineShapeTool } from './shapes/line/LineShapeTool'\nimport { NoteShapeTool } from './shapes/note/NoteShapeTool'\nimport { TextShapeTool } from './shapes/text/TextShapeTool'\n\n/** @public */\nexport const defaultShapeTools = [\n\tTextShapeTool,\n\tDrawShapeTool,\n\tGeoShapeTool,\n\tNoteShapeTool,\n\tLineShapeTool,\n\tFrameShapeTool,\n\tArrowShapeTool,\n\tHighlightShapeTool,\n] as const\n"],
+  "mappings": "AAAA,SAAS,sBAAsB;AAC/B,SAAS,qBAAqB;AAC9B,SAAS,sBAAsB;AAC/B,SAAS,oBAAoB;AAC7B,SAAS,0BAA0B;AACnC,SAAS,qBAAqB;AAC9B,SAAS,qBAAqB;AAC9B,SAAS,qBAAqB;AAGvB,MAAM,oBAAoB;AAAA,EAChC;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AAAA,EACA;AACD;",
+  "names": []
+}

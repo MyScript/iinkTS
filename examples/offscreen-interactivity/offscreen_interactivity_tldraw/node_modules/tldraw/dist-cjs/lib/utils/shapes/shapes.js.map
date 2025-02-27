@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/utils/shapes/shapes.ts"],
+  "sourcesContent": ["import { Geometry2d, Group2d } from '@tldraw/editor'\n\n/**\n * Return all the text labels in a geometry.\n *\n * @param geometry - The geometry to get the text labels from.\n *\n * @public\n */\nexport function getTextLabels(geometry: Geometry2d) {\n\tif (geometry.isLabel) {\n\t\treturn [geometry]\n\t}\n\n\tif (geometry instanceof Group2d) {\n\t\treturn geometry.children.filter((child) => child.isLabel)\n\t}\n\n\treturn []\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,oBAAoC;AAS7B,SAAS,cAAc,UAAsB;AACnD,MAAI,SAAS,SAAS;AACrB,WAAO,CAAC,QAAQ;AAAA,EACjB;AAEA,MAAI,oBAAoB,uBAAS;AAChC,WAAO,SAAS,SAAS,OAAO,CAAC,UAAU,MAAM,OAAO;AAAA,EACzD;AAEA,SAAO,CAAC;AACT;",
+  "names": []
+}

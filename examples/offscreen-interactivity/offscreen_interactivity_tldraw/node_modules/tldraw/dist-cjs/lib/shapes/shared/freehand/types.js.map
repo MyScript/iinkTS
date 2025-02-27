@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../src/lib/shapes/shared/freehand/types.ts"],
+  "sourcesContent": ["import { Vec } from '@tldraw/editor'\n\n/**\n * The options object for `getStroke` or `getStrokePoints`.\n *\n * @public\n */\nexport interface StrokeOptions {\n\t/** The base size (diameter) of the stroke. */\n\tsize?: number\n\t/** The effect of pressure on the stroke's size. */\n\tthinning?: number\n\t/** How much to soften the stroke's edges. */\n\tsmoothing?: number\n\tstreamline?: number\n\t/** An easing function to apply to each point's pressure. */\n\teasing?(pressure: number): number\n\t/** Whether to simulate pressure based on velocity. */\n\tsimulatePressure?: boolean\n\t/** Cap, taper and easing for the start of the line. */\n\tstart?: {\n\t\tcap?: boolean\n\t\ttaper?: number | boolean\n\t\teasing?(distance: number): number\n\t}\n\t/** Cap, taper and easing for the end of the line. */\n\tend?: {\n\t\tcap?: boolean\n\t\ttaper?: number | boolean\n\t\teasing?(distance: number): number\n\t}\n\t/** Whether to handle the points as a completed stroke. */\n\tlast?: boolean\n}\n\n/**\n * The points returned by `getStrokePoints`, and the input for `getStrokeOutlinePoints`\n *\n * @public\n */\nexport interface StrokePoint {\n\tpoint: Vec\n\tinput: Vec\n\tvector: Vec\n\tpressure: number\n\tdistance: number\n\trunningLength: number\n\tradius: number\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;AAAA;AAAA;",
+  "names": []
+}

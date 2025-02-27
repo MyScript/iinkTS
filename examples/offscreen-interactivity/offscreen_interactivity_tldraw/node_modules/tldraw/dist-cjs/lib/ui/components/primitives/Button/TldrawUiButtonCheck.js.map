@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../../src/lib/ui/components/primitives/Button/TldrawUiButtonCheck.tsx"],
+  "sourcesContent": ["import { TldrawUiIcon } from '../TldrawUiIcon'\n\n/** @public */\nexport interface TLUiButtonCheckProps {\n\tchecked: boolean\n}\n\n/** @public @react */\nexport function TldrawUiButtonCheck({ checked }: TLUiButtonCheckProps) {\n\treturn <TldrawUiIcon icon={checked ? 'check' : 'none'} className=\"tlui-button__icon\" small />\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AASQ;AATR,0BAA6B;AAQtB,SAAS,oBAAoB,EAAE,QAAQ,GAAyB;AACtE,SAAO,4CAAC,oCAAa,MAAM,UAAU,UAAU,QAAQ,WAAU,qBAAoB,OAAK,MAAC;AAC5F;",
+  "names": []
+}

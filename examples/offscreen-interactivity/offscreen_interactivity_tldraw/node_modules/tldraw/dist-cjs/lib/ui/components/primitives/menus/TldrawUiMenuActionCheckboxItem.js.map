@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../../src/lib/ui/components/primitives/menus/TldrawUiMenuActionCheckboxItem.tsx"],
+  "sourcesContent": ["import { useActions } from '../../../context/actions'\nimport {\n\tTldrawUiMenuCheckboxItem,\n\ttype TLUiMenuCheckboxItemProps,\n} from './TldrawUiMenuCheckboxItem'\n\n/** @public */\nexport type TLUiMenuActionCheckboxItemProps = {\n\tactionId?: string\n} & Pick<TLUiMenuCheckboxItemProps, 'disabled' | 'checked' | 'toggle'>\n\n/** @public @react */\nexport function TldrawUiMenuActionCheckboxItem({\n\tactionId = '',\n\t...rest\n}: TLUiMenuActionCheckboxItemProps) {\n\tconst actions = useActions()\n\tconst action = actions[actionId]\n\tif (!action) return null\n\treturn <TldrawUiMenuCheckboxItem {...action} {...rest} />\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAmBQ;AAnBR,qBAA2B;AAC3B,sCAGO;AAQA,SAAS,+BAA+B;AAAA,EAC9C,WAAW;AAAA,EACX,GAAG;AACJ,GAAoC;AACnC,QAAM,cAAU,2BAAW;AAC3B,QAAM,SAAS,QAAQ,QAAQ;AAC/B,MAAI,CAAC,OAAQ,QAAO;AACpB,SAAO,4CAAC,4DAA0B,GAAG,QAAS,GAAG,MAAM;AACxD;",
+  "names": []
+}

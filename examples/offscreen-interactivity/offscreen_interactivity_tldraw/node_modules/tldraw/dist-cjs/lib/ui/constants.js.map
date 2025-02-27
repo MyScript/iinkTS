@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/ui/constants.ts"],
+  "sourcesContent": ["// Breakpoints for portrait, keep in sync with PORTRAIT_BREAKPOINT enum below!\nexport const PORTRAIT_BREAKPOINTS = [0, 389, 436, 476, 580, 640, 840, 1023]\n\n// Mapping for above array -- needs to be kept in sync!\n/** @public */\nexport enum PORTRAIT_BREAKPOINT {\n\tZERO = 0,\n\tMOBILE_XXS = 1,\n\tMOBILE_XS = 2,\n\tMOBILE_SM = 3,\n\tMOBILE = 4,\n\tTABLET_SM = 5,\n\tTABLET = 6,\n\tDESKTOP = 7,\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AACO,MAAM,uBAAuB,CAAC,GAAG,KAAK,KAAK,KAAK,KAAK,KAAK,KAAK,IAAI;AAInE,IAAK,sBAAL,kBAAKA,yBAAL;AACN,EAAAA,0CAAA,UAAO,KAAP;AACA,EAAAA,0CAAA,gBAAa,KAAb;AACA,EAAAA,0CAAA,eAAY,KAAZ;AACA,EAAAA,0CAAA,eAAY,KAAZ;AACA,EAAAA,0CAAA,YAAS,KAAT;AACA,EAAAA,0CAAA,eAAY,KAAZ;AACA,EAAAA,0CAAA,YAAS,KAAT;AACA,EAAAA,0CAAA,aAAU,KAAV;AARW,SAAAA;AAAA,GAAA;",
+  "names": ["PORTRAIT_BREAKPOINT"]
+}

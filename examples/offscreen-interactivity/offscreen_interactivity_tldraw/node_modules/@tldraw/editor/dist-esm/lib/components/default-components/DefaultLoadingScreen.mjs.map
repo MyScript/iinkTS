@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/components/default-components/DefaultLoadingScreen.tsx"],
+  "sourcesContent": ["import { LoadingScreen } from '../../TldrawEditor'\nimport { useEditorComponents } from '../../hooks/useEditorComponents'\n\n/** @public @react */\nexport const DefaultLoadingScreen = () => {\n\tconst { Spinner } = useEditorComponents()\n\treturn <LoadingScreen>{Spinner ? <Spinner /> : null}</LoadingScreen>\n}\n"],
+  "mappings": "AAMkC;AANlC,SAAS,qBAAqB;AAC9B,SAAS,2BAA2B;AAG7B,MAAM,uBAAuB,MAAM;AACzC,QAAM,EAAE,QAAQ,IAAI,oBAAoB;AACxC,SAAO,oBAAC,iBAAe,oBAAU,oBAAC,WAAQ,IAAK,MAAK;AACrD;",
+  "names": []
+}

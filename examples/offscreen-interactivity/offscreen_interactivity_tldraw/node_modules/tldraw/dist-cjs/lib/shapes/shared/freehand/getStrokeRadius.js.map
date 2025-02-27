@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../src/lib/shapes/shared/freehand/getStrokeRadius.ts"],
+  "sourcesContent": ["/**\n * Compute a radius based on the pressure.\n *\n * @internal\n */\nexport function getStrokeRadius(\n\tsize: number,\n\tthinning: number,\n\tpressure: number,\n\teasing: (t: number) => number = (t) => t\n) {\n\treturn size * easing(0.5 - thinning * (0.5 - pressure))\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAKO,SAAS,gBACf,MACA,UACA,UACA,SAAgC,CAAC,MAAM,GACtC;AACD,SAAO,OAAO,OAAO,MAAM,YAAY,MAAM,SAAS;AACvD;",
+  "names": []
+}

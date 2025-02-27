@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/shapes/shared/rotated-box-shadow.ts"],
+  "sourcesContent": ["import { Vec } from '@tldraw/editor'\n\nconst ROTATING_BOX_SHADOWS = [\n\t{\n\t\toffsetX: 0,\n\t\toffsetY: 2,\n\t\tblur: 4,\n\t\tspread: 0,\n\t\tcolor: '#00000029',\n\t},\n\t{\n\t\toffsetX: 0,\n\t\toffsetY: 3,\n\t\tblur: 6,\n\t\tspread: 0,\n\t\tcolor: '#0000001f',\n\t},\n]\n\n/** @public */\nexport function getRotatedBoxShadow(rotation: number) {\n\tconst cssStrings = ROTATING_BOX_SHADOWS.map((shadow) => {\n\t\tconst { offsetX, offsetY, blur, spread, color } = shadow\n\t\tconst vec = new Vec(offsetX, offsetY)\n\t\tconst { x, y } = vec.rot(-rotation)\n\t\treturn `${x}px ${y}px ${blur}px ${spread}px ${color}`\n\t})\n\treturn cssStrings.join(', ')\n}\n"],
+  "mappings": "AAAA,SAAS,WAAW;AAEpB,MAAM,uBAAuB;AAAA,EAC5B;AAAA,IACC,SAAS;AAAA,IACT,SAAS;AAAA,IACT,MAAM;AAAA,IACN,QAAQ;AAAA,IACR,OAAO;AAAA,EACR;AAAA,EACA;AAAA,IACC,SAAS;AAAA,IACT,SAAS;AAAA,IACT,MAAM;AAAA,IACN,QAAQ;AAAA,IACR,OAAO;AAAA,EACR;AACD;AAGO,SAAS,oBAAoB,UAAkB;AACrD,QAAM,aAAa,qBAAqB,IAAI,CAAC,WAAW;AACvD,UAAM,EAAE,SAAS,SAAS,MAAM,QAAQ,MAAM,IAAI;AAClD,UAAM,MAAM,IAAI,IAAI,SAAS,OAAO;AACpC,UAAM,EAAE,GAAG,EAAE,IAAI,IAAI,IAAI,CAAC,QAAQ;AAClC,WAAO,GAAG,CAAC,MAAM,CAAC,MAAM,IAAI,MAAM,MAAM,MAAM,KAAK;AAAA,EACpD,CAAC;AACD,SAAO,WAAW,KAAK,IAAI;AAC5B;",
+  "names": []
+}

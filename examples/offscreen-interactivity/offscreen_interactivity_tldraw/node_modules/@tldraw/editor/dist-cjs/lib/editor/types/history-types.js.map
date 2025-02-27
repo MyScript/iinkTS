@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/editor/types/history-types.ts"],
+  "sourcesContent": ["import { RecordsDiff, UnknownRecord } from '@tldraw/store'\n\n/** @public */\nexport interface TLHistoryMark {\n\ttype: 'stop'\n\tid: string\n}\n\n/** @public */\nexport interface TLHistoryDiff<R extends UnknownRecord> {\n\ttype: 'diff'\n\tdiff: RecordsDiff<R>\n}\n\n/** @public */\nexport type TLHistoryEntry<R extends UnknownRecord> = TLHistoryMark | TLHistoryDiff<R>\n\n/** @public */\nexport interface TLHistoryBatchOptions {\n\t/**\n\t * How should this change interact with the history stack?\n\t * - record: Add to the undo stack and clear the redo stack\n\t * - record-preserveRedoStack: Add to the undo stack but do not clear the redo stack\n\t * - ignore: Do not add to the undo stack or the redo stack\n\t */\n\thistory?: 'record' | 'record-preserveRedoStack' | 'ignore'\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;AAAA;AAAA;",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/components/default-components/DefaultShapeErrorFallback.tsx"],
+  "sourcesContent": ["import { ComponentType } from 'react'\n\n/** @public */\nexport type TLShapeErrorFallbackComponent = ComponentType<{ error: any }>\n\n/** @internal */\nexport const DefaultShapeErrorFallback: TLShapeErrorFallbackComponent = () => {\n\treturn <div className=\"tl-shape-error-boundary\" />\n}\n"],
+  "mappings": "AAOQ;AADD,MAAM,4BAA2D,MAAM;AAC7E,SAAO,oBAAC,SAAI,WAAU,2BAA0B;AACjD;",
+  "names": []
+}

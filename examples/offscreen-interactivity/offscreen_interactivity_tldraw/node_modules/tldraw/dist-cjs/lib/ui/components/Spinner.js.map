@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/ui/components/Spinner.tsx"],
+  "sourcesContent": ["import React from 'react'\n\n/** @internal */\nexport function Spinner(props: React.SVGProps<SVGSVGElement>) {\n\treturn (\n\t\t<svg width={16} height={16} viewBox=\"0 0 16 16\" {...props}>\n\t\t\t<g strokeWidth={2} fill=\"none\" fillRule=\"evenodd\">\n\t\t\t\t<circle strokeOpacity={0.25} cx={8} cy={8} r={7} stroke=\"currentColor\" />\n\t\t\t\t<path strokeLinecap=\"round\" d=\"M15 8c0-4.5-4.5-7-7-7\" stroke=\"currentColor\">\n\t\t\t\t\t<animateTransform\n\t\t\t\t\t\tattributeName=\"transform\"\n\t\t\t\t\t\ttype=\"rotate\"\n\t\t\t\t\t\tfrom=\"0 8 8\"\n\t\t\t\t\t\tto=\"360 8 8\"\n\t\t\t\t\t\tdur=\"1s\"\n\t\t\t\t\t\trepeatCount=\"indefinite\"\n\t\t\t\t\t/>\n\t\t\t\t</path>\n\t\t\t</g>\n\t\t</svg>\n\t)\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAMG;AAHI,SAAS,QAAQ,OAAsC;AAC7D,SACC,4CAAC,SAAI,OAAO,IAAI,QAAQ,IAAI,SAAQ,aAAa,GAAG,OACnD,uDAAC,OAAE,aAAa,GAAG,MAAK,QAAO,UAAS,WACvC;AAAA,gDAAC,YAAO,eAAe,MAAM,IAAI,GAAG,IAAI,GAAG,GAAG,GAAG,QAAO,gBAAe;AAAA,IACvE,4CAAC,UAAK,eAAc,SAAQ,GAAE,yBAAwB,QAAO,gBAC5D;AAAA,MAAC;AAAA;AAAA,QACA,eAAc;AAAA,QACd,MAAK;AAAA,QACL,MAAK;AAAA,QACL,IAAG;AAAA,QACH,KAAI;AAAA,QACJ,aAAY;AAAA;AAAA,IACb,GACD;AAAA,KACD,GACD;AAEF;",
+  "names": []
+}

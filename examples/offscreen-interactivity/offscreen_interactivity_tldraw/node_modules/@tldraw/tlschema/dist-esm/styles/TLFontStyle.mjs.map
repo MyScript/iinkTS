@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../src/styles/TLFontStyle.ts"],
+  "sourcesContent": ["import { T } from '@tldraw/validate'\nimport { StyleProp } from './StyleProp'\n\n/** @public */\nexport const DefaultFontStyle = StyleProp.defineEnum('tldraw:font', {\n\tdefaultValue: 'draw',\n\tvalues: ['draw', 'sans', 'serif', 'mono'],\n})\n\n/** @public */\nexport type TLDefaultFontStyle = T.TypeOf<typeof DefaultFontStyle>\n\n/** @public */\nexport const DefaultFontFamilies = {\n\tdraw: \"'tldraw_draw', sans-serif\",\n\tsans: \"'tldraw_sans', sans-serif\",\n\tserif: \"'tldraw_serif', serif\",\n\tmono: \"'tldraw_mono', monospace\",\n}\n"],
+  "mappings": "AACA,SAAS,iBAAiB;AAGnB,MAAM,mBAAmB,UAAU,WAAW,eAAe;AAAA,EACnE,cAAc;AAAA,EACd,QAAQ,CAAC,QAAQ,QAAQ,SAAS,MAAM;AACzC,CAAC;AAMM,MAAM,sBAAsB;AAAA,EAClC,MAAM;AAAA,EACN,MAAM;AAAA,EACN,OAAO;AAAA,EACP,MAAM;AACP;",
+  "names": []
+}

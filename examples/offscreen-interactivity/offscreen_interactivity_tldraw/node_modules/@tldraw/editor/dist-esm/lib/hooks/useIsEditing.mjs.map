@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/hooks/useIsEditing.ts"],
+  "sourcesContent": ["import { useValue } from '@tldraw/state-react'\nimport { TLShapeId } from '@tldraw/tlschema'\nimport { useEditor } from './useEditor'\n\n/** @public */\nexport function useIsEditing(shapeId: TLShapeId) {\n\tconst editor = useEditor()\n\treturn useValue('isEditing', () => editor.getEditingShapeId() === shapeId, [editor, shapeId])\n}\n"],
+  "mappings": "AAAA,SAAS,gBAAgB;AAEzB,SAAS,iBAAiB;AAGnB,SAAS,aAAa,SAAoB;AAChD,QAAM,SAAS,UAAU;AACzB,SAAO,SAAS,aAAa,MAAM,OAAO,kBAAkB,MAAM,SAAS,CAAC,QAAQ,OAAO,CAAC;AAC7F;",
+  "names": []
+}

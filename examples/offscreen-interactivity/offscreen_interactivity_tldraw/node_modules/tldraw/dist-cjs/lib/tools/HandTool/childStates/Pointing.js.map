@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../src/lib/tools/HandTool/childStates/Pointing.ts"],
+  "sourcesContent": ["import { StateNode } from '@tldraw/editor'\n\nexport class Pointing extends StateNode {\n\tstatic override id = 'pointing'\n\n\toverride onEnter() {\n\t\tthis.editor.stopCameraAnimation()\n\t\tthis.editor.setCursor({ type: 'grabbing', rotation: 0 })\n\t}\n\n\toverride onLongPress() {\n\t\tthis.startDragging()\n\t}\n\n\toverride onPointerMove() {\n\t\tif (this.editor.inputs.isDragging) {\n\t\t\tthis.startDragging()\n\t\t}\n\t}\n\n\tprivate startDragging() {\n\t\tthis.parent.transition('dragging')\n\t}\n\n\toverride onPointerUp() {\n\t\tthis.complete()\n\t}\n\n\toverride onCancel() {\n\t\tthis.complete()\n\t}\n\n\toverride onComplete() {\n\t\tthis.complete()\n\t}\n\n\toverride onInterrupt() {\n\t\tthis.complete()\n\t}\n\n\tprivate complete() {\n\t\tthis.parent.transition('idle')\n\t}\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,oBAA0B;AAEnB,MAAM,iBAAiB,wBAAU;AAAA,EACvC,OAAgB,KAAK;AAAA,EAEZ,UAAU;AAClB,SAAK,OAAO,oBAAoB;AAChC,SAAK,OAAO,UAAU,EAAE,MAAM,YAAY,UAAU,EAAE,CAAC;AAAA,EACxD;AAAA,EAES,cAAc;AACtB,SAAK,cAAc;AAAA,EACpB;AAAA,EAES,gBAAgB;AACxB,QAAI,KAAK,OAAO,OAAO,YAAY;AAClC,WAAK,cAAc;AAAA,IACpB;AAAA,EACD;AAAA,EAEQ,gBAAgB;AACvB,SAAK,OAAO,WAAW,UAAU;AAAA,EAClC;AAAA,EAES,cAAc;AACtB,SAAK,SAAS;AAAA,EACf;AAAA,EAES,WAAW;AACnB,SAAK,SAAS;AAAA,EACf;AAAA,EAES,aAAa;AACrB,SAAK,SAAS;AAAA,EACf;AAAA,EAES,cAAc;AACtB,SAAK,SAAS;AAAA,EACf;AAAA,EAEQ,WAAW;AAClB,SAAK,OAAO,WAAW,MAAM;AAAA,EAC9B;AACD;",
+  "names": []
+}

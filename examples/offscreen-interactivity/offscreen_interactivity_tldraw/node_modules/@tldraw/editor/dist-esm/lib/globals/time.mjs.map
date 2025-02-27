@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/globals/time.ts"],
+  "sourcesContent": ["import { Timers } from '@tldraw/utils'\n\n/**\n * A global timer manager.\n *\n * @public\n */\nexport const tltime = new Timers()\n"],
+  "mappings": "AAAA,SAAS,cAAc;AAOhB,MAAM,SAAS,IAAI,OAAO;",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/ui/kbd-utils.ts"],
+  "sourcesContent": ["import { tlenv } from '@tldraw/editor'\n\nconst cmdKey = tlenv.isDarwin ? '\u2318' : 'Ctrl'\nconst altKey = tlenv.isDarwin ? '\u2325' : 'Alt'\n\n/** @public */\nexport function kbd(str: string) {\n\tif (str === ',') return [',']\n\n\treturn str\n\t\t.split(',')[0]\n\t\t.split('')\n\t\t.map((sub) => {\n\t\t\tconst subStr = sub.replace(/\\$/g, cmdKey).replace(/\\?/g, altKey).replace(/!/g, '\u21E7')\n\t\t\treturn subStr[0].toUpperCase() + subStr.slice(1)\n\t\t})\n}\n\n/** @public */\nexport function kbdStr(str: string) {\n\treturn '\u2014 ' + kbd(str).join('\u2009')\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,oBAAsB;AAEtB,MAAM,SAAS,oBAAM,WAAW,WAAM;AACtC,MAAM,SAAS,oBAAM,WAAW,WAAM;AAG/B,SAAS,IAAI,KAAa;AAChC,MAAI,QAAQ,IAAK,QAAO,CAAC,GAAG;AAE5B,SAAO,IACL,MAAM,GAAG,EAAE,CAAC,EACZ,MAAM,EAAE,EACR,IAAI,CAAC,QAAQ;AACb,UAAM,SAAS,IAAI,QAAQ,OAAO,MAAM,EAAE,QAAQ,OAAO,MAAM,EAAE,QAAQ,MAAM,QAAG;AAClF,WAAO,OAAO,CAAC,EAAE,YAAY,IAAI,OAAO,MAAM,CAAC;AAAA,EAChD,CAAC;AACH;AAGO,SAAS,OAAO,KAAa;AACnC,SAAO,YAAO,IAAI,GAAG,EAAE,KAAK,QAAG;AAChC;",
+  "names": []
+}

@@ -1,0 +1,201 @@
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var DefaultMinimap_exports = {};
+__export(DefaultMinimap_exports, {
+  DefaultMinimap: () => DefaultMinimap
+});
+module.exports = __toCommonJS(DefaultMinimap_exports);
+var import_jsx_runtime = require("react/jsx-runtime");
+var import_editor = require("@tldraw/editor");
+var React = __toESM(require("react"));
+var import_MinimapManager = require("./MinimapManager");
+function DefaultMinimap() {
+  const editor = (0, import_editor.useEditor)();
+  const container = (0, import_editor.useContainer)();
+  const rCanvas = React.useRef(null);
+  const rPointing = React.useRef(false);
+  const minimapRef = React.useRef();
+  React.useEffect(() => {
+    try {
+      const minimap = new import_MinimapManager.MinimapManager(editor, rCanvas.current, container);
+      minimapRef.current = minimap;
+      return minimapRef.current.close;
+    } catch (e) {
+      editor.annotateError(e, {
+        origin: "minimap",
+        willCrashApp: false
+      });
+      editor.timers.setTimeout(() => {
+        throw e;
+      });
+    }
+  }, [editor, container]);
+  const onDoubleClick = React.useCallback(
+    (e) => {
+      if (!editor.getCurrentPageShapeIds().size) return;
+      if (!minimapRef.current) return;
+      const point = minimapRef.current.minimapScreenPointToPagePoint(
+        e.clientX,
+        e.clientY,
+        false,
+        false
+      );
+      const clampedPoint = minimapRef.current.minimapScreenPointToPagePoint(
+        e.clientX,
+        e.clientY,
+        false,
+        true
+      );
+      minimapRef.current.originPagePoint.setTo(clampedPoint);
+      minimapRef.current.originPageCenter.setTo(editor.getViewportPageBounds().center);
+      editor.centerOnPoint(point, { animation: { duration: editor.options.animationMediumMs } });
+    },
+    [editor]
+  );
+  const onPointerDown = React.useCallback(
+    (e) => {
+      if (!minimapRef.current) return;
+      const elm = e.currentTarget;
+      (0, import_editor.setPointerCapture)(elm, e);
+      if (!editor.getCurrentPageShapeIds().size) return;
+      rPointing.current = true;
+      minimapRef.current.isInViewport = false;
+      const point = minimapRef.current.minimapScreenPointToPagePoint(
+        e.clientX,
+        e.clientY,
+        false,
+        false
+      );
+      const _vpPageBounds = editor.getViewportPageBounds();
+      const commonBounds = minimapRef.current.getContentPageBounds();
+      const allowedBounds = new import_editor.Box(
+        commonBounds.x - _vpPageBounds.width / 2,
+        commonBounds.y - _vpPageBounds.height / 2,
+        commonBounds.width + _vpPageBounds.width,
+        commonBounds.height + _vpPageBounds.height
+      );
+      if (allowedBounds.containsPoint(point) && !_vpPageBounds.containsPoint(point)) {
+        minimapRef.current.isInViewport = _vpPageBounds.containsPoint(point);
+        const delta = import_editor.Vec.Sub(_vpPageBounds.center, _vpPageBounds.point);
+        const pagePoint = import_editor.Vec.Add(point, delta);
+        minimapRef.current.originPagePoint.setTo(pagePoint);
+        minimapRef.current.originPageCenter.setTo(point);
+        editor.centerOnPoint(point, { animation: { duration: editor.options.animationMediumMs } });
+      } else {
+        const clampedPoint = minimapRef.current.minimapScreenPointToPagePoint(
+          e.clientX,
+          e.clientY,
+          false,
+          true
+        );
+        minimapRef.current.isInViewport = _vpPageBounds.containsPoint(clampedPoint);
+        minimapRef.current.originPagePoint.setTo(clampedPoint);
+        minimapRef.current.originPageCenter.setTo(_vpPageBounds.center);
+      }
+      function release(e2) {
+        if (elm) {
+          (0, import_editor.releasePointerCapture)(elm, e2);
+        }
+        rPointing.current = false;
+        document.body.removeEventListener("pointerup", release);
+      }
+      document.body.addEventListener("pointerup", release);
+    },
+    [editor]
+  );
+  const onPointerMove = React.useCallback(
+    (e) => {
+      if (!minimapRef.current) return;
+      const point = minimapRef.current.minimapScreenPointToPagePoint(
+        e.clientX,
+        e.clientY,
+        e.shiftKey,
+        true
+      );
+      if (rPointing.current) {
+        if (minimapRef.current.isInViewport) {
+          const delta = minimapRef.current.originPagePoint.clone().sub(minimapRef.current.originPageCenter);
+          editor.centerOnPoint(import_editor.Vec.Sub(point, delta));
+          return;
+        }
+        editor.centerOnPoint(point);
+      }
+      const pagePoint = minimapRef.current.getMinimapPagePoint(e.clientX, e.clientY);
+      const screenPoint = editor.pageToScreen(pagePoint);
+      const info = {
+        type: "pointer",
+        target: "canvas",
+        name: "pointer_move",
+        ...(0, import_editor.getPointerInfo)(e),
+        point: screenPoint,
+        isPen: editor.getInstanceState().isPenMode
+      };
+      editor.dispatch(info);
+    },
+    [editor]
+  );
+  const onWheel = React.useCallback(
+    (e) => {
+      const offset = (0, import_editor.normalizeWheel)(e);
+      editor.dispatch({
+        type: "wheel",
+        name: "wheel",
+        delta: offset,
+        point: new import_editor.Vec(e.clientX, e.clientY),
+        shiftKey: e.shiftKey,
+        altKey: e.altKey,
+        ctrlKey: e.metaKey || e.ctrlKey,
+        metaKey: e.metaKey,
+        accelKey: (0, import_editor.isAccelKey)(e)
+      });
+    },
+    [editor]
+  );
+  const isDarkMode = (0, import_editor.useIsDarkMode)();
+  React.useEffect(() => {
+    editor.timers.setTimeout(() => {
+      minimapRef.current?.updateColors();
+      minimapRef.current?.render();
+    });
+  }, [isDarkMode, editor]);
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", { className: "tlui-minimap", children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+    "canvas",
+    {
+      role: "img",
+      "aria-label": "minimap",
+      ref: rCanvas,
+      className: "tlui-minimap__canvas",
+      onDoubleClick,
+      onPointerMove,
+      onPointerDown,
+      onWheelCapture: onWheel
+    }
+  ) });
+}
+//# sourceMappingURL=DefaultMinimap.js.map

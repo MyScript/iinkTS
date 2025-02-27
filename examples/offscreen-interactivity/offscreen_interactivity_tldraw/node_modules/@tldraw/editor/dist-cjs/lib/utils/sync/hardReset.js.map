@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/utils/sync/hardReset.ts"],
+  "sourcesContent": ["import { clearLocalStorage, clearSessionStorage } from '@tldraw/utils'\nimport { deleteDB } from 'idb'\nimport { LocalIndexedDb, getAllIndexDbNames } from './LocalIndexedDb'\n\n/**\n * Clear the database of all data associated with tldraw.\n *\n * @public */\nexport async function hardReset({ shouldReload = true } = {}) {\n\tclearSessionStorage()\n\n\tfor (const instance of LocalIndexedDb.connectedInstances) {\n\t\tawait instance.close()\n\t}\n\tawait Promise.all(getAllIndexDbNames().map((db) => deleteDB(db)))\n\n\tclearLocalStorage()\n\tif (shouldReload) {\n\t\twindow.location.reload()\n\t}\n}\n\nif (typeof window !== 'undefined') {\n\tif (process.env.NODE_ENV === 'development') {\n\t\t;(window as any).hardReset = hardReset\n\t}\n\t// window.__tldraw__hardReset is used to inject the logic into the tldraw library\n\t;(window as any).__tldraw__hardReset = hardReset\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,mBAAuD;AACvD,iBAAyB;AACzB,4BAAmD;AAMnD,eAAsB,UAAU,EAAE,eAAe,KAAK,IAAI,CAAC,GAAG;AAC7D,wCAAoB;AAEpB,aAAW,YAAY,qCAAe,oBAAoB;AACzD,UAAM,SAAS,MAAM;AAAA,EACtB;AACA,QAAM,QAAQ,QAAI,0CAAmB,EAAE,IAAI,CAAC,WAAO,qBAAS,EAAE,CAAC,CAAC;AAEhE,sCAAkB;AAClB,MAAI,cAAc;AACjB,WAAO,SAAS,OAAO;AAAA,EACxB;AACD;AAEA,IAAI,OAAO,WAAW,aAAa;AAClC,MAAI,QAAQ,IAAI,aAAa,eAAe;AAC3C;AAAC,IAAC,OAAe,YAAY;AAAA,EAC9B;AAEA;AAAC,EAAC,OAAe,sBAAsB;AACxC;",
+  "names": []
+}
