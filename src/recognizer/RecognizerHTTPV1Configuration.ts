@@ -99,9 +99,12 @@ export class RecognizerHTTPV1Configuration implements TRecognizerHTTPV1Configura
     if (configuration?.recognition?.["raw-content"]?.recognition?.types) {
       this.recognition["raw-content"].recognition!.types = configuration?.recognition?.["raw-content"]?.recognition?.types as ("text" | "shape")[]
     }
+    this.recognition["raw-content"].recognition.types = [...new Set(this.recognition["raw-content"].recognition.types.filter((type) => type !== "decoration"))]
+
     if (configuration?.recognition?.["raw-content"]?.classification?.types) {
       this.recognition["raw-content"].classification!.types = configuration?.recognition?.["raw-content"]?.classification?.types as ("text" | "shape")[]
     }
+
     if (this.server.version) {
       if (!isVersionSuperiorOrEqual(this.server.version, "2.3.0")) {
         delete this.recognition.convert

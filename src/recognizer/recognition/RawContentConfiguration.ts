@@ -8,10 +8,10 @@ import { TTextConfConfiguration } from "./TextConfiguration"
 export type TRawContentConfiguration = {
   text?: TTextConfConfiguration
   "session-time"?: number
-  recognition?: {
+  recognition: {
     types: ("text" | "shape" | "math" | "decoration")[]
   }
-  classification?: {
+  classification: {
     types: ("text" | "shape" | "math" | "decoration" | "drawing")[]
   }
   eraser?: TEraserConfiguration

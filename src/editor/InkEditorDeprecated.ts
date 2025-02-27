@@ -117,21 +117,27 @@ export class InkEditorDeprecated extends AbstractEditor
 
   protected async onPointerUp(info: PointerInfo): Promise<void>
   {
-    this.logger.info("onPointerUp", { tool: this.tool, info })
-    switch (this.tool) {
-      case EditorTool.Erase:
-        this.model.removeStrokesFromPoint(info.pointer)
-        if (this.history.stack.at(-1)?.modificationDate !== this.model.modificationDate) {
+    try {
+      this.logger.info("onPointerUp", { tool: this.tool, info })
+      switch (this.tool) {
+        case EditorTool.Erase:
+          this.model.removeStrokesFromPoint(info.pointer)
+          if (this.history.stack.at(-1)?.modificationDate !== this.model.modificationDate) {
+            await this.updateModelRendering()
+          }
+          break
+        case EditorTool.Write:
+          this.model.endCurrentStroke(info.pointer)
           await this.updateModelRendering()
-        }
-        break
-      case EditorTool.Write:
-        this.model.endCurrentStroke(info.pointer)
-        await this.updateModelRendering()
-        break
-      default:
-        this.logger.warn("#onPointerUp", `onPointerUp tool unknow: "${ this.tool }"`)
-        break
+          break
+        default:
+          this.logger.warn("#onPointerUp", `onPointerUp tool unknow: "${ this.tool }"`)
+          break
+      }
+    } catch (error) {
+      this.layers.showMessageError(error as Error)
+      this.event.emitError(error as Error)
+      throw error
     }
   }
 
