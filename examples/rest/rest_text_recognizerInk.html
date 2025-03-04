@@ -79,8 +79,14 @@
           recognition: {
             type: "TEXT",
             lang: "en_US",
+            export: {
+              jiix: {
+                ranges: true,
+                "bounding-box": true,
+              },
+            },
             text: {
-              mimeTypes: ["text/plain"],
+              mimeTypes: ["application/vnd.myscript.jiix"],
             },
           },
         },

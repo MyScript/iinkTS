@@ -1,5 +1,4 @@
 import { LoggerCategory, LoggerManager } from "../logger"
-import { IIModel } from "../model"
 import
 {
   TIISymbol,
@@ -20,6 +19,7 @@ export abstract class AbstractWriteManager
   #logger = LoggerManager.getLogger(LoggerCategory.WRITE)
   grabber: PointerEventGrabber
   editor: InteractiveInkEditor | InkEditor
+  currentSymbol?: TIISymbol
 
   detectGesture: boolean = true
 
@@ -28,11 +28,6 @@ export abstract class AbstractWriteManager
     this.#logger.info("constructor")
     this.editor = editor
     this.grabber = new PointerEventGrabber(editor.configuration.grabber)
-  }
-
-  get model(): IIModel
-  {
-    return this.editor.model
   }
 
   get renderer(): SVGRenderer
@@ -60,16 +55,16 @@ export abstract class AbstractWriteManager
   {
     this.#logger.info("startWriting", { info })
     const localPointer = info.pointer
-    this.createCurrentSymbol(localPointer, this.editor.penStyle, info.pointerType)
-    this.renderer.drawSymbol(this.model.currentSymbol!)
+    this.currentSymbol = this.createCurrentSymbol(localPointer, this.editor.penStyle, info.pointerType)
+    this.renderer.drawSymbol(this.currentSymbol!)
   }
 
   continue(info: PointerInfo): void
   {
     this.#logger.info("continueWriting", { info })
     const localPointer = info.pointer
-    this.updateCurrentSymbol(localPointer)
-    this.renderer.drawSymbol(this.model.currentSymbol!)
+    this.currentSymbol = this.updateCurrentSymbol(localPointer)
+    this.renderer.drawSymbol(this.currentSymbol!)
   }
 
   abstract end(info: PointerInfo): Promise<void>

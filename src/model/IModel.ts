@@ -5,19 +5,19 @@ import
   SymbolType,
   TIISymbol,
 } from "../symbol"
-import { TExport } from "./Export"
+import { TExportV2 } from "./ExportV2"
 
 /**
  * @group Model
  */
-export class IIModel
+export class IModel
 {
   #logger = LoggerManager.getLogger(LoggerCategory.MODEL)
   readonly creationTime: number
   modificationDate: number
   symbols: TIISymbol[]
-  exports?: TExport
-  converts?: TExport
+  exports?: TExportV2
+  converts?: TExportV2
   width: number
   height: number
   rowHeight: number
@@ -241,7 +241,7 @@ export class IIModel
     this.#logger.debug("removeSymbol", this.symbols)
   }
 
-  extractDifferenceSymbols(model: IIModel): { added: TIISymbol[], removed: TIISymbol[] }
+  extractDifferenceSymbols(model: IModel): { added: TIISymbol[], removed: TIISymbol[] }
   {
     return {
       added: this.symbols.filter(s1 => model.symbols.findIndex(s2 => s1.id === s2.id && s1.modificationDate === s2.modificationDate) === -1),
@@ -249,7 +249,7 @@ export class IIModel
     }
   }
 
-  mergeExport(exports: TExport)
+  mergeExport(exports: TExportV2)
   {
     this.#logger.info("mergeExport", { exports })
     if (this.exports) {
@@ -260,10 +260,10 @@ export class IIModel
     this.#logger.debug("mergeExport", this.exports)
   }
 
-  clone(): IIModel
+  clone(): IModel
   {
     this.#logger.info("clone")
-    const clonedModel = new IIModel(this.width, this.height, this.rowHeight, this.creationTime)
+    const clonedModel = new IModel(this.width, this.height, this.rowHeight, this.creationTime)
     clonedModel.modificationDate = this.modificationDate
     clonedModel.symbols = this.symbols.map(s =>
     {

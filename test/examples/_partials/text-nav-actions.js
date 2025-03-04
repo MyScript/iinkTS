@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test"
-import { writeStrokes, writePointers, waitForExportedEvent, callEditorIdle, getEditorConfiguration } from "../helper"
+import { writeStrokes, writePointers, waitForChangedEvent, callEditorIdle, getEditorConfiguration } from "../helper"
 import h from "../__dataset__/h"
 import hello from "../__dataset__/helloMultipleStrokes"
 
@@ -12,14 +12,14 @@ export default {
 
       !skipClear && test("should clear", async ({ page }) => {
         const [exportBeforeClear] = await Promise.all([
-          waitForExportedEvent(page),
+          waitForChangedEvent(page),
           writeStrokes(page, h.strokes)
         ])
         expect(exportBeforeClear["application/vnd.myscript.jiix"].label).toStrictEqual(h.exports["text/plain"])
         await expect(page.locator(resultLocator)).toHaveText(h.exports["text/plain"])
 
         const [exportAfterClear] = await Promise.all([
-          waitForExportedEvent(page),
+          waitForChangedEvent(page),
           page.click("#clear")
         ])
         await expect(page.locator(resultLocator)).toBeEmpty()
@@ -37,17 +37,18 @@ export default {
           let exports
           for(const s of hello.strokes) {
             [exports] = await Promise.all([
-              waitForExportedEvent(page),
+              waitForChangedEvent(page),
               writePointers(page, s.pointers),
             ])
           }
           await expect(page.locator(resultLocator)).toHaveText(hello.exports["text/plain"].at(-1))
-          expect(exports['application/vnd.myscript.jiix'].label).toStrictEqual(hello.exports['text/plain'].at(-1))
+          console.log('exports["application/vnd.myscript.jiix"]: ', exports['application/vnd.myscript.jiix']);
+          expect(exports['application/vnd.myscript.jiix']).toStrictEqual(hello.exports['text/plain'].at(-1))
         })
 
         await test.step("should undo last stroke written", async () => {
           const [undoExports] = await Promise.all([
-            waitForExportedEvent(page),
+            waitForChangedEvent(page),
             page.click('#undo')
           ])
           expect(undoExports['application/vnd.myscript.jiix'].label).toStrictEqual(hello.exports['text/plain'].at(-2))
@@ -56,7 +57,7 @@ export default {
 
         await test.step("should undo penultimate stroke written", async () => {
           const [undo2Exports] = await Promise.all([
-            waitForExportedEvent(page),
+            waitForChangedEvent(page),
             page.click('#undo')
           ])
           expect(undo2Exports['application/vnd.myscript.jiix'].label).toStrictEqual(hello.exports['text/plain'].at(-3))
@@ -65,7 +66,7 @@ export default {
 
         await test.step("should redo penultimate stroke written", async () => {
           const [redoExports] = await Promise.all([
-            waitForExportedEvent(page),
+            waitForChangedEvent(page),
             page.click('#redo')
           ])
           expect(redoExports['application/vnd.myscript.jiix'].label).toStrictEqual(hello.exports['text/plain'].at(-2))

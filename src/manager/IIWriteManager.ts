@@ -128,25 +128,25 @@ export class IIWriteManager extends AbstractWriteManager
   {
     switch (this.tool) {
       case EditorWriteTool.Pencil:
-        this.model.currentSymbol = new IIStroke(style, pointerType)
+        this.currentSymbol = new IIStroke(style, pointerType)
         break
       case EditorWriteTool.Rectangle:
-        this.model.currentSymbol = IIShapePolygon.createRectangleBetweenPoints(pointer, pointer, style)
+        this.currentSymbol = IIShapePolygon.createRectangleBetweenPoints(pointer, pointer, style)
         break
       case EditorWriteTool.Triangle:
-        this.model.currentSymbol = IIShapePolygon.createTriangleBetweenPoints(pointer, pointer, style)
+        this.currentSymbol = IIShapePolygon.createTriangleBetweenPoints(pointer, pointer, style)
         break
       case EditorWriteTool.Parallelogram:
-        this.model.currentSymbol = IIShapePolygon.createParallelogramBetweenPoints(pointer, pointer, style)
+        this.currentSymbol = IIShapePolygon.createParallelogramBetweenPoints(pointer, pointer, style)
         break
       case EditorWriteTool.Rhombus:
-        this.model.currentSymbol = IIShapePolygon.createRhombusBetweenPoints(pointer, pointer, style)
+        this.currentSymbol = IIShapePolygon.createRhombusBetweenPoints(pointer, pointer, style)
         break
       case EditorWriteTool.Circle:
-        this.model.currentSymbol = IIShapeCircle.createBetweenPoints(pointer, pointer, style)
+        this.currentSymbol = IIShapeCircle.createBetweenPoints(pointer, pointer, style)
         break
       case EditorWriteTool.Ellipse:
-        this.model.currentSymbol = IIShapeEllipse.createBetweenPoints(pointer, pointer, style)
+        this.currentSymbol = IIShapeEllipse.createBetweenPoints(pointer, pointer, style)
         break
       case EditorWriteTool.Line:
       case EditorWriteTool.Arrow:
@@ -159,7 +159,7 @@ export class IIWriteManager extends AbstractWriteManager
           startDecoration = EdgeDecoration.Arrow
           endDecoration = EdgeDecoration.Arrow
         }
-        this.model.currentSymbol = new IIEdgeLine(pointer, pointer, startDecoration, endDecoration, style)
+        this.currentSymbol = new IIEdgeLine(pointer, pointer, startDecoration, endDecoration, style)
         break
       }
       default:
@@ -172,29 +172,29 @@ export class IIWriteManager extends AbstractWriteManager
   {
     switch (this.tool) {
       case EditorWriteTool.Rectangle:
-        IIShapePolygon.updateRectangleBetweenPoints(this.model.currentSymbol as IIShapePolygon, this.currentSymbolOrigin!, pointer)
+        IIShapePolygon.updateRectangleBetweenPoints(this.currentSymbol as IIShapePolygon, this.currentSymbolOrigin!, pointer)
         break
       case EditorWriteTool.Triangle:
-        IIShapePolygon.updateTriangleBetweenPoints(this.model.currentSymbol as IIShapePolygon, this.currentSymbolOrigin!, pointer)
+        IIShapePolygon.updateTriangleBetweenPoints(this.currentSymbol as IIShapePolygon, this.currentSymbolOrigin!, pointer)
         break
       case EditorWriteTool.Parallelogram:
-        IIShapePolygon.updateParallelogramBetweenPoints(this.model.currentSymbol as IIShapePolygon, this.currentSymbolOrigin!, pointer)
+        IIShapePolygon.updateParallelogramBetweenPoints(this.currentSymbol as IIShapePolygon, this.currentSymbolOrigin!, pointer)
         break
       case EditorWriteTool.Rhombus:
-        IIShapePolygon.updateRhombusBetweenPoints(this.model.currentSymbol as IIShapePolygon, this.currentSymbolOrigin!, pointer)
+        IIShapePolygon.updateRhombusBetweenPoints(this.currentSymbol as IIShapePolygon, this.currentSymbolOrigin!, pointer)
         break
       case EditorWriteTool.Circle:
-        IIShapeCircle.updateBetweenPoints(this.model.currentSymbol as IIShapeCircle, this.currentSymbolOrigin!, pointer)
+        IIShapeCircle.updateBetweenPoints(this.currentSymbol as IIShapeCircle, this.currentSymbolOrigin!, pointer)
         break
       case EditorWriteTool.Ellipse:
-        IIShapeEllipse.updateBetweenPoints(this.model.currentSymbol as IIShapeEllipse, this.currentSymbolOrigin!, pointer)
+        IIShapeEllipse.updateBetweenPoints(this.currentSymbol as IIShapeEllipse, this.currentSymbolOrigin!, pointer)
         break
     }
   }
 
   protected updateCurrentSymbolEdge(pointer: TPointer): void
   {
-    const edge = this.model.currentSymbol as TIIEdge
+    const edge = this.currentSymbol as TIIEdge
     switch (edge.kind) {
       case EdgeKind.Line:
         edge.end = pointer
@@ -204,13 +204,13 @@ export class IIWriteManager extends AbstractWriteManager
 
   protected updateCurrentSymbol(pointer: TPointer): TIISymbol
   {
-    if (!this.model.currentSymbol) {
+    if (!this.currentSymbol) {
       throw new Error("Can't update current symbol because currentSymbol is undefined")
     }
 
-    switch (this.model.currentSymbol.type) {
+    switch (this.currentSymbol.type) {
       case SymbolType.Stroke:
-        this.model.currentSymbol!.addPointer(pointer)
+        this.currentSymbol!.addPointer(pointer)
         break
       case SymbolType.Shape:
         this.updateCurrentSymbolShape(pointer)
@@ -219,7 +219,7 @@ export class IIWriteManager extends AbstractWriteManager
         this.updateCurrentSymbolEdge(pointer)
         break
     }
-    return this.model.currentSymbol
+    return this.currentSymbol
   }
 
   start(info: PointerInfo): void
@@ -232,7 +232,7 @@ export class IIWriteManager extends AbstractWriteManager
     }
     this.currentSymbolOrigin = localPointer
     this.createCurrentSymbol(localPointer, this.editor.penStyle, info.pointerType)
-    this.renderer.drawSymbol(this.model.currentSymbol!)
+    this.renderer.drawSymbol(this.currentSymbol!)
   }
 
   continue(info: PointerInfo): void
@@ -244,7 +244,7 @@ export class IIWriteManager extends AbstractWriteManager
       localPointer.y = y
     }
     this.updateCurrentSymbol(localPointer)
-    this.renderer.drawSymbol(this.model.currentSymbol!)
+    this.renderer.drawSymbol(this.currentSymbol!)
   }
 
   protected async interactWithBackend(stroke: IIStroke): Promise<void>
@@ -277,7 +277,7 @@ export class IIWriteManager extends AbstractWriteManager
       localPointer.y = y
     }
     const localSymbol = this.updateCurrentSymbol(localPointer)
-    this.model.currentSymbol = undefined
+    this.currentSymbol = undefined
     this.currentSymbolOrigin = undefined
     this.snaps.clearSnapToElementLines()
 
