@@ -1,7 +1,7 @@
 import { LoggerCategory, LoggerManager } from "../logger"
 import { IIModel } from "../model"
 import { IIEraser, TSegment } from "../symbol"
-import { IISVGRenderer } from "../renderer"
+import { SVGRenderer } from "../renderer"
 import { InteractiveInkEditor } from "../editor/InteractiveInkEditor"
 import { PointerEventGrabber, PointerInfo } from "../grabber"
 
@@ -28,7 +28,7 @@ export class IIEraseManager
     return this.editor.model
   }
 
-  get renderer(): IISVGRenderer
+  get renderer(): SVGRenderer
   {
     return this.editor.renderer
   }

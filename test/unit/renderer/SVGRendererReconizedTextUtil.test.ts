@@ -1,61 +1,61 @@
 import { DecoratorKind, IIDecorator } from "../../../src/symbol"
-import { IISVGRendererConst, IISVGRendererRecognizedUtil, IISVGRendererStrokeUtil } from "../../../src/renderer"
+import { SVGRendererConst, SVGRendererRecognizedUtil, SVGRendererStrokeUtil } from "../../../src/renderer"
 import { buildRecognizedText } from "../helpers"
 
 
-describe("IISVGRendererRecognizedUtil", () =>
+describe("SVGRendererRecognizedUtil", () =>
 {
-  test("should getSVGElement and call IISVGRendererStrokeUtil.getSVGElement", () =>
+  test("should getSVGElement and call SVGRendererStrokeUtil.getSVGElement", () =>
   {
-    IISVGRendererStrokeUtil.getSVGElement = jest.fn()
+    SVGRendererStrokeUtil.getSVGElement = jest.fn()
     const recognizedText = buildRecognizedText(2)
-    const el = IISVGRendererRecognizedUtil.getSVGElement(recognizedText)
+    const el = SVGRendererRecognizedUtil.getSVGElement(recognizedText)
 
     expect(el.getAttribute("id")).toEqual(recognizedText.id)
     expect(el.getAttribute("type")).toEqual(recognizedText.type)
 
-    expect(IISVGRendererStrokeUtil.getSVGElement).toHaveBeenNthCalledWith(1, recognizedText.strokes[0])
-    expect(IISVGRendererStrokeUtil.getSVGElement).toHaveBeenNthCalledWith(2, recognizedText.strokes[1])
+    expect(SVGRendererStrokeUtil.getSVGElement).toHaveBeenNthCalledWith(1, recognizedText.strokes[0])
+    expect(SVGRendererStrokeUtil.getSVGElement).toHaveBeenNthCalledWith(2, recognizedText.strokes[1])
   })
 
   test("should getSVGElement with selected filter", () =>
   {
-    IISVGRendererStrokeUtil.getSVGElement = jest.fn()
+    SVGRendererStrokeUtil.getSVGElement = jest.fn()
     const recognizedText = buildRecognizedText(2)
     recognizedText.selected = true
-    const el = IISVGRendererRecognizedUtil.getSVGElement(recognizedText)
+    const el = SVGRendererRecognizedUtil.getSVGElement(recognizedText)
 
     expect(el.getAttribute("id")).toEqual(recognizedText.id)
     expect(el.getAttribute("type")).toEqual(recognizedText.type)
-    expect(el.getAttribute("filter")).toEqual(`url(#${ IISVGRendererConst.selectionFilterId })`)
+    expect(el.getAttribute("filter")).toEqual(`url(#${ SVGRendererConst.selectionFilterId })`)
   })
 
   test("should getSVGElement with removal filter", () =>
   {
-    IISVGRendererStrokeUtil.getSVGElement = jest.fn()
+    SVGRendererStrokeUtil.getSVGElement = jest.fn()
     const recognizedText = buildRecognizedText(2)
     recognizedText.deleting = true
-    const el = IISVGRendererRecognizedUtil.getSVGElement(recognizedText)
+    const el = SVGRendererRecognizedUtil.getSVGElement(recognizedText)
 
     expect(el.getAttribute("id")).toEqual(recognizedText.id)
     expect(el.getAttribute("type")).toEqual(recognizedText.type)
-    expect(el.getAttribute("filter")).toEqual(`url(#${ IISVGRendererConst.removalFilterId })`)
+    expect(el.getAttribute("filter")).toEqual(`url(#${ SVGRendererConst.removalFilterId })`)
   })
 
   test("should getSVGElement with decorators", () =>
   {
-    IISVGRendererStrokeUtil.getSVGElement = jest.fn()
+    SVGRendererStrokeUtil.getSVGElement = jest.fn()
     const recognizedText = buildRecognizedText(2)
     recognizedText.deleting = true
 
-    const elWithoutDecorator = IISVGRendererRecognizedUtil.getSVGElement(recognizedText)!
+    const elWithoutDecorator = SVGRendererRecognizedUtil.getSVGElement(recognizedText)!
     expect(elWithoutDecorator.getAttribute("id")).toEqual(recognizedText.id)
     expect(elWithoutDecorator.querySelectorAll("[type=decorator]")).toHaveLength(0)
 
     recognizedText.decorators.push(new IIDecorator(DecoratorKind.Highlight, { color: "red" }))
     recognizedText.decorators.push(new IIDecorator(DecoratorKind.Underline, { color: "blue", width: 12 }))
 
-    const elDecorated = IISVGRendererRecognizedUtil.getSVGElement(recognizedText)!
+    const elDecorated = SVGRendererRecognizedUtil.getSVGElement(recognizedText)!
     expect(elDecorated.getAttribute("id")).toEqual(recognizedText.id)
     expect(elDecorated.querySelectorAll("[type=decorator]")).toHaveLength(2)
 

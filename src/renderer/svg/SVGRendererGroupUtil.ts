@@ -1,18 +1,18 @@
 import { DecoratorKind, IIEraser, IISymbolGroup, SymbolType, TIISymbol } from "../../symbol"
 import { DefaultStyle } from "../../style"
-import { IISVGRendererDecoratorUtil } from "./IISVGRendererDecoratorUtil"
-import { IISVGRendererEdgeUtil } from "./IISVGRendererEdgeUtil"
-import { IISVGRendererShapeUtil } from "./IISVGRendererShapeUtil"
-import { IISVGRendererStrokeUtil } from "./IISVGRendererStrokeUtil"
-import { IISVGRendererConst } from "./IISVGRendererConst"
+import { SVGRendererDecoratorUtil } from "./SVGRendererDecoratorUtil"
+import { SVGRendererEdgeUtil } from "./SVGRendererEdgeUtil"
+import { SVGRendererShapeUtil } from "./SVGRendererShapeUtil"
+import { SVGRendererStrokeUtil } from "./SVGRendererStrokeUtil"
+import { SVGRendererConst } from "./SVGRendererConst"
 import { SVGBuilder } from "./SVGBuilder"
-import { IISVGRendererTextUtil } from "./IISVGRendererTextUtil"
-import { IISVGRendererRecognizedUtil } from "./IISVGRendererRecognizedUtil"
+import { SVGRendererTextUtil } from "./SVGRendererTextUtil"
+import { SVGRendererRecognizedUtil } from "./SVGRendererRecognizedUtil"
 
 /**
  * @group Renderer
  */
-export class IISVGRendererGroupUtil
+export class SVGRendererGroupUtil
 {
 
   static getChildElement(symbol: TIISymbol | IIEraser): SVGGraphicsElement | undefined
@@ -20,22 +20,22 @@ export class IISVGRendererGroupUtil
     let element: SVGGraphicsElement | undefined
     switch (symbol.type) {
       case SymbolType.Stroke:
-        element = IISVGRendererStrokeUtil.getSVGElement(symbol)
+        element = SVGRendererStrokeUtil.getSVGElement(symbol)
         break
       case SymbolType.Shape:
-        element = IISVGRendererShapeUtil.getSVGElement(symbol)
+        element = SVGRendererShapeUtil.getSVGElement(symbol)
         break
       case SymbolType.Edge:
-        element = IISVGRendererEdgeUtil.getSVGElement(symbol)
+        element = SVGRendererEdgeUtil.getSVGElement(symbol)
         break
       case SymbolType.Text:
-        element = IISVGRendererTextUtil.getSVGElement(symbol)
+        element = SVGRendererTextUtil.getSVGElement(symbol)
         break
       case SymbolType.Group:
-        element = IISVGRendererGroupUtil.getSVGElement(symbol)
+        element = SVGRendererGroupUtil.getSVGElement(symbol)
         break
       case SymbolType.Recognized:
-        element = IISVGRendererRecognizedUtil.getSVGElement(symbol)
+        element = SVGRendererRecognizedUtil.getSVGElement(symbol)
         break
     }
     return element
@@ -56,22 +56,22 @@ export class IISVGRendererGroupUtil
       attrs["opacity"] = symbolGroup.style.opacity.toString()
     }
     if (symbolGroup.selected) {
-      attrs["filter"] = `url(#${ IISVGRendererConst.selectionFilterId })`
+      attrs["filter"] = `url(#${ SVGRendererConst.selectionFilterId })`
     }
     if (symbolGroup.deleting) {
-      attrs["filter"] = `url(#${ IISVGRendererConst.removalFilterId })`
+      attrs["filter"] = `url(#${ SVGRendererConst.removalFilterId })`
     }
 
     const groupEl = SVGBuilder.createGroup(attrs)
 
     symbolGroup.children.forEach(sym =>
     {
-      groupEl.append(IISVGRendererGroupUtil.getChildElement(sym)!)
+      groupEl.append(SVGRendererGroupUtil.getChildElement(sym)!)
     })
 
     symbolGroup.decorators.forEach(d =>
     {
-      const deco = IISVGRendererDecoratorUtil.getSVGElement(d, symbolGroup)
+      const deco = SVGRendererDecoratorUtil.getSVGElement(d, symbolGroup)
       if (deco) {
         if (d.kind === DecoratorKind.Highlight) {
           groupEl.prepend(deco)

@@ -1,8 +1,8 @@
 import { LoggerCategory, LoggerManager } from "../logger"
 import { IIModel } from "../model"
 import { Box, TPoint, TSegment } from "../symbol"
-import { IISVGRenderer } from "../renderer"
-import { IISVGRendererConst } from "../renderer/svg/IISVGRendererConst"
+import { SVGRenderer } from "../renderer"
+import { SVGRendererConst } from "../renderer/svg/SVGRendererConst"
 import { InteractiveInkEditor } from "../editor/InteractiveInkEditor"
 import { PartialDeep } from "../utils"
 import { SnapConfiguration, TSnapConfiguration } from "./IISnapConfiguration"
@@ -42,7 +42,7 @@ export class IISnapManager
     return this.editor.model
   }
 
-  get renderer(): IISVGRenderer
+  get renderer(): SVGRenderer
   {
     return this.editor.renderer
   }
@@ -100,9 +100,9 @@ export class IISnapManager
       fill: "transparent",
       stroke: "blue",
       "stroke-width": "2",
-      style: IISVGRendererConst.noSelection,
-      "marker-start": `url(#${ IISVGRendererConst.crossMarker })`,
-      "marker-end": `url(#${ IISVGRendererConst.crossMarker })`
+      style: SVGRendererConst.noSelection,
+      "marker-start": `url(#${ SVGRendererConst.crossMarker })`,
+      "marker-end": `url(#${ SVGRendererConst.crossMarker })`
     }
     lines.forEach(seg =>
     {
