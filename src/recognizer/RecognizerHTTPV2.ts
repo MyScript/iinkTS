@@ -40,7 +40,7 @@ export type TRecognizerHTTPV2PostData = {
 export class RecognizerHTTPV2 {
   #logger = LoggerManager.getLogger(LoggerCategory.RECOGNIZER)
 
-  protected configuration: RecognizerHTTPV2Configuration
+  configuration: RecognizerHTTPV2Configuration
 
   constructor(config: PartialDeep<TRecognizerHTTPV2Configuration>) {
     this.#logger.info("constructor", { config })

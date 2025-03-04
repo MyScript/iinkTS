@@ -5,6 +5,7 @@ import {
   waitForExportedEvent,
   getEditorExports,
   getEditorSymbols,
+  waitForChangedEvent,
 } from "../helper"
 import one from "../__dataset__/1"
 import equation from "../__dataset__/equation"
@@ -91,28 +92,30 @@ test.describe("Math Recognizer Iink", () => {
 
     test("should undo/redo", async ({ page }) => {
       await test.step("write stroke", async () => {
-        await Promise.all([
-          waitForExportedEvent(page),
-          writeStrokes(page, equation.strokes),
-        ])
+        for (const s of equation.strokes) {
+          await Promise.all([
+            waitForExportedEvent(page),
+            writeStrokes(page, [s])
+          ])
+        }
       })
 
       await test.step("should undo last stroke", async () => {
-        await Promise.all([waitForExportedEvent(page), page.click("#undo")])
+        await Promise.all([waitForChangedEvent(page), page.click("#undo")])
         expect(await getEditorSymbols(page)).toHaveLength(
           equation.strokes.length - 1
         )
       })
 
       await test.step("should undo last stroke", async () => {
-        await Promise.all([waitForExportedEvent(page), page.click("#undo")])
+        await Promise.all([waitForChangedEvent(page), page.click("#undo")])
         expect(await getEditorSymbols(page)).toHaveLength(
           equation.strokes.length - 2
         )
       })
 
       await test.step("should undo last stroke", async () => {
-        await Promise.all([waitForExportedEvent(page), page.click("#redo")])
+        await Promise.all([waitForChangedEvent(page), page.click("#redo")])
         expect(await getEditorSymbols(page)).toHaveLength(
           equation.strokes.length - 1
         )
