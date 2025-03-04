@@ -333,7 +333,7 @@ export class SVGRenderer
 
   drawRect(box: TBox, attrs: { [key: string]: string } = {}): void
   {
-    this.#logger.info("drawCircle", { box, attrs })
+    this.#logger.info("drawRect", { box, attrs })
     this.layer.appendChild(SVGBuilder.createRect(box, attrs))
   }
 

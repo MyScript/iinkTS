@@ -1,10 +1,10 @@
 import { EditorTool } from "../Constants"
 import { PointerEventGrabber } from "../grabber"
-import { IIModel, TExport } from "../model"
+import { IModel, TExport } from "../model"
 import { RecognizerHTTPV2 } from "../recognizer"
 import { SVGRenderer } from "../renderer"
 import { TStyle } from "../style"
-import { IIHistoryManager } from "../history"
+import { IHistoryManager } from "../history"
 import { PartialDeep } from "../utils"
 import { AbstractEditor, EditorOptionsBase } from "./AbstractEditor"
 import { InkEditorConfiguration, TInkEditorConfiguration } from "./InkEditorConfiguration"
@@ -29,11 +29,11 @@ export type TInkEditorOptions = PartialDeep<EditorOptionsBase &
  */
 export class InkEditor extends AbstractEditor {
   #configuration: InkEditorConfiguration
-  #model: IIModel
+  #model: IModel
   #penStyle: TStyle
   renderer: SVGRenderer
   recognizer: RecognizerHTTPV2
-  history: IIHistoryManager
+  history: IHistoryManager
   writer : IWriteManager
   #tool: EditorTool = EditorTool.Write
 
@@ -53,10 +53,10 @@ export class InkEditor extends AbstractEditor {
     }
     this.renderer = new SVGRenderer(this.#configuration.rendering)
 
-    this.#model = new IIModel()
+    this.#model = new IModel()
     this.writer = new IWriteManager(this)
     this.tool = EditorTool.Write
-    this.history = new IIHistoryManager(this.#configuration["undo-redo"], this.event)
+    this.history = new IHistoryManager(this.#configuration["undo-redo"], this.event)
   }
 
   get penStyle(): TStyle
@@ -96,7 +96,7 @@ export class InkEditor extends AbstractEditor {
     }
   }
 
-  get model(): IIModel {
+  get model(): IModel {
     return this.#model
   }
 
@@ -133,6 +133,21 @@ export class InkEditor extends AbstractEditor {
       this.layers.updateState(true)
     }
   }
+
+  //updateBoundingBox
+  updateSymbolsStyle(symbolIds: string[], style: PartialDeep<TStyle>): void
+    {
+      this.logger.info("updateSymbolsStyle", { symbolIds, style })
+      this.model.symbols.forEach(s =>
+      {
+        if (symbolIds.includes(s.id)) {
+          s.style = Object.assign({}, s.style, style)
+          this.renderer.drawSymbol(s)
+          this.model.updateSymbol(s)
+          s.modificationDate = Date.now()
+        }
+      })
+    }
 
   async resize({ height, width }: { height?: number, width?: number } = {}): Promise<void> {
     this.logger.info("resize", { height, width })
