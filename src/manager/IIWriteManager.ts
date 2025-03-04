@@ -18,7 +18,7 @@ import
   TPointer
 } from "../symbol"
 import { RecognizerWebSocket } from "../recognizer"
-import { IISVGRenderer } from "../renderer"
+import { SVGRenderer } from "../renderer"
 import { TStyle } from "../style"
 import { IIHistoryManager } from "../history"
 import { IIGestureManager } from "../gesture/IIGestureManager"
@@ -69,7 +69,7 @@ export class IIWriteManager
     return this.editor.model
   }
 
-  get renderer(): IISVGRenderer
+  get renderer(): SVGRenderer
   {
     return this.editor.renderer
   }

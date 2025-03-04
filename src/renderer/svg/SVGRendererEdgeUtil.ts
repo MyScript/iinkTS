@@ -1,12 +1,12 @@
 import { EdgeDecoration, EdgeKind, IIEdgeArc, IIEdgeLine, IIEdgePolyLine, TIIEdge } from "../../symbol"
 import { DefaultStyle } from "../../style"
-import { IISVGRendererConst } from "./IISVGRendererConst"
+import { SVGRendererConst } from "./SVGRendererConst"
 import { SVGBuilder } from "./SVGBuilder"
 
 /**
  * @group Renderer
  */
-export class IISVGRendererEdgeUtil
+export class SVGRendererEdgeUtil
 {
   static getLinePath(line: IIEdgeLine): string
   {
@@ -27,11 +27,11 @@ export class IISVGRendererEdgeUtil
   {
     switch (edge.kind) {
       case EdgeKind.Line:
-        return IISVGRendererEdgeUtil.getLinePath(edge)
+        return SVGRendererEdgeUtil.getLinePath(edge)
       case EdgeKind.PolyEdge:
-        return IISVGRendererEdgeUtil.getPolyLinePath(edge)
+        return SVGRendererEdgeUtil.getPolyLinePath(edge)
       case EdgeKind.Arc:
-        return IISVGRendererEdgeUtil.getArcPath(edge)
+        return SVGRendererEdgeUtil.getArcPath(edge)
       default:
         throw new Error(`Can't getSVGPath for edge cause kind is unknow: "${ JSON.stringify(edge) }"`)
     }
@@ -48,10 +48,10 @@ export class IISVGRendererEdgeUtil
       "stroke-linejoin": "round",
     }
     if (edge.selected) {
-      attrs["filter"] = `url(#${ IISVGRendererConst.selectionFilterId })`
+      attrs["filter"] = `url(#${ SVGRendererConst.selectionFilterId })`
     }
     if (edge.deleting) {
-      attrs["filter"] = `url(#${ IISVGRendererConst.removalFilterId })`
+      attrs["filter"] = `url(#${ SVGRendererConst.removalFilterId })`
     }
     const group = SVGBuilder.createGroup(attrs)
 
@@ -59,17 +59,17 @@ export class IISVGRendererEdgeUtil
       "fill": "transparent",
       "stroke": edge.style.color || DefaultStyle.color!,
       "stroke-width": (edge.style.width || DefaultStyle.width).toString(),
-      "d": IISVGRendererEdgeUtil.getSVGPath(edge),
+      "d": SVGRendererEdgeUtil.getSVGPath(edge),
     }
     if (edge.style.opacity) {
       pathAttrs["opacity"] = edge.style.opacity.toString()
     }
 
     if (edge.startDecoration === EdgeDecoration.Arrow) {
-      pathAttrs["marker-start"] = `url(#${ IISVGRendererConst.arrowHeadStartMarker })`
+      pathAttrs["marker-start"] = `url(#${ SVGRendererConst.arrowHeadStartMarker })`
     }
     if (edge.endDecoration === EdgeDecoration.Arrow) {
-      pathAttrs["marker-end"] = `url(#${ IISVGRendererConst.arrowHeadEndMaker })`
+      pathAttrs["marker-end"] = `url(#${ SVGRendererConst.arrowHeadEndMaker })`
     }
     group.appendChild(SVGBuilder.createPath(pathAttrs))
     return group

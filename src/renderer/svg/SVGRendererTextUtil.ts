@@ -1,12 +1,12 @@
 import { DecoratorKind, IIText } from "../../symbol"
-import { IISVGRendererDecoratorUtil } from "./IISVGRendererDecoratorUtil"
-import { IISVGRendererConst } from "./IISVGRendererConst"
+import { SVGRendererDecoratorUtil } from "./SVGRendererDecoratorUtil"
+import { SVGRendererConst } from "./SVGRendererConst"
 import { SVGBuilder } from "./SVGBuilder"
 
 /**
  * @group Renderer
  */
-export class IISVGRendererTextUtil
+export class SVGRendererTextUtil
 {
   static getSVGElement(text: IIText): SVGGraphicsElement
   {
@@ -16,7 +16,7 @@ export class IISVGRendererTextUtil
       "vector-effect": "non-scaling-stroke",
       "stroke-linecap": "round",
       "stroke-linejoin": "round",
-      "style": IISVGRendererConst.noSelection,
+      "style": SVGRendererConst.noSelection,
     }
     if (text.style.opacity) {
       attrs.opacity = text.style.opacity.toString()
@@ -25,10 +25,10 @@ export class IISVGRendererTextUtil
       attrs.transform = `rotate(${ text.rotation.degree }, ${ text.rotation.center.x }, ${ text.rotation.center.y })`
     }
     if (text.selected) {
-      attrs["filter"] = `url(#${ IISVGRendererConst.selectionFilterId })`
+      attrs["filter"] = `url(#${ SVGRendererConst.selectionFilterId })`
     }
     if (text.deleting) {
-      attrs["filter"] = `url(#${ IISVGRendererConst.removalFilterId })`
+      attrs["filter"] = `url(#${ SVGRendererConst.removalFilterId })`
     }
 
     const textGroup = SVGBuilder.createGroup(attrs)
@@ -49,7 +49,7 @@ export class IISVGRendererTextUtil
 
     text.decorators.forEach(d =>
     {
-      const deco = IISVGRendererDecoratorUtil.getSVGElement(d, text)
+      const deco = SVGRendererDecoratorUtil.getSVGElement(d, text)
       if (deco) {
         if (d.kind === DecoratorKind.Highlight) {
           textGroup.prepend(deco)

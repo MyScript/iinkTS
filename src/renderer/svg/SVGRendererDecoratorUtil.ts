@@ -5,7 +5,7 @@ import { SVGBuilder } from "./SVGBuilder"
 /**
  * @group Renderer
  */
-export class IISVGRendererDecoratorUtil
+export class SVGRendererDecoratorUtil
 {
   static getSVGElement(decorator: IIDecorator, symbol: TIISymbol): SVGGeometryElement | undefined
   {

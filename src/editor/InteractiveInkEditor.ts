@@ -27,7 +27,7 @@ import
   IIRecognizedArc,
 } from "../symbol"
 import { RecognizerWebSocket } from "../recognizer"
-import { IISVGRenderer, SVGBuilder, TIIRendererConfiguration } from "../renderer"
+import { SVGRenderer, SVGBuilder, TIIRendererConfiguration } from "../renderer"
 import { TStyle } from "../style"
 import
 {
@@ -79,7 +79,7 @@ export class InteractiveInkEditor extends AbstractEditor
   #layerUITimer?: ReturnType<typeof setTimeout>
   #recognizeStrokeTimer?: ReturnType<typeof setTimeout>
 
-  renderer: IISVGRenderer
+  renderer: SVGRenderer
   recognizer: RecognizerWebSocket
 
   #penStyle: TStyle
@@ -120,7 +120,7 @@ export class InteractiveInkEditor extends AbstractEditor
     this.recognizer.event.addEndInitialization(this.layers.hideMessageModal.bind(this.layers))
     this.recognizer.event.addIdleListener(this.updateLayerState.bind(this))
 
-    this.renderer = new IISVGRenderer(this.#configuration.rendering)
+    this.renderer = new SVGRenderer(this.#configuration.rendering)
 
     this.history = new IIHistoryManager(this.#configuration["undo-redo"], this.event)
 

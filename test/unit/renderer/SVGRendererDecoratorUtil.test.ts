@@ -1,7 +1,7 @@
 import { buildOIDecorator, buildOIStroke } from "../helpers"
-import { DecoratorKind, DefaultStyle, IISVGRendererDecoratorUtil, TStyle } from "../../../src/iink"
+import { DecoratorKind, DefaultStyle, SVGRendererDecoratorUtil, TStyle } from "../../../src/iink"
 
-describe("IISVGRendererDecoratorUtil.ts", () =>
+describe("SVGRendererDecoratorUtil.ts", () =>
 {
 
   describe("getSVGElement", () =>
@@ -14,7 +14,7 @@ describe("IISVGRendererDecoratorUtil.ts", () =>
         width: 42
       }
       const decorator = buildOIDecorator(DecoratorKind.Highlight, style)
-      const el = IISVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
+      const el = SVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
       expect(el).toBeDefined()
       expect(el.getAttribute("kind")).toEqual(DecoratorKind.Highlight)
       expect(el.getAttribute("opacity")).toEqual("0.5")
@@ -25,7 +25,7 @@ describe("IISVGRendererDecoratorUtil.ts", () =>
     {
       const sym = buildOIStroke()
       const decorator = buildOIDecorator(DecoratorKind.Highlight, {})
-      const el = IISVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
+      const el = SVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
       expect(el).toBeDefined()
       expect(el.getAttribute("kind")).toEqual(DecoratorKind.Highlight)
       expect(el.getAttribute("opacity")).toEqual("0.5")
@@ -36,10 +36,10 @@ describe("IISVGRendererDecoratorUtil.ts", () =>
     {
       const sym = buildOIStroke()
       const decorator = buildOIDecorator(DecoratorKind.Highlight)
-      const elNotToDelete = IISVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
+      const elNotToDelete = SVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
       expect(elNotToDelete.getAttribute("opacity")).toEqual(`0.5`)
       sym.deleting = true
-      const elToDelete = IISVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
+      const elToDelete = SVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
       expect(elToDelete.getAttribute("opacity")).toEqual(`0.25`)
     })
     test("should get Surround", () =>
@@ -51,7 +51,7 @@ describe("IISVGRendererDecoratorUtil.ts", () =>
         width: 4
       }
       const decorator = buildOIDecorator(DecoratorKind.Surround, style)
-      const el = IISVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
+      const el = SVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
       expect(el).toBeDefined()
       expect(el.getAttribute("kind")).toEqual(DecoratorKind.Surround)
       expect(el.getAttribute("fill")).toEqual("transparent")
@@ -63,7 +63,7 @@ describe("IISVGRendererDecoratorUtil.ts", () =>
     {
       const sym = buildOIStroke()
       const decorator = buildOIDecorator(DecoratorKind.Surround, {})
-      const el = IISVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
+      const el = SVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
       expect(el).toBeDefined()
       expect(el.getAttribute("kind")).toEqual(DecoratorKind.Surround)
       expect(el.getAttribute("fill")).toEqual("transparent")
@@ -79,7 +79,7 @@ describe("IISVGRendererDecoratorUtil.ts", () =>
         width: 4
       }
       const decorator = buildOIDecorator(DecoratorKind.Strikethrough, style)
-      const el = IISVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
+      const el = SVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
       expect(el).toBeDefined()
       expect(el.getAttribute("kind")).toEqual(DecoratorKind.Strikethrough)
       expect(el.getAttribute("fill")).toEqual("transparent")
@@ -91,7 +91,7 @@ describe("IISVGRendererDecoratorUtil.ts", () =>
     {
       const sym = buildOIStroke()
       const decorator = buildOIDecorator(DecoratorKind.Strikethrough, {})
-      const el = IISVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
+      const el = SVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
       expect(el).toBeDefined()
       expect(el.getAttribute("kind")).toEqual(DecoratorKind.Strikethrough)
       expect(el.getAttribute("fill")).toEqual("transparent")
@@ -107,7 +107,7 @@ describe("IISVGRendererDecoratorUtil.ts", () =>
         width: 4
       }
       const decorator = buildOIDecorator(DecoratorKind.Underline, style)
-      const el = IISVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
+      const el = SVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
       expect(el).toBeDefined()
       expect(el.getAttribute("kind")).toEqual(DecoratorKind.Underline)
       expect(el.getAttribute("fill")).toEqual("transparent")
@@ -119,7 +119,7 @@ describe("IISVGRendererDecoratorUtil.ts", () =>
     {
       const sym = buildOIStroke()
       const decorator = buildOIDecorator(DecoratorKind.Underline, {})
-      const el = IISVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
+      const el = SVGRendererDecoratorUtil.getSVGElement(decorator, sym) as SVGGeometryElement
       expect(el).toBeDefined()
       expect(el.getAttribute("kind")).toEqual(DecoratorKind.Underline)
       expect(el.getAttribute("fill")).toEqual("transparent")
