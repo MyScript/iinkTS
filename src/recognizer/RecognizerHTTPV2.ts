@@ -1,5 +1,5 @@
 import { LoggerCategory, LoggerManager } from "../logger"
-import { TExport, TJIIXExport } from "../model"
+import { TExportV2, TJIIXExport } from "../model"
 import { TStroke, TStrokeToSend } from "../symbol"
 import { computeHmac, isVersionSuperiorOrEqual, PartialDeep } from "../utils"
 import { RecognizerError } from "./RecognizerError"
@@ -168,11 +168,11 @@ export class RecognizerHTTPV2 {
     }
   }
 
-  protected async tryFetch(data: TRecognizerHTTPV2PostData, mimeType: string): Promise<TExport | never> {
+  protected async tryFetch(data: TRecognizerHTTPV2PostData, mimeType: string): Promise<TExportV2 | never> {
     this.#logger.debug("tryFetch", { data, mimeType })
     return this.post(data, mimeType)
       .then((res) => {
-        const exports: TExport = {}
+        const exports: TExportV2 = {}
         exports[mimeType] = res as TJIIXExport | string | Blob
         this.#logger.debug("tryFetch", { exports })
         return exports
@@ -215,30 +215,20 @@ export class RecognizerHTTPV2 {
     return mimeTypes
   }
 
-  async send(strokes: TStroke[]): Promise<TExport> {
+  async send(strokes: TStroke[], requestedMimeTypes?: string[]): Promise<TExportV2> {
     this.#logger.info("send", strokes)
-    let recognition: TExport = {}
 
+    const recognition: TExportV2 = {}
     if (strokes.length === 0) {
       return Promise.resolve(recognition)
     }
-    if (this.configuration.recognition.type) {
-      const mimeTypes = this.getMimeTypes()
-      if (!mimeTypes.length) {
-        const error = new Error("send failed, no mimeTypes define in recognition configuration")
-        this.#logger.error("send", error)
-        return Promise.reject(error)
-      }
-      const data = this.buildData(strokes)
-      const exports: TExport[] = await Promise.all(mimeTypes.map(mimeType => this.tryFetch(data, mimeType)))
+    const mimeTypes = requestedMimeTypes || this.getMimeTypes()
+
+    const data = this.buildData(strokes)
+    const exports: TExportV2[] = await Promise.all(mimeTypes.map(mimeType => this.tryFetch(data, mimeType)))
       exports.forEach(e => {
         Object.assign(recognition, e)
       })
-    }
-    else {
-      const data = this.buildData(strokes)
-      recognition = await this.tryFetch(data, "application/vnd.myscript.jiix")
-    }
 
     this.#logger.debug("send", recognition)
     return recognition

@@ -51,6 +51,20 @@ export function buildStroke({ box = defaultBox, style = DefaultPenStyle, nbPoint
   return stroke
 }
 
+export function buildStrokeV2({ box = defaultBox, style = DefaultPenStyle, nbPoint = 5, pointerType = "pen" } = {}): IIStroke
+{
+  const stroke = new IIStroke(style, pointerType)
+  for (let i = 0; i < nbPoint; i++) {
+    stroke.pointers.push({
+      p: Math.random(),
+      t: Date.now() + i,
+      x: randomIntFromInterval(box.x, box.x + box.width),
+      y: randomIntFromInterval(box.y, box.y + box.height),
+    })
+  }
+  return stroke
+}
+
 export function buildOIStroke({ box = defaultBox, style = DefaultStyle, nbPoint = 5, pointerType = "pen" } = {}): IIStroke
 {
   const stroke = new IIStroke(style, pointerType)

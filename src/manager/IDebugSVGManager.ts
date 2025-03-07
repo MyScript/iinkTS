@@ -1,17 +1,18 @@
 import { LoggerManager, LoggerCategory } from "../logger"
-import { IIModel, JIIXEdgeKind } from "../model"
-import { Box, IIText, SymbolType, TBox, TIISymbol } from "../symbol"
+import { IModel } from "../model"
+import { Box, IIStroke, IIText, SymbolType, TBox, TIISymbol } from "../symbol"
 import { SVGRenderer, SVGRendererConst, SVGBuilder } from "../renderer"
-import { convertBoundingBoxMillimeterToPixel, createUUID } from "../utils"
+import { createUUID } from "../utils"
 import { InkEditor } from "../editor"
 
 /**
  * @group Manager
  */
-export class IIDebugSVGManager
+export class IDebugSVGManager
 {
   #logger = LoggerManager.getLogger(LoggerCategory.SVGDEBUG)
   #recognitionBoxVisibility = false
+  #recognitionBoxItemsVisibility = false
 
   editor: InkEditor
 
@@ -21,7 +22,7 @@ export class IIDebugSVGManager
     this.editor = editor
   }
 
-  get model(): IIModel
+  get model(): IModel
   {
     return this.editor.model
   }
@@ -35,10 +36,22 @@ export class IIDebugSVGManager
   {
     return this.#recognitionBoxVisibility
   }
+
   set recognitionBoxVisibility(show: boolean)
   {
     this.#recognitionBoxVisibility = show
     this.debugRecognitionBox()
+  }
+
+  get recognitionBoxItemsVisibility(): boolean
+  {
+    return this.#recognitionBoxItemsVisibility
+  }
+
+  set recognitionBoxItemsVisibility(show: boolean)
+  {
+    this.#recognitionBoxItemsVisibility = show
+    this.debugRecognitionBoxItems()
   }
 
   protected drawBoundingBox(symbols: TIISymbol[]): void
@@ -97,27 +110,13 @@ export class IIDebugSVGManager
       }
     })
   }
-  protected showBoundingBox(): void
-  {
-    this.#logger.info("showBoundingBox")
-    if (this.model.currentSymbol) {
-      this.drawBoundingBox([this.model.currentSymbol])
-    }
-    this.drawBoundingBox(this.model.symbols)
-  }
-  protected hideBoundingBox(): void
-  {
-    this.#logger.info("hideBoundingBox")
-    this.renderer.clearElements({ attrs: { "debug": "bounding-box" } })
-  }
 
-  protected drawRecognitionBox(box: TBox, infos?: string[]): void
+  protected drawRecognitionBox(box: TBox, infos: string[], color: "blue" | "orange", debugAttr: string): void
   {
-    const COLOR = "green"
     const TEXT_HEIGHT = 20
-    const recognitionGroup = SVGBuilder.createGroup({ "debug": "recognition-box" })
+    const recognitionGroup = SVGBuilder.createGroup({ "debug": debugAttr })
 
-    const rect = SVGBuilder.createRect(box, { fill: "transparent", stroke: COLOR, style: SVGRendererConst.noSelection })
+    const rect = SVGBuilder.createRect(box, { fill: "transparent", stroke: color, style: SVGRendererConst.noSelection })
     recognitionGroup.appendChild(rect)
 
     const infosGroup = SVGBuilder.createGroup({ id: `infos-group-${ createUUID() }` })
@@ -125,7 +124,7 @@ export class IIDebugSVGManager
     let infoY = box.y + TEXT_HEIGHT / 2
     infos?.forEach(w =>
     {
-      infosGroup.appendChild(SVGBuilder.createText({ x: infoX, y: infoY }, w, { stroke: COLOR, style: SVGRendererConst.noSelection }))
+      infosGroup.appendChild(SVGBuilder.createText({ x: infoX, y: infoY }, w, { stroke: color, style: SVGRendererConst.noSelection }))
       infoY += TEXT_HEIGHT
     })
     recognitionGroup.appendChild(infosGroup)
@@ -138,7 +137,7 @@ export class IIDebugSVGManager
       x: infosGroupBox.x - 5,
       y: infosGroupBox.y - 5,
     }
-    const rectTranslate = SVGBuilder.createRect(rectBox, { fill: "white", style: "cursor:move", stroke: COLOR })
+    const rectTranslate = SVGBuilder.createRect(rectBox, { fill: "white", style: "cursor:move", stroke: color })
     infosGroup.prepend(rectTranslate)
 
     const translateEl = (e: PointerEvent) =>
@@ -157,7 +156,7 @@ export class IIDebugSVGManager
         y: rectBox.y + ty,
       }
       this.renderer.removeSymbol(`connection-${ infosGroup.id }`)
-      this.renderer.drawConnectionBetweenBox(`connection-${ infosGroup.id }`, box, newRectBox, { stroke: COLOR, debug: "recognition-box-link" })
+      this.renderer.drawConnectionBetweenBox(`connection-${ infosGroup.id }`, box, newRectBox, { stroke: color, debug: debugAttr })
     }
 
     rectTranslate.addEventListener("pointerdown", e =>
@@ -175,65 +174,58 @@ export class IIDebugSVGManager
     })
   }
 
+  protected buildInfos(obj: object, currentPath = ""): string[]
+  {
+    const infos: string[] = []
+    Object.keys(obj).forEach((key) => {
+      const value = obj[key as keyof typeof obj]
+      const localPath = currentPath ? `${currentPath}.${key}` : key
+        switch (typeof value) {
+          case "object":
+            infos.push(...this.buildInfos(value, localPath))
+            break
+          default:
+            infos.push(`${localPath}: ${JSON.stringify(value)}`)
+            break
+        }
+    })
+    return infos
+  }
+
   protected async showRecognitionBox(): Promise<void>
   {
     this.#logger.info("showRecognitionBox")
-    await this.editor.recognizer.send(["application/vnd.myscript.jiix"])
-    const jiix = this.model.exports?.["application/vnd.myscript.jiix"]
+    let jiix = this.model.exports?.["application/vnd.myscript.jiix"]
+    if(!jiix)
+    {
+      const exports = await this.editor.recognizer.send(this.model.strokes, ["application/vnd.myscript.jiix"])
+      jiix = exports["application/vnd.myscript.jiix"]!
+    }
     this.#logger.debug("showRecognitionBox", { jiix })
     if (jiix) {
-      if (!jiix["bounding-box"]) {
-        this.#logger.warn("drawRecognitionBox", "You must to enabled configuration.recognition.exports[\"bounding-box\"]")
-        return
-      }
       jiix.elements?.forEach(el =>
       {
         switch (el.type) {
-          case "Node": {
-            if (el["bounding-box"]) {
-              const box = convertBoundingBoxMillimeterToPixel(el["bounding-box"])
-              const hideProperties = ["bounding-box", "items", "id"]
-              const infos = Object.keys(el).filter(k => !hideProperties.includes(k)).map(k => `${ k }: ${ JSON.stringify(el[k as keyof typeof el]) }`)
-              this.drawRecognitionBox(box, infos)
-            }
+          case "Shape": {
+            const associatedStrokes: IIStroke[] = []
+              el.range?.forEach(r => {
+                associatedStrokes.push(...this.model.strokes.slice(r.from.stroke, r.to.stroke + 1))
+              })
+              const box = Box.createFromBoxes(associatedStrokes.map(s => s.bounds))
+              let infos: string[] = [`type: ${el.type}`]
+              infos.push(...this.buildInfos(el))
+              const hideProperties = ["bounding-box", "primitives", "range"]
+              infos = infos.filter(i => !hideProperties.some(h => i.indexOf( h ) > -1))
+              this.drawRecognitionBox(box, infos, "orange", "recognition-box")
             break
           }
           case "Text": {
-            el.words?.forEach(w =>
-            {
-              if (w?.["bounding-box"]) {
-                const box = convertBoundingBoxMillimeterToPixel(w["bounding-box"])
-                this.drawRecognitionBox(box, [`type: ${ el.type }`, `candidates: ${ JSON.stringify(w.candidates || []) }`])
-              }
+            const associatedStrokes: IIStroke[] = []
+            el.range?.forEach(r => {
+              associatedStrokes.push(...this.model.strokes.slice(r.from.stroke, r.to.stroke + 1))
             })
-            break
-          }
-          case "Edge": {
-            if (el.kind === JIIXEdgeKind.PolyEdge) {
-              const infos = [
-                `type: ${ el.type }`,
-                `kind: ${ el.kind }`,
-              ]
-              el.edges.forEach((e, i) =>
-              {
-                let inf = `edge-${ i }: [{ x1: ${ e.x1 }, y2: ${ e.y1 } },{ x2: ${ e.x2 }, y2: ${ e.y2 } }]`
-                if (e.p1Decoration) {
-                  inf += `, p1Decoration: ${ e.p1Decoration }`
-                }
-                if (e.p2Decoration) {
-                  inf += `, p2Decoration: ${ e.p2Decoration }`
-                }
-                infos.push(inf)
-              })
-              const box = convertBoundingBoxMillimeterToPixel(Box.createFromBoxes(el.edges.map(e => e["bounding-box"] as TBox)))
-              this.drawRecognitionBox(box, infos)
-            }
-            else if (el["bounding-box"]) {
-              const box = convertBoundingBoxMillimeterToPixel(el["bounding-box"])
-              const hideProperties = ["bounding-box", "items", "id", "ports", "connected"]
-              const infos = Object.keys(el).filter(k => !hideProperties.includes(k)).map(k => `${ k }: ${ JSON.stringify(el[k as keyof typeof el]) }`)
-              this.drawRecognitionBox(box, infos)
-            }
+            const box = Box.createFromBoxes(associatedStrokes.map(s => s.bounds))
+            this.drawRecognitionBox(box, [`type: ${ el.type }`, `label: ${ JSON.stringify(el.label || []) }`], "blue", "recognition-box")
             break
           }
           default: {
@@ -244,12 +236,68 @@ export class IIDebugSVGManager
       })
     }
   }
+
+  protected async showRecognitionBoxItems(): Promise<void>
+  {
+    this.#logger.info("showRecognitionBoxItems")
+    let jiix = this.model.exports?.["application/vnd.myscript.jiix"]
+    if(!jiix)
+    {
+      const exports = await this.editor.recognizer.send(this.model.strokes, ["application/vnd.myscript.jiix"])
+      jiix = exports["application/vnd.myscript.jiix"]!
+    }
+    this.#logger.debug("showRecognitionBoxItems", { jiix })
+    if (jiix) {
+      jiix.elements?.forEach(el =>
+      {
+        switch (el.type) {
+          case "Shape": {
+            el.elements.forEach(e => {
+              const associatedStrokes: IIStroke[] = []
+              e.range?.forEach(r => {
+                associatedStrokes.push(...this.model.strokes.slice(r.from.stroke, r.to.stroke + 1))
+              })
+              const box = Box.createFromBoxes(associatedStrokes.map(s => s.bounds))
+              let infos: string[] = [`type: ${el.type}`]
+              infos.push(...this.buildInfos(e))
+              const hideProperties = ["bounding-box", "primitives", "range"]
+              infos = infos.filter(i => !hideProperties.some(h => i.indexOf( h ) > -1))
+              this.drawRecognitionBox(box, infos, "orange", "recognition-box-items")
+            })
+            break
+          }
+          case "Text": {
+            el.lines?.forEach(e => {
+              const associatedStrokes: IIStroke[] = []
+              e.range.forEach(r => {
+                associatedStrokes.push(...this.model.strokes.slice(r.from.stroke, r.to.stroke + 1))
+              })
+              const box = Box.createFromBoxes(associatedStrokes.map(s => s.bounds))
+              this.drawRecognitionBox(box, [`type: ${ el.type }`, `label: ${ JSON.stringify(e.label || []) }`], "blue", "recognition-box-items")
+            })
+            break
+          }
+          default: {
+            this.#logger.warn("drawRecognitionBox", `Unknow jiix element type: ${ el.type }`)
+            break
+          }
+        }
+      })
+    }
+  }
+
   protected clearRecognitionBox(): void
   {
     this.#logger.info("clearRecognitionBox")
     this.renderer.clearElements({ attrs: { "debug": "recognition-box" } })
-    this.renderer.clearElements({ attrs: { "debug": "recognition-box-link" } })
   }
+
+  protected clearRecognitionBoxItems(): void
+  {
+    this.#logger.info("clearRecognitionBoxItems")
+    this.renderer.clearElements({ attrs: { "debug": "recognition-box-items" } })
+  }
+
   async debugRecognitionBox(): Promise<void>
   {
     this.clearRecognitionBox()
@@ -258,8 +306,17 @@ export class IIDebugSVGManager
     }
   }
 
+  async debugRecognitionBoxItems(): Promise<void>
+  {
+    this.clearRecognitionBoxItems()
+    if (this.#recognitionBoxItemsVisibility) {
+      this.showRecognitionBoxItems()
+    }
+  }
+
   apply(): void
   {
     this.debugRecognitionBox()
+    this.debugRecognitionBoxItems()
   }
 }
