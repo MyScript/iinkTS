@@ -130,9 +130,16 @@
         </button>
       </div>
       <div>
-        <span class="switch-label">Raw Content Visualisation</span>
+        <span class="switch-label">Show Recognition Block</span>
         <label class="switch">
-          <input id="visualisation" type="checkbox" />
+          <input id="showRecognitionBlock" type="checkbox" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+      <div>
+        <span class="switch-label">Show Recognition Items</span>
+        <label class="switch">
+          <input id="showRecognitionItems" type="checkbox" />
           <span class="slider round"></span>
         </label>
       </div>
@@ -149,7 +156,8 @@
       const clearElement = document.getElementById("clear")
       const undoElement = document.getElementById("undo")
       const redoElement = document.getElementById("redo")
-      const visualisationElement = document.getElementById("visualisation")
+      const showRecognitionBlock = document.getElementById("showRecognitionBlock")
+      const showRecognitionItems = document.getElementById("showRecognitionItems")
 
       /**
        * we expose the editor so we can access it in tests
@@ -173,12 +181,12 @@
         resultElement.classList.toggle("open")
       })
 
-      visualisationElement.addEventListener("change", () => {
-        if (visualisationElement.checked) {
-          editor?.showMapsStrokes("#3782d0")
-        } else {
-          editor?.showMapsStrokes("#000000")
-        }
+      showRecognitionBlock.addEventListener("change", () => {
+          editor.debugger.recognitionBoxVisibility = showRecognitionBlock.checked
+      })
+
+      showRecognitionItems.addEventListener("change", () => {
+          editor.debugger.recognitionBoxItemsVisibility = showRecognitionItems.checked
       })
 
       window.addEventListener("resize", () => {

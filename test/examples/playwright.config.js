@@ -10,7 +10,7 @@ const defaultProject = [
       },
     }
   },
-  /* {
+  {
     name: "Desktop Firefox",
     use: {...devices["Desktop Firefox"]}
   },
@@ -30,7 +30,7 @@ const defaultProject = [
   {
     name: "Tablet Safari",
     use: {...devices["iPad Mini landscape"]}
-  }, */
+  },
 ]
 
 let projects

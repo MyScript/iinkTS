@@ -14,7 +14,7 @@ import { InkEditor } from "../editor"
 /**
  * @group Manager
  */
-export abstract class AbstractWriteManager
+export abstract class AbstractWriterManager
 {
   #logger = LoggerManager.getLogger(LoggerCategory.WRITE)
   grabber: PointerEventGrabber

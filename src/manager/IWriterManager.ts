@@ -1,10 +1,11 @@
 import { InkEditor } from "../editor";
 import { PointerInfo } from "../grabber";
+import { IModel } from "../model";
 import { TStyle } from "../style";
 import { IIStroke, SymbolType, TIISymbol, TPointer } from "../symbol";
-import { AbstractWriteManager } from "./AbstractWriteManager";
+import { AbstractWriterManager } from "./AbstractWriterManager";
 
-export class IWriteManager extends AbstractWriteManager {
+export class IWriterManager extends AbstractWriterManager {
   editor: InkEditor
 
   constructor(editor: InkEditor) {
@@ -12,28 +13,33 @@ export class IWriteManager extends AbstractWriteManager {
     this.editor = editor
   }
 
-  protected createCurrentSymbol(pointer: TPointer, style: TStyle, pointerType: string): TIISymbol {
-    this.model.currentSymbol = new IIStroke(style, pointerType)
-    this.model.currentSymbol.addPointer(pointer)
-    return this.model.currentSymbol
+  get model(): IModel
+  {
+    return this.editor.model
   }
 
-  protected updateCurrentSymbol(pointer: TPointer): TIISymbol {
-    if (this.model.currentSymbol?.type === SymbolType.Stroke) {
-      this.model.currentSymbol.addPointer(pointer)
+  protected createCurrentSymbol(pointer: TPointer, style: TStyle, pointerType: string): TIISymbol {
+    this.model.currentStroke = new IIStroke(style, pointerType)
+    this.model.currentStroke.addPointer(pointer)
+    return this.model.currentStroke
+  }
+
+  protected updateCurrentSymbol(pointer: TPointer): IIStroke {
+    if (this.model.currentStroke?.type === SymbolType.Stroke) {
+      this.model.currentStroke.addPointer(pointer)
     }
-    return this.model.currentSymbol!
+    return this.model.currentStroke!
   }
 
   async end(info: PointerInfo): Promise<void> {
     const localPointer = info.pointer
     const localSymbol = this.updateCurrentSymbol(localPointer)
-    this.model.currentSymbol = undefined
+    this.model.currentStroke = undefined
 
     this.renderer.drawSymbol(localSymbol!)
-    this.model.addSymbol(localSymbol)
+    this.model.addStroke(localSymbol)
     if (localSymbol.type === SymbolType.Stroke) {
-      const exports = await this.editor.recognizer.send(this.model.symbols as IIStroke[])
+      const exports = await this.editor.recognizer.send(this.model.strokes as IIStroke[])
       this.model.mergeExport(exports)
     }
     this.editor.history.push(this.model, {added: [localSymbol]})

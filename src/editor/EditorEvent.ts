@@ -1,6 +1,6 @@
 import { EditorTool } from "../Constants"
 import { LoggerManager, LoggerCategory } from "../logger"
-import { TExport } from "../model"
+import { TExport, TExportV2 } from "../model"
 import { IIStroke, TIISymbol, TSymbol } from "../symbol"
 import { THistoryContext } from "../history"
 import { TGestureType } from "../gesture"
@@ -173,17 +173,17 @@ export class EditorEvent extends EventTarget
     )
   }
 
-  emitExported(exports: TExport): void
+  emitExported(exports: TExport | TExportV2): void
   {
     this.#logger.info("emitExported", { exports })
     this.emit(EditorEventName.EXPORTED, exports)
   }
-  addExportedListener(callback: (exports: TExport) => void): void
+  addExportedListener(callback: (exports: TExport | TExportV2) => void): void
   {
     this.#logger.info("addExportedListener", { callback })
     this.addEventListener(
       EditorEventName.EXPORTED,
-      (evt: unknown) => callback((evt as CustomEvent).detail as TExport),
+      (evt: unknown) => callback((evt as CustomEvent).detail as TExport | TExportV2),
       { signal: this.abortController.signal }
     )
   }

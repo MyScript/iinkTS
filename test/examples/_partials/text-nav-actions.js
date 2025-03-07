@@ -42,7 +42,6 @@ export default {
             ])
           }
           await expect(page.locator(resultLocator)).toHaveText(hello.exports["text/plain"].at(-1))
-          console.log('exports["application/vnd.myscript.jiix"]: ', exports['application/vnd.myscript.jiix']);
           expect(exports['application/vnd.myscript.jiix']).toStrictEqual(hello.exports['text/plain'].at(-1))
         })
 

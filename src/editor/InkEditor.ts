@@ -8,7 +8,8 @@ import { IHistoryManager } from "../history"
 import { PartialDeep } from "../utils"
 import { AbstractEditor, EditorOptionsBase } from "./AbstractEditor"
 import { InkEditorConfiguration, TInkEditorConfiguration } from "./InkEditorConfiguration"
-import { IWriteManager } from "../manager/IWriterManager"
+import { IWriterManager } from "../manager/IWriterManager"
+import { IDebugSVGManager } from "../manager"
 
 /**
  * @group Editor
@@ -34,7 +35,8 @@ export class InkEditor extends AbstractEditor {
   renderer: SVGRenderer
   recognizer: RecognizerHTTPV2
   history: IHistoryManager
-  writer : IWriteManager
+  writer : IWriterManager
+  debugger: IDebugSVGManager
   #tool: EditorTool = EditorTool.Write
 
   constructor(rootElement: HTMLElement, options?: TInkEditorOptions) {
@@ -54,7 +56,8 @@ export class InkEditor extends AbstractEditor {
     this.renderer = new SVGRenderer(this.#configuration.rendering)
 
     this.#model = new IModel()
-    this.writer = new IWriteManager(this)
+    this.writer = new IWriterManager(this)
+    this.debugger = new IDebugSVGManager(this)
     this.tool = EditorTool.Write
     this.history = new IHistoryManager(this.#configuration["undo-redo"], this.event)
   }
@@ -138,12 +141,12 @@ export class InkEditor extends AbstractEditor {
   updateSymbolsStyle(symbolIds: string[], style: PartialDeep<TStyle>): void
     {
       this.logger.info("updateSymbolsStyle", { symbolIds, style })
-      this.model.symbols.forEach(s =>
+      this.model.strokes.forEach(s =>
       {
         if (symbolIds.includes(s.id)) {
           s.style = Object.assign({}, s.style, style)
           this.renderer.drawSymbol(s)
-          this.model.updateSymbol(s)
+          this.model.updateStroke(s)
           s.modificationDate = Date.now()
         }
       })
@@ -162,7 +165,7 @@ export class InkEditor extends AbstractEditor {
   async undo(): Promise<void> {
     this.logger.info("undo")
     const previousStackItem = this.history.undo()
-    const modifications = previousStackItem.model.extractDifferenceSymbols(this.model)
+    const modifications = previousStackItem.model.extractDifferenceStrokes(this.model)
     this.#model = previousStackItem.model.clone()
     this.event.emitExported(this.#model.exports as TExport)
     modifications.removed.forEach(s => this.renderer.removeSymbol(s.id))
@@ -173,7 +176,7 @@ export class InkEditor extends AbstractEditor {
   async redo(): Promise<void> {
     this.logger.info("redo")
     const previousStackItem = this.history.redo()
-    const modifications = previousStackItem.model.extractDifferenceSymbols(this.model)
+    const modifications = previousStackItem.model.extractDifferenceStrokes(this.model)
     this.#model = previousStackItem.model.clone()
     this.event.emitExported(this.#model.exports as TExport)
     modifications.removed.forEach(s => this.renderer.removeSymbol(s.id))
@@ -183,7 +186,7 @@ export class InkEditor extends AbstractEditor {
 
   async clear(): Promise<void> {
     this.logger.info("clear")
-    const erased = this.model.symbols
+    const erased = this.model.strokes
     this.model.clear()
     this.history.push(this.model, { erased })
     this.renderer.clear()

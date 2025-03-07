@@ -15,6 +15,7 @@ export class IIModel
   #logger = LoggerManager.getLogger(LoggerCategory.MODEL)
   readonly creationTime: number
   modificationDate: number
+  currentSymbol?: TIISymbol
   symbols: TIISymbol[]
   exports?: TExport
   converts?: TExport
@@ -282,6 +283,7 @@ export class IIModel
     this.#logger.info("clear")
     this.modificationDate = Date.now()
     this.symbols = []
+    this.currentSymbol = undefined
     this.exports = undefined
     this.converts = undefined
     this.idle = true
