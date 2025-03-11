@@ -73,6 +73,7 @@ test.describe("Math Recognizer Iink", () => {
     test("should clear", async ({ page }) => {
       const [exportedDatas] = await Promise.all([
         waitForExportedEvent(page),
+        waitForChangedEvent(page),
         writeStrokes(page, one.strokes),
       ])
 

@@ -1,7 +1,7 @@
 import { InteractiveInkEditorMock } from "../__mocks__/InteractiveInkEditorMock"
 import
 {
-  IIWriteManager,
+  IIWriterManager,
   DefaultStyle,
   SymbolType,
   TPointer,
@@ -15,12 +15,12 @@ import
   PointerInfo
 } from "../../../src/iink"
 
-describe("IIWriteManager.ts", () =>
+describe("IIWriterManager.ts", () =>
 {
   test("should create", () =>
   {
     const editor = new InteractiveInkEditorMock()
-    const manager = new IIWriteManager(editor)
+    const manager = new IIWriterManager(editor)
     expect(manager).toBeDefined()
   })
 
@@ -30,7 +30,7 @@ describe("IIWriteManager.ts", () =>
     editor.recognizer.init = jest.fn(() => Promise.resolve())
     editor.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
 
-    const manager = new IIWriteManager(editor)
+    const manager = new IIWriterManager(editor)
     manager.renderer.drawSymbol = jest.fn()
 
     editor.init()

@@ -32,7 +32,7 @@ import { TStyle } from "../style"
 import
 {
   IIConversionManager,
-  IIWriteManager,
+  IIWriterManager,
   IISelectionManager,
   IIResizeManager,
   IIRotationManager,
@@ -85,7 +85,7 @@ export class InteractiveInkEditor extends AbstractEditor
   #penStyle: TStyle
 
   history: IIHistoryManager
-  writer: IIWriteManager
+  writer: IIWriterManager
   eraser: IIEraseManager
   gesture: IIGestureManager
   resizer: IIResizeManager
@@ -124,7 +124,7 @@ export class InteractiveInkEditor extends AbstractEditor
 
     this.history = new IIHistoryManager(this.#configuration["undo-redo"], this.event)
 
-    this.writer = new IIWriteManager(this)
+    this.writer = new IIWriterManager(this)
     this.eraser = new IIEraseManager(this)
     this.selector = new IISelectionManager(this)
     this.move = new IIMoveManager(this)

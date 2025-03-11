@@ -30,7 +30,7 @@ import { AbstractWriterManager } from "./AbstractWriterManager"
 /**
  * @group Manager
  */
-export class IIWriteManager extends AbstractWriterManager
+export class IIWriterManager extends AbstractWriterManager
 {
   #tool: EditorWriteTool = EditorWriteTool.Pencil
   detectGesture: boolean = true
