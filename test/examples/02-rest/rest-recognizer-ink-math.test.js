@@ -4,7 +4,7 @@ import {
   writeStrokes,
   waitForExportedEvent,
   getEditorExports,
-  getEditorSymbols,
+  getEditorStrokes,
   waitForChangedEvent,
 } from "../helper"
 import one from "../__dataset__/1"
@@ -102,21 +102,21 @@ test.describe("Math Recognizer Iink", () => {
 
       await test.step("should undo last stroke", async () => {
         await Promise.all([waitForChangedEvent(page), page.click("#undo")])
-        expect(await getEditorSymbols(page)).toHaveLength(
+        expect(await getEditorStrokes(page)).toHaveLength(
           equation.strokes.length - 1
         )
       })
 
       await test.step("should undo last stroke", async () => {
         await Promise.all([waitForChangedEvent(page), page.click("#undo")])
-        expect(await getEditorSymbols(page)).toHaveLength(
+        expect(await getEditorStrokes(page)).toHaveLength(
           equation.strokes.length - 2
         )
       })
 
       await test.step("should undo last stroke", async () => {
         await Promise.all([waitForChangedEvent(page), page.click("#redo")])
-        expect(await getEditorSymbols(page)).toHaveLength(
+        expect(await getEditorStrokes(page)).toHaveLength(
           equation.strokes.length - 1
         )
       })

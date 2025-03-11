@@ -99,6 +99,12 @@ export const getEditorSymbols = async (page) => page.evaluate("editor.model.symb
 
 /**
  * @param {Page} page - Playwright Page
+ * @returns Promise<TExportV2>
+ */
+export const getEditorStrokes = async (page) => page.evaluate("editor.model.strokes");
+
+/**
+ * @param {Page} page - Playwright Page
  * @returns Promise<TExport>
  */
 export const callEditorExport = async (page, type) => {
