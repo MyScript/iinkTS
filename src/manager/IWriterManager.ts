@@ -36,9 +36,9 @@ export class IWriterManager extends AbstractWriterManager {
     const localPointer = info.pointer
     const localSymbol = this.updateCurrentSymbol(localPointer)
     this.model.currentStroke = undefined
-    this.editor.history.push(this.model, { added: [localSymbol] })
     this.renderer.drawSymbol(localSymbol!)
     this.model.addStroke(localSymbol)
+    this.editor.history.push(this.model, { added: [localSymbol] })
     const deferred = new DeferredPromise<void>()
 
     if (this.editor.configuration.triggers.exportContent !== "DEMAND") {
@@ -46,11 +46,13 @@ export class IWriterManager extends AbstractWriterManager {
       const currentModel = this.model.clone()
       this.#exportTimer = setTimeout(async () => {
         try {
-
           const exports = await this.editor.recognizer.send(this.model.strokes as IIStroke[])
-          this.model.mergeExport(exports)
+          currentModel.mergeExport(exports)
+          if (this.model.modificationDate === currentModel.modificationDate) {
+            this.model.exports = currentModel.exports
+          }
           this.editor.history.updateModelStack(currentModel)
-          this.editor.event.emitExported(this.model.exports || {})
+          this.editor.event.emitExported(currentModel.exports || {})
 
           deferred.resolve()
         } catch (error) {
