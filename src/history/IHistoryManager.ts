@@ -33,8 +33,7 @@ export type TIHistoryStackItem = {
 /**
  * @group History
  */
-export class IHistoryManager
-{
+export class IHistoryManager {
   #logger = LoggerManager.getLogger(LoggerCategory.HISTORY)
 
   configuration: THistoryConfiguration
@@ -42,8 +41,7 @@ export class IHistoryManager
   context: THistoryContext
   stack: TIHistoryStackItem[]
 
-  constructor(configuration: THistoryConfiguration, event: EditorEvent)
-  {
+  constructor(configuration: THistoryConfiguration, event: EditorEvent) {
     this.#logger.info("constructor", { configuration })
     this.configuration = configuration
     this.event = event
@@ -51,29 +49,36 @@ export class IHistoryManager
     this.stack = []
   }
 
-  private updateContext(): void
-  {
+  private updateContext(): void {
     this.context.canRedo = this.stack.length - 1 > this.context.stackIndex
     this.context.canUndo = this.context.stackIndex > 0
     this.context.empty = this.stack[this.context.stackIndex].model.strokes.length === 0
   }
 
-  isChangesEmpty(changes: TIHistoryChanges): boolean
-  {
+  updateModelStack(model: IModel): void {
+    this.#logger.info("updateModelStack", { model })
+    const stackIdx = this.stack.findIndex(s => s.model.modificationDate === model.modificationDate)
+    if (stackIdx > -1) {
+      this.stack[stackIdx].model = model
+      this.updateContext()
+    }
+    this.updateContext()
+    this.event.emitChanged(this.context)
+  }
+
+  isChangesEmpty(changes: TIHistoryChanges): boolean {
     return !(
       changes.added?.length ||
       changes.erased?.length
     )
   }
 
-  init(model: IModel): void
-  {
+  init(model: IModel): void {
     this.stack.push({ model: model.clone(), changes: {} })
     this.event.emitChanged(this.context)
   }
 
-  push(model: IModel, changes: TIHistoryChanges): void
-  {
+  push(model: IModel, changes: TIHistoryChanges): void {
     this.#logger.info("push", { model, changes })
     if (this.isChangesEmpty(changes)) return
 
@@ -93,16 +98,14 @@ export class IHistoryManager
     this.event.emitChanged(this.context)
   }
 
-  pop(): void
-  {
+  pop(): void {
     this.#logger.info("pop")
     this.stack.pop()
     this.context.stackIndex = this.stack.length - 1
     this.updateContext()
   }
 
-  protected reverseChanges(changes: TIHistoryChanges): TIHistoryChanges
-  {
+  protected reverseChanges(changes: TIHistoryChanges): TIHistoryChanges {
     const reversedChanges: TIHistoryChanges = {}
     if (changes.added) {
       reversedChanges.erased = changes.added
@@ -113,8 +116,7 @@ export class IHistoryManager
     return reversedChanges
   }
 
-  undo(): TIHistoryStackItem
-  {
+  undo(): TIHistoryStackItem {
     this.#logger.info("undo")
     const currentStackItem = this.stack[this.context.stackIndex]
     if (this.context.canUndo) {
@@ -130,8 +132,7 @@ export class IHistoryManager
     }
   }
 
-  redo(): TIHistoryStackItem
-  {
+  redo(): TIHistoryStackItem {
     this.#logger.info("redo")
     if (this.context.canRedo) {
       this.context.stackIndex++
@@ -143,8 +144,7 @@ export class IHistoryManager
     return nextStackItem
   }
 
-  clear(): void
-  {
+  clear(): void {
     this.context = getInitialHistoryContext()
     this.stack = []
   }
