@@ -12,6 +12,7 @@ export default {
 
       !skipClear && test("should clear", async ({ page }) => {
         const [exportBeforeClear] = await Promise.all([
+          waitForExportedEvent(page),
           waitForChangedEvent(page),
           writeStrokes(page, h.strokes)
         ])
@@ -19,6 +20,7 @@ export default {
         await expect(page.locator(resultLocator)).toHaveText(h.exports["text/plain"])
 
         const [exportAfterClear] = await Promise.all([
+          waitForExportedEvent(page),
           waitForChangedEvent(page),
           page.click("#clear")
         ])
