@@ -49,7 +49,7 @@ export type JIIXV2ElementBase<T = TRecognitionV2Type> = JIIXV2Base & {
 /**
  * @group Exports
  */
-export type JIIXV2WordSpans = {
+export type JIIXV2LineSpan = {
   type: string
   range: JIIXV2RangeItem[]
   label: string
@@ -58,27 +58,36 @@ export type JIIXV2WordSpans = {
 /**
  * @group Exports
  */
-export type JIIXV2WordLines = {
+export type JIIXV2Line = {
   type: string
   range: JIIXV2RangeItem[]
   label: string
-  spans: JIIXV2WordSpans[]
+  spans: JIIXV2LineSpan[]
 }
 
 /**
  * @group Exports
  * @remarks {@link https://developer.myscript.com/docs/interactive-ink/latest/reference/jiix/#word-object | Word object}
  */
-export type JIIXV2Word = JIIXV2Base & TJIIXWord & {
-  lines: JIIXV2WordLines[]
+export type JIIXV2Expression = JIIXV2Base & TJIIXWord & {
+  lines: JIIXV2Line[]
 }
 
 /**
  * @group Exports
- * @remarks {@link https://developer.myscript.com/docs/interactive-ink/latest/reference/JIIXV2/#text-interpretation | Text Element }
+ * @remarks {@link https://developer.myscript.com/docs/interactive-ink/latest/reference/jiix#text-interpretation | Text Element }
  */
-export type JIIXV2TextElement = JIIXV2ElementBase<"Text"> &  JIIXV2Word & {
-}
+export type JIIXV2TextElement = JIIXV2ElementBase<"Text"> & JIIXV2Expression
+
+/**
+ * @group Exports
+ * @remarks {@link https://developer.myscript.com/docs/interactive-ink/latest/reference/jiix#text-interpretation | Math Element }
+ */
+export type JIIXV2MathElement = JIIXV2ElementBase<"Math"> & JIIXV2Expression
+
+/** @group Exports
+ */
+export type JIIXV2DrawingElement = JIIXV2ElementBase<"Drawing"> & JIIXV2Expression
 
 /**
  * @group Exports
@@ -322,7 +331,7 @@ export type JIIXV2ShapeElement = JIIXV2Circle | JIIXV2Ellipse | JIIXV2ShapePolyg
  * @group Exports
  * @remarks Only in InkRecognizer () activated with recognition.export.JIIXV2.range = true
  */
-export type JIIXV2RawContentBase<T = Omit<TRecognitionV2Type, "MATH">> = {
+export type JIIXV2RawContentBase<T = TRecognitionV2Type> = {
   type: T
   range?: JIIXV2Range
 }
@@ -330,7 +339,7 @@ export type JIIXV2RawContentBase<T = Omit<TRecognitionV2Type, "MATH">> = {
 /**
  * @group Exports
  */
-export type JIIXV2RawContentItemText = JIIXV2RawContentBase<"Text"> & JIIXV2Word
+export type JIIXV2RawContentItemText = JIIXV2RawContentBase<"Text"> & JIIXV2Expression
 
 /**
  * @group Exports
@@ -366,6 +375,8 @@ export type JIIXV2RawContentElement = JIIXV2RawContentItemText | JIIXV2RawConten
 export type JIIXV2Element =
   JIIXV2TextElement |
   JIIXV2ShapeElement |
+  JIIXV2MathElement |
+  JIIXV2DrawingElement |
   JIIXV2RawContentElement
 
 /**
@@ -377,7 +388,7 @@ export type JIIXV2Export = JIIXV2Base & {
   version: string
   elements?: JIIXV2Element[]
   label?: string
-  words?: JIIXV2Word[]
+  words?: JIIXV2Expression[]
 }
 
 /**
