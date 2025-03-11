@@ -106,18 +106,18 @@ test.describe("Rest Shape Recognizer Ink", () => {
         ])
 
         let strokes = await editorEl.evaluate(
-          (node) => node.editor.model.symbols
+          (node) => node.editor.model.strokes
         )
         expect(strokes.length).toEqual(rectangleShape.strokes.length)
 
         await Promise.all([waitForExportedEvent(page), page.click("#undo")])
 
-        strokes = await editorEl.evaluate((node) => node.editor.model.symbols)
+        strokes = await editorEl.evaluate((node) => node.editor.model.strokes)
         expect(strokes.length).toEqual(rectangleShape.strokes.length - 1)
 
         await Promise.all([waitForExportedEvent(page), page.click("#redo")])
 
-        strokes = await editorEl.evaluate((node) => node.editor.model.symbols)
+        strokes = await editorEl.evaluate((node) => node.editor.model.strokes)
         expect(strokes.length).toEqual(rectangleShape.strokes.length)
       })
     })

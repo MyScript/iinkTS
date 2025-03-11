@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test"
-import { writeStrokes, writePointers, waitForChangedEvent, callEditorIdle, getEditorConfiguration } from "../helper"
+import { writeStrokes, writePointers, waitForChangedEvent, callEditorIdle, getEditorConfiguration, waitForExportedEvent } from "../helper"
 import h from "../__dataset__/h"
 import hello from "../__dataset__/helloMultipleStrokes"
 
@@ -37,16 +37,17 @@ export default {
           let exports
           for(const s of hello.strokes) {
             [exports] = await Promise.all([
-              waitForChangedEvent(page),
+              waitForExportedEvent(page),
               writePointers(page, s.pointers),
             ])
           }
           await expect(page.locator(resultLocator)).toHaveText(hello.exports["text/plain"].at(-1))
-          expect(exports['application/vnd.myscript.jiix']).toStrictEqual(hello.exports['text/plain'].at(-1))
+          expect(exports['application/vnd.myscript.jiix'].label).toStrictEqual(hello.exports['text/plain'].at(-1))
         })
 
         await test.step("should undo last stroke written", async () => {
           const [undoExports] = await Promise.all([
+            waitForExportedEvent(page),
             waitForChangedEvent(page),
             page.click('#undo')
           ])
@@ -56,6 +57,7 @@ export default {
 
         await test.step("should undo penultimate stroke written", async () => {
           const [undo2Exports] = await Promise.all([
+            waitForExportedEvent(page),
             waitForChangedEvent(page),
             page.click('#undo')
           ])
@@ -65,6 +67,7 @@ export default {
 
         await test.step("should redo penultimate stroke written", async () => {
           const [redoExports] = await Promise.all([
+            waitForExportedEvent(page),
             waitForChangedEvent(page),
             page.click('#redo')
           ])
