@@ -4,7 +4,8 @@ export * from "./Editor"
 export * from "./EditorEvent"
 export * from "./EditorLayer"
 
-export * from "./EditorTriggerConfiguration"
+export * from "./IEditorTriggerConfiguration"
+export * from "./IIEditorTriggerConfiguration"
 
 export * from "./InkEditorDeprecated"
 export * from "./InkEditorDeprecatedConfiguration"
