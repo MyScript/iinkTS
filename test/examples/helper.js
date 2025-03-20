@@ -59,6 +59,38 @@ export const writeStrokes = async (page, strokes, offsetTop = 0, offsetLeft = 0)
     await writePointers(page, s.pointers, offsetTop, offsetLeft);
   }
 };
+/**
+ *
+ * @param {Page} page - Playwright Page
+ * @param {string|object} expectedResult
+ * @param {string} exportType ['text/plain', 'application/x-latex', 'application/x-mathml']
+ * @param {number} [nbRetry=5]
+ * @returns
+ */
+export const getExportedResults = async (page, expectedResult, exportType, nbRetry = 5) => {
+  return new Promise(async (resolve, reject) => {
+    let exported = null;
+    for (let i = 0; i < nbRetry; i++) {
+      exported = await getEditorExportsType(page, exportType);
+      if (exported) {
+        switch (exportType) {
+          case 'text/plain':
+          case 'application/x-latex':
+          case 'application/x-mathml':
+            if (exported === expectedResult) {
+              return resolve(exported);
+            }
+            break;
+        }
+      }
+      // eslint-disable-next-line playwright/no-wait-for-timeout
+      await page.waitForTimeout(500);
+
+    }
+    return reject(`Exported ${exportType} not found`);
+  });
+}
+
 
 /**
  * @param {Page} page - Playwright Page
@@ -85,7 +117,7 @@ export const getEditorExports = async (page) => page.evaluate("editor.model.expo
  * @param {Page} page - Playwright Page
  * @returns Promise<TExport>
  */
-export const getEditorExportsType = async (page, type) => page.evaluate(`editor.model.exports['${type}']`);
+export const getEditorExportsType = async (page, type) => page.evaluate(`editor.model?.exports?.['${type}']`);
 /**
  * @param {Page} page - Playwright Page
  * @returns Promise<TExport>

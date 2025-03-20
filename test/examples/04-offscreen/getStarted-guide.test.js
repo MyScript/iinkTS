@@ -88,7 +88,7 @@ test.describe("Offscreen Get Started - Guides", () => {
         }
       })
 
-      await test.step("verify no pointes", async () => {
+      await test.step("verify no points", async () => {
         await expect(page.locator(locator.guidesWrapper + ` circle`)).toHaveCount(0)
       })
     })
@@ -134,7 +134,7 @@ test.describe("Offscreen Get Started - Guides", () => {
         }
       })
 
-      await test.step("verify no pointes", async () => {
+      await test.step("verify there is no point", async () => {
         await expect(page.locator(locator.guidesWrapper + ` circle`)).toHaveCount(0)
       })
     })
