@@ -1,7 +1,7 @@
 import { LoggerCategory, LoggerManager } from "../logger"
 import { TExport, TJIIXExport } from "../model"
 import { TStroke, TStrokeToSend } from "../symbol"
-import { computeHmac, isVersionSuperiorOrEqual, PartialDeep } from "../utils"
+import { computeHmac, getApiInfos, isVersionSuperiorOrEqual, PartialDeep } from "../utils"
 import { RecognizerError } from "./RecognizerError"
 import { RecognizerHTTPV2Configuration, TRecognizerHTTPV2Configuration } from "./RecognizerHTTPV2Configuration"
 import { TDiagramConfiguration, TExportConfiguration, TMathConfiguration, TRawContentConfiguration, TTextConfiguration } from "./recognition"
@@ -127,6 +127,9 @@ export class RecognizerHTTPV2 {
     }
     headers.append("Content-Type", "application/json")
 
+    if (!this.configuration.server.version) {
+      this.configuration.server.version = (await getApiInfos(this.configuration)).version
+    }
 
     if (this.configuration.server.version && isVersionSuperiorOrEqual(this.configuration.server.version, "2.0.4")) {
       headers.append("myscript-client-name", "iink-ts")
