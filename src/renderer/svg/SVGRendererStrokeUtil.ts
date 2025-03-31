@@ -1,14 +1,14 @@
 import { DecoratorKind, IIStroke, TPointer } from "../../symbol"
 import { DefaultStyle } from "../../style"
 import { computeAngleAxeRadian, computeLinksPointers, computeMiddlePointer } from "../../utils"
-import { IISVGRendererDecoratorUtil } from "./IISVGRendererDecoratorUtil"
-import { IISVGRendererConst } from "./IISVGRendererConst"
+import { SVGRendererDecoratorUtil } from "./SVGRendererDecoratorUtil"
+import { SVGRendererConst } from "./SVGRendererConst"
 import { SVGBuilder } from "./SVGBuilder"
 
 /**
  * @group Renderer
  */
-export class IISVGRendererStrokeUtil
+export class SVGRendererStrokeUtil
 {
 
   protected static getArcPath(center: TPointer, radius: number): string
@@ -105,10 +105,10 @@ export class IISVGRendererStrokeUtil
       "stroke-linejoin": "round",
     }
     if (stroke.selected) {
-      attrs["filter"] = `url(#${ IISVGRendererConst.selectionFilterId })`
+      attrs["filter"] = `url(#${ SVGRendererConst.selectionFilterId })`
     }
     if (stroke.deleting) {
-      attrs["filter"] = `url(#${ IISVGRendererConst.removalFilterId })`
+      attrs["filter"] = `url(#${ SVGRendererConst.removalFilterId })`
     }
 
     const strokeGroup = SVGBuilder.createGroup(attrs)
@@ -116,7 +116,7 @@ export class IISVGRendererStrokeUtil
     const strokeAttrs: { [key: string]: string } = {
       "fill": stroke.style.color || DefaultStyle.color!,
       "stroke-width": stroke.style.width.toString(),
-      "d": IISVGRendererStrokeUtil.getSVGPath(stroke)
+      "d": SVGRendererStrokeUtil.getSVGPath(stroke)
     }
     if (stroke.style.opacity) {
       strokeAttrs.opacity = stroke.style.opacity.toString()
@@ -125,7 +125,7 @@ export class IISVGRendererStrokeUtil
 
     stroke.decorators.forEach(d =>
     {
-      const deco = IISVGRendererDecoratorUtil.getSVGElement(d, stroke)
+      const deco = SVGRendererDecoratorUtil.getSVGElement(d, stroke)
       if (deco) {
         if (d.kind === DecoratorKind.Highlight) {
           strokeGroup.prepend(deco)

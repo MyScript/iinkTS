@@ -16,7 +16,7 @@ import
   RecognizedKind,
 } from "../symbol"
 import { RecognizerWebSocket } from "../recognizer"
-import { IISVGRenderer } from "../renderer"
+import { SVGRenderer } from "../renderer"
 import { IIHistoryManager, TIIHistoryChanges } from "../history"
 import { computeAverage, isBetween, PartialDeep } from "../utils"
 import { IITranslateManager } from "../manager/IITranslateManager"
@@ -46,7 +46,7 @@ export class IIGestureManager
     this.insertAction = gestureAction?.insert || DefaultGestureConfiguration.insert
   }
 
-  get renderer(): IISVGRenderer
+  get renderer(): SVGRenderer
   {
     return this.editor.renderer
   }

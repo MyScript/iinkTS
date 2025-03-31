@@ -1,7 +1,7 @@
 import { LoggerCategory, LoggerManager } from "../logger"
 import { IIModel } from "../model"
 import { Box, IIText, SymbolType, TIISymbol, TIISymbolChar } from "../symbol"
-import { IISVGRenderer } from "../renderer"
+import { SVGRenderer } from "../renderer"
 import { InteractiveInkEditor } from "../editor/InteractiveInkEditor"
 
 /**
@@ -18,7 +18,7 @@ export class IITextManager
     this.editor = editor
   }
 
-  get renderer(): IISVGRenderer
+  get renderer(): SVGRenderer
   {
     return this.editor.renderer
   }

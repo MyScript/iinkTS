@@ -1,7 +1,7 @@
 import { buildOICircle, buildOIEraser, buildOIGroup, buildOILine, buildOIStroke, buildOIText } from "../helpers"
 import
 {
-  IISVGRenderer,
+  SVGRenderer,
   DefaultIIRendererConfiguration,
   TIIRendererConfiguration,
   TIISymbol,
@@ -9,11 +9,11 @@ import
   TIISymbolChar,
 } from "../../../src/iink"
 
-describe("IISVGRenderer.ts", () =>
+describe("SVGRenderer.ts", () =>
 {
   test("should instanciate", () =>
   {
-    const renderer = new IISVGRenderer(DefaultIIRendererConfiguration)
+    const renderer = new SVGRenderer(DefaultIIRendererConfiguration)
     expect(renderer).toBeDefined()
     expect(renderer.configuration).toEqual(DefaultIIRendererConfiguration)
   })
@@ -21,7 +21,7 @@ describe("IISVGRenderer.ts", () =>
   describe("init", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const renderer = new IISVGRenderer(DefaultIIRendererConfiguration)
+    const renderer = new SVGRenderer(DefaultIIRendererConfiguration)
     renderer.init(divElement)
     test("should create layer", () =>
     {
@@ -37,7 +37,7 @@ describe("IISVGRenderer.ts", () =>
       customConf.minHeight = customConf.guides.gap * 2
       customConf.minWidth = customConf.guides.gap * 2
       customConf.guides.type = "point"
-      const rendererCustom = new IISVGRenderer(customConf)
+      const rendererCustom = new SVGRenderer(customConf)
       rendererCustom.init(divElement)
       const guidesGroup = divElement.querySelector("#guides-wrapper") as SVGGElement
       expect(guidesGroup).toBeDefined()
@@ -49,7 +49,7 @@ describe("IISVGRenderer.ts", () =>
       const divElement: HTMLDivElement = document.createElement("div")
       const customConf = JSON.parse(JSON.stringify(DefaultIIRendererConfiguration)) as TIIRendererConfiguration
       customConf.guides.gap = 5
-      const rendererCustom = new IISVGRenderer(customConf)
+      const rendererCustom = new SVGRenderer(customConf)
       rendererCustom.init(divElement)
       const guidesGroup = divElement.querySelector("#guides-wrapper") as SVGGElement
       expect(guidesGroup).toBeDefined()
@@ -63,7 +63,7 @@ describe("IISVGRenderer.ts", () =>
       customConf.guides.type = "line"
       customConf.minHeight = customConf.guides.gap * 2
       customConf.minWidth = customConf.guides.gap * 2
-      const rendererCustom = new IISVGRenderer(customConf)
+      const rendererCustom = new SVGRenderer(customConf)
       rendererCustom.init(divElement)
       const guidesGroup = divElement.querySelector("#guides-wrapper") as SVGGElement
       expect(guidesGroup).toBeDefined()
@@ -77,7 +77,7 @@ describe("IISVGRenderer.ts", () =>
       customConf.guides.type = "grid"
       customConf.minHeight = customConf.guides.gap * 2
       customConf.minWidth = customConf.guides.gap * 2
-      const rendererCustom = new IISVGRenderer(customConf)
+      const rendererCustom = new SVGRenderer(customConf)
       rendererCustom.init(divElement)
       const guidesGroup = divElement.querySelector("#guides-wrapper") as SVGGElement
       expect(guidesGroup).toBeDefined()
@@ -89,7 +89,7 @@ describe("IISVGRenderer.ts", () =>
       const divElement: HTMLDivElement = document.createElement("div")
       const customConf = JSON.parse(JSON.stringify(DefaultIIRendererConfiguration))
       customConf.guides.type = "test"
-      const rendererCustom = new IISVGRenderer(customConf)
+      const rendererCustom = new SVGRenderer(customConf)
       rendererCustom.init(divElement)
       expect(console.error).toBeCalledTimes(1)
       expect(console.error).toBeCalledWith({ level: "error", message: ["Guide type unknow: test"], "from": "RENDERER.drawGuides" })
@@ -99,7 +99,7 @@ describe("IISVGRenderer.ts", () =>
       const divElement: HTMLDivElement = document.createElement("div")
       const customConf = JSON.parse(JSON.stringify(DefaultIIRendererConfiguration))
       customConf.guides.enable = false
-      const rendererCustom = new IISVGRenderer(customConf)
+      const rendererCustom = new SVGRenderer(customConf)
       rendererCustom.init(divElement)
       const element = divElement.querySelector("#guides-wrapper")
       expect(element).toBeNull()
@@ -109,7 +109,7 @@ describe("IISVGRenderer.ts", () =>
   describe("attribute", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const renderer = new IISVGRenderer(DefaultIIRendererConfiguration)
+    const renderer = new SVGRenderer(DefaultIIRendererConfiguration)
     renderer.init(divElement)
     const element = document.createElement("path")
     element.id = "attribut-test-id"
@@ -134,7 +134,7 @@ describe("IISVGRenderer.ts", () =>
   describe("element", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const renderer = new IISVGRenderer(DefaultIIRendererConfiguration)
+    const renderer = new SVGRenderer(DefaultIIRendererConfiguration)
     renderer.init(divElement)
 
     const elementToPreprend = document.createElement("path")
@@ -165,7 +165,7 @@ describe("IISVGRenderer.ts", () =>
   describe("symbol", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const renderer = new IISVGRenderer(DefaultIIRendererConfiguration)
+    const renderer = new SVGRenderer(DefaultIIRendererConfiguration)
     renderer.init(divElement)
 
     test("should write error if symbol type unknow", () =>
@@ -329,7 +329,7 @@ describe("IISVGRenderer.ts", () =>
   test("should drawCircle", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const renderer = new IISVGRenderer(DefaultIIRendererConfiguration)
+    const renderer = new SVGRenderer(DefaultIIRendererConfiguration)
     renderer.init(divElement)
     renderer.drawCircle({ x: 10, y: 5 }, 42, { id: "test", fill: "red" })
 
@@ -345,7 +345,7 @@ describe("IISVGRenderer.ts", () =>
   test("should drawRect", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const renderer = new IISVGRenderer(DefaultIIRendererConfiguration)
+    const renderer = new SVGRenderer(DefaultIIRendererConfiguration)
     renderer.init(divElement)
     renderer.drawRect({ height: 10, width: 5, x: 0, y: 2 }, { id: "test", stroke: "blue" })
 
@@ -362,7 +362,7 @@ describe("IISVGRenderer.ts", () =>
   test("should drawLine", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const renderer = new IISVGRenderer(DefaultIIRendererConfiguration)
+    const renderer = new SVGRenderer(DefaultIIRendererConfiguration)
     renderer.init(divElement)
     renderer.drawLine({ x: 0, y: 1 }, { x: 5, y: 10 }, { id: "test", stroke: "blue" })
 
@@ -379,7 +379,7 @@ describe("IISVGRenderer.ts", () =>
   describe("resize", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const renderer = new IISVGRenderer(DefaultIIRendererConfiguration)
+    const renderer = new SVGRenderer(DefaultIIRendererConfiguration)
     renderer.init(divElement)
 
     test("should update height, width & viewbox", () =>
@@ -404,7 +404,7 @@ describe("IISVGRenderer.ts", () =>
   describe("clearElements", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const renderer = new IISVGRenderer(DefaultIIRendererConfiguration)
+    const renderer = new SVGRenderer(DefaultIIRendererConfiguration)
     renderer.init(divElement)
 
     test("should clearElements by tagName", () =>
@@ -445,7 +445,7 @@ describe("IISVGRenderer.ts", () =>
   test("should clear", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const renderer = new IISVGRenderer(DefaultIIRendererConfiguration)
+    const renderer = new SVGRenderer(DefaultIIRendererConfiguration)
     renderer.init(divElement)
     const initChildNumber = renderer.layer.childElementCount
     const stroke = buildOIStroke()
@@ -458,7 +458,7 @@ describe("IISVGRenderer.ts", () =>
   test("should destroy", () =>
   {
     const divElement: HTMLDivElement = document.createElement("div")
-    const renderer = new IISVGRenderer(DefaultIIRendererConfiguration)
+    const renderer = new SVGRenderer(DefaultIIRendererConfiguration)
     renderer.init(divElement)
     expect(divElement.childElementCount).toEqual(1)
     renderer.destroy()

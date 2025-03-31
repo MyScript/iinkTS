@@ -2,7 +2,7 @@ import { ResizeDirection, SELECTION_MARGIN, SvgElementRole } from "../Constants"
 import { LoggerCategory, LoggerManager } from "../logger"
 import { IIModel } from "../model"
 import { Box, IIText, SymbolType, TBox, TIIEdge, TIISymbol, TPoint } from "../symbol"
-import { IISVGRenderer, SVGBuilder } from "../renderer"
+import { SVGRenderer, SVGBuilder } from "../renderer"
 import { IIResizeManager } from "./IIResizeManager"
 import { IIRotationManager } from "./IIRotationManager"
 import { IITranslateManager } from "./IITranslateManager"
@@ -39,7 +39,7 @@ export class IISelectionManager
     return this.editor.model
   }
 
-  get renderer(): IISVGRenderer
+  get renderer(): SVGRenderer
   {
     return this.editor.renderer
   }

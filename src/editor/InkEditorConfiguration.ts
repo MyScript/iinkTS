@@ -2,21 +2,21 @@ import { DefaultGrabberConfiguration, TGrabberConfiguration } from "../grabber"
 import { DefaultHistoryConfiguration, THistoryConfiguration } from "../history"
 import { DefaultLoggerConfiguration, TLoggerConfiguration } from "../logger"
 import { DefaultRecognizerHTTPV2Configuration, RecognizerHTTPV2Configuration, TRecognizerHTTPV2Configuration, TRecognizerHTTPV2RecognitionConfiguration, TServerHTTPConfiguration } from "../recognizer"
-import { DefaultRendererConfiguration, TRendererConfiguration } from "../renderer"
+import { DefaultIIRendererConfiguration, TIIRendererConfiguration } from "../renderer"
 import { DefaultStyle, TStyle } from "../style"
 import { convertPixelToMillimeter, mergeDeep, PartialDeep } from "../utils"
 import { TEditorConfiguration } from "./AbstractEditor"
-import { DefaultEditorTriggerConfiguration, TEditorTriggerConfiguration } from "./EditorTriggerConfiguration"
+import { DefaultIEditorTriggerConfiguration, TIEditorTriggerConfiguration } from "./IEditorTriggerConfiguration"
 
 
 /**
  * @group Editor
  */
 export type TInkEditorConfiguration = TEditorConfiguration & TRecognizerHTTPV2Configuration & {
-  renderer: TRendererConfiguration
+  rendering: TIIRendererConfiguration
   "undo-redo": THistoryConfiguration
   grabber: TGrabberConfiguration
-  triggers: TEditorTriggerConfiguration
+  triggers: TIEditorTriggerConfiguration
   logger: TLoggerConfiguration
   penStyle: TStyle
 }
@@ -28,9 +28,9 @@ export type TInkEditorConfiguration = TEditorConfiguration & TRecognizerHTTPV2Co
 export const DefaultInkEditorConfiguration: TInkEditorConfiguration = {
   server: DefaultRecognizerHTTPV2Configuration.server,
   recognition: DefaultRecognizerHTTPV2Configuration.recognition,
-  renderer: DefaultRendererConfiguration,
+  rendering: DefaultIIRendererConfiguration,
   grabber: DefaultGrabberConfiguration,
-  triggers: DefaultEditorTriggerConfiguration,
+  triggers: DefaultIEditorTriggerConfiguration,
   "undo-redo": DefaultHistoryConfiguration,
   logger: DefaultLoggerConfiguration,
   penStyle: DefaultStyle,
@@ -43,10 +43,10 @@ export class InkEditorConfiguration implements TInkEditorConfiguration
 {
   server: TServerHTTPConfiguration
   recognition: TRecognizerHTTPV2RecognitionConfiguration
-  renderer: TRendererConfiguration
+  rendering: TIIRendererConfiguration
   "undo-redo": THistoryConfiguration
   grabber: TGrabberConfiguration
-  triggers: TEditorTriggerConfiguration
+  triggers: TIEditorTriggerConfiguration
   logger: TLoggerConfiguration
   penStyle: TStyle
 
@@ -55,11 +55,11 @@ export class InkEditorConfiguration implements TInkEditorConfiguration
     const { server, recognition } = new RecognizerHTTPV2Configuration(configuration)
     this.server = server
     this.recognition = recognition
-    this.renderer = mergeDeep({}, DefaultInkEditorConfiguration.renderer, configuration?.renderer)
-    this.recognition.text.guides.enable = this.renderer.guides.enable
-    if (this.renderer.guides.enable)
+    this.rendering = mergeDeep({}, DefaultInkEditorConfiguration.rendering, configuration?.rendering)
+    this.recognition.text.guides.enable = this.rendering.guides.enable
+    if (this.rendering.guides.enable)
     {
-      this.recognition.text.guides["line-gap-mm"] = convertPixelToMillimeter(this.renderer.guides.gap)
+      this.recognition.text.guides["line-gap-mm"] = convertPixelToMillimeter(this.rendering.guides.gap)
     }
     this.grabber = mergeDeep({}, DefaultInkEditorConfiguration.grabber, configuration?.grabber)
     this["undo-redo"] = mergeDeep({}, DefaultInkEditorConfiguration["undo-redo"], configuration?.["undo-redo"])

@@ -5,7 +5,7 @@ import
   DefaultPenStyle,
   Model,
   TPointer,
-  TRecognitionType,
+  TRecognitionV2Type,
   TRecognizerHTTPV2Configuration,
   DefaultRecognizerHTTPV2Configuration
 } from "../../../src/iink"
@@ -30,7 +30,7 @@ describe("RecognizerHTTPV2.ts", () =>
     expect(rr).toBeDefined()
   })
 
-  const testDatas: { type: TRecognitionType, config: TRecognizerHTTPV2Configuration }[] = [
+  const testDatas: { type: TRecognitionV2Type, config: TRecognizerHTTPV2Configuration }[] = [
     {
       type: "TEXT",
       config: RecognizerHTTPV1TextConfiguration as unknown as TRecognizerHTTPV2Configuration

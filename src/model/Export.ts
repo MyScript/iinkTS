@@ -16,7 +16,7 @@ export enum ExportType
 
 /**
  * @group Exports
- * @remarks {@link https://developer.preprod.myscript.com/docs/interactive-ink/latest/reference/jiix  Element type}
+ * @remarks {@link https://developer.myscript.com/docs/interactive-ink/latest/reference/jiix  Element type}
  */
 export enum JIIXELementType
 {
@@ -28,7 +28,7 @@ export enum JIIXELementType
 
 /**
  * @group Exports
- * @remarks {@link https://developer.preprod.myscript.com/docs/interactive-ink/latest/reference/jiix/#diagram-item-blocks | Element node kind}
+ * @remarks {@link https://developer.myscript.com/docs/interactive-ink/latest/reference/jiix/#diagram-item-blocks | Element node kind}
  */
 export enum JIIXNodeKind
 {
@@ -53,7 +53,7 @@ export enum JIIXEdgeKind
 
 /**
  * @group Exports
- * @remarks {@link https://developer.preprod.myscript.com/docs/interactive-ink/latest/reference/jiix/#stroke-item | Stroke item}
+ * @remarks {@link https://developer.myscript.com/docs/interactive-ink/latest/reference/jiix/#stroke-item | Stroke item}
  */
 export type TJIIXStrokeItem = {
   type: "stroke"
@@ -84,7 +84,7 @@ export type TJIIXElementBase<T = string> = TJIIXBase & {
 
 /**
  * @group Exports
- * @remarks {@link https://developer.preprod.myscript.com/docs/interactive-ink/latest/reference/jiix/#word-object | Word object}
+ * @remarks {@link https://developer.myscript.com/docs/interactive-ink/latest/reference/jiix/#word-object | Word object}
  */
 export type TJIIXWord = TJIIXBase & {
   id?: string
@@ -96,7 +96,7 @@ export type TJIIXWord = TJIIXBase & {
 
 /**
  * @group Exports
- * @remarks {@link https://developer.preprod.myscript.com/docs/interactive-ink/latest/reference/jiix/#character-object | Character object}
+ * @remarks {@link https://developer.myscript.com/docs/interactive-ink/latest/reference/jiix/#character-object | Character object}
  */
 export type TJIIXChar = TJIIXBase & {
   label: string
@@ -107,7 +107,7 @@ export type TJIIXChar = TJIIXBase & {
 
 /**
  * @group Exports
- * @remarks {@link https://developer.preprod.myscript.com/docs/interactive-ink/latest/reference/jiix/#text-interpretation | Text Element }
+ * @remarks {@link https://developer.myscript.com/docs/interactive-ink/latest/reference/jiix/#text-interpretation | Text Element }
  */
 export type TJIIXLine = {
   "baseline-y": number
@@ -118,7 +118,7 @@ export type TJIIXLine = {
 
 /**
  * @group Exports
- * @remarks {@link https://developer.preprod.myscript.com/docs/interactive-ink/latest/reference/jiix/#text-interpretation | Text Element }
+ * @remarks {@link https://developer.myscript.com/docs/interactive-ink/latest/reference/jiix/#text-interpretation | Text Element }
  */
 export type TJIIXTextElement = TJIIXElementBase<JIIXELementType.Text> & {
   id: string
@@ -223,7 +223,7 @@ export type TJIIXEdgeElementBase<K = string> = TJIIXElementBase<JIIXELementType.
 
 /**
  * @group Exports
- * @remarks {@link https://developer.preprod.myscript.com/docs/interactive-ink/latest/reference/jiix/#line-item | Element line}
+ * @remarks {@link https://developer.myscript.com/docs/interactive-ink/latest/reference/jiix/#line-item | Element line}
  */
 export type TJIIXEdgeLine = TJIIXEdgeElementBase<JIIXEdgeKind.Line> & {
   x1: number
@@ -243,7 +243,7 @@ export type TJIIXEdgePolyEdge = TJIIXEdgeElementBase<JIIXEdgeKind.PolyEdge> & {
 
 /**
  * @group Exports
- * @remarks {@link https://developer.preprod.myscript.com/docs/interactive-ink/latest/reference/jiix/#arc-item | Element arc}
+ * @remarks {@link https://developer.myscript.com/docs/interactive-ink/latest/reference/jiix/#arc-item | Element arc}
  */
 export type TJIIXEdgeArc = TJIIXEdgeElementBase<JIIXEdgeKind.Arc> & {
   cx: number,
@@ -267,7 +267,7 @@ export type TJIIXEdgeElement =
 
 /**
  * @group Exports
- * @remarks {@link https://developer.preprod.myscript.com/docs/interactive-ink/latest/reference/web/jiix | Exports}
+ * @remarks {@link https://developer.myscript.com/docs/interactive-ink/latest/reference/web/jiix | Exports}
  */
 export type TJIIXElement =
   TJIIXTextElement |
@@ -295,7 +295,7 @@ export type TJIIXExport = {
  *
  * Attention the MIME types supported depend on the {@link TRecognitionType | type of recognition}
  *
- * {@link https://developer.preprod.myscript.com/docs/interactive-ink/latest/reference/jiix | Documentation}
+ * {@link https://developer.myscript.com/docs/interactive-ink/latest/reference/jiix | Documentation}
  */
 export type TExport = {
   /** @hidden */

@@ -1,14 +1,15 @@
 import { EditorTool } from "../Constants"
-import { PointerEventGrabber, PointerInfo } from "../grabber"
-import { Model, TExport } from "../model"
-import { TStroke, convertPartialStrokesToStrokes } from "../symbol"
+import { PointerEventGrabber } from "../grabber"
+import { IModel, TExport } from "../model"
 import { RecognizerHTTPV2 } from "../recognizer"
-import { CanvasRenderer } from "../renderer"
+import { SVGRenderer } from "../renderer"
 import { TStyle } from "../style"
-import { HistoryManager } from "../history"
-import { DeferredPromise, PartialDeep } from "../utils"
+import { IHistoryManager } from "../history"
+import { PartialDeep } from "../utils"
 import { AbstractEditor, EditorOptionsBase } from "./AbstractEditor"
 import { InkEditorConfiguration, TInkEditorConfiguration } from "./InkEditorConfiguration"
+import { IWriterManager } from "../manager/IWriterManager"
+import { IDebugSVGManager } from "../manager"
 
 /**
  * @group Editor
@@ -29,13 +30,13 @@ export type TInkEditorOptions = PartialDeep<EditorOptionsBase &
  */
 export class InkEditor extends AbstractEditor {
   #configuration: InkEditorConfiguration
-  #model: Model
-  #exportTimer?: ReturnType<typeof setTimeout>
+  #model: IModel
   #penStyle: TStyle
-  grabber: PointerEventGrabber
-  renderer: CanvasRenderer
+  renderer: SVGRenderer
   recognizer: RecognizerHTTPV2
-  history: HistoryManager
+  history: IHistoryManager
+  writer : IWriterManager
+  debugger: IDebugSVGManager
   #tool: EditorTool = EditorTool.Write
 
   constructor(rootElement: HTMLElement, options?: TInkEditorOptions) {
@@ -45,17 +46,6 @@ export class InkEditor extends AbstractEditor {
 
     this.#penStyle = Object.assign({}, this.#configuration.penStyle)
 
-    if (options?.override?.grabber) {
-      const CustomGrabber = options.override.grabber as unknown as typeof PointerEventGrabber
-      this.grabber = new CustomGrabber(this.#configuration.grabber)
-    }
-    else {
-      this.grabber = new PointerEventGrabber(this.#configuration.grabber)
-    }
-    this.grabber.onPointerDown = this.onPointerDown.bind(this)
-    this.grabber.onPointerMove = this.onPointerMove.bind(this)
-    this.grabber.onPointerUp = this.onPointerUp.bind(this)
-
     if (options?.override?.recognizer) {
       const CustomRecognizer = options.override.recognizer as unknown as typeof RecognizerHTTPV2
       this.recognizer = new CustomRecognizer(this.#configuration)
@@ -63,68 +53,13 @@ export class InkEditor extends AbstractEditor {
     else {
       this.recognizer = new RecognizerHTTPV2(this.#configuration)
     }
-    this.renderer = new CanvasRenderer(this.#configuration.renderer)
+    this.renderer = new SVGRenderer(this.#configuration.rendering)
 
+    this.#model = new IModel()
+    this.writer = new IWriterManager(this)
+    this.debugger = new IDebugSVGManager(this)
     this.tool = EditorTool.Write
-    this.#model = new Model()
-    this.history = new HistoryManager(this.#configuration["undo-redo"], this.event)
-  }
-
-  protected onPointerDown(info: PointerInfo): void {
-    this.logger.info("onPointerDown", { tool: this.tool, info })
-    switch (this.tool) {
-      case EditorTool.Erase: {
-        if (this.model.removeStrokesFromPoint(info.pointer).length > 0) {
-          this.renderer.drawModel(this.model)
-        }
-        break
-      }
-      case EditorTool.Write:
-        this.model.initCurrentStroke(info.pointer, info.pointerType, this.penStyle)
-        this.drawCurrentStroke()
-        break
-      default:
-        this.logger.warn("#onPointerDown", `onPointerDown tool unknow: "${this.tool}"`)
-        break
-    }
-  }
-
-  protected onPointerMove(info: PointerInfo): void {
-    this.logger.info("onPointerMove", { tool: this.tool, info })
-    switch (this.tool) {
-      case EditorTool.Erase: {
-        if (this.model.removeStrokesFromPoint(info.pointer).length > 0) {
-          this.renderer.drawModel(this.model)
-        }
-        break
-      }
-      case EditorTool.Write:
-        this.model.appendToCurrentStroke(info.pointer)
-        this.drawCurrentStroke()
-        break
-      default:
-        this.logger.warn("#onPointerMove", `onPointerMove tool unknow: "${this.tool}"`)
-        break
-    }
-  }
-
-  protected async onPointerUp(info: PointerInfo): Promise<void> {
-    this.logger.info("onPointerUp", { tool: this.tool, info })
-    switch (this.tool) {
-      case EditorTool.Erase:
-        this.model.removeStrokesFromPoint(info.pointer)
-        if (this.history.stack.at(-1)?.modificationDate !== this.model.modificationDate) {
-          await this.updateModelRendering()
-        }
-        break
-      case EditorTool.Write:
-        this.model.endCurrentStroke(info.pointer)
-        await this.updateModelRendering()
-        break
-      default:
-        this.logger.warn("#onPointerUp", `onPointerUp tool unknow: "${this.tool}"`)
-        break
-    }
+    this.history = new IHistoryManager(this.#configuration["undo-redo"], this.event)
   }
 
   get penStyle(): TStyle
@@ -150,19 +85,21 @@ export class InkEditor extends AbstractEditor {
   }
 
   protected setCursorStyle(): void {
+    this.writer.detach()
     switch (this.tool) {
       case EditorTool.Erase:
         this.layers.root.classList.remove("draw")
         this.layers.root.classList.add("erase")
         break
       default:
+        this.writer.attach(this.layers.root)
         this.layers.root.classList.add("draw")
         this.layers.root.classList.remove("erase")
         break
     }
   }
 
-  get model(): Model {
+  get model(): IModel {
     return this.#model
   }
 
@@ -175,14 +112,19 @@ export class InkEditor extends AbstractEditor {
       this.logger.info("initialize")
       this.layers.render()
       this.layers.showLoader()
+      this.tool = EditorTool.Write
+      this.renderer.init(this.layers.rendering)
 
       const compStyles = window.getComputedStyle(this.layers.root)
-      this.model.width = Math.max(parseInt(compStyles.width.replace("px", "")), this.#configuration.renderer.minWidth)
-      this.model.height = Math.max(parseInt(compStyles.height.replace("px", "")), this.#configuration.renderer.minHeight)
-      this.history.push(this.model)
-      this.layers.rendering.classList.add(this.configuration.recognition.type.toLowerCase().replace(" ", "-"))
-      this.renderer.init(this.layers.rendering, this.#configuration.renderer.guides.enable ? { x: this.#configuration.renderer.guides.gap, y: this.#configuration.renderer.guides.gap } : undefined)
-      this.grabber.attach(this.layers.rendering)
+      this.model.width = Math.max(parseInt(compStyles.width.replace("px", "")), this.#configuration.rendering.minWidth)
+      this.model.height = Math.max(parseInt(compStyles.height.replace("px", "")), this.#configuration.rendering.minHeight)
+      this.model.rowHeight = this.configuration.rendering.guides.gap
+      this.history.init(this.model)
+
+      if(!this.recognizer.configuration.server.version) {
+        await this.loadInfo(this.configuration.server)
+        this.recognizer.configuration.server.version = this.info!.version
+      }
     } catch (error) {
       this.logger.error("initialize", error)
       this.layers.showMessageError(error as Error)
@@ -195,102 +137,65 @@ export class InkEditor extends AbstractEditor {
     }
   }
 
-  drawCurrentStroke(): void {
-    this.logger.debug("drawCurrentStroke", { stroke: this.model.currentSymbol })
-    this.renderer.drawPendingStroke(this.model.currentSymbol)
-  }
-
-  async updateModelRendering(): Promise<Model> {
-    this.logger.info("updateModelRendering")
-    this.renderer.drawModel(this.model)
-    const deferred = new DeferredPromise<Model>()
-    this.history.push(this.model)
-    if (this.#configuration.triggers.exportContent !== "DEMAND") {
-      clearTimeout(this.#exportTimer)
-      const currentModel = this.model.clone()
-      this.#exportTimer = setTimeout(async () => {
-        try {
-          currentModel.mergeExport(await this.recognizer.send(currentModel.symbols))
-          this.history.updateStack(currentModel)
-          if (this.model.modificationDate === currentModel.modificationDate) {
-            this.model.exports = currentModel.exports
-          }
-          deferred.resolve(this.model)
-        } catch (error) {
-          this.logger.error("updateModelRendering", { error })
-          this.layers.showMessageError(error as Error)
-          this.event.emitError(error as Error)
-          deferred.reject(error as Error)
+  //updateBoundingBox
+  updateSymbolsStyle(symbolIds: string[], style: PartialDeep<TStyle>): void
+    {
+      this.logger.info("updateSymbolsStyle", { symbolIds, style })
+      this.model.strokes.forEach(s =>
+      {
+        if (symbolIds.includes(s.id)) {
+          s.style = Object.assign({}, s.style, style)
+          this.renderer.drawSymbol(s)
+          this.model.updateStroke(s)
+          s.modificationDate = Date.now()
         }
-      }, this.#configuration.triggers.exportContent === "QUIET_PERIOD" ? this.#configuration.triggers.exportContentDelay : 0)
-    } else {
-      deferred.resolve(this.model)
+      })
     }
-    await deferred.promise
-    this.event.emitExported(this.model.exports as TExport)
-    this.logger.debug("updateModelRendering", this.model.exports)
-    return deferred.promise
-  }
-
-  async importPointEvents(strokes: PartialDeep<TStroke>[]): Promise<Model> {
-    try {
-      convertPartialStrokesToStrokes(strokes)
-        .forEach((stroke) => {
-          this.model.addStroke(stroke)
-        })
-      const newModel = await this.updateModelRendering()
-      Object.assign(this.#model, newModel)
-      this.event.emitImported(this.model.exports as TExport)
-      return this.model
-    } catch (error) {
-      this.layers.showMessageError(error as Error)
-      this.event.emitError(error as Error)
-      throw error as Error
-    }
-  }
 
   async resize({ height, width }: { height?: number, width?: number } = {}): Promise<void> {
     this.logger.info("resize", { height, width })
     const compStyles = window.getComputedStyle(this.layers.root)
-    this.model.height = height || Math.max(parseInt(compStyles.height.replace("px", "")), this.configuration.renderer.minHeight)
-    this.model.width = width || Math.max(parseInt(compStyles.width.replace("px", "")), this.configuration.renderer.minWidth)
-    this.renderer.resize(this.model)
+    this.model.height = height || Math.max(parseInt(compStyles.height.replace("px", "")), this.configuration.rendering.minHeight)
+    this.model.width = width || Math.max(parseInt(compStyles.width.replace("px", "")), this.configuration.rendering.minWidth)
+    this.renderer.resize(this.model.height, this.model.width)
     this.logger.debug("resize", { model: this.model })
     this.event.emitExported(this.model.exports as TExport)
   }
 
   async undo(): Promise<void> {
     this.logger.info("undo")
-    this.#model = this.history.undo() as Model
-    this.renderer.drawModel(this.#model)
-    this.history.updateStack(this.#model)
+    const previousStackItem = this.history.undo()
+    const modifications = previousStackItem.model.extractDifferenceStrokes(this.model)
+    this.#model = previousStackItem.model.clone()
     this.event.emitExported(this.#model.exports as TExport)
+    modifications.removed.forEach(s => this.renderer.removeSymbol(s.id))
+    modifications.added.forEach(s => this.renderer.drawSymbol(s))
     this.logger.debug("undo", this.#model)
   }
 
   async redo(): Promise<void> {
     this.logger.info("redo")
-    this.#model = this.history.redo() as Model
-    this.renderer.drawModel(this.#model)
-    this.history.updateStack(this.#model)
+    const previousStackItem = this.history.redo()
+    const modifications = previousStackItem.model.extractDifferenceStrokes(this.model)
+    this.#model = previousStackItem.model.clone()
     this.event.emitExported(this.#model.exports as TExport)
+    modifications.removed.forEach(s => this.renderer.removeSymbol(s.id))
+    modifications.added.forEach(s => this.renderer.drawSymbol(s))
     this.logger.debug("redo", this.#model)
   }
 
   async clear(): Promise<void> {
     this.logger.info("clear")
+    const erased = this.model.strokes
     this.model.clear()
-    this.history.push(this.model)
-    this.renderer.drawModel(this.model)
-    this.event.emitExported(this.model.exports as TExport)
-    this.event.emitCleared()
-    this.logger.debug("clear", this.model)
+    this.history.push(this.model, { erased })
+    this.renderer.clear()
+    this.event.emitExported(this.#model.exports as TExport)
   }
 
   async destroy(): Promise<void> {
     this.logger.info("destroy")
     this.event.removeAllListeners()
-    this.grabber.detach()
     this.layers.destroy()
     this.renderer.destroy()
     return Promise.resolve()

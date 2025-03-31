@@ -1,13 +1,13 @@
 import { IIShapeCircle, IIShapeEllipse, IIShapePolygon, ShapeKind, TIIShape } from "../../symbol"
 import { DefaultStyle } from "../../style"
 import { convertRadianToDegree } from "../../utils"
-import { IISVGRendererConst } from "./IISVGRendererConst"
+import { SVGRendererConst } from "./SVGRendererConst"
 import { SVGBuilder } from "./SVGBuilder"
 
 /**
  * @group Renderer
  */
-export class IISVGRendererShapeUtil
+export class SVGRendererShapeUtil
 {
   static getPolygonePath(polygon: IIShapePolygon): string
   {
@@ -28,11 +28,11 @@ export class IISVGRendererShapeUtil
   {
     switch(shape.kind) {
       case ShapeKind.Polygon:
-        return IISVGRendererShapeUtil.getPolygonePath(shape as IIShapePolygon)
+        return SVGRendererShapeUtil.getPolygonePath(shape as IIShapePolygon)
       case ShapeKind.Circle:
-        return IISVGRendererShapeUtil.getCirclePath(shape as IIShapeCircle)
+        return SVGRendererShapeUtil.getCirclePath(shape as IIShapeCircle)
       case ShapeKind.Ellipse:
-        return IISVGRendererShapeUtil.getEllipsePath(shape as IIShapeEllipse)
+        return SVGRendererShapeUtil.getEllipsePath(shape as IIShapeEllipse)
       default:
         throw new Error(`Can't getSVGPath for shape cause kind is unknow: "${ JSON.stringify(shape) }"`)
     }
@@ -49,10 +49,10 @@ export class IISVGRendererShapeUtil
       "stroke-linejoin": "round",
     }
     if (shape.selected) {
-      attrs["filter"] = `url(#${ IISVGRendererConst.selectionFilterId })`
+      attrs["filter"] = `url(#${ SVGRendererConst.selectionFilterId })`
     }
     if (shape.deleting) {
-      attrs["filter"] = `url(#${ IISVGRendererConst.removalFilterId })`
+      attrs["filter"] = `url(#${ SVGRendererConst.removalFilterId })`
     }
 
     const group = SVGBuilder.createGroup(attrs)
@@ -61,7 +61,7 @@ export class IISVGRendererShapeUtil
       "fill": shape.style.fill || "transparent",
       "stroke": shape.style.color || DefaultStyle.color!,
       "stroke-width": (shape.style.width || DefaultStyle.width).toString(),
-      "d": IISVGRendererShapeUtil.getSVGPath(shape),
+      "d": SVGRendererShapeUtil.getSVGPath(shape),
     }
     if (shape.style.opacity) {
       pathAttrs["opacity"] = shape.style.opacity.toString()

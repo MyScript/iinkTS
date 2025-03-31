@@ -1,7 +1,7 @@
 import { LoggerManager, LoggerCategory } from "../logger"
 import { IIModel, JIIXEdgeKind } from "../model"
 import { Box, IIText, SymbolType, TBox, TIISymbol } from "../symbol"
-import { IISVGRenderer, IISVGRendererConst, SVGBuilder } from "../renderer"
+import { SVGRenderer, SVGRendererConst, SVGBuilder } from "../renderer"
 import { convertBoundingBoxMillimeterToPixel, createUUID } from "../utils"
 import { InteractiveInkEditor } from "../editor/InteractiveInkEditor"
 
@@ -30,7 +30,7 @@ export class IIDebugSVGManager
     return this.editor.model
   }
 
-  get renderer(): IISVGRenderer
+  get renderer(): SVGRenderer
   {
     return this.editor.renderer
   }
@@ -211,7 +211,7 @@ export class IIDebugSVGManager
     const TEXT_HEIGHT = 20
     const recognitionGroup = SVGBuilder.createGroup({ "debug": "recognition-box" })
 
-    const rect = SVGBuilder.createRect(box, { fill: "transparent", stroke: COLOR, style: IISVGRendererConst.noSelection })
+    const rect = SVGBuilder.createRect(box, { fill: "transparent", stroke: COLOR, style: SVGRendererConst.noSelection })
     recognitionGroup.appendChild(rect)
 
     const infosGroup = SVGBuilder.createGroup({ id: `infos-group-${ createUUID() }` })
@@ -219,7 +219,7 @@ export class IIDebugSVGManager
     let infoY = box.y + TEXT_HEIGHT / 2
     infos?.forEach(w =>
     {
-      infosGroup.appendChild(SVGBuilder.createText({ x: infoX, y: infoY }, w, { stroke: COLOR, style: IISVGRendererConst.noSelection }))
+      infosGroup.appendChild(SVGBuilder.createText({ x: infoX, y: infoY }, w, { stroke: COLOR, style: SVGRendererConst.noSelection }))
       infoY += TEXT_HEIGHT
     })
     recognitionGroup.appendChild(infosGroup)
@@ -358,7 +358,7 @@ export class IIDebugSVGManager
     const CHAR_SIZE = 14
 
     const recognitionItemGroup = SVGBuilder.createGroup({ "debug": "recognition-item-box" })
-    const rect = SVGBuilder.createRect(box, { fill: "transparent", stroke: COLOR, style: IISVGRendererConst.noSelection })
+    const rect = SVGBuilder.createRect(box, { fill: "transparent", stroke: COLOR, style: SVGRendererConst.noSelection })
     recognitionItemGroup.appendChild(rect)
 
     const charX = box.x
@@ -366,11 +366,11 @@ export class IIDebugSVGManager
 
     const charsGroup = SVGBuilder.createGroup({ id: `chars-group-${ createUUID() }` })
     if (label) {
-      charsGroup.appendChild(SVGBuilder.createText({ x: charX, y: charY }, `label: ${ label }`, { fill: COLOR, "font-size": CHAR_SIZE.toString(), style: IISVGRendererConst.noSelection }))
+      charsGroup.appendChild(SVGBuilder.createText({ x: charX, y: charY }, `label: ${ label }`, { fill: COLOR, "font-size": CHAR_SIZE.toString(), style: SVGRendererConst.noSelection }))
     }
     if (chars?.length) {
       charY += CHAR_SIZE
-      charsGroup.appendChild(SVGBuilder.createText({ x: charX, y: charY }, `[${ chars.join(", ") }]`, { fill: COLOR, "font-size": CHAR_SIZE.toString(), style: IISVGRendererConst.noSelection }))
+      charsGroup.appendChild(SVGBuilder.createText({ x: charX, y: charY }, `[${ chars.join(", ") }]`, { fill: COLOR, "font-size": CHAR_SIZE.toString(), style: SVGRendererConst.noSelection }))
     }
 
     recognitionItemGroup.appendChild(charsGroup)

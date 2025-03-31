@@ -12,14 +12,14 @@ import {
   TRawContentConfiguration,
   TTextRecognizerHTTPV2Configuration
 } from "./recognition"
-import { TRecognitionType } from "./RecognitionConfiguration"
+import { TRecognitionV2Type } from "./RecognitionConfiguration"
 import { DefaultServerHTTPConfiguration, TServerHTTPConfiguration } from "./ServerConfiguration"
 
 /**
  * @group Recognizer
  */
 export type TRecognizerHTTPV2RecognitionConfiguration = {
-  type: TRecognitionType
+  type: TRecognitionV2Type
   lang: string
   math: TMathConfiguration
   text: TTextRecognizerHTTPV2Configuration

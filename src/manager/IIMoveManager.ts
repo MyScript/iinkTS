@@ -1,6 +1,6 @@
 import { InteractiveInkEditor } from "../editor/InteractiveInkEditor"
 import { PointerEventGrabber, PointerInfo } from "../grabber"
-import { IISVGRenderer } from "../renderer"
+import { SVGRenderer } from "../renderer"
 
 /**
  * @group Manager
@@ -23,7 +23,7 @@ export class IIMoveManager
     this.grabber = new PointerEventGrabber(editor.configuration.grabber)
   }
 
-  get renderer(): IISVGRenderer
+  get renderer(): SVGRenderer
   {
     return this.editor.renderer
   }
