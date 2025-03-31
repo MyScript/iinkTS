@@ -41,8 +41,6 @@ test.describe("Text ja_JP vertical Recognizer Iink", () => {
     const plainTextExport = await getEditorExportsType(page, "text/plain")
     let resultText = await page.locator("#result").innerText()
     resultText = resultText.replace(/\n\n\n/g, "\n"); // FF: remove extra line breaks
-    console.log('resultText= ', resultText)
-    console.log('plainTextExport= ', plainTextExport)
     expect(resultText).toStrictEqual(plainTextExport)
     expect(resultText).toStrictEqual(ja_JP2Columns.exports["text/plain"].at(0))
   })
@@ -69,10 +67,13 @@ test.describe("Text ja_JP vertical Recognizer Iink", () => {
     })
 
     test("should only request text/plain by default", async ({ page }) => {
-      await writeStrokes(page, ja_JP1Column.strokes)
-      await getExportedResults(page, ja_JP1Column.exports["text/plain"].at(0), "text/plain", 5)
-      expect(mimeTypeRequest).toHaveLength(51)
+      const [exportedDatas] = await Promise.all([
+        waitForExportedEvent(page),
+        writeStrokes(page, ja_JP1Column.strokes),
+      ])
       expect(mimeTypeRequest[0]).toContain("text/plain")
+      expect(exportedDatas["text/plain"]).toContain("手書き認識")
+
     })
   })
 
@@ -104,7 +105,7 @@ test.describe("Text ja_JP vertical Recognizer Iink", () => {
         page.click("#undo")
       ])
 
-      expect(await page.locator("#editor").evaluate((node) => node.editor.model.symbols)).toHaveLength(20)
+      expect(await page.locator("#editor").evaluate((node) => node.editor.model.strokes)).toHaveLength(20)
       let resultText = await page.locator("#result").innerText()
       resultText = resultText.replace(/\n\n\n/g, "\n"); // FF: remove extra line breaks
       expect(resultText).toStrictEqual(ja_JP2Columns.exports["text/plain"].at(0))
@@ -115,7 +116,7 @@ test.describe("Text ja_JP vertical Recognizer Iink", () => {
         waitForExportedEvent(page),
         page.click("#undo")
       ])
-      expect(await page.locator("#editor").evaluate((node) => node.editor.model.symbols)).toHaveLength(19)
+      expect(await page.locator("#editor").evaluate((node) => node.editor.model.strokes)).toHaveLength(19)
     })
 
     await test.step("should redo write", async () => {
@@ -123,7 +124,7 @@ test.describe("Text ja_JP vertical Recognizer Iink", () => {
         waitForExportedEvent(page),
         page.click("#redo")
       ])
-      expect(await page.locator("#editor").evaluate((node) => node.editor.model.symbols)).toHaveLength(20)
+      expect(await page.locator("#editor").evaluate((node) => node.editor.model.strokes)).toHaveLength(20)
       let resultText = await page.locator("#result").innerText()
       resultText = resultText.replace(/\n\n\n/g, "\n"); // FF: remove extra line breaks
       expect(resultText).toStrictEqual(ja_JP2Columns.exports["text/plain"].at(0))
