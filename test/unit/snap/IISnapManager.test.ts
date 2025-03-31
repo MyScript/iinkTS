@@ -6,7 +6,7 @@ import
   TSegment,
   TPoint,
   TSnapNudge,
-  IISVGRendererConst,
+  SVGRendererConst,
 } from "../../../src/iink"
 
 describe("IISnapManager.ts", () =>
@@ -31,13 +31,13 @@ describe("IISnapManager.ts", () =>
     expect(manager.renderer.drawLine).toBeCalledTimes(2)
     expect(manager.renderer.drawLine).toHaveBeenNthCalledWith(1, lines[0].p1, lines[0].p2, expect.objectContaining({
       role: "snap-to-element",
-      "marker-start": `url(#${ IISVGRendererConst.crossMarker })`,
-      "marker-end": `url(#${ IISVGRendererConst.crossMarker })`
+      "marker-start": `url(#${ SVGRendererConst.crossMarker })`,
+      "marker-end": `url(#${ SVGRendererConst.crossMarker })`
     }))
     expect(manager.renderer.drawLine).toHaveBeenNthCalledWith(2, lines[1].p1, lines[1].p2, expect.objectContaining({
       role: "snap-to-element",
-      "marker-start": `url(#${ IISVGRendererConst.crossMarker })`,
-      "marker-end": `url(#${ IISVGRendererConst.crossMarker })`
+      "marker-start": `url(#${ SVGRendererConst.crossMarker })`,
+      "marker-end": `url(#${ SVGRendererConst.crossMarker })`
     }))
   })
 

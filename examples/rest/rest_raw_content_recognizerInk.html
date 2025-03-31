@@ -48,6 +48,69 @@
         background-color: white;
         cursor: zoom-out;
       }
+      .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+      }
+
+      /* Hide default HTML checkbox */
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      /* The slider */
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        -webkit-transition: 0.4s;
+        transition: 0.4s;
+      }
+
+      .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        -webkit-transition: 0.4s;
+        transition: 0.4s;
+      }
+
+      input:checked + .slider {
+        background-color: #2196f3;
+      }
+
+      input:focus + .slider {
+        box-shadow: 0 0 1px #2196f3;
+      }
+
+      input:checked + .slider:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+      }
+
+      .slider.round {
+        border-radius: 34px;
+      }
+
+      .slider.round:before {
+        border-radius: 50%;
+      }
+      .switch-label {
+        margin-top: 10px;
+      }
     </style>
   </head>
 
@@ -66,6 +129,21 @@
           <img src="../assets/img/redo.svg" />
         </button>
       </div>
+      <div>
+        <span class="switch-label">Show Recognition Block</span>
+        <label class="switch">
+          <input id="showRecognitionBlock" type="checkbox" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+      <div>
+        <span class="switch-label">Show Recognition Items</span>
+        <label class="switch">
+          <input id="showRecognitionItems" type="checkbox" />
+          <span class="slider round"></span>
+        </label>
+      </div>
+
       <select id="language"></select>
     </nav>
 
@@ -78,6 +156,8 @@
       const clearElement = document.getElementById("clear")
       const undoElement = document.getElementById("undo")
       const redoElement = document.getElementById("redo")
+      const showRecognitionBlock = document.getElementById("showRecognitionBlock")
+      const showRecognitionItems = document.getElementById("showRecognitionItems")
 
       /**
        * we expose the editor so we can access it in tests
@@ -101,6 +181,14 @@
         resultElement.classList.toggle("open")
       })
 
+      showRecognitionBlock.addEventListener("change", () => {
+          editor.debugger.recognitionBoxVisibility = showRecognitionBlock.checked
+      })
+
+      showRecognitionItems.addEventListener("change", () => {
+          editor.debugger.recognitionBoxItemsVisibility = showRecognitionItems.checked
+      })
+
       window.addEventListener("resize", () => {
         editor?.resize()
       })
@@ -110,6 +198,12 @@
         configuration: {
           recognition: {
             type: "Raw Content",
+            export: {
+              jiix: {
+                ranges: true,
+                "bounding-box": true,
+              },
+            },
             "raw-content": {
               classification: {
                 types: ["text", "math", "shape", "drawing", "decoration"],
@@ -118,7 +212,7 @@
                 types: ["text", "math", "shape"],
               },
             },
-          }
+          },
         },
       }
 
@@ -152,10 +246,19 @@
 
         if (!languageElement.options.length) {
           const currentLanguage = editor.configuration.recognition.lang
-          const availableLanguageListResponse = await iink.getAvailableLanguageList(editor.configuration)
-          Object.keys(availableLanguageListResponse.result).forEach(function (key) {
+          const availableLanguageListResponse =
+            await iink.getAvailableLanguageList(editor.configuration)
+          Object.keys(availableLanguageListResponse.result).forEach(function (
+            key
+          ) {
             const selected = currentLanguage === key
-            languageElement.options[languageElement.options.length] = new Option(availableLanguageListResponse.result[key], key, selected, selected)
+            languageElement.options[languageElement.options.length] =
+              new Option(
+                availableLanguageListResponse.result[key],
+                key,
+                selected,
+                selected
+              )
           })
         }
 

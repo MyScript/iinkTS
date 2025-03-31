@@ -27,12 +27,12 @@ import
   IIRecognizedArc,
 } from "../symbol"
 import { RecognizerWebSocket } from "../recognizer"
-import { IISVGRenderer, SVGBuilder, TIIRendererConfiguration } from "../renderer"
+import { SVGRenderer, SVGBuilder, TIIRendererConfiguration } from "../renderer"
 import { TStyle } from "../style"
 import
 {
   IIConversionManager,
-  IIWriteManager,
+  IIWriterManager,
   IISelectionManager,
   IIResizeManager,
   IIRotationManager,
@@ -79,13 +79,13 @@ export class InteractiveInkEditor extends AbstractEditor
   #layerUITimer?: ReturnType<typeof setTimeout>
   #recognizeStrokeTimer?: ReturnType<typeof setTimeout>
 
-  renderer: IISVGRenderer
+  renderer: SVGRenderer
   recognizer: RecognizerWebSocket
 
   #penStyle: TStyle
 
   history: IIHistoryManager
-  writer: IIWriteManager
+  writer: IIWriterManager
   eraser: IIEraseManager
   gesture: IIGestureManager
   resizer: IIResizeManager
@@ -120,11 +120,11 @@ export class InteractiveInkEditor extends AbstractEditor
     this.recognizer.event.addEndInitialization(this.layers.hideMessageModal.bind(this.layers))
     this.recognizer.event.addIdleListener(this.updateLayerState.bind(this))
 
-    this.renderer = new IISVGRenderer(this.#configuration.rendering)
+    this.renderer = new SVGRenderer(this.#configuration.rendering)
 
     this.history = new IIHistoryManager(this.#configuration["undo-redo"], this.event)
 
-    this.writer = new IIWriteManager(this)
+    this.writer = new IIWriterManager(this)
     this.eraser = new IIEraseManager(this)
     this.selector = new IISelectionManager(this)
     this.move = new IIMoveManager(this)

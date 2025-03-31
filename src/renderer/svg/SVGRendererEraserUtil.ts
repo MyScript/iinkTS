@@ -4,7 +4,7 @@ import { SVGBuilder } from "./SVGBuilder"
 /**
  * @group Renderer
  */
-export class IISVGRendererEraserUtil
+export class SVGRendererEraserUtil
 {
   static getSVGPath(eraser: IIEraser): string
   {
@@ -37,7 +37,7 @@ export class IISVGRendererEraserUtil
       "shadowBlur": "5",
       "stroke-linecap": "round",
       "fill": "transparent",
-      "d": IISVGRendererEraserUtil.getSVGPath(eraser)
+      "d": SVGRendererEraserUtil.getSVGPath(eraser)
     }
     return SVGBuilder.createPath(attrs)
   }

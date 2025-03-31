@@ -2,7 +2,7 @@
 /**
  * @group Renderer
  */
-export const IISVGRendererConst =
+export const SVGRendererConst =
 {
   arrowHeadStartMarker: "arrow-head-start",
   arrowHeadEndMaker: "arrow-head-end",

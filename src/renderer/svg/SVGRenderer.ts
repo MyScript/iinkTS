@@ -3,20 +3,20 @@ import { getClosestPoints } from "../../utils"
 import { LoggerCategory, LoggerManager } from "../../logger"
 import { TIISymbol, TPoint, TBox, Box, IIEraser, SymbolType } from "../../symbol"
 import { TIIRendererConfiguration } from "../RendererConfiguration"
-import { IISVGRendererConst } from "./IISVGRendererConst"
-import { IISVGRendererEdgeUtil } from "./IISVGRendererEdgeUtil"
-import { IISVGRendererEraserUtil } from "./IISVGRendererEraserUtil"
-import { IISVGRendererGroupUtil } from "./IISVGRendererGroupUtil"
-import { IISVGRendererShapeUtil } from "./IISVGRendererShapeUtil"
-import { IISVGRendererStrokeUtil } from "./IISVGRendererStrokeUtil"
-import { IISVGRendererTextUtil } from "./IISVGRendererTextUtil"
-import { IISVGRendererRecognizedUtil } from "./IISVGRendererRecognizedUtil"
+import { SVGRendererConst } from "./SVGRendererConst"
+import { SVGRendererEdgeUtil } from "./SVGRendererEdgeUtil"
+import { SVGRendererEraserUtil } from "./SVGRendererEraserUtil"
+import { SVGRendererGroupUtil } from "./SVGRendererGroupUtil"
+import { SVGRendererShapeUtil } from "./SVGRendererShapeUtil"
+import { SVGRendererStrokeUtil } from "./SVGRendererStrokeUtil"
+import { SVGRendererTextUtil } from "./SVGRendererTextUtil"
+import { SVGRendererRecognizedUtil } from "./SVGRendererRecognizedUtil"
 import { SVGBuilder } from "./SVGBuilder"
 
 /**
  * @group Renderer
  */
-export class IISVGRenderer
+export class SVGRenderer
 {
   #logger = LoggerManager.getLogger(LoggerCategory.RENDERER)
   groupGuidesId = "guides-wrapper"
@@ -54,7 +54,7 @@ export class IISVGRenderer
     const SIZE = 5
     const REFX = SIZE - 1, REFY = SIZE / 2
     const arrowHeadMarkerAttrs = {
-      style: IISVGRendererConst.noSelection,
+      style: SVGRendererConst.noSelection,
       fill: "context-stroke",
       markerWidth: SIZE.toString(),
       markerHeight: SIZE.toString(),
@@ -62,23 +62,23 @@ export class IISVGRenderer
       refY: REFY.toString(),
     }
 
-    const arrowHeadStart = SVGBuilder.createMarker(IISVGRendererConst.arrowHeadStartMarker, { ...arrowHeadMarkerAttrs, orient: "auto-start-reverse" })
+    const arrowHeadStart = SVGBuilder.createMarker(SVGRendererConst.arrowHeadStartMarker, { ...arrowHeadMarkerAttrs, orient: "auto-start-reverse" })
     arrowHeadStart.appendChild(SVGBuilder.createPolygon([0, 0, SIZE, REFY, 0, SIZE], arrowHeadMarkerAttrs))
     defs.appendChild(arrowHeadStart)
 
-    const arrowHeadEnd = SVGBuilder.createMarker(IISVGRendererConst.arrowHeadEndMaker, { ...arrowHeadMarkerAttrs, orient: "auto" })
+    const arrowHeadEnd = SVGBuilder.createMarker(SVGRendererConst.arrowHeadEndMaker, { ...arrowHeadMarkerAttrs, orient: "auto" })
     arrowHeadEnd.appendChild(SVGBuilder.createPolygon([0, 0, SIZE, REFY, 0, SIZE], arrowHeadMarkerAttrs))
     defs.appendChild(arrowHeadEnd)
 
     const crossMarkerAttrs = {
-      style: IISVGRendererConst.noSelection,
+      style: SVGRendererConst.noSelection,
       markerWidth: "5",
       markerHeight: "5",
       refX: "0",
       refY: "0",
       viewBox: "-5 -5 10 10"
     }
-    const cross = SVGBuilder.createMarker(IISVGRendererConst.crossMarker, crossMarkerAttrs)
+    const cross = SVGBuilder.createMarker(SVGRendererConst.crossMarker, crossMarkerAttrs)
     cross.appendChild(SVGBuilder.createPath({ d: "M -4,-4 L 4,4 M -4,4 L 4,-4", stroke: "white", "stroke-width": "3" }))
     cross.appendChild(SVGBuilder.createPath({ d: "M -4,-4 L 4,4 M -4,4 L 4,-4", stroke: "context-stroke", "stroke-width": "2" }))
     defs.appendChild(cross)
@@ -89,14 +89,14 @@ export class IISVGRenderer
   protected createFilters(): SVGGElement
   {
     const filtersGroup = SVGBuilder.createGroup({ id: "definition-group" })
-    const removalFilter = SVGBuilder.createFilter(IISVGRendererConst.removalFilterId, { filterUnits: "userSpaceOnUse" })
+    const removalFilter = SVGBuilder.createFilter(SVGRendererConst.removalFilterId, { filterUnits: "userSpaceOnUse" })
     const bfeComponentTransfer = SVGBuilder.createComponentTransfert()
     const bfeFuncA = SVGBuilder.createTransfertFunctionTable("feFuncA", "0 0.25")
     bfeComponentTransfer.appendChild(bfeFuncA)
     removalFilter.appendChild(bfeComponentTransfer)
     filtersGroup.appendChild(removalFilter)
 
-    const selectionFilter = SVGBuilder.createFilter(IISVGRendererConst.selectionFilterId, { filterUnits: "userSpaceOnUse" })
+    const selectionFilter = SVGBuilder.createFilter(SVGRendererConst.selectionFilterId, { filterUnits: "userSpaceOnUse" })
     selectionFilter.appendChild(SVGBuilder.createDropShadow({ dx: -1, dy: -1, deviation: 1 }))
     filtersGroup.appendChild(selectionFilter)
 
@@ -115,7 +115,7 @@ export class IISVGRenderer
       id: this.groupGuidesId,
       stroke: "grey",
       opacity: "0.5",
-      style: IISVGRendererConst.noSelection,
+      style: SVGRendererConst.noSelection,
       role: SvgElementRole.Guide
     }
     const guidesGroup = SVGBuilder.createGroup(attrs)
@@ -125,7 +125,7 @@ export class IISVGRenderer
           const begin: TPoint = { x: offSet, y }
           const end: TPoint = { x: width - offSet, y }
           this.horizontalGuides.push(y)
-          const svgLine = SVGBuilder.createLine(begin, end, { "stroke-width": "1", style: IISVGRendererConst.noSelection })
+          const svgLine = SVGBuilder.createLine(begin, end, { "stroke-width": "1", style: SVGRendererConst.noSelection })
           guidesGroup.appendChild(svgLine)
         }
         break
@@ -133,24 +133,24 @@ export class IISVGRenderer
         for (let y = 0; y < height; y += offSet) {
           const begin: TPoint = { x: 0, y }
           const end: TPoint = { x: width, y }
-          const svgLine = SVGBuilder.createLine(begin, end, { "stroke-width": "1", style: IISVGRendererConst.noSelection })
+          const svgLine = SVGBuilder.createLine(begin, end, { "stroke-width": "1", style: SVGRendererConst.noSelection })
           guidesGroup.appendChild(svgLine)
           this.horizontalGuides.push(y)
           for (let subY = y + subOffSet; subY < y + offSet; subY += subOffSet) {
             this.horizontalGuides.push(subY)
-            const svgLine = SVGBuilder.createLine({ x: 0, y: subY }, { x: width, y: subY }, { "stroke-width": "0.25", style: IISVGRendererConst.noSelection })
+            const svgLine = SVGBuilder.createLine({ x: 0, y: subY }, { x: width, y: subY }, { "stroke-width": "0.25", style: SVGRendererConst.noSelection })
             guidesGroup.appendChild(svgLine)
           }
         }
         for (let x = 0; x < width; x += offSet) {
           const begin: TPoint = { x, y: 0 }
           const end: TPoint = { x, y: height }
-          const svgLine = SVGBuilder.createLine(begin, end, { "stroke-width": "1", style: IISVGRendererConst.noSelection })
+          const svgLine = SVGBuilder.createLine(begin, end, { "stroke-width": "1", style: SVGRendererConst.noSelection })
           guidesGroup.appendChild(svgLine)
           this.verticalGuides.push(x)
           for (let subX = x + subOffSet; subX < x + offSet; subX += subOffSet) {
             this.verticalGuides.push(subX)
-            const svgLine = SVGBuilder.createLine({ x: subX, y: 0 }, { x: subX, y: height }, { "stroke-width": "0.25", style: IISVGRendererConst.noSelection })
+            const svgLine = SVGBuilder.createLine({ x: subX, y: 0 }, { x: subX, y: height }, { "stroke-width": "0.25", style: SVGRendererConst.noSelection })
             guidesGroup.appendChild(svgLine)
           }
         }
@@ -217,25 +217,25 @@ export class IISVGRenderer
     let element: SVGGraphicsElement | undefined
     switch (symbol.type) {
       case SymbolType.Stroke:
-        element = IISVGRendererStrokeUtil.getSVGElement(symbol)
+        element = SVGRendererStrokeUtil.getSVGElement(symbol)
         break
       case SymbolType.Eraser:
-        element = IISVGRendererEraserUtil.getSVGElement(symbol)
+        element = SVGRendererEraserUtil.getSVGElement(symbol)
         break
       case SymbolType.Shape:
-        element = IISVGRendererShapeUtil.getSVGElement(symbol)
+        element = SVGRendererShapeUtil.getSVGElement(symbol)
         break
       case SymbolType.Edge:
-        element = IISVGRendererEdgeUtil.getSVGElement(symbol)
+        element = SVGRendererEdgeUtil.getSVGElement(symbol)
         break
       case SymbolType.Text:
-        element = IISVGRendererTextUtil.getSVGElement(symbol)
+        element = SVGRendererTextUtil.getSVGElement(symbol)
         break
       case SymbolType.Group:
-        element = IISVGRendererGroupUtil.getSVGElement(symbol)
+        element = SVGRendererGroupUtil.getSVGElement(symbol)
         break
       case SymbolType.Recognized:
-        element = IISVGRendererRecognizedUtil.getSVGElement(symbol)
+        element = SVGRendererRecognizedUtil.getSVGElement(symbol)
         break
       default:
         this.#logger.error("buildElementFromSymbol", `symbol unknow: "${ JSON.stringify(symbol) }"`)
@@ -333,7 +333,7 @@ export class IISVGRenderer
 
   drawRect(box: TBox, attrs: { [key: string]: string } = {}): void
   {
-    this.#logger.info("drawCircle", { box, attrs })
+    this.#logger.info("drawRect", { box, attrs })
     this.layer.appendChild(SVGBuilder.createRect(box, attrs))
   }
 
@@ -351,7 +351,7 @@ export class IISVGRenderer
     const attrsLine = {
       id,
       fill: "transparent",
-      style: IISVGRendererConst.noSelection,
+      style: SVGRendererConst.noSelection,
       ...attrs
     }
     this.drawLine(p1, p2, attrsLine)

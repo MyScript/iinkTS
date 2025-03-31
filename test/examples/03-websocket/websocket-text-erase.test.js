@@ -48,6 +48,7 @@ test.describe("Websocket Text erase", () => {
 
   test("should erase stroke precisely", async ({ page }) => {
     await page.setChecked("#erase-precisely", true)
+    await page.waitForFunction(() => editor?.configuration?.recognition?.text?.eraser?.["erase-precisely"]);
     await waitForEditorInit(page)
     await callEditorIdle(page)
 

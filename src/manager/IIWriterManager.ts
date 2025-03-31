@@ -1,6 +1,5 @@
 import { SELECTION_MARGIN, EditorWriteTool } from "../Constants"
 import { TGesture } from "../gesture"
-import { LoggerCategory, LoggerManager } from "../logger"
 import { IIModel } from "../model"
 import
 {
@@ -18,34 +17,30 @@ import
   TPointer
 } from "../symbol"
 import { RecognizerWebSocket } from "../recognizer"
-import { IISVGRenderer } from "../renderer"
+import { SVGRenderer } from "../renderer"
 import { TStyle } from "../style"
 import { IIHistoryManager } from "../history"
 import { IIGestureManager } from "../gesture/IIGestureManager"
 import { IISnapManager } from "../snap/IISnapManager"
 import { InteractiveInkEditor } from "../editor/InteractiveInkEditor"
-import { PointerEventGrabber, PointerInfo } from "../grabber"
+import { PointerInfo } from "../grabber"
+import { AbstractWriterManager } from "./AbstractWriterManager"
 
 
 /**
  * @group Manager
  */
-export class IIWriteManager
+export class IIWriterManager extends AbstractWriterManager
 {
-  #logger = LoggerManager.getLogger(LoggerCategory.WRITE)
-  grabber: PointerEventGrabber
-  editor: InteractiveInkEditor
-
   #tool: EditorWriteTool = EditorWriteTool.Pencil
   detectGesture: boolean = true
-
+  editor: InteractiveInkEditor
   currentSymbolOrigin?: TPoint
 
   constructor(editor: InteractiveInkEditor)
   {
-    this.#logger.info("constructor")
+    super(editor)
     this.editor = editor
-    this.grabber = new PointerEventGrabber(editor.configuration.grabber)
   }
 
   get tool(): EditorWriteTool
@@ -69,7 +64,7 @@ export class IIWriteManager
     return this.editor.model
   }
 
-  get renderer(): IISVGRenderer
+  get renderer(): SVGRenderer
   {
     return this.editor.renderer
   }
@@ -131,8 +126,6 @@ export class IIWriteManager
 
   protected createCurrentSymbol(pointer: TPointer, style: TStyle, pointerType: string): TIISymbol
   {
-    this.#logger.debug("createCurrentSymbol", { pointer, style, pointerType })
-
     switch (this.tool) {
       case EditorWriteTool.Pencil:
         this.model.currentSymbol = new IIStroke(style, pointerType)
@@ -211,7 +204,6 @@ export class IIWriteManager
 
   protected updateCurrentSymbol(pointer: TPointer): TIISymbol
   {
-    this.#logger.debug("updateCurrentSymbol", { pointer })
     if (!this.model.currentSymbol) {
       throw new Error("Can't update current symbol because currentSymbol is undefined")
     }
@@ -232,7 +224,6 @@ export class IIWriteManager
 
   start(info: PointerInfo): void
   {
-    this.#logger.info("startWriting", { info })
     const localPointer = info.pointer
     if (this.tool !== EditorWriteTool.Pencil) {
       const { x, y } = this.snaps.snapResize(localPointer)
@@ -246,7 +237,6 @@ export class IIWriteManager
 
   continue(info: PointerInfo): void
   {
-    this.#logger.info("continueWriting", { info })
     const localPointer = info.pointer
     if (this.tool !== EditorWriteTool.Pencil) {
       const { x, y } = this.snaps.snapResize(localPointer)
@@ -280,7 +270,6 @@ export class IIWriteManager
 
   async end(info: PointerInfo): Promise<void>
   {
-    this.#logger.info("finishWriting", { info })
     const localPointer = info.pointer
     if (this.tool !== EditorWriteTool.Pencil) {
       const { x, y } = this.snaps.snapResize(localPointer)

@@ -1,14 +1,14 @@
 import { DecoratorKind, RecognizedKind, TIIRecognized } from "../../symbol"
 import { DefaultStyle } from "../../style"
-import { IISVGRendererDecoratorUtil } from "./IISVGRendererDecoratorUtil"
-import { IISVGRendererStrokeUtil } from "./IISVGRendererStrokeUtil"
-import { IISVGRendererConst } from "./IISVGRendererConst"
+import { SVGRendererDecoratorUtil } from "./SVGRendererDecoratorUtil"
+import { SVGRendererStrokeUtil } from "./SVGRendererStrokeUtil"
+import { SVGRendererConst } from "./SVGRendererConst"
 import { SVGBuilder } from "./SVGBuilder"
 
 /**
  * @group Renderer
  */
-export class IISVGRendererRecognizedUtil
+export class SVGRendererRecognizedUtil
 {
   static getSVGElement(recognizedSymbol: TIIRecognized): SVGGraphicsElement
   {
@@ -26,23 +26,23 @@ export class IISVGRendererRecognizedUtil
       attrs["opacity"] = recognizedSymbol.style.opacity.toString()
     }
     if (recognizedSymbol.selected) {
-      attrs["filter"] = `url(#${ IISVGRendererConst.selectionFilterId })`
+      attrs["filter"] = `url(#${ SVGRendererConst.selectionFilterId })`
     }
     if (recognizedSymbol.deleting) {
-      attrs["filter"] = `url(#${ IISVGRendererConst.removalFilterId })`
+      attrs["filter"] = `url(#${ SVGRendererConst.removalFilterId })`
     }
 
     const groupEl = SVGBuilder.createGroup(attrs)
 
     recognizedSymbol.strokes.forEach(s =>
     {
-      groupEl.append(IISVGRendererStrokeUtil.getSVGElement(s))
+      groupEl.append(SVGRendererStrokeUtil.getSVGElement(s))
     })
 
     if (recognizedSymbol.kind === RecognizedKind.Text) {
       recognizedSymbol.decorators.forEach(d =>
       {
-        const deco = IISVGRendererDecoratorUtil.getSVGElement(d, recognizedSymbol)
+        const deco = SVGRendererDecoratorUtil.getSVGElement(d, recognizedSymbol)
         if (deco) {
           if (d.kind === DecoratorKind.Highlight) {
             groupEl.prepend(deco)
