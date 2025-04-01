@@ -16,8 +16,7 @@ import { SVGBuilder } from "./SVGBuilder"
 /**
  * @group Renderer
  */
-export class SVGRenderer
-{
+export class SVGRenderer {
   #logger = LoggerManager.getLogger(LoggerCategory.RENDERER)
   groupGuidesId = "guides-wrapper"
 
@@ -29,14 +28,12 @@ export class SVGRenderer
   verticalGuides: number[] = []
   horizontalGuides: number[] = []
 
-  constructor(configuration: TIIRendererConfiguration)
-  {
+  constructor(configuration: TIIRendererConfiguration) {
     this.#logger.info("constructor", { configuration })
     this.configuration = configuration
   }
 
-  protected initLayer(): void
-  {
+  protected initLayer(): void {
     const width = Math.max(this.configuration.minWidth, this.parent.clientWidth)
     const height = Math.max(this.configuration.minHeight, this.parent.clientHeight)
     this.layer = SVGBuilder.createLayer({ x: 0, y: 0, width, height })
@@ -47,8 +44,7 @@ export class SVGRenderer
     this.parent.appendChild(this.layer)
   }
 
-  protected createDefs(): SVGDefsElement
-  {
+  protected createDefs(): SVGDefsElement {
     const defs = SVGBuilder.createDefs()
 
     const SIZE = 5
@@ -86,8 +82,7 @@ export class SVGRenderer
     return defs
   }
 
-  protected createFilters(): SVGGElement
-  {
+  protected createFilters(): SVGGElement {
     const filtersGroup = SVGBuilder.createGroup({ id: "definition-group" })
     const removalFilter = SVGBuilder.createFilter(SVGRendererConst.removalFilterId, { filterUnits: "userSpaceOnUse" })
     const bfeComponentTransfer = SVGBuilder.createComponentTransfert()
@@ -103,8 +98,7 @@ export class SVGRenderer
     return filtersGroup
   }
 
-  protected drawGuides(): void
-  {
+  protected drawGuides(): void {
     this.verticalGuides = []
     this.horizontalGuides = []
     const height = Number(this.layer.getAttribute("height")?.replace("px", ""))
@@ -166,7 +160,7 @@ export class SVGRenderer
         }
         break
       default:
-        this.#logger.error("drawGuides", `Guide type unknow: ${ this.configuration.guides.type }`)
+        this.#logger.error("drawGuides", `Guide type unknown: ${this.configuration.guides.type}`)
         break
     }
     this.horizontalGuides = [...new Set(this.horizontalGuides)]
@@ -174,15 +168,13 @@ export class SVGRenderer
     this.definitionGroup.appendChild(guidesGroup)
   }
 
-  protected removeGuides(): void
-  {
+  protected removeGuides(): void {
     this.verticalGuides = []
     this.horizontalGuides = []
-    this.layer.querySelector(`#${ this.groupGuidesId }`)?.remove()
+    this.layer.querySelector(`#${this.groupGuidesId}`)?.remove()
   }
 
-  protected createSVGTools(): SVGGElement
-  {
+  protected createSVGTools(): SVGGElement {
     this.definitionGroup = SVGBuilder.createGroup({ id: "definition-group" })
     this.definitionGroup.appendChild(this.createDefs())
     this.definitionGroup.appendChild(this.createFilters())
@@ -192,28 +184,24 @@ export class SVGRenderer
     return this.definitionGroup
   }
 
-  init(element: HTMLElement): void
-  {
+  init(element: HTMLElement): void {
     this.#logger.info("init", { element })
     this.parent = element
     this.parent.oncontextmenu = () => false
     this.initLayer()
   }
 
-  getAttribute(id: string, name: string): string | undefined | null
-  {
-    const element = this.layer.querySelector(`#${ id }`) as HTMLElement | null
+  getAttribute(id: string, name: string): string | undefined | null {
+    const element = this.layer.querySelector(`#${id}`) as HTMLElement | null
     return element?.getAttribute(name)
   }
 
-  setAttribute(id: string, name: string, value: string): void
-  {
-    const element = this.layer.querySelector(`#${ id }`) as HTMLElement | null
+  setAttribute(id: string, name: string, value: string): void {
+    const element = this.layer.querySelector(`#${id}`) as HTMLElement | null
     element?.setAttribute(name, value)
   }
 
-  buildElementFromSymbol(symbol: TIISymbol | IIEraser): SVGGraphicsElement | undefined
-  {
+  buildElementFromSymbol(symbol: TIISymbol | IIEraser): SVGGraphicsElement | undefined {
     let element: SVGGraphicsElement | undefined
     switch (symbol.type) {
       case SymbolType.Stroke:
@@ -238,19 +226,17 @@ export class SVGRenderer
         element = SVGRendererRecognizedUtil.getSVGElement(symbol)
         break
       default:
-        this.#logger.error("buildElementFromSymbol", `symbol unknow: "${ JSON.stringify(symbol) }"`)
+        this.#logger.error("buildElementFromSymbol", `symbol unknow: "${JSON.stringify(symbol)}"`)
     }
     return element
   }
 
-  prependElement(el: Element): void
-  {
+  prependElement(el: Element): void {
     this.layer.prepend(el)
   }
 
-  changeOrderSymbol(symbolToMove: TIISymbol, position: "first" | "last" | "forward" | "backward"): void
-  {
-    const moveEl = this.layer.querySelector(`#${ symbolToMove.id }`)
+  changeOrderSymbol(symbolToMove: TIISymbol, position: "first" | "last" | "forward" | "backward"): void {
+    const moveEl = this.layer.querySelector(`#${symbolToMove.id}`)
     if (!moveEl) return
     switch (position) {
       case "first":
@@ -270,24 +256,21 @@ export class SVGRenderer
     }
   }
 
-  appendElement(el: Element): void
-  {
+  appendElement(el: Element): void {
     this.layer.appendChild(el)
   }
 
-  removeElement(id: string): void
-  {
+  removeElement(id: string): void {
     this.#logger.debug("Element", { id })
-    const oldStroke = this.layer.querySelector(`#${ id }`)
+    const oldStroke = this.layer.querySelector(`#${id}`)
     if (oldStroke) {
       oldStroke.remove()
     }
   }
 
-  drawSymbol(symbol: TIISymbol | IIEraser): SVGGraphicsElement | undefined
-  {
+  drawSymbol(symbol: TIISymbol | IIEraser): SVGGraphicsElement | undefined {
     this.#logger.debug("drawSymbol", { symbol })
-    const oldNode = this.layer.querySelector(`#${ symbol?.id }`)
+    const oldNode = this.layer.querySelector(`#${symbol?.id}`)
     const svgEl = this.buildElementFromSymbol(symbol)
 
     if (svgEl) {
@@ -301,10 +284,9 @@ export class SVGRenderer
     return svgEl
   }
 
-  replaceSymbol(id: string, symbols: TIISymbol[]): SVGGraphicsElement[] | undefined
-  {
+  replaceSymbol(id: string, symbols: TIISymbol[]): SVGGraphicsElement[] | undefined {
     this.#logger.debug("drawSymbol", { symbols })
-    const oldNode = this.layer.querySelector(`#${ id }`)
+    const oldNode = this.layer.querySelector(`#${id}`)
     const elements = symbols.map(s => this.buildElementFromSymbol(s)).filter(x => !!x) as SVGGraphicsElement[]
 
     if (elements.length) {
@@ -319,34 +301,33 @@ export class SVGRenderer
     return elements
   }
 
-  removeSymbol(id: string): void
-  {
+  removeSymbol(id: string): void {
     this.#logger.debug("removeSymbol", { id })
     this.removeElement(id)
   }
 
-  drawCircle(point: TPoint, radius: number, attrs: { [key: string]: string } = {}): void
-  {
+  drawCircle(point: TPoint, radius: number, attrs: { [key: string]: string } = {}): void {
     this.#logger.info("drawCircle", { point, radius, attrs })
     this.layer.appendChild(SVGBuilder.createCircle(point, radius, attrs))
   }
 
-  drawRect(box: TBox, attrs: { [key: string]: string } = {}): void
-  {
+  drawRect(box: TBox, attrs: { [key: string]: string } = {}): void {
     this.#logger.info("drawRect", { box, attrs })
     this.layer.appendChild(SVGBuilder.createRect(box, attrs))
   }
 
-  drawLine(p1: TPoint, p2: TPoint, attrs: { [key: string]: string } = {}): void
-  {
+  drawLine(p1: TPoint, p2: TPoint, attrs: { [key: string]: string } = {}): void {
     this.#logger.info("drawLine", { p1, p2, attrs })
     this.layer.appendChild(SVGBuilder.createLine(p1, p2, attrs))
   }
 
-  drawConnectionBetweenBox(id: string, box1: TBox, box2: TBox, attrs?: { [key: string]: string }): void
-  {
-    const points1: TPoint[] = new Box(box1).corners
-    const points2: TPoint[] = new Box(box2).corners
+  drawConnectionBetweenBox(id: string, box1: TBox, box2: TBox, position: "corners" | "sides", attrs?: { [key: string]: string }): void {
+    let points1: TPoint[] = new Box(box1).corners
+    let points2: TPoint[] = new Box(box2).corners
+    if (position === "sides") {
+      points1 = new Box(box1).side
+      points2 = new Box(box2).side
+    }
     const { p1, p2 } = getClosestPoints(points1, points2)
     const attrsLine = {
       id,
@@ -357,45 +338,39 @@ export class SVGRenderer
     this.drawLine(p1, p2, attrsLine)
   }
 
-  resize(height: number, width: number): void
-  {
+  resize(height: number, width: number): void {
     this.#logger.info("resize", { height, width })
-    this.layer.setAttribute("width", `${ width }px`)
-    this.layer.setAttribute("height", `${ height }px`)
-    this.layer.setAttribute("viewBox", `0, 0, ${ width }, ${ height }`)
+    this.layer.setAttribute("width", `${width}px`)
+    this.layer.setAttribute("height", `${height}px`)
+    this.layer.setAttribute("viewBox", `0, 0, ${width}, ${height}`)
     this.removeGuides()
     if (this.configuration.guides.enable) {
       this.drawGuides()
     }
   }
 
-  getElementById(id: string): SVGGraphicsElement | null
-  {
-    return this.layer.querySelector(`#${ id }`) as SVGGraphicsElement | null
+  getElementById(id: string): SVGGraphicsElement | null {
+    return this.layer.querySelector(`#${id}`) as SVGGraphicsElement | null
   }
 
-  getElements({ tagName, attrs }: { tagName?: string, attrs?: { [key: string]: string } }): NodeListOf<Element>
-  {
+  getElements({ tagName, attrs }: { tagName?: string, attrs?: { [key: string]: string } }): NodeListOf<Element> {
     this.#logger.info("getElements", { tagName, attrs })
     let query = tagName || "*"
     if (attrs) {
-      Object.keys(attrs).forEach(k =>
-      {
-        query += `[${ k }=${ attrs[k] }]`
+      Object.keys(attrs).forEach(k => {
+        query += `[${k}=${attrs[k]}]`
       })
     }
     return this.layer.querySelectorAll(query)
   }
 
-  clearElements({ tagName, attrs }: { tagName?: string, attrs?: { [key: string]: string } }): void
-  {
+  clearElements({ tagName, attrs }: { tagName?: string, attrs?: { [key: string]: string } }): void {
     this.#logger.info("clearElements", { tagName, attrs })
     this.getElements({ tagName, attrs })
       .forEach(e => e.remove())
   }
 
-  clear(): void
-  {
+  clear(): void {
     this.#logger.info("clear")
     if (this.layer) {
       while (this.layer.firstChild) {
@@ -405,8 +380,7 @@ export class SVGRenderer
     }
   }
 
-  destroy(): void
-  {
+  destroy(): void {
     if (this.layer) {
       this.layer.remove()
     }

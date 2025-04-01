@@ -251,7 +251,7 @@ export class IIDebugSVGManager
         y: rectBox.y + ty,
       }
       this.renderer.removeSymbol(`connection-${ infosGroup.id }`)
-      this.renderer.drawConnectionBetweenBox(`connection-${ infosGroup.id }`, box, newRectBox, { stroke: COLOR, debug: "recognition-box-link" })
+      this.renderer.drawConnectionBetweenBox(`connection-${ infosGroup.id }`, box, newRectBox, "corners", { stroke: COLOR, debug: "recognition-box-link" })
     }
 
     rectTranslate.addEventListener("pointerdown", e =>
@@ -402,7 +402,7 @@ export class IIDebugSVGManager
         y: rectBox.y + ty,
       }
       this.renderer.removeSymbol(`connection-${ charsGroup.id }`)
-      this.renderer.drawConnectionBetweenBox(`connection-${ charsGroup.id }`, box, newRectBox, { stroke: COLOR, debug: "recognition-item-box-link" })
+      this.renderer.drawConnectionBetweenBox(`connection-${ charsGroup.id }`, box, newRectBox, "corners", { stroke: COLOR, debug: "recognition-item-box-link" })
     }
 
     rectTranslate.addEventListener("pointerdown", e =>
