@@ -65,6 +65,17 @@ export class Box implements TBox
     ]
   }
 
+  static getSide(box: TBox): TPoint[]
+  {
+    return [
+      { x: box.x + box.width / 2, y: box.y },
+      { x: box.x + box.width, y: box.y + box.height / 2 },
+      { x: box.x + box.width / 2, y: box.y + box.height },
+      { x: box.x, y: box.y + box.height / 2 }
+    ];
+
+  }
+
   static getCenter(box: TBox): TPoint
   {
     return { x: box.x + box.width / 2, y: box.y + box.height / 2 }
@@ -154,6 +165,11 @@ export class Box implements TBox
   get center(): TPoint
   {
     return Box.getCenter(this)
+  }
+
+  get side(): TPoint[]
+  {
+    return Box.getSide(this)
   }
 
   get snapPoints(): TPoint[]

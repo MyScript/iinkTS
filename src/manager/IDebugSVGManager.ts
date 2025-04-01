@@ -148,7 +148,7 @@ export class IDebugSVGManager {
         y: rectBox.y + ty,
       }
       this.renderer.removeSymbol(`connection-${infosGroup.id}`)
-      this.renderer.drawConnectionBetweenBox(`connection-${infosGroup.id}`, box, newRectBox, { stroke: color, debug: debugAttr })
+      this.renderer.drawConnectionBetweenBox(`connection-${infosGroup.id}`, box, newRectBox, "sides", { stroke: color, debug: debugAttr })
     }
 
     rectTranslate.addEventListener("pointerdown", e => {
