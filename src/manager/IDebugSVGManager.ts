@@ -202,7 +202,7 @@ export class IDebugSVGManager {
             const box = Box.createFromBoxes(associatedStrokes.map(s => s.bounds))
             let infos: string[] = [`type: ${el.type}`]
             infos.push(...this.buildInfos(el))
-            const hideProperties = ["bounding-box", "primitives", "range"]
+            const hideProperties = ["bounding-box", "primitives", "range", "candidates"]
             infos = infos.filter(i => !hideProperties.some(h => i.indexOf(h) > -1))
             const color = el.type === "Shape" ? "orange" : "green"
             this.drawRecognitionBox(box, infos, color, "recognition-box")
@@ -225,7 +225,7 @@ export class IDebugSVGManager {
             const box = Box.createFromBoxes(associatedStrokes.map(s => s.bounds))
             let infos: string[] = [`type: ${el.type}`]
             infos.push(...this.buildInfos(el))
-            const hideProperties = ["bounding-box", "primitives", "range"]
+            const hideProperties = ["bounding-box", "primitives", "range", "candidates"]
             infos = infos.filter(i => !hideProperties.some(h => i.indexOf(h) > -1))
             this.drawRecognitionBox(box, infos, "red", "recognition-box")
             break
@@ -259,7 +259,7 @@ export class IDebugSVGManager {
               const box = Box.createFromBoxes(associatedStrokes.map(s => s.bounds))
               let infos: string[] = [`type: ${el.type}`]
               infos.push(...this.buildInfos(e))
-              const hideProperties = ["bounding-box", "primitives", "range"]
+              const hideProperties = ["bounding-box", "primitives", "range", "candidates"]
               infos = infos.filter(i => !hideProperties.some(h => i.indexOf(h) > -1))
               this.drawRecognitionBox(box, infos, "#ce922a", "recognition-box-items")
             })
