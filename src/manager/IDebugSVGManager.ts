@@ -100,14 +100,14 @@ export class IDebugSVGManager {
     })
   }
 
-  protected drawRecognitionBox(box: TBox, infos: string[], color: "blue" | "orange" | "red" | "green", debugAttr: string): void {
+  protected drawRecognitionBox(box: TBox, infos: string[], color: string , debugAttr: string): void {
     const TEXT_HEIGHT = 20
     const recognitionGroup = SVGBuilder.createGroup({ "debug": debugAttr, "opacity": debugAttr === "recognition-box-items" ? "0.8" : "1" })
     const rectAttr = {
       fill: "transparent",
       stroke: color,
       style: SVGRendererConst.noSelection,
-      "stroke-dasharray": debugAttr === "recognition-box-items" ? "2 1" : "" ,
+      "stroke-dasharray": debugAttr === "recognition-box-items" ? "1 5 10" : "" ,
     }
     const rect = SVGBuilder.createRect(box, rectAttr)
     recognitionGroup.appendChild(rect)
@@ -261,7 +261,7 @@ export class IDebugSVGManager {
               infos.push(...this.buildInfos(e))
               const hideProperties = ["bounding-box", "primitives", "range"]
               infos = infos.filter(i => !hideProperties.some(h => i.indexOf(h) > -1))
-              this.drawRecognitionBox(box, infos, "orange", "recognition-box-items")
+              this.drawRecognitionBox(box, infos, "#ce922a", "recognition-box-items")
             })
             break
           }
@@ -273,7 +273,7 @@ export class IDebugSVGManager {
                 s.range.forEach(r => {
                   associatedStrokes.push(...this.model.strokes.slice(r.from.stroke, r.to.stroke + 1))
                 })
-                const color = s.type === "Math" ? "red" : "blue"
+                const color = s.type === "Math" ? "#ff6565" : "#099df7"
                 const box = Box.createFromBoxes(associatedStrokes.map(s => s.bounds))
                 this.drawRecognitionBox(box, [`type: ${s.type}`, `label: ${JSON.stringify(s.label || [])}`], color, "recognition-box-items")
               })

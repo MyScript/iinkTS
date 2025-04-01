@@ -166,15 +166,24 @@
 
       undoElement.addEventListener("click", () => {
         editor?.undo()
+        editor.debugger.recognitionBoxVisibility = false
+        editor.debugger.recognitionBoxItemsVisibility = false
+        clickRecognitionBlock()
       })
 
       redoElement.addEventListener("click", () => {
         editor?.redo()
+        editor.debugger.recognitionBoxVisibility = false
+        editor.debugger.recognitionBoxItemsVisibility = false
+        clickRecognitionBlock()
       })
 
       clearElement.addEventListener("click", () => {
         editor?.clear()
         resultElement.innerHTML = ""
+        editor.debugger.recognitionBoxVisibility = false
+        editor.debugger.recognitionBoxItemsVisibility = false
+        clickRecognitionBlock()
       })
 
       resultElement.addEventListener("click", () => {
@@ -192,6 +201,15 @@
       window.addEventListener("resize", () => {
         editor?.resize()
       })
+
+      const clickRecognitionBlock = () => {
+        if(showRecognitionBlock.checked) {
+          showRecognitionBlock.click()
+        }
+        if(showRecognitionItems.checked) {
+          showRecognitionItems.click()
+        }
+      }
 
       let serverConfiguration
       const editorOptions = {
@@ -267,6 +285,7 @@
             resultElement.firstChild.remove()
           }
           resultElement.appendChild(renderjson(event.detail))
+          clickRecognitionBlock()
         })
       }
 
