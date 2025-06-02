@@ -196,6 +196,7 @@ export class InkEditor extends AbstractEditor {
   async destroy(): Promise<void> {
     this.logger.info("destroy")
     this.event.removeAllListeners()
+    this.writer.detach()
     this.layers.destroy()
     this.renderer.destroy()
     return Promise.resolve()
