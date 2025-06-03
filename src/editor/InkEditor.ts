@@ -28,18 +28,20 @@ export type TInkEditorOptions = PartialDeep<EditorOptionsBase &
 /**
  * @group Editor
  */
-export class InkEditor extends AbstractEditor {
+export class InkEditor extends AbstractEditor
+{
   #configuration: InkEditorConfiguration
   #model: IModel
   #penStyle: TStyle
   renderer: SVGRenderer
   recognizer: RecognizerHTTPV2
   history: IHistoryManager
-  writer : IWriterManager
+  writer: IWriterManager
   debugger: IDebugSVGManager
   #tool: EditorTool = EditorTool.Write
 
-  constructor(rootElement: HTMLElement, options?: TInkEditorOptions) {
+  constructor(rootElement: HTMLElement, options?: TInkEditorOptions)
+  {
     super(rootElement, options)
 
     this.#configuration = new InkEditorConfiguration(options?.configuration)
@@ -72,19 +74,23 @@ export class InkEditor extends AbstractEditor {
     this.#penStyle = Object.assign({}, this.#penStyle, penStyle)
   }
 
-  get initializationPromise(): Promise<void> {
+  get initializationPromise(): Promise<void>
+  {
     return Promise.resolve()
   }
 
-  get tool(): EditorTool {
+  get tool(): EditorTool
+  {
     return this.#tool
   }
-  set tool(i: EditorTool) {
+  set tool(i: EditorTool)
+  {
     this.#tool = i
     this.setCursorStyle()
   }
 
-  protected setCursorStyle(): void {
+  protected setCursorStyle(): void
+  {
     this.writer.detach()
     switch (this.tool) {
       case EditorTool.Erase:
@@ -99,15 +105,18 @@ export class InkEditor extends AbstractEditor {
     }
   }
 
-  get model(): IModel {
+  get model(): IModel
+  {
     return this.#model
   }
 
-  get configuration(): InkEditorConfiguration {
+  get configuration(): InkEditorConfiguration
+  {
     return this.#configuration
   }
 
-  async initialize(): Promise<void> {
+  async initialize(): Promise<void>
+  {
     try {
       this.logger.info("initialize")
       this.layers.render()
@@ -121,7 +130,7 @@ export class InkEditor extends AbstractEditor {
       this.model.rowHeight = this.configuration.rendering.guides.gap
       this.history.init(this.model)
 
-      if(!this.recognizer.configuration.server.version) {
+      if (!this.recognizer.configuration.server.version) {
         await this.loadInfo(this.configuration.server)
         this.recognizer.configuration.server.version = this.info!.version
       }
@@ -139,20 +148,21 @@ export class InkEditor extends AbstractEditor {
 
   //updateBoundingBox
   updateSymbolsStyle(symbolIds: string[], style: PartialDeep<TStyle>): void
+  {
+    this.logger.info("updateSymbolsStyle", { symbolIds, style })
+    this.model.strokes.forEach(s =>
     {
-      this.logger.info("updateSymbolsStyle", { symbolIds, style })
-      this.model.strokes.forEach(s =>
-      {
-        if (symbolIds.includes(s.id)) {
-          s.style = Object.assign({}, s.style, style)
-          this.renderer.drawSymbol(s)
-          this.model.updateStroke(s)
-          s.modificationDate = Date.now()
-        }
-      })
-    }
+      if (symbolIds.includes(s.id)) {
+        s.style = Object.assign({}, s.style, style)
+        this.renderer.drawSymbol(s)
+        this.model.updateStroke(s)
+        s.modificationDate = Date.now()
+      }
+    })
+  }
 
-  async resize({ height, width }: { height?: number, width?: number } = {}): Promise<void> {
+  async resize({ height, width }: { height?: number, width?: number } = {}): Promise<void>
+  {
     this.logger.info("resize", { height, width })
     const compStyles = window.getComputedStyle(this.layers.root)
     this.model.height = height || Math.max(parseInt(compStyles.height.replace("px", "")), this.configuration.rendering.minHeight)
@@ -162,29 +172,40 @@ export class InkEditor extends AbstractEditor {
     this.event.emitExported(this.model.exports as TExport)
   }
 
-  async undo(): Promise<void> {
+  async undo(): Promise<void>
+  {
     this.logger.info("undo")
     const previousStackItem = this.history.undo()
     const modifications = previousStackItem.model.extractDifferenceStrokes(this.model)
     this.#model = previousStackItem.model.clone()
-    this.event.emitExported(this.#model.exports as TExport)
     modifications.removed.forEach(s => this.renderer.removeSymbol(s.id))
     modifications.added.forEach(s => this.renderer.drawSymbol(s))
+
+    const exports = await this.recognizer.send(this.model.strokes)
+    this.model.mergeExport(exports)
+    this.history.updateModelStack(this.model)
+    this.event.emitExported(this.#model.exports as TExport)
     this.logger.debug("undo", this.#model)
   }
 
-  async redo(): Promise<void> {
+  async redo(): Promise<void>
+  {
     this.logger.info("redo")
     const previousStackItem = this.history.redo()
     const modifications = previousStackItem.model.extractDifferenceStrokes(this.model)
     this.#model = previousStackItem.model.clone()
-    this.event.emitExported(this.#model.exports as TExport)
     modifications.removed.forEach(s => this.renderer.removeSymbol(s.id))
     modifications.added.forEach(s => this.renderer.drawSymbol(s))
+
+    const exports = await this.recognizer.send(this.model.strokes)
+    this.model.mergeExport(exports)
+    this.history.updateModelStack(this.model)
+    this.event.emitExported(this.#model.exports as TExport)
     this.logger.debug("redo", this.#model)
   }
 
-  async clear(): Promise<void> {
+  async clear(): Promise<void>
+  {
     this.logger.info("clear")
     const erased = this.model.strokes
     this.model.clear()
@@ -193,7 +214,8 @@ export class InkEditor extends AbstractEditor {
     this.event.emitExported(this.#model.exports as TExport)
   }
 
-  async destroy(): Promise<void> {
+  async destroy(): Promise<void>
+  {
     this.logger.info("destroy")
     this.event.removeAllListeners()
     this.writer.detach()
