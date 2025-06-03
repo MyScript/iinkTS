@@ -38,16 +38,13 @@ test.describe("Home Page", () => {
         expect(await links.count()).toBe(2)
 
         const exampleLink = links.nth(0)
+        await expect(exampleLink).toBeVisible()
+        await expect(exampleLink).toHaveText("View example")
+
         const codeLink = links.nth(1)
-
-        const exampleLinkText = await exampleLink.allInnerTexts()
-        expect(exampleLinkText.length).toBe(1)
-        expect(exampleLinkText[0].trim()).toBe("View example")
-
-        const codeLinkText = await codeLink.allInnerTexts()
-        expect(codeLinkText.length).toBe(1)
-        expect(codeLinkText[0].trim()).toBe("Get source code")
-        expect(await codeLink.getAttribute("href")).toContain("https://github.com/MyScript")
+        await expect(codeLink).toBeVisible()
+        await expect(codeLink).toHaveAttribute("href", /https:\/\/github.com\/MyScript\/iinkTS\/blob\/master\/examples\/.*/)
+        await expect(codeLink).toHaveText("Get source code")
       }
     }
   })
