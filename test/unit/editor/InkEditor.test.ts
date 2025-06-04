@@ -141,7 +141,7 @@ describe("InkEditor.ts", () =>
       editor.recognizer.send = jest.fn()
       editor.renderer.drawSymbol = jest.fn()
       editor.renderer.removeSymbol = jest.fn()
-      editor.history.undo = jest.fn(() => ({ model: firstModel, changes: { erased: [stroke1] } }))
+      editor.history.undo = jest.fn(() => ({ model: firstModel, changes: { removed: [stroke1] } }))
       editor.history.context.canUndo = true
       await editor.undo()
       expect(editor.renderer.drawSymbol).toHaveBeenNthCalledWith(1, stroke1)
@@ -191,7 +191,7 @@ describe("InkEditor.ts", () =>
       editor.recognizer.send = jest.fn()
       editor.renderer.drawSymbol = jest.fn()
       editor.renderer.removeSymbol = jest.fn()
-      editor.history.redo = jest.fn(() => ({ model: new IModel(), changes: { erased: [stroke1] } }))
+      editor.history.redo = jest.fn(() => ({ model: new IModel(), changes: { removed: [stroke1] } }))
       editor.history.context.canRedo = true
       await editor.redo()
       expect(editor.renderer.drawSymbol).toHaveBeenCalledTimes(0)

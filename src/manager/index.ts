@@ -1,3 +1,4 @@
+export * from "./AbstractWriterManager"
 export * from "./IIConversionManager"
 export * from "./IIResizeManager"
 export * from "./IIRotationManager"
@@ -5,9 +6,9 @@ export * from "./IISelectionManager"
 export * from "./IITextManager"
 export * from "./IITranslateManager"
 export * from "./IIWriterManager"
-export * from "./IIEraseManager"
-export * from "./AbstractWriterManager"
-export * from "./IIEraseManager"
 export * from "./IIDebugSVGManager"
-export * from "./IDebugSVGManager"
 export * from "./IIMoveManager"
+
+export * from "./IDebugSVGManager"
+
+export * from "./EraseManager"

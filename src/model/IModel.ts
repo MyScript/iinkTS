@@ -32,6 +32,11 @@ export class IModel
     this.idle = true
   }
 
+  get strokesToDelete(): IIStroke[]
+  {
+    return this.strokes.filter(s => s.deleting)
+  }
+
   addStroke(stroke: IIStroke): void
   {
     this.#logger.info("addStroke", { stroke })
@@ -58,6 +63,19 @@ export class IModel
       this.exports = undefined
     }
     this.#logger.debug("updateStroke", this.strokes)
+  }
+
+  removeStroke(id: string): void
+  {
+    this.#logger.info("removeSymbol", { id })
+    const strokeIndex = this.strokes.findIndex(s => s.id === id)
+    if (strokeIndex !== -1) {
+      this.strokes.splice(strokeIndex, 1)
+      this.modificationDate = Date.now()
+      this.converts = undefined
+      this.exports = undefined
+    }
+    this.#logger.debug("removeSymbol", this.strokes)
   }
 
   extractDifferenceStrokes(model: IModel): { added: IIStroke[], removed: IIStroke[] }

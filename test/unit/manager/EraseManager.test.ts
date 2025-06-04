@@ -1,14 +1,14 @@
 import { buildOICircle, buildOIStroke } from "../helpers"
 import { InteractiveInkEditorMock } from "../__mocks__/InteractiveInkEditorMock"
-import { IIEraseManager, PointerInfo, SymbolType } from "../../../src/iink"
+import { EraseManager, PointerInfo, SymbolType } from "../../../src/iink"
 
 
-describe("IIEraseManager.ts", () =>
+describe("EraseManager.ts", () =>
 {
   test("should create", () =>
   {
     const editor = new InteractiveInkEditorMock()
-    const manager = new IIEraseManager(editor)
+    const manager = new EraseManager(editor)
     expect(manager).toBeDefined()
     expect(manager.currentEraser).toBeUndefined()
   })
@@ -20,7 +20,7 @@ describe("IIEraseManager.ts", () =>
     editor.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
     editor.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
 
-    const manager = new IIEraseManager(editor)
+    const manager = new EraseManager(editor)
     manager.renderer.drawSymbol = jest.fn()
     manager.renderer.removeSymbol = jest.fn()
     editor.init()
@@ -57,11 +57,11 @@ describe("IIEraseManager.ts", () =>
       const eraserId = manager.currentEraser!.id
       const strokeToErase = buildOIStroke()
       strokeToErase.deleting = true
-      manager.model.symbols.push(strokeToErase)
+      editor.model.symbols.push(strokeToErase)
       const circleToErase = buildOICircle()
       circleToErase.deleting = true
-      manager.model.symbols.push(circleToErase)
-      manager.model.symbols.push(buildOIStroke())
+      editor.model.symbols.push(circleToErase)
+      editor.model.symbols.push(buildOIStroke())
 
       const info = {
         pointer: { t: 1, p: 0.5, x: 20, y: 20 }
@@ -72,7 +72,7 @@ describe("IIEraseManager.ts", () =>
       expect(manager.renderer.removeSymbol).toHaveBeenCalledTimes(1)
       expect(manager.renderer.removeSymbol).toHaveBeenNthCalledWith(1, eraserId)
 
-      expect(manager.editor.removeSymbols).toHaveBeenNthCalledWith(1, [strokeToErase.id, circleToErase.id])
+      expect(editor.removeSymbols).toHaveBeenNthCalledWith(1, [strokeToErase.id, circleToErase.id])
     })
     test("should throw error if continu when currentEraser is undefine", async () =>
     {

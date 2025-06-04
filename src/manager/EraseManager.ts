@@ -1,31 +1,26 @@
 import { LoggerCategory, LoggerManager } from "../logger"
-import { IIModel } from "../model"
 import { IIEraser, TSegment } from "../symbol"
 import { SVGRenderer } from "../renderer"
 import { InteractiveInkEditor } from "../editor/InteractiveInkEditor"
 import { PointerEventGrabber, PointerInfo } from "../grabber"
+import { InkEditor } from "../editor"
 
 /**
  * @group Manager
  */
-export class IIEraseManager
+export class EraseManager
 {
   #logger = LoggerManager.getLogger(LoggerCategory.WRITE)
   grabber: PointerEventGrabber
-  editor: InteractiveInkEditor
+  editor: InteractiveInkEditor | InkEditor
 
   currentEraser?: IIEraser
 
-  constructor(editor: InteractiveInkEditor)
+  constructor(editor: InteractiveInkEditor | InkEditor)
   {
     this.#logger.info("constructor")
     this.editor = editor
     this.grabber = new PointerEventGrabber(editor.configuration.grabber)
-  }
-
-  get model(): IIModel
-  {
-    return this.editor.model
   }
 
   get renderer(): SVGRenderer
@@ -66,13 +61,24 @@ export class IIEraseManager
       p1: this.currentEraser.pointers.at(-1)!,
       p2: this.currentEraser.pointers.at(-2)!
     }
-    this.model.symbols.forEach(s => {
-      if (s.isIntersected(lastSeg))
+    if (this.editor instanceof InteractiveInkEditor) {
+      this.editor.model.symbols.forEach(s =>
       {
-        s.deleting = true
-      }
-    })
-    this.model.symbolsToDelete.map(s => this.renderer.drawSymbol(s))
+        if (s.isIntersected(lastSeg)) {
+          s.deleting = true
+          this.renderer.drawSymbol(s)
+        }
+      })
+    }
+    else {
+      this.editor.model.strokes.forEach(s =>
+      {
+        if (s.isIntersected(lastSeg)) {
+          s.deleting = true
+          this.renderer.drawSymbol(s)
+        }
+      })
+    }
   }
 
   async end(info: PointerInfo): Promise<void>
@@ -81,7 +87,12 @@ export class IIEraseManager
     this.continue(info)
 
     this.renderer.removeSymbol(this.currentEraser!.id)
-    this.editor.removeSymbols(this.model.symbolsToDelete.map(s => s.id))
+    if (this.editor instanceof InteractiveInkEditor) {
+      this.editor.removeSymbols(this.editor.model.symbolsToDelete.map(s => s.id))
+    }
+    else {
+      this.editor.removeStrokes(this.editor.model.strokesToDelete.map(s => s.id))
+    }
     this.currentEraser = undefined
   }
 }
