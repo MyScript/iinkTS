@@ -38,7 +38,7 @@ import
   IIRotationManager,
   IITranslateManager,
   IITextManager,
-  IIEraseManager,
+  EraseManager,
   IIDebugSVGManager,
   IIMoveManager,
 } from "../manager"
@@ -86,7 +86,7 @@ export class InteractiveInkEditor extends AbstractEditor
 
   history: IIHistoryManager
   writer: IIWriterManager
-  eraser: IIEraseManager
+  eraser: EraseManager
   gesture: IIGestureManager
   resizer: IIResizeManager
   rotator: IIRotationManager
@@ -125,7 +125,7 @@ export class InteractiveInkEditor extends AbstractEditor
     this.history = new IIHistoryManager(this.#configuration["undo-redo"], this.event)
 
     this.writer = new IIWriterManager(this)
-    this.eraser = new IIEraseManager(this)
+    this.eraser = new EraseManager(this)
     this.selector = new IISelectionManager(this)
     this.move = new IIMoveManager(this)
 

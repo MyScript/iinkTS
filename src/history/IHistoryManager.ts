@@ -10,7 +10,7 @@ import { THistoryConfiguration } from "./HistoryConfiguration"
  */
 export type TIHistoryChanges = {
   added?: TIISymbol[]
-  erased?: TIISymbol[]
+  removed?: TIISymbol[]
 }
 
 /**
@@ -19,7 +19,7 @@ export type TIHistoryChanges = {
  */
 export type TIHistoryBackendChanges = {
   added?: IIStroke[]
-  erased?: IIStroke[]
+  removed?: IIStroke[]
 }
 
 /**
@@ -69,7 +69,7 @@ export class IHistoryManager {
   isChangesEmpty(changes: TIHistoryChanges): boolean {
     return !(
       changes.added?.length ||
-      changes.erased?.length
+      changes.removed?.length
     )
   }
 
@@ -108,10 +108,10 @@ export class IHistoryManager {
   protected reverseChanges(changes: TIHistoryChanges): TIHistoryChanges {
     const reversedChanges: TIHistoryChanges = {}
     if (changes.added) {
-      reversedChanges.erased = changes.added
+      reversedChanges.removed = changes.added
     }
-    if (changes.erased) {
-      reversedChanges.added = changes.erased
+    if (changes.removed) {
+      reversedChanges.added = changes.removed
     }
     return reversedChanges
   }

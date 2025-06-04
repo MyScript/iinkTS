@@ -1,6 +1,6 @@
 import { EditorTool } from "../Constants"
 import { PointerEventGrabber } from "../grabber"
-import { IModel, TExport } from "../model"
+import { IModel, TExport, TExportV2 } from "../model"
 import { RecognizerHTTPV2 } from "../recognizer"
 import { SVGRenderer } from "../renderer"
 import { TStyle } from "../style"
@@ -9,7 +9,7 @@ import { PartialDeep } from "../utils"
 import { AbstractEditor, EditorOptionsBase } from "./AbstractEditor"
 import { InkEditorConfiguration, TInkEditorConfiguration } from "./InkEditorConfiguration"
 import { IWriterManager } from "../manager/IWriterManager"
-import { IDebugSVGManager } from "../manager"
+import { IDebugSVGManager, EraseManager } from "../manager"
 
 /**
  * @group Editor
@@ -37,6 +37,7 @@ export class InkEditor extends AbstractEditor
   recognizer: RecognizerHTTPV2
   history: IHistoryManager
   writer: IWriterManager
+  eraser: EraseManager
   debugger: IDebugSVGManager
   #tool: EditorTool = EditorTool.Write
 
@@ -59,6 +60,7 @@ export class InkEditor extends AbstractEditor
 
     this.#model = new IModel()
     this.writer = new IWriterManager(this)
+    this.eraser = new EraseManager(this)
     this.debugger = new IDebugSVGManager(this)
     this.tool = EditorTool.Write
     this.history = new IHistoryManager(this.#configuration["undo-redo"], this.event)
@@ -86,14 +88,12 @@ export class InkEditor extends AbstractEditor
   set tool(i: EditorTool)
   {
     this.#tool = i
-    this.setCursorStyle()
-  }
-
-  protected setCursorStyle(): void
-  {
     this.writer.detach()
+    this.eraser.detach()
+
     switch (this.tool) {
       case EditorTool.Erase:
+        this.eraser.attach(this.layers.root)
         this.layers.root.classList.remove("draw")
         this.layers.root.classList.add("erase")
         break
@@ -103,6 +103,7 @@ export class InkEditor extends AbstractEditor
         this.layers.root.classList.remove("erase")
         break
     }
+
   }
 
   get model(): IModel
@@ -161,6 +162,16 @@ export class InkEditor extends AbstractEditor
     })
   }
 
+  async export(requestedMimeTypes?: string[]): Promise<TExportV2>
+  {
+    this.logger.info("export")
+    const exports = await this.recognizer.send(this.model.strokes, requestedMimeTypes)
+    this.model.mergeExport(exports)
+    this.history.updateModelStack(this.model)
+    this.event.emitExported(this.model.exports || {})
+    return exports
+  }
+
   async resize({ height, width }: { height?: number, width?: number } = {}): Promise<void>
   {
     this.logger.info("resize", { height, width })
@@ -170,6 +181,27 @@ export class InkEditor extends AbstractEditor
     this.renderer.resize(this.model.height, this.model.width)
     this.logger.debug("resize", { model: this.model })
     this.event.emitExported(this.model.exports as TExport)
+  }
+
+  async removeStrokes(strokeIds: string[]): Promise<void>
+  {
+    this.logger.info("removeStrokes", { strokeIds })
+    const removedStrokes = this.model.strokes.filter(s => strokeIds.includes(s.id))
+    if (removedStrokes.length === 0) {
+      this.logger.warn("removeStrokes", "No strokes found to remove")
+      return
+    }
+    this.#model = this.model.clone()
+    removedStrokes.forEach(s => {
+      this.renderer.removeSymbol(s.id)
+      this.model.removeStroke(s.id)
+    })
+    this.history.push(this.#model, { removed: removedStrokes })
+    const exports = await this.recognizer.send(this.model.strokes)
+    this.model.mergeExport(exports)
+    this.history.updateModelStack(this.model)
+    this.event.emitExported(this.#model.exports as TExport)
+    this.logger.debug("removeStrokes", { model: this.#model })
   }
 
   async undo(): Promise<void>
@@ -209,7 +241,7 @@ export class InkEditor extends AbstractEditor
     this.logger.info("clear")
     const erased = this.model.strokes
     this.model.clear()
-    this.history.push(this.model, { erased })
+    this.history.push(this.model, { removed: erased })
     this.renderer.clear()
     this.event.emitExported(this.#model.exports as TExport)
   }
