@@ -59,7 +59,7 @@ export class IHistoryManager {
     this.#logger.info("updateModelStack", { model })
     const stackIdx = this.stack.findIndex(s => s.model.modificationDate === model.modificationDate)
     if (stackIdx > -1) {
-      this.stack[stackIdx].model = model
+      this.stack[stackIdx].model = model.clone()
       this.updateContext()
     }
     this.updateContext()
