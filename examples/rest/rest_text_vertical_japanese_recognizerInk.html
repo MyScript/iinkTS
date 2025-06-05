@@ -118,9 +118,7 @@
         })
 
         editor.event.addEventListener("exported", (event) => {
-          resultElement.innerHTML = event.detail
-            ? event.detail["text/plain"].replace(/\n/g, "<br>")
-            : ""
+          resultElement.innerHTML = event.detail?.["text/plain"]?.replace(/\n/g, "<br>") || "";
         })
       }
 
