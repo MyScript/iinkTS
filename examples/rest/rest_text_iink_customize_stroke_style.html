@@ -126,7 +126,7 @@
         });
 
         editor.event.addEventListener("exported", (event) => {
-          resultElement.innerHTML = event.detail ? event.detail["text/plain"] : "";
+          resultElement.innerHTML = event.detail?.["text/plain"] || "";
         });
 
         clearElement.addEventListener("click", async () => {
