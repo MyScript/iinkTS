@@ -113,7 +113,7 @@ describe("InkEditor.ts", () =>
       editor.history.undo = jest.fn(() => ({ model: firstModel, changes: { added: [stroke1] } }))
       editor.history.context.canUndo = true
       await editor.undo()
-      expect(editor.recognizer.send).toHaveBeenNthCalledWith(1, [stroke1])
+      expect(editor.recognizer.send).toHaveBeenNthCalledWith(1, [stroke1], undefined)
     })
     test("should call renderer.drawSymbol when add stroke", async () =>
     {
@@ -164,7 +164,7 @@ describe("InkEditor.ts", () =>
       editor.history.redo = jest.fn(() => ({ model: firstModel, changes: { added: [stroke1] } }))
       editor.history.context.canRedo = true
       await editor.redo()
-      expect(editor.recognizer.send).toHaveBeenNthCalledWith(1, [stroke1])
+      expect(editor.recognizer.send).toHaveBeenNthCalledWith(1, [stroke1], undefined)
     })
     test("should call renderer.drawSymbol when added stroke", async () =>
     {
