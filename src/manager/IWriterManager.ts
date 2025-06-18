@@ -36,30 +36,15 @@ export class IWriterManager extends AbstractWriterManager {
     const localPointer = info.pointer
     const localSymbol = this.updateCurrentSymbol(localPointer)
     this.model.currentStroke = undefined
-    this.renderer.drawSymbol(localSymbol!)
+    this.renderer.drawSymbol(localSymbol)
     this.model.addStroke(localSymbol)
     this.editor.history.push(this.model, { added: [localSymbol] })
     const deferred = new DeferredPromise<void>()
 
     if (this.editor.configuration.triggers.exportContent !== "DEMAND") {
       clearTimeout(this.#exportTimer)
-      const currentModel = this.model.clone()
       this.#exportTimer = setTimeout(async () => {
-        try {
-          const exports = await this.editor.recognizer.send(this.model.strokes as IIStroke[])
-          currentModel.mergeExport(exports)
-          if (this.model.modificationDate === currentModel.modificationDate) {
-            this.model.exports = currentModel.exports
-          }
-          this.editor.history.updateModelStack(currentModel)
-          this.editor.event.emitExported(currentModel.exports || {})
-
-          deferred.resolve()
-        } catch (error) {
-          this.editor.logger.error("updateModelRendering", { error })
-          this.editor.event.emitError(error as Error)
-          deferred.reject(error as Error)
-        }
+        this.editor.export()
       }, this.editor.configuration.triggers.exportContent === "QUIET_PERIOD" ? this.editor.configuration.triggers.exportContentDelay : 0)
     } else {
       deferred.resolve()

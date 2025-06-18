@@ -165,9 +165,14 @@ export class InkEditor extends AbstractEditor
   async export(requestedMimeTypes?: string[]): Promise<TExportV2>
   {
     this.logger.info("export")
-    const exports = await this.recognizer.send(this.model.strokes, requestedMimeTypes)
-    this.model.mergeExport(exports)
-    this.history.updateModelStack(this.model)
+    const currentModel = this.model.clone()
+
+    const exports = await this.recognizer.send(currentModel.strokes, requestedMimeTypes)
+    currentModel.mergeExport(exports)
+    if (this.model.modificationDate === currentModel.modificationDate) {
+      this.model.exports = currentModel.exports
+    }
+    this.history.updateModelStack(currentModel)
     this.event.emitExported(this.model.exports || {})
     return exports
   }
@@ -180,7 +185,7 @@ export class InkEditor extends AbstractEditor
     this.model.width = width || Math.max(parseInt(compStyles.width.replace("px", "")), this.configuration.rendering.minWidth)
     this.renderer.resize(this.model.height, this.model.width)
     this.logger.debug("resize", { model: this.model })
-    this.event.emitExported(this.model.exports as TExport)
+    this.event.emitExported(this.model.exports || {})
   }
 
   async removeStrokes(strokeIds: string[]): Promise<void>
@@ -212,12 +217,7 @@ export class InkEditor extends AbstractEditor
     this.#model = previousStackItem.model.clone()
     modifications.removed.forEach(s => this.renderer.removeSymbol(s.id))
     modifications.added.forEach(s => this.renderer.drawSymbol(s))
-
-    const exports = await this.recognizer.send(this.model.strokes)
-    this.model.mergeExport(exports)
-    this.history.updateModelStack(this.model)
-    this.event.emitExported(this.#model.exports as TExport)
-    this.logger.debug("undo", this.#model)
+    await this.export()
   }
 
   async redo(): Promise<void>
@@ -228,12 +228,7 @@ export class InkEditor extends AbstractEditor
     this.#model = previousStackItem.model.clone()
     modifications.removed.forEach(s => this.renderer.removeSymbol(s.id))
     modifications.added.forEach(s => this.renderer.drawSymbol(s))
-
-    const exports = await this.recognizer.send(this.model.strokes)
-    this.model.mergeExport(exports)
-    this.history.updateModelStack(this.model)
-    this.event.emitExported(this.#model.exports as TExport)
-    this.logger.debug("redo", this.#model)
+    await this.export()
   }
 
   async clear(): Promise<void>
