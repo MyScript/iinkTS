@@ -123,4 +123,23 @@ test.describe("Math Recognizer Iink", () => {
       })
     })
   })
+
+  test.describe("multiple undos", () => {
+    test("should have an empty result after multiple undo", async ({ page}) => {
+      await test.step("write strokes", async () => {
+        await writeStrokes(page, equation.strokes)
+        await expect(page.locator("#result .katex-html")).toHaveText(equation.exports.LATEX.at(-1))
+      })
+
+      // Undo multiple times
+      await test.step("undo multiple times and verify result is empty", async () => {
+        for(let i = 0; i < equation.strokes.length; i++) {
+          await page.click("#undo")
+          // eslint-disable-next-line playwright/no-wait-for-timeout
+          await page.waitForTimeout(100) // wait for the undo to process
+        }
+        await expect(page.locator("#result")).toBeEmpty()
+      })
+    })
+  })
 })
