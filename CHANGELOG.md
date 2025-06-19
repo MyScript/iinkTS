@@ -1,3 +1,20 @@
+# [v3.0.2](https://github.com/MyScript/iinkTS/tree/v3.0.2)
+
+## Bugs fix
+- fix(InkEditor) last undo does not supress 1st result
+- fix(InkEditor) eraser does not work
+- fix(InkEditor) missing result after undo
+- fix(InkEditor) bad recognition displayed when language is not english
+
+# [v3.0.1](https://github.com/MyScript/iinkTS/tree/v3.0.1)
+
+## Features
+- feat(InkEditor): change CanvasRenderer with SVGRenderer
+- feat(examples): add japanese vertical example
+
+## Bugs fix
+- fix(InkEditor): add quiet_period before send recognition request
+
 # [v3.0](https://github.com/MyScript/iinkTS/tree/v3.0)
 
 ## Features
