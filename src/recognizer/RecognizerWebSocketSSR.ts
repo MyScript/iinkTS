@@ -245,10 +245,18 @@ export class RecognizerWebSocketSSR
     this.#logger.info("manageAckMessage", { websocketMessage })
     const hmacChallengeMessage = websocketMessage as TRecognizerWebSocketSSRMessageHMACChallenge
     if (hmacChallengeMessage.hmacChallenge) {
-      this.send({
-        type: "hmac",
-        hmac: await computeHmac(hmacChallengeMessage.hmacChallenge, this.configuration.server.applicationKey, this.configuration.server.hmacKey)
-      })
+        if (this.configuration.server.challenge_fn) {
+            this.send({
+                type: "hmac",
+                hmac: await this.configuration.server.challenge_fn(hmacChallengeMessage.hmacChallenge, this.configuration.server.applicationKey, this.configuration.server.hmacKey)
+            })
+        } else {
+            this.send({
+                type: "hmac",
+                hmac: await computeHmac(hmacChallengeMessage.hmacChallenge, this.configuration.server.applicationKey, this.configuration.server.hmacKey)
+            })
+        }
+
     }
     if (hmacChallengeMessage.iinkSessionId) {
       this.sessionId = hmacChallengeMessage.iinkSessionId

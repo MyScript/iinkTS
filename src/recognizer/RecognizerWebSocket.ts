@@ -223,10 +223,17 @@ export class RecognizerWebSocket
 
   protected async manageHMACChallenge(hmacChallengeMessage: TRecognizerWebSocketMessageHMACChallenge): Promise<void>
   {
-    this.#send({
-      type: "hmac",
-      hmac: await computeHmac(hmacChallengeMessage.hmacChallenge, this.configuration.server.applicationKey, this.configuration.server.hmacKey)
-    })
+      if (this.configuration.server.challenge_fn) {
+          this.send({
+              type: "hmac",
+              hmac: await this.configuration.server.challenge_fn(hmacChallengeMessage.hmacChallenge, this.configuration.server.applicationKey, this.configuration.server.hmacKey)
+          })
+      } else {
+          this.send({
+              type: "hmac",
+              hmac: await computeHmac(hmacChallengeMessage.hmacChallenge, this.configuration.server.applicationKey, this.configuration.server.hmacKey)
+          })
+      }
   }
 
   protected initPing(): void
