@@ -248,7 +248,7 @@ export class RecognizerWebSocketSSR
         if (this.configuration.server.challenge_fn) {
             this.send({
                 type: "hmac",
-                hmac: await this.configuration.server.challenge_fn(hmacChallengeMessage.hmacChallenge, this.configuration.server.applicationKey, this.configuration.server.hmacKey)
+                hmac: await this.configuration.server.challenge_fn(hmacChallengeMessage.hmacChallenge, this.configuration.server.applicationKey)
             })
         } else {
             this.send({
