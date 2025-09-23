@@ -80,7 +80,7 @@ export class GestureManager
       })
 
       if (mapToUpdate.length) {
-        this.editor.batch(() =>
+        this.editor.run(() =>
         {
           this.editor.deleteShape(gestureShape)
           this.editor.updateShapes(mapToUpdate)
