@@ -154,7 +154,19 @@ export class RecognizerHTTPV1
     headers.append("Accept", "application/json," + mimeType)
     headers.append("applicationKey", this.configuration.server.applicationKey)
     try {
-      const hmac = await computeHmac(JSON.stringify(data), this.configuration.server.applicationKey, this.configuration.server.hmacKey)
+      let hmacKey: string
+      if (typeof this.configuration.server.hmacKey == "string") {
+        if (this.configuration.server.hmacKey.length === 0) {
+          throw new Error("HMAC key is empty")
+        }
+        hmacKey = this.configuration.server.hmacKey
+      } else if (typeof this.configuration.server.hmacKey == "function") {
+        hmacKey = await this.configuration.server.hmacKey(this.configuration.server.applicationKey)
+      }
+      else {
+        throw new Error("HMAC key is not a string nor a function")
+      }
+      const hmac = await computeHmac(JSON.stringify(data), this.configuration.server.applicationKey, hmacKey)
       headers.append("hmac", hmac)
     } catch (error) {
       this.#logger.error("post.computeHmac", error)

@@ -10,7 +10,7 @@ export type TServerHTTPConfiguration = {
   scheme: TScheme,
   host: string
   applicationKey: string
-  hmacKey: string
+  hmacKey: string | ((applicationKey: string) => Promise<string>)
   version?: string
 }
 

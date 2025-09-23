@@ -245,9 +245,21 @@ export class RecognizerWebSocketSSR
     this.#logger.info("manageAckMessage", { websocketMessage })
     const hmacChallengeMessage = websocketMessage as TRecognizerWebSocketSSRMessageHMACChallenge
     if (hmacChallengeMessage.hmacChallenge) {
+      let hmacKey: string
+      if (typeof this.configuration.server.hmacKey == "string") {
+        if (this.configuration.server.hmacKey.length === 0) {
+          throw new Error("HMAC key is empty")
+        }
+        hmacKey = this.configuration.server.hmacKey
+      } else if (typeof this.configuration.server.hmacKey == "function") {
+        hmacKey = await this.configuration.server.hmacKey(this.configuration.server.applicationKey)
+      }
+      else {
+        throw new Error("HMAC key is not a string nor a function")
+      }
       this.send({
         type: "hmac",
-        hmac: await computeHmac(hmacChallengeMessage.hmacChallenge, this.configuration.server.applicationKey, this.configuration.server.hmacKey)
+        hmac: await computeHmac(hmacChallengeMessage.hmacChallenge, this.configuration.server.applicationKey, hmacKey)
       })
     }
     if (hmacChallengeMessage.iinkSessionId) {
