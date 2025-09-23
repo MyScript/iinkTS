@@ -767,6 +767,7 @@ export class IIGestureManager
     }
 
     if (changes) {
+      this.history.push(this.model, changes)
       const promises: Promise<void>[] = []
       if (changes.translate?.length) {
         promises.push(...changes.translate.map(tr => this.translator.translate(tr.symbols, tr.tx, tr.ty, false)))
@@ -774,7 +775,6 @@ export class IIGestureManager
       if (changes.replaced?.newSymbols.length) {
         promises.push(this.editor.replaceSymbols(changes.replaced.oldSymbols, changes.replaced.newSymbols, false))
       }
-      this.history.push(this.model, changes)
       await Promise.all(promises)
     }
   }
