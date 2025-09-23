@@ -174,6 +174,12 @@ export class InkEditor extends AbstractEditor
     }
     this.history.updateModelStack(currentModel)
     this.event.emitExported(this.model.exports || {})
+    if (this.debugger.recognitionBoxItemsVisibility) {
+      this.debugger.debugRecognitionBoxItems()
+    }
+    if (this.debugger.recognitionBoxVisibility) {
+      this.debugger.debugRecognitionBox()
+    }
     return exports
   }
 
