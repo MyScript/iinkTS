@@ -162,9 +162,22 @@ export class Converter
       y: firstShape.y + dy,
       rotation: 0,
       props: {
-        color: firstShape.props.color,
         size: firstShape.props.size,
-        text: text.label,
+        color: firstShape.props.color,
+        richText: {
+          type: "doc",
+          content: [
+            {
+              type: "paragraph",
+              content: [
+                {
+                  type: "text",
+                  text: text.label || "",
+                },
+              ],
+            },
+          ],
+        },
         font: this.font,
         textAlign: "start",
       },
