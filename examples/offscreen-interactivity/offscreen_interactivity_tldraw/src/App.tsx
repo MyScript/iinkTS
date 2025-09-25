@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import ReactJson from 'react-json-view'
-import { Editor, TLEventMapHandler, Tldraw } from 'tldraw'
+import { Editor, HistoryEntry, TLEventMapHandler, TLRecord, Tldraw } from 'tldraw'
 import { RootState } from './store'
 import { setExports } from './store/exportsStore'
 import { addError, removeError } from './store/errorsStore'
@@ -63,7 +63,7 @@ export default function App()
 
     recognizer.event.addContentChangedListener(updateExports)
 
-    const handleChangeEvent: TLEventMapHandler<'change'> = async (change) =>
+    const handleChangeEvent: TLEventMapHandler<'change'> = async (change: HistoryEntry<TLRecord>) =>
     {
       if (change.source === 'user') {
         try {

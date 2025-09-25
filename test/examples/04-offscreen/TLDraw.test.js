@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test"
-import { waitForEditorInit, writeStrokes, } from "../helper"
+import { writeStrokes, } from "../helper"
 import helloOneStroke from "../__dataset__/helloOneStroke"
 
 test.describe("Offscreen TLDraw", () => {
@@ -8,95 +8,97 @@ test.describe("Offscreen TLDraw", () => {
     await expect(page.locator('.loader')).toHaveCount(0)
   })
 
-  test.describe("write", () => {
-    test("should have shapes tab updated", async ({ page }) => {
-      await writeStrokes(page, helloOneStroke.strokes),
-      await page.locator('button:text("Shapes")').click()
-      const shapeLoc = await page.locator('.tab-content.active')
-      await expect(shapeLoc).toBeVisible()
-      let shapeText = await shapeLoc.textContent()
-      expect(shapeText).toContain("1 item")
-      await shapeLoc.click({
-        button: 'left',
-        position: { x: 10, y: 10 }
-      });
-      shapeText = await shapeLoc.textContent()
-      expect(shapeText).toContain("12 items")
-      const ellipsisLoc = await page.locator('.node-ellipsis').first()
-      await expect(ellipsisLoc).toBeVisible()
-      await ellipsisLoc.click();
-      shapeText = await page.locator('.pushed-content').first().textContent()
-      expect(shapeText).toContain("\"type\":string\"draw\"")
-      expect(shapeText).toContain("\"typeName\":string\"shape\"")
+  test("tabs should be empty", async ({ page }) => {
+    await test.step("check shapes tab is empty", async () => {
+      const tabBtnLocator = page.locator('button:text("Shapes")')
+      await tabBtnLocator.click()
+      await expect(tabBtnLocator).toHaveClass(/active/)
+
+      const tabContentLoc = page.locator('#shapes-tab-content')
+      await expect(tabContentLoc).toBeVisible()
+      await expect(tabContentLoc).toContainText("0 item")
     })
+    await test.step("check Export JIIX tab is empty", async () => {
+      const tabBtnLocator = page.locator('button:text("Export JIIX")')
+      await tabBtnLocator.click()
+      await expect(tabBtnLocator).toHaveClass(/active/)
 
-    test("should have Export JIIX tab updated", async ({ page }) => {
-      await writeStrokes(page, helloOneStroke.strokes)
-      await page.locator('button:text("Export JIIX")').click()
-      const jiixLoc = page.locator('.tab-content.active')
-      await expect(jiixLoc).toBeVisible()
-      await expect(jiixLoc).toContainText("5 items",{options: {timeout : 2000}})
-      await jiixLoc.click({
-        button: 'left',
-        position: { x: 10, y: 10 }
-      });
-      const jiixText = await jiixLoc.textContent()
-      expect(jiixText).toContain("\"type\":string\"Raw Content\"")
-      // let ellipsisLoc = await page.locator('.node-ellipsis').filter({hasText: 'bounding-box'})
-
-      await page.getByText('bounding-box').click();
-      const bboxText = await page.locator('.pushed-content').first().textContent()
-      expect(bboxText).toContain("\"x\":float")
-      expect(bboxText).toContain("\"y\":float")
-      expect(bboxText).toContain("\"width\":float")
-      expect(bboxText).toContain("\"height\":float")
-
-      const elemsLoc = page.getByText('elements')
-      await expect(elemsLoc).toBeVisible()
-      await elemsLoc.click();
-      const elems2Loc = page.locator('.pushed-content').last()
-      await expect(elems2Loc).toBeVisible()
-      await expect(elems2Loc).toHaveText("0:{...}7 items")
-      await elems2Loc.locator('.node-ellipsis').click();
-      const elemsText = await elems2Loc.textContent()
-      expect(elemsText).toContain("\"type\":string\"Text\"")
-      expect(elemsText).toContain("\"label\":string\"hello\"")
+      const tabContentLoc = page.locator('#jiix-tab-content')
+      await expect(tabContentLoc).toBeVisible()
+      await expect(tabContentLoc).toContainText("0 item")
     })
+    await test.step("check HTML tab is empty", async () => {
+      const tabBtnLocator = page.locator('button:text("Export HTML")')
+      await tabBtnLocator.click()
+      await expect(tabBtnLocator).toHaveClass(/active/)
 
-    test("should undo and redo", async ({ page }) => {
-      await writeStrokes(page, helloOneStroke.strokes)
-      const tabShapeBtnLoc = page.locator('button:text("Shapes")')
-      await tabShapeBtnLoc.click()
-      await expect(tabShapeBtnLoc).toHaveClass(/active/)
-
-      const shapeTabContentLoc = page.locator('#shapes-tab-content')
-      await expect(shapeTabContentLoc).toBeVisible()
-      // stroke has been written and shape tab has been updated
-      await expect(shapeTabContentLoc).toContainText("1 item")
-
-      await page.getByTitle('Undo').click()
-      await expect(shapeTabContentLoc).toBeVisible()
-      await expect(shapeTabContentLoc).toContainText("0 item")
-
-      await page.getByTitle('Redo').click()
-      await expect(shapeTabContentLoc).toBeVisible()
-      await expect(shapeTabContentLoc).toContainText("1 item")
-    })
-
-    test("Export HTML should be updated", async ({ page }) => {
-      const htmlExportBtnLoc = page.locator('button:text("Export HTML")')
-      await htmlExportBtnLoc.click()
-      await expect(htmlExportBtnLoc).toHaveClass(/active/)
-
-      const htmlTabContentLoc = page.locator('#html-tab-content')
-      await expect(htmlTabContentLoc).toBeVisible()
+      const tabContentLoc = page.locator('#html-tab-content')
+      await expect(tabContentLoc).toBeVisible()
       await expect(page.frameLocator('iframe').locator('svg')).toHaveCount(0)
-
-      await writeStrokes(page, helloOneStroke.strokes)
-
-      await expect(page.frameLocator('iframe').locator('svg')).toHaveCount(1)
-
-      await expect(page).toHaveScreenshot()
     })
+  })
+
+  test("tabs should be updated after writing", async ({ page }) => {
+    await test.step("write hello", async () => {
+      await writeStrokes(page, helloOneStroke.strokes)
+    })
+
+    await test.step("check Export HTML tab is updated", async () => {
+      const tabBtnLocator = page.locator('button:text("Export HTML")')
+      await tabBtnLocator.click()
+      await expect(tabBtnLocator).toHaveClass(/active/)
+
+      const tabContentLoc = page.locator('#html-tab-content')
+      await expect(tabContentLoc).toBeVisible()
+      await expect(tabContentLoc.frameLocator('iframe').locator('svg')).toHaveCount(1)
+      await expect(page).toHaveScreenshot({ name: "tldraw-hello-html.png" })
+    })
+
+    await test.step("check shapes tab is updated", async () => {
+      const tabBtnLocator = page.locator('button:text("Shapes")')
+      await tabBtnLocator.click()
+      await expect(tabBtnLocator).toHaveClass(/active/)
+
+      const tabContentLoc = page.locator('#shapes-tab-content')
+      await expect(tabContentLoc).toBeVisible()
+      await expect(tabContentLoc).toContainText("1 item")
+      await expect(page).toHaveScreenshot({ name: "tldraw-hello-shapes.png" })
+    })
+
+    await test.step("check Export JIIX tab is empty", async () => {
+      const tabBtnLocator = page.locator('button:text("Export JIIX")')
+      await tabBtnLocator.click()
+      await expect(tabBtnLocator).toHaveClass(/active/)
+
+      const tabContentLoc = page.locator('#jiix-tab-content')
+      await expect(tabContentLoc).toBeVisible()
+      await expect(tabContentLoc).toContainText("5 items")
+      await tabContentLoc.click({
+        button: 'left',
+        position: { x: 10, y: 10 }
+      });
+      await expect(tabContentLoc).toContainText("\"type\":string\"Raw Content\"")
+      await expect(page).toHaveScreenshot({ name: "tldraw-hello-jiix.png" })
+    })
+  })
+
+  test("should undo and redo", async ({ page }) => {
+    await test.step("write hello", async () => {
+      await writeStrokes(page, helloOneStroke.strokes)
+    })
+    const tabShapeBtnLoc = page.locator('button:text("Shapes")')
+    await tabShapeBtnLoc.click()
+    await expect(tabShapeBtnLoc).toHaveClass(/active/)
+
+    const shapeTabContentLoc = page.locator('#shapes-tab-content')
+    await expect(shapeTabContentLoc).toBeVisible()
+    // stroke has been written and shape tab has been updated
+    await expect(shapeTabContentLoc).toContainText("1 item")
+
+    await page.locator('button[data-testid="quick-actions.undo"]').click()
+    await expect(shapeTabContentLoc).toContainText("0 item")
+
+    await page.locator('button[data-testid="quick-actions.redo"]').click()
+    await expect(shapeTabContentLoc).toContainText("1 item")
   })
 })

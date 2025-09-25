@@ -1,13 +1,12 @@
 import
 {
   Editor,
+  RecordsDiff,
   TLDrawShape,
-  TLShape,
-  TLShapeId
+  TLRecord,
 } from "tldraw"
 import
 {
-  DeferredPromise,
   IIStroke,
   TStyle,
   TGesture
@@ -27,9 +26,7 @@ export class Synchronizer
   processGestures: boolean = true
   updateDebounce?: ReturnType<typeof setTimeout>
 
-  protected drawShapeToAdd: TLDrawShape[] = []
-  protected drawShapeToUpdate: TLDrawShape[] = []
-  protected drawShapeToRemove: TLDrawShape[] = []
+  protected shapeSendedToRecognizer: Set<string> = new Set<string>()
 
   constructor(editor: Editor)
   {
@@ -108,53 +105,26 @@ export class Synchronizer
   }
 
   //@ts-ignore
-  async sync(changes: RecordsDiff<TLShape>): Promise<void>
+  async sync(changes: RecordsDiff<TLRecord>): Promise<void>
   {
-    for (const record of Object.values((changes.added as Record<TLShapeId, TLShape>))) {
-      if (record.typeName === 'shape') {
-        if (record.type === 'draw') {
-          this.drawShapeToAdd.push(record as TLDrawShape)
-        }
-      }
-    }
-    for (const [_, to] of Object.values(changes.updated as [TLDrawShape, TLDrawShape][])) {
-      if (to.typeName === 'shape') {
-        if (to.type === 'draw') {
-          const shape = to as TLDrawShape
-          const newShape = this.drawShapeToAdd.find(s => s.id === shape.id)
-          if (newShape) {
-            const index = this.drawShapeToAdd.findIndex(s => s.id === shape.id)
-            this.drawShapeToAdd.splice(index, 1, shape)
-          }
-          else {
-            const index = this.drawShapeToUpdate.findIndex(s => s.id === shape.id)
-            if (index > -1) {
-              this.drawShapeToUpdate[index] = shape
-            } else {
-              this.drawShapeToUpdate.push(shape)
-            }
-          }
-        }
-      }
-    }
-    for (const record of Object.values(changes.removed as Record<TLShapeId, TLShape>)) {
-      if (record.typeName === 'shape') {
-        if (record.type === 'draw') {
-          this.drawShapeToRemove.push(record as TLDrawShape)
-        }
-      }
-    }
+    const drawShapesChanged = Object.values(changes.added).filter(r => r.typeName === "shape" && r.type === "draw").concat(Object.values(changes.updated).map(([_, to]) => to).filter(r => r.typeName === "shape" && r.type === "draw")) as TLDrawShape[]
+    const drawShapesToRemove = Object.values(changes.removed).filter(r => r.typeName === "shape" && r.type === "draw") as TLDrawShape[]
 
-    if (!this.drawShapeToAdd.filter(s => s.props.isComplete).length && !this.drawShapeToUpdate.length && !this.drawShapeToRemove.length) {
+    if (!drawShapesChanged.filter(s => s.props.isComplete).length && !drawShapesToRemove.length) {
       return
     }
+
     const recognizer = await useRecognizer()
-    if (this.drawShapeToAdd.length) {
-      const newDrawShapeCompleted = this.drawShapeToAdd.filter(s => s.props.isComplete)
-      this.drawShapeToAdd = this.drawShapeToAdd.filter(s => !s.props.isComplete)
-      if (newDrawShapeCompleted.length) {
-        const gesture = this.processGestures && newDrawShapeCompleted.length === 1 ? await this.determinesContextlessGesture(newDrawShapeCompleted) : undefined
-        recognizer.addStrokes(newDrawShapeCompleted.map(this.formatDrawShapeToSend), this.processGestures && !gesture && newDrawShapeCompleted.length === 1)
+
+    if (drawShapesChanged.length) {
+      const drawShapeCompleted = drawShapesChanged.filter(s => s.props.isComplete)
+      const toCreate = drawShapeCompleted.filter(s => !this.shapeSendedToRecognizer.has(s.id))
+      const toUpdate = drawShapeCompleted.filter(s => this.shapeSendedToRecognizer.has(s.id))
+ 
+      if (toCreate.length) {
+        toCreate.map(s => this.shapeSendedToRecognizer.add(s.id))
+        const gesture = this.processGestures && drawShapeCompleted.length === 1 ? await this.determinesContextlessGesture(toCreate) : undefined
+        recognizer.addStrokes(toCreate.map(this.formatDrawShapeToSend), this.processGestures && !gesture && toCreate.length === 1)
           .then(addStrokeResponse => {
             if (addStrokeResponse) {
               this.gestureManager.apply(addStrokeResponse)
@@ -164,44 +134,34 @@ export class Synchronizer
           await this.gestureManager.apply(gesture)
         }
       }
-    }
 
-    if (this.drawShapeToUpdate.length) {
-      clearTimeout(this.updateDebounce)
-      const updatePromise = new DeferredPromise<void>()
-      this.updateDebounce = setTimeout(async () =>
-      {
-        const newStrokes = this.drawShapeToUpdate.map(shape =>
-        {
-          const stroke = this.formatDrawShapeToSend(shape)
-          let points = shape.props.segments.flatMap(seg => seg.points)
-
-          const matrix = this.editor.getShapePageTransform(shape.id)
-          if (matrix) {
-            points = matrix.applyToPoints(points)
-          }
-          stroke.pointers = points.map((p, i) =>
+      if (toUpdate.length) {
+        clearTimeout(this.updateDebounce)
+        this.updateDebounce = setTimeout(async () => {
+          const newStrokes = toUpdate.map(shape =>
           {
-            return {
-              p: 1,
-              t: Date.now() + i,
-              x: p.x,
-              y: p.y
-            }
+            const matrix = this.editor.getShapePageTransform(shape.id)
+            const points = matrix.applyToPoints(shape.props.segments.flatMap(seg => seg.points))
+
+            const stroke = this.formatDrawShapeToSend(shape)
+            stroke.pointers = points.map((p, i) =>
+            {
+              return {
+                p: 1,
+                t: Date.now() + i,
+                x: p.x,
+                y: p.y
+              }
+            })
+            return stroke
           })
-          return stroke
+          await recognizer.replaceStrokes(newStrokes.map(s => s.id), newStrokes)
         })
-        await recognizer.replaceStrokes(newStrokes.map(s => s.id), newStrokes)
-        updatePromise.resolve()
-        this.drawShapeToUpdate = []
-      }, 500)
-      await updatePromise
+      }
     }
 
-    if (this.drawShapeToRemove.length) {
-      const promise = recognizer?.eraseStrokes(this.drawShapeToRemove.map(s => s.id))
-      this.drawShapeToRemove = []
-      await promise
+    if (drawShapesToRemove.length) {
+      await recognizer.eraseStrokes(drawShapesToRemove.map(s => s.id))
     }
   }
 }
