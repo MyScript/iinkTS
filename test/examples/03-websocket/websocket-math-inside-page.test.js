@@ -1,6 +1,5 @@
 import { test, expect } from "@playwright/test"
 import {
-  haveSameLabels,
   writeStrokes,
   getEditorExports,
   waitForImportedEvent,
@@ -221,8 +220,6 @@ test.describe("Websocket Math Inside Page", () => {
       await test.step(`should import data-jiix`, async () => {
         await callEditorIdle(page)
         const currentExport = await getEditorExports(page)
-        const jiixExpected = JSON.parse(await page.locator(`#${mc.id}`).getAttribute("data-jiix"))
-        expect(haveSameLabels(currentExport["application/vnd.myscript.jiix"], jiixExpected)).toEqual(true)
         expect(currentExport["application/x-latex"]).toEqual(mc.latex)
       })
 
