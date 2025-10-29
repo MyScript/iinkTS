@@ -2,8 +2,8 @@ import { test, expect } from "@playwright/test"
 import {
   waitForEditorInit,
   getEditorExportsType,
-  haveSameLabels,
-  waitForImportedEvent
+  waitForImportedEvent,
+  findValuesByKey
 } from "../helper"
 
 test.describe("Websocket Math Import JIIX", () => {
@@ -25,7 +25,9 @@ test.describe("Websocket Math Import JIIX", () => {
     const jiix = await getEditorExportsType(page, "application/vnd.myscript.jiix")
     const jiixTextToImport = await page.locator("#jiix").textContent()
     const jiixToImport = JSON.parse(jiixTextToImport)
-    expect(haveSameLabels(jiix, jiixToImport)).toEqual(true)
+    const labelsJiix = findValuesByKey(jiix, "label")
+    const labelsJiixToImport = findValuesByKey(jiixToImport, "label")
+    expect(labelsJiix).toEqual(labelsJiixToImport)
   })
 
 })

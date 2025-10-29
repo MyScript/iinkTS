@@ -299,12 +299,6 @@ export const findValuesByKey = (obj, key, list = []) => {
   return list;
 }
 
-export const haveSameLabels = (jiix1, jiix2) => {
-  const labels1 = findValuesByKey(jiix1, "label");
-  const labels2 = findValuesByKey(jiix2, "label");
-  return JSON.stringify(labels1) === JSON.stringify(labels2);
-};
-
 export class DeferredPromise {
   constructor()
   {
