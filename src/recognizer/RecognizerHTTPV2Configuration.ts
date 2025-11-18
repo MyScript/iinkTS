@@ -2,8 +2,8 @@ import { mergeDeep, isVersionSuperiorOrEqual, PartialDeep } from "../utils"
 import {
   DefaultShapeConfiguration,
   DefaultExportConfiguration,
-  DefaultMathConfiguration,
-  DefaultRawContentConfiguration,
+  DefaultMathV2Configuration,
+  DefaultRawContentV2Configuration,
   DefaultTexConfigurationV2,
   TConvertionConfiguration,
   TShapeConfiguration,
@@ -35,9 +35,9 @@ export type TRecognizerHTTPV2RecognitionConfiguration = {
  */
 export const DefaultRecognizerHTTPV2RecognitionConfiguration: TRecognizerHTTPV2RecognitionConfiguration = {
   export: DefaultExportConfiguration,
-  math: DefaultMathConfiguration,
+  math: DefaultMathV2Configuration,
   shape: DefaultShapeConfiguration,
-  "raw-content": DefaultRawContentConfiguration,
+  "raw-content": DefaultRawContentV2Configuration,
   text: DefaultTexConfigurationV2,
   type: "TEXT",
   lang: "en_US",
