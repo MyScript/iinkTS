@@ -1,3 +1,13 @@
+# [v3.1.0](https://github.com/MyScript/iinkTS/tree/v3.1.0)
+
+## Featues
+- feat(Editor) added the option to give a async function for challenge validation [#11](https://github.com/MyScript/iinkTS/issues/10)
+
+## Bugs fix
+- fix(offscreen) insert gesture does nothing after convert + undo - IIC-1235
+- fix(InkEditor.ts) [Raw Content] Show Recognition Blocks button does not work when writing after the check IIC-1409
+- fix(InkEditor) wrong default mimeTypes for Math & RawContent IIC-1496
+
 # [v3.0.2](https://github.com/MyScript/iinkTS/tree/v3.0.2)
 
 ## Bugs fix
