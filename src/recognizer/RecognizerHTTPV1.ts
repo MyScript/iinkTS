@@ -178,7 +178,7 @@ export class RecognizerHTTPV1
     }
     if (isVersionSuperiorOrEqual(this.configuration.server.version!, "2.0.4")) {
       headers.append("myscript-client-name", "iink-ts")
-      headers.append("myscript-client-version", "1.0.0-buildVersion")
+      headers.append("myscript-client-version", "3.1.0")
     }
     if (!isVersionSuperiorOrEqual(this.configuration.server.version!, "2.3.0")) {
       delete this.configuration.recognition.convert
