@@ -23,11 +23,11 @@
     ></script>
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
     <style>
-      #editor {
+      #editorEl {
         height: calc(100dvh - 166px);
       }
       @media only screen and (max-width: 451px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 213px);
         }
       }
@@ -60,6 +60,9 @@
   </head>
 
   <body>
+    <div id="showModal">
+      <button id="showModalBtn" class="btn-keys">Set Keys</button>
+    </div>
     <div id="result"></div>
 
     <nav class="flex-container wrap gap between">
@@ -92,17 +95,23 @@
       <select id="language"></select>
     </nav>
 
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
-    <script>
-      const editorElement = document.getElementById("editor")
+    <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl")
       const resultElement = document.getElementById("result")
       const languageElement = document.getElementById("language")
       const clearElement = document.getElementById("clear")
       const undoElement = document.getElementById("undo")
       const redoElement = document.getElementById("redo")
-      const showRecognitionBlock = document.getElementById("showRecognitionBlock")
-      const showRecognitionItems = document.getElementById("showRecognitionItems")
+      const showRecognitionBlock = document.getElementById(
+        "showRecognitionBlock"
+      )
+      const showRecognitionItems = document.getElementById(
+        "showRecognitionItems"
+      )
+      const showModalBtn = document.getElementById("showModalBtn")
 
       /**
        * we expose the editor so we can access it in tests
@@ -136,11 +145,16 @@
       })
 
       showRecognitionBlock.addEventListener("change", () => {
-          editor.debugger.recognitionBoxVisibility = showRecognitionBlock.checked
+        editor.debugger.recognitionBoxVisibility = showRecognitionBlock.checked
       })
 
       showRecognitionItems.addEventListener("change", () => {
-          editor.debugger.recognitionBoxItemsVisibility = showRecognitionItems.checked
+        editor.debugger.recognitionBoxItemsVisibility =
+          showRecognitionItems.checked
+      })
+
+      showModalBtn.addEventListener("click", () => {
+        ModalEditorOptions.show(loadEditor)
       })
 
       window.addEventListener("resize", () => {
@@ -148,10 +162,10 @@
       })
 
       const clickRecognitionBlock = () => {
-        if(showRecognitionBlock.checked) {
+        if (showRecognitionBlock.checked) {
           showRecognitionBlock.click()
         }
-        if(showRecognitionItems.checked) {
+        if (showRecognitionItems.checked) {
           showRecognitionItems.click()
         }
       }
@@ -180,12 +194,8 @@
        * We use a function to wait the server configuration to load
        */
       async function loadEditor(options) {
-        if (!serverConfiguration) {
-          const res = await fetch("../server-configuration.json")
-          serverConfiguration = await res.json()
-        }
-        options.configuration.server = serverConfiguration
-
+        resultElement.innerHTML = ""
+        await editor?.destroy()
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
@@ -225,7 +235,7 @@
         })
       }
 
-      loadEditor(editorOptions).catch((error) => console.error(error))
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
     </script>
   </body>
 </html>

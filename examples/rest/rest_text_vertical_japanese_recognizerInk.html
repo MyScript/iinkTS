@@ -15,11 +15,11 @@
     <link rel="stylesheet" href="../assets/style/examples.css" />
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
     <style>
-      #editor {
+      #editorEl {
         height: calc(100dvh - 166px);
       }
       @media only screen and (max-width: 451px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 213px);
         }
       }
@@ -27,6 +27,9 @@
   </head>
 
   <body>
+    <div id="showModal">
+      <button id="showModalBtn" class="btn-keys">Set Keys</button>
+    </div>
     <div id="result"></div>
 
     <nav class="flex-container wrap gap between">
@@ -43,14 +46,16 @@
       </div>
     </nav>
 
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
-    <script>
-      const editorElement = document.getElementById("editor")
+    <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl")
       const resultElement = document.getElementById("result")
       const clearElement = document.getElementById("clear")
       const undoElement = document.getElementById("undo")
       const redoElement = document.getElementById("redo")
+      const showModalBtn = document.getElementById("showModalBtn")
 
       /**
        * we expose the editor so we can access it in tests
@@ -91,18 +96,16 @@
           },
         },
       }
-      let serverConfiguration
+      showModalBtn.addEventListener("click", () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
 
       /**
        * We use a function to wait the server configuration to load
        */
       async function loadEditor(options) {
         resultElement.innerHTML = ""
-        if (!serverConfiguration) {
-          const res = await fetch("../server-configuration.json")
-          serverConfiguration = await res.json()
-        }
-        options.configuration.server = serverConfiguration
+        await editor?.destroy()
 
         /**
          * get editor instance from type
@@ -118,11 +121,12 @@
         })
 
         editor.event.addEventListener("exported", (event) => {
-          resultElement.innerHTML = event.detail?.["text/plain"]?.replace(/\n/g, "<br>") || "";
+          resultElement.innerHTML =
+            event.detail?.["text/plain"]?.replace(/\n/g, "<br>") || ""
         })
       }
 
-      loadEditor(editorOptions).catch((error) => console.error(error))
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
     </script>
   </body>
 </html>

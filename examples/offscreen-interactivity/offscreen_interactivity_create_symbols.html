@@ -75,6 +75,9 @@
   </head>
 
   <body>
+    <div id="showModal">
+      <button id="showModalBtn" class="btn-keys">Set Keys</button>
+    </div>
     <nav class="flex-container">
       <button class="classic-btn create-btn" id="create-all-btn">Create all</button>
       <button class="classic-btn" id="show-import">
@@ -86,16 +89,22 @@
       <div id="editor"></div>
     </div>
 
-    <script>
+    <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js";
       const editorElement = document.getElementById("editor");
       const showSymbolBtn = document.getElementById("show-import");
       const createAllBtn = document.getElementById("create-all-btn");
       const symbolsToCreate = document.getElementById("symbols-to-create");
+      const showModalBtn = document.getElementById("showModalBtn");
       const symbolsCreated = [];
 
       showSymbolBtn.addEventListener("pointerup", () => {
         document.getElementById("symbols-to-create").classList.toggle("open");
       });
+
+      showModalBtn.addEventListener("click", () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
 
       function createSymbolElToCreate(s) {
         const inputsWrapper = document.createElement("div");
@@ -123,21 +132,15 @@
        * we expose the editor so we can access it in tests
        */
       let editor;
-
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-
-        const options = {
+      const editorOption = {
           configuration: {
-            server,
             rendering: {
               minHeight: 800,
               minWidth: 800
             }
           }
         };
-
+      async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
@@ -168,7 +171,7 @@
         });
       }
 
-      loadEditor().catch((error) => console.error(error));
+      ModalEditorOptions.initConfiguration(loadEditor, editorOption)
     </script>
   </body>
 </html>

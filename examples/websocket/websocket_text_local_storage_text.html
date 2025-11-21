@@ -18,11 +18,11 @@
 
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
     <style>
-      #editor {
+      #editorEl {
         height: calc(100dvh - 66px);
       }
       @media only screen and (max-width: 319px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 114px);
         }
       }
@@ -30,6 +30,9 @@
   </head>
 
   <body>
+    <div id="showModal">
+      <button id="showModalBtn" class="btn-keys">Set Keys</button>
+    </div>
     <nav class="flex-container between wrap gap">
       <div class="flex-container wrap gap">
         <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
@@ -44,25 +47,22 @@
       </button>
     </nav>
 
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
-    <script>
-      const editorElement = document.getElementById("editor")
+    <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl")
       const undoElement = document.getElementById("undo")
       const redoElement = document.getElementById("redo")
       const clearStorage = document.getElementById("clear-storage")
+      const showModalBtn = document.getElementById("showModalBtn")
 
       /**
        * we expose the editor so we can access it in tests
        */
       let editor;
-
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json")
-        const server = await res.json();
-        const options = {
+      const editorOptions = {
           configuration: {
-            server,
             recognition: {
               type: "TEXT",
               text: {
@@ -71,7 +71,7 @@
             },
           },
         }
-
+      async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
@@ -99,6 +99,10 @@
           editorElement.editor.redo()
         })
 
+        showModalBtn.addEventListener("click", () => {
+          ModalEditorOptions.show(loadEditor, editorOptions)
+        })
+
         window.addEventListener("resize", () => {
           editorElement.editor.resize()
         })
@@ -110,7 +114,7 @@
         }
       };
 
-      loadEditor().catch(error => console.error(error));
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
     </script>
   </body>
 </html>

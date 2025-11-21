@@ -1,12 +1,12 @@
 import { test, expect } from "@playwright/test"
 import {
-  waitForEditorInit,
   writeStrokes,
   waitForExportedEvent,
   getEditorConfiguration,
   getEditorExports,
   getEditorSymbols,
   loadEditor,
+  passModalKey
 } from "../helper"
 import one from "../__dataset__/1"
 import equation from "../__dataset__/equation"
@@ -15,7 +15,7 @@ test.describe("Rest Math", () => {
 
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/rest/rest_math_iink.html")
-    await waitForEditorInit(page)
+    await passModalKey(page)
   })
 
   test("should have title", async ({ page }) => {

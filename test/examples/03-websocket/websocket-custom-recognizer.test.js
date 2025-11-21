@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test"
-import { writeStrokes, waitForEditorInit, callEditorIdle, waitForExportedEvent, getEditorConfiguration } from "../helper"
+import { writeStrokes, waitForEditorInit, waitForExportedEvent, getEditorConfiguration, passModalKey } from "../helper"
 import h from "../__dataset__/h"
 
 test.describe("Websocket custom recognizer", () => {
@@ -11,8 +11,7 @@ test.describe("Websocket custom recognizer", () => {
       ws.on('framereceived', event => lastMessageReceived = event.payload)
     })
     await page.goto("/examples/dev/websocket_custom_recognizer.html")
-    await waitForEditorInit(page)
-    await callEditorIdle(page)
+    await passModalKey(page)
   })
 
   test("should have title", async ({ page }) => {

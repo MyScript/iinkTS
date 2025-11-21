@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
@@ -19,26 +22,26 @@
       .description {
         padding: 12px;
       }
-      #editor {
+      #editorEl {
         height: calc(100dvh - 234px);
       }
       @media only screen and (max-width: 1156px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 252px);
         }
       }
       @media only screen and (max-width: 600px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 269px);
         }
       }
       @media only screen and (max-width: 423px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 286px);
         }
       }
       @media only screen and (max-width: 338px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 303px);
         }
       }
@@ -46,9 +49,13 @@
   </head>
 
   <body>
+    <div id="showModal">
+      <button id="showModalBtn" class="btn-keys">Set Keys</button>
+    </div>
     <p class="description">
-      This example use a math custom resource. The grammar restrict the recognition to only basic elementary school math (addition and substraction).
-      It is sent directly to the configuration.
+      This example use a math custom resource. The grammar restrict the
+      recognition to only basic elementary school math (addition and
+      substraction). It is sent directly to the configuration.
     </p>
 
     <div id="result"></div>
@@ -68,75 +75,82 @@
       <button class="classic-btn" id="convert" disabled>Convert</button>
     </nav>
 
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
-    <script>
-      const editorElement = document.getElementById("editor");
-      const resultElement = document.getElementById("result");
-      const undoElement = document.getElementById("undo");
-      const redoElement = document.getElementById("redo");
-      const clearElement = document.getElementById("clear");
-      const convertElement = document.getElementById("convert");
-      let editor;
+    <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl")
+      const resultElement = document.getElementById("result")
+      const undoElement = document.getElementById("undo")
+      const redoElement = document.getElementById("redo")
+      const clearElement = document.getElementById("clear")
+      const convertElement = document.getElementById("convert")
+      const showModalBtn = document.getElementById("showModalBtn");
+      let editor
 
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-        const options = {
-          configuration: {
-            server,
-            recognition: {
-              type: "MATH",
-              math: {
-                mimeTypes: ["application/x-latex"],
-                customGrammarContent: "symbol = 0 1 2 3 4 5 6 7 8 9 + -\ncharacter ::= identity(symbol)\nexpression ::= identity(character) | hpair(expression, expression)\nstart(expression)"
-              }
-            }
-          }
-        };
-
+      const editorOption = {
+        configuration: {
+          recognition: {
+            type: "MATH",
+            math: {
+              mimeTypes: ["application/x-latex"],
+              customGrammarContent:
+                "symbol = 0 1 2 3 4 5 6 7 8 9 + -\ncharacter ::= identity(symbol)\nexpression ::= identity(character) | hpair(expression, expression)\nstart(expression)",
+            },
+          },
+        },
+      }
+      async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(editorElement, "INTERACTIVEINKSSR", options);
+        editor = await iink.Editor.load(
+          editorElement,
+          "INTERACTIVEINKSSR",
+          options
+        )
 
         editorElement.addEventListener("changed", (event) => {
-          undoElement.disabled = !event.detail.canUndo;
-          redoElement.disabled = !event.detail.canRedo;
-          clearElement.disabled = event.detail.isEmpty;
-        });
+          undoElement.disabled = !event.detail.canUndo
+          redoElement.disabled = !event.detail.canRedo
+          clearElement.disabled = event.detail.isEmpty
+        })
 
         editorElement.addEventListener("exported", (evt) => {
-          const exports = evt.detail;
+          const exports = evt.detail
           if (exports && exports["application/x-latex"]) {
-            convertElement.disabled = false;
-            resultElement.innerHTML = "<span>" + exports["application/x-latex"] + "</span>";
+            convertElement.disabled = false
+            resultElement.innerHTML =
+              "<span>" + exports["application/x-latex"] + "</span>"
           } else {
-            convertElement.disabled = true;
-            resultElement.innerHTML = "";
+            convertElement.disabled = true
+            resultElement.innerHTML = ""
           }
-        });
+        })
         undoElement.addEventListener("click", () => {
-          editorElement.editor.undo();
-        });
+          editorElement.editor.undo()
+        })
         redoElement.addEventListener("click", () => {
-          editorElement.editor.redo();
-        });
+          editorElement.editor.redo()
+        })
         clearElement.addEventListener("click", () => {
-          editorElement.editor.clear();
-        });
+          editorElement.editor.clear()
+        })
         convertElement.addEventListener("click", () => {
-          editorElement.editor.convert();
-        });
+          editorElement.editor.convert()
+        })
+        showModalBtn.addEventListener("click", () => {
+          ModalEditorOptions.show(loadEditor, editorOption)
+        })
 
         window.addEventListener("resize", () => {
-          editorElement.editor.resize();
-        });
-      };
+          editorElement.editor.resize()
+        })
+      }
 
-      loadEditor().catch(error => console.error(error));
+      ModalEditorOptions.initConfiguration(loadEditor, editorOption)
     </script>
   </body>
 </html>

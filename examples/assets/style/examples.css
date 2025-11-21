@@ -7,6 +7,21 @@
     width: 32px;
 }
 
+.btn-keys {
+    width: 100px;
+    height: 40px;
+    background-color: #1a9fff;
+    color: white;
+    font-size: 14px;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 5px;
+    margin-left: 5px;
+}
+
 .help-overlay {
     display: none;
     position: fixed;

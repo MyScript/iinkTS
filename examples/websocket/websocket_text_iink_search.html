@@ -12,16 +12,16 @@
     <link rel="stylesheet" href="../assets/style/examples.css" />
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
     <style>
-      #editor {
+      #editorEl {
         height: calc(100dvh - 62px);
       }
       @media only screen and (max-width: 509px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 110px);
         }
       }
       @media only screen and (max-width: 397px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 157px);
         }
         .input-field {
@@ -32,6 +32,9 @@
   </head>
 
   <body>
+    <div id="showModal">
+      <button id="showModalBtn" class="btn-keys">Set Keys</button>
+    </div>
     <nav class="flex-container wrap between gap">
       <div class="flex-container wrap between gap">
         <input id="searchInput" type="search" class="input-field" />
@@ -40,13 +43,15 @@
       <button class="classic-btn" id="convert" disabled>Convert</button>
     </nav>
 
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
-    <script>
-      const editorElement = document.getElementById("editor");
+    <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl");
       const convertElement = document.getElementById("convert");
       const searchInput = document.getElementById("searchInput");
       const searchBtn = document.getElementById("searchBtn");
+      const showModalBtn = document.getElementById("showModalBtn");
       let lastJiix = undefined;
 
       /**
@@ -54,12 +59,8 @@
        */
       let editor;
 
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-        const options = {
+      const editorOptions = {
           configuration: {
-            server,
             recognition: {
               type: "TEXT",
               export: {
@@ -74,6 +75,7 @@
           }
         };
 
+      async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
@@ -108,7 +110,7 @@
         function performSearch() {
           document.querySelectorAll(".highlight").forEach((elem) => elem.parentNode.removeChild(elem));
           if (searchInput.value && lastJiix) {
-            searchWords = searchInput.value.split(" ");
+            let searchWords = searchInput.value.split(" ");
             let posUnderEvaluation = 0;
             let wordsToHighlight = [];
             lastJiix.words.forEach((word) => {
@@ -153,12 +155,16 @@
           editor.convert();
         });
 
+        showModalBtn.addEventListener("click", () => {
+          ModalEditorOptions.show(loadEditor, editorOptions)
+        })
+
         window.addEventListener("resize", () => {
           editor.resize();
         });
       };
 
-      loadEditor().catch(error => console.error(error));
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
     </script>
   </body>
 </html>

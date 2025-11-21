@@ -68,6 +68,9 @@
   </head>
 
   <body>
+    <div id="showModal">
+      <button id="showModalBtn" class="btn-keys">Set Keys</button>
+    </div>
     <nav class="flex-container wrap gap">
       <div class="flex-container wrap">
         <label class="label">Show/hide Menu Style</label>
@@ -95,11 +98,13 @@
     <div id="editor"></div>
 
     <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js";
       const editorElement = document.getElementById("editor");
 
       const menuStyleToggle = document.getElementById("menu-style-toggle");
       const menuIntentionToggle = document.getElementById("menu-tool-toggle");
       const menuActionToggle = document.getElementById("menu-action-toggle");
+      const showModalBtn = document.getElementById("showModalBtn");
 
 
       /**
@@ -107,12 +112,8 @@
        */
       let editor;
 
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-        const options = {
+      const editorOption = {
           configuration: {
-            server,
             menu: {
               style: {
                 enable: true
@@ -134,6 +135,7 @@
           }
         };
 
+      async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
@@ -151,12 +153,16 @@
           menuActionToggle.checked ? editor.menu.action.show() : editor.menu.action.hide();
         });
 
+        showModalBtn.addEventListener("click", () => {
+          ModalEditorOptions.show(loadEditor, editorOption);
+        });
+
         window.addEventListener("resize", () => {
           editor.resize();
         });
       }
 
-      loadEditor().catch((error) => console.error(error));
+      ModalEditorOptions.initConfiguration(loadEditor, editorOption);
     </script>
   </body>
 </html>

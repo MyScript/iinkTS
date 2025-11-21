@@ -1,8 +1,8 @@
 import { test, expect } from "@playwright/test"
 import {
-  waitForEditorInit,
   writeStrokes,
-  waitForExportedEvent
+  waitForExportedEvent,
+  passModalKey
 } from "../helper"
 import h from "../__dataset__/h"
 
@@ -10,7 +10,7 @@ test.describe("Rest custom recognizer", () => {
 
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/dev/rest_custom_recognizer.html")
-    await waitForEditorInit(page)
+    await passModalKey(page)
   })
 
   test("should have title", async ({ page }) => {

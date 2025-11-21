@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
@@ -24,11 +27,11 @@
     ></script>
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
     <style>
-      #editor {
+      #editorEl {
         height: calc(100dvh - 166px);
       }
       @media only screen and (max-width: 279px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 214px);
         }
       }
@@ -36,6 +39,9 @@
   </head>
 
   <body>
+    <div id="showModal">
+      <button id="showModalBtn" class="btn-keys">Set Keys</button>
+    </div>
     <div id="result"></div>
 
     <nav class="flex-container wrap between gap">
@@ -55,100 +61,113 @@
       </div>
     </nav>
 
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
-    <script>
-      const editorElement = document.getElementById("editor");
-      const resultElement = document.getElementById("result");
-      const clearElement = document.getElementById("clear");
-      const undoElement = document.getElementById("undo");
-      const redoElement = document.getElementById("redo");
-      const convertElement = document.getElementById("convert");
+    <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl")
+      const resultElement = document.getElementById("result")
+      const clearElement = document.getElementById("clear")
+      const undoElement = document.getElementById("undo")
+      const redoElement = document.getElementById("redo")
+      const convertElement = document.getElementById("convert")
+      const showModalBtn = document.getElementById("showModalBtn")
 
       function cleanLatex(latexExport) {
         if (typeof latexExport === "number") {
-          latexExport = latexExport.toString();
+          latexExport = latexExport.toString()
         }
         if (latexExport.includes("\\\\")) {
-          const steps = "\\begin{align*}" + latexExport + "\\end{align*}";
-          return steps.replace("\\begin{aligned}", "").replace("\\end{aligned}", "").replace(new RegExp("(align.{1})", "g"), "aligned");
+          const steps = "\\begin{align*}" + latexExport + "\\end{align*}"
+          return steps
+            .replace("\\begin{aligned}", "")
+            .replace("\\end{aligned}", "")
+            .replace(new RegExp("(align.{1})", "g"), "aligned")
         }
-        return latexExport.replace(new RegExp("(align.{1})", "g"), "aligned");
+        return latexExport.replace(new RegExp("(align.{1})", "g"), "aligned")
       }
+      window.cleanLatex = cleanLatex
 
       /**
        * we expose the editor so we can access it in tests
        */
-      let editor;
+      let editor
 
-      /**
-       * We use a function to wait the server configuration to load
-       */
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-        const options = {
-          configuration: {
-            server,
-            recognition: {
-              type: "MATH",
-              math: {
-                mimeTypes: ["application/x-latex"]
+      const editorOption = {
+        configuration: {
+          recognition: {
+            type: "MATH",
+            math: {
+              mimeTypes: ["application/x-latex"],
+              solver: {
+                enable: true
               }
-            }
+            },
           }
-        };
+        }
+      }
 
+      let navButtonsBinded = false
+
+      async function loadEditor(options) {
+        await editor?.destroy()
+        resultElement.innerHTML = ""
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(editorElement, "INTERACTIVEINKSSR", options);
+        editor = await iink.Editor.load(
+          editorElement,
+          "INTERACTIVEINKSSR",
+          options
+        )
 
         editor.event.addEventListener("changed", (event) => {
-          undoElement.disabled = !event.detail.canUndo;
-          redoElement.disabled = !event.detail.canRedo;
-          clearElement.disabled = !event.detail.canClear;
-        });
+          undoElement.disabled = !event.detail.canUndo
+          redoElement.disabled = !event.detail.canRedo
+          clearElement.disabled = !event.detail.canClear
+        })
 
         editor.event.addEventListener("exported", (evt) => {
-          const exports = evt.detail;
+          const exports = evt.detail
           if (exports && exports["application/x-latex"]) {
-            convertElement.disabled = false;
+            convertElement.disabled = false
             try {
-              katex.render(cleanLatex(exports["application/x-latex"]), resultElement);
+              katex.render(
+                cleanLatex(exports["application/x-latex"]),
+                resultElement
+              )
             } catch (error) {
-              resultElement.innerHTML = '<span>' + cleanLatex(exports['application/x-latex']) + '</span>';
+              resultElement.innerHTML =
+                "<span>" +
+                cleanLatex(exports["application/x-latex"]) +
+                "</span>"
             }
           } else {
-            convertElement.disabled = true;
-            resultElement.innerHTML = "";
+            convertElement.disabled = true
+            resultElement.innerHTML = ""
           }
-        });
+        })
+        if(!navButtonsBinded){
+          clearElement.addEventListener("click", () => editor.clear())
 
-        clearElement.addEventListener("click", async () => {
-          editor.clear();
-        });
+          undoElement.addEventListener("click", () => editor.undo())
 
-        undoElement.addEventListener("click", () => {
-          editor.undo();
-        });
+          redoElement.addEventListener("click", () => editor.redo())
+          convertElement.addEventListener("click", () => editor.convert())
 
-        redoElement.addEventListener("click", () => {
-          editor.redo();
-        });
+          window.addEventListener("resize", () => editor.resize())
+          navButtonsBinded = true
+        }
+      }
+      window.loadEditor = loadEditor
 
-        convertElement.addEventListener("click", () => {
-          editorElement.editor.convert();
-        });
+      showModalBtn.addEventListener("click", () => {
+        ModalEditorOptions.show(loadEditor, editorOption)
+      })
 
-        window.addEventListener("resize", () => {
-          editor.resize();
-        });
-      };
-
-      loadEditor().catch(error => console.error(error));
+      ModalEditorOptions.initConfiguration(loadEditor, editorOption)
     </script>
   </body>
 </html>

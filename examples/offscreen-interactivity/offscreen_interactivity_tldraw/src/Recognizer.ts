@@ -40,12 +40,10 @@ export class Recognizer extends RecognizerWebSocket
   }
 }
 
-export const useRecognizer = async (): Promise<Recognizer> =>
-{
+export const useRecognizer = async (serverConfiguration: PartialDeep<TServerWebsocketConfiguration>): Promise<Recognizer> =>
+  {
   if (!Recognizer.initializing) {
     Recognizer.initializing = true
-    const res = await fetch("../../../server-configuration.json")
-    const server = await res.json() as PartialDeep<TServerWebsocketConfiguration>
     const recognition: PartialDeep<TRecognitionWebSocketConfiguration> = {
       "raw-content": {
         gestures: ["underline", "scratch-out", "join", "insert", "strike-through", "surround"]
@@ -55,7 +53,7 @@ export const useRecognizer = async (): Promise<Recognizer> =>
         ignoreGestureStrokes: false
       }
     }
-    Recognizer.instance = new Recognizer({ server, recognition })
+    Recognizer.instance = new Recognizer({ server: serverConfiguration, recognition })
     await Recognizer.instance.init()
   }
 

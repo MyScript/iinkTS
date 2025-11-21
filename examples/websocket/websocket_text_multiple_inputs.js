@@ -1,10 +1,12 @@
+import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
 let currentInput;
 let editor
 
 const inputsColumns = document.getElementById("inputs-colum");
 const validateResponsesBtn = document.getElementById("validate-answers");
 const answersColumns = document.getElementById("answers-colum");
-const editorElement = document.getElementById("editor");
+const editorElement = document.getElementById("editorEl");
+const showModalBtn = document.getElementById("showModalBtn");
 
 function getWrittenStrokes() {
   return editor.layers.root.querySelector("[data-layer=MODEL]").cloneNode(true)
@@ -30,6 +32,10 @@ validateResponsesBtn.addEventListener("pointerup", () => {
       el.classList.remove("success")
     }
   }
+})
+
+showModalBtn.addEventListener("click", () => {
+  ModalEditorOptions.show(initEditor, editorOptions)
 })
 
 async function switchEditorInput(input) {
@@ -96,19 +102,12 @@ for (let i = 0; i < questions.length; i++) {
       switchEditorInput(inputEl)
     }
   })
+
+
 }
 
-initEditor()
-
-async function initEditor() {
-  currentInput = document.getElementById("input-0")
-  currentInput.appendChild(editorElement)
-
-  const res = await fetch("../server-configuration.json");
-  const server = await res.json();
-  const options = {
+const editorOptions = {
     configuration: {
-      server,
       recognition: {
         type: "TEXT",
         text: {
@@ -128,6 +127,12 @@ async function initEditor() {
       }
     },
   };
+
+ModalEditorOptions.initConfiguration(initEditor, editorOptions)
+
+async function initEditor(options) {
+  currentInput = document.getElementById("input-0")
+  currentInput.appendChild(editorElement)
 
   /**
    * get editor instance from type

@@ -2,7 +2,8 @@ import { test, expect } from '@playwright/test'
 import {
   waitForEditorInit,
   writeStrokes,
-  waitForExportedEvent
+  waitForExportedEvent,
+  passModalKey
 } from '../helper'
 import helloOneStroke from '../__dataset__/helloOneStroke'
 import TextNavActions from '../_partials/text-nav-actions'
@@ -10,7 +11,7 @@ import TextNavActions from '../_partials/text-nav-actions'
 test.describe('Websocket Text local storage', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/examples/websocket/websocket_text_local_storage_text.html')
-    await waitForEditorInit(page)
+    await passModalKey(page)
   })
 
   test('should have title', async ({ page }) => {
@@ -23,6 +24,7 @@ test.describe('Websocket Text local storage', () => {
       writeStrokes(page, helloOneStroke.strokes)
     ])
 
+    await expect(page.locator('.prompter-text')).toHaveText('hello')
     expect(await page.evaluate("localStorage.getItem(\"editorTextContent\")")).toEqual(helloOneStroke.exports['text/plain'].at(-1))
 
     await page.reload({ waitUntil: 'load' })

@@ -16,16 +16,16 @@
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
     <style>
-      #editor {
+      #editorEl {
         height: calc(100dvh - 66px);
       }
       @media only screen and (max-width: 486px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 114px);
         }
       }
       @media only screen and (max-width: 382px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 161px);
         }
       }
@@ -35,6 +35,9 @@
   </head>
 
   <body>
+    <div id="showModal">
+      <button id="showModalBtn" class="btn-keys">Set Keys</button>
+    </div>
     <nav class="flex-container wrap between gap">
       <div class="flex-container wrap gap">
         <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
@@ -55,14 +58,16 @@
       </div>
     </nav>
 
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
-    <script>
-      const editorElement = document.getElementById("editor")
+    <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl")
       const undoElement = document.getElementById("undo")
       const redoElement = document.getElementById("redo")
       const reinitButton = document.getElementById("reinit")
       const lexicon = document.getElementById("lexicon")
+      const showModalBtn = document.getElementById("showModalBtn")
 
       undoElement.addEventListener("click", () => {
         editor?.undo()
@@ -75,7 +80,7 @@
         editor?.resize()
       })
 
-      const options = {
+      const editorOption = {
         configuration: {
           recognition: {
             text: {
@@ -95,8 +100,12 @@
           customLexicon: values.split(" "),
           addLKText: true,
         }
-        options.configuration = configuration
-        loadEditor()
+        editorOption.configuration = configuration
+        loadEditor(editorOption)
+      })
+
+      showModalBtn.addEventListener("click", () => {
+        ModalEditorOptions.show(loadEditor, editorOption)
       })
 
       /**
@@ -104,12 +113,7 @@
        */
       let editor;
 
-      async function loadEditor() {
-        if (!options.configuration.server) {
-          const res = await fetch("../server-configuration.json")
-          options.configuration.server = await res.json();
-        }
-
+      async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
@@ -123,7 +127,7 @@
         })
       };
 
-      loadEditor().catch(error => console.error(error));
+      ModalEditorOptions.initConfiguration(loadEditor, editorOption)
     </script>
   </body>
 </html>

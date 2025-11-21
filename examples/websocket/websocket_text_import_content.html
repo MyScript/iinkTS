@@ -11,16 +11,16 @@
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
     <style>
-      #editor {
+      #editorEl {
         height: calc(100dvh - 72px);
       }
       @media only screen and (max-width: 514px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 114px);
         }
       }
       @media only screen and (max-width: 398px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 161px);
         }
       }
@@ -29,6 +29,9 @@
   </head>
 
   <body>
+    <div id="showModal">
+      <button id="showModalBtn" class="btn-keys">Set Keys</button>
+    </div>
     <nav class="flex-container wrap between gap">
       <div class="flex-container wrap gap">
         <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
@@ -44,32 +47,29 @@
       </div>
     </nav>
 
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
-    <script>
-      const editorElement = document.getElementById("editor");
+    <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl");
       const undoElement = document.getElementById("undo");
       const redoElement = document.getElementById("redo");
       const importContentField = document.getElementById("importContentField");
       const importContentElement = document.getElementById("importContent");
+      const showModalBtn = document.getElementById("showModalBtn");
 
       /**
        * we expose the editor so we can access it in tests
        */
       let editor;
-
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-        const options = {
+      const editorOptions = {
           configuration: {
-            server,
             recognition: {
               type: "TEXT"
             }
           }
         };
-
+      async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
@@ -90,6 +90,10 @@
           editor.redo();
         });
 
+        showModalBtn.addEventListener("click", () => {
+          ModalEditorOptions.show(loadEditor, editorOptions)
+        })
+
         importContentElement.addEventListener("click", () => {
           const value = importContentField.value.replace("\\n", "\n");
           editor.import(value, importContentField.dataset.type);
@@ -100,7 +104,7 @@
         });
       };
 
-      loadEditor().catch(error => console.error(error));
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
     </script>
   </body>
 </html>

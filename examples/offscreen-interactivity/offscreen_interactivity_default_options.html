@@ -22,22 +22,22 @@
   </head>
 
   <body>
+    <div id="showModal">
+      <button id="showModalBtn" class="btn-keys">Set Keys</button>
+    </div>
     <div id="editor"></div>
 
-    <script>
+    <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
       const editorElement = document.getElementById("editor");
+      const showModalBtn = document.getElementById("showModalBtn")
 
       /**
        * we expose the editor so we can access it in tests
        */
       let editor;
-
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-        const options = {
+      const editorOption = {
           configuration: {
-            server,
             rendering: {
               guides: {
                 gap: 25,
@@ -64,7 +64,7 @@
             }
           }
         }
-
+      async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
@@ -77,7 +77,11 @@
         });
       }
 
-      loadEditor().catch((error) => console.error(error));
+      showModalBtn.addEventListener("click", () => {
+        ModalEditorOptions.show(loadEditor, editorOption)
+      })
+
+      ModalEditorOptions.initConfiguration(loadEditor, editorOption)
     </script>
   </body>
 </html>

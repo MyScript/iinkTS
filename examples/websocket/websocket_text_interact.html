@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
@@ -14,35 +17,35 @@
     <link rel="stylesheet" href="../assets/style/examples.css" />
 
     <style>
-      #editor {
+      #editorEl {
         height: calc(100dvh - 225px);
       }
       @media only screen and (max-width: 391px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 259px);
         }
       }
       @media only screen and (max-width: 300px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 307px);
         }
       }
 
       .question {
-          font-size: 2em;
-          background-color: #f5f5f5;
-          margin: 0;
-          padding: 12px;
-          border-bottom: 1px solid #D7DDE3;
-          text-align: center;
+        font-size: 2em;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 12px;
+        border-bottom: 1px solid #d7dde3;
+        text-align: center;
       }
       .result {
-          font-size: 1.25em;
+        font-size: 1.25em;
       }
       .next-btn .icn {
-          margin: 0 -6px -4px 6px;
-          height: 20px;
-          width: 20px;
+        margin: 0 -6px -4px 6px;
+        height: 20px;
+        width: 20px;
       }
     </style>
 
@@ -50,7 +53,10 @@
   </head>
 
   <body>
-    <svg style="display: none;">
+    <div id="showModal">
+      <button id="showModalBtn" class="btn-keys">Set Keys</button>
+    </div>
+    <svg style="display: none">
       <symbol id="icn-play" viewBox="0 0 16 16">
         <path
           d="M13.153 8.589c.606-.325.603-.854 0-1.178L4.873 2.97C4.392 2.709 4 2.945 4 3.496v9.008c0 .55.39.787.874.527l8.28-4.442z"
@@ -75,111 +81,127 @@
       </div>
       <button id="next-btn" class="classic-btn next-btn">
         Next question
-        <svg class="icn"><use xmlns:xlink="http://www.w3.org/1999/xlink" href="#icn-play"></use></svg>
+        <svg class="icn">
+          <use
+            xmlns:xlink="http://www.w3.org/1999/xlink"
+            href="#icn-play"
+          ></use>
+        </svg>
       </button>
     </nav>
 
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
-    <script>
-      const editorElement = document.getElementById("editor");
-      const questionElement = document.getElementById("question");
-      const resultElement = document.getElementById("result");
-      const undoElement = document.getElementById("undo");
-      const redoElement = document.getElementById("redo");
-      const nextButton = document.getElementById("next-btn");
+    <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl")
+      const questionElement = document.getElementById("question")
+      const resultElement = document.getElementById("result")
+      const undoElement = document.getElementById("undo")
+      const redoElement = document.getElementById("redo")
+      const nextButton = document.getElementById("next-btn")
+      const showModalBtn = document.getElementById("showModalBtn")
 
-      const countries = ["France", "Italy", "Spain", "Argentina", "Japan"];
-      const capitals = ["paris", "rome", "madrid", "buenos aires", "tokyo"];
+      const countries = ["France", "Italy", "Spain", "Argentina", "Japan"]
+      const capitals = ["paris", "rome", "madrid", "buenos aires", "tokyo"]
 
-      let countQuestion = 0;
+      let countQuestion = 0
 
-      questionElement.innerText = "What is the capital of " + countries[countQuestion] + "?";
+      questionElement.innerText =
+        "What is the capital of " + countries[countQuestion] + "?"
 
       function checkAnswer(exportText) {
         if (exportText.toLowerCase() === capitals[countQuestion]) {
-          resultElement.innerHTML = "<span> Yes, it is " + exportText + ".</span>";
-          resultElement.style.setProperty("color", "green");
+          resultElement.innerHTML =
+            "<span> Yes, it is " + exportText + ".</span>"
+          resultElement.style.setProperty("color", "green")
         } else {
-          resultElement.innerHTML = "<span> No, it is not " + exportText + ".</span>";
-          resultElement.style.setProperty("color", "red");
+          resultElement.innerHTML =
+            "<span> No, it is not " + exportText + ".</span>"
+          resultElement.style.setProperty("color", "red")
         }
       }
 
       function changeQuestion() {
-        countQuestion++;
+        countQuestion++
         if (countQuestion > 4) {
-          countQuestion = 0;
+          countQuestion = 0
         }
-        questionElement.innerHTML = countries[countQuestion] ? "What is the capital of " + countries[countQuestion] + "?" : "You won !";
-        editor.clear();
-        resultElement.innerHTML = "";
+        questionElement.innerHTML = countries[countQuestion]
+          ? "What is the capital of " + countries[countQuestion] + "?"
+          : "You won !"
+        editor.clear()
+        resultElement.innerHTML = ""
       }
 
       /**
        * we expose the editor so we can access it in tests
        */
-      let editor;
+      let editor
 
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            type: "TEXT",
+            text: {
+              mimeTypes: ["text/plain"],
+            },
+          },
+        },
+      }
       /**
        * Instanciate Editor
        * @param {Element} The DOM element to attach the ink paper
        * @param {Object} The editor options
        */
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-        const options = {
-          configuration: {
-            server,
-            recognition: {
-              type: "TEXT",
-              text: {
-                mimeTypes: ["text/plain"]
-              }
-            }
-          }
-        };
-
+      async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(editorElement, "INTERACTIVEINKSSR", options);
+        editor = await iink.Editor.load(
+          editorElement,
+          "INTERACTIVEINKSSR",
+          options
+        )
 
         editor.event.addEventListener("changed", (event) => {
-          undoElement.disabled = !event.detail.canUndo;
-          redoElement.disabled = !event.detail.canRedo;
-        });
+          undoElement.disabled = !event.detail.canUndo
+          redoElement.disabled = !event.detail.canRedo
+        })
 
         editor.event.addEventListener("exported", (evt) => {
-          const exports = evt.detail;
+          const exports = evt.detail
           if (exports && exports["text/plain"]) {
-            checkAnswer(exports["text/plain"]);
+            checkAnswer(exports["text/plain"])
           } else {
-            resultElement.innerHTML = "";
+            resultElement.innerHTML = ""
           }
-        });
+        })
 
         nextButton.addEventListener("click", () => {
-          changeQuestion();
-        });
+          changeQuestion()
+        })
 
         undoElement.addEventListener("click", () => {
-          editor.undo();
-        });
+          editor.undo()
+        })
 
         redoElement.addEventListener("click", () => {
-          editor.redo();
-        });
+          editor.redo()
+        })
+
+        showModalBtn.addEventListener("click", () => {
+          ModalEditorOptions.show(loadEditor, editorOptions)
+        })
 
         window.addEventListener("resize", () => {
-          editor.resize();
-        });
-      };
+          editor.resize()
+        })
+      }
 
-      loadEditor().catch(error => console.error(error));
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
     </script>
   </body>
 </html>

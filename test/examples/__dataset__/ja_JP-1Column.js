@@ -2219,6 +2219,6 @@ export default {
     }
   ],
   exports: {
-    "text/plain": ["手書き認識"],
+    "text/plain": ["手書き認識", "手書きッ誌識"],
   }
 }

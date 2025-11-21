@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="../assets/style/examples.css" />
     <link rel="stylesheet" href="../assets/style/renderjson.css" />
     <style>
-      #editor {
+      #editorEl {
         height: calc(100dvh - 170px);
         width: 100dvw;
       }
@@ -43,7 +43,7 @@
         cursor: zoom-out;
       }
       @media only screen and (max-width: 418px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 220px);
         }
       }
@@ -57,6 +57,9 @@
   </head>
 
   <body>
+    <div id="showModal">
+      <button id="showModalBtn" class="btn-keys">Set Keys</button>
+    </div>
     <div id="result"></div>
 
     <nav class="flex-container wrap gap between">
@@ -86,18 +89,20 @@
 
     <div id="progress"></div>
 
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
     <div id="conversion-container"></div>
 
-    <script>
-      const editorElement = document.getElementById("editor");
+    <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl");
       const resultElement = document.getElementById("result");
       const clearElement = document.getElementById("clear");
       const undoElement = document.getElementById("undo");
       const redoElement = document.getElementById("redo");
       const eraserElement = document.getElementById("eraser");
       const penElement = document.getElementById("pen");
+      const showModalBtn = document.getElementById("showModalBtn");
 
       resultElement.addEventListener("click", () => {
         resultElement.classList.toggle("open")
@@ -107,15 +112,8 @@
        */
       let editor;
 
-      /**
-       * We use a function to wait the server configuration to load
-       */
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-        const options = {
+      const editorOptions = {
           configuration: {
-            server,
             recognition: {
               export: {
               jiix: {
@@ -126,6 +124,13 @@
             }
           }
         };
+
+        showModalBtn.addEventListener("click", () => {
+          ModalEditorOptions.show(loadEditor)
+        })
+      async function loadEditor(options) {
+        resultElement.innerHTML = ""
+        await editor?.destroy()
 
         /**
          * get editor instance from type
@@ -185,7 +190,7 @@
         });
       }
 
-      loadEditor().catch((error) => console.error(error));
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
     </script>
   </body>
 </html>

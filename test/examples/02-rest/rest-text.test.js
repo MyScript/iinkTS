@@ -1,22 +1,19 @@
 import { test, expect } from "@playwright/test"
 import {
-  waitForEditorInit,
   writeStrokes,
   waitForExportedEvent,
   getEditorConfiguration,
   getEditorExports,
   loadEditor,
+  passModalKey
 } from "../helper"
 import h from "../__dataset__/h"
 
 test.describe("Rest Text", () => {
 
   test.beforeEach(async ({ page }) => {
-    await Promise.all([
-      page.goto("/examples/rest/rest_text_iink.html"),
-      page.waitForResponse(req => req.url().includes("/api/v4.0/iink/availableLanguageList")),
-    ])
-    await waitForEditorInit(page)
+    await page.goto("/examples/rest/rest_text_iink.html")
+    await passModalKey(page)
   })
 
   test("should have title", async ({ page }) => {
@@ -141,7 +138,7 @@ test.describe("Rest Text", () => {
         waitForExportedEvent(page),
         page.click("#undo")
       ])
-      expect(await page.locator("#editor").evaluate((node) => node.editor.model.symbols)).toHaveLength(1)
+      expect(await page.locator("#editorEl").evaluate((node) => node.editor.model.symbols)).toHaveLength(1)
       await expect(page.locator("#result")).toHaveText(h.exports["text/plain"][0])
     })
 
@@ -150,7 +147,7 @@ test.describe("Rest Text", () => {
         waitForExportedEvent(page),
         page.click("#undo")
       ])
-      expect(await page.locator("#editor").evaluate((node) => node.editor.model.symbols)).toHaveLength(0)
+      expect(await page.locator("#editorEl").evaluate((node) => node.editor.model.symbols)).toHaveLength(0)
       await expect(page.locator("#result")).toBeEmpty()
     })
 
@@ -159,7 +156,7 @@ test.describe("Rest Text", () => {
         waitForExportedEvent(page),
         page.click("#redo")
       ])
-      expect(await page.locator("#editor").evaluate((node) => node.editor.model.symbols)).toHaveLength(1)
+      expect(await page.locator("#editorEl").evaluate((node) => node.editor.model.symbols)).toHaveLength(1)
       await expect(page.locator("#result")).toHaveText(h.exports["text/plain"][0])
     })
 

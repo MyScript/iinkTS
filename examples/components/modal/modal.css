@@ -1,0 +1,122 @@
+.modal {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0,0,0,0.4);
+  z-index: 10000;
+}
+
+.modal-container {
+  width: 90%;
+  max-width: 480px;
+  max-height: 90vh;
+  padding: 32px;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
+  background: #fff;
+  overflow-y: auto;
+  margin: 0;             /* important si tu utilises encore flex centering */
+}
+
+
+.modal-content {
+  width: 100%;
+}
+
+.modal-footer-message {
+  font-size: 15px;
+  color: #1a9fff;
+  margin-top: 50px;
+  text-align: center;
+  text-decoration: none;
+}
+.modal-footer-message:hover {
+  text-decoration: underline;
+  transition: 0.2s ease;
+  color: #007acc;
+}
+
+.modal-message {
+  font-size: 17px;
+  color: #1a9fff;
+  text-align: center;
+  text-decoration: none;
+}
+.modal-message:hover {
+  text-decoration: underline;
+  transition: 0.2s ease;
+  color: #007acc;
+}
+
+.app-key-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 6px;
+}
+
+.input-container-appkey {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.app-key-input,
+.modal-container select,
+.modal-container input {
+  width: 100%;
+  padding: auto 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #f5f7fa;
+  font-size: 14px;
+  transition: 0.2s ease;
+}
+
+.app-key-input:focus,
+.modal-container select:focus,
+.modal-container input:focus {
+  border-color: #1a9fff;
+  outline: none;
+  background: #fff;
+}
+
+.save {
+  width: 100%;
+  padding: 12px;
+  background: #1a9fff;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: 0.2s ease;
+  margin-bottom: 15px;
+}
+
+.save:hover {
+  opacity: 0.85;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  width: 100%;
+}
+
+.modal-input-container {
+  margin-top: 20px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.stop-scrolling {
+  height: 100%;
+  overflow: hidden;
+}

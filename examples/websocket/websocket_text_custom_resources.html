@@ -17,16 +17,16 @@
 
     <style>
 
-      #editor {
+      #editorEl {
         height: calc(100dvh - 166px);
       }
       @media only screen and (max-width: 608px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 123px);
         }
       }
       @media only screen and (max-width: 504px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 140px);
         }
       }
@@ -34,6 +34,9 @@
   </head>
 
   <body>
+    <div id="showModal">
+      <button id="showModalBtn" class="btn-keys">Set Keys</button>
+    </div>
     <nav class="flex-container wrap gap between">
       <div class="flex-container wrap gap">
         <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
@@ -46,20 +49,17 @@
       <p>Custom pre-loaded resources: <b>Dinosaurs</b>. Try to write some dinosaurs name!</p>
     </nav>
 
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
-    <script>
-      const editorElement = document.getElementById("editor");
-
+    <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl");
       const undoElement = document.getElementById("undo");
       const redoElement = document.getElementById("redo");
       let editor;
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-        const options = {
+
+      const editorOption = {
           configuration: {
-            server,
             recognition: {
               text: {
                 addLKText: true,
@@ -68,7 +68,7 @@
             }
           }
         };
-
+      async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
@@ -89,12 +89,16 @@
           editorElement.editor.redo();
         });
 
+        showModalBtn.addEventListener("click", () => {
+          ModalEditorOptions.show(loadEditor, editorOption)
+        })
+
         window.addEventListener("resize", () => {
           editorElement.editor.resize();
         });
       };
 
-      loadEditor().catch(error => console.error(error));
+      ModalEditorOptions.initConfiguration(loadEditor, editorOption)
     </script>
   </body>
 </html>

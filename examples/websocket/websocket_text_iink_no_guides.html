@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
@@ -12,13 +15,16 @@
     <link rel="stylesheet" href="../assets/style/examples.css" />
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
     <style>
-      #editor {
+      #editorEl {
         height: calc(100dvh - 66px);
       }
     </style>
   </head>
 
   <body>
+    <div id="showModal">
+      <button id="showModalBtn" class="btn-keys">Set Keys</button>
+    </div>
     <nav>
       <div class="flex-container wrap gap">
         <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
@@ -30,60 +36,65 @@
       </div>
     </nav>
 
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
-    <script>
-      const editorElement = document.getElementById("editor");
-      const undoElement = document.getElementById("undo");
-      const redoElement = document.getElementById("redo");
+    <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl")
+      const undoElement = document.getElementById("undo")
+      const redoElement = document.getElementById("redo")
+      const showModalBtn = document.getElementById("showModalBtn")
 
       /**
        * we expose the editor so we can access it in tests
        */
-      let editor;
+      let editor
 
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-        const options = {
-          configuration: {
-            server,
-            recognition: {
-              type: "TEXT",
-              text: {
-                guides: {
-                  enable: false
-                }
-              }
-            }
-          }
-        };
-
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            type: "TEXT",
+            text: {
+              guides: {
+                enable: false,
+              },
+            },
+          },
+        },
+      }
+      async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(editorElement, "INTERACTIVEINKSSR", options);
+        editor = await iink.Editor.load(
+          editorElement,
+          "INTERACTIVEINKSSR",
+          options
+        )
 
         editor.event.addEventListener("changed", (event) => {
-          undoElement.disabled = !event.detail.canUndo;
-          redoElement.disabled = !event.detail.canRedo;
-        });
+          undoElement.disabled = !event.detail.canUndo
+          redoElement.disabled = !event.detail.canRedo
+        })
 
         undoElement.addEventListener("click", () => {
-          editor.undo();
-        });
+          editor.undo()
+        })
         redoElement.addEventListener("click", () => {
-          editor.redo();
-        });
+          editor.redo()
+        })
+        showModalBtn.addEventListener("click", () => {
+          ModalEditorOptions.show(loadEditor, editorOptions)
+        })
 
         window.addEventListener("resize", () => {
-          editor.resize();
-        });
-      };
+          editor.resize()
+        })
+      }
 
-      loadEditor().catch(error => console.error(error));
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
     </script>
   </body>
 </html>

@@ -33,21 +33,21 @@
         background: rgba(240, 240, 240, 0.9);
       }
 
-      #editor {
+      #editorEl {
           height: calc(100dvh - 122px);
       }
       @media only screen and (max-width: 1030px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 169px);
         }
       }
       @media only screen and (max-width: 771px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 216px);
         }
       }
       @media only screen and (max-width: 648px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 263px);
         }
 
@@ -57,7 +57,7 @@
         }
       }
       @media only screen and (max-height: 400px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 50px);
         }
 
@@ -73,6 +73,9 @@
   </head>
 
   <body>
+    <div id="showModal">
+      <button id="showModalBtn" class="btn-keys">Set Keys</button>
+    </div>
     <nav class="nav-block">
       <div class="flex-container wrap gap row-options">
         <div class="flex-container wrap gap nav-item">
@@ -104,14 +107,15 @@
       </div>
     </nav>
 
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
     <div id="prompter-css" class="prompter-css">
       <div id="prompter-css-text">Theme or pen style applied will be written here.</div>
     </div>
 
-    <script>
-      const editorElement = document.getElementById("editor");
+    <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl");
       const penStyleClasses = document.getElementById("penStyleClasses");
       const themeSelector = document.getElementById("theme");
       const penEnabled = document.getElementById("penenabled");
@@ -207,22 +211,15 @@
        */
       let editor;
 
-      /**
-       * We use a function to wait the server configuration to load
-       */
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-        const options = {
+      const editorOption = {
           configuration: {
-            server,
             recognition: {
               type: "TEXT"
             },
             theme: getTheme(themes, defaultThemeId)
           },
         };
-
+      async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
@@ -287,11 +284,15 @@
           updatePrompter("editor.penStyle", editor.penStyle);
         });
 
+        showModalBtn.addEventListener("click", () => {
+          ModalEditorOptions.show(loadEditor, editorOption)
+        })
+
         window.addEventListener("resize", () => {
           editor.resize();
         });
       };
-      loadEditor().catch(error => console.error(error));
+      ModalEditorOptions.initConfiguration(loadEditor, editorOption)
     </script>
   </body>
 </html>

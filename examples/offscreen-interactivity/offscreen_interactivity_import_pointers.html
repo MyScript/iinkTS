@@ -60,6 +60,9 @@
   </head>
 
   <body>
+    <div id="showModal">
+      <button id="showModalBtn" class="btn-keys">Set Keys</button>
+    </div>
     <nav>
       <button id="show-symbols-to-import-btn" class="classic-btn">Show symbols</button>
       <button class="classic-btn" id="import">Import</button>
@@ -69,35 +72,35 @@
       <div id="editor"></div>
     </div>
 
-    <script>
+    <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js";
       const editorElement = document.getElementById("editor");
       const showSymbolBtn = document.getElementById("show-symbols-to-import-btn");
       const pointerEventsObjectElement = document.getElementById("pointerEventsObject");
       const importBtn = document.getElementById("import");
+      const showModalBtn = document.getElementById("showModalBtn");
 
       showSymbolBtn.addEventListener("pointerup", () => {
         pointerEventsObjectElement.classList.toggle("open");
+      });
+
+      showModalBtn.addEventListener("click", () => {
+        ModalEditorOptions.show(loadEditor, editorOption);
       });
 
       /**
        * we expose the editor so we can access it in tests
        */
       let editor;
-
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-
-        const options = {
+      const editorOption = {
           configuration: {
-            server,
             rendering: {
               minHeight: 1000,
               minWidth: 1000
             }
           }
         };
-
+      async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
@@ -118,7 +121,7 @@
         });
       }
 
-      loadEditor().catch((error) => console.error(error));
+      ModalEditorOptions.initConfiguration(loadEditor, editorOption);
     </script>
   </body>
 </html>

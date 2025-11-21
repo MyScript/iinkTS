@@ -4,6 +4,11 @@ test.describe("Rest no UI", () => {
 
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/rest/rest_no_ui.html")
+    await page.getByRole('button', { name: 'Set Keys' }).click()
+    await page.getByRole('textbox', { name: 'Host:' }).fill("cloud.preprod.myscript.com")
+    await page.getByRole('textbox', { name: 'Application Key:' }).fill("74716e99-0614-4559-abe4-300d30621808")
+    await page.getByRole('textbox', { name: 'HMAC Key:' }).fill("07b17879-cee0-4b0c-8ff6-23da4cbe419f")
+    await page.getByRole('button', { name: 'Save' }).click()
   })
 
   test("should have title", async ({ page }) => {

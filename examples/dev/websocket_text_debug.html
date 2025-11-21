@@ -12,11 +12,11 @@
     <link rel="stylesheet" href="../assets/style/examples.css" />
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
     <style>
-      #editor {
+      #editorEl {
         height: calc(100dvh - 166px);
       }
       @media only screen and (max-width: 452px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 213px);
         }
       }
@@ -60,10 +60,10 @@
       </div>
     </nav>
 
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
     <script>
-      const editorElement = document.getElementById("editor");
+      const editorElement = document.getElementById("editorEl");
       const resultElement = document.getElementById("result");
       const globalLoggerLevelSelect = document.getElementById("global-logger-level");
       const specificLggerLevel = document.getElementById("specific-logger-level");

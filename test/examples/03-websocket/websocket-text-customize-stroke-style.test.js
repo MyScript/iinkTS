@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test"
-import { waitForEditorInit, writeStrokes, waitForExportedEvent, callEditorIdle } from "../helper"
+import { writeStrokes, waitForExportedEvent, passModalKey } from "../helper"
 import h from "../__dataset__/h"
 
 function hexToRgbA(hex) {
@@ -20,12 +20,8 @@ function hexToRgbA(hex) {
 test.describe("Websocket Text Customize Stroke Style", () => {
 
   test.beforeEach(async ({ page }) => {
-    await Promise.all([
-      page.goto("/examples/websocket/websocket_text_customize_stroke_style.html"),
-      page.waitForResponse(req => req.url().includes("api/v4.0/iink/font/google/language/en_US")),
-    ])
-    await waitForEditorInit(page)
-    await callEditorIdle(page)
+    await page.goto("/examples/websocket/websocket_text_customize_stroke_style.html")
+    await passModalKey(page)
   })
 
   test("should have title", async ({ page }) => {
@@ -37,7 +33,7 @@ test.describe("Websocket Text Customize Stroke Style", () => {
       waitForExportedEvent(page),
       writeStrokes(page, h.strokes),
     ])
-    const defaultThemeColor = await page.evaluate("editor.theme.ink.color")
+    const defaultThemeColor = await page.evaluate("editorEl.editor.theme.ink.color")
     const path = page.locator(`path[fill="${hexToRgbA(defaultThemeColor)}"]`)
     expect(await path.count()).toEqual(1)
   })
@@ -50,8 +46,8 @@ test.describe("Websocket Text Customize Stroke Style", () => {
       writeStrokes(page, h.strokes),
     ])
 
-    const editorTheme = await page.evaluate("editor.theme")
-    const editorPenStyleClasses = await page.evaluate("editor.penStyleClasses")
+    const editorTheme = await page.evaluate("editorEl.editor.theme")
+    const editorPenStyleClasses = await page.evaluate("editorEl.editor.penStyleClasses")
     const penColorExpected = editorTheme[`.${editorPenStyleClasses}`].color
     expect(await page.locator(`path[fill="${hexToRgbA(penColorExpected)}"]`).count()).toEqual(1)
   })
@@ -64,31 +60,38 @@ test.describe("Websocket Text Customize Stroke Style", () => {
       writeStrokes(page, h.strokes),
     ])
 
-    const editorTheme = await page.evaluate("editor.theme")
+    const editorTheme = await page.evaluate("editorEl.editor.theme")
     const penColorExpected = editorTheme.ink.color
     const path = page.locator(`path[fill="${hexToRgbA(penColorExpected)}"]`)
     expect(await path.count()).toEqual(1)
   })
 
   test("should draw stroke with default penStyle", async ({ page }) => {
-    await expect(page.locator("#pencolor")).toBeDisabled()
-    await expect(page.locator("#penwidth")).toBeDisabled()
-    await page.setChecked("#penenabled", true)
-    await expect(page.locator("#pencolor")).toBeEnabled()
-    await expect(page.locator("#penwidth")).toBeEnabled()
+    const penColor = page.locator("#pencolor")
+    const penWidth = page.locator("#penwidth")
+    const enablePenStyle = page.locator("#penenabled")
+
+    await expect(penColor).toBeDisabled()
+    await expect(penWidth).toBeDisabled()
+    await enablePenStyle.click()
+    await expect(enablePenStyle).toBeChecked()
+
+    await expect(penColor).toBeEnabled()
+    await expect(penWidth).toBeEnabled()
 
     await Promise.all([
       waitForExportedEvent(page),
       writeStrokes(page, h.strokes),
     ])
 
-    const editorPenStyle = await page.evaluate("editor.penStyle")
+    const editorPenStyle = await page.evaluate("editorEl.editor.penStyle")
     const path = page.locator(`path[fill="${hexToRgbA(editorPenStyle.color)}"]`)
     expect(await path.count()).toEqual(1)
 
-    await page.setChecked("#penenabled", false)
-    await expect(page.locator("#pencolor")).toBeDisabled()
-    await expect(page.locator("#penwidth")).toBeDisabled()
+    await enablePenStyle.click()
+    await expect(enablePenStyle).not.toBeChecked()
+    await expect(penColor).toBeDisabled()
+    await expect(penWidth).toBeDisabled()
   })
 
   test("should draw stroke with selected penStyle", async ({ page }) => {
@@ -96,7 +99,7 @@ test.describe("Websocket Text Customize Stroke Style", () => {
     await expect(page.locator("#pencolor")).toBeDisabled()
     await expect(page.locator("#penwidth")).toBeDisabled()
 
-    await page.setChecked("#penenabled", true)
+    await page.locator("#penenabled").click()
     await expect(page.locator("#pencolor")).toBeEnabled()
     await expect(page.locator("#penwidth")).toBeEnabled()
 

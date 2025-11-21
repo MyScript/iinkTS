@@ -12,11 +12,11 @@
     <link rel="stylesheet" href="../assets/style/examples.css" />
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
     <style>
-      #editor {
+      #editorEl {
         height: calc(100dvh - 166px);
       }
       @media only screen and (max-width: 294px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 213px);
         }
       }
@@ -24,6 +24,9 @@
   </head>
 
   <body>
+    <div id="showModal">
+      <button id="showModalBtn" class="btn-keys">Set Keys</button>
+    </div>
     <div id="result"></div>
 
     <nav class="flex-container wrap gap between">
@@ -39,26 +42,21 @@
         </button>
       </div>
     </nav>
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
-    <script>
-      const editorElement = document.getElementById("editor");
+    <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl");
+      const showModalBtn = document.getElementById("showModalBtn");
 
       /**
        * we expose the editor so we can access it in tests
        */
       let editor;
 
-      /**
-       * We use a function to wait the server configuration to load
-       */
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-        const options = {
+      const editorOption = {
           configuration: {
             server: {
-              ...server,
               applicationKey: 'xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
               hmacKey: 'xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
             },
@@ -66,8 +64,9 @@
               type: "TEXT"
             }
           }
-        };
+        }
 
+      async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
@@ -76,7 +75,11 @@
         editor = await iink.Editor.load(editorElement, "INTERACTIVEINKSSR", options);
       };
 
-      loadEditor().catch(error => console.error(error));
+      showModalBtn.addEventListener("click", () => {
+        ModalEditorOptions.show(loadEditor, editorOption)
+      })
+
+      loadEditor(editorOption).catch(error => console.error(error));
     </script>
   </body>
 </html>

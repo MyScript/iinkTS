@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test"
 import {
+  passModalKey,
   getEditorSymbols,
   callEditorIdle,
   waitForConvertedEvent,
@@ -13,8 +14,7 @@ import helloOneStroke from "../__dataset__/helloOneStroke"
 test.describe("Offscreen Get Started Menu Style", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/offscreen-interactivity/index.html")
-    await waitForEditorInit(page)
-    await callEditorIdle(page)
+    await passModalKey(page)
   })
 
   test.describe("Stroke color", () => {
@@ -134,7 +134,7 @@ test.describe("Offscreen Get Started Menu Style", () => {
       const maxY = Math.max(...helloOneStroke.strokes[0].pointers.map(p => p.y))
 
       const strokesHeight = maxY - minY
-      const symbolsAfterConvert = await page.evaluate("editor.model.symbols")
+      const symbolsAfterConvert = await page.evaluate("editorEl.editor.model.symbols")
       const boundsHeight = symbolsAfterConvert[0].bounds.height
       const chars = symbolsAfterConvert[0].chars
       expect(chars.length).toStrictEqual(helloOneStroke.exports["application/vnd.myscript.jiix"].label.length)

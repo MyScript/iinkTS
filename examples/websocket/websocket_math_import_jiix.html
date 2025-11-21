@@ -21,7 +21,7 @@
         height: calc(100% - 66px);
         width: 100%;
       }
-      #editor {
+      #editorEl {
         height: calc(100dvh - 66px);
         width: 60%;
       }
@@ -36,7 +36,7 @@
           display: flex;
           flex-direction: column;
         }
-        #editor {
+        #editorEl {
           height: calc(50vh - 66px);
           width: 100%;
         }
@@ -50,6 +50,9 @@
     </style>
   </head>
   <body>
+    <div id="showModal">
+      <button id="showModalBtn" class="btn-keys">Set Keys</button>
+    </div>
     <nav class="flex-container wrap between">
       <div class="flex-container wrap gap">
         <button class="classic-btn" id="import">Import</button>
@@ -686,11 +689,12 @@
   "version": "3"
 }
       </textarea>
-      <div id="editor"></div>
+      <div id="editorEl"></div>
     </main>
 
-    <script>
-      const editorElement = document.getElementById("editor");
+    <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl");
       const undoElement = document.getElementById("undo");
       const redoElement = document.getElementById("redo");
       const convertElement = document.getElementById("convert");
@@ -701,15 +705,8 @@
        */
       let editor;
 
-      /**
-       * We use a function to wait the server configuration to load
-       */
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-        const options = {
+      const editorOption = {
           configuration: {
-            server,
             recognition: {
               type: "MATH",
               math: {
@@ -723,7 +720,7 @@
             }
           }
         };
-
+      async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
@@ -754,12 +751,16 @@
           editor.import(JSON.parse(jiix), "application/vnd.myscript.jiix");
         });
 
+        showModalBtn.addEventListener("click", () => {
+          ModalEditorOptions.show(loadEditor, editorOption)
+        })
+
         window.addEventListener("resize", () => {
           editor.resize();
         });
       };
 
-      loadEditor().catch(error => console.error(error));
+      ModalEditorOptions.initConfiguration(loadEditor, editorOption)
     </script>
   </body>
 </html>

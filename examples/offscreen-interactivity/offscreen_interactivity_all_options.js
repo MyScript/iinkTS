@@ -1,4 +1,6 @@
+import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
 const editorElement = document.getElementById("editor");
+const showModalBtn = document.getElementById("showModalBtn");
 
 const importBtn = document.getElementById("import");
 
@@ -187,19 +189,15 @@ htmlPanCloseBtn.addEventListener("pointerup", () => {
  * we expose the editor so we can access it in tests
  */
 let editor;
-
-async function loadEditor() {
-  const res = await fetch("../server-configuration.json");
-  const server = await res.json();
-  const options = {
+const editorOption = {
     configuration: {
-      server,
       rendering: {
         minHeight: 2000,
         minWidth: 2000
       }
     }
   };
+async function loadEditor(options) {
   /**
    * get editor instance from type
    * @param {Element} The DOM element to attach the ink paper
@@ -241,9 +239,13 @@ async function loadEditor() {
     await editor.createSymbols(symbolsToCreate);
   });
 
+  showModalBtn.addEventListener("pointerup", () => {
+    ModalEditorOptions.show(editor, editorOption);
+  });
+
   window.addEventListener("resize", () => {
     editor.resize();
   });
 }
 
-loadEditor().catch((error) => console.error(error));
+ModalEditorOptions.initConfiguration(loadEditor, editorOption)
