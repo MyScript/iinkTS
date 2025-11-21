@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
@@ -98,7 +101,7 @@
         z-index: 5 !important;
       }
 
-      #editor {
+      #editorEl {
         position: absolute;
         left: 10vw !important;
         top: 20vh !important;
@@ -133,16 +136,21 @@
   </head>
 
   <body>
+    <div id="showModal">
+      <button id="showModalBtn" class="btn-keys">Set Keys</button>
+    </div>
     <main>
       <h2>Pythagorean theorem</h2>
       <h3>Definition</h3>
       <div class="textContent">
-        In mathematics, the Pythagorean theorem, also known as Pythagoras' theorem, ... often called the "Pythagorean equation".
+        In mathematics, the Pythagorean theorem, also known as Pythagoras'
+        theorem, ... often called the "Pythagorean equation".
       </div>
       <h3>Other forms of the theorem</h3>
       <div class="textContent">
-        If c denotes the length of the hypotenuse and a and b denote the lengths of the other two sides, the Pythagorean theorem can be expressed as
-        the Pythagorean equation:
+        If c denotes the length of the hypotenuse and a and b denote the lengths
+        of the other two sides, the Pythagorean theorem can be expressed as the
+        Pythagorean equation:
         <span
           id="eq-1"
           class="mathContent"
@@ -160,7 +168,8 @@
         >
       </div>
       <div class="textContent">
-        If the length of the hypotenuse c and of one side (a or b) are known, then the length of the other side can be calculated as
+        If the length of the hypotenuse c and of one side (a or b) are known,
+        then the length of the other side can be calculated as
         <span
           id="eq-3"
           class="mathContent"
@@ -190,148 +199,173 @@
         <button class="classic-btn" id="convert" disabled>Convert</button>
         <button class="classic-btn" id="close">X</button>
       </nav>
-      <div id="editor"></div>
+      <div id="editorEl"></div>
       <div id="editorBox"></div>
     </div>
 
-    <script>
-      const animationDelay = getUrlParameter("animation-delay");
+    <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const animationDelay = getUrlParameter("animation-delay")
       if (animationDelay) {
-        document.querySelector("body").style.setProperty("--animation-duration", animationDelay);
+        document
+          .querySelector("body")
+          .style.setProperty("--animation-duration", animationDelay)
       }
 
-      const editorElement = document.getElementById("editor");
-      const mathContentElements = document.querySelectorAll(".mathContent");
-      const undoElement = document.getElementById("undo");
-      const redoElement = document.getElementById("redo");
-      const convertElement = document.getElementById("convert");
-      const closeElement = document.getElementById("close");
-      let currentMathElement = undefined;
+      const editorElement = document.getElementById("editorEl")
+      const mathContentElements = document.querySelectorAll(".mathContent")
+      const undoElement = document.getElementById("undo")
+      const redoElement = document.getElementById("redo")
+      const convertElement = document.getElementById("convert")
+      const closeElement = document.getElementById("close")
+      const showModalBtn = document.getElementById("showModalBtn")
+      let currentMathElement = undefined
 
       function toggleView() {
-        document.querySelector("#editor-modal").classList.toggle("visible");
-        document.querySelector("nav").classList.toggle("visible");
-        document.querySelector("#editor").classList.toggle("visible");
-        editorBox.classList.toggle("visible");
-        editorBox.classList.toggle("editorPosition");
-        editorBox.classList.toggle("animateResize");
+        document.querySelector("#editor-modal").classList.toggle("visible")
+        document.querySelector("nav").classList.toggle("visible")
+        document.querySelector("#editorEl").classList.toggle("visible")
+        editorBox.classList.toggle("visible")
+        editorBox.classList.toggle("editorPosition")
+        editorBox.classList.toggle("animateResize")
       }
 
       function getUrlParameter(name) {
-        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
-        const regex = new RegExp("[\\?&]" + name + "=([^&#]*)");
-        const results = regex.exec(location.search);
-        return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+        name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]")
+        const regex = new RegExp("[\\?&]" + name + "=([^&#]*)")
+        const results = regex.exec(location.search)
+        return results === null
+          ? ""
+          : decodeURIComponent(results[1].replace(/\+/g, " "))
       }
 
       /**
        * we expose the editor so we can access it in tests
        */
-      let editor;
-
-      /**
-       * We use a function to wait the server configuration to load
-       */
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-        const options = {
-          configuration: {
-            server,
-            recognition: {
-              type: "MATH",
-              export: {
-                jiix: {
-                  strokes: true,
-                  "bounding-box": true,
-                }
+      let editor
+      const editorOption = {
+        configuration: {
+          recognition: {
+            type: "MATH",
+            export: {
+              jiix: {
+                strokes: true,
+                "bounding-box": true,
               },
-              math: {
-                mimeTypes: ["application/vnd.myscript.jiix", "application/x-latex"],
-                solver: {
-                  enable: false
-                }
-              }
-            }
-          }
-        };
-
+            },
+            math: {
+              mimeTypes: [
+                "application/vnd.myscript.jiix",
+                "application/x-latex",
+              ],
+              solver: {
+                enable: false,
+              },
+            },
+          },
+        },
+      }
+      async function loadEditor(options) {
+        if (editor) {
+          await editor.destroy()
+          undoElement.removeEventListener("click", editor.undo)
+          redoElement.removeEventListener("click", editor.redo)
+          convertElement.removeEventListener("click", editor.convert)
+          closeElement.removeEventListener("click", editor.clear)
+          window.removeEventListener("resize", editor.resize)
+        }
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(editorElement, "INTERACTIVEINKSSR", options);
+        editor = await iink.Editor.load(
+          editorElement,
+          "INTERACTIVEINKSSR",
+          options
+        )
 
         editor.event.addEventListener("changed", (event) => {
-          undoElement.disabled = !event.detail.canUndo;
-          redoElement.disabled = !event.detail.canRedo;
-          convertElement.disabled = event.detail.isEmpty;
-        });
-
-        closeElement.addEventListener("click", () => {
-          const currentExports = editor.model.exports;
-          if (currentExports && currentExports["application/vnd.myscript.jiix"]) {
-            currentMathElement.setAttribute("data-jiix", JSON.stringify(currentExports["application/vnd.myscript.jiix"]));
-            currentMathElement.innerHTML = "";
-            katex.render(currentExports["application/x-latex"], currentMathElement, { displayMode: false });
-            editor.clear();
-          }
-          toggleView();
-        });
+          undoElement.disabled = !event.detail.canUndo
+          redoElement.disabled = !event.detail.canRedo
+          convertElement.disabled = event.detail.isEmpty
+        })
 
         mathContentElements.forEach((mathContentElement) => {
-          mathContentElement.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const srcMathContentElement = mathContentElement;
-            const editorBox = document.querySelector("#editorBox");
-            currentMathElement = srcMathContentElement;
-
-            //Importing the previous jjix
-            const currentJiix = currentMathElement.getAttribute("data-jiix");
-            if (currentJiix) {
-              editor.import(currentJiix, "application/vnd.myscript.jiix");
-            }
-
-            const srcElementHeight = srcMathContentElement.offsetHeight;
-            const srcElementWidth = srcMathContentElement.offsetWidth;
-            const srcElementLeft = srcMathContentElement.offsetLeft;
-            const srcElementTop = srcMathContentElement.offsetTop;
-
-            document.querySelector("#editor-modal").classList.toggle("visible");
-            document.querySelector("nav").classList.toggle("visible");
-            document.querySelector("#editor").classList.toggle("visible");
-
-            editorBox.style = `left: ${srcElementLeft}px; top: ${srcElementTop}px; height: ${srcElementHeight}px; width: ${srcElementWidth}px; `;
-            editorBox.classList.toggle("visible");
-            editorBox.classList.toggle("animateResize");
-
-            setTimeout(() => {
-              editorBox.classList.toggle("editorPosition");
-              editorBox.style = "";
-            }, 0);
-          });
-        });
+          mathContentElement.addEventListener("click", onMathContentClick)
+        })
 
         undoElement.addEventListener("click", () => {
-          editor.undo();
-        });
+          editor?.undo()
+        })
 
         redoElement.addEventListener("click", () => {
-          editor.redo();
-        });
+          editor?.redo()
+        })
 
         convertElement.addEventListener("click", () => {
-          editor.convert();
-        });
+          editor?.convert()
+        })
 
         window.addEventListener("resize", () => {
-          editor.resize();
-        });
-      };
+          editor.resize()
+        })
+      }
+      showModalBtn.addEventListener("click", () => {
+        ModalEditorOptions.show(loadEditor, editorOption)
+      })
 
-      loadEditor().catch((error) => console.error(error));
+      closeElement.addEventListener("click", () => {
+        const currentExports = editor.model.exports
+        if (currentExports && currentExports["application/vnd.myscript.jiix"]) {
+          currentMathElement.setAttribute(
+            "data-jiix",
+            JSON.stringify(currentExports["application/vnd.myscript.jiix"])
+          )
+          currentMathElement.innerHTML = ""
+          katex.render(
+            currentExports["application/x-latex"],
+            currentMathElement,
+            { displayMode: false }
+          )
+          editor.clear()
+        }
+        toggleView()
+      })
+
+      function onMathContentClick(e) {
+        e.preventDefault()
+        e.stopPropagation()
+        const srcMathContentElement = e.currentTarget
+        const editorBox = document.querySelector("#editorBox")
+        currentMathElement = srcMathContentElement
+
+        const currentJiix = currentMathElement.getAttribute("data-jiix")
+
+        if (currentJiix) {
+          editor.import(currentJiix, "application/vnd.myscript.jiix")
+        }
+
+        const srcElementHeight = srcMathContentElement.offsetHeight
+        const srcElementWidth = srcMathContentElement.offsetWidth
+        const srcElementLeft = srcMathContentElement.offsetLeft
+        const srcElementTop = srcMathContentElement.offsetTop
+
+        document.querySelector("#editor-modal").classList.toggle("visible")
+        document.querySelector("nav").classList.toggle("visible")
+        document.querySelector("#editorEl").classList.toggle("visible")
+
+        editorBox.style = `left: ${srcElementLeft}px; top: ${srcElementTop}px; height: ${srcElementHeight}px; width: ${srcElementWidth}px; `
+        editorBox.classList.toggle("visible")
+        editorBox.classList.toggle("animateResize")
+
+        setTimeout(() => {
+          editorBox.classList.toggle("editorPosition")
+          editorBox.style = ""
+        }, 0)
+      }
+
+      ModalEditorOptions.initConfiguration(loadEditor, editorOption)
     </script>
   </body>
 </html>

@@ -1,9 +1,9 @@
 import { test, expect } from "@playwright/test"
 import {
-  waitForEditorInit,
   writeStrokes,
   waitForExportedEvent,
   getEditorExports,
+  passModalKey
 } from "../helper"
 import rectangleShape from "../__dataset__/rectangleShape"
 import line from "../__dataset__/line"
@@ -11,7 +11,7 @@ import line from "../__dataset__/line"
 test.describe("Rest Shape Recognizer Ink", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/rest/rest_shape_recognizerInk.html")
-    await waitForEditorInit(page)
+    await passModalKey(page)
   })
 
   test("should have title", async ({ page }) => {
@@ -95,7 +95,7 @@ test.describe("Rest Shape Recognizer Ink", () => {
       })
 
       test("should undo/redo", async ({ page }) => {
-        const editorEl = page.locator("#editor")
+        const editorEl = page.locator("#editorEl")
         await Promise.all([
           waitForExportedEvent(page),
           writeStrokes(page, [rectangleShape.strokes[0]]),

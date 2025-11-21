@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState, } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import ReactJson from 'react-json-view'
-import { Editor, HistoryEntry, TLEventMapHandler, TLRecord, Tldraw } from 'tldraw'
+import { Editor, HistoryEntry, TLEventMapHandler, TLRecord, Tldraw, useDialogs } from 'tldraw'
 import { RootState } from './store'
 import { setExports } from './store/exportsStore'
 import { addError, removeError } from './store/errorsStore'
@@ -15,6 +15,8 @@ import { ExportHTMLTab } from './components/ExportHTMLTab'
 import { MainMenu } from './components/MainMenu'
 import { ContextMenu } from './components/ContextMenu'
 import { Modal } from './components/Modal'
+import { KeyForms } from './components/KeyForms'
+import { PartialDeep, TServerWebsocketConfiguration } from 'iink-ts'
 
 type TabName = 'HTML' | 'JIIX' | 'Shapes' | 'Messages'
 
@@ -26,14 +28,16 @@ export default function App()
   const [tabName, setTabName] = useState<TabName>('HTML')
   const [leftColumnWidthPercent, setLeftColumnWidthPercent] = useState<number>(60)
 
+  const [serverConfiguration, setServerConfiguration] = useState<PartialDeep<TServerWebsocketConfiguration>>()
   const exports = useSelector((state: RootState) => state.exports.value)
   const errors = useSelector((state: RootState) => state.errors.value)
   const dispatch = useDispatch()
 
-  const loadRecognizer = async () =>
+  const loadRecognizer = async (serverConfig: PartialDeep<TServerWebsocketConfiguration>) =>
   {
     try {
-      setRecognizer(await useRecognizer())
+      await Recognizer.instance?.destroy()
+      setRecognizer(await useRecognizer(serverConfig!))
     } catch (error) {
       dispatch(addError(typeof error === "string" ? error as string : (error as Error).message))
     }
@@ -60,7 +64,6 @@ export default function App()
   useEffect(() =>
   {
     if (!editor || !recognizer) return
-
     recognizer.event.addContentChangedListener(updateExports)
 
     const handleChangeEvent: TLEventMapHandler<'change'> = async (change: HistoryEntry<TLRecord>) =>
@@ -85,10 +88,10 @@ export default function App()
 
   useEffect(() =>
   {
-    if (!Recognizer.instance) {
-      loadRecognizer()
+    if (!Recognizer.instance?.initialized && serverConfiguration) {
+      loadRecognizer(serverConfiguration)
     }
-  }, [Recognizer.instance])
+  }, [Recognizer.instance?.initialized, serverConfiguration])
 
   const initResizeColumns = () =>
   {
@@ -97,6 +100,66 @@ export default function App()
     document.body.addEventListener('pointerup', () => document.body.removeEventListener('pointermove', resizeColumns))
   }
 
+  if(!serverConfiguration) {
+    if(!window.localStorage.getItem("server")) {
+      return <KeyForms onSubmit={(keys) => {
+        const serverKeys = JSON.stringify(keys)
+        window.localStorage.setItem("server", serverKeys)
+        setServerConfiguration(keys as PartialDeep<TServerWebsocketConfiguration>)
+      }} />
+    }
+    else
+    {
+      setServerConfiguration(JSON.parse(window.localStorage.getItem("server")!) as PartialDeep<TServerWebsocketConfiguration>)
+    }
+  }
+function ModalKeys({ onClose }: { onClose(): void }) {
+  return (
+    <div id="123456"
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        width: "100vw",
+        height: "100vh",
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center"
+      }}
+    >
+        <KeyForms
+          onSubmit={async (keys) => {
+            localStorage.setItem("server", JSON.stringify(keys))
+            await loadRecognizer(keys as PartialDeep<TServerWebsocketConfiguration>)
+            onClose()
+          }}
+        />
+    </div>
+  )
+}
+
+const CustomSharePanel = () => {
+	const { addDialog } = useDialogs()
+
+	return (
+		<div style={{ padding: 16, gap: 16, display: 'flex', pointerEvents: 'all' }}>
+			<button
+        className='modal-button'
+				onClick={() => {
+					addDialog({
+						component: ModalKeys,
+						onClose() {
+							void null
+						},
+					})
+				}}
+			>
+				Set keys
+			</button>
+		</div>
+	)
+}
   return (
     <div
       style={{
@@ -130,6 +193,7 @@ export default function App()
           components={{
             MainMenu,
             ContextMenu,
+            SharePanel: CustomSharePanel,
             PageMenu: null
           }}
           onMount={setAppToState}

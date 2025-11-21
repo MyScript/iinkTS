@@ -1,9 +1,9 @@
 import { test, expect } from "@playwright/test"
 import {
-  waitForEditorInit,
   waitForExportedEvent,
   callEditorIdle,
   writePointers,
+  passModalKey
 } from "../helper"
 import MathNavAction from "../_partials/math-nav-actions"
 import equation from "../__dataset__/equation"
@@ -12,8 +12,7 @@ test.describe("Custom resources math", () => {
 
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/websocket/websocket_math_custom_resources.html")
-    await waitForEditorInit(page)
-    await callEditorIdle(page)
+    await passModalKey(page)
   })
 
   test("should have title", async ({ page }) => {

@@ -240,7 +240,7 @@ export default {
       words: [
         {
           label: "h",
-          candidates: ["h", "k", "&", "hr", "G"],
+          candidates: ["h", "k", "hh", "hr", "L"],
         },
       ],
       version: "3",

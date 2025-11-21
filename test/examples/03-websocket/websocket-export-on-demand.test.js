@@ -1,11 +1,16 @@
 import { test, expect } from "@playwright/test"
-import { waitForEditorInit, callEditorIdle, getEditorExports, writeStrokes } from "../helper"
+import {
+  callEditorIdle,
+  getEditorExports,
+  writeStrokes,
+  passModalKey,
+} from "../helper"
 import hello from "../__dataset__/helloOneStroke"
 
 test.describe("Websocket on-demand export", function () {
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/websocket/websocket_export_on_demand.html")
-    await waitForEditorInit(page)
+    await passModalKey(page)
   })
 
   test("should have title", async ({ page }) => {
@@ -24,6 +29,8 @@ test.describe("Websocket on-demand export", function () {
     const exports = await getEditorExports(page)
     const jiix = exports["application/vnd.myscript.jiix"]
     expect(jiix.label).toEqual(hello.exports["text/plain"].at(-1))
-    await expect(page.locator("#result")).toHaveText(hello.exports["text/plain"].at(-1))
+    await expect(page.locator("#result")).toHaveText(
+      hello.exports["text/plain"].at(-1)
+    )
   })
 })

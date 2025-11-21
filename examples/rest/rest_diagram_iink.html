@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
@@ -13,7 +16,7 @@
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
     <style>
-      #editor {
+      #editorEl {
         height: calc(100dvh - 170px);
         width: 100dvw;
       }
@@ -43,6 +46,9 @@
   </head>
 
   <body>
+    <div id="showModal">
+      <button id="showModalBtn" class="btn-keys">Set Keys</button>
+    </div>
     <div id="result"></div>
 
     <nav class="flex-container wrap gap between">
@@ -81,167 +87,185 @@
 
     <div id="progress"></div>
 
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
     <div id="conversion-container"></div>
 
-    <script>
-      const editorElement = document.getElementById("editor");
-      const conversionContainer = document.getElementById("conversion-container");
-      const resultElement = document.getElementById("result");
-      const clearElement = document.getElementById("clear");
-      const editButton = document.getElementById("edit-btn");
-      const previewButton = document.getElementById("preview-btn");
-      const progressElement = document.getElementById("progress");
-      const undoElement = document.getElementById("undo");
-      const redoElement = document.getElementById("redo");
-      const eraserElement = document.getElementById("eraser");
-      const penElement = document.getElementById("pen");
+    <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl")
+      const conversionContainer = document.getElementById(
+        "conversion-container"
+      )
+      const resultElement = document.getElementById("result")
+      const clearElement = document.getElementById("clear")
+      const editButton = document.getElementById("edit-btn")
+      const previewButton = document.getElementById("preview-btn")
+      const progressElement = document.getElementById("progress")
+      const undoElement = document.getElementById("undo")
+      const redoElement = document.getElementById("redo")
+      const eraserElement = document.getElementById("eraser")
+      const penElement = document.getElementById("pen")
+      const showModalBtn = document.getElementById("showModalBtn")
 
-      let exports = "";
-      let firstChanged = true;
-      let undoRedoClearChanged = false;
-      let isPreview = false;
+      let exports = ""
+      let firstChanged = true
+      let undoRedoClearChanged = false
+      let isPreview = false
 
       function launchLoader() {
-        progressElement.style.transition = " width 10s";
-        progressElement.style.opacity = "1";
-        progressElement.style.width = `${editorElement.clientWidth / 2}px`;
+        progressElement.style.transition = " width 10s"
+        progressElement.style.opacity = "1"
+        progressElement.style.width = `${editorElement.clientWidth / 2}px`
       }
 
       function manageEditMode(withExport) {
         if (withExport && isPreview && editor.model.symbols.length > 0) {
           const convertParams = {
             conversionState: "DIGITAL_EDIT",
-            mimeTypes: ["image/svg+xml"]
-          };
-          editor.convert(convertParams);
-          launchLoader();
+            mimeTypes: ["image/svg+xml"],
+          }
+          editor.convert(convertParams)
+          launchLoader()
         }
-        undoElement.disabled = isPreview;
-        redoElement.disabled = isPreview;
-        clearElement.disabled = isPreview;
-        eraserElement.disabled = isPreview || editor.tool === iink.EditorTool.Erase;
-        penElement.disabled = isPreview || editor.tool === iink.EditorTool.Write;
+        undoElement.disabled = isPreview
+        redoElement.disabled = isPreview
+        clearElement.disabled = isPreview
+        eraserElement.disabled =
+          isPreview || editor.tool === iink.EditorTool.Erase
+        penElement.disabled = isPreview || editor.tool === iink.EditorTool.Write
         if (isPreview) {
-          conversionContainer.style.visibility = "visible";
-          editorElement.style.visibility = "hidden";
+          conversionContainer.style.visibility = "visible"
+          editorElement.style.visibility = "hidden"
         } else {
-          conversionContainer.style.visibility = "hidden";
-          editorElement.style.visibility = "visible";
+          conversionContainer.style.visibility = "hidden"
+          editorElement.style.visibility = "visible"
         }
       }
 
       /**
        * we expose the editor for use in the integration test
        */
-      let editor;
+      let editor
 
-      /**
-       * We use a function to wait the server configuration to load
-       */
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-        const options = {
-          configuration: {
-            server,
-            recognition: {
-              type: "DIAGRAM"
-            }
-          }
-        };
-
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            type: "DIAGRAM",
+          },
+        },
+      }
+      async function loadEditor(options) {
+        resultElement.innerHTML = ""
+        await editor?.destroy()
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(editorElement, "INKV1", options);
+        editor = await iink.Editor.load(editorElement, "INKV1", options)
 
         editor.event.addEventListener("changed", (event) => {
-          undoElement.disabled = !event.detail.canUndo || isPreview;
-          redoElement.disabled = !event.detail.canRedo || isPreview;
-          clearElement.disabled = !event.detail.canClear || isPreview;
-          eraserElement.disabled = !event.detail.canClear || editor.tool === iink.EditorTool.Erase || isPreview;
-        });
+          undoElement.disabled = !event.detail.canUndo || isPreview
+          redoElement.disabled = !event.detail.canRedo || isPreview
+          clearElement.disabled = !event.detail.canClear || isPreview
+          eraserElement.disabled =
+            !event.detail.canClear ||
+            editor.tool === iink.EditorTool.Erase ||
+            isPreview
+        })
 
         editor.event.addEventListener("exported", (event) => {
-          resultElement.innerHTML = JSON.stringify(event.detail || {});
-        });
+          resultElement.innerHTML = JSON.stringify(event.detail || {})
+        })
 
         editor.event.addEventListener("converted", (evt) => {
-          const exports = evt.detail;
+          const exports = evt.detail
           if (exports && exports["image/svg+xml"]) {
-            progressElement.style.transition = " width 0.3s";
-            progressElement.style.width = `${editorElement.clientWidth}px`;
+            progressElement.style.transition = " width 0.3s"
+            progressElement.style.width = `${editorElement.clientWidth}px`
             setTimeout(() => {
-              progressElement.style.opacity = "0";
-              progressElement.style.width = "0";
-            }, 300);
-            clearElement.disabled = false;
-            conversionContainer.innerHTML = exports["image/svg+xml"].trim();
-            conversionContainer.firstChild.setAttribute("width", editorElement.clientWidth);
-            conversionContainer.firstChild.setAttribute("height", editorElement.clientHeight);
-            conversionContainer.firstChild.setAttribute("viewBox", `0 0 ${editorElement.clientWidth / 3.77953} ${editorElement.clientHeight / 3.77953}`);
-            manageEditMode(false);
+              progressElement.style.opacity = "0"
+              progressElement.style.width = "0"
+            }, 300)
+            clearElement.disabled = false
+            conversionContainer.innerHTML = exports["image/svg+xml"].trim()
+            conversionContainer.firstChild.setAttribute(
+              "width",
+              editorElement.clientWidth
+            )
+            conversionContainer.firstChild.setAttribute(
+              "height",
+              editorElement.clientHeight
+            )
+            conversionContainer.firstChild.setAttribute(
+              "viewBox",
+              `0 0 ${editorElement.clientWidth / 3.77953} ${
+                editorElement.clientHeight / 3.77953
+              }`
+            )
+            manageEditMode(false)
           }
-        });
+        })
 
         clearElement.addEventListener("click", () => {
-          undoRedoClearChanged = true;
-          editor.clear();
-          conversionContainer.innerHTML = "";
-        });
+          undoRedoClearChanged = true
+          editor.clear()
+          conversionContainer.innerHTML = ""
+        })
 
         undoElement.addEventListener("click", () => {
-          editor.undo();
-        });
+          editor.undo()
+        })
 
         redoElement.addEventListener("click", () => {
-          editor.redo();
-        });
+          editor.redo()
+        })
 
         eraserElement.addEventListener("click", () => {
-          eraserElement.disabled = true;
-          penElement.disabled = false;
-          editorElement.editor.tool = iink.EditorTool.Erase;
-          eraserElement.disabled = true;
-          eraserElement.classList.add("active");
-          penElement.disabled = false;
-          penElement.classList.remove("active");
-        });
+          eraserElement.disabled = true
+          penElement.disabled = false
+          editorElement.editor.tool = iink.EditorTool.Erase
+          eraserElement.disabled = true
+          eraserElement.classList.add("active")
+          penElement.disabled = false
+          penElement.classList.remove("active")
+        })
 
         penElement.addEventListener("click", () => {
-          eraserElement.disabled = false;
-          penElement.disabled = true;
-          editorElement.editor.tool = iink.EditorTool.Write;
-          eraserElement.disabled = false;
-          eraserElement.classList.remove("active");
-          penElement.disabled = true;
-          penElement.classList.add("active");
-        });
+          eraserElement.disabled = false
+          penElement.disabled = true
+          editorElement.editor.tool = iink.EditorTool.Write
+          eraserElement.disabled = false
+          eraserElement.classList.remove("active")
+          penElement.disabled = true
+          penElement.classList.add("active")
+        })
 
         previewButton.addEventListener("click", () => {
-          isPreview = true;
-          previewButton.style.display = "none";
-          editButton.style.display = "flex";
-          manageEditMode(true);
-        });
+          isPreview = true
+          previewButton.style.display = "none"
+          editButton.style.display = "flex"
+          manageEditMode(true)
+        })
 
         editButton.addEventListener("click", () => {
-          isPreview = false;
-          editButton.style.display = "none";
-          previewButton.style.display = "flex";
-          manageEditMode(false);
-        });
+          isPreview = false
+          editButton.style.display = "none"
+          previewButton.style.display = "flex"
+          manageEditMode(false)
+        })
+
+        showModalBtn.addEventListener("click", () => {
+          ModalEditorOptions.show(loadEditor)
+        })
 
         window.addEventListener("resize", () => {
-          editor.resize();
-        });
+          editor.resize()
+        })
       }
 
-      loadEditor().catch((error) => console.error(error));
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
     </script>
   </body>
 </html>

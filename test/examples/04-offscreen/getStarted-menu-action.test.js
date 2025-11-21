@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test"
 import {
+  passModalKey,
   callEditorIdle,
-  waitForEditorInit,
   writePointers,
   writeStrokes,
   callEditorExport,
@@ -14,7 +14,8 @@ import {
   waitForGesturedEvent,
   getEditorSymbols,
   getEditorExportsType,
-  callEditorSynchronize
+  callEditorSynchronize,
+  getEditorExports
 } from "../helper"
 import locator from "../locators"
 import laLecon from "../__dataset__/laLecon"
@@ -26,8 +27,7 @@ import helloOneStrokeSurrounded from "../__dataset__/helloOneStrokeSurrounded"
 test.describe("Offscreen Get Started Menu Action", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/offscreen-interactivity/index.html")
-    await waitForEditorInit(page)
-    await callEditorIdle(page)
+    await passModalKey(page)
   })
 
   test("clear, undo and redo", async ({ page }) => {
@@ -73,14 +73,12 @@ test.describe("Offscreen Get Started Menu Action", () => {
     })
 
     await test.step("should undo convert", async () => {
-      await Promise.all([
-        waitForChangedEvent(page),
-        page.locator(locator.menu.action.undoBtn).click()
-      ])
+      await page.locator(locator.menu.action.undoBtn).click()
+      await page.evaluate(`editorEl.editor.export(['application/vnd.myscript.jiix'])`)
+      const jiix = await getEditorExportsType(page, "application/vnd.myscript.jiix")
       const symbols = await getEditorSymbols(page)
       expect(symbols).toHaveLength(1)
       expect(symbols[0].type).toEqual("stroke")
-      const jiix = await callEditorExport(page, "application/vnd.myscript.jiix")
       expect(jiix).toBeDefined()
       expect(jiix.elements).toBeDefined()
       expect(jiix.elements).toHaveLength(1)
@@ -154,7 +152,7 @@ test.describe("Offscreen Get Started Menu Action", () => {
     })
 
     await test.step("should display text", async () => {
-      const textSymbolId = await page.evaluate("editor.model.symbols[0].id")
+      const textSymbolId = await page.evaluate("editorEl.editor.model.symbols[0].id")
       await expect(page.locator(`#${  textSymbolId }`)).toHaveText(helloOneStroke.exports["application/vnd.myscript.jiix"].label)
     })
   })
@@ -247,8 +245,8 @@ test.describe("Offscreen Get Started Menu Action", () => {
     })
 
     await test.step("should conserve strikethrough when convert", async () => {
-      await page.evaluate("editor.convert()")
-      const symbols = await page.evaluate("editor.model.symbols")
+      await page.evaluate("editorEl.editor.convert()")
+      const symbols = await page.evaluate("editorEl.editor.model.symbols")
       expect(symbols).toHaveLength(1)
       const text = symbols[0]
       expect(text.type).toEqual("text")
@@ -267,7 +265,7 @@ test.describe("Offscreen Get Started Menu Action", () => {
     })
 
     await test.step("should define strikethrough on erase", async () => {
-      await page.evaluate("editor.clear()")
+      await page.evaluate("editorEl.editor.clear()")
       expect(await getEditorSymbols(page)).toHaveLength(0)
 
       await expect(page.locator(`${locator.menu.action.triggerBtn} + .sub-menu-content`)).toBeHidden()
@@ -352,7 +350,7 @@ test.describe("Offscreen Get Started Menu Action", () => {
 
     await test.step("clear the editor before setting surround parameter on draw", async () => {
       //clear the editor
-      await page.evaluate("editor.clear()")
+      await page.evaluate("editorEl.editor.clear()")
       expect(await getEditorSymbols(page)).toHaveLength(0)
     })
 
@@ -406,10 +404,10 @@ test.describe("Offscreen Get Started Menu Action", () => {
 
     await test.step("verify surround is kept after convert", async () => {
       //now convert
-      await page.evaluate("editor.convert()")
+      await page.evaluate("editorEl.editor.convert()")
 
       //verify surround is still drawn arround the text
-      const symbols = await page.evaluate("editor.model.symbols")
+      const symbols = await page.evaluate("editorEl.editor.model.symbols")
       expect(symbols).toHaveLength(1)
       const convertSym = symbols[0]
       expect(convertSym.type).toEqual("text")
@@ -458,7 +456,7 @@ test.describe("Offscreen Get Started Menu Action", () => {
         waitForSynchronizedEvent(page),
         writePointers(page, helloInsert.strokes[0].pointers)
       ])
-      const symbols = await page.evaluate("editor.model.symbols")
+      const symbols = await page.evaluate("editorEl.editor.model.symbols")
       expect(symbols).toHaveLength(1)
       expect(symbols[0].type).toEqual("recognized")
       expect(symbols[0].kind).toEqual("text")
@@ -470,7 +468,7 @@ test.describe("Offscreen Get Started Menu Action", () => {
         writePointers(page, helloInsert.strokes[1].pointers)
       ])
       // necessary to ensure that recognition is completed
-      await page.evaluate("editor.synchronizeStrokesWithJIIX()")
+      await page.evaluate("editorEl.editor.synchronizeStrokesWithJIIX()")
       const symbols = await getEditorSymbols(page)
       expect(symbols).toHaveLength(2)
       expect(symbols[0]).toEqual(expect.objectContaining({
@@ -500,7 +498,7 @@ test.describe("Offscreen Get Started Menu Action", () => {
         convertBtn.click()
       ])
 
-      const symbols = await page.evaluate("editor.model.symbols")
+      const symbols = await page.evaluate("editorEl.editor.model.symbols")
       expect(symbols).toHaveLength(2)
       const hel = symbols[0]
       expect(hel.type).toEqual("text")
@@ -515,13 +513,13 @@ test.describe("Offscreen Get Started Menu Action", () => {
 
     await test.step("insert should separate word on convert", async () => {
       //clear the editor
-      await page.evaluate("editor.clear()")
-      let symbols = await page.evaluate("editor.model.symbols")
+      await page.evaluate("editorEl.editor.clear()")
+      let symbols = await page.evaluate("editorEl.editor.model.symbols")
       expect(symbols).toHaveLength(0)
 
       //write again and convert
       await writePointers(page, helloInsert.strokes[0].pointers)
-      await page.evaluate("editor.synchronizeStrokesWithJIIX()")
+      await page.evaluate("editorEl.editor.synchronizeStrokesWithJIIX()")
       await Promise.all([
         waitForConvertedEvent(page),
         page.locator(locator.menu.action.convertBtn).click()
@@ -533,7 +531,7 @@ test.describe("Offscreen Get Started Menu Action", () => {
         writePointers(page, helloInsert.strokes[1].pointers, 0, -20)
       ])
 
-      symbols = await page.evaluate("editor.model.symbols")
+      symbols = await page.evaluate("editorEl.editor.model.symbols")
       expect(symbols).toHaveLength(2)
       const hel = symbols[0]
       expect(hel.type).toEqual("text")

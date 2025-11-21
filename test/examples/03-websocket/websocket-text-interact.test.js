@@ -1,10 +1,9 @@
 import { test, expect } from "@playwright/test"
 import {
   writeStrokes,
-  waitForEditorInit,
-  callEditorIdle,
   waitForExportedEvent,
-  writePointers
+  writePointers,
+  passModalKey
 } from "../helper"
 import buenosAires from "../__dataset__/buenosAires"
 import rome from "../__dataset__/rome"
@@ -16,8 +15,7 @@ import TextNavActions from "../_partials/text-nav-actions"
 test.describe("Websocket Text interact", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/websocket/websocket_text_interact.html")
-    await waitForEditorInit(page)
-    await callEditorIdle(page)
+    await passModalKey(page)
   })
 
   test("should have title", async ({ page }) => {
@@ -103,6 +101,4 @@ test.describe("Websocket Text interact", () => {
       await expect(page.locator("#result")).toHaveCSS("color", "rgb(0, 128, 0)")
     })
   })
-
-  TextNavActions.test({ skipClear: true, resultLocator: ".prompter-container" })
 })

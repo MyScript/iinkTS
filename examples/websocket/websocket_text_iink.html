@@ -12,11 +12,11 @@
     <link rel="stylesheet" href="../assets/style/examples.css" />
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
     <style>
-      #editor {
+      #editorEl {
         height: calc(100dvh - 166px);
       }
       @media only screen and (max-width: 452px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 213px);
         }
       }
@@ -24,6 +24,9 @@
   </head>
 
   <body>
+    <div id="showModal">
+      <button id="showModalBtn" class="btn-keys">Set Keys</button>
+    </div>
     <div id="result"></div>
     <a id="link-info" class="link-info">
       <img src="../assets/img/info.svg"/>
@@ -75,10 +78,11 @@
       <select id="language"></select>
     </nav>
 
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
-    <script>
-      const editorElement = document.getElementById("editor");
+    <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl");
       const resultElement = document.getElementById("result");
       const linkInfoElement = document.getElementById("link-info");
       const helpOverlayElement = document.getElementById("help-overlay");
@@ -86,6 +90,7 @@
       const clearElement = document.getElementById("clear");
       const undoElement = document.getElementById("undo");
       const redoElement = document.getElementById("redo");
+      const showModalBtn = document.getElementById("showModalBtn");
 
       linkInfoElement.addEventListener("click", async () => {
         document.querySelectorAll('.help-overlay,.help-modal').forEach(e => e.style.display = 'block');
@@ -112,11 +117,14 @@
         editor?.redo();
       });
 
+      showModalBtn.addEventListener("click", () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
+
       window.addEventListener("resize", () => {
         editor?.resize();
       });
 
-      let serverConfiguration;
       let languageList;
       const editorOptions = {
         configuration: {
@@ -137,15 +145,10 @@
        */
       async function loadEditor(options) {
         resultElement.innerHTML = "";
-        if (!serverConfiguration) {
-          const res = await fetch("../server-configuration.json");
-          serverConfiguration = await res.json();
-        }
-        options.configuration.server = serverConfiguration
-
+        await editor?.destroy();
         if (!languageList) {
           const currentLanguage = options.configuration.recognition.lang;
-          languageList = await iink.getAvailableLanguageList({ server: serverConfiguration });
+          languageList = await iink.getAvailableLanguageList({ server: options.configuration.server });
           Object.keys(languageList.result).forEach(function (key) {
             const selected = currentLanguage === key;
             languageElement.options[languageElement.options.length] = new Option(languageList.result[key], key, selected, selected);
@@ -171,7 +174,7 @@
 
       };
 
-      loadEditor(editorOptions).catch(error => console.error(error));
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
     </script>
   </body>
 </html>

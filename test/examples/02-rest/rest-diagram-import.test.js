@@ -1,15 +1,15 @@
 import { test, expect } from "@playwright/test"
 import {
-  waitForEditorInit,
   waitForExportedEvent,
   getEditorExports,
   getEditorSymbols,
+  passModalKey
 } from "../helper"
 
 test.describe("Rest Diagram Import", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/rest/rest_diagram_iink_import.html")
-    await waitForEditorInit(page)
+    await page.goto(`/examples/rest/rest_diagram_iink_import.html`)
+    await passModalKey(page)
   })
 
   test("should have title", async ({ page }) => {

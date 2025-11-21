@@ -447,7 +447,6 @@ export class RecognizerWebSocket
       this.sessionId = undefined
       this.currentPartId = undefined
     }
-    this.initialized = new DeferredPromise<void>()
     if (!this.configuration.server.version) {
       this.configuration.server.version = (await getApiInfos(this.configuration)).version
     }
@@ -462,6 +461,7 @@ export class RecognizerWebSocket
       this.initPing()
     }
     this.event.emitEndtInitialization()
+    return this.initialized.promise
   }
 
   async send(message: TRecognizerWebSocketMessage): Promise<void>

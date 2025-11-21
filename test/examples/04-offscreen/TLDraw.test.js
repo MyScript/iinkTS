@@ -1,10 +1,20 @@
 import { test, expect } from "@playwright/test"
-import { writeStrokes, } from "../helper"
+import { writeStrokes } from "../helper"
 import helloOneStroke from "../__dataset__/helloOneStroke"
 
 test.describe("Offscreen TLDraw", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/offscreen-interactivity/offscreen_interactivity_tldraw/dist/index.html")
+    if(await page.getByRole('textbox', { name: 'Host:' }).isVisible()) {
+    await page.getByRole('textbox', { name: 'Host:' }).fill("cloud.preprod.myscript.com")
+    await page.getByRole('textbox', { name: 'Application Key:' }).fill("74716e99-0614-4559-abe4-300d30621808")
+    await page.getByRole('textbox', { name: 'HMAC Key:' }).fill("07b17879-cee0-4b0c-8ff6-23da4cbe419f")
+    await page.getByRole('button', { name: 'Save' }).click()
+    }
+    else
+    {
+      await page.getByTestId('main-menu.button').click()
+    }
     await expect(page.locator('.loader')).toHaveCount(0)
   })
 

@@ -12,16 +12,16 @@
     <link rel="stylesheet" href="../assets/style/examples.css" />
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
     <style>
-      #editor {
+      #editorEl {
         height: calc(100dvh - 66px);
       }
       @media only screen and (max-width: 360px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 98px);
         }
       }
       @media only screen and (max-width: 219px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 150px);
         }
       }
@@ -29,6 +29,9 @@
   </head>
 
   <body>
+    <div id="showModal">
+      <button id="showModalBtn" class="btn-keys">Set Keys</button>
+    </div>
     <nav class="flex-container between wrap gap">
       <div class="flex-container wrap gap">
         <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
@@ -52,25 +55,17 @@
       </label>
     </nav>
 
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
-    <script>
-      const editorElement = document.getElementById("editor");
-
+    <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl");
       const undoElement = document.getElementById("undo");
       const redoElement = document.getElementById("redo");
       const eraserElement = document.getElementById("eraser");
       const penElement = document.getElementById("pen");
       const erasePreciselyElement = document.getElementById("erase-precisely");
-
-      erasePreciselyElement.addEventListener("change", (e) => {
-        options.configuration.recognition.text.eraser["erase-precisely"] = e.target.checked;
-        loadEditor()
-        eraserElement.disabled = false;
-        eraserElement.classList.remove("active");
-        penElement.disabled = true;
-        penElement.classList.add("active");
-      });
+      const showModalBtn = document.getElementById("showModalBtn")
 
       undoElement.addEventListener("click", () => {
         editor?.undo();
@@ -96,11 +91,15 @@
         penElement.classList.add("active");
       });
 
+      showModalBtn.addEventListener("click", () => {
+        ModalEditorOptions.show(loadEditor, editorOption)
+      })
+
       window.addEventListener("resize", () => {
         editor?.resize();
       });
 
-      const options = {
+      const editorOptions = {
         configuration: {
           recognition: {
             type: "TEXT",
@@ -113,20 +112,20 @@
         }
       };
 
+      erasePreciselyElement.addEventListener("change", (e) => {
+        editorOptions.configuration.recognition.text.eraser["erase-precisely"] = e.target.checked;
+        loadEditor(editorOptions);
+        eraserElement.disabled = false;
+        eraserElement.classList.remove("active");
+        penElement.disabled = true;
+        penElement.classList.add("active");
+      });
+
       /**
        * we expose the editor so we can access it in tests
        */
       let editor;
-
-      /**
-       * We use a function to wait the server configuration to load
-       */
-      async function loadEditor() {
-        if (!options.configuration.server) {
-          const res = await fetch("../server-configuration.json");
-          options.configuration.server = await res.json();
-        }
-
+      async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
@@ -140,7 +139,7 @@
         });
       };
 
-      loadEditor().catch(error => console.error(error));
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
     </script>
   </body>
 </html>

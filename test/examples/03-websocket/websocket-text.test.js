@@ -8,6 +8,7 @@ import {
   callEditorIdle,
   getEditorExports,
   loadEditor,
+  passModalKey
 } from '../helper'
 
 import TextNavActions from '../_partials/text-nav-actions'
@@ -19,13 +20,13 @@ const createNewEditor = async (page, options) => {
 
   await waitForEditorInit(page)
   await page.evaluate(`
-    editor.event.addEventListener("changed", (event) => {
+    editorEl.editor.event.addEventListener("changed", (event) => {
       undoElement.disabled = !event.detail.canUndo;
       redoElement.disabled = !event.detail.canRedo;
       clearElement.disabled = !event.detail.canClear;
     });
 
-    editor.event.addEventListener("exported", (event) => {
+    editorEl.editor.event.addEventListener("exported", (event) => {
       resultElement.innerHTML = event.detail && event.detail["application/vnd.myscript.jiix"] ? event.detail["application/vnd.myscript.jiix"].label : "";
     });
   `)
@@ -34,12 +35,8 @@ const createNewEditor = async (page, options) => {
 
 test.describe('Websocket Text', () => {
   test.beforeEach(async ({ page }) => {
-    await Promise.all([
-      page.goto('/examples/websocket/websocket_text_iink.html'),
-      page.waitForResponse((req) => req.url().includes('/api/v4.0/iink/availableLanguageList')),
-    ])
-    await waitForEditorInit(page)
-    await callEditorIdle(page)
+    await page.goto('/examples/websocket/websocket_text_iink.html')
+    await passModalKey(page)
   })
 
   test('should have title', async ({ page }) => {
@@ -47,14 +44,17 @@ test.describe('Websocket Text', () => {
   })
 
   test('should export application/vnd.myscript.jiix', async ({ page }) => {
-    const [exports] = await Promise.all([
-      waitForExportedEvent(page),
-      writeStrokes(page, h.strokes)
-    ])
+    await test.step("write strokes", async () => {
+      await Promise.all([
+        waitForExportedEvent(page),
+        writeStrokes(page, h.strokes),
+      ])
+    })
+    await expect(page.locator('#result')).toHaveText(h.exports['text/plain'].at(-1))
+    const exports = await getEditorExports(page)
     const jiixExpected = h.exports['application/vnd.myscript.jiix']
     const jiixReceived = exports['application/vnd.myscript.jiix']
-    const modelExportJiixReceived = await getEditorExportsType(page, 'application/vnd.myscript.jiix')
-    expect(jiixReceived).toEqual(modelExportJiixReceived)
+    expect(jiixReceived).toEqual(jiixExpected)
     expect(jiixReceived.label).toEqual(jiixExpected.label)
   })
 
@@ -261,7 +261,7 @@ test.describe('Websocket Text', () => {
 
     // TODO fix navigator.clipboard.readText
     // if (browserName === 'webkit') {
-    //   console.log("Skip webkit because no permissions are possible for clipboard")
+    //
     // }
     // else {
     //   await test.step("should Copy", async () => {

@@ -24,26 +24,26 @@
     ></script>
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
     <style>
-      #editor {
+      #editorEl {
         height: calc(100dvh - 166px);
       }
       @media only screen and (max-width: 524px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 214px);
         }
       }
       @media only screen and (max-width: 412px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 218px);
         }
       }
       @media only screen and (max-width: 412px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 218px);
         }
       }
       @media only screen and (max-width: 368px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 266px);
         }
       }
@@ -51,6 +51,9 @@
   </head>
 
   <body>
+    <div id="showModal">
+      <button id="showModalBtn" class="btn-keys">Set Keys</button>
+    </div>
     <div id="result"></div>
 
     <nav class="flex-container wrap between">
@@ -81,10 +84,11 @@
       </div>
     </nav>
 
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
-    <script>
-      const editorElement = document.getElementById("editor");
+    <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl");
       const resultElement = document.getElementById("result");
       const undoElement = document.getElementById("undo");
       const redoElement = document.getElementById("redo");
@@ -92,6 +96,7 @@
       const eraserElement = document.getElementById("eraser");
       const penElement = document.getElementById("pen");
       const erasePreciselyElement = document.getElementById("erase-precisely");
+      const showModalBtn = document.getElementById("showModalBtn");
 
       function cleanLatex(latexExport) {
         if (latexExport.includes("\\\\")) {
@@ -105,7 +110,7 @@
        * we expose the editor so we can access it in tests
        */
       let editor;
-      const options = {
+      const editorOption = {
           configuration: {
             recognition: {
               type: "MATH",
@@ -121,12 +126,7 @@
       /**
        * We use a function to wait the server configuration to load
        */
-      async function loadEditor() {
-        if (!options.configuration.server) {
-          const res = await fetch("../server-configuration.json");
-          options.configuration.server = await res.json();
-        }
-
+      async function loadEditor(options) {
 
         /**
          * get editor instance from type
@@ -191,12 +191,16 @@
           penElement.classList.add("active");
         });
 
+        showModalBtn.addEventListener("click", () => {
+          ModalEditorOptions.show(loadEditor, editorOption)
+        })
+
         window.addEventListener("resize", () => {
           editorElement.editor.resize();
         });
       };
 
-      loadEditor().catch(error => console.error(error));
+      ModalEditorOptions.initConfiguration(loadEditor, editorOption)
     </script>
   </body>
 </html>

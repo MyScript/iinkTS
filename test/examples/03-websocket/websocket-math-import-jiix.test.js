@@ -1,15 +1,15 @@
 import { test, expect } from "@playwright/test"
 import {
-  waitForEditorInit,
   getEditorExportsType,
   waitForImportedEvent,
-  findValuesByKey
+  findValuesByKey,
+  passModalKey
 } from "../helper"
 
 test.describe("Websocket Math Import JIIX", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/websocket/websocket_math_import_jiix.html")
-    await waitForEditorInit(page)
+    await passModalKey(page)
   })
 
   test("should have title", async ({ page }) => {

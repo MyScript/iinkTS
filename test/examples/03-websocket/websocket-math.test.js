@@ -9,7 +9,8 @@ import {
   getEditorExports,
   waitForConvertedEvent,
   callEditorIdle,
-  loadEditor
+  loadEditor,
+  passModalKey
 } from "../helper"
 
 import one from "../__dataset__/1"
@@ -21,8 +22,7 @@ import equation from "../__dataset__/equation"
 test.describe("Websocket Math", function () {
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/websocket/websocket_math_iink.html")
-    await waitForEditorInit(page)
-    await callEditorIdle(page)
+    await passModalKey(page)
   })
 
   test("should have title", async ({ page }) => {
@@ -236,8 +236,8 @@ test.describe("Websocket Math", function () {
                 "undo-redo": {
                   mode: "session"
                 },
-                // 10000 = time to write equation
-                "session-time": 10000,
+                // 5000 = time to write equation
+                "session-time": 3000,
                 mimeTypes: ["application/x-latex"]
               },
               export: {
@@ -248,29 +248,8 @@ test.describe("Websocket Math", function () {
             }
           }
         }
-        await loadEditor(page, "INTERACTIVEINKSSR", options)
+        await page.evaluate(`loadEditor(${JSON.stringify(options)})`)
         await waitForEditorInit(page)
-        await page.evaluate(`
-          editor.event.addEventListener("changed", (event) => {
-            undoElement.disabled = !event.detail.canUndo;
-            redoElement.disabled = !event.detail.canRedo;
-            clearElement.disabled = !event.detail.canClear;
-          });
-          editor.event.addEventListener("exported", (evt) => {
-            const exports = evt.detail;
-            if (exports && exports["application/x-latex"]) {
-              convertElement.disabled = false;
-              try {
-                katex.render(cleanLatex(exports["application/x-latex"]), resultElement);
-              } catch (error) {
-                resultElement.innerHTML = '<span>' + cleanLatex(exports['application/x-latex']) + '</span>';
-              }
-            } else {
-              convertElement.disabled = true;
-              resultElement.innerHTML = "";
-            }
-          });
-        `)
       })
 
       await test.step("should write stroke", async () => {
@@ -278,7 +257,8 @@ test.describe("Websocket Math", function () {
           waitForExportedEvent(page),
           writeStrokes(page, equation.strokes)
         ])
-        await callEditorIdle(page)
+        const exports = await page.evaluate(`editorEl.editor.export(["application/x-latex"])`)
+        expect(exports.exports["application/x-latex"]).toEqual(equation.exports.LATEX.at(-1))
         await expect(page.locator("#result .katex-html")).toHaveText(equation.exports.LATEX.at(-1))
         const latex = await getEditorExportsType(page, "application/x-latex")
         expect(latex).toEqual(equation.exports.LATEX.at(-1))
@@ -392,28 +372,9 @@ test.describe("Websocket Math", function () {
           }
         }
       }
-      await loadEditor(page, "INTERACTIVEINKSSR", options)
-      await page.evaluate(`
-        editor.event.addEventListener("changed", (event) => {
-          undoElement.disabled = !event.detail.canUndo;
-          redoElement.disabled = !event.detail.canRedo;
-          clearElement.disabled = !event.detail.canClear;
-        });
-        editor.event.addEventListener("exported", (evt) => {
-          const exports = evt.detail;
-          if (exports && exports["application/x-latex"]) {
-            convertElement.disabled = false;
-            try {
-              katex.render(cleanLatex(exports["application/x-latex"]), resultElement);
-            } catch (error) {
-              resultElement.innerHTML = '<span>' + cleanLatex(exports['application/x-latex']) + '</span>';
-            }
-          } else {
-            convertElement.disabled = true;
-            resultElement.innerHTML = "";
-          }
-        });
-    `)
+      await page.evaluate(`loadEditor(${JSON.stringify(options)})`)
+      await waitForEditorInit(page)
+
       let numStroke = 0
       for (const s of sum.strokes) {
         const [exports] = await Promise.all([

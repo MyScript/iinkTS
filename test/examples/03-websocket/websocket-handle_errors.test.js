@@ -11,6 +11,8 @@ test.describe("Websocket handle error", () => {
 
   test("should have error message", async ({ page }) => {
     await expect(page.locator(".message-modal.error-msg")).toBeVisible()
-    await expect(page.locator(".message-modal.error-msg")).toHaveText("Application credentials are invalid. Please check or regenerate your application key and hmackey.")
+    await expect(page.locator(".message-modal.error-msg")).toHaveText(
+      "Application credentials are invalid. Please check or regenerate your application key and hmackey."
+    )
   })
 })

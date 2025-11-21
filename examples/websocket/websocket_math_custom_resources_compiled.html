@@ -19,26 +19,26 @@
       .description {
         padding: 12px;
       }
-      #editor {
+      #editorEl {
         height: calc(100dvh - 234px);
       }
       @media only screen and (max-width: 1156px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 252px);
         }
       }
       @media only screen and (max-width: 600px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 269px);
         }
       }
       @media only screen and (max-width: 423px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 286px);
         }
       }
       @media only screen and (max-width: 338px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 303px);
         }
       }
@@ -46,6 +46,9 @@
   </head>
 
   <body>
+    <div id="showModal">
+      <button id="showModalBtn" class="btn-keys">Set Keys</button>
+    </div>
     <p class="description">
       This example use a math custom resource. The grammar restrict the recognition to only basic elementary school math (addition and substraction).
       The id of a pre-compiled grammar is sent.
@@ -68,21 +71,27 @@
       <button class="classic-btn" id="convert" disabled>Convert</button>
     </nav>
 
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
-    <script>
-      const editorElement = document.getElementById("editor");
+    <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl");
       const resultElement = document.getElementById("result");
       const undoElement = document.getElementById("undo");
       const redoElement = document.getElementById("redo");
       const clearElement = document.getElementById("clear");
       const convertElement = document.getElementById("convert");
+      const showModalBtn = document.getElementById("showModalBtn");
 
       editorElement.addEventListener("changed", (event) => {
         undoElement.disabled = !event.detail.canUndo;
         redoElement.disabled = !event.detail.canRedo;
         clearElement.disabled = event.detail.isEmpty;
       });
+
+      showModalBtn.addEventListener("click", () => {
+        ModalEditorOptions.show(loadEditor, editorOption)
+      })
 
       editorElement.addEventListener("exported", (evt) => {
         const exports = evt.detail;
@@ -95,20 +104,8 @@
         }
       });
 
-      /**
-       * we expose the editor so we can access it in tests
-       */
-      let editor;
-
-      /**
-       * We use a function to wait the server configuration to load
-       */
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-        const options = {
+      const editorOption = {
           configuration: {
-            server,
             recognition: {
               type: "MATH",
               math: {
@@ -119,6 +116,11 @@
           }
         };
 
+      /**
+       * we expose the editor so we can access it in tests
+       */
+      let editor;
+      async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
@@ -143,7 +145,7 @@
         });
       };
 
-      loadEditor().catch(error => console.error(error));
+      ModalEditorOptions.initConfiguration(loadEditor, editorOption)
     </script>
   </body>
 </html>

@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
@@ -54,6 +57,9 @@
   </head>
 
   <body>
+    <div id="showModal">
+      <button id="showModalBtn" class="btn-keys">Set Keys</button>
+    </div>
     <textarea id="strokes">
 [
   {
@@ -126,7 +132,8 @@
   }
 ]
 
-  </textarea>
+  </textarea
+    >
     <div id="result">
       <div id="interpretatedTextContent"></div>
       <div id="interpretatedImageContent"></div>
@@ -134,7 +141,9 @@
 
     <button id="recognize" class="classic-btn">Recognize</button>
 
-    <script>
+    <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const showModalBtn = document.getElementById("showModalBtn")
       async function convertBlobToBase64(blob) {
         return new Promise((resolve, reject) => {
           const reader = new FileReader();
@@ -145,9 +154,13 @@
           reader.readAsDataURL(blob);
         });
       }
+
+      showModalBtn.addEventListener("click", () => {
+          ModalEditorOptions.show()
+        })
+
       document.getElementById("recognize").addEventListener("click", async () => {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
+        const server = JSON.parse(window.localStorage.getItem("server") || "{}");
         // Creating a recognizer
         const iinkRecognizer = new iink.RecognizerHTTPV1({ server });
         // Creating a empty model

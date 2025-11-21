@@ -1,64 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+    <title>Get Started</title>
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <style>
+      #editorEl {
+        width: 100%;
+        height: 100dvh;
+      }
+    </style>
+    <script type="text/javascript" src="../../dist/iink.min.js"></script>
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="HandheldFriendly" content="true" />
-  <title>Get Started</title>
-  <link rel="stylesheet" href="../assets/style/reset.css" />
-  <link rel="stylesheet" href="../assets/style/components.css" />
-  <link rel="stylesheet" href="../assets/style/examples.css" />
-  <style>
-    #editor {
-      width: 100%;
-      height: 100dvh;
-    }
-  </style>
-  <script type="text/javascript" src="../../dist/iink.min.js"></script>
-</head>
+  <body>
+    <div id="showModal">
+      <button id="showModalBtn" class="btn-keys">Set Keys</button>
+    </div>
+    <div id="editorEl"></div>
 
-<body>
-  <div id="editor"></div>
+    <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl")
+      const showModalBtn = document.getElementById("showModalBtn")
 
-  <script>
-    const editorElement = document.getElementById("editor");
+      /**
+       * we expose the editor so we can access it in tests
+       */
+      let editor
 
-    /**
-     * we expose the editor so we can access it in tests
-     */
-    let editor;
-
-    async function loadEditor() {
-      const res = await fetch("../server-configuration.json");
-      const server = await res.json();
-
-      const options = {
+      const editorOptions = {
         configuration: {
-          server,
           rendering: {
             minHeight: 2000,
             minWidth: 2000,
           },
         },
-      };
+      }
 
-      /**
-       * get editor instance from type
-       * @param {Element} The DOM element to attach the ink paper
-       * @param {Object} The Editor parameters
-       */
-      editor = await iink.Editor.load(editorElement, "INTERACTIVEINK", options);
+      showModalBtn.addEventListener("click", () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
 
-      window.addEventListener("resize", () => {
-        editor.resize();
-      });
-    }
+      async function loadEditor(options) {
+        /**
+         * get editor instance from type
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Editor parameters
+         */
+        editor = await iink.Editor.load(
+          editorElement,
+          "INTERACTIVEINK",
+          options
+        )
 
-    loadEditor().catch((error) => console.error(error));
-  </script>
-</body>
+        window.addEventListener("resize", () => {
+          editor.resize()
+        })
+      }
 
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+    </script>
+  </body>
 </html>

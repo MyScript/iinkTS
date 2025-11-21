@@ -13,11 +13,11 @@
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
     <script type="text/javascript" src="./websocket_custom_recognizer.js"></script>
     <style>
-      #editor {
+      #editorEl {
         height: calc(100dvh - 187px);
       }
       @media only screen and (max-width: 600px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 257px);
         }
       }
@@ -40,6 +40,9 @@
   </head>
 
   <body>
+    <div id="showModal">
+      <button id="showModalBtn" class="btn-keys">Set Keys</button>
+    </div>
     <div id="result"></div>
 
     <nav class="flex-container gap between wrap">
@@ -61,30 +64,31 @@
       </ul>
     </nav>
 
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
-    <script>
-      const editorElement = document.getElementById("editor");
+    <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl");
       const resultElement = document.getElementById("result");
       const clearElement = document.getElementById("clear");
       const undoElement = document.getElementById("undo");
       const redoElement = document.getElementById("redo");
+      const showModalBtn = document.getElementById("showModalBtn");
 
       let editor;
-      /**
-       * We use a function to wait the server configuration to load
-       */
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-        const options = {
+      const editorOption = {
           configuration: {
-            server
           },
           override: {
             recognizer: CustomWebsocketRecognizer
           }
         };
+      /**
+       * We use a function to wait the server configuration to load
+       */
+      async function loadEditor(options) {
+        await editor?.destroy()
+        resultElement.innerHTML = ""
 
         /**
          * get editor instance from type
@@ -120,8 +124,11 @@
           editor.resize();
         });
       }
+      showModalBtn.addEventListener("click", () => {
+        ModalEditorOptions.show(loadEditor, editorOption)
+      })
 
-      loadEditor().catch((error) => console.error(error));
+      ModalEditorOptions.initConfiguration(loadEditor, editorOption)
     </script>
   </body>
 </html>

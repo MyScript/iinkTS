@@ -1,8 +1,8 @@
 import { test, expect } from "@playwright/test"
 import {
-  waitForEditorInit,
   waitForExportedEvent,
-  writeStrokes
+  writeStrokes,
+  passModalKey
 } from "../helper"
 import h from "../__dataset__/h"
 
@@ -10,7 +10,7 @@ test.describe("Rest Text Styling", () => {
 
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/rest/rest_text_iink_customize_stroke_style.html")
-    await waitForEditorInit(page)
+    await passModalKey(page)
   })
 
   test("should have title", async ({ page }) => {
@@ -46,7 +46,7 @@ test.describe("Rest Text Styling", () => {
       waitForExportedEvent(page),
       writeStrokes(page, h.strokes),
     ])
-    const style = await page.evaluate("editor.styleManager.penStyle")
+    const style = await page.evaluate("editorEl.editor.styleManager.penStyle")
     expect(style).toEqual({ color: "#1a5fb4", "-myscript-pen-width": "5" })
 
     await expect(page.locator("#result")).toHaveText(exportedDatas["text/plain"])
