@@ -12,6 +12,8 @@ export class IDebugSVGManager {
   #logger = LoggerManager.getLogger(LoggerCategory.SVGDEBUG)
   #recognitionBoxVisibility = false
   #recognitionBoxItemsVisibility = false
+  #recognitionBoxDrawing = false
+  #recognitionBoxItemsDrawing = false
 
   editor: InkEditor
 
@@ -100,14 +102,14 @@ export class IDebugSVGManager {
     })
   }
 
-  protected drawRecognitionBox(box: TBox, infos: string[], color: string , debugAttr: string): void {
+  protected drawRecognitionBox(box: TBox, infos: string[], color: string, debugAttr: string): void {
     const TEXT_HEIGHT = 20
     const recognitionGroup = SVGBuilder.createGroup({ "debug": debugAttr, "opacity": debugAttr === "recognition-box-items" ? "0.8" : "1" })
     const rectAttr = {
       fill: "transparent",
       stroke: color,
       style: SVGRendererConst.noSelection,
-      "stroke-dasharray": debugAttr === "recognition-box-items" ? "1 5 10" : "" ,
+      "stroke-dasharray": debugAttr === "recognition-box-items" ? "1 5 10" : "",
     }
     const rect = SVGBuilder.createRect(box, rectAttr)
     recognitionGroup.appendChild(rect)
@@ -183,6 +185,8 @@ export class IDebugSVGManager {
   }
 
   protected async showRecognitionBox(): Promise<void> {
+    if(this.#recognitionBoxDrawing) return
+    this.#recognitionBoxDrawing = true
     this.#logger.info("showRecognitionBox")
     let jiix = this.model.exports?.["application/vnd.myscript.jiix"]
     if (!jiix) {
@@ -237,9 +241,12 @@ export class IDebugSVGManager {
         }
       })
     }
+    this.#recognitionBoxDrawing = false
   }
 
   protected async showRecognitionBoxItems(): Promise<void> {
+    if(this.#recognitionBoxItemsDrawing) return
+    this.#recognitionBoxItemsDrawing = true
     this.#logger.info("showRecognitionBoxItems")
     let jiix = this.model.exports?.["application/vnd.myscript.jiix"]
     if (!jiix) {
@@ -288,6 +295,7 @@ export class IDebugSVGManager {
         }
       })
     }
+    this.#recognitionBoxItemsDrawing = false
   }
 
   protected clearRecognitionBox(): void {
