@@ -1493,6 +1493,11 @@ export class InteractiveInkEditor extends AbstractEditor
     this.recognizer.destroy()
     this.model.clear()
     this.history.clear()
+
+    this.layers.root.classList.remove("draw")
+    this.layers.root.classList.remove("erase")
+    this.layers.root.classList.remove("select")
+    this.layers.root.classList.remove("move")
     return Promise.resolve()
   }
 }
