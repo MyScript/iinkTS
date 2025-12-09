@@ -1483,21 +1483,23 @@ export class InteractiveInkEditor extends AbstractEditor
   async destroy(): Promise<void>
   {
     this.logger.info("destroy")
+
+    this.layers.root.classList.remove("draw")
+    this.layers.root.classList.remove("erase")
+    this.layers.root.classList.remove("select")
+    this.layers.root.classList.remove("move")
+
     this.eraser.detach()
     this.selector.detach()
     this.move.detach()
     this.writer.detach()
 
     this.renderer.destroy()
+    this.layers.destroy()
     this.menu.destroy()
     this.recognizer.destroy()
     this.model.clear()
     this.history.clear()
-
-    this.layers.root.classList.remove("draw")
-    this.layers.root.classList.remove("erase")
-    this.layers.root.classList.remove("select")
-    this.layers.root.classList.remove("move")
     return Promise.resolve()
   }
 }
