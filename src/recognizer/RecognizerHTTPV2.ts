@@ -151,7 +151,8 @@ export class RecognizerHTTPV2 {
     const reqInit: RequestInit = {
       method: "POST",
       headers,
-      body: JSON.stringify(data)
+      body: JSON.stringify(data),
+      credentials: "omit"
     }
     const request = new Request(this.url, reqInit)
     const response: Response = await fetch(request)
