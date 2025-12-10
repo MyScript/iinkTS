@@ -1,6 +1,6 @@
 {
   "name": "iink-ts",
-  "version": "1.0.0-buildVersion",
+  "version": "3.1.1",
   "description": "iinkTS is the fastest way to integrate handwriting panel and recognition in your webapp",
   "license": "Apache-2.0",
   "private": false,
