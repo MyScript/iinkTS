@@ -1,12 +1,20 @@
+# [v3.1.1](https://github.com/MyScript/iinkTS/tree/v3.1.1)
+
+## Bugs fix
+- fix(RecognizerHTTPV1, RecognizerHTTPV2): add credentials: "omit" option to POST requests
+- fix(InteractiveInkEditor): clean root element
+- fix(InteractiveInkEditor): remove layer classes on destroy
+- fix(rest-raw-content-recognizerInk.html): recognition info is displayed twice on rest_raw_content_recognizerInk example
+
 # [v3.1.0](https://github.com/MyScript/iinkTS/tree/v3.1.0)
 
 ## Featues
 - feat(Editor) added the option to give a async function for challenge validation [#11](https://github.com/MyScript/iinkTS/issues/10)
 
 ## Bugs fix
-- fix(offscreen) insert gesture does nothing after convert + undo - IIC-1235
-- fix(InkEditor.ts) [Raw Content] Show Recognition Blocks button does not work when writing after the check IIC-1409
-- fix(InkEditor) wrong default mimeTypes for Math & RawContent IIC-1496
+- fix(offscreen) insert gesture does nothing after convert + undo
+- fix(InkEditor.ts) [Raw Content] Show Recognition Blocks button does not work when writing after the check
+- fix(InkEditor) wrong default mimeTypes for Math & RawContent
 
 # [v3.0.2](https://github.com/MyScript/iinkTS/tree/v3.0.2)
 
@@ -63,7 +71,7 @@
 - feat(example) add possibility to disable gesture on tldraw example
 
 ## Bugs fix
-- fix(Convert) converted word in a group with a stroke disappears after conversion - IIC-1215
+- fix(Convert) converted word in a group with a stroke disappears after conversion
 - fix(Gesture) don't send contextLessGesture if stroke not overlaps symbol
 - fix(examples) wrong placement of text after convert in tldraw example
 - fix(examples) style broken on websocket_text_customize_editor_css.html
