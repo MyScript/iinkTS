@@ -43,6 +43,7 @@
     z-index: 20;
     height: 100%;
     width: 100%;
+    touch-action: none;
 }
 
 .ms-editor [data-layer="MODEL"],
@@ -78,12 +79,14 @@
     width: 100%;
     pointer-events: none;
     user-select: none;
+    touch-action: none;
 }
 
 .ms-editor .ms-layer-ui>* {
     cursor: auto;
     pointer-events: all;
     user-select: none;
+    touch-action: none;
 }
 
 /** loader **/
