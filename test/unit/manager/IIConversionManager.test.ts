@@ -73,25 +73,25 @@ describe("IIConversionManager.ts", () =>
     {
       const hTextJIIXElementClone = JSON.parse(JSON.stringify(hTextJIIXElement)) as TJIIXTextElement
       delete hTextJIIXElementClone.lines
-      await expect(async () => await manager.convertText(hTextJIIXElementClone, [], false)).rejects.toThrowError("You need to active configuration.recognition.export.jiix.text.lines = true")
+      await expect(async () => await manager.convertText(hTextJIIXElementClone, [], false)).rejects.toThrow("You need to active configuration.recognition.export.jiix.text.lines = true")
     })
     test("should throw Error if jiix has no word", async () =>
     {
       const hTextJIIXElementClone = JSON.parse(JSON.stringify(hTextJIIXElement)) as TJIIXTextElement
       delete hTextJIIXElementClone.words
-      await expect(async () => await manager.convertText(hTextJIIXElementClone, [], false)).rejects.toThrowError("You need to active configuration.recognition.export.jiix.text.words = true")
+      await expect(async () => await manager.convertText(hTextJIIXElementClone, [], false)).rejects.toThrow("You need to active configuration.recognition.export.jiix.text.words = true")
     })
     test("should throw Error if jiix has no char", async () =>
     {
       const hTextJIIXElementClone = JSON.parse(JSON.stringify(hTextJIIXElement)) as TJIIXTextElement
       delete hTextJIIXElementClone.chars
-      await expect(async () => await manager.convertText(hTextJIIXElementClone, [], false)).rejects.toThrowError("You need to active configuration.recognition.export.jiix.text.chars = true")
+      await expect(async () => await manager.convertText(hTextJIIXElementClone, [], false)).rejects.toThrow("You need to active configuration.recognition.export.jiix.text.chars = true")
     })
     test("should throw Error if jiix char has no items", async () =>
     {
       const hTextJIIXElementClone = JSON.parse(JSON.stringify(hTextJIIXElement)) as TJIIXTextElement
       hTextJIIXElementClone.chars?.forEach(c => delete c.items)
-      await expect(async () => await manager.convertText(hTextJIIXElementClone, [], false)).rejects.toThrowError("You need to active configuration.recognition.export.jiix.strokes = true")
+      await expect(async () => await manager.convertText(hTextJIIXElementClone, [], false)).rejects.toThrow("You need to active configuration.recognition.export.jiix.strokes = true")
     })
     test("should return converted symbol & strokes associate", async () =>
     {

@@ -69,9 +69,9 @@ describe("IIMenuManager.ts", () =>
     {
       editor.configuration.menu.enable = false
       manager.render(layer)
-      expect(manager.action.render).toBeCalledTimes(0)
-      expect(manager.style.render).toBeCalledTimes(0)
-      expect(manager.tool.render).toBeCalledTimes(0)
+      expect(manager.action.render).toHaveBeenCalledTimes(0)
+      expect(manager.style.render).toHaveBeenCalledTimes(0)
+      expect(manager.tool.render).toHaveBeenCalledTimes(0)
     })
     test("should render only action", () =>
     {
@@ -80,9 +80,9 @@ describe("IIMenuManager.ts", () =>
       editor.configuration.menu.style.enable = false
       editor.configuration.menu.tool.enable = false
       manager.render(layer)
-      expect(manager.action.render).toBeCalledTimes(1)
-      expect(manager.style.render).toBeCalledTimes(0)
-      expect(manager.tool.render).toBeCalledTimes(0)
+      expect(manager.action.render).toHaveBeenCalledTimes(1)
+      expect(manager.style.render).toHaveBeenCalledTimes(0)
+      expect(manager.tool.render).toHaveBeenCalledTimes(0)
     })
     test("should render only style", () =>
     {
@@ -91,9 +91,9 @@ describe("IIMenuManager.ts", () =>
       editor.configuration.menu.style.enable = true
       editor.configuration.menu.tool.enable = false
       manager.render(layer)
-      expect(manager.action.render).toBeCalledTimes(0)
-      expect(manager.style.render).toBeCalledTimes(1)
-      expect(manager.tool.render).toBeCalledTimes(0)
+      expect(manager.action.render).toHaveBeenCalledTimes(0)
+      expect(manager.style.render).toHaveBeenCalledTimes(1)
+      expect(manager.tool.render).toHaveBeenCalledTimes(0)
     })
     test("should render only tool", () =>
     {
@@ -102,9 +102,9 @@ describe("IIMenuManager.ts", () =>
       editor.configuration.menu.style.enable = false
       editor.configuration.menu.tool.enable = true
       manager.render(layer)
-      expect(manager.action.render).toBeCalledTimes(0)
-      expect(manager.style.render).toBeCalledTimes(0)
-      expect(manager.tool.render).toBeCalledTimes(1)
+      expect(manager.action.render).toHaveBeenCalledTimes(0)
+      expect(manager.style.render).toHaveBeenCalledTimes(0)
+      expect(manager.tool.render).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -120,9 +120,9 @@ describe("IIMenuManager.ts", () =>
     test("should update all menu", () =>
     {
       manager.update()
-      expect(manager.action.update).toBeCalledTimes(1)
-      expect(manager.style.update).toBeCalledTimes(1)
-      expect(manager.tool.update).toBeCalledTimes(1)
+      expect(manager.action.update).toHaveBeenCalledTimes(1)
+      expect(manager.style.update).toHaveBeenCalledTimes(1)
+      expect(manager.tool.update).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -141,16 +141,16 @@ describe("IIMenuManager.ts", () =>
     test("should show all menu", () =>
     {
       manager.show()
-      expect(manager.action.show).toBeCalledTimes(1)
-      expect(manager.style.show).toBeCalledTimes(1)
-      expect(manager.tool.show).toBeCalledTimes(1)
+      expect(manager.action.show).toHaveBeenCalledTimes(1)
+      expect(manager.style.show).toHaveBeenCalledTimes(1)
+      expect(manager.tool.show).toHaveBeenCalledTimes(1)
     })
     test("should hide all menu", () =>
     {
       manager.hide()
-      expect(manager.action.hide).toBeCalledTimes(1)
-      expect(manager.style.hide).toBeCalledTimes(1)
-      expect(manager.tool.hide).toBeCalledTimes(1)
+      expect(manager.action.hide).toHaveBeenCalledTimes(1)
+      expect(manager.style.hide).toHaveBeenCalledTimes(1)
+      expect(manager.tool.hide).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -166,9 +166,9 @@ describe("IIMenuManager.ts", () =>
     test("should destroy all menu", () =>
     {
       manager.destroy()
-      expect(manager.action.destroy).toBeCalledTimes(1)
-      expect(manager.style.destroy).toBeCalledTimes(1)
-      expect(manager.tool.destroy).toBeCalledTimes(1)
+      expect(manager.action.destroy).toHaveBeenCalledTimes(1)
+      expect(manager.style.destroy).toHaveBeenCalledTimes(1)
+      expect(manager.tool.destroy).toHaveBeenCalledTimes(1)
     })
   })
 

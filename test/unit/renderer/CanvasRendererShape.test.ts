@@ -28,11 +28,11 @@ describe("CanvasRendererShape.ts", () =>
       lines: [{ p1, p2 }]
     }
     canvasRendererShape.draw(canvasContext, table)
-    expect(canvasContext.moveTo).toBeCalledTimes(1)
-    expect(canvasContext.moveTo).toBeCalledWith(p1.x, p1.y)
+    expect(canvasContext.moveTo).toHaveBeenCalledTimes(1)
+    expect(canvasContext.moveTo).toHaveBeenCalledWith(p1.x, p1.y)
 
-    expect(canvasContext.lineTo).toBeCalledTimes(1)
-    expect(canvasContext.lineTo).toBeCalledWith(p2.x, p2.y)
+    expect(canvasContext.lineTo).toHaveBeenCalledTimes(1)
+    expect(canvasContext.lineTo).toHaveBeenCalledWith(p2.x, p2.y)
   })
 
   test("should draw a ellipse symbol", () =>
@@ -53,8 +53,8 @@ describe("CanvasRendererShape.ts", () =>
       sweepAngle: 1
     }
     canvasRendererShape.draw(canvasContext, table)
-    expect(canvasContext.moveTo).toBeCalledTimes(1)
-    expect(canvasContext.lineTo).toBeCalledTimes(50)
+    expect(canvasContext.moveTo).toHaveBeenCalledTimes(1)
+    expect(canvasContext.lineTo).toHaveBeenCalledTimes(50)
   })
 
   test("should draw a line symbol", () =>
@@ -71,11 +71,11 @@ describe("CanvasRendererShape.ts", () =>
       endTangentAngle: 90,
     }
     canvasRendererShape.draw(canvasContext, line)
-    expect(canvasContext.moveTo).toBeCalledTimes(1)
-    expect(canvasContext.moveTo).toBeCalledWith(p1.x, p1.y)
+    expect(canvasContext.moveTo).toHaveBeenCalledTimes(1)
+    expect(canvasContext.moveTo).toHaveBeenCalledWith(p1.x, p1.y)
 
-    expect(canvasContext.lineTo).toBeCalledTimes(1)
-    expect(canvasContext.lineTo).toBeCalledWith(p2.x, p2.y)
+    expect(canvasContext.lineTo).toHaveBeenCalledTimes(1)
+    expect(canvasContext.lineTo).toHaveBeenCalledWith(p2.x, p2.y)
   })
 
 })

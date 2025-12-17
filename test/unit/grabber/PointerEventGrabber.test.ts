@@ -48,19 +48,19 @@ describe("PointerEventGrabber.ts", () =>
     test("should listen pointerdown event", () =>
     {
       wrapperHTML.dispatchEvent(pointerDownEvt)
-      expect(grabber.onPointerDown).toBeCalledTimes(1)
+      expect(grabber.onPointerDown).toHaveBeenCalledTimes(1)
     })
 
     test("should listen pointermove event", () =>
     {
       wrapperHTML.dispatchEvent(pointerMoveEvt)
-      expect(grabber.onPointerMove).toBeCalledTimes(1)
+      expect(grabber.onPointerMove).toHaveBeenCalledTimes(1)
     })
 
     test("should listen pointerup event", () =>
     {
       wrapperHTML.dispatchEvent(pointerUpEvt)
-      expect(grabber.onPointerUp).toBeCalledTimes(1)
+      expect(grabber.onPointerUp).toHaveBeenCalledTimes(1)
     })
 
     test("should call detach if already attach", () =>
@@ -72,28 +72,28 @@ describe("PointerEventGrabber.ts", () =>
       g.detach = jest.fn()
       g.attach(wrapperHTML)
       g.attach(wrapperHTML)
-      expect(g.detach).toBeCalledTimes(1)
+      expect(g.detach).toHaveBeenCalledTimes(1)
     })
 
     test("should not listen pointerdown event after detach", () =>
     {
       grabber.detach()
       wrapperHTML.dispatchEvent(pointerDownEvt)
-      expect(grabber.onPointerDown).not.toBeCalled()
+      expect(grabber.onPointerDown).not.toHaveBeenCalled()
     })
 
     test("should not listen pointermove event after detach", () =>
     {
       grabber.detach()
       wrapperHTML.dispatchEvent(pointerMoveEvt)
-      expect(grabber.onPointerMove).not.toBeCalled()
+      expect(grabber.onPointerMove).not.toHaveBeenCalled()
     })
 
     test("should not listen pointerup event after detach", () =>
     {
       grabber.detach()
       wrapperHTML.dispatchEvent(pointerUpEvt)
-      expect(grabber.onPointerUp).not.toBeCalled()
+      expect(grabber.onPointerUp).not.toHaveBeenCalled()
     })
   })
 
@@ -120,7 +120,7 @@ describe("PointerEventGrabber.ts", () =>
       wrapperHTML.dispatchEvent(mouseDownEvt)
 
       expect(grabber.onPointerDown)
-        .toBeCalledWith(
+        .toHaveBeenCalledWith(
           expect.objectContaining({
             pointer: expect.objectContaining({
               x: mouseDownEvt.clientX,
@@ -143,7 +143,7 @@ describe("PointerEventGrabber.ts", () =>
       wrapperHTML.dispatchEvent(touchDownEvt)
 
       expect(grabber.onPointerDown)
-        .toBeCalledWith(
+        .toHaveBeenCalledWith(
           expect.objectContaining({
             pointer: expect.objectContaining({
               x: touchDownEvt.changedTouches[0].clientX,
@@ -180,7 +180,7 @@ describe("PointerEventGrabber.ts", () =>
       wrapperHTML.dispatchEvent(pointerDownEvt)
 
       expect(grabber.onPointerDown)
-        .toBeCalledWith(
+        .toHaveBeenCalledWith(
           expect.objectContaining({
             pointer: expect.objectContaining({
               x: pointerDownEvt.clientX,
@@ -206,7 +206,7 @@ describe("PointerEventGrabber.ts", () =>
       wrapperHTML.dispatchEvent(pointerDownEvt)
 
       expect(grabber.onPointerDown)
-        .toBeCalledWith(
+        .toHaveBeenCalledWith(
           expect.objectContaining({
             pointer: expect.objectContaining({
               x: Math.round(pointerDownEvt.clientX / 100) * 100,
@@ -231,7 +231,7 @@ describe("PointerEventGrabber.ts", () =>
       wrapperHTML.dispatchEvent(pointerDownEvt)
 
       expect(grabber.onPointerDown)
-        .toBeCalledWith(
+        .toHaveBeenCalledWith(
           expect.objectContaining({
             pointer: expect.objectContaining({
               x: pointerDownEvt.clientX,
@@ -263,7 +263,7 @@ describe("PointerEventGrabber.ts", () =>
         pressure: 1
       })
       wrapperHTML.dispatchEvent(pointerDownEvt)
-      expect(grabber.onPointerDown).not.toBeCalled()
+      expect(grabber.onPointerDown).not.toHaveBeenCalled()
       grabber.detach()
     })
 
@@ -276,7 +276,7 @@ describe("PointerEventGrabber.ts", () =>
         pressure: 1
       })
       wrapperHTML.dispatchEvent(pointerDownEvt)
-      expect(grabber.onPointerDown).not.toBeCalled()
+      expect(grabber.onPointerDown).not.toHaveBeenCalled()
       grabber.detach()
     })
   })

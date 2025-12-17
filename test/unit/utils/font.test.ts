@@ -12,8 +12,8 @@ describe("font.ts", () =>
   test("should call fetch with good url", async () =>
   {
     await getAvailableFontList(RecognizerWebSocketSSRTextConfiguration)
-    expect(fetch).toBeCalledTimes(1)
-    expect(fetch).toBeCalledWith(`${ RecognizerWebSocketSSRTextConfiguration?.server?.scheme }://${ RecognizerWebSocketSSRTextConfiguration?.server?.host }/api/v4.0/iink/font/google/language/${ RecognizerWebSocketSSRTextConfiguration?.recognition?.lang }`)
+    expect(fetch).toHaveBeenCalledTimes(1)
+    expect(fetch).toHaveBeenCalledWith(`${ RecognizerWebSocketSSRTextConfiguration?.server?.scheme }://${ RecognizerWebSocketSSRTextConfiguration?.server?.host }/api/v4.0/iink/font/google/language/${ RecognizerWebSocketSSRTextConfiguration?.recognition?.lang }`)
   })
 
   test("should reject getAvailableFontList if no configuration", async () =>

@@ -80,7 +80,7 @@ describe("EraseManager.ts", () =>
         pointer: { t: 1, p: 0.5, x: 20, y: 20 }
       } as PointerInfo
       expect(manager.currentEraser).toBeUndefined()
-      expect(() => manager.continue(info)).toThrowError("Can't update current eraser because currentEraser is undefined")
+      expect(() => manager.continue(info)).toThrow("Can't update current eraser because currentEraser is undefined")
     })
   })
 })

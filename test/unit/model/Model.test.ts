@@ -303,10 +303,10 @@ describe("Model.ts", () =>
       }
       model.endCurrentStroke(point)
       expect(model.currentSymbol).toBeUndefined()
-      expect(model.addPoint).toBeCalledTimes(1)
-      expect(model.addPoint).toBeCalledWith(currentSymbol, point)
-      expect(model.addStroke).toBeCalledTimes(1)
-      expect(model.addStroke).toBeCalledWith(currentSymbol)
+      expect(model.addPoint).toHaveBeenCalledTimes(1)
+      expect(model.addPoint).toHaveBeenCalledWith(currentSymbol, point)
+      expect(model.addStroke).toHaveBeenCalledTimes(1)
+      expect(model.addStroke).toHaveBeenCalledWith(currentSymbol)
     })
   })
 
