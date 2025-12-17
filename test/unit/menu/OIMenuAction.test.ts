@@ -94,7 +94,7 @@ describe("IIMenuAction.ts", () =>
     menu.render(editor.layers.ui.root)
     test("should call editor.clear on pointerup", () =>
     {
-      expect(editor.clear).not.toBeCalled()
+      expect(editor.clear).not.toHaveBeenCalled()
       const pointerEvt = new LeftClickEventMock("pointerup", {
         pointerType: "pen",
         clientX: 300,
@@ -102,21 +102,21 @@ describe("IIMenuAction.ts", () =>
         pressure: 1
       })
       editor.layers.ui.root.querySelector("#ms-menu-action-clear")?.dispatchEvent(pointerEvt)
-      expect(editor.clear).toBeCalled()
+      expect(editor.clear).toHaveBeenCalled()
     })
     test("should call editor.changeLanguage on change", () =>
     {
-      expect(editor.changeLanguage).not.toBeCalled()
+      expect(editor.changeLanguage).not.toHaveBeenCalled()
       editor.tool = EditorTool.Select
       const changeEvt = new ChangeEventMock({
         target: { value: "fr_FR" } as unknown as HTMLInputElement
       })
       editor.layers.ui.root.querySelector("#ms-menu-action-language")?.dispatchEvent(changeEvt)
-      expect(editor.changeLanguage).toBeCalled()
+      expect(editor.changeLanguage).toHaveBeenCalled()
     })
     test("should call editor.undo on pointerup", () =>
     {
-      expect(editor.undo).not.toBeCalled()
+      expect(editor.undo).not.toHaveBeenCalled()
       const pointerEvt = new LeftClickEventMock("pointerup", {
         pointerType: "pen",
         clientX: 300,
@@ -124,11 +124,11 @@ describe("IIMenuAction.ts", () =>
         pressure: 1
       })
       editor.layers.ui.root.querySelector("#ms-menu-action-undo")?.dispatchEvent(pointerEvt)
-      expect(editor.undo).toBeCalled()
+      expect(editor.undo).toHaveBeenCalled()
     })
     test("should call editor.redo on pointerup", () =>
     {
-      expect(editor.redo).not.toBeCalled()
+      expect(editor.redo).not.toHaveBeenCalled()
       const pointerEvt = new LeftClickEventMock("pointerup", {
         pointerType: "pen",
         clientX: 300,
@@ -136,11 +136,11 @@ describe("IIMenuAction.ts", () =>
         pressure: 1
       })
       editor.layers.ui.root.querySelector("#ms-menu-action-redo")?.dispatchEvent(pointerEvt)
-      expect(editor.redo).toBeCalled()
+      expect(editor.redo).toHaveBeenCalled()
     })
     test("should call editor.convert on pointerup", () =>
     {
-      expect(editor.convert).not.toBeCalled()
+      expect(editor.convert).not.toHaveBeenCalled()
       const pointerEvt = new LeftClickEventMock("pointerup", {
         pointerType: "pen",
         clientX: 300,
@@ -148,7 +148,7 @@ describe("IIMenuAction.ts", () =>
         pressure: 1
       })
       editor.layers.ui.root.querySelector("#ms-menu-action-convert")?.dispatchEvent(pointerEvt)
-      expect(editor.convert).toBeCalled()
+      expect(editor.convert).toHaveBeenCalled()
     })
   })
 

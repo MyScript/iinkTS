@@ -28,7 +28,7 @@ describe("IISnapManager.ts", () =>
       { p1: { x: 20, y: 0 }, p2: { x: 20, y: 20 } }
     ]
     manager.drawSnapToElementLines(lines)
-    expect(manager.renderer.drawLine).toBeCalledTimes(2)
+    expect(manager.renderer.drawLine).toHaveBeenCalledTimes(2)
     expect(manager.renderer.drawLine).toHaveBeenNthCalledWith(1, lines[0].p1, lines[0].p2, expect.objectContaining({
       role: "snap-to-element",
       "marker-start": `url(#${ SVGRendererConst.crossMarker })`,
@@ -47,8 +47,8 @@ describe("IISnapManager.ts", () =>
     const manager = new IISnapManager(editor)
     manager.renderer.clearElements = jest.fn()
     manager.clearSnapToElementLines()
-    expect(manager.renderer.clearElements).toBeCalledTimes(1)
-    expect(manager.renderer.clearElements).toBeCalledWith({ attrs: { role: "snap-to-element" } })
+    expect(manager.renderer.clearElements).toHaveBeenCalledTimes(1)
+    expect(manager.renderer.clearElements).toHaveBeenCalledWith({ attrs: { role: "snap-to-element" } })
   })
 
   describe("snapResize", () =>
@@ -70,7 +70,7 @@ describe("IISnapManager.ts", () =>
       manager.configuration.guide = false
       manager.configuration.symbol = false
       expect(manager.snapResize({ x: 10, y: 10 })).toEqual({ x: 10, y: 10 })
-      expect(manager.renderer.clearElements).toBeCalledTimes(1)
+      expect(manager.renderer.clearElements).toHaveBeenCalledTimes(1)
     })
 
     test("should return guide point when configuration.guide is equal to true", () =>
@@ -78,7 +78,7 @@ describe("IISnapManager.ts", () =>
       manager.configuration.guide = true
       manager.configuration.symbol = false
       expect(manager.snapResize({ x: 12, y: 32 })).toEqual({ x: 10, y: 30 })
-      expect(manager.renderer.clearElements).toBeCalledTimes(1)
+      expect(manager.renderer.clearElements).toHaveBeenCalledTimes(1)
     })
 
     describe("configuration.symbol", () =>
@@ -95,7 +95,7 @@ describe("IISnapManager.ts", () =>
       test("should return origin point if no symbol into model", () =>
       {
         expect(manager.snapResize({ x: 10, y: 10 })).toEqual({ x: 10, y: 10 })
-        expect(manager.renderer.clearElements).toBeCalledTimes(1)
+        expect(manager.renderer.clearElements).toHaveBeenCalledTimes(1)
       })
       test("should return the original point if point.x - symbol.x > snapThreshold & point.y - symbol.y > snapThreshold", () =>
       {
@@ -114,7 +114,7 @@ describe("IISnapManager.ts", () =>
         const line = buildOILine({ start, end })
         editor.model.addSymbol(line)
         expect(manager.snapResize(point)).toEqual(point)
-        expect(manager.renderer.clearElements).toBeCalledTimes(1)
+        expect(manager.renderer.clearElements).toHaveBeenCalledTimes(1)
       })
       test("should return the closest symbol in x, then call renderer.drawLine", () =>
       {
@@ -133,7 +133,7 @@ describe("IISnapManager.ts", () =>
         const line = buildOILine({ start, end })
         editor.model.addSymbol(line)
         expect(manager.snapResize(point)).toEqual({ x: end.x, y: point.y })
-        expect(manager.renderer.drawLine).toBeCalledTimes(1)
+        expect(manager.renderer.drawLine).toHaveBeenCalledTimes(1)
       })
       test("should return the closest symbol in y, then call renderer.drawLine", () =>
       {
@@ -152,7 +152,7 @@ describe("IISnapManager.ts", () =>
         const line = buildOILine({ start, end })
         editor.model.addSymbol(line)
         expect(manager.snapResize(point)).toEqual({ x: point.x, y: end.y })
-        expect(manager.renderer.drawLine).toBeCalledTimes(1)
+        expect(manager.renderer.drawLine).toHaveBeenCalledTimes(1)
       })
       test("should return the closest symbols in x and y, then call renderer.drawLine twice", () =>
       {
@@ -171,7 +171,7 @@ describe("IISnapManager.ts", () =>
         const line = buildOILine({ start, end })
         editor.model.addSymbol(line)
         expect(manager.snapResize(point)).toEqual({ x: start.x, y: end.y })
-        expect(manager.renderer.drawLine).toBeCalledTimes(2)
+        expect(manager.renderer.drawLine).toHaveBeenCalledTimes(2)
       })
     })
   })
@@ -200,7 +200,7 @@ describe("IISnapManager.ts", () =>
       manager.configuration.guide = false
       manager.configuration.symbol = false
       expect(manager.snapTranslate(10, 12)).toEqual({ x: 10, y: 12 })
-      expect(manager.renderer.clearElements).toBeCalledTimes(1)
+      expect(manager.renderer.clearElements).toHaveBeenCalledTimes(1)
     })
 
     test("should return a nudge to the nearest guide point when configuration.guide equals true", () =>
@@ -208,7 +208,7 @@ describe("IISnapManager.ts", () =>
       manager.configuration.guide = true
       manager.configuration.symbol = false
       expect(manager.snapTranslate(30, 22)).toEqual({ x: 25, y: 20 })
-      expect(manager.renderer.clearElements).toBeCalledTimes(1)
+      expect(manager.renderer.clearElements).toHaveBeenCalledTimes(1)
     })
 
     describe("configuration.symbol", () =>
@@ -226,7 +226,7 @@ describe("IISnapManager.ts", () =>
       test("should return origin nudge if no symbol into model", () =>
       {
         expect(manager.snapTranslate(10, 10)).toEqual({ x: 10, y: 10 })
-        expect(manager.renderer.clearElements).toBeCalledTimes(1)
+        expect(manager.renderer.clearElements).toHaveBeenCalledTimes(1)
       })
       test("should return the original snap if the closest symbol.x and symbol.y is further than snapThreshold", () =>
       {
@@ -245,7 +245,7 @@ describe("IISnapManager.ts", () =>
         const line = buildOILine({ start, end })
         editor.model.addSymbol(line)
         expect(manager.snapTranslate(nudge.x, nudge.y)).toEqual(nudge)
-        expect(manager.renderer.clearElements).toBeCalledTimes(1)
+        expect(manager.renderer.clearElements).toHaveBeenCalledTimes(1)
       })
       test("should return closest symbol x and drawLine", () =>
       {
@@ -264,7 +264,7 @@ describe("IISnapManager.ts", () =>
         const line = buildOILine({ start, end })
         editor.model.addSymbol(line)
         expect(manager.snapTranslate(nudge.x, nudge.y)).toEqual({ x: (end.x - selectionSnapPointMock.x), y: nudge.y })
-        expect(manager.renderer.drawLine).toBeCalledTimes(1)
+        expect(manager.renderer.drawLine).toHaveBeenCalledTimes(1)
       })
       test("should return closest symbol y and drawLine", () =>
       {
@@ -283,7 +283,7 @@ describe("IISnapManager.ts", () =>
         const line = buildOILine({ start, end })
         editor.model.addSymbol(line)
         expect(manager.snapTranslate(nudge.x, nudge.y)).toEqual({ x: nudge.x, y: (end.y - selectionSnapPointMock.y) })
-        expect(manager.renderer.drawLine).toBeCalledTimes(1)
+        expect(manager.renderer.drawLine).toHaveBeenCalledTimes(1)
       })
       test("should return closest symbol x & y and 2 drawLine", () =>
       {
@@ -302,7 +302,7 @@ describe("IISnapManager.ts", () =>
         const line = buildOILine({ start, end })
         editor.model.addSymbol(line)
         expect(manager.snapTranslate(nudge.x, nudge.y)).toEqual({ x: (start.x - selectionSnapPointMock.x), y: (end.y - selectionSnapPointMock.y) })
-        expect(manager.renderer.drawLine).toBeCalledTimes(2)
+        expect(manager.renderer.drawLine).toHaveBeenCalledTimes(2)
       })
     })
   })

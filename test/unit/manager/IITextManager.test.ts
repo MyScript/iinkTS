@@ -83,7 +83,7 @@ describe("IITextManager.ts", () =>
     const text = buildOIText({ chars })
     manager.getElementBoundingBox = jest.fn(() => new Box({ x: 1, y: 2, width: 3, height: 4 }))
     expect(manager.getBoundingBox(text)).toEqual({ x: 1, y: 2, width: 3, height: 4 })
-    expect(manager.getElementBoundingBox).toBeCalledTimes(1)
+    expect(manager.getElementBoundingBox).toHaveBeenCalledTimes(1)
   })
 
   test("shoud get Space Width", () =>
@@ -92,7 +92,7 @@ describe("IITextManager.ts", () =>
     const manager = new IITextManager(editor)
     manager.getBoundingBox = jest.fn(() => new Box({ height: 12, width: 42, x: 0, y: 0 }))
     expect(manager.getSpaceWidth(12)).toEqual(42)
-    expect(manager.getBoundingBox).toBeCalledTimes(1)
+    expect(manager.getBoundingBox).toHaveBeenCalledTimes(1)
   })
 
   test("should update Text BoundingBox", () =>
@@ -106,8 +106,8 @@ describe("IITextManager.ts", () =>
     const text = buildOIText({ chars })
     manager.updateBounds(text)
     expect(text.bounds).toEqual({ x: 1989, y: 27, width: 5, height: 42 })
-    expect(manager.getElementBoundingBox).toBeCalledTimes(1)
-    expect(manager.setCharsBounds).toBeCalledTimes(1)
+    expect(manager.getElementBoundingBox).toHaveBeenCalledTimes(1)
+    expect(manager.setCharsBounds).toHaveBeenCalledTimes(1)
   })
 
 })

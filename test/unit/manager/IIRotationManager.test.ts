@@ -40,7 +40,7 @@ describe("IIRotationManager.ts", () =>
       //@ts-ignore
       poly.kind = "pouet"
       const origin: TPoint = { x: 0, y: 0 }
-      expect(() => manager.applyToSymbol(poly, origin, Math.PI / 2)).toThrowError(expect.objectContaining({ message: expect.stringContaining("Can't apply rotate on shape, kind unknow: ") }))
+      expect(() => manager.applyToSymbol(poly, origin, Math.PI / 2)).toThrow(expect.objectContaining({ message: expect.stringContaining("Can't apply rotate on shape, kind unknow: ") }))
     })
     test("rotate stroke", () =>
     {

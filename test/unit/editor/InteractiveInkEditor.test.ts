@@ -150,13 +150,13 @@ describe("EditorOffscreen.ts", () =>
       expect(editor.history.context.empty).toEqual(true)
       expect(editor.history.context.stackIndex).toEqual(0)
       expect(editor.history.stack.length).toEqual(1)
-      await expect(editor.renderer.init).toBeCalledTimes(1)
-      await expect(editor.recognizer.init).toBeCalledTimes(1)
+      await expect(editor.renderer.init).toHaveBeenCalledTimes(1)
+      await expect(editor.recognizer.init).toHaveBeenCalledTimes(1)
     })
     test("should resolve init when recognizer.init is resolve", async () =>
     {
       await editor.initialize()
-      await expect(editor.recognizer.init).toBeCalledTimes(1)
+      await expect(editor.recognizer.init).toHaveBeenCalledTimes(1)
     })
     test("should reject init when recognizer.init is reject", async () =>
     {
@@ -346,7 +346,7 @@ describe("EditorOffscreen.ts", () =>
     test("should call recognizer.addStrokes", async () =>
     {
       await editor.importPointEvents(pStrokes)
-      expect(editor.recognizer.addStrokes).toBeCalledTimes(1)
+      expect(editor.recognizer.addStrokes).toHaveBeenCalledTimes(1)
     })
     test("should add symbols to model and draw", async () =>
     {
@@ -501,9 +501,9 @@ describe("EditorOffscreen.ts", () =>
     {
       editor.history.context.canUndo = false
       await editor.undo()
-      expect(editor.recognizer.undo).toBeCalledTimes(0)
-      expect(editor.renderer.drawSymbol).toBeCalledTimes(0)
-      expect(editor.renderer.removeSymbol).toBeCalledTimes(0)
+      expect(editor.recognizer.undo).toHaveBeenCalledTimes(0)
+      expect(editor.renderer.drawSymbol).toHaveBeenCalledTimes(0)
+      expect(editor.renderer.removeSymbol).toHaveBeenCalledTimes(0)
     })
     test("should call recognizer.undo & renderer.drawSymbol when history.undo return added stroke", async () =>
     {
@@ -513,11 +513,11 @@ describe("EditorOffscreen.ts", () =>
       editor.history.undo = jest.fn(() => ({ model: firstModel, changes: { added: [stroke1] } }))
       editor.history.context.canUndo = true
       await editor.undo()
-      expect(editor.recognizer.undo).toBeCalledTimes(1)
-      expect(editor.recognizer.undo).toBeCalledWith(expect.objectContaining({ added: [stroke1] }))
-      expect(editor.renderer.drawSymbol).toBeCalledTimes(1)
-      expect(editor.renderer.drawSymbol).toBeCalledWith(stroke1)
-      expect(editor.renderer.removeSymbol).toBeCalledTimes(0)
+      expect(editor.recognizer.undo).toHaveBeenCalledTimes(1)
+      expect(editor.recognizer.undo).toHaveBeenCalledWith(expect.objectContaining({ added: [stroke1] }))
+      expect(editor.renderer.drawSymbol).toHaveBeenCalledTimes(1)
+      expect(editor.renderer.drawSymbol).toHaveBeenCalledWith(stroke1)
+      expect(editor.renderer.removeSymbol).toHaveBeenCalledTimes(0)
     })
     test("should not call recognizer.undo & call renderer.drawSymbol when history.undo return added shape", async () =>
     {
@@ -527,10 +527,10 @@ describe("EditorOffscreen.ts", () =>
       editor.history.undo = jest.fn(() => ({ model: firstModel, changes: { added: [circle] } }))
       editor.history.context.canUndo = true
       await editor.undo()
-      expect(editor.recognizer.undo).toBeCalledTimes(0)
-      expect(editor.renderer.drawSymbol).toBeCalledTimes(1)
-      expect(editor.renderer.drawSymbol).toBeCalledWith(circle)
-      expect(editor.renderer.removeSymbol).toBeCalledTimes(0)
+      expect(editor.recognizer.undo).toHaveBeenCalledTimes(0)
+      expect(editor.renderer.drawSymbol).toHaveBeenCalledTimes(1)
+      expect(editor.renderer.drawSymbol).toHaveBeenCalledWith(circle)
+      expect(editor.renderer.removeSymbol).toHaveBeenCalledTimes(0)
     })
     test("should call recognizer.undo & renderer.removeSymbol when history.undo return erased stroke", async () =>
     {
@@ -540,11 +540,11 @@ describe("EditorOffscreen.ts", () =>
       editor.history.undo = jest.fn(() => ({ model: firstModel, changes: { erased: [stroke1] } }))
       editor.history.context.canUndo = true
       await editor.undo()
-      expect(editor.recognizer.undo).toBeCalledTimes(1)
-      expect(editor.recognizer.undo).toBeCalledWith(expect.objectContaining({ erased: [stroke1] }))
-      expect(editor.renderer.drawSymbol).toBeCalledTimes(0)
-      expect(editor.renderer.removeSymbol).toBeCalledTimes(1)
-      expect(editor.renderer.removeSymbol).toBeCalledWith(stroke1.id)
+      expect(editor.recognizer.undo).toHaveBeenCalledTimes(1)
+      expect(editor.recognizer.undo).toHaveBeenCalledWith(expect.objectContaining({ erased: [stroke1] }))
+      expect(editor.renderer.drawSymbol).toHaveBeenCalledTimes(0)
+      expect(editor.renderer.removeSymbol).toHaveBeenCalledTimes(1)
+      expect(editor.renderer.removeSymbol).toHaveBeenCalledWith(stroke1.id)
     })
     test("should call recognizer.undo & renderer.drawSymbol & renderer.removeSymbol when history.undo return replaced stroke", async () =>
     {
@@ -556,12 +556,12 @@ describe("EditorOffscreen.ts", () =>
       editor.history.undo = jest.fn(() => ({ model: firstModel, changes: { replaced: { newSymbols: [stroke2], oldSymbols: [stroke1] } } }))
       editor.history.context.canUndo = true
       await editor.undo()
-      expect(editor.recognizer.undo).toBeCalledTimes(1)
-      expect(editor.recognizer.undo).toBeCalledWith(expect.objectContaining({ replaced: { newStrokes: [stroke2], oldStrokes: [stroke1] } }))
-      expect(editor.renderer.drawSymbol).toBeCalledTimes(1)
-      expect(editor.renderer.drawSymbol).toBeCalledWith(stroke1)
-      expect(editor.renderer.removeSymbol).toBeCalledTimes(1)
-      expect(editor.renderer.removeSymbol).toBeCalledWith(stroke2.id)
+      expect(editor.recognizer.undo).toHaveBeenCalledTimes(1)
+      expect(editor.recognizer.undo).toHaveBeenCalledWith(expect.objectContaining({ replaced: { newStrokes: [stroke2], oldStrokes: [stroke1] } }))
+      expect(editor.renderer.drawSymbol).toHaveBeenCalledTimes(1)
+      expect(editor.renderer.drawSymbol).toHaveBeenCalledWith(stroke1)
+      expect(editor.renderer.removeSymbol).toHaveBeenCalledTimes(1)
+      expect(editor.renderer.removeSymbol).toHaveBeenCalledWith(stroke2.id)
     })
     test("should call recognizer.undo & renderer.drawSymbol & renderer.removeSymbol when history.undo return matrix", async () =>
     {
@@ -571,10 +571,10 @@ describe("EditorOffscreen.ts", () =>
       editor.history.undo = jest.fn(() => ({ model: firstModel, changes: { matrix: { matrix: { tx: 2, ty: 3, xx: 4, xy: 5, yx: 6, yy: 7 }, symbols: [stroke1] } } }))
       editor.history.context.canUndo = true
       await editor.undo()
-      expect(editor.recognizer.undo).toBeCalledTimes(1)
-      expect(editor.recognizer.undo).toBeCalledWith(expect.objectContaining({ matrix: { matrix: { tx: 2, ty: 3, xx: 4, xy: 5, yx: 6, yy: 7 }, strokes: [stroke1] } }))
-      expect(editor.renderer.drawSymbol).toBeCalledTimes(1)
-      expect(editor.renderer.drawSymbol).toBeCalledWith(stroke1)
+      expect(editor.recognizer.undo).toHaveBeenCalledTimes(1)
+      expect(editor.recognizer.undo).toHaveBeenCalledWith(expect.objectContaining({ matrix: { matrix: { tx: 2, ty: 3, xx: 4, xy: 5, yx: 6, yy: 7 }, strokes: [stroke1] } }))
+      expect(editor.renderer.drawSymbol).toHaveBeenCalledTimes(1)
+      expect(editor.renderer.drawSymbol).toHaveBeenCalledWith(stroke1)
     })
     test("should call recognizer.undo & renderer.drawSymbol & renderer.removeSymbol when history.undo return translate", async () =>
     {
@@ -584,10 +584,10 @@ describe("EditorOffscreen.ts", () =>
       editor.history.undo = jest.fn(() => ({ model: firstModel, changes: { translate: [{ tx: 1, ty: 2, symbols: [stroke1] }] } }))
       editor.history.context.canUndo = true
       await editor.undo()
-      expect(editor.recognizer.undo).toBeCalledTimes(1)
-      expect(editor.recognizer.undo).toBeCalledWith(expect.objectContaining({ translate: [{ tx: 1, ty: 2, strokes: [stroke1] }] }))
-      expect(editor.renderer.drawSymbol).toBeCalledTimes(1)
-      expect(editor.renderer.drawSymbol).toBeCalledWith(stroke1)
+      expect(editor.recognizer.undo).toHaveBeenCalledTimes(1)
+      expect(editor.recognizer.undo).toHaveBeenCalledWith(expect.objectContaining({ translate: [{ tx: 1, ty: 2, strokes: [stroke1] }] }))
+      expect(editor.renderer.drawSymbol).toHaveBeenCalledTimes(1)
+      expect(editor.renderer.drawSymbol).toHaveBeenCalledWith(stroke1)
     })
     test("should call recognizer.undo & renderer.drawSymbol & renderer.removeSymbol when history.undo return scale", async () =>
     {
@@ -597,10 +597,10 @@ describe("EditorOffscreen.ts", () =>
       editor.history.undo = jest.fn(() => ({ model: firstModel, changes: { scale: [{ origin: { x: 1, y: 2 }, scaleX: 2, scaleY: 4, symbols: [stroke1] }] } }))
       editor.history.context.canUndo = true
       await editor.undo()
-      expect(editor.recognizer.undo).toBeCalledTimes(1)
-      expect(editor.recognizer.undo).toBeCalledWith(expect.objectContaining({ scale: [{ origin: { x: 1, y: 2 }, scaleX: 2, scaleY: 4, strokes: [stroke1] }] }))
-      expect(editor.renderer.drawSymbol).toBeCalledTimes(1)
-      expect(editor.renderer.drawSymbol).toBeCalledWith(stroke1)
+      expect(editor.recognizer.undo).toHaveBeenCalledTimes(1)
+      expect(editor.recognizer.undo).toHaveBeenCalledWith(expect.objectContaining({ scale: [{ origin: { x: 1, y: 2 }, scaleX: 2, scaleY: 4, strokes: [stroke1] }] }))
+      expect(editor.renderer.drawSymbol).toHaveBeenCalledTimes(1)
+      expect(editor.renderer.drawSymbol).toHaveBeenCalledWith(stroke1)
     })
     test("should call recognizer.undo & renderer.drawSymbol & renderer.removeSymbol when history.undo return rotate", async () =>
     {
@@ -610,10 +610,10 @@ describe("EditorOffscreen.ts", () =>
       editor.history.undo = jest.fn(() => ({ model: firstModel, changes: { rotate: [{ angle: 42, center: { x: 1, y: 2 }, symbols: [stroke1] }] } }))
       editor.history.context.canUndo = true
       await editor.undo()
-      expect(editor.recognizer.undo).toBeCalledTimes(1)
-      expect(editor.recognizer.undo).toBeCalledWith(expect.objectContaining({ rotate: [{ angle: 42, center: { x: 1, y: 2 }, strokes: [stroke1] }] }))
-      expect(editor.renderer.drawSymbol).toBeCalledTimes(1)
-      expect(editor.renderer.drawSymbol).toBeCalledWith(stroke1)
+      expect(editor.recognizer.undo).toHaveBeenCalledTimes(1)
+      expect(editor.recognizer.undo).toHaveBeenCalledWith(expect.objectContaining({ rotate: [{ angle: 42, center: { x: 1, y: 2 }, strokes: [stroke1] }] }))
+      expect(editor.renderer.drawSymbol).toHaveBeenCalledTimes(1)
+      expect(editor.renderer.drawSymbol).toHaveBeenCalledWith(stroke1)
     })
   })
 
@@ -639,9 +639,9 @@ describe("EditorOffscreen.ts", () =>
     {
       editor.history.context.canRedo = false
       await editor.redo()
-      expect(editor.recognizer.redo).toBeCalledTimes(0)
-      expect(editor.renderer.drawSymbol).toBeCalledTimes(0)
-      expect(editor.renderer.removeSymbol).toBeCalledTimes(0)
+      expect(editor.recognizer.redo).toHaveBeenCalledTimes(0)
+      expect(editor.renderer.drawSymbol).toHaveBeenCalledTimes(0)
+      expect(editor.renderer.removeSymbol).toHaveBeenCalledTimes(0)
     })
     test("should call recognizer.redo & renderer.drawSymbol when history.redo return added stroke", async () =>
     {
@@ -651,10 +651,10 @@ describe("EditorOffscreen.ts", () =>
       editor.history.context.canRedo = true
       editor.history.redo = jest.fn(() => ({ model: secondModel, changes: { added: [stroke1] } }))
       await editor.redo()
-      expect(editor.recognizer.redo).toBeCalledTimes(1)
-      expect(editor.renderer.drawSymbol).toBeCalledTimes(1)
-      expect(editor.renderer.drawSymbol).toBeCalledWith(stroke1)
-      expect(editor.renderer.removeSymbol).toBeCalledTimes(0)
+      expect(editor.recognizer.redo).toHaveBeenCalledTimes(1)
+      expect(editor.renderer.drawSymbol).toHaveBeenCalledTimes(1)
+      expect(editor.renderer.drawSymbol).toHaveBeenCalledWith(stroke1)
+      expect(editor.renderer.removeSymbol).toHaveBeenCalledTimes(0)
     })
     test("should not call recognizer.redo & call renderer.drawSymbol when history.redo return added shape", async () =>
     {
@@ -664,10 +664,10 @@ describe("EditorOffscreen.ts", () =>
       editor.history.redo = jest.fn(() => ({ model: firstModel, changes: { added: [circle] } }))
       editor.history.context.canRedo = true
       await editor.redo()
-      expect(editor.recognizer.redo).toBeCalledTimes(0)
-      expect(editor.renderer.drawSymbol).toBeCalledTimes(1)
-      expect(editor.renderer.drawSymbol).toBeCalledWith(circle)
-      expect(editor.renderer.removeSymbol).toBeCalledTimes(0)
+      expect(editor.recognizer.redo).toHaveBeenCalledTimes(0)
+      expect(editor.renderer.drawSymbol).toHaveBeenCalledTimes(1)
+      expect(editor.renderer.drawSymbol).toHaveBeenCalledWith(circle)
+      expect(editor.renderer.removeSymbol).toHaveBeenCalledTimes(0)
     })
     test("should call recognizer.redo & renderer.removeSymbol when history.redo return erased stroke", async () =>
     {
@@ -677,11 +677,11 @@ describe("EditorOffscreen.ts", () =>
       editor.history.redo = jest.fn(() => ({ model: firstModel, changes: { erased: [stroke1] } }))
       editor.history.context.canRedo = true
       await editor.redo()
-      expect(editor.recognizer.redo).toBeCalledTimes(1)
-      expect(editor.recognizer.redo).toBeCalledWith(expect.objectContaining({ erased: [stroke1] }))
-      expect(editor.renderer.drawSymbol).toBeCalledTimes(0)
-      expect(editor.renderer.removeSymbol).toBeCalledTimes(1)
-      expect(editor.renderer.removeSymbol).toBeCalledWith(stroke1.id)
+      expect(editor.recognizer.redo).toHaveBeenCalledTimes(1)
+      expect(editor.recognizer.redo).toHaveBeenCalledWith(expect.objectContaining({ erased: [stroke1] }))
+      expect(editor.renderer.drawSymbol).toHaveBeenCalledTimes(0)
+      expect(editor.renderer.removeSymbol).toHaveBeenCalledTimes(1)
+      expect(editor.renderer.removeSymbol).toHaveBeenCalledWith(stroke1.id)
     })
     test("should call recognizer.redo & renderer.drawSymbol & renderer.removeSymbol when history.redo return replaced stroke", async () =>
     {
@@ -693,12 +693,12 @@ describe("EditorOffscreen.ts", () =>
       editor.history.redo = jest.fn(() => ({ model: firstModel, changes: { replaced: { newSymbols: [stroke2], oldSymbols: [stroke1] } } }))
       editor.history.context.canRedo = true
       await editor.redo()
-      expect(editor.recognizer.redo).toBeCalledTimes(1)
-      expect(editor.recognizer.redo).toBeCalledWith(expect.objectContaining({ replaced: { newStrokes: [stroke2], oldStrokes: [stroke1] } }))
-      expect(editor.renderer.drawSymbol).toBeCalledTimes(1)
-      expect(editor.renderer.drawSymbol).toBeCalledWith(stroke1)
-      expect(editor.renderer.removeSymbol).toBeCalledTimes(1)
-      expect(editor.renderer.removeSymbol).toBeCalledWith(stroke2.id)
+      expect(editor.recognizer.redo).toHaveBeenCalledTimes(1)
+      expect(editor.recognizer.redo).toHaveBeenCalledWith(expect.objectContaining({ replaced: { newStrokes: [stroke2], oldStrokes: [stroke1] } }))
+      expect(editor.renderer.drawSymbol).toHaveBeenCalledTimes(1)
+      expect(editor.renderer.drawSymbol).toHaveBeenCalledWith(stroke1)
+      expect(editor.renderer.removeSymbol).toHaveBeenCalledTimes(1)
+      expect(editor.renderer.removeSymbol).toHaveBeenCalledWith(stroke2.id)
     })
   })
 
@@ -710,7 +710,7 @@ describe("EditorOffscreen.ts", () =>
     {
       editor.recognizer.export = jest.fn(() => Promise.resolve(jiixText))
       await editor.export()
-      await expect(editor.recognizer.export).toBeCalledTimes(1)
+      await expect(editor.recognizer.export).toHaveBeenCalledTimes(1)
     })
     test("should reject if recognizer.export rejected", async () =>
     {
@@ -732,12 +732,12 @@ describe("EditorOffscreen.ts", () =>
     test("should call converter.apply", async () =>
     {
       await editor.convert()
-      await expect(editor.converter.apply).toBeCalledTimes(1)
+      await expect(editor.converter.apply).toHaveBeenCalledTimes(1)
     })
     test("should emitConverted", async () =>
     {
       await editor.convert()
-      expect(editor.event.emitConverted).toBeCalledTimes(1)
+      expect(editor.event.emitConverted).toHaveBeenCalledTimes(1)
     })
     test("should emit error if converter.apply is rejected", async () =>
     {
@@ -766,7 +766,7 @@ describe("EditorOffscreen.ts", () =>
     test("should call recognizer.waitForIdle", async () =>
     {
       await editor.waitForIdle()
-      await expect(editor.recognizer.waitForIdle).toBeCalledTimes(1)
+      await expect(editor.recognizer.waitForIdle).toHaveBeenCalledTimes(1)
     })
     test("should emit idle & call layers.updateState when recognizer emit idle", async () =>
     {
@@ -793,7 +793,7 @@ describe("EditorOffscreen.ts", () =>
     {
       await editor.initialize()
       await editor.resize({ height: 1, width: 2})
-      await expect(editor.renderer.resize).toBeCalledTimes(1)
+      await expect(editor.renderer.resize).toHaveBeenCalledTimes(1)
     })
     test("should update model", async () =>
     {
@@ -822,21 +822,21 @@ describe("EditorOffscreen.ts", () =>
       const stroke = buildOIStroke()
       editor.model.addSymbol(stroke)
       await editor.clear()
-      await expect(editor.renderer.clear).toBeCalledTimes(1)
+      await expect(editor.renderer.clear).toHaveBeenCalledTimes(1)
     })
     test("should call selector.removeSelectedGroup", async () =>
     {
       const stroke = buildOIStroke()
       editor.model.addSymbol(stroke)
       await editor.clear()
-      await expect(editor.selector.removeSelectedGroup).toBeCalledTimes(1)
+      await expect(editor.selector.removeSelectedGroup).toHaveBeenCalledTimes(1)
     })
     test("should call recognizer.clear", async () =>
     {
       const stroke = buildOIStroke()
       editor.model.addSymbol(stroke)
       editor.clear()
-      await expect(editor.recognizer.clear).toBeCalledTimes(1)
+      await expect(editor.recognizer.clear).toHaveBeenCalledTimes(1)
     })
     test("should clear model", async () =>
     {
@@ -848,8 +848,8 @@ describe("EditorOffscreen.ts", () =>
     test("should do nothing if strokes empty", async () =>
     {
       await editor.clear()
-      await expect(editor.renderer.clear).toBeCalledTimes(0)
-      await expect(editor.recognizer.clear).toBeCalledTimes(0)
+      await expect(editor.renderer.clear).toHaveBeenCalledTimes(0)
+      await expect(editor.recognizer.clear).toHaveBeenCalledTimes(0)
     })
   })
 
@@ -867,22 +867,22 @@ describe("EditorOffscreen.ts", () =>
     test("should detach all.managers", async () =>
     {
       editor.destroy()
-      await expect(editor.eraser.detach).toBeCalledTimes(1)
-      await expect(editor.selector.detach).toBeCalledTimes(1)
-      await expect(editor.move.detach).toBeCalledTimes(1)
-      await expect(editor.writer.detach).toBeCalledTimes(1)
+      await expect(editor.eraser.detach).toHaveBeenCalledTimes(1)
+      await expect(editor.selector.detach).toHaveBeenCalledTimes(1)
+      await expect(editor.move.detach).toHaveBeenCalledTimes(1)
+      await expect(editor.writer.detach).toHaveBeenCalledTimes(1)
     })
 
     test("should call renderer.destroy", async () =>
     {
       editor.destroy()
-      await expect(editor.renderer.destroy).toBeCalledTimes(1)
+      await expect(editor.renderer.destroy).toHaveBeenCalledTimes(1)
     })
 
     test("should call recognizer.destroy", async () =>
     {
       editor.destroy()
-      await expect(editor.recognizer.destroy).toBeCalledTimes(1)
+      await expect(editor.recognizer.destroy).toHaveBeenCalledTimes(1)
     })
 
   })

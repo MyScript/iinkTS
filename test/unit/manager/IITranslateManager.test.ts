@@ -53,7 +53,7 @@ describe("IITranslateManager.ts", () =>
       const poly = new IIShapePolygon(points)
       //@ts-ignore
       poly.kind = "pouet"
-      expect(() => manager.applyToSymbol(poly, 10, 15)).toThrowError(expect.objectContaining({ message: expect.stringContaining("Can't apply translate on shape, kind unknow:")}))
+      expect(() => manager.applyToSymbol(poly, 10, 15)).toThrow(expect.objectContaining({ message: expect.stringContaining("Can't apply translate on shape, kind unknow:")}))
     })
     test("translate edge Line", () =>
     {

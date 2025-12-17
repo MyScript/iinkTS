@@ -128,10 +128,10 @@ describe("InteractiveInkSSRSmartGuide.ts", () =>
     ellispis.dispatchEvent(pointerDownEvt)
     test("should call editor.convert", () =>
     {
-      expect(editorMock.convert).toBeCalledTimes(0)
+      expect(editorMock.convert).toHaveBeenCalledTimes(0)
       const btn = domElement.querySelector(`#convert-${ sm.uuid }`) as HTMLDivElement
       btn.dispatchEvent(pointerDownEvt)
-      expect(editorMock.convert).toBeCalledTimes(1)
+      expect(editorMock.convert).toHaveBeenCalledTimes(1)
     })
     test.skip("should COPY", () =>
     {
@@ -139,10 +139,10 @@ describe("InteractiveInkSSRSmartGuide.ts", () =>
     })
     test("should call behavior.clear", () =>
     {
-      expect(editorMock.clear).toBeCalledTimes(0)
+      expect(editorMock.clear).toHaveBeenCalledTimes(0)
       const btn = domElement.querySelector(`#delete-${ sm.uuid }`) as HTMLDivElement
       btn.dispatchEvent(pointerDownEvt)
-      expect(editorMock.clear).toBeCalledTimes(1)
+      expect(editorMock.clear).toHaveBeenCalledTimes(1)
     })
   })
 

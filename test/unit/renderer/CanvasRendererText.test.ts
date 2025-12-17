@@ -28,8 +28,8 @@ describe("CanvasRendererText.ts", () =>
       type: canvasRendererText.symbols.char
     }
     canvasRendererText.draw(canvasContext, text)
-    expect(canvasContext.fillText).toBeCalledTimes(1)
-    expect(canvasContext.fillText).toBeCalledWith(text.label, text.data.topLeftPoint.x, text.data.topLeftPoint.y + text.data.height)
+    expect(canvasContext.fillText).toHaveBeenCalledTimes(1)
+    expect(canvasContext.fillText).toHaveBeenCalledWith(text.label, text.data.topLeftPoint.x, text.data.topLeftPoint.y + text.data.height)
   })
 
   test("should draw text type string", () =>
@@ -50,8 +50,8 @@ describe("CanvasRendererText.ts", () =>
       type: canvasRendererText.symbols.string
     }
     canvasRendererText.draw(canvasContext, text)
-    expect(canvasContext.fillText).toBeCalledTimes(1)
-    expect(canvasContext.fillText).toBeCalledWith(text.label, text.data.topLeftPoint.x, text.data.topLeftPoint.y + text.data.height)
+    expect(canvasContext.fillText).toHaveBeenCalledTimes(1)
+    expect(canvasContext.fillText).toHaveBeenCalledWith(text.label, text.data.topLeftPoint.x, text.data.topLeftPoint.y + text.data.height)
   })
 
   test("should draw text type string", () =>
@@ -85,11 +85,11 @@ describe("CanvasRendererText.ts", () =>
       ]
     }
     canvasRendererText.draw(canvasContext, text)
-    expect(canvasContext.fillText).toBeCalledTimes(1)
-    expect(canvasContext.fillText).toBeCalledWith(text.label, text.data.topLeftPoint.x, text.data.topLeftPoint.y + text.data.height)
-    expect(canvasContext.moveTo).toBeCalledTimes(1)
-    expect(canvasContext.moveTo).toBeCalledWith(5, text.data.topLeftPoint.y + text.data.height)
-    expect(canvasContext.lineTo).toBeCalledTimes(1)
-    expect(canvasContext.lineTo).toBeCalledWith(13, text.data.topLeftPoint.y + text.data.height)
+    expect(canvasContext.fillText).toHaveBeenCalledTimes(1)
+    expect(canvasContext.fillText).toHaveBeenCalledWith(text.label, text.data.topLeftPoint.x, text.data.topLeftPoint.y + text.data.height)
+    expect(canvasContext.moveTo).toHaveBeenCalledTimes(1)
+    expect(canvasContext.moveTo).toHaveBeenCalledWith(5, text.data.topLeftPoint.y + text.data.height)
+    expect(canvasContext.lineTo).toHaveBeenCalledTimes(1)
+    expect(canvasContext.lineTo).toHaveBeenCalledWith(13, text.data.topLeftPoint.y + text.data.height)
   })
 })
