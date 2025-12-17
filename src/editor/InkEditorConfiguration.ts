@@ -6,7 +6,7 @@ import { DefaultIIRendererConfiguration, TIIRendererConfiguration } from "../ren
 import { DefaultStyle, TStyle } from "../style"
 import { convertPixelToMillimeter, mergeDeep, PartialDeep } from "../utils"
 import { TEditorConfiguration } from "./AbstractEditor"
-import { DefaultIEditorTriggerConfiguration, TIEditorTriggerConfiguration } from "./IEditorTriggerConfiguration"
+import { DefaulTEditorTriggerConfiguration, TEditorTriggerConfiguration } from "./EditorTriggerConfiguration"
 
 
 /**
@@ -16,7 +16,7 @@ export type TInkEditorConfiguration = TEditorConfiguration & TRecognizerHTTPV2Co
   rendering: TIIRendererConfiguration
   "undo-redo": THistoryConfiguration
   grabber: TGrabberConfiguration
-  triggers: TIEditorTriggerConfiguration
+  triggers: TEditorTriggerConfiguration
   logger: TLoggerConfiguration
   penStyle: TStyle
 }
@@ -30,7 +30,7 @@ export const DefaultInkEditorConfiguration: TInkEditorConfiguration = {
   recognition: DefaultRecognizerHTTPV2Configuration.recognition,
   rendering: DefaultIIRendererConfiguration,
   grabber: DefaultGrabberConfiguration,
-  triggers: DefaultIEditorTriggerConfiguration,
+  triggers: DefaulTEditorTriggerConfiguration,
   "undo-redo": DefaultHistoryConfiguration,
   logger: DefaultLoggerConfiguration,
   penStyle: DefaultStyle,
@@ -46,7 +46,7 @@ export class InkEditorConfiguration implements TInkEditorConfiguration
   rendering: TIIRendererConfiguration
   "undo-redo": THistoryConfiguration
   grabber: TGrabberConfiguration
-  triggers: TIEditorTriggerConfiguration
+  triggers: TEditorTriggerConfiguration
   logger: TLoggerConfiguration
   penStyle: TStyle
 
