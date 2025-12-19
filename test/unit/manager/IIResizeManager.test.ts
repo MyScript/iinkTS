@@ -36,7 +36,7 @@ describe("IIResizeManager.ts", () =>
       //@ts-ignore
       stroke.type = "pouet"
       const origin: TPoint = { x: 0, y: 0 }
-      expect(() => manager.applyToSymbol(stroke, origin, 2, 3)).toThrowError(expect.objectContaining({ message: expect.stringContaining("Can't apply resize on symbol, type unknow:") }))
+      expect(() => manager.applyToSymbol(stroke, origin, 2, 3)).toThrow(expect.objectContaining({ message: expect.stringContaining("Can't apply resize on symbol, type unknow:") }))
     })
     test("should resize stroke", () =>
     {
@@ -60,7 +60,7 @@ describe("IIResizeManager.ts", () =>
       //@ts-ignore
       poly.kind = "pouet"
       const origin: TPoint = { x: 0, y: 0 }
-      expect(() => manager.applyToSymbol(poly, origin, 2, 3)).toThrowError(expect.objectContaining({ message: expect.stringContaining("Can't apply resize on shape, kind unknow:") }))
+      expect(() => manager.applyToSymbol(poly, origin, 2, 3)).toThrow(expect.objectContaining({ message: expect.stringContaining("Can't apply resize on shape, kind unknow:") }))
     })
     test("should resize shape Circle", () =>
     {
@@ -117,7 +117,7 @@ describe("IIResizeManager.ts", () =>
       //@ts-ignore
       edge.kind = "pouet"
       const origin: TPoint = { x: 0, y: 0 }
-      expect(() => manager.applyToSymbol(edge, origin, 2, 3)).toThrowError(expect.objectContaining({ message: expect.stringContaining("Can't apply resize on edge, kind unknow:") }))
+      expect(() => manager.applyToSymbol(edge, origin, 2, 3)).toThrow(expect.objectContaining({ message: expect.stringContaining("Can't apply resize on edge, kind unknow:") }))
     })
     test("should resize edge Arc", () =>
     {

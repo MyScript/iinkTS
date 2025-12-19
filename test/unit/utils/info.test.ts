@@ -12,8 +12,8 @@ describe("language.ts", () =>
   test("should call fetch with good url", async () =>
   {
     await getApiInfos(RecognizerWebSocketSSRTextConfiguration)
-    expect(fetch).toBeCalledTimes(1)
-    expect(fetch).toBeCalledWith(`${ RecognizerWebSocketSSRTextConfiguration?.server?.scheme }://${ RecognizerWebSocketSSRTextConfiguration?.server?.host }/api/v4.0/iink/version`)
+    expect(fetch).toHaveBeenCalledTimes(1)
+    expect(fetch).toHaveBeenCalledWith(`${ RecognizerWebSocketSSRTextConfiguration?.server?.scheme }://${ RecognizerWebSocketSSRTextConfiguration?.server?.host }/api/v4.0/iink/version`)
   })
 
   test("should reject getApiInfos if no configuration", async () =>

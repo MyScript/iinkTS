@@ -112,7 +112,7 @@ describe("InteractiveInkSSREditor.ts", () =>
       })
       await expect(editor.grabber.attach).toHaveBeenNthCalledWith(1, editor.layers.rendering)
       await expect(editor.renderer.init).toHaveBeenNthCalledWith(1, editor.layers.rendering)
-      await expect(editor.recognizer.init).toBeCalledTimes(1)
+      await expect(editor.recognizer.init).toHaveBeenCalledTimes(1)
     })
 
     test("should resolve init when recognizer.init is resolve", async () =>
@@ -131,7 +131,7 @@ describe("InteractiveInkSSREditor.ts", () =>
       editor.recognizer.setTheme = jest.fn(() => Promise.resolve())
 
       await editor.initialize()
-      await expect(editor.recognizer.init).toBeCalledTimes(1)
+      await expect(editor.recognizer.init).toHaveBeenCalledTimes(1)
     })
 
     test("should reject init when recognizer.init is reject", async () =>
@@ -164,15 +164,15 @@ describe("InteractiveInkSSREditor.ts", () =>
     test("should not call renderer.drawPendingStroke if currentSymbol is null", async () =>
     {
       editor.drawCurrentStroke()
-      await expect(editor.renderer.drawPendingStroke).toBeCalledTimes(0)
+      await expect(editor.renderer.drawPendingStroke).toHaveBeenCalledTimes(0)
     })
     test("should call renderer.drawPendingStroke", async () =>
     {
       const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
       editor.model.initCurrentStroke(p1, "pen", DefaultPenStyle)
       editor.drawCurrentStroke()
-      await expect(editor.renderer.drawPendingStroke).toBeCalledTimes(1)
-      await expect(editor.renderer.drawPendingStroke).toBeCalledWith(editor.model.currentSymbol)
+      await expect(editor.renderer.drawPendingStroke).toHaveBeenCalledTimes(1)
+      await expect(editor.renderer.drawPendingStroke).toHaveBeenCalledWith(editor.model.currentSymbol)
     })
   })
 
@@ -192,12 +192,12 @@ describe("InteractiveInkSSREditor.ts", () =>
       test("should call recognizer.addStrokes", async () =>
       {
         await editor.synchronizeModelWithBackend()
-        await expect(editor.recognizer.addStrokes).toBeCalledTimes(1)
+        await expect(editor.recognizer.addStrokes).toHaveBeenCalledTimes(1)
       })
       test("should call renderer.clearErasingStrokes", async () =>
       {
         await editor.synchronizeModelWithBackend()
-        await expect(editor.renderer.clearErasingStrokes).toBeCalledTimes(1)
+        await expect(editor.renderer.clearErasingStrokes).toHaveBeenCalledTimes(1)
       })
     })
     describe("with exportContent = 'DEMAND", () =>
@@ -216,7 +216,7 @@ describe("InteractiveInkSSREditor.ts", () =>
       test("should not call recognizer.addStrokes when exportContent = DEMAND", async () =>
       {
         await editor.synchronizeModelWithBackend()
-        await expect(editor.recognizer.addStrokes).toBeCalledTimes(0)
+        await expect(editor.recognizer.addStrokes).toHaveBeenCalledTimes(0)
       })
     })
   })
@@ -235,7 +235,7 @@ describe("InteractiveInkSSREditor.ts", () =>
     test("should call recognizer.waitForIdle", async () =>
     {
       await editor.waitForIdle()
-      await expect(editor.recognizer.waitForIdle).toBeCalledTimes(1)
+      await expect(editor.recognizer.waitForIdle).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -256,7 +256,7 @@ describe("InteractiveInkSSREditor.ts", () =>
       {
         editor.recognizer.export = jest.fn(m => Promise.resolve(m))
         await editor.export()
-        await expect(editor.recognizer.export).toBeCalledTimes(1)
+        await expect(editor.recognizer.export).toHaveBeenCalledTimes(1)
       })
       test("should reject if recognizer.export rejected", async () =>
       {
@@ -282,8 +282,8 @@ describe("InteractiveInkSSREditor.ts", () =>
       {
         await editor.initialize()
         await editor.export()
-        await expect(editor.recognizer.addStrokes).toBeCalledTimes(1)
-        await expect(editor.recognizer.export).toBeCalledTimes(0)
+        await expect(editor.recognizer.addStrokes).toHaveBeenCalledTimes(1)
+        await expect(editor.recognizer.export).toHaveBeenCalledTimes(0)
       })
       test("should reject if recognizer.addStrokes rejected when exportContent = DEMAND", async () =>
       {
@@ -309,12 +309,12 @@ describe("InteractiveInkSSREditor.ts", () =>
     test("should call recognizer.convert", async () =>
     {
       await editor.convert()
-      await expect(editor.recognizer.convert).toBeCalledTimes(1)
+      await expect(editor.recognizer.convert).toHaveBeenCalledTimes(1)
     })
     test("should emit Converted recognizer.convert", async () =>
     {
       await editor.convert()
-      await expect(editor.event.emitConverted).toBeCalledTimes(1)
+      await expect(editor.event.emitConverted).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -334,7 +334,7 @@ describe("InteractiveInkSSREditor.ts", () =>
       const textImport = "winter is comming"
       const blob = new Blob([textImport], { type: mimeType })
       await editor.import(blob, mimeType)
-      await expect(editor.recognizer.import).toBeCalledTimes(1)
+      await expect(editor.recognizer.import).toHaveBeenCalledTimes(1)
     })
     test("should return model with new export", async () =>
     {
@@ -384,7 +384,7 @@ describe("InteractiveInkSSREditor.ts", () =>
       await editor.initialize()
       const strokeToImport = buildStroke()
       await editor.importPointEvents([strokeToImport])
-      expect(editor.recognizer.importPointEvents).toBeCalledTimes(1)
+      expect(editor.recognizer.importPointEvents).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -402,13 +402,13 @@ describe("InteractiveInkSSREditor.ts", () =>
     test("should call renderer.resize", async () =>
     {
       await editor.resize({ height: 1, width: 2})
-      await expect(editor.renderer.resize).toBeCalledTimes(1)
+      await expect(editor.renderer.resize).toHaveBeenCalledTimes(1)
     })
     test("should call recognizer.resize after resizeTriggerDelay", async () =>
     {
       await editor.resize({ height: 3, width: 4})
       await delay(editor.configuration.triggers.resizeTriggerDelay)
-      await expect(editor.recognizer.resize).toBeCalledTimes(1)
+      await expect(editor.recognizer.resize).toHaveBeenCalledTimes(1)
     })
     test("should reject if renderer.resize rejected", async () =>
     {
@@ -437,7 +437,7 @@ describe("InteractiveInkSSREditor.ts", () =>
       editor.history.context.canUndo = true
       editor.history.context.stackIndex = 1
       await editor.undo()
-      await expect(editor.recognizer.undo).toBeCalledTimes(1)
+      await expect(editor.recognizer.undo).toHaveBeenCalledTimes(1)
     })
     test("should return previous model", async () =>
     {
@@ -478,7 +478,7 @@ describe("InteractiveInkSSREditor.ts", () =>
       editor.history.context.canRedo = true
       editor.history.context.stackIndex = 0
       await editor.redo()
-      await expect(editor.recognizer.redo).toBeCalledTimes(1)
+      await expect(editor.recognizer.redo).toHaveBeenCalledTimes(1)
     })
     test("should return next model", async () =>
     {
@@ -516,18 +516,18 @@ describe("InteractiveInkSSREditor.ts", () =>
     {
       editor.model.clear = jest.fn()
       await editor.clear()
-      await expect(editor.model.clear).toBeCalledTimes(1)
+      await expect(editor.model.clear).toHaveBeenCalledTimes(1)
     })
     test("should call recognizer.clear", async () =>
     {
       await editor.clear()
-      await expect(editor.recognizer.clear).toBeCalledTimes(1)
+      await expect(editor.recognizer.clear).toHaveBeenCalledTimes(1)
     })
     test("should call recognizer.clear", async () =>
     {
       editor.event.emitCleared = jest.fn()
       await editor.clear()
-      await expect(editor.event.emitCleared).toBeCalledTimes(1)
+      await expect(editor.event.emitCleared).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -546,19 +546,19 @@ describe("InteractiveInkSSREditor.ts", () =>
     test("should call grabber.detach", async () =>
     {
       editor.destroy()
-      expect(editor.grabber.detach).toBeCalledTimes(1)
+      expect(editor.grabber.detach).toHaveBeenCalledTimes(1)
     })
 
     test("should call renderer.destroy", async () =>
     {
       editor.destroy()
-      expect(editor.renderer.destroy).toBeCalledTimes(1)
+      expect(editor.renderer.destroy).toHaveBeenCalledTimes(1)
     })
 
     test("should call recognizer.destroy", async () =>
     {
       editor.destroy()
-      expect(editor.recognizer.destroy).toBeCalledTimes(1)
+      expect(editor.recognizer.destroy).toHaveBeenCalledTimes(1)
     })
 
   })
@@ -607,8 +607,8 @@ describe("InteractiveInkSSREditor.ts", () =>
         updates: []
       }
       editor.recognizer.event.emitSVGPatch(svgPatch)
-      expect(editor.renderer.updatesLayer).toBeCalledTimes(1)
-      expect(editor.renderer.updatesLayer).toBeCalledWith(svgPatch.layer, svgPatch.updates)
+      expect(editor.renderer.updatesLayer).toHaveBeenCalledTimes(1)
+      expect(editor.renderer.updatesLayer).toHaveBeenCalledWith(svgPatch.layer, svgPatch.updates)
     })
   })
 
