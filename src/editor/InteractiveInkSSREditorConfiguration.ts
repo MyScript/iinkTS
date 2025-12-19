@@ -6,7 +6,7 @@ import { DefaultRendererConfiguration, TRendererConfiguration } from "../rendere
 import { DefaultTheme, TPenStyle, TTheme } from "../style"
 import { mergeDeep, PartialDeep } from "../utils"
 import { TEditorConfiguration } from "./AbstractEditor"
-import { DefaultIIEditorTriggerConfiguration, TIIEditorTriggerConfiguration } from "./IIEditorTriggerConfiguration"
+import { DefaulTEditorTriggerConfiguration, TEditorTriggerConfiguration } from "./EditorTriggerConfiguration"
 
 /**
  * @group Editor
@@ -18,7 +18,7 @@ export type TInteractiveInkSSREditorConfiguration = TEditorConfiguration & TReco
   },
   "undo-redo": THistoryConfiguration
   grabber: TGrabberConfiguration
-  triggers: TIIEditorTriggerConfiguration
+  triggers: TEditorTriggerConfiguration
   logger: TLoggerConfiguration
   penStyle: TPenStyle,
   penStyleClasses?: string
@@ -37,7 +37,7 @@ export const DefaultInteractiveInkSSREditorConfiguration: TInteractiveInkSSREdit
     enable: true
   },
   grabber: DefaultGrabberConfiguration,
-  triggers: DefaultIIEditorTriggerConfiguration,
+  triggers: DefaulTEditorTriggerConfiguration,
   "undo-redo": DefaultHistoryConfiguration,
   logger: DefaultLoggerConfiguration,
   penStyle: {},
@@ -57,7 +57,7 @@ export class InteractiveInkSSREditorConfiguration implements TInteractiveInkSSRE
   }
   "undo-redo": THistoryConfiguration
   grabber: TGrabberConfiguration
-  triggers: TIIEditorTriggerConfiguration
+  triggers: TEditorTriggerConfiguration
   logger: TLoggerConfiguration
   penStyle: TPenStyle
   penStyleClasses?: string

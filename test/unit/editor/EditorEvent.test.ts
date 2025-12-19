@@ -32,7 +32,7 @@ describe('EditorEvent.ts', () =>
     {
       events.addLoadedListener(loadedCallback)
       events.emitLoaded()
-      expect(loadedCallback).toBeCalledTimes(1)
+      expect(loadedCallback).toHaveBeenCalledTimes(1)
     })
 
     test("should execute callback on emitNotif", () =>
@@ -154,7 +154,7 @@ describe('EditorEvent.ts', () =>
       events.removeAllListeners()
 
       events.emitLoaded()
-      expect(loadedCallback).toBeCalledTimes(0)
+      expect(loadedCallback).toHaveBeenCalledTimes(0)
 
       events.emitNotif({ message: "Test message", timeout: 42 })
       expect(notifCallback).toHaveBeenCalledTimes(0)
@@ -174,7 +174,7 @@ describe('EditorEvent.ts', () =>
       const testCallback = jest.fn()
       element.addEventListener(EditorEventName.LOADED, testCallback)
       events.emitLoaded()
-      expect(testCallback).toBeCalledTimes(1)
+      expect(testCallback).toHaveBeenCalledTimes(1)
     })
 
     test("should execute callback on emitNotif", () =>

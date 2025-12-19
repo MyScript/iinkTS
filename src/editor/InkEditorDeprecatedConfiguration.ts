@@ -6,7 +6,7 @@ import { DefaultRendererConfiguration, TRendererConfiguration } from "../rendere
 import { DefaultTheme, TPenStyle, TTheme } from "../style"
 import { mergeDeep, PartialDeep } from "../utils"
 import { TEditorConfiguration } from "./AbstractEditor"
-import { DefaultIEditorTriggerConfiguration, TIEditorTriggerConfiguration } from "./IEditorTriggerConfiguration"
+import { DefaulTEditorTriggerConfiguration, TEditorTriggerConfiguration } from "./EditorTriggerConfiguration"
 
 
 /**
@@ -16,7 +16,7 @@ export type TInkEditorDeprecatedConfiguration = TEditorConfiguration & TRecogniz
   rendering: TRendererConfiguration
   "undo-redo": THistoryConfiguration
   grabber: TGrabberConfiguration
-  triggers: TIEditorTriggerConfiguration
+  triggers: TEditorTriggerConfiguration
   logger: TLoggerConfiguration
   penStyle: TPenStyle,
   penStyleClasses?: string
@@ -32,7 +32,7 @@ export const DefaultInkEditorDeprecatedConfiguration: TInkEditorDeprecatedConfig
   recognition: DefaultRecognizerHTTPV1Configuration.recognition,
   rendering: DefaultRendererConfiguration,
   grabber: DefaultGrabberConfiguration,
-  triggers: DefaultIEditorTriggerConfiguration,
+  triggers: DefaulTEditorTriggerConfiguration,
   "undo-redo": DefaultHistoryConfiguration,
   logger: DefaultLoggerConfiguration,
   penStyle: {},
@@ -49,7 +49,7 @@ export class InkEditorDeprecatedConfiguration implements TInkEditorDeprecatedCon
   rendering: TRendererConfiguration
   "undo-redo": THistoryConfiguration
   grabber: TGrabberConfiguration
-  triggers: TIEditorTriggerConfiguration
+  triggers: TEditorTriggerConfiguration
   logger: TLoggerConfiguration
   penStyle: TPenStyle
   penStyleClasses?: string

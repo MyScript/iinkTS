@@ -415,8 +415,8 @@ describe("InteractiveInkSSRSVGRenderer.ts", () =>
 
     renderer.drawPendingStroke(stroke)
 
-    expect(renderer.stroker.drawStroke).toBeCalledTimes(1)
-    expect(renderer.stroker.drawStroke).toBeCalledWith(pendingStrokesGroup, stroke, [{ name: "style", value: "fill:undefined;stroke:transparent;" }])
+    expect(renderer.stroker.drawStroke).toHaveBeenCalledTimes(1)
+    expect(renderer.stroker.drawStroke).toHaveBeenCalledWith(pendingStrokesGroup, stroke, [{ name: "style", value: "fill:undefined;stroke:transparent;" }])
   })
 
   test('should drawPendingStroke when pointerType = eraser', () =>
@@ -441,8 +441,8 @@ describe("InteractiveInkSSRSVGRenderer.ts", () =>
     ]
     renderer.drawPendingStroke(eraseStroke)
 
-    expect(renderer.stroker.drawStroke).toBeCalledTimes(1)
-    expect(renderer.stroker.drawStroke).toBeCalledWith(pendingStrokesGroup, eraseStroke, [{ name: "style", value: "fill:grey;stroke:transparent;shadowBlur:5;opacity:0.2;" }])
+    expect(renderer.stroker.drawStroke).toHaveBeenCalledTimes(1)
+    expect(renderer.stroker.drawStroke).toHaveBeenCalledWith(pendingStrokesGroup, eraseStroke, [{ name: "style", value: "fill:grey;stroke:transparent;shadowBlur:5;opacity:0.2;" }])
   })
 
   test('should delete erasing strokes', () =>

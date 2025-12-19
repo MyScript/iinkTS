@@ -65,10 +65,10 @@ describe("InkEditorDeprecated.ts", () =>
     editor.grabber.attach = jest.fn()
     editor.renderer.init = jest.fn()
     await editor.initialize()
-    expect(editor.grabber.attach).toBeCalledTimes(1)
-    expect(editor.grabber.attach).toBeCalledWith(editor.layers.rendering)
-    expect(editor.renderer.init).toBeCalledTimes(1)
-    expect(editor.renderer.init).toBeCalledWith(editor.layers.rendering, { x: 50, y: 50 })
+    expect(editor.grabber.attach).toHaveBeenCalledTimes(1)
+    expect(editor.grabber.attach).toHaveBeenCalledWith(editor.layers.rendering)
+    expect(editor.renderer.init).toHaveBeenCalledTimes(1)
+    expect(editor.renderer.init).toHaveBeenCalledWith(editor.layers.rendering, { x: 50, y: 50 })
   })
 
   test("should call renderer on drawCurrentStroke", async () =>
@@ -81,8 +81,8 @@ describe("InkEditorDeprecated.ts", () =>
     editor.model.initCurrentStroke(p1, "pen", DefaultPenStyle)
     editor.model.endCurrentStroke(p2)
     editor.drawCurrentStroke()
-    expect(editor.renderer.drawPendingStroke).toBeCalledTimes(1)
-    expect(editor.renderer.drawPendingStroke).toBeCalledWith(editor.model.currentSymbol)
+    expect(editor.renderer.drawPendingStroke).toHaveBeenCalledTimes(1)
+    expect(editor.renderer.drawPendingStroke).toHaveBeenCalledWith(editor.model.currentSymbol)
   })
 
   describe("updateModelRendering", () =>
@@ -94,7 +94,7 @@ describe("InkEditorDeprecated.ts", () =>
       editor.renderer.drawModel = jest.fn()
       editor.recognizer.export = jest.fn(m => Promise.resolve(m))
       editor.updateModelRendering()
-      expect(editor.renderer.drawModel).toBeCalledTimes(1)
+      expect(editor.renderer.drawModel).toHaveBeenCalledTimes(1)
     })
 
     test("should call recognizer.export", async () =>
@@ -105,7 +105,7 @@ describe("InkEditorDeprecated.ts", () =>
       editor.recognizer.export = jest.fn(m => Promise.resolve(m))
       await editor.updateModelRendering()
       await delay(DefaultInkEditorDeprecatedConfiguration.triggers.exportContentDelay)
-      expect(editor.recognizer.export).toBeCalledTimes(1)
+      expect(editor.recognizer.export).toHaveBeenCalledTimes(1)
     })
 
     test("should reject if recognizer.export in error", async () =>
@@ -127,7 +127,7 @@ describe("InkEditorDeprecated.ts", () =>
       editor.recognizer.export = jest.fn(m => Promise.resolve(m))
       await editor.updateModelRendering()
       await delay(DefaultInkEditorDeprecatedConfiguration.triggers.exportContentDelay)
-      expect(editor.recognizer.export).toBeCalledTimes(0)
+      expect(editor.recognizer.export).toHaveBeenCalledTimes(0)
     })
   })
 
@@ -138,7 +138,7 @@ describe("InkEditorDeprecated.ts", () =>
     editor.recognizer.export = jest.fn(m => Promise.resolve(m))
     editor.export()
     await delay(DefaultInkEditorDeprecatedConfiguration.triggers.exportContentDelay)
-    expect(editor.recognizer.export).toBeCalledTimes(1)
+    expect(editor.recognizer.export).toHaveBeenCalledTimes(1)
   })
 
   test("should convert", async () =>
@@ -148,7 +148,7 @@ describe("InkEditorDeprecated.ts", () =>
     editor.recognizer.convert = jest.fn(m => Promise.resolve(m))
     editor.convert({ conversionState: "DIGITAL_EDIT", mimeTypes: ["mime-type"]})
     await delay(DefaultInkEditorDeprecatedConfiguration.triggers.exportContentDelay)
-    expect(editor.recognizer.convert).toBeCalledTimes(1)
+    expect(editor.recognizer.convert).toHaveBeenCalledTimes(1)
   })
 
   test("should resize", async () =>
@@ -162,8 +162,8 @@ describe("InkEditorDeprecated.ts", () =>
     editor.model.initCurrentStroke(p1, "pen", DefaultPenStyle)
     editor.model.endCurrentStroke(p2)
     await editor.resize({ height: 1, width: 2 })
-    expect(editor.renderer.resize).toBeCalledTimes(1)
-    expect(editor.recognizer.resize).toBeCalledTimes(1)
+    expect(editor.renderer.resize).toHaveBeenCalledTimes(1)
+    expect(editor.recognizer.resize).toHaveBeenCalledTimes(1)
   })
 
   test("should not call recognizer on resize if no strokes", async () =>
@@ -173,8 +173,8 @@ describe("InkEditorDeprecated.ts", () =>
     editor.renderer.resize = jest.fn()
     editor.recognizer.resize = jest.fn(m => Promise.resolve(m))
     await editor.resize({ height: 1, width: 2 })
-    expect(editor.renderer.resize).toBeCalledTimes(1)
-    expect(editor.recognizer.resize).toBeCalledTimes(0)
+    expect(editor.renderer.resize).toHaveBeenCalledTimes(1)
+    expect(editor.recognizer.resize).toHaveBeenCalledTimes(0)
   })
 
   test("should undo", async () =>
@@ -229,8 +229,8 @@ describe("InkEditorDeprecated.ts", () =>
     editor.history.push = jest.fn(m => m)
     editor.destroy()
     await delay(DefaultInkEditorDeprecatedConfiguration.triggers.exportContentDelay)
-    expect(editor.grabber.detach).toBeCalledTimes(1)
-    expect(editor.renderer.destroy).toBeCalledTimes(1)
+    expect(editor.grabber.detach).toHaveBeenCalledTimes(1)
+    expect(editor.renderer.destroy).toHaveBeenCalledTimes(1)
   })
 
 })

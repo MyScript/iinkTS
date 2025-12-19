@@ -91,8 +91,8 @@ describe("SVGRenderer.ts", () =>
       customConf.guides.type = "test"
       const rendererCustom = new SVGRenderer(customConf)
       rendererCustom.init(divElement)
-      expect(console.error).toBeCalledTimes(1)
-      expect(console.error).toBeCalledWith({ level: "error", message: ["Guide type unknown: test"], "from": "RENDERER.drawGuides" })
+      expect(console.error).toHaveBeenCalledTimes(1)
+      expect(console.error).toHaveBeenCalledWith({ level: "error", message: ["Guide type unknown: test"], "from": "RENDERER.drawGuides" })
     })
     test("should not create guides", () =>
     {

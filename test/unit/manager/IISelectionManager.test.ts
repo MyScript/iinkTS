@@ -32,8 +32,8 @@ describe("IISelectionManager.ts", () =>
       y: 2
     }
     manager.drawSelectingRect(box)
-    expect(manager.renderer.clearElements).toBeCalledTimes(1)
-    expect(manager.renderer.appendElement).toBeCalledTimes(1)
+    expect(manager.renderer.clearElements).toHaveBeenCalledTimes(1)
+    expect(manager.renderer.appendElement).toHaveBeenCalledTimes(1)
   })
 
   test("should clear selecting rect", () =>
@@ -42,7 +42,7 @@ describe("IISelectionManager.ts", () =>
     const manager = new IISelectionManager(editor)
     manager.renderer.clearElements = jest.fn()
     manager.clearSelectingRect()
-    expect(manager.renderer.clearElements).toBeCalledTimes(1)
+    expect(manager.renderer.clearElements).toHaveBeenCalledTimes(1)
   })
 
   describe("selected group", () =>
@@ -318,7 +318,7 @@ describe("IISelectionManager.ts", () =>
         pointer: { x: 1, y: 2 }
       } as PointerInfo
       manager.start(info)
-      expect(manager.drawSelectingRect).toBeCalledTimes(1)
+      expect(manager.drawSelectingRect).toHaveBeenCalledTimes(1)
     })
 
     test("continue", () =>
@@ -327,9 +327,9 @@ describe("IISelectionManager.ts", () =>
         pointer: { x: 20, y: 20 }
       } as PointerInfo
       manager.continue(info)
-      expect(manager.drawSelectingRect).toBeCalledTimes(1)
-      expect(manager.renderer.drawSymbol).toBeCalledTimes(1)
-      expect(manager.renderer.drawSymbol).toBeCalledWith(strokeToSelect)
+      expect(manager.drawSelectingRect).toHaveBeenCalledTimes(1)
+      expect(manager.renderer.drawSymbol).toHaveBeenCalledTimes(1)
+      expect(manager.renderer.drawSymbol).toHaveBeenCalledWith(strokeToSelect)
       expect(manager.model.symbolsSelected).toEqual([strokeToSelect])
     })
 
@@ -339,13 +339,13 @@ describe("IISelectionManager.ts", () =>
         pointer: { x: 20, y: 20 }
       } as PointerInfo
       manager.end(info)
-      expect(manager.drawSelectingRect).toBeCalledTimes(1)
-      expect(manager.clearSelectingRect).toBeCalledTimes(1)
-      expect(manager.drawSelectedGroup).toBeCalledTimes(1)
-      expect(manager.drawSelectedGroup).toBeCalledWith([strokeToSelect])
+      expect(manager.drawSelectingRect).toHaveBeenCalledTimes(1)
+      expect(manager.clearSelectingRect).toHaveBeenCalledTimes(1)
+      expect(manager.drawSelectedGroup).toHaveBeenCalledTimes(1)
+      expect(manager.drawSelectedGroup).toHaveBeenCalledWith([strokeToSelect])
       expect(manager.model.symbolsSelected).toEqual([strokeToSelect])
-      expect(manager.editor.event.emitSelected).toBeCalledTimes(1)
-      expect(manager.editor.event.emitSelected).toBeCalledWith([strokeToSelect])
+      expect(manager.editor.event.emitSelected).toHaveBeenCalledTimes(1)
+      expect(manager.editor.event.emitSelected).toHaveBeenCalledWith([strokeToSelect])
     })
 
     test("continue should throw error when no start before", () =>
@@ -353,7 +353,7 @@ describe("IISelectionManager.ts", () =>
       const info = {
         pointer: { x: 20, y: 20 }
       } as PointerInfo
-      expect(() => manager.continue(info)).toThrowError("You need to call startSelectionByBox before")
+      expect(() => manager.continue(info)).toThrow("You need to call startSelectionByBox before")
     })
   })
 
