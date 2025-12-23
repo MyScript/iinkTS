@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
@@ -18,16 +16,18 @@
 
     <style>
       #editorEl {
-        height: calc(100dvh - 225px);
+        height: calc(100dvh - 275px);
       }
+
       @media only screen and (max-width: 391px) {
         #editorEl {
-          height: calc(100dvh - 259px);
+          height: calc(100dvh - 309px);
         }
       }
+
       @media only screen and (max-width: 300px) {
         #editorEl {
-          height: calc(100dvh - 307px);
+          height: calc(100dvh - 357px);
         }
       }
 
@@ -39,30 +39,31 @@
         border-bottom: 1px solid #d7dde3;
         text-align: center;
       }
+
       .result {
         font-size: 1.25em;
       }
+
       .next-btn .icn {
         margin: 0 -6px -4px 6px;
         height: 20px;
         width: 20px;
       }
     </style>
-
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
   </head>
 
   <body>
-    <div id="showModal">
-      <button id="showModalBtn" class="btn-keys">Set Keys</button>
-    </div>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">Interact with your app</h1>
+    </header>
+
     <svg style="display: none">
       <symbol id="icn-play" viewBox="0 0 16 16">
-        <path
-          d="M13.153 8.589c.606-.325.603-.854 0-1.178L4.873 2.97C4.392 2.709 4 2.945 4 3.496v9.008c0 .55.39.787.874.527l8.28-4.442z"
-          fill="currentColor"
-          fill-rule="evenodd"
-        ></path>
+        <path d="M13.153 8.589c.606-.325.603-.854 0-1.178L4.873 2.97C4.392 2.709 4 2.945 4 3.496v9.008c0 .55.39.787.874.527l8.28-4.442z" fill="currentColor" fill-rule="evenodd">
+        </path>
       </symbol>
     </svg>
 
@@ -82,10 +83,7 @@
       <button id="next-btn" class="classic-btn next-btn">
         Next question
         <svg class="icn">
-          <use
-            xmlns:xlink="http://www.w3.org/1999/xlink"
-            href="#icn-play"
-          ></use>
+          <use xmlns:xlink="http://www.w3.org/1999/xlink" href="#icn-play"></use>
         </svg>
       </button>
     </nav>
@@ -93,32 +91,33 @@
     <div id="editorEl"></div>
 
     <script type="module">
-      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
-      const editorElement = document.getElementById("editorEl")
-      const questionElement = document.getElementById("question")
-      const resultElement = document.getElementById("result")
-      const undoElement = document.getElementById("undo")
-      const redoElement = document.getElementById("redo")
-      const nextButton = document.getElementById("next-btn")
-      const showModalBtn = document.getElementById("showModalBtn")
+      import { Editor } from '../../dist/iink.esm.js'
+      import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
+      const editorElement = document.getElementById('editorEl')
+      const questionElement = document.getElementById('question')
+      const resultElement = document.getElementById('result')
+      const undoElement = document.getElementById('undo')
+      const redoElement = document.getElementById('redo')
+      const nextButton = document.getElementById('next-btn')
+      const showModalBtn = document.getElementById('showModalBtn')
 
-      const countries = ["France", "Italy", "Spain", "Argentina", "Japan"]
-      const capitals = ["paris", "rome", "madrid", "buenos aires", "tokyo"]
+      const countries = ['France', 'Italy', 'Spain', 'Argentina', 'Japan']
+      const capitals = ['paris', 'rome', 'madrid', 'buenos aires', 'tokyo']
 
       let countQuestion = 0
 
       questionElement.innerText =
-        "What is the capital of " + countries[countQuestion] + "?"
+        'What is the capital of ' + countries[countQuestion] + '?'
 
       function checkAnswer(exportText) {
         if (exportText.toLowerCase() === capitals[countQuestion]) {
           resultElement.innerHTML =
-            "<span> Yes, it is " + exportText + ".</span>"
-          resultElement.style.setProperty("color", "green")
+            '<span> Yes, it is ' + exportText + '.</span>'
+          resultElement.style.setProperty('color', 'green')
         } else {
           resultElement.innerHTML =
-            "<span> No, it is not " + exportText + ".</span>"
-          resultElement.style.setProperty("color", "red")
+            '<span> No, it is not ' + exportText + '.</span>'
+          resultElement.style.setProperty('color', 'red')
         }
       }
 
@@ -128,80 +127,80 @@
           countQuestion = 0
         }
         questionElement.innerHTML = countries[countQuestion]
-          ? "What is the capital of " + countries[countQuestion] + "?"
-          : "You won !"
+          ? 'What is the capital of ' + countries[countQuestion] + '?'
+          : 'You won !'
         editor.clear()
-        resultElement.innerHTML = ""
+        resultElement.innerHTML = ''
       }
 
-      /**
-       * we expose the editor so we can access it in tests
-       */
       let editor
 
       const editorOptions = {
         configuration: {
           recognition: {
-            type: "TEXT",
+            type: 'TEXT',
             text: {
-              mimeTypes: ["text/plain"],
-            },
-          },
-        },
+              mimeTypes: ['text/plain']
+            }
+          }
+        }
       }
-      /**
-       * Instanciate Editor
-       * @param {Element} The DOM element to attach the ink paper
-       * @param {Object} The editor options
-       */
+
       async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(
+        editor = await Editor.load(
           editorElement,
-          "INTERACTIVEINKSSR",
+          'INTERACTIVEINKSSR',
           options
         )
 
-        editor.event.addEventListener("changed", (event) => {
+        editor.event.addEventListener('changed', (event) => {
           undoElement.disabled = !event.detail.canUndo
           redoElement.disabled = !event.detail.canRedo
         })
 
-        editor.event.addEventListener("exported", (evt) => {
+        editor.event.addEventListener('exported', (evt) => {
           const exports = evt.detail
-          if (exports && exports["text/plain"]) {
-            checkAnswer(exports["text/plain"])
+          if (exports && exports['text/plain']) {
+            checkAnswer(exports['text/plain'])
           } else {
-            resultElement.innerHTML = ""
+            resultElement.innerHTML = ''
           }
-        })
-
-        nextButton.addEventListener("click", () => {
-          changeQuestion()
-        })
-
-        undoElement.addEventListener("click", () => {
-          editor.undo()
-        })
-
-        redoElement.addEventListener("click", () => {
-          editor.redo()
-        })
-
-        showModalBtn.addEventListener("click", () => {
-          ModalEditorOptions.show(loadEditor, editorOptions)
-        })
-
-        window.addEventListener("resize", () => {
-          editor.resize()
         })
       }
 
+      nextButton.addEventListener('click', () => {
+        changeQuestion()
+      })
+
+      undoElement.addEventListener('click', () => {
+        editor?.undo()
+      })
+
+      redoElement.addEventListener('click', () => {
+        editor?.redo()
+      })
+
+      window.addEventListener('resize', () => {
+        editor?.resize()
+      })
+
+      showModalBtn.addEventListener('click', () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
+
       ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
     </script>
   </body>
+
 </html>

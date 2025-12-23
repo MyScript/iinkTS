@@ -11,7 +11,7 @@ const defaultProject = [
       },
     }
   },
-  /* {
+  {
     name: "Desktop Firefox",
     use: {...devices["Desktop Firefox"]}
   },
@@ -31,7 +31,7 @@ const defaultProject = [
   {
     name: "Tablet Safari",
     use: {...devices["iPad Mini landscape"]}
-  }, */
+  },
 ]
 
 let projects
@@ -53,7 +53,7 @@ export default defineConfig({
   testMatch: "**/examples/**/*.test.js",
   outputDir: "test-results",
   retries: 1,
-  timeout: 3 * 60 * 1000,
+  timeout: 60 * 1000,
   workers: process.env.CI ? 1 : undefined,
   use: {
     headless: process.env.HEADLESS === "false" ? false : true,
@@ -67,7 +67,7 @@ export default defineConfig({
   snapshotPathTemplate: "./__snapshots__/{testFilePath}/{projectName}/{arg}{ext}",
   reporter: 'list',
   expect: {
-    timeout: 5000,
+    timeout: 2500,
     toHaveScreenshot: {
       maxDiffPixelRatio: 0.1,
     },

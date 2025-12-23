@@ -9,11 +9,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
-    <title>Rest Text</title>
+    <title>Text Recognizer Iink</title>
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
     <style>
       #editorEl {
         height: calc(100dvh - 166px);
@@ -27,9 +26,8 @@
   </head>
 
   <body>
-    <div id="showModal">
+
       <button id="showModalBtn" class="btn-keys">Set Keys</button>
-    </div>
     <div id="result"></div>
 
     <nav class="flex-container wrap gap between">
@@ -50,6 +48,7 @@
     <div id="editorEl"></div>
 
     <script type="module">
+      import { getAvailableLanguageList, Editor } from "../../dist/iink.esm.js"
       import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
       const editorElement = document.getElementById("editorEl")
       const resultElement = document.getElementById("result")
@@ -59,36 +58,59 @@
       const redoElement = document.getElementById("redo")
       const showModalBtn = document.getElementById("showModalBtn")
 
-      /**
-       * we expose the editor so we can access it in tests
-       */
-
       let editor
+
+      clearElement.addEventListener("click", async () => {
+        editor?.clear()
+      })
+
+      undoElement.addEventListener("click", () => {
+        editor?.undo()
+      })
+
+      redoElement.addEventListener("click", () => {
+        editor?.redo()
+      })
+
+      window.addEventListener("resize", () => {
+        editor?.resize()
+      })
 
       const editorOptions = {
         configuration: {
           recognition: {
             type: "TEXT",
             lang: "en_US",
+            export: {
+              jiix: {
+                ranges: true,
+                "bounding-box": true,
+              },
+            },
             text: {
               mimeTypes: ["text/plain"],
             },
           },
         },
       }
-
       let languageList
 
-      /**
-       * We use a function to wait the server configuration to load
-       */
+      showModalBtn.addEventListener("click", () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
+
+      languageElement.addEventListener("change", (e) => {
+        editorOptions.configuration.recognition.lang = e.target.value
+        loadEditor(editorOptions)
+      })
+
       async function loadEditor(options) {
         resultElement.innerHTML = ""
         await editor?.destroy()
 
         if (!languageList) {
           const currentLanguage = options.configuration.recognition.lang
-          languageList = await iink.getAvailableLanguageList({
+          languageList = await getAvailableLanguageList({
             server: options.configuration.server,
           })
           Object.keys(languageList.result).forEach(function (key) {
@@ -103,7 +125,7 @@
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(editorElement, "INKV1", options)
+        editor = await Editor.load(editorElement, "INKV2", options)
 
         editor.event.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo
@@ -114,34 +136,15 @@
         editor.event.addEventListener("exported", (event) => {
           resultElement.innerHTML = event.detail?.["text/plain"] || ""
         })
-
-        clearElement.addEventListener("click", async () => {
-          editor?.clear()
-        })
-
-        undoElement.addEventListener("click", () => {
-          editor?.undo()
-        })
-
-        redoElement.addEventListener("click", () => {
-          editor?.redo()
-        })
-
-        showModalBtn.addEventListener("click", () => {
-          ModalEditorOptions.show(loadEditor, editorOptions)
-        })
-
-        languageElement.addEventListener("change", (e) => {
-          editorOptions.configuration.recognition.lang = e.target.value
-          loadEditor(editorOptions)
-        })
-
-        window.addEventListener("resize", () => {
-          editor?.resize()
-        })
       }
 
       ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
     </script>
   </body>
 </html>

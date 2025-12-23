@@ -9,13 +9,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
-
-    <title>Rest Raw Content</title>
-
+    <title>Rest Text</title>
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
-
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
     <style>
       #editorEl {
@@ -26,17 +23,17 @@
           height: calc(100dvh - 213px);
         }
       }
-      #result span {
-        font-size: small;
-        padding: 12px;
-      }
     </style>
   </head>
 
   <body>
-    <div id="showModal">
-      <button id="showModalBtn" class="btn-keys">Set Keys</button>
-    </div>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">Rest Text</h1>
+    </header>
+
     <div id="result"></div>
 
     <nav class="flex-container wrap gap between">
@@ -66,51 +63,37 @@
       const redoElement = document.getElementById("redo")
       const showModalBtn = document.getElementById("showModalBtn")
 
-      /**
-       * we expose the editor so we can access it in tests
-       */
       let editor
-
-      undoElement.addEventListener("click", () => {
-        editor?.undo()
-      })
-
-      redoElement.addEventListener("click", () => {
-        editor?.redo()
-      })
-
-      clearElement.addEventListener("click", () => {
-        editor?.clear()
-        resultElement.innerHTML = ""
-      })
-
-      window.addEventListener("resize", () => {
-        editor?.resize()
-      })
 
       const editorOptions = {
         configuration: {
           recognition: {
-            type: "Raw Content",
+            type: "TEXT",
+            lang: "en_US",
+            text: {
+              mimeTypes: ["text/plain"],
+            },
           },
         },
       }
 
-      showModalBtn.addEventListener("click", () => {
-        ModalEditorOptions.show(loadEditor, editorOptions)
-      })
+      let languageList
 
-      languageElement.addEventListener("change", (e) => {
-        editorOptions.configuration.recognition.lang = e.target.value
-        loadEditor(editorOptions)
-      })
-
-      /**
-       * We use a function to wait the server configuration to load
-       */
       async function loadEditor(options) {
         resultElement.innerHTML = ""
         await editor?.destroy()
+
+        if (!languageList) {
+          const currentLanguage = options.configuration.recognition.lang
+          languageList = await iink.getAvailableLanguageList({
+            server: options.configuration.server,
+          })
+          Object.keys(languageList.result).forEach(function (key) {
+            const selected = currentLanguage === key
+            languageElement.options[languageElement.options.length] =
+              new Option(languageList.result[key], key, selected, selected)
+          })
+        }
 
         /**
          * get editor instance from type
@@ -125,33 +108,42 @@
           clearElement.disabled = !event.detail.canClear
         })
 
-        const currentLanguage = editor.configuration.recognition.lang
-        const availableLanguageListResponse =
-          await iink.getAvailableLanguageList(editor.configuration)
-        Object.keys(availableLanguageListResponse.result).forEach(function (
-          key
-        ) {
-          const selected = currentLanguage === key
-          languageElement.options[languageElement.options.length] = new Option(
-            availableLanguageListResponse.result[key],
-            key,
-            selected,
-            selected
-          )
-        })
-
-        editor.event.addEventListener("exported", (evt) => {
-          const exports = evt.detail
-          if (exports && exports["application/vnd.myscript.jiix"]) {
-            resultElement.innerHTML = `<span>${JSON.stringify(
-              exports["application/vnd.myscript.jiix"].elements
-            )}</span>`
-          } else {
-            resultElement.innerHTML = ""
-          }
+        editor.event.addEventListener("exported", (event) => {
+          resultElement.innerHTML = event.detail?.["text/plain"] || ""
         })
       }
+
+      clearElement.addEventListener("click", async () => {
+        editor?.clear()
+      })
+
+      undoElement.addEventListener("click", () => {
+        editor?.undo()
+      })
+
+      redoElement.addEventListener("click", () => {
+        editor?.redo()
+      })
+
+      window.addEventListener("resize", () => {
+        editor?.resize()
+      })
+
+      showModalBtn.addEventListener("click", () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
+
+      languageElement.addEventListener("change", (e) => {
+        editorOptions.configuration.recognition.lang = e.target.value
+        loadEditor(editorOptions)
+      })
+
       ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
     </script>
   </body>
 </html>

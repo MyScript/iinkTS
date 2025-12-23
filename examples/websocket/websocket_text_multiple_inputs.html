@@ -21,7 +21,7 @@
       .instructions ul {
         margin: 0;
         color: darkslategrey;
-        font-size: 18px;
+        font-size: 16px;
       }
       .instructions li {
         margin-left: 24px;
@@ -34,15 +34,16 @@
         display: flex;
         flex-direction: row;
         gap: 24px;
-        padding: 24px;
-        margin-bottom: 12px;
-        height: calc(100% - 100px);
+        padding: 8px 24px;
+        padding-bottom: 24px;
+        height: calc(100dvh - 165px);
         width: 100%;
+        overflow: auto;
       }
       #inputs-colum {
         display: flex;
         flex-direction: column;
-        width: calc(75% - 24px);
+        width: calc(100% - 50px);
         min-width: 400px;
       }
       #answers-colum {
@@ -56,7 +57,8 @@
         font-size: 36px;
         margin-bottom: 24px;
         width: 100%;
-        height: 150px;
+        height: 140px;
+        min-height: 140px;
         border: 1px #bfbfbf solid;
         border-radius: 6px;
         background-color: rgba(174, 174, 174, 0.1);
@@ -67,7 +69,8 @@
         margin-bottom: 24px;
         padding: 12px;
         width: 100%;
-        height: 150px;
+        height: 140px;
+        min-height: 140px;
         border: 1px #bfbfbf solid;
         border-radius: 6px;
       }
@@ -87,14 +90,18 @@
         width: 100%;
       }
     </style>
-
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
   </head>
 
   <body>
-    <div id="showModal">
-      <button id="showModalBtn" class="btn-keys">Set Keys</button>
-    </div>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">
+        Multiple text inputs
+      </h1>
+    </header>
+
     <div id="instructions" class="instructions">
       <ul>
         To answer question

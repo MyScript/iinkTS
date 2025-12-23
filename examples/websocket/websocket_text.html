@@ -7,7 +7,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
-    <title>Websocket on-demand export</title>
+    <title>Websocket Text</title>
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
@@ -16,7 +16,7 @@
         height: calc(100dvh - 216px);
       }
 
-      @media only screen and (max-width: 294px) {
+      @media only screen and (max-width: 452px) {
         #editorEl {
           height: calc(100dvh - 263px);
         }
@@ -29,12 +29,54 @@
       <button id="showModalBtn" class="btn-keys">
         Change server configuration
       </button>
-      <h1 class="header-title">Rest Diagram</h1>
+      <h1 class="header-title">Websocket Text</h1>
+      <a id="link-info" class="link-info">
+        <img src="../assets/img/info.svg" />
+      </a>
     </header>
 
     <div id="result"></div>
 
-    <nav class="flex-container wrap gap between">
+    <div id="help-overlay" class="help-overlay"></div>
+    <div id="help-modal" class="help-modal">
+      <div id="help-modal-content" class="help-modal-content">
+        <button class="close" href="#" onclick="document.querySelectorAll('.help-overlay,.help-modal').forEach(e => e.style.display = 'none');">
+          ×
+        </button>
+        <h1>Gestures</h1>
+        <div class="gestures">
+          <h3>Erase</h3>
+          <p>Scratch thoroughly and cover all the characters.</p>
+          <div class="gestures-img-container">
+            <img src="../assets/img/gestures/gest-erase.png" />
+          </div>
+        </div>
+        <div class="gestures">
+          <h3>Break</h3>
+          <p>
+            Draw a straight vertical line downwards. Start above characters and
+            end well below the baseline.
+          </p>
+          <div class="gestures-img-container">
+            <img src="../assets/img/gestures/gest-break-lines.png" />
+            <img src="../assets/img/gestures/gest-break-words.png" />
+          </div>
+        </div>
+        <div class="gestures">
+          <h3>Join</h3>
+          <p>
+            Draw a straight vertical line upwards. Start well below the baseline
+            and end above characters.
+          </p>
+          <div class="gestures-img-container">
+            <img src="../assets/img/gestures/gest-join-lines.png" />
+            <img src="../assets/img/gestures/gest-join-words.png" />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="flex-container between wrap gap">
       <div class="flex-container wrap gap">
         <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
           <img src="../assets/img/clear.svg" />
@@ -46,40 +88,56 @@
           <img src="../assets/img/redo.svg" />
         </button>
       </div>
-      <div class="flex-container wrap">
-        <button id="export" class="nav-btn btn-lightBlue">
-          Export
-        </button>
-      </div>
+      <select id="language"></select>
     </nav>
 
     <div id="editorEl"></div>
 
     <script type="module">
-      import { Editor } from '../../dist/iink.esm.js'
+      import { Editor, getAvailableLanguageList } from '../../dist/iink.esm.js'
       import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
       const editorElement = document.getElementById('editorEl')
       const resultElement = document.getElementById('result')
+      const linkInfoElement = document.getElementById('link-info')
+      const helpOverlayElement = document.getElementById('help-overlay')
+      const languageElement = document.getElementById('language')
       const clearElement = document.getElementById('clear')
       const undoElement = document.getElementById('undo')
       const redoElement = document.getElementById('redo')
-      const exportElement = document.getElementById('export')
       const showModalBtn = document.getElementById('showModalBtn')
+
+      linkInfoElement.addEventListener('click', async () => {
+        document
+          .querySelectorAll('.help-overlay,.help-modal')
+          .forEach((e) => (e.style.display = 'block'))
+      })
+
+      helpOverlayElement.addEventListener('click', async () => {
+        document
+          .querySelectorAll('.help-overlay,.help-modal')
+          .forEach((e) => (e.style.display = 'none'))
+      })
 
       let editor
 
       const editorOptions = {
         configuration: {
           recognition: {
+            lang: 'en_US',
             type: 'TEXT'
-          },
-          triggers: {
-            exportContent: 'DEMAND'
           }
         }
       }
 
+      languageElement.addEventListener('change', (e) => {
+        editorOptions.configuration.recognition.lang = e.target.value
+        loadEditor(editorOptions)
+      })
+
       async function loadEditor(options) {
+        resultElement.innerHTML = ''
+        await editor?.destroy()
+
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
@@ -99,6 +157,17 @@
               ? event.detail['application/vnd.myscript.jiix'].label
               : ''
         })
+
+        if (!languageElement.options.length) {
+          const currentLanguage = options.configuration.recognition.lang
+          const languageList = await getAvailableLanguageList({
+            server: options.configuration.server
+          })
+          Object.keys(languageList.result).forEach(function (key) {
+            const selected = currentLanguage === key
+            languageElement.options[languageElement.options.length] = new Option(languageList.result[key], key, selected, selected)
+          })
+        }
       }
 
       clearElement.addEventListener('click', async () => {
@@ -111,10 +180,6 @@
 
       redoElement.addEventListener('click', () => {
         editor?.redo()
-      })
-
-      exportElement.addEventListener('click', () => {
-        editor?.export()
       })
 
       window.addEventListener('resize', () => {

@@ -13,7 +13,7 @@ import line from "../__dataset__/line"
 test.describe("Rest Diagram", () => {
 
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/rest/rest_diagram_iink.html")
+    await page.goto("/examples/rest/rest_diagram.html")
     await passModalKey(page)
   })
 
@@ -86,7 +86,7 @@ test.describe("Rest Diagram", () => {
           }
         }
       }
-      await loadEditor(page, "INKV1", options)
+      await loadEditor(page, options)
       await Promise.all([
         waitForExportedEvent(page),
         writeStrokes(page, line.strokes),
@@ -112,7 +112,7 @@ test.describe("Rest Diagram", () => {
           }
         }
       }
-      await loadEditor(page, "INKV1", options)
+      await loadEditor(page, options)
       await Promise.all([
         waitForExportedEvent(page),
         writeStrokes(page, line.strokes),

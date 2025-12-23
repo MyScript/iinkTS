@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -7,7 +8,7 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
 
-    <title>Offscreen create symbol</title>
+    <title>Offscreen create symbols</title>
 
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
@@ -15,40 +16,45 @@
     <style>
       #editor {
         width: calc(100vw - 300px);
-        height: calc(100dvh - 62px);
+        height: calc(100dvh - 112px);
       }
-      #show-import {
+
+      #show-create {
         display: none;
         margin: 0;
         margin-left: -4px;
         padding: 0 4px;
       }
-      #show-import img {
+
+      #show-create img {
         margin: 0;
         padding: 0;
       }
+
       #symbols-to-create {
         width: 300px;
-        height: calc(100dvh - 62px);
+        height: calc(100dvh - 112px);
         background-color: white;
         box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.225);
-        height: calc(100dvh - 62px);
         overflow: auto;
       }
+
       textarea {
         min-width: 300px;
         width: 100%;
         height: calc(100% - 40px);
         resize: none;
       }
+
       @media only screen and (max-width: 900px) {
-        #show-import {
+        #show-create {
           display: block;
         }
+
         #symbols-to-create {
           position: absolute;
           z-index: 89;
-          top: 60px;
+          top: 110px;
           left: 0px;
           min-width: 300px;
           width: 50%;
@@ -61,26 +67,33 @@
           -o-transition: all 0.3s ease-in-out;
           transition: all 0.3s ease-in-out;
         }
+
         #symbols-to-create.open {
-          height: calc(100dvh - 62px);
+          height: calc(100dvh - 112px);
           overflow: auto;
         }
+
         #editor {
-          height: calc(100dvh - 62px);
+          height: calc(100dvh - 112px);
           width: 100dvw;
         }
       }
     </style>
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
   </head>
 
   <body>
-    <div id="showModal">
-      <button id="showModalBtn" class="btn-keys">Set Keys</button>
-    </div>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">Offscreen Interactivity - Create symbols</h1>
+    </header>
+
     <nav class="flex-container">
-      <button class="classic-btn create-btn" id="create-all-btn">Create all</button>
-      <button class="classic-btn" id="show-import">
+      <button class="classic-btn create-btn" id="create-all-btn">
+        Create all
+      </button>
+      <button class="classic-btn" id="show-create">
         <img src="../assets/img/nav-arrow-down.svg" />
       </button>
     </nav>
@@ -90,88 +103,111 @@
     </div>
 
     <script type="module">
-      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js";
-      const editorElement = document.getElementById("editor");
-      const showSymbolBtn = document.getElementById("show-import");
-      const createAllBtn = document.getElementById("create-all-btn");
-      const symbolsToCreate = document.getElementById("symbols-to-create");
-      const showModalBtn = document.getElementById("showModalBtn");
-      const symbolsCreated = [];
+      import { Editor } from '../../dist/iink.esm.js'
+      import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
+      import symbols from '../assets/datas/diagram-with-shape.json' with { type: 'json' }
 
-      showSymbolBtn.addEventListener("pointerup", () => {
-        document.getElementById("symbols-to-create").classList.toggle("open");
-      });
+      const editorElement = document.getElementById('editor')
+      const showSymbolBtn = document.getElementById('show-create')
+      const createAllBtn = document.getElementById('create-all-btn')
+      const symbolsToCreate = document.getElementById('symbols-to-create')
+      const showModalBtn = document.getElementById('showModalBtn')
+      const symbolsCreated = []
 
-      showModalBtn.addEventListener("click", () => {
-        ModalEditorOptions.show(loadEditor, editorOptions)
+      showSymbolBtn.addEventListener('pointerup', () => {
+        document.getElementById('symbols-to-create').classList.toggle('open')
+      })
+
+      symbols.forEach((s, i) => {
+        symbolsToCreate.appendChild(createSymbolElToCreate(s, i))
       })
 
       function createSymbolElToCreate(s) {
-        const inputsWrapper = document.createElement("div");
-        inputsWrapper.style.setProperty("height", "50%");
+        const inputsWrapper = document.createElement('div')
+        inputsWrapper.style.setProperty('height', '50%')
 
-        const textarea = document.createElement("textarea");
-        textarea.value = JSON.stringify(s, null, 2);
-        inputsWrapper.appendChild(textarea);
+        const textarea = document.createElement('textarea')
+        textarea.value = JSON.stringify(s, null, 2)
+        inputsWrapper.appendChild(textarea)
 
-        const btn = document.createElement("button");
-        btn.id = `add-symbol-${s.type}-btn`;
-        btn.classList.add("classic-btn", "create-btn");
-        btn.textContent = "Create";
-        inputsWrapper.appendChild(btn);
-        btn.addEventListener("pointerup", async () => {
-          symbolsCreated.push(await document.getElementById("editor").editor.createSymbol(JSON.parse(textarea.value)));
-          createAllBtn.disabled = true;
-          btn.disabled = true;
-        });
+        const btn = document.createElement('button')
+        btn.id = `add-symbol-${ s.type }-btn`
+        btn.classList.add('classic-btn', 'create-btn')
+        btn.textContent = 'Create'
+        inputsWrapper.appendChild(btn)
+        btn.addEventListener('pointerup', async () => {
+          symbolsCreated.push(
+            await document
+              .getElementById('editor')
+              .editor.createSymbol(JSON.parse(textarea.value))
+          )
+          createAllBtn.disabled = true
+          btn.disabled = true
+        })
 
-        return inputsWrapper;
+        return inputsWrapper
       }
 
-      /**
-       * we expose the editor so we can access it in tests
-       */
-      let editor;
-      const editorOption = {
-          configuration: {
-            rendering: {
-              minHeight: 800,
-              minWidth: 800
-            }
+      let editor
+
+      const editorOptions = {
+        configuration: {
+          rendering: {
+            minHeight: 800,
+            minWidth: 800
           }
-        };
+        }
+      }
+
       async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(editorElement, "INTERACTIVEINK", options);
+        editor = await Editor.load(editorElement, 'INTERACTIVEINK', options)
 
-        const shapeRes = await fetch("../assets/datas/diagram-with-shape.json");
-        const symbols = await shapeRes.json();
-        symbols.forEach((s, i) => {
-          symbolsToCreate.appendChild(createSymbolElToCreate(s, i));
-        });
-
-        createAllBtn.addEventListener("pointerup", async () => {
-          symbolsCreated.push(await editor.createSymbols(symbols));
-          document.querySelectorAll(".create-btn").forEach((b) => (b.disabled = true));
-        });
-
-        editor.event.addEventListener("changed", (event) => {
-          createAllBtn.disabled = symbolsCreated.some(sc => editor.model.symbols.some(s => s.id === sc.id));
-          symbols.forEach(sc => {
-            document.getElementById(`add-symbol-${sc.type}-btn`).disabled = symbolsCreated.some(sc => editor.model.symbols.some(s => s.id === sc.id && s.type === sc.type));
+        editor.event.addEventListener('changed', (event) => {
+          createAllBtn.disabled = symbolsCreated.some((sc) =>
+            editor.model.symbols.some((s) => s.id === sc.id)
+          )
+          symbols.forEach((sc) => {
+            document.getElementById(`add-symbol-${ sc.type }-btn`).disabled =
+              symbolsCreated.some((sc) =>
+                editor.model.symbols.some(
+                  (s) => s.id === sc.id && s.type === sc.type
+                )
+              )
           })
-        });
-
-        window.addEventListener("resize", () => {
-          editor.resize();
-        });
+        })
       }
 
-      ModalEditorOptions.initConfiguration(loadEditor, editorOption)
+      createAllBtn.addEventListener('pointerup', async () => {
+        if (!editor) return
+        createAllBtn.disabled = true
+        symbolsCreated.push(...(await editor.createSymbols(symbols)))
+
+        document
+          .querySelectorAll('.create-btn')
+          .forEach((b) => (b.disabled = true))
+      })
+
+      window.addEventListener('resize', () => {
+        editor?.resize()
+      })
+
+      showModalBtn.addEventListener('click', () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
     </script>
   </body>
+
 </html>

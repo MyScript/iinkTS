@@ -1,36 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
 
-    <title>Raw Content Recognizer Ink</title>
+    <title>Rest v2 Raw Content</title>
 
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
     <link rel="stylesheet" href="../assets/style/renderjson.css" />
 
-    <script
-      type="text/javascript"
-      src="../assets/renderjson/renderjson.js"
-    ></script>
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
+    <script type="text/javascript" src="../assets/renderjson/renderjson.js"></script>
     <style>
       #editorEl {
-        height: calc(100dvh - 166px);
+        height: calc(100dvh - 216px);
       }
+
       @media only screen and (max-width: 451px) {
         #editorEl {
-          height: calc(100dvh - 213px);
+          height: calc(100dvh - 263px);
         }
       }
+
       #result {
         border-bottom: solid gray 1px;
         display: block;
@@ -38,6 +34,7 @@
         padding: 12px;
         cursor: zoom-in;
       }
+
       #result.open {
         position: absolute;
         z-index: 999;
@@ -48,11 +45,13 @@
         background-color: white;
         cursor: zoom-out;
       }
+
       .switch-label {
         display: flex;
         margin-right: 15px;
         margin-top: 6px;
       }
+
       .switch-container {
         display: flex;
       }
@@ -60,9 +59,14 @@
   </head>
 
   <body>
-    <div id="showModal">
-      <button id="showModalBtn" class="btn-keys">Set Keys</button>
-    </div>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">
+        Rest v2 Raw Content
+      </h1>
+    </header>
     <div id="result"></div>
 
     <nav class="flex-container wrap gap between">
@@ -98,112 +102,91 @@
     <div id="editorEl"></div>
 
     <script type="module">
-      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
-      const editorElement = document.getElementById("editorEl")
-      const resultElement = document.getElementById("result")
-      const languageElement = document.getElementById("language")
-      const clearElement = document.getElementById("clear")
-      const undoElement = document.getElementById("undo")
-      const redoElement = document.getElementById("redo")
-      const showRecognitionBlock = document.getElementById(
-        "showRecognitionBlock"
-      )
-      const showRecognitionItems = document.getElementById(
-        "showRecognitionItems"
-      )
-      const showModalBtn = document.getElementById("showModalBtn")
+      import { Editor, getAvailableLanguageList } from '../../dist/iink.esm.js'
+      import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
+      const editorElement = document.getElementById('editorEl')
+      const resultElement = document.getElementById('result')
+      const languageElement = document.getElementById('language')
+      const clearElement = document.getElementById('clear')
+      const undoElement = document.getElementById('undo')
+      const redoElement = document.getElementById('redo')
+      const showRecognitionBlock = document.getElementById('showRecognitionBlock')
+      const showRecognitionItems = document.getElementById('showRecognitionItems')
+      const showModalBtn = document.getElementById('showModalBtn')
 
-      /**
-       * we expose the editor so we can access it in tests
-       */
       let editor
 
-      undoElement.addEventListener("click", () => {
-        editor?.undo()
+      undoElement.addEventListener('click', () => {
+        if (!editor) return
+        editor.undo()
         editor.debugger.recognitionBoxVisibility = false
         editor.debugger.recognitionBoxItemsVisibility = false
-        clickRecognitionBlock()
       })
 
-      redoElement.addEventListener("click", () => {
-        editor?.redo()
+      redoElement.addEventListener('click', () => {
+        if (!editor) return
+        editor.redo()
         editor.debugger.recognitionBoxVisibility = false
         editor.debugger.recognitionBoxItemsVisibility = false
-        clickRecognitionBlock()
       })
 
-      clearElement.addEventListener("click", () => {
-        editor?.clear()
-        resultElement.innerHTML = ""
+      clearElement.addEventListener('click', () => {
+        resultElement.innerHTML = ''
+        if (!editor) return
+        editor.clear()
         editor.debugger.recognitionBoxVisibility = false
         editor.debugger.recognitionBoxItemsVisibility = false
-        clickRecognitionBlock()
       })
 
-      resultElement.addEventListener("click", () => {
-        resultElement.classList.toggle("open")
+      resultElement.addEventListener('click', () => {
+        resultElement.classList.toggle('open')
       })
 
-      showRecognitionBlock.addEventListener("change", () => {
+      showRecognitionBlock.addEventListener('change', () => {
+        if (!editor) return
         editor.debugger.recognitionBoxVisibility = showRecognitionBlock.checked
       })
 
-      showRecognitionItems.addEventListener("change", () => {
-        editor.debugger.recognitionBoxItemsVisibility =
-          showRecognitionItems.checked
+      showRecognitionItems.addEventListener('change', () => {
+        if (!editor) return
+        editor.debugger.recognitionBoxItemsVisibility = showRecognitionItems.checked
       })
 
-      showModalBtn.addEventListener("click", () => {
-        ModalEditorOptions.show(loadEditor)
+      window.addEventListener('resize', () => {
+        if (!editor) return
+        editor.resize()
       })
 
-      window.addEventListener("resize", () => {
-        editor?.resize()
-      })
-
-      const clickRecognitionBlock = () => {
-        if (showRecognitionBlock.checked) {
-          showRecognitionBlock.click()
-        }
-        if (showRecognitionItems.checked) {
-          showRecognitionItems.click()
-        }
-      }
-
-      let serverConfiguration
       const editorOptions = {
         configuration: {
           recognition: {
-            type: "Raw Content",
+            type: 'Raw Content',
             export: {
               jiix: {
                 ranges: true,
-                "bounding-box": true,
-              },
-            },
-          },
-        },
+                'bounding-box': true
+              }
+            }
+          }
+        }
       }
 
-      languageElement.addEventListener("change", (e) => {
+      languageElement.addEventListener('change', (e) => {
         editorOptions.configuration.recognition.lang = e.target.value
         loadEditor(editorOptions)
       })
 
-      /**
-       * We use a function to wait the server configuration to load
-       */
       async function loadEditor(options) {
-        resultElement.innerHTML = ""
+        resultElement.innerHTML = ''
         await editor?.destroy()
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(editorElement, "INKV2", options)
+        editor = await Editor.load(editorElement, 'INKV2', options)
 
-        editor.event.addEventListener("changed", (event) => {
+        editor.event.addEventListener('changed', (event) => {
           undoElement.disabled = !event.detail.canUndo
           redoElement.disabled = !event.detail.canRedo
           clearElement.disabled = !event.detail.canClear
@@ -211,31 +194,36 @@
 
         if (!languageElement.options.length) {
           const currentLanguage = editor.configuration.recognition.lang
-          const availableLanguageListResponse =
-            await iink.getAvailableLanguageList(editor.configuration)
-          Object.keys(availableLanguageListResponse.result).forEach(function (
-            key
-          ) {
+          const availableLanguageListResponse = await getAvailableLanguageList(editor.configuration)
+          Object.keys(availableLanguageListResponse.result).forEach((key) => {
             const selected = currentLanguage === key
-            languageElement.options[languageElement.options.length] =
-              new Option(
-                availableLanguageListResponse.result[key],
-                key,
-                selected,
-                selected
-              )
+            languageElement.options[languageElement.options.length] = new Option(availableLanguageListResponse.result[key], key, selected, selected)
           })
         }
 
-        editor.event.addEventListener("exported", (evt) => {
+        editor.event.addEventListener('exported', (evt) => {
           while (resultElement.firstChild) {
             resultElement.firstChild.remove()
           }
           resultElement.appendChild(renderjson(event.detail))
         })
+
+        showRecognitionItems.checked = false
+        showRecognitionBlock.checked = false
       }
 
+      showModalBtn.addEventListener('click', () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
+
       ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
     </script>
   </body>
+
 </html>

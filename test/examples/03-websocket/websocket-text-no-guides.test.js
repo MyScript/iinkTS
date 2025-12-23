@@ -4,7 +4,7 @@ import TextNavActions from "../_partials/text-nav-actions"
 
 test.describe("Websocket Text Search Without Smartguide", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/websocket/websocket_text_iink_no_guides.html")
+    await page.goto("/examples/websocket/websocket_text_no_guides.html")
     await passModalKey(page)
   })
 

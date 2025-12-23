@@ -7,43 +7,24 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
-
-    <title>Custom resources math (pre-compiled)</title>
-
+    <title>Websocket Text Eraser</title>
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
-
     <style>
-      .description {
-        padding: 12px;
-      }
-
       #editorEl {
-        height: calc(100dvh - 284px);
+        height: calc(100dvh - 116px);
       }
 
-      @media only screen and (max-width: 1156px) {
+      @media only screen and (max-width: 360px) {
         #editorEl {
-          height: calc(100dvh - 302px);
+          height: calc(100dvh - 148px);
         }
       }
 
-      @media only screen and (max-width: 600px) {
+      @media only screen and (max-width: 219px) {
         #editorEl {
-          height: calc(100dvh - 319px);
-        }
-      }
-
-      @media only screen and (max-width: 423px) {
-        #editorEl {
-          height: calc(100dvh - 336px);
-        }
-      }
-
-      @media only screen and (max-width: 338px) {
-        #editorEl {
-          height: calc(100dvh - 353px);
+          height: calc(100dvh - 200px);
         }
       }
     </style>
@@ -54,24 +35,10 @@
       <button id="showModalBtn" class="btn-keys">
         Change server configuration
       </button>
-      <h1 class="header-title">
-        Custom resources math (pre-compiled)
-      </h1>
+      <h1 class="header-title">Websocket Text Eraser</h1>
     </header>
-
-    <p class="description">
-      This example use a math custom resource. The grammar restrict the
-      recognition to only basic elementary school math (addition and
-      substraction). The id of a pre-compiled grammar is sent.
-    </p>
-
-    <div id="result"></div>
-
-    <nav class="flex-container wrap gap between">
+    <nav class="flex-container between wrap gap">
       <div class="flex-container wrap gap">
-        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/clear.svg" />
-        </button>
         <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
           <img src="../assets/img/undo.svg" />
         </button>
@@ -79,43 +46,57 @@
           <img src="../assets/img/redo.svg" />
         </button>
       </div>
-      <button class="classic-btn" id="convert" disabled>
-        Convert
-      </button>
+      <div class="flex-container wrap gap">
+        <button id="pen" class="nav-btn btn-fab-mini btn-lightBlue active" disabled>
+          <img src="../assets/img/pen.svg" />
+        </button>
+        <button id="eraser" class="nav-btn btn-fab-mini btn-lightBlue">
+          <img src="../assets/img/eraser.svg" />
+        </button>
+      </div>
+      <label for="erase-precisely">Erase precisely:
+        <input type="checkbox" id="erase-precisely" name="erase-precisely" />
+      </label>
     </nav>
 
     <div id="editorEl"></div>
 
     <script type="module">
-      import { Editor } from '../../dist/iink.esm.js'
+      import { Editor, EditorTool } from '../../dist/iink.esm.js'
       import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
-
       const editorElement = document.getElementById('editorEl')
-      const resultElement = document.getElementById('result')
       const undoElement = document.getElementById('undo')
       const redoElement = document.getElementById('redo')
-      const clearElement = document.getElementById('clear')
-      const convertElement = document.getElementById('convert')
+      const eraserElement = document.getElementById('eraser')
+      const penElement = document.getElementById('pen')
+      const erasePreciselyElement = document.getElementById('erase-precisely')
       const showModalBtn = document.getElementById('showModalBtn')
 
       const editorOptions = {
         configuration: {
           recognition: {
-            type: 'MATH',
-            math: {
-              customGrammarId: 'math-elementary',
-              mimeTypes: ['application/x-latex']
+            type: 'TEXT',
+            text: {
+              eraser: {
+                'erase-precisely': false
+              }
             }
           }
         }
       }
 
+      erasePreciselyElement.addEventListener('change', (e) => {
+        editorOptions.configuration.recognition.text.eraser['erase-precisely'] = e.target.checked
+        loadEditor(editorOptions)
+        eraserElement.disabled = false
+        eraserElement.classList.remove('active')
+        penElement.disabled = true
+        penElement.classList.add('active')
+      })
+
       let editor
 
       async function loadEditor(options) {
-        resultElement.innerHTML = ''
-        await editor?.destroy()
-
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
@@ -126,18 +107,6 @@
         editor.event.addEventListener('changed', (event) => {
           undoElement.disabled = !event.detail.canUndo
           redoElement.disabled = !event.detail.canRedo
-          clearElement.disabled = event.detail.empty
-        })
-
-        editor.event.addEventListener('exported', (evt) => {
-          const exports = evt.detail
-          if (exports && exports['application/x-latex']) {
-            convertElement.disabled = false
-            resultElement.innerHTML = '<span>' + exports['application/x-latex'] + '</span>'
-          } else {
-            convertElement.disabled = true
-            resultElement.innerHTML = ''
-          }
         })
       }
 
@@ -149,12 +118,26 @@
         editor?.redo()
       })
 
-      clearElement.addEventListener('click', () => {
-        editor?.clear()
+      eraserElement.addEventListener('click', () => {
+        if (!editor) return
+        editor.tool = EditorTool.Erase
+        eraserElement.disabled = true
+        eraserElement.classList.add('active')
+        penElement.disabled = false
+        penElement.classList.remove('active')
       })
 
-      convertElement.addEventListener('click', () => {
-        editor?.convert()
+      penElement.addEventListener('click', () => {
+        if (!editor) return
+        editor.tool = EditorTool.Write
+        eraserElement.disabled = false
+        eraserElement.classList.remove('active')
+        penElement.disabled = true
+        penElement.classList.add('active')
+      })
+
+      window.addEventListener('resize', () => {
+        editor?.resize()
       })
 
       showModalBtn.addEventListener('click', () => {

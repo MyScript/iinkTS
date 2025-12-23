@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -18,44 +19,55 @@
       main {
         display: flex;
         flex-direction: row;
-        height: calc(100% - 66px);
+        height: calc(100% - 116px);
         width: 100%;
       }
+
       #editorEl {
-        height: calc(100dvh - 66px);
+        height: calc(100dvh - 116px);
         width: 60%;
       }
+
       #jiix {
-        border-right: 1px solid #D7DDE3;
-        min-height: calc(100dvh - 70px);
-        max-height: calc(100dvh - 70px);
+        border-right: 1px solid #d7dde3;
+        min-height: calc(100dvh - 120px);
+        max-height: calc(100dvh - 120px);
         width: 40%;
       }
+
       @media only screen and (max-width: 600px) {
         main {
           display: flex;
           flex-direction: column;
         }
+
         #editorEl {
-          height: calc(50vh - 66px);
+          height: calc(50svh - 116px);
           width: 100%;
         }
+
         #jiix {
-          border-right: 1px solid #D7DDE3;
-          min-height: calc(50vh - 66px);
-          max-height: calc(50vh - 66px);
+          border-right: 1px solid #d7dde3;
+          min-height: calc(50svh - 116px);
+          max-height: calc(50svh - 116px);
           width: 100%;
         }
       }
     </style>
   </head>
+
   <body>
-    <div id="showModal">
-      <button id="showModalBtn" class="btn-keys">Set Keys</button>
-    </div>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">Import math with JIIX</h1>
+    </header>
     <nav class="flex-container wrap between">
       <div class="flex-container wrap gap">
-        <button class="classic-btn" id="import">Import</button>
+        <button class="classic-btn" id="import">
+          Import
+        </button>
       </div>
       <div class="flex-container wrap gap">
         <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
@@ -64,7 +76,9 @@
         <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
           <img src="../assets/img/redo.svg" />
         </button>
-        <button class="classic-btn" id="convert" disabled>Convert</button>
+        <button class="classic-btn" id="convert" disabled>
+          Convert
+        </button>
       </div>
     </nav>
 
@@ -693,74 +707,82 @@
     </main>
 
     <script type="module">
-      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
-      const editorElement = document.getElementById("editorEl");
-      const undoElement = document.getElementById("undo");
-      const redoElement = document.getElementById("redo");
-      const convertElement = document.getElementById("convert");
-      const importElement = document.getElementById("import");
+      import { Editor } from '../../dist/iink.esm.js'
+      import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
+      const editorElement = document.getElementById('editorEl')
+      const undoElement = document.getElementById('undo')
+      const redoElement = document.getElementById('redo')
+      const convertElement = document.getElementById('convert')
+      const importElement = document.getElementById('import')
+      const showModalBtn = document.getElementById('showModalBtn')
 
-      /**
-       * we expose the editor so we can access it in tests
-       */
-      let editor;
+      let editor
 
-      const editorOption = {
-          configuration: {
-            recognition: {
-              type: "MATH",
-              math: {
-                mimeTypes: ["application/vnd.myscript.jiix"]
-              },
-              export: {
-                jiix: {
-                  strokes: true
-                }
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            type: 'MATH',
+            math: {
+              mimeTypes: ['application/vnd.myscript.jiix']
+            },
+            export: {
+              jiix: {
+                strokes: true
               }
             }
           }
-        };
+        }
+      }
+
       async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(editorElement, "INTERACTIVEINKSSR", options);
+        editor = await iink.Editor.load(editorElement, 'INTERACTIVEINKSSR', options)
 
-        editorElement.addEventListener("changed", (event) => {
-          undoElement.disabled = !event.detail.canUndo;
-          redoElement.disabled = !event.detail.canRedo;
-          convertElement.disabled = event.detail.isEmpty;
-        });
-
-        undoElement.addEventListener("click", () => {
-          editor.undo();
-        });
-
-        redoElement.addEventListener("click", () => {
-          editor.redo();
-        });
-
-        convertElement.addEventListener("click", () => {
-          editor.convert();
-        });
-
-        importElement.addEventListener("click", () => {
-          const jiix = document.getElementById("jiix").value;
-          editor.import(JSON.parse(jiix), "application/vnd.myscript.jiix");
-        });
-
-        showModalBtn.addEventListener("click", () => {
-          ModalEditorOptions.show(loadEditor, editorOption)
+        editor.event.addEventListener('changed', (event) => {
+          undoElement.disabled = !event.detail.canUndo
+          redoElement.disabled = !event.detail.canRedo
+          convertElement.disabled = !event.detail.empty
         })
 
-        window.addEventListener("resize", () => {
-          editor.resize();
-        });
-      };
+      }
 
-      ModalEditorOptions.initConfiguration(loadEditor, editorOption)
+      undoElement.addEventListener('click', () => {
+        editor?.undo()
+      })
+
+      redoElement.addEventListener('click', () => {
+        editor?.redo()
+      })
+
+      convertElement.addEventListener('click', () => {
+        editor?.convert()
+      })
+
+      importElement.addEventListener('click', () => {
+        const jiix = document.getElementById('jiix').value
+        editor?.import(JSON.parse(jiix), 'application/vnd.myscript.jiix')
+      })
+
+      window.addEventListener('resize', () => {
+        editor?.resize()
+      })
+
+      showModalBtn.addEventListener('click', () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
     </script>
   </body>
+
 </html>

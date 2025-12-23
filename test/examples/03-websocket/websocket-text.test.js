@@ -15,27 +15,9 @@ import TextNavActions from '../_partials/text-nav-actions'
 import h from '../__dataset__/h'
 import helloStrike from '../__dataset__/helloStrike'
 
-const createNewEditor = async (page, options) => {
-  await loadEditor(page, 'INTERACTIVEINKSSR', options)
-
-  await waitForEditorInit(page)
-  await page.evaluate(`
-    editorEl.editor.event.addEventListener("changed", (event) => {
-      undoElement.disabled = !event.detail.canUndo;
-      redoElement.disabled = !event.detail.canRedo;
-      clearElement.disabled = !event.detail.canClear;
-    });
-
-    editorEl.editor.event.addEventListener("exported", (event) => {
-      resultElement.innerHTML = event.detail && event.detail["application/vnd.myscript.jiix"] ? event.detail["application/vnd.myscript.jiix"].label : "";
-    });
-  `)
-  await callEditorIdle(page)
-}
-
 test.describe('Websocket Text', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/examples/websocket/websocket_text_iink.html')
+    await page.goto('/examples/websocket/websocket_text.html')
     await passModalKey(page)
   })
 
@@ -72,7 +54,7 @@ test.describe('Websocket Text', () => {
           }
         }
       }
-      await createNewEditor(page, options)
+      await loadEditor(page, options)
 
       await Promise.all([
         waitForExportedEvent(page),
@@ -100,7 +82,7 @@ test.describe('Websocket Text', () => {
           }
         }
       }
-      await createNewEditor(page, options)
+      await loadEditor(page, options)
 
       await Promise.all([
         waitForExportedEvent(page),
@@ -128,7 +110,7 @@ test.describe('Websocket Text', () => {
           }
         }
       }
-      await createNewEditor(page, options)
+      await loadEditor(page, options)
 
       await Promise.all([
         waitForExportedEvent(page),
@@ -170,7 +152,7 @@ test.describe('Websocket Text', () => {
           }
         }
       }
-      await loadEditor(page, "INTERACTIVEINKSSR", options)
+      await loadEditor(page, options)
       await waitForEditorInit(page)
       await expect(page.locator('.smartguide')).toBeHidden()
     })
@@ -188,7 +170,7 @@ test.describe('Websocket Text', () => {
           }
         }
       }
-      await loadEditor(page, "INTERACTIVEINKSSR", options)
+      await loadEditor(page, options)
       await waitForEditorInit(page)
       await expect(page.locator('.smartguide')).toBeVisible()
     })

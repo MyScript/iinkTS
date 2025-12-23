@@ -35,7 +35,9 @@
     "src",
     "config",
     "plugins",
-    "./eslint.config.mjs"
+    "./eslint.config.mjs",
+    "examples/**/*.ts",
+    "examples/**/*.js",
   ],
   "exclude": [
     "node_modules",

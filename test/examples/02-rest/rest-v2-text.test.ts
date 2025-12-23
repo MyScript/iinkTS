@@ -11,7 +11,7 @@ import h from "../__dataset__/h"
 test.describe("Text Recognizer Iink", () => {
 
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/rest/rest_text_recognizerInk.html")
+    await page.goto("/examples/rest/rest_v2_text.html")
     await passModalKey(page)
   })
 

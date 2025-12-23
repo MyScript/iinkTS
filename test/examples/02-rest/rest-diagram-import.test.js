@@ -8,7 +8,7 @@ import {
 
 test.describe("Rest Diagram Import", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`/examples/rest/rest_diagram_iink_import.html`)
+    await page.goto(`/examples/rest/rest_diagram_import.html`)
     await passModalKey(page)
   })
 
@@ -16,16 +16,11 @@ test.describe("Rest Diagram Import", () => {
     await expect(page).toHaveTitle("Rest Diagram Import")
   })
 
-  test("should display empty result", async ({ page }) => {
-    await expect(page.locator("#result")).toBeEmpty()
-  })
-
   test("should import pointers", async ({ page }) => {
     const [exportedDatas] = await Promise.all([
       waitForExportedEvent(page),
       page.locator("#import-btn").click(),
     ])
-    await expect(page.locator("#result")).toHaveText(JSON.stringify(exportedDatas))
     expect(Object.keys(exportedDatas["application/vnd.myscript.jiix"].elements).length).toEqual(12)
     expect(await getEditorSymbols(page)).toHaveLength(40)
   })
@@ -46,7 +41,6 @@ test.describe("Rest Diagram Import", () => {
       ])
       expect(promisesResult[0]).toBeFalsy()
       expect(await getEditorExports(page)).toBeFalsy()
-      await expect(page.locator("#result")).toHaveText("{}")
     })
 
     await test.step("should undo", async () => {
@@ -54,7 +48,6 @@ test.describe("Rest Diagram Import", () => {
         waitForExportedEvent(page),
         page.click("#undo"),
       ])
-      await expect(page.locator("#result")).toHaveText(JSON.stringify(exportedDatas))
       expect(Object.keys(exportedDatas["application/vnd.myscript.jiix"].elements).length).toEqual(12)
 
       expect(await getEditorSymbols(page)).toHaveLength(40)
@@ -65,7 +58,6 @@ test.describe("Rest Diagram Import", () => {
         waitForExportedEvent(page),
         page.click("#redo"),
       ])
-      await expect(page.locator("#result")).toHaveText("{}")
       expect(await getEditorSymbols(page)).toHaveLength(0)
     })
   })

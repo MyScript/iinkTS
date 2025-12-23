@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -15,24 +16,34 @@
     <style>
       #editor {
         width: calc(100vw - 300px);
-        height: calc(100dvh - 62px);
+        height: calc(100dvh - 112px);
       }
+
       textarea {
         width: 300px;
-        height: calc(100dvh - 62px);
+        height: calc(100dvh - 112px);
         resize: none;
       }
+
       #show-symbols-to-import-btn {
         display: none;
       }
-      @media only screen and (max-width: 900px) {
+
+      nav {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-start;
+      }
+
+      @media only screen and (max-width: 850px) {
         #show-symbols-to-import-btn {
           display: block;
         }
+
         #pointerEventsObject {
           position: absolute;
           z-index: 89;
-          top: 60px;
+          top: 110px;
           left: 0px;
           min-width: 300px;
           width: 50%;
@@ -46,26 +57,37 @@
           -o-transition: all 0.3s ease-in-out;
           transition: all 0.3s ease-in-out;
         }
+
         #pointerEventsObject.open {
-          height: calc(100dvh - 62px);
+          height: calc(100dvh - 112px);
           opacity: 1;
           overflow: auto;
         }
+
         #editor {
           width: 100dvw;
         }
       }
     </style>
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
   </head>
 
   <body>
-    <div id="showModal">
-      <button id="showModalBtn" class="btn-keys">Set Keys</button>
-    </div>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">
+        Offscreen Interactivity - Import pointers
+      </h1>
+    </header>
+
     <nav>
-      <button id="show-symbols-to-import-btn" class="classic-btn">Show symbols</button>
-      <button class="classic-btn" id="import">Import</button>
+      <button id="show-symbols-to-import-btn" class="classic-btn">
+        Show symbols
+      </button>
+      <button class="classic-btn" id="import">
+        Import
+      </button>
     </nav>
     <div class="flex-container">
       <textarea id="pointerEventsObject"> </textarea>
@@ -73,7 +95,10 @@
     </div>
 
     <script type="module">
+      import { Editor } from '../../dist/iink.esm.js'
       import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js";
+      import strokes from '../assets/datas/hello-my-friend.json' with { type: 'json' }
+
       const editorElement = document.getElementById("editor");
       const showSymbolBtn = document.getElementById("show-symbols-to-import-btn");
       const pointerEventsObjectElement = document.getElementById("pointerEventsObject");
@@ -84,44 +109,50 @@
         pointerEventsObjectElement.classList.toggle("open");
       });
 
-      showModalBtn.addEventListener("click", () => {
-        ModalEditorOptions.show(loadEditor, editorOption);
-      });
-
-      /**
-       * we expose the editor so we can access it in tests
-       */
       let editor;
-      const editorOption = {
-          configuration: {
-            rendering: {
-              minHeight: 1000,
-              minWidth: 1000
-            }
+      const editorOptions = {
+        configuration: {
+          rendering: {
+            minHeight: 1000,
+            minWidth: 1000
           }
-        };
+        }
+      };
       async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(editorElement, "INTERACTIVEINK", options);
+        editor = await Editor.load(editorElement, "INTERACTIVEINK", options);
 
-        const strokeRes = await fetch("../assets/datas/hello-my-friend.json");
-        pointerEventsObjectElement.value = JSON.stringify(await strokeRes.json(), null, 2);
-
-        importBtn.addEventListener("click", async () => {
-          importBtn.disabled = true;
-          await editor.importPointEvents(JSON.parse(pointerEventsObjectElement.value));
-        });
-
-        window.addEventListener("resize", () => {
-          editor.resize();
-        });
+        pointerEventsObjectElement.value = JSON.stringify(strokes, null, 2);
+        importBtn.disabled = false;
       }
 
-      ModalEditorOptions.initConfiguration(loadEditor, editorOption);
+      importBtn.addEventListener("click", async () => {
+        if (!editor) return;
+        importBtn.disabled = true;
+        await editor.importPointEvents(JSON.parse(pointerEventsObjectElement.value));
+      });
+
+      window.addEventListener("resize", () => {
+        editor?.resize();
+      });
+
+      showModalBtn.addEventListener("click", () => {
+        ModalEditorOptions.show(loadEditor, editorOptions);
+      });
+
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions);
+
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
     </script>
   </body>
+
 </html>

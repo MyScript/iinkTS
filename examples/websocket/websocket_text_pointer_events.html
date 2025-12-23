@@ -35,14 +35,18 @@
         bottom: 12px;
       }
     </style>
-
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
   </head>
 
   <body>
-    <div id="showModal">
-      <button id="showModalBtn" class="btn-keys">Set Keys</button>
-    </div>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">
+        Rest Math
+      </h1>
+    </header>
+
     <div id="result"></div>
     <div>
       <div id="editorEl"></div>
@@ -84,22 +88,14 @@
       <button class="classic-btn" id="pointerEvents">Process</button>
     </div>
     <script type="module">
+      import { Editor } from '../../dist/iink.esm.js'
       import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
       const editorElement = document.getElementById("editorEl")
       const resultElement = document.getElementById("result")
       const pointerEventsElement = document.getElementById("pointerEvents")
-      const pointerEventsObjectElement = document.getElementById(
-        "pointerEventsObject"
-      )
+      const pointerEventsObjectElement = document.getElementById("pointerEventsObject")
       const showModalBtn = document.getElementById("showModalBtn")
 
-      showModalBtn.addEventListener("click", () => {
-        ModalEditorOptions.show(loadEditor, editorOptions)
-      })
-
-      /**
-       * we expose the editor so we can access it in tests
-       */
       let editor
       const editorOptions = {
         configuration: {
@@ -110,21 +106,14 @@
       }
       async function loadEditor(options) {
         resultElement.innerHTML = ""
+        pointerEventsElement.disabled = false
         await editor?.destroy()
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(
-          editorElement,
-          "INTERACTIVEINKSSR",
-          options
-        )
-
-        pointerEventsElement.addEventListener("click", () => {
-          editor.importPointEvents(JSON.parse(pointerEventsObjectElement.value))
-        })
+        editor = await Editor.load(editorElement, "INTERACTIVEINKSSR", options)
 
         editor.event.addEventListener("exported", (event) => {
           resultElement.innerHTML =
@@ -133,12 +122,28 @@
               : ""
         })
 
-        window.addEventListener("resize", () => {
-          editor.resize()
-        })
       }
 
+      pointerEventsElement.addEventListener("click", () => {
+        pointerEventsElement.disabled = true
+        editor.importPointEvents(JSON.parse(pointerEventsObjectElement.value))
+      })
+
+      window.addEventListener("resize", () => {
+        editor.resize()
+      })
+
+      showModalBtn.addEventListener("click", () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
+
       ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
     </script>
   </body>
 </html>

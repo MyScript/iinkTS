@@ -14,7 +14,7 @@ test.describe("Websocket Text file export", () => {
   })
 
   test("should have title", async ({ page }) => {
-    await expect(page).toHaveTitle("Word Export with iink")
+    await expect(page).toHaveTitle("Export file")
   })
 
   test("should save to word file", async ({ page }) => {

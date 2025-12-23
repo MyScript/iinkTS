@@ -111,20 +111,20 @@ export const getExportedResults = async (
  * @param {Page} page - Playwright Page
  * @returns Promise<Object>
  */
-export const getEditorConfiguration = async (page) =>
-  page.evaluate("editorEl.editor.configuration")
+export const getEditorConfiguration = async (page) => {
+  await page.waitForFunction(() => !!editorEl?.editor)
+  return page.evaluate("editorEl.editor.configuration")
+}
 
 /**
  * @param {Page} page - Playwright Page
  * @param {Object} options - Editor options
  * @returns Promise<void>
  */
-export const loadEditor = async (page, type, options) => {
+export const loadEditor = async (page, options) => {
   await page.waitForFunction(() => !!editorEl?.editor)
   return page.evaluate(
-    `(async () => editorEl.editor = await iink.Editor.load(editorEl, "${type}", ${JSON.stringify(
-      options
-    )}))()`
+    `(async () => await loadEditor(${JSON.stringify(options)}))()`
   )
 }
 
@@ -211,19 +211,15 @@ export const callEditoClear = async (page) => {
  * @returns Promise<unknow>
  */
 export const waitForEvent = async (page, eventName) => {
-  await page.waitForFunction(() => {
-    const el = document.getElementById('editorEl')
-    return el && el.editor && el.editor.event
-  }, { timeout: 30000 })
-
-  return page.evaluate((eventName) => {
-  return new Promise((resolve) => {
-    editorEl.editor.event.addEventListener(eventName, (e) => {
-      resolve(e.detail)
-    })
-  })
-}, eventName)
-}
+  await page.waitForFunction(() => !!document.querySelector('#editorEl')?.editor);
+  return page.evaluate(`(async () => {
+    return new Promise((resolve, reject) => {
+      document.querySelector('#editorEl').editor.event.addEventListener('${eventName}', (e) => {
+        resolve(e.detail);
+      }, { once: true });
+    });
+  })()`);
+};
 
 /**
  * @param {Page} page - Playwright Page
@@ -302,7 +298,7 @@ export const waitForGesturedEvent = async (page) =>
 
 export const waitForEditorInit = async (page) => {
   await page.waitForFunction(() => !!editorEl?.editor)
-  return page.evaluate("editorEl.initializationPromise")
+  return page.evaluate("editorEl.editor.initializationPromise")
 }
 
 export const findValuesByKey = (obj, key, list = []) => {
@@ -339,19 +335,8 @@ export const passModalKey = async (page, waitLoader = true) => {
   await page.getByRole('textbox', { name: 'Application Key:' }).fill("74716e99-0614-4559-abe4-300d30621808")
   await page.getByRole('textbox', { name: 'HMAC Key:' }).fill("07b17879-cee0-4b0c-8ff6-23da4cbe419f")
   await page.getByRole('button', { name: 'Save' }).click()
-  if (waitLoader) await page.locator('.loader').waitFor({ state: 'hidden' })
-  await waitForEditorInit(page)
-}
-
-export class DeferredPromise {
-  constructor() {
-    this.promise = new Promise((resolve, reject) => {
-      this.reject = async (v) => {
-        return reject(v)
-      }
-      this.resolve = async (v) => {
-        return resolve(v)
-      }
-    })
+  if (waitLoader) {
+    await page.locator('.loader').waitFor({ state: 'hidden' })
+    await waitForEditorInit(page)
   }
 }

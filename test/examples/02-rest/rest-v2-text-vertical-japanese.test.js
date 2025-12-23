@@ -14,7 +14,7 @@ test.describe("Text ja_JP vertical Recognizer Iink", () => {
   test.beforeEach(async ({ page }) => {
     await Promise.all([
       page.goto(
-        "/examples/rest/rest_text_vertical_japanese_recognizerInk.html"
+        "/examples/rest/rest_v2_text_vertical_japanese.html"
       ),
     ])
     await passModalKey(page)
