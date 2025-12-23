@@ -129,16 +129,14 @@ export class ModalEditorOptions {
       return
     }
     this.show(callback, options)
-
   }
 
   static show(callback, options) {
     ModalEditorOptions.#init()
     this.options = options
-    this.title.innerText = "Set your Application Key and HMAC Key"
+    this.title.innerText = "Set your server configuration"
     this.callback = callback
-    this.message.innerText =
-      "You can generate your Application Key and HMAC Key for free"
+    this.message.innerText = "You can generate your Application Key and HMAC Key for free"
     document.body.appendChild(this.modal)
     document.body.classList.add("stop-scrolling")
   }

@@ -196,9 +196,8 @@ const mathContentList = [
 test.describe("Websocket Math Inside Page", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/examples/websocket/websocket_math_inside_page.html")
-    await passModalKey(page)
-    // eslint-disable-next-line playwright/no-wait-for-timeout
-    await page.waitForTimeout(2000)
+    await passModalKey(page, false)
+    await page.locator('#mainLoader').waitFor({ state: 'hidden' })
   })
 
   test("should have title", async ({ page }) => {

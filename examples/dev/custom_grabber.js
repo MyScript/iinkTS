@@ -1,10 +1,15 @@
-class CustomGrabber extends iink.PointerEventGrabber {
+import { PointerEventGrabber } from '../../dist/iink.esm.js'
+
+export class CustomGrabber extends PointerEventGrabber {
 
   constructor(configuration) {
     super(configuration)
     this.downElement = document.getElementById("pointer-down")
     this.moveElement = document.getElementById("pointer-move")
     this.upElement = document.getElementById("pointer-up")
+    this.downElement.textContent = "Down at:"
+    this.moveElement.textContent = "Move to:"
+    this.upElement.textContent = "Up at:"
   }
 
   pointerDownHandler = (evt) =>
@@ -41,7 +46,7 @@ class CustomGrabber extends iink.PointerEventGrabber {
       const pointerInfo = this.getPointerInfos(evt)
       this.downElement.textContent = `Down at: ${JSON.stringify(pointerInfo.pointer)}`
       this.moveElement.textContent = "Move to:"
-      this.upElement.textContent = "Up to:"
+      this.upElement.textContent = "Up at:"
       /**
        * onPointerDown is bind with the editor
        */

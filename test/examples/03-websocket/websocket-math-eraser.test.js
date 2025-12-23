@@ -17,7 +17,7 @@ const test = base.extend({
 
 test.describe("Websocket Math Eraser", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/websocket/websocket_math_iink_eraser.html")
+    await page.goto("/examples/websocket/websocket_math_eraser.html")
     await passModalKey(page)
   })
 

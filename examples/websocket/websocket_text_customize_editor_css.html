@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -13,20 +14,21 @@
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
     <link rel="stylesheet" href="../assets/style/my-custom-classes.css" />
-
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
     <style>
-
       #editorEl {
-        height: calc(100dvh - 66px);
+        height: calc(100dvh - 116px);
       }
     </style>
   </head>
 
   <body>
-    <div id="showModal">
-      <button id="showModalBtn" class="btn-keys">Set Keys</button>
-    </div>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">Styling editor style</h1>
+    </header>
+
     <nav>
       <div class="flex-container wrap gap">
         <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
@@ -40,62 +42,70 @@
     <div id="editorEl"></div>
 
     <script type="module">
-      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
-      const editorElement = document.getElementById("editorEl");
-      const undoElement = document.getElementById("undo");
-      const redoElement = document.getElementById("redo");
-      const showModalBtn = document.getElementById("showModalBtn")
-      let editor;
+      import { Editor } from '../../dist/iink.esm.js'
+      import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
+      const editorElement = document.getElementById('editorEl')
+      const undoElement = document.getElementById('undo')
+      const redoElement = document.getElementById('redo')
+      const showModalBtn = document.getElementById('showModalBtn')
+      let editor
 
-      const editorOption = {
-          configuration: {
-            recognition: {
-              type: "TEXT"
-            },
-             penStyle: {
-              color: "#ffffff"
-            },
-            theme: {
-              ink: {
-                color: "#ffffff"
-              }
-            },
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            type: 'TEXT'
           },
-          override: {
-            cssClass: "my-custom-class"
+          penStyle: {
+            color: '#ffffff'
+          },
+          theme: {
+            ink: {
+              color: '#ffffff'
+            }
           }
-        };
+        },
+        override: {
+          cssClass: 'my-custom-class'
+        }
+      }
       async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(editorElement, "INTERACTIVEINKSSR", options);
+        editor = await Editor.load(editorElement, 'INTERACTIVEINKSSR', options)
+      }
 
-        editorElement.addEventListener("changed", (event) => {
-          undoElement.disabled = !event.detail.canUndo;
-          redoElement.disabled = !event.detail.canRedo;
-        });
+      editorElement.addEventListener('changed', (event) => {
+        undoElement.disabled = !event.detail.canUndo
+        redoElement.disabled = !event.detail.canRedo
+      })
 
-        undoElement.addEventListener("click", () => {
-          editorElement.editor.undo();
-        });
+      undoElement.addEventListener('click', () => {
+        editorElement.editor?.undo()
+      })
 
-        redoElement.addEventListener("click", () => {
-          editorElement.editor.redo();
-        });
+      redoElement.addEventListener('click', () => {
+        editorElement.editor?.redo()
+      })
 
-        showModalBtn.addEventListener("click", () => {
-          ModalEditorOptions.show(loadEditor, editorOption)
-        })
+      window.addEventListener('resize', () => {
+        editorElement.editor?.resize()
+      })
 
-        window.addEventListener("resize", () => {
-          editorElement.editor.resize();
-        });
-      };
+      showModalBtn.addEventListener('click', () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
 
-      ModalEditorOptions.initConfiguration(loadEditor, editorOption)
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
     </script>
   </body>
+
 </html>

@@ -17,27 +17,33 @@
     <link rel="stylesheet" href="../assets/style/examples.css" />
     <style>
       #editorEl {
-        height: calc(100dvh - 66px);
+        height: calc(100dvh - 116px);
       }
       @media only screen and (max-width: 486px) {
         #editorEl {
-          height: calc(100dvh - 114px);
+          height: calc(100dvh - 164px);
         }
       }
       @media only screen and (max-width: 382px) {
         #editorEl {
-          height: calc(100dvh - 161px);
+          height: calc(100dvh - 211px);
         }
       }
+      #lexicon {
+        width: calc(100% - 100px);
+      }
     </style>
-
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
   </head>
 
   <body>
-    <div id="showModal">
-      <button id="showModalBtn" class="btn-keys">Set Keys</button>
-    </div>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">
+        Custom lexicon
+      </h1>
+    </header>
     <nav class="flex-container wrap between gap">
       <div class="flex-container wrap gap">
         <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
@@ -47,7 +53,7 @@
           <img src="../assets/img/redo.svg" />
         </button>
       </div>
-      <div class="flex-container wrap gap">
+      <div class="flex-container wrap gap" style="width: calc(100% - 110px);">
         <input
           type="text"
           id="lexicon"
@@ -61,6 +67,7 @@
     <div id="editorEl"></div>
 
     <script type="module">
+      import { Editor } from '../../dist/iink.esm.js'
       import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
       const editorElement = document.getElementById("editorEl")
       const undoElement = document.getElementById("undo")
@@ -80,7 +87,7 @@
         editor?.resize()
       })
 
-      const editorOption = {
+      const editorOptions = {
         configuration: {
           recognition: {
             text: {
@@ -100,17 +107,14 @@
           customLexicon: values.split(" "),
           addLKText: true,
         }
-        editorOption.configuration = configuration
-        loadEditor(editorOption)
+        editorOptions.configuration = configuration
+        loadEditor(editorOptions)
       })
 
       showModalBtn.addEventListener("click", () => {
-        ModalEditorOptions.show(loadEditor, editorOption)
+        ModalEditorOptions.show(loadEditor, editorOptions)
       })
 
-      /**
-       * we expose the editor so we can access it in tests
-       */
       let editor;
 
       async function loadEditor(options) {
@@ -119,7 +123,7 @@
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(editorElement, "INTERACTIVEINKSSR", options);
+        editor = await Editor.load(editorElement, "INTERACTIVEINKSSR", options);
 
         editor.event.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo
@@ -127,7 +131,13 @@
         })
       };
 
-      ModalEditorOptions.initConfiguration(loadEditor, editorOption)
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
     </script>
   </body>
 </html>

@@ -10,9 +10,9 @@ import {
 import one from "../__dataset__/1"
 import equation from "../__dataset__/equation"
 
-test.describe("Math Recognizer Iink", () => {
+test.describe("Rest v2 Math", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/rest/rest_math_recognizerInk.html")
+    await page.goto("/examples/rest/rest_v2_math.html")
     await passModalKey(page)
   })
 

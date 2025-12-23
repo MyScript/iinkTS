@@ -1,41 +1,40 @@
-import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
-let currentInput;
+import { Editor } from '../../dist/iink.esm.js'
+import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
+let currentInput
 let editor
 
-const inputsColumns = document.getElementById("inputs-colum");
-const validateResponsesBtn = document.getElementById("validate-answers");
-const answersColumns = document.getElementById("answers-colum");
-const editorElement = document.getElementById("editorEl");
-const showModalBtn = document.getElementById("showModalBtn");
+const inputsColumns = document.getElementById('inputs-colum')
+const validateResponsesBtn = document.getElementById('validate-answers')
+const answersColumns = document.getElementById('answers-colum')
+const editorElement = document.getElementById('editorEl')
+const showModalBtn = document.getElementById('showModalBtn')
 
 function getWrittenStrokes() {
-  return editor.layers.root.querySelector("[data-layer=MODEL]").cloneNode(true)
+  return editor.layers.root.querySelector('[data-layer=MODEL]').cloneNode(true)
 }
 
 function getResultElementFromInput(input) {
-  const answerId = input.getAttribute("answer-id")
+  const answerId = input.getAttribute('answer-id')
   if (answerId) {
     return document.getElementById(answerId)
   }
 }
 
-validateResponsesBtn.addEventListener("pointerup", () => {
+validateResponsesBtn.addEventListener('pointerup', () => {
   for (let i = 0; i < answers.length; i++) {
     const el = document.getElementById(`answer-${i}`)
-    const textAnswered = el.textContent.replace(/[\r\n]+/gm, " ").replace("  ", " ").toLocaleLowerCase()
+    const textAnswered = el.textContent
+      .replace(/[\r\n]+/gm, ' ')
+      .replace('  ', ' ')
+      .toLocaleLowerCase()
     if (answers[i].toLocaleLowerCase() === textAnswered) {
-      el.classList.add("success")
-      el.classList.remove("error")
-    }
-    else {
-      el.classList.add("error")
-      el.classList.remove("success")
+      el.classList.add('success')
+      el.classList.remove('error')
+    } else {
+      el.classList.add('error')
+      el.classList.remove('success')
     }
   }
-})
-
-showModalBtn.addEventListener("click", () => {
-  ModalEditorOptions.show(initEditor, editorOptions)
 })
 
 async function switchEditorInput(input) {
@@ -44,7 +43,7 @@ async function switchEditorInput(input) {
   if (currentInput.contains(editorElement)) {
     currentInput.replaceChild(strokesWritten, editorElement)
   }
-  currentInput.setAttribute("pointers", JSON.stringify(editor.model.symbols))
+  currentInput.setAttribute('pointers', JSON.stringify(editor.model.symbols))
 
   currentInput = input
 
@@ -54,84 +53,80 @@ async function switchEditorInput(input) {
   editor.clear()
   await editor.waitForIdle()
   if (textAnswered) {
-    const pointers = currentInput.getAttribute("pointers")
+    const pointers = currentInput.getAttribute('pointers')
     if (pointers) {
-      await editor.importPointEvents(JSON.parse(pointers));
+      await editor.importPointEvents(JSON.parse(pointers))
     }
   }
-  currentInput.textContent = ""
+  currentInput.textContent = ''
   currentInput.appendChild(editorElement)
 }
 
 const questions = [
-  "What does CPU mean?",
-  "In what year did the first programmable electronic computer “the Colossus” appear?",
-  "What does URL mean?",
-  "in what year was the first web browser named \"Mosaic\" developed?"
+  'What does CPU mean?',
+  'In what year did the first programmable electronic computer “the Colossus” appear?',
+  'What does URL mean?',
+  'in what year was the first web browser named "Mosaic" developed?'
 ]
 const answers = [
-  "Central Processing Unit",
-  "1943",
-  "Uniform Resource Locator",
-  "1993"
+  'Central Processing Unit',
+  '1943',
+  'Uniform Resource Locator',
+  '1993'
 ]
 
 for (let i = 0; i < questions.length; i++) {
-  const inputEl = document.createElement("div");
-  inputEl.id = `input-${i}`;
-  inputEl.setAttribute("answer-id", `answer-${i}`)
-  inputEl.classList.add("input");
-  const inputLabelEL = document.createElement("label");
-  inputLabelEL.setAttribute("for", inputEl.id);
-  inputLabelEL.innerText = questions[i];
-  inputsColumns.appendChild(inputLabelEL);
-  inputsColumns.appendChild(inputEl);
+  const inputEl = document.createElement('div')
+  inputEl.id = `input-${i}`
+  inputEl.setAttribute('answer-id', `answer-${i}`)
+  inputEl.classList.add('input')
+  const inputLabelEL = document.createElement('label')
+  inputLabelEL.setAttribute('for', inputEl.id)
+  inputLabelEL.innerText = questions[i]
+  inputsColumns.appendChild(inputLabelEL)
+  inputsColumns.appendChild(inputEl)
 
-  const answerEl = document.createElement("div");
-  answerEl.id = `answer-${i}`;
-  answerEl.classList.add("answer");
-  const answerLabelEL = document.createElement("label");
-  answerLabelEL.setAttribute("for", answerEl.id);
-  answerLabelEL.innerText = `Answer ${i + 1} :`;
-  answersColumns.insertBefore(answerLabelEL, validateResponsesBtn);
-  answersColumns.insertBefore(answerEl, validateResponsesBtn);
+  const answerEl = document.createElement('div')
+  answerEl.id = `answer-${i}`
+  answerEl.classList.add('answer')
+  const answerLabelEL = document.createElement('label')
+  answerLabelEL.setAttribute('for', answerEl.id)
+  answerLabelEL.innerText = `Answer ${i + 1} :`
+  answersColumns.insertBefore(answerLabelEL, validateResponsesBtn)
+  answersColumns.insertBefore(answerEl, validateResponsesBtn)
 
-  inputEl.addEventListener("pointerdown", async (evt) => {
+  inputEl.addEventListener('pointerdown', async (evt) => {
     evt.preventDefault()
     if (!inputEl.contains(editor.layers.root)) {
       switchEditorInput(inputEl)
     }
   })
-
-
 }
 
 const editorOptions = {
-    configuration: {
-      recognition: {
-        type: "TEXT",
-        text: {
-          guides: {
-            enable: false
-          },
-          mimeTypes: ["text/plain"],
-          margin: {
-            left: 10,
-            right: 10,
-            top: 5
-          }
+  configuration: {
+    recognition: {
+      type: 'TEXT',
+      text: {
+        guides: {
+          enable: false
         },
-      },
-      smartGuide: {
-        enable: false
+        mimeTypes: ['text/plain'],
+        margin: {
+          left: 10,
+          right: 10,
+          top: 5
+        }
       }
     },
-  };
+    smartGuide: {
+      enable: false
+    }
+  }
+}
 
-ModalEditorOptions.initConfiguration(initEditor, editorOptions)
-
-async function initEditor(options) {
-  currentInput = document.getElementById("input-0")
+async function loadEditor(options) {
+  currentInput = document.getElementById('input-0')
   currentInput.appendChild(editorElement)
 
   /**
@@ -139,17 +134,30 @@ async function initEditor(options) {
    * @param {Element} The DOM element to attach the ink paper
    * @param {Object} The Editor parameters
    */
-  editor = await iink.Editor.load(editorElement, "INTERACTIVEINKSSR", options);
+  editor = await Editor.load(editorElement, 'INTERACTIVEINKSSR', options)
 
-  editor.event.addEventListener("exported", (evt) => {
-    const answerId = currentInput?.getAttribute("answer-id")
+  editor.event.addEventListener('exported', (evt) => {
+    const answerId = currentInput?.getAttribute('answer-id')
     if (answerId) {
       const answerEl = document.getElementById(answerId)
-      answerEl.textContent = evt.detail["text/plain"]
+      answerEl.textContent = evt.detail['text/plain']
     }
   })
 }
 
-window.addEventListener("resize", () => {
-  editor.resize();
-});
+showModalBtn.addEventListener('click', () => {
+  ModalEditorOptions.show(loadEditor, editorOptions)
+})
+
+ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+
+window.addEventListener('resize', () => {
+  editor.resize()
+})
+
+/**
+ * We expose these objects to the window use it in test
+ */
+window.editorOptions = editorOptions
+window.loadEditor = loadEditor

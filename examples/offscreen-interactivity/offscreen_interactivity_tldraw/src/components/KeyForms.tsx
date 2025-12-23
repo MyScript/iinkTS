@@ -34,7 +34,7 @@ export const KeyForms: React.FC<KeyFormsProps> = ({ onSubmit }) => {
 
   return (
       <form onSubmit={handleSubmit} className="key-forms">
-        <h3>Set your Application Key and HMAC Key</h3>
+        <h3>Set your server configuration</h3>
 
         <a
           href="https://developer.myscript.com/getting-started/"

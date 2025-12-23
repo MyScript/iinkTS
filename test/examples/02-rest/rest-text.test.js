@@ -12,7 +12,7 @@ import h from "../__dataset__/h"
 test.describe("Rest Text", () => {
 
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/rest/rest_text_iink.html")
+    await page.goto("/examples/rest/rest_text.html")
     await passModalKey(page)
   })
 
@@ -75,7 +75,7 @@ test.describe("Rest Text", () => {
           }
         }
       }
-      await loadEditor(page, "INKV1", options)
+      await loadEditor(page, options)
 
       await Promise.all([
         waitForExportedEvent(page),
@@ -101,7 +101,7 @@ test.describe("Rest Text", () => {
           }
         }
       }
-      await loadEditor(page, "INKV1", options)
+      await loadEditor(page, options)
       await Promise.all([
         waitForExportedEvent(page),
         writeStrokes(page, h.strokes),

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+    <title>Text search</title>
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <style>
+      #editorEl {
+        height: calc(100dvh - 112px);
+      }
+
+      @media only screen and (max-width: 509px) {
+        #editorEl {
+          height: calc(100dvh - 160px);
+        }
+      }
+
+      @media only screen and (max-width: 397px) {
+        #editorEl {
+          height: calc(100dvh - 207px);
+        }
+
+        .input-field {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">Text Search</h1>
+    </header>
+    <nav class="flex-container wrap between gap">
+      <div class="flex-container wrap between gap">
+        <input id="searchInput" type="search" class="input-field" />
+        <button id="searchBtn" class="classic-btn">
+          Search
+        </button>
+      </div>
+      <button class="classic-btn" id="convert" disabled>
+        Convert
+      </button>
+    </nav>
+
+    <div id="editorEl"></div>
+
+    <script type="module">
+      import { Editor } from '../../dist/iink.esm.js'
+      import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
+      const editorElement = document.getElementById('editorEl')
+      const convertElement = document.getElementById('convert')
+      const searchInput = document.getElementById('searchInput')
+      const searchBtn = document.getElementById('searchBtn')
+      const showModalBtn = document.getElementById('showModalBtn')
+      let lastJiix = undefined
+
+      let editor
+
+      // Utility function transforming millimeters to pixel as iinkSDK is millimeters only
+      function mmToPixel(mm) {
+        return (96 * mm) / 25.4
+      }
+
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            type: 'TEXT',
+            export: {
+              jiix: {
+                'bounding-box': true
+              }
+            }
+          },
+          smartGuide: {
+            enable: false
+          }
+        }
+      }
+
+      async function loadEditor(options) {
+        /**
+         * get editor instance from type
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Editor parameters
+         */
+        editor = await Editor.load(editorElement, 'INTERACTIVEINKSSR', options)
+
+        editor.event.addEventListener('exported', (evt) => {
+          const exports = evt.detail
+
+          if (exports) {
+            convertElement.disabled = false
+            if (exports['application/vnd.myscript.jiix']) {
+              lastJiix = exports['application/vnd.myscript.jiix']
+              performSearch()
+            }
+          }
+        })
+
+        editor.event.addEventListener('changed', () => {
+          document
+            .querySelectorAll('.highlight')
+            .forEach((elem) => elem.parentNode.removeChild(elem))
+        })
+      }
+
+      // Highlight a series of words (jiix structure) by creating a div with a lower z-index
+      function highlightWords(words) {
+        words.forEach((word) => {
+          const boundingBox = word['bounding-box']
+          const newElement = document.createElement('div')
+          newElement.style.position = 'absolute'
+          newElement.style.left = mmToPixel(boundingBox.x) + 'px'
+          newElement.style.top = mmToPixel(boundingBox.y) + 'px'
+          newElement.style.height = mmToPixel(boundingBox.height) + 'px'
+          newElement.style.width = mmToPixel(boundingBox.width) + 'px'
+
+          newElement.classList.add('highlight')
+          newElement.style.backgroundColor = 'yellow'
+
+          editorElement.appendChild(newElement)
+        })
+      }
+
+      // Perform the search by iterating the last jiix received and ignoring the carriage returns and blank in it.
+      function performSearch() {
+        document
+          .querySelectorAll('.highlight')
+          .forEach((elem) => elem.parentNode.removeChild(elem))
+        if (searchInput.value && lastJiix) {
+          let searchWords = searchInput.value.split(' ')
+          let posUnderEvaluation = 0
+          let wordsToHighlight = []
+          lastJiix.words.forEach((word) => {
+            const searchWord = searchWords[posUnderEvaluation]
+            if (word.label.trim() !== '') {
+              if (word.label.toUpperCase() === searchWord.toUpperCase()) {
+                wordsToHighlight.push(word)
+                if (posUnderEvaluation === searchWords.length - 1) {
+                  highlightWords(wordsToHighlight)
+                  posUnderEvaluation = 0
+                  wordsToHighlight = []
+                } else {
+                  posUnderEvaluation++
+                }
+              } else {
+                posUnderEvaluation = 0
+                wordsToHighlight = []
+              }
+            }
+          })
+        }
+      }
+      searchBtn.addEventListener('click', performSearch)
+
+      convertElement.addEventListener('click', () => {
+        editor?.convert()
+      })
+
+      window.addEventListener('resize', () => {
+        edito .resize()
+      })
+
+      showModalBtn.addEventListener('click', () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
+
+
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
+    </script>
+  </body>
+
+</html>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -7,7 +8,7 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
 
-    <title>Word Export with iink</title>
+    <title>Export file</title>
 
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
@@ -15,32 +16,35 @@
 
     <style>
       #editorEl {
-        height: calc(100dvh - 66px);
+        height: calc(100dvh - 116px);
       }
+
       @media only screen and (max-width: 499px) {
         #editorEl {
-          height: calc(100dvh - 114px);
+          height: calc(100dvh - 164px);
         }
       }
+
       @media only screen and (max-width: 329px) {
         #editorEl {
-          height: calc(100dvh - 161px);
+          height: calc(100dvh - 211px);
         }
       }
     </style>
 
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js"
-      integrity="sha256-FPJJt8nA+xL4RU6/gsriA8p8xAeLGatoyTjldvQKGdE="
-      crossorigin="anonymous"
-    ></script>
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js" integrity="sha256-FPJJt8nA+xL4RU6/gsriA8p8xAeLGatoyTjldvQKGdE=" crossorigin="anonymous"></script>
   </head>
 
   <body>
-    <div id="showModal">
-      <button id="showModalBtn" class="btn-keys">Set Keys</button>
-    </div>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">
+        Export file
+      </h1>
+    </header>
+
     <nav class="flex-container between wrap gap">
       <div class="flex-container wrap gap">
         <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
@@ -55,121 +59,132 @@
       </div>
       <div class="flex-container wrap gap">
         <select id="exportType"></select>
-        <button class="classic-btn" id="exportContent" disabled>Export to file</button>
+        <button class="classic-btn" id="exportContent" disabled>
+          Export to file
+        </button>
       </div>
     </nav>
 
     <div id="editorEl"></div>
 
     <script type="module">
-      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
-      const editorElement = document.getElementById("editorEl");
-      const undoElement = document.getElementById("undo");
-      const redoElement = document.getElementById("redo");
-      const clearElement = document.getElementById("clear");
-      const exportElement = document.getElementById("exportContent");
-      const showModalBtn = document.getElementById("showModalBtn");
-      let editor;
-      const editorOption = {
-      };
+      import { Editor } from '../../dist/iink.esm.js'
+      import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
+      const editorElement = document.getElementById('editorEl')
+      const undoElement = document.getElementById('undo')
+      const redoElement = document.getElementById('redo')
+      const clearElement = document.getElementById('clear')
+      const exportElement = document.getElementById('exportContent')
+      const showModalBtn = document.getElementById('showModalBtn')
+      const exportTypeSelectElement = document.getElementById('exportType')
 
-      editorElement.addEventListener("changed", (event) => {
-        undoElement.disabled = !event.detail.canUndo;
-        redoElement.disabled = !event.detail.canRedo;
-        exportElement.disabled = event.detail.isEmpty;
-        clearElement.disabled = event.detail.isEmpty;
-      });
+      let editor
+      const editorOptions = {}
 
-          async function loadEditor(options) {
+      const toBlob = (data, mimeType) => new Blob([data], { type: mimeType })
 
+      const base64toBlob = (data, mimeType) => {
+        const byteCharacters = window.atob(data)
+        const byteNumbers = new Array(byteCharacters.length)
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i)
+        }
+        const byteArray = new Uint8Array(byteNumbers)
+        return toBlob(byteArray, mimeType)
+      }
+
+      const exportFileType = {
+        word: {
+          mimeType:
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          transform: base64toBlob,
+          name: 'Word (docx)',
+          extension: 'docx'
+        },
+        html: {
+          mimeType: 'text/html',
+          name: 'HTML',
+          transform: toBlob,
+          extension: 'html'
+        },
+        png: {
+          mimeType: 'image/png',
+          transform: base64toBlob,
+          name: 'PNG',
+          extension: 'png'
+        },
+        jpeg: {
+          mimeType: 'image/jpeg',
+          transform: base64toBlob,
+          name: 'JPEG',
+          extension: 'jpg'
+        }
+      }
+
+      editorElement.addEventListener('changed', (event) => {
+        undoElement.disabled = !event.detail.canUndo
+        redoElement.disabled = !event.detail.canRedo
+        exportElement.disabled = event.detail.empty
+        clearElement.disabled = event.detail.empty
+      })
+
+      async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(editorElement, "INTERACTIVEINKSSR", options);
+        editor = await Editor.load(editorElement, 'INTERACTIVEINKSSR', options)
 
-        const toBlob = (data, mimeType) => new Blob([data], { type: mimeType });
-
-        const base64toBlob = (data, mimeType) => {
-          const byteCharacters = window.atob(data);
-          const byteNumbers = new Array(byteCharacters.length);
-          for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
-          }
-          const byteArray = new Uint8Array(byteNumbers);
-          return toBlob(byteArray, mimeType);
-        };
-
-        const exportFileType = {
-          word: {
-            mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            transform: base64toBlob,
-            name: "Word (docx)",
-            extension: "docx"
-          },
-          html: {
-            mimeType: "text/html",
-            name: "HTML",
-            transform: toBlob,
-            extension: "html"
-          },
-          png: {
-            mimeType: "image/png",
-            transform: base64toBlob,
-            name: "PNG",
-            extension: "png"
-          },
-          jpeg: {
-            mimeType: "image/jpeg",
-            transform: base64toBlob,
-            name: "JPEG",
-            extension: "jpg"
-          }
-        };
-
-        const selectElement = document.getElementById("exportType");
         for (const exportType in exportFileType) {
-          const optionElement = document.createElement("option");
-          optionElement.value = exportType;
-          optionElement.innerText = exportFileType[exportType].name;
-          selectElement.appendChild(optionElement);
+          const optionElement = document.createElement('option')
+          optionElement.value = exportType
+          optionElement.innerText = exportFileType[exportType].name
+          exportTypeSelectElement.appendChild(optionElement)
         }
 
-        editorElement.addEventListener("exported", (evt) => {
-          const fileType = exportFileType[selectElement.options[selectElement.selectedIndex].value];
-          if (evt && evt.detail && evt.detail[fileType.mimeType]) {
-            window.saveAs(fileType.transform(evt.detail[fileType.mimeType], fileType.mimeType), `myDocument.${fileType.extension}`);
-          }
-        });
+      }
 
-        undoElement.addEventListener("click", () => {
-          editorElement.editor.undo();
-        });
+      editorElement.addEventListener('exported', (evt) => {
+        const fileType = exportFileType[exportTypeSelectElement.options[exportTypeSelectElement.selectedIndex].value]
+        if (evt && evt.detail && evt.detail[fileType.mimeType]) {
+          window.saveAs(fileType.transform(evt.detail[fileType.mimeType], fileType.mimeType), `myDocument.${ fileType.extension }`)
+        }
+      })
 
-        redoElement.addEventListener("click", () => {
-          editorElement.editor.redo();
-        });
+      undoElement.addEventListener('click', () => {
+        editorElement.editor?.undo()
+      })
 
-        clearElement.addEventListener("click", () => {
-          editorElement.editor.clear();
-        });
+      redoElement.addEventListener('click', () => {
+        editorElement.editor?.redo()
+      })
 
-        exportElement.addEventListener("click", () => {
-          const mimeType = exportFileType[selectElement.options[selectElement.selectedIndex].value].mimeType;
-          editorElement.editor.export([mimeType, "application/vnd.myscript.jiix"]);
-        });
+      clearElement.addEventListener('click', () => {
+        editorElement.editor?.clear()
+      })
 
-        showModalBtn.addEventListener("click", () => {
-          ModalEditorOptions.show(loadEditor, editorOption)
-        })
+      exportElement.addEventListener('click', () => {
+        const mimeType = exportFileType[exportTypeSelectElement.options[exportTypeSelectElement.selectedIndex].value].mimeType
+        editorElement.editor?.export([mimeType, 'application/vnd.myscript.jiix'])
+      })
 
-        window.addEventListener("resize", () => {
-          editorElement.editor.resize();
-        });
-      };
+      window.addEventListener('resize', () => {
+        editorElement.editor?.resize()
+      })
 
-      ModalEditorOptions.initConfiguration(loadEditor, editorOption)
+      showModalBtn.addEventListener('click', () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
     </script>
   </body>
+
 </html>

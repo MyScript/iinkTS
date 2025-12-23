@@ -1,9 +1,10 @@
+import * as iink from '../../dist/iink.esm.js'
 import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
 const inkEditorDeprecatedConfiguration = iink.DefaultInkEditorDeprecatedConfiguration
 const IISSREditorConfiguration = iink.DefaultInteractiveInkSSREditorConfiguration
 const IIEditorConfiguration = iink.DefaultInteractiveInkEditorConfiguration
 const inkEditorConfiguration = iink.DefaultInkEditorConfiguration
-const configurationContainer = document.getElementById('configuration-container')
+
 const configurationContent = document.getElementById('configuration-content')
 const editorTypeSelect = document.getElementById('editor-type')
 const editorElement = document.getElementById('editor')
@@ -396,3 +397,9 @@ window.addEventListener('resize', () => {
 loadEditorType()
 loadConfiguration()
 ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+/**
+ * We expose these objects to the window use it in test
+ */
+window.editorOptions = editorOptions
+window.loadEditor = loadEditor

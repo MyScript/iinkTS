@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
@@ -13,28 +11,26 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
 
     <style>
-      body {
-        display: flex;
-        flex-direction: row;
-      }
-      #strokes,
-      #result {
-        min-height: 95vh;
-        max-height: 95vh;
-        min-width: 49vw;
-        max-width: 49vw;
+      #recognize {
+        margin: 10px auto;
       }
 
-      #recognize {
-        position: absolute;
-        top: 2%;
-        left: calc(50% - 75px);
-        width: 125px;
-        height: 35px;
+      #strokes,
+      #result {
+        width: 50%;
+        height: calc(100dvh - 110px);
+        min-height: calc(100dvh - 110px);
+        box-sizing: border-box;
+        padding: 0.5em;
+        font-family: monospace;
+        font-size: 0.8em;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        overflow: auto;
       }
+
       #result {
         display: flex;
         flex-direction: column;
@@ -50,143 +46,183 @@
         max-height: 50%;
       }
 
-      #interpretatedImageContent > img {
+      #interpretatedImageContent>img {
         max-width: 100%;
       }
     </style>
   </head>
 
   <body>
-    <div id="showModal">
-      <button id="showModalBtn" class="btn-keys">Set Keys</button>
-    </div>
-    <textarea id="strokes">
-[
-  {
-    "pointerType": "mouse",
-    "pointers": [
-      { "x": 131, "y": 45, "t": 1693495755469, "p": 1 },
-      { "x": 122, "y": 47, "t": 1693495755485, "p": 0.82 },
-      { "x": 113, "y": 49, "t": 1693495755501, "p": 0.82 },
-      { "x": 107, "y": 54, "t": 1693495755518, "p": 0.78 },
-      { "x": 103, "y": 57, "t": 1693495755535, "p": 0.74 },
-      { "x": 100, "y": 61, "t": 1693495755551, "p": 0.74 },
-      { "x": 97, "y": 65, "t": 1693495755568, "p": 0.74 },
-      { "x": 96, "y": 69, "t": 1693495755586, "p": 0.72 },
-      { "x": 95, "y": 73, "t": 1693495755602, "p": 0.72 },
-      { "x": 95, "y": 80, "t": 1693495755619, "p": 0.78 },
-      { "x": 98, "y": 86, "t": 1693495755635, "p": 0.78 },
-      { "x": 103, "y": 92, "t": 1693495755651, "p": 0.8 },
-      { "x": 109, "y": 96, "t": 1693495755669, "p": 0.79 },
-      { "x": 113, "y": 99, "t": 1693495755685, "p": 0.74 },
-      { "x": 118, "y": 100, "t": 1693495755701, "p": 0.75 },
-      { "x": 125, "y": 102, "t": 1693495755718, "p": 0.79 },
-      { "x": 131, "y": 100, "t": 1693495755734, "p": 0.77 },
-      { "x": 134, "y": 98, "t": 1693495755752, "p": 0.7 },
-      { "x": 139, "y": 96, "t": 1693495755769, "p": 0.75 },
-      { "x": 146, "y": 92, "t": 1693495755784, "p": 0.8 },
-      { "x": 148, "y": 88, "t": 1693495755802, "p": 0.73 },
-      { "x": 150, "y": 84, "t": 1693495755819, "p": 0.73 },
-      { "x": 152, "y": 81, "t": 1693495755836, "p": 0.7 },
-      { "x": 154, "y": 74, "t": 1693495755868, "p": 0.79 },
-      { "x": 152, "y": 69, "t": 1693495755885, "p": 0.74 },
-      { "x": 150, "y": 62, "t": 1693495755901, "p": 0.78 },
-      { "x": 148, "y": 58, "t": 1693495755918, "p": 0.71 },
-      { "x": 146, "y": 55, "t": 1693495755935, "p": 0.7 },
-      { "x": 143, "y": 52, "t": 1693495755952, "p": 0.72 },
-      { "x": 138, "y": 48, "t": 1693495755968, "p": 0.79 },
-      { "x": 131, "y": 47, "t": 1693495755984, "p": 0.79 },
-      { "x": 126, "y": 45, "t": 1693495756001, "p": 0.74 }
-    ]
-  },
-  {
-    "pointerType": "mouse",
-    "pointers": [
-      { "x": 110, "y": 75, "t": 1693495756688, "p": 0.1 },
-      { "x": 110, "y": 78, "t": 1693495756751, "p": 0.68 },
-      { "x": 113, "y": 81, "t": 1693495756784, "p": 0.7 },
-      { "x": 116, "y": 85, "t": 1693495756801, "p": 0.68 },
-      { "x": 119, "y": 86, "t": 1693495756818, "p": 0.68 },
-      { "x": 124, "y": 87, "t": 1693495756851, "p": 0.75 },
-      { "x": 128, "y": 85, "t": 1693495756906, "p": 0.73 },
-      { "x": 131, "y": 81, "t": 1693495756934, "p": 0.74 },
-      { "x": 132, "y": 78, "t": 1693495756951, "p": 0.68 },
-      { "x": 134, "y": 75, "t": 1693495757001, "p": 1 }
-    ]
-  },
-  {
-    "pointerType": "mouse",
-    "pointers": [
-      { "x": 115, "y": 62, "t": 1693495757412, "p": 0.1 },
-      { "x": 117, "y": 58, "t": 1693495757501, "p": 0.73 },
-      { "x": 119, "y": 62, "t": 1693495757511, "p": 0.73 }
-    ]
-  },
-  {
-    "pointerType": "mouse",
-    "pointers": [
-      { "x": 132, "y": 62, "t": 1693495757829, "p": 0.1 },
-      { "x": 134, "y": 58, "t": 1693495757997, "p": 0.68 },
-      { "x": 136, "y": 62, "t": 1693495758011, "p": 0.1 }
-    ]
-  }
-]
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">Rest no UI</h1>
+    </header>
 
-  </textarea
-    >
-    <div id="result">
-      <div id="interpretatedTextContent"></div>
-      <div id="interpretatedImageContent"></div>
-    </div>
+    <div>
+      <button id="recognize" class="classic-btn">
+        Recognize
+      </button>
 
-    <button id="recognize" class="classic-btn">Recognize</button>
+      <div class="flex-container gap">
+        <textarea id="strokes">
+  [
+    {
+      "pointerType": "mouse",
+      "pointers": [
+        { "x": 131, "y": 45, "t": 1693495755469, "p": 1 },
+        { "x": 122, "y": 47, "t": 1693495755485, "p": 0.82 },
+        { "x": 113, "y": 49, "t": 1693495755501, "p": 0.82 },
+        { "x": 107, "y": 54, "t": 1693495755518, "p": 0.78 },
+        { "x": 103, "y": 57, "t": 1693495755535, "p": 0.74 },
+        { "x": 100, "y": 61, "t": 1693495755551, "p": 0.74 },
+        { "x": 97, "y": 65, "t": 1693495755568, "p": 0.74 },
+        { "x": 96, "y": 69, "t": 1693495755586, "p": 0.72 },
+        { "x": 95, "y": 73, "t": 1693495755602, "p": 0.72 },
+        { "x": 95, "y": 80, "t": 1693495755619, "p": 0.78 },
+        { "x": 98, "y": 86, "t": 1693495755635, "p": 0.78 },
+        { "x": 103, "y": 92, "t": 1693495755651, "p": 0.8 },
+        { "x": 109, "y": 96, "t": 1693495755669, "p": 0.79 },
+        { "x": 113, "y": 99, "t": 1693495755685, "p": 0.74 },
+        { "x": 118, "y": 100, "t": 1693495755701, "p": 0.75 },
+        { "x": 125, "y": 102, "t": 1693495755718, "p": 0.79 },
+        { "x": 131, "y": 100, "t": 1693495755734, "p": 0.77 },
+        { "x": 134, "y": 98, "t": 1693495755752, "p": 0.7 },
+        { "x": 139, "y": 96, "t": 1693495755769, "p": 0.75 },
+        { "x": 146, "y": 92, "t": 1693495755784, "p": 0.8 },
+        { "x": 148, "y": 88, "t": 1693495755802, "p": 0.73 },
+        { "x": 150, "y": 84, "t": 1693495755819, "p": 0.73 },
+        { "x": 152, "y": 81, "t": 1693495755836, "p": 0.7 },
+        { "x": 154, "y": 74, "t": 1693495755868, "p": 0.79 },
+        { "x": 152, "y": 69, "t": 1693495755885, "p": 0.74 },
+        { "x": 150, "y": 62, "t": 1693495755901, "p": 0.78 },
+        { "x": 148, "y": 58, "t": 1693495755918, "p": 0.71 },
+        { "x": 146, "y": 55, "t": 1693495755935, "p": 0.7 },
+        { "x": 143, "y": 52, "t": 1693495755952, "p": 0.72 },
+        { "x": 138, "y": 48, "t": 1693495755968, "p": 0.79 },
+        { "x": 131, "y": 47, "t": 1693495755984, "p": 0.79 },
+        { "x": 126, "y": 45, "t": 1693495756001, "p": 0.74 }
+      ]
+    },
+    {
+      "pointerType": "mouse",
+      "pointers": [
+        { "x": 110, "y": 75, "t": 1693495756688, "p": 0.1 },
+        { "x": 110, "y": 78, "t": 1693495756751, "p": 0.68 },
+        { "x": 113, "y": 81, "t": 1693495756784, "p": 0.7 },
+        { "x": 116, "y": 85, "t": 1693495756801, "p": 0.68 },
+        { "x": 119, "y": 86, "t": 1693495756818, "p": 0.68 },
+        { "x": 124, "y": 87, "t": 1693495756851, "p": 0.75 },
+        { "x": 128, "y": 85, "t": 1693495756906, "p": 0.73 },
+        { "x": 131, "y": 81, "t": 1693495756934, "p": 0.74 },
+        { "x": 132, "y": 78, "t": 1693495756951, "p": 0.68 },
+        { "x": 134, "y": 75, "t": 1693495757001, "p": 1 }
+      ]
+    },
+    {
+      "pointerType": "mouse",
+      "pointers": [
+        { "x": 115, "y": 62, "t": 1693495757412, "p": 0.1 },
+        { "x": 117, "y": 58, "t": 1693495757501, "p": 0.73 },
+        { "x": 119, "y": 62, "t": 1693495757511, "p": 0.73 }
+      ]
+    },
+    {
+      "pointerType": "mouse",
+      "pointers": [
+        { "x": 132, "y": 62, "t": 1693495757829, "p": 0.1 },
+        { "x": 134, "y": 58, "t": 1693495757997, "p": 0.68 },
+        { "x": 136, "y": 62, "t": 1693495758011, "p": 0.1 }
+      ]
+    }
+  ]
+
+        </textarea>
+
+        <div id="result">
+          <div id="interpretatedTextContent"></div>
+          <div id="interpretatedImageContent"></div>
+        </div>
+      </div>
+    </div>
 
     <script type="module">
-      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
-      const showModalBtn = document.getElementById("showModalBtn")
+      import {
+        RecognizerHTTPV1,
+        Model,
+        convertPartialStrokesToStrokes
+      } from '../../dist/iink.esm.js'
+      import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
+
+      const showModalBtn = document.getElementById('showModalBtn')
+
       async function convertBlobToBase64(blob) {
         return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onerror = reject;
+          const reader = new FileReader()
+          reader.onerror = reject
           reader.onload = () => {
-            resolve(reader.result);
-          };
-          reader.readAsDataURL(blob);
-        });
+            resolve(reader.result)
+          }
+          reader.readAsDataURL(blob)
+        })
       }
 
-      showModalBtn.addEventListener("click", () => {
-          ModalEditorOptions.show()
+      let serverConfiguration = {}
+      function setServerConfig(options) {
+        serverConfiguration = options.configuration.server
+      }
+
+      document
+        .getElementById('recognize')
+        .addEventListener('click', async () => {
+          try {
+            // Creating a recognizer
+            const iinkRecognizer = new RecognizerHTTPV1({ server: serverConfiguration })
+            // Creating a empty model
+            const model = new Model()
+            // Filling the model with the stroke
+            model.symbols = convertPartialStrokesToStrokes(JSON.parse(document.querySelector('#strokes').value))
+            // Define exported mimeTypes
+            const requestedMimeType = ['text/plain', 'image/png']
+            // Triggering the recognition
+            const newModel = await iinkRecognizer.export(model, requestedMimeType)
+
+            Object.entries(newModel.exports).forEach(
+              ([mimeType, exportValue]) => {
+                if (mimeType.startsWith('image/')) {
+                  convertBlobToBase64(exportValue)
+                    .then((b64) => {
+                      document.querySelector(
+                        '#interpretatedImageContent'
+                      ).innerHTML = '<img>'
+                      document.querySelector(
+                        '#interpretatedImageContent > img'
+                      ).src = b64
+                    })
+                    .catch((error) => {
+                      console.error('Unable to convert to base 64')
+                    })
+                } else {
+                  document.querySelector('#interpretatedTextContent').innerHTML =
+                    JSON.stringify(newModel.exports[mimeType])
+                }
+              }
+            )
+          } catch (error) {
+            document.querySelector('#interpretatedTextContent').innerHTML = `<span style="color:red;">Error during recognition: ${error.message}</span>`
+            document.querySelector('#interpretatedImageContent').innerHTML = ''
+          }
         })
 
-      document.getElementById("recognize").addEventListener("click", async () => {
-        const server = JSON.parse(window.localStorage.getItem("server") || "{}");
-        // Creating a recognizer
-        const iinkRecognizer = new iink.RecognizerHTTPV1({ server });
-        // Creating a empty model
-        const model = new iink.Model();
-        // Filling the model with the stroke
-        model.symbols = iink.convertPartialStrokesToStrokes(JSON.parse(document.querySelector("#strokes").value));
-        // Define exported mimeTypes
-        const requestedMimeType = ["text/plain", "image/png"];
-        // Triggering the recognition
-        const newModel = await iinkRecognizer.export(model, requestedMimeType);
+      showModalBtn.addEventListener('click', () => {
+        document.querySelector('#interpretatedTextContent').innerHTML = ''
+        document.querySelector('#interpretatedImageContent').innerHTML = ''
+        ModalEditorOptions.show(setServerConfig, {})
+      })
 
-        Object.entries(newModel.exports).forEach(([mimeType, exportValue]) => {
-          if (mimeType.startsWith("image/")) {
-            convertBlobToBase64(exportValue)
-              .then((b64) => {
-                document.querySelector("#interpretatedImageContent").innerHTML = "<img>";
-                document.querySelector("#interpretatedImageContent > img").src = b64;
-              })
-              .catch((error) => {
-                console.error("Unable to convert to base 64");
-              });
-          } else {
-            document.querySelector("#interpretatedTextContent").innerHTML = JSON.stringify(newModel.exports[mimeType]);
-          }
-        });
-      });
+      ModalEditorOptions.initConfiguration(setServerConfig, {})
     </script>
   </body>
+
 </html>

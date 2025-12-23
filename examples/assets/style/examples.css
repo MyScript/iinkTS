@@ -1,110 +1,135 @@
+.header-main {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 50px;
+  background-color: #1a9fff;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
 
-.link-info {
-    position: fixed;
-    top: 24px;
-    right: 24px;
-    height: 32px;
-    width: 32px;
+.header-title {
+  color: white;
+  font-size: 20px;
+  margin: 0;
+  flex-grow: 1;
+  text-align: center;
 }
 
 .btn-keys {
-    width: 100px;
-    height: 40px;
-    background-color: #1a9fff;
-    color: white;
-    font-size: 14px;
-    text-transform: uppercase;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    margin-top: 5px;
-    margin-left: 5px;
+  height: 40px;
+  background: #f5f5f5;
+  color: #1a9fff;
+  font-size: 14px;
+  text-transform: uppercase;
+  border: 1px solid #e0e0e0;
+  border-radius: 0;
+  box-shadow: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background 0.2s, color 0.2s;
+}
+
+.btn-keys:hover, .btn-keys:focus {
+  background: #e0e0e0;
+  color: #007acc;
+  outline: none;
+}
+
+.link-info {
+  right: 24px;
+  height: 32px;
+  width: 32px;
+  border: 1px solid gray;
+  border-radius: 5px;
 }
 
 .help-overlay {
-    display: none;
-    position: fixed;
-    z-index: 998;
-    top: 0;
-    left: 0;
-    height: 100dvh;
-    width: 100dvw;
-    background: #000;
-    opacity: 0.7;
+  display: none;
+  position: fixed;
+  z-index: 998;
+  top: 0;
+  left: 0;
+  height: 100dvh;
+  width: 100dvw;
+  background: #000;
+  opacity: 0.7;
 }
 
 .help-modal {
-    display: none;
-    position: fixed;
-    z-index: 999;
-    top: 50%;
-    max-height: 90%;
-    left: 50%;
-    width: 80%;
-    max-width: 1000px;
-    transform: translate(-50%, -50%);
-    background-color: #f5f5f5;
-    box-shadow: 0 6px 24px -12px rgba(6, 6, 7, .4);
-    overflow: auto;
-    padding: 0px 24px
+  display: none;
+  position: fixed;
+  z-index: 999;
+  top: 50%;
+  max-height: 90%;
+  left: 50%;
+  width: 80%;
+  max-width: 1000px;
+  transform: translate(-50%, -50%);
+  background-color: #f5f5f5;
+  box-shadow: 0 6px 24px -12px rgba(6, 6, 7, .4);
+  overflow: auto;
+  padding: 0px 24px
 }
 
 .help-modal .close {
-    position: absolute;
-    top: 0px;
-    right: 0px;
-    height: 32px;
-    width: 32px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 30px;
-    font-weight: bold;
-    text-decoration: none;
-    color: #333;
-    border: none;
-    background-color: transparent;
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  height: 32px;
+  width: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 30px;
+  font-weight: bold;
+  text-decoration: none;
+  color: #333;
+  border: none;
+  background-color: transparent;
 }
 
 .help-modal .close:focus,
 .help-modal .close:hover {
-    color: #1A9FFF;
+  color: #1A9FFF;
 }
 
 .help-modal .help-modal-content {
-    margin: 24px auto 24px;
+  margin: 24px auto 24px;
 }
 
 .help-modal .gestures {
-    margin-bottom: 24px;
-    padding: 24px;
-    box-shadow: 0 6px 24px -12px rgba(6, 6, 7, .4);
-    background-color: #fff;
+  margin-bottom: 24px;
+  padding: 24px;
+  box-shadow: 0 6px 24px -12px rgba(6, 6, 7, .4);
+  background-color: #fff;
 }
 
-.help-modal .gestures>div>img {
-    height: auto;
-    max-width: 300px;
+.help-modal .gestures > div > img {
+  height: auto;
+  max-width: 300px;
 }
 
 .help-modal .gestures-img-container {
-    text-align: center;
+  text-align: center;
 }
 
 #result {
-    min-height: 100px;
-    max-height: 100px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: auto;
-    width: 100%;
-    text-align: center;
+  min-height: 100px;
+  max-height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: auto;
+  width: 100%;
+  text-align: center;
 }
 
 .languages {
-    display: flex;
-    justify-content: center;
-    margin: 10px;
+  display: flex;
+  justify-content: center;
+  margin: 10px;
 }

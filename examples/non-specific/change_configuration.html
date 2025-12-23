@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -13,29 +14,22 @@
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
     <link rel="stylesheet" href="../assets/style/renderjson.css" />
+    <link rel="stylesheet" href="../components/modal/modal.css" />
 
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
-      integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X"
-      crossorigin="anonymous"
-    />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css" integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X"
+      crossorigin="anonymous" />
 
-    <script
-      defer
-      src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"
-      integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4"
-      crossorigin="anonymous"
-    ></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4"
+      crossorigin="anonymous"></script>
 
     <script type="text/javascript" src="../assets/renderjson/renderjson.js"></script>
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
 
     <style>
       .wrapper {
-        height: 100dvh;
+        height: calc(100dvh - 50px);
         width: 100dvw;
       }
+
       #result {
         border-bottom: solid gray 1px;
         display: block;
@@ -43,6 +37,7 @@
         padding: 12px;
         cursor: zoom-in;
       }
+
       #result.open {
         position: absolute;
         z-index: 999;
@@ -55,19 +50,21 @@
       }
 
       .content {
+        position: relative;
         width: calc(100vw - 400px);
         height: 100%;
       }
+
       .ms-editor {
         width: 100%;
-        height: calc(100dvh - 100px) !important;
+        height: calc(100dvh - 150px) !important;
       }
 
       .configuration-container {
         border-left: solid black 1px;
         background-color: white;
-        height: 100dvh;
-        min-height: 100dvh;
+        height: calc(100dvh - 50px);
+        min-height: calc(100dvh - 50px);
         width: 400px;
         max-width: 400px;
       }
@@ -108,9 +105,9 @@
       }
 
       .configuration-container .card .card-content select,
-      .configuration-container .card .card-content input:not([type="checkbox"]){
+      .configuration-container .card .card-content input:not([type='checkbox']) {
         width: 100%;
-        font: 400 14px "Source Sans Pro", sans-serif;
+        font: 400 14px 'Source Sans Pro', sans-serif;
       }
 
       .buttons-wrapper {
@@ -126,11 +123,12 @@
         right: 12px;
         top: 12px;
       }
-      @media screen and (max-width: 1000px) {
 
+      @media screen and (max-width: 1000px) {
         .content {
           width: 100vw;
         }
+
         .configuration-container {
           position: fixed;
           right: 0;
@@ -140,21 +138,27 @@
           width: 0;
           transition: width 0.75s ease;
         }
+
         #menu-button {
           display: block;
         }
+
         .configuration-container.open {
           width: 100vw;
         }
       }
-
     </style>
   </head>
 
   <body>
-    <div id="showModal">
-      <button id="showModalBtn" class="btn-keys">Set Keys</button>
-    </div>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">
+        Changing configuration dynamically
+      </h1>
+    </header>
     <button id="menu-button" class="menu-button">
       <img src="../assets/img/menu.svg" />
     </button>
@@ -168,28 +172,32 @@
         <div class="card">
           <div class="flex-container between">
             <label for="editor-type">Editor type:</label>
-            <select id="editor-type" name="server-protocol">
-            </select>
+            <select id="editor-type" name="server-protocol"></select>
           </div>
         </div>
-        <div id="configuration-content" class="params">
-        </div>
+        <div id="configuration-content" class="params"></div>
         <div class="buttons-wrapper">
-          <button class="classic-btn" id="export-btn">Export</button>
-          <button class="classic-btn reset" id="reset-btn">Reset</button>
-          <button class="classic-btn success" id="valid-btn">Valid</button>
+          <button class="classic-btn" id="export-btn">
+            Export
+          </button>
+          <button class="classic-btn reset" id="reset-btn">
+            Reset
+          </button>
+          <button class="classic-btn success" id="valid-btn">
+            Valid
+          </button>
         </div>
       </div>
     </div>
     <script>
-      const menuButton = document.getElementById("menu-button");
-      const mainMenu = document.getElementById("configuration-container");
+      const menuButton = document.getElementById('menu-button')
+      const mainMenu = document.getElementById('configuration-container')
 
-      menuButton.addEventListener("click", () => {
-        mainMenu.classList.toggle("open");
-      });
-
+      menuButton.addEventListener('click', () => {
+        mainMenu.classList.toggle('open')
+      })
     </script>
     <script src="./change_configuration.js" type="module"></script>
   </body>
+
 </html>

@@ -7,35 +7,27 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
-    <title>Websocket custom recognizer</title>
+
+    <title>Rest Raw Content</title>
+
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
+
     <style>
       #editorEl {
-        height: calc(100dvh - 237px);
+        height: calc(100dvh - 216px);
       }
 
-      @media only screen and (max-width: 600px) {
+      @media only screen and (max-width: 451px) {
         #editorEl {
-          height: calc(100dvh - 307px);
+          height: calc(100dvh - 263px);
         }
-      }
-    </style>
-    <style>
-      .recognizer-info {
-        width: calc(100% - 200px);
-        min-width: 200px;
-        overflow: auto;
-        white-space: nowrap;
-        padding: 0 12px;
-        margin: 5px 0;
       }
 
-      @media only screen and (max-width: 600px) {
-        .recognizer-info {
-          width: 100%;
-        }
+      #result span {
+        font-size: small;
+        padding: 12px;
       }
     </style>
   </head>
@@ -45,15 +37,13 @@
       <button id="showModalBtn" class="btn-keys">
         Change server configuration
       </button>
-      <h1 class="header-title">
-        Websocket with Custom Recognizer
-      </h1>
+      <h1 class="header-title">Rest Raw Content</h1>
     </header>
 
     <div id="result"></div>
 
-    <nav class="flex-container gap between wrap">
-      <div class="flex-container gap">
+    <nav class="flex-container wrap gap between">
+      <div class="flex-container wrap gap">
         <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
           <img src="../assets/img/clear.svg" />
         </button>
@@ -64,69 +54,23 @@
           <img src="../assets/img/redo.svg" />
         </button>
       </div>
-      <ul class="recognizer-info">
-        <li id="recognizer-url" class="text-into">
-          URL:
-        </li>
-        <li id="recognizer-sent" class="text-into">
-          Message sent:
-        </li>
-        <li id="recognizer-received" class="text-into">
-          Message received:
-        </li>
-      </ul>
+      <select id="language"></select>
     </nav>
 
     <div id="editorEl"></div>
 
     <script type="module">
-      import { Editor } from '../../dist/iink.esm.js'
-      import { CustomWebsocketRecognizer } from './websocket_custom_recognizer.js'
+      import { Editor, getAvailableLanguageList } from '../../dist/iink.esm.js'
       import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
       const editorElement = document.getElementById('editorEl')
       const resultElement = document.getElementById('result')
+      const languageElement = document.getElementById('language')
       const clearElement = document.getElementById('clear')
       const undoElement = document.getElementById('undo')
       const redoElement = document.getElementById('redo')
       const showModalBtn = document.getElementById('showModalBtn')
 
       let editor
-
-      const editorOptions = {
-        configuration: {},
-        override: {
-          recognizer: CustomWebsocketRecognizer
-        }
-      }
-
-      async function loadEditor(options) {
-        await editor?.destroy()
-        resultElement.innerHTML = ''
-
-        /**
-         * get editor instance from type
-         * @param {Element} The DOM element to attach the ink paper
-         * @param {Object} The Editor parameters
-         */
-        editor = await Editor.load(editorElement, 'INTERACTIVEINKSSR', options)
-
-        editor.event.addEventListener('changed', (event) => {
-          undoElement.disabled = !event.detail.canUndo
-          redoElement.disabled = !event.detail.canRedo
-          clearElement.disabled = !event.detail.canClear
-        })
-
-        editor.event.addEventListener('exported', (event) => {
-          resultElement.innerHTML =
-            event.detail && event.detail['application/vnd.myscript.jiix']
-              ? event.detail['application/vnd.myscript.jiix'].label
-              : ''
-        })
-      }
-
-      clearElement.addEventListener('click', async () => {
-        editor?.clear()
-      })
 
       undoElement.addEventListener('click', () => {
         editor?.undo()
@@ -136,15 +80,73 @@
         editor?.redo()
       })
 
+      clearElement.addEventListener('click', () => {
+        editor?.clear()
+        resultElement.innerHTML = ''
+      })
+
       window.addEventListener('resize', () => {
         editor?.resize()
       })
+
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            type: 'Raw Content'
+          }
+        }
+      }
 
       showModalBtn.addEventListener('click', () => {
         ModalEditorOptions.show(loadEditor, editorOptions)
       })
 
+      languageElement.addEventListener('change', (e) => {
+        editorOptions.configuration.recognition.lang = e.target.value
+        loadEditor(editorOptions)
+      })
+
+      async function loadEditor(options) {
+        resultElement.innerHTML = ''
+        await editor?.destroy()
+
+        /**
+         * get editor instance from type
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Editor parameters
+         */
+        editor = await Editor.load(editorElement, 'INKV1', options)
+
+        editor.event.addEventListener('changed', (event) => {
+          undoElement.disabled = !event.detail.canUndo
+          redoElement.disabled = !event.detail.canRedo
+          clearElement.disabled = !event.detail.canClear
+        })
+
+        const currentLanguage = editor.configuration.recognition.lang
+        const availableLanguageListResponse = await getAvailableLanguageList(editor.configuration)
+        Object.keys(availableLanguageListResponse.result).forEach((key) => {
+          const selected = currentLanguage === key
+          languageElement.options[languageElement.options.length] = new Option(availableLanguageListResponse.result[key], key, selected, selected)
+        })
+
+        editor.event.addEventListener('exported', (evt) => {
+          const exports = evt.detail
+          if (exports && exports['application/vnd.myscript.jiix']) {
+            resultElement.innerHTML = `<span>${ JSON.stringify(exports['application/vnd.myscript.jiix'].elements) }</span>`
+          } else {
+            resultElement.innerHTML = ''
+          }
+        })
+      }
+
       ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
     </script>
   </body>
 

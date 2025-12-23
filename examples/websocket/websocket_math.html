@@ -7,43 +7,20 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
-
-    <title>Custom resources math (pre-compiled)</title>
-
+    <title>Websocket Math</title>
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css" integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X" crossorigin="anonymous" />
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>
     <style>
-      .description {
-        padding: 12px;
-      }
-
       #editorEl {
-        height: calc(100dvh - 284px);
+        height: calc(100dvh - 216px);
       }
 
-      @media only screen and (max-width: 1156px) {
+      @media only screen and (max-width: 279px) {
         #editorEl {
-          height: calc(100dvh - 302px);
-        }
-      }
-
-      @media only screen and (max-width: 600px) {
-        #editorEl {
-          height: calc(100dvh - 319px);
-        }
-      }
-
-      @media only screen and (max-width: 423px) {
-        #editorEl {
-          height: calc(100dvh - 336px);
-        }
-      }
-
-      @media only screen and (max-width: 338px) {
-        #editorEl {
-          height: calc(100dvh - 353px);
+          height: calc(100dvh - 264px);
         }
       }
     </style>
@@ -55,19 +32,12 @@
         Change server configuration
       </button>
       <h1 class="header-title">
-        Custom resources math (pre-compiled)
+        Websocket Math
       </h1>
     </header>
-
-    <p class="description">
-      This example use a math custom resource. The grammar restrict the
-      recognition to only basic elementary school math (addition and
-      substraction). The id of a pre-compiled grammar is sent.
-    </p>
-
     <div id="result"></div>
 
-    <nav class="flex-container wrap gap between">
+    <nav class="flex-container wrap between gap">
       <div class="flex-container wrap gap">
         <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
           <img src="../assets/img/clear.svg" />
@@ -79,9 +49,11 @@
           <img src="../assets/img/redo.svg" />
         </button>
       </div>
-      <button class="classic-btn" id="convert" disabled>
-        Convert
-      </button>
+      <div class="flex-container wrap gap">
+        <button class="classic-btn" id="convert" disabled>
+          Convert
+        </button>
+      </div>
     </nav>
 
     <div id="editorEl"></div>
@@ -89,33 +61,47 @@
     <script type="module">
       import { Editor } from '../../dist/iink.esm.js'
       import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
-
       const editorElement = document.getElementById('editorEl')
       const resultElement = document.getElementById('result')
+      const clearElement = document.getElementById('clear')
       const undoElement = document.getElementById('undo')
       const redoElement = document.getElementById('redo')
-      const clearElement = document.getElementById('clear')
       const convertElement = document.getElementById('convert')
       const showModalBtn = document.getElementById('showModalBtn')
+
+      function cleanLatex(latexExport) {
+        if (typeof latexExport === 'number') {
+          latexExport = latexExport.toString()
+        }
+        if (latexExport.includes('\\\\')) {
+          const steps = '\\begin{align*}' + latexExport + '\\end{align*}'
+          return steps
+            .replace('\\begin{aligned}', '')
+            .replace('\\end{aligned}', '')
+            .replace(new RegExp('(align.{1})', 'g'), 'aligned')
+        }
+        return latexExport.replace(new RegExp('(align.{1})', 'g'), 'aligned')
+      }
+
+      let editor
 
       const editorOptions = {
         configuration: {
           recognition: {
             type: 'MATH',
             math: {
-              customGrammarId: 'math-elementary',
-              mimeTypes: ['application/x-latex']
+              mimeTypes: ['application/x-latex'],
+              solver: {
+                enable: true
+              }
             }
           }
         }
       }
 
-      let editor
-
       async function loadEditor(options) {
-        resultElement.innerHTML = ''
         await editor?.destroy()
-
+        resultElement.innerHTML = ''
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
@@ -126,14 +112,24 @@
         editor.event.addEventListener('changed', (event) => {
           undoElement.disabled = !event.detail.canUndo
           redoElement.disabled = !event.detail.canRedo
-          clearElement.disabled = event.detail.empty
+          clearElement.disabled = !event.detail.canClear
         })
 
         editor.event.addEventListener('exported', (evt) => {
           const exports = evt.detail
           if (exports && exports['application/x-latex']) {
             convertElement.disabled = false
-            resultElement.innerHTML = '<span>' + exports['application/x-latex'] + '</span>'
+            try {
+              katex.render(
+                cleanLatex(exports['application/x-latex']),
+                resultElement
+              )
+            } catch (error) {
+              resultElement.innerHTML =
+                '<span>' +
+                cleanLatex(exports['application/x-latex']) +
+                '</span>'
+            }
           } else {
             convertElement.disabled = true
             resultElement.innerHTML = ''
@@ -141,21 +137,15 @@
         })
       }
 
-      undoElement.addEventListener('click', () => {
-        editor?.undo()
-      })
+      clearElement.addEventListener('click', () => editor?.clear())
 
-      redoElement.addEventListener('click', () => {
-        editor?.redo()
-      })
+      undoElement.addEventListener('click', () => editor?.undo())
 
-      clearElement.addEventListener('click', () => {
-        editor?.clear()
-      })
+      redoElement.addEventListener('click', () => editor?.redo())
 
-      convertElement.addEventListener('click', () => {
-        editor?.convert()
-      })
+      convertElement.addEventListener('click', () => editor?.convert())
+
+      window.addEventListener('resize', () => editor?.resize())
 
       showModalBtn.addEventListener('click', () => {
         ModalEditorOptions.show(loadEditor, editorOptions)
@@ -166,6 +156,7 @@
       /**
        * We expose these objects to the window use it in test
        */
+      window.cleanLatex = cleanLatex
       window.editorOptions = editorOptions
       window.loadEditor = loadEditor
     </script>

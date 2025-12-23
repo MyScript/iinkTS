@@ -14,7 +14,7 @@ import equation from "../__dataset__/equation"
 test.describe("Rest Math", () => {
 
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/rest/rest_math_iink.html")
+    await page.goto("/examples/rest/rest_math.html")
     await passModalKey(page)
   })
 
@@ -77,7 +77,7 @@ test.describe("Rest Math", () => {
           }
         }
       }
-      await loadEditor(page, "INKV1", options)
+      await loadEditor(page, options)
 
       await Promise.all([
         waitForExportedEvent(page),
@@ -103,7 +103,7 @@ test.describe("Rest Math", () => {
           }
         }
       }
-      await loadEditor(page, "INKV1", options)
+      await loadEditor(page, options)
 
       await Promise.all([
         waitForExportedEvent(page),

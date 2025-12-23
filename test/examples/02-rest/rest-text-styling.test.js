@@ -9,7 +9,7 @@ import h from "../__dataset__/h"
 test.describe("Rest Text Styling", () => {
 
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/rest/rest_text_iink_customize_stroke_style.html")
+    await page.goto("/examples/rest/rest_text_styling.html")
     await passModalKey(page)
   })
 

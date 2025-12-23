@@ -101,13 +101,6 @@
   opacity: 0.85;
 }
 
-label {
-  display: flex;
-  flex-direction: column;
-  text-align: left;
-  width: 100%;
-}
-
 .modal-input-container {
   margin-top: 20px;
   width: 100%;
