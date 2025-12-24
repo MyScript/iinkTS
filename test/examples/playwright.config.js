@@ -53,8 +53,8 @@ export default defineConfig({
   globalSetup: "./global-setup.js",
   testMatch: "**/examples/**/*.test.js",
   outputDir: "test-results",
-  retries: 2,
-  timeout: 2 * 60 * 1000,
+  retries: 1,
+  timeout: 60 * 1000,
   workers: process.env.CI ? 1 : undefined,
   use: {
     headless: process.env.HEADLESS === "false" ? false : true,
