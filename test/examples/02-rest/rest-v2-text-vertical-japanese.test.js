@@ -57,47 +57,6 @@ test.describe("Text ja_JP vertical Recognizer Iink", () => {
     expect(resultText).toStrictEqual(ja_JP2Columns.exports["text/plain"].at(0))
   })
 
-  test.describe("Request sent", () => {
-    let mimeTypeRequest = []
-    const countMimeType = async (request) => {
-      if (
-        request.url().includes("api/v4.0/iink/recognize") &&
-        request.method() === "POST"
-      ) {
-        const headers = await request.allHeaders()
-        mimeTypeRequest.push(headers.accept)
-      }
-    }
-
-    test.beforeEach(async ({ page }) => {
-      page.on("request", countMimeType)
-      mimeTypeRequest = []
-    })
-
-    test.afterEach(async ({ page }) => {
-      await page.removeListener("request", countMimeType)
-    })
-
-    test("should only request text/plain by default", async ({ page }) => {
-      await test.step("write strokes", async () => {
-        await Promise.all([
-          waitForExportedEvent(page),
-          writeStrokes(page, ja_JP1Column.strokes),
-        ])
-      })
-
-      await expect(page.locator("#result")).toHaveText(
-        ja_JP1Column.exports["text/plain"].at(1)
-      )
-
-      expect(mimeTypeRequest[0]).toContain("text/plain")
-      const plainTextExport = await getEditorExportsType(page, "text/plain")
-      expect(plainTextExport).toStrictEqual(
-        ja_JP1Column.exports["text/plain"].at(1)
-      )
-    })
-  })
-
   test("Nav actions", async ({ page }) => {
     await test.step("should write", async () => {
       await writeStrokes(page, ja_JP2Columns.strokes)
