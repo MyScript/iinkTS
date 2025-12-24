@@ -14,7 +14,7 @@ import TextNavActions from "../_partials/text-nav-actions"
 
 test.describe("Websocket Text interact", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/websocket/websocket_text_interact.html")
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/websocket/websocket_text_interact.html`)
     await passModalKey(page)
   })
 

@@ -17,7 +17,7 @@ import helloStrike from '../__dataset__/helloStrike'
 
 test.describe('Websocket Text', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/examples/websocket/websocket_text.html')
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/websocket/websocket_text.html`)
     await passModalKey(page)
   })
 

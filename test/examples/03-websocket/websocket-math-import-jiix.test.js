@@ -8,7 +8,7 @@ import {
 
 test.describe("Websocket Math Import JIIX", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/websocket/websocket_math_import_jiix.html")
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/websocket/websocket_math_import_jiix.html`)
     await passModalKey(page)
   })
 

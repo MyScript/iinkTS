@@ -13,7 +13,7 @@ import line from "../__dataset__/line"
 test.describe("Rest Diagram", () => {
 
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/rest/rest_diagram.html")
+    await page.goto(`${process.env.PATH_PREFIX}/examples/rest/rest_diagram.html`)
     await passModalKey(page)
   })
 

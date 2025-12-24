@@ -4,7 +4,7 @@ import helloOneStroke from "../__dataset__/helloOneStroke"
 
 test.describe("Offscreen TLDraw", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/offscreen-interactivity/offscreen_interactivity_tldraw/dist/index.html")
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/offscreen-interactivity/offscreen_interactivity_tldraw/dist/index.html`)
     if(await page.getByRole('textbox', { name: 'Host:' }).isVisible()) {
     await page.getByRole('textbox', { name: 'Host:' }).fill("cloud.preprod.myscript.com")
     await page.getByRole('textbox', { name: 'Application Key:' }).fill("74716e99-0614-4559-abe4-300d30621808")

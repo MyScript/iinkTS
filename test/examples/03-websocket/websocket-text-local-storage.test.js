@@ -10,7 +10,7 @@ import TextNavActions from '../_partials/text-nav-actions'
 
 test.describe('Websocket Text local storage', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/examples/websocket/websocket_text_local_storage_text.html')
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/websocket/websocket_text_local_storage_text.html`)
     await passModalKey(page)
   })
 

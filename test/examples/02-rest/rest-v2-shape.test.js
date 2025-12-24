@@ -10,7 +10,7 @@ import line from "../__dataset__/line"
 
 test.describe("Rest v2 Shape", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/rest/rest_v2_shape.html")
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/rest/rest_v2_shape.html`)
     await passModalKey(page)
   })
 

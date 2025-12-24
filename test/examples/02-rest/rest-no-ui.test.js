@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test"
 test.describe("Rest no UI", () => {
 
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/rest/rest_no_ui.html")
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/rest/rest_no_ui.html`)
 
     await page.getByRole('textbox', { name: 'Host:' }).fill("cloud.preprod.myscript.com")
     await page.getByRole('textbox', { name: 'Application Key:' }).fill("74716e99-0614-4559-abe4-300d30621808")

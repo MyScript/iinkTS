@@ -20,7 +20,7 @@ function hexToRgbA(hex) {
 test.describe("Websocket Text Customize Stroke Style", () => {
 
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/websocket/websocket_text_customize_stroke_style.html")
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/websocket/websocket_text_customize_stroke_style.html`)
     await passModalKey(page)
   })
 
