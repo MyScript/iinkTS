@@ -5,7 +5,7 @@ test.describe("Rest no UI", () => {
 
   test.beforeEach(async ({ page }) => {
     await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/rest/rest_no_ui.html`)
-    await passModalKey(page)
+    await passModalKey(page, false)
   })
 
   test("should have title", async ({ page }) => {

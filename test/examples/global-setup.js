@@ -22,6 +22,7 @@ export default async function globalSetup(config) {
   }
 
   console.log('BASE_URL', process.env.BASE_URL)
+  console.log('PATH_PREFIX', process.env.PATH_PREFIX)
   console.log('SCHEME', process.env.SCHEME)
   console.log('HOST', process.env.HOST)
   console.log('HMAC_KEY', process.env.HMAC_KEY)
