@@ -46,18 +46,6 @@ export const KeyForms: React.FC<KeyFormsProps> = ({ onSubmit }) => {
         </a>
 
         <div className="form-group">
-          <label htmlFor="host">Host:</label>
-          <input
-            id="host"
-            type="text"
-            value={host}
-            placeholder="cloud.myscript.com"
-            onChange={(e) => setHost(e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="form-group">
           <label htmlFor="scheme">Scheme:</label>
           <select
             id="scheme"
@@ -67,6 +55,18 @@ export const KeyForms: React.FC<KeyFormsProps> = ({ onSubmit }) => {
             <option value="https">https</option>
             <option value="http">http</option>
           </select>
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="host">Host:</label>
+          <input
+            id="host"
+            type="text"
+            value={host}
+            placeholder="cloud.myscript.com"
+            onChange={(e) => setHost(e.target.value)}
+            required
+          />
         </div>
 
         <div className="form-group">
