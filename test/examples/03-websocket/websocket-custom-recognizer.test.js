@@ -10,7 +10,7 @@ test.describe("Websocket custom recognizer", () => {
       ws.on('framesent', event => lastMessageSent = event.payload)
       ws.on('framereceived', event => lastMessageReceived = event.payload)
     })
-    await page.goto("/examples/dev/websocket_custom_recognizer.html")
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/dev/websocket_custom_recognizer.html`)
     await passModalKey(page)
   })
 

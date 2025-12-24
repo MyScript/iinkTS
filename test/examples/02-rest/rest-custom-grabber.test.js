@@ -9,7 +9,7 @@ import h from "../__dataset__/h"
 test.describe("Rest custom grabber", () => {
 
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/dev/rest_custom_grabber.html")
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/dev/rest_custom_grabber.html`)
     await passModalKey(page)
   })
 

@@ -10,7 +10,7 @@ import TextNavActions from "../_partials/text-nav-actions"
 
 test.describe("Websocket Text erase", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/websocket/websocket_text_eraser.html")
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/websocket/websocket_text_eraser.html`)
     await passModalKey(page)
   })
 

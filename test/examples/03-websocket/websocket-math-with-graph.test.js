@@ -10,7 +10,7 @@ import equation from "../__dataset__/equation"
 
 test.describe("Websocket Math With Graph", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/websocket/websocket_math_with_graph.html")
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/websocket/websocket_math_with_graph.html`)
     await passModalKey(page)
   })
 

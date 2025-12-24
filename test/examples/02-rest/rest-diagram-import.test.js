@@ -8,7 +8,7 @@ import {
 
 test.describe("Rest Diagram Import", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`/examples/rest/rest_diagram_import.html`)
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/rest/rest_diagram_import.html`)
     await passModalKey(page)
   })
 

@@ -12,7 +12,7 @@ import equation from "../__dataset__/equation"
 
 test.describe("Rest v2 Math", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/rest/rest_v2_math.html")
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/rest/rest_v2_math.html`)
     await passModalKey(page)
   })
 

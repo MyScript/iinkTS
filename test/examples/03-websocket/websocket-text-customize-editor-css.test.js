@@ -5,7 +5,7 @@ import TextNavActions from "../_partials/text-nav-actions"
 test.describe("Websocket Styling editor style", () => {
 
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/websocket/websocket_text_customize_editor_css.html")
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/websocket/websocket_text_customize_editor_css.html`)
     await passModalKey(page)
   })
 

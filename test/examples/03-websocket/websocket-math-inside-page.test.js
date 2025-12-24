@@ -195,7 +195,7 @@ const mathContentList = [
 
 test.describe("Websocket Math Inside Page", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/websocket/websocket_math_inside_page.html")
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/websocket/websocket_math_inside_page.html`)
     await passModalKey(page, false)
     await page.locator('#mainLoader').waitFor({ state: 'hidden' })
   })

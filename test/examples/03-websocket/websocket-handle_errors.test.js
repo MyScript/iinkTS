@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test"
 
 test.describe("Websocket handle error", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/websocket/websocket_handle_errors.html")
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/websocket/websocket_handle_errors.html`)
   })
 
   test("should have title", async ({ page }) => {

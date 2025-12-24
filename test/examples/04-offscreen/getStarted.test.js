@@ -11,7 +11,7 @@ import helloOneStroke from "../__dataset__/helloOneStroke"
 
 test.describe("Offscreen Get Started", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/offscreen-interactivity/index.html")
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/offscreen-interactivity/index.html`)
     await passModalKey(page)
   })
 

@@ -14,7 +14,7 @@ import equation from "../__dataset__/equation"
 test.describe("Rest Math", () => {
 
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/rest/rest_math.html")
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/rest/rest_math.html`)
     await passModalKey(page)
   })
 

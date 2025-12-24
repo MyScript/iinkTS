@@ -9,7 +9,7 @@ import hello from "../__dataset__/helloOneStroke"
 
 test.describe("Websocket on-demand export", function () {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/websocket/websocket_export_on_demand.html")
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/websocket/websocket_export_on_demand.html`)
     await passModalKey(page)
   })
 

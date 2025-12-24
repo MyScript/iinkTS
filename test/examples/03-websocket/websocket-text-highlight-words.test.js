@@ -59,7 +59,7 @@ const colorMap = [
 
 test.describe("Websocket Text highlight words", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/websocket/websocket_text_highlight_words.html")
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/websocket/websocket_text_highlight_words.html`)
     await passModalKey(page)
   })
 

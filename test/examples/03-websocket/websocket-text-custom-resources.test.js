@@ -11,7 +11,7 @@ import { waitForEditorInit, passModalKey } from "../helper"
 
 test.describe("Websocket Custom pre-loaded resources", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/websocket/websocket_text_custom_resources.html")
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/websocket/websocket_text_custom_resources.html`)
     await passModalKey(page)
   })
 

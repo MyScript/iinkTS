@@ -9,7 +9,7 @@ import TextNavActions from "../_partials/text-nav-actions"
 
 test.describe("Websocket Text file export", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/websocket/websocket_text_file_export.html")
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/websocket/websocket_text_file_export.html`)
     await passModalKey(page)
   })
 

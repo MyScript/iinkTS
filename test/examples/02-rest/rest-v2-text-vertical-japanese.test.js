@@ -12,11 +12,7 @@ import ja_JP2Columns from "../__dataset__/ja_JP-2Columns"
 
 test.describe("Text ja_JP vertical Recognizer Iink", () => {
   test.beforeEach(async ({ page }) => {
-    await Promise.all([
-      page.goto(
-        "/examples/rest/rest_v2_text_vertical_japanese.html"
-      ),
-    ])
+    page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/rest/rest_v2_text_vertical_japanese.html`)
     await passModalKey(page)
   })
 

@@ -11,7 +11,7 @@ import equation from "../__dataset__/equation"
 test.describe("Custom resources math", () => {
 
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/websocket/websocket_math_custom_resources.html")
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/websocket/websocket_math_custom_resources.html`)
     await passModalKey(page)
   })
 
