@@ -9,25 +9,32 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
-    <title>Text Recognizer Iink</title>
+    <title>Rest v2 Text</title>
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
     <style>
       #editorEl {
-        height: calc(100dvh - 166px);
+        height: calc(100dvh - 216px);
       }
       @media only screen and (max-width: 451px) {
         #editorEl {
-          height: calc(100dvh - 213px);
+          height: calc(100dvh - 263px);
         }
       }
     </style>
   </head>
 
   <body>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">
+        Rest v2 Text
+      </h1>
+    </header>
 
-      <button id="showModalBtn" class="btn-keys">Set Keys</button>
     <div id="result"></div>
 
     <nav class="flex-container wrap gap between">
