@@ -19,16 +19,17 @@ test.describe('Websocket Text local storage', () => {
   })
 
   test('should show hello in the prompter after page reload', async ({ page }) => {
-    await Promise.all([
-      waitForExportedEvent(page),
-      writeStrokes(page, helloOneStroke.strokes)
-    ])
+    await test.step('write hello', async () => {
+      await Promise.all([
+        waitForExportedEvent(page),
+        writeStrokes(page, helloOneStroke.strokes)
+      ])
+    })
 
     await expect(page.locator('.prompter-text')).toHaveText('hello')
     expect(await page.evaluate("localStorage.getItem(\"editorTextContent\")")).toEqual(helloOneStroke.exports['text/plain'].at(-1))
 
     await page.reload({ waitUntil: 'load' })
-    await waitForEditorInit(page)
     await expect(page.locator('.prompter-text')).toHaveText('hello')
   })
 
