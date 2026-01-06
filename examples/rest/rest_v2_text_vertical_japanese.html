@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+    <title>Japanese Vertical (日本縦型)</title>
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <script type="text/javascript" src="../../dist/iink.min.js"></script>
+    <style>
+      #editorEl {
+        height: calc(100dvh - 216px);
+      }
+      @media only screen and (max-width: 451px) {
+        #editorEl {
+          height: calc(100dvh - 263px);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">
+        Japanese Vertical (日本縦型)
+      </h1>
+    </header>
+
+    <div id="result"></div>
+
+    <nav class="flex-container wrap gap between">
+      <div class="flex-container wrap gap">
+        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/clear.svg" />
+        </button>
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/undo.svg" />
+        </button>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/redo.svg" />
+        </button>
+      </div>
+    </nav>
+
+    <div id="editorEl"></div>
+
+    <script type="module">
+      import { Editor } from '../../dist/iink.esm.js'
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl")
+      const resultElement = document.getElementById("result")
+      const clearElement = document.getElementById("clear")
+      const undoElement = document.getElementById("undo")
+      const redoElement = document.getElementById("redo")
+      const showModalBtn = document.getElementById("showModalBtn")
+
+      let editor
+
+      clearElement.addEventListener("click", async () => {
+        editor?.clear()
+      })
+
+      undoElement.addEventListener("click", () => {
+        editor?.undo()
+      })
+
+      redoElement.addEventListener("click", () => {
+        editor?.redo()
+      })
+
+      window.addEventListener("resize", () => {
+        editor?.resize()
+      })
+
+      const editorOptions = {
+        configuration: {
+          rendering: {
+            guides: {
+              enable: false,
+            },
+          },
+          recognition: {
+            type: "TEXT",
+            lang: "ja_JP",
+            text: {
+              configuration: {
+                name: "vertical",
+              },
+              mimeTypes: ["text/plain"],
+            },
+          },
+        },
+      }
+
+      async function loadEditor(options) {
+        resultElement.innerHTML = ""
+        await editor?.destroy()
+
+        /**
+         * get editor instance from type
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Editor parameters
+         */
+        editor = await Editor.load(editorElement, "INKV2", options)
+
+        editor.event.addEventListener("changed", (event) => {
+          undoElement.disabled = !event.detail.canUndo
+          redoElement.disabled = !event.detail.canRedo
+          clearElement.disabled = !event.detail.canClear
+        })
+
+        editor.event.addEventListener("exported", (event) => {
+          resultElement.innerHTML = event.detail?.["text/plain"]?.replace(/\n/g, "<br>") || ""
+        })
+      }
+
+      showModalBtn.addEventListener("click", () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
+    </script>
+  </body>
+</html>

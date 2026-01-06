@@ -7,7 +7,7 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
 
-    <title>Offscreen All options</title>
+    <title>Offscreen Debug & Visualization Tools</title>
 
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
@@ -16,7 +16,7 @@
     <style>
       .content {
         width: 100dvw;
-        height: calc(100dvh - 62px);
+        height: calc(100dvh - 112px);
       }
       #editor {
         width: 100%;
@@ -24,7 +24,7 @@
       }
       @media only screen and (max-width: 466px) {
         .content {
-          height: calc(100dvh - 110px);
+          height: calc(100dvh - 160px);
         }
       }
     </style>
@@ -32,7 +32,7 @@
     <style>
       #export-html-pan {
         position: absolute;
-        top: calc(100% - 305px);
+        top: calc(100% - 355px);
         height: 300px;
         left: calc(100% - 305px);
         width: 300px;
@@ -56,7 +56,7 @@
         font-size: 25px;
       }
       #export-html-body {
-        height: calc(100% - 40px);
+        height: calc(100% - 90px);
         width: 100%;
         border: none;
       }
@@ -154,10 +154,15 @@
     </style>
 
     <script type="text/javascript" src="../assets/renderjson/renderjson.js"></script>
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
   </head>
 
   <body>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">Offscreen Interactivity - Debug & Visualization Tools</h1>
+    </header>
 
     <nav class="flex-container gap wrap center">
       <button class="classic-btn" id="import">Import</button>
@@ -212,6 +217,6 @@
       <iframe id="export-html-body"></iframe>
     </div>
 
-    <script src="./offscreen_interactivity_all_options.js"></script>
+    <script src="./offscreen_interactivity_all_options.js" type="module"></script>
   </body>
 </html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+    <title>Rest Text Styling</title>
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <style>
+      input[type='number'].pen-width-field {
+        width: 150px;
+      }
+
+      #editorEl {
+        height: calc(100dvh - 270px);
+      }
+
+      @media only screen and (max-width: 610px) {
+        #editorEl {
+          height: calc(100dvh - 310px);
+        }
+      }
+
+      @media only screen and (max-width: 375px) {
+        #editorEl {
+          height: calc(100dvh - 340px);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">
+        Rest Text Styling
+      </h1>
+    </header>
+
+    <div id="result"></div>
+
+    <nav>
+      <div class="flex-container wrap between gap">
+        <div class="flex-container wrap gap">
+          <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+            <img src="../assets/img/clear.svg" />
+          </button>
+          <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+            <img src="../assets/img/undo.svg" />
+          </button>
+          <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+            <img src="../assets/img/redo.svg" />
+          </button>
+        </div>
+      </div>
+      <div class="separator horizontal"></div>
+      <div class="flex-container wrap between gap">
+        <div class="flex-container wrap gap">
+          <label for="penenabled">Enable pen color/thickness: </label>
+          <input id="penenabled" type="checkbox" />
+        </div>
+        <div class="flex-container wrap gap">
+          <label for="pencolor">Color:</label>
+          <input id="pencolor" type="color" value="#ff7314" disabled />
+        </div>
+        <div class="flex-container wrap gap">
+          <label for="penwidth">Thickness:</label>
+          <input id="penwidth" class="pen-width-field" type="number" min="1" max="5" value="2" disabled />
+        </div>
+      </div>
+    </nav>
+
+    <div id="editorEl"></div>
+
+    <script type="module">
+      import { Editor } from '../../dist/iink.esm.js'
+      import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
+      const editorElement = document.getElementById('editorEl')
+      const resultElement = document.getElementById('result')
+      const clearElement = document.getElementById('clear')
+      const undoElement = document.getElementById('undo')
+      const redoElement = document.getElementById('redo')
+
+      const penEnabled = document.getElementById('penenabled')
+      const penColor = document.getElementById('pencolor')
+      const penWidth = document.getElementById('penwidth')
+      const showModalBtn = document.getElementById('showModalBtn')
+
+      function getStyle() {
+        return {
+          color: penColor.value,
+          '-myscript-pen-width': penWidth.value
+        }
+      }
+
+      let editor
+
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            type: 'TEXT',
+            text: {
+              mimeTypes: ['text/plain']
+            }
+          }
+        }
+      }
+
+      async function loadEditor(options) {
+        resultElement.innerHTML = ''
+        await editor?.destroy()
+
+        /**
+         * get editor instance from type
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Editor parameters
+         */
+        editor = await Editor.load(editorElement, 'INKV1', options)
+
+        editor.event.addEventListener('changed', (event) => {
+          undoElement.disabled = !event.detail.canUndo
+          redoElement.disabled = !event.detail.canRedo
+          clearElement.disabled = !event.detail.canClear
+        })
+
+        editor.event.addEventListener('exported', (event) => {
+          resultElement.innerHTML = event.detail?.['text/plain'] || ''
+        })
+      }
+
+      clearElement.addEventListener('click', async () => {
+        editor?.clear()
+      })
+
+      undoElement.addEventListener('click', () => {
+        editor?.undo()
+      })
+
+      redoElement.addEventListener('click', () => {
+        editor?.redo()
+      })
+
+      penEnabled.addEventListener('change', (event) => {
+        if (!editor) return;
+        penWidth.disabled = !event.target.checked
+        penColor.disabled = !event.target.checked
+        if (event.target.checked) {
+          editor.penStyle = getStyle()
+        } else {
+          editor.penStyle = undefined
+        }
+      })
+
+      penColor.addEventListener('input', () => {
+        if (!editor) return;
+        editor.penStyle = getStyle()
+      })
+
+      penWidth.addEventListener('change', () => {
+        if (!editor) return;
+        editor.penStyle = getStyle()
+      })
+
+      window.addEventListener('resize', () => {
+        if (!editor) return;
+        editor.resize()
+      })
+
+      showModalBtn.addEventListener('click', () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
+    </script>
+  </body>
+
+</html>

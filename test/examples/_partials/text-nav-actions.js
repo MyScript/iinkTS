@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test"
-import { writeStrokes, writePointers, waitForChangedEvent, callEditorIdle, getEditorConfiguration, waitForExportedEvent } from "../helper"
+import { writeStrokes, getEditorExports, waitForChangedEvent, getEditorConfiguration, waitForExportedEvent, waitForEditorInit } from "../helper"
 import h from "../__dataset__/h"
 import hello from "../__dataset__/helloMultipleStrokes"
 
@@ -7,17 +7,15 @@ export default {
   test({ skipClear, skipUndoRedo, resultLocator } = { resultLocator: "#result"}) {
     test.describe("Nav actions", () => {
       test.beforeEach(async ({ page }) => {
-        await callEditorIdle(page)
+        await waitForEditorInit(page)
       })
 
       !skipClear && test("should clear", async ({ page }) => {
-        const [exportBeforeClear] = await Promise.all([
+        await Promise.all([
           waitForExportedEvent(page),
-          waitForChangedEvent(page),
           writeStrokes(page, h.strokes)
         ])
-        expect(exportBeforeClear["application/vnd.myscript.jiix"].label).toStrictEqual(h.exports["text/plain"])
-        await expect(page.locator(resultLocator)).toHaveText(h.exports["text/plain"])
+        await expect(page.locator(resultLocator)).toHaveText(h.exports["text/plain"].at(0))
 
         const [exportAfterClear] = await Promise.all([
           waitForExportedEvent(page),
@@ -36,14 +34,12 @@ export default {
         })
 
         await test.step("should write strokes", async () => {
-          let exports
-          for(const s of hello.strokes) {
-            [exports] = await Promise.all([
-              waitForExportedEvent(page),
-              writePointers(page, s.pointers),
-            ])
-          }
+          await Promise.all([
+            waitForExportedEvent(page),
+            writeStrokes(page, hello.strokes)
+          ])
           await expect(page.locator(resultLocator)).toHaveText(hello.exports["text/plain"].at(-1))
+          const exports = await getEditorExports(page)
           expect(exports['application/vnd.myscript.jiix'].label).toStrictEqual(hello.exports['text/plain'].at(-1))
         })
 

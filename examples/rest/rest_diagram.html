@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Rest Diagram</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <style>
+      #editorEl {
+        height: calc(100dvh - 220px);
+        width: 100dvw;
+      }
+
+      #progress {
+        transition: width 10s;
+        width: 0;
+        height: 2px;
+        background-color: #1a9fff;
+        opacity: 0;
+      }
+
+      #conversion-container {
+        position: absolute;
+        left: 0;
+        top: 220px;
+      }
+
+      @media only screen and (max-width: 418px) {
+        #editorEl {
+          height: calc(100dvh - 270px);
+        }
+
+        #conversion-container {
+          top: 270px;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">
+        Rest Diagram
+      </h1>
+    </header>
+    <div id="result"></div>
+
+    <nav class="flex-container wrap gap between">
+      <div class="flex-container wrap gap">
+        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/clear.svg" />
+        </button>
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/undo.svg" />
+        </button>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/redo.svg" />
+        </button>
+      </div>
+      <div class="flex-container wrap gap">
+        <button id="pen" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/pen.svg" />
+        </button>
+        <button id="eraser" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/eraser.svg" />
+        </button>
+      </div>
+      <div class="flex-container wrap gap">
+        <div id="preview-container">
+          <div id="preview-btn" class="classic-btn">
+            <img src="../assets/img/document.svg" />
+            <span>Preview</span>
+          </div>
+          <div id="edit-btn" class="classic-btn" style="display: none">
+            <img src="../assets/img/edit.svg" />
+            <span>Edit</span>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div id="progress"></div>
+
+    <div id="editorEl"></div>
+
+    <div id="conversion-container"></div>
+
+    <script type="module">
+      import { Editor, EditorTool } from '../../dist/iink.esm.js'
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl")
+      const conversionContainer = document.getElementById("conversion-container")
+      const resultElement = document.getElementById("result")
+      const clearElement = document.getElementById("clear")
+      const editButton = document.getElementById("edit-btn")
+      const previewButton = document.getElementById("preview-btn")
+      const progressElement = document.getElementById("progress")
+      const undoElement = document.getElementById("undo")
+      const redoElement = document.getElementById("redo")
+      const eraserElement = document.getElementById("eraser")
+      const penElement = document.getElementById("pen")
+      const showModalBtn = document.getElementById("showModalBtn")
+
+      let isPreview = false
+
+      function launchLoader() {
+        progressElement.style.transition = " width 10s"
+        progressElement.style.opacity = "1"
+        progressElement.style.width = `${ editorElement.clientWidth / 2 }px`
+      }
+
+      function manageEditMode(withExport) {
+        if (!editor) return
+        if (withExport && isPreview && editor.model.symbols.length > 0) {
+          const convertParams = {
+            conversionState: "DIGITAL_EDIT",
+            mimeTypes: ["image/svg+xml"],
+          }
+          editor?.convert(convertParams)
+          launchLoader()
+        }
+        undoElement.disabled = isPreview
+        redoElement.disabled = isPreview
+        clearElement.disabled = isPreview
+        eraserElement.disabled =
+          isPreview || editor.tool === EditorTool.Erase
+        penElement.disabled = isPreview || editor.tool === EditorTool.Write
+        if (isPreview) {
+          conversionContainer.style.visibility = "visible"
+          editorElement.style.visibility = "hidden"
+        } else {
+          conversionContainer.style.visibility = "hidden"
+          editorElement.style.visibility = "visible"
+        }
+      }
+
+      let editor
+
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            type: "DIAGRAM",
+          },
+        },
+      }
+
+      async function loadEditor(options) {
+        isPreview = false
+        editButton.style.display = 'none'
+        previewButton.style.display = 'flex'
+        conversionContainer.innerHTML = ''
+        manageEditMode(false)
+        resultElement.innerHTML = ""
+        await editor?.destroy()
+        /**
+         * get editor instance from type
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Editor parameters
+         */
+        editor = await Editor.load(editorElement, "INKV1", options)
+
+        editor.event.addEventListener("changed", (event) => {
+          undoElement.disabled = !event.detail.canUndo || isPreview
+          redoElement.disabled = !event.detail.canRedo || isPreview
+          clearElement.disabled = !event.detail.canClear || isPreview
+          eraserElement.disabled = !event.detail.canClear || editor.tool === EditorTool.Erase || isPreview
+        })
+
+        editor.event.addEventListener("exported", (event) => {
+          resultElement.innerHTML = JSON.stringify(event.detail || {})
+        })
+
+        editor.event.addEventListener("converted", (evt) => {
+          const exports = evt.detail
+          if (exports && exports["image/svg+xml"]) {
+            progressElement.style.transition = " width 0.3s"
+            progressElement.style.width = `${ editorElement.clientWidth }px`
+            setTimeout(() => {
+              progressElement.style.opacity = "0"
+              progressElement.style.width = "0"
+            }, 300)
+            clearElement.disabled = false
+            conversionContainer.innerHTML = exports["image/svg+xml"].trim()
+            conversionContainer.firstChild.setAttribute(
+              "width",
+              editorElement.clientWidth
+            )
+            conversionContainer.firstChild.setAttribute(
+              "height",
+              editorElement.clientHeight
+            )
+            conversionContainer.firstChild.setAttribute(
+              "viewBox",
+              `0 0 ${ editorElement.clientWidth / 3.77953 } ${ editorElement.clientHeight / 3.77953
+              }`
+            )
+            manageEditMode(false)
+          }
+        })
+      }
+
+      clearElement.addEventListener("click", () => {
+        editor?.clear()
+        conversionContainer.innerHTML = ""
+      })
+
+      undoElement.addEventListener("click", () => {
+        editor?.undo()
+      })
+
+      redoElement.addEventListener("click", () => {
+        editor?.redo()
+      })
+
+      eraserElement.addEventListener("click", () => {
+        if (!editor) return
+        eraserElement.disabled = true
+        penElement.disabled = false
+        editorElement.editor.tool = EditorTool.Erase
+        eraserElement.disabled = true
+        eraserElement.classList.add("active")
+        penElement.disabled = false
+        penElement.classList.remove("active")
+      })
+
+      penElement.addEventListener("click", () => {
+        if (!editor) return
+        eraserElement.disabled = false
+        penElement.disabled = true
+        editorElement.editor.tool = EditorTool.Write
+        eraserElement.disabled = false
+        eraserElement.classList.remove("active")
+        penElement.disabled = true
+        penElement.classList.add("active")
+      })
+
+      previewButton.addEventListener("click", () => {
+        if (!editor) return
+        isPreview = true
+        previewButton.style.display = "none"
+        editButton.style.display = "flex"
+        manageEditMode(true)
+      })
+
+      editButton.addEventListener("click", () => {
+        if (!editor) return
+        isPreview = false
+        editButton.style.display = "none"
+        previewButton.style.display = "flex"
+        manageEditMode(false)
+      })
+
+      window.addEventListener("resize", () => {
+        editor?.resize()
+      })
+
+      showModalBtn.addEventListener("click", () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
+    </script>
+  </body>
+
+</html>

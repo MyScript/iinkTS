@@ -5,7 +5,7 @@ import {
   waitForImportedEvent,
   waitForExportedEvent,
   callEditorIdle,
-  waitForEditorInit,
+  passModalKey,
 } from "../helper"
 
 const mathContentList = [
@@ -43,11 +43,11 @@ const mathContentList = [
           { x: 168, y: 219, t: 1689858553260, p: 0.68 },
           { x: 168, y: 222, t: 1689858553277, p: 0.68 },
           { x: 168, y: 225, t: 1689858553431, p: 0.68 },
-          { x: 168, y: 229, t: 1689858553460, p: 0.71 }
-        ]
-      }
+          { x: 168, y: 229, t: 1689858553460, p: 0.71 },
+        ],
+      },
     ],
-    latexAfterWriting: "4a^{2}+b^{2}=c^{2}"
+    latexAfterWriting: "4a^{2}+b^{2}=c^{2}",
   },
   {
     id: "eq-2",
@@ -94,11 +94,11 @@ const mathContentList = [
           { x: 228, y: 231, t: 1689859053955, p: 0.64 },
           { x: 238, y: 231, t: 1689859053971, p: 0.68 },
           { x: 247, y: 231, t: 1689859053988, p: 0.81 },
-          { x: 255, y: 231, t: 1689859054005, p: 0.8 }
-        ]
-      }
+          { x: 255, y: 231, t: 1689859054005, p: 0.8 },
+        ],
+      },
     ],
-    latexAfterWriting: "2c=\\sqrt{a^{2}+b^{2}}"
+    latexAfterWriting: "2c=\\sqrt{a^{2}+b^{2}}",
   },
   {
     id: "eq-3",
@@ -134,11 +134,11 @@ const mathContentList = [
           { x: 168, y: 219, t: 1689858553260, p: 0.68 },
           { x: 168, y: 222, t: 1689858553277, p: 0.68 },
           { x: 168, y: 225, t: 1689858553431, p: 0.68 },
-          { x: 168, y: 229, t: 1689858553460, p: 0.71 }
-        ]
-      }
+          { x: 168, y: 229, t: 1689858553460, p: 0.71 },
+        ],
+      },
     ],
-    latexAfterWriting: "4a=\\sqrt{c^{2}-b^{2}}"
+    latexAfterWriting: "4a=\\sqrt{c^{2}-b^{2}}",
   },
   {
     id: "eq-4",
@@ -185,17 +185,19 @@ const mathContentList = [
           { x: 228, y: 231, t: 1689859053955, p: 0.64 },
           { x: 238, y: 231, t: 1689859053971, p: 0.68 },
           { x: 247, y: 231, t: 1689859053988, p: 0.81 },
-          { x: 255, y: 231, t: 1689859054005, p: 0.8 }
-        ]
-      }
+          { x: 255, y: 231, t: 1689859054005, p: 0.8 },
+        ],
+      },
     ],
-    latexAfterWriting: "2b=\\sqrt{c^{2}-a^{2}}"
-  }
+    latexAfterWriting: "2b=\\sqrt{c^{2}-a^{2}}",
+  },
 ]
 
 test.describe("Websocket Math Inside Page", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/websocket/websocket_math_inside_page.html")
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/websocket/websocket_math_inside_page.html`)
+    await passModalKey(page, false)
+    await page.locator('#mainLoader').waitFor({ state: 'hidden' })
   })
 
   test("should have title", async ({ page }) => {
@@ -205,16 +207,13 @@ test.describe("Websocket Math Inside Page", () => {
   mathContentList.forEach(async (mc) => {
     test(`Math content for ${mc.id}`, async ({ page }) => {
       await test.step(`should open modal editor`, async () => {
-        await waitForEditorInit(page)
-        await callEditorIdle(page)
         await expect(page.locator("#editor-modal")).toBeHidden()
-        await expect(page.locator(`#${mc.id} .katex-html`)).toHaveText(mc.textContent)
-
-        await Promise.all([
-          waitForImportedEvent(page),
-          page.locator(`#${mc.id}`).click()
-        ])
+        await expect(page.locator(`#${mc.id} .katex-html`)).toHaveText(
+          mc.textContent
+        )
+        await page.locator(`#${mc.id}`).click()
         await expect(page.locator("#editor-modal")).toBeVisible()
+
       })
 
       await test.step(`should import data-jiix`, async () => {
@@ -226,11 +225,13 @@ test.describe("Websocket Math Inside Page", () => {
       await test.step(`should update equation`, async () => {
         await Promise.all([
           waitForExportedEvent(page),
-          writeStrokes(page, mc.strokesToWrite)
+          writeStrokes(page, mc.strokesToWrite),
         ])
         await callEditorIdle(page)
         const currentExport = await getEditorExports(page)
-        expect(currentExport["application/x-latex"]).toEqual(mc.latexAfterWriting)
+        expect(currentExport["application/x-latex"]).toEqual(
+          mc.latexAfterWriting
+        )
       })
 
       await test.step(`should close modal editor`, async () => {
@@ -241,18 +242,22 @@ test.describe("Websocket Math Inside Page", () => {
 
       await test.step(`should update math content`, async () => {
         await callEditorIdle(page)
-        await expect(page.locator(`#${mc.id} .katex-html`)).not.toHaveText(mc.textContent)
+        await expect(page.locator(`#${mc.id} .katex-html`)).not.toHaveText(
+          mc.textContent
+        )
       })
 
       await test.step(`should re-open modal editor with new equation`, async () => {
         await Promise.all([
           waitForImportedEvent(page),
-          page.locator(`#${mc.id}`).click()
+          page.locator(`#${mc.id}`).click(),
         ])
         await expect(page.locator("#editor-modal")).toBeVisible()
         await callEditorIdle(page)
         const currentExport = await getEditorExports(page)
-        expect(currentExport["application/x-latex"]).toEqual(mc.latexAfterWriting)
+        expect(currentExport["application/x-latex"]).toEqual(
+          mc.latexAfterWriting
+        )
       })
 
       await test.step(`should re-close modal editor`, async () => {

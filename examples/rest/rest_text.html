@@ -9,17 +9,17 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
-    <title>Text Recognizer Iink</title>
+    <title>Rest Text</title>
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
     <script type="text/javascript" src="../../dist/iink.min.js"></script>
     <style>
-      #editor {
+      #editorEl {
         height: calc(100dvh - 166px);
       }
       @media only screen and (max-width: 451px) {
-        #editor {
+        #editorEl {
           height: calc(100dvh - 213px);
         }
       }
@@ -27,6 +27,13 @@
   </head>
 
   <body>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">Rest Text</h1>
+    </header>
+
     <div id="result"></div>
 
     <nav class="flex-container wrap gap between">
@@ -44,20 +51,68 @@
       <select id="language"></select>
     </nav>
 
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
-    <script>
-      const editorElement = document.getElementById("editor")
+    <script type="module">
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl")
       const resultElement = document.getElementById("result")
       const languageElement = document.getElementById("language")
       const clearElement = document.getElementById("clear")
       const undoElement = document.getElementById("undo")
       const redoElement = document.getElementById("redo")
+      const showModalBtn = document.getElementById("showModalBtn")
 
-      /**
-       * we expose the editor so we can access it in tests
-       */
       let editor
+
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            type: "TEXT",
+            lang: "en_US",
+            text: {
+              mimeTypes: ["text/plain"],
+            },
+          },
+        },
+      }
+
+      let languageList
+
+      async function loadEditor(options) {
+        resultElement.innerHTML = ""
+        await editor?.destroy()
+
+        if (!languageList) {
+          const currentLanguage = options.configuration.recognition.lang
+          languageList = await iink.getAvailableLanguageList({
+            server: options.configuration.server,
+          })
+          Object.keys(languageList.result).forEach(function (key) {
+            const selected = currentLanguage === key
+            languageElement.options[languageElement.options.length] =
+              new Option(languageList.result[key], key, selected, selected)
+          })
+        }
+
+        /**
+         * get editor instance from type
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Editor parameters
+         */
+        editor = await iink.Editor.load(editorElement, "INKV1", options)
+
+        editor.event.addEventListener("changed", (event) => {
+          undoElement.disabled = !event.detail.canUndo
+          redoElement.disabled = !event.detail.canRedo
+          clearElement.disabled = !event.detail.canClear
+        })
+
+        editor.event.addEventListener("exported", (event) => {
+          resultElement.innerHTML = event.detail?.["text/plain"] || ""
+        })
+      }
+
       clearElement.addEventListener("click", async () => {
         editor?.clear()
       })
@@ -74,73 +129,21 @@
         editor?.resize()
       })
 
-      const editorOptions = {
-        configuration: {
-          recognition: {
-            type: "TEXT",
-            lang: "en_US",
-            export: {
-              jiix: {
-                ranges: true,
-                "bounding-box": true,
-              },
-            },
-            text: {
-              mimeTypes: ["text/plain"],
-            },
-          },
-        },
-      }
-      let serverConfiguration
-      let languageList
+      showModalBtn.addEventListener("click", () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
 
       languageElement.addEventListener("change", (e) => {
         editorOptions.configuration.recognition.lang = e.target.value
         loadEditor(editorOptions)
       })
 
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
       /**
-       * We use a function to wait the server configuration to load
+       * We expose these objects to the window use it in test
        */
-      async function loadEditor(options) {
-        resultElement.innerHTML = ""
-        if (!serverConfiguration) {
-          const res = await fetch("../server-configuration.json")
-          serverConfiguration = await res.json()
-        }
-        options.configuration.server = serverConfiguration
-
-        if (!languageList) {
-          const currentLanguage = options.configuration.recognition.lang
-          languageList = await iink.getAvailableLanguageList({
-            server: serverConfiguration,
-          })
-          Object.keys(languageList.result).forEach(function (key) {
-            const selected = currentLanguage === key
-            languageElement.options[languageElement.options.length] =
-              new Option(languageList.result[key], key, selected, selected)
-          })
-        }
-
-        /**
-         * get editor instance from type
-         * @param {Element} The DOM element to attach the ink paper
-         * @param {Object} The Editor parameters
-         */
-        editor = await iink.Editor.load(editorElement, "INKV2", options)
-
-        editor.event.addEventListener("changed", (event) => {
-          undoElement.disabled = !event.detail.canUndo
-          redoElement.disabled = !event.detail.canRedo
-          clearElement.disabled = !event.detail.canClear
-        })
-
-        editor.event.addEventListener("exported", (event) => {
-          resultElement.innerHTML = event.detail?.["text/plain"] || "";
-        })
-      }
-
-      loadEditor(editorOptions).catch((error) => console.error(error))
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
     </script>
   </body>
 </html>

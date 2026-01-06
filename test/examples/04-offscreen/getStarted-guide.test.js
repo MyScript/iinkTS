@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test"
 import {
-  waitForEditorInit,
+  passModalKey,
   getEditorConfiguration,
   waitForUIUpdatedEvent
 } from "../helper"
@@ -9,8 +9,8 @@ import locator from "../locators"
 
 test.describe("Offscreen Get Started - Guides", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/offscreen-interactivity/index.html")
-    await waitForEditorInit(page)
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/offscreen-interactivity/index.html`)
+    await passModalKey(page)
   })
 
   test("Menu guide display", async ({ page }) => {

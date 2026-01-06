@@ -223,7 +223,7 @@ export class InteractiveInkSSREditor extends AbstractEditor
     }
   }
 
-  protected onContetChaned(undoRedoContext: THistoryContext): void
+  protected onContentChanged(undoRedoContext: THistoryContext): void
   {
     this.history.context = undoRedoContext
     this.event.emitChanged(undoRedoContext)
@@ -262,7 +262,7 @@ export class InteractiveInkSSREditor extends AbstractEditor
       await this.recognizer.init(this.model.height, this.model.width)
       this.recognizer.event.addExportedListener(this.onExport.bind(this))
       this.recognizer.event.addSVGPatchListener(this.onSVGPatch.bind(this))
-      this.recognizer.event.addContentChangedListener(this.onContetChaned.bind(this))
+      this.recognizer.event.addContentChangedListener(this.onContentChanged.bind(this))
       this.recognizer.event.addIdleListener(this.event.emitIdle.bind(this.event))
       this.recognizer.event.addErrorListener(this.onError.bind(this))
 

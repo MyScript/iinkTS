@@ -1,18 +1,17 @@
 import { test, expect } from "@playwright/test"
 import {
   writeStrokes,
-  waitForEditorInit,
   getEditorExports,
-  callEditorIdle
+  callEditorIdle,
+  passModalKey
 } from "../helper"
 import TextNavAction from "../_partials/text-nav-actions"
 import covfefe from "../__dataset__/covfefe"
 
 test.describe("Websocket Text Custom Lexicon", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/websocket/websocket_text_custom_lexicon.html")
-    await waitForEditorInit(page)
-    await callEditorIdle(page)
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/websocket/websocket_text_custom_lexicon.html`)
+    await passModalKey(page)
   })
 
   test("should have title", async ({ page }) => {

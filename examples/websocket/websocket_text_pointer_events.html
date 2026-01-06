@@ -2,7 +2,10 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
@@ -17,7 +20,7 @@
         justify-content: unset;
       }
 
-      #editor {
+      #editorEl {
         height: 50vh;
       }
 
@@ -32,13 +35,21 @@
         bottom: 12px;
       }
     </style>
-
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
   </head>
 
   <body>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">
+        Rest Math
+      </h1>
+    </header>
+
+    <div id="result"></div>
     <div>
-      <div id="editor"></div>
+      <div id="editorEl"></div>
       <textarea id="pointerEventsObject">
 [
   {
@@ -76,45 +87,63 @@
       </textarea>
       <button class="classic-btn" id="pointerEvents">Process</button>
     </div>
-    <script>
-      const editorElement = document.getElementById("editor");
-      const pointerEventsElement = document.getElementById("pointerEvents");
-      const pointerEventsObjectElement = document.getElementById("pointerEventsObject");
+    <script type="module">
+      import { Editor } from '../../dist/iink.esm.js'
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl")
+      const resultElement = document.getElementById("result")
+      const pointerEventsElement = document.getElementById("pointerEvents")
+      const pointerEventsObjectElement = document.getElementById("pointerEventsObject")
+      const showModalBtn = document.getElementById("showModalBtn")
 
-      /**
-       * we expose the editor so we can access it in tests
-       */
-      let editor;
-
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-        const options = {
-          configuration: {
-            server,
-            recognition: {
-              type: "TEXT"
-            }
-          }
-        };
-
+      let editor
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            type: "TEXT",
+          },
+        },
+      }
+      async function loadEditor(options) {
+        resultElement.innerHTML = ""
+        pointerEventsElement.disabled = false
+        await editor?.destroy()
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(editorElement, "INTERACTIVEINKSSR", options);
+        editor = await Editor.load(editorElement, "INTERACTIVEINKSSR", options)
 
-        pointerEventsElement.addEventListener("click", () => {
-          editor.importPointEvents(JSON.parse(pointerEventsObjectElement.value));
-        });
+        editor.event.addEventListener("exported", (event) => {
+          resultElement.innerHTML =
+            event.detail && event.detail["application/vnd.myscript.jiix"]
+              ? event.detail["application/vnd.myscript.jiix"].label
+              : ""
+        })
 
-        window.addEventListener("resize", () => {
-          editor.resize();
-        });
-      };
+      }
 
-      loadEditor().catch(error => console.error(error));
+      pointerEventsElement.addEventListener("click", () => {
+        pointerEventsElement.disabled = true
+        editor.importPointEvents(JSON.parse(pointerEventsObjectElement.value))
+      })
+
+      window.addEventListener("resize", () => {
+        editor.resize()
+      })
+
+      showModalBtn.addEventListener("click", () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
     </script>
   </body>
 </html>

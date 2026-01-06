@@ -1,4 +1,6 @@
-class CustomMenuStyle extends iink.IIMenuStyle {
+import { IIMenuStyle, IIMenuTool, IIMenuAction } from '../../dist/iink.esm.js'
+
+export class CustomMenuStyle extends IIMenuStyle {
 
   sizes = [
     { label: "S", value: 2 },
@@ -80,7 +82,7 @@ class CustomMenuStyle extends iink.IIMenuStyle {
   }
 }
 
-class CustomMenuTool extends iink.IIMenuTool {
+export class CustomMenuTool extends IIMenuTool {
 
   sizes = [
     { label: "S", value: 2 },
@@ -154,7 +156,7 @@ class CustomMenuTool extends iink.IIMenuTool {
   }
 }
 
-class CustomMenuAction extends iink.IIMenuAction {
+export class CustomMenuAction extends IIMenuAction {
 
   render(layer)
   {

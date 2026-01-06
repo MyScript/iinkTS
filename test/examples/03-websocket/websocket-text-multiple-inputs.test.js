@@ -1,9 +1,9 @@
 import { test, expect } from "@playwright/test"
 import {
-  waitForEditorInit,
   callEditorIdle,
   writePointers,
-  waitForExportedEvent
+  waitForExportedEvent,
+  passModalKey
 } from "../helper"
 import centralProcessingUnit from "../__dataset__/centralProcessingUnit"
 import oneThousandNineHundredAndFortyThree from "../__dataset__/1943"
@@ -12,14 +12,14 @@ import oneThousandNineHundredAndNintyThree from "../__dataset__/1993"
 const switchToOtherQuestion = async (page, inputId) => {
   await page.locator(`#${ inputId }`).scrollIntoViewIfNeeded()
   await page.locator(`#${ inputId }`).click()
-  await page.locator(`#${ inputId } #editor`).waitFor("attached")
+  await page.locator(`#${ inputId } #editorEl`).waitFor("attached")
   await callEditorIdle(page)
 }
 
 test.describe("Websocket Text Multiple Inputs", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/websocket/websocket_text_multiple_inputs.html")
-    await waitForEditorInit(page)
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/websocket/websocket_text_multiple_inputs.html`)
+    await passModalKey(page)
   })
 
   test("should have title", async ({ page }) => {

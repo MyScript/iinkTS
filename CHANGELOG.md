@@ -4,7 +4,7 @@
 - fix(RecognizerHTTPV1, RecognizerHTTPV2): add credentials: "omit" option to POST requests
 - fix(InteractiveInkEditor): clean root element
 - fix(InteractiveInkEditor): remove layer classes on destroy
-- fix(rest-raw-content-recognizerInk.html): recognition info is displayed twice on rest_raw_content_recognizerInk example
+- fix(rest-raw-content-recognizerInk.html): recognition info is displayed twice on rest_v2_raw_content example
 
 # [v3.1.0](https://github.com/MyScript/iinkTS/tree/v3.1.0)
 

@@ -1,11 +1,11 @@
 import { test, expect } from "@playwright/test"
 import {
-  waitForEditorInit,
   writeStrokes,
   waitForExportedEvent,
   getEditorExports,
   loadEditor,
   getEditorConfiguration,
+  passModalKey
 } from "../helper"
 import rectangle from "../__dataset__/rectangle"
 import line from "../__dataset__/line"
@@ -13,8 +13,8 @@ import line from "../__dataset__/line"
 test.describe("Rest Diagram", () => {
 
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/rest/rest_diagram_iink.html")
-    await waitForEditorInit(page)
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/rest/rest_diagram.html`)
+    await passModalKey(page)
   })
 
   test("should have title", async ({ page }) => {
@@ -86,7 +86,7 @@ test.describe("Rest Diagram", () => {
           }
         }
       }
-      await loadEditor(page, "INKV1", options)
+      await loadEditor(page, options)
       await Promise.all([
         waitForExportedEvent(page),
         writeStrokes(page, line.strokes),
@@ -112,7 +112,7 @@ test.describe("Rest Diagram", () => {
           }
         }
       }
-      await loadEditor(page, "INKV1", options)
+      await loadEditor(page, options)
       await Promise.all([
         waitForExportedEvent(page),
         writeStrokes(page, line.strokes),
@@ -147,7 +147,7 @@ test.describe("Rest Diagram", () => {
     })
 
     test("should undo/redo", async ({ page }) => {
-      const editorEl = page.locator("#editor")
+      const editorEl = page.locator("#editorEl")
       await Promise.all([
         waitForExportedEvent(page),
         writeStrokes(page, [rectangle.strokes[0]])

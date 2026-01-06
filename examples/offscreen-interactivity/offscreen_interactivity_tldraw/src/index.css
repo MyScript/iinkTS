@@ -34,6 +34,21 @@ body,
   animation: spin 2s linear infinite;
 }
 
+.modal-button {
+  width: 100px;
+  height: 40px;
+  background-color: #1a9fff;
+  color: white;
+  font-size: 14px;
+  text-transform: uppercase;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-top: 5px;
+  margin-left: 5px;
+}
+
 .modal {
 	position: absolute;
 	z-index: 999;
@@ -106,4 +121,82 @@ body,
 
 .tab-content.active {
 	display: block;
+}
+.key-forms {
+    max-width: 420px;
+    margin: 40px auto;
+    padding: 24px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: #333;
+}
+
+.form-group input,
+.form-group select {
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    outline: none;
+    background-color: #fafafa;
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.form-group input::placeholder {
+    color: #aaa;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #1a9fff;
+    background-color: #fff;
+}
+
+.key-forms button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    background-color: #1a9fff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.key-forms button:hover {
+    background-color: #007acc;
+}
+
+.key-forms button:active {
+    transform: translateY(1px);
+}
+
+.form-a {
+  font-size: 15px;
+  color: #1a9fff;
+  margin-top: 50px;
+  margin-bottom: 15px;
+  text-align: center;
+  text-decoration: none;
+}
+.form-a:hover {
+  text-decoration: underline;
+  transition: 0.2s ease;
+  color: #007acc;
 }

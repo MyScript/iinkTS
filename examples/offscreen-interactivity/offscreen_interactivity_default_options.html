@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -18,66 +19,84 @@
         height: 100dvh;
       }
     </style>
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
   </head>
 
   <body>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">Offscreen Interactivity - Override default options</h1>
+    </header>
+
     <div id="editor"></div>
 
-    <script>
-      const editorElement = document.getElementById("editor");
+    <script type="module">
+      import {
+        Editor,
+        SurroundAction,
+        StrikeThroughAction,
+        InsertAction
+      } from '../../dist/iink.esm.js'
+      import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
 
-      /**
-       * we expose the editor so we can access it in tests
-       */
-      let editor;
+      const editorElement = document.getElementById('editor')
+      const showModalBtn = document.getElementById('showModalBtn')
 
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-        const options = {
-          configuration: {
-            server,
-            rendering: {
-              guides: {
-                gap: 25,
-                type: "line"
-              }
-            },
-            gesture: {
-              surround: iink.SurroundAction.Highlight,
-              strikeThrough: iink.StrikeThroughAction.Erase,
-              insert: iink.InsertAction.Insert
-            },
-            snap: {
-              guide: false,
-              symbol: false,
-              angle: 90
-            },
-            penStyle: {
-              color: "#00af00",
-              width: 1 // values: [1, 2, 4, 8]
-            },
-            fontStyle: {
-              weight: "normal",
-              size: 1 // values: ['auto', 0.5, 0.75, 1]
+      let editor
+      const editorOptions = {
+        configuration: {
+          rendering: {
+            guides: {
+              gap: 25,
+              type: 'line'
             }
+          },
+          gesture: {
+            surround: SurroundAction.Highlight,
+            strikeThrough: StrikeThroughAction.Erase,
+            insert: InsertAction.Insert
+          },
+          snap: {
+            guide: false,
+            symbol: false,
+            angle: 90
+          },
+          penStyle: {
+            color: '#00af00',
+            width: 1 // values: [1, 2, 4, 8]
+          },
+          fontStyle: {
+            weight: 'normal',
+            size: 1 // values: ['auto', 0.5, 0.75, 1]
           }
         }
-
+      }
+      async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(editorElement, "INTERACTIVEINK", options);
-
-        window.addEventListener("resize", () => {
-          editor.resize();
-        });
+        editor = await Editor.load(editorElement, 'INTERACTIVEINK', options)
       }
 
-      loadEditor().catch((error) => console.error(error));
+      window.addEventListener('resize', () => {
+        editor?.resize()
+      })
+
+      showModalBtn.addEventListener('click', () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
     </script>
   </body>
+
 </html>

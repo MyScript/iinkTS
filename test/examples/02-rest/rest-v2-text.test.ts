@@ -4,16 +4,15 @@ import {
   writeStrokes,
   waitForExportedEvent,
   getEditorExports,
+  passModalKey
 } from "../helper"
 import h from "../__dataset__/h"
 
 test.describe("Text Recognizer Iink", () => {
 
   test.beforeEach(async ({ page }) => {
-    await Promise.all([
-      page.goto("/examples/rest/rest_text_recognizerInk.html")
-    ])
-    await waitForEditorInit(page)
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/rest/rest_v2_text.html`)
+    await passModalKey(page)
   })
 
   test("should have title", async ({ page }) => {

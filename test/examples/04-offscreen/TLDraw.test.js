@@ -1,11 +1,24 @@
 import { test, expect } from "@playwright/test"
-import { writeStrokes, } from "../helper"
+import { passModalKey, writeStrokes } from "../helper"
 import helloOneStroke from "../__dataset__/helloOneStroke"
 
 test.describe("Offscreen TLDraw", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/offscreen-interactivity/offscreen_interactivity_tldraw/dist/index.html")
-    await expect(page.locator('.loader')).toHaveCount(0)
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/offscreen-interactivity/offscreen_interactivity_tldraw/dist/index.html`)
+    if(await page.getByRole('textbox', { name: 'Host:' }).isVisible()) {
+
+      await page.getByLabel('Scheme:').selectOption(process.env.SCHEME)
+      await page.getByRole('textbox', { name: 'Host:' }).fill(process.env.HOST)
+      await page.getByRole('textbox', { name: 'Application Key:' }).fill(process.env.APPLICATION_KEY)
+      await page.getByRole('textbox', { name: 'HMAC Key:' }).fill(process.env.HMAC_KEY)
+      await page.getByRole('button', { name: 'Save' }).click()
+    }
+    else
+    {
+      await page.getByTestId('main-menu.button').click()
+    }
+
+    await expect(page.locator('.loader')).toBeHidden({ timeout: 5_000 })
   })
 
   test("tabs should be empty", async ({ page }) => {

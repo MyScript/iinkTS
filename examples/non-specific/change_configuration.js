@@ -1,8 +1,10 @@
+import * as iink from '../../dist/iink.esm.js'
+import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
 const inkEditorDeprecatedConfiguration = iink.DefaultInkEditorDeprecatedConfiguration
 const IISSREditorConfiguration = iink.DefaultInteractiveInkSSREditorConfiguration
 const IIEditorConfiguration = iink.DefaultInteractiveInkEditorConfiguration
 const inkEditorConfiguration = iink.DefaultInkEditorConfiguration
-const configurationContainer = document.getElementById('configuration-container')
+
 const configurationContent = document.getElementById('configuration-content')
 const editorTypeSelect = document.getElementById('editor-type')
 const editorElement = document.getElementById('editor')
@@ -10,6 +12,7 @@ const resultElement = document.getElementById('result')
 const exportBtn = document.getElementById('export-btn')
 const validBtn = document.getElementById('valid-btn')
 const resetBtn = document.getElementById('reset-btn')
+const showModalBtn = document.getElementById("showModalBtn");
 const inputMap = {
   'server.scheme': {
     type: 'select',
@@ -328,8 +331,6 @@ function loadConfiguration() {
 }
 async function loadEditor(options) {
   if (!serverConfiguration) {
-    const res = await fetch("../server-configuration.json");
-    serverConfiguration = await res.json();
     const defaultConfigurations = [
       inkEditorDeprecatedConfiguration,
       IISSREditorConfiguration,
@@ -385,10 +386,20 @@ resultElement.addEventListener('click', () =>{
   resultElement.classList.toggle("open")
 })
 
+showModalBtn.addEventListener('click', () => {
+  ModalEditorOptions.show(loadEditor, editorOptions)
+})
+
 window.addEventListener('resize', () => {
   editor?.resize()
 })
 
 loadEditorType()
 loadConfiguration()
-loadEditor(editorOptions)
+ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+/**
+ * We expose these objects to the window use it in test
+ */
+window.editorOptions = editorOptions
+window.loadEditor = loadEditor

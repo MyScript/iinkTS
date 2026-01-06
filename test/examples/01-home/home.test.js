@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test"
 
 test.describe("Home Page", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/index.html")
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/index.html`)
   })
 
   test("should have title", async ({ page }) => {

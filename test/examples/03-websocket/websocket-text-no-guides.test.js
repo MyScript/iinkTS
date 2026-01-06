@@ -1,11 +1,11 @@
 import { test, expect } from "@playwright/test"
-import { waitForEditorInit } from "../helper"
+import { waitForEditorInit, passModalKey } from "../helper"
 import TextNavActions from "../_partials/text-nav-actions"
 
 test.describe("Websocket Text Search Without Smartguide", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/websocket/websocket_text_iink_no_guides.html")
-    await waitForEditorInit(page)
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/websocket/websocket_text_no_guides.html`)
+    await passModalKey(page)
   })
 
   test("should have title", async ({ page }) => {
