@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -10,15 +11,14 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
-    <script type="text/javascript" src="./custom_grabber.js"></script>
     <style>
-      #editor {
-        height: calc(100dvh - 187px);
+      #editorEl {
+        height: calc(100dvh - 237px);
       }
+
       @media only screen and (max-width: 579px) {
-        #editor {
-          height: calc(100dvh - 257px);
+        #editorEl {
+          height: calc(100dvh - 307px);
         }
       }
     </style>
@@ -31,6 +31,7 @@
         padding: 0 12px;
         margin: 5px 0;
       }
+
       @media only screen and (max-width: 600px) {
         .point-info {
           width: 100%;
@@ -40,6 +41,15 @@
   </head>
 
   <body>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">
+        Websocket with Custom Grabber
+      </h1>
+    </header>
+
     <div id="result"></div>
 
     <nav class="flex-container gap between wrap">
@@ -61,67 +71,76 @@
       </ul>
     </nav>
 
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
-    <script>
-      const editorElement = document.getElementById("editor");
-      const resultElement = document.getElementById("result");
-      const clearElement = document.getElementById("clear");
-      const undoElement = document.getElementById("undo");
-      const redoElement = document.getElementById("redo");
+    <script type="module">
+      import { Editor } from '../../dist/iink.esm.js'
+      import { CustomGrabber } from './custom_grabber.js'
+      import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
+      const editorElement = document.getElementById('editorEl')
+      const resultElement = document.getElementById('result')
+      const clearElement = document.getElementById('clear')
+      const undoElement = document.getElementById('undo')
+      const redoElement = document.getElementById('redo')
+      const showModalBtn = document.getElementById('showModalBtn')
 
-      let editor;
+      const editorOptions = {
+        configuration: {},
+        override: {
+          grabber: CustomGrabber
+        }
+      }
+
+      let editor
       /**
        * We use a function to wait the server configuration to load
        */
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-        const options = {
-          configuration: {
-            server
-          },
-          override: {
-            grabber: CustomGrabber
-          }
-        };
-
+      async function loadEditor(options) {
+        resultElement.innerHTML = ''
+        await editor?.destroy()
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(editorElement, "INTERACTIVEINKSSR", options);
+        editor = await Editor.load(editorElement, 'INTERACTIVEINKSSR', options)
 
-        editor.event.addEventListener("changed", (event) => {
-          undoElement.disabled = !event.detail.canUndo;
-          redoElement.disabled = !event.detail.canRedo;
-          clearElement.disabled = !event.detail.canClear;
-        });
+        editor.event.addEventListener('changed', (event) => {
+          undoElement.disabled = !event.detail.canUndo
+          redoElement.disabled = !event.detail.canRedo
+          clearElement.disabled = !event.detail.canClear
+        })
 
-        editor.event.addEventListener("exported", (event) => {
+        editor.event.addEventListener('exported', (event) => {
           resultElement.innerHTML =
-            event.detail && event.detail["application/vnd.myscript.jiix"] ? event.detail["application/vnd.myscript.jiix"].label : "";
-        });
-
-        clearElement.addEventListener("click", async () => {
-          editor.clear();
-        });
-
-        undoElement.addEventListener("click", () => {
-          editor.undo();
-        });
-
-        redoElement.addEventListener("click", () => {
-          editor.redo();
-        });
-
-        window.addEventListener("resize", () => {
-          editor.resize();
-        });
+            event.detail && event.detail['application/vnd.myscript.jiix']
+              ? event.detail['application/vnd.myscript.jiix'].label
+              : ''
+        })
       }
 
-      loadEditor().catch((error) => console.error(error));
+      clearElement.addEventListener('click', async () => {
+        editor?.clear()
+      })
+
+      undoElement.addEventListener('click', () => {
+        editor?.undo()
+      })
+
+      redoElement.addEventListener('click', () => {
+        editor?.redo()
+      })
+
+      window.addEventListener('resize', () => {
+        editor?.resize()
+      })
+
+      showModalBtn.addEventListener('click', () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
     </script>
   </body>
+
 </html>

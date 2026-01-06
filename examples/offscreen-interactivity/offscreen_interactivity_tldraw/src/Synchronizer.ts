@@ -114,7 +114,8 @@ export class Synchronizer
       return
     }
 
-    const recognizer = await useRecognizer()
+    const serverConfiguration = JSON.parse(window.localStorage.getItem("server") || "{}") as Partial<import("iink-ts").TServerWebsocketConfiguration>
+    const recognizer = Recognizer.instance || await useRecognizer(serverConfiguration)
 
     if (drawShapesChanged.length) {
       const drawShapeCompleted = drawShapesChanged.filter(s => s.props.isComplete)

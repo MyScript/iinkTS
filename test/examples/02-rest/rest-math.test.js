@@ -1,12 +1,12 @@
 import { test, expect } from "@playwright/test"
 import {
-  waitForEditorInit,
   writeStrokes,
   waitForExportedEvent,
   getEditorConfiguration,
   getEditorExports,
   getEditorSymbols,
   loadEditor,
+  passModalKey
 } from "../helper"
 import one from "../__dataset__/1"
 import equation from "../__dataset__/equation"
@@ -14,8 +14,8 @@ import equation from "../__dataset__/equation"
 test.describe("Rest Math", () => {
 
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/rest/rest_math_iink.html")
-    await waitForEditorInit(page)
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/rest/rest_math.html`)
+    await passModalKey(page)
   })
 
   test("should have title", async ({ page }) => {
@@ -77,7 +77,7 @@ test.describe("Rest Math", () => {
           }
         }
       }
-      await loadEditor(page, "INKV1", options)
+      await loadEditor(page, options)
 
       await Promise.all([
         waitForExportedEvent(page),
@@ -103,7 +103,7 @@ test.describe("Rest Math", () => {
           }
         }
       }
-      await loadEditor(page, "INKV1", options)
+      await loadEditor(page, options)
 
       await Promise.all([
         waitForExportedEvent(page),

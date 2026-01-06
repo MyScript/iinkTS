@@ -10,55 +10,43 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
     <style>
-      #editor {
-        height: calc(100dvh - 166px);
+      #editorEl {
+        height: calc(100dvh - 150px);
       }
       @media only screen and (max-width: 294px) {
-        #editor {
-          height: calc(100dvh - 213px);
+        #editorEl {
+          height: calc(100dvh - 200px);
         }
       }
     </style>
   </head>
 
   <body>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">
+        Websocket Handle error
+      </h1>
+    </header>
+
     <div id="result"></div>
 
-    <nav class="flex-container wrap gap between">
-      <div class="flex-container wrap gap">
-        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/clear.svg" />
-        </button>
-        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/undo.svg" />
-        </button>
-        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/redo.svg" />
-        </button>
-      </div>
-    </nav>
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
-    <script>
-      const editorElement = document.getElementById("editor");
+    <script type="module">
+      import { Editor } from '../../dist/iink.esm.js'
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl");
+      const showModalBtn = document.getElementById("showModalBtn");
 
-      /**
-       * we expose the editor so we can access it in tests
-       */
       let editor;
 
-      /**
-       * We use a function to wait the server configuration to load
-       */
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-        const options = {
+      const editorOptions = {
           configuration: {
             server: {
-              ...server,
               applicationKey: 'xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
               hmacKey: 'xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
             },
@@ -66,17 +54,28 @@
               type: "TEXT"
             }
           }
-        };
+        }
 
+      async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(editorElement, "INTERACTIVEINKSSR", options);
+        editor = await Editor.load(editorElement, "INTERACTIVEINKSSR", options);
       };
 
-      loadEditor().catch(error => console.error(error));
+      showModalBtn.addEventListener("click", () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
+
+      loadEditor(editorOptions).catch(error => console.error(error));
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
     </script>
   </body>
 </html>

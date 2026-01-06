@@ -16,25 +16,34 @@
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
     <style>
-      #editor {
-        height: calc(100dvh - 66px);
+      #editorEl {
+        height: calc(100dvh - 116px);
       }
       @media only screen and (max-width: 486px) {
-        #editor {
-          height: calc(100dvh - 114px);
+        #editorEl {
+          height: calc(100dvh - 164px);
         }
       }
       @media only screen and (max-width: 382px) {
-        #editor {
-          height: calc(100dvh - 161px);
+        #editorEl {
+          height: calc(100dvh - 211px);
         }
       }
+      #lexicon {
+        width: calc(100% - 100px);
+      }
     </style>
-
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
   </head>
 
   <body>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">
+        Custom lexicon
+      </h1>
+    </header>
     <nav class="flex-container wrap between gap">
       <div class="flex-container wrap gap">
         <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
@@ -44,7 +53,7 @@
           <img src="../assets/img/redo.svg" />
         </button>
       </div>
-      <div class="flex-container wrap gap">
+      <div class="flex-container wrap gap" style="width: calc(100% - 110px);">
         <input
           type="text"
           id="lexicon"
@@ -55,14 +64,17 @@
       </div>
     </nav>
 
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
-    <script>
-      const editorElement = document.getElementById("editor")
+    <script type="module">
+      import { Editor } from '../../dist/iink.esm.js'
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl")
       const undoElement = document.getElementById("undo")
       const redoElement = document.getElementById("redo")
       const reinitButton = document.getElementById("reinit")
       const lexicon = document.getElementById("lexicon")
+      const showModalBtn = document.getElementById("showModalBtn")
 
       undoElement.addEventListener("click", () => {
         editor?.undo()
@@ -75,7 +87,7 @@
         editor?.resize()
       })
 
-      const options = {
+      const editorOptions = {
         configuration: {
           recognition: {
             text: {
@@ -95,27 +107,23 @@
           customLexicon: values.split(" "),
           addLKText: true,
         }
-        options.configuration = configuration
-        loadEditor()
+        editorOptions.configuration = configuration
+        loadEditor(editorOptions)
       })
 
-      /**
-       * we expose the editor so we can access it in tests
-       */
+      showModalBtn.addEventListener("click", () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
+
       let editor;
 
-      async function loadEditor() {
-        if (!options.configuration.server) {
-          const res = await fetch("../server-configuration.json")
-          options.configuration.server = await res.json();
-        }
-
+      async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(editorElement, "INTERACTIVEINKSSR", options);
+        editor = await Editor.load(editorElement, "INTERACTIVEINKSSR", options);
 
         editor.event.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo
@@ -123,7 +131,13 @@
         })
       };
 
-      loadEditor().catch(error => console.error(error));
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
     </script>
   </body>
 </html>

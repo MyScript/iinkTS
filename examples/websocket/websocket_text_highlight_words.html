@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -13,50 +14,58 @@
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
 
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
     <style type="text/css">
-      #editor {
+      #editorEl {
         width: auto;
-        height: calc(100dvh - 66px);
+        height: calc(100dvh - 116px);
       }
+
       @media only screen and (max-width: 889px) {
-        #editor {
-          height: calc(100dvh - 114px);
+        #editorEl {
+          height: calc(100dvh - 164px);
         }
       }
+
       @media only screen and (max-width: 600px) {
         .highlight-column {
           position: absolute;
           right: 0;
         }
       }
+
       @media only screen and (max-width: 454px) {
-        #editor {
-          height: calc(100dvh - 143px);
+        #editorEl {
+          height: calc(100dvh - 193px);
         }
       }
+
       .wrapper {
         height: 100dvh;
         width: 100dvw;
       }
+
       .editor-column {
         width: 80%;
       }
+
       .colors {
         display: flex;
         overflow: auto;
       }
+
       .pensettings {
         text-align: center;
         user-select: none;
         margin-right: 12px;
       }
+
       .color {
         width: 36px;
         height: 36px;
         border: 1px solid silver;
         border-radius: 50%;
       }
+
       .check {
         border-bottom: 2px solid #000;
         border-right: 2px solid #000;
@@ -65,6 +74,7 @@
         height: 16px;
         width: 8px;
       }
+
       .highlight-column {
         background-color: white;
         padding: 12px;
@@ -72,13 +82,21 @@
         min-width: 20%;
         border-left: 1px solid #d7dde3;
       }
+
       .highlight-column .colored .header {
         width: auto;
         height: 10px;
       }
     </style>
   </head>
+
   <body>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">Websocket Text Highlight Words</h1>
+    </header>
     <div class="flex-container wrap wrapper">
       <div class="editor-column">
         <nav class="flex-container wrap gap between">
@@ -117,23 +135,25 @@
             </div>
           </div>
         </nav>
-        <div id="editor"></div>
+        <div id="editorEl"></div>
       </div>
       <div class="highlight-column">
-        <ul id="highlight-list">
-
-        </ul>
+        <ul id="highlight-list"></ul>
       </div>
     </div>
 
-    <script>
-      const editorElement = document.getElementById("editor");
-      const undoElement = document.getElementById("undo");
-      const redoElement = document.getElementById("redo");
-      const colors = document.querySelectorAll(".pensettings");
-      const highlightListElement = document.getElementById("highlight-list");
+    <script type="module">
+      import { Editor } from '../../dist/iink.esm.js'
+      import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
 
-      let editor;
+      const editorElement = document.getElementById('editorEl')
+      const undoElement = document.getElementById('undo')
+      const redoElement = document.getElementById('redo')
+      const colors = document.querySelectorAll('.pensettings')
+      const highlightListElement = document.getElementById('highlight-list')
+      const showModalBtn = document.getElementById('showModalBtn')
+
+      let editor
 
       function clearHighlightList() {
         while (highlightListElement.firstChild) {
@@ -142,128 +162,136 @@
       }
 
       function extractColor(style) {
-          const regexColor = /; color:\s#([0-9a-f]{3}){1,2}/i;
-          if (regexColor.test(style)) {
-            const rule = style.match(regexColor);
-            const regexCss = rule[0].match(/#([0-9a-f]{3}){1,2}/i);
-            return regexCss[0];
-          }
+        const regexColor = /; color:\s#([0-9a-f]{3}){1,2}/i
+        if (regexColor.test(style)) {
+          const rule = style.match(regexColor)
+          const regexCss = rule[0].match(/#([0-9a-f]{3}){1,2}/i)
+          return regexCss[0]
+        }
       }
 
-      function convertHexToRGBA(hex)
-      {
-        const opacity = "0.5";
-        const red = parseInt(hex.substring(1, 3), 16);
-        const green = parseInt(hex.substring(3, 5), 16);
-        const blue = parseInt(hex.substring(5, 7), 16);
-        return ` rgba(${red}, ${green}, ${blue}, ${opacity})`;
+      function convertHexToRGBA(hex) {
+        const opacity = '0.5'
+        const red = parseInt(hex.substring(1, 3), 16)
+        const green = parseInt(hex.substring(3, 5), 16)
+        const blue = parseInt(hex.substring(5, 7), 16)
+        return ` rgba(${ red }, ${ green }, ${ blue }, ${ opacity })`
       }
 
       function extractBackgroundColor(style) {
-        const regexBackground = /-myscript-text-decoration-background-color:\s#([0-9a-f]{3}){1,2}/i;
-          if (regexBackground.test(style)) {
-            const rule = style.match(regexBackground);
-            const regexCss = rule[0].match(/#([0-9a-f]{3}){1,2}/i);
-            return convertHexToRGBA(regexCss[0])
-          }
+        const regexBackground =
+          /-myscript-text-decoration-background-color:\s#([0-9a-f]{3}){1,2}/i
+        if (regexBackground.test(style)) {
+          const rule = style.match(regexBackground)
+          const regexCss = rule[0].match(/#([0-9a-f]{3}){1,2}/i)
+          return convertHexToRGBA(regexCss[0])
+        }
       }
 
       function displayHightlightWords(jiix) {
-        if(!jiix || !jiix.spans?.length) {
+        if (!jiix || !jiix.spans?.length) {
           return
         }
         const highlightSpans = jiix.spans.filter((span) => {
-          return span.class.indexOf("text-highlight") !== -1;
+          return span.class.indexOf('text-highlight') !== -1
         })
-        const label = jiix.label;
+        const label = jiix.label
         const highlightWords = highlightSpans.map((span) => {
-          const lastCharIndex = span["last-char"] + 1;
-          const cleanLabel = label.substring(span["first-char"], lastCharIndex).replace(/\r?\n/g, "");
+          const lastCharIndex = span['last-char'] + 1
+          const cleanLabel = label
+            .substring(span['first-char'], lastCharIndex)
+            .replace(/\r?\n/g, '')
           return {
             label: cleanLabel,
             style: span.style,
-            id: `idLabel-${cleanLabel.replace(/\W/g, "-")}`
-          };
+            id: `idLabel-${ cleanLabel.replace(/\W/g, '-') }`
+          }
         })
         highlightWords.forEach((word) => {
-          const li = document.createElement("li");
-          li.id = `${word.id}`;
-          li.textContent = word.label;
-          li.style.backgroundColor = extractBackgroundColor(word.style);
-          li.style.color = extractColor(word.style);
+          const li = document.createElement('li')
+          li.id = `${ word.id }`
+          li.textContent = word.label
+          li.style.backgroundColor = extractBackgroundColor(word.style)
+          li.style.color = extractColor(word.style)
           highlightListElement.append(li)
         })
       }
 
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-        const options = {
-          configuration: {
-            server,
-            recognition: {
-              type: "TEXT",
-              export: {
-                jiix: {
-                  style: true
-                }
+      function handleColorClick(event) {
+        if(!editor) return;
+        if (event && event.currentTarget) {
+          editor.penStyle = {
+            color: event.currentTarget.getAttribute('data-color'),
+            '-myscript-pen-width': 1
+          }
+          const check = document.getElementById('check')
+          event.currentTarget.querySelector('.color').appendChild(check)
+        }
+      }
+
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            type: 'TEXT',
+            export: {
+              jiix: {
+                style: true
               }
             }
           }
-        };
+        }
+      }
 
+      async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(editorElement, "INTERACTIVEINKSSR", options);
+        editor = await Editor.load(editorElement, 'INTERACTIVEINKSSR', options)
+      }
 
-        function handleColorClick(event) {
-          if (event && event.currentTarget) {
-            editor.penStyle = {
-              color: event.currentTarget.getAttribute("data-color"),
-              "-myscript-pen-width": 1
-            };
-            const check = document.getElementById("check");
-            event.currentTarget.querySelector(".color").appendChild(check);
-          }
+      editorElement.addEventListener('changed', (event) => {
+        undoElement.disabled = !event.detail.canUndo
+        redoElement.disabled = !event.detail.canRedo
+      })
+
+      editorElement.addEventListener('exported', (event) => {
+        const exports = event.detail
+        clearHighlightList()
+        if (exports) {
+          displayHightlightWords(exports['application/vnd.myscript.jiix'])
         }
+      })
 
-        /**
-         * Init listeners
-         */
-        editorElement.addEventListener("changed", (event) => {
-          undoElement.disabled = !event.detail.canUndo;
-          redoElement.disabled = !event.detail.canRedo;
-        });
+      undoElement.addEventListener('click', () => {
+        editor?.undo()
+      })
 
-        editorElement.addEventListener("exported", (event) => {
-          const exports = event.detail;
-          clearHighlightList();
-          if (exports) {
-            displayHightlightWords(exports["application/vnd.myscript.jiix"])
-          }
-        });
+      redoElement.addEventListener('click', () => {
+        editor?.redo()
+      })
 
-        undoElement.addEventListener("click", () => {
-          editor.undo();
-        });
+      colors.forEach((el) => {
+        el.addEventListener('click', handleColorClick)
+      })
 
-        redoElement.addEventListener("click", () => {
-          editor.redo();
-        });
+      window.addEventListener('resize', () => {
+        editor?.resize()
+      })
 
-        colors.forEach((el) => {
-          el.addEventListener("click", handleColorClick);
-        });
+      showModalBtn.addEventListener('click', () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
 
-        window.addEventListener("resize", () => {
-          editor.resize();
-        });
-      };
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
 
-      loadEditor().catch(error => console.error(error));
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
     </script>
   </body>
+
 </html>

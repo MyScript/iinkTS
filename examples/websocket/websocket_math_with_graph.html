@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -10,37 +11,36 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css"
-      integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X"
-      crossorigin="anonymous"
-    />
-    <script
-      defer
-      src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js"
-      integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4"
-      crossorigin="anonymous"
-    ></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css" integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X" crossorigin="anonymous" />
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>
     <script type="text/javascript" src="../assets/desmos/calculator.js"></script>
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
     <style>
       #graph,
-      #editor {
-        height: calc(100dvh - 166px);
+      #editorEl {
+        height: calc(100dvh - 216px);
         width: 50%;
       }
+
       @media only screen and (max-width: 600px) {
+
         #graph,
-        #editor {
+        #editorEl {
           width: 100%;
-          height: calc(50vh - 83px);
+          height: calc(50vh - 133px);
         }
       }
     </style>
   </head>
 
   <body>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">
+        Websocket Math With Graph
+      </h1>
+    </header>
     <div id="result"></div>
 
     <nav class="flex-container wrap between">
@@ -58,17 +58,20 @@
     </nav>
 
     <div class="flex-container wrap">
-      <div id="editor"></div>
+      <div id="editorEl"></div>
       <div id="graph" class="graph"></div>
     </div>
 
-    <script>
-      const editorElement = document.getElementById("editor");
-      const resultElement = document.getElementById("result");
-      const clearElement = document.getElementById("clear");
-      const undoElement = document.getElementById("undo");
-      const redoElement = document.getElementById("redo");
+    <script type="module">
+      import { Editor } from '../../dist/iink.esm.js'
+      import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
+      const editorElement = document.getElementById('editorEl')
+      const resultElement = document.getElementById('result')
+      const clearElement = document.getElementById('clear')
+      const undoElement = document.getElementById('undo')
+      const redoElement = document.getElementById('redo')
       const graphEl = document.getElementById('graph')
+      const showModalBtn = document.getElementById('showModalBtn')
       const colors = ['#0060A0', '#09E05C', '#E06A09']
       const calculator = Desmos.Calculator(graphEl, {
         keypad: false,
@@ -84,98 +87,121 @@
       })
 
       function cleanLatex(latexExport) {
-        if (latexExport.includes("\\\\")) {
-          const steps = "\\begin{align*}" + latexExport + "\\end{align*}";
-          return steps.replace("\\begin{aligned}", "").replace("\\end{aligned}", "").replace(new RegExp("(align.{1})", "g"), "aligned");
+        if (latexExport.includes('\\\\')) {
+          const steps = '\\begin{align*}' + latexExport + '\\end{align*}'
+          return steps
+            .replace('\\begin{aligned}', '')
+            .replace('\\end{aligned}', '')
+            .replace(new RegExp('(align.{1})', 'g'), 'aligned')
         }
-        return latexExport.replace(new RegExp("(align.{1})", "g"), "aligned");
+        return latexExport.replace(new RegExp('(align.{1})', 'g'), 'aligned')
       }
 
-      function extractExpressions (latex) {
+      function extractExpressions(latex) {
         if (!latex) return ['']
         const expressions = latex.split('\\\\')
-        return expressions.map(e => {
-          return e.replace('\\dfrac', '\\frac')
+        return expressions.map((e) => {
+          return e
+            .replace('\\dfrac', '\\frac')
             .replace('\\begin{aligned}', '')
             .replace('\\end{aligned}', '')
             .replace('\\begin{cases}', '')
             .replace('\\end{cases} ', '')
-          }
-        )
+        })
       }
 
-      /**
-       * we expose the editor so we can access it in tests
-       */
-      let editor;
+      let editor
 
-      /**
-       * We use a function to wait the server configuration to load
-       */
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-        const options = {
-          configuration: {
-            server,
-            recognition: {
-              type: "MATH",
-              math: {
-                mimeTypes: ["application/x-latex"]
-              }
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            type: 'MATH',
+            math: {
+              mimeTypes: ['application/x-latex']
             }
           }
-        };
+        }
+      }
 
+      async function loadEditor(options) {
+        await editor?.destroy()
+        resultElement.innerHTML = ''
+        calculator.setExpression({
+          id: 0,
+          latex: '',
+          color: colors[0]
+        })
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(editorElement, "INTERACTIVEINKSSR", options);
+        editor = await Editor.load(editorElement, 'INTERACTIVEINKSSR', options)
 
-        editor.event.addEventListener("changed", (event) => {
-          undoElement.disabled = !event.detail.canUndo;
-          redoElement.disabled = !event.detail.canRedo;
-          clearElement.disabled = !event.detail.canClear;
-        });
+        editor.event.addEventListener('changed', (event) => {
+          undoElement.disabled = !event.detail.canUndo
+          redoElement.disabled = !event.detail.canRedo
+          clearElement.disabled = !event.detail.canClear
+        })
 
-        editor.event.addEventListener("exported", (evt) => {
-          const exports = evt.detail;
-          resultElement.innerHTML = event.detail && event.detail["application/vnd.myscript.jiix"] ? event.detail["application/vnd.myscript.jiix"].label : "";
+        editor.event.addEventListener('exported', (evt) => {
+          const exports = evt.detail
+          resultElement.innerHTML = exports && exports['application/vnd.myscript.jiix'] ? exports['application/vnd.myscript.jiix'].label : ''
           colors.forEach((color, index) => {
-            calculator.setExpression({ id: index, latex: '', color: colors[index] });
-          });
-          if (exports && exports["application/x-latex"]) {
-            try {
-              katex.render(cleanLatex(exports["application/x-latex"]), resultElement);
-            } catch (error) {
-              resultElement.innerHTML = '<span>' + cleanLatex(exports['application/x-latex']) + '</span>';
-            }
-            extractExpressions(exports['application/x-latex']).forEach((val, index) => {
-              calculator.setExpression({ id: index, latex: val, color: colors[index] });
+            calculator.setExpression({
+              id: index,
+              latex: '',
+              color: colors[index]
             })
+          })
+          if (exports && exports['application/x-latex']) {
+            try {
+              katex.render(cleanLatex(exports['application/x-latex']), resultElement)
+            } catch (error) {
+              resultElement.innerHTML = '<span>' + cleanLatex(exports['application/x-latex']) + '</span>'
+            }
+            extractExpressions(exports['application/x-latex']).forEach(
+              (val, index) => {
+                calculator.setExpression({
+                  id: index,
+                  latex: val,
+                  color: colors[index]
+                })
+              }
+            )
           }
-        });
+        })
 
-        clearElement.addEventListener("click", async () => {
-          editor.clear();
-        });
+      }
 
-        undoElement.addEventListener("click", () => {
-          editor.undo();
-        });
+      clearElement.addEventListener('click', async () => {
+        editor?.clear()
+      })
 
-        redoElement.addEventListener("click", () => {
-          editor.redo();
-        });
+      undoElement.addEventListener('click', () => {
+        editor?.undo()
+      })
 
-        window.addEventListener("resize", () => {
-          editor.resize();
-        });
-      };
+      redoElement.addEventListener('click', () => {
+        editor?.redo()
+      })
 
-      loadEditor().catch(error => console.error(error));
+      window.addEventListener('resize', () => {
+        editor?.resize()
+      })
+
+      showModalBtn.addEventListener('click', () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
     </script>
   </body>
+
 </html>

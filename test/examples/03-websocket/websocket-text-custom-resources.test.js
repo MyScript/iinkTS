@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test"
 import TextNavActions from "../_partials/text-nav-actions"
-import { waitForEditorInit } from "../helper"
+import { waitForEditorInit, passModalKey } from "../helper"
 // import {
 //   writeStrokes,
 //   waitForExportedEvent,
@@ -11,8 +11,8 @@ import { waitForEditorInit } from "../helper"
 
 test.describe("Websocket Custom pre-loaded resources", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/websocket/websocket_text_custom_resources.html")
-    await waitForEditorInit(page)
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/websocket/websocket_text_custom_resources.html`)
+    await passModalKey(page)
   })
 
   test("should have title", async ({ page }) => {

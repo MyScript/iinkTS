@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -7,17 +8,18 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
 
-    <title>Shape Recognizer Ink</title>
+    <title>Rest v2 Shape</title>
 
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
     <link rel="stylesheet" href="../assets/style/renderjson.css" />
     <style>
-      #editor {
-        height: calc(100dvh - 170px);
+      #editorEl {
+        height: calc(100dvh - 220px);
         width: 100dvw;
       }
+
       #progress {
         transition: width 10s;
         width: 0;
@@ -25,6 +27,7 @@
         background-color: #1a9fff;
         opacity: 0;
       }
+
       #result {
         border-bottom: solid gray 1px;
         display: block;
@@ -32,6 +35,7 @@
         padding: 12px;
         cursor: zoom-in;
       }
+
       #result.open {
         position: absolute;
         z-index: 999;
@@ -42,21 +46,27 @@
         background-color: white;
         cursor: zoom-out;
       }
+
       @media only screen and (max-width: 418px) {
-        #editor {
-          height: calc(100dvh - 220px);
+        #editorEl {
+          height: calc(100dvh - 270px);
         }
       }
     </style>
 
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
-    <script
-      type="text/javascript"
-      src="../assets/renderjson/renderjson.js"
-    ></script>
+    <script type="text/javascript" src="../assets/renderjson/renderjson.js"></script>
   </head>
 
   <body>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">
+        Rest v2 Shape
+      </h1>
+    </header>
+
     <div id="result"></div>
 
     <nav class="flex-container wrap gap between">
@@ -80,65 +90,65 @@
         </button>
       </div>
       <div class="flex-container wrap gap">
-        </div>
+      </div>
       </div>
     </nav>
 
     <div id="progress"></div>
 
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
     <div id="conversion-container"></div>
 
-    <script>
-      const editorElement = document.getElementById("editor");
+    <script type="module">
+      import { Editor, EditorTool } from '../../dist/iink.esm.js'
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+      const editorElement = document.getElementById("editorEl");
       const resultElement = document.getElementById("result");
       const clearElement = document.getElementById("clear");
       const undoElement = document.getElementById("undo");
       const redoElement = document.getElementById("redo");
       const eraserElement = document.getElementById("eraser");
       const penElement = document.getElementById("pen");
+      const showModalBtn = document.getElementById("showModalBtn");
 
       resultElement.addEventListener("click", () => {
         resultElement.classList.toggle("open")
       });
-      /**
-       * we expose the editor for use in the integration test
-       */
+
+
       let editor;
 
-      /**
-       * We use a function to wait the server configuration to load
-       */
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-        const options = {
-          configuration: {
-            server,
-            recognition: {
-              export: {
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            export: {
               jiix: {
                 ranges: true,
               },
             },
-              type: "SHAPE"
-            }
+            type: "SHAPE"
           }
-        };
+        }
+      };
+
+
+      async function loadEditor(options) {
+        resultElement.innerHTML = ""
+        await editor?.destroy()
 
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(editorElement, "INKV2", options);
+        editor = await Editor.load(editorElement, "INKV2", options);
 
         editor.event.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo;
           redoElement.disabled = !event.detail.canRedo;
           clearElement.disabled = !event.detail.canClear;
-          eraserElement.disabled = !event.detail.canClear || editor.tool === iink.EditorTool.Erase;
+          eraserElement.disabled = !event.detail.canClear || editor.tool === EditorTool.Erase;
         });
 
         editor.event.addEventListener("exported", (evt) => {
@@ -148,44 +158,58 @@
           resultElement.appendChild(renderjson(event.detail))
         })
 
-        clearElement.addEventListener("click", () => {
-          editor.clear();
-        });
-
-        undoElement.addEventListener("click", () => {
-          editor.undo();
-        });
-
-        redoElement.addEventListener("click", () => {
-          editor.redo();
-        });
-
-        eraserElement.addEventListener("click", () => {
-          eraserElement.disabled = true;
-          penElement.disabled = false;
-          editorElement.editor.tool = iink.EditorTool.Erase;
-          eraserElement.disabled = true;
-          eraserElement.classList.add("active");
-          penElement.disabled = false;
-          penElement.classList.remove("active");
-        });
-
-        penElement.addEventListener("click", () => {
-          eraserElement.disabled = false;
-          penElement.disabled = true;
-          editorElement.editor.tool = iink.EditorTool.Write;
-          eraserElement.disabled = false;
-          eraserElement.classList.remove("active");
-          penElement.disabled = true;
-          penElement.classList.add("active");
-        });
-
-        window.addEventListener("resize", () => {
-          editor.resize();
-        });
       }
 
-      loadEditor().catch((error) => console.error(error));
+      clearElement.addEventListener("click", () => {
+        editor?.clear();
+      });
+
+      undoElement.addEventListener("click", () => {
+        editor?.undo();
+      });
+
+      redoElement.addEventListener("click", () => {
+        editor?.redo();
+      });
+
+      eraserElement.addEventListener("click", () => {
+        if (!editor) return;
+        eraserElement.disabled = true;
+        penElement.disabled = false;
+        editorElement.editor.tool = EditorTool.Erase;
+        eraserElement.disabled = true;
+        eraserElement.classList.add("active");
+        penElement.disabled = false;
+        penElement.classList.remove("active");
+      });
+
+      penElement.addEventListener("click", () => {
+        if (!editor) return;
+        eraserElement.disabled = false;
+        penElement.disabled = true;
+        editorElement.editor.tool = EditorTool.Write;
+        eraserElement.disabled = false;
+        eraserElement.classList.remove("active");
+        penElement.disabled = true;
+        penElement.classList.add("active");
+      });
+
+      window.addEventListener("resize", () => {
+        editor?.resize();
+      });
+
+      showModalBtn.addEventListener("click", () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
     </script>
   </body>
+
 </html>

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -33,22 +34,25 @@
         background: rgba(240, 240, 240, 0.9);
       }
 
-      #editor {
-          height: calc(100dvh - 122px);
+      #editorEl {
+        height: calc(100dvh - 172px);
       }
+
       @media only screen and (max-width: 1030px) {
-        #editor {
-          height: calc(100dvh - 169px);
+        #editorEl {
+          height: calc(100dvh - 219px);
         }
       }
+
       @media only screen and (max-width: 771px) {
-        #editor {
-          height: calc(100dvh - 216px);
+        #editorEl {
+          height: calc(100dvh - 266px);
         }
       }
+
       @media only screen and (max-width: 648px) {
-        #editor {
-          height: calc(100dvh - 263px);
+        #editorEl {
+          height: calc(100dvh - 313px);
         }
 
         .prompter-css {
@@ -56,9 +60,10 @@
           bottom: 12px;
         }
       }
+
       @media only screen and (max-height: 400px) {
-        #editor {
-          height: calc(100dvh - 50px);
+        #editorEl {
+          height: calc(100dvh - 100px);
         }
 
         .nav-block {
@@ -68,16 +73,20 @@
         }
       }
     </style>
-
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
   </head>
 
   <body>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">Websocket Text Styling</h1>
+    </header>
     <nav class="nav-block">
       <div class="flex-container wrap gap row-options">
         <div class="flex-container wrap gap nav-item">
           <label for="penStyleClasses">Apply pen style class (greenThinPen):</label>
-          <input id="penStyleClasses" type="checkbox" disabled/>
+          <input id="penStyleClasses" type="checkbox" disabled />
         </div>
         <div class="flex-container wrap gap nav-item">
           <label for="theme">Theme:</label>
@@ -95,203 +104,237 @@
         </div>
         <div class="flex-container wrap gap nav-item">
           <label for="pencolor">Color:</label>
-          <input id="pencolor" type="color" value="#ff7314" disabled/>
+          <input id="pencolor" type="color" value="#ff7314" disabled />
         </div>
         <div class="flex-container wrap gap nav-item">
           <label for="penwidth">Thickness:</label>
-          <input id="penwidth" type="number" min="1" max="5" value="2" disabled/>
+          <input id="penwidth" type="number" min="1" max="5" value="2" disabled />
         </div>
       </div>
     </nav>
 
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
     <div id="prompter-css" class="prompter-css">
-      <div id="prompter-css-text">Theme or pen style applied will be written here.</div>
+      <div id="prompter-css-text">
+        Theme or pen style applied will be written here.
+      </div>
     </div>
 
-    <script>
-      const editorElement = document.getElementById("editor");
-      const penStyleClasses = document.getElementById("penStyleClasses");
-      const themeSelector = document.getElementById("theme");
-      const penEnabled = document.getElementById("penenabled");
-      const penColor = document.getElementById("pencolor");
-      const penWidth = document.getElementById("penwidth");
-      const fontsElement = document.getElementById("fonts");
-      const prompterText = document.getElementById("prompter-css-text");
+    <script type="module">
+      import { Editor, getAvailableFontList } from '../../dist/iink.esm.js'
+      import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
+      const editorElement = document.getElementById('editorEl')
+      const penStyleClasses = document.getElementById('penStyleClasses')
+      const themeSelector = document.getElementById('theme')
+      const penEnabled = document.getElementById('penenabled')
+      const penColor = document.getElementById('pencolor')
+      const penWidth = document.getElementById('penwidth')
+      const fontsElement = document.getElementById('fonts')
+      const prompterText = document.getElementById('prompter-css-text')
 
       const greenThickPenPenClass = {
-        color: "#00FF00",
-        "-myscript-pen-width": 0.5
+        color: '#00FF00',
+        '-myscript-pen-width': 0.5
       }
 
       const themes = [
         {
-          name: "Normal Gray theme",
-          id: "normal-white",
+          name: 'Normal Gray theme',
+          id: 'normal-white',
           theme: {
             ink: {
-              color: "#808080",
-              "-myscript-pen-width": 2
+              color: '#808080',
+              '-myscript-pen-width': 2
             },
-            ".text": {
-              "font-size": 12
+            '.text': {
+              'font-size': 12
             },
-            ".greenThickPen": greenThickPenPenClass
+            '.greenThickPen': greenThickPenPenClass
           }
         },
         {
-          name: "Thin green theme",
-          id: "thin-green",
+          name: 'Thin green theme',
+          id: 'thin-green',
           theme: {
             ink: {
-              color: "#2E7D32",
-              "-myscript-pen-width": 1
+              color: '#2E7D32',
+              '-myscript-pen-width': 1
             },
-            ".text": {
-              "font-size": 10
+            '.text': {
+              'font-size': 10
             },
-            ".greenThickPen": greenThickPenPenClass
+            '.greenThickPen': greenThickPenPenClass
           }
         },
         {
-          name: "Bold red theme",
-          id: "bold-red",
+          name: 'Bold red theme',
+          id: 'bold-red',
           theme: {
             ink: {
-              color: "#B71C1C",
-              "-myscript-pen-width": 3
+              color: '#B71C1C',
+              '-myscript-pen-width': 3
             },
-            ".text": {
-              "font-size": 14
+            '.text': {
+              'font-size': 14
             },
-            ".greenThickPen": greenThickPenPenClass
+            '.greenThickPen': greenThickPenPenClass
           }
         }
-      ];
+      ]
 
-      const defaultThemeId = "normal-white";
+      const defaultThemeId = 'normal-white'
       themes.forEach((theme) => {
-        const selected = defaultThemeId === theme.id;
-        themeSelector.options[themeSelector.options.length] = new Option(theme.name, theme.id, selected, selected);
-      });
+        const selected = defaultThemeId === theme.id
+        themeSelector.options[themeSelector.options.length] = new Option(
+          theme.name,
+          theme.id,
+          selected,
+          selected
+        )
+      })
 
       function getTheme(themes, id) {
-        return themes.find((theme) => theme.id === id).theme;
-      };
+        return themes.find((theme) => theme.id === id).theme
+      }
 
       function getFont() {
-        return fontsElement.value;
-      };
+        return fontsElement.value
+      }
 
       function updatePrompter(category, value, category2, value2) {
         if (category && value) {
-          prompterText.innerText = `${category} = ${JSON.stringify(value)}`;
+          prompterText.innerText = `${ category } = ${ JSON.stringify(value) }`
           if (category2 && value2) {
-            prompterText.innerText += `\n${category2} = ${JSON.stringify(value2)}`;
+            prompterText.innerText += `\n${ category2 } = ${ JSON.stringify(
+              value2
+            ) }`
           }
         } else if (category) {
-          prompterText.innerText = category;
+          prompterText.innerText = category
         }
-      };
+      }
 
       function getStyle() {
         return {
           color: penColor.value,
-          "-myscript-pen-width": penWidth.value
-        };
+          '-myscript-pen-width': penWidth.value
+        }
       }
 
       /**
        * we expose the editor so we can access it in tests
        */
-      let editor;
+      let editor
 
-      /**
-       * We use a function to wait the server configuration to load
-       */
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-        const options = {
-          configuration: {
-            server,
-            recognition: {
-              type: "TEXT"
-            },
-            theme: getTheme(themes, defaultThemeId)
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            type: 'TEXT'
           },
-        };
+          theme: getTheme(themes, defaultThemeId)
+        }
+      }
 
+      async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(editorElement, "INTERACTIVEINKSSR", options);
-        penStyleClasses.disabled = false;
-        const fontsResponse = await iink.getAvailableFontList(editor.configuration)
-        fontsResponse.forEach((f) => {
-          fontsElement.options[fontsElement.options.length] = new Option(f);
-        })
+        editor = await Editor.load(editorElement, 'INTERACTIVEINKSSR', options)
+        penStyleClasses.disabled = false
 
-        fontsElement.addEventListener("change", (e) => {
-          const fontFamily = e.target.value;
-          const currentTheme = Object.assign({}, getTheme(themes, themeSelector.value));
-          currentTheme[".text"]["font-family"] = fontFamily;
-          editor.theme = currentTheme;
-          updatePrompter("editor.theme", currentTheme);
-        });
+        if (fontsElement.options.length === 0) {
+          const fontsResponse = await getAvailableFontList(editor.configuration)
+          fontsResponse.forEach((f) => {
+            fontsElement.options[fontsElement.options.length] = new Option(f)
+          })
 
-        penStyleClasses.addEventListener("change", (event) => {
-          themeSelector.disabled = event.target.checked
-          if (event.target.checked) {
-            editor.penStyle = undefined;
-            editor.penStyleClasses = "greenThickPen";
-            const classesTheme = getTheme(themes, themeSelector.value);
-            updatePrompter("editor.theme", classesTheme, "editor.penStyleClasses", "greenThickPen");
-          } else {
-            editor.penStyleClasses = undefined;
-            editor.theme = getTheme(themes, themeSelector.value);
-            updatePrompter("editor.theme", getTheme(themes, themeSelector.value));
-          }
-        });
+          fontsElement.addEventListener('change', (e) => {
+            if (!editor) return;
+            const fontFamily = e.target.value
+            const currentTheme = Object.assign({}, getTheme(themes, themeSelector.value))
+            currentTheme['.text']['font-family'] = fontFamily
+            editor.theme = currentTheme
+            updatePrompter('editor.theme', currentTheme)
+          })
+        }
 
-        themeSelector.addEventListener("change", (event) => {
-          const selectedTheme = getTheme(themes, event.target.value);
-          selectedTheme[".text"]["font-family"] = getFont();
-          if (selectedTheme) {
-            editor.theme = selectedTheme;
-          }
-        });
+      }
+      penStyleClasses.addEventListener('change', (event) => {
+        if (!editor) return;
+        themeSelector.disabled = event.target.checked
+        if (event.target.checked) {
+          editor.penStyle = undefined
+          editor.penStyleClasses = 'greenThickPen'
+          const classesTheme = getTheme(themes, themeSelector.value)
+          updatePrompter(
+            'editor.theme',
+            classesTheme,
+            'editor.penStyleClasses',
+            'greenThickPen'
+          )
+        } else {
+          editor.penStyleClasses = undefined
+          editor.theme = getTheme(themes, themeSelector.value)
+          updatePrompter(
+            'editor.theme',
+            getTheme(themes, themeSelector.value)
+          )
+        }
+      })
 
-        penEnabled.addEventListener("change", (event) => {
-          penWidth.disabled = !event.target.checked;
-          penColor.disabled = !event.target.checked;
-          if (event.target.checked) {
-            editor.penStyle = getStyle();
-            updatePrompter("editor.penStyle", editor.penStyle);
-          } else {
-            editor.penStyle = undefined;
-            updatePrompter("editor.penStyle", "");
-          }
-        });
+      themeSelector.addEventListener('change', (event) => {
+        if (!editor) return;
+        const selectedTheme = getTheme(themes, event.target.value)
+        selectedTheme['.text']['font-family'] = getFont()
+        if (selectedTheme) {
+          editor.theme = selectedTheme
+        }
+      })
 
-        penColor.addEventListener("change", () => {
-          editor.penStyle = getStyle();
-          updatePrompter("editor.penStyle", editor.penStyle);
-        });
+      penEnabled.addEventListener('change', (event) => {
+        if (!editor) return;
+        penWidth.disabled = !event.target.checked
+        penColor.disabled = !event.target.checked
+        if (event.target.checked) {
+          editor.penStyle = getStyle()
+          updatePrompter('editor.penStyle', editor.penStyle)
+        } else {
+          editor.penStyle = undefined
+          updatePrompter('editor.penStyle', '')
+        }
+      })
 
-        penWidth.addEventListener("change", () => {
-          editor.penStyle = getStyle();
-          updatePrompter("editor.penStyle", editor.penStyle);
-        });
+      penColor.addEventListener('change', () => {
+        if (!editor) return;
+        editor.penStyle = getStyle()
+        updatePrompter('editor.penStyle', editor.penStyle)
+      })
 
-        window.addEventListener("resize", () => {
-          editor.resize();
-        });
-      };
-      loadEditor().catch(error => console.error(error));
+      penWidth.addEventListener('change', () => {
+        if (!editor) return;
+        editor.penStyle = getStyle()
+        updatePrompter('editor.penStyle', editor.penStyle)
+      })
+
+      window.addEventListener('resize', () => {
+        editor?.resize()
+      })
+
+      showModalBtn.addEventListener('click', () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
     </script>
   </body>
+
 </html>

@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Rest Math</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css" integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X"
+      crossorigin="anonymous" />
+
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4"
+      crossorigin="anonymous"></script>
+
+    <style>
+      #editorEl {
+        height: calc(100dvh - 216px);
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">
+        Rest Math
+      </h1>
+    </header>
+
+    <div id="result"></div>
+
+    <nav class="flex-container wrap gap">
+      <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+        <img src="../assets/img/clear.svg" />
+      </button>
+      <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+        <img src="../assets/img/undo.svg" />
+      </button>
+      <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+        <img src="../assets/img/redo.svg" />
+      </button>
+    </nav>
+
+    <div id="editorEl"></div>
+
+    <script type="module">
+      import { Editor } from '../../dist/iink.esm.js'
+      import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
+
+      const editorElement = document.getElementById('editorEl')
+      const resultElement = document.getElementById('result')
+      const clearElement = document.getElementById('clear')
+      const undoElement = document.getElementById('undo')
+      const redoElement = document.getElementById('redo')
+      const showModalBtn = document.getElementById('showModalBtn')
+
+      function cleanLatex(latexExport) {
+        if (typeof latexExport === 'number') {
+          latexExport = latexExport.toString()
+        }
+        if (latexExport.includes('\\\\')) {
+          const steps = '\\begin{align*}' + latexExport + '\\end{align*}'
+          return steps
+            .replace('\\begin{aligned}', '')
+            .replace('\\end{aligned}', '')
+            .replace(new RegExp('(align.{1})', 'g'), 'aligned')
+        }
+        return latexExport.replace(new RegExp('(align.{1})', 'g'), 'aligned')
+      }
+
+      let editor
+
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            type: 'MATH',
+            math: {
+              mimeTypes: ['application/x-latex']
+            }
+          }
+        }
+      }
+
+      async function loadEditor(options) {
+        resultElement.innerHTML = ''
+        await editor?.destroy()
+
+        /**
+         * get editor instance from type
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Editor parameters
+         */
+        editor = await Editor.load(editorElement, 'INKV1', options)
+
+        editor.event.addEventListener('changed', (event) => {
+          undoElement.disabled = !event.detail.canUndo
+          redoElement.disabled = !event.detail.canRedo
+          clearElement.disabled = !event.detail.canClear
+        })
+
+        editor.event.addEventListener('exported', (evt) => {
+          const exports = evt.detail
+          if (exports && exports['application/x-latex']) {
+            try {
+              katex.render(
+                cleanLatex(exports['application/x-latex']),
+                resultElement
+              )
+            } catch (error) {
+              resultElement.innerHTML =
+                '<span>' +
+                cleanLatex(exports['application/x-latex']) +
+                '</span>'
+            }
+          } else {
+            resultElement.innerHTML = ''
+          }
+        })
+      }
+
+      clearElement.addEventListener('click', async () => {
+        editor?.clear()
+        resultElement.innerHTML = ''
+      })
+
+      undoElement.addEventListener('click', () => {
+        editor?.undo()
+      })
+
+      redoElement.addEventListener('click', () => {
+        editor?.redo()
+      })
+
+      window.addEventListener('resize', () => {
+        editor?.resize()
+      })
+
+      showModalBtn.addEventListener('click', () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
+    </script>
+  </body>
+
+</html>

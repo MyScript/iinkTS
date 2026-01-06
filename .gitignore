@@ -8,5 +8,7 @@ test/examples/screenshots
 test-results/
 docs
 dist
+.env.local
+.env.*.local
 
 __diff_output__

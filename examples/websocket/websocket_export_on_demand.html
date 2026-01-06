@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -10,20 +11,27 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
     <style>
-      #editor {
-        height: calc(100dvh - 166px);
+      #editorEl {
+        height: calc(100dvh - 216px);
       }
+
       @media only screen and (max-width: 294px) {
-        #editor {
-          height: calc(100dvh - 213px);
+        #editorEl {
+          height: calc(100dvh - 263px);
         }
       }
     </style>
   </head>
 
   <body>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">Rest Diagram</h1>
+    </header>
+
     <div id="result"></div>
 
     <nav class="flex-container wrap gap between">
@@ -45,78 +53,86 @@
       </div>
     </nav>
 
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
-    <script>
-      const editorElement = document.getElementById("editor");
-      const resultElement = document.getElementById("result");
-      const clearElement = document.getElementById("clear");
-      const undoElement = document.getElementById("undo");
-      const redoElement = document.getElementById("redo");
-      const exportElement = document.getElementById("export");
+    <script type="module">
+      import { Editor } from '../../dist/iink.esm.js'
+      import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
+      const editorElement = document.getElementById('editorEl')
+      const resultElement = document.getElementById('result')
+      const clearElement = document.getElementById('clear')
+      const undoElement = document.getElementById('undo')
+      const redoElement = document.getElementById('redo')
+      const exportElement = document.getElementById('export')
+      const showModalBtn = document.getElementById('showModalBtn')
 
-      /**
-       * we expose the editor so we can access it in tests
-       */
-      let editor;
+      let editor
 
-      /**
-       * We use a function to wait the server configuration to load
-       */
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-        const options = {
-          configuration: {
-            server,
-            recognition: {
-              type: "TEXT"
-            },
-            triggers: {
-              exportContent: "DEMAND"
-            }
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            type: 'TEXT'
+          },
+          triggers: {
+            exportContent: 'DEMAND'
           }
-        };
+        }
+      }
 
+      async function loadEditor(options) {
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(editorElement, "INTERACTIVEINKSSR", options);
+        editor = await Editor.load(editorElement, 'INTERACTIVEINKSSR', options)
 
-        editor.event.addEventListener("changed", (event) => {
-          undoElement.disabled = !event.detail.canUndo;
-          redoElement.disabled = !event.detail.canRedo;
-          clearElement.disabled = !event.detail.canClear;
-        });
+        editor.event.addEventListener('changed', (event) => {
+          undoElement.disabled = !event.detail.canUndo
+          redoElement.disabled = !event.detail.canRedo
+          clearElement.disabled = !event.detail.canClear
+        })
 
-        editor.event.addEventListener("exported", (event) => {
-          resultElement.innerHTML = event.detail && event.detail["application/vnd.myscript.jiix"] ? event.detail["application/vnd.myscript.jiix"].label : "";
-        });
+        editor.event.addEventListener('exported', (event) => {
+          resultElement.innerHTML =
+            event.detail && event.detail['application/vnd.myscript.jiix']
+              ? event.detail['application/vnd.myscript.jiix'].label
+              : ''
+        })
+      }
 
-        clearElement.addEventListener("click", async () => {
-          editor.clear();
-        });
+      clearElement.addEventListener('click', async () => {
+        editor?.clear()
+      })
 
-        undoElement.addEventListener("click", () => {
-          editor.undo();
-        });
+      undoElement.addEventListener('click', () => {
+        editor?.undo()
+      })
 
-        redoElement.addEventListener("click", () => {
-          editor.redo();
-        });
+      redoElement.addEventListener('click', () => {
+        editor?.redo()
+      })
 
-        exportElement.addEventListener("click", () => {
-          editor.export();
-        });
+      exportElement.addEventListener('click', () => {
+        editor?.export()
+      })
 
-        window.addEventListener("resize", () => {
-          editor.resize();
-        });
-      };
+      window.addEventListener('resize', () => {
+        editor?.resize()
+      })
 
-      loadEditor().catch(error => console.error(error));
+      showModalBtn.addEventListener('click', () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
     </script>
   </body>
+
 </html>

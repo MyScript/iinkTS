@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
@@ -13,42 +14,55 @@
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
 
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
-
     <style>
       .description {
         padding: 12px;
       }
-      #editor {
-        height: calc(100dvh - 234px);
+
+      #editorEl {
+        height: calc(100dvh - 284px);
       }
+
       @media only screen and (max-width: 1156px) {
-        #editor {
-          height: calc(100dvh - 252px);
+        #editorEl {
+          height: calc(100dvh - 302px);
         }
       }
+
       @media only screen and (max-width: 600px) {
-        #editor {
-          height: calc(100dvh - 269px);
+        #editorEl {
+          height: calc(100dvh - 319px);
         }
       }
+
       @media only screen and (max-width: 423px) {
-        #editor {
-          height: calc(100dvh - 286px);
+        #editorEl {
+          height: calc(100dvh - 336px);
         }
       }
+
       @media only screen and (max-width: 338px) {
-        #editor {
-          height: calc(100dvh - 303px);
+        #editorEl {
+          height: calc(100dvh - 353px);
         }
       }
     </style>
   </head>
 
   <body>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        Change server configuration
+      </button>
+      <h1 class="header-title">
+        Custom resources math (pre-compiled)
+      </h1>
+    </header>
+
     <p class="description">
-      This example use a math custom resource. The grammar restrict the recognition to only basic elementary school math (addition and substraction).
-      The id of a pre-compiled grammar is sent.
+      This example use a math custom resource. The grammar restrict the
+      recognition to only basic elementary school math (addition and
+      substraction). The id of a pre-compiled grammar is sent.
     </p>
 
     <div id="result"></div>
@@ -65,85 +79,96 @@
           <img src="../assets/img/redo.svg" />
         </button>
       </div>
-      <button class="classic-btn" id="convert" disabled>Convert</button>
+      <button class="classic-btn" id="convert" disabled>
+        Convert
+      </button>
     </nav>
 
-    <div id="editor"></div>
+    <div id="editorEl"></div>
 
-    <script>
-      const editorElement = document.getElementById("editor");
-      const resultElement = document.getElementById("result");
-      const undoElement = document.getElementById("undo");
-      const redoElement = document.getElementById("redo");
-      const clearElement = document.getElementById("clear");
-      const convertElement = document.getElementById("convert");
+    <script type="module">
+      import { Editor } from '../../dist/iink.esm.js'
+      import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
 
-      editorElement.addEventListener("changed", (event) => {
-        undoElement.disabled = !event.detail.canUndo;
-        redoElement.disabled = !event.detail.canRedo;
-        clearElement.disabled = event.detail.isEmpty;
-      });
+      const editorElement = document.getElementById('editorEl')
+      const resultElement = document.getElementById('result')
+      const undoElement = document.getElementById('undo')
+      const redoElement = document.getElementById('redo')
+      const clearElement = document.getElementById('clear')
+      const convertElement = document.getElementById('convert')
+      const showModalBtn = document.getElementById('showModalBtn')
 
-      editorElement.addEventListener("exported", (evt) => {
-        const exports = evt.detail;
-        if (exports && exports["application/x-latex"]) {
-          convertElement.disabled = false;
-          resultElement.innerHTML = "<span>" + exports["application/x-latex"] + "</span>";
-        } else {
-          convertElement.disabled = true;
-          resultElement.innerHTML = "";
-        }
-      });
-
-      /**
-       * we expose the editor so we can access it in tests
-       */
-      let editor;
-
-      /**
-       * We use a function to wait the server configuration to load
-       */
-      async function loadEditor() {
-        const res = await fetch("../server-configuration.json");
-        const server = await res.json();
-        const options = {
-          configuration: {
-            server,
-            recognition: {
-              type: "MATH",
-              math: {
-                customGrammarId: "math-elementary",
-                mimeTypes: ["application/x-latex"]
-              }
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            type: 'MATH',
+            math: {
+              customGrammarId: 'math-elementary',
+              mimeTypes: ['application/x-latex']
             }
           }
-        };
+        }
+      }
+
+      let editor
+
+      async function loadEditor(options) {
+        resultElement.innerHTML = ''
+        await editor?.destroy()
 
         /**
          * get editor instance from type
          * @param {Element} The DOM element to attach the ink paper
          * @param {Object} The Editor parameters
          */
-        editor = await iink.Editor.load(editorElement, "INTERACTIVEINKSSR", options);
+        editor = await Editor.load(editorElement, 'INTERACTIVEINKSSR', options)
 
-        undoElement.addEventListener("click", () => {
-          editor.undo();
-        });
+        editor.event.addEventListener('changed', (event) => {
+          undoElement.disabled = !event.detail.canUndo
+          redoElement.disabled = !event.detail.canRedo
+          clearElement.disabled = event.detail.empty
+        })
 
-        redoElement.addEventListener("click", () => {
-          editor.redo();
-        });
+        editor.event.addEventListener('exported', (evt) => {
+          const exports = evt.detail
+          if (exports && exports['application/x-latex']) {
+            convertElement.disabled = false
+            resultElement.innerHTML = '<span>' + exports['application/x-latex'] + '</span>'
+          } else {
+            convertElement.disabled = true
+            resultElement.innerHTML = ''
+          }
+        })
+      }
 
-        clearElement.addEventListener("click", () => {
-          editor.clear();
-        });
+      undoElement.addEventListener('click', () => {
+        editor?.undo()
+      })
 
-        convertElement.addEventListener("click", () => {
-          editor.convert();
-        });
-      };
+      redoElement.addEventListener('click', () => {
+        editor?.redo()
+      })
 
-      loadEditor().catch(error => console.error(error));
+      clearElement.addEventListener('click', () => {
+        editor?.clear()
+      })
+
+      convertElement.addEventListener('click', () => {
+        editor?.convert()
+      })
+
+      showModalBtn.addEventListener('click', () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
     </script>
   </body>
+
 </html>

@@ -1,16 +1,16 @@
 import { test, expect } from "@playwright/test"
 import {
-  waitForEditorInit,
   waitForExportedEvent,
-  writeStrokes
+  writeStrokes,
+  passModalKey
 } from "../helper"
 import h from "../__dataset__/h"
 
 test.describe("Rest custom grabber", () => {
 
   test.beforeEach(async ({ page }) => {
-    await page.goto("/examples/dev/rest_custom_grabber.html")
-    await waitForEditorInit(page)
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/dev/rest_custom_grabber.html`)
+    await passModalKey(page)
   })
 
   test("should have title", async ({ page }) => {
@@ -48,7 +48,7 @@ test.describe("Rest custom grabber", () => {
     })
 
     const dialogPromise = dialogHandled
-    await page.locator("#editor").click({ button: "right", position: { x: 100, y: 100} })
+    await page.locator("#editorEl").click({ button: "right", position: { x: 100, y: 100} })
     const alertContent = await dialogPromise
     expect(alertContent).toMatch("You have not clicked with only main button.")
     expect(alertContent).toMatch("Secondary button pressed, usually the right button")
