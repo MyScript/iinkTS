@@ -164,23 +164,30 @@ export class InkEditor extends AbstractEditor
 
   async export(requestedMimeTypes?: string[]): Promise<TExportV2>
   {
-    this.logger.info("export")
-    const currentModel = this.model.clone()
+    try {
+      this.logger.info("export")
+      const currentModel = this.model.clone()
 
-    const exports = await this.recognizer.send(currentModel.strokes, requestedMimeTypes)
-    currentModel.mergeExport(exports)
-    if (this.model.modificationDate === currentModel.modificationDate) {
-      this.model.exports = currentModel.exports
+      const exports = await this.recognizer.send(currentModel.strokes, requestedMimeTypes)
+      currentModel.mergeExport(exports)
+      if (this.model.modificationDate === currentModel.modificationDate) {
+        this.model.exports = currentModel.exports
+      }
+      this.history.updateModelStack(currentModel)
+      this.event.emitExported(this.model.exports || {})
+      if (this.debugger.recognitionBoxItemsVisibility) {
+        this.debugger.debugRecognitionBoxItems()
+      }
+      if (this.debugger.recognitionBoxVisibility) {
+        this.debugger.debugRecognitionBox()
+      }
+      return exports
+    } catch (error) {
+      this.logger.error("export", error)
+      this.layers.showMessageError(error as Error)
+      this.event.emitError(error as Error)
+      throw error
     }
-    this.history.updateModelStack(currentModel)
-    this.event.emitExported(this.model.exports || {})
-    if (this.debugger.recognitionBoxItemsVisibility) {
-      this.debugger.debugRecognitionBoxItems()
-    }
-    if (this.debugger.recognitionBoxVisibility) {
-      this.debugger.debugRecognitionBox()
-    }
-    return exports
   }
 
   async resize({ height, width }: { height?: number, width?: number } = {}): Promise<void>
