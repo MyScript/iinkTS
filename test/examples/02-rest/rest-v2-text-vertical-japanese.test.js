@@ -30,12 +30,12 @@ test.describe("Text ja_JP vertical Recognizer Iink", () => {
       ])
     })
     await expect(page.locator("#result")).toHaveText(
-      ja_JP1Column.exports["text/plain"].at(1)
+      ja_JP1Column.exports["text/plain"].at(0)
     )
 
     const plainTextExport = await getEditorExportsType(page, "text/plain")
     expect(plainTextExport).toStrictEqual(
-      ja_JP1Column.exports["text/plain"].at(1)
+      ja_JP1Column.exports["text/plain"].at(0)
     )
   })
 

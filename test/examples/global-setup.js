@@ -5,7 +5,6 @@ if (process.env.TARGET) {
   pathToEnvFile += `.${process.env.TARGET}`
 }
 pathToEnvFile += `.local`
-console.log('pathToEnvFile: ', pathToEnvFile);
 
 dotenv.config({
   path: pathToEnvFile,
