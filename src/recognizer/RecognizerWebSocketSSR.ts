@@ -248,14 +248,19 @@ export class RecognizerWebSocketSSR
       let hmacKey: string
       if (typeof this.configuration.server.hmacKey == "string") {
         if (this.configuration.server.hmacKey.length === 0) {
-          throw new Error("HMAC key is empty")
+          return this.ackDeferred?.reject("HMAC key is empty")
         }
         hmacKey = this.configuration.server.hmacKey
       } else if (typeof this.configuration.server.hmacKey == "function") {
         hmacKey = await this.configuration.server.hmacKey(this.configuration.server.applicationKey)
       }
       else {
-        throw new Error("HMAC key is not a string nor a function")
+        this.ackDeferred?.reject("HMAC key is not a string nor a function")
+        return this.initialized.reject(new Error("HMAC key is not a string nor a function"))
+      }
+      if (!hmacKey) {
+        this.ackDeferred?.reject("HMAC key is undefined")
+        return this.initialized.reject(new Error("HMAC key is undefined"))
       }
       this.send({
         type: "hmac",
