@@ -76,11 +76,23 @@ yarn add iink-ts
 
 ## Usage
 
+### Universal Module Definition (UMD)
+
 1. Create an `index.html` file in the same directory.
 
 2. Add the following lines in the `head` section of your file to use iinkTS and the css :
 ```html
 <script src="node_modules/iink-ts/dist/iink.min.js"></script>
+```
+
+3. Still in the `head` section, add a `style` and specify the height and the width of your editor:
+```html
+<style>
+    #editor {
+        width: 100%;
+        height: 100%;
+    }
+</style>
 ```
 
 3. Still in the `head` section, add a `style` and specify the height and the width of your editor:
@@ -101,16 +113,16 @@ yarn add iink-ts
 5. In JavaScript and within a `<script>` tag placed before the closing `</body>` tag, create the editor using the `load` function of the editor, your html editor element, the type of editor desired and the possible options depending on the type of editor then initialize it:
 ```javascript
     const editorElement = document.getElementById('editor');
-
-    const editor = await iink.Editor.load(editorElement, "INTERACTIVEINK", /* or INTERACTIVEINKSSR or INKV1 or INKV2*/
-    {
-        configuration: {
-            server: {
-                applicationKey: '#YOUR MYSCRIPT DEVELOPER APPLICATION KEY#',
-                hmacKey: '#YOUR MYSCRIPT DEVELOPER HMAC KEY#'
-            }
-        }
-    });
+    const options = {
+      server: {
+        scheme: "https",
+        host: "cloud.myscript.com",
+        applicationKey: "<YOU-APPLICATION-KEY>",
+        hmacKey: "<YOUR-HMAC-KEY>",
+      }
+    }
+    const editorType = "INTERACTIVEINK" /* or INTERACTIVEINKSSR or INKV1 or INKV2 */
+    const editor = await iink.Editor.load(editorElement, editorType, options);
 ```
 
 6. Your `index.html` file should look like this:
@@ -129,16 +141,16 @@ yarn add iink-ts
         <div id="editor"></div>
         <script>
             const editorElement = document.getElementById('editor');
-
-            const editor = await iink.Editor.load(editorElement, "INTERACTIVEINK", /* or INTERACTIVEINKSSR or INKV1 or INKV2 */
-            {
-                configuration: {
-                    server: {
-                        applicationKey: '#YOUR MYSCRIPT DEVELOPER APPLICATION KEY#',
-                        hmacKey: '#YOUR MYSCRIPT DEVELOPER HMAC KEY#'
-                    }
-                }
-            });
+            const options = {
+              server: {
+                scheme: "https",
+                host: "cloud.myscript.com",
+                applicationKey: "<YOU-APPLICATION-KEY>",
+                hmacKey: "<YOUR-HMAC-KEY>",
+              }
+            }
+            const editorType = "INTERACTIVEINK" /* or INTERACTIVEINKSSR or INKV1 or INKV2 */
+            const editor = await iink.Editor.load(editorElement, editorType, options);
         </script>
     </body>
 </html>
@@ -147,6 +159,66 @@ yarn add iink-ts
 7. Open `index.html` in your browser or serve your folder content using any web server.
 
 You can find this guide, and a more complete example on the [MyScript Developer website](https://developer.myscript.com/docs/interactive-ink/latest/web/iinkts/).
+
+
+### ECMAScript module (ESM)
+1. Create an `index.html` file in the same directory.
+
+2. Add the following lines in the `body` section of your file to use iinkTS and the css :
+```html
+  <body>
+    <div id="editorEl"></div>
+
+    <script type="module">
+      import { Editor, getAvailableLanguageList } from '../../dist/iink.esm.js'
+      const editorElement = document.getElementById('editorEl')
+
+      const options = {
+        server: {
+          scheme: "https",
+          host: "cloud.myscript.com",
+          applicationKey: "<YOU-APPLICATION-KEY>",
+          hmacKey: "<YOUR-HMAC-KEY>",
+        }
+      }
+
+      const editorType = "INTERACTIVEINK" /* or INTERACTIVEINKSSR or INKV1 or INKV2 */
+      const editor = await Editor.load(editorElement, editorType, options);
+    </script>
+  </body>
+```
+
+3. Your `index.html` file should look like this:
+```html
+<html>
+    <head>
+        <style>
+            #editorEl {
+                width: 100%;
+                height: 100%;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="editorEl"></div>
+        <script>
+          import { Editor, getAvailableLanguageList } from '../../dist/iink.esm.js'
+          const editorElement = document.getElementById('editorEl')
+
+          const options = {
+            server: {
+              scheme: "https",
+              host: "cloud.myscript.com",
+              applicationKey: "<YOU-APPLICATION-KEY>",
+              hmacKey: "<YOUR-HMAC-KEY>",
+            }
+          }
+
+          const editor = await Editor.load(editorElement, 'INTERACTIVEINKSSR', options)
+        </script>
+    </body>
+</html>
+```
 
 ## Documentation
 
