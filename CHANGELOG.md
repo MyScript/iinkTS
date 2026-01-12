@@ -1,3 +1,16 @@
+# [v3.2.0](https://github.com/MyScript/iinkTS/tree/v3.2.0)
+
+## Bugs fix
+- Disable default touch actions on multiple elements to improve touch interaction handling
+- When HMAC key is missing despite being optional in Admin UI configuration
+- Sample websocket_text_highlight_words broken, enhance export options to include text words and chars
+
+## Refactor
+- Consolidate and rename trigger configuration types
+- Add API key input to iinkts sample and pass it from Admin UI
+- Update samples, import iink-ts as module
+
+
 # [v3.1.1](https://github.com/MyScript/iinkTS/tree/v3.1.1)
 
 ## Bugs fix
