@@ -4,7 +4,6 @@
 [![Examples](https://img.shields.io/badge/Link%20to-examples-blue.svg)](https://myscript.github.io/iinkTS/examples/)
 [![Documentation](https://img.shields.io/badge/Link%20to-documentation-green.svg)](https://developer.myscript.com/docs/interactive-ink/latest/web/iinkts/)
 
-
 > The fastest way to integrate rich **handwriting** features in your webapp.
 >
 > :point_right: [Examples](https://myscript.github.io/iinkTS/examples/):point_left:
@@ -17,34 +16,34 @@ iinkTS is a TypeScript library that can be used in every web application to brin
 
 It integrates all you need:
 
-* Signal capture for all devices,
-* Digital ink rendering,
-* Link to MyScript Cloud to bring handwriting recognition.
-
+- Signal capture for all devices,
+- Digital ink rendering,
+- Link to MyScript Cloud to bring handwriting recognition.
 
 ## Table of contents
-* [Features](#features)
-* [Requirements](#requirements)
-* [Installation](#installation)
-* [Usage](#usage)
-* [Documentation](#documentation)
-* [Development](#development)
-* [Support](#getting-support )
-* [Feedback](#sharing-your-feedback)
-* [Contributing](#contributing)
-* [License](#license)
+
+- [Features](#features)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Documentation](#documentation)
+- [Development](#development)
+- [Support](#getting-support)
+- [Feedback](#sharing-your-feedback)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Features
 
-* Text and Math support,
-* Easy to integrate,
-* Digital ink capture and rendering,
-* Rich editing gestures,
-* Import and export content,
-* Styling,
-* Typeset support,
-* More than 200 mathematical symbols supported,
-* 72 supported languages.
+- Text and Math support,
+- Easy to integrate,
+- Digital ink capture and rendering,
+- Rich editing gestures,
+- Import and export content,
+- Styling,
+- Typeset support,
+- More than 200 mathematical symbols supported,
+- 72 supported languages.
 
 You can discover all the features on our Developer website for [Text](https://developer.myscript.com/features/text) and [Math](https://developer.myscript.com/features/math).
 
@@ -81,99 +80,45 @@ yarn add iink-ts
 1. Create an `index.html` file in the same directory.
 
 2. Add the following lines in the `head` section of your file to use iinkTS and the css :
+
 ```html
 <script src="node_modules/iink-ts/dist/iink.min.js"></script>
 ```
 
 3. Still in the `head` section, add a `style` and specify the height and the width of your editor:
+
 ```html
 <style>
-    #editor {
-        width: 100%;
-        height: 100%;
-    }
+  #editor {
+    width: 100%;
+    height: 100%;
+  }
 </style>
 ```
 
 3. Still in the `head` section, add a `style` and specify the height and the width of your editor:
+
 ```html
 <style>
-    #editor {
-        width: 100%;
-        height: 100%;
-    }
+  #editor {
+    width: 100%;
+    height: 100%;
+  }
 </style>
 ```
 
 4. In the `body` tag, create a `div` tag that will contain the editing area:
+
 ```html
-    <div id="editor"></div>
+<div id="editor"></div>
 ```
 
 5. In JavaScript and within a `<script>` tag placed before the closing `</body>` tag, create the editor using the `load` function of the editor, your html editor element, the type of editor desired and the possible options depending on the type of editor then initialize it:
+
 ```javascript
     const editorElement = document.getElementById('editor');
     const options = {
-      server: {
-        scheme: "https",
-        host: "cloud.myscript.com",
-        applicationKey: "<YOU-APPLICATION-KEY>",
-        hmacKey: "<YOUR-HMAC-KEY>",
-      }
-    }
-    const editorType = "INTERACTIVEINK" /* or INTERACTIVEINKSSR or INKV1 or INKV2 */
-    const editor = await iink.Editor.load(editorElement, editorType, options);
-```
-
-6. Your `index.html` file should look like this:
-```html
-<html>
-    <head>
-        <script src="node_modules/iink-ts/dist/iink.min.js"></script>
-        <style>
-            #editor {
-                width: 100%;
-                height: 100%;
-            }
-        </style>
-    </head>
-    <body>
-        <div id="editor"></div>
-        <script>
-            const editorElement = document.getElementById('editor');
-            const options = {
-              server: {
-                scheme: "https",
-                host: "cloud.myscript.com",
-                applicationKey: "<YOU-APPLICATION-KEY>",
-                hmacKey: "<YOUR-HMAC-KEY>",
-              }
-            }
-            const editorType = "INTERACTIVEINK" /* or INTERACTIVEINKSSR or INKV1 or INKV2 */
-            const editor = await iink.Editor.load(editorElement, editorType, options);
-        </script>
-    </body>
-</html>
-```
-
-7. Open `index.html` in your browser or serve your folder content using any web server.
-
-You can find this guide, and a more complete example on the [MyScript Developer website](https://developer.myscript.com/docs/interactive-ink/latest/web/iinkts/).
-
-
-### ECMAScript module (ESM)
-1. Create an `index.html` file in the same directory.
-
-2. Add the following lines in the `body` section of your file to use iinkTS and the css :
-```html
-  <body>
-    <div id="editorEl"></div>
-
-    <script type="module">
-      import { Editor, getAvailableLanguageList } from '../../dist/iink.esm.js'
-      const editorElement = document.getElementById('editorEl')
-
-      const options = {
+      configuration = {
         server: {
           scheme: "https",
           host: "cloud.myscript.com",
@@ -181,42 +126,114 @@ You can find this guide, and a more complete example on the [MyScript Developer 
           hmacKey: "<YOUR-HMAC-KEY>",
         }
       }
+    }
+    const editorType = "INTERACTIVEINK" /* or INTERACTIVEINKSSR or INKV1 or INKV2 */
+    const editor = iink.Editor.load(editorElement, editorType, options);
+```
 
-      const editorType = "INTERACTIVEINK" /* or INTERACTIVEINKSSR or INKV1 or INKV2 */
-      const editor = await Editor.load(editorElement, editorType, options);
+6. Your `index.html` file should look like this:
+
+```html
+<html>
+  <head>
+    <script src="node_modules/iink-ts/dist/iink.min.js"></script>
+    <style>
+      #editor {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="editor"></div>
+    <script>
+      const editorElement = document.getElementById("editor")
+      const options = {
+        configuration: {
+          server: {
+            scheme: "https",
+            host: "cloud.myscript.com",
+            applicationKey: "<YOU-APPLICATION-KEY>",
+            hmacKey: "<YOUR-HMAC-KEY>",
+          },
+        }
+      }
+      const editorType =
+        "INTERACTIVEINK" /* or INTERACTIVEINKSSR or INKV1 or INKV2 */
+      const editor = iink.Editor.load(editorElement, editorType, options)
     </script>
   </body>
+</html>
+```
+
+7. Open `index.html` in your browser or serve your folder content using any web server.
+
+You can find this guide, and a more complete example on the [MyScript Developer website](https://developer.myscript.com/docs/interactive-ink/latest/web/iinkts/).
+
+### ECMAScript module (ESM)
+
+1. Create an `index.html` file in the same directory.
+
+2. Add the following lines in the `body` section of your file to use iinkTS and the css :
+
+```html
+<body>
+  <div id="editorEl"></div>
+
+  <script type="module">
+    import { Editor, getAvailableLanguageList } from "../../dist/iink.esm.js"
+    const editorElement = document.getElementById("editorEl")
+
+    const options = {
+      configuration : {
+        server: {
+          scheme: "https",
+          host: "cloud.myscript.com",
+          applicationKey: "<YOU-APPLICATION-KEY>",
+          hmacKey: "<YOUR-HMAC-KEY>",
+        },
+      }
+    }
+
+    const editorType =
+      "INTERACTIVEINK" /* or INTERACTIVEINKSSR or INKV1 or INKV2 */
+    const editor = await Editor.load(editorElement, editorType, options)
+  </script>
+</body>
 ```
 
 3. Your `index.html` file should look like this:
+
 ```html
 <html>
-    <head>
-        <style>
-            #editorEl {
-                width: 100%;
-                height: 100%;
-            }
-        </style>
-    </head>
-    <body>
-        <div id="editorEl"></div>
-        <script>
-          import { Editor, getAvailableLanguageList } from '../../dist/iink.esm.js'
-          const editorElement = document.getElementById('editorEl')
+  <head>
+    <style>
+      #editorEl {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="editorEl"></div>
+    <script type="module">
+      import { Editor, getAvailableLanguageList } from '../../dist/iink.esm.js'
+      const editorElement = document.getElementById('editorEl')
 
-          const options = {
-            server: {
-              scheme: "https",
-              host: "cloud.myscript.com",
-              applicationKey: "<YOU-APPLICATION-KEY>",
-              hmacKey: "<YOUR-HMAC-KEY>",
-            }
+      const options = {
+        configuration: {
+          server: {
+            scheme: "https",
+            host: "cloud.myscript.com",
+            applicationKey: "<YOU-APPLICATION-KEY>",
+            hmacKey: "<YOUR-HMAC-KEY>",
           }
+        }
+      }
 
-          const editor = await Editor.load(editorElement, 'INTERACTIVEINKSSR', options)
-        </script>
-    </body>
+      const editor = await Editor.load(editorElement, 'INTERACTIVEINKSSR', options)
+    </script>
+  </body>
 </html>
 ```
 
@@ -224,18 +241,17 @@ You can find this guide, and a more complete example on the [MyScript Developer 
 
 You can find a complete documentation with the following sections on our Developer website:
 
-* **Get Started**: [how to use iinkTS with a full example](https://developer.myscript.com/docs/interactive-ink/latest/web/iinkts/get-started/),
-* **Editing**: [how to interact with content](https://developer.myscript.com/docs/interactive-ink/latest/web/iinkts/editing/),
-* **Conversion**: [how to convert your handwritten content](https://developer.myscript.com/docs/interactive-ink/latest/web/iinkts/conversion/),
-* **Import and Export**: [how to import and export your content](https://developer.myscript.com/docs/interactive-ink/latest/web/iinkts/import-and-export/),
-* **Styling**: [how to style content](https://developer.myscript.com/docs/interactive-ink/latest/web/iinkts/styling/).
+- **Get Started**: [how to use iinkTS with a full example](https://developer.myscript.com/docs/interactive-ink/latest/web/iinkts/get-started/),
+- **Editing**: [how to interact with content](https://developer.myscript.com/docs/interactive-ink/latest/web/iinkts/editing/),
+- **Conversion**: [how to convert your handwritten content](https://developer.myscript.com/docs/interactive-ink/latest/web/iinkts/conversion/),
+- **Import and Export**: [how to import and export your content](https://developer.myscript.com/docs/interactive-ink/latest/web/iinkts/import-and-export/),
+- **Styling**: [how to style content](https://developer.myscript.com/docs/interactive-ink/latest/web/iinkts/styling/).
 
 We also provide a complete [API Reference](https://myscript.github.io/iinkTS/docs/).
 
 ## Development
 
 Instructions to help you build the project and develop are available in the [SETUP.md](./SETUP.md) file.
-
 
 ## Getting support
 
@@ -253,15 +269,19 @@ We welcome your contributions: if you would like to extend iinkTS for your needs
 Please take a look at our [contributing](./CONTRIBUTING.md) guidelines before submitting your pull request.
 
 ## Troubleshooting
+
 If you encounter the error: `Unrecognized property: convert.force`, this means your server version is lower than 2.3.0.
 To correct the problem, you have 2 options:
+
 - either update your server
 - either add in the iink-ts configuration `configuration.server.info.version = 2.2.0`
 
 If you encounter the error: `Unrecognized property: configuration.export.jiix.text.lines`, this means your server version is lower than 3.2.0.
 To correct the problem, you have 2 options:
+
 - either update your server
 - either add in the iink-ts configuration `configuration.server.info.version = 3.1.0`
 
 ## License
+
 This library is licensed under the [Apache 2.0](http://opensource.org/licenses/Apache-2.0).
