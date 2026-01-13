@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../src/styles/TLDashStyle.ts"],
+  "sourcesContent": ["import { T } from '@tldraw/validate'\nimport { StyleProp } from './StyleProp'\n\n/** @public */\nexport const DefaultDashStyle = StyleProp.defineEnum('tldraw:dash', {\n\tdefaultValue: 'draw',\n\tvalues: ['draw', 'solid', 'dashed', 'dotted'],\n})\n\n/** @public */\nexport type TLDefaultDashStyle = T.TypeOf<typeof DefaultDashStyle>\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AACA,uBAA0B;AAGnB,MAAM,mBAAmB,2BAAU,WAAW,eAAe;AAAA,EACnE,cAAc;AAAA,EACd,QAAQ,CAAC,QAAQ,SAAS,UAAU,QAAQ;AAC7C,CAAC;",
+  "names": []
+}

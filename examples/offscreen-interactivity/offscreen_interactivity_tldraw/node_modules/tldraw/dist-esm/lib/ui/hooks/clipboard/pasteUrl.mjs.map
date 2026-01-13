@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../src/lib/ui/hooks/clipboard/pasteUrl.ts"],
+  "sourcesContent": ["import { Editor, TLExternalContentSource, VecLike } from '@tldraw/editor'\n\n/**\n * When the clipboard has plain text that is a valid URL, create a bookmark shape and insert it into\n * the scene\n *\n * @param editor - The editor instance.\n * @param url - The URL to paste.\n * @param point - The point at which to paste the file.\n * @internal\n */\nexport async function pasteUrl(\n\teditor: Editor,\n\turl: string,\n\tpoint?: VecLike,\n\tsources?: TLExternalContentSource[]\n) {\n\teditor.markHistoryStoppingPoint('paste')\n\n\treturn await editor.putExternalContent({\n\t\ttype: 'url',\n\t\tpoint,\n\t\turl,\n\t\tsources,\n\t})\n}\n"],
+  "mappings": "AAWA,eAAsB,SACrB,QACA,KACA,OACA,SACC;AACD,SAAO,yBAAyB,OAAO;AAEvC,SAAO,MAAM,OAAO,mBAAmB;AAAA,IACtC,MAAM;AAAA,IACN;AAAA,IACA;AAAA,IACA;AAAA,EACD,CAAC;AACF;",
+  "names": []
+}

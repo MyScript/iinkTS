@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/canvas/TldrawSelectionBackground.tsx"],
+  "sourcesContent": ["import {\n\tDefaultSelectionBackground,\n\tTLSelectionBackgroundProps,\n\tuseEditor,\n\tuseValue,\n} from '@tldraw/editor'\n\n/** @public @react */\nexport const TldrawSelectionBackground = ({ bounds, rotation }: TLSelectionBackgroundProps) => {\n\tconst editor = useEditor()\n\n\tconst shouldDisplay = useValue(\n\t\t'should display',\n\t\t() =>\n\t\t\teditor.isInAny(\n\t\t\t\t'select.idle',\n\t\t\t\t'select.brushing',\n\t\t\t\t'select.scribble_brushing',\n\t\t\t\t'select.pointing_shape',\n\t\t\t\t'select.pointing_selection',\n\t\t\t\t'text.resizing'\n\t\t\t),\n\t\t[editor]\n\t)\n\n\tif (!shouldDisplay) return null\n\n\treturn <DefaultSelectionBackground bounds={bounds} rotation={rotation} />\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AA2BQ;AA3BR,oBAKO;AAGA,MAAM,4BAA4B,CAAC,EAAE,QAAQ,SAAS,MAAkC;AAC9F,QAAM,aAAS,yBAAU;AAEzB,QAAM,oBAAgB;AAAA,IACrB;AAAA,IACA,MACC,OAAO;AAAA,MACN;AAAA,MACA;AAAA,MACA;AAAA,MACA;AAAA,MACA;AAAA,MACA;AAAA,IACD;AAAA,IACD,CAAC,MAAM;AAAA,EACR;AAEA,MAAI,CAAC,cAAe,QAAO;AAE3B,SAAO,4CAAC,4CAA2B,QAAgB,UAAoB;AACxE;",
+  "names": []
+}

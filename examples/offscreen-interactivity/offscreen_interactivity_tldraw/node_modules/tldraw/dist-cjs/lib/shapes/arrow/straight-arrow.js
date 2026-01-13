@@ -1,0 +1,170 @@
+"use strict";
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var straight_arrow_exports = {};
+__export(straight_arrow_exports, {
+  getStraightArrowInfo: () => getStraightArrowInfo
+});
+module.exports = __toCommonJS(straight_arrow_exports);
+var import_editor = require("@tldraw/editor");
+var import_shared = require("./shared");
+function getStraightArrowInfo(editor, shape, bindings) {
+  const { arrowheadStart, arrowheadEnd } = shape.props;
+  const terminalsInArrowSpace = (0, import_shared.getArrowTerminalsInArrowSpace)(editor, shape, bindings);
+  const a = terminalsInArrowSpace.start.clone();
+  const b = terminalsInArrowSpace.end.clone();
+  const c = import_editor.Vec.Med(a, b);
+  if (import_editor.Vec.Equals(a, b)) {
+    return {
+      bindings,
+      isStraight: true,
+      start: {
+        handle: a,
+        point: a,
+        arrowhead: shape.props.arrowheadStart
+      },
+      end: {
+        handle: b,
+        point: b,
+        arrowhead: shape.props.arrowheadEnd
+      },
+      middle: c,
+      isValid: false,
+      length: 0
+    };
+  }
+  const uAB = import_editor.Vec.Sub(b, a).uni();
+  const startShapeInfo = (0, import_shared.getBoundShapeInfoForTerminal)(editor, shape, "start");
+  const endShapeInfo = (0, import_shared.getBoundShapeInfoForTerminal)(editor, shape, "end");
+  const arrowPageTransform = editor.getShapePageTransform(shape);
+  updateArrowheadPointWithBoundShape(
+    b,
+    // <-- will be mutated
+    terminalsInArrowSpace.start,
+    arrowPageTransform,
+    endShapeInfo
+  );
+  updateArrowheadPointWithBoundShape(
+    a,
+    // <-- will be mutated
+    terminalsInArrowSpace.end,
+    arrowPageTransform,
+    startShapeInfo
+  );
+  let offsetA = 0;
+  let offsetB = 0;
+  let strokeOffsetA = 0;
+  let strokeOffsetB = 0;
+  let minLength = import_shared.MIN_ARROW_LENGTH * shape.props.scale;
+  const isSelfIntersection = startShapeInfo && endShapeInfo && startShapeInfo.shape === endShapeInfo.shape;
+  const relationship = startShapeInfo && endShapeInfo ? (0, import_shared.getBoundShapeRelationships)(editor, startShapeInfo.shape.id, endShapeInfo.shape.id) : "safe";
+  if (relationship === "safe" && startShapeInfo && endShapeInfo && !isSelfIntersection && !startShapeInfo.isExact && !endShapeInfo.isExact) {
+    if (endShapeInfo.didIntersect && !startShapeInfo.didIntersect) {
+      if (startShapeInfo.isClosed) {
+        a.setTo(b.clone().add(uAB.clone().mul(import_shared.MIN_ARROW_LENGTH * shape.props.scale)));
+      }
+    } else if (!endShapeInfo.didIntersect) {
+      if (endShapeInfo.isClosed) {
+        b.setTo(a.clone().sub(uAB.clone().mul(import_shared.MIN_ARROW_LENGTH * shape.props.scale)));
+      }
+    }
+  }
+  const distance = import_editor.Vec.Sub(b, a);
+  const u = import_editor.Vec.Len(distance) ? distance.uni() : import_editor.Vec.From(distance);
+  const didFlip = !import_editor.Vec.Equals(u, uAB);
+  if (!isSelfIntersection) {
+    if (relationship !== "start-contains-end" && startShapeInfo && arrowheadStart !== "none" && !startShapeInfo.isExact) {
+      strokeOffsetA = import_shared.STROKE_SIZES[shape.props.size] / 2 + ("size" in startShapeInfo.shape.props ? import_shared.STROKE_SIZES[startShapeInfo.shape.props.size] / 2 : 0);
+      offsetA = (import_shared.BOUND_ARROW_OFFSET + strokeOffsetA) * shape.props.scale;
+      minLength += strokeOffsetA * shape.props.scale;
+    }
+    if (relationship !== "end-contains-start" && endShapeInfo && arrowheadEnd !== "none" && !endShapeInfo.isExact) {
+      strokeOffsetB = import_shared.STROKE_SIZES[shape.props.size] / 2 + ("size" in endShapeInfo.shape.props ? import_shared.STROKE_SIZES[endShapeInfo.shape.props.size] / 2 : 0);
+      offsetB = (import_shared.BOUND_ARROW_OFFSET + strokeOffsetB) * shape.props.scale;
+      minLength += strokeOffsetB * shape.props.scale;
+    }
+  }
+  const tA = a.clone().add(u.clone().mul(offsetA * (didFlip ? -1 : 1)));
+  const tB = b.clone().sub(u.clone().mul(offsetB * (didFlip ? -1 : 1)));
+  if (import_editor.Vec.DistMin(tA, tB, minLength)) {
+    if (offsetA !== 0 && offsetB !== 0) {
+      offsetA *= -1.5;
+      offsetB *= -1.5;
+    } else if (offsetA !== 0) {
+      offsetA *= -1;
+    } else if (offsetB !== 0) {
+      offsetB *= -1;
+    } else {
+    }
+  }
+  a.add(u.clone().mul(offsetA * (didFlip ? -1 : 1)));
+  b.sub(u.clone().mul(offsetB * (didFlip ? -1 : 1)));
+  if (didFlip) {
+    if (startShapeInfo && endShapeInfo) {
+      b.setTo(import_editor.Vec.Add(a, u.clone().mul(-import_shared.MIN_ARROW_LENGTH * shape.props.scale)));
+    }
+    c.setTo(import_editor.Vec.Med(terminalsInArrowSpace.start, terminalsInArrowSpace.end));
+  } else {
+    c.setTo(import_editor.Vec.Med(a, b));
+  }
+  const length = import_editor.Vec.Dist(a, b);
+  return {
+    bindings,
+    isStraight: true,
+    start: {
+      handle: terminalsInArrowSpace.start,
+      point: a,
+      arrowhead: shape.props.arrowheadStart
+    },
+    end: {
+      handle: terminalsInArrowSpace.end,
+      point: b,
+      arrowhead: shape.props.arrowheadEnd
+    },
+    middle: c,
+    isValid: length > 0,
+    length
+  };
+}
+function updateArrowheadPointWithBoundShape(point, opposite, arrowPageTransform, targetShapeInfo) {
+  if (targetShapeInfo === void 0) {
+    return;
+  }
+  if (targetShapeInfo.isExact) {
+    return;
+  }
+  const pageFrom = import_editor.Mat.applyToPoint(arrowPageTransform, opposite);
+  const pageTo = import_editor.Mat.applyToPoint(arrowPageTransform, point);
+  const targetFrom = import_editor.Mat.applyToPoint(import_editor.Mat.Inverse(targetShapeInfo.transform), pageFrom);
+  const targetTo = import_editor.Mat.applyToPoint(import_editor.Mat.Inverse(targetShapeInfo.transform), pageTo);
+  const isClosed = targetShapeInfo.isClosed;
+  const fn = isClosed ? import_editor.intersectLineSegmentPolygon : import_editor.intersectLineSegmentPolyline;
+  const intersection = fn(targetFrom, targetTo, targetShapeInfo.outline);
+  let targetInt;
+  if (intersection !== null) {
+    targetInt = intersection.sort((p1, p2) => import_editor.Vec.Dist2(p1, targetFrom) - import_editor.Vec.Dist2(p2, targetFrom))[0] ?? (isClosed ? void 0 : targetTo);
+  }
+  if (targetInt === void 0) {
+    return;
+  }
+  const pageInt = import_editor.Mat.applyToPoint(targetShapeInfo.transform, targetInt);
+  const arrowInt = import_editor.Mat.applyToPoint(import_editor.Mat.Inverse(arrowPageTransform), pageInt);
+  point.setTo(arrowInt);
+  targetShapeInfo.didIntersect = true;
+}
+//# sourceMappingURL=straight-arrow.js.map

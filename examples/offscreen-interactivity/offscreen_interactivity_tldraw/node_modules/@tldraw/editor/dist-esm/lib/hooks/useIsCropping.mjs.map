@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/hooks/useIsCropping.ts"],
+  "sourcesContent": ["import { useValue } from '@tldraw/state-react'\nimport { TLShapeId } from '@tldraw/tlschema'\nimport { useEditor } from './useEditor'\n\n/** @public */\nexport function useIsCropping(shapeId: TLShapeId) {\n\tconst editor = useEditor()\n\treturn useValue('isCropping', () => editor.getCroppingShapeId() === shapeId, [editor, shapeId])\n}\n"],
+  "mappings": "AAAA,SAAS,gBAAgB;AAEzB,SAAS,iBAAiB;AAGnB,SAAS,cAAc,SAAoB;AACjD,QAAM,SAAS,UAAU;AACzB,SAAO,SAAS,cAAc,MAAM,OAAO,mBAAmB,MAAM,SAAS,CAAC,QAAQ,OAAO,CAAC;AAC/F;",
+  "names": []
+}

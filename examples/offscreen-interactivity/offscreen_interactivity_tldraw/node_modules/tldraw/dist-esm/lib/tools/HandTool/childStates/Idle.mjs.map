@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../src/lib/tools/HandTool/childStates/Idle.ts"],
+  "sourcesContent": ["import { StateNode, TLPointerEventInfo } from '@tldraw/editor'\n\nexport class Idle extends StateNode {\n\tstatic override id = 'idle'\n\n\toverride onEnter() {\n\t\tthis.editor.setCursor({ type: 'grab', rotation: 0 })\n\t}\n\n\toverride onPointerDown(info: TLPointerEventInfo) {\n\t\tthis.parent.transition('pointing', info)\n\t}\n\n\toverride onCancel() {\n\t\tthis.editor.setCurrentTool('select')\n\t}\n}\n"],
+  "mappings": "AAAA,SAAS,iBAAqC;AAEvC,MAAM,aAAa,UAAU;AAAA,EACnC,OAAgB,KAAK;AAAA,EAEZ,UAAU;AAClB,SAAK,OAAO,UAAU,EAAE,MAAM,QAAQ,UAAU,EAAE,CAAC;AAAA,EACpD;AAAA,EAES,cAAc,MAA0B;AAChD,SAAK,OAAO,WAAW,YAAY,IAAI;AAAA,EACxC;AAAA,EAES,WAAW;AACnB,SAAK,OAAO,eAAe,QAAQ;AAAA,EACpC;AACD;",
+  "names": []
+}

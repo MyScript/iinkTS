@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../src/styles/TLHorizontalAlignStyle.ts"],
+  "sourcesContent": ["import { T } from '@tldraw/validate'\nimport { StyleProp } from './StyleProp'\n\n/** @public */\nexport const DefaultHorizontalAlignStyle = StyleProp.defineEnum('tldraw:horizontalAlign', {\n\tdefaultValue: 'middle',\n\tvalues: ['start', 'middle', 'end', 'start-legacy', 'end-legacy', 'middle-legacy'],\n})\n\n/** @public */\nexport type TLDefaultHorizontalAlignStyle = T.TypeOf<typeof DefaultHorizontalAlignStyle>\n"],
+  "mappings": "AACA,SAAS,iBAAiB;AAGnB,MAAM,8BAA8B,UAAU,WAAW,0BAA0B;AAAA,EACzF,cAAc;AAAA,EACd,QAAQ,CAAC,SAAS,UAAU,OAAO,gBAAgB,cAAc,eAAe;AACjF,CAAC;",
+  "names": []
+}

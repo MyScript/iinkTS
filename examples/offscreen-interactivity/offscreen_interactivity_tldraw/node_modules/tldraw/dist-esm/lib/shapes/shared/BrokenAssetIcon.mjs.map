@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/shapes/shared/BrokenAssetIcon.tsx"],
+  "sourcesContent": ["export function BrokenAssetIcon() {\n\treturn (\n\t\t<svg\n\t\t\twidth=\"15\"\n\t\t\theight=\"15\"\n\t\t\tviewBox=\"0 0 30 30\"\n\t\t\txmlns=\"http://www.w3.org/2000/svg\"\n\t\t\tfill=\"none\"\n\t\t\tstroke=\"currentColor\"\n\t\t\tstrokeLinecap=\"round\"\n\t\t\tstrokeLinejoin=\"round\"\n\t\t>\n\t\t\t<path d=\"M3,11 L3,3 11,3\" strokeWidth=\"2\" />\n\t\t\t<path d=\"M19,27 L27,27 L27,19\" strokeWidth=\"2\" />\n\t\t\t<path d=\"M27,3 L3,27\" strokeWidth=\"2\" />\n\t\t</svg>\n\t)\n}\n"],
+  "mappings": "AAEE,SAUC,KAVD;AAFK,SAAS,kBAAkB;AACjC,SACC;AAAA,IAAC;AAAA;AAAA,MACA,OAAM;AAAA,MACN,QAAO;AAAA,MACP,SAAQ;AAAA,MACR,OAAM;AAAA,MACN,MAAK;AAAA,MACL,QAAO;AAAA,MACP,eAAc;AAAA,MACd,gBAAe;AAAA,MAEf;AAAA,4BAAC,UAAK,GAAE,mBAAkB,aAAY,KAAI;AAAA,QAC1C,oBAAC,UAAK,GAAE,wBAAuB,aAAY,KAAI;AAAA,QAC/C,oBAAC,UAAK,GAAE,eAAc,aAAY,KAAI;AAAA;AAAA;AAAA,EACvC;AAEF;",
+  "names": []
+}

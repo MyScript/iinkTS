@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/utils/window-open.ts"],
+  "sourcesContent": ["import { runtime } from './runtime'\n\n/** @public */\nexport function openWindow(url: string, target = '_blank') {\n\truntime.openWindow(url, target)\n}\n"],
+  "mappings": "AAAA,SAAS,eAAe;AAGjB,SAAS,WAAW,KAAa,SAAS,UAAU;AAC1D,UAAQ,WAAW,KAAK,MAAM;AAC/B;",
+  "names": []
+}

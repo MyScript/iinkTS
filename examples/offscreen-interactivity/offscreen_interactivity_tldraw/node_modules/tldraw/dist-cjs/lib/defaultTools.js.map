@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../src/lib/defaultTools.ts"],
+  "sourcesContent": ["import { EraserTool } from './tools/EraserTool/EraserTool'\nimport { HandTool } from './tools/HandTool/HandTool'\nimport { LaserTool } from './tools/LaserTool/LaserTool'\nimport { SelectTool } from './tools/SelectTool/SelectTool'\nimport { ZoomTool } from './tools/ZoomTool/ZoomTool'\n\n/** @public */\nexport const defaultTools = [EraserTool, HandTool, LaserTool, ZoomTool, SelectTool] as const\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,wBAA2B;AAC3B,sBAAyB;AACzB,uBAA0B;AAC1B,wBAA2B;AAC3B,sBAAyB;AAGlB,MAAM,eAAe,CAAC,8BAAY,0BAAU,4BAAW,0BAAU,4BAAU;",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/shapes/line/LineShapeTool.ts"],
+  "sourcesContent": ["import { StateNode, TLStateNodeConstructor } from '@tldraw/editor'\nimport { Idle } from './toolStates/Idle'\nimport { Pointing } from './toolStates/Pointing'\n\n/** @public */\nexport class LineShapeTool extends StateNode {\n\tstatic override id = 'line'\n\tstatic override initial = 'idle'\n\tstatic override children(): TLStateNodeConstructor[] {\n\t\treturn [Idle, Pointing]\n\t}\n\n\toverride shapeType = 'line'\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,oBAAkD;AAClD,kBAAqB;AACrB,sBAAyB;AAGlB,MAAM,sBAAsB,wBAAU;AAAA,EAC5C,OAAgB,KAAK;AAAA,EACrB,OAAgB,UAAU;AAAA,EAC1B,OAAgB,WAAqC;AACpD,WAAO,CAAC,kBAAM,wBAAQ;AAAA,EACvB;AAAA,EAES,YAAY;AACtB;",
+  "names": []
+}

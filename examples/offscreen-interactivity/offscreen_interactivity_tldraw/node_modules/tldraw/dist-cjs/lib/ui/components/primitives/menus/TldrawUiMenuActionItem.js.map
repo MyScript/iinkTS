@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../../src/lib/ui/components/primitives/menus/TldrawUiMenuActionItem.tsx"],
+  "sourcesContent": ["import { useActions } from '../../../context/actions'\nimport { TldrawUiMenuItem, type TLUiMenuItemProps } from './TldrawUiMenuItem'\n\n/** @public */\nexport type TLUiMenuActionItemProps = {\n\tactionId?: string\n} & Partial<Pick<TLUiMenuItemProps, 'disabled' | 'isSelected' | 'noClose' | 'onSelect'>>\n\n/** @public @react */\nexport function TldrawUiMenuActionItem({ actionId = '', ...rest }: TLUiMenuActionItemProps) {\n\tconst actions = useActions()\n\tconst action = actions[actionId]\n\tif (!action) return null\n\treturn <TldrawUiMenuItem {...action} {...rest} />\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAaQ;AAbR,qBAA2B;AAC3B,8BAAyD;AAQlD,SAAS,uBAAuB,EAAE,WAAW,IAAI,GAAG,KAAK,GAA4B;AAC3F,QAAM,cAAU,2BAAW;AAC3B,QAAM,SAAS,QAAQ,QAAQ;AAC/B,MAAI,CAAC,OAAQ,QAAO;AACpB,SAAO,4CAAC,4CAAkB,GAAG,QAAS,GAAG,MAAM;AAChD;",
+  "names": []
+}

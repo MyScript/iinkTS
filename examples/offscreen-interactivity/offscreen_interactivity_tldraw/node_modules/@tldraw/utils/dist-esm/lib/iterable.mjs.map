@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../src/lib/iterable.ts"],
+  "sourcesContent": ["/**\n * Get the first item from an iterable Set or Map.\n *\n * @example\n *\n * ```ts\n * const A = getFirstItem(new Set([1, 2, 3])) // 1\n * const B = getFirstItem(\n * \tnew Map([\n * \t\t['a', 1],\n * \t\t['b', 2],\n * \t])\n * ) // 1\n * ```\n *\n * @param value - The iterable Set or Map.\n * @public\n */\nexport function getFirstFromIterable<T = unknown>(set: Set<T> | Map<any, T>): T {\n\treturn set.values().next().value\n}\n"],
+  "mappings": "AAkBO,SAAS,qBAAkC,KAA8B;AAC/E,SAAO,IAAI,OAAO,EAAE,KAAK,EAAE;AAC5B;",
+  "names": []
+}

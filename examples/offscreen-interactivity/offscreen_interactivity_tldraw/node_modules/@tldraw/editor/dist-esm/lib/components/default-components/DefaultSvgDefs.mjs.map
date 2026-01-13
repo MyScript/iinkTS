@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/components/default-components/DefaultSvgDefs.tsx"],
+  "sourcesContent": ["/** @public @react */\nexport const DefaultSvgDefs = () => {\n\treturn null\n}\n"],
+  "mappings": "AACO,MAAM,iBAAiB,MAAM;AACnC,SAAO;AACR;",
+  "names": []
+}

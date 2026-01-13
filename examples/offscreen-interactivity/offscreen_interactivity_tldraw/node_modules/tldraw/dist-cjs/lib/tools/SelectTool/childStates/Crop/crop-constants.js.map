@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../../src/lib/tools/SelectTool/childStates/Crop/crop-constants.ts"],
+  "sourcesContent": ["/** @internal */\nexport const MIN_CROP_SIZE = 8\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AACO,MAAM,gBAAgB;",
+  "names": []
+}

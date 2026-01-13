@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/tools/EraserTool/EraserTool.ts"],
+  "sourcesContent": ["import { StateNode, TLStateNodeConstructor } from '@tldraw/editor'\nimport { Erasing } from './childStates/Erasing'\nimport { Idle } from './childStates/Idle'\nimport { Pointing } from './childStates/Pointing'\n\n/** @public */\nexport class EraserTool extends StateNode {\n\tstatic override id = 'eraser'\n\tstatic override initial = 'idle'\n\tstatic override isLockable = false\n\tstatic override children(): TLStateNodeConstructor[] {\n\t\treturn [Idle, Pointing, Erasing]\n\t}\n\n\toverride onEnter() {\n\t\tthis.editor.setCursor({ type: 'cross', rotation: 0 })\n\t}\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,oBAAkD;AAClD,qBAAwB;AACxB,kBAAqB;AACrB,sBAAyB;AAGlB,MAAM,mBAAmB,wBAAU;AAAA,EACzC,OAAgB,KAAK;AAAA,EACrB,OAAgB,UAAU;AAAA,EAC1B,OAAgB,aAAa;AAAA,EAC7B,OAAgB,WAAqC;AACpD,WAAO,CAAC,kBAAM,0BAAU,sBAAO;AAAA,EAChC;AAAA,EAES,UAAU;AAClB,SAAK,OAAO,UAAU,EAAE,MAAM,SAAS,UAAU,EAAE,CAAC;AAAA,EACrD;AACD;",
+  "names": []
+}

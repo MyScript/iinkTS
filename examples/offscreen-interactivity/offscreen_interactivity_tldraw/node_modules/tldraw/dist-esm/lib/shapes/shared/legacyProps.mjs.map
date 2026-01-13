@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/shapes/shared/legacyProps.ts"],
+  "sourcesContent": ["import { Box, BoxModel, TLDefaultHorizontalAlignStyle } from '@tldraw/editor'\n\nexport function getLegacyOffsetX(\n\talign: TLDefaultHorizontalAlignStyle | string,\n\tpadding: number,\n\tspans: { text: string; box: BoxModel }[],\n\ttotalWidth: number\n): number | undefined {\n\tif ((align === 'start-legacy' || align === 'end-legacy') && spans.length !== 0) {\n\t\tconst spansBounds = Box.From(spans[0].box)\n\t\tfor (const { box } of spans) {\n\t\t\tspansBounds.union(box)\n\t\t}\n\t\tif (align === 'start-legacy') {\n\t\t\treturn (totalWidth - 2 * padding - spansBounds.width) / 2\n\t\t} else if (align === 'end-legacy') {\n\t\t\treturn -(totalWidth - 2 * padding - spansBounds.width) / 2\n\t\t}\n\t}\n}\n\n// sneaky TLDefaultHorizontalAlignStyle for legacies\nexport function isLegacyAlign(align: TLDefaultHorizontalAlignStyle | string): boolean {\n\treturn align === 'start-legacy' || align === 'middle-legacy' || align === 'end-legacy'\n}\n"],
+  "mappings": "AAAA,SAAS,WAAoD;AAEtD,SAAS,iBACf,OACA,SACA,OACA,YACqB;AACrB,OAAK,UAAU,kBAAkB,UAAU,iBAAiB,MAAM,WAAW,GAAG;AAC/E,UAAM,cAAc,IAAI,KAAK,MAAM,CAAC,EAAE,GAAG;AACzC,eAAW,EAAE,IAAI,KAAK,OAAO;AAC5B,kBAAY,MAAM,GAAG;AAAA,IACtB;AACA,QAAI,UAAU,gBAAgB;AAC7B,cAAQ,aAAa,IAAI,UAAU,YAAY,SAAS;AAAA,IACzD,WAAW,UAAU,cAAc;AAClC,aAAO,EAAE,aAAa,IAAI,UAAU,YAAY,SAAS;AAAA,IAC1D;AAAA,EACD;AACD;AAGO,SAAS,cAAc,OAAwD;AACrF,SAAO,UAAU,kBAAkB,UAAU,mBAAmB,UAAU;AAC3E;",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/config/defaultBindings.ts"],
+  "sourcesContent": ["import { TLBindingUtilConstructor } from '../editor/bindings/BindingUtil'\n\n/** @public */\nexport type TLAnyBindingUtilConstructor = TLBindingUtilConstructor<any>\n\nexport function checkBindings(customBindings: readonly TLAnyBindingUtilConstructor[]) {\n\tconst bindings = [] as TLAnyBindingUtilConstructor[]\n\n\tconst addedCustomBindingTypes = new Set<string>()\n\tfor (const customBinding of customBindings) {\n\t\tif (addedCustomBindingTypes.has(customBinding.type)) {\n\t\t\tthrow new Error(`Binding type \"${customBinding.type}\" is defined more than once`)\n\t\t}\n\t\tbindings.push(customBinding)\n\t\taddedCustomBindingTypes.add(customBinding.type)\n\t}\n\n\treturn bindings\n}\n"],
+  "mappings": "AAKO,SAAS,cAAc,gBAAwD;AACrF,QAAM,WAAW,CAAC;AAElB,QAAM,0BAA0B,oBAAI,IAAY;AAChD,aAAW,iBAAiB,gBAAgB;AAC3C,QAAI,wBAAwB,IAAI,cAAc,IAAI,GAAG;AACpD,YAAM,IAAI,MAAM,iBAAiB,cAAc,IAAI,6BAA6B;AAAA,IACjF;AACA,aAAS,KAAK,aAAa;AAC3B,4BAAwB,IAAI,cAAc,IAAI;AAAA,EAC/C;AAEA,SAAO;AACR;",
+  "names": []
+}

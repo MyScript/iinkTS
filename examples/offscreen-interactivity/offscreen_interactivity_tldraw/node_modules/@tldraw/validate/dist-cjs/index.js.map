@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../src/index.ts"],
+  "sourcesContent": ["import { registerTldrawLibraryVersion } from '@tldraw/utils'\nimport * as T from './lib/validation'\n\nexport {\n\tArrayOfValidator,\n\tDictValidator,\n\tObjectValidator,\n\tUnionValidator,\n\tValidator,\n\ttype UnionValidatorConfig,\n} from './lib/validation'\nexport { T }\n\nregisterTldrawLibraryVersion(\n\t(globalThis as any).TLDRAW_LIBRARY_NAME,\n\t(globalThis as any).TLDRAW_LIBRARY_VERSION,\n\t(globalThis as any).TLDRAW_LIBRARY_MODULES\n)\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,mBAA6C;AAC7C,QAAmB;AAEnB,wBAOO;AAAA,IAGP;AAAA,EACE;AAAA,EACA;AAAA,EACA;AACF;",
+  "names": []
+}

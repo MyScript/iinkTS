@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../../src/lib/ui/components/primitives/Button/TldrawUiButton.tsx"],
+  "sourcesContent": ["import classnames from 'classnames'\nimport * as React from 'react'\n\n/** @public */\nexport interface TLUiButtonProps extends React.HTMLAttributes<HTMLButtonElement> {\n\tdisabled?: boolean\n\ttype: 'normal' | 'primary' | 'danger' | 'low' | 'icon' | 'tool' | 'menu' | 'help'\n}\n\n/** @public @react */\nexport const TldrawUiButton = React.forwardRef<HTMLButtonElement, TLUiButtonProps>(\n\tfunction TldrawUiButton({ children, type, ...props }, ref) {\n\t\treturn (\n\t\t\t<button\n\t\t\t\tref={ref}\n\t\t\t\ttype=\"button\"\n\t\t\t\tdraggable={false}\n\t\t\t\t{...props}\n\t\t\t\tclassName={classnames('tlui-button', `tlui-button__${type}`, props.className)}\n\t\t\t>\n\t\t\t\t{children}\n\t\t\t</button>\n\t\t)\n\t}\n)\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAaG;AAbH,wBAAuB;AACvB,YAAuB;AAShB,MAAM,iBAAiB,MAAM;AAAA,EACnC,SAASA,gBAAe,EAAE,UAAU,MAAM,GAAG,MAAM,GAAG,KAAK;AAC1D,WACC;AAAA,MAAC;AAAA;AAAA,QACA;AAAA,QACA,MAAK;AAAA,QACL,WAAW;AAAA,QACV,GAAG;AAAA,QACJ,eAAW,kBAAAC,SAAW,eAAe,gBAAgB,IAAI,IAAI,MAAM,SAAS;AAAA,QAE3E;AAAA;AAAA,IACF;AAAA,EAEF;AACD;",
+  "names": ["TldrawUiButton", "classnames"]
+}

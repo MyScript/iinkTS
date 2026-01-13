@@ -1,0 +1,91 @@
+"use strict";
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  }
+  return to;
+};
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+var FrameLabelInput_exports = {};
+__export(FrameLabelInput_exports, {
+  FrameLabelInput: () => FrameLabelInput
+});
+module.exports = __toCommonJS(FrameLabelInput_exports);
+var import_jsx_runtime = require("react/jsx-runtime");
+var import_editor = require("@tldraw/editor");
+var import_react = require("react");
+var import_FrameShapeUtil = require("../FrameShapeUtil");
+const FrameLabelInput = (0, import_react.forwardRef)(({ id, name, isEditing }, ref) => {
+  const editor = (0, import_editor.useEditor)();
+  const handleKeyDown = (0, import_react.useCallback)(
+    (e) => {
+      if (e.key === "Enter" && !e.nativeEvent.isComposing) {
+        (0, import_editor.stopEventPropagation)(e);
+        e.currentTarget.blur();
+        editor.setEditingShape(null);
+      }
+    },
+    [editor]
+  );
+  const handleBlur = (0, import_react.useCallback)(
+    (e) => {
+      const shape = editor.getShape(id);
+      if (!shape) return;
+      const name2 = shape.props.name;
+      const value = e.currentTarget.value.trim();
+      if (name2 === value) return;
+      editor.updateShapes([
+        {
+          id,
+          type: "frame",
+          props: { name: value }
+        }
+      ]);
+    },
+    [id, editor]
+  );
+  const handleChange = (0, import_react.useCallback)(
+    (e) => {
+      const shape = editor.getShape(id);
+      if (!shape) return;
+      const name2 = shape.props.name;
+      const value = e.currentTarget.value;
+      if (name2 === value) return;
+      editor.updateShapes([
+        {
+          id,
+          type: "frame",
+          props: { name: value }
+        }
+      ]);
+    },
+    [id, editor]
+  );
+  return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { className: `tl-frame-label ${isEditing ? "tl-frame-label__editing" : ""}`, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime.jsx)(
+      "input",
+      {
+        className: "tl-frame-name-input",
+        ref,
+        style: { display: isEditing ? void 0 : "none" },
+        value: name,
+        autoFocus: true,
+        onKeyDown: handleKeyDown,
+        onBlur: handleBlur,
+        onChange: handleChange
+      }
+    ),
+    (0, import_FrameShapeUtil.defaultEmptyAs)(name, "Frame") + String.fromCharCode(8203)
+  ] });
+});
+//# sourceMappingURL=FrameLabelInput.js.map

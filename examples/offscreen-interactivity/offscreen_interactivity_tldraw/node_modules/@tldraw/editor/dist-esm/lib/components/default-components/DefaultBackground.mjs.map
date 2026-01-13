@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/components/default-components/DefaultBackground.tsx"],
+  "sourcesContent": ["/** @public @react */\nexport function DefaultBackground() {\n\treturn <div className=\"tl-background\" />\n}\n"],
+  "mappings": "AAEQ;AADD,SAAS,oBAAoB;AACnC,SAAO,oBAAC,SAAI,WAAU,iBAAgB;AACvC;",
+  "names": []
+}

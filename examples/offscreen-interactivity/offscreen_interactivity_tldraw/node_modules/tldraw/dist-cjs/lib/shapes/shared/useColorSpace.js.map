@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/shapes/shared/useColorSpace.tsx"],
+  "sourcesContent": ["import { debugFlags, useValue } from '@tldraw/editor'\nimport { useEffect, useState } from 'react'\n\nexport function useColorSpace(): 'srgb' | 'p3' {\n\tconst [supportsP3, setSupportsP3] = useState(false)\n\n\tuseEffect(() => {\n\t\tconst supportsSyntax = CSS.supports('color', 'color(display-p3 1 1 1)')\n\t\tconst query = matchMedia('(color-gamut: p3)')\n\t\tsetSupportsP3(supportsSyntax && query.matches)\n\n\t\tconst onChange = () => setSupportsP3(supportsSyntax && query.matches)\n\n\t\tquery.addEventListener('change', onChange)\n\t\treturn () => query.removeEventListener('change', onChange)\n\t}, [])\n\n\tconst forceSrgb = useValue(debugFlags.forceSrgb)\n\n\treturn forceSrgb || !supportsP3 ? 'srgb' : 'p3'\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,oBAAqC;AACrC,mBAAoC;AAE7B,SAAS,gBAA+B;AAC9C,QAAM,CAAC,YAAY,aAAa,QAAI,uBAAS,KAAK;AAElD,8BAAU,MAAM;AACf,UAAM,iBAAiB,IAAI,SAAS,SAAS,yBAAyB;AACtE,UAAM,QAAQ,WAAW,mBAAmB;AAC5C,kBAAc,kBAAkB,MAAM,OAAO;AAE7C,UAAM,WAAW,MAAM,cAAc,kBAAkB,MAAM,OAAO;AAEpE,UAAM,iBAAiB,UAAU,QAAQ;AACzC,WAAO,MAAM,MAAM,oBAAoB,UAAU,QAAQ;AAAA,EAC1D,GAAG,CAAC,CAAC;AAEL,QAAM,gBAAY,wBAAS,yBAAW,SAAS;AAE/C,SAAO,aAAa,CAAC,aAAa,SAAS;AAC5C;",
+  "names": []
+}

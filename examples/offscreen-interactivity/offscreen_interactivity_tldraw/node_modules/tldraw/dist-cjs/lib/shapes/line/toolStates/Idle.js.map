@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../src/lib/shapes/line/toolStates/Idle.ts"],
+  "sourcesContent": ["import { StateNode, TLShapeId } from '@tldraw/editor'\n\nexport class Idle extends StateNode {\n\tstatic override id = 'idle'\n\n\tprivate shapeId = '' as TLShapeId\n\n\toverride onEnter(info: { shapeId: TLShapeId }) {\n\t\tthis.shapeId = info.shapeId\n\t\tthis.editor.setCursor({ type: 'cross', rotation: 0 })\n\t}\n\n\toverride onPointerDown() {\n\t\tthis.parent.transition('pointing', { shapeId: this.shapeId })\n\t}\n\n\toverride onCancel() {\n\t\tthis.editor.setCurrentTool('select')\n\t}\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,oBAAqC;AAE9B,MAAM,aAAa,wBAAU;AAAA,EACnC,OAAgB,KAAK;AAAA,EAEb,UAAU;AAAA,EAET,QAAQ,MAA8B;AAC9C,SAAK,UAAU,KAAK;AACpB,SAAK,OAAO,UAAU,EAAE,MAAM,SAAS,UAAU,EAAE,CAAC;AAAA,EACrD;AAAA,EAES,gBAAgB;AACxB,SAAK,OAAO,WAAW,YAAY,EAAE,SAAS,KAAK,QAAQ,CAAC;AAAA,EAC7D;AAAA,EAES,WAAW;AACnB,SAAK,OAAO,eAAe,QAAQ;AAAA,EACpC;AACD;",
+  "names": []
+}

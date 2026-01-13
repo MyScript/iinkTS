@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../src/lib/sort.ts"],
+  "sourcesContent": ["/** @public */\nexport function sortById<T extends { id: any }>(a: T, b: T) {\n\treturn a.id > b.id ? 1 : -1\n}\n"],
+  "mappings": "AACO,SAAS,SAAgC,GAAM,GAAM;AAC3D,SAAO,EAAE,KAAK,EAAE,KAAK,IAAI;AAC1B;",
+  "names": []
+}

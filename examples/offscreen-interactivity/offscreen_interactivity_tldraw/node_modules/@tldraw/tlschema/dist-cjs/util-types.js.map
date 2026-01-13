@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../src/util-types.ts"],
+  "sourcesContent": ["/** @public */\nexport type SetValue<T extends Set<any>> = T extends Set<infer U> ? U : never\n"],
+  "mappings": ";;;;;;;;;;;;;;AAAA;AAAA;",
+  "names": []
+}

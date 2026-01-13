@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/utils/uniq.ts"],
+  "sourcesContent": ["import { uniq as _uniq } from '@tldraw/utils'\n\n/** @public */\nexport function uniq<T>(\n\tarray:\n\t\t| {\n\t\t\t\treadonly length: number\n\t\t\t\treadonly [n: number]: T\n\t\t  }\n\t\t| null\n\t\t| undefined\n): T[] {\n\treturn _uniq(array)\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,mBAA8B;AAGvB,SAAS,KACf,OAOM;AACN,aAAO,aAAAA,MAAM,KAAK;AACnB;",
+  "names": ["_uniq"]
+}
