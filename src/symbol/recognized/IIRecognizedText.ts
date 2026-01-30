@@ -51,8 +51,8 @@ export class IIRecognizedText extends IIRecognizedBase<RecognizedKind.Text>
       label: this.label,
       baseline: this.baseline,
       xHeight: this.xHeight,
-      strokes: JSON.parse(JSON.stringify(this.strokes)),
-      decorators: this.decorators.length ? JSON.parse(JSON.stringify(this.decorators)) : undefined
+      strokes: structuredClone(this.strokes),
+      decorators: this.decorators.length ? structuredClone(this.decorators) : undefined
     }
   }
 

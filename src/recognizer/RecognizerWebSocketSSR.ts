@@ -56,7 +56,6 @@ export class RecognizerWebSocketSSR
   protected viewSizeHeight!: number
   protected viewSizeWidth!: number
   protected sessionId?: string
-  // contentPartCount = 0
   currentPartId?: string
   protected currentErrorCode?: string | number
 

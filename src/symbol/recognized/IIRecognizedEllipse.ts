@@ -35,7 +35,7 @@ export class IIRecognizedEllipse extends IIRecognizedBase<RecognizedKind.Ellipse
       id: this.id,
       type: this.type,
       kind: this.kind,
-      strokes: JSON.parse(JSON.stringify(this.strokes)),
+      strokes: structuredClone(this.strokes),
     }
   }
 

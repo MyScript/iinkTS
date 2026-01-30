@@ -6,12 +6,14 @@ import { IIMenu, TMenuItemBoolean, TMenuItemButton, TMenuItemColorList } from ".
 import { createUUID } from "../utils"
 import { IIMenuSub, TSubMenuParam } from "./IIMenuSub"
 import { InteractiveInkEditor } from "../editor"
+import { createMenuButtonWithText } from "./MenuHelper"
 /**
  * @group Menu
  */
 export class IIMenuContext extends IIMenu
 {
   #logger = LoggerManager.getLogger(LoggerCategory.MENU)
+  static readonly #DECORABLE_TYPES = new Set([SymbolType.Group, SymbolType.Stroke, SymbolType.Text, SymbolType.Recognized])
   editor: InteractiveInkEditor
   id: string
   wrapper?: HTMLElement
@@ -54,7 +56,7 @@ export class IIMenuContext extends IIMenu
 
   get symbolsDecorable(): (IIStroke | IIText | IISymbolGroup | IIRecognizedText)[]
   {
-    return this.symbolsSelected.filter(s => [SymbolType.Stroke, SymbolType.Text, SymbolType.Group].includes(s.type) || (s.type === SymbolType.Recognized && s.kind === RecognizedKind.Text)) as (IIStroke | IIText | IISymbolGroup | IIRecognizedText)[]
+    return this.symbolsSelected.filter(s => IIMenuContext.#DECORABLE_TYPES.has(s.type) || (s.type === SymbolType.Recognized && s.kind === RecognizedKind.Text)) as (IIStroke | IIText | IISymbolGroup | IIRecognizedText)[]
   }
 
   get showDecorator(): boolean
@@ -117,15 +119,13 @@ export class IIMenuContext extends IIMenu
 
   protected createMenuDuplicate(): HTMLElement
   {
-    this.duplicateBtn = document.createElement("button")
-    this.duplicateBtn.id = `${ this.id }-duplicate`
-    this.duplicateBtn.textContent = "Duplicate"
-    this.duplicateBtn.classList.add("ms-menu-button")
-    this.duplicateBtn.addEventListener("pointerup", async () =>
-    {
-      const symbolsToDuplicate = this.symbolsSelected
+    this.duplicateBtn = createMenuButtonWithText(
+      `${ this.id }-duplicate`,
+      "Duplicate",
+      async () => {
+        const symbolsToDuplicate = this.symbolsSelected
 
-      const updateDeepIdInGroup = (gr: IISymbolGroup) =>
+        const updateDeepIdInGroup = (gr: IISymbolGroup) =>
       {
         gr.children.forEach(s =>
         {
@@ -160,54 +160,53 @@ export class IIMenuContext extends IIMenu
       this.editor.unselectAll()
       await this.editor.addSymbols(duplicatedSymbols)
       this.editor.selector.drawSelectedGroup(duplicatedSymbols)
-    })
+    }
+    )
     return this.duplicateBtn
   }
 
   protected createMenuGroup(): HTMLElement
   {
-    this.groupBtn = document.createElement("button")
-    this.groupBtn.id = `${ this.id }-duplicate`
-    this.groupBtn.textContent = "Group"
-    this.groupBtn.classList.add("ms-menu-button")
-    this.groupBtn.addEventListener("pointerup", async () =>
-    {
-      if (this.symbolsSelected.length === 1 && this.symbolsSelected[0].type === SymbolType.Group) {
-        const symbols = this.editor.ungroupSymbol(this.symbolsSelected[0] as IISymbolGroup)
-        this.editor.select(symbols.map(s => s.id))
+    this.groupBtn = createMenuButtonWithText(
+      `${ this.id }-duplicate`,
+      "Group",
+      async () => {
+        if (this.symbolsSelected.length === 1 && this.symbolsSelected[0].type === SymbolType.Group) {
+          const symbols = this.editor.ungroupSymbol(this.symbolsSelected[0] as IISymbolGroup)
+          this.editor.select(symbols.map(s => s.id))
+        }
+        else {
+          const symbols = this.symbolsSelected.slice()
+          this.editor.unselectAll()
+          const group = this.editor.groupSymbols(symbols)
+          group.selected = true
+          this.editor.select([group.id])
+        }
       }
-      else {
-        const symbols = this.symbolsSelected.slice()
-        this.editor.unselectAll()
-        const group = this.editor.groupSymbols(symbols)
-        group.selected = true
-        this.editor.select([group.id])
-      }
-    })
+    )
     return this.groupBtn
   }
 
   protected createMenuConvert(): HTMLElement
   {
-    this.convertBtn = document.createElement("button")
-    this.convertBtn.id = `${ this.id }-convert`
-    this.convertBtn.textContent = "Convert"
-    this.convertBtn.classList.add("ms-menu-button")
-    this.convertBtn.addEventListener("pointerup", () => this.editor.convertSymbols(this.symbolsSelected))
+    this.convertBtn = createMenuButtonWithText(
+      `${ this.id }-convert`,
+      "Convert",
+      () => this.editor.convertSymbols(this.symbolsSelected)
+    )
     return this.convertBtn
   }
 
   protected createMenuRemove(): HTMLButtonElement
   {
-    this.removeBtn = document.createElement("button")
-    this.removeBtn.id = `${ this.id }-remove`
-    this.removeBtn.textContent = "Remove"
-    this.removeBtn.classList.add("ms-menu-button")
-    this.removeBtn.addEventListener("pointerup", async () =>
-    {
-      this.editor.selector.removeSelectedGroup()
-      await this.editor.removeSymbols(this.symbolsSelected.map(s => s.id))
-    })
+    this.removeBtn = createMenuButtonWithText(
+      `${ this.id }-remove`,
+      "Remove",
+      async () => {
+        this.editor.selector.removeSelectedGroup()
+        await this.editor.removeSymbols(this.symbolsSelected.map(s => s.id))
+      }
+    )
     return this.removeBtn
   }
 

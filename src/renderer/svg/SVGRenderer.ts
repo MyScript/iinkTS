@@ -357,9 +357,9 @@ export class SVGRenderer {
     this.#logger.info("getElements", { tagName, attrs })
     let query = tagName || "*"
     if (attrs) {
-      Object.keys(attrs).forEach(k => {
+      for (const k in attrs) {
         query += `[${k}=${attrs[k]}]`
-      })
+      }
     }
     return this.layer.querySelectorAll(query)
   }

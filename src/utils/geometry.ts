@@ -12,6 +12,17 @@ export function computeDistance(p1: TPoint, p2: TPoint): number
 
 /**
  * @group Utils
+ * @remarks Faster than computeDistance when comparing distances (avoids sqrt)
+ */
+export function computeDistanceSquared(p1: TPoint, p2: TPoint): number
+{
+  const dx = p2.x - p1.x
+  const dy = p2.y - p1.y
+  return dx * dx + dy * dy
+}
+
+/**
+ * @group Utils
  */
 export function computeAngleAxeRadian(begin: TPoint, end: TPoint): number
 {
@@ -171,9 +182,14 @@ export function findIntersectBetweenSegmentAndCircle(seg: TSegment, c: TPoint, r
 {
   const result: TPoint[] = []
 
-  const a = Math.pow(seg.p2.x - seg.p1.x, 2) + Math.pow(seg.p2.y - seg.p1.y, 2)
-  const b = 2 * ((seg.p2.x - seg.p1.x) * (seg.p1.x - c.x) + (seg.p2.y - seg.p1.y) * (seg.p1.y - c.y))
-  const cc = Math.pow(c.x, 2) + Math.pow(c.y, 2) + Math.pow(seg.p1.x, 2) + Math.pow(seg.p1.y, 2) - 2 * (c.x * seg.p1.x + c.y * seg.p1.y) - Math.pow(r, 2)
+  const dx = seg.p2.x - seg.p1.x
+  const dy = seg.p2.y - seg.p1.y
+  const fx = seg.p1.x - c.x
+  const fy = seg.p1.y - c.y
+
+  const a = dx * dx + dy * dy
+  const b = 2 * (dx * fx + dy * fy)
+  const cc = fx * fx + fy * fy - r * r
   const deter = Math.pow(b, 2) - 4 * a * cc
 
   if (deter <= 0) return []
@@ -208,9 +224,9 @@ export function findIntersectBetweenSegmentAndCircle(seg: TSegment, c: TPoint, r
  */
 export function computeAngleRadian(p1: TPoint, center: TPoint, p2: TPoint): number
 {
-  const p1c = Math.sqrt(Math.pow(center.x - p1.x, 2) + Math.pow(center.y - p1.y, 2))
-  const p2c = Math.sqrt(Math.pow(center.x - p2.x, 2) + Math.pow(center.y - p2.y, 2))
-  const p1p2 = Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2))
+  const p1c = Math.hypot(center.x - p1.x, center.y - p1.y)
+  const p2c = Math.hypot(center.x - p2.x, center.y - p2.y)
+  const p1p2 = Math.hypot(p2.x - p1.x, p2.y - p1.y)
   return Math.acos((p2c * p2c + p1c * p1c - p1p2 * p1p2) / (2 * p2c * p1c))
 }
 
@@ -219,22 +235,19 @@ export function computeAngleRadian(p1: TPoint, center: TPoint, p2: TPoint): numb
  */
 export function getClosestPoints(points1: TPoint[], points2: TPoint[]): { p1: TPoint, p2: TPoint }
 {
-  let p1 = points1[0]
-  let p2 = points2[0]
-  let minDistance = Number.MAX_SAFE_INTEGER
-  points1.forEach(_p1 =>
-  {
-    points2.forEach(_p2 =>
-    {
-      const d = computeDistance(_p1, _p2)
-      if (minDistance > d) {
-        minDistance = d
-        p1 = _p1
-        p2 = _p2
+  let minDistanceSquared = Number.MAX_SAFE_INTEGER
+  let result = { p1: points1[0], p2: points2[0] }
+
+  for (const _p1 of points1) {
+    for (const _p2 of points2) {
+      const dSquared = computeDistanceSquared(_p1, _p2)
+      if (dSquared < minDistanceSquared) {
+        minDistanceSquared = dSquared
+        result = { p1: _p1, p2: _p2 }
       }
-    })
-  })
-  return { p1, p2 }
+    }
+  }
+  return result
 }
 
 /**
@@ -242,22 +255,19 @@ export function getClosestPoints(points1: TPoint[], points2: TPoint[]): { p1: TP
  */
 export function getClosestPoint(points: TPoint[], point: TPoint): { point?: TPoint, index: number }
 {
-  let minDistance = Number.MAX_SAFE_INTEGER
+  let minDistanceSquared = Number.MAX_SAFE_INTEGER
   let closest: TPoint | undefined
   let index = -1
-  points.forEach((p, i) =>
-  {
-    const d = computeDistance(p, point)
-    if (minDistance > d) {
-      minDistance = d
-      closest = p
+
+  for (let i = 0; i < points.length; i++) {
+    const dSquared = computeDistanceSquared(points[i], point)
+    if (dSquared < minDistanceSquared) {
+      minDistanceSquared = dSquared
+      closest = points[i]
       index = i
     }
-  })
-  return {
-    point: closest,
-    index
   }
+  return { point: closest, index }
 }
 
 /**

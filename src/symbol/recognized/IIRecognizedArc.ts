@@ -35,7 +35,7 @@ export class IIRecognizedArc extends IIRecognizedBase<RecognizedKind.Arc>
       id: this.id,
       type: this.type,
       kind: this.kind,
-      strokes: JSON.parse(JSON.stringify(this.strokes)),
+      strokes: structuredClone(this.strokes),
     }
   }
 

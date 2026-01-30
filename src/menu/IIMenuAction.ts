@@ -17,6 +17,7 @@ import { IIMenu, TMenuItemBoolean, TMenuItemButton, TMenuItemButtonList, TMenuIt
 import { TIISymbol } from "../symbol"
 import { InsertAction, StrikeThroughAction, SurroundAction } from "../gesture"
 import { IIMenuSub, TSubMenuParam } from "./IIMenuSub"
+import { createMenuButton } from "./MenuHelper"
 import { getAvailableLanguageList, PartialDeep } from "../utils"
 import { InteractiveInkEditor } from "../editor"
 
@@ -62,24 +63,24 @@ export class IIMenuAction extends IIMenu
 
   protected createMenuClear(): HTMLElement
   {
-    this.menuClear = document.createElement("button")
-    this.menuClear.id = `${ this.id }-clear`
-    this.menuClear.classList.add("ms-menu-button", "square")
-    this.menuClear.innerHTML = trashIcon
-    this.menuClear.addEventListener("pointerup", () =>
-    {
-      this.#logger.info(`${ this.id }.clear`)
-      this.editor.clear()
-    })
+    this.menuClear = createMenuButton(
+      `${ this.id }-clear`,
+      trashIcon,
+      () => {
+        this.#logger.info(`${ this.id }.clear`)
+        this.editor.clear()
+      }
+    )
     return this.menuClear
   }
 
   protected createMenuLanguage(): HTMLElement
   {
-    const triggerBtn = document.createElement("button")
-    triggerBtn.id = `${ this.id }-language-trigger`
-    triggerBtn.classList.add("ms-menu-button", "square")
-    triggerBtn.innerHTML = languageIcon
+    const triggerBtn = createMenuButton(
+      `${ this.id }-language-trigger`,
+      languageIcon,
+      () => {} // Click handled by IIMenuSub
+    )
 
     const select = document.createElement("select")
     select.classList.add("select-language")
@@ -88,12 +89,11 @@ export class IIMenuAction extends IIMenu
       .then(json =>
       {
         const languages = json.result as { [key: string]: string }
-        Object.keys(languages).forEach(key =>
-        {
+        for (const key in languages) {
           const selected = key === this.editor.configuration.recognition.lang
           const opt = new Option(languages[key], key, selected, selected)
           select.appendChild(opt)
-        })
+        }
       })
     select.addEventListener("change", (e) =>
     {
@@ -112,52 +112,50 @@ export class IIMenuAction extends IIMenu
 
   protected createMenuUndo(): HTMLElement
   {
-    this.menuUndo = document.createElement("button")
-    this.menuUndo.id = `${ this.id }-undo`
-    this.menuUndo.classList.add("ms-menu-button", "square")
-    this.menuUndo.innerHTML = undoIcon
-    this.menuUndo.addEventListener("pointerup", async () =>
-    {
-      this.#logger.info(`${ this.id }.undo`)
-      await this.editor.undo()
-    })
+    this.menuUndo = createMenuButton(
+      `${ this.id }-undo`,
+      undoIcon,
+      async () => {
+        this.#logger.info(`${ this.id }.undo`)
+        await this.editor.undo()
+      }
+    )
     return this.menuUndo
   }
 
   protected createMenuRedo(): HTMLElement
   {
-    this.menuRedo = document.createElement("button")
-    this.menuRedo.id = `${ this.id }-redo`
-    this.menuRedo.classList.add("ms-menu-button", "square")
-    this.menuRedo.innerHTML = redoIcon
-    this.menuRedo.addEventListener("pointerup", async () =>
-    {
-      this.#logger.info(`${ this.id }.redo`)
-      await this.editor.redo()
-    })
+    this.menuRedo = createMenuButton(
+      `${ this.id }-redo`,
+      redoIcon,
+      async () => {
+        this.#logger.info(`${ this.id }.redo`)
+        await this.editor.redo()
+      }
+    )
     return this.menuRedo
   }
 
   protected createMenuConvert(): HTMLElement
   {
-    this.menuConvert = document.createElement("button")
-    this.menuConvert.id = `${ this.id }-convert`
-    this.menuConvert.classList.add("ms-menu-button", "square")
-    this.menuConvert.innerHTML = translateIcon
-    this.menuConvert.addEventListener("pointerup", () =>
-    {
-      this.#logger.info(`${ this.id }.convert`)
-      this.editor.convert()
-    })
+    this.menuConvert = createMenuButton(
+      `${ this.id }-convert`,
+      translateIcon,
+      () => {
+        this.#logger.info(`${ this.id }.convert`)
+        this.editor.convert()
+      }
+    )
     return this.menuConvert
   }
 
   protected createMenuGesture(): HTMLDivElement
   {
-    const trigger = document.createElement("button")
-    trigger.id = `${ this.id }-gesture`
-    trigger.classList.add("ms-menu-button", "square")
-    trigger.innerHTML = gestureIcon
+    const trigger = createMenuButton(
+      `${ this.id }-gesture`,
+      gestureIcon,
+      () => {} // Click handled by IIMenuSub
+    )
     const subMenuWrapper = document.createElement("div")
     subMenuWrapper.classList.add("ms-menu-colmun")
 
@@ -248,10 +246,11 @@ export class IIMenuAction extends IIMenu
 
   protected createMenuGuide(): HTMLDivElement
   {
-    const trigger = document.createElement("button")
-    trigger.id = `${ this.id }-guide`
-    trigger.classList.add("ms-menu-button", "square")
-    trigger.innerHTML = guideIcon
+    const trigger = createMenuButton(
+      `${ this.id }-guide`,
+      guideIcon,
+      () => {} // Click handled by IIMenuSub
+    )
 
     const subMenuWrapper = document.createElement("div")
     subMenuWrapper.classList.add("ms-menu-colmun")
@@ -315,10 +314,11 @@ export class IIMenuAction extends IIMenu
 
   protected createMenuSnap(): HTMLDivElement
   {
-    const trigger = document.createElement("button")
-    trigger.id = `${ this.id }-snap`
-    trigger.classList.add("ms-menu-button", "square")
-    trigger.innerHTML = snapIcon
+    const trigger = createMenuButton(
+      `${ this.id }-snap`,
+      snapIcon,
+      () => {} // Click handled by IIMenuSub
+    )
 
     const subMenuWrapper = document.createElement("div")
     subMenuWrapper.classList.add("ms-menu-colmun")

@@ -80,9 +80,12 @@ export class IModel
 
   extractDifferenceStrokes(model: IModel): { added: IIStroke[], removed: IIStroke[] }
   {
+    const modelStrokeKeys = new Set(model.strokes.map(s => `${s.id}-${s.modificationDate}`))
+    const thisStrokeKeys = new Set(this.strokes.map(s => `${s.id}-${s.modificationDate}`))
+
     return {
-      added: this.strokes.filter(s1 => model.strokes.findIndex(s2 => s1.id === s2.id && s1.modificationDate === s2.modificationDate) === -1),
-      removed: model.strokes.filter(s1 => this.strokes.findIndex(s2 => s1.id === s2.id && s1.modificationDate === s2.modificationDate) === -1)
+      added: this.strokes.filter(s => !modelStrokeKeys.has(`${s.id}-${s.modificationDate}`)),
+      removed: model.strokes.filter(s => !thisStrokeKeys.has(`${s.id}-${s.modificationDate}`))
     }
   }
 

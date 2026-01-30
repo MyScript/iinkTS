@@ -169,7 +169,7 @@ export class IDebugSVGManager {
 
   protected buildInfos(obj: object, currentPath = ""): string[] {
     const infos: string[] = []
-    Object.keys(obj).forEach((key) => {
+    for (const key in obj) {
       const value = obj[key as keyof typeof obj]
       const localPath = currentPath ? `${currentPath}.${key}` : key
       switch (typeof value) {
@@ -180,7 +180,7 @@ export class IDebugSVGManager {
           infos.push(`${localPath}: ${JSON.stringify(value)}`)
           break
       }
-    })
+    }
     return infos
   }
 

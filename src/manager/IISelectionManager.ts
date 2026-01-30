@@ -562,9 +562,9 @@ export class IISelectionManager
   {
     let found = false
     let currentEl = info.target as HTMLElement | null
-    const symbolTypesAllowed = [SymbolType.Edge.toString(), SymbolType.Shape.toString(), SymbolType.Stroke.toString(), SymbolType.Text.toString()]
+    const symbolTypesAllowed = [SymbolType.Edge, SymbolType.Shape, SymbolType.Stroke, SymbolType.Text]
     while (currentEl && currentEl.tagName !== "svg" && !found) {
-      if (symbolTypesAllowed.includes(currentEl.getAttribute("type") as string)) {
+      if (symbolTypesAllowed.includes(currentEl.getAttribute("type") as SymbolType)) {
         found = true
       }
       else {

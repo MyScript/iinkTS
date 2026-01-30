@@ -147,7 +147,6 @@ export class InteractiveInkEditor extends AbstractEditor
     return this.recognizer.initialized.promise
   }
 
-  //#region Properties
   get tool(): EditorTool
   {
     return this.#tool
@@ -199,9 +198,7 @@ export class InteractiveInkEditor extends AbstractEditor
     this.history.stack.forEach(i => i.model.rowHeight = this.model.rowHeight)
     this.event.emitUIpdated()
   }
-  //#endregion
 
-  //#region Style
   get penStyle(): TStyle
   {
     return this.#penStyle
@@ -211,7 +208,6 @@ export class InteractiveInkEditor extends AbstractEditor
     this.logger.info("set penStyle", { penStyle })
     this.#penStyle = Object.assign({}, this.#penStyle, penStyle)
   }
-  //#endregion
 
   protected updateLayerState(idle: boolean): void
   {
@@ -759,7 +755,6 @@ export class InteractiveInkEditor extends AbstractEditor
 
   async synchronizeStrokesWithJIIX(force: boolean = false): Promise<void>
   {
-    //if there is no stroke, jiix should not have changed
     const strokes = this.model.symbols.filter(s => s.type === SymbolType.Stroke)
     if (!force && !strokes.length) {
       this.event.emitSynchronized()
@@ -782,16 +777,7 @@ export class InteractiveInkEditor extends AbstractEditor
         const sym = this.model.getRootSymbol(strokeId)
         if (sym) {
           switch (sym?.type) {
-            // we do not modify a group created by the user
-            // case SymbolType.Group:
-            //   strokes.push(...sym.extractStrokes())
-            //   break
             case SymbolType.Recognized:
-              // if it's recognized symbol with same number of strokes
-              // the recognition has been already done
-              // if (sym.strokes.length === items.length) {
-              //   return
-              // }
               strokes.push(sym.strokes.find(s => s.id === i["full-id"]!)!)
               break
             default:
@@ -943,7 +929,7 @@ export class InteractiveInkEditor extends AbstractEditor
           break
       }
     })
-    // because model.export is emptied when you change symbols
+
     this.model.mergeExport({ "application/vnd.myscript.jiix": jiix })
     this.history.update(this.model)
     this.event.emitSynchronized()

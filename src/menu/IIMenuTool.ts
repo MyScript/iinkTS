@@ -15,6 +15,7 @@ import { LoggerCategory, LoggerManager } from "../logger"
 import { IIMenu } from "./IIMenu"
 import { IIMenuSub } from "./IIMenuSub"
 import { TSubMenuParam } from "./IIMenuSub"
+import { createMenuButton } from "./MenuHelper"
 import { InteractiveInkEditor } from "../editor"
 
 /**
@@ -56,93 +57,89 @@ export class IIMenuTool extends IIMenu
 
   protected createMenuWrite(): HTMLElement
   {
-    this.writeBtn = document.createElement("button")
-    this.writeBtn.id = `${this.id}-write-pencil`
-    this.writeBtn.classList.add("ms-menu-button", "square")
-    this.writeBtn.innerHTML = pencilIcon
-    this.writeBtn.addEventListener("pointerup", () =>
-    {
-      this.unselectAll()
-      this.writeBtn!.classList.add("active")
-      this.editor.tool = EditorTool.Write
-      this.editor.writer.tool = EditorWriteTool.Pencil
-    })
+    this.writeBtn = createMenuButton(
+      `${this.id}-write-pencil`,
+      pencilIcon,
+      () => {
+        this.unselectAll()
+        this.writeBtn!.classList.add("active")
+        this.editor.tool = EditorTool.Write
+        this.editor.writer.tool = EditorWriteTool.Pencil
+      }
+    )
     return this.writeBtn
   }
 
   protected createMenuMove(): HTMLElement
   {
-    this.menuMove = document.createElement("button")
-    this.menuMove.id = `${this.id}-move`
-    this.menuMove.classList.add("ms-menu-button", "square")
-    this.menuMove.innerHTML = handIcon
-    this.menuMove.addEventListener("pointerup", () =>
-    {
-      this.unselectAll()
-      this.menuMove!.classList.add("active")
-      this.editor.tool = EditorTool.Move
-    })
+    this.menuMove = createMenuButton(
+      `${this.id}-move`,
+      handIcon,
+      () => {
+        this.unselectAll()
+        this.menuMove!.classList.add("active")
+        this.editor.tool = EditorTool.Move
+      }
+    )
     return this.menuMove
   }
 
   protected createMenuSelect(): HTMLElement
   {
-    this.menuSelect = document.createElement("button")
-    this.menuSelect.id = `${this.id}-select`
-    this.menuSelect.classList.add("ms-menu-button", "square")
-    this.menuSelect.innerHTML = cursorIcon
-    this.menuSelect.addEventListener("pointerup", () =>
-    {
-      this.unselectAll()
-      this.menuSelect!.classList.add("active")
-      this.editor.tool = EditorTool.Select
-    })
+    this.menuSelect = createMenuButton(
+      `${this.id}-select`,
+      cursorIcon,
+      () => {
+        this.unselectAll()
+        this.menuSelect!.classList.add("active")
+        this.editor.tool = EditorTool.Select
+      }
+    )
     return this.menuSelect
   }
 
   protected createMenuErase(): HTMLElement
   {
-    this.menuErase = document.createElement("button")
-    this.menuErase.id = `${this.id}-erase`
-    this.menuErase.classList.add("ms-menu-button", "square")
-    this.menuErase.innerHTML = eraseIcon
-    this.menuErase.addEventListener("pointerup", () =>
-    {
-      this.unselectAll()
-      this.menuErase!.classList.add("active")
-      this.editor.tool = EditorTool.Erase
-    })
+    this.menuErase = createMenuButton(
+      `${this.id}-erase`,
+      eraseIcon,
+      () => {
+        this.unselectAll()
+        this.menuErase!.classList.add("active")
+        this.editor.tool = EditorTool.Erase
+      }
+    )
     return this.menuErase
   }
 
   protected createShapeSubMenu(icon: string, tool: EditorWriteTool): HTMLButtonElement
   {
-    const subMenuShape = document.createElement("button")
-    subMenuShape.id = `${this.id}-write-shape-${tool}`
-    subMenuShape.classList.add("ms-menu-button", "square")
-    subMenuShape.innerHTML = icon
-    subMenuShape.addEventListener("pointerup", () =>
-    {
-      this.unselectAll()
-      this.editor.tool = EditorTool.Write
-      this.editor.writer.tool = tool
-      subMenuShape.classList.add("active")
-      this.menuShape!.innerHTML = icon
-      this.menuShape!.classList.add("active")
-      const subMenuContent = this.menuShape!.nextSibling
-      if (subMenuContent) {
-        (subMenuContent as HTMLElement).classList.remove("open")
+    const subMenuShape = createMenuButton(
+      `${this.id}-write-shape-${tool}`,
+      icon,
+      () => {
+        this.unselectAll()
+        this.editor.tool = EditorTool.Write
+        this.editor.writer.tool = tool
+        subMenuShape.classList.add("active")
+        this.menuShape!.innerHTML = icon
+        this.menuShape!.classList.add("active")
+        const subMenuContent = this.menuShape!.nextSibling
+        if (subMenuContent) {
+          (subMenuContent as HTMLElement).classList.remove("open")
+        }
       }
-    })
+    )
     return subMenuShape
   }
 
   protected createMenuShape(): HTMLElement
   {
-    this.menuShape = document.createElement("button")
-    this.menuShape.id = `${this.id}-write-shape`
-    this.menuShape.classList.add("ms-menu-button", "square")
-    this.menuShape.innerHTML = rectangleIcon
+    this.menuShape = createMenuButton(
+      `${this.id}-write-shape`,
+      rectangleIcon,
+      () => {} // Click handled by IIMenuSub
+    )
     this.subMenuShape = {
       circle: this.createShapeSubMenu(circleIcon, EditorWriteTool.Circle),
       rectangle: this.createShapeSubMenu(rectangleIcon, EditorWriteTool.Rectangle),
@@ -170,32 +167,32 @@ export class IIMenuTool extends IIMenu
 
   protected createEdgeSubMenu(square: string, tool: EditorWriteTool): HTMLButtonElement
   {
-    const subMenuEdge = document.createElement("button")
-    subMenuEdge.id = `${this.id}-write-edge-${tool}`
-    subMenuEdge.classList.add("ms-menu-button", "square")
-    subMenuEdge.innerHTML = square
-    subMenuEdge.addEventListener("pointerup", () =>
-    {
-      this.unselectAll()
-      this.editor.tool = EditorTool.Write
-      this.editor.writer.tool = tool
-      subMenuEdge.classList.add("active")
-      this.menuEdge!.innerHTML = square
-      this.menuEdge!.classList.add("active")
-      const subMenuContent = this.menuEdge!.nextSibling
-      if (subMenuContent) {
-        (subMenuContent as HTMLElement).classList.remove("open")
+    const subMenuEdge = createMenuButton(
+      `${this.id}-write-edge-${tool}`,
+      square,
+      () => {
+        this.unselectAll()
+        this.editor.tool = EditorTool.Write
+        this.editor.writer.tool = tool
+        subMenuEdge.classList.add("active")
+        this.menuEdge!.innerHTML = square
+        this.menuEdge!.classList.add("active")
+        const subMenuContent = this.menuEdge!.nextSibling
+        if (subMenuContent) {
+          (subMenuContent as HTMLElement).classList.remove("open")
+        }
       }
-    })
+    )
     return subMenuEdge
   }
 
   protected createMenuEdge(): HTMLElement
   {
-    this.menuEdge = document.createElement("button")
-    this.menuEdge.id = `${this.id}-write-edge`
-    this.menuEdge.classList.add("ms-menu-button", "square")
-    this.menuEdge.innerHTML = lineIcon
+    this.menuEdge = createMenuButton(
+      `${this.id}-write-edge`,
+      lineIcon,
+      () => {} // Click handled by IIMenuSub
+    )
     this.subMenuEdge = {
       line: this.createEdgeSubMenu(lineIcon, EditorWriteTool.Line),
       arrow: this.createEdgeSubMenu(arrowIcon, EditorWriteTool.Arrow),
