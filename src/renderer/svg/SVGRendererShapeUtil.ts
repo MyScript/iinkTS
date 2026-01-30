@@ -11,7 +11,11 @@ export class SVGRendererShapeUtil
 {
   static getPolygonePath(polygon: IIShapePolygon): string
   {
-    return `M ${polygon.points[0].x} ${polygon.points[0].y} ${polygon.points.slice(1).map(p => `L ${p.x} ${p.y}`).join(" ")} Z`
+    let path = `M ${polygon.points[0].x} ${polygon.points[0].y}`
+    for (let i = 1; i < polygon.points.length; i++) {
+      path += ` L ${polygon.points[i].x} ${polygon.points[i].y}`
+    }
+    return path + " Z"
   }
 
   static getCirclePath(circle: IIShapeCircle): string

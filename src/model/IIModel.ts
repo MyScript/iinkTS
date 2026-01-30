@@ -13,6 +13,7 @@ import { TExport } from "./Export"
 export class IIModel
 {
   #logger = LoggerManager.getLogger(LoggerCategory.MODEL)
+  #symbolsMap = new Map<string, TIISymbol>()
   readonly creationTime: number
   modificationDate: number
   currentSymbol?: TIISymbol
@@ -37,6 +38,18 @@ export class IIModel
     this.idle = true
   }
 
+  /**
+   * Synchronize the internal Map with the symbols array
+   * Useful when symbols are modified directly (e.g., in tests)
+   */
+  #syncMap(): void
+  {
+    if (this.#symbolsMap.size !== this.symbols.length) {
+      this.#symbolsMap.clear()
+      this.symbols.forEach(s => this.#symbolsMap.set(s.id, s))
+    }
+  }
+
   get symbolsSelected(): TIISymbol[]
   {
     return this.symbols.filter(s => s.selected)
@@ -49,7 +62,11 @@ export class IIModel
 
   selectSymbol(id: string): void
   {
-    const symbol = this.symbols.find(s => s.id === id || (s.type === SymbolType.Group && s.containsSymbol(id)))
+    this.#syncMap()
+    let symbol = this.#symbolsMap.get(id)
+    if (!symbol) {
+      symbol = this.symbols.find(s => s.type === SymbolType.Group && s.containsSymbol(id))
+    }
     if (symbol) {
       symbol.selected = true
     }
@@ -57,7 +74,8 @@ export class IIModel
 
   unselectSymbol(id: string): void
   {
-    const symbol = this.symbols.find(s => s.id === id)
+    this.#syncMap()
+    const symbol = this.#symbolsMap.get(id)
     if (symbol) {
       symbol.selected = false
     }
@@ -70,9 +88,12 @@ export class IIModel
 
   getRootSymbol(id: string): TIISymbol | undefined
   {
+    this.#syncMap()
+    const directMatch = this.#symbolsMap.get(id)
+    if (directMatch) return directMatch
+
     return this.symbols.find(s =>
     {
-      if (s.id === id) return s
       if (s.type === SymbolType.Group && s.containsSymbol(id)) {
         return s
       }
@@ -90,22 +111,24 @@ export class IIModel
 
   getSymbolsByRowOrdered(): { rowIndex: number, symbols: TIISymbol[] }[]
   {
-    const rows: { rowIndex: number, symbols: TIISymbol[] }[] = []
-    this.symbols.forEach(s =>
-    {
+    const rowsMap = new Map<number, TIISymbol[]>()
+
+    for (const s of this.symbols) {
       const rowIndex = this.getSymbolRowIndex(s)
-      const row = rows.find(r => r.rowIndex === rowIndex)
+      const row = rowsMap.get(rowIndex)
       if (row) {
-        row.symbols.push(s)
+        row.push(s)
+      } else {
+        rowsMap.set(rowIndex, [s])
       }
-      else {
-        rows.push({ rowIndex, symbols: [s] })
-      }
+    }
+
+    const rows: { rowIndex: number, symbols: TIISymbol[] }[] = []
+    rowsMap.forEach((symbols, rowIndex) => {
+      symbols.sort((s1, s2) => s1.bounds.xMid - s2.bounds.xMid)
+      rows.push({ rowIndex, symbols })
     })
-    rows.forEach(r =>
-    {
-      r.symbols.sort((s1, s2) => s1.bounds.xMid - s2.bounds.xMid)
-    })
+
     return rows.sort((r1, r2) => r1.rowIndex - r2.rowIndex)
   }
 
@@ -169,11 +192,11 @@ export class IIModel
   addSymbol(symbol: TIISymbol): void
   {
     this.#logger.info("addSymbol", { symbol })
-    const sIndex = this.symbols.findIndex(s => s.id === symbol.id)
-    if (sIndex > -1) {
+    if (this.#symbolsMap.has(symbol.id)) {
       throw new Error(`Symbol id already exist: ${ symbol.id }`)
     }
     this.symbols.push(symbol)
+    this.#symbolsMap.set(symbol.id, symbol)
     this.modificationDate = Date.now()
     this.converts = undefined
     this.exports = undefined
@@ -187,6 +210,7 @@ export class IIModel
     if (sIndex !== -1) {
       updatedSymbol.modificationDate = Date.now()
       this.symbols.splice(sIndex, 1, updatedSymbol)
+      this.#symbolsMap.set(updatedSymbol.id, updatedSymbol)
       this.modificationDate = Date.now()
       this.converts = undefined
       this.exports = undefined
@@ -199,6 +223,8 @@ export class IIModel
     const sIndex = this.symbols.findIndex(s => s.id === id)
     if (sIndex !== -1) {
       this.symbols.splice(sIndex, 1, ...symbols)
+      this.#symbolsMap.delete(id)
+      symbols.forEach(s => this.#symbolsMap.set(s.id, s))
       this.modificationDate = Date.now()
       this.converts = undefined
       this.exports = undefined
@@ -232,9 +258,11 @@ export class IIModel
   removeSymbol(id: string): void
   {
     this.#logger.info("removeSymbol", { id })
+    this.#syncMap()
     const symbolIndex = this.symbols.findIndex(s => s.id === id)
     if (symbolIndex !== -1) {
       this.symbols.splice(symbolIndex, 1)
+      this.#symbolsMap.delete(id)
       this.modificationDate = Date.now()
       this.converts = undefined
       this.exports = undefined
@@ -244,9 +272,12 @@ export class IIModel
 
   extractDifferenceSymbols(model: IIModel): { added: TIISymbol[], removed: TIISymbol[] }
   {
+    const modelKeys = new Set(model.symbols.map(s => `${s.id}:${s.modificationDate}`))
+    const thisKeys = new Set(this.symbols.map(s => `${s.id}:${s.modificationDate}`))
+
     return {
-      added: this.symbols.filter(s1 => model.symbols.findIndex(s2 => s1.id === s2.id && s1.modificationDate === s2.modificationDate) === -1),
-      removed: model.symbols.filter(s1 => this.symbols.findIndex(s2 => s1.id === s2.id && s1.modificationDate === s2.modificationDate) === -1)
+      added: this.symbols.filter(s => !modelKeys.has(`${s.id}:${s.modificationDate}`)),
+      removed: model.symbols.filter(s => !thisKeys.has(`${s.id}:${s.modificationDate}`))
     }
   }
 
@@ -270,6 +301,7 @@ export class IIModel
     {
       const c = s.clone()
       c.selected = false
+      clonedModel.#symbolsMap.set(c.id, c)
       return c
     })
     clonedModel.exports = structuredClone(this.exports)
@@ -283,6 +315,7 @@ export class IIModel
     this.#logger.info("clear")
     this.modificationDate = Date.now()
     this.symbols = []
+    this.#symbolsMap.clear()
     this.currentSymbol = undefined
     this.exports = undefined
     this.converts = undefined

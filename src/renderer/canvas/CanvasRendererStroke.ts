@@ -72,10 +72,6 @@ export class CanvasRendererStroke
         const secondPoint: TPointer = computeMiddlePointer(firstPoint, stroke.pointers[1])
         this.renderLine(context2d, firstPoint, secondPoint, width)
 
-        // Possibility to try this (the start looks better when the ink is large)
-        // var first = computeMiddlePoint(stroke.pointers[0], stroke.pointers[1]);
-        // context2d.arc(first.x, first.y, width * first.p, 0, Math.PI * 2, true);
-
         for (let i = 0; i < NUMBER_QUADRATICS; i++) {
           const begin: TPointer = computeMiddlePointer(stroke.pointers[i], stroke.pointers[i + 1])
           const end: TPointer = computeMiddlePointer(stroke.pointers[i + 1], stroke.pointers[i + 2])

@@ -15,12 +15,20 @@ export class SVGRendererEdgeUtil
 
   static getPolyLinePath(line: IIEdgePolyLine): string
   {
-    return `M ${ line.vertices[0].x } ${ line.vertices[0].y } ${ line.vertices.map(p => `L ${ p.x } ${ p.y }`).join(" ") }`
+    let path = `M ${ line.vertices[0].x } ${ line.vertices[0].y }`
+    for (let i = 0; i < line.vertices.length; i++) {
+      path += ` L ${ line.vertices[i].x } ${ line.vertices[i].y }`
+    }
+    return path
   }
 
   static getArcPath(arc: IIEdgeArc): string
   {
-    return `M ${ arc.vertices[0].x } ${ arc.vertices[0].y } Q ${ arc.vertices.map(p => `${ p.x } ${ p.y }`).join(" ") }`
+    let path = `M ${ arc.vertices[0].x } ${ arc.vertices[0].y } Q`
+    for (let i = 0; i < arc.vertices.length; i++) {
+      path += ` ${ arc.vertices[i].x } ${ arc.vertices[i].y }`
+    }
+    return path
   }
 
   static getSVGPath(edge: TIIEdge): string

@@ -240,12 +240,12 @@ export class Model
   {
     this.#logger.info("clone")
     const clonedModel = new Model(this.width, this.height, this.rowHeight, this.creationTime)
-    clonedModel.modificationDate = JSON.parse(JSON.stringify(this.modificationDate))
+    clonedModel.modificationDate = structuredClone(this.modificationDate)
     clonedModel.currentSymbol = this.currentSymbol ? this.currentSymbol.clone() : undefined
     clonedModel.symbols = this.symbols.map(s => s.clone())
-    clonedModel.positions = JSON.parse(JSON.stringify(this.positions))
-    clonedModel.exports = this.exports ? JSON.parse(JSON.stringify(this.exports)) : undefined
-    clonedModel.converts = this.converts ? JSON.parse(JSON.stringify(this.converts)) : undefined
+    clonedModel.positions = structuredClone(this.positions)
+    clonedModel.exports = this.exports ? structuredClone(this.exports) : undefined
+    clonedModel.converts = this.converts ? structuredClone(this.converts) : undefined
     clonedModel.idle = this.idle
     this.#logger.debug("clone", { clonedModel })
     return clonedModel

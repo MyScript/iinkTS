@@ -202,8 +202,8 @@ export class IISymbolGroup extends IISymbolBase<SymbolType.Group>
     return {
       id: this.id,
       type: this.type,
-      children: JSON.parse(JSON.stringify(this.children)),
-      decorators: this.decorators.length ? JSON.parse(JSON.stringify(this.decorators)) : undefined
+      children: structuredClone(this.children),
+      decorators: this.decorators.length ? structuredClone(this.decorators) : undefined
     }
   }
 }

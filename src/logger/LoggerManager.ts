@@ -18,9 +18,8 @@ export class LoggerManager
 
   static setLoggerLevel(config: TLoggerConfiguration)
   {
-    Object.keys(config).forEach((lc) =>
-    {
+    for (const lc in config) {
       LoggerManager.getLogger(lc as LoggerCategory).level = config[lc as LoggerCategory]
-    })
+    }
   }
 }

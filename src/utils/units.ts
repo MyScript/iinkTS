@@ -1,11 +1,14 @@
 import { TBox } from "../symbol"
 
+const MM_TO_PX_RATIO = 96 / 25.4
+const PX_TO_MM_RATIO = 25.4 / 96
+
 /**
  * @group Utils
  */
 export function convertMillimeterToPixel(mm: number): number
 {
-  return +(mm * 96 / 25.4).toFixed(3)
+  return +(mm * MM_TO_PX_RATIO).toFixed(3)
 }
 
 /**
@@ -13,7 +16,7 @@ export function convertMillimeterToPixel(mm: number): number
  */
 export function convertPixelToMillimeter(px: number): number
 {
-  return +(px / 96 * 25.4).toFixed(3)
+  return +(px * PX_TO_MM_RATIO).toFixed(3)
 }
 
 /**

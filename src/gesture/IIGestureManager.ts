@@ -32,6 +32,12 @@ export class IIGestureManager
 {
   #logger = LoggerManager.getLogger(LoggerCategory.GESTURE)
 
+  static readonly #DECORABLE_TYPES = new Set([SymbolType.Group, SymbolType.Stroke, SymbolType.Text, SymbolType.Recognized])
+  static readonly #TEXT_STROKE_GROUP_TYPES = new Set([SymbolType.Text, SymbolType.Stroke, SymbolType.Group])
+  static readonly #SURROUND_SELECT_TYPES = new Set([SymbolType.Group, SymbolType.Stroke, SymbolType.Text])
+  static readonly #ERASE_OVERLAY_TYPES = new Set([SymbolType.Stroke, SymbolType.Text, SymbolType.Group])
+  static readonly #ERASE_CONTAIN_TYPES = new Set([SymbolType.Shape, SymbolType.Edge])
+
   insertAction: InsertAction = InsertAction.LineBreak
   surroundAction: SurroundAction = SurroundAction.Select
   strikeThroughAction: StrikeThroughAction = StrikeThroughAction.Draw
@@ -100,12 +106,12 @@ export class IIGestureManager
         break
       }
       case SurroundAction.Highlight: {
-        const symbolIds: string[] = []
+        const symbolIdSet = new Set<string>()
         changes.decorator = []
         ids.forEach(id =>
         {
           const sym = this.model.getRootSymbol(id)
-          if (sym && [SymbolType.Group, SymbolType.Stroke, SymbolType.Text, SymbolType.Recognized].includes(sym.type) && !symbolIds.includes(sym.id)) {
+          if (sym && IIGestureManager.#DECORABLE_TYPES.has(sym.type) && !symbolIdSet.has(sym.id)) {
             const symWithDec = sym as (IIText | IIStroke | IISymbolGroup | IIRecognizedText)
             const highlight = new IIDecorator(DecoratorKind.Highlight, this.editor.penStyle)
             const index = symWithDec.decorators.findIndex(d => d.kind === DecoratorKind.Highlight)
@@ -114,7 +120,7 @@ export class IIGestureManager
             added ? symWithDec.decorators.push(highlight) : symWithDec.decorators.splice(index, 1)
             this.model.updateSymbol(symWithDec)
             this.renderer.drawSymbol(symWithDec)
-            symbolIds.push(symWithDec.id)
+            symbolIdSet.add(symWithDec.id)
             changes.decorator!.push({ symbol: symWithDec, decorator: highlight, added })
           }
         })
@@ -124,12 +130,12 @@ export class IIGestureManager
         break
       }
       case SurroundAction.Surround: {
-        const symbolIds: string[] = []
+        const symbolIdSet = new Set<string>()
         changes.decorator = []
         ids.forEach(id =>
         {
           const sym = this.model.getRootSymbol(id)
-          if (sym && [SymbolType.Group, SymbolType.Stroke, SymbolType.Text, SymbolType.Recognized].includes(sym.type) && !symbolIds.includes(sym.id)) {
+          if (sym && IIGestureManager.#DECORABLE_TYPES.has(sym.type) && !symbolIdSet.has(sym.id)) {
             const symWithDec = sym as (IIText | IIStroke | IISymbolGroup | IIRecognizedText)
             const surround = new IIDecorator(DecoratorKind.Surround, this.editor.penStyle)
             const index = symWithDec.decorators.findIndex(d => d.kind === DecoratorKind.Surround)
@@ -139,7 +145,7 @@ export class IIGestureManager
             this.model.updateSymbol(symWithDec)
             this.renderer.drawSymbol(symWithDec)
             changes.decorator!.push({ symbol: symWithDec, decorator: surround, added })
-            symbolIds.push(symWithDec.id)
+            symbolIdSet.add(symWithDec.id)
           }
         })
         this.history.push(this.model, changes)
@@ -380,8 +386,16 @@ export class IIGestureManager
       const lastSymbBefore = this.model.getLastSymbol(symbolsBeforeGestureInRow)!
       const firstSymbolAfter = this.model.getFirstSymbol(symbolsAfterGestureInRow)!
 
-      const lastXBefore = Math.max(...symbolsBeforeGestureInRow.map(s => s.bounds.xMax))
-      const firstXAfter = Math.min(...symbolsAfterGestureInRow.map(s => s.bounds.xMin))
+      let lastXBefore = symbolsBeforeGestureInRow[0].bounds.xMax
+      for (let i = 1; i < symbolsBeforeGestureInRow.length; i++) {
+        const xMax = symbolsBeforeGestureInRow[i].bounds.xMax
+        if (xMax > lastXBefore) lastXBefore = xMax
+      }
+      let firstXAfter = symbolsAfterGestureInRow[0].bounds.xMin
+      for (let i = 1; i < symbolsAfterGestureInRow.length; i++) {
+        const xMin = symbolsAfterGestureInRow[i].bounds.xMin
+        if (xMin < firstXAfter) firstXAfter = xMin
+      }
       const translateX = lastXBefore - firstXAfter
 
       const lastSymbBeforeClone = lastSymbBefore.clone()
@@ -409,13 +423,13 @@ export class IIGestureManager
       }
       else {
         const group = new IISymbolGroup(symbolsToGroup, lastSymbBefore.style)
-        if ([SymbolType.Group, SymbolType.Stroke, SymbolType.Text, SymbolType.Recognized].includes(lastSymbBefore.type)) {
+        if (IIGestureManager.#DECORABLE_TYPES.has(lastSymbBefore.type)) {
           (lastSymbBefore as IIStroke).decorators.forEach(d =>
           {
             group.decorators.push(new IIDecorator(d.kind, d.style))
           })
         }
-        if ([SymbolType.Group, SymbolType.Stroke, SymbolType.Text, SymbolType.Recognized].includes(firstSymbolAfter.type)) {
+        if (IIGestureManager.#DECORABLE_TYPES.has(firstSymbolAfter.type)) {
           (firstSymbolAfter as IIStroke).decorators.forEach(d =>
           {
             if (!group.decorators.some(d1 => d1.kind == d.kind)) {
@@ -788,11 +802,11 @@ export class IIGestureManager
     }
 
     const changes: TIIHistoryChanges = { decorator: [] }
-    const symbolIds: string[] = []
+    const symbolIdSet = new Set<string>()
     gesture.strokeIds.forEach(id =>
     {
       const sym = this.model.getRootSymbol(id)
-      if (sym && [SymbolType.Group, SymbolType.Stroke, SymbolType.Text, SymbolType.Recognized].includes(sym.type) && !symbolIds.includes(sym.id)) {
+      if (sym && IIGestureManager.#DECORABLE_TYPES.has(sym.type) && !symbolIdSet.has(sym.id)) {
         const symWithDec = sym as (IIText | IIStroke | IISymbolGroup | IIRecognizedText)
         const underline = new IIDecorator(DecoratorKind.Underline, this.editor.penStyle)
         const index = symWithDec.decorators.findIndex(d => d.kind === DecoratorKind.Underline)
@@ -802,7 +816,7 @@ export class IIGestureManager
         this.model.updateSymbol(symWithDec)
         this.renderer.drawSymbol(symWithDec)
         changes.decorator?.push({ symbol: symWithDec, decorator: underline, added })
-        symbolIds.push(symWithDec.id)
+        symbolIdSet.add(symWithDec.id)
       }
     })
     if (changes.decorator?.length) {
@@ -894,7 +908,7 @@ export class IIGestureManager
         const hasSymbolsToSurrond = this.model.symbols.some(s =>
         {
           if (s.id !== gestureStroke.id && gestureStroke.bounds.contains(s.bounds)) {
-            return this.surroundAction === SurroundAction.Select || [SymbolType.Group, SymbolType.Stroke, SymbolType.Text].includes(s.type)
+            return this.surroundAction === SurroundAction.Select || IIGestureManager.#SURROUND_SELECT_TYPES.has(s.type)
           }
           return false
         })
@@ -913,7 +927,7 @@ export class IIGestureManager
       case "right-left": {
         const symbolsToUnderline = this.model.symbols.filter(s =>
         {
-          return s.id !== gestureStroke.id && [SymbolType.Text, SymbolType.Stroke, SymbolType.Group].includes(s.type) &&
+          return s.id !== gestureStroke.id && IIGestureManager.#TEXT_STROKE_GROUP_TYPES.has(s.type) &&
             isBetween(s.bounds.xMid, gestureStroke.bounds.xMin, gestureStroke.bounds.xMax) &&
             isBetween(gestureStroke.bounds.yMid, s.bounds.y + s.bounds.height * 3 / 4, s.bounds.y + s.bounds.height * 5 / 4)
         })
@@ -928,7 +942,7 @@ export class IIGestureManager
         }
         const symbolsToStrikeThrough = this.model.symbols.filter(s =>
         {
-          return s.id !== gestureStroke.id && [SymbolType.Text, SymbolType.Stroke, SymbolType.Group].includes(s.type) &&
+          return s.id !== gestureStroke.id && IIGestureManager.#TEXT_STROKE_GROUP_TYPES.has(s.type) &&
             isBetween(s.bounds.xMid, gestureStroke.bounds.xMin, gestureStroke.bounds.xMax) &&
             isBetween(gestureStroke.bounds.yMid, s.bounds.y + s.bounds.height / 4, s.bounds.y + s.bounds.height * 3 / 4)
         })
@@ -948,8 +962,8 @@ export class IIGestureManager
         {
           return s.id !== gestureStroke.id &&
             (
-              gestureStroke.bounds.overlaps(s.bounds) && [SymbolType.Stroke, SymbolType.Text, SymbolType.Group].includes(s.type) ||
-              gestureStroke.bounds.contains(s.bounds) && [SymbolType.Shape, SymbolType.Edge].includes(s.type)
+              gestureStroke.bounds.overlaps(s.bounds) && IIGestureManager.#ERASE_OVERLAY_TYPES.has(s.type) ||
+              gestureStroke.bounds.contains(s.bounds) && IIGestureManager.#ERASE_CONTAIN_TYPES.has(s.type)
             )
         })
 
@@ -967,7 +981,7 @@ export class IIGestureManager
       case "bottom-top": {
         const hasSymbolsInRow = this.model.symbols.some(s =>
           s.id !== gestureStroke.id &&
-          [SymbolType.Text, SymbolType.Stroke, SymbolType.Group].includes(s.type) &&
+          IIGestureManager.#TEXT_STROKE_GROUP_TYPES.has(s.type) &&
           isBetween(s.bounds.yMid, gestureStroke.bounds.yMin, gestureStroke.bounds.yMax)
         )
         if (hasSymbolsInRow) {
@@ -984,7 +998,7 @@ export class IIGestureManager
       case "top-bottom": {
         const hasSymbolsInRow = this.model.symbols.some(s =>
           s.id !== gestureStroke.id &&
-          [SymbolType.Text, SymbolType.Stroke, SymbolType.Group].includes(s.type) &&
+          IIGestureManager.#TEXT_STROKE_GROUP_TYPES.has(s.type) &&
           isBetween(s.bounds.yMid, gestureStroke.bounds.yMin, gestureStroke.bounds.yMax)
         )
         if (hasSymbolsInRow) {

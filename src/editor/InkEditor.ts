@@ -147,13 +147,13 @@ export class InkEditor extends AbstractEditor
     }
   }
 
-  //updateBoundingBox
   updateSymbolsStyle(symbolIds: string[], style: PartialDeep<TStyle>): void
   {
     this.logger.info("updateSymbolsStyle", { symbolIds, style })
+    const symbolIdSet = new Set(symbolIds)
     this.model.strokes.forEach(s =>
     {
-      if (symbolIds.includes(s.id)) {
+      if (symbolIdSet.has(s.id)) {
         s.style = Object.assign({}, s.style, style)
         this.renderer.drawSymbol(s)
         this.model.updateStroke(s)
@@ -204,7 +204,8 @@ export class InkEditor extends AbstractEditor
   async removeStrokes(strokeIds: string[]): Promise<void>
   {
     this.logger.info("removeStrokes", { strokeIds })
-    const removedStrokes = this.model.strokes.filter(s => strokeIds.includes(s.id))
+    const strokeIdSet = new Set(strokeIds)
+    const removedStrokes = this.model.strokes.filter(s => strokeIdSet.has(s.id))
     if (removedStrokes.length === 0) {
       this.logger.warn("removeStrokes", "No strokes found to remove")
       return

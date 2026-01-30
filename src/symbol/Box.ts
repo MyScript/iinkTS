@@ -36,11 +36,18 @@ export class Box implements TBox
     if (!boxes?.length) {
       return new Box({ height: 0, width: 0, x: 0, y: 0 })
     }
-    const x = Math.min(...boxes.map(b => b.x))
-    const width = Math.max(...boxes.map(b => b.x + b.width)) - x
-    const y = Math.min(...boxes.map(b => b.y))
-    const height = Math.max(...boxes.map(b => b.y + b.height)) - y
-    return new Box({ x, y, width, height })
+    let minX = boxes[0].x
+    let maxX = boxes[0].x + boxes[0].width
+    let minY = boxes[0].y
+    let maxY = boxes[0].y + boxes[0].height
+    for (let i = 1; i < boxes.length; i++) {
+      const b = boxes[i]
+      if (b.x < minX) minX = b.x
+      if (b.x + b.width > maxX) maxX = b.x + b.width
+      if (b.y < minY) minY = b.y
+      if (b.y + b.height > maxY) maxY = b.y + b.height
+    }
+    return new Box({ x: minX, y: minY, width: maxX - minX, height: maxY - minY })
   }
 
   static createFromPoints(points: TPoint[]): Box
@@ -48,11 +55,18 @@ export class Box implements TBox
     if (!points?.length) {
       return new Box({ height: 0, width: 0, x: 0, y: 0 })
     }
-    const x = Math.min(...points.map(p => p.x))
-    const width = Math.max(...points.map(p => p.x)) - x
-    const y = Math.min(...points.map(p => p.y))
-    const height = Math.max(...points.map(p => p.y)) - y
-    return new Box({ x, y, width, height })
+    let minX = points[0].x
+    let maxX = points[0].x
+    let minY = points[0].y
+    let maxY = points[0].y
+    for (let i = 1; i < points.length; i++) {
+      const p = points[i]
+      if (p.x < minX) minX = p.x
+      if (p.x > maxX) maxX = p.x
+      if (p.y < minY) minY = p.y
+      if (p.y > maxY) maxY = p.y
+    }
+    return new Box({ x: minX, y: minY, width: maxX - minX, height: maxY - minY })
   }
 
   static getCorners(box: TBox): TPoint[]

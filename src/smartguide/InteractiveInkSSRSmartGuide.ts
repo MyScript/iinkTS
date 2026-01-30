@@ -407,7 +407,6 @@ export class InteractiveInkSSRSmartGuide
               this.lastWord = word
             }
             const span = createWordSpan(index, word)
-            // This is used to scroll to last word if last word is modified
 
             if ((this.lastWord?.candidates !== word.candidates) && (this.lastWord?.label !== word.label)) {
               this.lastWord = word

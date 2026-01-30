@@ -1,4 +1,5 @@
 import ArrowDown from "../assets/svg/nav-arrow-down.svg"
+import { createMenuButtonWithText } from "./MenuHelper"
 
 /**
  * @group Menu
@@ -177,21 +178,19 @@ export abstract class IIMenu
     wrapper.appendChild(labelEl)
     item.values.forEach((v) =>
     {
-      const btn = document.createElement("button")
+      const btn = createMenuButtonWithText(
+        `${item.id}-${ v.value }-btn`,
+        v.label,
+        () => {
+          item.callback(v.value)
+          wrapper.querySelectorAll("*").forEach(e => e.classList.remove("active"))
+          btn.classList.add("active")
+        },
+        item.initValue === v.value ? ["active"] : []
+      )
       if (item.disabled) {
         btn.disabled = true
       }
-      btn.id = `${item.id}-${ v.value }-btn`
-      if (item.initValue === v.value) {
-        btn.classList.add("active")
-      }
-      btn.textContent = v.label
-      btn.addEventListener("pointerup", () =>
-      {
-        item.callback(v.value)
-        wrapper.querySelectorAll("*").forEach(e => e.classList.remove("active"))
-        btn.classList.add("active")
-      })
       wrapper.appendChild(btn)
     })
     return wrapper
