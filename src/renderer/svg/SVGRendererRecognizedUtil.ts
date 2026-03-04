@@ -2,8 +2,8 @@ import { DecoratorKind, RecognizedKind, TIIRecognized } from "../../symbol"
 import { DefaultStyle } from "../../style"
 import { SVGRendererDecoratorUtil } from "./SVGRendererDecoratorUtil"
 import { SVGRendererStrokeUtil } from "./SVGRendererStrokeUtil"
-import { SVGRendererConst } from "./SVGRendererConst"
-import { SVGBuilder } from "./SVGBuilder"
+import { SVGRendererConst } from "./utils/SVGRendererConst"
+import { SVGBuilder } from "./utils/SVGBuilder"
 
 /**
  * @group Renderer

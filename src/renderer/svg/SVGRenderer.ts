@@ -3,7 +3,8 @@ import { getClosestPoints } from "../../utils"
 import { LoggerCategory, LoggerManager } from "../../logger"
 import { TIISymbol, TPoint, TBox, Box, IIEraser, SymbolType } from "../../symbol"
 import { TIIRendererConfiguration } from "../RendererConfiguration"
-import { SVGRendererConst } from "./SVGRendererConst"
+import { BaseRenderer } from "../base"
+import { SVGRendererConst } from "./utils/SVGRendererConst"
 import { SVGRendererEdgeUtil } from "./SVGRendererEdgeUtil"
 import { SVGRendererEraserUtil } from "./SVGRendererEraserUtil"
 import { SVGRendererGroupUtil } from "./SVGRendererGroupUtil"
@@ -11,17 +12,15 @@ import { SVGRendererShapeUtil } from "./SVGRendererShapeUtil"
 import { SVGRendererStrokeUtil } from "./SVGRendererStrokeUtil"
 import { SVGRendererTextUtil } from "./SVGRendererTextUtil"
 import { SVGRendererRecognizedUtil } from "./SVGRendererRecognizedUtil"
-import { SVGBuilder } from "./SVGBuilder"
+import { SVGBuilder } from "./utils/SVGBuilder"
 
 /**
  * @group Renderer
  */
-export class SVGRenderer {
+export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfiguration> {
   #logger = LoggerManager.getLogger(LoggerCategory.RENDERER)
   groupGuidesId = "guides-wrapper"
 
-  configuration: TIIRendererConfiguration
-  parent!: HTMLElement
   layer!: SVGSVGElement
   definitionGroup!: SVGGElement
 
@@ -29,6 +28,7 @@ export class SVGRenderer {
   horizontalGuides: number[] = []
 
   constructor(configuration: TIIRendererConfiguration) {
+    super(configuration)
     this.#logger.info("constructor", { configuration })
     this.configuration = configuration
   }
@@ -378,6 +378,11 @@ export class SVGRenderer {
       }
       this.layer.appendChild(this.createSVGTools())
     }
+  }
+
+  getRenderingContext(): SVGSVGElement
+  {
+    return this.layer
   }
 
   destroy(): void {
