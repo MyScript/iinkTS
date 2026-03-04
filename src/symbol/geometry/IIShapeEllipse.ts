@@ -1,9 +1,9 @@
 import { SELECTION_MARGIN } from "../../Constants"
 import { TStyle } from "../../style"
 import { PartialDeep, computePointOnEllipse, findIntersectionBetween2Segment, isValidNumber, } from "../../utils"
-import { TPoint, isValidPoint } from "../Point"
+import { TPoint, isValidPoint } from "../base/Point"
 import { OIShapeBase, ShapeKind } from "./IIShape"
-import { Box, TBox } from "../Box"
+import { Box, TBox } from "../base/Box"
 
 /**
  * @group Symbol

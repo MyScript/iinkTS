@@ -1,4 +1,4 @@
-import { isBetween } from "../utils"
+import { isBetween } from "../../utils"
 import { TPoint, TSegment } from "./Point"
 
 /**

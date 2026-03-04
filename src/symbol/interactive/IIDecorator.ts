@@ -1,5 +1,5 @@
-import { createUUID, mergeDeep, PartialDeep } from "../utils"
-import { DefaultStyle, TStyle } from "../style"
+import { createUUID, mergeDeep, PartialDeep } from "../../utils"
+import { DefaultStyle, TStyle } from "../../style"
 
 /**
  * @group Symbol

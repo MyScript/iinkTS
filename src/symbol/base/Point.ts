@@ -1,4 +1,4 @@
-import { PartialDeep, isValidNumber } from "../utils"
+import { PartialDeep, isValidNumber } from "../../utils"
 
 /**
  * @group Symbol

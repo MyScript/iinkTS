@@ -1,8 +1,8 @@
-import { TStyle } from "../style"
-import { PartialDeep, convertDegreeToRadian, findIntersectionBetween2Segment, isPointInsidePolygon, computeRotatedPoint } from "../utils"
-import { TPoint, isValidPoint } from "./Point"
-import { SymbolType } from "./Symbol"
-import { Box, TBox } from "./Box"
+import { TStyle } from "../../style"
+import { PartialDeep, convertDegreeToRadian, findIntersectionBetween2Segment, isPointInsidePolygon, computeRotatedPoint } from "../../utils"
+import { TPoint, isValidPoint } from "../base/Point"
+import { SymbolType } from "../base/Symbol"
+import { Box, TBox } from "../base/Box"
 import { IIDecorator } from "./IIDecorator"
 import { IISymbolBase } from "./IISymbolBase"
 
