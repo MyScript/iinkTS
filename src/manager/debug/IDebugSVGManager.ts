@@ -1,9 +1,9 @@
-import { LoggerManager, LoggerCategory } from "../logger"
-import { IModel } from "../model"
-import { Box, IIStroke, IIText, SymbolType, TBox, TIISymbol } from "../symbol"
-import { SVGRenderer, SVGRendererConst, SVGBuilder } from "../renderer"
-import { createUUID } from "../utils"
-import { InkEditor } from "../editor"
+import { LoggerManager, LoggerCategory } from "../../logger"
+import { IModel } from "../../model"
+import { Box, IIStroke, IIText, SymbolType, TBox, TIISymbol } from "../../symbol"
+import { SVGRenderer, SVGRendererConst, SVGBuilder } from "../../renderer"
+import { createUUID } from "../../utils"
+import { InkEditor } from "../../editor"
 
 /**
  * @group Manager

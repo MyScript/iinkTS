@@ -1,9 +1,9 @@
-import { LoggerCategory, LoggerManager } from "../logger"
-import { IIEraser, TSegment } from "../symbol"
-import { SVGRenderer } from "../renderer"
-import { InteractiveInkEditor } from "../editor/InteractiveInkEditor"
-import { PointerEventGrabber, PointerInfo } from "../grabber"
-import { InkEditor } from "../editor"
+import { LoggerCategory, LoggerManager } from "../../logger"
+import { IIEraser, TSegment } from "../../symbol"
+import { SVGRenderer } from "../../renderer"
+import { InteractiveInkEditor } from "../../editor/InteractiveInkEditor"
+import { PointerEventGrabber, PointerInfo } from "../../grabber"
+import { InkEditor } from "../../editor"
 
 /**
  * @group Manager

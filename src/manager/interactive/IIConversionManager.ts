@@ -1,5 +1,5 @@
-import { InteractiveInkEditor } from "../editor"
-import { LoggerManager, LoggerCategory } from "../logger"
+import { InteractiveInkEditor } from "../../editor"
+import { LoggerManager, LoggerCategory } from "../../logger"
 import
 {
   IIModel,
@@ -21,7 +21,7 @@ import
   TJIIXNodeTriangle,
   TJIIXTextElement,
   TJIIXWord
-} from "../model"
+} from "../../model"
 import
 {
   Box,
@@ -41,9 +41,9 @@ import
   TIISymbol,
   TIISymbolChar,
   TPoint
-} from "../symbol"
-import { RecognizedKind } from "../symbol"
-import { computeAngleAxeRadian, computeAverage, convertBoundingBoxMillimeterToPixel, convertMillimeterToPixel, createUUID } from "../utils"
+} from "../../symbol"
+import { RecognizedKind } from "../../symbol"
+import { computeAngleAxeRadian, computeAverage, convertBoundingBoxMillimeterToPixel, convertMillimeterToPixel, createUUID } from "../../utils"
 
 /**
  * @group Manager
