@@ -1,8 +1,8 @@
-import { LoggerCategory, LoggerManager } from "../logger"
-import { IIModel } from "../model"
-import { Box, IIText, SymbolType, TIISymbol, TIISymbolChar } from "../symbol"
-import { SVGRenderer } from "../renderer"
-import { InteractiveInkEditor } from "../editor/InteractiveInkEditor"
+import { LoggerCategory, LoggerManager } from "../../logger"
+import { IIModel } from "../../model"
+import { Box, IIText, SymbolType, TIISymbol, TIISymbolChar } from "../../symbol"
+import { SVGRenderer } from "../../renderer"
+import { InteractiveInkEditor } from "../../editor/InteractiveInkEditor"
 
 /**
  * @group Manager

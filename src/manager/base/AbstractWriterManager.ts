@@ -1,14 +1,14 @@
-import { LoggerCategory, LoggerManager } from "../logger"
+import { LoggerCategory, LoggerManager } from "../../logger"
 import
 {
   TIISymbol,
   TPointer,
-} from "../symbol"
-import { SVGRenderer } from "../renderer"
-import { TStyle } from "../style"
-import { InteractiveInkEditor } from "../editor/InteractiveInkEditor"
-import { PointerEventGrabber, PointerInfo } from "../grabber"
-import { InkEditor } from "../editor"
+} from "../../symbol"
+import { SVGRenderer } from "../../renderer"
+import { TStyle } from "../../style"
+import { InteractiveInkEditor } from "../../editor/InteractiveInkEditor"
+import { PointerEventGrabber, PointerInfo } from "../../grabber"
+import { InkEditor } from "../../editor"
 
 
 /**

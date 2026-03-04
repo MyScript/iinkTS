@@ -1,7 +1,7 @@
-import { ResizeDirection, SvgElementRole } from "../Constants"
-import { InteractiveInkEditor } from "../editor/InteractiveInkEditor"
-import { LoggerCategory, LoggerManager } from "../logger"
-import { IIModel } from "../model"
+import { ResizeDirection, SvgElementRole } from "../../Constants"
+import { InteractiveInkEditor } from "../../editor/InteractiveInkEditor"
+import { LoggerCategory, LoggerManager } from "../../logger"
+import { IIModel } from "../../model"
 import
 {
   Box,
@@ -17,7 +17,7 @@ import
   TPoint,
   TIIRecognized,
   RecognizedKind
-} from "../symbol"
+} from "../../symbol"
 
 /**
  * @group Manager
