@@ -1,8 +1,8 @@
 import { TStyle } from "../../style"
 import { PartialDeep } from "../../utils"
-import { IIDecorator } from "../IIDecorator"
+import { IIDecorator } from "../interactive/IIDecorator"
 import { IIRecognizedBase, RecognizedKind } from "./IIRecognizedBase"
-import { IIStroke } from "../IIStroke"
+import { IIStroke } from "../interactive/IIStroke"
 
 /**
  * @group Symbol

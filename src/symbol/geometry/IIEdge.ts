@@ -1,10 +1,10 @@
 import { SELECTION_MARGIN } from "../../Constants"
 import { TStyle } from "../../style"
 import { findIntersectionBetween2Segment, PartialDeep } from "../../utils"
-import { Box, TBox } from "../Box"
-import { IISymbolBase } from "../IISymbolBase"
-import { TPoint } from "../Point"
-import { SymbolType } from "../Symbol"
+import { Box, TBox } from "../base/Box"
+import { IISymbolBase } from "../interactive/IISymbolBase"
+import { TPoint } from "../base/Point"
+import { SymbolType } from "../base/Symbol"
 
 /**
  * @group Symbol

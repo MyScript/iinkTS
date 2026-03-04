@@ -1,5 +1,5 @@
-import { TStyle } from "../style"
-import { PartialDeep } from "../utils"
+import { TStyle } from "../../style"
+import { PartialDeep } from "../../utils"
 
 /**
  * @group Symbol

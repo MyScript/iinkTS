@@ -1,5 +1,5 @@
-import { DefaultPenStyle, TPenStyle } from "../style"
-import { PartialDeep, createUUID } from "../utils"
+import { DefaultPenStyle, TPenStyle } from "../../style"
+import { PartialDeep, createUUID } from "../../utils"
 import { TPointer } from "./Point"
 import { SymbolType, TSymbol } from "./Symbol"
 

@@ -6,7 +6,7 @@ import
   IIShapeCircle,
   IIShapeEllipse,
   IIShapePolygon
-} from "./geometry"
+} from "../geometry"
 import
 {
   IIRecognizedText,
@@ -16,7 +16,7 @@ import
   IIRecognizedLine,
   IIRecognizedPolyLine,
   IIRecognizedPolygon
-} from "./recognized"
+} from "../recognized"
 import { IIStroke } from "./IIStroke"
 import { IISymbolGroup } from "./IISymbolGroup"
 import { IIText } from "./IIText"
