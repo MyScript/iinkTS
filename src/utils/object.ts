@@ -2,38 +2,44 @@
 /**
  * @group Utils
  */
+type Mergeable = Record<string, unknown> | unknown[] | unknown
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const mergeDeep = (target: any, ...sources: any[]): any =>
+export const mergeDeep = (target: any, ...sources: Mergeable[]): any =>
 {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const isObject = (item: any) =>
+  const isObject = (item: unknown): item is Record<string, unknown> =>
   {
-    return (item && typeof item === "object" && !Array.isArray(item))
+    return typeof item === "object" && item !== null && !Array.isArray(item)
   }
   if (!sources.length) return target
   const source = sources.shift()
 
   if (isObject(target) && isObject(source)) {
     for (const key in source) {
-      if (isObject(source[key])) {
-        if (!target[key]) {
-          Object.assign(target, { [key]: {} })
+      if (Object.prototype.hasOwnProperty.call(source, key)) {
+        const sourceValue = source[key]
+        const targetValue = (target as Record<string, unknown>)[key]
+
+        if (isObject(sourceValue)) {
+          if (!isObject(targetValue)) {
+            (target as Record<string, unknown>)[key] = {}
+          }
+          mergeDeep((target as Record<string, unknown>)[key], sourceValue)
         }
-        mergeDeep(target[key], source[key])
-      }
-      else if (Array.isArray(target[key]) && Array.isArray(source[key])) {
-        target[key] = target[key].concat(source[key])
-      }
-      else {
-        Object.assign(target, { [key]: source[key] })
+        else if (Array.isArray(targetValue) && Array.isArray(sourceValue)) {
+          (target as Record<string, unknown>)[key] = (targetValue as unknown[]).concat(sourceValue as unknown[])
+        }
+        else {
+          (target as Record<string, unknown>)[key] = sourceValue
+        }
       }
     }
   }
   else if (Array.isArray(target) && Array.isArray(source)) {
-    target = target.concat(source)
+    return target.concat(source)
   }
   else if (source) {
-    target = source
+    return source
   }
 
   return mergeDeep(target, ...sources)
@@ -42,17 +48,20 @@ export const mergeDeep = (target: any, ...sources: any[]): any =>
 /**
  * @group Utils
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const isDeepEqual = (object1: any, object2: any) =>
+export const isDeepEqual = (object1: unknown, object2: unknown): boolean =>
 {
+  if (!isObject(object1) || !isObject(object2)) {
+    return object1 === object2
+  }
+
   const objKeys1 = Object.keys(object1)
   const objKeys2 = Object.keys(object2)
 
   if (objKeys1.length !== objKeys2.length) return false
 
   for (const key of objKeys1) {
-    const value1 = object1[key]
-    const value2 = object2[key]
+    const value1 = object1[key as keyof typeof object1]
+    const value2 = object2[key as keyof typeof object2]
 
     const isObjects = isObject(value1) && isObject(value2)
 
@@ -69,8 +78,7 @@ export const isDeepEqual = (object1: any, object2: any) =>
 /**
  * @group Utils
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const isObject = (object: any) =>
+const isObject = (object: unknown): object is Record<string, unknown> =>
 {
-  return object && typeof object === "object"
+  return typeof object === "object" && object !== null
 }
