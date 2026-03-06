@@ -1,7 +1,6 @@
 {
   "name": "iink-ts-with-tldraw",
   "version": "1.0.0-buildVersion",
-  "private": false,
   "homepage": "https://myscript.github.io/iinkTS/",
   "repository": "git://github.com/MyScript/iinkTS.git",
   "license": "Apache-2.0",
