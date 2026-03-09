@@ -6,7 +6,8 @@ import
   TLShapeId,
   TLShapePartial,
   TLTextShape,
-  createShapeId
+  createShapeId,
+  toRichText
 } from 'tldraw'
 import
 {
@@ -164,7 +165,7 @@ export class Converter
       props: {
         color: firstShape.props.color,
         size: firstShape.props.size,
-        text: text.label,
+        richText: toRichText(text.label),
         font: this.font,
         textAlign: "start",
       },
