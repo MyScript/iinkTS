@@ -83,7 +83,7 @@ export class IIResizeManager
         return shape
       }
       default:
-        throw new Error(`Can't apply resize on shape, kind unknow: ${ JSON.stringify(shape) }`)
+        throw new Error(`Can't apply resize on shape, kind unknown: ${ JSON.stringify(shape) }`)
     }
   }
 
@@ -125,7 +125,7 @@ export class IIResizeManager
         return edge
       }
       default:
-        throw new Error(`Can't apply resize on edge, kind unknow: ${ JSON.stringify(edge) }`)
+        throw new Error(`Can't apply resize on edge, kind unknown: ${ JSON.stringify(edge) }`)
     }
   }
 
@@ -173,7 +173,7 @@ export class IIResizeManager
       case SymbolType.Recognized:
         return this.applyOnRecognizedSymbol(symbol, origin, scaleX, scaleY)
       default:
-        throw new Error(`Can't apply resize on symbol, type unknow: ${ JSON.stringify(symbol) }`)
+        throw new Error(`Can't apply resize on symbol, type unknown: ${ JSON.stringify(symbol) }`)
     }
   }
 

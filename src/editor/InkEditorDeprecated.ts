@@ -90,7 +90,7 @@ export class InkEditorDeprecated extends AbstractEditor
         this.drawCurrentStroke()
         break
       default:
-        this.logger.warn("#onPointerDown", `onPointerDown tool unknow: "${ this.tool }"`)
+        this.logger.warn("#onPointerDown", `onPointerDown tool unknown: "${ this.tool }"`)
         break
     }
   }
@@ -110,7 +110,7 @@ export class InkEditorDeprecated extends AbstractEditor
         this.drawCurrentStroke()
         break
       default:
-        this.logger.warn("#onPointerMove", `onPointerMove tool unknow: "${ this.tool }"`)
+        this.logger.warn("#onPointerMove", `onPointerMove tool unknown: "${ this.tool }"`)
         break
     }
   }
@@ -131,7 +131,7 @@ export class InkEditorDeprecated extends AbstractEditor
           await this.updateModelRendering()
           break
         default:
-          this.logger.warn("#onPointerUp", `onPointerUp tool unknow: "${ this.tool }"`)
+          this.logger.warn("#onPointerUp", `onPointerUp tool unknown: "${ this.tool }"`)
           break
       }
     } catch (error) {

@@ -236,7 +236,7 @@ export class RecognizerHTTPV1
       .catch((err) =>
       {
         this.#logger.error("tryFetch", { data, mimeType, err })
-        let message = err.message || RecognizerError.UNKNOW
+        let message = err.message || RecognizerError.UNKNOWN
         if (!err.code) {
           message = RecognizerError.CANT_ESTABLISH
         } else if (err.code === "access.not.granted") {

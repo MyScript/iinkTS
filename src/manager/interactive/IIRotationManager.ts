@@ -74,7 +74,7 @@ export class IIRotationManager
         return shape
       }
       default:
-        throw new Error(`Can't apply rotate on shape, kind unknow: ${ JSON.stringify(shape) }`)
+        throw new Error(`Can't apply rotate on shape, kind unknown: ${ JSON.stringify(shape) }`)
     }
   }
 
@@ -96,7 +96,7 @@ export class IIRotationManager
         return edge
       }
       default:
-        throw new Error(`Can't apply rotate on edge, kind unknow: ${ JSON.stringify(edge) }`)
+        throw new Error(`Can't apply rotate on edge, kind unknown: ${ JSON.stringify(edge) }`)
     }
     return edge
   }
@@ -138,7 +138,7 @@ export class IIRotationManager
       case SymbolType.Recognized:
         return this.applyOnRecognizedSymbol(symbol, center, angleRad)
       default:
-        throw new Error(`Can't apply rotate on symbol, type unknow: ${ JSON.stringify(symbol) }`)
+        throw new Error(`Can't apply rotate on symbol, type unknown: ${ JSON.stringify(symbol) }`)
     }
   }
 

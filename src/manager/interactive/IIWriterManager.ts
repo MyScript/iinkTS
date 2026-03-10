@@ -163,7 +163,7 @@ export class IIWriterManager extends AbstractWriterManager
         break
       }
       default:
-        throw new Error(`Can't create symbol, tool is unknow: "${ this.tool }"`)
+        throw new Error(`Can't create symbol, tool is unknown: "${ this.tool }"`)
     }
     return this.updateCurrentSymbol(pointer)
   }

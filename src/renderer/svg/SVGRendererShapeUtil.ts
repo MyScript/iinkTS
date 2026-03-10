@@ -38,7 +38,7 @@ export class SVGRendererShapeUtil
       case ShapeKind.Ellipse:
         return SVGRendererShapeUtil.getEllipsePath(shape as IIShapeEllipse)
       default:
-        throw new Error(`Can't getSVGPath for shape cause kind is unknow: "${ JSON.stringify(shape) }"`)
+        throw new Error(`Can't getSVGPath for shape cause kind is unknown: "${ JSON.stringify(shape) }"`)
     }
   }
 

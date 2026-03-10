@@ -226,7 +226,7 @@ export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfigur
         element = SVGRendererRecognizedUtil.getSVGElement(symbol)
         break
       default:
-        this.#logger.error("buildElementFromSymbol", `symbol unknow: "${JSON.stringify(symbol)}"`)
+        this.#logger.error("buildElementFromSymbol", `symbol unknown: "${JSON.stringify(symbol)}"`)
     }
     return element
   }

@@ -74,7 +74,7 @@ export class CanvasRenderer extends BaseRenderer<CanvasRenderingContext2D, Omit<
     } else if (Object.keys(this.shapeRenderer.symbols).includes(symbol.type)) {
       this.shapeRenderer.draw(context2D, symbol)
     } else {
-      this.#logger.warn("drawSymbol", `symbol type unknow: ${symbol.type}`)
+      this.#logger.warn("drawSymbol", `symbol type unknown: ${symbol.type}`)
     }
   }
 
