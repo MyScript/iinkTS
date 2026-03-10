@@ -83,7 +83,7 @@ test.describe("Rest v2 Math", () => {
 
       const promisesResult = await Promise.all([
         waitForExportedEvent(page),
-        page.click("#clear"),
+        page.locator("#clear").click(),
       ])
       expect(promisesResult[0]).toBeNull()
       expect(await getEditorExports(page)).toBeFalsy()
@@ -102,21 +102,21 @@ test.describe("Rest v2 Math", () => {
       })
 
       await test.step("should undo last stroke", async () => {
-        await Promise.all([waitForChangedEvent(page), page.click("#undo")])
+        await Promise.all([waitForChangedEvent(page), page.locator("#undo").click()])
         expect(await getEditorStrokes(page)).toHaveLength(
           equation.strokes.length - 1
         )
       })
 
       await test.step("should undo last stroke", async () => {
-        await Promise.all([waitForChangedEvent(page), page.click("#undo")])
+        await Promise.all([waitForChangedEvent(page), page.locator("#undo").click()])
         expect(await getEditorStrokes(page)).toHaveLength(
           equation.strokes.length - 2
         )
       })
 
       await test.step("should undo last stroke", async () => {
-        await Promise.all([waitForChangedEvent(page), page.click("#redo")])
+        await Promise.all([waitForChangedEvent(page), page.locator("#redo").click()])
         expect(await getEditorStrokes(page)).toHaveLength(
           equation.strokes.length - 1
         )
@@ -134,7 +134,7 @@ test.describe("Rest v2 Math", () => {
       // Undo multiple times
       await test.step("undo multiple times and verify result is empty", async () => {
         for(let i = 0; i < equation.strokes.length; i++) {
-          await page.click("#undo")
+          await page.locator("#undo").click()
           // eslint-disable-next-line playwright/no-wait-for-timeout
           await page.waitForTimeout(100) // wait for the undo to process
         }

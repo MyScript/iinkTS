@@ -27,7 +27,7 @@ test.describe("Rest Text Styling", () => {
   })
 
   test("should draw stroke with penStyleEnabled", async ({ page }) => {
-    await page.click("#penenabled")
+    await page.locator("#penenabled").setChecked(true)
 
     const [exportedDatas] = await Promise.all([
       waitForExportedEvent(page),
@@ -39,7 +39,7 @@ test.describe("Rest Text Styling", () => {
   })
 
   test("should draw stroke with different color and width of ink", async ({ page }) => {
-    await page.click("#penenabled")
+    await page.locator("#penenabled").setChecked(true)
     await page.locator("#pencolor").fill("#1a5fb4")
     await page.locator("#penwidth").fill("5")
     const [exportedDatas] = await Promise.all([
@@ -56,7 +56,7 @@ test.describe("Rest Text Styling", () => {
   test("should draw stroke with default penStyle", async ({ page }) => {
     await expect(page.locator("#pencolor")).toBeDisabled()
     await expect(page.locator("#penwidth")).toBeDisabled()
-    await page.setChecked("#penenabled", true)
+    await page.locator("#penenabled").setChecked(true)
     await expect(page.locator("#pencolor")).toBeEnabled()
     await expect(page.locator("#penwidth")).toBeEnabled()
 
@@ -65,7 +65,7 @@ test.describe("Rest Text Styling", () => {
       writeStrokes(page, h.strokes),
     ])
 
-    await page.setChecked("#penenabled", false)
+    await page.locator("#penenabled").setChecked(false)
     await expect(page.locator("#pencolor")).toBeDisabled()
     await expect(page.locator("#penwidth")).toBeDisabled()
   })

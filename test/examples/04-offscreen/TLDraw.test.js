@@ -31,6 +31,7 @@ test.describe("Offscreen TLDraw", () => {
       await expect(tabContentLoc).toBeVisible()
       await expect(tabContentLoc).toContainText("0 item")
     })
+
     await test.step("check Export JIIX tab is empty", async () => {
       const tabBtnLocator = page.locator('button:text("Export JIIX")')
       await tabBtnLocator.click()
@@ -40,6 +41,7 @@ test.describe("Offscreen TLDraw", () => {
       await expect(tabContentLoc).toBeVisible()
       await expect(tabContentLoc).toContainText("0 item")
     })
+
     await test.step("check HTML tab is empty", async () => {
       const tabBtnLocator = page.locator('button:text("Export HTML")')
       await tabBtnLocator.click()
@@ -99,6 +101,7 @@ test.describe("Offscreen TLDraw", () => {
     await test.step("write hello", async () => {
       await writeStrokes(page, helloOneStroke.strokes)
     })
+
     const tabShapeBtnLoc = page.locator('button:text("Shapes")')
     await tabShapeBtnLoc.click()
     await expect(tabShapeBtnLoc).toHaveClass(/active/)

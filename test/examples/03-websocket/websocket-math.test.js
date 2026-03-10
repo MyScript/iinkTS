@@ -187,7 +187,7 @@ test.describe('Websocket Math', function () {
       await test.step('should clean stroke', async () => {
         const [clearExport] = await Promise.all([
           waitForExportedEvent(page),
-          page.click('#clear')
+          page.locator('#clear').click()
         ])
         await expect(page.locator('#result')).toBeEmpty()
         const latex = await getEditorExportsType(page, 'application/x-latex')
@@ -198,7 +198,7 @@ test.describe('Websocket Math', function () {
       await test.step('should undo clear', async () => {
         const [exportEvt] = await Promise.all([
           waitForExportedEvent(page),
-          page.click('#undo')
+          page.locator('#undo').click()
         ])
         expect(exportEvt['application/x-latex']).toEqual(
           equation.exports.LATEX.at(-1)
@@ -213,7 +213,7 @@ test.describe('Websocket Math', function () {
       await test.step('should undo last stroke written', async () => {
         const [exportEvt] = await Promise.all([
           waitForExportedEvent(page),
-          page.click('#undo')
+          page.locator('#undo').click()
         ])
         expect(exportEvt['application/x-latex']).toEqual(
           equation.exports.LATEX.at(-2)
@@ -228,7 +228,7 @@ test.describe('Websocket Math', function () {
       await test.step('should undo penultimate stroke written', async () => {
         const [exportEvt] = await Promise.all([
           waitForExportedEvent(page),
-          page.click('#undo')
+          page.locator('#undo').click()
         ])
         expect(exportEvt['application/x-latex']).toEqual(
           equation.exports.LATEX.at(-3)
@@ -243,7 +243,7 @@ test.describe('Websocket Math', function () {
       await test.step('should redo penultimate stroke written', async () => {
         const [exportEvt] = await Promise.all([
           waitForExportedEvent(page),
-          page.click('#redo')
+          page.locator('#redo').click()
         ])
         expect(exportEvt['application/x-latex']).toEqual(
           equation.exports.LATEX.at(-2)
@@ -305,7 +305,7 @@ test.describe('Websocket Math', function () {
       await test.step('should undo all stroke written during session time', async () => {
         const [exportEvt] = await Promise.all([
           waitForExportedEvent(page),
-          page.click('#undo')
+          page.locator('#undo').click()
         ])
         await expect(page.locator('#result')).toBeEmpty()
         const latex = await getEditorExportsType(page, 'application/x-latex')
@@ -316,7 +316,7 @@ test.describe('Websocket Math', function () {
       await test.step('should redo all stroke written during session time', async () => {
         const [exportEvt] = await Promise.all([
           waitForExportedEvent(page),
-          page.click('#redo')
+          page.locator('#redo').click()
         ])
         await expect(page.locator('#result .katex-html')).toHaveText(
           equation.exports.LATEX.at(-1)
@@ -336,11 +336,11 @@ test.describe('Websocket Math', function () {
       const latex = exports['application/x-latex']
       expect(latex).toEqual('')
 
-      await page.click('#undo')
+      await page.locator('#undo').click()
       await callEditorIdle(page)
       const [undoRedoModelExport] = await Promise.all([
         waitForExportedEvent(page),
-        page.click('#redo')
+        page.locator('#redo').click()
       ])
       const undoRedoExport = undoRedoModelExport['application/x-latex']
       expect(undoRedoExport).toEqual('')
@@ -358,14 +358,14 @@ test.describe('Websocket Math', function () {
       await callEditorIdle(page)
       const emptyConvert = await getEditorConverts(page)
       expect(emptyConvert).toBeUndefined()
-      expect(await page.locator('path').count()).toEqual(
+      await expect(page.locator('path')).toHaveCount(
         equation.strokes.length
       )
 
-      await Promise.all([waitForConvertedEvent(page), page.click('#convert')])
+      await Promise.all([waitForConvertedEvent(page), page.locator('#convert').click()])
 
       await callEditorIdle(page)
-      expect(await page.locator('path').count()).toEqual(
+      await expect(page.locator('path')).toHaveCount(
         equation.exports.LATEX.at(-1).length
       )
 
@@ -395,7 +395,7 @@ test.describe('Websocket Math', function () {
       const emptyConvert = await getEditorConverts(page)
       expect(emptyConvert).toBeUndefined()
 
-      await Promise.all([waitForConvertedEvent(page), page.click('#convert')])
+      await Promise.all([waitForConvertedEvent(page), page.locator('#convert').click()])
       const convert = await getEditorConverts(page)
       expect(convert['application/x-latex']).toEqual(sum.exports.LATEX.at(-1))
       await expect(page.locator('#result .katex-html')).toHaveText(
@@ -436,7 +436,7 @@ test.describe('Websocket Math', function () {
       const emptyConvert = await getEditorConverts(page)
       expect(emptyConvert).toBeUndefined()
 
-      await Promise.all([waitForConvertedEvent(page), page.click('#convert')])
+      await Promise.all([waitForConvertedEvent(page), page.locator('#convert').click()])
       const convert = await getEditorConverts(page)
       const latexExport = await getEditorExportsType(
         page,

@@ -36,7 +36,7 @@ test.describe("Websocket Text file export", () => {
     ])
     expect(exported).toBeDefined()
     const downloadPromise = page.waitForEvent("download")
-    await page.selectOption("#exportType", "html")
+    await page.locator("#exportType").selectOption("html")
     await page.locator("#exportContent").click()
     const download = await downloadPromise
     expect(download.suggestedFilename()).toBe("myDocument.html")
@@ -49,7 +49,7 @@ test.describe("Websocket Text file export", () => {
     ])
     expect(exported).toBeDefined()
     const downloadPromise = page.waitForEvent("download")
-    await page.selectOption("#exportType", "png")
+    await page.locator("#exportType").selectOption("png")
     await page.locator("#exportContent").click()
     const download = await downloadPromise
     expect(download.suggestedFilename()).toBe("myDocument.png")
@@ -62,7 +62,7 @@ test.describe("Websocket Text file export", () => {
     ])
     expect(exported).toBeDefined()
     const downloadPromise = page.waitForEvent("download")
-    await page.selectOption("#exportType", "jpeg")
+    await page.locator("#exportType").selectOption("jpeg")
     await page.locator("#exportContent").click()
     const download = await downloadPromise
     expect(download.suggestedFilename()).toBe("myDocument.jpg")

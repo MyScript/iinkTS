@@ -29,6 +29,7 @@ test.describe("Text ja_JP vertical Recognizer Iink", () => {
         writeStrokes(page, ja_JP1Column.strokes),
       ])
     })
+
     await expect(page.locator("#result")).toHaveText(
       ja_JP1Column.exports["text/plain"].at(0)
     )
@@ -79,7 +80,7 @@ test.describe("Text ja_JP vertical Recognizer Iink", () => {
     await test.step("should clear", async () => {
       const promisesResult = await Promise.all([
         waitForExportedEvent(page),
-        page.click("#clear"),
+        page.locator("#clear").click(),
       ])
       expect(promisesResult[0]).toBeNull()
       expect(await getEditorExports(page)).toBeFalsy()
@@ -87,7 +88,7 @@ test.describe("Text ja_JP vertical Recognizer Iink", () => {
     })
 
     await test.step("should undo clear", async () => {
-      await Promise.all([waitForExportedEvent(page), page.click("#undo")])
+      await Promise.all([waitForExportedEvent(page), page.locator("#undo").click()])
 
       expect(
         await page
@@ -102,7 +103,7 @@ test.describe("Text ja_JP vertical Recognizer Iink", () => {
     })
 
     await test.step("should undo write", async () => {
-      await Promise.all([waitForExportedEvent(page), page.click("#undo")])
+      await Promise.all([waitForExportedEvent(page), page.locator("#undo").click()])
       expect(
         await page
           .locator("#editorEl")
@@ -111,7 +112,7 @@ test.describe("Text ja_JP vertical Recognizer Iink", () => {
     })
 
     await test.step("should redo write", async () => {
-      await Promise.all([waitForExportedEvent(page), page.click("#redo")])
+      await Promise.all([waitForExportedEvent(page), page.locator("#redo").click()])
       expect(
         await page
           .locator("#editorEl")

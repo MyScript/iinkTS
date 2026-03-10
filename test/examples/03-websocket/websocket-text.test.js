@@ -32,6 +32,7 @@ test.describe('Websocket Text', () => {
         writeStrokes(page, h.strokes),
       ])
     })
+
     await expect(page.locator('#result')).toHaveText(h.exports['text/plain'].at(-1))
     const exports = await getEditorExports(page)
     const jiixExpected = h.exports['application/vnd.myscript.jiix']
@@ -126,13 +127,13 @@ test.describe('Websocket Text', () => {
 
       await Promise.all([
         waitForExportedEvent(page),
-        page.click('#undo')
+        page.locator('#undo').click()
       ])
       await expect(page.locator("#result")).toHaveText(helloStrike.exports["text/plain"].at(0))
 
       await Promise.all([
         waitForExportedEvent(page),
-        page.click('#redo')
+        page.locator('#redo').click()
       ])
       await expect(page.locator("#result")).toHaveText(helloStrike.exports["text/plain"].at(1))
     })
@@ -190,13 +191,13 @@ test.describe('Websocket Text', () => {
       await expect(page.locator('.prompter-text')).toHaveText(jiixExport.label)
       await expect(page.locator('.candidates')).toBeHidden()
 
-      await page.click(`.prompter-text > span`)
+      await page.locator(`.prompter-text > span`).click()
       await expect(page.locator('.candidates')).toBeVisible()
 
       const candidate = jiixExport.words[0].candidates[2]
       await Promise.all([
         waitForExportedEvent(page),
-        page.click(`.candidates > span >> text=${candidate}`)
+        page.locator(`.candidates > span >> text=${candidate}`).click()
       ])
 
       await expect(page.locator('.prompter-text')).toHaveText(candidate)
@@ -205,7 +206,7 @@ test.describe('Websocket Text', () => {
 
     await test.step('should open menu more', async () => {
       await expect(page.locator('.more-menu')).toBeHidden()
-      await page.click(`.ellipsis`)
+      await page.locator(`.ellipsis`).click()
       await expect(page.locator('.more-menu')).toBeVisible()
     })
 
@@ -213,13 +214,13 @@ test.describe('Websocket Text', () => {
       const wrotePath = await page.locator('path').first().getAttribute('d')
       await Promise.all([
         waitForExportedEvent(page),
-        page.click(`.more-menu > button >> text=Convert`)
+        page.locator(`.more-menu > button >> text=Convert`).click()
       ])
 
       const convert = await getEditorExports(page)
       expect(convert).toBeDefined()
 
-      await expect(page.locator('path').first()).not.toHaveAttribute(wrotePath)
+      await expect(page.locator('path').first()).not.toHaveAttribute('d', wrotePath)
     })
 
     await test.step('should close menu more after convert', async () => {
@@ -227,14 +228,14 @@ test.describe('Websocket Text', () => {
     })
 
     await test.step('should Delete', async () => {
-      await page.click(`.ellipsis`)
+      await page.locator(`.ellipsis`).click()
       await expect(page.locator('.more-menu')).toBeVisible()
 
       await Promise.all([
         waitForExportedEvent(page),
-        page.click(`.more-menu > button >> text=Delete`)
+        page.locator(`.more-menu > button >> text=Delete`).click()
       ])
-      expect(await page.locator('path').count()).toEqual(0)
+      await expect(page.locator('path')).toHaveCount(0)
     })
 
     await test.step('should close menu more after delete', async () => {

@@ -21,7 +21,7 @@ test.describe("Rest Diagram Import", () => {
       waitForExportedEvent(page),
       page.locator("#import-btn").click(),
     ])
-    expect(Object.keys(exportedDatas["application/vnd.myscript.jiix"].elements).length).toEqual(12)
+    expect(Object.keys(exportedDatas["application/vnd.myscript.jiix"].elements)).toHaveLength(12)
     expect(await getEditorSymbols(page)).toHaveLength(40)
   })
 
@@ -37,7 +37,7 @@ test.describe("Rest Diagram Import", () => {
     await test.step("should clear", async () => {
       const promisesResult = await Promise.all([
         waitForExportedEvent(page),
-        page.click("#clear"),
+        page.locator("#clear").click(),
       ])
       expect(promisesResult[0]).toBeFalsy()
       expect(await getEditorExports(page)).toBeFalsy()
@@ -46,9 +46,9 @@ test.describe("Rest Diagram Import", () => {
     await test.step("should undo", async () => {
       const [exportedDatas] = await Promise.all([
         waitForExportedEvent(page),
-        page.click("#undo"),
+        page.locator("#undo").click(),
       ])
-      expect(Object.keys(exportedDatas["application/vnd.myscript.jiix"].elements).length).toEqual(12)
+      expect(Object.keys(exportedDatas["application/vnd.myscript.jiix"].elements)).toHaveLength(12)
 
       expect(await getEditorSymbols(page)).toHaveLength(40)
     })
@@ -56,7 +56,7 @@ test.describe("Rest Diagram Import", () => {
     await test.step("should redo", async () => {
       await Promise.all([
         waitForExportedEvent(page),
-        page.click("#redo"),
+        page.locator("#redo").click(),
       ])
       expect(await getEditorSymbols(page)).toHaveLength(0)
     })
