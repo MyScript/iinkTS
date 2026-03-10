@@ -146,7 +146,7 @@ export class InteractiveInkSSRSVGRenderer
         this.removeAttribute(update as TUpdatePatchRemoveAttribut)
         break
       default:
-        this.#logger.warn("updateLayer", `update.type unknow ${update.type}`)
+        this.#logger.warn("updateLayer", `update.type unknown ${update.type}`)
         break
     }
   }
