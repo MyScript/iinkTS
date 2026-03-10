@@ -1,9 +1,17 @@
 import { LoggerCategory, LoggerManager } from "../../logger"
 import { IIEraser, TSegment } from "../../symbol"
 import { SVGRenderer } from "../../renderer"
-import { InteractiveInkEditor } from "../../editor/InteractiveInkEditor"
 import { PointerEventGrabber, PointerInfo } from "../../grabber"
-import { InkEditor } from "../../editor"
+import type { InteractiveInkEditor } from "../../editor/InteractiveInkEditor"
+import type { InkEditor } from "../../editor/InkEditor"
+
+/**
+ * @group Manager
+ */
+function isInteractiveInkEditor(editor: InteractiveInkEditor | InkEditor): editor is InteractiveInkEditor
+{
+  return "removeSymbols" in editor && typeof editor.removeSymbols === "function"
+}
 
 /**
  * @group Manager
@@ -61,7 +69,7 @@ export class EraseManager
       p1: this.currentEraser.pointers.at(-1)!,
       p2: this.currentEraser.pointers.at(-2)!
     }
-    if (this.editor instanceof InteractiveInkEditor) {
+    if (isInteractiveInkEditor(this.editor)) {
       this.editor.model.symbols.forEach(s =>
       {
         if (s.isIntersected(lastSeg)) {
@@ -87,7 +95,7 @@ export class EraseManager
     this.continue(info)
 
     this.renderer.removeSymbol(this.currentEraser!.id)
-    if (this.editor instanceof InteractiveInkEditor) {
+    if (isInteractiveInkEditor(this.editor)) {
       this.editor.removeSymbols(this.editor.model.symbolsToDelete.map(s => s.id))
     }
     else {
