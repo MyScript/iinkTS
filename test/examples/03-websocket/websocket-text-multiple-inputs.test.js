@@ -103,7 +103,7 @@ test.describe("Websocket Text Multiple Inputs", () => {
       await expect(page.locator(`#${ data2.answerId }`)).not.toHaveClass("error")
       await expect(page.locator(`#${ data3.answerId }`)).not.toHaveClass("success")
       await expect(page.locator(`#${ data3.answerId }`)).not.toHaveClass("error")
-      await page.click("#validate-answers")
+      await page.locator("#validate-answers").click()
       await expect(page.locator(`#${ data0.answerId }`)).toHaveClass(/success/)
       await expect(page.locator(`#${ data1.answerId }`)).toHaveClass(/success/)
       await expect(page.locator(`#${ data2.answerId }`)).toHaveClass(/error/)

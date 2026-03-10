@@ -25,10 +25,11 @@ test.describe("Websocket Text search", () => {
       ])
       expect(exported).toBeDefined()
     })
+
     await test.step("should find hello", async () => {
       await Promise.all([
         page.locator("#searchInput").fill("hello"),
-        page.click("#searchBtn"),
+        page.locator("#searchBtn").click(),
       ])
       await expect(page.locator(".highlight")).toHaveCount(1)
       await expect(page.locator(".highlight")).toBeVisible()
@@ -43,10 +44,11 @@ test.describe("Websocket Text search", () => {
       ])
       expect(exported).toBeDefined()
     })
+
     await test.step("should not find hello", async () => {
       await Promise.all([
         page.locator("#searchInput").fill("hello"),
-        page.click("#searchBtn"),
+        page.locator("#searchBtn").click(),
       ])
       await expect(page.locator(".highlight")).toHaveCount(0)
     })

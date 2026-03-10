@@ -127,7 +127,7 @@ test.describe("Rest Math", () => {
 
       const promisesResult = await Promise.all([
         waitForExportedEvent(page),
-        page.click("#clear"),
+        page.locator("#clear").click(),
       ])
       expect(promisesResult[0]).toBeNull()
       expect(await getEditorExports(page)).toBeFalsy()
@@ -146,7 +146,7 @@ test.describe("Rest Math", () => {
       await test.step("should undo last stroke", async () => {
         await Promise.all([
           waitForExportedEvent(page),
-          page.click("#undo")
+          page.locator("#undo").click()
         ])
         expect(await getEditorSymbols(page)).toHaveLength(equation.strokes.length - 1)
       })
@@ -154,7 +154,7 @@ test.describe("Rest Math", () => {
       await test.step("should undo last stroke", async () => {
         await Promise.all([
           waitForExportedEvent(page),
-          page.click("#undo")
+          page.locator("#undo").click()
         ])
         expect(await getEditorSymbols(page)).toHaveLength(equation.strokes.length - 2)
       })
@@ -162,7 +162,7 @@ test.describe("Rest Math", () => {
       await test.step("should undo last stroke", async () => {
         await Promise.all([
           waitForExportedEvent(page),
-          page.click("#redo")
+          page.locator("#redo").click()
         ])
         expect(await getEditorSymbols(page)).toHaveLength(equation.strokes.length - 1)
       })

@@ -75,7 +75,7 @@ test.describe('Rest v2 Raw Content', () => {
 
       const promisesResult = await Promise.all([
         waitForExportedEvent(page),
-        page.click('#clear')
+        page.locator('#clear').click()
       ])
       expect(promisesResult[0]).toBeNull()
       expect(await getEditorExports(page)).toBeFalsy()
@@ -94,11 +94,11 @@ test.describe('Rest v2 Raw Content', () => {
 
       expect(await page.evaluate("editorEl.editor.model.strokes")).toHaveLength(rectangleShape.strokes.length)
 
-      await Promise.all([waitForExportedEvent(page), page.click('#undo')])
+      await Promise.all([waitForExportedEvent(page), page.locator('#undo').click()])
 
       expect(await page.evaluate("editorEl.editor.model.strokes")).toHaveLength(rectangleShape.strokes.length - 1)
 
-      await Promise.all([waitForExportedEvent(page), page.click('#redo')])
+      await Promise.all([waitForExportedEvent(page), page.locator('#redo').click()])
 
       expect(await page.evaluate("editorEl.editor.model.strokes")).toHaveLength(rectangleShape.strokes.length)
     })
