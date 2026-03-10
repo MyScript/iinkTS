@@ -348,7 +348,7 @@ export class IIConversionManager
         shape = this.buildRhombus(node, uniqStrokes)
         break
       default:
-        this.#logger.warn("convertNode", `Conversion of Node with kind equal to ${ JSON.stringify(node) } is unknow`)
+        this.#logger.warn("convertNode", `Conversion of Node with kind equal to ${ JSON.stringify(node) } is unknown`)
         return
     }
     return { symbol: shape, strokes: uniqStrokes }
@@ -437,7 +437,7 @@ export class IIConversionManager
         }
       }
       default:
-        this.#logger.error("convertEdge", `Conversion of Edge with kind equal to ${ JSON.stringify(edge) } is unknow`)
+        this.#logger.error("convertEdge", `Conversion of Edge with kind equal to ${ JSON.stringify(edge) } is unknown`)
         return
     }
   }
@@ -480,7 +480,7 @@ export class IIConversionManager
             break
           }
           default: {
-            this.#logger.warn("buildConversions", `Unknow jiix element type: ${ el.type }`)
+            this.#logger.warn("buildConversions", `Unknown jiix element type: ${ el.type }`)
           }
         }
       })

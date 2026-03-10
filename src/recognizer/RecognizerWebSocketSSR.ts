@@ -226,7 +226,7 @@ export class RecognizerWebSocketSSR
           message = RecognizerError.TLS_HANDSHAKE
           break
         default:
-          this.#logger.warn("closeCallback", "unknow CloseEvent.code", { evt })
+          this.#logger.warn("closeCallback", "unknown CloseEvent.code", { evt })
           message = RecognizerError.CANT_ESTABLISH
           break
       }
@@ -329,7 +329,7 @@ export class RecognizerWebSocketSSR
   {
     const err = websocketMessage as TRecognizerWebSocketSSRMessageError
     this.currentErrorCode = err.data?.code || err.code
-    let message = err.data?.message || err.message || RecognizerError.UNKNOW
+    let message = err.data?.message || err.message || RecognizerError.UNKNOWN
 
     switch (this.currentErrorCode) {
       case "no.activity":
@@ -405,7 +405,7 @@ export class RecognizerWebSocketSSR
           this.manageWaitForIdle()
           break
         default:
-          this.#logger.warn("messageCallback", `Message type unknow: "${ websocketMessage.type }".`)
+          this.#logger.warn("messageCallback", `Message type unknown: "${ websocketMessage.type }".`)
       }
     }
   }

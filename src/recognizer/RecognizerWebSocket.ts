@@ -344,7 +344,7 @@ export class RecognizerWebSocket
   protected manageErrorMessage(errorMessage: TRecognizerWebSocketMessageError): void
   {
     this.currentErrorCode = errorMessage.data?.code || errorMessage.code
-    let message = errorMessage.data?.message || errorMessage.message || RecognizerError.UNKNOW
+    let message = errorMessage.data?.message || errorMessage.message || RecognizerError.UNKNOWN
 
     if (this.currentErrorCode === "no.activity") {
       this.rejectDeferredPending(message)
@@ -421,7 +421,7 @@ export class RecognizerWebSocket
           this.manageWaitForIdle()
           break
         default:
-          this.#logger.warn("messageCallback", `Message type unknow: "${ websocketMessage }".`)
+          this.#logger.warn("messageCallback", `Message type unknown: "${ websocketMessage }".`)
           break
       }
     }

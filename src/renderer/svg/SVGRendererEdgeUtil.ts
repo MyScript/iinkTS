@@ -41,7 +41,7 @@ export class SVGRendererEdgeUtil
       case EdgeKind.Arc:
         return SVGRendererEdgeUtil.getArcPath(edge)
       default:
-        throw new Error(`Can't getSVGPath for edge cause kind is unknow: "${ JSON.stringify(edge) }"`)
+        throw new Error(`Can't getSVGPath for edge cause kind is unknown: "${ JSON.stringify(edge) }"`)
     }
   }
 

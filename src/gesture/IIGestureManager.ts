@@ -152,7 +152,7 @@ export class IIGestureManager
         break
       }
       default:
-        this.#logger.error("applySurroundGesture", `Unknow surroundAction: ${ this.surroundAction }, values allowed are: ${ SurroundAction.Highlight }, ${ SurroundAction.Select }, ${ SurroundAction.Surround }`)
+        this.#logger.error("applySurroundGesture", `Unknown surroundAction: ${ this.surroundAction }, values allowed are: ${ SurroundAction.Highlight }, ${ SurroundAction.Select }, ${ SurroundAction.Surround }`)
         break
     }
     return
@@ -860,7 +860,7 @@ export class IIGestureManager
         return this.editor.removeSymbols(gesture.strokeIds)
       }
       default:
-        this.#logger.warn("#applyStrikeThroughGesture", `Unknow OnStrikeThrough: ${ this.strikeThroughAction }, values allowed are: ${ StrikeThroughAction.Draw }, ${ StrikeThroughAction.Erase }`)
+        this.#logger.warn("#applyStrikeThroughGesture", `Unknown OnStrikeThrough: ${ this.strikeThroughAction }, values allowed are: ${ StrikeThroughAction.Draw }, ${ StrikeThroughAction.Erase }`)
         break
     }
   }
@@ -891,7 +891,7 @@ export class IIGestureManager
         await this.applySurroundGesture(gestureStroke, gesture)
         break
       default:
-        this.#logger.warn("apply", `Gesture unknow: ${ gesture.gestureType }`)
+        this.#logger.warn("apply", `Gesture unknown: ${ gesture.gestureType }`)
         break
     }
     this.editor.event.emitGestured({ gestureType: gesture.gestureType, stroke: gestureStroke })

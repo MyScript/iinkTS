@@ -4,10 +4,10 @@ import { DefaultStyle, TStyle } from "../../../src/style"
 
 describe("SVGRendererShapeUtil.ts", () =>
 {
-  test("should throw error if kind is unknow when getSVGPath", () =>
+  test("should throw error if kind is unknown when getSVGPath", () =>
   {
     //@ts-ignore
-    expect(() => SVGRendererShapeUtil.getSVGPath({ kind: "pouet" })).toThrow("Can't getSVGPath for shape cause kind is unknow: \"{\"kind\":\"pouet\"}\"")
+    expect(() => SVGRendererShapeUtil.getSVGPath({ kind: "pouet" })).toThrow("Can't getSVGPath for shape cause kind is unknown: \"{\"kind\":\"pouet\"}\"")
   })
 
   test("should getSVGPath for circle", () =>

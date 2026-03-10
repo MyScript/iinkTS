@@ -67,7 +67,7 @@ export class IITranslateManager
         return shape
       }
       default:
-        throw new Error(`Can't apply translate on shape, kind unknow: ${ JSON.stringify(shape) }`)
+        throw new Error(`Can't apply translate on shape, kind unknown: ${ JSON.stringify(shape) }`)
     }
   }
 
@@ -141,7 +141,7 @@ export class IITranslateManager
       case SymbolType.Recognized:
         return this.applyOnRecognizedSymbol(symbol, tx, ty)
       default:
-        throw new Error(`Can't apply translate on symbol, type unknow: ${ JSON.stringify(symbol) }`)
+        throw new Error(`Can't apply translate on symbol, type unknown: ${ JSON.stringify(symbol) }`)
     }
   }
 

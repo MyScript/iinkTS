@@ -2,10 +2,10 @@ import { DefaultStyle, EdgeDecoration, EdgeKind, IIEdgeArc, IIEdgeLine, IIEdgePo
 
 describe("SVGRendererEdgeUtil.ts", () =>
 {
-  test("should throw error if kind is unknow when getSVGPath", () =>
+  test("should throw error if kind is unknown when getSVGPath", () =>
   {
     //@ts-ignore
-    expect(() => SVGRendererEdgeUtil.getSVGPath({ kind: "pouet" })).toThrow("Can't getSVGPath for edge cause kind is unknow: \"{\"kind\":\"pouet\"}\"")
+    expect(() => SVGRendererEdgeUtil.getSVGPath({ kind: "pouet" })).toThrow("Can't getSVGPath for edge cause kind is unknown: \"{\"kind\":\"pouet\"}\"")
   })
 
   test("should getSVGPath for line", () =>

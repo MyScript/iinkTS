@@ -375,7 +375,7 @@ export class InteractiveInkEditor extends AbstractEditor
       case RecognizedKind.PolyEdge:
         return IIRecognizedPolyLine.create(partialSymbol)
       default:
-        throw new Error(`Unable to create recognized, symbol type '${ JSON.stringify(partialSymbol) } is unknow`)
+        throw new Error(`Unable to create recognized, symbol type '${ JSON.stringify(partialSymbol) } is unknown`)
     }
   }
 
@@ -401,7 +401,7 @@ export class InteractiveInkEditor extends AbstractEditor
         case SymbolType.Recognized:
           return this.buildRecognized(partialSymbol as PartialDeep<TIIRecognized>)
         default:
-          throw new Error(`Unable to create group, symbol type '${ JSON.stringify(partialSymbol) } is unknow`)
+          throw new Error(`Unable to create group, symbol type '${ JSON.stringify(partialSymbol) } is unknown`)
       }
     })
     const group = new IISymbolGroup(children, partialGroup.style)
@@ -869,7 +869,7 @@ export class InteractiveInkEditor extends AbstractEditor
                 break
               }
               default:
-                this.logger.warn("synchronizeStrokesWithJIIX", `Can not create recognized shape symbol, kind unknow: ${ el }`)
+                this.logger.warn("synchronizeStrokesWithJIIX", `Can not create recognized shape symbol, kind unknown: ${ el }`)
                 break
             }
             if (symbolRecognized) {
@@ -909,7 +909,7 @@ export class InteractiveInkEditor extends AbstractEditor
                 break
               }
               default:
-                this.logger.warn("synchronizeStrokesWithJIIX", `Can not create recognized edge symbol, kind unknow: ${ el }`)
+                this.logger.warn("synchronizeStrokesWithJIIX", `Can not create recognized edge symbol, kind unknown: ${ el }`)
                 break
             }
             if (symbolRecognized) {
@@ -925,7 +925,7 @@ export class InteractiveInkEditor extends AbstractEditor
           break
         }
         default:
-          this.logger.warn("synchronizeStrokesWithJIIX", `Can not create recognized symbol, type unknow: ${ el }`)
+          this.logger.warn("synchronizeStrokesWithJIIX", `Can not create recognized symbol, type unknown: ${ el }`)
           break
       }
     })

@@ -305,7 +305,7 @@ describe("IIGestureManager.ts", () =>
       expect(gestMan.history.push).toHaveBeenCalledTimes(1)
     })
 
-    test("should log error if surroundAction is unknow", async () =>
+    test("should log error if surroundAction is unknown", async () =>
     {
       console.error = jest.fn()
       const gestureStroke = buildOIStroke({
@@ -324,10 +324,10 @@ describe("IIGestureManager.ts", () =>
         strokeAfterIds: []
       }
       //@ts-ignore
-      gestMan.surroundAction = "unknow"
+      gestMan.surroundAction = "unknown"
       await gestMan.applySurroundGesture(gestureStroke, gesture)
       expect(console.error).toHaveBeenCalledTimes(1)
-      expect(console.error).toHaveBeenCalledWith({ "level": "error",  message: ["Unknow surroundAction: unknow, values allowed are: highlight, select, surround"], "from": "GESTURE.applySurroundGesture" })
+      expect(console.error).toHaveBeenCalledWith({ "level": "error",  message: ["Unknown surroundAction: unknown, values allowed are: highlight, select, surround"], "from": "GESTURE.applySurroundGesture" })
     })
   })
 

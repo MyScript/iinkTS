@@ -331,7 +331,7 @@ export class IIDebugSVGManager
             break
           }
           default: {
-            this.#logger.warn("drawRecognitionBox", `Unknow jiix element type: ${ el.type }`)
+            this.#logger.warn("drawRecognitionBox", `Unknown jiix element type: ${ el.type }`)
             break
           }
         }
@@ -462,7 +462,7 @@ export class IIDebugSVGManager
             break
           }
           default:
-            this.#logger.warn("drawRecognitionBoxItem", `Unknow jiix element type: ${ el.type }`)
+            this.#logger.warn("drawRecognitionBoxItem", `Unknown jiix element type: ${ el.type }`)
             break
         }
       })
