@@ -242,6 +242,9 @@ export class IIWriterManager extends AbstractWriterManager
       localPointer.x = x
       localPointer.y = y
     }
+
+    this.renderer.ensurePointVisible(localPointer)
+
     this.updateCurrentSymbol(localPointer)
     this.renderer.drawSymbol(this.model.currentSymbol!)
   }
@@ -283,6 +286,8 @@ export class IIWriterManager extends AbstractWriterManager
     this.renderer.drawSymbol(localSymbol!)
     this.model.addSymbol(localSymbol)
     this.history.push(this.model, { added: [localSymbol] })
+
+    this.renderer.redrawGuides()
 
     if (localSymbol.type === SymbolType.Stroke) {
       await this.interactWithBackend(localSymbol)

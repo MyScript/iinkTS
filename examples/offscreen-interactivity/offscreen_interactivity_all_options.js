@@ -197,10 +197,6 @@ htmlPanCloseBtn.addEventListener('pointerup', () => {
 let editor
 const editorOptions = {
   configuration: {
-    rendering: {
-      minHeight: 2000,
-      minWidth: 2000
-    }
   }
 }
 
