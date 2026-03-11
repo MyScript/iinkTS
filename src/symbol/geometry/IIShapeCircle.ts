@@ -1,6 +1,6 @@
 import { SELECTION_MARGIN } from "../../Constants"
 import { TStyle } from "../../style"
-import { PartialDeep, findIntersectBetweenSegmentAndCircle, isValidNumber, computeRotatedPoint } from "../../utils"
+import { PartialDeep, findIntersectBetweenSegmentAndCircle, isValidNumber, computeRotatedPoint, computeDistance } from "../../utils"
 import { TPoint, isValidPoint } from "../base/Point"
 import { OIShapeBase, ShapeKind } from "./IIShape"
 import { Box, TBox } from "../base/Box"
@@ -109,26 +109,14 @@ export class IIShapeCircle extends OIShapeBase<ShapeKind.Circle>
 
   static createBetweenPoints(origin: TPoint, target: TPoint, style?: PartialDeep<TStyle>): IIShapeCircle
   {
-    const center = {
-      x: (origin.x + target.x) / 2,
-      y: (origin.y + target.y) / 2
-    }
-
-    const width = Math.abs(origin.x - target.x)
-    const height = Math.abs(origin.y - target.y)
-    const radius = Math.min(width, height) / 2
-    return new IIShapeCircle(center, radius, style)
+    const circle = new IIShapeCircle(origin, 0, style)
+    circle.radius = computeDistance(circle.center, target)
+    return circle
   }
 
-  static updateBetweenPoints(circle: IIShapeCircle, origin: TPoint, target: TPoint): IIShapeCircle
+  static updateBetweenPoints(circle: IIShapeCircle, _origin: TPoint, target: TPoint): IIShapeCircle
   {
-    circle.center = {
-      x: (origin.x + target.x) / 2,
-      y: (origin.y + target.y) / 2
-    }
-    const width = Math.abs(origin.x - target.x)
-    const height = Math.abs(origin.y - target.y)
-    circle.radius = Math.min(width, height) / 2
+    circle.radius = computeDistance(circle.center, target)
     return circle
   }
 

@@ -76,6 +76,7 @@ export class InteractiveInkEditor extends AbstractEditor
   #configuration: InteractiveInkEditorConfiguration
   #model: IIModel
   #tool: EditorTool = EditorTool.Write
+  #toolBeforeCtrl?: EditorTool
   #layerUITimer?: ReturnType<typeof setTimeout>
   #recognizeStrokeTimer?: ReturnType<typeof setTimeout>
 
@@ -157,6 +158,10 @@ export class InteractiveInkEditor extends AbstractEditor
     this.menu.tool.update()
     this.setCursorStyle()
     this.unselectAll()
+
+    if (this.#toolBeforeCtrl && i !== EditorTool.Move) {
+      this.#toolBeforeCtrl = undefined
+    }
 
     this.eraser.detach()
     this.selector.detach()
@@ -283,6 +288,9 @@ export class InteractiveInkEditor extends AbstractEditor
       this.tool = EditorTool.Write
       this.renderer.init(this.layers.rendering)
       this.menu.render(this.layers.ui.root)
+
+      window.addEventListener("keydown", this.handleKeyDown)
+      window.addEventListener("keyup", this.handleKeyUp)
 
       const compStyles = window.getComputedStyle(this.layers.root)
       this.model.width = Math.max(parseInt(compStyles.width.replace("px", "")), this.#configuration.rendering.minWidth)
@@ -1324,6 +1332,27 @@ export class InteractiveInkEditor extends AbstractEditor
     return backendChanges
   }
 
+  protected handleKeyDown = (event: KeyboardEvent): void => {
+    const target = event.target as HTMLElement
+    if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
+      return
+    }
+
+    if ((event.ctrlKey || event.metaKey) && this.#tool !== EditorTool.Move && !this.#toolBeforeCtrl) {
+      this.logger.debug("handleKeyDown", "Switching to Move mode")
+      this.#toolBeforeCtrl = this.#tool
+      this.tool = EditorTool.Move
+    }
+  }
+
+  protected handleKeyUp = (event: KeyboardEvent): void => {
+    if (!event.ctrlKey && !event.metaKey && this.#toolBeforeCtrl) {
+      this.logger.debug("handleKeyUp", "Restoring previous tool")
+      this.tool = this.#toolBeforeCtrl
+      this.#toolBeforeCtrl = undefined
+    }
+  }
+
   async undo(): Promise<IIModel>
   {
     this.logger.info("undo")
@@ -1469,6 +1498,10 @@ export class InteractiveInkEditor extends AbstractEditor
   async destroy(): Promise<void>
   {
     this.logger.info("destroy")
+
+    // Retirer les écouteurs d'événements clavier
+    window.removeEventListener("keydown", this.handleKeyDown)
+    window.removeEventListener("keyup", this.handleKeyUp)
 
     this.layers.root.classList.remove("draw")
     this.layers.root.classList.remove("erase")

@@ -41,8 +41,9 @@ describe("SVGRenderer.ts", () =>
       rendererCustom.init(divElement)
       const guidesGroup = divElement.querySelector("#guides-wrapper") as SVGGElement
       expect(guidesGroup).toBeDefined()
-      const guideLines = guidesGroup.getElementsByTagName("circle")
+      const guideLines = guidesGroup.getElementsByTagName("path")
       expect(guideLines).toHaveLength(1)
+      expect( guideLines.item(0)?.getAttribute("d")?.split("M")).toHaveLength(82)
     })
     test("should create guides with custom gap", () =>
     {
@@ -53,8 +54,9 @@ describe("SVGRenderer.ts", () =>
       rendererCustom.init(divElement)
       const guidesGroup = divElement.querySelector("#guides-wrapper") as SVGGElement
       expect(guidesGroup).toBeDefined()
-      const guideLines = guidesGroup.getElementsByTagName("circle")
-      expect(guideLines).toHaveLength(361)
+      const guideLines = guidesGroup.getElementsByTagName("path")
+      expect(guideLines).toHaveLength(1)
+      expect( guideLines.item(0)?.getAttribute("d")?.split("M")).toHaveLength(2501)
     })
     test("should create guides line", () =>
     {
@@ -67,8 +69,9 @@ describe("SVGRenderer.ts", () =>
       rendererCustom.init(divElement)
       const guidesGroup = divElement.querySelector("#guides-wrapper") as SVGGElement
       expect(guidesGroup).toBeDefined()
-      const guideLines = guidesGroup.getElementsByTagName("line")
+      const guideLines = guidesGroup.getElementsByTagName("path")
       expect(guideLines).toHaveLength(1)
+      expect( guideLines.item(0)?.getAttribute("d")?.split("M")).toHaveLength(10)
     })
     test("should create guides grid", () =>
     {
@@ -81,8 +84,10 @@ describe("SVGRenderer.ts", () =>
       rendererCustom.init(divElement)
       const guidesGroup = divElement.querySelector("#guides-wrapper") as SVGGElement
       expect(guidesGroup).toBeDefined()
-      const guideLines = guidesGroup.getElementsByTagName("line")
-      expect(guideLines).toHaveLength(20)
+      const guideLines = guidesGroup.getElementsByTagName("path")
+      expect(guideLines).toHaveLength(2)
+      expect( guideLines.item(0)?.getAttribute("d")?.split("M")).toHaveLength(21)
+      expect( guideLines.item(1)?.getAttribute("d")?.split("M")).toHaveLength(81)
     })
     test("should write error if guides.type unknow", () =>
     {
@@ -395,9 +400,10 @@ describe("SVGRenderer.ts", () =>
 
     test("should update guides", () =>
     {
-      const nbGuide = renderer.layer.querySelector(`#${ renderer.groupGuidesId }`)?.children.length
-      renderer.resize(400, 400)
-      expect(nbGuide).not.toEqual(renderer.layer.querySelector(`#${ renderer.groupGuidesId }`)?.children.length)
+      const nbGuideBefore = renderer.layer.querySelector(`#${ renderer.groupGuidesId }`)?.getElementsByTagName("path").item(0)?.getAttribute("d")?.split("M").length
+      renderer.resize(2000, 2000)
+      const nbGuideAfter = renderer.layer.querySelector(`#${ renderer.groupGuidesId }`)?.getElementsByTagName("path").item(0)?.getAttribute("d")?.split("M").length
+      expect(nbGuideBefore).not.toEqual(nbGuideAfter)
     })
   })
 

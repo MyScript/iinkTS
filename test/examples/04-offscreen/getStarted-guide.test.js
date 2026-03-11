@@ -59,38 +59,7 @@ test.describe("Offscreen Get Started - Guides", () => {
         await expect(page.locator(locator.guidesWrapper)).toBeVisible()
       })
 
-      const conf = await getEditorConfiguration(page)
-      const increment = conf.rendering.guides.gap / 5
-
-      const viewportSize = page.viewportSize()
-      const width = Math.max(viewportSize.width, conf.rendering.minWidth)
-      const height = Math.max(viewportSize.height, conf.rendering.minHeight)
-
-      await test.step("verify horizontal lines", async () => {
-        let i = 0
-        for (let y = 0; y < height; y += increment) {
-          const ll = page.locator(locator.guidesWrapper + ` line[y1="${ y }"][y2="${ y }"]`)
-          await expect(ll).toHaveAttribute("x1", "0")
-          await expect(ll).toHaveAttribute("x2", width.toString())
-          await expect(ll).toHaveAttribute("stroke-width", i % 5 ? "0.25" : "1")
-          i++
-        }
-      })
-
-      await test.step("verify vertical lines", async () => {
-        let i = 0
-        for (let x = 0; x < width; x += increment) {
-          const ll = page.locator(locator.guidesWrapper + ` line[x1="${ x }"][x2="${ x }"]`)
-          await expect(ll).toHaveAttribute("y1", "0")
-          await expect(ll).toHaveAttribute("y2", height.toString())
-          await expect(ll).toHaveAttribute("stroke-width", i % 5 ? "0.25" : "1")
-          i++
-        }
-      })
-
-      await test.step("verify no points", async () => {
-        await expect(page.locator(locator.guidesWrapper + ` circle`)).toHaveCount(0)
-      })
+      await expect(page).toHaveScreenshot()
     })
 
     test(`should display guides in line mode with size: "${ guideSize.size }"`, async ({ page }) => {
@@ -111,32 +80,7 @@ test.describe("Offscreen Get Started - Guides", () => {
         await expect(page.locator(locator.guidesWrapper)).toBeVisible()
       })
 
-      const conf = await getEditorConfiguration(page)
-      const viewportSize = page.viewportSize()
-      const width = Math.max(viewportSize.width, conf.rendering.minWidth)
-      const height = Math.max(viewportSize.height, conf.rendering.minHeight)
-      const increment = conf.rendering.guides.gap
-
-      await test.step("verify horizontal lines", async () => {
-        let i = 0
-        for (let y = increment; y < height; y += increment) {
-          const ll = page.locator(locator.guidesWrapper + ` line[y1="${ y }"][y2="${ y }"]`)
-          await expect(ll).toHaveAttribute("x1", (increment).toString())
-          await expect(ll).toHaveAttribute("x2", (width - increment).toString())
-          await expect(ll).toHaveAttribute("stroke-width", "1")
-          i++
-        }
-      })
-
-      await test.step("verify no vertical lines", async () => {
-        for (let x = 0; x < width; x += increment) {
-          await expect(page.locator(locator.guidesWrapper + ` line[x1="${ x }"][x2="${ x }"]`)).toHaveCount(0)
-        }
-      })
-
-      await test.step("verify there is no point", async () => {
-        await expect(page.locator(locator.guidesWrapper + ` circle`)).toHaveCount(0)
-      })
+      await expect(page).toHaveScreenshot()
     })
 
     test(`should display guides in point mode with size: "${ guideSize.size }"`, async ({ page }) => {
@@ -157,25 +101,7 @@ test.describe("Offscreen Get Started - Guides", () => {
         await expect(page.locator(locator.guidesWrapper)).toBeVisible()
       })
 
-
-      const conf = await getEditorConfiguration(page)
-      const viewportSize = page.viewportSize()
-      const width = Math.max(viewportSize.width, conf.rendering.minWidth)
-      const height = Math.max(viewportSize.height, conf.rendering.minHeight)
-      const increment = conf.rendering.guides.gap
-
-      await test.step("verify there is no line", async () => {
-        await expect(page.locator(locator.guidesWrapper + ` line`)).toHaveCount(0)
-      })
-
-      await test.step("verify points", async () => {
-        for (let x = increment; x < width; x += increment) {
-          for (let y = increment; y < height; y += increment) {
-            const ll = page.locator(locator.guidesWrapper + ` circle[cx="${ x }"][cy="${ y }"]`)
-            await expect(ll).toHaveAttribute("r", "1")
-          }
-        }
-      })
+      await expect(page).toHaveScreenshot()
     })
   })
 })

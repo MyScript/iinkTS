@@ -282,7 +282,7 @@ describe("IIMenuAction.ts", () =>
     test("should remove elements", () =>
     {
       expect(editor.layers.ui.root.contains(menu.wrapper!)).toEqual(true)
-      expect(menu.wrapper?.childElementCount).toEqual(6)
+      expect(menu.wrapper?.childElementCount).toEqual(9)
       menu.destroy()
       expect(editor.layers.ui.root.contains(menu.wrapper!)).toEqual(false)
       expect(menu.wrapper).toBeUndefined()
