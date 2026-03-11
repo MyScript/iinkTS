@@ -41,6 +41,8 @@ import
   EraseManager,
   IIDebugSVGManager,
   IIMoveManager,
+  IIGestureManager,
+  IISnapManager,
 } from "../manager"
 import { RecognizedKind, IIRecognizedCircle, IIRecognizedEllipse, IIRecognizedPolygon } from "../symbol"
 import { IIHistoryManager, TIIHistoryBackendChanges, TIIHistoryChanges, THistoryContext } from "../history"
@@ -48,8 +50,6 @@ import { PartialDeep, convertMillimeterToPixel, mergeDeep } from "../utils"
 import { IIMenuAction, IIMenuManager, IIMenuStyle, IIMenuTool } from "../menu"
 import { AbstractEditor, EditorOptionsBase } from "./AbstractEditor"
 import { InteractiveInkEditorConfiguration, TInteractiveInkEditorConfiguration } from "./InteractiveInkEditorConfiguration"
-import { IIGestureManager } from "../gesture"
-import { IISnapManager } from "../snap"
 
 /**
  * @group Editor

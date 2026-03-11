@@ -6,9 +6,8 @@ import { DefaultHistoryConfiguration, THistoryConfiguration } from "../history"
 import { DefaultMenuConfiguration, TMenuConfiguration } from "../menu"
 import { DefaultRecognizerWebSocketConfiguration, RecognizerWebSocketConfiguration, TRecognitionWebSocketConfiguration, TRecognizerWebSocketConfiguration, TServerWebsocketConfiguration } from "../recognizer"
 import { DefaultIIRendererConfiguration, TIIRendererConfiguration } from "../renderer"
-import { DefaultGestureConfiguration, TGestureConfiguration } from "../gesture"
 import { TEditorConfiguration } from "./AbstractEditor"
-import { DefaultSnapConfiguration, SnapConfiguration, TSnapConfiguration } from "../snap"
+import { DefaultGestureConfiguration, TGestureConfiguration, DefaultSnapConfiguration, SnapConfiguration, TSnapConfiguration } from "../manager"
 
 /**
  * @group Editor

@@ -3,7 +3,7 @@ import { LoggerManager, LoggerCategory } from "../logger"
 import { TExport, TExportV2 } from "../model"
 import { IIStroke, TIISymbol, TSymbol } from "../symbol"
 import { THistoryContext } from "../history"
-import { TGestureType } from "../gesture"
+import { TGestureType } from "../manager"
 
 /**
  * @group Editor

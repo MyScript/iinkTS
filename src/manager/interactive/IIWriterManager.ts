@@ -1,5 +1,4 @@
 import { SELECTION_MARGIN, EditorWriteTool } from "../../Constants"
-import { TGesture } from "../../gesture"
 import { IIModel } from "../../model"
 import
 {
@@ -20,8 +19,8 @@ import { RecognizerWebSocket } from "../../recognizer"
 import { SVGRenderer } from "../../renderer"
 import { TStyle } from "../../style"
 import { IIHistoryManager } from "../../history"
-import { IIGestureManager } from "../../gesture/IIGestureManager"
-import { IISnapManager } from "../../snap/IISnapManager"
+import { IIGestureManager, TGesture } from "./IIGestureManager"
+import { IISnapManager } from "./IISnapManager"
 import { InteractiveInkEditor } from "../../editor/InteractiveInkEditor"
 import { PointerInfo } from "../../grabber"
 import { AbstractWriterManager } from "../base/AbstractWriterManager"
