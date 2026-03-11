@@ -1,4 +1,4 @@
-import { TGesture } from "../gesture"
+import { TGesture } from "../manager"
 import { TExport } from "../model"
 
 /**

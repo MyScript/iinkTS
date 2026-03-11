@@ -8,11 +8,13 @@
  * @remarks
  * All managers in this group work with InteractiveInkEditor and depend on the IIModel (Interactive Ink Model).
  */
-export { IIConversionManager } from "./IIConversionManager"
-export { IIMoveManager } from "./IIMoveManager"
-export { IIResizeManager } from "./IIResizeManager"
-export { IIRotationManager } from "./IIRotationManager"
-export { IISelectionManager } from "./IISelectionManager"
-export { IITextManager } from "./IITextManager"
-export { IITranslateManager } from "./IITranslateManager"
-export { IIWriterManager } from "./IIWriterManager"
+export * from "./IIConversionManager"
+export * from "./IIMoveManager"
+export * from "./IIResizeManager"
+export * from "./IIRotationManager"
+export * from "./IISelectionManager"
+export * from "./IITextManager"
+export * from "./IITranslateManager"
+export * from "./IIWriterManager"
+export * from "./IIGestureManager"
+export * from "./IISnapManager"
