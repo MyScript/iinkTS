@@ -1,7 +1,7 @@
 import { EdgeDecoration, EdgeKind, IIEdgeArc, IIEdgeLine, IIEdgePolyLine, TIIEdge } from "../../symbol"
 import { DefaultStyle } from "../../style"
-import { SVGRendererConst } from "./SVGRendererConst"
-import { SVGBuilder } from "./SVGBuilder"
+import { SVGRendererConst } from "./utils/SVGRendererConst"
+import { SVGBuilder } from "./utils/SVGBuilder"
 
 /**
  * @group Renderer
@@ -41,7 +41,7 @@ export class SVGRendererEdgeUtil
       case EdgeKind.Arc:
         return SVGRendererEdgeUtil.getArcPath(edge)
       default:
-        throw new Error(`Can't getSVGPath for edge cause kind is unknow: "${ JSON.stringify(edge) }"`)
+        throw new Error(`Can't getSVGPath for edge cause kind is unknown: "${ JSON.stringify(edge) }"`)
     }
   }
 

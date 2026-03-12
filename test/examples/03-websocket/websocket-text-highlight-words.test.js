@@ -134,7 +134,7 @@ test.describe("Websocket Text highlight words", () => {
   }) => {
     const strokeColor = colorMap[4]
     const highlightColor = colorMap[5]
-    await page.click(`#${strokeColor.id}`)
+    await page.locator(`#${strokeColor.id}`).click()
     await Promise.all([
       waitForExportedEvent(page),
       writeStrokes(page, [helloOneStrokeSurrounded.strokes[0]]),
@@ -142,7 +142,7 @@ test.describe("Websocket Text highlight words", () => {
     await callEditorIdle(page)
     await expect(page.locator("#highlight-list > li")).toHaveCount(0)
 
-    await page.click(`#${highlightColor.id}`)
+    await page.locator(`#${highlightColor.id}`).click()
     await Promise.all([
       waitForExportedEvent(page),
       writeStrokes(page, [helloOneStrokeSurrounded.strokes[1]]),

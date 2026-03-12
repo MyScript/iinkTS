@@ -1,5 +1,5 @@
 import { IIEraser, TPointer } from "../../symbol"
-import { SVGBuilder } from "./SVGBuilder"
+import { SVGBuilder } from "./utils/SVGBuilder"
 
 /**
  * @group Renderer

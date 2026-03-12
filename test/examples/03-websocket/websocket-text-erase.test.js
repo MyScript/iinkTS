@@ -24,7 +24,7 @@ test.describe("Websocket Text erase", () => {
     expect(await page.locator("#editorEl").getAttribute("class")).not.toContain(
       "erase"
     )
-    await page.click("#eraser")
+    await page.locator("#eraser").click()
     await expect(page.locator("#pen")).toBeEnabled()
     await expect(page.locator("#eraser")).toBeDisabled()
     expect(await page.locator("#editorEl").getAttribute("class")).toContain(
@@ -43,7 +43,7 @@ test.describe("Websocket Text erase", () => {
       ponyErase.exports[0]["application/vnd.myscript.jiix"].label
     await expect(page.locator(".prompter-text")).toHaveText(ponyLabelExpected)
 
-    await page.click("#eraser")
+    await page.locator("#eraser").click()
     await callEditorIdle(page)
 
     await Promise.all([
@@ -58,7 +58,7 @@ test.describe("Websocket Text erase", () => {
   })
 
   test("should erase stroke precisely", async ({ page }) => {
-    await page.setChecked("#erase-precisely", true)
+    await page.locator("#erase-precisely").setChecked(true)
     await page.waitForFunction(
       () =>
         editorEl?.editor?.configuration?.recognition?.text?.eraser?.[
@@ -76,7 +76,7 @@ test.describe("Websocket Text erase", () => {
       ponyErase.exports[0]["application/vnd.myscript.jiix"].label
     await expect(page.locator(".prompter-text")).toHaveText(labelExpected)
 
-    await page.click("#eraser")
+    await page.locator("#eraser").click()
     await callEditorIdle(page)
 
     await Promise.all([

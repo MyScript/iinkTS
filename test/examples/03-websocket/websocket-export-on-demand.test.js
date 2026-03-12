@@ -24,7 +24,7 @@ test.describe("Websocket on-demand export", function () {
     expect(noExport).toBeUndefined()
     await expect(page.locator("#result")).toBeEmpty()
 
-    await page.click("#export")
+    await page.locator("#export").click()
     await callEditorIdle(page)
     const exports = await getEditorExports(page)
     const jiix = exports["application/vnd.myscript.jiix"]

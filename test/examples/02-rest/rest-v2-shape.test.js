@@ -68,7 +68,7 @@ test.describe("Rest v2 Shape", () => {
 
       const promisesResult = await Promise.all([
         waitForExportedEvent(page),
-        page.click("#clear"),
+        page.locator("#clear").click(),
       ])
       expect(promisesResult[0]).toBeNull()
       expect(await getEditorExports(page)).toBeFalsy()
@@ -89,17 +89,17 @@ test.describe("Rest v2 Shape", () => {
       let strokes = await editorEl.evaluate(
         (node) => node.editor.model.strokes
       )
-      expect(strokes.length).toEqual(rectangleShape.strokes.length)
+      expect(strokes).toHaveLength(rectangleShape.strokes.length)
 
-      await Promise.all([waitForExportedEvent(page), page.click("#undo")])
-
-      strokes = await editorEl.evaluate((node) => node.editor.model.strokes)
-      expect(strokes.length).toEqual(rectangleShape.strokes.length - 1)
-
-      await Promise.all([waitForExportedEvent(page), page.click("#redo")])
+      await Promise.all([waitForExportedEvent(page), page.locator("#undo").click()])
 
       strokes = await editorEl.evaluate((node) => node.editor.model.strokes)
-      expect(strokes.length).toEqual(rectangleShape.strokes.length)
+      expect(strokes).toHaveLength(rectangleShape.strokes.length - 1)
+
+      await Promise.all([waitForExportedEvent(page), page.locator("#redo").click()])
+
+      strokes = await editorEl.evaluate((node) => node.editor.model.strokes)
+      expect(strokes).toHaveLength(rectangleShape.strokes.length)
     })
   })
 })

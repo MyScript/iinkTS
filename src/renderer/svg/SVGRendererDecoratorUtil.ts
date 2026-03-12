@@ -1,6 +1,6 @@
 import { DecoratorKind, IIDecorator, RecognizedKind, SymbolType, TBox, TIISymbol } from "../../symbol"
 import { DefaultStyle } from "../../style"
-import { SVGBuilder } from "./SVGBuilder"
+import { SVGBuilder } from "./utils/SVGBuilder"
 
 /**
  * @group Renderer

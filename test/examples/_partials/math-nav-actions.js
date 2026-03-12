@@ -53,7 +53,7 @@ export default {
         await test.step("should undo last stroke written", async () => {
           const [exportEvt] = await Promise.all([
             waitForExportedEvent(page),
-            page.click("#undo")
+            page.locator("#undo").click()
           ])
           expect(exportEvt["application/x-latex"]).toEqual(equation.exports.LATEX.at(-2))
           await expect(page.locator(resultLocator)).toHaveText(equation.exports.LATEX.at(-2))
@@ -64,7 +64,7 @@ export default {
         await test.step("should undo penultimate stroke written", async () => {
           const [exportEvt] = await Promise.all([
             waitForExportedEvent(page),
-            page.click("#undo")
+            page.locator("#undo").click()
           ])
           expect(exportEvt["application/x-latex"]).toEqual(equation.exports.LATEX.at(-3))
           await expect(page.locator(resultLocator)).toHaveText(equation.exports.LATEX.at(-3).replace("-", "−"))
@@ -75,7 +75,7 @@ export default {
         await test.step("should redo penultimate stroke written", async () => {
           const [exportEvt] = await Promise.all([
             waitForExportedEvent(page),
-            page.click("#redo")
+            page.locator("#redo").click()
           ])
           expect(exportEvt["application/x-latex"]).toEqual(equation.exports.LATEX.at(-2))
           await expect(page.locator(resultLocator)).toHaveText(equation.exports.LATEX.at(-2))

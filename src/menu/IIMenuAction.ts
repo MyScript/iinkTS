@@ -10,12 +10,14 @@ import snapIcon from "../assets/svg/arrow-to-dot.svg"
 import debugIcon from "../assets/svg/wolf.svg"
 import downloadIcon from "../assets/svg/download.svg"
 import uploadIcon from "../assets/svg/upload.svg"
+import zoomInIcon from "../assets/svg/zoom-in.svg"
+import zoomOutIcon from "../assets/svg/zoom-out.svg"
 import { EditorTool, EditorWriteTool } from "../Constants"
 import { LoggerCategory, LoggerManager } from "../logger"
 import { IIModel } from "../model"
 import { IIMenu, TMenuItemBoolean, TMenuItemButton, TMenuItemButtonList, TMenuItemSelect } from "./IIMenu"
 import { TIISymbol } from "../symbol"
-import { InsertAction, StrikeThroughAction, SurroundAction } from "../gesture"
+import { InsertAction, StrikeThroughAction, SurroundAction } from "../manager"
 import { IIMenuSub, TSubMenuParam } from "./IIMenuSub"
 import { createMenuButton } from "./MenuHelper"
 import { getAvailableLanguageList, PartialDeep } from "../utils"
@@ -36,6 +38,9 @@ export class IIMenuAction extends IIMenu
   menuUndo?: HTMLButtonElement
   menuRedo?: HTMLButtonElement
   menuConvert?: HTMLButtonElement
+  menuZoomIn?: HTMLButtonElement
+  menuZoomLevel?: HTMLSpanElement
+  menuZoomOut?: HTMLButtonElement
 
   guideGaps = [
     { label: "S", value: "25" },
@@ -149,6 +154,60 @@ export class IIMenuAction extends IIMenu
     return this.menuConvert
   }
 
+  protected createMenuZoomIn(): HTMLElement
+  {
+    this.menuZoomIn = createMenuButton(
+      `${ this.id }-zoom-in`,
+      zoomInIcon,
+      () => {
+        this.#logger.info(`${ this.id }.zoom-in`)
+        const currentZoom = this.editor.renderer.getZoom()
+        this.editor.renderer.setZoom(currentZoom * 1.2)
+        this.updateZoomDisplay()
+      }
+    )
+    return this.menuZoomIn
+  }
+
+  protected createMenuZoomLevel(): HTMLElement
+  {
+    this.menuZoomLevel = document.createElement("span")
+    this.menuZoomLevel.id = `${ this.id }-zoom-level`
+    this.menuZoomLevel.classList.add("ms-menu-zoom-level")
+    this.menuZoomLevel.style.cursor = "pointer"
+    this.menuZoomLevel.addEventListener("click", () => {
+      this.#logger.info(`${ this.id }.zoom-reset`)
+      this.editor.renderer.setZoom(1)
+      this.updateZoomDisplay()
+    })
+    this.updateZoomDisplay()
+    return this.menuZoomLevel
+  }
+
+  protected createMenuZoomOut(): HTMLElement
+  {
+    this.menuZoomOut = createMenuButton(
+      `${ this.id }-zoom-out`,
+      zoomOutIcon,
+      () => {
+        this.#logger.info(`${ this.id }.zoom-out`)
+        const currentZoom = this.editor.renderer.getZoom()
+        this.editor.renderer.setZoom(currentZoom / 1.2)
+        this.updateZoomDisplay()
+      }
+    )
+    return this.menuZoomOut
+  }
+
+  protected updateZoomDisplay(): void
+  {
+    if (this.menuZoomLevel) {
+      const zoom = this.editor.renderer.getZoom()
+      const percentage = Math.round(zoom * 100)
+      this.menuZoomLevel.textContent = `${percentage}%`
+    }
+  }
+
   protected createMenuGesture(): HTMLDivElement
   {
     const trigger = createMenuButton(
@@ -157,7 +216,7 @@ export class IIMenuAction extends IIMenu
       () => {} // Click handled by IIMenuSub
     )
     const subMenuWrapper = document.createElement("div")
-    subMenuWrapper.classList.add("ms-menu-colmun")
+    subMenuWrapper.classList.add("ms-menu-column")
 
     const surroundActionValues: { label: string, value: string }[] = []
     for (const key in SurroundAction) {
@@ -572,6 +631,9 @@ export class IIMenuAction extends IIMenu
       this.wrapper.appendChild(this.createMenuUndo())
       this.wrapper.appendChild(this.createMenuRedo())
       this.wrapper.appendChild(this.createMenuConvert())
+      this.wrapper.appendChild(this.createMenuZoomIn())
+      this.wrapper.appendChild(this.createMenuZoomLevel())
+      this.wrapper.appendChild(this.createMenuZoomOut())
 
       layer.appendChild(this.wrapper)
       this.update()
@@ -625,6 +687,9 @@ export class IIMenuAction extends IIMenu
       this.menuUndo = undefined
       this.menuRedo = undefined
       this.menuConvert = undefined
+      this.menuZoomIn = undefined
+      this.menuZoomLevel = undefined
+      this.menuZoomOut = undefined
     }
   }
 }

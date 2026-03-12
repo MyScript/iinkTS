@@ -1,7 +1,7 @@
 import { TStyle } from "../../style"
-import { TPoint, isValidPoint } from "../Point"
+import { TPoint, isValidPoint } from "../base/Point"
 import { OIShapeBase, ShapeKind } from "./IIShape"
-import { Box } from "../Box"
+import { Box } from "../base/Box"
 import { PartialDeep } from "../../utils"
 
 /**

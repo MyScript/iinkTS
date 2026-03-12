@@ -35,7 +35,7 @@ test.describe("Websocket Text Customize Stroke Style", () => {
     ])
     const defaultThemeColor = await page.evaluate("editorEl.editor.theme.ink.color")
     const path = page.locator(`path[fill="${hexToRgbA(defaultThemeColor)}"]`)
-    expect(await path.count()).toEqual(1)
+    await expect(path).toHaveCount(1)
   })
 
   test("should draw stroke with penStyleClasses", async ({ page }) => {
@@ -49,11 +49,11 @@ test.describe("Websocket Text Customize Stroke Style", () => {
     const editorTheme = await page.evaluate("editorEl.editor.theme")
     const editorPenStyleClasses = await page.evaluate("editorEl.editor.penStyleClasses")
     const penColorExpected = editorTheme[`.${editorPenStyleClasses}`].color
-    expect(await page.locator(`path[fill="${hexToRgbA(penColorExpected)}"]`).count()).toEqual(1)
+    await expect(page.locator(`path[fill="${hexToRgbA(penColorExpected)}"]`)).toHaveCount(1)
   })
 
   test("should draw stroke with theme", async ({ page }) => {
-    await page.selectOption("#theme", "bold-red"),
+    await page.locator("#theme").selectOption("bold-red")
 
     await Promise.all([
       waitForExportedEvent(page),
@@ -63,7 +63,7 @@ test.describe("Websocket Text Customize Stroke Style", () => {
     const editorTheme = await page.evaluate("editorEl.editor.theme")
     const penColorExpected = editorTheme.ink.color
     const path = page.locator(`path[fill="${hexToRgbA(penColorExpected)}"]`)
-    expect(await path.count()).toEqual(1)
+    await expect(path).toHaveCount(1)
   })
 
   test("should draw stroke with default penStyle", async ({ page }) => {
@@ -86,7 +86,7 @@ test.describe("Websocket Text Customize Stroke Style", () => {
 
     const editorPenStyle = await page.evaluate("editorEl.editor.penStyle")
     const path = page.locator(`path[fill="${hexToRgbA(editorPenStyle.color)}"]`)
-    expect(await path.count()).toEqual(1)
+    await expect(path).toHaveCount(1)
 
     await enablePenStyle.click()
     await expect(enablePenStyle).not.toBeChecked()
@@ -103,7 +103,7 @@ test.describe("Websocket Text Customize Stroke Style", () => {
     await expect(page.locator("#pencolor")).toBeEnabled()
     await expect(page.locator("#penwidth")).toBeEnabled()
 
-    await page.fill("#pencolor", penColorExpected)
+    await page.locator("#pencolor").fill(penColorExpected)
 
     await Promise.all([
       waitForExportedEvent(page),
@@ -111,6 +111,6 @@ test.describe("Websocket Text Customize Stroke Style", () => {
     ])
 
     const path = page.locator(`path[fill="${hexToRgbA(penColorExpected)}"]`)
-    expect(await path.count()).toEqual(1)
+    await expect(path).toHaveCount(1)
   })
 })

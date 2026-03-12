@@ -190,14 +190,14 @@ describe("IIWriterManager.ts", () =>
       expect(manager.renderer.drawSymbol).toHaveBeenCalledTimes(1)
       expect(manager.renderer.drawSymbol).toHaveBeenCalledWith(manager.model.currentSymbol)
     })
-    test("should throw error if symbol type unknow when start", () =>
+    test("should throw error if symbol type unknown when start", () =>
     {
       const info = {
         pointer: { t: 1, p: 0.5, x: 1, y: 1 }
       } as PointerInfo
       //@ts-ignore
-      manager.tool = "unknow"
-      expect(() => manager.start(info)).toThrow("Can't create symbol, tool is unknow: \"unknow\"")
+      manager.tool = "unknown"
+      expect(() => manager.start(info)).toThrow("Can't create symbol, tool is unknown: \"unknown\"")
     })
     test("should update currentSymbol", () =>
     {

@@ -1,7 +1,6 @@
 {
   "name": "iink-ts-with-tldraw",
   "version": "1.0.0-buildVersion",
-  "private": false,
   "homepage": "https://myscript.github.io/iinkTS/",
   "repository": "git://github.com/MyScript/iinkTS.git",
   "license": "Apache-2.0",
@@ -13,28 +12,28 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@reduxjs/toolkit": "^2.4.0",
-    "iink-ts": "2.0.1",
+    "@reduxjs/toolkit": "^2.11.2",
+    "iink-ts": "3.2.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-json-view": "^1.21.3",
     "react-portal": "^4.3.0",
-    "react-redux": "^9.1.2",
+    "react-redux": "^9.2.0",
     "tldraw": "^3.7.0"
   },
   "devDependencies": {
-    "@types/lodash": "^4.17.13",
-    "@types/react": "^18.3.12",
-    "@types/react-dom": "^18.3.1",
+    "@types/lodash": "^4.17.24",
+    "@types/react": "^18.3.28",
+    "@types/react-dom": "^18.3.7",
     "@types/react-portal": "^4.0.7",
-    "@typescript-eslint/eslint-plugin": "^8.17.0",
-    "@typescript-eslint/parser": "^8.17.0",
-    "@vitejs/plugin-react-swc": "^3.7.2",
+    "@typescript-eslint/eslint-plugin": "^8.56.1",
+    "@typescript-eslint/parser": "^8.56.1",
+    "@vitejs/plugin-react-swc": "^3.11.0",
     "buffer": "^6.0.3",
-    "eslint": "^9.16.0",
-    "eslint-plugin-react-hooks": "^5.0.0",
-    "eslint-plugin-react-refresh": "^0.4.16",
-    "typescript": "^5.7.2",
-    "vite": "^6.0.2"
+    "eslint": "^9.39.4",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.26",
+    "typescript": "^5.9.3",
+    "vite": "^6.4.1"
   }
 }

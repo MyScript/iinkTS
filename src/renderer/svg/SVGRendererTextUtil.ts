@@ -1,7 +1,7 @@
 import { DecoratorKind, IIText } from "../../symbol"
 import { SVGRendererDecoratorUtil } from "./SVGRendererDecoratorUtil"
-import { SVGRendererConst } from "./SVGRendererConst"
-import { SVGBuilder } from "./SVGBuilder"
+import { SVGRendererConst } from "./utils/SVGRendererConst"
+import { SVGBuilder } from "./utils/SVGBuilder"
 
 /**
  * @group Renderer

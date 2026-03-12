@@ -56,10 +56,38 @@ export class PointerEventGrabber
     } else {
       ({ clientX, clientY } = event)
     }
-    const rect: DOMRect = this.layerCapture.getBoundingClientRect()
+
+    let x: number, y: number
+
+    const svgElement: SVGSVGElement | null =
+      this.layerCapture instanceof SVGSVGElement
+        ? this.layerCapture
+        : this.layerCapture.querySelector("svg")
+
+
+    if (svgElement) {
+      const ctm = svgElement.getScreenCTM()
+      if (ctm) {
+        const point = svgElement.createSVGPoint()
+        point.x = clientX
+        point.y = clientY
+        const transformedPoint = point.matrixTransform(ctm.inverse())
+        x = transformedPoint.x
+        y = transformedPoint.y
+      } else {
+        const rect: DOMRect = this.layerCapture.getBoundingClientRect()
+        x = clientX - rect.left - this.layerCapture.clientLeft
+        y = clientY - rect.top - this.layerCapture.clientTop
+      }
+    } else {
+      const rect: DOMRect = this.layerCapture.getBoundingClientRect()
+      x = clientX - rect.left - this.layerCapture.clientLeft + this.layerCapture.scrollLeft
+      y = clientY - rect.top - this.layerCapture.clientTop + this.layerCapture.scrollTop
+    }
+
     const pointer = {
-      x: this.roundFloat(clientX - rect.left - this.layerCapture.clientLeft + this.layerCapture.scrollLeft, this.configuration.xyFloatPrecision),
-      y: this.roundFloat(clientY - rect.top - this.layerCapture.clientTop + this.layerCapture.scrollTop, this.configuration.xyFloatPrecision),
+      x: this.roundFloat(x, this.configuration.xyFloatPrecision),
+      y: this.roundFloat(y, this.configuration.xyFloatPrecision),
       t: this.roundFloat(Date.now(), this.configuration.timestampFloatPrecision),
       p: (event as PointerEvent).pressure,
     }

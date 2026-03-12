@@ -19,7 +19,7 @@ test.describe("Websocket Math Import JIIX", () => {
   test("should import JIIX", async ({ page }) => {
     await Promise.all([
       waitForImportedEvent(page),
-      page.click("#import")
+      page.locator("#import").click()
     ])
 
     const jiix = await getEditorExportsType(page, "application/vnd.myscript.jiix")

@@ -41,6 +41,8 @@ import
   EraseManager,
   IIDebugSVGManager,
   IIMoveManager,
+  IIGestureManager,
+  IISnapManager,
 } from "../manager"
 import { RecognizedKind, IIRecognizedCircle, IIRecognizedEllipse, IIRecognizedPolygon } from "../symbol"
 import { IIHistoryManager, TIIHistoryBackendChanges, TIIHistoryChanges, THistoryContext } from "../history"
@@ -48,8 +50,6 @@ import { PartialDeep, convertMillimeterToPixel, mergeDeep } from "../utils"
 import { IIMenuAction, IIMenuManager, IIMenuStyle, IIMenuTool } from "../menu"
 import { AbstractEditor, EditorOptionsBase } from "./AbstractEditor"
 import { InteractiveInkEditorConfiguration, TInteractiveInkEditorConfiguration } from "./InteractiveInkEditorConfiguration"
-import { IIGestureManager } from "../gesture"
-import { IISnapManager } from "../snap"
 
 /**
  * @group Editor
@@ -76,6 +76,7 @@ export class InteractiveInkEditor extends AbstractEditor
   #configuration: InteractiveInkEditorConfiguration
   #model: IIModel
   #tool: EditorTool = EditorTool.Write
+  #toolBeforeCtrl?: EditorTool
   #layerUITimer?: ReturnType<typeof setTimeout>
   #recognizeStrokeTimer?: ReturnType<typeof setTimeout>
 
@@ -157,6 +158,10 @@ export class InteractiveInkEditor extends AbstractEditor
     this.menu.tool.update()
     this.setCursorStyle()
     this.unselectAll()
+
+    if (this.#toolBeforeCtrl && i !== EditorTool.Move) {
+      this.#toolBeforeCtrl = undefined
+    }
 
     this.eraser.detach()
     this.selector.detach()
@@ -284,6 +289,9 @@ export class InteractiveInkEditor extends AbstractEditor
       this.renderer.init(this.layers.rendering)
       this.menu.render(this.layers.ui.root)
 
+      window.addEventListener("keydown", this.handleKeyDown)
+      window.addEventListener("keyup", this.handleKeyUp)
+
       const compStyles = window.getComputedStyle(this.layers.root)
       this.model.width = Math.max(parseInt(compStyles.width.replace("px", "")), this.#configuration.rendering.minWidth)
       this.model.height = Math.max(parseInt(compStyles.height.replace("px", "")), this.#configuration.rendering.minHeight)
@@ -375,7 +383,7 @@ export class InteractiveInkEditor extends AbstractEditor
       case RecognizedKind.PolyEdge:
         return IIRecognizedPolyLine.create(partialSymbol)
       default:
-        throw new Error(`Unable to create recognized, symbol type '${ JSON.stringify(partialSymbol) } is unknow`)
+        throw new Error(`Unable to create recognized, symbol type '${ JSON.stringify(partialSymbol) } is unknown`)
     }
   }
 
@@ -401,7 +409,7 @@ export class InteractiveInkEditor extends AbstractEditor
         case SymbolType.Recognized:
           return this.buildRecognized(partialSymbol as PartialDeep<TIIRecognized>)
         default:
-          throw new Error(`Unable to create group, symbol type '${ JSON.stringify(partialSymbol) } is unknow`)
+          throw new Error(`Unable to create group, symbol type '${ JSON.stringify(partialSymbol) } is unknown`)
       }
     })
     const group = new IISymbolGroup(children, partialGroup.style)
@@ -869,7 +877,7 @@ export class InteractiveInkEditor extends AbstractEditor
                 break
               }
               default:
-                this.logger.warn("synchronizeStrokesWithJIIX", `Can not create recognized shape symbol, kind unknow: ${ el }`)
+                this.logger.warn("synchronizeStrokesWithJIIX", `Can not create recognized shape symbol, kind unknown: ${ el }`)
                 break
             }
             if (symbolRecognized) {
@@ -909,7 +917,7 @@ export class InteractiveInkEditor extends AbstractEditor
                 break
               }
               default:
-                this.logger.warn("synchronizeStrokesWithJIIX", `Can not create recognized edge symbol, kind unknow: ${ el }`)
+                this.logger.warn("synchronizeStrokesWithJIIX", `Can not create recognized edge symbol, kind unknown: ${ el }`)
                 break
             }
             if (symbolRecognized) {
@@ -925,7 +933,7 @@ export class InteractiveInkEditor extends AbstractEditor
           break
         }
         default:
-          this.logger.warn("synchronizeStrokesWithJIIX", `Can not create recognized symbol, type unknow: ${ el }`)
+          this.logger.warn("synchronizeStrokesWithJIIX", `Can not create recognized symbol, type unknown: ${ el }`)
           break
       }
     })
@@ -1324,6 +1332,27 @@ export class InteractiveInkEditor extends AbstractEditor
     return backendChanges
   }
 
+  protected handleKeyDown = (event: KeyboardEvent): void => {
+    const target = event.target as HTMLElement
+    if (target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA")) {
+      return
+    }
+
+    if ((event.ctrlKey || event.metaKey) && this.#tool !== EditorTool.Move && !this.#toolBeforeCtrl) {
+      this.logger.debug("handleKeyDown", "Switching to Move mode")
+      this.#toolBeforeCtrl = this.#tool
+      this.tool = EditorTool.Move
+    }
+  }
+
+  protected handleKeyUp = (event: KeyboardEvent): void => {
+    if (!event.ctrlKey && !event.metaKey && this.#toolBeforeCtrl) {
+      this.logger.debug("handleKeyUp", "Restoring previous tool")
+      this.tool = this.#toolBeforeCtrl
+      this.#toolBeforeCtrl = undefined
+    }
+  }
+
   async undo(): Promise<IIModel>
   {
     this.logger.info("undo")
@@ -1469,6 +1498,10 @@ export class InteractiveInkEditor extends AbstractEditor
   async destroy(): Promise<void>
   {
     this.logger.info("destroy")
+
+    // Retirer les écouteurs d'événements clavier
+    window.removeEventListener("keydown", this.handleKeyDown)
+    window.removeEventListener("keyup", this.handleKeyUp)
 
     this.layers.root.classList.remove("draw")
     this.layers.root.classList.remove("erase")

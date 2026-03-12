@@ -2,7 +2,7 @@ import { SELECTION_MARGIN } from "../../Constants"
 import { TStyle } from "../../style"
 import { PartialDeep, computePointOnEllipse, isValidNumber } from "../../utils"
 import { EdgeDecoration, EdgeKind, OIEdgeBase } from "./IIEdge"
-import { TPoint, isValidPoint } from "../Point"
+import { TPoint, isValidPoint } from "../base/Point"
 
 /**
  * @group Symbol

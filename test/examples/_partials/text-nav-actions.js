@@ -20,7 +20,7 @@ export default {
         const [exportAfterClear] = await Promise.all([
           waitForExportedEvent(page),
           waitForChangedEvent(page),
-          page.click("#clear")
+          page.locator("#clear").click()
         ])
         await expect(page.locator(resultLocator)).toBeEmpty()
         expect(exportAfterClear["application/vnd.myscript.jiix"].label).toStrictEqual("")
@@ -47,7 +47,7 @@ export default {
           const [undoExports] = await Promise.all([
             waitForExportedEvent(page),
             waitForChangedEvent(page),
-            page.click('#undo')
+            page.locator('#undo').click()
           ])
           expect(undoExports['application/vnd.myscript.jiix'].label).toStrictEqual(hello.exports['text/plain'].at(-2))
           await expect(page.locator(resultLocator)).toHaveText(hello.exports["text/plain"].at(-2))
@@ -57,7 +57,7 @@ export default {
           const [undo2Exports] = await Promise.all([
             waitForExportedEvent(page),
             waitForChangedEvent(page),
-            page.click('#undo')
+            page.locator('#undo').click()
           ])
           expect(undo2Exports['application/vnd.myscript.jiix'].label).toStrictEqual(hello.exports['text/plain'].at(-3))
           await expect(page.locator(resultLocator)).toHaveText(hello.exports["text/plain"].at(-3))
@@ -67,7 +67,7 @@ export default {
           const [redoExports] = await Promise.all([
             waitForExportedEvent(page),
             waitForChangedEvent(page),
-            page.click('#redo')
+            page.locator('#redo').click()
           ])
           expect(redoExports['application/vnd.myscript.jiix'].label).toStrictEqual(hello.exports['text/plain'].at(-2))
           await expect(page.locator(resultLocator)).toHaveText(hello.exports["text/plain"].at(-2))
