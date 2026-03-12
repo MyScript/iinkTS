@@ -7,7 +7,7 @@ export enum RecognizerError {
   WRONG_CREDENTIALS = "Application credentials are invalid. Please check or regenerate your application key and hmackey.",
   TOO_OLD = "Session is too old. Max Session Duration Reached.",
   NO_SESSION_FOUND = "No sessions found. Without activation for 1 hour, sessions are deleted from the server. To avoid losing your work, use the json export, then import it this will create a new session.",
-  UNKNOW = "An unknown error has occurred.",
+  UNKNOWN = "An unknown error has occurred.",
   ABNORMAL_CLOSURE = "MyScript recognition server is not reachable.",
   CANT_ESTABLISH = "Unable to establish a connection to MyScript recognition server. Check the host and your connectivity.",
   GOING_AWAY = "MyScript recognition server is going away, either because of a server failure or because the browser is navigating away from the page that opened the connection.",

@@ -8,8 +8,9 @@ import { IHistoryManager } from "../history"
 import { PartialDeep } from "../utils"
 import { AbstractEditor, EditorOptionsBase } from "./AbstractEditor"
 import { InkEditorConfiguration, TInkEditorConfiguration } from "./InkEditorConfiguration"
-import { IWriterManager } from "../manager/IWriterManager"
-import { IDebugSVGManager, EraseManager } from "../manager"
+import { IWriterManager } from "../manager/simple"
+import { IDebugSVGManager } from "../manager/debug"
+import { EraseManager } from "../manager/base"
 
 /**
  * @group Editor

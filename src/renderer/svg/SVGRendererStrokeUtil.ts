@@ -2,8 +2,8 @@ import { DecoratorKind, IIStroke, TPointer } from "../../symbol"
 import { DefaultStyle } from "../../style"
 import { computeAngleAxeRadian, computeLinksPointers, computeMiddlePointer } from "../../utils"
 import { SVGRendererDecoratorUtil } from "./SVGRendererDecoratorUtil"
-import { SVGRendererConst } from "./SVGRendererConst"
-import { SVGBuilder } from "./SVGBuilder"
+import { SVGRendererConst } from "./utils/SVGRendererConst"
+import { SVGBuilder } from "./utils/SVGBuilder"
 
 /**
  * @group Renderer

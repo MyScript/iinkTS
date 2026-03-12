@@ -28,7 +28,7 @@ describe("IIRotationManager.ts", () =>
     editor.renderer.setAttribute = jest.fn()
     const manager = new IIRotationManager(editor)
 
-    test("not rotate shape with kind unknow", () =>
+    test("not rotate shape with kind unknown", () =>
     {
       const points: TPoint[] = [
         { x: 0, y: 0 },
@@ -40,7 +40,7 @@ describe("IIRotationManager.ts", () =>
       //@ts-ignore
       poly.kind = "pouet"
       const origin: TPoint = { x: 0, y: 0 }
-      expect(() => manager.applyToSymbol(poly, origin, Math.PI / 2)).toThrow(expect.objectContaining({ message: expect.stringContaining("Can't apply rotate on shape, kind unknow: ") }))
+      expect(() => manager.applyToSymbol(poly, origin, Math.PI / 2)).toThrow(expect.objectContaining({ message: expect.stringContaining("Can't apply rotate on shape, kind unknown: ") }))
     })
     test("rotate stroke", () =>
     {

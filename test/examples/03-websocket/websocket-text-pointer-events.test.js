@@ -24,6 +24,7 @@ test.describe("Websocket Text Pointer Events", () => {
         writeStrokes(page, h.strokes),
       ])
     })
+
     await expect(page.locator("#result")).toHaveText(
       h.exports["text/plain"].at(-1)
     )

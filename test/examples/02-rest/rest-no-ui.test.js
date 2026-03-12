@@ -26,7 +26,7 @@ test.describe("Rest no UI", () => {
     await Promise.all([
       textPlainExport,
       imagePngExport,
-      page.click("#recognize")
+      page.locator("#recognize").click()
     ])
     // // for wait rendering after convertBlobToBase64
     // await page.waitForTimeout(1000)

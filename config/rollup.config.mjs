@@ -3,7 +3,7 @@ import resolve from "@rollup/plugin-node-resolve"
 import typescript from "rollup-plugin-typescript2"
 import postcss from "rollup-plugin-postcss"
 import dts from "rollup-plugin-dts"
-import commonjs from "rollup-plugin-commonjs"
+import commonjs from "@rollup/plugin-commonjs"
 import svg from "rollup-plugin-svg-import"
 import webWorkerLoader from "rollup-plugin-web-worker-loader"
 

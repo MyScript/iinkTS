@@ -3,7 +3,8 @@ import { getClosestPoints } from "../../utils"
 import { LoggerCategory, LoggerManager } from "../../logger"
 import { TIISymbol, TPoint, TBox, Box, IIEraser, SymbolType } from "../../symbol"
 import { TIIRendererConfiguration } from "../RendererConfiguration"
-import { SVGRendererConst } from "./SVGRendererConst"
+import { BaseRenderer } from "../base"
+import { SVGRendererConst } from "./utils/SVGRendererConst"
 import { SVGRendererEdgeUtil } from "./SVGRendererEdgeUtil"
 import { SVGRendererEraserUtil } from "./SVGRendererEraserUtil"
 import { SVGRendererGroupUtil } from "./SVGRendererGroupUtil"
@@ -11,24 +12,26 @@ import { SVGRendererShapeUtil } from "./SVGRendererShapeUtil"
 import { SVGRendererStrokeUtil } from "./SVGRendererStrokeUtil"
 import { SVGRendererTextUtil } from "./SVGRendererTextUtil"
 import { SVGRendererRecognizedUtil } from "./SVGRendererRecognizedUtil"
-import { SVGBuilder } from "./SVGBuilder"
+import { SVGBuilder } from "./utils/SVGBuilder"
 
 /**
  * @group Renderer
  */
-export class SVGRenderer {
+export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfiguration> {
   #logger = LoggerManager.getLogger(LoggerCategory.RENDERER)
   groupGuidesId = "guides-wrapper"
 
-  configuration: TIIRendererConfiguration
-  parent!: HTMLElement
   layer!: SVGSVGElement
   definitionGroup!: SVGGElement
 
   verticalGuides: number[] = []
   horizontalGuides: number[] = []
 
+  #zoom: number = 1
+  #viewBox: { x: number, y: number, width: number, height: number } = { x: 0, y: 0, width: 0, height: 0 }
+
   constructor(configuration: TIIRendererConfiguration) {
+    super(configuration)
     this.#logger.info("constructor", { configuration })
     this.configuration = configuration
   }
@@ -39,6 +42,7 @@ export class SVGRenderer {
     this.layer = SVGBuilder.createLayer({ x: 0, y: 0, width, height })
     this.layer.style.setProperty("height", "auto")
     this.layer.style.setProperty("width", "auto")
+    this.#viewBox = { x: 0, y: 0, width, height }
     this.layer.appendChild(this.createSVGTools())
     this.parent.style.setProperty("overflow", "auto")
     this.parent.appendChild(this.layer)
@@ -101,8 +105,17 @@ export class SVGRenderer {
   protected drawGuides(): void {
     this.verticalGuides = []
     this.horizontalGuides = []
-    const height = Number(this.layer.getAttribute("height")?.replace("px", ""))
-    const width = Number(this.layer.getAttribute("width")?.replace("px", ""))
+
+    const viewBox = this.#viewBox
+    const maxMargin = 2000
+    const calculatedMargin = Math.max(viewBox.width, viewBox.height) * 2
+    const margin = Math.min(calculatedMargin, maxMargin)
+
+    const startX = viewBox.x - margin
+    const endX = viewBox.x + viewBox.width + margin
+    const startY = viewBox.y - margin
+    const endY = viewBox.y + viewBox.height + margin
+
     const offSet = this.configuration.guides.gap
     const subOffSet = this.configuration.guides.gap / 5
     const attrs = {
@@ -113,52 +126,101 @@ export class SVGRenderer {
       role: SvgElementRole.Guide
     }
     const guidesGroup = SVGBuilder.createGroup(attrs)
+
     switch (this.configuration.guides.type) {
-      case "line":
-        for (let y = offSet; y < height; y += offSet) {
-          const begin: TPoint = { x: offSet, y }
-          const end: TPoint = { x: width - offSet, y }
+      case "line": {
+        let pathData = ""
+        const firstLineY = Math.floor(startY / offSet) * offSet + offSet
+        for (let y = firstLineY; y < endY; y += offSet) {
           this.horizontalGuides.push(y)
-          const svgLine = SVGBuilder.createLine(begin, end, { "stroke-width": "1", style: SVGRendererConst.noSelection })
-          guidesGroup.appendChild(svgLine)
+          pathData += `M ${startX + offSet} ${y} L ${endX - offSet} ${y} `
+        }
+        if (pathData) {
+          const path = SVGBuilder.createPath({ d: pathData, "stroke-width": "1", stroke: "grey", fill: "none", style: SVGRendererConst.noSelection })
+          guidesGroup.appendChild(path)
         }
         break
-      case "grid":
-        for (let y = 0; y < height; y += offSet) {
-          const begin: TPoint = { x: 0, y }
-          const end: TPoint = { x: width, y }
-          const svgLine = SVGBuilder.createLine(begin, end, { "stroke-width": "1", style: SVGRendererConst.noSelection })
-          guidesGroup.appendChild(svgLine)
+      }
+      case "grid": {
+        let mainPathData = ""
+        let subPathData = ""
+        const drawSubGuides = this.#zoom >= 0.5
+
+        const firstGridY = Math.floor(startY / offSet) * offSet
+        for (let y = firstGridY; y < endY; y += offSet) {
+          mainPathData += `M ${startX} ${y} L ${endX} ${y} `
           this.horizontalGuides.push(y)
-          for (let subY = y + subOffSet; subY < y + offSet; subY += subOffSet) {
-            this.horizontalGuides.push(subY)
-            const svgLine = SVGBuilder.createLine({ x: 0, y: subY }, { x: width, y: subY }, { "stroke-width": "0.25", style: SVGRendererConst.noSelection })
-            guidesGroup.appendChild(svgLine)
+          if (drawSubGuides) {
+            for (let subY = y + subOffSet; subY < y + offSet && subY < endY; subY += subOffSet) {
+              this.horizontalGuides.push(subY)
+              subPathData += `M ${startX} ${subY} L ${endX} ${subY} `
+            }
           }
         }
-        for (let x = 0; x < width; x += offSet) {
-          const begin: TPoint = { x, y: 0 }
-          const end: TPoint = { x, y: height }
-          const svgLine = SVGBuilder.createLine(begin, end, { "stroke-width": "1", style: SVGRendererConst.noSelection })
-          guidesGroup.appendChild(svgLine)
+
+        const firstGridX = Math.floor(startX / offSet) * offSet
+        for (let x = firstGridX; x < endX; x += offSet) {
+          mainPathData += `M ${x} ${startY} L ${x} ${endY} `
           this.verticalGuides.push(x)
-          for (let subX = x + subOffSet; subX < x + offSet; subX += subOffSet) {
-            this.verticalGuides.push(subX)
-            const svgLine = SVGBuilder.createLine({ x: subX, y: 0 }, { x: subX, y: height }, { "stroke-width": "0.25", style: SVGRendererConst.noSelection })
-            guidesGroup.appendChild(svgLine)
+          if (drawSubGuides) {
+            for (let subX = x + subOffSet; subX < x + offSet && subX < endX; subX += subOffSet) {
+              this.verticalGuides.push(subX)
+              subPathData += `M ${subX} ${startY} L ${subX} ${endY} `
+            }
           }
+        }
+
+        if (mainPathData) {
+          const mainPath = SVGBuilder.createPath({ d: mainPathData, "stroke-width": "1", stroke: "grey", fill: "none", style: SVGRendererConst.noSelection })
+          guidesGroup.appendChild(mainPath)
+        }
+        if (subPathData) {
+          const subPath = SVGBuilder.createPath({ d: subPathData, "stroke-width": "0.25", stroke: "grey", fill: "none", style: SVGRendererConst.noSelection })
+          guidesGroup.appendChild(subPath)
         }
         break
-      case "point":
-        for (let x = offSet; x < width; x += offSet) {
+      }
+      case "point": {
+        const firstPointX = Math.floor(startX / offSet) * offSet + offSet
+        const firstPointY = Math.floor(startY / offSet) * offSet + offSet
+
+        let pathData = ""
+        const pointsX = []
+        const pointsY = []
+
+        for (let x = firstPointX; x < endX; x += offSet) {
           this.verticalGuides.push(x)
-          for (let y = offSet; y < height; y += offSet) {
-            this.horizontalGuides.push(y)
-            const svgPoint = SVGBuilder.createCircle({ x, y }, 1)
-            guidesGroup.appendChild(svgPoint)
+          pointsX.push(x)
+        }
+        for (let y = firstPointY; y < endY; y += offSet) {
+          this.horizontalGuides.push(y)
+          pointsY.push(y)
+        }
+
+        const maxPoints = 5000
+        const totalPoints = pointsX.length * pointsY.length
+
+        if (totalPoints <= maxPoints) {
+          for (const x of pointsX) {
+            for (const y of pointsY) {
+              pathData += `M ${x} ${y} m -1,0 a 1,1 0 1,0 2,0 a 1,1 0 1,0 -2,0 `
+            }
+          }
+        } else {
+          const skipFactor = Math.ceil(Math.sqrt(totalPoints / maxPoints))
+          for (let i = 0; i < pointsX.length; i += skipFactor) {
+            for (let j = 0; j < pointsY.length; j += skipFactor) {
+              pathData += `M ${pointsX[i]} ${pointsY[j]} m -1,0 a 1,1 0 1,0 2,0 a 1,1 0 1,0 -2,0 `
+            }
           }
         }
+
+        if (pathData) {
+          const pointsPath = SVGBuilder.createPath({ d: pathData, fill: "grey", stroke: "none", style: SVGRendererConst.noSelection })
+          guidesGroup.appendChild(pointsPath)
+        }
         break
+      }
       default:
         this.#logger.error("drawGuides", `Guide type unknown: ${this.configuration.guides.type}`)
         break
@@ -172,6 +234,13 @@ export class SVGRenderer {
     this.verticalGuides = []
     this.horizontalGuides = []
     this.layer.querySelector(`#${this.groupGuidesId}`)?.remove()
+  }
+
+  redrawGuides(): void {
+    if (this.configuration.guides.enable) {
+      this.removeGuides()
+      this.drawGuides()
+    }
   }
 
   protected createSVGTools(): SVGGElement {
@@ -226,7 +295,7 @@ export class SVGRenderer {
         element = SVGRendererRecognizedUtil.getSVGElement(symbol)
         break
       default:
-        this.#logger.error("buildElementFromSymbol", `symbol unknow: "${JSON.stringify(symbol)}"`)
+        this.#logger.error("buildElementFromSymbol", `symbol unknown: "${JSON.stringify(symbol)}"`)
     }
     return element
   }
@@ -342,7 +411,9 @@ export class SVGRenderer {
     this.#logger.info("resize", { height, width })
     this.layer.setAttribute("width", `${width}px`)
     this.layer.setAttribute("height", `${height}px`)
-    this.layer.setAttribute("viewBox", `0, 0, ${width}, ${height}`)
+    this.#viewBox.width = width
+    this.#viewBox.height = height
+    this.layer.setAttribute("viewBox", `${this.#viewBox.x}, ${this.#viewBox.y}, ${this.#viewBox.width}, ${this.#viewBox.height}`)
     this.removeGuides()
     if (this.configuration.guides.enable) {
       this.drawGuides()
@@ -377,6 +448,124 @@ export class SVGRenderer {
         this.layer.firstChild.remove()
       }
       this.layer.appendChild(this.createSVGTools())
+    }
+  }
+
+  getRenderingContext(): SVGSVGElement
+  {
+    return this.layer
+  }
+
+
+  getZoom(): number {
+    return this.#zoom
+  }
+
+  setZoom(zoom: number, centerX?: number, centerY?: number): void {
+    this.#logger.info("setZoom", { zoom, centerX, centerY })
+
+    if (zoom <= 0) {
+      this.#logger.warn("setZoom", "Zoom must be greater than 0")
+      return
+    }
+
+    const oldZoom = this.#zoom
+    this.#zoom = zoom
+
+    if (centerX !== undefined && centerY !== undefined) {
+      const zoomRatio = oldZoom / zoom
+      const dx = centerX * (1 - zoomRatio)
+      const dy = centerY * (1 - zoomRatio)
+      this.#viewBox.x += dx
+      this.#viewBox.y += dy
+    }
+
+    const baseWidth = this.#viewBox.width * oldZoom
+    const baseHeight = this.#viewBox.height * oldZoom
+    this.#viewBox.width = baseWidth / zoom
+    this.#viewBox.height = baseHeight / zoom
+
+    this.layer.setAttribute("viewBox", `${this.#viewBox.x}, ${this.#viewBox.y}, ${this.#viewBox.width}, ${this.#viewBox.height}`)
+
+    if (this.configuration.guides.enable) {
+      this.removeGuides()
+      this.drawGuides()
+    }
+  }
+
+  /**
+   * Get current viewBox
+   * @returns Current viewBox {x, y, width, height}
+   */
+  getViewBox(): { x: number, y: number, width: number, height: number } {
+    return { ...this.#viewBox }
+  }
+
+  /**
+   * Set viewBox
+   * @param x X coordinate of top-left corner
+   * @param y Y coordinate of top-left corner
+   * @param width Width of viewBox
+   * @param height Height of viewBox
+   * @param redrawGuides Whether to redraw guides (default: true)
+   */
+  setViewBox(x: number, y: number, width: number, height: number, redrawGuides: boolean = true): void {
+    this.#logger.debug("setViewBox", { x, y, width, height, redrawGuides })
+    this.#viewBox = { x, y, width, height }
+    this.layer.setAttribute("viewBox", `${x}, ${y}, ${width}, ${height}`)
+
+    if (redrawGuides && this.configuration.guides.enable) {
+      this.removeGuides()
+      this.drawGuides()
+    }
+  }
+
+  /**
+   * Pan (translate) the viewBox
+   * @param dx Horizontal translation (in viewBox coordinates)
+   * @param dy Vertical translation (in viewBox coordinates)
+   * @param redrawGuides Whether to redraw guides (default: true)
+   */
+  pan(dx: number, dy: number, redrawGuides: boolean = true): void {
+    this.#logger.debug("pan", { dx, dy, redrawGuides })
+    this.#viewBox.x += dx
+    this.#viewBox.y += dy
+    this.layer.setAttribute("viewBox", `${this.#viewBox.x}, ${this.#viewBox.y}, ${this.#viewBox.width}, ${this.#viewBox.height}`)
+
+    if (redrawGuides && this.configuration.guides.enable) {
+      this.removeGuides()
+      this.drawGuides()
+    }
+  }
+
+  /**
+   * Ensure a point is visible in the viewBox by panning if necessary
+   * @param point Point to make visible
+   * @param margin Optional margin around the point (default: 50)
+   */
+  ensurePointVisible(point: TPoint, margin: number = 50): void {
+    let needsPan = false
+    let dx = 0
+    let dy = 0
+
+    if (point.x < this.#viewBox.x + margin) {
+      dx = (this.#viewBox.x + margin) - point.x
+      needsPan = true
+    } else if (point.x > this.#viewBox.x + this.#viewBox.width - margin) {
+      dx = (this.#viewBox.x + this.#viewBox.width - margin) - point.x
+      needsPan = true
+    }
+
+    if (point.y < this.#viewBox.y + margin) {
+      dy = (this.#viewBox.y + margin) - point.y
+      needsPan = true
+    } else if (point.y > this.#viewBox.y + this.#viewBox.height - margin) {
+      dy = (this.#viewBox.y + this.#viewBox.height - margin) - point.y
+      needsPan = true
+    }
+
+    if (needsPan) {
+      this.pan(-dx, -dy, false)
     }
   }
 

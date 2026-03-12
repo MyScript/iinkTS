@@ -143,7 +143,7 @@ test.describe("Offscreen Get Started Menu Action", () => {
     await test.step("should convert stroke to text", async () => {
       await Promise.all([
         waitForConvertedEvent(page),
-        page.click(locator.menu.action.convertBtn)
+        page.locator(locator.menu.action.convertBtn).click()
       ])
       const symbols = await getEditorSymbols(page)
       expect(symbols).toHaveLength(1)

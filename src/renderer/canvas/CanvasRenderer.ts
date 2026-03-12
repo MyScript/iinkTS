@@ -2,6 +2,8 @@ import { LoggerCategory, LoggerManager } from "../../logger"
 import { Model } from "../../model"
 import { Stroke, TSymbol } from "../../symbol"
 import { TRendererConfiguration } from "../RendererConfiguration"
+import { BaseRenderer } from "../base"
+import { isStroke } from "../shared"
 import { CanvasRendererShape } from "./CanvasRendererShape"
 import { CanvasRendererStroke } from "./CanvasRendererStroke"
 import { CanvasRendererText } from "./CanvasRendererText"
@@ -9,10 +11,9 @@ import { CanvasRendererText } from "./CanvasRendererText"
 /**
  * @group Renderer
  */
-export class CanvasRenderer
+export class CanvasRenderer extends BaseRenderer<CanvasRenderingContext2D, Omit<TRendererConfiguration, "guides">>
 {
   #logger = LoggerManager.getLogger(LoggerCategory.RENDERER)
-  configuration: Omit<TRendererConfiguration, "guides">
   strokeRenderer: CanvasRendererStroke
   shapeRenderer: CanvasRendererShape
   textRenderer: CanvasRendererText
@@ -26,6 +27,7 @@ export class CanvasRenderer
 
   constructor(config: Omit<TRendererConfiguration, "guides">)
   {
+    super(config)
     this.#logger.info("constructor", { config })
     this.configuration = config
     this.strokeRenderer = new CanvasRendererStroke()
@@ -63,17 +65,16 @@ export class CanvasRenderer
   protected drawSymbol(context2D: CanvasRenderingContext2D, symbol: TSymbol)
   {
     this.#logger.debug("drawSymbol", { symbol })
-    if (symbol.type === "stroke") {
-      const stroke = symbol as Stroke
-      if (stroke.pointerType !== "eraser") {
-        this.strokeRenderer.draw(context2D, stroke)
+    if (isStroke(symbol)) {
+      if (symbol.pointerType !== "eraser") {
+        this.strokeRenderer.draw(context2D, symbol)
       }
     } else if (Object.keys(this.textRenderer.symbols).includes(symbol.type)) {
       this.textRenderer.draw(context2D, symbol)
     } else if (Object.keys(this.shapeRenderer.symbols).includes(symbol.type)) {
       this.shapeRenderer.draw(context2D, symbol)
     } else {
-      this.#logger.warn("drawSymbol", `symbol type unknow: ${symbol.type}`)
+      this.#logger.warn("drawSymbol", `symbol type unknown: ${symbol.type}`)
     }
   }
 
@@ -132,5 +133,17 @@ export class CanvasRenderer
     if (this.context.parent) {
       this.context.parent.innerHTML = ""
     }
+  }
+
+  clear(): void
+  {
+    this.#logger.debug("clear")
+    this.context.renderingCanvasContext?.clearRect(0, 0, this.context.renderingCanvas.width, this.context.renderingCanvas.height)
+    this.context.capturingCanvasContext?.clearRect(0, 0, this.context.capturingCanvas.width, this.context.capturingCanvas.height)
+  }
+
+  getRenderingContext(): CanvasRenderingContext2D
+  {
+    return this.context.renderingCanvasContext
   }
 }

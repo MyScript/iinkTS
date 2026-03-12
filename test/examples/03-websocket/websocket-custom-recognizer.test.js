@@ -5,6 +5,7 @@ import h from "../__dataset__/h"
 test.describe("Websocket custom recognizer", () => {
   let lastMessageReceived
   let lastMessageSent
+
   test.beforeEach(async ({ page }) => {
     page.on('websocket', ws => {
       ws.on('framesent', event => lastMessageSent = event.payload)

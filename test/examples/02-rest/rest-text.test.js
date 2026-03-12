@@ -126,7 +126,7 @@ test.describe("Rest Text", () => {
     await test.step("should clear", async () => {
       const promisesResult = await Promise.all([
         waitForExportedEvent(page),
-        page.click("#clear"),
+        page.locator("#clear").click(),
       ])
       expect(promisesResult[0]).toBeNull()
       expect(await getEditorExports(page)).toBeFalsy()
@@ -136,7 +136,7 @@ test.describe("Rest Text", () => {
     await test.step("should undo clear", async () => {
       await Promise.all([
         waitForExportedEvent(page),
-        page.click("#undo")
+        page.locator("#undo").click()
       ])
       expect(await page.locator("#editorEl").evaluate((node) => node.editor.model.symbols)).toHaveLength(1)
       await expect(page.locator("#result")).toHaveText(h.exports["text/plain"][0])
@@ -145,7 +145,7 @@ test.describe("Rest Text", () => {
     await test.step("should undo write", async () => {
       await Promise.all([
         waitForExportedEvent(page),
-        page.click("#undo")
+        page.locator("#undo").click()
       ])
       expect(await page.locator("#editorEl").evaluate((node) => node.editor.model.symbols)).toHaveLength(0)
       await expect(page.locator("#result")).toBeEmpty()
@@ -154,7 +154,7 @@ test.describe("Rest Text", () => {
     await test.step("should redo write", async () => {
       await Promise.all([
         waitForExportedEvent(page),
-        page.click("#redo")
+        page.locator("#redo").click()
       ])
       expect(await page.locator("#editorEl").evaluate((node) => node.editor.model.symbols)).toHaveLength(1)
       await expect(page.locator("#result")).toHaveText(h.exports["text/plain"][0])
@@ -168,7 +168,7 @@ test.describe("Rest Text", () => {
       const enPostData = (await requestEn).postDataJSON()
       expect(enPostData.configuration.lang).toEqual("en_US")
 
-      await page.selectOption("#language", "fr_FR")
+      await page.locator("#language").selectOption("fr_FR")
 
       await expect(page.locator("#result")).toBeEmpty()
 

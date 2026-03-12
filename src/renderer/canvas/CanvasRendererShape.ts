@@ -1,5 +1,6 @@
 import { LoggerCategory, LoggerManager } from "../../logger"
 import { TPoint, TCanvasShapeEllipseSymbol, TCanvasShapeLineSymbol, TCanvasShapeTableSymbol, TSymbol } from "../../symbol"
+import { normalizeAngle, calculateEllipseArcPoints } from "../shared"
 
 /**
  * @group Renderer
@@ -14,46 +15,28 @@ export class CanvasRendererShape
     line: "line"
   }
 
-  protected phi(angle: number): number
-  {
-    let returnedAngle = ((angle + Math.PI) % (Math.PI * 2)) - Math.PI
-    if (returnedAngle < -Math.PI) {
-      returnedAngle += Math.PI * 2
-    }
-    this.#logger.debug("phi", { angle, returnedAngle })
-    return returnedAngle
-  }
-
   protected drawEllipseArc(context2D: CanvasRenderingContext2D, shapeEllipse: TCanvasShapeEllipseSymbol): TPoint[]
   {
     this.#logger.debug("drawEllipseArc", { context2D, shapeEllipse })
     const { centerPoint, maxRadius, minRadius, orientation, startAngle, sweepAngle } = shapeEllipse
-    const angleStep = 0.02
-    const z1 = Math.cos(orientation) * maxRadius
-    const z2 = Math.cos(orientation) * minRadius
-    const z3 = Math.sin(orientation) * maxRadius
-    const z4 = Math.sin(orientation) * minRadius
-    const n = Math.floor(Math.abs(sweepAngle) / angleStep)
-    const boundariesPoints = []
+    const boundariesPoints: TPoint[] = []
+
     context2D.save()
     try {
       context2D.beginPath()
-      for (let i = 0; i <= n; i++) {
-        const angle = startAngle + ((i / n) * sweepAngle)
-        const alpha = Math.atan2(Math.sin(angle) / minRadius, Math.cos(angle) / maxRadius)
-        const cosAlpha = Math.cos(alpha)
-        const sinAlpha = Math.sin(alpha)
-        const x = (centerPoint.x + (z1 * cosAlpha)) - (z4 * sinAlpha)
-        const y = (centerPoint.y + (z2 * sinAlpha)) + (z3 * cosAlpha)
-        if (i === 0) {
-          context2D.moveTo(x, y)
+      const arcPoints = calculateEllipseArcPoints(centerPoint, maxRadius, minRadius, orientation, startAngle, sweepAngle)
+
+      arcPoints.forEach((point, index) => {
+        if (index === 0) {
+          context2D.moveTo(point.x, point.y)
         } else {
-          context2D.lineTo(x, y)
+          context2D.lineTo(point.x, point.y)
         }
-        if (i === 0 || i === n) {
-          boundariesPoints.push({ x, y })
+        // Collect boundary points (first and last)
+        if (index === 0 || index === arcPoints.length - 1) {
+          boundariesPoints.push(point)
         }
-      }
+      })
       context2D.stroke()
     } catch(error) {
       this.#logger.error("drawEllipseArc", { error })
@@ -82,8 +65,8 @@ export class CanvasRendererShape
   protected drawArrowHead(context2D: CanvasRenderingContext2D, headPoint: TPoint, angle: number, length: number)
   {
     this.#logger.debug("drawArrowHead", { context2D, headPoint, angle, length })
-    const alpha = this.phi(angle + (Math.PI * (7 / 8)))
-    const beta = this.phi(angle - (Math.PI * (7 / 8)))
+    const alpha = normalizeAngle(angle + (Math.PI * (7 / 8)))
+    const beta = normalizeAngle(angle - (Math.PI * (7 / 8)))
     context2D.save()
     try {
       context2D.fillStyle = context2D.strokeStyle

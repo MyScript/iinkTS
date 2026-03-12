@@ -2,8 +2,22 @@ import JsonCSS from "json-css"
 import { TTheme } from "./Theme"
 import { TPenStyle } from "./PenStyle"
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const parser: any = new JsonCSS()
+/**
+ * Interface for JsonCSS parser
+ */
+interface IJsonCSSParser {
+  toCSS(json: Record<string, unknown>): string
+  toJSON(css: string): Record<string, unknown>
+}
+
+// Lazy initialize JsonCSS parser to improve bundle load time
+let parserInstance: IJsonCSSParser | null = null
+const getParser = (): IJsonCSSParser => {
+  if (!parserInstance) {
+    parserInstance = new JsonCSS() as IJsonCSSParser
+  }
+  return parserInstance
+}
 
 /**
  * @group Style
@@ -11,25 +25,25 @@ const parser: any = new JsonCSS()
 export const StyleHelper = {
   themeToCSS(json: TTheme): string
   {
-    return parser.toCSS(json) as string
+    return getParser().toCSS(json) as string
     // css = css.replace( /[\r\n]+/gm, "" )
     // return css
   },
   themeToJSON(style: string): TTheme
   {
-    const theme = parser.toJSON(style) as TTheme
+    const theme = getParser().toJSON(style) as TTheme
     theme[".text"]["font-size"] = Number(theme[".text"]["font-size"])
     theme.ink["-myscript-pen-width"] = Number(theme.ink["-myscript-pen-width"])
     theme.ink.width = Number(theme.ink.width)
     return theme
   },
   penStyleToCSS (penStyle: TPenStyle): string {
-    let css = parser.toCSS({ css: penStyle }) as string
+    let css = getParser().toCSS({ css: penStyle }) as string
     css = css.substring(6, css.length - 3)
     return css
   },
   penStyleToJSON (penStyleString: string): TPenStyle {
-    const penStyle = parser.toJSON(`css {${penStyleString}}`).css as TPenStyle
+    const penStyle = getParser().toJSON(`css {${penStyleString}}`).css as TPenStyle
     if (penStyle.width) {
       penStyle.width = Number(penStyle.width)
     } else {
@@ -43,11 +57,11 @@ export const StyleHelper = {
     return penStyle
   },
 
-  stringToJSON(style: string): {[key: string]: string}
+  stringToJSON(style: string): Record<string, string>
   {
-    return parser.toJSON(`css {${style}}`).css
+    return getParser().toJSON(`css {${style}}`).css as Record<string, string>
   },
-  JSONToString(style: {[key: string]: string}): string
+  JSONToString(style: Record<string, string>): string
   {
     return Object.entries(style).map(([k, v]) => `${k}:${v}`).join(";")
   }

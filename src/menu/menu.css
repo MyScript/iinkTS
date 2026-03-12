@@ -156,6 +156,29 @@
   justify-content: center;
 }
 
+.ms-editor .ms-menu .ms-menu-zoom-level {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 32px;
+  min-width: 50px;
+  padding: 0 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.8);
+  cursor: pointer;
+  border-radius: 4px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.ms-editor .ms-menu .ms-menu-zoom-level:hover {
+  background-color: rgb(239, 239, 239, 1);
+}
+
 .ms-editor .ms-menu .ms-menu-button .color {
   height: 75%;
   width: 75%;

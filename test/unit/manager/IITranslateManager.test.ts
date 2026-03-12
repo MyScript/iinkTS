@@ -42,7 +42,7 @@ describe("IITranslateManager.ts", () =>
       expect(circle.radius).toEqual(radius)
       expect(circle.center).toEqual({ x: 15, y: 20 })
     })
-    test("translate shape with kind unknow", () =>
+    test("translate shape with kind unknown", () =>
     {
       const points: TPoint[] = [
         { x: 0, y: 0 },
@@ -53,7 +53,7 @@ describe("IITranslateManager.ts", () =>
       const poly = new IIShapePolygon(points)
       //@ts-ignore
       poly.kind = "pouet"
-      expect(() => manager.applyToSymbol(poly, 10, 15)).toThrow(expect.objectContaining({ message: expect.stringContaining("Can't apply translate on shape, kind unknow:")}))
+      expect(() => manager.applyToSymbol(poly, 10, 15)).toThrow(expect.objectContaining({ message: expect.stringContaining("Can't apply translate on shape, kind unknown:")}))
     })
     test("translate edge Line", () =>
     {

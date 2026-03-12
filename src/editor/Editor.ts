@@ -1,54 +1,66 @@
-import { LoggerCategory, LoggerManager } from "../logger"
 import { EditorType } from "./AbstractEditor"
-import { InteractiveInkEditor, TInteractiveInkEditorOptions } from "./InteractiveInkEditor"
-import { InkEditorDeprecated, TInkEditorDeprecatedOptions } from "./InkEditorDeprecated"
-import { InteractiveInkSSREditor, TInteractiveInkSSREditorOptions } from "./InteractiveInkSSREditor"
-import { InkEditor, TInkEditorOptions } from "./InkEditor"
+import { EditorFactory, EditorVariantMap, EditorOptionsMap } from "./EditorFactory"
 
 /**
  * @group Editor
+ * @summary Main Editor facade for loading editor instances
+ *
+ * This class provides a convenient interface for loading editor instances.
+ * It delegates to EditorFactory for the actual implementation.
+ *
+ * @example
+ * ```typescript
+ * const editor = await Editor.load(
+ *   document.getElementById("editor"),
+ *   "INTERACTIVEINK",
+ *   { configuration: {...} }
+ * )
+ * ```
  * @hideconstructor
  */
 export class Editor
 {
-  protected static logger = LoggerManager.getLogger(LoggerCategory.EDITOR)
-  protected static instance: InteractiveInkEditor | InkEditorDeprecated | InteractiveInkSSREditor | InkEditor |undefined
-
-  static async load<T extends EditorType>(rootElement: HTMLElement, type: T, options: T extends "INTERACTIVEINK" ? TInteractiveInkEditorOptions : T extends "INKV1" ? TInkEditorDeprecatedOptions : TInteractiveInkSSREditorOptions extends "INKV2" ? TInkEditorOptions : TInteractiveInkSSREditorOptions):
-    Promise<T extends "INTERACTIVEINK" ? InteractiveInkEditor : T extends "INKV1" ? InkEditorDeprecated : InteractiveInkSSREditor extends "INKV2" ? InkEditor : InteractiveInkSSREditor>
+  /**
+   * Loads and initializes an editor instance
+   *
+   * @template T - The editor type to load
+   * @param rootElement - The HTML element to mount the editor
+   * @param type - The editor variant type to load
+   * @param options - Configuration options specific to the editor type
+   * @returns Promise resolving to the initialized editor instance
+   *
+   * @remarks
+   * This method will destroy any previously loaded editor instance before creating a new one.
+   * Use {@link getInstance} to access the currently active editor.
+   */
+  static async load<T extends EditorType>(
+    rootElement: HTMLElement,
+    type: T,
+    options: EditorOptionsMap[T]
+  ): Promise<EditorVariantMap[T]>
   {
-    Editor.logger.info("load", { type, options })
-    if (!options) {
-        throw new Error(`Param 'options' missing`)
-    }
-    if (Editor.instance) {
-      await Editor.instance.destroy()
-    }
-
-    switch (type) {
-      case "INTERACTIVEINK":
-        Editor.instance = new InteractiveInkEditor(rootElement, options as TInteractiveInkEditorOptions)
-        break
-      case "INKV1":
-        Editor.instance = new InkEditorDeprecated(rootElement, options as TInkEditorDeprecatedOptions)
-        break
-      case "INKV2":
-        Editor.instance = new InkEditor(rootElement, options as TInkEditorOptions)
-        break;
-      // case "INTERACTIVEINKSSR":
-      default:
-        Editor.instance = new InteractiveInkSSREditor(rootElement, options as TInteractiveInkSSREditorOptions)
-        break
-    }
-
-    await Editor.instance.initialize()
-
-    return Editor.instance as T extends "INTERACTIVEINK" ? InteractiveInkEditor : T extends "INKV1" ? InkEditorDeprecated : InteractiveInkSSREditor extends "INKV2" ? InkEditor : InteractiveInkSSREditor
+    return EditorFactory.createEditor(rootElement, type, options)
   }
 
-  static getInstance(): InteractiveInkEditor | InkEditorDeprecated | InteractiveInkSSREditor | InkEditor | undefined
+  /**
+   * Gets the currently active editor instance
+   *
+   * @returns The current editor instance or undefined if none exists
+   */
+  static getInstance(): EditorVariantMap[EditorType] | undefined
   {
-    return Editor.instance
+    return EditorFactory.getInstance()
   }
 
+  /**
+   * Gets a specific editor instance by type
+   *
+   * @template T - The editor type to retrieve
+   * @param type - The editor type to retrieve
+   * @returns The editor instance of the specified type or undefined
+   */
+  static getInstanceByType<T extends EditorType>(type: T): EditorVariantMap[T] | undefined
+  {
+    return EditorFactory.getInstanceByType(type)
+  }
 }
