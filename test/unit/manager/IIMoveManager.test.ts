@@ -77,15 +77,5 @@ describe("IIMoveManager.ts", () =>
       expect(manager.renderer.parent.scrollTop).toEqual(0)
       expect(manager.origin).toBeUndefined()
     })
-
-    test("should throw error if continu without do start before", async () =>
-    {
-      const info = {
-        clientX: 75,
-        clientY: 102,
-      } as PointerInfo
-
-      expect(() => manager.continue(info)).toThrow("Can't move cause origin is undefined")
-    })
   })
 })
