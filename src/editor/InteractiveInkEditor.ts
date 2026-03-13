@@ -291,6 +291,7 @@ export class InteractiveInkEditor extends AbstractEditor
 
       window.addEventListener("keydown", this.handleKeyDown)
       window.addEventListener("keyup", this.handleKeyUp)
+      this.layers.root.addEventListener("wheel", this.handleWheel)
 
       const compStyles = window.getComputedStyle(this.layers.root)
       this.model.width = Math.max(parseInt(compStyles.width.replace("px", "")), this.#configuration.rendering.minWidth)
@@ -1342,6 +1343,19 @@ export class InteractiveInkEditor extends AbstractEditor
       this.logger.debug("handleKeyDown", "Switching to Move mode")
       this.#toolBeforeCtrl = this.#tool
       this.tool = EditorTool.Move
+    }
+  }
+
+  protected handleWheel = (event: WheelEvent): void => {
+    if (event.ctrlKey || event.metaKey) {
+      event.preventDefault()
+      event.stopPropagation()
+      const zoomIntensity = 0.001
+      const zoom = this.renderer.getZoom() * Math.exp(-event.deltaY * zoomIntensity)
+      const rect = this.layers.root.getBoundingClientRect()
+      const offsetX = event.clientX - rect.left
+      const offsetY = event.clientY - rect.top
+      this.renderer.setZoom(zoom, offsetX, offsetY)
     }
   }
 
