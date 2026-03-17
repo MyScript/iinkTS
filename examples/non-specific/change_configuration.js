@@ -379,7 +379,7 @@ exportBtn.addEventListener('click', () => {
 
 validBtn.addEventListener('click', async () => {
   resultElement.innerHTML = ''
-  loadEditor(editorOptions)
+  ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
 })
 
 resultElement.addEventListener('click', () =>{
