@@ -327,6 +327,7 @@ function loadConfiguration() {
       editorOptions.configuration = structuredClone(IIEditorConfiguration)
       break
   }
+  editorOptions.configuration.server = Object.assign({}, editorOptions.configuration.server, ModalEditorOptions.options?.configuration?.server)
   renderConfiguration(editorOptions.configuration)
 }
 async function loadEditor(options) {
@@ -393,7 +394,6 @@ showModalBtn.addEventListener('click', () => {
 window.addEventListener('resize', () => {
   editor?.resize()
 })
-
 loadEditorType()
 loadConfiguration()
 ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
