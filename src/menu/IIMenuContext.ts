@@ -126,41 +126,41 @@ export class IIMenuContext extends IIMenu
         const symbolsToDuplicate = this.symbolsSelected
 
         const updateDeepIdInGroup = (gr: IISymbolGroup) =>
-      {
-        gr.children.forEach(s =>
         {
-          s.id = s.id.slice(0, -36) + `-${ createUUID() }`
-          switch (s.type) {
-            case SymbolType.Group:
-              updateDeepIdInGroup(s)
-              break
-            case SymbolType.Recognized:
-              s.strokes.forEach(s => s.id = s.id.slice(0, -36) + `-${ createUUID() }`)
-              break
-          }
-        })
-      }
-      const duplicatedSymbols = symbolsToDuplicate.map(s =>
-      {
-        const clone = s.clone()
-        while (this.editor.model.symbols.find(s => s.id === clone.id)) {
-          clone.id = clone.id.slice(0, -36) + `-${ createUUID() }`
-          if (clone.type === SymbolType.Group) {
-            updateDeepIdInGroup(clone)
-          }
-          else if (clone.type === SymbolType.Recognized) {
-            clone.strokes.forEach(s => s.id = s.id.slice(0, -36) + `-${ createUUID() }`)
-          }
+          gr.children.forEach(s =>
+          {
+            s.id = `${s.type}-${ createUUID() }`
+            switch (s.type) {
+              case SymbolType.Group:
+                updateDeepIdInGroup(s)
+                break
+              case SymbolType.Recognized:
+                s.strokes.forEach(s => s.id = `${s.type}-${ createUUID() }`)
+                break
+            }
+          })
         }
-        clone.selected = true
-        this.editor.translator.applyToSymbol(clone, SELECTION_MARGIN, SELECTION_MARGIN)
-        return clone
-      })
+        const duplicatedSymbols = symbolsToDuplicate.map(s =>
+        {
+          const clone = s.clone()
+          while (this.editor.model.symbols.find(s => s.id === clone.id)) {
+            clone.id = `${clone.type}-${ createUUID() }`
+            if (clone.type === SymbolType.Group) {
+              updateDeepIdInGroup(clone)
+            }
+            else if (clone.type === SymbolType.Recognized) {
+              clone.strokes.forEach(s => s.id = `${s.type}-${ createUUID() }`)
+            }
+          }
+          clone.selected = true
+          this.editor.translator.applyToSymbol(clone, SELECTION_MARGIN, SELECTION_MARGIN)
+          return clone
+        })
 
-      this.editor.unselectAll()
-      await this.editor.addSymbols(duplicatedSymbols)
-      this.editor.selector.drawSelectedGroup(duplicatedSymbols)
-    }
+        this.editor.unselectAll()
+        await this.editor.addSymbols(duplicatedSymbols)
+        this.editor.selector.drawSelectedGroup(duplicatedSymbols)
+      }
     )
     return this.duplicateBtn
   }
@@ -168,7 +168,7 @@ export class IIMenuContext extends IIMenu
   protected createMenuGroup(): HTMLElement
   {
     this.groupBtn = createMenuButtonWithText(
-      `${ this.id }-duplicate`,
+      `${ this.id }-group`,
       "Group",
       async () => {
         if (this.symbolsSelected.length === 1 && this.symbolsSelected[0].type === SymbolType.Group) {
