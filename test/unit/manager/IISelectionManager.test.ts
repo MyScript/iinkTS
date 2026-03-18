@@ -12,6 +12,49 @@ import { LeftClickEventMock, RightClickEventMock } from "../__mocks__/EventMock"
 
 describe("IISelectionManager.ts", () =>
 {
+  Object.defineProperty(global.SVGElement.prototype, 'getBBox', {
+    writable: true,
+    value: jest.fn().mockReturnValue({
+      x: 0,
+      y: 0,
+      width: 10,
+      height: 10
+    }),
+  })
+
+  Object.defineProperty(global.SVGElement.prototype, 'getScreenCTM', {
+    writable: true,
+    value: jest.fn().mockReturnValue({
+      a: 1,
+      b: 0,
+      c: 0,
+      d: 1,
+      e: 0,
+      f: 0,
+      inverse: jest.fn().mockReturnValue({
+        a: 1,
+        b: 0,
+        c: 0,
+        d: 1,
+        e: 0,
+        f: 0
+      })
+    }),
+  })
+
+  Object.defineProperty(global.SVGElement.prototype, 'createSVGPoint', {
+    writable: true,
+    value: jest.fn().mockReturnValue({
+      x: 0,
+      y: 0,
+      matrixTransform: jest.fn(function(this: any, _matrix: any) {
+        return {
+          x: this.x,
+          y: this.y
+        }
+      })
+    }),
+  })
   test("should create", () =>
   {
     const editor = new InteractiveInkEditorMock()
@@ -47,15 +90,6 @@ describe("IISelectionManager.ts", () =>
 
   describe("selected group", () =>
   {
-    Object.defineProperty(global.SVGElement.prototype, 'getBBox', {
-      writable: true,
-      value: jest.fn().mockReturnValue({
-        x: 0,
-        y: 0,
-        width: 10,
-        height: 10
-      }),
-    })
     const editor = new InteractiveInkEditorMock()
     editor.menu.context.hide = jest.fn()
     const manager = new IISelectionManager(editor)
