@@ -55,13 +55,24 @@ export class SVGRendererEdgeUtil
       "stroke-linecap": "round",
       "stroke-linejoin": "round",
     }
-    if (edge.selected) {
-      attrs["filter"] = `url(#${ SVGRendererConst.selectionFilterId })`
-    }
+
     if (edge.deleting) {
       attrs["filter"] = `url(#${ SVGRendererConst.removalFilterId })`
     }
     const group = SVGBuilder.createGroup(attrs)
+
+    if (edge.selected) {
+      const outlineAttrs: { [key: string]: string } = {
+        "fill": "transparent",
+        "stroke": "#3e68ff",
+        "stroke-width": ((edge.style.width || DefaultStyle.width) + 3).toString(),
+        "d": SVGRendererEdgeUtil.getSVGPath(edge),
+        "vector-effect": "non-scaling-stroke",
+        "stroke-linecap": "round",
+        "stroke-linejoin": "round",
+      }
+      group.appendChild(SVGBuilder.createPath(outlineAttrs))
+    }
 
     const pathAttrs: { [key: string]: string } = {
       "fill": "transparent",
