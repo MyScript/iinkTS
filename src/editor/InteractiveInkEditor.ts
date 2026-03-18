@@ -1356,6 +1356,7 @@ export class InteractiveInkEditor extends AbstractEditor
       const offsetX = event.clientX - rect.left
       const offsetY = event.clientY - rect.top
       this.renderer.setZoom(zoom, offsetX, offsetY)
+      this.menu.action.updateZoomDisplay()
     }
   }
 

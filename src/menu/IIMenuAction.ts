@@ -199,15 +199,6 @@ export class IIMenuAction extends IIMenu
     return this.menuZoomOut
   }
 
-  protected updateZoomDisplay(): void
-  {
-    if (this.menuZoomLevel) {
-      const zoom = this.editor.renderer.getZoom()
-      const percentage = Math.round(zoom * 100)
-      this.menuZoomLevel.textContent = `${percentage}%`
-    }
-  }
-
   protected createMenuGesture(): HTMLDivElement
   {
     const trigger = createMenuButton(
@@ -641,6 +632,16 @@ export class IIMenuAction extends IIMenu
     }
   }
 
+  updateZoomDisplay(): void
+  {
+    if (this.menuZoomLevel) {
+      const zoom = this.editor.renderer.getZoom()
+      const percentage = Math.round(zoom * 100)
+      this.menuZoomLevel.textContent = `${percentage}%`
+    }
+  }
+
+
   update(): void
   {
     if (this.menuLanguage) {
@@ -658,6 +659,9 @@ export class IIMenuAction extends IIMenu
     }
     if (this.menuConvert) {
       this.menuConvert.disabled = !this.editor.extractStrokesFromSymbols(this.model.symbols).length
+    }
+    if (this.menuZoomLevel) {
+      this.updateZoomDisplay()
     }
   }
 
