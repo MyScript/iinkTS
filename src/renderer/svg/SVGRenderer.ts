@@ -472,18 +472,22 @@ export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfigur
     const oldZoom = this.#zoom
     this.#zoom = zoom
 
-    if (centerX !== undefined && centerY !== undefined) {
-      const zoomRatio = oldZoom / zoom
-      const dx = centerX * (1 - zoomRatio)
-      const dy = centerY * (1 - zoomRatio)
-      this.#viewBox.x += dx
-      this.#viewBox.y += dy
-    }
-
     const baseWidth = this.#viewBox.width * oldZoom
     const baseHeight = this.#viewBox.height * oldZoom
-    this.#viewBox.width = baseWidth / zoom
-    this.#viewBox.height = baseHeight / zoom
+    const newWidth = baseWidth / zoom
+    const newHeight = baseHeight / zoom
+
+    if (centerX !== undefined && centerY !== undefined) {
+      const rect = this.layer.getBoundingClientRect()
+      const viewBoxX = this.#viewBox.x + (centerX / rect.width) * this.#viewBox.width
+      const viewBoxY = this.#viewBox.y + (centerY / rect.height) * this.#viewBox.height
+
+      this.#viewBox.x = viewBoxX - (centerX / rect.width) * newWidth
+      this.#viewBox.y = viewBoxY - (centerY / rect.height) * newHeight
+    }
+
+    this.#viewBox.width = newWidth
+    this.#viewBox.height = newHeight
 
     this.layer.setAttribute("viewBox", `${this.#viewBox.x}, ${this.#viewBox.y}, ${this.#viewBox.width}, ${this.#viewBox.height}`)
 
