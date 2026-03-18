@@ -98,11 +98,26 @@ export class IISelectionManager
 
   protected getPoint(ev: PointerEvent): TPoint
   {
-    const { clientLeft, scrollLeft, clientTop, scrollTop } = this.renderer.parent
-    const rect: DOMRect = this.renderer.parent.getBoundingClientRect()
-    return {
-      x: ev.clientX - rect.left - clientLeft + scrollLeft,
-      y: ev.clientY - rect.top - clientTop + scrollTop,
+    const svgElement = this.renderer.layer
+    const ctm = svgElement.getScreenCTM()
+
+    if (ctm) {
+      const point = svgElement.createSVGPoint()
+      point.x = ev.clientX
+      point.y = ev.clientY
+      const transformedPoint = point.matrixTransform(ctm.inverse())
+      return {
+        x: transformedPoint.x,
+        y: transformedPoint.y,
+      }
+    } else {
+      // Fallback si getScreenCTM() échoue
+      const { clientLeft, scrollLeft, clientTop, scrollTop } = this.renderer.parent
+      const rect: DOMRect = this.renderer.parent.getBoundingClientRect()
+      return {
+        x: ev.clientX - rect.left - clientLeft + scrollLeft,
+        y: ev.clientY - rect.top - clientTop + scrollTop,
+      }
     }
   }
 
