@@ -95,8 +95,38 @@ export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfigur
     removalFilter.appendChild(bfeComponentTransfer)
     filtersGroup.appendChild(removalFilter)
 
-    const selectionFilter = SVGBuilder.createFilter(SVGRendererConst.selectionFilterId)
-    selectionFilter.appendChild(SVGBuilder.createDropShadow({ dx: -1, dy: -1, deviation: 1 }))
+    const selectionFilter = SVGBuilder.createFilter(SVGRendererConst.selectionFilterId, {
+      x: "-50%",
+      y: "-50%",
+      width: "200%",
+      height: "200%"
+    })
+
+    const feMorphology = document.createElementNS("http://www.w3.org/2000/svg", "feMorphology")
+    feMorphology.setAttribute("operator", "dilate")
+    feMorphology.setAttribute("radius", "1.5")
+    feMorphology.setAttribute("in", "SourceAlpha")
+    feMorphology.setAttribute("result", "dilated")
+
+    const feFlood = document.createElementNS("http://www.w3.org/2000/svg", "feFlood")
+    feFlood.setAttribute("flood-color", "#3e68ff")
+    feFlood.setAttribute("result", "color")
+
+    const feComposite1 = document.createElementNS("http://www.w3.org/2000/svg", "feComposite")
+    feComposite1.setAttribute("in", "color")
+    feComposite1.setAttribute("in2", "dilated")
+    feComposite1.setAttribute("operator", "in")
+    feComposite1.setAttribute("result", "outline")
+
+    const feComposite2 = document.createElementNS("http://www.w3.org/2000/svg", "feComposite")
+    feComposite2.setAttribute("in", "SourceGraphic")
+    feComposite2.setAttribute("in2", "outline")
+    feComposite2.setAttribute("operator", "over")
+
+    selectionFilter.appendChild(feMorphology)
+    selectionFilter.appendChild(feFlood)
+    selectionFilter.appendChild(feComposite1)
+    selectionFilter.appendChild(feComposite2)
     filtersGroup.appendChild(selectionFilter)
 
     return filtersGroup
