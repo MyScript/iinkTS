@@ -88,14 +88,14 @@ export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfigur
 
   protected createFilters(): SVGGElement {
     const filtersGroup = SVGBuilder.createGroup({ id: "definition-group" })
-    const removalFilter = SVGBuilder.createFilter(SVGRendererConst.removalFilterId, { filterUnits: "userSpaceOnUse" })
+    const removalFilter = SVGBuilder.createFilter(SVGRendererConst.removalFilterId)
     const bfeComponentTransfer = SVGBuilder.createComponentTransfert()
     const bfeFuncA = SVGBuilder.createTransfertFunctionTable("feFuncA", "0 0.25")
     bfeComponentTransfer.appendChild(bfeFuncA)
     removalFilter.appendChild(bfeComponentTransfer)
     filtersGroup.appendChild(removalFilter)
 
-    const selectionFilter = SVGBuilder.createFilter(SVGRendererConst.selectionFilterId, { filterUnits: "userSpaceOnUse" })
+    const selectionFilter = SVGBuilder.createFilter(SVGRendererConst.selectionFilterId)
     selectionFilter.appendChild(SVGBuilder.createDropShadow({ dx: -1, dy: -1, deviation: 1 }))
     filtersGroup.appendChild(selectionFilter)
 
