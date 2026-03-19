@@ -117,7 +117,6 @@ export class IIGestureManager
 {
   #logger = LoggerManager.getLogger(LoggerCategory.GESTURE)
 
-  static readonly #DECORABLE_TYPES = new Set([SymbolType.Group, SymbolType.Stroke, SymbolType.Text, SymbolType.Recognized])
   static readonly #TEXT_STROKE_GROUP_TYPES = new Set([SymbolType.Text, SymbolType.Stroke, SymbolType.Group])
   static readonly #SURROUND_SELECT_TYPES = new Set([SymbolType.Group, SymbolType.Stroke, SymbolType.Text])
   static readonly #ERASE_OVERLAY_TYPES = new Set([SymbolType.Stroke, SymbolType.Text, SymbolType.Group])
@@ -177,6 +176,11 @@ export class IIGestureManager
     return this.editor.configuration.rendering.guides.gap * 2
   }
 
+  protected isDecorable(symbol: TIISymbol): boolean
+  {
+    return symbol.type === SymbolType.Group || symbol.type === SymbolType.Stroke || symbol.type === SymbolType.Text || (symbol.type === SymbolType.Recognized && symbol.kind === RecognizedKind.Text)
+  }
+
   async applySurroundGesture(gestureStroke: IIStroke, gesture: TGesture): Promise<void>
   {
     this.#logger.info("applySurroundGesture", { gestureStroke, gesture })
@@ -196,7 +200,7 @@ export class IIGestureManager
         ids.forEach(id =>
         {
           const sym = this.model.getRootSymbol(id)
-          if (sym && IIGestureManager.#DECORABLE_TYPES.has(sym.type) && !symbolIdSet.has(sym.id)) {
+          if (sym && this.isDecorable(sym) && !symbolIdSet.has(sym.id)) {
             const symWithDec = sym as (IIText | IIStroke | IISymbolGroup | IIRecognizedText)
             const highlight = new IIDecorator(DecoratorKind.Highlight, this.editor.penStyle)
             const index = symWithDec.decorators.findIndex(d => d.kind === DecoratorKind.Highlight)
@@ -220,7 +224,7 @@ export class IIGestureManager
         ids.forEach(id =>
         {
           const sym = this.model.getRootSymbol(id)
-          if (sym && IIGestureManager.#DECORABLE_TYPES.has(sym.type) && !symbolIdSet.has(sym.id)) {
+          if (sym && this.isDecorable(sym) && !symbolIdSet.has(sym.id)) {
             const symWithDec = sym as (IIText | IIStroke | IISymbolGroup | IIRecognizedText)
             const surround = new IIDecorator(DecoratorKind.Surround, this.editor.penStyle)
             const index = symWithDec.decorators.findIndex(d => d.kind === DecoratorKind.Surround)
@@ -508,13 +512,13 @@ export class IIGestureManager
       }
       else {
         const group = new IISymbolGroup(symbolsToGroup, lastSymbBefore.style)
-        if (IIGestureManager.#DECORABLE_TYPES.has(lastSymbBefore.type)) {
+        if (this.isDecorable(lastSymbBefore)) {
           (lastSymbBefore as IIStroke).decorators.forEach(d =>
           {
             group.decorators.push(new IIDecorator(d.kind, d.style))
           })
         }
-        if (IIGestureManager.#DECORABLE_TYPES.has(firstSymbolAfter.type)) {
+        if (this.isDecorable(firstSymbolAfter)) {
           (firstSymbolAfter as IIStroke).decorators.forEach(d =>
           {
             if (!group.decorators.some(d1 => d1.kind == d.kind)) {
@@ -891,7 +895,7 @@ export class IIGestureManager
     gesture.strokeIds.forEach(id =>
     {
       const sym = this.model.getRootSymbol(id)
-      if (sym && IIGestureManager.#DECORABLE_TYPES.has(sym.type) && !symbolIdSet.has(sym.id)) {
+      if (sym && this.isDecorable(sym) && !symbolIdSet.has(sym.id)) {
         const symWithDec = sym as (IIText | IIStroke | IISymbolGroup | IIRecognizedText)
         const underline = new IIDecorator(DecoratorKind.Underline, this.editor.penStyle)
         const index = symWithDec.decorators.findIndex(d => d.kind === DecoratorKind.Underline)
