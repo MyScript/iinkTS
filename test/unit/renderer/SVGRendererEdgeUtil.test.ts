@@ -112,12 +112,12 @@ describe("SVGRendererEdgeUtil.ts", () =>
       const elNotSelected = SVGRendererEdgeUtil.getSVGElement(line)!
       expect(elNotSelected.getAttribute("id")).toEqual(line.id)
       expect(elNotSelected.getAttribute("type")).toEqual(SymbolType.Edge)
-      expect(elNotSelected.getAttribute("filter")).toBeFalsy()
+      expect(elNotSelected.children).toHaveLength(1)
       line.selected = true
       const elSelected = SVGRendererEdgeUtil.getSVGElement(line)!
       expect(elSelected.getAttribute("id")).toEqual(line.id)
       expect(elSelected.getAttribute("type")).toEqual(SymbolType.Edge)
-      expect(elSelected.getAttribute("filter")).toEqual(`url(#${ SVGRendererConst.selectionFilterId })`)
+      expect(elSelected.children).toHaveLength(2)
     })
     test("should get line when deleting", () =>
     {
@@ -199,12 +199,12 @@ describe("SVGRendererEdgeUtil.ts", () =>
       const elNotSelected = SVGRendererEdgeUtil.getSVGElement(arc)!
       expect(elNotSelected.getAttribute("id")).toEqual(arc.id)
       expect(elNotSelected.getAttribute("type")).toEqual(SymbolType.Edge)
-      expect(elNotSelected.getAttribute("filter")).toBeFalsy()
+      expect(elNotSelected.children).toHaveLength(1)
       arc.selected = true
       const elSelected = SVGRendererEdgeUtil.getSVGElement(arc)!
       expect(elSelected.getAttribute("id")).toEqual(arc.id)
       expect(elSelected.getAttribute("type")).toEqual(SymbolType.Edge)
-      expect(elSelected.getAttribute("filter")).toEqual(`url(#${ SVGRendererConst.selectionFilterId })`)
+      expect(elSelected.children).toHaveLength(2)
     })
     test("should get arc when deleting", () =>
     {
