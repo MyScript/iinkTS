@@ -13,7 +13,6 @@ import { createMenuButtonWithText } from "./MenuHelper"
 export class IIMenuContext extends IIMenu
 {
   #logger = LoggerManager.getLogger(LoggerCategory.MENU)
-  static readonly #DECORABLE_TYPES = new Set([SymbolType.Group, SymbolType.Stroke, SymbolType.Text, SymbolType.Recognized])
   editor: InteractiveInkEditor
   id: string
   wrapper?: HTMLElement
@@ -56,7 +55,9 @@ export class IIMenuContext extends IIMenu
 
   get symbolsDecorable(): (IIStroke | IIText | IISymbolGroup | IIRecognizedText)[]
   {
-    return this.symbolsSelected.filter(s => IIMenuContext.#DECORABLE_TYPES.has(s.type) || (s.type === SymbolType.Recognized && s.kind === RecognizedKind.Text)) as (IIStroke | IIText | IISymbolGroup | IIRecognizedText)[]
+    return this.symbolsSelected.filter(s => {
+      return s.type === SymbolType.Stroke || s.type === SymbolType.Text || s.type === SymbolType.Group || (s.type === SymbolType.Recognized && s.kind === RecognizedKind.Text)
+    }) as (IIStroke | IIText | IISymbolGroup | IIRecognizedText)[]
   }
 
   get showDecorator(): boolean
