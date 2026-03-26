@@ -23,11 +23,16 @@ export default [
       },
     ],
     plugins: [
-      commonjs({
-        include: ["node_modules/json-css/**"],
+      typescript({
+        tsconfig: "./tsconfig.json",
+        clean: true,
+        include: ["src/**/*.ts", "src/**/*.tsx"]
       }),
       resolve({ browser: true }),
-      typescript(),
+      commonjs({
+        include: ["node_modules/json-css/**"],
+        defaultIsModuleExports: true
+      }),
       terser({
         keep_fnames: true,
         compress: true,
