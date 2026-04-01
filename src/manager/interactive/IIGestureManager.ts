@@ -18,7 +18,7 @@ import
 import { RecognizerWebSocket } from "../../recognizer"
 import { SVGRenderer } from "../../renderer"
 import { IIHistoryManager, TIIHistoryChanges } from "../../history"
-import { computeAverage, isBetween, PartialDeep } from "../../utils"
+import { computeAverage, createUUID, isBetween, PartialDeep } from "../../utils"
 import { IITranslateManager } from "."
 import { IITextManager } from "."
 import { InteractiveInkEditor } from "../../editor"
@@ -314,8 +314,29 @@ export class IIGestureManager
               replaced: [strokeText]
             }
           }
+        } else {
+          const childrenNotTouch = symbol.strokes.filter(s => !gestureStroke.bounds.overlaps(s.bounds))
+          const childrenTouch = symbol.strokes.filter(s => gestureStroke.bounds.overlaps(s.bounds))
+          const results = childrenTouch.map(s =>
+          {
+            return {
+              symbol: s,
+              result: this.computeScratchOnStrokes(gesture, s)
+            }
+          })
+          if (childrenNotTouch.length === 0 && results.every(r => r.result.length === 0)) {
+            return { erased: true }
+          }
+          else {
+            const strokesToConserve: IIStroke[] = childrenNotTouch.concat(...results.flatMap(r => r.result))
+            const newSym = symbol.clone()
+            newSym.id = `${ newSym.type }-${ createUUID() }`
+            newSym.strokes = strokesToConserve
+            return {
+              replaced: [newSym]
+            }
+          }
         }
-        return {}
       }
       case SymbolType.Group: {
         const childrenNotTouch = symbol.children.filter(s => !gestureStroke.bounds.overlaps(s.bounds))
