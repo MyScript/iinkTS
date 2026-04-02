@@ -17,6 +17,8 @@ let currentTabId = 'symbols-tab'
 const copyTabToClipboard = document.getElementById('copy-content-tab')
 const contentTab = document.getElementById('content-tab')
 
+const BACKEND_MODEL_EMPTY = '<div style="display: flex; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; color: #666;">The backend model is empty</div>'
+
 copyTabToClipboard.addEventListener('pointerdown', () => {
   try {
     navigator.clipboard.writeText(contentTab.getAttribute('data-string'))
@@ -184,7 +186,6 @@ leftPanToggle.addEventListener('change', () => {
   editor?.resize()
 })
 
-exportHtmlBody.srcdoc = ''
 htmlPanToggle.addEventListener('change', (event) => {
   exportHtmlPan.style.setProperty('display', event.target.checked ? 'block' : 'none')
 })
@@ -201,6 +202,7 @@ const editorOptions = {
 }
 
 async function loadEditor(options) {
+  exportHtmlBody.srcdoc = BACKEND_MODEL_EMPTY
   await editor?.destroy()
   /**
    * get editor instance from type
@@ -227,8 +229,11 @@ async function loadEditor(options) {
   })
 
   editor.event.addEventListener('exported', (event) => {
+    console.log('event.detail: ', event.detail);
     if (event.detail?.['text/html']) {
       exportHtmlBody.srcdoc = event.detail['text/html']
+    } else {
+      exportHtmlBody.srcdoc = BACKEND_MODEL_EMPTY
     }
   })
 
