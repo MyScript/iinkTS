@@ -27,6 +27,13 @@ export class Synchronizer
   updateDebounce?: ReturnType<typeof setTimeout>
 
   protected shapeSendedToRecognizer: Set<string> = new Set<string>()
+  private pageShapesCache?: ReturnType<Editor["getCurrentPageShapes"]>
+  private cacheTimestamp: number = 0
+  private static readonly CACHE_DURATION = 500
+
+  private pendingStrokes: TLDrawShape[] = []
+  private batchDebounce?: ReturnType<typeof setTimeout>
+  private static readonly BATCH_DELAY = 10
 
   constructor(editor: Editor)
   {
@@ -36,7 +43,6 @@ export class Synchronizer
 
   protected formatDrawShapeToSend(shape: TLDrawShape): IIStroke
   {
-
     const style: TStyle = {
       color: shape.props.color,
       fill: shape.props.fill,
@@ -45,27 +51,40 @@ export class Synchronizer
     const stroke = new IIStroke(style, shape.props.isPen ? "pen" : "mouse")
     stroke.id = shape.id
 
+    const baseTime = Date.now()
+    let pointIndex = 0
+
     shape.props.segments.forEach(seg =>
     {
-      seg.points.forEach((p, i) =>
+      seg.points.forEach((p) =>
       {
         stroke.addPointer({
           p: 1,
-          t: Date.now() + i * 20,
+          t: baseTime + pointIndex * 20,
           x: p.x + shape.x,
           y: p.y + shape.y
         })
+        pointIndex++
       })
     })
 
     return stroke
   }
 
+  private getPageShapesOptimized() {
+    const now = Date.now()
+    if (!this.pageShapesCache || now - this.cacheTimestamp > Synchronizer.CACHE_DURATION) {
+      this.pageShapesCache = this.editor.getCurrentPageShapes()
+      this.cacheTimestamp = now
+    }
+    return this.pageShapesCache
+  }
+
   protected async determinesContextlessGesture(drawShapes: TLDrawShape[]): Promise<TGesture | undefined>
   {
     const gestureShape = drawShapes[0]
     if (!gestureShape) return
-    const shapesTypeset = this.editor.getCurrentPageShapes().filter(s => s.id !== gestureShape.id && s.typeName === "shape" && s.type !== "draw")
+    const shapesTypeset = this.getPageShapesOptimized().filter(s => s.id !== gestureShape.id && s.typeName === "shape" && s.type !== "draw")
     if(!shapesTypeset.length) return
 
     const gestureBounds = this.editor.getShapePageBounds(gestureShape)!
@@ -104,36 +123,68 @@ export class Synchronizer
     return
   }
 
-  //@ts-ignore
+  private async sendBatchedStrokes(): Promise<void>
+  {
+    if (this.pendingStrokes.length === 0) return
+
+    const strokesToSend = [...this.pendingStrokes]
+    this.pendingStrokes = []
+
+    const serverConfiguration = JSON.parse(window.localStorage.getItem("server") || "{}") as Partial<import("iink-ts").TServerWebsocketConfiguration>
+    const recognizer = Recognizer.instance || await useRecognizer(serverConfiguration)
+
+    const shouldDetectGesture = this.processGestures && strokesToSend.length === 1
+
+    if (shouldDetectGesture) {
+      this.determinesContextlessGesture(strokesToSend).then(gesture => {
+        if (gesture) {
+          this.gestureManager.apply(gesture)
+        }
+      })
+    }
+
+    recognizer.addStrokes(
+      strokesToSend.map(this.formatDrawShapeToSend.bind(this)),
+      shouldDetectGesture
+    ).then(addStrokeResponse => {
+      if (addStrokeResponse) {
+        this.gestureManager.apply(addStrokeResponse)
+      }
+    })
+  }
+
   async sync(changes: RecordsDiff<TLRecord>): Promise<void>
   {
-    const drawShapesChanged = Object.values(changes.added).filter(r => r.typeName === "shape" && r.type === "draw").concat(Object.values(changes.updated).map(([_, to]) => to).filter(r => r.typeName === "shape" && r.type === "draw")) as TLDrawShape[]
-    const drawShapesToRemove = Object.values(changes.removed).filter(r => r.typeName === "shape" && r.type === "draw") as TLDrawShape[]
+    const allChangedRecords = Object.values(changes.added).concat(
+      Object.values(changes.updated).map(([, to]) => to)
+    )
+    const drawShapesChanged = allChangedRecords.filter(
+      r => r.typeName === "shape" && r.type === "draw"
+    ) as TLDrawShape[]
 
-    if (!drawShapesChanged.filter(s => s.props.isComplete).length && !drawShapesToRemove.length) {
+    const drawShapesToRemove = Object.values(changes.removed).filter(
+      r => r.typeName === "shape" && r.type === "draw"
+    ) as TLDrawShape[]
+
+    const completedShapes = drawShapesChanged.filter(s => s.props.isComplete)
+    if (completedShapes.length === 0 && drawShapesToRemove.length === 0) {
       return
     }
 
     const serverConfiguration = JSON.parse(window.localStorage.getItem("server") || "{}") as Partial<import("iink-ts").TServerWebsocketConfiguration>
     const recognizer = Recognizer.instance || await useRecognizer(serverConfiguration)
 
-    if (drawShapesChanged.length) {
-      const drawShapeCompleted = drawShapesChanged.filter(s => s.props.isComplete)
-      const toCreate = drawShapeCompleted.filter(s => !this.shapeSendedToRecognizer.has(s.id))
-      const toUpdate = drawShapeCompleted.filter(s => this.shapeSendedToRecognizer.has(s.id))
+    if (completedShapes.length > 0) {
+      const toCreate = completedShapes.filter(s => !this.shapeSendedToRecognizer.has(s.id))
+      const toUpdate = completedShapes.filter(s => this.shapeSendedToRecognizer.has(s.id))
  
       if (toCreate.length) {
-        toCreate.map(s => this.shapeSendedToRecognizer.add(s.id))
-        const gesture = this.processGestures && drawShapeCompleted.length === 1 ? await this.determinesContextlessGesture(toCreate) : undefined
-        recognizer.addStrokes(toCreate.map(this.formatDrawShapeToSend), this.processGestures && !gesture && toCreate.length === 1)
-          .then(addStrokeResponse => {
-            if (addStrokeResponse) {
-              this.gestureManager.apply(addStrokeResponse)
-            }
-          })
-        if (gesture) {
-          await this.gestureManager.apply(gesture)
-        }
+        toCreate.forEach(s => this.shapeSendedToRecognizer.add(s.id))
+        this.pendingStrokes.push(...toCreate)
+        clearTimeout(this.batchDebounce)
+        this.batchDebounce = setTimeout(() => {
+          this.sendBatchedStrokes()
+        }, Synchronizer.BATCH_DELAY)
       }
 
       if (toUpdate.length) {
@@ -156,13 +207,14 @@ export class Synchronizer
             })
             return stroke
           })
-          await recognizer.replaceStrokes(newStrokes.map(s => s.id), newStrokes)
-        })
+          recognizer.replaceStrokes(newStrokes.map(s => s.id), newStrokes)
+        }, 100)
       }
     }
 
     if (drawShapesToRemove.length) {
-      await recognizer.eraseStrokes(drawShapesToRemove.map(s => s.id))
+      drawShapesToRemove.forEach(s => this.shapeSendedToRecognizer.delete(s.id))
+      recognizer.eraseStrokes(drawShapesToRemove.map(s => s.id))
     }
   }
 }

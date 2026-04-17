@@ -1,6 +1,6 @@
-import { configureStore } from '@reduxjs/toolkit'
-import exports from './exportsStore'
-import errors from './errorsStore'
+import { configureStore } from "@reduxjs/toolkit"
+import exports from "./exportsStore"
+import errors from "./errorsStore"
 
 export const store = configureStore({
   reducer: {

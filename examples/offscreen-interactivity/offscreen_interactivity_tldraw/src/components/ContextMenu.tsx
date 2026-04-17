@@ -6,18 +6,19 @@ import
 	TldrawUiMenuGroup,
 	TldrawUiMenuItem,
 	useEditor,
-} from 'tldraw'
-import { useConverter } from '../Converter'
-import { useState } from 'react'
+} from "tldraw"
+import { useConverter } from "../Converter"
 
 export function ContextMenu()
 {
-	const [shapesToConvert, setShapesToConvert] = useState<TLDrawShape[]>([])
 	const editor = useEditor()
 	const converter = useConverter()
 
 	const OnConvert = () =>
 	{
+    const shapesToConvert = editor.getCurrentPageShapes().filter(s => s.type === "draw") as TLDrawShape[]
+    if (!shapesToConvert?.length) return
+
 		const { toConvert, toRemove } = converter.convert(shapesToConvert)
 		if (toRemove.length) {
 			editor.deleteShapes(toRemove)
@@ -27,33 +28,17 @@ export function ContextMenu()
 		}
 	}
 
-
-	editor.on("update", () =>
-	{
-		setShapesToConvert(editor.getSelectedShapes().filter(s => s.type === "draw") as TLDrawShape[])
-	}, editor)
-
-	if (shapesToConvert.length) {
-		return (
-			<DefaultContextMenu>
-				<TldrawUiMenuGroup id="example">
-					<TldrawUiMenuItem
-						id="convert-selection"
-						label="Convert"
-						readonlyOk
-						onSelect={OnConvert}
-					/>
-				</TldrawUiMenuGroup>
-				<DefaultContextMenuContent />
-			</DefaultContextMenu>
-		)
-	}
-	else {
-		return (
-			<DefaultContextMenu>
-				<DefaultContextMenuContent />
-			</DefaultContextMenu>
-		)
-	}
-
+  return (
+    <DefaultContextMenu>
+      <TldrawUiMenuGroup id="example">
+        <TldrawUiMenuItem
+          id="convert-selection"
+          label="Convert"
+          readonlyOk
+          onSelect={OnConvert}
+        />
+      </TldrawUiMenuGroup>
+      <DefaultContextMenuContent />
+    </DefaultContextMenu>
+  )
 }

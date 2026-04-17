@@ -7,11 +7,11 @@ import
 	TldrawUiMenuGroup,
 	TldrawUiMenuItem,
 	useEditor,
-} from 'tldraw'
+} from "tldraw"
 import { useConverter } from "../Converter"
-import { useSynchronizer } from '../Synchronizer'
-import { useEffect, useState } from 'react'
-import { useGestureManager } from '../GestureManager'
+import { useSynchronizer } from "../Synchronizer"
+import { useEffect, useState } from "react"
+import { useGestureManager } from "../GestureManager"
 
 export function MainMenu()
 {
@@ -27,7 +27,7 @@ export function MainMenu()
 	{
 		const shapesToConvert = editor.getCurrentPageShapes().filter(s => s.type === "draw") as TLDrawShape[]
 		const { toConvert, toRemove } = converter.convert(shapesToConvert)
-		editor.batch(() => {
+		editor.run(() => {
 			editor.deleteShapes(toRemove)
 			editor.createShapes(toConvert)
 		})

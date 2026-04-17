@@ -14,20 +14,34 @@ export class GestureManager
   onUnderline: "draw" | "size" = "size"
   onStrikethrough: "draw" | "erase" = "erase"
 
+  private pageShapesCache?: ReturnType<Editor["getCurrentPageShapes"]>
+  private cacheTimestamp: number = 0
+  private static readonly CACHE_DURATION = 500
+
   constructor(editor: Editor)
   {
     this.editor = editor
   }
 
+  private getPageShapes() {
+    const now = Date.now()
+    if (!this.pageShapesCache || now - this.cacheTimestamp > GestureManager.CACHE_DURATION) {
+      this.pageShapesCache = this.editor.getCurrentPageShapes()
+      this.cacheTimestamp = now
+    }
+    return this.pageShapesCache
+  }
+
   get drawShapes(): TLDrawShape[]
   {
-    return this.editor.getCurrentPageShapes().filter(s => s.type === "draw") as TLDrawShape[]
+    return this.getPageShapes().filter(s => s.type === "draw") as TLDrawShape[]
   }
 
   protected async applySurround(gesture: TGesture): Promise<void>
   {
-    const gestureShape = this.editor.getCurrentPageShapes().find(s => s.id === gesture.gestureStrokeId)
-    const othersPageShape = this.editor.getCurrentPageShapes().filter(s => s.id !== gesture.gestureStrokeId)
+    const pageShapes = this.getPageShapes()
+    const gestureShape = pageShapes.find(s => s.id === gesture.gestureStrokeId)
+    const othersPageShape = pageShapes.filter(s => s.id !== gesture.gestureStrokeId)
     if (!gestureShape || !othersPageShape.length) return
 
     const surroundBounds = this.editor.getShapePageBounds(gestureShape)
@@ -36,7 +50,7 @@ export class GestureManager
     const selectedShapes = othersPageShape.filter(s => surroundBounds.contains(this.editor.getShapePageBounds(s)!))
 
     if (selectedShapes.length) {
-      this.editor.setCurrentTool('select')
+      this.editor.setCurrentTool("select")
       this.editor.setSelectedShapes(selectedShapes)
       this.editor.deleteShape(gestureShape)
     }
@@ -44,8 +58,9 @@ export class GestureManager
 
   protected async applyScratch(gesture: TGesture): Promise<void>
   {
-    const gestureShape = this.editor.getCurrentPageShapes().find(s => s.id === gesture.gestureStrokeId)
-    const othersPageShape = this.editor.getCurrentPageShapes().filter(s => s.id !== gesture.gestureStrokeId)
+    const pageShapes = this.getPageShapes()
+    const gestureShape = pageShapes.find(s => s.id === gesture.gestureStrokeId)
+    const othersPageShape = pageShapes.filter(s => s.id !== gesture.gestureStrokeId)
     if (!gestureShape || !othersPageShape.length) return
 
     const surroundBounds = this.editor.getShapePageBounds(gestureShape)
@@ -60,8 +75,9 @@ export class GestureManager
 
   protected async applyUnderline(gesture: TGesture): Promise<void>
   {
-    const gestureShape = this.editor.getCurrentPageShapes().find(s => s.id === gesture.gestureStrokeId)
-    const shapeToApplyGesture = this.editor.getCurrentPageShapes().filter(s => gesture.strokeIds.includes(s.id)) as TLDrawShape[]
+    const pageShapes = this.getPageShapes()
+    const gestureShape = pageShapes.find(s => s.id === gesture.gestureStrokeId)
+    const shapeToApplyGesture = pageShapes.filter(s => gesture.strokeIds.includes(s.id)) as TLDrawShape[]
     if (!gestureShape || !shapeToApplyGesture.length) return
 
     if (this.onUnderline === "size") {
@@ -92,8 +108,9 @@ export class GestureManager
   protected async applyStrikeThrough(gesture: TGesture): Promise<void>
   {
     if (this.onStrikethrough === "erase") {
-      const gestureShape = this.editor.getCurrentPageShapes().find(s => s.id === gesture.gestureStrokeId)
-      const drawShapeToApplyGesture = this.editor.getCurrentPageShapes().filter(s => gesture.strokeIds.includes(s.id)) as TLDrawShape[]
+      const pageShapes = this.getPageShapes()
+      const gestureShape = pageShapes.find(s => s.id === gesture.gestureStrokeId)
+      const drawShapeToApplyGesture = pageShapes.filter(s => gesture.strokeIds.includes(s.id)) as TLDrawShape[]
       if (!gestureShape || !drawShapeToApplyGesture.length) return
 
       this.editor.deleteShapes([gestureShape, ...drawShapeToApplyGesture])

@@ -1,6 +1,6 @@
-import { createSlice } from '@reduxjs/toolkit'
-import type { PayloadAction } from '@reduxjs/toolkit'
-import { TExport } from 'iink-ts'
+import { createSlice } from "@reduxjs/toolkit"
+import type { PayloadAction } from "@reduxjs/toolkit"
+import { TExport } from "iink-ts"
 
 export interface ExportState
 {
@@ -12,7 +12,7 @@ const initialState: ExportState = {
 }
 
 export const exportsSlice = createSlice({
-  name: 'exports',
+  name: "exports",
 
   initialState,
 
