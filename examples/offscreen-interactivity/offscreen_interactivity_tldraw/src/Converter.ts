@@ -60,7 +60,6 @@ export class Converter
 
     for (const element of this.jiixExport.elements) {
       const shapeIds = new Set<string>()
-
       element.items?.forEach(i => {
         if (i["full-id"]) shapeIds.add(i["full-id"])
       })
@@ -85,6 +84,12 @@ export class Converter
         this.jiixElementsCache.get(shapeId)!.push(element)
       })
     }
+  }
+
+  invalidateCache(): void
+  {
+    this.jiixElementsCache.clear()
+    this.lastJiixExportTime = 0
   }
 
   protected findJiixElements(shape: TLDrawShape): TJIIXElement[]
