@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, useRef } from "react"
+import { useCallback, useEffect, useState, useRef, useMemo } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import ReactJson from "react-json-view"
 import { Editor, TLDrawShape, Tldraw, RecordsDiff, TLRecord } from "tldraw"
@@ -16,6 +16,7 @@ import { ExportHTMLTab } from "./components/ExportHTMLTab"
 import { MainMenu } from "./components/MainMenu"
 import { QuickActions } from "./components/QuickActionsMenu"
 import { ContextMenu } from "./components/ContextMenu"
+import { TopZone } from "./components/TopZone"
 import { Modal } from "./components/Modal"
 import { KeyForms } from "./components/KeyForms"
 import { PartialDeep, TServerWebsocketConfiguration } from "iink-ts"
@@ -38,6 +39,11 @@ export default function App()
   const dispatch = useDispatch()
   const converter = useConverter()
 
+  const memoizedExports = useMemo(() => ({
+    jiix: exports["application/vnd.myscript.jiix"] as object,
+    html: exports["text/html"] as string
+  }), [exports])
+
   const batchedChangesRef = useRef<{
     added: Map<string, TLDrawShape>,
     updated: Map<string, { prev: TLRecord, current: TLDrawShape }>,
@@ -50,7 +56,7 @@ export default function App()
   const UPD_SHAPE_TAB_DELAY = 250
   const UPD_EXPORTS_TABS_DELAY = 500
   const SYNC_BATCH_DELAY = 200
-  const AUTO_CONVERT_DELAY = 500
+  const AUTO_CONVERT_DELAY = 1000
 
   const loadRecognizer = async (serverConfig: PartialDeep<TServerWebsocketConfiguration>) =>
   {
@@ -123,9 +129,12 @@ export default function App()
     }
 
     useSynchronizer(editor).sync(changes)
-      .then(() =>
+      .then(async () =>
       {
         if (converter.auto && shapesToConvert.length > 0) {
+          const exports = await recognizer!.export(["application/vnd.myscript.jiix", "text/html"])
+          dispatch(setExports(exports))
+          converter.invalidateCache()
           scheduleConversion(shapesToConvert)
         }
         updateShapesDisplay()
@@ -297,6 +306,7 @@ export default function App()
             MainMenu,
             QuickActions,
             ContextMenu,
+            TopPanel: TopZone,
             SharePanel: (props) => <SharePanel {...props} loadRecognizer={loadRecognizer} />,
             PageMenu: null
           }}
@@ -362,18 +372,41 @@ export default function App()
               padding: 12
             }}
           >
-            <div id="shapes-tab-content" className={`tab-content ${ tabName === "Shapes" ? "active" : "" }`}>
-              <ReactJson src={cachedShapes} collapsed={true} />
-            </div>
-            <div id="jiix-tab-content" className={`tab-content ${ tabName === "JIIX" ? "active" : "" }`}>
-              <ReactJson src={exports["application/vnd.myscript.jiix"] as object} collapsed={true} />
-            </div>
-            <div id="html-tab-content" style={{ pointerEvents: "none" }} className={`tab-content ${ tabName === "HTML" ? "active" : "" }`}>
-              {ExportHTMLTab(exports["text/html"] as string)}
-            </div>
-            <div id="messages-tab-content" className={`tab-content ${ tabName === "Messages" ? "active" : "" }`}>
-              <ReactJson src={recognizer?.messages || []} collapsed={true} />
-            </div>
+            {tabName === "Shapes" && (
+              <div id="shapes-tab-content" className="tab-content active">
+                <ReactJson
+                  src={cachedShapes}
+                  collapsed={2}
+                  displayDataTypes={false}
+                  displayObjectSize={false}
+                />
+              </div>
+            )}
+            {tabName === "JIIX" && (
+              <div id="jiix-tab-content" className="tab-content active">
+                <ReactJson
+                  src={memoizedExports.jiix}
+                  collapsed={2}
+                  displayDataTypes={false}
+                  displayObjectSize={false}
+                />
+              </div>
+            )}
+            {tabName === "HTML" && (
+              <div id="html-tab-content" style={{ pointerEvents: "none" }} className="tab-content active">
+                {ExportHTMLTab(memoizedExports.html)}
+              </div>
+            )}
+            {tabName === "Messages" && (
+              <div id="messages-tab-content" className="tab-content active">
+                <ReactJson
+                  src={recognizer?.messages || []}
+                  collapsed={2}
+                  displayDataTypes={false}
+                  displayObjectSize={false}
+                />
+              </div>
+            )}
           </div>
         </div>
 
