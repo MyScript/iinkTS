@@ -1,5 +1,5 @@
-import { createSlice } from '@reduxjs/toolkit'
-import type { PayloadAction } from '@reduxjs/toolkit'
+import { createSlice } from "@reduxjs/toolkit"
+import type { PayloadAction } from "@reduxjs/toolkit"
 
 export interface ErrorState
 {
@@ -11,7 +11,7 @@ const initialState: ErrorState = {
 }
 
 export const errorsSlice = createSlice({
-  name: 'errors',
+  name: "errors",
 
   initialState,
 

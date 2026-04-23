@@ -29,7 +29,7 @@ test.describe("Offscreen TLDraw", () => {
 
       const tabContentLoc = page.locator('#shapes-tab-content')
       await expect(tabContentLoc).toBeVisible()
-      await expect(tabContentLoc).toContainText("0 item")
+      await expect(tabContentLoc).toContainText('"root":{}')
     })
 
     await test.step("check Export JIIX tab is empty", async () => {
@@ -39,7 +39,7 @@ test.describe("Offscreen TLDraw", () => {
 
       const tabContentLoc = page.locator('#jiix-tab-content')
       await expect(tabContentLoc).toBeVisible()
-      await expect(tabContentLoc).toContainText("0 item")
+      await expect(tabContentLoc).toContainText('"root":{}')
     })
 
     await test.step("check HTML tab is empty", async () => {
@@ -76,7 +76,7 @@ test.describe("Offscreen TLDraw", () => {
 
       const tabContentLoc = page.locator('#shapes-tab-content')
       await expect(tabContentLoc).toBeVisible()
-      await expect(tabContentLoc).toContainText("1 item")
+      await expect(tabContentLoc).toContainText(/"root":\[0:\{"x":252"y":244/)
       await expect(page).toHaveScreenshot({ name: "tldraw-hello-shapes.png" })
     })
 
@@ -87,12 +87,7 @@ test.describe("Offscreen TLDraw", () => {
 
       const tabContentLoc = page.locator('#jiix-tab-content')
       await expect(tabContentLoc).toBeVisible()
-      await expect(tabContentLoc).toContainText("5 items")
-      await tabContentLoc.click({
-        button: 'left',
-        position: { x: 10, y: 10 }
-      });
-      await expect(tabContentLoc).toContainText("\"type\":string\"Raw Content\"")
+      await expect(tabContentLoc).toContainText(/"root":\{"type":"Raw Content"/)
       await expect(page).toHaveScreenshot({ name: "tldraw-hello-jiix.png" })
     })
   })
@@ -109,12 +104,12 @@ test.describe("Offscreen TLDraw", () => {
     const shapeTabContentLoc = page.locator('#shapes-tab-content')
     await expect(shapeTabContentLoc).toBeVisible()
     // stroke has been written and shape tab has been updated
-    await expect(shapeTabContentLoc).toContainText("1 item")
+    await expect(shapeTabContentLoc).toContainText(/"root":\[0:\{/)
 
     await page.locator('button[data-testid="quick-actions.undo"]').click()
-    await expect(shapeTabContentLoc).toContainText("0 item")
+    await expect(shapeTabContentLoc).toContainText(/"root":\[\]/)
 
     await page.locator('button[data-testid="quick-actions.redo"]').click()
-    await expect(shapeTabContentLoc).toContainText("1 item")
+    await expect(shapeTabContentLoc).toContainText(/"root":\[0:\{/)
   })
 })

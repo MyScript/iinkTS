@@ -13,6 +13,7 @@ export class Recognizer extends RecognizerWebSocket
   static initializing = false
   static instance: Recognizer
   messages: { state: "Sent" | "Received", message: TRecognizerWebSocketMessage }[]
+  private static readonly MAX_MESSAGES = 100
 
   constructor(config: PartialDeep<TRecognizerWebSocketConfiguration>)
   {
@@ -25,11 +26,17 @@ export class Recognizer extends RecognizerWebSocket
     super.messageCallback(message)
     const websocketMessage: TRecognizerWebSocketMessage = JSON.parse(message.data)
     this.messages.push({ state: "Received", message: websocketMessage })
+    if (this.messages.length > Recognizer.MAX_MESSAGES) {
+      this.messages.shift()
+    }
   }
 
   override send(message: TRecognizerWebSocketMessage): Promise<void>
   {
     this.messages.push({ state: "Sent", message })
+    if (this.messages.length > Recognizer.MAX_MESSAGES) {
+      this.messages.shift()
+    }
     return super.send(message)
   }
 

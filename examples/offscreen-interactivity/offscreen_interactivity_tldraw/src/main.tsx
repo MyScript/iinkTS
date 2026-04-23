@@ -1,12 +1,12 @@
-import './index.css'
-import React from 'react'
-import { createRoot } from 'react-dom/client'
-import { Provider } from 'react-redux'
+import "./index.css"
+import React from "react"
+import { createRoot } from "react-dom/client"
+import { Provider } from "react-redux"
 
-import App from './App.tsx'
-import { store } from './store/index.ts'
+import App from "./App.tsx"
+import { store } from "./store/index.ts"
 
-const rootElement = createRoot(document.getElementById('root') as HTMLElement)
+const rootElement = createRoot(document.getElementById("root") as HTMLElement)
 
 rootElement.render(
   <React.StrictMode>

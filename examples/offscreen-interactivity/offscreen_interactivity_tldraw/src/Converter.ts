@@ -8,7 +8,7 @@ import
   TLTextShape,
   createShapeId,
   toRichText
-} from 'tldraw'
+} from "tldraw"
 import
 {
   TJIIXEdgeArc,
@@ -24,8 +24,8 @@ import
   TJIIXNodeTriangle,
   TJIIXTextElement,
   convertMillimeterToPixel
-} from 'iink-ts'
-import { store } from './store'
+} from "iink-ts"
+import { store } from "./store"
 
 type geoType = "arrow-down" | "arrow-left" | "arrow-right" | "arrow-up" | "check-box" | "diamond" | "ellipse" | "hexagon" | "octagon" | "oval" | "pentagon" | "rectangle" | "rhombus-2" | "rhombus" | "star" | "trapezoid" | "triangle" | "x-box"
 type arrowheadType = "none" | "diamond" | "triangle" | "arrow" | "bar" | "dot" | "inverted" | "pipe" | "square" | undefined
@@ -35,20 +35,67 @@ export class Converter
   static instance: Converter
   font: "draw" | "mono" | "sans" | "serif" = "draw"
 
+  auto: boolean = false
+
+  private jiixElementsCache: Map<string, TJIIXElement[]> = new Map()
+  private lastJiixExportTime: number = 0
+
   get jiixExport(): TJIIXExport
   {
     const exports = store.getState().exports.value
     return exports["application/vnd.myscript.jiix"] as TJIIXExport
   }
 
+  private buildJiixIndex(): void
+  {
+    const now = Date.now()
+    if (now - this.lastJiixExportTime < 100 && this.jiixElementsCache.size > 0) {
+      return
+    }
+
+    this.jiixElementsCache.clear()
+    this.lastJiixExportTime = now
+
+    if (!this.jiixExport?.elements) return
+
+    for (const element of this.jiixExport.elements) {
+      const shapeIds = new Set<string>()
+      element.items?.forEach(i => {
+        if (i["full-id"]) shapeIds.add(i["full-id"])
+      })
+
+      const textElement = element as TJIIXTextElement
+      textElement.words?.forEach(w => {
+        w.items?.forEach(i => {
+          if (i["full-id"]) shapeIds.add(i["full-id"])
+        })
+      })
+
+      textElement.chars?.forEach(c => {
+        c.items?.forEach(i => {
+          if (i["full-id"]) shapeIds.add(i["full-id"])
+        })
+      })
+
+      shapeIds.forEach(shapeId => {
+        if (!this.jiixElementsCache.has(shapeId)) {
+          this.jiixElementsCache.set(shapeId, [])
+        }
+        this.jiixElementsCache.get(shapeId)!.push(element)
+      })
+    }
+  }
+
+  invalidateCache(): void
+  {
+    this.jiixElementsCache.clear()
+    this.lastJiixExportTime = 0
+  }
+
   protected findJiixElements(shape: TLDrawShape): TJIIXElement[]
   {
-    return this.jiixExport?.elements?.filter(e =>
-    {
-      return e.items?.some(i => i['full-id'] === shape.id) ||
-        (e as TJIIXTextElement).words?.some(w => w.items?.some(i2 => i2['full-id'] === shape.id)) ||
-        (e as TJIIXTextElement).chars?.some(c => c.items?.some(i2 => i2['full-id'] === shape.id))
-    }) || []
+    this.buildJiixIndex()
+    return this.jiixElementsCache.get(shape.id) || []
   }
 
   protected findDerivation(drawShapes: TLDrawShape[]): { dx: number, dy: number }
@@ -63,8 +110,8 @@ export class Converter
   protected createArrowShape(id: string, shapeOrigin: TLDrawShape, x: number, y: number, xEnd: number, yEnd: number, bend = 0, arrowheadStart: arrowheadType = "none", arrowheadEnd: arrowheadType = "none"): TLShapePartial<TLArrowShape>
   {
     return {
-      typeName: 'shape',
-      type: 'arrow',
+      typeName: "shape",
+      type: "arrow",
       id: createShapeId(id),
       index: shapeOrigin.index,
       isLocked: shapeOrigin.isLocked,
@@ -175,8 +222,8 @@ export class Converter
   protected createGeoShapeFromNode(id: string, shapeOrigin: TLDrawShape, geo: geoType, x: number, y: number, w: number, h: number): TLShapePartial<TLGeoShape>
   {
     return {
-      typeName: 'shape',
-      type: 'geo',
+      typeName: "shape",
+      type: "geo",
       id: createShapeId(id),
       index: shapeOrigin.index,
       isLocked: shapeOrigin.isLocked,
@@ -232,15 +279,15 @@ export class Converter
       case "triangle": {
         const triangle = node as TJIIXNodeTriangle
         geo = "triangle"
-        w = convertMillimeterToPixel(triangle['bounding-box']!.width)
-        h = convertMillimeterToPixel(triangle['bounding-box']!.height)
+        w = convertMillimeterToPixel(triangle["bounding-box"]!.width)
+        h = convertMillimeterToPixel(triangle["bounding-box"]!.height)
         break
       }
       case "rhombus": {
         const rhombus = node as TJIIXNodeRhombus
         geo = "diamond"
-        w = convertMillimeterToPixel(rhombus['bounding-box']!.width)
-        h = convertMillimeterToPixel(rhombus['bounding-box']!.height)
+        w = convertMillimeterToPixel(rhombus["bounding-box"]!.width)
+        h = convertMillimeterToPixel(rhombus["bounding-box"]!.height)
         break
       }
       // case "parallelogram":
@@ -259,56 +306,63 @@ export class Converter
   convert(drawShapes: TLDrawShape[]): { toConvert: TLShapePartial<(TLArrowShape | TLTextShape | TLGeoShape)>[], toRemove: TLShapeId[] }
   {
     const toConvert: TLShapePartial<(TLArrowShape | TLTextShape | TLGeoShape)>[] = []
-    const toRemove: TLShapeId[] = []
+    const toRemove = new Set<TLShapeId>()
+    const processed = new Set<string>()
 
-    let drawShapesClone = structuredClone(drawShapes)
-    let limit = drawShapesClone.length - 1
-    while (drawShapesClone.length && limit >= 0) {
-      const ds = drawShapesClone.shift() as TLDrawShape
+    this.buildJiixIndex()
+
+    for (const ds of drawShapes) {
+      if (toRemove.has(ds.id)) continue
+
       const jiixElts = this.findJiixElements(ds)
-      const shapeIds = [...new Set([
-        ...jiixElts.map(e => e.items?.map(i => i['full-id'])).flat() as TLShapeId[],
-        ...jiixElts.map(e => (e as TJIIXTextElement).words?.map(w => w.items?.map(i => i['full-id']))).flat(2) as TLShapeId[],
-        ...jiixElts.map(e => (e as TJIIXTextElement).chars?.map(c => c.items?.map(i => i['full-id']))).flat(2) as TLShapeId[]
-      ])]
 
-      jiixElts.forEach(e =>
-      {
+      for (const e of jiixElts) {
+        if (processed.has(e.id)) continue
+        processed.add(e.id)
+
         let shapeConverted: TLShapePartial<TLArrowShape | TLTextShape | TLGeoShape> | undefined
+
         try {
           switch (e.type) {
-            case "Node": {
+            case "Node":
               shapeConverted = this.convertNode(e as TJIIXNodeElement, drawShapes)
               break
-            }
-            case "Text": {
+            case "Text":
               shapeConverted = this.convertText(e as TJIIXTextElement, drawShapes)
               break
-            }
-            case "Edge": {
+            case "Edge":
               shapeConverted = this.convertEdge(e as TJIIXEdgeElement, drawShapes)
               break
-            }
-            default: {
-              console.warn("convert", `Unknow jiix element type: ${ e.type }`)
-              break
-            }
+            default:
+              console.warn("convert", `Unknown jiix element type: ${ (e as TJIIXElement).type }`)
           }
         } catch (error) {
-          console.error('error: ', error)
+          console.error("Conversion error:", error)
         }
+
         if (shapeConverted) {
           toConvert.push(shapeConverted)
-          toRemove.push(...shapeIds)
+          e.items?.forEach(i => {
+            if (i["full-id"]) toRemove.add(i["full-id"] as TLShapeId)
+          })
+          const textElement = e as TJIIXTextElement
+          textElement.words?.forEach(w => {
+            w.items?.forEach(i => {
+              if (i["full-id"]) toRemove.add(i["full-id"] as TLShapeId)
+            })
+          })
+          textElement.chars?.forEach(c => {
+            c.items?.forEach(i => {
+              if (i["full-id"]) toRemove.add(i["full-id"] as TLShapeId)
+            })
+          })
         }
-        drawShapesClone = drawShapesClone.filter(s => !shapeIds.includes(s.id))
-        limit--
-      })
+      }
     }
 
     return {
-      toConvert: toConvert.filter(s => s),
-      toRemove: toRemove.filter(s => s),
+      toConvert,
+      toRemove: Array.from(toRemove),
     }
   }
 }
