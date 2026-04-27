@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../src/lib/ui/components/SharePanel/PeopleMenuMore.tsx"],
+  "sourcesContent": ["export function PeopleMenuMore({ count }: { count: number }) {\n\treturn <div className=\"tlui-people-menu__avatar tlui-people-menu__more\">{Math.abs(count)}</div>\n}\n"],
+  "mappings": "AACQ;AADD,SAAS,eAAe,EAAE,MAAM,GAAsB;AAC5D,SAAO,oBAAC,SAAI,WAAU,mDAAmD,eAAK,IAAI,KAAK,GAAE;AAC1F;",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../src/lib/ui/components/SharePanel/PeopleMenuAvatar.tsx"],
+  "sourcesContent": ["import { usePresence } from '@tldraw/editor'\n\nexport function PeopleMenuAvatar({ userId }: { userId: string }) {\n\tconst presence = usePresence(userId)\n\n\tif (!presence) return null\n\treturn (\n\t\t<div\n\t\t\tclassName=\"tlui-people-menu__avatar\"\n\t\t\tkey={userId}\n\t\t\tstyle={{\n\t\t\t\tbackgroundColor: presence.color,\n\t\t\t}}\n\t\t>\n\t\t\t{presence.userName?.[0] ?? ''}\n\t\t</div>\n\t)\n}\n"],
+  "mappings": "AAOE;AAPF,SAAS,mBAAmB;AAErB,SAAS,iBAAiB,EAAE,OAAO,GAAuB;AAChE,QAAM,WAAW,YAAY,MAAM;AAEnC,MAAI,CAAC,SAAU,QAAO;AACtB,SACC;AAAA,IAAC;AAAA;AAAA,MACA,WAAU;AAAA,MAEV,OAAO;AAAA,QACN,iBAAiB,SAAS;AAAA,MAC3B;AAAA,MAEC,mBAAS,WAAW,CAAC,KAAK;AAAA;AAAA,IALtB;AAAA,EAMN;AAEF;",
+  "names": []
+}

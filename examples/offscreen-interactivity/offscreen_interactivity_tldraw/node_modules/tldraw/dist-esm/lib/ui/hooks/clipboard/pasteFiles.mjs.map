@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../src/lib/ui/hooks/clipboard/pasteFiles.ts"],
+  "sourcesContent": ["import { Editor, TLExternalContentSource, VecLike } from '@tldraw/editor'\n\n/**\n * When the clipboard has a file, create an image/video shape from the file and paste it into the scene.\n *\n * @param editor - The editor instance.\n * @param urls - The file urls.\n * @param point - The point at which to paste the file.\n * @internal\n */\nexport async function pasteFiles(\n\teditor: Editor,\n\tblobs: (File | Blob)[],\n\tpoint?: VecLike,\n\tsources?: TLExternalContentSource[]\n) {\n\tconst files = blobs.map((blob) =>\n\t\tblob instanceof File ? blob : new File([blob], 'tldrawFile', { type: blob.type })\n\t)\n\n\teditor.markHistoryStoppingPoint('paste')\n\n\tawait editor.putExternalContent({\n\t\ttype: 'files',\n\t\tfiles,\n\t\tpoint,\n\t\tsources,\n\t})\n}\n"],
+  "mappings": "AAUA,eAAsB,WACrB,QACA,OACA,OACA,SACC;AACD,QAAM,QAAQ,MAAM;AAAA,IAAI,CAAC,SACxB,gBAAgB,OAAO,OAAO,IAAI,KAAK,CAAC,IAAI,GAAG,cAAc,EAAE,MAAM,KAAK,KAAK,CAAC;AAAA,EACjF;AAEA,SAAO,yBAAyB,OAAO;AAEvC,QAAM,OAAO,mBAAmB;AAAA,IAC/B,MAAM;AAAA,IACN;AAAA,IACA;AAAA,IACA;AAAA,EACD,CAAC;AACF;",
+  "names": []
+}

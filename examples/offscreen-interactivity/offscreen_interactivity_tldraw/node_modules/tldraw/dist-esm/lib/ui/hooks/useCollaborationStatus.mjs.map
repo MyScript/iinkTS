@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/ui/hooks/useCollaborationStatus.ts"],
+  "sourcesContent": ["import { useMaybeEditor, useValue } from '@tldraw/editor'\n\n/** @public */\nexport function useShowCollaborationUi() {\n\tconst editor = useMaybeEditor()\n\treturn editor?.store.props.collaboration !== undefined\n}\n\n/** @public */\nexport function useCollaborationStatus() {\n\tconst editor = useMaybeEditor()\n\treturn useValue(\n\t\t'sync status',\n\t\t() => {\n\t\t\tif (!editor?.store.props.collaboration?.status) {\n\t\t\t\treturn null\n\t\t\t}\n\t\t\treturn editor.store.props.collaboration.status.get()\n\t\t},\n\t\t[editor]\n\t)\n}\n"],
+  "mappings": "AAAA,SAAS,gBAAgB,gBAAgB;AAGlC,SAAS,yBAAyB;AACxC,QAAM,SAAS,eAAe;AAC9B,SAAO,QAAQ,MAAM,MAAM,kBAAkB;AAC9C;AAGO,SAAS,yBAAyB;AACxC,QAAM,SAAS,eAAe;AAC9B,SAAO;AAAA,IACN;AAAA,IACA,MAAM;AACL,UAAI,CAAC,QAAQ,MAAM,MAAM,eAAe,QAAQ;AAC/C,eAAO;AAAA,MACR;AACA,aAAO,OAAO,MAAM,MAAM,cAAc,OAAO,IAAI;AAAA,IACpD;AAAA,IACA,CAAC,MAAM;AAAA,EACR;AACD;",
+  "names": []
+}

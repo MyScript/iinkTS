@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/ui/components/LoadingScreen.tsx"],
+  "sourcesContent": ["import { LoadingScreen as LoadingScreenContainer, useEditorComponents } from '@tldraw/editor'\n\n/** @public @react */\nexport const LoadingScreen = () => {\n\tconst { Spinner } = useEditorComponents()\n\treturn <LoadingScreenContainer>{Spinner ? <Spinner /> : null}</LoadingScreenContainer>\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAK2C;AAL3C,oBAA6E;AAGtE,MAAM,gBAAgB,MAAM;AAClC,QAAM,EAAE,QAAQ,QAAI,mCAAoB;AACxC,SAAO,4CAAC,cAAAA,eAAA,EAAwB,oBAAU,4CAAC,WAAQ,IAAK,MAAK;AAC9D;",
+  "names": ["LoadingScreenContainer"]
+}

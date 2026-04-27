@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/shapes/shared/useDefaultColorTheme.ts"],
+  "sourcesContent": ["import { getDefaultColorTheme, useIsDarkMode } from '@tldraw/editor'\n\n/** @public */\nexport function useDefaultColorTheme() {\n\treturn getDefaultColorTheme({ isDarkMode: useIsDarkMode() })\n}\n"],
+  "mappings": "AAAA,SAAS,sBAAsB,qBAAqB;AAG7C,SAAS,uBAAuB;AACtC,SAAO,qBAAqB,EAAE,YAAY,cAAc,EAAE,CAAC;AAC5D;",
+  "names": []
+}

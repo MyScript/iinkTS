@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/primitives/geometry/Polygon2d.ts"],
+  "sourcesContent": ["import { Vec } from '../Vec'\nimport { Geometry2dOptions } from './Geometry2d'\nimport { Polyline2d } from './Polyline2d'\n\n/** @public */\nexport class Polygon2d extends Polyline2d {\n\tconstructor(config: Omit<Geometry2dOptions, 'isClosed'> & { points: Vec[] }) {\n\t\tsuper({ ...config })\n\t\tthis.isClosed = true\n\n\t\tif (config.points.length < 3) {\n\t\t\tthrow new Error('Polygon2d: points must be an array of at least 3 points')\n\t\t}\n\t}\n}\n"],
+  "mappings": "AAEA,SAAS,kBAAkB;AAGpB,MAAM,kBAAkB,WAAW;AAAA,EACzC,YAAY,QAAiE;AAC5E,UAAM,EAAE,GAAG,OAAO,CAAC;AACnB,SAAK,WAAW;AAEhB,QAAI,OAAO,OAAO,SAAS,GAAG;AAC7B,YAAM,IAAI,MAAM,yDAAyD;AAAA,IAC1E;AAAA,EACD;AACD;",
+  "names": []
+}

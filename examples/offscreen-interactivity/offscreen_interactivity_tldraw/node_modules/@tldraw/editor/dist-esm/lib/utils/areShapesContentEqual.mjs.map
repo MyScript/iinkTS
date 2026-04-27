@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/utils/areShapesContentEqual.ts"],
+  "sourcesContent": ["import { TLShape } from '@tldraw/tlschema'\n\nexport const areShapesContentEqual = (a: TLShape, b: TLShape) =>\n\ta.props === b.props && a.meta === b.meta\n"],
+  "mappings": "AAEO,MAAM,wBAAwB,CAAC,GAAY,MACjD,EAAE,UAAU,EAAE,SAAS,EAAE,SAAS,EAAE;",
+  "names": []
+}

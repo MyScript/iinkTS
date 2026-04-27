@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/license/useLicenseManagerState.ts"],
+  "sourcesContent": ["import { useValue } from '@tldraw/state-react'\nimport { LicenseManager, LicenseState } from './LicenseManager'\n\n/** @internal */\nexport function useLicenseManagerState(licenseManager: LicenseManager): LicenseState {\n\treturn useValue('watermarkState', () => licenseManager.state.get(), [licenseManager])\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,yBAAyB;AAIlB,SAAS,uBAAuB,gBAA8C;AACpF,aAAO,6BAAS,kBAAkB,MAAM,eAAe,MAAM,IAAI,GAAG,CAAC,cAAc,CAAC;AACrF;",
+  "names": []
+}

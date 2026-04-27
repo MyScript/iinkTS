@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/hooks/usePresence.ts"],
+  "sourcesContent": ["import { useValue } from '@tldraw/state-react'\nimport { TLInstancePresence } from '@tldraw/tlschema'\nimport { useEditor } from './useEditor'\n\n// TODO: maybe move this to a computed property on the App class?\n/**\n * @returns The latest presence of the user matching userId\n * @public\n */\nexport function usePresence(userId: string): TLInstancePresence | null {\n\tconst editor = useEditor()\n\n\tconst latestPresence = useValue(\n\t\t`latestPresence:${userId}`,\n\t\t() => {\n\t\t\treturn editor.getCollaborators().find((c) => c.userId === userId)\n\t\t},\n\t\t[editor, userId]\n\t)\n\n\treturn latestPresence ?? null\n}\n"],
+  "mappings": "AAAA,SAAS,gBAAgB;AAEzB,SAAS,iBAAiB;AAOnB,SAAS,YAAY,QAA2C;AACtE,QAAM,SAAS,UAAU;AAEzB,QAAM,iBAAiB;AAAA,IACtB,kBAAkB,MAAM;AAAA,IACxB,MAAM;AACL,aAAO,OAAO,iBAAiB,EAAE,KAAK,CAAC,MAAM,EAAE,WAAW,MAAM;AAAA,IACjE;AAAA,IACA,CAAC,QAAQ,MAAM;AAAA,EAChB;AAEA,SAAO,kBAAkB;AAC1B;",
+  "names": []
+}

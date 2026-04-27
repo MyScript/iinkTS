@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/ui/components/Spinner.tsx"],
+  "sourcesContent": ["import { DefaultSpinner } from '@tldraw/editor'\nimport React from 'react'\nimport { useTranslation } from '../hooks/useTranslation/useTranslation'\n\n/** @internal */\nexport function Spinner(props: React.SVGProps<SVGSVGElement>) {\n\tconst msg = useTranslation()\n\n\treturn <DefaultSpinner aria-label={msg('app.loading')} {...props} />\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAQQ;AARR,oBAA+B;AAE/B,4BAA+B;AAGxB,SAAS,QAAQ,OAAsC;AAC7D,QAAM,UAAM,sCAAe;AAE3B,SAAO,4CAAC,gCAAe,cAAY,IAAI,aAAa,GAAI,GAAG,OAAO;AACnE;",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/editor/types/clipboard-types.ts"],
+  "sourcesContent": ["import { SerializedSchema } from '@tldraw/store'\nimport { TLAsset, TLBinding, TLShape, TLShapeId } from '@tldraw/tlschema'\n\n/** @public */\nexport interface TLContent {\n\tshapes: TLShape[]\n\tbindings: TLBinding[] | undefined\n\trootShapeIds: TLShapeId[]\n\tassets: TLAsset[]\n\tschema: SerializedSchema\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;AAAA;AAAA;",
+  "names": []
+}

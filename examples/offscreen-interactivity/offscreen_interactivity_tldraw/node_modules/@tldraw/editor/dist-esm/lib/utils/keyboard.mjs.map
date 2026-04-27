@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/utils/keyboard.ts"],
+  "sourcesContent": ["import { tlenv } from '../globals/environment'\n\n/** @internal */\nexport const isAccelKey = <InputType extends { metaKey: boolean; ctrlKey: boolean }>(\n\te: InputType\n) => {\n\treturn tlenv.isDarwin ? e.metaKey : e.ctrlKey || e.metaKey\n}\n"],
+  "mappings": "AAAA,SAAS,aAAa;AAGf,MAAM,aAAa,CACzB,MACI;AACJ,SAAO,MAAM,WAAW,EAAE,UAAU,EAAE,WAAW,EAAE;AACpD;",
+  "names": []
+}

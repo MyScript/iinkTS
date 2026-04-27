@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../../src/lib/ui/components/primitives/Button/TldrawUiButtonLabel.tsx"],
+  "sourcesContent": ["import { ReactNode } from 'react'\n\n/** @public */\nexport interface TLUiButtonLabelProps {\n\tchildren?: ReactNode\n}\n\n/** @public @react */\nexport function TldrawUiButtonLabel({ children }: TLUiButtonLabelProps) {\n\treturn <span className=\"tlui-button__label\">{children}</span>\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AASQ;AADD,SAAS,oBAAoB,EAAE,SAAS,GAAyB;AACvE,SAAO,4CAAC,UAAK,WAAU,sBAAsB,UAAS;AACvD;",
+  "names": []
+}

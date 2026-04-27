@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/shapes/highlight/HighlightShapeTool.ts"],
+  "sourcesContent": ["// shared custody\nimport { StateNode, TLStateNodeConstructor } from '@tldraw/editor'\nimport { Drawing } from '../draw/toolStates/Drawing'\nimport { Idle } from '../draw/toolStates/Idle'\n\n/** @public */\nexport class HighlightShapeTool extends StateNode {\n\tstatic override id = 'highlight'\n\tstatic override initial = 'idle'\n\tstatic override useCoalescedEvents = true\n\tstatic override children(): TLStateNodeConstructor[] {\n\t\treturn [Idle, Drawing]\n\t}\n\tstatic override isLockable = false\n\toverride shapeType = 'highlight'\n\n\toverride onExit() {\n\t\tconst drawingState = this.children!['drawing'] as Drawing\n\t\tdrawingState.initialShape = undefined\n\t}\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AACA,oBAAkD;AAClD,qBAAwB;AACxB,kBAAqB;AAGd,MAAM,2BAA2B,wBAAU;AAAA,EACjD,OAAgB,KAAK;AAAA,EACrB,OAAgB,UAAU;AAAA,EAC1B,OAAgB,qBAAqB;AAAA,EACrC,OAAgB,WAAqC;AACpD,WAAO,CAAC,kBAAM,sBAAO;AAAA,EACtB;AAAA,EACA,OAAgB,aAAa;AAAA,EACpB,YAAY;AAAA,EAEZ,SAAS;AACjB,UAAM,eAAe,KAAK,SAAU,SAAS;AAC7C,iBAAa,eAAe;AAAA,EAC7B;AACD;",
+  "names": []
+}

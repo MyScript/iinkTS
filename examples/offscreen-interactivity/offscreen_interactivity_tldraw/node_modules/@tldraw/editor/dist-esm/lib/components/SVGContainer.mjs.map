@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/components/SVGContainer.tsx"],
+  "sourcesContent": ["import classNames from 'classnames'\nimport * as React from 'react'\n\n/** @public */\nexport type SVGContainerProps = React.ComponentProps<'svg'>\n\n/** @public @react */\nexport function SVGContainer({ children, className = '', ...rest }: SVGContainerProps) {\n\treturn (\n\t\t<svg {...rest} className={classNames('tl-svg-container', className)} aria-hidden=\"true\">\n\t\t\t{children}\n\t\t</svg>\n\t)\n}\n"],
+  "mappings": "AASE;AATF,OAAO,gBAAgB;AAOhB,SAAS,aAAa,EAAE,UAAU,YAAY,IAAI,GAAG,KAAK,GAAsB;AACtF,SACC,oBAAC,SAAK,GAAG,MAAM,WAAW,WAAW,oBAAoB,SAAS,GAAG,eAAY,QAC/E,UACF;AAEF;",
+  "names": []
+}

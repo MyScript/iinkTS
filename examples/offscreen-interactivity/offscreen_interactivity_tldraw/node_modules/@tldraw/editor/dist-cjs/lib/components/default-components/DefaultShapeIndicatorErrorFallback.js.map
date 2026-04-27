@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/components/default-components/DefaultShapeIndicatorErrorFallback.tsx"],
+  "sourcesContent": ["import { ComponentType } from 'react'\n\n/** @public */\nexport type TLShapeIndicatorErrorFallbackComponent = ComponentType<{ error: unknown }>\n\n/** @internal */\nexport const DefaultShapeIndicatorErrorFallback: TLShapeIndicatorErrorFallbackComponent = () => {\n\treturn <circle cx={4} cy={4} r={8} strokeWidth=\"1\" stroke=\"red\" />\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAOQ;AADD,MAAM,qCAA6E,MAAM;AAC/F,SAAO,4CAAC,YAAO,IAAI,GAAG,IAAI,GAAG,GAAG,GAAG,aAAY,KAAI,QAAO,OAAM;AACjE;",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/utils/assets.ts"],
+  "sourcesContent": ["import { fetch } from '@tldraw/utils'\nimport { version } from '../../version'\n\n/** @public */\nexport function dataUrlToFile(url: string, filename: string, mimeType: string) {\n\treturn fetch(url)\n\t\t.then(function (res) {\n\t\t\treturn res.arrayBuffer()\n\t\t})\n\t\t.then(function (buf) {\n\t\t\treturn new File([buf], filename, { type: mimeType })\n\t\t})\n}\n\n/** @internal */\nconst CDN_BASE_URL = 'https://cdn.tldraw.com'\n\n/** @public */\nexport function getDefaultCdnBaseUrl() {\n\treturn `${CDN_BASE_URL}/${version}`\n}\n"],
+  "mappings": "AAAA,SAAS,aAAa;AACtB,SAAS,eAAe;AAGjB,SAAS,cAAc,KAAa,UAAkB,UAAkB;AAC9E,SAAO,MAAM,GAAG,EACd,KAAK,SAAU,KAAK;AACpB,WAAO,IAAI,YAAY;AAAA,EACxB,CAAC,EACA,KAAK,SAAU,KAAK;AACpB,WAAO,IAAI,KAAK,CAAC,GAAG,GAAG,UAAU,EAAE,MAAM,SAAS,CAAC;AAAA,EACpD,CAAC;AACH;AAGA,MAAM,eAAe;AAGd,SAAS,uBAAuB;AACtC,SAAO,GAAG,YAAY,IAAI,OAAO;AAClC;",
+  "names": []
+}

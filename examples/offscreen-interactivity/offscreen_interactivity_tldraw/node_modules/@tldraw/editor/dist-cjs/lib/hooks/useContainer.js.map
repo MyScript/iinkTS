@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/hooks/useContainer.tsx"],
+  "sourcesContent": ["import { assertExists } from '@tldraw/utils'\nimport { createContext, useContext } from 'react'\n\nconst ContainerContext = createContext<HTMLElement | null>(null)\n\n/** @public */\nexport interface ContainerProviderProps {\n\tcontainer: HTMLElement\n\tchildren: React.ReactNode\n}\n\n/**\n * @public\n * @react\n */\nexport function ContainerProvider({ container, children }: ContainerProviderProps) {\n\treturn <ContainerContext.Provider value={container}>{children}</ContainerContext.Provider>\n}\n\n/** @public */\nexport function useContainer(): HTMLElement {\n\treturn assertExists(useContext(ContainerContext), 'useContainer used outside of <Tldraw />')\n}\n\n/** @public */\nexport function useContainerIfExists(): HTMLElement | null {\n\treturn useContext(ContainerContext)\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA;AAgBQ;AAhBR,mBAA6B;AAC7B,mBAA0C;AAE1C,MAAM,uBAAmB,4BAAkC,IAAI;AAYxD,SAAS,kBAAkB,EAAE,WAAW,SAAS,GAA2B;AAClF,SAAO,4CAAC,iBAAiB,UAAjB,EAA0B,OAAO,WAAY,UAAS;AAC/D;AAGO,SAAS,eAA4B;AAC3C,aAAO,+BAAa,yBAAW,gBAAgB,GAAG,yCAAyC;AAC5F;AAGO,SAAS,uBAA2C;AAC1D,aAAO,yBAAW,gBAAgB;AACnC;",
+  "names": []
+}

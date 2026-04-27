@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/shapes/shared/TextHelpers.ts"],
+  "sourcesContent": ["/**\t@public */\nexport const INDENT = '  '\n\n/** @internal */\nexport class TextHelpers {\n\tstatic fixNewLines = /\\r?\\n|\\r/g\n\n\tstatic normalizeText(text: string) {\n\t\treturn text.replace(TextHelpers.fixNewLines, '\\n')\n\t}\n\n\tstatic normalizeTextForDom(text: string) {\n\t\treturn text\n\t\t\t.replace(TextHelpers.fixNewLines, '\\n')\n\t\t\t.split('\\n')\n\t\t\t.map((x) => x || ' ')\n\t\t\t.join('\\n')\n\t}\n}\n"],
+  "mappings": "AACO,MAAM,SAAS;AAGf,MAAM,YAAY;AAAA,EACxB,OAAO,cAAc;AAAA,EAErB,OAAO,cAAc,MAAc;AAClC,WAAO,KAAK,QAAQ,YAAY,aAAa,IAAI;AAAA,EAClD;AAAA,EAEA,OAAO,oBAAoB,MAAc;AACxC,WAAO,KACL,QAAQ,YAAY,aAAa,IAAI,EACrC,MAAM,IAAI,EACV,IAAI,CAAC,MAAM,KAAK,GAAG,EACnB,KAAK,IAAI;AAAA,EACZ;AACD;",
+  "names": []
+}

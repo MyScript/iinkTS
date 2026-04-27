@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/components/default-components/DefaultSelectionBackground.tsx"],
+  "sourcesContent": ["import * as React from 'react'\nimport { useTransform } from '../../hooks/useTransform'\nimport { Box } from '../../primitives/Box'\nimport { toDomPrecision } from '../../primitives/utils'\n\n/** @public */\nexport interface TLSelectionBackgroundProps {\n\tbounds: Box\n\trotation: number\n}\n\n/** @public @react */\nexport function DefaultSelectionBackground({ bounds, rotation }: TLSelectionBackgroundProps) {\n\tconst rDiv = React.useRef<HTMLDivElement>(null)\n\tuseTransform(rDiv, bounds.x, bounds.y, 1, rotation)\n\n\tReact.useLayoutEffect(() => {\n\t\tconst div = rDiv.current\n\t\tif (!div) return\n\t\tdiv.style.width = toDomPrecision(Math.max(1, bounds.width)) + 'px'\n\t\tdiv.style.height = toDomPrecision(Math.max(1, bounds.height)) + 'px'\n\t}, [bounds.width, bounds.height])\n\n\treturn <div ref={rDiv} className=\"tl-selection__bg\" draggable={false} />\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAuBQ;AAvBR,YAAuB;AACvB,0BAA6B;AAE7B,mBAA+B;AASxB,SAAS,2BAA2B,EAAE,QAAQ,SAAS,GAA+B;AAC5F,QAAM,OAAO,MAAM,OAAuB,IAAI;AAC9C,wCAAa,MAAM,OAAO,GAAG,OAAO,GAAG,GAAG,QAAQ;AAElD,QAAM,gBAAgB,MAAM;AAC3B,UAAM,MAAM,KAAK;AACjB,QAAI,CAAC,IAAK;AACV,QAAI,MAAM,YAAQ,6BAAe,KAAK,IAAI,GAAG,OAAO,KAAK,CAAC,IAAI;AAC9D,QAAI,MAAM,aAAS,6BAAe,KAAK,IAAI,GAAG,OAAO,MAAM,CAAC,IAAI;AAAA,EACjE,GAAG,CAAC,OAAO,OAAO,OAAO,MAAM,CAAC;AAEhC,SAAO,4CAAC,SAAI,KAAK,MAAM,WAAU,oBAAmB,WAAW,OAAO;AACvE;",
+  "names": []
+}

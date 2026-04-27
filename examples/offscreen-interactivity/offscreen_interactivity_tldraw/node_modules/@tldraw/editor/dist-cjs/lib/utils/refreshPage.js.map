@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../src/lib/utils/refreshPage.ts"],
+  "sourcesContent": ["import { runtime } from './runtime'\n\n/** @public */\nexport function refreshPage() {\n\truntime.refreshPage()\n}\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,qBAAwB;AAGjB,SAAS,cAAc;AAC7B,yBAAQ,YAAY;AACrB;",
+  "names": []
+}

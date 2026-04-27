@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../../src/lib/ui/components/SharePanel/DefaultSharePanel.tsx"],
+  "sourcesContent": ["import { PeopleMenu } from './PeopleMenu'\n\n/** @public @react */\nexport function DefaultSharePanel() {\n\treturn (\n\t\t<div className=\"tlui-share-zone\" draggable={false}>\n\t\t\t<PeopleMenu />\n\t\t</div>\n\t)\n}\n"],
+  "mappings": "AAMG;AANH,SAAS,kBAAkB;AAGpB,SAAS,oBAAoB;AACnC,SACC,oBAAC,SAAI,WAAU,mBAAkB,WAAW,OAC3C,8BAAC,cAAW,GACb;AAEF;",
+  "names": []
+}

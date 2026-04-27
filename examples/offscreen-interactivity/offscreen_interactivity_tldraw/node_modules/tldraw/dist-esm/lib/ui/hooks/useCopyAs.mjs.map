@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/ui/hooks/useCopyAs.ts"],
+  "sourcesContent": ["import { TLShapeId, assert, useMaybeEditor } from '@tldraw/editor'\nimport { useCallback } from 'react'\nimport { TLCopyType, copyAs } from '../../utils/export/copyAs'\nimport { useToasts } from '../context/toasts'\nimport { useTranslation } from './useTranslation/useTranslation'\n\n/** @public */\nexport function useCopyAs() {\n\tconst editor = useMaybeEditor()\n\tconst { addToast } = useToasts()\n\tconst msg = useTranslation()\n\n\treturn useCallback(\n\t\t(ids: TLShapeId[], format: TLCopyType = 'svg') => {\n\t\t\tassert(editor, 'useCopyAs: editor is required')\n\t\t\tcopyAs(editor, ids, { format }).catch(() => {\n\t\t\t\taddToast({\n\t\t\t\t\tid: 'copy-fail',\n\t\t\t\t\tseverity: 'warning',\n\t\t\t\t\ttitle: msg('toast.error.copy-fail.title'),\n\t\t\t\t\tdescription: msg('toast.error.copy-fail.desc'),\n\t\t\t\t})\n\t\t\t})\n\t\t},\n\t\t[editor, addToast, msg]\n\t)\n}\n"],
+  "mappings": "AAAA,SAAoB,QAAQ,sBAAsB;AAClD,SAAS,mBAAmB;AAC5B,SAAqB,cAAc;AACnC,SAAS,iBAAiB;AAC1B,SAAS,sBAAsB;AAGxB,SAAS,YAAY;AAC3B,QAAM,SAAS,eAAe;AAC9B,QAAM,EAAE,SAAS,IAAI,UAAU;AAC/B,QAAM,MAAM,eAAe;AAE3B,SAAO;AAAA,IACN,CAAC,KAAkB,SAAqB,UAAU;AACjD,aAAO,QAAQ,+BAA+B;AAC9C,aAAO,QAAQ,KAAK,EAAE,OAAO,CAAC,EAAE,MAAM,MAAM;AAC3C,iBAAS;AAAA,UACR,IAAI;AAAA,UACJ,UAAU;AAAA,UACV,OAAO,IAAI,6BAA6B;AAAA,UACxC,aAAa,IAAI,4BAA4B;AAAA,QAC9C,CAAC;AAAA,MACF,CAAC;AAAA,IACF;AAAA,IACA,CAAC,QAAQ,UAAU,GAAG;AAAA,EACvB;AACD;",
+  "names": []
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../src/styles/TLSizeStyle.ts"],
+  "sourcesContent": ["import { T } from '@tldraw/validate'\nimport { StyleProp } from './StyleProp'\n\n/** @public */\nexport const DefaultSizeStyle = StyleProp.defineEnum('tldraw:size', {\n\tdefaultValue: 'm',\n\tvalues: ['s', 'm', 'l', 'xl'],\n})\n\n/** @public */\nexport type TLDefaultSizeStyle = T.TypeOf<typeof DefaultSizeStyle>\n"],
+  "mappings": "AACA,SAAS,iBAAiB;AAGnB,MAAM,mBAAmB,UAAU,WAAW,eAAe;AAAA,EACnE,cAAc;AAAA,EACd,QAAQ,CAAC,KAAK,KAAK,KAAK,IAAI;AAC7B,CAAC;",
+  "names": []
+}

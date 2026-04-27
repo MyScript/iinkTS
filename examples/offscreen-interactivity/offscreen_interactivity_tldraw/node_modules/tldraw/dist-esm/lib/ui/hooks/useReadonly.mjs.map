@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../../../src/lib/ui/hooks/useReadonly.ts"],
+  "sourcesContent": ["import { useMaybeEditor, useValue } from '@tldraw/editor'\n\n/** @public */\nexport function useReadonly() {\n\tconst editor = useMaybeEditor()\n\treturn useValue('isReadonlyMode', () => !!editor?.getIsReadonly(), [editor])\n}\n"],
+  "mappings": "AAAA,SAAS,gBAAgB,gBAAgB;AAGlC,SAAS,cAAc;AAC7B,QAAM,SAAS,eAAe;AAC9B,SAAO,SAAS,kBAAkB,MAAM,CAAC,CAAC,QAAQ,cAAc,GAAG,CAAC,MAAM,CAAC;AAC5E;",
+  "names": []
+}
