@@ -1,3 +1,44 @@
+
+
+# [v3.3.0](https://github.com/MyScript/iinkTS/tree/v3.3.0)
+
+## Features
+- exemple(TLDraw): add TopZone component for auto conversion toggle
+- feat: add zoom functionality
+- feat: add pan functionality
+
+## Performance
+- perf(example): optimize perf of tldraw example
+- perf(core): refactor the library to optimize performance
+
+## Bugs fix
+- fix(tldraw): Converter add toRichText
+- fix(IIGestureManager): scratch-out on a shape does not erase the shape
+- fix: update SVG element selection logic to verify child element counts
+- fix: refactor decorable type checks in IIGestureManager and IIMenuContext
+- fix: enhance selection filter and outline rendering in SVGRendererEdgeUtil
+- fix: update ID generation logic in duplicate menu for consistent symbol identification
+- fix: improve point calculation in getPoint method for better accuracy
+- fix: correct spelling of "unknown" in error messages across multiple files
+- fix: EraserManager remove warning Circular dependency
+- fix(rest_custom_grabber.html): remove unused event listener for modal editor
+- fix(rest_diagram_import.html): update modal editor options to include editorOptions
+
+## Refactor
+- refactor: manager, move IISnapManager & IIGestureManager into manager folder
+- refactor(logger): change LoggerLevel values to integers and streamline logging methods
+- refactor(exports): reorganize export types into ExportCommon for better structure and maintainability
+- refactor(renderer): introduce base renderer and shared utilities for consistent rendering across formats
+- refactor(symbol): reorganize symbols into dedicated folders
+- refactor(Manager): separation of Managers' Dependencies
+- refactor(editor): restructure editor classes and introduce EditorFactory for improved instance management
+- refactor(helper): optimisation of helpers
+
+# [v3.2.1](https://github.com/MyScript/iinkTS/tree/v3.2.1)
+
+## Bugs fix
+- fix(readme.md): remove await from readme
+
 # [v3.2.0](https://github.com/MyScript/iinkTS/tree/v3.2.0)
 
 ## Bugs fix
