@@ -7,11 +7,11 @@ export enum EditorTool {
   Write = "write",
   Erase = "erase",
   /**
-   * @remarks only usable in the case of offscreen
+   * @remarks only usable in the case of interactive ink editor
    */
   Select = "select",
   /**
-   * @remarks only usable in the case of offscreen
+   * @remarks only usable in the case of interactive ink editor
    */
   Move = "move",
 }
@@ -21,7 +21,7 @@ export enum EditorTool {
  * @summary
  * List all the shapes that can be drawn
  * @remarks
- * only usable in the case of offscreen
+ * only usable in the case of interactive ink editor
  */
 export enum EditorWriteTool {
   Pencil = "pencil",
@@ -41,7 +41,7 @@ export enum EditorWriteTool {
  * @summary
  * List all svg elements roles
  * @remarks
- * only usable in the case of offscreen
+ * only usable in the case of interactive ink editor
  */
 export enum SvgElementRole {
   Guide = "guide",
@@ -56,7 +56,7 @@ export enum SvgElementRole {
  * @summary
  * List all svg elements resize direction
  * @remarks
- * only usable in the case of offscreen
+ * only usable in the case of interactive ink editor
  */
 export const enum ResizeDirection {
   North = "n-resize",
