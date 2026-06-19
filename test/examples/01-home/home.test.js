@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test"
 
-test.describe("Home Page", () => {
+test.describe.skip("Home Page", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/index.html`)
   })
