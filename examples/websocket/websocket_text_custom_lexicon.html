@@ -15,77 +15,75 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
     <style>
-      #editorEl {
-        height: calc(100dvh - 116px);
-      }
-      @media only screen and (max-width: 486px) {
-        #editorEl {
-          height: calc(100dvh - 164px);
-        }
-      }
-      @media only screen and (max-width: 382px) {
-        #editorEl {
-          height: calc(100dvh - 211px);
-        }
-      }
       #lexicon {
         width: calc(100% - 100px);
       }
     </style>
-  </head>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
   <body>
     <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
       <button id="showModalBtn" class="btn-keys">
-        Change server configuration
+        API Keys
       </button>
       <h1 class="header-title">
         Custom lexicon
       </h1>
     </header>
-    <nav class="flex-container wrap between gap">
-      <div class="flex-container wrap gap">
-        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/undo.svg" />
-        </button>
-        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/redo.svg" />
-        </button>
-      </div>
-      <div class="flex-container wrap gap" style="width: calc(100% - 110px);">
-        <input
-          type="text"
-          id="lexicon"
-          data-type="text/plain"
-          placeholder='Add your own lexicon (space-separated) and press "Send"'
-        />
-        <button class="classic-btn" id="reinit">Send</button>
-      </div>
-    </nav>
 
-    <div id="editorEl"></div>
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">📖 Custom lexicon</p>
+        <p class="ex-panel-intro">The recognition engine may struggle with rare or highly technical words — think internal project codenames, proprietary product names, uncommon surnames, or domain-specific abbreviations your team coined.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">A custom lexicon gives the engine a hint: words listed there become valid candidates during recognition, even if absent from the built-in dictionary.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">As the engine continuously improves, some of these words may eventually be recognized without a custom lexicon.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Type your words space-separated in the field below and click <strong>Send</strong> — the editor reloads with the new lexicon applied.</div>
+        </div>
+      </aside>
+
+      <div class="page-content">
+        <nav class="flex-container wrap between gap">
+          <input
+            type="text"
+            id="lexicon"
+            data-type="text/plain"
+            placeholder='Add your own lexicon (space-separated) and press "Send"'
+          />
+          <button class="classic-btn" id="reinit">Send</button>
+        </nav>
+
+        <div id="editorEl"></div>
+      </div>
+    </div>
 
     <script type="module">
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
       import { Editor } from '../../dist/iink.esm.js'
       import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
       const editorElement = document.getElementById("editorEl")
-      const undoElement = document.getElementById("undo")
-      const redoElement = document.getElementById("redo")
       const reinitButton = document.getElementById("reinit")
       const lexicon = document.getElementById("lexicon")
       const showModalBtn = document.getElementById("showModalBtn")
-
-      undoElement.addEventListener("click", () => {
-        editor?.undo()
-      })
-      redoElement.addEventListener("click", () => {
-        editor?.redo()
-      })
-
-      window.addEventListener("resize", () => {
-        editor?.resize()
-      })
 
       const editorOptions = {
         configuration: {
@@ -118,26 +116,15 @@
       let editor;
 
       async function loadEditor(options) {
-        /**
-         * get editor instance from type
-         * @param {Element} The DOM element to attach the ink paper
-         * @param {Object} The Editor parameters
-         */
-        editor = await Editor.load(editorElement, "INTERACTIVEINKSSR", options);
-
-        editor.event.addEventListener("changed", (event) => {
-          undoElement.disabled = !event.detail.canUndo
-          redoElement.disabled = !event.detail.canRedo
-        })
-      };
+        editor = await Editor.load(editorElement, "INTERACTIVEINKSSR", options)
+      }
 
       ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
 
-      /**
-       * We expose these objects to the window use it in test
-       */
       window.editorOptions = editorOptions
       window.loadEditor = loadEditor
     </script>
-  </body>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
 </html>

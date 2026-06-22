@@ -11,39 +11,50 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
-    <style>
-      #editorEl {
-        height: calc(100dvh - 116px);
-      }
-    </style>
-  </head>
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
   <body>
     <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
       <button id="showModalBtn" class="btn-keys">
-        Change server configuration
+        API Keys
       </button>
       <h1 class="header-title">No guides</h1>
     </header>
-    <nav>
-      <div class="flex-container wrap gap">
-        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/undo.svg" />
-        </button>
-        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/redo.svg" />
-        </button>
-      </div>
-    </nav>
 
-    <div id="editorEl"></div>
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">✏️ Text recognition without guides</p>
+        <p class="ex-panel-intro">By default, the editor displays horizontal guide lines to help users write in a straight line. This example disables them by setting <code>text.guides.enable: false</code>.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Recognition quality is unchanged — the engine does not rely on guides to interpret handwriting. Guides are purely a visual aid for the user.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Removing guides is useful for free-form layouts, custom backgrounds, or when the host UI already provides its own writing lines.</div>
+        </div>
+      </aside>
+
+      <div id="editorEl"></div>
+    </div>
 
     <script type="module">
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
       import { Editor } from '../../dist/iink.esm.js'
       import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
       const editorElement = document.getElementById('editorEl')
-      const undoElement = document.getElementById('undo')
-      const redoElement = document.getElementById('redo')
       const showModalBtn = document.getElementById('showModalBtn')
 
       let editor
@@ -67,24 +78,7 @@
          * @param {Object} The Editor parameters
          */
         editor = await Editor.load(editorElement, 'INTERACTIVEINKSSR', options)
-
-        editor.event.addEventListener('changed', (event) => {
-          undoElement.disabled = !event.detail.canUndo
-          redoElement.disabled = !event.detail.canRedo
-        })
       }
-
-      undoElement.addEventListener('click', () => {
-        editor?.undo()
-      })
-
-      redoElement.addEventListener('click', () => {
-        editor?.redo()
-      })
-
-      window.addEventListener('resize', () => {
-        editor?.resize()
-      })
 
       showModalBtn.addEventListener('click', () => {
         ModalEditorOptions.show(loadEditor, editorOptions)
@@ -98,6 +92,8 @@
       window.editorOptions = editorOptions
       window.loadEditor = loadEditor
     </script>
-  </body>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
 
 </html>

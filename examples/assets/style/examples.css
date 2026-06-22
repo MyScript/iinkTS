@@ -1,135 +1,362 @@
+/* ─── Page layout (flex column, editor fills remaining space) ────────────── */
+
+/* Flex column content area — used alongside ex-page-layout when nav/result bars exist */
+.page-content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Two-column layout inside ex-page-layout — editor + right panel (minimap, deps, etc.) */
+.main-layout {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  overflow: hidden;
+}
+
+/* Loading spinner */
+.loader {
+  margin: auto;
+  border: 16px solid var(--ex-surface);
+  border-top: 16px solid var(--ex-primary);
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+
+/* Both id conventions used across examples */
+#editorEl,
+#editor {
+  flex: 1;
+  min-height: 0;
+}
+
+nav {
+  flex-shrink: 0;
+}
+
+#result {
+  flex-shrink: 0;
+}
+
+
+/* ─── Header ─────────────────────────────────────────────────────────────── */
+
 .header-main {
   position: sticky;
   top: 0;
   width: 100%;
-  height: 50px;
-  background-color: #1a9fff;
+  height: var(--ex-header-height);
+  background: var(--ex-primary);
   display: flex;
   align-items: center;
-  padding: 0 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 0 var(--ex-space-xl);
+  gap: var(--ex-space-md);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
   z-index: 1000;
 }
 
 .header-title {
-  color: white;
-  font-size: 20px;
+  flex: 1;
   margin: 0;
-  flex-grow: 1;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
   text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
+
+/* ─── Keys button (header action) ───────────────────────────────────────── */
 
 .btn-keys {
-  height: 40px;
-  background: #f5f5f5;
-  color: #1a9fff;
-  font-size: 14px;
-  text-transform: uppercase;
-  border: 1px solid #e0e0e0;
-  border-radius: 0;
-  box-shadow: none;
-  cursor: pointer;
+  height: 34px;
+  padding: 0 var(--ex-space-md);
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 13px;
   font-weight: 600;
-  transition: background 0.2s, color 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--ex-radius-md);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--ex-transition), border-color var(--ex-transition);
 }
 
-.btn-keys:hover, .btn-keys:focus {
-  background: #e0e0e0;
-  color: #007acc;
+.btn-keys:hover,
+.btn-keys:focus {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
   outline: none;
 }
 
-.link-info {
-  right: 24px;
-  height: 32px;
-  width: 32px;
-  border: 1px solid gray;
-  border-radius: 5px;
-}
+/* ─── Result panel ───────────────────────────────────────────────────────── */
 
-.help-overlay {
-  display: none;
-  position: fixed;
-  z-index: 998;
-  top: 0;
-  left: 0;
-  height: 100dvh;
-  width: 100dvw;
-  background: #000;
-  opacity: 0.7;
-}
+/* ─── Theme toggle button (injected into .header-main by theme.js) ────────── */
 
-.help-modal {
-  display: none;
-  position: fixed;
-  z-index: 999;
-  top: 50%;
-  max-height: 90%;
-  left: 50%;
-  width: 80%;
-  max-width: 1000px;
-  transform: translate(-50%, -50%);
-  background-color: #f5f5f5;
-  box-shadow: 0 6px 24px -12px rgba(6, 6, 7, .4);
-  overflow: auto;
-  padding: 0px 24px
-}
-
-.help-modal .close {
-  position: absolute;
-  top: 0px;
-  right: 0px;
-  height: 32px;
-  width: 32px;
+.ex-theme-toggle {
   display: flex;
-  justify-content: center;
   align-items: center;
-  font-size: 30px;
-  font-weight: bold;
-  text-decoration: none;
-  color: #333;
-  border: none;
-  background-color: transparent;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--ex-radius-md);
+  cursor: pointer;
+  color: #fff;
+  font-size: 16px;
+  flex-shrink: 0;
+  transition: background var(--ex-transition);
 }
 
-.help-modal .close:focus,
-.help-modal .close:hover {
-  color: #1A9FFF;
+.ex-theme-toggle:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
-.help-modal .help-modal-content {
-  margin: 24px auto 24px;
+.ex-theme-toggle .ico-sun  { display: none; }
+.ex-theme-toggle .ico-moon { display: block; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .ex-theme-toggle .ico-sun  { display: block; }
+  :root:not([data-theme="light"]) .ex-theme-toggle .ico-moon { display: none; }
 }
 
-.help-modal .gestures {
-  margin-bottom: 24px;
-  padding: 24px;
-  box-shadow: 0 6px 24px -12px rgba(6, 6, 7, .4);
-  background-color: #fff;
-}
-
-.help-modal .gestures > div > img {
-  height: auto;
-  max-width: 300px;
-}
-
-.help-modal .gestures-img-container {
-  text-align: center;
-}
+:root[data-theme="dark"] .ex-theme-toggle .ico-sun  { display: block; }
+:root[data-theme="dark"] .ex-theme-toggle .ico-moon { display: none; }
 
 #result {
-  min-height: 100px;
-  max-height: 100px;
+  height: var(--ex-result-height);
   display: flex;
   justify-content: center;
   align-items: center;
   overflow: auto;
   width: 100%;
   text-align: center;
+  padding: 0 var(--ex-space-md);
+  background: var(--ex-surface);
+  border-bottom: 1px solid var(--ex-border);
 }
 
-.languages {
+
+/* ─── Reusable example components ────────────────────────────────────────── */
+
+/* Inline keyword / value highlight */
+.highlight {
+  background: #fff3cd;
+  color: #5a3e00;
+  padding: 2px 6px;
+  border-radius: 2px;
+  font-weight: bold;
+}
+
+/* Monospace code block */
+.ex-code {
+  display: block;
+  background: var(--ex-surface-alt);
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-family: monospace;
+  font-size: 12px;
+  margin: 8px 0;
+  border-left: 3px solid #2196F3;
+}
+
+/* Amber tip / instruction box */
+.ex-tip {
+  padding: 12px;
+  background: #fff9c4;
+  color: #3d2e00;
+  border-radius: 4px;
+  border-left: 4px solid #fbc02d;
+}
+
+.ex-tip strong {
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* Comparison card — base */
+.ex-card {
+  padding: 12px;
+  border: 2px solid var(--ex-border);
+  border-radius: 4px;
+  background: var(--ex-surface-alt);
+}
+
+.ex-card h4 { margin: 0 0 8px 0; font-size: 16px; }
+.ex-card ul  { margin: 0; padding-left: 20px; font-size: 13px; }
+.ex-card li  { margin: 4px 0; }
+
+/* Success / draw variant (green) */
+.ex-card-success {
+  border-color: #4caf50;
+  background: #f1f8e9;
+}
+
+/* Warning / ghost variant (amber-orange) */
+.ex-card-warning {
+  border-color: #ff9800;
+  background: #fff3e0;
+}
+
+/* Green callout */
+.ex-callout-success {
+  margin-top: 12px;
+  padding: 12px;
+  background: #e8f5e9;
+  border-left: 4px solid #4caf50;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* Purple / info callout */
+.ex-callout-info {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f3e5f5;
+  border-left: 4px solid #9C27B0;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+/* ─── Dark mode overrides for components ──────────────────────────────────── */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .highlight          { background: #78350f; color: #fef3c7; }
+  :root:not([data-theme="light"]) .ex-tip             { background: #422006; color: var(--ex-text); border-left-color: #fbc02d; }
+  :root:not([data-theme="light"]) .ex-card-success    { background: #052e16; border-color: #4caf50; }
+  :root:not([data-theme="light"]) .ex-card-warning    { background: #431407; border-color: #ff9800; }
+  :root:not([data-theme="light"]) .ex-callout-success { background: #052e16; }
+  :root:not([data-theme="light"]) .ex-callout-info    { background: #2d1b4e; }
+}
+
+:root[data-theme="dark"] .highlight          { background: #78350f; color: #fef3c7; }
+:root[data-theme="dark"] .ex-tip             { background: #422006; color: var(--ex-text); border-left-color: #fbc02d; }
+:root[data-theme="dark"] .ex-card-success    { background: #052e16; border-color: #4caf50; }
+:root[data-theme="dark"] .ex-card-warning    { background: #431407; border-color: #ff9800; }
+:root[data-theme="dark"] .ex-callout-success { background: #052e16; }
+:root[data-theme="dark"] .ex-callout-info    { background: #2d1b4e; }
+
+
+/* ─── Expandable result panel (#result.open toggle) ──────────────────────── */
+
+#result.open {
+  position: absolute;
+  z-index: 999;
+  overflow: visible;
+  height: 100dvh;
+  width: 100dvw;
+  max-height: 100dvh;
+  background-color: white;
+  cursor: zoom-out;
+}
+
+
+/* ─── Thin progress bar ───────────────────────────────────────────────────── */
+
+#progress {
+  transition: width 10s;
+  width: 0;
+  height: 2px;
+  background-color: #1a9fff;
+  opacity: 0;
+}
+
+
+/* ─── Tab component ──────────────────────────────────────────────────────── */
+
+.tabs-header {
   display: flex;
-  justify-content: center;
-  margin: 10px;
+  gap: 4px;
+  border-bottom: 2px solid var(--ex-border);
+  margin-bottom: 0;
+  flex-wrap: wrap;
+}
+
+.tab-button {
+  padding: 12px 16px;
+  background: var(--ex-surface-alt);
+  border: none;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ex-text-muted);
+  transition: all 0.2s;
+  border-bottom: 3px solid transparent;
+}
+
+.tab-button:hover {
+  background: var(--ex-hover);
+  color: var(--ex-text);
+}
+
+.tab-button.active {
+  background: var(--ex-surface);
+  color: #1976D2;
+  border-bottom-color: #2196F3;
+}
+
+.tab-content {
+  display: none;
+  padding: 16px;
+  background: var(--ex-surface);
+  border: 1px solid var(--ex-border);
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+}
+
+.tab-content.active { display: block; }
+
+.tab-content h3 { margin-top: 0; margin-bottom: 12px; }
+.tab-content ul,
+.tab-content ol  { margin: 8px 0; padding-left: 24px; }
+.tab-content li  { margin: 8px 0; line-height: 1.5; }
+.tab-content h4  { margin-top: 12px; margin-bottom: 8px; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .tab-button.active { color: #90caf9; border-bottom-color: #42a5f5; }
+}
+:root[data-theme="dark"] .tab-button.active { color: #90caf9; border-bottom-color: #42a5f5; }
+
+
+/* ─── Dev output info panels (custom grabber / recognizer examples) ────────── */
+
+.point-info,
+.recognizer-info {
+  width: calc(100% - 200px);
+  min-width: 200px;
+  overflow: auto;
+  white-space: nowrap;
+  padding: 0 12px;
+  margin: 5px 0;
+}
+
+@media only screen and (max-width: 600px) {
+  .point-info,
+  .recognizer-info {
+    width: 100%;
+  }
 }

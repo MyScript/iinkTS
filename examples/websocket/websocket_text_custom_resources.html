@@ -13,57 +13,54 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
-    <style>
-      #editorEl {
-        height: calc(100dvh - 166px);
-      }
-
-      @media only screen and (max-width: 608px) {
-        #editorEl {
-          height: calc(100dvh - 123px);
-        }
-      }
-
-      @media only screen and (max-width: 504px) {
-        #editorEl {
-          height: calc(100dvh - 140px);
-        }
-      }
-    </style>
-  </head>
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
   <body>
     <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
       <button id="showModalBtn" class="btn-keys">
-        Change server configuration
+        API Keys
       </button>
       <h1 class="header-title">Custom pre-loaded resources</h1>
     </header>
 
-    <nav class="flex-container wrap gap between">
-      <div class="flex-container wrap gap">
-        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/undo.svg" />
-        </button>
-        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/redo.svg" />
-        </button>
-      </div>
-      <p>
-        Custom pre-loaded resources: <b>Dinosaurs</b>. Try to write some
-        dinosaurs name!
-      </p>
-    </nav>
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">📦 Custom pre-loaded resources</p>
+        <p class="ex-panel-intro">Unlike an inline custom lexicon, resources are uploaded to the recognition server in advance — they can be full vocabulary lists or language models, pre-processed and ready to use.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Once uploaded, reference a resource by its identifier in <code>customResources</code>. Multiple resources can be combined.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">This example loads a <strong>dinosaur</strong> resource — try writing <em>Triceratops</em>, <em>Brachiosaurus</em>, or <em>Pachycephalosaurus</em>.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">As with the custom lexicon, the engine evolves: some of these words may eventually be recognized without a resource.</div>
+        </div>
+      </aside>
 
-    <div id="editorEl"></div>
+      <div id="editorEl"></div>
+    </div>
 
     <script type="module">
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
       import { Editor } from '../../dist/iink.esm.js'
       import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
       const editorElement = document.getElementById('editorEl')
       const showModalBtn = document.getElementById('showModalBtn')
-      const undoElement = document.getElementById('undo')
-      const redoElement = document.getElementById('redo')
       let editor
 
       const editorOptions = {
@@ -77,30 +74,8 @@
         }
       }
       async function loadEditor(options) {
-        /**
-         * get editor instance from type
-         * @param {Element} The DOM element to attach the ink paper
-         * @param {Object} The Editor parameters
-         */
         editor = await Editor.load(editorElement, 'INTERACTIVEINKSSR', options)
       }
-
-      editorElement.addEventListener('changed', (event) => {
-        undoElement.disabled = !event.detail.canUndo
-        redoElement.disabled = !event.detail.canRedo
-      })
-
-      undoElement.addEventListener('click', () => {
-        editor?.undo()
-      })
-
-      redoElement.addEventListener('click', () => {
-        editor?.redo()
-      })
-
-      window.addEventListener('resize', () => {
-        editor?.resize()
-      })
 
       showModalBtn.addEventListener('click', () => {
         ModalEditorOptions.show(loadEditor, editorOptions)
@@ -108,12 +83,11 @@
 
       ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
 
-      /**
-       * We expose these objects to the window use it in test
-       */
       window.editorOptions = editorOptions
       window.loadEditor = loadEditor
     </script>
-  </body>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
 
 </html>

@@ -15,6 +15,4 @@ test.describe("Websocket Text Search Without Smartguide", () => {
   test("should not see guides", async ({ page }) => {
     await expect(page.locator("line")).toHaveCount(0)
   })
-
-  TextNavActions.test({ skipClear: true, resultLocator: ".prompter-container" })
 })

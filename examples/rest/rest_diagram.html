@@ -13,20 +13,9 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
     <style>
-      #editorEl {
-        height: calc(100dvh - 220px);
-        width: 100dvw;
-      }
-
-      #progress {
-        transition: width 10s;
-        width: 0;
-        height: 2px;
-        background-color: #1a9fff;
-        opacity: 0;
-      }
-
       #conversion-container {
         position: absolute;
         left: 0;
@@ -34,21 +23,18 @@
       }
 
       @media only screen and (max-width: 418px) {
-        #editorEl {
-          height: calc(100dvh - 270px);
-        }
-
         #conversion-container {
           top: 270px;
         }
       }
     </style>
-  </head>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
   <body>
     <header class="header-main">
       <button id="showModalBtn" class="btn-keys">
-        Change server configuration
+        API Keys
       </button>
       <h1 class="header-title">
         Rest Diagram
@@ -260,11 +246,6 @@
         previewButton.style.display = "flex"
         manageEditMode(false)
       })
-
-      window.addEventListener("resize", () => {
-        editor?.resize()
-      })
-
       showModalBtn.addEventListener("click", () => {
         ModalEditorOptions.show(loadEditor, editorOptions)
       })
@@ -277,6 +258,8 @@
       window.editorOptions = editorOptions
       window.loadEditor = loadEditor
     </script>
-  </body>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
 
 </html>

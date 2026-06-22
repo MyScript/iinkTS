@@ -27,13 +27,6 @@
   <symbol id="icn-search" viewBox="0 0 16 16">
     <path d="M11.74 10.33l2.93 2.93-1.41 1.41-2.93-2.93A6 6 0 1 1 11.74 10.33zm-4.74.67a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" fill="currentColor"/>
   </symbol>
-  <symbol id="icn-sun" viewBox="0 0 24 24">
-    <circle cx="12" cy="12" r="4" fill="currentColor"/>
-    <path stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none" d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-  </symbol>
-  <symbol id="icn-moon" viewBox="0 0 24 24">
-    <path fill="currentColor" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-  </symbol>
 </svg>
 
 <!-- ===== Header ===== -->
@@ -48,8 +41,8 @@
   </a>
   <span class="home-header-spacer"></span>
   <button id="theme-toggle" class="home-theme-toggle" aria-label="Toggle dark mode" onclick="toggleTheme()">
-    <svg class="ico-sun" aria-hidden="true"><use href="#icn-sun"/></svg>
-    <svg class="ico-moon" aria-hidden="true"><use href="#icn-moon"/></svg>
+    <span class="ico-sun">&#x2600;&#xFE0F;</span>
+    <span class="ico-moon">&#x1F319;</span>
   </button>
   <a class="home-header-legacy" href="./index.html">← Modern Examples</a>
 </header>
@@ -140,6 +133,20 @@
           <div class="card-actions">
             <a href="websocket/websocket_text.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
             <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+          </div>
+        </article>
+
+        <article class="card" data-search="text get started basic websocket">
+          <div class="card-top">
+            <span class="badge badge-secondary">INTERACTIVITY</span>
+            <span class="badge badge-secondary">LEGACY</span>
+            <span class="badge badge-secondary" title="Server-Side Rendering">SSR</span>
+          </div>
+          <h3>Gesture</h3>
+          <p>Basic multi-line text recognition — handwriting to digital text in real time with gesture support.</p>
+          <div class="card-actions">
+            <a href="websocket/websocket_text_gesture.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_gesture.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
 
@@ -359,7 +366,7 @@
       </div>
 
       <div class="card-grid">
-        <article class="card" data-search="math get started equation formula websocket">
+        <article class="card" data-search="math get started equation jiix websocket">
           <div class="card-top">
             <span class="badge badge-secondary">INTERACTIVITY</span>
             <span class="badge badge-secondary">LEGACY</span>
@@ -372,18 +379,17 @@
             <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
-
-        <article class="card" data-search="math eraser erase symbol">
+        <article class="card" data-search="math equation mathml websocket flavor standard ms-office">
           <div class="card-top">
             <span class="badge badge-secondary">INTERACTIVITY</span>
             <span class="badge badge-secondary">LEGACY</span>
             <span class="badge badge-secondary" title="Server-Side Rendering">SSR</span>
           </div>
-          <h3>Eraser</h3>
-          <p>Erase mathematical ink symbols from the canvas.</p>
+          <h3>MathML</h3>
+          <p>Real-time handwritten math equation recognition and rendering with MathML export.</p>
           <div class="card-actions">
-            <a href="websocket/websocket_math_eraser.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_eraser.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            <a href="websocket/websocket_math_mathml.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_mathml.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
 
@@ -778,15 +784,6 @@
 <button class="back-to-top-btn" id="back-to-top" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
 
 <script>
-  function toggleTheme() {
-    const current = document.documentElement.getAttribute('data-theme');
-    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const isDark = current === 'dark' || (!current && systemDark);
-    const next = isDark ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('theme', next);
-  }
-
   function toggleSidebar() {
     document.getElementById('home-sidebar').classList.toggle('open');
     document.getElementById('sidebar-backdrop').classList.toggle('open');
@@ -841,6 +838,7 @@
   }, { rootMargin: '-20% 0px -70% 0px' });
   sections.forEach(s => observer.observe(s));
 </script>
+<script src="assets/js/theme.js"></script>
 
 </body>
 </html>

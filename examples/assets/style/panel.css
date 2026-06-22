@@ -1,0 +1,243 @@
+/**
+ * Example side panel — reusable explanatory panel for example pages.
+ *
+ * Usage:
+ *   1. Add <link rel="stylesheet" href="../assets/style/panel.css" />
+ *   2. Wrap page body in <div class="ex-page-layout">
+ *   3. Add <aside class="ex-panel" id="myPanel"> with content inside
+ *   4. Add <button class="btn-panel-toggle"> in the header for mobile toggle
+ *
+ * On desktop (>900px): panel is always visible as a 300px left sidebar.
+ * On tablet/mobile (≤900px): panel is hidden, toggled by .btn-panel-toggle.
+ */
+
+.ex-page-layout {
+  display: flex;
+  height: calc(100dvh - var(--ex-header-height, 50px));
+  overflow: hidden;
+}
+
+.ex-panel {
+  width: 300px;
+  max-width: 100dvw;
+  flex-shrink: 0;
+  overflow-y: auto;
+  border-right: 1px solid var(--ex-border);
+  background: var(--ex-surface);
+  padding: var(--ex-space-md) var(--ex-space-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ex-space-sm);
+}
+
+.ex-panel::-webkit-scrollbar { width: 4px; }
+.ex-panel::-webkit-scrollbar-thumb {
+  background: var(--ex-border);
+  border-radius: var(--ex-radius-full);
+}
+
+.ex-panel-heading {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ex-primary);
+  margin: 0 0 2px var(--ex-space-xs);
+}
+
+.ex-panel-intro {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ex-text);
+  opacity: 0.75;
+  margin: 0;
+  padding: 0 var(--ex-space-xs);
+}
+
+.ex-panel-subtitle {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ex-text);
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.ex-panel-divider {
+  height: 1px;
+  background: var(--ex-border);
+  margin: 2px var(--ex-space-xs);
+}
+
+.ex-panel-hint {
+  font-size: 11px;
+  padding: 6px var(--ex-space-sm);
+  background: var(--ex-hover);
+  border-radius: var(--ex-radius-sm);
+  border-left: 3px solid var(--ex-primary);
+  line-height: 1.5;
+  color: var(--ex-text);
+}
+
+.ex-panel-item {
+  padding: 6px var(--ex-space-sm);
+  border: 1px solid var(--ex-border);
+  border-radius: var(--ex-radius-sm);
+  background: var(--ex-bg);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.ex-panel-item-label {
+  font-weight: 600;
+  color: var(--ex-primary);
+  font-size: 12px;
+}
+
+.ex-panel-item-values {
+  color: var(--ex-text);
+  opacity: 0.7;
+  font-size: 11px;
+}
+
+.ex-panel-item-default {
+  display: inline-block;
+  margin-left: 3px;
+  font-size: 9px;
+  background: var(--ex-primary);
+  color: #fff;
+  border-radius: 3px;
+  padding: 0 3px;
+  vertical-align: middle;
+  opacity: 0.85;
+}
+
+.ex-panel-item-desc {
+  color: var(--ex-text);
+  opacity: 0.6;
+  margin-top: 2px;
+  font-size: 11px;
+}
+
+.ex-panel-code {
+  font-family: monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  padding: var(--ex-space-sm);
+  background: var(--ex-hover);
+  border-left: 3px solid var(--ex-border);
+  border-radius: var(--ex-radius-sm);
+}
+
+/* ── Header toggle button (visible only on mobile/tablet) ──────────────────── */
+
+.btn-panel-toggle {
+  display: none;
+  align-items: center;
+  gap: 5px;
+  padding: 0 var(--ex-space-md);
+  height: 34px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--ex-radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--ex-transition);
+}
+
+.btn-panel-toggle:hover { background: rgba(255, 255, 255, 0.25); }
+
+@media (max-width: 900px), (max-height: 500px) {
+  .btn-panel-toggle { display: flex; }
+
+  .ex-panel {
+    position: fixed;
+    left: 0;
+    top: var(--ex-header-height, 50px);
+    bottom: 0;
+    width: min(320px, 90vw);
+    z-index: 200;
+    border-right: 1px solid var(--ex-border);
+    border-bottom: none;
+    max-height: none;
+    overflow-y: auto;
+    padding: var(--ex-space-md) var(--ex-space-sm);
+    gap: var(--ex-space-sm);
+    transform: translateX(-100%);
+    transition: transform 280ms ease, box-shadow 280ms ease;
+  }
+
+  .ex-panel.open {
+    transform: translateX(0);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* ── Config panel sections ─────────────────────────────────────────────────── */
+
+.config-section {
+  flex-shrink: 0;
+  margin-bottom: 12px;
+  border: 1px solid var(--ex-border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.config-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  background: var(--ex-surface-alt);
+  cursor: pointer;
+  user-select: none;
+  font-weight: 600;
+  color: var(--ex-text);
+}
+
+.config-section-header:hover {
+  background: var(--ex-hover);
+}
+
+.config-section-body {
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.config-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 0;
+}
+
+.config-row label:not(.toggle) {
+  color: var(--ex-text);
+  cursor: pointer;
+  flex: 1;
+}
+
+.config-subsection {
+  margin-left: 12px;
+  border-left: 2px solid var(--ex-border);
+  padding-left: 8px;
+  margin-top: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.config-subsection-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ex-text);
+  opacity: 0.5;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 4px 0 2px;
+}

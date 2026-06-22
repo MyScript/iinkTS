@@ -13,80 +13,79 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
     <style>
       #editorEl {
-        min-height: 500px;
-        width: calc(100vw - 240px);
-        height: calc(100dvh - 60px);
+        flex: 1;
+        min-width: 0;
       }
 
-      .info-section {
-        background: #e3f2fd;
-        padding: 12px;
-        margin: 12px 0;
-        border-radius: 4px;
-        border-left: 4px solid #2196F3;
-      }
-      .info-section h3 {
-        margin-top: 0;
-        color: #1976D2;
-      }
-
-      .info-section ul {
-        margin: 8px 0;
-        padding-left: 24px;
-      }
-
-      .info-section li {
-        margin: 4px 0;
-      }
       #minimap-container {
-        top: 50px;
-        right: 50%;
-        z-index: 100;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
-        border-radius: 6px;
+        width: 260px;
+        flex-shrink: 0;
+        position: relative;
+        background: var(--ex-surface);
+        border-left: 1px solid var(--ex-border);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding-top: 24px;
         overflow: hidden;
       }
 
       #minimap-label {
         position: absolute;
-        top: 4px;
-        left: 6px;
+        top: 6px;
+        left: 10px;
         font-size: 10px;
         font-family: sans-serif;
-        color: #888;
+        color: var(--ex-text-muted, #888);
         pointer-events: none;
         user-select: none;
         letter-spacing: 0.05em;
         text-transform: uppercase;
       }
     </style>
-  </head>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
   <body>
     <header class="header-main">
-      <button id="showModalBtn" class="btn-keys">Change server configuration</button>
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="showModalBtn" class="btn-keys">API Keys</button>
       <h1 class="header-title">Interactive Ink Editor - External Minimap</h1>
     </header>
-    <div class="info-section">
-      <h3>📋 Two menus to explore</h3>
-      <ul>
-        <li>This example shows how to use the <code>Minimap</code> component in an external container. The minimap is not part of the editor's DOM tree, but it is still interactive and synchronized with the editor.</li>
-        <li>The minimap is created with the <code>Minimap</code> class, which takes the editor instance and a configuration object as parameters. The minimap is then attached to an external container using the <code>attach</code> method. The minimap will automatically update when the editor's content changes, and it will also respond to user interactions such as zooming and panning.</li>
-      </ul>
-    </div>
-    <div class="flex-container">
-      <div id="editorEl"></div>
-
-      <div id="minimap-container">
-        <span id="minimap-label">Minimap</span>
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">External Minimap</p>
+        <p class="ex-panel-intro">This example shows how to use the <code>Minimap</code> component in an external container. The minimap is not part of the editor's DOM tree, but it is still interactive and synchronized with the editor.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">The minimap is created with the <code>Minimap</code> class, which takes the editor instance and a configuration object as parameters. The minimap is then attached to an external container using the <code>attach</code> method. The minimap will automatically update when the editor's content changes, and it will also respond to user interactions such as zooming and panning.</div>
+        </div>
+      </aside>
+      <div class="main-layout">
+        <div id="editorEl"></div>
+        <div id="minimap-container">
+          <span id="minimap-label">Minimap</span>
+        </div>
       </div>
     </div>
 
     <script type="module">
       import { Editor, Minimap } from '../../dist/iink.esm.js'
       import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
+
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
 
       const editorElement = document.getElementById('editorEl')
       const showModalBtn = document.getElementById('showModalBtn')
@@ -116,11 +115,6 @@
         minimap = new Minimap(editor, { width: 240, height: 160 })
         minimap.attach(minimapContainer)
       }
-
-      window.addEventListener('resize', () => {
-        editor?.resize()
-      })
-
       showModalBtn.addEventListener('click', () => {
         ModalEditorOptions.show(loadEditor, editorOptions)
       })
@@ -130,6 +124,8 @@
       window.editorOptions = editorOptions
       window.loadEditor = loadEditor
     </script>
-  </body>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
 
 </html>

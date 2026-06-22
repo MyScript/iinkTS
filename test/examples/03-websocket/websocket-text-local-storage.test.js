@@ -32,6 +32,4 @@ test.describe('Websocket Text local storage', () => {
     await page.reload({ waitUntil: 'load' })
     await expect(page.locator('.prompter-text')).toHaveText('hello')
   })
-
-  TextNavActions.test({ skipClear: true, resultLocator: ".prompter-container" })
 })

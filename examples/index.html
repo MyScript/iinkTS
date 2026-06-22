@@ -27,13 +27,6 @@
   <symbol id="icn-search" viewBox="0 0 16 16">
     <path d="M11.74 10.33l2.93 2.93-1.41 1.41-2.93-2.93A6 6 0 1 1 11.74 10.33zm-4.74.67a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" fill="currentColor"/>
   </symbol>
-  <symbol id="icn-sun" viewBox="0 0 24 24">
-    <circle cx="12" cy="12" r="4" fill="currentColor"/>
-    <path stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none" d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>
-  </symbol>
-  <symbol id="icn-moon" viewBox="0 0 24 24">
-    <path fill="currentColor" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-  </symbol>
 </svg>
 
 <!-- ===== Header ===== -->
@@ -48,8 +41,8 @@
   </a>
   <span class="home-header-spacer"></span>
   <button id="theme-toggle" class="home-theme-toggle" aria-label="Toggle dark mode" onclick="toggleTheme()">
-    <svg class="ico-sun" aria-hidden="true"><use href="#icn-sun"/></svg>
-    <svg class="ico-moon" aria-hidden="true"><use href="#icn-moon"/></svg>
+    <span class="ico-sun">&#x2600;&#xFE0F;</span>
+    <span class="ico-moon">&#x1F319;</span>
   </button>
   <a class="home-header-legacy" href="./legacy.html">Legacy Examples →</a>
 </header>
@@ -59,7 +52,7 @@
   <h1>iinkTS Examples</h1>
   <p>Explore handwriting recognition demos — Interactive Ink Editor, Ink Editor (v2), and advanced integrations.</p>
   <div class="home-hero-stats">
-    <div class="hero-stat"><strong>13</strong><span>Interactive Ink Editor</span></div>
+    <div class="hero-stat"><strong>16</strong><span>Interactive Ink Editor</span></div>
     <div class="hero-stat"><strong>5</strong><span>Ink Editor v2</span></div>
     <div class="hero-stat"><strong>1</strong><span>Configuration</span></div>
   </div>
@@ -137,7 +130,7 @@
               <span class="badge badge-primary">All types</span>
             </div>
             <h3>Get Started</h3>
-            <p>Introduction to the Interactive Ink Editor with offscreen capabilities.</p>
+            <p>Get started with the Interactive Ink Editor — draw, edit and recognize text, math and shapes.</p>
             <div class="card-actions">
               <a href="offscreen-interactivity/index.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
               <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/index.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
@@ -149,11 +142,24 @@
               <span class="badge badge-primary">INTERACTIVITY</span>
               <span class="badge badge-primary">All types</span>
             </div>
-            <h3>Debug &amp; Visualization</h3>
-            <p>Full diagnostic view with all rendering layers and options visible.</p>
+            <h3>Showcase</h3>
+            <p>Interactive Ink Editor feature tour — inspect symbols, history, selection and backend rendering.</p>
             <div class="card-actions">
               <a href="offscreen-interactivity/offscreen_interactivity_all_options.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
               <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_all_options.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="gestures scratch surround strikethrough underline insert join interactive ink">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Gestures</h3>
+            <p>All 6 gesture types with visual reference and gesture menu configuration.</p>
+            <div class="card-actions">
+              <a href="offscreen-interactivity/offscreen_interactivity_gestures.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_gestures.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
             </div>
           </article>
 
@@ -170,7 +176,20 @@
             </div>
           </article>
 
-          <article class="card" data-search="menu visibility show hide configure items toolbar all types">
+          <article class="card" data-search="menu configuration activate deactivate all types">
+            <div class="card-top">
+              <span class="badge badge-ws">INTERACTIVEINK</span>
+              <span class="badge badge-ws">All types</span>
+            </div>
+            <h3>Override Theme</h3>
+            <p>Customize background, menu panels, and input appearance via <code>cssVars</code> CSS custom properties.</p>
+            <div class="card-actions">
+              <a href="offscreen-interactivity/offscreen_interactivity_style.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_style.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="menu configuration activate deactivate all types">
             <div class="card-top">
               <span class="badge badge-primary">INTERACTIVITY</span>
               <span class="badge badge-primary">All types</span>
@@ -222,6 +241,32 @@
             </div>
           </article>
 
+          <article class="card" data-search="zoom pan viewport fit navigation programmatic api all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Zoom &amp; Pan</h3>
+            <p>Programmatic zoom and pan — set zoom level, fit to content, and shift the viewport via the API.</p>
+            <div class="card-actions">
+              <a href="offscreen-interactivity/offscreen_interactivity_zoom_pan.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_zoom_pan.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="selection select all symbols programmatic api ids event all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Selection API</h3>
+            <p>Programmatic symbol selection — select all, select by ID, react to selection events, zoom to selection.</p>
+            <div class="card-actions">
+              <a href="offscreen-interactivity/offscreen_interactivity_selection.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_selection.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
           <article class="card" data-search="minimap overview bird eye canvas navigation thumbnail all types">
             <div class="card-top">
               <span class="badge badge-primary">INTERACTIVITY</span>
@@ -248,7 +293,20 @@
             </div>
           </article>
 
-          <article class="card" data-search="keyboard shortcuts hotkeys navigation accessibility all types">
+          <article class="card" data-search="live monitor status events log symbols undo redo zoom clipboard all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Live Monitor</h3>
+            <p>Real-time editor state snapshot and timestamped action log — symbols, selection, undo/redo, zoom, and clipboard.</p>
+            <div class="card-actions">
+              <a href="offscreen-interactivity/offscreen_interactivity_live_monitor.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_live_monitor.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="live monitor status events log symbols undo redo zoom clipboard all types">
             <div class="card-top">
               <span class="badge badge-primary">INTERACTIVITY</span>
               <span class="badge badge-primary">All types</span>
@@ -308,16 +366,29 @@
             </div>
           </article>
 
-          <article class="card" data-search="math advanced menu extended features interactive ink">
+          <article class="card" data-search="math context menu surround gesture compute function evaluate diagnostic capabilities interactive ink">
             <div class="card-top">
               <span class="badge badge-primary">INTERACTIVITY</span>
               <span class="badge badge-primary">Math</span>
             </div>
-            <h3>Advanced Math</h3>
-            <p>Math-specific actions available in the action menu and context menu.</p>
+            <h3>Context Menu</h3>
+            <p>Surround a math expression to compute, evaluate functions, set variables, or check the solver diagnostic.</p>
             <div class="card-actions">
-              <a href="offscreen-interactivity/offscreen_interactivity_math_menu.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_math_menu.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+              <a href="offscreen-interactivity/offscreen_interactivity_math_context_menu.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_math_context_menu.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="math variables block api global fallback substitution priority edit interactive ink">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">Math</span>
+            </div>
+            <h3>Variables</h3>
+            <p>Declare variables as ink expressions, substitute them across blocks, and manage global fallbacks via the variable editor.</p>
+            <div class="card-actions">
+              <a href="offscreen-interactivity/offscreen_interactivity_math_variables.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_math_variables.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
             </div>
           </article>
 
@@ -465,15 +536,6 @@
 <button class="back-to-top-btn" id="back-to-top" aria-label="Back to top" onclick="scrollToTop()">↑</button>
 
 <script>
-  function toggleTheme() {
-    const current = document.documentElement.getAttribute('data-theme');
-    const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const isDark = current === 'dark' || (!current && systemDark);
-    const next = isDark ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('theme', next);
-  }
-
   function toggleSidebar() {
     document.getElementById('home-sidebar').classList.toggle('open');
     document.getElementById('sidebar-backdrop').classList.toggle('open');
@@ -532,6 +594,7 @@
   }, { rootMargin: '-20% 0px -70% 0px' });
   sections.forEach(s => observer.observe(s));
 </script>
+<script src="assets/js/theme.js"></script>
 
 </body>
 </html>

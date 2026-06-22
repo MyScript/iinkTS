@@ -13,7 +13,8 @@ test.describe("Rest Text", () => {
 
   test.beforeEach(async ({ page }) => {
     await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/rest/rest_text.html`)
-    await passModalKey(page)
+    await passModalKey(page, false)
+    await page.locator(".ms-capture-canvas").waitFor({ state: "visible" })
   })
 
   test("should have title", async ({ page }) => {

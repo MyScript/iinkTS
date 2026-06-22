@@ -22,7 +22,7 @@ test.describe("Websocket Math With Graph", () => {
     for(const s of equation.strokes) {
       await Promise.all([
         waitForExportedEvent(page),
-        writePointers(page, s.pointers, 100, 100)
+        writePointers(page, s.pointers)
       ])
     }
     await callEditorIdle(page)

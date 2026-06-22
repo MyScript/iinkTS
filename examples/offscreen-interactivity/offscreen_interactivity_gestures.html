@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+    <title>Gestures</title>
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <script>(function(){var t=localStorage.getItem("theme");if(t)document.documentElement.setAttribute("data-theme",t);})();</script>
+    <style>
+      /* ── Gesture cards (gesture-example-specific) ──────────────────── */
+      .gesture-cards {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .gesture-card {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--ex-space-sm);
+        padding: 6px var(--ex-space-sm);
+        border: 1px solid var(--ex-border);
+        border-radius: var(--ex-radius-sm);
+        background: var(--ex-bg);
+      }
+
+      .gesture-visual {
+        flex-shrink: 0;
+        width: 56px;
+      }
+
+      .gesture-visual img {
+        width: 56px;
+        height: 36px;
+        border-radius: 3px;
+        object-fit: contain;
+      }
+
+      .gesture-visual svg {
+        width: 56px;
+        height: 36px;
+      }
+
+      .gesture-body { flex: 1; min-width: 0; }
+
+      .gesture-body strong {
+        display: block;
+        font-size: 12px;
+        color: var(--ex-primary);
+        margin-bottom: 2px;
+      }
+
+      .gesture-body p {
+        margin: 0;
+        font-size: 11px;
+        line-height: 1.45;
+        color: var(--ex-text);
+        opacity: 0.75;
+      }
+
+      /* ── Editor fills remaining space ──────────────────────────────── */
+      #editorEl {
+        flex: 1;
+        min-width: 0;
+        height: 100%;
+      }
+
+      @media (max-width: 900px) {
+        #editorEl { flex: 1; min-height: 0; }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="gesturePanel">
+        ✌️ Guide
+      </button>
+      <button id="showModalBtn" class="btn-keys">API Keys</button>
+      <h1 class="header-title">Interactive Ink Editor — Gestures</h1>
+    </header>
+
+    <div class="ex-page-layout">
+
+      <!-- ── Gesture reference panel ── -->
+      <aside class="ex-panel" id="gesturePanel">
+
+        <p class="ex-panel-heading">Gestures</p>
+        <p class="ex-panel-intro">Write normally — the editor detects gestures in the ink stream. Configure each via the ✌️ Gesture menu in the toolbar.</p>
+
+        <div class="gesture-cards">
+
+          <div class="gesture-card">
+            <div class="gesture-visual">
+              <img src="../assets/img/gestures/gest-erase.png" alt="Scratch-out gesture" />
+            </div>
+            <div class="gesture-body">
+              <strong>Scratch-out</strong>
+              <p>Scribble rapidly back and forth over content to erase it.</p>
+            </div>
+          </div>
+
+          <div class="gesture-card">
+            <div class="gesture-visual">
+              <svg viewBox="0 0 56 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M28 5 Q50 5 52 18 Q52 33 28 33 Q4 33 4 18 Q4 5 28 5Z"
+                  stroke="#1a9fff" stroke-width="1.8" stroke-linecap="round"
+                  stroke-dasharray="4 2.5" fill="none"/>
+                <circle cx="28" cy="5" r="2" fill="#1a9fff"/>
+              </svg>
+            </div>
+            <div class="gesture-body">
+              <strong>Surround</strong>
+              <p>Draw a closed loop around symbols. Configurable: select, surround, or highlight.</p>
+            </div>
+          </div>
+
+          <div class="gesture-card">
+            <div class="gesture-visual">
+              <svg viewBox="0 0 56 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 12 Q19 10 28 12 Q39 14 49 12" stroke="#1a9fff" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.35"/>
+                <path d="M7 24 Q19 22 28 24 Q39 26 49 24" stroke="#1a9fff" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.35"/>
+                <path d="M5 18 L51 18" stroke="#1a9fff" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+              </svg>
+            </div>
+            <div class="gesture-body">
+              <strong>Strikethrough</strong>
+              <p>Draw through content. Configurable: erase it, or apply a strikethrough decoration.</p>
+            </div>
+          </div>
+
+          <div class="gesture-card">
+            <div class="gesture-visual">
+              <svg viewBox="0 0 56 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M7 12 Q19 10 28 12 Q39 14 49 12" stroke="#1a9fff" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.35"/>
+                <path d="M7 20 Q19 18 28 20 Q39 22 49 20" stroke="#1a9fff" stroke-width="1.2" stroke-linecap="round" fill="none" opacity="0.35"/>
+                <path d="M5 30 L51 30" stroke="#1a9fff" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+              </svg>
+            </div>
+            <div class="gesture-body">
+              <strong>Underline</strong>
+              <p>Draw below text. Configurable: add an underline, or thicken the strokes above.</p>
+            </div>
+          </div>
+
+          <div class="gesture-card">
+            <div class="gesture-visual">
+              <svg viewBox="0 0 56 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="15" width="19" height="4" rx="2" fill="#1a9fff" opacity="0.35"/>
+                <rect x="34" y="15" width="19" height="4" rx="2" fill="#1a9fff" opacity="0.35"/>
+                <path d="M28 4 L28 29" stroke="#1a9fff" stroke-width="2" stroke-linecap="round"/>
+                <path d="M23 24 L28 32 L33 24" stroke="#1a9fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="gesture-body">
+              <strong>Insert</strong>
+              <p>Vertical stroke <em>downward</em> between elements. Configurable: line break or insert space.</p>
+            </div>
+          </div>
+
+          <div class="gesture-card">
+            <div class="gesture-visual">
+              <svg viewBox="0 0 56 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="7" width="50" height="4" rx="2" fill="#1a9fff" opacity="0.35"/>
+                <rect x="3" y="25" width="50" height="4" rx="2" fill="#1a9fff" opacity="0.35"/>
+                <path d="M28 32 L28 7" stroke="#1a9fff" stroke-width="2" stroke-linecap="round"/>
+                <path d="M23 12 L28 4 L33 12" stroke="#1a9fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="gesture-body">
+              <strong>Join</strong>
+              <p>Vertical stroke <em>upward</em> between elements to merge lines or words.</p>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <!-- Gesture menu reference -->
+        <p class="ex-panel-heading">Gesture menu</p>
+
+        <div class="ex-panel-hint">
+          Open via the menu in the editor toolbar to configure gesture behavior.
+        </div>
+
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-label">Detect gesture</div>
+          <div class="ex-panel-item-desc">Master toggle — enables or disables all gesture recognition.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-label">On surround</div>
+          <div class="ex-panel-item-values">
+            Select<span class="ex-panel-item-default">default</span> · Surround · Highlight
+          </div>
+          <div class="ex-panel-item-desc">
+            <strong>Select</strong> — lasso selection.<br>
+            <strong>Surround</strong> — decoration ring.<br>
+            <strong>Highlight</strong> — highlight decoration.
+          </div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-label">On strikethrough</div>
+          <div class="ex-panel-item-values">
+            Erase<span class="ex-panel-item-default">default</span> · Draw
+          </div>
+          <div class="ex-panel-item-desc">
+            <strong>Erase</strong> — delete struck content.<br>
+            <strong>Draw</strong> — add strikethrough decoration.
+          </div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-label">On underline</div>
+          <div class="ex-panel-item-values">
+            Draw<span class="ex-panel-item-default">default</span> · Thicken
+          </div>
+          <div class="ex-panel-item-desc">
+            <strong>Draw</strong> — underline decoration.<br>
+            <strong>Thicken</strong> — increase stroke weight.
+          </div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-label">On insert</div>
+          <div class="ex-panel-item-values">
+            Line break<span class="ex-panel-item-default">default</span> · Insert
+          </div>
+          <div class="ex-panel-item-desc">
+            <strong>Line break</strong> — split across lines.<br>
+            <strong>Insert</strong> — insert word space.
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- ── Editor ── -->
+      <div id="editorEl"></div>
+
+    </div>
+
+    <script type="module">
+      import { Editor } from "../../dist/iink.esm.js"
+      import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+
+      const editorElement = document.getElementById("editorEl")
+      const showModalBtn = document.getElementById("showModalBtn")
+      const panelToggleBtn = document.getElementById("panelToggleBtn")
+      const gesturePanel = document.getElementById("gesturePanel")
+
+      panelToggleBtn.addEventListener("click", () => {
+        const open = gesturePanel.classList.toggle("open")
+        panelToggleBtn.setAttribute("aria-expanded", String(open))
+        panelToggleBtn.textContent = open ? "✌️ Close" : "✌️ Guide"
+      })
+
+      let editor
+
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            lang: "en_US",
+            "raw-content": {
+              gestures: ["scratch-out", "surround", "strike-through", "underline", "insert"]
+            }
+          }
+        }
+      }
+
+      async function loadEditor(options) {
+        await editor?.destroy()
+        editor = await Editor.load(editorElement, "INTERACTIVEINK", options)
+      }
+
+      showModalBtn.addEventListener("click", () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+  </body>
+
+</html>
