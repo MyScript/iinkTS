@@ -1,35 +1,33 @@
-.renderjson a {
-    text-decoration: none;
-  }
-  .renderjson span {
-    height: 16px;
-  }
-  .renderjson .disclosure {
-    color: gray;
-    font-size: 150%;
-    padding-right: 12px;
-    font-weight: 900;
-    vertical-align: sub;
-  }
-  .renderjson .syntax {
-    color: grey;
-  }
-  .renderjson .string {
-    color: red;
-  }
-  .renderjson .number {
-    color: green;
-  }
-  .renderjson .boolean {
-    color: blue;
-  }
-  .renderjson .key {
-    color: darkblue;
-  }
-  .renderjson .keyword {
-    color: darkgray;
-  }
-  .renderjson .object.syntax,
-  .renderjson .array.syntax {
-    color: darkblue;
-  }
+.renderjson a              { text-decoration: none; }
+.renderjson span           { height: 16px; }
+.renderjson .disclosure    { color: gray; font-size: 150%; padding-right: 12px; font-weight: 900; vertical-align: sub; }
+.renderjson .syntax        { color: grey; }
+.renderjson .string        { color: #c0392b; }
+.renderjson .number        { color: #2e7d32; }
+.renderjson .boolean       { color: #1565c0; }
+.renderjson .key           { color: #0d47a1; }
+.renderjson .keyword       { color: darkgray; }
+.renderjson .object.syntax,
+.renderjson .array.syntax  { color: #0d47a1; }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .renderjson .disclosure    { color: #888; }
+  :root:not([data-theme="light"]) .renderjson .syntax        { color: #9da5b4; }
+  :root:not([data-theme="light"]) .renderjson .string        { color: #e06c75; }
+  :root:not([data-theme="light"]) .renderjson .number        { color: #98c379; }
+  :root:not([data-theme="light"]) .renderjson .boolean       { color: #61afef; }
+  :root:not([data-theme="light"]) .renderjson .key           { color: #9cdcfe; }
+  :root:not([data-theme="light"]) .renderjson .keyword       { color: #abb2bf; }
+  :root:not([data-theme="light"]) .renderjson .object.syntax,
+  :root:not([data-theme="light"]) .renderjson .array.syntax  { color: #61afef; }
+}
+
+:root[data-theme="dark"] .renderjson .disclosure    { color: #888; }
+:root[data-theme="dark"] .renderjson .syntax        { color: #9da5b4; }
+:root[data-theme="dark"] .renderjson .string        { color: #e06c75; }
+:root[data-theme="dark"] .renderjson .number        { color: #98c379; }
+:root[data-theme="dark"] .renderjson .boolean       { color: #61afef; }
+:root[data-theme="dark"] .renderjson .key           { color: #9cdcfe; }
+:root[data-theme="dark"] .renderjson .keyword       { color: #abb2bf; }
+:root[data-theme="dark"] .renderjson .object.syntax,
+:root[data-theme="dark"] .renderjson .array.syntax  { color: #61afef; }

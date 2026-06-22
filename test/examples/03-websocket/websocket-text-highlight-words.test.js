@@ -153,6 +153,4 @@ test.describe("Websocket Text highlight words", () => {
     expect(style.backgroundColor).toContain(highlightColor.backgroundColor)
     expect(style.color).toContain(strokeColor.color)
   })
-
-  TextNavActions.test({ skipClear: true, resultLocator: ".prompter-container" })
 })

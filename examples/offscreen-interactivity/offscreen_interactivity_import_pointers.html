@@ -13,12 +13,10 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
     <style>
-      #editor {
-        width: calc(100vw - 300px);
-        height: calc(100dvh - 112px);
-      }
-
       textarea {
         width: 300px;
         height: calc(100dvh - 112px);
@@ -69,29 +67,51 @@
         }
       }
     </style>
-  </head>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
   <body>
     <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
       <button id="showModalBtn" class="btn-keys">
-        Change server configuration
+        API Keys
       </button>
       <h1 class="header-title">
         Interactive Ink Editor - Import pointers
       </h1>
     </header>
 
-    <nav>
-      <button id="show-symbols-to-import-btn" class="classic-btn">
-        Show symbols
-      </button>
-      <button class="classic-btn" id="import">
-        Import
-      </button>
-    </nav>
-    <div class="flex-container">
-      <textarea id="pointerEventsObject"> </textarea>
-      <div id="editor"></div>
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">Importing raw pointer events</p>
+        <p class="ex-panel-intro"><code>editor.importPointEvents()</code> replays raw ink input — arrays of <code>x</code>, <code>y</code>, <code>t</code> (timestamp), and <code>p</code> (pressure) values — as if the user had drawn them with a stylus.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">This is different from importing JIIX: pointer events bypass recognition and feed directly into the grabber pipeline, making it useful for replaying recorded strokes or injecting synthetic input.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">The left panel is pre-loaded with a "hello my friend" stroke set. Edit the JSON directly, then click <strong>Import</strong> to replay your modified strokes on the canvas.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Use case: automated testing, stroke replay for demos, or migrating raw ink data from another capture device or format.</div>
+        </div>
+      </aside>
+      <div class="page-content">
+        <nav>
+          <button id="show-symbols-to-import-btn" class="classic-btn">
+            Show symbols
+          </button>
+          <button class="classic-btn" id="import">
+            Import
+          </button>
+        </nav>
+        <div class="flex-container">
+          <textarea id="pointerEventsObject"> </textarea>
+          <div id="editorEl"></div>
+        </div>
+      </div>
     </div>
 
     <script type="module">
@@ -99,7 +119,14 @@
       import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js";
       import strokes from '../assets/datas/hello-my-friend.json' with { type: 'json' }
 
-      const editorElement = document.getElementById("editor");
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      const editorElement = document.getElementById("editorEl");
       const showSymbolBtn = document.getElementById("show-symbols-to-import-btn");
       const pointerEventsObjectElement = document.getElementById("pointerEventsObject");
       const importBtn = document.getElementById("import");
@@ -130,16 +157,11 @@
         await editor.importPointEvents(JSON.parse(pointerEventsObjectElement.value));
       });
 
-      window.addEventListener("resize", () => {
-        editor?.resize();
-      });
-
       showModalBtn.addEventListener("click", () => {
         ModalEditorOptions.show(loadEditor, editorOptions);
       });
 
       ModalEditorOptions.initConfiguration(loadEditor, editorOptions);
-
 
       /**
        * We expose these objects to the window use it in test
@@ -147,6 +169,8 @@
       window.editorOptions = editorOptions
       window.loadEditor = loadEditor
     </script>
-  </body>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
 
 </html>

@@ -13,13 +13,26 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
     <style>
-      .nav-block {
-        display: block;
+      .content {
+        width: 100dvw;
+        height: 100dvh;
+        min-height: 400px;
       }
-
+      .editor-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+      }
       .row-options {
         padding: 12px 12px 0px 12px;
+      }
+      .style-part {
+        flex: 1;
+        align-items: start;
       }
 
       .prompter-css {
@@ -28,100 +41,95 @@
         margin-left: 36px;
         padding: 24px;
         position: absolute;
-        bottom: 60px;
+        bottom: 24px;
         z-index: 30;
         border-radius: 6px;
         background: rgba(240, 240, 240, 0.9);
       }
-
-      #editorEl {
-        height: calc(100dvh - 172px);
-      }
-
-      @media only screen and (max-width: 1030px) {
-        #editorEl {
-          height: calc(100dvh - 219px);
-        }
-      }
-
-      @media only screen and (max-width: 771px) {
-        #editorEl {
-          height: calc(100dvh - 266px);
-        }
-      }
-
-      @media only screen and (max-width: 648px) {
-        #editorEl {
-          height: calc(100dvh - 313px);
-        }
-
-        .prompter-css {
-          position: fixed;
-          bottom: 12px;
-        }
-      }
-
-      @media only screen and (max-height: 400px) {
-        #editorEl {
-          height: calc(100dvh - 100px);
-        }
-
-        .nav-block {
-          padding: 0px 10px;
-          max-height: 50px;
-          overflow: auto;
-        }
-      }
     </style>
-  </head>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
   <body>
     <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
       <button id="showModalBtn" class="btn-keys">
-        Change server configuration
+        API Keys
       </button>
       <h1 class="header-title">Websocket Text Styling</h1>
     </header>
-    <nav class="nav-block">
-      <div class="flex-container wrap gap row-options">
-        <div class="flex-container wrap gap nav-item">
-          <label for="penStyleClasses">Apply pen style class (greenThinPen):</label>
-          <input id="penStyleClasses" type="checkbox" disabled />
-        </div>
-        <div class="flex-container wrap gap nav-item">
-          <label for="theme">Theme:</label>
-          <select id="theme"></select>
-        </div>
-        <div class="flex-container wrap gap nav-item">
-          <label for="fonts">Font:</label>
-          <select id="fonts"></select>
-        </div>
-      </div>
-      <div class="flex-container wrap gap row-options">
-        <div class="flex-container wrap gap nav-item">
-          <label for="penenabled">Enable pen color/thickness</label>
-          <input id="penenabled" type="checkbox" />
-        </div>
-        <div class="flex-container wrap gap nav-item">
-          <label for="pencolor">Color:</label>
-          <input id="pencolor" type="color" value="#ff7314" disabled />
-        </div>
-        <div class="flex-container wrap gap nav-item">
-          <label for="penwidth">Thickness:</label>
-          <input id="penwidth" type="number" min="1" max="5" value="2" disabled />
-        </div>
-      </div>
-    </nav>
 
-    <div id="editorEl"></div>
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">🖊️ Stroke styling — three layers</p>
+        <p class="ex-panel-intro"><strong>Theme</strong> (<code>editor.theme</code>) — global style: ink color, pen width, text font size. Can also define named pen classes (e.g. <code>.greenThickPen</code>) for reuse.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc"><strong>Pen style</strong> (<code>editor.penStyle</code>) — inline override for the active stroke only. Takes priority over the theme ink settings.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc"><strong>Pen style classes</strong> (<code>editor.penStyleClasses</code>) — references a class name defined <em>inside</em> the theme object (not a CSS class). Disables direct theme selection while active.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc"><code>-myscript-pen-width</code> is a MyScript-specific property: values range from <code>0</code> (hairline) to <code>5</code> (very thick), independent of CSS pixels.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">The overlay at the bottom shows the exact style object currently applied — useful to copy into your own configuration.</div>
+        </div>
+      </aside>
 
-    <div id="prompter-css" class="prompter-css">
-      <div id="prompter-css-text">
-        Theme or pen style applied will be written here.
+      <div class="page-content">
+        <div class="content flex-container wrap">
+          <div class="style-part flex-container column gap">
+            <div class="style-part flex-container between wrap gap nav-item">
+              <label for="penStyleClasses">Apply pen style class (greenThinPen):
+
+                <input id="penStyleClasses" type="checkbox" disabled />
+              </label>
+              <label for="theme">Theme:
+                <select id="theme"></select>
+              </label>
+              <label for="fonts">Font:
+                <select id="fonts"></select>
+              </label>
+            </div>
+            <div class="separator horizontal"></div>
+            <div class="style-part flex-container between wrap gap">
+              <label for="penenabled">Enable pen color/thickness
+                <input id="penenabled" type="checkbox" />
+              </label>
+              <label for="pencolor">Color:
+                <input id="pencolor" type="color" value="#ff7314" disabled />
+              </label>
+              <label for="penwidth">Thickness:
+                <input id="penwidth" type="number" min="1" max="5" value="2" disabled />
+              </label>
+            </div>
+          </div>
+
+          <div class="editor-container">
+            <div id="editorEl"></div>
+
+            <div id="prompter-css" class="prompter-css">
+              <div id="prompter-css-text">
+                Theme or pen style applied will be written here.
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
     <script type="module">
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
       import { Editor, getAvailableFontList } from '../../dist/iink.esm.js'
       import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
       const editorElement = document.getElementById('editorEl')
@@ -222,9 +230,6 @@
         }
       }
 
-      /**
-       * we expose the editor so we can access it in tests
-       */
       let editor
 
       const editorOptions = {
@@ -237,11 +242,6 @@
       }
 
       async function loadEditor(options) {
-        /**
-         * get editor instance from type
-         * @param {Element} The DOM element to attach the ink paper
-         * @param {Object} The Editor parameters
-         */
         editor = await Editor.load(editorElement, 'INTERACTIVEINKSSR', options)
         penStyleClasses.disabled = false
 
@@ -318,23 +318,17 @@
         editor.penStyle = getStyle()
         updatePrompter('editor.penStyle', editor.penStyle)
       })
-
-      window.addEventListener('resize', () => {
-        editor?.resize()
-      })
-
       showModalBtn.addEventListener('click', () => {
         ModalEditorOptions.show(loadEditor, editorOptions)
       })
 
       ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
 
-      /**
-       * We expose these objects to the window use it in test
-       */
       window.editorOptions = editorOptions
       window.loadEditor = loadEditor
     </script>
-  </body>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
 
 </html>

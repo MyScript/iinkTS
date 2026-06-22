@@ -11,39 +11,15 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
-    <style>
-      #editorEl {
-        height: calc(100dvh - 287px);
-      }
-
-      @media only screen and (max-width: 600px) {
-        #editorEl {
-          height: calc(100dvh - 307px);
-        }
-      }
-    </style>
-    <style>
-      .point-info {
-        width: calc(100% - 200px);
-        min-width: 200px;
-        overflow: auto;
-        white-space: nowrap;
-        padding: 0 12px;
-        margin: 5px 0;
-      }
-
-      @media only screen and (max-width: 600px) {
-        .point-info {
-          width: 100%;
-        }
-      }
-    </style>
-  </head>
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
   <body>
     <header class="header-main">
       <button id="showModalBtn" class="btn-keys">
-        Change server configuration
+        API Keys
       </button>
       <h1 class="header-title">
         Rest with Custom Grabber
@@ -53,17 +29,6 @@
     <div id="result"></div>
 
     <nav class="flex-container gap between wrap">
-      <div class="flex-container gap">
-        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/clear.svg" />
-        </button>
-        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/undo.svg" />
-        </button>
-        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/redo.svg" />
-        </button>
-      </div>
       <ul class="point-info">
         <li id="pointer-down">Down at:</li>
         <li id="pointer-move">Move to:</li>
@@ -79,9 +44,6 @@
       import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
       const editorElement = document.getElementById('editorEl')
       const resultElement = document.getElementById('result')
-      const clearElement = document.getElementById('clear')
-      const undoElement = document.getElementById('undo')
-      const redoElement = document.getElementById('redo')
       const showModalBtn = document.getElementById('showModalBtn')
 
       let editor
@@ -103,12 +65,6 @@
          */
         editor = await Editor.load(editorElement, 'INKV1', options)
 
-        editor.event.addEventListener('changed', (event) => {
-          undoElement.disabled = !event.detail.canUndo
-          redoElement.disabled = !event.detail.canRedo
-          clearElement.disabled = !event.detail.canClear
-        })
-
         editor.event.addEventListener('exported', (event) => {
           resultElement.innerHTML =
             event.detail && event.detail['application/vnd.myscript.jiix']
@@ -117,28 +73,14 @@
         })
       }
 
-      clearElement.addEventListener('click', async () => {
-        editor?.clear()
-      })
-
-      undoElement.addEventListener('click', () => {
-        editor?.undo()
-      })
-
-      redoElement.addEventListener('click', () => {
-        editor?.redo()
-      })
-
-      window.addEventListener('resize', () => {
-        editor?.resize()
-      })
-
       showModalBtn.addEventListener('click', () => {
         ModalEditorOptions.show(loadEditor, editorOptions)
       })
 
       ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
     </script>
-  </body>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
 
 </html>

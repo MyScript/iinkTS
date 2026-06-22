@@ -11,53 +11,74 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
     <style>
-      #editorEl {
-        height: calc(100dvh - 112px);
-      }
-
-      @media only screen and (max-width: 509px) {
-        #editorEl {
-          height: calc(100dvh - 160px);
-        }
-      }
-
       @media only screen and (max-width: 397px) {
-        #editorEl {
-          height: calc(100dvh - 207px);
-        }
-
         .input-field {
           width: 100%;
         }
       }
     </style>
-  </head>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
   <body>
     <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
       <button id="showModalBtn" class="btn-keys">
-        Change server configuration
+        API Keys
       </button>
       <h1 class="header-title">Text Search</h1>
     </header>
-    <nav class="flex-container wrap between gap">
-      <div class="flex-container wrap between gap">
-        <input id="searchInput" type="search" class="input-field" />
-        <button id="searchBtn" class="classic-btn">
-          Search
-        </button>
-      </div>
-      <button class="classic-btn" id="convert" disabled>
-        Convert
-      </button>
-    </nav>
 
-    <div id="editorEl"></div>
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">🔍 Searching handwritten text</p>
+        <p class="ex-panel-intro">A sample text (<em>"hello my friend"</em>) is loaded automatically on startup — no need to write anything to try the search.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">The search works on the JIIX export, which contains each recognized word with its <strong>bounding box</strong> (position and size in mm). Matching words are highlighted by overlaying a yellow <code>&lt;div&gt;</code> at the corresponding coordinates.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">The search is case-insensitive and supports multi-word phrases — all consecutive words must match in order.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">You can also write your own text and search within it. Use <strong>Convert</strong> to turn the handwriting into digital text.</div>
+        </div>
+      </aside>
+
+      <div class="page-content">
+        <nav class="flex-container wrap between gap">
+          <div class="flex-container wrap between gap">
+            <input id="searchInput" type="search" class="input-field" />
+            <button id="searchBtn" class="classic-btn">
+              Search
+            </button>
+          </div>
+          <button class="classic-btn" id="convert" disabled>
+            Convert
+          </button>
+        </nav>
+
+        <div id="editorEl"></div>
+      </div>
+    </div>
 
     <script type="module">
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
       import { Editor } from '../../dist/iink.esm.js'
       import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
+      import strokes from '../assets/datas/hello-my-friend.json' with { type: 'json' }
       const editorElement = document.getElementById('editorEl')
       const convertElement = document.getElementById('convert')
       const searchInput = document.getElementById('searchInput')
@@ -89,12 +110,9 @@
       }
 
       async function loadEditor(options) {
-        /**
-         * get editor instance from type
-         * @param {Element} The DOM element to attach the ink paper
-         * @param {Object} The Editor parameters
-         */
         editor = await Editor.load(editorElement, 'INTERACTIVEINKSSR', options)
+
+        await editor.importPointEvents(strokes, 'application/vnd.myscript.pointerevents+json')
 
         editor.event.addEventListener('exported', (evt) => {
           const exports = evt.detail
@@ -168,23 +186,17 @@
         editor?.convert()
       })
 
-      window.addEventListener('resize', () => {
-        edito .resize()
-      })
-
       showModalBtn.addEventListener('click', () => {
         ModalEditorOptions.show(loadEditor, editorOptions)
       })
 
-
       ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
 
-      /**
-       * We expose these objects to the window use it in test
-       */
       window.editorOptions = editorOptions
       window.loadEditor = loadEditor
     </script>
-  </body>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
 
 </html>

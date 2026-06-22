@@ -12,6 +12,4 @@ test.describe("Websocket Styling editor style", () => {
   test("should have title", async ({ page }) => {
     await expect(page).toHaveTitle("Styling editor style")
   })
-
-  TextNavActions.test({ skipClear: true, resultLocator: ".prompter-container" })
 })

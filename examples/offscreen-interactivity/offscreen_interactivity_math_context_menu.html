@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Math Context Menu</title>
+
+  <link rel="stylesheet" href="../assets/style/reset.css" />
+  <link rel="stylesheet" href="../assets/style/components.css" />
+  <link rel="stylesheet" href="../assets/style/examples.css" />
+  <link rel="stylesheet" href="../assets/style/inputs.css" />
+  <link rel="stylesheet" href="../assets/style/panel.css" />
+  <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+
+  <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
+
+<body>
+  <header class="header-main">
+    <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+      ✏️ Guide
+    </button>
+    <button id="showModalBtn" class="btn-keys">API Keys</button>
+    <h1 class="header-title">Math — Context Menu</h1>
+  </header>
+
+  <div class="ex-page-layout">
+
+    <aside id="info-panel" class="ex-panel">
+      <p class="ex-panel-heading">✏️ Context menu — try it</p>
+      <p class="ex-panel-intro">Draw a circle around any math expression to open the context menu.</p>
+
+      <div class="ex-panel-divider"></div>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label">Compute</span></div>
+        <div class="ex-panel-item-desc">
+          Write <code>√16=</code> or <code>5+3=</code>, draw a circle around it → Compute numerical result
+        </div>
+      </div>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label">Function evaluation</span></div>
+        <div class="ex-panel-item-desc">
+          Write <code>f(x)=x²</code>, draw a circle → Evaluate function, set range −5 to 5
+        </div>
+      </div>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label">Set variable</span></div>
+        <div class="ex-panel-item-desc">
+          Write <code>2x+5=</code>, draw a circle → Set variable value, enter a number, then Compute
+        </div>
+      </div>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label">Check diagnostic</span></div>
+        <div class="ex-panel-item-desc">
+          Write <code>1/0=</code>, draw a circle → Check diagnostic to see why computation fails
+        </div>
+      </div>
+
+      <div class="ex-panel-divider"></div>
+
+      <p class="ex-panel-subtitle">🔍 Capabilities overview</p>
+      <p class="ex-panel-intro">Also accessible via ≡ → Math → Show Math Capabilities Overview.</p>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label" style="color:#2e7d32">✓ ALLOWED</span></div>
+        <div class="ex-panel-item-desc">
+          Task can be performed successfully.
+        </div>
+      </div>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label" style="color:#f57c00">⚠ INCOMPLETE_EXPRESSION</span></div>
+        <div class="ex-panel-item-desc">
+          Expression needs to be completed.
+        </div>
+      </div>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label" style="color:#f57c00">⚠ TOO_MANY_VARIABLES</span></div>
+        <div class="ex-panel-item-desc">
+          Too many undefined variables to solve.
+        </div>
+      </div>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label" style="color:#c62828">✗ DIVISION_BY_ZERO</span></div>
+        <div class="ex-panel-item-desc">
+          Computation leads to division by zero.
+        </div>
+      </div>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label" style="color:#c62828">✗ NUMBER_OVERFLOW</span></div>
+        <div class="ex-panel-item-desc">
+          Result is too large to compute.
+        </div>
+      </div>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label" style="color:#c62828">✗ INVALID_OPERATION</span></div>
+        <div class="ex-panel-item-desc">
+          Invalid mathematical operation.
+        </div>
+      </div>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label" style="color:#1976d2">ℹ NO_VARIABLE / NOT_APPLICABLE</span></div>
+        <div class="ex-panel-item-desc">
+          No undefined variables, or task doesn't apply to this expression.
+        </div>
+      </div>
+
+      <div class="ex-panel-divider"></div>
+
+      <div class="ex-panel-hint">
+        💡 End expressions with <code>=</code> or <code>?</code> to request a result. Use the scratch-out gesture to erase. Draw a tight circle to trigger the context menu reliably.
+      </div>
+
+    </aside>
+
+    <div id="editorEl"></div>
+
+  </div>
+
+  <script type="module">
+    import { Editor } from '../../dist/iink.esm.js'
+    import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
+
+    const editorElement = document.getElementById('editorEl');
+    const showModalBtn = document.getElementById("showModalBtn");
+    const panelToggleBtn = document.getElementById('panelToggleBtn')
+    const infoPanel = document.getElementById('info-panel')
+
+    panelToggleBtn.addEventListener('click', () => {
+      const open = infoPanel.classList.toggle('open')
+      panelToggleBtn.setAttribute('aria-expanded', open)
+    })
+
+    let editor
+
+    const editorOptions = {
+      configuration: {
+        recognition: {
+          "raw-content": {
+            recognition: { types: ["math"] },
+            classification: { types: ["math"] },
+            gestures: ["scratch-out", "surround"]
+          },
+        },
+        menu: {
+          action: {
+            language: false,
+            gesture: false,
+            snap: false,
+            export: false,
+            import: false,
+            convert: false,
+            debug: false,
+            guide: false,
+            selection: false,
+            math: {
+              autoCompute: true,
+              resultMode: true,
+              resultColor: true,
+              capabilities: true,
+            }
+          },
+          tool: {
+            write: true,
+            move: true,
+            select: true,
+            erase: true,
+            shape: false,
+            edge: false
+          },
+          style: {
+            strokeColor: true,
+            fillColor: false,
+            thickness: false,
+            fontSize: false,
+            fontWeight: false,
+            opacity: false,
+          }
+        }
+      }
+    }
+
+    async function loadEditor(options) {
+      await editor?.destroy()
+
+      editor = await Editor.load(editorElement, 'INTERACTIVEINK', options)
+
+      return editor
+    }
+
+    showModalBtn.addEventListener('click', () => {
+      ModalEditorOptions.show(loadEditor, editorOptions)
+    })
+
+    ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+  </script>
+  <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+  <script src="../assets/js/theme.js"></script>
+</body>
+</html>

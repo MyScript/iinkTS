@@ -1,48 +1,36 @@
 export class ModalEditorOptions {
+  static #escapeHandler = null
+
   static #init() {
     if (this.modal) return
     this.#loadCSS()
 
-    const createElement = (t, p = {}, ...c) =>
-      Object.assign(document.createElement(t), p, c.length ? { appendChild: c[0] } : {})
-    const getItemStorage = (k) => {
-      return JSON.parse(window.localStorage.getItem("server") || "{}")[k]
-    }
+    const el = (tag, props = {}) => Object.assign(document.createElement(tag), props)
 
-    this.modal = createElement("div", { className: "modal" })
-    this.container = createElement("div", { className: "modal-container" })
-    this.inputContainer = createElement("div", {
-      className: "modal-input-container",
+    this.modal = el("div", { className: "modal" })
+    this.modal.addEventListener("pointerdown", (e) => {
+      if (e.target === this.modal) this.hide()
     })
+
+    this.container = el("div", { className: "modal-container" })
     this.modal.appendChild(this.container)
 
-    this.scheme = createElement("select")
-    this.scheme.add(new Option("https", "https"))
-    this.scheme.add(new Option("http", "http"))
+    const header = el("div", { className: "modal-header" })
 
-    const schemeLabel = createElement("label", {
-      innerText: "Scheme:",
-      className: "app-key-label",
-    })
-    this.scheme.value = getItemStorage("scheme") || "https"
-    schemeLabel.appendChild(this.scheme)
+    this.title = el("h2")
 
-    this.host = createElement("input", {
-      type: "text",
-      placeholder: "Host",
-      value: getItemStorage("host") || "cloud.myscript.com",
-      className: "app-key-input",
-    })
-    const hostLabel = createElement("label", {
-      innerText: "Host:",
-      className: "app-key-label",
-    })
-    hostLabel.appendChild(this.host)
+    const closeBtn = el("button", { className: "modal-close-btn", type: "button" })
+    closeBtn.setAttribute("aria-label", "Close")
+    closeBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>`
+    closeBtn.addEventListener("click", () => this.hide())
 
-    this.title = createElement("h2")
-    this.container.appendChild(this.title)
+    header.appendChild(this.title)
+    header.appendChild(closeBtn)
+    this.container.appendChild(header)
 
-    this.message = createElement("a", {
+    this.message = el("a", {
       href: "https://developer.myscript.com/getting-started/",
       className: "modal-message",
       target: "_blank",
@@ -50,37 +38,61 @@ export class ModalEditorOptions {
     })
     this.container.appendChild(this.message)
 
-    const mkInput = (txt, id, def) => {
-      const lbl = createElement("label", {
-        innerText: txt,
-        className: "app-key-label",
-        htmlFor: id,
-      })
-      const inp = createElement("input", {
-        type: "text",
-        id,
-        className: "app-key-input",
-        placeholder: "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
-        value: getItemStorage(def) || "",
-      })
-      lbl.appendChild(inp)
-      return [lbl, inp]
-    }
+    this.inputContainer = el("div", { className: "modal-input-container" })
 
-    ;[this.labelAppKey, this.inputField] = mkInput("Application Key:", "appKeyInput", "applicationKey")
-    ;[this.labelHmacKey, this.inputFieldHmac] = mkInput("HMAC Key:", "appKeyInputHmac", "hmacKey")
+    this.scheme = el("select")
+    this.scheme.add(new Option("https", "https"))
+    this.scheme.add(new Option("http", "http"))
+    const schemeLabel = el("label", { innerText: "Scheme:", className: "app-key-label" })
+    schemeLabel.appendChild(this.scheme)
 
-    this.saveBtn = createElement("button", {
-      id: "saveBtn",
-      className: "save",
-      innerText: "Save",
-      onclick: () => this.setSave(),
+    this.host = el("input", {
+      type: "text",
+      placeholder: "Host",
+      value: this.#getStorage("host") || "cloud.myscript.com",
+      className: "app-key-input",
     })
+    const hostLabel = el("label", { innerText: "Host:", className: "app-key-label" })
+    hostLabel.appendChild(this.host)
+
+    this.inputField = el("input", {
+      type: "text",
+      id: "appKeyInput",
+      className: "app-key-input",
+      placeholder: "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+      value: this.#getStorage("applicationKey") || "",
+    })
+    this.labelAppKey = el("label", {
+      innerText: "Application Key:",
+      className: "app-key-label",
+      htmlFor: "appKeyInput",
+    })
+    this.labelAppKey.appendChild(this.inputField)
+
+    this.inputFieldHmac = el("input", {
+      type: "text",
+      id: "appKeyInputHmac",
+      className: "app-key-input",
+      placeholder: "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX",
+      value: this.#getStorage("hmacKey") || "",
+    })
+    this.labelHmacKey = el("label", { innerText: "HMAC Key:", className: "app-key-label", htmlFor: "appKeyInputHmac" })
+    this.labelHmacKey.appendChild(this.inputFieldHmac)
+
+    this.saveBtn = el("button", { id: "saveBtn", className: "save", innerText: "Save", type: "button" })
+    this.saveBtn.addEventListener("click", () => this.setSave())
+
+    this._validate = () => {
+      const valid = !!(this.inputField.value.trim() && this.inputFieldHmac.value.trim())
+      this.saveBtn.disabled = !valid
+    }
+    this.inputField.addEventListener("input", this._validate)
+    this.inputFieldHmac.addEventListener("input", this._validate)
 
     this.inputContainer.append(schemeLabel, hostLabel, this.labelAppKey, this.labelHmacKey, this.saveBtn)
-
     this.container.appendChild(this.inputContainer)
-    this.messageFooter = createElement("a", {
+
+    this.messageFooter = el("a", {
       href: "https://cloud.myscript.com/#/applications",
       target: "_blank",
       rel: "noopener noreferrer",
@@ -88,7 +100,10 @@ export class ModalEditorOptions {
       innerText: "Already have an Application Key and HMAC Key? Go to MyScript Cloud to retrieve them.",
     })
     this.container.appendChild(this.messageFooter)
-    this.modal.appendChild(createElement("div", { className: "modal-content" }))
+  }
+
+  static #getStorage(key) {
+    return JSON.parse(window.localStorage.getItem("server") || "{}")[key]
   }
 
   static #loadCSS() {
@@ -118,8 +133,21 @@ export class ModalEditorOptions {
     this.title.innerText = "Set your server configuration"
     this.callback = callback
     this.message.innerText = "You can generate your Application Key and HMAC Key for free"
+
+    // Refresh stored values each time modal opens
+    this.host.value = this.#getStorage("host") || "cloud.myscript.com"
+    this.scheme.value = this.#getStorage("scheme") || "https"
+    this.inputField.value = this.#getStorage("applicationKey") || ""
+    this.inputFieldHmac.value = this.#getStorage("hmacKey") || ""
+    this._validate()
+
     document.body.appendChild(this.modal)
     document.body.classList.add("stop-scrolling")
+
+    this.#escapeHandler = (e) => {
+      if (e.key === "Escape") this.hide()
+    }
+    document.addEventListener("keydown", this.#escapeHandler)
   }
 
   static hide() {
@@ -127,21 +155,20 @@ export class ModalEditorOptions {
       document.body.removeChild(this.modal)
     }
     document.body.classList.remove("stop-scrolling")
+    if (this.#escapeHandler) {
+      document.removeEventListener("keydown", this.#escapeHandler)
+      this.#escapeHandler = null
+    }
   }
 
   static setSave() {
-    if (!this.options) {
-      this.options = {}
-    }
-    if (!this.options.configuration) {
-      this.options.configuration = {}
-    }
-    if (!this.options.configuration.server) {
-      this.options.configuration.server = {}
-    }
-    this.options.configuration.server.applicationKey = this.inputField.value
-    this.options.configuration.server.hmacKey = this.inputFieldHmac.value
-    this.options.configuration.server.host = this.host.value
+    if (!this.options) this.options = {}
+    if (!this.options.configuration) this.options.configuration = {}
+    if (!this.options.configuration.server) this.options.configuration.server = {}
+
+    this.options.configuration.server.applicationKey = this.inputField.value.trim()
+    this.options.configuration.server.hmacKey = this.inputFieldHmac.value.trim()
+    this.options.configuration.server.host = this.host.value.trim()
     this.options.configuration.server.scheme = this.scheme.value
     window.localStorage.setItem("server", JSON.stringify(this.options.configuration.server))
     this.callback?.(this.options)

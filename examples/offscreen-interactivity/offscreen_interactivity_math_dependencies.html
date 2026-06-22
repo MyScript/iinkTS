@@ -8,99 +8,25 @@
   <link rel="stylesheet" href="../assets/style/reset.css" />
   <link rel="stylesheet" href="../assets/style/components.css" />
   <link rel="stylesheet" href="../assets/style/examples.css" />
-
-  <script type="text/javascript" src="../../dist/iink.min.js"></script>
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+  <link rel="stylesheet" href="../assets/style/panel.css" />
+  <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
 
   <style>
-    .info-control-row {
-      display: flex;
-      gap: 12px;
-      margin: 12px 0;
-    }
-
-    .info-section {
-      flex: 1;
-      background: #e3f2fd;
-      padding: 12px;
-      border-radius: 4px;
-      border-left: 4px solid #2196F3;
-    }
-
-    .info-section h3 {
-      margin-top: 0;
-      color: #1976D2;
-    }
-
-    .info-section ul {
-      margin: 8px 0;
-      padding-left: 24px;
-    }
-
-    .info-section li {
-      margin: 4px 0;
-      line-height: 1.6;
-    }
-
-    .control-section {
-      flex: 1;
-      padding: 12px;
-      background: #fff9c4;
-      border-radius: 4px;
-      border-left: 4px solid #fbc02d;
-    }
-
-    .control-section strong {
-      display: block;
-      margin-bottom: 8px;
-    }
-
-    #editor-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      height: calc(100dvh - 180px);
-      min-height: 500px;
-    }
-
-    @media only screen and (max-width: 1010px) {
-      #editor-container {
-        height: calc(100dvh - 220px);
-      }
-    }
-
-    @media only screen and (max-width: 760px) {
-      .info-control-row {
-        flex-direction: column;
-      }
-      #editor-container {
-        height: calc(100dvh - 330px);
-      }
-    }
-
-    @media only screen and (max-width: 653px) {
-      #editor-container {
-        height: calc(100dvh - 380px);
-        width: 100%;
-      }
-    }
-
     #editorEl {
-      flex: 4;
-      min-width: 300px;
-      min-height: 300px;
+      flex: 1;
+      min-width: 0;
     }
 
     #dependencies {
-      flex: 1;
-      min-width: 300px;
+      width: 260px;
+      flex-shrink: 0;
       padding: 12px;
-      background: #f5f5f5;
-      border-radius: 4px;
+      background: var(--ex-surface-alt);
+      border-left: 1px solid var(--ex-border);
       font-family: monospace;
       font-size: 12px;
       overflow-y: auto;
-      flex-shrink: 0;
-      border-left: 3px solid #2196F3;
     }
 
     #dependencies strong {
@@ -112,57 +38,93 @@
     .dependency-info {
       margin: 4px 0;
       padding: 4px;
-      background: white;
+      background: var(--ex-surface);
       border-left: 3px solid #2196F3;
     }
 
     .source { border-left-color: #4CAF50; }
     .dependent { border-left-color: #FF9800; }
     .global-var { border-left-color: #9C27B0; }
+
+    .dep-group {
+      margin-bottom: 16px;
+      padding: 8px;
+      background: #f0fdf4;
+      border-radius: 4px;
+    }
+
+    .dep-isolated {
+      margin-top: 16px;
+      padding-top: 8px;
+      border-top: 1px dashed var(--ex-border);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) #dependencies strong { color: #90caf9; }
+      :root:not([data-theme="light"]) .dep-group           { background: #052e16; }
+    }
+    :root[data-theme="dark"] #dependencies strong { color: #90caf9; }
+    :root[data-theme="dark"] .dep-group           { background: #052e16; }
   </style>
+  <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
 </head>
 
 <body>
   <header class="header-main">
-    <button id="showModalBtn" class="btn-keys">Change server configuration</button>
+    <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+      💡 Info
+    </button>
+    <button id="showModalBtn" class="btn-keys">API Keys</button>
     <h1 class="header-title">Math Dependencies Example</h1>
   </header>
 
-  <div class="info-control-row">
-    <div class="info-section">
-      <h3>🔗 What are Math Dependencies?</h3>
-      <p>
-        When you write math expressions that use variables, the system tracks which blocks depend on which variables.
-      </p>
-      <ul>
-        <li><strong>Source blocks</strong> define variables (e.g., "x=2")</li>
-        <li><strong>Dependent blocks</strong> use those variables (e.g., "3x+2=")</li>
-        <li>When a variable changes, dependent expressions recalculate automatically</li>
-        <li>Hover over blocks to see dependencies highlighted with colored arrows</li>
-      </ul>
-    </div>
-
-    <div class="control-section">
-      <strong>📝 Try it:</strong><br>
-      1. Write a variable definition like <span style="background: #fff3cd; padding: 2px 6px; border-radius: 2px; font-weight: bold;">x=2</span><br>
-      2. Write an expression using that variable like <span style="background: #fff3cd; padding: 2px 6px; border-radius: 2px; font-weight: bold;">3x+2=</span><br>
-      3. The result computes automatically when you end with <span style="background: #fff3cd; padding: 2px 6px; border-radius: 2px; font-weight: bold;">=</span> or <span style="background: #fff3cd; padding: 2px 6px; border-radius: 2px; font-weight: bold;">?</span> (if Auto-compute is enabled)<br>
-      4. Toggle "Auto-compute" to switch between automatic and manual computation<br>
-      5. Change the variable value using "Edit Variables"<br>
-      6. Watch dependent expressions recalculate in real-time<br>
-      7. <strong>Hover over math blocks</strong> to see dependencies highlighted (sources in green, dependents in orange)
-    </div>
-  </div>
-
-  <div id="editor-container">
-    <div id="editorEl"></div>
-    <div id="dependencies">
-      <strong>Dependencies:</strong><br>
-      <span id="dependency-list">No dependencies yet</span>
+  <div class="ex-page-layout">
+    <aside id="info-panel" class="ex-panel">
+      <p class="ex-panel-heading">What are Math Dependencies?</p>
+      <p class="ex-panel-intro">When you write math expressions that use variables, the system tracks which blocks depend on which variables.</p>
+      <div class="ex-panel-divider"></div>
+      <div class="ex-panel-item">
+        <div class="ex-panel-item-desc"><strong>Source blocks</strong> define variables (e.g., "x=2")</div>
+      </div>
+      <div class="ex-panel-item">
+        <div class="ex-panel-item-desc"><strong>Dependent blocks</strong> use those variables (e.g., "3x+2=")</div>
+      </div>
+      <div class="ex-panel-item">
+        <div class="ex-panel-item-desc">When a variable changes, dependent expressions recalculate automatically</div>
+      </div>
+      <div class="ex-panel-item">
+        <div class="ex-panel-item-desc">Hover over blocks to see dependencies highlighted with colored arrows</div>
+      </div>
+      <div class="ex-panel-divider"></div>
+      <div class="ex-panel-item">
+        <div class="ex-panel-item-desc"><strong>Try it:</strong><br>
+          1. Write a variable definition like <span class="highlight">x=2</span><br>
+          2. Write an expression using that variable like <span class="highlight">3x+2=</span><br>
+          3. The result computes automatically when you end with <span class="highlight">=</span> or <span class="highlight">?</span> (if Auto-compute is enabled)<br>
+          4. Toggle "Auto-compute" to switch between automatic and manual computation<br>
+          5. Change the variable value using "Edit Variables"<br>
+          6. Watch dependent expressions recalculate in real-time<br>
+          7. <strong>Hover over math blocks</strong> to see dependencies highlighted (sources in green, dependents in orange)
+        </div>
+      </div>
+    </aside>
+    <div class="main-layout">
+      <div id="editorEl"></div>
+      <div id="dependencies">
+        <strong>Dependencies:</strong><br>
+        <span id="dependency-list">No dependencies yet</span>
+      </div>
     </div>
   </div>
 
   <script type="module">
+    const panelToggleBtn = document.getElementById('panelToggleBtn')
+    const infoPanel = document.getElementById('info-panel')
+    panelToggleBtn.addEventListener('click', () => {
+      const open = infoPanel.classList.toggle('open')
+      panelToggleBtn.setAttribute('aria-expanded', open)
+    })
+
     import { Editor } from '../../dist/iink.esm.js'
     import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
 
@@ -242,10 +204,6 @@
     async function onEditorChanged(event) {
       if (event.empty) {
         dependenciesList.innerHTML = 'No dependencies yet'
-        variableSelect.innerHTML = '<option value="">-- No variables --</option>'
-        variableSelect.disabled = true
-        variableValue.disabled = true
-        setVariableBtn.disabled = true
         return
       }
     }
@@ -325,8 +283,8 @@
       for (const sourceBlock of sourceBlocks) {
         const { symbol, deps } = sourceBlock
 
-        html += `<div style="margin-bottom: 16px; padding: 8px; background: #e8f5e9; border-radius: 4px;">`
-        html += `<div class="dependency-info source" style="margin-bottom: 8px; background: #c8e6c9;">`
+        html += `<div class="dep-group">`
+        html += `<div class="dependency-info source" style="margin-bottom: 8px;">`
         html += `<strong>📊 ${symbol.label || symbol.id}</strong>`
         if (deps.dependentBlocks.length > 0) {
           html += ` <small>(used by ${deps.dependentBlocks.length} block(s))</small>`
@@ -363,7 +321,7 @@
 
       const remainingBlocks = mathBlocks.filter(s => !processedBlocks.has(s.id))
       if (remainingBlocks.length > 0) {
-        html += '<div style="margin-top: 16px; padding-top: 8px; border-top: 1px dashed #ccc;">'
+        html += '<div class="dep-isolated">'
         html += '<small><strong>Isolated blocks:</strong></small>'
         for (const mathBlock of remainingBlocks) {
           html += `<div class="dependency-info" style="margin-top: 4px;">`
@@ -378,5 +336,7 @@
 
     ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
   </script>
+  <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+  <script src="../assets/js/theme.js"></script>
 </body>
 </html>

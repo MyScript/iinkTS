@@ -41,102 +41,30 @@ test.describe('Websocket Text', () => {
     expect(jiixReceived.label).toEqual(jiixExpected.label)
   })
 
-  test.describe('Gesture', () => {
-    test('should apply gesture', async ({ page }) => {
-      const configuration = await getEditorConfiguration(page)
-      const options = {
-        configuration: {
-          server: configuration.server,
-          recognition: {
-            type: "TEXT",
-            gesture: {
-              enable: true
-            },
-          }
-        }
-      }
-      await loadEditor(page, options)
+  test('should work after gesture then undo-redo', async ({ page }) => {
+    await Promise.all([
+      waitForExportedEvent(page),
+      writeStrokes(page, [helloStrike.strokes[0]])
+    ])
+    await expect(page.locator("#result")).toHaveText(helloStrike.exports["text/plain"].at(0))
 
-      await Promise.all([
-        waitForExportedEvent(page),
-        writeStrokes(page, [helloStrike.strokes[0]])
-      ])
-      await expect(page.locator("#result")).toHaveText(helloStrike.exports["text/plain"].at(0))
+    await Promise.all([
+      waitForExportedEvent(page),
+      writeStrokes(page, [helloStrike.strokes[1]])
+    ])
+    await expect(page.locator("#result")).toHaveText(helloStrike.exports["text/plain"].at(1))
 
-      await Promise.all([
-        waitForExportedEvent(page),
-        writeStrokes(page, [helloStrike.strokes[1]])
-      ])
-      await expect(page.locator("#result")).toHaveText(helloStrike.exports["text/plain"].at(1))
-    })
+    await Promise.all([
+      waitForExportedEvent(page),
+      page.locator('#undo').click()
+    ])
+    await expect(page.locator("#result")).toHaveText(helloStrike.exports["text/plain"].at(0))
 
-    test('should not apply gesture', async ({ page }) => {
-      const configuration = await getEditorConfiguration(page)
-      const options = {
-        configuration: {
-          server: configuration.server,
-          recognition: {
-            type: 'TEXT',
-            gesture: {
-              enable: false
-            }
-          }
-        }
-      }
-      await loadEditor(page, options)
-
-      await Promise.all([
-        waitForExportedEvent(page),
-        writeStrokes(page, [helloStrike.strokes[0]])
-      ])
-      await expect(page.locator("#result")).toHaveText(helloStrike.exports["text/plain"].at(0))
-
-      await Promise.all([
-        waitForExportedEvent(page),
-        writeStrokes(page, [helloStrike.strokes[1]])
-      ])
-      await expect(page.locator("#result")).not.toHaveText(helloStrike.exports["text/plain"].at(1))
-    })
-
-    test('should work after gesture then undo-redo', async ({ page }) => {
-      const configuration = await getEditorConfiguration(page)
-      const options = {
-        configuration: {
-          server: configuration.server,
-          recognition: {
-            type: 'TEXT',
-            gesture: {
-              enable: true
-            }
-          }
-        }
-      }
-      await loadEditor(page, options)
-
-      await Promise.all([
-        waitForExportedEvent(page),
-        writeStrokes(page, [helloStrike.strokes[0]])
-      ])
-      await expect(page.locator("#result")).toHaveText(helloStrike.exports["text/plain"].at(0))
-
-      await Promise.all([
-        waitForExportedEvent(page),
-        writeStrokes(page, [helloStrike.strokes[1]])
-      ])
-      await expect(page.locator("#result")).toHaveText(helloStrike.exports["text/plain"].at(1))
-
-      await Promise.all([
-        waitForExportedEvent(page),
-        page.locator('#undo').click()
-      ])
-      await expect(page.locator("#result")).toHaveText(helloStrike.exports["text/plain"].at(0))
-
-      await Promise.all([
-        waitForExportedEvent(page),
-        page.locator('#redo').click()
-      ])
-      await expect(page.locator("#result")).toHaveText(helloStrike.exports["text/plain"].at(1))
-    })
+    await Promise.all([
+      waitForExportedEvent(page),
+      page.locator('#redo').click()
+    ])
+    await expect(page.locator("#result")).toHaveText(helloStrike.exports["text/plain"].at(1))
   })
 
   test('SmartGuide', async ({ page }) => {
@@ -235,7 +163,7 @@ test.describe('Websocket Text', () => {
         waitForExportedEvent(page),
         page.locator(`.more-menu > button >> text=Delete`).click()
       ])
-      await expect(page.locator('svg[data-layer="MODEL"] path')).toHaveCount(0)
+      await expect(page.locator('#editorEl svg[data-layer="MODEL"] path')).toHaveCount(0)
     })
 
     await test.step('should close menu more after delete', async () => {

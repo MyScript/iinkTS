@@ -1,17 +1,105 @@
-* {
+*, *::before, *::after {
   box-sizing: border-box;
 }
 
+:root {
+  /* Brand colors — aligned with iinkTS --iink-* palette */
+  --ex-primary:       #1a9fff;
+  --ex-primary-dark:  #0d7ecc;
+  --ex-success:       #4caf50;
+  --ex-warning:       #ffc107;
+  --ex-error:         #f44336;
+  --ex-accent-orange: #ffaf1a;
+
+  /* Surfaces & text */
+  --ex-bg:          #f8fafc;
+  --ex-surface:     #ffffff;
+  --ex-surface-alt: #f5f6f7;
+  --ex-text:        #1a202c;
+  --ex-text-muted:  #6b7280;
+  --ex-border:      #e2e8f0;
+  --ex-hover:       #ebf4ff;
+  --ex-disabled:    #e0e0e0;
+
+  /* Spacing */
+  --ex-space-xs: 4px;
+  --ex-space-sm: 8px;
+  --ex-space-md: 12px;
+  --ex-space-lg: 16px;
+  --ex-space-xl: 24px;
+
+  /* Border radius */
+  --ex-radius-sm:   4px;
+  --ex-radius-md:   6px;
+  --ex-radius-lg:   8px;
+  --ex-radius-xl:   12px;
+  --ex-radius-full: 9999px;
+
+  /* Shadows */
+  --ex-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+  --ex-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --ex-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  /* Transitions */
+  --ex-transition: 125ms ease;
+
+  /* Chrome heights (used in height calc on #editorEl) */
+  --ex-header-height: 50px;
+  --ex-nav-height:    57px;
+  --ex-result-height: 100px;
+}
+
+/* ─── Dark mode (system + manual override) ────────────────────────────────── */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ex-bg:          #0f172a;
+    --ex-surface:     #1e293b;
+    --ex-surface-alt: #263147;
+    --ex-text:        #f1f5f9;
+    --ex-text-muted:  #94a3b8;
+    --ex-border:      #334155;
+    --ex-hover:       #1e3a5f;
+    --ex-disabled:    #475569;
+    --ex-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+    --ex-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);
+    --ex-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+  }
+}
+
+:root[data-theme="dark"] {
+  --ex-bg:          #0f172a;
+  --ex-surface:     #1e293b;
+  --ex-surface-alt: #263147;
+  --ex-text:        #f1f5f9;
+  --ex-text-muted:  #94a3b8;
+  --ex-border:      #334155;
+  --ex-hover:       #1e3a5f;
+  --ex-disabled:    #475569;
+  --ex-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --ex-shadow-md: 0 2px 8px rgba(0, 0, 0, 0.4);
+  --ex-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
 html {
-  font-family: "Source Sans Pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
+  color: var(--ex-text);
+  background: var(--ex-bg);
 }
 
 nav {
-  border-bottom: 1px solid #D7DDE3;
-  padding: 12px;
+  display: flex;
+  align-items: center;
+  gap: var(--ex-space-md);
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--ex-border);
+  padding: var(--ex-space-md);
+  background: var(--ex-surface);
 }
-

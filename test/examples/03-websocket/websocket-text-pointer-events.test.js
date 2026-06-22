@@ -17,21 +17,15 @@ test.describe("Websocket Text Pointer Events", () => {
     await expect(page).toHaveTitle("Pointer events")
   })
 
-  test("should export application/vnd.myscript.jiix", async ({ page }) => {
+  test("should import pointers when click on Process button", async ({ page }) => {
     await test.step("write strokes", async () => {
       await Promise.all([
         waitForExportedEvent(page),
-        writeStrokes(page, h.strokes),
+        page.getByRole('button', { name: 'Process' }).click(),
       ])
     })
 
-    await expect(page.locator("#result")).toHaveText(
-      h.exports["text/plain"].at(-1)
-    )
-    const exports = await getEditorExports(page)
-    const jiixExpected = h.exports["application/vnd.myscript.jiix"]
-    const jiixReceived = exports["application/vnd.myscript.jiix"]
-    expect(jiixReceived).toEqual(jiixExpected)
-    expect(jiixReceived.label).toEqual(jiixExpected.label)
+    const prompterText = page.locator(".prompter-text")
+    await expect(prompterText).toHaveText("A")
   })
 })

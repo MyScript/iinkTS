@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
     <style>
       body {
         display: flex;
@@ -25,17 +28,11 @@
       #editorEl {
         flex: 1;
         min-width: 0;
-        height: 100%;
+        min-height: 0;
       }
 
-      /* Config panel */
       #config-panel {
         width: 280px;
-        min-width: 240px;
-        overflow-y: auto;
-        background: #f8f9fa;
-        border-left: 1px solid #dee2e6;
-        padding: 12px;
         font-size: 13px;
       }
 
@@ -43,157 +40,61 @@
         font-size: 14px;
         font-weight: 700;
         margin: 0 0 10px;
-        color: #333;
+        color: var(--ex-text);
       }
 
-      .config-section {
-        margin-bottom: 12px;
-        border: 1px solid #dee2e6;
-        border-radius: 6px;
-        overflow: hidden;
-      }
 
-      .config-section-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 8px 10px;
-        background: #e9ecef;
-        cursor: pointer;
-        user-select: none;
-        font-weight: 600;
-        color: #495057;
-      }
 
-      .config-section-header:hover {
-        background: #dee2e6;
-      }
-
-      .config-section-body {
-        padding: 8px 10px;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-      }
-
-      .config-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 2px 0;
-      }
-
-      .config-row label {
-        color: #495057;
-        cursor: pointer;
-        flex: 1;
-      }
-
-      .config-subsection {
-        margin-left: 12px;
-        border-left: 2px solid #dee2e6;
-        padding-left: 8px;
-        margin-top: 2px;
-        display: flex;
-        flex-direction: column;
-        gap: 3px;
-      }
-
-      .config-subsection-label {
-        font-size: 11px;
-        font-weight: 600;
-        color: #868e96;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin: 4px 0 2px;
-      }
-
-      /* Toggle switch */
-      .toggle {
-        position: relative;
-        width: 34px;
-        height: 18px;
-        flex-shrink: 0;
-      }
-
-      .toggle input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-      }
-
-      .toggle-slider {
-        position: absolute;
-        inset: 0;
-        background: #ced4da;
-        border-radius: 18px;
-        cursor: pointer;
-        transition: 0.2s;
-      }
-
-      .toggle-slider::before {
-        content: "";
-        position: absolute;
-        width: 12px;
-        height: 12px;
-        left: 3px;
-        top: 3px;
-        background: white;
-        border-radius: 50%;
-        transition: 0.2s;
-      }
-
-      .toggle input:checked + .toggle-slider {
-        background: #4c6ef5;
-      }
-
-      .toggle input:checked + .toggle-slider::before {
-        transform: translateX(16px);
-      }
-
-      .toggle input:disabled + .toggle-slider {
-        opacity: 0.4;
-        cursor: not-allowed;
-      }
-
-      /* Global action buttons */
       .panel-actions {
         display: flex;
         gap: 6px;
         margin-bottom: 12px;
       }
 
-      .panel-actions button {
+      .panel-actions .classic-btn {
         flex: 1;
-        padding: 6px;
-        font-size: 12px;
-        border: 1px solid #dee2e6;
-        border-radius: 4px;
-        background: white;
-        cursor: pointer;
-      }
-
-      .panel-actions button:hover {
-        background: #e9ecef;
+        justify-content: center;
       }
     </style>
-  </head>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
   <body>
     <header class="header-main">
-      <button id="showModalBtn" class="btn-keys">Change server configuration</button>
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="configPanelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="config-panel">
+        ⚙ Config
+      </button>
+      <button id="showModalBtn" class="btn-keys">API Keys</button>
       <h1 class="header-title">Menu Configuration</h1>
     </header>
 
-    <div class="layout">
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">Fine-grained menu configuration</p>
+        <p class="ex-panel-intro">Every menu item in the editor can be individually shown or hidden at runtime via <code>editor.menu.setConfig()</code> — no reload required. Toggle any switch on the right panel and the change takes effect instantly.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">The configuration covers four menus: <strong>Action</strong> (toolbar buttons: clear, undo/redo, convert, zoom…), <strong>Tool</strong> (write, erase, select, shape, edge…), <strong>Style</strong> (color, fill, thickness, font…), and <strong>Context</strong> (right-click: convert, duplicate, reorder, decorators…).</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Sub-menus such as Export formats, Gesture actions, Snap options, Math options, and Decorator types can each be toggled independently.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Use <strong>Enable all</strong> / <strong>Disable all</strong> to quickly switch between fully featured and minimal UI, then fine-tune from there for your specific application needs.</div>
+        </div>
+      </aside>
+      <div class="layout">
       <div id="editorEl"></div>
 
-      <div id="config-panel">
+      <div id="config-panel" class="ex-panel">
         <h2>Menu Configuration</h2>
 
         <div class="panel-actions">
-          <button id="btn-enable-all">Enable all</button>
-          <button id="btn-disable-all">Disable all</button>
+          <button id="btn-enable-all" class="classic-btn">Enable all</button>
+          <button id="btn-disable-all" class="classic-btn">Disable all</button>
         </div>
 
         <!-- Action menu section -->
@@ -429,6 +330,7 @@
         </div>
 
       </div>
+      </div>
     </div>
 
     <script type="module">
@@ -620,11 +522,24 @@
       showModalBtn.addEventListener('click', () => {
         ModalEditorOptions.show(loadEditor, editorOptions)
       })
-
-      window.addEventListener('resize', () => editor?.resize())
-
       ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      const configPanelToggleBtn = document.getElementById('configPanelToggleBtn')
+      const configPanel = document.getElementById('config-panel')
+      configPanelToggleBtn.addEventListener('click', () => {
+        const open = configPanel.classList.toggle('open')
+        configPanelToggleBtn.setAttribute('aria-expanded', open)
+      })
     </script>
-  </body>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
 
 </html>

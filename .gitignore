@@ -21,3 +21,4 @@ __diff_output__
 .agent/
 .claude/
 .serena/
+.playwright-mcp/

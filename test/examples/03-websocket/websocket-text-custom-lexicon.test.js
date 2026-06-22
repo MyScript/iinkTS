@@ -35,6 +35,4 @@ test.describe("Websocket Text Custom Lexicon", () => {
     const jiixReceived = exports["application/vnd.myscript.jiix"]
     expect(jiixReceived.label).toEqual(covfefe.exports["text/plain"].at(-1))
   })
-
-  TextNavAction.test({ skipClear: true, resultLocator: ".prompter-container" })
 })

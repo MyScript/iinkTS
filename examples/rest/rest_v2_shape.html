@@ -13,21 +13,10 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
     <link rel="stylesheet" href="../assets/style/renderjson.css" />
     <style>
-      #editorEl {
-        height: calc(100dvh - 220px);
-        width: 100dvw;
-      }
-
-      #progress {
-        transition: width 10s;
-        width: 0;
-        height: 2px;
-        background-color: #1a9fff;
-        opacity: 0;
-      }
-
       #result {
         border-bottom: solid gray 1px;
         display: block;
@@ -35,32 +24,16 @@
         padding: 12px;
         cursor: zoom-in;
       }
-
-      #result.open {
-        position: absolute;
-        z-index: 999;
-        overflow: visible;
-        height: 100dvh;
-        width: 100dvw;
-        max-height: 100dvh;
-        background-color: white;
-        cursor: zoom-out;
-      }
-
-      @media only screen and (max-width: 418px) {
-        #editorEl {
-          height: calc(100dvh - 270px);
-        }
-      }
     </style>
 
     <script type="text/javascript" src="../assets/renderjson/renderjson.js"></script>
-  </head>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
   <body>
     <header class="header-main">
       <button id="showModalBtn" class="btn-keys">
-        Change server configuration
+        API Keys
       </button>
       <h1 class="header-title">
         Rest v2 Shape
@@ -116,7 +89,6 @@
         resultElement.classList.toggle("open")
       });
 
-
       let editor;
 
       const editorOptions = {
@@ -131,7 +103,6 @@
           }
         }
       };
-
 
       async function loadEditor(options) {
         resultElement.innerHTML = ""
@@ -193,10 +164,6 @@
         penElement.classList.add("active");
       });
 
-      window.addEventListener("resize", () => {
-        editor?.resize();
-      });
-
       showModalBtn.addEventListener("click", () => {
         ModalEditorOptions.show(loadEditor, editorOptions)
       })
@@ -209,6 +176,8 @@
       window.editorOptions = editorOptions
       window.loadEditor = loadEditor
     </script>
-  </body>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
 
 </html>
