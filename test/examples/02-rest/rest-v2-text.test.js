@@ -1,15 +1,15 @@
 import { test, expect } from "@playwright/test"
-import { waitForEditorInit, writeStrokes, waitForExportedEvent, getEditorExports, passModalKey } from "../helper"
+import { waitForEditorInit, writeStrokes, waitForExportedEvent, getEditorExports, passModalKey, getEditorStrokes } from "../helper"
 import h from "../__dataset__/h"
 
-test.describe("Text Recognizer Iink", () => {
+test.describe("Rest v2 Text", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/rest/rest_v2_text.html`)
     await passModalKey(page)
   })
 
   test("should have title", async ({ page }) => {
-    await expect(page).toHaveTitle("Text Recognizer Iink")
+    await expect(page).toHaveTitle("Rest v2 Text")
   })
 
   test("should display text/plain into result", async ({ page }) => {
@@ -17,6 +17,13 @@ test.describe("Text Recognizer Iink", () => {
     const resultText = await page.locator("#result").textContent()
     expect(resultText).toStrictEqual(exportedDatas["text/plain"])
     expect(resultText).toStrictEqual(h.exports["text/plain"].at(-1))
+  })
+
+  test("should display stroke in DOM", async ({ page }) => {
+    const [exportedDatas] = await Promise.all([waitForExportedEvent(page), writeStrokes(page, h.strokes)])
+    const strokes = await getEditorStrokes(page)
+    expect(strokes).toHaveLength(1)
+    await expect(page.locator(`#${strokes[0].id}`)).toBeVisible()
   })
 
   test.describe("Request sent", () => {
@@ -52,27 +59,27 @@ test.describe("Text Recognizer Iink", () => {
     })
 
     await test.step("should clear", async () => {
-      const promisesResult = await Promise.all([waitForExportedEvent(page), page.click("#clear")])
+      const promisesResult = await Promise.all([waitForExportedEvent(page), page.locator("#clear").click()])
       expect(promisesResult[0]).toBeNull()
       expect(await getEditorExports(page)).toBeFalsy()
       await expect(page.locator("#result")).toBeEmpty()
     })
 
     await test.step("should undo clear", async () => {
-      await Promise.all([waitForExportedEvent(page), page.click("#undo")])
-      expect(await page.locator("#editor").evaluate((node) => node.editor.model.symbols)).toHaveLength(1)
+      await Promise.all([waitForExportedEvent(page), page.locator("#undo").click()])
+      expect(await page.locator("#editorEl").evaluate((node) => node.editor.model.strokes)).toHaveLength(1)
       await expect(page.locator("#result")).toHaveText(h.exports["text/plain"][0])
     })
 
     await test.step("should undo write", async () => {
-      await Promise.all([waitForExportedEvent(page), page.click("#undo")])
-      expect(await page.locator("#editor").evaluate((node) => node.editor.model.symbols)).toHaveLength(0)
+      await Promise.all([waitForExportedEvent(page), page.locator("#undo").click()])
+      expect(await page.locator("#editorEl").evaluate((node) => node.editor.model.strokes)).toHaveLength(0)
       await expect(page.locator("#result")).toBeEmpty()
     })
 
     await test.step("should redo write", async () => {
-      await Promise.all([waitForExportedEvent(page), page.click("#redo")])
-      expect(await page.locator("#editor").evaluate((node) => node.editor.model.symbols)).toHaveLength(1)
+      await Promise.all([waitForExportedEvent(page), page.locator("#redo").click()])
+      expect(await page.locator("#editorEl").evaluate((node) => node.editor.model.strokes)).toHaveLength(1)
       await expect(page.locator("#result")).toHaveText(h.exports["text/plain"][0])
     })
 
@@ -84,7 +91,7 @@ test.describe("Text Recognizer Iink", () => {
       const enPostData = (await requestEn).postDataJSON()
       expect(enPostData.configuration.lang).toEqual("en_US")
 
-      await page.selectOption("#language", "fr_FR")
+      await page.locator("#language").selectOption("fr_FR")
 
       await expect(page.locator("#result")).toBeEmpty()
 
