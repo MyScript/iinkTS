@@ -1,5 +1,12 @@
+import loadingDotsIcon from "@/assets/svg/loading-dots.svg"
+import loadingRingIcon from "@/assets/svg/loading-ring.svg"
+import syncIcon from "@/assets/svg/sync.svg"
+import warningTriangleIcon from "@/assets/svg/warning-triangle.svg"
+import wifiIcon from "@/assets/svg/wifi.svg"
+import wifiOffIcon from "@/assets/svg/wifi-off.svg"
 import { DOMFactory } from "@/components/dom"
 import { Modal } from "@/components/Modal"
+import type { TEditorConnectionState } from "@/editor/EditorEvent"
 import style from "@/iink.css"
 
 /**
@@ -7,7 +14,9 @@ import style from "@/iink.css"
  */
 export type TEditorLayerUIState = {
   root: HTMLDivElement
-  busy: HTMLDivElement
+  icon: HTMLDivElement
+  count: HTMLSpanElement
+  tooltip: HTMLDivElement
 }
 
 /**
@@ -22,6 +31,25 @@ export type TEditorLayerUI = {
 /**
  * @group Editor
  */
+export type TEditorStateDetail = {
+  /** Number of addStrokes batches queued locally while offline (only relevant for `syncing`). */
+  queuedCount: number
+  /** Labels of operations currently running (only relevant for `online-working`), e.g. `["Converting"]`. */
+  activeOperations: string[]
+}
+
+const CONNECTION_STATE_INFO: Record<TEditorConnectionState, { icon: string; tooltip: string }> = {
+  initializing: { icon: loadingRingIcon, tooltip: "Connecting…" },
+  "online-idle": { icon: wifiIcon, tooltip: "Connected" },
+  "online-working": { icon: loadingDotsIcon, tooltip: "Processing…" },
+  syncing: { icon: syncIcon, tooltip: "Reconnecting — strokes queued to send" },
+  offline: { icon: wifiOffIcon, tooltip: "Offline — reconnecting…" },
+  error: { icon: warningTriangleIcon, tooltip: "Sync failed — reconnection attempts exhausted" },
+}
+
+/**
+ * @group Editor
+ */
 export class EditorLayer {
   root: HTMLElement
   ui: TEditorLayerUI
@@ -30,6 +58,7 @@ export class EditorLayer {
   onCloseModal?: (inError?: boolean) => void
 
   #modal?: Modal
+  #documentPointerdownHandler?: (e: PointerEvent) => void
 
   constructor(root: HTMLElement, rootClassCss: string = "ms-editor") {
     this.root = root
@@ -95,34 +124,52 @@ export class EditorLayer {
     this.#modal.open()
   }
 
-  createBusy(): HTMLDivElement {
-    return DOMFactory.div({ className: "busy" })
-  }
   createState(): TEditorLayerUIState {
-    const root = DOMFactory.div({
-      className: "state",
+    const root = DOMFactory.div({ className: "editor-state" })
+    const icon = DOMFactory.div({ className: "editor-state-icon" })
+    root.appendChild(icon)
+    const count = DOMFactory.span({
+      className: "editor-state-count",
       style: "display: none",
     })
+    root.appendChild(count)
+    const tooltip = DOMFactory.div({ className: "editor-state-tooltip" })
+    root.appendChild(tooltip)
 
-    const busy = this.createBusy()
-    root.appendChild(busy)
-
-    return {
-      root,
-      busy,
+    root.addEventListener("pointerdown", (e) => {
+      e.stopPropagation()
+      tooltip.classList.toggle("open")
+    })
+    this.#documentPointerdownHandler = (e: PointerEvent) => {
+      if (!root.contains(e.target as HTMLElement)) {
+        tooltip.classList.remove("open")
+      }
     }
+    document.addEventListener("pointerdown", this.#documentPointerdownHandler)
+
+    return { root, icon, count, tooltip }
   }
-  showState(): void {
-    this.ui.state.root.style.display = "block"
-  }
-  hideState(): void {
-    this.ui.state.root.style.display = "none"
-  }
-  updateState(idle: boolean): void {
-    if (idle) {
-      this.hideState()
+
+  /**
+   * Reflect the editor's derived state (see `TEditorConnectionState`) on the state badge:
+   * icon, color (via CSS class), and the explanatory tooltip shown next to the badge on click
+   * (including active operation labels or queued count).
+   */
+  updateEditorState(state: TEditorConnectionState, detail: TEditorStateDetail): void {
+    const { root, icon, count, tooltip } = this.ui.state
+    const info = CONNECTION_STATE_INFO[state]
+    root.className = `editor-state editor-state-${state}`
+    icon.innerHTML = info.icon
+    if (state === "syncing" && detail.queuedCount > 0) {
+      tooltip.textContent = `${info.tooltip} — ${detail.queuedCount} stroke batch(es) waiting to be sent`
+      count.textContent = String(detail.queuedCount)
+      count.style.display = "flex"
+    } else if (state === "online-working" && detail.activeOperations.length > 0) {
+      tooltip.textContent = detail.activeOperations.join(", ")
+      count.style.display = "none"
     } else {
-      this.showState()
+      tooltip.textContent = info.tooltip
+      count.style.display = "none"
     }
   }
 
@@ -152,6 +199,10 @@ export class EditorLayer {
 
   destroy(): void {
     this.#modal = undefined
+    if (this.#documentPointerdownHandler) {
+      document.removeEventListener("pointerdown", this.#documentPointerdownHandler)
+      this.#documentPointerdownHandler = undefined
+    }
     while (this.root.lastChild) {
       this.root.removeChild(this.root.lastChild)
     }

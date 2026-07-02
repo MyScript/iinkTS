@@ -40,12 +40,12 @@ export const writePointers = async (
       oldTimestamp = p.t
     }
     // eslint-disable-next-line playwright/no-wait-for-timeout
-    await page.waitForTimeout(waitTime / 10)
+    await page.waitForTimeout(waitTime / 100)
     await page.mouse.move(offsetX + p.x, offsetY + p.y)
   }
   await page.mouse.up()
   // eslint-disable-next-line playwright/no-wait-for-timeout
-  await page.waitForTimeout(150)
+  await page.waitForTimeout(100)
 }
 
 /**

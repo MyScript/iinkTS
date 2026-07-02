@@ -37,10 +37,30 @@ export class Synchronizer
   private batchDebounce?: ReturnType<typeof setTimeout>
   private static readonly BATCH_DELAY = 10
 
+  private gestureListenerAttached = false
+
   constructor(editor: Editor)
   {
     this.editor = editor
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- useGestureManager is a plain singleton factory, not a React hook
     this.gestureManager = useGestureManager(editor)
+  }
+
+  /**
+   * Resolves the shared Recognizer instance and attaches the gestureDetected listener exactly
+   * once — server-detected gestures (from addStrokes) arrive asynchronously via this event now,
+   * not via addStrokes()'s resolved value.
+   */
+  private async getRecognizer(): Promise<Recognizer>
+  {
+    const serverConfiguration = JSON.parse(window.localStorage.getItem("server") || "{}") as Partial<TServerWebsocketConfiguration>
+    // eslint-disable-next-line react-hooks/rules-of-hooks -- useRecognizer is a plain singleton factory, not a React hook
+    const recognizer = Recognizer.instance || await useRecognizer(serverConfiguration)
+    if (!this.gestureListenerAttached) {
+      this.gestureListenerAttached = true
+      recognizer.event.addGestureDetectedListener(gesture => this.gestureManager.apply(gesture))
+    }
+    return recognizer
   }
 
   protected formatDrawShapeToSend(shape: TLDrawShape): TStroke
@@ -132,8 +152,7 @@ export class Synchronizer
     const strokesToSend = [...this.pendingStrokes]
     this.pendingStrokes = []
 
-    const serverConfiguration = JSON.parse(window.localStorage.getItem("server") || "{}") as Partial<TServerWebsocketConfiguration>
-    const recognizer = Recognizer.instance || await useRecognizer(serverConfiguration)
+    const recognizer = await this.getRecognizer()
 
     const shouldDetectGesture = this.processGestures && strokesToSend.length === 1
 
@@ -145,14 +164,12 @@ export class Synchronizer
       })
     }
 
+    // Any server-detected gesture arrives asynchronously via the gestureDetected listener
+    // attached in getRecognizer() — not via this call's resolved value.
     recognizer.addStrokes(
       strokesToSend.map(this.formatDrawShapeToSend.bind(this)),
       shouldDetectGesture
-    ).then(addStrokeResponse => {
-      if (addStrokeResponse) {
-        this.gestureManager.apply(addStrokeResponse)
-      }
-    })
+    )
   }
 
   async sync(changes: RecordsDiff<TLRecord>): Promise<void>
@@ -173,8 +190,7 @@ export class Synchronizer
       return
     }
 
-    const serverConfiguration = JSON.parse(window.localStorage.getItem("server") || "{}") as Partial<TServerWebsocketConfiguration>
-    const recognizer = Recognizer.instance || await useRecognizer(serverConfiguration)
+    const recognizer = await this.getRecognizer()
 
     if (completedShapes.length > 0) {
       const toCreate = completedShapes.filter(s => !this.shapeSendedToRecognizer.has(s.id))

@@ -204,36 +204,179 @@
   }
 }
 
-/** state **/
-.ms-editor .state {
+/** editor state **/
+.ms-editor .editor-state {
   z-index: 99;
   position: absolute;
-  width: 42px;
-  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
   bottom: 8px;
-  left: 0px;
+  left: 8px;
+  border-radius: var(--iink-radius-full);
   background-color: var(--iink-surface);
   cursor: auto;
-  color: var(--iink-text-muted);
   box-shadow:
     1px 1px 5px rgba(0, 0, 0, 0.25),
     -1px -1px 5px rgba(0, 0, 0, 0.25);
 }
 
-.ms-editor .state .busy {
-  margin-top: 6px;
-  margin-left: 6px;
-  height: 30px;
-  width: 30px;
-  color: var(--iink-text-muted);
-  border: 4px solid var(--iink-surface);
-  border-radius: 100%;
-  border-top-color: var(--iink-primary);
-  border-left-color: var(--iink-primary);
-  border-bottom-color: var(--iink-primary);
-  -webkit-animation: spin 2s linear infinite;
-  animation: spin 2s linear infinite;
+.ms-editor .editor-state-icon {
+  display: flex;
+  width: 18px;
+  height: 18px;
 }
+
+.ms-editor .editor-state-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.ms-editor .editor-state-count {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 3px;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--iink-radius-full);
+  background-color: var(--iink-warning);
+  color: white;
+  font-size: 10px;
+  line-height: 16px;
+  text-align: center;
+}
+
+.ms-editor .editor-state-tooltip {
+  display: none;
+  position: absolute;
+  bottom: 0;
+  left: calc(100% + 10px);
+  min-width: 120px;
+  max-width: 240px;
+  padding: 6px 10px;
+  border-radius: var(--iink-radius-sm);
+  background-color: var(--iink-color);
+  color: white;
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: normal;
+  box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.25);
+}
+
+.ms-editor .editor-state-tooltip.open {
+  display: block;
+}
+
+.ms-editor .editor-state-tooltip::after {
+  content: "";
+  position: absolute;
+  bottom: 10px;
+  left: -5px;
+  border-width: 5px 5px 5px 0;
+  border-style: solid;
+  border-color: transparent var(--iink-color) transparent transparent;
+}
+
+.ms-editor .editor-state-initializing .editor-state-icon,
+.ms-editor .editor-state-initializing .editor-state-icon svg {
+  color: var(--iink-secondary);
+}
+.ms-editor .editor-state-initializing .editor-state-icon {
+  -webkit-animation: spin 1.5s linear infinite;
+  animation: spin 1.5s linear infinite;
+}
+
+.ms-editor .editor-state-online-idle .editor-state-icon,
+.ms-editor .editor-state-online-idle .editor-state-icon svg {
+  color: var(--iink-success);
+}
+
+.ms-editor .editor-state-online-working .editor-state-icon,
+.ms-editor .editor-state-online-working .editor-state-icon svg {
+  color: var(--iink-primary);
+}
+.ms-editor .editor-state-online-working .editor-state-icon .dot {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: dot-pulse 1.2s ease-in-out infinite;
+}
+.ms-editor .editor-state-online-working .editor-state-icon .dot-1 {
+  animation-delay: 0s;
+}
+.ms-editor .editor-state-online-working .editor-state-icon .dot-2 {
+  animation-delay: 0.2s;
+}
+.ms-editor .editor-state-online-working .editor-state-icon .dot-3 {
+  animation-delay: 0.4s;
+}
+
+@keyframes dot-pulse {
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+    transform: scale(0.85);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+.ms-editor .editor-state-syncing .editor-state-icon,
+.ms-editor .editor-state-syncing .editor-state-icon svg {
+  color: var(--iink-warning);
+}
+.ms-editor .editor-state-syncing .editor-state-icon {
+  -webkit-animation: spin 1.5s linear infinite;
+  animation: spin 1.5s linear infinite;
+}
+
+.ms-editor .editor-state-online-working,
+.ms-editor .editor-state-syncing {
+  --iink-state-pulse-color: var(--iink-primary);
+  animation: badge-pulse 1.6s ease-out infinite;
+}
+.ms-editor .editor-state-syncing {
+  --iink-state-pulse-color: var(--iink-warning);
+}
+
+@keyframes badge-pulse {
+  0% {
+    box-shadow:
+      0 0 0 0 color-mix(in srgb, var(--iink-state-pulse-color) 45%, transparent),
+      1px 1px 5px rgba(0, 0, 0, 0.25),
+      -1px -1px 5px rgba(0, 0, 0, 0.25);
+  }
+  70% {
+    box-shadow:
+      0 0 0 8px color-mix(in srgb, var(--iink-state-pulse-color) 0%, transparent),
+      1px 1px 5px rgba(0, 0, 0, 0.25),
+      -1px -1px 5px rgba(0, 0, 0, 0.25);
+  }
+  100% {
+    box-shadow:
+      0 0 0 0 color-mix(in srgb, var(--iink-state-pulse-color) 0%, transparent),
+      1px 1px 5px rgba(0, 0, 0, 0.25),
+      -1px -1px 5px rgba(0, 0, 0, 0.25);
+  }
+}
+
+.ms-editor .editor-state-offline .editor-state-icon,
+.ms-editor .editor-state-offline .editor-state-icon svg {
+  color: var(--iink-error);
+}
+
+.ms-editor .editor-state-error .editor-state-icon,
+.ms-editor .editor-state-error .editor-state-icon svg {
+  color: var(--iink-error);
+}
+
 /** modal **/
 .ms-editor .ms-modal-backdrop {
   position: fixed;

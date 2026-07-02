@@ -1,6 +1,7 @@
 import type { THistoryContext } from "@/history"
 import type { TExport } from "@/model"
 
+import type { TRecognizerWebSocketMessageGesture } from "./RecognizerWebSocketMessage"
 import type { TRecognizerWebSocketSSRMessageSVGPatch } from "./RecognizerWebSocketSSRMessage"
 
 /**
@@ -53,7 +54,22 @@ export enum RecognizerEventName {
    * @summary event emitted session opened
    */
   SESSION_OPENED = "session-opened",
+  /**
+   * @summary event emitted when the connection status changes (e.g. going offline while queueing strokes, or reconnecting)
+   */
+  CONNECTION_STATUS_CHANGED = "connection-status-changed",
+  /**
+   * @summary event emitted after receiving a "gestureDetected" message
+   */
+  GESTURE_DETECTED = "gesture-detected",
 }
+
+/**
+ * @group Recognizer
+ * @remarks "offline" covers both a bare disconnect and actively reconnecting/queueing.
+ * "error" means reconnection attempts were exhausted and the offline queue was rejected.
+ */
+export type TConnectionStatus = "connected" | "offline" | "error"
 
 /**
  * @group Recognizer
@@ -166,6 +182,28 @@ export class RecognizerEvent extends EventTarget {
             message?: string
           }
         ),
+      { signal: this.abortController.signal }
+    )
+  }
+
+  emitConnectionStatusChanged(status: TConnectionStatus): void {
+    this.emit(RecognizerEventName.CONNECTION_STATUS_CHANGED, status)
+  }
+  addConnectionStatusChangedListener(callback: (status: TConnectionStatus) => void): void {
+    this.addEventListener(
+      RecognizerEventName.CONNECTION_STATUS_CHANGED,
+      (evt: unknown) => callback((evt as CustomEvent).detail as TConnectionStatus),
+      { signal: this.abortController.signal }
+    )
+  }
+
+  emitGestureDetected(gesture: TRecognizerWebSocketMessageGesture): void {
+    this.emit(RecognizerEventName.GESTURE_DETECTED, gesture)
+  }
+  addGestureDetectedListener(callback: (gesture: TRecognizerWebSocketMessageGesture) => void): void {
+    this.addEventListener(
+      RecognizerEventName.GESTURE_DETECTED,
+      (evt: unknown) => callback((evt as CustomEvent).detail as TRecognizerWebSocketMessageGesture),
       { signal: this.abortController.signal }
     )
   }

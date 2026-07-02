@@ -37,6 +37,14 @@ export type TServerWebsocketConfiguration = TServerHTTPConfiguration & {
     autoReconnect: boolean
     maxRetryCount: number
     fileChunkSize: number
+    /** Queue `addStrokes()` calls locally while disconnected and replay them in order on reconnect. */
+    offlineQueueEnabled: boolean
+    /** Max number of queued addStrokes batches; further calls reject once reached. */
+    offlineQueueMaxSize: number
+    /** Delay in ms between reconnection attempts while offline. */
+    reconnectDelay: number
+    /** Give up reconnecting (and reject the queue) after this many failed attempts. */
+    maxReconnectAttempts: number
   }
 }
 
@@ -53,5 +61,9 @@ export const DefaultServerWebsocketConfiguration: TServerWebsocketConfiguration 
     autoReconnect: true,
     maxRetryCount: 2,
     fileChunkSize: 300000,
+    offlineQueueEnabled: true,
+    offlineQueueMaxSize: 50,
+    reconnectDelay: 3000,
+    maxReconnectAttempts: 10,
   },
 }

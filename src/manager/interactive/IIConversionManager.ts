@@ -761,6 +761,10 @@ export class IIConversionManager extends IIAbstractManager {
   }
 
   async apply(symbols: TSymbol[] = []): Promise<TSymbol[]> {
+    return this.editor.trackOperation("Converting", async () => this.#applyInternal(symbols))
+  }
+
+  async #applyInternal(symbols: TSymbol[] = []): Promise<TSymbol[]> {
     this.logger.info("convert")
     if (!this.model.exports?.["application/vnd.myscript.jiix"]) {
       await this.editor.export(["application/vnd.myscript.jiix"])

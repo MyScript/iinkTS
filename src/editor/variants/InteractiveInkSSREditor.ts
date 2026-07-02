@@ -262,7 +262,7 @@ export class InteractiveInkSSREditor extends AbstractEditor {
       this.recognizer.event.addExportedListener(this.onExport.bind(this))
       this.recognizer.event.addSVGPatchListener(this.onSVGPatch.bind(this))
       this.recognizer.event.addContentChangedListener(this.onContentChanged.bind(this))
-      this.recognizer.event.addIdleListener(this.event.emitIdle.bind(this.event))
+      this.recognizer.event.addIdleListener(this.manageIdleState.bind(this))
       this.recognizer.event.addErrorListener(this.onError.bind(this))
 
       await this.syncStyle()
@@ -273,7 +273,7 @@ export class InteractiveInkSSREditor extends AbstractEditor {
     } finally {
       this.logger.debug("initialize", "finally")
       this.layers.hideLoader()
-      this.layers.updateState(true)
+      this.markConnectedOnce()
     }
   }
 
@@ -288,6 +288,10 @@ export class InteractiveInkSSREditor extends AbstractEditor {
   }
 
   async synchronizeModelWithBackend(): Promise<Model> {
+    return this.trackOperation("Recognizing", async () => this.#synchronizeModelWithBackendInternal())
+  }
+
+  async #synchronizeModelWithBackendInternal(): Promise<Model> {
     this.logger.info("synchronizeModelWithBackend")
     if (this.#configuration.triggers.exportContent !== "DEMAND") {
       const unsentStrokes = this.model.extractUnsentStrokes()
@@ -307,6 +311,10 @@ export class InteractiveInkSSREditor extends AbstractEditor {
   }
 
   async export(mimeTypes?: string[]): Promise<Model> {
+    return this.trackOperation("Exporting", async () => this.#exportInternal(mimeTypes))
+  }
+
+  async #exportInternal(mimeTypes?: string[]): Promise<Model> {
     this.logger.info("export", { mimeTypes })
     try {
       if (this.#configuration.triggers.exportContent === "DEMAND") {
@@ -330,6 +338,10 @@ export class InteractiveInkSSREditor extends AbstractEditor {
   }
 
   async convert(params?: { conversionState?: TConverstionState }): Promise<Model> {
+    return this.trackOperation("Converting", () => this.#convertInternal(params))
+  }
+
+  async #convertInternal(params?: { conversionState?: TConverstionState }): Promise<Model> {
     this.logger.info("convert", { params })
     this.history.push(this.model)
     this.history.stack.push(this.model.clone())
@@ -341,6 +353,10 @@ export class InteractiveInkSSREditor extends AbstractEditor {
   }
 
   async import(data: Blob | string | TJIIXExport, mimeType?: string): Promise<Model> {
+    return this.trackOperation("Importing", async () => this.#importInternal(data, mimeType))
+  }
+
+  async #importInternal(data: Blob | string | TJIIXExport, mimeType?: string): Promise<Model> {
     let blobToImport: Blob
     if (data instanceof Blob) {
       blobToImport = data
@@ -358,6 +374,10 @@ export class InteractiveInkSSREditor extends AbstractEditor {
   }
 
   async importPointEvents(strokes: TPartialDeep<TLegacyStroke>[]): Promise<Model> {
+    return this.trackOperation("Importing", async () => this.#importPointEventsInternal(strokes))
+  }
+
+  async #importPointEventsInternal(strokes: TPartialDeep<TLegacyStroke>[]): Promise<Model> {
     this.logger.info("importPointEvents", {
       strokes,
     })
@@ -460,32 +480,38 @@ export class InteractiveInkSSREditor extends AbstractEditor {
   }
 
   async undo(): Promise<Model> {
-    this.logger.info("undo")
-    if (this.history.context.canUndo) {
-      this.#model = this.history.undo() as Model
-      return this.recognizer.undo(this.model)
-    } else {
-      throw new Error("Undo not allowed")
-    }
+    return this.trackOperation("Undoing", async () => {
+      this.logger.info("undo")
+      if (this.history.context.canUndo) {
+        this.#model = this.history.undo() as Model
+        return this.recognizer.undo(this.model)
+      } else {
+        throw new Error("Undo not allowed")
+      }
+    })
   }
 
   async redo(): Promise<Model> {
-    this.logger.info("redo")
-    if (this.history.context.canRedo) {
-      this.#model = this.history.redo() as Model
-      this.logger.debug("undo", this.#model)
-      return this.recognizer.redo(this.model)
-    } else {
-      throw new Error("Redo not allowed")
-    }
+    return this.trackOperation("Redoing", async () => {
+      this.logger.info("redo")
+      if (this.history.context.canRedo) {
+        this.#model = this.history.redo() as Model
+        this.logger.debug("undo", this.#model)
+        return this.recognizer.redo(this.model)
+      } else {
+        throw new Error("Redo not allowed")
+      }
+    })
   }
 
   async clear(): Promise<void> {
-    this.logger.info("clear")
-    this.model.clear()
-    this.history.push(this.model)
-    await this.recognizer.clear(this.model)
-    this.event.emitCleared()
+    return this.trackOperation("Clearing", async () => {
+      this.logger.info("clear")
+      this.model.clear()
+      this.history.push(this.model)
+      await this.recognizer.clear(this.model)
+      this.event.emitCleared()
+    })
   }
 
   async destroy(): Promise<void> {

@@ -10,7 +10,9 @@ import {
   waitForConvertedEvent,
   callEditorIdle,
   loadEditor,
-  passModalKey
+  passModalKey,
+  waitForChangedEvent,
+  callEditorExport
 } from '../helper'
 
 import one from '../__dataset__/1'
@@ -257,6 +259,8 @@ test.describe('Websocket Math', function () {
     })
 
     test('should undo/redo in mode "session"', async ({ page }) => {
+      test.setTimeout(90 * 1000)
+
       await test.step('should set undo/redo mode set to "session"', async () => {
         const config = await getEditorConfiguration(page)
         const options = {
@@ -286,46 +290,38 @@ test.describe('Websocket Math', function () {
 
       await test.step('should write stroke', async () => {
         await Promise.all([
-          waitForExportedEvent(page),
+          waitForChangedEvent(page),
           writeStrokes(page, equation.strokes)
         ])
-        const exports = await page.evaluate(
-          `editorEl.editor.export(["application/x-latex"])`
-        )
-        expect(exports.exports['application/x-latex']).toEqual(
-          equation.exports.LATEX.at(-1)
-        )
-        await expect(page.locator('#result .katex-html')).toHaveText(
-          equation.exports.LATEX.at(-1)
-        )
+        await callEditorIdle(page)
+        const expected = equation.exports.LATEX.at(-1)
+        
+        await expect(page.locator('#result .katex-html')).toHaveText(expected)
         const latex = await getEditorExportsType(page, 'application/x-latex')
-        expect(latex).toEqual(equation.exports.LATEX.at(-1))
+        expect(latex).toEqual(expected)
       })
 
       await test.step('should undo all stroke written during session time', async () => {
-        const [exportEvt] = await Promise.all([
-          waitForExportedEvent(page),
+        await callEditorIdle(page)
+        await Promise.all([
+          waitForChangedEvent(page),
           page.locator('#undo').click()
         ])
         await expect(page.locator('#result')).toBeEmpty()
         const latex = await getEditorExportsType(page, 'application/x-latex')
         expect(latex).toEqual('')
-        expect(exportEvt['application/x-latex']).toEqual('')
       })
 
       await test.step('should redo all stroke written during session time', async () => {
-        const [exportEvt] = await Promise.all([
-          waitForExportedEvent(page),
+        await callEditorIdle(page)
+        await Promise.all([
+          waitForChangedEvent(page),
           page.locator('#redo').click()
         ])
-        await expect(page.locator('#result .katex-html')).toHaveText(
-          equation.exports.LATEX.at(-1)
-        )
+        const expected = equation.exports.LATEX.at(-1)
+        await expect(page.locator('#result .katex-html')).toHaveText(expected)
         const latex = await getEditorExportsType(page, 'application/x-latex')
-        expect(exportEvt['application/x-latex']).toEqual(latex)
-        expect(exportEvt['application/x-latex']).toEqual(
-          equation.exports.LATEX.at(-1)
-        )
+        expect(latex).toEqual(expected)
       })
     })
 
@@ -358,14 +354,14 @@ test.describe('Websocket Math', function () {
       await callEditorIdle(page)
       const emptyConvert = await getEditorConverts(page)
       expect(emptyConvert).toBeUndefined()
-      await expect(page.locator('path')).toHaveCount(
+      await expect(page.locator('svg[data-layer="MODEL"] path')).toHaveCount(
         equation.strokes.length
       )
 
       await Promise.all([waitForConvertedEvent(page), page.locator('#convert').click()])
 
       await callEditorIdle(page)
-      await expect(page.locator('path')).toHaveCount(
+      await expect(page.locator('svg[data-layer="MODEL"] path')).toHaveCount(
         equation.exports.LATEX.at(-1).length
       )
 

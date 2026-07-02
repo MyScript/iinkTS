@@ -2,7 +2,7 @@ import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
 import type { IIHistoryManager } from "@/history"
 import { LoggerCategory } from "@/logger"
 import type { TStroke } from "@/symbol"
-import { isDecorator, SymbolType } from "@/symbol"
+import { isDecorator, isStroke, SymbolType } from "@/symbol"
 import { OBBOps } from "@/symbol/primitives/OBB"
 import type { TPartialDeep } from "@/utils"
 import { isBetween } from "@/utils"
@@ -59,6 +59,10 @@ export class IIGestureManager extends IIAbstractManager {
     // Initialize helpers with reference to this manager and register handlers
     this.#helpers = new GestureHelpers(editor)
     this.#registerHandlers()
+
+    // Server-detected gestures (from addStrokes) arrive asynchronously with no link to the
+    // original write call — handled here instead of by the caller.
+    this.recognizer.event.addGestureDetectedListener((gesture) => this.apply(gesture))
   }
 
   /**
@@ -87,16 +91,28 @@ export class IIGestureManager extends IIAbstractManager {
   }
 
   /**
-   * Apply a detected gesture using the appropriate handler
-   * @param gestureStroke - The stroke that represents the gesture
-   * @param gesture - The detected gesture with metadata
+   * Apply a detected gesture using the appropriate handler.
+   * @param gesture - The detected gesture with metadata; the triggering stroke is looked up
+   * from the model via `gesture.gestureStrokeId` (works whether the gesture was detected
+   * client-side/contextless or arrived asynchronously from the server).
    */
-  async apply(gestureStroke: TStroke, gesture: TGesture): Promise<void> {
-    this.logger.info("apply", {
-      gestureStroke,
-      gesture,
-    })
+  async apply(gesture: TGesture): Promise<void> {
+    return this.editor.trackOperation("Applying gesture", async () => this.#applyInternal(gesture))
+  }
 
+  async #applyInternal(gesture: TGesture): Promise<void> {
+    this.logger.info("apply", { gesture })
+
+    const gestureSymbol = this.model.getRootSymbol(gesture.gestureStrokeId)
+    if (!gestureSymbol || !isStroke(gestureSymbol)) {
+      this.logger.warn("apply", `Gesture stroke not found in model: ${gesture.gestureStrokeId}`)
+      return
+    }
+    const gestureStroke: TStroke = gestureSymbol
+
+    // Removes the "stroke added" history entry pushed for the gesture stroke itself —
+    // the handler below pushes its own entry for the gesture's actual effect instead.
+    this.history.pop()
     this.editor.removeSymbol(gestureStroke.id, false)
 
     // Dispatch to appropriate handler
@@ -122,6 +138,12 @@ export class IIGestureManager extends IIAbstractManager {
    * @returns The detected gesture or undefined
    */
   async getGestureFromContextLess(gestureStroke: TStroke): Promise<TGesture | undefined> {
+    return this.editor.trackOperation("Applying gesture", async () =>
+      this.#getGestureFromContextLessInternal(gestureStroke)
+    )
+  }
+
+  async #getGestureFromContextLessInternal(gestureStroke: TStroke): Promise<TGesture | undefined> {
     const gesture = await this.recognizer.recognizeGesture(gestureStroke)
     if (!gesture) {
       return
