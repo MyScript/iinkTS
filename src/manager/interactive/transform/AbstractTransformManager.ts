@@ -46,16 +46,17 @@ export abstract class IIAbstractTransformManager extends IIAbstractManager {
   protected finalizeTransform(): void {
     this.interactElementsGroup = undefined
     this.editor.overlays.apply()
+    this.editor.selector.drawSelectedGroup(this.editor.model.symbolsSelected)
   }
 
-  protected clearGhostStrokesForSelectedMath(): void {
+  protected clearResultStrokesForSelectedMath(): void {
     const ids = new Set<string>()
     this.model.symbolsSelected.forEach((s) => {
       if (isStroke(s) && s.jiixBlockType === "Math" && s.jiixBlockId) {
         ids.add(s.jiixBlockId)
       }
     })
-    ids.forEach((id) => this.editor.math.clearGhostStrokes(id))
+    ids.forEach((id) => this.editor.math.clearSolverOutputs(id))
   }
 
   protected abstract applyToStroke(stroke: TStroke, matrix: MatrixTransform): TStroke

@@ -142,7 +142,7 @@ export class IITranslateManager extends IIAbstractTransformManager {
     this.logger.info("start", { origin })
     this.interactElementsGroup = this.resolveInteractGroup(target)
     this.transformOrigin = origin
-    this.clearGhostStrokesForSelectedMath()
+    this.clearResultStrokesForSelectedMath()
   }
 
   continue(point: TPoint): {
@@ -177,7 +177,7 @@ export class IITranslateManager extends IIAbstractTransformManager {
     this.logger.info("end", { point })
     const { tx, ty } = this.continue(point)
     this.editor.snaps.clearSnapToElementLines()
-    this.translate(this.model.symbolsSelected, tx, ty)
+    await this.translate(this.model.symbolsSelected, tx, ty)
     this.finalizeTransform()
   }
 }

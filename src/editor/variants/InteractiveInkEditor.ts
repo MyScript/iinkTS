@@ -789,7 +789,7 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
   async synchronize(): Promise<void> {
     await this.synchronizer.synchronize()
     if (this.model.symbolsSelected.length > 0) {
-      this.selector.resetSelectedGroup(this.model.symbolsSelected)
+      this.selector.drawSelectedGroup(this.model.symbolsSelected)
     }
   }
 
@@ -927,7 +927,6 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
    */
   select(ids: string[]): void {
     this.tool = EditorTool.Select
-    this.selector.removeSelectedGroup()
     this.model.symbols.forEach((s) => {
       const shouldBeSelected = ids.includes(s.id)
       const wasSelected = this.model.selectedIds.has(s.id)
@@ -957,7 +956,6 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
    */
   selectAll(): void {
     this.tool = EditorTool.Select
-    this.selector.removeSelectedGroup()
     this.model.symbols.forEach((s) => {
       this.model.selectedIds.add(s.id)
       this.renderer.updateSelectedState(s, true)

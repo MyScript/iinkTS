@@ -51,7 +51,7 @@ export class FontWeightStyle extends BaseMenuItem<HTMLDivElement> {
               fontWeight: value as "normal" | "bold",
             }
           )
-          editor.selector.resetSelectedGroup(editor.model.symbolsSelected)
+          editor.selector.redrawSelectedGroup()
         }
       },
     }

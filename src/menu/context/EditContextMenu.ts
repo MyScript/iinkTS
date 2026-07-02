@@ -67,7 +67,7 @@ export class EditContextMenu extends BaseMenuItem<HTMLElement> {
           })
         }
         await this.editor.updateSymbol(textSymbol)
-        this.editor.selector.resetSelectedGroup([textSymbol])
+        this.editor.selector.drawSelectedGroup([textSymbol])
       }
     })
 

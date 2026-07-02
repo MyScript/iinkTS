@@ -119,7 +119,7 @@ export class IIRotationManager extends IIAbstractTransformManager {
     this.model.symbolsSelected.forEach((s) => {
       this.setTransformOrigin(s.id, this.center.x, this.center.y)
     })
-    this.clearGhostStrokesForSelectedMath()
+    this.clearResultStrokesForSelectedMath()
   }
 
   continue(point: TPoint): number {
@@ -171,7 +171,7 @@ export class IIRotationManager extends IIAbstractTransformManager {
       preTransformBoundsById
     )
     const strokesFromSymbols = this.editor.extractStrokesFromSymbols(this.model.symbolsSelected)
-    this.editor.recognizer.transformRotate(
+    await this.editor.recognizer.transformRotate(
       strokesFromSymbols.map((s) => s.id),
       angleRad,
       this.center.x,

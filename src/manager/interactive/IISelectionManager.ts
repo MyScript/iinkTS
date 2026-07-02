@@ -139,7 +139,7 @@ export class IISelectionManager extends IIAbstractManager {
       this.renderer.layer.removeEventListener("pointerleave", endHandler)
       this.renderer.layer.removeEventListener("pointerup", endHandler)
       this.renderer.layer.style.cursor = ""
-      this.resetSelectedGroup(this.model.symbolsSelected)
+      this.redrawSelectedGroup()
     }
 
     translateEl.addEventListener("pointerdown", (ev) => {
@@ -215,7 +215,7 @@ export class IISelectionManager extends IIAbstractManager {
       this.renderer.layer.removeEventListener("pointercancel", endHandler)
       this.renderer.layer.removeEventListener("pointerleave", endHandler)
       this.renderer.layer.removeEventListener("pointerup", endHandler)
-      this.resetSelectedGroup(this.model.symbolsSelected)
+      this.drawSelectedGroup(this.model.symbolsSelected)
     }
 
     group.addEventListener("pointerdown", (ev) => {
@@ -274,7 +274,7 @@ export class IISelectionManager extends IIAbstractManager {
         this.renderer.layer.removeEventListener("pointerup", endHandler)
 
         this.renderer.layer.style.cursor = ""
-        this.resetSelectedGroup(this.model.symbolsSelected)
+        this.drawSelectedGroup(this.model.symbolsSelected)
       }
 
       el.addEventListener("pointerdown", (ev) => {
@@ -469,7 +469,7 @@ export class IISelectionManager extends IIAbstractManager {
         this.renderer.layer.removeEventListener("pointerleave", endHandler)
         this.renderer.layer.removeEventListener("pointerup", endHandler)
         this.editor.snaps.clearSnapToElementLines()
-        this.resetSelectedGroup(this.model.symbolsSelected)
+        this.drawSelectedGroup(this.model.symbolsSelected)
       }
 
       el.addEventListener("pointerdown", (ev) => {
@@ -532,7 +532,7 @@ export class IISelectionManager extends IIAbstractManager {
           this.renderer.layer.removeEventListener("pointerleave", endHandler)
           this.renderer.layer.removeEventListener("pointerup", endHandler)
           this.editor.snaps.clearSnapToElementLines()
-          this.resetSelectedGroup(this.model.symbolsSelected)
+          this.drawSelectedGroup(this.model.symbolsSelected)
         }
         el.addEventListener("pointerdown", (ev) => {
           if (ev.button !== 0 || ev.buttons !== 1) {
@@ -615,7 +615,7 @@ export class IISelectionManager extends IIAbstractManager {
       this.renderer.layer.removeEventListener("pointerleave", endHandler)
       this.renderer.layer.removeEventListener("pointerup", endHandler)
       this.renderer.layer.style.cursor = ""
-      this.resetSelectedGroup(this.model.symbolsSelected)
+      this.drawSelectedGroup(this.model.symbolsSelected)
     }
     translateEl.addEventListener("pointerdown", (ev) => {
       if (ev.button !== 0 || ev.buttons !== 1) {
@@ -656,6 +656,7 @@ export class IISelectionManager extends IIAbstractManager {
     if (!symbols.length) {
       return
     }
+    this.removeSelectedGroup()
     if (symbols.length === 1 && EdgeOps.isEdge(symbols[0])) {
       this.selectedGroup = this.createInteractEdgeGroup(symbols[0])
     } else {
@@ -689,19 +690,15 @@ export class IISelectionManager extends IIAbstractManager {
     this.editor.menu.update()
   }
 
-  resetSelectedGroup(symbols: TSymbol[]): void {
-    this.logger.info("resetSelectedGroup", {
-      symbols,
-    })
-    this.removeSelectedGroup()
-    this.drawSelectedGroup(symbols)
-  }
-
   removeSelectedGroup(): void {
     this.logger.info("removeSelectedGroup")
     this.editor.menu.context.hide()
     this.selectedGroup?.remove()
     this.selectedGroup = undefined
+  }
+
+  redrawSelectedGroup(): void {
+    this.drawSelectedGroup(this.editor.model.symbolsSelected)
   }
 
   hideInteractElements(): void {
@@ -856,17 +853,16 @@ export class IISelectionManager extends IIAbstractManager {
   }
 
   /**
-   * Find the JIIX block ID of the single fully-selected math block, if any.
+   * JIIX block IDs currently qualifying as "selected".
    * In "element" mode: a block qualifies if any of its strokes are selected.
    * In "operand" mode: a block qualifies only if ALL its strokes are selected.
-   * Returns undefined when zero or more than one block qualifies.
    */
-  getSelectedMathJiixBlockId(): string | undefined {
+  private getQualifyingMathBlockIds(): string[] {
     const mathLevel = this.editor.configuration.mathSelectionLevel
     const selectedMathStrokes = this.model.symbolsSelected.filter(isRecognizedMath) as TStroke[]
 
     if (selectedMathStrokes.length === 0) {
-      return undefined
+      return []
     }
 
     const blockGroups = new Map<string, TStroke[]>()
@@ -892,7 +888,25 @@ export class IISelectionManager extends IIAbstractManager {
       }
     }
 
+    return qualifyingBlockIds
+  }
+
+  /**
+   * Find the JIIX block ID of the single fully-selected math block, if any.
+   * Returns undefined when zero or more than one block qualifies.
+   */
+  getSelectedMathJiixBlockId(): string | undefined {
+    const qualifyingBlockIds = this.getQualifyingMathBlockIds()
     return qualifyingBlockIds.length === 1 ? qualifyingBlockIds[0] : undefined
+  }
+
+  /**
+   * Whether the given math block currently qualifies as selected.
+   * Reuses the same per-block coverage rule as {@link getSelectedMathJiixBlockId},
+   * without the single-block constraint (supports multi-block selection).
+   */
+  isMathBlockSelected(jiixBlockId: string): boolean {
+    return this.getQualifyingMathBlockIds().includes(jiixBlockId)
   }
 
   end(info: TPointerInfo): TSymbol[] {

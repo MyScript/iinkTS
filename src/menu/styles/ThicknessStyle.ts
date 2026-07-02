@@ -54,7 +54,7 @@ export class ThicknessStyle extends BaseMenuItem<HTMLDivElement> {
             editor.model.symbolsSelected.map((s) => s.id),
             { width: numValue }
           )
-          editor.selector.resetSelectedGroup(editor.model.symbolsSelected)
+          editor.selector.redrawSelectedGroup()
         }
       },
     }

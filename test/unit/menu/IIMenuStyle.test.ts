@@ -124,7 +124,8 @@ describe("IIMenuStyle.ts", () => {
     })
     const layer = document.createElement("div")
     const editor = createEditorMock()
-    editor.selector.resetSelectedGroup = jest.fn()
+    editor.selector.drawSelectedGroup = jest.fn()
+    editor.selector.redrawSelectedGroup = jest.fn()
 
     const menu = new IIMenuStyle(asEditor(editor))
     menu.render(layer)
@@ -169,7 +170,7 @@ describe("IIMenuStyle.ts", () => {
       btn.dispatchEvent(pointerUpEvt)
       expect(editor.updateSymbolsStyle).toHaveBeenCalledTimes(1)
       expect(editor.updateSymbolsStyle).toHaveBeenCalledWith([stroke.id], { width: 8 })
-      expect(editor.selector.resetSelectedGroup).toHaveBeenNthCalledWith(1, [stroke])
+      expect(editor.selector.redrawSelectedGroup).toHaveBeenNthCalledWith(1)
     })
     test("should update style opacity", () => {
       const input = layer.querySelector("#ms-menu-style-opacity-input") as HTMLInputElement

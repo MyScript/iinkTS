@@ -1,7 +1,7 @@
 import { createEditorMock, asEditor } from "../../__mocks__/createEditorMock"
 import { LeftClickEventMock, RightClickEventMock } from "../../__mocks__/EventMock"
 import { buildIIStroke } from "../../helpers"
-import { IISelectionManager, OBBOps, TBox, SvgElementRole, ResizeDirection, TPointerInfo } from "@/iink"
+import { IISelectionManager, OBBOps, TBox, SvgElementRole, ResizeDirection, TPointerInfo, TStroke } from "@/iink"
 
 describe("IISelectionManager.ts", () => {
   Object.defineProperty(global.SVGElement.prototype, "getBBox", {
@@ -124,13 +124,69 @@ describe("IISelectionManager.ts", () => {
       expect(group).toBeNull()
       expect(editor.menu.context.hide).toHaveBeenCalledTimes(1)
     })
+  })
 
-    test("should reset selected group", () => {
-      manager.drawSelectedGroup = jest.fn()
-      manager.removeSelectedGroup = jest.fn()
-      manager.resetSelectedGroup([stroke])
-      expect(manager.drawSelectedGroup).toHaveBeenCalledTimes(1)
-      expect(manager.removeSelectedGroup).toHaveBeenCalledTimes(1)
+  describe("isMathBlockSelected / getSelectedMathJiixBlockId", () => {
+    function buildMathStroke(jiixBlockId: string): TStroke {
+      const stroke = buildIIStroke()
+      stroke.jiixBlockType = "Math"
+      stroke.jiixBlockId = jiixBlockId
+      return stroke
+    }
+
+    test("element mode: block qualifies as soon as one of its strokes is selected", () => {
+      const editor = createEditorMock()
+      const manager = new IISelectionManager(asEditor(editor))
+      const stroke1 = buildMathStroke("block-1")
+      const stroke2 = buildMathStroke("block-1")
+      editor.model.addSymbol(stroke1)
+      editor.model.addSymbol(stroke2)
+      editor.model.selectedIds.add(stroke1.id)
+
+      expect(manager.isMathBlockSelected("block-1")).toBe(true)
+      expect(manager.getSelectedMathJiixBlockId()).toEqual("block-1")
+    })
+
+    test("returns false/undefined when the block has no selected strokes", () => {
+      const editor = createEditorMock()
+      const manager = new IISelectionManager(asEditor(editor))
+      const stroke = buildMathStroke("block-1")
+      editor.model.addSymbol(stroke)
+
+      expect(manager.isMathBlockSelected("block-1")).toBe(false)
+      expect(manager.getSelectedMathJiixBlockId()).toBeUndefined()
+    })
+
+    test("supports multiple selected blocks at once", () => {
+      const editor = createEditorMock()
+      const manager = new IISelectionManager(asEditor(editor))
+      const stroke1 = buildMathStroke("block-1")
+      const stroke2 = buildMathStroke("block-2")
+      editor.model.addSymbol(stroke1)
+      editor.model.addSymbol(stroke2)
+      editor.model.selectedIds.add(stroke1.id)
+      editor.model.selectedIds.add(stroke2.id)
+
+      expect(manager.isMathBlockSelected("block-1")).toBe(true)
+      expect(manager.isMathBlockSelected("block-2")).toBe(true)
+      expect(manager.getSelectedMathJiixBlockId()).toBeUndefined()
+    })
+
+    test("operand mode: block only qualifies when ALL its strokes are selected", () => {
+      const editor = createEditorMock()
+      editor.configuration.mathSelectionLevel = "operand"
+      const manager = new IISelectionManager(asEditor(editor))
+      const stroke1 = buildMathStroke("block-1")
+      const stroke2 = buildMathStroke("block-1")
+      editor.model.addSymbol(stroke1)
+      editor.model.addSymbol(stroke2)
+      editor.jiix.getStrokesForElement = jest.fn().mockReturnValue([stroke1.id, stroke2.id])
+
+      editor.model.selectedIds.add(stroke1.id)
+      expect(manager.isMathBlockSelected("block-1")).toBe(false)
+
+      editor.model.selectedIds.add(stroke2.id)
+      expect(manager.isMathBlockSelected("block-1")).toBe(true)
     })
   })
 
@@ -155,7 +211,6 @@ describe("IISelectionManager.ts", () => {
     editor.transform.resize.continue = jest.fn()
     editor.transform.resize.end = jest.fn()
     const manager = new IISelectionManager(asEditor(editor))
-    manager.resetSelectedGroup = jest.fn()
     const stroke = buildIIStroke()
 
     beforeAll(async () => {
@@ -210,7 +265,6 @@ describe("IISelectionManager.ts", () => {
       }) as PointerEvent
       editor.renderer.layer.dispatchEvent(pointerUp)
       expect(editor.transform.translate.end).toHaveBeenNthCalledWith(1, { x: 5, y: 6 })
-      expect(manager.resetSelectedGroup).toHaveBeenCalledTimes(1)
     })
 
     test("should not call rotation.start on right pointerdown on rotateEl", () => {
@@ -258,7 +312,6 @@ describe("IISelectionManager.ts", () => {
       }) as PointerEvent
       editor.renderer.layer.dispatchEvent(pointerUp)
       expect(editor.transform.rotation.end).toHaveBeenNthCalledWith(1, { x: 5, y: 6 })
-      expect(manager.resetSelectedGroup).toHaveBeenCalledTimes(1)
     })
 
     test("should not call resize.start on right pointerdown on north resizeEl", () => {
@@ -310,7 +363,6 @@ describe("IISelectionManager.ts", () => {
       }) as PointerEvent
       editor.renderer.layer.dispatchEvent(pointerUp)
       expect(editor.transform.resize.end).toHaveBeenNthCalledWith(1, { x: 5, y: 6 })
-      expect(manager.resetSelectedGroup).toHaveBeenCalledTimes(1)
     })
   })
 
