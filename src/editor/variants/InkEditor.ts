@@ -9,6 +9,7 @@ import { IModel } from "@/model"
 import { RecognizerHTTPV2 } from "@/recognizer"
 import { SVGRenderer } from "@/renderer"
 import type { TStyle } from "@/style"
+import { registerBuiltinSymbolUtils } from "@/symbol-utils"
 import type { TPartialDeep } from "@/utils"
 
 import type { TInkEditorConfiguration } from "./InkEditorConfiguration"
@@ -56,6 +57,7 @@ export class InkEditor extends AbstractEditor {
   constructor(rootElement: HTMLElement, options?: TInkEditorOptions) {
     super(rootElement, options)
 
+    registerBuiltinSymbolUtils()
     this.#configuration = new InkEditorConfiguration(options?.configuration)
 
     this.#penStyle = Object.assign({}, this.#configuration.penStyle)
