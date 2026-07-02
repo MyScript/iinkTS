@@ -35,7 +35,7 @@ export class ReorderContextMenu extends SubMenuItem {
         label: "Bring to front",
         action: () => {
           editor.changeOrderSymbols(editor.model.symbolsSelected, "last")
-          editor.selector.resetSelectedGroup(editor.model.symbolsSelected)
+          editor.selector.redrawSelectedGroup()
         },
       })
     }
@@ -47,7 +47,7 @@ export class ReorderContextMenu extends SubMenuItem {
         label: "Bring forward",
         action: () => {
           editor.changeOrderSymbols(editor.model.symbolsSelected, "forward")
-          editor.selector.resetSelectedGroup(editor.model.symbolsSelected)
+          editor.selector.redrawSelectedGroup()
         },
       })
     }
@@ -59,7 +59,7 @@ export class ReorderContextMenu extends SubMenuItem {
         label: "Send backward",
         action: () => {
           editor.changeOrderSymbols(editor.model.symbolsSelected, "backward")
-          editor.selector.resetSelectedGroup(editor.model.symbolsSelected)
+          editor.selector.redrawSelectedGroup()
         },
       })
     }
@@ -71,7 +71,7 @@ export class ReorderContextMenu extends SubMenuItem {
         label: "Send to back",
         action: () => {
           editor.changeOrderSymbols(editor.model.symbolsSelected.slice().reverse(), "first")
-          editor.selector.resetSelectedGroup(editor.model.symbolsSelected)
+          editor.selector.redrawSelectedGroup()
         },
       })
     }

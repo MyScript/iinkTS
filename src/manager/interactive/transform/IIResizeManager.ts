@@ -193,7 +193,7 @@ export class IIResizeManager extends IIAbstractTransformManager {
     this.model.symbolsSelected.forEach((s) => {
       this.setTransformOrigin(s.id, this.transformOrigin.x, this.transformOrigin.y)
     })
-    this.clearGhostStrokesForSelectedMath()
+    this.clearResultStrokesForSelectedMath()
   }
 
   continue(point: TPoint): {
@@ -272,7 +272,7 @@ export class IIResizeManager extends IIAbstractTransformManager {
     this.applyAndDraw(this.model.symbolsSelected, matrix)
     this.editor.connector.updateAnchoredEdges(this.model.symbolsSelected.map((s) => s.id))
     const strokesFromSymbols = this.editor.extractStrokesFromSymbols(this.model.symbolsSelected)
-    this.editor.recognizer.transformScale(
+    await this.editor.recognizer.transformScale(
       strokesFromSymbols.map((s) => s.id),
       scaleX,
       scaleY,

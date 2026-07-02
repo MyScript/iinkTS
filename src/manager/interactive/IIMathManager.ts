@@ -446,6 +446,7 @@ export class IIMathManager extends IIAbstractManager {
         this.logger.debug("tryAutoCompute", `Cannot auto-compute "${label}":`, (error as Error).message)
       }
     }
+    this.editor.selector.redrawSelectedGroup()
   }
 
   protected onDestroy(): void {

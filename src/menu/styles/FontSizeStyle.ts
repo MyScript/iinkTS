@@ -57,7 +57,7 @@ export class FontSizeStyle extends BaseMenuItem<HTMLDivElement> {
               fontSize: fontSize * this.rowHeight,
             }
           )
-          editor.selector.resetSelectedGroup(editor.model.symbolsSelected)
+          editor.selector.redrawSelectedGroup()
         }
       },
     }

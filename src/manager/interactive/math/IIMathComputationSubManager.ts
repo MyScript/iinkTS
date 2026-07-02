@@ -305,6 +305,7 @@ export class IIMathComputationSubManager extends IIAbstractManager {
     let addedStrokesCount = 0
 
     if (mode === "draw") {
+      const wasBlockSelected = this.editor.selector.isMathBlockSelected(jiixBlockId)
       const addedStrokes = await this.addSolverOutputStrokes(result)
       addedStrokesCount = addedStrokes.length
       this.logger.info("computeNumericalResult", `Added ${addedStrokesCount} solver output strokes`)
@@ -312,6 +313,9 @@ export class IIMathComputationSubManager extends IIAbstractManager {
         jiixBlockId,
         addedStrokes.map((s) => s.id)
       )
+      if (wasBlockSelected && addedStrokes.length > 0) {
+        this.editor.select([...this.editor.model.selectedIds, ...addedStrokes.map((s) => s.id)])
+      }
     } else if (mode === "ghost") {
       const elementIds = this.addGhostOutputStrokes(result)
       addedStrokesCount = elementIds.length
@@ -433,7 +437,6 @@ export class IIMathComputationSubManager extends IIAbstractManager {
       color: this.#config.resultColor,
       width: 5,
     }
-
     for (const strokeData of solverStrokes) {
       if (!strokeData.X || !strokeData.Y) {
         this.logger.warn("addSolverOutputStrokes", "Stroke data missing X or Y coordinates")
@@ -455,10 +458,10 @@ export class IIMathComputationSubManager extends IIAbstractManager {
         jiixBlockId: result.id,
       })
 
-      await this.editor.addSymbol(stroke)
       addedStrokes.push(stroke)
       this.logger.debug("addSolverOutputStrokes", "Added solver output stroke:", stroke.id)
     }
+    await this.editor.addSymbols(addedStrokes)
     return addedStrokes
   }
 
