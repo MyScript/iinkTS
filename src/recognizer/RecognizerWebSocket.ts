@@ -70,17 +70,10 @@ export class RecognizerWebSocket {
   protected currentPartId?: string
   protected currentErrorCode?: string | number
 
-  protected addStrokeDeferred?: DeferredPromise<TRecognizerWebSocketMessageGesture | undefined>
   protected contextlessGestureDeferred: Map<string, DeferredPromise<TRecognizerWebSocketMessageContextlessGesture>>
-  protected transformStrokeDeferred?: DeferredPromise<void>
-  protected eraseStrokeDeferred?: DeferredPromise<void>
-  protected replaceStrokeDeferred?: DeferredPromise<void>
   protected exportDeferredMap: Map<string, DeferredPromise<TExport>>
   protected closeDeferred?: DeferredPromise<void>
   protected waitForIdleDeferred?: DeferredPromise<void>
-  protected undoDeferred?: DeferredPromise<void>
-  protected redoDeferred?: DeferredPromise<void>
-  protected clearDeferred?: DeferredPromise<void>
   protected availableActionsDeferred: Map<string, DeferredPromise<string[]>[]>
   protected numericalComputationDeferred: Map<string, DeferredPromise<string>[]>
   protected getDiagnosticDeferred: Map<string, DeferredPromise<string>[]>
@@ -92,6 +85,21 @@ export class RecognizerWebSocket {
   protected getVariableDefinitionsDeferred: DeferredPromise<TMathVariableDefinitions[]>[]
   protected getEvaluablesDeferred: Map<string, DeferredPromise<TMathEvaluable[]>[]>
   protected evaluateDeferred: Map<string, DeferredPromise<number[][]>[]>
+
+  // Resolved once the queued message is actually sent (post-reconnect), not once any server ack
+  // arrives — mutating calls (addStrokes, undo, etc.) never wait for a server ack; there's no
+  // correlation id on "contentChanged"/"gestureDetected" to safely match one to a specific call.
+  #offlineQueue: {
+    message: TRecognizerWebSocketMessage
+    deferred: DeferredPromise<void>
+  }[] = []
+  #reconnectTimer?: ReturnType<typeof setTimeout>
+  #reconnectAttempts = 0
+  // Guards against concurrent init() calls: the offline-queue reconnect loop and the legacy
+  // auto-reconnect in `send()` can both observe a closed socket and call init() around the same
+  // time. Without this, each would create its own `new WebSocket()`, leaving two live sockets
+  // with only the last one referenced by `this.socket`.
+  #connectingPromise: Promise<void> | null = null
 
   configuration: RecognizerWebSocketConfiguration
   initialized: DeferredPromise<void>
@@ -128,6 +136,20 @@ export class RecognizerWebSocket {
     return ["application/vnd.myscript.jiix"]
   }
 
+  /**
+   * Number of addStrokes batches currently queued locally while disconnected.
+   */
+  get offlineQueueLength(): number {
+    return this.#offlineQueue.length
+  }
+
+  /**
+   * True while strokes are queued locally waiting for reconnection (see `server.websocket.offlineQueueEnabled`).
+   */
+  get isOffline(): boolean {
+    return this.offlineQueueLength > 0
+  }
+
   async #send(message: TRecognizerWebSocketMessage): Promise<void> {
     if (!this.socket) {
       throw new Error("Recognizer must be initilized")
@@ -141,13 +163,6 @@ export class RecognizerWebSocket {
 
   protected rejectDeferredPending(error: Error | string): void {
     this.initialized.reject(error)
-    this.addStrokeDeferred?.reject(error)
-    this.transformStrokeDeferred?.reject(error)
-    this.eraseStrokeDeferred?.reject(error)
-    this.replaceStrokeDeferred?.reject(error)
-    this.undoDeferred?.reject(error)
-    this.redoDeferred?.reject(error)
-    this.clearDeferred?.reject(error)
     Array.from(this.contextlessGestureDeferred.values()).forEach((v) => {
       v.reject(error)
     })
@@ -159,15 +174,9 @@ export class RecognizerWebSocket {
 
   protected resetAllDeferred(): void {
     this.initialized = new DeferredPromise<void>()
-    this.addStrokeDeferred = undefined
     this.contextlessGestureDeferred.clear()
-    this.transformStrokeDeferred = undefined
-    this.eraseStrokeDeferred = undefined
-    this.replaceStrokeDeferred = undefined
     this.exportDeferredMap.clear()
     this.waitForIdleDeferred = undefined
-    this.undoDeferred = undefined
-    this.redoDeferred = undefined
     this.closeDeferred = undefined
     this.availableActionsDeferred.clear()
     this.numericalComputationDeferred.clear()
@@ -180,6 +189,94 @@ export class RecognizerWebSocket {
     this.getVariableDefinitionsDeferred = []
     this.getEvaluablesDeferred.clear()
     this.evaluateDeferred.clear()
+  }
+
+  #isDisconnected(): boolean {
+    return (
+      !this.socket || this.socket.readyState === this.socket.CLOSING || this.socket.readyState === this.socket.CLOSED
+    )
+  }
+
+  #enqueueOfflineMessage(message: TRecognizerWebSocketMessage, deferred: DeferredPromise<void>): void {
+    if (this.#offlineQueue.length >= this.configuration.server.websocket.offlineQueueMaxSize) {
+      deferred.reject(new Error("Offline queue full: unable to queue addStrokes while disconnected"))
+      return
+    }
+    this.#offlineQueue.push({ message, deferred })
+    this.event.emitConnectionStatusChanged("offline")
+    this.#startReconnectLoop()
+  }
+
+  #startReconnectLoop(): void {
+    if (this.#reconnectTimer) {
+      return
+    }
+    this.#scheduleReconnectAttempt()
+  }
+
+  #scheduleReconnectAttempt(): void {
+    const { reconnectDelay, maxReconnectAttempts } = this.configuration.server.websocket
+    this.#reconnectTimer = setTimeout(async () => {
+      this.#reconnectTimer = undefined
+      this.#reconnectAttempts++
+      try {
+        await this.init()
+      } catch {
+        if (this.#reconnectAttempts >= maxReconnectAttempts) {
+          this.#giveUpReconnecting()
+        } else {
+          this.#scheduleReconnectAttempt()
+        }
+      }
+    }, reconnectDelay)
+  }
+
+  /**
+   * Runs once per successful connection, regardless of which caller triggered it (the
+   * reconnect loop above, or the legacy auto-reconnect in `send()`). Cancels any reconnect
+   * attempt still scheduled by the other path so it doesn't open a redundant second socket
+   * once this one is up, and drains the offline queue since nothing else would.
+   */
+  #onConnected(): Promise<void> {
+    this.#clearReconnectLoop()
+    this.#reconnectAttempts = 0
+    this.event.emitConnectionStatusChanged("connected")
+    return this.#drainOfflineQueue()
+  }
+
+  async #drainOfflineQueue(): Promise<void> {
+    while (this.#offlineQueue.length > 0) {
+      if (this.#isDisconnected()) {
+        this.#startReconnectLoop()
+        return
+      }
+      const item = this.#offlineQueue[0]
+      await this.#send(item.message)
+      item.deferred.resolve()
+      this.#offlineQueue.shift()
+    }
+  }
+
+  /**
+   * Reconnection attempts exhausted: reject and clear the queue, emit "error", and
+   * reset the attempt counter so the next `addStrokes()` (or drop) gets a fresh retry budget.
+   */
+  #giveUpReconnecting(): void {
+    this.#reconnectAttempts = 0
+    this.#clearOfflineQueue(new Error("Unable to reconnect after offline queueing; queued strokes were not sent"))
+    this.event.emitConnectionStatusChanged("error")
+  }
+
+  #clearOfflineQueue(error: Error): void {
+    this.#offlineQueue.forEach((item) => item.deferred.reject(error))
+    this.#offlineQueue = []
+  }
+
+  #clearReconnectLoop(): void {
+    if (this.#reconnectTimer) {
+      clearTimeout(this.#reconnectTimer)
+      this.#reconnectTimer = undefined
+    }
   }
 
   protected clearSocketListener(): void {
@@ -204,6 +301,10 @@ export class RecognizerWebSocket {
     }
     this.pingWorker?.terminate()
     this.resetAllDeferred()
+    if (evt.code !== 1000 && this.configuration.server.websocket.offlineQueueEnabled) {
+      this.event.emitConnectionStatusChanged("offline")
+      this.#startReconnectLoop()
+    }
   }
 
   protected openCallback(): void {
@@ -297,12 +398,6 @@ export class RecognizerWebSocket {
 
   protected manageContentChangedMessage(contentChangeMessage: TRecognizerWebSocketMessageContentChange): void {
     this.initialized.resolve()
-    this.replaceStrokeDeferred?.resolve()
-    this.transformStrokeDeferred?.resolve()
-    this.eraseStrokeDeferred?.resolve()
-    this.undoDeferred?.resolve()
-    this.redoDeferred?.resolve()
-    this.clearDeferred?.resolve()
     this.event.emitContentChanged({
       canRedo: contentChangeMessage.canRedo,
       canUndo: contentChangeMessage.canUndo,
@@ -357,7 +452,7 @@ export class RecognizerWebSocket {
   }
 
   protected manageGestureDetected(gestureMessage: TRecognizerWebSocketMessageGesture): void {
-    this.addStrokeDeferred?.resolve(gestureMessage)
+    this.event.emitGestureDetected(gestureMessage)
   }
 
   protected manageContextlessGesture(gestureMessage: TRecognizerWebSocketMessageContextlessGesture): void {
@@ -498,6 +593,18 @@ export class RecognizerWebSocket {
   }
 
   async init(): Promise<void> {
+    if (this.#connectingPromise) {
+      return this.#connectingPromise
+    }
+    this.#connectingPromise = this.#connect()
+      .then(() => this.#onConnected())
+      .finally(() => {
+        this.#connectingPromise = null
+      })
+    return this.#connectingPromise
+  }
+
+  async #connect(): Promise<void> {
     this.event.emitStartInitialization()
     if (this.currentErrorCode === "restore.session.not.found") {
       this.currentErrorCode = undefined
@@ -560,17 +667,21 @@ export class RecognizerWebSocket {
       strokes: strokes.map((s) => StrokeOps.formatToSend(s)),
     }
   }
-  async addStrokes(
-    strokes: TStroke[],
-    processGestures = true
-  ): Promise<TRecognizerWebSocketMessageGesture | undefined> {
-    this.addStrokeDeferred = new DeferredPromise<TRecognizerWebSocketMessageGesture | undefined>()
+  /**
+   * @remarks Resolves once the message is sent, not once the server acks it — gesture detection
+   * results (if any) arrive asynchronously via `event.addGestureDetectedListener`, not this promise.
+   */
+  async addStrokes(strokes: TStroke[], processGestures = true): Promise<void> {
     if (strokes.length === 0) {
-      this.addStrokeDeferred.resolve(undefined)
-      return this.addStrokeDeferred?.promise
+      return
     }
-    await this.send(this.buildAddStrokesMessage(strokes, processGestures))
-    return this.addStrokeDeferred?.promise
+    const message = this.buildAddStrokesMessage(strokes, processGestures)
+    if (this.configuration.server.websocket.offlineQueueEnabled && this.#isDisconnected()) {
+      const deferred = new DeferredPromise<void>()
+      this.#enqueueOfflineMessage(message, deferred)
+      return deferred.promise
+    }
+    await this.send(message)
   }
 
   async getAvailableActions(blockId: string): Promise<string[]> {
@@ -774,13 +885,10 @@ export class RecognizerWebSocket {
     }
   }
   async replaceStrokes(oldStrokeIds: string[], newStrokes: TStroke[]): Promise<void> {
-    this.replaceStrokeDeferred = new DeferredPromise<void>()
     if (oldStrokeIds.length === 0) {
-      this.replaceStrokeDeferred.resolve()
-      return this.replaceStrokeDeferred?.promise
+      return
     }
     await this.send(this.buildReplaceStrokesMessage(oldStrokeIds, newStrokes))
-    return this.replaceStrokeDeferred?.promise
   }
 
   protected buildTransformTranslateMessage(strokeIds: string[], tx: number, ty: number): TRecognizerWebSocketMessage {
@@ -793,13 +901,10 @@ export class RecognizerWebSocket {
     }
   }
   async transformTranslate(strokeIds: string[], tx: number, ty: number): Promise<void> {
-    this.transformStrokeDeferred = new DeferredPromise<void>()
     if (strokeIds.length === 0) {
-      this.transformStrokeDeferred.resolve()
-      return this.transformStrokeDeferred?.promise
+      return
     }
     await this.send(this.buildTransformTranslateMessage(strokeIds, tx, ty))
-    return this.transformStrokeDeferred?.promise
   }
 
   protected buildTransformRotateMessage(
@@ -818,13 +923,10 @@ export class RecognizerWebSocket {
     }
   }
   async transformRotate(strokeIds: string[], angle: number, x0: number = 0, y0: number = 0): Promise<void> {
-    this.transformStrokeDeferred = new DeferredPromise<void>()
     if (strokeIds.length === 0) {
-      this.transformStrokeDeferred.resolve()
-      return this.transformStrokeDeferred?.promise
+      return
     }
     await this.send(this.buildTransformRotateMessage(strokeIds, angle, x0, y0))
-    return this.transformStrokeDeferred?.promise
   }
 
   protected buildTransformScaleMessage(
@@ -851,13 +953,10 @@ export class RecognizerWebSocket {
     x0: number = 0,
     y0: number = 0
   ): Promise<void> {
-    this.transformStrokeDeferred = new DeferredPromise<void>()
     if (strokeIds.length === 0) {
-      this.transformStrokeDeferred.resolve()
-      return this.transformStrokeDeferred?.promise
+      return
     }
     await this.send(this.buildTransformScaleMessage(strokeIds, scaleX, scaleY, x0, y0))
-    return this.transformStrokeDeferred?.promise
   }
 
   protected buildTransformMatrixMessage(strokeIds: string[], matrix: TMatrixTransform): TRecognizerWebSocketMessage {
@@ -869,13 +968,10 @@ export class RecognizerWebSocket {
     }
   }
   async transformMatrix(strokeIds: string[], matrix: TMatrixTransform): Promise<void> {
-    this.transformStrokeDeferred = new DeferredPromise<void>()
     if (strokeIds.length === 0) {
-      this.transformStrokeDeferred.resolve()
-      return this.transformStrokeDeferred?.promise
+      return
     }
     await this.send(this.buildTransformMatrixMessage(strokeIds, matrix))
-    return this.transformStrokeDeferred?.promise
   }
 
   protected buildEraseStrokesMessage(strokeIds: string[]): TRecognizerWebSocketMessage {
@@ -885,13 +981,10 @@ export class RecognizerWebSocket {
     }
   }
   async eraseStrokes(strokeIds: string[]): Promise<void> {
-    this.eraseStrokeDeferred = new DeferredPromise<void>()
     if (strokeIds.length === 0) {
-      this.eraseStrokeDeferred.resolve()
-      return this.eraseStrokeDeferred?.promise
+      return
     }
     await this.send(this.buildEraseStrokesMessage(strokeIds))
-    return this.eraseStrokeDeferred?.promise
   }
 
   async recognizeGesture(stroke: TStroke): Promise<TRecognizerWebSocketMessageContextlessGesture | undefined> {
@@ -988,13 +1081,11 @@ export class RecognizerWebSocket {
     if (changes.length === 0) {
       return
     }
-    this.undoDeferred = new DeferredPromise<void>()
     const message: TRecognizerWebSocketMessage = {
       type: "undo",
       changes,
     }
     await this.send(message)
-    return this.undoDeferred?.promise
   }
 
   async redo(actions: TIIHistoryBackendChanges): Promise<void> {
@@ -1002,14 +1093,11 @@ export class RecognizerWebSocket {
     if (changes.length === 0) {
       return
     }
-    this.redoDeferred = new DeferredPromise<void>()
-
     const message: TRecognizerWebSocketMessage = {
       type: "redo",
       changes,
     }
     await this.send(message)
-    return this.redoDeferred?.promise
   }
 
   async export(requestedMimeTypes?: string[]): Promise<TExport> {
@@ -1030,14 +1118,14 @@ export class RecognizerWebSocket {
   }
 
   async clear(): Promise<void> {
-    this.clearDeferred = new DeferredPromise<void>()
     await this.send({
       type: "clear",
     })
-    return this.clearDeferred?.promise
   }
 
   async close(code: number, reason: string): Promise<void> {
+    this.#clearReconnectLoop()
+    this.#clearOfflineQueue(new Error(`Recognizer closed (${reason}): queued strokes were not sent`))
     this.resetAllDeferred()
     this.closeDeferred = new DeferredPromise<void>()
     if (this.socket.readyState === this.socket.OPEN || this.socket.readyState === this.socket.CONNECTING) {

@@ -157,6 +157,14 @@ export function createEditorMock(overrides: Partial<TEditorMock> = {}): TEditorM
   const model = overrides.model ?? new IIModel(configuration.rendering.guides.gap)
   const renderer = overrides.renderer ?? createRendererStub()
   const event = overrides.event ?? new EditorEventMock(document.createElement("div"))
+  const recognizer = overrides.recognizer ?? stubManager()
+  if (!overrides.recognizer) {
+    // recognizer.event.addXListener(...) is called from manager constructors (e.g. IIGestureManager) —
+    // nest another auto-stub proxy so any listener-registration method resolves to a jest.fn().
+    // Must be a direct assignment (not `??=`): reading `.event` through the proxy would already
+    // auto-vivify it to a plain jest.fn() before the nullish check runs.
+    ;(recognizer as unknown as { event: unknown }).event = stubManager()
+  }
 
   let _penStyle: TStyle = { ...DefaultStyle }
   let _tool: EditorTool = EditorTool.Write
@@ -164,7 +172,7 @@ export function createEditorMock(overrides: Partial<TEditorMock> = {}): TEditorM
   const base = {
     model,
     renderer,
-    recognizer: overrides.recognizer ?? stubManager(),
+    recognizer,
     configuration,
     event,
     layers: overrides.layers ?? new EditorLayer(document.createElement("div")),
@@ -324,6 +332,10 @@ export function createEditorMock(overrides: Partial<TEditorMock> = {}): TEditorM
     resize: jest.fn().mockResolvedValue(undefined),
     setCssVars: jest.fn(),
     manageError: jest.fn(),
+    connectionState: "online-idle",
+    trackOperation: jest.fn().mockImplementation((_label: string, fn: () => Promise<unknown>) => fn()),
+    startOperation: jest.fn(),
+    endOperation: jest.fn(),
   }
 
   Object.defineProperty(base, "renderingConfiguration", {

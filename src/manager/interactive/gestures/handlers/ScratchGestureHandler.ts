@@ -127,6 +127,7 @@ export class ScratchGestureHandler extends GestureHandler {
       }
     }
   }
+
   async apply(gestureStroke: TStroke, gesture: TGesture): Promise<void> {
     this.logger.debug("applyScratchGesture", {
       gestureStroke,

@@ -128,7 +128,9 @@ export class IIMathManager extends IIAbstractManager {
     wasRecomputed: boolean
   }> {
     try {
-      return this.#computation.computeNumericalResult(jiixBlockId, mode)
+      return this.editor.trackOperation("Computing", async () =>
+        this.#computation.computeNumericalResult(jiixBlockId, mode)
+      )
     } catch (error) {
       this.editor.manageError(error as Error)
       throw error
@@ -136,15 +138,15 @@ export class IIMathManager extends IIAbstractManager {
   }
 
   async computeAllNumericalResults(): Promise<void> {
-    return this.#computation.computeAllNumericalResults()
+    return this.editor.trackOperation("Computing", async () => this.#computation.computeAllNumericalResults())
   }
 
   async clearSolverOutputs(jiixBlockId: string): Promise<void> {
-    return this.#computation.clearSolverOutputs(jiixBlockId)
+    return this.editor.trackOperation("Computing", async () => this.#computation.clearSolverOutputs(jiixBlockId))
   }
 
   async clearAllSolverOutputs(): Promise<void> {
-    return this.#computation.clearAllSolverOutputs()
+    return this.editor.trackOperation("Computing", async () => this.#computation.clearAllSolverOutputs())
   }
 
   getComputation(jiixBlockId: string): TMathBlockComputation | undefined {
@@ -179,6 +181,12 @@ export class IIMathManager extends IIAbstractManager {
    * @returns Promise that resolves when the variable is set
    */
   async setVariableValue(jiixBlockId: string, variableName: string, variableValue: number): Promise<void> {
+    return this.editor.trackOperation("Updating variables", async () =>
+      this.#setVariableValueInternal(jiixBlockId, variableName, variableValue)
+    )
+  }
+
+  async #setVariableValueInternal(jiixBlockId: string, variableName: string, variableValue: number): Promise<void> {
     try {
       this.logger.info("setVariableValue", {
         jiixBlockId,
@@ -205,6 +213,12 @@ export class IIMathManager extends IIAbstractManager {
    * @returns Promise that resolves when all variables are set
    */
   async setListVariableValue(jiixBlockId: string, variableValues: Record<string, number>): Promise<void> {
+    return this.editor.trackOperation("Updating variables", async () =>
+      this.#setListVariableValueInternal(jiixBlockId, variableValues)
+    )
+  }
+
+  async #setListVariableValueInternal(jiixBlockId: string, variableValues: Record<string, number>): Promise<void> {
     try {
       this.logger.info("setListVariableValue", {
         jiixBlockId,
@@ -227,7 +241,7 @@ export class IIMathManager extends IIAbstractManager {
    */
   async getVariables(jiixBlockId: string): Promise<TMathVariable[]> {
     try {
-      return this.#variables.getVariables(jiixBlockId)
+      return this.editor.trackOperation("Loading variables", async () => this.#variables.getVariables(jiixBlockId))
     } catch (error) {
       this.editor.manageError(error as Error)
       throw error
@@ -242,7 +256,9 @@ export class IIMathManager extends IIAbstractManager {
    */
   async getVariableValue(jiixBlockId: string, variableName: string): Promise<number | null> {
     try {
-      return this.#variables.getVariableValue(jiixBlockId, variableName)
+      return this.editor.trackOperation("Loading variables", async () =>
+        this.#variables.getVariableValue(jiixBlockId, variableName)
+      )
     } catch (error) {
       this.editor.manageError(error as Error)
       throw error
@@ -254,7 +270,9 @@ export class IIMathManager extends IIAbstractManager {
   }
 
   async enrichMathDependencies(jiixBlockId: string): Promise<void> {
-    return this.#variables.enrichMathDependencies(jiixBlockId)
+    return this.editor.trackOperation("Loading variables", async () =>
+      this.#variables.enrichMathDependencies(jiixBlockId)
+    )
   }
 
   cleanupMathDependencies(jiixBlockIds: string[]): void {
@@ -262,6 +280,10 @@ export class IIMathManager extends IIAbstractManager {
   }
 
   async recalculateDependentBlocks(sourceBlockId: string): Promise<void> {
+    return this.editor.trackOperation("Computing", async () => this.#recalculateDependentBlocksInternal(sourceBlockId))
+  }
+
+  async #recalculateDependentBlocksInternal(sourceBlockId: string): Promise<void> {
     this.logger.info("recalculateDependentBlocks", { sourceBlockId })
 
     const deps = this.#variables.getDependencies(sourceBlockId)
@@ -306,20 +328,24 @@ export class IIMathManager extends IIAbstractManager {
   }
 
   async removeVariable(jiixBlockId: string, variableName: string): Promise<void> {
-    await this.#variables.removeVariableValue(jiixBlockId, variableName)
-    await this.recalculateDependentBlocks(jiixBlockId)
+    return this.editor.trackOperation("Updating variables", async () => {
+      await this.#variables.removeVariableValue(jiixBlockId, variableName)
+      await this.recalculateDependentBlocks(jiixBlockId)
+    })
   }
 
   async asVariableDefinition(jiixBlockId: string): Promise<TMathVariableDefinition | null> {
-    return this.#variables.asVariableDefinition(jiixBlockId)
+    return this.editor.trackOperation("Loading variables", async () =>
+      this.#variables.asVariableDefinition(jiixBlockId)
+    )
   }
 
   async getVariableDefinitions(): Promise<TMathVariableDefinitions[]> {
-    return this.#variables.getVariableDefinitions()
+    return this.editor.trackOperation("Loading variables", async () => this.#variables.getVariableDefinitions())
   }
 
   async getAllVariableUsages(): Promise<TMathVariableUsage[]> {
-    return this.#variables.getAllVariableUsages()
+    return this.editor.trackOperation("Loading variables", async () => this.#variables.getAllVariableUsages())
   }
 
   clearVariableInteractions(): void {
@@ -343,7 +369,9 @@ export class IIMathManager extends IIAbstractManager {
     }
   ): Promise<{ [key: string]: number }[][]> {
     try {
-      return this.#evaluation.evaluateFunction(jiixBlockId, evaluation)
+      return this.editor.trackOperation("Evaluating", async () =>
+        this.#evaluation.evaluateFunction(jiixBlockId, evaluation)
+      )
     } catch (error) {
       this.editor.manageError(error as Error)
       throw error
@@ -357,7 +385,7 @@ export class IIMathManager extends IIAbstractManager {
    */
   async getEvaluables(jiixBlockId: string): Promise<TMathEvaluable[]> {
     try {
-      return this.#evaluation.getEvaluables(jiixBlockId)
+      return this.editor.trackOperation("Evaluating", async () => this.#evaluation.getEvaluables(jiixBlockId))
     } catch (error) {
       this.editor.manageError(error as Error)
       throw error
@@ -376,7 +404,9 @@ export class IIMathManager extends IIAbstractManager {
         jiixBlockId,
         task,
       })
-      return await this.editor.recognizer.getDiagnostic(jiixBlockId, task)
+      return await this.editor.trackOperation("Checking", async () =>
+        this.editor.recognizer.getDiagnostic(jiixBlockId, task)
+      )
     } catch (error) {
       this.editor.manageError(error as Error)
       throw error
@@ -393,7 +423,9 @@ export class IIMathManager extends IIAbstractManager {
       this.logger.info("getAvailableActions", {
         jiixBlockId,
       })
-      return await this.editor.recognizer.getAvailableActions(jiixBlockId)
+      return await this.editor.trackOperation("Checking", async () =>
+        this.editor.recognizer.getAvailableActions(jiixBlockId)
+      )
     } catch (error) {
       this.editor.manageError(error as Error)
       throw error
@@ -417,6 +449,10 @@ export class IIMathManager extends IIAbstractManager {
   // ==========================================
 
   async tryAutoCompute(): Promise<void> {
+    return this.editor.trackOperation("Computing", async () => this.#tryAutoComputeInternal())
+  }
+
+  async #tryAutoComputeInternal(): Promise<void> {
     this.logger.info("tryAutoCompute")
 
     const mathBlocks = this.editor.model.mathBlocks

@@ -107,6 +107,9 @@ export class IIRotationManager extends IIAbstractTransformManager {
 
   start(target: Element, origin: TPoint): void {
     this.logger.info("start", { target })
+    // Optimistic: reflects "working" on the state badge as soon as the drag starts. Cleared by
+    // the debounced synchronize() triggered by onContentChanged once the transform is acked.
+    this.editor.startOperation("Recognizing")
     this.interactElementsGroup = this.resolveInteractGroup(target)
     const boundingBox = BoxOps.createFromPoints(this.model.symbolsSelected.flatMap((s) => s.vertices))
 

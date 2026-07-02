@@ -241,7 +241,7 @@ export class InkEditorDeprecated extends AbstractEditor {
     } finally {
       this.logger.debug("initialize", "finally")
       this.layers.hideLoader()
-      this.layers.updateState(true)
+      this.markConnectedOnce()
     }
   }
 
@@ -253,6 +253,10 @@ export class InkEditorDeprecated extends AbstractEditor {
   }
 
   async updateModelRendering(): Promise<Model> {
+    return this.trackOperation("Recognizing", async () => this.#updateModelRenderingInternal())
+  }
+
+  async #updateModelRenderingInternal(): Promise<Model> {
     this.logger.info("updateModelRendering")
     this.renderer.drawModel(this.model)
     const deferred = new DeferredPromise<Model>()
@@ -289,6 +293,10 @@ export class InkEditorDeprecated extends AbstractEditor {
   }
 
   async export(mimeTypes?: string[]): Promise<Model> {
+    return this.trackOperation("Exporting", async () => this.#exportInternal(mimeTypes))
+  }
+
+  async #exportInternal(mimeTypes?: string[]): Promise<Model> {
     this.logger.info("export", { mimeTypes })
     const newModel = await this.recognizer.export(this.model.clone(), mimeTypes)
     if (this.model.modificationDate === newModel.modificationDate) {
@@ -301,6 +309,10 @@ export class InkEditorDeprecated extends AbstractEditor {
   }
 
   async convert(params?: { conversionState?: TConverstionState; mimeTypes?: string[] }): Promise<Model> {
+    return this.trackOperation("Converting", async () => this.#convertInternal(params))
+  }
+
+  async #convertInternal(params?: { conversionState?: TConverstionState; mimeTypes?: string[] }): Promise<Model> {
     this.logger.info("convert", { params })
     const newModel = await this.recognizer.convert(this.model, params?.conversionState, params?.mimeTypes)
     Object.assign(this.#model, newModel)
@@ -310,6 +322,10 @@ export class InkEditorDeprecated extends AbstractEditor {
   }
 
   async importPointEvents(strokes: TPartialDeep<TLegacyStroke>[]): Promise<Model> {
+    return this.trackOperation("Importing", async () => this.#importPointEventsInternal(strokes))
+  }
+
+  async #importPointEventsInternal(strokes: TPartialDeep<TLegacyStroke>[]): Promise<Model> {
     const errors: string[] = []
     strokes.forEach((s, strokeIndex) => {
       let flag = true
@@ -387,23 +403,27 @@ export class InkEditorDeprecated extends AbstractEditor {
   }
 
   async undo(): Promise<void> {
-    this.logger.info("undo")
-    this.#model = this.history.undo() as Model
-    this.renderer.drawModel(this.#model)
-    this.#model = await this.recognizer.export(this.#model)
-    this.history.updateStack(this.#model)
-    this.event.emitExported(this.#model.exports as TExport)
-    this.logger.debug("undo", this.#model)
+    return this.trackOperation("Undoing", async () => {
+      this.logger.info("undo")
+      this.#model = this.history.undo() as Model
+      this.renderer.drawModel(this.#model)
+      this.#model = await this.recognizer.export(this.#model)
+      this.history.updateStack(this.#model)
+      this.event.emitExported(this.#model.exports as TExport)
+      this.logger.debug("undo", this.#model)
+    })
   }
 
   async redo(): Promise<void> {
-    this.logger.info("redo")
-    this.#model = this.history.redo() as Model
-    this.renderer.drawModel(this.#model)
-    this.#model = await this.recognizer.export(this.#model)
-    this.history.updateStack(this.#model)
-    this.event.emitExported(this.#model.exports as TExport)
-    this.logger.debug("redo", this.#model)
+    return this.trackOperation("Redoing", async () => {
+      this.logger.info("redo")
+      this.#model = this.history.redo() as Model
+      this.renderer.drawModel(this.#model)
+      this.#model = await this.recognizer.export(this.#model)
+      this.history.updateStack(this.#model)
+      this.event.emitExported(this.#model.exports as TExport)
+      this.logger.debug("redo", this.#model)
+    })
   }
 
   async clear(): Promise<void> {

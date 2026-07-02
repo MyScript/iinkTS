@@ -124,6 +124,92 @@ describe("EditorOffscreen.ts", () => {
     })
   })
 
+  describe("connectionState", () => {
+    let editor: InteractiveInkEditor
+
+    beforeEach(() => {
+      editor = new InteractiveInkEditor(document.createElement("div"), EditorOptions)
+    })
+
+    function stubOfflineQueueLength(length: number): void {
+      Object.defineProperty(editor.recognizer, "offlineQueueLength", { get: () => length, configurable: true })
+    }
+
+    test("should start as initializing before the first successful connection", () => {
+      expect(editor.connectionState).toEqual("initializing")
+    })
+
+    test("should become online-idle once connected for the first time", () => {
+      editor.recognizer.event.emitEndInitialization()
+      expect(editor.connectionState).toEqual("online-idle")
+    })
+
+    test("should become online-working while an operation is active", () => {
+      // recognizer.idle only fires in response to an explicit waitForIdle() call, not
+      // automatically after addStrokes()/etc — "Recognizing" is tracked at the call site instead.
+      editor.recognizer.event.emitEndInitialization()
+      editor.startOperation("Recognizing")
+      expect(editor.connectionState).toEqual("online-working")
+    })
+
+    test("should return to online-idle once the active operation ends", () => {
+      editor.recognizer.event.emitEndInitialization()
+      editor.startOperation("Recognizing")
+      editor.endOperation("Recognizing")
+      expect(editor.connectionState).toEqual("online-idle")
+    })
+
+    test("should become offline when disconnected with nothing queued", () => {
+      editor.recognizer.event.emitEndInitialization()
+      stubOfflineQueueLength(0)
+      editor.recognizer.event.emitConnectionStatusChanged("offline")
+      expect(editor.connectionState).toEqual("offline")
+    })
+
+    test("should become syncing when disconnected with strokes queued", () => {
+      editor.recognizer.event.emitEndInitialization()
+      stubOfflineQueueLength(2)
+      editor.recognizer.event.emitConnectionStatusChanged("offline")
+      expect(editor.connectionState).toEqual("syncing")
+    })
+
+    test("should become error once reconnection attempts are exhausted", () => {
+      editor.recognizer.event.emitEndInitialization()
+      editor.recognizer.event.emitConnectionStatusChanged("error")
+      expect(editor.connectionState).toEqual("error")
+    })
+
+    test("should emit connectionStateChanged only when the derived state actually changes", () => {
+      const spyEmit: jest.SpyInstance = jest.spyOn(editor.event, "emitConnectionStateChanged")
+      editor.recognizer.event.emitEndInitialization()
+      expect(spyEmit).toHaveBeenCalledWith("online-idle")
+      spyEmit.mockClear()
+      // idle already true — emitting idle(true) again should not change the derived state
+      editor.recognizer.event.emitIdle(true)
+      expect(spyEmit).not.toHaveBeenCalled()
+    })
+
+    test("should always refresh the layer badge, even when the discrete state stays the same", () => {
+      const spyLayer: jest.SpyInstance = jest.spyOn(editor.layers, "updateEditorState")
+      editor.recognizer.event.emitEndInitialization()
+      expect(spyLayer).toHaveBeenCalledWith("online-idle", { queuedCount: 0, activeOperations: [] })
+      spyLayer.mockClear()
+      // starting a second overlapping operation stays "online-working" but the label list changes
+      editor.startOperation("Recognizing")
+      editor.startOperation("Converting")
+      expect(spyLayer).toHaveBeenLastCalledWith("online-working", {
+        queuedCount: 0,
+        activeOperations: ["Recognizing", "Converting"],
+      })
+    })
+
+    test("should still forward the passthrough connectionStatusChanged event unchanged", () => {
+      const spyStatus: jest.SpyInstance = jest.spyOn(editor.event, "emitConnectionStatusChanged")
+      editor.recognizer.event.emitConnectionStatusChanged("offline")
+      expect(spyStatus).toHaveBeenCalledWith("offline")
+    })
+  })
+
   describe("init", () => {
     const editor = new InteractiveInkEditor(document.createElement("div"), EditorOptions)
     editor.menu.render = jest.fn()
@@ -301,7 +387,7 @@ describe("EditorOffscreen.ts", () => {
 
     const editor = new InteractiveInkEditor(document.createElement("div"), EditorOptions)
     editor.event.emitIdle = jest.fn()
-    editor.layers.updateState = jest.fn()
+    editor.layers.updateEditorState = jest.fn()
     editor.renderer.drawSymbol = jest.fn()
     editor.recognizer.addStrokes = jest.fn()
     editor.updateLayerUI = jest.fn()
@@ -310,7 +396,7 @@ describe("EditorOffscreen.ts", () => {
     test("should update layer state", async () => {
       await editor.importPointEvents(pStrokes)
       expect(editor.event.emitIdle).toHaveBeenNthCalledWith(1, false)
-      expect(editor.layers.updateState).toHaveBeenNthCalledWith(1, false)
+      expect(editor.layers.updateEditorState).toHaveBeenCalled()
     })
     test("should call recognizer.addStrokes", async () => {
       await editor.importPointEvents(pStrokes)
@@ -716,7 +802,7 @@ describe("EditorOffscreen.ts", () => {
     editor.recognizer.init = jest.fn(() => Promise.resolve())
     editor.recognizer.waitForIdle = jest.fn(() => Promise.resolve())
     editor.event.emitIdle = jest.fn()
-    editor.layers.updateState = jest.fn()
+    editor.layers.updateEditorState = jest.fn()
 
     beforeAll(async () => {
       await editor.initialize()
@@ -726,10 +812,9 @@ describe("EditorOffscreen.ts", () => {
       await editor.waitForIdle()
       await expect(editor.recognizer.waitForIdle).toHaveBeenCalledTimes(1)
     })
-    test("should emit idle & call layers.updateState when recognizer emit idle", async () => {
+    test("should pass through the idle event (recognizer.idle only fires in response to an explicit waitForIdle call)", async () => {
       editor.recognizer.event.emitIdle(true)
       expect(editor.event.emitIdle).toHaveBeenNthCalledWith(1, true)
-      expect(editor.layers.updateState).toHaveBeenNthCalledWith(1, true)
     })
   })
 

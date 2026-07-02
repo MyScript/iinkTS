@@ -51,14 +51,12 @@ export class IISynchronizerManager extends IIAbstractManager {
       return
     }
 
-    this.editor.layers.updateState(false)
-    this.#synchronizePromise = this.#syncLoop()
+    this.#synchronizePromise = this.editor.trackOperation("Synchronizing", async () => this.#syncLoop())
 
     try {
       await this.#synchronizePromise
     } finally {
       this.#synchronizePromise = undefined
-      this.editor.layers.updateState(true)
     }
   }
 
