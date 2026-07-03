@@ -2,7 +2,7 @@ import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
 import { LoggerCategory } from "@/logger"
 import type { TJIIXMathElement } from "@/model"
 import { SVGBuilder, SVGRendererConst } from "@/renderer"
-import type { TBox, TStroke } from "@/symbol"
+import type { TBox, TPoint, TStroke } from "@/symbol"
 import { isStroke } from "@/symbol"
 import { BoxOps } from "@/symbol/primitives/Box"
 import { OBBOps } from "@/symbol/primitives/OBB"
@@ -22,6 +22,20 @@ export type TOverlayConfig = {
   panelPadding: number
   labelMaxChars: number
   labelFontSize: number
+}
+
+/**
+ * One row displayed in the variable-value encart (name, current value, source-type label).
+ * `swatchColor` matches the highlight drawn on the variable's occurrence(s) in the block ink;
+ * `typeColor` colors the source-type label text (API/Global/Predefined/Undefined).
+ * @group Manager
+ */
+export type TVariableEncartItem = {
+  name: string
+  value: string
+  typeLabel: string
+  typeColor: string
+  swatchColor: string
 }
 
 /**
@@ -69,6 +83,18 @@ export class IIOverlayManager extends IIAbstractManager {
     // user-select only — pointer-events must stay enabled so hover/click work
     NO_SELECT:
       "-webkit-touch-callout: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;",
+  }
+
+  private static readonly VARIABLE_ENCART_ID = "variable-encart"
+
+  private static readonly ENCART_STYLES = {
+    PADDING: 6,
+    LINE_HEIGHT: 16,
+    FONT_SIZE: 11,
+    SWATCH_SIZE: 8,
+    SWATCH_GAP: 6,
+    BACKGROUND: "#ffffff",
+    BORDER: "#999999",
   }
 
   // Overlay config
@@ -385,6 +411,9 @@ export class IIOverlayManager extends IIAbstractManager {
     this.renderer.clearElements({
       attrs: { "data-overlay": "label" },
     })
+    this.renderer.clearElements({
+      attrs: { "data-overlay": "variable-encart" },
+    })
   }
 
   protected sanitizeId(id: string): string {
@@ -461,6 +490,76 @@ export class IIOverlayManager extends IIAbstractManager {
     this.renderer.clearElements({
       attrs: { "data-overlay": "glow" },
     })
+    this.hideVariableEncart()
+  }
+
+  /**
+   * Small box, centered on `anchor`, listing non-BLOCK-sourced variables (API/Global/Predefined/Undefined)
+   * used by the hovered or selected math block. Each row's swatch matches the color of that variable's
+   * highlighted occurrence(s) in the block ink (see `highlightWithColor`).
+   */
+  showVariableEncart(options: { anchor: TPoint; items: TVariableEncartItem[] }): void {
+    this.renderer.removeSymbol(IIOverlayManager.VARIABLE_ENCART_ID)
+
+    const { anchor, items } = options
+    if (items.length === 0) {
+      return
+    }
+
+    const { PADDING, LINE_HEIGHT, FONT_SIZE, SWATCH_SIZE, SWATCH_GAP, BACKGROUND, BORDER } =
+      IIOverlayManager.ENCART_STYLES
+    const CHAR_WIDTH = FONT_SIZE * 0.6
+    const lines = items.map((item) => `${item.name}: ${item.value} · ${item.typeLabel}`)
+    const textWidth = Math.max(...lines.map((line) => line.length)) * CHAR_WIDTH
+    const width = SWATCH_SIZE + SWATCH_GAP + textWidth + PADDING * 2
+    const height = items.length * LINE_HEIGHT + PADDING * 2
+    const position = { x: anchor.x, y: anchor.y - height }
+
+    const group = SVGBuilder.createGroup({
+      id: IIOverlayManager.VARIABLE_ENCART_ID,
+      "data-overlay": "variable-encart",
+      style: "pointer-events: none;",
+    })
+
+    const bgRect = SVGBuilder.createRect(
+      { x: position.x, y: position.y, width, height },
+      {
+        fill: BACKGROUND,
+        stroke: BORDER,
+        "stroke-width": "1",
+        rx: "4",
+        style: SVGRendererConst.noSelection,
+      }
+    )
+    group.appendChild(bgRect)
+
+    items.forEach((item, i) => {
+      const rowY = position.y + PADDING + i * LINE_HEIGHT
+
+      const swatch = SVGBuilder.createRect(
+        { x: position.x + PADDING, y: rowY + (LINE_HEIGHT - SWATCH_SIZE) / 2, width: SWATCH_SIZE, height: SWATCH_SIZE },
+        { fill: item.swatchColor, rx: "2" }
+      )
+      group.appendChild(swatch)
+
+      const textEl = SVGBuilder.createText(
+        { x: position.x + PADDING + SWATCH_SIZE + SWATCH_GAP, y: rowY + FONT_SIZE },
+        lines[i] ?? "",
+        {
+          fill: item.typeColor,
+          "font-size": FONT_SIZE.toString(),
+          "font-family": "monospace",
+          style: SVGRendererConst.noSelection,
+        }
+      )
+      group.appendChild(textEl)
+    })
+
+    this.renderer.layer.appendChild(group)
+  }
+
+  hideVariableEncart(): void {
+    this.renderer.removeSymbol(IIOverlayManager.VARIABLE_ENCART_ID)
   }
 
   clearDimming(): void {
