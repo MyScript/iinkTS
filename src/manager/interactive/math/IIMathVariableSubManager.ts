@@ -1,3 +1,4 @@
+import { SOURCE_TYPE_COLORS, SOURCE_TYPE_LABELS } from "@/components/IIMathVariableInputList"
 import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
 import { LoggerCategory } from "@/logger"
 import type { TJIIXMathElement, TJIIXMathExpression } from "@/model/ExportMath"
@@ -10,6 +11,7 @@ import { convertBoundingBoxMillimeterToPixel, getBoxConnectionPoint } from "@/ut
 
 import { ColorPaletteManager } from "../../base"
 import { IIAbstractManager } from "../IIAbstractManager"
+import type { TVariableEncartItem } from "../IIOverlayManager"
 
 /**
  * Type representing math symbol dependencies
@@ -27,6 +29,11 @@ export type TMathDependencies = {
    * Array of block IDs that depend on this block
    */
   dependentBlocks?: string[]
+
+  /**
+   * Variables used by this block that aren't linked to another block (API, API_GLOBAL, PREDEFINED, UNDEFINED)
+   */
+  externalVariables?: TMathVariable[]
 }
 
 /**
@@ -158,7 +165,7 @@ export class IIMathVariableSubManager extends IIAbstractManager {
 
   async enrichMathDependencies(jiixBlockId: string): Promise<void> {
     try {
-      this.invalidateCacheForBlock(jiixBlockId)
+      this.invalidateCache(jiixBlockId)
       this.logger.info("enrichMathDependencies", `Starting enrichment for "${jiixBlockId}"`)
 
       const variables = await this.getVariables(jiixBlockId)
@@ -167,14 +174,23 @@ export class IIMathVariableSubManager extends IIAbstractManager {
         this.logger.debug("enrichMathDependencies", `No variables in "${jiixBlockId}"`)
 
         const existing = this.#dependencies.get(jiixBlockId)
-        if (existing?.variableSources && Object.keys(existing.variableSources).length > 0) {
+        if (
+          (existing?.variableSources && Object.keys(existing.variableSources).length > 0) ||
+          (existing?.externalVariables && existing.externalVariables.length > 0)
+        ) {
           this.#dependencies.set(jiixBlockId, {
             ...existing,
             variableSources: {},
+            externalVariables: [],
           })
         }
         return
       }
+
+      const ownDefinition = await this.asVariableDefinition(jiixBlockId)
+      const externalVariables = variables.filter(
+        (variable) => variable.sourceType !== "BLOCK" && variable.name !== ownDefinition?.name
+      )
 
       this.logger.info(
         "enrichMathDependencies",
@@ -215,6 +231,7 @@ export class IIMathVariableSubManager extends IIAbstractManager {
       this.#dependencies.set(jiixBlockId, {
         ...existing,
         variableSources: newVariableSources,
+        externalVariables,
       })
 
       this.logger.info("enrichMathDependencies", `Enriched "${jiixBlockId}" with variableSources:`, newVariableSources)
@@ -318,7 +335,7 @@ export class IIMathVariableSubManager extends IIAbstractManager {
     }
   }
 
-  invalidateCacheForBlock(jiixBlockId: string): void {
+  invalidateCache(jiixBlockId: string): void {
     if (jiixBlockId === "") {
       this.#variableCache.clear()
       this.#variableDefinitionCache.clear()
@@ -367,7 +384,7 @@ export class IIMathVariableSubManager extends IIAbstractManager {
       variableValue,
     })
     await this.editor.recognizer.setVariableValue(jiixBlockId, variableName, variableValue)
-    this.invalidateCacheForBlock(jiixBlockId)
+    this.invalidateCache(jiixBlockId)
   }
 
   async removeVariableValue(jiixBlockId: string, variableName: string): Promise<void> {
@@ -376,7 +393,7 @@ export class IIMathVariableSubManager extends IIAbstractManager {
       variableName,
     })
     await this.editor.recognizer.removeVariableValue(jiixBlockId, variableName)
-    this.invalidateCacheForBlock(jiixBlockId)
+    this.invalidateCache(jiixBlockId)
   }
 
   async asVariableDefinition(jiixBlockId: string): Promise<TMathVariableDefinition | null> {
@@ -526,6 +543,55 @@ export class IIMathVariableSubManager extends IIAbstractManager {
     return dependents
   }
 
+  private buildExternalVariableItems(jiixBlockId: string): TVariableEncartItem[] {
+    const externalVariables = this.getDependencies(jiixBlockId)?.externalVariables ?? []
+    return externalVariables.map((variable) => {
+      const sourceType = variable.sourceType ?? "UNDEFINED"
+      return {
+        name: variable.name,
+        value: variable.value?.toString() ?? "undefined",
+        typeLabel: SOURCE_TYPE_LABELS[sourceType] ?? sourceType,
+        typeColor: SOURCE_TYPE_COLORS[sourceType] ?? SOURCE_TYPE_COLORS.UNDEFINED,
+        swatchColor: this.#colorManager.getColorForVariable(variable.name),
+      }
+    })
+  }
+
+  /** Highlights each listed variable's occurrence(s) in the block's ink, colored to match its encart row. */
+  private highlightExternalVariableOccurrences(jiixBlockId: string, items: TVariableEncartItem[]): void {
+    const firstStroke = this.findMathSymbolsByJiixId(jiixBlockId)[0]
+    const mathExpressions = firstStroke
+      ? (this.editor.jiix.getElementForStroke(firstStroke.id) as TJIIXMathElement | undefined)?.expressions
+      : undefined
+    if (!mathExpressions) {
+      return
+    }
+
+    items.forEach((item) => {
+      const boxes = this.findVariableBoxesInExpressions(mathExpressions, item.name)
+      boxes.forEach((box, i) => {
+        this.editor.overlays.highlightWithColor(box, `${jiixBlockId}-extvar-${item.name}-occ${i}`, item.name)
+      })
+    })
+  }
+
+  /** Shows the variable-value encart centered on the block, plus matching in-ink highlights. No-op if there's nothing to show. */
+  private showExternalVariablesEncart(jiixBlockId: string): void {
+    const items = this.buildExternalVariableItems(jiixBlockId)
+    if (items.length === 0) {
+      return
+    }
+
+    const bounds = this.getBlockBounds(jiixBlockId)
+    if (!bounds) {
+      return
+    }
+
+    const anchor = { x: bounds.x, y: bounds.y }
+    this.editor.overlays.showVariableEncart({ anchor, items })
+    this.highlightExternalVariableOccurrences(jiixBlockId, items)
+  }
+
   onSymbolHover(jiixBlockId: string | null): void {
     if (!this.#config.showDependencyOnHover) {
       return
@@ -567,6 +633,7 @@ export class IIMathVariableSubManager extends IIAbstractManager {
     }
 
     this.drawDependencyArrows(jiixBlockId, sources, dependents)
+    this.showExternalVariablesEncart(jiixBlockId)
   }
 
   private clearHoverHighlights(): void {
@@ -625,6 +692,7 @@ export class IIMathVariableSubManager extends IIAbstractManager {
     })
 
     this.drawDependencyArrows(jiixBlockId, sources, dependents)
+    this.showExternalVariablesEncart(jiixBlockId)
   }
 
   clearBlockSelection(): void {
