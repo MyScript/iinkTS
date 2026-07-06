@@ -3,6 +3,7 @@ import type { THistoryContext } from "@/history"
 import { LoggerCategory, LoggerManager } from "@/logger"
 import type { TGestureType } from "@/manager"
 import type { TExport, TExportV2 } from "@/model"
+import type { TConnectionStatus } from "@/recognizer"
 import type { TBaseSymbol, TStroke, TSymbol } from "@/symbol"
 
 /**
@@ -79,7 +80,28 @@ export enum EditorEventName {
    * @remarks event emitted after applying a gesture
    */
   GESTURED = "gestured",
+  /**
+   * @remarks event emitted when the connection status changes (e.g. going offline while queueing strokes, or reconnecting)
+   */
+  CONNECTION_STATUS_CHANGED = "connection-status-changed",
+  /**
+   * @remarks event emitted when the derived UI connection state changes (see {@link TEditorConnectionState})
+   */
+  CONNECTION_STATE_CHANGED = "connection-state-changed",
 }
+
+/**
+ * @group Editor
+ * @remarks Derived, UI-oriented connection state combining initialization, connection, offline
+ * queue, and busy/idle status. See `editor.connectionState` and `addConnectionStateChangedListener`.
+ * - `initializing` — editor not yet connected to the server for the first time
+ * - `online-idle` — connected, recognizer idle
+ * - `online-working` — connected, recognizer processing a request
+ * - `syncing` — disconnected, actively reconnecting, with strokes queued to replay
+ * - `offline` — disconnected, actively reconnecting, nothing queued yet
+ * - `error` — reconnection attempts exhausted, queued strokes were rejected
+ */
+export type TEditorConnectionState = "initializing" | "online-idle" | "online-working" | "syncing" | "offline" | "error"
 
 /**
  * @group Editor
@@ -109,6 +131,32 @@ export class EditorEvent extends EventTarget {
     )
     this.dispatchEvent(evt)
     this.element?.dispatchEvent(evt)
+  }
+
+  emitConnectionStatusChanged(status: TConnectionStatus): void {
+    this.#logger.info("emitConnectionStatusChanged", { status })
+    this.emit(EditorEventName.CONNECTION_STATUS_CHANGED, status)
+  }
+  addConnectionStatusChangedListener(callback: (status: TConnectionStatus) => void): void {
+    this.#logger.info("addConnectionStatusChangedListener", { callback })
+    this.addEventListener(
+      EditorEventName.CONNECTION_STATUS_CHANGED,
+      (evt: unknown) => callback((evt as CustomEvent).detail as TConnectionStatus),
+      { signal: this.abortController.signal }
+    )
+  }
+
+  emitConnectionStateChanged(state: TEditorConnectionState): void {
+    this.#logger.info("emitConnectionStateChanged", { state })
+    this.emit(EditorEventName.CONNECTION_STATE_CHANGED, state)
+  }
+  addConnectionStateChangedListener(callback: (state: TEditorConnectionState) => void): void {
+    this.#logger.info("addConnectionStateChangedListener", { callback })
+    this.addEventListener(
+      EditorEventName.CONNECTION_STATE_CHANGED,
+      (evt: unknown) => callback((evt as CustomEvent).detail as TEditorConnectionState),
+      { signal: this.abortController.signal }
+    )
   }
 
   emitSessionOpened(sessionId: string): void {

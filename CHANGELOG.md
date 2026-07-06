@@ -4,6 +4,16 @@
 
 ## Features
 
+### Editor state (IIC-1681 / IIC-1706)
+- feat(editor): add `editor.connectionState` (initializing/online-idle/online-working/syncing/offline/error) + `connectionStateChanged` event, computed centrally in `AbstractEditor` for all 4 editor variants
+- feat(editor): add `editor.trackOperation()`/`startOperation()`/`endOperation()` — named, ref-counted busy tracking; wired into recognition, conversion, synchronization, math computation/evaluation, transforms, gestures, and export/undo/redo/clear/import across all editor variants
+- feat(editor): the state badge tooltip opens on click (positioned beside the badge) instead of on hover, and lists the active operation label(s) when busy
+- feat(editor): `online-working` badge icon changed from a pencil to a 3-dot "typing" indicator (pulses per-dot); `online-working`/`syncing` badges now also pulse a colored ring around the badge itself
+- feat(editor): "Recognizing" busy tracking reworked to an optimistic model — writer/transform managers mark it active on pointerDown/drag-start (immediate UI feedback, no network round-trip), and it's cleared once per debounced `synchronize()` cycle rather than per network call. Avoids serializing every stroke/transform send behind its individual server ack (previous approach added real latency to fast writing, scratch-out gestures, and multi-stroke imports)
+- feat(editor): **BREAKING** `EditorLayer.updateState()`/`showState()`/`hideState()`/`createState()`/`createBusy()` removed — replaced by `updateEditorState()` driven by `editor.connectionState`. `EditorLayer.ui.state` shape changed (`{ root, icon, count }` instead of `{ root, busy }`)
+- feat(recognizer): `RecognizerWebSocket` proactively detects unexpected disconnects and starts reconnecting immediately (previously only reactive, on the next `addStrokes()` call); `TConnectionStatus` gains an `"error"` value once reconnection attempts are exhausted, with the retry budget reset for the next attempt
+- feat(examples): add "Connection Status" example demonstrating `editor.connectionState` and reconnect handling
+
 ### Math (IIC-1633)
 - feat(math): implement comprehensive math dependencies visualization (variables, overlays, computation, evaluation)
 - feat(math): add Math Diagnostic menu and function evaluator UI component
