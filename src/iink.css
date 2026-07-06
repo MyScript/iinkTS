@@ -377,6 +377,16 @@
   color: var(--iink-error);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .ms-editor .editor-state-initializing .editor-state-icon,
+  .ms-editor .editor-state-syncing .editor-state-icon,
+  .ms-editor .editor-state-online-working .editor-state-icon .dot,
+  .ms-editor .editor-state-online-working,
+  .ms-editor .editor-state-syncing {
+    animation: none;
+  }
+}
+
 /** modal **/
 .ms-editor .ms-modal-backdrop {
   position: fixed;
