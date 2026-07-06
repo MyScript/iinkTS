@@ -331,6 +331,13 @@ export const findValuesByKey = (obj, key, list = []) => {
 }
 
 export const passModalKey = async (page, waitLoader = true) => {
+  // The "online-working"/"syncing" connection-state badge pulses via infinite CSS
+  // animations. On WebKit, a running animation keeps stalling the automation
+  // protocol's command acks, so page.mouse.move() gets ~10x slower for the whole
+  // duration the badge stays active (e.g. undo-redo "session" mode, where it
+  // doesn't go back to idle between strokes). The `reducedMotion` Playwright
+  // context option doesn't reliably reach WebKit, so force it via emulateMedia.
+  await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.getByLabel('Scheme:httpshttp').selectOption(process.env.SCHEME)
   await page.getByRole('textbox', { name: 'Host:' }).fill(process.env.HOST)
   await page.getByRole('textbox', { name: 'Application Key:' }).fill(process.env.APPLICATION_KEY)
