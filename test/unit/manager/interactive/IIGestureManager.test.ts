@@ -27,6 +27,7 @@ describe("IIGestureManager.ts", () => {
     // Handlers are now private - test behavior instead of implementation
 
     const gestureStroke = buildIIStroke()
+    editor.model.addSymbol(gestureStroke)
     test("should remove gestureStroke from renderer", async () => {
       const gesture: TGesture = {
         gestureType: "UNDERLINE",
@@ -35,7 +36,7 @@ describe("IIGestureManager.ts", () => {
         strokeBeforeIds: [],
         strokeAfterIds: [],
       }
-      await gestMan.apply(gestureStroke, gesture)
+      await gestMan.apply(gesture)
       expect(editor.removeSymbol).toHaveBeenNthCalledWith(1, gestureStroke.id, false)
     })
     test("should handle SCRATCH gesture", async () => {
@@ -46,7 +47,7 @@ describe("IIGestureManager.ts", () => {
         strokeBeforeIds: [],
         strokeAfterIds: [],
       }
-      await gestMan.apply(gestureStroke, gesture)
+      await gestMan.apply(gesture)
       expect(editor.removeSymbol).toHaveBeenCalled()
     })
     test("should handle JOIN gesture", async () => {
@@ -57,7 +58,7 @@ describe("IIGestureManager.ts", () => {
         strokeBeforeIds: [],
         strokeAfterIds: [],
       }
-      await gestMan.apply(gestureStroke, gesture)
+      await gestMan.apply(gesture)
       expect(editor.removeSymbol).toHaveBeenCalled()
     })
     test("should handle INSERT gesture", async () => {
@@ -68,7 +69,7 @@ describe("IIGestureManager.ts", () => {
         strokeBeforeIds: [],
         strokeAfterIds: [],
       }
-      await gestMan.apply(gestureStroke, gesture)
+      await gestMan.apply(gesture)
       expect(editor.removeSymbol).toHaveBeenCalled()
     })
     test("should handle STRIKETHROUGH gesture", async () => {
@@ -79,7 +80,7 @@ describe("IIGestureManager.ts", () => {
         strokeBeforeIds: [],
         strokeAfterIds: [],
       }
-      await gestMan.apply(gestureStroke, gesture)
+      await gestMan.apply(gesture)
       expect(editor.removeSymbol).toHaveBeenCalled()
     })
     test("should handle SURROUND gesture", async () => {
@@ -90,7 +91,7 @@ describe("IIGestureManager.ts", () => {
         strokeBeforeIds: [],
         strokeAfterIds: [],
       }
-      await gestMan.apply(gestureStroke, gesture)
+      await gestMan.apply(gesture)
       expect(editor.removeSymbol).toHaveBeenCalled()
     })
   })

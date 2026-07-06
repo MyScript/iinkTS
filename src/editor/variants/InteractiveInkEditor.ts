@@ -158,7 +158,11 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
     this.recognizer.event.addContentChangedListener(this.onContentChanged.bind(this))
     this.recognizer.event.addSessionOpenedListener(this.event.emitSessionOpened.bind(this.event))
     this.recognizer.event.addEndInitialization(this.layers.clearModal.bind(this.layers))
+    this.recognizer.event.addEndInitialization(this.markConnectedOnce.bind(this))
     this.recognizer.event.addIdleListener(this.updateLayerState.bind(this))
+    this.recognizer.event.addConnectionStatusChangedListener((status) =>
+      this.manageConnectionStatus(status, this.recognizer.offlineQueueLength)
+    )
 
     this.renderer = new SVGRenderer(this.#configuration.rendering)
 
@@ -191,6 +195,14 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
    */
   get initializationPromise(): Promise<void> {
     return this.recognizer.initialized.promise
+  }
+
+  /**
+   * True while strokes are queued locally waiting for reconnection.
+   * Listen to `event.addConnectionStatusChangedListener` for change notifications.
+   */
+  get isOffline(): boolean {
+    return this.recognizer.isOffline
   }
 
   /**
@@ -273,8 +285,7 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
   }
 
   protected updateLayerState(idle: boolean): void {
-    this.event.emitIdle(idle)
-    this.layers.updateState(idle)
+    this.manageIdleState(idle)
   }
 
   /**
@@ -339,7 +350,14 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
   protected async onContentChanged(undoRedoContext: THistoryContext): Promise<void> {
     clearTimeout(this.#recognizeStrokeTimer)
     this.#recognizeStrokeTimer = setTimeout(async () => {
-      await this.synchronize()
+      try {
+        await this.synchronize()
+      } finally {
+        // Clears every "Recognizing" started since the last synchronize (writer/transform pointerDown,
+        // programmatic API calls) in one shot — not a matched start/end pair, since several may have
+        // accumulated before this single debounced synchronize() ran.
+        this.clearOperation("Recognizing")
+      }
       this.updateLayerUI(0)
       this.event.emitChanged(undoRedoContext)
     }, 500)
@@ -380,7 +398,7 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
     } finally {
       this.logger.debug("initialize", "finally")
       this.layers.hideLoader()
-      this.layers.updateState(true)
+      this.updateLayerState(true)
     }
   }
 
@@ -396,7 +414,11 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
       this.updateLayerState(false)
       this.configuration.recognition.lang = code
       await this.recognizer.newSession(this.configuration)
-      this.recognizer.addStrokes(this.extractStrokesFromSymbols(this.model.symbols), false)
+      const strokes = this.extractStrokesFromSymbols(this.model.symbols)
+      if (strokes.length > 0) {
+        this.startOperation("Recognizing")
+        this.recognizer.addStrokes(strokes, false)
+      }
       this.layers.hideLoader()
       this.event.emitLoaded()
     } catch (error) {
@@ -437,10 +459,13 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
     const removedStrokeIds = oldStrokes.filter((s) => !newStrokeIds.has(s.id)).map((s) => s.id)
 
     if (removedStrokeIds.length > 0 && addedStrokes.length > 0) {
+      this.startOperation("Recognizing")
       this.recognizer.replaceStrokes(removedStrokeIds, addedStrokes)
     } else if (removedStrokeIds.length > 0) {
+      this.startOperation("Recognizing")
       this.recognizer.eraseStrokes(removedStrokeIds)
     } else if (addedStrokes.length > 0) {
+      this.startOperation("Recognizing")
       this.recognizer.addStrokes(addedStrokes, false)
     }
   }
@@ -494,6 +519,9 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
     this.renderer.drawSymbol(sym)
 
     const strokes = this.extractStrokesFromSymbols([sym])
+    if (strokes.length > 0) {
+      this.startOperation("Recognizing")
+    }
     this.recognizer.addStrokes(strokes, false)
 
     if (addToHistory) {
@@ -520,6 +548,9 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
       this.renderer.drawSymbol(s)
     })
     const strokes = this.extractStrokesFromSymbols(symList)
+    if (strokes.length > 0) {
+      this.startOperation("Recognizing")
+    }
     this.recognizer.addStrokes(strokes, false)
     if (addToHistory) {
       this.history.push(this.model, {
@@ -840,6 +871,7 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
     const symbol = this.model.getRootSymbol(id)
     if (symbol) {
       this.updateLayerState(false)
+      this.startOperation("Recognizing")
       this.recognizer.eraseStrokes([id])
       this.model.removeSymbol(symbol.id)
       this.renderer.removeSymbol(symbol.id)
@@ -859,6 +891,7 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
       this.updateLayerUI()
     } else {
       this.renderer.removeSymbol(id)
+      this.startOperation("Recognizing")
       this.recognizer.eraseStrokes([id])
     }
     this.selector.removeSelectedGroup()
@@ -885,7 +918,10 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
         this.renderer.removeSymbol(sym.id)
       }
     })
-    this.recognizer.eraseStrokes(strokesIds)
+    if (strokesIds.length > 0) {
+      this.startOperation("Recognizing")
+      this.recognizer.eraseStrokes(strokesIds)
+    }
 
     const mathBlockIds = new Set<string>()
     symbolsRemoved.forEach((s) => {
@@ -1004,7 +1040,10 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
       this.model.addSymbol(s)
       this.renderer.drawSymbol(s)
     })
-    this.recognizer.addStrokes(strokes, false)
+    if (strokes.length > 0) {
+      this.startOperation("Recognizing")
+      this.recognizer.addStrokes(strokes, false)
+    }
     this.history.push(this.model, {
       added: strokes,
     })
@@ -1330,30 +1369,36 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
   async undo(): Promise<IIModel> {
     this.logger.info("undo")
     if (this.history.context.canUndo) {
-      this.updateLayerState(false)
-      this.unselectAll()
-      const previousStackItem = this.history.undo()
-      const modifications = previousStackItem.model.extractDifferenceSymbols(this.model)
-      this.#model = previousStackItem.model.clone()
-      this.logger.debug("undo", {
-        previousStackItem,
-      })
-      const actionsToBackend = this.extractBackendChanges(previousStackItem.changes)
-      modifications.removed.forEach((s) => this.renderer.removeSymbol(s.id))
-      modifications.added.forEach((s) => this.renderer.drawSymbol(s))
-      if (
-        actionsToBackend.added?.length ||
-        actionsToBackend.erased?.length ||
-        actionsToBackend.replaced ||
-        actionsToBackend.matrix ||
-        actionsToBackend.translate?.length ||
-        actionsToBackend.scale?.length ||
-        actionsToBackend.rotate?.length
-      ) {
-        await this.recognizer.undo(actionsToBackend)
-      }
-      this.updateLayerUI()
+      return this.#undoInternal()
     }
+    return this.model
+  }
+
+  async #undoInternal(): Promise<IIModel> {
+    this.updateLayerState(false)
+    this.unselectAll()
+    const previousStackItem = this.history.undo()
+    const modifications = previousStackItem.model.extractDifferenceSymbols(this.model)
+    this.#model = previousStackItem.model.clone()
+    this.logger.debug("undo", {
+      previousStackItem,
+    })
+    const actionsToBackend = this.extractBackendChanges(previousStackItem.changes)
+    modifications.removed.forEach((s) => this.renderer.removeSymbol(s.id))
+    modifications.added.forEach((s) => this.renderer.drawSymbol(s))
+    if (
+      actionsToBackend.added?.length ||
+      actionsToBackend.erased?.length ||
+      actionsToBackend.replaced ||
+      actionsToBackend.matrix ||
+      actionsToBackend.translate?.length ||
+      actionsToBackend.scale?.length ||
+      actionsToBackend.rotate?.length
+    ) {
+      this.startOperation("Recognizing")
+      await this.recognizer.undo(actionsToBackend)
+    }
+    this.updateLayerUI()
     return this.model
   }
 
@@ -1365,29 +1410,35 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
     this.logger.info("redo")
 
     if (this.history.context.canRedo) {
-      this.updateLayerState(false)
-      this.unselectAll()
-      const nextStackItem = this.history.redo()
-      const modifications = nextStackItem.model.extractDifferenceSymbols(this.model)
-      this.#model = nextStackItem.model.clone()
-      this.logger.debug("redo", { modifications })
-      const actionsToBackend = this.extractBackendChanges(nextStackItem.changes)
-      modifications.removed.forEach((s) => this.renderer.removeSymbol(s.id))
-      modifications.added.forEach((s) => this.renderer.drawSymbol(s))
-      if (
-        actionsToBackend.added?.length ||
-        actionsToBackend.erased?.length ||
-        actionsToBackend.replaced ||
-        actionsToBackend.matrix ||
-        actionsToBackend.translate?.length ||
-        actionsToBackend.scale?.length ||
-        actionsToBackend.rotate?.length
-      ) {
-        await this.recognizer.redo(actionsToBackend)
-      }
-
-      this.updateLayerUI()
+      return this.#redoInternal()
     }
+    return this.model
+  }
+
+  async #redoInternal(): Promise<IIModel> {
+    this.updateLayerState(false)
+    this.unselectAll()
+    const nextStackItem = this.history.redo()
+    const modifications = nextStackItem.model.extractDifferenceSymbols(this.model)
+    this.#model = nextStackItem.model.clone()
+    this.logger.debug("redo", { modifications })
+    const actionsToBackend = this.extractBackendChanges(nextStackItem.changes)
+    modifications.removed.forEach((s) => this.renderer.removeSymbol(s.id))
+    modifications.added.forEach((s) => this.renderer.drawSymbol(s))
+    if (
+      actionsToBackend.added?.length ||
+      actionsToBackend.erased?.length ||
+      actionsToBackend.replaced ||
+      actionsToBackend.matrix ||
+      actionsToBackend.translate?.length ||
+      actionsToBackend.scale?.length ||
+      actionsToBackend.rotate?.length
+    ) {
+      this.startOperation("Recognizing")
+      await this.recognizer.redo(actionsToBackend)
+    }
+
+    this.updateLayerUI()
     return this.model
   }
 
@@ -1542,6 +1593,7 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
         this.renderer.clear()
         this.model.clear()
         this.history.push(this.model, { erased })
+        this.startOperation("Recognizing")
         this.recognizer.clear()
         this.event.emitSelected(this.model.symbolsSelected)
       }

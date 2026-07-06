@@ -149,7 +149,7 @@ export class InkEditor extends AbstractEditor {
     } finally {
       this.logger.debug("initialize", "finally")
       this.layers.hideLoader()
-      this.layers.updateState(true)
+      this.markConnectedOnce()
     }
   }
 
@@ -170,6 +170,10 @@ export class InkEditor extends AbstractEditor {
   }
 
   async export(requestedMimeTypes?: string[]): Promise<TExportV2> {
+    return this.trackOperation("Exporting", async () => this.#exportInternal(requestedMimeTypes))
+  }
+
+  async #exportInternal(requestedMimeTypes?: string[]): Promise<TExportV2> {
     try {
       this.logger.info("export")
       const currentModel = this.model.clone()
@@ -216,6 +220,10 @@ export class InkEditor extends AbstractEditor {
   }
 
   async removeStrokes(strokeIds: string[]): Promise<void> {
+    return this.trackOperation("Removing strokes", async () => this.#removeStrokesInternal(strokeIds))
+  }
+
+  async #removeStrokesInternal(strokeIds: string[]): Promise<void> {
     this.logger.info("removeStrokes", {
       strokeIds,
     })
@@ -243,23 +251,27 @@ export class InkEditor extends AbstractEditor {
   }
 
   async undo(): Promise<void> {
-    this.logger.info("undo")
-    const previousStackItem = this.history.undo()
-    const modifications = previousStackItem.model.extractDifferenceStrokes(this.model)
-    this.#model = previousStackItem.model.clone()
-    modifications.removed.forEach((s) => this.renderer.removeSymbol(s.id))
-    modifications.added.forEach((s) => this.renderer.drawSymbol(s))
-    await this.export()
+    return this.trackOperation("Undoing", async () => {
+      this.logger.info("undo")
+      const previousStackItem = this.history.undo()
+      const modifications = previousStackItem.model.extractDifferenceStrokes(this.model)
+      this.#model = previousStackItem.model.clone()
+      modifications.removed.forEach((s) => this.renderer.removeSymbol(s.id))
+      modifications.added.forEach((s) => this.renderer.drawSymbol(s))
+      await this.export()
+    })
   }
 
   async redo(): Promise<void> {
-    this.logger.info("redo")
-    const previousStackItem = this.history.redo()
-    const modifications = previousStackItem.model.extractDifferenceStrokes(this.model)
-    this.#model = previousStackItem.model.clone()
-    modifications.removed.forEach((s) => this.renderer.removeSymbol(s.id))
-    modifications.added.forEach((s) => this.renderer.drawSymbol(s))
-    await this.export()
+    return this.trackOperation("Redoing", async () => {
+      this.logger.info("redo")
+      const previousStackItem = this.history.redo()
+      const modifications = previousStackItem.model.extractDifferenceStrokes(this.model)
+      this.#model = previousStackItem.model.clone()
+      modifications.removed.forEach((s) => this.renderer.removeSymbol(s.id))
+      modifications.added.forEach((s) => this.renderer.drawSymbol(s))
+      await this.export()
+    })
   }
 
   async clear(): Promise<void> {

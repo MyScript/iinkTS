@@ -140,6 +140,9 @@ export class IITranslateManager extends IIAbstractTransformManager {
 
   start(target: Element, origin: TPoint): void {
     this.logger.info("start", { origin })
+    // Optimistic: reflects "working" on the state badge as soon as the drag starts. Cleared by
+    // the debounced synchronize() triggered by onContentChanged once the transform is acked.
+    this.editor.startOperation("Recognizing")
     this.interactElementsGroup = this.resolveInteractGroup(target)
     this.transformOrigin = origin
     this.clearResultStrokesForSelectedMath()

@@ -211,7 +211,7 @@ test.describe('Websocket Text', () => {
     })
 
     await test.step('should convert', async () => {
-      const wrotePath = await page.locator('path').first().getAttribute('d')
+      const wrotePath = await page.locator('svg[data-layer="MODEL"] path').first().getAttribute('d')
       await Promise.all([
         waitForExportedEvent(page),
         page.locator(`.more-menu > button >> text=Convert`).click()
@@ -220,7 +220,7 @@ test.describe('Websocket Text', () => {
       const convert = await getEditorExports(page)
       expect(convert).toBeDefined()
 
-      await expect(page.locator('path').first()).not.toHaveAttribute('d', wrotePath)
+      await expect(page.locator('svg[data-layer="MODEL"] path').first()).not.toHaveAttribute('d', wrotePath)
     })
 
     await test.step('should close menu more after convert', async () => {
@@ -235,7 +235,7 @@ test.describe('Websocket Text', () => {
         waitForExportedEvent(page),
         page.locator(`.more-menu > button >> text=Delete`).click()
       ])
-      await expect(page.locator('path')).toHaveCount(0)
+      await expect(page.locator('svg[data-layer="MODEL"] path')).toHaveCount(0)
     })
 
     await test.step('should close menu more after delete', async () => {

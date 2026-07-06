@@ -216,6 +216,10 @@ export class IIWriterManager extends AbstractWriterManager {
   }
 
   start(info: TPointerInfo): void {
+    // Optimistic: reflects "working" on the state badge as soon as the user starts drawing,
+    // without waiting for a server round-trip. Cleared either right away in `end()` (nothing sent
+    // to the recognizer, e.g. a shape) or by the debounced synchronize() triggered by onContentChanged.
+    this.editor.startOperation("Recognizing")
     const localPointer = info.pointer
     if (this.tool !== EditorWriteTool.Pencil) {
       const { x, y } = this.snaps.snapResize(localPointer)
@@ -248,15 +252,12 @@ export class IIWriterManager extends AbstractWriterManager {
       gestureFromContextLess = await this.gestureManager.getGestureFromContextLess(localStroke)
     }
     if (gestureFromContextLess) {
-      this.history.pop()
       this.recognizer.addStrokes([localStroke], this.detectGesture)
-      await this.gestureManager.apply(localStroke, gestureFromContextLess)
+      await this.gestureManager.apply(gestureFromContextLess)
     } else {
-      const gesture = await this.recognizer.addStrokes([localStroke], this.detectGesture)
-      if (gesture) {
-        this.history.pop()
-        await this.gestureManager.apply(localStroke, gesture)
-      }
+      // Any server-detected gesture arrives asynchronously via recognizer.event.addGestureDetectedListener,
+      // handled by IIGestureManager itself — not tied to this call's return value.
+      await this.recognizer.addStrokes([localStroke], this.detectGesture)
     }
   }
 
@@ -278,10 +279,14 @@ export class IIWriterManager extends AbstractWriterManager {
       added: [localSymbol],
     })
 
-    this.renderer.redrawGuides()
+    // this.renderer.redrawGuides()
 
     if (isStroke(localSymbol)) {
       await this.interactWithBackend(localSymbol)
+    } else {
+      // Nothing sent to the recognizer (e.g. a shape) — nothing will ever trigger the
+      // debounced synchronize() that clears the optimistic "Recognizing" started in start().
+      this.editor.endOperation("Recognizing")
     }
   }
 }

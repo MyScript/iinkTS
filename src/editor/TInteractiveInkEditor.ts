@@ -28,7 +28,7 @@ import type { TBaseSymbol, TBox, TStroke, TSymbol } from "@/symbol"
 import type { SymbolUtil } from "@/symbol-utils/SymbolUtil"
 import type { TPartialDeep } from "@/utils"
 
-import type { EditorEvent } from "./EditorEvent"
+import type { EditorEvent, TEditorConnectionState } from "./EditorEvent"
 import type { EditorLayer } from "./EditorLayer"
 import type { InteractiveInkEditorConfiguration } from "./variants/InteractiveInkEditorConfiguration"
 
@@ -51,6 +51,12 @@ export type TInteractiveInkEditor = {
   set penStyle(v: TPartialDeep<TStyle>)
   tool: EditorTool
   set renderingConfiguration(v: TIIRendererConfiguration)
+
+  // ── Editor state (busy/connection badge) ───────────────────────────
+  get connectionState(): TEditorConnectionState
+  trackOperation<T>(label: string, fn: () => Promise<T>): Promise<T>
+  startOperation(label: string): void
+  endOperation(label: string): void
 
   // ── Sub-managers ───────────────────────────────────────────────────
   readonly history: IIHistoryManager
