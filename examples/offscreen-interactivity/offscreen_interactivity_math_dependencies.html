@@ -118,6 +118,7 @@
 
     .source { border-left-color: #4CAF50; }
     .dependent { border-left-color: #FF9800; }
+    .global-var { border-left-color: #9C27B0; }
   </style>
 </head>
 
@@ -257,6 +258,49 @@
       }, 250)
     }
 
+    async function buildGlobalVariablesHtml(mathBlocks, processedBlocks) {
+      const usages = await editor.math.getAllVariableUsages()
+      const globalUsages = usages.filter(u => u.sourceType === 'API_GLOBAL')
+      if (globalUsages.length === 0) {
+        return ''
+      }
+
+      const globalVars = new Map()
+      for (const usage of globalUsages) {
+        if (!globalVars.has(usage.name)) {
+          globalVars.set(usage.name, { value: usage.value, dependentBlockIds: [] })
+        }
+        if (usage.isDefinition) {
+          globalVars.get(usage.name).value = usage.value
+        } else if (!globalVars.get(usage.name).dependentBlockIds.includes(usage.targetBlockId)) {
+          globalVars.get(usage.name).dependentBlockIds.push(usage.targetBlockId)
+        }
+      }
+
+      let html = '<div style="margin-top: 16px; padding-top: 8px; border-top: 1px dashed #ccc;">'
+      html += '<small><strong>🌐 Global variables:</strong></small>'
+      for (const [name, { value, dependentBlockIds }] of globalVars) {
+        html += `<div class="dependency-info global-var" style="margin-top: 8px;">`
+        html += `<strong>${name} = ${value ?? '?'}</strong>`
+        if (dependentBlockIds.length > 0) {
+          html += ` <small>(used by ${dependentBlockIds.length} block(s))</small>`
+        } else {
+          html += ' <small>(not used yet)</small>'
+        }
+        html += '</div>'
+
+        for (const depId of dependentBlockIds) {
+          const depSymbol = mathBlocks.find(s => s.id === depId)
+          html += `<div class="dependency-info dependent" style="margin-left: 16px; margin-top: 4px;">`
+          html += `<strong>→ ${depSymbol?.label || depId}</strong>`
+          html += '</div>'
+          processedBlocks.add(depId)
+        }
+      }
+      html += '</div>'
+      return html
+    }
+
     async function updateDependenciesDisplay() {
       const mathBlocks = editor.model.mathBlocks
 
@@ -314,6 +358,8 @@
 
         html += '</div>'
       }
+
+      html += await buildGlobalVariablesHtml(mathBlocks, processedBlocks)
 
       const remainingBlocks = mathBlocks.filter(s => !processedBlocks.has(s.id))
       if (remainingBlocks.length > 0) {
