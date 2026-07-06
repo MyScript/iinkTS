@@ -15,7 +15,7 @@ export type TVariableInputItem = {
   onDelete?: (name: string) => Promise<void>
 }
 
-const SOURCE_TYPE_COLORS: Record<string, string> = {
+export const SOURCE_TYPE_COLORS: Record<string, string> = {
   UNDEFINED: "var(--iink-secondary)",
   API: "var(--iink-info)",
   API_GLOBAL: "var(--iink-primary)",
@@ -23,7 +23,7 @@ const SOURCE_TYPE_COLORS: Record<string, string> = {
   PREDEFINED: "var(--iink-warning)",
 }
 
-const SOURCE_TYPE_LABELS: Record<string, string> = {
+export const SOURCE_TYPE_LABELS: Record<string, string> = {
   UNDEFINED: "Undefined",
   API: "API",
   API_GLOBAL: "Global",
