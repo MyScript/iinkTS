@@ -56,6 +56,7 @@ import {
   convertBoundingBoxMillimeterToPixel,
   convertMillimeterToPixel,
   createUUID,
+  latexToUnicodeMath,
 } from "@/utils"
 
 import { IIAbstractManager } from "./IIAbstractManager"
@@ -454,117 +455,6 @@ export class IIConversionManager extends IIAbstractManager {
     }
   }
 
-  protected convertLatexToUnicode(latex: string): string {
-    // Convert common LaTeX commands to Unicode symbols
-    const result = latex
-      // Greek letters
-      .replace(/\\alpha/g, "α")
-      .replace(/\\beta/g, "β")
-      .replace(/\\gamma/g, "γ")
-      .replace(/\\delta/g, "δ")
-      .replace(/\\epsilon/g, "ε")
-      .replace(/\\lambda/g, "λ")
-      .replace(/\\Lambda/g, "Λ")
-      .replace(/\\pi/g, "π")
-      .replace(/\\sigma/g, "σ")
-      .replace(/\\Sigma/g, "Σ")
-      .replace(/\\omega/g, "ω")
-      .replace(/\\Omega/g, "Ω")
-      // Math operators
-      .replace(/\\int/g, "∫")
-      .replace(/\\sum/g, "∑")
-      .replace(/\\prod/g, "∏")
-      .replace(/\\sqrt/g, "√")
-      .replace(/\\infty/g, "∞")
-      .replace(/\\partial/g, "∂")
-      .replace(/\\nabla/g, "∇")
-      // Superscripts (convert ^{n} to Unicode superscript)
-      .replace(/\^{([0-9]+)}/g, (_, num) => {
-        const superscripts: {
-          [key: string]: string
-        } = {
-          "0": "⁰",
-          "1": "¹",
-          "2": "²",
-          "3": "³",
-          "4": "⁴",
-          "5": "⁵",
-          "6": "⁶",
-          "7": "⁷",
-          "8": "⁸",
-          "9": "⁹",
-        }
-        return num
-          .split("")
-          .map((d: string) => superscripts[d] || d)
-          .join("")
-      })
-      .replace(/\^([0-9])/g, (_, num) => {
-        const superscripts: {
-          [key: string]: string
-        } = {
-          "0": "⁰",
-          "1": "¹",
-          "2": "²",
-          "3": "³",
-          "4": "⁴",
-          "5": "⁵",
-          "6": "⁶",
-          "7": "⁷",
-          "8": "⁸",
-          "9": "⁹",
-        }
-        return superscripts[num] || num
-      })
-      // Subscripts (convert _{n} to Unicode subscript)
-      .replace(/_{([0-9]+)}/g, (_, num) => {
-        const subscripts: {
-          [key: string]: string
-        } = {
-          "0": "₀",
-          "1": "₁",
-          "2": "₂",
-          "3": "₃",
-          "4": "₄",
-          "5": "₅",
-          "6": "₆",
-          "7": "₇",
-          "8": "₈",
-          "9": "₉",
-        }
-        return num
-          .split("")
-          .map((d: string) => subscripts[d] || d)
-          .join("")
-      })
-      .replace(/_([0-9])/g, (_, num) => {
-        const subscripts: {
-          [key: string]: string
-        } = {
-          "0": "₀",
-          "1": "₁",
-          "2": "₂",
-          "3": "₃",
-          "4": "₄",
-          "5": "₅",
-          "6": "₆",
-          "7": "₇",
-          "8": "₈",
-          "9": "₉",
-        }
-        return subscripts[num] || num
-      })
-      // Fractions - simplified rendering as a/b
-      .replace(/\\dfrac{([^}]+)}{([^}]+)}/g, "($1)/($2)")
-      .replace(/\\frac{([^}]+)}{([^}]+)}/g, "($1)/($2)")
-      // Remove remaining braces
-      .replace(/[{}]/g, "")
-      // Clean up backslashes for simple commands
-      .replace(/\\/g, "")
-
-    return result
-  }
-
   buildMath(mathElement: TJIIXMathElement, strokes: TStroke[], fontSize: number): TMath {
     const boundingBox = BoxOps.createFromBoxes([convertBoundingBoxMillimeterToPixel(mathElement["bounding-box"])])
 
@@ -635,7 +525,7 @@ export class IIConversionManager extends IIAbstractManager {
       // 2. Upper bound (superscript)
       mathElements.push({
         id: `math-element-${createUUID()}`,
-        label: this.convertLatexToUnicode(upperBound),
+        label: latexToUnicodeMath(upperBound),
         color,
         fontSize: limitFontSize,
         fontWeight,
@@ -647,7 +537,7 @@ export class IIConversionManager extends IIAbstractManager {
       // 3. Lower bound (subscript)
       mathElements.push({
         id: `math-element-${createUUID()}`,
-        label: this.convertLatexToUnicode(lowerBound),
+        label: latexToUnicodeMath(lowerBound),
         color,
         fontSize: limitFontSize,
         fontWeight,
@@ -660,7 +550,7 @@ export class IIConversionManager extends IIAbstractManager {
       if (restOfExpression) {
         mathElements.push({
           id: `math-element-${createUUID()}`,
-          label: this.convertLatexToUnicode(restOfExpression),
+          label: latexToUnicodeMath(restOfExpression),
           color,
           fontSize,
           fontWeight,
@@ -671,7 +561,7 @@ export class IIConversionManager extends IIAbstractManager {
       }
     } else {
       // No special bounds - convert the whole label as before
-      const unicodeLabel = this.convertLatexToUnicode(label)
+      const unicodeLabel = latexToUnicodeMath(label)
 
       mathElements.push({
         id: `math-element-${createUUID()}`,

@@ -118,6 +118,7 @@ export const MathOps = {
         ? OBBOps.toBox(rawBounds as TOBB)
         : (rawBounds as TBox)
     const math = MathOps.create(elements, partial.point as TPoint, boundsBox, partial.style)
+
     if (partial.id) {
       math.id = partial.id
     }
