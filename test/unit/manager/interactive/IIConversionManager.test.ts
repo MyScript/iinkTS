@@ -12,7 +12,15 @@ import {
 } from "../../__dataset__/jiix.dataset"
 import { buildIIStroke } from "../../helpers"
 import { createEditorMock, asEditor } from "../../__mocks__/createEditorMock"
-import { IIConversionManager, TJIIXEdgeElement, TJIIXNodeElement, TJIIXTextElement, TextOps } from "@/iink"
+import {
+  IIConversionManager,
+  JIIXElementType,
+  TJIIXEdgeElement,
+  TJIIXMathElement,
+  TJIIXNodeElement,
+  TJIIXTextElement,
+  TextOps,
+} from "@/iink"
 
 describe("IIConversionManager.ts", () => {
   test("should create", () => {
@@ -215,6 +223,22 @@ describe("IIConversionManager.ts", () => {
       const result = manager.convertEdge(jiixEdgeArc, [stroke])!
       expect(result.strokes).toEqual([stroke])
       expect(result.symbol.kind).toEqual("arc")
+    })
+  })
+
+  describe("buildMath", () => {
+    const editor = createEditorMock()
+    const manager = new IIConversionManager(asEditor(editor))
+
+    test("should flatten a simple fraction label without extra parentheses", () => {
+      const mathElement: TJIIXMathElement = {
+        id: "math-block-1",
+        type: JIIXElementType.Math,
+        label: "x=\\dfrac{1}{2}",
+        "bounding-box": { x: 0, y: 0, width: 10, height: 5 },
+      }
+      const math = manager.buildMath(mathElement, [buildIIStroke()], 16)
+      expect(math.elements[0].label).toBe("x=1/2")
     })
   })
 })

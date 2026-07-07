@@ -68,6 +68,7 @@
 - fix(math): arrow SVG elements leak on each overlay refresh
 - fix(math): hover zone not created if showOverlay is disabled
 - fix(math): reset jiixId and variableValues on symbol duplication
+- fix(math): remove unneeded parentheses around fraction numerator/denominator when converting math blocks to text (IIC-1717)
 - fix(menu): context menu positioning within rendering layer bounds (IIC-1659)
 - fix(menu): refresh context menu after editing variables
 - fix(menu): remove document/scroll listener leaks on destroy
