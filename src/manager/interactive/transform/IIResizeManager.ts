@@ -41,10 +41,6 @@ export class IIResizeManager extends IIAbstractTransformManager {
 
   protected applyToStroke(stroke: TStroke, matrix: MatrixTransform): TStroke {
     this.logger.debug("applyToStroke", { stroke })
-    if (stroke.isSolverOutput) {
-      this.logger.warn("applyToStroke", "Skipping solver output stroke - it will be recalculated", stroke.id)
-      return stroke
-    }
     this.applyMatrixToPoints(stroke.pointers, matrix)
     StrokeOps.updateBounds(stroke)
     return stroke
@@ -196,7 +192,6 @@ export class IIResizeManager extends IIAbstractTransformManager {
     this.model.symbolsSelected.forEach((s) => {
       this.setTransformOrigin(s.id, this.transformOrigin.x, this.transformOrigin.y)
     })
-    this.clearResultStrokesForSelectedMath()
   }
 
   continue(point: TPoint): {
@@ -258,6 +253,9 @@ export class IIResizeManager extends IIAbstractTransformManager {
     this.model.symbolsSelected.forEach((s) => {
       this.scaleElement(s.id, scaleX, scaleY)
     })
+    this.getGhostStrokeIdsForSelectedMath(this.model.symbolsSelected).forEach((id) => {
+      this.scaleElement(id, scaleX, scaleY)
+    })
     const matrix = MatrixTransform.identity().scale(scaleX, scaleY, this.transformOrigin)
     this.editor.connector.drawAnchoredEdgesForMatrix(
       this.model.symbolsSelected.map((s) => s.id),
@@ -273,6 +271,7 @@ export class IIResizeManager extends IIAbstractTransformManager {
     const oldSymbols = this.model.symbolsSelected.map((s) => cloneSymbol(s))
     const matrix = MatrixTransform.identity().scale(scaleX, scaleY, this.transformOrigin)
     this.applyAndDraw(this.model.symbolsSelected, matrix)
+    this.applyTransformToGhostStrokesForSelectedMath(this.model.symbolsSelected, matrix)
     this.editor.connector.updateAnchoredEdges(this.model.symbolsSelected.map((s) => s.id))
     const strokesFromSymbols = this.editor.extractStrokesFromSymbols(this.model.symbolsSelected)
     await this.editor.recognizer.transformScale(

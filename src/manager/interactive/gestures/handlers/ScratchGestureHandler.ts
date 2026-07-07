@@ -4,7 +4,7 @@ import { GestureHandler } from "@/manager/interactive/gestures/GestureHandler"
 import type { GestureHelpers } from "@/manager/interactive/gestures/GestureHelpers"
 import type { TGesture } from "@/manager/interactive/gestures/GestureTypes"
 import type { TStroke, TText } from "@/symbol"
-import { isRecognizedMath, SymbolType, type TSymbol } from "@/symbol"
+import { SymbolType, type TSymbol } from "@/symbol"
 import { StrokeOps } from "@/symbol/stroke/Stroke"
 import { TextOps } from "@/symbol/text/Text"
 
@@ -160,33 +160,6 @@ export class ScratchGestureHandler extends GestureHandler {
         }
       }
     })
-
-    // Handle dependent math blocks
-    const affectedMathSymbols = [
-      ...symbolsToErase.filter(isRecognizedMath),
-      ...symbolsToReplace.oldSymbols.filter(isRecognizedMath),
-    ]
-
-    const dependentBlocksToClean = new Set<string>()
-    for (const mathSymbol of affectedMathSymbols) {
-      if (!mathSymbol.jiixBlockId) {
-        continue
-      }
-
-      const deps = await this.editor.math.getDependencies(mathSymbol.jiixBlockId)
-      if (deps?.dependentBlocks && deps.dependentBlocks.length > 0) {
-        this.logger.info(
-          "applyScratch",
-          `Math symbol ${mathSymbol.jiixBlockId} has ${deps.dependentBlocks.length} dependent blocks, clearing their solver outputs`
-        )
-        deps.dependentBlocks.forEach((blockId) => dependentBlocksToClean.add(blockId))
-      }
-    }
-
-    for (const blockId of dependentBlocksToClean) {
-      await this.editor.math.clearSolverOutputs(blockId)
-      this.logger.info("applyScratch", `Cleared solver outputs from dependent block ${blockId}`)
-    }
 
     const promises: Promise<void | TSymbol[]>[] = []
     const changes: TIIHistoryChanges = {}

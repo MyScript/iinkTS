@@ -6,7 +6,6 @@ import type { TMenuCheckbox } from "@/menu/items/CheckboxMenuItem"
 import type { TMenuSelect } from "@/menu/items/SelectMenuItem"
 import type { TMenuSubMenu } from "@/menu/items/SubMenuItem"
 import { SubMenuItem } from "@/menu/items/SubMenuItem"
-import { isStroke } from "@/symbol"
 
 /** @group Menu */
 export type TMathActionItemsConfig = {
@@ -17,8 +16,7 @@ export type TMathActionItemsConfig = {
   highlightOnSelect?: boolean
   editVariables?: boolean
   capabilities?: boolean
-  selectResultStrokes?: boolean
-  deleteResultStrokes?: boolean
+  forceComputeAll?: boolean
 }
 /** @group Menu */
 export type TMathActionConfig = boolean | TMathActionItemsConfig
@@ -46,6 +44,18 @@ export class MathMenuAction extends SubMenuItem {
           if (value) {
             await editor.math.tryAutoCompute()
           }
+        },
+      })
+    }
+
+    if (enabled("forceComputeAll")) {
+      items.push({
+        type: "button",
+        id: `${idPrefix}-math-force-compute-all`,
+        label: "Force Compute all",
+        action: async (editor: TInteractiveInkEditor) => {
+          await editor.math.clearAllSolverOutputs()
+          await editor.math.computeAllNumericalResults()
         },
       })
     }
@@ -154,34 +164,6 @@ export class MathMenuAction extends SubMenuItem {
         action: async (editor: TInteractiveInkEditor) => {
           const capabilitiesTable = new IIMathCapabilitiesTable(editor)
           await capabilitiesTable.show()
-        },
-      })
-    }
-
-    if (enabled("selectResultStrokes")) {
-      items.push({
-        type: "button",
-        id: `${idPrefix}-math-select-result-strokes`,
-        label: "Select result strokes",
-        action: (editor: TInteractiveInkEditor) => {
-          const ids = editor.model.symbols.filter((s) => isStroke(s) && s.isSolverOutput).map((s) => s.id)
-          if (ids.length > 0) {
-            editor.select(ids)
-          }
-        },
-      })
-    }
-
-    if (enabled("deleteResultStrokes")) {
-      items.push({
-        type: "button",
-        id: `${idPrefix}-math-delete-result-strokes`,
-        label: "Delete result strokes",
-        action: async (editor: TInteractiveInkEditor) => {
-          const ids = editor.model.symbolsSelected.filter((s) => isStroke(s) && s.isSolverOutput).map((s) => s.id)
-          if (ids.length > 0) {
-            await editor.removeSymbols(ids, false)
-          }
         },
       })
     }

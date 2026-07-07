@@ -109,6 +109,7 @@ export class IITranslateManager extends IIAbstractTransformManager {
     this.editor.connector.clearAnchoredEdgesFor(symbols)
     const matrix = MatrixTransform.identity().translate(tx, ty)
     this.applyAndDraw(symbols, matrix)
+    this.applyTransformToGhostStrokesForSelectedMath(symbols, matrix)
     this.editor.connector.updateAnchoredEdges(symbols.map((s) => s.id))
     if (addToHistory) {
       this.editor.history.push(this.model, {
@@ -145,7 +146,6 @@ export class IITranslateManager extends IIAbstractTransformManager {
     this.editor.startOperation("Recognizing")
     this.interactElementsGroup = this.resolveInteractGroup(target)
     this.transformOrigin = origin
-    this.clearResultStrokesForSelectedMath()
   }
 
   continue(point: TPoint): {
@@ -167,6 +167,9 @@ export class IITranslateManager extends IIAbstractTransformManager {
     this.translateElement(this.interactElementsGroup.id as string, tx, ty)
     this.model.symbolsSelected.forEach((s) => {
       this.translateElement(s.id as string, tx, ty)
+    })
+    this.getGhostStrokeIdsForSelectedMath(this.model.symbolsSelected).forEach((id) => {
+      this.translateElement(id, tx, ty)
     })
     const matrix = MatrixTransform.identity().translate(tx, ty)
     this.editor.connector.drawAnchoredEdgesForMatrix(
