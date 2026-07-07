@@ -13,35 +13,17 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
 
     <style>
-      #editorEl {
-        height: calc(100dvh - 275px);
-      }
-
-      @media only screen and (max-width: 391px) {
-        #editorEl {
-          height: calc(100dvh - 309px);
-        }
-      }
-
-      @media only screen and (max-width: 300px) {
-        #editorEl {
-          height: calc(100dvh - 357px);
-        }
-      }
-
       .question {
+        flex: 2;
         font-size: 2em;
-        background-color: #f5f5f5;
         margin: 0;
         padding: 12px;
-        border-bottom: 1px solid #d7dde3;
         text-align: center;
-      }
-
-      .result {
-        font-size: 1.25em;
       }
 
       .next-btn .icn {
@@ -50,12 +32,16 @@
         width: 20px;
       }
     </style>
-  </head>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
   <body>
     <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
       <button id="showModalBtn" class="btn-keys">
-        Change server configuration
+        API Keys
       </button>
       <h1 class="header-title">Interact with your app</h1>
     </header>
@@ -67,37 +53,53 @@
       </symbol>
     </svg>
 
-    <p id="question" class="question"></p>
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">🧠 Interactive handwriting exercises</p>
+        <p class="ex-panel-intro">This example shows how to build automated exercises driven by handwriting recognition — the app asks a question, the user writes the answer, and the result is validated in real time via the <code>exported</code> event.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Recognition fires automatically as you write, no submit button needed. The answer is checked as soon as the engine produces a <code>text/plain</code> export.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Use <strong>Next question</strong> to cycle through the 5 capitals. The editor is cleared automatically between questions.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Pattern applicable to any exercise type: spelling, maths, translation, fill-in-the-blank — just replace the question/answer arrays.</div>
+        </div>
+      </aside>
 
-    <div id="result" class="result"></div>
+      <div class="page-content">
+        <nav class="flex-container wrap gap between">
+          <p id="question" class="question"></p>
+          <button id="next-btn" class="classic-btn next-btn">
+            Next question
+            <svg class="icn">
+              <use xmlns:xlink="http://www.w3.org/1999/xlink" href="#icn-play"></use>
+            </svg>
+          </button>
+        </nav>
 
-    <nav class="flex-container wrap gap between">
-      <div class="flex-container wrap gap">
-        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/undo.svg" />
-        </button>
-        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/redo.svg" />
-        </button>
+        <div id="result" class="result"></div>
+
+
+        <div id="editorEl"></div>
       </div>
-      <button id="next-btn" class="classic-btn next-btn">
-        Next question
-        <svg class="icn">
-          <use xmlns:xlink="http://www.w3.org/1999/xlink" href="#icn-play"></use>
-        </svg>
-      </button>
-    </nav>
-
-    <div id="editorEl"></div>
+    </div>
 
     <script type="module">
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
       import { Editor } from '../../dist/iink.esm.js'
       import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
       const editorElement = document.getElementById('editorEl')
       const questionElement = document.getElementById('question')
       const resultElement = document.getElementById('result')
-      const undoElement = document.getElementById('undo')
-      const redoElement = document.getElementById('redo')
       const nextButton = document.getElementById('next-btn')
       const showModalBtn = document.getElementById('showModalBtn')
 
@@ -147,21 +149,7 @@
       }
 
       async function loadEditor(options) {
-        /**
-         * get editor instance from type
-         * @param {Element} The DOM element to attach the ink paper
-         * @param {Object} The Editor parameters
-         */
-        editor = await Editor.load(
-          editorElement,
-          'INTERACTIVEINKSSR',
-          options
-        )
-
-        editor.event.addEventListener('changed', (event) => {
-          undoElement.disabled = !event.detail.canUndo
-          redoElement.disabled = !event.detail.canRedo
-        })
+        editor = await Editor.load(editorElement, 'INTERACTIVEINKSSR', options)
 
         editor.event.addEventListener('exported', (evt) => {
           const exports = evt.detail
@@ -177,30 +165,17 @@
         changeQuestion()
       })
 
-      undoElement.addEventListener('click', () => {
-        editor?.undo()
-      })
-
-      redoElement.addEventListener('click', () => {
-        editor?.redo()
-      })
-
-      window.addEventListener('resize', () => {
-        editor?.resize()
-      })
-
       showModalBtn.addEventListener('click', () => {
         ModalEditorOptions.show(loadEditor, editorOptions)
       })
 
       ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
 
-      /**
-       * We expose these objects to the window use it in test
-       */
       window.editorOptions = editorOptions
       window.loadEditor = loadEditor
     </script>
-  </body>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
 
 </html>

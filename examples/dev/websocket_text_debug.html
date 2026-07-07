@@ -11,29 +11,21 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
-    <style>
-      #editorEl {
-        height: calc(100dvh - 216px);
-      }
-
-      @media only screen and (max-width: 452px) {
-        #editorEl {
-          height: calc(100dvh - 263px);
-        }
-      }
-    </style>
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
     <style>
       #specific-logger-level {
         max-height: 500px;
         overflow: auto;
       }
     </style>
-  </head>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
   <body>
     <header class="header-main">
       <button id="showModalBtn" class="btn-keys">
-        Change server configuration
+        API Keys
       </button>
       <h1 class="header-title">
         Websocket with Debug Logger
@@ -94,22 +86,18 @@
 
       let editor
       const loggerConfig = {
-        [LoggerCategory.EDITOR]: LoggerLevel.ERROR,
-        [LoggerCategory.RECOGNIZER]: LoggerLevel.ERROR,
-        [LoggerCategory.GRABBER]: LoggerLevel.ERROR,
-        [LoggerCategory.RENDERER]: LoggerLevel.ERROR,
-        [LoggerCategory.EDITOR_EVENT]: LoggerLevel.ERROR,
-        [LoggerCategory.INTERNAL_EVENT]: LoggerLevel.ERROR,
-        [LoggerCategory.MODEL]: LoggerLevel.ERROR,
-        [LoggerCategory.STROKE]: LoggerLevel.ERROR,
-        [LoggerCategory.SMARTGUIDE]: LoggerLevel.ERROR,
-        [LoggerCategory.STYLE]: LoggerLevel.ERROR,
-        [LoggerCategory.HISTORY]: LoggerLevel.ERROR
       }
+      Object.keys(LoggerCategory).forEach((c) => {
+        loggerConfig[c] = LoggerLevel.ERROR
+      })
 
-      Object.keys(LoggerLevel).forEach((level) => {
-        const selected = LoggerLevel[level] === LoggerLevel.ERROR
-        const opt = new Option(level, LoggerLevel[level], selected, selected)
+      const LOGGER_LEVELS = Object.fromEntries(
+        Object.entries(LoggerLevel).filter(([k]) => isNaN(Number(k)))
+      )
+
+      Object.entries(LOGGER_LEVELS).forEach(([name, value]) => {
+        const selected = value === LoggerLevel.ERROR
+        const opt = new Option(name, value, selected, selected)
         globalLoggerLevelSelect.appendChild(opt)
       })
 
@@ -123,15 +111,15 @@
 
         const select = document.createElement('select')
         select.classList.add('specific-logger-level-input')
-        Object.keys(LoggerLevel).forEach((level) => {
-          const selected = LoggerLevel[level] === LoggerLevel.ERROR
-          const opt = new Option(level, LoggerLevel[level], selected, selected)
+        Object.entries(LOGGER_LEVELS).forEach(([name, value]) => {
+          const selected = value === LoggerLevel.ERROR
+          const opt = new Option(name, value, selected, selected)
           select.appendChild(opt)
         })
         li.appendChild(select)
         select.addEventListener('change', (evt) => {
           loggerConfig[c] = evt.target.value
-          editor.loggerConfiguration = loggerConfig
+          editor.loggerConfiguration = Number(loggerConfig)
         })
         specificLggerLevel.appendChild(li)
       })
@@ -169,17 +157,9 @@
 
       globalLoggerLevelSelect.addEventListener('change', (evt) => {
         if (!editor) return
-        loggerConfig[LoggerCategory.EDITOR] = evt.target.value
-        loggerConfig[LoggerCategory.RECOGNIZER] = evt.target.value
-        loggerConfig[LoggerCategory.GRABBER] = evt.target.value
-        loggerConfig[LoggerCategory.RENDERER] = evt.target.value
-        loggerConfig[LoggerCategory.EDITOR_EVENT] = evt.target.value
-        loggerConfig[LoggerCategory.INTERNAL_EVENT] = evt.target.value
-        loggerConfig[LoggerCategory.MODEL] = evt.target.value
-        loggerConfig[LoggerCategory.STROKE] = evt.target.value
-        loggerConfig[LoggerCategory.SMARTGUIDE] = evt.target.value
-        loggerConfig[LoggerCategory.STYLE] = evt.target.value
-        loggerConfig[LoggerCategory.HISTORY] = evt.target.value
+        Object.keys(LoggerCategory).forEach((c) => {
+          loggerConfig[c] = Number(evt.target.value)
+        })
         Array.from(
           document.getElementsByClassName('specific-logger-level-input')
         ).forEach((input) => {
@@ -199,17 +179,14 @@
       redoElement.addEventListener('click', () => {
         editor?.redo()
       })
-
-      window.addEventListener('resize', () => {
-        editor?.resize()
-      })
-
       showModalBtn.addEventListener('click', () => {
         ModalEditorOptions.show(loadEditor, editorOptions)
       })
 
       ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
     </script>
-  </body>
+      <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
 
 </html>

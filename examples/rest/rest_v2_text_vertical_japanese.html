@@ -13,23 +13,15 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
-    <script type="text/javascript" src="../../dist/iink.min.js"></script>
-    <style>
-      #editorEl {
-        height: calc(100dvh - 216px);
-      }
-      @media only screen and (max-width: 451px) {
-        #editorEl {
-          height: calc(100dvh - 263px);
-        }
-      }
-    </style>
-  </head>
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
   <body>
     <header class="header-main">
       <button id="showModalBtn" class="btn-keys">
-        Change server configuration
+        API Keys
       </button>
       <h1 class="header-title">
         Japanese Vertical (日本縦型)
@@ -77,11 +69,6 @@
       redoElement.addEventListener("click", () => {
         editor?.redo()
       })
-
-      window.addEventListener("resize", () => {
-        editor?.resize()
-      })
-
       const editorOptions = {
         configuration: {
           rendering: {
@@ -136,5 +123,7 @@
       window.editorOptions = editorOptions
       window.loadEditor = loadEditor
     </script>
-  </body>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
 </html>

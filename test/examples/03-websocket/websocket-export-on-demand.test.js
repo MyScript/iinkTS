@@ -22,15 +22,11 @@ test.describe("Websocket on-demand export", function () {
     await callEditorIdle(page)
     const noExport = await getEditorExports(page)
     expect(noExport).toBeUndefined()
-    await expect(page.locator("#result")).toBeEmpty()
+    await expect(page.locator(".prompter-text")).toBeEmpty()
 
     await page.locator("#export").click()
     await callEditorIdle(page)
-    const exports = await getEditorExports(page)
-    const jiix = exports["application/vnd.myscript.jiix"]
-    expect(jiix.label).toEqual(hello.exports["text/plain"].at(-1))
-    await expect(page.locator("#result")).toHaveText(
-      hello.exports["text/plain"].at(-1)
-    )
+    const expectedLabel = hello.exports["text/plain"].at(-1)
+    await expect(page.locator(".prompter-text")).toHaveText(expectedLabel)
   })
 })

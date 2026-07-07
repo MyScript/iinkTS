@@ -1,1313 +1,600 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="HandheldFriendly" content="true" />
-    <link rel="icon" type="image/" href="./favicon.ico" />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="icon" type="image/x-icon" href="./favicon.ico" />
+  <title>iinkTS — Examples</title>
+  <link rel="stylesheet" href="./assets/style/home.css" />
 
-    <title>iinkTS: Examples</title>
+  <script type="module">
+    try { await import('./dev-env-loader.generated.js'); } catch (e) {}
+  </script>
+  <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
-    <link rel="stylesheet" href="./assets/style/reset.css" />
-    <link rel="stylesheet" href="./assets/style/components.css" />
-    <link rel="stylesheet" href="./assets/style/home.css" />
+<body class="home">
 
-    <!-- Auto-load dev environment variables from .env.local -->
-    <script type="module">
-      try {
-        await import('./dev-env-loader.generated.js');
-      } catch (e) {
-        console.log('[DevEnv] No dev-env-loader.generated.js found (run "npm run dev" to generate it)');
-      }
-    </script>
-  </head>
+<!-- ===== SVG icon defs ===== -->
+<svg style="display:none">
+  <symbol id="icn-play" viewBox="0 0 16 16">
+    <path d="M13.15 8.59c.61-.33.6-.86 0-1.18L4.87 2.97C4.39 2.71 4 2.95 4 3.5v9c0 .55.39.79.87.53l8.28-4.44z" fill="currentColor"/>
+  </symbol>
+  <symbol id="icn-github" viewBox="0 0 16 16">
+    <path d="M8 1a7 7 0 0 0-2.21 13.64c.35.06.48-.15.48-.34 0-.17-.01-.6-.01-1.19-1.95.42-2.36-.94-2.36-.94-.32-.81-.78-1.02-.78-1.02-.64-.43.05-.43.05-.43.7.05 1.07.72 1.07.72.63 1.07 1.64.76 2.04.58.06-.45.24-.76.44-.93-1.55-.18-3.19-.78-3.19-3.46 0-.76.27-1.39.72-1.88-.07-.18-.31-.89.07-1.85 0 0 .59-.19 1.92.72A6.7 6.7 0 0 1 8 4.38c.6.003 1.19.08 1.75.24 1.34-.91 1.92-.72 1.92-.72.38.96.14 1.67.07 1.85.45.49.72 1.12.72 1.88 0 2.69-1.64 3.28-3.2 3.45.25.22.47.64.47 1.3 0 .93-.01 1.69-.01 1.92 0 .19.13.41.48.34A7 7 0 0 0 8 1" fill="currentColor"/>
+  </symbol>
+  <symbol id="icn-search" viewBox="0 0 16 16">
+    <path d="M11.74 10.33l2.93 2.93-1.41 1.41-2.93-2.93A6 6 0 1 1 11.74 10.33zm-4.74.67a4 4 0 1 0 0-8 4 4 0 0 0 0 8z" fill="currentColor"/>
+  </symbol>
+</svg>
 
-  <body class="home">
-    <script defer>
-      function openTarget() {
-        const hash = location.hash.substring(1);
-        if (hash) {
-          const target = document.getElementById(hash);
-          if (target) {
-            if (target.tagName.toLowerCase() === "details") {
-              target.open = true;
-            } else {
-              const details = target.closest("details");
-              details.open = true;
-            }
-            target.scrollIntoView({ behavior: "smooth", block: "start", inline: "start" });
-          }
-        }
-      }
-      window.addEventListener("hashchange", openTarget);
-      document.addEventListener("DOMContentLoaded", openTarget);
+<!-- ===== Header ===== -->
+<header class="home-header">
+  <button class="home-menu-toggle" id="menu-toggle" aria-label="Toggle navigation" onclick="toggleSidebar()">
+    <img src="./assets/img/menu.svg" alt="" />
+  </button>
+  <a class="home-header-brand" href="http://www.myscript.com/" target="_blank" rel="noopener">
+    <span class="home-header-logo" role="img" aria-label="MyScript"></span>
+    <span class="home-header-sep"></span>
+    <span class="home-header-label">iinkTS Examples</span>
+  </a>
+  <span class="home-header-spacer"></span>
+  <button id="theme-toggle" class="home-theme-toggle" aria-label="Toggle dark mode" onclick="toggleTheme()">
+    <span class="ico-sun">&#x2600;&#xFE0F;</span>
+    <span class="ico-moon">&#x1F319;</span>
+  </button>
+  <a class="home-header-legacy" href="./legacy.html">Legacy Examples →</a>
+</header>
 
-      function scrollFunction() {
-        const backToTop = document.getElementById("back-to-top-btn");
-        if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-          backToTop.style.display = "block";
-        } else {
-          backToTop.style.display = "none";
-        }
-      }
-      document.addEventListener("scroll", scrollFunction);
+<!-- ===== Hero ===== -->
+<section class="home-hero">
+  <h1>iinkTS Examples</h1>
+  <p>Explore handwriting recognition demos — Interactive Ink Editor, Ink Editor (v2), and advanced integrations.</p>
+  <div class="home-hero-stats">
+    <div class="hero-stat"><strong>16</strong><span>Interactive Ink Editor</span></div>
+    <div class="hero-stat"><strong>5</strong><span>Ink Editor v2</span></div>
+    <div class="hero-stat"><strong>1</strong><span>Configuration</span></div>
+  </div>
+</section>
 
-      function topFunction() {
-        document.body.scrollTop = 0;
-        document.documentElement.scrollTop = 0;
-      }
+<!-- ===== Search ===== -->
+<div class="home-search-wrap">
+  <div class="home-search-inner">
+    <span class="home-search-ico" aria-hidden="true">
+      <svg><use href="#icn-search"/></svg>
+    </span>
+    <input id="search-input" class="home-search-input" type="search" placeholder="Search examples…" autocomplete="off" />
+  </div>
+</div>
 
-      window.addEventListener("load", () => {
-        if (window.innerWidth < 1000) {
-          document.getElementById("home-nav").classList.add("hidden");
-        }
-      });
-      window.addEventListener("resize", () => {
-        if (window.innerWidth < 1000) {
-          document.getElementById("home-nav").classList.add("hidden");
-        }
-      });
+<!-- ===== Layout ===== -->
+<div class="home-layout">
 
-      function toggleMenu() {
-        document.getElementById("home-nav").classList.toggle("hidden");
-      }
-    </script>
+  <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
 
-    <svg style="display: none">
-      <symbol id="icn-info" viewBox="0 0 16 16">
-        <g stroke="currentColor" fill-rule="evenodd" stroke-linecap="round" stroke-linejoin="round">
-          <path
-            d="M6 7.5l1.526-.366c.538-.13.823.198.646.704L6.93 11.386c-.293.836.181 1.42 1.058 1.302L9.4 12.5"
-            stroke-width="1.8"
-            vector-effect="non-scaling-stroke"
-            class="path"
-          ></path>
-          <path d="M8.9 3.25l-.02.1" stroke-width="2.6" vector-effect="non-scaling-stroke" class="path"></path>
-        </g>
-      </symbol>
-      <symbol id="icn-github" viewBox="0 0 16 16">
-        <path
-          d="M8 1a7 7 0 0 0-2.213 13.642c.35.064.478-.152.478-.337 0-.166-.006-.607-.01-1.19-1.947.422-2.357-.94-2.357-.94-.319-.808-.778-1.023-.778-1.023-.635-.434.048-.426.048-.426.703.05 1.073.722 1.073.722.624 1.07 1.638.76 2.037.581.063-.452.244-.76.444-.935-1.554-.177-3.188-.778-3.188-3.46 0-.764.273-1.39.72-1.878-.072-.177-.312-.89.07-1.853 0 0 .586-.188 1.924.718A6.705 6.705 0 0 1 8 4.385c.595.003 1.194.08 1.753.236 1.336-.906 1.923-.718 1.923-.718.382.964.141 1.676.07 1.853a2.7 2.7 0 0 1 .72 1.878c0 2.69-1.638 3.281-3.197 3.454.251.216.475.644.475 1.297 0 .935-.009 1.69-.009 1.92 0 .187.127.405.482.337A7 7 0 0 0 8 1"
-          fill="currentColor"
-          fill-rule="evenodd"
-        ></path>
-      </symbol>
-      <symbol id="icn-play" viewBox="0 0 16 16">
-        <path
-          d="M13.153 8.589c.606-.325.603-.854 0-1.178L4.873 2.97C4.392 2.709 4 2.945 4 3.496v9.008c0 .55.39.787.874.527l8.28-4.442z"
-          fill="currentColor"
-          fill-rule="evenodd"
-        ></path>
-      </symbol>
-    </svg>
-
-    <header class="home-header">
-      <button id="home-menu-toggle" class="menu-button home-menu-toggle" onpointerup="toggleMenu()">
-        <img src="./assets/img/menu.svg" />
-      </button>
-      <a id="home-header-link" class="home-header-link" href="http://www.myscript.com/" target="_blank" title="MyScript"> </a>
-    </header>
-
-    <button id="back-to-top-btn" class="back-to-top-btn" title="Go to top" onpointerup="topFunction()">Top</button>
-
-    <h1>iinkTS Examples</h1>
-
-    <div class="home-content">
-      <nav id="home-nav" class="home-nav">
-        <h2>Table of contents</h2>
-        <ul id="table-of-content">
-          <li><a href="#ink-editor">Ink Editor</a></li>
-          <li><a href="#interactive-ink-editor">Interactive Ink Editor</a></li>
-          <li><a href="#text">Text recognition</a></li>
-          <li><a href="#math">Math recognition</a></li>
-          <li><a href="#diagram">Diagram recognition</a></li>
-          <li><a href="#raw-content">Raw content recognition</a></li>
-          <li><a href="#not-specific">Not specific recognition</a></li>
-          <li><a href="#development">Development</a></li>
-        </ul>
-      </nav>
-      <main class="home-main">
-        <details id="ink-editor" name="ink-editor" class="accordion example-recognition">
-          <summary class="accordion-summary example-recognition-summary">
-            <div class="example-recognition-title">
-              <img src="./assets/img/home-offscreen.svg" />
-              <span>
-                <h2>Ink Editor</h2>
-                <div class="quote">
-                  New Recognizer technology for text, math, raw content and shape recognition.
-                </div>
-              </span>
-            </div>
-          </summary>
-          <div role="definition" class="accordion-content example-recognition-content">
-            <section class="example-section">
-              <div class="example-item">
-                <p><strong>Math</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="rest/rest_v2_math.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_v2_math.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Text</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="rest/rest_v2_text.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a
-                    href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_v2_text.html"
-                    class="btn"
-                  >
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Raw Content</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="rest/rest_v2_raw_content.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a
-                    href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_v2_raw_content.html"
-                    class="btn"
-                  >
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Shape</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="rest/rest_v2_shape.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a
-                    href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_v2_shape.html"
-                    class="btn"
-                  >
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Japanese Vertical (日本縦型)</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="rest/rest_v2_text_vertical_japanese.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_v2_text_vertical_japanese.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-            </section>
-          </div>
-        </details>
-
-        <details id="interactive-ink-editor" name="interactive-ink-editor" class="accordion example-recognition">
-          <summary class="accordion-summary example-recognition-summary">
-            <div class="example-recognition-title">
-              <img src="./assets/img/home-offscreen.svg" />
-              <span>
-                <h2>Interactive Ink Editor</h2>
-                <div class="quote">
-                  Client implementation plug into myscript recognition without explicit segmentation into text, mathematics, diagram
-                </div>
-              </span>
-            </div>
-          </summary>
-          <div role="definition" class="accordion-content example-recognition-content">
-            <section class="example-section">
-              <div class="example-item">
-                <p><strong>Get Started</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="offscreen-interactivity/index.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/index.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Debug & Visualization Tools</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="offscreen-interactivity/offscreen_interactivity_all_options.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a
-                    href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_all_options.html"
-                    class="btn"
-                  >
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Math computation modes</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="offscreen-interactivity/offscreen_interactivity_math_computation_modes.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a
-                    href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_math_computation_modes.html"
-                    class="btn"
-                  >
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Math dependencies</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="offscreen-interactivity/offscreen_interactivity_math_dependencies.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a
-                    href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_math_dependencies.html"
-                    class="btn"
-                  >
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Advanced Math</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="offscreen-interactivity/offscreen_interactivity_math_menu.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a
-                    href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_math_menu.html"
-                    class="btn"
-                  >
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Create symbol</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="offscreen-interactivity/offscreen_interactivity_create_symbols.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a
-                    href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_create_symbols.html"
-                    class="btn"
-                  >
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Import pointers</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="offscreen-interactivity/offscreen_interactivity_import_pointers.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a
-                    href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_import_pointers.html"
-                    class="btn"
-                  >
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Menu configuration</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="offscreen-interactivity/offscreen_interactivity_menu_config.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a
-                    href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_menu_config.html"
-                    class="btn"
-                  >
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Override menus</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="offscreen-interactivity/offscreen_interactivity_override_menu.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a
-                    href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_override_menu.html"
-                    class="btn"
-                  >
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Override default options</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="offscreen-interactivity/offscreen_interactivity_default_options.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a
-                    href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_default_options.html"
-                    class="btn"
-                  >
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Minimap</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="offscreen-interactivity/offscreen_interactivity_minimap.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a
-                    href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_minimap.html"
-                    class="btn"
-                  >
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Connection Status</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="offscreen-interactivity/offscreen_interactivity_connection_status.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a
-                    href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_connection_status.html"
-                    class="btn"
-                  >
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Keyboard Shortcuts</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="offscreen-interactivity/offscreen_interactivity_keyboard_shortcuts.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a
-                    href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_keyboard_shortcuts.html"
-                    class="btn"
-                  >
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Style/Theming</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="offscreen-interactivity/offscreen_interactivity_style.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a
-                    href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_style.html"
-                    class="btn"
-                  >
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>TLDraw</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="offscreen-interactivity/offscreen_interactivity_tldraw/dist/index.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a
-                    href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_tldraw/src/App.tsx"
-                    class="btn"
-                  >
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-            </section>
-          </div>
-        </details>
-
-        <details id="text" name="text" class="accordion example-recognition">
-          <summary class="accordion-summary example-recognition-summary">
-            <div class="example-recognition-title">
-              <img src="./assets/img/home-text.svg" />
-              <span>
-                <h2>Text recognition</h2>
-                <div class="quote">Simple block of multi-line text.</div>
-              </span>
-            </div>
-          </summary>
-          <div role="definition" class="accordion-content example-recognition-content">
-            <section class="example-section">
-              <h3 class="example-section-title">Websocket</h3>
-              <div class="example-item">
-                <p><strong>Get Started</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="websocket/websocket_text.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Disable guides</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="websocket/websocket_text_no_guides.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_no_guides.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Eraser</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="websocket/websocket_text_eraser.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_eraser.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Use local storage to save text</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="websocket/websocket_text_local_storage_text.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_local_storage_text.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Custom lexicon</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="websocket/websocket_text_custom_lexicon.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_custom_lexicon.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Custom pre-loaded resource</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="websocket/websocket_text_custom_resources.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_custom_resources.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Customize editor style</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="websocket/websocket_text_customize_editor_css.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_customize_editor_css.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Customize font and style of stroke</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="websocket/websocket_text_customize_stroke_style.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_customize_stroke_style.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Import pointer events</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="websocket/websocket_text_pointer_events.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_pointer_events.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Import text</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="websocket/websocket_text_import_content.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_import_content.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Searching text (without Smart Guide)</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="websocket/websocket_text_search.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_search.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Interact</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="websocket/websocket_text_interact.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_interact.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Highlight words</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="websocket/websocket_text_highlight_words.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_highlight_words.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Use multiple inputs fields</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="websocket/websocket_text_multiple_inputs.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_multiple_inputs.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Produce file from writing (docx, html...)</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="websocket/websocket_text_file_export.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_file_export.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-            </section>
-            <section class="example-section">
-              <h3 class="example-section-title">REST</h3>
-              <div class="example-item">
-                <p><strong>Getting Started</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="rest/rest_text.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_text.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Customize style of stroke</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="rest/rest_text_styling.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_text_styling.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-            </section>
-          </div>
-        </details>
-
-        <details id="math" name="math" class="accordion example-recognition">
-          <summary class="accordion-summary example-recognition-summary">
-            <div class="example-recognition-title">
-              <img src="./assets/img/home-math.svg" />
-              <span>
-                <h2>Math recognition</h2>
-                <div class="quote">Block supporting one or more equation.</div>
-              </span>
-            </div>
-          </summary>
-          <div role="definition" class="accordion-content example-recognition-content">
-            <section class="example-section">
-              <h3 class="example-section-title">Websocket</h3>
-              <div class="example-item">
-                <p><strong>Get Started</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="websocket/websocket_math.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Eraser</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="websocket/websocket_math_eraser.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_eraser.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Custom resource math</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="websocket/websocket_math_custom_resources.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_custom_resources.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Custom resource math (pre-compiled)</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="websocket/websocket_math_custom_resources_compiled.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a
-                    href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_custom_resources_compiled.html"
-                    class="btn"
-                  >
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Import JIIX</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="websocket/websocket_math_import_jiix.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_import_jiix.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Math inside page</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="websocket/websocket_math_inside_page.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_inside_page.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Draw graph</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="websocket/websocket_math_with_graph.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_with_graph.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-            </section>
-            <section class="example-section">
-              <h3 class="example-section-title">REST</h3>
-              <div class="example-item">
-                <p><strong>Getting Started</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="rest/rest_math.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_math.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-            </section>
-          </div>
-        </details>
-
-        <details id="diagram" name="diagram" class="accordion example-recognition">
-          <summary class="accordion-summary example-recognition-summary">
-            <div class="example-recognition-title">
-              <img src="./assets/img/home-diagram.svg" />
-              <span>
-                <h2>Diagram recognition</h2>
-                <div class="quote">
-                  Block supporting a diagram, with automatic text/non-text distinction and dynamic reorganization possibilities.
-                </div>
-              </span>
-            </div>
-          </summary>
-          <div role="definition" class="accordion-content example-recognition-content">
-            <section class="example-section">
-              <h3 class="example-section-title">REST</h3>
-              <div class="example-item">
-                <p><strong>Get Started</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="rest/rest_diagram.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_diagram.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Import pointer events</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="rest/rest_diagram_import.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_diagram_import.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-            </section>
-          </div>
-        </details>
-
-        <details id="raw-content" name="raw-content" class="accordion example-recognition">
-          <summary class="accordion-summary example-recognition-summary">
-            <div class="example-recognition-title">
-              <img src="./assets/img/home-raw-content.svg" />
-              <span>
-                <h2>Raw Content recognition</h2>
-                <div class="quote">
-                  Block hosting digital ink with no explicit segmentation into text, math, diagram or other items which semantics is known by iink
-                  SDK.
-                </div>
-              </span>
-            </div>
-          </summary>
-          <div role="definition" class="accordion-content example-recognition-content">
-            <section class="example-section">
-              <h3 class="example-section-title">REST</h3>
-              <div class="example-item">
-                <p><strong>Get Started</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="rest/rest_raw_content.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_raw_content.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-            </section>
-          </div>
-        </details>
-
-        <details id="not-specific" name="not-specific" class="accordion example-recognition">
-          <summary class="accordion-summary example-recognition-summary">
-            <div class="example-recognition-title">
-              <img src="./assets/img/home-not-specific.svg" />
-              <span>
-                <h2>Not Specific recognition</h2>
-                <div class="quote">For all recognition types</div>
-              </span>
-            </div>
-          </summary>
-          <div role="definition" class="accordion-content example-recognition-content">
-            <section class="example-section">
-              <div class="example-item">
-                <p><strong>Change configuration</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="non-specific/change_configuration.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/non-specific/change_configuration.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-            </section>
-            <section class="example-section">
-              <h3 class="example-section-title">Websocket</h3>
-              <div class="example-item">
-                <p><strong>Configure on-demand export</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="websocket/websocket_export_on_demand.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_export_on_demand.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Handle errors</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="websocket/websocket_handle_errors.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_handle_errors.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-            </section>
-            <section class="example-section">
-              <h3 class="example-section-title">REST</h3>
-              <div class="example-item">
-                <p><strong>Without UI</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="rest/rest_no_ui.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_no_ui.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-            </section>
-          </div>
-        </details>
-
-        <details id="development" name="development" class="accordion example-recognition">
-          <summary class="accordion-summary example-recognition-summary">
-            <div class="example-recognition-title">
-              <img src="./assets/img/home-development.svg" />
-              <span>
-                <h2>Development</h2>
-                <div class="quote">For developers who want to integrate link-ts</div>
-              </span>
-            </div>
-          </summary>
-          <div role="definition" class="accordion-content example-recognition-content">
-            <section class="example-section">
-              <div class="example-item">
-                <p><strong>Configuring debug trace</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="dev/websocket_text_debug.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/dev/websocket_text_debug.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <h3 class="example-section-title">Websocket</h3>
-              <div class="example-item">
-                <p><strong>Custom recognizer</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="dev/websocket_custom_recognizer.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/dev/websocket_custom_recognizer.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Custom grabber</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="dev/websocket_custom_grabber.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/dev/websocket_custom_grabber.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <h3 class="example-section-title">REST</h3>
-              <div class="example-item">
-                <p><strong>Custom recognizer</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="dev/rest_custom_recognizer.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/dev/rest_custom_recognizer.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-              <div class="example-item">
-                <p><strong>Custom grabber</strong></p>
-                <div class="example-btn-wrapper">
-                  <a href="dev/rest_custom_grabber.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-play"></use>
-                    </svg>
-                    View example
-                  </a>
-                  <a href="https://github.com/MyScript/iinkTS/blob/master/examples/dev/rest_custom_grabber.html" class="btn">
-                    <svg class="icn">
-                      <use xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#icn-github"></use>
-                    </svg>
-                    Get source code
-                  </a>
-                </div>
-              </div>
-            </section>
-          </div>
-        </details>
-
-      </main>
+  <!-- Sidebar -->
+  <nav class="home-sidebar" id="home-sidebar" aria-label="Examples navigation">
+    <p class="sidebar-heading">Interactive Ink</p>
+    <ul>
+      <li><a href="#ii-all"><span class="dot" style="background:#1A9FFF"></span>All types</a></li>
+      <li><a href="#ii-math"><span class="dot" style="background:#6C63FF"></span>Math</a></li>
+    </ul>
+    <hr class="sidebar-divider" />
+    <p class="sidebar-heading">Ink Editor v2</p>
+    <ul>
+      <li><a href="#ink-v2"><span class="dot" style="background:#00B894"></span>Ink Editor v2</a></li>
+    </ul>
+    <hr class="sidebar-divider" />
+    <p class="sidebar-heading">Utilities</p>
+    <ul>
+      <li><a href="#config"><span class="dot" style="background:#718096"></span>Configuration</a></li>
+    </ul>
+    <hr class="sidebar-divider" />
+    <div class="sidebar-legacy">
+      <a href="./legacy.html">⚠ Legacy Examples</a>
     </div>
-  </body>
+  </nav>
+
+  <!-- Main content -->
+  <main class="home-main" id="main-content">
+
+    <!-- ============================================
+         SECTION: Interactive Ink Editor
+    ============================================= -->
+    <section class="home-section">
+      <div class="section-header">
+        <div class="section-icon">
+          <img src="./assets/img/home-offscreen.svg" alt="" />
+        </div>
+        <div class="section-meta">
+          <h2>Interactive Ink Editor</h2>
+          <p>Full interactive ink editing with real-time recognition — text, math, shapes, and mixed content, with advanced menus, minimap, and third-party integrations.</p>
+          <div class="section-badges">
+            <span class="badge badge-primary">INTERACTIVITY</span>
+            <span class="badge badge-primary">Text</span>
+            <span class="badge badge-primary">Math</span>
+            <span class="badge badge-primary">Shape</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- All types -->
+      <div class="subsection" id="ii-all">
+        <div class="subsection-title">All types</div>
+        <div class="card-grid">
+
+          <article class="card" data-search="get started interactive ink advanced all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Get Started</h3>
+            <p>Get started with the Interactive Ink Editor — draw, edit and recognize text, math and shapes.</p>
+            <div class="card-actions">
+              <a href="offscreen-interactivity/index.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/index.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="debug visualization all options diagnostics">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Showcase</h3>
+            <p>Interactive Ink Editor feature tour — inspect symbols, history, selection and backend rendering.</p>
+            <div class="card-actions">
+              <a href="offscreen-interactivity/offscreen_interactivity_all_options.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_all_options.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="gestures scratch surround strikethrough underline insert join interactive ink">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Gestures</h3>
+            <p>All 6 gesture types with visual reference and gesture menu configuration.</p>
+            <div class="card-actions">
+              <a href="offscreen-interactivity/offscreen_interactivity_gestures.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_gestures.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="override default options configuration settings all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Override Default Options</h3>
+            <p>Configure editor defaults, behavior overrides, and initial settings.</p>
+            <div class="card-actions">
+              <a href="offscreen-interactivity/offscreen_interactivity_default_options.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_default_options.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="menu configuration activate deactivate all types">
+            <div class="card-top">
+              <span class="badge badge-ws">INTERACTIVEINK</span>
+              <span class="badge badge-ws">All types</span>
+            </div>
+            <h3>Override Theme</h3>
+            <p>Customize background, menu panels, and input appearance via <code>cssVars</code> CSS custom properties.</p>
+            <div class="card-actions">
+              <a href="offscreen-interactivity/offscreen_interactivity_style.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_style.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="menu configuration activate deactivate all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Configure Menu Visibility</h3>
+            <p>Show or hide specific menus and toolbar actions without custom code.</p>
+            <div class="card-actions">
+              <a href="offscreen-interactivity/offscreen_interactivity_menu_config.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_menu_config.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="override menu custom class replace implementation all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Override Menu</h3>
+            <p>Replace built-in menus with fully custom menu classes.</p>
+            <div class="card-actions">
+              <a href="offscreen-interactivity/offscreen_interactivity_override_menu.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_override_menu.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="import pointers load existing strokes ink all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Import Pointers</h3>
+            <p>Load pre-existing ink pointer data into an Interactive Ink editor.</p>
+            <div class="card-actions">
+              <a href="offscreen-interactivity/offscreen_interactivity_import_pointers.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_import_pointers.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="create symbol programmatic ink stroke shape all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Create Symbols</h3>
+            <p>Programmatically create and inject ink symbols into the editor.</p>
+            <div class="card-actions">
+              <a href="offscreen-interactivity/offscreen_interactivity_create_symbols.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_create_symbols.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="zoom pan viewport fit navigation programmatic api all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Zoom &amp; Pan</h3>
+            <p>Programmatic zoom and pan — set zoom level, fit to content, and shift the viewport via the API.</p>
+            <div class="card-actions">
+              <a href="offscreen-interactivity/offscreen_interactivity_zoom_pan.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_zoom_pan.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="selection select all symbols programmatic api ids event all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Selection API</h3>
+            <p>Programmatic symbol selection — select all, select by ID, react to selection events, zoom to selection.</p>
+            <div class="card-actions">
+              <a href="offscreen-interactivity/offscreen_interactivity_selection.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_selection.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="minimap overview bird eye canvas navigation thumbnail all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Minimap</h3>
+            <p>Bird's-eye overview panel for navigating large ink canvases.</p>
+            <div class="card-actions">
+              <a href="offscreen-interactivity/offscreen_interactivity_minimap.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_minimap.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="keyboard shortcuts hotkeys navigation accessibility all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Keyboard Shortcuts</h3>
+            <p>Keyboard navigation and shortcut bindings for hands-free editing.</p>
+            <div class="card-actions">
+              <a href="offscreen-interactivity/offscreen_interactivity_keyboard_shortcuts.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_keyboard_shortcuts.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="live monitor status events log symbols undo redo zoom clipboard all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Live Monitor</h3>
+            <p>Real-time editor state snapshot and timestamped action log — symbols, selection, undo/redo, zoom, and clipboard.</p>
+            <div class="card-actions">
+              <a href="offscreen-interactivity/offscreen_interactivity_live_monitor.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_live_monitor.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="live monitor status events log symbols undo redo zoom clipboard all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>Connection Status</h3>
+            <p>Live connection state indicator with automatic reconnect handling.</p>
+            <div class="card-actions">
+              <a href="offscreen-interactivity/offscreen_interactivity_connection_status.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_connection_status.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="tldraw integration whiteboard react drawing canvas third-party all types">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">All types</span>
+            </div>
+            <h3>TLDraw Integration</h3>
+            <p>Handwriting recognition embedded inside a TLDraw collaborative canvas (React).</p>
+            <div class="card-actions">
+              <a href="offscreen-interactivity/offscreen_interactivity_tldraw/dist/index.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_tldraw/src/App.tsx" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+        </div>
+      </div>
+
+      <!-- Math -->
+      <div class="subsection" id="ii-math">
+        <div class="subsection-title">Math</div>
+        <div class="card-grid">
+
+          <article class="card" data-search="math computation modes evaluate symbolic solve interactive ink">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">Math</span>
+            </div>
+            <h3>Computation Modes</h3>
+            <p>Switch between numeric evaluation and symbolic computation modes.</p>
+            <div class="card-actions">
+              <a href="offscreen-interactivity/offscreen_interactivity_math_computation_modes.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_math_computation_modes.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="math dependencies variables tracking linked blocks interactive ink">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">Math</span>
+            </div>
+            <h3>Dependencies</h3>
+            <p>Track variables across linked math blocks for dependency-aware computation.</p>
+            <div class="card-actions">
+              <a href="offscreen-interactivity/offscreen_interactivity_math_dependencies.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_math_dependencies.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="math context menu surround gesture compute function evaluate diagnostic capabilities interactive ink">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">Math</span>
+            </div>
+            <h3>Context Menu</h3>
+            <p>Surround a math expression to compute, evaluate functions, set variables, or check the solver diagnostic.</p>
+            <div class="card-actions">
+              <a href="offscreen-interactivity/offscreen_interactivity_math_context_menu.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_math_context_menu.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+          <article class="card" data-search="math variables block api global fallback substitution priority edit interactive ink">
+            <div class="card-top">
+              <span class="badge badge-primary">INTERACTIVITY</span>
+              <span class="badge badge-primary">Math</span>
+            </div>
+            <h3>Variables</h3>
+            <p>Declare variables as ink expressions, substitute them across blocks, and manage global fallbacks via the variable editor.</p>
+            <div class="card-actions">
+              <a href="offscreen-interactivity/offscreen_interactivity_math_variables.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+              <a href="https://github.com/MyScript/iinkTS/blob/master/examples/offscreen-interactivity/offscreen_interactivity_math_variables.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            </div>
+          </article>
+
+        </div>
+      </div>
+
+    </section>
+
+    <section class="home-section" id="ink-v2">
+      <div class="section-header">
+        <div class="section-icon section-icon--rest">
+          <img src="./assets/img/home-offscreen.svg" alt="" />
+        </div>
+        <div class="section-meta">
+          <h2>Ink Editor v2</h2>
+          <p>Batch recognition via REST v2 API — text, math, shapes, and raw content without a persistent WebSocket connection.</p>
+          <div class="section-badges">
+            <span class="badge badge-rest">RECOGNIZER-v2</span>
+            <span class="badge badge-rest">Math</span>
+            <span class="badge badge-rest">Text</span>
+            <span class="badge badge-rest">Shapes</span>
+            <span class="badge badge-rest">Raw Content</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-grid">
+
+        <article class="card" data-search="ink editor v2 rest math equation batch">
+          <div class="card-top">
+            <span class="badge badge-rest">RECOGNIZER-v2</span>
+            <span class="badge badge-rest">Math</span>
+          </div>
+          <h3>Math</h3>
+          <p>Math equation recognition with the new REST v2 API — no WebSocket needed.</p>
+          <div class="card-actions">
+            <a href="rest/rest_v2_math.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_v2_math.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+          </div>
+        </article>
+
+        <article class="card" data-search="ink editor v2 rest shape detect geometry">
+          <div class="card-top">
+            <span class="badge badge-rest">RECOGNIZER-v2</span>
+            <span class="badge badge-rest">Shape</span>
+          </div>
+          <h3>Shape</h3>
+          <p>Shape detection and vectorization — circles, arrows, polygons, and more.</p>
+          <div class="card-actions">
+            <a href="rest/rest_v2_shape.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_v2_shape.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+          </div>
+        </article>
+
+        <article class="card" data-search="ink editor v2 rest raw content digital ink">
+          <div class="card-top">
+            <span class="badge badge-rest">RECOGNIZER-v2</span>
+            <span class="badge badge-rest">Raw Content</span>
+          </div>
+          <h3>Raw Content</h3>
+          <p>Raw digital ink recognition — no explicit content type segmentation.</p>
+          <div class="card-actions">
+            <a href="rest/rest_v2_raw_content.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_v2_raw_content.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+          </div>
+        </article>
+
+        <article class="card" data-search="ink editor v2 rest text batch recognition">
+          <div class="card-top">
+            <span class="badge badge-rest">RECOGNIZER-v2</span>
+            <span class="badge badge-rest">Text</span>
+          </div>
+          <h3>Text</h3>
+          <p>Text recognition using the REST v2 API — simple batch handwriting to text.</p>
+          <div class="card-actions">
+            <a href="rest/rest_v2_text.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_v2_text.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+          </div>
+        </article>
+
+        <article class="card" data-search="ink editor v2 rest japanese vertical text 日本縦型 asian">
+          <div class="card-top">
+            <span class="badge badge-rest">RECOGNIZER-v2</span>
+            <span class="badge badge-rest">Text</span>
+          </div>
+          <h3>Japanese Vertical (日本縦型)</h3>
+          <p>Vertical Japanese text recognition — tategumi layout with REST v2.</p>
+          <div class="card-actions">
+            <a href="rest/rest_v2_text_vertical_japanese.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_v2_text_vertical_japanese.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ============================================
+         SECTION: Configuration
+    ============================================= -->
+    <section class="home-section" id="config">
+      <div class="section-header">
+        <div class="section-icon section-icon--config">
+          <img src="./assets/img/home-not-specific.svg" alt="" />
+        </div>
+        <div class="section-meta">
+          <h2>Configuration</h2>
+          <p>Dynamic editor type switching across all recognition variants.</p>
+          <div class="section-badges">
+            <span class="badge badge-primary">Multi-variant</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-grid">
+
+        <article class="card" data-search="change configuration switch editor type dynamic variant">
+          <div class="card-top"><span class="badge badge-primary">Multi-variant</span></div>
+          <h3>Change Configuration</h3>
+          <p>Dynamically switch between editor types and recognition configurations at runtime.</p>
+          <div class="card-actions">
+            <a href="non-specific/change_configuration.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/non-specific/change_configuration.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ============================================
+         Legacy banner
+    ============================================= -->
+    <div class="legacy-banner">
+      <div class="legacy-banner-text">
+        <h3>Looking for WebSocket or INKV1 examples?</h3>
+        <p>Text recognition, math recognition, and other WebSocket-based INTERACTIVITY examples — plus deprecated INKV1 REST examples — are available on the legacy page.</p>
+      </div>
+      <a href="./legacy.html" class="legacy-banner-btn">View Legacy Examples →</a>
+    </div>
+
+    <p id="no-results" class="home-no-results" style="display:none">No examples match your search.</p>
+
+  </main>
+</div><!-- /home-layout -->
+
+<button class="back-to-top-btn" id="back-to-top" aria-label="Back to top" onclick="scrollToTop()">↑</button>
+
+<script>
+  function toggleSidebar() {
+    document.getElementById('home-sidebar').classList.toggle('open');
+    document.getElementById('sidebar-backdrop').classList.toggle('open');
+  }
+
+  document.getElementById('sidebar-backdrop').addEventListener('click', () => {
+    document.getElementById('home-sidebar').classList.remove('open');
+    document.getElementById('sidebar-backdrop').classList.remove('open');
+  });
+
+  function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  window.addEventListener('scroll', () => {
+    document.getElementById('back-to-top').classList.toggle('visible', window.scrollY > 300);
+  });
+
+  function openHash() {
+    const id = location.hash.slice(1);
+    if (!id) return;
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  window.addEventListener('hashchange', openHash);
+  document.addEventListener('DOMContentLoaded', openHash);
+
+  document.getElementById('search-input').addEventListener('input', function () {
+    const query = this.value.trim().toLowerCase();
+    const cards = document.querySelectorAll('.card');
+    let visible = 0;
+    cards.forEach(card => {
+      const text = (card.dataset.search || '') + ' ' + card.textContent.toLowerCase();
+      const match = !query || text.includes(query);
+      card.classList.toggle('hidden', !match);
+      if (match) visible++;
+    });
+    document.querySelectorAll('.home-section').forEach(section => {
+      const anyVisible = [...section.querySelectorAll('.card')].some(c => !c.classList.contains('hidden'));
+      section.style.display = anyVisible ? '' : 'none';
+    });
+    document.getElementById('no-results').style.display = (visible === 0 && query) ? 'block' : 'none';
+  });
+
+  const navLinks = document.querySelectorAll('.home-sidebar a[href^="#"]');
+  const sections = [...navLinks]
+    .map(a => document.getElementById(a.getAttribute('href').slice(1)))
+    .filter(Boolean);
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        navLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + entry.target.id));
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+  sections.forEach(s => observer.observe(s));
+</script>
+<script src="assets/js/theme.js"></script>
+
+</body>
 </html>

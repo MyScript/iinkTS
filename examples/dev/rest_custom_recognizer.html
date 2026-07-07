@@ -11,39 +11,15 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
-    <style>
-      #editorEl {
-        height: calc(100dvh - 237px);
-      }
-
-      @media only screen and (max-width: 600px) {
-        #editorEl {
-          height: calc(100dvh - 307px);
-        }
-      }
-    </style>
-    <style>
-      .recognizer-info {
-        width: calc(100% - 200px);
-        min-width: 200px;
-        overflow: auto;
-        white-space: nowrap;
-        padding: 0 12px;
-        margin: 5px 0;
-      }
-
-      @media only screen and (max-width: 600px) {
-        .recognizer-info {
-          width: 100%;
-        }
-      }
-    </style>
-  </head>
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
   <body>
     <header class="header-main">
       <button id="showModalBtn" class="btn-keys">
-        Change server configuration
+        API Keys
       </button>
       <h1 class="header-title">
         Rest with Custom Recognizer
@@ -135,17 +111,14 @@
       redoElement.addEventListener('click', () => {
         editor?.redo()
       })
-
-      window.addEventListener('resize', () => {
-        editor?.resize()
-      })
-
       showModalBtn.addEventListener('click', () => {
         ModalEditorOptions.show(loadEditor, editorOptions)
       })
 
       ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
     </script>
-  </body>
+      <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
 
 </html>

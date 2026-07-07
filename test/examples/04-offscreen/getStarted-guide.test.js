@@ -7,7 +7,7 @@ import {
 
 import locator from "../locators"
 
-test.describe("Offscreen Get Started - Guides", () => {
+test.describe("Interactive ink editor Get Started - Guides", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/offscreen-interactivity/index.html`)
     await passModalKey(page)

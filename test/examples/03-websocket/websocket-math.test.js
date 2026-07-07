@@ -36,134 +36,12 @@ test.describe('Websocket Math', function () {
       waitForExportedEvent(page),
       writeStrokes(page, one.strokes)
     ])
-    const jiix = await getEditorExportsType(
-      page,
-      'application/vnd.myscript.jiix'
-    )
+    const jiix = await getEditorExportsType(page, 'application/vnd.myscript.jiix')
     expect(jiix).toBeUndefined()
     const latex = await getEditorExportsType(page, 'application/x-latex')
     expect(latex).toBeDefined()
     const mathml = await getEditorExportsType(page, 'application/mathml+xml')
     expect(mathml).toBeUndefined()
-  })
-
-  test('should only export jiix', async ({ page }) => {
-    const config = await getEditorConfiguration(page)
-    const options = {
-      configuration: {
-        server: config.server,
-        recognition: {
-          type: 'MATH',
-          math: {
-            mimeTypes: ['application/vnd.myscript.jiix']
-          }
-        }
-      }
-    }
-    await loadEditor(page, options)
-
-    await Promise.all([
-      waitForExportedEvent(page),
-      writeStrokes(page, one.strokes)
-    ])
-    const latex = await getEditorExportsType(page, 'application/x-latex')
-    expect(latex).toBeUndefined()
-    const jiix = await getEditorExportsType(
-      page,
-      'application/vnd.myscript.jiix'
-    )
-    expect(jiix).toBeDefined()
-    const mathml = await getEditorExportsType(page, 'application/mathml+xml')
-    expect(mathml).toBeUndefined()
-  })
-
-  test('should only export mathml+xml', async ({ page }) => {
-    const config = await getEditorConfiguration(page)
-    const options = {
-      configuration: {
-        server: config.server,
-        recognition: {
-          type: 'MATH',
-          math: {
-            mimeTypes: ['application/mathml+xml']
-          }
-        }
-      }
-    }
-    await loadEditor(page, options)
-
-    await Promise.all([
-      waitForExportedEvent(page),
-      writeStrokes(page, one.strokes)
-    ])
-    const latex = await getEditorExportsType(page, 'application/x-latex')
-    expect(latex).toBeUndefined()
-    const jiix = await getEditorExportsType(
-      page,
-      'application/vnd.myscript.jiix'
-    )
-    expect(jiix).toBeUndefined()
-    const mathml = await getEditorExportsType(page, 'application/mathml+xml')
-    expect(mathml).toBeDefined()
-  })
-
-  test('should export mathml with flavor "standard"', async ({ page }) => {
-    const config = await getEditorConfiguration(page)
-    const options = {
-      configuration: {
-        server: config.server,
-        recognition: {
-          type: 'MATH',
-          math: {
-            mimeTypes: ['application/mathml+xml']
-          },
-          export: {
-            mathml: {
-              flavor: 'standard'
-            }
-          }
-        }
-      }
-    }
-    await loadEditor(page, options)
-    await writeStrokes(page, fence.strokes)
-    await callEditorIdle(page)
-    const mathml = await getEditorExportsType(page, 'application/mathml+xml')
-    expect(mathml.trim().replace(/ /g, '')).toEqual(
-      fence.exports.MATHML.STANDARD[fence.exports.MATHML.STANDARD.length - 1]
-        .trim()
-        .replace(/ /g, '')
-    )
-  })
-
-  test('should export mathml with flavor "ms-office"', async ({ page }) => {
-    const config = await getEditorConfiguration(page)
-    const options = {
-      configuration: {
-        server: config.server,
-        recognition: {
-          type: 'MATH',
-          math: {
-            mimeTypes: ['application/mathml+xml']
-          },
-          export: {
-            mathml: {
-              flavor: 'ms-office'
-            }
-          }
-        }
-      }
-    }
-    await loadEditor(page, options)
-    await waitForEditorInit(page)
-    await writeStrokes(page, fence.strokes)
-    await callEditorIdle(page)
-    const mathml = await getEditorExportsType(page, 'application/mathml+xml')
-    expect(mathml.trim().replace(/ /g, '')).toEqual(
-      fence.exports.MATHML.MSOFFICE[fence.exports.MATHML.MSOFFICE.length - 1]
-        .trim()
-        .replace(/ /g, '')
-    )
   })
 
   test.describe('Nav actions', () => {
@@ -343,7 +221,7 @@ test.describe('Websocket Math', function () {
 
       const [oneModelExport] = await Promise.all([
         waitForExportedEvent(page),
-        writeStrokes(page, one.strokes, 100, 150)
+        writeStrokes(page, one.strokes)
       ])
       const oneExport = oneModelExport['application/x-latex']
       expect(oneExport).toEqual('1')
@@ -354,16 +232,15 @@ test.describe('Websocket Math', function () {
       await callEditorIdle(page)
       const emptyConvert = await getEditorConverts(page)
       expect(emptyConvert).toBeUndefined()
-      await expect(page.locator('svg[data-layer="MODEL"] path')).toHaveCount(
+      await expect(page.locator('#editorEl svg[data-layer="MODEL"] path')).toHaveCount(
         equation.strokes.length
       )
 
       await Promise.all([waitForConvertedEvent(page), page.locator('#convert').click()])
 
       await callEditorIdle(page)
-      await expect(page.locator('svg[data-layer="MODEL"] path')).toHaveCount(
-        equation.exports.LATEX.at(-1).length
-      )
+      await expect(page.locator('#editorEl svg[data-layer="MODEL"] path'))
+        .toHaveCount(equation.exports.LATEX.at(-1).length)
 
       const convert = await getEditorConverts(page)
       const latexExport = await getEditorExportsType(

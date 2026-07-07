@@ -13,28 +13,26 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
 
     <style>
-      #editor {
-        width: 100%;
-        height: calc(100dvh - 375px);
-        min-height: 400px;
-      }
-
       .theme-bar {
         display: flex;
         align-items: center;
         gap: 10px;
         flex-wrap: wrap;
         padding: 10px 16px;
-        background: #fff9c4;
-        border-bottom: 1px solid #f0e68c;
+        background: var(--ex-surface-alt);
+        border-bottom: 1px solid var(--ex-border);
+        flex-shrink: 0;
       }
 
       .theme-bar-label {
         font-size: 13px;
         font-weight: 700;
-        color: #555;
+        color: var(--ex-text-muted);
         text-transform: uppercase;
         letter-spacing: 0.05em;
       }
@@ -44,70 +42,329 @@
         padding: 0 14px;
         font-size: 13px;
         font-weight: 600;
-        border: 2px solid #e0e0e0;
+        border: 2px solid var(--ex-border);
         border-radius: 4px;
-        background: white;
+        background: var(--ex-surface);
+        color: var(--ex-text);
         cursor: pointer;
         transition: border-color 0.15s, background 0.15s, color 0.15s;
       }
 
       .theme-btn.active {
-        border-color: #1a9fff;
-        background: #e8f4ff;
-        color: #1a9fff;
+        border-color: #2196F3;
+        background: var(--ex-hover);
+        color: #2196F3;
       }
 
       .theme-btn:hover:not(.active) {
-        background: #f5f5f5;
-        border-color: #bbb;
+        background: var(--ex-hover);
+        border-color: var(--ex-text-muted);
       }
 
       .code-bar {
         padding: 8px 16px;
-        background: #f5f5f5;
-        border-bottom: 1px solid #e0e0e0;
+        background: var(--ex-surface-alt);
+        border-bottom: 1px solid var(--ex-border);
+        flex-shrink: 0;
       }
 
-      .code-example {
-        display: block;
-        background: #fff;
-        padding: 8px 12px;
-        border-radius: 4px;
-        font-family: monospace;
-        font-size: 12px;
-        border-left: 3px solid #2196F3;
+      pre.ex-code {
         white-space: pre;
         max-height: 175px;
         overflow-x: auto;
         margin: 0;
       }
+
+      #editorEl {
+        flex: 1;
+        min-height: 0;
+      }
     </style>
-  </head>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
   <body>
     <header class="header-main">
-      <button id="showModalBtn" class="btn-keys">Change server configuration</button>
-      <h1 class="header-title">Interactive Ink Editor - CSS Variables Themes</h1>
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="guide-panel">
+        🎨 CSS Vars
+      </button>
+      <button id="showModalBtn" class="btn-keys">API Keys</button>
+      <h1 class="header-title">Interactive Ink Editor — CSS Variables Themes</h1>
     </header>
 
-    <div class="info-section" style="margin: 0; border-radius: 0; padding: 10px 16px;">
-      <strong>cssVars</strong> — Pass a <code>Record&lt;string, string&gt;</code> to override <code>--iink-*</code> CSS custom properties on the editor root element.
-      All colors, spacing, and radius tokens flow from <code>iink.css</code> through the entire UI.
-      Switching themes reinitializes the editor.
+    <div class="ex-page-layout">
+
+      <aside id="guide-panel" class="ex-panel">
+        <p class="ex-panel-heading">CSS custom properties</p>
+        <p class="ex-panel-intro">Pass a <code>Record&lt;string, string&gt;</code> as <code>cssVars</code> in <code>editorOptions.configuration</code> to override any <code>--iink-*</code> token on the editor root element.</p>
+
+        <div class="ex-panel-divider"></div>
+
+        <!-- ── Brand colors ── -->
+        <p class="ex-panel-subtitle">Brand &amp; semantic</p>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-primary</span><span class="ex-panel-item-default">#1A9FFF</span></div>
+          <div class="ex-panel-item-desc">Primary action color — buttons, active borders, accents.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-secondary</span><span class="ex-panel-item-default">#9E9E9E</span></div>
+          <div class="ex-panel-item-desc">Secondary / muted color — ghost buttons, helper text.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-tertiary</span><span class="ex-panel-item-default">#d6d6d6</span></div>
+          <div class="ex-panel-item-desc">Tertiary / ghost color — lowest-emphasis text and elements.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-success</span><span class="ex-panel-item-default">#4CAF50</span></div>
+          <div class="ex-panel-item-desc">Success state — confirmation buttons, positive overlays.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-info</span><span class="ex-panel-item-default">#2196F3</span></div>
+          <div class="ex-panel-item-desc">Info state — informational buttons and indicators.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-warning</span><span class="ex-panel-item-default">#FFC107</span></div>
+          <div class="ex-panel-item-desc">Warning state — caution indicators and buttons.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-error</span><span class="ex-panel-item-default">#f44336</span></div>
+          <div class="ex-panel-item-desc">Error / danger state — destructive buttons and alerts.</div>
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <!-- ── Editor canvas ── -->
+        <p class="ex-panel-subtitle">Editor canvas</p>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-editor-bg</span><span class="ex-panel-item-default">white</span></div>
+          <div class="ex-panel-item-desc">Writing surface background color.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-color</span><span class="ex-panel-item-default">#000000</span></div>
+          <div class="ex-panel-item-desc">Primary text and icon color inside the editor.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-surface</span><span class="ex-panel-item-default">#F5F6F7</span></div>
+          <div class="ex-panel-item-desc">Card / panel surface background (loader, state indicator).</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-section-bg</span><span class="ex-panel-item-default">#f5f5f5</span></div>
+          <div class="ex-panel-item-desc">Section / group background inside menus and modals.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-border-color</span><span class="ex-panel-item-default">#e0e0e0</span></div>
+          <div class="ex-panel-item-desc">Border color used throughout the editor UI.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-text-muted</span><span class="ex-panel-item-default">#717171</span></div>
+          <div class="ex-panel-item-desc">Muted / helper text color.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-guide-color</span><span class="ex-panel-item-default">#c8c8c8</span></div>
+          <div class="ex-panel-item-desc">Guide grid line color drawn on the canvas background.</div>
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <!-- ── Menu ── -->
+        <p class="ex-panel-subtitle">Menu / UI chrome</p>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-menu-bg</span><span class="ex-panel-item-default">#ffffff</span></div>
+          <div class="ex-panel-item-desc">Background of all floating menus and toolbars.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-menu-title-bg</span><span class="ex-panel-item-default">#b3dfff</span></div>
+          <div class="ex-panel-item-desc">Background of menu section title rows.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-menu-hover</span><span class="ex-panel-item-default">rgb(239,239,239)</span></div>
+          <div class="ex-panel-item-desc">Hover highlight background for menu items and buttons.</div>
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <!-- ── Inputs ── -->
+        <p class="ex-panel-subtitle">Inputs</p>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-input-bg</span><span class="ex-panel-item-default">#ffffff</span></div>
+          <div class="ex-panel-item-desc">Input and select background color.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-input-color</span><span class="ex-panel-item-default">#131F26</span></div>
+          <div class="ex-panel-item-desc">Input text color.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-input-border</span><span class="ex-panel-item-default">#CED5D9</span></div>
+          <div class="ex-panel-item-desc">Input border color.</div>
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <!-- ── Spacing ── -->
+        <p class="ex-panel-subtitle">Spacing</p>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-spacing-xs</span><span class="ex-panel-item-default">4px</span></div>
+          <div class="ex-panel-item-desc">Extra-small gap — tight icon spacing.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-spacing-sm</span><span class="ex-panel-item-default">8px</span></div>
+          <div class="ex-panel-item-desc">Small gap — default button padding, list gaps.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-spacing-md</span><span class="ex-panel-item-default">12px</span></div>
+          <div class="ex-panel-item-desc">Medium gap — card padding, section gaps.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-spacing-lg</span><span class="ex-panel-item-default">16px</span></div>
+          <div class="ex-panel-item-desc">Large gap — page padding, primary action spacing.</div>
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <!-- ── Radius ── -->
+        <p class="ex-panel-subtitle">Border radius</p>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-radius-sm</span><span class="ex-panel-item-default">4px</span></div>
+          <div class="ex-panel-item-desc">Small radius — buttons, inputs, chips.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-radius-md</span><span class="ex-panel-item-default">6px</span></div>
+          <div class="ex-panel-item-desc">Medium radius — cards, menus.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-radius-lg</span><span class="ex-panel-item-default">8px</span></div>
+          <div class="ex-panel-item-desc">Large radius — modals, panels.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-radius-full</span><span class="ex-panel-item-default">50%</span></div>
+          <div class="ex-panel-item-desc">Full pill / circle radius.</div>
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <!-- ── Modal ── -->
+        <p class="ex-panel-subtitle">Modal</p>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-modal-backdrop</span><span class="ex-panel-item-default">rgba(0,0,0,0.3)</span></div>
+          <div class="ex-panel-item-desc">Modal overlay backdrop color.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-modal-bg</span><span class="ex-panel-item-default">→ --iink-section-bg</span></div>
+          <div class="ex-panel-item-desc">Modal panel background.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-modal-radius</span><span class="ex-panel-item-default">→ --iink-radius-lg</span></div>
+          <div class="ex-panel-item-desc">Modal corner radius.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-modal-shadow</span><span class="ex-panel-item-default">0 4px 12px rgba(0,0,0,0.15)</span></div>
+          <div class="ex-panel-item-desc">Modal box shadow.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-modal-width</span><span class="ex-panel-item-default">auto</span></div>
+          <div class="ex-panel-item-desc">Modal width — set to a % or px value to constrain.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-modal-title-bg</span><span class="ex-panel-item-default">→ --iink-menu-title-bg</span></div>
+          <div class="ex-panel-item-desc">Modal title bar background.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-modal-title-color</span><span class="ex-panel-item-default">→ --iink-color</span></div>
+          <div class="ex-panel-item-desc">Modal title text color.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-modal-title-size</span><span class="ex-panel-item-default">18px</span></div>
+          <div class="ex-panel-item-desc">Modal title font size.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-modal-icon-btn-hover</span><span class="ex-panel-item-default">→ --iink-menu-hover</span></div>
+          <div class="ex-panel-item-desc">Hover background for modal icon buttons (close, fullscreen).</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-modal-content-bg</span><span class="ex-panel-item-default">→ --iink-editor-bg</span></div>
+          <div class="ex-panel-item-desc">Modal content area background.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-modal-content-color</span><span class="ex-panel-item-default">→ --iink-color</span></div>
+          <div class="ex-panel-item-desc">Modal content text color.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-modal-padding</span><span class="ex-panel-item-default">20px</span></div>
+          <div class="ex-panel-item-desc">Modal content area inner padding.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">--iink-modal-primary</span><span class="ex-panel-item-default">→ --iink-primary</span></div>
+          <div class="ex-panel-item-desc">Primary accent color inside the modal.</div>
+        </div>
+
+      </aside>
+
+      <div class="page-content">
+        <div class="theme-bar">
+          <span class="theme-bar-label">Theme:</span>
+          <button class="theme-btn active" data-theme="default">Default</button>
+          <button class="theme-btn" data-theme="ink">Ink Studio</button>
+          <button class="theme-btn" data-theme="neon">Neon Lab</button>
+        </div>
+
+        <div class="code-bar">
+          <pre id="codeDisplay" class="ex-code"></pre>
+        </div>
+
+        <div id="editorEl"></div>
+      </div>
+
     </div>
 
-    <div class="theme-bar">
-      <span class="theme-bar-label">Theme:</span>
-      <button class="theme-btn active" data-theme="default">Default</button>
-      <button class="theme-btn" data-theme="ink">Ink Studio</button>
-      <button class="theme-btn" data-theme="neon">Neon Lab</button>
-    </div>
-
-    <div class="code-bar">
-      <pre id="codeDisplay" class="code-example"></pre>
-    </div>
-
-    <div id="editor"></div>
+    <script>
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const guidePanel = document.getElementById('guide-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = guidePanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+    </script>
 
     <script type="module">
       import { Editor, Modal } from "../../dist/iink.esm.js"
@@ -267,7 +524,7 @@ Editor.load(el, "INTERACTIVEINK", {
       let serverConfig = null
       let editor = null
 
-      const editorElement = document.getElementById("editor")
+      const editorElement = document.getElementById("editorEl")
       const showModalBtn = document.getElementById("showModalBtn")
       const codeDisplay = document.getElementById("codeDisplay")
       const themeBtns = document.querySelectorAll(".theme-btn")
@@ -298,18 +555,17 @@ Editor.load(el, "INTERACTIVEINK", {
         })
       }
 
+      function applyThemeCssVars(vars) {
+        const target = editorElement.querySelector('.ms-editor') || editorElement
+        Array.from(target.style).filter(k => k.startsWith('--iink-')).forEach(k => target.style.removeProperty(k))
+        if (vars) Object.entries(vars).forEach(([k, v]) => target.style.setProperty(k, v))
+      }
+
       function activateTheme(themeKey) {
         currentTheme = themeKey
-
-        themeBtns.forEach(btn => {
-          btn.classList.toggle("active", btn.dataset.theme === themeKey)
-        })
-
+        themeBtns.forEach(btn => btn.classList.toggle("active", btn.dataset.theme === themeKey))
         renderCode(themeKey)
-
-        if (editor) {
-          editor.setCssVars(THEMES[themeKey].cssVars)
-        }
+        if (editor) applyThemeCssVars(THEMES[themeKey].cssVars)
       }
 
       themeBtns.forEach(btn => {
@@ -321,11 +577,6 @@ Editor.load(el, "INTERACTIVEINK", {
           }
         })
       })
-
-      window.addEventListener("resize", () => {
-        editor?.resize()
-      })
-
       showModalBtn.addEventListener("click", () => {
         ModalEditorOptions.show(loadEditor, editorOptions)
       })
@@ -337,6 +588,8 @@ Editor.load(el, "INTERACTIVEINK", {
       window.editorOptions = editorOptions
       window.loadEditor = loadEditor
     </script>
-  </body>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
 
 </html>

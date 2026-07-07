@@ -13,27 +13,48 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
-    <style>
-      #editorEl {
-        width: 100%;
-        height: calc(100dvh - 50px);
-      }
-    </style>
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
   </head>
 
   <body>
     <header class="header-main">
-      <button id="showModalBtn" class="btn-keys">
-        Change server configuration
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
       </button>
-      <h1 class="header-title">Offscreen Interactivity - Get Started</h1>
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">Interactive Ink Editor - Get Started</h1>
     </header>
 
-    <div id="editorEl"></div>
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">Interactive Ink Editor — get started</p>
+        <p class="ex-panel-intro">This is the full <strong>INTERACTIVEINK</strong> editor — the most capable variant. It supports gestures, selection, move, resize, convert, and rich multi-symbol rendering, all driven by a WebSocket connection to the server.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Write, draw shapes, or sketch equations — the editor handles mixed content automatically and keeps the ink interactive after recognition.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">A built-in toolbar appears on the canvas. Use it to switch tools, undo/redo, convert, or export without any extra UI code.</div>
+        </div>
+      </aside>
+      <div id="editorEl"></div>
+    </div>
 
     <script type="module">
       import { Editor } from "../../dist/iink.esm.js"
       import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', String(open))
+      })
       const editorElement = document.getElementById("editorEl")
       const showModalBtn = document.getElementById("showModalBtn")
 
@@ -53,10 +74,6 @@
         editor = await Editor.load(editorElement, "INTERACTIVEINK", options)
       }
 
-      window.addEventListener("resize", () => {
-        editor?.resize()
-      })
-
       showModalBtn.addEventListener("click", () => {
         ModalEditorOptions.show(loadEditor, editorOptions)
       })
@@ -69,5 +86,7 @@
       window.editorOptions = editorOptions
       window.loadEditor = loadEditor
     </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
   </body>
 </html>

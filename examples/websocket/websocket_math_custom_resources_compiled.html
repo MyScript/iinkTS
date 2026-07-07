@@ -13,89 +13,62 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
 
-    <style>
-      .description {
-        padding: 12px;
-      }
-
-      #editorEl {
-        height: calc(100dvh - 284px);
-      }
-
-      @media only screen and (max-width: 1156px) {
-        #editorEl {
-          height: calc(100dvh - 302px);
-        }
-      }
-
-      @media only screen and (max-width: 600px) {
-        #editorEl {
-          height: calc(100dvh - 319px);
-        }
-      }
-
-      @media only screen and (max-width: 423px) {
-        #editorEl {
-          height: calc(100dvh - 336px);
-        }
-      }
-
-      @media only screen and (max-width: 338px) {
-        #editorEl {
-          height: calc(100dvh - 353px);
-        }
-      }
-    </style>
-  </head>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
   <body>
     <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
       <button id="showModalBtn" class="btn-keys">
-        Change server configuration
+        API Keys
       </button>
       <h1 class="header-title">
         Custom resources math (pre-compiled)
       </h1>
     </header>
 
-    <p class="description">
-      This example use a math custom resource. The grammar restrict the
-      recognition to only basic elementary school math (addition and
-      substraction). The id of a pre-compiled grammar is sent.
-    </p>
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">🏫 Pre-compiled grammar — same restriction, lighter payload</p>
+        <p class="ex-panel-intro">Same goal as the inline grammar example: limit recognition to elementary school math (digits 0–9, <strong>+</strong> and <strong>−</strong> only).</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">The difference: the grammar is <strong>compiled and uploaded to the server in advance</strong>. The client simply references it by identifier (<code>customGrammarId: 'math-elementary'</code>) — no grammar string is sent on every request.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Prefer <code>customGrammarId</code> over <code>customGrammarContent</code> in production: the compiled grammar is faster to load server-side and keeps the configuration payload small.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Try writing <em>3 + 5</em> or <em>12 - 4</em>. Complex symbols like <em>∫</em> or <em>√</em> will not be recognized.</div>
+        </div>
+      </aside>
 
-    <div id="result"></div>
-
-    <nav class="flex-container wrap gap between">
-      <div class="flex-container wrap gap">
-        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/clear.svg" />
-        </button>
-        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/undo.svg" />
-        </button>
-        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/redo.svg" />
-        </button>
+      <div class="page-content">
+        <div id="result"></div>
+        <div id="editorEl"></div>
       </div>
-      <button class="classic-btn" id="convert" disabled>
-        Convert
-      </button>
-    </nav>
+    </div>
 
-    <div id="editorEl"></div>
 
     <script type="module">
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
       import { Editor } from '../../dist/iink.esm.js'
       import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
 
       const editorElement = document.getElementById('editorEl')
       const resultElement = document.getElementById('result')
-      const undoElement = document.getElementById('undo')
-      const redoElement = document.getElementById('redo')
-      const clearElement = document.getElementById('clear')
-      const convertElement = document.getElementById('convert')
       const showModalBtn = document.getElementById('showModalBtn')
 
       const editorOptions = {
@@ -116,18 +89,7 @@
         resultElement.innerHTML = ''
         await editor?.destroy()
 
-        /**
-         * get editor instance from type
-         * @param {Element} The DOM element to attach the ink paper
-         * @param {Object} The Editor parameters
-         */
         editor = await Editor.load(editorElement, 'INTERACTIVEINKSSR', options)
-
-        editor.event.addEventListener('changed', (event) => {
-          undoElement.disabled = !event.detail.canUndo
-          redoElement.disabled = !event.detail.canRedo
-          clearElement.disabled = event.detail.empty
-        })
 
         editor.event.addEventListener('exported', (evt) => {
           const exports = evt.detail
@@ -141,34 +103,17 @@
         })
       }
 
-      undoElement.addEventListener('click', () => {
-        editor?.undo()
-      })
-
-      redoElement.addEventListener('click', () => {
-        editor?.redo()
-      })
-
-      clearElement.addEventListener('click', () => {
-        editor?.clear()
-      })
-
-      convertElement.addEventListener('click', () => {
-        editor?.convert()
-      })
-
       showModalBtn.addEventListener('click', () => {
         ModalEditorOptions.show(loadEditor, editorOptions)
       })
 
       ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
 
-      /**
-       * We expose these objects to the window use it in test
-       */
       window.editorOptions = editorOptions
       window.loadEditor = loadEditor
     </script>
-  </body>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
 
 </html>

@@ -11,13 +11,16 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css" integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X" crossorigin="anonymous" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.js" integrity="sha384-g7c+Jr9ZivxKLnZTDUhnkOnsh30B4H0rpLUpJ4jAIKs4fnJI+sEnkvrMWph2EDg4" crossorigin="anonymous"></script>
     <script type="text/javascript" src="../assets/desmos/calculator.js"></script>
     <style>
       #graph,
       #editorEl {
-        height: calc(100dvh - 216px);
+        height: calc(100dvh - 260px);
         width: 50%;
       }
 
@@ -30,39 +33,70 @@
         }
       }
     </style>
-  </head>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
   <body>
     <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
       <button id="showModalBtn" class="btn-keys">
-        Change server configuration
+        API Keys
       </button>
       <h1 class="header-title">
         Websocket Math With Graph
       </h1>
     </header>
-    <div id="result"></div>
 
-    <nav class="flex-container wrap between">
-      <div class="flex-container wrap gap">
-        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/clear.svg" />
-        </button>
-        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/undo.svg" />
-        </button>
-        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/redo.svg" />
-        </button>
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">📈 Handwritten math → live graph</p>
+        <p class="ex-panel-intro">Write a mathematical expression on the left — functions (<em>y = x²</em>), equations (<em>x² + y² = 25</em>), inequalities… The engine recognizes it and exports it as LaTeX.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">The LaTeX is fed directly to <strong>Desmos</strong>, which plots the corresponding curve on the right in real time.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Write <strong>multiple expressions</strong> one after another — each is plotted in a different color.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Use <strong>Clear</strong> to reset both the ink and the graph.</div>
+        </div>
+      </aside>
+
+      <div class="page-content">
+        <div id="result"></div>
+
+        <nav class="flex-container wrap between">
+          <div class="flex-container wrap gap">
+            <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+              <img src="../assets/img/clear.svg" />
+            </button>
+            <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+              <img src="../assets/img/undo.svg" />
+            </button>
+            <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+              <img src="../assets/img/redo.svg" />
+            </button>
+          </div>
+        </nav>
+
+        <div class="flex-container wrap">
+          <div id="editorEl"></div>
+          <div id="graph" class="graph"></div>
+        </div>
       </div>
-    </nav>
-
-    <div class="flex-container wrap">
-      <div id="editorEl"></div>
-      <div id="graph" class="graph"></div>
     </div>
 
     <script type="module">
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
       import { Editor } from '../../dist/iink.esm.js'
       import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
       const editorElement = document.getElementById('editorEl')
@@ -185,11 +219,6 @@
       redoElement.addEventListener('click', () => {
         editor?.redo()
       })
-
-      window.addEventListener('resize', () => {
-        editor?.resize()
-      })
-
       showModalBtn.addEventListener('click', () => {
         ModalEditorOptions.show(loadEditor, editorOptions)
       })
@@ -202,6 +231,8 @@
       window.editorOptions = editorOptions
       window.loadEditor = loadEditor
     </script>
-  </body>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
 
 </html>

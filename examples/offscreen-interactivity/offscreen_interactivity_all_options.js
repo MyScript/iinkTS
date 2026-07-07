@@ -1,14 +1,15 @@
+/* eslint-disable no-undef */
 import { Editor } from "../../dist/iink.esm.js"
 import shakespeareQuotes from "../assets/datas/shakespeare-quotes.json" with { type: "json" }
 import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+
 const editorElement = document.getElementById("editorEl")
 const showModalBtn = document.getElementById("showModalBtn")
-
 const importBtn = document.getElementById("import")
+const panelToggleBtn = document.getElementById("panelToggleBtn")
+const leftPan = document.getElementById("left-pan")
 
-const leftPanToggle = document.getElementById("toggle-left-pan")
 const htmlPanToggle = document.getElementById("toggle-export-html-pan")
-
 const exportHtmlPan = document.getElementById("export-html-pan")
 const htmlPanCloseBtn = document.getElementById("html-pan-close-btn")
 const exportHtmlBody = document.getElementById("export-html-body")
@@ -17,8 +18,7 @@ let currentTabId = "symbols-tab"
 const copyTabToClipboard = document.getElementById("copy-content-tab")
 const contentTab = document.getElementById("content-tab")
 
-const BACKEND_MODEL_EMPTY =
-  '<div style="display: flex; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; color: #666;">The backend model is empty</div>'
+const BACKEND_MODEL_EMPTY = `<div style="display: flex; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif; color: #666;">The backend model is empty</div>`
 
 copyTabToClipboard.addEventListener("pointerup", () => {
   try {
@@ -29,28 +29,33 @@ copyTabToClipboard.addEventListener("pointerup", () => {
   }
 })
 
+function isPanelVisible() {
+  // Desktop: panel is always visible (width > 0); Mobile: needs .open class
+  return window.innerWidth > 900 || leftPan.classList.contains("open")
+}
+
 function setCurrentTab(tabId) {
   currentTabId = tabId
-  document.querySelectorAll(".tab").forEach((t) => t.classList.remove("active"))
+  document.querySelectorAll(".tab-button").forEach((t) => t.classList.remove("active"))
   document.getElementById(tabId).classList.add("active")
   updateTabContent()
 }
+
 async function updateTabContent() {
-  if (!leftPanToggle.checked) return
+  if (!isPanelVisible()) return
   if (!editor) {
     contentTab.innerHTML = "<p>No editor available</p>"
     return
   }
   let content
   let dataString = ""
-  contentTab.innerHTML = '<div class="loader"></div>'
+  contentTab.innerHTML = `<div class="loader"></div>`
   copyTabToClipboard.disabled = true
 
   switch (currentTabId) {
     case "jiix-tab": {
       const exports = await editor.export(["application/vnd.myscript.jiix"])
       const jiix = exports?.["application/vnd.myscript.jiix"] || {}
-      // eslint-disable-next-line no-undef
       content = renderjson(jiix)
       dataString = JSON.stringify(jiix)
       break
@@ -67,7 +72,6 @@ async function updateTabContent() {
           banner.textContent = `Showing ${MAX_SYMBOLS} of ${symbols.length} symbols`
           wrapper.appendChild(banner)
         }
-        // eslint-disable-next-line no-undef
         wrapper.appendChild(renderjson(sliced))
         content = wrapper
         dataString = JSON.stringify(sliced)
@@ -79,7 +83,6 @@ async function updateTabContent() {
       }
       break
     case "history-tab":
-      // eslint-disable-next-line no-undef
       content = renderjson({
         context: editor.history.context,
         stack: editor.history.stack,
@@ -126,15 +129,30 @@ async function updateTabContent() {
   copyTabToClipboard.disabled = false
 }
 
-document.querySelectorAll(".tab").forEach((tab) =>
+document.querySelectorAll(".tab-button").forEach((tab) =>
   tab.addEventListener("pointerup", (evt) => {
     setCurrentTab(evt.target.dataset.tabid)
   })
 )
 
-function closeHtmlPanVisibilty() {
+panelToggleBtn.addEventListener("click", () => {
+  const open = leftPan.classList.toggle("open")
+  panelToggleBtn.setAttribute("aria-expanded", String(open))
+  panelToggleBtn.textContent = open ? "🔬 Close" : "🔬 Inspect"
+  if (open) updateTabContent()
+  editor?.resize()
+})
+
+htmlPanToggle.addEventListener("change", (event) => {
+  exportHtmlPan.style.setProperty("display", event.target.checked ? "block" : "none")
+})
+
+htmlPanCloseBtn.addEventListener("pointerup", () => {
+  htmlPanToggle.checked = false
   exportHtmlPan.style.setProperty("display", "none")
-}
+})
+
+exportHtmlPan.style.setProperty("display", htmlPanToggle.checked ? "block" : "none")
 
 function createSymbolInputColor(symbol) {
   const inputColor = document.createElement("input")
@@ -190,39 +208,11 @@ function createStrokeInputWrapper(symbol) {
   return inputWrapper
 }
 
-if (leftPanToggle.checked) {
-  document.getElementById("left-pan").classList.add("open")
-} else {
-  document.getElementById("left-pan").classList.remove("open")
-}
-exportHtmlPan.style.setProperty("display", htmlPanToggle.checked ? "block" : "none")
-
-leftPanToggle.addEventListener("change", () => {
-  document.getElementById("left-pan").classList.toggle("open")
-  if (leftPanToggle.checked) {
-    updateTabContent()
-  }
-  editor?.resize()
-})
-
-htmlPanToggle.addEventListener("change", (event) => {
-  exportHtmlPan.style.setProperty("display", event.target.checked ? "block" : "none")
-})
-
-htmlPanCloseBtn.addEventListener("pointerup", () => {
-  htmlPanToggle.checked = false
-  closeHtmlPanVisibilty()
-})
-
 let editor
 const editorOptions = {
   configuration: {},
 }
 
-/**
- * Load (or reload) the editor with the given options, reset UI state and attach event listeners.
- * @param {Object} options - Editor options forwarded to Editor.load
- */
 async function loadEditor(options) {
   importBtn.disabled = true
   exportHtmlBody.srcdoc = BACKEND_MODEL_EMPTY
@@ -269,8 +259,5 @@ window.addEventListener("resize", () => {
 
 ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
 
-/**
- * We expose these objects to the window use it in test
- */
 window.editorOptions = editorOptions
 window.loadEditor = loadEditor

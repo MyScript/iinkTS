@@ -18,14 +18,6 @@ test.describe("Websocket Text search", () => {
   })
 
   test("should find text", async ({ page }) => {
-    await test.step("write hello", async () => {
-      const [exported] = await Promise.all([
-        waitForExportedEvent(page),
-        writeStrokes(page, hello.strokes),
-      ])
-      expect(exported).toBeDefined()
-    })
-
     await test.step("should find hello", async () => {
       await Promise.all([
         page.locator("#searchInput").fill("hello"),
@@ -36,18 +28,10 @@ test.describe("Websocket Text search", () => {
     })
   })
 
-  test("should not to find", async ({ page }) => {
-    await test.step("write h", async () => {
-      const [exported] = await Promise.all([
-        waitForExportedEvent(page),
-        writeStrokes(page, h.strokes),
-      ])
-      expect(exported).toBeDefined()
-    })
-
+  test("should not find text", async ({ page }) => {
     await test.step("should not find hello", async () => {
       await Promise.all([
-        page.locator("#searchInput").fill("hello"),
+        page.locator("#searchInput").fill("hi"),
         page.locator("#searchBtn").click(),
       ])
       await expect(page.locator(".highlight")).toHaveCount(0)

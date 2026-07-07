@@ -15,15 +15,13 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
     <style>
       nav {
         justify-content: unset;
       }
-
-      #editorEl {
-        height: 50vh;
-      }
-
       textarea {
         width: 100vw;
         height: calc(50vh - 58px);
@@ -35,22 +33,42 @@
         bottom: 12px;
       }
     </style>
-  </head>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
   <body>
     <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
       <button id="showModalBtn" class="btn-keys">
-        Change server configuration
+        API Keys
       </button>
       <h1 class="header-title">
-        Rest Math
+        Pointer events
       </h1>
     </header>
 
-    <div id="result"></div>
-    <div>
-      <div id="editorEl"></div>
-      <textarea id="pointerEventsObject">
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">🖱️ Programmatic pointer events</p>
+        <p class="ex-panel-intro"><code>editor.importPointEvents(strokes)</code> injects raw stroke data directly — no physical input needed. Useful for replaying recorded sessions, testing, or integrating custom hardware (digitizers, stylus SDKs) that expose raw coordinates.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Each stroke is an object with <code>pointerType</code> (<code>"pen"</code>, <code>"mouse"</code>, <code>"touch"</code>) and a <code>pointers</code> array. Each pointer has <code>x</code>, <code>y</code> (coordinates), <code>t</code> (timestamp in ms), and <code>p</code> (pressure 0–1).</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Timestamps must be monotonically increasing within a stroke — gaps between strokes are used by the engine to infer word boundaries.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Edit the JSON below and click <strong>Process</strong> to try your own stroke data.</div>
+        </div>
+      </aside>
+
+      <div class="page-content">
+        <div>
+          <div id="editorEl"></div>
+          <textarea id="pointerEventsObject">
 [
   {
     "pointerType": "mouse",
@@ -84,14 +102,23 @@
     ]
   }
 ]
-      </textarea>
-      <button class="classic-btn" id="pointerEvents">Process</button>
+          </textarea>
+          <button class="classic-btn" id="pointerEvents">Process</button>
+        </div>
+      </div>
     </div>
+
     <script type="module">
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
       import { Editor } from '../../dist/iink.esm.js'
       import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
       const editorElement = document.getElementById("editorEl")
-      const resultElement = document.getElementById("result")
       const pointerEventsElement = document.getElementById("pointerEvents")
       const pointerEventsObjectElement = document.getElementById("pointerEventsObject")
       const showModalBtn = document.getElementById("showModalBtn")
@@ -105,45 +132,25 @@
         },
       }
       async function loadEditor(options) {
-        resultElement.innerHTML = ""
         pointerEventsElement.disabled = false
         await editor?.destroy()
-        /**
-         * get editor instance from type
-         * @param {Element} The DOM element to attach the ink paper
-         * @param {Object} The Editor parameters
-         */
         editor = await Editor.load(editorElement, "INTERACTIVEINKSSR", options)
-
-        editor.event.addEventListener("exported", (event) => {
-          resultElement.innerHTML =
-            event.detail && event.detail["application/vnd.myscript.jiix"]
-              ? event.detail["application/vnd.myscript.jiix"].label
-              : ""
-        })
-
       }
 
       pointerEventsElement.addEventListener("click", () => {
         pointerEventsElement.disabled = true
         editor.importPointEvents(JSON.parse(pointerEventsObjectElement.value))
       })
-
-      window.addEventListener("resize", () => {
-        editor.resize()
-      })
-
       showModalBtn.addEventListener("click", () => {
         ModalEditorOptions.show(loadEditor, editorOptions)
       })
 
       ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
 
-      /**
-       * We expose these objects to the window use it in test
-       */
       window.editorOptions = editorOptions
       window.loadEditor = loadEditor
     </script>
-  </body>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
 </html>
