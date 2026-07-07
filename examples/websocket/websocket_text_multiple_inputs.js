@@ -146,10 +146,6 @@ showModalBtn.addEventListener("click", () => {
 
 ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
 
-window.addEventListener("resize", () => {
-  editor.resize()
-})
-
 /**
  * We expose these objects to the window use it in test
  */

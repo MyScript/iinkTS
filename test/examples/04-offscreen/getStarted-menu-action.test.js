@@ -22,7 +22,7 @@ import helloInsert from "../__dataset__/helloInsert"
 import helloOneStroke from "../__dataset__/helloOneStroke"
 import helloOneStrokeSurrounded from "../__dataset__/helloOneStrokeSurrounded"
 
-test.describe("Offscreen Get Started Menu Action", () => {
+test.describe("Interactive ink editor Get Started Menu Action", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/offscreen-interactivity/index.html`)
     await passModalKey(page)

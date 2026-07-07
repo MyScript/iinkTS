@@ -13,96 +13,72 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+
     <style>
-      #editorEl {
-        min-height: 500px;
-        width: calc(100vw - 240px);
-        height: calc(100dvh - 250px);
-      }
-
-      .info-section {
-        background: #e3f2fd;
-        padding: 12px;
-        margin: 12px 0;
-        border-radius: 4px;
-        border-left: 4px solid #2196F3;
-      }
-      .info-section h3 {
-        margin-top: 0;
-        color: #1976D2;
-      }
-
-      .info-section ul {
-        margin: 8px 0;
-        padding-left: 24px;
-      }
-
-      .info-section li {
-        margin: 4px 0;
-      }
-
-      #connection-status-panel {
-        min-width: 220px;
-        padding: 12px;
-        border-radius: 6px;
-        background: #f5f6f7;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
-        font-family: sans-serif;
-        font-size: 13px;
-      }
-
-      #connection-status-panel h4 {
-        margin: 0 0 8px 0;
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: #888;
-      }
-
       #connection-status-value {
         display: inline-block;
         padding: 2px 8px;
-        border-radius: 4px;
+        border-radius: var(--ex-radius-sm, 4px);
         font-weight: bold;
-        color: white;
+        color: #fff;
       }
 
       #connection-status-log {
-        margin-top: 12px;
-        max-height: 160px;
+        margin-top: 8px;
+        max-height: 200px;
         overflow-y: auto;
         font-size: 11px;
-        color: #666;
+        color: var(--ex-text-muted, #888);
       }
 
       #connection-status-log div {
         padding: 2px 0;
-        border-bottom: 1px solid #e0e0e0;
+        border-bottom: 1px solid var(--ex-border);
       }
     </style>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
   </head>
 
   <body>
     <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="connection-status-panel">
+        📡 Status
+      </button>
       <button id="showModalBtn" class="btn-keys">Change server configuration</button>
       <h1 class="header-title">Offscreen Interactivity - External Connection Status</h1>
     </header>
-    <div class="info-section">
-      <h3>📋 Custom UI built on the connection state API</h3>
-      <ul>
-        <li>iinkTS already shows a built-in connection badge (icon in the top-right corner of the editor). This example shows how an external consumer can ignore that badge and build its own status panel instead, using <code>editor.connectionState</code> and <code>editor.event.addConnectionStateChangedListener</code>.</li>
-        <li>States: <code>initializing</code>, <code>online-idle</code>, <code>online-working</code>, <code>syncing</code> (reconnecting with strokes queued), <code>offline</code> (reconnecting, nothing queued yet), <code>error</code> (reconnection attempts exhausted).</li>
-        <li>To see the offline/syncing/error states: open DevTools → Network tab → set throttling to "Offline", write a few strokes, then set it back to "Online" to watch it recover.</li>
-      </ul>
-    </div>
-    <div class="flex-container">
-      <div id="editorEl"></div>
 
-      <div id="connection-status-panel">
-        <h4>Connection status (external panel)</h4>
+    <div class="ex-page-layout">
+
+      <aside id="connection-status-panel" class="ex-panel">
+        <p class="ex-panel-heading">Custom UI built on the connection state API</p>
+        <p class="ex-panel-intro">
+          iinkTS already shows a built-in connection badge (icon in the top-right corner of the editor). This example shows how an external consumer can ignore that badge and build its own status panel instead, using <code>editor.connectionState</code> and <code>editor.event.addConnectionStateChangedListener</code>.
+        </p>
+
+        <div class="ex-panel-divider"></div>
+
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">
+            States: <code>initializing</code>, <code>online-idle</code>, <code>online-working</code>, <code>syncing</code> (reconnecting with strokes queued), <code>offline</code> (reconnecting, nothing queued yet), <code>error</code> (reconnection attempts exhausted).
+          </div>
+        </div>
+
+        <div class="ex-panel-hint">
+          To see the offline/syncing/error states: open DevTools → Network tab → set throttling to "Offline", write a few strokes, then set it back to "Online" to watch it recover.
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <p class="ex-panel-subtitle">Connection status (external panel)</p>
         <span id="connection-status-value">initializing</span>
         <div id="connection-status-log"></div>
-      </div>
+      </aside>
+
+      <div id="editorEl"></div>
+
     </div>
 
     <script type="module">
@@ -111,8 +87,15 @@
 
       const editorElement = document.getElementById('editorEl')
       const showModalBtn = document.getElementById('showModalBtn')
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const connectionStatusPanel = document.getElementById('connection-status-panel')
       const statusValueElement = document.getElementById('connection-status-value')
       const statusLogElement = document.getElementById('connection-status-log')
+
+      panelToggleBtn.addEventListener('click', () => {
+        const open = connectionStatusPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
 
       const STATE_COLORS = {
         initializing: '#9e9e9e',
@@ -160,6 +143,8 @@
       window.editorOptions = editorOptions
       window.loadEditor = loadEditor
     </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
   </body>
 
 </html>

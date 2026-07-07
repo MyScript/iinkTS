@@ -13,8 +13,10 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
     <link rel="stylesheet" href="../assets/style/renderjson.css" />
-    <link rel="stylesheet" href="../components/modal/modal.css" />
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.min.css" integrity="sha384-AfEj0r4/OFrOo5t7NnNe46zW/tFgW6x/bCJG8FqQCEo3+Aro6EYUG4+cU+KJWu/X"
       crossorigin="anonymous" />
@@ -31,148 +33,98 @@
       }
 
       #result {
-        border-bottom: solid gray 1px;
+        border-bottom: 1px solid var(--ex-border);
         display: block;
         text-align: start;
         padding: 12px;
         cursor: zoom-in;
       }
 
-      #result.open {
-        position: absolute;
-        z-index: 999;
-        overflow: visible;
-        height: 100dvh;
-        width: 100dvw;
-        max-height: 100dvh;
-        background-color: white;
-        cursor: zoom-out;
-      }
-
       .content {
         position: relative;
-        width: calc(100vw - 400px);
         height: 100%;
       }
 
       .ms-editor {
         width: 100%;
-        height: calc(100dvh - 150px) !important;
+        height: calc(100% - 100px);
       }
 
       .configuration-container {
-        border-left: solid black 1px;
-        background-color: white;
-        height: calc(100dvh - 50px);
-        min-height: calc(100dvh - 50px);
-        width: 400px;
-        max-width: 400px;
+        background: var(--ex-surface);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        font-size: 13px;
+        overflow: hidden;
+        padding: 0;
+        gap: 0;
       }
 
-      .configuration-container .configuration-title {
+      .configuration-title {
         text-align: center;
+        padding: 12px 10px 8px;
+        font-size: 15px;
+        font-weight: 700;
+        color: var(--ex-text);
+        flex-shrink: 0;
       }
 
       .configuration-container .params {
-        height: calc(100% - 180px);
-        overflow: auto;
+        flex: 1;
+        overflow-y: auto;
+        min-height: 0;
+        padding: 0 10px;
       }
 
-      .configuration-container .card {
-        width: 100%;
-        padding: 10px;
-      }
-
-      .configuration-container .card .card-title {
-        padding: 5px;
-        border-bottom: solid rgba(150, 150, 200, 1) 1px;
-        cursor: pointer;
-      }
-
-      .configuration-container .card .card-title:hover {
-        background-color: rgba(150, 150, 200, 0.15);
-      }
-
-      .configuration-container .card .card-content {
-        width: 100%;
-        padding: 0px 0px 10px 20px;
+      /* Config section body starts collapsed — JS opens with display: "" */
+      #configuration-content .config-section-body {
         display: none;
       }
 
-      .configuration-container .card label {
+      /* Form labels inside collapsible sections */
+      .configuration-container .config-section-body label:not(.toggle) {
         display: block;
-        margin-top: 15px;
-      }
-
-      .configuration-container .card .card-content select,
-      .configuration-container .card .card-content input:not([type='checkbox']) {
-        width: 100%;
-        font: 400 14px 'Source Sans Pro', sans-serif;
+        margin-top: 12px;
+        color: var(--ex-text);
       }
 
       .buttons-wrapper {
         padding: 15px;
         display: flex;
         justify-content: space-around;
-      }
-
-      #menu-button {
-        display: none;
-        position: fixed;
-        z-index: 100;
-        right: 12px;
-        top: 12px;
-      }
-
-      @media screen and (max-width: 1000px) {
-        .content {
-          width: 100vw;
-        }
-
-        .configuration-container {
-          position: fixed;
-          right: 0;
-          z-index: 99;
-          padding-top: 60px;
-          overflow: hidden;
-          width: 0;
-          transition: width 0.75s ease;
-        }
-
-        #menu-button {
-          display: block;
-        }
-
-        .configuration-container.open {
-          width: 100vw;
-        }
+        flex-shrink: 0;
+        border-top: 1px solid var(--ex-border);
       }
     </style>
-  </head>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
   <body>
     <header class="header-main">
+      <button id="menu-button" class="btn-panel-toggle" aria-expanded="false" aria-controls="configuration-container">
+        ⚙ Config
+      </button>
       <button id="showModalBtn" class="btn-keys">
-        Change server configuration
+        API Keys
       </button>
       <h1 class="header-title">
         Changing configuration dynamically
       </h1>
     </header>
-    <button id="menu-button" class="menu-button">
-      <img src="../assets/img/menu.svg" />
-    </button>
     <div class="wrapper flex-container">
       <div class="content">
         <div id="result"></div>
-        <div id="editor" class="editor"></div>
+        <div id="editorEl" class="editor"></div>
       </div>
-      <div id="configuration-container" class="configuration-container">
+      <div id="configuration-container" class="configuration-container ex-panel">
         <h2 class="configuration-title">Configuration</h2>
-        <div class="card">
-          <div class="flex-container between">
-            <label for="editor-type">Editor type:</label>
-            <select id="editor-type" name="server-protocol"></select>
+        <div class="config-section">
+          <div class="config-section-body">
+            <div class="config-row">
+              <label for="editor-type" style="flex:1">Editor type</label>
+              <select id="editor-type" name="server-protocol" class="input-inline" style="width:auto"></select>
+            </div>
           </div>
         </div>
         <div id="configuration-content" class="params"></div>
@@ -194,10 +146,13 @@
       const mainMenu = document.getElementById('configuration-container')
 
       menuButton.addEventListener('click', () => {
-        mainMenu.classList.toggle('open')
+        const open = mainMenu.classList.toggle('open')
+        menuButton.setAttribute('aria-expanded', open)
       })
     </script>
     <script src="./change_configuration.js" type="module"></script>
-  </body>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
 
 </html>

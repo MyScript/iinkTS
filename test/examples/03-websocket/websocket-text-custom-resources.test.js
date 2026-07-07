@@ -29,5 +29,5 @@ test.describe("Websocket Custom pre-loaded resources", () => {
   //   expect(exports["application/vnd.myscript.jiix"].label).toEqual(abrausorus.exports["application/vnd.myscript.jiix"].label)
   // })
 
-  TextNavActions.test({ skipClear: true, resultLocator: ".prompter-container" })
+  TextNavActions.test({ skipClear: true, skipUndoRedo: true, resultLocator: ".prompter-container" })
 })

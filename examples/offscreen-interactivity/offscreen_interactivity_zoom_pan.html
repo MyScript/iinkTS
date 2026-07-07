@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Interactive Ink Editor — Zoom &amp; Pan</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        🔍 Guide
+      </button>
+      <button id="showModalBtn" class="btn-keys">API Keys</button>
+      <h1 class="header-title">Zoom &amp; Pan</h1>
+    </header>
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">Zoom &amp; Pan API</p>
+        <p class="ex-panel-intro">Control zoom level and viewport position programmatically.</p>
+        <div class="ex-panel-divider"></div>
+        <p class="ex-panel-section">🔍 Zoom</p>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-label"><code>editor.zoom(level)</code></div>
+          <div class="ex-panel-item-desc">Set zoom level (e.g. 1.5 = 150%). Optional centerX/centerY to zoom around a point.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-label"><code>editor.zoomToFit()</code></div>
+          <div class="ex-panel-item-desc">Fit all symbols in the viewport. Pass a symbols array to fit a subset.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-label"><code>editor.getZoom()</code></div>
+          <div class="ex-panel-item-desc">Get the current zoom level as a number.</div>
+        </div>
+        <div class="ex-panel-divider"></div>
+        <p class="ex-panel-section">↔ Pan</p>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-label"><code>editor.pan(dx, dy)</code></div>
+          <div class="ex-panel-item-desc">Shift viewport by dx pixels horizontally and dy pixels vertically.</div>
+        </div>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-hint">Zoom and pan also work with mouse wheel (Ctrl+scroll) and Ctrl+drag. Keyboard shortcuts: Ctrl+0 to fit, Ctrl++/Ctrl+- to zoom.</div>
+      </aside>
+      <div class="page-content">
+        <nav>
+          <button id="btn-zoom-in" class="classic-btn">Zoom In</button>
+          <button id="btn-zoom-out" class="classic-btn">Zoom Out</button>
+          <button id="btn-zoom-reset" class="classic-btn">Reset</button>
+          <button id="btn-zoom-fit" class="classic-btn">Fit All</button>
+          <span id="zoom-display" style="font-size:12px;padding:0 8px;color:var(--ex-text)">100%</span>
+          <span style="width:1px;background:var(--ex-border);margin:0 4px;align-self:stretch"></span>
+          <button id="btn-pan-left" class="classic-btn">← Pan</button>
+          <button id="btn-pan-right" class="classic-btn">Pan →</button>
+          <button id="btn-pan-up" class="classic-btn">↑ Pan</button>
+          <button id="btn-pan-down" class="classic-btn">↓ Pan</button>
+        </nav>
+        <div id="editorEl"></div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { Editor } from '../../dist/iink.esm.js'
+      import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
+
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      const editorElement = document.getElementById('editorEl')
+      const showModalBtn = document.getElementById('showModalBtn')
+      const zoomDisplay = document.getElementById('zoom-display')
+
+      let editor
+
+      const PAN_STEP = 80
+
+      function updateZoomDisplay() {
+        if (!editor) return
+        zoomDisplay.textContent = Math.round(editor.getZoom() * 100) + '%'
+      }
+
+      document.getElementById('btn-zoom-in').addEventListener('click', () => {
+        if (!editor) return
+        editor.zoom(editor.getZoom() + 0.25)
+        updateZoomDisplay()
+      })
+
+      document.getElementById('btn-zoom-out').addEventListener('click', () => {
+        if (!editor) return
+        editor.zoom(Math.max(0.1, editor.getZoom() - 0.25))
+        updateZoomDisplay()
+      })
+
+      document.getElementById('btn-zoom-reset').addEventListener('click', () => {
+        if (!editor) return
+        editor.zoom(1)
+        updateZoomDisplay()
+      })
+
+      document.getElementById('btn-zoom-fit').addEventListener('click', () => {
+        if (!editor) return
+        editor.zoomToFit()
+        updateZoomDisplay()
+      })
+
+      document.getElementById('btn-pan-left').addEventListener('click',  () => { editor?.pan(-PAN_STEP, 0) })
+      document.getElementById('btn-pan-right').addEventListener('click', () => { editor?.pan(PAN_STEP, 0) })
+      document.getElementById('btn-pan-up').addEventListener('click',    () => { editor?.pan(0, -PAN_STEP) })
+      document.getElementById('btn-pan-down').addEventListener('click',  () => { editor?.pan(0, PAN_STEP) })
+
+      const editorOptions = {}
+
+      async function loadEditor(options) {
+        await editor?.destroy()
+        editor = await Editor.load(editorElement, 'INTERACTIVEINK', options)
+        editor.event.addEventListener('changed', updateZoomDisplay)
+        updateZoomDisplay()
+        return editor
+      }
+
+      showModalBtn.addEventListener('click', () => {
+        ModalEditorOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>

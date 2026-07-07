@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test"
 import { passModalKey, writeStrokes } from "../helper"
 import helloOneStroke from "../__dataset__/helloOneStroke"
 
-test.describe("Offscreen TLDraw", () => {
+test.describe("Interactive ink editor TLDraw", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/offscreen-interactivity/offscreen_interactivity_tldraw/dist/index.html`)
     if(await page.getByRole('textbox', { name: 'Host:' }).isVisible()) {

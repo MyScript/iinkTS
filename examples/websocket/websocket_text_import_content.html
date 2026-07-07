@@ -11,41 +11,19 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
-    <style>
-      #editorEl {
-        height: calc(100dvh - 122px);
-      }
-
-      @media only screen and (max-width: 514px) {
-        #editorEl {
-          height: calc(100dvh - 164px);
-        }
-      }
-
-      @media only screen and (max-width: 398px) {
-        #editorEl {
-          height: calc(100dvh - 211px);
-        }
-      }
-    </style>
-  </head>
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
   <body>
     <header class="header-main">
       <button id="showModalBtn" class="btn-keys">
-        Change server configuration
+        API Keys
       </button>
       <h1 class="header-title">Import content</h1>
     </header>
     <nav class="flex-container wrap between gap">
-      <div class="flex-container wrap gap">
-        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/undo.svg" />
-        </button>
-        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/redo.svg" />
-        </button>
-      </div>
       <div class="flex-container wrap gap">
         <input type="text" id="importContentField" data-type="text/plain" placeholder="e.g. hello world" />
         <button class="classic-btn" id="importContent">
@@ -60,8 +38,6 @@
       import { Editor } from '../../dist/iink.esm.js'
       import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
       const editorElement = document.getElementById('editorEl')
-      const undoElement = document.getElementById('undo')
-      const redoElement = document.getElementById('redo')
       const importContentField = document.getElementById('importContentField')
       const importContentElement = document.getElementById('importContent')
       const showModalBtn = document.getElementById('showModalBtn')
@@ -83,28 +59,10 @@
         editor = await Editor.load(editorElement, 'INTERACTIVEINKSSR', options)
       }
 
-      editorElement.addEventListener('changed', (event) => {
-        undoElement.disabled = !event.detail.canUndo
-        redoElement.disabled = !event.detail.canRedo
-      })
-
-      undoElement.addEventListener('click', () => {
-        editor?.undo()
-      })
-
-      redoElement.addEventListener('click', () => {
-        editor?.redo()
-      })
-
       importContentElement.addEventListener('click', () => {
         const value = importContentField.value.replace('\\n', '\n')
         editor?.import(value, importContentField.dataset.type)
       })
-
-      window.addEventListener('resize', () => {
-        editor?.resize()
-      })
-
       showModalBtn.addEventListener('click', () => {
         ModalEditorOptions.show(loadEditor, editorOptions)
       })
@@ -117,6 +75,8 @@
       window.editorOptions = editorOptions
       window.loadEditor = loadEditor
     </script>
-  </body>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
 
 </html>

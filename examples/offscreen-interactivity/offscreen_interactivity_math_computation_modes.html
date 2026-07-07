@@ -8,212 +8,111 @@
   <link rel="stylesheet" href="../assets/style/reset.css" />
   <link rel="stylesheet" href="../assets/style/components.css" />
   <link rel="stylesheet" href="../assets/style/examples.css" />
+  <link rel="stylesheet" href="../assets/style/inputs.css" />
+  <link rel="stylesheet" href="../assets/style/panel.css" />
+  <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
 
-  <script type="text/javascript" src="../../dist/iink.min.js"></script>
-
-  <style>
-    .info-control-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin: 12px 0;
-    }
-
-    .info-col {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .info-section {
-      background: #e3f2fd;
-      padding: 12px;
-      border-radius: 4px;
-      border-left: 4px solid #2196F3;
-    }
-
-    .info-section h3 {
-      margin-top: 0;
-      color: #1976D2;
-    }
-
-    .info-section ul {
-      margin: 8px 0;
-      padding-left: 24px;
-    }
-
-    .info-section li {
-      margin: 4px 0;
-      line-height: 1.6;
-    }
-
-    .mode-comparison {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin: 12px 0;
-    }
-
-    .mode-card {
-      padding: 12px;
-      border: 2px solid #e0e0e0;
-      border-radius: 4px;
-      background: #fafafa;
-    }
-
-    .mode-card.draw {
-      border-color: #4caf50;
-      background: #f1f8e9;
-    }
-
-    .mode-card.ghost {
-      border-color: #ff9800;
-      background: #fff3e0;
-    }
-
-    .mode-card h4 {
-      margin: 0 0 8px 0;
-      font-size: 16px;
-    }
-
-    .mode-card ul {
-      margin: 0;
-      padding-left: 20px;
-      font-size: 13px;
-    }
-
-    .mode-card li {
-      margin: 4px 0;
-    }
-
-    .code-example {
-      display: block;
-      background: #f5f5f5;
-      padding: 8px 12px;
-      border-radius: 4px;
-      font-family: monospace;
-      font-size: 12px;
-      margin: 8px 0;
-      border-left: 3px solid #2196F3;
-    }
-
-    .highlight {
-      background: #fff3cd;
-      padding: 2px 6px;
-      border-radius: 2px;
-      font-weight: bold;
-    }
-
-    #editorEl {
-      width: 100%;
-      height: calc(100vh - 360px);
-      min-height: 500px;
-    }
-
-    .control-section {
-      padding: 12px;
-      background: #fff9c4;
-      border-radius: 4px;
-      border-left: 4px solid #fbc02d;
-    }
-
-    #editorEl {
-      height: calc(100vh - 500px);
-    }
-    @media only screen and (max-width: 760px) {
-      .info-control-row {
-        grid-template-columns: 1fr;
-      }
-    }
-    @media only screen and (max-width: 1131px) {
-      #editorEl {
-        height: calc(100vh - 530px);
-      }
-    }
-    @media only screen and (max-width: 930px) {
-      #editorEl {
-        height: calc(100vh - 550px);
-      }
-    }
-  </style>
+  <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
 </head>
 
 <body>
   <header class="header-main">
-    <button id="showModalBtn" class="btn-keys">Change server configuration</button>
+    <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+      🔢 Info
+    </button>
+    <button id="showModalBtn" class="btn-keys">API Keys</button>
     <h1 class="header-title">Math Computation Modes</h1>
   </header>
 
-  <div class="info-section">
-    <h3>🎯 What are computation modes?</h3>
-    <p>
-      When solving a math expression, the result can be displayed in two different ways:
-    </p>
-    <div class="mode-comparison">
-      <div class="mode-card draw">
-        <h4>✏️ Draw Result</h4>
-        <ul>
-          <li>Result added as real ink strokes in the document</li>
-          <li>Sent to backend — recognized and part of the model</li>
-          <li>Fully interactive: move, erase, select</li>
-          <li><strong>With auto-compute:</strong> result strokes automatically cleared and recomputed when the expression label changes</li>
-          <li>Result strokes also cleared when a dependent block changes (e.g. <em>x=2</em> changes → <em>2x=</em> result cleared)</li>
-          <li>To remove manually: use <em>Math menu → Select result strokes → Delete result strokes</em></li>
-        </ul>
+  <div class="ex-page-layout">
+    <aside id="info-panel" class="ex-panel">
+      <p class="ex-panel-heading">What are computation modes?</p>
+      <p class="ex-panel-intro">
+        When solving a math expression, the result can be displayed in two different ways.
+      </p>
+
+      <div class="ex-panel-divider"></div>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label">✏️ Draw Result</span></div>
+        <div class="ex-panel-item-desc">
+          Result added as real ink strokes in the document — sent to backend, recognized and part of the model, fully interactive (move, erase, select).<br>
+          <strong>With auto-compute:</strong> result strokes automatically cleared and recomputed when the expression label changes, or when a dependent block changes (e.g. <em>x=2</em> changes → <em>2x=</em> result cleared).<br>
+          To remove manually: use <em>Math menu → Select result strokes → Delete result strokes</em>.
+        </div>
       </div>
-      <div class="mode-card ghost">
-        <h4>👻 Show Result (Ghost)</h4>
-        <ul>
-          <li>Result shown as SVG overlay at 50% opacity</li>
-          <li>Not in model, not sent to backend</li>
-          <li>Non-interactive — view only</li>
-          <li><strong>With auto-compute:</strong> refreshed on every sync. Ghost cleared and recomputed when expression changes</li>
-          <li>Automatically cleared when the block no longer ends with <span class="highlight">=</span> or <span class="highlight">?</span></li>
-        </ul>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label">👻 Show Result (Ghost)</span></div>
+        <div class="ex-panel-item-desc">
+          Result shown as SVG overlay at 50% opacity — not in model, not sent to backend, non-interactive (view only).<br>
+          <strong>With auto-compute:</strong> refreshed on every sync. Ghost cleared and recomputed when expression changes.<br>
+          Automatically cleared when the block no longer ends with <span class="highlight">=</span> or <span class="highlight">?</span>.
+        </div>
       </div>
-    </div>
+
+      <div class="ex-panel-divider"></div>
+
+      <p class="ex-panel-subtitle">Auto-Compute</p>
+
+      <div class="ex-panel-item">
+        <div class="ex-panel-item-desc">
+          Automatically compute expressions when finishing a block ending with <code>=</code> or <code>?</code>. After writing, the synchronized event triggers an auto-compute check — no manual "Compute" click needed.
+        </div>
+      </div>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label">Show Block Overlays</span></div>
+        <div class="ex-panel-item-desc">
+          Toggle via ≡ → Math → <em>Show Block Overlays</em>. Displays boundaries, computed results, and status indicators on each recognized math block.
+        </div>
+      </div>
+
+      <div class="ex-panel-code">
+        // Ghost mode — safe for auto-compute<br>
+        editor.math.updateComputationConfig({ resultMode: "ghost", autoCompute: true })<br>
+        <br>
+        // Draw mode — result persists, computed once per block<br>
+        editor.math.updateComputationConfig({ resultMode: "draw", autoCompute: true })
+      </div>
+
+      <div class="ex-panel-divider"></div>
+
+      <p class="ex-panel-subtitle">Try it</p>
+
+      <div class="ex-panel-hint">
+        1. Write <code>5+3=</code> (with equals sign)<br>
+        2. With auto-compute on → result appears instantly<br>
+        3. Toggle <strong>Auto-compute</strong> via ≡ → Math to see difference<br>
+        4. Switch <strong>Result mode</strong> to compare Draw vs Ghost<br>
+        5. Toggle <strong>Show Block Overlays</strong> to see block boundaries
+      </div>
+
+      <div class="ex-panel-item">
+        <div class="ex-panel-item-desc">
+          <strong>Ghost mode:</strong><br>
+          1. Select "Show result" + enable "Auto-compute"<br>
+          2. Write <span class="highlight">5+3=</span> → ghost result appears immediately<br>
+          3. Modify the expression → ghost updates in real time<br>
+          4. Remove the <span class="highlight">=</span> → ghost disappears automatically
+        </div>
+      </div>
+
+      <div class="ex-panel-item">
+        <div class="ex-panel-item-desc">
+          <strong>Draw mode:</strong><br>
+          1. Select "Draw result" + enable "Auto-compute"<br>
+          2. Write <span class="highlight">5+3=</span> → result added as ink strokes<br>
+          3. Modify the expression (e.g. change <span class="highlight">3</span> to <span class="highlight">30</span>) → old result cleared, new result computed<br>
+          4. Write <span class="highlight">x=2</span> then <span class="highlight">2x=</span> → both computed<br>
+          5. Change <span class="highlight">x=2</span> to <span class="highlight">x=5</span> → <em>2x=</em> result automatically cleared and updated to 10<br>
+          6. Use <em>Math menu → Select result strokes</em> then <em>Delete result strokes</em> to remove manually
+        </div>
+      </div>
+    </aside>
+
+    <div id="editorEl"></div>
   </div>
-  <div class="info-control-row">
-
-    <div class="info-section">
-      <h3>⚙️ Auto-Compute</h3>
-      <p>
-        Automatically compute expressions ending with <span class="highlight">=</span> or <span class="highlight">?</span> after each recognition sync.
-      </p>
-      <p>
-        <strong>Both modes:</strong> when a block's recognized expression changes (label change), existing solver output strokes are automatically cleared — for the block itself and any dependent blocks. A fresh computation follows immediately.
-      </p>
-      <p>
-        <strong>Ghost mode:</strong> result re-rendered on every sync. Cleared automatically when block no longer ends with <span class="highlight">=</span> or <span class="highlight">?</span>.
-      </p>
-      <p>
-        <strong>Draw mode:</strong> result stays as ink when expression is stable. Cleared and recomputed only when expression changes. Use the Math menu to manage result strokes manually.
-      </p>
-      <code class="code-example">// Ghost mode — safe for auto-compute
-editor.math.updateComputationConfig({ resultMode: "ghost", autoCompute: true })
-
-// Draw mode — result persists, computed once per block
-editor.math.updateComputationConfig({ resultMode: "draw", autoCompute: true })</code>
-    </div>
-
-    <div class="control-section">
-      <strong>📝 Try it:</strong><br><br>
-      <strong>Ghost mode:</strong><br>
-      1. Select "Show result" + enable "Auto-compute"<br>
-      2. Write <span class="highlight">5+3=</span> → ghost result appears immediately<br>
-      3. Modify the expression → ghost updates in real time<br>
-      4. Remove the <span class="highlight">=</span> → ghost disappears automatically<br><br>
-      <strong>Draw mode:</strong><br>
-      1. Select "Draw result" + enable "Auto-compute"<br>
-      2. Write <span class="highlight">5+3=</span> → result added as ink strokes<br>
-      3. Modify the expression (e.g. change <span class="highlight">3</span> to <span class="highlight">30</span>) → old result cleared, new result computed<br>
-      4. Write <span class="highlight">x=2</span> then <span class="highlight">2x=</span> → both computed<br>
-      5. Change <span class="highlight">x=2</span> to <span class="highlight">x=5</span> → <em>2x=</em> result automatically cleared and updated to 10<br>
-      6. Use <em>Math menu → Select result strokes</em> then <em>Delete result strokes</em> to remove manually
-    </div>
-  </div>
-
-  <div id="editorEl"></div>
 
   <script type="module">
     import { Editor } from '../../dist/iink.esm.js'
@@ -221,6 +120,13 @@ editor.math.updateComputationConfig({ resultMode: "draw", autoCompute: true })</
 
     const editorElement = document.getElementById('editorEl');
     const showModalBtn = document.getElementById("showModalBtn");
+    const panelToggleBtn = document.getElementById('panelToggleBtn')
+    const infoPanel = document.getElementById('info-panel')
+
+    panelToggleBtn.addEventListener('click', () => {
+      const open = infoPanel.classList.toggle('open')
+      panelToggleBtn.setAttribute('aria-expanded', open)
+    })
 
     let editor
 
@@ -295,5 +201,7 @@ editor.math.updateComputationConfig({ resultMode: "draw", autoCompute: true })</
 
     ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
   </script>
+  <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+  <script src="../assets/js/theme.js"></script>
 </body>
 </html>

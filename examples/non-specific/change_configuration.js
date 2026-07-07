@@ -7,7 +7,7 @@ const inkEditorConfiguration = iink.DefaultInkEditorConfiguration
 
 const configurationContent = document.getElementById("configuration-content")
 const editorTypeSelect = document.getElementById("editor-type")
-const editorElement = document.getElementById("editor")
+const editorElement = document.getElementById("editorEl")
 const resultElement = document.getElementById("result")
 const exportBtn = document.getElementById("export-btn")
 const validBtn = document.getElementById("valid-btn")
@@ -159,6 +159,35 @@ function setDeep(obj, path, value) {
  * @param {*} value
  */
 function buildInput(path, name, type, value) {
+  if (type === "checkbox") {
+    const row = document.createElement("div")
+    row.classList.add("config-row")
+
+    const textLabel = document.createElement("label")
+    textLabel.innerText = name
+
+    const toggleLabel = document.createElement("label")
+    toggleLabel.classList.add("toggle")
+
+    const input = document.createElement("input")
+    input.setAttribute("id", path)
+    input.setAttribute("name", path)
+    input.setAttribute("type", "checkbox")
+    input.checked = value
+    input.addEventListener("change", () => {
+      setDeep(editorOptions.configuration, path, input.checked)
+    })
+
+    const slider = document.createElement("span")
+    slider.classList.add("toggle-slider")
+
+    toggleLabel.appendChild(input)
+    toggleLabel.appendChild(slider)
+    row.appendChild(textLabel)
+    row.appendChild(toggleLabel)
+    return row
+  }
+
   const label = document.createElement("label")
   label.innerText = name
 
@@ -166,13 +195,9 @@ function buildInput(path, name, type, value) {
   input.setAttribute("id", path)
   input.setAttribute("name", path)
   input.setAttribute("type", type)
-  if (type === "checkbox") {
-    input.checked = value
-  } else {
-    input.value = value
-  }
+  input.value = value
   input.addEventListener("change", () => {
-    setDeep(editorOptions.configuration, path, type === "checkbox" ? input.checked : input.value)
+    setDeep(editorOptions.configuration, path, input.value)
   })
   label.appendChild(input)
   return label
@@ -266,24 +291,20 @@ function renderPartialConfiguration(conf, currentPath = "") {
 
 function createCard(title, content) {
   const card = document.createElement("div")
-  card.classList.add("card")
+  card.classList.add("config-section")
 
   const titleWrapper = document.createElement("div")
-  titleWrapper.classList.add("card-title")
+  titleWrapper.classList.add("config-section-header")
   titleWrapper.innerText = title
 
   const contentWrapper = document.createElement("div")
-  contentWrapper.classList.add("card-content")
+  contentWrapper.classList.add("config-section-body")
   contentWrapper.appendChild(content)
 
   card.appendChild(titleWrapper)
   card.appendChild(contentWrapper)
   titleWrapper.addEventListener("click", () => {
-    if (contentWrapper.style.display === "block") {
-      contentWrapper.style.display = "none"
-    } else {
-      contentWrapper.style.display = "block"
-    }
+    contentWrapper.style.display = contentWrapper.style.display === "flex" ? "none" : "flex"
   })
   return card
 }
@@ -373,10 +394,6 @@ resultElement.addEventListener("click", () => {
 
 showModalBtn.addEventListener("click", () => {
   ModalEditorOptions.show(loadEditor, editorOptions)
-})
-
-window.addEventListener("resize", () => {
-  editor?.resize()
 })
 
 loadEditorType()

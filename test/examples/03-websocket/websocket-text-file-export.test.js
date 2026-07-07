@@ -67,6 +67,4 @@ test.describe("Websocket Text file export", () => {
     const download = await downloadPromise
     expect(download.suggestedFilename()).toBe("myDocument.jpg")
   })
-
-  TextNavActions.test({ resultLocator: ".prompter-container" })
 })

@@ -1,0 +1,196 @@
+.cv-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--ex-radius-md, 6px);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 125ms ease, border-color 125ms ease;
+  flex-shrink: 0;
+}
+
+.cv-toggle-btn:hover,
+.cv-toggle-btn:focus {
+  background: rgba(255, 255, 255, 0.28);
+  border-color: rgba(255, 255, 255, 0.55);
+  outline: none;
+}
+
+.cv-toggle-btn.active {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.7);
+}
+
+.cv-toggle-btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.cv-panel {
+  position: fixed;
+  top: var(--ex-header-height, 50px);
+  right: 0;
+  bottom: 0;
+  width: 450px;
+  display: flex;
+  flex-direction: column;
+  background: #1e1e2e;
+  border-left: 1px solid #313145;
+  z-index: 500;
+  transform: translateX(100%);
+  transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  contain: strict;
+}
+
+body.cv-open .cv-panel {
+  transform: translateX(0);
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.25);
+}
+
+.cv-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: #16162a;
+  border-bottom: 1px solid #313145;
+  flex-shrink: 0;
+}
+
+.cv-panel-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #7c7ca8;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.cv-copy-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 10px;
+  background: transparent;
+  color: #7c7ca8;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  border: 1px solid #313145;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 125ms ease, color 125ms ease, border-color 125ms ease;
+}
+
+.cv-copy-btn:hover {
+  background: #313145;
+  color: #c8c8e8;
+  border-color: #4a4a6a;
+}
+
+.cv-copy-btn.copied {
+  color: #4caf50;
+  border-color: #4caf50;
+}
+
+.cv-copy-btn svg {
+  width: 13px;
+  height: 13px;
+}
+
+.cv-code-wrapper {
+  flex: 1;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.cv-code-wrapper pre {
+  margin: 0;
+  padding: 16px;
+  font-family: "Cascadia Code", "Fira Code", "Consolas", "Menlo", monospace;
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: #cdd6f4;
+  white-space: pre;
+  tab-size: 2;
+}
+
+.cv-kw  { color: #cba6f7; } /* keywords: import, const, let, async, etc. */
+.cv-str { color: #a6e3a1; } /* strings */
+.cv-cmt { color: #6c7086; font-style: italic; } /* comments */
+.cv-fn  { color: #89b4fa; } /* function calls */
+.cv-num { color: #fab387; } /* numbers */
+.cv-cls { color: #f38ba8; } /* class names / constructor calls */
+
+@media (min-width: 900px) {
+  body.cv-open #editorEl {
+    width: calc(100% - 450px);
+  }
+}
+
+@media (max-width: 899px) {
+  .cv-panel {
+    width: min(450px, 100vw);
+    box-shadow: none;
+  }
+  body.cv-open .cv-panel {
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.4);
+  }
+}
+
+@media (max-width: 599px) {
+  .cv-panel {
+    top: auto;
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 52dvh;
+    border-left: none;
+    border-top: 2px solid #1a9fff;
+    transform: translateY(100%);
+    transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  body.cv-open .cv-panel {
+    transform: translateY(0);
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  body.cv-open #editorEl {
+    width: 100%;
+  }
+}
+
+@media (max-height: 500px) {
+  .cv-panel {
+    top: var(--ex-header-height, 50px);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: auto;
+    border-left: none;
+    border-top: none;
+    transform: translateX(100%);
+    transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  body.cv-open .cv-panel {
+    transform: translateX(0);
+    box-shadow: -4px 0 20px rgba(0, 0, 0, 0.25);
+  }
+
+  body.cv-open #editorEl {
+    width: 100%;
+  }
+}

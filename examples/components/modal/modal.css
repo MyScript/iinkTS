@@ -3,110 +3,135 @@
   inset: 0;
   display: grid;
   place-items: center;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.4);
   z-index: 10000;
 }
 
 .modal-container {
   width: 90%;
   max-width: 480px;
-  max-height: 90vh;
-  padding: 32px;
-  border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-  background: #fff;
+  max-height: 90dvh;
+  padding: var(--ex-space-xl);
+  border-radius: var(--ex-radius-xl);
+  box-shadow: var(--ex-shadow-lg);
+  background: var(--ex-surface);
   overflow-y: auto;
-  margin: 0;             /* important si tu utilises encore flex centering */
 }
 
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--ex-space-sm);
+  margin-bottom: var(--ex-space-sm);
+}
 
-.modal-content {
+.modal-header h2 {
+  margin: 0;
+  flex: 1;
+}
+
+.modal-close-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: var(--ex-radius-full);
+  background: var(--ex-hover);
+  color: var(--ex-text);
+  cursor: pointer;
+  transition: background var(--ex-transition);
+}
+
+.modal-close-btn:hover {
+  background: var(--ex-border);
+}
+
+/* ── Inputs ── */
+
+.modal-input-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ex-space-lg);
+  margin-top: var(--ex-space-lg);
   width: 100%;
-}
-
-.modal-footer-message {
-  font-size: 15px;
-  color: #1a9fff;
-  margin-top: 50px;
-  text-align: center;
-  text-decoration: none;
-}
-.modal-footer-message:hover {
-  text-decoration: underline;
-  transition: 0.2s ease;
-  color: #007acc;
-}
-
-.modal-message {
-  font-size: 17px;
-  color: #1a9fff;
-  text-align: center;
-  text-decoration: none;
-}
-.modal-message:hover {
-  text-decoration: underline;
-  transition: 0.2s ease;
-  color: #007acc;
 }
 
 .app-key-label {
-  font-size: 14px;
-  font-weight: 600;
-  color: #222;
-  margin-bottom: 6px;
-}
-
-.input-container-appkey {
-  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ex-text);
 }
 
 .app-key-input,
 .modal-container select,
 .modal-container input {
   width: 100%;
-  padding: auto 14px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  background: #f5f7fa;
+  padding: 8px 12px;
+  border: 1px solid var(--ex-border);
+  border-radius: var(--ex-radius-lg);
+  background: var(--ex-surface-alt);
   font-size: 14px;
-  transition: 0.2s ease;
+  color: var(--ex-text);
+  transition: border-color var(--ex-transition), background var(--ex-transition);
 }
 
 .app-key-input:focus,
 .modal-container select:focus,
 .modal-container input:focus {
-  border-color: #1a9fff;
+  border-color: var(--ex-primary);
+  background: var(--ex-surface);
   outline: none;
-  background: #fff;
 }
 
 .save {
   width: 100%;
-  padding: 12px;
-  background: #1a9fff;
+  padding: var(--ex-space-md);
+  background: var(--ex-primary);
   color: #fff;
   font-size: 15px;
   font-weight: 600;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--ex-radius-lg);
   cursor: pointer;
-  transition: 0.2s ease;
-  margin-bottom: 15px;
+  transition: opacity var(--ex-transition);
+  margin-bottom: var(--ex-space-md);
 }
 
-.save:hover {
+.save:hover:not(:disabled) {
   opacity: 0.85;
 }
 
-.modal-input-container {
-  margin-top: 20px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+.save:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.modal-message,
+.modal-footer-message {
+  font-size: 15px;
+  color: var(--ex-primary);
+  text-align: center;
+  text-decoration: none;
+  transition: color var(--ex-transition);
+}
+
+.modal-footer-message {
+  margin-top: var(--ex-space-lg);
+  display: block;
+}
+
+.modal-message:hover,
+.modal-footer-message:hover {
+  color: var(--ex-primary-dark);
+  text-decoration: underline;
 }
 
 .stop-scrolling {

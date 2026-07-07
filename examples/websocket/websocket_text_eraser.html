@@ -11,57 +11,71 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
-    <style>
-      #editorEl {
-        height: calc(100dvh - 116px);
-      }
-
-      @media only screen and (max-width: 360px) {
-        #editorEl {
-          height: calc(100dvh - 148px);
-        }
-      }
-
-      @media only screen and (max-width: 219px) {
-        #editorEl {
-          height: calc(100dvh - 200px);
-        }
-      }
-    </style>
-  </head>
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
   <body>
     <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
       <button id="showModalBtn" class="btn-keys">
-        Change server configuration
+        API Keys
       </button>
       <h1 class="header-title">Websocket Text Eraser</h1>
     </header>
-    <nav class="flex-container between wrap gap">
-      <div class="flex-container wrap gap">
-        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/undo.svg" />
-        </button>
-        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-          <img src="../assets/img/redo.svg" />
-        </button>
-      </div>
-      <div class="flex-container wrap gap">
-        <button id="pen" class="nav-btn btn-fab-mini btn-lightBlue active" disabled>
-          <img src="../assets/img/pen.svg" />
-        </button>
-        <button id="eraser" class="nav-btn btn-fab-mini btn-lightBlue">
-          <img src="../assets/img/eraser.svg" />
-        </button>
-      </div>
-      <label for="erase-precisely">Erase precisely:
-        <input type="checkbox" id="erase-precisely" name="erase-precisely" />
-      </label>
-    </nav>
 
-    <div id="editorEl"></div>
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">🧹 Text recognition with eraser</p>
+        <p class="ex-panel-intro">Switch between <strong>Pen</strong> and <strong>Eraser</strong> tools using the toolbar buttons. The active tool is highlighted.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Two erase modes are available via <code>text.eraser.erase-precisely</code>: the default mode erases whole words at a stroke, while <strong>precise mode</strong> erases only the ink segments actually touched by the eraser.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Toggle <strong>Erase precisely</strong> to switch modes on the fly — the editor reloads automatically with the new setting.</div>
+        </div>
+      </aside>
+
+      <div class="page-content">
+        <nav class="flex-container between wrap gap">
+          <div class="flex-container wrap gap">
+            <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+              <img src="../assets/img/undo.svg" />
+            </button>
+            <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+              <img src="../assets/img/redo.svg" />
+            </button>
+          </div>
+          <div class="flex-container wrap gap">
+            <button id="pen" class="nav-btn btn-fab-mini btn-lightBlue active" disabled>
+              <img src="../assets/img/pen.svg" />
+            </button>
+            <button id="eraser" class="nav-btn btn-fab-mini btn-lightBlue">
+              <img src="../assets/img/eraser.svg" />
+            </button>
+          </div>
+          <label for="erase-precisely">Erase precisely:
+            <input type="checkbox" id="erase-precisely" name="erase-precisely" />
+          </label>
+        </nav>
+
+        <div id="editorEl"></div>
+      </div>
+    </div>
 
     <script type="module">
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
       import { Editor, EditorTool } from '../../dist/iink.esm.js'
       import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
       const editorElement = document.getElementById('editorEl')
@@ -135,11 +149,6 @@
         penElement.disabled = true
         penElement.classList.add('active')
       })
-
-      window.addEventListener('resize', () => {
-        editor?.resize()
-      })
-
       showModalBtn.addEventListener('click', () => {
         ModalEditorOptions.show(loadEditor, editorOptions)
       })
@@ -152,6 +161,8 @@
       window.editorOptions = editorOptions
       window.loadEditor = loadEditor
     </script>
-  </body>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
 
 </html>

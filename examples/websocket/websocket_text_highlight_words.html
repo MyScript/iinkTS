@@ -13,44 +13,31 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
 
     <style type="text/css">
       #editorEl {
         width: auto;
-        height: calc(100dvh - 116px);
-      }
-
-      @media only screen and (max-width: 889px) {
-        #editorEl {
-          height: calc(100dvh - 164px);
-        }
-      }
-
-      @media only screen and (max-width: 600px) {
-        .highlight-column {
-          position: absolute;
-          right: 0;
-        }
-      }
-
-      @media only screen and (max-width: 454px) {
-        #editorEl {
-          height: calc(100dvh - 193px);
-        }
+        height: 100%;
       }
 
       .wrapper {
-        height: 100dvh;
+        height: calc(100dvh - 250px);
         width: 100dvw;
       }
 
       .editor-column {
         width: 80%;
+        height: 100%;
       }
 
       .colors {
         display: flex;
         overflow: auto;
+        padding: 12px;
+        border-bottom: 1px solid #d7dde3;
       }
 
       .pensettings {
@@ -88,67 +75,85 @@
         height: 10px;
       }
     </style>
-  </head>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
   <body>
     <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
       <button id="showModalBtn" class="btn-keys">
-        Change server configuration
+        API Keys
       </button>
       <h1 class="header-title">Websocket Text Highlight Words</h1>
     </header>
-    <div class="flex-container wrap wrapper">
-      <div class="editor-column">
-        <nav class="flex-container wrap gap between">
-          <div class="flex-container wrap gap">
-            <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-              <img src="../assets/img/undo.svg" />
-            </button>
-            <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
-              <img src="../assets/img/redo.svg" />
-            </button>
+
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">🖍️ Ink color & word highlighting</p>
+        <p class="ex-panel-intro">Pick a color from the palette, then write — ink is drawn in that color. Switch colors between words to mix inks.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">To highlight a word, <strong>circle it</strong> with the current pen color. The circle color becomes the word's highlight background.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">The panel on the right lists every highlighted word with its ink color and highlight color — updated live on each recognition export.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Technically, the JIIX export is requested with <code>style: true</code>. Circled words appear in <code>jiix.spans</code> with class <code>text-highlight</code>; the span's <code>style</code> field carries <code>color</code> (ink) and <code>-myscript-text-decoration-background-color</code> (surround color).</div>
+        </div>
+      </aside>
+
+      <div class="page-content">
+        <div class="flex-container wrap wrapper">
+          <div class="editor-column">
+            <div class="colors">
+              <div class="pensettings" data-color="#000000">
+                <button id="black-btn" class="color" style="background-color: rgb(0, 0, 0)">
+                  <span id="check" class="check" style="border-color: white"></span>
+                </button>
+              </div>
+              <div class="pensettings" data-color="#808080">
+                <button id="dark-grey-btn" class="color" style="background-color: rgb(128, 128, 128)"></button>
+              </div>
+              <div class="pensettings" data-color="#d9d9d9">
+                <button id="light-grey-btn" class="color" style="background-color: rgb(217, 217, 217)"></button>
+              </div>
+              <div class="pensettings" data-color="#1a8cff">
+                <button id="blue-btn" class="color" style="background-color: rgb(26, 140, 255)"></button>
+              </div>
+              <div class="pensettings" data-color="#ff1a40">
+                <button id="red-btn" class="color" style="background-color: rgb(255, 26, 64)"></button>
+              </div>
+              <div class="pensettings" data-color="#2bd965">
+                <button id="green-btn" class="color" style="background-color: rgb(43, 217, 101)"></button>
+              </div>
+              <div class="pensettings" data-color="#ffdd33">
+                <button id="yellow-btn" class="color" style="background-color: rgb(255, 221, 51)"></button>
+              </div>
+            </div>
+            <div id="editorEl"></div>
           </div>
-          <div>Surround your words to highlight them</div>
-          <div class="colors">
-            <div class="pensettings" data-color="#000000">
-              <button id="black-btn" class="color" style="background-color: rgb(0, 0, 0)">
-                <span id="check" class="check" style="border-color: white"></span>
-              </button>
-            </div>
-            <div class="pensettings" data-color="#808080">
-              <button id="dark-grey-btn" class="color" style="background-color: rgb(128, 128, 128)"></button>
-            </div>
-            <div class="pensettings" data-color="#d9d9d9">
-              <button id="light-grey-btn" class="color" style="background-color: rgb(217, 217, 217)"></button>
-            </div>
-            <div class="pensettings" data-color="#1a8cff">
-              <button id="blue-btn" class="color" style="background-color: rgb(26, 140, 255)"></button>
-            </div>
-            <div class="pensettings" data-color="#ff1a40">
-              <button id="red-btn" class="color" style="background-color: rgb(255, 26, 64)"></button>
-            </div>
-            <div class="pensettings" data-color="#2bd965">
-              <button id="green-btn" class="color" style="background-color: rgb(43, 217, 101)"></button>
-            </div>
-            <div class="pensettings" data-color="#ffdd33">
-              <button id="yellow-btn" class="color" style="background-color: rgb(255, 221, 51)"></button>
-            </div>
+          <div class="highlight-column">
+            <ul id="highlight-list"></ul>
           </div>
-        </nav>
-        <div id="editorEl"></div>
-      </div>
-      <div class="highlight-column">
-        <ul id="highlight-list"></ul>
+        </div>
       </div>
     </div>
 
     <script type="module">
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
       import { Editor } from '../../dist/iink.esm.js'
       import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
 
       const editorElement = document.getElementById('editorEl')
-      const undoElement = document.getElementById('undo')
-      const redoElement = document.getElementById('redo')
       const colors = document.querySelectorAll('.pensettings')
       const highlightListElement = document.getElementById('highlight-list')
       const showModalBtn = document.getElementById('showModalBtn')
@@ -247,18 +252,9 @@
       }
 
       async function loadEditor(options) {
-        /**
-         * get editor instance from type
-         * @param {Element} The DOM element to attach the ink paper
-         * @param {Object} The Editor parameters
-         */
         editor = await Editor.load(editorElement, 'INTERACTIVEINKSSR', options)
       }
 
-      editorElement.addEventListener('changed', (event) => {
-        undoElement.disabled = !event.detail.canUndo
-        redoElement.disabled = !event.detail.canRedo
-      })
 
       editorElement.addEventListener('exported', (event) => {
         const exports = event.detail
@@ -268,20 +264,8 @@
         }
       })
 
-      undoElement.addEventListener('click', () => {
-        editor?.undo()
-      })
-
-      redoElement.addEventListener('click', () => {
-        editor?.redo()
-      })
-
       colors.forEach((el) => {
         el.addEventListener('click', handleColorClick)
-      })
-
-      window.addEventListener('resize', () => {
-        editor?.resize()
       })
 
       showModalBtn.addEventListener('click', () => {
@@ -290,12 +274,11 @@
 
       ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
 
-      /**
-       * We expose these objects to the window use it in test
-       */
       window.editorOptions = editorOptions
       window.loadEditor = loadEditor
     </script>
-  </body>
+      <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
 
 </html>

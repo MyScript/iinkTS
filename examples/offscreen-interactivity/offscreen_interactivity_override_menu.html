@@ -8,18 +8,10 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
     <style>
-      #editorEl {
-        width: 100vw;
-        height: calc(100dvh - 50px);
-      }
-
-      @media only screen and (max-width: 631px) {
-        #editorEl {
-          height: calc(100dvh - 102px);
-        }
-      }
-
       /* Badge appended by CustomMenuAction */
       .custom-badge {
         display: inline-flex;
@@ -58,20 +50,47 @@
         transform: translateX(-50%) translateY(0);
       }
     </style>
-  </head>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
   <body>
     <header class="header-main">
-      <button id="showModalBtn" class="btn-keys">Change server configuration</button>
-      <h1 class="header-title">Offscreen Interactivity — Override menus</h1>
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="showModalBtn" class="btn-keys">API Keys</button>
+      <h1 class="header-title">Interactive Ink Editor — Override menus</h1>
     </header>
 
-    <div id="editorEl"></div>
-    <div id="toast"></div>
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">Extending built-in menus with custom classes</p>
+        <p class="ex-panel-intro">Any of the four built-in menus (<code>action</code>, <code>tool</code>, <code>style</code>, <code>context</code>) can be replaced by a custom class passed in <code>editorOptions.override.menu</code>. Extend the base class to keep all existing behavior, then add or modify what you need.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Here, <strong>CustomMenuAction</strong> extends <code>IIMenuAction</code> to add a <strong>Download PNG</strong> button (exports the current canvas as a PNG file) and a <strong>stroke count badge</strong> that updates live on every render cycle.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc"><strong>CustomMenuTool</strong> extends <code>IIMenuTool</code> to append a <strong>Reset zoom</strong> button that snaps the viewport back to 100% with a toast confirmation.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc"><strong>CustomMenuStyle</strong> extends <code>IIMenuStyle</code> and injects a restricted configuration: only six brand colors are available, and font controls are hidden — useful for enforcing a design system across users.</div>
+        </div>
+      </aside>
+      <div id="editorEl"></div>
+      <div id="toast"></div>
+    </div>
 
     <script type="module">
       import { Editor, IIMenuAction, IIMenuTool, IIMenuStyle } from '../../dist/iink.esm.js'
       import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
+
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
 
       // ─── Toast helper ────────────────────────────────────────────────────────────
 
@@ -193,11 +212,10 @@
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"/>
             <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-            <line x1="11" y1="8" x2="11" y2="14"/>
-            <line x1="8" y1="11" x2="14" y2="11"/>
           </svg>`
 
           this.#resetZoomBtn.addEventListener('pointerdown', () => {
+            console.log('this: ', this);
             this.editor.zoom(1)
             showToast('Zoom reset to 100%')
           })
@@ -260,15 +278,14 @@
         editor = await Editor.load(editorElement, 'INTERACTIVEINK', options)
         window.editor = editor
       }
-
-      window.addEventListener('resize', () => editor?.resize())
-
       showModalBtn.addEventListener('click', () => {
         ModalEditorOptions.show(loadEditor, editorOptions)
       })
 
       ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
     </script>
-  </body>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
 
 </html>

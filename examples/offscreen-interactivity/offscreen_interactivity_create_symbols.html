@@ -8,17 +8,15 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
 
-    <title>Offscreen create symbols</title>
+    <title>Interactive Ink Editor create symbols</title>
 
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
     <style>
-      #editorEl {
-        width: calc(100vw - 300px);
-        height: calc(100dvh - 112px);
-      }
-
       #show-create {
         display: none;
         margin: 0;
@@ -33,7 +31,7 @@
 
       #symbols-to-create {
         width: 300px;
-        height: calc(100dvh - 112px);
+        height: calc(100dvh - 300px);
         background-color: white;
         box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.225);
         overflow: auto;
@@ -71,41 +69,64 @@
         #symbols-to-create.open {
           height: calc(100dvh - 112px);
           overflow: auto;
-        }
-
-        #editorEl {
-          height: calc(100dvh - 112px);
-          width: 100dvw;
-        }
-      }
+        }}
     </style>
-  </head>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
   <body>
     <header class="header-main">
-      <button id="showModalBtn" class="btn-keys">
-        Change server configuration
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
       </button>
-      <h1 class="header-title">Offscreen Interactivity - Create symbols</h1>
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">Interactive Ink Editor - Create symbols</h1>
     </header>
 
-    <nav class="flex-container">
-      <button class="classic-btn create-btn" id="create-all-btn">
-        Create all
-      </button>
-      <button class="classic-btn" id="show-create">
-        <img src="../assets/img/nav-arrow-down.svg" />
-      </button>
-    </nav>
-    <div class="flex-container">
-      <div id="symbols-to-create"></div>
-      <div id="editorEl"></div>
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">Programmatic symbol creation</p>
+        <p class="ex-panel-intro">This example shows how to inject symbols into the editor from code — without any user drawing — using <code>editor.createSymbol()</code> and <code>editor.createSymbols()</code>.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">The left panel lists each symbol defined in the <code>diagram-with-shape.json</code> fixture. Click <strong>Create</strong> on a specific symbol or <strong>Create all</strong> to load the full set at once.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Each symbol is represented as a plain JSON object; you can edit the textarea before creating to experiment with properties such as position, size, type, and style.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Use case: seed the editor from a database record, reconstruct a saved diagram, or inject server-generated shapes at runtime.</div>
+        </div>
+      </aside>
+      <div class="page-content">
+        <nav class="flex-container">
+          <button class="classic-btn create-btn" id="create-all-btn">
+            Create all
+          </button>
+          <button class="classic-btn" id="show-create">
+            <img src="../assets/img/nav-arrow-down.svg" />
+          </button>
+        </nav>
+        <div class="flex-container">
+          <div id="symbols-to-create"></div>
+          <div id="editorEl"></div>
+        </div>
+      </div>
     </div>
 
     <script type="module">
       import { Editor } from '../../dist/iink.esm.js'
       import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
       import symbols from '../assets/datas/diagram-with-shape.json' with { type: 'json' }
+
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
 
       const editorElement = document.getElementById('editorEl')
       const showSymbolBtn = document.getElementById('show-create')
@@ -184,11 +205,6 @@
           .querySelectorAll('.create-btn')
           .forEach((b) => (b.disabled = true))
       })
-
-      window.addEventListener('resize', () => {
-        editor?.resize()
-      })
-
       showModalBtn.addEventListener('click', () => {
         ModalEditorOptions.show(loadEditor, editorOptions)
       })
@@ -201,6 +217,8 @@
       window.editorOptions = editorOptions
       window.loadEditor = loadEditor
     </script>
-  </body>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
 
 </html>

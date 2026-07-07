@@ -8,410 +8,141 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
 
-    <title>Offscreen - Keyboard Shortcuts</title>
+    <title>Interactive Ink Editor - Keyboard Shortcuts</title>
 
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+
     <style>
-      #editor {
-        flex: 1;
-        height: calc(100dvh - 50px);
-        min-width: 0;
-      }
-
-      #sidebar {
-        width: 320px;
-        height: calc(100dvh - 50px);
-        background: #fff;
-        box-shadow: -2px 0 8px rgba(0,0,0,0.1);
-        display: flex;
-        flex-direction: column;
-        overflow-y: auto;
-        flex-shrink: 0;
-      }
-
-      .sidebar-section {
-        padding: 16px;
-        border-bottom: 1px solid #eee;
-      }
-
-      .sidebar-section h2 {
-        font-size: 13px;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: #666;
-        margin-bottom: 12px;
-      }
-
       .shortcut-row {
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 6px 0;
-        font-size: 14px;
+        padding: 5px 0;
+        font-size: 12px;
+        border-bottom: 1px solid var(--ex-border);
       }
 
+      .shortcut-row:last-of-type { border-bottom: none; }
+
       .shortcut-label {
-        color: #333;
+        color: var(--ex-text);
         flex: 1;
       }
 
       .shortcut-keys {
         display: flex;
-        gap: 4px;
+        gap: 3px;
         align-items: center;
         flex-shrink: 0;
       }
 
-      kbd {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 2px 7px;
-        font-size: 12px;
-        font-family: monospace;
-        background: #f5f5f5;
-        border: 1px solid #ccc;
-        border-bottom: 2px solid #bbb;
-        border-radius: 4px;
-        color: #333;
-        min-width: 28px;
-        white-space: nowrap;
-      }
-
       .shortcut-separator {
-        font-size: 11px;
-        color: #999;
-        margin: 0 2px;
-      }
-
-      .status-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
-      }
-
-      .status-item {
-        background: #f8f8f8;
-        border-radius: 6px;
-        padding: 10px;
-        text-align: center;
-      }
-
-      .status-item .status-value {
-        font-size: 22px;
-        font-weight: 700;
-        color: #0065b8;
-        display: block;
-      }
-
-      .status-item .status-key {
-        font-size: 11px;
-        color: #888;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-      }
-
-      .status-item.on .status-value { color: #29ac0f; }
-      .status-item.off .status-value { color: #ccc; }
-
-      .event-log {
-        font-size: 12px;
-        font-family: monospace;
-        color: #555;
-        max-height: 160px;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column-reverse;
-      }
-
-      .event-log .log-entry {
-        padding: 3px 0;
-        border-bottom: 1px solid #f0f0f0;
-        animation: fadeIn 0.2s ease;
-      }
-
-      .log-entry .log-time { color: #aaa; margin-right: 6px; }
-      .log-entry .log-action { color: #0065b8; font-weight: 600; }
-
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-4px); }
-        to   { opacity: 1; transform: translateY(0); }
-      }
-
-      @media only screen and (max-width: 700px) {
-        #sidebar { display: none; }
+        font-size: 10px;
+        color: var(--ex-text-muted, #999);
+        margin: 0 1px;
       }
     </style>
-  </head>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
   <body>
     <header class="header-main">
-      <button id="showModalBtn" class="btn-keys">Change server configuration</button>
-      <h1 class="header-title">Offscreen Interactivity - Keyboard Shortcuts</h1>
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="sidebar">
+        ⌨️ Guide
+      </button>
+      <button id="showModalBtn" class="btn-keys">API Keys</button>
+      <h1 class="header-title">Interactive Ink Editor — Keyboard Shortcuts</h1>
     </header>
 
-    <div class="flex-container">
-      <div id="editor"></div>
+    <div class="ex-page-layout">
 
-      <aside id="sidebar">
+      <aside id="sidebar" class="ex-panel">
+        <p class="ex-panel-heading">Keyboard Shortcuts</p>
+        <p class="ex-panel-intro">Standard shortcuts for undo/redo, copy/cut/paste, delete, zoom, and pan. On Mac, use <kbd>⌘</kbd> instead of <kbd>Ctrl</kbd>.</p>
 
-        <div class="sidebar-section">
-          <h2>Keyboard Shortcuts</h2>
+        <div class="ex-panel-divider"></div>
 
+        <p class="ex-panel-subtitle">Shortcuts</p>
+
+        <div class="ex-panel-item" style="padding: 4px 8px;">
           <div class="shortcut-row">
             <span class="shortcut-label">Undo</span>
-            <span class="shortcut-keys">
-              <kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>Z</kbd>
-            </span>
+            <span class="shortcut-keys"><kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>Z</kbd></span>
           </div>
           <div class="shortcut-row">
             <span class="shortcut-label">Redo</span>
-            <span class="shortcut-keys">
-              <kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>Y</kbd>
-              <span class="shortcut-separator">or</span>
-              <kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>⇧</kbd><span class="shortcut-separator">+</span><kbd>Z</kbd>
-            </span>
+            <span class="shortcut-keys"><kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>Y</kbd><span class="shortcut-separator">or</span><kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>⇧Z</kbd></span>
           </div>
           <div class="shortcut-row">
             <span class="shortcut-label">Copy</span>
-            <span class="shortcut-keys">
-              <kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>C</kbd>
-            </span>
+            <span class="shortcut-keys"><kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>C</kbd></span>
           </div>
           <div class="shortcut-row">
             <span class="shortcut-label">Cut</span>
-            <span class="shortcut-keys">
-              <kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>X</kbd>
-            </span>
+            <span class="shortcut-keys"><kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>X</kbd></span>
           </div>
           <div class="shortcut-row">
             <span class="shortcut-label">Paste</span>
-            <span class="shortcut-keys">
-              <kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>V</kbd>
-            </span>
+            <span class="shortcut-keys"><kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>V</kbd></span>
           </div>
           <div class="shortcut-row">
             <span class="shortcut-label">Delete selected</span>
-            <span class="shortcut-keys">
-              <kbd>Del</kbd>
-              <span class="shortcut-separator">or</span>
-              <kbd>⌫</kbd>
-            </span>
+            <span class="shortcut-keys"><kbd>Del</kbd><span class="shortcut-separator">or</span><kbd>⌫</kbd></span>
           </div>
           <div class="shortcut-row">
             <span class="shortcut-label">Zoom in</span>
-            <span class="shortcut-keys">
-              <kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>+</kbd>
-            </span>
+            <span class="shortcut-keys"><kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>+</kbd></span>
           </div>
           <div class="shortcut-row">
             <span class="shortcut-label">Zoom out</span>
-            <span class="shortcut-keys">
-              <kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>-</kbd>
-            </span>
+            <span class="shortcut-keys"><kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>-</kbd></span>
           </div>
           <div class="shortcut-row">
             <span class="shortcut-label">Fit to content</span>
-            <span class="shortcut-keys">
-              <kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>0</kbd>
-            </span>
+            <span class="shortcut-keys"><kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>0</kbd></span>
           </div>
           <div class="shortcut-row">
-            <span class="shortcut-label">Pan canvas</span>
-            <span class="shortcut-keys">
-              <kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>↑↓←→</kbd>
-            </span>
+            <span class="shortcut-label">Pan</span>
+            <span class="shortcut-keys"><kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>↑↓←→</kbd></span>
           </div>
           <div class="shortcut-row">
-            <span class="shortcut-label">Pan canvas (drag)</span>
-            <span class="shortcut-keys">
-              <kbd>Ctrl</kbd><span class="shortcut-separator">+</span>drag
-            </span>
+            <span class="shortcut-label">Pan (drag)</span>
+            <span class="shortcut-keys"><kbd>Ctrl</kbd><span class="shortcut-separator">+</span>drag</span>
           </div>
-
-          <p style="font-size:12px;color:#999;margin-top:10px;">
-            On Mac, use <kbd>⌘</kbd> instead of <kbd>Ctrl</kbd>.
-          </p>
-        </div>
-
-        <div class="sidebar-section">
-          <h2>Live Status</h2>
-          <div class="status-grid">
-            <div class="status-item" id="status-symbols">
-              <span class="status-value" id="val-symbols">0</span>
-              <span class="status-key">Symbols</span>
-            </div>
-            <div class="status-item" id="status-selected">
-              <span class="status-value" id="val-selected">0</span>
-              <span class="status-key">Selected</span>
-            </div>
-            <div class="status-item off" id="status-undo">
-              <span class="status-value" id="val-undo">✗</span>
-              <span class="status-key">Can Undo</span>
-            </div>
-            <div class="status-item off" id="status-redo">
-              <span class="status-value" id="val-redo">✗</span>
-              <span class="status-key">Can Redo</span>
-            </div>
-            <div class="status-item" id="status-zoom">
-              <span class="status-value" id="val-zoom">100%</span>
-              <span class="status-key">Zoom</span>
-            </div>
-            <div class="status-item" id="status-clipboard">
-              <span class="status-value" id="val-clipboard">0</span>
-              <span class="status-key">Clipboard</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="sidebar-section" style="flex:1">
-          <h2>Action Log</h2>
-          <div class="event-log" id="event-log"></div>
         </div>
 
       </aside>
+
+      <div id="editorEl"></div>
+
     </div>
 
     <script type="module">
       import { Editor } from '../../dist/iink.esm.js'
       import { ModalEditorOptions } from '../components/modal/modalEditorOptions.js'
 
-      const editorElement = document.getElementById('editor')
+      const editorElement = document.getElementById('editorEl')
       const showModalBtn = document.getElementById('showModalBtn')
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const sidebar = document.getElementById('sidebar')
 
-      const valSymbols = document.getElementById('val-symbols')
-      const valSelected = document.getElementById('val-selected')
-      const statusUndo = document.getElementById('status-undo')
-      const valUndo = document.getElementById('val-undo')
-      const statusRedo = document.getElementById('status-redo')
-      const valRedo = document.getElementById('val-redo')
-      const valClipboard = document.getElementById('val-clipboard')
-      const valZoom = document.getElementById('val-zoom')
-      const eventLog = document.getElementById('event-log')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = sidebar.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
 
       let editor
-      let clipboardCount = 0
-
       const editorOptions = {}
-
-      function log(action, detail = '') {
-        const entry = document.createElement('div')
-        entry.className = 'log-entry'
-        const now = new Date()
-        const time = now.toLocaleTimeString('en', { hour12: false })
-        entry.innerHTML = `<span class="log-time">${time}</span><span class="log-action">${action}</span>${detail ? ' — ' + detail : ''}`
-        eventLog.prepend(entry)
-        if (eventLog.children.length > 50) {
-          eventLog.lastElementChild.remove()
-        }
-      }
-
-      function updateStatus() {
-        if (!editor) return
-        const ctx = editor.history.context
-        valSymbols.textContent = editor.model.symbols.length
-        valSelected.textContent = editor.model.symbolsSelected.length
-
-        const canUndo = ctx.canUndo
-        statusUndo.className = 'status-item ' + (canUndo ? 'on' : 'off')
-        valUndo.textContent = canUndo ? '✓' : '✗'
-
-        const canRedo = ctx.canRedo
-        statusRedo.className = 'status-item ' + (canRedo ? 'on' : 'off')
-        valRedo.textContent = canRedo ? '✓' : '✗'
-
-        valClipboard.textContent = clipboardCount
-        valZoom.textContent = Math.round(editor.renderer.getZoom() * 100) + '%'
-      }
-
-      function patchEditor(ed) {
-        const origCopy = ed.copy.bind(ed)
-        const origPaste = ed.paste.bind(ed)
-        const origCut = ed.cut.bind(ed)
-        const origUndo = ed.undo.bind(ed)
-        const origRedo = ed.redo.bind(ed)
-
-        ed.copy = () => {
-          origCopy()
-          clipboardCount = ed.model.symbolsSelected.length || ed.model.symbols.length
-          log('copy', `${clipboardCount} symbol(s) copied`)
-          updateStatus()
-        }
-
-        ed.paste = async () => {
-          await origPaste()
-          log('paste', `${clipboardCount} symbol(s) pasted`)
-          updateStatus()
-        }
-
-        ed.cut = async () => {
-          clipboardCount = ed.model.symbolsSelected.length
-          await origCut()
-          log('cut', `${clipboardCount} symbol(s) cut`)
-          updateStatus()
-        }
-
-        ed.undo = async () => {
-          const result = await origUndo()
-          log('undo')
-          updateStatus()
-          return result
-        }
-
-        ed.redo = async () => {
-          const result = await origRedo()
-          log('redo')
-          updateStatus()
-          return result
-        }
-      }
 
       async function loadEditor(options) {
         editor = await Editor.load(editorElement, 'INTERACTIVEINK', options)
-
-        patchEditor(editor)
-
-        editor.event.addEventListener('changed', () => {
-          updateStatus()
-        })
-
-        editor.event.addEventListener('selected', (evt) => {
-          const count = evt.detail?.length ?? 0
-          if (count > 0) log('selected', `${count} symbol(s)`)
-          updateStatus()
-        })
-
-        // Patch zoomToFit to log
-        const origZoomToFit = editor.zoomToFit.bind(editor)
-        editor.zoomToFit = (symbols) => {
-          origZoomToFit(symbols)
-          log('fit', Math.round(editor.renderer.getZoom() * 100) + '%')
-          updateStatus()
-        }
-
-        // Patch renderer to track zoom/pan
-        const origSetZoom = editor.renderer.setZoom.bind(editor.renderer)
-        editor.renderer.setZoom = (zoom, cx, cy) => {
-          origSetZoom(zoom, cx, cy)
-          log('zoom', Math.round(editor.renderer.getZoom() * 100) + '%')
-          updateStatus()
-        }
-        const origPan = editor.renderer.pan.bind(editor.renderer)
-        editor.renderer.pan = (dx, dy, redraw) => {
-          origPan(dx, dy, redraw)
-          updateStatus()
-        }
-
-        log('editor loaded')
-        updateStatus()
+        return editor
       }
-
-      window.addEventListener('resize', () => {
-        editor?.resize()
-      })
 
       showModalBtn.addEventListener('click', () => {
         ModalEditorOptions.show(loadEditor, editorOptions)
@@ -422,6 +153,8 @@
       window.editorOptions = editorOptions
       window.loadEditor = loadEditor
     </script>
-  </body>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
 
 </html>

@@ -13,20 +13,12 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
     <link rel="stylesheet" href="../assets/style/renderjson.css" />
 
     <script type="text/javascript" src="../assets/renderjson/renderjson.js"></script>
     <style>
-      #editorEl {
-        height: calc(100dvh - 216px);
-      }
-
-      @media only screen and (max-width: 451px) {
-        #editorEl {
-          height: calc(100dvh - 263px);
-        }
-      }
-
       #result {
         border-bottom: solid gray 1px;
         display: block;
@@ -35,33 +27,15 @@
         cursor: zoom-in;
       }
 
-      #result.open {
-        position: absolute;
-        z-index: 999;
-        overflow: visible;
-        height: 100dvh;
-        width: 100dvw;
-        max-height: 100dvh;
-        background-color: white;
-        cursor: zoom-out;
-      }
 
-      .switch-label {
-        display: flex;
-        margin-right: 15px;
-        margin-top: 6px;
-      }
-
-      .switch-container {
-        display: flex;
-      }
     </style>
-  </head>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
   <body>
     <header class="header-main">
       <button id="showModalBtn" class="btn-keys">
-        Change server configuration
+        API Keys
       </button>
       <h1 class="header-title">
         Rest v2 Raw Content
@@ -83,17 +57,17 @@
       </div>
       <div class="switch-container">
         <span class="switch-label">Show Recognition Block</span>
-        <div class="toggle-switch">
-          <input class="toggle-input" id="showRecognitionBlock" type="checkbox" />
-          <label class="toggle-label" for="showRecognitionBlock"></label>
-        </div>
+        <label class="toggle">
+          <input type="checkbox" id="showRecognitionBlock" />
+          <span class="toggle-slider"></span>
+        </label>
       </div>
       <div class="switch-container">
         <span class="switch-label">Show Recognition Items</span>
-        <div class="toggle-switch">
-          <input class="toggle-input" id="showRecognitionItems" type="checkbox" />
-          <label class="toggle-label" for="showRecognitionItems"></label>
-        </div>
+        <label class="toggle">
+          <input type="checkbox" id="showRecognitionItems" />
+          <span class="toggle-slider"></span>
+        </label>
       </div>
 
       <select id="language"></select>
@@ -224,6 +198,8 @@
       window.editorOptions = editorOptions
       window.loadEditor = loadEditor
     </script>
-  </body>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
 
 </html>

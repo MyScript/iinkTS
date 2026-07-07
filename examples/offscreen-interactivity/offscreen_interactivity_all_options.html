@@ -6,150 +6,118 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
-
-    <title>Offscreen Debug & Visualization Tools</title>
-
+    <title>Interactive Ink Editor Showcase</title>
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
     <link rel="stylesheet" href="../assets/style/renderjson.css" />
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
     <style>
-      .content {
-        width: 100dvw;
-        height: calc(100dvh - 112px);
+      .ex-panel {
+        width: 380px;
+        overflow: hidden; /* tab-panel handles its own scroll */
       }
-      #editorEl {
-        width: 100%;
-        height: 100%;
-      }
-      @media only screen and (max-width: 466px) {
-        .content {
-          height: calc(100dvh - 160px);
-        }
-      }
-    </style>
 
-    <style>
-      #export-html-pan {
-        position: absolute;
-        top: calc(100% - 355px);
-        height: 300px;
-        left: calc(100% - 305px);
-        width: 300px;
-        background-color: white;
-        display: none;
-        border: 1px solid grey;
-        box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.225);
-        z-index: 30;
-        border-radius: 20px;
-      }
-      .export-html-header {
-        text-align: center;
-        padding: 4px;
+      .debug-controls {
         display: flex;
-        justify-content: space-between;
-        border-bottom: 1px solid grey;
+        flex-direction: column;
+        gap: var(--ex-space-sm);
       }
-      .export-html-title {
+
+      .tabs-header {
+        flex-shrink: 0;
+      }
+
+      .tab-button {
         text-align: center;
-        padding-left: 12px;
-        font-size: 25px;
-      }
-      #export-html-body {
-        height: calc(100% - 90px);
-        width: 100%;
-        border: none;
-      }
-    </style>
-
-    <style>
-      .loader {
-        margin: auto;
-        border: 16px solid #f3f3f3;
-        border-top: 16px solid #3498db;
-        border-radius: 50%;
-        width: 120px;
-        height: 120px;
-        animation: spin 2s linear infinite;
+        font-size: 13px;
+        flex: 1;
       }
 
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+      .tab-panel {
+        flex: 1;
+        overflow-y: auto;
+        min-height: 0;
+        padding: var(--ex-space-sm);
       }
-    </style>
 
-    <style>
-      .left-pan {
-        height: 100%;
-        width: 0px;
-        background-color: white;
-        /* box-shadow: 0 2px 10px 0 rgba(0, 0, 0, 0.5); */
-        border-right: 1px solid #D7DDE3;
-        overflow: hidden;
-      }
-      .left-pan.open {
-        width: 25%;
-        min-width: 400px;
-      }
-      .tabs {
-        padding: 0px;
-      }
-      .tab {
-        width: 25%;
-        padding: 12px;
-        color: darkgrey;
-        text-align: center;
-        font-size: large;
-        cursor: pointer;
-      }
-      .tab:hover {
-        background-color: rgb(150, 150, 150);
-        color: white;
-      }
-      .tab.active {
-        background-color: rgb(50, 50, 50);
-        color: white;
-        font-size: larger;
-      }
-      .content-tab {
-        overflow: auto;
-        height: calc(100% - 80px);
-        padding: 12px;
-      }
-      #copy-content-tab {
-        justify-content: center;
-        width: 100%;
-      }
-      .content-tab ul {
+      .tab-panel ul {
         padding: 0;
         list-style-type: none;
       }
-      .content-tab li {
+
+      .tab-panel li {
         display: flex;
         justify-content: space-between;
         flex-wrap: wrap;
         gap: 2px;
         margin-bottom: 12px;
       }
-      .content-tab li span {
+
+      .tab-panel li span {
         margin: auto 0;
         word-wrap: anywhere;
       }
-      .content-tab li .symbol-input-wrapper {
+
+      .tab-panel li .symbol-input-wrapper {
         display: flex;
         width: 66px;
         gap: 2px;
       }
-      .content-tab li .symbol-input {
+
+      .tab-panel li .symbol-input {
         height: 20px;
         width: 20px;
         border-radius: 4px;
-        background: #f6f5f4;
         border: none;
-        box-shadow: 0 2px 5px 0 rgba(0, 0, 0, 0.225);
-        background-color: white;
+        box-shadow: var(--ex-shadow-sm);
+        background-color: var(--ex-surface);
         display: block;
+      }
+
+      #export-html-pan {
+        position: absolute;
+        bottom: 60px;
+        right: 10px;
+        height: 300px;
+        width: 300px;
+        background-color: var(--ex-surface);
+        display: none;
+        border: 1px solid var(--ex-border);
+        box-shadow: var(--ex-shadow-md);
+        z-index: 30;
+        border-radius: var(--ex-radius-sm);
+        overflow: hidden;
+      }
+
+      .export-html-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 10px;
+        border-bottom: 1px solid var(--ex-border);
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      #export-html-body {
+        height: calc(100% - 37px);
+        width: 100%;
+        border: none;
+      }
+
+      #editorEl {
+        flex: 1;
+        min-width: 0;
+        height: 100%;
+      }
+
+      @media (max-width: 900px) {
+        .ex-panel { width: 100%; }
+        #editorEl { flex: 1; min-height: 0; }
       }
     </style>
 
@@ -158,65 +126,69 @@
 
   <body>
     <header class="header-main">
-      <button id="showModalBtn" class="btn-keys">
-        Change server configuration
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="true" aria-controls="left-pan">
+        🔬 Inspect
       </button>
-      <h1 class="header-title">Offscreen Interactivity - Debug & Visualization Tools</h1>
+      <button id="showModalBtn" class="btn-keys">API Keys</button>
+      <h1 class="header-title">Interactive Ink Editor — Showcase</h1>
     </header>
 
-    <nav class="flex-container gap wrap center">
-      <button class="classic-btn" id="import">Import</button>
-      <div class="flex-container">
-        <label class="label">Show left pan</label>
-        <div class="toggle-switch">
-          <input class="toggle-input" id="toggle-left-pan" type="checkbox" />
-          <label class="toggle-label" for="toggle-left-pan"></label>
-        </div>
-      </div>
-      <div class="flex-container">
-        <label class="label">Show backend rendering</label>
-        <div class="toggle-switch">
-          <input class="toggle-input" id="toggle-export-html-pan" type="checkbox" />
-          <label class="toggle-label" for="toggle-export-html-pan"></label>
-        </div>
-      </div>
-    </nav>
+    <div class="ex-page-layout" style="position: relative">
 
-    <div class="content flex-container">
-      <div id="left-pan" class="left-pan">
-        <nav class="tabs flex-container between">
-          <div id="jiix-tab" data-tabid="jiix-tab" class="tab">
-            JIIX
+      <!-- ── Debug panel ── -->
+      <aside id="left-pan" class="ex-panel">
+
+        <p class="ex-panel-heading">Showcase</p>
+        <p class="ex-panel-intro">Inspect the editor's internal state in real time. All tabs update live as you draw or interact with the canvas.</p>
+
+        <div class="ex-panel-divider"></div>
+
+        <!-- Controls -->
+        <div class="debug-controls">
+          <button class="classic-btn primary" id="import">Import</button>
+          <div class="switch-container">
+            <span class="switch-label">Backend rendering</span>
+            <label class="toggle">
+              <input type="checkbox" id="toggle-export-html-pan" />
+              <span class="toggle-slider"></span>
+            </label>
           </div>
-          <div id="symbols-tab" data-tabid="symbols-tab" class="tab">
-            Symbols
-          </div>
-          <div id="history-tab" data-tabid="history-tab" class="tab">
-            History
-          </div>
-          <div id="selection-tab" data-tabid="selection-tab" class="tab">
-            Selection
-          </div>
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <!-- Tabs -->
+        <nav class="tabs-header flex-container">
+          <div id="jiix-tab" data-tabid="jiix-tab" class="tab-button">JIIX</div>
+          <div id="symbols-tab" data-tabid="symbols-tab" class="tab-button">Symbols</div>
+          <div id="history-tab" data-tabid="history-tab" class="tab-button">History</div>
+          <div id="selection-tab" data-tabid="selection-tab" class="tab-button">Selection</div>
         </nav>
         <button id="copy-content-tab" class="classic-btn" disabled>Copy to clipboard</button>
-        <div id="content-tab" class="content-tab">
+        <div id="content-tab" class="tab-panel">
           <div class="loader"></div>
         </div>
-      </div>
 
+      </aside>
+
+      <!-- ── Editor ── -->
       <div id="editorEl"></div>
-    </div>
 
-    <div id="export-html-pan">
-      <div class="export-html-header">
-        <span class="export-html-title"> Backend rendering </span>
-        <button id="html-pan-close-btn" class="close-btn">
-          <img src="../assets/img/cross.svg" />
-        </button>
+      <!-- ── Backend rendering overlay ── -->
+      <div id="export-html-pan">
+        <div class="export-html-header">
+          <span>Backend rendering</span>
+          <button id="html-pan-close-btn" class="close-btn">
+            <img src="../assets/img/cross.svg" alt="close" />
+          </button>
+        </div>
+        <iframe id="export-html-body"></iframe>
       </div>
-      <iframe id="export-html-body"></iframe>
+
     </div>
 
     <script src="./offscreen_interactivity_all_options.js" type="module"></script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
   </body>
 </html>

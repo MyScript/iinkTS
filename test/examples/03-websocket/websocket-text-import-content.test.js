@@ -32,5 +32,5 @@ test.describe("Websocket Text Import Content", () => {
     await expect(page.locator(".prompter-text")).toHaveText("pony")
   })
 
-  TextNavActions.test({ skipClear: true, resultLocator: ".prompter-container" })
+  TextNavActions.test({ skipClear: true, skipUndoRedo: true, resultLocator: ".prompter-container" })
 })

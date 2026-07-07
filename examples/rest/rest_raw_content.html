@@ -13,29 +13,22 @@
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
     <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
 
     <style>
-      #editorEl {
-        height: calc(100dvh - 216px);
-      }
-
-      @media only screen and (max-width: 451px) {
-        #editorEl {
-          height: calc(100dvh - 263px);
-        }
-      }
-
       #result span {
         font-size: small;
         padding: 12px;
       }
     </style>
-  </head>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
 
   <body>
     <header class="header-main">
       <button id="showModalBtn" class="btn-keys">
-        Change server configuration
+        API Keys
       </button>
       <h1 class="header-title">Rest Raw Content</h1>
     </header>
@@ -84,11 +77,6 @@
         editor?.clear()
         resultElement.innerHTML = ''
       })
-
-      window.addEventListener('resize', () => {
-        editor?.resize()
-      })
-
       const editorOptions = {
         configuration: {
           recognition: {
@@ -148,6 +136,8 @@
       window.editorOptions = editorOptions
       window.loadEditor = loadEditor
     </script>
-  </body>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
 
 </html>
