@@ -1,4 +1,5 @@
 import { createEditorMock, asEditor } from "../../../__mocks__/createEditorMock"
+import { buildIIStroke } from "../../../helpers"
 import {
   EdgeLineOps,
   IIRotationManager,
@@ -44,6 +45,19 @@ describe("IIRotationManager.ts", () => {
     })
     test("rotate stroke", () => {
       const stroke = StrokeOps.create()
+      const origin: TPoint = { x: 0, y: 0 }
+      StrokeOps.addPointer(stroke, { p: 1, t: 1, x: 1, y: 1 })
+      StrokeOps.addPointer(stroke, { p: 1, t: 10, x: 10, y: 0 })
+      const matrix = MatrixTransform.identity().rotate(Math.PI / 2, origin)
+      manager.applyToSymbol(stroke, matrix)
+      expect(stroke.pointers[0].x.toFixed(0)).toEqual("-1")
+      expect(stroke.pointers[0].y.toFixed(0)).toEqual("1")
+      expect(stroke.pointers[1].x.toFixed(0)).toEqual("0")
+      expect(stroke.pointers[1].y.toFixed(0)).toEqual("10")
+    })
+    test("rotate a math solver-output (draw) stroke like a normal stroke", () => {
+      const stroke = StrokeOps.create()
+      stroke.isSolverOutput = true
       const origin: TPoint = { x: 0, y: 0 }
       StrokeOps.addPointer(stroke, { p: 1, t: 1, x: 1, y: 1 })
       StrokeOps.addPointer(stroke, { p: 1, t: 10, x: 10, y: 0 })
@@ -176,6 +190,73 @@ describe("IIRotationManager.ts", () => {
         )
         expect(stroke).not.toEqual(strokeNotRotate)
       })
+    })
+  })
+
+  describe("ghost strokes follow a selected math block during rotation", () => {
+    function buildMathStroke(jiixBlockId: string) {
+      const stroke = buildIIStroke()
+      stroke.jiixBlockType = "Math"
+      stroke.jiixBlockId = jiixBlockId
+      return stroke
+    }
+
+    function setupTarget(origin: TPoint) {
+      const group = document.createElementNS("http://www.w3.org/2000/svg", "g")
+      group.setAttribute("role", SvgElementRole.InteractElementsGroup)
+      const target = document.createElementNS("http://www.w3.org/2000/svg", "circle")
+      target.setAttribute("cx", origin.x.toString())
+      target.setAttribute("cy", origin.y.toString())
+      group.appendChild(target)
+      return target
+    }
+
+    test("continue() live-rotates the block's ghost stroke element", () => {
+      const editor = createEditorMock()
+      editor.math.getGhostStrokeIds = jest.fn().mockReturnValue(["ghost-1"])
+      editor.renderer.setAttribute = jest.fn()
+      const manager = new IIRotationManager(asEditor(editor))
+      const stroke = buildMathStroke("block-1")
+      editor.model.addSymbol(stroke)
+      editor.model.selectedIds.add(stroke.id)
+
+      const origin: TPoint = {
+        x: OBBOps.toBox(stroke.bounds).x + stroke.bounds.width / 2,
+        y: OBBOps.toBox(stroke.bounds).y + stroke.bounds.height,
+      }
+      const center: TPoint = {
+        x: OBBOps.toBox(stroke.bounds).x + stroke.bounds.width / 2,
+        y: OBBOps.toBox(stroke.bounds).y + stroke.bounds.height / 2,
+      }
+
+      manager.start(setupTarget(origin), origin)
+      manager.continue(computeRotatedPoint(origin, center, Math.PI / 2))
+
+      expect(editor.renderer.setAttribute).toHaveBeenCalledWith("ghost-1", "transform", expect.stringContaining("rotate("))
+    })
+
+    test("end() permanently applies the matrix to the block's ghost strokes", async () => {
+      const editor = createEditorMock()
+      editor.recognizer.transformRotate = jest.fn(() => Promise.resolve())
+      editor.math.applyTransformToGhostStrokes = jest.fn()
+      const manager = new IIRotationManager(asEditor(editor))
+      const stroke = buildMathStroke("block-1")
+      editor.model.addSymbol(stroke)
+      editor.model.selectedIds.add(stroke.id)
+
+      const origin: TPoint = {
+        x: OBBOps.toBox(stroke.bounds).x + stroke.bounds.width / 2,
+        y: OBBOps.toBox(stroke.bounds).y + stroke.bounds.height,
+      }
+      const center: TPoint = {
+        x: OBBOps.toBox(stroke.bounds).x + stroke.bounds.width / 2,
+        y: OBBOps.toBox(stroke.bounds).y + stroke.bounds.height / 2,
+      }
+
+      manager.start(setupTarget(origin), origin)
+      await manager.end(computeRotatedPoint(origin, center, Math.PI / 2))
+
+      expect(editor.math.applyTransformToGhostStrokes).toHaveBeenCalledWith("block-1", expect.anything())
     })
   })
 })

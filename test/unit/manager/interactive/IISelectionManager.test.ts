@@ -190,6 +190,136 @@ describe("IISelectionManager.ts", () => {
     })
   })
 
+  describe("expandSelectionForMathBlocks", () => {
+    function buildMathStroke(jiixBlockId: string): TStroke {
+      const stroke = buildIIStroke()
+      stroke.jiixBlockType = "Math"
+      stroke.jiixBlockId = jiixBlockId
+      return stroke
+    }
+
+    test("element mode: selecting one source stroke pulls in sibling strokes and the block's frozen draw result", () => {
+      const editor = createEditorMock()
+      const manager = new IISelectionManager(asEditor(editor))
+      const stroke1 = buildMathStroke("block-1")
+      const stroke2 = buildMathStroke("block-1")
+      const drawStroke = buildIIStroke()
+      editor.model.addSymbol(stroke1)
+      editor.model.addSymbol(stroke2)
+      editor.model.addSymbol(drawStroke)
+      editor.jiix.getStrokesForElement = jest.fn().mockReturnValue([stroke1.id, stroke2.id])
+      editor.math.getStoredSolverOutputs = jest.fn().mockReturnValue([drawStroke.id])
+      editor.model.selectedIds.add(stroke1.id)
+
+      manager.expandSelectionForMathBlocks()
+
+      expect(editor.model.selectedIds.has(stroke2.id)).toBe(true)
+      expect(editor.model.selectedIds.has(drawStroke.id)).toBe(true)
+    })
+
+    test("element mode: no draw yet, only sibling source strokes are pulled in", () => {
+      const editor = createEditorMock()
+      const manager = new IISelectionManager(asEditor(editor))
+      const stroke1 = buildMathStroke("block-1")
+      const stroke2 = buildMathStroke("block-1")
+      editor.model.addSymbol(stroke1)
+      editor.model.addSymbol(stroke2)
+      editor.jiix.getStrokesForElement = jest.fn().mockReturnValue([stroke1.id, stroke2.id])
+      editor.math.getStoredSolverOutputs = jest.fn().mockReturnValue(undefined)
+      editor.model.selectedIds.add(stroke1.id)
+
+      manager.expandSelectionForMathBlocks()
+
+      expect(editor.model.selectedIds.has(stroke2.id)).toBe(true)
+    })
+
+    test("operand mode: does not expand the selection", () => {
+      const editor = createEditorMock()
+      editor.configuration.mathSelectionLevel = "operand"
+      const manager = new IISelectionManager(asEditor(editor))
+      const stroke1 = buildMathStroke("block-1")
+      const stroke2 = buildMathStroke("block-1")
+      const drawStroke = buildIIStroke()
+      editor.model.addSymbol(stroke1)
+      editor.model.addSymbol(stroke2)
+      editor.model.addSymbol(drawStroke)
+      editor.jiix.getStrokesForElement = jest.fn().mockReturnValue([stroke1.id, stroke2.id])
+      editor.math.getStoredSolverOutputs = jest.fn().mockReturnValue([drawStroke.id])
+      editor.model.selectedIds.add(stroke1.id)
+
+      manager.expandSelectionForMathBlocks()
+
+      expect(editor.model.selectedIds.has(stroke2.id)).toBe(false)
+      expect(editor.model.selectedIds.has(drawStroke.id)).toBe(false)
+    })
+  })
+
+  describe("selection rectangle includes ghost bounds", () => {
+    function buildMathStroke(jiixBlockId: string): TStroke {
+      const stroke = buildIIStroke()
+      stroke.jiixBlockType = "Math"
+      stroke.jiixBlockId = jiixBlockId
+      return stroke
+    }
+
+    test("element mode: merges the block's ghost bounds into the selection rectangle", async () => {
+      const editor = createEditorMock()
+      editor.menu.context.hide = jest.fn()
+      const manager = new IISelectionManager(asEditor(editor))
+      const stroke = buildMathStroke("block-1")
+      await editor.init()
+      editor.model.addSymbol(stroke)
+      editor.renderer.drawSymbol(stroke)
+
+      const strokeBox = OBBOps.toBox(stroke.bounds)
+      const ghostBox: TBox = {
+        x: strokeBox.x + strokeBox.width + 50,
+        y: strokeBox.y,
+        width: 10,
+        height: 10,
+      }
+      editor.math.getGhostBounds = jest.fn().mockReturnValue(ghostBox)
+
+      manager.drawSelectedGroup([stroke])
+
+      const group = editor.renderer.layer.querySelector(`[role=${SvgElementRole.InteractElementsGroup}]`) as SVGGElement
+      const translateRect = group?.querySelector(`[role=${SvgElementRole.Translate}]`)
+      const rectX = Number(translateRect?.getAttribute("x"))
+      const rectWidth = Number(translateRect?.getAttribute("width"))
+
+      expect(rectX + rectWidth).toBeGreaterThanOrEqual(ghostBox.x + ghostBox.width)
+    })
+
+    test("operand mode: does not merge ghost bounds into the selection rectangle", async () => {
+      const editor = createEditorMock()
+      editor.menu.context.hide = jest.fn()
+      editor.configuration.mathSelectionLevel = "operand"
+      const manager = new IISelectionManager(asEditor(editor))
+      const stroke = buildMathStroke("block-1")
+      await editor.init()
+      editor.model.addSymbol(stroke)
+      editor.renderer.drawSymbol(stroke)
+
+      const strokeBox = OBBOps.toBox(stroke.bounds)
+      const ghostBox: TBox = {
+        x: strokeBox.x + strokeBox.width + 50,
+        y: strokeBox.y,
+        width: 10,
+        height: 10,
+      }
+      editor.math.getGhostBounds = jest.fn().mockReturnValue(ghostBox)
+
+      manager.drawSelectedGroup([stroke])
+
+      const group = editor.renderer.layer.querySelector(`[role=${SvgElementRole.InteractElementsGroup}]`) as SVGGElement
+      const translateRect = group?.querySelector(`[role=${SvgElementRole.Translate}]`)
+      const rectX = Number(translateRect?.getAttribute("x"))
+      const rectWidth = Number(translateRect?.getAttribute("width"))
+
+      expect(rectX + rectWidth).toBeLessThan(ghostBox.x + ghostBox.width)
+    })
+  })
+
   describe("interact elements", () => {
     Object.defineProperty(global.SVGElement.prototype, "getBBox", {
       writable: true,

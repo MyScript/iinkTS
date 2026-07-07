@@ -233,6 +233,7 @@ export const StrokeOps = {
       stroke.id = partial.id
     }
     stroke.isSolverOutput = partial.isSolverOutput
+    stroke.jiixBlockId = partial.jiixBlockId
     const errors: string[] = []
     let flag = true
     partial.pointers?.forEach((pp, pIndex) => {

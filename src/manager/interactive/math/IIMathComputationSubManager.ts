@@ -2,9 +2,10 @@ import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
 import { LoggerCategory } from "@/logger"
 import type { TJIIXMathElement, TJIIXMathExpression } from "@/model"
 import type { TStyle } from "@/style/Style"
-import type { TPoint, TStroke } from "@/symbol"
-import { isStroke } from "@/symbol"
+import type { TBox, TPoint, TStroke } from "@/symbol"
+import { BoxOps, isStroke, OBBOps } from "@/symbol"
 import { StrokeOps } from "@/symbol/stroke/Stroke"
+import type { MatrixTransform } from "@/transform"
 import { convertMillimeterToPixel } from "@/utils"
 import { isDeepEqualIgnoring } from "@/utils/object"
 import { createUUID } from "@/utils/uuid"
@@ -61,6 +62,7 @@ export class IIMathComputationSubManager extends IIAbstractManager {
   #config: TMathComputationConfig
   #computations = new Map<string, TMathBlockComputation>()
   #ghostStrokeElementIds = new Map<string, string[]>()
+  #ghostStrokes = new Map<string, TStroke[]>()
   #lastComputationResult = new Map<string, TJIIXMathElement>()
 
   constructor(editor: TInteractiveInkEditor, config: Partial<TMathComputationConfig> = {}) {
@@ -147,13 +149,13 @@ export class IIMathComputationSubManager extends IIAbstractManager {
     return tail.length > 0 ? `${start} ${tail}` : start
   }
 
-  protected addGhostOutputStrokes(result: TJIIXMathElement, style?: TStyle): string[] {
+  protected addGhostOutputStrokes(result: TJIIXMathElement, style?: TStyle): TStroke[] {
     this.logger.info("addGhostOutputStrokes", {
       result,
     })
 
     const solverStrokes = this.extractSolverOutputStrokes(result)
-    const elementIds: string[] = []
+    const strokes: TStroke[] = []
     const strokeColor = style?.color ?? this.#config.resultColor
     const strokeWidth = style?.width ?? 5
 
@@ -187,11 +189,11 @@ export class IIMathComputationSubManager extends IIAbstractManager {
       }
 
       this.renderer.drawSymbol(stroke)
-      elementIds.push(stroke.id)
+      strokes.push(stroke)
     }
 
-    this.logger.debug("addGhostOutputStrokes", `Added ${elementIds.length} ghost stroke elements`)
-    return elementIds
+    this.logger.debug("addGhostOutputStrokes", `Added ${strokes.length} ghost stroke elements`)
+    return strokes
   }
 
   hasSolverOutputs(jiixBlockId: string): boolean {
@@ -211,6 +213,43 @@ export class IIMathComputationSubManager extends IIAbstractManager {
     return !!(ghostIds && ghostIds.length > 0)
   }
 
+  /** Element ids of a block's ghost strokes, for live CSS-transform following during a drag. */
+  getGhostStrokeIds(jiixBlockId: string): string[] {
+    return this.#ghostStrokeElementIds.get(jiixBlockId) ?? []
+  }
+
+  /**
+   * Merged bounds of a block's ghost strokes, for inclusion in the selection rectangle
+   * while the block has no frozen draw result yet. Undefined if the block has no ghost.
+   */
+  getGhostBounds(jiixBlockId: string): TBox | undefined {
+    const strokes = this.#ghostStrokes.get(jiixBlockId)
+    if (!strokes || strokes.length === 0) {
+      return undefined
+    }
+    return BoxOps.createFromBoxes(strokes.map((s) => OBBOps.toBox(s.bounds)))
+  }
+
+  /**
+   * Moves and redraws a block's ghost strokes in place, so they passively follow a
+   * translate/resize/rotate of the block's source strokes instead of visually detaching.
+   */
+  applyTransformToGhostStrokes(jiixBlockId: string, matrix: MatrixTransform): void {
+    const strokes = this.#ghostStrokes.get(jiixBlockId)
+    if (!strokes || strokes.length === 0) {
+      return
+    }
+    strokes.forEach((stroke) => {
+      stroke.pointers.forEach((p) => {
+        const np = matrix.applyToPoint(p)
+        p.x = +np.x.toFixed(3)
+        p.y = +np.y.toFixed(3)
+      })
+      StrokeOps.updateBounds(stroke)
+      this.renderer.drawSymbol(stroke)
+    })
+  }
+
   clearGhostStrokes(jiixBlockId: string): void {
     this.logger.debug("clearGhostStrokes", {
       jiixBlockId,
@@ -219,6 +258,7 @@ export class IIMathComputationSubManager extends IIAbstractManager {
     const elementIds = this.#ghostStrokeElementIds.get(jiixBlockId) ?? []
     elementIds.forEach((id) => this.renderer.removeSymbol(id))
     this.#ghostStrokeElementIds.delete(jiixBlockId)
+    this.#ghostStrokes.delete(jiixBlockId)
     this.#lastComputationResult.delete(jiixBlockId)
   }
 
@@ -285,6 +325,16 @@ export class IIMathComputationSubManager extends IIAbstractManager {
       throw new Error("Math block does not have jiixBlockId")
     }
 
+    if (this.hasDrawSolverOutputs(jiixBlockId)) {
+      const cachedResult = this.#lastComputationResult.get(jiixBlockId)
+      if (cachedResult) {
+        this.logger.debug("computeNumericalResult", "Draw result is frozen, skipping recompute", { jiixBlockId })
+        const addedStrokesCount = this.#computations.get(jiixBlockId)?.solverOutputStrokeIds?.length ?? 0
+        const value = this.#computations.get(jiixBlockId)?.computedResult as number | undefined
+        return { result: cachedResult, addedStrokesCount, value, wasRecomputed: false }
+      }
+    }
+
     const result = await this.editor.recognizer.getNumericalComputation(jiixBlockId)
     this.logger.info("computeNumericalResult", "Numerical computation completed successfully", result)
 
@@ -317,10 +367,14 @@ export class IIMathComputationSubManager extends IIAbstractManager {
         this.editor.select([...this.editor.model.selectedIds, ...addedStrokes.map((s) => s.id)])
       }
     } else if (mode === "ghost") {
-      const elementIds = this.addGhostOutputStrokes(result)
-      addedStrokesCount = elementIds.length
+      const strokes = this.addGhostOutputStrokes(result)
+      addedStrokesCount = strokes.length
       this.logger.info("computeNumericalResult", `Added ${addedStrokesCount} ghost stroke elements`)
-      this.#ghostStrokeElementIds.set(jiixBlockId, elementIds)
+      this.#ghostStrokeElementIds.set(
+        jiixBlockId,
+        strokes.map((s) => s.id)
+      )
+      this.#ghostStrokes.set(jiixBlockId, strokes)
     }
 
     let value: number | undefined
