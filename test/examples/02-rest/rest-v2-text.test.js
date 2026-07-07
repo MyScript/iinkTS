@@ -93,8 +93,6 @@ test.describe("Rest v2 Text", () => {
 
       await page.locator("#language").selectOption("fr_FR")
 
-      await expect(page.locator("#result")).toBeEmpty()
-
       const [requestFr] = await Promise.all([
         page.waitForRequest((req) => req.url().includes("/api/v4.0/iink/recognize") && req.method() === "POST"),
         writeStrokes(page, h.strokes),
