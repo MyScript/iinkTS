@@ -48,6 +48,17 @@ describe("IIResizeManager.ts", () => {
       expect(stroke.pointers[0]).toEqual(expect.objectContaining({ x: 1, y: 2 }))
       expect(stroke.pointers[1]).toEqual(expect.objectContaining({ x: 41, y: 122 }))
     })
+    test("should resize a math solver-output (draw) stroke like a normal stroke", () => {
+      const stroke = StrokeOps.create()
+      stroke.isSolverOutput = true
+      const origin: TPoint = { x: 1, y: 2 }
+      StrokeOps.addPointer(stroke, { p: 1, t: 1, x: 1, y: 2 })
+      StrokeOps.addPointer(stroke, { p: 1, t: 10, x: 21, y: 42 })
+      const matrix = MatrixTransform.identity().scale(2, 3, origin)
+      manager.applyToSymbol(stroke, matrix)
+      expect(stroke.pointers[0]).toEqual(expect.objectContaining({ x: 1, y: 2 }))
+      expect(stroke.pointers[1]).toEqual(expect.objectContaining({ x: 41, y: 122 }))
+    })
     test("should not resize shape with kind unknown", () => {
       const points: TPoint[] = [
         { x: 0, y: 0 },
@@ -374,6 +385,56 @@ describe("IIResizeManager.ts", () => {
         )
         expect(stroke).not.toEqual(strokeNotResized)
       })
+    })
+  })
+
+  describe("ghost strokes follow a selected math block during resize", () => {
+    function buildMathStroke(jiixBlockId: string) {
+      const stroke = buildIIStroke()
+      stroke.jiixBlockType = "Math"
+      stroke.jiixBlockId = jiixBlockId
+      return stroke
+    }
+
+    function setupTarget() {
+      const group = document.createElementNS("http://www.w3.org/2000/svg", "g")
+      group.setAttribute("role", SvgElementRole.InteractElementsGroup)
+      const target = document.createElementNS("http://www.w3.org/2000/svg", "line")
+      target.setAttribute("resize-direction", ResizeDirection.East)
+      group.appendChild(target)
+      return target
+    }
+
+    test("continue() live-scales the block's ghost stroke element", () => {
+      const editor = createEditorMock()
+      editor.math.getGhostStrokeIds = jest.fn().mockReturnValue(["ghost-1"])
+      editor.renderer.setAttribute = jest.fn()
+      const manager = new IIResizeManager(asEditor(editor))
+      const stroke = buildMathStroke("block-1")
+      editor.model.addSymbol(stroke)
+      editor.model.selectedIds.add(stroke.id)
+
+      const sb = OBBOps.toBox(stroke.bounds)
+      manager.start(setupTarget(), { x: sb.x, y: sb.y + stroke.bounds.height / 2 })
+      manager.continue({ x: sb.x + stroke.bounds.width * 2, y: sb.y + stroke.bounds.height / 2 })
+
+      expect(editor.renderer.setAttribute).toHaveBeenCalledWith("ghost-1", "transform", expect.stringContaining("scale("))
+    })
+
+    test("end() permanently applies the matrix to the block's ghost strokes", async () => {
+      const editor = createEditorMock()
+      editor.recognizer.transformScale = jest.fn(() => Promise.resolve())
+      editor.math.applyTransformToGhostStrokes = jest.fn()
+      const manager = new IIResizeManager(asEditor(editor))
+      const stroke = buildMathStroke("block-1")
+      editor.model.addSymbol(stroke)
+      editor.model.selectedIds.add(stroke.id)
+
+      const sb = OBBOps.toBox(stroke.bounds)
+      manager.start(setupTarget(), { x: sb.x, y: sb.y + stroke.bounds.height / 2 })
+      await manager.end({ x: sb.x + stroke.bounds.width * 2, y: sb.y + stroke.bounds.height / 2 })
+
+      expect(editor.math.applyTransformToGhostStrokes).toHaveBeenCalledWith("block-1", expect.anything())
     })
   })
 })

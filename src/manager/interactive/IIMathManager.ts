@@ -7,6 +7,8 @@ import type {
   TMathVariableDefinition,
   TMathVariableDefinitions,
 } from "@/recognizer/RecognizerWebSocketMessage"
+import type { TBox } from "@/symbol"
+import type { MatrixTransform } from "@/transform"
 
 import { IIAbstractManager } from "./IIAbstractManager"
 import type {
@@ -49,9 +51,7 @@ export class IIMathManager extends IIAbstractManager {
   #variables: IIMathVariableSubManager
   #evaluation: IIMathFunctionEvaluationSubManager
 
-  #mathBlockSnapshot = new Map<string, string>()
   #isHandlingSynchronized = false
-  #blocksWithRecentSolverAdd = new Set<string>()
 
   constructor(editor: TInteractiveInkEditor, config?: TMathConfig) {
     super(editor, LoggerCategory.MATH)
@@ -71,44 +71,11 @@ export class IIMathManager extends IIAbstractManager {
     }
     this.#isHandlingSynchronized = true
     try {
-      await this.#clearStaleBlockOutputs()
       if (this.#computation.getConfig().autoCompute) {
         await this.tryAutoCompute()
       }
     } finally {
       this.#isHandlingSynchronized = false
-    }
-  }
-
-  async #clearStaleBlockOutputs(): Promise<void> {
-    const currentBlocks = this.editor.model.mathBlocks
-    const currentSnapshot = new Map(currentBlocks.map((b) => [b.id, b.label ?? ""]))
-
-    const changedIds: string[] = []
-
-    for (const [id, prevLabel] of this.#mathBlockSnapshot) {
-      const currentLabel = currentSnapshot.get(id)
-      if ((currentLabel === undefined || currentLabel !== prevLabel) && !this.#blocksWithRecentSolverAdd.has(id)) {
-        changedIds.push(id)
-      }
-    }
-
-    this.#blocksWithRecentSolverAdd.clear()
-    this.#mathBlockSnapshot = currentSnapshot
-
-    for (const blockId of changedIds) {
-      await this.#clearSolverOutputsForBlockAndDependents(blockId)
-    }
-  }
-
-  async #clearSolverOutputsForBlockAndDependents(blockId: string): Promise<void> {
-    await this.#computation.clearSolverOutputs(blockId)
-    const deps = this.#variables.getDependencies(blockId)
-    if (!deps?.dependentBlocks) {
-      return
-    }
-    for (const dependentId of deps.dependentBlocks) {
-      await this.#computation.clearSolverOutputs(dependentId)
     }
   }
 
@@ -171,6 +138,18 @@ export class IIMathManager extends IIAbstractManager {
 
   hasGhostStrokes(jiixBlockId: string): boolean {
     return this.#computation.hasGhostStrokes(jiixBlockId)
+  }
+
+  getGhostStrokeIds(jiixBlockId: string): string[] {
+    return this.#computation.getGhostStrokeIds(jiixBlockId)
+  }
+
+  getGhostBounds(jiixBlockId: string): TBox | undefined {
+    return this.#computation.getGhostBounds(jiixBlockId)
+  }
+
+  applyTransformToGhostStrokes(jiixBlockId: string, matrix: MatrixTransform): void {
+    this.#computation.applyTransformToGhostStrokes(jiixBlockId, matrix)
   }
 
   /**
@@ -473,10 +452,7 @@ export class IIMathManager extends IIAbstractManager {
       try {
         const actions = await this.editor.recognizer.getAvailableActions(mb.id)
         if (actions?.includes("numerical-computation")) {
-          const { wasRecomputed, addedStrokesCount } = await this.#computation.computeNumericalResult(mb.id)
-          if (wasRecomputed && addedStrokesCount > 0 && this.#computation.getConfig().resultMode === "draw") {
-            this.#blocksWithRecentSolverAdd.add(mb.id)
-          }
+          await this.#computation.computeNumericalResult(mb.id)
         }
       } catch (error) {
         this.logger.debug("tryAutoCompute", `Cannot auto-compute "${label}":`, (error as Error).message)

@@ -932,9 +932,6 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
         }
       }
     })
-    for (const blockId of mathBlockIds) {
-      await this.math.clearSolverOutputs(blockId)
-    }
 
     const removedIds = new Set(symbolsRemoved.map((s) => s.id))
     const { erased: decErased, updated: decUpdated } = this.#cleanupDecoratorsForRemovedIds(removedIds)
@@ -975,6 +972,7 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
         this.renderer.updateSelectedState(s, shouldBeSelected)
       }
     })
+    this.selector.expandSelectionForMathBlocks()
     this.selector.drawSelectedGroup(this.model.symbolsSelected)
 
     const selectedMathJiixBlockId = this.selector.getSelectedMathJiixBlockId()

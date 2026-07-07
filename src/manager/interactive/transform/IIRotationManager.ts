@@ -25,10 +25,6 @@ export class IIRotationManager extends IIAbstractTransformManager {
   }
 
   protected applyToStroke(stroke: TStroke, matrix: MatrixTransform): TStroke {
-    if (stroke.isSolverOutput) {
-      this.logger.warn("applyToStroke", "Skipping solver output stroke - it will be recalculated", stroke.id)
-      return stroke
-    }
     this.applyMatrixToPoints(stroke.pointers, matrix)
     StrokeOps.updateBounds(stroke)
     return stroke
@@ -122,7 +118,6 @@ export class IIRotationManager extends IIAbstractTransformManager {
     this.model.symbolsSelected.forEach((s) => {
       this.setTransformOrigin(s.id, this.center.x, this.center.y)
     })
-    this.clearResultStrokesForSelectedMath()
   }
 
   continue(point: TPoint): number {
@@ -141,6 +136,9 @@ export class IIRotationManager extends IIAbstractTransformManager {
     this.rotateElement(this.interactElementsGroup.id, angleDegree)
     this.model.symbolsSelected.forEach((s) => {
       this.rotateElement(s.id, angleDegree)
+    })
+    this.getGhostStrokeIdsForSelectedMath(this.model.symbolsSelected).forEach((id) => {
+      this.rotateElement(id, angleDegree)
     })
     const angleRad = convertDegreeToRadian(angleDegree)
     const matrix = MatrixTransform.identity().rotate(angleRad, this.center)
@@ -168,6 +166,7 @@ export class IIRotationManager extends IIAbstractTransformManager {
       }
     })
     this.applyAndDraw(this.model.symbolsSelected, matrix)
+    this.applyTransformToGhostStrokesForSelectedMath(this.model.symbolsSelected, matrix)
     this.editor.connector.updateAnchoredEdges(
       this.model.symbolsSelected.map((s) => s.id),
       matrix,
