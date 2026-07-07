@@ -410,7 +410,8 @@ export class IISelectionManager extends IIAbstractManager {
     )
 
     const box2 = BoxOps.createFromPoints(symbols.flatMap((s) => s.vertices))
-    const box = BoxOps.createFromBoxes([box1, box2])
+    const ghostBoxes = this.getGhostBoxesForSelectedMath(symbols)
+    const box = BoxOps.createFromBoxes([box1, box2, ...ghostBoxes])
 
     const attrs = {
       id: `selected-${Date.now()}`,
@@ -421,6 +422,30 @@ export class IISelectionManager extends IIAbstractManager {
     surroundGroup.appendChild(this.createResizeGroup(box))
     surroundGroup.appendChild(this.createRotateGroup(box))
     return surroundGroup
+  }
+
+  /**
+   * In "element" mode, bounds of any active ghost preview for a selected math block —
+   * merged into the selection rectangle even though ghost strokes aren't real model symbols.
+   */
+  private getGhostBoxesForSelectedMath(symbols: TSymbol[]): TBox[] {
+    if (this.editor.configuration.mathSelectionLevel !== "element") {
+      return []
+    }
+    const jiixBlockIds = new Set<string>()
+    symbols.forEach((s) => {
+      if (isRecognizedMath(s) && s.jiixBlockId) {
+        jiixBlockIds.add(s.jiixBlockId)
+      }
+    })
+    const boxes: TBox[] = []
+    jiixBlockIds.forEach((id) => {
+      const bounds = this.editor.math.getGhostBounds(id)
+      if (bounds) {
+        boxes.push(bounds)
+      }
+    })
+    return boxes
   }
 
   protected createEdgeResizeGroup(edge: TEdge): SVGGElement {
@@ -909,8 +934,37 @@ export class IISelectionManager extends IIAbstractManager {
     return this.getQualifyingMathBlockIds().includes(jiixBlockId)
   }
 
+  /**
+   * In "element" mode, grows the current selection to include, for every math block that has
+   * at least one selected source stroke, all of that block's sibling source strokes plus its
+   * frozen draw result stroke (if any). No-op in "operand" mode.
+   */
+  expandSelectionForMathBlocks(): void {
+    if (this.editor.configuration.mathSelectionLevel !== "element") {
+      return
+    }
+
+    const idsToAdd = new Set<string>()
+    this.getQualifyingMathBlockIds().forEach((jiixBlockId) => {
+      this.editor.jiix.getStrokesForElement(jiixBlockId).forEach((id) => idsToAdd.add(id))
+      this.editor.math.getStoredSolverOutputs(jiixBlockId)?.forEach((id) => idsToAdd.add(id))
+    })
+
+    idsToAdd.forEach((id) => {
+      if (this.model.selectedIds.has(id)) {
+        return
+      }
+      this.model.selectedIds.add(id)
+      const symbol = this.model.symbols.find((s) => s.id === id)
+      if (symbol) {
+        this.renderer.updateSelectedState(symbol, true)
+      }
+    })
+  }
+
   end(info: TPointerInfo): TSymbol[] {
     const updatedSymbols = this.continue(info)
+    this.expandSelectionForMathBlocks()
     this.startSelectionPoint = undefined
     this.endSelectionPoint = undefined
     this.clearSelectingRect()

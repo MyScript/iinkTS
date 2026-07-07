@@ -49,14 +49,36 @@ export abstract class IIAbstractTransformManager extends IIAbstractManager {
     this.editor.selector.drawSelectedGroup(this.editor.model.symbolsSelected)
   }
 
-  protected clearResultStrokesForSelectedMath(): void {
+  private getSelectedMathBlockIds(symbols: TSymbol[]): Set<string> {
     const ids = new Set<string>()
-    this.model.symbolsSelected.forEach((s) => {
+    symbols.forEach((s) => {
       if (isStroke(s) && s.jiixBlockType === "Math" && s.jiixBlockId) {
         ids.add(s.jiixBlockId)
       }
     })
-    ids.forEach((id) => this.editor.math.clearSolverOutputs(id))
+    return ids
+  }
+
+  /**
+   * Element ids of the ghost previews attached to the given selection's math blocks —
+   * for live CSS-transform following while a translate/resize/rotate drag is in progress.
+   */
+  protected getGhostStrokeIdsForSelectedMath(symbols: TSymbol[]): string[] {
+    const ids: string[] = []
+    this.getSelectedMathBlockIds(symbols).forEach((id) => {
+      ids.push(...(this.editor.math.getGhostStrokeIds(id) ?? []))
+    })
+    return ids
+  }
+
+  /**
+   * Permanently applies the given transform matrix to the ghost previews attached to the
+   * selection's math blocks, so they stay visually attached once the drag settles.
+   */
+  protected applyTransformToGhostStrokesForSelectedMath(symbols: TSymbol[], matrix: MatrixTransform): void {
+    this.getSelectedMathBlockIds(symbols).forEach((id) => {
+      this.editor.math.applyTransformToGhostStrokes(id, matrix)
+    })
   }
 
   protected abstract applyToStroke(stroke: TStroke, matrix: MatrixTransform): TStroke

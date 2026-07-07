@@ -1,4 +1,5 @@
 import { createEditorMock, asEditor } from "../../../__mocks__/createEditorMock"
+import { buildIIStroke } from "../../../helpers"
 import {
   EdgeLineOps,
   IITranslateManager,
@@ -151,6 +152,50 @@ describe("IITranslateManager.ts", () => {
         expect(editor.recognizer.transformTranslate).toHaveBeenCalledWith([stroke.id], data.tx, data.ty)
         expect(stroke).not.toEqual(strokeNotTranslate)
       })
+    })
+  })
+
+  describe("ghost strokes follow a selected math block during translate", () => {
+    function buildMathStroke(jiixBlockId: string) {
+      const stroke = buildIIStroke()
+      stroke.jiixBlockType = "Math"
+      stroke.jiixBlockId = jiixBlockId
+      return stroke
+    }
+
+    function setupTarget() {
+      const group = document.createElementNS("http://www.w3.org/2000/svg", "g")
+      group.setAttribute("role", SvgElementRole.InteractElementsGroup)
+      const target = document.createElementNS("http://www.w3.org/2000/svg", "circle")
+      group.appendChild(target)
+      return target
+    }
+
+    test("continue() live-translates the block's ghost stroke element", () => {
+      const editor = createEditorMock()
+      editor.math.getGhostStrokeIds = jest.fn().mockReturnValue(["ghost-1"])
+      editor.renderer.setAttribute = jest.fn()
+      const manager = new IITranslateManager(asEditor(editor))
+      const stroke = buildMathStroke("block-1")
+      editor.model.addSymbol(stroke)
+      editor.model.selectedIds.add(stroke.id)
+
+      manager.start(setupTarget(), { x: 0, y: 0 })
+      manager.continue({ x: 10, y: 20 })
+
+      expect(editor.renderer.setAttribute).toHaveBeenCalledWith("ghost-1", "transform", "translate(10,20)")
+    })
+
+    test("translate() permanently applies the matrix to the block's ghost strokes", async () => {
+      const editor = createEditorMock()
+      editor.math.applyTransformToGhostStrokes = jest.fn()
+      const manager = new IITranslateManager(asEditor(editor))
+      const stroke = buildMathStroke("block-1")
+      editor.model.addSymbol(stroke)
+
+      await manager.translate([stroke], 10, 20, false)
+
+      expect(editor.math.applyTransformToGhostStrokes).toHaveBeenCalledWith("block-1", expect.anything())
     })
   })
 })

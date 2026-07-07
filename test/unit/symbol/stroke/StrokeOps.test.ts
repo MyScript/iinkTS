@@ -227,5 +227,15 @@ describe("StrokeOps", () => {
       })
       expect(stroke.isSolverOutput).toBe(true)
     })
+    test("should preserve jiixBlockId from partial", () => {
+      const stroke = StrokeOps.createFromPartial({
+        jiixBlockId: "block-1",
+        pointers: [
+          { x: 10, y: 20, t: 1, p: 0.5 },
+          { x: 30, y: 40, t: 2, p: 0.8 },
+        ],
+      })
+      expect(stroke.jiixBlockId).toEqual("block-1")
+    })
   })
 })
