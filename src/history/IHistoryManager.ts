@@ -1,11 +1,7 @@
-import type { EditorEvent } from "@/editor/EditorEvent"
-import { LoggerCategory, LoggerManager } from "@/logger"
 import type { IModel } from "@/model"
 import type { TSymbol } from "@/symbol"
 
-import type { THistoryConfiguration } from "./HistoryConfiguration"
-import type { THistoryContext } from "./HistoryContext"
-import { getInitialHistoryContext } from "./HistoryContext"
+import { AbstractHistoryStack } from "./AbstractHistoryStack"
 
 /**
  * @group History
@@ -26,32 +22,13 @@ export type TIHistoryStackItem = {
 /**
  * @group History
  */
-export class IHistoryManager {
-  #logger = LoggerManager.getLogger(LoggerCategory.HISTORY)
-
-  configuration: THistoryConfiguration
-  event: EditorEvent
-  context: THistoryContext
-  stack: TIHistoryStackItem[]
-
-  constructor(configuration: THistoryConfiguration, event: EditorEvent) {
-    this.#logger.info("constructor", {
-      configuration,
-    })
-    this.configuration = configuration
-    this.event = event
-    this.context = getInitialHistoryContext()
-    this.stack = []
-  }
-
-  private updateContext(): void {
-    this.context.canRedo = this.stack.length - 1 > this.context.stackIndex
-    this.context.canUndo = this.context.stackIndex > 0
-    this.context.empty = this.stack[this.context.stackIndex].model.strokes.length === 0
+export class IHistoryManager extends AbstractHistoryStack<TIHistoryStackItem> {
+  protected isStackItemEmpty(item: TIHistoryStackItem): boolean {
+    return item.model.strokes.length === 0
   }
 
   updateModelStack(model: IModel): void {
-    this.#logger.info("updateModelStack", {
+    this.logger.info("updateModelStack", {
       model,
     })
     const stackIdx = this.stack.findIndex((s) => s.model.modificationDate === model.modificationDate)
@@ -67,43 +44,21 @@ export class IHistoryManager {
   }
 
   init(model: IModel): void {
-    this.stack.push({
+    this.initStack({
       model: model.clone(),
       changes: {},
     })
-    this.event.emitChanged(this.context)
   }
 
   push(model: IModel, changes: TIHistoryChanges): void {
-    this.#logger.info("push", { model, changes })
+    this.logger.info("push", { model, changes })
     if (this.isChangesEmpty(changes)) {
       return
     }
-
-    if (this.context.stackIndex + 1 < this.stack.length) {
-      this.stack.splice(this.context.stackIndex + 1)
-    }
-
-    this.stack.push({
+    this.pushToStack({
       model: model.clone(),
       changes,
     })
-    this.context.stackIndex = this.stack.length - 1
-
-    if (this.stack.length > this.configuration.maxStackSize) {
-      this.stack.shift()
-      this.context.stackIndex--
-    }
-
-    this.updateContext()
-    this.event.emitChanged(this.context)
-  }
-
-  pop(): void {
-    this.#logger.info("pop")
-    this.stack.pop()
-    this.context.stackIndex = this.stack.length - 1
-    this.updateContext()
   }
 
   protected reverseChanges(changes: TIHistoryChanges): TIHistoryChanges {
@@ -118,15 +73,11 @@ export class IHistoryManager {
   }
 
   undo(): TIHistoryStackItem {
-    this.#logger.info("undo")
+    this.logger.info("undo")
     const currentStackItem = this.stack[this.context.stackIndex]
-    if (this.context.canUndo) {
-      this.context.stackIndex--
-      this.updateContext()
-      this.event.emitChanged(this.context)
-    }
+    this.moveStackIndex(-1, this.context.canUndo)
     const previousStackItem = this.stack[this.context.stackIndex]
-    this.#logger.debug("undo", previousStackItem)
+    this.logger.debug("undo", previousStackItem)
     return {
       model: previousStackItem.model,
       changes: this.reverseChanges(currentStackItem.changes),
@@ -134,19 +85,10 @@ export class IHistoryManager {
   }
 
   redo(): TIHistoryStackItem {
-    this.#logger.info("redo")
-    if (this.context.canRedo) {
-      this.context.stackIndex++
-      this.updateContext()
-      this.event.emitChanged(this.context)
-    }
+    this.logger.info("redo")
+    this.moveStackIndex(1, this.context.canRedo)
     const nextStackItem = this.stack[this.context.stackIndex]
-    this.#logger.debug("redo", nextStackItem)
+    this.logger.debug("redo", nextStackItem)
     return nextStackItem
-  }
-
-  clear(): void {
-    this.context = getInitialHistoryContext()
-    this.stack = []
   }
 }
