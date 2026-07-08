@@ -3,8 +3,8 @@ import { EditorTool, SELECTION_MARGIN } from "@/Constants"
 import type { TEditorOptionsBase } from "@/editor/AbstractEditor"
 import { AbstractEditor } from "@/editor/AbstractEditor"
 import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
-import type { THistoryContext, TIIHistoryBackendChanges, TIIHistoryChanges } from "@/history"
-import { IIHistoryManager } from "@/history"
+import type { THistoryContext, TIIHistoryBackendChanges, TIIHistoryChanges, TIIHistoryStackItem } from "@/history"
+import { extractIIBackendChanges, IIHistoryManager } from "@/history"
 import {
   EraseManager,
   IIConnectorManager,
@@ -32,7 +32,16 @@ import { SVGBuilder, SVGRenderer } from "@/renderer"
 import type { TStyle } from "@/style"
 import type { TBox, TDecorator, TMath, TStroke, TSymbol, TText } from "@/symbol"
 import type { TBaseSymbol } from "@/symbol"
-import { cloneSymbol, isDecorator, isMath, isStroke, isStrokeSolverOutput, isText, StrokeOps } from "@/symbol"
+import {
+  cloneSymbol,
+  extractStrokes,
+  isDecorator,
+  isMath,
+  isStroke,
+  isStrokeSolverOutput,
+  isText,
+  StrokeOps,
+} from "@/symbol"
 import { DecoratorOps } from "@/symbol/decorator/Decorator"
 import { MathOps } from "@/symbol/math/Math"
 import { BoxOps } from "@/symbol/primitives/Box"
@@ -1251,10 +1260,7 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
    * @returns Array of extracted strokes
    */
   extractStrokesFromSymbols(symbols: TSymbol[] | undefined): TStroke[] {
-    if (!symbols?.length) {
-      return []
-    }
-    return symbols.filter(isStroke)
+    return extractStrokes(symbols)
   }
 
   /**
@@ -1267,75 +1273,6 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
       return []
     }
     return symbols.filter(isMath)
-  }
-
-  protected extractBackendChanges(changes: TIIHistoryChanges): TIIHistoryBackendChanges {
-    const backendChanges: TIIHistoryBackendChanges = {}
-    backendChanges.added = this.extractStrokesFromSymbols(changes.added)
-    backendChanges.erased = this.extractStrokesFromSymbols(changes.erased)
-
-    const updated = this.extractStrokesFromSymbols(changes.updated)
-
-    const oldStrokes = updated.concat(this.extractStrokesFromSymbols(changes.replaced?.oldSymbols))
-    const newStrokes = updated.concat(this.extractStrokesFromSymbols(changes.replaced?.newSymbols))
-    if (oldStrokes.length && newStrokes.length) {
-      backendChanges.replaced = {
-        oldStrokes,
-        newStrokes,
-      }
-    } else {
-      backendChanges.added.push(...newStrokes)
-      backendChanges.erased.push(...oldStrokes)
-    }
-
-    if (changes.matrix) {
-      backendChanges.matrix = {
-        strokes: this.extractStrokesFromSymbols(changes.matrix.symbols),
-        matrix: changes.matrix.matrix,
-      }
-    }
-
-    if (changes.translate?.length) {
-      backendChanges.translate = []
-      changes.translate.forEach((tr) => {
-        const strokes = this.extractStrokesFromSymbols(tr.symbols)
-        if (strokes.length) {
-          backendChanges.translate!.push({
-            strokes,
-            tx: tr.tx,
-            ty: tr.ty,
-          })
-        }
-      })
-    }
-    if (changes.scale?.length) {
-      backendChanges.scale = []
-      changes.scale.forEach((tr) => {
-        const strokes = this.extractStrokesFromSymbols(tr.symbols)
-        if (strokes.length) {
-          backendChanges.scale!.push({
-            strokes,
-            origin: tr.origin,
-            scaleX: tr.scaleX,
-            scaleY: tr.scaleY,
-          })
-        }
-      })
-    }
-    if (changes.rotate?.length) {
-      backendChanges.rotate = []
-      changes.rotate.forEach((tr) => {
-        const strokes = this.extractStrokesFromSymbols(tr.symbols)
-        if (strokes.length) {
-          backendChanges.rotate!.push({
-            strokes,
-            center: tr.center,
-            angle: tr.angle,
-          })
-        }
-      })
-    }
-    return backendChanges
   }
 
   protected handleWheel = (event: WheelEvent): void => {
@@ -1364,27 +1301,35 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
     return this.model
   }
 
-  async #undoInternal(): Promise<IIModel> {
+  #hasBackendActions(actions: TIIHistoryBackendChanges): boolean {
+    return !!(
+      actions.added?.length ||
+      actions.erased?.length ||
+      actions.replaced ||
+      actions.matrix ||
+      actions.translate?.length ||
+      actions.scale?.length ||
+      actions.rotate?.length
+    )
+  }
+
+  #applyHistoryStackItem(stackItem: TIIHistoryStackItem): TIIHistoryBackendChanges {
     this.updateLayerState(false)
     this.unselectAll()
+    const modifications = stackItem.model.extractDifferenceSymbols(this.model)
+    this.#model = stackItem.model.clone()
+    modifications.removed.forEach((s) => this.renderer.removeSymbol(s.id))
+    modifications.added.forEach((s) => this.renderer.drawSymbol(s))
+    return extractIIBackendChanges(stackItem.changes)
+  }
+
+  async #undoInternal(): Promise<IIModel> {
     const previousStackItem = this.history.undo()
-    const modifications = previousStackItem.model.extractDifferenceSymbols(this.model)
-    this.#model = previousStackItem.model.clone()
     this.logger.debug("undo", {
       previousStackItem,
     })
-    const actionsToBackend = this.extractBackendChanges(previousStackItem.changes)
-    modifications.removed.forEach((s) => this.renderer.removeSymbol(s.id))
-    modifications.added.forEach((s) => this.renderer.drawSymbol(s))
-    if (
-      actionsToBackend.added?.length ||
-      actionsToBackend.erased?.length ||
-      actionsToBackend.replaced ||
-      actionsToBackend.matrix ||
-      actionsToBackend.translate?.length ||
-      actionsToBackend.scale?.length ||
-      actionsToBackend.rotate?.length
-    ) {
+    const actionsToBackend = this.#applyHistoryStackItem(previousStackItem)
+    if (this.#hasBackendActions(actionsToBackend)) {
       this.startOperation("Recognizing")
       await this.recognizer.undo(actionsToBackend)
     }
@@ -1406,28 +1351,13 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
   }
 
   async #redoInternal(): Promise<IIModel> {
-    this.updateLayerState(false)
-    this.unselectAll()
     const nextStackItem = this.history.redo()
-    const modifications = nextStackItem.model.extractDifferenceSymbols(this.model)
-    this.#model = nextStackItem.model.clone()
-    this.logger.debug("redo", { modifications })
-    const actionsToBackend = this.extractBackendChanges(nextStackItem.changes)
-    modifications.removed.forEach((s) => this.renderer.removeSymbol(s.id))
-    modifications.added.forEach((s) => this.renderer.drawSymbol(s))
-    if (
-      actionsToBackend.added?.length ||
-      actionsToBackend.erased?.length ||
-      actionsToBackend.replaced ||
-      actionsToBackend.matrix ||
-      actionsToBackend.translate?.length ||
-      actionsToBackend.scale?.length ||
-      actionsToBackend.rotate?.length
-    ) {
+    this.logger.debug("redo", { nextStackItem })
+    const actionsToBackend = this.#applyHistoryStackItem(nextStackItem)
+    if (this.#hasBackendActions(actionsToBackend)) {
       this.startOperation("Recognizing")
       await this.recognizer.redo(actionsToBackend)
     }
-
     this.updateLayerUI()
     return this.model
   }
