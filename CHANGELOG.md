@@ -68,6 +68,7 @@
 - fix(math): arrow SVG elements leak on each overlay refresh
 - fix(math): hover zone not created if showOverlay is disabled
 - fix(math): reset jiixId and variableValues on symbol duplication
+- fix(math): remove unneeded parentheses around fraction numerator/denominator when converting math blocks to text (IIC-1717)
 - fix(menu): context menu positioning within rendering layer bounds (IIC-1659)
 - fix(menu): refresh context menu after editing variables
 - fix(menu): remove document/scroll listener leaks on destroy
@@ -103,6 +104,8 @@
 - refactor(symbol): **BREAKING** remove SymbolFactory — creation dispatchers moved to SymbolHelpers (IIC-1703)
 - refactor(symbol): apply TBaseSymbol intersection to all full symbol types (IIC-1703)
 - refactor(symbol): rename convertPartialStrokesToIIStrokes → convertLegacyStrokesToStrokes (internal)
+- refactor(history): `HistoryManager`, `IHistoryManager`, `IIHistoryManager` now share stack/context bookkeeping via a common internal `AbstractHistoryStack` base class — no behavior change, all three keep their existing public API
+- refactor(history): add `extractStrokes(symbols)` (in `@/symbol`) and `extractIIBackendChanges(changes)` (in `@/history`) as new exported pure helpers, extracted from `InteractiveInkEditor` internals
 
 # [v3.3.0](https://github.com/MyScript/iinkTS/tree/v3.3.0)
 
