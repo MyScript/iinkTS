@@ -80,10 +80,6 @@
   touch-action: none;
   container-type: inline-size;
   container-name: editor;
-}
-
-#editor:active,
-#editor:focus {
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -590,6 +586,7 @@
   padding: 0 var(--iink-spacing-sm);
   background-color: transparent;
   color: var(--iink-color);
+  -webkit-tap-highlight-color: transparent;
   transition:
     background-color 0.15s,
     border-color 0.15s,
