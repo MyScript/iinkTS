@@ -32,16 +32,7 @@ import { SVGBuilder, SVGRenderer } from "@/renderer"
 import type { TStyle } from "@/style"
 import type { TBox, TDecorator, TMath, TStroke, TSymbol, TText } from "@/symbol"
 import type { TBaseSymbol } from "@/symbol"
-import {
-  cloneSymbol,
-  isDecorator,
-  isMath,
-  isStroke,
-  isStrokeSolverOutput,
-  isText,
-  StrokeOps,
-  SymbolType,
-} from "@/symbol"
+import { cloneSymbol, isDecorator, isMath, isStroke, isStrokeSolverOutput, isText, StrokeOps } from "@/symbol"
 import { DecoratorOps } from "@/symbol/decorator/Decorator"
 import { MathOps } from "@/symbol/math/Math"
 import { BoxOps } from "@/symbol/primitives/Box"
@@ -873,6 +864,14 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
       this.updateLayerState(false)
       this.startOperation("Recognizing")
       this.recognizer.eraseStrokes([id])
+      if (
+        isStroke(symbol) &&
+        symbol.jiixBlockType === "Math" &&
+        symbol.jiixBlockId &&
+        this.math.hasGhostStrokes(symbol.jiixBlockId)
+      ) {
+        this.math.clearGhostStrokes(symbol.jiixBlockId)
+      }
       this.model.removeSymbol(symbol.id)
       this.renderer.removeSymbol(symbol.id)
       const { erased: decErased, updated: decUpdated } = this.#cleanupDecoratorsForRemovedIds(new Set([id]))
@@ -911,8 +910,11 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
       const sym = this.model.getRootSymbol(id)
       if (sym) {
         symbolsRemoved.push(sym)
-        if (sym.type === SymbolType.Stroke) {
+        if (isStroke(sym)) {
           strokesIds.push(sym.id)
+          if (sym.jiixBlockType === "Math" && sym.jiixBlockId && this.math.hasGhostStrokes(sym.jiixBlockId)) {
+            this.math.clearGhostStrokes(sym.jiixBlockId)
+          }
         }
         this.model.removeSymbol(sym.id)
         this.renderer.removeSymbol(sym.id)
@@ -922,16 +924,6 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
       this.startOperation("Recognizing")
       this.recognizer.eraseStrokes(strokesIds)
     }
-
-    const mathBlockIds = new Set<string>()
-    symbolsRemoved.forEach((s) => {
-      if (s.type === SymbolType.Stroke) {
-        const stroke = s as TStroke
-        if (stroke.jiixBlockType === "Math" && stroke.jiixBlockId && !stroke.isSolverOutput) {
-          mathBlockIds.add(stroke.jiixBlockId)
-        }
-      }
-    })
 
     const removedIds = new Set(symbolsRemoved.map((s) => s.id))
     const { erased: decErased, updated: decUpdated } = this.#cleanupDecoratorsForRemovedIds(removedIds)
