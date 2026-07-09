@@ -435,7 +435,6 @@ export class IIMathManager extends IIAbstractManager {
     this.logger.info("tryAutoCompute")
 
     const mathBlocks = this.editor.model.mathBlocks
-
     for (const mb of mathBlocks) {
       if (!mb.id) {
         continue
@@ -453,6 +452,8 @@ export class IIMathManager extends IIAbstractManager {
         const actions = await this.editor.recognizer.getAvailableActions(mb.id)
         if (actions?.includes("numerical-computation")) {
           await this.#computation.computeNumericalResult(mb.id)
+        } else if (this.#computation.hasGhostStrokes(mb.id)) {
+          this.#computation.clearGhostStrokes(mb.id)
         }
       } catch (error) {
         this.logger.debug("tryAutoCompute", `Cannot auto-compute "${label}":`, (error as Error).message)
