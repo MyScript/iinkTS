@@ -275,6 +275,7 @@ export class IIMathFunctionEvaluator {
   ): HTMLButtonElement {
     const evaluateBtn = DOMFactory.button({
       label: "Evaluate",
+      variant: "primary",
       onClick: () => {
         this.evaluateFunctions(this.functionsToEvaluate, fromInput, toInput, pointCountInput)
       },
