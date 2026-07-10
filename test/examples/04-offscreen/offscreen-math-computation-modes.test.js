@@ -3,32 +3,15 @@ import {
   passModalKey,
   writeStrokes,
   writePointers,
-  waitForGesturedEvent,
   callEditorIdle,
   getEditorSymbols,
-  getEditorExportsType,
+  pollJiix,
+  openMathActionMenu,
+  selectBlockViaSurround,
+  GHOST_STROKE_SELECTOR,
 } from "../helper"
 import locator from "../locators"
 import sum, { surroundPointers } from "../__dataset__/sum"
-
-const GHOST_STROKE_SELECTOR = '[id^="ghost-stroke-"]'
-
-const openMathMenu = async (page) => {
-  await page.locator("#ms-menu-action").click()
-  await page.locator("#ms-menu-action-math-trigger").click()
-}
-
-// Selection in this editor happens via a recognized "surround" gesture (closed loop drawn
-// with the write tool) — not by switching to a "select" tool and dragging a rectangle.
-const selectBlockViaSurround = async (page) => {
-  await Promise.all([
-    waitForGesturedEvent(page),
-    writePointers(page, surroundPointers),
-  ])
-  await expect
-    .poll(() => page.evaluate(() => editorEl.editor.model.symbolsSelected.length), { timeout: 3000 })
-    .toBeGreaterThan(0)
-}
 
 // Once selected, dragging from within the selection's bounding box moves the block.
 const dragSelectionBy = async (page, dx, dy) => {
@@ -42,19 +25,10 @@ const dragSelectionBy = async (page, dx, dy) => {
   ])
 }
 
-// Waiting for a single "exported"/"synchronized" event is unreliable here: recognition can push
-// intermediate updates while writing, so the first event doesn't guarantee the JIIX for the
-// finished expression is ready. Poll the actual condition instead.
 const writeSumExpressionAndGetBlockId = async (page) => {
   await writeStrokes(page, sum.strokes)
   await callEditorIdle(page)
-  await expect
-    .poll(async () => {
-      const jiix = await getEditorExportsType(page, "application/vnd.myscript.jiix")
-      return jiix?.elements?.length ?? 0
-    }, { timeout: 8000 })
-    .toBeGreaterThan(0)
-  const jiix = await getEditorExportsType(page, "application/vnd.myscript.jiix")
+  const jiix = await pollJiix(page, 1)
   return jiix.elements[0].id
 }
 
@@ -71,7 +45,7 @@ test.describe("Math Computation Modes", () => {
     let jiixBlockId
 
     await test.step('1. Select "Show result" + enable "Auto-compute"', async () => {
-      await openMathMenu(page)
+      await openMathActionMenu(page)
       await page.locator("#ms-menu-action-math-result-mode-input").selectOption("ghost")
       await page.locator("#ms-menu-action-math-auto-compute-input").check()
       await page.locator("#ms-menu-action").click()
@@ -92,7 +66,7 @@ test.describe("Math Computation Modes", () => {
     // dedicated test below — Modify the expression via undo/redo → ghost updates in real time
 
     await test.step("4. Move the expression around → the ghost preview follows it", async () => {
-      await selectBlockViaSurround(page)
+      await selectBlockViaSurround(page, surroundPointers)
 
       const before = await page.evaluate(
         (id) => editorEl.editor.math.getGhostBounds(id),
@@ -126,7 +100,7 @@ test.describe("Math Computation Modes", () => {
   test("Try it — Ghost mode › Modify the expression via undo/redo → ghost updates in real time", async ({ page }) => {
 
     await test.step('Select "Show result" + enable "Auto-compute"', async () => {
-      await openMathMenu(page)
+      await openMathActionMenu(page)
       await page.locator("#ms-menu-action-math-result-mode-input").selectOption("ghost")
       await page.locator("#ms-menu-action-math-auto-compute-input").check()
       await page.locator("#ms-menu-action").click()
@@ -164,7 +138,7 @@ test.describe("Math Computation Modes", () => {
     }
 
     await test.step('1. Select "Draw result" + enable "Auto-compute"', async () => {
-      await openMathMenu(page)
+      await openMathActionMenu(page)
       await page.locator("#ms-menu-action-math-result-mode-input").selectOption("draw")
       await page.locator("#ms-menu-action-math-auto-compute-input").check()
       await page.locator("#ms-menu-action").click()
@@ -191,7 +165,7 @@ test.describe("Math Computation Modes", () => {
     })
 
     await test.step("4. Drag the expression somewhere else → its draw result moves with it", async () => {
-      await selectBlockViaSurround(page)
+      await selectBlockViaSurround(page, surroundPointers)
 
       const before = await page.locator(`#${firstResultStrokeIds[0]}`).boundingBox()
 
@@ -206,7 +180,7 @@ test.describe("Math Computation Modes", () => {
     })
 
     await test.step('5. "Force Compute all" → wipes and recomputes every block fresh', async () => {
-      await openMathMenu(page)
+      await openMathActionMenu(page)
       await page.locator("#ms-menu-action-math-force-compute-all").click()
       await page.locator("#ms-menu-action").click()
 

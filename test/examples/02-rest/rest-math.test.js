@@ -148,7 +148,12 @@ test.describe("Rest Math", () => {
           waitForExportedEvent(page),
           page.locator("#undo").click()
         ])
-        expect(await getEditorSymbols(page)).toHaveLength(equation.strokes.length - 1)
+        // waitForExportedEvent can resolve on a still-in-flight "exported" event fired just
+        // before the click's own model mutation lands (listener attachment races the click) —
+        // seen flaky on CI as a stale symbol count. Poll instead of a single immediate read.
+        await expect
+          .poll(async () => (await getEditorSymbols(page)).length, { timeout: 5000 })
+          .toBe(equation.strokes.length - 1)
       })
 
       await test.step("should undo last stroke", async () => {
@@ -156,7 +161,9 @@ test.describe("Rest Math", () => {
           waitForExportedEvent(page),
           page.locator("#undo").click()
         ])
-        expect(await getEditorSymbols(page)).toHaveLength(equation.strokes.length - 2)
+        await expect
+          .poll(async () => (await getEditorSymbols(page)).length, { timeout: 5000 })
+          .toBe(equation.strokes.length - 2)
       })
 
       await test.step("should undo last stroke", async () => {
@@ -164,7 +171,9 @@ test.describe("Rest Math", () => {
           waitForExportedEvent(page),
           page.locator("#redo").click()
         ])
-        expect(await getEditorSymbols(page)).toHaveLength(equation.strokes.length - 1)
+        await expect
+          .poll(async () => (await getEditorSymbols(page)).length, { timeout: 5000 })
+          .toBe(equation.strokes.length - 1)
       })
 
     })

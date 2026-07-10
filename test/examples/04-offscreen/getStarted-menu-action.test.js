@@ -161,6 +161,11 @@ test.describe("Interactive ink editor Get Started Menu Action", () => {
   })
 
   test("language", async ({ page }) => {
+    // Switching recognition language can trigger a real server-side language-pack reload,
+    // which is occasionally slow under load — give it real headroom instead of racing a
+    // zero-timeout event.
+    test.setTimeout(120 * 1000)
+
     await test.step("should display language list", async () => {
       await page.locator(locator.menu.action.language.trigger).click()
       await page.locator(locator.menu.action.language.inputSelect).click()
@@ -170,20 +175,28 @@ test.describe("Interactive ink editor Get Started Menu Action", () => {
 
     await test.step("should not recognize french text", async () => {
       //write something in French with a typical French character: ç
-      await Promise.all([
-        waitForSynchronizedEvent(page),
-        writeStrokes(page, laLecon.strokes)
-      ])
+      // Not racing this against waitForSynchronizedEvent: that helper has no timeout of its
+      // own and hangs the whole test (60s) if the event doesn't fire for any reason — seen
+      // flaky on CI. callEditorIdle + callEditorSynchronize + a bounded poll below give the
+      // same guarantee without the hang risk.
+      await writeStrokes(page, laLecon.strokes)
       await callEditorIdle(page)
       await callEditorSynchronize(page)
 
-      const symbols = await getEditorSymbols(page)
-      expect(symbols).toHaveLength(laLecon.strokes.length)
+      await expect
+        .poll(async () => (await getEditorSymbols(page)).length, { timeout: 15000 })
+        .toBe(laLecon.strokes.length)
       const jiix = await getEditorExportsType(page, "application/vnd.myscript.jiix")
       expect(jiix.elements[0].label).not.toEqual(laLecon.exports["application/vnd.myscript.jiix"].label)
     })
 
     await test.step("should recognize french text", async () => {
+      // Unlike the step above, waitForLoadedEvent here isn't just an optimization — switching
+      // language triggers a real recognizer reload, and calling callEditorIdle before that
+      // reload lands can hang forever on the old (about-to-be-replaced) editor instance
+      // (confirmed: removing this wait entirely made the step hang past 2 minutes on CI).
+      // waitForEvent now has its own 30s timeout (see helper.js), so a genuine failure surfaces
+      // clearly and fast instead of hanging to the whole-test timeout.
       await Promise.all([
         waitForLoadedEvent(page),
         page.locator(locator.menu.action.language.trigger).click(),
@@ -192,8 +205,9 @@ test.describe("Interactive ink editor Get Started Menu Action", () => {
       await callEditorIdle(page)
       await callEditorSynchronize(page)
 
-      const symbols = await getEditorSymbols(page)
-      expect(symbols).toHaveLength(laLecon.strokes.length)
+      await expect
+        .poll(async () => (await getEditorSymbols(page)).length, { timeout: 15000 })
+        .toBe(laLecon.strokes.length)
 
       const jiix = await getEditorExportsType(page, "application/vnd.myscript.jiix")
       expect(jiix.elements[0].label).toEqual(laLecon.exports["application/vnd.myscript.jiix"].label)

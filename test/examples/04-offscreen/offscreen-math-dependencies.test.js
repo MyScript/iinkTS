@@ -5,9 +5,12 @@ import {
   writePointers,
   callEditorIdle,
   getEditorSymbols,
-  getEditorExportsType,
   boundsOf,
   buildEraseSweepPointers,
+  pollJiix,
+  getBlockIdByLabel,
+  openMathActionMenu,
+  GHOST_STROKE_SELECTOR,
 } from "../helper"
 import mathDependencies from "../__dataset__/math_dependencies"
 import overridingSource from "../__dataset__/math_dependencies_overriding_source"
@@ -29,42 +32,17 @@ const overrideSourceStrokes = overridingSource.strokes.slice(0, 5)
 const overrideDependentStrokes = overridingSource.strokes.slice(5, 10)
 const overrideReplacementStrokes = overridingSource.strokes.slice(10, 12)
 
-const pollJiixElementCount = async (page, minCount) => {
-  await expect
-    .poll(async () => {
-      const jiix = await getEditorExportsType(page, "application/vnd.myscript.jiix")
-      return jiix?.elements?.length ?? 0
-    }, { timeout: 8000 })
-    .toBeGreaterThanOrEqual(minCount)
-}
-
-// Match by substring, not strict equality: cloud recognition of the longer "3x+2=" expression
-// can vary slightly run to run (spacing, minus-sign glyph, ...), even though it's stable enough
-// to always contain "x=2" for the short source definition. Once the source is identified, the
-// dependent is simply "the other of the 2 blocks" — no need for its label to match exactly.
-const getBlockIdByLabel = async (page, label) => {
-  const jiix = await getEditorExportsType(page, "application/vnd.myscript.jiix")
-  for (const element of jiix.elements) {
-    const blockLabel = await page.evaluate((id) => editorEl.editor.jiix.getBlockLabel(id), element.id)
-    if (blockLabel?.includes(label)) {
-      return element.id
-    }
-  }
-  return undefined
-}
-
 // Follows "Try it" steps 1-2: write the source definition, then the dependent expression.
 const writeSourceThenDependent = async (page) => {
   await writeStrokes(page, sourceStrokes)
   await callEditorIdle(page)
-  await pollJiixElementCount(page, 1)
+  await pollJiix(page, 1)
 
   await writeStrokes(page, dependentStrokes)
   await callEditorIdle(page)
-  await pollJiixElementCount(page, 2)
+  const jiix = await pollJiix(page, 2)
 
-  const jiix = await getEditorExportsType(page, "application/vnd.myscript.jiix")
-  const sourceId = await getBlockIdByLabel(page, SOURCE_LABEL)
+  const sourceId = await getBlockIdByLabel(page, jiix, SOURCE_LABEL)
   const dependentId = jiix.elements.map((e) => e.id).find((id) => id !== sourceId)
   return { sourceId, dependentId }
 }
@@ -88,7 +66,7 @@ test.describe("Math Dependencies", () => {
   test('Try it — 1. Write a source variable definition (x=2) → shows as an isolated block', async ({ page }) => {
     await writeStrokes(page, sourceStrokes)
     await callEditorIdle(page)
-    await pollJiixElementCount(page, 1)
+    await pollJiix(page, 1)
 
     const dependencyList = page.locator("#dependency-list")
     await expect(dependencyList).toContainText("Isolated blocks", { timeout: 5000 })
@@ -110,8 +88,7 @@ test.describe("Math Dependencies", () => {
   // Follows the "Try it" > steps 3-4: toggle "Auto-compute" on, then writing the dependent
   // expression (ending with "=") computes its result automatically.
   test('Try it — 3-4. Enable Auto-compute → dependent expression computes automatically when written', async ({ page }) => {
-    await page.locator("#ms-menu-action").click()
-    await page.locator("#ms-menu-action-math-trigger").click()
+    await openMathActionMenu(page)
     await page.locator("#ms-menu-action-math-auto-compute-input").check()
     await page.locator("#ms-menu-action").click()
 
@@ -126,26 +103,24 @@ test.describe("Math Dependencies", () => {
   // expression recalculate — by erasing and rewriting the source's own ink (a BLOCK variable's
   // value is defined by the user's handwriting, not overridable through Edit Variables or the
   test('Try it — 5-6. Erase and rewrite "x" on the source block → dependent expression recalculates', async ({ page }) => {
-    await page.locator("#ms-menu-action").click()
-    await page.locator("#ms-menu-action-math-trigger").click()
+    await openMathActionMenu(page)
     await page.locator("#ms-menu-action-math-result-mode-input").selectOption("ghost")
     await page.locator("#ms-menu-action-math-auto-compute-input").check()
     await page.locator("#ms-menu-action").click()
 
     await writeStrokes(page, overrideSourceStrokes)
     await callEditorIdle(page)
-    await pollJiixElementCount(page, 1)
+    await pollJiix(page, 1)
 
     await writeStrokes(page, overrideDependentStrokes)
     await callEditorIdle(page)
-    await pollJiixElementCount(page, 2)
+    const jiix = await pollJiix(page, 2)
 
-    const jiix = await getEditorExportsType(page, "application/vnd.myscript.jiix")
-    const sourceId = await getBlockIdByLabel(page, SOURCE_LABEL)
+    const sourceId = await getBlockIdByLabel(page, jiix, SOURCE_LABEL)
     const dependentId = jiix.elements.map((e) => e.id).find((id) => id !== sourceId)
     expect(dependentId).toBeTruthy()
 
-    await expect(page.locator('#editorEl [id^="ghost-stroke-"]').first()).toBeVisible({ timeout: 12000 })
+    await expect(page.locator(`#editorEl ${GHOST_STROKE_SELECTOR}`).first()).toBeVisible({ timeout: 12000 })
     const before = await page.evaluate((id) => editorEl.editor.math.getGhostBounds(id), dependentId)
     expect(before).toBeDefined()
 
