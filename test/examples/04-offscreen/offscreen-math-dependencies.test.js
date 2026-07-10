@@ -6,6 +6,8 @@ import {
   callEditorIdle,
   getEditorSymbols,
   getEditorExportsType,
+  boundsOf,
+  buildEraseSweepPointers,
 } from "../helper"
 import mathDependencies from "../__dataset__/math_dependencies"
 import overridingSource from "../__dataset__/math_dependencies_overriding_source"
@@ -26,32 +28,6 @@ const dependentStrokes = mathDependencies.strokes.slice(5)
 const overrideSourceStrokes = overridingSource.strokes.slice(0, 5)
 const overrideDependentStrokes = overridingSource.strokes.slice(5, 10)
 const overrideReplacementStrokes = overridingSource.strokes.slice(10, 12)
-
-const boundsOf = (strokes, padding = 6) => {
-  const points = strokes.flatMap((s) => s.pointers)
-  return {
-    minX: Math.min(...points.map((p) => p.x)) - padding,
-    maxX: Math.max(...points.map((p) => p.x)) + padding,
-    minY: Math.min(...points.map((p) => p.y)) - padding,
-    maxY: Math.max(...points.map((p) => p.y)) + padding,
-  }
-}
-
-// Boustrophedon (back-and-forth) sweep across a bounding box, dense enough to fully cover it
-// with the eraser regardless of exact eraser width.
-const buildEraseSweepPointers = (bounds, rows = 6) => {
-  const { minX, maxX, minY, maxY } = bounds
-  const pointers = []
-  let t = 0
-  for (let i = 0; i < rows; i++) {
-    const y = Math.round(minY + ((maxY - minY) * i) / (rows - 1))
-    const xs = i % 2 === 0 ? [minX, maxX] : [maxX, minX]
-    for (const x of xs) {
-      pointers.push({ x, y, t: (t += 40), p: 0.5 })
-    }
-  }
-  return pointers
-}
 
 const pollJiixElementCount = async (page, minCount) => {
   await expect
