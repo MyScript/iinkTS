@@ -3,11 +3,15 @@ import {
   passModalKey,
   writeStrokes,
   callEditorIdle,
-  getEditorExportsType,
-  getEditorSymbols,
   writePointers,
   buildEraseSweepPointers,
   boundsOf,
+  pollJiix,
+  getBlockIdByLabel,
+  openMathActionMenu,
+  openMathContextMenu,
+  selectBlockById,
+  GHOST_STROKE_SELECTOR,
 } from "../helper"
 import mathDependencies from "../__dataset__/math_dependencies"
 import twoXPlus5 from "../__dataset__/math_context_menu._2x+5="
@@ -19,31 +23,9 @@ import chainedVar from "../__dataset__/math_variables_chained_var"
 // defaults (menu.action.math.resultMode is false, so there isn't even a selector to change it) —
 // unlike the computation-modes/context-menu/dependencies examples, nothing needs toggling via
 // the action menu before writing.
-const GHOST_STROKE_SELECTOR = '[id^="ghost-stroke-"]'
-
-const pollJiixElementCount = async (page, minCount) => {
-  await expect
-    .poll(async () => {
-      const jiix = await getEditorExportsType(page, "application/vnd.myscript.jiix")
-      return jiix?.elements?.length ?? 0
-    }, { timeout: 8000 })
-    .toBeGreaterThanOrEqual(minCount)
-}
-
-const getBlockIdByLabel = async (page, label) => {
-  const jiix = await getEditorExportsType(page, "application/vnd.myscript.jiix")
-  for (const element of jiix.elements) {
-    const blockLabel = await page.evaluate((id) => editorEl.editor.jiix.getBlockLabel(id), element.id)
-    if (blockLabel?.includes(label)) {
-      return element.id
-    }
-  }
-  return undefined
-}
 
 const openGlobalEditVariables = async (page) => {
-  await page.locator("#ms-menu-action").click()
-  await page.locator("#ms-menu-action-math-trigger").click()
+  await openMathActionMenu(page)
   await page.locator("#ms-menu-action-math-variables").click()
   await expect(page.locator(".ms-modal-title")).toContainText("Variable Definitions")
 }
@@ -63,13 +45,13 @@ test.describe("Math Variables", () => {
 
     await writeStrokes(page, sourceStrokes)
     await callEditorIdle(page)
-    await pollJiixElementCount(page, 1)
+    await pollJiix(page, 1)
 
     await writeStrokes(page, dependentStrokes)
     await callEditorIdle(page)
-    await pollJiixElementCount(page, 2)
+    const jiix = await pollJiix(page, 2)
 
-    const dependentId = await getBlockIdByLabel(page, "3x+2")
+    const dependentId = await getBlockIdByLabel(page, jiix, "3x+2")
     expect(dependentId).toBeTruthy()
 
     await expect(page.locator(`#editorEl ${GHOST_STROKE_SELECTOR}`).first()).toBeVisible({ timeout: 12000 })
@@ -80,7 +62,8 @@ test.describe("Math Variables", () => {
   test('Try it — Global fallback: write 2x= (stand-in 2x+5=) undefined, add global x=10 → computes', async ({ page }) => {
     await writeStrokes(page, twoXPlus5.strokes)
     await callEditorIdle(page)
-    await pollJiixElementCount(page, 1)
+    const jiix = await pollJiix(page, 1)
+    const blockId = jiix.elements[0].id
 
     await openGlobalEditVariables(page)
 
@@ -90,9 +73,6 @@ test.describe("Math Variables", () => {
     await newRow.locator("input").nth(1).fill("10")
     await page.getByRole("button", { name: "Apply", exact: true }).click()
     await expect(page.locator(".ms-modal-title")).toBeHidden()
-
-    const jiix = await getEditorExportsType(page, "application/vnd.myscript.jiix")
-    const blockId = jiix.elements[0].id
 
     // Applying a *new global* variable doesn't itself fire a "synchronized" event (unlike
     // setting a per-block variable, which explicitly recalculates its dependents) — force the
@@ -113,14 +93,13 @@ test.describe("Math Variables", () => {
 
     await writeStrokes(page, sourceStrokes)
     await callEditorIdle(page)
-    await pollJiixElementCount(page, 1)
+    await pollJiix(page, 1)
 
     await writeStrokes(page, dependentStrokes)
     await callEditorIdle(page)
-    await pollJiixElementCount(page, 2)
+    const jiix = await pollJiix(page, 2)
 
-    const sourceId = await getBlockIdByLabel(page, "x=2")
-    const jiix = await getEditorExportsType(page, "application/vnd.myscript.jiix")
+    const sourceId = await getBlockIdByLabel(page, jiix, "x=2")
     const dependentId = jiix.elements.map((e) => e.id).find((id) => id !== sourceId)
 
     await expect(page.locator(`#editorEl ${GHOST_STROKE_SELECTOR}`).first()).toBeVisible({ timeout: 12000 })
@@ -162,19 +141,11 @@ test.describe("Math Variables", () => {
   test("Try it — Undefined variable: write A+B= without defining them", async ({ page }) => {
     await writeStrokes(page, aPlusB.strokes)
     await callEditorIdle(page)
-    await pollJiixElementCount(page, 1)
-
-    const jiix = await getEditorExportsType(page, "application/vnd.myscript.jiix")
+    const jiix = await pollJiix(page, 1)
     const blockId = jiix.elements[0].id
 
-    const symbols = await getEditorSymbols(page)
-    const ids = symbols.filter((s) => s.jiixBlockId === blockId).map((s) => s.id)
-    await page.evaluate((ids) => {
-      editorEl.editor.select(ids)
-      editorEl.editor.menu.context.show()
-    }, ids)
-    await expect(page.locator("#ms-menu-context-wrapper")).toBeVisible()
-    await page.locator("#ms-menu-context-math-trigger").click()
+    await selectBlockById(page, blockId)
+    await openMathContextMenu(page)
 
     const editVariablesButton = page.locator("#ms-menu-context-math-variables")
     await expect(editVariablesButton).toBeVisible()
@@ -210,19 +181,18 @@ test.describe("Math Variables", () => {
 
     await writeStrokes(page, xStrokes)
     await callEditorIdle(page)
-    await pollJiixElementCount(page, 1)
+    await pollJiix(page, 1)
 
     await writeStrokes(page, yStrokes)
     await callEditorIdle(page)
-    await pollJiixElementCount(page, 2)
+    await pollJiix(page, 2)
 
     await writeStrokes(page, ySquaredStrokes)
     await callEditorIdle(page)
-    await pollJiixElementCount(page, 3)
+    const jiix = await pollJiix(page, 3)
 
-    const xId = await getBlockIdByLabel(page, "x=3")
-    const yId = await getBlockIdByLabel(page, "x+1")
-    const jiix = await getEditorExportsType(page, "application/vnd.myscript.jiix")
+    const xId = await getBlockIdByLabel(page, jiix, "x=3")
+    const yId = await getBlockIdByLabel(page, jiix, "x+1")
     const ySquaredId = jiix.elements.map((e) => e.id).find((id) => id !== xId && id !== yId)
     expect(ySquaredId).toBeTruthy()
 

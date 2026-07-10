@@ -1,3 +1,5 @@
+import { expect } from "@playwright/test"
+
 /**
  * @param {Page} page - Playwright Page
  * @param {Array}  pointers
@@ -31,6 +33,7 @@ export const writePointers = async (
   if (firstPointer.t) {
     oldTimestamp = firstPointer.t
   }
+  const browserName = page.context().browser()?.browserType().name()
   await page.mouse.move(offsetX + firstPointer.x, offsetY + firstPointer.y)
   await page.mouse.down()
   for (const p of pointers) {
@@ -39,8 +42,13 @@ export const writePointers = async (
       waitTime = p.t - oldTimestamp
       oldTimestamp = p.t
     }
+    // WebKit's Linux port crashes ("Target crashed") when pointer moves are replayed almost
+    // back-to-back (waitTime / 100) during surround-gesture recognition — give it the real
+    // captured delay instead. Chrome/Firefox handle the fast replay fine, so only WebKit pays
+    // the slowdown.
+    const delay = browserName === "webkit" ? Math.max(waitTime, 5) : waitTime / 100
     // eslint-disable-next-line playwright/no-wait-for-timeout
-    await page.waitForTimeout(waitTime / 100)
+    await page.waitForTimeout(delay)
     await page.mouse.move(offsetX + p.x, offsetY + p.y)
   }
   await page.mouse.up()
@@ -253,14 +261,25 @@ export const callEditoClear = async (page) => {
 }
 
 /**
+ * Rejects with a clear error if the event never fires within `timeout`, instead of hanging
+ * page.evaluate indefinitely (page.evaluate has no timeout of its own — this used to only
+ * surface as a confusing "Test timeout of 60000ms exceeded" deep inside page.evaluate, seen
+ * flaky on CI). 30s default leaves generous room for a real content-change round trip while
+ * still failing well before the outer test timeout.
  * @param {Page} page - Playwright Page
+ * @param {string} eventName
+ * @param {number} [timeout=30000]
  * @returns Promise<unknow>
  */
-export const waitForEvent = async (page, eventName) => {
+export const waitForEvent = async (page, eventName, timeout = 30000) => {
   await page.waitForFunction(() => !!document.querySelector('#editorEl')?.editor);
   return page.evaluate(`(async () => {
     return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(new Error('Event "${eventName}" did not fire within ${timeout}ms'));
+      }, ${timeout});
       document.querySelector('#editorEl').editor.event.addEventListener('${eventName}', (e) => {
+        clearTimeout(timer);
         resolve(e.detail);
       }, { once: true });
     });
@@ -285,7 +304,7 @@ export const waitForImportedEvent = async (page) =>
  * @param {Page} page - Playwright Page
  * @returns Promise<void>
  */
-export const waitForChangedEvent = async (page) => waitForEvent(page, "changed")
+export const waitForChangedEvent = async (page, timeout) => waitForEvent(page, "changed", timeout)
 
 /**
  * @param {Page} page - Playwright Page
@@ -374,6 +393,129 @@ export const findValuesByKey = (obj, key, list = []) => {
     }
   }
   return list
+}
+
+// Shared by the offscreen math-* test files (computation-modes, context-menu, dependencies,
+// variables) — a single math block's DOM id for its rendered ghost-mode result strokes.
+export const GHOST_STROKE_SELECTOR = '[id^="ghost-stroke-"]'
+
+// Waiting for a single "exported"/"synchronized" event is unreliable for multi-stroke writes:
+// recognition can push intermediate updates while writing, so the first event doesn't
+// guarantee the JIIX for the finished expression is ready. Poll the actual condition instead.
+// Returns the jiix export that satisfied the poll, instead of making callers re-fetch it
+// separately right after — model.exports is a live snapshot, and a second fetch a moment
+// later can race with an in-flight recompute and come back undefined (seen on CI:
+// "TypeError: Cannot read properties of undefined (reading 'elements')").
+export const pollJiix = async (page, minCount, timeout = 8000) => {
+  let jiix
+  await expect
+    .poll(async () => {
+      jiix = await getEditorExportsType(page, "application/vnd.myscript.jiix")
+      return jiix?.elements?.length ?? 0
+    }, { timeout })
+    .toBeGreaterThanOrEqual(minCount)
+  return jiix
+}
+
+// Match by substring, not strict equality: cloud recognition of longer/more complex
+// expressions can vary slightly run to run (spacing, glyph choice, ...) even when shorter ones
+// are stable. Takes the already-fetched jiix (see pollJiix) rather than re-fetching it.
+export const getBlockIdByLabel = async (page, jiix, label) => {
+  for (const element of jiix.elements) {
+    const blockLabel = await page.evaluate((id) => editorEl.editor.jiix.getBlockLabel(id), element.id)
+    if (blockLabel?.includes(label)) {
+      return element.id
+    }
+  }
+  return undefined
+}
+
+// Opens ≡ → Math (the main action menu's math submenu) — e.g. for "Edit Variables" (global)
+// or "Show Math Capabilities Overview", neither of which need a block selected first.
+export const openMathActionMenu = async (page) => {
+  await page.locator("#ms-menu-action").click()
+  await page.locator("#ms-menu-action-math-trigger").click()
+}
+
+// Opens the *per-block* context menu's math submenu — the wrapper only shows once a symbol is
+// selected (see IISelectionManager calling editor.menu.context.show()).
+export const openMathContextMenu = async (page) => {
+  await expect(page.locator("#ms-menu-context-wrapper")).toBeVisible()
+  await page.locator("#ms-menu-context-math-trigger").click()
+}
+
+// Select a block by its known jiixBlockId instead of drawing a surround gesture — useful for
+// reselecting after a modal interaction (editor.select() doesn't itself call
+// menu.context.show(), so call both) or whenever the target block's id is already known:
+// it's a more robust default than a surround gesture, real or synthetic. Drawing a *second*
+// real gesture in the same test is flaky (waitForGesturedEvent has no timeout of its own and
+// hangs the whole test if the second gesture never fires a "gestured" event).
+export const selectBlockById = async (page, jiixBlockId) => {
+  const symbols = await getEditorSymbols(page)
+  const ids = symbols.filter((s) => s.jiixBlockId === jiixBlockId).map((s) => s.id)
+  await page.evaluate((ids) => {
+    editorEl.editor.select(ids)
+    editorEl.editor.menu.context.show()
+  }, ids)
+  await expect
+    .poll(() => page.evaluate(() => editorEl.editor.model.symbolsSelected.length), { timeout: 3000 })
+    .toBeGreaterThan(0)
+}
+
+// No recorded surround-gesture capture exists for most math_context_menu.* datasets (only
+// "sum" has a hand-captured surroundPointers). Selection only needs the gesture stroke to be
+// classified as SURROUND by the cloud recognizer and to geometrically contain the expression's
+// bounds (see SurroundGestureHandler#apply: OBBOps.contains(gestureStroke.bounds, s.bounds)) —
+// so a synthetic padded ellipse around the written strokes' bounding box is sufficient.
+// `steps` defaults lower on WebKit: drawing this ellipse over already-rendered ink reproducibly
+// crashes WebKit's renderer ("Target crashed") — fewer intermediate points means fewer SVG
+// re-renders during the gesture. Doesn't fully eliminate the crash (pre-existing, undiagnosed
+// WebKit rendering issue), but reduces how often it happens. Pass `steps` explicitly from a
+// test's `browserName` fixture, e.g. `buildSurroundPointers(strokes, { steps: browserName ===
+// "webkit" ? 12 : 32 })`.
+export const buildSurroundPointers = (strokes, { padding = 40, steps = 32 } = {}) => {
+  const points = strokes.flatMap((s) => s.pointers)
+  const minX = Math.min(...points.map((p) => p.x)) - padding
+  const maxX = Math.max(...points.map((p) => p.x)) + padding
+  const minY = Math.min(...points.map((p) => p.y)) - padding
+  const maxY = Math.max(...points.map((p) => p.y)) + padding
+  const cx = (minX + maxX) / 2
+  const cy = (minY + maxY) / 2
+  const rx = (maxX - minX) / 2
+  const ry = (maxY - minY) / 2
+  const t0 = Date.now()
+  return Array.from({ length: steps + 1 }, (_, i) => {
+    const angle = (i / steps) * Math.PI * 2
+    return {
+      x: Math.round(cx + rx * Math.cos(angle)),
+      y: Math.round(cy + ry * Math.sin(angle)),
+      t: t0 + i * 15,
+      p: 0.6,
+    }
+  })
+}
+
+// Selection in this editor happens via a recognized "surround" gesture (closed loop drawn with
+// the write tool) — the math context menu is shown automatically once a single math block is
+// selected. Asserts exactly 1 *distinct Math block* among the selected symbols, not just
+// symbolsSelected.length: a multi-stroke expression like "√5=" legitimately selects several raw
+// symbols (one per stroke), so a raw length check wouldn't catch the real failure mode — if the
+// gesture (real or synthetic) ever also catches a stray adjacent artifact,
+// IIMenuContext#hasSingleMathSymbol (which counts distinct blocks, same check as here) goes
+// false, and the whole math submenu stays hidden. Left uncaught, that only surfaces later as a
+// confusing "button stayed hidden until timeout" failure instead of a clear "selection picked
+// up N blocks" one here.
+export const selectBlockViaSurround = async (page, surroundPointers) => {
+  await Promise.all([
+    waitForGesturedEvent(page),
+    writePointers(page, surroundPointers),
+  ])
+  await expect
+    .poll(() => page.evaluate(() => {
+      const selected = editorEl.editor.model.symbolsSelected
+      return editorEl.editor.jiix.getBlocksForSymbols(selected).filter((s) => s.type === "Math").length
+    }), { timeout: 3000 })
+    .toBe(1)
 }
 
 export const passModalKey = async (page, waitLoader = true) => {
