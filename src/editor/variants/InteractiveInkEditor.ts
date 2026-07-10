@@ -15,6 +15,7 @@ import {
   IIMathManager,
   IIMoveManager,
   IIOverlayManager,
+  IIPlaybackManager,
   IISelectionManager,
   IISnapManager,
   IISynchronizerManager,
@@ -132,6 +133,8 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
   connector: IIConnectorManager
   /** Manages the floating UI menu (tool selector, style panel, action buttons). */
   menu: IIMenuManager
+  /** Replays a recorded set of strokes with play/pause/speed control. */
+  playback: IIPlaybackManager
   /** Static utility class for creating DOM elements. */
   readonly dom = DOMFactory
 
@@ -187,6 +190,7 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
     this.math = new IIMathManager(this, this.#configuration.math)
     this.connector = new IIConnectorManager(this)
     this.menu = new IIMenuManager(this, options?.override?.menu)
+    this.playback = new IIPlaybackManager(this)
   }
 
   /**
@@ -1636,6 +1640,7 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
     this.move.detach()
     this.writer.detach()
 
+    this.playback.destroy()
     this.renderer.destroy()
     this.layers.destroy()
     this.menu.destroy()
