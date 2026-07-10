@@ -103,6 +103,13 @@
       </div>
 
       <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label">Updating a BLOCK variable</span></div>
+        <div class="ex-panel-item-desc">
+          Write <code>x=2</code>, then <code>x²=</code> (result 4). To change x, erase the "2" and write <code>5</code> in its place — a BLOCK variable's value is defined by the ink itself, so it's read-only in Edit Variables (and can't be overridden via the API either); editing the canvas is the only way. The dependent expression recalculates automatically (result becomes 25).
+        </div>
+      </div>
+
+      <div class="ex-panel-item">
         <div><span class="ex-panel-item-label">Global fallback</span></div>
         <div class="ex-panel-item-desc">
           Write <code>2x=</code> without defining x first. Open ≡ → Math → Edit Variables → add x=10 → Apply. Compute → result 20. Now write <code>x=3</code> next to it — BLOCK x=3 wins, result becomes 6.
