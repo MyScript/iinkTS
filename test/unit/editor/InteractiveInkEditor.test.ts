@@ -1,4 +1,4 @@
-import { jiixText } from "../__dataset__/exports.dataset"
+import { jiixMathDuplicateStrokes, jiixText } from "../__dataset__/exports.dataset"
 import { buildIICircle, buildIIStroke, buildIIText, buildIIMath, buildIIDecorator, delay } from "../helpers"
 import {
   InteractiveInkEditor,
@@ -13,6 +13,8 @@ import {
   ShapeKind,
   TSymbol,
   DecoratorKind,
+  TSymbolChar,
+  TText,
 } from "@/iink"
 
 describe("EditorOffscreen.ts", () => {
@@ -503,6 +505,94 @@ describe("EditorOffscreen.ts", () => {
       expect(link.download).toContain("iink-ts-")
       expect(link.download).toContain(".txt")
       expect(link.click).toHaveBeenCalledTimes(1)
+    })
+    test("should not duplicate label of a math item written with several strokes", async () => {
+      // "x" and "=" are each drawn with 2 strokes; JIIX maps every stroke of
+      // an item to that item's single label, so a naive per-stroke join
+      // used to produce "xx==2" instead of "x=2"
+      const addStrokeWithId = (id: string): void => {
+        const s = buildIIStroke()
+        s.id = id
+        editor.model.addSymbol(s)
+      }
+      addStrokeWithId("eq-1")
+      addStrokeWithId("eq-2")
+      addStrokeWithId("x-1")
+      addStrokeWithId("x-2")
+      addStrokeWithId("n-1")
+      editor.model.exports = { "application/vnd.myscript.jiix": jiixMathDuplicateStrokes }
+
+      const link = document.createElement("a")
+      link.click = jest.fn()
+      jest.spyOn(document, "createElement").mockImplementationOnce(() => link)
+      editor.downloadAsText()
+
+      expect(link.href).toContain(encodeURIComponent("x=2"))
+      expect(link.href).not.toContain(encodeURIComponent("xx==2"))
+    })
+    test("should order extracted text by reading position, not draw order", async () => {
+      const charFor = (label: string): TSymbolChar => ({
+        bounds: { height: 0, width: 0, x: 0, y: 0 },
+        color: "black",
+        fontSize: 12,
+        fontWeight: "normal",
+        id: `char-${label}`,
+        label,
+      })
+      // "middle" is drawn first but sits below "above" on the page
+      const middleWord = buildIIText({
+        chars: [charFor("middle")],
+        boundingBox: { x: 0, y: 50, width: 40, height: 20 },
+      })
+      const aboveWord = buildIIText({
+        chars: [charFor("above")],
+        boundingBox: { x: 0, y: 0, width: 40, height: 20 },
+      })
+      editor.model.addSymbol(middleWord)
+      editor.model.addSymbol(aboveWord)
+
+      const link = document.createElement("a")
+      link.click = jest.fn()
+      jest.spyOn(document, "createElement").mockImplementationOnce(() => link)
+      editor.downloadAsText()
+
+      const decoded = decodeURIComponent(link.href)
+      expect(decoded.indexOf("above")).toBeLessThan(decoded.indexOf("middle"))
+    })
+    test("should keep words recognized on the same line together", async () => {
+      const charFor = (label: string): TSymbolChar => ({
+        bounds: { height: 0, width: 0, x: 0, y: 0 },
+        color: "black",
+        fontSize: 52,
+        fontWeight: "normal",
+        id: `char-${label}`,
+        label,
+      })
+      const line1Y = { x: 0, y: 501, width: 62 }
+      const line2Y = { x: 0, y: 611, width: 49 }
+      const wordAt = (label: string, x: number, line: typeof line1Y): TText =>
+        buildIIText({
+          chars: [charFor(label)],
+          boundingBox: { x, y: line.y, width: line.width, height: 62 },
+        })
+
+      editor.model.addSymbol(wordAt("How", 0, line1Y))
+      editor.model.addSymbol(wordAt("are", 100, line1Y))
+      editor.model.addSymbol(wordAt("you", 200, line1Y))
+      editor.model.addSymbol(wordAt("?", 300, line1Y))
+      editor.model.addSymbol(wordAt("Fine", 0, line2Y))
+      editor.model.addSymbol(wordAt("and", 100, line2Y))
+      editor.model.addSymbol(wordAt("you", 200, line2Y))
+      editor.model.addSymbol(wordAt("?", 300, line2Y))
+
+      const link = document.createElement("a")
+      link.click = jest.fn()
+      jest.spyOn(document, "createElement").mockImplementationOnce(() => link)
+      editor.downloadAsText()
+
+      const decoded = decodeURIComponent(link.href)
+      expect(decoded).toContain("How are you ?")
+      expect(decoded).toContain("Fine and you ?")
     })
   })
 
