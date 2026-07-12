@@ -100,6 +100,11 @@ export class RecognizerWebSocket {
   // time. Without this, each would create its own `new WebSocket()`, leaving two live sockets
   // with only the last one referenced by `this.socket`.
   #connectingPromise: Promise<void> | null = null
+  // Set for the duration of a deliberate `close()` (e.g. `newSession()` switching language).
+  // `send()`'s legacy auto-reconnect must wait for this instead of racing its own `init()` against
+  // the one `newSession()` issues right after — starting a second socket before the first one's
+  // close handshake completes has left the server never answering on either connection.
+  #closingPromise: Promise<void> | null = null
 
   configuration: RecognizerWebSocketConfiguration
   initialized: DeferredPromise<void>
@@ -170,6 +175,48 @@ export class RecognizerWebSocket {
       v.reject(error)
     })
     this.waitForIdleDeferred?.reject(error)
+  }
+
+  /**
+   * Settle completion-signal promises (no payload) as resolved rather than rejected — used on a
+   * deliberate close (`close()`/`newSession()`), which isn't an error: the operation the caller
+   * was waiting on (init, idle) is simply moot now, not failed.
+   */
+  protected resolveDeferredPending(): void {
+    this.initialized.resolve()
+    this.waitForIdleDeferred?.resolve()
+
+    Array.from(this.contextlessGestureDeferred.entries()).forEach(([strokeId, deferred]) => {
+      deferred.resolve({
+        type: TRecognizerWebSocketMessageType.ContextlessGesture,
+        strokeId,
+        gestureType: "none",
+      })
+    })
+    Array.from(this.exportDeferredMap.values()).forEach((deferred) => {
+      deferred.resolve({})
+    })
+
+    this.resolveAllInQueue(this.availableActionsDeferred, [])
+    // "null" (not "") so callers doing `JSON.parse(await promise)` (see `getNumericalComputation`) get `null` instead of throwing
+    this.resolveAllInQueue(this.numericalComputationDeferred, "null")
+    this.resolveAllInQueue(this.getDiagnosticDeferred, "")
+    this.resolveAllInQueue(this.getVariablesDeferred, [])
+    this.resolveAllInQueue(this.setVariableValueDeferred, undefined)
+    // NaN, not 0 — 0 would read as a real value; NaN clearly signals "no value"
+    this.resolveAllInQueue(this.getVariableValueDeferred, NaN)
+    this.resolveAllInQueue(this.removeVariableValueDeferred, undefined)
+    this.resolveAllInQueue(this.asVariableDefinitionDeferred, { name: "", value: NaN })
+    this.getVariableDefinitionsDeferred.forEach((deferred) => deferred.resolve([]))
+    this.resolveAllInQueue(this.getEvaluablesDeferred, [])
+    this.resolveAllInQueue(this.evaluateDeferred, [])
+  }
+
+  /** Resolve every still-pending deferred in every queue of `map` with the same neutral `value`. */
+  protected resolveAllInQueue<T>(map: Map<string, DeferredPromise<T>[]>, value: T): void {
+    Array.from(map.values()).forEach((queue) => {
+      queue.forEach((deferred) => deferred.resolve(value))
+    })
   }
 
   protected resetAllDeferred(): void {
@@ -640,6 +687,12 @@ export class RecognizerWebSocket {
         return Promise.resolve()
       case this.socket.CLOSING:
       case this.socket.CLOSED:
+        if (this.#closingPromise) {
+          // A deliberate `close()` (e.g. `newSession()`) is already tearing down the socket —
+          // wait for it instead of racing our own `init()` against the one it issues right after.
+          await this.#closingPromise
+          return this.send(message)
+        }
         if (this.configuration.server.websocket.autoReconnect) {
           this.reconnectionCount++
           if (this.configuration.server.websocket.maxRetryCount > this.reconnectionCount) {
@@ -991,7 +1044,8 @@ export class RecognizerWebSocket {
     if (!stroke) {
       return
     }
-    this.contextlessGestureDeferred.set(stroke.id, new DeferredPromise<TRecognizerWebSocketMessageContextlessGesture>())
+    const deferred = new DeferredPromise<TRecognizerWebSocketMessageContextlessGesture>()
+    this.contextlessGestureDeferred.set(stroke.id, deferred)
     const pixelTomm = 25.4 / 96
     await this.send({
       type: "contextlessGesture",
@@ -999,7 +1053,7 @@ export class RecognizerWebSocket {
       scaleY: pixelTomm,
       stroke: StrokeOps.formatToSend(stroke),
     })
-    return this.contextlessGestureDeferred.get(stroke.id)!.promise
+    return deferred.promise
   }
 
   async waitForIdle(): Promise<void> {
@@ -1103,8 +1157,10 @@ export class RecognizerWebSocket {
   async export(requestedMimeTypes?: string[]): Promise<TExport> {
     const mimeTypes: string[] = requestedMimeTypes || this.mimeTypes.slice()
     await Promise.all(mimeTypes.map((mt) => this.exportDeferredMap.get(mt)?.promise))
-    mimeTypes.forEach((mt) => {
-      this.exportDeferredMap.set(mt, new DeferredPromise<TExport>())
+    const deferreds = mimeTypes.map((mt) => {
+      const deferred = new DeferredPromise<TExport>()
+      this.exportDeferredMap.set(mt, deferred)
+      return deferred
     })
 
     const message: TRecognizerWebSocketMessage = {
@@ -1113,7 +1169,7 @@ export class RecognizerWebSocket {
       mimeTypes,
     }
     await this.send(message)
-    const exports = await Promise.all(mimeTypes.map((mt) => this.exportDeferredMap.get(mt)!.promise))
+    const exports = await Promise.all(deferreds.map((deferred) => deferred.promise))
     return Object.assign({}, ...exports)
   }
 
@@ -1126,14 +1182,21 @@ export class RecognizerWebSocket {
   async close(code: number, reason: string): Promise<void> {
     this.#clearReconnectLoop()
     this.#clearOfflineQueue(new Error(`Recognizer closed (${reason}): queued strokes were not sent`))
+    this.resolveDeferredPending()
     this.resetAllDeferred()
     this.closeDeferred = new DeferredPromise<void>()
-    if (this.socket.readyState === this.socket.OPEN || this.socket.readyState === this.socket.CONNECTING) {
-      this.socket.close(code, reason)
-    } else {
-      this.closeDeferred.resolve()
+    const doClose = async (): Promise<void> => {
+      if (this.socket.readyState === this.socket.OPEN || this.socket.readyState === this.socket.CONNECTING) {
+        this.socket.close(code, reason)
+      } else {
+        this.closeDeferred!.resolve()
+      }
+      await this.closeDeferred!.promise
     }
-    await this.closeDeferred.promise
+    this.#closingPromise = doClose().finally(() => {
+      this.#closingPromise = null
+    })
+    await this.#closingPromise
   }
 
   async destroy(): Promise<void> {
