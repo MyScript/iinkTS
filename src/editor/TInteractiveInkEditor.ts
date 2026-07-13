@@ -11,6 +11,7 @@ import type {
   IIMathManager,
   IIMoveManager,
   IIOverlayManager,
+  IIPlaybackManager,
   IISelectionManager,
   IISnapManager,
   IISynchronizerManager,
@@ -76,6 +77,7 @@ export type TInteractiveInkEditor = {
   readonly math: IIMathManager
   readonly connector: IIConnectorManager
   readonly menu: IIMenuManager
+  readonly playback: IIPlaybackManager
 
   // ── Symbol mutation ────────────────────────────────────────────────
   createSymbols(partialSymbols: TPartialDeep<TSymbol>[]): Promise<TSymbol[]>
