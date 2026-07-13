@@ -43,7 +43,7 @@ test.describe("Math Context Menu", () => {
     // The math submenu only becomes visible once IIMenuContext#updateMathMenu's async
     // getAvailableActions/getVariables/getEvaluables round-trip resolves — the default 2500ms
     // expect timeout is too tight under CI load (flaky "Received: hidden" on Safari).
-    await expect(computeButton).toBeVisible({ timeout: 8000 })
+    await expect(computeButton).toBeVisible({ timeout: 20000 })
     await computeButton.click()
 
     await expect
