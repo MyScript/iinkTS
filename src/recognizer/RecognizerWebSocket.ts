@@ -348,10 +348,7 @@ export class RecognizerWebSocket {
     }
     this.pingWorker?.terminate()
     this.resetAllDeferred()
-    if (evt.code !== 1000 && this.configuration.server.websocket.offlineQueueEnabled) {
-      this.event.emitConnectionStatusChanged("offline")
-      this.#startReconnectLoop()
-    }
+    this.event.emitConnectionStatusChanged("offline")
   }
 
   protected openCallback(): void {
