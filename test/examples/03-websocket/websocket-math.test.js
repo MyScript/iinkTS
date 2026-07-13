@@ -137,7 +137,10 @@ test.describe('Websocket Math', function () {
     })
 
     test('should undo/redo in mode "session"', async ({ page }) => {
-      test.setTimeout(90 * 1000)
+      // Writing the full equation over a real WebSocket round trip per stroke is genuinely
+      // slower under CI load than locally — 180s was still hit on CI ("Test timeout of 180000ms
+      // exceeded" with no specific assertion failing, i.e. cumulative step time, not a hang).
+      test.setTimeout(5 * 60 * 1000)
 
       await test.step('should set undo/redo mode set to "session"', async () => {
         const config = await getEditorConfiguration(page)
@@ -150,8 +153,11 @@ test.describe('Websocket Math', function () {
                 'undo-redo': {
                   mode: 'session'
                 },
-                // 5000 = time to write equation
-                'session-time': 3000,
+                // Writing the equation strokes takes a few seconds and varies with runner
+                // speed (flaky on loaded CI when this window is too tight and the last
+                // stroke(s) land outside the undo session) — keep well above worst-case
+                // write time.
+                'session-time': 20000,
                 mimeTypes: ['application/x-latex']
               },
               export: {
@@ -168,7 +174,7 @@ test.describe('Websocket Math', function () {
 
       await test.step('should write stroke', async () => {
         await Promise.all([
-          waitForChangedEvent(page),
+          waitForChangedEvent(page, 60000),
           writeStrokes(page, equation.strokes)
         ])
         await callEditorIdle(page)
@@ -182,7 +188,7 @@ test.describe('Websocket Math', function () {
       await test.step('should undo all stroke written during session time', async () => {
         await callEditorIdle(page)
         await Promise.all([
-          waitForChangedEvent(page),
+          waitForChangedEvent(page, 60000),
           page.locator('#undo').click()
         ])
         await expect(page.locator('#result')).toBeEmpty()
@@ -193,7 +199,7 @@ test.describe('Websocket Math', function () {
       await test.step('should redo all stroke written during session time', async () => {
         await callEditorIdle(page)
         await Promise.all([
-          waitForChangedEvent(page),
+          waitForChangedEvent(page, 60000),
           page.locator('#redo').click()
         ])
         const expected = equation.exports.LATEX.at(-1)
