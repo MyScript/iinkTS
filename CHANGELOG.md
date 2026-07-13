@@ -2,20 +2,39 @@
 
 # [v4.0.0](https://github.com/MyScript/iinkTS/tree/v4.0.0)
 
+## Breaking Changes
+
+See [MIGRATION.md](./MIGRATION.md) for step-by-step upgrade instructions.
+
+### Class/API renaming (IIC-1716)
+- refactor: **BREAKING** `Editor` class renamed to `Canvas` (`Editor.load()` → `Canvas.load()`); `Canvas.load()` type constants renamed: `"INTERACTIVEINK"` → `"INTERACTIVE_INK"`, `"INTERACTIVEINKSSR"` → `"INTERACTIVE_INK_SSR"`, `"INKV1"` → `"INK_V1"`, `"INKV2"` → `"INK_V2"`
+- refactor: **BREAKING** editor variants renamed: `InteractiveInkEditor` → `InteractiveInkCanvas`, `InteractiveInkSSREditor` → `InteractiveInkSSRCanvas`, `InkEditor` → `InkCanvas`, `InkEditorDeprecated` → `InkCanvasDeprecated` (and their `*Configuration`/`*Options` companion types)
+- refactor: **BREAKING** network layer renamed from `Recognizer*` to `*Client`: `RecognizerHTTPV1` → `HTTPClientV1`, `RecognizerHTTPV2` → `HTTPClientV2`, `RecognizerWebSocket` → `WebSocketClient`, `RecognizerWebSocketSSR` → `WebSocketSSRClient` (and their `Configuration`/`Message`/`Event`/`Error` companion types)
+- refactor: source layout mirrors the new naming — `src/editor/` → `src/canvas/`, `src/recognizer/` → `src/client/`
+- refactor(examples): directories renamed to match — `examples/rest/` → `examples/canvas/` (files split `canvas_v1_*`/`canvas_v2_*`), `examples/websocket/` → `examples/interactive-canvas-ssr/`, `examples/offscreen-interactivity/` → `examples/interactive-canvas/`; new `examples/custom-rendering/` hosts the tldraw + `WebSocketClient` demo (`examples/custom-rendering/tldraw-websocket-client/`)
+- refactor: **BREAKING** remove II-prefix from all symbol types — IIStroke→TStroke, IIText→TText, IIMath→TMath, IIDecorator→TDecorator, IIEraser→TEraser, IIShapeCircle→TShapeCircle, IIEdgeLine→TEdgeLine, etc. (IIC-1703)
+- refactor: **BREAKING** convert all symbol interfaces to type aliases with T* naming convention (IIC-1703)
+- refactor: **BREAKING** remove SymbolFactory — creation dispatchers moved to SymbolHelpers (IIC-1703)
+- refactor: **BREAKING** the canvas instance attached to the root DOM element is now exposed as `rootElement.iink` (was `rootElement.editor`/`.canvas`) — decoupled from the class name since it collided with the real `<canvas>` elements rendered inside that same root element
+- refactor: **BREAKING** `EditorTool`/`EditorWriteTool` renamed to `CanvasTool`/`CanvasWriteTool`
+- refactor: **BREAKING** `LoggerCategory.EDITOR`/`EDITOR_EVENT` renamed to `LoggerCategory.CANVAS`/`CANVAS_EVENT`
+- refactor: **BREAKING** default/public CSS hook `.ms-editor` renamed to `.ms-ink`; state badge classes `.editor-state*` renamed to `.ms-ink-state*`
+- refactor: **BREAKING** CSS custom property prefix `--iink-*` renamed to `--ms-ink-*` (e.g. `--iink-primary` → `--ms-ink-primary`); `--iink-editor-bg` also renamed to `--ms-ink-canvas-bg`
+
 ## Features
 
-### Editor state (IIC-1681 / IIC-1706)
-- feat(editor): add `editor.connectionState` (initializing/online-idle/online-working/syncing/offline/error) + `connectionStateChanged` event, computed centrally in `AbstractEditor` for all 4 editor variants
-- feat(editor): add `editor.trackOperation()`/`startOperation()`/`endOperation()` — named, ref-counted busy tracking; wired into recognition, conversion, synchronization, math computation/evaluation, transforms, gestures, and export/undo/redo/clear/import across all editor variants
-- feat(editor): the state badge tooltip opens on click (positioned beside the badge) instead of on hover, and lists the active operation label(s) when busy
-- feat(editor): `online-working` badge icon changed from a pencil to a 3-dot "typing" indicator (pulses per-dot); `online-working`/`syncing` badges now also pulse a colored ring around the badge itself
-- feat(editor): "Recognizing" busy tracking reworked to an optimistic model — writer/transform managers mark it active on pointerDown/drag-start (immediate UI feedback, no network round-trip), and it's cleared once per debounced `synchronize()` cycle rather than per network call. Avoids serializing every stroke/transform send behind its individual server ack (previous approach added real latency to fast writing, scratch-out gestures, and multi-stroke imports)
-- feat(editor): **BREAKING** `EditorLayer.updateState()`/`showState()`/`hideState()`/`createState()`/`createBusy()` removed — replaced by `updateEditorState()` driven by `editor.connectionState`. `EditorLayer.ui.state` shape changed (`{ root, icon, count }` instead of `{ root, busy }`)
-- feat(recognizer): `RecognizerWebSocket` proactively detects unexpected disconnects and starts reconnecting immediately (previously only reactive, on the next `addStrokes()` call); `TConnectionStatus` gains an `"error"` value once reconnection attempts are exhausted, with the retry budget reset for the next attempt
-- feat(examples): add "Connection Status" example demonstrating `editor.connectionState` and reconnect handling
+### Canvas state (IIC-1681 / IIC-1706)
+- feat(canvas): add `canvas.connectionState` (initializing/online-idle/online-working/syncing/offline/error) + `connectionStateChanged` event, computed centrally in `AbstractCanvas` for all 4 canvas variants
+- feat(canvas): add `canvas.trackOperation()`/`startOperation()`/`endOperation()` — named, ref-counted busy tracking; wired into recognition, conversion, synchronization, math computation/evaluation, transforms, gestures, and export/undo/redo/clear/import across all canvas variants
+- feat(canvas): the state badge tooltip opens on click (positioned beside the badge) instead of on hover, and lists the active operation label(s) when busy
+- feat(canvas): `online-working` badge icon changed from a pencil to a 3-dot "typing" indicator (pulses per-dot); `online-working`/`syncing` badges now also pulse a colored ring around the badge itself
+- feat(canvas): "Recognizing" busy tracking reworked to an optimistic model — writer/transform managers mark it active on pointerDown/drag-start (immediate UI feedback, no network round-trip), and it's cleared once per debounced `synchronize()` cycle rather than per network call. Avoids serializing every stroke/transform send behind its individual server ack (previous approach added real latency to fast writing, scratch-out gestures, and multi-stroke imports)
+- feat(canvas): **BREAKING** `CanvasLayer.updateState()`/`showState()`/`hideState()`/`createState()`/`createBusy()` removed — replaced by `updateCanvasState()` driven by `canvas.connectionState`. `CanvasLayer.ui.state` shape changed (`{ root, icon, count }` instead of `{ root, busy }`)
+- feat(client): `WebSocketClient` proactively detects unexpected disconnects and starts reconnecting immediately (previously only reactive, on the next `addStrokes()` call); `TConnectionStatus` gains an `"error"` value once reconnection attempts are exhausted, with the retry budget reset for the next attempt
+- feat(examples): add "Connection Status" example demonstrating `canvas.connectionState` and reconnect handling
 
 ### Stroke Playback (IIC-1688)
-- feat(editor): add `editor.playback` (`IIPlaybackManager`) — replays a recorded set of strokes point by point, honoring their original relative timing, via `editor.writer.start/continue/end`; `play(strokes, speed?)`, `pause()`, `resume()`, `stop()`, `setSpeed()`; `state`/`progress` getters and `onProgress`/`onStateChange`/`onEnd` callbacks
+- feat(canvas): add `canvas.playback` (`IIPlaybackManager`) — replays a recorded set of strokes point by point, honoring their original relative timing, via `canvas.writer.start/continue/end`; `play(strokes, speed?)`, `pause()`, `resume()`, `stop()`, `setSpeed()`; `state`/`progress` getters and `onProgress`/`onStateChange`/`onEnd` callbacks
 - feat(examples): rework "Import Pointers" example into a "Stroke Playback" demo with play/pause/stop/speed controls, replaying `demo.json`
 
 ### Math (IIC-1633)
@@ -32,11 +51,11 @@
 - feat(chart): add zoom and pan functionality with control buttons
 - feat(chart): add toggle button for graph points visibility
 
-### Editor
+### Canvas
 - feat(keyboard): add keyboard shortcuts — copy/paste/cut (Ctrl+C/V/X), undo/redo (Ctrl+Z/Y), zoom (Ctrl+±), pan (Ctrl+Arrows), fit (Ctrl+0) (IIC-1679)
-- feat(editor): add zoomToFit(symbols?) to center view on content (IIC-1680)
+- feat(canvas): add zoomToFit(symbols?) to center view on content (IIC-1680)
 - feat(minimap): add Minimap component with MutationObserver sync and click/drag navigation
-- feat(menu): add minimap toggle button in action menu bar (shown in editor UI layer)
+- feat(menu): add minimap toggle button in action menu bar (shown in canvas UI layer)
 
 ### Gestures & Input
 - feat(gesture): add underline action options and integrate into gesture menu
@@ -63,10 +82,10 @@
 - fix(history): undo is no-op for style, order, and updated changes
 - fix(history): carry through updated symbols in reverseChanges for undo
 - fix(history): use -angle for rotation reversal
-- fix(recognizer): HMAC challenge and computation errors surfaced via emitError
-- fix(recognizer): undoDeferred and redoDeferred not reset after connection reset
-- fix(recognizer): WebSocketSSR listeners never removed on reconnect
-- fix(recognizer): emit EndInitialization after WebSocket handshake completes
+- fix(client): HMAC challenge and computation errors surfaced via emitError
+- fix(client): undoDeferred and redoDeferred not reset after connection reset
+- fix(client): WebSocketSSR listeners never removed on reconnect
+- fix(client): emit EndInitialization after WebSocket handshake completes
 - fix(renderer): canvas transform accumulates on each resize
 - fix(renderer): remove spurious context2d.save() unbalancing canvas state
 - fix(math): arrow SVG elements leak on each overlay refresh
@@ -81,35 +100,30 @@
 - fix(utils): isDeepEqual incorrectly treats arrays as plain objects
 - fix(utils): correct segment intersection endpoint guard
 - fix(grabber): contextMenuHandler unsafe cast MouseEvent to PointerEvent
-- fix(editor): destroy all existing instances before creating a new editor
-- fix(editor): filter invalid strokes in importPointEvents
+- fix(canvas): destroy all existing instances before creating a new canvas
+- fix(canvas): filter invalid strokes in importPointEvents
 - fix(BaseMenuItem): remove replaceWith(cloneNode) causing DOM node leak on destroy
 - fix(smartguide): correct event listener removal in removeListeners
 - fix(security): force js-yaml ≥4.2.0 to fix CVE DoS audit
 
 ## Refactor
-- refactor(math): split IIMathManager into sub-managers — variables, computation, evaluation (IIC-1633)
-- refactor(overlay): replace math overlays with unified IIOverlayManager (IIC-1633)
-- refactor(transform): unify transform managers under IITransformManager orchestrator (editor.transform.translate/.resize/.rotation)
+- refactor(transform): unify transform managers under IITransformManager orchestrator (canvas.transform.translate/.resize/.rotation)
 - refactor(transform): rewrite AbstractTransformManager — drop TParams generics, all apply*() take MatrixTransform; add applyMatrixToPoints, setTransformOrigin, resolveInteractGroup, applyAndDraw, finalizeTransform helpers
 - refactor(transform): move sub-managers to src/manager/interactive/transform/ (mirrors math/ structure)
 - refactor(gesture): implement Strategy Pattern for IIGestureManager with GestureHandler base
-- refactor(core): extract IIKeyboardManager, MathDependencyService, SymbolFactory from InteractiveInkEditor
-- refactor(editor): move editor variants to dedicated folder
+- refactor(core): extract IIKeyboardManager, MathDependencyService, SymbolFactory from InteractiveInkCanvas
+- refactor(canvas): move canvas variants to dedicated folder
 - refactor(selection): rename selection granularity levels from "block" to "element"
 - refactor(symbol): remove group symbol handling and related utilities (IIC-1647)
 - refactor(utils): centralize coordinate validation and constants
 - refactor(renderer): remove duplicate SVG utility files
-- refactor(recognizer): extract resolveDeferredByBlockId, mapCloseCodeToMessage
+- refactor(client): extract resolveDeferredByBlockId, mapCloseCodeToMessage
 - refactor(chart): centralize dimension and range calculations
 - refactor(symbol): reorganize src/symbol/ into logical categories — stroke/, text/, math/, typeset/, decorator/, eraser/, shape/, edge/, primitives/, legacy/ (IIC-1703)
-- refactor(symbol): **BREAKING** remove II-prefix from all symbol types — IIStroke→TStroke, IIText→TText, IIMath→TMath, IIDecorator→TDecorator, IIEraser→TEraser, IIShapeCircle→TShapeCircle, IIEdgeLine→TEdgeLine, etc. (IIC-1703)
-- refactor(symbol): **BREAKING** convert all symbol interfaces to type aliases with T* naming convention (IIC-1703)
-- refactor(symbol): **BREAKING** remove SymbolFactory — creation dispatchers moved to SymbolHelpers (IIC-1703)
 - refactor(symbol): apply TBaseSymbol intersection to all full symbol types (IIC-1703)
 - refactor(symbol): rename convertPartialStrokesToIIStrokes → convertLegacyStrokesToStrokes (internal)
 - refactor(history): `HistoryManager`, `IHistoryManager`, `IIHistoryManager` now share stack/context bookkeeping via a common internal `AbstractHistoryStack` base class — no behavior change, all three keep their existing public API
-- refactor(history): add `extractStrokes(symbols)` (in `@/symbol`) and `extractIIBackendChanges(changes)` (in `@/history`) as new exported pure helpers, extracted from `InteractiveInkEditor` internals
+- refactor(history): add `extractStrokes(symbols)` (in `@/symbol`) and `extractIIBackendChanges(changes)` (in `@/history`) as new exported pure helpers, extracted from `InteractiveInkCanvas` internals
 
 # [v3.3.0](https://github.com/MyScript/iinkTS/tree/v3.3.0)
 

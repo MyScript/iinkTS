@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { LoggerCategory } from "@/logger"
 import type { TJIIXMathElement, TJIIXMathExpression } from "@/model"
 import type { TStyle } from "@/style/Style"
@@ -65,8 +65,8 @@ export class IIMathComputationSubManager extends IIAbstractManager {
   #ghostStrokes = new Map<string, TStroke[]>()
   #lastComputationResult = new Map<string, TJIIXMathElement>()
 
-  constructor(editor: TInteractiveInkEditor, config: Partial<TMathComputationConfig> = {}) {
-    super(editor, LoggerCategory.MATH)
+  constructor(canvas: TInteractiveInkCanvas, config: Partial<TMathComputationConfig> = {}) {
+    super(canvas, LoggerCategory.MATH)
     this.#config = {
       ...IIMathComputationSubManager.DEFAULT_CONFIG,
       ...config,
@@ -275,12 +275,12 @@ export class IIMathComputationSubManager extends IIAbstractManager {
       jiixBlockId,
     })
 
-    const solverOutputStrokes = this.editor.model.symbols.filter(
+    const solverOutputStrokes = this.canvas.model.symbols.filter(
       (s) => isStroke(s) && s.jiixBlockId === jiixBlockId && s.isSolverOutput
     )
 
     if (solverOutputStrokes.length > 0) {
-      await this.editor.removeSymbols(
+      await this.canvas.removeSymbols(
         solverOutputStrokes.map((s) => s.id),
         false
       )
@@ -294,10 +294,10 @@ export class IIMathComputationSubManager extends IIAbstractManager {
   async clearAllSolverOutputs(): Promise<void> {
     this.logger.info("clearAllSolverOutputs")
 
-    const solverOutputStrokes = this.editor.model.symbols.filter((s) => isStroke(s) && s.isSolverOutput)
+    const solverOutputStrokes = this.canvas.model.symbols.filter((s) => isStroke(s) && s.isSolverOutput)
 
     if (solverOutputStrokes.length > 0) {
-      await this.editor.removeSymbols(
+      await this.canvas.removeSymbols(
         solverOutputStrokes.map((s) => s.id),
         false
       )
@@ -335,7 +335,7 @@ export class IIMathComputationSubManager extends IIAbstractManager {
       }
     }
 
-    const result = await this.editor.recognizer.getNumericalComputation(jiixBlockId)
+    const result = await this.canvas.client.getNumericalComputation(jiixBlockId)
     this.logger.info("computeNumericalResult", "Numerical computation completed successfully", result)
 
     const lastResult = this.#lastComputationResult.get(jiixBlockId)
@@ -355,7 +355,7 @@ export class IIMathComputationSubManager extends IIAbstractManager {
     let addedStrokesCount = 0
 
     if (mode === "draw") {
-      const wasBlockSelected = this.editor.selector.isMathBlockSelected(jiixBlockId)
+      const wasBlockSelected = this.canvas.selector.isMathBlockSelected(jiixBlockId)
       const addedStrokes = await this.addSolverOutputStrokes(result)
       addedStrokesCount = addedStrokes.length
       this.logger.info("computeNumericalResult", `Added ${addedStrokesCount} solver output strokes`)
@@ -364,7 +364,7 @@ export class IIMathComputationSubManager extends IIAbstractManager {
         addedStrokes.map((s) => s.id)
       )
       if (wasBlockSelected && addedStrokes.length > 0) {
-        this.editor.select([...this.editor.model.selectedIds, ...addedStrokes.map((s) => s.id)])
+        this.canvas.select([...this.canvas.model.selectedIds, ...addedStrokes.map((s) => s.id)])
       }
     } else if (mode === "ghost") {
       const strokes = this.addGhostOutputStrokes(result)
@@ -397,7 +397,7 @@ export class IIMathComputationSubManager extends IIAbstractManager {
     this.logger.info("computeAllNumericalResults")
 
     const { resultMode: mode } = this.#config
-    const jiixBlocks = this.editor.model.mathBlocks
+    const jiixBlocks = this.canvas.model.mathBlocks
 
     for (const mathSymbol of jiixBlocks) {
       try {
@@ -515,7 +515,7 @@ export class IIMathComputationSubManager extends IIAbstractManager {
       addedStrokes.push(stroke)
       this.logger.debug("addSolverOutputStrokes", "Added solver output stroke:", stroke.id)
     }
-    await this.editor.addSymbols(addedStrokes)
+    await this.canvas.addSymbols(addedStrokes)
     return addedStrokes
   }
 

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Math Computation Modes Example</title>
+
+  <link rel="stylesheet" href="../assets/style/reset.css" />
+  <link rel="stylesheet" href="../assets/style/components.css" />
+  <link rel="stylesheet" href="../assets/style/examples.css" />
+  <link rel="stylesheet" href="../assets/style/inputs.css" />
+  <link rel="stylesheet" href="../assets/style/panel.css" />
+  <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+
+  <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
+
+<body>
+  <header class="header-main">
+    <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+      🔢 Info
+    </button>
+    <button id="showModalBtn" class="btn-keys">API Keys</button>
+    <h1 class="header-title">Math Computation Modes</h1>
+  </header>
+
+  <div class="ex-page-layout">
+    <aside id="info-panel" class="ex-panel">
+      <p class="ex-panel-heading">What are computation modes?</p>
+      <p class="ex-panel-intro">
+        When solving a math expression, the result can be displayed in two different ways.
+      </p>
+
+      <div class="ex-panel-divider"></div>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label">✏️ Draw Result</span></div>
+        <div class="ex-panel-item-desc">
+          Result added as real ink strokes in the document — sent to backend, recognized and part of the model, fully interactive (move, resize, rotate, erase, select).<br>
+          <strong>Frozen once computed:</strong> a draw result is computed <em>once</em> per block and never auto-recomputed or auto-erased afterward — not when the expression changes, not when a dependent block changes (e.g. <em>x=2</em> → <em>x=5</em> no longer touches an existing <em>2x=</em> draw result).<br>
+          To get a fresh result: erase the result stroke yourself (select it, then delete), or use <em>Math menu → Force Compute all</em> to wipe and recompute everything.
+        </div>
+      </div>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label">👻 Show Result (Ghost)</span></div>
+        <div class="ex-panel-item-desc">
+          Result shown as SVG overlay at 50% opacity — not in model, not sent to backend, non-interactive (view only, can't be clicked or selected directly).<br>
+          <strong>Live preview:</strong> recomputed only when the recognized result actually changes (no needless flicker) — as long as the block has no draw result yet.<br>
+          Automatically cleared when the block no longer ends with <span class="highlight">=</span> or <span class="highlight">?</span>. Once a block gets a draw result it freezes too: the ghost stops updating for that block entirely.
+        </div>
+      </div>
+
+      <div class="ex-panel-divider"></div>
+
+      <p class="ex-panel-subtitle">Auto-Compute</p>
+
+      <div class="ex-panel-item">
+        <div class="ex-panel-item-desc">
+          Automatically compute expressions when finishing a block ending with <code>=</code> or <code>?</code>. After writing, the synchronized event triggers an auto-compute check — no manual "Compute" click needed.
+        </div>
+      </div>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label">Show Block Overlays</span></div>
+        <div class="ex-panel-item-desc">
+          Toggle via ≡ → Math → <em>Show Block Overlays</em>. Displays boundaries, computed results, and status indicators on each recognized math block.
+        </div>
+      </div>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label">🔄 Force Compute all</span></div>
+        <div class="ex-panel-item-desc">
+          Via ≡ → Math → <em>Force Compute all</em>. The only way to refresh a frozen draw result: clears <strong>every</strong> block's result strokes — draw <em>and</em> ghost — then recomputes every math block from scratch in the currently selected result mode.
+        </div>
+      </div>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label">Selection &amp; Transform</span></div>
+        <div class="ex-panel-item-desc">
+          Selecting one stroke of an expression selects the whole block, including its draw result. Moving, resizing or rotating a selected block carries its result along with it — draw result strokes transform like normal strokes, and a live ghost preview follows the drag too.
+        </div>
+      </div>
+
+      <div class="ex-panel-code">
+        // Ghost mode — live preview, safe for auto-compute<br>
+        canvas.math.updateComputationConfig({ resultMode: "ghost", autoCompute: true })<br>
+        <br>
+        // Draw mode — result persists, computed once per block<br>
+        canvas.math.updateComputationConfig({ resultMode: "draw", autoCompute: true })<br>
+        <br>
+        // Wipe everything (draw + ghost) and recompute all blocks<br>
+        await canvas.math.clearAllSolverOutputs()<br>
+        await canvas.math.computeAllNumericalResults()
+      </div>
+
+      <div class="ex-panel-divider"></div>
+
+      <p class="ex-panel-subtitle">Try it</p>
+
+      <div class="ex-panel-hint">
+        1. Write <code>5+3=</code> (with equals sign)<br>
+        2. With auto-compute on → result appears instantly<br>
+        3. Toggle <strong>Auto-compute</strong> via ≡ → Math to see difference<br>
+        4. Switch <strong>Result mode</strong> to compare Draw vs Ghost<br>
+        5. Toggle <strong>Show Block Overlays</strong> to see block boundaries
+      </div>
+
+      <div class="ex-panel-item">
+        <div class="ex-panel-item-desc">
+          <strong>Ghost mode:</strong><br>
+          1. Select "Show result" + enable "Auto-compute"<br>
+          2. Write <span class="highlight">5+3=</span> → ghost result appears immediately<br>
+          3. Modify the expression → ghost updates in real time<br>
+          4. Move the expression around → the ghost preview follows it<br>
+          5. Remove the <span class="highlight">=</span> → ghost disappears automatically
+        </div>
+      </div>
+
+      <div class="ex-panel-item">
+        <div class="ex-panel-item-desc">
+          <strong>Draw mode:</strong><br>
+          1. Select "Draw result" + enable "Auto-compute"<br>
+          2. Write <span class="highlight">5+3=</span> → result added as ink strokes<br>
+          3. Modify the expression (e.g. change <span class="highlight">3</span> to <span class="highlight">30</span>) → result stays <strong>8</strong>, untouched — draw is frozen<br>
+          4. Write <span class="highlight">x=2</span> then <span class="highlight">2x=</span> → both computed<br>
+          5. Change <span class="highlight">x=2</span> to <span class="highlight">x=5</span> → <em>2x=</em> result stays <strong>4</strong>, not auto-updated<br>
+          6. Drag the expression somewhere else → its draw result moves with it<br>
+          7. Use <em>Math menu → Force Compute all</em> to wipe and recompute every block fresh
+        </div>
+      </div>
+    </aside>
+
+    <div id="rootEl"></div>
+  </div>
+
+  <script type="module">
+    import { Canvas } from '../../dist/iink.esm.js'
+    import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
+
+    const rootElement = document.getElementById('rootEl');
+    const showModalBtn = document.getElementById("showModalBtn");
+    const panelToggleBtn = document.getElementById('panelToggleBtn')
+    const infoPanel = document.getElementById('info-panel')
+
+    panelToggleBtn.addEventListener('click', () => {
+      const open = infoPanel.classList.toggle('open')
+      panelToggleBtn.setAttribute('aria-expanded', open)
+    })
+
+    let canvas
+
+    const editorOptions = {
+      configuration: {
+        recognition: {
+          "raw-content": {
+            recognition: {
+              types: ["math"]
+            },
+            classification: {
+              types: ["math"]
+            },
+            gestures: ["scratch-out", "surround"]
+          },
+        },
+        menu: {
+          action: {
+            language: false,
+            gesture: false,
+            snap: false,
+            export: false,
+            import: false,
+            convert: false,
+            math: true,
+            debug: false,
+            guide: false,
+            selection: false
+          },
+          tool: {
+            write: true,
+            move: true,
+            select: true,
+            erase: true,
+            shape: false,
+            edge: false
+          },
+          style: {
+            strokeColor: true,
+            fillColor: false,
+            thickness: false,
+            fontSize: false,
+            fontWeight: false,
+            opacity: false,
+          }
+        },
+        math: {
+          computation: {
+            // "draw"  → result is added to the canvas as ink strokes
+            // "ghost" → result is shown as a semi-transparent SVG overlay (not sent to backend)
+            resultMode: "ghost",
+            // Automatically compute when a block ends with = or ?
+            autoCompute: true,
+            // Color applied to result strokes (both draw and ghost modes)
+            resultColor: "#9c27b0"
+          },
+        }
+      },
+    }
+
+    async function loadEditor(options) {
+      await canvas?.destroy()
+
+      canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK', options)
+
+      return canvas
+    }
+
+    showModalBtn.addEventListener('click', () => {
+      ModalCanvasOptions.show(loadEditor, editorOptions)
+    })
+
+    ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+  </script>
+  <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+  <script src="../assets/js/theme.js"></script>
+</body>
+</html>

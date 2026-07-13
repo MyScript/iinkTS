@@ -3,8 +3,8 @@ import ellipseIcon from "@/assets/svg/ellipse.svg"
 import rectangleIcon from "@/assets/svg/rectangle.svg"
 import rhombusIcon from "@/assets/svg/rhombus.svg"
 import triangleIcon from "@/assets/svg/triangle.svg"
-import { EditorTool, EditorWriteTool } from "@/Constants"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import { CanvasTool, CanvasWriteTool } from "@/Constants"
 import type { TMenuItemBase } from "@/menu/items/BaseMenuItem"
 import { BaseMenuItem } from "@/menu/items/BaseMenuItem"
 
@@ -18,20 +18,20 @@ type TShapeToolConfig = TMenuItemBase & {
  */
 export class ShapeTool extends BaseMenuItem<HTMLDivElement> {
   #documentPointerdownHandler?: (e: PointerEvent) => void
-  private subMenuButtons: Map<EditorWriteTool, HTMLButtonElement> = new Map()
+  private subMenuButtons: Map<CanvasWriteTool, HTMLButtonElement> = new Map()
   private triggerButton?: HTMLButtonElement
   private currentIcon: string = rectangleIcon
 
-  constructor(editor: TInteractiveInkEditor, idPrefix = "ms-menu-tool") {
+  constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-tool") {
     const config: TShapeToolConfig = {
       type: "shape",
       id: `${idPrefix}-write-shape`,
       label: "Shape",
     }
-    super(config, editor)
+    super(config, canvas)
   }
 
-  private createShapeButton(icon: string, tool: EditorWriteTool, label: string): HTMLButtonElement {
+  private createShapeButton(icon: string, tool: CanvasWriteTool, label: string): HTMLButtonElement {
     const button = this.dom.button({
       id: `${this.config.id}-${tool}`,
       className: "square",
@@ -41,8 +41,8 @@ export class ShapeTool extends BaseMenuItem<HTMLDivElement> {
 
     button.addEventListener("click", () => {
       this.unselectAll()
-      this.editor.tool = EditorTool.Write
-      this.editor.writer.tool = tool
+      this.canvas.tool = CanvasTool.Write
+      this.canvas.writer.tool = tool
       this.currentIcon = icon
 
       if (this.triggerButton) {
@@ -70,11 +70,11 @@ export class ShapeTool extends BaseMenuItem<HTMLDivElement> {
       id: `${this.config.id}-list`,
       className: ["ms-menu-row", "sub-menu-content-shape"],
     })
-    subMenuContent.appendChild(this.createShapeButton(rectangleIcon, EditorWriteTool.Rectangle, "Rectangle"))
-    subMenuContent.appendChild(this.createShapeButton(circleIcon, EditorWriteTool.Circle, "Circle"))
-    subMenuContent.appendChild(this.createShapeButton(ellipseIcon, EditorWriteTool.Ellipse, "Ellipse"))
-    subMenuContent.appendChild(this.createShapeButton(triangleIcon, EditorWriteTool.Triangle, "Triangle"))
-    subMenuContent.appendChild(this.createShapeButton(rhombusIcon, EditorWriteTool.Rhombus, "Rhombus"))
+    subMenuContent.appendChild(this.createShapeButton(rectangleIcon, CanvasWriteTool.Rectangle, "Rectangle"))
+    subMenuContent.appendChild(this.createShapeButton(circleIcon, CanvasWriteTool.Circle, "Circle"))
+    subMenuContent.appendChild(this.createShapeButton(ellipseIcon, CanvasWriteTool.Ellipse, "Ellipse"))
+    subMenuContent.appendChild(this.createShapeButton(triangleIcon, CanvasWriteTool.Triangle, "Triangle"))
+    subMenuContent.appendChild(this.createShapeButton(rhombusIcon, CanvasWriteTool.Rhombus, "Rhombus"))
 
     const content = this.dom.div({
       className: ["sub-menu-content", "top"],
@@ -113,18 +113,18 @@ export class ShapeTool extends BaseMenuItem<HTMLDivElement> {
     }
 
     const isShapeTool =
-      this.editor.tool === EditorTool.Write &&
+      this.canvas.tool === CanvasTool.Write &&
       [
-        EditorWriteTool.Circle,
-        EditorWriteTool.Ellipse,
-        EditorWriteTool.Triangle,
-        EditorWriteTool.Rectangle,
-        EditorWriteTool.Rhombus,
-      ].includes(this.editor.writer.tool)
+        CanvasWriteTool.Circle,
+        CanvasWriteTool.Ellipse,
+        CanvasWriteTool.Triangle,
+        CanvasWriteTool.Rectangle,
+        CanvasWriteTool.Rhombus,
+      ].includes(this.canvas.writer.tool)
 
     if (isShapeTool) {
       this.triggerButton.classList.add("active")
-      const activeButton = this.subMenuButtons.get(this.editor.writer.tool)
+      const activeButton = this.subMenuButtons.get(this.canvas.writer.tool)
       activeButton?.classList.add("active")
     } else {
       this.triggerButton.classList.remove("active")

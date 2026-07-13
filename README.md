@@ -27,6 +27,7 @@ It integrates all you need:
 - [Installation](#installation)
 - [Usage](#usage)
 - [Documentation](#documentation)
+- [Migration](#migration)
 - [Development](#development)
 - [Support](#getting-support)
 - [Feedback](#sharing-your-feedback)
@@ -85,38 +86,27 @@ yarn add iink-ts
 <script src="node_modules/iink-ts/dist/iink.min.js"></script>
 ```
 
-3. Still in the `head` section, add a `style` and specify the height and the width of your editor:
+3. Still in the `head` section, add a `style` and specify the height and the width of your canvas:
 
 ```html
 <style>
-  #editor {
+  #canvas {
     width: 100%;
     height: 100%;
   }
 </style>
 ```
 
-3. Still in the `head` section, add a `style` and specify the height and the width of your editor:
+4. In the `body` tag, create a `div` tag that will contain the drawing area:
 
 ```html
-<style>
-  #editor {
-    width: 100%;
-    height: 100%;
-  }
-</style>
+<div id="canvas"></div>
 ```
 
-4. In the `body` tag, create a `div` tag that will contain the editing area:
-
-```html
-<div id="editor"></div>
-```
-
-5. In JavaScript and within a `<script>` tag placed before the closing `</body>` tag, create the editor using the `load` function of the editor, your html editor element, the type of editor desired and the possible options depending on the type of editor then initialize it:
+5. In JavaScript and within a `<script>` tag placed before the closing `</body>` tag, create the canvas using the `load` function, your HTML element, the desired type and the possible options depending on the type, then initialize it:
 
 ```javascript
-    const editorElement = document.getElementById('editor');
+    const canvasElement = document.getElementById('canvas');
     const options = {
       configuration = {
         server: {
@@ -127,8 +117,8 @@ yarn add iink-ts
         }
       }
     }
-    const editorType = "INTERACTIVEINK" /* or INTERACTIVEINKSSR or INKV1 or INKV2 */
-    const editor = iink.Editor.load(editorElement, editorType, options);
+    const canvasType = "INTERACTIVE_INK" /* or INTERACTIVE_INK_SSR or INK_V1 or INK_V2 */
+    const canvas = iink.Canvas.load(canvasElement, canvasType, options);
 ```
 
 6. Your `index.html` file should look like this:
@@ -138,16 +128,16 @@ yarn add iink-ts
   <head>
     <script src="node_modules/iink-ts/dist/iink.min.js"></script>
     <style>
-      #editor {
+      #canvas {
         width: 100%;
         height: 100%;
       }
     </style>
   </head>
   <body>
-    <div id="editor"></div>
+    <div id="canvas"></div>
     <script>
-      const editorElement = document.getElementById("editor")
+      const canvasElement = document.getElementById("canvas")
       const options = {
         configuration: {
           server: {
@@ -158,9 +148,8 @@ yarn add iink-ts
           },
         }
       }
-      const editorType =
-        "INTERACTIVEINK" /* or INTERACTIVEINKSSR or INKV1 or INKV2 */
-      const editor = iink.Editor.load(editorElement, editorType, options)
+      const canvasType = "INTERACTIVE_INK" /* or INTERACTIVE_INK_SSR or INK_V1 or INK_V2 */
+      const canvas = iink.Canvas.load(canvasElement, canvasType, options)
     </script>
   </body>
 </html>
@@ -178,11 +167,11 @@ You can find this guide, and a more complete example on the [MyScript Developer 
 
 ```html
 <body>
-  <div id="editorEl"></div>
+  <div id="canvasEl"></div>
 
   <script type="module">
-    import { Editor, getAvailableLanguageList } from "../../dist/iink.esm.js"
-    const editorElement = document.getElementById("editorEl")
+    import { Canvas, getAvailableLanguageList } from "../../dist/iink.esm.js"
+    const canvasElement = document.getElementById("canvasEl")
 
     const options = {
       configuration : {
@@ -195,9 +184,9 @@ You can find this guide, and a more complete example on the [MyScript Developer 
       }
     }
 
-    const editorType =
-      "INTERACTIVEINK" /* or INTERACTIVEINKSSR or INKV1 or INKV2 */
-    const editor = await Editor.load(editorElement, editorType, options)
+    const canvasType =
+      "INTERACTIVE_INK" /* or INTERACTIVE_INK_SSR or INK_V1 or INK_V2 */
+    const canvas = await Canvas.load(canvasElement, canvasType, options)
   </script>
 </body>
 ```
@@ -208,17 +197,17 @@ You can find this guide, and a more complete example on the [MyScript Developer 
 <html>
   <head>
     <style>
-      #editorEl {
+      #canvasEl {
         width: 100%;
         height: 100%;
       }
     </style>
   </head>
   <body>
-    <div id="editorEl"></div>
+    <div id="canvasEl"></div>
     <script type="module">
-      import { Editor, getAvailableLanguageList } from '../../dist/iink.esm.js'
-      const editorElement = document.getElementById('editorEl')
+      import { Canvas, getAvailableLanguageList } from '../../dist/iink.esm.js'
+      const canvasElement = document.getElementById('canvasEl')
 
       const options = {
         configuration: {
@@ -231,7 +220,7 @@ You can find this guide, and a more complete example on the [MyScript Developer 
         }
       }
 
-      const editor = await Editor.load(editorElement, 'INTERACTIVEINKSSR', options)
+      const canvas = await Canvas.load(canvasElement, 'INTERACTIVE_INK_SSR', options)
     </script>
   </body>
 </html>
@@ -249,6 +238,10 @@ You can find a complete documentation with the following sections on our Develop
 
 We also provide a complete [API Reference](https://myscript.github.io/iinkTS/docs/).
 
+## Migration
+
+Upgrading from an earlier major version? See [MIGRATION.md](./MIGRATION.md) for breaking changes and step-by-step instructions.
+
 ## Development
 
 Instructions to help you build the project and develop are available in the [SETUP.md](./SETUP.md) file.
@@ -257,7 +250,7 @@ Instructions to help you build the project and develop are available in the [SET
 
 You can get support and ask your questions on the [dedicated section](https://developer-support.myscript.com/support/discussions/forums/16000096760) of MyScript Developer website.
 
-## Sharing your feedback ?
+## Sharing your feedback
 
 Made a cool app with iinkTS? We would love to hear about you!
 We’re planning to showcase apps using it so let us know by sending a quick mail to [myapp@myscript.com](mailto://myapp@myscript.com).

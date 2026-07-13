@@ -1,12 +1,12 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
-import { LoggerCategory } from "@/logger"
-import type { TJIIXMathElement } from "@/model"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type {
   TMathEvaluable,
   TMathVariable,
   TMathVariableDefinition,
   TMathVariableDefinitions,
-} from "@/recognizer/RecognizerWebSocketMessage"
+} from "@/client/WebSocketClientMessage"
+import { LoggerCategory } from "@/logger"
+import type { TJIIXMathElement } from "@/model"
 import type { TBox } from "@/symbol"
 import type { MatrixTransform } from "@/transform"
 
@@ -53,14 +53,14 @@ export class IIMathManager extends IIAbstractManager {
 
   #isHandlingSynchronized = false
 
-  constructor(editor: TInteractiveInkEditor, config?: TMathConfig) {
-    super(editor, LoggerCategory.MATH)
+  constructor(canvas: TInteractiveInkCanvas, config?: TMathConfig) {
+    super(canvas, LoggerCategory.MATH)
 
-    this.#computation = new IIMathComputationSubManager(editor, config?.computation)
-    this.#variables = new IIMathVariableSubManager(editor, config?.interaction)
-    this.#evaluation = new IIMathFunctionEvaluationSubManager(editor)
+    this.#computation = new IIMathComputationSubManager(canvas, config?.computation)
+    this.#variables = new IIMathVariableSubManager(canvas, config?.interaction)
+    this.#evaluation = new IIMathFunctionEvaluationSubManager(canvas)
 
-    editor.event.addSynchronizedListener(() => {
+    canvas.event.addSynchronizedListener(() => {
       this.#onSynchronized()
     })
   }
@@ -82,7 +82,7 @@ export class IIMathManager extends IIAbstractManager {
   /**
    * Compute numerical result for a math symbol
    * @param jiixBlockId - The ID of the math block
-   * @param mode - Result display mode ("draw" or "ghost"). Defaults to editor.mathResultMode
+   * @param mode - Result display mode ("draw" or "ghost"). Defaults to canvas.mathResultMode
    * @returns Promise with the computation result, number of added strokes, and numeric value
    */
   async computeNumericalResult(
@@ -95,25 +95,25 @@ export class IIMathManager extends IIAbstractManager {
     wasRecomputed: boolean
   }> {
     try {
-      return this.editor.trackOperation("Computing", async () =>
+      return this.canvas.trackOperation("Computing", async () =>
         this.#computation.computeNumericalResult(jiixBlockId, mode)
       )
     } catch (error) {
-      this.editor.manageError(error as Error)
+      this.canvas.manageError(error as Error)
       throw error
     }
   }
 
   async computeAllNumericalResults(): Promise<void> {
-    return this.editor.trackOperation("Computing", async () => this.#computation.computeAllNumericalResults())
+    return this.canvas.trackOperation("Computing", async () => this.#computation.computeAllNumericalResults())
   }
 
   async clearSolverOutputs(jiixBlockId: string): Promise<void> {
-    return this.editor.trackOperation("Computing", async () => this.#computation.clearSolverOutputs(jiixBlockId))
+    return this.canvas.trackOperation("Computing", async () => this.#computation.clearSolverOutputs(jiixBlockId))
   }
 
   async clearAllSolverOutputs(): Promise<void> {
-    return this.editor.trackOperation("Computing", async () => this.#computation.clearAllSolverOutputs())
+    return this.canvas.trackOperation("Computing", async () => this.#computation.clearAllSolverOutputs())
   }
 
   getComputation(jiixBlockId: string): TMathBlockComputation | undefined {
@@ -160,7 +160,7 @@ export class IIMathManager extends IIAbstractManager {
    * @returns Promise that resolves when the variable is set
    */
   async setVariableValue(jiixBlockId: string, variableName: string, variableValue: number): Promise<void> {
-    return this.editor.trackOperation("Updating variables", async () =>
+    return this.canvas.trackOperation("Updating variables", async () =>
       this.#setVariableValueInternal(jiixBlockId, variableName, variableValue)
     )
   }
@@ -180,7 +180,7 @@ export class IIMathManager extends IIAbstractManager {
         await this.recalculateDependentBlocks(jiixBlockId)
       }
     } catch (error) {
-      this.editor.manageError(error as Error)
+      this.canvas.manageError(error as Error)
       throw error
     }
   }
@@ -192,7 +192,7 @@ export class IIMathManager extends IIAbstractManager {
    * @returns Promise that resolves when all variables are set
    */
   async setListVariableValue(jiixBlockId: string, variableValues: Record<string, number>): Promise<void> {
-    return this.editor.trackOperation("Updating variables", async () =>
+    return this.canvas.trackOperation("Updating variables", async () =>
       this.#setListVariableValueInternal(jiixBlockId, variableValues)
     )
   }
@@ -208,7 +208,7 @@ export class IIMathManager extends IIAbstractManager {
         await this.setVariableValue(jiixBlockId, variableName, variableValue)
       }
     } catch (error) {
-      this.editor.manageError(error as Error)
+      this.canvas.manageError(error as Error)
       throw error
     }
   }
@@ -220,9 +220,9 @@ export class IIMathManager extends IIAbstractManager {
    */
   async getVariables(jiixBlockId: string): Promise<TMathVariable[]> {
     try {
-      return this.editor.trackOperation("Loading variables", async () => this.#variables.getVariables(jiixBlockId))
+      return this.canvas.trackOperation("Loading variables", async () => this.#variables.getVariables(jiixBlockId))
     } catch (error) {
-      this.editor.manageError(error as Error)
+      this.canvas.manageError(error as Error)
       throw error
     }
   }
@@ -235,11 +235,11 @@ export class IIMathManager extends IIAbstractManager {
    */
   async getVariableValue(jiixBlockId: string, variableName: string): Promise<number | null> {
     try {
-      return this.editor.trackOperation("Loading variables", async () =>
+      return this.canvas.trackOperation("Loading variables", async () =>
         this.#variables.getVariableValue(jiixBlockId, variableName)
       )
     } catch (error) {
-      this.editor.manageError(error as Error)
+      this.canvas.manageError(error as Error)
       throw error
     }
   }
@@ -249,7 +249,7 @@ export class IIMathManager extends IIAbstractManager {
   }
 
   async enrichMathDependencies(jiixBlockId: string): Promise<void> {
-    return this.editor.trackOperation("Loading variables", async () =>
+    return this.canvas.trackOperation("Loading variables", async () =>
       this.#variables.enrichMathDependencies(jiixBlockId)
     )
   }
@@ -259,7 +259,7 @@ export class IIMathManager extends IIAbstractManager {
   }
 
   async recalculateDependentBlocks(sourceBlockId: string): Promise<void> {
-    return this.editor.trackOperation("Computing", async () => this.#recalculateDependentBlocksInternal(sourceBlockId))
+    return this.canvas.trackOperation("Computing", async () => this.#recalculateDependentBlocksInternal(sourceBlockId))
   }
 
   async #recalculateDependentBlocksInternal(sourceBlockId: string): Promise<void> {
@@ -283,7 +283,7 @@ export class IIMathManager extends IIAbstractManager {
     }
 
     this.logger.info("recalculateDependentBlocks", "All dependent blocks recalculated")
-    this.editor.event.emitChanged(this.editor.history.context)
+    this.canvas.event.emitChanged(this.canvas.history.context)
   }
 
   selectBlock(jiixBlockId: string): void {
@@ -307,24 +307,24 @@ export class IIMathManager extends IIAbstractManager {
   }
 
   async removeVariable(jiixBlockId: string, variableName: string): Promise<void> {
-    return this.editor.trackOperation("Updating variables", async () => {
+    return this.canvas.trackOperation("Updating variables", async () => {
       await this.#variables.removeVariableValue(jiixBlockId, variableName)
       await this.recalculateDependentBlocks(jiixBlockId)
     })
   }
 
   async asVariableDefinition(jiixBlockId: string): Promise<TMathVariableDefinition | null> {
-    return this.editor.trackOperation("Loading variables", async () =>
+    return this.canvas.trackOperation("Loading variables", async () =>
       this.#variables.asVariableDefinition(jiixBlockId)
     )
   }
 
   async getVariableDefinitions(): Promise<TMathVariableDefinitions[]> {
-    return this.editor.trackOperation("Loading variables", async () => this.#variables.getVariableDefinitions())
+    return this.canvas.trackOperation("Loading variables", async () => this.#variables.getVariableDefinitions())
   }
 
   async getAllVariableUsages(): Promise<TMathVariableUsage[]> {
-    return this.editor.trackOperation("Loading variables", async () => this.#variables.getAllVariableUsages())
+    return this.canvas.trackOperation("Loading variables", async () => this.#variables.getAllVariableUsages())
   }
 
   clearVariableInteractions(): void {
@@ -348,11 +348,11 @@ export class IIMathManager extends IIAbstractManager {
     }
   ): Promise<{ [key: string]: number }[][]> {
     try {
-      return this.editor.trackOperation("Evaluating", async () =>
+      return this.canvas.trackOperation("Evaluating", async () =>
         this.#evaluation.evaluateFunction(jiixBlockId, evaluation)
       )
     } catch (error) {
-      this.editor.manageError(error as Error)
+      this.canvas.manageError(error as Error)
       throw error
     }
   }
@@ -364,9 +364,9 @@ export class IIMathManager extends IIAbstractManager {
    */
   async getEvaluables(jiixBlockId: string): Promise<TMathEvaluable[]> {
     try {
-      return this.editor.trackOperation("Evaluating", async () => this.#evaluation.getEvaluables(jiixBlockId))
+      return this.canvas.trackOperation("Evaluating", async () => this.#evaluation.getEvaluables(jiixBlockId))
     } catch (error) {
-      this.editor.manageError(error as Error)
+      this.canvas.manageError(error as Error)
       throw error
     }
   }
@@ -383,11 +383,11 @@ export class IIMathManager extends IIAbstractManager {
         jiixBlockId,
         task,
       })
-      return await this.editor.trackOperation("Checking", async () =>
-        this.editor.recognizer.getDiagnostic(jiixBlockId, task)
+      return await this.canvas.trackOperation("Checking", async () =>
+        this.canvas.client.getDiagnostic(jiixBlockId, task)
       )
     } catch (error) {
-      this.editor.manageError(error as Error)
+      this.canvas.manageError(error as Error)
       throw error
     }
   }
@@ -402,11 +402,11 @@ export class IIMathManager extends IIAbstractManager {
       this.logger.info("getAvailableActions", {
         jiixBlockId,
       })
-      return await this.editor.trackOperation("Checking", async () =>
-        this.editor.recognizer.getAvailableActions(jiixBlockId)
+      return await this.canvas.trackOperation("Checking", async () =>
+        this.canvas.client.getAvailableActions(jiixBlockId)
       )
     } catch (error) {
-      this.editor.manageError(error as Error)
+      this.canvas.manageError(error as Error)
       throw error
     }
   }
@@ -428,13 +428,13 @@ export class IIMathManager extends IIAbstractManager {
   // ==========================================
 
   async tryAutoCompute(): Promise<void> {
-    return this.editor.trackOperation("Computing", async () => this.#tryAutoComputeInternal())
+    return this.canvas.trackOperation("Computing", async () => this.#tryAutoComputeInternal())
   }
 
   async #tryAutoComputeInternal(): Promise<void> {
     this.logger.info("tryAutoCompute")
 
-    const mathBlocks = this.editor.model.mathBlocks
+    const mathBlocks = this.canvas.model.mathBlocks
     for (const mb of mathBlocks) {
       if (!mb.id) {
         continue
@@ -449,7 +449,7 @@ export class IIMathManager extends IIAbstractManager {
       }
 
       try {
-        const actions = await this.editor.recognizer.getAvailableActions(mb.id)
+        const actions = await this.canvas.client.getAvailableActions(mb.id)
         if (actions?.includes("numerical-computation")) {
           await this.#computation.computeNumericalResult(mb.id)
         } else if (this.#computation.hasGhostStrokes(mb.id)) {
@@ -459,7 +459,7 @@ export class IIMathManager extends IIAbstractManager {
         this.logger.debug("tryAutoCompute", `Cannot auto-compute "${label}":`, (error as Error).message)
       }
     }
-    this.editor.selector.redrawSelectedGroup()
+    this.canvas.selector.redrawSelectedGroup()
   }
 
   protected onDestroy(): void {

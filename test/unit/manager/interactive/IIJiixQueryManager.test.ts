@@ -1,11 +1,11 @@
 import { buildIIStroke } from "../../helpers"
-import { createEditorMock, asEditor } from "../../__mocks__/createEditorMock"
+import { createCanvasMock, asEditor } from "../../__mocks__/createCanvasMock"
 import { IIJiixQueryManager } from "@/iink"
 
 describe("IIJiixQueryManager.ts", () => {
   describe("getBlocksForSymbols", () => {
     test("should return empty array when no exports", () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const jiix = new IIJiixQueryManager(asEditor(editor))
       const stroke = buildIIStroke()
       editor.model.addSymbol(stroke)
@@ -13,7 +13,7 @@ describe("IIJiixQueryManager.ts", () => {
     })
 
     test("should return empty array when no symbol matches any block", () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const jiix = new IIJiixQueryManager(asEditor(editor))
       const stroke = buildIIStroke()
       editor.model.addSymbol(stroke)
@@ -32,7 +32,7 @@ describe("IIJiixQueryManager.ts", () => {
     })
 
     test("should return block when all its strokes are in symbols", () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const jiix = new IIJiixQueryManager(asEditor(editor))
       const stroke = buildIIStroke()
       editor.model.addSymbol(stroke)
@@ -52,7 +52,7 @@ describe("IIJiixQueryManager.ts", () => {
     })
 
     test("should not return block when only some strokes are in symbols", () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const jiix = new IIJiixQueryManager(asEditor(editor))
       const stroke1 = buildIIStroke()
       const stroke2 = buildIIStroke()
@@ -80,7 +80,7 @@ describe("IIJiixQueryManager.ts", () => {
     })
 
     test("should return only fully-covered blocks among multiple", () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const jiix = new IIJiixQueryManager(asEditor(editor))
       const stroke1 = buildIIStroke()
       const stroke2 = buildIIStroke()
@@ -114,7 +114,7 @@ describe("IIJiixQueryManager.ts", () => {
 
   describe("getBlocksForSymbols with selected symbols", () => {
     test("should return blocks for selected symbols", () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const jiix = new IIJiixQueryManager(asEditor(editor))
       const stroke = buildIIStroke()
       editor.model.addSymbol(stroke)
@@ -138,7 +138,7 @@ describe("IIJiixQueryManager.ts", () => {
     })
 
     test("should return empty when no symbols selected", () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const jiix = new IIJiixQueryManager(asEditor(editor))
       const stroke = buildIIStroke()
       editor.model.addSymbol(stroke)

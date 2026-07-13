@@ -1,8 +1,8 @@
-.ms-editor .ms-menu {
+.ms-ink .ms-menu {
   z-index: 99;
   padding: 5px;
-  color: var(--iink-color);
-  background-color: var(--iink-menu-bg);
+  color: var(--ms-ink-color);
+  background-color: var(--ms-ink-menu-bg);
   box-shadow:
     1px 1px 5px rgba(0, 0, 0, 0.25),
     -1px -1px 5px rgba(0, 0, 0, 0.25);
@@ -10,14 +10,14 @@
   pointer-events: all;
 }
 
-.ms-editor .ms-menu-top-left {
+.ms-ink .ms-menu-top-left {
   position: absolute;
   top: 0;
   left: 5px;
   border-radius: 0 0 5px 5px;
 }
 
-.ms-editor .ms-menu-bottom {
+.ms-ink .ms-menu-bottom {
   position: absolute;
   bottom: 8px;
   left: 50%;
@@ -25,14 +25,14 @@
   border-radius: 5px;
 }
 
-.ms-editor .ms-menu-top-right {
+.ms-ink .ms-menu-top-right {
   position: absolute;
   top: 0;
   right: 5px;
   border-radius: 0 0 5px 5px;
 }
 
-.ms-editor .ms-menu-minimap {
+.ms-ink .ms-menu-minimap {
   position: absolute;
   bottom: 16px;
   right: 16px;
@@ -40,31 +40,31 @@
   padding: 0;
 }
 
-.ms-editor .ms-menu .ms-menu-title {
+.ms-ink .ms-menu .ms-menu-title {
   margin-top: 0px;
   margin-bottom: 8px;
   font-size: 16px;
   font-weight: bold;
   padding: 2px;
-  background-color: var(--iink-menu-title-bg);
+  background-color: var(--ms-ink-menu-title-bg);
   border-radius: 5px 5px 0 0;
   text-align: center;
 }
 
-.ms-editor .ms-menu-column {
+.ms-ink .ms-menu-column {
   display: flex;
   flex-direction: column;
   justify-content: center;
   min-width: 0;
 }
 
-.ms-editor .ms-menu-row {
+.ms-ink .ms-menu-row {
   display: flex;
   flex-direction: row;
   justify-content: center;
 }
 
-.ms-editor .ms-menu-item {
+.ms-ink .ms-menu-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -73,7 +73,7 @@
   width: 100%;
 }
 
-.ms-editor .ms-menu .list {
+.ms-ink .ms-menu .list {
   gap: 2px;
   cursor: pointer;
   flex-wrap: wrap;
@@ -83,29 +83,29 @@
   max-width: 150px;
 }
 
-.ms-editor .ms-menu svg {
+.ms-ink .ms-menu svg {
   position: relative;
   width: 20px;
   height: 20px;
 }
 
-.ms-editor button .color {
+.ms-ink button .color {
   height: 75%;
   width: 75%;
   border-radius: 100%;
   margin: auto;
 }
 
-.ms-editor .sub-menu {
+.ms-ink .sub-menu {
   position: relative;
   overflow: visible;
 }
 
-.ms-editor .sub-menu .sub-menu-content {
+.ms-ink .sub-menu .sub-menu-content {
   position: absolute;
   z-index: 100;
   white-space: nowrap;
-  background-color: var(--iink-menu-bg);
+  background-color: var(--ms-ink-menu-bg);
   box-shadow:
     1px 1px 5px rgba(0, 0, 0, 0.25),
     -1px -1px 5px rgba(0, 0, 0, 0.25);
@@ -115,40 +115,40 @@
   display: none;
 }
 
-.ms-editor .sub-menu .sub-menu-content.open {
+.ms-ink .sub-menu .sub-menu-content.open {
   display: block;
 }
 
-.ms-editor .sub-menu .sub-menu-content.top {
+.ms-ink .sub-menu .sub-menu-content.top {
   top: -8px;
   transform: translate(-50%, -100%);
   left: 50%;
 }
 
-.ms-editor .sub-menu .sub-menu-content.bottom {
+.ms-ink .sub-menu .sub-menu-content.bottom {
   bottom: -8px;
   left: 50%;
   transform: translate(-50%, 100%);
 }
 
-.ms-editor .sub-menu .sub-menu-content.bottom-left {
+.ms-ink .sub-menu .sub-menu-content.bottom-left {
   bottom: -8px;
   transform: translate(-0%, 100%);
   right: 0;
 }
 
-.ms-editor .sub-menu .sub-menu-content.right-top {
+.ms-ink .sub-menu .sub-menu-content.right-top {
   top: 0%;
   transform: translate(100%, 0%);
   right: -8px;
 }
 
-.ms-editor .sub-menu .sub-menu-content.right {
+.ms-ink .sub-menu .sub-menu-content.right {
   top: 50%;
   transform: translate(100%, -50%);
   right: -8px;
 }
 
-.ms-editor .ms-menu-context {
+.ms-ink .ms-menu-context {
   position: absolute;
 }

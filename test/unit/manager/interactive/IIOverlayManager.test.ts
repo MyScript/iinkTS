@@ -1,16 +1,16 @@
-import { createEditorMock, asEditor } from "../../__mocks__/createEditorMock"
+import { createCanvasMock, asEditor } from "../../__mocks__/createCanvasMock"
 import { IIOverlayManager } from "@/iink"
 
 describe("IIOverlayManager.ts", () => {
   test("should create", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IIOverlayManager(asEditor(editor))
     expect(manager).toBeDefined()
   })
 
   describe("showVariableEncart / hideVariableEncart", () => {
     test("should append a group with one text line per item, centered on the anchor", () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const manager = new IIOverlayManager(asEditor(editor))
 
       manager.showVariableEncart({
@@ -25,7 +25,7 @@ describe("IIOverlayManager.ts", () => {
     })
 
     test("should render one swatch + one text line per item when several variables are shown", () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const manager = new IIOverlayManager(asEditor(editor))
 
       manager.showVariableEncart({
@@ -42,7 +42,7 @@ describe("IIOverlayManager.ts", () => {
     })
 
     test("should not append anything when there are no items", () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const manager = new IIOverlayManager(asEditor(editor))
 
       manager.showVariableEncart({ anchor: { x: 0, y: 0 }, items: [] })
@@ -51,7 +51,7 @@ describe("IIOverlayManager.ts", () => {
     })
 
     test("hideVariableEncart should remove the encart symbol", () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const manager = new IIOverlayManager(asEditor(editor))
 
       manager.hideVariableEncart()
@@ -60,7 +60,7 @@ describe("IIOverlayManager.ts", () => {
     })
 
     test("clearHighlights should also hide the variable encart", () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const manager = new IIOverlayManager(asEditor(editor))
       const hideSpy = jest.spyOn(manager, "hideVariableEncart")
 

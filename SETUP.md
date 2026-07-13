@@ -28,7 +28,7 @@ Requires Node.js >= 22.
 
 **Prefix Helper**
 
-* **T**: correspond to TypeScript type (ex: TInkEditorConfiguration, TStyle...)
-* **I**: correspond to Ink with RecognizerHTTPV2 (IWriterManager, IModel, IHistoryManager...)
-* **II**: correspond to Interactive Ink with RecognizerWebsocket (IIModek, IIHistoryManager, IITextManager...)
-* **InteractiveInkSSR**: correspond to Interactive Ink Server Side Rendering with RecognizerWebsocketSSR
+* **T**: correspond to TypeScript type (ex: TInkCanvasConfiguration, TStyle...)
+* **I**: correspond to Ink with HTTPClientV2 (IWriterManager, IModel, IHistoryManager...)
+* **II**: correspond to Interactive Ink with WebSocketClient (IIModek, IIHistoryManager, IITextManager...)
+* **InteractiveInkSSR**: correspond to Interactive Ink Server Side Rengering with WebSocketSSRClient

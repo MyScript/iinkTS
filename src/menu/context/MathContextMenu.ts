@@ -1,5 +1,5 @@
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { IIMathDiagnosticChecker, IIMathFunctionEvaluator, IIMathVariablePerBlockEditor } from "@/components"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
 import { LoggerCategory, LoggerManager } from "@/logger"
 import type { TMenuSubMenu } from "@/menu/items/SubMenuItem"
 import { SubMenuItem } from "@/menu/items/SubMenuItem"
@@ -30,7 +30,7 @@ export class MathContextMenu extends SubMenuItem {
   readonly idSelectResultStrokes: string
   readonly idDeleteResultStrokes: string
 
-  constructor(editor: TInteractiveInkEditor, idPrefix = "ms-menu-context", itemsConfig?: TContextMathItemsConfig) {
+  constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-context", itemsConfig?: TContextMathItemsConfig) {
     const enabled = (key: keyof TContextMathItemsConfig) => itemsConfig?.[key] !== false
 
     const id = `${idPrefix}-math`
@@ -57,15 +57,15 @@ export class MathContextMenu extends SubMenuItem {
         action: async () => {
           this.logger.info("Check diagnostic clicked")
           try {
-            const jiixBlockIds = editor.jiix
-              .getBlocksForSymbols(editor.model.symbolsSelected)
+            const jiixBlockIds = canvas.jiix
+              .getBlocksForSymbols(canvas.model.symbolsSelected)
               .filter((s) => s.type === "Math")
               .map((s) => s.id)
             if (jiixBlockIds.length === 0) {
               this.logger.warn("No block math selected")
               return
             }
-            const checker = new IIMathDiagnosticChecker(editor, jiixBlockIds)
+            const checker = new IIMathDiagnosticChecker(canvas, jiixBlockIds)
             await checker.show()
           } catch (error) {
             this.logger.error("Error checking diagnostic:", error)
@@ -80,15 +80,15 @@ export class MathContextMenu extends SubMenuItem {
         type: "button",
         label: "Edit variables",
         action: async () => {
-          const jiixBlockIds = editor.jiix
-            .getBlocksForSymbols(editor.model.symbolsSelected)
+          const jiixBlockIds = canvas.jiix
+            .getBlocksForSymbols(canvas.model.symbolsSelected)
             .filter((s) => s.type === "Math")
             .map((s) => s.id)
           if (jiixBlockIds.length === 0) {
             this.logger.warn("No block math selected")
             return
           }
-          const variableEditor = new IIMathVariablePerBlockEditor(editor, jiixBlockIds)
+          const variableEditor = new IIMathVariablePerBlockEditor(canvas, jiixBlockIds)
           await variableEditor.show()
         },
       })
@@ -102,15 +102,15 @@ export class MathContextMenu extends SubMenuItem {
         action: async () => {
           this.logger.info("Compute numerical result clicked")
           try {
-            const jiixBlockIds = editor.jiix
-              .getBlocksForSymbols(editor.model.symbolsSelected)
+            const jiixBlockIds = canvas.jiix
+              .getBlocksForSymbols(canvas.model.symbolsSelected)
               .filter((s) => s.type === "Math")
               .map((s) => s.id)
             if (jiixBlockIds.length === 0) {
               this.logger.warn("No block math selected")
               return
             }
-            await Promise.all(jiixBlockIds.map((jiixBlockId) => this.editor.math.computeNumericalResult(jiixBlockId)))
+            await Promise.all(jiixBlockIds.map((jiixBlockId) => this.canvas.math.computeNumericalResult(jiixBlockId)))
           } catch (error) {
             this.logger.error("Error computing numerical result:", error)
           }
@@ -126,15 +126,15 @@ export class MathContextMenu extends SubMenuItem {
         action: async () => {
           this.logger.info("Evaluate function clicked")
           try {
-            const jiixBlockIds = editor.jiix
-              .getBlocksForSymbols(editor.model.symbolsSelected)
+            const jiixBlockIds = canvas.jiix
+              .getBlocksForSymbols(canvas.model.symbolsSelected)
               .filter((s) => s.type === "Math")
               .map((s) => s.id)
             if (jiixBlockIds.length === 0) {
               this.logger.warn("No block math selected")
               return
             }
-            const evaluator = new IIMathFunctionEvaluator(editor, jiixBlockIds)
+            const evaluator = new IIMathFunctionEvaluator(canvas, jiixBlockIds)
             await evaluator.show()
           } catch (error) {
             this.logger.error("Error evaluating function:", error)
@@ -149,15 +149,15 @@ export class MathContextMenu extends SubMenuItem {
         type: "button",
         label: "Select result strokes",
         action: () => {
-          const jiixBlockId = editor.jiix
-            .getBlocksForSymbols(editor.model.symbolsSelected)
+          const jiixBlockId = canvas.jiix
+            .getBlocksForSymbols(canvas.model.symbolsSelected)
             .find((s) => s.type === "Math")?.id
           if (!jiixBlockId) {
             return
           }
-          const ids = editor.math.getStoredSolverOutputs(jiixBlockId) ?? []
+          const ids = canvas.math.getStoredSolverOutputs(jiixBlockId) ?? []
           if (ids.length > 0) {
-            editor.select(ids)
+            canvas.select(ids)
           }
         },
       })
@@ -167,18 +167,18 @@ export class MathContextMenu extends SubMenuItem {
         type: "button",
         label: "Delete result strokes",
         action: async () => {
-          const jiixBlockId = editor.jiix
-            .getBlocksForSymbols(editor.model.symbolsSelected)
+          const jiixBlockId = canvas.jiix
+            .getBlocksForSymbols(canvas.model.symbolsSelected)
             .find((s) => s.type === "Math")?.id
           if (!jiixBlockId) {
             return
           }
-          await editor.math.clearSolverOutputs(jiixBlockId)
+          await canvas.math.clearSolverOutputs(jiixBlockId)
         },
       })
     }
 
-    super(config, editor)
+    super(config, canvas)
     this.id = id
     this.idEditVariables = idEditVariables
     this.idNumericalComputation = idNumericalComputation

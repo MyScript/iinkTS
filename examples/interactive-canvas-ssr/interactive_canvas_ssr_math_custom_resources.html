@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Custom resources math</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">Custom resources math</h1>
+    </header>
+
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">🏫 Restricted math grammar for young learners</p>
+        <p class="ex-panel-intro">By default the math engine recognizes the full range of mathematical notation. A custom grammar narrows that scope — here, only digits <strong>0–9</strong> and the operators <strong>+</strong> and <strong>−</strong> are accepted. Anything else is ignored.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">This is useful for educational apps targeting young students: the engine won't misinterpret a shaky digit as a Greek letter or a fraction.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">The grammar is passed inline via <code>customGrammarContent</code> — no server upload needed (contrast with <code>customResources</code>, which references a pre-uploaded file).</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Try writing <em>3 + 5</em> or <em>12 - 4</em>. Complex symbols like <em>∫</em> or <em>√</em> will not be recognized.</div>
+        </div>
+      </aside>
+
+      <div class="page-content">
+        <div id="result"></div>
+
+        <nav class="flex-container between wrap gap">
+          <div class="flex-container wrap gap">
+            <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+              <img src="../assets/img/clear.svg" />
+            </button>
+            <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+              <img src="../assets/img/undo.svg" />
+            </button>
+            <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+              <img src="../assets/img/redo.svg" />
+            </button>
+          </div>
+          <button class="classic-btn" id="convert" disabled>
+            Convert
+          </button>
+        </nav>
+
+        <div id="rootEl"></div>
+      </div>
+    </div>
+
+    <script type="module">
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      import { Canvas } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
+      const rootElement = document.getElementById('rootEl')
+      const resultElement = document.getElementById('result')
+      const undoElement = document.getElementById('undo')
+      const redoElement = document.getElementById('redo')
+      const clearElement = document.getElementById('clear')
+      const convertElement = document.getElementById('convert')
+      const showModalBtn = document.getElementById('showModalBtn')
+      let canvas
+
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            type: 'MATH',
+            math: {
+              mimeTypes: ['application/x-latex'],
+              customGrammarContent:
+                'symbol = 0 1 2 3 4 5 6 7 8 9 + -\ncharacter ::= identity(symbol)\nexpression ::= identity(character) | hpair(expression, expression)\nstart(expression)'
+            }
+          }
+        }
+      }
+      async function loadEditor(options) {
+        canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK_SSR', options)
+
+        canvas.event.addEventListener('changed', (event) => {
+          undoElement.disabled = !event.detail.canUndo
+          redoElement.disabled = !event.detail.canRedo
+          clearElement.disabled = event.detail.empty
+        })
+
+        canvas.event.addEventListener('exported', (evt) => {
+          const exports = evt.detail
+          if (exports && exports['application/x-latex']) {
+            convertElement.disabled = false
+            resultElement.innerHTML = '<span>' + exports['application/x-latex'] + '</span>'
+          } else {
+            convertElement.disabled = true
+            resultElement.innerHTML = ''
+          }
+        })
+      }
+
+      undoElement.addEventListener('click', () => {
+        rootElement.iink?.undo()
+      })
+
+      redoElement.addEventListener('click', () => {
+        rootElement.iink?.redo()
+      })
+
+      clearElement.addEventListener('click', () => {
+        rootElement.iink?.clear()
+      })
+
+      convertElement.addEventListener('click', () => {
+        rootElement.iink?.convert()
+      })
+
+      showModalBtn.addEventListener('click', () => {
+        ModalCanvasOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>

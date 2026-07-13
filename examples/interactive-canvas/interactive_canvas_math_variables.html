@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Math Variables</title>
+
+  <link rel="stylesheet" href="../assets/style/reset.css" />
+  <link rel="stylesheet" href="../assets/style/components.css" />
+  <link rel="stylesheet" href="../assets/style/examples.css" />
+  <link rel="stylesheet" href="../assets/style/inputs.css" />
+  <link rel="stylesheet" href="../assets/style/panel.css" />
+  <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+
+  <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
+
+<body>
+  <header class="header-main">
+    <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+      x Variables
+    </button>
+    <button id="showModalBtn" class="btn-keys">API Keys</button>
+    <h1 class="header-title">Math — Variables</h1>
+  </header>
+
+  <div class="ex-page-layout">
+
+    <aside id="info-panel" class="ex-panel">
+      <p class="ex-panel-heading">Variable types</p>
+      <p class="ex-panel-intro">Variables are auto-detected when you write definitions and expressions.</p>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label" style="color: #4CAF50">BLOCK</span></div>
+        <div class="ex-panel-item-desc">
+          Defined by a written expression (e.g. x=3). Read-only in the variable canvas — change the expression on canvas to update.
+        </div>
+      </div>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label" style="color: #9C27B0">API_GLOBAL</span></div>
+        <div class="ex-panel-item-desc">
+          Set via ≡ → Math → Edit Variables. Global fallback — used when no BLOCK definition exists for that name.
+        </div>
+      </div>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label" style="color: #1976d2">API</span></div>
+        <div class="ex-panel-item-desc">
+          Set programmatically per block. Takes priority over everything else.
+        </div>
+      </div>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label" style="color: #9e9e9e">UNDEFINED</span></div>
+        <div class="ex-panel-item-desc">
+          Referenced in an expression but not yet defined. Set a value via Edit Variables to resolve.
+        </div>
+      </div>
+
+      <div class="ex-panel-divider"></div>
+
+      <p class="ex-panel-subtitle">Priority order</p>
+      <p class="ex-panel-intro">When the same variable name exists in multiple scopes:</p>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label">1. API</span></div>
+        <div class="ex-panel-item-desc">
+          Highest — per-block programmatic value overrides all.
+        </div>
+      </div>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label">2. BLOCK</span></div>
+        <div class="ex-panel-item-desc">
+          Written expression on the canvas.
+        </div>
+      </div>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label">3. API_GLOBAL</span></div>
+        <div class="ex-panel-item-desc">
+          Global fallback — only used if no BLOCK definition exists.
+        </div>
+      </div>
+
+      <div class="ex-panel-divider"></div>
+
+      <p class="ex-panel-subtitle">Try it</p>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label">Substitution</span></div>
+        <div class="ex-panel-item-desc">
+          Write <code>x=5</code>, then write <code>3x+2=</code>. Computation uses x=5 automatically.
+        </div>
+      </div>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label">Chained variables</span></div>
+        <div class="ex-panel-item-desc">
+          Write <code>x=3</code> and <code>y=x+1</code>. Then write <code>y²=</code>. Result chains through both definitions.
+        </div>
+      </div>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label">Updating a BLOCK variable</span></div>
+        <div class="ex-panel-item-desc">
+          Write <code>x=2</code>, then <code>x²=</code> (result 4). To change x, erase the "2" and write <code>5</code> in its place — a BLOCK variable's value is defined by the ink itself, so it's read-only in Edit Variables (and can't be overridden via the API either); editing the canvas is the only way. The dependent expression recalculates automatically (result becomes 25).
+        </div>
+      </div>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label">Global fallback</span></div>
+        <div class="ex-panel-item-desc">
+          Write <code>2x=</code> without defining x first. Open ≡ → Math → Edit Variables → add x=10 → Apply. Compute → result 20. Now write <code>x=3</code> next to it — BLOCK x=3 wins, result becomes 6.
+        </div>
+      </div>
+
+      <div class="ex-panel-item">
+        <div><span class="ex-panel-item-label">Undefined variable</span></div>
+        <div class="ex-panel-item-desc">
+          Write <code>A+B=</code> without defining them. They appear as UNDEFINED in Edit Variables. Assign values there to resolve.
+        </div>
+      </div>
+
+      <div class="ex-panel-divider"></div>
+
+      <p class="ex-panel-subtitle">Tips</p>
+
+      <div class="ex-panel-hint">
+        BLOCK variables update when you modify the expression on canvas. Use API_GLOBAL for constants shared across the page (e.g. A=42) when you don't want to write them as ink.
+      </div>
+
+    </aside>
+
+    <div id="rootEl"></div>
+
+  </div>
+
+  <script type="module">
+    import { Canvas } from '../../dist/iink.esm.js'
+    import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
+
+    const rootElement = document.getElementById('rootEl');
+    const showModalBtn = document.getElementById("showModalBtn");
+    const panelToggleBtn = document.getElementById('panelToggleBtn')
+    const infoPanel = document.getElementById('info-panel')
+
+    panelToggleBtn.addEventListener('click', () => {
+      const open = infoPanel.classList.toggle('open')
+      panelToggleBtn.setAttribute('aria-expanded', open)
+    })
+
+    let canvas
+
+    const editorOptions = {
+      configuration: {
+        recognition: {
+          "raw-content": {
+            recognition: { types: ["math"] },
+            classification: { types: ["math"] },
+            gestures: ["scratch-out", "surround"]
+          },
+        },
+        menu: {
+          action: {
+            language: false,
+            gesture: false,
+            snap: false,
+            export: false,
+            import: false,
+            convert: false,
+            debug: false,
+            guide: false,
+            selection: false,
+            math: {
+              autoCompute: true,
+              resultMode: false,
+              editVariables: true,
+            }
+          },
+          tool: {
+            write: true,
+            move: true,
+            select: true,
+            erase: true,
+            shape: false,
+            edge: false
+          },
+          style: {
+            strokeColor: true,
+            fillColor: false,
+            thickness: false,
+            fontSize: false,
+            fontWeight: false,
+            opacity: false,
+          }
+        },
+        math: {
+          computation: {
+            autoCompute: true,
+            resultMode: "ghost",
+            resultColor: "#9c27b0"
+          }
+        }
+      }
+    }
+
+    async function loadEditor(options) {
+      await canvas?.destroy()
+
+      canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK', options)
+
+      return canvas
+    }
+
+    showModalBtn.addEventListener('click', () => {
+      ModalCanvasOptions.show(loadEditor, editorOptions)
+    })
+
+    ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+  </script>
+  <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+  <script src="../assets/js/theme.js"></script>
+</body>
+</html>

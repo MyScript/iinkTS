@@ -1,12 +1,12 @@
 import { buildIICircle, buildIIStroke, buildIIText } from "../../helpers"
-import { createEditorMock, asEditor } from "../../__mocks__/createEditorMock"
+import { createCanvasMock, asEditor } from "../../__mocks__/createCanvasMock"
 import {
   DefaultIIRendererConfiguration,
   TGesture,
   TSymbolChar,
   IIGestureManager,
   TStroke,
-  TRecognizerWebSocketMessageType,
+  TWebSocketClientMessageType,
   BoxOps,
   OBBOps,
 } from "@/iink"
@@ -15,13 +15,13 @@ describe("IIGestureManager.ts", () => {
   const rowHeight = DefaultIIRendererConfiguration.guides.gap
 
   test("should create", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const gestMan = new IIGestureManager(asEditor(editor))
     expect(gestMan).toBeDefined()
   })
 
   describe("apply", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     editor.overlays.apply = jest.fn()
     const gestMan = new IIGestureManager(asEditor(editor))
     // Handlers are now private - test behavior instead of implementation
@@ -97,7 +97,7 @@ describe("IIGestureManager.ts", () => {
   })
 
   describe.skip("applyScratchGesture", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IIGestureManager(asEditor(editor))
     manager.typeset.updateBounds = jest.fn()
     manager.renderer.drawSymbol = jest.fn()
@@ -106,8 +106,8 @@ describe("IIGestureManager.ts", () => {
     manager.model.removeSymbol = jest.fn((id) => [id])
     manager.model.updateSymbol = jest.fn((id) => [id])
     manager.model.replaceSymbol = jest.fn((id) => [id])
-    manager.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
-    manager.recognizer.replaceStrokes = jest.fn(() => Promise.resolve())
+    manager.client.eraseStrokes = jest.fn(() => Promise.resolve())
+    manager.client.replaceStrokes = jest.fn(() => Promise.resolve())
     manager.history.push = jest.fn()
 
     beforeEach(() => {
@@ -278,7 +278,7 @@ describe("IIGestureManager.ts", () => {
 
   // TODO: Refactor these tests to work with Strategy Pattern - JoinGestureHandler
   describe.skip("applyJoinGesture", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const stroke11 = buildIIStroke({ box: { height: 9, width: 10, x: 0, y: 0.6 * rowHeight } })
     editor.model.addSymbol(stroke11)
     const stroke12 = buildIIStroke({ box: { height: 9, width: 10, x: 100, y: 0.6 * rowHeight } })
@@ -345,7 +345,7 @@ describe("IIGestureManager.ts", () => {
 
   // TODO: Refactor these tests to work with Strategy Pattern - InsertGestureHandler
   describe.skip("applyInsertGesture", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const stroke = buildIIStroke()
     editor.model.addSymbol(stroke)
     const gestMan = new IIGestureManager(asEditor(editor))
@@ -408,7 +408,7 @@ describe("IIGestureManager.ts", () => {
   })
 
   describe("getGestureFromContextLess", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     // editor.model.addSymbol(stroke)
     const gestMan = new IIGestureManager(asEditor(editor))
 
@@ -417,15 +417,15 @@ describe("IIGestureManager.ts", () => {
     })
 
     test("should return undefined when recognizeGesture return nothing", async () => {
-      gestMan.recognizer.recognizeGesture = jest.fn()
+      gestMan.client.recognizeGesture = jest.fn()
       const gestureStroke = buildIIStroke()
       expect(await gestMan.getGestureFromContextLess(gestureStroke)).toBeUndefined()
     })
 
     test("should return undefined when recognizeGesture return nothing", async () => {
-      gestMan.recognizer.recognizeGesture = jest.fn((stroke: TStroke) =>
+      gestMan.client.recognizeGesture = jest.fn((stroke: TStroke) =>
         Promise.resolve({
-          type: TRecognizerWebSocketMessageType.ContextlessGesture,
+          type: TWebSocketClientMessageType.ContextlessGesture,
           gestureType: "none",
           strokeId: stroke.id,
         })
@@ -436,9 +436,9 @@ describe("IIGestureManager.ts", () => {
 
     describe("surround", () => {
       beforeAll(() => {
-        gestMan.recognizer.recognizeGesture = jest.fn((stroke: TStroke) =>
+        gestMan.client.recognizeGesture = jest.fn((stroke: TStroke) =>
           Promise.resolve({
-            type: TRecognizerWebSocketMessageType.ContextlessGesture,
+            type: TWebSocketClientMessageType.ContextlessGesture,
             gestureType: "surround",
             strokeId: stroke.id,
           })
@@ -478,9 +478,9 @@ describe("IIGestureManager.ts", () => {
 
     describe("left-right", () => {
       beforeAll(() => {
-        gestMan.recognizer.recognizeGesture = jest.fn((stroke: TStroke) =>
+        gestMan.client.recognizeGesture = jest.fn((stroke: TStroke) =>
           Promise.resolve({
-            type: TRecognizerWebSocketMessageType.ContextlessGesture,
+            type: TWebSocketClientMessageType.ContextlessGesture,
             gestureType: "left-right",
             strokeId: stroke.id,
           })
@@ -524,9 +524,9 @@ describe("IIGestureManager.ts", () => {
 
     describe("scratch", () => {
       beforeAll(() => {
-        gestMan.recognizer.recognizeGesture = jest.fn((stroke: TStroke) =>
+        gestMan.client.recognizeGesture = jest.fn((stroke: TStroke) =>
           Promise.resolve({
-            type: TRecognizerWebSocketMessageType.ContextlessGesture,
+            type: TWebSocketClientMessageType.ContextlessGesture,
             gestureType: "scratch",
             strokeId: stroke.id,
           })
@@ -554,9 +554,9 @@ describe("IIGestureManager.ts", () => {
 
     describe("bottom-top", () => {
       beforeAll(() => {
-        gestMan.recognizer.recognizeGesture = jest.fn((stroke: TStroke) =>
+        gestMan.client.recognizeGesture = jest.fn((stroke: TStroke) =>
           Promise.resolve({
-            type: TRecognizerWebSocketMessageType.ContextlessGesture,
+            type: TWebSocketClientMessageType.ContextlessGesture,
             gestureType: "bottom-top",
             strokeId: stroke.id,
           })
@@ -585,9 +585,9 @@ describe("IIGestureManager.ts", () => {
 
     describe("top-bottom", () => {
       beforeAll(() => {
-        gestMan.recognizer.recognizeGesture = jest.fn((stroke: TStroke) =>
+        gestMan.client.recognizeGesture = jest.fn((stroke: TStroke) =>
           Promise.resolve({
-            type: TRecognizerWebSocketMessageType.ContextlessGesture,
+            type: TWebSocketClientMessageType.ContextlessGesture,
             gestureType: "top-bottom",
             strokeId: stroke.id,
           })

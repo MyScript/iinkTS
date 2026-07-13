@@ -2,11 +2,11 @@
  * @group Manager
  * @summary Interactive Ink managers
  *
- * These managers are used with the InteractiveInkEditor variant (WebSocket API with advanced features).
+ * These managers are used with the InteractiveInkCanvas variant (WebSocket API with advanced features).
  * They handle selection, resizing, rotation, text editing, gesture recognition, and more.
  *
  * @remarks
- * All managers in this group work with InteractiveInkEditor and depend on the IIModel (Interactive Ink Model).
+ * All managers in this group work with InteractiveInkCanvas and depend on the IIModel (Interactive Ink Model).
  */
 export * from "./gestures"
 export * from "./IIAbstractManager"

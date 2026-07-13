@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Ink Canvas v2 Raw Content</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <link rel="stylesheet" href="../assets/style/renderjson.css" />
+
+    <script type="text/javascript" src="../assets/renderjson/renderjson.js"></script>
+    <style>
+      #result {
+        border-bottom: solid gray 1px;
+        display: block;
+        text-align: start;
+        padding: 12px;
+        cursor: zoom-in;
+      }
+
+
+    </style>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">
+        Ink Canvas v2 Raw Content
+      </h1>
+    </header>
+    <div id="result"></div>
+
+    <nav class="flex-container wrap gap between">
+      <div class="flex-container wrap gap">
+        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/clear.svg" />
+        </button>
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/undo.svg" />
+        </button>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/redo.svg" />
+        </button>
+      </div>
+      <div class="switch-container">
+        <span class="switch-label">Show Recognition Block</span>
+        <label class="toggle">
+          <input type="checkbox" id="showRecognitionBlock" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="switch-container">
+        <span class="switch-label">Show Recognition Items</span>
+        <label class="toggle">
+          <input type="checkbox" id="showRecognitionItems" />
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <select id="language"></select>
+    </nav>
+
+    <div id="rootEl"></div>
+
+    <script type="module">
+      import { Canvas, getAvailableLanguageList } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
+      const rootElement = document.getElementById('rootEl')
+      const resultElement = document.getElementById('result')
+      const languageElement = document.getElementById('language')
+      const clearElement = document.getElementById('clear')
+      const undoElement = document.getElementById('undo')
+      const redoElement = document.getElementById('redo')
+      const showRecognitionBlock = document.getElementById('showRecognitionBlock')
+      const showRecognitionItems = document.getElementById('showRecognitionItems')
+      const showModalBtn = document.getElementById('showModalBtn')
+
+      let canvas
+
+      undoElement.addEventListener('click', () => {
+        if (!canvas) return
+        canvas.undo()
+        canvas.debugger.recognitionBoxVisibility = false
+        canvas.debugger.recognitionBoxItemsVisibility = false
+      })
+
+      redoElement.addEventListener('click', () => {
+        if (!canvas) return
+        canvas.redo()
+        canvas.debugger.recognitionBoxVisibility = false
+        canvas.debugger.recognitionBoxItemsVisibility = false
+      })
+
+      clearElement.addEventListener('click', () => {
+        resultElement.innerHTML = ''
+        if (!canvas) return
+        canvas.clear()
+        canvas.debugger.recognitionBoxVisibility = false
+        canvas.debugger.recognitionBoxItemsVisibility = false
+      })
+
+      resultElement.addEventListener('click', () => {
+        resultElement.classList.toggle('open')
+      })
+
+      showRecognitionBlock.addEventListener('change', () => {
+        if (!canvas) return
+        canvas.debugger.recognitionBoxVisibility = showRecognitionBlock.checked
+      })
+
+      showRecognitionItems.addEventListener('change', () => {
+        if (!canvas) return
+        canvas.debugger.recognitionBoxItemsVisibility = showRecognitionItems.checked
+      })
+
+      window.addEventListener('resize', () => {
+        if (!canvas) return
+        canvas.resize()
+      })
+
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            type: 'Raw Content',
+            export: {
+              jiix: {
+                ranges: true,
+                'bounding-box': true
+              }
+            }
+          }
+        }
+      }
+
+      languageElement.addEventListener('change', (e) => {
+        editorOptions.configuration.recognition.lang = e.target.value
+        loadEditor(editorOptions)
+      })
+
+      async function loadEditor(options) {
+        resultElement.innerHTML = ''
+        await canvas?.destroy()
+        /**
+         * get canvas instance from type
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Canvas parameters
+         */
+        canvas = await Canvas.load(rootElement, 'INK_V2', options)
+
+        canvas.event.addEventListener('changed', (event) => {
+          undoElement.disabled = !event.detail.canUndo
+          redoElement.disabled = !event.detail.canRedo
+          clearElement.disabled = !event.detail.canClear
+        })
+
+        if (!languageElement.options.length) {
+          const currentLanguage = canvas.configuration.recognition.lang
+          const availableLanguageListResponse = await getAvailableLanguageList(canvas.configuration)
+          Object.keys(availableLanguageListResponse.result).forEach((key) => {
+            const selected = currentLanguage === key
+            languageElement.options[languageElement.options.length] = new Option(availableLanguageListResponse.result[key], key, selected, selected)
+          })
+        }
+
+        canvas.event.addEventListener('exported', (evt) => {
+          while (resultElement.firstChild) {
+            resultElement.firstChild.remove()
+          }
+          resultElement.appendChild(renderjson(evt.detail))
+        })
+
+        showRecognitionItems.checked = false
+        showRecognitionBlock.checked = false
+      }
+
+      showModalBtn.addEventListener('click', () => {
+        ModalCanvasOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>

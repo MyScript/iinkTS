@@ -12,12 +12,12 @@ export enum LoggerLevel {
  * @group Logger
  */
 export enum LoggerCategory {
-  EDITOR = "EDITOR",
-  RECOGNIZER = "RECOGNIZER",
+  CANVAS = "CANVAS",
+  CLIENT = "CLIENT",
   GRABBER = "GRABBER",
   GESTURE = "GESTURE",
   MOVE = "MOVE",
-  EDITOR_EVENT = "EDITOR_EVENT",
+  CANVAS_EVENT = "CANVAS_EVENT",
   MODEL = "MODEL",
   RENDERER = "RENDERER",
   SMARTGUIDE = "SMARTGUIDE",

@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { TMenuButtonList } from "@/menu/items"
 import { ButtonListMenuItem, CollapsibleWrapper } from "@/menu/items"
 import { BaseMenuItem } from "@/menu/items/BaseMenuItem"
@@ -15,7 +15,7 @@ export class ThicknessStyle extends BaseMenuItem<HTMLDivElement> {
   }[]
 
   constructor(
-    editor: TInteractiveInkEditor,
+    canvas: TInteractiveInkCanvas,
     thicknessList: {
       label: string
       value: number
@@ -27,7 +27,7 @@ export class ThicknessStyle extends BaseMenuItem<HTMLDivElement> {
       id: `${idPrefix}-thickness`,
       label: "Thickness",
     }
-    super(config, editor)
+    super(config, canvas)
     this.thicknessList = thicknessList
   }
 
@@ -40,26 +40,26 @@ export class ThicknessStyle extends BaseMenuItem<HTMLDivElement> {
         label: t.label,
         value: t.value.toString(),
       })),
-      getValue: (editor) => {
-        const symbolsStyles = editor.model.symbolsSelected.map((s) => s.style)
+      getValue: (canvas) => {
+        const symbolsStyles = canvas.model.symbolsSelected.map((s) => s.style)
         const hasUniqWidth = symbolsStyles.length && symbolsStyles.every((st) => st.width === symbolsStyles[0].width)
-        const width = hasUniqWidth ? symbolsStyles[0].width : editor.penStyle.width
+        const width = hasUniqWidth ? symbolsStyles[0].width : canvas.penStyle.width
         return width?.toString() || "1"
       },
-      setValue: (editor, value) => {
+      setValue: (canvas, value) => {
         const numValue = parseInt(value)
-        editor.penStyle = { width: numValue }
-        if (editor.model.symbolsSelected.length) {
-          editor.updateSymbolsStyle(
-            editor.model.symbolsSelected.map((s) => s.id),
+        canvas.penStyle = { width: numValue }
+        if (canvas.model.symbolsSelected.length) {
+          canvas.updateSymbolsStyle(
+            canvas.model.symbolsSelected.map((s) => s.id),
             { width: numValue }
           )
-          editor.selector.redrawSelectedGroup()
+          canvas.selector.redrawSelectedGroup()
         }
       },
     }
 
-    this.thicknessItem = new ButtonListMenuItem(thicknessConfig, this.editor)
+    this.thicknessItem = new ButtonListMenuItem(thicknessConfig, this.canvas)
     const thicknessElement = this.thicknessItem.getElement()
     const wrapper = new CollapsibleWrapper(thicknessElement, "Thickness", this.config.id)
     return wrapper.getElement()

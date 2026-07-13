@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { TEdge, TMath, TPoint, TShape, TStroke, TSymbol, TText } from "@/symbol"
 import { EdgeKind, ShapeKind } from "@/symbol"
 import { EdgeOps } from "@/symbol/edge/Edge"
@@ -16,8 +16,8 @@ export class IITranslateManager extends IIAbstractTransformManager {
   protected transformName = "translate"
   transformOrigin!: TPoint
 
-  constructor(editor: TInteractiveInkEditor) {
-    super(editor)
+  constructor(canvas: TInteractiveInkCanvas) {
+    super(canvas)
   }
 
   protected applyToStroke(stroke: TStroke, matrix: MatrixTransform): TStroke {
@@ -73,7 +73,7 @@ export class IITranslateManager extends IIAbstractTransformManager {
     const np = matrix.applyToPoint(text.point)
     text.point.x = +np.x.toFixed(3)
     text.point.y = +np.y.toFixed(3)
-    return this.editor.typeset.updateBounds(text)
+    return this.canvas.typeset.updateBounds(text)
   }
 
   protected applyOnMath(math: TMath, matrix: MatrixTransform): TMath {
@@ -97,7 +97,7 @@ export class IITranslateManager extends IIAbstractTransformManager {
       e.bounds.y = +ep.y.toFixed(3)
     })
 
-    return this.editor.typeset.updateBounds(math)
+    return this.canvas.typeset.updateBounds(math)
   }
 
   translate(symbols: TSymbol[], tx: number, ty: number, addToHistory = true): Promise<void> {
@@ -106,13 +106,13 @@ export class IITranslateManager extends IIAbstractTransformManager {
       tx,
       ty,
     })
-    this.editor.connector.clearAnchoredEdgesFor(symbols)
+    this.canvas.connector.clearAnchoredEdgesFor(symbols)
     const matrix = MatrixTransform.identity().translate(tx, ty)
     this.applyAndDraw(symbols, matrix)
     this.applyTransformToGhostStrokesForSelectedMath(symbols, matrix)
-    this.editor.connector.updateAnchoredEdges(symbols.map((s) => s.id))
+    this.canvas.connector.updateAnchoredEdges(symbols.map((s) => s.id))
     if (addToHistory) {
-      this.editor.history.push(this.model, {
+      this.canvas.history.push(this.model, {
         translate: [
           {
             symbols: this.model.symbolsSelected,
@@ -122,8 +122,8 @@ export class IITranslateManager extends IIAbstractTransformManager {
         ],
       })
     }
-    const strokes = this.editor.extractStrokesFromSymbols(symbols)
-    return this.editor.recognizer.transformTranslate(
+    const strokes = this.canvas.extractStrokesFromSymbols(symbols)
+    return this.canvas.client.transformTranslate(
       strokes.map((s) => s.id),
       tx,
       ty
@@ -136,14 +136,14 @@ export class IITranslateManager extends IIAbstractTransformManager {
       tx,
       ty,
     })
-    this.editor.renderer.setAttribute(id, "transform", `translate(${tx},${ty})`)
+    this.canvas.renderer.setAttribute(id, "transform", `translate(${tx},${ty})`)
   }
 
   start(target: Element, origin: TPoint): void {
     this.logger.info("start", { origin })
     // Optimistic: reflects "working" on the state badge as soon as the drag starts. Cleared by
     // the debounced synchronize() triggered by onContentChanged once the transform is acked.
-    this.editor.startOperation("Recognizing")
+    this.canvas.startOperation("Recognizing")
     this.interactElementsGroup = this.resolveInteractGroup(target)
     this.transformOrigin = origin
   }
@@ -160,7 +160,7 @@ export class IITranslateManager extends IIAbstractTransformManager {
     let tx = point.x - this.transformOrigin.x
     let ty = point.y - this.transformOrigin.y
 
-    const nudge = this.editor.snaps.snapTranslate(tx, ty)
+    const nudge = this.canvas.snaps.snapTranslate(tx, ty)
     tx = nudge.x
     ty = nudge.y
 
@@ -172,7 +172,7 @@ export class IITranslateManager extends IIAbstractTransformManager {
       this.translateElement(id, tx, ty)
     })
     const matrix = MatrixTransform.identity().translate(tx, ty)
-    this.editor.connector.drawAnchoredEdgesForMatrix(
+    this.canvas.connector.drawAnchoredEdgesForMatrix(
       this.model.symbolsSelected.map((s) => s.id),
       matrix
     )
@@ -182,7 +182,7 @@ export class IITranslateManager extends IIAbstractTransformManager {
   async end(point: TPoint): Promise<void> {
     this.logger.info("end", { point })
     const { tx, ty } = this.continue(point)
-    this.editor.snaps.clearSnapToElementLines()
+    this.canvas.snaps.clearSnapToElementLines()
     await this.translate(this.model.symbolsSelected, tx, ty)
     this.finalizeTransform()
   }

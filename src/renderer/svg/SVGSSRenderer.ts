@@ -1,5 +1,3 @@
-import { LoggerCategory, LoggerManager } from "@/logger"
-import type { Model } from "@/model"
 import type {
   TUpdatePatch,
   TUpdatePatchAppendChild,
@@ -10,7 +8,9 @@ import type {
   TUpdatePatchReplaceAll,
   TUpdatePatchReplaceELement,
   TUpdatePatchSetAttribut,
-} from "@/recognizer"
+} from "@/client"
+import { LoggerCategory, LoggerManager } from "@/logger"
+import type { Model } from "@/model"
 import type { TRendererConfiguration } from "@/renderer/RendererConfiguration"
 import type { TLegacyStroke } from "@/symbol"
 

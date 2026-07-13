@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 
 import type { TMenuItemBase } from "./BaseMenuItem"
 import { BaseMenuItem } from "./BaseMenuItem"
@@ -9,8 +9,8 @@ import { BaseMenuItem } from "./BaseMenuItem"
  */
 export type TMenuCheckbox = TMenuItemBase & {
   type: "checkbox"
-  getValue: (editor: TInteractiveInkEditor) => boolean
-  setValue: (editor: TInteractiveInkEditor, value: boolean) => void
+  getValue: (canvas: TInteractiveInkCanvas) => boolean
+  setValue: (canvas: TInteractiveInkCanvas, value: boolean) => void
 }
 
 /**
@@ -31,17 +31,17 @@ export class CheckboxMenuItem extends BaseMenuItem<HTMLDivElement> {
     }
 
     const isDisabled =
-      typeof this.config.disabled === "function" ? this.config.disabled(this.editor) : (this.config.disabled ?? false)
+      typeof this.config.disabled === "function" ? this.config.disabled(this.canvas) : (this.config.disabled ?? false)
 
     const checkbox = this.dom.checkbox({
       id: `${this.config.id}-input`,
-      checked: this.config.getValue(this.editor),
+      checked: this.config.getValue(this.canvas),
       disabled: isDisabled,
     })
 
     checkbox.addEventListener("change", () => {
       this.logger.info(`${this.config.id}.change`, { value: checkbox.checked })
-      this.config.setValue(this.editor, checkbox.checked)
+      this.config.setValue(this.canvas, checkbox.checked)
     })
 
     wrapper.appendChild(checkbox)
@@ -56,7 +56,7 @@ export class CheckboxMenuItem extends BaseMenuItem<HTMLDivElement> {
 
     const checkbox = this.element.querySelector("input") as HTMLInputElement
     if (checkbox) {
-      checkbox.checked = this.config.getValue(this.editor)
+      checkbox.checked = this.config.getValue(this.canvas)
     }
 
     this.updateDisabled()

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Offscreen - External Connection Status</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+
+    <style>
+      #connection-status-value {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: var(--ex-radius-sm, 4px);
+        font-weight: bold;
+        color: #fff;
+      }
+
+      #connection-status-log {
+        margin-top: 8px;
+        max-height: 200px;
+        overflow-y: auto;
+        font-size: 11px;
+        color: var(--ex-text-muted, #888);
+      }
+
+      #connection-status-log div {
+        padding: 2px 0;
+        border-bottom: 1px solid var(--ex-border);
+      }
+    </style>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+  </head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="connection-status-panel">
+        📡 Status
+      </button>
+      <button id="showModalBtn" class="btn-keys">Change server configuration</button>
+      <h1 class="header-title">Offscreen Interactivity - External Connection Status</h1>
+    </header>
+
+    <div class="ex-page-layout">
+
+      <aside id="connection-status-panel" class="ex-panel">
+        <p class="ex-panel-heading">Custom UI built on the connection state API</p>
+        <p class="ex-panel-intro">
+          iinkTS already shows a built-in connection badge (icon in the top-right corner of the canvas). This example shows how an external consumer can ignore that badge and build its own status panel instead, using <code>canvas.connectionState</code> and <code>canvas.event.addConnectionStateChangedListener</code>.
+        </p>
+
+        <div class="ex-panel-divider"></div>
+
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">
+            States: <code>initializing</code>, <code>online-idle</code>, <code>online-working</code>, <code>syncing</code> (reconnecting with strokes queued), <code>offline</code> (reconnecting, nothing queued yet), <code>error</code> (reconnection attempts exhausted).
+          </div>
+        </div>
+
+        <div class="ex-panel-hint">
+          To see the offline/syncing/error states: open DevTools → Network tab → set throttling to "Offline", write a few strokes, then set it back to "Online" to watch it recover.
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <p class="ex-panel-subtitle">Connection status (external panel)</p>
+        <span id="connection-status-value">initializing</span>
+        <div id="connection-status-log"></div>
+      </aside>
+
+      <div id="rootEl"></div>
+
+    </div>
+
+    <script type="module">
+      import { Canvas } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
+
+      const rootElement = document.getElementById('rootEl')
+      const showModalBtn = document.getElementById('showModalBtn')
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const connectionStatusPanel = document.getElementById('connection-status-panel')
+      const statusValueElement = document.getElementById('connection-status-value')
+      const statusLogElement = document.getElementById('connection-status-log')
+
+      panelToggleBtn.addEventListener('click', () => {
+        const open = connectionStatusPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      const STATE_COLORS = {
+        initializing: '#9e9e9e',
+        'online-idle': '#4caf50',
+        'online-working': '#1a9fff',
+        syncing: '#ffc107',
+        offline: '#f44336',
+        error: '#f44336',
+      }
+
+      let canvas
+
+      const editorOptions = {
+        configuration: {}
+      }
+
+      function renderConnectionState(state) {
+        statusValueElement.textContent = state
+        statusValueElement.style.backgroundColor = STATE_COLORS[state] ?? '#9e9e9e'
+
+        const entry = document.createElement('div')
+        entry.textContent = `${new Date().toLocaleTimeString()} — ${state}`
+        statusLogElement.prepend(entry)
+      }
+
+      async function loadEditor(options) {
+        await canvas?.destroy()
+
+        canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK', options)
+
+        renderConnectionState(canvas.connectionState)
+        canvas.event.addConnectionStateChangedListener(renderConnectionState)
+      }
+
+      window.addEventListener('resize', () => {
+        canvas?.resize()
+      })
+
+      showModalBtn.addEventListener('click', () => {
+        ModalCanvasOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+  </body>
+
+</html>

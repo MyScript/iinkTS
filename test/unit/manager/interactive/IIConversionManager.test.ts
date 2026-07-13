@@ -11,26 +11,18 @@ import {
   triangleJIIX,
 } from "../../__dataset__/jiix.dataset"
 import { buildIIStroke } from "../../helpers"
-import { createEditorMock, asEditor } from "../../__mocks__/createEditorMock"
-import {
-  IIConversionManager,
-  JIIXElementType,
-  TJIIXEdgeElement,
-  TJIIXMathElement,
-  TJIIXNodeElement,
-  TJIIXTextElement,
-  TextOps,
-} from "@/iink"
+import { createCanvasMock, asEditor } from "../../__mocks__/createCanvasMock"
+import { IIConversionManager, JIIXElementType, TJIIXEdgeElement, TJIIXMathElement, TJIIXNodeElement, TJIIXTextElement, TextOps } from "@/iink"
 
 describe("IIConversionManager.ts", () => {
   test("should create", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IIConversionManager(asEditor(editor))
     expect(manager).toBeDefined()
   })
 
   describe("apply", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     editor.selector.removeSelectedGroup = jest.fn()
     const manager = new IIConversionManager(asEditor(editor))
     manager.convertText = jest.fn()
@@ -67,7 +59,7 @@ describe("IIConversionManager.ts", () => {
 
   describe("convertText", () => {
     const symEl = document.createElementNS("http://www.w3.org/2000/svg", "path")
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     editor.renderer.drawSymbol = jest.fn(() => symEl)
     editor.typeset.getSpaceWidth = jest.fn(() => 10)
     editor.model.addSymbol = jest.fn()
@@ -116,7 +108,7 @@ describe("IIConversionManager.ts", () => {
   })
 
   describe("convertNode", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IIConversionManager(asEditor(editor))
 
     const jiixNodeRect = rectangleJIIX.elements?.[0] as TJIIXNodeElement
@@ -194,7 +186,7 @@ describe("IIConversionManager.ts", () => {
 
   describe("convertEdge", () => {
     const symEl = document.createElementNS("http://www.w3.org/2000/svg", "path")
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     editor.renderer.drawSymbol = jest.fn(() => symEl)
     const manager = new IIConversionManager(asEditor(editor))
 
@@ -227,7 +219,7 @@ describe("IIConversionManager.ts", () => {
   })
 
   describe("buildMath", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IIConversionManager(asEditor(editor))
 
     test("should flatten a simple fraction label without extra parentheses", () => {

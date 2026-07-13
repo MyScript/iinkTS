@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { TPointerInfo } from "@/grabber"
 import { PointerEventGrabber } from "@/grabber"
 import { LoggerCategory } from "@/logger"
@@ -20,7 +20,7 @@ export class IIMoveManager extends IIAbstractManager {
     clientY: number
   }
 
-  constructor(editor: TInteractiveInkEditor) {
+  constructor(editor: TInteractiveInkCanvas) {
     super(editor, LoggerCategory.MOVE)
     this.grabber = new PointerEventGrabber(editor.configuration.grabber)
   }

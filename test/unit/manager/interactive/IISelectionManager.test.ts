@@ -1,4 +1,4 @@
-import { createEditorMock, asEditor } from "../../__mocks__/createEditorMock"
+import { createCanvasMock, asEditor } from "../../__mocks__/createCanvasMock"
 import { LeftClickEventMock, RightClickEventMock } from "../../__mocks__/EventMock"
 import { buildIIStroke } from "../../helpers"
 import {
@@ -58,13 +58,13 @@ describe("IISelectionManager.ts", () => {
     }),
   })
   test("should create", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IISelectionManager(asEditor(editor))
     expect(manager).toBeDefined()
   })
 
   test("should draw selecting rect", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IISelectionManager(asEditor(editor))
     manager.renderer.clearElements = jest.fn()
     manager.renderer.appendElement = jest.fn()
@@ -80,7 +80,7 @@ describe("IISelectionManager.ts", () => {
   })
 
   test("should clear selecting rect", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IISelectionManager(asEditor(editor))
     manager.renderer.clearElements = jest.fn()
     manager.clearSelectingRect()
@@ -88,7 +88,7 @@ describe("IISelectionManager.ts", () => {
   })
 
   describe("selected group", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     editor.menu.context.hide = jest.fn()
     const manager = new IISelectionManager(asEditor(editor))
     const stroke = buildIIStroke()
@@ -145,7 +145,7 @@ describe("IISelectionManager.ts", () => {
     }
 
     test("element mode: block qualifies as soon as one of its strokes is selected", () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const manager = new IISelectionManager(asEditor(editor))
       const stroke1 = buildMathStroke("block-1")
       const stroke2 = buildMathStroke("block-1")
@@ -158,7 +158,7 @@ describe("IISelectionManager.ts", () => {
     })
 
     test("returns false/undefined when the block has no selected strokes", () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const manager = new IISelectionManager(asEditor(editor))
       const stroke = buildMathStroke("block-1")
       editor.model.addSymbol(stroke)
@@ -168,7 +168,7 @@ describe("IISelectionManager.ts", () => {
     })
 
     test("supports multiple selected blocks at once", () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const manager = new IISelectionManager(asEditor(editor))
       const stroke1 = buildMathStroke("block-1")
       const stroke2 = buildMathStroke("block-2")
@@ -183,7 +183,7 @@ describe("IISelectionManager.ts", () => {
     })
 
     test("operand mode: block only qualifies when ALL its strokes are selected", () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       editor.configuration.mathSelectionLevel = "operand"
       const manager = new IISelectionManager(asEditor(editor))
       const stroke1 = buildMathStroke("block-1")
@@ -209,7 +209,7 @@ describe("IISelectionManager.ts", () => {
     }
 
     test("element mode: selecting one source stroke pulls in sibling strokes and the block's frozen draw result", () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const manager = new IISelectionManager(asEditor(editor))
       const stroke1 = buildMathStroke("block-1")
       const stroke2 = buildMathStroke("block-1")
@@ -228,7 +228,7 @@ describe("IISelectionManager.ts", () => {
     })
 
     test("element mode: no draw yet, only sibling source strokes are pulled in", () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const manager = new IISelectionManager(asEditor(editor))
       const stroke1 = buildMathStroke("block-1")
       const stroke2 = buildMathStroke("block-1")
@@ -244,7 +244,7 @@ describe("IISelectionManager.ts", () => {
     })
 
     test("operand mode: does not expand the selection", () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       editor.configuration.mathSelectionLevel = "operand"
       const manager = new IISelectionManager(asEditor(editor))
       const stroke1 = buildMathStroke("block-1")
@@ -273,7 +273,7 @@ describe("IISelectionManager.ts", () => {
     }
 
     test("element mode: merges the block's ghost bounds into the selection rectangle", async () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       editor.menu.context.hide = jest.fn()
       const manager = new IISelectionManager(asEditor(editor))
       const stroke = buildMathStroke("block-1")
@@ -301,7 +301,7 @@ describe("IISelectionManager.ts", () => {
     })
 
     test("operand mode: does not merge ghost bounds into the selection rectangle", async () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       editor.menu.context.hide = jest.fn()
       editor.configuration.mathSelectionLevel = "operand"
       const manager = new IISelectionManager(asEditor(editor))
@@ -340,7 +340,7 @@ describe("IISelectionManager.ts", () => {
         height: 10,
       }),
     })
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     editor.transform.translate.start = jest.fn()
     editor.transform.translate.continue = jest.fn()
     editor.transform.translate.end = jest.fn()
@@ -507,7 +507,7 @@ describe("IISelectionManager.ts", () => {
   })
 
   describe("process", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IISelectionManager(asEditor(editor))
     const strokeToSelect = buildIIStroke({ box: { height: 10, width: 10, x: 10, y: 10 } })
     manager.model.addSymbol(strokeToSelect)
@@ -564,7 +564,7 @@ describe("IISelectionManager.ts", () => {
 
   describe("standalone decorators are never directly selectable", () => {
     test("box selection over a decorated stroke selects the stroke, not the decorator", () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const manager = new IISelectionManager(asEditor(editor))
       manager.drawSelectingRect = jest.fn()
       manager.renderer.updateSelectedState = jest.fn()

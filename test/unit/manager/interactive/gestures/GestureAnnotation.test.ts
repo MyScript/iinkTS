@@ -1,11 +1,11 @@
-import { createEditorMock, asEditor } from "../../../__mocks__/createEditorMock"
+import { createCanvasMock, asEditor } from "../../../__mocks__/createCanvasMock"
 import { buildIIStroke } from "../../../helpers"
 import { IIGestureAnnotationProcessor, DecoratorKind, StrokeOps } from "@/iink"
 
 describe("GestureAnnotation.ts", () => {
   describe("IIGestureAnnotationProcessor.apply (decorator)", () => {
     test("waits for a still-unclassified target stroke to be recognized before giving up", async () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const processor = new IIGestureAnnotationProcessor(asEditor(editor))
 
       const stroke = buildIIStroke()
@@ -31,7 +31,7 @@ describe("GestureAnnotation.ts", () => {
     })
 
     test("gives up if the target stroke is never classified as text", async () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const processor = new IIGestureAnnotationProcessor(asEditor(editor))
 
       const stroke = buildIIStroke()

@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { TEdge, TMath, TPoint, TShape, TStroke, TText } from "@/symbol"
 import { cloneSymbol, EdgeKind, ShapeKind } from "@/symbol"
 import { EdgeOps } from "@/symbol/edge/Edge"
@@ -20,8 +20,8 @@ export class IIRotationManager extends IIAbstractTransformManager {
   center!: TPoint
   origin!: TPoint
 
-  constructor(editor: TInteractiveInkEditor) {
-    super(editor)
+  constructor(canvas: TInteractiveInkCanvas) {
+    super(canvas)
   }
 
   protected applyToStroke(stroke: TStroke, matrix: MatrixTransform): TStroke {
@@ -82,7 +82,7 @@ export class IIRotationManager extends IIAbstractTransformManager {
       degree: convertRadianToDegree(MatrixTransform.rotation(matrix)) + (text.rotation?.degree || 0),
       center: this.center,
     }
-    return this.editor.typeset.updateBounds(text)
+    return this.canvas.typeset.updateBounds(text)
   }
 
   protected applyOnMath(math: TMath, matrix: MatrixTransform): TMath {
@@ -98,14 +98,14 @@ export class IIRotationManager extends IIAbstractTransformManager {
       id,
       degree,
     })
-    this.editor.renderer.setAttribute(id, "transform", `rotate(${degree})`)
+    this.canvas.renderer.setAttribute(id, "transform", `rotate(${degree})`)
   }
 
   start(target: Element, origin: TPoint): void {
     this.logger.info("start", { target })
     // Optimistic: reflects "working" on the state badge as soon as the drag starts. Cleared by
     // the debounced synchronize() triggered by onContentChanged once the transform is acked.
-    this.editor.startOperation("Recognizing")
+    this.canvas.startOperation("Recognizing")
     this.interactElementsGroup = this.resolveInteractGroup(target)
     const boundingBox = BoxOps.createFromPoints(this.model.symbolsSelected.flatMap((s) => s.vertices))
 
@@ -127,7 +127,7 @@ export class IIRotationManager extends IIAbstractTransformManager {
     }
     let angleDegree = Math.round(convertRadianToDegree(computeAngleRadian(this.origin, this.center, point)))
 
-    angleDegree = this.editor.snaps.snapRotation(angleDegree)
+    angleDegree = this.canvas.snaps.snapRotation(angleDegree)
 
     if (point.x - this.center.x < 0) {
       angleDegree = 360 - angleDegree
@@ -142,7 +142,7 @@ export class IIRotationManager extends IIAbstractTransformManager {
     })
     const angleRad = convertDegreeToRadian(angleDegree)
     const matrix = MatrixTransform.identity().rotate(angleRad, this.center)
-    this.editor.connector.drawAnchoredEdgesForMatrix(
+    this.canvas.connector.drawAnchoredEdgesForMatrix(
       this.model.symbolsSelected.map((s) => s.id),
       matrix
     )
@@ -167,19 +167,19 @@ export class IIRotationManager extends IIAbstractTransformManager {
     })
     this.applyAndDraw(this.model.symbolsSelected, matrix)
     this.applyTransformToGhostStrokesForSelectedMath(this.model.symbolsSelected, matrix)
-    this.editor.connector.updateAnchoredEdges(
+    this.canvas.connector.updateAnchoredEdges(
       this.model.symbolsSelected.map((s) => s.id),
       matrix,
       preTransformBoundsById
     )
-    const strokesFromSymbols = this.editor.extractStrokesFromSymbols(this.model.symbolsSelected)
-    await this.editor.recognizer.transformRotate(
+    const strokesFromSymbols = this.canvas.extractStrokesFromSymbols(this.model.symbolsSelected)
+    await this.canvas.client.transformRotate(
       strokesFromSymbols.map((s) => s.id),
       angleRad,
       this.center.x,
       this.center.y
     )
-    this.editor.history.push(this.model, {
+    this.canvas.history.push(this.model, {
       rotate: [
         {
           symbols: oldSymbols,

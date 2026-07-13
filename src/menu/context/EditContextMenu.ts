@@ -1,5 +1,5 @@
 import ArrowDown from "@/assets/svg/nav-arrow-down.svg"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { TGenericMenuItem } from "@/menu/items/BaseMenuItem"
 import { BaseMenuItem } from "@/menu/items/BaseMenuItem"
 import type { TText } from "@/symbol"
@@ -16,13 +16,13 @@ export class EditContextMenu extends BaseMenuItem<HTMLElement> {
   editInput?: HTMLInputElement
   editSaveBtn?: HTMLButtonElement
 
-  constructor(editor: TInteractiveInkEditor, idPrefix = "ms-menu-context") {
+  constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-context") {
     const config: TGenericMenuItem = {
       type: "custom",
       id: `${idPrefix}-edit`,
       label: "Edit",
     }
-    super(config, editor)
+    super(config, canvas)
   }
 
   createElement(): HTMLElement {
@@ -52,7 +52,7 @@ export class EditContextMenu extends BaseMenuItem<HTMLElement> {
 
     this.editSaveBtn.addEventListener("pointerdown", async (e) => {
       e.stopPropagation()
-      const textSymbol = this.editor.model.symbolsSelected.find((s) => isText(s)) as TText
+      const textSymbol = this.canvas.model.symbolsSelected.find((s) => isText(s)) as TText
       if (textSymbol) {
         const firstChar = textSymbol.chars[0]
         textSymbol.chars = []
@@ -66,8 +66,8 @@ export class EditContextMenu extends BaseMenuItem<HTMLElement> {
             bounds: firstChar.bounds,
           })
         }
-        await this.editor.updateSymbol(textSymbol)
-        this.editor.selector.drawSelectedGroup([textSymbol])
+        await this.canvas.updateSymbol(textSymbol)
+        this.canvas.selector.drawSelectedGroup([textSymbol])
       }
     })
 

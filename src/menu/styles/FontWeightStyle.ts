@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { TMenuButtonList } from "@/menu/items"
 import { ButtonListMenuItem, CollapsibleWrapper } from "@/menu/items"
 import { BaseMenuItem } from "@/menu/items/BaseMenuItem"
@@ -16,7 +16,7 @@ export class FontWeightStyle extends BaseMenuItem<HTMLDivElement> {
   }[]
 
   constructor(
-    editor: TInteractiveInkEditor,
+    canvas: TInteractiveInkCanvas,
     fontWeightList: {
       label: string
       value: "auto" | "normal" | "bold"
@@ -28,7 +28,7 @@ export class FontWeightStyle extends BaseMenuItem<HTMLDivElement> {
       id: `${idPrefix}-font-weight`,
       label: "Font Weight",
     }
-    super(config, editor)
+    super(config, canvas)
     this.fontWeightList = fontWeightList
   }
 
@@ -40,23 +40,23 @@ export class FontWeightStyle extends BaseMenuItem<HTMLDivElement> {
         label: f.label,
         value: f.value,
       })),
-      getValue: (editor) => editor.configuration.fontStyle.weight,
-      setValue: (editor, value) => {
-        editor.configuration.fontStyle.weight = value as "auto" | "normal" | "bold"
+      getValue: (canvas) => canvas.configuration.fontStyle.weight,
+      setValue: (canvas, value) => {
+        canvas.configuration.fontStyle.weight = value as "auto" | "normal" | "bold"
         if (value !== "auto") {
-          const textSymbols = editor.model.symbolsSelected.filter((s) => isText(s))
-          editor.updateTextFontStyle(
+          const textSymbols = canvas.model.symbolsSelected.filter((s) => isText(s))
+          canvas.updateTextFontStyle(
             textSymbols.map((s) => s.id),
             {
               fontWeight: value as "normal" | "bold",
             }
           )
-          editor.selector.redrawSelectedGroup()
+          canvas.selector.redrawSelectedGroup()
         }
       },
     }
 
-    this.fontWeightItem = new ButtonListMenuItem(fontWeightConfig, this.editor)
+    this.fontWeightItem = new ButtonListMenuItem(fontWeightConfig, this.canvas)
     const fontWeightElement = this.fontWeightItem.getElement()
     const wrapper = new CollapsibleWrapper(fontWeightElement, "Font weight", this.config.id)
     return wrapper.getElement()

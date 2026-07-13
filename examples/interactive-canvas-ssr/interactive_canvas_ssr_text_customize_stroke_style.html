@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Interactive Canvas SSR Text Styling</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <style>
+      .content {
+        width: 100dvw;
+        height: 100dvh;
+        min-height: 400px;
+      }
+      .canvas-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+      }
+      .row-options {
+        padding: 12px 12px 0px 12px;
+      }
+      .style-part {
+        flex: 1;
+        align-items: start;
+      }
+
+      .prompter-css {
+        height: 110px;
+        width: 70%;
+        margin-left: 36px;
+        padding: 24px;
+        position: absolute;
+        bottom: 24px;
+        z-index: 30;
+        border-radius: 6px;
+        background: rgba(240, 240, 240, 0.9);
+      }
+    </style>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">Interactive Canvas SSR Text Styling</h1>
+    </header>
+
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">🖊️ Stroke styling — three layers</p>
+        <p class="ex-panel-intro"><strong>Theme</strong> (<code>canvas.theme</code>) — global style: ink color, pen width, text font size. Can also define named pen classes (e.g. <code>.greenThickPen</code>) for reuse.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc"><strong>Pen style</strong> (<code>canvas.penStyle</code>) — inline override for the active stroke only. Takes priority over the theme ink settings.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc"><strong>Pen style classes</strong> (<code>canvas.penStyleClasses</code>) — references a class name defined <em>inside</em> the theme object (not a CSS class). Disables direct theme selection while active.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc"><code>-myscript-pen-width</code> is a MyScript-specific property: values range from <code>0</code> (hairline) to <code>5</code> (very thick), independent of CSS pixels.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">The overlay at the bottom shows the exact style object currently applied — useful to copy into your own configuration.</div>
+        </div>
+      </aside>
+
+      <div class="page-content">
+        <div class="content flex-container wrap">
+          <div class="style-part flex-container column gap">
+            <div class="style-part flex-container between wrap gap nav-item">
+              <label for="penStyleClasses">Apply pen style class (greenThinPen):
+
+                <input id="penStyleClasses" type="checkbox" disabled />
+              </label>
+              <label for="theme">Theme:
+                <select id="theme"></select>
+              </label>
+              <label for="fonts">Font:
+                <select id="fonts"></select>
+              </label>
+            </div>
+            <div class="separator horizontal"></div>
+            <div class="style-part flex-container between wrap gap">
+              <label for="penenabled">Enable pen color/thickness
+                <input id="penenabled" type="checkbox" />
+              </label>
+              <label for="pencolor">Color:
+                <input id="pencolor" type="color" value="#ff7314" disabled />
+              </label>
+              <label for="penwidth">Thickness:
+                <input id="penwidth" type="number" min="1" max="5" value="2" disabled />
+              </label>
+            </div>
+          </div>
+
+          <div class="canvas-container">
+            <div id="rootEl"></div>
+
+            <div id="prompter-css" class="prompter-css">
+              <div id="prompter-css-text">
+                Theme or pen style applied will be written here.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      import { Canvas, getAvailableFontList } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
+      const rootElement = document.getElementById('rootEl')
+      const penStyleClasses = document.getElementById('penStyleClasses')
+      const themeSelector = document.getElementById('theme')
+      const penEnabled = document.getElementById('penenabled')
+      const penColor = document.getElementById('pencolor')
+      const penWidth = document.getElementById('penwidth')
+      const fontsElement = document.getElementById('fonts')
+      const prompterText = document.getElementById('prompter-css-text')
+
+      const greenThickPenPenClass = {
+        color: '#00FF00',
+        '-myscript-pen-width': 0.5
+      }
+
+      const themes = [
+        {
+          name: 'Normal Gray theme',
+          id: 'normal-white',
+          theme: {
+            ink: {
+              color: '#808080',
+              '-myscript-pen-width': 2
+            },
+            '.text': {
+              'font-size': 12
+            },
+            '.greenThickPen': greenThickPenPenClass
+          }
+        },
+        {
+          name: 'Thin green theme',
+          id: 'thin-green',
+          theme: {
+            ink: {
+              color: '#2E7D32',
+              '-myscript-pen-width': 1
+            },
+            '.text': {
+              'font-size': 10
+            },
+            '.greenThickPen': greenThickPenPenClass
+          }
+        },
+        {
+          name: 'Bold red theme',
+          id: 'bold-red',
+          theme: {
+            ink: {
+              color: '#B71C1C',
+              '-myscript-pen-width': 3
+            },
+            '.text': {
+              'font-size': 14
+            },
+            '.greenThickPen': greenThickPenPenClass
+          }
+        }
+      ]
+
+      const defaultThemeId = 'normal-white'
+      themes.forEach((theme) => {
+        const selected = defaultThemeId === theme.id
+        themeSelector.options[themeSelector.options.length] = new Option(
+          theme.name,
+          theme.id,
+          selected,
+          selected
+        )
+      })
+
+      function getTheme(themes, id) {
+        return themes.find((theme) => theme.id === id).theme
+      }
+
+      function getFont() {
+        return fontsElement.value
+      }
+
+      function updatePrompter(category, value, category2, value2) {
+        if (category && value) {
+          prompterText.innerText = `${ category } = ${ JSON.stringify(value) }`
+          if (category2 && value2) {
+            prompterText.innerText += `\n${ category2 } = ${ JSON.stringify(
+              value2
+            ) }`
+          }
+        } else if (category) {
+          prompterText.innerText = category
+        }
+      }
+
+      function getStyle() {
+        return {
+          color: penColor.value,
+          '-myscript-pen-width': penWidth.value
+        }
+      }
+
+      let canvas
+
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            type: 'TEXT'
+          },
+          theme: getTheme(themes, defaultThemeId)
+        }
+      }
+
+      async function loadEditor(options) {
+        canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK_SSR', options)
+        penStyleClasses.disabled = false
+
+        if (fontsElement.options.length === 0) {
+          const fontsResponse = await getAvailableFontList(canvas.configuration)
+          fontsResponse.forEach((f) => {
+            fontsElement.options[fontsElement.options.length] = new Option(f)
+          })
+
+          fontsElement.addEventListener('change', (e) => {
+            if (!canvas) return;
+            const fontFamily = e.target.value
+            const currentTheme = Object.assign({}, getTheme(themes, themeSelector.value))
+            currentTheme['.text']['font-family'] = fontFamily
+            canvas.theme = currentTheme
+            updatePrompter('canvas.theme', currentTheme)
+          })
+        }
+
+      }
+      penStyleClasses.addEventListener('change', (event) => {
+        if (!canvas) return;
+        themeSelector.disabled = event.target.checked
+        if (event.target.checked) {
+          canvas.penStyle = undefined
+          canvas.penStyleClasses = 'greenThickPen'
+          const classesTheme = getTheme(themes, themeSelector.value)
+          updatePrompter(
+            'canvas.theme',
+            classesTheme,
+            'canvas.penStyleClasses',
+            'greenThickPen'
+          )
+        } else {
+          canvas.penStyleClasses = undefined
+          canvas.theme = getTheme(themes, themeSelector.value)
+          updatePrompter(
+            'canvas.theme',
+            getTheme(themes, themeSelector.value)
+          )
+        }
+      })
+
+      themeSelector.addEventListener('change', (event) => {
+        if (!canvas) return;
+        const selectedTheme = getTheme(themes, event.target.value)
+        selectedTheme['.text']['font-family'] = getFont()
+        if (selectedTheme) {
+          canvas.theme = selectedTheme
+        }
+      })
+
+      penEnabled.addEventListener('change', (event) => {
+        if (!canvas) return;
+        penWidth.disabled = !event.target.checked
+        penColor.disabled = !event.target.checked
+        if (event.target.checked) {
+          canvas.penStyle = getStyle()
+          updatePrompter('canvas.penStyle', canvas.penStyle)
+        } else {
+          canvas.penStyle = undefined
+          updatePrompter('canvas.penStyle', '')
+        }
+      })
+
+      penColor.addEventListener('change', () => {
+        if (!canvas) return;
+        canvas.penStyle = getStyle()
+        updatePrompter('canvas.penStyle', canvas.penStyle)
+      })
+
+      penWidth.addEventListener('change', () => {
+        if (!canvas) return;
+        canvas.penStyle = getStyle()
+        updatePrompter('canvas.penStyle', canvas.penStyle)
+      })
+      showModalBtn.addEventListener('click', () => {
+        ModalCanvasOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>

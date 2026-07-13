@@ -1,7 +1,7 @@
 import styleIcon from "@/assets/svg/palette.svg"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { DOMFactory } from "@/components/dom"
-import { EditorTool, EditorWriteTool } from "@/Constants"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import { CanvasTool, CanvasWriteTool } from "@/Constants"
 import { LoggerCategory, LoggerManager } from "@/logger"
 import type { IIModel } from "@/model"
 import type { TSymbol } from "@/symbol"
@@ -79,7 +79,7 @@ import {
 export class IIMenuStyle {
   #logger = LoggerManager.getLogger(LoggerCategory.MENU)
 
-  editor: TInteractiveInkEditor
+  canvas: TInteractiveInkCanvas
   id: string
   wrapper?: HTMLDivElement
   config: Required<TMenuStyleConfig>
@@ -91,10 +91,10 @@ export class IIMenuStyle {
   // Style items
   private styleItems: Map<string, BaseMenuItem> = new Map()
 
-  constructor(editor: TInteractiveInkEditor, id = "ms-menu-style", config?: TMenuStyleConfig) {
+  constructor(canvas: TInteractiveInkCanvas, id = "ms-menu-style", config?: TMenuStyleConfig) {
     this.id = id
     this.#logger.info("constructor")
-    this.editor = editor
+    this.canvas = canvas
     this.config = { ...DefaultMenuStyleConfig }
     if (config) {
       if (config.colors) {
@@ -119,7 +119,7 @@ export class IIMenuStyle {
   }
 
   get model(): IIModel {
-    return this.editor.model
+    return this.canvas.model
   }
 
   get symbolsSelected(): TSymbol[] {
@@ -127,21 +127,21 @@ export class IIMenuStyle {
   }
 
   get writeShape(): boolean {
-    return ![EditorWriteTool.Arrow, EditorWriteTool.DoubleArrow, EditorWriteTool.Line, EditorWriteTool.Pencil].includes(
-      this.editor.writer.tool
+    return ![CanvasWriteTool.Arrow, CanvasWriteTool.DoubleArrow, CanvasWriteTool.Line, CanvasWriteTool.Pencil].includes(
+      this.canvas.writer.tool
     )
   }
 
   get rowHeight(): number {
-    return this.editor.configuration.rendering.guides.gap
+    return this.canvas.configuration.rendering.guides.gap
   }
 
   get isMobile(): boolean {
-    return this.editor.renderer.parent.clientWidth < 700
+    return this.canvas.renderer.parent.clientWidth < 700
   }
 
   render(layer: HTMLElement): void {
-    if (this.editor.configuration.menu.style.enable) {
+    if (this.canvas.configuration.menu.style.enable) {
       this.#logger.info("Rendering menu styles with config", this.config)
 
       this.triggerBtn = DOMFactory.button({
@@ -156,37 +156,37 @@ export class IIMenuStyle {
 
       // Add style elements conditionally using new style classes
       if (this.config.strokeColor) {
-        const strokeColorStyle = new StrokeColorStyle(this.editor, this.config.colors, this.id)
+        const strokeColorStyle = new StrokeColorStyle(this.canvas, this.config.colors, this.id)
         this.styleItems.set("strokeColor", strokeColorStyle)
         subMenuContent.appendChild(strokeColorStyle.getElement())
       }
 
       if (this.config.fillColor) {
-        const fillColorStyle = new FillColorStyle(this.editor, this.config.colors, this.id)
+        const fillColorStyle = new FillColorStyle(this.canvas, this.config.colors, this.id)
         this.styleItems.set("fillColor", fillColorStyle)
         subMenuContent.appendChild(fillColorStyle.getElement())
       }
 
       if (this.config.thickness) {
-        const thicknessStyle = new ThicknessStyle(this.editor, this.config.thicknessList, this.id)
+        const thicknessStyle = new ThicknessStyle(this.canvas, this.config.thicknessList, this.id)
         this.styleItems.set("thickness", thicknessStyle)
         subMenuContent.appendChild(thicknessStyle.getElement())
       }
 
       if (this.config.fontSize) {
-        const fontSizeStyle = new FontSizeStyle(this.editor, this.config.fontSizeList, this.rowHeight, this.id)
+        const fontSizeStyle = new FontSizeStyle(this.canvas, this.config.fontSizeList, this.rowHeight, this.id)
         this.styleItems.set("fontSize", fontSizeStyle)
         subMenuContent.appendChild(fontSizeStyle.getElement())
       }
 
       if (this.config.fontWeight) {
-        const fontWeightStyle = new FontWeightStyle(this.editor, this.config.fontWeightList, this.id)
+        const fontWeightStyle = new FontWeightStyle(this.canvas, this.config.fontWeightList, this.id)
         this.styleItems.set("fontWeight", fontWeightStyle)
         subMenuContent.appendChild(fontWeightStyle.getElement())
       }
 
       if (this.config.opacity) {
-        const opacityStyle = new OpacityStyle(this.editor, this.id)
+        const opacityStyle = new OpacityStyle(this.canvas, this.id)
         this.styleItems.set("opacity", opacityStyle)
         subMenuContent.appendChild(opacityStyle.getElement())
       }
@@ -239,7 +239,7 @@ export class IIMenuStyle {
       }
     }
 
-    if (this.editor.tool === EditorTool.Write) {
+    if (this.canvas.tool === CanvasTool.Write) {
       this.show()
       // Show all style items for write mode
       const strokeColorEl = this.styleItems.get("strokeColor")?.getElement()
@@ -267,7 +267,7 @@ export class IIMenuStyle {
       if (opacityEl) {
         opacityEl.style.display = "block"
       }
-    } else if (this.editor.tool === EditorTool.Select) {
+    } else if (this.canvas.tool === CanvasTool.Select) {
       this.show()
       const shapeSelected =
         this.model.symbolsSelected.length && this.model.symbolsSelected.some((s) => ShapeOps.isShape(s))

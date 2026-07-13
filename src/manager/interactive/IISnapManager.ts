@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { LoggerCategory } from "@/logger"
 import { SVGRendererConst } from "@/renderer/svg/utils/SVGRendererConst"
 import type { TPoint, TSegment } from "@/symbol"
@@ -63,8 +63,8 @@ export class IISnapManager extends IIAbstractManager {
 
   snapConfiguration: SnapConfiguration
 
-  constructor(editor: TInteractiveInkEditor, config?: TPartialDeep<TSnapConfiguration>) {
-    super(editor, LoggerCategory.SNAP)
+  constructor(canvas: TInteractiveInkCanvas, config?: TPartialDeep<TSnapConfiguration>) {
+    super(canvas, LoggerCategory.SNAP)
     this.logger.info("constructor")
     this.snapConfiguration = new SnapConfiguration(config)
   }
@@ -79,7 +79,7 @@ export class IISnapManager extends IIAbstractManager {
   }
 
   get snapThreshold(): number {
-    return this.editor.configuration.rendering.guides.gap / 2
+    return this.canvas.configuration.rendering.guides.gap / 2
   }
 
   protected getNearestVerticalGuide(x: number): number {

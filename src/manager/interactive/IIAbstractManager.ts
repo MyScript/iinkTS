@@ -1,9 +1,9 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
-import type { InteractiveInkEditorConfiguration } from "@/editor/variants/InteractiveInkEditorConfiguration"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import type { InteractiveInkCanvasConfiguration } from "@/canvas/variants/InteractiveInkCanvasConfiguration"
+import type { WebSocketClient } from "@/client"
 import type { Logger, LoggerCategory } from "@/logger"
 import { LoggerManager } from "@/logger"
 import type { IIModel } from "@/model"
-import type { RecognizerWebSocket } from "@/recognizer"
 import type { SVGRenderer } from "@/renderer"
 
 /**
@@ -12,8 +12,8 @@ import type { SVGRenderer } from "@/renderer"
  *
  * All managers in iink-ts should extend this class to ensure consistent:
  * - Logger management
- * - Editor reference
- * - Common getters (model, renderer, recognizer, configuration)
+ * - Canvas reference
+ * - Common getters (model, renderer, client, configuration)
  * - Lifecycle hooks (onInit, onDestroy)
  *
  * @example
@@ -21,8 +21,8 @@ import type { SVGRenderer } from "@/renderer"
  * export class IIMyManager extends IIAbstractManager {
  *   protected managerName = "IIMyManager"
  *
- *   constructor(editor: InteractiveInkEditor) {
- *     super(editor)
+ *   constructor(canvas: InteractiveInkCanvas) {
+ *     super(canvas)
  *     // Custom initialization
  *   }
  *
@@ -32,7 +32,7 @@ import type { SVGRenderer } from "@/renderer"
  *   }
  *
  *   myMethod() {
- *     // Use this.editor, this.model, this.renderer, this.logger
+ *     // Use this.canvas, this.model, this.renderer, this.logger
  *     this.logger.info("Doing something")
  *   }
  *
@@ -61,10 +61,10 @@ export abstract class IIAbstractManager {
 
   /**
    * Create a new manager
-   * @param editor - The Interactive Ink Editor instance
+   * @param canvas - The Interactive Ink Canvas instance
    */
   constructor(
-    protected editor: TInteractiveInkEditor,
+    protected canvas: TInteractiveInkCanvas,
     logger: LoggerCategory
   ) {
     this.logger = LoggerManager.getLogger(logger)
@@ -76,35 +76,35 @@ export abstract class IIAbstractManager {
   }
 
   /**
-   * Get the model from the editor
-   * Convenience getter to avoid accessing editor.model everywhere
+   * Get the model from the canvas
+   * Convenience getter to avoid accessing canvas.model everywhere
    */
   get model(): IIModel {
-    return this.editor.model
+    return this.canvas.model
   }
 
   /**
-   * Get the renderer from the editor
-   * Convenience getter to avoid accessing editor.renderer everywhere
+   * Get the renderer from the canvas
+   * Convenience getter to avoid accessing canvas.renderer everywhere
    */
   get renderer(): SVGRenderer {
-    return this.editor.renderer
+    return this.canvas.renderer
   }
 
   /**
-   * Get the recognizer from the editor
-   * Convenience getter to avoid accessing editor.recognizer everywhere
+   * Get the client from the canvas
+   * Convenience getter to avoid accessing canvas.client everywhere
    */
-  get recognizer(): RecognizerWebSocket {
-    return this.editor.recognizer
+  get client(): WebSocketClient {
+    return this.canvas.client
   }
 
   /**
-   * Get the configuration from the editor
-   * Convenience getter to avoid accessing editor.configuration everywhere
+   * Get the configuration from the canvas
+   * Convenience getter to avoid accessing canvas.configuration everywhere
    */
-  get configuration(): InteractiveInkEditorConfiguration {
-    return this.editor.configuration
+  get configuration(): InteractiveInkCanvasConfiguration {
+    return this.canvas.configuration
   }
 
   /**

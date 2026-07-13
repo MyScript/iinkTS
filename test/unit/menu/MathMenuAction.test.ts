@@ -1,4 +1,4 @@
-import { createEditorMock, asEditor } from "../__mocks__/createEditorMock"
+import { createCanvasMock, asEditor } from "../__mocks__/createCanvasMock"
 import { MathMenuAction } from "@/menu/actions/MathMenuAction"
 
 describe("MathMenuAction.ts", () => {
@@ -7,7 +7,7 @@ describe("MathMenuAction.ts", () => {
   })
 
   test("does not build the removed select/delete result strokes buttons", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const action = new MathMenuAction(asEditor(editor))
     const element = action.getElement()
 
@@ -16,7 +16,7 @@ describe("MathMenuAction.ts", () => {
   })
 
   test("clicking Force Compute all clears then recomputes all math blocks", async () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     editor.math.clearAllSolverOutputs = jest.fn().mockResolvedValue(undefined)
     editor.math.computeAllNumericalResults = jest.fn().mockResolvedValue(undefined)
     const action = new MathMenuAction(asEditor(editor))
@@ -36,7 +36,7 @@ describe("MathMenuAction.ts", () => {
   })
 
   test("does not build the Force Compute all button when disabled via config", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const action = new MathMenuAction(asEditor(editor), "ms-menu-action", { forceComputeAll: false })
     const element = action.getElement()
 

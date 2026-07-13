@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 
 import type { BaseMenuItem, TGenericMenuItem } from "./BaseMenuItem"
 import { ButtonListMenuItem } from "./ButtonListMenuItem"
@@ -24,24 +24,24 @@ export type TAllMenuItems = TSubMenuItems | TMenuSubMenu | TMenuColorList | TMen
  * @group Menu
  * @remarks Factory function to create an instance of the appropriate menu item class
  */
-export function createMenuItemInstance(config: TAllMenuItems, editor: TInteractiveInkEditor): BaseMenuItem {
+export function createMenuItemInstance(config: TAllMenuItems, canvas: TInteractiveInkCanvas): BaseMenuItem {
   switch (config.type) {
     case "button":
-      return new ButtonMenuItem(config, editor)
+      return new ButtonMenuItem(config, canvas)
     case "checkbox":
-      return new CheckboxMenuItem(config, editor)
+      return new CheckboxMenuItem(config, canvas)
     case "select":
-      return new SelectMenuItem(config, editor)
+      return new SelectMenuItem(config, canvas)
     case "buttonlist":
-      return new ButtonListMenuItem(config, editor)
+      return new ButtonListMenuItem(config, canvas)
     case "submenu":
-      return new SubMenuItem(config, editor)
+      return new SubMenuItem(config, canvas)
     case "colorlist":
-      return new ColorListMenuItem(config, editor)
+      return new ColorListMenuItem(config, canvas)
     case "range":
-      return new RangeMenuItem(config, editor)
+      return new RangeMenuItem(config, canvas)
     case "fileinput":
-      return new FileInputMenuItem(config, editor)
+      return new FileInputMenuItem(config, canvas)
     default:
       throw new Error(`Unknown menu item type: ${(config as TGenericMenuItem).type}`)
   }

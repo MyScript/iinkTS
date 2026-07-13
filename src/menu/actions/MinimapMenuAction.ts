@@ -1,6 +1,6 @@
 import minimapIcon from "@/assets/svg/minimap.svg"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { Minimap } from "@/components"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
 import type { TMenuButton } from "@/menu/items/ButtonMenuItem"
 import { ButtonMenuItem } from "@/menu/items/ButtonMenuItem"
 
@@ -12,7 +12,7 @@ export class MinimapMenuAction extends ButtonMenuItem {
   #minimap: Minimap
   #visible = false
 
-  constructor(editor: TInteractiveInkEditor, layer: HTMLElement, idPrefix = "ms-menu-action") {
+  constructor(editor: TInteractiveInkCanvas, layer: HTMLElement, idPrefix = "ms-menu-action") {
     const config: TMenuButton = {
       type: "button",
       id: `${idPrefix}-minimap`,

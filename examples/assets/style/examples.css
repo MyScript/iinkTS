@@ -1,4 +1,4 @@
-/* ─── Page layout (flex column, editor fills remaining space) ────────────── */
+/* ─── Page layout (flex column, canvas fills remaining space) ────────────── */
 
 /* Flex column content area — used alongside ex-page-layout when nav/result bars exist */
 .page-content {
@@ -9,7 +9,7 @@
   overflow: hidden;
 }
 
-/* Two-column layout inside ex-page-layout — editor + right panel (minimap, deps, etc.) */
+/* Two-column layout inside ex-page-layout — canvas + right panel (minimap, deps, etc.) */
 .main-layout {
   flex: 1;
   min-width: 0;
@@ -40,8 +40,8 @@ body {
 }
 
 /* Both id conventions used across examples */
-#editorEl,
-#editor {
+#rootEl,
+#canvas {
   flex: 1;
   min-height: 0;
 }
@@ -268,7 +268,7 @@ nav {
   height: 100dvh;
   width: 100dvw;
   max-height: 100dvh;
-  background-color: white;
+  background-color: var(--ex-surface);
   cursor: zoom-out;
 }
 
@@ -342,10 +342,10 @@ nav {
 :root[data-theme="dark"] .tab-button.active { color: #90caf9; border-bottom-color: #42a5f5; }
 
 
-/* ─── Dev output info panels (custom grabber / recognizer examples) ────────── */
+/* ─── Dev output info panels (custom grabber / client examples) ────────── */
 
 .point-info,
-.recognizer-info {
+.client-info {
   width: calc(100% - 200px);
   min-width: 200px;
   overflow: auto;
@@ -356,7 +356,7 @@ nav {
 
 @media only screen and (max-width: 600px) {
   .point-info,
-  .recognizer-info {
+  .client-info {
     width: 100%;
   }
 }

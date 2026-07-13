@@ -1,5 +1,5 @@
 import translateIcon from "@/assets/svg/translate.svg"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { TMenuButton } from "@/menu/items/ButtonMenuItem"
 import { ButtonMenuItem } from "@/menu/items/ButtonMenuItem"
 
@@ -8,7 +8,7 @@ import { ButtonMenuItem } from "@/menu/items/ButtonMenuItem"
  * @remarks Menu action Convert
  */
 export class ConvertMenuAction extends ButtonMenuItem {
-  constructor(editor: TInteractiveInkEditor, idPrefix = "ms-menu-action") {
+  constructor(editor: TInteractiveInkCanvas, idPrefix = "ms-menu-action") {
     const config: TMenuButton = {
       type: "button",
       id: `${idPrefix}-convert`,

@@ -1,11 +1,11 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import type { WebSocketClient } from "@/client"
 import type { IIHistoryManager } from "@/history"
 import { type Logger, LoggerCategory, LoggerManager } from "@/logger"
 import type { TGesture, TGestureType } from "@/manager/interactive/gestures/GestureTypes"
 import type { IITypesetManager } from "@/manager/interactive/IITypesetManager"
 import type { IITranslateManager } from "@/manager/interactive/transform/IITranslateManager"
 import type { IIModel } from "@/model"
-import type { RecognizerWebSocket } from "@/recognizer"
 import type { SVGRenderer } from "@/renderer"
 import type { TStroke, TSymbol } from "@/symbol"
 
@@ -35,7 +35,7 @@ export type TGestureHandler = {
 
 /**
  * Abstract base class for gesture handlers
- * Provides common functionality and access to editor services via helpers
+ * Provides common functionality and access to canvas services via helpers
  * @group Manager
  */
 export abstract class GestureHandler implements TGestureHandler {
@@ -43,69 +43,69 @@ export abstract class GestureHandler implements TGestureHandler {
   protected readonly processor: IIGestureAnnotationProcessor
 
   constructor(
-    protected editor: TInteractiveInkEditor,
+    protected canvas: TInteractiveInkCanvas,
     protected helpers: GestureHelpers
   ) {
     this.logger = LoggerManager.getLogger(LoggerCategory.GESTURE)
-    this.processor = new IIGestureAnnotationProcessor(editor)
+    this.processor = new IIGestureAnnotationProcessor(canvas)
   }
 
   abstract readonly gestureType: TGestureType
   abstract apply(gestureStroke: TStroke, gesture: TGesture): Promise<void | TSymbol[]>
 
   /**
-   * Get the editor's model
+   * Get the canvas's model
    */
   protected get model(): IIModel {
-    return this.editor.model
+    return this.canvas.model
   }
   /**
-   * Get the editor's model
+   * Get the canvas's model
    */
   protected get manager(): IIGestureManager {
-    return this.editor.gesture
+    return this.canvas.gesture
   }
 
   /**
-   * Get the editor's renderer
+   * Get the canvas's renderer
    */
   protected get renderer(): SVGRenderer {
-    return this.editor.renderer
+    return this.canvas.renderer
   }
 
   /**
-   * Get the editor's history manager
+   * Get the canvas's history manager
    */
   protected get history(): IIHistoryManager {
-    return this.editor.history
+    return this.canvas.history
   }
 
   /**
-   * Get the editor's recognizer
+   * Get the canvas's client
    */
-  protected get recognizer(): RecognizerWebSocket {
-    return this.editor.recognizer
+  protected get client(): WebSocketClient {
+    return this.canvas.client
   }
 
   /**
-   * Get the editor's translator manager
+   * Get the canvas's translator manager
    */
   protected get translator(): IITranslateManager {
-    return this.editor.transform.translate
+    return this.canvas.transform.translate
   }
 
   /**
-   * Get the editor's typeset manager
+   * Get the canvas's typeset manager
    */
   protected get typeset(): IITypesetManager {
-    return this.editor.typeset
+    return this.canvas.typeset
   }
 
   /**
    * Get the row height from configuration
    */
   protected get rowHeight(): number {
-    return this.editor.configuration.rendering.guides.gap
+    return this.canvas.configuration.rendering.guides.gap
   }
 
   private getSymbolRowIndex(symbol: TSymbol): number {
@@ -167,6 +167,6 @@ export abstract class GestureHandler implements TGestureHandler {
    * Get the stroke space width from configuration
    */
   protected get strokeSpaceWidth(): number {
-    return this.editor.configuration.rendering.guides.gap * 2
+    return this.canvas.configuration.rendering.guides.gap * 2
   }
 }

@@ -1,5 +1,5 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
-import type { InkEditor } from "@/editor/variants/InkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import type { InkCanvas } from "@/canvas/variants/InkCanvas"
 import type { TPointerInfo } from "@/grabber"
 import { PointerEventGrabber } from "@/grabber"
 import { LoggerCategory, LoggerManager } from "@/logger"
@@ -26,26 +26,26 @@ export type THittable = {
 export class EraseManager {
   #logger = LoggerManager.getLogger(LoggerCategory.WRITE)
   grabber: PointerEventGrabber
-  editor: TInteractiveInkEditor | InkEditor
+  canvas: TInteractiveInkCanvas | InkCanvas
 
   eraserWidth = 5
   currentEraser?: TEraser
   deletingIds: Set<string>
   charsToDelete: Map<string, Set<string>> = new Map()
 
-  constructor(editor: TInteractiveInkEditor | InkEditor) {
+  constructor(canvas: TInteractiveInkCanvas | InkCanvas) {
     this.#logger.info("constructor")
-    this.editor = editor
-    this.grabber = new PointerEventGrabber(editor.configuration.grabber)
+    this.canvas = canvas
+    this.grabber = new PointerEventGrabber(canvas.configuration.grabber)
     this.deletingIds = new Set()
   }
 
   get renderer(): SVGRenderer {
-    return this.editor.renderer
+    return this.canvas.renderer
   }
 
-  #isTInteractiveInkEditor(editor: TInteractiveInkEditor | InkEditor): editor is TInteractiveInkEditor {
-    return "removeSymbols" in editor && typeof editor.removeSymbols === "function"
+  #isTInteractiveInkCanvas(canvas: TInteractiveInkCanvas | InkCanvas): canvas is TInteractiveInkCanvas {
+    return "removeSymbols" in canvas && typeof canvas.removeSymbols === "function"
   }
 
   #isHitByPoint(symbol: THittable, point: TPoint, radius: number): boolean {
@@ -95,8 +95,8 @@ export class EraseManager {
     this.renderer.drawSymbol(this.currentEraser)
     const currentPoint = info.pointer
     const radius = (this.currentEraser.style.width as number) / 2
-    if (this.#isTInteractiveInkEditor(this.editor)) {
-      this.editor.model.symbols.forEach((s) => {
+    if (this.#isTInteractiveInkCanvas(this.canvas)) {
+      this.canvas.model.symbols.forEach((s) => {
         if (isText(s)) {
           let hasHitChar = false
           s.chars.forEach((char) => {
@@ -125,7 +125,7 @@ export class EraseManager {
         }
       })
     } else {
-      this.editor.model.strokes.forEach((s) => {
+      this.canvas.model.strokes.forEach((s) => {
         if (this.#isHitByPoint(s, currentPoint, radius)) {
           this.deletingIds.add(s.id)
           this.renderer.updateDeletingState(s, true)
@@ -139,11 +139,11 @@ export class EraseManager {
     this.continue(info)
 
     this.renderer.removeSymbol(this.currentEraser!.id)
-    if (this.#isTInteractiveInkEditor(this.editor)) {
-      const editor = this.editor as TInteractiveInkEditor
+    if (this.#isTInteractiveInkCanvas(this.canvas)) {
+      const canvas = this.canvas as TInteractiveInkCanvas
       const symbolsToRemove: string[] = []
 
-      editor.model.symbols.forEach((s) => {
+      canvas.model.symbols.forEach((s) => {
         if (isText(s) && this.charsToDelete.has(s.id)) {
           const charIdsToDelete = this.charsToDelete.get(s.id)!
           const remainingChars = s.chars.filter((char) => !charIdsToDelete.has(char.id))
@@ -154,7 +154,7 @@ export class EraseManager {
           } else {
             // Some chars deleted, update the symbol directly
             s.chars = remainingChars
-            editor.typeset.setBounds(s)
+            canvas.typeset.setBounds(s)
             this.renderer.drawSymbol(s)
           }
         } else if (this.deletingIds.has(s.id)) {
@@ -163,13 +163,13 @@ export class EraseManager {
       })
 
       if (symbolsToRemove.length > 0) {
-        await editor.removeSymbols(symbolsToRemove)
+        await canvas.removeSymbols(symbolsToRemove)
       }
 
       this.deletingIds.clear()
       this.charsToDelete.clear()
     } else {
-      this.editor.removeStrokes(this.deletingIds.values().toArray())
+      this.canvas.removeStrokes(this.deletingIds.values().toArray())
       this.deletingIds.clear()
     }
     this.currentEraser = undefined

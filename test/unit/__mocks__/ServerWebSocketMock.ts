@@ -1,6 +1,6 @@
 import Server from "jest-websocket-mock"
 import { DeserializedMessage } from "jest-websocket-mock/lib/websocket"
-import { TRecognizerWebSocketMessage } from "@/recognizer"
+import { TWebSocketClientMessage } from "@/client"
 
 export const HMACChallengeMessage = {
   type: "hmacChallenge",
@@ -89,7 +89,7 @@ export class ServerWebSocketMock extends Server {
   init({ withHMAC, withIdle }: { withHMAC?: boolean; withIdle?: boolean } = { withHMAC: true, withIdle: true }) {
     this.on("connection", (socket) => {
       socket.on("message", (message: string | Blob | ArrayBuffer | ArrayBufferView) => {
-        const parsedMessage: TRecognizerWebSocketMessage = JSON.parse(message as string)
+        const parsedMessage: TWebSocketClientMessage = JSON.parse(message as string)
         switch (parsedMessage.type) {
           case "authenticate":
             if (withHMAC) {
@@ -163,7 +163,7 @@ export class ServerWebSocketMock extends Server {
 
   getMessages(type: string): DeserializedMessage<object>[] {
     return this.messages.filter((m: DeserializedMessage<object>) => {
-      const parseMessage = JSON.parse(m as string) as TRecognizerWebSocketMessage
+      const parseMessage = JSON.parse(m as string) as TWebSocketClientMessage
       return parseMessage.type === type
     })
   }

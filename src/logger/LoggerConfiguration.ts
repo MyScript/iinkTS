@@ -12,11 +12,11 @@ export type TLoggerConfiguration = {
  * @source
  */
 export const DefaultLoggerConfiguration: TLoggerConfiguration = {
-  [LoggerCategory.EDITOR]: LoggerLevel.ERROR,
-  [LoggerCategory.RECOGNIZER]: LoggerLevel.ERROR,
+  [LoggerCategory.CANVAS]: LoggerLevel.ERROR,
+  [LoggerCategory.CLIENT]: LoggerLevel.ERROR,
   [LoggerCategory.GRABBER]: LoggerLevel.ERROR,
   [LoggerCategory.RENDERER]: LoggerLevel.ERROR,
-  [LoggerCategory.EDITOR_EVENT]: LoggerLevel.ERROR,
+  [LoggerCategory.CANVAS_EVENT]: LoggerLevel.ERROR,
   [LoggerCategory.MODEL]: LoggerLevel.ERROR,
   [LoggerCategory.SYMBOL]: LoggerLevel.ERROR,
   [LoggerCategory.SMARTGUIDE]: LoggerLevel.ERROR,

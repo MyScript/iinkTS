@@ -1,5 +1,5 @@
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { DOMFactory } from "@/components/dom"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
 import { LoggerCategory, LoggerManager } from "@/logger"
 import type { TMathVariableUsage } from "@/manager/interactive/math"
 
@@ -9,12 +9,12 @@ import { Modal } from "./Modal"
 
 /**
  * @group Components
- * @remarks Modal editor for all variable definitions returned by get-variable-definitions.
+ * @remarks Modal canvas for all variable definitions returned by get-variable-definitions.
  * Shows one row per (variable, block) usage. Definition rows are read-only;
  * BLOCK-provided and free (UNDEFINED) variables are editable/deletable.
  */
 export class IIMathVariableEditor {
-  private editor: TInteractiveInkEditor
+  private canvas: TInteractiveInkCanvas
   private modal?: Modal
   private usages: TMathVariableUsage[] = []
   private usagesById: Map<string, TMathVariableUsage> = new Map()
@@ -25,8 +25,8 @@ export class IIMathVariableEditor {
   }> = []
   private logger = LoggerManager.getLogger(LoggerCategory.MATH)
 
-  constructor(editor: TInteractiveInkEditor) {
-    this.editor = editor
+  constructor(canvas: TInteractiveInkCanvas) {
+    this.canvas = canvas
   }
 
   async show(): Promise<void> {
@@ -36,7 +36,7 @@ export class IIMathVariableEditor {
     this.newRows = []
 
     try {
-      this.usages = await this.editor.math.getAllVariableUsages()
+      this.usages = await this.canvas.math.getAllVariableUsages()
     } catch (error) {
       this.logger.error("show", "Error fetching variable usages:", error)
       return
@@ -52,7 +52,7 @@ export class IIMathVariableEditor {
       title: "Variable Definitions",
       fields: [],
       customContent: container,
-      container: this.editor.layers.root,
+      container: this.canvas.layers.root,
       buttons: [
         {
           label: "Apply",
@@ -67,7 +67,7 @@ export class IIMathVariableEditor {
 
   private createModalContent(): HTMLDivElement {
     const container = DOMFactory.div({
-      className: "ms-var-editor-content",
+      className: "ms-var-canvas-content",
     })
 
     if (this.usages.length > 0) {
@@ -86,7 +86,7 @@ export class IIMathVariableEditor {
         disabled: !usage.isEditable,
         onDelete: usage.isEditable
           ? async (name) => {
-              await this.editor.math.removeVariable(usage.targetBlockId, name)
+              await this.canvas.math.removeVariable(usage.targetBlockId, name)
             }
           : undefined,
       }))
@@ -177,7 +177,7 @@ export class IIMathVariableEditor {
             continue
           }
           if (usage.value !== newValue) {
-            updates.push(this.editor.math.setVariableValue(usage.targetBlockId, usage.name, newValue))
+            updates.push(this.canvas.math.setVariableValue(usage.targetBlockId, usage.name, newValue))
           }
         }
       }
@@ -186,7 +186,7 @@ export class IIMathVariableEditor {
         const name = nameInput.value.trim()
         const value = parseFloat(valueInput.value)
         if (name && !isNaN(value)) {
-          updates.push(this.editor.math.setVariableValue("", name, value))
+          updates.push(this.canvas.math.setVariableValue("", name, value))
         }
       }
 
@@ -195,7 +195,7 @@ export class IIMathVariableEditor {
         this.logger.info("applyChanges", `Updated ${updates.length} variable(s)`)
       }
       this.close()
-      this.editor.menu.context.update()
+      this.canvas.menu.context.update()
     } catch (error) {
       this.logger.error("applyChanges", "Error applying variable changes:", error)
     }

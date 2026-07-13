@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { LoggerCategory } from "@/logger"
 import type { TEdge, TPoint, TShape, TSymbol } from "@/symbol"
 import type { TAnchor } from "@/symbol/edge/Anchor"
@@ -25,8 +25,8 @@ const ANCHOR_HINT_COLOR = "#3e68ff"
 export class IIConnectorManager extends IIAbstractManager {
   protected managerName = "IIConnectorManager"
 
-  constructor(editor: TInteractiveInkEditor) {
-    super(editor, LoggerCategory.MANAGER)
+  constructor(canvas: TInteractiveInkCanvas) {
+    super(canvas, LoggerCategory.MANAGER)
   }
 
   /**
@@ -57,7 +57,7 @@ export class IIConnectorManager extends IIAbstractManager {
     const target = this.findSymbolAtPoint(point, excludeId)
     if (target) {
       const bounds = OBBOps.toBox((target as unknown as { bounds: TOBB }).bounds)
-      this.editor.renderer.drawRect(bounds, {
+      this.canvas.renderer.drawRect(bounds, {
         role: ANCHOR_HINT_ROLE,
         fill: "none",
         stroke: ANCHOR_HINT_COLOR,
@@ -72,7 +72,7 @@ export class IIConnectorManager extends IIAbstractManager {
 
   /** Remove the anchor snap hint from the interaction layer. */
   clearAnchorHint(): void {
-    this.editor.renderer.clearElements({
+    this.canvas.renderer.clearElements({
       attrs: { role: ANCHOR_HINT_ROLE },
     })
   }
@@ -305,7 +305,7 @@ export class IIConnectorManager extends IIAbstractManager {
             endAnchor: cloneEndAnchor,
           }
           EdgeLineOps.updateDerivedFields(clone)
-          this.editor.renderer.drawSymbol(clone)
+          this.canvas.renderer.drawSymbol(clone)
         }
       } else if (EdgeOps.isPolyEdge(symbol)) {
         const points = symbol.points.map((p) => ({
@@ -367,7 +367,7 @@ export class IIConnectorManager extends IIAbstractManager {
             endAnchor: cloneEndAnchor,
           }
           EdgePolyLineOps.updateDerivedFields(clone)
-          this.editor.renderer.drawSymbol(clone)
+          this.canvas.renderer.drawSymbol(clone)
         }
       }
     })
@@ -426,7 +426,7 @@ export class IIConnectorManager extends IIAbstractManager {
         EdgePolyLineOps.updateDerivedFields(symbol)
       }
       this.model.updateSymbol(symbol)
-      this.editor.renderer.drawSymbol(symbol)
+      this.canvas.renderer.drawSymbol(symbol)
     })
   }
 
@@ -497,7 +497,7 @@ export class IIConnectorManager extends IIAbstractManager {
       }
 
       if (changed) {
-        this.editor.renderer.drawSymbol(symbol)
+        this.canvas.renderer.drawSymbol(symbol)
         this.model.updateSymbol(symbol)
       }
     })

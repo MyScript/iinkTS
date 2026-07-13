@@ -1,5 +1,5 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
-import type { InkEditor } from "@/editor/variants/InkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import type { InkCanvas } from "@/canvas/variants/InkCanvas"
 import type { TPointerInfo } from "@/grabber"
 import { PointerEventGrabber } from "@/grabber"
 import { LoggerCategory, LoggerManager } from "@/logger"
@@ -13,19 +13,19 @@ import type { TPointer, TSymbol } from "@/symbol"
 export abstract class AbstractWriterManager {
   #logger = LoggerManager.getLogger(LoggerCategory.WRITE)
   grabber: PointerEventGrabber
-  editor: TInteractiveInkEditor | InkEditor
+  canvas: TInteractiveInkCanvas | InkCanvas
   currentSymbol?: TSymbol
 
   detectGesture: boolean = true
 
-  constructor(editor: TInteractiveInkEditor | InkEditor) {
+  constructor(canvas: TInteractiveInkCanvas | InkCanvas) {
     this.#logger.info("constructor")
-    this.editor = editor
-    this.grabber = new PointerEventGrabber(editor.configuration.grabber)
+    this.canvas = canvas
+    this.grabber = new PointerEventGrabber(canvas.configuration.grabber)
   }
 
   get renderer(): SVGRenderer {
-    return this.editor.renderer
+    return this.canvas.renderer
   }
 
   attach(layer: HTMLElement): void {
@@ -45,7 +45,7 @@ export abstract class AbstractWriterManager {
   start(info: TPointerInfo): void {
     this.#logger.info("startWriting", { info })
     const localPointer = info.pointer
-    this.currentSymbol = this.createCurrentSymbol(localPointer, this.editor.penStyle, info.pointerType)
+    this.currentSymbol = this.createCurrentSymbol(localPointer, this.canvas.penStyle, info.pointerType)
     this.renderer.drawSymbol(this.currentSymbol!)
   }
 

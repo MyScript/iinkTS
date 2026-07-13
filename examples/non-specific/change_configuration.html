@@ -45,7 +45,7 @@
         height: 100%;
       }
 
-      .ms-editor {
+      .ms-ink {
         width: 100%;
         height: calc(100% - 100px);
       }
@@ -115,15 +115,15 @@
     <div class="wrapper flex-container">
       <div class="content">
         <div id="result"></div>
-        <div id="editorEl" class="editor"></div>
+        <div id="rootEl" class="canvas"></div>
       </div>
       <div id="configuration-container" class="configuration-container ex-panel">
         <h2 class="configuration-title">Configuration</h2>
         <div class="config-section">
           <div class="config-section-body">
             <div class="config-row">
-              <label for="editor-type" style="flex:1">Editor type</label>
-              <select id="editor-type" name="server-protocol" class="input-inline" style="width:auto"></select>
+              <label for="canvas-type" style="flex:1">Canvas type</label>
+              <select id="canvas-type" name="server-protocol" class="input-inline" style="width:auto"></select>
             </div>
           </div>
         </div>

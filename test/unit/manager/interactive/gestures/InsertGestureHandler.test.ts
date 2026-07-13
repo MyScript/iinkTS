@@ -1,14 +1,14 @@
-import { createEditorMock, asEditor } from "../../../__mocks__/createEditorMock"
+import { createCanvasMock, asEditor } from "../../../__mocks__/createCanvasMock"
 import { buildIIStroke } from "../../../helpers"
 import { type TStroke, InsertGestureHandler, GestureHelpers, OBBOps, StrokeOps, MatrixTransform } from "@/iink"
 
 describe("InsertGestureHandler.ts", () => {
-  let editor: ReturnType<typeof createEditorMock>
+  let editor: ReturnType<typeof createCanvasMock>
   let helpers: GestureHelpers
   let handler: InsertGestureHandler
 
   beforeEach(() => {
-    editor = createEditorMock()
+    editor = createCanvasMock()
     ;(editor.transform as unknown as Record<string, unknown>).translate = {
       applyToSymbol: jest.fn().mockImplementation((sym: TStroke, matrix: MatrixTransform) => {
         sym.pointers.forEach((p) => {

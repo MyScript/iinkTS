@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { TIIHistoryChanges } from "@/history"
 import { GestureHandler } from "@/manager/interactive/gestures/GestureHandler"
 import type { GestureHelpers } from "@/manager/interactive/gestures/GestureHelpers"
@@ -16,8 +16,8 @@ import { TextOps } from "@/symbol/text/Text"
 export class ScratchGestureHandler extends GestureHandler {
   readonly gestureType = "SCRATCH" as const
 
-  constructor(editor: TInteractiveInkEditor, helpers: GestureHelpers) {
-    super(editor, helpers)
+  constructor(canvas: TInteractiveInkCanvas, helpers: GestureHelpers) {
+    super(canvas, helpers)
   }
 
   /**
@@ -166,7 +166,7 @@ export class ScratchGestureHandler extends GestureHandler {
 
     if (symbolsToErase.length) {
       promises.push(
-        this.editor.removeSymbols(
+        this.canvas.removeSymbols(
           symbolsToErase.map((s) => s.id),
           false
         )
@@ -176,7 +176,7 @@ export class ScratchGestureHandler extends GestureHandler {
 
     if (symbolsToReplace.newSymbols.length) {
       changes.replaced = symbolsToReplace
-      promises.push(this.editor.replaceSymbols(symbolsToReplace.oldSymbols, symbolsToReplace.newSymbols, false))
+      promises.push(this.canvas.replaceSymbols(symbolsToReplace.oldSymbols, symbolsToReplace.newSymbols, false))
     }
 
     this.history.push(this.model, changes)

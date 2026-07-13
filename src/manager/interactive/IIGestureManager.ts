@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { IIHistoryManager } from "@/history"
 import { LoggerCategory } from "@/logger"
 import type { TStroke } from "@/symbol"
@@ -48,8 +48,8 @@ export class IIGestureManager extends IIAbstractManager {
   strikeThroughAction: StrikeThroughAction = StrikeThroughAction.Draw
   underlineAction: UnderlineAction = UnderlineAction.Draw
 
-  constructor(editor: TInteractiveInkEditor, gestureAction?: TPartialDeep<TGestureConfiguration>) {
-    super(editor, LoggerCategory.GESTURE)
+  constructor(canvas: TInteractiveInkCanvas, gestureAction?: TPartialDeep<TGestureConfiguration>) {
+    super(canvas, LoggerCategory.GESTURE)
     this.logger.info("constructor")
     this.surroundAction = gestureAction?.surround || DefaultGestureConfiguration.surround
     this.strikeThroughAction = gestureAction?.strikeThrough || DefaultGestureConfiguration.strikeThrough
@@ -57,12 +57,12 @@ export class IIGestureManager extends IIAbstractManager {
     this.insertAction = gestureAction?.insert || DefaultGestureConfiguration.insert
 
     // Initialize helpers with reference to this manager and register handlers
-    this.#helpers = new GestureHelpers(editor)
+    this.#helpers = new GestureHelpers(canvas)
     this.#registerHandlers()
 
     // Server-detected gestures (from addStrokes) arrive asynchronously with no link to the
     // original write call — handled here instead of by the caller.
-    this.recognizer.event.addGestureDetectedListener((gesture) => this.apply(gesture))
+    this.client.event.addGestureDetectedListener((gesture) => this.apply(gesture))
   }
 
   /**
@@ -70,24 +70,24 @@ export class IIGestureManager extends IIAbstractManager {
    * @private
    */
   #registerHandlers(): void {
-    this.#handlers.set("SURROUND", new SurroundGestureHandler(this.editor, this.#helpers))
-    this.#handlers.set("STRIKETHROUGH", new StrikeThroughGestureHandler(this.editor, this.#helpers))
-    this.#handlers.set("UNDERLINE", new UnderlineGestureHandler(this.editor, this.#helpers))
-    this.#handlers.set("SCRATCH", new ScratchGestureHandler(this.editor, this.#helpers))
-    this.#handlers.set("JOIN", new JoinGestureHandler(this.editor, this.#helpers))
-    this.#handlers.set("INSERT", new InsertGestureHandler(this.editor, this.#helpers))
+    this.#handlers.set("SURROUND", new SurroundGestureHandler(this.canvas, this.#helpers))
+    this.#handlers.set("STRIKETHROUGH", new StrikeThroughGestureHandler(this.canvas, this.#helpers))
+    this.#handlers.set("UNDERLINE", new UnderlineGestureHandler(this.canvas, this.#helpers))
+    this.#handlers.set("SCRATCH", new ScratchGestureHandler(this.canvas, this.#helpers))
+    this.#handlers.set("JOIN", new JoinGestureHandler(this.canvas, this.#helpers))
+    this.#handlers.set("INSERT", new InsertGestureHandler(this.canvas, this.#helpers))
   }
 
   get translator(): IITranslateManager {
-    return this.editor.transform.translate
+    return this.canvas.transform.translate
   }
 
   get typeset(): IITypesetManager {
-    return this.editor.typeset
+    return this.canvas.typeset
   }
 
   get history(): IIHistoryManager {
-    return this.editor.history
+    return this.canvas.history
   }
 
   /**
@@ -97,7 +97,7 @@ export class IIGestureManager extends IIAbstractManager {
    * client-side/contextless or arrived asynchronously from the server).
    */
   async apply(gesture: TGesture): Promise<void> {
-    return this.editor.trackOperation("Applying gesture", async () => this.#applyInternal(gesture))
+    return this.canvas.trackOperation("Applying gesture", async () => this.#applyInternal(gesture))
   }
 
   async #applyInternal(gesture: TGesture): Promise<void> {
@@ -113,7 +113,7 @@ export class IIGestureManager extends IIAbstractManager {
     // Removes the "stroke added" history entry pushed for the gesture stroke itself —
     // the handler below pushes its own entry for the gesture's actual effect instead.
     this.history.pop()
-    this.editor.removeSymbol(gestureStroke.id, false)
+    this.canvas.removeSymbol(gestureStroke.id, false)
 
     // Dispatch to appropriate handler
     const handler = this.#handlers.get(gesture.gestureType)
@@ -124,11 +124,11 @@ export class IIGestureManager extends IIAbstractManager {
     }
 
     // Emit event and update UI
-    this.editor.event.emitGestured({
+    this.canvas.event.emitGestured({
       gestureType: gesture.gestureType,
       stroke: gestureStroke,
     })
-    this.editor.overlays.apply()
+    this.canvas.overlays.apply()
     return Promise.resolve()
   }
 
@@ -138,13 +138,13 @@ export class IIGestureManager extends IIAbstractManager {
    * @returns The detected gesture or undefined
    */
   async getGestureFromContextLess(gestureStroke: TStroke): Promise<TGesture | undefined> {
-    return this.editor.trackOperation("Applying gesture", async () =>
+    return this.canvas.trackOperation("Applying gesture", async () =>
       this.#getGestureFromContextLessInternal(gestureStroke)
     )
   }
 
   async #getGestureFromContextLessInternal(gestureStroke: TStroke): Promise<TGesture | undefined> {
-    const gesture = await this.recognizer.recognizeGesture(gestureStroke)
+    const gesture = await this.client.recognizeGesture(gestureStroke)
     if (!gesture) {
       return
     }
