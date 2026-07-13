@@ -14,6 +14,10 @@
 - feat(recognizer): `RecognizerWebSocket` proactively detects unexpected disconnects and starts reconnecting immediately (previously only reactive, on the next `addStrokes()` call); `TConnectionStatus` gains an `"error"` value once reconnection attempts are exhausted, with the retry budget reset for the next attempt
 - feat(examples): add "Connection Status" example demonstrating `editor.connectionState` and reconnect handling
 
+### Stroke Playback (IIC-1688)
+- feat(editor): add `editor.playback` (`IIPlaybackManager`) — replays a recorded set of strokes point by point, honoring their original relative timing, via `editor.writer.start/continue/end`; `play(strokes, speed?)`, `pause()`, `resume()`, `stop()`, `setSpeed()`; `state`/`progress` getters and `onProgress`/`onStateChange`/`onEnd` callbacks
+- feat(examples): rework "Import Pointers" example into a "Stroke Playback" demo with play/pause/stop/speed controls, replaying `demo.json`
+
 ### Math (IIC-1633)
 - feat(math): implement comprehensive math dependencies visualization (variables, overlays, computation, evaluation)
 - feat(math): add Math Diagnostic menu and function evaluator UI component
