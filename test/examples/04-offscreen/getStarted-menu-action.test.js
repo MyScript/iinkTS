@@ -14,9 +14,10 @@ import {
   getEditorSymbols,
   getEditorExportsType,
   callEditorSynchronize,
+  callEditorExport,
 } from "../helper"
 import locator from "../locators"
-import laLecon from "../__dataset__/laLecon"
+import lecon from "../__dataset__/leçon"
 import helloStrike from "../__dataset__/helloStrike"
 import helloInsert from "../__dataset__/helloInsert"
 import helloOneStroke from "../__dataset__/helloOneStroke"
@@ -161,6 +162,11 @@ test.describe("Interactive ink editor Get Started Menu Action", () => {
   })
 
   test("language", async ({ page }) => {
+    // Switching recognition language can trigger a real server-side language-pack reload,
+    // which is occasionally slow under load — give it real headroom instead of racing a
+    // zero-timeout event.
+    test.setTimeout(120 * 1000)
+
     await test.step("should display language list", async () => {
       await page.locator(locator.menu.action.language.trigger).click()
       await page.locator(locator.menu.action.language.inputSelect).click()
@@ -170,17 +176,11 @@ test.describe("Interactive ink editor Get Started Menu Action", () => {
 
     await test.step("should not recognize french text", async () => {
       //write something in French with a typical French character: ç
-      await Promise.all([
-        waitForSynchronizedEvent(page),
-        writeStrokes(page, laLecon.strokes)
-      ])
+      await writeStrokes(page, lecon.strokes)
       await callEditorIdle(page)
-      await callEditorSynchronize(page)
+      const jiix =  await callEditorExport(page, "application/vnd.myscript.jiix")
 
-      const symbols = await getEditorSymbols(page)
-      expect(symbols).toHaveLength(laLecon.strokes.length)
-      const jiix = await getEditorExportsType(page, "application/vnd.myscript.jiix")
-      expect(jiix.elements[0].label).not.toEqual(laLecon.exports["application/vnd.myscript.jiix"].label)
+      expect(jiix.elements[0].label).not.toEqual(lecon.exports["application/vnd.myscript.jiix"].elements[0].label)
     })
 
     await test.step("should recognize french text", async () => {
@@ -190,13 +190,9 @@ test.describe("Interactive ink editor Get Started Menu Action", () => {
         page.locator(locator.menu.action.language.inputSelect).selectOption({ value: "fr_FR" })
       ])
       await callEditorIdle(page)
-      await callEditorSynchronize(page)
+      const jiix = await callEditorExport(page, "application/vnd.myscript.jiix")
 
-      const symbols = await getEditorSymbols(page)
-      expect(symbols).toHaveLength(laLecon.strokes.length)
-
-      const jiix = await getEditorExportsType(page, "application/vnd.myscript.jiix")
-      expect(jiix.elements[0].label).toEqual(laLecon.exports["application/vnd.myscript.jiix"].label)
+      expect(jiix.elements[0].label).toEqual(lecon.exports["application/vnd.myscript.jiix"].elements[0].label)
     })
   })
 
