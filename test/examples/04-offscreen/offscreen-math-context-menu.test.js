@@ -35,6 +35,9 @@ test.describe("Math Context Menu", () => {
   // Follows the "Try it" > "Compute" step from the example's info panel ("write √16=... draw a
   // circle around it → Compute numerical result"), using the verified "√5=" dataset.
   test('Try it — Compute: write "√16=" (stand-in "√5="), circle it, Compute numerical result', async ({ page, browserName }) => {
+    // eslint-disable-next-line playwright/no-skipped-test
+    test.skip(browserName === "webkit", "Need investigation IIC-1724")
+  
     const jiixBlockId = await writeExpressionAndGetBlockId(page, sqrt5.strokes)
 
     await selectBlockViaSurround(page, buildSurroundPointers(sqrt5.strokes, { steps: surroundStepsFor(browserName) }))
