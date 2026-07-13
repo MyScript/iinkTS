@@ -1,0 +1,38 @@
+import { test, expect } from "@playwright/test"
+import { passModalKey } from "../helper"
+
+test.describe("Ink Canvas no UI", () => {
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/canvas/canvas_v1_no_ui.html`)
+    await passModalKey(page, false)
+  })
+
+  test("should have title", async ({ page }) => {
+    await expect(page).toHaveTitle("Ink Canvas no UI")
+  })
+
+  test("should display text/plain into result", async ({ page }) => {
+    await expect(page.locator("#interpretatedTextContent")).toBeEmpty()
+    await expect(page.locator("#interpretatedImageContent > *")).toHaveCount(0)
+
+    const textPlainExport =  page.waitForResponse(async (resp) => {
+      const headers = await resp.allHeaders()
+      return resp.url().includes("/iink/batch") && (headers["content-type"] == "text/plain")
+    })
+    const imagePngExport = page.waitForResponse(async (resp) => {
+      return resp.url().includes("/iink/batch") && (await resp.allHeaders())["content-type"] == "image/png"
+    })
+    await Promise.all([
+      textPlainExport,
+      imagePngExport,
+      page.locator("#recognize").click()
+    ])
+    // // for wait rendering after convertBlobToBase64
+    // await page.waitForTimeout(1000)
+
+    await expect(page.locator("#interpretatedTextContent")).not.toBeEmpty()
+    await expect(page.locator("#interpretatedImageContent > *")).toHaveCount(1)
+    expect(await page.locator("#interpretatedImageContent > img").getAttribute("src")).toContain("data:image/png;base64")
+  })
+})

@@ -129,7 +129,7 @@ export class SubMenuItem extends BaseMenuItem<HTMLDivElement> {
     })
 
     this.config.items.forEach((item) => {
-      const menuItem = createMenuItemInstance(item, this.editor)
+      const menuItem = createMenuItemInstance(item, this.canvas)
       const element = menuItem.getElement()
       if (element) {
         this.subMenuWrapper!.appendChild(element)

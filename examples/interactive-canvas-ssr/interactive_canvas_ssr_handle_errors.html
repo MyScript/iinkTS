@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+    <title>Interactive Canvas SSR Handle error</title>
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">
+        Interactive Canvas SSR Handle error
+      </h1>
+    </header>
+
+    <div id="result"></div>
+
+    <div id="rootEl"></div>
+
+    <script type="module">
+      import { Canvas } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from "../components/modal/modalCanvasOptions.js"
+      const rootElement = document.getElementById("rootEl");
+      const showModalBtn = document.getElementById("showModalBtn");
+
+      let canvas;
+
+      const editorOptions = {
+          configuration: {
+            server: {
+              applicationKey: 'xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+              hmacKey: 'xxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+            },
+            recognition: {
+              type: "TEXT"
+            }
+          }
+        }
+
+      async function loadEditor(options) {
+        /**
+         * get canvas instance from type
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Canvas parameters
+         */
+        canvas = await Canvas.load(rootElement, "INTERACTIVE_INK_SSR", options);
+      };
+
+      showModalBtn.addEventListener("click", () => {
+        ModalCanvasOptions.show(loadEditor, editorOptions)
+      })
+
+      loadEditor(editorOptions).catch(error => console.error(error));
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+</html>

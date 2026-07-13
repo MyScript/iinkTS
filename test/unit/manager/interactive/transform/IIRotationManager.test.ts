@@ -1,4 +1,4 @@
-import { createEditorMock, asEditor } from "../../../__mocks__/createEditorMock"
+import { createCanvasMock, asEditor } from "../../../__mocks__/createCanvasMock"
 import { buildIIStroke } from "../../../helpers"
 import {
   EdgeLineOps,
@@ -16,13 +16,13 @@ import {
 
 describe("IIRotationManager.ts", () => {
   test("should create", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IIRotationManager(asEditor(editor))
     expect(manager).toBeDefined()
   })
 
   describe("should applyToSymbol", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     editor.typeset.updateBounds = jest.fn()
     editor.renderer.setAttribute = jest.fn()
     const manager = new IIRotationManager(asEditor(editor))
@@ -93,9 +93,9 @@ describe("IIRotationManager.ts", () => {
   })
 
   describe("rotate process on stroke", () => {
-    const editor = createEditorMock()
-    editor.recognizer.init = jest.fn(() => Promise.resolve())
-    editor.recognizer.transformRotate = jest.fn(() => Promise.resolve())
+    const editor = createCanvasMock()
+    editor.client.init = jest.fn(() => Promise.resolve())
+    editor.client.transformRotate = jest.fn(() => Promise.resolve())
     editor.renderer.setAttribute = jest.fn()
     editor.renderer.drawSymbol = jest.fn()
 
@@ -181,8 +181,8 @@ describe("IIRotationManager.ts", () => {
         expect(manager.applyToSymbol).toHaveBeenCalledTimes(1)
         expect(editor.renderer.drawSymbol).toHaveBeenCalledTimes(1)
         expect(editor.renderer.drawSymbol).toHaveBeenCalledWith(stroke)
-        expect(editor.recognizer.transformRotate).toHaveBeenCalledTimes(1)
-        expect(editor.recognizer.transformRotate).toHaveBeenCalledWith(
+        expect(editor.client.transformRotate).toHaveBeenCalledTimes(1)
+        expect(editor.client.transformRotate).toHaveBeenCalledWith(
           [stroke.id],
           convertDegreeToRadian(data.angle),
           rotateCenter.x,
@@ -212,7 +212,7 @@ describe("IIRotationManager.ts", () => {
     }
 
     test("continue() live-rotates the block's ghost stroke element", () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       editor.math.getGhostStrokeIds = jest.fn().mockReturnValue(["ghost-1"])
       editor.renderer.setAttribute = jest.fn()
       const manager = new IIRotationManager(asEditor(editor))
@@ -236,8 +236,8 @@ describe("IIRotationManager.ts", () => {
     })
 
     test("end() permanently applies the matrix to the block's ghost strokes", async () => {
-      const editor = createEditorMock()
-      editor.recognizer.transformRotate = jest.fn(() => Promise.resolve())
+      const editor = createCanvasMock()
+      editor.client.transformRotate = jest.fn(() => Promise.resolve())
       editor.math.applyTransformToGhostStrokes = jest.fn()
       const manager = new IIRotationManager(asEditor(editor))
       const stroke = buildMathStroke("block-1")

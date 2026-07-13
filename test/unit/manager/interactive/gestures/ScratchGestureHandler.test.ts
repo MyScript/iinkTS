@@ -1,14 +1,14 @@
-import { createEditorMock, asEditor } from "../../../__mocks__/createEditorMock"
+import { createCanvasMock, asEditor } from "../../../__mocks__/createCanvasMock"
 import { buildIIStroke, buildIIText } from "../../../helpers"
 import { ScratchGestureHandler, GestureHelpers, TGesture, StrokeOps } from "@/iink"
 
 describe("ScratchGestureHandler.ts", () => {
-  let editor: ReturnType<typeof createEditorMock>
+  let editor: ReturnType<typeof createCanvasMock>
   let helpers: GestureHelpers
   let handler: ScratchGestureHandler
 
   beforeEach(() => {
-    editor = createEditorMock()
+    editor = createCanvasMock()
     helpers = new GestureHelpers(asEditor(editor))
     handler = new ScratchGestureHandler(asEditor(editor), helpers)
   })

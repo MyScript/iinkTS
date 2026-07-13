@@ -1,4 +1,4 @@
-import type { InkEditor } from "@/editor"
+import type { InkCanvas } from "@/canvas"
 import { LoggerCategory, LoggerManager } from "@/logger"
 import type { IModel } from "@/model"
 import type { SVGRenderer } from "@/renderer"
@@ -19,19 +19,19 @@ export class IDebugSVGManager {
   #recognitionBoxDrawing = false
   #recognitionBoxItemsDrawing = false
 
-  editor: InkEditor
+  canvas: InkCanvas
 
-  constructor(editor: InkEditor) {
+  constructor(canvas: InkCanvas) {
     this.#logger.info("constructor")
-    this.editor = editor
+    this.canvas = canvas
   }
 
   get model(): IModel {
-    return this.editor.model
+    return this.canvas.model
   }
 
   get renderer(): SVGRenderer {
-    return this.editor.renderer
+    return this.canvas.renderer
   }
 
   get recognitionBoxVisibility(): boolean {
@@ -217,7 +217,7 @@ export class IDebugSVGManager {
     this.#logger.info("showRecognitionBox")
     let jiix = this.model.exports?.["application/vnd.myscript.jiix"]
     if (!jiix) {
-      const exports = await this.editor.recognizer.send(this.model.strokes, ["application/vnd.myscript.jiix"])
+      const exports = await this.canvas.client.send(this.model.strokes, ["application/vnd.myscript.jiix"])
       jiix = exports["application/vnd.myscript.jiix"]!
     }
     this.#logger.debug("showRecognitionBox", {
@@ -286,7 +286,7 @@ export class IDebugSVGManager {
     this.#logger.info("showRecognitionBoxItems")
     let jiix = this.model.exports?.["application/vnd.myscript.jiix"]
     if (!jiix) {
-      const exports = await this.editor.recognizer.send(this.model.strokes, ["application/vnd.myscript.jiix"])
+      const exports = await this.canvas.client.send(this.model.strokes, ["application/vnd.myscript.jiix"])
       jiix = exports["application/vnd.myscript.jiix"]!
     }
     this.#logger.debug("showRecognitionBoxItems", { jiix })

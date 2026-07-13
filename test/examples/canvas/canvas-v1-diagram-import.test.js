@@ -1,0 +1,64 @@
+import { test, expect } from "@playwright/test"
+import {
+  waitForExportedEvent,
+  getEditorExports,
+  getEditorSymbols,
+  passModalKey
+} from "../helper"
+
+test.describe("Ink Canvas Diagram Import", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/canvas/canvas_v1_diagram_import.html`)
+    await passModalKey(page)
+  })
+
+  test("should have title", async ({ page }) => {
+    await expect(page).toHaveTitle("Ink Canvas Diagram Import")
+  })
+
+  test("should import pointers", async ({ page }) => {
+    const [exportedDatas] = await Promise.all([
+      waitForExportedEvent(page),
+      page.locator("#import-btn").click(),
+    ])
+    expect(Object.keys(exportedDatas["application/vnd.myscript.jiix"].elements)).toHaveLength(12)
+    expect(await getEditorSymbols(page)).toHaveLength(40)
+  })
+
+  test("Nav actions", async ({ page }) => {
+
+    await test.step("should import pointers", async () => {
+      await Promise.all([
+        waitForExportedEvent(page),
+        page.locator("#import-btn").click(),
+      ])
+    })
+
+    await test.step("should clear", async () => {
+      const promisesResult = await Promise.all([
+        waitForExportedEvent(page),
+        page.locator("#clear").click(),
+      ])
+      expect(promisesResult[0]).toBeFalsy()
+      expect(await getEditorExports(page)).toBeFalsy()
+    })
+
+    await test.step("should undo", async () => {
+      const [exportedDatas] = await Promise.all([
+        waitForExportedEvent(page),
+        page.locator("#undo").click(),
+      ])
+      expect(Object.keys(exportedDatas["application/vnd.myscript.jiix"].elements)).toHaveLength(12)
+
+      expect(await getEditorSymbols(page)).toHaveLength(40)
+    })
+
+    await test.step("should redo", async () => {
+      await Promise.all([
+        waitForExportedEvent(page),
+        page.locator("#redo").click(),
+      ])
+      expect(await getEditorSymbols(page)).toHaveLength(0)
+    })
+  })
+})

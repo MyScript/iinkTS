@@ -1,4 +1,4 @@
-import type { TServerHTTPConfiguration } from "@/recognizer"
+import type { TServerHTTPConfiguration } from "@/client"
 
 import type { TPartialDeep } from "./types"
 import { assertServerConfig } from "./validation"

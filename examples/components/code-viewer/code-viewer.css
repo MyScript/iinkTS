@@ -133,7 +133,7 @@ body.cv-open .cv-panel {
 .cv-cls { color: #f38ba8; } /* class names / constructor calls */
 
 @media (min-width: 900px) {
-  body.cv-open #editorEl {
+  body.cv-open #rootEl {
     width: calc(100% - 450px);
   }
 }
@@ -166,7 +166,7 @@ body.cv-open .cv-panel {
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
   }
 
-  body.cv-open #editorEl {
+  body.cv-open #rootEl {
     width: 100%;
   }
 }
@@ -190,7 +190,7 @@ body.cv-open .cv-panel {
     box-shadow: -4px 0 20px rgba(0, 0, 0, 0.25);
   }
 
-  body.cv-open #editorEl {
+  body.cv-open #rootEl {
     width: 100%;
   }
 }

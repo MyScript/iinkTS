@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { TPointerInfo } from "@/grabber"
 import { LoggerCategory } from "@/logger"
 import type { TPointer, TStroke } from "@/symbol"
@@ -23,7 +23,7 @@ type TScheduledPoint = {
  * Replays a recorded set of strokes on the canvas, point by point, honoring
  * their original relative timing (roadmap: Stroke Playback / Animation).
  *
- * Each point is fed to `editor.writer` (`start`/`continue`/`end`) at the
+ * Each point is fed to `canvas.writer` (`start`/`continue`/`end`) at the
  * moment it was originally recorded (scaled by `speed`), so ink appears to
  * be drawn progressively rather than strokes popping in fully formed.
  * Play / pause / resume / stop and live speed changes are supported.
@@ -55,8 +55,8 @@ export class IIPlaybackManager extends IIAbstractManager {
   /** `performance.now()` when the current run of timers was (re)scheduled. */
   #scheduledAt = 0
 
-  constructor(editor: TInteractiveInkEditor) {
-    super(editor, LoggerCategory.MANAGER)
+  constructor(canvas: TInteractiveInkCanvas) {
+    super(canvas, LoggerCategory.MANAGER)
   }
 
   get state(): TPlaybackState {
@@ -108,16 +108,16 @@ export class IIPlaybackManager extends IIAbstractManager {
   #fire(index: number): void {
     const entry = this.#schedule[index]
     if (entry.isFirstOfStroke) {
-      this.editor.writer.start(this.#toPointerInfo(entry.point, "pointerdown"))
+      this.canvas.writer.start(this.#toPointerInfo(entry.point, "pointerdown"))
       this.#strokeInProgress = true
     }
     if (entry.isLastOfStroke) {
-      Promise.resolve(this.editor.writer.end(this.#toPointerInfo(entry.point, "pointerup"))).catch((error: Error) =>
-        this.editor.manageError(error)
+      Promise.resolve(this.canvas.writer.end(this.#toPointerInfo(entry.point, "pointerup"))).catch((error: Error) =>
+        this.canvas.manageError(error)
       )
       this.#strokeInProgress = false
     } else if (!entry.isFirstOfStroke) {
-      this.editor.writer.continue(this.#toPointerInfo(entry.point, "pointermove"))
+      this.canvas.writer.continue(this.#toPointerInfo(entry.point, "pointermove"))
     }
 
     this.#firedIndex = index + 1
@@ -137,8 +137,8 @@ export class IIPlaybackManager extends IIAbstractManager {
       return
     }
     const lastFired = this.#schedule[this.#firedIndex - 1]
-    Promise.resolve(this.editor.writer.end(this.#toPointerInfo(lastFired.point, "pointerup"))).catch((error: Error) =>
-      this.editor.manageError(error)
+    Promise.resolve(this.canvas.writer.end(this.#toPointerInfo(lastFired.point, "pointerup"))).catch((error: Error) =>
+      this.canvas.manageError(error)
     )
     this.#strokeInProgress = false
   }

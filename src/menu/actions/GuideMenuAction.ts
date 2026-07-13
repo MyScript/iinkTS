@@ -1,5 +1,5 @@
 import guideIcon from "@/assets/svg/orthogonal-view.svg"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { TMenuSubMenu } from "@/menu/items/SubMenuItem"
 import { SubMenuItem } from "@/menu/items/SubMenuItem"
 
@@ -17,7 +17,7 @@ export type TGuideActionConfig = boolean | TGuideActionItemsConfig
  * @remarks Menu action Guide - Configuration des guides
  */
 export class GuideMenuAction extends SubMenuItem {
-  constructor(editor: TInteractiveInkEditor, idPrefix = "ms-menu-action", itemsConfig?: TGuideActionItemsConfig) {
+  constructor(editor: TInteractiveInkCanvas, idPrefix = "ms-menu-action", itemsConfig?: TGuideActionItemsConfig) {
     const enabled = (key: keyof TGuideActionItemsConfig) => itemsConfig?.[key] !== false
 
     const guideGaps = [

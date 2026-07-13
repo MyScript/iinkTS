@@ -1,4 +1,4 @@
-import { createEditorMock, asEditor } from "../__mocks__/createEditorMock"
+import { createCanvasMock, asEditor } from "../__mocks__/createCanvasMock"
 import { IIMathVariableEditor, TMathVariableUsage } from "@/iink"
 
 function makeUsage(overrides: Partial<TMathVariableUsage> = {}): TMathVariableUsage {
@@ -16,10 +16,10 @@ function makeUsage(overrides: Partial<TMathVariableUsage> = {}): TMathVariableUs
 }
 
 describe("IIMathVariableEditor.ts", () => {
-  let editor: ReturnType<typeof createEditorMock>
+  let editor: ReturnType<typeof createCanvasMock>
 
   beforeEach(() => {
-    editor = createEditorMock()
+    editor = createCanvasMock()
     document.body.appendChild(editor.layers.root)
 
     editor.math.getAllVariableUsages = jest.fn().mockResolvedValue([])

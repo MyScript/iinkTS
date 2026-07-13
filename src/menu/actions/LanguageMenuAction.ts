@@ -1,5 +1,5 @@
 import languageIcon from "@/assets/svg/language.svg"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { BaseMenuItem } from "@/menu/items/BaseMenuItem"
 import { getAvailableLanguageList } from "@/utils"
 
@@ -13,13 +13,13 @@ export class LanguageMenuAction extends BaseMenuItem<HTMLDivElement> {
   private subMenuWrapper!: HTMLDivElement
   private subMenuContent!: HTMLDivElement
 
-  constructor(editor: TInteractiveInkEditor, idPrefix = "ms-menu-action") {
+  constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-action") {
     const config = {
       type: "language" as const,
       id: `${idPrefix}-language`,
       label: "Language",
     }
-    super(config, editor)
+    super(config, canvas)
   }
 
   createElement(): HTMLDivElement {
@@ -35,17 +35,17 @@ export class LanguageMenuAction extends BaseMenuItem<HTMLDivElement> {
       className: "select-language",
       onChange: (value) => {
         this.logger.info(`${this.config.id}.change`)
-        this.editor.changeLanguage(value)
+        this.canvas.changeLanguage(value)
       },
     })
 
     // Chargement asynchrone des langues disponibles
-    getAvailableLanguageList(this.editor.configuration).then((json) => {
+    getAvailableLanguageList(this.canvas.configuration).then((json) => {
       const languages = json.result as {
         [key: string]: string
       }
       for (const key in languages) {
-        const selected = key === this.editor.configuration.recognition.lang
+        const selected = key === this.canvas.configuration.recognition.lang
         const opt = new Option(languages[key], key, selected, selected)
         this.select.appendChild(opt)
       }
@@ -103,7 +103,7 @@ export class LanguageMenuAction extends BaseMenuItem<HTMLDivElement> {
 
   update(): void {
     if (this.select) {
-      this.select.value = this.editor.configuration.recognition.lang
+      this.select.value = this.canvas.configuration.recognition.lang
     }
     this.updateDisabled()
     this.updateVisible()

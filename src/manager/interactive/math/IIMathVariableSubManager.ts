@@ -1,8 +1,8 @@
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import type { TMathVariable, TMathVariableDefinition, TMathVariableDefinitions } from "@/client"
 import { SOURCE_TYPE_COLORS, SOURCE_TYPE_LABELS } from "@/components/IIMathVariableInputList"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
 import { LoggerCategory } from "@/logger"
 import type { TJIIXMathElement, TJIIXMathExpression } from "@/model/ExportMath"
-import type { TMathVariable, TMathVariableDefinition, TMathVariableDefinitions } from "@/recognizer"
 import type { TBox, TStroke } from "@/symbol"
 import { isRecognizedMath, isStroke } from "@/symbol"
 import { BoxOps } from "@/symbol/primitives/Box"
@@ -94,8 +94,8 @@ export class IIMathVariableSubManager extends IIAbstractManager {
   #selectedJiixBlockIds: Set<string> = new Set()
   #colorManager: ColorPaletteManager
 
-  constructor(editor: TInteractiveInkEditor, config: Partial<TMathInteractionConfig> = {}) {
-    super(editor, LoggerCategory.MATH)
+  constructor(canvas: TInteractiveInkCanvas, config: Partial<TMathInteractionConfig> = {}) {
+    super(canvas, LoggerCategory.MATH)
     this.#colorManager = ColorPaletteManager.getInstance()
     this.#config = {
       ...IIMathVariableSubManager.DEFAULT_CONFIG,
@@ -113,11 +113,11 @@ export class IIMathVariableSubManager extends IIAbstractManager {
   }
 
   private getMathSymbols(): TStroke[] {
-    return this.editor.model.symbols.filter(isRecognizedMath)
+    return this.canvas.model.symbols.filter(isRecognizedMath)
   }
 
   findMathSymbolsByJiixId(jiixId: string): TStroke[] {
-    return this.editor.model.symbols.filter(
+    return this.canvas.model.symbols.filter(
       (s) => isStroke(s) && s.jiixBlockId === jiixId && s.jiixBlockType === "Math"
     ) as TStroke[]
   }
@@ -131,7 +131,7 @@ export class IIMathVariableSubManager extends IIAbstractManager {
   }
 
   private getAllMathBlockIds(): string[] {
-    return this.editor.jiix.getAllMathBlocksWithStrokes().map((b) => b.mathBlock.id)
+    return this.canvas.jiix.getAllMathBlocksWithStrokes().map((b) => b.mathBlock.id)
   }
 
   protected findVariableBoxesInExpressions(expressions: TJIIXMathExpression[], variableName: string): TBox[] {
@@ -235,7 +235,7 @@ export class IIMathVariableSubManager extends IIAbstractManager {
       })
 
       this.logger.info("enrichMathDependencies", `Enriched "${jiixBlockId}" with variableSources:`, newVariableSources)
-      this.editor.event.emitChanged(this.editor.history.context)
+      this.canvas.event.emitChanged(this.canvas.history.context)
     } catch (error) {
       this.logger.error("enrichMathDependencies", { error })
     }
@@ -358,7 +358,7 @@ export class IIMathVariableSubManager extends IIAbstractManager {
     this.logger.info("getVariables", {
       jiixBlockId,
     })
-    const variables = await this.editor.recognizer.getVariables(jiixBlockId)
+    const variables = await this.canvas.client.getVariables(jiixBlockId)
     const definition = jiixBlockId ? await this.asVariableDefinition(jiixBlockId) : null
     const enriched: TMathVariable[] = variables.map((v) => ({
       ...v,
@@ -383,7 +383,7 @@ export class IIMathVariableSubManager extends IIAbstractManager {
       variableName,
       variableValue,
     })
-    await this.editor.recognizer.setVariableValue(jiixBlockId, variableName, variableValue)
+    await this.canvas.client.setVariableValue(jiixBlockId, variableName, variableValue)
     this.invalidateCache(jiixBlockId)
   }
 
@@ -392,7 +392,7 @@ export class IIMathVariableSubManager extends IIAbstractManager {
       jiixBlockId,
       variableName,
     })
-    await this.editor.recognizer.removeVariableValue(jiixBlockId, variableName)
+    await this.canvas.client.removeVariableValue(jiixBlockId, variableName)
     this.invalidateCache(jiixBlockId)
   }
 
@@ -408,7 +408,7 @@ export class IIMathVariableSubManager extends IIAbstractManager {
       this.logger.info("asVariableDefinition", {
         jiixBlockId,
       })
-      const definition = await this.editor.recognizer.asVariableDefinition(jiixBlockId)
+      const definition = await this.canvas.client.asVariableDefinition(jiixBlockId)
       this.#variableDefinitionCache.set(jiixBlockId, definition)
       return definition
     } catch {
@@ -423,7 +423,7 @@ export class IIMathVariableSubManager extends IIAbstractManager {
       return this.#variableDefsCache
     }
     this.logger.info("getVariableDefinitions")
-    const defs = await this.editor.recognizer.getVariableDefinitions()
+    const defs = await this.canvas.client.getVariableDefinitions()
     this.#variableDefsCache = defs
     return defs
   }
@@ -435,7 +435,7 @@ export class IIMathVariableSubManager extends IIAbstractManager {
     // One row per definition entry (authoritative source of truth)
     for (const vd of defs) {
       for (const d of vd.definitions) {
-        const targetLabel = d.blockId ? (this.editor.jiix.getBlockLabel(d.blockId) ?? d.blockId) : "Global"
+        const targetLabel = d.blockId ? (this.canvas.jiix.getBlockLabel(d.blockId) ?? d.blockId) : "Global"
         usages.push({
           id: `${vd.name}|def|${d.blockId || "global"}|${d.sourceType}`,
           name: vd.name,
@@ -462,7 +462,7 @@ export class IIMathVariableSubManager extends IIAbstractManager {
     )
 
     for (const [blockId, variables] of allBlockVars) {
-      const targetLabel = this.editor.jiix.getBlockLabel(blockId) ?? blockId
+      const targetLabel = this.canvas.jiix.getBlockLabel(blockId) ?? blockId
       for (const variable of variables) {
         if (variable.sourceType === "UNDEFINED") {
           continue
@@ -476,7 +476,7 @@ export class IIMathVariableSubManager extends IIAbstractManager {
 
         const sourceLabel =
           variable.sourceType === "BLOCK" && variable.sourceId
-            ? (this.editor.jiix.getBlockLabel(variable.sourceId) ?? variable.sourceId)
+            ? (this.canvas.jiix.getBlockLabel(variable.sourceId) ?? variable.sourceId)
             : undefined
 
         usages.push({
@@ -561,7 +561,7 @@ export class IIMathVariableSubManager extends IIAbstractManager {
   private highlightExternalVariableOccurrences(jiixBlockId: string, items: TVariableEncartItem[]): void {
     const firstStroke = this.findMathSymbolsByJiixId(jiixBlockId)[0]
     const mathExpressions = firstStroke
-      ? (this.editor.jiix.getElementForStroke(firstStroke.id) as TJIIXMathElement | undefined)?.expressions
+      ? (this.canvas.jiix.getElementForStroke(firstStroke.id) as TJIIXMathElement | undefined)?.expressions
       : undefined
     if (!mathExpressions) {
       return
@@ -570,7 +570,7 @@ export class IIMathVariableSubManager extends IIAbstractManager {
     items.forEach((item) => {
       const boxes = this.findVariableBoxesInExpressions(mathExpressions, item.name)
       boxes.forEach((box, i) => {
-        this.editor.overlays.highlightWithColor(box, `${jiixBlockId}-extvar-${item.name}-occ${i}`, item.name)
+        this.canvas.overlays.highlightWithColor(box, `${jiixBlockId}-extvar-${item.name}-occ${i}`, item.name)
       })
     })
   }
@@ -588,7 +588,7 @@ export class IIMathVariableSubManager extends IIAbstractManager {
     }
 
     const anchor = { x: bounds.x, y: bounds.y }
-    this.editor.overlays.showVariableEncart({ anchor, items })
+    this.canvas.overlays.showVariableEncart({ anchor, items })
     this.highlightExternalVariableOccurrences(jiixBlockId, items)
   }
 
@@ -615,7 +615,7 @@ export class IIMathVariableSubManager extends IIAbstractManager {
     sources.forEach((sourceJiixId) => {
       const bounds = this.getBlockBounds(sourceJiixId)
       if (bounds) {
-        this.editor.overlays.highlightPrimary(sourceJiixId, bounds)
+        this.canvas.overlays.highlightPrimary(sourceJiixId, bounds)
       }
     })
 
@@ -623,13 +623,13 @@ export class IIMathVariableSubManager extends IIAbstractManager {
     dependents.forEach((dependentJiixId) => {
       const bounds = this.getBlockBounds(dependentJiixId)
       if (bounds) {
-        this.editor.overlays.highlightLinked(dependentJiixId, bounds)
+        this.canvas.overlays.highlightLinked(dependentJiixId, bounds)
       }
     })
 
     const hoveredBounds = this.getBlockBounds(jiixBlockId)
     if (hoveredBounds) {
-      this.editor.overlays.addHoverGlow(jiixBlockId, hoveredBounds)
+      this.canvas.overlays.addHoverGlow(jiixBlockId, hoveredBounds)
     }
 
     this.drawDependencyArrows(jiixBlockId, sources, dependents)
@@ -638,7 +638,7 @@ export class IIMathVariableSubManager extends IIAbstractManager {
 
   private clearHoverHighlights(): void {
     this.logger.debug("clearHoverHighlights")
-    this.editor.overlays.clearHighlights()
+    this.canvas.overlays.clearHighlights()
     this.clearDependencyArrows()
   }
 
@@ -672,7 +672,7 @@ export class IIMathVariableSubManager extends IIAbstractManager {
       if (!relatedJiixIds.has(jid)) {
         const bounds = this.getBlockBounds(jid)
         if (bounds) {
-          this.editor.overlays.dimSymbol(jid, bounds, this.#config.dimOpacity)
+          this.canvas.overlays.dimSymbol(jid, bounds, this.#config.dimOpacity)
         }
       }
     })
@@ -680,14 +680,14 @@ export class IIMathVariableSubManager extends IIAbstractManager {
     sources.forEach((sourceJiixId) => {
       const bounds = this.getBlockBounds(sourceJiixId)
       if (bounds) {
-        this.editor.overlays.highlightPrimary(sourceJiixId, bounds)
+        this.canvas.overlays.highlightPrimary(sourceJiixId, bounds)
       }
     })
 
     dependents.forEach((dependentJiixId) => {
       const bounds = this.getBlockBounds(dependentJiixId)
       if (bounds) {
-        this.editor.overlays.highlightLinked(dependentJiixId, bounds)
+        this.canvas.overlays.highlightLinked(dependentJiixId, bounds)
       }
     })
 
@@ -702,8 +702,8 @@ export class IIMathVariableSubManager extends IIAbstractManager {
 
   private clearSelectionHighlights(): void {
     this.logger.debug("clearSelectionHighlights")
-    this.editor.overlays.clearHighlights()
-    this.editor.overlays.clearDimming()
+    this.canvas.overlays.clearHighlights()
+    this.canvas.overlays.clearDimming()
   }
 
   protected drawDependencyArrowToBox(fromId: string, fromBounds: TBox, toId: string, toBox: TBox, color: string): void {
@@ -792,16 +792,16 @@ export class IIMathVariableSubManager extends IIAbstractManager {
         }
 
         const mathExpressions = hoveredFirstStroke
-          ? (this.editor.jiix.getElementForStroke(hoveredFirstStroke.id) as TJIIXMathElement | undefined)?.expressions
+          ? (this.canvas.jiix.getElementForStroke(hoveredFirstStroke.id) as TJIIXMathElement | undefined)?.expressions
           : undefined
 
         if (mathExpressions) {
           const variableBoxes = this.findVariableBoxesInExpressions(mathExpressions, variableName)
           if (variableBoxes.length > 0) {
             const variableColor = this.#colorManager.getColorForVariable(variableName)
-            this.editor.overlays.highlightPrimary(sourceJiixId, sourceBounds, variableColor)
+            this.canvas.overlays.highlightPrimary(sourceJiixId, sourceBounds, variableColor)
             variableBoxes.forEach((variableBox, i) => {
-              this.editor.overlays.highlightWithColor(variableBox, `${jiixBlockId}-occ${i}`, variableName)
+              this.canvas.overlays.highlightWithColor(variableBox, `${jiixBlockId}-occ${i}`, variableName)
               this.drawDependencyArrowToBox(
                 `${sourceJiixId}-occ${i}`,
                 sourceBounds,
@@ -843,7 +843,7 @@ export class IIMathVariableSubManager extends IIAbstractManager {
         }
 
         const depMathExpressions = depFirstStroke
-          ? (this.editor.jiix.getElementForStroke(depFirstStroke.id) as TJIIXMathElement | undefined)?.expressions
+          ? (this.canvas.jiix.getElementForStroke(depFirstStroke.id) as TJIIXMathElement | undefined)?.expressions
           : undefined
 
         if (depMathExpressions) {
@@ -851,7 +851,7 @@ export class IIMathVariableSubManager extends IIAbstractManager {
           if (variableBoxes.length > 0) {
             const variableColor = this.#colorManager.getColorForVariable(variableName)
             variableBoxes.forEach((variableBox, i) => {
-              this.editor.overlays.highlightWithColor(variableBox, `${dependentJiixId}-occ${i}`, variableName)
+              this.canvas.overlays.highlightWithColor(variableBox, `${dependentJiixId}-occ${i}`, variableName)
               this.drawDependencyArrowToBox(
                 `${jiixBlockId}-occ${i}`,
                 hoveredBounds,

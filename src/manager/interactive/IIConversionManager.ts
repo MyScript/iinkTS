@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { LoggerCategory } from "@/logger"
 import type {
   TJIIXChar,
@@ -68,8 +68,8 @@ import { IIAbstractManager } from "./IIAbstractManager"
 export class IIConversionManager extends IIAbstractManager {
   protected managerName = "IIConversionManager"
 
-  constructor(editor: TInteractiveInkEditor) {
-    super(editor, LoggerCategory.CONVERTER)
+  constructor(canvas: TInteractiveInkCanvas) {
+    super(canvas, LoggerCategory.CONVERTER)
     this.logger.info("constructor")
   }
 
@@ -77,11 +77,11 @@ export class IIConversionManager extends IIAbstractManager {
     size: number | "auto"
     weight: "bold" | "normal" | "auto"
   } {
-    return this.editor.configuration.fontStyle
+    return this.canvas.configuration.fontStyle
   }
 
   get rowHeight(): number {
-    return this.editor.configuration.rendering.guides.gap
+    return this.canvas.configuration.rendering.guides.gap
   }
 
   protected computeFontSize(chars: TJIIXChar[]): number {
@@ -154,7 +154,7 @@ export class IIConversionManager extends IIAbstractManager {
     // Remove standalone decorators that were absorbed into the text
     for (const dec of decoratorsToRemove) {
       this.model.removeSymbol(dec.id)
-      this.editor.renderer.removeElement(dec.id)
+      this.canvas.renderer.removeElement(dec.id)
     }
 
     return text
@@ -199,7 +199,7 @@ export class IIConversionManager extends IIAbstractManager {
     let currentX = convertMillimeterToPixel(jiixWords[0]["bounding-box"]?.x || 0)
     jiixWords.forEach((word) => {
       if (word.label === " ") {
-        currentX += this.editor.typeset.getSpaceWidth(result.at(-1)?.symbol.chars[0].fontSize || this.rowHeight / 2)
+        currentX += this.canvas.typeset.getSpaceWidth(result.at(-1)?.symbol.chars[0].fontSize || this.rowHeight / 2)
         return
       }
       const wordStrokes = strokes.filter((s) => word.items?.some((i) => i["full-id"] === s.id))
@@ -222,7 +222,7 @@ export class IIConversionManager extends IIAbstractManager {
           wordSymbol.point.y = roundTo(currentY, this.rowHeight)
         }
 
-        this.editor.typeset.setBounds(wordSymbol)
+        this.canvas.typeset.setBounds(wordSymbol)
         currentX += wordSymbol.bounds.width
         result.push({
           symbol: wordSymbol,
@@ -652,18 +652,18 @@ export class IIConversionManager extends IIAbstractManager {
   }
 
   async apply(symbols: TSymbol[] = []): Promise<TSymbol[]> {
-    return this.editor.trackOperation("Converting", async () => this.#applyInternal(symbols))
+    return this.canvas.trackOperation("Converting", async () => this.#applyInternal(symbols))
   }
 
   async #applyInternal(symbols: TSymbol[] = []): Promise<TSymbol[]> {
     this.logger.info("convert")
     if (!this.model.exports?.["application/vnd.myscript.jiix"]) {
-      await this.editor.export(["application/vnd.myscript.jiix"])
+      await this.canvas.export(["application/vnd.myscript.jiix"])
     }
-    this.editor.selector.removeSelectedGroup()
+    this.canvas.selector.removeSelectedGroup()
     const jiix = this.model.exports?.["application/vnd.myscript.jiix"] as TJIIXExport
 
-    const strokesToConvert = this.editor.extractStrokesFromSymbols(symbols.length ? symbols : this.model.symbols)
+    const strokesToConvert = this.canvas.extractStrokesFromSymbols(symbols.length ? symbols : this.model.symbols)
 
     // Track all changes for history (batch at the end for performance)
     const allAddedSymbols: TSymbol[] = []
@@ -692,7 +692,7 @@ export class IIConversionManager extends IIAbstractManager {
 
     for (const [blockId, blockStrokes] of mathStrokesByBlock.entries()) {
       const firstStroke = blockStrokes[0]
-      const jiixMathElement = this.editor.jiix.getElementForStroke(firstStroke.id) as TJIIXMathElement | undefined
+      const jiixMathElement = this.canvas.jiix.getElementForStroke(firstStroke.id) as TJIIXMathElement | undefined
 
       if (jiixMathElement?.expressions && jiixMathElement.label && jiixMathElement["bounding-box"]) {
         const mathElement: TJIIXMathElement = {
@@ -710,7 +710,7 @@ export class IIConversionManager extends IIAbstractManager {
 
         const conversion = this.convertMath(mathElement, blockStrokes)
         if (conversion) {
-          this.editor.typeset.setBounds(conversion.symbol)
+          this.canvas.typeset.setBounds(conversion.symbol)
           mathConversions.push(conversion)
         }
       }
@@ -718,11 +718,11 @@ export class IIConversionManager extends IIAbstractManager {
 
     // Apply all pre-fetched conversions with progressive rendering
     for (const conversion of mathConversions) {
-      await this.editor.removeSymbols(
+      await this.canvas.removeSymbols(
         conversion.strokes.map((s) => s.id),
         false
       )
-      await this.editor.addSymbols([conversion.symbol], false)
+      await this.canvas.addSymbols([conversion.symbol], false)
 
       allAddedSymbols.push(conversion.symbol)
       allErasedStrokes.push(...conversion.strokes)
@@ -778,11 +778,11 @@ export class IIConversionManager extends IIAbstractManager {
         if (conversionResults.length) {
           // First remove all strokes for this block
           const strokeIds = conversionResults.flatMap((cs) => cs.strokes.map((s) => s.id))
-          await this.editor.removeSymbols(strokeIds, false)
+          await this.canvas.removeSymbols(strokeIds, false)
 
           // Then add all typeset symbols for this block
           const newSymbols = conversionResults.map((cs) => cs.symbol)
-          await this.editor.addSymbols(newSymbols, false)
+          await this.canvas.addSymbols(newSymbols, false)
 
           allAddedSymbols.push(...newSymbols)
           allErasedStrokes.push(...conversionResults.flatMap((cs) => cs.strokes))
@@ -795,7 +795,7 @@ export class IIConversionManager extends IIAbstractManager {
 
     // Add single history entry for the entire conversion
     if (allAddedSymbols.length) {
-      this.editor.history.push(this.model, {
+      this.canvas.history.push(this.model, {
         added: allAddedSymbols,
         erased: allErasedStrokes,
       })

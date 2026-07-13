@@ -52,10 +52,10 @@
   <div style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:99px;background:rgba(255,255,255,.2);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px;">⚠ Legacy</div>
   <div style="display:inline-flex;align-items:center;gap:6px;padding:4px 12px;border-radius:99px;background:rgba(255,255,255,.2);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:14px;">⚠ Deprecated</div>
   <h1 style="font-size:clamp(1.5rem,4vw,2.2rem);font-weight:800;margin:0 0 10px;letter-spacing:-.03em;">Legacy Examples</h1>
-  <p style="font-size:.95rem;opacity:.9;max-width:520px;margin:0 auto 28px;">Interactive Ink Editor SSR and deprecated Ink Editor (v1) examples. Kept for reference — use <a href="./index.html" style="color:#fff;font-weight:600;">Interactive Ink Editor or Ink Editor (v2)</a> for new projects.</p>
+  <p style="font-size:.95rem;opacity:.9;max-width:520px;margin:0 auto 28px;">Interactive Ink Canvas SSR and deprecated Ink Canvas (v1) examples. Kept for reference — use <a href="./index.html" style="color:#fff;font-weight:600;">Interactive Ink Canvas or Ink Canvas (v2)</a> for new projects.</p>
   <div style="display:flex;justify-content:center;gap:36px;flex-wrap:wrap;">
-    <div style="text-align:center"><strong style="display:block;font-size:1.75rem;font-weight:800;line-height:1;">24</strong><span style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;opacity:.8;">Interactive Ink Editor SSR</span></div>
-    <div style="text-align:center"><strong style="display:block;font-size:1.75rem;font-weight:800;line-height:1;">7</strong><span style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;opacity:.8;">Ink Editor (v1) Deprecated</span></div>
+    <div style="text-align:center"><strong style="display:block;font-size:1.75rem;font-weight:800;line-height:1;">24</strong><span style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;opacity:.8;">Interactive Ink Canvas SSR</span></div>
+    <div style="text-align:center"><strong style="display:block;font-size:1.75rem;font-weight:800;line-height:1;">7</strong><span style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;opacity:.8;">Ink Canvas (v1) Deprecated</span></div>
     <div style="text-align:center"><strong style="display:block;font-size:1.75rem;font-weight:800;line-height:1;">5</strong><span style="font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;opacity:.8;">Dev Tools</span></div>
   </div>
 </div>
@@ -77,24 +77,20 @@
 
   <!-- Sidebar -->
   <nav class="home-sidebar" id="home-sidebar" aria-label="Examples navigation">
-    <p class="sidebar-heading">Interactive Ink Editor SSR — Legacy</p>
+    <p class="sidebar-heading">Interactive Ink Canvas SSR — Legacy</p>
     <ul>
       <li><a href="#ssr-text"><span class="dot" style="background:#1A9FFF"></span>Text</a></li>
       <li><a href="#ssr-math"><span class="dot" style="background:#6C63FF"></span>Math</a></li>
       <li><a href="#ssr-utilities"><span class="dot" style="background:#718096"></span>Utilities</a></li>
     </ul>
     <hr class="sidebar-divider" />
-    <p class="sidebar-heading">Ink Editor (v1) — Deprecated</p>
+    <p class="sidebar-heading">Ink Canvas (v1) — Deprecated</p>
     <ul>
       <li><a href="#v1-text"><span class="dot" style="background:#FCD34D"></span>Text</a></li>
       <li><a href="#v1-math"><span class="dot" style="background:#F97316"></span>Math</a></li>
       <li><a href="#v1-diagram"><span class="dot" style="background:#EF4444"></span>Diagram</a></li>
       <li><a href="#v1-raw"><span class="dot" style="background:#8B5CF6"></span>Raw Content</a></li>
-    </ul>
-    <hr class="sidebar-divider" />
-    <p class="sidebar-heading">Dev Tools</p>
-    <ul>
-      <li><a href="#dev-tools"><span class="dot" style="background:#E17055"></span>Custom Recognizer &amp; Grabber</a></li>
+      <li><a href="#v1-utilities"><span class="dot" style="background:#718096"></span>Utilities</a></li>
     </ul>
     <hr class="sidebar-divider" />
     <div class="sidebar-legacy">
@@ -104,6 +100,9 @@
 
   <main class="home-main" id="main-content">
 
+    <!-- ============================================
+         SECTION: InteractiveInkCanvasSSR — Text
+    ============================================= -->
     <section class="home-section" id="ssr-text">
       <div class="section-header">
         <div class="section-icon">
@@ -111,7 +110,7 @@
         </div>
         <div class="section-meta">
           <h2>Text Recognition</h2>
-          <p>Interactive Ink Editor SSR (Server-Side Rendering) text examples — real-time multi-line handwriting recognition.</p>
+          <p>Interactive Ink Canvas SSR (Server-Side Rendering) text examples — real-time multi-line handwriting recognition.</p>
           <div class="section-badges">
             <span class="badge badge-secondary">INTERACTIVITY</span>
             <span class="badge badge-secondary">LEGACY</span>
@@ -131,8 +130,8 @@
           <h3>Get Started</h3>
           <p>Basic multi-line text recognition — handwriting to digital text in real time.</p>
           <div class="card-actions">
-            <a href="websocket/websocket_text.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            <a href="interactive-canvas-ssr/interactive_canvas_ssr_text.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas-ssr/interactive_canvas_ssr_text.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
 
@@ -145,8 +144,8 @@
           <h3>Gesture</h3>
           <p>Basic multi-line text recognition — handwriting to digital text in real time with gesture support.</p>
           <div class="card-actions">
-            <a href="websocket/websocket_text_gesture.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_gesture.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            <a href="interactive-canvas-ssr/interactive_canvas_ssr_text_gesture.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas-ssr/interactive_canvas_ssr_text_gesture.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
 
@@ -157,10 +156,10 @@
             <span class="badge badge-secondary" title="Server-Side Rendering">SSR</span>
           </div>
           <h3>Disable Guides</h3>
-          <p>Text editor without baseline guide lines — clean writing area.</p>
+          <p>Text canvas without baseline guide lines — clean writing area.</p>
           <div class="card-actions">
-            <a href="websocket/websocket_text_no_guides.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_no_guides.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            <a href="interactive-canvas-ssr/interactive_canvas_ssr_text_no_guides.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas-ssr/interactive_canvas_ssr_text_no_guides.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
 
@@ -173,8 +172,8 @@
           <h3>Eraser</h3>
           <p>Erase handwritten strokes using the built-in eraser tool.</p>
           <div class="card-actions">
-            <a href="websocket/websocket_text_eraser.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_eraser.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            <a href="interactive-canvas-ssr/interactive_canvas_ssr_text_eraser.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas-ssr/interactive_canvas_ssr_text_eraser.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
 
@@ -187,8 +186,8 @@
           <h3>Local Storage</h3>
           <p>Persist recognized text to browser local storage across sessions.</p>
           <div class="card-actions">
-            <a href="websocket/websocket_text_local_storage_text.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_local_storage_text.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            <a href="interactive-canvas-ssr/interactive_canvas_ssr_text_local_storage_text.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas-ssr/interactive_canvas_ssr_text_local_storage_text.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
 
@@ -201,8 +200,8 @@
           <h3>Custom Lexicon</h3>
           <p>Boost recognition accuracy by adding domain-specific vocabulary.</p>
           <div class="card-actions">
-            <a href="websocket/websocket_text_custom_lexicon.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_custom_lexicon.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            <a href="interactive-canvas-ssr/interactive_canvas_ssr_text_custom_lexicon.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas-ssr/interactive_canvas_ssr_text_custom_lexicon.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
 
@@ -215,8 +214,8 @@
           <h3>Custom Resource</h3>
           <p>Load pre-trained language model resources for specialized domains.</p>
           <div class="card-actions">
-            <a href="websocket/websocket_text_custom_resources.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_custom_resources.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            <a href="interactive-canvas-ssr/interactive_canvas_ssr_text_custom_resources.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas-ssr/interactive_canvas_ssr_text_custom_resources.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
 
@@ -226,11 +225,11 @@
             <span class="badge badge-secondary">LEGACY</span>
             <span class="badge badge-secondary" title="Server-Side Rendering">SSR</span>
           </div>
-          <h3>Customize Editor CSS</h3>
-          <p>Override default editor styles with custom CSS classes.</p>
+          <h3>Customize Canvas CSS</h3>
+          <p>Override default canvas styles with custom CSS classes.</p>
           <div class="card-actions">
-            <a href="websocket/websocket_text_customize_editor_css.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_customize_editor_css.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            <a href="interactive-canvas-ssr/interactive_canvas_ssr_text_customize_canvas_css.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas-ssr/interactive_canvas_ssr_text_customize_canvas_css.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
 
@@ -243,8 +242,8 @@
           <h3>Customize Stroke Style</h3>
           <p>Change pen color, stroke width, and font appearance settings.</p>
           <div class="card-actions">
-            <a href="websocket/websocket_text_customize_stroke_style.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_customize_stroke_style.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            <a href="interactive-canvas-ssr/interactive_canvas_ssr_text_customize_stroke_style.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas-ssr/interactive_canvas_ssr_text_customize_stroke_style.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
 
@@ -257,8 +256,8 @@
           <h3>Import Pointer Events</h3>
           <p>Replay pre-recorded ink pointer events programmatically.</p>
           <div class="card-actions">
-            <a href="websocket/websocket_text_pointer_events.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_pointer_events.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            <a href="interactive-canvas-ssr/interactive_canvas_ssr_text_pointer_events.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas-ssr/interactive_canvas_ssr_text_pointer_events.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
 
@@ -269,10 +268,10 @@
             <span class="badge badge-secondary" title="Server-Side Rendering">SSR</span>
           </div>
           <h3>Import Text Content</h3>
-          <p>Pre-populate the editor with existing text content via import.</p>
+          <p>Pre-populate the canvas with existing text content via import.</p>
           <div class="card-actions">
-            <a href="websocket/websocket_text_import_content.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_import_content.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            <a href="interactive-canvas-ssr/interactive_canvas_ssr_text_import_content.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas-ssr/interactive_canvas_ssr_text_import_content.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
 
@@ -285,8 +284,8 @@
           <h3>Search Text</h3>
           <p>Find and highlight words in recognized text without Smart Guide.</p>
           <div class="card-actions">
-            <a href="websocket/websocket_text_search.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_search.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            <a href="interactive-canvas-ssr/interactive_canvas_ssr_text_search.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas-ssr/interactive_canvas_ssr_text_search.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
 
@@ -299,8 +298,8 @@
           <h3>Interact</h3>
           <p>Handle word-level tap/click interaction events on recognized text.</p>
           <div class="card-actions">
-            <a href="websocket/websocket_text_interact.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_interact.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            <a href="interactive-canvas-ssr/interactive_canvas_ssr_text_interact.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas-ssr/interactive_canvas_ssr_text_interact.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
 
@@ -313,8 +312,8 @@
           <h3>Highlight Words</h3>
           <p>Programmatically highlight specific recognized words in the result.</p>
           <div class="card-actions">
-            <a href="websocket/websocket_text_highlight_words.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_highlight_words.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            <a href="interactive-canvas-ssr/interactive_canvas_ssr_text_highlight_words.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas-ssr/interactive_canvas_ssr_text_highlight_words.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
 
@@ -325,10 +324,10 @@
             <span class="badge badge-secondary" title="Server-Side Rendering">SSR</span>
           </div>
           <h3>Multiple Inputs</h3>
-          <p>Use multiple independent editor instances on a single page.</p>
+          <p>Use multiple independent canvas instances on a single page.</p>
           <div class="card-actions">
-            <a href="websocket/websocket_text_multiple_inputs.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_multiple_inputs.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            <a href="interactive-canvas-ssr/interactive_canvas_ssr_text_multiple_inputs.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas-ssr/interactive_canvas_ssr_text_multiple_inputs.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
 
@@ -341,14 +340,17 @@
           <h3>File Export</h3>
           <p>Export handwriting as DOCX, HTML, and other document formats.</p>
           <div class="card-actions">
-            <a href="websocket/websocket_text_file_export.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_text_file_export.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            <a href="interactive-canvas-ssr/interactive_canvas_ssr_text_file_export.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas-ssr/interactive_canvas_ssr_text_file_export.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
 
       </div>
     </section>
 
+    <!-- ============================================
+         SECTION: InteractiveInkCanvasSSR — Math
+    ============================================= -->
     <section class="home-section" id="ssr-math">
       <div class="section-header">
         <div class="section-icon">
@@ -356,7 +358,7 @@
         </div>
         <div class="section-meta">
           <h2>Math Recognition</h2>
-          <p>Interactive Ink Editor SSR math examples — real-time equation recognition, custom grammars, graph plotting.</p>
+          <p>Interactive Ink Canvas SSR math examples — real-time equation recognition, custom grammars, graph plotting.</p>
           <div class="section-badges">
             <span class="badge badge-secondary">INTERACTIVITY</span>
             <span class="badge badge-secondary">LEGACY</span>
@@ -375,8 +377,8 @@
           <h3>Get Started</h3>
           <p>Real-time handwritten math equation recognition and rendering.</p>
           <div class="card-actions">
-            <a href="websocket/websocket_math.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            <a href="interactive-canvas-ssr/interactive_canvas_ssr_math.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas-ssr/interactive_canvas_ssr_math.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
         <article class="card" data-search="math equation mathml websocket flavor standard ms-office">
@@ -388,8 +390,8 @@
           <h3>MathML</h3>
           <p>Real-time handwritten math equation recognition and rendering with MathML export.</p>
           <div class="card-actions">
-            <a href="websocket/websocket_math_mathml.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_mathml.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            <a href="interactive-canvas-ssr/interactive_canvas_ssr_math_mathml.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas-ssr/interactive_canvas_ssr_math_mathml.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
 
@@ -402,8 +404,8 @@
           <h3>Custom Resource</h3>
           <p>Load custom math grammars and symbol sets for specialized notation.</p>
           <div class="card-actions">
-            <a href="websocket/websocket_math_custom_resources.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_custom_resources.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            <a href="interactive-canvas-ssr/interactive_canvas_ssr_math_custom_resources.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas-ssr/interactive_canvas_ssr_math_custom_resources.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
 
@@ -416,8 +418,8 @@
           <h3>Custom Resource (pre-compiled)</h3>
           <p>Pre-compiled custom math resources for faster loading performance.</p>
           <div class="card-actions">
-            <a href="websocket/websocket_math_custom_resources_compiled.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_custom_resources_compiled.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            <a href="interactive-canvas-ssr/interactive_canvas_ssr_math_custom_resources_compiled.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas-ssr/interactive_canvas_ssr_math_custom_resources_compiled.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
 
@@ -430,8 +432,8 @@
           <h3>Import JIIX</h3>
           <p>Import mathematical content from JIIX (JSON Ink Interchange eXchange) format.</p>
           <div class="card-actions">
-            <a href="websocket/websocket_math_import_jiix.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_import_jiix.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            <a href="interactive-canvas-ssr/interactive_canvas_ssr_math_import_jiix.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas-ssr/interactive_canvas_ssr_math_import_jiix.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
 
@@ -442,10 +444,10 @@
             <span class="badge badge-secondary" title="Server-Side Rendering">SSR</span>
           </div>
           <h3>Math Inside Page</h3>
-          <p>Embed a math editor inline within existing page content.</p>
+          <p>Embed a math canvas inline within existing page content.</p>
           <div class="card-actions">
-            <a href="websocket/websocket_math_inside_page.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_inside_page.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            <a href="interactive-canvas-ssr/interactive_canvas_ssr_math_inside_page.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas-ssr/interactive_canvas_ssr_math_inside_page.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
 
@@ -458,22 +460,25 @@
           <h3>Draw Graph</h3>
           <p>Plot recognized math functions live using Desmos graph integration.</p>
           <div class="card-actions">
-            <a href="websocket/websocket_math_with_graph.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_math_with_graph.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            <a href="interactive-canvas-ssr/interactive_canvas_ssr_math_with_graph.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas-ssr/interactive_canvas_ssr_math_with_graph.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
 
       </div>
     </section>
 
+    <!-- ============================================
+         SECTION: InteractiveInkCanvasSSR — Utilities
+    ============================================= -->
     <section class="home-section" id="ssr-utilities">
       <div class="section-header">
         <div class="section-icon">
           <img src="./assets/img/home-not-specific.svg" alt="" />
         </div>
         <div class="section-meta">
-          <h2>Interactive Ink Editor SSR Utilities</h2>
-          <p>Cross-topic Interactive Ink Editor SSR helpers — export control and error handling patterns.</p>
+          <h2>Interactive Ink Canvas SSR Utilities</h2>
+          <p>Cross-topic Interactive Ink Canvas SSR helpers — export control and error handling patterns.</p>
           <div class="section-badges">
             <span class="badge badge-secondary">INTERACTIVITY</span>
             <span class="badge badge-secondary">LEGACY</span>
@@ -483,244 +488,17 @@
       </div>
 
       <div class="card-grid">
-
-        <article class="card" data-search="export on demand trigger manual recognition">
+        <article class="card" data-search="websocket custom client client implement override backend">
           <div class="card-top">
             <span class="badge badge-secondary">INTERACTIVITY</span>
             <span class="badge badge-secondary">LEGACY</span>
             <span class="badge badge-secondary" title="Server-Side Rendering">SSR</span>
           </div>
-          <h3>Export On Demand</h3>
-          <p>Trigger recognition export manually instead of on every ink change.</p>
+          <h3>Custom Client</h3>
+          <p>Override the default webSocket client to connect to your own backend.</p>
           <div class="card-actions">
-            <a href="websocket/websocket_export_on_demand.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_export_on_demand.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
-          </div>
-        </article>
-
-        <article class="card" data-search="handle errors network reconnect error recovery">
-          <div class="card-top">
-            <span class="badge badge-secondary">INTERACTIVITY</span>
-            <span class="badge badge-secondary">LEGACY</span>
-            <span class="badge badge-secondary" title="Server-Side Rendering">SSR</span>
-          </div>
-          <h3>Handle Errors</h3>
-          <p>Error handling patterns for network issues, authentication, and reconnection.</p>
-          <div class="card-actions">
-            <a href="websocket/websocket_handle_errors.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/websocket/websocket_handle_errors.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
-          </div>
-        </article>
-
-      </div>
-    </section>
-
-    <section class="home-section home-section--deprecated" id="v1-text">
-      <div class="section-header">
-        <div class="section-icon">
-          <img src="./assets/img/home-text.svg" alt="" />
-        </div>
-        <div class="section-meta">
-          <h2>Text Recognition</h2>
-          <p>Legacy Ink Editor text recognition examples.</p>
-          <div class="section-badges">
-            <span class="badge badge-deprecated">Ink Editor v1 · Deprecated</span>
-          </div>
-        </div>
-      </div>
-      <div class="card-grid">
-        <article class="card card--deprecated" data-search="inkv1 text rest v1 deprecated basic">
-          <div class="card-top">
-            <span class="badge badge-deprecated">RECOGNIZER-v1</span>
-            <span class="badge badge-deprecated">Deprecated</span>
-          </div>
-          <h3>Get Started</h3>
-          <p>Basic text recognition using the legacy Ink Editor v1 API.</p>
-          <div class="card-actions">
-            <a href="rest/rest_text.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_text.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
-          </div>
-        </article>
-        <article class="card card--deprecated" data-search="inkv1 text style stroke color deprecated">
-          <div class="card-top">
-            <span class="badge badge-deprecated">RECOGNIZER-v1</span>
-            <span class="badge badge-deprecated">Deprecated</span>
-          </div>
-          <h3>Customize Stroke Style</h3>
-          <p>Change pen color and stroke style with the legacy Ink Editor v1 text editor.</p>
-          <div class="card-actions">
-            <a href="rest/rest_text_styling.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_text_styling.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <!-- ============================================
-         SECTION: RECOGNIZER-v1 — Math
-    ============================================= -->
-    <section class="home-section home-section--deprecated" id="v1-math">
-      <div class="section-header">
-        <div class="section-icon">
-          <img src="./assets/img/home-math.svg" alt="" />
-        </div>
-        <div class="section-meta">
-          <h2>Math Recognition</h2>
-          <p>Legacy Ink Editor math recognition examples.</p>
-          <div class="section-badges">
-            <span class="badge badge-deprecated">Ink Editor v1 · Deprecated</span>
-          </div>
-        </div>
-      </div>
-      <div class="card-grid">
-        <article class="card card--deprecated" data-search="inkv1 math rest v1 deprecated equation">
-          <div class="card-top">
-            <span class="badge badge-deprecated">RECOGNIZER-v1</span>
-            <span class="badge badge-deprecated">Deprecated</span>
-          </div>
-          <h3>Get Started</h3>
-          <p>Basic math equation recognition using the legacy Ink Editor API.</p>
-          <div class="card-actions">
-            <a href="rest/rest_math.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_math.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <!-- ============================================
-         SECTION: RECOGNIZER-v1 — Diagram
-    ============================================= -->
-    <section class="home-section home-section--deprecated" id="v1-diagram">
-      <div class="section-header">
-        <div class="section-icon">
-          <img src="./assets/img/home-diagram.svg" alt="" />
-        </div>
-        <div class="section-meta">
-          <h2>Diagram Recognition</h2>
-          <p>Legacy Ink Editor diagram recognition — text/non-text auto-distinction.</p>
-          <div class="section-badges">
-            <span class="badge badge-deprecated">Ink Editor v1 · Deprecated</span>
-          </div>
-        </div>
-      </div>
-      <div class="card-grid">
-        <article class="card card--deprecated" data-search="inkv1 diagram rest v1 deprecated shape text">
-          <div class="card-top">
-            <span class="badge badge-deprecated">RECOGNIZER-v1</span>
-            <span class="badge badge-deprecated">Deprecated</span>
-          </div>
-          <h3>Get Started</h3>
-          <p>Diagram recognition with automatic text and shape distinction.</p>
-          <div class="card-actions">
-            <a href="rest/rest_diagram.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_diagram.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
-          </div>
-        </article>
-        <article class="card card--deprecated" data-search="inkv1 diagram rest v1 import pointer events deprecated">
-          <div class="card-top">
-            <span class="badge badge-deprecated">RECOGNIZER-v1</span>
-            <span class="badge badge-deprecated">Deprecated</span>
-          </div>
-          <h3>Import Pointer Events</h3>
-          <p>Replay pre-recorded pointer events into the legacy diagram editor.</p>
-          <div class="card-actions">
-            <a href="rest/rest_diagram_import.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_diagram_import.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <!-- ============================================
-         SECTION: RECOGNIZER-v1 — Raw Content
-    ============================================= -->
-    <section class="home-section home-section--deprecated" id="v1-raw">
-      <div class="section-header">
-        <div class="section-icon">
-          <img src="./assets/img/home-raw-content.svg" alt="" />
-        </div>
-        <div class="section-meta">
-          <h2>Raw Content Recognition</h2>
-          <p>Legacy Ink Editor raw content recognition with no explicit type segmentation.</p>
-          <div class="section-badges">
-            <span class="badge badge-deprecated">Ink Editor v1 · Deprecated</span>
-          </div>
-        </div>
-      </div>
-      <div class="card-grid">
-        <article class="card card--deprecated" data-search="inkv1 raw content rest v1 deprecated ink">
-          <div class="card-top">
-            <span class="badge badge-deprecated">RECOGNIZER-v1</span>
-            <span class="badge badge-deprecated">Deprecated</span>
-          </div>
-          <h3>Get Started</h3>
-          <p>Raw ink recognition with no explicit text, math, or diagram segmentation.</p>
-          <div class="card-actions">
-            <a href="rest/rest_raw_content.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_raw_content.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
-          </div>
-        </article>
-        <article class="card card--deprecated" data-search="inkv1 rest v1 no ui headless deprecated api">
-          <div class="card-top">
-            <span class="badge badge-deprecated">RECOGNIZER-v1</span>
-            <span class="badge badge-deprecated">Deprecated</span>
-          </div>
-          <h3>Without UI</h3>
-          <p>Headless REST recognition with no visible editor UI — API usage only.</p>
-          <div class="card-actions">
-            <a href="rest/rest_no_ui.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/rest/rest_no_ui.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
-          </div>
-        </article>
-      </div>
-    </section>
-
-    <!-- ============================================
-         SECTION: Dev Tools (WebSocket + RECOGNIZER-v1)
-    ============================================= -->
-    <section class="home-section" id="dev-tools">
-      <div class="section-header">
-        <div class="section-icon" style="background:#FFF0EC">
-          <img src="./assets/img/home-development.svg" alt="" />
-        </div>
-        <div class="section-meta">
-          <h2>Development Tools</h2>
-          <p>Custom recognizer and grabber implementations for WebSocket (INTERACTIVITY) and RECOGNIZER-v1 editors.</p>
-          <div class="section-badges">
-            <span class="badge badge-secondary">INTERACTIVITY</span>
-            <span class="badge badge-deprecated">RECOGNIZER-v1</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="card-grid">
-
-        <article class="card" data-search="debug trace logging verbose level configure websocket">
-          <div class="card-top">
-            <span class="badge badge-secondary">INTERACTIVITY</span>
-            <span class="badge badge-secondary">LEGACY</span>
-            <span class="badge badge-secondary" title="Server-Side Rendering">SSR</span>
-          </div>
-          <h3>Debug Trace</h3>
-          <p>Enable verbose logging categories to trace recognition and network events.</p>
-          <div class="card-actions">
-            <a href="dev/websocket_text_debug.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/dev/websocket_text_debug.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
-          </div>
-        </article>
-
-        <article class="card" data-search="websocket custom recognizer implement override backend">
-          <div class="card-top">
-            <span class="badge badge-secondary">INTERACTIVITY</span>
-            <span class="badge badge-secondary">LEGACY</span>
-            <span class="badge badge-secondary" title="Server-Side Rendering">SSR</span>
-          </div>
-          <h3>Custom Recognizer</h3>
-          <p>Implement a custom WebSocket recognizer to connect to your own backend.</p>
-          <div class="card-actions">
-            <a href="dev/websocket_custom_recognizer.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/dev/websocket_custom_recognizer.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            <a href="interactive-canvas-ssr/interactive_canvas_ssr_custom_client.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas-ssr/interactive_canvas_ssr_custom_client.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
 
@@ -733,37 +511,247 @@
           <h3>Custom Grabber</h3>
           <p>Override the default pointer input handler with a fully custom grabber.</p>
           <div class="card-actions">
-            <a href="dev/websocket_custom_grabber.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/dev/websocket_custom_grabber.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            <a href="interactive-canvas-ssr/interactive_canvas_ssr_custom_grabber.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas-ssr/interactive_canvas_ssr_custom_grabber.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
 
-        <article class="card card--deprecated" data-search="inkv1 rest custom recognizer implement override api deprecated">
+        <article class="card" data-search="export on demand trigger manual recognition">
           <div class="card-top">
-            <span class="badge badge-deprecated">RECOGNIZER-v1</span>
+            <span class="badge badge-secondary">INTERACTIVITY</span>
+            <span class="badge badge-secondary">LEGACY</span>
+            <span class="badge badge-secondary" title="Server-Side Rendering">SSR</span>
+          </div>
+          <h3>Export On Demand</h3>
+          <p>Trigger recognition export manually instead of on every ink change.</p>
+          <div class="card-actions">
+            <a href="interactive-canvas-ssr/interactive_canvas_ssr_export_on_demand.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas-ssr/interactive_canvas_ssr_export_on_demand.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+          </div>
+        </article>
+
+        <article class="card" data-search="handle errors network reconnect error recovery">
+          <div class="card-top">
+            <span class="badge badge-secondary">INTERACTIVITY</span>
+            <span class="badge badge-secondary">LEGACY</span>
+            <span class="badge badge-secondary" title="Server-Side Rendering">SSR</span>
+          </div>
+          <h3>Handle Errors</h3>
+          <p>Error handling patterns for network issues, authentication, and reconnection.</p>
+          <div class="card-actions">
+            <a href="interactive-canvas-ssr/interactive_canvas_ssr_handle_errors.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/interactive-canvas-ssr/interactive_canvas_ssr_handle_errors.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ============================================
+         SECTION: InkCanvas-v1 — Text
+    ============================================= -->
+    <section class="home-section home-section--deprecated" id="v1-text">
+      <div class="section-header">
+        <div class="section-icon">
+          <img src="./assets/img/home-text.svg" alt="" />
+        </div>
+        <div class="section-meta">
+          <h2>Text Recognition</h2>
+          <p>Legacy Ink Canvas text recognition examples.</p>
+          <div class="section-badges">
+            <span class="badge badge-deprecated">Ink Canvas v1 · Deprecated</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-grid">
+        <article class="card card--deprecated" data-search="inkv1 text rest v1 deprecated basic">
+          <div class="card-top">
+            <span class="badge badge-deprecated">InkCanvas-v1</span>
             <span class="badge badge-deprecated">Deprecated</span>
           </div>
-          <h3>Custom Recognizer (REST v1)</h3>
-          <p>Implement a custom REST v1 recognizer — for legacy RECOGNIZER-v1 editor integrations.</p>
+          <h3>Get Started</h3>
+          <p>Basic text recognition using the legacy Ink Canvas v1 API.</p>
           <div class="card-actions">
-            <a href="dev/rest_custom_recognizer.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/dev/rest_custom_recognizer.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            <a href="canvas/canvas_v1_text.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/canvas/canvas_v1_text.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
+        <article class="card card--deprecated" data-search="inkv1 text style stroke color deprecated">
+          <div class="card-top">
+            <span class="badge badge-deprecated">InkCanvas-v1</span>
+            <span class="badge badge-deprecated">Deprecated</span>
+          </div>
+          <h3>Customize Stroke Style</h3>
+          <p>Change pen color and stroke style with the legacy Ink Canvas v1 text.</p>
+          <div class="card-actions">
+            <a href="canvas/canvas_v1_text_styling.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/canvas/canvas_v1_text_styling.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+          </div>
+        </article>
+      </div>
+    </section>
 
+    <!-- ============================================
+         SECTION: InkCanvas-v1 — Math
+    ============================================= -->
+    <section class="home-section home-section--deprecated" id="v1-math">
+      <div class="section-header">
+        <div class="section-icon">
+          <img src="./assets/img/home-math.svg" alt="" />
+        </div>
+        <div class="section-meta">
+          <h2>Math Recognition</h2>
+          <p>Legacy Ink Canvas math recognition examples.</p>
+          <div class="section-badges">
+            <span class="badge badge-deprecated">Ink Canvas v1 · Deprecated</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-grid">
+        <article class="card card--deprecated" data-search="inkv1 math rest v1 deprecated equation">
+          <div class="card-top">
+            <span class="badge badge-deprecated">InkCanvas-v1</span>
+            <span class="badge badge-deprecated">Deprecated</span>
+          </div>
+          <h3>Get Started</h3>
+          <p>Basic math equation recognition using the legacy Ink Canvas API.</p>
+          <div class="card-actions">
+            <a href="canvas/canvas_v1_math.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/canvas/canvas_v1_math.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============================================
+         SECTION: InkCanvas-v1 — Diagram
+    ============================================= -->
+    <section class="home-section home-section--deprecated" id="v1-diagram">
+      <div class="section-header">
+        <div class="section-icon">
+          <img src="./assets/img/home-diagram.svg" alt="" />
+        </div>
+        <div class="section-meta">
+          <h2>Diagram Recognition</h2>
+          <p>Legacy Ink Canvas diagram recognition — text/non-text auto-distinction.</p>
+          <div class="section-badges">
+            <span class="badge badge-deprecated">Ink Canvas v1 · Deprecated</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-grid">
+        <article class="card card--deprecated" data-search="inkv1 diagram rest v1 deprecated shape text">
+          <div class="card-top">
+            <span class="badge badge-deprecated">InkCanvas-v1</span>
+            <span class="badge badge-deprecated">Deprecated</span>
+          </div>
+          <h3>Get Started</h3>
+          <p>Diagram recognition with automatic text and shape distinction.</p>
+          <div class="card-actions">
+            <a href="canvas/canvas_v1_diagram.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/canvas/canvas_v1_diagram.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+          </div>
+        </article>
+        <article class="card card--deprecated" data-search="inkv1 diagram rest v1 import pointer events deprecated">
+          <div class="card-top">
+            <span class="badge badge-deprecated">InkCanvas-v1</span>
+            <span class="badge badge-deprecated">Deprecated</span>
+          </div>
+          <h3>Import Pointer Events</h3>
+          <p>Replay pre-recorded pointer events into the legacy ink canvas diagram.</p>
+          <div class="card-actions">
+            <a href="canvas/canvas_v1_diagram_import.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/canvas/canvas_v1_diagram_import.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============================================
+         SECTION: InkCanvas-v1 — Raw Content
+    ============================================= -->
+    <section class="home-section home-section--deprecated" id="v1-raw">
+      <div class="section-header">
+        <div class="section-icon">
+          <img src="./assets/img/home-raw-content.svg" alt="" />
+        </div>
+        <div class="section-meta">
+          <h2>Raw Content Recognition</h2>
+          <p>Legacy Ink Canvas raw content recognition with no explicit type segmentation.</p>
+          <div class="section-badges">
+            <span class="badge badge-deprecated">Ink Canvas v1 · Deprecated</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-grid">
+        <article class="card card--deprecated" data-search="inkv1 raw content rest v1 deprecated ink">
+          <div class="card-top">
+            <span class="badge badge-deprecated">InkCanvas-v1</span>
+            <span class="badge badge-deprecated">Deprecated</span>
+          </div>
+          <h3>Get Started</h3>
+          <p>Raw ink recognition with no explicit text, math, or diagram segmentation.</p>
+          <div class="card-actions">
+            <a href="canvas/canvas_v1_raw_content.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/canvas/canvas_v1_raw_content.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+          </div>
+        </article>
+        <article class="card card--deprecated" data-search="inkv1 rest v1 no ui headless deprecated api">
+          <div class="card-top">
+            <span class="badge badge-deprecated">InkCanvas-v1</span>
+            <span class="badge badge-deprecated">Deprecated</span>
+          </div>
+          <h3>Without UI</h3>
+          <p>Headless REST recognition with no visible canvas UI — API usage only.</p>
+          <div class="card-actions">
+            <a href="canvas/canvas_v1_no_ui.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/canvas/canvas_v1_no_ui.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ============================================
+         SECTION: InkCanvas-v1 — Utilities
+    ============================================= -->
+    <section class="home-section" id="v1-utilities">
+      <div class="section-header">
+        <div class="section-icon">
+          <img src="./assets/img/home-not-specific.svg" alt="" />
+        </div>
+        <div class="section-meta">
+          <h2>Ink Canvas Utilities</h2>
+          <p>Cross-topic Ink Canvas helpers — export control patterns.</p>
+          <div class="section-badges">
+            <span class="badge badge-deprecated">Ink Canvas v1 · Deprecated</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-grid">
+        <article class="card card--deprecated" data-search="inkv1 rest custom client implement override api deprecated">
+          <div class="card-top">
+            <span class="badge badge-deprecated">InkCanvas-v1</span>
+            <span class="badge badge-deprecated">Deprecated</span>
+          </div>
+          <h3>Custom Client v1</h3>
+          <p>Override default http client.</p>
+          <div class="card-actions">
+            <a href="canvas/canvas_v1_custom_client.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/canvas/canvas_v1_custom_client.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+          </div>
+        </article>
         <article class="card card--deprecated" data-search="inkv1 rest custom grabber input pointer override deprecated">
           <div class="card-top">
-            <span class="badge badge-deprecated">RECOGNIZER-v1</span>
+            <span class="badge badge-deprecated">InkCanvas-v1</span>
             <span class="badge badge-deprecated">Deprecated</span>
           </div>
-          <h3>Custom Grabber (REST v1)</h3>
-          <p>Override default pointer input handling for the RECOGNIZER-v1 legacy REST editor.</p>
+          <h3>Custom Grabber v1</h3>
+          <p>Override default pointer input handling.</p>
           <div class="card-actions">
-            <a href="dev/rest_custom_grabber.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
-            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/dev/rest_custom_grabber.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
+            <a href="canvas/canvas_v1_custom_grabber.html" class="btn-view"><svg><use href="#icn-play"/></svg> View</a>
+            <a href="https://github.com/MyScript/iinkTS/blob/master/examples/canvas/canvas_v1_custom_grabber.html" class="btn-code" target="_blank" rel="noopener"><svg><use href="#icn-github"/></svg> Code</a>
           </div>
         </article>
-
       </div>
     </section>
 
@@ -771,7 +759,7 @@
     <div class="legacy-banner">
       <div class="legacy-banner-text">
         <h3>Ready for modern examples?</h3>
-        <p>Interactive Ink Editor and Ink Editor offer a richer, more flexible experience.</p>
+        <p>Interactive Ink Canvas and Ink Canvas offer a richer, more flexible experience.</p>
       </div>
       <a href="./index.html" class="legacy-banner-btn">← Back to Modern Examples</a>
     </div>

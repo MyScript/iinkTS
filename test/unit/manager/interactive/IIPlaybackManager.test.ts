@@ -1,6 +1,6 @@
 import { describe, test, expect, beforeEach, afterEach, jest } from "@jest/globals"
 
-import { createEditorMock, asEditor } from "../../__mocks__/createEditorMock"
+import { createCanvasMock, asEditor } from "../../__mocks__/createCanvasMock"
 import { IIPlaybackManager } from "@/manager/interactive/IIPlaybackManager"
 import type { TStroke } from "@/symbol"
 import type { TPartialDeep } from "@/utils"
@@ -27,14 +27,14 @@ describe("IIPlaybackManager.ts", () => {
   })
 
   test("should instanciate idle with empty progress", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IIPlaybackManager(asEditor(editor))
     expect(manager.state).toEqual("idle")
     expect(manager.progress).toEqual({ current: 0, total: 0 })
   })
 
   test("should call onEnd immediately when strokes is empty", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IIPlaybackManager(asEditor(editor))
     const onEnd = jest.fn()
     manager.onEnd = onEnd
@@ -46,7 +46,7 @@ describe("IIPlaybackManager.ts", () => {
   })
 
   test("should drive writer.start/continue/end point by point in order", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IIPlaybackManager(asEditor(editor))
     const onProgress = jest.fn()
     const onEnd = jest.fn()
@@ -83,7 +83,7 @@ describe("IIPlaybackManager.ts", () => {
   })
 
   test("should start then end immediately for a single-point stroke", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IIPlaybackManager(asEditor(editor))
 
     manager.play([buildPartialStroke(0, 1)])
@@ -95,7 +95,7 @@ describe("IIPlaybackManager.ts", () => {
   })
 
   test("should scale delays down when speed > 1", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IIPlaybackManager(asEditor(editor))
 
     manager.play([buildPartialStroke(0, 2), buildPartialStroke(200, 2)], 2)
@@ -109,7 +109,7 @@ describe("IIPlaybackManager.ts", () => {
   })
 
   test("should stop scheduling further points on pause and resume from there", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IIPlaybackManager(asEditor(editor))
     const onStateChange = jest.fn()
     manager.onStateChange = onStateChange
@@ -133,7 +133,7 @@ describe("IIPlaybackManager.ts", () => {
   })
 
   test("should reset progress, clear pending timers, and finalize a mid-stroke on stop", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IIPlaybackManager(asEditor(editor))
 
     manager.play([buildPartialStroke(0, 3), buildPartialStroke(500, 2)])
@@ -151,7 +151,7 @@ describe("IIPlaybackManager.ts", () => {
   })
 
   test("should reschedule remaining points when speed changes mid-playback", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IIPlaybackManager(asEditor(editor))
 
     manager.play([buildPartialStroke(0, 2), buildPartialStroke(1000, 2)])
@@ -166,7 +166,7 @@ describe("IIPlaybackManager.ts", () => {
   })
 
   test("should no-op pause/resume when not applicable", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IIPlaybackManager(asEditor(editor))
     const onStateChange = jest.fn()
     manager.onStateChange = onStateChange
@@ -178,7 +178,7 @@ describe("IIPlaybackManager.ts", () => {
   })
 
   test("should clear pending timers on destroy", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IIPlaybackManager(asEditor(editor))
 
     manager.play([buildPartialStroke(0, 2), buildPartialStroke(500, 2)])

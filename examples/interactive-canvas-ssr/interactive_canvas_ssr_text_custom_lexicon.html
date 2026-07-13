@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Custom lexicon</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <style>
+      #lexicon {
+        width: calc(100% - 100px);
+      }
+    </style>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">
+        Custom lexicon
+      </h1>
+    </header>
+
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">📖 Custom lexicon</p>
+        <p class="ex-panel-intro">The recognition engine may struggle with rare or highly technical words — think internal project codenames, proprietary product names, uncommon surnames, or domain-specific abbreviations your team coined.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">A custom lexicon gives the engine a hint: words listed there become valid candidates during recognition, even if absent from the built-in dictionary.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">As the engine continuously improves, some of these words may eventually be recognized without a custom lexicon.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Type your words space-separated in the field below and click <strong>Send</strong> — the canvas reloads with the new lexicon applied.</div>
+        </div>
+      </aside>
+
+      <div class="page-content">
+        <nav class="flex-container wrap between gap">
+          <input
+            type="text"
+            id="lexicon"
+            data-type="text/plain"
+            placeholder='Add your own lexicon (space-separated) and press "Send"'
+          />
+          <button class="classic-btn" id="reinit">Send</button>
+        </nav>
+
+        <div id="rootEl"></div>
+      </div>
+    </div>
+
+    <script type="module">
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      import { Canvas } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from "../components/modal/modalCanvasOptions.js"
+      const rootElement = document.getElementById("rootEl")
+      const reinitButton = document.getElementById("reinit")
+      const lexicon = document.getElementById("lexicon")
+      const showModalBtn = document.getElementById("showModalBtn")
+
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            text: {
+              configuration: {
+                customLexicon: [""],
+                addLKText: true,
+              },
+            },
+          },
+        },
+      }
+
+      reinitButton.addEventListener("click", () => {
+        const values = lexicon.value
+        const configuration = canvas.configuration
+        configuration.recognition.text.configuration = {
+          customLexicon: values.split(" "),
+          addLKText: true,
+        }
+        editorOptions.configuration = configuration
+        loadEditor(editorOptions)
+      })
+
+      showModalBtn.addEventListener("click", () => {
+        ModalCanvasOptions.show(loadEditor, editorOptions)
+      })
+
+      let canvas;
+
+      async function loadEditor(options) {
+        canvas = await Canvas.load(rootElement, "INTERACTIVE_INK_SSR", options)
+      }
+
+      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+</html>

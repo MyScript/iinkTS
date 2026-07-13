@@ -1,14 +1,14 @@
-import { createEditorMock, asEditor } from "../../../__mocks__/createEditorMock"
+import { createCanvasMock, asEditor } from "../../../__mocks__/createCanvasMock"
 import { buildIIStroke, buildIIText } from "../../../helpers"
 import { SurroundGestureHandler, GestureHelpers, TGesture, SurroundAction, StrokeOps } from "@/iink"
 
 describe("SurroundGestureHandler.ts", () => {
-  let editor: ReturnType<typeof createEditorMock>
+  let editor: ReturnType<typeof createCanvasMock>
   let helpers: GestureHelpers
   let handler: SurroundGestureHandler
 
   beforeEach(() => {
-    editor = createEditorMock()
+    editor = createCanvasMock()
     helpers = new GestureHelpers(asEditor(editor))
     handler = new SurroundGestureHandler(asEditor(editor), helpers)
   })

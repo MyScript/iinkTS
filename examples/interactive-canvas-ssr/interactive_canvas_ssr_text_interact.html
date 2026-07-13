@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Interact with your app</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+
+    <style>
+      .question {
+        flex: 2;
+        font-size: 2em;
+        margin: 0;
+        padding: 12px;
+        text-align: center;
+      }
+
+      .next-btn .icn {
+        margin: 0 -6px -4px 6px;
+        height: 20px;
+        width: 20px;
+      }
+    </style>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">Interact with your app</h1>
+    </header>
+
+    <svg style="display: none">
+      <symbol id="icn-play" viewBox="0 0 16 16">
+        <path d="M13.153 8.589c.606-.325.603-.854 0-1.178L4.873 2.97C4.392 2.709 4 2.945 4 3.496v9.008c0 .55.39.787.874.527l8.28-4.442z" fill="currentColor" fill-rule="evenodd">
+        </path>
+      </symbol>
+    </svg>
+
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">🧠 Interactive handwriting exercises</p>
+        <p class="ex-panel-intro">This example shows how to build automated exercises driven by handwriting recognition — the app asks a question, the user writes the answer, and the result is validated in real time via the <code>exported</code> event.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Recognition fires automatically as you write, no submit button needed. The answer is checked as soon as the engine produces a <code>text/plain</code> export.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Use <strong>Next question</strong> to cycle through the 5 capitals. The canvas is cleared automatically between questions.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Pattern applicable to any exercise type: spelling, maths, translation, fill-in-the-blank — just replace the question/answer arrays.</div>
+        </div>
+      </aside>
+
+      <div class="page-content">
+        <nav class="flex-container wrap gap between">
+          <p id="question" class="question"></p>
+          <button id="next-btn" class="classic-btn next-btn">
+            Next question
+            <svg class="icn">
+              <use xmlns:xlink="http://www.w3.org/1999/xlink" href="#icn-play"></use>
+            </svg>
+          </button>
+        </nav>
+
+        <div id="result" class="result"></div>
+
+
+        <div id="rootEl"></div>
+      </div>
+    </div>
+
+    <script type="module">
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      import { Canvas } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
+      const rootElement = document.getElementById('rootEl')
+      const questionElement = document.getElementById('question')
+      const resultElement = document.getElementById('result')
+      const nextButton = document.getElementById('next-btn')
+      const showModalBtn = document.getElementById('showModalBtn')
+
+      const countries = ['France', 'Italy', 'Spain', 'Argentina', 'Japan']
+      const capitals = ['paris', 'rome', 'madrid', 'buenos aires', 'tokyo']
+
+      let countQuestion = 0
+
+      questionElement.innerText =
+        'What is the capital of ' + countries[countQuestion] + '?'
+
+      function checkAnswer(exportText) {
+        if (exportText.toLowerCase() === capitals[countQuestion]) {
+          resultElement.innerHTML =
+            '<span> Yes, it is ' + exportText + '.</span>'
+          resultElement.style.setProperty('color', 'green')
+        } else {
+          resultElement.innerHTML =
+            '<span> No, it is not ' + exportText + '.</span>'
+          resultElement.style.setProperty('color', 'red')
+        }
+      }
+
+      function changeQuestion() {
+        countQuestion++
+        if (countQuestion > 4) {
+          countQuestion = 0
+        }
+        questionElement.innerHTML = countries[countQuestion]
+          ? 'What is the capital of ' + countries[countQuestion] + '?'
+          : 'You won !'
+        canvas.clear()
+        resultElement.innerHTML = ''
+      }
+
+      let canvas
+
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            type: 'TEXT',
+            text: {
+              mimeTypes: ['text/plain']
+            }
+          }
+        }
+      }
+
+      async function loadEditor(options) {
+        canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK_SSR', options)
+
+        canvas.event.addEventListener('exported', (evt) => {
+          const exports = evt.detail
+          if (exports && exports['text/plain']) {
+            checkAnswer(exports['text/plain'])
+          } else {
+            resultElement.innerHTML = ''
+          }
+        })
+      }
+
+      nextButton.addEventListener('click', () => {
+        changeQuestion()
+      })
+
+      showModalBtn.addEventListener('click', () => {
+        ModalCanvasOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>

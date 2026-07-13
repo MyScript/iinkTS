@@ -1,4 +1,4 @@
-import { createEditorMock, asEditor } from "../../../__mocks__/createEditorMock"
+import { createCanvasMock, asEditor } from "../../../__mocks__/createCanvasMock"
 import { IIMathComputationSubManager } from "@/manager/interactive/math/IIMathComputationSubManager"
 import { JIIXElementType, JIIXMathExpressionType } from "@/model"
 import type { TJIIXMathElement, TJIIXMathNumber } from "@/model"
@@ -24,65 +24,65 @@ function buildSolverOutputResult(blockId: string, value: number): TJIIXMathEleme
 
 describe("IIMathComputationSubManager.ts", () => {
   describe("computeNumericalResult", () => {
-    test("draw result is frozen: a later recompute must not query the recognizer nor touch the model", async () => {
-      const editor = createEditorMock()
+    test("draw result is frozen: a later recompute must not query the client nor touch the model", async () => {
+      const editor = createCanvasMock()
       const manager = new IIMathComputationSubManager(asEditor(editor))
 
-      editor.recognizer.getNumericalComputation = jest.fn().mockResolvedValue(buildSolverOutputResult("block-1", 4))
+      editor.client.getNumericalComputation = jest.fn().mockResolvedValue(buildSolverOutputResult("block-1", 4))
       await manager.computeNumericalResult("block-1", "draw")
 
-      expect(editor.recognizer.getNumericalComputation).toHaveBeenCalledTimes(1)
+      expect(editor.client.getNumericalComputation).toHaveBeenCalledTimes(1)
       expect(editor.addSymbols).toHaveBeenCalledTimes(1)
 
-      editor.recognizer.getNumericalComputation = jest.fn().mockResolvedValue(buildSolverOutputResult("block-1", 7))
+      editor.client.getNumericalComputation = jest.fn().mockResolvedValue(buildSolverOutputResult("block-1", 7))
 
       const { wasRecomputed } = await manager.computeNumericalResult("block-1", "draw")
 
       expect(wasRecomputed).toBe(false)
-      expect(editor.recognizer.getNumericalComputation).not.toHaveBeenCalled()
+      expect(editor.client.getNumericalComputation).not.toHaveBeenCalled()
       expect(editor.addSymbols).toHaveBeenCalledTimes(1)
     })
 
     test("draw result is frozen: ghost mode must not kick in either once a draw exists for the block", async () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const manager = new IIMathComputationSubManager(asEditor(editor))
 
-      editor.recognizer.getNumericalComputation = jest.fn().mockResolvedValue(buildSolverOutputResult("block-1", 4))
+      editor.client.getNumericalComputation = jest.fn().mockResolvedValue(buildSolverOutputResult("block-1", 4))
       await manager.computeNumericalResult("block-1", "draw")
 
-      editor.recognizer.getNumericalComputation = jest.fn().mockResolvedValue(buildSolverOutputResult("block-1", 7))
+      editor.client.getNumericalComputation = jest.fn().mockResolvedValue(buildSolverOutputResult("block-1", 7))
       await manager.computeNumericalResult("block-1", "ghost")
 
-      expect(editor.recognizer.getNumericalComputation).not.toHaveBeenCalled()
+      expect(editor.client.getNumericalComputation).not.toHaveBeenCalled()
       expect(manager.hasGhostStrokes("block-1")).toBe(false)
     })
 
     test("no draw yet: recompute proceeds normally when the result changes", async () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const manager = new IIMathComputationSubManager(asEditor(editor))
 
-      editor.recognizer.getNumericalComputation = jest.fn().mockResolvedValue(buildSolverOutputResult("block-1", 4))
+      editor.client.getNumericalComputation = jest.fn().mockResolvedValue(buildSolverOutputResult("block-1", 4))
 
       const { wasRecomputed } = await manager.computeNumericalResult("block-1", "draw")
 
       expect(wasRecomputed).toBe(true)
-      expect(editor.recognizer.getNumericalComputation).toHaveBeenCalledTimes(1)
+      expect(editor.client.getNumericalComputation).toHaveBeenCalledTimes(1)
       expect(editor.addSymbols).toHaveBeenCalledTimes(1)
     })
   })
 
   describe("getGhostBounds / applyTransformToGhostStrokes", () => {
     test("getGhostBounds returns undefined when the block has no ghost", () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const manager = new IIMathComputationSubManager(asEditor(editor))
 
       expect(manager.getGhostBounds("block-1")).toBeUndefined()
     })
 
     test("getGhostBounds returns the merged bounds of the block's ghost strokes", async () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const manager = new IIMathComputationSubManager(asEditor(editor))
-      editor.recognizer.getNumericalComputation = jest.fn().mockResolvedValue(buildSolverOutputResult("block-1", 4))
+      editor.client.getNumericalComputation = jest.fn().mockResolvedValue(buildSolverOutputResult("block-1", 4))
 
       await manager.computeNumericalResult("block-1", "ghost")
 
@@ -92,9 +92,9 @@ describe("IIMathComputationSubManager.ts", () => {
     })
 
     test("applyTransformToGhostStrokes moves and redraws the block's ghost strokes", async () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const manager = new IIMathComputationSubManager(asEditor(editor))
-      editor.recognizer.getNumericalComputation = jest.fn().mockResolvedValue(buildSolverOutputResult("block-1", 4))
+      editor.client.getNumericalComputation = jest.fn().mockResolvedValue(buildSolverOutputResult("block-1", 4))
       await manager.computeNumericalResult("block-1", "ghost")
       const before = manager.getGhostBounds("block-1")!
       editor.renderer.drawSymbol = jest.fn()
@@ -109,7 +109,7 @@ describe("IIMathComputationSubManager.ts", () => {
     })
 
     test("applyTransformToGhostStrokes is a no-op when the block has no ghost", () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const manager = new IIMathComputationSubManager(asEditor(editor))
       editor.renderer.drawSymbol = jest.fn()
 
@@ -119,9 +119,9 @@ describe("IIMathComputationSubManager.ts", () => {
     })
 
     test("getGhostStrokeIds returns the element ids of the block's ghost strokes", async () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const manager = new IIMathComputationSubManager(asEditor(editor))
-      editor.recognizer.getNumericalComputation = jest.fn().mockResolvedValue(buildSolverOutputResult("block-1", 4))
+      editor.client.getNumericalComputation = jest.fn().mockResolvedValue(buildSolverOutputResult("block-1", 4))
       await manager.computeNumericalResult("block-1", "ghost")
 
       expect(manager.getGhostStrokeIds("block-1")).toEqual(
@@ -130,7 +130,7 @@ describe("IIMathComputationSubManager.ts", () => {
     })
 
     test("getGhostStrokeIds returns an empty array when the block has no ghost", () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const manager = new IIMathComputationSubManager(asEditor(editor))
 
       expect(manager.getGhostStrokeIds("block-1")).toEqual([])

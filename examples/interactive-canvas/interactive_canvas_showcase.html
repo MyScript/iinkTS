@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+    <title>Interactive Ink Canvas Showcase</title>
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <link rel="stylesheet" href="../assets/style/renderjson.css" />
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+    <style>
+      .ex-panel {
+        width: 380px;
+        overflow: hidden; /* tab-panel handles its own scroll */
+      }
+
+      .debug-controls {
+        display: flex;
+        flex-direction: column;
+        gap: var(--ex-space-sm);
+      }
+
+      .tabs-header {
+        flex-shrink: 0;
+      }
+
+      .tab-button {
+        text-align: center;
+        font-size: 13px;
+        flex: 1;
+      }
+
+      .tab-panel {
+        flex: 1;
+        overflow-y: auto;
+        min-height: 0;
+        padding: var(--ex-space-sm);
+      }
+
+      .tab-panel ul {
+        padding: 0;
+        list-style-type: none;
+      }
+
+      .tab-panel li {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 2px;
+        margin-bottom: 12px;
+      }
+
+      .tab-panel li span {
+        margin: auto 0;
+        word-wrap: anywhere;
+      }
+
+      .tab-panel li .symbol-input-wrapper {
+        display: flex;
+        width: 66px;
+        gap: 2px;
+      }
+
+      .tab-panel li .symbol-input {
+        height: 20px;
+        width: 20px;
+        border-radius: 4px;
+        border: none;
+        box-shadow: var(--ex-shadow-sm);
+        background-color: var(--ex-surface);
+        display: block;
+      }
+
+      #export-html-pan {
+        position: absolute;
+        bottom: 60px;
+        right: 10px;
+        height: 300px;
+        width: 300px;
+        background-color: var(--ex-surface);
+        display: none;
+        border: 1px solid var(--ex-border);
+        box-shadow: var(--ex-shadow-md);
+        z-index: 30;
+        border-radius: var(--ex-radius-sm);
+        overflow: hidden;
+      }
+
+      .export-html-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 10px;
+        border-bottom: 1px solid var(--ex-border);
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      #export-html-body {
+        height: calc(100% - 37px);
+        width: 100%;
+        border: none;
+      }
+
+      #rootEl {
+        flex: 1;
+        min-width: 0;
+        height: 100%;
+      }
+
+      @media (max-width: 900px) {
+        .ex-panel { width: 100%; }
+        #rootEl { flex: 1; min-height: 0; }
+      }
+    </style>
+
+    <script type="text/javascript" src="../assets/renderjson/renderjson.js"></script>
+  </head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="true" aria-controls="left-pan">
+        🔬 Inspect
+      </button>
+      <button id="showModalBtn" class="btn-keys">API Keys</button>
+      <h1 class="header-title">Interactive Ink Canvas — Showcase</h1>
+    </header>
+
+    <div class="ex-page-layout" style="position: relative">
+
+      <!-- ── Debug panel ── -->
+      <aside id="left-pan" class="ex-panel">
+
+        <p class="ex-panel-heading">Showcase</p>
+        <p class="ex-panel-intro">Inspect the canvas's internal state in real time. All tabs update live as you draw or interact with the canvas.</p>
+
+        <div class="ex-panel-divider"></div>
+
+        <!-- Controls -->
+        <div class="debug-controls">
+          <button class="classic-btn primary" id="import">Import</button>
+          <div class="switch-container">
+            <span class="switch-label">Backend rendering</span>
+            <label class="toggle">
+              <input type="checkbox" id="toggle-export-html-pan" />
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <!-- Tabs -->
+        <nav class="tabs-header flex-container">
+          <div id="jiix-tab" data-tabid="jiix-tab" class="tab-button">JIIX</div>
+          <div id="symbols-tab" data-tabid="symbols-tab" class="tab-button">Symbols</div>
+          <div id="history-tab" data-tabid="history-tab" class="tab-button">History</div>
+          <div id="selection-tab" data-tabid="selection-tab" class="tab-button">Selection</div>
+        </nav>
+        <button id="copy-content-tab" class="classic-btn" disabled>Copy to clipboard</button>
+        <div id="content-tab" class="tab-panel">
+          <div class="loader"></div>
+        </div>
+
+      </aside>
+
+      <!-- ── Canvas ── -->
+      <div id="rootEl"></div>
+
+      <!-- ── Backend rendering overlay ── -->
+      <div id="export-html-pan">
+        <div class="export-html-header">
+          <span>Backend rendering</span>
+          <button id="html-pan-close-btn" class="close-btn">
+            <img src="../assets/img/cross.svg" alt="close" />
+          </button>
+        </div>
+        <iframe id="export-html-body"></iframe>
+      </div>
+
+    </div>
+
+    <script src="./interactive_canvas_showcase.js" type="module"></script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+  </body>
+</html>

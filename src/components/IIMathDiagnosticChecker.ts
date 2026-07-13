@@ -1,6 +1,6 @@
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { DOMFactory } from "@/components/dom"
 import { getMathDiagnosticMessage } from "@/constants/MathDiagnosticMessages"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
 import { LoggerCategory, LoggerManager } from "@/logger"
 
 import { Modal } from "./Modal"
@@ -19,13 +19,13 @@ export type TSymbolDiagnostic = {
  * @remarks Component for checking and displaying diagnostics for multiple math symbols
  */
 export class IIMathDiagnosticChecker {
-  private editor: TInteractiveInkEditor
+  private canvas: TInteractiveInkCanvas
   private jiixBlockIds: string[]
   private modal?: Modal
   private logger = LoggerManager.getLogger(LoggerCategory.MATH)
 
-  constructor(editor: TInteractiveInkEditor, jiixBlockIds: string[]) {
-    this.editor = editor
+  constructor(canvas: TInteractiveInkCanvas, jiixBlockIds: string[]) {
+    this.canvas = canvas
     this.jiixBlockIds = [...new Set(jiixBlockIds)]
   }
 
@@ -43,8 +43,8 @@ export class IIMathDiagnosticChecker {
       }
 
       try {
-        const computeDiagnostic = await this.editor.math.getDiagnostic(jiixBlockId, "numerical-computation")
-        const evaluationDiagnostic = await this.editor.math.getDiagnostic(jiixBlockId, "evaluation")
+        const computeDiagnostic = await this.canvas.math.getDiagnostic(jiixBlockId, "numerical-computation")
+        const evaluationDiagnostic = await this.canvas.math.getDiagnostic(jiixBlockId, "evaluation")
 
         diagnostics.push({
           jiixBlockId,
@@ -52,7 +52,7 @@ export class IIMathDiagnosticChecker {
           evaluationDiagnostic,
         })
       } catch (error) {
-        const label = this.editor.jiix.getBlockLabel(jiixBlockId)
+        const label = this.canvas.jiix.getBlockLabel(jiixBlockId)
         this.logger.error(`Error fetching diagnostics for symbol ${label}:`, error)
       }
     }
@@ -70,7 +70,7 @@ export class IIMathDiagnosticChecker {
       title: `Math Diagnostic${diagnostics.length > 1 ? "s" : ""} (${diagnostics.length} symbol${diagnostics.length > 1 ? "s" : ""})`,
       fields: [],
       customContent: container,
-      container: this.editor.layers.root,
+      container: this.canvas.layers.root,
     })
 
     this.modal.open()
@@ -102,7 +102,7 @@ export class IIMathDiagnosticChecker {
     })
 
     // Expression header
-    const label = this.editor.jiix.getBlockLabel(diagnostic.jiixBlockId) || "N/A"
+    const label = this.canvas.jiix.getBlockLabel(diagnostic.jiixBlockId) || "N/A"
     const expressionDiv = DOMFactory.div({
       className: "ms-diagnostic-expression",
       html: `<strong>Expression:</strong> ${label}`,
@@ -112,23 +112,23 @@ export class IIMathDiagnosticChecker {
     // Severity colors configuration
     const severityColors = {
       success: {
-        bg: "color-mix(in srgb, var(--iink-success) 15%, transparent)",
-        color: "var(--iink-success)",
+        bg: "color-mix(in srgb, var(--ms-ink-success) 15%, transparent)",
+        color: "var(--ms-ink-success)",
         icon: "✓",
       },
       warning: {
-        bg: "color-mix(in srgb, var(--iink-warning) 15%, transparent)",
-        color: "var(--iink-warning)",
+        bg: "color-mix(in srgb, var(--ms-ink-warning) 15%, transparent)",
+        color: "var(--ms-ink-warning)",
         icon: "⚠",
       },
       error: {
-        bg: "color-mix(in srgb, var(--iink-error)   15%, transparent)",
-        color: "var(--iink-error)",
+        bg: "color-mix(in srgb, var(--ms-ink-error)   15%, transparent)",
+        color: "var(--ms-ink-error)",
         icon: "✗",
       },
       info: {
-        bg: "color-mix(in srgb, var(--iink-info)    15%, transparent)",
-        color: "var(--iink-info)",
+        bg: "color-mix(in srgb, var(--ms-ink-info)    15%, transparent)",
+        color: "var(--ms-ink-info)",
         icon: "ℹ",
       },
     }

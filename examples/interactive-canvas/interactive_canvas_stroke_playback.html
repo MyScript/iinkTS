@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Interactive Ink Canvas - Stroke Playback</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <style>
+      #rootEl {
+        height: calc(100dvh - 270px);
+      }
+      .playback-controls {
+        padding: var(--ex-space-md);
+      }
+
+      .playback-progress {
+        flex: 1;
+        min-width: 160px;
+        color: var(--ex-text-muted);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .playback-progress-bar {
+        height: 6px;
+        border-radius: var(--ex-radius-md);
+        background: var(--ex-surface-alt);
+        overflow: hidden;
+        margin-top: 4px;
+      }
+
+      .playback-progress-bar > span {
+        display: block;
+        height: 100%;
+        width: 0%;
+        background: var(--ex-primary);
+        transition: width 0.1s linear;
+      }
+
+      #strokesEditor {
+        display: none;
+        width: 320px;
+        height: calc(100dvh - 166px);
+        resize: none;
+      }
+
+      #strokesEditor.open {
+        display: block;
+      }
+    </style>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">
+        Interactive Ink Canvas - Stroke Playback
+      </h1>
+    </header>
+
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">Stroke playback / animation</p>
+        <p class="ex-panel-intro"><code>canvas.playback</code> replays a recorded set of strokes on the canvas, honoring the timing they were originally drawn with.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Each stroke is fed to the canvas at the moment it was originally drawn (scaled by the selected speed), instead of appearing all at once like a plain import.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Use case: tutorials, content review, or demos where replaying how something was written matters as much as the end result.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Controls: <strong>Play</strong> starts the replay, <strong>Pause/Resume</strong> toggles mid-playback, <strong>Stop</strong> cancels remaining strokes, and the speed selector changes pacing — live, even while playing.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc"><strong>Show strokes</strong> reveals the raw stroke data being replayed — edit the JSON, then click <strong>Play</strong> to replay your modified strokes instead.</div>
+        </div>
+      </aside>
+      <div class="page-content">
+        <nav class="flex-container wrap gap between playback-controls">
+          <div class="flex-container wrap gap">
+            <button class="classic-btn primary" id="play">
+              Play
+            </button>
+            <button class="classic-btn" id="pauseResume" disabled>
+              Pause
+            </button>
+            <button class="classic-btn" id="stop" disabled>
+              Stop
+            </button>
+            <select id="speed">
+              <option value="0.5">0.5x</option>
+              <option value="1" selected>1x</option>
+              <option value="2">2x</option>
+              <option value="4">4x</option>
+            </select>
+            <button class="classic-btn" id="toggleStrokes">
+              Show strokes
+            </button>
+          </div>
+          <div class="playback-progress">
+            <span id="progressLabel">0 / 0 strokes</span>
+            <div class="playback-progress-bar">
+              <span id="progressBar"></span>
+            </div>
+          </div>
+        </nav>
+        <div class="flex-container">
+          <textarea id="strokesEditor"></textarea>
+          <div id="rootEl"></div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { Canvas } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from "../components/modal/modalCanvasOptions.js";
+      import strokes from '../assets/datas/demo.json' with { type: 'json' }
+
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      const rootElement = document.getElementById("rootEl");
+      const playBtn = document.getElementById("play");
+      const pauseResumeBtn = document.getElementById("pauseResume");
+      const stopBtn = document.getElementById("stop");
+      const speedSelect = document.getElementById("speed");
+      const progressLabel = document.getElementById("progressLabel");
+      const progressBar = document.getElementById("progressBar");
+      const showModalBtn = document.getElementById("showModalBtn");
+      const toggleStrokesBtn = document.getElementById("toggleStrokes");
+      const strokesEditorElement = document.getElementById("strokesEditor");
+
+      toggleStrokesBtn.addEventListener("click", () => {
+        const open = strokesEditorElement.classList.toggle("open");
+        toggleStrokesBtn.textContent = open ? "Hide strokes" : "Show strokes";
+      });
+
+      let canvas;
+      const editorOptions = {
+      };
+
+      function updateProgress(current, total) {
+        progressLabel.textContent = `${current} / ${total} strokes`;
+        progressBar.style.width = total > 0 ? `${(current / total) * 100}%` : "0%";
+      }
+
+      function onPlaybackStateChange(state) {
+        playBtn.disabled = state === "playing";
+        pauseResumeBtn.disabled = state === "idle";
+        pauseResumeBtn.textContent = state === "paused" ? "Resume" : "Pause";
+        stopBtn.disabled = state === "idle";
+      }
+
+      async function loadEditor(options) {
+        /**
+         * get canvas instance from type
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Canvas parameters
+         */
+        canvas = await Canvas.load(rootElement, "INTERACTIVE_INK", options);
+
+        canvas.playback.onProgress = updateProgress;
+        canvas.playback.onStateChange = onPlaybackStateChange;
+        canvas.playback.onEnd = () => onPlaybackStateChange("idle");
+
+        strokesEditorElement.value = JSON.stringify(strokes, null, 2);
+        updateProgress(0, strokes.length);
+        onPlaybackStateChange("idle");
+        playBtn.disabled = false;
+      }
+
+      playBtn.addEventListener("click", async () => {
+        if (!canvas) return;
+        let editedStrokes;
+        try {
+          editedStrokes = JSON.parse(strokesEditorElement.value);
+        } catch (error) {
+          alert(`Invalid strokes JSON: ${error.message}`);
+          return;
+        }
+        await canvas.clear();
+        canvas.playback.play(editedStrokes, Number(speedSelect.value));
+      });
+
+      pauseResumeBtn.addEventListener("click", () => {
+        if (!canvas) return;
+        if (canvas.playback.state === "paused") {
+          canvas.playback.resume();
+        } else {
+          canvas.playback.pause();
+        }
+      });
+
+      stopBtn.addEventListener("click", () => {
+        if (!canvas) return;
+        canvas.playback.stop();
+        onPlaybackStateChange("idle");
+      });
+
+      speedSelect.addEventListener("change", () => {
+        if (!canvas) return;
+        canvas.playback.setSpeed(Number(speedSelect.value));
+      });
+
+      showModalBtn.addEventListener("click", () => {
+        ModalCanvasOptions.show(loadEditor, editorOptions);
+      });
+
+      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions);
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>

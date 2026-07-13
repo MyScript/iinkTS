@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { GestureHandler } from "@/manager/interactive/gestures/GestureHandler"
 import type { GestureHelpers } from "@/manager/interactive/gestures/GestureHelpers"
 import type { TGesture } from "@/manager/interactive/gestures/GestureTypes"
@@ -15,7 +15,7 @@ import { OBBOps } from "@/symbol/primitives/OBB"
 export class SurroundGestureHandler extends GestureHandler {
   readonly gestureType = "SURROUND" as const
 
-  constructor(editor: TInteractiveInkEditor, helpers: GestureHelpers) {
+  constructor(editor: TInteractiveInkCanvas, helpers: GestureHelpers) {
     super(editor, helpers)
   }
 

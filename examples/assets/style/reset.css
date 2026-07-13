@@ -3,7 +3,7 @@
 }
 
 :root {
-  /* Brand colors — aligned with iinkTS --iink-* palette */
+  /* Brand colors — aligned with iinkTS --ms-ink-* palette */
   --ex-primary:       #1a9fff;
   --ex-primary-dark:  #0d7ecc;
   --ex-success:       #4caf50;
@@ -43,7 +43,7 @@
   /* Transitions */
   --ex-transition: 125ms ease;
 
-  /* Chrome heights (used in height calc on #editorEl) */
+  /* Chrome heights (used in height calc on #rootEl) */
   --ex-header-height: 50px;
   --ex-nav-height:    57px;
   --ex-result-height: 100px;

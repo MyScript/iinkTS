@@ -1,6 +1,6 @@
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { TButtonElConfig } from "@/components/dom"
 import { DOMFactory } from "@/components/dom"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
 import { LoggerCategory } from "@/logger/logger"
 import { LoggerManager } from "@/logger/LoggerManager"
 
@@ -27,7 +27,7 @@ export type TMathSymbolCapabilities = {
  * @remarks Component for displaying math symbols capabilities in a table
  */
 export class IIMathCapabilitiesTable {
-  private editor: TInteractiveInkEditor
+  private canvas: TInteractiveInkCanvas
   private modal?: Modal
   private table?: Table
   private capabilities: TMathSymbolCapabilities[] = []
@@ -39,8 +39,8 @@ export class IIMathCapabilitiesTable {
   } = {}
   private logger = LoggerManager.getLogger(LoggerCategory.MATH)
 
-  constructor(editor: TInteractiveInkEditor) {
-    this.editor = editor
+  constructor(canvas: TInteractiveInkCanvas) {
+    this.canvas = canvas
     this.logger.debug("IIMathCapabilitiesTable initialized")
   }
 
@@ -56,15 +56,15 @@ export class IIMathCapabilitiesTable {
     if (jiixBlockId) {
       try {
         const [actions, variables, evaluables] = await Promise.all([
-          this.editor.math.getAvailableActions(jiixBlockId),
-          this.editor.math.getVariables(jiixBlockId),
-          this.editor.math.getEvaluables(jiixBlockId),
+          this.canvas.math.getAvailableActions(jiixBlockId),
+          this.canvas.math.getVariables(jiixBlockId),
+          this.canvas.math.getEvaluables(jiixBlockId),
         ])
 
         canCheckDiagnostic = true // Always available if jiixId exists
         canEditVariables = Object.keys(variables).length > 0
         // Check if numerical computation is available
-        // Note: Could also check if block has solver outputs via editor.math.computation.getStoredSolverOutputs(jiixBlock.id)
+        // Note: Could also check if block has solver outputs via canvas.math.computation.getStoredSolverOutputs(jiixBlock.id)
         canCompute = actions?.includes("numerical-computation")
         canEvaluate = evaluables?.length ? true : false
       } catch (error) {
@@ -94,9 +94,9 @@ export class IIMathCapabilitiesTable {
       // Symbol label cell
       const symbolCell = DOMFactory.span({
         className: "ms-symbol-cell",
-        text: this.editor.jiix.getBlockLabel(cap.jiixBlockId) || "Unknown Symbol",
+        text: this.canvas.jiix.getBlockLabel(cap.jiixBlockId) || "Unknown Symbol",
       })
-      symbolCell.title = this.editor.jiix.getBlockLabel(cap.jiixBlockId) || ""
+      symbolCell.title = this.canvas.jiix.getBlockLabel(cap.jiixBlockId) || ""
 
       // Create capability marks
       const capabilityValues = [cap.canCheckDiagnostic, cap.canEditVariables, cap.canCompute, cap.canEvaluate]
@@ -159,8 +159,8 @@ export class IIMathCapabilitiesTable {
     }[]
     const selectedIds = selectedBlocks.map((s) => s.id)
 
-    // Update editor selection
-    this.editor.select(selectedIds)
+    // Update canvas selection
+    this.canvas.select(selectedIds)
 
     // Update action buttons state
     this.updateActionButtons()
@@ -272,7 +272,7 @@ export class IIMathCapabilitiesTable {
       return
     }
 
-    const checker = new IIMathDiagnosticChecker(this.editor, selectedBlockIds)
+    const checker = new IIMathDiagnosticChecker(this.canvas, selectedBlockIds)
     await checker.show()
   }
 
@@ -295,7 +295,7 @@ export class IIMathCapabilitiesTable {
       return
     }
 
-    const variableEditor = new IIMathVariablePerBlockEditor(this.editor, selectedBlockIds)
+    const variableEditor = new IIMathVariablePerBlockEditor(this.canvas, selectedBlockIds)
     await variableEditor.show()
   }
 
@@ -318,7 +318,7 @@ export class IIMathCapabilitiesTable {
       return
     }
 
-    await Promise.all(selectedBlockIds.map((id) => this.editor.math.computeNumericalResult(id)))
+    await Promise.all(selectedBlockIds.map((id) => this.canvas.math.computeNumericalResult(id)))
   }
 
   /**
@@ -340,7 +340,7 @@ export class IIMathCapabilitiesTable {
       return
     }
 
-    const evaluator = new IIMathFunctionEvaluator(this.editor, selectedBlockIds)
+    const evaluator = new IIMathFunctionEvaluator(this.canvas, selectedBlockIds)
     await evaluator.show()
   }
 
@@ -349,7 +349,7 @@ export class IIMathCapabilitiesTable {
    */
   async show(): Promise<void> {
     this.logger.debug("Showing Math Capabilities Overview modal")
-    const mathBlocks = this.editor.model.mathBlocks
+    const mathBlocks = this.canvas.model.mathBlocks
 
     // Fetch capabilities for all symbols
     const capabilities: TMathSymbolCapabilities[] = []
@@ -377,7 +377,7 @@ export class IIMathCapabilitiesTable {
       title: `Math Symbols Capabilities (${mathBlocks.length} symbols)`,
       fields: [],
       customContent: container,
-      container: this.editor.layers.root,
+      container: this.canvas.layers.root,
     })
     this.modal.open()
   }

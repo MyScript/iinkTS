@@ -1,6 +1,6 @@
 import redoIcon from "@/assets/svg/redo.svg"
 import undoIcon from "@/assets/svg/undo.svg"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { BaseMenuItem } from "@/menu/items/BaseMenuItem"
 
 /**
@@ -11,13 +11,13 @@ export class UndoRedoMenuAction extends BaseMenuItem<HTMLDivElement> {
   private undoButton!: HTMLButtonElement
   private redoButton!: HTMLButtonElement
 
-  constructor(editor: TInteractiveInkEditor, idPrefix = "ms-menu-action") {
+  constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-action") {
     const config = {
       type: "undoredo" as const,
       id: `${idPrefix}-undoredo`,
       label: "Undo/Redo",
     }
-    super(config, editor)
+    super(config, canvas)
   }
 
   createElement(): HTMLDivElement {
@@ -32,10 +32,10 @@ export class UndoRedoMenuAction extends BaseMenuItem<HTMLDivElement> {
       className: "square",
       html: undoIcon,
     })
-    this.undoButton.disabled = !this.editor.history.context.canUndo
+    this.undoButton.disabled = !this.canvas.history.context.canUndo
     this.undoButton.addEventListener("pointerup", async () => {
       this.logger.info(`${this.config.id}-undo.click`)
-      await this.editor.undo()
+      await this.canvas.undo()
     })
 
     // Bouton Redo
@@ -44,10 +44,10 @@ export class UndoRedoMenuAction extends BaseMenuItem<HTMLDivElement> {
       className: "square",
       html: redoIcon,
     })
-    this.redoButton.disabled = !this.editor.history.context.canRedo
+    this.redoButton.disabled = !this.canvas.history.context.canRedo
     this.redoButton.addEventListener("pointerup", async () => {
       this.logger.info(`${this.config.id}-redo.click`)
-      await this.editor.redo()
+      await this.canvas.redo()
     })
 
     wrapper.appendChild(this.undoButton)
@@ -58,10 +58,10 @@ export class UndoRedoMenuAction extends BaseMenuItem<HTMLDivElement> {
 
   update(): void {
     if (this.undoButton) {
-      this.undoButton.disabled = !this.editor.history.context.canUndo
+      this.undoButton.disabled = !this.canvas.history.context.canUndo
     }
     if (this.redoButton) {
-      this.redoButton.disabled = !this.editor.history.context.canRedo
+      this.redoButton.disabled = !this.canvas.history.context.canRedo
     }
     this.updateDisabled()
     this.updateVisible()

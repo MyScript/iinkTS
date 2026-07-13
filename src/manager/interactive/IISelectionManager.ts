@@ -1,5 +1,5 @@
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { ResizeDirection, SELECTION_MARGIN, SvgElementRole } from "@/Constants"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
 import type { TPointerInfo } from "@/grabber"
 import { PointerEventGrabber } from "@/grabber"
 import { LoggerCategory } from "@/logger"
@@ -31,10 +31,10 @@ export class IISelectionManager extends IIAbstractManager {
   endSelectionPoint?: TPoint
   selectedGroup?: SVGGElement
 
-  constructor(editor: TInteractiveInkEditor) {
-    super(editor, LoggerCategory.SELECTION)
+  constructor(canvas: TInteractiveInkCanvas) {
+    super(canvas, LoggerCategory.SELECTION)
     this.logger.info("constructor")
-    this.grabber = new PointerEventGrabber(editor.configuration.grabber)
+    this.grabber = new PointerEventGrabber(canvas.configuration.grabber)
     this.grabber.onPointerDown = this.start.bind(this)
     this.grabber.onPointerMove = this.continue.bind(this)
     this.grabber.onPointerUp = this.end.bind(this)
@@ -42,15 +42,15 @@ export class IISelectionManager extends IIAbstractManager {
   }
 
   get rotation(): IIRotationManager {
-    return this.editor.transform.rotation
+    return this.canvas.transform.rotation
   }
 
   get translate(): IITranslateManager {
-    return this.editor.transform.translate
+    return this.canvas.transform.translate
   }
 
   get resize(): IIResizeManager {
-    return this.editor.transform.resize
+    return this.canvas.transform.resize
   }
 
   get selectionBox(): TBox | undefined {
@@ -429,7 +429,7 @@ export class IISelectionManager extends IIAbstractManager {
    * merged into the selection rectangle even though ghost strokes aren't real model symbols.
    */
   private getGhostBoxesForSelectedMath(symbols: TSymbol[]): TBox[] {
-    if (this.editor.configuration.mathSelectionLevel !== "element") {
+    if (this.canvas.configuration.mathSelectionLevel !== "element") {
       return []
     }
     const jiixBlockIds = new Set<string>()
@@ -440,7 +440,7 @@ export class IISelectionManager extends IIAbstractManager {
     })
     const boxes: TBox[] = []
     jiixBlockIds.forEach((id) => {
-      const bounds = this.editor.math.getGhostBounds(id)
+      const bounds = this.canvas.math.getGhostBounds(id)
       if (bounds) {
         boxes.push(bounds)
       }
@@ -469,31 +469,31 @@ export class IISelectionManager extends IIAbstractManager {
         ev.preventDefault()
         ev.stopPropagation()
         const point = this.getPoint(ev)
-        const { x, y } = this.editor.snaps.snapResize(point)
+        const { x, y } = this.canvas.snaps.snapResize(point)
         edge.vertices[pointIndex].x = x
         edge.vertices[pointIndex].y = y
         EdgeOps.updateEdgeDerivedFields(edge)
         this.model.updateSymbol(edge)
         this.renderer.drawSymbol(edge)
-        this.editor.connector.showAnchorHint({ x, y }, edge.id)
+        this.canvas.connector.showAnchorHint({ x, y }, edge.id)
       }
       const endHandler = (ev: PointerEvent) => {
         ev.preventDefault()
         ev.stopPropagation()
         const point = this.getPoint(ev)
-        const { x, y } = this.editor.snaps.snapResize(point)
+        const { x, y } = this.canvas.snaps.snapResize(point)
         edge.vertices[pointIndex].x = x
         edge.vertices[pointIndex].y = y
         EdgeOps.updateEdgeDerivedFields(edge)
-        this.editor.connector.clearAnchorHint()
-        this.editor.connector.applyEndpointAnchor(edge, pointIndex, { x, y })
+        this.canvas.connector.clearAnchorHint()
+        this.canvas.connector.applyEndpointAnchor(edge, pointIndex, { x, y })
         this.renderer.layer.style.cursor = ""
-        this.editor.updateSymbol(edge)
+        this.canvas.updateSymbol(edge)
         this.renderer.layer.removeEventListener("pointermove", handler)
         this.renderer.layer.removeEventListener("pointercancel", endHandler)
         this.renderer.layer.removeEventListener("pointerleave", endHandler)
         this.renderer.layer.removeEventListener("pointerup", endHandler)
-        this.editor.snaps.clearSnapToElementLines()
+        this.canvas.snaps.clearSnapToElementLines()
         this.drawSelectedGroup(this.model.symbolsSelected)
       }
 
@@ -537,7 +537,7 @@ export class IISelectionManager extends IIAbstractManager {
           ev.preventDefault()
           ev.stopPropagation()
           const point = this.getPoint(ev)
-          const { x, y } = this.editor.snaps.snapResize(point)
+          const { x, y } = this.canvas.snaps.snapResize(point)
           updateArc(x, y)
           EdgeArcOps.updateDerivedFields(arc)
           this.model.updateSymbol(arc)
@@ -547,16 +547,16 @@ export class IISelectionManager extends IIAbstractManager {
           ev.preventDefault()
           ev.stopPropagation()
           const point = this.getPoint(ev)
-          const { x, y } = this.editor.snaps.snapResize(point)
+          const { x, y } = this.canvas.snaps.snapResize(point)
           updateArc(x, y)
           EdgeArcOps.updateDerivedFields(arc)
           this.renderer.layer.style.cursor = ""
-          this.editor.updateSymbol(arc)
+          this.canvas.updateSymbol(arc)
           this.renderer.layer.removeEventListener("pointermove", handler)
           this.renderer.layer.removeEventListener("pointercancel", endHandler)
           this.renderer.layer.removeEventListener("pointerleave", endHandler)
           this.renderer.layer.removeEventListener("pointerup", endHandler)
-          this.editor.snaps.clearSnapToElementLines()
+          this.canvas.snaps.clearSnapToElementLines()
           this.drawSelectedGroup(this.model.symbolsSelected)
         }
         el.addEventListener("pointerdown", (ev) => {
@@ -700,34 +700,34 @@ export class IISelectionManager extends IIAbstractManager {
         point.y = groupBox.y + groupBox.height
         const screenPoint = point.matrixTransform(ctm)
 
-        const menuParent = this.editor.menu.context.wrapper?.parentElement
+        const menuParent = this.canvas.menu.context.wrapper?.parentElement
         if (menuParent) {
           const rect = menuParent.getBoundingClientRect()
-          this.editor.menu.context.position.x = screenPoint.x - rect.left
-          this.editor.menu.context.position.y = screenPoint.y - rect.top
+          this.canvas.menu.context.position.x = screenPoint.x - rect.left
+          this.canvas.menu.context.position.y = screenPoint.y - rect.top
         } else {
-          this.editor.menu.context.position.x = screenPoint.x
-          this.editor.menu.context.position.y = screenPoint.y
+          this.canvas.menu.context.position.x = screenPoint.x
+          this.canvas.menu.context.position.y = screenPoint.y
         }
       }
-      this.editor.menu.context.show()
+      this.canvas.menu.context.show()
     }
-    this.editor.menu.update()
+    this.canvas.menu.update()
   }
 
   removeSelectedGroup(): void {
     this.logger.info("removeSelectedGroup")
-    this.editor.menu.context.hide()
+    this.canvas.menu.context.hide()
     this.selectedGroup?.remove()
     this.selectedGroup = undefined
   }
 
   redrawSelectedGroup(): void {
-    this.drawSelectedGroup(this.editor.model.symbolsSelected)
+    this.drawSelectedGroup(this.canvas.model.symbolsSelected)
   }
 
   hideInteractElements(): void {
-    this.editor.menu.context.hide()
+    this.canvas.menu.context.hide()
     const query = `[role=${SvgElementRole.Resize}],[role=${SvgElementRole.Rotate}],[role=${SvgElementRole.Translate}]`
     this.selectedGroup?.querySelectorAll(query).forEach((el) => {
       el.setAttribute("visibility", "hidden")
@@ -742,7 +742,7 @@ export class IISelectionManager extends IIAbstractManager {
     selected: Set<string>
     covered: Set<string>
   } | null {
-    const groups = this.editor.jiix.getTextSelectionGroups(this.editor.configuration.textSelectionLevel)
+    const groups = this.canvas.jiix.getTextSelectionGroups(this.canvas.configuration.textSelectionLevel)
     if (groups.length === 0) {
       return null
     }
@@ -768,7 +768,7 @@ export class IISelectionManager extends IIAbstractManager {
     selected: Set<string>
     covered: Set<string>
   } | null {
-    const groups = this.editor.jiix.getMathSelectionGroups(this.editor.configuration.mathSelectionLevel)
+    const groups = this.canvas.jiix.getMathSelectionGroups(this.canvas.configuration.mathSelectionLevel)
     if (groups.length === 0) {
       return null
     }
@@ -794,7 +794,7 @@ export class IISelectionManager extends IIAbstractManager {
     selected: Set<string>
     covered: Set<string>
   } | null {
-    const groups = this.editor.jiix.getShapeSelectionGroups(this.editor.configuration.shapeSelectionLevel)
+    const groups = this.canvas.jiix.getShapeSelectionGroups(this.canvas.configuration.shapeSelectionLevel)
     if (groups.length === 0) {
       return null
     }
@@ -889,7 +889,7 @@ export class IISelectionManager extends IIAbstractManager {
    * In "operand" mode: a block qualifies only if ALL its strokes are selected.
    */
   private getQualifyingMathBlockIds(): string[] {
-    const mathLevel = this.editor.configuration.mathSelectionLevel
+    const mathLevel = this.canvas.configuration.mathSelectionLevel
     const selectedMathStrokes = this.model.symbolsSelected.filter(isRecognizedMath) as TStroke[]
 
     if (selectedMathStrokes.length === 0) {
@@ -911,7 +911,7 @@ export class IISelectionManager extends IIAbstractManager {
       if (mathLevel === "element") {
         qualifyingBlockIds.push(jiixBlockId)
       } else {
-        const allBlockStrokeIds = this.editor.jiix.getStrokesForElement(jiixBlockId)
+        const allBlockStrokeIds = this.canvas.jiix.getStrokesForElement(jiixBlockId)
         const selectedIds = new Set(strokes.map((s) => s.id))
         if (allBlockStrokeIds.length > 0 && allBlockStrokeIds.every((id) => selectedIds.has(id))) {
           qualifyingBlockIds.push(jiixBlockId)
@@ -946,14 +946,14 @@ export class IISelectionManager extends IIAbstractManager {
    * frozen draw result stroke (if any). No-op in "operand" mode.
    */
   expandSelectionForMathBlocks(): void {
-    if (this.editor.configuration.mathSelectionLevel !== "element") {
+    if (this.canvas.configuration.mathSelectionLevel !== "element") {
       return
     }
 
     const idsToAdd = new Set<string>()
     this.getQualifyingMathBlockIds().forEach((jiixBlockId) => {
-      this.editor.jiix.getStrokesForElement(jiixBlockId).forEach((id) => idsToAdd.add(id))
-      this.editor.math.getStoredSolverOutputs(jiixBlockId)?.forEach((id) => idsToAdd.add(id))
+      this.canvas.jiix.getStrokesForElement(jiixBlockId).forEach((id) => idsToAdd.add(id))
+      this.canvas.math.getStoredSolverOutputs(jiixBlockId)?.forEach((id) => idsToAdd.add(id))
     })
 
     idsToAdd.forEach((id) => {
@@ -975,18 +975,18 @@ export class IISelectionManager extends IIAbstractManager {
     this.endSelectionPoint = undefined
     this.clearSelectingRect()
     this.drawSelectedGroup(this.model.symbolsSelected)
-    this.editor.menu.style.update()
+    this.canvas.menu.style.update()
 
     // Notify math interactions system of selection changes
     const selectedMathJiixBlockId = this.getSelectedMathJiixBlockId()
     if (selectedMathJiixBlockId) {
-      this.editor.math.selectBlock(selectedMathJiixBlockId)
+      this.canvas.math.selectBlock(selectedMathJiixBlockId)
     } else {
-      this.editor.math.clearBlockSelection()
+      this.canvas.math.clearBlockSelection()
     }
 
     // Defer external event so synchronous user callbacks don't block pointer-up completion
-    setTimeout(() => this.editor.event.emitSelected(this.model.symbolsSelected), 0)
+    setTimeout(() => this.canvas.event.emitSelected(this.model.symbolsSelected), 0)
     return updatedSymbols
   }
 
@@ -1007,28 +1007,28 @@ export class IISelectionManager extends IIAbstractManager {
         currentEl = currentEl.parentElement
       }
     }
-    this.editor.unselectAll()
+    this.canvas.unselectAll()
     if (currentEl?.id) {
-      const sym = this.editor.model.symbols.find((s) => s.id === currentEl!.id)
+      const sym = this.canvas.model.symbols.find((s) => s.id === currentEl!.id)
       if (sym && isDecorator(sym)) {
-        this.editor.select((sym as TDecorator).targetIds)
+        this.canvas.select((sym as TDecorator).targetIds)
       } else {
-        this.editor.select([currentEl.id])
+        this.canvas.select([currentEl.id])
       }
     } else {
       // Use clientX/clientY relative to the menu's parent container
       // The menu is attached to the UI layer, so we need its bounding rect
-      const menuParent = this.editor.menu.context.wrapper?.parentElement
+      const menuParent = this.canvas.menu.context.wrapper?.parentElement
       if (menuParent) {
         const rect = menuParent.getBoundingClientRect()
-        this.editor.menu.context.position.x = info.clientX - rect.left
-        this.editor.menu.context.position.y = info.clientY - rect.top
+        this.canvas.menu.context.position.x = info.clientX - rect.left
+        this.canvas.menu.context.position.y = info.clientY - rect.top
       } else {
         // Fallback: use viewport coordinates directly
-        this.editor.menu.context.position.x = info.clientX
-        this.editor.menu.context.position.y = info.clientY
+        this.canvas.menu.context.position.x = info.clientX
+        this.canvas.menu.context.position.y = info.clientY
       }
-      this.editor.menu.context.show()
+      this.canvas.menu.context.show()
     }
   }
 }

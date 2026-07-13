@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+    <title>Ink Canvas custom http client</title>
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">
+        Ink Canvas v1 with Custom http client
+      </h1>
+    </header>
+
+    <div id="result"></div>
+
+    <nav class="flex-container gap between wrap">
+      <div class="flex-container gap">
+        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/clear.svg" />
+        </button>
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/undo.svg" />
+        </button>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/redo.svg" />
+        </button>
+      </div>
+      <ul class="client-info">
+        <li id="client-url" class="text-into">
+          Server url:
+        </li>
+        <li id="client-sent" class="text-into">
+          Message sent:
+        </li>
+        <li id="client-received" class="text-into">
+          Message received:
+        </li>
+      </ul>
+    </nav>
+
+    <div id="rootEl"></div>
+
+    <script type="module">
+      import { Canvas, HTTPClientV1 } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
+      const rootElement = document.getElementById('rootEl')
+      const resultElement = document.getElementById('result')
+      const clearElement = document.getElementById('clear')
+      const undoElement = document.getElementById('undo')
+      const redoElement = document.getElementById('redo')
+      const showModalBtn = document.getElementById('showModalBtn')
+
+      class CustomHTTPClientV1 extends HTTPClientV1 {
+        constructor(config) {
+          super(config)
+          this.urlElement = document.getElementById("client-url")
+          this.sentElement = document.getElementById("client-sent")
+          this.receivedElement = document.getElementById("client-received")
+
+          this.urlElement.textContent = `Server url: ${this.url}`
+          this.sentElement.textContent = "Message sent:"
+          this.receivedElement.textContent = "Message received:"
+        }
+
+        async post(data, mimeType) {
+          this.sentElement.textContent = `POST: ${JSON.stringify(data)}`
+          const response = await super.post(data, mimeType)
+          this.receivedElement.textContent = `Response: ${JSON.stringify(response)}`
+          return response
+        }
+      }
+
+      const editorOptions = {
+        configuration: {},
+        override: {
+          client: CustomHTTPClientV1
+        }
+      }
+
+      let canvas
+      /**
+       * We use a function to wait the server configuration to load
+       */
+      async function loadEditor(options) {
+        resultElement.innerHTML = ''
+        await canvas?.destroy()
+        /**
+         * get canvas instance from type
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Canvas parameters
+         */
+        canvas = await Canvas.load(rootElement, 'INK_V1', options)
+
+        canvas.event.addEventListener('changed', (event) => {
+          undoElement.disabled = !event.detail.canUndo
+          redoElement.disabled = !event.detail.canRedo
+          clearElement.disabled = !event.detail.canClear
+        })
+
+        canvas.event.addEventListener('exported', (event) => {
+          resultElement.innerHTML =
+            event.detail && event.detail['application/vnd.myscript.jiix']
+              ? event.detail['application/vnd.myscript.jiix'].label
+              : ''
+        })
+      }
+
+      clearElement.addEventListener('click', async () => {
+        canvas?.clear()
+      })
+
+      undoElement.addEventListener('click', () => {
+        canvas?.undo()
+      })
+
+      redoElement.addEventListener('click', () => {
+        canvas?.redo()
+      })
+      showModalBtn.addEventListener('click', () => {
+        ModalCanvasOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+    </script>
+
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>

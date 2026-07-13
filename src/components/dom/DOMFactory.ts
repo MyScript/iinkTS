@@ -108,7 +108,7 @@ export class DOMFactory {
       style: `
         width: ${size};
         height: ${size};
-        border-radius: var(--iink-radius-full);
+        border-radius: var(--ms-ink-radius-full);
         background-color: ${color};
         display: inline-block;
         flex-shrink: 0;
@@ -120,8 +120,8 @@ export class DOMFactory {
     return buildSpan({
       text: available ? "✓" : "✗",
       style: available
-        ? "color: var(--iink-success); font-weight: bold; font-size: 16px;"
-        : "color: var(--iink-error); font-weight: bold; font-size: 16px;",
+        ? "color: var(--ms-ink-success); font-weight: bold; font-size: 16px;"
+        : "color: var(--ms-ink-error); font-weight: bold; font-size: 16px;",
     })
   }
 
@@ -145,7 +145,7 @@ export class DOMFactory {
       style: `
       display: flex;
       flex-direction: column;
-      gap: ${config.gap ?? "var(--iink-spacing-xs)"};
+      gap: ${config.gap ?? "var(--ms-ink-spacing-xs)"};
     `,
     })
     const label = buildLabel({

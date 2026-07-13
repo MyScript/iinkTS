@@ -1,5 +1,5 @@
 import snapIcon from "@/assets/svg/arrow-to-dot.svg"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { TMenuSubMenu } from "@/menu/items/SubMenuItem"
 import { SubMenuItem } from "@/menu/items/SubMenuItem"
 
@@ -17,7 +17,7 @@ export type TSnapActionConfig = boolean | TSnapActionItemsConfig
  * @remarks Menu action Snap - Configuration du snap
  */
 export class SnapMenuAction extends SubMenuItem {
-  constructor(editor: TInteractiveInkEditor, idPrefix = "ms-menu-action", itemsConfig?: TSnapActionItemsConfig) {
+  constructor(editor: TInteractiveInkCanvas, idPrefix = "ms-menu-action", itemsConfig?: TSnapActionItemsConfig) {
     const enabled = (key: keyof TSnapActionItemsConfig) => itemsConfig?.[key] !== false
 
     const config: TMenuSubMenu = {

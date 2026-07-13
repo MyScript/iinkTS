@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Interactive Ink Canvas override default options</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+
+    <style>
+      #rootEl {
+        flex: 1;
+        min-width: 0;
+        height: 100%;
+      }
+    </style>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="guide-panel">
+        ⚙ Options
+      </button>
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">Interactive Ink Canvas — Override default options</h1>
+    </header>
+
+    <div class="ex-page-layout">
+
+      <aside id="guide-panel" class="ex-panel">
+        <p class="ex-panel-heading">Configuration options</p>
+        <p class="ex-panel-intro">All options have sensible defaults. Pass any subset in <code>editorOptions.configuration</code> to <code>Canvas.load()</code> — unset keys keep their default.</p>
+
+        <div class="ex-panel-divider"></div>
+
+        <!-- ── Pen style ── -->
+        <p class="ex-panel-subtitle">Pen style</p>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">penStyle.color</span><span class="ex-panel-item-default">"#000000"</span></div>
+          <div class="ex-panel-item-values">any CSS color — #rgb #rgba #rrggbb #rrggbbaa rgb() rgba() hsl() hsla()</div>
+          <div class="ex-panel-item-desc">Ink stroke color.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">penStyle.width</span><span class="ex-panel-item-default">2</span></div>
+          <div class="ex-panel-item-values">number (px) — recommended: 1 · 2 · 4 · 8</div>
+          <div class="ex-panel-item-desc">Stroke width in px.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">penStyle.opacity</span><span class="ex-panel-item-default">1</span></div>
+          <div class="ex-panel-item-values">0.0 – 1.0</div>
+          <div class="ex-panel-item-desc">Stroke opacity (optional, defaults to fully opaque).</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">penStyle.fill</span><span class="ex-panel-item-default">"transparent"</span></div>
+          <div class="ex-panel-item-values">any CSS color string</div>
+          <div class="ex-panel-item-desc">Fill color for closed shapes (optional).</div>
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <!-- ── Font style ── -->
+        <p class="ex-panel-subtitle">Font style</p>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">fontStyle.size</span><span class="ex-panel-item-default">"auto"</span></div>
+          <div class="ex-panel-item-values">"auto" · 0.5 · 0.75 · 1</div>
+          <div class="ex-panel-item-desc">Text size multiplier.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">fontStyle.weight</span><span class="ex-panel-item-default">"auto"</span></div>
+          <div class="ex-panel-item-values">"auto" · "normal" · "bold"</div>
+          <div class="ex-panel-item-desc">Text font weight.</div>
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <!-- ── Gestures ── -->
+        <p class="ex-panel-subtitle">Gesture</p>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">gesture.surround</span><span class="ex-panel-item-default">"select"</span></div>
+          <div class="ex-panel-item-values">select · surround · highlight</div>
+          <div class="ex-panel-item-desc">Action triggered by a surround stroke.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">gesture.strikeThrough</span><span class="ex-panel-item-default">"draw"</span></div>
+          <div class="ex-panel-item-values">draw · erase</div>
+          <div class="ex-panel-item-desc">Action triggered by a strikethrough stroke.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">gesture.underline</span><span class="ex-panel-item-default">"draw"</span></div>
+          <div class="ex-panel-item-values">draw · thicken</div>
+          <div class="ex-panel-item-desc">Action triggered by an underline stroke.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">gesture.insert</span><span class="ex-panel-item-default">"line-break"</span></div>
+          <div class="ex-panel-item-values">line-break · insert</div>
+          <div class="ex-panel-item-desc">Action triggered by an insert (caret) stroke.</div>
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <!-- ── Snap ── -->
+        <p class="ex-panel-subtitle">Snap</p>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">snap.guide</span><span class="ex-panel-item-default">true</span></div>
+          <div class="ex-panel-item-values">true · false</div>
+          <div class="ex-panel-item-desc">Snap moved/resized symbols to guide grid.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">snap.symbol</span><span class="ex-panel-item-default">true</span></div>
+          <div class="ex-panel-item-values">true · false</div>
+          <div class="ex-panel-item-desc">Snap to edges and centers of other symbols.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">snap.angle</span><span class="ex-panel-item-default">0</span></div>
+          <div class="ex-panel-item-values">0 = free · 45 · 90</div>
+          <div class="ex-panel-item-desc">Constrain rotation to multiples of this angle (0 = free).</div>
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <!-- ── Rendering ── -->
+        <p class="ex-panel-subtitle">Rendering</p>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">rendering.guides.enable</span><span class="ex-panel-item-default">true</span></div>
+          <div class="ex-panel-item-values">true · false</div>
+          <div class="ex-panel-item-desc">Show guide grid on the canvas.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">rendering.guides.type</span><span class="ex-panel-item-default">"point"</span></div>
+          <div class="ex-panel-item-values">"point" · "line" · "grid"</div>
+          <div class="ex-panel-item-desc">Guide grid style.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">rendering.guides.gap</span><span class="ex-panel-item-default">50</span></div>
+          <div class="ex-panel-item-values">number (px)</div>
+          <div class="ex-panel-item-desc">Spacing between guide grid lines/dots.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">rendering.minWidth</span><span class="ex-panel-item-default">400</span></div>
+          <div class="ex-panel-item-values">number (px)</div>
+          <div class="ex-panel-item-desc">Minimum canvas width before scrolling.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">rendering.minHeight</span><span class="ex-panel-item-default">400</span></div>
+          <div class="ex-panel-item-values">number (px)</div>
+          <div class="ex-panel-item-desc">Minimum canvas height before scrolling.</div>
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <!-- ── Selection ── -->
+        <p class="ex-panel-subtitle">Selection granularity</p>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">textSelectionLevel</span><span class="ex-panel-item-default">"element"</span></div>
+          <div class="ex-panel-item-values">"element" · "word" · "char"</div>
+          <div class="ex-panel-item-desc">Tap-selection granularity for text blocks.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">mathSelectionLevel</span><span class="ex-panel-item-default">"element"</span></div>
+          <div class="ex-panel-item-values">"element" · "operand"</div>
+          <div class="ex-panel-item-desc">Tap-selection granularity for math blocks.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">shapeSelectionLevel</span><span class="ex-panel-item-default">"element"</span></div>
+          <div class="ex-panel-item-values">"element" · "stroke"</div>
+          <div class="ex-panel-item-desc">Tap-selection granularity for shapes and edges.</div>
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <!-- ── Overlays ── -->
+        <p class="ex-panel-subtitle">Overlays</p>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">overlays.showBlockOverlays</span><span class="ex-panel-item-default">false</span></div>
+          <div class="ex-panel-item-values">true · false</div>
+          <div class="ex-panel-item-desc">Always show block borders (instead of only on hover).</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">overlays.badgeSize</span><span class="ex-panel-item-default">20</span></div>
+          <div class="ex-panel-item-values">number (px)</div>
+          <div class="ex-panel-item-desc">Size of the action badge icon on recognized blocks.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">overlays.borderWidth</span><span class="ex-panel-item-default">2</span></div>
+          <div class="ex-panel-item-values">number (px)</div>
+          <div class="ex-panel-item-desc">Width of the selection/hover border.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">overlays.panelPadding</span><span class="ex-panel-item-default">8</span></div>
+          <div class="ex-panel-item-values">number (px)</div>
+          <div class="ex-panel-item-desc">Inner padding of floating overlay panels.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">overlays.labelMaxChars</span><span class="ex-panel-item-default">10</span></div>
+          <div class="ex-panel-item-values">number</div>
+          <div class="ex-panel-item-desc">Max characters shown in block label badge.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">overlays.labelFontSize</span><span class="ex-panel-item-default">12</span></div>
+          <div class="ex-panel-item-values">number (px)</div>
+          <div class="ex-panel-item-desc">Font size of block label badges.</div>
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <!-- ── Undo/Redo ── -->
+        <p class="ex-panel-subtitle">Undo / Redo</p>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">undo-redo.maxStackSize</span><span class="ex-panel-item-default">100</span></div>
+          <div class="ex-panel-item-values">number</div>
+          <div class="ex-panel-item-desc">Maximum depth of the undo/redo history stack.</div>
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <!-- ── Grabber ── -->
+        <p class="ex-panel-subtitle">Grabber</p>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">grabber.xyFloatPrecision</span><span class="ex-panel-item-default">0</span></div>
+          <div class="ex-panel-item-values">0–6</div>
+          <div class="ex-panel-item-desc">Decimal places kept for pointer x/y coordinates.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">grabber.timestampFloatPrecision</span><span class="ex-panel-item-default">0</span></div>
+          <div class="ex-panel-item-values">0–6</div>
+          <div class="ex-panel-item-desc">Decimal places kept for pointer timestamps.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">grabber.delayLongTouch</span><span class="ex-panel-item-default">500</span></div>
+          <div class="ex-panel-item-values">number (ms)</div>
+          <div class="ex-panel-item-desc">Hold duration before a touch is treated as long-press.</div>
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <!-- ── Math ── -->
+        <p class="ex-panel-subtitle">Math</p>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">math.computation.resultMode</span><span class="ex-panel-item-default">"draw"</span></div>
+          <div class="ex-panel-item-values">"draw" · "ghost"</div>
+          <div class="ex-panel-item-desc"><strong>draw</strong>: result strokes added to the model (interactive, sent to backend). <strong>ghost</strong>: SVG overlay at 0.5 opacity, not in model.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">math.computation.autoCompute</span><span class="ex-panel-item-default">false</span></div>
+          <div class="ex-panel-item-values">true · false</div>
+          <div class="ex-panel-item-desc">Automatically trigger solver when a math block ends with <code>=</code> or <code>?</code>.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">math.computation.resultColor</span><span class="ex-panel-item-default">"#4caf50"</span></div>
+          <div class="ex-panel-item-values">any CSS color string</div>
+          <div class="ex-panel-item-desc">Color applied to result strokes in both draw and ghost modes.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">math.interaction.showDependencyOnHover</span><span class="ex-panel-item-default">false</span></div>
+          <div class="ex-panel-item-values">true · false</div>
+          <div class="ex-panel-item-desc">Highlight variable dependency arrows when hovering a math block.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">math.interaction.highlightOnSelect</span><span class="ex-panel-item-default">false</span></div>
+          <div class="ex-panel-item-values">true · false</div>
+          <div class="ex-panel-item-desc">Highlight dependent blocks when a math block is selected.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">math.interaction.dimOpacity</span><span class="ex-panel-item-default">0.3</span></div>
+          <div class="ex-panel-item-values">0.0 – 1.0</div>
+          <div class="ex-panel-item-desc">Opacity applied to non-selected blocks when dependency highlighting is active.</div>
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <!-- ── Other ── -->
+        <p class="ex-panel-subtitle">Other</p>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">cssVars</span><span class="ex-panel-item-default">undefined</span></div>
+          <div class="ex-panel-item-values">Record&lt;string, string&gt;</div>
+          <div class="ex-panel-item-desc">CSS custom properties applied to the canvas root, e.g. <code>{ "--ms-ink-primary": "#0070f3" }</code>.</div>
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <!-- ── Server ── -->
+        <p class="ex-panel-subtitle">Server</p>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">server.scheme</span><span class="ex-panel-item-default">"https"</span></div>
+          <div class="ex-panel-item-values">"https" · "http"</div>
+          <div class="ex-panel-item-desc">Connection protocol.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">server.host</span><span class="ex-panel-item-default">"cloud.myscript.com"</span></div>
+          <div class="ex-panel-item-values">string</div>
+          <div class="ex-panel-item-desc">MyScript server hostname.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">server.applicationKey</span><span class="ex-panel-item-default">""</span></div>
+          <div class="ex-panel-item-values">string (UUID)</div>
+          <div class="ex-panel-item-desc">MyScript application key.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">server.hmacKey</span><span class="ex-panel-item-default">""</span></div>
+          <div class="ex-panel-item-values">string | (appKey) => Promise&lt;string&gt;</div>
+          <div class="ex-panel-item-desc">HMAC secret or async signer function (for server-side signing).</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">server.version</span><span class="ex-panel-item-default">""</span></div>
+          <div class="ex-panel-item-values">string (semver)</div>
+          <div class="ex-panel-item-desc">Backend version — enables version-gated features (e.g. ≥3.2.0 for JIIX lines).</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">server.websocket.pingEnabled</span><span class="ex-panel-item-default">true</span></div>
+          <div class="ex-panel-item-values">true · false</div>
+          <div class="ex-panel-item-desc">Send periodic pings to keep the WebSocket alive.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">server.websocket.pingDelay</span><span class="ex-panel-item-default">15000</span></div>
+          <div class="ex-panel-item-values">number (ms)</div>
+          <div class="ex-panel-item-desc">Interval between ping messages.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">server.websocket.maxPingLostCount</span><span class="ex-panel-item-default">20</span></div>
+          <div class="ex-panel-item-values">number</div>
+          <div class="ex-panel-item-desc">Max missed pings before reconnecting.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">server.websocket.autoReconnect</span><span class="ex-panel-item-default">true</span></div>
+          <div class="ex-panel-item-values">true · false</div>
+          <div class="ex-panel-item-desc">Automatically reconnect on disconnect.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">server.websocket.maxRetryCount</span><span class="ex-panel-item-default">2</span></div>
+          <div class="ex-panel-item-values">number</div>
+          <div class="ex-panel-item-desc">Max reconnection attempts before giving up.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">server.websocket.fileChunkSize</span><span class="ex-panel-item-default">300000</span></div>
+          <div class="ex-panel-item-values">number (bytes)</div>
+          <div class="ex-panel-item-desc">Max bytes per chunk when sending file data.</div>
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <!-- ── Recognition ── -->
+        <p class="ex-panel-subtitle">Recognition</p>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">recognition.lang</span><span class="ex-panel-item-default">"en_US"</span></div>
+          <div class="ex-panel-item-values">BCP 47 language tag (e.g. "fr_FR", "ja_JP")</div>
+          <div class="ex-panel-item-desc">Language used for text recognition.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">recognition.gesture.enable</span><span class="ex-panel-item-default">true</span></div>
+          <div class="ex-panel-item-values">true · false</div>
+          <div class="ex-panel-item-desc">Enable gesture recognition on the backend.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">recognition.gesture.ignoreGestureStrokes</span><span class="ex-panel-item-default">false</span></div>
+          <div class="ex-panel-item-values">true · false</div>
+          <div class="ex-panel-item-desc">Exclude gesture strokes from ink content.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">recognition.math.solver.angle-unit</span><span class="ex-panel-item-default">"deg"</span></div>
+          <div class="ex-panel-item-values">"deg" · "rad"</div>
+          <div class="ex-panel-item-desc">Angle unit for math solver trigonometric functions.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">recognition.math.solver.auto-variable-management.enable</span><span class="ex-panel-item-default">true</span></div>
+          <div class="ex-panel-item-values">true · false</div>
+          <div class="ex-panel-item-desc">Automatically manage math variables across blocks.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">recognition.math.solver.auto-variable-management.scoping-policy</span><span class="ex-panel-item-default">"closest"</span></div>
+          <div class="ex-panel-item-values">"closest" · "last-modified" · "last-edited"</div>
+          <div class="ex-panel-item-desc">How the solver resolves variable scope across math blocks.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">recognition.raw-content.recognition.types</span><span class="ex-panel-item-default">["text","shape","math"]</span></div>
+          <div class="ex-panel-item-values">array of "text" · "shape" · "math"</div>
+          <div class="ex-panel-item-desc">Content types recognized in raw-content mode.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">recognition.raw-content.classification.types</span><span class="ex-panel-item-default">["text","shape","math"]</span></div>
+          <div class="ex-panel-item-values">array of "text" · "shape" · "math"</div>
+          <div class="ex-panel-item-desc">Content types classified in raw-content mode.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">recognition.raw-content.gestures</span><span class="ex-panel-item-default">["underline","scratch-out","strike-through","surround"]</span></div>
+          <div class="ex-panel-item-values">array: "underline" · "scratch-out" · "join" · "insert" · "strike-through" · "surround"</div>
+          <div class="ex-panel-item-desc">Gesture types detected in raw-content mode.</div>
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <!-- ── Menu ── -->
+        <p class="ex-panel-subtitle">Menu</p>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">menu.enable</span><span class="ex-panel-item-default">true</span></div>
+          <div class="ex-panel-item-values">true · false</div>
+          <div class="ex-panel-item-desc">Show or hide the entire canvas menu system.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">menu.style.enable</span><span class="ex-panel-item-default">true</span></div>
+          <div class="ex-panel-item-values">true · false + per-item: strokeColor · fillColor · thickness · fontSize · fontWeight · opacity</div>
+          <div class="ex-panel-item-desc">Style toolbar visibility. Each sub-item is a boolean toggle.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">menu.tool.enable</span><span class="ex-panel-item-default">true</span></div>
+          <div class="ex-panel-item-values">true · false + per-item: write · move · select · erase · shape · edge</div>
+          <div class="ex-panel-item-desc">Tool toolbar visibility. Each sub-item is a boolean toggle.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">menu.action.enable</span><span class="ex-panel-item-default">true</span></div>
+          <div class="ex-panel-item-values">true · false + per-item: clear · language · undoRedo · zoom · convert · gesture · guide · snap · math · overlay · selection · export · import · minimap</div>
+          <div class="ex-panel-item-desc">Action toolbar visibility. Each sub-item is a boolean toggle.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">menu.context.enable</span><span class="ex-panel-item-default">true</span></div>
+          <div class="ex-panel-item-values">true · false + per-item: edit · decorator · reorder · export · convert · math · group · duplicate · remove · selectAll</div>
+          <div class="ex-panel-item-desc">Context menu visibility. Each sub-item is a boolean toggle.</div>
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <!-- ── Logger ── -->
+        <p class="ex-panel-subtitle">Logger</p>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">logger.&lt;CATEGORY&gt;</span><span class="ex-panel-item-default">ERROR</span></div>
+          <div class="ex-panel-item-values">DEBUG · INFO · WARN · ERROR</div>
+          <div class="ex-panel-item-desc">Log level per category. Categories: EDITOR · CLIENT · GRABBER · GESTURE · RENDERER · MODEL · HISTORY · SYMBOL · MENU · MATH · SNAP · TEXT · SELECTION · SYNCHRONIZER · WRITE · MOVE · MANAGER · CONVERTER · TRANSFORMER · KEYBOARD · JIIX_QUERY · SVGDEBUG · SMARTGUIDE · EDITOR_EVENT · STYLE</div>
+        </div>
+
+      </aside>
+
+      <div id="rootEl"></div>
+
+    </div>
+
+    <script>
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const guidePanel = document.getElementById('guide-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = guidePanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+    </script>
+
+    <script type="module">
+      import {
+        Canvas,
+        SurroundAction,
+        StrikeThroughAction,
+        InsertAction
+      } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
+
+      const rootElement = document.getElementById('rootEl')
+      const showModalBtn = document.getElementById('showModalBtn')
+
+      let canvas
+      const editorOptions = {
+        configuration: {
+          rendering: {
+            guides: {
+              gap: 150,
+              type: 'line'
+            }
+          },
+          gesture: {
+            surround: SurroundAction.Highlight,
+            strikeThrough: StrikeThroughAction.Erase,
+            insert: InsertAction.Insert
+          },
+          snap: {
+            guide: false,
+            symbol: false,
+            angle: 90
+          },
+          penStyle: {
+            color: '#00af00',
+            width: 1
+          },
+          fontStyle: {
+            weight: 'normal',
+            size: 1
+          }
+        }
+      }
+      async function loadEditor(options) {
+        canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK', options)
+      }
+      showModalBtn.addEventListener('click', () => {
+        ModalCanvasOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>

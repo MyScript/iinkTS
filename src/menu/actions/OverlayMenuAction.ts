@@ -1,5 +1,5 @@
 import rectangleIcon from "@/assets/svg/rectangle.svg"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { TMenuCheckbox } from "@/menu/items/CheckboxMenuItem"
 import type { TMenuRange } from "@/menu/items/RangeMenuItem"
 import type { TMenuSubMenu } from "@/menu/items/SubMenuItem"
@@ -21,7 +21,7 @@ export type TOverlayActionConfig = boolean | TOverlayActionItemsConfig
  * @remarks Menu action for overlay configuration (block overlays badge/border)
  */
 export class OverlayMenuAction extends SubMenuItem {
-  constructor(editor: TInteractiveInkEditor, idPrefix = "ms-menu-action", itemsConfig?: TOverlayActionItemsConfig) {
+  constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-action", itemsConfig?: TOverlayActionItemsConfig) {
     const enabled = (key: keyof TOverlayActionItemsConfig) => itemsConfig?.[key] !== false
 
     const items: (TMenuCheckbox | TMenuRange)[] = []
@@ -31,9 +31,9 @@ export class OverlayMenuAction extends SubMenuItem {
         type: "checkbox",
         id: `${idPrefix}-overlay-show-block-overlays`,
         label: "Show block overlays",
-        getValue: (editor: TInteractiveInkEditor) => editor.overlays.getConfig().showBlockOverlays,
-        setValue: (editor: TInteractiveInkEditor, value: boolean) => {
-          editor.overlays.updateConfig({
+        getValue: (canvas: TInteractiveInkCanvas) => canvas.overlays.getConfig().showBlockOverlays,
+        setValue: (canvas: TInteractiveInkCanvas, value: boolean) => {
+          canvas.overlays.updateConfig({
             showBlockOverlays: value,
           })
         },
@@ -48,10 +48,10 @@ export class OverlayMenuAction extends SubMenuItem {
         min: 10,
         max: 40,
         step: 2,
-        initValue: editor.overlays.getConfig().badgeSize,
+        initValue: canvas.overlays.getConfig().badgeSize,
         unit: "px",
-        onChange: (value: number, editor: TInteractiveInkEditor) => {
-          editor.overlays.updateConfig({
+        onChange: (value: number, canvas: TInteractiveInkCanvas) => {
+          canvas.overlays.updateConfig({
             badgeSize: value,
           })
         },
@@ -66,10 +66,10 @@ export class OverlayMenuAction extends SubMenuItem {
         min: 1,
         max: 8,
         step: 1,
-        initValue: editor.overlays.getConfig().borderWidth,
+        initValue: canvas.overlays.getConfig().borderWidth,
         unit: "px",
-        onChange: (value: number, editor: TInteractiveInkEditor) => {
-          editor.overlays.updateConfig({
+        onChange: (value: number, canvas: TInteractiveInkCanvas) => {
+          canvas.overlays.updateConfig({
             borderWidth: value,
           })
         },
@@ -84,10 +84,10 @@ export class OverlayMenuAction extends SubMenuItem {
         min: 5,
         max: 40,
         step: 1,
-        initValue: editor.overlays.getConfig().labelMaxChars,
+        initValue: canvas.overlays.getConfig().labelMaxChars,
         unit: "chars",
-        onChange: (value: number, editor: TInteractiveInkEditor) => {
-          editor.overlays.updateConfig({
+        onChange: (value: number, canvas: TInteractiveInkCanvas) => {
+          canvas.overlays.updateConfig({
             labelMaxChars: value,
           })
         },
@@ -102,10 +102,10 @@ export class OverlayMenuAction extends SubMenuItem {
         min: 8,
         max: 20,
         step: 1,
-        initValue: editor.overlays.getConfig().labelFontSize,
+        initValue: canvas.overlays.getConfig().labelFontSize,
         unit: "px",
-        onChange: (value: number, editor: TInteractiveInkEditor) => {
-          editor.overlays.updateConfig({
+        onChange: (value: number, canvas: TInteractiveInkCanvas) => {
+          canvas.overlays.updateConfig({
             labelFontSize: value,
           })
         },
@@ -122,6 +122,6 @@ export class OverlayMenuAction extends SubMenuItem {
       items,
     }
 
-    super(config, editor)
+    super(config, canvas)
   }
 }

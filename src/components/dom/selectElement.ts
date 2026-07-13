@@ -17,11 +17,11 @@ export type TSelectElConfig = {
 }
 
 const DEFAULT_SELECT_STYLE = `
-  padding: var(--iink-spacing-xs) var(--iink-spacing-sm);
-  border: 1px solid var(--iink-input-border);
-  border-radius: var(--iink-radius-sm);
+  padding: var(--ms-ink-spacing-xs) var(--ms-ink-spacing-sm);
+  border: 1px solid var(--ms-ink-input-border);
+  border-radius: var(--ms-ink-radius-sm);
   font-size: 12px;
-  background: var(--iink-input-bg);
+  background: var(--ms-ink-input-bg);
   cursor: pointer;
 `
 

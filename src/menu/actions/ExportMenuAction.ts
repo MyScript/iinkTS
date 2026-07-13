@@ -1,5 +1,5 @@
 import downloadIcon from "@/assets/svg/download.svg"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { TMenuSubMenu } from "@/menu/items/SubMenuItem"
 import { SubMenuItem } from "@/menu/items/SubMenuItem"
 
@@ -18,7 +18,7 @@ export type TExportActionConfig = boolean | TExportActionItemsConfig
  * @remarks Menu action Export - Export en différents formats
  */
 export class ExportMenuAction extends SubMenuItem {
-  constructor(editor: TInteractiveInkEditor, idPrefix = "ms-menu-action", itemsConfig?: TExportActionItemsConfig) {
+  constructor(editor: TInteractiveInkCanvas, idPrefix = "ms-menu-action", itemsConfig?: TExportActionItemsConfig) {
     const enabled = (key: keyof TExportActionItemsConfig) => itemsConfig?.[key] !== false
 
     const config: TMenuSubMenu = {

@@ -22,13 +22,13 @@ export default [
       ".claude/**",
       "delivery/**",
       "docker/**",
-      "dist/**",
+      "**/dist/**",
       "docs/**",
       "config/**",
       "examples/**/*.html",
       "examples/assets/**",
       "examples/dev-env-loader.generated.js",
-      "examples/offscreen-interactivity/offscreen_interactivity_tldraw/**",
+      "examples/custom-rendering/tldraw-websocket-client/**",
       "*.config.mjs",
       "*.config.js",
     ],
@@ -127,7 +127,7 @@ export default [
     },
   },
 
-  // Layer boundary: renderer must not import from manager or editor
+  // Layer boundary: renderer must not import from manager or canvas
   {
     files: ["src/renderer/**/*.ts"],
     rules: {
@@ -136,7 +136,7 @@ export default [
         {
           patterns: [
             { group: ["*/manager*", "**/manager/**"], message: "renderer layer must not import from manager" },
-            { group: ["*/editor*", "**/editor/**"], message: "renderer layer must not import from editor" },
+            { group: ["@/canvas", "@/canvas/**"], message: "renderer layer must not import from canvas" },
             { group: ["*/menu*", "**/menu/**"], message: "renderer layer must not import from menu" },
           ],
         },
@@ -144,7 +144,7 @@ export default [
     },
   },
 
-  // Layer boundary: symbol must not import from manager, renderer, editor, or menu
+  // Layer boundary: symbol must not import from manager, renderer, canvas, or menu
   {
     files: ["src/symbol/**/*.ts"],
     rules: {
@@ -154,7 +154,7 @@ export default [
           patterns: [
             { group: ["*/manager*", "**/manager/**"], message: "symbol layer must not import from manager" },
             { group: ["*/renderer*", "**/renderer/**"], message: "symbol layer must not import from renderer" },
-            { group: ["*/editor*", "**/editor/**"], message: "symbol layer must not import from editor" },
+            { group: ["@/canvas", "@/canvas/**"], message: "symbol layer must not import from canvas" },
             { group: ["*/menu*", "**/menu/**"], message: "symbol layer must not import from menu" },
           ],
         },
@@ -162,7 +162,7 @@ export default [
     },
   },
 
-  // Layer boundary: model must not import from manager, renderer, editor, or menu
+  // Layer boundary: model must not import from manager, renderer, canvas, or menu
   {
     files: ["src/model/**/*.ts"],
     rules: {
@@ -172,7 +172,7 @@ export default [
           patterns: [
             { group: ["*/manager*", "**/manager/**"], message: "model layer must not import from manager" },
             { group: ["*/renderer*", "**/renderer/**"], message: "model layer must not import from renderer" },
-            { group: ["*/editor*", "**/editor/**"], message: "model layer must not import from editor" },
+            { group: ["@/canvas", "@/canvas/**"], message: "model layer must not import from canvas" },
             { group: ["*/menu*", "**/menu/**"], message: "model layer must not import from menu" },
           ],
         },

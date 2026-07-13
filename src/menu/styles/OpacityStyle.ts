@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { TMenuRange } from "@/menu/items"
 import { CollapsibleWrapper, RangeMenuItem } from "@/menu/items"
 import { BaseMenuItem } from "@/menu/items/BaseMenuItem"
@@ -10,20 +10,20 @@ import { BaseMenuItem } from "@/menu/items/BaseMenuItem"
 export class OpacityStyle extends BaseMenuItem<HTMLDivElement> {
   private opacityItem?: RangeMenuItem
 
-  constructor(editor: TInteractiveInkEditor, idPrefix = "ms-menu-style") {
+  constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-style") {
     const config = {
       type: "opacity" as const,
       id: `${idPrefix}-opacity`,
       label: "Opacity",
     }
-    super(config, editor)
+    super(config, canvas)
   }
 
   createElement(): HTMLDivElement {
-    const symbolsStyles = this.editor.model.symbolsSelected.map((s) => s.style)
+    const symbolsStyles = this.canvas.model.symbolsSelected.map((s) => s.style)
     const hasUniqOpacity = symbolsStyles.length && symbolsStyles.every((st) => st.opacity === symbolsStyles[0]?.opacity)
     const currentOpacity = Math.round(
-      (hasUniqOpacity && symbolsStyles[0]?.opacity ? symbolsStyles[0]?.opacity : this.editor.penStyle.opacity || 1) *
+      (hasUniqOpacity && symbolsStyles[0]?.opacity ? symbolsStyles[0]?.opacity : this.canvas.penStyle.opacity || 1) *
         100
     )
 
@@ -34,18 +34,18 @@ export class OpacityStyle extends BaseMenuItem<HTMLDivElement> {
       max: 100,
       step: 1,
       initValue: currentOpacity,
-      onChange: (value: number, editor) => {
-        editor.penStyle = { opacity: value / 100 }
-        if (editor.model.symbolsSelected.length) {
-          editor.updateSymbolsStyle(
-            editor.model.symbolsSelected.map((s) => s.id),
+      onChange: (value: number, canvas) => {
+        canvas.penStyle = { opacity: value / 100 }
+        if (canvas.model.symbolsSelected.length) {
+          canvas.updateSymbolsStyle(
+            canvas.model.symbolsSelected.map((s) => s.id),
             { opacity: value / 100 }
           )
         }
       },
     }
 
-    this.opacityItem = new RangeMenuItem(opacityConfig, this.editor)
+    this.opacityItem = new RangeMenuItem(opacityConfig, this.canvas)
     const opacityElement = this.opacityItem.getElement()
     const wrapper = new CollapsibleWrapper(opacityElement, "Opacity", this.config.id)
     return wrapper.getElement()

@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { TSymbol } from "@/symbol"
 import { isRecognizedText, SymbolType } from "@/symbol"
 
@@ -8,7 +8,7 @@ import { isRecognizedText, SymbolType } from "@/symbol"
  * @group Manager
  */
 export class GestureHelpers {
-  constructor(protected editor: TInteractiveInkEditor) {}
+  constructor(protected canvas: TInteractiveInkCanvas) {}
 
   /**
    * Check if a symbol can have decorators applied to it

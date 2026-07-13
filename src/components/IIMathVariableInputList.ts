@@ -16,11 +16,11 @@ export type TVariableInputItem = {
 }
 
 export const SOURCE_TYPE_COLORS: Record<string, string> = {
-  UNDEFINED: "var(--iink-secondary)",
-  API: "var(--iink-info)",
-  API_GLOBAL: "var(--iink-primary)",
-  BLOCK: "var(--iink-success)",
-  PREDEFINED: "var(--iink-warning)",
+  UNDEFINED: "var(--ms-ink-secondary)",
+  API: "var(--ms-ink-info)",
+  API_GLOBAL: "var(--ms-ink-primary)",
+  BLOCK: "var(--ms-ink-success)",
+  PREDEFINED: "var(--ms-ink-warning)",
 }
 
 export const SOURCE_TYPE_LABELS: Record<string, string> = {
@@ -59,7 +59,7 @@ export class IIMathVariableInputList {
 
     const row = DOMFactory.div({
       className: "ms-var-row",
-      style: `display: grid; grid-template-columns: ${colDefs}; gap: var(--iink-spacing-sm);`,
+      style: `display: grid; grid-template-columns: ${colDefs}; gap: var(--ms-ink-spacing-sm);`,
     })
 
     const nameLabel = DOMFactory.div({
@@ -85,7 +85,7 @@ export class IIMathVariableInputList {
       const typeLabel = DOMFactory.span({
         text: SOURCE_TYPE_LABELS[item.sourceType] ?? item.sourceType,
         className: "ms-type-label",
-        style: `color: ${SOURCE_TYPE_COLORS[item.sourceType] ?? "var(--iink-text-muted)"};`,
+        style: `color: ${SOURCE_TYPE_COLORS[item.sourceType] ?? "var(--ms-ink-text-muted)"};`,
       })
       typeCell.appendChild(typeLabel)
     }

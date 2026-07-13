@@ -1,4 +1,4 @@
-import { createEditorMock, asEditor } from "../../../__mocks__/createEditorMock"
+import { createCanvasMock, asEditor } from "../../../__mocks__/createCanvasMock"
 import { buildIIStroke } from "../../../helpers"
 import {
   EdgeArcOps,
@@ -20,13 +20,13 @@ import {
 
 describe("IIResizeManager.ts", () => {
   test("should create", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IIResizeManager(asEditor(editor))
     expect(manager).toBeDefined()
   })
 
   describe("applyToSymbol", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IIResizeManager(asEditor(editor))
     test("should not resize symbol with type unknown", () => {
       const stroke = buildIIStroke()
@@ -209,9 +209,9 @@ describe("IIResizeManager.ts", () => {
   })
 
   describe("resize process on stroke without snap", () => {
-    const editor = createEditorMock()
-    editor.recognizer.init = jest.fn(() => Promise.resolve())
-    editor.recognizer.transformScale = jest.fn(() => Promise.resolve())
+    const editor = createCanvasMock()
+    editor.client.init = jest.fn(() => Promise.resolve())
+    editor.client.transformScale = jest.fn(() => Promise.resolve())
     editor.renderer.setAttribute = jest.fn()
     editor.renderer.drawSymbol = jest.fn()
     editor.snaps.snapConfiguration.guide = false
@@ -375,8 +375,8 @@ describe("IIResizeManager.ts", () => {
         expect(manager.applyToSymbol).toHaveBeenCalledTimes(1)
         expect(editor.renderer.drawSymbol).toHaveBeenCalledTimes(1)
         expect(editor.renderer.drawSymbol).toHaveBeenCalledWith(stroke)
-        expect(editor.recognizer.transformScale).toHaveBeenCalledTimes(1)
-        expect(editor.recognizer.transformScale).toHaveBeenCalledWith(
+        expect(editor.client.transformScale).toHaveBeenCalledTimes(1)
+        expect(editor.client.transformScale).toHaveBeenCalledWith(
           [stroke.id],
           data.scale.x,
           data.scale.y,
@@ -406,7 +406,7 @@ describe("IIResizeManager.ts", () => {
     }
 
     test("continue() live-scales the block's ghost stroke element", () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       editor.math.getGhostStrokeIds = jest.fn().mockReturnValue(["ghost-1"])
       editor.renderer.setAttribute = jest.fn()
       const manager = new IIResizeManager(asEditor(editor))
@@ -422,8 +422,8 @@ describe("IIResizeManager.ts", () => {
     })
 
     test("end() permanently applies the matrix to the block's ghost strokes", async () => {
-      const editor = createEditorMock()
-      editor.recognizer.transformScale = jest.fn(() => Promise.resolve())
+      const editor = createCanvasMock()
+      editor.client.transformScale = jest.fn(() => Promise.resolve())
       editor.math.applyTransformToGhostStrokes = jest.fn()
       const manager = new IIResizeManager(asEditor(editor))
       const stroke = buildMathStroke("block-1")

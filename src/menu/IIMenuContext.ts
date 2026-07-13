@@ -1,5 +1,5 @@
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { DOMFactory } from "@/components/dom"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
 import { LoggerCategory, LoggerManager } from "@/logger"
 import type { TJIIXMathElement } from "@/model"
 import type { TStroke, TSymbol, TText } from "@/symbol"
@@ -74,7 +74,7 @@ function extractSubConfig<T>(config: boolean | T): T | undefined {
  */
 export class IIMenuContext {
   #logger = LoggerManager.getLogger(LoggerCategory.MENU)
-  editor: TInteractiveInkEditor
+  canvas: TInteractiveInkCanvas
   id: string
   wrapper?: HTMLElement
   config: Required<TMenuContextConfig>
@@ -100,10 +100,10 @@ export class IIMenuContext {
     y: number
   }
 
-  constructor(editor: TInteractiveInkEditor, id = "ms-menu-context", config?: TMenuContextConfig) {
+  constructor(canvas: TInteractiveInkCanvas, id = "ms-menu-context", config?: TMenuContextConfig) {
     this.id = id
     this.#logger.info("constructor")
-    this.editor = editor
+    this.canvas = canvas
     this.config = {
       ...DefaultMenuContextConfig,
       ...config,
@@ -112,7 +112,7 @@ export class IIMenuContext {
   }
 
   get symbolsSelected(): TSymbol[] {
-    return this.editor.model.symbolsSelected
+    return this.canvas.model.symbolsSelected
   }
 
   get haveSymbolsSelected(): boolean {
@@ -130,7 +130,7 @@ export class IIMenuContext {
   }
 
   get mathBlocksSelected(): TJIIXMathElement[] {
-    return this.editor.jiix.getBlocksForSymbols(this.editor.model.symbolsSelected).filter((s) => s.type === "Math")
+    return this.canvas.jiix.getBlocksForSymbols(this.canvas.model.symbolsSelected).filter((s) => s.type === "Math")
   }
 
   protected async updateMathMenu(): Promise<void> {
@@ -147,15 +147,15 @@ export class IIMenuContext {
           return
         }
         const [actions, variables, evaluables] = await Promise.all([
-          this.editor.math.getAvailableActions(mathBlock.id),
-          this.editor.math.getVariables(mathBlock.id),
-          this.editor.math.getEvaluables(mathBlock.id),
+          this.canvas.math.getAvailableActions(mathBlock.id),
+          this.canvas.math.getVariables(mathBlock.id),
+          this.canvas.math.getEvaluables(mathBlock.id),
         ])
 
         const canEditVariables = Object.keys(variables).length > 0
         const canCompute = actions?.includes("numerical-computation")
         const canEvaluate = evaluables?.length ? true : false
-        const hasDrawSolverOutputs = this.editor.math.hasDrawSolverOutputs(mathBlock.id)
+        const hasDrawSolverOutputs = this.canvas.math.hasDrawSolverOutputs(mathBlock.id)
         mathMenuInstance.setMenuVisibility(true, {
           canEditVariables,
           canCompute,
@@ -180,7 +180,7 @@ export class IIMenuContext {
     // Adjust position if menu overflows rendering layer boundaries
     if (this.wrapper) {
       const menuRect = this.wrapper.getBoundingClientRect()
-      const renderingRect = this.editor.layers.rendering.getBoundingClientRect()
+      const renderingRect = this.canvas.layers.rendering.getBoundingClientRect()
       const parent = this.wrapper.parentElement
       if (!parent) {
         return
@@ -230,8 +230,8 @@ export class IIMenuContext {
       // Update edit menu
       const editMenuInstance = this.contextMenus.get("edit") as EditContextMenu | undefined
       if (editMenuInstance) {
-        const textSymbol = this.editor.model.symbolsSelected.find((s) => isText(s))
-        if (editMenuInstance.editInput && this.editor.model.symbolsSelected.length === 1 && textSymbol) {
+        const textSymbol = this.canvas.model.symbolsSelected.find((s) => isText(s))
+        if (editMenuInstance.editInput && this.canvas.model.symbolsSelected.length === 1 && textSymbol) {
           editMenuInstance.editInput.value = TextOps.getLabel(textSymbol as TText)
           editMenuInstance.getElement().style.removeProperty("display")
         } else {
@@ -240,7 +240,7 @@ export class IIMenuContext {
       }
 
       // Show convert button only if there are strokes AND not only math selected
-      if (this.editor.extractStrokesFromSymbols(this.symbolsSelected).length) {
+      if (this.canvas.extractStrokesFromSymbols(this.symbolsSelected).length) {
         this.contextMenus.get("convert")?.getElement().style.removeProperty("display")
       } else {
         this.contextMenus.get("convert")?.getElement().style.setProperty("display", "none")
@@ -275,14 +275,14 @@ export class IIMenuContext {
     })
 
     if (this.config.edit) {
-      const editMenuInstance = new EditContextMenu(this.editor, this.id)
+      const editMenuInstance = new EditContextMenu(this.canvas, this.id)
       this.contextMenus.set("edit", editMenuInstance)
       this.wrapper.appendChild(editMenuInstance.getElement())
     }
 
     if (this.config.decorator) {
       const decoratorMenuInstance = new DecoratorContextMenu(
-        this.editor,
+        this.canvas,
         this.id,
         extractSubConfig(this.config.decorator)
       )
@@ -291,43 +291,43 @@ export class IIMenuContext {
     }
 
     if (this.config.reorder) {
-      const reorderMenuInstance = new ReorderContextMenu(this.editor, this.id, extractSubConfig(this.config.reorder))
+      const reorderMenuInstance = new ReorderContextMenu(this.canvas, this.id, extractSubConfig(this.config.reorder))
       this.contextMenus.set("reorder", reorderMenuInstance)
       this.wrapper.appendChild(reorderMenuInstance.getElement())
     }
 
     if (this.config.export) {
-      const exportMenuInstance = new ExportContextMenu(this.editor, this.id, extractSubConfig(this.config.export))
+      const exportMenuInstance = new ExportContextMenu(this.canvas, this.id, extractSubConfig(this.config.export))
       this.contextMenus.set("export", exportMenuInstance)
       this.wrapper.appendChild(exportMenuInstance.getElement())
     }
 
     if (this.config.convert) {
-      const convertMenuInstance = new ConvertContextMenu(this.editor, this.id)
+      const convertMenuInstance = new ConvertContextMenu(this.canvas, this.id)
       this.contextMenus.set("convert", convertMenuInstance)
       this.wrapper.appendChild(convertMenuInstance.getElement())
     }
 
     if (this.config.math) {
-      const mathMenuInstance = new MathContextMenu(this.editor, this.id, extractSubConfig(this.config.math))
+      const mathMenuInstance = new MathContextMenu(this.canvas, this.id, extractSubConfig(this.config.math))
       this.contextMenus.set("math", mathMenuInstance)
       this.wrapper.appendChild(mathMenuInstance.getElement())
     }
 
     if (this.config.duplicate) {
-      const duplicateMenuInstance = new DuplicateContextMenu(this.editor, this.id)
+      const duplicateMenuInstance = new DuplicateContextMenu(this.canvas, this.id)
       this.contextMenus.set("duplicate", duplicateMenuInstance)
       this.wrapper.appendChild(duplicateMenuInstance.getElement())
     }
 
     if (this.config.remove) {
-      const removeMenuInstance = new RemoveContextMenu(this.editor, this.id)
+      const removeMenuInstance = new RemoveContextMenu(this.canvas, this.id)
       this.contextMenus.set("remove", removeMenuInstance)
       this.wrapper.appendChild(removeMenuInstance.getElement())
     }
 
     if (this.config.selectAll) {
-      const selectAllMenuInstance = new SelectAllContextMenu(this.editor, this.id)
+      const selectAllMenuInstance = new SelectAllContextMenu(this.canvas, this.id)
       this.contextMenus.set("selectAll", selectAllMenuInstance)
       this.wrapper.appendChild(selectAllMenuInstance.getElement())
     }
@@ -337,7 +337,7 @@ export class IIMenuContext {
 
     // Hide context menu when scrolling as the referenced element moves
     this.#scrollHandler = () => this.hide()
-    this.editor.layers.rendering.addEventListener("scroll", this.#scrollHandler)
+    this.canvas.layers.rendering.addEventListener("scroll", this.#scrollHandler)
   }
 
   show(): void {
@@ -351,7 +351,7 @@ export class IIMenuContext {
 
   destroy(): void {
     if (this.#scrollHandler) {
-      this.editor.layers.rendering.removeEventListener("scroll", this.#scrollHandler)
+      this.canvas.layers.rendering.removeEventListener("scroll", this.#scrollHandler)
       this.#scrollHandler = undefined
     }
     while (this.wrapper?.lastChild) {

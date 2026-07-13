@@ -1,6 +1,6 @@
-import { createEditorMock, asEditor } from "../__mocks__/createEditorMock"
+import { createCanvasMock, asEditor } from "../__mocks__/createCanvasMock"
 import { ChangeEventMock, LeftClickEventMock } from "../__mocks__/EventMock"
-import { EditorTool, IIMenuAction, StrikeThroughAction, SurroundAction } from "@/iink"
+import { CanvasTool, IIMenuAction, StrikeThroughAction, SurroundAction } from "@/iink"
 
 describe("IIMenuAction.ts", () => {
   global.fetch = jest.fn(() =>
@@ -11,13 +11,13 @@ describe("IIMenuAction.ts", () => {
   Object.defineProperty(HTMLElement.prototype, "clientWidth", { configurable: true, value: 500 })
 
   test("should create", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const menu = new IIMenuAction(asEditor(editor))
     expect(menu).toBeDefined()
   })
 
   describe("render", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const menu = new IIMenuAction(asEditor(editor))
     menu.render(editor.layers.ui.root)
     test("should render menu action", () => {
@@ -50,7 +50,7 @@ describe("IIMenuAction.ts", () => {
   })
 
   describe("show/hide", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const menu = new IIMenuAction(asEditor(editor))
     menu.render(editor.layers.ui.root)
     test("should hide", () => {
@@ -66,7 +66,7 @@ describe("IIMenuAction.ts", () => {
   })
 
   describe("Main menu", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const menu = new IIMenuAction(asEditor(editor))
     menu.render(editor.layers.ui.root)
     test("should call editor.clear on pointerup", () => {
@@ -82,7 +82,7 @@ describe("IIMenuAction.ts", () => {
     })
     test("should call editor.changeLanguage on change", () => {
       expect(editor.changeLanguage).not.toHaveBeenCalled()
-      editor.tool = EditorTool.Select
+      editor.tool = CanvasTool.Select
       const changeEvt = new ChangeEventMock({
         target: { value: "fr_FR" } as unknown as HTMLInputElement,
       })
@@ -125,7 +125,7 @@ describe("IIMenuAction.ts", () => {
   })
 
   describe("Sub menu", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const menu = new IIMenuAction(asEditor(editor))
     menu.render(editor.layers.ui.root)
     test("submenu should be hidden", () => {
@@ -158,18 +158,18 @@ describe("IIMenuAction.ts", () => {
     })
     test("should define editor to write on change gesture detected", () => {
       editor.writer.detectGesture = true
-      editor.tool = EditorTool.Select
+      editor.tool = CanvasTool.Select
       const changeEvt = new ChangeEventMock({
         target: { checked: false } as unknown as HTMLInputElement,
       })
       const input = editor.layers.ui.root.querySelector("#ms-menu-action-gesture-detect-input") as HTMLInputElement
       input.checked = false
       input.dispatchEvent(changeEvt)
-      expect(editor.tool).toEqual(EditorTool.Write)
+      expect(editor.tool).toEqual(CanvasTool.Write)
       expect(editor.writer.detectGesture).toEqual(false)
     })
     test("should define editor to write on change gesture surround", () => {
-      editor.tool = EditorTool.Select
+      editor.tool = CanvasTool.Select
       editor.gesture.surroundAction = SurroundAction.Select
       const changeEvt = new ChangeEventMock({
         target: { value: SurroundAction.Surround } as unknown as HTMLInputElement,
@@ -177,11 +177,11 @@ describe("IIMenuAction.ts", () => {
       const input = editor.layers.ui.root.querySelector("#ms-menu-action-gesture-surround-input") as HTMLInputElement
       input.value = SurroundAction.Surround
       input.dispatchEvent(changeEvt)
-      expect(editor.tool).toEqual(EditorTool.Write)
+      expect(editor.tool).toEqual(CanvasTool.Write)
       expect(editor.gesture.surroundAction).toEqual(SurroundAction.Surround)
     })
     test("should define editor to write on change gesture strikethrough", () => {
-      editor.tool = EditorTool.Select
+      editor.tool = CanvasTool.Select
       editor.gesture.strikeThroughAction = StrikeThroughAction.Draw
       const changeEvt = new ChangeEventMock({
         target: { value: StrikeThroughAction.Erase } as unknown as HTMLInputElement,
@@ -191,7 +191,7 @@ describe("IIMenuAction.ts", () => {
       ) as HTMLInputElement
       input.value = StrikeThroughAction.Erase
       input.dispatchEvent(changeEvt)
-      expect(editor.tool).toEqual(EditorTool.Write)
+      expect(editor.tool).toEqual(CanvasTool.Write)
       expect(editor.gesture.strikeThroughAction).toEqual(StrikeThroughAction.Erase)
     })
     test("should open guide sub menu", () => {
@@ -244,7 +244,7 @@ describe("IIMenuAction.ts", () => {
   })
 
   describe("destroy", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const menu = new IIMenuAction(asEditor(editor))
     menu.render(editor.layers.ui.root)
     test("should remove elements", () => {

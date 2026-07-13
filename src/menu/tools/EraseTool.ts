@@ -1,6 +1,6 @@
 import eraseIcon from "@/assets/svg/erase.svg"
-import { EditorTool } from "@/Constants"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import { CanvasTool } from "@/Constants"
 import type { TMenuItemBase } from "@/menu/items/BaseMenuItem"
 import { BaseMenuItem } from "@/menu/items/BaseMenuItem"
 import { DEFAULT_ERASER_SIZE_LIST } from "@/menu/MenuConstants"
@@ -21,13 +21,13 @@ export class EraseTool extends BaseMenuItem<HTMLDivElement> {
   private sizeButtons: Map<number, HTMLButtonElement> = new Map()
   private triggerButton?: HTMLButtonElement
 
-  constructor(editor: TInteractiveInkEditor, idPrefix = "ms-menu-tool") {
+  constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-tool") {
     const config: TEraseToolConfig = {
       type: "erase",
       id: `${idPrefix}-erase`,
       label: "Erase",
     }
-    super(config, editor)
+    super(config, canvas)
   }
 
   private createEraserSizeIcon(value: number): string {
@@ -51,8 +51,8 @@ export class EraseTool extends BaseMenuItem<HTMLDivElement> {
 
     button.addEventListener("click", () => {
       this.unselectAll()
-      this.editor.eraser.eraserWidth = value
-      this.editor.tool = EditorTool.Erase
+      this.canvas.eraser.eraserWidth = value
+      this.canvas.tool = CanvasTool.Erase
       this.triggerButton?.classList.add("active")
       this.element?.querySelector(".sub-menu-content")?.classList.remove("open")
     })
@@ -89,7 +89,7 @@ export class EraseTool extends BaseMenuItem<HTMLDivElement> {
 
     this.triggerButton.addEventListener("click", () => {
       this.unselectAll()
-      this.editor.tool = EditorTool.Erase
+      this.canvas.tool = CanvasTool.Erase
       this.triggerButton?.classList.add("active")
     })
     this.triggerButton.addEventListener("pointerdown", () => {
@@ -119,10 +119,10 @@ export class EraseTool extends BaseMenuItem<HTMLDivElement> {
       return
     }
 
-    const isActive = this.editor.tool === EditorTool.Erase
+    const isActive = this.canvas.tool === CanvasTool.Erase
     this.triggerButton.classList.toggle("active", isActive)
 
-    const currentSize = this.editor.eraser.eraserWidth
+    const currentSize = this.canvas.eraser.eraserWidth
     this.sizeButtons.forEach((btn, value) => {
       btn.classList.toggle("active", isActive && value === currentSize)
     })

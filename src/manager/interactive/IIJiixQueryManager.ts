@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { LoggerCategory } from "@/logger"
 import type {
   TJIIXEdgeElement,
@@ -105,7 +105,7 @@ export class IIJiixQueryManager extends IIAbstractManager {
   /** Text metadata per stroke ID (pixel-converted, set during sync) */
   #textMetadata = new Map<string, TBlockTextMetadata>()
 
-  constructor(editor: TInteractiveInkEditor) {
+  constructor(editor: TInteractiveInkCanvas) {
     super(editor, LoggerCategory.JIIX_QUERY)
     this.logger.info("constructor", this.managerName)
   }

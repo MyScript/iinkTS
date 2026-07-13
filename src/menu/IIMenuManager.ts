@@ -1,5 +1,5 @@
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { DOMFactory } from "@/components/dom"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
 import { LoggerCategory, LoggerManager } from "@/logger"
 import { mergeDeep } from "@/utils"
 
@@ -34,7 +34,7 @@ export type TMenuConfigUpdate = {
  */
 export class IIMenuManager {
   #logger = LoggerManager.getLogger(LoggerCategory.MENU)
-  editor: TInteractiveInkEditor
+  canvas: TInteractiveInkCanvas
   layer?: HTMLElement
   action: IIMenuAction
   tool: IIMenuTool
@@ -42,7 +42,7 @@ export class IIMenuManager {
   style: IIMenuStyle
 
   constructor(
-    editor: TInteractiveInkEditor,
+    canvas: TInteractiveInkCanvas,
     custom?: {
       style?: IIMenuStyle
       tool?: IIMenuTool
@@ -51,51 +51,51 @@ export class IIMenuManager {
     }
   ) {
     this.#logger.info("constructor")
-    this.editor = editor
+    this.canvas = canvas
 
     if (custom?.style) {
       const CustomMenuStyle = custom.style as unknown as typeof IIMenuStyle
-      this.style = new CustomMenuStyle(this.editor)
+      this.style = new CustomMenuStyle(this.canvas)
     } else {
-      this.style = new IIMenuStyle(this.editor, "ms-menu-style", this.editor.configuration.menu.style)
+      this.style = new IIMenuStyle(this.canvas, "ms-menu-style", this.canvas.configuration.menu.style)
     }
     if (custom?.tool) {
       const CustomMenuTool = custom.tool as unknown as typeof IIMenuTool
-      this.tool = new CustomMenuTool(this.editor)
+      this.tool = new CustomMenuTool(this.canvas)
     } else {
-      this.tool = new IIMenuTool(this.editor, "ms-menu-tool", this.editor.configuration.menu.tool)
+      this.tool = new IIMenuTool(this.canvas, "ms-menu-tool", this.canvas.configuration.menu.tool)
     }
     if (custom?.action) {
       const CustomMenuAction = custom.action as unknown as typeof IIMenuAction
-      this.action = new CustomMenuAction(this.editor)
+      this.action = new CustomMenuAction(this.canvas)
     } else {
-      this.action = new IIMenuAction(this.editor, "ms-menu-action", this.editor.configuration.menu.action)
+      this.action = new IIMenuAction(this.canvas, "ms-menu-action", this.canvas.configuration.menu.action)
     }
     if (custom?.context) {
       const CustomMenuAction = custom.context as unknown as typeof IIMenuContext
-      this.context = new CustomMenuAction(this.editor)
+      this.context = new CustomMenuAction(this.canvas)
     } else {
-      this.context = new IIMenuContext(this.editor, "ms-menu-context", this.editor.configuration.menu.context)
+      this.context = new IIMenuContext(this.canvas, "ms-menu-context", this.canvas.configuration.menu.context)
     }
   }
 
   render(layer: HTMLElement): void {
-    if (this.editor.configuration.menu.enable) {
+    if (this.canvas.configuration.menu.enable) {
       this.layer = layer
 
       const styleElement = DOMFactory.style(style as string, { "ms-menu-style": "" })
       this.layer.prepend(styleElement)
 
-      if (this.editor.configuration.menu.action.enable) {
+      if (this.canvas.configuration.menu.action.enable) {
         this.action.render(this.layer)
       }
-      if (this.editor.configuration.menu.style.enable) {
+      if (this.canvas.configuration.menu.style.enable) {
         this.style.render(this.layer)
       }
-      if (this.editor.configuration.menu.tool.enable) {
+      if (this.canvas.configuration.menu.tool.enable) {
         this.tool.render(this.layer)
       }
-      if (this.editor.configuration.menu.context.enable) {
+      if (this.canvas.configuration.menu.context.enable) {
         this.context.render(this.layer)
       }
     }
@@ -106,12 +106,12 @@ export class IIMenuManager {
    * Merges deeply into the current config — omitted keys keep their current value.
    * @example
    * // Hide only PNG and text export
-   * editor.menu.setConfig({ action: { export: { png: false, text: false } } })
+   * canvas.menu.setConfig({ action: { export: { png: false, text: false } } })
    * // Disable the entire action menu
-   * editor.menu.setConfig({ action: { enable: false } })
+   * canvas.menu.setConfig({ action: { enable: false } })
    */
   setConfig(config: TMenuConfigUpdate): void {
-    mergeDeep(this.editor.configuration.menu, config)
+    mergeDeep(this.canvas.configuration.menu, config)
 
     if (!this.layer) {
       return
@@ -127,22 +127,22 @@ export class IIMenuManager {
     this.style.destroy()
     this.context.destroy()
 
-    this.action = new IIMenuAction(this.editor, "ms-menu-action", this.editor.configuration.menu.action)
-    this.tool = new IIMenuTool(this.editor, "ms-menu-tool", this.editor.configuration.menu.tool)
-    this.style = new IIMenuStyle(this.editor, "ms-menu-style", this.editor.configuration.menu.style)
-    this.context = new IIMenuContext(this.editor, "ms-menu-context", this.editor.configuration.menu.context)
+    this.action = new IIMenuAction(this.canvas, "ms-menu-action", this.canvas.configuration.menu.action)
+    this.tool = new IIMenuTool(this.canvas, "ms-menu-tool", this.canvas.configuration.menu.tool)
+    this.style = new IIMenuStyle(this.canvas, "ms-menu-style", this.canvas.configuration.menu.style)
+    this.context = new IIMenuContext(this.canvas, "ms-menu-context", this.canvas.configuration.menu.context)
 
-    if (this.editor.configuration.menu.enable) {
-      if (this.editor.configuration.menu.action.enable) {
+    if (this.canvas.configuration.menu.enable) {
+      if (this.canvas.configuration.menu.action.enable) {
         this.action.render(this.layer)
       }
-      if (this.editor.configuration.menu.style.enable) {
+      if (this.canvas.configuration.menu.style.enable) {
         this.style.render(this.layer)
       }
-      if (this.editor.configuration.menu.tool.enable) {
+      if (this.canvas.configuration.menu.tool.enable) {
         this.tool.render(this.layer)
       }
-      if (this.editor.configuration.menu.context.enable) {
+      if (this.canvas.configuration.menu.context.enable) {
         this.context.render(this.layer)
         this.context.position = contextPosition
         if (contextVisible) {

@@ -1,7 +1,7 @@
 import { LeftClickEventMock } from "../__mocks__/EventMock"
-import { type InteractiveInkEditor, Minimap } from "@/iink"
+import { type InteractiveInkCanvas, Minimap } from "@/iink"
 
-function buildMockEditor(overrides: Partial<any> = {}): InteractiveInkEditor {
+function buildMockEditor(overrides: Partial<any> = {}): InteractiveInkCanvas {
   const mockMainLayer = document.createElementNS("http://www.w3.org/2000/svg", "svg")
 
   return {
@@ -15,7 +15,7 @@ function buildMockEditor(overrides: Partial<any> = {}): InteractiveInkEditor {
     },
     getSymbolsBounds: jest.fn(() => ({ x: 10, y: 20, width: 200, height: 100 })),
     ...overrides,
-  } as unknown as InteractiveInkEditor
+  } as unknown as InteractiveInkCanvas
 }
 
 describe("Minimap", () => {

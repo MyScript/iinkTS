@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Interactive Ink Canvas - Keyboard Shortcuts</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+
+    <style>
+      .shortcut-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 5px 0;
+        font-size: 12px;
+        border-bottom: 1px solid var(--ex-border);
+      }
+
+      .shortcut-row:last-of-type { border-bottom: none; }
+
+      .shortcut-label {
+        color: var(--ex-text);
+        flex: 1;
+      }
+
+      .shortcut-keys {
+        display: flex;
+        gap: 3px;
+        align-items: center;
+        flex-shrink: 0;
+      }
+
+      .shortcut-separator {
+        font-size: 10px;
+        color: var(--ex-text-muted, #999);
+        margin: 0 1px;
+      }
+    </style>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="sidebar">
+        ⌨️ Guide
+      </button>
+      <button id="showModalBtn" class="btn-keys">API Keys</button>
+      <h1 class="header-title">Interactive Ink Canvas — Keyboard Shortcuts</h1>
+    </header>
+
+    <div class="ex-page-layout">
+
+      <aside id="sidebar" class="ex-panel">
+        <p class="ex-panel-heading">Keyboard Shortcuts</p>
+        <p class="ex-panel-intro">Standard shortcuts for undo/redo, copy/cut/paste, delete, zoom, and pan. On Mac, use <kbd>⌘</kbd> instead of <kbd>Ctrl</kbd>.</p>
+
+        <div class="ex-panel-divider"></div>
+
+        <p class="ex-panel-subtitle">Shortcuts</p>
+
+        <div class="ex-panel-item" style="padding: 4px 8px;">
+          <div class="shortcut-row">
+            <span class="shortcut-label">Undo</span>
+            <span class="shortcut-keys"><kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>Z</kbd></span>
+          </div>
+          <div class="shortcut-row">
+            <span class="shortcut-label">Redo</span>
+            <span class="shortcut-keys"><kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>Y</kbd><span class="shortcut-separator">or</span><kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>⇧Z</kbd></span>
+          </div>
+          <div class="shortcut-row">
+            <span class="shortcut-label">Copy</span>
+            <span class="shortcut-keys"><kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>C</kbd></span>
+          </div>
+          <div class="shortcut-row">
+            <span class="shortcut-label">Cut</span>
+            <span class="shortcut-keys"><kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>X</kbd></span>
+          </div>
+          <div class="shortcut-row">
+            <span class="shortcut-label">Paste</span>
+            <span class="shortcut-keys"><kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>V</kbd></span>
+          </div>
+          <div class="shortcut-row">
+            <span class="shortcut-label">Delete selected</span>
+            <span class="shortcut-keys"><kbd>Del</kbd><span class="shortcut-separator">or</span><kbd>⌫</kbd></span>
+          </div>
+          <div class="shortcut-row">
+            <span class="shortcut-label">Zoom in</span>
+            <span class="shortcut-keys"><kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>+</kbd></span>
+          </div>
+          <div class="shortcut-row">
+            <span class="shortcut-label">Zoom out</span>
+            <span class="shortcut-keys"><kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>-</kbd></span>
+          </div>
+          <div class="shortcut-row">
+            <span class="shortcut-label">Fit to content</span>
+            <span class="shortcut-keys"><kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>0</kbd></span>
+          </div>
+          <div class="shortcut-row">
+            <span class="shortcut-label">Pan</span>
+            <span class="shortcut-keys"><kbd>Ctrl</kbd><span class="shortcut-separator">+</span><kbd>↑↓←→</kbd></span>
+          </div>
+          <div class="shortcut-row">
+            <span class="shortcut-label">Pan (drag)</span>
+            <span class="shortcut-keys"><kbd>Ctrl</kbd><span class="shortcut-separator">+</span>drag</span>
+          </div>
+        </div>
+
+      </aside>
+
+      <div id="rootEl"></div>
+
+    </div>
+
+    <script type="module">
+      import { Canvas } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
+
+      const rootElement = document.getElementById('rootEl')
+      const showModalBtn = document.getElementById('showModalBtn')
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const sidebar = document.getElementById('sidebar')
+
+      panelToggleBtn.addEventListener('click', () => {
+        const open = sidebar.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      let canvas
+      const editorOptions = {}
+
+      async function loadEditor(options) {
+        canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK', options)
+        return canvas
+      }
+
+      showModalBtn.addEventListener('click', () => {
+        ModalCanvasOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>

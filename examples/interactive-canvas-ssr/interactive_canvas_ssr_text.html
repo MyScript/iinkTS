@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+    <title>Interactive Canvas SSR Text</title>
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">Interactive Canvas SSR Text</h1>
+    </header>
+
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">✍️ Handwritten text recognition</p>
+        <p class="ex-panel-intro">Write naturally on the canvas — recognition is continuous and updates in real time as you write.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">The recognized text is exported via <code>application/vnd.myscript.jiix</code> and the plain-text label is displayed above.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Use the <strong>language selector</strong> to switch recognition language on the fly — the canvas reloads automatically.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Use <strong>Undo / Redo</strong> to step through stroke history, and <strong>Clear</strong> to reset the canvas.</div>
+        </div>
+      </aside>
+
+      <div class="page-content">
+        <div id="result"></div>
+
+        <nav class="flex-container between wrap gap">
+          <div class="flex-container wrap gap">
+            <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+              <img src="../assets/img/clear.svg" />
+            </button>
+            <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+              <img src="../assets/img/undo.svg" />
+            </button>
+            <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+              <img src="../assets/img/redo.svg" />
+            </button>
+          </div>
+          <select id="language"></select>
+        </nav>
+
+        <div id="rootEl"></div>
+      </div>
+    </div>
+
+    <script type="module">
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      import { Canvas, getAvailableLanguageList } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
+      const rootElement = document.getElementById('rootEl')
+      const resultElement = document.getElementById('result')
+      const languageElement = document.getElementById('language')
+      const clearElement = document.getElementById('clear')
+      const undoElement = document.getElementById('undo')
+      const redoElement = document.getElementById('redo')
+      const showModalBtn = document.getElementById('showModalBtn')
+
+      let canvas
+
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            lang: 'en_US',
+            type: 'TEXT'
+          }
+        }
+      }
+
+      languageElement.addEventListener('change', (e) => {
+        editorOptions.configuration.recognition.lang = e.target.value
+        loadEditor(editorOptions)
+      })
+
+      async function loadEditor(options) {
+        resultElement.innerHTML = ''
+        await canvas?.destroy()
+
+        canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK_SSR', options)
+
+        canvas.event.addEventListener('changed', (event) => {
+          undoElement.disabled = !event.detail.canUndo
+          redoElement.disabled = !event.detail.canRedo
+          clearElement.disabled = !event.detail.canClear
+        })
+
+        canvas.event.addEventListener('exported', (event) => {
+          resultElement.innerHTML =
+            event.detail && event.detail['application/vnd.myscript.jiix']
+              ? event.detail['application/vnd.myscript.jiix'].label
+              : ''
+        })
+
+        if (!languageElement.options.length) {
+          const currentLanguage = options.configuration.recognition.lang
+          const languageList = await getAvailableLanguageList({
+            server: options.configuration.server
+          })
+          Object.keys(languageList.result).forEach(function (key) {
+            const selected = currentLanguage === key
+            languageElement.options[languageElement.options.length] = new Option(languageList.result[key], key, selected, selected)
+          })
+        }
+      }
+
+      clearElement.addEventListener('click', async () => {
+        canvas?.clear()
+      })
+
+      undoElement.addEventListener('click', () => {
+        canvas?.undo()
+      })
+
+      redoElement.addEventListener('click', () => {
+        canvas?.redo()
+      })
+      showModalBtn.addEventListener('click', () => {
+        ModalCanvasOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>

@@ -1,11 +1,11 @@
-import { createEditorMock, asEditor } from "../__mocks__/createEditorMock"
+import { createCanvasMock, asEditor } from "../__mocks__/createCanvasMock"
 import { type IIJiixQueryManager, IIMathCapabilitiesTable } from "@/iink"
 
 describe("IIMathCapabilitiesTable.ts", () => {
-  let editor: ReturnType<typeof createEditorMock>
+  let editor: ReturnType<typeof createCanvasMock>
 
   beforeEach(() => {
-    editor = createEditorMock({
+    editor = createCanvasMock({
       jiix: {
         getBlockLabel: jest.fn().mockImplementation((id: string) => {
           if (id === "block-1") return "f(x) = x + 1"

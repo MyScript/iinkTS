@@ -1,12 +1,12 @@
-import { createEditorMock, asEditor } from "../__mocks__/createEditorMock"
+import { createCanvasMock, asEditor } from "../__mocks__/createCanvasMock"
 import { MathContextMenu } from "@/iink"
 
 describe("MathContextMenu.ts", () => {
-  let editor: ReturnType<typeof createEditorMock>
+  let editor: ReturnType<typeof createCanvasMock>
   let mathMenu: MathContextMenu
 
   beforeEach(() => {
-    editor = createEditorMock()
+    editor = createCanvasMock()
     mathMenu = new MathContextMenu(asEditor(editor))
     document.body.innerHTML = ""
   })

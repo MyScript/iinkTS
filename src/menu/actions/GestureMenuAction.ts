@@ -1,5 +1,5 @@
-import { EditorTool, EditorWriteTool } from "@/Constants"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import { CanvasTool, CanvasWriteTool } from "@/Constants"
 import type { TMenuSubMenu } from "@/menu/items/SubMenuItem"
 import { SubMenuItem } from "@/menu/items/SubMenuItem"
 
@@ -21,7 +21,7 @@ import { InsertAction, StrikeThroughAction, SurroundAction, UnderlineAction } fr
  * @remarks Menu action Gesture - Détection et actions de gestes
  */
 export class GestureMenuAction extends SubMenuItem {
-  constructor(editor: TInteractiveInkEditor, idPrefix = "ms-menu-action", itemsConfig?: TGestureActionItemsConfig) {
+  constructor(editor: TInteractiveInkCanvas, idPrefix = "ms-menu-action", itemsConfig?: TGestureActionItemsConfig) {
     const enabled = (key: keyof TGestureActionItemsConfig) => itemsConfig?.[key] !== false
 
     const surroundActionValues: {
@@ -90,8 +90,8 @@ export class GestureMenuAction extends SubMenuItem {
         getValue: (editor) => editor.writer.detectGesture,
         setValue: (editor, value) => {
           editor.writer.detectGesture = value
-          editor.tool = EditorTool.Write
-          editor.writer.tool = EditorWriteTool.Pencil
+          editor.tool = CanvasTool.Write
+          editor.writer.tool = CanvasWriteTool.Pencil
         },
       })
     }
@@ -105,8 +105,8 @@ export class GestureMenuAction extends SubMenuItem {
         getValue: (editor) => editor.gesture.surroundAction,
         setValue: (editor, value) => {
           editor.gesture.surroundAction = value as SurroundAction
-          editor.tool = EditorTool.Write
-          editor.writer.tool = EditorWriteTool.Pencil
+          editor.tool = CanvasTool.Write
+          editor.writer.tool = CanvasWriteTool.Pencil
         },
       })
     }
@@ -123,8 +123,8 @@ export class GestureMenuAction extends SubMenuItem {
         getValue: (editor) => editor.gesture.strikeThroughAction,
         setValue: (editor, value) => {
           editor.gesture.strikeThroughAction = value as StrikeThroughAction
-          editor.tool = EditorTool.Write
-          editor.writer.tool = EditorWriteTool.Pencil
+          editor.tool = CanvasTool.Write
+          editor.writer.tool = CanvasWriteTool.Pencil
         },
       })
     }
@@ -138,8 +138,8 @@ export class GestureMenuAction extends SubMenuItem {
         getValue: (editor) => editor.gesture.underlineAction,
         setValue: (editor, value) => {
           editor.gesture.underlineAction = value as UnderlineAction
-          editor.tool = EditorTool.Write
-          editor.writer.tool = EditorWriteTool.Pencil
+          editor.tool = CanvasTool.Write
+          editor.writer.tool = CanvasWriteTool.Pencil
         },
       })
     }
@@ -153,8 +153,8 @@ export class GestureMenuAction extends SubMenuItem {
         getValue: (editor) => editor.gesture.insertAction,
         setValue: (editor, value) => {
           editor.gesture.insertAction = value as InsertAction
-          editor.tool = EditorTool.Write
-          editor.writer.tool = EditorWriteTool.Pencil
+          editor.tool = CanvasTool.Write
+          editor.writer.tool = CanvasWriteTool.Pencil
         },
       })
     }
