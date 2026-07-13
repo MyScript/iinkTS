@@ -42,13 +42,8 @@ export const writePointers = async (
       waitTime = p.t - oldTimestamp
       oldTimestamp = p.t
     }
-    // WebKit's Linux port crashes ("Target crashed") when pointer moves are replayed almost
-    // back-to-back (waitTime / 100) during surround-gesture recognition — give it the real
-    // captured delay instead. Chrome/Firefox handle the fast replay fine, so only WebKit pays
-    // the slowdown.
-    const delay = browserName === "webkit" ? Math.max(waitTime, 5) : waitTime / 100
     // eslint-disable-next-line playwright/no-wait-for-timeout
-    await page.waitForTimeout(delay)
+    await page.waitForTimeout(waitTime)
     await page.mouse.move(offsetX + p.x, offsetY + p.y)
   }
   await page.mouse.up()
