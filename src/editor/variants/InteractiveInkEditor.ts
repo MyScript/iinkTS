@@ -1229,29 +1229,63 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
   }
 
   protected extractTextFromSymbols(symbols: TSymbol[]): string {
-    const textParts: string[] = []
+    const entries: { box: TBox; label: string }[] = []
+    const seenElementIds = new Set<string>()
 
     symbols.forEach((s) => {
       if (isText(s)) {
         const content = TextOps.getLabel(s)
         if (content) {
-          textParts.push(content)
+          entries.push({ box: BoxOps.createFromPoints(s.vertices), label: content })
         }
       } else if (isMath(s)) {
         const content = MathOps.getLabel(s)
         if (content) {
-          textParts.push(content)
+          entries.push({ box: BoxOps.createFromPoints(s.vertices), label: content })
         }
       } else if (isStroke(s)) {
-        // Stroke with JIIX metadata (text or math recognized from backend)
-        const label = this.jiix.getLabelForStroke(s.id)
-        if (label) {
-          textParts.push(label)
+        // Stroke with JIIX metadata (text or math recognized from backend).
+        // A block (word or math expression) can span several strokes: use
+        // the block label so the block is emitted once, and its own
+        // bounding box (not draw order) so it sorts into reading order.
+        const element = this.jiix.getElementForStroke(s.id)
+        if (element && !seenElementIds.has(element.id)) {
+          seenElementIds.add(element.id)
+          const label = this.jiix.getBlockLabel(element.id)
+          if (label) {
+            const box = element["bounding-box"] ?? BoxOps.createFromPoints(s.vertices)
+            entries.push({ box, label })
+          }
         }
       }
     })
 
-    return textParts.join("\n")
+    return this.groupEntriesIntoLines(entries)
+      .map((line) => line.map((e) => e.label).join(" "))
+      .join("\n")
+  }
+
+  /**
+   * Groups entries (words, math expressions) sharing a vertical extent into
+   * the same reading line, ordered top-to-bottom then left-to-right, so
+   * words drawn on the same line stay on the same line in the export.
+   */
+  private groupEntriesIntoLines<T extends { box: TBox }>(entries: T[]): T[][] {
+    const sortedByTop = [...entries].sort((a, b) => a.box.y - b.box.y)
+    const lines: { bottom: number; entries: T[] }[] = []
+
+    sortedByTop.forEach((entry) => {
+      const bottom = entry.box.y + entry.box.height
+      const currentLine = lines[lines.length - 1]
+      if (currentLine && entry.box.y < currentLine.bottom) {
+        currentLine.entries.push(entry)
+        currentLine.bottom = Math.max(currentLine.bottom, bottom)
+      } else {
+        lines.push({ bottom, entries: [entry] })
+      }
+    })
+
+    return lines.map((line) => line.entries.sort((a, b) => a.box.x - b.box.x))
   }
 
   /**

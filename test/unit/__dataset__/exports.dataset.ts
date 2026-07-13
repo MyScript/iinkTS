@@ -106,3 +106,38 @@ export const jiixText: TPartialDeep<TJIIXExport> = {
   id: "MainBlock",
   version: "3",
 }
+
+export const jiixMathDuplicateStrokes: TPartialDeep<TJIIXExport> = {
+  type: "Math",
+  elements: [
+    {
+      id: "math-block/1",
+      type: "Math",
+      label: "x=2",
+      expressions: [
+        {
+          type: "=",
+          id: "math/1",
+          items: [{ type: "stroke", id: "eq-1" }, { type: "stroke", id: "eq-2" }],
+          operands: [
+            {
+              type: "variable",
+              id: "math/2",
+              label: "x",
+              items: [{ type: "stroke", id: "x-1" }, { type: "stroke", id: "x-2" }],
+            },
+            {
+              type: "number",
+              id: "math/3",
+              label: "2",
+              value: 2,
+              items: [{ type: "stroke", id: "n-1" }],
+            },
+          ],
+        },
+      ],
+    },
+  ],
+  id: "MainBlock",
+  version: "3",
+}
