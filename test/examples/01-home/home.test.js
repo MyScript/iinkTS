@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test"
 
+// eslint-disable-next-line playwright/no-skipped-test
 test.describe.skip("Home Page", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/index.html`)
