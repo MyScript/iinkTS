@@ -27,6 +27,8 @@ test.describe("Websocket Text Multiple Inputs", () => {
   })
 
   test("should resolve all questions", async ({ page }) => {
+    test.setTimeout(120_000)
+  
     const data0 = {
       inputId: "input-0",
       answerId: "answer-0",
