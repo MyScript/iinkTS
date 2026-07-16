@@ -151,7 +151,6 @@ export class IISynchronizerManager extends IIAbstractManager {
     await this.#waitForWriteIdle()
 
     try {
-      console.log("#doSynchronize")
       await this.editor.export(["application/vnd.myscript.jiix"])
 
       this.editor.jiix.invalidateIndex()
