@@ -48,10 +48,10 @@ describe("EraseManager.ts", () => {
       const eraserId = manager.currentEraser!.id
       const strokeToErase = buildIIStroke()
       editor.model.symbols.push(strokeToErase)
-      editor.model.deletingIds.add(strokeToErase.id)
+      manager.deletingIds.add(strokeToErase.id)
       const circleToErase = buildIICircle()
       editor.model.symbols.push(circleToErase)
-      editor.model.deletingIds.add(circleToErase.id)
+      manager.deletingIds.add(circleToErase.id)
       editor.model.symbols.push(buildIIStroke())
 
       const info = {

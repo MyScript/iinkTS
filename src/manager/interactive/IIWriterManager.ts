@@ -113,8 +113,8 @@ export class IIWriterManager extends AbstractWriterManager {
     }
     this.#pendingFrame = requestAnimationFrame(() => {
       this.#pendingFrame = undefined
-      if (this.model.currentSymbol) {
-        this.renderer.drawCurrentSymbol(this.model.currentSymbol)
+      if (this.currentSymbol) {
+        this.renderer.drawCurrentSymbol(this.currentSymbol)
       }
     })
   }
@@ -137,25 +137,25 @@ export class IIWriterManager extends AbstractWriterManager {
   protected createCurrentSymbol(pointer: TPointer, style: TStyle, pointerType: string): TSymbol {
     switch (this.tool) {
       case EditorWriteTool.Pencil:
-        this.model.currentSymbol = StrokeOps.create(style, pointerType)
+        this.currentSymbol = StrokeOps.create(style, pointerType)
         break
       case EditorWriteTool.Rectangle:
-        this.model.currentSymbol = ShapePolygonOps.createRectangleBetweenPoints(pointer, pointer, style)
+        this.currentSymbol = ShapePolygonOps.createRectangleBetweenPoints(pointer, pointer, style)
         break
       case EditorWriteTool.Triangle:
-        this.model.currentSymbol = ShapePolygonOps.createTriangleBetweenPoints(pointer, pointer, style)
+        this.currentSymbol = ShapePolygonOps.createTriangleBetweenPoints(pointer, pointer, style)
         break
       case EditorWriteTool.Parallelogram:
-        this.model.currentSymbol = ShapePolygonOps.createParallelogramBetweenPoints(pointer, pointer, style)
+        this.currentSymbol = ShapePolygonOps.createParallelogramBetweenPoints(pointer, pointer, style)
         break
       case EditorWriteTool.Rhombus:
-        this.model.currentSymbol = ShapePolygonOps.createRhombusBetweenPoints(pointer, pointer, style)
+        this.currentSymbol = ShapePolygonOps.createRhombusBetweenPoints(pointer, pointer, style)
         break
       case EditorWriteTool.Circle:
-        this.model.currentSymbol = ShapeCircleOps.createBetweenPoints(pointer, pointer, style)
+        this.currentSymbol = ShapeCircleOps.createBetweenPoints(pointer, pointer, style)
         break
       case EditorWriteTool.Ellipse:
-        this.model.currentSymbol = ShapeEllipseOps.createBetweenPoints(pointer, pointer, style)
+        this.currentSymbol = ShapeEllipseOps.createBetweenPoints(pointer, pointer, style)
         break
       case EditorWriteTool.Line:
       case EditorWriteTool.Arrow:
@@ -167,7 +167,7 @@ export class IIWriterManager extends AbstractWriterManager {
           startDecoration = EdgeDecoration.Arrow
           endDecoration = EdgeDecoration.Arrow
         }
-        this.model.currentSymbol = EdgeLineOps.create(pointer, pointer, startDecoration, endDecoration, style)
+        this.currentSymbol = EdgeLineOps.create(pointer, pointer, startDecoration, endDecoration, style)
         break
       }
       default:
@@ -180,47 +180,43 @@ export class IIWriterManager extends AbstractWriterManager {
     switch (this.tool) {
       case EditorWriteTool.Rectangle:
         ShapePolygonOps.updateRectangleBetweenPoints(
-          this.model.currentSymbol as TShapePolygon,
+          this.currentSymbol as TShapePolygon,
           this.currentSymbolOrigin!,
           pointer
         )
         break
       case EditorWriteTool.Triangle:
         ShapePolygonOps.updateTriangleBetweenPoints(
-          this.model.currentSymbol as TShapePolygon,
+          this.currentSymbol as TShapePolygon,
           this.currentSymbolOrigin!,
           pointer
         )
         break
       case EditorWriteTool.Parallelogram:
         ShapePolygonOps.updateParallelogramBetweenPoints(
-          this.model.currentSymbol as TShapePolygon,
+          this.currentSymbol as TShapePolygon,
           this.currentSymbolOrigin!,
           pointer
         )
         break
       case EditorWriteTool.Rhombus:
         ShapePolygonOps.updateRhombusBetweenPoints(
-          this.model.currentSymbol as TShapePolygon,
+          this.currentSymbol as TShapePolygon,
           this.currentSymbolOrigin!,
           pointer
         )
         break
       case EditorWriteTool.Circle:
-        ShapeCircleOps.updateBetweenPoints(this.model.currentSymbol as TShapeCircle, this.currentSymbolOrigin!, pointer)
+        ShapeCircleOps.updateBetweenPoints(this.currentSymbol as TShapeCircle, this.currentSymbolOrigin!, pointer)
         break
       case EditorWriteTool.Ellipse:
-        ShapeEllipseOps.updateBetweenPoints(
-          this.model.currentSymbol as TShapeEllipse,
-          this.currentSymbolOrigin!,
-          pointer
-        )
+        ShapeEllipseOps.updateBetweenPoints(this.currentSymbol as TShapeEllipse, this.currentSymbolOrigin!, pointer)
         break
     }
   }
 
   protected updateCurrentSymbolEdge(pointer: TPointer): void {
-    const edge = this.model.currentSymbol as TEdge
+    const edge = this.currentSymbol as TEdge
     switch (edge.kind) {
       case EdgeKind.Line:
         ;(edge as TEdgeLine).end = pointer
@@ -230,13 +226,13 @@ export class IIWriterManager extends AbstractWriterManager {
   }
 
   protected updateCurrentSymbol(pointer: TPointer): TSymbol {
-    if (!this.model.currentSymbol) {
+    if (!this.currentSymbol) {
       throw new Error("Can't update current symbol because currentSymbol is undefined")
     }
 
-    switch (this.model.currentSymbol.type) {
+    switch (this.currentSymbol.type) {
       case SymbolType.Stroke:
-        StrokeOps.addPointer(this.model.currentSymbol as TStroke, pointer)
+        StrokeOps.addPointer(this.currentSymbol as TStroke, pointer)
         break
       case SymbolType.Shape:
         this.updateCurrentSymbolShape(pointer)
@@ -245,7 +241,7 @@ export class IIWriterManager extends AbstractWriterManager {
         this.updateCurrentSymbolEdge(pointer)
         break
     }
-    return this.model.currentSymbol
+    return this.currentSymbol
   }
 
   start(info: TPointerInfo): void {
@@ -261,7 +257,7 @@ export class IIWriterManager extends AbstractWriterManager {
     }
     this.currentSymbolOrigin = localPointer
     this.createCurrentSymbol(localPointer, this.editor.penStyle, info.pointerType)
-    this.renderer.drawCurrentSymbol(this.model.currentSymbol!)
+    this.renderer.drawCurrentSymbol(this.currentSymbol!)
   }
 
   continue(info: TPointerInfo): void {
@@ -303,7 +299,7 @@ export class IIWriterManager extends AbstractWriterManager {
       localPointer.y = y
     }
     const localSymbol = this.updateCurrentSymbol(localPointer)
-    this.model.currentSymbol = undefined
+    this.currentSymbol = undefined
     this.currentSymbolOrigin = undefined
     this.snaps.clearSnapToElementLines()
 
