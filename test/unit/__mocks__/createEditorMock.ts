@@ -158,7 +158,7 @@ export function createEditorMock(overrides: Partial<TEditorMock> = {}): TEditorM
   const configuration =
     overrides.configuration ??
     new InteractiveInkEditorConfiguration(JSON.parse(JSON.stringify(DefaultInteractiveInkEditorConfiguration)))
-  const model = overrides.model ?? new IIModel(configuration.rendering.guides.gap)
+  const model = overrides.model ?? new IIModel()
   const renderer = overrides.renderer ?? createRendererStub()
   const event = overrides.event ?? new EditorEventMock(document.createElement("div"))
   const recognizer = overrides.recognizer ?? stubManager()
@@ -282,7 +282,6 @@ export function createEditorMock(overrides: Partial<TEditorMock> = {}): TEditorM
     },
 
     init: jest.fn().mockImplementation(() => {
-      model.rowHeight = configuration.rendering.guides.gap
       const gap = configuration.rendering.guides.gap
       if (gap > 0) {
         const extent = Math.max(400, gap * 50)

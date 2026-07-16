@@ -57,6 +57,7 @@ import {
   convertMillimeterToPixel,
   createUUID,
   latexToUnicodeMath,
+  roundTo,
 } from "@/utils"
 
 import { IIAbstractManager } from "./IIAbstractManager"
@@ -218,7 +219,7 @@ export class IIConversionManager extends IIAbstractManager {
             }
           }
           wordSymbol.point.x = currentX
-          wordSymbol.point.y = this.model.roundToLineGuide(currentY)
+          wordSymbol.point.y = roundTo(currentY, this.rowHeight)
         }
 
         this.editor.typeset.setBounds(wordSymbol)

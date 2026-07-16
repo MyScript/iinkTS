@@ -15,13 +15,11 @@ export class IIModel {
   modificationDate: number
   symbols: TSymbol[]
   exports?: TExport
-  rowHeight: number
   selectedIds: Set<string>
 
-  constructor(rowHeight = 0, creationDate = Date.now()) {
+  constructor(creationDate = Date.now()) {
     this.creationTime = creationDate
     this.modificationDate = creationDate
-    this.rowHeight = rowHeight
     this.symbols = []
     this.exports = undefined
     this.selectedIds = new Set()
@@ -85,93 +83,6 @@ export class IIModel {
       return directMatch
     }
     return undefined
-  }
-
-  getSymbolRowIndex(symbol: TSymbol): number {
-    // Use symbol bounds yMid for row calculation
-    return Math.round(symbol.bounds.center.y / this.rowHeight)
-  }
-
-  getSymbolsByRowOrdered(): {
-    rowIndex: number
-    symbols: TSymbol[]
-  }[] {
-    const rowsMap = new Map<number, TSymbol[]>()
-
-    for (const s of this.symbols) {
-      const rowIndex = this.getSymbolRowIndex(s)
-      const row = rowsMap.get(rowIndex)
-      if (row) {
-        row.push(s)
-      } else {
-        rowsMap.set(rowIndex, [s])
-      }
-    }
-
-    const rows: {
-      rowIndex: number
-      symbols: TSymbol[]
-    }[] = []
-    rowsMap.forEach((symbols, rowIndex) => {
-      symbols.sort((s1, s2) => s1.bounds.center.x - s2.bounds.center.x)
-      rows.push({ rowIndex, symbols })
-    })
-
-    return rows.sort((r1, r2) => r1.rowIndex - r2.rowIndex)
-  }
-
-  roundToLineGuide(y: number): number {
-    return Math.round(y / this.rowHeight) * this.rowHeight
-  }
-
-  isSymbolAbove(source: TSymbol, target: TSymbol): boolean {
-    return this.getSymbolRowIndex(source) > this.getSymbolRowIndex(target)
-  }
-
-  isSymbolInRow(source: TSymbol, target: TSymbol): boolean {
-    return this.getSymbolRowIndex(source) === this.getSymbolRowIndex(target)
-  }
-
-  isSymbolBelow(source: TSymbol, target: TSymbol): boolean {
-    return this.getSymbolRowIndex(source) < this.getSymbolRowIndex(target)
-  }
-
-  getFirstSymbol(symbols: TSymbol[]): TSymbol | undefined {
-    if (!symbols.length) {
-      return
-    }
-    return symbols.reduce((previous, current) => {
-      if (previous) {
-        if (this.getSymbolRowIndex(previous) < this.getSymbolRowIndex(current)) {
-          return previous
-        } else if (
-          this.getSymbolRowIndex(previous) == this.getSymbolRowIndex(current) &&
-          previous.bounds.center.x < current.bounds.center.x
-        ) {
-          return previous
-        }
-      }
-      return current
-    })
-  }
-
-  getLastSymbol(symbols: TSymbol[]): TSymbol | undefined {
-    if (!symbols.length) {
-      return
-    }
-    return symbols.reduce((previous, current) => {
-      if (previous) {
-        if (this.getSymbolRowIndex(previous) > this.getSymbolRowIndex(current)) {
-          return previous
-        }
-        if (this.getSymbolRowIndex(previous) < this.getSymbolRowIndex(current)) {
-          return current
-        } else if (previous.bounds.center.x > current.bounds.center.x) {
-          return previous
-        }
-      }
-      return current
-    })
   }
 
   addSymbol(symbol: TSymbol): void {
@@ -273,7 +184,7 @@ export class IIModel {
 
   clone(): IIModel {
     this.#logger.info("clone")
-    const clonedModel = new IIModel(this.rowHeight, this.creationTime)
+    const clonedModel = new IIModel(this.creationTime)
     clonedModel.modificationDate = this.modificationDate
     clonedModel.symbols = this.symbols.map((s) => {
       const c = cloneSymbol(s)

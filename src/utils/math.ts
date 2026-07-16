@@ -7,6 +7,17 @@ export function isBetween(val: number, min: number, max: number): boolean {
 
 /**
  * @group Utilities
+ * @summary Round a value to the nearest multiple of a step
+ * @param value - Value to round
+ * @param step - Rounding step
+ * @returns Value rounded to the nearest multiple of step
+ */
+export function roundTo(value: number, step: number): number {
+  return Math.round(value / step) * step
+}
+
+/**
+ * @group Utilities
  */
 export function computeAverage(arr: number[]): number {
   return arr.reduce((p, c) => p + c, 0) / (arr.length || 1)
