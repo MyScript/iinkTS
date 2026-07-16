@@ -82,6 +82,8 @@ export class IIWriterManager extends AbstractWriterManager {
     return this.editor.recognizer
   }
 
+  #pendingFrame?: number
+
   attach(layer: HTMLElement): void {
     this.grabber.attach(layer)
     this.grabber.onPointerDown = this.start.bind(this)
@@ -89,8 +91,39 @@ export class IIWriterManager extends AbstractWriterManager {
     this.grabber.onPointerUp = this.end.bind(this)
   }
 
+  /**
+   * name: alice-strokes-write-latency
+   */
+
   detach(): void {
+    this.cancelScheduledRender()
+    this.renderer.clearCurrentSymbolLayer()
     this.grabber.detach()
+  }
+
+  /**
+   * Coalesces the DOM write for the current symbol to at most once per animation
+   * frame: a fast pen/mouse can fire many `continue()` calls per frame (further
+   * amplified by coalesced pointer samples), each of which would otherwise force
+   * a real DOM replace + repaint on a canvas that may already hold many symbols.
+   */
+  protected scheduleRender(): void {
+    if (this.#pendingFrame !== undefined) {
+      return
+    }
+    this.#pendingFrame = requestAnimationFrame(() => {
+      this.#pendingFrame = undefined
+      if (this.model.currentSymbol) {
+        this.renderer.drawCurrentSymbol(this.model.currentSymbol)
+      }
+    })
+  }
+
+  protected cancelScheduledRender(): void {
+    if (this.#pendingFrame !== undefined) {
+      cancelAnimationFrame(this.#pendingFrame)
+      this.#pendingFrame = undefined
+    }
   }
 
   protected needContextLessGesture(stroke: TStroke): boolean {
@@ -228,7 +261,7 @@ export class IIWriterManager extends AbstractWriterManager {
     }
     this.currentSymbolOrigin = localPointer
     this.createCurrentSymbol(localPointer, this.editor.penStyle, info.pointerType)
-    this.renderer.drawSymbol(this.model.currentSymbol!)
+    this.renderer.drawCurrentSymbol(this.model.currentSymbol!)
   }
 
   continue(info: TPointerInfo): void {
@@ -242,7 +275,7 @@ export class IIWriterManager extends AbstractWriterManager {
     this.renderer.ensurePointVisible(localPointer, 20)
 
     this.updateCurrentSymbol(localPointer)
-    this.renderer.drawSymbol(this.model.currentSymbol!)
+    this.scheduleRender()
   }
 
   protected async interactWithBackend(stroke: TStroke): Promise<void> {
@@ -262,6 +295,7 @@ export class IIWriterManager extends AbstractWriterManager {
   }
 
   async end(info: TPointerInfo): Promise<void> {
+    this.cancelScheduledRender()
     const localPointer = info.pointer
     if (this.tool !== EditorWriteTool.Pencil) {
       const { x, y } = this.snaps.snapResize(localPointer)
@@ -274,6 +308,7 @@ export class IIWriterManager extends AbstractWriterManager {
     this.snaps.clearSnapToElementLines()
 
     this.renderer.drawSymbol(localSymbol!)
+    this.renderer.clearCurrentSymbolLayer()
     this.model.addSymbol(localSymbol)
     this.history.push(this.model, {
       added: [localSymbol],

@@ -43,6 +43,8 @@ export type TRendererStub = {
   verticalGuides: number[]
   horizontalGuides: number[]
   drawSymbol: jest.Mock
+  drawCurrentSymbol: jest.Mock
+  clearCurrentSymbolLayer: jest.Mock
   updateSelectedState: jest.Mock
   updateDeletingState: jest.Mock
   removeSymbol: jest.Mock
@@ -80,6 +82,8 @@ function createRendererStub(): TRendererStub {
     verticalGuides: [],
     horizontalGuides: [],
     drawSymbol: jest.fn(),
+    drawCurrentSymbol: jest.fn(),
+    clearCurrentSymbolLayer: jest.fn(),
     updateSelectedState: jest.fn(),
     updateDeletingState: jest.fn(),
     removeSymbol: jest.fn(),
