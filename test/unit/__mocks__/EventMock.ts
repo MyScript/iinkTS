@@ -4,6 +4,7 @@ type EventMockProps = {
   pressure: number
   pointerType: string
   pointerId?: number
+  coalescedEvents?: EventMock[]
 }
 
 type CompleteEventMockProps = EventMockProps & {
@@ -25,6 +26,7 @@ export class EventMock extends Event {
   button: number
   buttons: number
   pointerId: number
+  coalescedEvents?: EventMock[]
   constructor(type: string, props: CompleteEventMockProps) {
     super(type, props as EventInit)
     this.clientX = props.clientX
@@ -34,6 +36,11 @@ export class EventMock extends Event {
     this.button = props.button
     this.buttons = props.buttons
     this.pointerId = props.pointerId || Math.floor(Math.random() * 100)
+    this.coalescedEvents = props.coalescedEvents
+  }
+
+  getCoalescedEvents(): EventMock[] {
+    return this.coalescedEvents ?? [this]
   }
 }
 
