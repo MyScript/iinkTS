@@ -725,13 +725,21 @@ export class RecognizerWebSocket {
     if (strokes.length === 0) {
       return
     }
-    const message = this.buildAddStrokesMessage(strokes, processGestures)
-    if (this.configuration.server.websocket.offlineQueueEnabled && this.#isDisconnected()) {
-      const deferred = new DeferredPromise<void>()
-      this.#enqueueOfflineMessage(message, deferred)
-      return deferred.promise
+    const promises: Promise<void>[] = []
+    const _processGestures = processGestures || strokes.length < 3
+    const chunkSize = 10
+    for (let i = 0; i < strokes.length; i += chunkSize) {
+      const strokesPart = strokes.slice(i, i + chunkSize)
+      const message = this.buildAddStrokesMessage(strokesPart, _processGestures)
+      if (this.configuration.server.websocket.offlineQueueEnabled && this.#isDisconnected()) {
+        const deferred = new DeferredPromise<void>()
+        this.#enqueueOfflineMessage(message, deferred)
+        promises.push(deferred.promise)
+      } else {
+        promises.push(this.send(message))
+      }
     }
-    await this.send(message)
+    await Promise.all(promises)
   }
 
   async getAvailableActions(blockId: string): Promise<string[]> {
