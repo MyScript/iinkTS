@@ -43,14 +43,6 @@ export class IISynchronizerManager extends IIAbstractManager {
     this.logger.info("constructor", "IISynchronizerManager")
   }
 
-  #createTimeoutPromise(timeoutMs: number): Promise<never> {
-    return new Promise((_, reject) => {
-      setTimeout(() => {
-        reject(new Error(`Synchronization timeout after ${timeoutMs}ms`))
-      }, timeoutMs)
-    })
-  }
-
   async synchronize(): Promise<void> {
     if (this.#synchronizePromise) {
       this.logger.debug("synchronize", "Synchronization already in progress, will re-run after")
@@ -84,10 +76,7 @@ export class IISynchronizerManager extends IIAbstractManager {
           this.logger.warn("synchronize", `Retry attempt ${attempt}/${IISynchronizerManager.MAX_RETRY_ATTEMPTS}`)
         }
 
-        await Promise.race([
-          this.#doSynchronize(),
-          this.#createTimeoutPromise(IISynchronizerManager.SYNCHRONIZE_TIMEOUT),
-        ])
+        await this.#doSynchronize()
 
         if (attempt > 1) {
           this.logger.info("synchronize", `Synchronization succeeded on attempt ${attempt}`)
@@ -95,22 +84,14 @@ export class IISynchronizerManager extends IIAbstractManager {
         return
       } catch (error) {
         lastError = error as Error
-        const isTimeout = error instanceof Error && error.message.includes("timeout")
 
-        if (isTimeout) {
-          this.logger.error(
+        if (attempt < IISynchronizerManager.MAX_RETRY_ATTEMPTS) {
+          this.logger.warn(
             "synchronize",
-            `Timeout on attempt ${attempt}/${IISynchronizerManager.MAX_RETRY_ATTEMPTS}:`,
-            error
+            `Will retry synchronization (attempt ${attempt + 1}/${IISynchronizerManager.MAX_RETRY_ATTEMPTS})`
           )
-          if (attempt < IISynchronizerManager.MAX_RETRY_ATTEMPTS) {
-            this.logger.warn(
-              "synchronize",
-              `Will retry synchronization (attempt ${attempt + 1}/${IISynchronizerManager.MAX_RETRY_ATTEMPTS})`
-            )
-            await new Promise((resolve) => setTimeout(resolve, 500))
-            continue
-          }
+          await new Promise((resolve) => setTimeout(resolve, 500))
+          continue
         } else {
           // Non-timeout error - don't retry, fail immediately
           this.logger.error("synchronize", "Synchronization failed with non-timeout error:", error)
@@ -128,7 +109,7 @@ export class IISynchronizerManager extends IIAbstractManager {
 
   /** Resolves once no stroke is being actively drawn — writing always wins over sync. */
   async #waitForWriteIdle(): Promise<void> {
-    while (this.model.currentSymbol) {
+    while (this.editor.writer.currentSymbol) {
       await new Promise((resolve) => requestAnimationFrame(resolve))
     }
   }
