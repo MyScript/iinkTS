@@ -34,13 +34,6 @@ function isPanelVisible() {
   return window.innerWidth > 900 || leftPan.classList.contains("open")
 }
 
-function setCurrentTab(tabId) {
-  currentTabId = tabId
-  document.querySelectorAll(".tab-button").forEach((t) => t.classList.remove("active"))
-  document.getElementById(tabId).classList.add("active")
-  updateTabContent()
-}
-
 async function updateTabContent() {
   if (!isPanelVisible()) return
   if (!editor) {
@@ -127,6 +120,13 @@ async function updateTabContent() {
   contentTab.setAttribute("data-string", dataString)
   contentTab.appendChild(content)
   copyTabToClipboard.disabled = false
+}
+
+function setCurrentTab(tabId) {
+  currentTabId = tabId
+  document.querySelectorAll(".tab-button").forEach((t) => t.classList.remove("active"))
+  document.getElementById(tabId).classList.add("active")
+  updateTabContent()
 }
 
 document.querySelectorAll(".tab-button").forEach((tab) =>
@@ -233,8 +233,11 @@ async function loadEditor(options) {
     updateTabTimeout = setTimeout(() => updateTabContent(), 300)
     clearTimeout(exportTimeout)
     exportTimeout = setTimeout(async () => {
-      const HTML = await editor.export(["text/html"])
-      exportHtmlBody.srcdoc = HTML?.["text/html"] || BACKEND_MODEL_EMPTY
+      // Skip the HTML export while the backend panel is hidden - no point paying for it if nothing shows it.
+      if (exportHtmlPan.style.getPropertyValue("display") === "block") {
+        const HTML = await editor.export(["text/html"])
+        exportHtmlBody.srcdoc = HTML?.["text/html"] || BACKEND_MODEL_EMPTY
+      }
     }, 500)
   })
 
