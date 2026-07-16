@@ -1408,9 +1408,14 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
   async export(mimeTypes?: string[]): Promise<TExport> {
     try {
       this.logger.info("export", { mimeTypes })
-      const exports = await this.recognizer.export(mimeTypes)
+      const requestedMimeTypes = mimeTypes?.length ? mimeTypes : this.recognizer.mimeTypes
+      const missingMimeTypes = requestedMimeTypes.filter((mt) => !this.model.exports?.[mt])
+      if (missingMimeTypes.length === 0) {
+        return this.model.exports!
+      }
+      const exports = await this.recognizer.export(missingMimeTypes)
       this.model.mergeExport(exports as TExport)
-      return exports
+      return this.model.exports!
     } catch (error) {
       this.logger.error("export", { error })
       this.manageError(error as Error)
