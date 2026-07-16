@@ -1,4 +1,4 @@
-import { computeAverage, isBetween, isValidNumber } from "@/iink"
+import { computeAverage, isBetween, isValidNumber, roundTo } from "@/iink"
 
 describe("math.ts", () => {
   describe("isValidNumber", () => {
@@ -30,6 +30,16 @@ describe("math.ts", () => {
     test("should return false", () => {
       expect(isBetween(3, 0, 2)).toEqual(false)
     })
+  })
+})
+
+describe("roundTo", () => {
+  const rowHeight = 10
+  test("should return row height", () => {
+    expect(roundTo(1.4 * rowHeight, rowHeight)).toEqual(rowHeight)
+  })
+  test("should return 2 row height", () => {
+    expect(roundTo(1.6 * rowHeight, rowHeight)).toEqual(2 * rowHeight)
   })
 })
 

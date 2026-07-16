@@ -23,6 +23,39 @@ export class IITypesetManager extends IIAbstractManager {
     return this.editor.configuration.rendering.guides.gap
   }
 
+  getSymbolRowIndex(symbol: TSymbol): number {
+    // Use symbol bounds yMid for row calculation
+    return Math.round(symbol.bounds.center.y / this.rowHeight)
+  }
+
+  getSymbolsByRowOrdered(): {
+    rowIndex: number
+    symbols: TSymbol[]
+  }[] {
+    const rowsMap = new Map<number, TSymbol[]>()
+
+    for (const s of this.model.symbols) {
+      const rowIndex = this.getSymbolRowIndex(s)
+      const row = rowsMap.get(rowIndex)
+      if (row) {
+        row.push(s)
+      } else {
+        rowsMap.set(rowIndex, [s])
+      }
+    }
+
+    const rows: {
+      rowIndex: number
+      symbols: TSymbol[]
+    }[] = []
+    rowsMap.forEach((symbols, rowIndex) => {
+      symbols.sort((s1, s2) => s1.bounds.center.x - s2.bounds.center.x)
+      rows.push({ rowIndex, symbols })
+    })
+
+    return rows.sort((r1, r2) => r1.rowIndex - r2.rowIndex)
+  }
+
   protected drawSymbolHidden(symbol: TText | TMath): SVGGElement {
     const clone = structuredClone(symbol) as TText | TMath
     clone.id = "symbol-to-measure"
@@ -121,7 +154,7 @@ export class IITypesetManager extends IIAbstractManager {
   }
 
   moveTextAfter(text: TText, tx: number): TSymbol[] | undefined {
-    const row = this.model.getSymbolsByRowOrdered().find((r) => r.rowIndex === this.model.getSymbolRowIndex(text))
+    const row = this.getSymbolsByRowOrdered().find((r) => r.rowIndex === this.getSymbolRowIndex(text))
     if (row) {
       const textsAfter = row.symbols.filter((s) => isText(s) && s.bounds.center.x > text.bounds.center.x) as TText[]
       textsAfter.forEach((symbol) => {

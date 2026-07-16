@@ -1,4 +1,4 @@
-import { buildIIText } from "../../helpers"
+import { buildIICircle, buildIIStroke, buildIIText } from "../../helpers"
 import { createEditorMock, asEditor } from "../../__mocks__/createEditorMock"
 import { IITypesetManager, OBBOps, TSymbolChar, SVGBuilder } from "@/iink"
 
@@ -95,5 +95,54 @@ describe("IITypesetManager.ts", () => {
     expect(OBBOps.toBox(text.bounds)).toEqual({ x: 1989, y: 27, width: 5, height: 42 })
     expect(manager.getElementBoundingBox).toHaveBeenCalledTimes(1)
     expect(manager.setCharsBounds).toHaveBeenCalledTimes(1)
+  })
+
+  describe("get symbols with row index", () => {
+    const rowHeight = 10
+    const editor = createEditorMock()
+    editor.configuration.rendering.guides.gap = rowHeight
+    const manager = new IITypesetManager(asEditor(editor))
+
+    const stroke51 = buildIIStroke({ box: { height: 9, width: 10, x: 0, y: 4.6 * rowHeight } })
+    editor.model.addSymbol(stroke51)
+
+    const stroke12 = buildIIStroke({ box: { height: 9, width: 100, x: 50, y: rowHeight / 2 } })
+    editor.model.addSymbol(stroke12)
+
+    const circle13 = buildIICircle({ center: { x: 200, y: rowHeight * 1.4 }, radius: 5 })
+    editor.model.addSymbol(circle13)
+
+    const circle22 = buildIICircle({ center: { x: 200, y: rowHeight * 2.25 }, radius: 5 })
+    editor.model.addSymbol(circle22)
+
+    const stroke21 = buildIIStroke({ box: { height: 9, width: 10, x: 0, y: 1.6 * rowHeight } })
+    editor.model.addSymbol(stroke21)
+
+    const stroke11 = buildIIStroke({ box: { height: 9, width: 10, x: 0, y: rowHeight / 2 } })
+    editor.model.addSymbol(stroke11)
+
+    const stroke31 = buildIIStroke({ box: { height: 9, width: 10, x: 0, y: 2.6 * rowHeight } })
+    editor.model.addSymbol(stroke31)
+
+    test("shoud get rowIndex for each symbols", () => {
+      expect(manager.getSymbolRowIndex(stroke11)).toEqual(1)
+      expect(manager.getSymbolRowIndex(stroke12)).toEqual(1)
+      expect(manager.getSymbolRowIndex(circle13)).toEqual(1)
+      expect(manager.getSymbolRowIndex(circle22)).toEqual(2)
+      expect(manager.getSymbolRowIndex(stroke21)).toEqual(2)
+      expect(manager.getSymbolRowIndex(stroke31)).toEqual(3)
+      expect(manager.getSymbolRowIndex(stroke51)).toEqual(5)
+    })
+    test("shoud get symbols group by row and ordered", () => {
+      const rows = manager.getSymbolsByRowOrdered()
+      expect(rows[0].rowIndex).toEqual(1)
+      expect(rows[0].symbols).toEqual([stroke11, stroke12, circle13])
+      expect(rows[1].rowIndex).toEqual(2)
+      expect(rows[1].symbols).toEqual([stroke21, circle22])
+      expect(rows[2].rowIndex).toEqual(3)
+      expect(rows[2].symbols).toEqual([stroke31])
+      expect(rows[3].rowIndex).toEqual(5)
+      expect(rows[3].symbols).toEqual([stroke51])
+    })
   })
 })

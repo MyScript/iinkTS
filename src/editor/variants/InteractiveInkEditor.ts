@@ -169,7 +169,7 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
 
     this.renderer = new SVGRenderer(this.#configuration.rendering)
 
-    this.#model = new IIModel(this.configuration.rendering.guides.gap)
+    this.#model = new IIModel()
 
     this.history = new IIHistoryManager(this.#configuration["undo-redo"], this.event)
 
@@ -271,8 +271,6 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
     const height = Math.max(this.renderer.parent.clientHeight, this.configuration.rendering.minHeight)
     const width = Math.max(this.renderer.parent.clientWidth, this.configuration.rendering.minWidth)
     this.renderer.resize(height, width)
-    this.model.rowHeight = this.configuration.rendering.guides.gap
-    this.history.stack.forEach((i) => (i.model.rowHeight = this.model.rowHeight))
     this.event.emitUIpdated()
   }
 
@@ -383,7 +381,6 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
       this.layers.root.addEventListener("wheel", this.handleWheel)
       this.startResizeObserver()
 
-      this.model.rowHeight = this.configuration.rendering.guides.gap
       this.history.init(this.model)
 
       if (!this.recognizer.configuration.server.version) {
