@@ -91,13 +91,13 @@ describe("IISynchronizerManager.ts", () => {
 
     test("should wait for an in-progress stroke to finish before processing synchronized data", async () => {
       const { editor, manager, strokes, restoreRaf } = setup(3)
-      editor.model.currentSymbol = buildIIStroke()
+      editor.writer.currentSymbol = buildIIStroke()
 
       const syncPromise = manager.synchronize()
       await new Promise((resolve) => setTimeout(resolve, 20))
       strokes.forEach((stroke) => expect(stroke.jiixBlockId).toBeUndefined())
 
-      editor.model.currentSymbol = undefined
+      editor.writer.currentSymbol = undefined
       await syncPromise
 
       strokes.forEach((stroke, i) => expect(stroke.jiixBlockId).toBe(`block-${i}`))

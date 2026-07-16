@@ -13,13 +13,10 @@ export class IIModel {
   #symbolsMap = new Map<string, TSymbol>()
   readonly creationTime: number
   modificationDate: number
-  currentSymbol?: TSymbol
   symbols: TSymbol[]
   exports?: TExport
   rowHeight: number
-  idle: boolean
   selectedIds: Set<string>
-  deletingIds: Set<string>
 
   constructor(rowHeight = 0, creationDate = Date.now()) {
     this.creationTime = creationDate
@@ -27,9 +24,7 @@ export class IIModel {
     this.rowHeight = rowHeight
     this.symbols = []
     this.exports = undefined
-    this.idle = true
     this.selectedIds = new Set()
-    this.deletingIds = new Set()
   }
 
   /**
@@ -45,10 +40,6 @@ export class IIModel {
 
   get symbolsSelected(): TSymbol[] {
     return this.symbols.filter((s) => this.selectedIds.has(s.id))
-  }
-
-  get symbolsDeleting(): TSymbol[] {
-    return this.symbols.filter((s) => this.deletingIds.has(s.id))
   }
 
   /**
@@ -290,7 +281,6 @@ export class IIModel {
       return c
     })
     clonedModel.exports = structuredClone(this.exports)
-    clonedModel.idle = this.idle
     this.#logger.debug("clone", { clonedModel })
     return clonedModel
   }
@@ -300,8 +290,6 @@ export class IIModel {
     this.modificationDate = Date.now()
     this.symbols = []
     this.#symbolsMap.clear()
-    this.currentSymbol = undefined
     this.exports = undefined
-    this.idle = true
   }
 }

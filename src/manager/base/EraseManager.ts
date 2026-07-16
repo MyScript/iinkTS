@@ -30,7 +30,19 @@ export class EraseManager {
 
   eraserWidth = 5
   currentEraser?: TEraser
+  deletingIds: Set<string>
   charsToDelete: Map<string, Set<string>> = new Map()
+
+  constructor(editor: TInteractiveInkEditor | InkEditor) {
+    this.#logger.info("constructor")
+    this.editor = editor
+    this.grabber = new PointerEventGrabber(editor.configuration.grabber)
+    this.deletingIds = new Set()
+  }
+
+  get renderer(): SVGRenderer {
+    return this.editor.renderer
+  }
 
   #isTInteractiveInkEditor(editor: TInteractiveInkEditor | InkEditor): editor is TInteractiveInkEditor {
     return "removeSymbols" in editor && typeof editor.removeSymbols === "function"
@@ -53,16 +65,6 @@ export class EraseManager {
       return symbol.vertices.some((v) => computeDistanceSquared(point, v) <= squaredRadius)
     }
     return edges.some((edge) => computeDistanceBetweenPointAndSegment(point, edge) < radius)
-  }
-
-  constructor(editor: TInteractiveInkEditor | InkEditor) {
-    this.#logger.info("constructor")
-    this.editor = editor
-    this.grabber = new PointerEventGrabber(editor.configuration.grabber)
-  }
-
-  get renderer(): SVGRenderer {
-    return this.editor.renderer
   }
 
   attach(layer: HTMLElement): void {
@@ -114,19 +116,18 @@ export class EraseManager {
             }
           })
           if (hasHitChar) {
-            this.editor.model.deletingIds.add(s.id)
+            this.deletingIds.add(s.id)
             this.renderer.updateDeletingState(s, true)
           }
         } else if (this.#isHitByPoint(s, currentPoint, radius)) {
-          this.editor.model.deletingIds.add(s.id)
+          this.deletingIds.add(s.id)
           this.renderer.updateDeletingState(s, true)
         }
       })
     } else {
-      const inkEditor = this.editor as InkEditor
-      inkEditor.model.strokes.forEach((s) => {
+      this.editor.model.strokes.forEach((s) => {
         if (this.#isHitByPoint(s, currentPoint, radius)) {
-          inkEditor.model.deletingIds.add(s.id)
+          this.deletingIds.add(s.id)
           this.renderer.updateDeletingState(s, true)
         }
       })
@@ -156,7 +157,7 @@ export class EraseManager {
             editor.typeset.setBounds(s)
             this.renderer.drawSymbol(s)
           }
-        } else if (editor.model.deletingIds.has(s.id)) {
+        } else if (this.deletingIds.has(s.id)) {
           symbolsToRemove.push(s.id)
         }
       })
@@ -165,12 +166,11 @@ export class EraseManager {
         await editor.removeSymbols(symbolsToRemove)
       }
 
-      editor.model.deletingIds.clear()
+      this.deletingIds.clear()
       this.charsToDelete.clear()
     } else {
-      const inkEditor = this.editor as InkEditor
-      inkEditor.removeStrokes(inkEditor.model.strokesToDelete.map((s) => s.id))
-      inkEditor.model.deletingIds.clear()
+      this.editor.removeStrokes(this.deletingIds.values().toArray())
+      this.deletingIds.clear()
     }
     this.currentEraser = undefined
   }

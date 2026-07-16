@@ -162,7 +162,7 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
     this.recognizer.event.addSessionOpenedListener(this.event.emitSessionOpened.bind(this.event))
     this.recognizer.event.addEndInitialization(this.layers.clearModal.bind(this.layers))
     this.recognizer.event.addEndInitialization(this.markConnectedOnce.bind(this))
-    this.recognizer.event.addIdleListener(this.updateLayerState.bind(this))
+    this.recognizer.event.addIdleListener(this.manageIdleState.bind(this))
     this.recognizer.event.addConnectionStatusChangedListener((status) =>
       this.manageConnectionStatus(status, this.recognizer.offlineQueueLength)
     )
@@ -288,10 +288,6 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
     this.#penStyle = Object.assign({}, this.#penStyle, penStyle)
   }
 
-  protected updateLayerState(idle: boolean): void {
-    this.manageIdleState(idle)
-  }
-
   /**
    * Update layer UI with debouncing
    * @param timeout - Debounce timeout in milliseconds (default: 500ms)
@@ -402,7 +398,7 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
     } finally {
       this.logger.debug("initialize", "finally")
       this.layers.hideLoader()
-      this.updateLayerState(true)
+      this.manageIdleState(true)
     }
   }
 
@@ -415,7 +411,7 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
   async changeLanguage(code: string): Promise<void> {
     try {
       this.logger.info("changeLanguage", { code })
-      this.updateLayerState(false)
+      this.manageIdleState(false)
       this.configuration.recognition.lang = code
       await this.recognizer.newSession(this.configuration)
       const strokes = this.extractStrokesFromSymbols(this.model.symbols)
@@ -517,7 +513,7 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
   /** @hidden */
   async addSymbol(sym: TSymbol, addToHistory = true): Promise<TSymbol> {
     this.logger.info("addSymbol", { sym })
-    this.updateLayerState(false)
+    this.manageIdleState(false)
     this.updateTypesetBounds(sym)
     this.model.addSymbol(sym)
     this.renderer.drawSymbol(sym)
@@ -545,7 +541,7 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
    */
   async addSymbols(symList: TSymbol[], addToHistory = true): Promise<TSymbol[]> {
     this.logger.info("addSymbol", { symList })
-    this.updateLayerState(false)
+    this.manageIdleState(false)
     symList.forEach((s) => {
       this.updateTypesetBounds(s)
       this.model.addSymbol(s)
@@ -573,7 +569,7 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
    */
   async updateSymbol(sym: TSymbol, addToHistory = true): Promise<TSymbol> {
     this.logger.info("updateSymbol", { sym })
-    this.updateLayerState(false)
+    this.manageIdleState(false)
     this.updateTypesetBounds(sym)
 
     const oldSymbol = this.history.stack.at(-1)?.model.getRootSymbol(sym.id) ?? this.model.getRootSymbol(sym.id)
@@ -603,7 +599,7 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
    */
   async updateSymbols(symList: TSymbol[], addToHistory = true): Promise<TSymbol[]> {
     this.logger.info("updateSymbol", { symList })
-    this.updateLayerState(false)
+    this.manageIdleState(false)
 
     const oldSymbolsMap = new Map<string, TSymbol>()
     symList.forEach((sym) => {
@@ -746,7 +742,7 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
       oldSymbols,
       newSymbols,
     })
-    this.updateLayerState(false)
+    this.manageIdleState(false)
 
     const oldStrokes = this.extractStrokesFromSymbols(oldSymbols)
     const newStrokes = this.extractStrokesFromSymbols(newSymbols)
@@ -874,7 +870,7 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
     this.logger.info("removeSymbol", { id })
     const symbol = this.model.getRootSymbol(id)
     if (symbol) {
-      this.updateLayerState(false)
+      this.manageIdleState(false)
       this.startOperation("Recognizing")
       this.recognizer.eraseStrokes([id])
       if (
@@ -954,7 +950,7 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
       this.history.push(this.model, changes)
       this.updateLayerUI()
     }
-    this.updateLayerState(false)
+    this.manageIdleState(false)
     this.selector.removeSelectedGroup()
     return symbolsRemoved
   }
@@ -1037,7 +1033,7 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
     this.logger.info("importPointEvents", {
       partialStrokes,
     })
-    this.updateLayerState(false)
+    this.manageIdleState(false)
     const strokes = partialStrokes.map(StrokeOps.createFromPartial)
     strokes.forEach((s) => {
       this.model.addSymbol(s)
@@ -1352,7 +1348,7 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
   }
 
   #applyHistoryStackItem(stackItem: TIIHistoryStackItem): TIIHistoryBackendChanges {
-    this.updateLayerState(false)
+    this.manageIdleState(false)
     this.unselectAll()
     const modifications = stackItem.model.extractDifferenceSymbols(this.model)
     this.#model = stackItem.model.clone()
@@ -1430,7 +1426,7 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
    */
   async convert(symbols?: TSymbol[]): Promise<void> {
     try {
-      this.updateLayerState(false)
+      this.manageIdleState(false)
       const addedSymbols = await this.converter.apply(symbols)
       this.select(addedSymbols.map((s) => s.id))
       this.event.emitConverted()
@@ -1450,7 +1446,7 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
    */
   async duplicate(symbols?: TSymbol[]): Promise<TSymbol[]> {
     try {
-      this.updateLayerState(false)
+      this.manageIdleState(false)
       const symbolsToDuplicate = symbols ?? this.model.symbols
       const bounds = BoxOps.createFromBoxes(symbolsToDuplicate.map((s) => OBBOps.toBox(s.bounds)))
 
@@ -1515,10 +1511,10 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
       this.#renderedHeight = height
       this.#renderedWidth = width
 
-      this.updateLayerState(false)
+      this.manageIdleState(false)
       this.renderer.resize(height, width)
       this.updateLayerUI(50)
-      this.updateLayerState(true)
+      this.manageIdleState(true)
     } catch (error) {
       this.manageError(error as Error)
     }
@@ -1549,7 +1545,7 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
   async clear(): Promise<void> {
     try {
       this.logger.info("clear")
-      this.updateLayerState(false)
+      this.manageIdleState(false)
       if (this.model.symbols.length) {
         this.selector.removeSelectedGroup()
         const erased = this.model.symbols

@@ -28,7 +28,6 @@ export class Model {
   width: number
   height: number
   rowHeight: number
-  idle: boolean
   #logger = LoggerManager.getLogger(LoggerCategory.MODEL)
 
   constructor(width = 100, height = 100, rowHeight = 0, creationDate = Date.now()) {
@@ -47,7 +46,6 @@ export class Model {
       lastSentPosition: 0,
       lastReceivedPosition: 0,
     }
-    this.idle = true
   }
 
   protected computePressure(distance: number, globalDistance: number): number {
@@ -262,7 +260,6 @@ export class Model {
     clonedModel.positions = structuredClone(this.positions)
     clonedModel.exports = this.exports ? structuredClone(this.exports) : undefined
     clonedModel.converts = this.converts ? structuredClone(this.converts) : undefined
-    clonedModel.idle = this.idle
     this.#logger.debug("clone", { clonedModel })
     return clonedModel
   }
@@ -276,6 +273,5 @@ export class Model {
     this.positions.lastReceivedPosition = 0
     this.exports = undefined
     this.converts = undefined
-    this.idle = true
   }
 }

@@ -187,6 +187,7 @@ export function createEditorMock(overrides: Partial<TEditorMock> = {}): TEditorM
       (() => {
         const w = stubManager()
         ;(w as unknown as Record<string, unknown>).tool = EditorWriteTool.Pencil
+        ;(w as unknown as Record<string, unknown>).currentSymbol = undefined
         return w
       })(),
     keyboard: overrides.keyboard ?? stubManager(),

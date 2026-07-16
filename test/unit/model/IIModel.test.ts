@@ -396,13 +396,10 @@ describe("IIModel.ts", () => {
   describe("clear", () => {
     test("should clear model", () => {
       const model = new IIModel(rowHeight)
-      model.currentSymbol = buildIIStroke()
       model.addSymbol(buildIIStroke())
-      expect(model.currentSymbol).toBeDefined()
       expect(model.symbols).toHaveLength(1)
 
       model.clear()
-      expect(model.currentSymbol).toBeUndefined()
       expect(model.symbols).toHaveLength(0)
     })
   })
