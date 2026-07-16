@@ -7,7 +7,7 @@ import { SymbolType } from "@/symbol"
 import { BoxOps } from "@/symbol/primitives/Box"
 import { arrowHeadEndMarkerId, arrowHeadStartMarkerId } from "@/symbol-utils/edge/EdgeRenderOptions"
 import { symbolRegistry } from "@/symbol-utils/SymbolRegistry"
-import { getClosestPoints } from "@/utils"
+import { bumpSvgTransformVersion, getClosestPoints } from "@/utils"
 
 import { SVGBuilder } from "./utils/SVGBuilder"
 import { GUIDE_PATH_ATTRS, SUB_GUIDE_PATH_ATTRS, SVGRendererConst } from "./utils/SVGRendererConst"
@@ -21,6 +21,13 @@ export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfigur
 
   layer!: SVGSVGElement
   definitionGroup!: SVGGElement
+  /**
+   * Dedicated overlay for the stroke currently being drawn. Kept out of `layer`
+   * so redrawing it every frame doesn't force the browser to repaint every
+   * other symbol - cost stays proportional to the current stroke, not the
+   * total number of symbols on the canvas.
+   */
+  #currentSymbolLayer!: SVGSVGElement
 
   verticalGuides: number[] = []
   horizontalGuides: number[] = []
@@ -56,6 +63,22 @@ export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfigur
     this.#viewBox = { x: 0, y: 0, width, height }
     this.layer.appendChild(this.createSVGTools())
     this.parent.appendChild(this.layer)
+
+    this.#currentSymbolLayer = SVGBuilder.createLayer(
+      { x: 0, y: 0, width, height },
+      { "data-layer": "CAPTURE", style: "pointer-events: none;" }
+    )
+    this.parent.appendChild(this.#currentSymbolLayer)
+  }
+
+  /** Keeps the current-symbol overlay's viewBox/size aligned with `layer`'s. */
+  #syncCurrentSymbolLayerViewBox(): void {
+    this.#currentSymbolLayer.setAttribute("width", `${this.#viewBox.width}px`)
+    this.#currentSymbolLayer.setAttribute("height", `${this.#viewBox.height}px`)
+    this.#currentSymbolLayer.setAttribute(
+      "viewBox",
+      `${this.#viewBox.x}, ${this.#viewBox.y}, ${this.#viewBox.width}, ${this.#viewBox.height}`
+    )
   }
 
   protected createDefs(): SVGDefsElement {
@@ -439,6 +462,35 @@ export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfigur
     return svgEl
   }
 
+  /**
+   * Draws `symbol` into the dedicated current-symbol overlay instead of the
+   * main layer - used while a stroke/shape is still being drawn, so redrawing
+   * it every frame doesn't repaint the rest of the canvas. See `drawSymbol`.
+   */
+  drawCurrentSymbol(symbol: TSymbol): SVGGraphicsElement | undefined {
+    this.#logger.debug("drawCurrentSymbol", { symbol })
+    const oldNode = this.#currentSymbolLayer.querySelector(`#${symbol.id}`) as SVGGraphicsElement | null
+    const svgEl = this.buildElementFromSymbol(symbol)
+    if (svgEl) {
+      if (oldNode) {
+        oldNode.replaceWith(svgEl)
+      } else {
+        this.#currentSymbolLayer.appendChild(svgEl)
+      }
+    }
+    return svgEl
+  }
+
+  /** Clears the current-symbol overlay once its content has been merged into `layer`. */
+  clearCurrentSymbolLayer(): void {
+    if (!this.#currentSymbolLayer) {
+      return
+    }
+    while (this.#currentSymbolLayer.firstChild) {
+      this.#currentSymbolLayer.firstChild.remove()
+    }
+  }
+
   updateSelectedState(symbol: TSymbol, isSelected: boolean): void {
     // Edge selection adds/removes a child outline path — full redraw needed
     if (symbol.type === SymbolType.Edge) {
@@ -545,6 +597,8 @@ export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfigur
       "viewBox",
       `${this.#viewBox.x}, ${this.#viewBox.y}, ${this.#viewBox.width}, ${this.#viewBox.height}`
     )
+    bumpSvgTransformVersion(this.layer)
+    this.#syncCurrentSymbolLayerViewBox()
     this.removeGuides()
     if (this.configuration.guides.enable) {
       this.drawGuides()
@@ -595,6 +649,7 @@ export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfigur
       }
       this.layer.appendChild(this.createSVGTools())
     }
+    this.clearCurrentSymbolLayer()
   }
 
   getRenderingContext(): SVGSVGElement {
@@ -641,6 +696,8 @@ export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfigur
       "viewBox",
       `${this.#viewBox.x}, ${this.#viewBox.y}, ${this.#viewBox.width}, ${this.#viewBox.height}`
     )
+    bumpSvgTransformVersion(this.layer)
+    this.#syncCurrentSymbolLayerViewBox()
 
     if (this.configuration.guides.enable) {
       this.removeGuides()
@@ -704,6 +761,8 @@ export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfigur
       "viewBox",
       `${this.#viewBox.x}, ${this.#viewBox.y}, ${this.#viewBox.width}, ${this.#viewBox.height}`
     )
+    bumpSvgTransformVersion(this.layer)
+    this.#syncCurrentSymbolLayerViewBox()
 
     if (redrawGuides && this.configuration.guides.enable) {
       this.removeGuides()
@@ -746,5 +805,6 @@ export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfigur
     if (this.layer) {
       this.layer.remove()
     }
+    this.#currentSymbolLayer?.remove()
   }
 }

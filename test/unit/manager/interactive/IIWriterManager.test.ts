@@ -43,8 +43,8 @@ describe("IIWriterManager.ts", () => {
       expect(manager.model.currentSymbol?.type).toEqual(SymbolType.Stroke)
       expect(manager.model.currentSymbol?.style.color).toBe(DefaultStyle.color)
       expect(manager.model.currentSymbol?.style.width).toBe(DefaultStyle.width)
-      expect(manager.renderer.drawSymbol).toHaveBeenCalledTimes(1)
-      expect(manager.renderer.drawSymbol).toHaveBeenCalledWith(manager.model.currentSymbol)
+      expect(manager.renderer.drawCurrentSymbol).toHaveBeenCalledTimes(1)
+      expect(manager.renderer.drawCurrentSymbol).toHaveBeenCalledWith(manager.model.currentSymbol)
     })
     test("should init model.currentSymbol with pencil & custom style", () => {
       editor.penStyle = { color: "red", width: 42 }
@@ -69,8 +69,8 @@ describe("IIWriterManager.ts", () => {
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Shape)
       const shape = manager.model.currentSymbol as TShape
       expect(shape.kind).toBe(ShapeKind.Polygon)
-      expect(manager.renderer.drawSymbol).toHaveBeenCalledTimes(1)
-      expect(manager.renderer.drawSymbol).toHaveBeenCalledWith(manager.model.currentSymbol)
+      expect(manager.renderer.drawCurrentSymbol).toHaveBeenCalledTimes(1)
+      expect(manager.renderer.drawCurrentSymbol).toHaveBeenCalledWith(manager.model.currentSymbol)
     })
     test("should init model.currentSymbol with Circle", () => {
       manager.tool = EditorWriteTool.Circle
@@ -83,8 +83,8 @@ describe("IIWriterManager.ts", () => {
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Shape)
       const shape = manager.model.currentSymbol as TShape
       expect(shape.kind).toBe(ShapeKind.Circle)
-      expect(manager.renderer.drawSymbol).toHaveBeenCalledTimes(1)
-      expect(manager.renderer.drawSymbol).toHaveBeenCalledWith(manager.model.currentSymbol)
+      expect(manager.renderer.drawCurrentSymbol).toHaveBeenCalledTimes(1)
+      expect(manager.renderer.drawCurrentSymbol).toHaveBeenCalledWith(manager.model.currentSymbol)
     })
     test("should init model.currentSymbol with Ellipse", () => {
       manager.tool = EditorWriteTool.Ellipse
@@ -97,8 +97,8 @@ describe("IIWriterManager.ts", () => {
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Shape)
       const shape = manager.model.currentSymbol as TShape
       expect(shape.kind).toBe(ShapeKind.Ellipse)
-      expect(manager.renderer.drawSymbol).toHaveBeenCalledTimes(1)
-      expect(manager.renderer.drawSymbol).toHaveBeenCalledWith(manager.model.currentSymbol)
+      expect(manager.renderer.drawCurrentSymbol).toHaveBeenCalledTimes(1)
+      expect(manager.renderer.drawCurrentSymbol).toHaveBeenCalledWith(manager.model.currentSymbol)
     })
     test("should init model.currentSymbol with Triangle", () => {
       manager.tool = EditorWriteTool.Triangle
@@ -111,8 +111,8 @@ describe("IIWriterManager.ts", () => {
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Shape)
       const shape = manager.model.currentSymbol as TShape
       expect(shape.kind).toBe(ShapeKind.Polygon)
-      expect(manager.renderer.drawSymbol).toHaveBeenCalledTimes(1)
-      expect(manager.renderer.drawSymbol).toHaveBeenCalledWith(manager.model.currentSymbol)
+      expect(manager.renderer.drawCurrentSymbol).toHaveBeenCalledTimes(1)
+      expect(manager.renderer.drawCurrentSymbol).toHaveBeenCalledWith(manager.model.currentSymbol)
     })
     test("should init model.currentSymbol with Parallelogram", () => {
       manager.tool = EditorWriteTool.Parallelogram
@@ -125,8 +125,8 @@ describe("IIWriterManager.ts", () => {
       expect(manager.model.currentSymbol?.type).toBe(SymbolType.Shape)
       const shape = manager.model.currentSymbol as TShape
       expect(shape.kind).toBe(ShapeKind.Polygon)
-      expect(manager.renderer.drawSymbol).toHaveBeenCalledTimes(1)
-      expect(manager.renderer.drawSymbol).toHaveBeenCalledWith(manager.model.currentSymbol)
+      expect(manager.renderer.drawCurrentSymbol).toHaveBeenCalledTimes(1)
+      expect(manager.renderer.drawCurrentSymbol).toHaveBeenCalledWith(manager.model.currentSymbol)
     })
     test("should init model.currentSymbol with Line", () => {
       manager.tool = EditorWriteTool.Line
@@ -141,8 +141,8 @@ describe("IIWriterManager.ts", () => {
       expect(shape.kind).toBe(EdgeKind.Line)
       expect(shape.startDecoration).toBeUndefined()
       expect(shape.endDecoration).toBeUndefined()
-      expect(manager.renderer.drawSymbol).toHaveBeenCalledTimes(1)
-      expect(manager.renderer.drawSymbol).toHaveBeenCalledWith(manager.model.currentSymbol)
+      expect(manager.renderer.drawCurrentSymbol).toHaveBeenCalledTimes(1)
+      expect(manager.renderer.drawCurrentSymbol).toHaveBeenCalledWith(manager.model.currentSymbol)
     })
     test("should init model.currentSymbol with Arrow", () => {
       manager.tool = EditorWriteTool.Arrow
@@ -157,8 +157,8 @@ describe("IIWriterManager.ts", () => {
       expect(shape.kind).toBe(EdgeKind.Line)
       expect(shape.startDecoration).toBeUndefined()
       expect(shape.endDecoration).toEqual(EdgeDecoration.Arrow)
-      expect(manager.renderer.drawSymbol).toHaveBeenCalledTimes(1)
-      expect(manager.renderer.drawSymbol).toHaveBeenCalledWith(manager.model.currentSymbol)
+      expect(manager.renderer.drawCurrentSymbol).toHaveBeenCalledTimes(1)
+      expect(manager.renderer.drawCurrentSymbol).toHaveBeenCalledWith(manager.model.currentSymbol)
     })
     test("should init model.currentSymbol with DoubleArrow", () => {
       manager.tool = EditorWriteTool.DoubleArrow
@@ -173,8 +173,8 @@ describe("IIWriterManager.ts", () => {
       expect(shape.kind).toBe(EdgeKind.Line)
       expect(shape.startDecoration).toEqual(EdgeDecoration.Arrow)
       expect(shape.endDecoration).toEqual(EdgeDecoration.Arrow)
-      expect(manager.renderer.drawSymbol).toHaveBeenCalledTimes(1)
-      expect(manager.renderer.drawSymbol).toHaveBeenCalledWith(manager.model.currentSymbol)
+      expect(manager.renderer.drawCurrentSymbol).toHaveBeenCalledTimes(1)
+      expect(manager.renderer.drawCurrentSymbol).toHaveBeenCalledWith(manager.model.currentSymbol)
     })
     test("should throw error if symbol type unknown when start", () => {
       const info = {
@@ -219,6 +219,51 @@ describe("IIWriterManager.ts", () => {
       expect(manager.model.symbols).toHaveLength(1)
       expect(editor.recognizer.addStrokes).toHaveBeenCalledTimes(1)
       expect(editor.recognizer.addStrokes).toHaveBeenCalledWith([manager.model.symbols[0]], true)
+    })
+  })
+
+  describe("continue() rendering throttle", () => {
+    const editor = createEditorMock()
+    editor.recognizer.init = jest.fn(() => Promise.resolve())
+    editor.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
+
+    const manager = new IIWriterManager(asEditor(editor))
+    manager.renderer.drawSymbol = jest.fn()
+
+    editor.init()
+
+    test("should coalesce several continue() calls into a single drawCurrentSymbol per animation frame", async () => {
+      manager.tool = EditorWriteTool.Pencil
+      manager.start({ pointer: { t: 0, p: 0.5, x: 0, y: 0 } } as TPointerInfo)
+      ;(manager.renderer.drawCurrentSymbol as jest.Mock).mockClear()
+
+      manager.continue({ pointer: { t: 1, p: 0.5, x: 10, y: 10 } } as TPointerInfo)
+      manager.continue({ pointer: { t: 2, p: 0.5, x: 20, y: 20 } } as TPointerInfo)
+      manager.continue({ pointer: { t: 3, p: 0.5, x: 30, y: 30 } } as TPointerInfo)
+
+      // Data is updated synchronously for every point - only the DOM write is throttled.
+      expect((manager.model.currentSymbol as TStroke).pointers).toHaveLength(4)
+      expect(manager.renderer.drawCurrentSymbol).not.toHaveBeenCalled()
+
+      await new Promise((resolve) => requestAnimationFrame(resolve))
+
+      expect(manager.renderer.drawCurrentSymbol).toHaveBeenCalledTimes(1)
+      expect(manager.renderer.drawCurrentSymbol).toHaveBeenCalledWith(manager.model.currentSymbol)
+    })
+
+    test("should still draw the final state immediately on end(), without a pending stale frame", async () => {
+      manager.continue({ pointer: { t: 4, p: 0.5, x: 4, y: 4 } } as TPointerInfo)
+      ;(manager.renderer.drawSymbol as jest.Mock).mockClear()
+      ;(manager.renderer.drawCurrentSymbol as jest.Mock).mockClear()
+
+      await manager.end({ pointer: { t: 5, p: 0.5, x: 5, y: 5 } } as TPointerInfo)
+      expect(manager.renderer.drawSymbol).toHaveBeenCalledTimes(1)
+      expect(manager.renderer.clearCurrentSymbolLayer).toHaveBeenCalledTimes(1)
+
+      // If the pending frame from the continue() above wasn't cancelled, it would fire here
+      // and call drawCurrentSymbol again with a stale (now undefined) currentSymbol.
+      await new Promise((resolve) => requestAnimationFrame(resolve))
+      expect(manager.renderer.drawCurrentSymbol).not.toHaveBeenCalled()
     })
   })
 })
