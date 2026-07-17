@@ -727,7 +727,7 @@ export class RecognizerWebSocket {
     }
     const promises: Promise<void>[] = []
     const _processGestures = processGestures && strokes.length < 3
-    const chunkSize = 10
+    const chunkSize = 1000
     for (let i = 0; i < strokes.length; i += chunkSize) {
       const strokesPart = strokes.slice(i, i + chunkSize)
       const message = this.buildAddStrokesMessage(strokesPart, _processGestures)
