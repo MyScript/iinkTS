@@ -88,6 +88,10 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
   #tool: EditorTool = EditorTool.Write
   #layerUITimer?: ReturnType<typeof setTimeout>
   #recognizeStrokeTimer?: ReturnType<typeof setTimeout>
+  #exportRetryTimer?: ReturnType<typeof setTimeout>
+  #pendingExportRetry?: Promise<TExport>
+  #pendingExportRetryMimeTypes = new Set<string>()
+  static readonly EXPORT_RETRY_DEBOUNCE_MS = 300
   #clipboard: TSymbol[] = []
   #renderedWidth = 0
   #renderedHeight = 0
@@ -410,7 +414,7 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
       this.logger.info("changeLanguage", { code })
       this.manageIdleState(false)
       // Reset the export when changing language to force synchronization.
-      this.model.exports = undefined
+      this.model.invalidateExports()
       this.configuration.recognition.lang = code
       await this.recognizer.newSession(this.configuration)
       const strokes = this.extractStrokesFromSymbols(this.model.symbols)
@@ -1408,7 +1412,16 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
       if (missingMimeTypes.length === 0) {
         return this.model.exports!
       }
+      const versionAtRequest = this.model.version
       const exports = await this.recognizer.export(missingMimeTypes)
+      if (this.model.version !== versionAtRequest) {
+        // The model mutated (e.g. a gesture-triggered stroke erase) while this export request
+        // was in flight — the response reflects a server state that's already superseded, so
+        // merging it would cache stale content. Debounce the retry so a burst of mutations
+        // coalesces into a single re-fetch instead of one per mutation.
+        return this.#debouncedExportRetry(missingMimeTypes)
+      }
+      this.jiix.invalidateIndex()
       this.model.mergeExport(exports as TExport)
       return this.model.exports!
     } catch (error) {
@@ -1416,6 +1429,26 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
       this.manageError(error as Error)
       throw error
     }
+  }
+
+  /**
+   * Coalesces concurrent stale-export retries triggered within the debounce window into a
+   * single re-fetch covering the union of requested mime types.
+   */
+  #debouncedExportRetry(mimeTypes: string[]): Promise<TExport> {
+    mimeTypes.forEach((mt) => this.#pendingExportRetryMimeTypes.add(mt))
+    clearTimeout(this.#exportRetryTimer)
+    if (!this.#pendingExportRetry) {
+      this.#pendingExportRetry = new Promise<TExport>((resolve, reject) => {
+        this.#exportRetryTimer = setTimeout(() => {
+          const mimeTypesToRetry = [...this.#pendingExportRetryMimeTypes]
+          this.#pendingExportRetryMimeTypes.clear()
+          this.#pendingExportRetry = undefined
+          this.export(mimeTypesToRetry).then(resolve, reject)
+        }, InteractiveInkEditor.EXPORT_RETRY_DEBOUNCE_MS)
+      })
+    }
+    return this.#pendingExportRetry
   }
 
   /**
