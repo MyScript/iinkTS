@@ -409,6 +409,8 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
     try {
       this.logger.info("changeLanguage", { code })
       this.manageIdleState(false)
+      // Reset the export when changing language to force synchronization.
+      this.model.exports = undefined
       this.configuration.recognition.lang = code
       await this.recognizer.newSession(this.configuration)
       const strokes = this.extractStrokesFromSymbols(this.model.symbols)
