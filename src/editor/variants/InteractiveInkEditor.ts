@@ -1421,8 +1421,8 @@ export class InteractiveInkEditor extends AbstractEditor implements TInteractive
         // coalesces into a single re-fetch instead of one per mutation.
         return this.#debouncedExportRetry(missingMimeTypes)
       }
-      this.jiix.invalidateIndex()
       this.model.mergeExport(exports as TExport)
+      this.jiix.invalidateIndex()
       return this.model.exports!
     } catch (error) {
       this.logger.error("export", { error })
