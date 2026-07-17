@@ -23,9 +23,6 @@ const writeExpressionAndGetBlockId = async (page, strokes) => {
   return jiix.elements[0].id
 }
 
-// Fewer ellipse points on WebKit — see buildSurroundPointers in helper.js for why.
-const surroundStepsFor = (browserName) => (browserName === "webkit" ? 12 : 32)
-
 test.describe("Math Context Menu", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/offscreen-interactivity/offscreen_interactivity_math_context_menu.html`)
@@ -40,13 +37,13 @@ test.describe("Math Context Menu", () => {
   
     const jiixBlockId = await writeExpressionAndGetBlockId(page, sqrt5.strokes)
 
-    await selectBlockViaSurround(page, buildSurroundPointers(sqrt5.strokes, { steps: surroundStepsFor(browserName) }))
+    await selectBlockViaSurround(page, buildSurroundPointers(sqrt5.strokes))
     await openMathContextMenu(page)
     const computeButton = page.locator("#ms-menu-context-math-numerical-computation")
     // The math submenu only becomes visible once IIMenuContext#updateMathMenu's async
     // getAvailableActions/getVariables/getEvaluables round-trip resolves — the default 2500ms
     // expect timeout is too tight under CI load (flaky "Received: hidden" on Safari).
-    await expect(computeButton).toBeVisible({ timeout: 20000 })
+    await expect(computeButton).toBeVisible({ timeout: 5000 })
     await computeButton.click()
 
     await expect
@@ -62,7 +59,7 @@ test.describe("Math Context Menu", () => {
   test('Try it — Check diagnostic: write 1/0=, circle it, Check diagnostic → DIVISION_BY_ZERO', async ({ page, browserName }) => {
     await writeExpressionAndGetBlockId(page, oneFracZero.strokes)
 
-    await selectBlockViaSurround(page, buildSurroundPointers(oneFracZero.strokes, { steps: surroundStepsFor(browserName) }))
+    await selectBlockViaSurround(page, buildSurroundPointers(oneFracZero.strokes))
     await openMathContextMenu(page)
     const checkDiagnosticButton = page.locator("#ms-menu-context-math-check-diagnostic")
     await expect(checkDiagnosticButton).toBeVisible({ timeout: 8000 })
@@ -78,7 +75,7 @@ test.describe("Math Context Menu", () => {
   test("Try it — Function evaluation: write f(x)=x², circle, Evaluate function, set range −5 to 5", async ({ page, browserName }) => {
     await writeExpressionAndGetBlockId(page, fxEqualsX2.strokes)
 
-    await selectBlockViaSurround(page, buildSurroundPointers(fxEqualsX2.strokes, { steps: surroundStepsFor(browserName) }))
+    await selectBlockViaSurround(page, buildSurroundPointers(fxEqualsX2.strokes))
     await openMathContextMenu(page)
 
     await expect(page.locator("#ms-menu-context-math-evaluate")).toBeVisible({ timeout: 8000 })
@@ -99,7 +96,7 @@ test.describe("Math Context Menu", () => {
   // enter a number, then Compute.
   test("Try it — Set variable: write 2x+5=, circle, Set variable value, then Compute", async ({ page, browserName }) => {
     const jiixBlockId = await writeExpressionAndGetBlockId(page, twoXPlus5.strokes)
-    const surroundPointers = buildSurroundPointers(twoXPlus5.strokes, { steps: surroundStepsFor(browserName) })
+    const surroundPointers = buildSurroundPointers(twoXPlus5.strokes)
 
     await selectBlockViaSurround(page, surroundPointers)
     const selectedIds = await page.evaluate(() => editorEl.editor.model.symbolsSelected.map((s) => s.id))

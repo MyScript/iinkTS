@@ -1,3 +1,4 @@
+import { EditorTool } from "@/Constants"
 import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
 import { LoggerCategory } from "@/logger"
 import type {
@@ -55,6 +56,9 @@ export class IISynchronizerManager extends IIAbstractManager {
 
     try {
       await this.#synchronizePromise
+      if (this.editor.tool === EditorTool.Select) {
+        this.editor.menu.context.update()
+      }
     } finally {
       this.#synchronizePromise = undefined
     }
@@ -133,8 +137,6 @@ export class IISynchronizerManager extends IIAbstractManager {
 
     try {
       await this.editor.export(["application/vnd.myscript.jiix"])
-
-      this.editor.jiix.invalidateIndex()
       this.editor.history.update(this.model)
     } catch (error) {
       this.logger.error("#doSynchronize", "Failed to export JIIX:", error)
@@ -192,7 +194,7 @@ export class IISynchronizerManager extends IIAbstractManager {
     await Promise.resolve()
 
     // Enrich math blocks with dependencies — parallel with individual timeout to avoid one hanging block stalling the whole sync
-    const mathBlockIds = this.editor.jiix.getAllMathBlocksWithStrokes().map((m) => m.mathBlock.id)
+    const mathBlockIds = this.model.mathBlocks.map((m) => m.id)
     const ENRICH_TIMEOUT_MS = 5000
     await Promise.allSettled(
       mathBlockIds.map(async (blockId) => {

@@ -11,6 +11,7 @@ import { JIIXElementType } from "./Export"
 export class IIModel {
   #logger = LoggerManager.getLogger(LoggerCategory.MODEL)
   #symbolsMap = new Map<string, TSymbol>()
+  #version = 0
   readonly creationTime: number
   modificationDate: number
   symbols: TSymbol[]
@@ -92,8 +93,7 @@ export class IIModel {
     }
     this.symbols.push(symbol)
     this.#symbolsMap.set(symbol.id, symbol)
-    this.modificationDate = Date.now()
-    this.exports = undefined
+    this.#markDirty()
     this.#logger.debug("addSymbol", this.symbols)
   }
 
@@ -106,8 +106,7 @@ export class IIModel {
       updatedSymbol.modificationDate = Date.now()
       this.symbols.splice(sIndex, 1, updatedSymbol)
       this.#symbolsMap.set(updatedSymbol.id, updatedSymbol)
-      this.modificationDate = Date.now()
-      this.exports = undefined
+      this.#markDirty()
     }
     this.#logger.debug("updateSymbol", this.symbols)
   }
@@ -118,8 +117,7 @@ export class IIModel {
       this.symbols.splice(sIndex, 1, ...symbols)
       this.#symbolsMap.delete(id)
       symbols.forEach((s) => this.#symbolsMap.set(s.id, s))
-      this.modificationDate = Date.now()
-      this.exports = undefined
+      this.#markDirty()
     }
   }
 
@@ -153,8 +151,7 @@ export class IIModel {
     if (symbolIndex !== -1) {
       this.symbols.splice(symbolIndex, 1)
       this.#symbolsMap.delete(id)
-      this.modificationDate = Date.now()
-      this.exports = undefined
+      this.#markDirty()
     }
     this.#logger.debug("removeSymbol", this.symbols)
   }
@@ -170,6 +167,29 @@ export class IIModel {
       added: this.symbols.filter((s) => !modelKeys.has(`${s.id}:${s.modificationDate}`)),
       removed: model.symbols.filter((s) => !thisKeys.has(`${s.id}:${s.modificationDate}`)),
     }
+  }
+
+  /**
+   * Bumped on every mutation that invalidates `exports` (add/remove/update/replace/clear).
+   * Lets an in-flight export request detect that the model changed while it was waiting
+   * for a server response, so a now-stale response isn't cached as if it were current.
+   */
+  get version(): number {
+    return this.#version
+  }
+
+  /**
+   * Force `exports` to be considered stale (e.g. after a language change), without
+   * going through a symbol mutation.
+   */
+  invalidateExports(): void {
+    this.#markDirty()
+  }
+
+  #markDirty(): void {
+    this.modificationDate = Date.now()
+    this.exports = undefined
+    this.#version++
   }
 
   mergeExport(exports: TExport) {
@@ -198,9 +218,8 @@ export class IIModel {
 
   clear(): void {
     this.#logger.info("clear")
-    this.modificationDate = Date.now()
     this.symbols = []
     this.#symbolsMap.clear()
-    this.exports = undefined
+    this.#markDirty()
   }
 }
