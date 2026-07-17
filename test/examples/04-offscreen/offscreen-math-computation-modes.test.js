@@ -116,7 +116,6 @@ test.describe("Math Computation Modes", () => {
   
     await test.step("6. Redo → ghost should reappear", async () => {
       await page.locator(locator.menu.action.redoBtn).click()
-      let symbols
       await expect
         .poll(async () => {
           return page.locator(`#editorEl ${GHOST_STROKE_SELECTOR}`).count()
