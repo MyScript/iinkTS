@@ -73,8 +73,14 @@ export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfigur
 
   /** Keeps the current-symbol overlay's viewBox/size aligned with `layer`'s. */
   #syncCurrentSymbolLayerViewBox(): void {
-    this.#currentSymbolLayer.setAttribute("width", `${this.#viewBox.width}px`)
-    this.#currentSymbolLayer.setAttribute("height", `${this.#viewBox.height}px`)
+    const width = this.layer.getAttribute("width")
+    const height = this.layer.getAttribute("height")
+    if (width) {
+      this.#currentSymbolLayer.setAttribute("width", width)
+    }
+    if (height) {
+      this.#currentSymbolLayer.setAttribute("height", height)
+    }
     this.#currentSymbolLayer.setAttribute(
       "viewBox",
       `${this.#viewBox.x}, ${this.#viewBox.y}, ${this.#viewBox.width}, ${this.#viewBox.height}`
@@ -736,6 +742,8 @@ export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfigur
     })
     this.#viewBox = { x, y, width, height }
     this.layer.setAttribute("viewBox", `${x}, ${y}, ${width}, ${height}`)
+    bumpSvgTransformVersion(this.layer)
+    this.#syncCurrentSymbolLayerViewBox()
 
     if (redrawGuides && this.configuration.guides.enable) {
       this.removeGuides()
