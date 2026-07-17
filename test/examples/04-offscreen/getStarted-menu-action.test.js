@@ -367,8 +367,14 @@ test.describe("Interactive ink editor Get Started Menu Action", () => {
         waitForGesturedEvent(page),
         writeStrokes(page, helloOneStrokeSurrounded.strokes, 0, 100)
       ])
-      const symbols = await getEditorSymbols(page)
-      expect(symbols).toHaveLength(2)
+
+      let symbols
+      await expect
+        .poll(async () => {
+          symbols = await page.evaluate(() => editorEl.editor.model.symbols)
+          return symbols
+        }, { timeout: 8000 })
+        .toHaveLength(2)
 
       const stroke = symbols.find(s => s.type === "stroke")
       expect(stroke.type).toEqual("stroke")
