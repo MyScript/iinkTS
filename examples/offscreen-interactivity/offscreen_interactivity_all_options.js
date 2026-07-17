@@ -143,8 +143,17 @@ panelToggleBtn.addEventListener("click", () => {
   editor?.resize()
 })
 
+async function updateExportHTMLPan() {
+  // Skip the HTML export while the backend panel is hidden - no point paying for it if nothing shows it.
+  if (exportHtmlPan.style.getPropertyValue("display") === "block") {
+    const HTML = await editor.export(["text/html"])
+    exportHtmlBody.srcdoc = HTML?.["text/html"] || BACKEND_MODEL_EMPTY
+  }
+}
+
 htmlPanToggle.addEventListener("change", (event) => {
   exportHtmlPan.style.setProperty("display", event.target.checked ? "block" : "none")
+  updateExportHTMLPan()
 })
 
 htmlPanCloseBtn.addEventListener("pointerup", () => {
@@ -233,11 +242,7 @@ async function loadEditor(options) {
     updateTabTimeout = setTimeout(() => updateTabContent(), 300)
     clearTimeout(exportTimeout)
     exportTimeout = setTimeout(async () => {
-      // Skip the HTML export while the backend panel is hidden - no point paying for it if nothing shows it.
-      if (exportHtmlPan.style.getPropertyValue("display") === "block") {
-        const HTML = await editor.export(["text/html"])
-        exportHtmlBody.srcdoc = HTML?.["text/html"] || BACKEND_MODEL_EMPTY
-      }
+      updateExportHTMLPan()
     }, 500)
   })
 
