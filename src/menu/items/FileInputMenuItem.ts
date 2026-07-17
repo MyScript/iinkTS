@@ -27,7 +27,7 @@ export class FileInputMenuItem extends BaseMenuItem<HTMLDivElement> {
   createElement(): HTMLDivElement {
     const wrapper = this.dom.div({
       id: this.config.id,
-      className: "ms-menu-file-input",
+      className: "ms-menu-file-input ms-menu-column ms-gap-sm",
     })
 
     this.inputElement = this.dom.fileInput({
@@ -42,6 +42,8 @@ export class FileInputMenuItem extends BaseMenuItem<HTMLDivElement> {
 
     this.buttonElement = this.dom.button({
       label: this.config.buttonLabel || this.config.label || "Upload",
+      variant: "primary",
+      className: "full-width",
     })
     this.buttonElement.disabled = true
     this.buttonElement.addEventListener("pointerup", async (e) => {
@@ -51,6 +53,7 @@ export class FileInputMenuItem extends BaseMenuItem<HTMLDivElement> {
         await this.config.action(this.editor, this.inputElement.files)
         this.inputElement.value = ""
         this.buttonElement.disabled = true
+        wrapper.dispatchEvent(new CustomEvent("ms-menu-close", { bubbles: true }))
       }
     })
     wrapper.appendChild(this.buttonElement)

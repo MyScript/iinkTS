@@ -140,6 +140,8 @@ export class SubMenuItem extends BaseMenuItem<HTMLDivElement> {
     this.subMenuContent.appendChild(this.subMenuWrapper)
     wrapper.appendChild(this.subMenuContent)
 
+    this.subMenuWrapper.addEventListener("ms-menu-close", () => this.close())
+
     this.trigger.addEventListener("pointerdown", () => this.toggle())
     this.#documentPointerdownHandler = (e: PointerEvent) => {
       if (!wrapper.contains(e.target as HTMLElement)) {
