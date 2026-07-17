@@ -192,7 +192,7 @@ export class IISynchronizerManager extends IIAbstractManager {
     await Promise.resolve()
 
     // Enrich math blocks with dependencies — parallel with individual timeout to avoid one hanging block stalling the whole sync
-    const mathBlockIds = this.model.mathBlocks.map((mb) => mb.id)
+    const mathBlockIds = this.editor.jiix.getAllMathBlocksWithStrokes().map((m) => m.mathBlock.id)
     const ENRICH_TIMEOUT_MS = 5000
     await Promise.allSettled(
       mathBlockIds.map(async (blockId) => {
