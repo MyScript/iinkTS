@@ -10,6 +10,7 @@ import { DefaultServerWebsocketConfiguration } from "./ServerConfiguration"
  */
 export type TRecognitionWebSocketConfiguration = {
   lang: string
+  alwaysConnected: boolean
   export: TExportConfiguration
   "raw-content": {
     text?: TTextConfConfiguration
@@ -65,6 +66,7 @@ export const DefaultRecognitionWebSocketConfiguration: TRecognitionWebSocketConf
     gestures: ["underline", "scratch-out", "strike-through", "surround"],
   },
   lang: "en_US",
+  alwaysConnected: true,
   gesture: {
     enable: true,
     ignoreGestureStrokes: false,
@@ -109,6 +111,7 @@ export class RecognizerWebSocketConfiguration implements TRecognizerWebSocketCon
 
     this.recognition = mergeDeep({}, DefaultRecognizerWebSocketConfiguration.recognition, configuration?.recognition)
     this.recognition.export.jiix["full-stroke-ids"] = true
+    // required to draw stroke with math solver
     this.recognition.export.jiix.strokes = true
     this.recognition.export.jiix.ids = true
     this.recognition.export.jiix.text.words = true
