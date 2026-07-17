@@ -726,7 +726,7 @@ export class RecognizerWebSocket {
       return
     }
     const promises: Promise<void>[] = []
-    const _processGestures = processGestures || strokes.length < 3
+    const _processGestures = processGestures && strokes.length < 3
     const chunkSize = 10
     for (let i = 0; i < strokes.length; i += chunkSize) {
       const strokesPart = strokes.slice(i, i + chunkSize)
