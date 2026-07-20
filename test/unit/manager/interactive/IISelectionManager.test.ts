@@ -1,7 +1,17 @@
 import { createEditorMock, asEditor } from "../../__mocks__/createEditorMock"
 import { LeftClickEventMock, RightClickEventMock } from "../../__mocks__/EventMock"
 import { buildIIStroke } from "../../helpers"
-import { IISelectionManager, OBBOps, TBox, SvgElementRole, ResizeDirection, TPointerInfo, TStroke } from "@/iink"
+import {
+  IISelectionManager,
+  OBBOps,
+  TBox,
+  SvgElementRole,
+  ResizeDirection,
+  TPointerInfo,
+  TStroke,
+  DecoratorOps,
+  DecoratorKind,
+} from "@/iink"
 
 describe("IISelectionManager.ts", () => {
   Object.defineProperty(global.SVGElement.prototype, "getBBox", {
@@ -549,6 +559,27 @@ describe("IISelectionManager.ts", () => {
         pointer: { x: 20, y: 20 },
       } as TPointerInfo
       expect(() => manager.continue(info)).toThrow("You need to call startSelectionByBox before")
+    })
+  })
+
+  describe("standalone decorators are never directly selectable", () => {
+    test("box selection over a decorated stroke selects the stroke, not the decorator", () => {
+      const editor = createEditorMock()
+      const manager = new IISelectionManager(asEditor(editor))
+      manager.drawSelectingRect = jest.fn()
+      manager.renderer.updateSelectedState = jest.fn()
+
+      const stroke = buildIIStroke({ box: { height: 10, width: 10, x: 10, y: 10 } })
+      manager.model.addSymbol(stroke)
+      const decorator = DecoratorOps.create(DecoratorKind.Surround, {}, [stroke.id], OBBOps.toBox(stroke.bounds))
+      manager.model.addSymbol(decorator)
+
+      manager.start({ pointer: { x: 1, y: 2 } } as TPointerInfo)
+      manager.continue({ pointer: { x: 20, y: 20 } } as TPointerInfo)
+
+      expect(manager.model.selectedIds.has(stroke.id)).toBe(true)
+      expect(manager.model.selectedIds.has(decorator.id)).toBe(false)
+      expect(manager.renderer.updateSelectedState).not.toHaveBeenCalledWith(decorator, true)
     })
   })
 })

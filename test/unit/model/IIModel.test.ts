@@ -5,12 +5,12 @@ import { IIModel, TExport } from "@/iink"
 describe("IIModel.ts", () => {
   const rowHeight = 10
   test("should create", () => {
-    const model = new IIModel(rowHeight)
+    const model = new IIModel()
     expect(model).toBeDefined()
   })
 
   describe("crud symbols", () => {
-    const model = new IIModel(rowHeight)
+    const model = new IIModel()
     const sym = buildIIStroke()
     test("should addSymbol", () => {
       expect(model.symbols).toHaveLength(0)
@@ -76,7 +76,7 @@ describe("IIModel.ts", () => {
   })
 
   describe("change symbol order", () => {
-    const model = new IIModel(rowHeight)
+    const model = new IIModel()
     const sym1 = buildIIStroke()
     model.addSymbol(sym1)
     const sym2 = buildIIStroke()
@@ -136,54 +136,8 @@ describe("IIModel.ts", () => {
     })
   })
 
-  describe("get symbols with row index", () => {
-    const model = new IIModel(rowHeight)
-
-    const stroke51 = buildIIStroke({ box: { height: 9, width: 10, x: 0, y: 4.6 * rowHeight } })
-    model.addSymbol(stroke51)
-
-    const stroke12 = buildIIStroke({ box: { height: 9, width: 100, x: 50, y: rowHeight / 2 } })
-    model.addSymbol(stroke12)
-
-    const circle13 = buildIICircle({ center: { x: 200, y: rowHeight * 1.4 }, radius: 5 })
-    model.addSymbol(circle13)
-
-    const circle22 = buildIICircle({ center: { x: 200, y: rowHeight * 2.25 }, radius: 5 })
-    model.addSymbol(circle22)
-
-    const stroke21 = buildIIStroke({ box: { height: 9, width: 10, x: 0, y: 1.6 * rowHeight } })
-    model.addSymbol(stroke21)
-
-    const stroke11 = buildIIStroke({ box: { height: 9, width: 10, x: 0, y: rowHeight / 2 } })
-    model.addSymbol(stroke11)
-
-    const stroke31 = buildIIStroke({ box: { height: 9, width: 10, x: 0, y: 2.6 * rowHeight } })
-    model.addSymbol(stroke31)
-
-    test("shoud get rowIndex for each symbols", () => {
-      expect(model.getSymbolRowIndex(stroke11)).toEqual(1)
-      expect(model.getSymbolRowIndex(stroke12)).toEqual(1)
-      expect(model.getSymbolRowIndex(circle13)).toEqual(1)
-      expect(model.getSymbolRowIndex(circle22)).toEqual(2)
-      expect(model.getSymbolRowIndex(stroke21)).toEqual(2)
-      expect(model.getSymbolRowIndex(stroke31)).toEqual(3)
-      expect(model.getSymbolRowIndex(stroke51)).toEqual(5)
-    })
-    test("shoud get symbols group by row and ordered", () => {
-      const rows = model.getSymbolsByRowOrdered()
-      expect(rows[0].rowIndex).toEqual(1)
-      expect(rows[0].symbols).toEqual([stroke11, stroke12, circle13])
-      expect(rows[1].rowIndex).toEqual(2)
-      expect(rows[1].symbols).toEqual([stroke21, circle22])
-      expect(rows[2].rowIndex).toEqual(3)
-      expect(rows[2].symbols).toEqual([stroke31])
-      expect(rows[3].rowIndex).toEqual(5)
-      expect(rows[3].symbols).toEqual([stroke51])
-    })
-  })
-
   describe("get root symbol", () => {
-    const model = new IIModel(rowHeight)
+    const model = new IIModel()
 
     const stroke1 = buildIIStroke()
     model.addSymbol(stroke1)
@@ -202,98 +156,8 @@ describe("IIModel.ts", () => {
     })
   })
 
-  describe("roundToLineGuide", () => {
-    const model = new IIModel(rowHeight)
-    test("should return row height", () => {
-      expect(model.roundToLineGuide(1.4 * rowHeight)).toEqual(rowHeight)
-    })
-    test("should return 2 row height", () => {
-      expect(model.roundToLineGuide(1.6 * rowHeight)).toEqual(2 * rowHeight)
-    })
-  })
-
-  describe("isSymbol", () => {
-    const model = new IIModel(rowHeight)
-    const s11 = buildIIStroke({ box: { height: rowHeight / 2, width: 5, x: 5, y: rowHeight } })
-    const s12 = buildIIStroke({ box: { height: rowHeight / 2, width: 5, x: 50, y: rowHeight } })
-    const s21 = buildIIStroke({ box: { height: rowHeight * 2, width: 5, x: 5, y: rowHeight } })
-    const s22 = buildIIStroke({ box: { height: rowHeight * 2, width: 5, x: 50, y: rowHeight } })
-    test("above should return false", () => {
-      expect(model.isSymbolAbove(s11, s12)).toEqual(false)
-    })
-    test("above should return false", () => {
-      expect(model.isSymbolAbove(s11, s21)).toEqual(false)
-    })
-    test("above should return false", () => {
-      expect(model.isSymbolAbove(s12, s21)).toEqual(false)
-    })
-    test("above should return true", () => {
-      expect(model.isSymbolAbove(s21, s12)).toEqual(true)
-    })
-    test("above should return false", () => {
-      expect(model.isSymbolAbove(s21, s22)).toEqual(false)
-    })
-    test("in row should return false", () => {
-      expect(model.isSymbolInRow(s11, s12)).toEqual(true)
-    })
-    test("in row should return false", () => {
-      expect(model.isSymbolInRow(s11, s21)).toEqual(false)
-    })
-    test("in row should return false", () => {
-      expect(model.isSymbolInRow(s12, s21)).toEqual(false)
-    })
-    test("in row should return true", () => {
-      expect(model.isSymbolInRow(s21, s12)).toEqual(false)
-    })
-    test("in row should return false", () => {
-      expect(model.isSymbolInRow(s21, s22)).toEqual(true)
-    })
-    test("below should return false", () => {
-      expect(model.isSymbolBelow(s11, s12)).toEqual(false)
-    })
-    test("below should return false", () => {
-      expect(model.isSymbolBelow(s11, s21)).toEqual(true)
-    })
-    test("below should return false", () => {
-      expect(model.isSymbolBelow(s12, s21)).toEqual(true)
-    })
-    test("below should return true", () => {
-      expect(model.isSymbolBelow(s21, s12)).toEqual(false)
-    })
-    test("below should return false", () => {
-      expect(model.isSymbolBelow(s21, s22)).toEqual(false)
-    })
-  })
-
-  describe("get first/last symbol", () => {
-    const model = new IIModel(rowHeight)
-    const s11 = buildIIStroke({ box: { height: rowHeight / 2, width: 5, x: 5, y: rowHeight } })
-    const s21 = buildIIStroke({ box: { height: rowHeight * 2, width: 5, x: 5, y: rowHeight } })
-    const s22 = buildIIStroke({ box: { height: rowHeight * 2, width: 5, x: 50, y: rowHeight } })
-    const s23 = buildIIStroke({ box: { height: rowHeight * 2, width: 5, x: 150, y: rowHeight } })
-    const s31 = buildIIStroke({ box: { height: rowHeight * 3, width: 5, x: 5, y: rowHeight } })
-    test("should return first symbol when different rows", () => {
-      expect(model.getFirstSymbol([s11, s21, s31])).toEqual(s11)
-    })
-    test("should return first symbol when in same row", () => {
-      expect(model.getFirstSymbol([s21, s22, s23])).toEqual(s21)
-    })
-    test("should return first symbol when only 1 symbol", () => {
-      expect(model.getFirstSymbol([s21])).toEqual(s21)
-    })
-    test("should return last symbol when different rows", () => {
-      expect(model.getLastSymbol([s11, s21, s31])).toEqual(s31)
-    })
-    test("should return last symbol when in same row", () => {
-      expect(model.getLastSymbol([s21, s22, s23])).toEqual(s23)
-    })
-    test("should return last symbol when only 1 symbol", () => {
-      expect(model.getLastSymbol([s21])).toEqual(s21)
-    })
-  })
-
   describe("selection", () => {
-    const model = new IIModel(rowHeight)
+    const model = new IIModel()
     const stroke1 = buildIIStroke({ box: { height: 10, width: 10, x: 0, y: 0 } })
     model.addSymbol(stroke1)
     const stroke2 = buildIIStroke({ box: { height: 10, width: 10, x: 20, y: 0 } })
@@ -322,7 +186,7 @@ describe("IIModel.ts", () => {
   })
 
   describe("extract", () => {
-    const model = new IIModel(rowHeight)
+    const model = new IIModel()
     model.addSymbol(buildIIStroke())
     model.addSymbol(buildIIStroke())
 
@@ -350,7 +214,7 @@ describe("IIModel.ts", () => {
   })
 
   describe("export", () => {
-    const model = new IIModel(rowHeight)
+    const model = new IIModel()
     const e: TExport = { "text/plain": "poney" }
     test("should define export to undefined", () => {
       expect(model.exports).toBeUndefined()
@@ -382,7 +246,7 @@ describe("IIModel.ts", () => {
   })
 
   describe("clone", () => {
-    const model = new IIModel(rowHeight)
+    const model = new IIModel()
     const stroke = buildIIStroke()
     model.addSymbol(stroke)
     model.exports = { "text/plain": "M" }
@@ -395,14 +259,11 @@ describe("IIModel.ts", () => {
 
   describe("clear", () => {
     test("should clear model", () => {
-      const model = new IIModel(rowHeight)
-      model.currentSymbol = buildIIStroke()
+      const model = new IIModel()
       model.addSymbol(buildIIStroke())
-      expect(model.currentSymbol).toBeDefined()
       expect(model.symbols).toHaveLength(1)
 
       model.clear()
-      expect(model.currentSymbol).toBeUndefined()
       expect(model.symbols).toHaveLength(0)
     })
   })

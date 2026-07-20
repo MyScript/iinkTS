@@ -416,8 +416,6 @@ describe("Model.ts", () => {
 
       expect(clone.height).toEqual(model.height)
 
-      expect(clone.idle).toEqual(model.idle)
-
       expect(clone.positions).toEqual(model.positions)
       expect(clone.positions).not.toBe(model.positions)
 

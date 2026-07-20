@@ -1,6 +1,8 @@
 import { createEditorMock, asEditor } from "../../../__mocks__/createEditorMock"
 import { buildIIStroke } from "../../../helpers"
 import {
+  DecoratorKind,
+  DecoratorOps,
   EdgeLineOps,
   IITranslateManager,
   OBBOps,
@@ -196,6 +198,47 @@ describe("IITranslateManager.ts", () => {
       await manager.translate([stroke], 10, 20, false)
 
       expect(editor.math.applyTransformToGhostStrokes).toHaveBeenCalledWith("block-1", expect.anything())
+    })
+  })
+
+  describe("standalone decorator bounds follow translated targets", () => {
+    test("translate() recomputes the decorator's bounds from its (moved) target symbols", async () => {
+      const editor = createEditorMock()
+      const manager = new IITranslateManager(asEditor(editor))
+
+      const stroke = buildIIStroke()
+      editor.model.addSymbol(stroke)
+      const decorator = DecoratorOps.create(DecoratorKind.Highlight, {}, [stroke.id], OBBOps.toBox(stroke.bounds))
+      editor.model.addSymbol(decorator)
+      const centerBefore = { ...decorator.bounds.center }
+
+      await manager.translate([stroke], 10, 20, false)
+
+      expect(decorator.bounds.center).toEqual(
+        expect.objectContaining({ x: centerBefore.x + 10, y: centerBefore.y + 20 })
+      )
+    })
+
+    test("translate() leaves other decorators (not targeting a moved symbol) untouched", async () => {
+      const editor = createEditorMock()
+      const manager = new IITranslateManager(asEditor(editor))
+
+      const movedStroke = buildIIStroke()
+      const otherStroke = buildIIStroke()
+      editor.model.addSymbol(movedStroke)
+      editor.model.addSymbol(otherStroke)
+      const decorator = DecoratorOps.create(
+        DecoratorKind.Highlight,
+        {},
+        [otherStroke.id],
+        OBBOps.toBox(otherStroke.bounds)
+      )
+      editor.model.addSymbol(decorator)
+      const centerBefore = { ...decorator.bounds.center }
+
+      await manager.translate([movedStroke], 10, 20, false)
+
+      expect(decorator.bounds.center).toEqual(centerBefore)
     })
   })
 })

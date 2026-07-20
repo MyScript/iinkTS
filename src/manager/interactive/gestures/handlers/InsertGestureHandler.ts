@@ -119,7 +119,7 @@ export class InsertGestureHandler extends GestureHandler {
     const symbolsAfterGestureInRow = this.model.symbols.filter(
       (s) =>
         gestureStroke.id !== s.id &&
-        this.model.isSymbolInRow(gestureStroke, s) &&
+        this.isSymbolInRow(gestureStroke, s) &&
         gestureStroke.bounds.center.x < s.bounds.center.x - s.bounds.width / 2
     )
 
@@ -169,10 +169,10 @@ export class InsertGestureHandler extends GestureHandler {
     const symbolsAfterGestureInRow = this.model.symbols.filter(
       (s) =>
         gestureStroke.id !== s.id &&
-        this.model.isSymbolInRow(gestureStroke, s) &&
+        this.isSymbolInRow(gestureStroke, s) &&
         gestureStroke.bounds.center.x < s.bounds.center.x - s.bounds.width / 2
     )
-    const symbolsBelow = this.model.symbols.filter((s) => this.model.isSymbolBelow(gestureStroke, s))
+    const symbolsBelow = this.model.symbols.filter((s) => this.isSymbolBelow(gestureStroke, s))
 
     const charsBefore = textToSplit.chars.filter(
       (c) => c.bounds.x + c.bounds.width / 2 <= gestureStroke.bounds.center.x
@@ -251,7 +251,7 @@ export class InsertGestureHandler extends GestureHandler {
     })
 
     const symbolsRow = this.model.symbols.filter(
-      (s) => gestureStroke.id !== s.id && this.model.isSymbolInRow(gestureStroke, s)
+      (s) => gestureStroke.id !== s.id && this.isSymbolInRow(gestureStroke, s)
     )
     const textToSplit = symbolsRow.find(
       (s) =>
@@ -269,7 +269,7 @@ export class InsertGestureHandler extends GestureHandler {
       (s) => gestureStroke.bounds.center.x < s.bounds.center.x - s.bounds.width / 2
     )
 
-    const symbolsBelow = this.model.symbols.filter((s) => this.model.isSymbolBelow(gestureStroke, s))
+    const symbolsBelow = this.model.symbols.filter((s) => this.isSymbolBelow(gestureStroke, s))
 
     let changes: TIIHistoryChanges | undefined
     if (gesture.strokeIds.length && gesture.subStrokes?.length) {

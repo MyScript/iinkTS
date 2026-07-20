@@ -28,7 +28,7 @@ describe("SVGRenderer.ts", () => {
     renderer.init(divElement)
     test("should create layer", () => {
       const elements = divElement.getElementsByTagName("svg")
-      expect(elements).toHaveLength(1)
+      expect(elements).toHaveLength(2) // main layer + current-symbol overlay
       const layer = elements.item(0) as SVGElement
       expect(renderer.layer).toBe(layer)
     })
@@ -311,7 +311,7 @@ describe("SVGRenderer.ts", () => {
     renderer.init(divElement)
     renderer.drawCircle({ x: 10, y: 5 }, 42, { id: "test", fill: "red" })
 
-    expect(divElement.children).toHaveLength(1)
+    expect(divElement.children).toHaveLength(2) // main layer + current-symbol overlay
     const el = divElement.querySelector("#test")!
     expect(el.tagName).toEqual("circle")
     expect(el.getAttribute("cx")).toEqual("10")
@@ -326,7 +326,7 @@ describe("SVGRenderer.ts", () => {
     renderer.init(divElement)
     renderer.drawRect({ height: 10, width: 5, x: 0, y: 2 }, { id: "test", stroke: "blue" })
 
-    expect(divElement.children).toHaveLength(1)
+    expect(divElement.children).toHaveLength(2) // main layer + current-symbol overlay
     const el = divElement.querySelector("#test")!
     expect(el.tagName).toEqual("rect")
     expect(el.getAttribute("x")).toEqual("0")
@@ -342,7 +342,7 @@ describe("SVGRenderer.ts", () => {
     renderer.init(divElement)
     renderer.drawLine({ x: 0, y: 1 }, { x: 5, y: 10 }, { id: "test", stroke: "blue" })
 
-    expect(divElement.children).toHaveLength(1)
+    expect(divElement.children).toHaveLength(2) // main layer + current-symbol overlay
     const el = divElement.querySelector("#test")!
     expect(el.tagName).toEqual("line")
     expect(el.getAttribute("x1")).toEqual("0")
@@ -438,7 +438,7 @@ describe("SVGRenderer.ts", () => {
     const divElement: HTMLDivElement = document.createElement("div")
     const renderer = new SVGRenderer(DefaultIIRendererConfiguration)
     renderer.init(divElement)
-    expect(divElement.childElementCount).toEqual(1)
+    expect(divElement.childElementCount).toEqual(2) // main layer + current-symbol overlay
     renderer.destroy()
     expect(divElement.childElementCount).toEqual(0)
   })

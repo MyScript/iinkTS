@@ -9,6 +9,7 @@ import { BoxOps } from "@/symbol/primitives/Box"
 import { OBBOps } from "@/symbol/primitives/OBB"
 import { TextOps } from "@/symbol/text/Text"
 import { MatrixTransform } from "@/transform"
+import { roundTo } from "@/utils"
 
 /**
  * Handler for JOIN gesture type
@@ -28,9 +29,9 @@ export class JoinGestureHandler extends GestureHandler {
       gesture,
     })
 
-    const symbolsAbove = this.model.symbols.filter((s) => this.model.isSymbolAbove(gestureStroke, s))
+    const symbolsAbove = this.model.symbols.filter((s) => this.isSymbolAbove(gestureStroke, s))
     const symbolsRow = this.model.symbols.filter(
-      (s) => gestureStroke.id !== s.id && this.model.isSymbolInRow(gestureStroke, s)
+      (s) => gestureStroke.id !== s.id && this.isSymbolInRow(gestureStroke, s)
     )
 
     const symbolsBeforeGestureInRow = symbolsRow.filter(
@@ -39,7 +40,7 @@ export class JoinGestureHandler extends GestureHandler {
     const symbolsAfterGestureInRow = symbolsRow.filter(
       (s) => s.bounds.center.x - s.bounds.width / 2 > gestureStroke.bounds.center.x
     )
-    const symbolsBelow = this.model.symbols.filter((s) => this.model.isSymbolBelow(gestureStroke, s))
+    const symbolsBelow = this.model.symbols.filter((s) => this.isSymbolBelow(gestureStroke, s))
 
     const changes: TIIHistoryChanges = {}
     const translate: {
@@ -49,8 +50,8 @@ export class JoinGestureHandler extends GestureHandler {
     }[] = []
 
     if (symbolsBeforeGestureInRow.length && symbolsAfterGestureInRow.length) {
-      const lastSymbBefore = this.model.getLastSymbol(symbolsBeforeGestureInRow)!
-      const firstSymbolAfter = this.model.getFirstSymbol(symbolsAfterGestureInRow)!
+      const lastSymbBefore = this.getLastSymbol(symbolsBeforeGestureInRow)!
+      const firstSymbolAfter = this.getFirstSymbol(symbolsAfterGestureInRow)!
 
       let lastXBefore = symbolsBeforeGestureInRow[0].bounds.center.x + symbolsBeforeGestureInRow[0].bounds.width / 2
       for (let i = 1; i < symbolsBeforeGestureInRow.length; i++) {
@@ -95,14 +96,14 @@ export class JoinGestureHandler extends GestureHandler {
         })
       }
     } else if (symbolsBeforeGestureInRow.length) {
-      const lastSymbolBeforeGesture = this.model.getLastSymbol(symbolsBeforeGestureInRow)!
-      const firstSymbolAfterGesture = this.model.getFirstSymbol(symbolsBelow)
+      const lastSymbolBeforeGesture = this.getLastSymbol(symbolsBeforeGestureInRow)!
+      const firstSymbolAfterGesture = this.getFirstSymbol(symbolsBelow)
       if (firstSymbolAfterGesture) {
         if (
-          this.model.roundToLineGuide(lastSymbolBeforeGesture.bounds.center.y) >=
-          this.model.roundToLineGuide(firstSymbolAfterGesture.bounds.center.y - this.rowHeight)
+          roundTo(lastSymbolBeforeGesture.bounds.center.y, this.rowHeight) >=
+          roundTo(firstSymbolAfterGesture.bounds.center.y - this.rowHeight, this.rowHeight)
         ) {
-          const symbolInNextRow = symbolsBelow.filter((s) => this.model.isSymbolInRow(firstSymbolAfterGesture, s))
+          const symbolInNextRow = symbolsBelow.filter((s) => this.isSymbolInRow(firstSymbolAfterGesture, s))
           if (symbolInNextRow.length) {
             const translateX =
               lastSymbolBeforeGesture.bounds.center.x +
@@ -115,7 +116,7 @@ export class JoinGestureHandler extends GestureHandler {
               ty: -this.rowHeight,
             })
           }
-          const symbolsAfterNextRow = symbolsBelow.filter((s) => this.model.isSymbolBelow(firstSymbolAfterGesture, s))
+          const symbolsAfterNextRow = symbolsBelow.filter((s) => this.isSymbolBelow(firstSymbolAfterGesture, s))
           if (symbolsAfterNextRow.length) {
             translate.push({
               symbols: symbolsAfterNextRow,
@@ -132,12 +133,12 @@ export class JoinGestureHandler extends GestureHandler {
         })
       }
     } else if (symbolsAfterGestureInRow.length) {
-      const firstSymbolAfterGesture = this.model.getFirstSymbol(symbolsAfterGestureInRow)!
-      const lastSymbolAbove = this.model.getLastSymbol(symbolsAbove)
+      const firstSymbolAfterGesture = this.getFirstSymbol(symbolsAfterGestureInRow)!
+      const lastSymbolAbove = this.getLastSymbol(symbolsAbove)
       if (lastSymbolAbove) {
         if (
-          this.model.roundToLineGuide(lastSymbolAbove.bounds.center.y) >=
-          this.model.roundToLineGuide(firstSymbolAfterGesture.bounds.center.y - this.rowHeight)
+          roundTo(lastSymbolAbove.bounds.center.y, this.rowHeight) >=
+          roundTo(firstSymbolAfterGesture.bounds.center.y - this.rowHeight, this.rowHeight)
         ) {
           const translateX =
             lastSymbolAbove.bounds.center.x +
