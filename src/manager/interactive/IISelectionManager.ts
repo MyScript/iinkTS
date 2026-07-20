@@ -832,6 +832,12 @@ export class IISelectionManager extends IIAbstractManager {
     const shapeSets = this.getShapeGroupSets(selectionBox)
 
     this.model.symbols.forEach((s) => {
+      // Standalone decorators are never directly selectable — selecting one only ever
+      // happens by redirect to its targetIds (see onContextMenu).
+      if (isDecorator(s)) {
+        return
+      }
+
       let shouldBeSelected: boolean
 
       if (s.type === SymbolType.Stroke) {
