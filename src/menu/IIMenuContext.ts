@@ -1,6 +1,7 @@
 import { DOMFactory } from "@/components/dom"
 import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
 import { LoggerCategory, LoggerManager } from "@/logger"
+import type { TJIIXMathElement } from "@/model"
 import type { TStroke, TSymbol, TText } from "@/symbol"
 import { isStroke, isText } from "@/symbol"
 import { TextOps } from "@/symbol/text/Text"
@@ -128,19 +129,16 @@ export class IIMenuContext {
     return this.symbolsDecorable.length > 0
   }
 
-  get hasSingleMathSymbol(): boolean {
-    return (
-      this.editor.jiix.getBlocksForSymbols(this.editor.model.symbolsSelected).filter((s) => s.type === "Math")
-        .length === 1
-    )
+  get mathBlocksSelected(): TJIIXMathElement[] {
+    return this.editor.jiix.getBlocksForSymbols(this.editor.model.symbolsSelected).filter((s) => s.type === "Math")
   }
 
   protected async updateMathMenu(): Promise<void> {
     const mathMenuInstance = this.contextMenus.get("math") as MathContextMenu | undefined
     if (mathMenuInstance) {
-      if (this.hasSingleMathSymbol) {
-        const mathSymbol = this.symbolsSelected[0] as TStroke
-        if (!mathSymbol.jiixBlockId) {
+      if (this.mathBlocksSelected.length === 1) {
+        const mathBlock = this.mathBlocksSelected[0]
+        if (!mathBlock.id) {
           mathMenuInstance.setMenuVisibility(false, {
             canEditVariables: false,
             canCompute: false,
@@ -149,15 +147,15 @@ export class IIMenuContext {
           return
         }
         const [actions, variables, evaluables] = await Promise.all([
-          this.editor.math.getAvailableActions(mathSymbol.jiixBlockId),
-          this.editor.math.getVariables(mathSymbol.jiixBlockId),
-          this.editor.math.getEvaluables(mathSymbol.jiixBlockId),
+          this.editor.math.getAvailableActions(mathBlock.id),
+          this.editor.math.getVariables(mathBlock.id),
+          this.editor.math.getEvaluables(mathBlock.id),
         ])
 
         const canEditVariables = Object.keys(variables).length > 0
         const canCompute = actions?.includes("numerical-computation")
         const canEvaluate = evaluables?.length ? true : false
-        const hasDrawSolverOutputs = this.editor.math.hasDrawSolverOutputs(mathSymbol.jiixBlockId)
+        const hasDrawSolverOutputs = this.editor.math.hasDrawSolverOutputs(mathBlock.id)
         mathMenuInstance.setMenuVisibility(true, {
           canEditVariables,
           canCompute,

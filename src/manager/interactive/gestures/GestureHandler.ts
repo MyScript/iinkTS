@@ -108,6 +108,61 @@ export abstract class GestureHandler implements TGestureHandler {
     return this.editor.configuration.rendering.guides.gap
   }
 
+  private getSymbolRowIndex(symbol: TSymbol): number {
+    // Use symbol bounds yMid for row calculation
+    return Math.round(symbol.bounds.center.y / this.rowHeight)
+  }
+
+  protected isSymbolAbove(source: TSymbol, target: TSymbol): boolean {
+    return this.getSymbolRowIndex(source) > this.getSymbolRowIndex(target)
+  }
+
+  protected isSymbolInRow(source: TSymbol, target: TSymbol): boolean {
+    return this.getSymbolRowIndex(source) === this.getSymbolRowIndex(target)
+  }
+
+  protected isSymbolBelow(source: TSymbol, target: TSymbol): boolean {
+    return this.getSymbolRowIndex(source) < this.getSymbolRowIndex(target)
+  }
+
+  protected getFirstSymbol(symbols: TSymbol[]): TSymbol | undefined {
+    if (!symbols.length) {
+      return
+    }
+    return symbols.reduce((previous, current) => {
+      if (previous) {
+        if (this.getSymbolRowIndex(previous) < this.getSymbolRowIndex(current)) {
+          return previous
+        } else if (
+          this.getSymbolRowIndex(previous) == this.getSymbolRowIndex(current) &&
+          previous.bounds.center.x < current.bounds.center.x
+        ) {
+          return previous
+        }
+      }
+      return current
+    })
+  }
+
+  protected getLastSymbol(symbols: TSymbol[]): TSymbol | undefined {
+    if (!symbols.length) {
+      return
+    }
+    return symbols.reduce((previous, current) => {
+      if (previous) {
+        if (this.getSymbolRowIndex(previous) > this.getSymbolRowIndex(current)) {
+          return previous
+        }
+        if (this.getSymbolRowIndex(previous) < this.getSymbolRowIndex(current)) {
+          return current
+        } else if (previous.bounds.center.x > current.bounds.center.x) {
+          return previous
+        }
+      }
+      return current
+    })
+  }
+
   /**
    * Get the stroke space width from configuration
    */

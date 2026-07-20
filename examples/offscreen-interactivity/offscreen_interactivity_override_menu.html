@@ -215,7 +215,6 @@
           </svg>`
 
           this.#resetZoomBtn.addEventListener('pointerdown', () => {
-            console.log('this: ', this);
             this.editor.zoom(1)
             showToast('Zoom reset to 100%')
           })

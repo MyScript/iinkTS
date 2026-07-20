@@ -5,7 +5,8 @@
     "outDir": "../../dist-test",
     "types": [
       "@types/jest",
-      "jest-websocket-mock"
+      "jest-websocket-mock",
+      "node"
     ]
   },
   "include": [

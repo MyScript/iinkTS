@@ -1,0 +1,139 @@
+import { buildIIStroke } from "../../helpers"
+import { createEditorMock, asEditor } from "../../__mocks__/createEditorMock"
+import { IISynchronizerManager, JIIXElementType, TJIIXExport, TJIIXTextElement, TStroke } from "@/iink"
+
+function buildTextElement(id: string, strokeId: string): TJIIXTextElement {
+  return {
+    type: JIIXElementType.Text,
+    id,
+    label: "a",
+    words: [
+      {
+        label: "a",
+        items: [{ type: "stroke", id: `item-${id}`, "full-id": strokeId }],
+      },
+    ],
+  }
+}
+
+function buildJiixExport(elements: TJIIXTextElement[]): TJIIXExport {
+  return {
+    type: "Text",
+    id: "root",
+    version: "3",
+    elements,
+  }
+}
+
+describe("IISynchronizerManager.ts", () => {
+  test("should create", () => {
+    const editor = createEditorMock()
+    const manager = new IISynchronizerManager(asEditor(editor))
+    expect(manager).toBeDefined()
+  })
+
+  describe("synchronize()", () => {
+    function setup(strokeCount: number) {
+      const editor = createEditorMock()
+      const strokes: TStroke[] = []
+      for (let i = 0; i < strokeCount; i++) {
+        const stroke = buildIIStroke()
+        editor.model.addSymbol(stroke)
+        strokes.push(stroke)
+      }
+      const elements = strokes.map((stroke, i) => buildTextElement(`block-${i}`, stroke.id))
+      const jiixExport = buildJiixExport(elements)
+      editor.export = jest.fn().mockImplementation(async () => {
+        editor.model.exports = { "application/vnd.myscript.jiix": jiixExport }
+      })
+
+      const rafSpy = jest.fn().mockImplementation((cb: FrameRequestCallback) => {
+        setTimeout(() => cb(0), 0)
+        return 0
+      })
+      const originalRaf = globalThis.requestAnimationFrame
+      globalThis.requestAnimationFrame = rafSpy
+
+      const manager = new IISynchronizerManager(asEditor(editor))
+      return { editor, manager, strokes, rafSpy, restoreRaf: () => (globalThis.requestAnimationFrame = originalRaf) }
+    }
+
+    test("should assign jiixBlockId/jiixBlockType to every stroke referenced by the export", async () => {
+      const { manager, strokes, restoreRaf } = setup(5)
+      await manager.synchronize()
+      strokes.forEach((stroke, i) => {
+        expect(stroke.jiixBlockId).toBe(`block-${i}`)
+        expect(stroke.jiixBlockType).toBe("Text")
+      })
+      restoreRaf()
+    })
+
+    test("should yield to the event loop periodically instead of processing every element in one blocking pass", async () => {
+      const chunkSize = IISynchronizerManager.SYNC_YIELD_CHUNK_SIZE
+      const { manager, strokes, rafSpy, restoreRaf } = setup(chunkSize * 2 + 1)
+      await manager.synchronize()
+
+      // One yield after each full chunk (here: 2 chunks completed mid-loop).
+      expect(rafSpy).toHaveBeenCalledTimes(2)
+      // Yielding must not skip or duplicate work.
+      strokes.forEach((stroke, i) => {
+        expect(stroke.jiixBlockId).toBe(`block-${i}`)
+      })
+      restoreRaf()
+    })
+
+    test("should not yield at all when there are fewer elements than one chunk", async () => {
+      const { manager, rafSpy, restoreRaf } = setup(3)
+      await manager.synchronize()
+      expect(rafSpy).not.toHaveBeenCalled()
+      restoreRaf()
+    })
+
+    test("should wait for an in-progress stroke to finish before processing synchronized data", async () => {
+      const { editor, manager, strokes, restoreRaf } = setup(3)
+      editor.writer.currentSymbol = buildIIStroke()
+
+      const syncPromise = manager.synchronize()
+      await new Promise((resolve) => setTimeout(resolve, 20))
+      strokes.forEach((stroke) => expect(stroke.jiixBlockId).toBeUndefined())
+
+      editor.writer.currentSymbol = undefined
+      await syncPromise
+
+      strokes.forEach((stroke, i) => expect(stroke.jiixBlockId).toBe(`block-${i}`))
+      restoreRaf()
+    })
+
+    test("should skip reprocessing a block whose content is unchanged since the last sync", async () => {
+      const { editor, manager, strokes, restoreRaf } = setup(3)
+      await manager.synchronize()
+      expect(editor.jiix.updateTextMetadata).toHaveBeenCalledTimes(3)
+
+      const [firstModificationDate] = strokes.map((s) => s.modificationDate)
+
+      await manager.synchronize()
+      // Same export content again - nothing changed, nothing should be reprocessed.
+      expect(editor.jiix.updateTextMetadata).toHaveBeenCalledTimes(3)
+      expect(strokes[0].modificationDate).toBe(firstModificationDate)
+      restoreRaf()
+    })
+
+    test("should reprocess a block whose content actually changed since the last sync", async () => {
+      const { editor, manager, restoreRaf } = setup(3)
+      await manager.synchronize()
+      expect(editor.jiix.updateTextMetadata).toHaveBeenCalledTimes(3)
+
+      const changedExport = editor.model.exports!["application/vnd.myscript.jiix"] as TJIIXExport
+      const changedElement = changedExport.elements![0] as TJIIXTextElement
+      changedElement.label = "b"
+      changedElement.words = [{ label: "b", items: changedElement.words![0].items }]
+      editor.export = jest.fn().mockImplementation(async () => {
+        editor.model.exports = { "application/vnd.myscript.jiix": changedExport }
+      })
+
+      await manager.synchronize()
+      expect(editor.jiix.updateTextMetadata).toHaveBeenCalledTimes(4)
+      restoreRaf()
+    })
+  })
+})

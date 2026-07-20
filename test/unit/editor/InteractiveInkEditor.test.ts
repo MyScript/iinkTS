@@ -860,6 +860,54 @@ describe("EditorOffscreen.ts", () => {
       await expect(async () => await editor.export()).rejects.toEqual("export-error")
       expect(editor.event.emitError).toHaveBeenCalledTimes(1)
     })
+
+    test("should only request mimeTypes not already cached in model.exports", async () => {
+      const cachedEditor = new InteractiveInkEditor(document.createElement("div"), EditorOptions)
+      cachedEditor.model.exports = { "text/plain": "already cached" }
+      cachedEditor.recognizer.export = jest.fn(() =>
+        Promise.resolve({ "application/vnd.myscript.jiix": jiixText })
+      )
+
+      const result = await cachedEditor.export(["text/plain", "application/vnd.myscript.jiix"])
+
+      expect(cachedEditor.recognizer.export).toHaveBeenCalledTimes(1)
+      expect(cachedEditor.recognizer.export).toHaveBeenCalledWith(["application/vnd.myscript.jiix"])
+      expect(result).toEqual({
+        "text/plain": "already cached",
+        "application/vnd.myscript.jiix": jiixText,
+      })
+    })
+
+    test("should not call recognizer.export at all when every requested mimeType is already cached", async () => {
+      const cachedEditor = new InteractiveInkEditor(document.createElement("div"), EditorOptions)
+      cachedEditor.model.exports = { "text/plain": "already cached" }
+      cachedEditor.recognizer.export = jest.fn()
+
+      const result = await cachedEditor.export(["text/plain"])
+
+      expect(cachedEditor.recognizer.export).not.toHaveBeenCalled()
+      expect(result).toBe(cachedEditor.model.exports)
+    })
+
+    test("should use the recognizer's default mimeTypes when none are requested", async () => {
+      const freshEditor = new InteractiveInkEditor(document.createElement("div"), EditorOptions)
+      freshEditor.recognizer.export = jest.fn(() => Promise.resolve({ "application/vnd.myscript.jiix": jiixText }))
+
+      await freshEditor.export()
+
+      expect(freshEditor.recognizer.export).toHaveBeenCalledWith(freshEditor.recognizer.mimeTypes)
+    })
+
+    test("should not call recognizer.export when no mimeTypes requested but the recognizer's defaults are already cached", async () => {
+      const freshEditor = new InteractiveInkEditor(document.createElement("div"), EditorOptions)
+      freshEditor.model.exports = { "application/vnd.myscript.jiix": jiixText }
+      freshEditor.recognizer.export = jest.fn()
+
+      const result = await freshEditor.export()
+
+      expect(freshEditor.recognizer.export).not.toHaveBeenCalled()
+      expect(result).toBe(freshEditor.model.exports)
+    })
   })
 
   describe("convert", () => {

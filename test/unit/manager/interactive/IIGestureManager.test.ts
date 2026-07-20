@@ -563,15 +563,15 @@ describe("IIGestureManager.ts", () => {
         )
       })
       test("must return undefined when the gesture stroke has no symbols in row", async () => {
-        const gestureStroke = buildIIStroke({ box: { height: 10, width: 10, x: 0, y: editor.model.rowHeight } })
+        const gestureStroke = buildIIStroke({ box: { height: 10, width: 10, x: 0, y: rowHeight } })
         editor.model.addSymbol(
-          buildIIText({ boundingBox: { height: 10, width: 10, x: 0, y: 2 * editor.model.rowHeight } })
+          buildIIText({ boundingBox: { height: 10, width: 10, x: 0, y: 2 * rowHeight } })
         )
         expect(await gestMan.getGestureFromContextLess(gestureStroke)).toBeUndefined()
       })
       test("should return gesture join when there is symbol in gesture row", async () => {
-        const gestureStroke = buildIIStroke({ box: { height: 20, width: 10, x: 0, y: editor.model.rowHeight } })
-        const text = buildIIText({ boundingBox: { height: 12, width: 10, x: 0, y: editor.model.rowHeight } })
+        const gestureStroke = buildIIStroke({ box: { height: 20, width: 10, x: 0, y: rowHeight } })
+        const text = buildIIText({ boundingBox: { height: 12, width: 10, x: 0, y: rowHeight } })
         editor.model.addSymbol(gestureStroke)
         editor.model.addSymbol(text)
         expect(await gestMan.getGestureFromContextLess(gestureStroke)).toEqual(
@@ -594,15 +594,15 @@ describe("IIGestureManager.ts", () => {
         )
       })
       test("must return undefined when the gesture stroke has no symbols in row", async () => {
-        const gestureStroke = buildIIStroke({ box: { height: 10, width: 10, x: 0, y: editor.model.rowHeight } })
+        const gestureStroke = buildIIStroke({ box: { height: 10, width: 10, x: 0, y: rowHeight } })
         editor.model.addSymbol(
-          buildIIText({ boundingBox: { height: 10, width: 10, x: 0, y: 2 * editor.model.rowHeight } })
+          buildIIText({ boundingBox: { height: 10, width: 10, x: 0, y: 2 * rowHeight } })
         )
         expect(await gestMan.getGestureFromContextLess(gestureStroke)).toBeUndefined()
       })
       test("should return gesture insert when there is symbol in gesture row", async () => {
-        const gestureStroke = buildIIStroke({ box: { height: 20, width: 10, x: 0, y: editor.model.rowHeight } })
-        const text = buildIIText({ boundingBox: { height: 12, width: 10, x: 0, y: editor.model.rowHeight } })
+        const gestureStroke = buildIIStroke({ box: { height: 20, width: 10, x: 0, y: rowHeight } })
+        const text = buildIIText({ boundingBox: { height: 12, width: 10, x: 0, y: rowHeight } })
         editor.model.addSymbol(gestureStroke)
         editor.model.addSymbol(text)
         expect(await gestMan.getGestureFromContextLess(gestureStroke)).toEqual(

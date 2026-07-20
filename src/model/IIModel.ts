@@ -11,25 +11,19 @@ import { JIIXElementType } from "./Export"
 export class IIModel {
   #logger = LoggerManager.getLogger(LoggerCategory.MODEL)
   #symbolsMap = new Map<string, TSymbol>()
+  #version = 0
   readonly creationTime: number
   modificationDate: number
-  currentSymbol?: TSymbol
   symbols: TSymbol[]
   exports?: TExport
-  rowHeight: number
-  idle: boolean
   selectedIds: Set<string>
-  deletingIds: Set<string>
 
-  constructor(rowHeight = 0, creationDate = Date.now()) {
+  constructor(creationDate = Date.now()) {
     this.creationTime = creationDate
     this.modificationDate = creationDate
-    this.rowHeight = rowHeight
     this.symbols = []
     this.exports = undefined
-    this.idle = true
     this.selectedIds = new Set()
-    this.deletingIds = new Set()
   }
 
   /**
@@ -45,10 +39,6 @@ export class IIModel {
 
   get symbolsSelected(): TSymbol[] {
     return this.symbols.filter((s) => this.selectedIds.has(s.id))
-  }
-
-  get symbolsDeleting(): TSymbol[] {
-    return this.symbols.filter((s) => this.deletingIds.has(s.id))
   }
 
   /**
@@ -96,93 +86,6 @@ export class IIModel {
     return undefined
   }
 
-  getSymbolRowIndex(symbol: TSymbol): number {
-    // Use symbol bounds yMid for row calculation
-    return Math.round(symbol.bounds.center.y / this.rowHeight)
-  }
-
-  getSymbolsByRowOrdered(): {
-    rowIndex: number
-    symbols: TSymbol[]
-  }[] {
-    const rowsMap = new Map<number, TSymbol[]>()
-
-    for (const s of this.symbols) {
-      const rowIndex = this.getSymbolRowIndex(s)
-      const row = rowsMap.get(rowIndex)
-      if (row) {
-        row.push(s)
-      } else {
-        rowsMap.set(rowIndex, [s])
-      }
-    }
-
-    const rows: {
-      rowIndex: number
-      symbols: TSymbol[]
-    }[] = []
-    rowsMap.forEach((symbols, rowIndex) => {
-      symbols.sort((s1, s2) => s1.bounds.center.x - s2.bounds.center.x)
-      rows.push({ rowIndex, symbols })
-    })
-
-    return rows.sort((r1, r2) => r1.rowIndex - r2.rowIndex)
-  }
-
-  roundToLineGuide(y: number): number {
-    return Math.round(y / this.rowHeight) * this.rowHeight
-  }
-
-  isSymbolAbove(source: TSymbol, target: TSymbol): boolean {
-    return this.getSymbolRowIndex(source) > this.getSymbolRowIndex(target)
-  }
-
-  isSymbolInRow(source: TSymbol, target: TSymbol): boolean {
-    return this.getSymbolRowIndex(source) === this.getSymbolRowIndex(target)
-  }
-
-  isSymbolBelow(source: TSymbol, target: TSymbol): boolean {
-    return this.getSymbolRowIndex(source) < this.getSymbolRowIndex(target)
-  }
-
-  getFirstSymbol(symbols: TSymbol[]): TSymbol | undefined {
-    if (!symbols.length) {
-      return
-    }
-    return symbols.reduce((previous, current) => {
-      if (previous) {
-        if (this.getSymbolRowIndex(previous) < this.getSymbolRowIndex(current)) {
-          return previous
-        } else if (
-          this.getSymbolRowIndex(previous) == this.getSymbolRowIndex(current) &&
-          previous.bounds.center.x < current.bounds.center.x
-        ) {
-          return previous
-        }
-      }
-      return current
-    })
-  }
-
-  getLastSymbol(symbols: TSymbol[]): TSymbol | undefined {
-    if (!symbols.length) {
-      return
-    }
-    return symbols.reduce((previous, current) => {
-      if (previous) {
-        if (this.getSymbolRowIndex(previous) > this.getSymbolRowIndex(current)) {
-          return previous
-        }
-        if (this.getSymbolRowIndex(previous) < this.getSymbolRowIndex(current)) {
-          return current
-        } else if (previous.bounds.center.x > current.bounds.center.x) {
-          return previous
-        }
-      }
-      return current
-    })
-  }
-
   addSymbol(symbol: TSymbol): void {
     this.#logger.info("addSymbol", { symbol })
     if (this.#symbolsMap.has(symbol.id)) {
@@ -190,8 +93,7 @@ export class IIModel {
     }
     this.symbols.push(symbol)
     this.#symbolsMap.set(symbol.id, symbol)
-    this.modificationDate = Date.now()
-    this.exports = undefined
+    this.#markDirty()
     this.#logger.debug("addSymbol", this.symbols)
   }
 
@@ -204,8 +106,7 @@ export class IIModel {
       updatedSymbol.modificationDate = Date.now()
       this.symbols.splice(sIndex, 1, updatedSymbol)
       this.#symbolsMap.set(updatedSymbol.id, updatedSymbol)
-      this.modificationDate = Date.now()
-      this.exports = undefined
+      this.#markDirty()
     }
     this.#logger.debug("updateSymbol", this.symbols)
   }
@@ -216,8 +117,7 @@ export class IIModel {
       this.symbols.splice(sIndex, 1, ...symbols)
       this.#symbolsMap.delete(id)
       symbols.forEach((s) => this.#symbolsMap.set(s.id, s))
-      this.modificationDate = Date.now()
-      this.exports = undefined
+      this.#markDirty()
     }
   }
 
@@ -251,8 +151,7 @@ export class IIModel {
     if (symbolIndex !== -1) {
       this.symbols.splice(symbolIndex, 1)
       this.#symbolsMap.delete(id)
-      this.modificationDate = Date.now()
-      this.exports = undefined
+      this.#markDirty()
     }
     this.#logger.debug("removeSymbol", this.symbols)
   }
@@ -270,6 +169,29 @@ export class IIModel {
     }
   }
 
+  /**
+   * Bumped on every mutation that invalidates `exports` (add/remove/update/replace/clear).
+   * Lets an in-flight export request detect that the model changed while it was waiting
+   * for a server response, so a now-stale response isn't cached as if it were current.
+   */
+  get version(): number {
+    return this.#version
+  }
+
+  /**
+   * Force `exports` to be considered stale (e.g. after a language change), without
+   * going through a symbol mutation.
+   */
+  invalidateExports(): void {
+    this.#markDirty()
+  }
+
+  #markDirty(): void {
+    this.modificationDate = Date.now()
+    this.exports = undefined
+    this.#version++
+  }
+
   mergeExport(exports: TExport) {
     this.#logger.info("mergeExport", { exports })
     if (this.exports) {
@@ -282,7 +204,7 @@ export class IIModel {
 
   clone(): IIModel {
     this.#logger.info("clone")
-    const clonedModel = new IIModel(this.rowHeight, this.creationTime)
+    const clonedModel = new IIModel(this.creationTime)
     clonedModel.modificationDate = this.modificationDate
     clonedModel.symbols = this.symbols.map((s) => {
       const c = cloneSymbol(s)
@@ -290,18 +212,14 @@ export class IIModel {
       return c
     })
     clonedModel.exports = structuredClone(this.exports)
-    clonedModel.idle = this.idle
     this.#logger.debug("clone", { clonedModel })
     return clonedModel
   }
 
   clear(): void {
     this.#logger.info("clear")
-    this.modificationDate = Date.now()
     this.symbols = []
     this.#symbolsMap.clear()
-    this.currentSymbol = undefined
-    this.exports = undefined
-    this.idle = true
+    this.#markDirty()
   }
 }

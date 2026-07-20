@@ -100,8 +100,6 @@ describe("IModel.ts", () => {
 
       expect(clone.height).toEqual(model.height)
 
-      expect(clone.idle).toEqual(model.idle)
-
       expect(clone.strokes).toEqual(model.strokes)
       expect(clone.strokes).not.toBe(model.strokes)
 

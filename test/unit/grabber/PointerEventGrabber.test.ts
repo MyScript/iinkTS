@@ -1,5 +1,10 @@
 import { DoubleTouchEventMock, LeftClickEventMock, RightClickEventMock, TouchEventMock } from "../__mocks__/EventMock"
-import { DefaultGrabberConfiguration, PointerEventGrabber, TGrabberConfiguration } from "@/iink"
+import {
+  bumpSvgTransformVersion,
+  DefaultGrabberConfiguration,
+  PointerEventGrabber,
+  TGrabberConfiguration,
+} from "@/iink"
 
 describe("PointerEventGrabber.ts", () => {
   test("should create with default configuration", () => {
@@ -55,6 +60,55 @@ describe("PointerEventGrabber.ts", () => {
     test("should listen pointerup event", () => {
       wrapperHTML.dispatchEvent(pointerUpEvt)
       expect(grabber.onPointerUp).toHaveBeenCalledTimes(1)
+    })
+
+    test("should call onPointerMove once per coalesced point instead of only the last one", () => {
+      const g = new PointerEventGrabber(DefaultGrabberConfiguration)
+      g.onPointerDown = jest.fn()
+      g.onPointerMove = jest.fn()
+      g.onPointerUp = jest.fn()
+      g.attach(wrapperHTML)
+
+      const downEvt = new LeftClickEventMock("pointerdown", {
+        pointerType: "pen",
+        clientX: 0,
+        clientY: 0,
+        pressure: 1,
+      })
+      wrapperHTML.dispatchEvent(downEvt)
+
+      const coalesced1 = new LeftClickEventMock("pointermove", {
+        pointerType: "pen",
+        clientX: 5,
+        clientY: 5,
+        pressure: 1,
+      })
+      const coalesced2 = new LeftClickEventMock("pointermove", {
+        pointerType: "pen",
+        clientX: 10,
+        clientY: 10,
+        pressure: 1,
+      })
+      const batchedMoveEvt = new LeftClickEventMock("pointermove", {
+        pointerType: "pen",
+        clientX: 10,
+        clientY: 10,
+        pressure: 1,
+        coalescedEvents: [coalesced1, coalesced2],
+      })
+
+      wrapperHTML.dispatchEvent(batchedMoveEvt)
+
+      expect(g.onPointerMove).toHaveBeenCalledTimes(2)
+      expect(g.onPointerMove).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ pointer: expect.objectContaining({ x: 5, y: 5 }) })
+      )
+      expect(g.onPointerMove).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({ pointer: expect.objectContaining({ x: 10, y: 10 }) })
+      )
+      g.detach()
     })
 
     test("should call detach if already attach", () => {
@@ -252,6 +306,55 @@ describe("PointerEventGrabber.ts", () => {
       })
       wrapperHTML.dispatchEvent(pointerDownEvt)
       expect(grabber.onPointerDown).not.toHaveBeenCalled()
+      grabber.detach()
+    })
+  })
+
+  describe("should cache getScreenCTM and only recompute it when the svg transform changes", () => {
+    const wrapperHTML: HTMLElement = document.createElement("div")
+    document.body.appendChild(wrapperHTML)
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg") as SVGSVGElement
+    wrapperHTML.appendChild(svg)
+
+    const fakeCTM = { inverse: () => ({}) } as unknown as DOMMatrix
+    svg.getScreenCTM = jest.fn(() => fakeCTM)
+    svg.createSVGPoint = jest.fn(
+      () =>
+        ({
+          x: 0,
+          y: 0,
+          matrixTransform: () => ({ x: 1, y: 2 }),
+        }) as unknown as DOMPoint
+    )
+
+    const grabber = new PointerEventGrabber(DefaultGrabberConfiguration)
+    grabber.attach(wrapperHTML)
+    grabber.onPointerDown = jest.fn()
+    grabber.onPointerMove = jest.fn()
+    grabber.onPointerUp = jest.fn()
+
+    test("should reuse the cached CTM across pointerdown/pointermove while unchanged", () => {
+      const downEvt = new LeftClickEventMock("pointerdown", { pointerType: "pen", clientX: 0, clientY: 0, pressure: 1 })
+      wrapperHTML.dispatchEvent(downEvt)
+
+      const moveEvt1 = new LeftClickEventMock("pointermove", { pointerType: "pen", clientX: 1, clientY: 1, pressure: 1 })
+      wrapperHTML.dispatchEvent(moveEvt1)
+      const moveEvt2 = new LeftClickEventMock("pointermove", { pointerType: "pen", clientX: 2, clientY: 2, pressure: 1 })
+      wrapperHTML.dispatchEvent(moveEvt2)
+
+      expect(svg.getScreenCTM).toHaveBeenCalledTimes(1)
+    })
+
+    test("should recompute the CTM once the svg transform version changes", () => {
+      // jest's clearMocks resets call counts between tests, so this counts only
+      // calls made within this test - the grabber's own cache state (private
+      // fields) persists across tests since it's the same instance.
+      bumpSvgTransformVersion(svg)
+
+      const moveEvt = new LeftClickEventMock("pointermove", { pointerType: "pen", clientX: 3, clientY: 3, pressure: 1 })
+      wrapperHTML.dispatchEvent(moveEvt)
+
+      expect(svg.getScreenCTM).toHaveBeenCalledTimes(1)
       grabber.detach()
     })
   })

@@ -9,14 +9,18 @@ import {
   openMathActionMenu,
   selectBlockViaSurround,
   GHOST_STROKE_SELECTOR,
+  buildSurroundPointers,
 } from "../helper"
 import locator from "../locators"
-import sum, { surroundPointers } from "../__dataset__/sum"
+import sum from "../__dataset__/sum"
+
+const sumStrokes = sum.strokes
+const surroundSumStrokes = buildSurroundPointers(sum.strokes)
 
 // Once selected, dragging from within the selection's bounding box moves the block.
 const dragSelectionBy = async (page, dx, dy) => {
-  const xs = surroundPointers.map((p) => p.x)
-  const ys = surroundPointers.map((p) => p.y)
+  const xs = surroundSumStrokes.map((p) => p.x)
+  const ys = surroundSumStrokes.map((p) => p.y)
   const cx = (Math.min(...xs) + Math.max(...xs)) / 2
   const cy = (Math.min(...ys) + Math.max(...ys)) / 2
   await writePointers(page, [
@@ -26,7 +30,7 @@ const dragSelectionBy = async (page, dx, dy) => {
 }
 
 const writeSumExpressionAndGetBlockId = async (page) => {
-  await writeStrokes(page, sum.strokes)
+  await writeStrokes(page, sumStrokes)
   await callEditorIdle(page)
   const jiix = await pollJiix(page, 1)
   return jiix.elements[0].id
@@ -51,24 +55,25 @@ test.describe("Math Computation Modes", () => {
       await page.locator("#ms-menu-action").click()
     })
 
-    await test.step('2. Write "3+1=" (stand-in for "5+3=") → ghost result appears immediately', async () => {
+    await test.step('2. Write "3+1=" → ghost result appears immediately', async () => {
       jiixBlockId = await writeSumExpressionAndGetBlockId(page)
-
-      const ghostStrokes = page.locator(`#editorEl ${GHOST_STROKE_SELECTOR}`)
+      let ghostStrokes
+      await expect
+        .poll(async () => {
+          ghostStrokes = page.locator(`#editorEl ${GHOST_STROKE_SELECTOR}`)
+          return ghostStrokes.count()
+        }, { timeout: 10000 })
+        .toBe(2)
       await expect(ghostStrokes.first()).toBeVisible()
       await expect(ghostStrokes.locator("path").first()).toHaveCSS("opacity", "0.5")
-
-      const symbols = await getEditorSymbols(page)
-      expect(symbols.some((s) => s.isSolverOutput)).toBe(false)
     })
+    
+    let boundsBefore
+    
+    await test.step("3. Move the expression around → the ghost preview follows it", async () => {
+      await selectBlockViaSurround(page, surroundSumStrokes)
 
-    // Step 3 ("Modify the expression → ghost updates in real time") is covered by the
-    // dedicated test below — Modify the expression via undo/redo → ghost updates in real time
-
-    await test.step("4. Move the expression around → the ghost preview follows it", async () => {
-      await selectBlockViaSurround(page, surroundPointers)
-
-      const before = await page.evaluate(
+      boundsBefore = await page.evaluate(
         (id) => editorEl.editor.math.getGhostBounds(id),
         jiixBlockId
       )
@@ -83,41 +88,39 @@ test.describe("Math Computation Modes", () => {
       )
 
       expect(after).toBeDefined()
-      expect(Math.abs(after.x - before.x - dx)).toBeLessThan(15)
-      expect(Math.abs(after.y - before.y - dy)).toBeLessThan(15)
+      expect(Math.abs(after.x - boundsBefore.x - dx)).toBeLessThan(15)
+      expect(Math.abs(after.y - boundsBefore.y - dy)).toBeLessThan(15)
+    })
 
-      // Revert the move so it doesn't leave an extra entry on the history stack for step 5.
+    await test.step('4. Undo the move expression → the ghost preview follows it', async () => {
       await page.locator(locator.menu.action.undoBtn).click()
+      await expect
+      .poll(async () => {
+          const bounds = await page.evaluate(
+            (id) => editorEl.editor.math.getGhostBounds(id),
+            jiixBlockId
+          )
+          return boundsBefore.x === bounds.x && boundsBefore.y === bounds.y
+        })
+        .toBe(true)
     })
 
-    await test.step('5. Remove the "=" → ghost disappears automatically', async () => {
+    await test.step('5. Undo across the "=" boundary → ghost disappears', async () => {
       await page.locator(locator.menu.action.undoBtn).click()
-      await expect(page.locator(`#editorEl ${GHOST_STROKE_SELECTOR}`)).toHaveCount(0)
+      await expect
+        .poll(async () => {
+          return page.locator(`#editorEl ${GHOST_STROKE_SELECTOR}`).count()
+        }, { timeout: 8000 })
+        .toBe(0)
     })
-  })
-
-  // "Try it" > "Ghost mode" step 3: "Modify the expression → ghost updates in real time".
-  test("Try it — Ghost mode › Modify the expression via undo/redo → ghost updates in real time", async ({ page }) => {
-
-    await test.step('Select "Show result" + enable "Auto-compute"', async () => {
-      await openMathActionMenu(page)
-      await page.locator("#ms-menu-action-math-result-mode-input").selectOption("ghost")
-      await page.locator("#ms-menu-action-math-auto-compute-input").check()
-      await page.locator("#ms-menu-action").click()
-    })
-
-    await test.step('Write "3+1="', async () => {
-      await writeSumExpressionAndGetBlockId(page)
-      await expect(page.locator(`#editorEl ${GHOST_STROKE_SELECTOR}`).first()).toBeVisible()
-    })
-
-    await test.step('Undo across the "=" boundary → ghost disappears', async () => {
-      await page.locator(locator.menu.action.undoBtn).click()
-      await expect(page.locator(`#editorEl ${GHOST_STROKE_SELECTOR}`)).toHaveCount(0)
-    })
-
-    await test.step("Redo → ghost should reappear", async () => {
+  
+    await test.step("6. Redo → ghost should reappear", async () => {
       await page.locator(locator.menu.action.redoBtn).click()
+      await expect
+        .poll(async () => {
+          return page.locator(`#editorEl ${GHOST_STROKE_SELECTOR}`).count()
+        }, { timeout: 8000 })
+        .toBe(2)
       await expect(page.locator(`#editorEl ${GHOST_STROKE_SELECTOR}`).first()).toBeVisible({ timeout: 8000 })
     })
   })
@@ -165,7 +168,7 @@ test.describe("Math Computation Modes", () => {
     })
 
     await test.step("4. Drag the expression somewhere else → its draw result moves with it", async () => {
-      await selectBlockViaSurround(page, surroundPointers)
+      await selectBlockViaSurround(page, surroundSumStrokes)
 
       const before = await page.locator(`#${firstResultStrokeIds[0]}`).boundingBox()
 

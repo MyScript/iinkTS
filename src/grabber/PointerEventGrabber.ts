@@ -1,5 +1,6 @@
 import { LoggerCategory, LoggerLevel, LoggerManager } from "@/logger"
 import type { TPointer } from "@/symbol"
+import { getSvgTransformVersion } from "@/utils"
 
 import type { TGrabberConfiguration } from "./GrabberConfiguration"
 
@@ -54,6 +55,27 @@ export class PointerEventGrabber {
     return oneFloat
   }
 
+  #cachedCTM?: DOMMatrix
+  #cachedCTMSvg?: SVGSVGElement
+  #cachedCTMVersion = -1
+
+  /**
+   * `getScreenCTM` forces the browser to flush pending layout, which gets
+   * increasingly costly as the svg grows (more symbols on the canvas). Reuse
+   * the last value as long as `svg`'s transform (pan/zoom/resize) hasn't changed.
+   */
+  protected getCachedScreenCTM(svg: SVGSVGElement): DOMMatrix | null {
+    const version = getSvgTransformVersion(svg)
+    if (this.#cachedCTMSvg === svg && this.#cachedCTMVersion === version) {
+      return this.#cachedCTM ?? null
+    }
+    const ctm = svg.getScreenCTM()
+    this.#cachedCTM = ctm ?? undefined
+    this.#cachedCTMSvg = svg
+    this.#cachedCTMVersion = version
+    return ctm
+  }
+
   protected extractPointer(event: MouseEvent | TouchEvent): TPointer {
     let clientX: number, clientY: number
     if ("changedTouches" in event) {
@@ -68,7 +90,7 @@ export class PointerEventGrabber {
       this.layerCapture instanceof SVGSVGElement ? this.layerCapture : this.layerCapture.querySelector("svg")
 
     if (svgElement) {
-      const ctm = svgElement.getScreenCTM()
+      const ctm = this.getCachedScreenCTM(svgElement)
       if (ctm) {
         const point = svgElement.createSVGPoint()
         point.x = clientX
@@ -131,9 +153,16 @@ export class PointerEventGrabber {
   }
 
   protected pointerMoveHandler = (evt: PointerEvent) => {
-    const pointerInfo = this.getPointerInfos(evt)
-    this.#logger.debug("pointerMoveHandler", pointerInfo)
-    if (this.capturing && this.pointerType === evt.pointerType) {
+    if (!this.capturing || this.pointerType !== evt.pointerType) {
+      return
+    }
+    // The browser may coalesce several physical samples into one pointermove
+    // event under main-thread pressure; replay each one so points aren't lost.
+    const coalescedEvents = typeof evt.getCoalescedEvents === "function" ? evt.getCoalescedEvents() : []
+    const events = coalescedEvents.length > 0 ? coalescedEvents : [evt]
+    for (const event of events) {
+      const pointerInfo = this.getPointerInfos(event)
+      this.#logger.debug("pointerMoveHandler", pointerInfo)
       if (this.onPointerMove) {
         this.onPointerMove(pointerInfo)
       }
