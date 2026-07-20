@@ -147,10 +147,10 @@ export class IITypesetManager extends IIAbstractManager {
     return this.getBoundingBox(TextOps.create([charSymbol], { x: 0, y: 0 }, boundingBox))?.width as number
   }
 
-  updateBounds(textSymbol: TText): TText {
-    this.setBounds(textSymbol)
-    this.model.updateSymbol(textSymbol)
-    return textSymbol
+  updateBounds<T extends TText | TMath>(typesetSymbol: T): T {
+    this.setBounds(typesetSymbol)
+    this.model.updateSymbol(typesetSymbol)
+    return typesetSymbol
   }
 
   moveTextAfter(text: TText, tx: number): TSymbol[] | undefined {

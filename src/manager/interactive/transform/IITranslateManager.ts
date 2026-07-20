@@ -97,7 +97,7 @@ export class IITranslateManager extends IIAbstractTransformManager {
       e.bounds.y = +ep.y.toFixed(3)
     })
 
-    return math
+    return this.editor.typeset.updateBounds(math)
   }
 
   translate(symbols: TSymbol[], tx: number, ty: number, addToHistory = true): Promise<void> {
