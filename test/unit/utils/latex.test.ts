@@ -34,6 +34,13 @@ describe("latexToUnicodeMath", () => {
     expect(latexToUnicodeMath("\\sqrt")).toBe("√")
   })
 
+  test("should convert comparison/multiplication operators instead of stripping their backslash", () => {
+    expect(latexToUnicodeMath("3\\times 2=")).toBe("3×2=")
+    expect(latexToUnicodeMath("a\\neq b")).toBe("a≠b")
+    expect(latexToUnicodeMath("a\\leq b")).toBe("a≤b")
+    expect(latexToUnicodeMath("a\\geq b")).toBe("a≥b")
+  })
+
   test("should parenthesize sqrt operand only when it contains +/-", () => {
     expect(latexToUnicodeMath("\\sqrt{x+y}")).toBe("√(x+y)")
     expect(latexToUnicodeMath("\\sqrt{x}+y")).toBe("√x+y")
