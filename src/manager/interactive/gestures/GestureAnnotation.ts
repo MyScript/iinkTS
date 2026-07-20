@@ -1,7 +1,7 @@
 import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
 import type { TIIHistoryChanges } from "@/history"
 import type { DecoratorKind, TBox, TDecorator, TStroke, TText } from "@/symbol"
-import { isDecorator, isRecognizedText, isText, SymbolType, type TSymbol } from "@/symbol"
+import { isDecorator, isRecognizedText, isStroke, isText, SymbolType, type TSymbol } from "@/symbol"
 import { DecoratorOps } from "@/symbol/decorator/Decorator"
 import { OBBOps, type TOBB } from "@/symbol/primitives/OBB"
 
@@ -44,7 +44,9 @@ export class IIGestureAnnotationProcessor {
     }
   }
 
-  #applyDecorator(ids: string[], kind: DecoratorKind): TIIHistoryChanges | undefined {
+  async #applyDecorator(ids: string[], kind: DecoratorKind): Promise<TIIHistoryChanges | undefined> {
+    await this.#waitForPendingClassification(ids)
+
     const seenWordKeys = new Set<string>()
     const added: TDecorator[] = []
     const erased: TDecorator[] = []
@@ -100,6 +102,30 @@ export class IIGestureAnnotationProcessor {
       changes.erased = erased
     }
     return changes
+  }
+
+  /**
+   * A stroke's `jiixBlockType` (its recognition classification, e.g. "Text") is assigned
+   * asynchronously once its own recognition round-trip completes — a separate round-trip
+   * from (and not necessarily faster than) the one classifying a gesture drawn around/through
+   * it. Without this wait, a decorator gesture applied right after writing its target can
+   * find the target stroke present but still unclassified, silently skip it (`isRecognizedText`
+   * below is false), and produce no decorator at all — measured up to ~800ms of real
+   * classification latency in a slower environment (WebKit/Safari). Give it a couple of
+   * seconds to land before giving up on a still-pending candidate.
+   */
+  async #waitForPendingClassification(ids: string[]): Promise<void> {
+    const isPending = () =>
+      ids.some((id) => {
+        const sym = this.editor.model.getRootSymbol(id)
+        return sym && isStroke(sym) && !sym.jiixBlockType
+      })
+    for (const delay of [100, 200, 300, 400, 500, 500]) {
+      if (!isPending()) {
+        return
+      }
+      await new Promise((resolve) => setTimeout(resolve, delay))
+    }
   }
 
   #toggleWordDecorator(
