@@ -112,6 +112,10 @@ function replaceMathOperators(latex: string): string {
     .replace(/\\infty/g, "∞")
     .replace(/\\partial/g, "∂")
     .replace(/\\nabla/g, "∇")
+    .replace(/\\times */g, "×")
+    .replace(/\\neq */g, "≠")
+    .replace(/\\leq */g, "≤")
+    .replace(/\\geq */g, "≥")
 }
 
 function replaceSqrt(latex: string): string {
