@@ -1,6 +1,18 @@
 import { buildIIStroke } from "../../helpers"
 import { createCanvasMock, asEditor } from "../../__mocks__/createCanvasMock"
-import { IISynchronizerManager, JIIXElementType, TJIIXExport, TJIIXTextElement, TStroke } from "@/iink"
+import {
+  IISynchronizerManager,
+  JIIXElementType,
+  TJIIXElement,
+  TJIIXExport,
+  TJIIXMathElement,
+  TJIIXTextElement,
+  TStroke,
+} from "@/iink"
+
+function buildMathElement(id: string): TJIIXMathElement {
+  return { type: JIIXElementType.Math, id }
+}
 
 function buildTextElement(id: string, strokeId: string): TJIIXTextElement {
   return {
@@ -16,7 +28,7 @@ function buildTextElement(id: string, strokeId: string): TJIIXTextElement {
   }
 }
 
-function buildJiixExport(elements: TJIIXTextElement[]): TJIIXExport {
+function buildJiixExport(elements: TJIIXElement[]): TJIIXExport {
   return {
     type: "Text",
     id: "root",
@@ -134,6 +146,51 @@ describe("IISynchronizerManager.ts", () => {
       await manager.synchronize()
       expect(editor.jiix.updateTextMetadata).toHaveBeenCalledTimes(4)
       restoreRaf()
+    })
+  })
+
+  describe("math dependency enrichment", () => {
+    function setupMath(mathBlockIds: string[]) {
+      const editor = createCanvasMock()
+      const jiixExport = buildJiixExport(mathBlockIds.map(buildMathElement))
+      editor.export = jest.fn().mockImplementation(async () => {
+        editor.model.exports = { "application/vnd.myscript.jiix": jiixExport }
+      })
+      const manager = new IISynchronizerManager(asEditor(editor))
+      return { editor, manager }
+    }
+
+    test("should call enrichMathDependencies for every math block with a staleness callback", async () => {
+      const { editor, manager } = setupMath(["math-0", "math-1"])
+
+      await manager.synchronize()
+
+      expect(editor.math.enrichMathDependencies).toHaveBeenCalledWith("math-0", expect.any(Function))
+      expect(editor.math.enrichMathDependencies).toHaveBeenCalledWith("math-1", expect.any(Function))
+    })
+
+    test("should report stale once a new synchronize() is queued mid-enrichment, then resolve fresh on the redo pass", async () => {
+      const { editor, manager } = setupMath(["math-0"])
+      let triggeredRedo = false
+      const isStaleResultsPerPass: boolean[] = []
+
+      editor.math.enrichMathDependencies = jest.fn().mockImplementation(async (_blockId: string, isStale: () => boolean) => {
+        if (!triggeredRedo) {
+          triggeredRedo = true
+          expect(isStale()).toBe(false)
+          // A stroke came in mid-enrichment: queue a fresh pass (not awaited - it can
+          // only complete once this one, and its redo, are done).
+          void manager.synchronize()
+          expect(isStale()).toBe(true)
+        }
+        isStaleResultsPerPass.push(isStale())
+      })
+
+      await manager.synchronize()
+
+      // First pass: superseded before the backend answered - discarded.
+      // Redo pass (triggered by #dirtyDuringSync): fresh, nothing pending after it.
+      expect(isStaleResultsPerPass).toEqual([true, false])
     })
   })
 })

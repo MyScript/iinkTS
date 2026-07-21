@@ -202,9 +202,21 @@ export class IISynchronizerManager extends IIAbstractManager {
           setTimeout(() => reject(new Error(`enrichMathDependencies timeout for "${blockId}"`)), ENRICH_TIMEOUT_MS)
         )
         try {
-          await Promise.race([this.canvas.math.enrichMathDependencies(blockId), timeout])
+          // `isStale` lets the enrichment discard its result instead of committing it if strokes
+          // kept coming in while the backend round-trip was in flight (this pass's mathBlockIds
+          // snapshot may already be outdated by the time the response lands) - a fresh, correct
+          // enrichment is guaranteed to run right after via `#dirtyDuringSync`/`#syncLoop`.
+          await Promise.race([this.canvas.math.enrichMathDependencies(blockId, () => this.#dirtyDuringSync), timeout])
         } catch (err) {
-          this.logger.error("synchronize", "Error enriching math dependencies:", err)
+          if (this.#dirtyDuringSync) {
+            this.logger.debug(
+              "synchronize",
+              `Ignoring enrichMathDependencies failure for stale block "${blockId}":`,
+              err
+            )
+          } else {
+            this.logger.error("synchronize", "Error enriching math dependencies:", err)
+          }
         }
       })
     )
