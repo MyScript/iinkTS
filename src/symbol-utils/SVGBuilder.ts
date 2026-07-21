@@ -38,6 +38,20 @@ export class SVGBuilder {
     return marker
   }
 
+  static createPattern(id: string, box: TBox, attrs: { [key: string]: string } = {}): SVGPatternElement {
+    const patternEl = document.createElementNS(XMLNS, "pattern")
+    patternEl.setAttribute("id", id)
+    patternEl.setAttribute("patternUnits", "userSpaceOnUse")
+    patternEl.setAttribute("x", box.x.toString())
+    patternEl.setAttribute("y", box.y.toString())
+    patternEl.setAttribute("width", box.width.toString())
+    patternEl.setAttribute("height", box.height.toString())
+    for (const k in attrs) {
+      patternEl.setAttribute(k, attrs[k])
+    }
+    return patternEl
+  }
+
   static createComponentTransfert(): SVGFEComponentTransferElement {
     return document.createElementNS(XMLNS, "feComponentTransfer")
   }
