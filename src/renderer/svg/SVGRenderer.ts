@@ -280,49 +280,35 @@ export class SVGRenderer extends BaseRenderer<SVGSVGElement, TIIRendererConfigur
         break
       }
       case "point": {
+        // Tiled pattern instead of one path with a dot per grid point: painting
+        // thousands of arc subpaths every frame is what caused the write-lag
+        // (cf IIC-1731 investigation) - a pattern rasterizes one tile and repeats it,
+        // so cost stays ~constant regardless of gap/viewport size.
         const firstPointX = Math.floor(startX / offSet) * offSet + offSet
         const firstPointY = Math.floor(startY / offSet) * offSet + offSet
 
-        let pathData = ""
-        const pointsX = []
-        const pointsY = []
-
         for (let x = firstPointX; x < endX; x += offSet) {
           this.verticalGuides.push(x)
-          pointsX.push(x)
         }
         for (let y = firstPointY; y < endY; y += offSet) {
           this.horizontalGuides.push(y)
-          pointsY.push(y)
         }
 
-        const maxPoints = 5000
-        const totalPoints = pointsX.length * pointsY.length
+        const patternId = `${this.groupGuidesId}-point-pattern`
+        const pattern = SVGBuilder.createPattern(patternId, {
+          x: firstPointX,
+          y: firstPointY,
+          width: offSet,
+          height: offSet,
+        })
+        pattern.appendChild(SVGBuilder.createCircle({ x: 0, y: 0 }, 1, { fill: "grey" }))
+        guidesGroup.appendChild(pattern)
 
-        if (totalPoints <= maxPoints) {
-          for (const x of pointsX) {
-            for (const y of pointsY) {
-              pathData += `M ${x} ${y} m -1,0 a 1,1 0 1,0 2,0 a 1,1 0 1,0 -2,0 `
-            }
-          }
-        } else {
-          const skipFactor = Math.ceil(Math.sqrt(totalPoints / maxPoints))
-          for (let i = 0; i < pointsX.length; i += skipFactor) {
-            for (let j = 0; j < pointsY.length; j += skipFactor) {
-              pathData += `M ${pointsX[i]} ${pointsY[j]} m -1,0 a 1,1 0 1,0 2,0 a 1,1 0 1,0 -2,0 `
-            }
-          }
-        }
-
-        if (pathData) {
-          const pointsPath = SVGBuilder.createPath({
-            d: pathData,
-            fill: "grey",
-            stroke: "none",
-            style: SVGRendererConst.noSelection,
-          })
-          guidesGroup.appendChild(pointsPath)
-        }
+        const pointsRect = SVGBuilder.createRect(
+          { x: startX, y: startY, width: endX - startX, height: endY - startY },
+          { fill: `url(#${patternId})`, stroke: "none", style: SVGRendererConst.noSelection }
+        )
+        guidesGroup.appendChild(pointsRect)
         break
       }
       default:
