@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { TMenuSubMenu } from "@/menu/items/SubMenuItem"
 import { SubMenuItem } from "@/menu/items/SubMenuItem"
 
@@ -17,7 +17,7 @@ export type TContextReorderConfig = boolean | TContextReorderItemsConfig
  * @remarks Menu contextuel Reorder - Réordonne les symboles sélectionnés
  */
 export class ReorderContextMenu extends SubMenuItem {
-  constructor(editor: TInteractiveInkEditor, idPrefix = "ms-menu-context", itemsConfig?: TContextReorderItemsConfig) {
+  constructor(editor: TInteractiveInkCanvas, idPrefix = "ms-menu-context", itemsConfig?: TContextReorderItemsConfig) {
     const enabled = (key: keyof TContextReorderItemsConfig) => itemsConfig?.[key] !== false
 
     const config: TMenuSubMenu = {

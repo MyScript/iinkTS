@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { LoggerCategory } from "@/logger"
 import type { TBox, TMath, TSymbol, TSymbolChar, TText } from "@/symbol"
 import { isText } from "@/symbol"
@@ -14,13 +14,13 @@ import { IIAbstractManager } from "./IIAbstractManager"
 export class IITypesetManager extends IIAbstractManager {
   protected managerName = "IITypesetManager"
 
-  constructor(editor: TInteractiveInkEditor) {
-    super(editor, LoggerCategory.TEXT)
+  constructor(canvas: TInteractiveInkCanvas) {
+    super(canvas, LoggerCategory.TEXT)
     this.logger.info("constructor")
   }
 
   get rowHeight(): number {
-    return this.editor.configuration.rendering.guides.gap
+    return this.canvas.configuration.rendering.guides.gap
   }
 
   getSymbolRowIndex(symbol: TSymbol): number {

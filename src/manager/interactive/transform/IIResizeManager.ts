@@ -1,5 +1,5 @@
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { ResizeDirection } from "@/Constants"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
 import type { TBox, TEdge, TMath, TPoint, TShape, TStroke, TText } from "@/symbol"
 import { cloneSymbol, EdgeKind, isMath, isText, ShapeKind } from "@/symbol"
 import { EdgeOps } from "@/symbol/edge/Edge"
@@ -35,8 +35,8 @@ export class IIResizeManager extends IIAbstractTransformManager {
   transformOrigin!: TPoint
   keepRatio = false
 
-  constructor(editor: TInteractiveInkEditor) {
-    super(editor)
+  constructor(canvas: TInteractiveInkCanvas) {
+    super(canvas)
   }
 
   protected applyToStroke(stroke: TStroke, matrix: MatrixTransform): TStroke {
@@ -171,14 +171,14 @@ export class IIResizeManager extends IIAbstractTransformManager {
       sx,
       sy,
     })
-    this.editor.renderer.setAttribute(id, "transform", `scale(${sx},${sy})`)
+    this.canvas.renderer.setAttribute(id, "transform", `scale(${sx},${sy})`)
   }
 
   start(target: Element, origin: TPoint): void {
     this.logger.info("start", { target })
     // Optimistic: reflects "working" on the state badge as soon as the drag starts. Cleared by
     // the debounced synchronize() triggered by onContentChanged once the transform is acked.
-    this.editor.startOperation("Recognizing")
+    this.canvas.startOperation("Recognizing")
     this.interactElementsGroup = this.resolveInteractGroup(target)
     this.direction = target.getAttribute("resize-direction") as ResizeDirection
 
@@ -219,7 +219,7 @@ export class IIResizeManager extends IIAbstractTransformManager {
       ResizeDirection.SouthEast,
       ResizeDirection.SouthWest,
     ].includes(this.direction)
-    const { x, y } = this.editor.snaps.snapResize(point, horizontalResize, verticalResize)
+    const { x, y } = this.canvas.snaps.snapResize(point, horizontalResize, verticalResize)
     localPoint.x = x
     localPoint.y = y
 
@@ -257,7 +257,7 @@ export class IIResizeManager extends IIAbstractTransformManager {
       this.scaleElement(id, scaleX, scaleY)
     })
     const matrix = MatrixTransform.identity().scale(scaleX, scaleY, this.transformOrigin)
-    this.editor.connector.drawAnchoredEdgesForMatrix(
+    this.canvas.connector.drawAnchoredEdgesForMatrix(
       this.model.symbolsSelected.map((s) => s.id),
       matrix
     )
@@ -267,21 +267,21 @@ export class IIResizeManager extends IIAbstractTransformManager {
   async end(point: TPoint): Promise<void> {
     this.logger.info("end", { point })
     const { scaleX, scaleY } = this.continue(point)
-    this.editor.snaps.clearSnapToElementLines()
+    this.canvas.snaps.clearSnapToElementLines()
     const oldSymbols = this.model.symbolsSelected.map((s) => cloneSymbol(s))
     const matrix = MatrixTransform.identity().scale(scaleX, scaleY, this.transformOrigin)
     this.applyAndDraw(this.model.symbolsSelected, matrix)
     this.applyTransformToGhostStrokesForSelectedMath(this.model.symbolsSelected, matrix)
-    this.editor.connector.updateAnchoredEdges(this.model.symbolsSelected.map((s) => s.id))
-    const strokesFromSymbols = this.editor.extractStrokesFromSymbols(this.model.symbolsSelected)
-    await this.editor.recognizer.transformScale(
+    this.canvas.connector.updateAnchoredEdges(this.model.symbolsSelected.map((s) => s.id))
+    const strokesFromSymbols = this.canvas.extractStrokesFromSymbols(this.model.symbolsSelected)
+    await this.canvas.client.transformScale(
       strokesFromSymbols.map((s) => s.id),
       scaleX,
       scaleY,
       this.transformOrigin.x,
       this.transformOrigin.y
     )
-    this.editor.history.push(this.model, {
+    this.canvas.history.push(this.model, {
       scale: [
         {
           symbols: oldSymbols,

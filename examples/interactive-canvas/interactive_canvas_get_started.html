@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+    <title>Get Started</title>
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+  </head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">Interactive Ink Canvas - Get Started</h1>
+    </header>
+
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">Interactive Ink Canvas — get started</p>
+        <p class="ex-panel-intro">This is the full <strong>INTERACTIVEINK</strong> canvas — the most capable variant. It supports gestures, selection, move, resize, convert, and rich multi-symbol rendering, all driven by a WebSocket connection to the server.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Write, draw shapes, or sketch equations — the canvas handles mixed content automatically and keeps the ink interactive after recognition.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">A built-in toolbar appears on the canvas. Use it to switch tools, undo/redo, convert, or export without any extra UI code.</div>
+        </div>
+      </aside>
+      <div id="rootEl"></div>
+    </div>
+
+    <script type="module">
+      import { Canvas } from "../../dist/iink.esm.js"
+      import { ModalCanvasOptions } from "../components/modal/modalCanvasOptions.js"
+
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', String(open))
+      })
+      const rootElement = document.getElementById("rootEl")
+      const showModalBtn = document.getElementById("showModalBtn")
+
+      let canvas
+
+      const editorOptions = {
+        configuration: {
+        },
+      }
+
+      async function loadEditor(options) {
+        /**
+         * get canvas instance from type
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Canvas parameters
+         */
+        canvas = await Canvas.load(rootElement, "INTERACTIVE_INK", options)
+      }
+
+      showModalBtn.addEventListener("click", () => {
+        ModalCanvasOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+  </body>
+</html>

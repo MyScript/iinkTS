@@ -1,10 +1,10 @@
-import { EditorWriteTool, SELECTION_MARGIN } from "@/Constants"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import type { WebSocketClient } from "@/client"
+import { CanvasWriteTool, SELECTION_MARGIN } from "@/Constants"
 import type { TPointerInfo } from "@/grabber"
 import type { IIHistoryManager } from "@/history"
 import { AbstractWriterManager } from "@/manager/base/AbstractWriterManager"
 import type { IIModel } from "@/model"
-import type { RecognizerWebSocket } from "@/recognizer"
 import type { SVGRenderer } from "@/renderer"
 import type { TStyle } from "@/style"
 import type {
@@ -35,51 +35,51 @@ import type { IISnapManager } from "./IISnapManager"
  * @group Manager
  */
 export class IIWriterManager extends AbstractWriterManager {
-  #tool: EditorWriteTool = EditorWriteTool.Pencil
+  #tool: CanvasWriteTool = CanvasWriteTool.Pencil
   detectGesture: boolean = true
-  editor: TInteractiveInkEditor
+  canvas: TInteractiveInkCanvas
   currentSymbolOrigin?: TPoint
 
-  constructor(editor: TInteractiveInkEditor) {
-    super(editor)
-    this.editor = editor
+  constructor(canvas: TInteractiveInkCanvas) {
+    super(canvas)
+    this.canvas = canvas
   }
 
-  get tool(): EditorWriteTool {
+  get tool(): CanvasWriteTool {
     return this.#tool
   }
-  set tool(wt: EditorWriteTool) {
+  set tool(wt: CanvasWriteTool) {
     this.#tool = wt
-    if (wt !== EditorWriteTool.Pencil) {
-      this.editor.layers.root.classList.add("shape")
+    if (wt !== CanvasWriteTool.Pencil) {
+      this.canvas.layers.root.classList.add("shape")
     } else {
-      this.editor.layers.root.classList.remove("shape")
+      this.canvas.layers.root.classList.remove("shape")
     }
-    this.editor.unselectAll()
+    this.canvas.unselectAll()
   }
 
   get model(): IIModel {
-    return this.editor.model
+    return this.canvas.model
   }
 
   get renderer(): SVGRenderer {
-    return this.editor.renderer
+    return this.canvas.renderer
   }
 
   get history(): IIHistoryManager {
-    return this.editor.history
+    return this.canvas.history
   }
 
   get gestureManager(): IIGestureManager {
-    return this.editor.gesture
+    return this.canvas.gesture
   }
 
   get snaps(): IISnapManager {
-    return this.editor.snaps
+    return this.canvas.snaps
   }
 
-  get recognizer(): RecognizerWebSocket {
-    return this.editor.recognizer
+  get client(): WebSocketClient {
+    return this.canvas.client
   }
 
   #pendingFrame?: number
@@ -127,7 +127,7 @@ export class IIWriterManager extends AbstractWriterManager {
   }
 
   protected needContextLessGesture(stroke: TStroke): boolean {
-    const strokeBoundsWithMargin = this.editor.getSymbolsBounds([stroke], 2 * SELECTION_MARGIN)
+    const strokeBoundsWithMargin = this.canvas.getSymbolsBounds([stroke], 2 * SELECTION_MARGIN)
     return (
       this.detectGesture &&
       this.model.symbols.some((s) => !isStroke(s) && OBBOps.overlapsBox(s.bounds, strokeBoundsWithMargin))
@@ -136,34 +136,34 @@ export class IIWriterManager extends AbstractWriterManager {
 
   protected createCurrentSymbol(pointer: TPointer, style: TStyle, pointerType: string): TSymbol {
     switch (this.tool) {
-      case EditorWriteTool.Pencil:
+      case CanvasWriteTool.Pencil:
         this.currentSymbol = StrokeOps.create(style, pointerType)
         break
-      case EditorWriteTool.Rectangle:
+      case CanvasWriteTool.Rectangle:
         this.currentSymbol = ShapePolygonOps.createRectangleBetweenPoints(pointer, pointer, style)
         break
-      case EditorWriteTool.Triangle:
+      case CanvasWriteTool.Triangle:
         this.currentSymbol = ShapePolygonOps.createTriangleBetweenPoints(pointer, pointer, style)
         break
-      case EditorWriteTool.Parallelogram:
+      case CanvasWriteTool.Parallelogram:
         this.currentSymbol = ShapePolygonOps.createParallelogramBetweenPoints(pointer, pointer, style)
         break
-      case EditorWriteTool.Rhombus:
+      case CanvasWriteTool.Rhombus:
         this.currentSymbol = ShapePolygonOps.createRhombusBetweenPoints(pointer, pointer, style)
         break
-      case EditorWriteTool.Circle:
+      case CanvasWriteTool.Circle:
         this.currentSymbol = ShapeCircleOps.createBetweenPoints(pointer, pointer, style)
         break
-      case EditorWriteTool.Ellipse:
+      case CanvasWriteTool.Ellipse:
         this.currentSymbol = ShapeEllipseOps.createBetweenPoints(pointer, pointer, style)
         break
-      case EditorWriteTool.Line:
-      case EditorWriteTool.Arrow:
-      case EditorWriteTool.DoubleArrow: {
+      case CanvasWriteTool.Line:
+      case CanvasWriteTool.Arrow:
+      case CanvasWriteTool.DoubleArrow: {
         let startDecoration, endDecoration
-        if (this.tool === EditorWriteTool.Arrow) {
+        if (this.tool === CanvasWriteTool.Arrow) {
           endDecoration = EdgeDecoration.Arrow
-        } else if (this.tool === EditorWriteTool.DoubleArrow) {
+        } else if (this.tool === CanvasWriteTool.DoubleArrow) {
           startDecoration = EdgeDecoration.Arrow
           endDecoration = EdgeDecoration.Arrow
         }
@@ -178,38 +178,38 @@ export class IIWriterManager extends AbstractWriterManager {
 
   protected updateCurrentSymbolShape(pointer: TPointer): void {
     switch (this.tool) {
-      case EditorWriteTool.Rectangle:
+      case CanvasWriteTool.Rectangle:
         ShapePolygonOps.updateRectangleBetweenPoints(
           this.currentSymbol as TShapePolygon,
           this.currentSymbolOrigin!,
           pointer
         )
         break
-      case EditorWriteTool.Triangle:
+      case CanvasWriteTool.Triangle:
         ShapePolygonOps.updateTriangleBetweenPoints(
           this.currentSymbol as TShapePolygon,
           this.currentSymbolOrigin!,
           pointer
         )
         break
-      case EditorWriteTool.Parallelogram:
+      case CanvasWriteTool.Parallelogram:
         ShapePolygonOps.updateParallelogramBetweenPoints(
           this.currentSymbol as TShapePolygon,
           this.currentSymbolOrigin!,
           pointer
         )
         break
-      case EditorWriteTool.Rhombus:
+      case CanvasWriteTool.Rhombus:
         ShapePolygonOps.updateRhombusBetweenPoints(
           this.currentSymbol as TShapePolygon,
           this.currentSymbolOrigin!,
           pointer
         )
         break
-      case EditorWriteTool.Circle:
+      case CanvasWriteTool.Circle:
         ShapeCircleOps.updateBetweenPoints(this.currentSymbol as TShapeCircle, this.currentSymbolOrigin!, pointer)
         break
-      case EditorWriteTool.Ellipse:
+      case CanvasWriteTool.Ellipse:
         ShapeEllipseOps.updateBetweenPoints(this.currentSymbol as TShapeEllipse, this.currentSymbolOrigin!, pointer)
         break
     }
@@ -247,22 +247,22 @@ export class IIWriterManager extends AbstractWriterManager {
   start(info: TPointerInfo): void {
     // Optimistic: reflects "working" on the state badge as soon as the user starts drawing,
     // without waiting for a server round-trip. Cleared either right away in `end()` (nothing sent
-    // to the recognizer, e.g. a shape) or by the debounced synchronize() triggered by onContentChanged.
-    this.editor.startOperation("Recognizing")
+    // to the client, e.g. a shape) or by the debounced synchronize() triggered by onContentChanged.
+    this.canvas.startOperation("Recognizing")
     const localPointer = info.pointer
-    if (this.tool !== EditorWriteTool.Pencil) {
+    if (this.tool !== CanvasWriteTool.Pencil) {
       const { x, y } = this.snaps.snapResize(localPointer)
       localPointer.x = x
       localPointer.y = y
     }
     this.currentSymbolOrigin = localPointer
-    this.createCurrentSymbol(localPointer, this.editor.penStyle, info.pointerType)
+    this.createCurrentSymbol(localPointer, this.canvas.penStyle, info.pointerType)
     this.renderer.drawCurrentSymbol(this.currentSymbol!)
   }
 
   continue(info: TPointerInfo): void {
     const localPointer = info.pointer
-    if (this.tool !== EditorWriteTool.Pencil) {
+    if (this.tool !== CanvasWriteTool.Pencil) {
       const { x, y } = this.snaps.snapResize(localPointer)
       localPointer.x = x
       localPointer.y = y
@@ -281,19 +281,19 @@ export class IIWriterManager extends AbstractWriterManager {
       gestureFromContextLess = await this.gestureManager.getGestureFromContextLess(localStroke)
     }
     if (gestureFromContextLess) {
-      this.recognizer.addStrokes([localStroke], this.detectGesture)
+      this.client.addStrokes([localStroke], this.detectGesture)
       await this.gestureManager.apply(gestureFromContextLess)
     } else {
-      // Any server-detected gesture arrives asynchronously via recognizer.event.addGestureDetectedListener,
+      // Any server-detected gesture arrives asynchronously via client.event.addGestureDetectedListener,
       // handled by IIGestureManager itself — not tied to this call's return value.
-      await this.recognizer.addStrokes([localStroke], this.detectGesture)
+      await this.client.addStrokes([localStroke], this.detectGesture)
     }
   }
 
   async end(info: TPointerInfo): Promise<void> {
     this.cancelScheduledRender()
     const localPointer = info.pointer
-    if (this.tool !== EditorWriteTool.Pencil) {
+    if (this.tool !== CanvasWriteTool.Pencil) {
       const { x, y } = this.snaps.snapResize(localPointer)
       localPointer.x = x
       localPointer.y = y
@@ -315,9 +315,9 @@ export class IIWriterManager extends AbstractWriterManager {
     if (isStroke(localSymbol)) {
       await this.interactWithBackend(localSymbol)
     } else {
-      // Nothing sent to the recognizer (e.g. a shape) — nothing will ever trigger the
+      // Nothing sent to the client (e.g. a shape) — nothing will ever trigger the
       // debounced synchronize() that clears the optimistic "Recognizing" started in start().
-      this.editor.endOperation("Recognizing")
+      this.canvas.endOperation("Recognizing")
     }
   }
 }

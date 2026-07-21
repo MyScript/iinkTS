@@ -141,13 +141,13 @@
     </style>
 
     <style>
-      #editor {
+      #canvas {
         width: 100vw;
         height: calc(100dvh - 166px);
       }
 
       @media only screen and (max-width: 478px) {
-        #editor {
+        #canvas {
           height: calc(100dvh - 215px);
         }
       }
@@ -168,32 +168,32 @@
       <select id="language"></select>
     </nav>
 
-    <div id="editorEl"></div>
+    <div id="rootEl"></div>
 
     <script>
-      const editorElement = document.getElementById("editorEl");
+      const rootElement = document.getElementById("rootEl");
       const resultElement = document.getElementById("result");
       const languageElement = document.getElementById("language");
       const clearElement = document.getElementById("clear");
       const undoElement = document.getElementById("undo");
       const redoElement = document.getElementById("redo");
 
-      let editor
+      let canvas
 
       clearElement.addEventListener("click", async () => {
-        await editor?.clear();
+        await canvas?.clear();
       });
 
       undoElement.addEventListener("click", async () => {
-        await editor?.undo();
+        await canvas?.undo();
       });
 
       redoElement.addEventListener("click", async () => {
-        await editor?.redo();
+        await canvas?.redo();
       });
 
       window.addEventListener("resize", async () => {
-        await editor?.resize();
+        await canvas?.resize();
       });
 
       const options = {
@@ -211,51 +211,51 @@
       };
 
       languageElement.addEventListener("change", (e) => {
-        editor.configuration.recognition.lang = e.target.value;
-        options.configuration = editor.configuration
+        canvas.configuration.recognition.lang = e.target.value;
+        options.configuration = canvas.configuration
         loadEditor(options)
       });
 
       /**
-       * we use an asynchronous function to be able to wait for the end of the initialization of the editor
+       * we use an asynchronous function to be able to wait for the end of the initialization of the canvas
        * before connecting the different event listeners
        */
       async function loadEditor(options) {
         /**
-         * get editor instance from type
+         * get canvas instance from type
          * @param {Element} The DOM element to attach the ink paper
-         * @param {String} Editor type [INTERACTIVEINK", "INTERACTIVEINKSSR", "INKV1", "INKV2"]
-         * @param {Object} Editor options depend on editor type
+         * @param {String} Canvas type [INTERACTIVEINK", "INTERACTIVE_INK_SSR", "INK_V1", "INK_V2"]
+         * @param {Object} Canvas options depend on canvas type
          * - {@link https://myscript.github.io/iinkTS/docs/types/TInteractiveInkEditorOptions.html}
          * - {@link https://myscript.github.io/iinkTS/docs/types/TInteractiveInkSSREditorOptions.html}
-         * - {@link https://myscript.github.io/iinkTS/docs/types/TInkEditorDeprecatedOptions.html}
+         * - {@link https://myscript.github.io/iinkTS/docs/types/TInkCanvasDeprecatedOptions.html}
          * - {@link https://myscript.github.io/iinkTS/docs/types/TInkEditorOptions.html}
          *
-         * @return {Object} Editor (the type of editor depends on the second parameter pass to the "load" function)
-         * - {@link https://myscript.github.io/iinkTS/docs/classes/InteractiveInkEditor.html}
-         * - {@link https://myscript.github.io/iinkTS/docs/classes/InteractiveInkSSREditor.html}
-         * - {@link https://myscript.github.io/iinkTS/docs/classes/InkEditorDeprecated.html}
-         * - {@link https://myscript.github.io/iinkTS/docs/classes/InkEditor.html}
+         * @return {Object} Canvas (the type of canvas depends on the second parameter pass to the "load" function)
+         * - {@link https://myscript.github.io/iinkTS/docs/classes/InteractiveInkCanvas.html}
+         * - {@link https://myscript.github.io/iinkTS/docs/classes/InteractiveInkSSRCanvas.html}
+         * - {@link https://myscript.github.io/iinkTS/docs/classes/InkCanvasDeprecated.html}
+         * - {@link https://myscript.github.io/iinkTS/docs/classes/InkCanvas.html}
          */
-        editor = await iink.Editor.load(editorElement, "INTERACTIVEINKSSR", options);
+        canvas = await iink.Canvas.load(rootElement, "INTERACTIVE_INK_SSR", options);
 
-        const currentLanguage = editor.configuration.recognition.lang;
-        const availableLanguageResponse = await iink.getAvailableLanguageList(editor.configuration);
+        const currentLanguage = canvas.configuration.recognition.lang;
+        const availableLanguageResponse = await iink.getAvailableLanguageList(canvas.configuration);
         Object.keys(availableLanguageResponse.result).forEach(function (key) {
           const selected = currentLanguage === key;
           languageElement.options[languageElement.options.length] = new Option(availableLanguageResponse.result[key], key, selected, selected);
         });
 
         /**
-         * You can use `editor.event` or directly `editorElement` to add event listener
+         * You can use `canvas.event` or directly `rootElement` to add event listener
          */
-        editor.event.addEventListener("changed", (event) => {
+        canvas.event.addEventListener("changed", (event) => {
           undoElement.disabled = !event.detail.canUndo;
           redoElement.disabled = !event.detail.canRedo;
           clearElement.disabled = !event.detail.canClear;
         });
 
-        editor.event.addEventListener("exported", (event) => {
+        canvas.event.addEventListener("exported", (event) => {
           resultElement.innerHTML = event.detail && event.detail["application/vnd.myscript.jiix"] ? event.detail["application/vnd.myscript.jiix"].label : "";
         });
       }

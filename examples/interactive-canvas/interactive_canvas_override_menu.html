@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Override menus</title>
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <style>
+      /* Badge appended by CustomMenuAction */
+      .custom-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #4c6ef5;
+        color: white;
+        font-size: 10px;
+        font-weight: 700;
+        border-radius: 4px;
+        padding: 2px 5px;
+        margin-left: 4px;
+        vertical-align: middle;
+        pointer-events: none;
+      }
+
+      /* Notification toast */
+      #toast {
+        position: fixed;
+        bottom: 60px;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        background: #212529;
+        color: white;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 13px;
+        opacity: 0;
+        transition: opacity 0.2s, transform 0.2s;
+        pointer-events: none;
+        z-index: 9999;
+      }
+
+      #toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    </style>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="showModalBtn" class="btn-keys">API Keys</button>
+      <h1 class="header-title">Interactive Ink Canvas — Override menus</h1>
+    </header>
+
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">Extending built-in menus with custom classes</p>
+        <p class="ex-panel-intro">Any of the four built-in menus (<code>action</code>, <code>tool</code>, <code>style</code>, <code>context</code>) can be replaced by a custom class passed in <code>editorOptions.override.menu</code>. Extend the base class to keep all existing behavior, then add or modify what you need.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Here, <strong>CustomMenuAction</strong> extends <code>IIMenuAction</code> to add a <strong>Download PNG</strong> button (exports the current canvas as a PNG file) and a <strong>stroke count badge</strong> that updates live on every render cycle.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc"><strong>CustomMenuTool</strong> extends <code>IIMenuTool</code> to append a <strong>Reset zoom</strong> button that snaps the viewport back to 100% with a toast confirmation.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc"><strong>CustomMenuStyle</strong> extends <code>IIMenuStyle</code> and injects a restricted configuration: only six brand colors are available, and font controls are hidden — useful for enforcing a design system across users.</div>
+        </div>
+      </aside>
+      <div id="rootEl"></div>
+      <div id="toast"></div>
+    </div>
+
+    <script type="module">
+      import { Canvas, IIMenuAction, IIMenuTool, IIMenuStyle } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
+
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      // ─── Toast helper ────────────────────────────────────────────────────────────
+
+      function showToast(message) {
+        const toast = document.getElementById('toast')
+        toast.textContent = message
+        toast.classList.add('show')
+        setTimeout(() => toast.classList.remove('show'), 2500)
+      }
+
+      // ─── Custom action menu ───────────────────────────────────────────────────────
+      // Extends IIMenuAction to inject two extra buttons:
+      //   • "Download PNG"  – exports current content as PNG and triggers download
+      //   • "Stroke count"  – shows a badge with live stroke count (updates on render)
+
+      class CustomMenuAction extends IIMenuAction {
+        #downloadBtn = null
+        #strokeCountBadge = null
+
+        render(layer) {
+          // Call parent to render all standard action buttons
+          super.render(layer)
+
+          if (!this.wrapper) return
+
+          // Button 1 — Download PNG
+          this.#downloadBtn = document.createElement('button')
+          this.#downloadBtn.classList.add('ms-menu-button')
+          this.#downloadBtn.title = 'Download as PNG'
+          this.#downloadBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>`
+
+          this.#downloadBtn.addEventListener('pointerdown', async () => {
+            try {
+              const exports = await this.canvas.export(['image/png'])
+              const pngData = exports?.['image/png']
+              if (!pngData) {
+                showToast('No content to export')
+                return
+              }
+              const url = URL.createObjectURL(new Blob([pngData], { type: 'image/png' }))
+              const a = document.createElement('a')
+              a.href = url
+              a.download = 'drawing.png'
+              a.click()
+              URL.revokeObjectURL(url)
+              showToast('PNG downloaded')
+            }
+            catch (e) {
+              showToast('Export failed: ' + e.message)
+            }
+          })
+
+          this.wrapper.appendChild(this.#downloadBtn)
+
+          // Button 2 — Stroke count badge
+          const countBtn = document.createElement('button')
+          countBtn.classList.add('ms-menu-button')
+          countBtn.title = 'Stroke count'
+          countBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="8" y1="6" x2="21" y2="6"/>
+            <line x1="8" y1="12" x2="21" y2="12"/>
+            <line x1="8" y1="18" x2="21" y2="18"/>
+            <line x1="3" y1="6" x2="3.01" y2="6"/>
+            <line x1="3" y1="12" x2="3.01" y2="12"/>
+            <line x1="3" y1="18" x2="3.01" y2="18"/>
+          </svg>`
+
+          this.#strokeCountBadge = document.createElement('span')
+          this.#strokeCountBadge.classList.add('custom-badge')
+          this.#strokeCountBadge.textContent = '0'
+          countBtn.appendChild(this.#strokeCountBadge)
+
+          countBtn.addEventListener('pointerdown', () => {
+            const count = this.canvas.model.symbols.length
+            showToast(`${count} symbol${count !== 1 ? 's' : ''} on canvas`)
+          })
+
+          this.wrapper.appendChild(countBtn)
+
+          this.update()
+        }
+
+        update() {
+          super.update()
+          // Keep badge in sync
+          if (this.#strokeCountBadge) {
+            this.#strokeCountBadge.textContent = String(this.canvas.model.symbols.length)
+          }
+        }
+
+        destroy() {
+          this.#downloadBtn = null
+          this.#strokeCountBadge = null
+          super.destroy()
+        }
+      }
+
+      // ─── Custom tool menu ─────────────────────────────────────────────────────────
+      // Extends IIMenuTool to add a custom "Reset zoom" button at the end of the toolbar.
+
+      class CustomMenuTool extends IIMenuTool {
+        #resetZoomBtn = null
+
+        render(layer) {
+          super.render(layer)
+
+          if (!this.wrapper) return
+
+          this.#resetZoomBtn = document.createElement('button')
+          this.#resetZoomBtn.classList.add('ms-menu-button')
+          this.#resetZoomBtn.title = 'Reset zoom'
+          this.#resetZoomBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>`
+
+          this.#resetZoomBtn.addEventListener('pointerdown', () => {
+            this.canvas.zoom(1)
+            showToast('Zoom reset to 100%')
+          })
+
+          this.wrapper.appendChild(this.#resetZoomBtn)
+        }
+
+        destroy() {
+          this.#resetZoomBtn = null
+          super.destroy()
+        }
+      }
+
+      // ─── Custom style menu ────────────────────────────────────────────────────────
+      // Extends IIMenuStyle to restrict the color palette to brand colors only.
+
+      class CustomMenuStyle extends IIMenuStyle {
+        constructor(canvas) {
+          // Inject a restricted config: brand colors only, no font controls
+          super(canvas, 'ms-menu-style', {
+            strokeColor: true,
+            fillColor: true,
+            thickness: true,
+            fontSize: false,
+            fontWeight: false,
+            opacity: true,
+            colors: ['#000000', '#e03131', '#1971c2', '#2f9e44', '#f08c00', '#ffffff'],
+          })
+        }
+      }
+
+      // ─── Canvas setup ─────────────────────────────────────────────────────────────
+
+      const rootElement = document.getElementById('rootEl')
+      const showModalBtn = document.getElementById('showModalBtn')
+
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            lang: 'en_US',
+            'raw-content': {
+              recognition: { types: ['text', 'shape', 'math'] },
+              gestures: ['surround', 'strike-through', 'underline', 'insert']
+            }
+          }
+        },
+        override: {
+          menu: {
+            action: CustomMenuAction,
+            tool: CustomMenuTool,
+            style: CustomMenuStyle
+          }
+        }
+      }
+
+      let canvas
+
+      async function loadEditor(options) {
+        await canvas?.destroy()
+        canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK', options)
+        window.canvas = canvas
+      }
+      showModalBtn.addEventListener('click', () => {
+        ModalCanvasOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>

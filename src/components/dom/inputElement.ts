@@ -39,9 +39,9 @@ export type TFileInputElConfig = {
 }
 
 const DEFAULT_INPUT_STYLE = `
-  padding: var(--iink-spacing-sm) var(--iink-spacing-md);
-  border: 1px solid var(--iink-input-border);
-  border-radius: var(--iink-radius-sm);
+  padding: var(--ms-ink-spacing-sm) var(--ms-ink-spacing-md);
+  border: 1px solid var(--ms-ink-input-border);
+  border-radius: var(--ms-ink-radius-sm);
   font-size: 14px;
 `
 

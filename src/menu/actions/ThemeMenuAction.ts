@@ -1,23 +1,23 @@
 import styleIcon from "@/assets/svg/palette.svg"
-import type { TEditorTheme } from "@/editor/EditorThemes"
-import { EditorThemes } from "@/editor/EditorThemes"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TCanvasTheme } from "@/canvas/CanvasThemes"
+import { CanvasThemes } from "@/canvas/CanvasThemes"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { TMenuSubMenu } from "@/menu/items/SubMenuItem"
 import { SubMenuItem } from "@/menu/items/SubMenuItem"
 
 const STORAGE_KEY_ATTR = "data-theme-id"
 
 /**
- * Sub-menu action for switching predefined editor themes.
+ * Sub-menu action for switching predefined canvas themes.
  * Selected theme is persisted to localStorage.
  * @group Menu
  */
 export class ThemeMenuAction extends SubMenuItem {
-  private themes: TEditorTheme[]
+  private themes: TCanvasTheme[]
   private currentThemeId: string
   private themeItems: Map<string, HTMLElement> = new Map()
 
-  constructor(editor: TInteractiveInkEditor, idPrefix = "ms-menu-action", themes?: TEditorTheme[]) {
+  constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-action", themes?: TCanvasTheme[]) {
     const config: TMenuSubMenu = {
       type: "submenu",
       id: `${idPrefix}-theme`,
@@ -27,9 +27,9 @@ export class ThemeMenuAction extends SubMenuItem {
       position: "right-top",
       items: [],
     }
-    super(config, editor)
-    this.themes = themes ?? EditorThemes.EDITOR_THEMES
-    this.currentThemeId = EditorThemes.getSavedThemeId()
+    super(config, canvas)
+    this.themes = themes ?? CanvasThemes.EDITOR_THEMES
+    this.currentThemeId = CanvasThemes.getSavedThemeId()
   }
 
   createElement(): HTMLDivElement {
@@ -75,9 +75,9 @@ export class ThemeMenuAction extends SubMenuItem {
 
   private applyTheme(id: string): void {
     const theme = this.themes.find((t) => t.id === id) ?? this.themes[0]
-    this.editor.setCssVars(theme.vars)
+    this.canvas.setCssVars(theme.vars)
     this.currentThemeId = id
-    EditorThemes.saveThemeId(id)
+    CanvasThemes.saveThemeId(id)
     this.updateActiveItem()
   }
 

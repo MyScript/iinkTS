@@ -1,10 +1,10 @@
-import type { TRecognitionTypeV2 } from "@/recognizer"
+import type { TRecognitionTypeV2 } from "@/client"
 
 import type { TJIIXBase, TJIIXWord } from "./ExportCommon"
 
 /**
  * @group Exports
- * @remarks List all supported MIME types for export in RecognizersV2. Please note, the MIME types supported depend on the recognition type configured
+ * @remarks List all supported MIME types for export in ClientsV2. Please note, the MIME types supported depend on the recognition type configured
  */
 export enum ExportV2Type {
   JIIX = "application/vnd.myscript.jiix",
@@ -27,7 +27,7 @@ export type TJIIXV2RangeItem = {
 
 /**
  * @group Exports
- * @remarks Only in InkRecognizer () activated with recognition.export.JIIXV2.range = true
+ * @remarks Only in InkCanvas () activated with recognition.export.JIIXV2.range = true
  */
 export type TJIIXV2Range = TJIIXV2RangeItem[]
 
@@ -367,7 +367,7 @@ export type TJIIXV2ShapeElement =
 
 /**
  * @group Exports
- * @remarks Only in InkRecognizer () activated with recognition.export.JIIXV2.range = true
+ * @remarks Only in InkCanvas () activated with recognition.export.JIIXV2.range = true
  */
 export type TJIIXV2RawContentBase<T = TRecognitionTypeV2> = {
   type: T

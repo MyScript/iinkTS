@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Custom pre-loaded resources</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">Custom pre-loaded resources</h1>
+    </header>
+
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">📦 Custom pre-loaded resources</p>
+        <p class="ex-panel-intro">Unlike an inline custom lexicon, resources are uploaded to the recognition server in advance — they can be full vocabulary lists or language models, pre-processed and ready to use.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Once uploaded, reference a resource by its identifier in <code>customResources</code>. Multiple resources can be combined.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">This example loads a <strong>dinosaur</strong> resource — try writing <em>Triceratops</em>, <em>Brachiosaurus</em>, or <em>Pachycephalosaurus</em>.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">As with the custom lexicon, the engine evolves: some of these words may eventually be recognized without a resource.</div>
+        </div>
+      </aside>
+
+      <div id="rootEl"></div>
+    </div>
+
+    <script type="module">
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      import { Canvas } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
+      const rootElement = document.getElementById('rootEl')
+      const showModalBtn = document.getElementById('showModalBtn')
+      let canvas
+
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            text: {
+              addLKText: true,
+              customResources: ['dinosaur']
+            }
+          }
+        }
+      }
+      async function loadEditor(options) {
+        canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK_SSR', options)
+      }
+
+      showModalBtn.addEventListener('click', () => {
+        ModalCanvasOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>

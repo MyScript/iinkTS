@@ -1,14 +1,14 @@
 import { buildIIStroke, buildIIText } from "../../../helpers"
-import { createEditorMock, asEditor } from "../../../__mocks__/createEditorMock"
+import { createCanvasMock, asEditor } from "../../../__mocks__/createCanvasMock"
 import { JoinGestureHandler, GestureHelpers, TGesture, StrokeOps } from "@/iink"
 
 describe("JoinGestureHandler.ts", () => {
-  let editor: ReturnType<typeof createEditorMock>
+  let editor: ReturnType<typeof createCanvasMock>
   let helpers: GestureHelpers
   let handler: JoinGestureHandler
 
   beforeEach(() => {
-    editor = createEditorMock()
+    editor = createCanvasMock()
     helpers = new GestureHelpers(asEditor(editor))
     handler = new JoinGestureHandler(asEditor(editor), helpers)
   })

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+    <title>Ink Canvas custom grabber</title>
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">
+        Ink Canvas with Custom Grabber
+      </h1>
+    </header>
+
+    <div id="result"></div>
+
+    <nav class="flex-container gap between wrap">
+      <ul class="point-info">
+        <li id="pointer-down">Down at:</li>
+        <li id="pointer-move">Move to:</li>
+        <li id="pointer-up">Up at:</li>
+      </ul>
+    </nav>
+
+    <div id="rootEl"></div>
+
+    <script type="module">
+      import { Canvas, PointerEventGrabber } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
+      const rootElement = document.getElementById('rootEl')
+      const resultElement = document.getElementById('result')
+      const showModalBtn = document.getElementById('showModalBtn')
+
+      class CustomGrabber extends PointerEventGrabber {
+        constructor(configuration) {
+          super(configuration)
+          this.downElement = document.getElementById("pointer-down")
+          this.moveElement = document.getElementById("pointer-move")
+          this.upElement = document.getElementById("pointer-up")
+          this.downElement.textContent = "Down at:"
+          this.moveElement.textContent = "Move to:"
+          this.upElement.textContent = "Up at:"
+        }
+
+        pointerDownHandler = (evt) => {
+          if (evt.button !== 0 || evt.buttons !== 1) {
+            let warning
+            warning = "You have not clicked with only main button.\r"
+            switch (evt.button) {
+              case 1:
+                warning += "Auxiliary button pressed, usually the wheel button or the middle button"
+                break
+              case 2:
+                warning += "Secondary button pressed, usually the right button"
+                break
+              case 3:
+                warning += "Fourth button, typically the Browser Back button"
+                break
+              case 4:
+                warning += "Fifth button, typically the Browser Forward button"
+                break
+            }
+            alert(warning)
+            return
+          }
+
+          this.capturing = true
+          this.pointerType = evt.pointerType
+
+          if (this.onPointerDown) {
+            /**
+             * getPointerInfos inherits PointerEventGrabber
+             */
+            const pointerInfo = this.getPointerInfos(evt)
+            this.downElement.textContent = `Down at: ${JSON.stringify(pointerInfo.pointer)}`
+            this.moveElement.textContent = "Move to:"
+            this.upElement.textContent = "Up at:"
+            /**
+             * onPointerDown is bind with the canvas
+             */
+            this.onPointerDown(pointerInfo)
+          }
+        }
+
+        pointerMoveHandler = (evt) => {
+          if (this.capturing && this.pointerType === evt.pointerType) {
+            if (this.onPointerMove) {
+              /**
+               * getPointerInfos inherits PointerEventGrabber
+               */
+              const pointerInfo = this.getPointerInfos(evt)
+              this.moveElement.textContent = `Move to: ${JSON.stringify(pointerInfo.pointer)}`
+              /**
+               * onPointerMove is bind with the canvas
+               */
+              this.onPointerMove(pointerInfo)
+            }
+          }
+        }
+
+        pointerUpHandler = (evt) => {
+          if (this.capturing && this.pointerType === evt.pointerType) {
+            this.pointerType = undefined
+            this.capturing = false
+            evt.stopPropagation()
+            if (this.onPointerUp) {
+              /**
+               * getPointerInfos inherits PointerEventGrabber
+               */
+              const pointerInfo = this.getPointerInfos(evt)
+              this.upElement.textContent = `Up at: ${JSON.stringify(pointerInfo.pointer)}`
+              /**
+               * onPointerUp is bind with the canvas
+               */
+              this.onPointerUp(pointerInfo)
+            }
+          }
+        }
+      }
+
+      let canvas
+
+      const editorOptions = {
+        configuration: {},
+        override: {
+          grabber: CustomGrabber
+        }
+      }
+
+      async function loadEditor(options) {
+        resultElement.innerHTML = ''
+        await canvas?.destroy()
+        /**
+         * get canvas instance from type
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Canvas parameters
+         */
+        canvas = await Canvas.load(rootElement, 'INK_V1', options)
+
+        canvas.event.addEventListener('exported', (event) => {
+          resultElement.innerHTML =
+            event.detail && event.detail['application/vnd.myscript.jiix']
+              ? event.detail['application/vnd.myscript.jiix'].label
+              : ''
+        })
+      }
+
+      showModalBtn.addEventListener('click', () => {
+        ModalCanvasOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+    </script>
+
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>

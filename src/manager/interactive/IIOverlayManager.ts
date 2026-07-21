@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { LoggerCategory } from "@/logger"
 import type { TJIIXMathElement } from "@/model"
 import { SVGBuilder, SVGRendererConst } from "@/renderer"
@@ -58,7 +58,7 @@ export const DefaultOverlayConfig: TOverlayConfig = {
  * - Math blocks: ∑ badge, border, hover zone, highlights, dimming
  * - Text blocks: recognized text badge, border
  *
- * Owned by InteractiveInkEditor as `editor.overlays`.
+ * Owned by InteractiveInkCanvas as `canvas.overlays`.
  *
  * @group Manager
  */
@@ -101,8 +101,8 @@ export class IIOverlayManager extends IIAbstractManager {
   #config: TOverlayConfig
   #colorManager: ColorPaletteManager
 
-  constructor(editor: TInteractiveInkEditor, config: Partial<TOverlayConfig> = {}) {
-    super(editor, LoggerCategory.SVGDEBUG)
+  constructor(canvas: TInteractiveInkCanvas, config: Partial<TOverlayConfig> = {}) {
+    super(canvas, LoggerCategory.SVGDEBUG)
     this.#config = {
       ...DefaultOverlayConfig,
       ...config,
@@ -285,12 +285,12 @@ export class IIOverlayManager extends IIAbstractManager {
 
     hoverZone.addEventListener("pointerenter", () => {
       this.logger.debug("hover", `Pointer entered block ${blockId}`)
-      this.editor.math.onSymbolHover(blockId)
+      this.canvas.math.onSymbolHover(blockId)
     })
 
     hoverZone.addEventListener("pointerleave", () => {
       this.logger.debug("hover", `Pointer left block ${blockId}`)
-      this.editor.math.onSymbolHover(null)
+      this.canvas.math.onSymbolHover(null)
     })
 
     this.renderer.layer.appendChild(hoverZone)
@@ -300,7 +300,7 @@ export class IIOverlayManager extends IIAbstractManager {
     if (mathBlock["bounding-box"]) {
       return convertBoundingBoxMillimeterToPixel(mathBlock["bounding-box"])
     }
-    const blockStrokes = this.editor.model.symbols.filter(
+    const blockStrokes = this.canvas.model.symbols.filter(
       (s) => isStroke(s) && (s as TStroke).jiixBlockId === mathBlock.id
     ) as TStroke[]
     if (!blockStrokes.length) {
@@ -439,7 +439,7 @@ export class IIOverlayManager extends IIAbstractManager {
 
   highlightPrimary(id: string, bounds: TBox, color?: string): void {
     this.drawOverlayRect(id, bounds, "highlight-source", {
-      stroke: color || "var(--iink-success)",
+      stroke: color || "var(--ms-ink-success)",
       "stroke-width": "3",
       "stroke-dasharray": "5 3",
       "data-overlay": "highlight",
@@ -448,7 +448,7 @@ export class IIOverlayManager extends IIAbstractManager {
 
   highlightLinked(id: string, bounds: TBox): void {
     this.drawOverlayRect(id, bounds, "highlight-dependent", {
-      stroke: "var(--iink-warning)",
+      stroke: "var(--ms-ink-warning)",
       "stroke-width": "3",
       "stroke-dasharray": "5 3",
       "data-overlay": "highlight",
@@ -467,17 +467,17 @@ export class IIOverlayManager extends IIAbstractManager {
 
   addHoverGlow(id: string, bounds: TBox): void {
     this.drawOverlayRect(id, bounds, "glow", {
-      stroke: "var(--iink-primary)",
+      stroke: "var(--ms-ink-primary)",
       "stroke-width": "2",
       "data-overlay": "glow",
       style:
-        "pointer-events: none; filter: drop-shadow(0 0 8px color-mix(in srgb, var(--iink-primary) 60%, transparent));",
+        "pointer-events: none; filter: drop-shadow(0 0 8px color-mix(in srgb, var(--ms-ink-primary) 60%, transparent));",
     })
   }
 
   dimSymbol(id: string, bounds: TBox, opacity: number = 0.3): void {
     this.drawOverlayRect(id, bounds, "dim", {
-      fill: "var(--iink-editor-bg)",
+      fill: "var(--ms-ink-canvas-bg)",
       opacity: (1 - opacity).toString(),
       "data-overlay": "dim",
     })

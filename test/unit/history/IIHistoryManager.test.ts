@@ -1,4 +1,4 @@
-import { EditorEventMock } from "../__mocks__/EditorEventMock"
+import { CanvasEventMock } from "../__mocks__/CanvasEventMock"
 import { buildIIStroke } from "../helpers"
 import {
   THistoryConfiguration,
@@ -10,7 +10,7 @@ import {
 } from "@/iink"
 
 describe("IIHistoryManager.ts", () => {
-  const event = new EditorEventMock(document.createElement("div"))
+  const event = new CanvasEventMock(document.createElement("div"))
   test("should instanciate IIHistoryManager", () => {
     const manager = new IIHistoryManager(DefaultHistoryConfiguration, event)
     expect(manager).toBeDefined()

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Styling canvas</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <link rel="stylesheet" href="../assets/style/my-custom-classes.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">Styling canvas</h1>
+    </header>
+
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">🎨 Custom canvas styling</p>
+        <p class="ex-panel-intro"><strong>Canvas appearance</strong> — pass <code>override.cssClass</code> with your own CSS class name. The canvas root element receives that class, letting you fully control background, cursors, layers, and UI components via CSS.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc"><strong>Ink color</strong> — set <code>penStyle.color</code> for the ink drawn during capture, and <code>theme.ink.color</code> for the recognized ink rendered by the engine. Both must match when writing on a dark background.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">This example applies <code>my-custom-class</code> (defined in <code>my-custom-classes.css</code>), which sets a photo background and white ink to match.</div>
+        </div>
+      </aside>
+
+      <div id="rootEl"></div>
+    </div>
+
+    <script type="module">
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      import { Canvas } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
+      const rootElement = document.getElementById('rootEl')
+      const showModalBtn = document.getElementById('showModalBtn')
+      let canvas
+
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            type: 'TEXT'
+          },
+          penStyle: {
+            color: '#ffffff'
+          },
+          theme: {
+            ink: {
+              color: '#ffffff'
+            }
+          }
+        },
+        override: {
+          cssClass: 'my-custom-class'
+        }
+      }
+      async function loadEditor(options) {
+        canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK_SSR', options)
+      }
+
+      showModalBtn.addEventListener('click', () => {
+        ModalCanvasOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>

@@ -1,4 +1,4 @@
-import { EditorEventMock } from "../__mocks__/EditorEventMock"
+import { CanvasEventMock } from "../__mocks__/CanvasEventMock"
 import { delay } from "../helpers"
 import {
   TPointer,
@@ -11,7 +11,7 @@ import {
 } from "@/iink"
 
 describe("HistoryManager.ts", () => {
-  const event = new EditorEventMock(document.createElement("div"))
+  const event = new CanvasEventMock(document.createElement("div"))
   test("should instanciate HistoryManager", () => {
     const manager = new HistoryManager(DefaultHistoryConfiguration, event)
     expect(manager).toBeDefined()

@@ -1,5 +1,5 @@
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { IIMathCapabilitiesTable, IIMathVariableEditor } from "@/components"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
 import type { TMathResultMode } from "@/manager/interactive/math"
 import type { TMenuButton } from "@/menu/items/ButtonMenuItem"
 import type { TMenuCheckbox } from "@/menu/items/CheckboxMenuItem"
@@ -26,7 +26,7 @@ export type TMathActionConfig = boolean | TMathActionItemsConfig
  * @remarks Menu action for Math visualization and interaction controls
  */
 export class MathMenuAction extends SubMenuItem {
-  constructor(editor: TInteractiveInkEditor, idPrefix = "ms-menu-action", itemsConfig?: TMathActionItemsConfig) {
+  constructor(editor: TInteractiveInkCanvas, idPrefix = "ms-menu-action", itemsConfig?: TMathActionItemsConfig) {
     const enabled = (key: keyof TMathActionItemsConfig) => itemsConfig?.[key] !== false
 
     const items: (TMenuCheckbox | TMenuSelect | TMenuButton)[] = []
@@ -36,8 +36,8 @@ export class MathMenuAction extends SubMenuItem {
         type: "checkbox",
         id: `${idPrefix}-math-auto-compute`,
         label: "Auto-compute",
-        getValue: (editor: TInteractiveInkEditor) => editor.math.getComputationConfig().autoCompute,
-        setValue: async (editor: TInteractiveInkEditor, value: boolean) => {
+        getValue: (editor: TInteractiveInkCanvas) => editor.math.getComputationConfig().autoCompute,
+        setValue: async (editor: TInteractiveInkCanvas, value: boolean) => {
           editor.math.updateComputationConfig({
             autoCompute: value,
           })
@@ -53,7 +53,7 @@ export class MathMenuAction extends SubMenuItem {
         type: "button",
         id: `${idPrefix}-math-force-compute-all`,
         label: "Force Compute all",
-        action: async (editor: TInteractiveInkEditor) => {
+        action: async (editor: TInteractiveInkCanvas) => {
           await editor.math.clearAllSolverOutputs()
           await editor.math.computeAllNumericalResults()
         },
@@ -72,8 +72,8 @@ export class MathMenuAction extends SubMenuItem {
             value: "ghost",
           },
         ],
-        getValue: (editor: TInteractiveInkEditor) => editor.math.getComputationConfig().resultMode,
-        setValue: async (editor: TInteractiveInkEditor, value: string) => {
+        getValue: (editor: TInteractiveInkCanvas) => editor.math.getComputationConfig().resultMode,
+        setValue: async (editor: TInteractiveInkCanvas, value: string) => {
           const mode = value as TMathResultMode
           editor.math.updateComputationConfig({
             resultMode: mode,
@@ -100,8 +100,8 @@ export class MathMenuAction extends SubMenuItem {
           { label: "Purple", value: "#9c27b0" },
           { label: "Black", value: "#000000" },
         ],
-        getValue: (editor: TInteractiveInkEditor) => editor.math.getComputationConfig().resultColor,
-        setValue: async (editor: TInteractiveInkEditor, value: string) => {
+        getValue: (editor: TInteractiveInkCanvas) => editor.math.getComputationConfig().resultColor,
+        setValue: async (editor: TInteractiveInkCanvas, value: string) => {
           editor.math.updateComputationConfig({
             resultColor: value,
           })
@@ -117,8 +117,8 @@ export class MathMenuAction extends SubMenuItem {
           type: "checkbox",
           id: `${idPrefix}-math-show-dependency-on-hover`,
           label: "Show Dependencies on Hover",
-          getValue: (editor: TInteractiveInkEditor) => editor.math.getVariablesConfig().showDependencyOnHover,
-          setValue: (editor: TInteractiveInkEditor, value: boolean) => {
+          getValue: (editor: TInteractiveInkCanvas) => editor.math.getVariablesConfig().showDependencyOnHover,
+          setValue: (editor: TInteractiveInkCanvas, value: boolean) => {
             editor.math.updateVariablesConfig({
               showDependencyOnHover: value,
             })
@@ -134,8 +134,8 @@ export class MathMenuAction extends SubMenuItem {
           type: "checkbox",
           id: `${idPrefix}-math-highlight-on-select`,
           label: "Highlight on Select",
-          getValue: (editor: TInteractiveInkEditor) => editor.math.getVariablesConfig().highlightOnSelect,
-          setValue: (editor: TInteractiveInkEditor, value: boolean) => {
+          getValue: (editor: TInteractiveInkCanvas) => editor.math.getVariablesConfig().highlightOnSelect,
+          setValue: (editor: TInteractiveInkCanvas, value: boolean) => {
             editor.math.updateVariablesConfig({
               highlightOnSelect: value,
             })
@@ -149,7 +149,7 @@ export class MathMenuAction extends SubMenuItem {
         type: "button",
         id: `${idPrefix}-math-variables`,
         label: "Edit Variables",
-        action: async (editor: TInteractiveInkEditor) => {
+        action: async (editor: TInteractiveInkCanvas) => {
           const variableEditor = new IIMathVariableEditor(editor)
           await variableEditor.show()
         },
@@ -161,7 +161,7 @@ export class MathMenuAction extends SubMenuItem {
         type: "button",
         id: `${idPrefix}-math-capabilities-overview`,
         label: "Show Math Capabilities Overview",
-        action: async (editor: TInteractiveInkEditor) => {
+        action: async (editor: TInteractiveInkCanvas) => {
           const capabilitiesTable = new IIMathCapabilitiesTable(editor)
           await capabilitiesTable.show()
         },

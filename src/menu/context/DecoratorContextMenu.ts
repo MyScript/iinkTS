@@ -1,5 +1,5 @@
 import ArrowDown from "@/assets/svg/nav-arrow-down.svg"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { TGenericMenuItem } from "@/menu/items/BaseMenuItem"
 import { BaseMenuItem } from "@/menu/items/BaseMenuItem"
 import { DEFAULT_MENU_COLORS } from "@/menu/MenuConstants"
@@ -29,7 +29,7 @@ export class DecoratorContextMenu extends BaseMenuItem<HTMLElement> {
   }
   #itemsConfig?: TContextDecoratorItemsConfig
 
-  constructor(editor: TInteractiveInkEditor, idPrefix = "ms-menu-context", itemsConfig?: TContextDecoratorItemsConfig) {
+  constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-context", itemsConfig?: TContextDecoratorItemsConfig) {
     const config: TGenericMenuItem & {
       idPrefix: string
     } = {
@@ -38,12 +38,12 @@ export class DecoratorContextMenu extends BaseMenuItem<HTMLElement> {
       label: "Decorator",
       idPrefix,
     }
-    super(config, editor)
+    super(config, canvas)
     this.#itemsConfig = itemsConfig
   }
 
   get symbolsDecorable(): TText[] {
-    return this.editor.model.symbolsSelected.filter(isText) as TText[]
+    return this.canvas.model.symbolsSelected.filter(isText) as TText[]
   }
 
   get showDecorator(): boolean {
@@ -51,7 +51,7 @@ export class DecoratorContextMenu extends BaseMenuItem<HTMLElement> {
   }
 
   get hasSingleMathSymbol(): boolean {
-    const selected = this.editor.model.symbolsSelected
+    const selected = this.canvas.model.symbolsSelected
     return selected.length === 1 && isRecognizedMath(selected[0])
   }
 
@@ -92,7 +92,7 @@ export class DecoratorContextMenu extends BaseMenuItem<HTMLElement> {
       symbolsDecorable.forEach((s) => {
         if (enable) {
           if (!s.decorators.some((d) => d.kind === kind)) {
-            s.decorators.push(DecoratorOps.create(kind, this.editor.penStyle))
+            s.decorators.push(DecoratorOps.create(kind, this.canvas.penStyle))
           }
         } else {
           const decoIndex = s.decorators.findIndex((d) => d.kind === kind)
@@ -101,7 +101,7 @@ export class DecoratorContextMenu extends BaseMenuItem<HTMLElement> {
           }
         }
       })
-      this.editor.updateSymbols(symbolsDecorable)
+      this.canvas.updateSymbols(symbolsDecorable)
 
       document.querySelectorAll(`#${idPrefix}-decorator-${kind}-color button`).forEach((b) => {
         ;(b as HTMLButtonElement).disabled = !enable
@@ -162,7 +162,7 @@ export class DecoratorContextMenu extends BaseMenuItem<HTMLElement> {
             deco.style.color = color
           }
         })
-        this.editor.updateSymbols(symbolsDecorable.filter((s) => s.decorators.some((d) => d.kind === kind)))
+        this.canvas.updateSymbols(symbolsDecorable.filter((s) => s.decorators.some((d) => d.kind === kind)))
         colorList.querySelectorAll("*").forEach((e) => e.classList.remove("active"))
         btn.classList.add("active")
       })

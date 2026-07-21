@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 
 import type { TMenuItemBase } from "./BaseMenuItem"
 import { BaseMenuItem } from "./BaseMenuItem"
@@ -10,8 +10,8 @@ import { BaseMenuItem } from "./BaseMenuItem"
 export type TMenuSelect = TMenuItemBase & {
   type: "select"
   options: Array<{ label: string; value: string }>
-  getValue: (editor: TInteractiveInkEditor) => string
-  setValue: (editor: TInteractiveInkEditor, value: string) => void
+  getValue: (canvas: TInteractiveInkCanvas) => string
+  setValue: (canvas: TInteractiveInkCanvas, value: string) => void
 }
 
 /**
@@ -32,9 +32,9 @@ export class SelectMenuItem extends BaseMenuItem<HTMLDivElement> {
     }
 
     const isDisabled =
-      typeof this.config.disabled === "function" ? this.config.disabled(this.editor) : (this.config.disabled ?? false)
+      typeof this.config.disabled === "function" ? this.config.disabled(this.canvas) : (this.config.disabled ?? false)
 
-    const currentValue = this.config.getValue(this.editor)
+    const currentValue = this.config.getValue(this.canvas)
 
     const select = this.dom.select({
       id: `${this.config.id}-input`,
@@ -47,7 +47,7 @@ export class SelectMenuItem extends BaseMenuItem<HTMLDivElement> {
       disabled: isDisabled,
       onChange: (value) => {
         this.logger.info(`${this.config.id}.change`, { value })
-        this.config.setValue(this.editor, value)
+        this.config.setValue(this.canvas, value)
       },
     })
 
@@ -63,7 +63,7 @@ export class SelectMenuItem extends BaseMenuItem<HTMLDivElement> {
 
     const select = this.element.querySelector("select") as HTMLSelectElement
     if (select) {
-      select.value = this.config.getValue(this.editor)
+      select.value = this.config.getValue(this.canvas)
     }
 
     this.updateDisabled()

@@ -1,5 +1,5 @@
 import { describe, test, expect, jest, beforeEach } from "@jest/globals"
-import { createEditorMock, asEditor } from "../../__mocks__/createEditorMock"
+import { createCanvasMock, asEditor } from "../../__mocks__/createCanvasMock"
 import {
   IIConnectorManager,
   EdgeLineOps,
@@ -55,7 +55,7 @@ function buildPolyLineWithEndAnchor() {
   return poly
 }
 
-function setupSymbols(mock: ReturnType<typeof createEditorMock>, symbols: unknown[]) {
+function setupSymbols(mock: ReturnType<typeof createCanvasMock>, symbols: unknown[]) {
   Object.defineProperty(mock.model, "symbols", {
     get: () => [...symbols],
     configurable: true,
@@ -63,11 +63,11 @@ function setupSymbols(mock: ReturnType<typeof createEditorMock>, symbols: unknow
 }
 
 describe("IIConnectorManager", () => {
-  let mock: ReturnType<typeof createEditorMock>
+  let mock: ReturnType<typeof createCanvasMock>
   let manager: IIConnectorManager
 
   beforeEach(() => {
-    mock = createEditorMock()
+    mock = createCanvasMock()
     manager = new IIConnectorManager(asEditor(mock))
     jest
       .spyOn(mock.model, "getRootSymbol")

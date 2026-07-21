@@ -1,13 +1,13 @@
 //@ts-nocheck
 import {
   TPartialDeep,
-  TInteractiveInkEditorConfiguration,
-  TInteractiveInkSSREditorConfiguration,
-  TRecognizerHTTPV1Configuration,
-  TRecognizerWebSocketSSRConfiguration,
+  TInteractiveInkCanvasConfiguration,
+  TInteractiveInkSSRCanvasConfiguration,
+  THTTPClientV1Configuration,
+  TWebSocketSSRClientConfiguration,
 } from "@/iink"
 
-export const RecognizerWebSocketSSRTextConfiguration: TRecognizerWebSocketSSRConfiguration = {
+export const WebSocketSSRClientTextConfiguration: TWebSocketSSRClientConfiguration = {
   server: {
     scheme: "http",
     host: "test.com",
@@ -34,7 +34,7 @@ export const RecognizerWebSocketSSRTextConfiguration: TRecognizerWebSocketSSRCon
   },
 }
 
-export const RecognizerWebSocketSSRMathConfiguration: TRecognizerWebSocketSSRConfiguration = {
+export const WebSocketSSRClientMathConfiguration: TWebSocketSSRClientConfiguration = {
   server: {
     scheme: "http",
     host: "test.com",
@@ -54,7 +54,7 @@ export const RecognizerWebSocketSSRMathConfiguration: TRecognizerWebSocketSSRCon
   },
 }
 
-export const RecognizerHTTPV1TextConfiguration: TRecognizerHTTPV1Configuration = {
+export const HTTPClientV1TextConfiguration: THTTPClientV1Configuration = {
   server: {
     scheme: "http",
     host: "test.com",
@@ -76,7 +76,7 @@ export const RecognizerHTTPV1TextConfiguration: TRecognizerHTTPV1Configuration =
   },
 }
 
-export const RecognizerHTTPV1DiagramConfiguration: TRecognizerHTTPV1Configuration = {
+export const HTTPClientV1DiagramConfiguration: THTTPClientV1Configuration = {
   server: {
     scheme: "http",
     host: "test.com",
@@ -92,7 +92,7 @@ export const RecognizerHTTPV1DiagramConfiguration: TRecognizerHTTPV1Configuratio
   },
 }
 
-export const RecognizerHTTPV1MathConfiguration: TRecognizerHTTPV1Configuration = {
+export const HTTPClientV1MathConfiguration: THTTPClientV1Configuration = {
   server: {
     scheme: "http",
     host: "test.com",
@@ -108,7 +108,7 @@ export const RecognizerHTTPV1MathConfiguration: TRecognizerHTTPV1Configuration =
   },
 }
 
-export const RecognizerHTTPV1RawContentConfiguration: TRecognizerHTTPV1Configuration = {
+export const HTTPClientV1RawContentConfiguration: THTTPClientV1Configuration = {
   server: {
     scheme: "http",
     host: "test.com",
@@ -121,7 +121,7 @@ export const RecognizerHTTPV1RawContentConfiguration: TRecognizerHTTPV1Configura
   },
 }
 
-export const InteractiveInkEditorOverrideConfiguration: TInteractiveInkEditorConfiguration = {
+export const InteractiveInkCanvasOverrideConfiguration: TInteractiveInkCanvasConfiguration = {
   server: {
     scheme: "http",
     host: "test.com",

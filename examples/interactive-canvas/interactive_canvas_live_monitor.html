@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Interactive Ink Canvas - Live Monitor</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+
+    <style>
+      .status-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+      }
+
+      .status-item {
+        background: var(--ex-hover);
+        border: 1px solid var(--ex-border);
+        border-radius: var(--ex-radius-sm, 4px);
+        padding: 8px 6px;
+        text-align: center;
+      }
+
+      .status-item .status-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--ex-primary, #0065b8);
+        display: block;
+      }
+
+      .status-item .status-key {
+        font-size: 10px;
+        color: var(--ex-text-muted, #888);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .status-item.on .status-value  { color: #29ac0f; }
+      .status-item.off .status-value { color: var(--ex-border, #ccc); }
+
+      .event-log {
+        font-size: 11px;
+        font-family: monospace;
+        color: var(--ex-text-muted, #555);
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column-reverse;
+        gap: 1px;
+        flex: 1;
+        min-height: 0;
+      }
+
+      .event-log .log-entry {
+        padding: 2px 0;
+        border-bottom: 1px solid var(--ex-border);
+        animation: fadeIn 0.2s ease;
+        flex-shrink: 0;
+      }
+
+      .log-entry .log-time   { color: var(--ex-border, #aaa); margin-right: 5px; }
+      .log-entry .log-action { color: var(--ex-primary, #0065b8); font-weight: 600; }
+
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-3px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+    </style>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+  </head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="monitor-panel">
+        📊 Monitor
+      </button>
+      <button id="showModalBtn" class="btn-keys">API Keys</button>
+      <h1 class="header-title">Interactive Ink Canvas — Live Monitor</h1>
+    </header>
+
+    <div class="ex-page-layout">
+
+      <aside id="monitor-panel" class="ex-panel">
+        <p class="ex-panel-heading">Live Monitor</p>
+        <p class="ex-panel-intro">Real-time snapshot of canvas state and a timestamped log of every operation. Use the canvas API to observe <code>changed</code>, <code>selected</code>, and other events.</p>
+
+        <div class="ex-panel-divider"></div>
+
+        <p class="ex-panel-subtitle">Status</p>
+
+        <div class="status-grid">
+          <div class="status-item" id="status-symbols">
+            <span class="status-value" id="val-symbols">—</span>
+            <span class="status-key">Symbols</span>
+          </div>
+          <div class="status-item" id="status-selected">
+            <span class="status-value" id="val-selected">—</span>
+            <span class="status-key">Selected</span>
+          </div>
+          <div class="status-item off" id="status-undo">
+            <span class="status-value" id="val-undo">—</span>
+            <span class="status-key">Can Undo</span>
+          </div>
+          <div class="status-item off" id="status-redo">
+            <span class="status-value" id="val-redo">—</span>
+            <span class="status-key">Can Redo</span>
+          </div>
+          <div class="status-item" id="status-zoom">
+            <span class="status-value" id="val-zoom">—</span>
+            <span class="status-key">Zoom</span>
+          </div>
+          <div class="status-item" id="status-clipboard">
+            <span class="status-value" id="val-clipboard">0</span>
+            <span class="status-key">Clipboard</span>
+          </div>
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <p class="ex-panel-subtitle">Action Log</p>
+        <div class="event-log" id="event-log"></div>
+
+      </aside>
+
+      <div id="rootEl"></div>
+
+    </div>
+
+    <script type="module">
+      import { Canvas } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
+
+      const rootElement = document.getElementById('rootEl')
+      const showModalBtn = document.getElementById('showModalBtn')
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const monitorPanel = document.getElementById('monitor-panel')
+
+      panelToggleBtn.addEventListener('click', () => {
+        const open = monitorPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      const valSymbols  = document.getElementById('val-symbols')
+      const valSelected = document.getElementById('val-selected')
+      const statusUndo  = document.getElementById('status-undo')
+      const valUndo     = document.getElementById('val-undo')
+      const statusRedo  = document.getElementById('status-redo')
+      const valRedo     = document.getElementById('val-redo')
+      const valClipboard = document.getElementById('val-clipboard')
+      const valZoom     = document.getElementById('val-zoom')
+      const eventLog    = document.getElementById('event-log')
+
+      let canvas
+      let clipboardCount = 0
+
+      const editorOptions = {}
+
+      function log(action, detail = '') {
+        const entry = document.createElement('div')
+        entry.className = 'log-entry'
+        const time = new Date().toLocaleTimeString('en', { hour12: false })
+        entry.innerHTML = `<span class="log-time">${time}</span><span class="log-action">${action}</span>${detail ? ' — ' + detail : ''}`
+        eventLog.prepend(entry)
+        if (eventLog.children.length > 50) eventLog.lastElementChild.remove()
+      }
+
+      function updateStatus() {
+        if (!canvas) return
+        const ctx = canvas.history.context
+
+        valSymbols.textContent  = canvas.model.symbols.length
+        valSelected.textContent = canvas.model.symbolsSelected.length
+
+        const canUndo = ctx.canUndo
+        statusUndo.className  = 'status-item ' + (canUndo ? 'on' : 'off')
+        valUndo.textContent   = canUndo ? '✓' : '✗'
+
+        const canRedo = ctx.canRedo
+        statusRedo.className  = 'status-item ' + (canRedo ? 'on' : 'off')
+        valRedo.textContent   = canRedo ? '✓' : '✗'
+
+        valClipboard.textContent = clipboardCount
+        valZoom.textContent      = Math.round(canvas.renderer.getZoom() * 100) + '%'
+      }
+
+      function patchEditor(ed) {
+        const origCopy  = ed.copy.bind(ed)
+        const origPaste = ed.paste.bind(ed)
+        const origCut   = ed.cut.bind(ed)
+        const origUndo  = ed.undo.bind(ed)
+        const origRedo  = ed.redo.bind(ed)
+
+        ed.copy = () => {
+          origCopy()
+          clipboardCount = ed.model.symbolsSelected.length || ed.model.symbols.length
+          log('copy', `${clipboardCount} symbol(s)`)
+          updateStatus()
+        }
+
+        ed.paste = async () => {
+          await origPaste()
+          log('paste', `${clipboardCount} symbol(s)`)
+          updateStatus()
+        }
+
+        ed.cut = async () => {
+          clipboardCount = ed.model.symbolsSelected.length
+          await origCut()
+          log('cut', `${clipboardCount} symbol(s)`)
+          updateStatus()
+        }
+
+        ed.undo = async () => {
+          const result = await origUndo()
+          log('undo')
+          updateStatus()
+          return result
+        }
+
+        ed.redo = async () => {
+          const result = await origRedo()
+          log('redo')
+          updateStatus()
+          return result
+        }
+      }
+
+      async function loadEditor(options) {
+        canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK', options)
+
+        patchEditor(canvas)
+
+        canvas.event.addEventListener('changed', () => {
+          updateStatus()
+        })
+
+        canvas.event.addEventListener('selected', (evt) => {
+          const count = evt.detail?.length ?? 0
+          if (count > 0) log('selected', `${count} symbol(s)`)
+          updateStatus()
+        })
+
+        const origZoomToFit = canvas.zoomToFit.bind(canvas)
+        canvas.zoomToFit = (symbols) => {
+          origZoomToFit(symbols)
+          log('fit', Math.round(canvas.renderer.getZoom() * 100) + '%')
+          updateStatus()
+        }
+
+        const origSetZoom = canvas.renderer.setZoom.bind(canvas.renderer)
+        canvas.renderer.setZoom = (zoom, cx, cy) => {
+          origSetZoom(zoom, cx, cy)
+          log('zoom', Math.round(canvas.renderer.getZoom() * 100) + '%')
+          updateStatus()
+        }
+
+        const origPan = canvas.renderer.pan.bind(canvas.renderer)
+        canvas.renderer.pan = (dx, dy, redraw) => {
+          origPan(dx, dy, redraw)
+          updateStatus()
+        }
+
+        log('canvas loaded')
+        updateStatus()
+      }
+
+      showModalBtn.addEventListener('click', () => {
+        ModalCanvasOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>

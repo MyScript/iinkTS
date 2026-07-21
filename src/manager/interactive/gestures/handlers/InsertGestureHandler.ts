@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { TIIHistoryChanges } from "@/history"
 import type { TPoint, TStroke, TText } from "@/symbol"
 import { isText, SymbolType, type TSymbol } from "@/symbol"
@@ -21,8 +21,8 @@ import { InsertAction } from "../GestureTypes"
 export class InsertGestureHandler extends GestureHandler {
   readonly gestureType = "INSERT" as const
 
-  constructor(editor: TInteractiveInkEditor, helpers: GestureHelpers) {
-    super(editor, helpers)
+  constructor(canvas: TInteractiveInkCanvas, helpers: GestureHelpers) {
+    super(canvas, helpers)
   }
 
   /**
@@ -338,7 +338,7 @@ export class InsertGestureHandler extends GestureHandler {
         )
       }
       if (changes.replaced?.newSymbols.length) {
-        promises.push(this.editor.replaceSymbols(changes.replaced.oldSymbols, changes.replaced.newSymbols, false))
+        promises.push(this.canvas.replaceSymbols(changes.replaced.oldSymbols, changes.replaced.newSymbols, false))
       }
       await Promise.all(promises)
     }

@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { TMenuButtonList } from "@/menu/items"
 import { ButtonListMenuItem, CollapsibleWrapper } from "@/menu/items"
 import { BaseMenuItem } from "@/menu/items/BaseMenuItem"
@@ -17,7 +17,7 @@ export class FontSizeStyle extends BaseMenuItem<HTMLDivElement> {
   private rowHeight: number
 
   constructor(
-    editor: TInteractiveInkEditor,
+    canvas: TInteractiveInkCanvas,
     fontSizeList: {
       label: string
       value: "auto" | number
@@ -30,7 +30,7 @@ export class FontSizeStyle extends BaseMenuItem<HTMLDivElement> {
       id: `${idPrefix}-font-size`,
       label: "Font Size",
     }
-    super(config, editor)
+    super(config, canvas)
     this.fontSizeList = fontSizeList
     this.rowHeight = rowHeight
   }
@@ -43,26 +43,26 @@ export class FontSizeStyle extends BaseMenuItem<HTMLDivElement> {
         label: f.label,
         value: f.value.toString(),
       })),
-      getValue: (editor) => editor.configuration.fontStyle.size.toString(),
-      setValue: (editor, value) => {
+      getValue: (canvas) => canvas.configuration.fontStyle.size.toString(),
+      setValue: (canvas, value) => {
         if (value === "auto") {
-          editor.configuration.fontStyle.size = "auto"
+          canvas.configuration.fontStyle.size = "auto"
         } else {
           const fontSize = parseFloat(value)
-          editor.configuration.fontStyle.size = fontSize
-          const textSymbols = editor.model.symbolsSelected.filter((s) => isText(s))
-          editor.updateTextFontStyle(
+          canvas.configuration.fontStyle.size = fontSize
+          const textSymbols = canvas.model.symbolsSelected.filter((s) => isText(s))
+          canvas.updateTextFontStyle(
             textSymbols.map((s) => s.id),
             {
               fontSize: fontSize * this.rowHeight,
             }
           )
-          editor.selector.redrawSelectedGroup()
+          canvas.selector.redrawSelectedGroup()
         }
       },
     }
 
-    this.fontSizeItem = new ButtonListMenuItem(fontSizeConfig, this.editor)
+    this.fontSizeItem = new ButtonListMenuItem(fontSizeConfig, this.canvas)
     const fontSizeElement = this.fontSizeItem.getElement()
     const wrapper = new CollapsibleWrapper(fontSizeElement, "Font size", this.config.id)
     return wrapper.getElement()

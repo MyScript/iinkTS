@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { TMenuColorList } from "@/menu/items"
 import { CollapsibleWrapper, ColorListMenuItem } from "@/menu/items"
 import { BaseMenuItem } from "@/menu/items/BaseMenuItem"
@@ -11,21 +11,21 @@ export class FillColorStyle extends BaseMenuItem<HTMLDivElement> {
   private colorItem?: ColorListMenuItem
   private colors: string[]
 
-  constructor(editor: TInteractiveInkEditor, colors: string[], idPrefix = "ms-menu-style") {
+  constructor(canvas: TInteractiveInkCanvas, colors: string[], idPrefix = "ms-menu-style") {
     const config = {
       type: "fillcolor" as const,
       id: `${idPrefix}-fill`,
       label: "Fill Color",
     }
-    super(config, editor)
+    super(config, canvas)
     this.colors = colors
   }
 
   createElement(): HTMLDivElement {
-    const symbolsStyles = this.editor.model.symbolsSelected.map((s) => s.style)
+    const symbolsStyles = this.canvas.model.symbolsSelected.map((s) => s.style)
     const hasUniqColor = symbolsStyles.length && symbolsStyles.every((st) => st.color === symbolsStyles[0]?.color)
     const color =
-      hasUniqColor && symbolsStyles[0].color ? symbolsStyles[0].color : (this.editor.penStyle.color as string)
+      hasUniqColor && symbolsStyles[0].color ? symbolsStyles[0].color : (this.canvas.penStyle.color as string)
 
     const colorConfig: TMenuColorList = {
       type: "colorlist",
@@ -33,16 +33,16 @@ export class FillColorStyle extends BaseMenuItem<HTMLDivElement> {
       fill: true,
       colors: this.colors,
       initValue: color,
-      onChange: (fill, editor) => {
-        editor.penStyle = { fill }
-        editor.updateSymbolsStyle(
-          editor.model.symbolsSelected.map((s) => s.id),
+      onChange: (fill, canvas) => {
+        canvas.penStyle = { fill }
+        canvas.updateSymbolsStyle(
+          canvas.model.symbolsSelected.map((s) => s.id),
           { fill }
         )
       },
     }
 
-    this.colorItem = new ColorListMenuItem(colorConfig, this.editor)
+    this.colorItem = new ColorListMenuItem(colorConfig, this.canvas)
     const colorElement = this.colorItem.getElement()
     const wrapper = new CollapsibleWrapper(colorElement, "Fill", this.config.id)
     return wrapper.getElement()

@@ -1,6 +1,6 @@
 import handIcon from "@/assets/svg/drag-hand-gesture.svg"
-import { EditorTool } from "@/Constants"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import { CanvasTool } from "@/Constants"
 import type { TMenuButton } from "@/menu/items/ButtonMenuItem"
 import { ButtonMenuItem } from "@/menu/items/ButtonMenuItem"
 
@@ -9,17 +9,17 @@ import { ButtonMenuItem } from "@/menu/items/ButtonMenuItem"
  * @remarks Move tool - View movement
  */
 export class MoveTool extends ButtonMenuItem {
-  constructor(editor: TInteractiveInkEditor, idPrefix = "ms-menu-tool") {
+  constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-tool") {
     const config: TMenuButton = {
       type: "button",
       id: `${idPrefix}-move`,
       label: "Move",
       icon: handIcon,
-      action: (editor: TInteractiveInkEditor) => {
-        editor.tool = EditorTool.Move
+      action: (canvas: TInteractiveInkCanvas) => {
+        canvas.tool = CanvasTool.Move
       },
     }
-    super(config, editor)
+    super(config, canvas)
   }
 
   createElement(): HTMLButtonElement {
@@ -31,7 +31,7 @@ export class MoveTool extends ButtonMenuItem {
     button.addEventListener("click", () => {
       this.unselectAll()
       button.classList.add("active")
-      this.config.action(this.editor)
+      this.config.action(this.canvas)
     })
     return button
   }
@@ -41,7 +41,7 @@ export class MoveTool extends ButtonMenuItem {
       return
     }
 
-    const isActive = this.editor.tool === EditorTool.Move
+    const isActive = this.canvas.tool === CanvasTool.Move
 
     if (isActive) {
       this.element.classList.add("active")

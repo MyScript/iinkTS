@@ -1,4 +1,4 @@
-import { RecognizerWebSocketSSRTextConfiguration } from "../__dataset__/configuration.dataset"
+import { WebSocketSSRClientTextConfiguration } from "../__dataset__/configuration.dataset"
 import { getApiInfos } from "@/iink"
 
 describe("language.ts", () => {
@@ -9,10 +9,10 @@ describe("language.ts", () => {
   ) as jest.Mock
 
   test("should call fetch with good url", async () => {
-    await getApiInfos(RecognizerWebSocketSSRTextConfiguration)
+    await getApiInfos(WebSocketSSRClientTextConfiguration)
     expect(fetch).toHaveBeenCalledTimes(1)
     expect(fetch).toHaveBeenCalledWith(
-      `${RecognizerWebSocketSSRTextConfiguration?.server?.scheme}://${RecognizerWebSocketSSRTextConfiguration?.server?.host}/api/v4.0/iink/version`
+      `${WebSocketSSRClientTextConfiguration?.server?.scheme}://${WebSocketSSRClientTextConfiguration?.server?.host}/api/v4.0/iink/version`
     )
   })
 
@@ -26,7 +26,7 @@ describe("language.ts", () => {
   })
 
   test("should reject getApiInfos if configuration.server is empty", async () => {
-    const conf = JSON.parse(JSON.stringify(RecognizerWebSocketSSRTextConfiguration))
+    const conf = JSON.parse(JSON.stringify(WebSocketSSRClientTextConfiguration))
     delete conf?.server
     getApiInfos(conf).catch((e) => {
       expect(e.message).toBe(
@@ -36,7 +36,7 @@ describe("language.ts", () => {
   })
 
   test("should reject getApiInfos if configuration.server.scheme is empty", async () => {
-    const conf = JSON.parse(JSON.stringify(RecognizerWebSocketSSRTextConfiguration))
+    const conf = JSON.parse(JSON.stringify(WebSocketSSRClientTextConfiguration))
     delete conf?.server?.scheme
     getApiInfos(conf).catch((e) => {
       expect(e.message).toBe(
@@ -46,7 +46,7 @@ describe("language.ts", () => {
   })
 
   test("should reject getApiInfos if configuration.server.host empty", async () => {
-    const conf = JSON.parse(JSON.stringify(RecognizerWebSocketSSRTextConfiguration))
+    const conf = JSON.parse(JSON.stringify(WebSocketSSRClientTextConfiguration))
     delete conf?.server?.host
     getApiInfos(conf).catch((e) => {
       expect(e.message).toBe(

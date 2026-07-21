@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 
 import type { TMenuItemBase } from "./BaseMenuItem"
 import { BaseMenuItem } from "./BaseMenuItem"
@@ -12,7 +12,7 @@ export type TMenuColorList = TMenuItemBase & {
   colors: string[]
   fill: boolean
   initValue?: string
-  onChange: (color: string, editor: TInteractiveInkEditor) => void
+  onChange: (color: string, canvas: TInteractiveInkCanvas) => void
 }
 
 /**
@@ -23,8 +23,8 @@ export class ColorListMenuItem extends BaseMenuItem<HTMLDivElement> {
   declare protected config: TMenuColorList
   private currentValue: string
 
-  constructor(config: TMenuColorList, editor: TInteractiveInkEditor) {
-    super(config, editor)
+  constructor(config: TMenuColorList, canvas: TInteractiveInkCanvas) {
+    super(config, canvas)
     this.currentValue = config.initValue || config.colors[0] || "#000000"
   }
 
@@ -73,7 +73,7 @@ export class ColorListMenuItem extends BaseMenuItem<HTMLDivElement> {
         e.preventDefault()
         e.stopPropagation()
         this.currentValue = color
-        this.config.onChange(color, this.editor)
+        this.config.onChange(color, this.canvas)
         wrapper.querySelectorAll("button").forEach((b) => b.classList.remove("active"))
         btn.classList.add("active")
       })
