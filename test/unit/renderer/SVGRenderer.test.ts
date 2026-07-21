@@ -42,9 +42,14 @@ describe("SVGRenderer.ts", () => {
       rendererCustom.init(divElement)
       const guidesGroup = divElement.querySelector("#guides-wrapper") as SVGGElement
       expect(guidesGroup).toBeDefined()
-      const guideLines = guidesGroup.getElementsByTagName("path")
-      expect(guideLines).toHaveLength(1)
-      expect(guideLines.item(0)?.getAttribute("d")?.split("M")).toHaveLength(82)
+      // Point guide is a tiled pattern (cheap to rasterize), not one dot per point in the DOM.
+      const pattern = guidesGroup.querySelector("pattern")
+      const rect = guidesGroup.querySelector("rect")
+      expect(pattern).not.toBeNull()
+      expect(pattern?.getAttribute("width")).toBe(String(customConf.guides.gap))
+      expect(rect?.getAttribute("fill")).toBe(`url(#${pattern?.id})`)
+      expect(rendererCustom.horizontalGuides.length).toBeGreaterThan(0)
+      expect(rendererCustom.verticalGuides.length).toBeGreaterThan(0)
     })
     test("should create guides with custom gap", () => {
       const divElement: HTMLDivElement = document.createElement("div")
@@ -56,9 +61,13 @@ describe("SVGRenderer.ts", () => {
       rendererCustom.init(divElement)
       const guidesGroup = divElement.querySelector("#guides-wrapper") as SVGGElement
       expect(guidesGroup).toBeDefined()
-      const guideLines = guidesGroup.getElementsByTagName("path")
-      expect(guideLines).toHaveLength(1)
-      expect(guideLines.item(0)?.getAttribute("d")?.split("M")).toHaveLength(2501)
+      const pattern = guidesGroup.querySelector("pattern")
+      const rect = guidesGroup.querySelector("rect")
+      expect(pattern).not.toBeNull()
+      expect(pattern?.getAttribute("width")).toBe("5")
+      expect(rect?.getAttribute("fill")).toBe(`url(#${pattern?.id})`)
+      // Full resolution kept (no more skip-factor thinning) - pattern cost doesn't scale with point count.
+      expect(rendererCustom.horizontalGuides.length).toBe(rendererCustom.verticalGuides.length)
     })
     test("should create guides line", () => {
       const divElement: HTMLDivElement = document.createElement("div")
@@ -368,19 +377,9 @@ describe("SVGRenderer.ts", () => {
     })
 
     test("should update guides", () => {
-      const nbGuideBefore = renderer.layer
-        .querySelector(`#${renderer.groupGuidesId}`)
-        ?.getElementsByTagName("path")
-        .item(0)
-        ?.getAttribute("d")
-        ?.split("M").length
+      const nbGuideBefore = renderer.horizontalGuides.length * renderer.verticalGuides.length
       renderer.resize(2000, 2000)
-      const nbGuideAfter = renderer.layer
-        .querySelector(`#${renderer.groupGuidesId}`)
-        ?.getElementsByTagName("path")
-        .item(0)
-        ?.getAttribute("d")
-        ?.split("M").length
+      const nbGuideAfter = renderer.horizontalGuides.length * renderer.verticalGuides.length
       expect(nbGuideBefore).not.toEqual(nbGuideAfter)
     })
   })
