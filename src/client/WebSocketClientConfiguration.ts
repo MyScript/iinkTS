@@ -111,8 +111,6 @@ export class WebSocketClientConfiguration implements TWebSocketClientConfigurati
 
     this.recognition = mergeDeep({}, DefaultWebSocketClientConfiguration.recognition, configuration?.recognition)
     this.recognition.export.jiix["full-stroke-ids"] = true
-    // required to draw stroke with math solver
-    this.recognition.export.jiix.strokes = true
     this.recognition.export.jiix.ids = true
     this.recognition.export.jiix.text.words = true
     this.recognition.export.jiix.text.chars = true
