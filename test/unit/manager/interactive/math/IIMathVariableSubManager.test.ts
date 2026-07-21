@@ -75,6 +75,49 @@ describe("IIMathVariableSubManager.ts", () => {
 
       expect(manager.getDependencies("block-1")?.externalVariables).toEqual([])
     })
+
+    test("should skip the backend call entirely when isStale() is already true before requesting", async () => {
+      const editor = createCanvasMock()
+      const manager = new IIMathVariableSubManager(asEditor(editor))
+      editor.client.getVariables = jest.fn().mockResolvedValue([{ name: "k", sourceType: "API_GLOBAL", value: 1 }])
+      const invalidateCacheSpy = jest.spyOn(manager, "invalidateCache")
+
+      await manager.enrichMathDependencies("block-1", () => true)
+
+      expect(editor.client.getVariables).not.toHaveBeenCalled()
+      expect(manager.getDependencies("block-1")).toBeNull()
+      // Cache still purged even though the fetch itself was skipped - it holds pre-change data.
+      expect(invalidateCacheSpy).toHaveBeenCalledWith("block-1")
+    })
+
+    test("should discard the result instead of committing it when isStale() turns true while the backend is answering", async () => {
+      const editor = createCanvasMock()
+      const manager = new IIMathVariableSubManager(asEditor(editor))
+      editor.client.getVariables = jest.fn().mockResolvedValue([{ name: "k", sourceType: "API_GLOBAL", value: 1 }])
+      // false on the pre-request check, true once the backend has responded.
+      let calls = 0
+      const isStale = () => ++calls > 1
+
+      // Strokes kept coming in while this request was in flight (e.g. the block got
+      // reclassified) - a fresh, correct enrichment is already queued to re-run.
+      await manager.enrichMathDependencies("block-1", isStale)
+
+      expect(editor.client.getVariables).toHaveBeenCalled()
+      expect(manager.getDependencies("block-1")).toBeNull()
+    })
+
+    test("should swallow (not throw) a backend error for a block that turned stale mid-request", async () => {
+      const editor = createCanvasMock()
+      const manager = new IIMathVariableSubManager(asEditor(editor))
+      editor.client.getVariables = jest.fn().mockRejectedValue(new Error("block is no longer math"))
+      // false on the pre-request check, true by the time the backend rejects.
+      let calls = 0
+      const isStale = () => ++calls > 1
+
+      await expect(manager.enrichMathDependencies("block-1", isStale)).resolves.toBeUndefined()
+      expect(editor.client.getVariables).toHaveBeenCalled()
+      expect(manager.getDependencies("block-1")).toBeNull()
+    })
   })
 
   describe("onSymbolHover", () => {
