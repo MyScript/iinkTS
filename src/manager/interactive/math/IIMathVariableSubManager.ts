@@ -163,12 +163,34 @@ export class IIMathVariableSubManager extends IIAbstractManager {
     return this.#dependencies.get(blockId) ?? null
   }
 
-  async enrichMathDependencies(jiixBlockId: string): Promise<void> {
+  async enrichMathDependencies(jiixBlockId: string, isStale: () => boolean = () => false): Promise<void> {
+    // The cached value (if any) reflects the pre-change document either way, so purge it
+    // regardless of staleness - only the re-fetch itself is skippable.
+    this.invalidateCache(jiixBlockId)
+
+    // Already known stale before even asking the backend (e.g. a redo was queued earlier
+    // in this same synchronize pass) - skip the round-trip entirely, it'd be discarded anyway.
+    if (isStale()) {
+      this.logger.debug("enrichMathDependencies", `Skipping "${jiixBlockId}" (a newer synchronize is already queued)`)
+      return
+    }
+
     try {
-      this.invalidateCache(jiixBlockId)
       this.logger.info("enrichMathDependencies", `Starting enrichment for "${jiixBlockId}"`)
 
       const variables = await this.getVariables(jiixBlockId)
+
+      // Strokes kept coming in while this request was in flight: the backend may already have
+      // reclassified this block (or it may no longer exist), so `variables` reflects a document
+      // state that's already superseded. A fresh, correct enrichment is guaranteed to re-run once
+      // the synchronize pass that queued it starts - discard this stale result instead of committing it.
+      if (isStale()) {
+        this.logger.debug(
+          "enrichMathDependencies",
+          `Discarding stale result for "${jiixBlockId}" (a newer synchronize is already queued)`
+        )
+        return
+      }
 
       if (!variables || variables.length === 0) {
         this.logger.debug("enrichMathDependencies", `No variables in "${jiixBlockId}"`)
@@ -237,6 +259,10 @@ export class IIMathVariableSubManager extends IIAbstractManager {
       this.logger.info("enrichMathDependencies", `Enriched "${jiixBlockId}" with variableSources:`, newVariableSources)
       this.canvas.event.emitChanged(this.canvas.history.context)
     } catch (error) {
+      if (isStale()) {
+        this.logger.debug("enrichMathDependencies", `Ignoring error for stale block "${jiixBlockId}":`, error)
+        return
+      }
       this.logger.error("enrichMathDependencies", { error })
     }
   }
