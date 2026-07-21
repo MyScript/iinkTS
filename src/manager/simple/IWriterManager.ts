@@ -1,4 +1,4 @@
-import type { InkEditor } from "@/editor"
+import type { InkCanvas } from "@/canvas"
 import type { TPointerInfo } from "@/grabber"
 import { AbstractWriterManager } from "@/manager/base/AbstractWriterManager"
 import type { IModel } from "@/model"
@@ -11,16 +11,16 @@ import { StrokeOps } from "@/symbol/stroke/Stroke"
  * @group Manager
  */
 export class IWriterManager extends AbstractWriterManager {
-  editor: InkEditor
+  canvas: InkCanvas
   #exportTimer?: ReturnType<typeof setTimeout>
 
-  constructor(editor: InkEditor) {
-    super(editor)
-    this.editor = editor
+  constructor(canvas: InkCanvas) {
+    super(canvas)
+    this.canvas = canvas
   }
 
   get model(): IModel {
-    return this.editor.model
+    return this.canvas.model
   }
 
   protected createCurrentSymbol(pointer: TPointer, style: TStyle, pointerType: string): TSymbol {
@@ -42,17 +42,17 @@ export class IWriterManager extends AbstractWriterManager {
     this.model.currentStroke = undefined
     this.renderer.drawSymbol(localSymbol)
     this.model.addStroke(localSymbol)
-    this.editor.history.push(this.model, {
+    this.canvas.history.push(this.model, {
       added: [localSymbol],
     })
-    if (this.editor.configuration.triggers.exportContent !== "DEMAND") {
+    if (this.canvas.configuration.triggers.exportContent !== "DEMAND") {
       clearTimeout(this.#exportTimer)
       this.#exportTimer = setTimeout(
         async () => {
-          this.editor.export()
+          this.canvas.export()
         },
-        this.editor.configuration.triggers.exportContent === "QUIET_PERIOD"
-          ? this.editor.configuration.triggers.exportContentDelay
+        this.canvas.configuration.triggers.exportContent === "QUIET_PERIOD"
+          ? this.canvas.configuration.triggers.exportContentDelay
           : 0
       )
     }

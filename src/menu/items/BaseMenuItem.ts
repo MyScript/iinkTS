@@ -1,5 +1,5 @@
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { DOMFactory } from "@/components/dom"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
 import { LoggerCategory, LoggerManager } from "@/logger"
 
 /**
@@ -9,8 +9,8 @@ import { LoggerCategory, LoggerManager } from "@/logger"
 export type TMenuItemBase = {
   id: string
   label?: string
-  disabled?: boolean | ((editor: TInteractiveInkEditor) => boolean)
-  visible?: boolean | ((editor: TInteractiveInkEditor) => boolean)
+  disabled?: boolean | ((canvas: TInteractiveInkCanvas) => boolean)
+  visible?: boolean | ((canvas: TInteractiveInkCanvas) => boolean)
 }
 
 /**
@@ -28,16 +28,16 @@ export type TGenericMenuItem = TMenuItemBase & {
 export abstract class BaseMenuItem<T extends HTMLElement = HTMLElement> {
   protected logger = LoggerManager.getLogger(LoggerCategory.MENU)
   protected config: TGenericMenuItem
-  protected editor: TInteractiveInkEditor
+  protected canvas: TInteractiveInkCanvas
   protected element?: T
 
   protected get dom(): typeof DOMFactory {
-    return this.editor.dom
+    return this.canvas.dom
   }
 
-  constructor(config: TGenericMenuItem, editor: TInteractiveInkEditor) {
+  constructor(config: TGenericMenuItem, canvas: TInteractiveInkCanvas) {
     this.config = config
-    this.editor = editor
+    this.canvas = canvas
   }
 
   /**
@@ -69,7 +69,7 @@ export abstract class BaseMenuItem<T extends HTMLElement = HTMLElement> {
     }
 
     if (typeof this.config.disabled === "function") {
-      const isDisabled = this.config.disabled(this.editor)
+      const isDisabled = this.config.disabled(this.canvas)
       if (this.element instanceof HTMLButtonElement) {
         this.element.disabled = isDisabled
       } else {
@@ -90,7 +90,7 @@ export abstract class BaseMenuItem<T extends HTMLElement = HTMLElement> {
     }
 
     if (typeof this.config.visible === "function") {
-      this.element.style.display = this.config.visible(this.editor) ? "" : "none"
+      this.element.style.display = this.config.visible(this.canvas) ? "" : "none"
     }
   }
 

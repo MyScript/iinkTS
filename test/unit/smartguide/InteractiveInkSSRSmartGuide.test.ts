@@ -1,9 +1,9 @@
 import { LeftClickEventMock } from "../__mocks__/EventMock"
-import { InteractiveInkSSREditorMock } from "../__mocks__/InteractiveInkSSREditorMock"
+import { InteractiveInkSSRCanvasMock } from "../__mocks__/InteractiveInkSSRCanvasMock"
 import { InteractiveInkSSRSmartGuide, TMarginConfiguration } from "@/iink"
 
 describe("InteractiveInkSSRSmartGuide.ts", () => {
-  const editorMock = new InteractiveInkSSREditorMock()
+  const editorMock = new InteractiveInkSSRCanvasMock()
   const margin: TMarginConfiguration = {
     bottom: 100,
     top: 20,

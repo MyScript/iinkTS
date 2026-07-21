@@ -1,11 +1,11 @@
-import { EditorTool } from "@/Constants"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import { CanvasTool } from "@/Constants"
 import { LoggerCategory } from "@/logger"
 
 import { IIAbstractManager } from "./IIAbstractManager"
 
 /**
- * Manages keyboard input for the Interactive Ink editor
+ * Manages keyboard input for the Interactive Ink canvas
  * Handles tool switching via modifier keys (Ctrl/Cmd for Move mode)
  * @group Manager
  */
@@ -15,10 +15,10 @@ export class IIKeyboardManager extends IIAbstractManager {
   static readonly ZOOM_STEP = 1.2
   static readonly PAN_STEP = 100
 
-  #toolBeforeCtrl?: EditorTool
+  #toolBeforeCtrl?: CanvasTool
 
-  constructor(editor: TInteractiveInkEditor) {
-    super(editor, LoggerCategory.KEYBOARD)
+  constructor(canvas: TInteractiveInkCanvas) {
+    super(canvas, LoggerCategory.KEYBOARD)
     this.handleKeyDown = this.handleKeyDown.bind(this)
     this.handleKeyUp = this.handleKeyUp.bind(this)
   }
@@ -43,7 +43,7 @@ export class IIKeyboardManager extends IIAbstractManager {
 
   /**
    * Reset the stored tool when user manually changes tool
-   * Called by the editor when tool changes programmatically
+   * Called by the canvas when tool changes programmatically
    */
   resetStoredTool(): void {
     if (this.#toolBeforeCtrl) {
@@ -52,10 +52,10 @@ export class IIKeyboardManager extends IIAbstractManager {
   }
 
   #zoomAtCenter(factor: number): void {
-    const cx = this.editor.renderer.parent.clientWidth / 2
-    const cy = this.editor.renderer.parent.clientHeight / 2
-    this.editor.renderer.setZoom(this.editor.renderer.getZoom() * factor, cx, cy)
-    this.editor.menu.action.update()
+    const cx = this.canvas.renderer.parent.clientWidth / 2
+    const cy = this.canvas.renderer.parent.clientHeight / 2
+    this.canvas.renderer.setZoom(this.canvas.renderer.getZoom() * factor, cx, cy)
+    this.canvas.menu.action.update()
   }
 
   #handleCtrlShortcut(event: KeyboardEvent): boolean {
@@ -63,34 +63,34 @@ export class IIKeyboardManager extends IIAbstractManager {
       case "z":
         event.preventDefault()
         if (event.shiftKey) {
-          this.editor.redo()
+          this.canvas.redo()
         } else {
-          this.editor.undo()
+          this.canvas.undo()
         }
         return true
       case "y":
         event.preventDefault()
-        this.editor.redo()
+        this.canvas.redo()
         return true
       case "c":
         event.preventDefault()
-        this.editor.copy()
+        this.canvas.copy()
         return true
       case "v":
         event.preventDefault()
         this.#toolBeforeCtrl = undefined
-        this.editor.tool = EditorTool.Select
-        this.editor.paste()
+        this.canvas.tool = CanvasTool.Select
+        this.canvas.paste()
         return true
       case "x":
         event.preventDefault()
-        this.editor.cut()
+        this.canvas.cut()
         return true
       case "0":
       case "à": // AZERTY: unshifted value of the 0 key
         event.preventDefault()
-        this.editor.zoomToFit()
-        this.editor.menu.action.update()
+        this.canvas.zoomToFit()
+        this.canvas.menu.action.update()
         return true
       case "+":
       case "=":
@@ -103,19 +103,19 @@ export class IIKeyboardManager extends IIAbstractManager {
         return true
       case "arrowup":
         event.preventDefault()
-        this.editor.renderer.pan(0, -IIKeyboardManager.PAN_STEP / this.editor.renderer.getZoom())
+        this.canvas.renderer.pan(0, -IIKeyboardManager.PAN_STEP / this.canvas.renderer.getZoom())
         return true
       case "arrowdown":
         event.preventDefault()
-        this.editor.renderer.pan(0, IIKeyboardManager.PAN_STEP / this.editor.renderer.getZoom())
+        this.canvas.renderer.pan(0, IIKeyboardManager.PAN_STEP / this.canvas.renderer.getZoom())
         return true
       case "arrowleft":
         event.preventDefault()
-        this.editor.renderer.pan(-IIKeyboardManager.PAN_STEP / this.editor.renderer.getZoom(), 0)
+        this.canvas.renderer.pan(-IIKeyboardManager.PAN_STEP / this.canvas.renderer.getZoom(), 0)
         return true
       case "arrowright":
         event.preventDefault()
-        this.editor.renderer.pan(IIKeyboardManager.PAN_STEP / this.editor.renderer.getZoom(), 0)
+        this.canvas.renderer.pan(IIKeyboardManager.PAN_STEP / this.canvas.renderer.getZoom(), 0)
         return true
       default:
         return false
@@ -123,10 +123,10 @@ export class IIKeyboardManager extends IIAbstractManager {
   }
 
   #handleDelete(event: KeyboardEvent): void {
-    const selected = this.editor.model.symbolsSelected
+    const selected = this.canvas.model.symbolsSelected
     if (selected.length) {
       event.preventDefault()
-      this.editor.removeSymbols(selected.map((s) => s.id))
+      this.canvas.removeSymbols(selected.map((s) => s.id))
     }
   }
 
@@ -151,16 +151,16 @@ export class IIKeyboardManager extends IIAbstractManager {
       return
     }
 
-    const hasSelection = this.editor.model.symbolsSelected.length > 0
+    const hasSelection = this.canvas.model.symbolsSelected.length > 0
     if (
       (event.ctrlKey || event.metaKey) &&
-      this.editor.tool !== EditorTool.Move &&
+      this.canvas.tool !== CanvasTool.Move &&
       !this.#toolBeforeCtrl &&
       !hasSelection
     ) {
       this.logger.debug("handleKeyDown", "Switching to Move mode")
-      this.#toolBeforeCtrl = this.editor.tool
-      this.editor.tool = EditorTool.Move
+      this.#toolBeforeCtrl = this.canvas.tool
+      this.canvas.tool = CanvasTool.Move
     }
   }
 
@@ -171,7 +171,7 @@ export class IIKeyboardManager extends IIAbstractManager {
   protected handleKeyUp = (event: KeyboardEvent): void => {
     if (!event.ctrlKey && !event.metaKey && this.#toolBeforeCtrl) {
       this.logger.debug("handleKeyUp", "Restoring previous tool")
-      this.editor.tool = this.#toolBeforeCtrl
+      this.canvas.tool = this.#toolBeforeCtrl
       this.#toolBeforeCtrl = undefined
     }
   }

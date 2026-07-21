@@ -1,7 +1,7 @@
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import type { TMathVariable, TMathVariableDefinition } from "@/client"
 import { DOMFactory } from "@/components/dom"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
 import { LoggerCategory, LoggerManager } from "@/logger"
-import type { TMathVariable, TMathVariableDefinition } from "@/recognizer"
 
 import type { TVariableInputItem } from "./IIMathVariableInputList"
 import { IIMathVariableInputList } from "./IIMathVariableInputList"
@@ -18,19 +18,19 @@ export type TSymbolVariables = {
 
 /**
  * @group Components
- * @remarks Modal editor for variables of one or more math block symbols.
+ * @remarks Modal canvas for variables of one or more math block symbols.
  * Fetches variables per jiixBlockId and applies changes via setListVariableValue.
  */
 export class IIMathVariablePerBlockEditor {
-  private editor: TInteractiveInkEditor
+  private canvas: TInteractiveInkCanvas
   private jiixBlockIds: string[]
   private modal?: Modal
   private blockVariables: TSymbolVariables[] = []
   private inputLists: Map<string, IIMathVariableInputList> = new Map()
   private logger = LoggerManager.getLogger(LoggerCategory.MATH)
 
-  constructor(editor: TInteractiveInkEditor, jiixBlockIds: string[]) {
-    this.editor = editor
+  constructor(canvas: TInteractiveInkCanvas, jiixBlockIds: string[]) {
+    this.canvas = canvas
     this.jiixBlockIds = [...new Set(jiixBlockIds)]
   }
 
@@ -44,8 +44,8 @@ export class IIMathVariablePerBlockEditor {
         continue
       }
       try {
-        const definition = await this.editor.math.asVariableDefinition(jiixBlockId)
-        const variables = await this.editor.math.getVariables(jiixBlockId)
+        const definition = await this.canvas.math.asVariableDefinition(jiixBlockId)
+        const variables = await this.canvas.math.getVariables(jiixBlockId)
         if (variables.length > 0) {
           this.blockVariables.push({
             jiixBlockId,
@@ -54,7 +54,7 @@ export class IIMathVariablePerBlockEditor {
           })
         }
       } catch (error) {
-        const label = this.editor.jiix.getBlockLabel(jiixBlockId)
+        const label = this.canvas.jiix.getBlockLabel(jiixBlockId)
         this.logger.error("show", `Error fetching variables for JiixBlock ${label}:`, error)
       }
     }
@@ -72,7 +72,7 @@ export class IIMathVariablePerBlockEditor {
       title,
       fields: [],
       customContent: container,
-      container: this.editor.layers.root,
+      container: this.canvas.layers.root,
       buttons: [
         {
           label: "Apply",
@@ -87,7 +87,7 @@ export class IIMathVariablePerBlockEditor {
 
   private createModalContent(): HTMLDivElement {
     const container = DOMFactory.div({
-      className: "ms-var-editor-content",
+      className: "ms-var-canvas-content",
     })
     this.blockVariables.forEach((symVar) => container.appendChild(this.createSymbolSection(symVar)))
     return container
@@ -98,7 +98,7 @@ export class IIMathVariablePerBlockEditor {
       className: "ms-card",
     })
 
-    const label = this.editor.jiix.getBlockLabel(symVar.jiixBlockId) || "N/A"
+    const label = this.canvas.jiix.getBlockLabel(symVar.jiixBlockId) || "N/A"
     const expressionDiv = DOMFactory.div({
       className: "ms-expression-header",
       html: `<strong>Expression:</strong> ${label}`,
@@ -114,14 +114,14 @@ export class IIMathVariablePerBlockEditor {
         sourceType: variable.sourceType,
         sourceLabel:
           variable.sourceType === "BLOCK" && variable.sourceId
-            ? (this.editor.jiix.getBlockLabel(variable.sourceId) ?? variable.sourceId)
+            ? (this.canvas.jiix.getBlockLabel(variable.sourceId) ?? variable.sourceId)
             : undefined,
         isDefinition,
         disabled: isDefinition || variable.sourceType === "PREDEFINED",
         onDelete:
           variable.sourceType === "API" || variable.sourceType === "API_GLOBAL"
             ? async (name) => {
-                await this.editor.math.removeVariable(symVar.jiixBlockId, name)
+                await this.canvas.math.removeVariable(symVar.jiixBlockId, name)
               }
             : undefined,
       }
@@ -157,7 +157,7 @@ export class IIMathVariablePerBlockEditor {
         }
 
         if (hasChanges) {
-          updates.push(this.editor.math.setListVariableValue(symVar.jiixBlockId, variableValues))
+          updates.push(this.canvas.math.setListVariableValue(symVar.jiixBlockId, variableValues))
         }
       }
 
@@ -166,7 +166,7 @@ export class IIMathVariablePerBlockEditor {
         this.logger.info("applyChanges", `Updated variables for ${updates.length} symbol(s)`)
       }
       this.close()
-      this.editor.menu.context.update()
+      this.canvas.menu.context.update()
     } catch (error) {
       this.logger.error("applyChanges", "Error applying variable changes:", error)
     }

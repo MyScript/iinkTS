@@ -1,17 +1,17 @@
-import { createEditorMock, asEditor } from "../__mocks__/createEditorMock"
+import { createCanvasMock, asEditor } from "../__mocks__/createCanvasMock"
 import { LeftClickEventMock } from "../__mocks__/EventMock"
-import { EditorTool, IIMenuTool, EditorWriteTool } from "@/iink"
+import { CanvasTool, IIMenuTool, CanvasWriteTool } from "@/iink"
 
 describe("IIMenuTool.ts", () => {
   test("should create", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const menu = new IIMenuTool(asEditor(editor))
     expect(menu).toBeDefined()
   })
 
   describe("render", () => {
     const layer = document.createElement("div")
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const menu = new IIMenuTool(asEditor(editor))
     menu.render(layer)
     test("should display menu write pencil", () => {
@@ -32,7 +32,7 @@ describe("IIMenuTool.ts", () => {
   })
 
   describe("change tool", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const menu = new IIMenuTool(asEditor(editor))
     const clickEvt = new LeftClickEventMock("click", {
       pointerType: "pen",
@@ -42,30 +42,30 @@ describe("IIMenuTool.ts", () => {
     })
     menu.render(editor.layers.ui.root)
     test("should set menu select", () => {
-      editor.tool = EditorTool.Erase
+      editor.tool = CanvasTool.Erase
       const menuEl = editor.layers.ui.root.querySelector("#ms-menu-tool-select") as HTMLDivElement
       menuEl.dispatchEvent(clickEvt)
-      expect(editor.tool).toEqual(EditorTool.Select)
+      expect(editor.tool).toEqual(CanvasTool.Select)
     })
     test("should set menu move", () => {
-      editor.tool = EditorTool.Erase
+      editor.tool = CanvasTool.Erase
       const menuEl = editor.layers.ui.root.querySelector("#ms-menu-tool-move") as HTMLDivElement
       menuEl.dispatchEvent(clickEvt)
-      expect(editor.tool).toEqual(EditorTool.Move)
+      expect(editor.tool).toEqual(CanvasTool.Move)
     })
     test("should set menu erase", () => {
-      editor.tool = EditorTool.Write
+      editor.tool = CanvasTool.Write
       const menuEl = editor.layers.ui.root.querySelector("#ms-menu-tool-erase") as HTMLDivElement
       menuEl.dispatchEvent(clickEvt)
-      expect(editor.tool).toEqual(EditorTool.Erase)
+      expect(editor.tool).toEqual(CanvasTool.Erase)
     })
     test("should set menu write pencil", () => {
-      editor.tool = EditorTool.Erase
-      editor.writer.tool = EditorWriteTool.Rectangle
+      editor.tool = CanvasTool.Erase
+      editor.writer.tool = CanvasWriteTool.Rectangle
       const menuEl = editor.layers.ui.root.querySelector("#ms-menu-tool-write-pencil") as HTMLDivElement
       menuEl.dispatchEvent(clickEvt)
-      expect(editor.tool).toEqual(EditorTool.Write)
-      expect(editor.writer.tool).toEqual(EditorWriteTool.Pencil)
+      expect(editor.tool).toEqual(CanvasTool.Write)
+      expect(editor.writer.tool).toEqual(CanvasWriteTool.Pencil)
     })
     test("should display sub menu shape", () => {
       const menuEl = editor.layers.ui.root.querySelector("#ms-menu-tool-write-shape") as HTMLDivElement
@@ -76,48 +76,48 @@ describe("IIMenuTool.ts", () => {
       expect(subMenuEl2.classList.contains("open")).toBeFalsy()
     })
     test("should set write rectangle", () => {
-      editor.tool = EditorTool.Erase
-      editor.writer.tool = EditorWriteTool.Pencil
+      editor.tool = CanvasTool.Erase
+      editor.writer.tool = CanvasWriteTool.Pencil
       const subMenuEl1 = editor.layers.ui.root.querySelector("#ms-menu-tool-write-shape-rectangle") as HTMLDivElement
       subMenuEl1.dispatchEvent(clickEvt)
       const subMenuEl2 = editor.layers.ui.root.querySelector("#ms-menu-tool-write-shape-rectangle") as HTMLDivElement
       expect(subMenuEl2.classList.contains("open")).toBeFalsy()
 
-      expect(editor.tool).toEqual(EditorTool.Write)
-      expect(editor.writer.tool).toEqual(EditorWriteTool.Rectangle)
+      expect(editor.tool).toEqual(CanvasTool.Write)
+      expect(editor.writer.tool).toEqual(CanvasWriteTool.Rectangle)
     })
     test("should set write triangle", () => {
-      editor.tool = EditorTool.Erase
-      editor.writer.tool = EditorWriteTool.Pencil
+      editor.tool = CanvasTool.Erase
+      editor.writer.tool = CanvasWriteTool.Pencil
       const subMenuEl1 = editor.layers.ui.root.querySelector("#ms-menu-tool-write-shape-triangle") as HTMLDivElement
       subMenuEl1.dispatchEvent(clickEvt)
       const subMenuEl2 = editor.layers.ui.root.querySelector("#ms-menu-tool-write-shape-triangle") as HTMLDivElement
       expect(subMenuEl2.classList.contains("open")).toBeFalsy()
 
-      expect(editor.tool).toEqual(EditorTool.Write)
-      expect(editor.writer.tool).toEqual(EditorWriteTool.Triangle)
+      expect(editor.tool).toEqual(CanvasTool.Write)
+      expect(editor.writer.tool).toEqual(CanvasWriteTool.Triangle)
     })
     test("should set write ellipse", () => {
-      editor.tool = EditorTool.Erase
-      editor.writer.tool = EditorWriteTool.Pencil
+      editor.tool = CanvasTool.Erase
+      editor.writer.tool = CanvasWriteTool.Pencil
       const subMenuEl1 = editor.layers.ui.root.querySelector("#ms-menu-tool-write-shape-ellipse") as HTMLDivElement
       subMenuEl1.dispatchEvent(clickEvt)
       const subMenuEl2 = editor.layers.ui.root.querySelector("#ms-menu-tool-write-shape-ellipse") as HTMLDivElement
       expect(subMenuEl2.classList.contains("open")).toBeFalsy()
 
-      expect(editor.tool).toEqual(EditorTool.Write)
-      expect(editor.writer.tool).toEqual(EditorWriteTool.Ellipse)
+      expect(editor.tool).toEqual(CanvasTool.Write)
+      expect(editor.writer.tool).toEqual(CanvasWriteTool.Ellipse)
     })
     test("should set write circle", () => {
-      editor.tool = EditorTool.Erase
-      editor.writer.tool = EditorWriteTool.Pencil
+      editor.tool = CanvasTool.Erase
+      editor.writer.tool = CanvasWriteTool.Pencil
       const subMenuEl1 = editor.layers.ui.root.querySelector("#ms-menu-tool-write-shape-circle") as HTMLDivElement
       subMenuEl1.dispatchEvent(clickEvt)
       const subMenuEl2 = editor.layers.ui.root.querySelector("#ms-menu-tool-write-shape-circle") as HTMLDivElement
       expect(subMenuEl2.classList.contains("open")).toBeFalsy()
 
-      expect(editor.tool).toEqual(EditorTool.Write)
-      expect(editor.writer.tool).toEqual(EditorWriteTool.Circle)
+      expect(editor.tool).toEqual(CanvasTool.Write)
+      expect(editor.writer.tool).toEqual(CanvasWriteTool.Circle)
     })
     test("should display sub menu edge", () => {
       const menuEl = editor.layers.ui.root.querySelector("#ms-menu-tool-write-edge") as HTMLDivElement
@@ -128,37 +128,37 @@ describe("IIMenuTool.ts", () => {
       expect(subMenuEl2.classList.contains("open")).toBeFalsy()
     })
     test("should set write arrow", () => {
-      editor.tool = EditorTool.Erase
-      editor.writer.tool = EditorWriteTool.Pencil
+      editor.tool = CanvasTool.Erase
+      editor.writer.tool = CanvasWriteTool.Pencil
       const subMenuEl1 = editor.layers.ui.root.querySelector("#ms-menu-tool-write-edge-arrow") as HTMLDivElement
       subMenuEl1.dispatchEvent(clickEvt)
       const subMenuEl2 = editor.layers.ui.root.querySelector("#ms-menu-tool-write-edge-arrow") as HTMLDivElement
       expect(subMenuEl2.classList.contains("open")).toBeFalsy()
 
-      expect(editor.tool).toEqual(EditorTool.Write)
-      expect(editor.writer.tool).toEqual(EditorWriteTool.Arrow)
+      expect(editor.tool).toEqual(CanvasTool.Write)
+      expect(editor.writer.tool).toEqual(CanvasWriteTool.Arrow)
     })
   })
 
   describe("update", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const menu = new IIMenuTool(asEditor(editor))
     menu.render(editor.layers.ui.root)
     test("should set menu select activated", () => {
       expect(editor.layers.ui.root.querySelector("#ms-menu-tool-select")?.classList.contains("active")).toBe(false)
-      editor.tool = EditorTool.Select
+      editor.tool = CanvasTool.Select
       menu.update()
       expect(editor.layers.ui.root.querySelector("#ms-menu-tool-select")?.classList.contains("active")).toBe(true)
     })
     test("should set menu move activated", () => {
       expect(editor.layers.ui.root.querySelector("#ms-menu-tool-move")?.classList.contains("active")).toBe(false)
-      editor.tool = EditorTool.Move
+      editor.tool = CanvasTool.Move
       menu.update()
       expect(editor.layers.ui.root.querySelector("#ms-menu-tool-move")?.classList.contains("active")).toBe(true)
     })
     test("should set menu erase activated", () => {
       expect(editor.layers.ui.root.querySelector("#ms-menu-tool-erase")?.classList.contains("active")).toBe(false)
-      editor.tool = EditorTool.Erase
+      editor.tool = CanvasTool.Erase
       menu.update()
       expect(editor.layers.ui.root.querySelector("#ms-menu-tool-erase")?.classList.contains("active")).toBe(true)
     })
@@ -166,69 +166,69 @@ describe("IIMenuTool.ts", () => {
       expect(editor.layers.ui.root.querySelector("#ms-menu-tool-write-pencil")?.classList.contains("active")).toBe(
         false
       )
-      editor.tool = EditorTool.Write
-      editor.writer.tool = EditorWriteTool.Pencil
+      editor.tool = CanvasTool.Write
+      editor.writer.tool = CanvasWriteTool.Pencil
       menu.update()
       expect(editor.layers.ui.root.querySelector("#ms-menu-tool-write-pencil")?.classList.contains("active")).toBe(true)
     })
     test("should set menu write circle activated", () => {
-      editor.tool = EditorTool.Select
+      editor.tool = CanvasTool.Select
       menu.update()
       expect(editor.layers.ui.root.querySelector("#ms-menu-tool-write-shape")?.classList.contains("active")).toBe(false)
-      editor.tool = EditorTool.Write
-      editor.writer.tool = EditorWriteTool.Circle
+      editor.tool = CanvasTool.Write
+      editor.writer.tool = CanvasWriteTool.Circle
       menu.update()
       expect(editor.layers.ui.root.querySelector("#ms-menu-tool-write-shape")?.classList.contains("active")).toBe(true)
     })
     test("should set menu write triangle activated", () => {
-      editor.tool = EditorTool.Select
+      editor.tool = CanvasTool.Select
       menu.update()
       expect(editor.layers.ui.root.querySelector("#ms-menu-tool-write-shape")?.classList.contains("active")).toBe(false)
-      editor.tool = EditorTool.Write
-      editor.writer.tool = EditorWriteTool.Triangle
+      editor.tool = CanvasTool.Write
+      editor.writer.tool = CanvasWriteTool.Triangle
       menu.update()
       expect(editor.layers.ui.root.querySelector("#ms-menu-tool-write-shape")?.classList.contains("active")).toBe(true)
     })
     test("should set menu write rectangle activated", () => {
-      editor.tool = EditorTool.Select
+      editor.tool = CanvasTool.Select
       menu.update()
       expect(editor.layers.ui.root.querySelector("#ms-menu-tool-write-shape")?.classList.contains("active")).toBe(false)
-      editor.tool = EditorTool.Write
-      editor.writer.tool = EditorWriteTool.Rectangle
+      editor.tool = CanvasTool.Write
+      editor.writer.tool = CanvasWriteTool.Rectangle
       menu.update()
       expect(editor.layers.ui.root.querySelector("#ms-menu-tool-write-shape")?.classList.contains("active")).toBe(true)
     })
     test("should set menu write line activated", () => {
-      editor.tool = EditorTool.Select
+      editor.tool = CanvasTool.Select
       menu.update()
       expect(editor.layers.ui.root.querySelector("#ms-menu-tool-write-edge")?.classList.contains("active")).toBe(false)
-      editor.tool = EditorTool.Write
-      editor.writer.tool = EditorWriteTool.Line
+      editor.tool = CanvasTool.Write
+      editor.writer.tool = CanvasWriteTool.Line
       menu.update()
       expect(editor.layers.ui.root.querySelector("#ms-menu-tool-write-edge")?.classList.contains("active")).toBe(true)
     })
     test("should set menu write arrow activated", () => {
-      editor.tool = EditorTool.Select
+      editor.tool = CanvasTool.Select
       menu.update()
       expect(editor.layers.ui.root.querySelector("#ms-menu-tool-write-edge")?.classList.contains("active")).toBe(false)
-      editor.tool = EditorTool.Write
-      editor.writer.tool = EditorWriteTool.Arrow
+      editor.tool = CanvasTool.Write
+      editor.writer.tool = CanvasWriteTool.Arrow
       menu.update()
       expect(editor.layers.ui.root.querySelector("#ms-menu-tool-write-edge")?.classList.contains("active")).toBe(true)
     })
     test("should set menu write doubleArrow activated", () => {
-      editor.tool = EditorTool.Select
+      editor.tool = CanvasTool.Select
       menu.update()
       expect(editor.layers.ui.root.querySelector("#ms-menu-tool-write-edge")?.classList.contains("active")).toBe(false)
-      editor.tool = EditorTool.Write
-      editor.writer.tool = EditorWriteTool.DoubleArrow
+      editor.tool = CanvasTool.Write
+      editor.writer.tool = CanvasWriteTool.DoubleArrow
       menu.update()
       expect(editor.layers.ui.root.querySelector("#ms-menu-tool-write-edge")?.classList.contains("active")).toBe(true)
     })
   })
 
   describe("show/hide", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const menu = new IIMenuTool(asEditor(editor))
     menu.render(editor.layers.ui.root)
     test("should hide", () => {
@@ -244,7 +244,7 @@ describe("IIMenuTool.ts", () => {
   })
 
   describe("destroy", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const menu = new IIMenuTool(asEditor(editor))
     menu.render(editor.layers.ui.root)
     test("should remove elements", () => {

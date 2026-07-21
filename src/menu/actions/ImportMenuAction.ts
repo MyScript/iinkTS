@@ -1,5 +1,5 @@
 import uploadIcon from "@/assets/svg/upload.svg"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { TMenuSubMenu } from "@/menu/items/SubMenuItem"
 import { SubMenuItem } from "@/menu/items/SubMenuItem"
 import type { TSymbol } from "@/symbol"
@@ -10,7 +10,7 @@ import type { TPartialDeep } from "@/utils"
  * @remarks Menu action Import - Import de fichiers JSON
  */
 export class ImportMenuAction extends SubMenuItem {
-  constructor(editor: TInteractiveInkEditor, idPrefix = "ms-menu-action") {
+  constructor(editor: TInteractiveInkCanvas, idPrefix = "ms-menu-action") {
     const config: TMenuSubMenu = {
       type: "submenu",
       id: `${idPrefix}-import`,

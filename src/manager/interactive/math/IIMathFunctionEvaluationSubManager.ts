@@ -1,6 +1,6 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import type { TMathEvaluable } from "@/client"
 import { LoggerCategory } from "@/logger"
-import type { TMathEvaluable } from "@/recognizer"
 
 import { IIAbstractManager } from "../IIAbstractManager"
 
@@ -11,8 +11,8 @@ import { IIAbstractManager } from "../IIAbstractManager"
 export class IIMathFunctionEvaluationSubManager extends IIAbstractManager {
   protected managerName = "IIMathFunctionEvaluationSubManager"
 
-  constructor(editor: TInteractiveInkEditor) {
-    super(editor, LoggerCategory.MATH)
+  constructor(canvas: TInteractiveInkCanvas) {
+    super(canvas, LoggerCategory.MATH)
   }
 
   async evaluateFunction(
@@ -34,7 +34,7 @@ export class IIMathFunctionEvaluationSubManager extends IIAbstractManager {
       throw new Error("Math block does not have jiixBlockId")
     }
 
-    const series = await this.editor.recognizer.evaluate(jiixBlockId, evaluation)
+    const series = await this.canvas.client.evaluate(jiixBlockId, evaluation)
     this.logger.info("evaluateFunction", {
       seriesCount: series.length,
       totalPoints: series.reduce((sum, s) => sum + s.length, 0),
@@ -47,6 +47,6 @@ export class IIMathFunctionEvaluationSubManager extends IIAbstractManager {
     this.logger.info("getEvaluables", {
       jiixBlockId,
     })
-    return this.editor.recognizer.getEvaluables(jiixBlockId)
+    return this.canvas.client.getEvaluables(jiixBlockId)
   }
 }

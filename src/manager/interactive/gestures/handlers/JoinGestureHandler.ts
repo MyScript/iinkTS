@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { TIIHistoryChanges } from "@/history"
 import { GestureHandler } from "@/manager/interactive/gestures/GestureHandler"
 import type { GestureHelpers } from "@/manager/interactive/gestures/GestureHelpers"
@@ -19,8 +19,8 @@ import { roundTo } from "@/utils"
 export class JoinGestureHandler extends GestureHandler {
   readonly gestureType = "JOIN" as const
 
-  constructor(editor: TInteractiveInkEditor, helpers: GestureHelpers) {
-    super(editor, helpers)
+  constructor(canvas: TInteractiveInkCanvas, helpers: GestureHelpers) {
+    super(canvas, helpers)
   }
 
   async apply(gestureStroke: TStroke, gesture: TGesture): Promise<void> {
@@ -80,7 +80,7 @@ export class JoinGestureHandler extends GestureHandler {
           texts[0].point,
           BoxOps.createFromBoxes(texts.map((t) => OBBOps.toBox(t.bounds)))
         )
-        this.editor.typeset.setBounds(text)
+        this.canvas.typeset.setBounds(text)
         changes.replaced = {
           oldSymbols: [lastSymbBefore, firstSymbolAfter],
           newSymbols: [text],
@@ -175,7 +175,7 @@ export class JoinGestureHandler extends GestureHandler {
     }
 
     if (changes.replaced?.oldSymbols.length) {
-      await this.editor.replaceSymbols(changes.replaced.oldSymbols, changes.replaced.newSymbols, false)
+      await this.canvas.replaceSymbols(changes.replaced.oldSymbols, changes.replaced.newSymbols, false)
     }
     if (translate.length) {
       changes.translate = translate

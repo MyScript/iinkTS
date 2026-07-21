@@ -1,16 +1,16 @@
 import { buildIILine } from "../helpers"
-import { createEditorMock, asEditor } from "../__mocks__/createEditorMock"
+import { createCanvasMock, asEditor } from "../__mocks__/createCanvasMock"
 import { IISnapManager, TSegment, TPoint, TSnapNudge, SVGRendererConst } from "@/iink"
 
 describe("IISnapManager.ts", () => {
   test("should create", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IISnapManager(asEditor(editor))
     expect(manager).toBeDefined()
   })
 
   test("should call renderer.drawLine when drawSnapToElementLines", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IISnapManager(asEditor(editor))
     manager.renderer.drawLine = jest.fn()
     const lines: TSegment[] = [
@@ -42,7 +42,7 @@ describe("IISnapManager.ts", () => {
   })
 
   test("should call renderer.clearElements when clearSnapToElementLines", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IISnapManager(asEditor(editor))
     manager.renderer.clearElements = jest.fn()
     manager.clearSnapToElementLines()
@@ -51,8 +51,8 @@ describe("IISnapManager.ts", () => {
   })
 
   describe("snapResize", () => {
-    const editor = createEditorMock()
-    editor.recognizer.init = jest.fn(() => Promise.resolve())
+    const editor = createCanvasMock()
+    editor.client.init = jest.fn(() => Promise.resolve())
     editor.configuration.rendering.guides.gap = 10
     const manager = new IISnapManager(asEditor(editor))
     manager.renderer.drawLine = jest.fn()
@@ -164,8 +164,8 @@ describe("IISnapManager.ts", () => {
   })
 
   describe("snapTranslate", () => {
-    const editor = createEditorMock()
-    editor.recognizer.init = jest.fn(() => Promise.resolve())
+    const editor = createCanvasMock()
+    editor.client.init = jest.fn(() => Promise.resolve())
     editor.configuration.rendering.guides.gap = 10
     const manager = new IISnapManager(asEditor(editor))
     const selectionSnapPointMock = { x: 25, y: 30 }
@@ -285,7 +285,7 @@ describe("IISnapManager.ts", () => {
   })
 
   describe("snapRotation", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IISnapManager(asEditor(editor))
 
     test("should do nothing if configuration.symbol & configuration.guide are equal to false", () => {

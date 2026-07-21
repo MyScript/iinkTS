@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 
 import type { TMenuItemBase } from "./BaseMenuItem"
 import { BaseMenuItem } from "./BaseMenuItem"
@@ -12,7 +12,7 @@ export type TMenuFileInput = TMenuItemBase & {
   accept?: string
   multiple?: boolean
   buttonLabel?: string
-  action: (editor: TInteractiveInkEditor, files: FileList) => void | Promise<void>
+  action: (canvas: TInteractiveInkCanvas, files: FileList) => void | Promise<void>
 }
 
 /**
@@ -50,7 +50,7 @@ export class FileInputMenuItem extends BaseMenuItem<HTMLDivElement> {
       e.preventDefault()
       e.stopPropagation()
       if (this.inputElement.files?.length) {
-        await this.config.action(this.editor, this.inputElement.files)
+        await this.config.action(this.canvas, this.inputElement.files)
         this.inputElement.value = ""
         this.buttonElement.disabled = true
         wrapper.dispatchEvent(new CustomEvent("ms-menu-close", { bubbles: true }))

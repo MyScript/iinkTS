@@ -1,4 +1,4 @@
-import type { EditorEvent } from "@/editor/EditorEvent"
+import type { CanvasEvent } from "@/canvas/CanvasEvent"
 import { LoggerCategory, LoggerManager } from "@/logger"
 
 import type { THistoryConfiguration } from "./HistoryConfiguration"
@@ -14,11 +14,11 @@ export abstract class AbstractHistoryStack<TStackItem> {
   protected logger = LoggerManager.getLogger(LoggerCategory.HISTORY)
 
   configuration: THistoryConfiguration
-  event: EditorEvent
+  event: CanvasEvent
   context: THistoryContext
   stack: TStackItem[]
 
-  constructor(configuration: THistoryConfiguration, event: EditorEvent) {
+  constructor(configuration: THistoryConfiguration, event: CanvasEvent) {
     this.logger.info("constructor", {
       configuration,
     })

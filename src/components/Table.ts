@@ -94,7 +94,7 @@ export class Table {
     const thead = DOMFactory.thead()
 
     if (this.config.stickyHeader) {
-      thead.style.cssText = "position: sticky; top: 0; background: var(--iink-editor-bg); font-weight: bold;"
+      thead.style.cssText = "position: sticky; top: 0; background: var(--ms-ink-canvas-bg); font-weight: bold;"
     }
 
     const headerRow = DOMFactory.tr({
@@ -140,7 +140,7 @@ export class Table {
     this.rowElements.clear()
 
     this.config.rows.forEach((rowConfig, rowIndex) => {
-      const baseStyle = rowConfig.style || "border-bottom: 1px solid var(--iink-surface);"
+      const baseStyle = rowConfig.style || "border-bottom: 1px solid var(--ms-ink-surface);"
       const row = DOMFactory.tr({
         style: baseStyle,
       })
@@ -155,7 +155,7 @@ export class Table {
 
       // Add hover effect if enabled
       if (this.config.hoverEffect) {
-        const hoverStyle = rowConfig.hoverStyle || "var(--iink-menu-hover)"
+        const hoverStyle = rowConfig.hoverStyle || "var(--ms-ink-menu-hover)"
         row.addEventListener("pointerenter", () => {
           if (!this.selectedRows.has(rowIndex)) {
             row.style.background = hoverStyle
@@ -292,10 +292,10 @@ export class Table {
     }
 
     const rowConfig = this.config.rows[rowIndex]
-    const baseStyle = rowConfig?.style || "border-bottom: 1px solid var(--iink-surface);"
+    const baseStyle = rowConfig?.style || "border-bottom: 1px solid var(--ms-ink-surface);"
 
     if (selected) {
-      row.style.cssText = baseStyle + " background: var(--iink-info); font-weight: 500;"
+      row.style.cssText = baseStyle + " background: var(--ms-ink-info); font-weight: 500;"
     } else {
       row.style.cssText = baseStyle
     }

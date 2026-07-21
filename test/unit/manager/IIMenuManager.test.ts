@@ -1,9 +1,9 @@
-import { createEditorMock, asEditor } from "../__mocks__/createEditorMock"
+import { createCanvasMock, asEditor } from "../__mocks__/createCanvasMock"
 import { IIMenuManager, IIMenuStyle, IIMenuTool, IIMenuAction } from "@/iink"
 
 describe("IIMenuManager.ts", () => {
   test("should instanciate", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IIMenuManager(asEditor(editor))
     expect(manager).toBeDefined()
   })
@@ -13,7 +13,7 @@ describe("IIMenuManager.ts", () => {
       class CustomMenuStyle extends IIMenuStyle {
         name = "override-style"
       }
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       //@ts-ignore
       const manager = new IIMenuManager(asEditor(editor), { style: CustomMenuStyle })
       //@ts-ignore
@@ -23,7 +23,7 @@ describe("IIMenuManager.ts", () => {
       class CustomMenuTool extends IIMenuTool {
         name = "override-tool"
       }
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       //@ts-ignore
       const manager = new IIMenuManager(asEditor(editor), { tool: CustomMenuTool })
       //@ts-ignore
@@ -33,7 +33,7 @@ describe("IIMenuManager.ts", () => {
       class CustomMenuAction extends IIMenuAction {
         name = "override-action"
       }
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       //@ts-ignore
       const manager = new IIMenuManager(asEditor(editor), { action: CustomMenuAction })
       //@ts-ignore
@@ -43,7 +43,7 @@ describe("IIMenuManager.ts", () => {
 
   describe("render", () => {
     const layer = document.createElement("div")
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IIMenuManager(asEditor(editor))
     manager.action.render = jest.fn()
     manager.style.render = jest.fn()
@@ -88,7 +88,7 @@ describe("IIMenuManager.ts", () => {
   })
 
   describe("update", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IIMenuManager(asEditor(editor))
     manager.action.update = jest.fn()
     manager.style.update = jest.fn()
@@ -103,7 +103,7 @@ describe("IIMenuManager.ts", () => {
   })
 
   describe("show/hide", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IIMenuManager(asEditor(editor))
     manager.action.show = jest.fn()
     manager.action.hide = jest.fn()
@@ -127,7 +127,7 @@ describe("IIMenuManager.ts", () => {
   })
 
   describe("destroy", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IIMenuManager(asEditor(editor))
     manager.action.destroy = jest.fn()
     manager.style.destroy = jest.fn()

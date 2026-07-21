@@ -1,4 +1,4 @@
-import { createEditorMock, asEditor } from "../__mocks__/createEditorMock"
+import { createCanvasMock, asEditor } from "../__mocks__/createCanvasMock"
 import { type IIJiixQueryManager, IIMathVariablePerBlockEditor, TMathVariable, TMathVariableDefinition } from "@/iink"
 
 function makeVariable(overrides: Partial<TMathVariable> = {}): TMathVariable {
@@ -10,10 +10,10 @@ function makeDefinition(overrides: Partial<TMathVariableDefinition> = {}): TMath
 }
 
 describe("IIMathVariablePerBlockEditor.ts", () => {
-  let editor: ReturnType<typeof createEditorMock>
+  let editor: ReturnType<typeof createCanvasMock>
 
   beforeEach(() => {
-    editor = createEditorMock({
+    editor = createCanvasMock({
       jiix: {
         getBlockLabel: jest.fn().mockImplementation((id: string) => `label(${id})`),
       } as unknown as IIJiixQueryManager,

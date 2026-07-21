@@ -1,5 +1,5 @@
 import { buildIIStroke } from "../../helpers"
-import { createEditorMock, asEditor } from "../../__mocks__/createEditorMock"
+import { createCanvasMock, asEditor } from "../../__mocks__/createCanvasMock"
 import { IISynchronizerManager, JIIXElementType, TJIIXExport, TJIIXTextElement, TStroke } from "@/iink"
 
 function buildTextElement(id: string, strokeId: string): TJIIXTextElement {
@@ -27,14 +27,14 @@ function buildJiixExport(elements: TJIIXTextElement[]): TJIIXExport {
 
 describe("IISynchronizerManager.ts", () => {
   test("should create", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IISynchronizerManager(asEditor(editor))
     expect(manager).toBeDefined()
   })
 
   describe("synchronize()", () => {
     function setup(strokeCount: number) {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const strokes: TStroke[] = []
       for (let i = 0; i < strokeCount; i++) {
         const stroke = buildIIStroke()

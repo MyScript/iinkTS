@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 
 import type { TMenuItemBase } from "./BaseMenuItem"
 import { BaseMenuItem } from "./BaseMenuItem"
@@ -11,8 +11,8 @@ export type TMenuButtonList = TMenuItemBase & {
   type: "buttonlist"
   buttonType?: "square" | "round"
   options: Array<{ label: string; value: string }>
-  getValue: (editor: TInteractiveInkEditor) => string
-  setValue: (editor: TInteractiveInkEditor, value: string) => void
+  getValue: (canvas: TInteractiveInkCanvas) => string
+  setValue: (canvas: TInteractiveInkCanvas, value: string) => void
 }
 
 /**
@@ -32,7 +32,7 @@ export class ButtonListMenuItem extends BaseMenuItem<HTMLDivElement> {
       wrapper.appendChild(this.dom.span({ text: this.config.label }))
     }
 
-    const currentValue = this.config.getValue(this.editor)
+    const currentValue = this.config.getValue(this.canvas)
 
     this.config.options.forEach((option) => {
       const button = this.dom.button({
@@ -41,7 +41,7 @@ export class ButtonListMenuItem extends BaseMenuItem<HTMLDivElement> {
         className: [this.config.buttonType || "", option.value === currentValue ? "active" : ""],
         onPointerUp: () => {
           this.logger.info(`${this.config.id}.change`, { value: option.value })
-          this.config.setValue(this.editor, option.value)
+          this.config.setValue(this.canvas, option.value)
 
           wrapper.querySelectorAll("button").forEach((btn) => btn.classList.remove("active"))
           button.classList.add("active")
@@ -51,7 +51,7 @@ export class ButtonListMenuItem extends BaseMenuItem<HTMLDivElement> {
     })
 
     if (typeof this.config.disabled === "function") {
-      const isDisabled = this.config.disabled(this.editor)
+      const isDisabled = this.config.disabled(this.canvas)
       wrapper.querySelectorAll("button").forEach((btn) => {
         ;(btn as HTMLButtonElement).disabled = isDisabled
       })
@@ -69,7 +69,7 @@ export class ButtonListMenuItem extends BaseMenuItem<HTMLDivElement> {
       return
     }
 
-    const currentValue = this.config.getValue(this.editor)
+    const currentValue = this.config.getValue(this.canvas)
     this.element.querySelectorAll("button").forEach((btn) => {
       const value = btn.id.replace(`${this.config.id}-`, "")
       if (value === currentValue) {

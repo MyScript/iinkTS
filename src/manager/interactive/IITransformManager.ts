@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { LoggerCategory } from "@/logger"
 
 import { IIAbstractManager } from "./IIAbstractManager"
@@ -18,7 +18,7 @@ export class IITransformManager extends IIAbstractManager {
   readonly resize: IIResizeManager
   readonly rotation: IIRotationManager
 
-  constructor(editor: TInteractiveInkEditor) {
+  constructor(editor: TInteractiveInkCanvas) {
     super(editor, LoggerCategory.TRANSFORMER)
     this.translate = new IITranslateManager(editor)
     this.resize = new IIResizeManager(editor)

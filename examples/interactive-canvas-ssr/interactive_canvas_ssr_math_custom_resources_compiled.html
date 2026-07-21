@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Custom resources math (pre-compiled)</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">
+        Custom resources math (pre-compiled)
+      </h1>
+    </header>
+
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">🏫 Pre-compiled grammar — same restriction, lighter payload</p>
+        <p class="ex-panel-intro">Same goal as the inline grammar example: limit recognition to elementary school math (digits 0–9, <strong>+</strong> and <strong>−</strong> only).</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">The difference: the grammar is <strong>compiled and uploaded to the server in advance</strong>. The client simply references it by identifier (<code>customGrammarId: 'math-elementary'</code>) — no grammar string is sent on every request.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Prefer <code>customGrammarId</code> over <code>customGrammarContent</code> in production: the compiled grammar is faster to load server-side and keeps the configuration payload small.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Try writing <em>3 + 5</em> or <em>12 - 4</em>. Complex symbols like <em>∫</em> or <em>√</em> will not be recognized.</div>
+        </div>
+      </aside>
+
+      <div class="page-content">
+        <div id="result"></div>
+        <div id="rootEl"></div>
+      </div>
+    </div>
+
+
+    <script type="module">
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      import { Canvas } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
+
+      const rootElement = document.getElementById('rootEl')
+      const resultElement = document.getElementById('result')
+      const showModalBtn = document.getElementById('showModalBtn')
+
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            type: 'MATH',
+            math: {
+              customGrammarId: 'math-elementary',
+              mimeTypes: ['application/x-latex']
+            }
+          }
+        }
+      }
+
+      let canvas
+
+      async function loadEditor(options) {
+        resultElement.innerHTML = ''
+        await canvas?.destroy()
+
+        canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK_SSR', options)
+
+        canvas.event.addEventListener('exported', (evt) => {
+          const exports = evt.detail
+          if (exports && exports['application/x-latex']) {
+            convertElement.disabled = false
+            resultElement.innerHTML = '<span>' + exports['application/x-latex'] + '</span>'
+          } else {
+            convertElement.disabled = true
+            resultElement.innerHTML = ''
+          }
+        })
+      }
+
+      showModalBtn.addEventListener('click', () => {
+        ModalCanvasOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>

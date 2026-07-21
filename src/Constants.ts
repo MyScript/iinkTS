@@ -1,9 +1,9 @@
 /**
- * @group Editor
+ * @group Canvas
  * @summary
  * List the possibilities of interactions
  */
-export enum EditorTool {
+export enum CanvasTool {
   Write = "write",
   Erase = "erase",
   /**
@@ -17,13 +17,13 @@ export enum EditorTool {
 }
 
 /**
- * @group Editor
+ * @group Canvas
  * @summary
  * List all the shapes that can be drawn
  * @remarks
  * only usable in the case of interactive ink editor
  */
-export enum EditorWriteTool {
+export enum CanvasWriteTool {
   Pencil = "pencil",
   Rectangle = "rectangle",
   Rhombus = "rhombus",

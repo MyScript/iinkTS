@@ -10,12 +10,12 @@
  * - {@link EraseManager} - Handles erasing strokes/symbols
  * - {@link ColorPaletteManager} - Color palette manager (key-to-color mapping)
  *
- * **Simple Editor Managers** (`./simple`)
- * - Used by {@link InkEditor} (HTTPv2 API)
+ * **Simple Canvas Managers** (`./simple`)
+ * - Used by {@link InkCanvas} (HTTPv2 API)
  * - {@link IWriterManager} - Manages writing with basic stroke model
  *
- * **Interactive Editor Managers** (`./interactive`)
- * - Used by {@link InteractiveInkEditor} (WebSocket API with advanced features)
+ * **Interactive Canvas Managers** (`./interactive`)
+ * - Used by {@link InteractiveInkCanvas} (WebSocket API with advanced features)
  * - {@link IIWriterManager} - Manages writing with rich symbol support
  * - {@link IIConversionManager} - Converts between symbol types
  * - {@link IISelectionManager} - Manages symbol selection
@@ -30,8 +30,8 @@
  * - {@link IIMathDependencyManager} - Math symbol dependency tracking and recalculation
  *
  * **Debug Managers** (`./debug`)
- * - {@link IIDebugSVGManager} - Debug visualization for InteractiveInkEditor
- * - {@link IDebugSVGManager} - Debug visualization for InkEditor
+ * - {@link IIDebugSVGManager} - Debug visualization for InteractiveInkCanvas
+ * - {@link IDebugSVGManager} - Debug visualization for InkCanvas
  */
 
 // Core abstractions

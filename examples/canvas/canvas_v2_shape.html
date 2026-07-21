@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Ink Canvas v2 Shape</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <link rel="stylesheet" href="../assets/style/renderjson.css" />
+    <style>
+      #result {
+        border-bottom: solid gray 1px;
+        display: block;
+        text-align: start;
+        padding: 12px;
+        cursor: zoom-in;
+      }
+    </style>
+
+    <script type="text/javascript" src="../assets/renderjson/renderjson.js"></script>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">
+        Ink Canvas v2 Shape
+      </h1>
+    </header>
+
+    <div id="result"></div>
+
+    <nav class="flex-container wrap gap between">
+      <div class="flex-container wrap gap">
+        <button id="clear" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/clear.svg" />
+        </button>
+        <button id="undo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/undo.svg" />
+        </button>
+        <button id="redo" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/redo.svg" />
+        </button>
+      </div>
+      <div class="flex-container wrap gap">
+        <button id="pen" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/pen.svg" />
+        </button>
+        <button id="eraser" class="nav-btn btn-fab-mini btn-lightBlue" disabled>
+          <img src="../assets/img/eraser.svg" />
+        </button>
+      </div>
+      <div class="flex-container wrap gap">
+      </div>
+      </div>
+    </nav>
+
+    <div id="progress"></div>
+
+    <div id="rootEl"></div>
+
+    <div id="conversion-container"></div>
+
+    <script type="module">
+      import { Canvas, CanvasTool } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from "../components/modal/modalCanvasOptions.js"
+      const rootElement = document.getElementById("rootEl");
+      const resultElement = document.getElementById("result");
+      const clearElement = document.getElementById("clear");
+      const undoElement = document.getElementById("undo");
+      const redoElement = document.getElementById("redo");
+      const eraserElement = document.getElementById("eraser");
+      const penElement = document.getElementById("pen");
+      const showModalBtn = document.getElementById("showModalBtn");
+
+      resultElement.addEventListener("click", () => {
+        resultElement.classList.toggle("open")
+      });
+
+      let canvas;
+
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            export: {
+              jiix: {
+                ranges: true,
+              },
+            },
+            type: "SHAPE"
+          }
+        }
+      };
+
+      async function loadEditor(options) {
+        resultElement.innerHTML = ""
+        await canvas?.destroy()
+
+        /**
+         * get canvas instance from type
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Canvas parameters
+         */
+        canvas = await Canvas.load(rootElement, "INK_V2", options);
+
+        canvas.event.addEventListener("changed", (event) => {
+          undoElement.disabled = !event.detail.canUndo;
+          redoElement.disabled = !event.detail.canRedo;
+          clearElement.disabled = !event.detail.canClear;
+          eraserElement.disabled = !event.detail.canClear || canvas.tool === CanvasTool.Erase;
+        });
+
+        canvas.event.addEventListener("exported", (evt) => {
+          while (resultElement.firstChild) {
+            resultElement.firstChild.remove()
+          }
+          resultElement.appendChild(renderjson(evt.detail))
+        });
+      };
+
+      clearElement.addEventListener("click", () => {
+        canvas?.clear();
+      });
+
+      undoElement.addEventListener("click", () => {
+        canvas?.undo();
+      });
+
+      redoElement.addEventListener("click", () => {
+        canvas?.redo();
+      });
+
+      eraserElement.addEventListener("click", () => {
+        if (!canvas) return;
+        eraserElement.disabled = true;
+        penElement.disabled = false;
+        rootElement.iink.tool = CanvasTool.Erase;
+        eraserElement.disabled = true;
+        eraserElement.classList.add("active");
+        penElement.disabled = false;
+        penElement.classList.remove("active");
+      });
+
+      penElement.addEventListener("click", () => {
+        if (!canvas) return;
+        eraserElement.disabled = false;
+        penElement.disabled = true;
+        rootElement.iink.tool = CanvasTool.Write;
+        eraserElement.disabled = false;
+        eraserElement.classList.remove("active");
+        penElement.disabled = true;
+        penElement.classList.add("active");
+      });
+
+      showModalBtn.addEventListener("click", () => {
+        ModalCanvasOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>

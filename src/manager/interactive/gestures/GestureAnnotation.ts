@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { TIIHistoryChanges } from "@/history"
 import type { DecoratorKind, TBox, TDecorator, TStroke, TText } from "@/symbol"
 import { isDecorator, isRecognizedText, isStroke, isText, SymbolType, type TSymbol } from "@/symbol"
@@ -25,14 +25,14 @@ export type TGestureAnnotation =
  * @group Manager
  */
 export class IIGestureAnnotationProcessor {
-  constructor(private editor: TInteractiveInkEditor) {}
+  constructor(private canvas: TInteractiveInkCanvas) {}
 
   async apply(ids: string[], annotation: TGestureAnnotation): Promise<TIIHistoryChanges | undefined> {
     switch (annotation.kind) {
       case "decorator":
         return this.#applyDecorator(ids, annotation.decoratorKind)
       case "erase":
-        await this.editor.removeSymbols(ids)
+        await this.canvas.removeSymbols(ids)
         return undefined
       case "thicken": {
         const changed = this.#applyThicken(ids, annotation.factor)
@@ -52,7 +52,7 @@ export class IIGestureAnnotationProcessor {
     const erased: TDecorator[] = []
 
     for (const id of ids) {
-      const sym = this.editor.model.getRootSymbol(id)
+      const sym = this.canvas.model.getRootSymbol(id)
       if (!sym) {
         continue
       }
@@ -66,7 +66,7 @@ export class IIGestureAnnotationProcessor {
         continue
       }
 
-      const wordGroup = this.editor.jiix.getWordGroupForStroke(sym.id)
+      const wordGroup = this.canvas.jiix.getWordGroupForStroke(sym.id)
       if (wordGroup) {
         if (seenWordKeys.has(wordGroup.wordKey)) {
           continue
@@ -117,7 +117,7 @@ export class IIGestureAnnotationProcessor {
   async #waitForPendingClassification(ids: string[]): Promise<void> {
     const isPending = () =>
       ids.some((id) => {
-        const sym = this.editor.model.getRootSymbol(id)
+        const sym = this.canvas.model.getRootSymbol(id)
         return sym && isStroke(sym) && !sym.jiixBlockType
       })
     for (const delay of [100, 200, 300, 400, 500, 500]) {
@@ -137,16 +137,16 @@ export class IIGestureAnnotationProcessor {
     added: TDecorator[],
     erased: TDecorator[]
   ): void {
-    const existing = this.editor.model.symbols
+    const existing = this.canvas.model.symbols
       .filter(isDecorator)
       .find((d) => d.kind === kind && this.#sameTargets(d.targetIds, targetIds))
 
     if (existing) {
-      this.editor.model.removeSymbol(existing.id)
-      this.editor.renderer.removeElement(existing.id)
+      this.canvas.model.removeSymbol(existing.id)
+      this.canvas.renderer.removeElement(existing.id)
       erased.push(existing)
     } else {
-      const decorator = DecoratorOps.create(kind, this.editor.penStyle, targetIds)
+      const decorator = DecoratorOps.create(kind, this.canvas.penStyle, targetIds)
       if (wordBounds) {
         DecoratorOps.setBounds(decorator, OBBOps.fromBox(wordBounds))
       } else {
@@ -161,8 +161,8 @@ export class IIGestureAnnotationProcessor {
       if (xHeight !== null) {
         decorator.xHeight = xHeight
       }
-      this.editor.model.addSymbol(decorator)
-      this.editor.renderer.drawSymbol(decorator)
+      this.canvas.model.addSymbol(decorator)
+      this.canvas.renderer.drawSymbol(decorator)
       added.push(decorator)
     }
   }
@@ -171,14 +171,14 @@ export class IIGestureAnnotationProcessor {
     const index = sym.decorators.findIndex((d) => d.kind === kind)
     if (index !== -1) {
       const removed = sym.decorators.splice(index, 1)[0]
-      this.editor.model.updateSymbol(sym)
-      this.editor.renderer.drawSymbol(sym)
+      this.canvas.model.updateSymbol(sym)
+      this.canvas.renderer.drawSymbol(sym)
       erased.push(removed)
     } else {
-      const decorator = DecoratorOps.create(kind, this.editor.penStyle)
+      const decorator = DecoratorOps.create(kind, this.canvas.penStyle)
       sym.decorators.push(decorator)
-      this.editor.model.updateSymbol(sym)
-      this.editor.renderer.drawSymbol(sym)
+      this.canvas.model.updateSymbol(sym)
+      this.canvas.renderer.drawSymbol(sym)
       added.push(decorator)
     }
   }
@@ -192,7 +192,7 @@ export class IIGestureAnnotationProcessor {
   }
 
   #computeBoundsFromTargets(targetIds: string[]): TOBB | null {
-    const syms = targetIds.map((id) => this.editor.model.getRootSymbol(id)).filter((s): s is TSymbol => !!s)
+    const syms = targetIds.map((id) => this.canvas.model.getRootSymbol(id)).filter((s): s is TSymbol => !!s)
     if (!syms.length) {
       return null
     }
@@ -203,14 +203,14 @@ export class IIGestureAnnotationProcessor {
     const changed: TStroke[] = []
     const seen = new Set<string>()
     for (const id of ids) {
-      const sym = this.editor.model.getRootSymbol(id)
+      const sym = this.canvas.model.getRootSymbol(id)
       if (!sym || sym.type !== SymbolType.Stroke || seen.has(sym.id)) {
         continue
       }
       seen.add(sym.id)
       const stroke = sym as TStroke
       const newWidth = (stroke.style.width || 1) * factor
-      this.editor.updateSymbolsStyle([stroke.id], { width: newWidth }, false)
+      this.canvas.updateSymbolsStyle([stroke.id], { width: newWidth }, false)
       changed.push(stroke)
     }
     return changed
@@ -218,7 +218,7 @@ export class IIGestureAnnotationProcessor {
 
   #applySelect(ids: string[]): void {
     if (ids.length) {
-      this.editor.select(ids)
+      this.canvas.select(ids)
     }
   }
 }

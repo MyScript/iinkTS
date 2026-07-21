@@ -1,20 +1,20 @@
 import { buildIICircle, buildIIStroke } from "../../helpers"
-import { createEditorMock, asEditor } from "../../__mocks__/createEditorMock"
+import { createCanvasMock, asEditor } from "../../__mocks__/createCanvasMock"
 import { EraseManager, TPointerInfo, SymbolType } from "@/iink"
 
 describe("EraseManager.ts", () => {
   test("should create", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new EraseManager(asEditor(editor))
     expect(manager).toBeDefined()
     expect(manager.currentEraser).toBeUndefined()
   })
 
   describe("writing process", () => {
-    const editor = createEditorMock()
-    editor.recognizer.init = jest.fn(() => Promise.resolve())
-    editor.recognizer.addStrokes = jest.fn(() => Promise.resolve(undefined))
-    editor.recognizer.eraseStrokes = jest.fn(() => Promise.resolve())
+    const editor = createCanvasMock()
+    editor.client.init = jest.fn(() => Promise.resolve())
+    editor.client.addStrokes = jest.fn(() => Promise.resolve(undefined))
+    editor.client.eraseStrokes = jest.fn(() => Promise.resolve())
 
     const manager = new EraseManager(asEditor(editor))
     manager.renderer.drawSymbol = jest.fn()

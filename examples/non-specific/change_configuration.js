@@ -1,13 +1,13 @@
 import * as iink from "../../dist/iink.esm.js"
-import { ModalEditorOptions } from "../components/modal/modalEditorOptions.js"
+import { ModalCanvasOptions } from "../components/modal/modalCanvasOptions.js"
 const inkEditorDeprecatedConfiguration = iink.DefaultInkEditorDeprecatedConfiguration
 const IISSREditorConfiguration = iink.DefaultInteractiveInkSSREditorConfiguration
 const IIEditorConfiguration = iink.DefaultInteractiveInkEditorConfiguration
 const inkEditorConfiguration = iink.DefaultInkEditorConfiguration
 
 const configurationContent = document.getElementById("configuration-content")
-const editorTypeSelect = document.getElementById("editor-type")
-const editorElement = document.getElementById("editorEl")
+const editorTypeSelect = document.getElementById("canvas-type")
+const rootElement = document.getElementById("rootEl")
 const resultElement = document.getElementById("result")
 const exportBtn = document.getElementById("export-btn")
 const validBtn = document.getElementById("valid-btn")
@@ -236,8 +236,8 @@ function buildSelect(path, name, values, options, multiple = false) {
 }
 
 function loadEditorType() {
-  ;["INTERACTIVEINK", "INTERACTIVEINKSSR", "INKV1", "INKV2"].forEach((type) => {
-    const selected = type === (editor?.type || "INTERACTIVEINKSSR")
+  ;["INTERACTIVE_INK", "INTERACTIVE_INK_SSR", "INK_V1", "INK_V2"].forEach((type) => {
+    const selected = type === (canvas?.type || "INTERACTIVE_INK_SSR")
     editorTypeSelect.appendChild(new Option(type, type, selected, selected))
   })
   editorTypeSelect.addEventListener("input", () => {
@@ -321,7 +321,7 @@ function renderConfiguration(configuration) {
     })
 }
 
-let editor
+let canvas
 let languageList
 
 const editorOptions = {
@@ -330,16 +330,16 @@ const editorOptions = {
 
 function loadConfiguration() {
   switch (editorTypeSelect.value) {
-    case "INTERACTIVEINKSSR":
+    case "INTERACTIVE_INK_SSR":
       editorOptions.configuration = structuredClone(IISSREditorConfiguration)
       break
-    case "INKV1":
+    case "INK_V1":
       editorOptions.configuration = structuredClone(inkEditorDeprecatedConfiguration)
       break
-    case "INKV2":
+    case "INK_V2":
       editorOptions.configuration = structuredClone(inkEditorConfiguration)
       break
-    case "INTERACTIVEINK":
+    case "INTERACTIVE_INK":
       editorOptions.configuration = structuredClone(IIEditorConfiguration)
       break
   }
@@ -358,13 +358,13 @@ async function loadEditor(options) {
   renderConfiguration(editorOptions.configuration)
 
   /**
-   * get editor instance from type
+   * get canvas instance from type
    * @param {Element} The DOM element to attach the ink paper
-   * @param {Object} The Editor parameters
+   * @param {Object} The Canvas parameters
    */
-  editor = await iink.Editor.load(editorElement, editorTypeSelect.value, options)
+  canvas = await iink.Canvas.load(rootElement, editorTypeSelect.value, options)
 
-  editor.event.addEventListener("exported", (event) => {
+  canvas.event.addEventListener("exported", (event) => {
     while (resultElement.firstChild) {
       resultElement.firstChild.remove()
     }
@@ -372,7 +372,7 @@ async function loadEditor(options) {
     resultElement.appendChild(renderjson(event.detail))
   })
 
-  editor.event.addEventListener("changed", (event) => {
+  canvas.event.addEventListener("changed", (event) => {
     exportBtn.disabled = !event.detail.canExport
   })
 }
@@ -380,12 +380,12 @@ async function loadEditor(options) {
 resetBtn.addEventListener("click", loadConfiguration)
 
 exportBtn.addEventListener("click", () => {
-  editor.export()
+  canvas.export()
 })
 
 validBtn.addEventListener("click", async () => {
   resultElement.innerHTML = ""
-  ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+  ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
 })
 
 resultElement.addEventListener("click", () => {
@@ -393,12 +393,12 @@ resultElement.addEventListener("click", () => {
 })
 
 showModalBtn.addEventListener("click", () => {
-  ModalEditorOptions.show(loadEditor, editorOptions)
+  ModalCanvasOptions.show(loadEditor, editorOptions)
 })
 
 loadEditorType()
 loadConfiguration()
-ModalEditorOptions.initConfiguration(loadEditor, editorOptions)
+ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
 
 /**
  * We expose these objects to the window use it in test

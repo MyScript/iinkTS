@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { TMenuSubMenu } from "@/menu/items/SubMenuItem"
 import { SubMenuItem } from "@/menu/items/SubMenuItem"
 
@@ -17,7 +17,7 @@ export type TContextExportConfig = boolean | TContextExportItemsConfig
  * @remarks Menu contextuel Export - Exporte les symboles sélectionnés
  */
 export class ExportContextMenu extends SubMenuItem {
-  constructor(editor: TInteractiveInkEditor, idPrefix = "ms-menu-context", itemsConfig?: TContextExportItemsConfig) {
+  constructor(editor: TInteractiveInkCanvas, idPrefix = "ms-menu-context", itemsConfig?: TContextExportItemsConfig) {
     const enabled = (key: keyof TContextExportItemsConfig) => itemsConfig?.[key] !== false
 
     const config: TMenuSubMenu = {

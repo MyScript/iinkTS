@@ -1,4 +1,4 @@
-import { RecognizerWebSocketSSRTextConfiguration } from "../__dataset__/configuration.dataset"
+import { WebSocketSSRClientTextConfiguration } from "../__dataset__/configuration.dataset"
 import { getAvailableFontList } from "@/iink"
 
 describe("font.ts", () => {
@@ -9,10 +9,10 @@ describe("font.ts", () => {
   ) as jest.Mock
 
   test("should call fetch with good url", async () => {
-    await getAvailableFontList(RecognizerWebSocketSSRTextConfiguration)
+    await getAvailableFontList(WebSocketSSRClientTextConfiguration)
     expect(fetch).toHaveBeenCalledTimes(1)
     expect(fetch).toHaveBeenCalledWith(
-      `${RecognizerWebSocketSSRTextConfiguration?.server?.scheme}://${RecognizerWebSocketSSRTextConfiguration?.server?.host}/api/v4.0/iink/font/google/language/${RecognizerWebSocketSSRTextConfiguration?.recognition?.lang}`
+      `${WebSocketSSRClientTextConfiguration?.server?.scheme}://${WebSocketSSRClientTextConfiguration?.server?.host}/api/v4.0/iink/font/google/language/${WebSocketSSRClientTextConfiguration?.recognition?.lang}`
     )
   })
 
@@ -26,7 +26,7 @@ describe("font.ts", () => {
   })
 
   test("should reject getAvailableFontList if configuration.server is empty", async () => {
-    const conf = JSON.parse(JSON.stringify(RecognizerWebSocketSSRTextConfiguration))
+    const conf = JSON.parse(JSON.stringify(WebSocketSSRClientTextConfiguration))
     delete conf?.server
     getAvailableFontList(conf).catch((e) => {
       expect(e.message).toBe(
@@ -36,7 +36,7 @@ describe("font.ts", () => {
   })
 
   test("should reject getAvailableFontList if configuration.server.scheme is empty", async () => {
-    const conf = JSON.parse(JSON.stringify(RecognizerWebSocketSSRTextConfiguration))
+    const conf = JSON.parse(JSON.stringify(WebSocketSSRClientTextConfiguration))
     delete conf?.server?.scheme
     getAvailableFontList(conf).catch((e) => {
       expect(e.message).toBe(
@@ -46,7 +46,7 @@ describe("font.ts", () => {
   })
 
   test("should reject getAvailableFontList if configuration.server.host empty", async () => {
-    const conf = JSON.parse(JSON.stringify(RecognizerWebSocketSSRTextConfiguration))
+    const conf = JSON.parse(JSON.stringify(WebSocketSSRClientTextConfiguration))
     delete conf?.server?.host
     getAvailableFontList(conf).catch((e) => {
       expect(e.message).toBe(
@@ -56,7 +56,7 @@ describe("font.ts", () => {
   })
 
   test("should reject getAvailableFontList if configuration.server.host empty", async () => {
-    const conf = JSON.parse(JSON.stringify(RecognizerWebSocketSSRTextConfiguration))
+    const conf = JSON.parse(JSON.stringify(WebSocketSSRClientTextConfiguration))
     delete conf?.recognition?.lang
     getAvailableFontList(conf).catch((e) => {
       expect(e.message).toBe("Failed to get fonts: configuration.recognition.lang is required!")

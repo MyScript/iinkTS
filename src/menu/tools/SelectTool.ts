@@ -1,6 +1,6 @@
 import cursorIcon from "@/assets/svg/frame-select.svg"
-import { EditorTool } from "@/Constants"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import { CanvasTool } from "@/Constants"
 import type { TMenuButton } from "@/menu/items/ButtonMenuItem"
 import { ButtonMenuItem } from "@/menu/items/ButtonMenuItem"
 
@@ -9,17 +9,17 @@ import { ButtonMenuItem } from "@/menu/items/ButtonMenuItem"
  * @remarks Select tool - Element selection
  */
 export class SelectTool extends ButtonMenuItem {
-  constructor(editor: TInteractiveInkEditor, idPrefix = "ms-menu-tool") {
+  constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-tool") {
     const config: TMenuButton = {
       type: "button",
       id: `${idPrefix}-select`,
       label: "Select",
       icon: cursorIcon,
-      action: (editor: TInteractiveInkEditor) => {
-        editor.tool = EditorTool.Select
+      action: (canvas: TInteractiveInkCanvas) => {
+        canvas.tool = CanvasTool.Select
       },
     }
-    super(config, editor)
+    super(config, canvas)
   }
 
   createElement(): HTMLButtonElement {
@@ -31,7 +31,7 @@ export class SelectTool extends ButtonMenuItem {
     button.addEventListener("click", () => {
       this.unselectAll()
       button.classList.add("active")
-      this.config.action(this.editor)
+      this.config.action(this.canvas)
     })
     return button
   }
@@ -41,7 +41,7 @@ export class SelectTool extends ButtonMenuItem {
       return
     }
 
-    const isActive = this.editor.tool === EditorTool.Select
+    const isActive = this.canvas.tool === CanvasTool.Select
 
     if (isActive) {
       this.element.classList.add("active")

@@ -1,5 +1,5 @@
 import { buildIIStroke } from "../../../helpers"
-import { createEditorMock, asEditor } from "../../../__mocks__/createEditorMock"
+import { createCanvasMock, asEditor } from "../../../__mocks__/createCanvasMock"
 import { GestureHandler, GestureHelpers, TGestureType, TSymbol } from "@/iink"
 
 class TestGestureHandler extends GestureHandler {
@@ -29,7 +29,7 @@ describe("GestureHandler.ts", () => {
   const rowHeight = 10
 
   function setup() {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     editor.configuration.rendering.guides.gap = rowHeight
     const helpers = new GestureHelpers(asEditor(editor))
     const handler = new TestGestureHandler(asEditor(editor), helpers)

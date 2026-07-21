@@ -1,5 +1,5 @@
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { DOMFactory } from "@/components/dom"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
 import { LoggerCategory, LoggerManager } from "@/logger"
 
 import { Chart } from "./Chart"
@@ -33,7 +33,7 @@ export type TEvaluationResult = {
  * @remarks Component for evaluating and displaying multiple math functions
  */
 export class IIMathFunctionEvaluator {
-  private editor: TInteractiveInkEditor
+  private canvas: TInteractiveInkCanvas
   private jiixBlockIds: string[]
   private modal?: Modal
   private evaluationResults?: TEvaluationResult[]
@@ -56,8 +56,8 @@ export class IIMathFunctionEvaluator {
     "#795548", // Brown
   ]
 
-  constructor(editor: TInteractiveInkEditor, jiixBlockIds: string[]) {
-    this.editor = editor
+  constructor(canvas: TInteractiveInkCanvas, jiixBlockIds: string[]) {
+    this.canvas = canvas
     this.jiixBlockIds = [...new Set(jiixBlockIds)]
   }
 
@@ -75,7 +75,7 @@ export class IIMathFunctionEvaluator {
       }
 
       try {
-        const evaluables = await this.editor.math.getEvaluables(jiixBlockId)
+        const evaluables = await this.canvas.math.getEvaluables(jiixBlockId)
         if (evaluables.length > 0) {
           this.functionsToEvaluate.push({
             jiixBlockId,
@@ -102,7 +102,7 @@ export class IIMathFunctionEvaluator {
       title: "Evaluate Function",
       fields: [],
       customContent: container,
-      container: this.editor.layers.root,
+      container: this.canvas.layers.root,
     })
 
     this.modal.open()
@@ -143,7 +143,7 @@ export class IIMathFunctionEvaluator {
       style: `font-family: monospace; flex-shrink: 0;`,
     })
 
-    const blockLabel = this.editor.jiix.getBlockLabel(func.jiixBlockId) || "N/A"
+    const blockLabel = this.canvas.jiix.getBlockLabel(func.jiixBlockId) || "N/A"
     const symbolLabel = DOMFactory.span({
       text: ` - ${blockLabel}`,
       className: "ms-symbol-label",
@@ -280,7 +280,7 @@ export class IIMathFunctionEvaluator {
         this.evaluateFunctions(this.functionsToEvaluate, fromInput, toInput, pointCountInput)
       },
     })
-    evaluateBtn.style.marginTop = "var(--iink-spacing-lg)"
+    evaluateBtn.style.marginTop = "var(--ms-ink-spacing-lg)"
     evaluateBtn.style.width = "100%"
     return evaluateBtn
   }
@@ -487,7 +487,7 @@ export class IIMathFunctionEvaluator {
 
       for (const func of functions) {
         const selectedEvaluable = func.evaluables[func.selectedEvaluableIndex]
-        const points = await this.editor.math.evaluateFunction(func.jiixBlockId, {
+        const points = await this.canvas.math.evaluateFunction(func.jiixBlockId, {
           inputVariableName: selectedEvaluable.inputName,
           outputVariableName: selectedEvaluable.outputName,
           from,
@@ -587,7 +587,7 @@ export class IIMathFunctionEvaluator {
         title: chartTitle,
         xLabel: inputName,
         yLabel: outputNamesStr,
-        lineColor: "var(--iink-primary)",
+        lineColor: "var(--ms-ink-primary)",
         showGrid: true,
         showPoints: true,
         seriesColors: seriesColors,

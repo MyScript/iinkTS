@@ -6,6 +6,6 @@
  * Useful for development and troubleshooting.
  *
  * @remarks
- * - IDebugSVGManager: For InkEditor
+ * - IDebugSVGManager: For InkCanvas
  */
 export { IDebugSVGManager } from "./IDebugSVGManager"

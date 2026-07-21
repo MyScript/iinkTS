@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+    <title>Interactive Canvas SSR on-demand export</title>
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">Export on demand</h1>
+    </header>
+
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">📤 On-demand export</p>
+        <p class="ex-panel-intro">By default the canvas exports automatically after each stroke. Setting <code>triggers.exportContent: 'DEMAND'</code> disables that — recognition only runs when explicitly requested.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Click <strong>Export</strong> to trigger recognition and display the result. Nothing is sent to the server until that button is pressed.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Useful for form-style UIs where you want to control exactly when the server is called, reducing network traffic and avoiding partial results during writing.</div>
+        </div>
+      </aside>
+
+      <div class="page-content">
+        <nav class="flex-container wrap gap between">
+          <div class="flex-container wrap">
+            <button id="export" class="nav-btn btn-lightBlue">
+              Export
+            </button>
+          </div>
+        </nav>
+
+        <div id="rootEl"></div>
+      </div>
+    </div>
+
+    <script type="module">
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      import { Canvas } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
+      const rootElement = document.getElementById('rootEl')
+      const resultElement = document.getElementById('result')
+      const exportElement = document.getElementById('export')
+      const showModalBtn = document.getElementById('showModalBtn')
+
+      let canvas
+
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            type: 'TEXT'
+          },
+          triggers: {
+            exportContent: 'DEMAND'
+          }
+        }
+      }
+
+      async function loadEditor(options) {
+        /**
+         * get canvas instance from type
+         * @param {Element} The DOM element to attach the ink paper
+         * @param {Object} The Canvas parameters
+         */
+        canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK_SSR', options)
+      }
+
+      exportElement.addEventListener('click', () => {
+        canvas?.export()
+      })
+
+      showModalBtn.addEventListener('click', () => {
+        ModalCanvasOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+
+      /**
+       * We expose these objects to the window use it in test
+       */
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>

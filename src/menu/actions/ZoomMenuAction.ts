@@ -1,6 +1,6 @@
 import zoomInIcon from "@/assets/svg/zoom-in.svg"
 import zoomOutIcon from "@/assets/svg/zoom-out.svg"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { BaseMenuItem } from "@/menu/items/BaseMenuItem"
 
 /**
@@ -12,13 +12,13 @@ export class ZoomMenuAction extends BaseMenuItem<HTMLDivElement> {
   private zoomLevelButton!: HTMLButtonElement
   private zoomOutButton!: HTMLButtonElement
 
-  constructor(editor: TInteractiveInkEditor, idPrefix = "ms-menu-action") {
+  constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-action") {
     const config = {
       type: "zoom" as const,
       id: `${idPrefix}-zoom`,
       label: "Zoom",
     }
-    super(config, editor)
+    super(config, canvas)
   }
 
   createElement(): HTMLDivElement {
@@ -34,8 +34,8 @@ export class ZoomMenuAction extends BaseMenuItem<HTMLDivElement> {
       html: zoomInIcon,
     })
     this.zoomInButton.addEventListener("pointerup", () => {
-      const currentZoom = this.editor.renderer.getZoom()
-      this.editor.renderer.setZoom(currentZoom * 1.2)
+      const currentZoom = this.canvas.renderer.getZoom()
+      this.canvas.renderer.setZoom(currentZoom * 1.2)
       this.updateZoomLevel()
     })
 
@@ -45,7 +45,7 @@ export class ZoomMenuAction extends BaseMenuItem<HTMLDivElement> {
       className: "ms-menu-zoom-level",
     })
     this.zoomLevelButton.addEventListener("click", () => {
-      this.editor.renderer.setZoom(1)
+      this.canvas.renderer.setZoom(1)
       this.updateZoomLevel()
     })
     this.updateZoomLevel()
@@ -57,8 +57,8 @@ export class ZoomMenuAction extends BaseMenuItem<HTMLDivElement> {
       html: zoomOutIcon,
     })
     this.zoomOutButton.addEventListener("pointerup", () => {
-      const currentZoom = this.editor.renderer.getZoom()
-      this.editor.renderer.setZoom(currentZoom / 1.2)
+      const currentZoom = this.canvas.renderer.getZoom()
+      this.canvas.renderer.setZoom(currentZoom / 1.2)
       this.updateZoomLevel()
     })
 
@@ -71,7 +71,7 @@ export class ZoomMenuAction extends BaseMenuItem<HTMLDivElement> {
 
   private updateZoomLevel(): void {
     if (this.zoomLevelButton) {
-      const zoom = this.editor.renderer.getZoom()
+      const zoom = this.canvas.renderer.getZoom()
       this.zoomLevelButton.textContent = `${Math.round(zoom * 100)}%`
     }
   }

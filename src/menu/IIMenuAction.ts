@@ -1,7 +1,7 @@
 import menuIcon from "@/assets/svg/menu.svg"
+import type { TCanvasTheme } from "@/canvas/CanvasThemes"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { DOMFactory } from "@/components/dom"
-import type { TEditorTheme } from "@/editor/EditorThemes"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
 import { LoggerCategory, LoggerManager } from "@/logger"
 import type { IIModel } from "@/model"
 
@@ -70,7 +70,7 @@ export type TMenuActionConfig = {
   /** Enable/disable Theme picker */
   theme?: boolean
   /** Override predefined themes shown in the theme picker */
-  themes?: TEditorTheme[]
+  themes?: TCanvasTheme[]
 }
 
 /** @group Menu */
@@ -102,7 +102,7 @@ function extractSubConfig<T>(config: boolean | T): T | undefined {
 export class IIMenuAction {
   #logger = LoggerManager.getLogger(LoggerCategory.MENU)
 
-  editor: TInteractiveInkEditor
+  canvas: TInteractiveInkCanvas
   id: string
   wrapper?: HTMLElement
   config: Required<Omit<TMenuActionConfig, "themes">> & Pick<TMenuActionConfig, "themes">
@@ -110,9 +110,9 @@ export class IIMenuAction {
   private menuActions: Map<string, BaseMenuItem> = new Map()
   #documentPointerdownHandler?: (e: PointerEvent) => void
 
-  constructor(editor: TInteractiveInkEditor, id = "ms-menu-action", config?: TMenuActionConfig) {
+  constructor(canvas: TInteractiveInkCanvas, id = "ms-menu-action", config?: TMenuActionConfig) {
     this.id = id
-    this.editor = editor
+    this.canvas = canvas
     this.config = {
       ...DefaultMenuActionConfig,
       ...config,
@@ -120,15 +120,15 @@ export class IIMenuAction {
   }
 
   get model(): IIModel {
-    return this.editor.model
+    return this.canvas.model
   }
 
   get isMobile(): boolean {
-    return this.editor.renderer.parent.clientWidth < 700
+    return this.canvas.renderer.parent.clientWidth < 700
   }
 
   render(layer: HTMLElement): void {
-    if (this.editor.configuration.menu.action.enable) {
+    if (this.canvas.configuration.menu.action.enable) {
       this.#logger.info("Rendering menu actions with config", this.config)
 
       const menuTrigger = DOMFactory.button({
@@ -142,58 +142,58 @@ export class IIMenuAction {
       })
 
       if (this.config.theme) {
-        const themeAction = new ThemeMenuAction(this.editor, this.id, this.config.themes)
+        const themeAction = new ThemeMenuAction(this.canvas, this.id, this.config.themes)
         this.menuActions.set("theme", themeAction)
         subMenuWrapper.appendChild(themeAction.getElement())
       }
 
       if (this.config.gesture) {
-        const gestureAction = new GestureMenuAction(this.editor, this.id, extractSubConfig(this.config.gesture))
+        const gestureAction = new GestureMenuAction(this.canvas, this.id, extractSubConfig(this.config.gesture))
         this.menuActions.set("gesture", gestureAction)
         subMenuWrapper.appendChild(gestureAction.getElement())
       }
 
       if (this.config.guide) {
-        const guideAction = new GuideMenuAction(this.editor, this.id, extractSubConfig(this.config.guide))
+        const guideAction = new GuideMenuAction(this.canvas, this.id, extractSubConfig(this.config.guide))
         this.menuActions.set("guide", guideAction)
         subMenuWrapper.appendChild(guideAction.getElement())
       }
 
       if (this.config.snap) {
-        const snapAction = new SnapMenuAction(this.editor, this.id, extractSubConfig(this.config.snap))
+        const snapAction = new SnapMenuAction(this.canvas, this.id, extractSubConfig(this.config.snap))
         this.menuActions.set("snap", snapAction)
         subMenuWrapper.appendChild(snapAction.getElement())
       }
 
       if (
         this.config.math &&
-        this.editor.configuration.recognition["raw-content"].recognition?.types.includes("math")
+        this.canvas.configuration.recognition["raw-content"].recognition?.types.includes("math")
       ) {
-        const mathAction = new MathMenuAction(this.editor, this.id, extractSubConfig(this.config.math))
+        const mathAction = new MathMenuAction(this.canvas, this.id, extractSubConfig(this.config.math))
         this.menuActions.set("math", mathAction)
         subMenuWrapper.appendChild(mathAction.getElement())
       }
 
       if (this.config.overlay) {
-        const overlayAction = new OverlayMenuAction(this.editor, this.id, extractSubConfig(this.config.overlay))
+        const overlayAction = new OverlayMenuAction(this.canvas, this.id, extractSubConfig(this.config.overlay))
         this.menuActions.set("overlay", overlayAction)
         subMenuWrapper.appendChild(overlayAction.getElement())
       }
 
       if (this.config.selection) {
-        const selectionAction = new SelectionMenuAction(this.editor, this.id, extractSubConfig(this.config.selection))
+        const selectionAction = new SelectionMenuAction(this.canvas, this.id, extractSubConfig(this.config.selection))
         this.menuActions.set("selection", selectionAction)
         subMenuWrapper.appendChild(selectionAction.getElement())
       }
 
       if (this.config.import) {
-        const importAction = new ImportMenuAction(this.editor, this.id)
+        const importAction = new ImportMenuAction(this.canvas, this.id)
         this.menuActions.set("import", importAction)
         subMenuWrapper.appendChild(importAction.getElement())
       }
 
       if (this.config.export) {
-        const exportAction = new ExportMenuAction(this.editor, this.id, extractSubConfig(this.config.export))
+        const exportAction = new ExportMenuAction(this.canvas, this.id, extractSubConfig(this.config.export))
         this.menuActions.set("export", exportAction)
         subMenuWrapper.appendChild(exportAction.getElement())
       }
@@ -228,37 +228,37 @@ export class IIMenuAction {
       }
 
       if (this.config.language) {
-        const languageAction = new LanguageMenuAction(this.editor, this.id)
+        const languageAction = new LanguageMenuAction(this.canvas, this.id)
         this.menuActions.set("language", languageAction)
         this.wrapper.appendChild(languageAction.getElement())
       }
 
       if (this.config.clear) {
-        const clearAction = new ClearMenuAction(this.editor, this.id)
+        const clearAction = new ClearMenuAction(this.canvas, this.id)
         this.menuActions.set("clear", clearAction)
         this.wrapper.appendChild(clearAction.getElement())
       }
 
       if (this.config.undoRedo) {
-        const undoRedoAction = new UndoRedoMenuAction(this.editor, this.id)
+        const undoRedoAction = new UndoRedoMenuAction(this.canvas, this.id)
         this.menuActions.set("undoRedo", undoRedoAction)
         this.wrapper.appendChild(undoRedoAction.getElement())
       }
 
       if (this.config.convert) {
-        const convertAction = new ConvertMenuAction(this.editor, this.id)
+        const convertAction = new ConvertMenuAction(this.canvas, this.id)
         this.menuActions.set("convert", convertAction)
         this.wrapper.appendChild(convertAction.getElement())
       }
 
       if (this.config.zoom) {
-        const zoomAction = new ZoomMenuAction(this.editor, this.id)
+        const zoomAction = new ZoomMenuAction(this.canvas, this.id)
         this.menuActions.set("zoom", zoomAction)
         this.wrapper.appendChild(zoomAction.getElement())
       }
 
       if (this.config.minimap) {
-        const minimapAction = new MinimapMenuAction(this.editor, layer, this.id)
+        const minimapAction = new MinimapMenuAction(this.canvas, layer, this.id)
         this.menuActions.set("minimap", minimapAction)
         this.wrapper.appendChild(minimapAction.getElement())
       }

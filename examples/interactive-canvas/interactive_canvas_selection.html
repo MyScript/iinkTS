@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Interactive Ink Canvas — Selection API</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        ◻ Guide
+      </button>
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">Selection API</h1>
+    </header>
+
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">Selection API</p>
+        <p class="ex-panel-intro">Select symbols programmatically and react to selection changes.</p>
+
+        <div class="ex-panel-divider"></div>
+
+        <p class="ex-panel-subtitle">◻ Selection methods</p>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">canvas.selectAll()</span></div>
+          <div class="ex-panel-item-desc">Select all symbols on the canvas. Emits the selected event.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">canvas.unselectAll()</span></div>
+          <div class="ex-panel-item-desc">Clear the current selection.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">canvas.select(ids)</span></div>
+          <div class="ex-panel-item-desc">Select specific symbols by their IDs. Pass an array of symbol ID strings.</div>
+        </div>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">canvas.model.symbolsSelected</span></div>
+          <div class="ex-panel-item-desc">Array of currently selected TIISymbol objects. Read-only — use select/selectAll to change it.</div>
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <p class="ex-panel-subtitle">📡 Selection event</p>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">selected</span></div>
+          <div class="ex-panel-item-desc">Fires when selection changes. Listen with <code>canvas.event.addSelectedListener(callback)</code>. Callback receives the array of selected symbols.</div>
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <p class="ex-panel-subtitle">🔍 Zoom to selection</p>
+
+        <div class="ex-panel-item">
+          <div><span class="ex-panel-item-label">canvas.zoomToFit(symbols)</span></div>
+          <div class="ex-panel-item-desc">Pass <code>canvas.model.symbolsSelected</code> to zoom the viewport to fit only the selected symbols.</div>
+        </div>
+
+        <div class="ex-panel-divider"></div>
+
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Switch to the Select tool (toolbar) to interactively select symbols. Then use the API buttons to manipulate the selection programmatically.</div>
+        </div>
+      </aside>
+
+      <div class="page-content">
+        <nav>
+          <button id="btn-select-all" class="classic-btn">Select All</button>
+          <button id="btn-unselect" class="classic-btn">Unselect</button>
+          <button id="btn-zoom-selection" class="classic-btn">Zoom to Selection</button>
+          <button id="btn-delete" class="classic-btn">Delete Selected</button>
+        </nav>
+        <div id="rootEl"></div>
+        <div id="result">
+          <span id="selection-info" style="font-size:13px;color:var(--ex-text)">No selection</span>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { Canvas } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
+
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      const rootElement = document.getElementById('rootEl')
+      const showModalBtn = document.getElementById('showModalBtn')
+      const selectionInfo = document.getElementById('selection-info')
+
+      let canvas
+
+      function updateSelectionInfo() {
+        if (!canvas) return
+        const count = canvas.model.symbolsSelected.length
+        const total = canvas.model.symbols.length
+        selectionInfo.textContent = count > 0
+          ? `${count} of ${total} symbol(s) selected`
+          : total > 0 ? `${total} symbol(s) — none selected` : 'No symbols'
+      }
+
+      document.getElementById('btn-select-all').addEventListener('click', () => {
+        canvas?.selectAll()
+      })
+
+      document.getElementById('btn-unselect').addEventListener('click', () => {
+        canvas?.unselectAll()
+      })
+
+      document.getElementById('btn-zoom-selection').addEventListener('click', () => {
+        if (!canvas) return
+        const selected = canvas.model.symbolsSelected
+        if (selected.length > 0) {
+          canvas.zoomToFit(selected)
+        } else {
+          canvas.zoomToFit()
+        }
+      })
+
+      document.getElementById('btn-delete').addEventListener('click', async () => {
+        if (!canvas || canvas.model.symbolsSelected.length === 0) return
+        await canvas.removeSymbols(canvas.model.symbolsSelected.map(s => s.id))
+        updateSelectionInfo()
+      })
+
+      const editorOptions = {}
+
+      async function loadEditor(options) {
+        await canvas?.destroy()
+        canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK', options)
+
+        canvas.event.addSelectedListener((symbols) => {
+          updateSelectionInfo()
+        })
+
+        canvas.event.addEventListener('changed', () => {
+          updateSelectionInfo()
+        })
+
+        updateSelectionInfo()
+        return canvas
+      }
+
+      showModalBtn.addEventListener('click', () => {
+        ModalCanvasOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>

@@ -1,4 +1,4 @@
-import { createEditorMock, asEditor } from "../../../__mocks__/createEditorMock"
+import { createCanvasMock, asEditor } from "../../../__mocks__/createCanvasMock"
 import { buildIIStroke } from "../../../helpers"
 import {
   DecoratorKind,
@@ -16,13 +16,13 @@ import {
 
 describe("IITranslateManager.ts", () => {
   test("should create", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IITranslateManager(asEditor(editor))
     expect(manager).toBeDefined()
   })
 
   describe("should applyToSymbol", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const manager = new IITranslateManager(asEditor(editor))
 
     test("translate stroke", () => {
@@ -70,11 +70,11 @@ describe("IITranslateManager.ts", () => {
   })
 
   describe("translate process on stroke without snap", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     editor.snaps.snapConfiguration.guide = false
     editor.snaps.snapConfiguration.symbol = false
-    editor.recognizer.init = jest.fn(() => Promise.resolve())
-    editor.recognizer.transformTranslate = jest.fn(() => Promise.resolve())
+    editor.client.init = jest.fn(() => Promise.resolve())
+    editor.client.transformTranslate = jest.fn(() => Promise.resolve())
     editor.renderer.setAttribute = jest.fn()
     editor.renderer.drawSymbol = jest.fn()
 
@@ -150,8 +150,8 @@ describe("IITranslateManager.ts", () => {
         expect(manager.applyToSymbol).toHaveBeenCalledTimes(1)
         expect(editor.renderer.drawSymbol).toHaveBeenCalledTimes(1)
         expect(editor.renderer.drawSymbol).toHaveBeenCalledWith(stroke)
-        expect(editor.recognizer.transformTranslate).toHaveBeenCalledTimes(1)
-        expect(editor.recognizer.transformTranslate).toHaveBeenCalledWith([stroke.id], data.tx, data.ty)
+        expect(editor.client.transformTranslate).toHaveBeenCalledTimes(1)
+        expect(editor.client.transformTranslate).toHaveBeenCalledWith([stroke.id], data.tx, data.ty)
         expect(stroke).not.toEqual(strokeNotTranslate)
       })
     })
@@ -174,7 +174,7 @@ describe("IITranslateManager.ts", () => {
     }
 
     test("continue() live-translates the block's ghost stroke element", () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       editor.math.getGhostStrokeIds = jest.fn().mockReturnValue(["ghost-1"])
       editor.renderer.setAttribute = jest.fn()
       const manager = new IITranslateManager(asEditor(editor))
@@ -189,7 +189,7 @@ describe("IITranslateManager.ts", () => {
     })
 
     test("translate() permanently applies the matrix to the block's ghost strokes", async () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       editor.math.applyTransformToGhostStrokes = jest.fn()
       const manager = new IITranslateManager(asEditor(editor))
       const stroke = buildMathStroke("block-1")
@@ -203,7 +203,7 @@ describe("IITranslateManager.ts", () => {
 
   describe("standalone decorator bounds follow translated targets", () => {
     test("translate() recomputes the decorator's bounds from its (moved) target symbols", async () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const manager = new IITranslateManager(asEditor(editor))
 
       const stroke = buildIIStroke()
@@ -220,7 +220,7 @@ describe("IITranslateManager.ts", () => {
     })
 
     test("translate() leaves other decorators (not targeting a moved symbol) untouched", async () => {
-      const editor = createEditorMock()
+      const editor = createCanvasMock()
       const manager = new IITranslateManager(asEditor(editor))
 
       const movedStroke = buildIIStroke()

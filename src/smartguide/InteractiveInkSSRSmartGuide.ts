@@ -1,8 +1,8 @@
-import type { InteractiveInkSSREditor } from "@/editor"
+import type { InteractiveInkSSRCanvas } from "@/canvas"
+import type { TMarginConfiguration } from "@/client"
 import { LoggerCategory, LoggerManager } from "@/logger"
 import type { TJIIXExport, TJIIXWord } from "@/model"
 import { ExportType } from "@/model"
-import type { TMarginConfiguration } from "@/recognizer"
 import { convertMillimeterToPixel, createUUID } from "@/utils"
 
 import style from "./InteractiveInkSSRSmartGuide.css"
@@ -24,17 +24,17 @@ export class InteractiveInkSSRSmartGuide {
   #copyElement!: HTMLButtonElement
   #deleteElement!: HTMLButtonElement
   #isMenuOpen!: boolean
-  editor: InteractiveInkSSREditor
+  canvas: InteractiveInkSSRCanvas
   margin: TMarginConfiguration
   jiix?: TJIIXExport
   lastWord?: TJIIXWord
   wordToChange?: TJIIXWord
   #logger = LoggerManager.getLogger(LoggerCategory.SMARTGUIDE)
 
-  constructor(editor: InteractiveInkSSREditor) {
+  constructor(canvas: InteractiveInkSSRCanvas) {
     this.#logger.info("constructor")
     this.uuid = createUUID()
-    this.editor = editor
+    this.canvas = canvas
     this.margin = {
       bottom: 0,
       left: 0,
@@ -217,7 +217,7 @@ export class InteractiveInkSSRSmartGuide {
     this.#logger.info("onClickConvert", { evt })
     evt.preventDefault()
     evt.stopPropagation()
-    this.editor.convert()
+    this.canvas.convert()
     this.#closeMenu()
   }
 
@@ -264,13 +264,13 @@ export class InteractiveInkSSRSmartGuide {
         document.execCommand("copy")
         fakeEl.remove()
       }
-      this.editor.event.emitNotif({
+      this.canvas.event.emitNotif({
         message,
         timeout: 1500,
       })
     } catch (error) {
       this.#logger.error("onClickCopy", error)
-      this.editor.event.emitError(error as Error)
+      this.canvas.event.emitError(error as Error)
     }
   }
 
@@ -278,7 +278,7 @@ export class InteractiveInkSSRSmartGuide {
     this.#logger.info("onClickDelete", { evt })
     evt.preventDefault()
     evt.stopPropagation()
-    this.editor.clear()
+    this.canvas.clear()
     this.#closeMenu()
   }
 
@@ -294,7 +294,7 @@ export class InteractiveInkSSRSmartGuide {
       this.wordToChange?.candidates?.includes(candidate)
     ) {
       this.jiix.words[parseInt(this.wordToChange?.id as string)].label = candidate
-      this.editor.import(
+      this.canvas.import(
         new Blob([JSON.stringify(this.jiix)], {
           type: ExportType.JIIX,
         }),

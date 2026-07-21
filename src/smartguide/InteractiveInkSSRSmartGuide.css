@@ -1,4 +1,4 @@
-.ms-editor .smartguide {
+.ms-ink .smartguide {
   position: absolute;
   z-index: 40;
   font-size: 16px;
@@ -13,12 +13,12 @@
   background-color: white;
 }
 
-.ms-editor .smartguide .smartguide-wrapper {
+.ms-ink .smartguide .smartguide-wrapper {
   display: flex;
   border-bottom: 1px solid #959da6;
 }
 
-.ms-editor .smartguide .tag-icon {
+.ms-ink .smartguide .tag-icon {
   padding: 0 18px;
   border-left: 1px solid #959da6;
   border-top: 1px solid #959da6;
@@ -38,7 +38,7 @@
   color: #959da6;
 }
 
-.ms-editor .smartguide .ellipsis {
+.ms-ink .smartguide .ellipsis {
   cursor: pointer;
   height: 48px;
   width: 48px;
@@ -54,11 +54,11 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.ms-editor .smartguide .ellipsis:active {
+.ms-ink .smartguide .ellipsis:active {
   background-color: #e0e0e0;
 }
 
-.ms-editor .smartguide .prompter-container {
+.ms-ink .smartguide .prompter-container {
   height: 48px;
   width: calc(100% - 96px);
   line-height: 48px;
@@ -74,28 +74,28 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.ms-editor .smartguide .prompter-container > div > span {
+.ms-ink .smartguide .prompter-container > div > span {
   cursor: pointer;
   display: inline-block;
 }
 
-.ms-editor .smartguide .prompter-container .prompter-text {
+.ms-ink .smartguide .prompter-container .prompter-text {
   margin-left: 12px;
 }
 
-.ms-editor .smartguide .prompter-container .prompter-text .added-word {
+.ms-ink .smartguide .prompter-container .prompter-text .added-word {
   animation:
     0.1s linear word-added,
     3s ease-in-out color-input;
 }
 
-.ms-editor .smartguide .prompter-container .prompter-text .modified-word {
+.ms-ink .smartguide .prompter-container .prompter-text .modified-word {
   animation:
     0.1s linear word-modified,
     3s ease-in-out color-input;
 }
 
-.ms-editor .smartguide .candidates {
+.ms-ink .smartguide .candidates {
   z-index: 100;
   position: absolute;
   color: black;
@@ -110,25 +110,25 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.ms-editor .smartguide .candidates > span {
+.ms-ink .smartguide .candidates > span {
   cursor: pointer;
   padding: 2px 20px;
 }
 
-.ms-editor .smartguide .candidates > span:hover {
+.ms-ink .smartguide .candidates > span:hover {
   background-color: #eeeeee;
 }
 
-.ms-editor .smartguide .candidates > span:active {
+.ms-ink .smartguide .candidates > span:active {
   background-color: #e0e0e0;
 }
 
-.ms-editor .smartguide .candidates .selected-word {
+.ms-ink .smartguide .candidates .selected-word {
   font-weight: bold;
   background-color: #e0e0e0;
 }
 
-.ms-editor .smartguide .more-menu {
+.ms-ink .smartguide .more-menu {
   display: flex;
   flex-direction: column;
   margin-right: 12px;
@@ -148,19 +148,19 @@
   transform: translateY(100%);
 }
 
-.ms-editor .smartguide .more-menu.open {
+.ms-ink .smartguide .more-menu.open {
   max-height: 500px;
   visibility: visible;
   opacity: 1;
 }
 
-.ms-editor .smartguide .more-menu.close {
+.ms-ink .smartguide .more-menu.close {
   max-height: 0;
   visibility: hidden;
   opacity: 0;
 }
 
-.ms-editor .smartguide .more-menu .options-label-button {
+.ms-ink .smartguide .more-menu .options-label-button {
   color: black;
   font-size: 16px;
   cursor: pointer;
@@ -174,12 +174,12 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.ms-editor .smartguide .more-menu .options-label-button:hover {
+.ms-ink .smartguide .more-menu .options-label-button:hover {
   background-color: #eeeeee;
   padding: 4px;
 }
 
-.ms-editor .smartguide .more-menu .options-label-button:active {
+.ms-ink .smartguide .more-menu .options-label-button:active {
   background-color: #e0e0e0;
 }
 

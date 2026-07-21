@@ -1,5 +1,5 @@
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { SvgElementRole } from "@/Constants"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
 import { LoggerCategory } from "@/logger"
 import type { TEdge, TMath, TPoint, TShape, TStroke, TSymbol, TText } from "@/symbol"
 import { isDecorator, isStroke, SymbolType } from "@/symbol"
@@ -17,8 +17,8 @@ export abstract class IIAbstractTransformManager extends IIAbstractManager {
   protected abstract transformName: string
   interactElementsGroup?: SVGElement
 
-  constructor(editor: TInteractiveInkEditor) {
-    super(editor, LoggerCategory.TRANSFORMER)
+  constructor(canvas: TInteractiveInkCanvas) {
+    super(canvas, LoggerCategory.TRANSFORMER)
   }
 
   protected applyMatrixToPoints(points: TPoint[], matrix: MatrixTransform): void {
@@ -30,7 +30,7 @@ export abstract class IIAbstractTransformManager extends IIAbstractManager {
   }
 
   setTransformOrigin(id: string, originX: number, originY: number): void {
-    this.editor.renderer.setAttribute(id, "transform-origin", `${originX}px ${originY}px`)
+    this.canvas.renderer.setAttribute(id, "transform-origin", `${originX}px ${originY}px`)
   }
 
   protected resolveInteractGroup(target: Element): SVGGElement {
@@ -40,7 +40,7 @@ export abstract class IIAbstractTransformManager extends IIAbstractManager {
   protected applyAndDraw(symbols: TSymbol[], matrix: MatrixTransform): void {
     symbols.forEach((s) => {
       this.applyToSymbol(s, matrix)
-      this.editor.renderer.drawSymbol(s)
+      this.canvas.renderer.drawSymbol(s)
       this.model.updateSymbol(s)
     })
     this.updateDecoratorsForTargets(symbols)
@@ -62,15 +62,15 @@ export abstract class IIAbstractTransformManager extends IIAbstractManager {
       if (targetSyms.length) {
         DecoratorOps.setBounds(sym, OBBOps.createFromOBBs(targetSyms.map((s) => s.bounds)))
         this.model.updateSymbol(sym)
-        this.editor.renderer.drawSymbol(sym)
+        this.canvas.renderer.drawSymbol(sym)
       }
     })
   }
 
   protected finalizeTransform(): void {
     this.interactElementsGroup = undefined
-    this.editor.overlays.apply()
-    this.editor.selector.drawSelectedGroup(this.editor.model.symbolsSelected)
+    this.canvas.overlays.apply()
+    this.canvas.selector.drawSelectedGroup(this.canvas.model.symbolsSelected)
   }
 
   private getSelectedMathBlockIds(symbols: TSymbol[]): Set<string> {
@@ -90,7 +90,7 @@ export abstract class IIAbstractTransformManager extends IIAbstractManager {
   protected getGhostStrokeIdsForSelectedMath(symbols: TSymbol[]): string[] {
     const ids: string[] = []
     this.getSelectedMathBlockIds(symbols).forEach((id) => {
-      ids.push(...(this.editor.math.getGhostStrokeIds(id) ?? []))
+      ids.push(...(this.canvas.math.getGhostStrokeIds(id) ?? []))
     })
     return ids
   }
@@ -101,7 +101,7 @@ export abstract class IIAbstractTransformManager extends IIAbstractManager {
    */
   protected applyTransformToGhostStrokesForSelectedMath(symbols: TSymbol[], matrix: MatrixTransform): void {
     this.getSelectedMathBlockIds(symbols).forEach((id) => {
-      this.editor.math.applyTransformToGhostStrokes(id, matrix)
+      this.canvas.math.applyTransformToGhostStrokes(id, matrix)
     })
   }
 

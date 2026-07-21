@@ -1,5 +1,5 @@
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { DOMFactory } from "@/components/dom"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
 import { LoggerCategory, LoggerManager } from "@/logger"
 
 import type { BaseMenuItem } from "./items"
@@ -40,7 +40,7 @@ export const DefaultMenuToolConfig: Required<TMenuToolConfig> = {
 export class IIMenuTool {
   #logger = LoggerManager.getLogger(LoggerCategory.MENU)
 
-  editor: TInteractiveInkEditor
+  canvas: TInteractiveInkCanvas
   id: string
   wrapper?: HTMLDivElement
   config: Required<TMenuToolConfig>
@@ -48,10 +48,10 @@ export class IIMenuTool {
   // Instances des classes d'outils
   private menuTools: Map<string, BaseMenuItem> = new Map()
 
-  constructor(editor: TInteractiveInkEditor, id = "ms-menu-tool", config?: TMenuToolConfig) {
+  constructor(canvas: TInteractiveInkCanvas, id = "ms-menu-tool", config?: TMenuToolConfig) {
     this.id = id
     this.#logger.info("constructor")
-    this.editor = editor
+    this.canvas = canvas
     this.config = {
       ...DefaultMenuToolConfig,
       ...config,
@@ -59,7 +59,7 @@ export class IIMenuTool {
   }
 
   render(layer: HTMLElement): void {
-    if (this.editor.configuration.menu.tool.enable) {
+    if (this.canvas.configuration.menu.tool.enable) {
       this.#logger.info("Rendering menu tools with config", this.config)
 
       this.wrapper = DOMFactory.div({
@@ -68,37 +68,37 @@ export class IIMenuTool {
 
       // Ajouter les outils conditionnellement
       if (this.config.write) {
-        const writeTool = new WriteTool(this.editor, this.id)
+        const writeTool = new WriteTool(this.canvas, this.id)
         this.menuTools.set("write", writeTool)
         this.wrapper.appendChild(writeTool.getElement())
       }
 
       if (this.config.move) {
-        const moveTool = new MoveTool(this.editor, this.id)
+        const moveTool = new MoveTool(this.canvas, this.id)
         this.menuTools.set("move", moveTool)
         this.wrapper.appendChild(moveTool.getElement())
       }
 
       if (this.config.select) {
-        const selectTool = new SelectTool(this.editor, this.id)
+        const selectTool = new SelectTool(this.canvas, this.id)
         this.menuTools.set("select", selectTool)
         this.wrapper.appendChild(selectTool.getElement())
       }
 
       if (this.config.erase) {
-        const eraseTool = new EraseTool(this.editor, this.id)
+        const eraseTool = new EraseTool(this.canvas, this.id)
         this.menuTools.set("erase", eraseTool)
         this.wrapper.appendChild(eraseTool.getElement())
       }
 
       if (this.config.edge) {
-        const edgeTool = new EdgeTool(this.editor, this.id)
+        const edgeTool = new EdgeTool(this.canvas, this.id)
         this.menuTools.set("edge", edgeTool)
         this.wrapper.appendChild(edgeTool.getElement())
       }
 
       if (this.config.shape) {
-        const shapeTool = new ShapeTool(this.editor, this.id)
+        const shapeTool = new ShapeTool(this.canvas, this.id)
         this.menuTools.set("shape", shapeTool)
         this.wrapper.appendChild(shapeTool.getElement())
       }

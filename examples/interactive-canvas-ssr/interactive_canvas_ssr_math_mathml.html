@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+    <title>Interactive Canvas SSR Math MathML</title>
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <style>
+      #result {
+        display: flex;
+        gap: 1rem;
+        padding: 0;
+      }
+
+      #result-rendered,
+      #result-text {
+        flex: 1;
+        min-width: 0;
+      }
+
+      #result-rendered {
+        height: var(--ex-result-height);
+        overflow: auto;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #d7dde3;
+        border-radius: 4px;
+        padding: 1rem;
+        background: #fff;
+      }
+
+      #result-text {
+        height: var(--ex-result-height);
+        overflow: auto;
+        text-align: left;
+        border: 1px solid #d7dde3;
+        border-radius: 4px;
+        background: #f8f9fa;
+        overflow: auto;
+        padding: 0.75rem;
+        font-family: monospace;
+        font-size: 12px;
+        white-space: pre-wrap;
+        word-break: break-all;
+        color: #333;
+      }
+    </style>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="showModalBtn" class="btn-keys">
+        API Keys
+      </button>
+      <h1 class="header-title">
+        Interactive Canvas SSR Math MathML
+      </h1>
+    </header>
+
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">∑ Handwritten math recognition — MathML export</p>
+        <p class="ex-panel-intro">Write any mathematical expression — fractions, integrals, square roots, Greek letters, matrices, sums, limits… The engine recognizes a broad range of standard notation.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">The recognized expression is exported as <strong>MathML</strong> (<code>application/mathml+xml</code>) with the <code>standard</code> flavor, making it directly compatible with Microsoft Office, LibreOffice, and any MathML-aware renderer.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">The result panel shows both views side by side: <strong>rendered MathML</strong> on the left (native browser) and the <strong>raw MathML markup</strong> on the right for copy-paste into your application.</div>
+        </div>
+      </aside>
+
+      <div class="page-content">
+        <div class="flex-container between gap">
+          <div id="result-rendered"></div>
+          <pre id="result-text"></pre>
+        </div>
+
+        <div id="rootEl"></div>
+      </div>
+    </div>
+
+    <script type="module">
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      import { Canvas } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
+      const rootElement = document.getElementById('rootEl')
+      const resultElement = document.getElementById('result')
+      const resultRendered = document.getElementById('result-rendered')
+      const resultText = document.getElementById('result-text')
+      const showModalBtn = document.getElementById('showModalBtn')
+
+      let canvas
+
+      const editorOptions = {
+        configuration: {
+          recognition: {
+            type: 'MATH',
+            math: {
+              mimeTypes: ['application/mathml+xml']
+            },
+            export: {
+              mathml: {
+                flavor: 'standard' // can be 'standard' or 'ms-office'
+              }
+            }
+          }
+        }
+      }
+
+
+      const renderMathML = (mathml) => {
+        resultRendered.innerHTML = mathml
+        resultText.textContent = mathml
+      }
+
+      async function loadEditor(options) {
+        await canvas?.destroy()
+        resultRendered.innerHTML = ''
+        resultText.textContent = ''
+        canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK_SSR', options)
+
+        canvas.event.addEventListener('exported', (evt) => {
+          const exports = evt.detail
+          if (exports && exports['application/mathml+xml']) {
+            renderMathML(exports['application/mathml+xml'])
+          } else {
+            resultRendered.innerHTML = ''
+            resultText.textContent = ''
+          }
+        })
+      }
+
+      showModalBtn.addEventListener('click', () => {
+        ModalCanvasOptions.show(loadEditor, editorOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+
+      window.editorOptions = editorOptions
+      window.loadEditor = loadEditor
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>

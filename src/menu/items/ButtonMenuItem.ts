@@ -1,4 +1,4 @@
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 
 import type { TMenuItemBase } from "./BaseMenuItem"
 import { BaseMenuItem } from "./BaseMenuItem"
@@ -10,7 +10,7 @@ import { BaseMenuItem } from "./BaseMenuItem"
 export type TMenuButton = TMenuItemBase & {
   type: "button"
   icon?: string
-  action: (editor: TInteractiveInkEditor) => void | Promise<void>
+  action: (canvas: TInteractiveInkCanvas) => void | Promise<void>
 }
 
 /**
@@ -36,12 +36,12 @@ export class ButtonMenuItem extends BaseMenuItem<HTMLButtonElement> {
 
     button.addEventListener("pointerup", async () => {
       this.logger.info(`${this.config.id}.click`)
-      await this.config.action(this.editor)
+      await this.config.action(this.canvas)
     })
 
     // Apply initial disabled state
     if (typeof this.config.disabled === "function") {
-      button.disabled = this.config.disabled(this.editor)
+      button.disabled = this.config.disabled(this.canvas)
     } else if (this.config.disabled) {
       button.disabled = true
     }

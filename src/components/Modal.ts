@@ -6,28 +6,28 @@ export type TModalType = "info" | "success" | "warning" | "error" | "primary"
 
 const MODAL_TYPE_STYLE: Record<TModalType, { bg: string; color: string; icon: string }> = {
   info: {
-    bg: "color-mix(in srgb, var(--iink-info) 14%, var(--iink-editor-bg))",
-    color: "var(--iink-info)",
+    bg: "color-mix(in srgb, var(--ms-ink-info) 14%, var(--ms-ink-canvas-bg))",
+    color: "var(--ms-ink-info)",
     icon: "ℹ",
   },
   success: {
-    bg: "color-mix(in srgb, var(--iink-success) 14%, var(--iink-editor-bg))",
-    color: "var(--iink-success)",
+    bg: "color-mix(in srgb, var(--ms-ink-success) 14%, var(--ms-ink-canvas-bg))",
+    color: "var(--ms-ink-success)",
     icon: "✓",
   },
   warning: {
-    bg: "color-mix(in srgb, var(--iink-warning) 14%, var(--iink-editor-bg))",
-    color: "var(--iink-warning)",
+    bg: "color-mix(in srgb, var(--ms-ink-warning) 14%, var(--ms-ink-canvas-bg))",
+    color: "var(--ms-ink-warning)",
     icon: "⚠",
   },
   error: {
-    bg: "color-mix(in srgb, var(--iink-error) 14%, var(--iink-editor-bg))",
-    color: "var(--iink-error)",
+    bg: "color-mix(in srgb, var(--ms-ink-error) 14%, var(--ms-ink-canvas-bg))",
+    color: "var(--ms-ink-error)",
     icon: "✗",
   },
   primary: {
-    bg: "color-mix(in srgb, var(--iink-primary) 14%, var(--iink-editor-bg))",
-    color: "var(--iink-primary)",
+    bg: "color-mix(in srgb, var(--ms-ink-primary) 14%, var(--ms-ink-canvas-bg))",
+    color: "var(--ms-ink-primary)",
     icon: "",
   },
 }
@@ -39,8 +39,8 @@ function getModalTitleStyle(type?: TModalType): {
 } {
   if (!type) {
     return {
-      bg: "var(--iink-editor-bg)",
-      color: "var(--iink-color)",
+      bg: "var(--ms-ink-canvas-bg)",
+      color: "var(--ms-ink-color)",
       icon: "",
     }
   }

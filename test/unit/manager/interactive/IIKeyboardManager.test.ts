@@ -1,4 +1,4 @@
-import { IIKeyboardManager, InteractiveInkEditor, EditorTool } from "@/iink"
+import { IIKeyboardManager, InteractiveInkCanvas, CanvasTool } from "@/iink"
 
 describe("IIKeyboardManager", () => {
   let manager: IIKeyboardManager
@@ -6,7 +6,7 @@ describe("IIKeyboardManager", () => {
 
   beforeEach(() => {
     mockEditor = {
-      tool: EditorTool.Write,
+      tool: CanvasTool.Write,
       model: { symbolsSelected: [] },
       copy: jest.fn(),
       paste: jest.fn(() => Promise.resolve()),
@@ -26,7 +26,7 @@ describe("IIKeyboardManager", () => {
       },
     }
 
-    manager = new IIKeyboardManager(mockEditor as InteractiveInkEditor)
+    manager = new IIKeyboardManager(mockEditor as InteractiveInkCanvas)
   })
 
   afterEach(() => {
@@ -67,43 +67,43 @@ describe("IIKeyboardManager", () => {
       const event = new KeyboardEvent("keydown", { ctrlKey: true })
       window.dispatchEvent(event)
 
-      expect(mockEditor.tool).toBe(EditorTool.Move)
+      expect(mockEditor.tool).toBe(CanvasTool.Move)
     })
 
     it("should switch to Move tool when Meta (Cmd) is pressed", () => {
       const event = new KeyboardEvent("keydown", { metaKey: true })
       window.dispatchEvent(event)
 
-      expect(mockEditor.tool).toBe(EditorTool.Move)
+      expect(mockEditor.tool).toBe(CanvasTool.Move)
     })
 
     it("should not switch if already in Move mode", () => {
-      mockEditor.tool = EditorTool.Move
+      mockEditor.tool = CanvasTool.Move
 
       const event = new KeyboardEvent("keydown", { ctrlKey: true })
       window.dispatchEvent(event)
 
-      expect(mockEditor.tool).toBe(EditorTool.Move)
+      expect(mockEditor.tool).toBe(CanvasTool.Move)
     })
 
     it("should not switch to Move when symbols are selected", () => {
-      mockEditor.tool = EditorTool.Select
+      mockEditor.tool = CanvasTool.Select
       mockEditor.model.symbolsSelected = [{ id: "sym-1" }]
 
       const event = new KeyboardEvent("keydown", { ctrlKey: true })
       window.dispatchEvent(event)
 
-      expect(mockEditor.tool).toBe(EditorTool.Select)
+      expect(mockEditor.tool).toBe(CanvasTool.Select)
     })
 
     it("should switch to Move when Ctrl pressed and no selection", () => {
-      mockEditor.tool = EditorTool.Write
+      mockEditor.tool = CanvasTool.Write
       mockEditor.model.symbolsSelected = []
 
       const event = new KeyboardEvent("keydown", { ctrlKey: true })
       window.dispatchEvent(event)
 
-      expect(mockEditor.tool).toBe(EditorTool.Move)
+      expect(mockEditor.tool).toBe(CanvasTool.Move)
     })
 
     it("should ignore keydown in INPUT elements", () => {
@@ -115,7 +115,7 @@ describe("IIKeyboardManager", () => {
 
       input.dispatchEvent(event)
 
-      expect(mockEditor.tool).toBe(EditorTool.Write)
+      expect(mockEditor.tool).toBe(CanvasTool.Write)
 
       document.body.removeChild(input)
     })
@@ -129,7 +129,7 @@ describe("IIKeyboardManager", () => {
 
       textarea.dispatchEvent(event)
 
-      expect(mockEditor.tool).toBe(EditorTool.Write)
+      expect(mockEditor.tool).toBe(CanvasTool.Write)
 
       document.body.removeChild(textarea)
     })
@@ -141,42 +141,42 @@ describe("IIKeyboardManager", () => {
     })
 
     it("should restore previous tool when Ctrl is released", () => {
-      mockEditor.tool = EditorTool.Select
+      mockEditor.tool = CanvasTool.Select
 
       // Press Ctrl to switch to Move
       const keydownEvent = new KeyboardEvent("keydown", { ctrlKey: true })
       window.dispatchEvent(keydownEvent)
-      expect(mockEditor.tool).toBe(EditorTool.Move)
+      expect(mockEditor.tool).toBe(CanvasTool.Move)
 
       // Release Ctrl to restore previous tool
       const keyupEvent = new KeyboardEvent("keyup", { ctrlKey: false })
       window.dispatchEvent(keyupEvent)
 
-      expect(mockEditor.tool).toBe(EditorTool.Select)
+      expect(mockEditor.tool).toBe(CanvasTool.Select)
     })
 
     it("should restore previous tool when Meta is released", () => {
-      mockEditor.tool = EditorTool.Erase
+      mockEditor.tool = CanvasTool.Erase
 
       // Press Meta to switch to Move
       const keydownEvent = new KeyboardEvent("keydown", { metaKey: true })
       window.dispatchEvent(keydownEvent)
-      expect(mockEditor.tool).toBe(EditorTool.Move)
+      expect(mockEditor.tool).toBe(CanvasTool.Move)
 
       // Release Meta to restore previous tool
       const keyupEvent = new KeyboardEvent("keyup", { metaKey: false })
       window.dispatchEvent(keyupEvent)
 
-      expect(mockEditor.tool).toBe(EditorTool.Erase)
+      expect(mockEditor.tool).toBe(CanvasTool.Erase)
     })
 
     it("should not restore tool if Ctrl was not pressed", () => {
-      mockEditor.tool = EditorTool.Write
+      mockEditor.tool = CanvasTool.Write
 
       const event = new KeyboardEvent("keyup", { ctrlKey: false })
       window.dispatchEvent(event)
 
-      expect(mockEditor.tool).toBe(EditorTool.Write)
+      expect(mockEditor.tool).toBe(CanvasTool.Write)
     })
   })
 
@@ -184,38 +184,38 @@ describe("IIKeyboardManager", () => {
     it("should handle complete Ctrl+Move flow", () => {
       manager.attach()
 
-      mockEditor.tool = EditorTool.Write
+      mockEditor.tool = CanvasTool.Write
 
       // Press Ctrl
       const keydown = new KeyboardEvent("keydown", { ctrlKey: true })
       window.dispatchEvent(keydown)
-      expect(mockEditor.tool).toBe(EditorTool.Move)
+      expect(mockEditor.tool).toBe(CanvasTool.Move)
 
       // Release Ctrl
       const keyup = new KeyboardEvent("keyup", { ctrlKey: false })
       window.dispatchEvent(keyup)
-      expect(mockEditor.tool).toBe(EditorTool.Write)
+      expect(mockEditor.tool).toBe(CanvasTool.Write)
     })
 
     it("should not switch twice if Ctrl is pressed multiple times", () => {
       manager.attach()
 
-      mockEditor.tool = EditorTool.Select
+      mockEditor.tool = CanvasTool.Select
 
       // First Ctrl press
       const keydown1 = new KeyboardEvent("keydown", { ctrlKey: true })
       window.dispatchEvent(keydown1)
-      expect(mockEditor.tool).toBe(EditorTool.Move)
+      expect(mockEditor.tool).toBe(CanvasTool.Move)
 
       // Second Ctrl press (holding)
       const keydown2 = new KeyboardEvent("keydown", { ctrlKey: true })
       window.dispatchEvent(keydown2)
-      expect(mockEditor.tool).toBe(EditorTool.Move)
+      expect(mockEditor.tool).toBe(CanvasTool.Move)
 
       // Release Ctrl
       const keyup = new KeyboardEvent("keyup", { ctrlKey: false })
       window.dispatchEvent(keyup)
-      expect(mockEditor.tool).toBe(EditorTool.Select)
+      expect(mockEditor.tool).toBe(CanvasTool.Select)
     })
   })
 
@@ -257,10 +257,10 @@ describe("IIKeyboardManager", () => {
     })
 
     it("should NOT switch to Move tool on Ctrl+Z", () => {
-      mockEditor.tool = EditorTool.Write
+      mockEditor.tool = CanvasTool.Write
       const event = new KeyboardEvent("keydown", { ctrlKey: true, key: "z" })
       window.dispatchEvent(event)
-      expect(mockEditor.tool).toBe(EditorTool.Write)
+      expect(mockEditor.tool).toBe(CanvasTool.Write)
     })
   })
 
@@ -294,26 +294,26 @@ describe("IIKeyboardManager", () => {
     })
 
     it("should NOT switch to Move tool on Ctrl+C", () => {
-      mockEditor.tool = EditorTool.Write
+      mockEditor.tool = CanvasTool.Write
       const event = new KeyboardEvent("keydown", { ctrlKey: true, key: "c" })
       window.dispatchEvent(event)
-      expect(mockEditor.tool).toBe(EditorTool.Write)
+      expect(mockEditor.tool).toBe(CanvasTool.Write)
     })
 
     it("should switch to Select tool on Ctrl+V and not restore previous tool on keyup", () => {
-      mockEditor.tool = EditorTool.Write
+      mockEditor.tool = CanvasTool.Write
 
       // Ctrl held → Move
       window.dispatchEvent(new KeyboardEvent("keydown", { ctrlKey: true }))
-      expect(mockEditor.tool).toBe(EditorTool.Move)
+      expect(mockEditor.tool).toBe(CanvasTool.Move)
 
       // Ctrl+V → Select immediately, clears #toolBeforeCtrl
       window.dispatchEvent(new KeyboardEvent("keydown", { ctrlKey: true, key: "v" }))
-      expect(mockEditor.tool).toBe(EditorTool.Select)
+      expect(mockEditor.tool).toBe(CanvasTool.Select)
 
       // Ctrl released → #toolBeforeCtrl is cleared → no restore
       window.dispatchEvent(new KeyboardEvent("keyup", { ctrlKey: false }))
-      expect(mockEditor.tool).toBe(EditorTool.Select)
+      expect(mockEditor.tool).toBe(CanvasTool.Select)
     })
   })
 

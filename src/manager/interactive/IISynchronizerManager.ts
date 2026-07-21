@@ -1,5 +1,5 @@
-import { EditorTool } from "@/Constants"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
+import { CanvasTool } from "@/Constants"
 import { LoggerCategory } from "@/logger"
 import type {
   TJIIXEdgeElement,
@@ -39,8 +39,8 @@ export class IISynchronizerManager extends IIAbstractManager {
    * document doesn't block the main thread (and pending pointer input) in one go. */
   static readonly SYNC_YIELD_CHUNK_SIZE = 50
 
-  constructor(editor: TInteractiveInkEditor) {
-    super(editor, LoggerCategory.SYNCHRONIZER)
+  constructor(canvas: TInteractiveInkCanvas) {
+    super(canvas, LoggerCategory.SYNCHRONIZER)
     this.logger.info("constructor", "IISynchronizerManager")
   }
 
@@ -52,12 +52,12 @@ export class IISynchronizerManager extends IIAbstractManager {
       return
     }
 
-    this.#synchronizePromise = this.editor.trackOperation("Synchronizing", async () => this.#syncLoop())
+    this.#synchronizePromise = this.canvas.trackOperation("Synchronizing", async () => this.#syncLoop())
 
     try {
       await this.#synchronizePromise
-      if (this.editor.tool === EditorTool.Select) {
-        this.editor.menu.context.update()
+      if (this.canvas.tool === CanvasTool.Select) {
+        this.canvas.menu.context.update()
       }
     } finally {
       this.#synchronizePromise = undefined
@@ -113,7 +113,7 @@ export class IISynchronizerManager extends IIAbstractManager {
 
   /** Resolves once no stroke is being actively drawn — writing always wins over sync. */
   async #waitForWriteIdle(): Promise<void> {
-    while (this.editor.writer.currentSymbol) {
+    while (this.canvas.writer.currentSymbol) {
       await new Promise((resolve) => requestAnimationFrame(resolve))
     }
   }
@@ -136,8 +136,8 @@ export class IISynchronizerManager extends IIAbstractManager {
     await this.#waitForWriteIdle()
 
     try {
-      await this.editor.export(["application/vnd.myscript.jiix"])
-      this.editor.history.update(this.model)
+      await this.canvas.export(["application/vnd.myscript.jiix"])
+      this.canvas.history.update(this.model)
     } catch (error) {
       this.logger.error("#doSynchronize", "Failed to export JIIX:", error)
       throw error
@@ -169,7 +169,7 @@ export class IISynchronizerManager extends IIAbstractManager {
             this.#updateBlockMetadata(stroke, el)
 
             if (el.type === JIIXElementType.Text) {
-              this.editor.jiix.updateTextMetadata(stroke, el)
+              this.canvas.jiix.updateTextMetadata(stroke, el)
             }
 
             stroke.modificationDate = now
@@ -202,7 +202,7 @@ export class IISynchronizerManager extends IIAbstractManager {
           setTimeout(() => reject(new Error(`enrichMathDependencies timeout for "${blockId}"`)), ENRICH_TIMEOUT_MS)
         )
         try {
-          await Promise.race([this.editor.math.enrichMathDependencies(blockId), timeout])
+          await Promise.race([this.canvas.math.enrichMathDependencies(blockId), timeout])
         } catch (err) {
           this.logger.error("synchronize", "Error enriching math dependencies:", err)
         }
@@ -211,20 +211,20 @@ export class IISynchronizerManager extends IIAbstractManager {
 
     // Cleanup invalid math dependencies
     try {
-      this.editor.math.cleanupMathDependencies(mathBlockIds)
+      this.canvas.math.cleanupMathDependencies(mathBlockIds)
     } catch (error) {
       this.logger.error("#doSynchronize", "Failed to cleanup math dependencies:", error)
     }
 
     // Refresh math overlays
     try {
-      this.editor.overlays.refresh()
+      this.canvas.overlays.refresh()
     } catch (error) {
       this.logger.error("#doSynchronize", "Failed to refresh math overlays:", error)
     }
-    this.editor.history.update(this.model)
+    this.canvas.history.update(this.model)
 
-    this.editor.event.emitSynchronized()
+    this.canvas.event.emitSynchronized()
   }
 
   /**

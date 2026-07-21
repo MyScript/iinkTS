@@ -17,12 +17,12 @@ export const writePointers = async (
   offsetTop = 0,
   offsetLeft = 0
 ) => {
-  const editorEl = page.locator("#editorEl")
-  const editorExist = (await editorEl.count()) != 0
+  const rootEl = page.locator("#rootEl")
+  const editorExist = (await rootEl.count()) != 0
   let offsetX = 0
   let offsetY = 0
   if (editorExist) {
-    const boundingBox = await editorEl.evaluate((node) =>
+    const boundingBox = await rootEl.evaluate((node) =>
       node.getBoundingClientRect()
     )
     offsetX = offsetLeft + boundingBox.x
@@ -161,17 +161,17 @@ export const getExportedResults = async (
  * @returns Promise<Object>
  */
 export const getEditorConfiguration = async (page) => {
-  await page.waitForFunction(() => !!editorEl?.editor)
-  return page.evaluate("editorEl.editor.configuration")
+  await page.waitForFunction(() => !!rootEl?.iink)
+  return page.evaluate("rootEl.iink.configuration")
 }
 
 /**
  * @param {Page} page - Playwright Page
- * @param {Object} options - Editor options
+ * @param {Object} options - Canvas options
  * @returns Promise<void>
  */
 export const loadEditor = async (page, options) => {
-  await page.waitForFunction(() => !!editorEl?.editor)
+  await page.waitForFunction(() => !!rootEl?.iink)
   return page.evaluate(
     `(async () => await loadEditor(${JSON.stringify(options)}))()`
   )
@@ -182,41 +182,41 @@ export const loadEditor = async (page, options) => {
  * @returns Promise<TExport>
  */
 export const getEditorExports = async (page) =>
-  page.evaluate("editorEl.editor.model.exports")
+  page.evaluate("rootEl.iink.model.exports")
 /**
  * @param {Page} page - Playwright Page
  * @returns Promise<TExport>
  */
 export const getEditorExportsType = async (page, type) =>
-  page.evaluate(`editorEl.editor.model?.exports?.['${type}']`)
+  page.evaluate(`rootEl.iink.model?.exports?.['${type}']`)
 
 /**
  * @param {Page} page - Playwright Page
  * @returns Promise<TExport>
  */
 export const getEditorConverts = async (page) =>
-  page.evaluate("editorEl.editor.model.converts")
+  page.evaluate("rootEl.iink.model.converts")
 /**
  * @param {Page} page - Playwright Page
  * @returns Promise<TExport>
  */
 export const getEditorSymbols = async (page) =>
-  page.evaluate("editorEl.editor.model.symbols")
+  page.evaluate("rootEl.iink.model.symbols")
 
 /**
  * @param {Page} page - Playwright Page
  * @returns Promise<TExportV2>
  */
 export const getEditorStrokes = async (page) =>
-  page.evaluate("editorEl.editor.model.strokes")
+  page.evaluate("rootEl.iink.model.strokes")
 
 /**
  * @param {Page} page - Playwright Page
  * @returns Promise<TExport>
  */
 export const callEditorExport = async (page, type) => {
-  await page.waitForFunction(() => !!editorEl?.editor)
-  const exports = await page.evaluate(`editorEl.editor.export(['${type}'])`)
+  await page.waitForFunction(() => !!rootEl?.iink)
+  const exports = await page.evaluate(`rootEl.iink.export(['${type}'])`)
   return exports[type]
 }
 /**
@@ -224,8 +224,8 @@ export const callEditorExport = async (page, type) => {
  * @returns Promise<TExport>
  */
 export const callEditorSynchronize = async (page) => {
-  await page.waitForFunction(() => !!editorEl?.editor)
-  return page.evaluate(`editorEl.editor.synchronize()`)
+  await page.waitForFunction(() => !!rootEl?.iink)
+  return page.evaluate(`rootEl.iink.synchronize()`)
 }
 
 /**
@@ -233,8 +233,8 @@ export const callEditorSynchronize = async (page) => {
  * @returns Promise<void>
  */
 export const callEditorIdle = async (page) => {
-  await page.waitForFunction(() => !!editorEl?.editor)
-  return page.evaluate("editorEl.editor.waitForIdle()")
+  await page.waitForFunction(() => !!rootEl?.iink)
+  return page.evaluate("rootEl.iink.waitForIdle()")
 }
 
 /**
@@ -242,8 +242,8 @@ export const callEditorIdle = async (page) => {
  * @returns Promise<void>
  */
 export const callEditorConvert = async (page) => {
-  await page.waitForFunction(() => !!editorEl?.editor)
-  return page.evaluate("editorEl.editor.convert()")
+  await page.waitForFunction(() => !!rootEl?.iink)
+  return page.evaluate("rootEl.iink.convert()")
 }
 
 /**
@@ -251,8 +251,8 @@ export const callEditorConvert = async (page) => {
  * @returns Promise<void>
  */
 export const callEditoClear = async (page) => {
-  await page.waitForFunction(() => !!editorEl?.editor)
-  return page.evaluate("editorEl.editor.clear()")
+  await page.waitForFunction(() => !!rootEl?.iink)
+  return page.evaluate("rootEl.iink.clear()")
 }
 
 /**
@@ -267,13 +267,13 @@ export const callEditoClear = async (page) => {
  * @returns Promise<unknow>
  */
 export const waitForEvent = async (page, eventName, timeout = 30000) => {
-  await page.waitForFunction(() => !!document.querySelector('#editorEl')?.editor);
+  await page.waitForFunction(() => !!document.querySelector('#rootEl')?.iink);
   return page.evaluate(`(async () => {
     return new Promise((resolve, reject) => {
       const timer = setTimeout(() => {
         reject(new Error('Event "${eventName}" did not fire within ${timeout}ms'));
       }, ${timeout});
-      document.querySelector('#editorEl').editor.event.addEventListener('${eventName}', (e) => {
+      document.querySelector('#rootEl').iink.event.addEventListener('${eventName}', (e) => {
         clearTimeout(timer);
         resolve(e.detail);
       }, { once: true });
@@ -357,8 +357,8 @@ export const waitForGesturedEvent = async (page) =>
   waitForEvent(page, "gestured")
 
 export const waitForEditorInit = async (page) => {
-  await page.waitForFunction(() => !!editorEl?.editor)
-  return page.evaluate("editorEl.editor.initializationPromise")
+  await page.waitForFunction(() => !!rootEl?.iink)
+  return page.evaluate("rootEl.iink.initializationPromise")
 }
 
 export const findValuesByKey = (obj, key, list = []) => {
@@ -417,7 +417,7 @@ export const pollJiix = async (page, minCount, timeout = 8000) => {
 // are stable. Takes the already-fetched jiix (see pollJiix) rather than re-fetching it.
 export const getBlockIdByLabel = async (page, jiix, label) => {
   for (const element of jiix.elements) {
-    const blockLabel = await page.evaluate((id) => editorEl.editor.jiix.getBlockLabel(id), element.id)
+    const blockLabel = await page.evaluate((id) => rootEl.iink.jiix.getBlockLabel(id), element.id)
     if (blockLabel?.includes(label)) {
       return element.id
     }
@@ -433,14 +433,14 @@ export const openMathActionMenu = async (page) => {
 }
 
 // Opens the *per-block* context menu's math submenu — the wrapper only shows once a symbol is
-// selected (see IISelectionManager calling editor.menu.context.show()).
+// selected (see IISelectionManager calling canvas.menu.context.show()).
 export const openMathContextMenu = async (page) => {
   await expect(page.locator("#ms-menu-context-wrapper")).toBeVisible()
   await page.locator("#ms-menu-context-math-trigger").click()
 }
 
 // Select a block by its known jiixBlockId instead of drawing a surround gesture — useful for
-// reselecting after a modal interaction (editor.select() doesn't itself call
+// reselecting after a modal interaction (canvas.select() doesn't itself call
 // menu.context.show(), so call both) or whenever the target block's id is already known:
 // it's a more robust default than a surround gesture, real or synthetic. Drawing a *second*
 // real gesture in the same test is flaky (waitForGesturedEvent has no timeout of its own and
@@ -449,17 +449,17 @@ export const selectBlockById = async (page, jiixBlockId) => {
   const symbols = await getEditorSymbols(page)
   const ids = symbols.filter((s) => s.jiixBlockId === jiixBlockId).map((s) => s.id)
   await page.evaluate((ids) => {
-    editorEl.editor.select(ids)
-    editorEl.editor.menu.context.show()
+    rootEl.iink.select(ids)
+    rootEl.iink.menu.context.show()
   }, ids)
   await expect
-    .poll(() => page.evaluate(() => editorEl.editor.model.symbolsSelected.length), { timeout: 3000 })
+    .poll(() => page.evaluate(() => rootEl.iink.model.symbolsSelected.length), { timeout: 3000 })
     .toBeGreaterThan(0)
 }
 
 // No recorded surround-gesture capture exists for most math_context_menu.* datasets (only
 // "sum" has a hand-captured surroundPointers). Selection only needs the gesture stroke to be
-// classified as SURROUND by the cloud recognizer and to geometrically contain the expression's
+// classified as SURROUND by the cloud client and to geometrically contain the expression's
 // bounds (see SurroundGestureHandler#apply: OBBOps.contains(gestureStroke.bounds, s.bounds)) —
 // so a synthetic padded ellipse around the written strokes' bounding box is sufficient.
 // `steps` defaults lower on WebKit: drawing this ellipse over already-rendered ink reproducibly
@@ -507,8 +507,8 @@ export const selectBlockViaSurround = async (page, surroundPointers) => {
   ])
   await expect
     .poll(() => page.evaluate(() => {
-      const selected = editorEl.editor.model.symbolsSelected
-      return editorEl.editor.jiix.getBlocksForSymbols(selected).filter((s) => s.type === "Math").length
+      const selected = rootEl.iink.model.symbolsSelected
+      return rootEl.iink.jiix.getBlocksForSymbols(selected).filter((s) => s.type === "Math").length
     }), { timeout: 3000 })
     .toBe(1)
 }

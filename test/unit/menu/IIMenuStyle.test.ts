@@ -1,17 +1,17 @@
 import { LeftClickEventMock } from "../__mocks__/EventMock"
-import { createEditorMock, asEditor } from "../__mocks__/createEditorMock"
+import { createCanvasMock, asEditor } from "../__mocks__/createCanvasMock"
 import { buildIICircle, buildIIStroke } from "../helpers"
-import { EditorTool, IIMenuStyle, EditorWriteTool } from "@/iink"
+import { CanvasTool, IIMenuStyle, CanvasWriteTool } from "@/iink"
 
 describe("IIMenuStyle.ts", () => {
   test("should create", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const menu = new IIMenuStyle(asEditor(editor))
     expect(menu).toBeDefined()
   })
 
   describe("render", () => {
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const menu = new IIMenuStyle(asEditor(editor))
     describe("isMobile", () => {
       const layer = document.createElement("div")
@@ -123,7 +123,7 @@ describe("IIMenuStyle.ts", () => {
       pressure: 1,
     })
     const layer = document.createElement("div")
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     editor.selector.drawSelectedGroup = jest.fn()
     editor.selector.redrawSelectedGroup = jest.fn()
 
@@ -193,14 +193,14 @@ describe("IIMenuStyle.ts", () => {
 
   describe("update", () => {
     const layer = document.createElement("div")
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const menu = new IIMenuStyle(asEditor(editor))
     menu.render(layer)
 
     describe("when tool == write with pencil", () => {
       beforeAll(() => {
-        editor.tool = EditorTool.Write
-        editor.writer.tool = EditorWriteTool.Pencil
+        editor.tool = CanvasTool.Write
+        editor.writer.tool = CanvasWriteTool.Pencil
         menu.update()
       })
       test("should display menu color", () => {
@@ -223,8 +223,8 @@ describe("IIMenuStyle.ts", () => {
 
     describe("when tool == write with circle", () => {
       beforeAll(() => {
-        editor.tool = EditorTool.Write
-        editor.writer.tool = EditorWriteTool.Circle
+        editor.tool = CanvasTool.Write
+        editor.writer.tool = CanvasWriteTool.Circle
         menu.update()
       })
       test("should display menu color", () => {
@@ -247,7 +247,7 @@ describe("IIMenuStyle.ts", () => {
 
     describe("when tool == select", () => {
       beforeAll(() => {
-        editor.tool = EditorTool.Select
+        editor.tool = CanvasTool.Select
         menu.update()
       })
       test("should display menu color", () => {
@@ -270,7 +270,7 @@ describe("IIMenuStyle.ts", () => {
 
     describe("when tool == select and shape selected", () => {
       beforeAll(() => {
-        editor.tool = EditorTool.Select
+        editor.tool = CanvasTool.Select
         const shape = buildIICircle()
         editor.model.addSymbol(shape)
         editor.model.selectedIds.add(shape.id)
@@ -296,7 +296,7 @@ describe("IIMenuStyle.ts", () => {
 
     describe("when tool == select and shape selected", () => {
       beforeAll(() => {
-        editor.tool = EditorTool.Move
+        editor.tool = CanvasTool.Move
         menu.update()
       })
       test("should hide", () => {
@@ -308,7 +308,7 @@ describe("IIMenuStyle.ts", () => {
 
   describe("show/hide", () => {
     const layer = document.createElement("div")
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const menu = new IIMenuStyle(asEditor(editor))
     menu.render(layer)
     test("should hide", () => {
@@ -325,7 +325,7 @@ describe("IIMenuStyle.ts", () => {
 
   describe("destroy", () => {
     const layer = document.createElement("div")
-    const editor = createEditorMock()
+    const editor = createCanvasMock()
     const menu = new IIMenuStyle(asEditor(editor))
     menu.render(layer)
     test("should remove elements", () => {

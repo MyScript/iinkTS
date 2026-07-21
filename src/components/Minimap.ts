@@ -1,5 +1,5 @@
+import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import { DOMFactory } from "@/components/dom"
-import type { TInteractiveInkEditor } from "@/editor/TInteractiveInkEditor"
 
 /**
  * @group Components
@@ -20,7 +20,7 @@ export class Minimap {
   static readonly DEFAULT_WIDTH = 200
   static readonly DEFAULT_HEIGHT = 150
 
-  #editor: TInteractiveInkEditor
+  #editor: TInteractiveInkCanvas
   #width: number
   #height: number
   #container: HTMLDivElement
@@ -36,7 +36,7 @@ export class Minimap {
   #isDragging = false
   #observer: MutationObserver
 
-  constructor(editor: TInteractiveInkEditor, options?: TMinimapOptions) {
+  constructor(editor: TInteractiveInkCanvas, options?: TMinimapOptions) {
     this.#editor = editor
     this.#width = options?.width ?? Minimap.DEFAULT_WIDTH
     this.#height = options?.height ?? Minimap.DEFAULT_HEIGHT
