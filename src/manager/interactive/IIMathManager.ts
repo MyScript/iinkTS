@@ -248,9 +248,9 @@ export class IIMathManager extends IIAbstractManager {
     return this.#variables.getDependencies(jiixBlockId)
   }
 
-  async enrichMathDependencies(jiixBlockId: string): Promise<void> {
+  async enrichMathDependencies(jiixBlockId: string, isStale?: () => boolean): Promise<void> {
     return this.canvas.trackOperation("Loading variables", async () =>
-      this.#variables.enrichMathDependencies(jiixBlockId)
+      this.#variables.enrichMathDependencies(jiixBlockId, isStale)
     )
   }
 
