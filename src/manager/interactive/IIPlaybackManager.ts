@@ -54,6 +54,10 @@ export class IIPlaybackManager extends IIAbstractManager {
   #elapsedOffset = 0
   /** `performance.now()` when the current run of timers was (re)scheduled. */
   #scheduledAt = 0
+  /** `canvas.writer.detectGesture` value to restore once playback pauses/stops/ends. */
+  #initialDetectGesture: boolean | null = null
+  /** True when `pause()` was called mid-stroke; pause takes effect once that stroke ends. */
+  #pauseRequested = false
 
   constructor(canvas: TInteractiveInkCanvas) {
     super(canvas, LoggerCategory.MANAGER)
@@ -80,6 +84,22 @@ export class IIPlaybackManager extends IIAbstractManager {
     this.#timers = []
   }
 
+  /** Disable gesture detection for the duration of playback, remembering the prior value. */
+  #disableGestureDetection(): void {
+    if (this.#initialDetectGesture === null) {
+      this.#initialDetectGesture = this.canvas.writer.detectGesture
+      this.canvas.writer.detectGesture = false
+    }
+  }
+
+  /** Restore `canvas.writer.detectGesture` to its pre-playback value. */
+  #restoreGestureDetection(): void {
+    if (this.#initialDetectGesture !== null) {
+      this.canvas.writer.detectGesture = this.#initialDetectGesture
+      this.#initialDetectGesture = null
+    }
+  }
+
   #toPointerInfo(point: TPointer, type: string): TPointerInfo {
     return {
       clientX: point.x,
@@ -96,6 +116,7 @@ export class IIPlaybackManager extends IIAbstractManager {
 
   #run(): void {
     this.#scheduledAt = performance.now()
+    this.#disableGestureDetection()
     this.#setState("playing")
     for (let i = this.#firedIndex; i < this.#schedule.length; i++) {
       const entry = this.#schedule[i]
@@ -126,8 +147,12 @@ export class IIPlaybackManager extends IIAbstractManager {
       this.onProgress?.(this.#firedStrokes, this.#totalStrokes)
     }
     if (this.#firedIndex === this.#schedule.length) {
+      this.#restoreGestureDetection()
       this.#setState("idle")
       this.onEnd?.()
+    } else if (this.#pauseRequested && entry.isLastOfStroke) {
+      this.#pauseRequested = false
+      this.#completePause()
     }
   }
 
@@ -141,6 +166,19 @@ export class IIPlaybackManager extends IIAbstractManager {
       this.canvas.manageError(error)
     )
     this.#strokeInProgress = false
+  }
+
+  /** Stop scheduling further points and switch to `paused` (or `idle` if nothing is left). */
+  #completePause(): void {
+    this.#elapsedOffset += (performance.now() - this.#scheduledAt) * this.#speed
+    this.#clearTimers()
+    this.#restoreGestureDetection()
+    if (this.#firedIndex === this.#schedule.length) {
+      this.#setState("idle")
+      this.onEnd?.()
+      return
+    }
+    this.#setState("paused")
   }
 
   /**
@@ -176,17 +214,24 @@ export class IIPlaybackManager extends IIAbstractManager {
     this.#firedStrokes = 0
     this.#elapsedOffset = 0
     this.#strokeInProgress = false
+    this.#pauseRequested = false
     this.#run()
   }
 
-  /** Pause playback, preserving progress so `resume()` continues from here. */
+  /**
+   * Pause playback, preserving progress so `resume()` continues from here.
+   * If a stroke is mid-progress, pause is deferred until that stroke completes
+   * naturally - it is never cut short.
+   */
   pause(): void {
     if (this.#state !== "playing") {
       return
     }
-    this.#elapsedOffset += (performance.now() - this.#scheduledAt) * this.#speed
-    this.#clearTimers()
-    this.#setState("paused")
+    if (this.#strokeInProgress) {
+      this.#pauseRequested = true
+      return
+    }
+    this.#completePause()
   }
 
   /** Resume playback from where it was paused. */
@@ -201,11 +246,13 @@ export class IIPlaybackManager extends IIAbstractManager {
   stop(): void {
     this.#clearTimers()
     this.#finalizeStrokeInProgress()
+    this.#restoreGestureDetection()
     this.#schedule = []
     this.#totalStrokes = 0
     this.#firedIndex = 0
     this.#firedStrokes = 0
     this.#elapsedOffset = 0
+    this.#pauseRequested = false
     this.#setState("idle")
   }
 
@@ -226,5 +273,6 @@ export class IIPlaybackManager extends IIAbstractManager {
 
   protected onDestroy(): void {
     this.#clearTimers()
+    this.#restoreGestureDetection()
   }
 }
