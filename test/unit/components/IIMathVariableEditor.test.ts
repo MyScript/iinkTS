@@ -20,7 +20,7 @@ describe("IIMathVariableEditor.ts", () => {
 
   beforeEach(() => {
     editor = createCanvasMock()
-    document.body.appendChild(editor.layers.root)
+    document.body.appendChild(editor.layers.ui.root)
 
     editor.math.getAllVariableUsages = jest.fn().mockResolvedValue([])
     editor.math.setVariableValue = jest.fn().mockResolvedValue(undefined)

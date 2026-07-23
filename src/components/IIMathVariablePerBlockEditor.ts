@@ -72,7 +72,7 @@ export class IIMathVariablePerBlockEditor {
       title,
       fields: [],
       customContent: container,
-      container: this.canvas.layers.root,
+      container: this.canvas.layers.ui.root,
       buttons: [
         {
           label: "Apply",

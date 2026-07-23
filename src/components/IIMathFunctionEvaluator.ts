@@ -102,7 +102,7 @@ export class IIMathFunctionEvaluator {
       title: "Evaluate Function",
       fields: [],
       customContent: container,
-      container: this.canvas.layers.root,
+      container: this.canvas.layers.ui.root,
     })
 
     this.modal.open()
