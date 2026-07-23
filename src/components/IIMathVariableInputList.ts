@@ -14,7 +14,10 @@ export type TVariableInputItem = {
   disabled?: boolean
   onDelete?: (name: string) => Promise<void>
 }
-
+/**
+ * @group Components
+ * @remarks Color token per variable source type (UNDEFINED, API, API_GLOBAL, BLOCK, PREDEFINED). Used to color-code the source badge in the variable list UI.
+ */
 export const SOURCE_TYPE_COLORS: Record<string, string> = {
   UNDEFINED: "var(--ms-ink-secondary)",
   API: "var(--ms-ink-info)",
@@ -22,7 +25,10 @@ export const SOURCE_TYPE_COLORS: Record<string, string> = {
   BLOCK: "var(--ms-ink-success)",
   PREDEFINED: "var(--ms-ink-warning)",
 }
-
+/**
+ * @group Components
+ * @remarks Human-readable label per variable source type (UNDEFINED, API, API_GLOBAL, BLOCK, PREDEFINED). Displayed next to the source badge in the variable list UI.
+ */
 export const SOURCE_TYPE_LABELS: Record<string, string> = {
   UNDEFINED: "Undefined",
   API: "API",
