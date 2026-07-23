@@ -70,7 +70,7 @@ export class IIMathDiagnosticChecker {
       title: `Math Diagnostic${diagnostics.length > 1 ? "s" : ""} (${diagnostics.length} symbol${diagnostics.length > 1 ? "s" : ""})`,
       fields: [],
       customContent: container,
-      container: this.canvas.layers.root,
+      container: this.canvas.layers.ui.root,
     })
 
     this.modal.open()

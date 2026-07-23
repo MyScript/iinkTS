@@ -52,7 +52,7 @@ export class IIMathVariableEditor {
       title: "Variable Definitions",
       fields: [],
       customContent: container,
-      container: this.canvas.layers.root,
+      container: this.canvas.layers.ui.root,
       buttons: [
         {
           label: "Apply",

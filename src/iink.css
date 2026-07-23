@@ -480,6 +480,7 @@
   padding: var(--ms-ink-modal-padding, 20px);
   background: var(--ms-ink-modal-content-bg, white);
   color: var(--ms-ink-modal-content-color, inherit);
+  overflow: auto;
 }
 
 .ms-ink .ms-modal-field-label {
@@ -988,7 +989,7 @@
 .ms-ink .ms-tabs-section {
   border: 1px solid var(--ms-ink-border-color);
   border-radius: var(--ms-ink-radius-lg);
-  overflow: hidden;
+  overflow: auto;
 }
 
 .ms-ink .ms-tab-headers {
@@ -1051,8 +1052,6 @@
 }
 
 .ms-ink .ms-table-wrapper {
-  max-height: 400px;
-  overflow: auto;
   margin-bottom: 24px;
 }
 

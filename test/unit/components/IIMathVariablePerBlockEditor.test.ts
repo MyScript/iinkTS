@@ -18,7 +18,7 @@ describe("IIMathVariablePerBlockEditor.ts", () => {
         getBlockLabel: jest.fn().mockImplementation((id: string) => `label(${id})`),
       } as unknown as IIJiixQueryManager,
     })
-    document.body.appendChild(editor.layers.root)
+    document.body.appendChild(editor.layers.ui.root)
 
     editor.math.asVariableDefinition = jest.fn().mockResolvedValue(null)
     editor.math.getVariables = jest.fn().mockResolvedValue([makeVariable()])
