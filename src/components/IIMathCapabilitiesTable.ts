@@ -377,7 +377,7 @@ export class IIMathCapabilitiesTable {
       title: `Math Symbols Capabilities (${mathBlocks.length} symbols)`,
       fields: [],
       customContent: container,
-      container: this.canvas.layers.root,
+      container: this.canvas.layers.ui.root,
     })
     this.modal.open()
   }
