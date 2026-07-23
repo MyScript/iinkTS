@@ -11,6 +11,9 @@ import { IIAbstractManager } from "./IIAbstractManager"
  */
 export type TPlaybackState = "idle" | "playing" | "paused"
 
+/**
+ * @hidden
+ */
 type TScheduledPoint = {
   /** Timeline offset (ms, unscaled) relative to the first point of the first stroke. */
   offset: number

@@ -200,7 +200,7 @@ function convertToUnicodeMath(latex: string): string {
 }
 
 /**
- * @group Utils
+ * @group Utilities
  * @summary Convert a LaTeX math string into a flat UnicodeMath-compatible linear string
  * @param latex - LaTeX source, e.g. a JIIX math block label
  * @returns Plain text using unicode symbols/sub/superscripts, safe to paste into a Word equation field
