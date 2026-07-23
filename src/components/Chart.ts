@@ -161,7 +161,11 @@ export class Chart {
 
   private setupInteractions(): void {
     this.canvas.addEventListener("wheel", (e) => {
+      if (!e.ctrlKey) {
+        return
+      }
       e.preventDefault()
+      e.stopPropagation()
       const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9
       this.zoom(zoomFactor, {
         x: e.offsetX,
@@ -170,7 +174,6 @@ export class Chart {
     })
 
     this.canvas.addEventListener("mousedown", (e) => {
-      this.isDragging = true
       this.lastMousePos = {
         x: e.offsetX,
         y: e.offsetY,
