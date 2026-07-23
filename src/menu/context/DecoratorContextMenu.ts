@@ -217,7 +217,7 @@ export class DecoratorContextMenu extends BaseMenuItem<HTMLElement> {
     })
 
     if (enabled("highlight")) {
-      subMenuWrapper.appendChild(this.createDecoratorSubMenu("Hightlight", DecoratorKind.Highlight))
+      subMenuWrapper.appendChild(this.createDecoratorSubMenu("Highlight", DecoratorKind.Highlight))
     }
     if (enabled("surround")) {
       subMenuWrapper.appendChild(this.createDecoratorSubMenu("Surround", DecoratorKind.Surround))
