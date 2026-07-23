@@ -251,8 +251,10 @@ export class InsertGestureHandler extends GestureHandler {
     })
 
     const symbolsRow = this.model.symbols.filter(
-      (s) => gestureStroke.id !== s.id && this.isSymbolInRow(gestureStroke, s)
+      (s) =>
+        gestureStroke.id !== s.id && (this.isSymbolInRow(gestureStroke, s) || gesture.strokeAfterIds.includes(s.id))
     )
+
     const textToSplit = symbolsRow.find(
       (s) =>
         isText(s) &&
