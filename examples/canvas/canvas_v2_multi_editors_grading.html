@@ -45,7 +45,7 @@
          class selector, and later in source order - it would otherwise win and force this field
          to the size of its (unsized) parent instead of the fixed size set here. */
       div.ink-field {
-        width: 100px;
+        width: 130px;
         height: 70px;
         border: 1px solid var(--ex-border);
         border-radius: 6px;
@@ -89,6 +89,13 @@
         min-width: 60px;
       }
 
+      .grade-error {
+        color: var(--ex-error, crimson);
+        font-size: 11px;
+        min-height: 14px;
+        max-width: 100px;
+      }
+
       #report {
         margin-top: var(--ex-space-lg);
       }
@@ -122,7 +129,10 @@
           <div class="ex-panel-item-desc">Each grade cell uses <code>recognition.type: 'MATH'</code> (a handwritten number is a math expression), while the Comment column uses <code>recognition.type: 'TEXT'</code> - two recognition types mixed on the same page, one editor instance per cell.</div>
         </div>
         <div class="ex-panel-item">
-          <div class="ex-panel-item-desc">"Compute results" calls <code>canvas.export()</code> on every grade cell of a row, sums the parsed numbers into the Total column, and lists each participant's total plus their comment in the report below.</div>
+          <div class="ex-panel-item-desc">Grades are out of <strong>/20</strong>. Each grade cell's <code>exported</code> event is checked as soon as recognition completes: if the written value isn't a number or falls outside 0-20, the cell is cleared automatically and an error message is shown under it.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">"Get summary" calls <code>canvas.export()</code> on every grade cell of a row, sums the parsed numbers into the Total column, and lists each participant's total plus their comment in the report below.</div>
         </div>
         <div class="ex-panel-item">
           <div class="ex-panel-item-desc"><code>Canvas.load()</code> is not used here: it keeps a single instance per editor type and destroys the previous one on every call, which breaks with several concurrent <code>INK_V2</code> instances (12 of them on this page). Constructing <code>new InkCanvas(fieldEl, options)</code> directly (still a public export) sidesteps that and gives each cell a fully independent instance.</div>
@@ -130,7 +140,7 @@
       </aside>
       <div class="grading-content">
         <div class="grading-header">
-          <button class="classic-btn primary" id="compute-btn" disabled>Compute results</button>
+          <button class="classic-btn primary" id="compute-btn" disabled>Get summary</button>
         </div>
         <table class="grading-table">
           <thead>
@@ -145,6 +155,20 @@
     <script type="module">
       import { InkCanvas } from '../../dist/iink.esm.js'
       import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
+
+      function cleanLatex(latexExport) {
+        if (typeof latexExport === 'number') {
+          latexExport = latexExport.toString()
+        }
+        if (latexExport.includes('\\\\')) {
+          const steps = '\\begin{align*}' + latexExport + '\\end{align*}'
+          return steps
+            .replace('\\begin{aligned}', '')
+            .replace('\\end{aligned}', '')
+            .replace(new RegExp('(align.{1})', 'g'), 'aligned')
+        }
+        return latexExport.replace(new RegExp('(align.{1})', 'g'), 'aligned')
+      }
 
       const panelToggleBtn = document.getElementById('panelToggleBtn')
       const infoPanel = document.getElementById('info-panel')
@@ -172,8 +196,6 @@
       let gradeCanvases = [] // parallel to rows[].gradeFields, one array per row
       let commentCanvases = [] // parallel to rows, one per row
 
-      // Small undo/redo/clear toolbar for one field. `getCanvas` is read at click time (not
-      // capture time) so it keeps working after loadAll() destroys/recreates the instance.
       function createFieldToolbar(getCanvas) {
         const toolbar = document.createElement('div')
         toolbar.className = 'field-toolbar'
@@ -190,8 +212,6 @@
         return toolbar
       }
 
-      // One row per participant: name cell, one grade field per criterion, one comment field,
-      // one (non-editor) total cell. `rows` keeps direct references for the compute step below.
       const rows = PARTICIPANTS.map((name, pIndex) => {
         const tr = document.createElement('tr')
 
@@ -206,7 +226,10 @@
           const fieldEl = document.createElement('div')
           fieldEl.className = 'ink-field'
           fieldEl.id = `grade-${pIndex}-${cIndex}`
-          fieldWrap.append(fieldEl, createFieldToolbar(() => gradeCanvases[pIndex]?.[cIndex]))
+          const errorEl = document.createElement('div')
+          errorEl.className = 'grade-error'
+          errorEl.id = `grade-error-${pIndex}-${cIndex}`
+          fieldWrap.append(fieldEl, createFieldToolbar(() => gradeCanvases[pIndex]?.[cIndex]), errorEl)
           td.appendChild(fieldWrap)
           tr.appendChild(td)
           return fieldEl
@@ -231,14 +254,19 @@
         return { name, gradeFields, commentFieldEl, totalCell }
       })
 
-      // One grade cache slot per row/criterion, kept live by each grade cell's own 'exported'
-      // listener (see loadAll below) so the Total column updates as soon as recognition
-      // completes for a cell, without waiting for "Compute results".
       const liveGrades = rows.map(() => CRITERIA.map(() => 0))
 
       function updateLiveTotal(pIndex) {
-        rows[pIndex].totalCell.textContent = liveGrades[pIndex].reduce((sum, g) => sum + g, 0)
+        rows[pIndex].totalCell.textContent = liveGrades[pIndex].reduce((sum, g) => sum + g, 0).toFixed(2)
       }
+
+      function setGradeError(pIndex, cIndex, message) {
+        const errorEl = document.getElementById(`grade-error-${pIndex}-${cIndex}`)
+        if (errorEl) errorEl.textContent = message
+      }
+
+      const pendingInvalidTimers = rows.map(() => CRITERIA.map(() => undefined))
+      const INVALID_GRADE_DEBOUNCE_MS = 250
 
       const editorOptions = {
         configuration: {},
@@ -261,8 +289,9 @@
         ])
         reportEl.innerHTML = ''
         liveGrades.forEach((grades) => grades.fill(0))
-        rows.forEach(({ totalCell }) => {
+        rows.forEach(({ totalCell }, pIndex) => {
           totalCell.textContent = ''
+          CRITERIA.forEach((_, cIndex) => setGradeError(pIndex, cIndex, ''))
         })
 
         // Hides each cell's connection-status badge - noisy clutter with a dozen compact
@@ -271,7 +300,7 @@
           configuration: {
             server: options.configuration.server,
             recognition: { type: 'MATH' },
-            rendering: { minWidth: 100, minHeight: 70, guides: { enable: false } },
+            rendering: { minWidth: 130, minHeight: 70, guides: { enable: false } },
             ui: { showConnectionState: false },
           },
         })
@@ -289,10 +318,19 @@
             Promise.all(
               gradeFields.map((fieldEl, cIndex) =>
                 loadInkField(fieldEl, mathOptions(fieldEl)).then((canvas) => {
-                  // Recognition auto-runs (debounced) after writing, so this keeps the Total
-                  // column live without needing "Compute results" - see parseGrade below.
                   canvas.event.addEventListener('exported', (evt) => {
-                    liveGrades[pIndex][cIndex] = parseGrade(evt.detail['application/x-latex'])
+                    clearTimeout(pendingInvalidTimers[pIndex][cIndex])
+                    const { empty, isNumber, inRange, value } = parseGradeRaw(evt.detail?.['application/x-latex'])
+                    if (!empty && !inRange) {
+                      liveGrades[pIndex][cIndex] = 0
+                      pendingInvalidTimers[pIndex][cIndex] = setTimeout(() => {
+                        setGradeError(pIndex, cIndex, isNumber ? 'Grade must be between 0 and 20 - write it again.' : 'Not a number - write it again.')
+                        canvas.clear()
+                      }, INVALID_GRADE_DEBOUNCE_MS)
+                    } else {
+                      if (!empty) setGradeError(pIndex, cIndex, '')
+                      liveGrades[pIndex][cIndex] = value
+                    }
                     updateLiveTotal(pIndex)
                   })
                   return canvas
@@ -307,11 +345,20 @@
         computeBtn.disabled = false
       }
 
-      // A plain handwritten number's LaTeX export is just its digits (e.g. "15"), no markup to
-      // strip - parseFloat handles it directly. Falls back to 0 for an empty/unrecognized cell.
+      function parseGradeRaw(latex) {
+        const trimmed = (latex || '').trim()
+        if (!trimmed) {
+          return { empty: true, isNumber: false, inRange: false, value: 0 }
+        }
+        
+        const parsed = +parseFloat(trimmed.replace(',', '.').replaceAll(' ', '')).toFixed(2)
+        const isNumber = !Number.isNaN(parsed)
+        const inRange = isNumber && parsed >= 0 && parsed <= 20
+        return { empty: false, isNumber, inRange, value: inRange ? parsed : 0 }
+      }
+
       function parseGrade(latex) {
-        const value = parseFloat((latex || '').replace(',', '.'))
-        return Number.isNaN(value) ? 0 : value
+        return parseGradeRaw(latex).value
       }
 
       computeBtn.addEventListener('click', async () => {
@@ -322,7 +369,7 @@
           for (let pIndex = 0; pIndex < rows.length; pIndex++) {
             const { name, totalCell } = rows[pIndex]
             const gradeExports = await Promise.all(gradeCanvases[pIndex].map((canvas) => canvas.export()))
-            const total = gradeExports.reduce((sum, exports) => sum + parseGrade(exports['application/x-latex']), 0)
+            const total = gradeExports.reduce((sum, exports) => sum + parseGrade(exports['application/x-latex']), 0).toFixed(2)
             totalCell.textContent = total
 
             const commentExports = await commentCanvases[pIndex].export()
