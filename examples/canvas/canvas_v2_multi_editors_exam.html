@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Ink Canvas v2 - Multiple Editors (Exam)</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <style>
+      .exam-content {
+        padding: var(--ex-space-lg);
+        overflow: auto;
+      }
+
+      .exam-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: var(--ex-space-lg);
+      }
+
+      .exam-score {
+        font-weight: bold;
+      }
+
+      .exam-question {
+        display: flex;
+        align-items: center;
+        gap: var(--ex-space-md);
+        padding: var(--ex-space-md) 0;
+        border-bottom: 1px solid var(--ex-border);
+      }
+
+      .exam-question-text {
+        width: 220px;
+        flex-shrink: 0;
+      }
+
+      /* Element-type selector (not just .ink-field) needed for specificity: the SDK injects its
+         own `.ms-ink { width: 100%; height: 100% }` rule at runtime, same specificity as a bare
+         class selector, and later in source order - it would otherwise win and force this field
+         to the size of its (unsized) parent instead of the fixed size set here. */
+      div.ink-field {
+        width: 260px;
+        height: 90px;
+        flex-shrink: 0;
+        border: 1px solid var(--ex-border);
+        border-radius: 6px;
+        overflow: hidden;
+      }
+
+      .field-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        flex-shrink: 0;
+      }
+
+      .field-toolbar {
+        display: flex;
+        gap: 4px;
+      }
+
+      .mini-btn {
+        width: 22px;
+        height: 22px;
+        padding: 0;
+        font-size: 12px;
+        line-height: 1;
+        border: 1px solid var(--ex-border);
+        border-radius: 4px;
+        background: var(--ex-surface, #fff);
+        cursor: pointer;
+      }
+
+      .mini-btn:hover {
+        background: var(--ex-hover, #eee);
+      }
+
+      .exam-result {
+        min-width: 220px;
+        font-size: 14px;
+      }
+
+      .exam-result.correct {
+        color: var(--ex-success, green);
+      }
+
+      .exam-result.incorrect {
+        color: var(--ex-error, crimson);
+      }
+    </style>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="showModalBtn" class="btn-keys">API Keys</button>
+      <h1 class="header-title">Ink Canvas v2 - Multiple Editors (Exam)</h1>
+    </header>
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">Multiple editors — exam form</p>
+        <p class="ex-panel-intro">One <code>InkCanvas</code> instance per input field, not one shared multi-page editor: this is the pattern to use when a page has several independent handwriting fields (a form, a quiz, a grid) instead of a single free-form canvas.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Each question gets its own small <code>InkCanvas</code> instance, all sharing the same server credentials from the configuration modal but each with its own <code>recognition</code>/<code>rendering</code> config sized for a compact field.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc"><code>Canvas.load()</code> is not used here: it keeps a single instance per editor type and destroys the previous one on every call, which breaks with several concurrent <code>INK_V2</code> instances. Constructing <code>new InkCanvas(fieldEl, options)</code> directly (still a public export) sidesteps that and gives each field a fully independent instance.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">"Validate answers" calls <code>canvas.export()</code> on every field's editor, compares the recognized text against the expected answer, and tallies a score.</div>
+        </div>
+      </aside>
+      <div class="exam-content">
+        <div class="exam-header">
+          <button class="classic-btn primary" id="validate-btn" disabled>Validate answers</button>
+          <span class="exam-score" id="exam-score"></span>
+        </div>
+        <div id="questions"></div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { InkCanvas } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
+
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      const showModalBtn = document.getElementById('showModalBtn')
+      const questionsEl = document.getElementById('questions')
+      const validateBtn = document.getElementById('validate-btn')
+      const scoreEl = document.getElementById('exam-score')
+
+      const QUESTIONS = [
+        { question: 'Capital of France?', answer: 'paris' },
+        { question: 'Opposite of hot?', answer: 'cold' },
+        { question: 'Color of the sky?', answer: 'blue' },
+        { question: 'Largest planet in the solar system?', answer: 'jupiter' },
+        { question: 'Number of continents on Earth?', answers: ['seven', '7'] },
+        { question: 'Chemical symbol for water?', answer: 'h2o' },
+        { question: 'Author of Romeo and Juliet?', answer: 'shakespeare' },
+        { question: 'Opposite of up?', answer: 'down' },
+      ]
+
+      // Small undo/redo/clear toolbar for one field. `getCanvas` is read at click time (not
+      // capture time) so it keeps working after loadAll() destroys/recreates the instance.
+      function createFieldToolbar(getCanvas) {
+        const toolbar = document.createElement('div')
+        toolbar.className = 'field-toolbar'
+        const makeBtn = (label, title, action) => {
+          const btn = document.createElement('button')
+          btn.type = 'button'
+          btn.className = 'mini-btn'
+          btn.textContent = label
+          btn.title = title
+          btn.addEventListener('click', () => getCanvas()?.[action]())
+          return btn
+        }
+        toolbar.append(makeBtn('↺', 'Undo', 'undo'), makeBtn('↻', 'Redo', 'redo'), makeBtn('✕', 'Clear', 'clear'))
+        return toolbar
+      }
+
+      // One field element + result badge per question, built once - only the editor instances
+      // themselves get destroyed/recreated when the server configuration changes.
+      const rows = QUESTIONS.map((q, i) => {
+        const rowEl = document.createElement('div')
+        rowEl.className = 'exam-question'
+        rowEl.id = `question-${i}`
+
+        const label = document.createElement('div')
+        label.className = 'exam-question-text'
+        label.textContent = `${i + 1}. ${q.question}`
+
+        const fieldWrap = document.createElement('div')
+        fieldWrap.className = 'field-wrap'
+
+        const fieldEl = document.createElement('div')
+        fieldEl.className = 'ink-field'
+        fieldEl.id = `field-${i}`
+
+        const row = { fieldEl, result: null, canvas: null }
+        const toolbar = createFieldToolbar(() => row.canvas)
+        fieldWrap.append(fieldEl, toolbar)
+
+        const result = document.createElement('span')
+        result.className = 'exam-result'
+        result.id = `result-${i}`
+        row.result = result
+
+        rowEl.append(label, fieldWrap, result)
+        questionsEl.appendChild(rowEl)
+        return row
+      })
+
+      let canvases = []
+
+      const editorOptions = {
+        configuration: {},
+      }
+
+      // Not Canvas.load(): CanvasFactory keeps one instance per editor type and destroys the
+      // previous one on every call, which races and corrupts several concurrent INK_V2 fields.
+      // Constructing the class directly gives each field a fully independent instance.
+      async function loadInkField(fieldEl, options) {
+        const canvas = new InkCanvas(fieldEl, options)
+        await canvas.initialize()
+        return canvas
+      }
+
+      async function loadAll(options) {
+        validateBtn.disabled = true
+        await Promise.all(canvases.map((canvas) => canvas.destroy()))
+        canvases = []
+        scoreEl.textContent = ''
+        rows.forEach(({ result }) => {
+          result.textContent = ''
+          result.className = 'exam-result'
+        })
+
+        canvases = await Promise.all(
+          rows.map(({ fieldEl }) =>
+            loadInkField(fieldEl, {
+              configuration: {
+                server: options.configuration.server,
+                recognition: {
+                  type: 'TEXT',
+                  lang: 'en_US',
+                  text: { mimeTypes: ['text/plain'] },
+                },
+                rendering: { minWidth: 260, minHeight: 90, guides: { enable: false } },
+                // Hides the per-field connection-status badge - noisy clutter with many
+                // compact fields on one page; each field's connectivity still surfaces via
+                // canvas.event's own connection-state/error events if needed.
+                ui: { showConnectionState: false },
+              },
+            })
+          )
+        )
+        rows.forEach((row, i) => {
+          row.canvas = canvases[i]
+        })
+        validateBtn.disabled = false
+      }
+
+      validateBtn.addEventListener('click', async () => {
+        validateBtn.disabled = true
+        try {
+          const exportsPerQuestion = await Promise.all(canvases.map((canvas) => canvas.export()))
+          let correctCount = 0
+          exportsPerQuestion.forEach((exports, i) => {
+            const recognized = (exports['text/plain'] || '').trim()
+            const expectedAnswers = QUESTIONS[i].answers || [QUESTIONS[i].answer]
+            const isCorrect = expectedAnswers.some((a) => a.toLowerCase() === recognized.toLowerCase())
+            if (isCorrect) correctCount++
+            const { result } = rows[i]
+            result.textContent = `"${recognized}" ${isCorrect ? '✓' : '✗'}`
+            result.className = `exam-result ${isCorrect ? 'correct' : 'incorrect'}`
+          })
+          scoreEl.textContent = `Score: ${correctCount} / ${QUESTIONS.length}`
+        } finally {
+          validateBtn.disabled = false
+        }
+      })
+
+      showModalBtn.addEventListener('click', () => {
+        ModalCanvasOptions.show(loadAll, editorOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadAll, editorOptions)
+
+      window.editorOptions = editorOptions
+      window.loadAll = loadAll
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>
