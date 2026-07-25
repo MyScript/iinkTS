@@ -14,6 +14,10 @@ import { CanvasLayer } from "./CanvasLayer"
  */
 export type TCanvasConfiguration = {
   logger: TLoggerConfiguration
+  ui?: {
+    /** Whether to show the connection-state badge (bottom-left icon). Defaults to `true`. */
+    showConnectionState?: boolean
+  }
 }
 
 /**
@@ -76,6 +80,9 @@ export abstract class AbstractCanvas {
 
     this.event = new CanvasEvent(rootElement)
     this.layers = new CanvasLayer(rootElement, options?.override?.cssClass || "ms-ink")
+    if (options?.configuration?.ui?.showConnectionState === false) {
+      this.layers.ui.state.root.style.display = "none"
+    }
     this.layers.updateCanvasState(this.#connectionState, { queuedCount: 0, activeOperations: [] })
 
     rootElement.iink = this

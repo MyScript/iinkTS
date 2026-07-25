@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="HandheldFriendly" content="true" />
+
+    <title>Ink Canvas v2 - Multiple Editors (Grading table)</title>
+
+    <link rel="stylesheet" href="../assets/style/reset.css" />
+    <link rel="stylesheet" href="../assets/style/components.css" />
+    <link rel="stylesheet" href="../assets/style/examples.css" />
+    <link rel="stylesheet" href="../assets/style/inputs.css" />
+    <link rel="stylesheet" href="../assets/style/panel.css" />
+    <link rel="stylesheet" href="../components/code-viewer/code-viewer.css" />
+    <style>
+      .grading-content {
+        padding: var(--ex-space-lg);
+        overflow: auto;
+      }
+
+      .grading-header {
+        display: flex;
+        align-items: center;
+        gap: var(--ex-space-md);
+        margin-bottom: var(--ex-space-lg);
+      }
+
+      table.grading-table {
+        border-collapse: collapse;
+      }
+
+      table.grading-table th,
+      table.grading-table td {
+        border: 1px solid var(--ex-border);
+        padding: var(--ex-space-sm);
+        vertical-align: middle;
+      }
+
+      /* Element-type selector (not just .ink-field) needed for specificity: the SDK injects its
+         own `.ms-ink { width: 100%; height: 100% }` rule at runtime, same specificity as a bare
+         class selector, and later in source order - it would otherwise win and force this field
+         to the size of its (unsized) parent instead of the fixed size set here. */
+      div.ink-field {
+        width: 100px;
+        height: 70px;
+        border: 1px solid var(--ex-border);
+        border-radius: 6px;
+        overflow: hidden;
+      }
+
+      div.ink-field.comment-field {
+        width: 400px;
+      }
+
+      .field-wrap {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .field-toolbar {
+        display: flex;
+        gap: 4px;
+      }
+
+      .mini-btn {
+        width: 22px;
+        height: 22px;
+        padding: 0;
+        font-size: 12px;
+        line-height: 1;
+        border: 1px solid var(--ex-border);
+        border-radius: 4px;
+        background: var(--ex-surface, #fff);
+        cursor: pointer;
+      }
+
+      .mini-btn:hover {
+        background: var(--ex-hover, #eee);
+      }
+
+      .total-cell {
+        font-weight: bold;
+        text-align: center;
+        min-width: 60px;
+      }
+
+      #report {
+        margin-top: var(--ex-space-lg);
+      }
+
+      #report ul {
+        list-style: none;
+        padding: 0;
+      }
+
+      #report li {
+        padding: 4px 0;
+      }
+    </style>
+    <script>(function(){var t=localStorage.getItem('theme');if(t)document.documentElement.setAttribute('data-theme',t);})();</script>
+</head>
+
+  <body>
+    <header class="header-main">
+      <button id="panelToggleBtn" class="btn-panel-toggle" aria-expanded="false" aria-controls="info-panel">
+        💡 Info
+      </button>
+      <button id="showModalBtn" class="btn-keys">API Keys</button>
+      <h1 class="header-title">Ink Canvas v2 - Multiple Editors (Grading table)</h1>
+    </header>
+    <div class="ex-page-layout">
+      <aside id="info-panel" class="ex-panel">
+        <p class="ex-panel-heading">Multiple editors — grading table</p>
+        <p class="ex-panel-intro">One row per participant, one small <code>InkCanvas</code> instance per criterion column - a grid of independent handwriting fields instead of a single free-form canvas.</p>
+        <div class="ex-panel-divider"></div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">Each grade cell uses <code>recognition.type: 'MATH'</code> (a handwritten number is a math expression), while the Comment column uses <code>recognition.type: 'TEXT'</code> - two recognition types mixed on the same page, one editor instance per cell.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc">"Compute results" calls <code>canvas.export()</code> on every grade cell of a row, sums the parsed numbers into the Total column, and lists each participant's total plus their comment in the report below.</div>
+        </div>
+        <div class="ex-panel-item">
+          <div class="ex-panel-item-desc"><code>Canvas.load()</code> is not used here: it keeps a single instance per editor type and destroys the previous one on every call, which breaks with several concurrent <code>INK_V2</code> instances (12 of them on this page). Constructing <code>new InkCanvas(fieldEl, options)</code> directly (still a public export) sidesteps that and gives each cell a fully independent instance.</div>
+        </div>
+      </aside>
+      <div class="grading-content">
+        <div class="grading-header">
+          <button class="classic-btn primary" id="compute-btn" disabled>Compute results</button>
+        </div>
+        <table class="grading-table">
+          <thead>
+            <tr id="table-head"></tr>
+          </thead>
+          <tbody id="table-body"></tbody>
+        </table>
+        <div id="report"></div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { InkCanvas } from '../../dist/iink.esm.js'
+      import { ModalCanvasOptions } from '../components/modal/modalCanvasOptions.js'
+
+      const panelToggleBtn = document.getElementById('panelToggleBtn')
+      const infoPanel = document.getElementById('info-panel')
+      panelToggleBtn.addEventListener('click', () => {
+        const open = infoPanel.classList.toggle('open')
+        panelToggleBtn.setAttribute('aria-expanded', open)
+      })
+
+      const showModalBtn = document.getElementById('showModalBtn')
+      const tableHead = document.getElementById('table-head')
+      const tableBody = document.getElementById('table-body')
+      const computeBtn = document.getElementById('compute-btn')
+      const reportEl = document.getElementById('report')
+
+      const PARTICIPANTS = ['Alice', 'Bob', 'Charlie']
+      const CRITERIA = ['Clarity', 'Content', 'Style']
+
+      // Header row: name column + one column per criterion + Comment + Total.
+      ;['', ...CRITERIA, 'Comment', 'Total'].forEach((label) => {
+        const th = document.createElement('th')
+        th.textContent = label
+        tableHead.appendChild(th)
+      })
+
+      let gradeCanvases = [] // parallel to rows[].gradeFields, one array per row
+      let commentCanvases = [] // parallel to rows, one per row
+
+      // Small undo/redo/clear toolbar for one field. `getCanvas` is read at click time (not
+      // capture time) so it keeps working after loadAll() destroys/recreates the instance.
+      function createFieldToolbar(getCanvas) {
+        const toolbar = document.createElement('div')
+        toolbar.className = 'field-toolbar'
+        const makeBtn = (label, title, action) => {
+          const btn = document.createElement('button')
+          btn.type = 'button'
+          btn.className = 'mini-btn'
+          btn.textContent = label
+          btn.title = title
+          btn.addEventListener('click', () => getCanvas()?.[action]())
+          return btn
+        }
+        toolbar.append(makeBtn('↺', 'Undo', 'undo'), makeBtn('↻', 'Redo', 'redo'), makeBtn('✕', 'Clear', 'clear'))
+        return toolbar
+      }
+
+      // One row per participant: name cell, one grade field per criterion, one comment field,
+      // one (non-editor) total cell. `rows` keeps direct references for the compute step below.
+      const rows = PARTICIPANTS.map((name, pIndex) => {
+        const tr = document.createElement('tr')
+
+        const nameCell = document.createElement('td')
+        nameCell.textContent = name
+        tr.appendChild(nameCell)
+
+        const gradeFields = CRITERIA.map((_, cIndex) => {
+          const td = document.createElement('td')
+          const fieldWrap = document.createElement('div')
+          fieldWrap.className = 'field-wrap'
+          const fieldEl = document.createElement('div')
+          fieldEl.className = 'ink-field'
+          fieldEl.id = `grade-${pIndex}-${cIndex}`
+          fieldWrap.append(fieldEl, createFieldToolbar(() => gradeCanvases[pIndex]?.[cIndex]))
+          td.appendChild(fieldWrap)
+          tr.appendChild(td)
+          return fieldEl
+        })
+
+        const commentTd = document.createElement('td')
+        const commentWrap = document.createElement('div')
+        commentWrap.className = 'field-wrap'
+        const commentFieldEl = document.createElement('div')
+        commentFieldEl.className = 'ink-field comment-field'
+        commentFieldEl.id = `comment-${pIndex}`
+        commentWrap.append(commentFieldEl, createFieldToolbar(() => commentCanvases[pIndex]))
+        commentTd.appendChild(commentWrap)
+        tr.appendChild(commentTd)
+
+        const totalCell = document.createElement('td')
+        totalCell.className = 'total-cell'
+        totalCell.id = `total-${pIndex}`
+        tr.appendChild(totalCell)
+
+        tableBody.appendChild(tr)
+        return { name, gradeFields, commentFieldEl, totalCell }
+      })
+
+      // One grade cache slot per row/criterion, kept live by each grade cell's own 'exported'
+      // listener (see loadAll below) so the Total column updates as soon as recognition
+      // completes for a cell, without waiting for "Compute results".
+      const liveGrades = rows.map(() => CRITERIA.map(() => 0))
+
+      function updateLiveTotal(pIndex) {
+        rows[pIndex].totalCell.textContent = liveGrades[pIndex].reduce((sum, g) => sum + g, 0)
+      }
+
+      const editorOptions = {
+        configuration: {},
+      }
+
+      // Not Canvas.load(): CanvasFactory keeps one instance per editor type and destroys the
+      // previous one on every call, which races and corrupts several concurrent INK_V2 cells.
+      // Constructing the class directly gives each cell a fully independent instance.
+      async function loadInkField(fieldEl, options) {
+        const canvas = new InkCanvas(fieldEl, options)
+        await canvas.initialize()
+        return canvas
+      }
+
+      async function loadAll(options) {
+        computeBtn.disabled = true
+        await Promise.all([
+          ...gradeCanvases.flat().map((canvas) => canvas.destroy()),
+          ...commentCanvases.map((canvas) => canvas.destroy()),
+        ])
+        reportEl.innerHTML = ''
+        liveGrades.forEach((grades) => grades.fill(0))
+        rows.forEach(({ totalCell }) => {
+          totalCell.textContent = ''
+        })
+
+        // Hides each cell's connection-status badge - noisy clutter with a dozen compact
+        // cells on one page; connectivity still surfaces via canvas.event if needed.
+        const mathOptions = (fieldEl) => ({
+          configuration: {
+            server: options.configuration.server,
+            recognition: { type: 'MATH' },
+            rendering: { minWidth: 100, minHeight: 70, guides: { enable: false } },
+            ui: { showConnectionState: false },
+          },
+        })
+        const textOptions = () => ({
+          configuration: {
+            server: options.configuration.server,
+            recognition: { type: 'TEXT', lang: 'en_US', text: { mimeTypes: ['text/plain'] } },
+            rendering: { minWidth: 220, minHeight: 70, guides: { enable: false } },
+            ui: { showConnectionState: false },
+          },
+        })
+
+        gradeCanvases = await Promise.all(
+          rows.map(({ gradeFields }, pIndex) =>
+            Promise.all(
+              gradeFields.map((fieldEl, cIndex) =>
+                loadInkField(fieldEl, mathOptions(fieldEl)).then((canvas) => {
+                  // Recognition auto-runs (debounced) after writing, so this keeps the Total
+                  // column live without needing "Compute results" - see parseGrade below.
+                  canvas.event.addEventListener('exported', (evt) => {
+                    liveGrades[pIndex][cIndex] = parseGrade(evt.detail['application/x-latex'])
+                    updateLiveTotal(pIndex)
+                  })
+                  return canvas
+                })
+              )
+            )
+          )
+        )
+        commentCanvases = await Promise.all(
+          rows.map(({ commentFieldEl }) => loadInkField(commentFieldEl, textOptions()))
+        )
+        computeBtn.disabled = false
+      }
+
+      // A plain handwritten number's LaTeX export is just its digits (e.g. "15"), no markup to
+      // strip - parseFloat handles it directly. Falls back to 0 for an empty/unrecognized cell.
+      function parseGrade(latex) {
+        const value = parseFloat((latex || '').replace(',', '.'))
+        return Number.isNaN(value) ? 0 : value
+      }
+
+      computeBtn.addEventListener('click', async () => {
+        computeBtn.disabled = true
+        try {
+          reportEl.innerHTML = ''
+          const list = document.createElement('ul')
+          for (let pIndex = 0; pIndex < rows.length; pIndex++) {
+            const { name, totalCell } = rows[pIndex]
+            const gradeExports = await Promise.all(gradeCanvases[pIndex].map((canvas) => canvas.export()))
+            const total = gradeExports.reduce((sum, exports) => sum + parseGrade(exports['application/x-latex']), 0)
+            totalCell.textContent = total
+
+            const commentExports = await commentCanvases[pIndex].export()
+            const comment = (commentExports['text/plain'] || '').trim()
+
+            const li = document.createElement('li')
+            li.textContent = `${name}: ${total} / ${CRITERIA.length * 20}${comment ? ` — "${comment}"` : ''}`
+            list.appendChild(li)
+          }
+          reportEl.appendChild(list)
+        } finally {
+          computeBtn.disabled = false
+        }
+      })
+
+      showModalBtn.addEventListener('click', () => {
+        ModalCanvasOptions.show(loadAll, editorOptions)
+      })
+
+      ModalCanvasOptions.initConfiguration(loadAll, editorOptions)
+
+      window.editorOptions = editorOptions
+      window.loadAll = loadAll
+    </script>
+    <script type="module" src="../components/code-viewer/code-viewer.js"></script>
+    <script src="../assets/js/theme.js"></script>
+</body>
+
+</html>
