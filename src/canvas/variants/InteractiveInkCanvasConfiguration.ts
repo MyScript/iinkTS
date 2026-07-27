@@ -11,10 +11,17 @@ import type { THistoryConfiguration } from "@/history"
 import { DefaultHistoryConfiguration } from "@/history"
 import type { TLoggerConfiguration } from "@/logger"
 import { DefaultLoggerConfiguration } from "@/logger"
-import type { TGestureConfiguration, TMathConfig, TOverlayConfig, TSnapConfiguration } from "@/manager"
+import type {
+  TGestureConfiguration,
+  TMathConfig,
+  TOverlayConfig,
+  TSelectionConfig,
+  TSnapConfiguration,
+} from "@/manager"
 import {
   DefaultGestureConfiguration,
   DefaultOverlayConfig,
+  DefaultSelectionConfig,
   DefaultSnapConfiguration,
   SnapConfiguration,
 } from "@/manager"
@@ -26,24 +33,6 @@ import type { TStyle } from "@/style"
 import { DefaultStyle } from "@/style"
 import type { TPartialDeep } from "@/utils"
 import { mergeDeep } from "@/utils"
-
-/**
- * @group Canvas
- * @remarks Level of text selection granularity
- */
-export type TTextSelectionLevel = "element" | "word" | "char"
-
-/**
- * @group Canvas
- * @remarks Level of math selection granularity
- */
-export type TMathSelectionLevel = "element" | "operand"
-
-/**
- * @group Canvas
- * @remarks Level of shape (Node/Edge) selection granularity
- */
-export type TShapeSelectionLevel = "element" | "stroke"
 
 /**
  * @group Canvas
@@ -62,9 +51,7 @@ export type TInteractiveInkCanvasConfiguration = TCanvasConfiguration &
     gesture: TGestureConfiguration
     snap: TSnapConfiguration
     overlays: TOverlayConfig
-    textSelectionLevel: TTextSelectionLevel
-    mathSelectionLevel: TMathSelectionLevel
-    shapeSelectionLevel: TShapeSelectionLevel
+    selection: TSelectionConfig
     /** Math manager configuration (computation behavior and visual interactions) */
     math: TMathConfig
     /** CSS custom property overrides applied to the canvas root element (e.g. `{ "--ms-ink-primary": "#ff0" }`) */
@@ -92,9 +79,7 @@ export const DefaultInteractiveInkCanvasConfiguration: TInteractiveInkCanvasConf
   gesture: DefaultGestureConfiguration,
   snap: DefaultSnapConfiguration,
   overlays: DefaultOverlayConfig,
-  textSelectionLevel: "element",
-  mathSelectionLevel: "element",
-  shapeSelectionLevel: "element",
+  selection: DefaultSelectionConfig,
   math: {},
   cssVars: undefined,
 }
@@ -119,9 +104,7 @@ export class InteractiveInkCanvasConfiguration implements TInteractiveInkCanvasC
   gesture: TGestureConfiguration
   snap: TSnapConfiguration
   overlays: TOverlayConfig
-  textSelectionLevel: TTextSelectionLevel
-  mathSelectionLevel: TMathSelectionLevel
-  shapeSelectionLevel: TShapeSelectionLevel
+  selection: TSelectionConfig
   math: TMathConfig
   cssVars?: Record<string, string>
 
@@ -186,12 +169,7 @@ export class InteractiveInkCanvasConfiguration implements TInteractiveInkCanvasC
 
     this.penStyle = mergeDeep({}, DefaultInteractiveInkCanvasConfiguration.penStyle, configuration?.penStyle)
     this.fontStyle = mergeDeep({}, DefaultInteractiveInkCanvasConfiguration.fontStyle, configuration?.fontStyle)
-    this.textSelectionLevel =
-      configuration?.textSelectionLevel ?? DefaultInteractiveInkCanvasConfiguration.textSelectionLevel
-    this.mathSelectionLevel =
-      configuration?.mathSelectionLevel ?? DefaultInteractiveInkCanvasConfiguration.mathSelectionLevel
-    this.shapeSelectionLevel =
-      configuration?.shapeSelectionLevel ?? DefaultInteractiveInkCanvasConfiguration.shapeSelectionLevel
+    this.selection = mergeDeep({}, DefaultSelectionConfig, configuration?.selection)
     this.math = mergeDeep({}, DefaultInteractiveInkCanvasConfiguration.math, configuration?.math)
     this.cssVars = configuration?.cssVars as Record<string, string> | undefined
   }
