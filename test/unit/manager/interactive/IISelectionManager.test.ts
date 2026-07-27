@@ -184,7 +184,7 @@ describe("IISelectionManager.ts", () => {
 
     test("operand mode: block only qualifies when ALL its strokes are selected", () => {
       const canvas = createCanvasMock()
-      canvas.configuration.mathSelectionLevel = "operand"
+      canvas.configuration.selection.mathLevel = "operand"
       const manager = new IISelectionManager(asCanvas(canvas))
       const stroke1 = buildMathStroke("block-1")
       const stroke2 = buildMathStroke("block-1")
@@ -245,7 +245,7 @@ describe("IISelectionManager.ts", () => {
 
     test("operand mode: does not expand the selection", () => {
       const canvas = createCanvasMock()
-      canvas.configuration.mathSelectionLevel = "operand"
+      canvas.configuration.selection.mathLevel = "operand"
       const manager = new IISelectionManager(asCanvas(canvas))
       const stroke1 = buildMathStroke("block-1")
       const stroke2 = buildMathStroke("block-1")
@@ -303,7 +303,7 @@ describe("IISelectionManager.ts", () => {
     test("operand mode: does not merge ghost bounds into the selection rectangle", async () => {
       const canvas = createCanvasMock()
       canvas.menu.context.hide = jest.fn()
-      canvas.configuration.mathSelectionLevel = "operand"
+      canvas.configuration.selection.mathLevel = "operand"
       const manager = new IISelectionManager(asCanvas(canvas))
       const stroke = buildMathStroke("block-1")
       await canvas.init()
