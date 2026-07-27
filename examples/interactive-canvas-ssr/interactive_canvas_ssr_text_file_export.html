@@ -81,7 +81,7 @@
       const exportTypeSelectElement = document.getElementById('exportType')
 
       let canvas
-      const editorOptions = {}
+      const canvasOptions = {}
 
       const toBlob = (data, mimeType) => new Blob([data], { type: mimeType })
 
@@ -127,7 +127,7 @@
         exportElement.disabled = event.detail.empty
       })
 
-      async function loadEditor(options) {
+      async function loadCanvas(options) {
         canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK_SSR', options)
 
         for (const exportType in exportFileType) {
@@ -152,13 +152,13 @@
       })
 
       showModalBtn.addEventListener('click', () => {
-        ModalCanvasOptions.show(loadEditor, editorOptions)
+        ModalCanvasOptions.show(loadCanvas, canvasOptions)
       })
 
-      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
 
-      window.editorOptions = editorOptions
-      window.loadEditor = loadEditor
+      window.canvasOptions = canvasOptions
+      window.loadCanvas = loadCanvas
     </script>
     <script type="module" src="../components/code-viewer/code-viewer.js"></script>
     <script src="../assets/js/theme.js"></script>

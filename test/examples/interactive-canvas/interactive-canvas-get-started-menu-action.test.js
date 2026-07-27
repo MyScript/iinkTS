@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test"
 import {
   passModalKey,
-  callEditorIdle,
+  callCanvasIdle,
   writePointers,
   writeStrokes,
   waitForLoadedEvent,
@@ -11,10 +11,10 @@ import {
   waitForExportedEvent,
   waitForSynchronizedEvent,
   waitForGesturedEvent,
-  getEditorSymbols,
-  getEditorExportsType,
-  callEditorSynchronize,
-  callEditorExport,
+  getCanvasSymbols,
+  getCanvasExportsType,
+  callCanvasSynchronize,
+  callCanvasExport,
 } from "../helper"
 import locator from "../locators"
 import lecon from "../__dataset__/leçon"
@@ -35,8 +35,8 @@ test.describe("Interactive ink canvas Get Started Menu Action", () => {
         waitForSynchronizedEvent(page),
         writeStrokes(page, helloOneStroke.strokes)
       ])
-      const symbols = await getEditorSymbols(page)
-      const jiix = await getEditorExportsType(page, "application/vnd.myscript.jiix")
+      const symbols = await getCanvasSymbols(page)
+      const jiix = await getCanvasExportsType(page, "application/vnd.myscript.jiix")
       expect(symbols).toHaveLength(helloOneStroke.strokes.length)
       expect(jiix.elements).toHaveLength(1)
       expect(jiix.elements[0].type).toStrictEqual("Text")
@@ -52,7 +52,7 @@ test.describe("Interactive ink canvas Get Started Menu Action", () => {
         waitForChangedEvent(page),
         page.locator(locator.menu.action.undoBtn).click()
       ])
-      const symbols = await getEditorSymbols(page)
+      const symbols = await getCanvasSymbols(page)
       expect(symbols).toHaveLength(0)
     })
 
@@ -61,7 +61,7 @@ test.describe("Interactive ink canvas Get Started Menu Action", () => {
         waitForChangedEvent(page),
         page.locator(locator.menu.action.redoBtn).click()
       ])
-      const symbols = await getEditorSymbols(page)
+      const symbols = await getCanvasSymbols(page)
       expect(symbols).toHaveLength(1)
       expect(symbols[0].type).toEqual("stroke")
     })
@@ -71,7 +71,7 @@ test.describe("Interactive ink canvas Get Started Menu Action", () => {
         waitForConvertedEvent(page),
         page.locator(locator.menu.action.convertBtn).click()
       ])
-      const symbols = await getEditorSymbols(page)
+      const symbols = await getCanvasSymbols(page)
       expect(symbols).toHaveLength(1)
       expect(symbols[0].type).toEqual("text")
       await expect(page.locator(`#${ symbols[0].id }`)).toHaveText(helloOneStroke.exports["application/vnd.myscript.jiix"].label)
@@ -80,8 +80,8 @@ test.describe("Interactive ink canvas Get Started Menu Action", () => {
     await test.step("should undo convert", async () => {
       await page.locator(locator.menu.action.undoBtn).click()
       await page.evaluate(`rootEl.iink.export(['application/vnd.myscript.jiix'])`)
-      const jiix = await getEditorExportsType(page, "application/vnd.myscript.jiix")
-      const symbols = await getEditorSymbols(page)
+      const jiix = await getCanvasExportsType(page, "application/vnd.myscript.jiix")
+      const symbols = await getCanvasSymbols(page)
       expect(symbols).toHaveLength(1)
       expect(symbols[0].type).toEqual("stroke")
       expect(jiix).toBeDefined()
@@ -97,7 +97,7 @@ test.describe("Interactive ink canvas Get Started Menu Action", () => {
         waitForChangedEvent(page),
         page.locator(locator.menu.action.redoBtn).click()
       ])
-      const symbols = await getEditorSymbols(page)
+      const symbols = await getCanvasSymbols(page)
       expect(symbols).toHaveLength(1)
       expect(symbols[0].type).toEqual("text")
       await expect(page.locator(`#${  symbols[0].id }`)).toHaveText(helloOneStroke.exports["application/vnd.myscript.jiix"].label)
@@ -108,7 +108,7 @@ test.describe("Interactive ink canvas Get Started Menu Action", () => {
         waitForChangedEvent(page),
         page.locator(locator.menu.action.clearBtn).click()
       ])
-      const symbols = await getEditorSymbols(page)
+      const symbols = await getCanvasSymbols(page)
       expect(symbols).toHaveLength(0)
     })
 
@@ -117,7 +117,7 @@ test.describe("Interactive ink canvas Get Started Menu Action", () => {
         waitForChangedEvent(page),
         page.locator(locator.menu.action.undoBtn).click()
       ])
-      const symbols = await getEditorSymbols(page)
+      const symbols = await getCanvasSymbols(page)
       expect(symbols).toHaveLength(1)
       expect(symbols[0].type).toEqual("text")
       await expect(page.locator(`#${  symbols[0].id }`)).toHaveText(helloOneStroke.exports["application/vnd.myscript.jiix"].label)
@@ -128,7 +128,7 @@ test.describe("Interactive ink canvas Get Started Menu Action", () => {
         waitForChangedEvent(page),
         page.locator(locator.menu.action.redoBtn).click()
       ])
-      const symbols = await getEditorSymbols(page)
+      const symbols = await getCanvasSymbols(page)
       expect(symbols).toHaveLength(0)
     })
   })
@@ -139,7 +139,7 @@ test.describe("Interactive ink canvas Get Started Menu Action", () => {
         waitForSynchronizedEvent(page),
         writeStrokes(page, helloOneStroke.strokes)
       ])
-      const symbols = await getEditorSymbols(page)
+      const symbols = await getCanvasSymbols(page)
       expect(symbols).toHaveLength(1)
       expect(symbols[0].type).toEqual("stroke")
     })
@@ -149,7 +149,7 @@ test.describe("Interactive ink canvas Get Started Menu Action", () => {
         waitForConvertedEvent(page),
         page.locator(locator.menu.action.convertBtn).click()
       ])
-      const symbols = await getEditorSymbols(page)
+      const symbols = await getCanvasSymbols(page)
       expect(symbols).toHaveLength(1)
       expect(symbols[0].type).toEqual("text")
       expect(symbols[0].chars.map(c => c.label).join("")).toEqual(helloOneStroke.exports["application/vnd.myscript.jiix"].label)
@@ -177,8 +177,8 @@ test.describe("Interactive ink canvas Get Started Menu Action", () => {
     await test.step("should not recognize french text", async () => {
       //write something in French with a typical French character: ç
       await writeStrokes(page, lecon.strokes)
-      await callEditorIdle(page)
-      const jiix =  await callEditorExport(page, "application/vnd.myscript.jiix")
+      await callCanvasIdle(page)
+      const jiix =  await callCanvasExport(page, "application/vnd.myscript.jiix")
 
       expect(jiix.elements[0].label).not.toEqual(lecon.exports["application/vnd.myscript.jiix"].elements[0].label)
     })
@@ -189,8 +189,8 @@ test.describe("Interactive ink canvas Get Started Menu Action", () => {
         page.locator(locator.menu.action.language.trigger).click(),
         page.locator(locator.menu.action.language.inputSelect).selectOption({ value: "fr_FR" })
       ])
-      await callEditorIdle(page)
-      const jiix = await callEditorExport(page, "application/vnd.myscript.jiix")
+      await callCanvasIdle(page)
+      const jiix = await callCanvasExport(page, "application/vnd.myscript.jiix")
 
       expect(jiix.elements[0].label).toEqual(lecon.exports["application/vnd.myscript.jiix"].elements[0].label)
     })
@@ -215,14 +215,14 @@ test.describe("Interactive ink canvas Get Started Menu Action", () => {
         waitForSynchronizedEvent(page),
         writePointers(page, helloStrike.strokes[0].pointers)
       ])
-      expect(await getEditorSymbols(page)).toHaveLength(1)
+      expect(await getCanvasSymbols(page)).toHaveLength(1)
 
       await Promise.all([
         waitForGesturedEvent(page),
         writePointers(page, helloStrike.strokes[1].pointers)
       ])
 
-      const symbols = await getEditorSymbols(page)
+      const symbols = await getCanvasSymbols(page)
       expect(symbols).toHaveLength(2)
       const strikethrough = symbols.find(s => s.type === "decorator")
       expect(strikethrough).toBeDefined()
@@ -258,7 +258,7 @@ test.describe("Interactive ink canvas Get Started Menu Action", () => {
 
     await test.step("should define strikethrough on erase", async () => {
       await page.evaluate("rootEl.iink.clear()")
-      expect(await getEditorSymbols(page)).toHaveLength(0)
+      expect(await getCanvasSymbols(page)).toHaveLength(0)
 
       await expect(page.locator(`${locator.menu.action.triggerBtn} + .sub-menu-content`)).toBeHidden()
       await page.locator(locator.menu.action.triggerBtn).click()
@@ -284,14 +284,14 @@ test.describe("Interactive ink canvas Get Started Menu Action", () => {
         waitForExportedEvent(page),
         writePointers(page, helloStrike.strokes[0].pointers)
       ])
-      expect(await getEditorSymbols(page)).toHaveLength(1)
+      expect(await getCanvasSymbols(page)).toHaveLength(1)
 
       // write the strike through
       await Promise.all([
         waitForGesturedEvent(page),
         writePointers(page, helloStrike.strokes[1].pointers)
       ])
-      expect(await getEditorSymbols(page)).toHaveLength(0)
+      expect(await getCanvasSymbols(page)).toHaveLength(0)
     })
   })
 
@@ -340,10 +340,10 @@ test.describe("Interactive ink canvas Get Started Menu Action", () => {
       await expect(selectIntentionLocator).toHaveClass(/active/)
     })
 
-    await test.step("clear the editor before setting surround parameter on draw", async () => {
-      //clear the editor
+    await test.step("clear the canvas before setting surround parameter on draw", async () => {
+      //clear the canvas
       await page.evaluate("rootEl.iink.clear()")
-      expect(await getEditorSymbols(page)).toHaveLength(0)
+      expect(await getCanvasSymbols(page)).toHaveLength(0)
     })
 
     await test.step("should define surround on draw surround", async () => {
@@ -467,7 +467,7 @@ test.describe("Interactive ink canvas Get Started Menu Action", () => {
       ])
       // necessary to ensure that recognition is completed
       await page.evaluate("rootEl.iink.synchronize()")
-      const symbols = await getEditorSymbols(page)
+      const symbols = await getCanvasSymbols(page)
       expect(symbols).toHaveLength(1)
       expect(symbols[0].words[0].label).toEqual("hel")
       expect(symbols[0].words[1].label).toEqual(" ")
@@ -497,7 +497,7 @@ test.describe("Interactive ink canvas Get Started Menu Action", () => {
     })
 
     await test.step("insert should separate word on convert", async () => {
-      //clear the editor
+      //clear the canvas
       await page.evaluate("rootEl.iink.clear()")
       let symbols = await page.evaluate("rootEl.iink.model.symbols")
       expect(symbols).toHaveLength(0)

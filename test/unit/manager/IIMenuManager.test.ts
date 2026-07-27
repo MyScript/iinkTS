@@ -1,10 +1,10 @@
-import { createCanvasMock, asEditor } from "../__mocks__/createCanvasMock"
+import { createCanvasMock, asCanvas } from "../__mocks__/createCanvasMock"
 import { IIMenuManager, IIMenuStyle, IIMenuTool, IIMenuAction } from "@/iink"
 
 describe("IIMenuManager.ts", () => {
   test("should instanciate", () => {
-    const editor = createCanvasMock()
-    const manager = new IIMenuManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new IIMenuManager(asCanvas(canvas))
     expect(manager).toBeDefined()
   })
 
@@ -13,9 +13,9 @@ describe("IIMenuManager.ts", () => {
       class CustomMenuStyle extends IIMenuStyle {
         name = "override-style"
       }
-      const editor = createCanvasMock()
+      const canvas = createCanvasMock()
       //@ts-ignore
-      const manager = new IIMenuManager(asEditor(editor), { style: CustomMenuStyle })
+      const manager = new IIMenuManager(asCanvas(canvas), { style: CustomMenuStyle })
       //@ts-ignore
       expect(manager.style.name).toEqual("override-style")
     })
@@ -23,9 +23,9 @@ describe("IIMenuManager.ts", () => {
       class CustomMenuTool extends IIMenuTool {
         name = "override-tool"
       }
-      const editor = createCanvasMock()
+      const canvas = createCanvasMock()
       //@ts-ignore
-      const manager = new IIMenuManager(asEditor(editor), { tool: CustomMenuTool })
+      const manager = new IIMenuManager(asCanvas(canvas), { tool: CustomMenuTool })
       //@ts-ignore
       expect(manager.tool.name).toEqual("override-tool")
     })
@@ -33,9 +33,9 @@ describe("IIMenuManager.ts", () => {
       class CustomMenuAction extends IIMenuAction {
         name = "override-action"
       }
-      const editor = createCanvasMock()
+      const canvas = createCanvasMock()
       //@ts-ignore
-      const manager = new IIMenuManager(asEditor(editor), { action: CustomMenuAction })
+      const manager = new IIMenuManager(asCanvas(canvas), { action: CustomMenuAction })
       //@ts-ignore
       expect(manager.action.name).toEqual("override-action")
     })
@@ -43,43 +43,43 @@ describe("IIMenuManager.ts", () => {
 
   describe("render", () => {
     const layer = document.createElement("div")
-    const editor = createCanvasMock()
-    const manager = new IIMenuManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new IIMenuManager(asCanvas(canvas))
     manager.action.render = jest.fn()
     manager.style.render = jest.fn()
     manager.tool.render = jest.fn()
     test("should do nothing if configuration.menu.enable =  false", () => {
-      editor.configuration.menu.enable = false
+      canvas.configuration.menu.enable = false
       manager.render(layer)
       expect(manager.action.render).toHaveBeenCalledTimes(0)
       expect(manager.style.render).toHaveBeenCalledTimes(0)
       expect(manager.tool.render).toHaveBeenCalledTimes(0)
     })
     test("should render only action", () => {
-      editor.configuration.menu.enable = true
-      editor.configuration.menu.action.enable = true
-      editor.configuration.menu.style.enable = false
-      editor.configuration.menu.tool.enable = false
+      canvas.configuration.menu.enable = true
+      canvas.configuration.menu.action.enable = true
+      canvas.configuration.menu.style.enable = false
+      canvas.configuration.menu.tool.enable = false
       manager.render(layer)
       expect(manager.action.render).toHaveBeenCalledTimes(1)
       expect(manager.style.render).toHaveBeenCalledTimes(0)
       expect(manager.tool.render).toHaveBeenCalledTimes(0)
     })
     test("should render only style", () => {
-      editor.configuration.menu.enable = true
-      editor.configuration.menu.action.enable = false
-      editor.configuration.menu.style.enable = true
-      editor.configuration.menu.tool.enable = false
+      canvas.configuration.menu.enable = true
+      canvas.configuration.menu.action.enable = false
+      canvas.configuration.menu.style.enable = true
+      canvas.configuration.menu.tool.enable = false
       manager.render(layer)
       expect(manager.action.render).toHaveBeenCalledTimes(0)
       expect(manager.style.render).toHaveBeenCalledTimes(1)
       expect(manager.tool.render).toHaveBeenCalledTimes(0)
     })
     test("should render only tool", () => {
-      editor.configuration.menu.enable = true
-      editor.configuration.menu.action.enable = false
-      editor.configuration.menu.style.enable = false
-      editor.configuration.menu.tool.enable = true
+      canvas.configuration.menu.enable = true
+      canvas.configuration.menu.action.enable = false
+      canvas.configuration.menu.style.enable = false
+      canvas.configuration.menu.tool.enable = true
       manager.render(layer)
       expect(manager.action.render).toHaveBeenCalledTimes(0)
       expect(manager.style.render).toHaveBeenCalledTimes(0)
@@ -88,8 +88,8 @@ describe("IIMenuManager.ts", () => {
   })
 
   describe("update", () => {
-    const editor = createCanvasMock()
-    const manager = new IIMenuManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new IIMenuManager(asCanvas(canvas))
     manager.action.update = jest.fn()
     manager.style.update = jest.fn()
     manager.tool.update = jest.fn()
@@ -103,8 +103,8 @@ describe("IIMenuManager.ts", () => {
   })
 
   describe("show/hide", () => {
-    const editor = createCanvasMock()
-    const manager = new IIMenuManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new IIMenuManager(asCanvas(canvas))
     manager.action.show = jest.fn()
     manager.action.hide = jest.fn()
     manager.style.show = jest.fn()
@@ -127,8 +127,8 @@ describe("IIMenuManager.ts", () => {
   })
 
   describe("destroy", () => {
-    const editor = createCanvasMock()
-    const manager = new IIMenuManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new IIMenuManager(asCanvas(canvas))
     manager.action.destroy = jest.fn()
     manager.style.destroy = jest.fn()
     manager.tool.destroy = jest.fn()

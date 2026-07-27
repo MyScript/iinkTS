@@ -37,7 +37,7 @@ validateResponsesBtn.addEventListener("pointerup", () => {
   }
 })
 
-async function switchEditorInput(input) {
+async function switchInput(input) {
   await canvas.waitForIdle()
   const strokesWritten = getWrittenStrokes()
   if (currentInput.contains(rootElement)) {
@@ -93,12 +93,12 @@ for (let i = 0; i < questions.length; i++) {
   inputEl.addEventListener("pointerdown", async (evt) => {
     evt.preventDefault()
     if (!inputEl.contains(canvas.layers.root)) {
-      switchEditorInput(inputEl)
+      switchInput(inputEl)
     }
   })
 }
 
-const editorOptions = {
+const canvasOptions = {
   configuration: {
     recognition: {
       type: "TEXT",
@@ -120,7 +120,7 @@ const editorOptions = {
   },
 }
 
-async function loadEditor(options) {
+async function loadCanvas(options) {
   currentInput = document.getElementById("input-0")
   currentInput.appendChild(rootElement)
 
@@ -141,13 +141,13 @@ async function loadEditor(options) {
 }
 
 showModalBtn.addEventListener("click", () => {
-  ModalCanvasOptions.show(loadEditor, editorOptions)
+  ModalCanvasOptions.show(loadCanvas, canvasOptions)
 })
 
-ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
 
 /**
  * We expose these objects to the window use it in test
  */
-window.editorOptions = editorOptions
-window.loadEditor = loadEditor
+window.canvasOptions = canvasOptions
+window.loadCanvas = loadCanvas

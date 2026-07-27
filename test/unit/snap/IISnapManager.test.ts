@@ -1,17 +1,17 @@
 import { buildIILine } from "../helpers"
-import { createCanvasMock, asEditor } from "../__mocks__/createCanvasMock"
+import { createCanvasMock, asCanvas } from "../__mocks__/createCanvasMock"
 import { IISnapManager, TSegment, TPoint, TSnapNudge, SVGRendererConst } from "@/iink"
 
 describe("IISnapManager.ts", () => {
   test("should create", () => {
-    const editor = createCanvasMock()
-    const manager = new IISnapManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new IISnapManager(asCanvas(canvas))
     expect(manager).toBeDefined()
   })
 
   test("should call renderer.drawLine when drawSnapToElementLines", () => {
-    const editor = createCanvasMock()
-    const manager = new IISnapManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new IISnapManager(asCanvas(canvas))
     manager.renderer.drawLine = jest.fn()
     const lines: TSegment[] = [
       { p1: { x: 0, y: 0 }, p2: { x: 0, y: 20 } },
@@ -42,8 +42,8 @@ describe("IISnapManager.ts", () => {
   })
 
   test("should call renderer.clearElements when clearSnapToElementLines", () => {
-    const editor = createCanvasMock()
-    const manager = new IISnapManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new IISnapManager(asCanvas(canvas))
     manager.renderer.clearElements = jest.fn()
     manager.clearSnapToElementLines()
     expect(manager.renderer.clearElements).toHaveBeenCalledTimes(1)
@@ -51,15 +51,15 @@ describe("IISnapManager.ts", () => {
   })
 
   describe("snapResize", () => {
-    const editor = createCanvasMock()
-    editor.client.init = jest.fn(() => Promise.resolve())
-    editor.configuration.rendering.guides.gap = 10
-    const manager = new IISnapManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    canvas.client.init = jest.fn(() => Promise.resolve())
+    canvas.configuration.rendering.guides.gap = 10
+    const manager = new IISnapManager(asCanvas(canvas))
     manager.renderer.drawLine = jest.fn()
     manager.renderer.clearElements = jest.fn()
 
     beforeAll(async () => {
-      await editor.init()
+      await canvas.init()
     })
 
     test("should do nothing if configuration.symbol & configuration.guide are equal to false", () => {
@@ -82,7 +82,7 @@ describe("IISnapManager.ts", () => {
         manager.snapConfiguration.symbol = true
       })
       afterEach(() => {
-        editor.model.clear()
+        canvas.model.clear()
       })
       test("should return origin point if no symbol into model", () => {
         expect(manager.snapResize({ x: 10, y: 10 })).toEqual({ x: 10, y: 10 })
@@ -102,7 +102,7 @@ describe("IISnapManager.ts", () => {
           y: point.y + 4 * manager.snapThreshold,
         }
         const line = buildIILine({ start, end })
-        editor.model.addSymbol(line)
+        canvas.model.addSymbol(line)
         expect(manager.snapResize(point)).toEqual(point)
         expect(manager.renderer.clearElements).toHaveBeenCalledTimes(1)
       })
@@ -120,7 +120,7 @@ describe("IISnapManager.ts", () => {
           y: point.y + 4 * manager.snapThreshold,
         }
         const line = buildIILine({ start, end })
-        editor.model.addSymbol(line)
+        canvas.model.addSymbol(line)
         expect(manager.snapResize(point)).toEqual({ x: end.x, y: point.y })
         expect(manager.renderer.drawLine).toHaveBeenCalledTimes(1)
       })
@@ -138,7 +138,7 @@ describe("IISnapManager.ts", () => {
           y: point.y + manager.snapThreshold / 2,
         }
         const line = buildIILine({ start, end })
-        editor.model.addSymbol(line)
+        canvas.model.addSymbol(line)
         expect(manager.snapResize(point)).toEqual({ x: point.x, y: end.y })
         expect(manager.renderer.drawLine).toHaveBeenCalledTimes(1)
       })
@@ -156,7 +156,7 @@ describe("IISnapManager.ts", () => {
           y: point.y + manager.snapThreshold / 2,
         }
         const line = buildIILine({ start, end })
-        editor.model.addSymbol(line)
+        canvas.model.addSymbol(line)
         expect(manager.snapResize(point)).toEqual({ x: start.x, y: end.y })
         expect(manager.renderer.drawLine).toHaveBeenCalledTimes(2)
       })
@@ -164,10 +164,10 @@ describe("IISnapManager.ts", () => {
   })
 
   describe("snapTranslate", () => {
-    const editor = createCanvasMock()
-    editor.client.init = jest.fn(() => Promise.resolve())
-    editor.configuration.rendering.guides.gap = 10
-    const manager = new IISnapManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    canvas.client.init = jest.fn(() => Promise.resolve())
+    canvas.configuration.rendering.guides.gap = 10
+    const manager = new IISnapManager(asCanvas(canvas))
     const selectionSnapPointMock = { x: 25, y: 30 }
     Object.defineProperty(manager, "selectionSnapPoints", {
       get: jest.fn(() => [selectionSnapPointMock]),
@@ -176,7 +176,7 @@ describe("IISnapManager.ts", () => {
     manager.renderer.clearElements = jest.fn()
 
     beforeAll(async () => {
-      await editor.init()
+      await canvas.init()
     })
 
     test("should do nothing if configuration.symbol & configuration.guide are equal to false", () => {
@@ -199,7 +199,7 @@ describe("IISnapManager.ts", () => {
         manager.snapConfiguration.symbol = true
       })
       afterEach(() => {
-        editor.model.clear()
+        canvas.model.clear()
       })
 
       test("should return origin nudge if no symbol into model", () => {
@@ -220,7 +220,7 @@ describe("IISnapManager.ts", () => {
           y: nudge.y + 4 * manager.snapThreshold,
         }
         const line = buildIILine({ start, end })
-        editor.model.addSymbol(line)
+        canvas.model.addSymbol(line)
         expect(manager.snapTranslate(nudge.x, nudge.y)).toEqual(nudge)
         expect(manager.renderer.clearElements).toHaveBeenCalledTimes(1)
       })
@@ -238,7 +238,7 @@ describe("IISnapManager.ts", () => {
           y: selectionSnapPointMock.y + nudge.y + 4 * manager.snapThreshold,
         }
         const line = buildIILine({ start, end })
-        editor.model.addSymbol(line)
+        canvas.model.addSymbol(line)
         expect(manager.snapTranslate(nudge.x, nudge.y)).toEqual({ x: end.x - selectionSnapPointMock.x, y: nudge.y })
         expect(manager.renderer.drawLine).toHaveBeenCalledTimes(1)
       })
@@ -256,7 +256,7 @@ describe("IISnapManager.ts", () => {
           y: selectionSnapPointMock.y + nudge.y + manager.snapThreshold / 4,
         }
         const line = buildIILine({ start, end })
-        editor.model.addSymbol(line)
+        canvas.model.addSymbol(line)
         expect(manager.snapTranslate(nudge.x, nudge.y)).toEqual({ x: nudge.x, y: end.y - selectionSnapPointMock.y })
         expect(manager.renderer.drawLine).toHaveBeenCalledTimes(1)
       })
@@ -274,7 +274,7 @@ describe("IISnapManager.ts", () => {
           y: selectionSnapPointMock.y + nudge.y + manager.snapThreshold / 2,
         }
         const line = buildIILine({ start, end })
-        editor.model.addSymbol(line)
+        canvas.model.addSymbol(line)
         expect(manager.snapTranslate(nudge.x, nudge.y)).toEqual({
           x: start.x - selectionSnapPointMock.x,
           y: end.y - selectionSnapPointMock.y,
@@ -285,8 +285,8 @@ describe("IISnapManager.ts", () => {
   })
 
   describe("snapRotation", () => {
-    const editor = createCanvasMock()
-    const manager = new IISnapManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new IISnapManager(asCanvas(canvas))
 
     test("should do nothing if configuration.symbol & configuration.guide are equal to false", () => {
       manager.snapConfiguration.angle = 0

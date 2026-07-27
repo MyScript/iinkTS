@@ -1,15 +1,15 @@
-import { createCanvasMock, asEditor } from "../../../__mocks__/createCanvasMock"
+import { createCanvasMock, asCanvas } from "../../../__mocks__/createCanvasMock"
 import { buildIIStroke } from "../../../helpers"
 import { type TStroke, InsertGestureHandler, GestureHelpers, OBBOps, StrokeOps, MatrixTransform } from "@/iink"
 
 describe("InsertGestureHandler.ts", () => {
-  let editor: ReturnType<typeof createCanvasMock>
+  let canvas: ReturnType<typeof createCanvasMock>
   let helpers: GestureHelpers
   let handler: InsertGestureHandler
 
   beforeEach(() => {
-    editor = createCanvasMock()
-    ;(editor.transform as unknown as Record<string, unknown>).translate = {
+    canvas = createCanvasMock()
+    ;(canvas.transform as unknown as Record<string, unknown>).translate = {
       applyToSymbol: jest.fn().mockImplementation((sym: TStroke, matrix: MatrixTransform) => {
         sym.pointers.forEach((p) => {
           const np = MatrixTransform.applyToPoint(matrix, p)
@@ -20,8 +20,8 @@ describe("InsertGestureHandler.ts", () => {
         return sym
       }),
     }
-    helpers = new GestureHelpers(asEditor(editor))
-    handler = new InsertGestureHandler(asEditor(editor), helpers)
+    helpers = new GestureHelpers(asCanvas(canvas))
+    handler = new InsertGestureHandler(asCanvas(canvas), helpers)
   })
 
   test("should instantiate", () => {
@@ -106,7 +106,7 @@ describe("InsertGestureHandler.ts", () => {
       StrokeOps.addPointer(strokeToSplit, { x: 0, y: 0, p: 1, t: 100 })
       StrokeOps.addPointer(strokeToSplit, { x: 10, y: 10, p: 1, t: 200 })
 
-      editor.model.addSymbol(strokeToSplit)
+      canvas.model.addSymbol(strokeToSplit)
 
       const subStrokes = [
         { fullStrokeId: strokeToSplit.id, x: [0, 1], y: [0, 1] },

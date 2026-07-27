@@ -2,8 +2,8 @@ import { test, expect } from "@playwright/test"
 import {
   passModalKey,
   writeStrokes,
-  callEditorIdle,
-  getEditorSymbols,
+  callCanvasIdle,
+  getCanvasSymbols,
   pollJiix,
   openMathActionMenu,
   openMathContextMenu,
@@ -18,7 +18,7 @@ import oneFracZero from "../__dataset__/math_context_menu._1frac0"
 
 const writeExpressionAndGetBlockId = async (page, strokes) => {
   await writeStrokes(page, strokes)
-  await callEditorIdle(page)
+  await callCanvasIdle(page)
   const jiix = await pollJiix(page, 1)
   return jiix.elements[0].id
 }
@@ -48,7 +48,7 @@ test.describe("Math Context Menu", () => {
 
     await expect
       .poll(async () => {
-        const symbols = await getEditorSymbols(page)
+        const symbols = await getCanvasSymbols(page)
         return symbols.some((s) => s.isSolverOutput && s.jiixBlockId === jiixBlockId)
       }, { timeout: 8000 })
       .toBe(true)
@@ -124,7 +124,7 @@ test.describe("Math Context Menu", () => {
 
     await expect
       .poll(async () => {
-        const symbols = await getEditorSymbols(page)
+        const symbols = await getCanvasSymbols(page)
         return symbols.some((s) => s.isSolverOutput && s.jiixBlockId === jiixBlockId)
       }, { timeout: 8000 })
       .toBe(true)

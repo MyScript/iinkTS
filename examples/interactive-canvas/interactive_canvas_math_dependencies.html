@@ -135,7 +135,7 @@
     let canvas
     let allVariables = []
 
-    const editorOptions = {
+    const canvasOptions = {
       configuration: {
         recognition: {
           "raw-content": {
@@ -191,17 +191,17 @@
       },
     }
 
-    async function loadEditor(options) {
+    async function loadCanvas(options) {
       await canvas?.destroy()
 
       canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK', options)
 
-      canvas.event.addChangedListener(onEditorChanged)
+      canvas.event.addChangedListener(onCanvasChanged)
       canvas.event.addSynchronizedListener(onSynchronized)
       return canvas
     }
 
-    async function onEditorChanged(event) {
+    async function onCanvasChanged(event) {
       if (event.empty) {
         dependenciesList.innerHTML = 'No dependencies yet'
         return
@@ -334,7 +334,7 @@
       dependenciesList.innerHTML = html
     }
 
-    ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+    ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
   </script>
   <script type="module" src="../components/code-viewer/code-viewer.js"></script>
   <script src="../assets/js/theme.js"></script>

@@ -31,7 +31,7 @@ export type TInkCanvasOptions = TPartialDeep<
 
 /**
  * @group Canvas
- * @remarks InkCanvas is the core editor variant focused on freeform ink input, rendering, and recognition. It provides a rich API for managing strokes, exports, and editor state, and serves as the foundation for more specialized editor variants.
+ * @remarks InkCanvas is the core canvas variant focused on freeform ink input, rendering, and recognition. It provides a rich API for managing strokes, exports, and canvas state, and serves as the foundation for more specialized canvas variants.
  *
  * Key features include:
  * - Stroke management: Add, remove, and style ink strokes with real-time rendering.

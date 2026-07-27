@@ -65,7 +65,7 @@
     <div class="ex-page-layout">
       <aside id="info-panel" class="ex-panel">
         <p class="ex-panel-heading">Extending built-in menus with custom classes</p>
-        <p class="ex-panel-intro">Any of the four built-in menus (<code>action</code>, <code>tool</code>, <code>style</code>, <code>context</code>) can be replaced by a custom class passed in <code>editorOptions.override.menu</code>. Extend the base class to keep all existing behavior, then add or modify what you need.</p>
+        <p class="ex-panel-intro">Any of the four built-in menus (<code>action</code>, <code>tool</code>, <code>style</code>, <code>context</code>) can be replaced by a custom class passed in <code>canvasOptions.override.menu</code>. Extend the base class to keep all existing behavior, then add or modify what you need.</p>
         <div class="ex-panel-divider"></div>
         <div class="ex-panel-item">
           <div class="ex-panel-item-desc">Here, <strong>CustomMenuAction</strong> extends <code>IIMenuAction</code> to add a <strong>Download PNG</strong> button (exports the current canvas as a PNG file) and a <strong>stroke count badge</strong> that updates live on every render cycle.</div>
@@ -251,7 +251,7 @@
       const rootElement = document.getElementById('rootEl')
       const showModalBtn = document.getElementById('showModalBtn')
 
-      const editorOptions = {
+      const canvasOptions = {
         configuration: {
           recognition: {
             lang: 'en_US',
@@ -272,16 +272,16 @@
 
       let canvas
 
-      async function loadEditor(options) {
+      async function loadCanvas(options) {
         await canvas?.destroy()
         canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK', options)
         window.canvas = canvas
       }
       showModalBtn.addEventListener('click', () => {
-        ModalCanvasOptions.show(loadEditor, editorOptions)
+        ModalCanvasOptions.show(loadCanvas, canvasOptions)
       })
 
-      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
     </script>
     <script type="module" src="../components/code-viewer/code-viewer.js"></script>
     <script src="../assets/js/theme.js"></script>

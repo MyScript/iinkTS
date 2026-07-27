@@ -2,10 +2,10 @@ import { test, expect } from "@playwright/test"
 import {
   writeStrokes,
   waitForExportedEvent,
-  getEditorConfiguration,
-  getEditorExports,
-  getEditorSymbols,
-  loadEditor,
+  getCanvasConfiguration,
+  getCanvasExports,
+  getCanvasSymbols,
+  loadCanvas,
   passModalKey
 } from "../helper"
 import one from "../__dataset__/1"
@@ -28,7 +28,7 @@ test.describe("Ink Canvas Math", () => {
       writeStrokes(page, one.strokes),
     ])
 
-    const modelExports = await getEditorExports(page)
+    const modelExports = await getCanvasExports(page)
     expect(modelExports["application/x-latex"]).toStrictEqual(one.exports.LATEX.at(-1))
 
     await expect(page.locator("#result .katex-html")).toHaveText(one.exports.LATEX.at(-1))
@@ -65,7 +65,7 @@ test.describe("Ink Canvas Math", () => {
     })
 
     test("should only request application/mathml+xml", async ({ page }) => {
-      const configuration = await getEditorConfiguration(page)
+      const configuration = await getCanvasConfiguration(page)
       const options = {
         configuration: {
           server: configuration.server,
@@ -77,7 +77,7 @@ test.describe("Ink Canvas Math", () => {
           }
         }
       }
-      await loadEditor(page, options)
+      await loadCanvas(page, options)
 
       await Promise.all([
         waitForExportedEvent(page),
@@ -88,7 +88,7 @@ test.describe("Ink Canvas Math", () => {
     })
 
     test("should request application/mathml+xml & application/x-latex", async ({ page }) => {
-      const configuration = await getEditorConfiguration(page)
+      const configuration = await getCanvasConfiguration(page)
       const options = {
         configuration: {
           server: configuration.server,
@@ -103,7 +103,7 @@ test.describe("Ink Canvas Math", () => {
           }
         }
       }
-      await loadEditor(page, options)
+      await loadCanvas(page, options)
 
       await Promise.all([
         waitForExportedEvent(page),
@@ -130,7 +130,7 @@ test.describe("Ink Canvas Math", () => {
         page.locator("#clear").click(),
       ])
       expect(promisesResult[0]).toBeNull()
-      expect(await getEditorExports(page)).toBeFalsy()
+      expect(await getCanvasExports(page)).toBeFalsy()
 
       await expect(page.locator("#result")).toBeEmpty()
     })
@@ -152,7 +152,7 @@ test.describe("Ink Canvas Math", () => {
         // before the click's own model mutation lands (listener attachment races the click) —
         // seen flaky on CI as a stale symbol count. Poll instead of a single immediate read.
         await expect
-          .poll(async () => (await getEditorSymbols(page)).length, { timeout: 5000 })
+          .poll(async () => (await getCanvasSymbols(page)).length, { timeout: 5000 })
           .toBe(equation.strokes.length - 1)
       })
 
@@ -162,7 +162,7 @@ test.describe("Ink Canvas Math", () => {
           page.locator("#undo").click()
         ])
         await expect
-          .poll(async () => (await getEditorSymbols(page)).length, { timeout: 5000 })
+          .poll(async () => (await getCanvasSymbols(page)).length, { timeout: 5000 })
           .toBe(equation.strokes.length - 2)
       })
 
@@ -172,7 +172,7 @@ test.describe("Ink Canvas Math", () => {
           page.locator("#redo").click()
         ])
         await expect
-          .poll(async () => (await getEditorSymbols(page)).length, { timeout: 5000 })
+          .poll(async () => (await getCanvasSymbols(page)).length, { timeout: 5000 })
           .toBe(equation.strokes.length - 1)
       })
 

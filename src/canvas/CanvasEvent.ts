@@ -8,7 +8,7 @@ import type { TBaseSymbol, TStroke, TSymbol } from "@/symbol"
 
 /**
  * @group Canvas
- * @remarks Lists all events that can be listened to on the editor or DOM element
+ * @remarks Lists all events that can be listened to on the canvas or DOM element
  * @example
  * You can run code on "CanvasEventName" raised by using
  * ```ts
@@ -29,7 +29,7 @@ export enum CanvasEventName {
    */
   CONVERTED = "converted",
   /**
-   * @remarks event emitted when the editor encounters an error
+   * @remarks event emitted when the canvas encounters an error
    */
   ERROR = "error",
   /**
@@ -53,7 +53,7 @@ export enum CanvasEventName {
    */
   IDLE = "idle",
   /**
-   * @remarks event emitted after full editor initialization
+   * @remarks event emitted after full canvas initialization
    */
   LOADED = "loaded",
   /**
@@ -93,8 +93,8 @@ export enum CanvasEventName {
 /**
  * @group Canvas
  * @remarks Derived, UI-oriented connection state combining initialization, connection, offline
- * queue, and busy/idle status. See `editor.connectionState` and `addConnectionStateChangedListener`.
- * - `initializing` — editor not yet connected to the server for the first time
+ * queue, and busy/idle status. See `canvas.connectionState` and `addConnectionStateChangedListener`.
+ * - `initializing` — canvas not yet connected to the server for the first time
  * - `online-idle` — connected, client idle
  * - `online-working` — connected, client processing a request
  * - `syncing` — disconnected, actively reconnecting, with strokes queued to replay

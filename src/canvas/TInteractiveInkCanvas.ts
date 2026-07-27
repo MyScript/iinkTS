@@ -36,7 +36,7 @@ import type { InteractiveInkCanvasConfiguration } from "./variants/InteractiveIn
 /**
  * Structural type for InteractiveInkCanvas used by all managers.
  * Managers depend on this type rather than the concrete class to
- * enable isolation testing and future editor variants.
+ * enable isolation testing and future canvas variants.
  * @group Canvas
  */
 export type TInteractiveInkCanvas = {

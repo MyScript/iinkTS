@@ -1,11 +1,11 @@
 import { test, expect } from "@playwright/test"
 import {
   passModalKey,
-  getEditorSymbols,
+  getCanvasSymbols,
   waitForConvertedEvent,
   waitForSynchronizedEvent,
   writeStrokes,
-  callEditorConvert
+  callCanvasConvert
 } from "../helper"
 import helloOneStroke from "../__dataset__/helloOneStroke"
 
@@ -33,7 +33,7 @@ test.describe("Interactive ink canvas Get Started Menu Style", () => {
           writeStrokes(page, helloOneStroke.strokes),
         ])
 
-        const strokes = await getEditorSymbols(page)
+        const strokes = await getCanvasSymbols(page)
         const stroke = strokes[0]
         expect(stroke.style.color).toStrictEqual("#" + color.rgb)
         expect(stroke.style.width).toStrictEqual(2)
@@ -64,7 +64,7 @@ test.describe("Interactive ink canvas Get Started Menu Style", () => {
           writeStrokes(page, helloOneStroke.strokes),
         ])
 
-        const strokes = await getEditorSymbols(page)
+        const strokes = await getCanvasSymbols(page)
         const stroke = strokes[0]
         expect(stroke.style.color).toStrictEqual("#000000")
         expect(stroke.style.width).toStrictEqual(thickness.width)
@@ -98,10 +98,10 @@ test.describe("Interactive ink canvas Get Started Menu Style", () => {
 
         await Promise.all([
           waitForConvertedEvent(page),
-          callEditorConvert(page)
+          callCanvasConvert(page)
         ])
 
-        const symbols = await getEditorSymbols(page)
+        const symbols = await getCanvasSymbols(page)
         expect(symbols).toHaveLength(1)
 
         const chars = symbols[0].chars
@@ -125,7 +125,7 @@ test.describe("Interactive ink canvas Get Started Menu Style", () => {
 
       await Promise.all([
         waitForConvertedEvent(page),
-        callEditorConvert(page)
+        callCanvasConvert(page)
       ])
 
       const minX = Math.min(...helloOneStroke.strokes[0].pointers.map(p => p.x))
@@ -169,10 +169,10 @@ test.describe("Interactive ink canvas Get Started Menu Style", () => {
 
         await Promise.all([
           waitForConvertedEvent(page),
-          callEditorConvert(page)
+          callCanvasConvert(page)
         ])
 
-        const symbols = await getEditorSymbols(page)
+        const symbols = await getCanvasSymbols(page)
         let chars = symbols[0].chars
         for (const char of chars) {
           expect(char.fontWeight).toStrictEqual(fw.value)
@@ -192,7 +192,7 @@ test.describe("Interactive ink canvas Get Started Menu Style", () => {
         writeStrokes(page, helloOneStroke.strokes),
       ])
 
-      const strokes = await getEditorSymbols(page)
+      const strokes = await getCanvasSymbols(page)
       const stroke = strokes[0]
       expect(stroke.style.opacity).toStrictEqual(0.5)
       await expect(page.locator(`#${ stroke.id } path`)).toHaveAttribute("opacity", "0.5")

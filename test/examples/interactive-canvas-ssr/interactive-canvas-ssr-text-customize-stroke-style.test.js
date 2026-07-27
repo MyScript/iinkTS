@@ -46,9 +46,9 @@ test.describe("Interactive Canvas SSR Text Customize Stroke Style", () => {
       writeStrokes(page, h.strokes, -150, 0),
     ])
 
-    const editorTheme = await page.evaluate("rootEl.iink.theme")
-    const editorPenStyleClasses = await page.evaluate("rootEl.iink.penStyleClasses")
-    const penColorExpected = editorTheme[`.${editorPenStyleClasses}`].color
+    const canvasTheme = await page.evaluate("rootEl.iink.theme")
+    const canvasPenStyleClasses = await page.evaluate("rootEl.iink.penStyleClasses")
+    const penColorExpected = canvasTheme[`.${canvasPenStyleClasses}`].color
     await expect(page.locator(`path[fill="${hexToRgbA(penColorExpected)}"]`)).toHaveCount(1)
   })
 
@@ -60,8 +60,8 @@ test.describe("Interactive Canvas SSR Text Customize Stroke Style", () => {
       writeStrokes(page, h.strokes, -150, 0),
     ])
 
-    const editorTheme = await page.evaluate("rootEl.iink.theme")
-    const penColorExpected = editorTheme.ink.color
+    const canvasTheme = await page.evaluate("rootEl.iink.theme")
+    const penColorExpected = canvasTheme.ink.color
     const path = page.locator(`path[fill="${hexToRgbA(penColorExpected)}"]`)
     await expect(path).toHaveCount(1)
   })
@@ -84,8 +84,8 @@ test.describe("Interactive Canvas SSR Text Customize Stroke Style", () => {
       writeStrokes(page, h.strokes, -150, 0),
     ])
 
-    const editorPenStyle = await page.evaluate("rootEl.iink.penStyle")
-    const path = page.locator(`path[fill="${hexToRgbA(editorPenStyle.color)}"]`)
+    const canvasPenStyle = await page.evaluate("rootEl.iink.penStyle")
+    const path = page.locator(`path[fill="${hexToRgbA(canvasPenStyle.color)}"]`)
     await expect(path).toHaveCount(1)
 
     await enablePenStyle.click()

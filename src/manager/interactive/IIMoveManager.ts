@@ -20,9 +20,9 @@ export class IIMoveManager extends IIAbstractManager {
     clientY: number
   }
 
-  constructor(editor: TInteractiveInkCanvas) {
-    super(editor, LoggerCategory.MOVE)
-    this.grabber = new PointerEventGrabber(editor.configuration.grabber)
+  constructor(canvas: TInteractiveInkCanvas) {
+    super(canvas, LoggerCategory.MOVE)
+    this.grabber = new PointerEventGrabber(canvas.configuration.grabber)
   }
 
   protected updateViewBox(info: TPointerInfo, redrawGuide: boolean): void {

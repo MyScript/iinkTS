@@ -42,7 +42,7 @@
 
       <aside id="guide-panel" class="ex-panel">
         <p class="ex-panel-heading">Configuration options</p>
-        <p class="ex-panel-intro">All options have sensible defaults. Pass any subset in <code>editorOptions.configuration</code> to <code>Canvas.load()</code> — unset keys keep their default.</p>
+        <p class="ex-panel-intro">All options have sensible defaults. Pass any subset in <code>canvasOptions.configuration</code> to <code>Canvas.load()</code> — unset keys keep their default.</p>
 
         <div class="ex-panel-divider"></div>
 
@@ -500,7 +500,7 @@
         <div class="ex-panel-item">
           <div><span class="ex-panel-item-label">logger.&lt;CATEGORY&gt;</span><span class="ex-panel-item-default">ERROR</span></div>
           <div class="ex-panel-item-values">DEBUG · INFO · WARN · ERROR</div>
-          <div class="ex-panel-item-desc">Log level per category. Categories: EDITOR · CLIENT · GRABBER · GESTURE · RENDERER · MODEL · HISTORY · SYMBOL · MENU · MATH · SNAP · TEXT · SELECTION · SYNCHRONIZER · WRITE · MOVE · MANAGER · CONVERTER · TRANSFORMER · KEYBOARD · JIIX_QUERY · SVGDEBUG · SMARTGUIDE · EDITOR_EVENT · STYLE</div>
+          <div class="ex-panel-item-desc">Log level per category. Categories: CANVAS · CLIENT · GRABBER · GESTURE · RENDERER · MODEL · HISTORY · SYMBOL · MENU · MATH · SNAP · TEXT · SELECTION · SYNCHRONIZER · WRITE · MOVE · MANAGER · CONVERTER · TRANSFORMER · KEYBOARD · JIIX_QUERY · SVGDEBUG · SMARTGUIDE · CANVAS_EVENT · STYLE</div>
         </div>
 
       </aside>
@@ -531,7 +531,7 @@
       const showModalBtn = document.getElementById('showModalBtn')
 
       let canvas
-      const editorOptions = {
+      const canvasOptions = {
         configuration: {
           rendering: {
             guides: {
@@ -559,17 +559,17 @@
           }
         }
       }
-      async function loadEditor(options) {
+      async function loadCanvas(options) {
         canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK', options)
       }
       showModalBtn.addEventListener('click', () => {
-        ModalCanvasOptions.show(loadEditor, editorOptions)
+        ModalCanvasOptions.show(loadCanvas, canvasOptions)
       })
 
-      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
 
-      window.editorOptions = editorOptions
-      window.loadEditor = loadEditor
+      window.canvasOptions = canvasOptions
+      window.loadCanvas = loadCanvas
     </script>
     <script type="module" src="../components/code-viewer/code-viewer.js"></script>
     <script src="../assets/js/theme.js"></script>

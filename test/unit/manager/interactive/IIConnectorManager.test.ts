@@ -1,5 +1,5 @@
 import { describe, test, expect, jest, beforeEach } from "@jest/globals"
-import { createCanvasMock, asEditor } from "../../__mocks__/createCanvasMock"
+import { createCanvasMock, asCanvas } from "../../__mocks__/createCanvasMock"
 import {
   IIConnectorManager,
   EdgeLineOps,
@@ -68,7 +68,7 @@ describe("IIConnectorManager", () => {
 
   beforeEach(() => {
     mock = createCanvasMock()
-    manager = new IIConnectorManager(asEditor(mock))
+    manager = new IIConnectorManager(asCanvas(mock))
     jest
       .spyOn(mock.model, "getRootSymbol")
       .mockReturnValue({ id: TARGET_ID, bounds: TARGET_BOUNDS } as unknown as ReturnType<

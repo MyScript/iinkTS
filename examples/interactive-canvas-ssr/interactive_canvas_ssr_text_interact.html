@@ -137,7 +137,7 @@
 
       let canvas
 
-      const editorOptions = {
+      const canvasOptions = {
         configuration: {
           recognition: {
             type: 'TEXT',
@@ -148,7 +148,7 @@
         }
       }
 
-      async function loadEditor(options) {
+      async function loadCanvas(options) {
         canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK_SSR', options)
 
         canvas.event.addEventListener('exported', (evt) => {
@@ -166,13 +166,13 @@
       })
 
       showModalBtn.addEventListener('click', () => {
-        ModalCanvasOptions.show(loadEditor, editorOptions)
+        ModalCanvasOptions.show(loadCanvas, canvasOptions)
       })
 
-      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
 
-      window.editorOptions = editorOptions
-      window.loadEditor = loadEditor
+      window.canvasOptions = canvasOptions
+      window.loadCanvas = loadCanvas
     </script>
     <script type="module" src="../components/code-viewer/code-viewer.js"></script>
     <script src="../assets/js/theme.js"></script>

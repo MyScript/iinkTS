@@ -18,10 +18,10 @@ export const writePointers = async (
   offsetLeft = 0
 ) => {
   const rootEl = page.locator("#rootEl")
-  const editorExist = (await rootEl.count()) != 0
+  const canvasExist = (await rootEl.count()) != 0
   let offsetX = 0
   let offsetY = 0
-  if (editorExist) {
+  if (canvasExist) {
     const boundingBox = await rootEl.evaluate((node) =>
       node.getBoundingClientRect()
     )
@@ -137,7 +137,7 @@ export const getExportedResults = async (
   return new Promise(async (resolve, reject) => {
     let exported = null
     for (let i = 0; i < nbRetry; i++) {
-      exported = await getEditorExportsType(page, exportType)
+      exported = await getCanvasExportsType(page, exportType)
       if (exported) {
         switch (exportType) {
           case "text/plain":
@@ -160,7 +160,7 @@ export const getExportedResults = async (
  * @param {Page} page - Playwright Page
  * @returns Promise<Object>
  */
-export const getEditorConfiguration = async (page) => {
+export const getCanvasConfiguration = async (page) => {
   await page.waitForFunction(() => !!rootEl?.iink)
   return page.evaluate("rootEl.iink.configuration")
 }
@@ -170,10 +170,10 @@ export const getEditorConfiguration = async (page) => {
  * @param {Object} options - Canvas options
  * @returns Promise<void>
  */
-export const loadEditor = async (page, options) => {
+export const loadCanvas = async (page, options) => {
   await page.waitForFunction(() => !!rootEl?.iink)
   return page.evaluate(
-    `(async () => await loadEditor(${JSON.stringify(options)}))()`
+    `(async () => await loadCanvas(${JSON.stringify(options)}))()`
   )
 }
 
@@ -181,40 +181,40 @@ export const loadEditor = async (page, options) => {
  * @param {Page} page - Playwright Page
  * @returns Promise<TExport>
  */
-export const getEditorExports = async (page) =>
+export const getCanvasExports = async (page) =>
   page.evaluate("rootEl.iink.model.exports")
 /**
  * @param {Page} page - Playwright Page
  * @returns Promise<TExport>
  */
-export const getEditorExportsType = async (page, type) =>
+export const getCanvasExportsType = async (page, type) =>
   page.evaluate(`rootEl.iink.model?.exports?.['${type}']`)
 
 /**
  * @param {Page} page - Playwright Page
  * @returns Promise<TExport>
  */
-export const getEditorConverts = async (page) =>
+export const getCanvasConverts = async (page) =>
   page.evaluate("rootEl.iink.model.converts")
 /**
  * @param {Page} page - Playwright Page
  * @returns Promise<TExport>
  */
-export const getEditorSymbols = async (page) =>
+export const getCanvasSymbols = async (page) =>
   page.evaluate("rootEl.iink.model.symbols")
 
 /**
  * @param {Page} page - Playwright Page
  * @returns Promise<TExportV2>
  */
-export const getEditorStrokes = async (page) =>
+export const getCanvasStrokes = async (page) =>
   page.evaluate("rootEl.iink.model.strokes")
 
 /**
  * @param {Page} page - Playwright Page
  * @returns Promise<TExport>
  */
-export const callEditorExport = async (page, type) => {
+export const callCanvasExport = async (page, type) => {
   await page.waitForFunction(() => !!rootEl?.iink)
   const exports = await page.evaluate(`rootEl.iink.export(['${type}'])`)
   return exports[type]
@@ -223,7 +223,7 @@ export const callEditorExport = async (page, type) => {
  * @param {Page} page - Playwright Page
  * @returns Promise<TExport>
  */
-export const callEditorSynchronize = async (page) => {
+export const callCanvasSynchronize = async (page) => {
   await page.waitForFunction(() => !!rootEl?.iink)
   return page.evaluate(`rootEl.iink.synchronize()`)
 }
@@ -232,7 +232,7 @@ export const callEditorSynchronize = async (page) => {
  * @param {Page} page - Playwright Page
  * @returns Promise<void>
  */
-export const callEditorIdle = async (page) => {
+export const callCanvasIdle = async (page) => {
   await page.waitForFunction(() => !!rootEl?.iink)
   return page.evaluate("rootEl.iink.waitForIdle()")
 }
@@ -241,7 +241,7 @@ export const callEditorIdle = async (page) => {
  * @param {Page} page - Playwright Page
  * @returns Promise<void>
  */
-export const callEditorConvert = async (page) => {
+export const callCanvasConvert = async (page) => {
   await page.waitForFunction(() => !!rootEl?.iink)
   return page.evaluate("rootEl.iink.convert()")
 }
@@ -356,7 +356,7 @@ export const waitForSelectedEvent = async (page) =>
 export const waitForGesturedEvent = async (page) =>
   waitForEvent(page, "gestured")
 
-export const waitForEditorInit = async (page) => {
+export const waitForCanvasInit = async (page) => {
   await page.waitForFunction(() => !!rootEl?.iink)
   return page.evaluate("rootEl.iink.initializationPromise")
 }
@@ -405,7 +405,7 @@ export const pollJiix = async (page, minCount, timeout = 8000) => {
   let jiix
   await expect
     .poll(async () => {
-      jiix = await getEditorExportsType(page, "application/vnd.myscript.jiix")
+      jiix = await getCanvasExportsType(page, "application/vnd.myscript.jiix")
       return jiix?.elements?.length ?? 0
     }, { timeout })
     .toBeGreaterThanOrEqual(minCount)
@@ -446,7 +446,7 @@ export const openMathContextMenu = async (page) => {
 // real gesture in the same test is flaky (waitForGesturedEvent has no timeout of its own and
 // hangs the whole test if the second gesture never fires a "gestured" event).
 export const selectBlockById = async (page, jiixBlockId) => {
-  const symbols = await getEditorSymbols(page)
+  const symbols = await getCanvasSymbols(page)
   const ids = symbols.filter((s) => s.jiixBlockId === jiixBlockId).map((s) => s.id)
   await page.evaluate((ids) => {
     rootEl.iink.select(ids)
@@ -490,7 +490,7 @@ export const buildSurroundPointers = (strokes, { padding = 40, steps = 32 } = {}
   })
 }
 
-// Selection in this editor happens via a recognized "surround" gesture (closed loop drawn with
+// Selection in this canvas happens via a recognized "surround" gesture (closed loop drawn with
 // the write tool) — the math context menu is shown automatically once a single math block is
 // selected. Asserts exactly 1 *distinct Math block* among the selected symbols, not just
 // symbolsSelected.length: a multi-stroke expression like "√5=" legitimately selects several raw
@@ -528,6 +528,6 @@ export const passModalKey = async (page, waitLoader = true) => {
   await page.getByRole('button', { name: 'Save' }).click()
   if (waitLoader) {
     await page.locator('.loader').waitFor({ state: 'hidden' })
-    await waitForEditorInit(page)
+    await waitForCanvasInit(page)
   }
 }

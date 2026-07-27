@@ -8,7 +8,7 @@ import { IITranslateManager } from "./transform/IITranslateManager"
 
 /**
  * Orchestrates the three transform sub-managers (translate, resize, rotation).
- * Access via editor.transform.translate / .resize / .rotation
+ * Access via canvas.transform.translate / .resize / .rotation
  * @group Manager
  */
 export class IITransformManager extends IIAbstractManager {
@@ -18,10 +18,10 @@ export class IITransformManager extends IIAbstractManager {
   readonly resize: IIResizeManager
   readonly rotation: IIRotationManager
 
-  constructor(editor: TInteractiveInkCanvas) {
-    super(editor, LoggerCategory.TRANSFORMER)
-    this.translate = new IITranslateManager(editor)
-    this.resize = new IIResizeManager(editor)
-    this.rotation = new IIRotationManager(editor)
+  constructor(canvas: TInteractiveInkCanvas) {
+    super(canvas, LoggerCategory.TRANSFORMER)
+    this.translate = new IITranslateManager(canvas)
+    this.resize = new IIResizeManager(canvas)
+    this.rotation = new IIRotationManager(canvas)
   }
 }

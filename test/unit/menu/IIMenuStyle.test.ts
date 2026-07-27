@@ -1,18 +1,18 @@
 import { LeftClickEventMock } from "../__mocks__/EventMock"
-import { createCanvasMock, asEditor } from "../__mocks__/createCanvasMock"
+import { createCanvasMock, asCanvas } from "../__mocks__/createCanvasMock"
 import { buildIICircle, buildIIStroke } from "../helpers"
 import { CanvasTool, IIMenuStyle, CanvasWriteTool } from "@/iink"
 
 describe("IIMenuStyle.ts", () => {
   test("should create", () => {
-    const editor = createCanvasMock()
-    const menu = new IIMenuStyle(asEditor(editor))
+    const canvas = createCanvasMock()
+    const menu = new IIMenuStyle(asCanvas(canvas))
     expect(menu).toBeDefined()
   })
 
   describe("render", () => {
-    const editor = createCanvasMock()
-    const menu = new IIMenuStyle(asEditor(editor))
+    const canvas = createCanvasMock()
+    const menu = new IIMenuStyle(asCanvas(canvas))
     describe("isMobile", () => {
       const layer = document.createElement("div")
       beforeAll(() => {
@@ -123,84 +123,84 @@ describe("IIMenuStyle.ts", () => {
       pressure: 1,
     })
     const layer = document.createElement("div")
-    const editor = createCanvasMock()
-    editor.selector.drawSelectedGroup = jest.fn()
-    editor.selector.redrawSelectedGroup = jest.fn()
+    const canvas = createCanvasMock()
+    canvas.selector.drawSelectedGroup = jest.fn()
+    canvas.selector.redrawSelectedGroup = jest.fn()
 
-    const menu = new IIMenuStyle(asEditor(editor))
+    const menu = new IIMenuStyle(asCanvas(canvas))
     menu.render(layer)
 
     beforeEach(() => {
-      editor.model.clear()
+      canvas.model.clear()
     })
 
     test("should update style color", () => {
       const btn = layer.querySelector("#ms-menu-style-color-list-808080") as HTMLButtonElement
       btn.dispatchEvent(clickEvt)
-      expect(editor.penStyle.color).toEqual("#808080")
+      expect(canvas.penStyle.color).toEqual("#808080")
     })
     test("should update color of selected symbols", () => {
       const stroke = buildIIStroke()
-      editor.model.addSymbol(stroke)
-      editor.model.selectedIds.add(stroke.id)
+      canvas.model.addSymbol(stroke)
+      canvas.model.selectedIds.add(stroke.id)
       const btn = layer.querySelector("#ms-menu-style-color-list-808080") as HTMLButtonElement
       btn.dispatchEvent(clickEvt)
-      expect(editor.updateSymbolsStyle).toHaveBeenCalledTimes(1)
-      expect(editor.updateSymbolsStyle).toHaveBeenCalledWith([stroke.id], { color: "#808080" })
+      expect(canvas.updateSymbolsStyle).toHaveBeenCalledTimes(1)
+      expect(canvas.updateSymbolsStyle).toHaveBeenCalledWith([stroke.id], { color: "#808080" })
     })
     test("should update fill of selected symbols", () => {
       const stroke = buildIIStroke()
-      editor.model.addSymbol(stroke)
-      editor.model.selectedIds.add(stroke.id)
+      canvas.model.addSymbol(stroke)
+      canvas.model.selectedIds.add(stroke.id)
       const btn = layer.querySelector("#ms-menu-style-fill-list-ffff00") as HTMLButtonElement
       btn.dispatchEvent(clickEvt)
-      expect(editor.updateSymbolsStyle).toHaveBeenCalledTimes(1)
-      expect(editor.updateSymbolsStyle).toHaveBeenCalledWith([stroke.id], { fill: "#ffff00" })
+      expect(canvas.updateSymbolsStyle).toHaveBeenCalledTimes(1)
+      expect(canvas.updateSymbolsStyle).toHaveBeenCalledWith([stroke.id], { fill: "#ffff00" })
     })
     test("should update style thickness", () => {
       const btn = layer.querySelector("#ms-menu-style-thickness-8") as HTMLButtonElement
       btn.dispatchEvent(pointerUpEvt)
-      expect(editor.penStyle.width).toEqual(8)
+      expect(canvas.penStyle.width).toEqual(8)
     })
     test("should update thickness of selected symbols", () => {
       const stroke = buildIIStroke()
-      editor.model.addSymbol(stroke)
-      editor.model.selectedIds.add(stroke.id)
+      canvas.model.addSymbol(stroke)
+      canvas.model.selectedIds.add(stroke.id)
       const btn = layer.querySelector("#ms-menu-style-thickness-8") as HTMLButtonElement
       btn.dispatchEvent(pointerUpEvt)
-      expect(editor.updateSymbolsStyle).toHaveBeenCalledTimes(1)
-      expect(editor.updateSymbolsStyle).toHaveBeenCalledWith([stroke.id], { width: 8 })
-      expect(editor.selector.redrawSelectedGroup).toHaveBeenNthCalledWith(1)
+      expect(canvas.updateSymbolsStyle).toHaveBeenCalledTimes(1)
+      expect(canvas.updateSymbolsStyle).toHaveBeenCalledWith([stroke.id], { width: 8 })
+      expect(canvas.selector.redrawSelectedGroup).toHaveBeenNthCalledWith(1)
     })
     test("should update style opacity", () => {
       const input = layer.querySelector("#ms-menu-style-opacity-input") as HTMLInputElement
       input.value = "42"
       //@ts-ignore
       input.dispatchEvent(new Event("input", { target: input }))
-      expect(editor.penStyle.opacity).toEqual(0.42)
+      expect(canvas.penStyle.opacity).toEqual(0.42)
     })
     test("should update opacity of selected symbols", () => {
       const stroke = buildIIStroke()
-      editor.model.addSymbol(stroke)
-      editor.model.selectedIds.add(stroke.id)
+      canvas.model.addSymbol(stroke)
+      canvas.model.selectedIds.add(stroke.id)
       const input = layer.querySelector("#ms-menu-style-opacity-input") as HTMLInputElement
       input.value = "42"
       input.dispatchEvent(new Event("input"))
-      expect(editor.updateSymbolsStyle).toHaveBeenCalledTimes(1)
-      expect(editor.updateSymbolsStyle).toHaveBeenCalledWith([stroke.id], { opacity: 0.42 })
+      expect(canvas.updateSymbolsStyle).toHaveBeenCalledTimes(1)
+      expect(canvas.updateSymbolsStyle).toHaveBeenCalledWith([stroke.id], { opacity: 0.42 })
     })
   })
 
   describe("update", () => {
     const layer = document.createElement("div")
-    const editor = createCanvasMock()
-    const menu = new IIMenuStyle(asEditor(editor))
+    const canvas = createCanvasMock()
+    const menu = new IIMenuStyle(asCanvas(canvas))
     menu.render(layer)
 
     describe("when tool == write with pencil", () => {
       beforeAll(() => {
-        editor.tool = CanvasTool.Write
-        editor.writer.tool = CanvasWriteTool.Pencil
+        canvas.tool = CanvasTool.Write
+        canvas.writer.tool = CanvasWriteTool.Pencil
         menu.update()
       })
       test("should display menu color", () => {
@@ -223,8 +223,8 @@ describe("IIMenuStyle.ts", () => {
 
     describe("when tool == write with circle", () => {
       beforeAll(() => {
-        editor.tool = CanvasTool.Write
-        editor.writer.tool = CanvasWriteTool.Circle
+        canvas.tool = CanvasTool.Write
+        canvas.writer.tool = CanvasWriteTool.Circle
         menu.update()
       })
       test("should display menu color", () => {
@@ -247,7 +247,7 @@ describe("IIMenuStyle.ts", () => {
 
     describe("when tool == select", () => {
       beforeAll(() => {
-        editor.tool = CanvasTool.Select
+        canvas.tool = CanvasTool.Select
         menu.update()
       })
       test("should display menu color", () => {
@@ -270,10 +270,10 @@ describe("IIMenuStyle.ts", () => {
 
     describe("when tool == select and shape selected", () => {
       beforeAll(() => {
-        editor.tool = CanvasTool.Select
+        canvas.tool = CanvasTool.Select
         const shape = buildIICircle()
-        editor.model.addSymbol(shape)
-        editor.model.selectedIds.add(shape.id)
+        canvas.model.addSymbol(shape)
+        canvas.model.selectedIds.add(shape.id)
         menu.update()
       })
       test("should display menu color", () => {
@@ -296,7 +296,7 @@ describe("IIMenuStyle.ts", () => {
 
     describe("when tool == select and shape selected", () => {
       beforeAll(() => {
-        editor.tool = CanvasTool.Move
+        canvas.tool = CanvasTool.Move
         menu.update()
       })
       test("should hide", () => {
@@ -308,8 +308,8 @@ describe("IIMenuStyle.ts", () => {
 
   describe("show/hide", () => {
     const layer = document.createElement("div")
-    const editor = createCanvasMock()
-    const menu = new IIMenuStyle(asEditor(editor))
+    const canvas = createCanvasMock()
+    const menu = new IIMenuStyle(asCanvas(canvas))
     menu.render(layer)
     test("should hide", () => {
       expect(menu.wrapper?.style.visibility).toEqual("visible")
@@ -325,8 +325,8 @@ describe("IIMenuStyle.ts", () => {
 
   describe("destroy", () => {
     const layer = document.createElement("div")
-    const editor = createCanvasMock()
-    const menu = new IIMenuStyle(asEditor(editor))
+    const canvas = createCanvasMock()
+    const menu = new IIMenuStyle(asCanvas(canvas))
     menu.render(layer)
     test("should remove elements", () => {
       expect(layer.childElementCount).toEqual(1)

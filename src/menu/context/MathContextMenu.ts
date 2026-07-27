@@ -1,5 +1,5 @@
 import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import { IIMathDiagnosticChecker, IIMathFunctionEvaluator, IIMathVariablePerBlockEditor } from "@/components"
+import { IIMathDiagnosticChecker, IIMathFunctionEvaluator, IIMathVariablePerBlockCanvas } from "@/components"
 import { LoggerCategory, LoggerManager } from "@/logger"
 import type { TMenuSubMenu } from "@/menu/items/SubMenuItem"
 import { SubMenuItem } from "@/menu/items/SubMenuItem"
@@ -88,8 +88,8 @@ export class MathContextMenu extends SubMenuItem {
             this.logger.warn("No block math selected")
             return
           }
-          const variableEditor = new IIMathVariablePerBlockEditor(canvas, jiixBlockIds)
-          await variableEditor.show()
+          const variableCanvas = new IIMathVariablePerBlockCanvas(canvas, jiixBlockIds)
+          await variableCanvas.show()
         },
       })
     }

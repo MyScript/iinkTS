@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test"
 import {
   writeStrokes,
   waitForExportedEvent,
-  getEditorExports,
+  getCanvasExports,
   passModalKey
 } from "../helper"
 import rectangleShape from "../__dataset__/rectangleShape"
@@ -64,14 +64,14 @@ test.describe("Ink Canvas v2 Shape", () => {
         waitForExportedEvent(page),
         writeStrokes(page, line.strokes),
       ])
-      expect(await getEditorExports(page)).toBeDefined()
+      expect(await getCanvasExports(page)).toBeDefined()
 
       const promisesResult = await Promise.all([
         waitForExportedEvent(page),
         page.locator("#clear").click(),
       ])
       expect(promisesResult[0]).toBeNull()
-      expect(await getEditorExports(page)).toBeFalsy()
+      expect(await getCanvasExports(page)).toBeFalsy()
       await expect(page.locator("#result")).toHaveText("null")
     })
 

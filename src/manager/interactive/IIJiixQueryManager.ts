@@ -105,8 +105,8 @@ export class IIJiixQueryManager extends IIAbstractManager {
   /** Text metadata per stroke ID (pixel-converted, set during sync) */
   #textMetadata = new Map<string, TBlockTextMetadata>()
 
-  constructor(editor: TInteractiveInkCanvas) {
-    super(editor, LoggerCategory.JIIX_QUERY)
+  constructor(canvas: TInteractiveInkCanvas) {
+    super(canvas, LoggerCategory.JIIX_QUERY)
     this.logger.info("constructor", this.managerName)
   }
 

@@ -13,7 +13,7 @@ import { Modal } from "./Modal"
  * Shows one row per (variable, block) usage. Definition rows are read-only;
  * BLOCK-provided and free (UNDEFINED) variables are editable/deletable.
  */
-export class IIMathVariableEditor {
+export class IIMathVariableCanvas {
   private canvas: TInteractiveInkCanvas
   private modal?: Modal
   private usages: TMathVariableUsage[] = []

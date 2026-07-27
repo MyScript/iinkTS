@@ -15,8 +15,8 @@ import { OBBOps } from "@/symbol/primitives/OBB"
 export class SurroundGestureHandler extends GestureHandler {
   readonly gestureType = "SURROUND" as const
 
-  constructor(editor: TInteractiveInkCanvas, helpers: GestureHelpers) {
-    super(editor, helpers)
+  constructor(canvas: TInteractiveInkCanvas, helpers: GestureHelpers) {
+    super(canvas, helpers)
   }
 
   async apply(gestureStroke: TStroke, gesture: TGesture): Promise<void> {
