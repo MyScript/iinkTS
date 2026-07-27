@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test"
-import { waitForEditorInit, writeStrokes, waitForExportedEvent, getEditorExports, passModalKey, getEditorStrokes } from "../helper"
+import { waitForCanvasInit, writeStrokes, waitForExportedEvent, getCanvasExports, passModalKey, getCanvasStrokes } from "../helper"
 import h from "../__dataset__/h"
 
 test.describe("Ink Canvas v2 Text", () => {
@@ -21,7 +21,7 @@ test.describe("Ink Canvas v2 Text", () => {
 
   test("should display stroke in DOM", async ({ page }) => {
     const [exportedDatas] = await Promise.all([waitForExportedEvent(page), writeStrokes(page, h.strokes)])
-    const strokes = await getEditorStrokes(page)
+    const strokes = await getCanvasStrokes(page)
     expect(strokes).toHaveLength(1)
     await expect(page.locator(`#${strokes[0].id}`)).toBeVisible()
   })
@@ -61,7 +61,7 @@ test.describe("Ink Canvas v2 Text", () => {
     await test.step("should clear", async () => {
       const promisesResult = await Promise.all([waitForExportedEvent(page), page.locator("#clear").click()])
       expect(promisesResult[0]).toBeNull()
-      expect(await getEditorExports(page)).toBeFalsy()
+      expect(await getCanvasExports(page)).toBeFalsy()
       await expect(page.locator("#result")).toBeEmpty()
     })
 

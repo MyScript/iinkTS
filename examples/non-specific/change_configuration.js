@@ -1,12 +1,13 @@
 import * as iink from "../../dist/iink.esm.js"
 import { ModalCanvasOptions } from "../components/modal/modalCanvasOptions.js"
-const inkEditorDeprecatedConfiguration = iink.DefaultInkEditorDeprecatedConfiguration
-const IISSREditorConfiguration = iink.DefaultInteractiveInkSSREditorConfiguration
-const IIEditorConfiguration = iink.DefaultInteractiveInkEditorConfiguration
-const inkEditorConfiguration = iink.DefaultInkEditorConfiguration
+
+const iinkCanvasConfiguration = iink.DefaultInteractiveInkCanvasConfiguration
+const inkCanvasConfiguration = iink.DefaultInkCanvasConfiguration
+const iinkCanvasSSRConfiguration = iink.DefaultInteractiveInkSSRCanvasConfiguration
+const inkCanvasDeprecatedConfiguration = iink.DefaultInkCanvasDeprecatedConfiguration
 
 const configurationContent = document.getElementById("configuration-content")
-const editorTypeSelect = document.getElementById("canvas-type")
+const canvasTypeSelect = document.getElementById("canvas-type")
 const rootElement = document.getElementById("rootEl")
 const resultElement = document.getElementById("result")
 const exportBtn = document.getElementById("export-btn")
@@ -175,7 +176,7 @@ function buildInput(path, name, type, value) {
     input.setAttribute("type", "checkbox")
     input.checked = value
     input.addEventListener("change", () => {
-      setDeep(editorOptions.configuration, path, input.checked)
+      setDeep(canvasOptions.configuration, path, input.checked)
     })
 
     const slider = document.createElement("span")
@@ -197,7 +198,7 @@ function buildInput(path, name, type, value) {
   input.setAttribute("type", type)
   input.value = value
   input.addEventListener("change", () => {
-    setDeep(editorOptions.configuration, path, input.value)
+    setDeep(canvasOptions.configuration, path, input.value)
   })
   label.appendChild(input)
   return label
@@ -225,7 +226,7 @@ function buildSelect(path, name, values, options, multiple = false) {
   })
   input.addEventListener("input", () => {
     setDeep(
-      editorOptions.configuration,
+      canvasOptions.configuration,
       path,
       multiple ? Array.from(input.selectedOptions).map((o) => o.value) : input.value
     )
@@ -235,12 +236,12 @@ function buildSelect(path, name, values, options, multiple = false) {
   return label
 }
 
-function loadEditorType() {
+function loadCanvasType() {
   ;["INTERACTIVE_INK", "INTERACTIVE_INK_SSR", "INK_V1", "INK_V2"].forEach((type) => {
     const selected = type === (canvas?.type || "INTERACTIVE_INK_SSR")
-    editorTypeSelect.appendChild(new Option(type, type, selected, selected))
+    canvasTypeSelect.appendChild(new Option(type, type, selected, selected))
   })
-  editorTypeSelect.addEventListener("input", () => {
+  canvasTypeSelect.addEventListener("input", () => {
     loadConfiguration()
   })
 }
@@ -324,30 +325,30 @@ function renderConfiguration(configuration) {
 let canvas
 let languageList
 
-const editorOptions = {
+const canvasOptions = {
   configuration: {},
 }
 
 function loadConfiguration() {
-  switch (editorTypeSelect.value) {
+  switch (canvasTypeSelect.value) {
     case "INTERACTIVE_INK_SSR":
-      editorOptions.configuration = structuredClone(IISSREditorConfiguration)
+      canvasOptions.configuration = structuredClone(iinkCanvasSSRConfiguration)
       break
     case "INK_V1":
-      editorOptions.configuration = structuredClone(inkEditorDeprecatedConfiguration)
+      canvasOptions.configuration = structuredClone(inkCanvasDeprecatedConfiguration)
       break
     case "INK_V2":
-      editorOptions.configuration = structuredClone(inkEditorConfiguration)
+      canvasOptions.configuration = structuredClone(inkCanvasConfiguration)
       break
     case "INTERACTIVE_INK":
-      editorOptions.configuration = structuredClone(IIEditorConfiguration)
+      canvasOptions.configuration = structuredClone(iinkCanvasConfiguration)
       break
   }
-  renderConfiguration(editorOptions.configuration)
+  renderConfiguration(canvasOptions.configuration)
 }
-async function loadEditor(options) {
+async function loadCanvas(options) {
   if (!languageList) {
-    languageList = await iink.getAvailableLanguageList(editorOptions.configuration)
+    languageList = await iink.getAvailableLanguageList(canvasOptions.configuration)
     Object.keys(languageList.result).forEach(function (key) {
       inputMap["recognition.lang"].values.push({
         label: languageList.result[key],
@@ -355,14 +356,14 @@ async function loadEditor(options) {
       })
     })
   }
-  renderConfiguration(editorOptions.configuration)
+  renderConfiguration(canvasOptions.configuration)
 
   /**
    * get canvas instance from type
    * @param {Element} The DOM element to attach the ink paper
    * @param {Object} The Canvas parameters
    */
-  canvas = await iink.Canvas.load(rootElement, editorTypeSelect.value, options)
+  canvas = await iink.Canvas.load(rootElement, canvasTypeSelect.value, options)
 
   canvas.event.addEventListener("exported", (event) => {
     while (resultElement.firstChild) {
@@ -385,7 +386,7 @@ exportBtn.addEventListener("click", () => {
 
 validBtn.addEventListener("click", async () => {
   resultElement.innerHTML = ""
-  ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+  ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
 })
 
 resultElement.addEventListener("click", () => {
@@ -393,15 +394,15 @@ resultElement.addEventListener("click", () => {
 })
 
 showModalBtn.addEventListener("click", () => {
-  ModalCanvasOptions.show(loadEditor, editorOptions)
+  ModalCanvasOptions.show(loadCanvas, canvasOptions)
 })
 
-loadEditorType()
+loadCanvasType()
 loadConfiguration()
-ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
 
 /**
  * We expose these objects to the window use it in test
  */
-window.editorOptions = editorOptions
-window.loadEditor = loadEditor
+window.canvasOptions = canvasOptions
+window.loadCanvas = loadCanvas

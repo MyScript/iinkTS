@@ -1,4 +1,4 @@
-import { createCanvasMock, asEditor } from "../../../__mocks__/createCanvasMock"
+import { createCanvasMock, asCanvas } from "../../../__mocks__/createCanvasMock"
 import { buildIIStroke } from "../../../helpers"
 import {
   EdgeArcOps,
@@ -20,14 +20,14 @@ import {
 
 describe("IIResizeManager.ts", () => {
   test("should create", () => {
-    const editor = createCanvasMock()
-    const manager = new IIResizeManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new IIResizeManager(asCanvas(canvas))
     expect(manager).toBeDefined()
   })
 
   describe("applyToSymbol", () => {
-    const editor = createCanvasMock()
-    const manager = new IIResizeManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new IIResizeManager(asCanvas(canvas))
     test("should not resize symbol with type unknown", () => {
       const stroke = buildIIStroke()
       //@ts-ignore
@@ -209,23 +209,23 @@ describe("IIResizeManager.ts", () => {
   })
 
   describe("resize process on stroke without snap", () => {
-    const editor = createCanvasMock()
-    editor.client.init = jest.fn(() => Promise.resolve())
-    editor.client.transformScale = jest.fn(() => Promise.resolve())
-    editor.renderer.setAttribute = jest.fn()
-    editor.renderer.drawSymbol = jest.fn()
-    editor.snaps.snapConfiguration.guide = false
-    editor.snaps.snapConfiguration.symbol = false
+    const canvas = createCanvasMock()
+    canvas.client.init = jest.fn(() => Promise.resolve())
+    canvas.client.transformScale = jest.fn(() => Promise.resolve())
+    canvas.renderer.setAttribute = jest.fn()
+    canvas.renderer.drawSymbol = jest.fn()
+    canvas.snaps.snapConfiguration.guide = false
+    canvas.snaps.snapConfiguration.symbol = false
 
-    const manager = new IIResizeManager(asEditor(editor))
+    const manager = new IIResizeManager(asCanvas(canvas))
     manager.applyToSymbol = jest.fn()
 
     const stroke = StrokeOps.create({})
     StrokeOps.addPointer(stroke, { p: 1, t: 1, x: 0, y: 0 })
     StrokeOps.addPointer(stroke, { p: 1, t: 1, x: 10, y: 50 })
     const strokeNotResized = structuredClone(stroke)
-    editor.model.addSymbol(stroke)
-    editor.model.selectedIds.add(stroke.id)
+    canvas.model.addSymbol(stroke)
+    canvas.model.selectedIds.add(stroke.id)
 
     const sb = OBBOps.toBox(stroke.bounds)
     const resizeToPoint: TPoint = {
@@ -325,7 +325,7 @@ describe("IIResizeManager.ts", () => {
     ]
 
     beforeAll(async () => {
-      await editor.init()
+      await canvas.init()
     })
 
     testDatas.forEach((data) => {
@@ -342,13 +342,13 @@ describe("IIResizeManager.ts", () => {
         expect(manager.boundingBox).toEqual(OBBOps.toBox(stroke.bounds))
         expect(manager.direction).toEqual(data.direction)
         expect(manager.transformOrigin).toEqual(data.transformOrigin)
-        expect(editor.renderer.setAttribute).toHaveBeenNthCalledWith(
+        expect(canvas.renderer.setAttribute).toHaveBeenNthCalledWith(
           1,
           group.id,
           "transform-origin",
           `${data.transformOrigin.x}px ${data.transformOrigin.y}px`
         )
-        expect(editor.renderer.setAttribute).toHaveBeenNthCalledWith(
+        expect(canvas.renderer.setAttribute).toHaveBeenNthCalledWith(
           2,
           stroke.id,
           "transform-origin",
@@ -357,13 +357,13 @@ describe("IIResizeManager.ts", () => {
       })
       test(`shoud continu with direction: "${data.direction}"`, () => {
         expect(manager.continue(resizeToPoint)).toEqual({ scaleX: data.scale.x, scaleY: data.scale.y })
-        expect(editor.renderer.setAttribute).toHaveBeenNthCalledWith(
+        expect(canvas.renderer.setAttribute).toHaveBeenNthCalledWith(
           1,
           group.id,
           "transform",
           `scale(${data.scale.x},${data.scale.y})`
         )
-        expect(editor.renderer.setAttribute).toHaveBeenNthCalledWith(
+        expect(canvas.renderer.setAttribute).toHaveBeenNthCalledWith(
           2,
           stroke.id,
           "transform",
@@ -373,10 +373,10 @@ describe("IIResizeManager.ts", () => {
       test(`shoud end with direction: "${data.direction}"`, async () => {
         await manager.end(resizeToPoint)
         expect(manager.applyToSymbol).toHaveBeenCalledTimes(1)
-        expect(editor.renderer.drawSymbol).toHaveBeenCalledTimes(1)
-        expect(editor.renderer.drawSymbol).toHaveBeenCalledWith(stroke)
-        expect(editor.client.transformScale).toHaveBeenCalledTimes(1)
-        expect(editor.client.transformScale).toHaveBeenCalledWith(
+        expect(canvas.renderer.drawSymbol).toHaveBeenCalledTimes(1)
+        expect(canvas.renderer.drawSymbol).toHaveBeenCalledWith(stroke)
+        expect(canvas.client.transformScale).toHaveBeenCalledTimes(1)
+        expect(canvas.client.transformScale).toHaveBeenCalledWith(
           [stroke.id],
           data.scale.x,
           data.scale.y,
@@ -406,35 +406,35 @@ describe("IIResizeManager.ts", () => {
     }
 
     test("continue() live-scales the block's ghost stroke element", () => {
-      const editor = createCanvasMock()
-      editor.math.getGhostStrokeIds = jest.fn().mockReturnValue(["ghost-1"])
-      editor.renderer.setAttribute = jest.fn()
-      const manager = new IIResizeManager(asEditor(editor))
+      const canvas = createCanvasMock()
+      canvas.math.getGhostStrokeIds = jest.fn().mockReturnValue(["ghost-1"])
+      canvas.renderer.setAttribute = jest.fn()
+      const manager = new IIResizeManager(asCanvas(canvas))
       const stroke = buildMathStroke("block-1")
-      editor.model.addSymbol(stroke)
-      editor.model.selectedIds.add(stroke.id)
+      canvas.model.addSymbol(stroke)
+      canvas.model.selectedIds.add(stroke.id)
 
       const sb = OBBOps.toBox(stroke.bounds)
       manager.start(setupTarget(), { x: sb.x, y: sb.y + stroke.bounds.height / 2 })
       manager.continue({ x: sb.x + stroke.bounds.width * 2, y: sb.y + stroke.bounds.height / 2 })
 
-      expect(editor.renderer.setAttribute).toHaveBeenCalledWith("ghost-1", "transform", expect.stringContaining("scale("))
+      expect(canvas.renderer.setAttribute).toHaveBeenCalledWith("ghost-1", "transform", expect.stringContaining("scale("))
     })
 
     test("end() permanently applies the matrix to the block's ghost strokes", async () => {
-      const editor = createCanvasMock()
-      editor.client.transformScale = jest.fn(() => Promise.resolve())
-      editor.math.applyTransformToGhostStrokes = jest.fn()
-      const manager = new IIResizeManager(asEditor(editor))
+      const canvas = createCanvasMock()
+      canvas.client.transformScale = jest.fn(() => Promise.resolve())
+      canvas.math.applyTransformToGhostStrokes = jest.fn()
+      const manager = new IIResizeManager(asCanvas(canvas))
       const stroke = buildMathStroke("block-1")
-      editor.model.addSymbol(stroke)
-      editor.model.selectedIds.add(stroke.id)
+      canvas.model.addSymbol(stroke)
+      canvas.model.selectedIds.add(stroke.id)
 
       const sb = OBBOps.toBox(stroke.bounds)
       manager.start(setupTarget(), { x: sb.x, y: sb.y + stroke.bounds.height / 2 })
       await manager.end({ x: sb.x + stroke.bounds.width * 2, y: sb.y + stroke.bounds.height / 2 })
 
-      expect(editor.math.applyTransformToGhostStrokes).toHaveBeenCalledWith("block-1", expect.anything())
+      expect(canvas.math.applyTransformToGhostStrokes).toHaveBeenCalledWith("block-1", expect.anything())
     })
   })
 })

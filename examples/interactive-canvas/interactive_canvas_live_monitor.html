@@ -163,7 +163,7 @@
       let canvas
       let clipboardCount = 0
 
-      const editorOptions = {}
+      const canvasOptions = {}
 
       function log(action, detail = '') {
         const entry = document.createElement('div')
@@ -193,7 +193,7 @@
         valZoom.textContent      = Math.round(canvas.renderer.getZoom() * 100) + '%'
       }
 
-      function patchEditor(ed) {
+      function patchCanvas(ed) {
         const origCopy  = ed.copy.bind(ed)
         const origPaste = ed.paste.bind(ed)
         const origCut   = ed.cut.bind(ed)
@@ -235,10 +235,10 @@
         }
       }
 
-      async function loadEditor(options) {
+      async function loadCanvas(options) {
         canvas = await Canvas.load(rootElement, 'INTERACTIVE_INK', options)
 
-        patchEditor(canvas)
+        patchCanvas(canvas)
 
         canvas.event.addEventListener('changed', () => {
           updateStatus()
@@ -275,13 +275,13 @@
       }
 
       showModalBtn.addEventListener('click', () => {
-        ModalCanvasOptions.show(loadEditor, editorOptions)
+        ModalCanvasOptions.show(loadCanvas, canvasOptions)
       })
 
-      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
 
-      window.editorOptions = editorOptions
-      window.loadEditor = loadEditor
+      window.canvasOptions = canvasOptions
+      window.loadCanvas = loadCanvas
     </script>
     <script type="module" src="../components/code-viewer/code-viewer.js"></script>
     <script src="../assets/js/theme.js"></script>

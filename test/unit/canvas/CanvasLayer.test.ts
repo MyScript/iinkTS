@@ -1,7 +1,7 @@
 import { CanvasLayer } from "@/canvas/CanvasLayer"
 
 describe("CanvasLayer.ts", () => {
-  describe("editor state badge", () => {
+  describe("canvas state badge", () => {
     let layer: CanvasLayer
 
     beforeEach(() => {

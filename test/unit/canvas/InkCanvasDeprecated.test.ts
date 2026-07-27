@@ -14,98 +14,98 @@ import {
 describe("InkCanvasDeprecated.ts", () => {
   const height = 100,
     width = 100
-  const DefaultInkEditorDeprecatedOptions: TInkCanvasDeprecatedOptions = {
+  const DefaultInkCanvasDeprecatedOptions: TInkCanvasDeprecatedOptions = {
     configuration: DefaultInkCanvasDeprecatedConfiguration,
   }
 
   test("should instanciate InkCanvasDeprecated with default grabber & client", () => {
     //@ts-ignore IIC-1006 Type instantiation is excessively deep and possibly infinite.
-    const editor = new InkCanvasDeprecated(document.createElement("div"), DefaultInkEditorDeprecatedOptions)
-    expect(editor).toBeDefined()
-    expect(editor.grabber).toBeDefined()
-    expect(editor.grabber instanceof PointerEventGrabber).toBe(true)
-    expect(editor.client).toBeDefined()
-    expect(editor.client instanceof HTTPClientV1).toBe(true)
+    const canvas = new InkCanvasDeprecated(document.createElement("div"), DefaultInkCanvasDeprecatedOptions)
+    expect(canvas).toBeDefined()
+    expect(canvas.grabber).toBeDefined()
+    expect(canvas.grabber instanceof PointerEventGrabber).toBe(true)
+    expect(canvas.client).toBeDefined()
+    expect(canvas.client instanceof HTTPClientV1).toBe(true)
   })
 
   test("should instanciate InkCanvasDeprecated with custom grabber", () => {
     class CustomGrabber extends PointerEventGrabber {
       name = "custom-grabber"
     }
-    const customBehaviorsOptions = structuredClone(DefaultInkEditorDeprecatedOptions)
+    const customBehaviorsOptions = structuredClone(DefaultInkCanvasDeprecatedOptions)
     //@ts-ignore
     customBehaviorsOptions.override = { grabber: CustomGrabber }
     //@ts-ignore IIC-1006 Type instantiation is excessively deep and possibly infinite.
-    const editor = new InkCanvasDeprecated(document.createElement("div"), customBehaviorsOptions)
-    expect(editor).toBeDefined()
-    expect(editor.grabber).toBeDefined()
-    expect(editor.grabber instanceof CustomGrabber).toBe(true)
+    const canvas = new InkCanvasDeprecated(document.createElement("div"), customBehaviorsOptions)
+    expect(canvas).toBeDefined()
+    expect(canvas.grabber).toBeDefined()
+    expect(canvas.grabber instanceof CustomGrabber).toBe(true)
   })
 
   test("should instanciate InkCanvasDeprecated with custom client", () => {
     class CustomClient extends HTTPClientV1 {
       name = "custom-client"
     }
-    const customBehaviorsOptions = structuredClone(DefaultInkEditorDeprecatedOptions)
+    const customBehaviorsOptions = structuredClone(DefaultInkCanvasDeprecatedOptions)
     //@ts-ignore
     customBehaviorsOptions.override = { client: CustomClient }
     //@ts-ignore IIC-1006 Type instantiation is excessively deep and possibly infinite.
-    const editor = new InkCanvasDeprecated(document.createElement("div"), customBehaviorsOptions)
-    expect(editor).toBeDefined()
-    expect(editor.client).toBeDefined()
-    expect(editor.client instanceof CustomClient).toBe(true)
+    const canvas = new InkCanvasDeprecated(document.createElement("div"), customBehaviorsOptions)
+    expect(canvas).toBeDefined()
+    expect(canvas.client).toBeDefined()
+    expect(canvas.client instanceof CustomClient).toBe(true)
   })
 
   test("should init", async () => {
-    const editor = new InkCanvasDeprecated(document.createElement("div"), DefaultInkEditorDeprecatedOptions)
-    editor.grabber.attach = jest.fn()
-    editor.renderer.init = jest.fn()
-    await editor.initialize()
-    expect(editor.grabber.attach).toHaveBeenCalledTimes(1)
-    expect(editor.grabber.attach).toHaveBeenCalledWith(editor.layers.rendering)
-    expect(editor.renderer.init).toHaveBeenCalledTimes(1)
-    expect(editor.renderer.init).toHaveBeenCalledWith(editor.layers.rendering, { x: 50, y: 50 })
+    const canvas = new InkCanvasDeprecated(document.createElement("div"), DefaultInkCanvasDeprecatedOptions)
+    canvas.grabber.attach = jest.fn()
+    canvas.renderer.init = jest.fn()
+    await canvas.initialize()
+    expect(canvas.grabber.attach).toHaveBeenCalledTimes(1)
+    expect(canvas.grabber.attach).toHaveBeenCalledWith(canvas.layers.rendering)
+    expect(canvas.renderer.init).toHaveBeenCalledTimes(1)
+    expect(canvas.renderer.init).toHaveBeenCalledWith(canvas.layers.rendering, { x: 50, y: 50 })
   })
 
   test("should call renderer on drawCurrentStroke", async () => {
-    const editor = new InkCanvasDeprecated(document.createElement("div"), DefaultInkEditorDeprecatedOptions)
-    await editor.initialize()
-    editor.renderer.drawPendingStroke = jest.fn()
+    const canvas = new InkCanvasDeprecated(document.createElement("div"), DefaultInkCanvasDeprecatedOptions)
+    await canvas.initialize()
+    canvas.renderer.drawPendingStroke = jest.fn()
     const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
     const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
-    editor.model.initCurrentStroke(p1, "pen", DefaultPenStyle)
-    editor.model.endCurrentStroke(p2)
-    editor.drawCurrentStroke()
-    expect(editor.renderer.drawPendingStroke).toHaveBeenCalledTimes(1)
-    expect(editor.renderer.drawPendingStroke).toHaveBeenCalledWith(editor.model.currentSymbol)
+    canvas.model.initCurrentStroke(p1, "pen", DefaultPenStyle)
+    canvas.model.endCurrentStroke(p2)
+    canvas.drawCurrentStroke()
+    expect(canvas.renderer.drawPendingStroke).toHaveBeenCalledTimes(1)
+    expect(canvas.renderer.drawPendingStroke).toHaveBeenCalledWith(canvas.model.currentSymbol)
   })
 
   describe("updateModelRendering", () => {
     test("should call renderer.drawModel", async () => {
-      const editor = new InkCanvasDeprecated(document.createElement("div"), DefaultInkEditorDeprecatedOptions)
-      await editor.initialize()
-      editor.renderer.drawModel = jest.fn()
-      editor.client.export = jest.fn((m) => Promise.resolve(m))
-      editor.updateModelRendering()
-      expect(editor.renderer.drawModel).toHaveBeenCalledTimes(1)
+      const canvas = new InkCanvasDeprecated(document.createElement("div"), DefaultInkCanvasDeprecatedOptions)
+      await canvas.initialize()
+      canvas.renderer.drawModel = jest.fn()
+      canvas.client.export = jest.fn((m) => Promise.resolve(m))
+      canvas.updateModelRendering()
+      expect(canvas.renderer.drawModel).toHaveBeenCalledTimes(1)
     })
 
     test("should call client.export", async () => {
-      const editor = new InkCanvasDeprecated(document.createElement("div"), DefaultInkEditorDeprecatedOptions)
-      await editor.initialize()
-      editor.renderer.drawModel = jest.fn()
-      editor.client.export = jest.fn((m) => Promise.resolve(m))
-      await editor.updateModelRendering()
+      const canvas = new InkCanvasDeprecated(document.createElement("div"), DefaultInkCanvasDeprecatedOptions)
+      await canvas.initialize()
+      canvas.renderer.drawModel = jest.fn()
+      canvas.client.export = jest.fn((m) => Promise.resolve(m))
+      await canvas.updateModelRendering()
       await delay(DefaultInkCanvasDeprecatedConfiguration.triggers.exportContentDelay)
-      expect(editor.client.export).toHaveBeenCalledTimes(1)
+      expect(canvas.client.export).toHaveBeenCalledTimes(1)
     })
 
     test("should reject if client.export in error", async () => {
-      const editor = new InkCanvasDeprecated(document.createElement("div"), DefaultInkEditorDeprecatedOptions)
-      await editor.initialize()
-      editor.renderer.drawModel = jest.fn()
-      editor.client.export = jest.fn(() => Promise.reject("pouet"))
-      expect(editor.updateModelRendering()).rejects.toEqual("pouet")
+      const canvas = new InkCanvasDeprecated(document.createElement("div"), DefaultInkCanvasDeprecatedOptions)
+      await canvas.initialize()
+      canvas.renderer.drawModel = jest.fn()
+      canvas.client.export = jest.fn(() => Promise.reject("pouet"))
+      expect(canvas.updateModelRendering()).rejects.toEqual("pouet")
     })
 
     test("should not call client.export when exportContent = DEMAND", async () => {
@@ -113,106 +113,106 @@ describe("InkCanvasDeprecated.ts", () => {
         JSON.stringify(DefaultInkCanvasDeprecatedConfiguration)
       )
       configuration.triggers.exportContent = "DEMAND"
-      const editor = new InkCanvasDeprecated(document.createElement("div"), { configuration })
-      await editor.initialize()
-      editor.renderer.drawModel = jest.fn()
-      editor.client.export = jest.fn((m) => Promise.resolve(m))
-      await editor.updateModelRendering()
+      const canvas = new InkCanvasDeprecated(document.createElement("div"), { configuration })
+      await canvas.initialize()
+      canvas.renderer.drawModel = jest.fn()
+      canvas.client.export = jest.fn((m) => Promise.resolve(m))
+      await canvas.updateModelRendering()
       await delay(DefaultInkCanvasDeprecatedConfiguration.triggers.exportContentDelay)
-      expect(editor.client.export).toHaveBeenCalledTimes(0)
+      expect(canvas.client.export).toHaveBeenCalledTimes(0)
     })
   })
 
   test("should export", async () => {
-    const editor = new InkCanvasDeprecated(document.createElement("div"), DefaultInkEditorDeprecatedOptions)
-    await editor.initialize()
-    editor.client.export = jest.fn((m) => Promise.resolve(m))
-    editor.export()
+    const canvas = new InkCanvasDeprecated(document.createElement("div"), DefaultInkCanvasDeprecatedOptions)
+    await canvas.initialize()
+    canvas.client.export = jest.fn((m) => Promise.resolve(m))
+    canvas.export()
     await delay(DefaultInkCanvasDeprecatedConfiguration.triggers.exportContentDelay)
-    expect(editor.client.export).toHaveBeenCalledTimes(1)
+    expect(canvas.client.export).toHaveBeenCalledTimes(1)
   })
 
   test("should convert", async () => {
-    const editor = new InkCanvasDeprecated(document.createElement("div"), DefaultInkEditorDeprecatedOptions)
-    await editor.initialize()
-    editor.client.convert = jest.fn((m) => Promise.resolve(m))
-    editor.convert({ conversionState: "DIGITAL_EDIT", mimeTypes: ["mime-type"] })
+    const canvas = new InkCanvasDeprecated(document.createElement("div"), DefaultInkCanvasDeprecatedOptions)
+    await canvas.initialize()
+    canvas.client.convert = jest.fn((m) => Promise.resolve(m))
+    canvas.convert({ conversionState: "DIGITAL_EDIT", mimeTypes: ["mime-type"] })
     await delay(DefaultInkCanvasDeprecatedConfiguration.triggers.exportContentDelay)
-    expect(editor.client.convert).toHaveBeenCalledTimes(1)
+    expect(canvas.client.convert).toHaveBeenCalledTimes(1)
   })
 
   test("should resize", async () => {
-    const editor = new InkCanvasDeprecated(document.createElement("div"), DefaultInkEditorDeprecatedOptions)
-    editor.renderer.resize = jest.fn()
-    editor.client.resize = jest.fn((m) => Promise.resolve(m))
-    await editor.initialize()
+    const canvas = new InkCanvasDeprecated(document.createElement("div"), DefaultInkCanvasDeprecatedOptions)
+    canvas.renderer.resize = jest.fn()
+    canvas.client.resize = jest.fn((m) => Promise.resolve(m))
+    await canvas.initialize()
     const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
     const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
-    editor.model.initCurrentStroke(p1, "pen", DefaultPenStyle)
-    editor.model.endCurrentStroke(p2)
-    await editor.resize({ height: 1, width: 2 })
-    expect(editor.renderer.resize).toHaveBeenCalledTimes(1)
+    canvas.model.initCurrentStroke(p1, "pen", DefaultPenStyle)
+    canvas.model.endCurrentStroke(p2)
+    await canvas.resize({ height: 1, width: 2 })
+    expect(canvas.renderer.resize).toHaveBeenCalledTimes(1)
   })
 
   test("should not call client on resize if no strokes", async () => {
-    const editor = new InkCanvasDeprecated(document.createElement("div"), DefaultInkEditorDeprecatedOptions)
-    await editor.initialize()
-    editor.renderer.resize = jest.fn()
-    editor.client.resize = jest.fn((m) => Promise.resolve(m))
-    await editor.resize({ height: 1, width: 2 })
-    expect(editor.renderer.resize).toHaveBeenCalledTimes(1)
-    expect(editor.client.resize).toHaveBeenCalledTimes(0)
+    const canvas = new InkCanvasDeprecated(document.createElement("div"), DefaultInkCanvasDeprecatedOptions)
+    await canvas.initialize()
+    canvas.renderer.resize = jest.fn()
+    canvas.client.resize = jest.fn((m) => Promise.resolve(m))
+    await canvas.resize({ height: 1, width: 2 })
+    expect(canvas.renderer.resize).toHaveBeenCalledTimes(1)
+    expect(canvas.client.resize).toHaveBeenCalledTimes(0)
   })
 
   test("should undo", async () => {
-    const editor = new InkCanvasDeprecated(document.createElement("div"), DefaultInkEditorDeprecatedOptions)
-    await editor.initialize()
+    const canvas = new InkCanvasDeprecated(document.createElement("div"), DefaultInkCanvasDeprecatedOptions)
+    await canvas.initialize()
     const model1 = new Model()
-    editor.client.export = jest.fn((m) => Promise.resolve(m))
-    editor.renderer.drawModel = jest.fn()
-    editor.history.undo = jest.fn(() => model1)
-    await await editor.updateModelRendering()
-    await editor.undo()
-    expect(editor.model).toEqual(model1)
+    canvas.client.export = jest.fn((m) => Promise.resolve(m))
+    canvas.renderer.drawModel = jest.fn()
+    canvas.history.undo = jest.fn(() => model1)
+    await await canvas.updateModelRendering()
+    await canvas.undo()
+    expect(canvas.model).toEqual(model1)
   })
 
   test("should redo", async () => {
-    const editor = new InkCanvasDeprecated(document.createElement("div"), DefaultInkEditorDeprecatedOptions)
-    await editor.initialize()
+    const canvas = new InkCanvasDeprecated(document.createElement("div"), DefaultInkCanvasDeprecatedOptions)
+    await canvas.initialize()
     const model2 = new Model(width, height)
     const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
     const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
     model2.initCurrentStroke(p1, "pen", DefaultPenStyle)
     model2.endCurrentStroke(p2)
-    editor.client.export = jest.fn((m) => Promise.resolve(m))
-    editor.renderer.drawModel = jest.fn()
-    editor.history.redo = jest.fn(() => model2)
-    await editor.redo()
-    expect(editor.model.creationTime).toEqual(model2.creationTime)
+    canvas.client.export = jest.fn((m) => Promise.resolve(m))
+    canvas.renderer.drawModel = jest.fn()
+    canvas.history.redo = jest.fn(() => model2)
+    await canvas.redo()
+    expect(canvas.model.creationTime).toEqual(model2.creationTime)
   })
 
   test("should clear", async () => {
-    const editor = new InkCanvasDeprecated(document.createElement("div"), DefaultInkEditorDeprecatedOptions)
-    await editor.initialize()
-    editor.renderer.drawModel = jest.fn()
+    const canvas = new InkCanvasDeprecated(document.createElement("div"), DefaultInkCanvasDeprecatedOptions)
+    await canvas.initialize()
+    canvas.renderer.drawModel = jest.fn()
     const p1: TPointer = { t: 1, p: 1, x: 1, y: 1 }
     const p2: TPointer = { t: 10, p: 1, x: 100, y: 1 }
-    editor.model.initCurrentStroke(p1, "pen", DefaultPenStyle)
-    editor.model.endCurrentStroke(p2)
-    expect(editor.model.symbols.length).toBeGreaterThan(0)
-    await editor.clear()
-    expect(editor.model.symbols).toHaveLength(0)
+    canvas.model.initCurrentStroke(p1, "pen", DefaultPenStyle)
+    canvas.model.endCurrentStroke(p2)
+    expect(canvas.model.symbols.length).toBeGreaterThan(0)
+    await canvas.clear()
+    expect(canvas.model.symbols).toHaveLength(0)
   })
 
   test("should destroy", async () => {
-    const editor = new InkCanvasDeprecated(document.createElement("div"), DefaultInkEditorDeprecatedOptions)
-    await editor.initialize()
-    editor.grabber.detach = jest.fn()
-    editor.renderer.destroy = jest.fn()
-    editor.history.push = jest.fn((m) => m)
-    editor.destroy()
+    const canvas = new InkCanvasDeprecated(document.createElement("div"), DefaultInkCanvasDeprecatedOptions)
+    await canvas.initialize()
+    canvas.grabber.detach = jest.fn()
+    canvas.renderer.destroy = jest.fn()
+    canvas.history.push = jest.fn((m) => m)
+    canvas.destroy()
     await delay(DefaultInkCanvasDeprecatedConfiguration.triggers.exportContentDelay)
-    expect(editor.grabber.detach).toHaveBeenCalledTimes(1)
-    expect(editor.renderer.destroy).toHaveBeenCalledTimes(1)
+    expect(canvas.grabber.detach).toHaveBeenCalledTimes(1)
+    expect(canvas.renderer.destroy).toHaveBeenCalledTimes(1)
   })
 })

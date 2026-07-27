@@ -11,60 +11,60 @@ import {
   triangleJIIX,
 } from "../../__dataset__/jiix.dataset"
 import { buildIIStroke } from "../../helpers"
-import { createCanvasMock, asEditor } from "../../__mocks__/createCanvasMock"
+import { createCanvasMock, asCanvas } from "../../__mocks__/createCanvasMock"
 import { IIConversionManager, JIIXElementType, TJIIXEdgeElement, TJIIXMathElement, TJIIXNodeElement, TJIIXTextElement, TextOps } from "@/iink"
 
 describe("IIConversionManager.ts", () => {
   test("should create", () => {
-    const editor = createCanvasMock()
-    const manager = new IIConversionManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new IIConversionManager(asCanvas(canvas))
     expect(manager).toBeDefined()
   })
 
   describe("apply", () => {
-    const editor = createCanvasMock()
-    editor.selector.removeSelectedGroup = jest.fn()
-    const manager = new IIConversionManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    canvas.selector.removeSelectedGroup = jest.fn()
+    const manager = new IIConversionManager(asCanvas(canvas))
     manager.convertText = jest.fn()
     manager.convertNode = jest.fn()
     manager.convertEdge = jest.fn()
-    test('should call editor.export if no model.exports?.["application/vnd.myscript.jiix"]', async () => {
+    test('should call canvas.export if no model.exports?.["application/vnd.myscript.jiix"]', async () => {
       await manager.apply()
-      expect(editor.selector.removeSelectedGroup).toHaveBeenCalledTimes(1)
-      expect(editor.export).toHaveBeenCalledTimes(1)
-      expect(editor.export).toHaveBeenCalledWith(["application/vnd.myscript.jiix"])
+      expect(canvas.selector.removeSelectedGroup).toHaveBeenCalledTimes(1)
+      expect(canvas.export).toHaveBeenCalledTimes(1)
+      expect(canvas.export).toHaveBeenCalledWith(["application/vnd.myscript.jiix"])
     })
     test("should call convertText", async () => {
       expect(manager.convertText).toHaveBeenCalledTimes(0)
       manager.model.exports = { "application/vnd.myscript.jiix": hTextJIIX }
       await manager.apply()
-      expect(editor.selector.removeSelectedGroup).toHaveBeenCalledTimes(1)
+      expect(canvas.selector.removeSelectedGroup).toHaveBeenCalledTimes(1)
       expect(manager.convertText).toHaveBeenCalledTimes(1)
     })
     test("should call convertNode", async () => {
       expect(manager.convertNode).toHaveBeenCalledTimes(0)
       manager.model.exports = { "application/vnd.myscript.jiix": rectangleJIIX }
       await manager.apply()
-      expect(editor.selector.removeSelectedGroup).toHaveBeenCalledTimes(1)
+      expect(canvas.selector.removeSelectedGroup).toHaveBeenCalledTimes(1)
       expect(manager.convertNode).toHaveBeenCalledTimes(1)
     })
     test("should call convertEdge", async () => {
       expect(manager.convertEdge).toHaveBeenCalledTimes(0)
       manager.model.exports = { "application/vnd.myscript.jiix": lineJIIX }
       await manager.apply()
-      expect(editor.selector.removeSelectedGroup).toHaveBeenCalledTimes(1)
+      expect(canvas.selector.removeSelectedGroup).toHaveBeenCalledTimes(1)
       expect(manager.convertEdge).toHaveBeenCalledTimes(1)
     })
   })
 
   describe("convertText", () => {
     const symEl = document.createElementNS("http://www.w3.org/2000/svg", "path")
-    const editor = createCanvasMock()
-    editor.renderer.drawSymbol = jest.fn(() => symEl)
-    editor.typeset.getSpaceWidth = jest.fn(() => 10)
-    editor.model.addSymbol = jest.fn()
-    editor.model.removeSymbol = jest.fn()
-    const manager = new IIConversionManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    canvas.renderer.drawSymbol = jest.fn(() => symEl)
+    canvas.typeset.getSpaceWidth = jest.fn(() => 10)
+    canvas.model.addSymbol = jest.fn()
+    canvas.model.removeSymbol = jest.fn()
+    const manager = new IIConversionManager(asCanvas(canvas))
 
     const hTextJIIXElement = hTextJIIX.elements?.[0] as TJIIXTextElement
 
@@ -108,8 +108,8 @@ describe("IIConversionManager.ts", () => {
   })
 
   describe("convertNode", () => {
-    const editor = createCanvasMock()
-    const manager = new IIConversionManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new IIConversionManager(asCanvas(canvas))
 
     const jiixNodeRect = rectangleJIIX.elements?.[0] as TJIIXNodeElement
     const jiixNodeCircle = circleJIIX.elements?.[0] as TJIIXNodeElement
@@ -186,9 +186,9 @@ describe("IIConversionManager.ts", () => {
 
   describe("convertEdge", () => {
     const symEl = document.createElementNS("http://www.w3.org/2000/svg", "path")
-    const editor = createCanvasMock()
-    editor.renderer.drawSymbol = jest.fn(() => symEl)
-    const manager = new IIConversionManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    canvas.renderer.drawSymbol = jest.fn(() => symEl)
+    const manager = new IIConversionManager(asCanvas(canvas))
 
     const jiixEdgeLine = lineJIIX.elements?.[0] as TJIIXEdgeElement
     const jiixEdgeArc = arcJIIX.elements?.[0] as TJIIXEdgeElement
@@ -219,8 +219,8 @@ describe("IIConversionManager.ts", () => {
   })
 
   describe("buildMath", () => {
-    const editor = createCanvasMock()
-    const manager = new IIConversionManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new IIConversionManager(asCanvas(canvas))
 
     test("should flatten a simple fraction label without extra parentheses", () => {
       const mathElement: TJIIXMathElement = {

@@ -67,7 +67,7 @@ export type TInteractiveInkCanvasConfiguration = TCanvasConfiguration &
     shapeSelectionLevel: TShapeSelectionLevel
     /** Math manager configuration (computation behavior and visual interactions) */
     math: TMathConfig
-    /** CSS custom property overrides applied to the editor root element (e.g. `{ "--ms-ink-primary": "#ff0" }`) */
+    /** CSS custom property overrides applied to the canvas root element (e.g. `{ "--ms-ink-primary": "#ff0" }`) */
     cssVars?: Record<string, string>
   }
 

@@ -85,7 +85,7 @@
       const lexicon = document.getElementById("lexicon")
       const showModalBtn = document.getElementById("showModalBtn")
 
-      const editorOptions = {
+      const canvasOptions = {
         configuration: {
           recognition: {
             text: {
@@ -105,24 +105,24 @@
           customLexicon: values.split(" "),
           addLKText: true,
         }
-        editorOptions.configuration = configuration
-        loadEditor(editorOptions)
+        canvasOptions.configuration = configuration
+        loadCanvas(canvasOptions)
       })
 
       showModalBtn.addEventListener("click", () => {
-        ModalCanvasOptions.show(loadEditor, editorOptions)
+        ModalCanvasOptions.show(loadCanvas, canvasOptions)
       })
 
       let canvas;
 
-      async function loadEditor(options) {
+      async function loadCanvas(options) {
         canvas = await Canvas.load(rootElement, "INTERACTIVE_INK_SSR", options)
       }
 
-      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
 
-      window.editorOptions = editorOptions
-      window.loadEditor = loadEditor
+      window.canvasOptions = canvasOptions
+      window.loadCanvas = loadCanvas
     </script>
     <script type="module" src="../components/code-viewer/code-viewer.js"></script>
     <script src="../assets/js/theme.js"></script>

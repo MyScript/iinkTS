@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 import {
-  waitForEditorInit,
+  waitForCanvasInit,
   writeStrokes,
   waitForExportedEvent,
   passModalKey
@@ -27,7 +27,7 @@ test.describe('Interactive Canvas SSR Text local storage', () => {
     })
 
     await expect(page.locator('.prompter-text')).toHaveText('hello')
-    expect(await page.evaluate("localStorage.getItem(\"editorTextContent\")")).toEqual(helloOneStroke.exports['text/plain'].at(-1))
+    expect(await page.evaluate("localStorage.getItem(\"textContentToImport\")")).toEqual(helloOneStroke.exports['text/plain'].at(-1))
 
     await page.reload({ waitUntil: 'load' })
     await expect(page.locator('.prompter-text')).toHaveText('hello')

@@ -2,9 +2,9 @@ import { test, expect } from "@playwright/test"
 import {
   writeStrokes,
   waitForExportedEvent,
-  getEditorExportsType,
-  getEditorConfiguration,
-  callEditorIdle
+  getCanvasExportsType,
+  getCanvasConfiguration,
+  callCanvasIdle
 } from "../helper"
 import one from "../__dataset__/1"
 import equation from "../__dataset__/equation"
@@ -13,7 +13,7 @@ export default {
   test({ skipClear, skipUndoRedo, resultLocator } = { resultLocator: "#result .katex-html"}) {
     test.describe("Nav actions", () => {
       test.beforeEach(async ({ page }) => {
-        await callEditorIdle(page)
+        await callCanvasIdle(page)
       })
 
       !skipClear && test("should clear", async ({ page }) => {
@@ -35,7 +35,7 @@ export default {
       !skipUndoRedo && test("should undo/redo in mode \"stroke\" by default", async ({ page }) => {
 
         await test.step("should have undo/redo mode set to \"stroke\" by default", async () => {
-          const config = await getEditorConfiguration(page)
+          const config = await getCanvasConfiguration(page)
           expect(config.recognition.math["undo-redo"].mode).toEqual("stroke")
         })
 
@@ -44,9 +44,9 @@ export default {
             waitForExportedEvent(page),
             writeStrokes(page, equation.strokes)
           ])
-          await callEditorIdle(page)
+          await callCanvasIdle(page)
           await expect(page.locator(resultLocator)).toHaveText(equation.exports.LATEX.at(-1))
-          const latex = await getEditorExportsType(page, "application/x-latex")
+          const latex = await getCanvasExportsType(page, "application/x-latex")
           expect(latex).toEqual(equation.exports.LATEX.at(-1))
         })
 
@@ -57,7 +57,7 @@ export default {
           ])
           expect(exportEvt["application/x-latex"]).toEqual(equation.exports.LATEX.at(-2))
           await expect(page.locator(resultLocator)).toHaveText(equation.exports.LATEX.at(-2))
-          const latex = await getEditorExportsType(page, "application/x-latex")
+          const latex = await getCanvasExportsType(page, "application/x-latex")
           expect(latex).toEqual(equation.exports.LATEX.at(-2))
         })
 
@@ -68,7 +68,7 @@ export default {
           ])
           expect(exportEvt["application/x-latex"]).toEqual(equation.exports.LATEX.at(-3))
           await expect(page.locator(resultLocator)).toHaveText(equation.exports.LATEX.at(-3).replace("-", "−"))
-          const latex = await getEditorExportsType(page, "application/x-latex")
+          const latex = await getCanvasExportsType(page, "application/x-latex")
           expect(latex).toEqual(equation.exports.LATEX.at(-3))
         })
 
@@ -79,7 +79,7 @@ export default {
           ])
           expect(exportEvt["application/x-latex"]).toEqual(equation.exports.LATEX.at(-2))
           await expect(page.locator(resultLocator)).toHaveText(equation.exports.LATEX.at(-2))
-          const latex = await getEditorExportsType(page, "application/x-latex")
+          const latex = await getCanvasExportsType(page, "application/x-latex")
           expect(latex).toEqual(equation.exports.LATEX.at(-2))
         })
       })

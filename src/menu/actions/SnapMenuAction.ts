@@ -17,7 +17,7 @@ export type TSnapActionConfig = boolean | TSnapActionItemsConfig
  * @remarks Menu action Snap - Configuration du snap
  */
 export class SnapMenuAction extends SubMenuItem {
-  constructor(editor: TInteractiveInkCanvas, idPrefix = "ms-menu-action", itemsConfig?: TSnapActionItemsConfig) {
+  constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-action", itemsConfig?: TSnapActionItemsConfig) {
     const enabled = (key: keyof TSnapActionItemsConfig) => itemsConfig?.[key] !== false
 
     const config: TMenuSubMenu = {
@@ -35,9 +35,9 @@ export class SnapMenuAction extends SubMenuItem {
         type: "checkbox",
         id: `${idPrefix}-snap-to-guide`,
         label: "Snap to guide",
-        getValue: (editor) => editor.snaps.snapConfiguration.guide,
-        setValue: (editor, value) => {
-          editor.snaps.snapConfiguration.guide = value
+        getValue: (canvas) => canvas.snaps.snapConfiguration.guide,
+        setValue: (canvas, value) => {
+          canvas.snaps.snapConfiguration.guide = value
         },
       })
     }
@@ -47,9 +47,9 @@ export class SnapMenuAction extends SubMenuItem {
         type: "checkbox",
         id: `${idPrefix}-snap-to-element`,
         label: "Snap to element",
-        getValue: (editor) => editor.snaps.snapConfiguration.symbol,
-        setValue: (editor, value) => {
-          editor.snaps.snapConfiguration.symbol = value
+        getValue: (canvas) => canvas.snaps.snapConfiguration.symbol,
+        setValue: (canvas, value) => {
+          canvas.snaps.snapConfiguration.symbol = value
         },
       })
     }
@@ -67,13 +67,13 @@ export class SnapMenuAction extends SubMenuItem {
           { label: "90°", value: "90" },
           { label: "180°", value: "180" },
         ],
-        getValue: (editor) => editor.snaps.snapConfiguration.angle.toString(),
-        setValue: (editor, angle) => {
-          editor.snaps.snapConfiguration.angle = +angle
+        getValue: (canvas) => canvas.snaps.snapConfiguration.angle.toString(),
+        setValue: (canvas, angle) => {
+          canvas.snaps.snapConfiguration.angle = +angle
         },
       })
     }
 
-    super(config, editor)
+    super(config, canvas)
   }
 }

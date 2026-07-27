@@ -2,9 +2,9 @@ import { test, expect } from "@playwright/test"
 import {
   writeStrokes,
   waitForExportedEvent,
-  getEditorExports,
-  loadEditor,
-  getEditorConfiguration,
+  getCanvasExports,
+  loadCanvas,
+  getCanvasConfiguration,
   passModalKey
 } from "../helper"
 import rectangle from "../__dataset__/rectangle"
@@ -72,7 +72,7 @@ test.describe("Ink Canvas Diagram", () => {
     })
 
     test("should only request application/vnd.openxmlformats-officedocument.presentationml.presentation", async ({ page }) => {
-      const configuration = await getEditorConfiguration(page)
+      const configuration = await getCanvasConfiguration(page)
       const options = {
         configuration: {
           server: configuration.server,
@@ -86,7 +86,7 @@ test.describe("Ink Canvas Diagram", () => {
           }
         }
       }
-      await loadEditor(page, options)
+      await loadCanvas(page, options)
       await Promise.all([
         waitForExportedEvent(page),
         writeStrokes(page, line.strokes),
@@ -96,7 +96,7 @@ test.describe("Ink Canvas Diagram", () => {
     })
 
     test("should request application/vnd.myscript.jiix & application/vnd.openxmlformats-officedocument.presentationml.presentation", async ({ page }) => {
-      const configuration = await getEditorConfiguration(page)
+      const configuration = await getCanvasConfiguration(page)
       const options = {
         type: "INKV1",
         configuration: {
@@ -112,7 +112,7 @@ test.describe("Ink Canvas Diagram", () => {
           }
         }
       }
-      await loadEditor(page, options)
+      await loadCanvas(page, options)
       await Promise.all([
         waitForExportedEvent(page),
         writeStrokes(page, line.strokes),
@@ -135,14 +135,14 @@ test.describe("Ink Canvas Diagram", () => {
       expect(exportedDatas["application/vnd.myscript.jiix"]).toEqual(rectResultJson["application/vnd.myscript.jiix"])
       expect(rectResultJson["application/vnd.myscript.jiix"]).toMatchObject(line.exports[0]["application/vnd.myscript.jiix"])
 
-      expect(await getEditorExports(page)).toBeDefined()
+      expect(await getCanvasExports(page)).toBeDefined()
 
       const promisesResult = await Promise.all([
         waitForExportedEvent(page),
         page.locator("#clear").click(),
       ])
       expect(promisesResult[0]).toBeNull()
-      expect(await getEditorExports(page)).toBeFalsy()
+      expect(await getCanvasExports(page)).toBeFalsy()
       await expect(page.locator("#result")).toHaveText("{}")
     })
 

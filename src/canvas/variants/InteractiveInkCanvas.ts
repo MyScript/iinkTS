@@ -143,9 +143,9 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
   readonly dom = DOMFactory
 
   /**
-   * Create and attach an InteractiveInk editor to the given DOM element.
+   * Create and attach an InteractiveInk canvas to the given DOM element.
    * Use `Canvas.load()` instead of calling this constructor directly.
-   * @param rootElement - Host DOM element that will contain the editor layers
+   * @param rootElement - Host DOM element that will contain the canvas layers
    * @param options - Canvas options: configuration, CSS vars, manager overrides
    */
   constructor(rootElement: HTMLElement, options?: TInteractiveInkCanvasOptions) {
@@ -260,7 +260,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
   }
 
   /**
-   * Active editor configuration (recognition, rendering, menu, math, etc.).
+   * Active canvas configuration (recognition, rendering, menu, math, etc.).
    */
   get configuration(): InteractiveInkCanvasConfiguration {
     return this.#configuration
@@ -304,7 +304,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
   }
 
   /**
-   * Display an error in the editor overlay and emit an `error` event.
+   * Display an error in the canvas overlay and emit an `error` event.
    * @param error - Error to display and emit
    */
   manageError(error: Error): void {
@@ -366,7 +366,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
   }
 
   /**
-   * Initialize the editor: render layers, attach input handlers, connect to the
+   * Initialize the canvas: render layers, attach input handlers, connect to the
    * WebSocket client, and load the initial session.
    * Called automatically by `Canvas.load()` — do not call manually.
    * @throws If the client connection or session setup fails
@@ -404,7 +404,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
   }
 
   /**
-   * Switch the recognition language without destroying the editor.
+   * Switch the recognition language without destroying the canvas.
    * Opens a new backend session and re-sends all existing strokes.
    * @param code - BCP 47 language code (e.g. `"en_US"`, `"fr_FR"`)
    * @throws If the new session fails to open
@@ -1516,7 +1516,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
   }
 
   /**
-   * Resize the editor
+   * Resize the canvas
    * @param dimensions - New height and/or width
    * @returns Promise that resolves when resize is complete
    */
@@ -1553,7 +1553,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
   }
 
   /**
-   * Apply or replace CSS custom properties on the editor root element.
+   * Apply or replace CSS custom properties on the canvas root element.
    * Clears all existing `--ms-ink-*` properties first, then sets the provided vars.
    * Does not reinitialize — current model and session are preserved.
    * Pass `undefined` to reset to stylesheet defaults.
@@ -1571,7 +1571,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
   }
 
   /**
-   * Clear all content from the editor
+   * Clear all content from the canvas
    * @returns Promise that resolves when cleared
    */
   async clear(): Promise<void> {
@@ -1653,7 +1653,7 @@ export class InteractiveInkCanvas extends AbstractCanvas implements TInteractive
   }
 
   /**
-   * Destroy the editor and clean up resources
+   * Destroy the canvas and clean up resources
    * @returns Promise that resolves when destruction is complete
    */
   async destroy(): Promise<void> {

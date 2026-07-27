@@ -7,11 +7,11 @@ export enum CanvasTool {
   Write = "write",
   Erase = "erase",
   /**
-   * @remarks only usable in the case of interactive ink editor
+   * @remarks only usable in the case of interactive ink canvas
    */
   Select = "select",
   /**
-   * @remarks only usable in the case of interactive ink editor
+   * @remarks only usable in the case of interactive ink canvas
    */
   Move = "move",
 }
@@ -21,7 +21,7 @@ export enum CanvasTool {
  * @summary
  * List all the shapes that can be drawn
  * @remarks
- * only usable in the case of interactive ink editor
+ * only usable in the case of interactive ink canvas
  */
 export enum CanvasWriteTool {
   Pencil = "pencil",
@@ -41,7 +41,7 @@ export enum CanvasWriteTool {
  * @summary
  * List all svg elements roles
  * @remarks
- * only usable in the case of interactive ink editor
+ * only usable in the case of interactive ink canvas
  */
 export enum SvgElementRole {
   Guide = "guide",
@@ -56,7 +56,7 @@ export enum SvgElementRole {
  * @summary
  * List all svg elements resize direction
  * @remarks
- * only usable in the case of interactive ink editor
+ * only usable in the case of interactive ink canvas
  */
 export const enum ResizeDirection {
   North = "n-resize",

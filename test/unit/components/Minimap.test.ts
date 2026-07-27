@@ -1,7 +1,7 @@
 import { LeftClickEventMock } from "../__mocks__/EventMock"
 import { type InteractiveInkCanvas, Minimap } from "@/iink"
 
-function buildMockEditor(overrides: Partial<any> = {}): InteractiveInkCanvas {
+function buildMockCanvas(overrides: Partial<any> = {}): InteractiveInkCanvas {
   const mockMainLayer = document.createElementNS("http://www.w3.org/2000/svg", "svg")
 
   return {
@@ -21,21 +21,21 @@ function buildMockEditor(overrides: Partial<any> = {}): InteractiveInkCanvas {
 describe("Minimap", () => {
   describe("constructor", () => {
     it("should create container with default dimensions", () => {
-      const minimap = new Minimap(buildMockEditor())
+      const minimap = new Minimap(buildMockCanvas())
       const el = minimap.getElement()
       expect(el.style.width).toBe(`${Minimap.DEFAULT_WIDTH}px`)
       expect(el.style.height).toBe(`${Minimap.DEFAULT_HEIGHT}px`)
     })
 
     it("should create container with custom dimensions", () => {
-      const minimap = new Minimap(buildMockEditor(), { width: 300, height: 200 })
+      const minimap = new Minimap(buildMockCanvas(), { width: 300, height: 200 })
       const el = minimap.getElement()
       expect(el.style.width).toBe("300px")
       expect(el.style.height).toBe("200px")
     })
 
     it("should contain an SVG element", () => {
-      const minimap = new Minimap(buildMockEditor())
+      const minimap = new Minimap(buildMockCanvas())
       const svg = minimap.getElement().querySelector("svg")
       expect(svg).not.toBeNull()
     })
@@ -43,7 +43,7 @@ describe("Minimap", () => {
 
   describe("getElement", () => {
     it("should return the same container element each time", () => {
-      const minimap = new Minimap(buildMockEditor())
+      const minimap = new Minimap(buildMockCanvas())
       expect(minimap.getElement()).toBe(minimap.getElement())
     })
   })
@@ -52,7 +52,7 @@ describe("Minimap", () => {
     it("should append element to the given parent", () => {
       const parent = document.createElement("div")
       document.body.appendChild(parent)
-      const minimap = new Minimap(buildMockEditor())
+      const minimap = new Minimap(buildMockCanvas())
 
       minimap.attach(parent)
 
@@ -63,13 +63,13 @@ describe("Minimap", () => {
     it("should call getViewBox and getBounds on attach", () => {
       const parent = document.createElement("div")
       document.body.appendChild(parent)
-      const editor = buildMockEditor()
-      const minimap = new Minimap(editor)
+      const canvas = buildMockCanvas()
+      const minimap = new Minimap(canvas)
 
       minimap.attach(parent)
 
-      expect(editor.renderer.getViewBox).toHaveBeenCalled()
-      expect(editor.renderer.getBounds).toHaveBeenCalled()
+      expect(canvas.renderer.getViewBox).toHaveBeenCalled()
+      expect(canvas.renderer.getBounds).toHaveBeenCalled()
       parent.remove()
     })
   })
@@ -78,7 +78,7 @@ describe("Minimap", () => {
     it("should remove element from DOM", () => {
       const parent = document.createElement("div")
       document.body.appendChild(parent)
-      const minimap = new Minimap(buildMockEditor())
+      const minimap = new Minimap(buildMockCanvas())
       minimap.attach(parent)
 
       minimap.detach()
@@ -92,7 +92,7 @@ describe("Minimap", () => {
     it("should remove element from DOM", () => {
       const parent = document.createElement("div")
       document.body.appendChild(parent)
-      const minimap = new Minimap(buildMockEditor())
+      const minimap = new Minimap(buildMockCanvas())
       minimap.attach(parent)
 
       minimap.destroy()
@@ -106,8 +106,8 @@ describe("Minimap", () => {
     it("should call setViewBox when clicking the minimap", () => {
       const parent = document.createElement("div")
       document.body.appendChild(parent)
-      const editor = buildMockEditor()
-      const minimap = new Minimap(editor, { width: 200, height: 150 })
+      const canvas = buildMockCanvas()
+      const minimap = new Minimap(canvas, { width: 200, height: 150 })
       minimap.attach(parent)
 
       const el = minimap.getElement()
@@ -119,7 +119,7 @@ describe("Minimap", () => {
       })
       el.dispatchEvent(event)
 
-      expect(editor.renderer.setViewBox).toHaveBeenCalled()
+      expect(canvas.renderer.setViewBox).toHaveBeenCalled()
       parent.remove()
     })
   })

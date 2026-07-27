@@ -18,24 +18,24 @@ async function writeInField(page, fieldId, offsetX = 30, offsetY = 40) {
   await page.waitForTimeout(300)
 }
 
-// Must match the QUESTIONS array length in canvas_v2_multi_editors_exam.html.
+// Must match the QUESTIONS array length in canvas_v2_multi_canvas_exam.html.
 const QUESTION_COUNT = 8
 
-test.describe("Ink Canvas v2 Multiple Editors (Exam)", () => {
+test.describe("Ink Canvas v2 Multiple Canvas (Exam)", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/canvas/canvas_v2_multi_editors_exam.html`)
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/canvas/canvas_v2_multi_canvas_exam.html`)
     await passModalKey(page, false)
-    // loadAll() only re-enables this button once every field's editor has fully initialized -
+    // loadAll() only re-enables this button once every field's canvas has fully initialized -
     // a more precise readiness signal than checking DOM children, which can appear before the
     // async load actually completes.
     await expect(page.locator("#validate-btn")).toBeEnabled({ timeout: 10000 })
   })
 
   test("should have title", async ({ page }) => {
-    await expect(page).toHaveTitle("Ink Canvas v2 - Multiple Editors (Exam)")
+    await expect(page).toHaveTitle("Ink Canvas v2 - Multiple Canvas (Exam)")
   })
 
-  test("should mount one independent editor per question", async ({ page }) => {
+  test("should mount one independent canvas per question", async ({ page }) => {
     await expect(page.locator(".ink-field")).toHaveCount(QUESTION_COUNT)
     for (let i = 0; i < QUESTION_COUNT; i++) {
       await expect(page.locator(`#field-${i} svg[data-layer="CAPTURE"]`)).toBeVisible()

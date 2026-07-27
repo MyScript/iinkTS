@@ -1,16 +1,16 @@
 import { buildIIStroke, buildIIText } from "../../../helpers"
-import { createCanvasMock, asEditor } from "../../../__mocks__/createCanvasMock"
+import { createCanvasMock, asCanvas } from "../../../__mocks__/createCanvasMock"
 import { JoinGestureHandler, GestureHelpers, TGesture, StrokeOps } from "@/iink"
 
 describe("JoinGestureHandler.ts", () => {
-  let editor: ReturnType<typeof createCanvasMock>
+  let canvas: ReturnType<typeof createCanvasMock>
   let helpers: GestureHelpers
   let handler: JoinGestureHandler
 
   beforeEach(() => {
-    editor = createCanvasMock()
-    helpers = new GestureHelpers(asEditor(editor))
-    handler = new JoinGestureHandler(asEditor(editor), helpers)
+    canvas = createCanvasMock()
+    helpers = new GestureHelpers(asCanvas(canvas))
+    handler = new JoinGestureHandler(asCanvas(canvas), helpers)
   })
 
   test("should instantiate", () => {
@@ -71,8 +71,8 @@ describe("JoinGestureHandler.ts", () => {
         boundingBox: { x: 60, y: 10, width: 30, height: 16 },
       })
 
-      editor.model.addSymbol(text1)
-      editor.model.addSymbol(text2)
+      canvas.model.addSymbol(text1)
+      canvas.model.addSymbol(text2)
 
       const gestureStroke = buildIIStroke()
       StrokeOps.addPointer(gestureStroke, { x: 45, y: 10, p: 1, t: 100 })
@@ -88,7 +88,7 @@ describe("JoinGestureHandler.ts", () => {
 
       // Verify handler and model structure
       expect(handler.gestureType).toBe("JOIN")
-      expect(editor.model.symbols.length).toBe(2)
+      expect(canvas.model.symbols.length).toBe(2)
       expect(gesture.gestureType).toBe("JOIN")
     })
 
@@ -101,8 +101,8 @@ describe("JoinGestureHandler.ts", () => {
       StrokeOps.addPointer(stroke2, { x: 10, y: 50, p: 1, t: 300 })
       StrokeOps.addPointer(stroke2, { x: 20, y: 60, p: 1, t: 400 })
 
-      editor.model.addSymbol(stroke1)
-      editor.model.addSymbol(stroke2)
+      canvas.model.addSymbol(stroke1)
+      canvas.model.addSymbol(stroke2)
 
       const gestureStroke = buildIIStroke()
       StrokeOps.addPointer(gestureStroke, { x: 15, y: 30, p: 1, t: 500 })

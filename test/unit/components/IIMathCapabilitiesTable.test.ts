@@ -1,11 +1,11 @@
-import { createCanvasMock, asEditor } from "../__mocks__/createCanvasMock"
+import { createCanvasMock, asCanvas } from "../__mocks__/createCanvasMock"
 import { type IIJiixQueryManager, IIMathCapabilitiesTable } from "@/iink"
 
 describe("IIMathCapabilitiesTable.ts", () => {
-  let editor: ReturnType<typeof createCanvasMock>
+  let canvas: ReturnType<typeof createCanvasMock>
 
   beforeEach(() => {
-    editor = createCanvasMock({
+    canvas = createCanvasMock({
       jiix: {
         getBlockLabel: jest.fn().mockImplementation((id: string) => {
           if (id === "block-1") return "f(x) = x + 1"
@@ -18,23 +18,23 @@ describe("IIMathCapabilitiesTable.ts", () => {
     })
 
     // Mock methods for capabilities checking
-    editor.math.getAvailableActions = jest.fn().mockResolvedValue(["numerical-computation", "evaluation"])
-    editor.math.getVariables = jest.fn().mockResolvedValue([{ name: "x", value: 1, sourceType: "UNDEFINED" }])
-    editor.math.getEvaluables = jest.fn().mockResolvedValue([{ inputName: "x", outputName: "f(x)" }])
+    canvas.math.getAvailableActions = jest.fn().mockResolvedValue(["numerical-computation", "evaluation"])
+    canvas.math.getVariables = jest.fn().mockResolvedValue([{ name: "x", value: 1, sourceType: "UNDEFINED" }])
+    canvas.math.getEvaluables = jest.fn().mockResolvedValue([{ inputName: "x", outputName: "f(x)" }])
   })
 
   afterEach(() => {
     document.body.innerHTML = ""
   })
 
-  test("should instantiate with editor", () => {
-    const table = new IIMathCapabilitiesTable(asEditor(editor))
+  test("should instantiate with canvas", () => {
+    const table = new IIMathCapabilitiesTable(asCanvas(canvas))
     expect(table).toBeDefined()
   })
 
   describe("fetchSymbolCapabilities()", () => {
     test("should fetch all capabilities for a symbol", async () => {
-      const table = new IIMathCapabilitiesTable(asEditor(editor))
+      const table = new IIMathCapabilitiesTable(asCanvas(canvas))
       const jiixBlockId = "block-1"
 
       const capabilities = await (table as any).fetchSymbolCapabilities(jiixBlockId)
@@ -46,13 +46,13 @@ describe("IIMathCapabilitiesTable.ts", () => {
       expect(capabilities.canCompute).toBe(true)
       expect(capabilities.canEvaluate).toBe(true)
 
-      expect(editor.math.getAvailableActions).toHaveBeenCalledWith("block-1")
-      expect(editor.math.getVariables).toHaveBeenCalledWith("block-1")
-      expect(editor.math.getEvaluables).toHaveBeenCalledWith("block-1")
+      expect(canvas.math.getAvailableActions).toHaveBeenCalledWith("block-1")
+      expect(canvas.math.getVariables).toHaveBeenCalledWith("block-1")
+      expect(canvas.math.getEvaluables).toHaveBeenCalledWith("block-1")
     })
 
     test("should handle symbol without id", async () => {
-      const table = new IIMathCapabilitiesTable(asEditor(editor))
+      const table = new IIMathCapabilitiesTable(asCanvas(canvas))
       const jiixBlockId = ""
 
       const capabilities = await (table as any).fetchSymbolCapabilities(jiixBlockId)
@@ -64,13 +64,13 @@ describe("IIMathCapabilitiesTable.ts", () => {
     })
 
     test("should handle errors gracefully", async () => {
-      const table = new IIMathCapabilitiesTable(asEditor(editor))
+      const table = new IIMathCapabilitiesTable(asCanvas(canvas))
       const jiixBlockId = "block-1"
 
       // Mock methods to throw errors
-      editor.math.getAvailableActions = jest.fn().mockRejectedValue(new Error("API error"))
-      editor.math.getVariables = jest.fn().mockRejectedValue(new Error("API error"))
-      editor.math.getEvaluables = jest.fn().mockRejectedValue(new Error("API error"))
+      canvas.math.getAvailableActions = jest.fn().mockRejectedValue(new Error("API error"))
+      canvas.math.getVariables = jest.fn().mockRejectedValue(new Error("API error"))
+      canvas.math.getEvaluables = jest.fn().mockRejectedValue(new Error("API error"))
 
       const capabilities = await (table as any).fetchSymbolCapabilities(jiixBlockId)
 
@@ -82,10 +82,10 @@ describe("IIMathCapabilitiesTable.ts", () => {
     })
 
     test("should detect when no variables available", async () => {
-      const table = new IIMathCapabilitiesTable(asEditor(editor))
+      const table = new IIMathCapabilitiesTable(asCanvas(canvas))
       const jiixBlockId = "block-2"
 
-      editor.math.getVariables = jest.fn().mockResolvedValue([])
+      canvas.math.getVariables = jest.fn().mockResolvedValue([])
 
       const capabilities = await (table as any).fetchSymbolCapabilities(jiixBlockId)
 
@@ -93,10 +93,10 @@ describe("IIMathCapabilitiesTable.ts", () => {
     })
 
     test("should detect when no evaluables available", async () => {
-      const table = new IIMathCapabilitiesTable(asEditor(editor))
+      const table = new IIMathCapabilitiesTable(asCanvas(canvas))
       const jiixBlockId = "block-3"
 
-      editor.math.getEvaluables = jest.fn().mockResolvedValue([])
+      canvas.math.getEvaluables = jest.fn().mockResolvedValue([])
 
       const capabilities = await (table as any).fetchSymbolCapabilities(jiixBlockId)
 
@@ -104,10 +104,10 @@ describe("IIMathCapabilitiesTable.ts", () => {
     })
 
     test("should detect when numerical-computation not available", async () => {
-      const table = new IIMathCapabilitiesTable(asEditor(editor))
+      const table = new IIMathCapabilitiesTable(asCanvas(canvas))
       const jiixBlockId = "block-4"
 
-      editor.math.getAvailableActions = jest.fn().mockResolvedValue(["evaluation"])
+      canvas.math.getAvailableActions = jest.fn().mockResolvedValue(["evaluation"])
 
       const capabilities = await (table as any).fetchSymbolCapabilities(jiixBlockId)
 
@@ -117,7 +117,7 @@ describe("IIMathCapabilitiesTable.ts", () => {
 
   describe("createTable()", () => {
     test("should create table with capabilities data", () => {
-      const table = new IIMathCapabilitiesTable(asEditor(editor))
+      const table = new IIMathCapabilitiesTable(asCanvas(canvas))
       const capabilities = [
         {
           jiixBlockId: "block-1",
@@ -134,7 +134,7 @@ describe("IIMathCapabilitiesTable.ts", () => {
     })
 
     test("should create table with multiple capabilities", () => {
-      const table = new IIMathCapabilitiesTable(asEditor(editor))
+      const table = new IIMathCapabilitiesTable(asCanvas(canvas))
       const capabilities = [
         {
           jiixBlockId: "block-1",
@@ -158,7 +158,7 @@ describe("IIMathCapabilitiesTable.ts", () => {
     })
 
     test("should store capabilities for later use", () => {
-      const table = new IIMathCapabilitiesTable(asEditor(editor))
+      const table = new IIMathCapabilitiesTable(asCanvas(canvas))
       const capabilities = [
         {
           jiixBlockId: "block-1",

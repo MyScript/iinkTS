@@ -71,7 +71,7 @@
       const resultElement = document.getElementById('result')
       const showModalBtn = document.getElementById('showModalBtn')
 
-      const editorOptions = {
+      const canvasOptions = {
         configuration: {
           recognition: {
             type: 'MATH',
@@ -85,7 +85,7 @@
 
       let canvas
 
-      async function loadEditor(options) {
+      async function loadCanvas(options) {
         resultElement.innerHTML = ''
         await canvas?.destroy()
 
@@ -104,13 +104,13 @@
       }
 
       showModalBtn.addEventListener('click', () => {
-        ModalCanvasOptions.show(loadEditor, editorOptions)
+        ModalCanvasOptions.show(loadCanvas, canvasOptions)
       })
 
-      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
 
-      window.editorOptions = editorOptions
-      window.loadEditor = loadEditor
+      window.canvasOptions = canvasOptions
+      window.loadCanvas = loadCanvas
     </script>
     <script type="module" src="../components/code-viewer/code-viewer.js"></script>
     <script src="../assets/js/theme.js"></script>

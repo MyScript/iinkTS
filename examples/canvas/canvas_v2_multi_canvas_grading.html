@@ -8,7 +8,7 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="HandheldFriendly" content="true" />
 
-    <title>Ink Canvas v2 - Multiple Editors (Grading table)</title>
+    <title>Ink Canvas v2 - Multiple Canvas (Grading table)</title>
 
     <link rel="stylesheet" href="../assets/style/reset.css" />
     <link rel="stylesheet" href="../assets/style/components.css" />
@@ -118,15 +118,15 @@
         💡 Info
       </button>
       <button id="showModalBtn" class="btn-keys">API Keys</button>
-      <h1 class="header-title">Ink Canvas v2 - Multiple Editors (Grading table)</h1>
+      <h1 class="header-title">Ink Canvas v2 - Multiple Canvas (Grading table)</h1>
     </header>
     <div class="ex-page-layout">
       <aside id="info-panel" class="ex-panel">
-        <p class="ex-panel-heading">Multiple editors — grading table</p>
+        <p class="ex-panel-heading">Multiple canvas — grading table</p>
         <p class="ex-panel-intro">One row per participant, one small <code>InkCanvas</code> instance per criterion column - a grid of independent handwriting fields instead of a single free-form canvas.</p>
         <div class="ex-panel-divider"></div>
         <div class="ex-panel-item">
-          <div class="ex-panel-item-desc">Each grade cell uses <code>recognition.type: 'MATH'</code> (a handwritten number is a math expression), while the Comment column uses <code>recognition.type: 'TEXT'</code> - two recognition types mixed on the same page, one editor instance per cell.</div>
+          <div class="ex-panel-item-desc">Each grade cell uses <code>recognition.type: 'MATH'</code> (a handwritten number is a math expression), while the Comment column uses <code>recognition.type: 'TEXT'</code> - two recognition types mixed on the same page, one canvas instance per cell.</div>
         </div>
         <div class="ex-panel-item">
           <div class="ex-panel-item-desc">Grades are out of <strong>/20</strong>. Each grade cell's <code>exported</code> event is checked as soon as recognition completes: if the written value isn't a number or falls outside 0-20, the cell is cleared automatically and an error message is shown under it.</div>
@@ -135,7 +135,7 @@
           <div class="ex-panel-item-desc">"Get summary" calls <code>canvas.export()</code> on every grade cell of a row, sums the parsed numbers into the Total column, and lists each participant's total plus their comment in the report below.</div>
         </div>
         <div class="ex-panel-item">
-          <div class="ex-panel-item-desc"><code>Canvas.load()</code> is not used here: it keeps a single instance per editor type and destroys the previous one on every call, which breaks with several concurrent <code>INK_V2</code> instances (12 of them on this page). Constructing <code>new InkCanvas(fieldEl, options)</code> directly (still a public export) sidesteps that and gives each cell a fully independent instance.</div>
+          <div class="ex-panel-item-desc"><code>Canvas.load()</code> is not used here: it keeps a single instance per canvas type and destroys the previous one on every call, which breaks with several concurrent <code>INK_V2</code> instances (12 of them on this page). Constructing <code>new InkCanvas(fieldEl, options)</code> directly (still a public export) sidesteps that and gives each cell a fully independent instance.</div>
         </div>
       </aside>
       <div class="grading-content">
@@ -268,11 +268,11 @@
       const pendingInvalidTimers = rows.map(() => CRITERIA.map(() => undefined))
       const INVALID_GRADE_DEBOUNCE_MS = 250
 
-      const editorOptions = {
+      const canvasOptions = {
         configuration: {},
       }
 
-      // Not Canvas.load(): CanvasFactory keeps one instance per editor type and destroys the
+      // Not Canvas.load(): CanvasFactory keeps one instance per canvas type and destroys the
       // previous one on every call, which races and corrupts several concurrent INK_V2 cells.
       // Constructing the class directly gives each cell a fully independent instance.
       async function loadInkField(fieldEl, options) {
@@ -386,12 +386,12 @@
       })
 
       showModalBtn.addEventListener('click', () => {
-        ModalCanvasOptions.show(loadAll, editorOptions)
+        ModalCanvasOptions.show(loadAll, canvasOptions)
       })
 
-      ModalCanvasOptions.initConfiguration(loadAll, editorOptions)
+      ModalCanvasOptions.initConfiguration(loadAll, canvasOptions)
 
-      window.editorOptions = editorOptions
+      window.canvasOptions = canvasOptions
       window.loadAll = loadAll
     </script>
     <script type="module" src="../components/code-viewer/code-viewer.js"></script>

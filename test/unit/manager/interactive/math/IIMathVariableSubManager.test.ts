@@ -1,4 +1,4 @@
-import { createCanvasMock, asEditor } from "../../../__mocks__/createCanvasMock"
+import { createCanvasMock, asCanvas } from "../../../__mocks__/createCanvasMock"
 import { buildIIStroke } from "../../../helpers"
 import { ColorPaletteManager } from "@/iink"
 import { IIMathVariableSubManager } from "@/manager/interactive/math/IIMathVariableSubManager"
@@ -20,22 +20,22 @@ describe("IIMathVariableSubManager.ts", () => {
   }
 
   test("should create", () => {
-    const editor = createCanvasMock()
-    const manager = new IIMathVariableSubManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new IIMathVariableSubManager(asCanvas(canvas))
     expect(manager).toBeDefined()
   })
 
   describe("enrichMathDependencies", () => {
     test("should keep non-BLOCK sourced variables as externalVariables", async () => {
-      const editor = createCanvasMock()
-      const manager = new IIMathVariableSubManager(asEditor(editor))
+      const canvas = createCanvasMock()
+      const manager = new IIMathVariableSubManager(asCanvas(canvas))
       const variables: TMathVariable[] = [
         { name: "x", value: 2, sourceType: "BLOCK", sourceId: "block-source" },
         { name: "k", value: 5, sourceType: "API_GLOBAL" },
         { name: "pi", value: 3.14, sourceType: "PREDEFINED" },
         { name: "z", sourceType: "UNDEFINED" },
       ]
-      editor.client.getVariables = jest.fn().mockResolvedValue(variables)
+      canvas.client.getVariables = jest.fn().mockResolvedValue(variables)
 
       await manager.enrichMathDependencies("block-1")
 
@@ -48,14 +48,14 @@ describe("IIMathVariableSubManager.ts", () => {
     })
 
     test("should exclude the block's own definition variable (e.g. writing \"c=3/2\")", async () => {
-      const editor = createCanvasMock()
-      const manager = new IIMathVariableSubManager(asEditor(editor))
+      const canvas = createCanvasMock()
+      const manager = new IIMathVariableSubManager(asCanvas(canvas))
       const variables: TMathVariable[] = [
         { name: "c", value: 1.5, sourceType: "UNDEFINED" },
         { name: "k", value: 5, sourceType: "API_GLOBAL" },
       ]
-      editor.client.getVariables = jest.fn().mockResolvedValue(variables)
-      editor.client.asVariableDefinition = jest.fn().mockResolvedValue({ name: "c", value: 1.5 })
+      canvas.client.getVariables = jest.fn().mockResolvedValue(variables)
+      canvas.client.asVariableDefinition = jest.fn().mockResolvedValue({ name: "c", value: 1.5 })
 
       await manager.enrichMathDependencies("block-1")
 
@@ -64,36 +64,36 @@ describe("IIMathVariableSubManager.ts", () => {
     })
 
     test("should clear externalVariables once the block has no more variables", async () => {
-      const editor = createCanvasMock()
-      const manager = new IIMathVariableSubManager(asEditor(editor))
-      editor.client.getVariables = jest.fn().mockResolvedValue([{ name: "k", sourceType: "API_GLOBAL", value: 1 }])
+      const canvas = createCanvasMock()
+      const manager = new IIMathVariableSubManager(asCanvas(canvas))
+      canvas.client.getVariables = jest.fn().mockResolvedValue([{ name: "k", sourceType: "API_GLOBAL", value: 1 }])
       await manager.enrichMathDependencies("block-1")
       expect(manager.getDependencies("block-1")?.externalVariables).toHaveLength(1)
 
-      editor.client.getVariables = jest.fn().mockResolvedValue([])
+      canvas.client.getVariables = jest.fn().mockResolvedValue([])
       await manager.enrichMathDependencies("block-1")
 
       expect(manager.getDependencies("block-1")?.externalVariables).toEqual([])
     })
 
     test("should skip the backend call entirely when isStale() is already true before requesting", async () => {
-      const editor = createCanvasMock()
-      const manager = new IIMathVariableSubManager(asEditor(editor))
-      editor.client.getVariables = jest.fn().mockResolvedValue([{ name: "k", sourceType: "API_GLOBAL", value: 1 }])
+      const canvas = createCanvasMock()
+      const manager = new IIMathVariableSubManager(asCanvas(canvas))
+      canvas.client.getVariables = jest.fn().mockResolvedValue([{ name: "k", sourceType: "API_GLOBAL", value: 1 }])
       const invalidateCacheSpy = jest.spyOn(manager, "invalidateCache")
 
       await manager.enrichMathDependencies("block-1", () => true)
 
-      expect(editor.client.getVariables).not.toHaveBeenCalled()
+      expect(canvas.client.getVariables).not.toHaveBeenCalled()
       expect(manager.getDependencies("block-1")).toBeNull()
       // Cache still purged even though the fetch itself was skipped - it holds pre-change data.
       expect(invalidateCacheSpy).toHaveBeenCalledWith("block-1")
     })
 
     test("should discard the result instead of committing it when isStale() turns true while the backend is answering", async () => {
-      const editor = createCanvasMock()
-      const manager = new IIMathVariableSubManager(asEditor(editor))
-      editor.client.getVariables = jest.fn().mockResolvedValue([{ name: "k", sourceType: "API_GLOBAL", value: 1 }])
+      const canvas = createCanvasMock()
+      const manager = new IIMathVariableSubManager(asCanvas(canvas))
+      canvas.client.getVariables = jest.fn().mockResolvedValue([{ name: "k", sourceType: "API_GLOBAL", value: 1 }])
       // false on the pre-request check, true once the backend has responded.
       let calls = 0
       const isStale = () => ++calls > 1
@@ -102,44 +102,44 @@ describe("IIMathVariableSubManager.ts", () => {
       // reclassified) - a fresh, correct enrichment is already queued to re-run.
       await manager.enrichMathDependencies("block-1", isStale)
 
-      expect(editor.client.getVariables).toHaveBeenCalled()
+      expect(canvas.client.getVariables).toHaveBeenCalled()
       expect(manager.getDependencies("block-1")).toBeNull()
     })
 
     test("should swallow (not throw) a backend error for a block that turned stale mid-request", async () => {
-      const editor = createCanvasMock()
-      const manager = new IIMathVariableSubManager(asEditor(editor))
-      editor.client.getVariables = jest.fn().mockRejectedValue(new Error("block is no longer math"))
+      const canvas = createCanvasMock()
+      const manager = new IIMathVariableSubManager(asCanvas(canvas))
+      canvas.client.getVariables = jest.fn().mockRejectedValue(new Error("block is no longer math"))
       // false on the pre-request check, true by the time the backend rejects.
       let calls = 0
       const isStale = () => ++calls > 1
 
       await expect(manager.enrichMathDependencies("block-1", isStale)).resolves.toBeUndefined()
-      expect(editor.client.getVariables).toHaveBeenCalled()
+      expect(canvas.client.getVariables).toHaveBeenCalled()
       expect(manager.getDependencies("block-1")).toBeNull()
     })
   })
 
   describe("onSymbolHover", () => {
     async function setupHoveredBlock(config: { showDependencyOnHover: boolean }, variables: TMathVariable[]) {
-      const editor = createCanvasMock()
-      const manager = new IIMathVariableSubManager(asEditor(editor), config)
+      const canvas = createCanvasMock()
+      const manager = new IIMathVariableSubManager(asCanvas(canvas), config)
       const stroke = buildMathStroke("block-1")
-      editor.model.addSymbol(stroke)
-      editor.client.getVariables = jest.fn().mockResolvedValue(variables)
+      canvas.model.addSymbol(stroke)
+      canvas.client.getVariables = jest.fn().mockResolvedValue(variables)
       await manager.enrichMathDependencies("block-1")
-      return { editor, manager }
+      return { canvas, manager }
     }
 
     test("should show a centered encart for a hovered block with external variables", async () => {
-      const { editor, manager } = await setupHoveredBlock({ showDependencyOnHover: true }, [
+      const { canvas, manager } = await setupHoveredBlock({ showDependencyOnHover: true }, [
         { name: "k", value: 5, sourceType: "API_GLOBAL" },
       ])
       const swatchColor = ColorPaletteManager.getInstance().getColorForVariable("k")
 
       manager.onSymbolHover("block-1")
 
-      expect(editor.overlays.showVariableEncart).toHaveBeenCalledWith(
+      expect(canvas.overlays.showVariableEncart).toHaveBeenCalledWith(
         expect.objectContaining({
           items: [{ name: "k", value: "5", typeLabel: "Global", typeColor: "var(--ms-ink-primary)", swatchColor }],
         })
@@ -147,33 +147,33 @@ describe("IIMathVariableSubManager.ts", () => {
     })
 
     test("should not show an encart when the block has no external variables", async () => {
-      const { editor, manager } = await setupHoveredBlock({ showDependencyOnHover: true }, [
+      const { canvas, manager } = await setupHoveredBlock({ showDependencyOnHover: true }, [
         { name: "x", value: 2, sourceType: "BLOCK", sourceId: "src" },
       ])
 
       manager.onSymbolHover("block-1")
 
-      expect(editor.overlays.showVariableEncart).not.toHaveBeenCalled()
+      expect(canvas.overlays.showVariableEncart).not.toHaveBeenCalled()
     })
 
     test("should not show an encart when showDependencyOnHover is disabled", async () => {
-      const { editor, manager } = await setupHoveredBlock({ showDependencyOnHover: false }, [
+      const { canvas, manager } = await setupHoveredBlock({ showDependencyOnHover: false }, [
         { name: "k", value: 5, sourceType: "API_GLOBAL" },
       ])
 
       manager.onSymbolHover("block-1")
 
-      expect(editor.overlays.showVariableEncart).not.toHaveBeenCalled()
+      expect(canvas.overlays.showVariableEncart).not.toHaveBeenCalled()
     })
 
     test("should not crash when the server returns a null value instead of omitting it", async () => {
       // The client sometimes sends `value: null` rather than leaving the field out,
       // even though TMathVariable types it as `number | undefined`.
       const nullValueVariable = { name: "k", value: null, sourceType: "API_GLOBAL" } as unknown as TMathVariable
-      const { editor, manager } = await setupHoveredBlock({ showDependencyOnHover: true }, [nullValueVariable])
+      const { canvas, manager } = await setupHoveredBlock({ showDependencyOnHover: true }, [nullValueVariable])
 
       expect(() => manager.onSymbolHover("block-1")).not.toThrow()
-      expect(editor.overlays.showVariableEncart).toHaveBeenCalledWith(
+      expect(canvas.overlays.showVariableEncart).toHaveBeenCalledWith(
         expect.objectContaining({
           items: [expect.objectContaining({ name: "k", value: "undefined" })],
         })
@@ -181,7 +181,7 @@ describe("IIMathVariableSubManager.ts", () => {
     })
 
     test("should highlight each variable occurrence found in the block's expressions", async () => {
-      const { editor, manager } = await setupHoveredBlock({ showDependencyOnHover: true }, [
+      const { canvas, manager } = await setupHoveredBlock({ showDependencyOnHover: true }, [
         { name: "k", value: 5, sourceType: "API_GLOBAL" },
       ])
       const variableExpression: TJIIXMathExpression = {
@@ -195,11 +195,11 @@ describe("IIMathVariableSubManager.ts", () => {
         type: "+",
         operands: [variableExpression],
       }
-      editor.jiix.getElementForStroke = jest.fn().mockReturnValue({ expressions: [operatorExpression] })
+      canvas.jiix.getElementForStroke = jest.fn().mockReturnValue({ expressions: [operatorExpression] })
 
       manager.onSymbolHover("block-1")
 
-      expect(editor.overlays.highlightWithColor).toHaveBeenCalledWith(
+      expect(canvas.overlays.highlightWithColor).toHaveBeenCalledWith(
         expect.objectContaining({ x: 0, y: 0 }),
         "block-1-extvar-k-occ0",
         "k"
@@ -209,17 +209,17 @@ describe("IIMathVariableSubManager.ts", () => {
 
   describe("selectBlock", () => {
     test("should show a centered encart for a selected block with external variables", async () => {
-      const editor = createCanvasMock()
-      const manager = new IIMathVariableSubManager(asEditor(editor), { highlightOnSelect: true })
+      const canvas = createCanvasMock()
+      const manager = new IIMathVariableSubManager(asCanvas(canvas), { highlightOnSelect: true })
       const stroke = buildMathStroke("block-1")
-      editor.model.addSymbol(stroke)
-      editor.client.getVariables = jest.fn().mockResolvedValue([{ name: "k", value: 5, sourceType: "API_GLOBAL" }])
+      canvas.model.addSymbol(stroke)
+      canvas.client.getVariables = jest.fn().mockResolvedValue([{ name: "k", value: 5, sourceType: "API_GLOBAL" }])
       await manager.enrichMathDependencies("block-1")
       const swatchColor = ColorPaletteManager.getInstance().getColorForVariable("k")
 
       manager.selectBlock("block-1")
 
-      expect(editor.overlays.showVariableEncart).toHaveBeenCalledWith(
+      expect(canvas.overlays.showVariableEncart).toHaveBeenCalledWith(
         expect.objectContaining({
           items: [{ name: "k", value: "5", typeLabel: "Global", typeColor: "var(--ms-ink-primary)", swatchColor }],
         })
@@ -227,16 +227,16 @@ describe("IIMathVariableSubManager.ts", () => {
     })
 
     test("should not show an encart when highlightOnSelect is disabled", async () => {
-      const editor = createCanvasMock()
-      const manager = new IIMathVariableSubManager(asEditor(editor), { highlightOnSelect: false })
+      const canvas = createCanvasMock()
+      const manager = new IIMathVariableSubManager(asCanvas(canvas), { highlightOnSelect: false })
       const stroke = buildMathStroke("block-1")
-      editor.model.addSymbol(stroke)
-      editor.client.getVariables = jest.fn().mockResolvedValue([{ name: "k", value: 5, sourceType: "API_GLOBAL" }])
+      canvas.model.addSymbol(stroke)
+      canvas.client.getVariables = jest.fn().mockResolvedValue([{ name: "k", value: 5, sourceType: "API_GLOBAL" }])
       await manager.enrichMathDependencies("block-1")
 
       manager.selectBlock("block-1")
 
-      expect(editor.overlays.showVariableEncart).not.toHaveBeenCalled()
+      expect(canvas.overlays.showVariableEncart).not.toHaveBeenCalled()
     })
   })
 })

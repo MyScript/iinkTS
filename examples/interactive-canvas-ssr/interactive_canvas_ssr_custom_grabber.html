@@ -146,7 +146,7 @@
         }
       }
 
-      const editorOptions = {
+      const canvasOptions = {
         configuration: {},
         override: {
           grabber: CustomGrabber
@@ -154,10 +154,7 @@
       }
 
       let canvas
-      /**
-       * We use a function to wait the server configuration to load
-       */
-      async function loadEditor(options) {
+      async function loadCanvas(options) {
         resultElement.innerHTML = ''
         await canvas?.destroy()
         /**
@@ -193,10 +190,10 @@
         canvas?.redo()
       })
       showModalBtn.addEventListener('click', () => {
-        ModalCanvasOptions.show(loadEditor, editorOptions)
+        ModalCanvasOptions.show(loadCanvas, canvasOptions)
       })
 
-      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
     </script>
       <script type="module" src="../components/code-viewer/code-viewer.js"></script>
     <script src="../assets/js/theme.js"></script>

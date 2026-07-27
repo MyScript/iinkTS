@@ -1,4 +1,4 @@
-import { createCanvasMock, asEditor } from "../../__mocks__/createCanvasMock"
+import { createCanvasMock, asCanvas } from "../../__mocks__/createCanvasMock"
 import {
   IIWriterManager,
   DefaultStyle,
@@ -16,20 +16,20 @@ import {
 
 describe("IIWriterManager.ts", () => {
   test("should create", () => {
-    const editor = createCanvasMock()
-    const manager = new IIWriterManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new IIWriterManager(asCanvas(canvas))
     expect(manager).toBeDefined()
   })
 
   describe("writing process", () => {
-    const editor = createCanvasMock()
-    editor.client.init = jest.fn(() => Promise.resolve())
-    editor.client.addStrokes = jest.fn(() => Promise.resolve(undefined))
+    const canvas = createCanvasMock()
+    canvas.client.init = jest.fn(() => Promise.resolve())
+    canvas.client.addStrokes = jest.fn(() => Promise.resolve(undefined))
 
-    const manager = new IIWriterManager(asEditor(editor))
+    const manager = new IIWriterManager(asCanvas(canvas))
     manager.renderer.drawSymbol = jest.fn()
 
-    editor.init()
+    canvas.init()
 
     test("should init model.currentSymbol with pencil", async () => {
       expect(manager.currentSymbol).toBeUndefined()
@@ -47,20 +47,20 @@ describe("IIWriterManager.ts", () => {
       expect(manager.renderer.drawCurrentSymbol).toHaveBeenCalledWith(manager.currentSymbol)
     })
     test("should init model.currentSymbol with pencil & custom style", () => {
-      editor.penStyle = { color: "red", width: 42 }
+      canvas.penStyle = { color: "red", width: 42 }
       const info = {
         pointer: { t: 1, p: 0.5, x: 1, y: 1 },
       } as TPointerInfo
       manager.start(info)
       expect(manager.currentSymbol).toBeDefined()
-      expect(manager.currentSymbol?.style.color).toBe(editor.penStyle.color)
-      expect(manager.currentSymbol?.style.width).toBe(editor.penStyle.width)
+      expect(manager.currentSymbol?.style.color).toBe(canvas.penStyle.color)
+      expect(manager.currentSymbol?.style.width).toBe(canvas.penStyle.width)
     })
     test("should init model.currentSymbol with Rectangle", () => {
-      editor.penStyle = DefaultStyle
-      expect(editor.layers.root.classList.contains("shape")).toBe(false)
+      canvas.penStyle = DefaultStyle
+      expect(canvas.layers.root.classList.contains("shape")).toBe(false)
       manager.tool = CanvasWriteTool.Rectangle
-      expect(editor.layers.root.classList.contains("shape")).toBe(true)
+      expect(canvas.layers.root.classList.contains("shape")).toBe(true)
       const info = {
         pointer: { t: 1, p: 0.5, x: 1, y: 1 },
       } as TPointerInfo
@@ -74,7 +74,7 @@ describe("IIWriterManager.ts", () => {
     })
     test("should init model.currentSymbol with Circle", () => {
       manager.tool = CanvasWriteTool.Circle
-      expect(editor.layers.root.classList.contains("shape")).toBe(true)
+      expect(canvas.layers.root.classList.contains("shape")).toBe(true)
       const info = {
         pointer: { t: 1, p: 0.5, x: 1, y: 1 },
       } as TPointerInfo
@@ -88,7 +88,7 @@ describe("IIWriterManager.ts", () => {
     })
     test("should init model.currentSymbol with Ellipse", () => {
       manager.tool = CanvasWriteTool.Ellipse
-      expect(editor.layers.root.classList.contains("shape")).toBe(true)
+      expect(canvas.layers.root.classList.contains("shape")).toBe(true)
       const info = {
         pointer: { t: 1, p: 0.5, x: 1, y: 1 },
       } as TPointerInfo
@@ -102,7 +102,7 @@ describe("IIWriterManager.ts", () => {
     })
     test("should init model.currentSymbol with Triangle", () => {
       manager.tool = CanvasWriteTool.Triangle
-      expect(editor.layers.root.classList.contains("shape")).toBe(true)
+      expect(canvas.layers.root.classList.contains("shape")).toBe(true)
       const info = {
         pointer: { t: 1, p: 0.5, x: 1, y: 1 },
       } as TPointerInfo
@@ -116,7 +116,7 @@ describe("IIWriterManager.ts", () => {
     })
     test("should init model.currentSymbol with Parallelogram", () => {
       manager.tool = CanvasWriteTool.Parallelogram
-      expect(editor.layers.root.classList.contains("shape")).toBe(true)
+      expect(canvas.layers.root.classList.contains("shape")).toBe(true)
       const info = {
         pointer: { t: 1, p: 0.5, x: 1, y: 1 },
       } as TPointerInfo
@@ -130,7 +130,7 @@ describe("IIWriterManager.ts", () => {
     })
     test("should init model.currentSymbol with Line", () => {
       manager.tool = CanvasWriteTool.Line
-      expect(editor.layers.root.classList.contains("shape")).toBe(true)
+      expect(canvas.layers.root.classList.contains("shape")).toBe(true)
       const info = {
         pointer: { t: 1, p: 0.5, x: 1, y: 1 },
       } as TPointerInfo
@@ -146,7 +146,7 @@ describe("IIWriterManager.ts", () => {
     })
     test("should init model.currentSymbol with Arrow", () => {
       manager.tool = CanvasWriteTool.Arrow
-      expect(editor.layers.root.classList.contains("shape")).toBe(true)
+      expect(canvas.layers.root.classList.contains("shape")).toBe(true)
       const info = {
         pointer: { t: 1, p: 0.5, x: 1, y: 1 },
       } as TPointerInfo
@@ -162,7 +162,7 @@ describe("IIWriterManager.ts", () => {
     })
     test("should init model.currentSymbol with DoubleArrow", () => {
       manager.tool = CanvasWriteTool.DoubleArrow
-      expect(editor.layers.root.classList.contains("shape")).toBe(true)
+      expect(canvas.layers.root.classList.contains("shape")).toBe(true)
       const info = {
         pointer: { t: 1, p: 0.5, x: 1, y: 1 },
       } as TPointerInfo
@@ -218,20 +218,20 @@ describe("IIWriterManager.ts", () => {
       await manager.end({ pointer: point } as TPointerInfo)
       expect(manager.currentSymbol).toBeUndefined()
       expect(manager.model.symbols).toHaveLength(1)
-      expect(editor.client.addStrokes).toHaveBeenCalledTimes(1)
-      expect(editor.client.addStrokes).toHaveBeenCalledWith([manager.model.symbols[0]], true)
+      expect(canvas.client.addStrokes).toHaveBeenCalledTimes(1)
+      expect(canvas.client.addStrokes).toHaveBeenCalledWith([manager.model.symbols[0]], true)
     })
   })
 
   describe("continue() rendering throttle", () => {
-    const editor = createCanvasMock()
-    editor.client.init = jest.fn(() => Promise.resolve())
-    editor.client.addStrokes = jest.fn(() => Promise.resolve(undefined))
+    const canvas = createCanvasMock()
+    canvas.client.init = jest.fn(() => Promise.resolve())
+    canvas.client.addStrokes = jest.fn(() => Promise.resolve(undefined))
 
-    const manager = new IIWriterManager(asEditor(editor))
+    const manager = new IIWriterManager(asCanvas(canvas))
     manager.renderer.drawSymbol = jest.fn()
 
-    editor.init()
+    canvas.init()
 
     test("should coalesce several continue() calls into a single drawCurrentSymbol per animation frame", async () => {
       manager.tool = CanvasWriteTool.Pencil

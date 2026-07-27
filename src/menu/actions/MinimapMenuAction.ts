@@ -12,7 +12,7 @@ export class MinimapMenuAction extends ButtonMenuItem {
   #minimap: Minimap
   #visible = false
 
-  constructor(editor: TInteractiveInkCanvas, layer: HTMLElement, idPrefix = "ms-menu-action") {
+  constructor(canvas: TInteractiveInkCanvas, layer: HTMLElement, idPrefix = "ms-menu-action") {
     const config: TMenuButton = {
       type: "button",
       id: `${idPrefix}-minimap`,
@@ -20,8 +20,8 @@ export class MinimapMenuAction extends ButtonMenuItem {
       icon: minimapIcon,
       action: () => this.#toggle(),
     }
-    super(config, editor)
-    this.#minimap = new Minimap(editor, {
+    super(config, canvas)
+    this.#minimap = new Minimap(canvas, {
       width: 240,
       height: 160,
     })

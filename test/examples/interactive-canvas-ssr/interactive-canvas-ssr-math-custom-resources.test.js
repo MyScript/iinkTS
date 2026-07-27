@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test"
 import {
   waitForExportedEvent,
-  callEditorIdle,
+  callCanvasIdle,
   writePointers,
   passModalKey
 } from "../helper"
@@ -26,7 +26,7 @@ test.describe("Custom resources math", () => {
         writePointers(page, s.pointers)
       ])
     }
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
     await expect(page.locator("#result")).not.toHaveText(equation.exports.LATEX.at(-1))
   })
 

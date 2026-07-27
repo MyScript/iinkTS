@@ -1,15 +1,15 @@
 import { test, expect } from '@playwright/test'
 import {
-  waitForEditorInit,
+  waitForCanvasInit,
   writeStrokes,
   waitForExportedEvent,
-  getEditorExportsType,
-  getEditorConfiguration,
-  getEditorConverts,
-  getEditorExports,
+  getCanvasExportsType,
+  getCanvasConfiguration,
+  getCanvasConverts,
+  getCanvasExports,
   waitForConvertedEvent,
-  callEditorIdle,
-  loadEditor,
+  callCanvasIdle,
+  loadCanvas,
   passModalKey
 } from '../helper'
 
@@ -34,18 +34,18 @@ test.describe('Interactive Canvas SSR Math MathML', function () {
       waitForExportedEvent(page),
       writeStrokes(page, one.strokes)
     ])
-    const latex = await getEditorExportsType(page, 'application/x-latex')
+    const latex = await getCanvasExportsType(page, 'application/x-latex')
     expect(latex).toBeUndefined()
-    const jiix = await getEditorExportsType(page, 'application/vnd.myscript.jiix')
+    const jiix = await getCanvasExportsType(page, 'application/vnd.myscript.jiix')
     expect(jiix).toBeUndefined()
-    const mathml = await getEditorExportsType(page, 'application/mathml+xml')
+    const mathml = await getCanvasExportsType(page, 'application/mathml+xml')
     expect(mathml).toBeDefined()
   })
 
   test('should export mathml with flavor "standard"', async ({ page }) => {
     await writeStrokes(page, fence.strokes)
-    await callEditorIdle(page)
-    const mathml = await getEditorExportsType(page, 'application/mathml+xml')
+    await callCanvasIdle(page)
+    const mathml = await getCanvasExportsType(page, 'application/mathml+xml')
     expect(mathml.trim().replace(/ /g, '')).toEqual(
       fence.exports.MATHML.STANDARD[fence.exports.MATHML.STANDARD.length - 1]
         .trim()
@@ -55,8 +55,8 @@ test.describe('Interactive Canvas SSR Math MathML', function () {
 
   // test('should export mathml with flavor "ms-office"', async ({ page }) => {
   //   await writeStrokes(page, fence.strokes)
-  //   await callEditorIdle(page)
-  //   const mathml = await getEditorExportsType(page, 'application/mathml+xml')
+  //   await callCanvasIdle(page)
+  //   const mathml = await getCanvasExportsType(page, 'application/mathml+xml')
   //   expect(mathml.trim().replace(/ /g, '')).toEqual(
   //     fence.exports.MATHML.MSOFFICE[fence.exports.MATHML.MSOFFICE.length - 1]
   //       .trim()

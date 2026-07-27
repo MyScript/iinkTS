@@ -8,15 +8,15 @@ import { ButtonMenuItem } from "@/menu/items/ButtonMenuItem"
  * @remarks Menu action Clear
  */
 export class ClearMenuAction extends ButtonMenuItem {
-  constructor(editor: TInteractiveInkCanvas, idPrefix = "ms-menu-action") {
+  constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-action") {
     const config: TMenuButton = {
       type: "button",
       id: `${idPrefix}-clear`,
       label: "Clear",
       icon: trashIcon,
-      action: (editor) => editor.clear(),
-      disabled: (editor) => editor.history.context.empty,
+      action: (canvas) => canvas.clear(),
+      disabled: (canvas) => canvas.history.context.empty,
     }
-    super(config, editor)
+    super(config, canvas)
   }
 }

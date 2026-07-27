@@ -1,25 +1,25 @@
 import { buildIICircle, buildIIStroke } from "../../helpers"
-import { createCanvasMock, asEditor } from "../../__mocks__/createCanvasMock"
+import { createCanvasMock, asCanvas } from "../../__mocks__/createCanvasMock"
 import { EraseManager, TPointerInfo, SymbolType } from "@/iink"
 
 describe("EraseManager.ts", () => {
   test("should create", () => {
-    const editor = createCanvasMock()
-    const manager = new EraseManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new EraseManager(asCanvas(canvas))
     expect(manager).toBeDefined()
     expect(manager.currentEraser).toBeUndefined()
   })
 
   describe("writing process", () => {
-    const editor = createCanvasMock()
-    editor.client.init = jest.fn(() => Promise.resolve())
-    editor.client.addStrokes = jest.fn(() => Promise.resolve(undefined))
-    editor.client.eraseStrokes = jest.fn(() => Promise.resolve())
+    const canvas = createCanvasMock()
+    canvas.client.init = jest.fn(() => Promise.resolve())
+    canvas.client.addStrokes = jest.fn(() => Promise.resolve(undefined))
+    canvas.client.eraseStrokes = jest.fn(() => Promise.resolve())
 
-    const manager = new EraseManager(asEditor(editor))
+    const manager = new EraseManager(asCanvas(canvas))
     manager.renderer.drawSymbol = jest.fn()
     manager.renderer.removeSymbol = jest.fn()
-    editor.init()
+    canvas.init()
 
     test("should init currentEraser", async () => {
       expect(manager.currentEraser).toBeUndefined()
@@ -47,12 +47,12 @@ describe("EraseManager.ts", () => {
     test("should complete erasing", async () => {
       const eraserId = manager.currentEraser!.id
       const strokeToErase = buildIIStroke()
-      editor.model.symbols.push(strokeToErase)
+      canvas.model.symbols.push(strokeToErase)
       manager.deletingIds.add(strokeToErase.id)
       const circleToErase = buildIICircle()
-      editor.model.symbols.push(circleToErase)
+      canvas.model.symbols.push(circleToErase)
       manager.deletingIds.add(circleToErase.id)
-      editor.model.symbols.push(buildIIStroke())
+      canvas.model.symbols.push(buildIIStroke())
 
       const info = {
         pointer: { t: 1, p: 0.5, x: 20, y: 20 },
@@ -62,7 +62,7 @@ describe("EraseManager.ts", () => {
       expect(manager.renderer.removeSymbol).toHaveBeenCalledTimes(1)
       expect(manager.renderer.removeSymbol).toHaveBeenNthCalledWith(1, eraserId)
 
-      expect(editor.removeSymbols).toHaveBeenNthCalledWith(1, [strokeToErase.id, circleToErase.id])
+      expect(canvas.removeSymbols).toHaveBeenNthCalledWith(1, [strokeToErase.id, circleToErase.id])
     })
     test("should throw error if continu when currentEraser is undefine", async () => {
       const info = {

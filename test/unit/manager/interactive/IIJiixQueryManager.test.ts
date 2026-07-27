@@ -1,23 +1,23 @@
 import { buildIIStroke } from "../../helpers"
-import { createCanvasMock, asEditor } from "../../__mocks__/createCanvasMock"
+import { createCanvasMock, asCanvas } from "../../__mocks__/createCanvasMock"
 import { IIJiixQueryManager } from "@/iink"
 
 describe("IIJiixQueryManager.ts", () => {
   describe("getBlocksForSymbols", () => {
     test("should return empty array when no exports", () => {
-      const editor = createCanvasMock()
-      const jiix = new IIJiixQueryManager(asEditor(editor))
+      const canvas = createCanvasMock()
+      const jiix = new IIJiixQueryManager(asCanvas(canvas))
       const stroke = buildIIStroke()
-      editor.model.addSymbol(stroke)
+      canvas.model.addSymbol(stroke)
       expect(jiix.getBlocksForSymbols([stroke])).toEqual([])
     })
 
     test("should return empty array when no symbol matches any block", () => {
-      const editor = createCanvasMock()
-      const jiix = new IIJiixQueryManager(asEditor(editor))
+      const canvas = createCanvasMock()
+      const jiix = new IIJiixQueryManager(asCanvas(canvas))
       const stroke = buildIIStroke()
-      editor.model.addSymbol(stroke)
-      editor.model.mergeExport({
+      canvas.model.addSymbol(stroke)
+      canvas.model.mergeExport({
         "application/vnd.myscript.jiix": {
           type: "Math",
           id: "MainBlock",
@@ -32,11 +32,11 @@ describe("IIJiixQueryManager.ts", () => {
     })
 
     test("should return block when all its strokes are in symbols", () => {
-      const editor = createCanvasMock()
-      const jiix = new IIJiixQueryManager(asEditor(editor))
+      const canvas = createCanvasMock()
+      const jiix = new IIJiixQueryManager(asCanvas(canvas))
       const stroke = buildIIStroke()
-      editor.model.addSymbol(stroke)
-      editor.model.mergeExport({
+      canvas.model.addSymbol(stroke)
+      canvas.model.mergeExport({
         "application/vnd.myscript.jiix": {
           type: "Math",
           id: "MainBlock",
@@ -52,13 +52,13 @@ describe("IIJiixQueryManager.ts", () => {
     })
 
     test("should not return block when only some strokes are in symbols", () => {
-      const editor = createCanvasMock()
-      const jiix = new IIJiixQueryManager(asEditor(editor))
+      const canvas = createCanvasMock()
+      const jiix = new IIJiixQueryManager(asCanvas(canvas))
       const stroke1 = buildIIStroke()
       const stroke2 = buildIIStroke()
-      editor.model.addSymbol(stroke1)
-      editor.model.addSymbol(stroke2)
-      editor.model.mergeExport({
+      canvas.model.addSymbol(stroke1)
+      canvas.model.addSymbol(stroke2)
+      canvas.model.mergeExport({
         "application/vnd.myscript.jiix": {
           type: "Math",
           id: "MainBlock",
@@ -80,15 +80,15 @@ describe("IIJiixQueryManager.ts", () => {
     })
 
     test("should return only fully-covered blocks among multiple", () => {
-      const editor = createCanvasMock()
-      const jiix = new IIJiixQueryManager(asEditor(editor))
+      const canvas = createCanvasMock()
+      const jiix = new IIJiixQueryManager(asCanvas(canvas))
       const stroke1 = buildIIStroke()
       const stroke2 = buildIIStroke()
       const stroke3 = buildIIStroke()
-      editor.model.addSymbol(stroke1)
-      editor.model.addSymbol(stroke2)
-      editor.model.addSymbol(stroke3)
-      editor.model.mergeExport({
+      canvas.model.addSymbol(stroke1)
+      canvas.model.addSymbol(stroke2)
+      canvas.model.addSymbol(stroke3)
+      canvas.model.mergeExport({
         "application/vnd.myscript.jiix": {
           type: "Math",
           id: "MainBlock",
@@ -114,12 +114,12 @@ describe("IIJiixQueryManager.ts", () => {
 
   describe("getBlocksForSymbols with selected symbols", () => {
     test("should return blocks for selected symbols", () => {
-      const editor = createCanvasMock()
-      const jiix = new IIJiixQueryManager(asEditor(editor))
+      const canvas = createCanvasMock()
+      const jiix = new IIJiixQueryManager(asCanvas(canvas))
       const stroke = buildIIStroke()
-      editor.model.addSymbol(stroke)
-      editor.model.selectSymbol(stroke.id)
-      editor.model.mergeExport({
+      canvas.model.addSymbol(stroke)
+      canvas.model.selectSymbol(stroke.id)
+      canvas.model.mergeExport({
         "application/vnd.myscript.jiix": {
           type: "Math",
           id: "MainBlock",
@@ -134,15 +134,15 @@ describe("IIJiixQueryManager.ts", () => {
         },
       })
       jiix.invalidateIndex()
-      expect(jiix.getBlocksForSymbols(editor.model.symbolsSelected).map((el) => el.id)).toEqual(["block-selected"])
+      expect(jiix.getBlocksForSymbols(canvas.model.symbolsSelected).map((el) => el.id)).toEqual(["block-selected"])
     })
 
     test("should return empty when no symbols selected", () => {
-      const editor = createCanvasMock()
-      const jiix = new IIJiixQueryManager(asEditor(editor))
+      const canvas = createCanvasMock()
+      const jiix = new IIJiixQueryManager(asCanvas(canvas))
       const stroke = buildIIStroke()
-      editor.model.addSymbol(stroke)
-      editor.model.mergeExport({
+      canvas.model.addSymbol(stroke)
+      canvas.model.mergeExport({
         "application/vnd.myscript.jiix": {
           type: "Math",
           id: "MainBlock",
@@ -153,7 +153,7 @@ describe("IIJiixQueryManager.ts", () => {
         },
       })
       jiix.invalidateIndex()
-      expect(jiix.getBlocksForSymbols(editor.model.symbolsSelected)).toEqual([])
+      expect(jiix.getBlocksForSymbols(canvas.model.symbolsSelected)).toEqual([])
     })
   })
 })

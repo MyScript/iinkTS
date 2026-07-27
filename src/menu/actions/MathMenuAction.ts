@@ -1,5 +1,5 @@
 import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
-import { IIMathCapabilitiesTable, IIMathVariableEditor } from "@/components"
+import { IIMathCapabilitiesTable, IIMathVariableCanvas } from "@/components"
 import type { TMathResultMode } from "@/manager/interactive/math"
 import type { TMenuButton } from "@/menu/items/ButtonMenuItem"
 import type { TMenuCheckbox } from "@/menu/items/CheckboxMenuItem"
@@ -26,7 +26,7 @@ export type TMathActionConfig = boolean | TMathActionItemsConfig
  * @remarks Menu action for Math visualization and interaction controls
  */
 export class MathMenuAction extends SubMenuItem {
-  constructor(editor: TInteractiveInkCanvas, idPrefix = "ms-menu-action", itemsConfig?: TMathActionItemsConfig) {
+  constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-action", itemsConfig?: TMathActionItemsConfig) {
     const enabled = (key: keyof TMathActionItemsConfig) => itemsConfig?.[key] !== false
 
     const items: (TMenuCheckbox | TMenuSelect | TMenuButton)[] = []
@@ -36,13 +36,13 @@ export class MathMenuAction extends SubMenuItem {
         type: "checkbox",
         id: `${idPrefix}-math-auto-compute`,
         label: "Auto-compute",
-        getValue: (editor: TInteractiveInkCanvas) => editor.math.getComputationConfig().autoCompute,
-        setValue: async (editor: TInteractiveInkCanvas, value: boolean) => {
-          editor.math.updateComputationConfig({
+        getValue: (canvas: TInteractiveInkCanvas) => canvas.math.getComputationConfig().autoCompute,
+        setValue: async (canvas: TInteractiveInkCanvas, value: boolean) => {
+          canvas.math.updateComputationConfig({
             autoCompute: value,
           })
           if (value) {
-            await editor.math.tryAutoCompute()
+            await canvas.math.tryAutoCompute()
           }
         },
       })
@@ -53,9 +53,9 @@ export class MathMenuAction extends SubMenuItem {
         type: "button",
         id: `${idPrefix}-math-force-compute-all`,
         label: "Force Compute all",
-        action: async (editor: TInteractiveInkCanvas) => {
-          await editor.math.clearAllSolverOutputs()
-          await editor.math.computeAllNumericalResults()
+        action: async (canvas: TInteractiveInkCanvas) => {
+          await canvas.math.clearAllSolverOutputs()
+          await canvas.math.computeAllNumericalResults()
         },
       })
     }
@@ -72,16 +72,16 @@ export class MathMenuAction extends SubMenuItem {
             value: "ghost",
           },
         ],
-        getValue: (editor: TInteractiveInkCanvas) => editor.math.getComputationConfig().resultMode,
-        setValue: async (editor: TInteractiveInkCanvas, value: string) => {
+        getValue: (canvas: TInteractiveInkCanvas) => canvas.math.getComputationConfig().resultMode,
+        setValue: async (canvas: TInteractiveInkCanvas, value: string) => {
           const mode = value as TMathResultMode
-          editor.math.updateComputationConfig({
+          canvas.math.updateComputationConfig({
             resultMode: mode,
           })
-          await editor.math.clearAllSolverOutputs()
+          await canvas.math.clearAllSolverOutputs()
 
           if (mode === "draw") {
-            await editor.math.computeAllNumericalResults()
+            await canvas.math.computeAllNumericalResults()
           }
         },
       })
@@ -100,30 +100,30 @@ export class MathMenuAction extends SubMenuItem {
           { label: "Purple", value: "#9c27b0" },
           { label: "Black", value: "#000000" },
         ],
-        getValue: (editor: TInteractiveInkCanvas) => editor.math.getComputationConfig().resultColor,
-        setValue: async (editor: TInteractiveInkCanvas, value: string) => {
-          editor.math.updateComputationConfig({
+        getValue: (canvas: TInteractiveInkCanvas) => canvas.math.getComputationConfig().resultColor,
+        setValue: async (canvas: TInteractiveInkCanvas, value: string) => {
+          canvas.math.updateComputationConfig({
             resultColor: value,
           })
-          await editor.math.clearAllSolverOutputs()
-          await editor.math.computeAllNumericalResults()
+          await canvas.math.clearAllSolverOutputs()
+          await canvas.math.computeAllNumericalResults()
         },
       })
     }
 
-    if (editor.configuration.recognition.math?.solver?.["auto-variable-management"]?.enable) {
+    if (canvas.configuration.recognition.math?.solver?.["auto-variable-management"]?.enable) {
       if (enabled("showDependencies")) {
         items.push({
           type: "checkbox",
           id: `${idPrefix}-math-show-dependency-on-hover`,
           label: "Show Dependencies on Hover",
-          getValue: (editor: TInteractiveInkCanvas) => editor.math.getVariablesConfig().showDependencyOnHover,
-          setValue: (editor: TInteractiveInkCanvas, value: boolean) => {
-            editor.math.updateVariablesConfig({
+          getValue: (canvas: TInteractiveInkCanvas) => canvas.math.getVariablesConfig().showDependencyOnHover,
+          setValue: (canvas: TInteractiveInkCanvas, value: boolean) => {
+            canvas.math.updateVariablesConfig({
               showDependencyOnHover: value,
             })
             if (!value) {
-              editor.math.clearVariableInteractions()
+              canvas.math.clearVariableInteractions()
             }
           },
         })
@@ -134,9 +134,9 @@ export class MathMenuAction extends SubMenuItem {
           type: "checkbox",
           id: `${idPrefix}-math-highlight-on-select`,
           label: "Highlight on Select",
-          getValue: (editor: TInteractiveInkCanvas) => editor.math.getVariablesConfig().highlightOnSelect,
-          setValue: (editor: TInteractiveInkCanvas, value: boolean) => {
-            editor.math.updateVariablesConfig({
+          getValue: (canvas: TInteractiveInkCanvas) => canvas.math.getVariablesConfig().highlightOnSelect,
+          setValue: (canvas: TInteractiveInkCanvas, value: boolean) => {
+            canvas.math.updateVariablesConfig({
               highlightOnSelect: value,
             })
           },
@@ -149,9 +149,9 @@ export class MathMenuAction extends SubMenuItem {
         type: "button",
         id: `${idPrefix}-math-variables`,
         label: "Edit Variables",
-        action: async (editor: TInteractiveInkCanvas) => {
-          const variableEditor = new IIMathVariableEditor(editor)
-          await variableEditor.show()
+        action: async (canvas: TInteractiveInkCanvas) => {
+          const variableCanvas = new IIMathVariableCanvas(canvas)
+          await variableCanvas.show()
         },
       })
     }
@@ -161,8 +161,8 @@ export class MathMenuAction extends SubMenuItem {
         type: "button",
         id: `${idPrefix}-math-capabilities-overview`,
         label: "Show Math Capabilities Overview",
-        action: async (editor: TInteractiveInkCanvas) => {
-          const capabilitiesTable = new IIMathCapabilitiesTable(editor)
+        action: async (canvas: TInteractiveInkCanvas) => {
+          const capabilitiesTable = new IIMathCapabilitiesTable(canvas)
           await capabilitiesTable.show()
         },
       })
@@ -177,6 +177,6 @@ export class MathMenuAction extends SubMenuItem {
       items: items,
     }
 
-    super(config, editor)
+    super(config, canvas)
   }
 }

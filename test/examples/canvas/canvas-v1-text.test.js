@@ -2,9 +2,9 @@ import { test, expect } from "@playwright/test"
 import {
   writeStrokes,
   waitForExportedEvent,
-  getEditorConfiguration,
-  getEditorExports,
-  loadEditor,
+  getCanvasConfiguration,
+  getCanvasExports,
+  loadCanvas,
   passModalKey
 } from "../helper"
 import h from "../__dataset__/h"
@@ -62,7 +62,7 @@ test.describe("Ink Canvas Text", () => {
     })
 
     test("should only request application/vnd.myscript.jiix", async ({ page }) => {
-      const configuration = await getEditorConfiguration(page)
+      const configuration = await getCanvasConfiguration(page)
       const options = {
         configuration: {
           server: configuration.server,
@@ -76,7 +76,7 @@ test.describe("Ink Canvas Text", () => {
           }
         }
       }
-      await loadEditor(page, options)
+      await loadCanvas(page, options)
 
       await Promise.all([
         waitForExportedEvent(page),
@@ -87,7 +87,7 @@ test.describe("Ink Canvas Text", () => {
     })
 
     test("should request application/vnd.myscript.jiix & text/plain", async ({ page }) => {
-      const configuration = await getEditorConfiguration(page)
+      const configuration = await getCanvasConfiguration(page)
       const options = {
         configuration: {
           server: configuration.server,
@@ -102,7 +102,7 @@ test.describe("Ink Canvas Text", () => {
           }
         }
       }
-      await loadEditor(page, options)
+      await loadCanvas(page, options)
       await Promise.all([
         waitForExportedEvent(page),
         writeStrokes(page, h.strokes),
@@ -130,7 +130,7 @@ test.describe("Ink Canvas Text", () => {
         page.locator("#clear").click(),
       ])
       expect(promisesResult[0]).toBeNull()
-      expect(await getEditorExports(page)).toBeFalsy()
+      expect(await getCanvasExports(page)).toBeFalsy()
       await expect(page.locator("#result")).toBeEmpty()
     })
 

@@ -14,8 +14,8 @@ import { DecoratorKind } from "@/symbol"
 export class UnderlineGestureHandler extends GestureHandler {
   readonly gestureType = "UNDERLINE" as const
 
-  constructor(editor: TInteractiveInkCanvas, helpers: GestureHelpers) {
-    super(editor, helpers)
+  constructor(canvas: TInteractiveInkCanvas, helpers: GestureHelpers) {
+    super(canvas, helpers)
   }
 
   async apply(gestureStroke: TStroke, gesture: TGesture): Promise<void> {

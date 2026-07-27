@@ -21,7 +21,7 @@ import { InsertAction, StrikeThroughAction, SurroundAction, UnderlineAction } fr
  * @remarks Menu action Gesture - Détection et actions de gestes
  */
 export class GestureMenuAction extends SubMenuItem {
-  constructor(editor: TInteractiveInkCanvas, idPrefix = "ms-menu-action", itemsConfig?: TGestureActionItemsConfig) {
+  constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-action", itemsConfig?: TGestureActionItemsConfig) {
     const enabled = (key: keyof TGestureActionItemsConfig) => itemsConfig?.[key] !== false
 
     const surroundActionValues: {
@@ -87,78 +87,78 @@ export class GestureMenuAction extends SubMenuItem {
         type: "checkbox",
         id: `${idPrefix}-gesture-detect`,
         label: "Detect gesture",
-        getValue: (editor) => editor.writer.detectGesture,
-        setValue: (editor, value) => {
-          editor.writer.detectGesture = value
-          editor.tool = CanvasTool.Write
-          editor.writer.tool = CanvasWriteTool.Pencil
+        getValue: (canvas) => canvas.writer.detectGesture,
+        setValue: (canvas, value) => {
+          canvas.writer.detectGesture = value
+          canvas.tool = CanvasTool.Write
+          canvas.writer.tool = CanvasWriteTool.Pencil
         },
       })
     }
 
-    if (enabled("surround") && editor.configuration.recognition["raw-content"]?.gestures?.includes("surround")) {
+    if (enabled("surround") && canvas.configuration.recognition["raw-content"]?.gestures?.includes("surround")) {
       config.items.push({
         type: "select",
         id: `${idPrefix}-gesture-surround`,
         label: "On surround",
         options: surroundActionValues,
-        getValue: (editor) => editor.gesture.surroundAction,
-        setValue: (editor, value) => {
-          editor.gesture.surroundAction = value as SurroundAction
-          editor.tool = CanvasTool.Write
-          editor.writer.tool = CanvasWriteTool.Pencil
+        getValue: (canvas) => canvas.gesture.surroundAction,
+        setValue: (canvas, value) => {
+          canvas.gesture.surroundAction = value as SurroundAction
+          canvas.tool = CanvasTool.Write
+          canvas.writer.tool = CanvasWriteTool.Pencil
         },
       })
     }
 
     if (
       enabled("strikethrough") &&
-      editor.configuration.recognition["raw-content"]?.gestures?.includes("strike-through")
+      canvas.configuration.recognition["raw-content"]?.gestures?.includes("strike-through")
     ) {
       config.items.push({
         type: "select",
         id: `${idPrefix}-gesture-strikethrough`,
         label: "On strikethrough",
         options: strikeThroughActionValues,
-        getValue: (editor) => editor.gesture.strikeThroughAction,
-        setValue: (editor, value) => {
-          editor.gesture.strikeThroughAction = value as StrikeThroughAction
-          editor.tool = CanvasTool.Write
-          editor.writer.tool = CanvasWriteTool.Pencil
+        getValue: (canvas) => canvas.gesture.strikeThroughAction,
+        setValue: (canvas, value) => {
+          canvas.gesture.strikeThroughAction = value as StrikeThroughAction
+          canvas.tool = CanvasTool.Write
+          canvas.writer.tool = CanvasWriteTool.Pencil
         },
       })
     }
 
-    if (enabled("underline") && editor.configuration.recognition["raw-content"]?.gestures?.includes("underline")) {
+    if (enabled("underline") && canvas.configuration.recognition["raw-content"]?.gestures?.includes("underline")) {
       config.items.push({
         type: "select",
         id: `${idPrefix}-gesture-underline`,
         label: "On underline",
         options: underlineActionValues,
-        getValue: (editor) => editor.gesture.underlineAction,
-        setValue: (editor, value) => {
-          editor.gesture.underlineAction = value as UnderlineAction
-          editor.tool = CanvasTool.Write
-          editor.writer.tool = CanvasWriteTool.Pencil
+        getValue: (canvas) => canvas.gesture.underlineAction,
+        setValue: (canvas, value) => {
+          canvas.gesture.underlineAction = value as UnderlineAction
+          canvas.tool = CanvasTool.Write
+          canvas.writer.tool = CanvasWriteTool.Pencil
         },
       })
     }
 
-    if (enabled("insert") && editor.configuration.recognition["raw-content"]?.gestures?.includes("insert")) {
+    if (enabled("insert") && canvas.configuration.recognition["raw-content"]?.gestures?.includes("insert")) {
       config.items.push({
         type: "select",
         id: `${idPrefix}-gesture-insert`,
         label: "On insert",
         options: splitActionValues,
-        getValue: (editor) => editor.gesture.insertAction,
-        setValue: (editor, value) => {
-          editor.gesture.insertAction = value as InsertAction
-          editor.tool = CanvasTool.Write
-          editor.writer.tool = CanvasWriteTool.Pencil
+        getValue: (canvas) => canvas.gesture.insertAction,
+        setValue: (canvas, value) => {
+          canvas.gesture.insertAction = value as InsertAction
+          canvas.tool = CanvasTool.Write
+          canvas.writer.tool = CanvasWriteTool.Pencil
         },
       })
     }
 
-    super(config, editor)
+    super(config, canvas)
   }
 }

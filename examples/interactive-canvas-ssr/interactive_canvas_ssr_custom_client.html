@@ -94,14 +94,14 @@
 
       let canvas
 
-      const editorOptions = {
+      const canvasOptions = {
         configuration: {},
         override: {
           client: CustomWebSocketSSRClient
         }
       }
 
-      async function loadEditor(options) {
+      async function loadCanvas(options) {
         await canvas?.destroy()
         resultElement.innerHTML = ''
 
@@ -138,10 +138,10 @@
         canvas?.redo()
       })
       showModalBtn.addEventListener('click', () => {
-        ModalCanvasOptions.show(loadEditor, editorOptions)
+        ModalCanvasOptions.show(loadCanvas, canvasOptions)
       })
 
-      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
     </script>
       <script type="module" src="../components/code-viewer/code-viewer.js"></script>
     <script src="../assets/js/theme.js"></script>

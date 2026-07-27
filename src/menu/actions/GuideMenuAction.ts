@@ -17,7 +17,7 @@ export type TGuideActionConfig = boolean | TGuideActionItemsConfig
  * @remarks Menu action Guide - Configuration des guides
  */
 export class GuideMenuAction extends SubMenuItem {
-  constructor(editor: TInteractiveInkCanvas, idPrefix = "ms-menu-action", itemsConfig?: TGuideActionItemsConfig) {
+  constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-action", itemsConfig?: TGuideActionItemsConfig) {
     const enabled = (key: keyof TGuideActionItemsConfig) => itemsConfig?.[key] !== false
 
     const guideGaps = [
@@ -42,10 +42,10 @@ export class GuideMenuAction extends SubMenuItem {
         type: "checkbox",
         id: `${idPrefix}-guide-enable`,
         label: "Show guide",
-        getValue: (editor) => editor.configuration.rendering.guides.enable,
-        setValue: (editor, value) => {
-          editor.configuration.rendering.guides.enable = value
-          editor.renderingConfiguration = editor.configuration.rendering
+        getValue: (canvas) => canvas.configuration.rendering.guides.enable,
+        setValue: (canvas, value) => {
+          canvas.configuration.rendering.guides.enable = value
+          canvas.renderingConfiguration = canvas.configuration.rendering
         },
       })
     }
@@ -60,10 +60,10 @@ export class GuideMenuAction extends SubMenuItem {
           { label: "Grid", value: "grid" },
           { label: "Point", value: "point" },
         ],
-        getValue: (editor) => editor.configuration.rendering.guides.type,
-        setValue: (editor, value) => {
-          editor.configuration.rendering.guides.type = value as "line" | "grid" | "point"
-          editor.renderingConfiguration = editor.configuration.rendering
+        getValue: (canvas) => canvas.configuration.rendering.guides.type,
+        setValue: (canvas, value) => {
+          canvas.configuration.rendering.guides.type = value as "line" | "grid" | "point"
+          canvas.renderingConfiguration = canvas.configuration.rendering
         },
       })
     }
@@ -75,14 +75,14 @@ export class GuideMenuAction extends SubMenuItem {
         label: "Guide size",
         buttonType: "square",
         options: guideGaps,
-        getValue: (editor) => editor.configuration.rendering.guides.gap.toString(),
-        setValue: (editor, value) => {
-          editor.configuration.rendering.guides.gap = +value
-          editor.renderingConfiguration = editor.configuration.rendering
+        getValue: (canvas) => canvas.configuration.rendering.guides.gap.toString(),
+        setValue: (canvas, value) => {
+          canvas.configuration.rendering.guides.gap = +value
+          canvas.renderingConfiguration = canvas.configuration.rendering
         },
       })
     }
 
-    super(config, editor)
+    super(config, canvas)
   }
 }
