@@ -1,6 +1,6 @@
 import { buildIIStroke } from "../../../helpers"
 import { createCanvasMock, asCanvas } from "../../../__mocks__/createCanvasMock"
-import { GestureHandler, GestureHelpers, TGestureType, TSymbol } from "@/iink"
+import { GestureHandler, GestureHelpers, TGestureType, TSymbol, DecoratorKind, DecoratorOps } from "@/iink"
 
 class TestGestureHandler extends GestureHandler {
   readonly gestureType: TGestureType = "JOIN"
@@ -115,6 +115,42 @@ describe("GestureHandler.ts", () => {
     })
     test("should return last symbol when only 1 symbol", () => {
       expect(handler.testGetLastSymbol([s21])).toEqual(s21)
+    })
+  })
+
+  describe("row index via JIIX line center", () => {
+    test("uses the JIIX line center instead of geometric bounds for a recognized stroke", () => {
+      const { canvas, handler } = setup()
+      // Geometrically this stroke sits in row 1, but JIIX says its word's line center is row 10
+      const s1 = buildIIStroke({ box: { height: 5, width: 5, x: 5, y: 10 } })
+      // Purely geometric stroke, no JIIX data, sits in row 10
+      const s2 = buildIIStroke({ box: { height: 10, width: 5, x: 50, y: 95 } })
+      ;(canvas.jiix as unknown as Record<string, unknown>).getLineCenterYForStroke = jest.fn((id: string) =>
+        id === s1.id ? 96 : null
+      )
+
+      expect(handler.testIsSymbolInRow(s1, s2)).toBe(true)
+    })
+
+    test("falls back to geometric bounds when JIIX has no line for the stroke", () => {
+      const { canvas, handler } = setup()
+      const s1 = buildIIStroke({ box: { height: 5, width: 5, x: 5, y: 10 } })
+      const s2 = buildIIStroke({ box: { height: 10, width: 5, x: 50, y: 95 } })
+      ;(canvas.jiix as unknown as Record<string, unknown>).getLineCenterYForStroke = jest.fn().mockReturnValue(null)
+
+      expect(handler.testIsSymbolInRow(s1, s2)).toBe(false)
+    })
+
+    test("resolves a decorator's row via its first target stroke's JIIX line center", () => {
+      const { canvas, handler } = setup()
+      const s1 = buildIIStroke({ box: { height: 5, width: 5, x: 5, y: 10 } })
+      const s2 = buildIIStroke({ box: { height: 10, width: 5, x: 50, y: 95 } })
+      const decorator = DecoratorOps.create(DecoratorKind.Underline, {}, [s1.id])
+      ;(canvas.jiix as unknown as Record<string, unknown>).getLineCenterYForStroke = jest.fn((id: string) =>
+        id === s1.id ? 96 : null
+      )
+
+      expect(handler.testIsSymbolInRow(decorator, s2)).toBe(true)
     })
   })
 })
