@@ -1,7 +1,7 @@
 import type { TInteractiveInkCanvas } from "@/canvas/TInteractiveInkCanvas"
 import type { TIIHistoryChanges } from "@/history"
-import type { TPoint, TStroke, TText } from "@/symbol"
-import { isText, SymbolType, type TSymbol } from "@/symbol"
+import type { TDecorator, TPoint, TStroke, TText } from "@/symbol"
+import { cloneSymbol, isText, SymbolType, type TSymbol } from "@/symbol"
 import { BoxOps } from "@/symbol/primitives/Box"
 import { StrokeOps } from "@/symbol/stroke/Stroke"
 import { TextOps } from "@/symbol/text/Text"
@@ -185,6 +185,7 @@ export class InsertGestureHandler extends GestureHandler {
         textToSplit.point,
         BoxOps.createFromBoxes(charsBefore.map((c) => c.bounds))
       )
+      textBefore.decorators = textToSplit.decorators.map((d) => cloneSymbol(d) as TDecorator)
       this.typeset.setBounds(textBefore)
       newTexts.push(textBefore)
 
@@ -206,6 +207,7 @@ export class InsertGestureHandler extends GestureHandler {
         }
       }
       const textAfter = TextOps.create(charsAfter, pointAfter, BoxOps.createFromBoxes(charsAfter.map((c) => c.bounds)))
+      textAfter.decorators = textToSplit.decorators.map((d) => cloneSymbol(d) as TDecorator)
       this.typeset.setBounds(textAfter)
       newTexts.push(textAfter)
       replaced.newSymbols = newTexts
@@ -251,8 +253,7 @@ export class InsertGestureHandler extends GestureHandler {
     })
 
     const symbolsRow = this.model.symbols.filter(
-      (s) =>
-        gestureStroke.id !== s.id && (this.isSymbolInRow(gestureStroke, s) || gesture.strokeAfterIds.includes(s.id))
+      (s) => gestureStroke.id !== s.id && this.isSymbolInRow(gestureStroke, s)
     )
 
     const textToSplit = symbolsRow.find(

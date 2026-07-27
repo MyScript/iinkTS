@@ -156,4 +156,61 @@ describe("IIJiixQueryManager.ts", () => {
       expect(jiix.getBlocksForSymbols(canvas.model.symbolsSelected)).toEqual([])
     })
   })
+
+  describe("getLineCenterYForStroke", () => {
+    test("should return the containing line's bounding-box center-y converted to pixels, not the baseline", () => {
+      const canvas = createCanvasMock()
+      const jiix = new IIJiixQueryManager(asCanvas(canvas))
+      const stroke = buildIIStroke()
+      canvas.model.addSymbol(stroke)
+      canvas.model.mergeExport({
+        "application/vnd.myscript.jiix": {
+          type: "Text",
+          id: "MainBlock",
+          version: "3",
+          elements: [
+            {
+              id: "block-1",
+              type: "Text" as never,
+              label: "hello",
+              words: [
+                {
+                  label: "hello",
+                  "first-char": 0,
+                  "last-char": 4,
+                  items: [{ type: "stroke", id: "s1", "full-id": stroke.id }],
+                },
+              ],
+              chars: [
+                { label: "h", word: 0, grid: [], items: [{ type: "stroke", id: "s1", "full-id": stroke.id }] },
+              ],
+              lines: [
+                {
+                  "first-char": 0,
+                  "last-char": 4,
+                  // Deliberately far from the bounding-box center to prove the center, not the
+                  // baseline, drives the result (baseline sits low in a line, center doesn't).
+                  "baseline-y": 40,
+                  "x-height": 5,
+                  "bounding-box": { x: 0, y: 20.4, width: 30, height: 10 },
+                },
+              ],
+            },
+          ],
+        },
+      })
+      jiix.invalidateIndex()
+
+      expect(jiix.getLineCenterYForStroke(stroke.id)).toBeCloseTo(96, 2)
+    })
+
+    test("should return null when the stroke isn't part of any recognized word", () => {
+      const canvas = createCanvasMock()
+      const jiix = new IIJiixQueryManager(asCanvas(canvas))
+      const stroke = buildIIStroke()
+      canvas.model.addSymbol(stroke)
+
+      expect(jiix.getLineCenterYForStroke(stroke.id)).toBeNull()
+    })
+  })
 })

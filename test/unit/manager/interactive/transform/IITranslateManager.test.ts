@@ -240,5 +240,21 @@ describe("IITranslateManager.ts", () => {
 
       expect(decorator.bounds.center).toEqual(centerBefore)
     })
+
+    test("translate() shifts the decorator's baseline vertically along with its target stroke", async () => {
+      const canvas = createCanvasMock()
+      const manager = new IITranslateManager(asCanvas(canvas))
+
+      const stroke = buildIIStroke()
+      canvas.model.addSymbol(stroke)
+      const decorator = DecoratorOps.create(DecoratorKind.Underline, {}, [stroke.id], OBBOps.toBox(stroke.bounds))
+      decorator.baseline = 100
+      decorator.xHeight = 8
+      canvas.model.addSymbol(decorator)
+
+      await manager.translate([stroke], 0, 50, false)
+
+      expect(decorator.baseline).toBe(150)
+    })
   })
 })
