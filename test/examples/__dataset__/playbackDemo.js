@@ -1,17 +1,5 @@
+import strokes from "./json/playbackDemo.json" with { type: "json" }
+
 export default {
-  strokes: [
-    {
-      pointers: [
-        { x: 50, y: 50, t: 1700000000000, p: 0.5 },
-        { x: 100, y: 50, t: 1700000000500, p: 0.5 },
-        { x: 150, y: 50, t: 1700000001000, p: 0.5 },
-      ],
-    },
-    {
-      pointers: [
-        { x: 50, y: 100, t: 1700000001300, p: 0.5 },
-        { x: 100, y: 100, t: 1700000001350, p: 0.5 },
-      ],
-    },
-  ],
+  strokes,
 }
