@@ -16,24 +16,24 @@ test.describe("Interactive ink canvas Stroke Playback", () => {
     await expect(page.locator("#progressLabel")).toHaveText(/^0 \/ \d+ strokes$/)
   })
 
-  test("should toggle the strokes editor visibility", async ({ page }) => {
-    const editor = page.locator("#strokesEditor")
+  test("should toggle the strokes canvas visibility", async ({ page }) => {
+    const canvas = page.locator("#strokesToPlay")
     const toggleBtn = page.locator("#toggleStrokes")
 
-    await expect(editor).toBeHidden()
+    await expect(canvas).toBeHidden()
     await toggleBtn.click()
-    await expect(editor).toBeVisible()
+    await expect(canvas).toBeVisible()
     await expect(toggleBtn).toHaveText("Hide strokes")
 
     await toggleBtn.click()
-    await expect(editor).toBeHidden()
+    await expect(canvas).toBeHidden()
     await expect(toggleBtn).toHaveText("Show strokes")
   })
 
   test.describe("with custom strokes", () => {
     test.beforeEach(async ({ page }) => {
       await page.locator("#toggleStrokes").click()
-      await page.locator("#strokesEditor").fill(JSON.stringify(playbackDemo.strokes))
+      await page.locator("#strokesToPlay").fill(JSON.stringify(playbackDemo.strokes))
     })
 
     test("should replay strokes end to end and settle back to idle", async ({ page }) => {

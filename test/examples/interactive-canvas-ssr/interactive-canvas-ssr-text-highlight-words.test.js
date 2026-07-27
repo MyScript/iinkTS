@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test"
 import {
   writeStrokes,
   waitForExportedEvent,
-  callEditorIdle,
+  callCanvasIdle,
   passModalKey,
 } from "../helper"
 import helloOneStroke from "../__dataset__/helloOneStroke"
@@ -72,7 +72,7 @@ test.describe("Interactive Canvas SSR Text highlight words", () => {
       waitForExportedEvent(page),
       writeStrokes(page, helloOneStroke.strokes),
     ])
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
     await expect(page.locator("#highlight-list > li")).toHaveCount(0)
   })
 
@@ -81,7 +81,7 @@ test.describe("Interactive Canvas SSR Text highlight words", () => {
       waitForExportedEvent(page),
       writeStrokes(page, helloOneStrokeSurrounded.strokes),
     ])
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
     await expect(page.locator("#highlight-list > li")).toHaveCount(1)
     const style = await getComputedStyle(page.locator("#highlight-list > li"))
     expect(style.backgroundColor).toContain("rgba(0, 0, 0, 0.5)")
@@ -94,7 +94,7 @@ test.describe("Interactive Canvas SSR Text highlight words", () => {
       waitForExportedEvent(page),
       writeStrokes(page, helloOneStrokeSurrounded.strokes),
     ])
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
     await expect(page.locator("#highlight-list > li")).toHaveCount(1)
     await Promise.all([
       waitForExportedEvent(page),
@@ -139,7 +139,7 @@ test.describe("Interactive Canvas SSR Text highlight words", () => {
       waitForExportedEvent(page),
       writeStrokes(page, [helloOneStrokeSurrounded.strokes[0]]),
     ])
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
     await expect(page.locator("#highlight-list > li")).toHaveCount(0)
 
     await page.locator(`#${highlightColor.id}`).click()
@@ -147,7 +147,7 @@ test.describe("Interactive Canvas SSR Text highlight words", () => {
       waitForExportedEvent(page),
       writeStrokes(page, [helloOneStrokeSurrounded.strokes[1]]),
     ])
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
     await expect(page.locator("#highlight-list > li")).toHaveCount(1)
     const style = await getComputedStyle(page.locator("#highlight-list > li"))
     expect(style.backgroundColor).toContain(highlightColor.backgroundColor)

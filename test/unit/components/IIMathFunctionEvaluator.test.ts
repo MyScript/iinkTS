@@ -1,11 +1,11 @@
-import { createCanvasMock, asEditor } from "../__mocks__/createCanvasMock"
+import { createCanvasMock, asCanvas } from "../__mocks__/createCanvasMock"
 import { type IIJiixQueryManager, IIMathFunctionEvaluator } from "@/iink"
 
 describe("IIMathFunctionEvaluator.ts", () => {
-  let editor: ReturnType<typeof createCanvasMock>
+  let canvas: ReturnType<typeof createCanvasMock>
 
   beforeEach(() => {
-    editor = createCanvasMock({
+    canvas = createCanvasMock({
       jiix: {
         getBlockLabel: jest.fn().mockImplementation((id: string) => {
           if (id === "block-1") return "f(x) = x + 1"
@@ -16,10 +16,10 @@ describe("IIMathFunctionEvaluator.ts", () => {
     })
 
     // Mock math.getEvaluables method
-    editor.math.getEvaluables = jest.fn().mockResolvedValue([{ inputName: "x", outputName: "f(x)" }])
+    canvas.math.getEvaluables = jest.fn().mockResolvedValue([{ inputName: "x", outputName: "f(x)" }])
 
     // Mock math.evaluateFunction method
-    editor.math.evaluateFunction = jest.fn().mockResolvedValue({
+    canvas.math.evaluateFunction = jest.fn().mockResolvedValue({
       f: [
         [1, 2],
         [2, 4],
@@ -32,17 +32,17 @@ describe("IIMathFunctionEvaluator.ts", () => {
     document.body.innerHTML = ""
   })
 
-  test("should instantiate with editor and jiixBlockIds", () => {
+  test("should instantiate with canvas and jiixBlockIds", () => {
     const jiixBlockIds = ["block-1", "block-2"]
 
-    const evaluator = new IIMathFunctionEvaluator(asEditor(editor), jiixBlockIds)
+    const evaluator = new IIMathFunctionEvaluator(asCanvas(canvas), jiixBlockIds)
     expect(evaluator).toBeDefined()
   })
 
   test("should deduplicate jiixBlockIds in constructor", () => {
     const jiixBlockIds = ["block-1", "block-1", "block-2"]
 
-    const evaluator = new IIMathFunctionEvaluator(asEditor(editor), jiixBlockIds)
+    const evaluator = new IIMathFunctionEvaluator(asCanvas(canvas), jiixBlockIds)
     expect(evaluator).toBeDefined()
   })
 
@@ -50,7 +50,7 @@ describe("IIMathFunctionEvaluator.ts", () => {
     test("should fetch evaluables for all blocks", async () => {
       const jiixBlockIds = ["block-1", "block-2"]
 
-      const evaluator = new IIMathFunctionEvaluator(asEditor(editor), jiixBlockIds)
+      const evaluator = new IIMathFunctionEvaluator(asCanvas(canvas), jiixBlockIds)
 
       // Mock modal to prevent actual DOM operations
       const showSpy = jest.spyOn(evaluator as any, "createModalContent")
@@ -58,8 +58,8 @@ describe("IIMathFunctionEvaluator.ts", () => {
 
       await evaluator.show()
 
-      expect(editor.math.getEvaluables).toHaveBeenCalledWith("block-1")
-      expect(editor.math.getEvaluables).toHaveBeenCalledWith("block-2")
+      expect(canvas.math.getEvaluables).toHaveBeenCalledWith("block-1")
+      expect(canvas.math.getEvaluables).toHaveBeenCalledWith("block-2")
 
       showSpy.mockRestore()
     })
@@ -67,7 +67,7 @@ describe("IIMathFunctionEvaluator.ts", () => {
     test("should skip empty block ids", async () => {
       const jiixBlockIds = ["", "block-2"]
 
-      const evaluator = new IIMathFunctionEvaluator(asEditor(editor), jiixBlockIds)
+      const evaluator = new IIMathFunctionEvaluator(asCanvas(canvas), jiixBlockIds)
 
       const showSpy = jest.spyOn(evaluator as any, "createModalContent")
       showSpy.mockReturnValue(document.createElement("div"))
@@ -75,8 +75,8 @@ describe("IIMathFunctionEvaluator.ts", () => {
       await evaluator.show()
 
       // Only block-2 should be called
-      expect(editor.math.getEvaluables).toHaveBeenCalledWith("block-2")
-      expect(editor.math.getEvaluables).toHaveBeenCalledTimes(1)
+      expect(canvas.math.getEvaluables).toHaveBeenCalledWith("block-2")
+      expect(canvas.math.getEvaluables).toHaveBeenCalledTimes(1)
 
       showSpy.mockRestore()
     })
@@ -84,7 +84,7 @@ describe("IIMathFunctionEvaluator.ts", () => {
     test("should assign unique colors to functions", async () => {
       const jiixBlockIds = ["block-1", "block-2", "block-3"]
 
-      const evaluator = new IIMathFunctionEvaluator(asEditor(editor), jiixBlockIds)
+      const evaluator = new IIMathFunctionEvaluator(asCanvas(canvas), jiixBlockIds)
 
       const showSpy = jest.spyOn(evaluator as any, "createModalContent")
       showSpy.mockReturnValue(document.createElement("div"))

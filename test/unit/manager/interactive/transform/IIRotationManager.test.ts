@@ -1,4 +1,4 @@
-import { createCanvasMock, asEditor } from "../../../__mocks__/createCanvasMock"
+import { createCanvasMock, asCanvas } from "../../../__mocks__/createCanvasMock"
 import { buildIIStroke } from "../../../helpers"
 import {
   EdgeLineOps,
@@ -16,16 +16,16 @@ import {
 
 describe("IIRotationManager.ts", () => {
   test("should create", () => {
-    const editor = createCanvasMock()
-    const manager = new IIRotationManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new IIRotationManager(asCanvas(canvas))
     expect(manager).toBeDefined()
   })
 
   describe("should applyToSymbol", () => {
-    const editor = createCanvasMock()
-    editor.typeset.updateBounds = jest.fn()
-    editor.renderer.setAttribute = jest.fn()
-    const manager = new IIRotationManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    canvas.typeset.updateBounds = jest.fn()
+    canvas.renderer.setAttribute = jest.fn()
+    const manager = new IIRotationManager(asCanvas(canvas))
 
     test("not rotate shape with kind unknown", () => {
       const points: TPoint[] = [
@@ -93,21 +93,21 @@ describe("IIRotationManager.ts", () => {
   })
 
   describe("rotate process on stroke", () => {
-    const editor = createCanvasMock()
-    editor.client.init = jest.fn(() => Promise.resolve())
-    editor.client.transformRotate = jest.fn(() => Promise.resolve())
-    editor.renderer.setAttribute = jest.fn()
-    editor.renderer.drawSymbol = jest.fn()
+    const canvas = createCanvasMock()
+    canvas.client.init = jest.fn(() => Promise.resolve())
+    canvas.client.transformRotate = jest.fn(() => Promise.resolve())
+    canvas.renderer.setAttribute = jest.fn()
+    canvas.renderer.drawSymbol = jest.fn()
 
-    const manager = new IIRotationManager(asEditor(editor))
+    const manager = new IIRotationManager(asCanvas(canvas))
     manager.applyToSymbol = jest.fn()
 
     const stroke = StrokeOps.create({})
     StrokeOps.addPointer(stroke, { p: 1, t: 1, x: 0, y: 0 })
     StrokeOps.addPointer(stroke, { p: 1, t: 1, x: 10, y: 50 })
     const strokeNotRotate = structuredClone(stroke)
-    editor.model.addSymbol(stroke)
-    editor.model.selectedIds.add(stroke.id)
+    canvas.model.addSymbol(stroke)
+    canvas.model.selectedIds.add(stroke.id)
 
     const rotateCenter: TPoint = {
       x: OBBOps.toBox(stroke.bounds).x + stroke.bounds.width / 2,
@@ -138,7 +138,7 @@ describe("IIRotationManager.ts", () => {
     ]
 
     beforeAll(async () => {
-      await editor.init()
+      await canvas.init()
     })
 
     testDatas.forEach((data) => {
@@ -156,13 +156,13 @@ describe("IIRotationManager.ts", () => {
         expect(manager.interactElementsGroup).toEqual(group)
         expect(manager.center).toEqual(rotateCenter)
         expect(manager.origin).toEqual(rotateOrigin)
-        expect(editor.renderer.setAttribute).toHaveBeenNthCalledWith(
+        expect(canvas.renderer.setAttribute).toHaveBeenNthCalledWith(
           1,
           group.id,
           "transform-origin",
           `${rotateCenter.x}px ${rotateCenter.y}px`
         )
-        expect(editor.renderer.setAttribute).toHaveBeenNthCalledWith(
+        expect(canvas.renderer.setAttribute).toHaveBeenNthCalledWith(
           2,
           stroke.id,
           "transform-origin",
@@ -172,17 +172,17 @@ describe("IIRotationManager.ts", () => {
       test(`shoud continu with angle: "${data.angle}°`, () => {
         expect(manager.continue(data.rotateToPoint)).toEqual(data.angle)
 
-        expect(editor.renderer.setAttribute).toHaveBeenNthCalledWith(1, group.id, "transform", `rotate(${data.angle})`)
-        expect(editor.renderer.setAttribute).toHaveBeenNthCalledWith(2, stroke.id, "transform", `rotate(${data.angle})`)
+        expect(canvas.renderer.setAttribute).toHaveBeenNthCalledWith(1, group.id, "transform", `rotate(${data.angle})`)
+        expect(canvas.renderer.setAttribute).toHaveBeenNthCalledWith(2, stroke.id, "transform", `rotate(${data.angle})`)
       })
       test(`shoud end with angle: "${data.angle}°`, async () => {
         await manager.end(data.rotateToPoint)
 
         expect(manager.applyToSymbol).toHaveBeenCalledTimes(1)
-        expect(editor.renderer.drawSymbol).toHaveBeenCalledTimes(1)
-        expect(editor.renderer.drawSymbol).toHaveBeenCalledWith(stroke)
-        expect(editor.client.transformRotate).toHaveBeenCalledTimes(1)
-        expect(editor.client.transformRotate).toHaveBeenCalledWith(
+        expect(canvas.renderer.drawSymbol).toHaveBeenCalledTimes(1)
+        expect(canvas.renderer.drawSymbol).toHaveBeenCalledWith(stroke)
+        expect(canvas.client.transformRotate).toHaveBeenCalledTimes(1)
+        expect(canvas.client.transformRotate).toHaveBeenCalledWith(
           [stroke.id],
           convertDegreeToRadian(data.angle),
           rotateCenter.x,
@@ -212,13 +212,13 @@ describe("IIRotationManager.ts", () => {
     }
 
     test("continue() live-rotates the block's ghost stroke element", () => {
-      const editor = createCanvasMock()
-      editor.math.getGhostStrokeIds = jest.fn().mockReturnValue(["ghost-1"])
-      editor.renderer.setAttribute = jest.fn()
-      const manager = new IIRotationManager(asEditor(editor))
+      const canvas = createCanvasMock()
+      canvas.math.getGhostStrokeIds = jest.fn().mockReturnValue(["ghost-1"])
+      canvas.renderer.setAttribute = jest.fn()
+      const manager = new IIRotationManager(asCanvas(canvas))
       const stroke = buildMathStroke("block-1")
-      editor.model.addSymbol(stroke)
-      editor.model.selectedIds.add(stroke.id)
+      canvas.model.addSymbol(stroke)
+      canvas.model.selectedIds.add(stroke.id)
 
       const origin: TPoint = {
         x: OBBOps.toBox(stroke.bounds).x + stroke.bounds.width / 2,
@@ -232,17 +232,17 @@ describe("IIRotationManager.ts", () => {
       manager.start(setupTarget(origin), origin)
       manager.continue(computeRotatedPoint(origin, center, Math.PI / 2))
 
-      expect(editor.renderer.setAttribute).toHaveBeenCalledWith("ghost-1", "transform", expect.stringContaining("rotate("))
+      expect(canvas.renderer.setAttribute).toHaveBeenCalledWith("ghost-1", "transform", expect.stringContaining("rotate("))
     })
 
     test("end() permanently applies the matrix to the block's ghost strokes", async () => {
-      const editor = createCanvasMock()
-      editor.client.transformRotate = jest.fn(() => Promise.resolve())
-      editor.math.applyTransformToGhostStrokes = jest.fn()
-      const manager = new IIRotationManager(asEditor(editor))
+      const canvas = createCanvasMock()
+      canvas.client.transformRotate = jest.fn(() => Promise.resolve())
+      canvas.math.applyTransformToGhostStrokes = jest.fn()
+      const manager = new IIRotationManager(asCanvas(canvas))
       const stroke = buildMathStroke("block-1")
-      editor.model.addSymbol(stroke)
-      editor.model.selectedIds.add(stroke.id)
+      canvas.model.addSymbol(stroke)
+      canvas.model.selectedIds.add(stroke.id)
 
       const origin: TPoint = {
         x: OBBOps.toBox(stroke.bounds).x + stroke.bounds.width / 2,
@@ -256,7 +256,7 @@ describe("IIRotationManager.ts", () => {
       manager.start(setupTarget(origin), origin)
       await manager.end(computeRotatedPoint(origin, center, Math.PI / 2))
 
-      expect(editor.math.applyTransformToGhostStrokes).toHaveBeenCalledWith("block-1", expect.anything())
+      expect(canvas.math.applyTransformToGhostStrokes).toHaveBeenCalledWith("block-1", expect.anything())
     })
   })
 })

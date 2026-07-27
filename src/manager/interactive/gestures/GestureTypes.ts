@@ -28,7 +28,7 @@ export type TGesture = {
  * @summary
  * List all action allowed on surround detected
  * @remarks
- * only usable in the case of interactive ink editor
+ * only usable in the case of interactive ink canvas
  */
 export enum SurroundAction {
   Select = "select",
@@ -41,7 +41,7 @@ export enum SurroundAction {
  * @summary
  * List all action allowed on strikeThrough detected
  * @remarks
- * only usable in the case of interactive ink editor
+ * only usable in the case of interactive ink canvas
  */
 export enum StrikeThroughAction {
   Erase = "erase",
@@ -53,7 +53,7 @@ export enum StrikeThroughAction {
  * @summary
  * List all action allowed on underline detected
  * @remarks
- * only usable in the case of interactive ink editor
+ * only usable in the case of interactive ink canvas
  */
 export enum UnderlineAction {
   Draw = "draw",
@@ -65,7 +65,7 @@ export enum UnderlineAction {
  * @summary
  * List all action allowed on split detected
  * @remarks
- * only usable in the case of interactive ink editor
+ * only usable in the case of interactive ink canvas
  */
 export enum InsertAction {
   /**

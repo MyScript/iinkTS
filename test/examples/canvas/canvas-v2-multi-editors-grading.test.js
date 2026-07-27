@@ -19,9 +19,9 @@ async function writeStrokesInField(page, fieldId, strokes) {
   }
 }
 
-test.describe("Ink Canvas v2 Multiple Editors (Grading table)", () => {
+test.describe("Ink Canvas v2 Multiple Canvas (Grading table)", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/canvas/canvas_v2_multi_editors_grading.html`)
+    await page.goto(`${process.env.PATH_PREFIX ? process.env.PATH_PREFIX : ""}/examples/canvas/canvas_v2_multi_canvas_grading.html`)
     await passModalKey(page, false)
     // loadAll() only re-enables this button once all 12 cells have fully initialized - a more
     // precise readiness signal than checking DOM children, which can appear before the async
@@ -30,7 +30,7 @@ test.describe("Ink Canvas v2 Multiple Editors (Grading table)", () => {
   })
 
   test("should have title", async ({ page }) => {
-    await expect(page).toHaveTitle("Ink Canvas v2 - Multiple Editors (Grading table)")
+    await expect(page).toHaveTitle("Ink Canvas v2 - Multiple Canvas (Grading table)")
   })
 
   test("summing several written grades should produce the correct row total", async ({ page }) => {

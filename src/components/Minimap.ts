@@ -12,15 +12,15 @@ export type TMinimapOptions = {
 const SVG_NS = "http://www.w3.org/2000/svg"
 
 /**
- * Minimap component showing a scaled-down overview of the editor canvas.
- * Click or drag to navigate the editor viewport.
+ * Minimap component showing a scaled-down overview of the canvas.
+ * Click or drag to navigate the canvas viewport.
  * @group Components
  */
 export class Minimap {
   static readonly DEFAULT_WIDTH = 200
   static readonly DEFAULT_HEIGHT = 150
 
-  #editor: TInteractiveInkCanvas
+  #canvas: TInteractiveInkCanvas
   #width: number
   #height: number
   #container: HTMLDivElement
@@ -36,8 +36,8 @@ export class Minimap {
   #isDragging = false
   #observer: MutationObserver
 
-  constructor(editor: TInteractiveInkCanvas, options?: TMinimapOptions) {
-    this.#editor = editor
+  constructor(canvas: TInteractiveInkCanvas, options?: TMinimapOptions) {
+    this.#canvas = canvas
     this.#width = options?.width ?? Minimap.DEFAULT_WIDTH
     this.#height = options?.height ?? Minimap.DEFAULT_HEIGHT
     this.#container = this.#createContainer()
@@ -88,7 +88,7 @@ export class Minimap {
 
   #createObserver(): MutationObserver {
     const observer = new MutationObserver(() => this.#sync())
-    observer.observe(this.#editor.renderer.getRenderingContext(), {
+    observer.observe(this.#canvas.renderer.getRenderingContext(), {
       attributes: true,
       attributeFilter: ["viewBox"],
       childList: true,
@@ -109,13 +109,13 @@ export class Minimap {
     width: number
     height: number
   } {
-    const rb = this.#editor.renderer.getBounds()
-    const symbols = this.#editor.model.symbols
+    const rb = this.#canvas.renderer.getBounds()
+    const symbols = this.#canvas.model.symbols
     if (!symbols.length) {
       return rb
     }
 
-    const sb = this.#editor.getSymbolsBounds(symbols, 100)
+    const sb = this.#canvas.getSymbolsBounds(symbols, 100)
     const x = Math.min(rb.x, sb.x)
     const y = Math.min(rb.y, sb.y)
     return {
@@ -134,7 +134,7 @@ export class Minimap {
   }
 
   #syncContent(): void {
-    const mainLayer = this.#editor.renderer.getRenderingContext()
+    const mainLayer = this.#canvas.renderer.getRenderingContext()
     const clones = Array.from(mainLayer.children)
       .filter((el) => el.tagName.toLowerCase() !== "defs")
       .map((el) => {
@@ -146,7 +146,7 @@ export class Minimap {
   }
 
   #syncViewport(): void {
-    const vb = this.#editor.renderer.getViewBox()
+    const vb = this.#canvas.renderer.getViewBox()
     this.#viewportRect.setAttribute("x", String(vb.x))
     this.#viewportRect.setAttribute("y", String(vb.y))
     this.#viewportRect.setAttribute("width", String(vb.width))
@@ -181,8 +181,8 @@ export class Minimap {
   }
 
   #centerViewOn(docX: number, docY: number): void {
-    const vb = this.#editor.renderer.getViewBox()
-    this.#editor.renderer.setViewBox(docX - vb.width / 2, docY - vb.height / 2, vb.width, vb.height)
+    const vb = this.#canvas.renderer.getViewBox()
+    this.#canvas.renderer.setViewBox(docX - vb.width / 2, docY - vb.height / 2, vb.width, vb.height)
   }
 
   #handlePointerDown = (event: PointerEvent): void => {

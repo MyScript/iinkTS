@@ -134,14 +134,14 @@
 
       let canvas
 
-      const editorOptions = {
+      const canvasOptions = {
         configuration: {},
         override: {
           grabber: CustomGrabber
         }
       }
 
-      async function loadEditor(options) {
+      async function loadCanvas(options) {
         resultElement.innerHTML = ''
         await canvas?.destroy()
         /**
@@ -160,10 +160,10 @@
       }
 
       showModalBtn.addEventListener('click', () => {
-        ModalCanvasOptions.show(loadEditor, editorOptions)
+        ModalCanvasOptions.show(loadCanvas, canvasOptions)
       })
 
-      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
     </script>
 
     <script type="module" src="../components/code-viewer/code-viewer.js"></script>

@@ -6,7 +6,7 @@ import { LoggerManager } from "@/logger/LoggerManager"
 
 import { IIMathDiagnosticChecker } from "./IIMathDiagnosticChecker"
 import { IIMathFunctionEvaluator } from "./IIMathFunctionEvaluator"
-import { IIMathVariablePerBlockEditor } from "./IIMathVariablePerBlockEditor"
+import { IIMathVariablePerBlockCanvas } from "./IIMathVariablePerBlockCanvas"
 import { Modal } from "./Modal"
 import type { TTableRow } from "./Table"
 import { Table } from "./Table"
@@ -295,8 +295,8 @@ export class IIMathCapabilitiesTable {
       return
     }
 
-    const variableEditor = new IIMathVariablePerBlockEditor(this.canvas, selectedBlockIds)
-    await variableEditor.show()
+    const variableCanvas = new IIMathVariablePerBlockCanvas(this.canvas, selectedBlockIds)
+    await variableCanvas.show()
   }
 
   /**

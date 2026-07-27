@@ -71,7 +71,7 @@
 
       let canvas
 
-      const editorOptions = {
+      const canvasOptions = {
         configuration: {
           recognition: {
             type: 'TEXT'
@@ -82,7 +82,7 @@
         }
       }
 
-      async function loadEditor(options) {
+      async function loadCanvas(options) {
         /**
          * get canvas instance from type
          * @param {Element} The DOM element to attach the ink paper
@@ -96,16 +96,16 @@
       })
 
       showModalBtn.addEventListener('click', () => {
-        ModalCanvasOptions.show(loadEditor, editorOptions)
+        ModalCanvasOptions.show(loadCanvas, canvasOptions)
       })
 
-      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
 
       /**
        * We expose these objects to the window use it in test
        */
-      window.editorOptions = editorOptions
-      window.loadEditor = loadEditor
+      window.canvasOptions = canvasOptions
+      window.loadCanvas = loadCanvas
     </script>
     <script type="module" src="../components/code-viewer/code-viewer.js"></script>
     <script src="../assets/js/theme.js"></script>

@@ -3,7 +3,7 @@ import { InteractiveInkSSRCanvasMock } from "../__mocks__/InteractiveInkSSRCanva
 import { InteractiveInkSSRSmartGuide, TMarginConfiguration } from "@/iink"
 
 describe("InteractiveInkSSRSmartGuide.ts", () => {
-  const editorMock = new InteractiveInkSSRCanvasMock()
+  const canvasMock = new InteractiveInkSSRCanvasMock()
   const margin: TMarginConfiguration = {
     bottom: 100,
     top: 20,
@@ -11,13 +11,13 @@ describe("InteractiveInkSSRSmartGuide.ts", () => {
     right: 40,
   }
   test("should instanciate InteractiveInkSSRSmartGuide", () => {
-    const sm = new InteractiveInkSSRSmartGuide(editorMock)
+    const sm = new InteractiveInkSSRSmartGuide(canvasMock)
     expect(sm).toBeDefined()
   })
 
   describe("Initilize", () => {
     const domElement = document.createElement("div")
-    const sm = new InteractiveInkSSRSmartGuide(editorMock)
+    const sm = new InteractiveInkSSRSmartGuide(canvasMock)
     sm.init(domElement, margin)
 
     test("should init wrapper", () => {
@@ -66,7 +66,7 @@ describe("InteractiveInkSSRSmartGuide.ts", () => {
 
   describe("Menu visibility", () => {
     const domElement = document.createElement("div")
-    const sm = new InteractiveInkSSRSmartGuide(editorMock)
+    const sm = new InteractiveInkSSRSmartGuide(canvasMock)
     sm.init(domElement, margin)
 
     const pointerDownEvt = new LeftClickEventMock("pointerdown", {
@@ -98,7 +98,7 @@ describe("InteractiveInkSSRSmartGuide.ts", () => {
 
   describe("Menu actions", () => {
     const domElement = document.createElement("div")
-    const sm = new InteractiveInkSSRSmartGuide(editorMock)
+    const sm = new InteractiveInkSSRSmartGuide(canvasMock)
     sm.init(domElement, margin)
 
     const pointerDownEvt = new LeftClickEventMock("pointerdown", {
@@ -109,26 +109,26 @@ describe("InteractiveInkSSRSmartGuide.ts", () => {
     })
     const ellispis = domElement.querySelector(".ellipsis") as HTMLDivElement
     ellispis.dispatchEvent(pointerDownEvt)
-    test("should call editor.convert", () => {
-      expect(editorMock.convert).toHaveBeenCalledTimes(0)
+    test("should call canvas.convert", () => {
+      expect(canvasMock.convert).toHaveBeenCalledTimes(0)
       const btn = domElement.querySelector(`#convert-${sm.uuid}`) as HTMLDivElement
       btn.dispatchEvent(pointerDownEvt)
-      expect(editorMock.convert).toHaveBeenCalledTimes(1)
+      expect(canvasMock.convert).toHaveBeenCalledTimes(1)
     })
     test.skip("should COPY", () => {
       // TODO
     })
     test("should call behavior.clear", () => {
-      expect(editorMock.clear).toHaveBeenCalledTimes(0)
+      expect(canvasMock.clear).toHaveBeenCalledTimes(0)
       const btn = domElement.querySelector(`#delete-${sm.uuid}`) as HTMLDivElement
       btn.dispatchEvent(pointerDownEvt)
-      expect(editorMock.clear).toHaveBeenCalledTimes(1)
+      expect(canvasMock.clear).toHaveBeenCalledTimes(1)
     })
   })
 
   describe("Display", () => {
     const domElement = document.createElement("div")
-    const sm = new InteractiveInkSSRSmartGuide(editorMock)
+    const sm = new InteractiveInkSSRSmartGuide(canvasMock)
     sm.init(domElement, margin)
     const jiix = {
       type: "Text",

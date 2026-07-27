@@ -3,7 +3,7 @@ import {
   passModalKey,
   writeStrokes,
   waitForSynchronizedEvent,
-  getEditorSymbols,
+  getCanvasSymbols,
 } from "../helper"
 import helloOneStroke from "../__dataset__/helloOneStroke"
 
@@ -22,7 +22,7 @@ test.describe("Interactive ink canvas Get Started", () => {
     })
 
     test("should have stroke into model.symbols", async ({ page }) => {
-      const symbols = await getEditorSymbols(page)
+      const symbols = await getCanvasSymbols(page)
       expect(symbols).toHaveLength(1)
       const stroke = symbols[0]
       expect(stroke.type).toEqual("stroke")
@@ -32,7 +32,7 @@ test.describe("Interactive ink canvas Get Started", () => {
     })
 
     test("should display stroke", async ({ page }) => {
-      const symbols = await getEditorSymbols(page)
+      const symbols = await getCanvasSymbols(page)
       expect(symbols).toHaveLength(1)
       const stroke = symbols[0]
       expect(stroke.type).toEqual("stroke")

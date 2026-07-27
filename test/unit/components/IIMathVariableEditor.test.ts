@@ -1,5 +1,5 @@
-import { createCanvasMock, asEditor } from "../__mocks__/createCanvasMock"
-import { IIMathVariableEditor, TMathVariableUsage } from "@/iink"
+import { createCanvasMock, asCanvas } from "../__mocks__/createCanvasMock"
+import { IIMathVariableCanvas, TMathVariableUsage } from "@/iink"
 
 function makeUsage(overrides: Partial<TMathVariableUsage> = {}): TMathVariableUsage {
   return {
@@ -15,17 +15,17 @@ function makeUsage(overrides: Partial<TMathVariableUsage> = {}): TMathVariableUs
   }
 }
 
-describe("IIMathVariableEditor.ts", () => {
-  let editor: ReturnType<typeof createCanvasMock>
+describe("IIMathVariableCanvas.ts", () => {
+  let canvas: ReturnType<typeof createCanvasMock>
 
   beforeEach(() => {
-    editor = createCanvasMock()
-    document.body.appendChild(editor.layers.ui.root)
+    canvas = createCanvasMock()
+    document.body.appendChild(canvas.layers.ui.root)
 
-    editor.math.getAllVariableUsages = jest.fn().mockResolvedValue([])
-    editor.math.setVariableValue = jest.fn().mockResolvedValue(undefined)
-    editor.math.removeVariable = jest.fn().mockResolvedValue(undefined)
-    editor.menu.context = { update: jest.fn() } as any
+    canvas.math.getAllVariableUsages = jest.fn().mockResolvedValue([])
+    canvas.math.setVariableValue = jest.fn().mockResolvedValue(undefined)
+    canvas.math.removeVariable = jest.fn().mockResolvedValue(undefined)
+    canvas.menu.context = { update: jest.fn() } as any
   })
 
   afterEach(() => {
@@ -33,22 +33,22 @@ describe("IIMathVariableEditor.ts", () => {
   })
 
   describe("constructor", () => {
-    test("should instantiate with editor", () => {
-      const component = new IIMathVariableEditor(asEditor(editor))
+    test("should instantiate with canvas", () => {
+      const component = new IIMathVariableCanvas(asCanvas(canvas))
       expect(component).toBeDefined()
     })
   })
 
   describe("show()", () => {
     test("should call getAllVariableUsages", async () => {
-      const component = new IIMathVariableEditor(asEditor(editor))
+      const component = new IIMathVariableCanvas(asCanvas(canvas))
       await component.show()
-      expect(editor.math.getAllVariableUsages).toHaveBeenCalledTimes(1)
+      expect(canvas.math.getAllVariableUsages).toHaveBeenCalledTimes(1)
     })
 
     test("should return early and not open modal on fetch error", async () => {
-      editor.math.getAllVariableUsages = jest.fn().mockRejectedValue(new Error("network error"))
-      const component = new IIMathVariableEditor(asEditor(editor))
+      canvas.math.getAllVariableUsages = jest.fn().mockRejectedValue(new Error("network error"))
+      const component = new IIMathVariableCanvas(asCanvas(canvas))
       await expect(component.show()).resolves.toBeUndefined()
       // no modal backdrop in DOM
       const backdrop = document.querySelector(".ms-modal-backdrop")
@@ -56,15 +56,15 @@ describe("IIMathVariableEditor.ts", () => {
     })
 
     test("should open modal when usages are fetched", async () => {
-      editor.math.getAllVariableUsages = jest.fn().mockResolvedValue([makeUsage()])
-      const component = new IIMathVariableEditor(asEditor(editor))
+      canvas.math.getAllVariableUsages = jest.fn().mockResolvedValue([makeUsage()])
+      const component = new IIMathVariableCanvas(asCanvas(canvas))
       await component.show()
       const backdrop = document.querySelector(".ms-modal-backdrop")
       expect(backdrop).not.toBeNull()
     })
 
     test("should open modal even with empty usages", async () => {
-      const component = new IIMathVariableEditor(asEditor(editor))
+      const component = new IIMathVariableCanvas(asCanvas(canvas))
       await component.show()
       const backdrop = document.querySelector(".ms-modal-backdrop")
       expect(backdrop).not.toBeNull()
@@ -72,8 +72,8 @@ describe("IIMathVariableEditor.ts", () => {
 
     test("should build usagesById map keyed by usage.id", async () => {
       const usage = makeUsage({ id: "uid-99", name: "k" })
-      editor.math.getAllVariableUsages = jest.fn().mockResolvedValue([usage])
-      const component = new IIMathVariableEditor(asEditor(editor))
+      canvas.math.getAllVariableUsages = jest.fn().mockResolvedValue([usage])
+      const component = new IIMathVariableCanvas(asCanvas(canvas))
       await component.show()
       // usagesById is private — verify indirectly via applyChanges
       const input = document.querySelector("input[type='number']") as HTMLInputElement
@@ -85,14 +85,14 @@ describe("IIMathVariableEditor.ts", () => {
       ) as HTMLButtonElement
       applyBtn?.click()
       await new Promise((r) => setTimeout(r, 20))
-      expect(editor.math.setVariableValue).toHaveBeenCalledWith("block-1", "k", 100)
+      expect(canvas.math.setVariableValue).toHaveBeenCalledWith("block-1", "k", 100)
     })
   })
 
   describe("close()", () => {
     test("should destroy modal and reset state", async () => {
-      editor.math.getAllVariableUsages = jest.fn().mockResolvedValue([makeUsage()])
-      const component = new IIMathVariableEditor(asEditor(editor))
+      canvas.math.getAllVariableUsages = jest.fn().mockResolvedValue([makeUsage()])
+      const component = new IIMathVariableCanvas(asCanvas(canvas))
       await component.show()
 
       expect(document.querySelector(".ms-modal-backdrop")).not.toBeNull()
@@ -101,7 +101,7 @@ describe("IIMathVariableEditor.ts", () => {
     })
 
     test("should be safe to call before show()", () => {
-      const component = new IIMathVariableEditor(asEditor(editor))
+      const component = new IIMathVariableCanvas(asCanvas(canvas))
       expect(() => component.close()).not.toThrow()
     })
   })
@@ -109,8 +109,8 @@ describe("IIMathVariableEditor.ts", () => {
   describe("applyChanges()", () => {
     test("should call setVariableValue for changed editable usage", async () => {
       const usage = makeUsage({ id: "u1", name: "x", value: 1, isEditable: true, targetBlockId: "block-1" })
-      editor.math.getAllVariableUsages = jest.fn().mockResolvedValue([usage])
-      const component = new IIMathVariableEditor(asEditor(editor))
+      canvas.math.getAllVariableUsages = jest.fn().mockResolvedValue([usage])
+      const component = new IIMathVariableCanvas(asCanvas(canvas))
       await component.show()
 
       const input = document.querySelector("input[type='number']") as HTMLInputElement
@@ -122,13 +122,13 @@ describe("IIMathVariableEditor.ts", () => {
       applyBtn.click()
       await new Promise((r) => setTimeout(r, 20))
 
-      expect(editor.math.setVariableValue).toHaveBeenCalledWith("block-1", "x", 99)
+      expect(canvas.math.setVariableValue).toHaveBeenCalledWith("block-1", "x", 99)
     })
 
     test("should skip non-editable usages", async () => {
       const usage = makeUsage({ id: "u1", name: "x", value: 1, isEditable: false })
-      editor.math.getAllVariableUsages = jest.fn().mockResolvedValue([usage])
-      const component = new IIMathVariableEditor(asEditor(editor))
+      canvas.math.getAllVariableUsages = jest.fn().mockResolvedValue([usage])
+      const component = new IIMathVariableCanvas(asCanvas(canvas))
       await component.show()
 
       const input = document.querySelector("input[type='number']") as HTMLInputElement
@@ -141,13 +141,13 @@ describe("IIMathVariableEditor.ts", () => {
       applyBtn.click()
       await new Promise((r) => setTimeout(r, 20))
 
-      expect(editor.math.setVariableValue).not.toHaveBeenCalled()
+      expect(canvas.math.setVariableValue).not.toHaveBeenCalled()
     })
 
     test("should skip unchanged values", async () => {
       const usage = makeUsage({ id: "u1", name: "x", value: 42, isEditable: true })
-      editor.math.getAllVariableUsages = jest.fn().mockResolvedValue([usage])
-      const component = new IIMathVariableEditor(asEditor(editor))
+      canvas.math.getAllVariableUsages = jest.fn().mockResolvedValue([usage])
+      const component = new IIMathVariableCanvas(asCanvas(canvas))
       await component.show()
 
       // input already has value=42; do not change it
@@ -157,11 +157,11 @@ describe("IIMathVariableEditor.ts", () => {
       applyBtn.click()
       await new Promise((r) => setTimeout(r, 20))
 
-      expect(editor.math.setVariableValue).not.toHaveBeenCalled()
+      expect(canvas.math.setVariableValue).not.toHaveBeenCalled()
     })
 
     test("should add new global variable via setVariableValue('', name, value)", async () => {
-      const component = new IIMathVariableEditor(asEditor(editor))
+      const component = new IIMathVariableCanvas(asCanvas(canvas))
       await component.show()
 
       // click "+ Add"
@@ -182,11 +182,11 @@ describe("IIMathVariableEditor.ts", () => {
       applyBtn.click()
       await new Promise((r) => setTimeout(r, 20))
 
-      expect(editor.math.setVariableValue).toHaveBeenCalledWith("", "NewVar", 7)
+      expect(canvas.math.setVariableValue).toHaveBeenCalledWith("", "NewVar", 7)
     })
 
     test("should skip new row with empty name", async () => {
-      const component = new IIMathVariableEditor(asEditor(editor))
+      const component = new IIMathVariableCanvas(asCanvas(canvas))
       await component.show()
 
       const addBtn = Array.from(document.querySelectorAll("button")).find(
@@ -205,13 +205,13 @@ describe("IIMathVariableEditor.ts", () => {
       applyBtn.click()
       await new Promise((r) => setTimeout(r, 20))
 
-      expect(editor.math.setVariableValue).not.toHaveBeenCalled()
+      expect(canvas.math.setVariableValue).not.toHaveBeenCalled()
     })
 
     test("should call menu.context.update() after applying changes", async () => {
       const usage = makeUsage({ id: "u1", name: "x", value: 1, isEditable: true })
-      editor.math.getAllVariableUsages = jest.fn().mockResolvedValue([usage])
-      const component = new IIMathVariableEditor(asEditor(editor))
+      canvas.math.getAllVariableUsages = jest.fn().mockResolvedValue([usage])
+      const component = new IIMathVariableCanvas(asCanvas(canvas))
       await component.show()
 
       const input = document.querySelector("input[type='number']") as HTMLInputElement
@@ -223,11 +223,11 @@ describe("IIMathVariableEditor.ts", () => {
       applyBtn.click()
       await new Promise((r) => setTimeout(r, 20))
 
-      expect(editor.menu.context.update).toHaveBeenCalled()
+      expect(canvas.menu.context.update).toHaveBeenCalled()
     })
 
     test("should remove new row when its delete button is clicked", async () => {
-      const component = new IIMathVariableEditor(asEditor(editor))
+      const component = new IIMathVariableCanvas(asCanvas(canvas))
       await component.show()
 
       const addBtn = Array.from(document.querySelectorAll("button")).find(
@@ -246,7 +246,7 @@ describe("IIMathVariableEditor.ts", () => {
       await new Promise((r) => setTimeout(r, 20))
 
       // new row was removed, nothing to apply
-      expect(editor.math.setVariableValue).not.toHaveBeenCalled()
+      expect(canvas.math.setVariableValue).not.toHaveBeenCalled()
     })
   })
 })

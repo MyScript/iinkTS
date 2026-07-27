@@ -17,7 +17,7 @@ export type TContextReorderConfig = boolean | TContextReorderItemsConfig
  * @remarks Menu contextuel Reorder - Réordonne les symboles sélectionnés
  */
 export class ReorderContextMenu extends SubMenuItem {
-  constructor(editor: TInteractiveInkCanvas, idPrefix = "ms-menu-context", itemsConfig?: TContextReorderItemsConfig) {
+  constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-context", itemsConfig?: TContextReorderItemsConfig) {
     const enabled = (key: keyof TContextReorderItemsConfig) => itemsConfig?.[key] !== false
 
     const config: TMenuSubMenu = {
@@ -34,8 +34,8 @@ export class ReorderContextMenu extends SubMenuItem {
         type: "button",
         label: "Bring to front",
         action: () => {
-          editor.changeOrderSymbols(editor.model.symbolsSelected, "last")
-          editor.selector.redrawSelectedGroup()
+          canvas.changeOrderSymbols(canvas.model.symbolsSelected, "last")
+          canvas.selector.redrawSelectedGroup()
         },
       })
     }
@@ -46,8 +46,8 @@ export class ReorderContextMenu extends SubMenuItem {
         type: "button",
         label: "Bring forward",
         action: () => {
-          editor.changeOrderSymbols(editor.model.symbolsSelected, "forward")
-          editor.selector.redrawSelectedGroup()
+          canvas.changeOrderSymbols(canvas.model.symbolsSelected, "forward")
+          canvas.selector.redrawSelectedGroup()
         },
       })
     }
@@ -58,8 +58,8 @@ export class ReorderContextMenu extends SubMenuItem {
         type: "button",
         label: "Send backward",
         action: () => {
-          editor.changeOrderSymbols(editor.model.symbolsSelected, "backward")
-          editor.selector.redrawSelectedGroup()
+          canvas.changeOrderSymbols(canvas.model.symbolsSelected, "backward")
+          canvas.selector.redrawSelectedGroup()
         },
       })
     }
@@ -70,12 +70,12 @@ export class ReorderContextMenu extends SubMenuItem {
         type: "button",
         label: "Send to back",
         action: () => {
-          editor.changeOrderSymbols(editor.model.symbolsSelected.slice().reverse(), "first")
-          editor.selector.redrawSelectedGroup()
+          canvas.changeOrderSymbols(canvas.model.symbolsSelected.slice().reverse(), "first")
+          canvas.selector.redrawSelectedGroup()
         },
       })
     }
 
-    super(config, editor)
+    super(config, canvas)
   }
 }

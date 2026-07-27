@@ -2,8 +2,8 @@ import { test, expect } from "@playwright/test"
 import {
   writeStrokes,
   waitForExportedEvent,
-  getEditorExports,
-  getEditorExportsType,
+  getCanvasExports,
+  getCanvasExportsType,
   getExportedResults,
   passModalKey
 } from "../helper"
@@ -34,7 +34,7 @@ test.describe("Text ja_JP vertical Canvas Iink", () => {
       ja_JP1Column.exports["text/plain"].at(0)
     )
 
-    const plainTextExport = await getEditorExportsType(page, "text/plain")
+    const plainTextExport = await getCanvasExportsType(page, "text/plain")
     expect(plainTextExport).toStrictEqual(
       ja_JP1Column.exports["text/plain"].at(0)
     )
@@ -51,7 +51,7 @@ test.describe("Text ja_JP vertical Canvas Iink", () => {
       5
     )
 
-    const plainTextExport = await getEditorExportsType(page, "text/plain")
+    const plainTextExport = await getCanvasExportsType(page, "text/plain")
     let resultText = await page.locator("#result").innerText()
     resultText = resultText.replace(/\n\n\n/g, "\n") // FF: remove extra line breaks
     expect(resultText).toStrictEqual(plainTextExport)
@@ -68,7 +68,7 @@ test.describe("Text ja_JP vertical Canvas Iink", () => {
         5
       )
 
-      const plainTextExport = await getEditorExportsType(page, "text/plain")
+      const plainTextExport = await getCanvasExportsType(page, "text/plain")
       let resultText = await page.locator("#result").innerText()
       resultText = resultText.replace(/\n\n\n/g, "\n") // FF: remove extra line breaks
       expect(resultText).toStrictEqual(plainTextExport)
@@ -83,7 +83,7 @@ test.describe("Text ja_JP vertical Canvas Iink", () => {
         page.locator("#clear").click(),
       ])
       expect(promisesResult[0]).toBeNull()
-      expect(await getEditorExports(page)).toBeFalsy()
+      expect(await getCanvasExports(page)).toBeFalsy()
       await expect(page.locator("#result")).toBeEmpty()
     })
 

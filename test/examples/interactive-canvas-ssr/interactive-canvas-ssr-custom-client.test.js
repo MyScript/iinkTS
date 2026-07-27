@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test"
-import { writeStrokes, waitForEditorInit, waitForExportedEvent, getEditorConfiguration, passModalKey } from "../helper"
+import { writeStrokes, waitForCanvasInit, waitForExportedEvent, getCanvasConfiguration, passModalKey } from "../helper"
 import h from "../__dataset__/h"
 
 test.describe("Interactive Canvas SSR with custom client", () => {
@@ -26,7 +26,7 @@ test.describe("Interactive Canvas SSR with custom client", () => {
       writeStrokes(page, h.strokes)
     ])
 
-    const conf = await getEditorConfiguration(page)
+    const conf = await getCanvasConfiguration(page)
     await expect(page.locator("#client-url")).toHaveText(`connection established at ${conf.server.scheme === "http" ? "ws" : "wss"}://${conf.server.host}/api/v4.0/iink/document?applicationKey=${conf.server.applicationKey}`)
     await expect(page.locator("#client-sent")).toHaveText(`Message sent: ${lastMessageSent}`)
     await expect(page.locator("#client-received")).toHaveText(`Message received: ${lastMessageReceived}`)

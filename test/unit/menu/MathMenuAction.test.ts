@@ -1,4 +1,4 @@
-import { createCanvasMock, asEditor } from "../__mocks__/createCanvasMock"
+import { createCanvasMock, asCanvas } from "../__mocks__/createCanvasMock"
 import { MathMenuAction } from "@/menu/actions/MathMenuAction"
 
 describe("MathMenuAction.ts", () => {
@@ -7,8 +7,8 @@ describe("MathMenuAction.ts", () => {
   })
 
   test("does not build the removed select/delete result strokes buttons", () => {
-    const editor = createCanvasMock()
-    const action = new MathMenuAction(asEditor(editor))
+    const canvas = createCanvasMock()
+    const action = new MathMenuAction(asCanvas(canvas))
     const element = action.getElement()
 
     expect(element.querySelector("#ms-menu-action-math-select-result-strokes")).toBeNull()
@@ -16,10 +16,10 @@ describe("MathMenuAction.ts", () => {
   })
 
   test("clicking Force Compute all clears then recomputes all math blocks", async () => {
-    const editor = createCanvasMock()
-    editor.math.clearAllSolverOutputs = jest.fn().mockResolvedValue(undefined)
-    editor.math.computeAllNumericalResults = jest.fn().mockResolvedValue(undefined)
-    const action = new MathMenuAction(asEditor(editor))
+    const canvas = createCanvasMock()
+    canvas.math.clearAllSolverOutputs = jest.fn().mockResolvedValue(undefined)
+    canvas.math.computeAllNumericalResults = jest.fn().mockResolvedValue(undefined)
+    const action = new MathMenuAction(asCanvas(canvas))
     const element = action.getElement()
     document.body.appendChild(element)
 
@@ -31,13 +31,13 @@ describe("MathMenuAction.ts", () => {
     await Promise.resolve()
     await Promise.resolve()
 
-    expect(editor.math.clearAllSolverOutputs).toHaveBeenCalledTimes(1)
-    expect(editor.math.computeAllNumericalResults).toHaveBeenCalledTimes(1)
+    expect(canvas.math.clearAllSolverOutputs).toHaveBeenCalledTimes(1)
+    expect(canvas.math.computeAllNumericalResults).toHaveBeenCalledTimes(1)
   })
 
   test("does not build the Force Compute all button when disabled via config", () => {
-    const editor = createCanvasMock()
-    const action = new MathMenuAction(asEditor(editor), "ms-menu-action", { forceComputeAll: false })
+    const canvas = createCanvasMock()
+    const action = new MathMenuAction(asCanvas(canvas), "ms-menu-action", { forceComputeAll: false })
     const element = action.getElement()
 
     expect(element.querySelector("#ms-menu-action-math-force-compute-all")).toBeNull()

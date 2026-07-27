@@ -218,11 +218,11 @@ function createStrokeInputWrapper(symbol) {
 }
 
 let canvas
-const editorOptions = {
+const canvasOptions = {
   configuration: {},
 }
 
-async function loadEditor(options) {
+async function loadCanvas(options) {
   importBtn.disabled = true
   exportHtmlBody.srcdoc = BACKEND_MODEL_EMPTY
   await canvas?.destroy()
@@ -258,14 +258,14 @@ importBtn.addEventListener("pointerup", async () => {
 })
 
 showModalBtn.addEventListener("pointerup", () => {
-  ModalCanvasOptions.show(loadEditor, editorOptions)
+  ModalCanvasOptions.show(loadCanvas, canvasOptions)
 })
 
 window.addEventListener("resize", () => {
   canvas?.resize()
 })
 
-ModalCanvasOptions.initConfiguration(loadEditor, editorOptions)
+ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions)
 
-window.editorOptions = editorOptions
-window.loadEditor = loadEditor
+window.canvasOptions = canvasOptions
+window.loadCanvas = loadCanvas

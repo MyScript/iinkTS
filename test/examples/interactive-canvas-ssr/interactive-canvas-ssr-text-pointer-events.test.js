@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test"
 import {
   waitForExportedEvent,
-  getEditorExports,
+  getCanvasExports,
   writeStrokes,
   passModalKey
 } from "../helper"

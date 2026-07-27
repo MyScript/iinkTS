@@ -3,8 +3,8 @@ import {
   passModalKey,
   writeStrokes,
   writePointers,
-  callEditorIdle,
-  getEditorSymbols,
+  callCanvasIdle,
+  getCanvasSymbols,
   pollJiix,
   openMathActionMenu,
   selectBlockViaSurround,
@@ -31,7 +31,7 @@ const dragSelectionBy = async (page, dx, dy) => {
 
 const writeSumExpressionAndGetBlockId = async (page) => {
   await writeStrokes(page, sumStrokes)
-  await callEditorIdle(page)
+  await callCanvasIdle(page)
   const jiix = await pollJiix(page, 1)
   return jiix.elements[0].id
 }
@@ -133,7 +133,7 @@ test.describe("Math Computation Modes", () => {
     let firstResultStrokeIds
 
     const getResultStrokeIds = async () => {
-      const symbols = await getEditorSymbols(page)
+      const symbols = await getCanvasSymbols(page)
       return symbols
         .filter((s) => s.isSolverOutput && s.jiixBlockId === jiixBlockId)
         .map((s) => s.id)
@@ -162,7 +162,7 @@ test.describe("Math Computation Modes", () => {
 
     await test.step("3. Result stays frozen — re-triggering auto-compute does not recompute an already-solved block", async () => {
       await page.evaluate(() => rootEl.iink.math.tryAutoCompute())
-      await callEditorIdle(page)
+      await callCanvasIdle(page)
 
       expect(await getResultStrokeIds()).toEqual(firstResultStrokeIds)
     })

@@ -1,13 +1,13 @@
 import { test, expect } from '@playwright/test'
 import {
-  waitForEditorInit,
+  waitForCanvasInit,
   writeStrokes,
   waitForExportedEvent,
-  getEditorExportsType,
-  getEditorConfiguration,
-  callEditorIdle,
-  getEditorExports,
-  loadEditor,
+  getCanvasExportsType,
+  getCanvasConfiguration,
+  callCanvasIdle,
+  getCanvasExports,
+  loadCanvas,
   passModalKey
 } from '../helper'
 
@@ -26,7 +26,7 @@ test.describe('Interactive Canvas SSR Text Gesture', () => {
   })
   
   test('should apply gesture', async ({ page }) => {
-    const configuration = await getEditorConfiguration(page)
+    const configuration = await getCanvasConfiguration(page)
     const options = {
       configuration: {
         server: configuration.server,
@@ -38,7 +38,7 @@ test.describe('Interactive Canvas SSR Text Gesture', () => {
         }
       }
     }
-    await loadEditor(page, options)
+    await loadCanvas(page, options)
 
     await Promise.all([
       waitForExportedEvent(page),
@@ -55,7 +55,7 @@ test.describe('Interactive Canvas SSR Text Gesture', () => {
   })
 
   test('should not apply gesture', async ({ page }) => {
-    const configuration = await getEditorConfiguration(page)
+    const configuration = await getCanvasConfiguration(page)
     const options = {
       configuration: {
         server: configuration.server,
@@ -67,7 +67,7 @@ test.describe('Interactive Canvas SSR Text Gesture', () => {
         }
       }
     }
-    await loadEditor(page, options)
+    await loadCanvas(page, options)
 
     await Promise.all([
       waitForExportedEvent(page),

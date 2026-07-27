@@ -47,14 +47,14 @@
         transition: width 0.1s linear;
       }
 
-      #strokesEditor {
+      #strokesToPlay {
         display: none;
         width: 320px;
         height: calc(100dvh - 166px);
         resize: none;
       }
 
-      #strokesEditor.open {
+      #strokesToPlay.open {
         display: block;
       }
     </style>
@@ -122,7 +122,7 @@
           </div>
         </nav>
         <div class="flex-container">
-          <textarea id="strokesEditor"></textarea>
+          <textarea id="strokesToPlay"></textarea>
           <div id="rootEl"></div>
         </div>
       </div>
@@ -149,15 +149,15 @@
       const progressBar = document.getElementById("progressBar");
       const showModalBtn = document.getElementById("showModalBtn");
       const toggleStrokesBtn = document.getElementById("toggleStrokes");
-      const strokesEditorElement = document.getElementById("strokesEditor");
+      const strokesToPlayElement = document.getElementById("strokesToPlay");
 
       toggleStrokesBtn.addEventListener("click", () => {
-        const open = strokesEditorElement.classList.toggle("open");
+        const open = strokesToPlayElement.classList.toggle("open");
         toggleStrokesBtn.textContent = open ? "Hide strokes" : "Show strokes";
       });
 
       let canvas;
-      const editorOptions = {
+      const canvasOptions = {
       };
 
       function updateProgress(current, total) {
@@ -172,7 +172,7 @@
         stopBtn.disabled = state === "idle";
       }
 
-      async function loadEditor(options) {
+      async function loadCanvas(options) {
         /**
          * get canvas instance from type
          * @param {Element} The DOM element to attach the ink paper
@@ -184,7 +184,7 @@
         canvas.playback.onStateChange = onPlaybackStateChange;
         canvas.playback.onEnd = () => onPlaybackStateChange("idle");
 
-        strokesEditorElement.value = JSON.stringify(strokes, null, 2);
+        strokesToPlayElement.value = JSON.stringify(strokes, null, 2);
         updateProgress(0, strokes.length);
         onPlaybackStateChange("idle");
         playBtn.disabled = false;
@@ -194,7 +194,7 @@
         if (!canvas) return;
         let editedStrokes;
         try {
-          editedStrokes = JSON.parse(strokesEditorElement.value);
+          editedStrokes = JSON.parse(strokesToPlayElement.value);
         } catch (error) {
           alert(`Invalid strokes JSON: ${error.message}`);
           return;
@@ -224,16 +224,16 @@
       });
 
       showModalBtn.addEventListener("click", () => {
-        ModalCanvasOptions.show(loadEditor, editorOptions);
+        ModalCanvasOptions.show(loadCanvas, canvasOptions);
       });
 
-      ModalCanvasOptions.initConfiguration(loadEditor, editorOptions);
+      ModalCanvasOptions.initConfiguration(loadCanvas, canvasOptions);
 
       /**
        * We expose these objects to the window use it in test
        */
-      window.editorOptions = editorOptions
-      window.loadEditor = loadEditor
+      window.canvasOptions = canvasOptions
+      window.loadCanvas = loadCanvas
     </script>
     <script type="module" src="../components/code-viewer/code-viewer.js"></script>
     <script src="../assets/js/theme.js"></script>

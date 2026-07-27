@@ -4,18 +4,18 @@ import { ButtonMenuItem } from "@/menu/items/ButtonMenuItem"
 
 /**
  * @group Menu
- * @remarks Menu contextuel Select All - Sélectionne tous les symboles
+ * @remarks Menu contextuel Select All - selects all symbols
  */
 export class SelectAllContextMenu extends ButtonMenuItem {
-  constructor(editor: TInteractiveInkCanvas, idPrefix = "ms-menu-context") {
+  constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-context") {
     const config: TMenuButton = {
       type: "button",
       id: `${idPrefix}-select-all`,
       label: "Select all",
-      action: async (editor: TInteractiveInkCanvas) => {
-        await editor.selectAll()
+      action: async (canvas: TInteractiveInkCanvas) => {
+        await canvas.selectAll()
       },
     }
-    super(config, editor)
+    super(config, canvas)
   }
 }

@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test"
 import {
   passModalKey,
   writeStrokes,
-  callEditorIdle,
+  callCanvasIdle,
   writePointers,
   buildEraseSweepPointers,
   boundsOf,
@@ -44,11 +44,11 @@ test.describe("Math Variables", () => {
     const dependentStrokes = mathDependencies.strokes.slice(5)
 
     await writeStrokes(page, sourceStrokes)
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
     await pollJiix(page, 1)
 
     await writeStrokes(page, dependentStrokes)
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
     const jiix = await pollJiix(page, 2)
 
     const dependentId = await getBlockIdByLabel(page, jiix, "3x+2")
@@ -61,7 +61,7 @@ test.describe("Math Variables", () => {
 
   test('Try it — Global fallback: write 2x= (stand-in 2x+5=) undefined, add global x=10 → computes', async ({ page }) => {
     await writeStrokes(page, twoXPlus5.strokes)
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
     const jiix = await pollJiix(page, 1)
     const blockId = jiix.elements[0].id
 
@@ -78,7 +78,7 @@ test.describe("Math Variables", () => {
     // setting a per-block variable, which explicitly recalculates its dependents) — force the
     // same auto-compute sweep a real content change would trigger.
     await page.evaluate(() => rootEl.iink.math.tryAutoCompute())
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
 
     await expect(page.locator(`#rootEl ${GHOST_STROKE_SELECTOR}`).first()).toBeVisible({ timeout: 12000 })
     const bounds = await page.evaluate((id) => rootEl.iink.math.getGhostBounds(id), blockId)
@@ -92,11 +92,11 @@ test.describe("Math Variables", () => {
     const replacementStrokes = overridingSource.strokes.slice(10, 12)
 
     await writeStrokes(page, sourceStrokes)
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
     await pollJiix(page, 1)
 
     await writeStrokes(page, dependentStrokes)
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
     const jiix = await pollJiix(page, 2)
 
     const sourceId = await getBlockIdByLabel(page, jiix, "x=2")
@@ -108,7 +108,7 @@ test.describe("Math Variables", () => {
     await page.locator("#ms-menu-tool-erase").click()
     await page.locator("#ms-menu-tool-erase-20").click()
     await writePointers(page, buildEraseSweepPointers(boundsOf(replacementStrokes, -20)))
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
     await expect
       .poll(async () => {
         const label = await page.evaluate((id) => rootEl.iink.jiix.getBlockLabel(id), sourceId)
@@ -118,13 +118,13 @@ test.describe("Math Variables", () => {
 
     await page.locator("#ms-menu-tool-write-pencil").click()
     await writeStrokes(page, replacementStrokes)
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
 
     await page.locator("#ms-menu-tool-write-pencil").click()
     await writeStrokes(page, replacementStrokes)
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
     await page.evaluate(() => rootEl.iink.math.tryAutoCompute())
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
 
     await expect
       .poll(async () => {
@@ -140,7 +140,7 @@ test.describe("Math Variables", () => {
   // test file). Assign values there to resolve, matching the doc's "Set variable" flow.
   test("Try it — Undefined variable: write A+B= without defining them", async ({ page }) => {
     await writeStrokes(page, aPlusB.strokes)
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
     const jiix = await pollJiix(page, 1)
     const blockId = jiix.elements[0].id
 
@@ -163,7 +163,7 @@ test.describe("Math Variables", () => {
     await expect(page.locator(".ms-modal-title")).toBeHidden()
 
     await page.evaluate(() => rootEl.iink.math.tryAutoCompute())
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
 
     await expect(page.locator(`#rootEl ${GHOST_STROKE_SELECTOR}`).first()).toBeVisible({ timeout: 12000 })
     const bounds = await page.evaluate((id) => rootEl.iink.math.getGhostBounds(id), blockId)
@@ -180,15 +180,15 @@ test.describe("Math Variables", () => {
     const ySquaredStrokes = chainedVar.strokes.slice(13, 17)
 
     await writeStrokes(page, xStrokes)
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
     await pollJiix(page, 1)
 
     await writeStrokes(page, yStrokes)
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
     await pollJiix(page, 2)
 
     await writeStrokes(page, ySquaredStrokes)
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
     const jiix = await pollJiix(page, 3)
 
     const xId = await getBlockIdByLabel(page, jiix, "x=3")

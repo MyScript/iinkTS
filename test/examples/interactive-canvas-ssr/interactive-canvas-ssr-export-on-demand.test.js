@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test"
 import {
-  callEditorIdle,
-  getEditorExports,
+  callCanvasIdle,
+  getCanvasExports,
   writeStrokes,
   passModalKey,
 } from "../helper"
@@ -19,13 +19,13 @@ test.describe("Interactive Canvas SSR on-demand export", function () {
 
   test("should only export on click", async ({ page }) => {
     await writeStrokes(page, hello.strokes)
-    await callEditorIdle(page)
-    const noExport = await getEditorExports(page)
+    await callCanvasIdle(page)
+    const noExport = await getCanvasExports(page)
     expect(noExport).toBeUndefined()
     await expect(page.locator(".prompter-text")).toBeEmpty()
 
     await page.locator("#export").click()
-    await callEditorIdle(page)
+    await callCanvasIdle(page)
     const expectedLabel = hello.exports["text/plain"].at(-1)
     await expect(page.locator(".prompter-text")).toHaveText(expectedLabel)
   })

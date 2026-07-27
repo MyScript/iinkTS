@@ -18,12 +18,12 @@ export type TSelectionActionConfig = boolean | TSelectionActionItemsConfig
  * @remarks Menu action for configuring selection granularity (text, math and shape levels)
  */
 export class SelectionMenuAction extends SubMenuItem {
-  constructor(editor: TInteractiveInkCanvas, idPrefix = "ms-menu-action", itemsConfig?: TSelectionActionItemsConfig) {
+  constructor(canvas: TInteractiveInkCanvas, idPrefix = "ms-menu-action", itemsConfig?: TSelectionActionItemsConfig) {
     const enabled = (key: keyof TSelectionActionItemsConfig) => itemsConfig?.[key] !== false
 
     const items: TMenuSelect[] = []
 
-    if (enabled("text") && editor.configuration.recognition["raw-content"].recognition?.types.includes("text")) {
+    if (enabled("text") && canvas.configuration.recognition["raw-content"].recognition?.types.includes("text")) {
       items.push({
         type: "select",
         id: `${idPrefix}-selection-text-level`,
@@ -33,14 +33,14 @@ export class SelectionMenuAction extends SubMenuItem {
           { label: "Word", value: "word" },
           { label: "Character", value: "char" },
         ],
-        getValue: (editor: TInteractiveInkCanvas) => editor.configuration.textSelectionLevel,
-        setValue: (editor: TInteractiveInkCanvas, value: string) => {
-          editor.configuration.textSelectionLevel = value as "element" | "word" | "char"
+        getValue: (canvas: TInteractiveInkCanvas) => canvas.configuration.textSelectionLevel,
+        setValue: (canvas: TInteractiveInkCanvas, value: string) => {
+          canvas.configuration.textSelectionLevel = value as "element" | "word" | "char"
         },
       })
     }
 
-    if (enabled("math") && editor.configuration.recognition["raw-content"].recognition?.types.includes("math")) {
+    if (enabled("math") && canvas.configuration.recognition["raw-content"].recognition?.types.includes("math")) {
       items.push({
         type: "select",
         id: `${idPrefix}-selection-math-level`,
@@ -49,14 +49,14 @@ export class SelectionMenuAction extends SubMenuItem {
           { label: "Element", value: "element" },
           { label: "Operand", value: "operand" },
         ],
-        getValue: (editor: TInteractiveInkCanvas) => editor.configuration.mathSelectionLevel,
-        setValue: (editor: TInteractiveInkCanvas, value: string) => {
-          editor.configuration.mathSelectionLevel = value as "element" | "operand"
+        getValue: (canvas: TInteractiveInkCanvas) => canvas.configuration.mathSelectionLevel,
+        setValue: (canvas: TInteractiveInkCanvas, value: string) => {
+          canvas.configuration.mathSelectionLevel = value as "element" | "operand"
         },
       })
     }
 
-    if (enabled("shape") && editor.configuration.recognition["raw-content"].recognition?.types.includes("shape")) {
+    if (enabled("shape") && canvas.configuration.recognition["raw-content"].recognition?.types.includes("shape")) {
       items.push({
         type: "select",
         id: `${idPrefix}-selection-shape-level`,
@@ -65,9 +65,9 @@ export class SelectionMenuAction extends SubMenuItem {
           { label: "Element", value: "element" },
           { label: "Stroke", value: "stroke" },
         ],
-        getValue: (editor: TInteractiveInkCanvas) => editor.configuration.shapeSelectionLevel,
-        setValue: (editor: TInteractiveInkCanvas, value: string) => {
-          editor.configuration.shapeSelectionLevel = value as "element" | "stroke"
+        getValue: (canvas: TInteractiveInkCanvas) => canvas.configuration.shapeSelectionLevel,
+        setValue: (canvas: TInteractiveInkCanvas, value: string) => {
+          canvas.configuration.shapeSelectionLevel = value as "element" | "stroke"
         },
       })
     }
@@ -82,6 +82,6 @@ export class SelectionMenuAction extends SubMenuItem {
       items,
     }
 
-    super(config, editor)
+    super(config, canvas)
   }
 }

@@ -1,16 +1,16 @@
-import { createCanvasMock, asEditor } from "../../../__mocks__/createCanvasMock"
+import { createCanvasMock, asCanvas } from "../../../__mocks__/createCanvasMock"
 import { buildIIStroke, buildIIText } from "../../../helpers"
 import { ScratchGestureHandler, GestureHelpers, TGesture, StrokeOps } from "@/iink"
 
 describe("ScratchGestureHandler.ts", () => {
-  let editor: ReturnType<typeof createCanvasMock>
+  let canvas: ReturnType<typeof createCanvasMock>
   let helpers: GestureHelpers
   let handler: ScratchGestureHandler
 
   beforeEach(() => {
-    editor = createCanvasMock()
-    helpers = new GestureHelpers(asEditor(editor))
-    handler = new ScratchGestureHandler(asEditor(editor), helpers)
+    canvas = createCanvasMock()
+    helpers = new GestureHelpers(asCanvas(canvas))
+    handler = new ScratchGestureHandler(asCanvas(canvas), helpers)
   })
 
   test("should instantiate", () => {
@@ -161,7 +161,7 @@ describe("ScratchGestureHandler.ts", () => {
       StrokeOps.addPointer(stroke, { x: 10, y: 10, p: 1, t: 100 })
       StrokeOps.addPointer(stroke, { x: 20, y: 20, p: 1, t: 200 })
 
-      editor.model.addSymbol(stroke)
+      canvas.model.addSymbol(stroke)
 
       const gestureStroke = buildIIStroke()
       StrokeOps.addPointer(gestureStroke, { x: 15, y: 15, p: 1, t: 300 })

@@ -21,7 +21,7 @@ export type TSymbolVariables = {
  * @remarks Modal canvas for variables of one or more math block symbols.
  * Fetches variables per jiixBlockId and applies changes via setListVariableValue.
  */
-export class IIMathVariablePerBlockEditor {
+export class IIMathVariablePerBlockCanvas {
   private canvas: TInteractiveInkCanvas
   private jiixBlockIds: string[]
   private modal?: Modal

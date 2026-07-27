@@ -1,4 +1,4 @@
-import { createCanvasMock, asEditor } from "../../__mocks__/createCanvasMock"
+import { createCanvasMock, asCanvas } from "../../__mocks__/createCanvasMock"
 import { LeftClickEventMock, RightClickEventMock } from "../../__mocks__/EventMock"
 import { buildIIStroke } from "../../helpers"
 import {
@@ -58,14 +58,14 @@ describe("IISelectionManager.ts", () => {
     }),
   })
   test("should create", () => {
-    const editor = createCanvasMock()
-    const manager = new IISelectionManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new IISelectionManager(asCanvas(canvas))
     expect(manager).toBeDefined()
   })
 
   test("should draw selecting rect", () => {
-    const editor = createCanvasMock()
-    const manager = new IISelectionManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new IISelectionManager(asCanvas(canvas))
     manager.renderer.clearElements = jest.fn()
     manager.renderer.appendElement = jest.fn()
     const box: TBox = {
@@ -80,28 +80,28 @@ describe("IISelectionManager.ts", () => {
   })
 
   test("should clear selecting rect", () => {
-    const editor = createCanvasMock()
-    const manager = new IISelectionManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new IISelectionManager(asCanvas(canvas))
     manager.renderer.clearElements = jest.fn()
     manager.clearSelectingRect()
     expect(manager.renderer.clearElements).toHaveBeenCalledTimes(1)
   })
 
   describe("selected group", () => {
-    const editor = createCanvasMock()
-    editor.menu.context.hide = jest.fn()
-    const manager = new IISelectionManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    canvas.menu.context.hide = jest.fn()
+    const manager = new IISelectionManager(asCanvas(canvas))
     const stroke = buildIIStroke()
 
     beforeAll(async () => {
-      await editor.init()
-      editor.model.addSymbol(stroke)
-      editor.renderer.drawSymbol(stroke)
+      await canvas.init()
+      canvas.model.addSymbol(stroke)
+      canvas.renderer.drawSymbol(stroke)
     })
 
     test("should draw selected group", () => {
       manager.drawSelectedGroup([stroke])
-      const group = editor.renderer.layer.querySelector(`[role=${SvgElementRole.InteractElementsGroup}]`) as SVGGElement
+      const group = canvas.renderer.layer.querySelector(`[role=${SvgElementRole.InteractElementsGroup}]`) as SVGGElement
       expect(group).not.toBeNull()
       const translateRect = group?.querySelector(`[role=${SvgElementRole.Translate}]`)
       expect(translateRect?.getAttribute("x")).toEqual(
@@ -127,12 +127,12 @@ describe("IISelectionManager.ts", () => {
     })
 
     test("should remove selected group", () => {
-      let group = editor.renderer.layer.querySelector(`[role=${SvgElementRole.InteractElementsGroup}]`) as SVGGElement
+      let group = canvas.renderer.layer.querySelector(`[role=${SvgElementRole.InteractElementsGroup}]`) as SVGGElement
       expect(group).not.toBeNull()
       manager.removeSelectedGroup()
-      group = editor.renderer.layer.querySelector(`[role=${SvgElementRole.InteractElementsGroup}]`) as SVGGElement
+      group = canvas.renderer.layer.querySelector(`[role=${SvgElementRole.InteractElementsGroup}]`) as SVGGElement
       expect(group).toBeNull()
-      expect(editor.menu.context.hide).toHaveBeenCalledTimes(1)
+      expect(canvas.menu.context.hide).toHaveBeenCalledTimes(1)
     })
   })
 
@@ -145,37 +145,37 @@ describe("IISelectionManager.ts", () => {
     }
 
     test("element mode: block qualifies as soon as one of its strokes is selected", () => {
-      const editor = createCanvasMock()
-      const manager = new IISelectionManager(asEditor(editor))
+      const canvas = createCanvasMock()
+      const manager = new IISelectionManager(asCanvas(canvas))
       const stroke1 = buildMathStroke("block-1")
       const stroke2 = buildMathStroke("block-1")
-      editor.model.addSymbol(stroke1)
-      editor.model.addSymbol(stroke2)
-      editor.model.selectedIds.add(stroke1.id)
+      canvas.model.addSymbol(stroke1)
+      canvas.model.addSymbol(stroke2)
+      canvas.model.selectedIds.add(stroke1.id)
 
       expect(manager.isMathBlockSelected("block-1")).toBe(true)
       expect(manager.getSelectedMathJiixBlockId()).toEqual("block-1")
     })
 
     test("returns false/undefined when the block has no selected strokes", () => {
-      const editor = createCanvasMock()
-      const manager = new IISelectionManager(asEditor(editor))
+      const canvas = createCanvasMock()
+      const manager = new IISelectionManager(asCanvas(canvas))
       const stroke = buildMathStroke("block-1")
-      editor.model.addSymbol(stroke)
+      canvas.model.addSymbol(stroke)
 
       expect(manager.isMathBlockSelected("block-1")).toBe(false)
       expect(manager.getSelectedMathJiixBlockId()).toBeUndefined()
     })
 
     test("supports multiple selected blocks at once", () => {
-      const editor = createCanvasMock()
-      const manager = new IISelectionManager(asEditor(editor))
+      const canvas = createCanvasMock()
+      const manager = new IISelectionManager(asCanvas(canvas))
       const stroke1 = buildMathStroke("block-1")
       const stroke2 = buildMathStroke("block-2")
-      editor.model.addSymbol(stroke1)
-      editor.model.addSymbol(stroke2)
-      editor.model.selectedIds.add(stroke1.id)
-      editor.model.selectedIds.add(stroke2.id)
+      canvas.model.addSymbol(stroke1)
+      canvas.model.addSymbol(stroke2)
+      canvas.model.selectedIds.add(stroke1.id)
+      canvas.model.selectedIds.add(stroke2.id)
 
       expect(manager.isMathBlockSelected("block-1")).toBe(true)
       expect(manager.isMathBlockSelected("block-2")).toBe(true)
@@ -183,19 +183,19 @@ describe("IISelectionManager.ts", () => {
     })
 
     test("operand mode: block only qualifies when ALL its strokes are selected", () => {
-      const editor = createCanvasMock()
-      editor.configuration.mathSelectionLevel = "operand"
-      const manager = new IISelectionManager(asEditor(editor))
+      const canvas = createCanvasMock()
+      canvas.configuration.mathSelectionLevel = "operand"
+      const manager = new IISelectionManager(asCanvas(canvas))
       const stroke1 = buildMathStroke("block-1")
       const stroke2 = buildMathStroke("block-1")
-      editor.model.addSymbol(stroke1)
-      editor.model.addSymbol(stroke2)
-      editor.jiix.getStrokesForElement = jest.fn().mockReturnValue([stroke1.id, stroke2.id])
+      canvas.model.addSymbol(stroke1)
+      canvas.model.addSymbol(stroke2)
+      canvas.jiix.getStrokesForElement = jest.fn().mockReturnValue([stroke1.id, stroke2.id])
 
-      editor.model.selectedIds.add(stroke1.id)
+      canvas.model.selectedIds.add(stroke1.id)
       expect(manager.isMathBlockSelected("block-1")).toBe(false)
 
-      editor.model.selectedIds.add(stroke2.id)
+      canvas.model.selectedIds.add(stroke2.id)
       expect(manager.isMathBlockSelected("block-1")).toBe(true)
     })
   })
@@ -209,58 +209,58 @@ describe("IISelectionManager.ts", () => {
     }
 
     test("element mode: selecting one source stroke pulls in sibling strokes and the block's frozen draw result", () => {
-      const editor = createCanvasMock()
-      const manager = new IISelectionManager(asEditor(editor))
+      const canvas = createCanvasMock()
+      const manager = new IISelectionManager(asCanvas(canvas))
       const stroke1 = buildMathStroke("block-1")
       const stroke2 = buildMathStroke("block-1")
       const drawStroke = buildIIStroke()
-      editor.model.addSymbol(stroke1)
-      editor.model.addSymbol(stroke2)
-      editor.model.addSymbol(drawStroke)
-      editor.jiix.getStrokesForElement = jest.fn().mockReturnValue([stroke1.id, stroke2.id])
-      editor.math.getStoredSolverOutputs = jest.fn().mockReturnValue([drawStroke.id])
-      editor.model.selectedIds.add(stroke1.id)
+      canvas.model.addSymbol(stroke1)
+      canvas.model.addSymbol(stroke2)
+      canvas.model.addSymbol(drawStroke)
+      canvas.jiix.getStrokesForElement = jest.fn().mockReturnValue([stroke1.id, stroke2.id])
+      canvas.math.getStoredSolverOutputs = jest.fn().mockReturnValue([drawStroke.id])
+      canvas.model.selectedIds.add(stroke1.id)
 
       manager.expandSelectionForMathBlocks()
 
-      expect(editor.model.selectedIds.has(stroke2.id)).toBe(true)
-      expect(editor.model.selectedIds.has(drawStroke.id)).toBe(true)
+      expect(canvas.model.selectedIds.has(stroke2.id)).toBe(true)
+      expect(canvas.model.selectedIds.has(drawStroke.id)).toBe(true)
     })
 
     test("element mode: no draw yet, only sibling source strokes are pulled in", () => {
-      const editor = createCanvasMock()
-      const manager = new IISelectionManager(asEditor(editor))
+      const canvas = createCanvasMock()
+      const manager = new IISelectionManager(asCanvas(canvas))
       const stroke1 = buildMathStroke("block-1")
       const stroke2 = buildMathStroke("block-1")
-      editor.model.addSymbol(stroke1)
-      editor.model.addSymbol(stroke2)
-      editor.jiix.getStrokesForElement = jest.fn().mockReturnValue([stroke1.id, stroke2.id])
-      editor.math.getStoredSolverOutputs = jest.fn().mockReturnValue(undefined)
-      editor.model.selectedIds.add(stroke1.id)
+      canvas.model.addSymbol(stroke1)
+      canvas.model.addSymbol(stroke2)
+      canvas.jiix.getStrokesForElement = jest.fn().mockReturnValue([stroke1.id, stroke2.id])
+      canvas.math.getStoredSolverOutputs = jest.fn().mockReturnValue(undefined)
+      canvas.model.selectedIds.add(stroke1.id)
 
       manager.expandSelectionForMathBlocks()
 
-      expect(editor.model.selectedIds.has(stroke2.id)).toBe(true)
+      expect(canvas.model.selectedIds.has(stroke2.id)).toBe(true)
     })
 
     test("operand mode: does not expand the selection", () => {
-      const editor = createCanvasMock()
-      editor.configuration.mathSelectionLevel = "operand"
-      const manager = new IISelectionManager(asEditor(editor))
+      const canvas = createCanvasMock()
+      canvas.configuration.mathSelectionLevel = "operand"
+      const manager = new IISelectionManager(asCanvas(canvas))
       const stroke1 = buildMathStroke("block-1")
       const stroke2 = buildMathStroke("block-1")
       const drawStroke = buildIIStroke()
-      editor.model.addSymbol(stroke1)
-      editor.model.addSymbol(stroke2)
-      editor.model.addSymbol(drawStroke)
-      editor.jiix.getStrokesForElement = jest.fn().mockReturnValue([stroke1.id, stroke2.id])
-      editor.math.getStoredSolverOutputs = jest.fn().mockReturnValue([drawStroke.id])
-      editor.model.selectedIds.add(stroke1.id)
+      canvas.model.addSymbol(stroke1)
+      canvas.model.addSymbol(stroke2)
+      canvas.model.addSymbol(drawStroke)
+      canvas.jiix.getStrokesForElement = jest.fn().mockReturnValue([stroke1.id, stroke2.id])
+      canvas.math.getStoredSolverOutputs = jest.fn().mockReturnValue([drawStroke.id])
+      canvas.model.selectedIds.add(stroke1.id)
 
       manager.expandSelectionForMathBlocks()
 
-      expect(editor.model.selectedIds.has(stroke2.id)).toBe(false)
-      expect(editor.model.selectedIds.has(drawStroke.id)).toBe(false)
+      expect(canvas.model.selectedIds.has(stroke2.id)).toBe(false)
+      expect(canvas.model.selectedIds.has(drawStroke.id)).toBe(false)
     })
   })
 
@@ -273,13 +273,13 @@ describe("IISelectionManager.ts", () => {
     }
 
     test("element mode: merges the block's ghost bounds into the selection rectangle", async () => {
-      const editor = createCanvasMock()
-      editor.menu.context.hide = jest.fn()
-      const manager = new IISelectionManager(asEditor(editor))
+      const canvas = createCanvasMock()
+      canvas.menu.context.hide = jest.fn()
+      const manager = new IISelectionManager(asCanvas(canvas))
       const stroke = buildMathStroke("block-1")
-      await editor.init()
-      editor.model.addSymbol(stroke)
-      editor.renderer.drawSymbol(stroke)
+      await canvas.init()
+      canvas.model.addSymbol(stroke)
+      canvas.renderer.drawSymbol(stroke)
 
       const strokeBox = OBBOps.toBox(stroke.bounds)
       const ghostBox: TBox = {
@@ -288,11 +288,11 @@ describe("IISelectionManager.ts", () => {
         width: 10,
         height: 10,
       }
-      editor.math.getGhostBounds = jest.fn().mockReturnValue(ghostBox)
+      canvas.math.getGhostBounds = jest.fn().mockReturnValue(ghostBox)
 
       manager.drawSelectedGroup([stroke])
 
-      const group = editor.renderer.layer.querySelector(`[role=${SvgElementRole.InteractElementsGroup}]`) as SVGGElement
+      const group = canvas.renderer.layer.querySelector(`[role=${SvgElementRole.InteractElementsGroup}]`) as SVGGElement
       const translateRect = group?.querySelector(`[role=${SvgElementRole.Translate}]`)
       const rectX = Number(translateRect?.getAttribute("x"))
       const rectWidth = Number(translateRect?.getAttribute("width"))
@@ -301,14 +301,14 @@ describe("IISelectionManager.ts", () => {
     })
 
     test("operand mode: does not merge ghost bounds into the selection rectangle", async () => {
-      const editor = createCanvasMock()
-      editor.menu.context.hide = jest.fn()
-      editor.configuration.mathSelectionLevel = "operand"
-      const manager = new IISelectionManager(asEditor(editor))
+      const canvas = createCanvasMock()
+      canvas.menu.context.hide = jest.fn()
+      canvas.configuration.mathSelectionLevel = "operand"
+      const manager = new IISelectionManager(asCanvas(canvas))
       const stroke = buildMathStroke("block-1")
-      await editor.init()
-      editor.model.addSymbol(stroke)
-      editor.renderer.drawSymbol(stroke)
+      await canvas.init()
+      canvas.model.addSymbol(stroke)
+      canvas.renderer.drawSymbol(stroke)
 
       const strokeBox = OBBOps.toBox(stroke.bounds)
       const ghostBox: TBox = {
@@ -317,11 +317,11 @@ describe("IISelectionManager.ts", () => {
         width: 10,
         height: 10,
       }
-      editor.math.getGhostBounds = jest.fn().mockReturnValue(ghostBox)
+      canvas.math.getGhostBounds = jest.fn().mockReturnValue(ghostBox)
 
       manager.drawSelectedGroup([stroke])
 
-      const group = editor.renderer.layer.querySelector(`[role=${SvgElementRole.InteractElementsGroup}]`) as SVGGElement
+      const group = canvas.renderer.layer.querySelector(`[role=${SvgElementRole.InteractElementsGroup}]`) as SVGGElement
       const translateRect = group?.querySelector(`[role=${SvgElementRole.Translate}]`)
       const rectX = Number(translateRect?.getAttribute("x"))
       const rectWidth = Number(translateRect?.getAttribute("width"))
@@ -340,28 +340,28 @@ describe("IISelectionManager.ts", () => {
         height: 10,
       }),
     })
-    const editor = createCanvasMock()
-    editor.transform.translate.start = jest.fn()
-    editor.transform.translate.continue = jest.fn()
-    editor.transform.translate.end = jest.fn()
-    editor.transform.rotation.start = jest.fn()
-    editor.transform.rotation.continue = jest.fn()
-    editor.transform.rotation.end = jest.fn()
-    editor.transform.resize.start = jest.fn()
-    editor.transform.resize.continue = jest.fn()
-    editor.transform.resize.end = jest.fn()
-    const manager = new IISelectionManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    canvas.transform.translate.start = jest.fn()
+    canvas.transform.translate.continue = jest.fn()
+    canvas.transform.translate.end = jest.fn()
+    canvas.transform.rotation.start = jest.fn()
+    canvas.transform.rotation.continue = jest.fn()
+    canvas.transform.rotation.end = jest.fn()
+    canvas.transform.resize.start = jest.fn()
+    canvas.transform.resize.continue = jest.fn()
+    canvas.transform.resize.end = jest.fn()
+    const manager = new IISelectionManager(asCanvas(canvas))
     const stroke = buildIIStroke()
 
     beforeAll(async () => {
-      await editor.init()
-      editor.model.addSymbol(stroke)
-      editor.renderer.drawSymbol(stroke)
+      await canvas.init()
+      canvas.model.addSymbol(stroke)
+      canvas.renderer.drawSymbol(stroke)
       manager.drawSelectedGroup([stroke])
     })
 
     test("should not call translate.start on right pointerdown on translateEl", () => {
-      const translateEl = editor.renderer.layer.querySelector(`[role=${SvgElementRole.Translate}]`)
+      const translateEl = canvas.renderer.layer.querySelector(`[role=${SvgElementRole.Translate}]`)
       const pointerDown = new RightClickEventMock("pointerdown", {
         pointerType: "pen",
         clientX: 1,
@@ -370,10 +370,10 @@ describe("IISelectionManager.ts", () => {
         pointerId: 1,
       }) as PointerEvent
       translateEl?.dispatchEvent(pointerDown)
-      expect(editor.transform.translate.start).not.toHaveBeenCalled()
+      expect(canvas.transform.translate.start).not.toHaveBeenCalled()
     })
     test("should call translate.start on pointerdown on translateEl", () => {
-      const translateEl = editor.renderer.layer.querySelector(`[role=${SvgElementRole.Translate}]`)
+      const translateEl = canvas.renderer.layer.querySelector(`[role=${SvgElementRole.Translate}]`)
       const pointerDown = new LeftClickEventMock("pointerdown", {
         pointerType: "pen",
         clientX: 1,
@@ -382,7 +382,7 @@ describe("IISelectionManager.ts", () => {
         pointerId: 1,
       }) as PointerEvent
       translateEl?.dispatchEvent(pointerDown)
-      expect(editor.transform.translate.start).toHaveBeenNthCalledWith(1, translateEl, { x: 1, y: 2 })
+      expect(canvas.transform.translate.start).toHaveBeenNthCalledWith(1, translateEl, { x: 1, y: 2 })
     })
     test("should call translate.continue on pointermove on render layer", () => {
       const pointerMove = new LeftClickEventMock("pointermove", {
@@ -392,8 +392,8 @@ describe("IISelectionManager.ts", () => {
         pressure: 1,
         pointerId: 1,
       }) as PointerEvent
-      editor.renderer.layer.dispatchEvent(pointerMove)
-      expect(editor.transform.translate.continue).toHaveBeenNthCalledWith(1, { x: 3, y: 4 })
+      canvas.renderer.layer.dispatchEvent(pointerMove)
+      expect(canvas.transform.translate.continue).toHaveBeenNthCalledWith(1, { x: 3, y: 4 })
     })
     test("should call translate.end on pointerup on render layer", () => {
       const pointerUp = new LeftClickEventMock("pointerup", {
@@ -403,12 +403,12 @@ describe("IISelectionManager.ts", () => {
         pressure: 1,
         pointerId: 1,
       }) as PointerEvent
-      editor.renderer.layer.dispatchEvent(pointerUp)
-      expect(editor.transform.translate.end).toHaveBeenNthCalledWith(1, { x: 5, y: 6 })
+      canvas.renderer.layer.dispatchEvent(pointerUp)
+      expect(canvas.transform.translate.end).toHaveBeenNthCalledWith(1, { x: 5, y: 6 })
     })
 
     test("should not call rotation.start on right pointerdown on rotateEl", () => {
-      const rotateEl = editor.renderer.layer.querySelector(`[role=${SvgElementRole.Rotate}]`)
+      const rotateEl = canvas.renderer.layer.querySelector(`[role=${SvgElementRole.Rotate}]`)
       const pointerDown = new RightClickEventMock("pointerdown", {
         pointerType: "pen",
         clientX: 1,
@@ -417,10 +417,10 @@ describe("IISelectionManager.ts", () => {
         pointerId: 1,
       }) as PointerEvent
       rotateEl?.dispatchEvent(pointerDown)
-      expect(editor.transform.rotation.start).not.toHaveBeenCalled()
+      expect(canvas.transform.rotation.start).not.toHaveBeenCalled()
     })
     test("should call rotation.start on pointerdown on rotateEl", () => {
-      const rotateEl = editor.renderer.layer.querySelector(`[role=${SvgElementRole.Rotate}]`)
+      const rotateEl = canvas.renderer.layer.querySelector(`[role=${SvgElementRole.Rotate}]`)
       const pointerDown = new LeftClickEventMock("pointerdown", {
         pointerType: "pen",
         clientX: 1,
@@ -429,7 +429,7 @@ describe("IISelectionManager.ts", () => {
         pointerId: 1,
       }) as PointerEvent
       rotateEl?.dispatchEvent(pointerDown)
-      expect(editor.transform.rotation.start).toHaveBeenNthCalledWith(1, rotateEl, { x: 1, y: 2 })
+      expect(canvas.transform.rotation.start).toHaveBeenNthCalledWith(1, rotateEl, { x: 1, y: 2 })
     })
     test("should call rotation.continue on pointermove on render layer", () => {
       const pointerMove = new LeftClickEventMock("pointermove", {
@@ -439,8 +439,8 @@ describe("IISelectionManager.ts", () => {
         pressure: 1,
         pointerId: 1,
       }) as PointerEvent
-      editor.renderer.layer.dispatchEvent(pointerMove)
-      expect(editor.transform.rotation.continue).toHaveBeenNthCalledWith(1, { x: 3, y: 4 })
+      canvas.renderer.layer.dispatchEvent(pointerMove)
+      expect(canvas.transform.rotation.continue).toHaveBeenNthCalledWith(1, { x: 3, y: 4 })
     })
     test("should call rotation.end on pointerup on render layer", () => {
       const pointerUp = new LeftClickEventMock("pointerup", {
@@ -450,12 +450,12 @@ describe("IISelectionManager.ts", () => {
         pressure: 1,
         pointerId: 1,
       }) as PointerEvent
-      editor.renderer.layer.dispatchEvent(pointerUp)
-      expect(editor.transform.rotation.end).toHaveBeenNthCalledWith(1, { x: 5, y: 6 })
+      canvas.renderer.layer.dispatchEvent(pointerUp)
+      expect(canvas.transform.rotation.end).toHaveBeenNthCalledWith(1, { x: 5, y: 6 })
     })
 
     test("should not call resize.start on right pointerdown on north resizeEl", () => {
-      const resizeEl = editor.renderer.layer.querySelector(
+      const resizeEl = canvas.renderer.layer.querySelector(
         `[role=${SvgElementRole.Resize}][resize-direction=${ResizeDirection.North}]`
       )
       const pointerDown = new RightClickEventMock("pointerdown", {
@@ -466,10 +466,10 @@ describe("IISelectionManager.ts", () => {
         pointerId: 1,
       }) as PointerEvent
       resizeEl?.dispatchEvent(pointerDown)
-      expect(editor.transform.resize.start).not.toHaveBeenCalled()
+      expect(canvas.transform.resize.start).not.toHaveBeenCalled()
     })
     test("should call resize.start on pointerdown on north resizeEl", () => {
-      const resizeEl = editor.renderer.layer.querySelector(
+      const resizeEl = canvas.renderer.layer.querySelector(
         `[role=${SvgElementRole.Resize}][resize-direction=${ResizeDirection.North}]`
       )
       const pointerDown = new LeftClickEventMock("pointerdown", {
@@ -480,7 +480,7 @@ describe("IISelectionManager.ts", () => {
         pointerId: 1,
       }) as PointerEvent
       resizeEl?.dispatchEvent(pointerDown)
-      expect(editor.transform.resize.start).toHaveBeenNthCalledWith(1, resizeEl, { x: 6, y: 13 })
+      expect(canvas.transform.resize.start).toHaveBeenNthCalledWith(1, resizeEl, { x: 6, y: 13 })
     })
     test("should call resize.continue on pointermove on render layer", () => {
       const pointerMove = new LeftClickEventMock("pointermove", {
@@ -490,8 +490,8 @@ describe("IISelectionManager.ts", () => {
         pressure: 1,
         pointerId: 1,
       }) as PointerEvent
-      editor.renderer.layer.dispatchEvent(pointerMove)
-      expect(editor.transform.resize.continue).toHaveBeenNthCalledWith(1, { x: 3, y: 4 })
+      canvas.renderer.layer.dispatchEvent(pointerMove)
+      expect(canvas.transform.resize.continue).toHaveBeenNthCalledWith(1, { x: 3, y: 4 })
     })
     test("should call resize.end on pointerup on render layer", () => {
       const pointerUp = new LeftClickEventMock("pointerup", {
@@ -501,14 +501,14 @@ describe("IISelectionManager.ts", () => {
         pressure: 1,
         pointerId: 1,
       }) as PointerEvent
-      editor.renderer.layer.dispatchEvent(pointerUp)
-      expect(editor.transform.resize.end).toHaveBeenNthCalledWith(1, { x: 5, y: 6 })
+      canvas.renderer.layer.dispatchEvent(pointerUp)
+      expect(canvas.transform.resize.end).toHaveBeenNthCalledWith(1, { x: 5, y: 6 })
     })
   })
 
   describe("process", () => {
-    const editor = createCanvasMock()
-    const manager = new IISelectionManager(asEditor(editor))
+    const canvas = createCanvasMock()
+    const manager = new IISelectionManager(asCanvas(canvas))
     const strokeToSelect = buildIIStroke({ box: { height: 10, width: 10, x: 10, y: 10 } })
     manager.model.addSymbol(strokeToSelect)
     const otherStroke = buildIIStroke({ box: { height: 10, width: 10, x: 100, y: 100 } })
@@ -550,8 +550,8 @@ describe("IISelectionManager.ts", () => {
       expect(manager.model.symbolsSelected).toEqual([strokeToSelect])
       // emitSelected is deferred via setTimeout(0)
       await new Promise((resolve) => setTimeout(resolve, 0))
-      expect(editor.event.emitSelected).toHaveBeenCalledTimes(1)
-      expect(editor.event.emitSelected).toHaveBeenCalledWith([strokeToSelect])
+      expect(canvas.event.emitSelected).toHaveBeenCalledTimes(1)
+      expect(canvas.event.emitSelected).toHaveBeenCalledWith([strokeToSelect])
     })
 
     test("continue should throw error when no start before", () => {
@@ -564,8 +564,8 @@ describe("IISelectionManager.ts", () => {
 
   describe("standalone decorators are never directly selectable", () => {
     test("box selection over a decorated stroke selects the stroke, not the decorator", () => {
-      const editor = createCanvasMock()
-      const manager = new IISelectionManager(asEditor(editor))
+      const canvas = createCanvasMock()
+      const manager = new IISelectionManager(asCanvas(canvas))
       manager.drawSelectingRect = jest.fn()
       manager.renderer.updateSelectedState = jest.fn()
 

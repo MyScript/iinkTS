@@ -2,8 +2,8 @@ import { test, expect } from "@playwright/test"
 import {
   writeStrokes,
   waitForExportedEvent,
-  getEditorExports,
-  getEditorStrokes,
+  getCanvasExports,
+  getCanvasStrokes,
   waitForChangedEvent,
   passModalKey
 } from "../helper"
@@ -26,7 +26,7 @@ test.describe("Ink Canvas v2 Math", () => {
       writeStrokes(page, one.strokes),
     ])
 
-    const modelExports = await getEditorExports(page)
+    const modelExports = await getCanvasExports(page)
     expect(modelExports["application/x-latex"]).toStrictEqual(
       one.exports.LATEX.at(-1)
     )
@@ -86,7 +86,7 @@ test.describe("Ink Canvas v2 Math", () => {
         page.locator("#clear").click(),
       ])
       expect(promisesResult[0]).toBeNull()
-      expect(await getEditorExports(page)).toBeFalsy()
+      expect(await getCanvasExports(page)).toBeFalsy()
 
       await expect(page.locator("#result")).toBeEmpty()
     })
@@ -103,21 +103,21 @@ test.describe("Ink Canvas v2 Math", () => {
 
       await test.step("should undo last stroke", async () => {
         await Promise.all([waitForChangedEvent(page), page.locator("#undo").click()])
-        expect(await getEditorStrokes(page)).toHaveLength(
+        expect(await getCanvasStrokes(page)).toHaveLength(
           equation.strokes.length - 1
         )
       })
 
       await test.step("should undo last stroke", async () => {
         await Promise.all([waitForChangedEvent(page), page.locator("#undo").click()])
-        expect(await getEditorStrokes(page)).toHaveLength(
+        expect(await getCanvasStrokes(page)).toHaveLength(
           equation.strokes.length - 2
         )
       })
 
       await test.step("should undo last stroke", async () => {
         await Promise.all([waitForChangedEvent(page), page.locator("#redo").click()])
-        expect(await getEditorStrokes(page)).toHaveLength(
+        expect(await getCanvasStrokes(page)).toHaveLength(
           equation.strokes.length - 1
         )
       })

@@ -6,7 +6,7 @@ export type THistoryContext = {
   canRedo: boolean
   empty: boolean
   stackIndex: number
-  /** @remarks populated from the backend `contentChanged` message; only meaningful for the SSR editor variant, where the server is the source of truth for the undo stack. */
+  /** @remarks populated from the backend `contentChanged` message; only meaningful for the SSR canvas variant, where the server is the source of truth for the undo stack. */
   possibleUndoCount: number
 }
 
